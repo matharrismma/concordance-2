@@ -21,11 +21,14 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 
 ## Complications — the verifiers (mount on the train; each earns its place)
 
-- [~] secular verifiers — **1/57 mounted**: `combinatorics` (proves the pipeline end-to-end).
-      Remaining 56 port next — lazy-load (no eager scripture import, hotspot #1 already avoided);
-      heavy deps (sympy/scipy/numpy) lazy
+- [~] secular verifiers — **2/57 mounted**: `combinatorics`, `mathematics` (the derivation moat:
+      equality/inequality/derivative + integral/limit/solve, sympy lazy, the pole/removable-
+      singularity guard). Remaining 55 port next — lazy-load; heavy deps lazy
+- [x] `derivation` moat — `verify` / `verify_step` / `verify_derivation` (mode→verifier→verdict,
+      first-break-governs); the crown jewel, the engine verifies, never generates
+- [x] **benchmark GREEN — 58/58, 0 false-positives** (LOCAL `tools/benchmark.py` + `tests/test_benchmark.py`
+      regression gate). The 5 removable-singularity traps caught; the symmetric rational identity held
 - [ ] conditional registration by `surface` for the witness verifiers (hotspot #6)
-- [ ] **benchmark** ported and GREEN (58/58, 0 false-positives) — the regression gate, the proof
 
 ## Witness surface (.org) — config-gated, NOT a separate install
 

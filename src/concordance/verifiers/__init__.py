@@ -23,6 +23,8 @@ from .base import VerifierResult, VerifierStatus, confirm, error, mismatch, na
 # Grows as verifiers port; only listed domains are active.
 VERIFIERS: Dict[str, str] = {
     "combinatorics": "concordance.verifiers.combinatorics",
+    "mathematics": "concordance.verifiers.mathematics",
+    "math": "concordance.verifiers.mathematics",
 }
 
 # Cross-cutting verifiers run on every packet. Empty in the secular core.
