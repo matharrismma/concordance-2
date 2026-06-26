@@ -1,0 +1,13 @@
+# Narrow Highway — Caddy reverse proxy (auto-TLS via Let's Encrypt).
+# Two faces, one engine: .com is the secular reach, .org is the witness.
+# Each surface runs as its own service (see nh-com.service / nh-org.service).
+
+narrowhighway.com, www.narrowhighway.com {
+	encode gzip
+	reverse_proxy 127.0.0.1:8000
+}
+
+narrowhighway.org, www.narrowhighway.org {
+	encode gzip
+	reverse_proxy 127.0.0.1:8001
+}

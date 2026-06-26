@@ -17,8 +17,10 @@ Run: `python -m concordance serve`.
 **Honestly deferred (optional / not blocking, flagged not faked):** precedent amendments
 (`latest_in_amendment_chain` returns id unchanged); morphhb/morphgnt deep morphology (the Strong's
 lexicons + concordance are in); an MCP server (the HTTP API covers agents); a templated build + the
-`.org` witness site (the lean site suffices now). **Deployment to narrowhighway.com is the
-operator's — outward/gated (Caddy + droplet + DNS).**
+`.org` witness site (the lean site suffices now). **Deployment configs PREPARED** — Dockerfile ·
+`deploy/Caddyfile` · `deploy/nh-com.service` + `nh-org.service` (the two surfaces) · `docs/DEPLOY.md`
+runbook; env-var data loading (`CONCORDANCE_DATA_DIR`) validated live. **Deploying to
+narrowhighway.com is the operator's — outward/gated (DNS + droplet + Caddy).**
 
 ## Movement — the deterministic core (sovereign, stdlib hot path)
 
