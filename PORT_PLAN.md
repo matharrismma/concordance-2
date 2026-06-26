@@ -9,12 +9,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 ## Movement — the deterministic core (sovereign, stdlib hot path)
 
 - [x] `config` / `branding` / `layers` — the surface seam (one foundation, two surfaces) + seam test
+- [x] `packet` / `gates` / `verifiers/base` / `validate` — verdict types · gate constructors · verifier base · schema+hash helpers (ported as-is)
+- [x] `record` (was `witness_record`) — sealed-result schema, **SourceLayer un-hardcoded** (`Anchor.layer: str`, validated from config) — hotspot #2 closed; 6 core tests green
+- [x] `cas` — content-addressed seal store (SHA-256, 256-way sharded) — ported as-is
 - [ ] `foundation/` — truth-model + the disciplines (docs) + Scripture substrate hook (shared)
-- [ ] `witness_record` — the sealed-result schema, with **SourceLayer injected** (hotspot #2)
-- [ ] `cas` — content-addressed seal store (SHA-256, 256-way sharded) — *already clean, port as-is*
 - [ ] `ledger` — append-only hash chain + precedent search — *already clean, port as-is*
-- [ ] `gates` — RED · FLOOR · PATH · (wait/witness); rename WAY→PATH, neutral scopes (hotspot #4/#7)
-- [ ] `engine` — `validate_and_seal`: claim → gates → verifiers → (verdict, trail, seal)
+- [ ] `engine` — `validate_and_seal`: claim → gates → verifiers → (verdict, trail, seal); rename WAY→PATH, neutral scopes (hotspot #4/#7)
 - [ ] `signing` — Ed25519 attestation (optional crypto, graceful degradation)
 - [ ] `ranker` — IDF/full-text retrieval over the keeping
 
