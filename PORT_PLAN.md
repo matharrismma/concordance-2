@@ -12,17 +12,19 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 - [x] `packet` / `gates` / `verifiers/base` / `validate` — verdict types · gate constructors · verifier base · schema+hash helpers (ported as-is)
 - [x] `record` (was `witness_record`) — sealed-result schema, **SourceLayer un-hardcoded** (`Anchor.layer: str`, validated from config) — hotspot #2 closed; 6 core tests green
 - [x] `cas` — content-addressed seal store (SHA-256, 256-way sharded) — ported as-is
+- [x] `engine` — `validate_and_seal`: claim → gates → verifiers → (verdict, trail, seal); gates **RED·FLOOR·PATH·WITNESS·WAIT** (WAY→PATH, BROTHERS→WITNESS, GOD→WAIT; neutral scopes local/mesh/archived) — hotspots #4/#7 closed; 6 engine tests green
+- [x] `verifiers` registry (`run_for_domain`, lazy) + `domains` loader (`load_domain_validator`) — the two seams the engine plugs into
 - [ ] `foundation/` — truth-model + the disciplines (docs) + Scripture substrate hook (shared)
 - [ ] `ledger` — append-only hash chain + precedent search — *already clean, port as-is*
-- [ ] `engine` — `validate_and_seal`: claim → gates → verifiers → (verdict, trail, seal); rename WAY→PATH, neutral scopes (hotspot #4/#7)
 - [ ] `signing` — Ed25519 attestation (optional crypto, graceful degradation)
 - [ ] `ranker` — IDF/full-text retrieval over the keeping
 
 ## Complications — the verifiers (mount on the train; each earns its place)
 
-- [ ] 57 **secular** verifiers (math, physics, chemistry, biology, earth/space, finance, law, CS, …)
-      — refactor: lazy-load (no eager scripture import, hotspot #1); heavy deps (sympy/scipy/numpy) lazy
-- [ ] verifier registry — conditional registration by `surface` (hotspot #6)
+- [~] secular verifiers — **1/57 mounted**: `combinatorics` (proves the pipeline end-to-end).
+      Remaining 56 port next — lazy-load (no eager scripture import, hotspot #1 already avoided);
+      heavy deps (sympy/scipy/numpy) lazy
+- [ ] conditional registration by `surface` for the witness verifiers (hotspot #6)
 - [ ] **benchmark** ported and GREEN (58/58, 0 false-positives) — the regression gate, the proof
 
 ## Witness surface (.org) — config-gated, NOT a separate install
