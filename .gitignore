@@ -11,6 +11,8 @@ venv/
 
 # runtime data (kept out of source; the contracts live in docs/)
 data/cas/
+data/cards.jsonl
+data/*.jsonl
 data/*.db
 data/*.db-wal
 data/*.db-shm

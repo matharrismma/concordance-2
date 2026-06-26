@@ -17,7 +17,14 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 - [x] `ledger` — append-only **hash chain** (prev_hash links, verify_chain catches tampering) + `seal_record` wiring **seal→CAS→ledger** — 4 ledger tests green. `find_closest` (precedent search) deferred — needs the grid
 - [ ] `foundation/` — truth-model + the disciplines (docs) + Scripture substrate hook (shared)
 - [ ] `signing` — Ed25519 attestation (optional crypto, graceful degradation)
-- [ ] `ranker` — IDF/full-text retrieval over the keeping (needs the corpus data)
+- [x] `ranker` — `corpus.py`: IDF inverted-index retrieval, distinctiveness-floored, **surface-filtered**
+      (#7 BUILT; fixture + real-corpus proven). **Floor now 7/7.** `tools/migrate_cards.py` consolidates
+      the keeping → `data/cards.jsonl` (gitignored, 11,085 cards). ⚠ CLASSIFICATION DECISION FOR MATT:
+      the shelf-based surface tag is COARSE — the keeping is ~Christian, so Easton's Bible Dictionary
+      (2,619), Pilgrim's Progress/Pirkei Avot (classics), and scripture-connections (5,095) are tagged
+      "secular" but are religious and would LEAK onto the .com. Genuinely-secular slice ≈ 50 cards
+      (maker/recipes/atlas/animation). The ranker is correct; the .com's secular CORPUS must be defined
+      (content-level reclassify · fresh secular corpus · or .com = engine-only, no library).
 
 ## Complications — the verifiers (mount on the train; each earns its place)
 
