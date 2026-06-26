@@ -1,0 +1,42 @@
+# Concordance 2.0
+
+A deterministic verification engine. It checks what is true and hands you a **receipt you can
+re-verify** — a verdict, the worked reasoning, and a permanent content-addressed seal. It
+eliminates what is not the answer so that what survives stands on its own.
+
+> Rebuilt like a watch (the Calibre 44 discipline): one bounded, counted movement; serviceable by
+> any competent hand; machine-honest — the accuracy *is* the finish. See
+> [`docs/V2_DEFINITION.md`](docs/V2_DEFINITION.md).
+
+## The floor — seven primitives
+
+Every answer is a `(verdict, trail, seal)` — three things, each independently checkable.
+
+1. **Claim** — a structured assertion `{domain, spec}` (or text the router resolves)
+2. **Verifier** — a pure deterministic function `spec → verdict + worked trail` (no I/O, no LLM)
+3. **Verdict** — `PASS | REJECT | QUARANTINE` + the worked math (the elimination trail)
+4. **Seal** — content-addressed (SHA-256) record of `{claim, verdict, trail}`
+5. **Ledger** — append-only hash chain of seals
+6. **Ranker** — IDF/full-text retrieval over the keeping
+7. **Surface** — the face over the shared foundation (`secular` reach / `witness`)
+
+The measure: **reproducibility, zero false-positives, re-checkability.**
+
+## One foundation, two surfaces
+
+The foundation is the Bible ([`FOUNDATION.md`](FOUNDATION.md)) — Christ at the center. From it the
+engine reaches the world two ways: a secular `.com` (the reach) and an explicit-witness `.org`.
+One engine, one foundation, selected by config — never a fork.
+
+```python
+from concordance import EngineConfig
+EngineConfig("secular").identity   # the reach — no religious wording
+EngineConfig("witness").identity   # the witness — the foundation named
+```
+
+## Status
+
+Cornerstone scaffold. Sovereign, stdlib-first; heavy deps (`sympy`/`scipy`/`numpy`) are optional
+extras, lazy-loaded only for math/physics/stats claims. Port progress: [`PORT_PLAN.md`](PORT_PLAN.md).
+
+1.0 is frozen (`v1.0-frozen` in the Lighthouse repo) — the shape that taught us the floor.

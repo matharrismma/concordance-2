@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "concordance"
+version = "2.0.0a0"
+description = "A deterministic verification engine — a verdict, the worked reasoning, and a re-checkable seal."
+requires-python = ">=3.10"
+# Sovereign: the core hot path is stdlib-only. Heavy deps are optional and lazy-loaded,
+# pulled in ONLY when a math/physics/stats claim actually needs them.
+dependencies = []
+
+[project.optional-dependencies]
+math = ["sympy", "scipy", "numpy"]
+web = ["fastapi", "uvicorn"]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

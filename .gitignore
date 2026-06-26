@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# runtime data (kept out of source; the contracts live in docs/)
+data/cas/
+data/*.db
+data/*.db-wal
+data/*.db-shm
+*.log
