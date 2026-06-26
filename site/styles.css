@@ -1,0 +1,49 @@
+:root {
+  --ink: #1a2230; --muted: #5a6678; --line: #d9dee6; --bg: #f7f8fa;
+  --paper: #ffffff; --accent: #1a3a52; --pass: #2f7d4f; --fail: #b03b3b;
+  --gold: #8a6d3b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 16px/1.6 -apple-system, "Segoe UI", system-ui, sans-serif;
+}
+.wrap { max-width: 760px; margin: 0 auto; padding: 2.2rem 1.2rem 4rem; }
+header.site { border-bottom: 1px solid var(--line); }
+.brand { font-weight: 700; letter-spacing: .02em; color: var(--accent); text-decoration: none; }
+.brand .road { color: var(--gold); }
+nav.site a { color: var(--muted); text-decoration: none; margin-left: 1.1rem; font-size: .92rem; }
+nav.site a:hover { color: var(--ink); }
+h1 { font-size: 2.05rem; line-height: 1.2; margin: .2em 0 .1em; }
+.tagline { font-size: 1.18rem; color: var(--accent); margin: .2em 0 1.1em; }
+.lede { color: var(--muted); font-size: 1.04rem; }
+section { margin: 2.2rem 0; }
+h2 { font-size: 1.15rem; margin: 0 0 .5em; }
+label { display: block; font-size: .85rem; color: var(--muted); margin: .6rem 0 .25rem; }
+input, textarea, select, button {
+  font: inherit; width: 100%; padding: .55rem .7rem; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--paper); color: var(--ink);
+}
+button {
+  width: auto; background: var(--accent); color: #fff; border: 0; cursor: pointer;
+  padding: .55rem 1.1rem; margin-top: .7rem;
+}
+button:hover { filter: brightness(1.08); }
+.row { display: flex; gap: .6rem; }
+.row input { flex: 1; }
+.row button { margin-top: 0; }
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem; }
+.verdict { font-weight: 700; font-size: 1.1rem; }
+.verdict.holds { color: var(--pass); }
+.verdict.broken, .verdict.error { color: var(--fail); }
+.trail { font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: .82rem;
+  white-space: pre-wrap; color: var(--muted); margin-top: .5rem; }
+.result { border-top: 1px solid var(--line); padding: .6rem 0; }
+.result .t { font-weight: 600; }
+.result .s { color: var(--muted); font-size: .9rem; }
+.shelf { font-size: .72rem; color: var(--gold); text-transform: uppercase; letter-spacing: .08em; }
+footer.site { border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem;
+  margin-top: 3rem; padding-top: 1.2rem; }
+footer.site a { color: var(--accent); }
+.muted { color: var(--muted); }
+.mono { font-family: ui-monospace, Consolas, monospace; font-size: .85rem; }

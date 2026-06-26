@@ -77,8 +77,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 
 ## Dial faces — the site (later)
 
-- [ ] real build step (templates, no 211 hand-authored pages); `.com` secular + `.org` witness builds
-- [ ] minimal: what it is · "bring a claim → get a receipt" demo · the seal viewer
+- [x] **Narrow Highway** (narrowhighway.com) — lean static site: landing ("wisdom & discernment by
+      narrowing the possibilities"), the live "bring a claim → receipt" demo (POST /verify), search,
+      the seal viewer, an honest link to .org. Served **same-origin** by `python -m concordance serve`
+      (the API serves the static site too). 4 site tests + a live end-to-end smoke (health, index,
+      moat HOLDS/BROKEN, search, witness-gating) — all green.
+- [ ] (later) a templated build + the .org witness build, if the page count grows; minimal suffices now.
 
 ## Data contracts to preserve (from 1.0)
 

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seal viewer — Narrow Highway</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site"><div class="wrap" style="padding:.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center">
+  <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
+  <nav class="site"><a href="index.html#verify">Verify</a><a href="index.html#search">Search</a><a href="seal.html">Seal</a></nav>
+</div></header>
+
+<main class="wrap">
+  <h1>The receipt</h1>
+  <p class="tagline">Every verdict is content-addressed. Re-fetch it by its hash; the hash is the proof.</p>
+  <p class="lede">A seal is the permanent, tamper-evident record of a verification — the verdict, the
+  worked trail, the anchors. Paste a content hash to retrieve it. If the bytes were altered, the
+  hash would no longer match.</p>
+
+  <section>
+    <div class="row">
+      <input id="h" placeholder="content hash (sha256)" aria-label="content hash" class="mono">
+      <button onclick="fetchSeal()">Fetch</button>
+    </div>
+    <div id="out" style="margin-top:1rem"></div>
+  </section>
+
+  <footer class="site">
+    <p>The trail is the trust: each step is machine-verified, and the seal lets anyone re-check it.
+    The fuller witness is at <a href="https://narrowhighway.org">narrowhighway.org</a>.</p>
+  </footer>
+</main>
+
+<script>
+const API = "";
+async function fetchSeal() {
+  const h = document.getElementById('h').value.trim(), out = document.getElementById('out');
+  if (!h) return;
+  out.innerHTML = '<p class="muted">fetching…</p>';
+  try {
+    const r = await fetch(API + "/seal?hash=" + encodeURIComponent(h));
+    if (r.status === 404) { out.innerHTML = '<p class="muted">no seal found for that hash.</p>'; return; }
+    const d = await r.json();
+    out.innerHTML = '<div class="card"><div class="verdict ' +
+      (d.overall === "PASS" ? "holds" : "broken") + '">' + esc(d.overall || "") + '</div>' +
+      '<div class="trail">' + esc(JSON.stringify(d, null, 2)) + '</div></div>';
+  } catch (e) { out.innerHTML = '<p class="muted">API unreachable — start it with <span class="mono">python -m concordance serve</span></p>'; }
+}
+function esc(s){const d=document.createElement('div');d.textContent=String(s==null?"":s);return d.innerHTML;}
+</script>
+</body>
+</html>

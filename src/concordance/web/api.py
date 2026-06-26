@@ -100,17 +100,48 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     return _err(404, "not found")
 
 
-def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular") -> None:
-    """Thin http.server shell around dispatch(). Sovereign — stdlib only."""
+_API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word_study"}
+
+
+def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
+          site_dir: str = None) -> None:
+    """Thin http.server shell: the API + (optionally) the static site, same-origin. Stdlib only."""
     import json
+    import mimetypes
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    from pathlib import Path
     from urllib.parse import parse_qs, urlparse
 
     config = EngineConfig(surface)
+    site = Path(site_dir).resolve() if site_dir else None
 
     class Handler(BaseHTTPRequestHandler):
+        def _json(self, status: int, payload: dict) -> None:
+            data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+            self.send_response(status)
+            self.send_header("content-type", "application/json; charset=utf-8")
+            self.send_header("content-length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+
+        def _static(self, path: str) -> None:
+            rel = path.lstrip("/") or "index.html"
+            fp = (site / rel).resolve()
+            if not str(fp).startswith(str(site)) or not fp.is_file():  # traversal guard + existence
+                return self._json(404, {"error": "not found"})
+            body = fp.read_bytes()
+            ctype = mimetypes.guess_type(str(fp))[0] or "application/octet-stream"
+            self.send_response(200)
+            self.send_header("content-type", ctype)
+            self.send_header("content-length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
         def _do(self, method: str) -> None:
             u = urlparse(self.path)
+            # static site (GET only) for non-API paths, when a site dir is configured
+            if method == "GET" and site is not None and u.path not in _API_GET_PATHS:
+                return self._static(u.path)
             q = {k: v[0] for k, v in parse_qs(u.query).items()}
             body = None
             if method == "POST":
@@ -121,12 +152,7 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular") -
                 except (ValueError, TypeError):
                     body = {}
             status, payload = dispatch(method, u.path, q, body, config)
-            data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-            self.send_response(status)
-            self.send_header("content-type", "application/json; charset=utf-8")
-            self.send_header("content-length", str(len(data)))
-            self.end_headers()
-            self.wfile.write(data)
+            self._json(status, payload)
 
         def do_GET(self) -> None:
             self._do("GET")
@@ -137,5 +163,6 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular") -
         def log_message(self, *args) -> None:  # quiet
             pass
 
-    print(f"Concordance API ({surface}) on http://{host}:{port}")
+    where = f" + site {site}" if site else ""
+    print(f"Narrow Highway API ({surface}) on http://{host}:{port}{where}")
     ThreadingHTTPServer((host, port), Handler).serve_forever()

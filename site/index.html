@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Narrow Highway — wisdom by narrowing the possibilities</title>
+<meta name="description" content="A verification engine. It narrows the possibilities — eliminating what is not the answer so what survives stands on its own — and hands you a receipt you can re-verify.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site"><div class="wrap" style="padding:.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center">
+  <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
+  <nav class="site"><a href="#verify">Verify</a><a href="#search">Search</a><a href="seal.html">Seal</a></nav>
+</div></header>
+
+<main class="wrap">
+  <h1>Wisdom and discernment by narrowing the possibilities.</h1>
+  <p class="tagline">It eliminates what is not the answer, so what survives stands on its own.</p>
+  <p class="lede">A deterministic verification engine. Bring a claim — it checks it, shows the worked
+  reasoning, and hands you a receipt you can re-verify. No "trust me." Just what holds, and why.</p>
+
+  <section id="verify">
+    <h2>Bring a claim → get a receipt</h2>
+    <p class="muted">Symbolic math, checked exactly. Try <span class="mono">2+2 = 4</span> (holds),
+    <span class="mono">2+2 = 5</span> (caught), or <span class="mono">x/x = 1</span> (caught — undefined at x=0).</p>
+    <div class="row">
+      <input id="a" value="(x-1)*(x+1)" aria-label="left side">
+      <span style="align-self:center" class="muted">=</span>
+      <input id="b" value="x**2-1" aria-label="right side">
+      <button onclick="verify()">Verify</button>
+    </div>
+    <div id="verdict" style="margin-top:1rem"></div>
+  </section>
+
+  <section id="search">
+    <h2>Search the keeping</h2>
+    <p class="muted">Ranked retrieval over the kept library.</p>
+    <div class="row">
+      <input id="q" placeholder="e.g. love, justice, baptism" aria-label="search query">
+      <button onclick="search()">Search</button>
+    </div>
+    <div id="results" style="margin-top:.8rem"></div>
+  </section>
+
+  <footer class="site">
+    <p>Narrow Highway narrows the possibilities so the way is clear. The engine verifies; it does
+    not generate the answer — it finds what survives.</p>
+    <p>Built on the Word. The fuller witness is at <a href="https://narrowhighway.org">narrowhighway.org</a>.</p>
+  </footer>
+</main>
+
+<script>
+const API = ""; // same-origin when served by `python -m concordance serve`; set to http://127.0.0.1:8000 otherwise
+async function verify() {
+  const a = document.getElementById('a').value, b = document.getElementById('b').value;
+  const out = document.getElementById('verdict');
+  out.innerHTML = '<p class="muted">checking…</p>';
+  try {
+    const r = await fetch(API + "/verify", {
+      method: "POST", headers: {"content-type": "application/json"},
+      body: JSON.stringify({mode: "equality", params: {expr_a: a, expr_b: b, variables: {}}})
+    });
+    const d = await r.json();
+    const v = (d.verdict || "ERROR");
+    const cls = v === "HOLDS" ? "holds" : (v === "BROKEN" ? "broken" : "error");
+    const step = (d.trail && d.trail[0]) || {};
+    out.innerHTML = '<div class="card"><div class="verdict ' + cls + '">' +
+      (v === "HOLDS" ? "✓ HOLDS" : (v === "BROKEN" ? "✗ BROKEN" : v)) + '</div>' +
+      '<div class="trail">' + esc(step.detail || d.detail || "") + '</div></div>';
+  } catch (e) { out.innerHTML = '<p class="muted">API unreachable — start it with <span class="mono">python -m concordance serve</span></p>'; }
+}
+async function search() {
+  const q = document.getElementById('q').value, out = document.getElementById('results');
+  if (!q.trim()) return;
+  out.innerHTML = '<p class="muted">searching…</p>';
+  try {
+    const r = await fetch(API + "/search?q=" + encodeURIComponent(q) + "&limit=8");
+    const d = await r.json();
+    if (!d.results || !d.results.length) { out.innerHTML = '<p class="muted">nothing in the keeping matched.</p>'; return; }
+    out.innerHTML = d.results.map(c =>
+      '<div class="result"><span class="shelf">' + esc(c.shelf || "") + '</span>' +
+      '<div class="t">' + esc(c.title || "") + '</div>' +
+      '<div class="s">' + esc((c.snippet || "").slice(0, 160)) + '</div></div>').join("");
+  } catch (e) { out.innerHTML = '<p class="muted">API unreachable.</p>'; }
+}
+function esc(s){const d=document.createElement('div');d.textContent=String(s==null?"":s);return d.innerHTML;}
+</script>
+</body>
+</html>
