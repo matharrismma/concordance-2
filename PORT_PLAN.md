@@ -41,7 +41,10 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 - [x] `canon` — layered canon ported (self-contained)
 - [ ] `scripture` (ref resolution) — DEFERRED: reads the Bible corpus (1144 lines, data=86); port with
       graceful degradation (abstain without data) + the keeping/ranker data migration
-- [ ] governance: structural check + anchor surfaced on witness (hotspot #5)
+- [x] governance: **de-laundered secular port** — structural checks kept (decision-packet shape,
+      witness-count consistency, decision timing, rationale alignment, domain profiles for
+      business/household/education); the 5 scriptural anchors + "church" profile removed from the
+      core, scopes neutralized (local/mesh/archived). Hotspot #5 closed. Proven true+false.
 
 ## Case + dial — the thin web layer (later)
 

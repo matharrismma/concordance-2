@@ -48,6 +48,13 @@ CASES = [
     ("finance",
      {"FIN_VERIFY": {"assets": 100, "liabilities": 60, "equity": 40}},
      {"FIN_VERIFY": {"assets": 100, "liabilities": 60, "equity": 30}}),
+    ("governance",
+     {"DECISION_PACKET": {"title": "t", "scope": "local", "red_items": ["x"],
+                          "floor_items": ["y"], "way_path": "choose the careful reversible path",
+                          "execution_steps": ["do it"], "witnesses": ["Alice"]}},
+     {"DECISION_PACKET": {"title": "t", "scope": "local", "red_items": ["x"],
+                          "floor_items": [], "way_path": "choose the careful reversible path",
+                          "execution_steps": ["do it"], "witnesses": ["Alice"]}}),
 ]
 
 

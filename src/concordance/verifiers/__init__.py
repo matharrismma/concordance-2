@@ -79,6 +79,8 @@ VERIFIERS: Dict[str, str] = {
     "labor": _P + "labor", "labour": _P + "labor", "employment": _P + "labor", "wages": _P + "labor",
     "real_estate": _P + "real_estate", "property": _P + "real_estate", "mortgage": _P + "real_estate",
     "law": _P + "law", "legal": _P + "law", "contract": _P + "law",
+    "governance": _P + "governance", "business": _P + "governance",
+    "household": _P + "governance", "education": _P + "governance",
     "manufacturing": _P + "manufacturing",
     "construction": _P + "construction", "building": _P + "construction",
     "architecture": _P + "architecture", "building_design": _P + "architecture",
