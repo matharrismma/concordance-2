@@ -35,9 +35,13 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 
 ## Witness surface (.org) — config-gated, NOT a separate install
 
-- [ ] `scripture` / `theology_doctrine` / `witness` verifiers — surfaced only when `surface=witness`
-- [ ] `canon` — layered canon
-- [ ] governance: keep the structural check in core; anchor surfaced on witness (hotspot #5)
+- [x] `theology_doctrine` + `witness` verifiers — surfaced ONLY when `surface=witness` (WITNESS_VERIFIERS
+      map + `surface` threaded through run_for_domain + the engine). 4 witness-surface tests green: the
+      witness surfaces them, the secular reach does not, the secular path is unaffected
+- [x] `canon` — layered canon ported (self-contained)
+- [ ] `scripture` (ref resolution) — DEFERRED: reads the Bible corpus (1144 lines, data=86); port with
+      graceful degradation (abstain without data) + the keeping/ranker data migration
+- [ ] governance: structural check + anchor surfaced on witness (hotspot #5)
 
 ## Case + dial — the thin web layer (later)
 

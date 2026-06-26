@@ -98,16 +98,22 @@ VERIFIERS: Dict[str, str] = {
     "philosophy": _P + "philosophy", "ethics": _P + "philosophy", "epistemology": _P + "philosophy",
 }
 
+# Witness-surface verifiers — surfaced ONLY when surface == "witness" (the .org overlay).
+# The foundation is shared on both surfaces; this governs only what the surface EXPOSES.
+# `scripture` (ref resolution) is deferred — it needs the Bible corpus data.
+WITNESS_VERIFIERS: Dict[str, str] = {
+    "theology_doctrine": _P + "theology_doctrine", "theology": _P + "theology_doctrine",
+    "doctrine": _P + "theology_doctrine", "scripture_doctrine": _P + "theology_doctrine",
+    "witness": _P + "witness", "testimony": _P + "witness",
+}
+
 # Cross-cutting verifiers run on every packet. Empty in the secular core.
 CROSS_CUTTING_VERIFIERS: tuple = ()
 
 _LOADED_MODULES: Dict[str, ModuleType] = {}
 
 
-def _get_module(domain: str) -> Optional[ModuleType]:
-    """Resolve a domain to its verifier module, importing on first use.
-    Returns None for unregistered domains."""
-    mod_path = VERIFIERS.get(domain)
+def _resolve(mod_path: Optional[str]) -> Optional[ModuleType]:
     if mod_path is None:
         return None
     cached = _LOADED_MODULES.get(mod_path)
@@ -118,12 +124,29 @@ def _get_module(domain: str) -> Optional[ModuleType]:
     return cached
 
 
-def run_for_domain(domain: str, packet) -> List[VerifierResult]:
-    """Run all verifiers registered for this domain plus any cross-cutting ones."""
+def _get_module(domain: str) -> Optional[ModuleType]:
+    """Resolve a SECULAR domain to its verifier module (lazy). None if unregistered."""
+    return _resolve(VERIFIERS.get(domain))
+
+
+def _get_witness_module(domain: str) -> Optional[ModuleType]:
+    """Resolve a WITNESS-surface domain to its verifier module (lazy). None if unregistered."""
+    return _resolve(WITNESS_VERIFIERS.get(domain))
+
+
+def run_for_domain(domain: str, packet, surface: str = "secular") -> List[VerifierResult]:
+    """Run the verifiers for this domain. On the witness surface, the witness-surface
+    verifiers (theology/witness) are ALSO surfaced; on the secular reach they are not.
+    The foundation is shared; surface governs only what is exposed."""
     results: List[VerifierResult] = []
-    mod = _get_module((domain or "").lower())
+    d = (domain or "").lower()
+    mod = _get_module(d)
     if mod is not None:
         results.extend(mod.run(packet))
+    if surface == "witness":
+        wmod = _get_witness_module(d)
+        if wmod is not None:
+            results.extend(wmod.run(packet))
     for cross in CROSS_CUTTING_VERIFIERS:
         results.extend(cross.run(packet))
     return results
@@ -131,5 +154,5 @@ def run_for_domain(domain: str, packet) -> List[VerifierResult]:
 
 __all__ = [
     "VerifierResult", "VerifierStatus", "na", "confirm", "mismatch", "error",
-    "run_for_domain", "VERIFIERS", "CROSS_CUTTING_VERIFIERS",
+    "run_for_domain", "VERIFIERS", "WITNESS_VERIFIERS", "CROSS_CUTTING_VERIFIERS",
 ]

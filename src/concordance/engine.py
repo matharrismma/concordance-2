@@ -148,7 +148,7 @@ def _run_validation(packet: Dict[str, Any], *, now_epoch: Optional[int],
 
     # RED — verifier dispatch (does the math/logic actually hold)
     if config.run_verifiers:
-        ver_results = _verifiers.run_for_domain(domain, packet)
+        ver_results = _verifiers.run_for_domain(domain, packet, surface=config.surface)
         verifier_results.extend(ver_results)
         ver_failures = [v for v in ver_results if v.failed]
         ver_passes = [v for v in ver_results if v.passed]
