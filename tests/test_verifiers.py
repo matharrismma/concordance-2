@@ -42,6 +42,12 @@ CASES = [
     ("geometry",
      {"GEOM_VERIFY": {"polygon_n": 4, "claimed_interior_angle_sum_deg": 360}},
      {"GEOM_VERIFY": {"polygon_n": 4, "claimed_interior_angle_sum_deg": 999}}),
+    ("physics",
+     {"PHYS_VERIFY": {"v0": 0, "a": 10, "t": 2, "claimed_displacement": 20}},
+     {"PHYS_VERIFY": {"v0": 0, "a": 10, "t": 2, "claimed_displacement": 21}}),
+    ("finance",
+     {"FIN_VERIFY": {"assets": 100, "liabilities": 60, "equity": 40}},
+     {"FIN_VERIFY": {"assets": 100, "liabilities": 60, "equity": 30}}),
 ]
 
 
@@ -51,8 +57,20 @@ def test_verifiers_confirm_truth_and_catch_falsehood():
         assert _status(domain, false_pkt) == "FAIL", f"{domain} failed to CATCH a falsehood: {false_pkt}"
 
 
+def test_all_registered_verifiers_load_and_run():
+    """Structural guard: every registered secular domain imports and runs on an empty
+    packet (returns NOT_APPLICABLE, never crashes). Catches a broken/missing port."""
+    from concordance.verifiers import VERIFIERS, run_for_domain
+    for d in sorted(VERIFIERS):
+        res = run_for_domain(d, {})
+        assert isinstance(res, list) and res, f"{d}: no result on empty packet"
+
+
 if __name__ == "__main__":
     test_verifiers_confirm_truth_and_catch_falsehood()
     doms = sorted({c[0] for c in CASES})
     print(f"  ok  {len(CASES)} cases across {len(doms)} domains: {', '.join(doms)}")
     print("  ok  each confirms a truth and catches a falsehood")
+    test_all_registered_verifiers_load_and_run()
+    from concordance.verifiers import VERIFIERS
+    print(f"  ok  all {len(VERIFIERS)} registered domain names load + run on an empty packet")

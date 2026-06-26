@@ -1,0 +1,444 @@
+"""Statistics verifier.
+
+Checks performed:
+  * pvalue_calibration: given (test, n, statistic, df, claimed_p), recompute
+    p from the test distribution and verify within tolerance
+  * pvalue_significance_consistency: if the packet claims significance at
+    alpha, verify p <= alpha; if it claims non-significance, verify p > alpha
+  * effect_size_required: if p <= alpha, an effect size must be reported
+  * multiple_comparisons: given k tests with raw p-values and a stated
+    correction method (bonferroni, bh), recompute corrected p-values and
+    verify the rejection set matches the claim
+  * confidence_interval_coverage: given (estimate, ci_low, ci_high, alpha),
+    verify the interval is symmetric (or shape-correct) and contains the
+    estimate
+
+Recomputed test statistics for two_sample_t are derived from the supplied
+(n1, n2, mean1, mean2, sd1, sd2) using Welch's formula.
+"""
+from __future__ import annotations
+from typing import Any, Dict, List
+import math
+
+from .base import VerifierResult, na, confirm, mismatch, error
+
+# numpy + scipy.stats are heavy imports (scipy.stats ~1.5s). They load on
+# first use (via _ensure_stats) so the engine's cold start stays fast.
+np = scistats = None
+_stats_loaded = False
+
+
+def _ensure_stats() -> None:
+    """Import numpy + scipy.stats on first use. Idempotent."""
+    global np, scistats, _stats_loaded
+    if _stats_loaded:
+        return
+    import numpy as _np
+    from scipy import stats as _scistats
+    np, scistats = _np, _scistats
+    _stats_loaded = True
+
+
+# Aliases accepted for the `tail` parameter. The canonical values returned
+# by _normalize_tail are exactly: "two-sided", "greater", "less".
+_TAIL_TWO_SIDED = frozenset({"two-sided", "two_sided", "twosided", "two", "both", "2", "!="})
+_TAIL_GREATER = frozenset({"greater", "right", "right-tailed", "upper", "upper-tailed", ">"})
+_TAIL_LESS = frozenset({"less", "left", "left-tailed", "lower", "lower-tailed", "<"})
+
+
+def _normalize_tail(t):
+    """Return canonical tail name. Defaults to two-sided if t is None."""
+    if t is None:
+        return "two-sided"
+    s = str(t).lower().strip()
+    if s in _TAIL_TWO_SIDED:
+        return "two-sided"
+    if s in _TAIL_GREATER:
+        return "greater"
+    if s in _TAIL_LESS:
+        return "less"
+    raise ValueError(
+        f"unknown tail spec {t!r}; "
+        f"use one of: two-sided/two/both, greater/right, less/left"
+    )
+
+
+def verify_pvalue_calibration(spec: Dict[str, Any]) -> VerifierResult:
+    """Recompute p-value from supplied test inputs and verify the claim."""
+    _ensure_stats()
+    test = spec.get("test", "").lower()
+    claimed_p = spec.get("claimed_p")
+    # Default tolerance raised from 1e-3 to 5e-3: published p-values are typically
+    # rounded to 2-3 decimal places, so a 0.001 window rejects legitimate claims
+    # whose reported p differs from the recomputed p only by rounding.
+    tol = spec.get("tolerance", 5e-3)
+
+    try:
+        if test in ("two_sample_t", "welch_t"):
+            n1, n2 = spec["n1"], spec["n2"]
+            m1, m2 = spec["mean1"], spec["mean2"]
+            s1, s2 = spec["sd1"], spec["sd2"]
+            tail = _normalize_tail(spec.get("tail"))
+            se = math.sqrt(s1 ** 2 / n1 + s2 ** 2 / n2)
+            t = (m1 - m2) / se
+            df = (s1 ** 2 / n1 + s2 ** 2 / n2) ** 2 / (
+                (s1 ** 2 / n1) ** 2 / (n1 - 1) + (s2 ** 2 / n2) ** 2 / (n2 - 1)
+            )
+            if tail == "two-sided":
+                p = 2 * scistats.t.sf(abs(t), df)
+            elif tail == "greater":
+                p = scistats.t.sf(t, df)
+            else:  # "less"
+                p = scistats.t.cdf(t, df)
+            data = {"recomputed_t": t, "df": df, "recomputed_p": p, "tail": tail}
+
+        elif test == "one_sample_t":
+            n = spec["n"]
+            m = spec["mean"]
+            s = spec["sd"]
+            mu0 = spec.get("mu0", 0.0)
+            tail = _normalize_tail(spec.get("tail"))
+            t = (m - mu0) / (s / math.sqrt(n))
+            df = n - 1
+            if tail == "two-sided":
+                p = 2 * scistats.t.sf(abs(t), df)
+            elif tail == "greater":
+                p = scistats.t.sf(t, df)
+            else:  # "less"
+                p = scistats.t.cdf(t, df)
+            data = {"recomputed_t": t, "df": df, "recomputed_p": p, "tail": tail}
+
+        elif test == "z":
+            z = spec["z"]
+            tail = _normalize_tail(spec.get("tail"))
+            if tail == "two-sided":
+                p = 2 * scistats.norm.sf(abs(z))
+            elif tail == "greater":
+                p = scistats.norm.sf(z)
+            else:  # "less"
+                p = scistats.norm.cdf(z)
+            data = {"recomputed_z": z, "recomputed_p": p, "tail": tail}
+
+        elif test == "chi2":
+            stat = spec["statistic"]
+            df = spec["df"]
+            p = scistats.chi2.sf(stat, df)
+            data = {"recomputed_stat": stat, "df": df, "recomputed_p": p}
+
+        elif test == "f":
+            stat = spec["statistic"]
+            df1 = spec["df1"]
+            df2 = spec["df2"]
+            p = scistats.f.sf(stat, df1, df2)
+            data = {"recomputed_stat": stat, "df1": df1, "df2": df2, "recomputed_p": p}
+
+        elif test == "paired_t":
+            # Either supply (mean_diff, sd_diff, n) or supply (paired1, paired2)
+            tail = _normalize_tail(spec.get("tail"))
+            if "mean_diff" in spec:
+                n = spec["n"]
+                d = spec["mean_diff"]
+                sd = spec["sd_diff"]
+            else:
+                a = np.asarray(spec["paired1"], dtype=float)
+                b = np.asarray(spec["paired2"], dtype=float)
+                if a.shape != b.shape:
+                    raise ValueError("paired1 and paired2 must be same length")
+                diffs = a - b
+                n = len(diffs)
+                d = float(np.mean(diffs))
+                sd = float(np.std(diffs, ddof=1))
+            t = d / (sd / math.sqrt(n))
+            df = n - 1
+            if tail == "two-sided":
+                p = 2 * scistats.t.sf(abs(t), df)
+            elif tail == "greater":
+                p = scistats.t.sf(t, df)
+            else:
+                p = scistats.t.cdf(t, df)
+            data = {"recomputed_t": t, "df": df, "recomputed_p": p, "tail": tail}
+
+        elif test == "one_proportion_z":
+            n = spec["n"]
+            x = spec.get("successes")
+            phat = (x / n) if x is not None else spec["phat"]
+            p0 = spec["p0"]
+            tail = _normalize_tail(spec.get("tail"))
+            se = math.sqrt(p0 * (1 - p0) / n)
+            z = (phat - p0) / se
+            if tail == "two-sided":
+                p = 2 * scistats.norm.sf(abs(z))
+            elif tail == "greater":
+                p = scistats.norm.sf(z)
+            else:
+                p = scistats.norm.cdf(z)
+            data = {"recomputed_z": z, "recomputed_p": p, "tail": tail}
+
+        elif test == "two_proportion_z":
+            n1, n2 = spec["n1"], spec["n2"]
+            x1 = spec.get("successes1"); x2 = spec.get("successes2")
+            p1 = (x1 / n1) if x1 is not None else spec["phat1"]
+            p2 = (x2 / n2) if x2 is not None else spec["phat2"]
+            ppool = ((x1 if x1 is not None else p1 * n1) + (x2 if x2 is not None else p2 * n2)) / (n1 + n2)
+            se = math.sqrt(ppool * (1 - ppool) * (1 / n1 + 1 / n2))
+            z = (p1 - p2) / se
+            tail = _normalize_tail(spec.get("tail"))
+            if tail == "two-sided":
+                p = 2 * scistats.norm.sf(abs(z))
+            elif tail == "greater":
+                p = scistats.norm.sf(z)
+            else:
+                p = scistats.norm.cdf(z)
+            data = {"recomputed_z": z, "recomputed_p": p, "tail": tail}
+
+        elif test == "fisher_exact":
+            table = spec["table"]  # 2x2
+            tail_raw = spec.get("tail")
+            tail = _normalize_tail(tail_raw)
+            alt = {"two-sided": "two-sided", "greater": "greater", "less": "less"}[tail]
+            res = scistats.fisher_exact(table, alternative=alt)
+            # scipy >= 1.10 returns SignificanceResult; older returns tuple
+            if hasattr(res, "pvalue"):
+                p = float(res.pvalue); odds = float(res.statistic)
+            else:
+                odds, p = float(res[0]), float(res[1])
+            data = {"odds_ratio": odds, "recomputed_p": p, "tail": tail}
+
+        elif test == "mannwhitney":
+            x = spec["x"]; y = spec["y"]
+            tail = _normalize_tail(spec.get("tail"))
+            alt = {"two-sided": "two-sided", "greater": "greater", "less": "less"}[tail]
+            res = scistats.mannwhitneyu(x, y, alternative=alt)
+            p = float(res.pvalue); u = float(res.statistic)
+            data = {"U": u, "recomputed_p": p, "tail": tail}
+
+        elif test in ("wilcoxon_signed_rank", "wilcoxon"):
+            tail = _normalize_tail(spec.get("tail"))
+            alt = {"two-sided": "two-sided", "greater": "greater", "less": "less"}[tail]
+            if "x" in spec and "y" in spec:
+                res = scistats.wilcoxon(spec["x"], spec["y"], alternative=alt)
+            else:
+                res = scistats.wilcoxon(spec["d"], alternative=alt)
+            p = float(res.pvalue); w = float(res.statistic)
+            data = {"W": w, "recomputed_p": p, "tail": tail}
+
+        elif test == "regression_coefficient_t":
+            beta = spec["beta"]
+            se = spec["se"]
+            n = spec["n"]
+            k = spec.get("k", 1)  # number of predictors (excluding intercept)
+            tail = _normalize_tail(spec.get("tail"))
+            t = beta / se
+            df = n - k - 1
+            if tail == "two-sided":
+                p = 2 * scistats.t.sf(abs(t), df)
+            elif tail == "greater":
+                p = scistats.t.sf(t, df)
+            else:
+                p = scistats.t.cdf(t, df)
+            data = {"recomputed_t": t, "df": df, "recomputed_p": p, "tail": tail}
+
+        else:
+            return error("statistics.pvalue_calibration", f"unknown test {test!r}")
+
+    except KeyError as e:
+        return error("statistics.pvalue_calibration", f"missing field: {e}")
+    except Exception as e:
+        return error("statistics.pvalue_calibration", f"computation failure: {e}")
+
+    if claimed_p is None:
+        return confirm("statistics.pvalue_calibration",
+                       f"recomputed p={p:.6g} (no claimed_p to compare)", data)
+
+    diff = abs(p - claimed_p)
+    # Ratio check (relative agreement) supplements the absolute tolerance.
+    # Without it, the 5e-3 absolute window accepts cases like claimed=0.0014
+    # vs recomputed=0.0028 (wrong_tail: ratio=2.0) or claimed=0.001379 vs
+    # recomputed=0.000276 (wrong_p_value: ratio=5.0) — the diffs are tiny in
+    # absolute terms but the inferential errors are large. A ratio threshold
+    # of 1.5 catches wrong_tail (ratio=2 exactly) while still allowing
+    # published rounding (typically ratio<1.2). Both p-values must be above a
+    # floor (1e-6) for the ratio check to apply — below that, scipy's
+    # underflow can pin one side to 0 and the ratio loses meaning.
+    ratio_threshold = float(spec.get("ratio_threshold", 1.5))
+    p_floor = 1e-6
+    if p > p_floor and claimed_p > p_floor:
+        ratio = max(p, claimed_p) / min(p, claimed_p)
+        ratio_ok = ratio <= ratio_threshold
+    else:
+        ratio = 1.0
+        ratio_ok = True
+    if diff <= tol and ratio_ok:
+        return confirm("statistics.pvalue_calibration",
+                       f"claimed p={claimed_p}, recomputed p={p:.6g} "
+                       f"(diff {diff:.2e}, ratio {ratio:.2f})", data)
+    failures = []
+    if diff > tol:
+        failures.append(f"diff {diff:.2e} > tol {tol}")
+    if not ratio_ok:
+        failures.append(f"ratio {ratio:.2f} > {ratio_threshold}")
+    return mismatch("statistics.pvalue_calibration",
+                    f"claimed p={claimed_p}, recomputed p={p:.6g}: " + "; ".join(failures),
+                    data)
+
+
+def verify_significance_consistency(spec: Dict[str, Any]) -> VerifierResult:
+    """If author claims 'significant', verify p <= alpha. Same for 'not significant'."""
+    p = spec.get("p_value")
+    alpha = spec.get("alpha", 0.05)
+    claimed_significance = spec.get("claimed_significance")  # "significant" or "not_significant"
+    if p is None or claimed_significance is None:
+        return na("statistics.significance_consistency")
+    is_sig = p <= alpha
+    if claimed_significance.lower() in ("significant", "sig", "yes", "true"):
+        if is_sig:
+            return confirm("statistics.significance_consistency",
+                           f"p={p} <= alpha={alpha}, claim of significance is consistent")
+        return mismatch("statistics.significance_consistency",
+                        f"claimed significant but p={p} > alpha={alpha}")
+    else:
+        if not is_sig:
+            return confirm("statistics.significance_consistency",
+                           f"p={p} > alpha={alpha}, claim of non-significance is consistent")
+        return mismatch("statistics.significance_consistency",
+                        f"claimed non-significant but p={p} <= alpha={alpha}")
+
+
+def verify_effect_size_present(spec: Dict[str, Any]) -> VerifierResult:
+    p = spec.get("p_value")
+    alpha = spec.get("alpha", 0.05)
+    if p is None:
+        return na("statistics.effect_size_present")
+    has_effect = (
+        spec.get("effect_size") is not None
+        or spec.get("effect_size_type") is not None
+    )
+    has_ci = spec.get("confidence_interval") is not None
+    if p <= alpha and not has_effect:
+        return mismatch(
+            "statistics.effect_size_present",
+            f"significant result (p={p} <= alpha={alpha}) without effect_size",
+        )
+    if has_effect and not has_ci:
+        return mismatch(
+            "statistics.effect_size_present",
+            "effect_size reported without a confidence_interval",
+        )
+    return confirm("statistics.effect_size_present", "effect size reporting consistent")
+
+
+def verify_multiple_comparisons(spec: Dict[str, Any]) -> VerifierResult:
+    """Given raw p-values and a correction method, recompute and verify."""
+    _ensure_stats()
+    raw_p = spec.get("raw_p_values")
+    method = (spec.get("method") or "").lower()
+    alpha = spec.get("alpha", 0.05)
+    claimed_rejected = spec.get("claimed_rejected_indices")  # optional
+    if not raw_p:
+        return na("statistics.multiple_comparisons")
+    p = np.asarray(raw_p, dtype=float)
+    k = len(p)
+    if method in ("bonferroni", "bonf"):
+        adj = np.minimum(p * k, 1.0)
+    elif method in ("bh", "benjamini-hochberg", "fdr"):
+        order = np.argsort(p)
+        ranks = np.empty(k, dtype=int)
+        ranks[order] = np.arange(1, k + 1)
+        adj_sorted = (p[order] * k / ranks[order]).astype(float)
+        # enforce monotonicity
+        for i in range(k - 2, -1, -1):
+            adj_sorted[i] = min(adj_sorted[i], adj_sorted[i + 1])
+        adj = np.empty(k, dtype=float)
+        adj[order] = np.minimum(adj_sorted, 1.0)
+    else:
+        return error("statistics.multiple_comparisons", f"unknown method {method!r}")
+
+    rejected = sorted([i for i, q in enumerate(adj) if q <= alpha])
+    data = {"adjusted_p": adj.tolist(), "rejected_indices": rejected}
+    if claimed_rejected is None:
+        return confirm("statistics.multiple_comparisons",
+                       f"{len(rejected)}/{k} rejected at alpha={alpha} after {method}", data)
+    if sorted(claimed_rejected) == rejected:
+        return confirm("statistics.multiple_comparisons",
+                       f"rejection set matches claim: {rejected}", data)
+    return mismatch("statistics.multiple_comparisons",
+                    f"claimed rejected={sorted(claimed_rejected)}, computed={rejected}", data)
+
+
+def verify_confidence_interval(spec: Dict[str, Any]) -> VerifierResult:
+    """Verify CI shape and (if raw inputs supplied) recompute bounds.
+
+    Bound-recompute path: pass mean, sd, n, conf_level (default 0.95) plus
+    optional ``df`` (default n-1). Compares the recomputed bounds to the
+    claimed ci_low/ci_high within ``tolerance`` (default 1e-3).
+    """
+    _ensure_stats()
+    est = spec.get("estimate")
+    lo = spec.get("ci_low")
+    hi = spec.get("ci_high")
+    if est is None or lo is None or hi is None:
+        return na("statistics.confidence_interval")
+    if not (lo <= hi):
+        return mismatch("statistics.confidence_interval", f"ci_low={lo} > ci_high={hi}")
+    if not (lo <= est <= hi):
+        return mismatch("statistics.confidence_interval",
+                        f"estimate {est} not in [{lo}, {hi}]")
+
+    # Optional bound recomputation
+    mean = spec.get("mean", est)
+    sd = spec.get("sd")
+    n = spec.get("n")
+    conf = float(spec.get("conf_level", 0.95))
+    tol = float(spec.get("tolerance", 5e-3))
+    if sd is not None and n is not None and n >= 2:
+        df = spec.get("df", n - 1)
+        try:
+            tcrit = float(scistats.t.ppf(0.5 + conf / 2.0, df))
+            margin = tcrit * (sd / math.sqrt(n))
+            recompute_lo = mean - margin
+            recompute_hi = mean + margin
+            data = {"recomputed_ci_low": recompute_lo,
+                    "recomputed_ci_high": recompute_hi,
+                    "conf_level": conf, "df": df, "tcrit": tcrit}
+            if abs(recompute_lo - lo) > tol or abs(recompute_hi - hi) > tol:
+                return mismatch(
+                    "statistics.confidence_interval",
+                    f"claimed CI [{lo}, {hi}] != recomputed [{recompute_lo:.6g}, {recompute_hi:.6g}] (tol {tol})",
+                    data,
+                )
+            return confirm(
+                "statistics.confidence_interval",
+                f"recomputed CI matches: [{recompute_lo:.6g}, {recompute_hi:.6g}]",
+                data,
+            )
+        except Exception as e:
+            return error("statistics.confidence_interval", f"recompute failed: {e}")
+
+    return confirm("statistics.confidence_interval",
+                   f"estimate {est} in [{lo}, {hi}]")
+
+
+def run(packet: Dict[str, Any]) -> List[VerifierResult]:
+    results: List[VerifierResult] = []
+    sv = packet.get("STAT_VERIFY") or {}
+    inf = packet.get("STAT_INFERENCE") or {}
+
+    if sv.get("test"):
+        results.append(verify_pvalue_calibration(sv))
+
+    sig_spec = {**inf, **sv}
+    if sig_spec.get("claimed_significance") and sig_spec.get("p_value") is not None:
+        results.append(verify_significance_consistency(sig_spec))
+
+    if inf.get("p_value") is not None:
+        results.append(verify_effect_size_present(inf))
+
+    if sv.get("raw_p_values"):
+        results.append(verify_multiple_comparisons(sv))
+
+    if all(k in sv for k in ("estimate", "ci_low", "ci_high")):
+        results.append(verify_confidence_interval(sv))
+
+    if not results:
+        results.append(na("statistics", "no STAT_VERIFY artifacts present"))
+    return results

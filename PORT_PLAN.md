@@ -21,10 +21,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 
 ## Complications — the verifiers (mount on the train; each earns its place)
 
-- [~] secular verifiers — **5/57 mounted**: `mathematics` (the derivation moat: equality/inequality/
-      derivative + integral/limit/solve, sympy lazy, the pole guard), `combinatorics`, `number_theory`,
-      `information_theory`, `geometry` (all pure stdlib, copied byte-faithful). Each proven with a
-      true+false case (tests/test_verifiers.py). Remaining 52 port next — lazy-load; heavy deps lazy
+- [x] secular verifiers — **60 modules mounted** (118 domain names + aliases), copied byte-faithful
+      (all import only `from .base`; heavy deps sympy/scipy/numpy lazy, present locally). ALL load+run
+      on an empty packet (tests/test_verifiers.py load-guard) + 7 behavior cases across math-moat,
+      number_theory, information_theory, geometry, physics, finance (confirm truths / catch falsehoods).
+      DEFERRED: `governance` (carries a 1 Cor 14:40 anchor → hotspot #5 strip first), `giving` /
+      `layer_zero_grounding` (review). WITNESS-surface verifiers (scripture/theology/witness) = .org.
 - [x] `derivation` moat — `verify` / `verify_step` / `verify_derivation` (mode→verifier→verdict,
       first-break-governs); the crown jewel, the engine verifies, never generates
 - [x] **benchmark GREEN — 58/58, 0 false-positives** (LOCAL `tools/benchmark.py` + `tests/test_benchmark.py`
