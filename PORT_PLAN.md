@@ -21,7 +21,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
       optional + graceful). Feeds find_closest + record.axis_coords_for. The scripture/theology axes
       stay (the grid is the shared conceptual map — we are not hiding)
 - [ ] `foundation/` — truth-model + the disciplines (docs) + Scripture substrate hook (shared)
-- [ ] `signing` — Ed25519 attestation (optional crypto, graceful degradation)
+- [x] `signing` — Ed25519 attestation (optional `cryptography`, graceful when absent). Detached
+      `sign_seal`/`verify_seal` over a seal's content_hash (no circularity); `seal_record(sign_key=)`
+      attaches a verifiable attestation. 3 signing tests green.
 - [x] `ranker` — `corpus.py`: IDF inverted-index retrieval, distinctiveness-floored, **surface-filtered**
       (#7 BUILT; fixture + real-corpus proven). **Floor now 7/7.** `tools/migrate_cards.py` consolidates
       the keeping → `data/cards.jsonl` (gitignored, 11,085 cards). ⚠ CLASSIFICATION DECISION FOR MATT:

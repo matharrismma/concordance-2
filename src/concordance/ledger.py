@@ -227,14 +227,22 @@ def seal_to_ledger(record: WitnessRecord, *, summary: str,
 def seal_record(record: WitnessRecord, *, summary: str,
                 ledger_dir: Optional[Path] = None,
                 cas_base: Optional[Path] = None,
-                sealed_at: Optional[float] = None) -> Dict[str, Any]:
+                sealed_at: Optional[float] = None,
+                sign_key: Optional[str] = None) -> Dict[str, Any]:
     """Wire the floor: store the sealed record in the CAS (content-addressed), then
-    append it to the ledger chain. Returns {content_hash, ledger_path, precedent}."""
+    append it to the ledger chain. Returns {content_hash, ledger_path, precedent}.
+    If sign_key (an Ed25519 private key, base64url) is given, also returns an
+    `attestation` — a detached signature over the content_hash that binds an identity
+    to the seal."""
     content_hash = cas.store(record.to_dict(), base_dir=cas_base)
     record = with_permanent_ref(record, content_hash)
     path = seal_to_ledger(record, summary=summary, ledger_dir=ledger_dir, sealed_at=sealed_at)
-    return {"content_hash": content_hash, "ledger_path": str(path),
-            "precedent": _read_precedent_file(path)}
+    result = {"content_hash": content_hash, "ledger_path": str(path),
+              "precedent": _read_precedent_file(path)}
+    if sign_key:
+        from . import signing
+        result["attestation"] = signing.sign_seal(content_hash, sign_key)
+    return result
 
 
 # ── Precedent search (find_closest) — the overlay onto a verdict ──────────
