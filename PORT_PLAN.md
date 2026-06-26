@@ -21,9 +21,10 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 
 ## Complications — the verifiers (mount on the train; each earns its place)
 
-- [~] secular verifiers — **2/57 mounted**: `combinatorics`, `mathematics` (the derivation moat:
-      equality/inequality/derivative + integral/limit/solve, sympy lazy, the pole/removable-
-      singularity guard). Remaining 55 port next — lazy-load; heavy deps lazy
+- [~] secular verifiers — **5/57 mounted**: `mathematics` (the derivation moat: equality/inequality/
+      derivative + integral/limit/solve, sympy lazy, the pole guard), `combinatorics`, `number_theory`,
+      `information_theory`, `geometry` (all pure stdlib, copied byte-faithful). Each proven with a
+      true+false case (tests/test_verifiers.py). Remaining 52 port next — lazy-load; heavy deps lazy
 - [x] `derivation` moat — `verify` / `verify_step` / `verify_derivation` (mode→verifier→verdict,
       first-break-governs); the crown jewel, the engine verifies, never generates
 - [x] **benchmark GREEN — 58/58, 0 false-positives** (LOCAL `tools/benchmark.py` + `tests/test_benchmark.py`

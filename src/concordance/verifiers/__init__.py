@@ -25,6 +25,10 @@ VERIFIERS: Dict[str, str] = {
     "combinatorics": "concordance.verifiers.combinatorics",
     "mathematics": "concordance.verifiers.mathematics",
     "math": "concordance.verifiers.mathematics",
+    "number_theory": "concordance.verifiers.number_theory",
+    "information_theory": "concordance.verifiers.information_theory",
+    "info_theory": "concordance.verifiers.information_theory",
+    "geometry": "concordance.verifiers.geometry",
 }
 
 # Cross-cutting verifiers run on every packet. Empty in the secular core.
