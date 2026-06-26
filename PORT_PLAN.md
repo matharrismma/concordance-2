@@ -69,10 +69,11 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 
 ## Case + dial — the thin web layer (later)
 
-- [ ] `web/` — handlers · services · generation (flagged LLM edge) · data · middleware
-- [ ] verify/seal/search API (the floor, exposed)
-- [ ] MCP server — conditional tool registration by surface
-- [ ] `web/witness/` routers (/shepherd /codex /scripture) — surfaced when `surface=witness`
+- [x] `web/api.py` — **sovereign stdlib HTTP API** (zero deps; pure testable `dispatch()` + a thin
+      `serve()` http.server shell), BOTH surfaces via EngineConfig: GET /health · /identity ·
+      POST /verify (the moat) · GET /search (shared keeping) · /seal (the receipt) · /resolve +
+      /word_study (witness-gated). 7 API tests green.
+- [ ] MCP server — conditional tool registration by surface (optional; the HTTP API covers agents for now)
 
 ## Dial faces — the site (later)
 
