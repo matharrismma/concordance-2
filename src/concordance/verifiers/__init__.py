@@ -107,6 +107,7 @@ WITNESS_VERIFIERS: Dict[str, str] = {
     "theology_doctrine": _P + "theology_doctrine", "theology": _P + "theology_doctrine",
     "doctrine": _P + "theology_doctrine", "scripture_doctrine": _P + "theology_doctrine",
     "witness": _P + "witness", "testimony": _P + "witness",
+    "scripture": _P + "scripture", "scripture_anchors": _P + "scripture",
 }
 
 # Cross-cutting verifiers run on every packet. Empty in the secular core.

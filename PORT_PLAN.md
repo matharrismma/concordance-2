@@ -46,8 +46,11 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
       map + `surface` threaded through run_for_domain + the engine). 4 witness-surface tests green: the
       witness surfaces them, the secular reach does not, the secular path is unaffected
 - [x] `canon` — layered canon ported (self-contained)
-- [ ] `scripture` (ref resolution) — DEFERRED: reads the Bible corpus (1144 lines, data=86); port with
-      graceful degradation (abstain without data) + the keeping/ranker data migration
+- [x] `scripture` (ref resolution) — LEAN port on the WEB verses (data/bible_en.jsonl, 31,098 verses,
+      public domain, gitignored; tools/migrate_bible.py). resolve_ref → WEB text (incl. abbreviations
+      Jn/Mt/Ps...) + verify cited anchors (ref resolves; quoted text matches), witness-surface-gated,
+      graceful when data absent. 5 scripture tests green. Strong's / word-study / original-language
+      triangulation DEFERRED — needs the lw/00_source backend (a separate subsystem).
 - [x] governance: **de-laundered secular port** — structural checks kept (decision-packet shape,
       witness-count consistency, decision timing, rationale alignment, domain profiles for
       business/household/education); the 5 scriptural anchors + "church" profile removed from the
