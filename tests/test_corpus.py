@@ -29,19 +29,22 @@ def _corpus():
 
 
 def test_relevance_ranks_the_right_card():
-    res = _corpus().search("chlorophyll sunlight", surface="witness")
+    res = _corpus().search("chlorophyll sunlight")
     assert res and res[0]["id"] == "c1", res
 
 
-def test_secular_surface_excludes_witness_cards():
-    res = _corpus().search("Trinity Father Spirit God", surface="secular")
-    assert all(r["surface"] == "secular" for r in res), res
-    assert not any(r["id"] == "c2" for r in res), "witness card leaked onto the secular reach"
+def test_keeping_is_shared_includes_religious_cards():
+    # the keeping is one shared library — the .com includes the religious cards too
+    # (Matt, 2026-06-26: "the religious cards can be included"; "we are not hiding")
+    res = _corpus().search("Trinity Father Spirit God")
+    assert any(r["id"] == "c2" for r in res), "the shared keeping should include the witness card"
 
 
-def test_witness_surface_includes_witness_cards():
-    res = _corpus().search("Trinity Father Spirit God", surface="witness")
-    assert any(r["id"] == "c2" for r in res), "witness surface should surface the witness card"
+def test_optional_secular_only_view():
+    # include_witness=False is the optional scrubbed view, should a caller want it
+    res = _corpus().search("Trinity Father Spirit God", include_witness=False)
+    assert all(r.get("surface") != "witness" for r in res), res
+    assert not any(r["id"] == "c2" for r in res)
 
 
 def test_empty_query_returns_nothing():
@@ -49,7 +52,7 @@ def test_empty_query_returns_nothing():
 
 
 def test_limit_respected():
-    res = _corpus().search("energy", surface="secular", limit=1)
+    res = _corpus().search("energy", limit=1)
     assert len(res) <= 1
 
 

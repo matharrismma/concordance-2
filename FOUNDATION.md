@@ -29,10 +29,13 @@ exhibition caseback is open: the `.org` shows the movement named, the `.com` sho
 
 ## Reaching the world — two surfaces, one foundation
 
-- **`.com` — the reach.** A secular surface that meets the world in its own language: truth,
-  verification, a re-checkable receipt. No religious wording on the surface. This is Paul at the
-  Areopagus (Acts 17) — reasoning from what they already accept, quoting their own poets, never
-  moving the foundation. Speaking the hearer's tongue is not shame; it is love (1 Cor 9:19–22).
+- **`.com` — the reach.** Meets the world in accessible, outward-facing language: truth,
+  verification, a re-checkable receipt. It reaches the world where it is — **openly Christian-rooted,
+  not hiding the faith** (the keeping is shared: the `.com` includes the religious cards too —
+  operator, 2026-06-26: "the religious cards can be included"; "we are not hiding anything").
+  This is Paul at the Areopagus (Acts 17) — reasoning from what they already accept, quoting their
+  own poets, never moving the foundation. Speaking the hearer's tongue is not shame; it is love
+  (1 Cor 9:19–22). "Secular" here means *accessible / for the world*, not *faith-scrubbed*.
 - **`.org` — the witness.** The same engine with the foundation made explicit: Scripture, canon,
   theology, the Shepherd, the named Rock.
 

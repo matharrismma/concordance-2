@@ -89,8 +89,13 @@ class Corpus:
             score *= 1.5
         return float(score)
 
-    def search(self, query: str, limit: int = 25, surface: str = "secular") -> List[dict]:
-        """Ranked search. surface="secular" returns only secular cards; "witness" returns all."""
+    def search(self, query: str, limit: int = 25, include_witness: bool = True) -> List[dict]:
+        """Ranked search over the keeping.
+
+        The keeping is ONE SHARED library: by default BOTH surfaces draw the whole thing
+        — the .com includes the religious cards too (Matt, 2026-06-26: "the religious
+        cards can be included"; "we are not hiding anything"). `include_witness=False`
+        gives an optional scrubbed view if a caller ever wants secular-only results."""
         query_tokens = set(_tokens(query or ""))
         if not query_tokens:
             return []
@@ -102,7 +107,7 @@ class Corpus:
                 continue
             if c.get("lifecycle_stage") in ("archived", "quarantine"):
                 continue
-            if surface == "secular" and c.get("surface") != "secular":
+            if not include_witness and c.get("surface") == "witness":
                 continue
             s = self._score(c, query_tokens, idf)
             if s > 0:
@@ -151,6 +156,8 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
     return _DEFAULT
 
 
-def search(query: str, limit: int = 25, surface: str = "secular") -> List[dict]:
-    """Ranked search over the default corpus (cards.jsonl). The floor's retrieval primitive."""
-    return default_corpus().search(query, limit, surface)
+def search(query: str, limit: int = 25, include_witness: bool = True) -> List[dict]:
+    """Ranked search over the default corpus (cards.jsonl) — the floor's retrieval primitive.
+    The keeping is shared across both surfaces by default (the .com includes the religious
+    cards too); pass include_witness=False for an optional secular-only view."""
+    return default_corpus().search(query, limit, include_witness)
