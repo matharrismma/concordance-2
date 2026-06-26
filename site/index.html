@@ -19,6 +19,13 @@
   <p class="lede">A deterministic verification engine. Bring a claim — it checks it, shows the worked
   reasoning, and hands you a receipt you can re-verify. No "trust me." Just what holds, and why.</p>
 
+  <div id="witness-banner" class="card" hidden style="border-left:4px solid var(--gold)">
+    <strong>The witness face.</strong> Built on the Word — Jesus Christ, the narrow way
+    (Matthew 7:14). The same engine that reaches the world on
+    <a href="https://narrowhighway.com">narrowhighway.com</a>, here with its foundation named.
+    It verifies, keeps, and points — a conduit, not the source.
+  </div>
+
   <section id="verify">
     <h2>Bring a claim → get a receipt</h2>
     <p class="muted">Symbolic math, checked exactly. Try <span class="mono">2+2 = 4</span> (holds),
@@ -84,6 +91,19 @@ async function search() {
   } catch (e) { out.innerHTML = '<p class="muted">API unreachable.</p>'; }
 }
 function esc(s){const d=document.createElement('div');d.textContent=String(s==null?"":s);return d.innerHTML;}
+// Surface-aware: the same static page is served on both faces. On the witness surface
+// (.org) name the foundation; the secular reach (.com) stays accessible. We are not hiding.
+async function init(){
+  try{
+    const d = await (await fetch(API + "/identity")).json();
+    if(d && d.surface === "witness"){
+      document.getElementById("witness-banner").hidden = false;
+      document.title = "Narrow Highway — the witness";
+      const road = document.querySelector(".brand .road"); if(road) road.textContent = "Highway ✚";
+    }
+  }catch(e){ /* API not reachable yet — the secular page stands on its own */ }
+}
+init();
 </script>
 </body>
 </html>

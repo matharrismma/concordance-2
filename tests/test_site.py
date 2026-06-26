@@ -24,6 +24,7 @@ def test_index_named_positioned_and_wired():
     assert "Narrow" in t and "narrowing the possibilities" in t, "name + positioning"
     assert "/verify" in t and "/search" in t, "the demo must call the API"
     assert "narrowhighway.org" in t, "honest link to the witness — not hiding"
+    assert "witness-banner" in t and "/identity" in t, "surface-aware: name the foundation on .org"
 
 
 def test_seal_page_calls_seal_endpoint():
