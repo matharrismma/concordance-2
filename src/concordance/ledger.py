@@ -19,8 +19,8 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from . import cas
-from .record import WitnessRecord, with_permanent_ref
+from . import cas, grid
+from .record import ClosestCase, WitnessRecord, with_permanent_ref
 from .validate import canonical_json_bytes, sha256_bytes
 
 GENESIS_HASH = "GENESIS"
@@ -235,3 +235,107 @@ def seal_record(record: WitnessRecord, *, summary: str,
     path = seal_to_ledger(record, summary=summary, ledger_dir=ledger_dir, sealed_at=sealed_at)
     return {"content_hash": content_hash, "ledger_path": str(path),
             "precedent": _read_precedent_file(path)}
+
+
+# ── Precedent search (find_closest) — the overlay onto a verdict ──────────
+
+_ANCHOR_WEIGHT = 0.35
+
+
+def _anchor_to_ref(raw: Any) -> Optional[str]:
+    if isinstance(raw, str):
+        return raw
+    if isinstance(raw, dict):
+        ref = raw.get("ref")
+        if isinstance(ref, str):
+            return ref
+    return None
+
+
+def _packet_anchor_refs(packet: Dict[str, Any]) -> List[str]:
+    raw: List[Any] = []
+    raw.extend(packet.get("scripture_anchors") or [])
+    dp = packet.get("DECISION_PACKET")
+    if isinstance(dp, dict):
+        raw.extend(dp.get("scripture_anchors") or [])
+    raw.extend(packet.get("refs") or [])
+    out: List[str] = []
+    for a in raw:
+        r = _anchor_to_ref(a)
+        if r:
+            out.append(r)
+    return out
+
+
+def _precedent_anchor_refs(precedent: Dict[str, Any]) -> List[str]:
+    out: List[str] = []
+    for a in precedent.get("anchors") or []:
+        r = _anchor_to_ref(a)
+        if r:
+            out.append(r)
+    return out
+
+
+def latest_in_amendment_chain(precedent_id: str, *, ledger_dir: Optional[Path] = None) -> str:
+    """The latest precedent in an amendment chain. Amendments are deferred in 2.0,
+    so this returns the id unchanged (no superseding chains yet)."""
+    return precedent_id
+
+
+def find_closest(packet: Dict[str, Any], *, ledger_dir: Optional[Path] = None) -> Optional[ClosestCase]:
+    """Find the closest sealed precedent for a packet — the precedent overlay onto a
+    verdict. Distance = (1 - Jaccard on grid dimensions), blended with anchor overlap
+    when both sides carry anchors. Returns None if the packet's domain has no resolvable
+    axis; ClosestCase(precedent_id=None) for an empty ledger or honest-novel; else the match."""
+    domain = (packet.get("domain") or "").lower()
+    if not domain or domain not in grid.AXIS_DIMENSIONS:
+        return None
+    packet_dims = grid.AXIS_DIMENSIONS[domain]
+    packet_anchors = set(_packet_anchor_refs(packet))
+    precedents = _load_precedents(ledger_dir)
+    if not precedents:
+        return ClosestCase(precedent_id=None)
+
+    best = None
+    best_distance = float("inf")
+    best_shared_dims: frozenset = frozenset()
+    best_shared_anchors: tuple = ()
+    for p in precedents:
+        p_dims = frozenset(p.get("dimensions", []))
+        if not p_dims:
+            continue
+        shared = packet_dims & p_dims
+        union = packet_dims | p_dims
+        if not union:
+            continue
+        dim_distance = 1.0 - (len(shared) / len(union))
+        p_anchors = set(_precedent_anchor_refs(p))
+        shared_anchors = packet_anchors & p_anchors
+        if packet_anchors and p_anchors:
+            anchor_sim = len(shared_anchors) / len(packet_anchors | p_anchors)
+            distance = (1.0 - _ANCHOR_WEIGHT) * dim_distance + _ANCHOR_WEIGHT * (1.0 - anchor_sim)
+        else:
+            distance = dim_distance
+        effective = distance + (0 if p.get("axis") == domain else 0.001)
+        if effective < best_distance:
+            best_distance = effective
+            best = p
+            best_shared_dims = shared
+            best_shared_anchors = tuple(sorted(shared_anchors))
+
+    if best is None or (not best_shared_dims and not best_shared_anchors):
+        return ClosestCase(precedent_id=None)
+    matched_id = best["precedent_id"]
+    latest_id = latest_in_amendment_chain(matched_id, ledger_dir=ledger_dir)
+    if latest_id != matched_id:
+        for p in precedents:
+            if p.get("precedent_id") == latest_id:
+                best = p
+                break
+    return ClosestCase(
+        precedent_id=best["precedent_id"],
+        shared_dimensions=best_shared_dims,
+        shared_anchors=best_shared_anchors,
+        distance=round(best_distance, 4),
+        reasoning_overlay=best.get("reasoning_overlay"),
+    )
