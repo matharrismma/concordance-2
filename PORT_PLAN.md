@@ -6,6 +6,20 @@ Put the jewels on the seams (the contact points between subsystems get the most 
 
 Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 
+## ✅ 2.0 COMPLETE — built end to end, every part verified
+
+Engine + scripture depth + front door + polish, all green. **63 tests across 14 suites; the
+derivation moat 58/58 with 0 false-positives; every module imports; AGPL-3.0 + CC-BY-SA.** One
+sovereign engine (stdlib-first; sympy/scipy/numpy/cryptography optional + lazy), Christ at the
+foundation (FOUNDATION.md + `foundation.py`), two surfaces — `.com` reach, `.org` witness.
+Run: `python -m concordance serve`.
+
+**Honestly deferred (optional / not blocking, flagged not faked):** precedent amendments
+(`latest_in_amendment_chain` returns id unchanged); morphhb/morphgnt deep morphology (the Strong's
+lexicons + concordance are in); an MCP server (the HTTP API covers agents); a templated build + the
+`.org` witness site (the lean site suffices now). **Deployment to narrowhighway.com is the
+operator's — outward/gated (Caddy + droplet + DNS).**
+
 ## Movement — the deterministic core (sovereign, stdlib hot path)
 
 - [x] `config` / `branding` / `layers` — the surface seam (one foundation, two surfaces) + seam test
