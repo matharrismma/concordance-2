@@ -14,9 +14,23 @@ from .web import serve
 
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    if not argv or argv[0] != "serve":
-        print("usage: python -m concordance serve "
-              "[--surface secular|witness] [--port N] [--host H] [--site DIR|--no-site]")
+    usage = ("usage: python -m concordance <serve|mcp> ...\n"
+             "  serve [--surface secular|witness] [--port N] [--host H] [--site DIR|--no-site]\n"
+             "  mcp   [--surface secular|witness]   (MCP server over stdio, for agents)")
+    if not argv:
+        print(usage)
+        return 0
+    if argv[0] == "mcp":
+        from .mcp import serve_stdio
+        surface = "secular"
+        opts = argv[1:]
+        for j, o in enumerate(opts):
+            if o == "--surface" and j + 1 < len(opts):
+                surface = opts[j + 1]
+        serve_stdio(surface=surface)
+        return 0
+    if argv[0] != "serve":
+        print(usage)
         return 0
 
     surface, port, host = "secular", 8000, "127.0.0.1"

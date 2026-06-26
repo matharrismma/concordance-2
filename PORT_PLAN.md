@@ -16,8 +16,8 @@ Run: `python -m concordance serve`.
 
 **Honestly deferred (optional / not blocking, flagged not faked):** precedent amendments
 (`latest_in_amendment_chain` returns id unchanged); morphhb/morphgnt deep morphology (the Strong's
-lexicons + concordance are in); an MCP server (the HTTP API covers agents); a templated build + the
-`.org` witness site (the lean site suffices now). **Deployment configs PREPARED** — Dockerfile ·
+lexicons + concordance are in); a templated build for the site (the lean static site, surface-aware,
+suffices now). **Deployment configs PREPARED** — Dockerfile ·
 `deploy/Caddyfile` · `deploy/nh-com.service` + `nh-org.service` (the two surfaces) · `docs/DEPLOY.md`
 runbook; env-var data loading (`CONCORDANCE_DATA_DIR`) validated live. **Deploying to
 narrowhighway.com is the operator's — outward/gated (DNS + droplet + Caddy).**
@@ -91,7 +91,9 @@ narrowhighway.com is the operator's — outward/gated (DNS + droplet + Caddy).**
       `serve()` http.server shell), BOTH surfaces via EngineConfig: GET /health · /identity ·
       POST /verify (the moat) · GET /search (shared keeping) · /seal (the receipt) · /resolve +
       /word_study (witness-gated). 7 API tests green.
-- [ ] MCP server — conditional tool registration by surface (optional; the HTTP API covers agents for now)
+- [x] MCP server — **sovereign stdlib stdio JSON-RPC** (`src/concordance/mcp`, no SDK dep),
+      surface-gated tools (verify · search · seal_fetch + witness resolve · word_study);
+      `python -m concordance mcp`. 6 MCP tests + a live stdio round-trip green. The agent surface.
 
 ## Dial faces — the site (later)
 

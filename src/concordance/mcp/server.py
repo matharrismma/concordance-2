@@ -1,0 +1,125 @@
+"""Sovereign MCP server — the engine for AI agents.
+
+Stdlib only: newline-delimited JSON-RPC 2.0 over stdio, no MCP SDK dependency. `handle()`
+is a pure, testable request handler; `serve_stdio()` is the thin read/write loop. Surface-
+aware like everything else: the witness tools (resolve, word_study) are listed and callable
+only on surface="witness". The engine verifies and finds; it does not generate the answer.
+"""
+from __future__ import annotations
+
+import json
+import sys
+from typing import Any, Dict, List, Optional
+
+from .. import __version__, cas, corpus
+from ..config import EngineConfig
+from ..derivation import verify_derivation
+from ..verifiers import scripture
+
+PROTOCOL_VERSION = "2024-11-05"
+
+
+def _secular_tools() -> List[dict]:
+    return [
+        {"name": "verify",
+         "description": ("Verify a claim deterministically — returns a verdict "
+                         "(HOLDS / BROKEN / INCOMPLETE) plus the worked trail. The engine "
+                         "eliminates what is not the answer; it does not generate it."),
+         "inputSchema": {"type": "object", "properties": {
+             "mode": {"type": "string", "description": "equality | inequality | derivative | integral | limit | solve"},
+             "params": {"type": "object", "description": "e.g. {expr_a, expr_b, variables} for equality"}},
+             "required": ["mode", "params"]}},
+        {"name": "search",
+         "description": "Ranked search over the keeping (the kept library).",
+         "inputSchema": {"type": "object", "properties": {
+             "query": {"type": "string"}, "limit": {"type": "integer"}}, "required": ["query"]}},
+        {"name": "seal_fetch",
+         "description": "Fetch a sealed verification record (the receipt) by its content hash.",
+         "inputSchema": {"type": "object", "properties": {"hash": {"type": "string"}}, "required": ["hash"]}},
+    ]
+
+
+def _witness_tools() -> List[dict]:
+    return [
+        {"name": "resolve",
+         "description": "Resolve a Scripture reference to its World English Bible text.",
+         "inputSchema": {"type": "object", "properties": {"ref": {"type": "string"}}, "required": ["ref"]}},
+        {"name": "word_study",
+         "description": "Strong's word study — original-language definition + every occurrence.",
+         "inputSchema": {"type": "object", "properties": {
+             "strongs": {"type": "string", "description": "e.g. G26, H2617"}}, "required": ["strongs"]}},
+    ]
+
+
+def _tools_for(config: EngineConfig) -> List[dict]:
+    tools = _secular_tools()
+    if config.witness_surfaced:
+        tools += _witness_tools()
+    return tools
+
+
+def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
+    args = args or {}
+    if name == "verify":
+        if isinstance(args.get("steps"), list):
+            return verify_derivation(args["steps"])
+        return verify_derivation([{"id": "b", "domain": "mathematics",
+                                   "spec": {"mode": args.get("mode"), "params": args.get("params", {})}}])
+    if name == "search":
+        res = corpus.search(args.get("query", ""), limit=int(args.get("limit", 10)))
+        return {"count": len(res), "results": [
+            {"id": c.get("id"), "title": c.get("title"), "shelf": c.get("shelf"),
+             "snippet": (c.get("body", "") or "")[:200]} for c in res]}
+    if name == "seal_fetch":
+        rec = cas.fetch(args.get("hash", ""))
+        return rec if rec is not None else {"error": "seal not found"}
+    if name == "resolve" and config.witness_surfaced:
+        return scripture.resolve_ref(args.get("ref", ""))
+    if name == "word_study" and config.witness_surfaced:
+        return scripture.word_study(args.get("strongs", ""))
+    raise KeyError(f"unknown tool {name!r} (on the {config.surface} surface)")
+
+
+def handle(request: dict, config: EngineConfig) -> Optional[dict]:
+    """Pure JSON-RPC handler. Returns a response dict, or None for notifications."""
+    rid = request.get("id")
+    method = request.get("method")
+
+    if method == "initialize":
+        return {"jsonrpc": "2.0", "id": rid, "result": {
+            "protocolVersion": PROTOCOL_VERSION, "capabilities": {"tools": {}},
+            "serverInfo": {"name": "narrow-highway", "version": __version__, "surface": config.surface}}}
+    if method == "tools/list":
+        return {"jsonrpc": "2.0", "id": rid, "result": {"tools": _tools_for(config)}}
+    if method == "tools/call":
+        p = request.get("params") or {}
+        name, args = p.get("name"), p.get("arguments") or {}
+        try:
+            result = _call_tool(name, args, config)
+        except KeyError as e:
+            return {"jsonrpc": "2.0", "id": rid, "error": {"code": -32602, "message": str(e)}}
+        except Exception as e:  # noqa: BLE001 — tool errors are results, not crashes
+            return {"jsonrpc": "2.0", "id": rid, "result": {
+                "content": [{"type": "text", "text": json.dumps({"error": str(e)[:200]})}], "isError": True}}
+        return {"jsonrpc": "2.0", "id": rid, "result": {
+            "content": [{"type": "text", "text": json.dumps(result, ensure_ascii=False)}], "isError": False}}
+    if method and method.startswith("notifications/"):
+        return None  # notifications get no response
+    return {"jsonrpc": "2.0", "id": rid, "error": {"code": -32601, "message": f"method not found: {method}"}}
+
+
+def serve_stdio(surface: str = "secular") -> None:
+    """Read newline-delimited JSON-RPC from stdin, write responses to stdout. Stdlib only."""
+    config = EngineConfig(surface)
+    for line in sys.stdin:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            req = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        resp = handle(req, config)
+        if resp is not None:
+            sys.stdout.write(json.dumps(resp, ensure_ascii=False) + "\n")
+            sys.stdout.flush()
