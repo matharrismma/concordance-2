@@ -148,6 +148,22 @@ def resolve_ref(ref: str) -> Dict[str, Any]:
     return default_bible().resolve(ref)
 
 
+def word_study(strongs_num: str) -> Dict[str, Any]:
+    """Strong's word study — the original-language definition + every occurrence — via the
+    triangulation backend (concordance.strongs). The agent in the original source: it FINDS
+    the lexicon definition and the verses, never generates them. Returns
+    {"status": "unavailable", ...} when the backend or its data isn't provisioned — the
+    lean WEB-only path still works without it."""
+    try:
+        from ..strongs import Concordance
+    except Exception as e:  # noqa: BLE001
+        return {"status": "unavailable", "detail": f"strongs backend not importable: {e}"}
+    try:
+        return Concordance().word_study(strongs_num)
+    except Exception as e:  # noqa: BLE001
+        return {"status": "unavailable", "detail": str(e)[:200]}
+
+
 def _verify_anchor(anchor: Any) -> VerifierResult:
     name = "scripture.anchor"
     if isinstance(anchor, str):

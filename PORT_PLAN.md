@@ -55,7 +55,13 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
       public domain, gitignored; tools/migrate_bible.py). resolve_ref → WEB text (incl. abbreviations
       Jn/Mt/Ps...) + verify cited anchors (ref resolves; quoted text matches), witness-surface-gated,
       graceful when data absent. 5 scripture tests green. Strong's / word-study / original-language
-      triangulation DEFERRED — needs the lw/00_source backend (a separate subsystem).
+      now DONE (see the `strongs` backend below).
+- [x] `strongs` backend — original-language triangulation ported (lookup/concordance/drift_check,
+      stdlib sqlite3+json) over data/strongs/ (web.db + concordance.db + Strong's Greek/Hebrew
+      lexicons, ~31M gitignored; tools/migrate_strongs.py; ROOT via CONCORDANCE_STRONGS_DIR).
+      `scripture.word_study(strongs)` → lexicon definition + every occurrence (G26 ἀγάπη: 36 verses),
+      witness-gated, graceful when absent. morphhb/morphgnt deep morphology not migrated (optional).
+      4 strongs tests green.
 - [x] governance: **de-laundered secular port** — structural checks kept (decision-packet shape,
       witness-count consistency, decision timing, rationale alignment, domain profiles for
       business/household/education); the 5 scriptural anchors + "church" profile removed from the
