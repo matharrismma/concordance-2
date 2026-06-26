@@ -14,10 +14,10 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done & verified
 - [x] `cas` — content-addressed seal store (SHA-256, 256-way sharded) — ported as-is
 - [x] `engine` — `validate_and_seal`: claim → gates → verifiers → (verdict, trail, seal); gates **RED·FLOOR·PATH·WITNESS·WAIT** (WAY→PATH, BROTHERS→WITNESS, GOD→WAIT; neutral scopes local/mesh/archived) — hotspots #4/#7 closed; 6 engine tests green
 - [x] `verifiers` registry (`run_for_domain`, lazy) + `domains` loader (`load_domain_validator`) — the two seams the engine plugs into
+- [x] `ledger` — append-only **hash chain** (prev_hash links, verify_chain catches tampering) + `seal_record` wiring **seal→CAS→ledger** — 4 ledger tests green. `find_closest` (precedent search) deferred — needs the grid
 - [ ] `foundation/` — truth-model + the disciplines (docs) + Scripture substrate hook (shared)
-- [ ] `ledger` — append-only hash chain + precedent search — *already clean, port as-is*
 - [ ] `signing` — Ed25519 attestation (optional crypto, graceful degradation)
-- [ ] `ranker` — IDF/full-text retrieval over the keeping
+- [ ] `ranker` — IDF/full-text retrieval over the keeping (needs the corpus data)
 
 ## Complications — the verifiers (mount on the train; each earns its place)
 
