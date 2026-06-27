@@ -1,0 +1,30 @@
+# Narrow Highway
+
+> Wisdom and discernment by narrowing the possibilities. A deterministic verification engine: it
+> eliminates what is not the answer, shows the worked reasoning, and hands you a receipt you can
+> re-verify — no "trust me." Sovereign, offline-capable, stdlib-first.
+
+One engine, two surfaces: **narrowhighway.com** (the reach — accessible to all) and
+**narrowhighway.org** (the witness — Scripture, the original languages, Christ at the foundation).
+The engine verifies and finds; it does not generate the answer.
+
+## API (JSON over HTTP, same-origin)
+
+- `POST /verify` — verify a claim. Body `{"mode":"equality|inequality|derivative|integral|limit|solve","params":{...}}`
+  or `{"steps":[...]}`. Returns `{verdict: HOLDS|BROKEN|INCOMPLETE, trail, ...}`. The math moat holds
+  0 false-positives — e.g. `x/x = 1` is caught (undefined at x=0), not sealed as an identity.
+- `GET /search?q=&limit=` — ranked retrieval over the keeping (the kept library).
+- `GET /seal?hash=` — fetch a sealed verification record (the receipt) by its content hash.
+- `GET /identity` — what this surface is. `GET /health` — status.
+
+### Witness surface only (narrowhighway.org)
+- `GET /resolve?ref=John 3:16` — resolve a Scripture reference to its World English Bible text.
+- `GET /word_study?strongs=G26` — Strong's original-language definition + every occurrence.
+
+## For agents
+MCP server (stdio JSON-RPC, no SDK dependency): `python -m concordance mcp`.
+Tools: `verify`, `search`, `seal_fetch` — plus `resolve`, `word_study` on the witness surface.
+
+## Foundation
+It serves truth because Truth is a Person (John 14:6); a conduit, not the source. The fuller
+witness is at https://narrowhighway.org.

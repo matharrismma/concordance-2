@@ -1,0 +1,5 @@
+# Narrow Highway — a public verification engine; agents and crawlers welcome.
+User-agent: *
+Allow: /
+
+# What this is, for machines: /llms.txt
