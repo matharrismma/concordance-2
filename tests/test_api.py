@@ -7,6 +7,7 @@ Runnable with `pytest` OR `python tests/test_api.py`.
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -66,6 +67,24 @@ def test_witness_endpoints_gated_to_witness_surface():
 
 def test_unknown_route_404():
     assert dispatch("GET", "/nope", {}, None, SEC)[0] == 404
+
+
+def test_http_mcp_endpoint():
+    # remote MCP over HTTP: tools/call verify -> HOLDS
+    s, p = dispatch("POST", "/mcp", {}, {"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                    "params": {"name": "verify", "arguments": {
+                        "mode": "equality", "params": {"expr_a": "2+2", "expr_b": "4", "variables": {}}}}}, SEC)
+    assert s == 200
+    assert json.loads(p["result"]["content"][0]["text"])["verdict"] == "HOLDS"
+    s2, p2 = dispatch("POST", "/mcp", {}, {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}, SEC)
+    assert any(t["name"] == "verify" for t in p2["result"]["tools"])
+
+
+def test_derivation_verify_alias():
+    s, p = dispatch("POST", "/derivation/verify", {}, {"steps": [
+        {"id": "b", "domain": "mathematics",
+         "spec": {"mode": "equality", "params": {"expr_a": "2+2", "expr_b": "4", "variables": {}}}}]}, SEC)
+    assert s == 200 and p["verdict"] == "HOLDS"
 
 
 if __name__ == "__main__":

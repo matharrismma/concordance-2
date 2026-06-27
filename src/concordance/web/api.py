@@ -52,7 +52,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/identity":
         return _ok({"surface": surface, "identity": config.identity})
 
-    if method == "POST" and path == "/verify":
+    if method == "POST" and path in ("/verify", "/derivation/verify"):
+        # /derivation/verify is the 1.0-compatible alias (preserves the public moat contract).
         if not isinstance(body, dict):
             return _err(400, "JSON object body required")
         if isinstance(body.get("steps"), list):
@@ -60,6 +61,13 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if body.get("mode"):
             return _ok(verify_derivation([{"id": "b", "domain": "mathematics", "spec": body}]))
         return _err(400, "body must have 'steps' or {mode, params}")
+
+    if method == "POST" and path == "/mcp":
+        # Remote MCP over HTTP — reuse the pure JSON-RPC handler, surface-gated. Stateless
+        # request/response (initialize · tools/list · tools/call). Notifications get 202.
+        from ..mcp import handle as _mcp_handle
+        resp = _mcp_handle(body if isinstance(body, dict) else {}, config)
+        return (200, resp) if resp is not None else (202, {})
 
     if method == "GET" and path == "/search":
         q = (query.get("q") or "").strip()
