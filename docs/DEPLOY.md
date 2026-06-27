@@ -15,9 +15,11 @@ touches DNS, the server, and live traffic. Nothing here deploys anything by itse
 ```bash
 git clone <concordance-2 remote> /home/nh/concordance-2     # or rsync the repo up
 cd /home/nh/concordance-2
-python3 -m pip install -e ".[math]" cryptography            # moat (sympy) + signing; stdlib otherwise
-python3 -m pytest tests/ -q                                  # sanity: 63 tests, moat 58/58
+python3 -m venv .venv                                        # a DEDICATED venv (don't share another app's)
+.venv/bin/pip install sympy cryptography numpy scipy          # moat + signing + the heavier verifiers
+PYTHONPATH=src .venv/bin/python -m pytest tests/ -q           # sanity: 63 tests, moat 58/58
 ```
+The systemd units (`deploy/nh-*.service`) run `/home/nh/concordance-2/.venv/bin/python`.
 
 ## 2. Data (the keeping, the WEB Bible, Strong's)
 Data is **gitignored** — it lives beside the engine, not in source. Generate it on the droplet

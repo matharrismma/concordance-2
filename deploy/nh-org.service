@@ -8,7 +8,7 @@ WorkingDirectory=/home/nh/concordance-2
 Environment=PYTHONPATH=/home/nh/concordance-2/src
 Environment=CONCORDANCE_DATA_DIR=/home/nh/concordance-2/data
 Environment=CONCORDANCE_STRONGS_DIR=/home/nh/concordance-2/data/strongs
-ExecStart=/usr/bin/python3 -m concordance serve --host 127.0.0.1 --port 8001 --surface witness
+ExecStart=/home/nh/concordance-2/.venv/bin/python -m concordance serve --host 127.0.0.1 --port 8001 --surface witness
 Restart=on-failure
 RestartSec=3
 
