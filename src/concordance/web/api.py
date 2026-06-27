@@ -147,6 +147,21 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
 
         def _do(self, method: str) -> None:
             u = urlparse(self.path)
+            if u.path == "/mcp":  # full Streamable-HTTP MCP transport (POST/GET/DELETE)
+                raw = b""
+                if method == "POST":
+                    n = int(self.headers.get("content-length") or 0)
+                    raw = self.rfile.read(n) if n else b""
+                from ..mcp.http import handle_http
+                status, hdrs, body = handle_http(method, self.headers, raw, config)
+                self.send_response(status)
+                for k, v in hdrs.items():
+                    self.send_header(k, v)
+                self.send_header("content-length", str(len(body)))
+                self.end_headers()
+                if body:
+                    self.wfile.write(body)
+                return
             # static site (GET only) for non-API paths, when a site dir is configured
             if method == "GET" and site is not None and u.path not in _API_GET_PATHS:
                 return self._static(u.path)
@@ -167,6 +182,9 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
 
         def do_POST(self) -> None:
             self._do("POST")
+
+        def do_DELETE(self) -> None:
+            self._do("DELETE")
 
         def log_message(self, *args) -> None:  # quiet
             pass
