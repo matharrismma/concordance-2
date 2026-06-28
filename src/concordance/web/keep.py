@@ -12,21 +12,44 @@ No token set + non-localhost  →  the keep is closed (404 to all). Sovereign: s
 """
 from __future__ import annotations
 
+import hmac
 import os
 from typing import Any, Dict, Optional
 
 from .. import __version__, cas, corpus, ledger, telemetry
 from ..config import EngineConfig
 
-_LOCAL = {"127.0.0.1", "::1", "localhost", "", None}
+_TRUE = {"1", "true", "yes", "on"}
+_LOOPBACK = {"127.0.0.1", "::1"}
 
 
-def is_operator(token: Optional[str], client_ip: Optional[str]) -> bool:
-    """True if this request may see the keep. Localhost always; otherwise a matching token."""
-    if client_ip in _LOCAL:
-        return True
+def is_operator(token: Optional[str], peer_ip: Optional[str]) -> bool:
+    """True if this request may see the keep. FAIL CLOSED.
+
+    SECURITY: access requires a matching CONCORDANCE_KEEP_TOKEN (constant-time compare).
+    Loopback is trusted ONLY when CONCORDANCE_KEEP_TRUST_LOCAL is set — which it is NOT in
+    production, because behind a proxy every request's socket peer is the proxy (loopback),
+    so trusting loopback would expose the keep to the world. The empty/unknown IP is never
+    trusted. The caller passes the REAL socket peer, never X-Forwarded-For (spoofable)."""
     want = os.environ.get("CONCORDANCE_KEEP_TOKEN", "").strip()
-    return bool(want) and (token or "").strip() == want
+    if want and token and hmac.compare_digest(str(token).strip(), want):
+        return True
+    if os.environ.get("CONCORDANCE_KEEP_TRUST_LOCAL", "").strip().lower() in _TRUE \
+            and peer_ip in _LOOPBACK:
+        return True
+    return False
+
+
+def request_is_operator(peer_ip: Optional[str], headers: Any, query: Optional[dict]) -> bool:
+    """Operator decision for a keep request. The token may come from ?token= or the
+    X-Keep-Token header. X-Forwarded-For is deliberately NOT consulted — it is client-
+    spoofable, so the gate trusts only the real socket peer + the token."""
+    token = None
+    if query:
+        token = query.get("token")
+    if not token and headers is not None:
+        token = headers.get("x-keep-token")
+    return is_operator(token, peer_ip)
 
 
 def dashboard(config: EngineConfig) -> Dict[str, Any]:

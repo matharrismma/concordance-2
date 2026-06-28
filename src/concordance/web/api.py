@@ -131,18 +131,27 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
     """Thin http.server shell: the API + (optionally) the static site, same-origin. Stdlib only."""
     import json
     import mimetypes
+    import os
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
     from pathlib import Path
     from urllib.parse import parse_qs, urlparse
 
+    from .. import ratelimit
+
     config = EngineConfig(surface)
     site = Path(site_dir).resolve() if site_dir else None
+    limiter = ratelimit.from_env()
+    MAX_BODY = int(os.environ.get("CONCORDANCE_MAX_BODY", str(256 * 1024)) or 256 * 1024)
+    RATELIMITED = ("/verify", "/derivation/verify", "/search", "/mcp")
 
     class Handler(BaseHTTPRequestHandler):
-        def _json(self, status: int, payload: dict) -> None:
+        def _json(self, status: int, payload: dict, extra: dict = None) -> None:
             data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
             self.send_response(status)
             self.send_header("content-type", "application/json; charset=utf-8")
+            self.send_header("x-content-type-options", "nosniff")
+            for k, v in (extra or {}).items():
+                self.send_header(k, v)
             self.send_header("content-length", str(len(data)))
             self.end_headers()
             self.wfile.write(data)
@@ -156,30 +165,50 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
             ctype = mimetypes.guess_type(str(fp))[0] or "application/octet-stream"
             self.send_response(200)
             self.send_header("content-type", ctype)
+            self.send_header("x-content-type-options", "nosniff")
             self.send_header("content-length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
 
-        def _keep(self, u) -> None:
-            """The operator's window — gated. 404 to non-operators (hide-existence)."""
-            from .keep import dashboard as _keep_dash
-            from .keep import is_operator
-            q = {k: v[0] for k, v in parse_qs(u.query).items()}
-            token = q.get("token") or self.headers.get("x-keep-token")
+        def _rl_key(self) -> str:
+            """Rate-limit key: the real client (Caddy sets X-Forwarded-For to it), else peer."""
             xff = (self.headers.get("x-forwarded-for") or "").split(",")[0].strip()
-            client_ip = xff or (self.client_address[0] if self.client_address else "")
-            if not is_operator(token, client_ip):
+            return xff or (self.client_address[0] if self.client_address else "?")
+
+        def _keep(self, u) -> None:
+            """The operator's window — gated. 404 to non-operators (hide-existence).
+            SECURITY: the operator decision uses the REAL socket peer + token only; the
+            spoofable X-Forwarded-For is never consulted for access (see keep.is_operator)."""
+            from .keep import dashboard as _keep_dash
+            from .keep import request_is_operator
+            q = {k: v[0] for k, v in parse_qs(u.query).items()}
+            peer_ip = self.client_address[0] if self.client_address else ""
+            if not request_is_operator(peer_ip, self.headers, q):
                 return self._json(404, {"error": "not found"})
             if u.path == "/keep.json":
-                return self._json(200, _keep_dash(config))
+                return self._json(200, _keep_dash(config), {"cache-control": "no-store"})
             if site is not None:
                 return self._static("keep.html")
             return self._json(404, {"error": "not found"})
 
         def _do(self, method: str) -> None:
             u = urlparse(self.path)
+            # DoS guard: reject oversized bodies before reading a single byte
+            if method == "POST":
+                try:
+                    clen = int(self.headers.get("content-length") or 0)
+                except ValueError:
+                    clen = 0
+                if clen > MAX_BODY:
+                    return self._json(413, {"error": f"request body too large (> {MAX_BODY} bytes)"})
             if method == "GET" and u.path in ("/keep", "/keep.html", "/keep.json"):
                 return self._keep(u)  # operator-gated dashboard
+            # rate limit the compute / IO paths, keyed by the real client
+            if u.path in RATELIMITED:
+                key = self._rl_key()
+                if not limiter.allow(key):
+                    return self._json(429, {"error": "rate limit exceeded"},
+                                      {"retry-after": str(limiter.retry_after(key))})
             if u.path == "/mcp":  # full Streamable-HTTP MCP transport (POST/GET/DELETE)
                 raw = b""
                 if method == "POST":

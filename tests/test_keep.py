@@ -46,11 +46,30 @@ def test_telemetry_never_raises_on_bad_dir():
     assert telemetry.recent() == []
 
 
-def test_gate_trusts_localhost():
+def test_gate_localhost_only_when_enabled():
+    os.environ.pop("CONCORDANCE_KEEP_TOKEN", None)
+    os.environ.pop("CONCORDANCE_KEEP_TRUST_LOCAL", None)
     from concordance.web import keep
+    # FAIL CLOSED by default: loopback is NOT trusted (behind a proxy the peer is loopback)
+    assert keep.is_operator(None, "127.0.0.1") is False
+    assert keep.is_operator(None, "") is False
+    os.environ["CONCORDANCE_KEEP_TRUST_LOCAL"] = "1"
     assert keep.is_operator(None, "127.0.0.1") is True
-    assert keep.is_operator(None, "::1") is True
-    assert keep.is_operator(None, "") is True
+    assert keep.is_operator(None, "203.0.113.7") is False  # only loopback, even when enabled
+    os.environ.pop("CONCORDANCE_KEEP_TRUST_LOCAL", None)
+
+
+def test_xff_is_ignored_for_auth():
+    """The keep must NOT trust X-Forwarded-For — the spoof that the review flagged."""
+    os.environ["CONCORDANCE_KEEP_TOKEN"] = "tok"
+    os.environ.pop("CONCORDANCE_KEEP_TRUST_LOCAL", None)
+    from concordance.web import keep
+    # remote attacker forging XFF: 127.0.0.1, no token -> denied
+    assert keep.request_is_operator("203.0.113.9", {"x-forwarded-for": "127.0.0.1"}, {}) is False
+    # the operator with the token passes regardless of peer (query or header)
+    assert keep.request_is_operator("203.0.113.9", {}, {"token": "tok"}) is True
+    assert keep.request_is_operator("203.0.113.9", {"x-keep-token": "tok"}, {}) is True
+    os.environ.pop("CONCORDANCE_KEEP_TOKEN", None)
 
 
 def test_gate_closed_to_remote_without_token():

@@ -17,10 +17,26 @@ request/response tool server.
 from __future__ import annotations
 
 import json
+import os
 import secrets
 from typing import Any, Dict, Tuple
 
 from .server import PROTOCOL_VERSION, handle
+
+_DEFAULT_ORIGINS = {"https://narrowhighway.com", "https://narrowhighway.org",
+                    "https://narrowhighway.tv"}
+
+
+def _origin_allowed(origin: str) -> bool:
+    """DNS-rebinding defense (MCP Streamable-HTTP). Non-browser clients (agents) send no
+    Origin and are allowed; a browser Origin must be on the allowlist. Extend via
+    CONCORDANCE_ALLOWED_ORIGINS (comma-separated)."""
+    if not origin:
+        return True
+    o = origin.strip().lower()
+    allowed = {a.strip().lower() for a in os.environ.get("CONCORDANCE_ALLOWED_ORIGINS", "").split(",") if a.strip()}
+    allowed |= {a.lower() for a in _DEFAULT_ORIGINS}
+    return o in allowed or o.startswith("http://localhost") or o.startswith("http://127.0.0.1")
 
 # In-memory session registry. Lightweight: the tools are stateless, so a session is just
 # a validity token + the negotiated protocol version. Cleared on restart.
@@ -53,6 +69,11 @@ def handle_http(method: str, headers: Any, raw_body: bytes,
                 config) -> Tuple[int, Dict[str, str], bytes]:
     """Handle one Streamable-HTTP MCP request. Returns (status, headers, body_bytes)."""
     method = (method or "GET").upper()
+
+    origin = _hget(headers, "Origin")
+    if origin and not _origin_allowed(origin):  # DNS-rebinding defense
+        return (403, {"Content-Type": "application/json"},
+                b'{"error":"origin not allowed"}')
 
     if method == "GET":
         return (405, {"Allow": "POST, DELETE", "Content-Type": "application/json"},

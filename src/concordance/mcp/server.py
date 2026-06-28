@@ -107,8 +107,11 @@ def handle(request: dict, config: EngineConfig) -> Optional[dict]:
         except KeyError as e:
             return {"jsonrpc": "2.0", "id": rid, "error": {"code": -32602, "message": str(e)}}
         except Exception as e:  # noqa: BLE001 — tool errors are results, not crashes
+            from .. import telemetry  # log detail server-side; return a generic message
+            telemetry.record("mcp_error", surface=config.surface, tool=str(name),
+                             detail=f"{type(e).__name__}: {str(e)[:160]}")
             return {"jsonrpc": "2.0", "id": rid, "result": {
-                "content": [{"type": "text", "text": json.dumps({"error": str(e)[:200]})}], "isError": True}}
+                "content": [{"type": "text", "text": json.dumps({"error": "tool error"})}], "isError": True}}
         return {"jsonrpc": "2.0", "id": rid, "result": {
             "content": [{"type": "text", "text": json.dumps(result, ensure_ascii=False)}], "isError": False}}
     if method and method.startswith("notifications/"):
