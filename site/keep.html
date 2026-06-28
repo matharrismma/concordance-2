@@ -46,6 +46,10 @@
         <div class="stat"><div class="n" id="s-ledger">—</div><div class="k">ledger verified</div></div>
         <div class="stat"><div class="n" id="s-events">—</div><div class="k">recent events</div></div>
       </div>
+      <p class="muted" style="font-size:.78rem;margin-top:.5rem">
+        <strong>Seals + ledger</strong> are the authoritative integrity record — hash-chained,
+        content-addressed, independently re-verifiable. <strong>Recent events</strong> are an
+        advisory ops log (best-effort, tamperable) — not part of the integrity chain.</p>
     </section>
 
     <section>
@@ -54,7 +58,7 @@
     </section>
 
     <section>
-      <h2>Live activity</h2>
+      <h2>Live activity <span class="muted" style="font-size:.68rem;font-weight:400">· advisory ops log, not the integrity record</span></h2>
       <p class="muted" id="feed-empty" hidden>No activity recorded yet. As the engine
       verifies, searches, and seals, it will appear here.</p>
       <table class="feed"><tbody id="feed"></tbody></table>

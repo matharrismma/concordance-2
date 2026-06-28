@@ -3,6 +3,11 @@
 This is how the operator SEES what the engine is doing: health, the keeping's size, the
 seal/ledger counts, and a live feed of recent activity (verifications, searches, seals).
 
+TRUST BOUNDARY (load-bearing): the ledger + seals (CAS) are the AUTHORITATIVE integrity
+record — hash-chained, content-addressed, independently re-verifiable. The activity feed is
+ADVISORY — a best-effort, tamperable ops log, NOT part of the integrity chain. The dashboard
+labels them so an operator never reads an activity count as sealed truth.
+
 Operator-gated, like 1.0's keep: it serves only to the operator and returns 404 to
 everyone else (hide-existence — the keep is not a public surface). Operator =
   - localhost on the box (the box itself is always trusted), OR
@@ -76,6 +81,11 @@ def dashboard(config: EngineConfig) -> Dict[str, Any]:
         "version": __version__,
         "surface": config.surface,
         "identity": config.identity,
+        # The trust boundary, stated so the operator never mistakes one for the other:
+        "trust": {
+            "authoritative": "ledger + seals (CAS) — hash-chained, content-addressed, re-verifiable",
+            "advisory": "activity — a best-effort ops log; tamperable, NOT part of the integrity chain",
+        },
         "keeping": {"cards": cards, "precedents": precedents},
         "seals": {
             "count": seal_stats.get("count"),

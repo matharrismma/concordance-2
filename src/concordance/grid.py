@@ -1,9 +1,9 @@
 """Scaffold registry — make the pattern visible.
 
-The 36 axes live in a *multi-dimensional scaffold* with seven members
+The 117 axes live in a *multi-dimensional scaffold* with eight members
 (encoding, metabolism, reasoning, physical_substance, authority_trust,
-time_sequence, conservation_balance). Each axis has coordinates along
-some subset of those members. Axes that share a member are *adjacent*;
+time_sequence, conservation_balance, discreteness). Each axis has coordinates
+along some subset of those members. Axes that share a member are *adjacent*;
 axes that sit on three or more are *structurally deep*. The renders
 in this module are flat projections of that scaffold — useful for
 reading, but each one collapses dimensions a higher-dimensional view
@@ -13,11 +13,18 @@ The mapping is a proposal, not a closed claim. Discovery, not design:
 when an axis sits clearly on a member, mark it; when it doesn't,
 leave it off. Surface the cluster the data shows; don't force one.
 
+ON THE FLOOR vs the EXTENDED MAP: the 2.0 verification floor consumes ONLY
+AXIS_DIMENSIONS and UMBRELLAS (record.axis_coords_for, ledger.find_closest). The
+projections, retag/DIMENSION_KIND machinery, MEASURE_AXES/FORCES, and the CLI below
+are the EXTENDED MAP — exploration scaffolding, not part of the verification path.
+`check_dimension_members()` enforces the floor invariant: every axis sits only on
+declared members (a test asserts it; see test_grid).
+
 Run as a CLI (each subcommand is a different projection):
-    python -m concordance_engine.grid              # matrix projection
-    python -m concordance_engine.grid depth        # axes ranked by member count
-    python -m concordance_engine.grid adjacent X   # neighbors on the scaffold
-    python -m concordance_engine.grid dimension D  # axes on a single member
+    python -m concordance.grid              # matrix projection
+    python -m concordance.grid depth        # axes ranked by member count
+    python -m concordance.grid adjacent X   # neighbors on the scaffold
+    python -m concordance.grid dimension D  # axes on a single member
 """
 from __future__ import annotations
 
@@ -44,7 +51,14 @@ _BASE_DIMENSIONS: Tuple[str, ...] = (
     "time_sequence",       # ordering / period / when-it-happens
     "conservation_balance",# what-must-balance / equilibrium / invariants
 )
-DIMENSIONS: List[str] = list(_BASE_DIMENSIONS)
+# Members discovered beyond the original seven. `discreteness` is biology's (and its child
+# genetics'): living systems are quantized — cells, genes, species are discrete units — a
+# member the original seven lacked (the "missing-1" data fix). _BASE_DIMENSIONS stays the
+# historical seven; DIMENSIONS is the full declared member set the invariant checks against.
+_EXTENDED_DIMENSIONS: Tuple[str, ...] = (
+    "discreteness",        # quantization / countable units / indivisible parts
+)
+DIMENSIONS: List[str] = list(_BASE_DIMENSIONS) + list(_EXTENDED_DIMENSIONS)
 
 
 # Each axis → frozenset of dimensions it sits on. Empty set is allowed in
@@ -532,6 +546,29 @@ def _apply_axis_extensions(exts: List[Dict[str, object]]) -> None:
 
 # Load extensions immediately so module consumers see the runtime grid.
 _apply_axis_extensions(_load_axis_extensions())
+
+
+def check_dimension_members() -> List[Tuple[str, List[str]]]:
+    """The floor invariant: every member an axis sits on must be a DECLARED dimension.
+    Returns [(axis, [undeclared members]), ...] — empty when the scaffold is consistent.
+    A violation means an axis references a phantom member (the class of bug that left
+    biology on an undeclared 'discreteness'); test_grid asserts this is empty. Not raised
+    at import — grid is imported lazily by record.axis_coords_for behind a narrow
+    `except ImportError`, so a hard failure here would silently disable sealing."""
+    declared = set(DIMENSIONS)
+    violations: List[Tuple[str, List[str]]] = []
+    for axis, members in AXIS_DIMENSIONS.items():
+        undeclared = sorted(m for m in members if m not in declared)
+        if undeclared:
+            violations.append((axis, undeclared))
+    return violations
+
+
+_member_violations = check_dimension_members()
+if _member_violations:  # loud, but non-fatal (CI/test_grid is the hard gate)
+    import logging
+    logging.getLogger("concordance").warning(
+        "grid scaffold inconsistency — axes on undeclared members: %s", _member_violations)
 
 
 def remove_axis(name: str) -> Dict[str, object]:

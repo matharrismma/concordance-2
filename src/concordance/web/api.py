@@ -22,7 +22,8 @@ from typing import Any, Dict, Tuple
 from .. import __version__, cas, corpus, telemetry
 from ..config import EngineConfig
 from ..derivation import verify_derivation
-from ..verifiers import scripture
+# NOTE: scripture (a witness verifier) is imported LAZILY inside the witness-gated branches
+# below — never at module top. The secular surface (.com) must not load witness code.
 
 Response = Tuple[int, Dict[str, Any]]
 
@@ -113,6 +114,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         ref = (query.get("ref") or "").strip()
         if not ref:
             return _err(400, "ref required")
+        from ..verifiers import scripture  # lazy: witness-only
         return _ok(scripture.resolve_ref(ref))
 
     if method == "GET" and path == "/word_study":
@@ -121,6 +123,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         s = (query.get("strongs") or "").strip()
         if not s:
             return _err(400, "strongs required")
+        from ..verifiers import scripture  # lazy: witness-only
         return _ok(scripture.word_study(s))
 
     return _err(404, "not found")

@@ -14,7 +14,8 @@ from typing import Any, Dict, List, Optional
 from .. import __version__, cas, corpus
 from ..config import EngineConfig
 from ..derivation import verify_derivation
-from ..verifiers import scripture
+# scripture (witness verifier) is imported LAZILY in the witness-gated tool branches below —
+# never at module top, so the secular surface never loads witness code.
 
 PROTOCOL_VERSION = "2024-11-05"
 
@@ -82,8 +83,10 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
         rec = cas.fetch(args.get("hash", ""))
         return rec if rec is not None else {"error": "seal not found"}
     if name == "resolve" and config.witness_surfaced:
+        from ..verifiers import scripture  # lazy: witness-only
         return scripture.resolve_ref(args.get("ref", ""))
     if name == "word_study" and config.witness_surfaced:
+        from ..verifiers import scripture  # lazy: witness-only
         return scripture.word_study(args.get("strongs", ""))
     raise KeyError(f"unknown tool {name!r} (on the {config.surface} surface)")
 
