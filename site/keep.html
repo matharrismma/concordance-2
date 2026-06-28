@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>The Keep — Narrow Highway</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .8rem; }
+  .stat { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: .9rem 1rem; }
+  .stat .n { font-size: 1.7rem; font-weight: 700; color: var(--accent); line-height: 1.1; }
+  .stat .k { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-top: .2rem; }
+  .ok { color: var(--pass); } .bad { color: var(--fail); }
+  table.feed { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  table.feed td { padding: .4rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.feed td.t { color: var(--muted); white-space: nowrap; font-family: ui-monospace, Consolas, monospace; font-size: .8rem; }
+  .pill { display: inline-block; font-size: .72rem; padding: .08rem .5rem; border-radius: 20px; background: var(--bg); border: 1px solid var(--line); }
+  .pill.HOLDS { color: var(--pass); border-color: var(--pass); }
+  .pill.BROKEN, .pill.ERROR { color: var(--fail); border-color: var(--fail); }
+  .dot { display:inline-block; width:.6rem; height:.6rem; border-radius:50%; background: var(--pass); margin-right:.4rem; }
+  #closed { display:none; }
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap" style="padding:.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center">
+  <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
+  <nav class="site"><span class="muted" id="hdr-surface">the keep</span></nav>
+</div></header>
+
+<main class="wrap">
+  <h1 style="font-size:1.7rem"><span class="dot" id="live-dot"></span>The Keep</h1>
+  <p class="lede">The operator's window into the live engine — what it is doing, right now.
+  <span class="muted" id="updated"></span></p>
+
+  <div id="closed" class="card" style="border-left:4px solid var(--fail)">
+    <strong>The keep is closed to you.</strong> It serves only the operator. Append your
+    operator token to the URL — <span class="mono">?token=…</span> — or open it from the box itself.
+  </div>
+
+  <div id="dash" hidden>
+    <section>
+      <div class="grid">
+        <div class="stat"><div class="n" id="s-cards">—</div><div class="k">cards kept</div></div>
+        <div class="stat"><div class="n" id="s-seals">—</div><div class="k">seals minted</div></div>
+        <div class="stat"><div class="n" id="s-ledger">—</div><div class="k">ledger verified</div></div>
+        <div class="stat"><div class="n" id="s-events">—</div><div class="k">recent events</div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>What the engine is doing</h2>
+      <div class="grid" id="actions"></div>
+    </section>
+
+    <section>
+      <h2>Live activity</h2>
+      <p class="muted" id="feed-empty" hidden>No activity recorded yet. As the engine
+      verifies, searches, and seals, it will appear here.</p>
+      <table class="feed"><tbody id="feed"></tbody></table>
+    </section>
+
+    <section class="card">
+      <strong id="d-surface">—</strong> · v<span id="d-version">—</span>
+      <div class="muted mono" id="d-identity" style="margin-top:.4rem"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="site"><div class="wrap" style="padding-top:0">
+  <p>The keep is not a public surface. It is gated — and refreshes itself every 15 seconds.</p>
+</div></footer>
+
+<script>
+const TOKEN = new URLSearchParams(location.search).get("token") || "";
+const fmtTime = t => { if(!t) return ""; const d = new Date(t*1000);
+  return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"}); };
+
+async function refresh() {
+  let r;
+  try { r = await fetch("/keep.json" + (TOKEN ? "?token=" + encodeURIComponent(TOKEN) : ""),
+                        {headers: TOKEN ? {} : {}}); }
+  catch (e) { return; }
+  if (r.status === 404) {  // hidden — not the operator
+    document.getElementById("closed").style.display = "block";
+    document.getElementById("dash").hidden = true;
+    document.getElementById("live-dot").style.background = "var(--fail)";
+    return;
+  }
+  if (!r.ok) return;
+  const d = await r.json();
+  document.getElementById("closed").style.display = "none";
+  document.getElementById("dash").hidden = false;
+
+  document.getElementById("s-cards").textContent = (d.keeping?.cards ?? "—").toLocaleString?.() ?? d.keeping?.cards ?? "—";
+  document.getElementById("s-seals").textContent = d.seals?.count ?? "—";
+  const lg = d.ledger || {};
+  document.getElementById("s-ledger").textContent = (lg.verified ?? "—") + (lg.total != null ? "/" + lg.total : "");
+  document.getElementById("s-ledger").className = "n " + (lg.ok === false ? "bad" : "ok");
+  document.getElementById("s-events").textContent = d.activity?.stats?.events ?? "—";
+
+  // action breakdown
+  const acts = d.activity?.stats?.by_action || {};
+  const ae = document.getElementById("actions");
+  ae.innerHTML = "";
+  const entries = Object.entries(acts);
+  if (!entries.length) ae.innerHTML = '<p class="muted">Nothing yet.</p>';
+  for (const [k, v] of entries.sort((a,b)=>b[1]-a[1])) {
+    const el = document.createElement("div"); el.className = "stat";
+    el.innerHTML = '<div class="n">' + v + '</div><div class="k">' + k + '</div>';
+    ae.appendChild(el);
+  }
+
+  // live feed
+  const feed = document.getElementById("feed");
+  const recent = d.activity?.recent || [];
+  feed.innerHTML = "";
+  document.getElementById("feed-empty").hidden = recent.length > 0;
+  for (const e of recent) {
+    const tr = document.createElement("tr");
+    let detail = e.action;
+    if (e.verdict) detail += ' <span class="pill ' + e.verdict + '">' + e.verdict + '</span>';
+    if (e.query != null) detail += ' <span class="muted">“' + escapeHtml(e.query) + '” → ' + (e.count ?? "?") + '</span>';
+    if (e.method) detail += ' <span class="muted mono">' + escapeHtml(e.method) + '</span>';
+    if (e.mode && e.action === "verify") detail += ' <span class="muted">(' + escapeHtml(e.mode) + ')</span>';
+    if (e.found != null) detail += ' <span class="muted">' + (e.found ? "found" : "miss") + '</span>';
+    tr.innerHTML = '<td class="t">' + fmtTime(e.t) + '</td><td>' + detail +
+                   ' <span class="pill">' + (e.surface || "") + '</span></td>';
+    feed.appendChild(tr);
+  }
+
+  document.getElementById("d-surface").textContent = (d.surface || "") + " surface";
+  document.getElementById("d-version").textContent = d.version || "—";
+  document.getElementById("d-identity").textContent = d.identity || "";
+  document.getElementById("hdr-surface").textContent = (d.surface || "") + " · the keep";
+  document.getElementById("updated").textContent = "Updated " + new Date().toLocaleTimeString();
+  document.getElementById("live-dot").style.background = "var(--pass)";
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+refresh();
+setInterval(refresh, 15000);
+</script>
+</body>
+</html>

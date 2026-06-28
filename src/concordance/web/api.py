@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Tuple
 
-from .. import __version__, cas, corpus
+from .. import __version__, cas, corpus, telemetry
 from ..config import EngineConfig
 from ..derivation import verify_derivation
 from ..verifiers import scripture
@@ -57,16 +57,22 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not isinstance(body, dict):
             return _err(400, "JSON object body required")
         if isinstance(body.get("steps"), list):
-            return _ok(verify_derivation(body["steps"]))
-        if body.get("mode"):
-            return _ok(verify_derivation([{"id": "b", "domain": "mathematics", "spec": body}]))
-        return _err(400, "body must have 'steps' or {mode, params}")
+            res = verify_derivation(body["steps"])
+        elif body.get("mode"):
+            res = verify_derivation([{"id": "b", "domain": "mathematics", "spec": body}])
+        else:
+            return _err(400, "body must have 'steps' or {mode, params}")
+        telemetry.record("verify", surface=surface,
+                         verdict=res.get("verdict"), mode=str(body.get("mode") or "steps"))
+        return _ok(res)
 
     if method == "POST" and path == "/mcp":
         # Remote MCP over HTTP — reuse the pure JSON-RPC handler, surface-gated. Stateless
         # request/response (initialize · tools/list · tools/call). Notifications get 202.
         from ..mcp import handle as _mcp_handle
-        resp = _mcp_handle(body if isinstance(body, dict) else {}, config)
+        req = body if isinstance(body, dict) else {}
+        telemetry.record("mcp", surface=surface, method=str(req.get("method") or ""))
+        resp = _mcp_handle(req, config)
         return (200, resp) if resp is not None else (202, {})
 
     if method == "GET" and path == "/search":
@@ -78,6 +84,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         except (TypeError, ValueError):
             limit = 20
         res = corpus.search(q, limit=limit)  # shared keeping (both surfaces)
+        telemetry.record("search", surface=surface, query=q, count=len(res))
         return _ok({"query": q, "count": len(res), "results": [_card_brief(c) for c in res]})
 
     if method == "GET" and path == "/seal":
@@ -85,6 +92,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not h:
             return _err(400, "hash required")
         rec = cas.fetch(h)
+        telemetry.record("seal_fetch", surface=surface, found=rec is not None)
         if rec is None:
             return _err(404, "seal not found")
         return _ok(rec)
@@ -145,8 +153,26 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
             self.end_headers()
             self.wfile.write(body)
 
+        def _keep(self, u) -> None:
+            """The operator's window — gated. 404 to non-operators (hide-existence)."""
+            from .keep import dashboard as _keep_dash
+            from .keep import is_operator
+            q = {k: v[0] for k, v in parse_qs(u.query).items()}
+            token = q.get("token") or self.headers.get("x-keep-token")
+            xff = (self.headers.get("x-forwarded-for") or "").split(",")[0].strip()
+            client_ip = xff or (self.client_address[0] if self.client_address else "")
+            if not is_operator(token, client_ip):
+                return self._json(404, {"error": "not found"})
+            if u.path == "/keep.json":
+                return self._json(200, _keep_dash(config))
+            if site is not None:
+                return self._static("keep.html")
+            return self._json(404, {"error": "not found"})
+
         def _do(self, method: str) -> None:
             u = urlparse(self.path)
+            if method == "GET" and u.path in ("/keep", "/keep.html", "/keep.json"):
+                return self._keep(u)  # operator-gated dashboard
             if u.path == "/mcp":  # full Streamable-HTTP MCP transport (POST/GET/DELETE)
                 raw = b""
                 if method == "POST":

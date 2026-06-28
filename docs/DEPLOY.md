@@ -58,6 +58,27 @@ curl -s 'https://narrowhighway.org/word_study?strongs=G26'   # agape — witness
 curl -s 'https://narrowhighway.com/word_study?strongs=G26'   # 404 — gated off the secular reach
 ```
 
+## 6. The keep (operator dashboard)
+The keep is the operator's window into the live engine — health, the keeping's size, the
+seal/ledger counts, and a live feed of recent activity (verifications, searches, seals).
+It is **operator-gated**: served only to localhost or a request carrying the operator
+token, and `404` (hide-existence) to everyone else. It is **not** a public surface.
+
+Set the token as a systemd drop-in (kept out of the repo — it's a secret):
+```bash
+TOKEN=$(openssl rand -hex 16)
+sudo mkdir -p /etc/systemd/system/nh-org.service.d
+printf '[Service]\nEnvironment=CONCORDANCE_KEEP_TOKEN=%s\n' "$TOKEN" \
+  | sudo tee /etc/systemd/system/nh-org.service.d/keep-token.conf >/dev/null
+sudo systemctl daemon-reload && sudo systemctl restart nh-org
+echo "keep token: $TOKEN"
+```
+Then open `https://narrowhighway.org/keep.html?token=$TOKEN` in a browser (the page reads the
+token from its own URL). Rotate by re-running with a new token. Without a token configured,
+the keep is closed to everyone but localhost. Activity is logged to
+`$CONCORDANCE_DATA_DIR/activity.jsonl` (append-only, best-effort, gitignored) — telemetry
+failures never break a request.
+
 ## Notes
 - **Sovereign**: no external services required; runs offline. `sympy` (the moat) and
   `cryptography` (signing) are the only runtime deps worth installing; everything else is stdlib.
