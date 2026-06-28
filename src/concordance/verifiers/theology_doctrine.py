@@ -1,9 +1,11 @@
 """Theology / Christian doctrine verifier.
 
 Deterministic checks against claims that are directly verifiable from the
-literal text of Scripture (KJV / ESV equivalents) and classical orthodox
-Christian doctrine. Disputed passages are NOT interpreted here — only
-claims that are plainly and repeatedly attested in public-domain biblical text.
+literal text of Scripture (public-domain KJV is embedded in the anchors; the
+served scripture verifier resolves the public-domain WEB) and classical orthodox
+Christian doctrine. No copyrighted translation (e.g. ESV) is shipped or served.
+Disputed passages are NOT interpreted here — only claims that are plainly and
+repeatedly attested in public-domain biblical text.
 
 Doctrinal hierarchy honoured:
     1. Jesus' words (primary)

@@ -294,7 +294,8 @@ class SourceLayer:
                 "detail": f"Lexicon not found. Run: python fetch_sources.py",
             }
 
-        # openscriptures format uses zero-padded keys
+        # the shipped lexicons use UNPADDED keys (G26, H1) — matched by the first try below;
+        # zero-padded forms (G0026) are also tried for compatibility with padded exports.
         for pad in (key, key.zfill(4), key.zfill(5)):
             full_key = prefix + pad
             if full_key in lex:
