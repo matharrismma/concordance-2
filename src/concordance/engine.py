@@ -16,7 +16,6 @@ Ported from 1.0 src/concordance_engine/engine.py — logic faithful, names neutr
 from __future__ import annotations
 
 import time
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from . import verifiers as _verifiers
@@ -25,7 +24,7 @@ from .domains import load_domain_validator
 from .gates import ok, quarantine, reject
 from .packet import DecisionStatus, EngineResult, GateResult
 from .record import Anchor, ClosestCase, WitnessRecord, axis_coords_for
-from .validate import load_schema, validate_against_schema
+from .validate import resolve_schema, validate_against_schema
 from .verifiers.base import VerifierResult
 
 # Wait windows by scope (seconds). Neutral scope names (1.0: adapter/mesh/canon).
@@ -43,21 +42,10 @@ _GOVERNANCE_DOMAINS = {"governance", "business", "household", "education"}
 _DP_TRIGGER_FIELDS = ("red_items", "floor_items", "path", "execution_steps", "witnesses")
 _DP_ALL_FIELDS = _DP_TRIGGER_FIELDS + ("title", "scope", "wait_window_seconds")
 
-_DEFAULT_SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schema" / "packet.schema.json"
-_LOADED_SCHEMA: Dict[str, Any] | None = None
-
-
 def _get_schema(config: EngineConfig) -> Dict[str, Any] | None:
-    """Resolve the schema for validation, or None (graceful — best-effort)."""
-    global _LOADED_SCHEMA
-    if _LOADED_SCHEMA is not None:
-        return _LOADED_SCHEMA
-    candidate = config.schema_path or str(_DEFAULT_SCHEMA_PATH)
-    try:
-        _LOADED_SCHEMA = load_schema(Path(candidate))
-        return _LOADED_SCHEMA
-    except (OSError, ValueError):
-        return None
+    """Resolve the schema for validation, or None. The schema ships inside the package
+    (validate.DEFAULT_SCHEMA_PATH); a missing one is logged loudly there, not silent."""
+    return resolve_schema(config.schema_path)
 
 
 def _scope_seconds(scope: Optional[str]) -> int:

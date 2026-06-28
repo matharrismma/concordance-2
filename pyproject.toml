@@ -14,11 +14,16 @@ dependencies = []
 
 [project.optional-dependencies]
 math = ["sympy", "scipy", "numpy"]
+signing = ["cryptography"]      # Ed25519 seal attestations (optional, lazy)
+schema = ["jsonschema"]         # full packet validation; without it, the sovereign structural fallback runs
 web = ["fastapi", "uvicorn"]
-dev = ["pytest"]
+dev = ["pytest", "coverage"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+concordance = ["schema/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

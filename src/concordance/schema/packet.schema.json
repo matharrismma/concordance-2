@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://narrowhighway.org/schema/packet.schema.json",
+  "title": "Narrow Highway claim packet",
+  "description": "The minimal structural contract for a packet entering the engine. A packet MUST be an object naming its verifier domain; domain-specific fields are allowed (additionalProperties). Enforced at the RED gate: a packet failing this is malformed input and is rejected before any verifier runs. With jsonschema installed the full constraints apply; without it, the sovereign fallback enforces required-fields + object-type.",
+  "type": "object",
+  "required": ["domain"],
+  "properties": {
+    "domain": {
+      "type": "string",
+      "minLength": 1,
+      "description": "the verifier domain to route to (e.g. mathematics, chemistry, combinatorics)"
+    },
+    "claim": {
+      "type": "string",
+      "description": "optional human statement of the claim being checked"
+    },
+    "created_epoch": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "unix seconds when the packet was created; required to seal (the WAIT gate)"
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["local", "mesh", "archived"],
+      "description": "wait-window scope; controls how long before the packet may seal"
+    },
+    "required_witnesses": {"type": "integer", "minimum": 0},
+    "witness_count": {"type": "integer", "minimum": 0},
+    "wait_window_seconds": {"type": "integer", "minimum": 0}
+  },
+  "additionalProperties": true
+}

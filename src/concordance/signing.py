@@ -1,10 +1,9 @@
-"""Ed25519 packet signing — canonical asymmetric crypto layer.
+"""Ed25519 packet signing — asymmetric attestation layer.
 
-Per canonical 02_SPECS/INVESTMENT_PACKET_SPEC_v1_1.md and the
-reference implementation in 04_CODE/lighthouse_all.py, every signed
-packet uses Ed25519 with a base64url-encoded 32-byte private key
+Every signed packet uses Ed25519 with a base64url-encoded 32-byte private key
 seed and 32-byte public key. The signature covers the canonical JSON
-serialization of the packet *excluding* its `signature` field.
+serialization of the packet *excluding* its `signature` field (the one canonical
+form — see validate.canonical_json_bytes).
 
 Three operations:
   * `generate_keypair()` — fresh (private, public) pair, both b64u.
@@ -47,7 +46,7 @@ def _require_cryptography():
     except ImportError as e:
         raise ImportError(
             "Ed25519 signing requires the `cryptography` package. "
-            "Install with: pip install 'concordance-engine[signing]' "
+            "Install with: pip install 'concordance[signing]' "
             "(or pip install cryptography)"
         ) from e
 

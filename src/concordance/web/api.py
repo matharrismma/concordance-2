@@ -48,7 +48,10 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     surface = config.surface
 
     if method == "GET" and path in ("/", "/health"):
-        return _ok({"ok": True, "version": __version__, "surface": surface})
+        from ..validate import _HAS_JSONSCHEMA, schema_active
+        return _ok({"ok": True, "version": __version__, "surface": surface,
+                    "schema_active": schema_active(config.schema_path, config.skip_schema_validation),
+                    "jsonschema": _HAS_JSONSCHEMA})
     if method == "GET" and path == "/identity":
         return _ok({"surface": surface, "identity": config.identity})
 
