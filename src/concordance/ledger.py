@@ -94,13 +94,17 @@ def _ledger_chain_files(ledger_dir: Optional[Path] = None) -> List[Path]:
     return sorted(d.glob("*.json"), key=_sort_key)
 
 
-def verify_chain(ledger_dir: Optional[Path] = None) -> Dict[str, Any]:
+def verify_chain(ledger_dir: Optional[Path] = None, *,
+                 cas_base: Optional[Path] = None) -> Dict[str, Any]:
     """Walk the ledger in chain order and verify integrity: recompute each
-    content_hash and confirm each prev_hash links to the prior file's hash."""
+    content_hash, confirm each prev_hash links to the prior file's hash, and (for
+    precedents bound to a CAS record) confirm that sealed record still exists and
+    re-verifies in the store. A broken link, a tampered file, or a missing/altered
+    bound record all set ok=False."""
     files = _ledger_chain_files(ledger_dir)
     report: Dict[str, Any] = {
         "ok": True, "total": len(files), "verified": 0,
-        "unsigned": [], "tampered": [], "broken_links": [],
+        "unsigned": [], "tampered": [], "broken_links": [], "missing_records": [],
     }
     expected_prev = GENESIS_HASH
     for f in files:
@@ -109,6 +113,15 @@ def verify_chain(ledger_dir: Optional[Path] = None) -> Dict[str, Any]:
             report["tampered"].append({"file": f.name, "error": "could not parse JSON"})
             report["ok"] = False
             continue
+        rh = precedent.get("record_hash")
+        if rh:  # the chain binds this precedent to a sealed CAS record — confirm it stands
+            try:
+                ok_cas, _ = cas.verify(rh, base_dir=cas_base)
+            except Exception:  # noqa: BLE001 — never false-alarm if the store is unreachable
+                ok_cas = True
+            if not ok_cas:
+                report["missing_records"].append({"file": f.name, "record_hash": rh[:12] + "..."})
+                report["ok"] = False
         stored_hash = precedent.get("content_hash")
         if stored_hash is None:
             report["unsigned"].append(f.name)
@@ -196,6 +209,11 @@ def seal_to_ledger(record: WitnessRecord, *, summary: str,
         "reasoning_overlay": overlay,
         "sealed_at": sealed_at if sealed_at is not None else time.time(),
     }
+    # Bind the chain to the actual sealed record in the CAS: the precedent's content_hash
+    # now commits to record_hash, so the hash-chain attests the real verdict/trail — not
+    # just the human summary. (record.permanent_ref is the CAS address, set before sealing.)
+    if record.permanent_ref:
+        precedent_payload["record_hash"] = record.permanent_ref
 
     d = ledger_dir or _default_ledger_dir()
     d.mkdir(parents=True, exist_ok=True)

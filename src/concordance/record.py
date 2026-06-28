@@ -165,8 +165,8 @@ class WitnessRecord:
             out["subject_pubkey"] = self.subject_pubkey
         if self.witness_attestations:
             out["witness_attestations"] = list(self.witness_attestations)
-        canonical = json.dumps(out, sort_keys=True, separators=(",", ":")).encode("utf-8")
-        out["content_hash"] = hashlib.sha256(canonical).hexdigest()
+        from .validate import canonical_json_bytes  # the ONE canonical form (ensure_ascii=False)
+        out["content_hash"] = hashlib.sha256(canonical_json_bytes(out)).hexdigest()
         if self.permanent_ref is not None:
             out["permanent_ref"] = self.permanent_ref
         return out

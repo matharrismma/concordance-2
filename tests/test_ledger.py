@@ -48,8 +48,9 @@ def test_verify_chain_ok():
         cb = Path(tmp) / "cas"
         seal_record(_pass("p1"), summary="first", ledger_dir=ld, cas_base=cb, sealed_at=1000.0)
         seal_record(_pass("p2"), summary="second", ledger_dir=ld, cas_base=cb, sealed_at=2000.0)
-        rep = verify_chain(ld)
+        rep = verify_chain(ld, cas_base=cb)
         assert rep["ok"] and rep["total"] == 2 and rep["verified"] == 2, rep
+        assert not rep["missing_records"]  # the chain's bound CAS records all exist
 
 
 def test_tamper_is_caught():
@@ -63,7 +64,7 @@ def test_tamper_is_caught():
         data = json.loads(target.read_text(encoding="utf-8"))
         data["summary"] = "ALTERED"
         target.write_text(json.dumps(data, indent=2), encoding="utf-8")
-        rep = verify_chain(ld)
+        rep = verify_chain(ld, cas_base=cb)
         assert not rep["ok"], "tampering must break the chain"
         assert rep["tampered"] or rep["broken_links"]
 

@@ -36,11 +36,10 @@ def _cas_dir() -> Path:
 
 def content_hash_of(record_dict: Dict[str, Any]) -> str:
     """Canonical SHA-256 of a record dict, excluding self-referential fields
-    (`content_hash`, `permanent_ref`) so the hash is stable."""
-    payload = {k: v for k, v in record_dict.items()
-               if k not in ("content_hash", "permanent_ref")}
-    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    return hashlib.sha256(canonical).hexdigest()
+    (`content_hash`, `permanent_ref`) so the hash is stable. Uses the ONE shared
+    canonicalizer (validate.content_hash, ensure_ascii=False) — see validate.py."""
+    from .validate import content_hash as _canonical
+    return _canonical(record_dict, exclude=("content_hash", "permanent_ref"))
 
 
 def _record_path(base: Path, h: str) -> Path:
@@ -58,7 +57,8 @@ def store(record_dict: Dict[str, Any], *, base_dir: Optional[Path] = None,
     path.parent.mkdir(parents=True, exist_ok=True)
     stored = dict(record_dict)
     stored["content_hash"] = h
-    path.write_text(json.dumps(stored, sort_keys=True, separators=(",", ":")), encoding="utf-8")
+    from .validate import canonical_json_bytes
+    path.write_bytes(canonical_json_bytes(stored))  # same canonical form (ensure_ascii=False)
     return h
 
 

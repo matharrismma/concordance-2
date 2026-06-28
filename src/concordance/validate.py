@@ -24,7 +24,19 @@ def sha256_bytes(b: bytes) -> str:
 
 
 def canonical_json_bytes(obj: Any) -> bytes:
+    """THE one canonical JSON form for the whole floor: sorted keys, tight separators,
+    ensure_ascii=False. ensure_ascii=False is load-bearing — Greek/Hebrew (the witness
+    surface) stays human-readable in stored seals AND hashes identically everywhere. A
+    content-addressed integrity system must have exactly one canonical form; this is it."""
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+
+
+def content_hash(obj: Any, *, exclude: tuple = ()) -> str:
+    """The canonical SHA-256 used across CAS, records, and the ledger. `exclude` drops
+    self-referential dict keys (e.g. content_hash, permanent_ref) so the hash is stable."""
+    if exclude and isinstance(obj, dict):
+        obj = {k: v for k, v in obj.items() if k not in exclude}
+    return sha256_bytes(canonical_json_bytes(obj))
 
 
 def load_schema(schema_path: Path) -> Dict[str, Any]:
