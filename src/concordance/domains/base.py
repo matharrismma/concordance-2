@@ -28,8 +28,21 @@ class DomainValidator(Protocol):
 
 
 # Domain name (canonical or alias) -> (module path, class name). Lazy import on
-# first hit. Empty for now — domain validators port here as they land.
-_DOMAIN_VALIDATOR_REGISTRY: Dict[str, Tuple[str, str]] = {}
+# first hit. The FLOOR "reference not advice" attestation gate is mounted for the
+# safety-critical domains (health -> not_medical_advice; giving -> not_financial_advice).
+# herb/herbalism/apothecary and giving have no 2.0 verifier yet, but the attestation gate
+# still applies to any packet declaring those domains. Extend conservatively.
+_ATT = "concordance.domains.attestation"
+_DOMAIN_VALIDATOR_REGISTRY: Dict[str, Tuple[str, str]] = {
+    "medicine": (_ATT, "MedicineValidator"),
+    "medical": (_ATT, "MedicineValidator"),
+    "nutrition": (_ATT, "NutritionValidator"),
+    "herb": (_ATT, "HerbValidator"),
+    "herbal": (_ATT, "HerbValidator"),
+    "herbalism": (_ATT, "HerbValidator"),
+    "apothecary": (_ATT, "HerbValidator"),
+    "giving": (_ATT, "GivingValidator"),
+}
 
 _LOADED_VALIDATOR_CLASSES: Dict[str, Type] = {}
 
