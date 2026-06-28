@@ -1,13 +1,25 @@
 # Narrow Highway — Caddy reverse proxy (auto-TLS via Let's Encrypt).
 # Two faces, one engine: .com is the secular reach, .org is the witness.
-# Each surface runs as its own service (see nh-com.service / nh-org.service).
+#
+# CURRENT LIVE REALITY (2026-06-28): narrowhighway.com is served by 1.0 (the `nh-engine`
+# service) on :8000. The `nh-com.service` (2.0 secular) in this directory is PREPARED but
+# NOT enabled — the .com cutover is gated on 2.0 reaching feature parity with 1.0 (the keep,
+# library, workspace, etc.). So the .com block below points at :8000 = whatever runs there
+# (currently 1.0). narrowhighway.org IS 2.0 — the witness face (`nh-org` on :8001).
+#
+# `header_up X-Forwarded-For {remote_host}` OVERRIDES any client-sent value — defense-in-depth
+# for the operator keep gate (which also ignores X-Forwarded-For in code; see web/keep.py).
 
 narrowhighway.com, www.narrowhighway.com {
 	encode gzip
-	reverse_proxy 127.0.0.1:8000
+	reverse_proxy 127.0.0.1:8000 {
+		header_up X-Forwarded-For {remote_host}
+	}
 }
 
 narrowhighway.org, www.narrowhighway.org {
 	encode gzip
-	reverse_proxy 127.0.0.1:8001
+	reverse_proxy 127.0.0.1:8001 {
+		header_up X-Forwarded-For {remote_host}
+	}
 }

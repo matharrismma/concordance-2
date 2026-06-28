@@ -1,5 +1,10 @@
+# PREPARED, NOT ENABLED (as of 2026-06-28). narrowhighway.com is currently served by 1.0
+# (the `nh-engine` service). Do NOT `systemctl enable --now nh-com` until 2.0 reaches feature
+# parity with 1.0 (the keep, library, workspace, etc.) — enabling it replaces the live 1.0
+# site with 2.0's leaner one. The .com cutover is a deliberate, reversible operator step
+# (rollback: `systemctl enable --now nh-engine`). narrowhighway.org already runs 2.0 (nh-org).
 [Unit]
-Description=Narrow Highway — .com (the secular reach: API + site)
+Description=Narrow Highway — .com (the secular reach: API + site) [2.0, not yet enabled]
 After=network.target
 
 [Service]

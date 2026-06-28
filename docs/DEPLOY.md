@@ -6,6 +6,14 @@ Two faces, one engine: **narrowhighway.com** (the secular reach) and **narrowhig
 These configs are *prepared*. **Deployment is the operator's** — it is outward-facing and
 touches DNS, the server, and live traffic. Nothing here deploys anything by itself.
 
+> **Current live reality (2026-06-28).** `narrowhighway.org` runs **2.0** (the witness face,
+> `nh-org` on :8001). `narrowhighway.com` still runs **1.0** (the `nh-engine` service on :8000) —
+> the `nh-com.service` (2.0 secular) here is prepared but **not enabled**. The .com cutover is
+> **gated on 2.0 reaching feature parity with 1.0** (the keep, library, workspace, …); cutting
+> over now would replace the live 1.0 site with 2.0's leaner one. Rollback from a cutover is
+> `sudo systemctl enable --now nh-engine`. So the `.com` examples below describe the *target*
+> 2.0 secular surface, not what `.com` serves today.
+
 ## Prerequisites (operator)
 - A server (the droplet) with Python ≥ 3.10 and Caddy installed.
 - DNS **A records**: `narrowhighway.com` and `narrowhighway.org` (and `www`) → the droplet IP.
@@ -50,8 +58,8 @@ sudo systemctl reload caddy
 
 ## 5. Verify (live)
 ```bash
-curl -s https://narrowhighway.com/health          # {"ok":true,"surface":"secular",...}
-curl -s https://narrowhighway.org/health          # surface":"witness"
+curl -s https://narrowhighway.org/health          # LIVE 2.0 → {"ok":true,"surface":"witness",...}
+curl -s https://narrowhighway.com/health          # AFTER cutover → surface":"secular"  (today: 1.0)
 curl -s -X POST https://narrowhighway.com/verify -H content-type:application/json \
   -d '{"mode":"equality","params":{"expr_a":"2+2","expr_b":"4","variables":{}}}'   # verdict HOLDS
 curl -s 'https://narrowhighway.org/word_study?strongs=G26'   # agape — witness-only
