@@ -50,6 +50,7 @@
         <strong>Seals + ledger</strong> are the authoritative integrity record — hash-chained,
         content-addressed, independently re-verifiable. <strong>Recent events</strong> are an
         advisory ops log (best-effort, tamperable) — not part of the integrity chain.</p>
+      <p id="integrity-line" style="font-size:.82rem;margin-top:.2rem"></p>
     </section>
 
     <section>
@@ -102,6 +103,21 @@ async function refresh() {
   document.getElementById("s-ledger").textContent = (lg.verified ?? "—") + (lg.total != null ? "/" + lg.total : "");
   document.getElementById("s-ledger").className = "n " + (lg.ok === false ? "bad" : "ok");
   document.getElementById("s-events").textContent = d.activity?.stats?.events ?? "—";
+
+  // integrity (from the scheduled check — tools/integrity_check.py)
+  const ig = d.integrity, il = document.getElementById("integrity-line");
+  if (il) {
+    if (!ig) {
+      il.innerHTML = '<span class="muted">Integrity check: not yet run.</span>';
+    } else {
+      const when = ig.checked_at ? new Date(ig.checked_at * 1000).toLocaleString() : "?";
+      il.innerHTML = ig.ok
+        ? '<span class="ok">✓ Integrity verified</span> <span class="muted">— ' + when + ' · ledger '
+          + (ig.ledger?.verified ?? "?") + "/" + (ig.ledger?.total ?? "?") + " · "
+          + (ig.cas?.total ?? "?") + ' seals re-verified</span>'
+        : '<span class="bad">✗ INTEGRITY CHECK FAILED</span> <span class="muted">— ' + when + '</span>';
+    }
+  }
 
   // action breakdown
   const acts = d.activity?.stats?.by_action || {};

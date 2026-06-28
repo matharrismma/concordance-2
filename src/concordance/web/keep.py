@@ -57,6 +57,19 @@ def request_is_operator(peer_ip: Optional[str], headers: Any, query: Optional[di
     return is_operator(token, peer_ip)
 
 
+def _read_integrity_status() -> Optional[Dict[str, Any]]:
+    """The last scheduled integrity check's result (tools/integrity_check.py writes it).
+    Cheap file read — the heavy verify_chain + CAS sweep runs on the timer, not per poll."""
+    import json
+    base = os.environ.get("CONCORDANCE_DATA_DIR", "").strip() or "data"
+    path = os.path.join(base, "integrity_status.json")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return None
+
+
 def dashboard(config: EngineConfig) -> Dict[str, Any]:
     """The live state — what the operator needs to see at a glance. All best-effort."""
     try:
@@ -96,6 +109,7 @@ def dashboard(config: EngineConfig) -> Dict[str, Any]:
             "total": chain.get("total"),
             "verified": chain.get("verified"),
         },
+        "integrity": _read_integrity_status(),  # last scheduled check (tools/integrity_check.py)
         "activity": {
             "stats": telemetry.stats(),
             "recent": list(reversed(telemetry.recent(50))),  # newest first for the feed
