@@ -17,7 +17,7 @@ math = ["sympy", "scipy", "numpy"]
 signing = ["cryptography"]      # Ed25519 seal attestations (optional, lazy)
 schema = ["jsonschema"]         # full packet validation; without it, the sovereign structural fallback runs
 web = ["fastapi", "uvicorn"]
-dev = ["pytest", "coverage"]
+dev = ["pytest>=8", "coverage>=7"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -27,3 +27,7 @@ concordance = ["schema/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["src/concordance"]
+branch = true

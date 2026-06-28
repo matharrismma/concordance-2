@@ -1,0 +1,35 @@
+name: CI
+
+# The enforced regression gate. For a project whose entire value is integrity, a green
+# run is the barrier: a single false-positive in the moat, a failing test, or coverage
+# below the integrity-core floor fails the build. Runs on every push and PR.
+on:
+  push:
+  pull_request:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install (engine + heavy deps + dev tools)
+        run: python -m pip install -e ".[math,signing,schema,dev]"
+
+      - name: Moat benchmark — must be 58/58 with 0 false-positives
+        run: python tools/benchmark.py   # exits non-zero on any false-positive
+
+      - name: Test suite (with coverage)
+        run: coverage run --source=src/concordance -m pytest -q
+
+      - name: Coverage report
+        run: coverage report
+
+      - name: Integrity-core coverage floor (cas/ledger/record/signing/validate/receipts/derivation >= 75%)
+        run: >
+          coverage report
+          --include="*/cas.py,*/ledger.py,*/record.py,*/signing.py,*/validate.py,*/receipts.py,*/derivation.py"
+          --fail-under=75
