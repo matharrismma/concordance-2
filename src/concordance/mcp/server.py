@@ -23,11 +23,13 @@ def _secular_tools() -> List[dict]:
     return [
         {"name": "verify",
          "description": ("Verify a claim deterministically — returns a verdict "
-                         "(HOLDS / BROKEN / INCOMPLETE) plus the worked trail. The engine "
-                         "eliminates what is not the answer; it does not generate it."),
+                         "(HOLDS / BROKEN / INCOMPLETE), the worked trail, AND a sealed receipt "
+                         "{content_hash, cite_url} you can re-fetch and re-verify (seal_fetch). "
+                         "The engine eliminates what is not the answer; it does not generate it."),
          "inputSchema": {"type": "object", "properties": {
              "mode": {"type": "string", "description": "equality | inequality | derivative | integral | limit | solve"},
-             "params": {"type": "object", "description": "e.g. {expr_a, expr_b, variables} for equality"}},
+             "params": {"type": "object", "description": "e.g. {expr_a, expr_b, variables} for equality"},
+             "seal": {"type": "boolean", "description": "mint a re-checkable seal (default true)"}},
              "required": ["mode", "params"]}},
         {"name": "search",
          "description": "Ranked search over the keeping (the kept library).",
@@ -62,9 +64,15 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
     args = args or {}
     if name == "verify":
         if isinstance(args.get("steps"), list):
-            return verify_derivation(args["steps"])
-        return verify_derivation([{"id": "b", "domain": "mathematics",
-                                   "spec": {"mode": args.get("mode"), "params": args.get("params", {})}}])
+            res = verify_derivation(args["steps"])
+            dom = str(args["steps"][0].get("domain") or "mathematics") if args["steps"] else "mathematics"
+        else:
+            res = verify_derivation([{"id": "b", "domain": "mathematics",
+                                      "spec": {"mode": args.get("mode"), "params": args.get("params", {})}}])
+            dom = "mathematics"
+        # Agents get a receipt too: a re-checkable seal, not just a verdict. seal:false opts out.
+        from .. import receipts
+        return receipts.attach(res, config=config, domain=dom, enabled=args.get("seal", True) is not False)
     if name == "search":
         res = corpus.search(args.get("query", ""), limit=int(args.get("limit", 10)))
         return {"count": len(res), "results": [

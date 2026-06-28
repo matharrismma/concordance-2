@@ -56,14 +56,21 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # /derivation/verify is the 1.0-compatible alias (preserves the public moat contract).
         if not isinstance(body, dict):
             return _err(400, "JSON object body required")
+        dom = "mathematics"
         if isinstance(body.get("steps"), list):
             res = verify_derivation(body["steps"])
+            if body["steps"]:
+                dom = str(body["steps"][0].get("domain") or "mathematics")
         elif body.get("mode"):
             res = verify_derivation([{"id": "b", "domain": "mathematics", "spec": body}])
         else:
             return _err(400, "body must have 'steps' or {mode, params}")
-        telemetry.record("verify", surface=surface,
-                         verdict=res.get("verdict"), mode=str(body.get("mode") or "steps"))
+        # Mint the receipt: a verdict alone is "trust me"; the seal is re-checkable. ?seal=0 opts out.
+        seal_on = str(query.get("seal", "1")).lower() not in ("0", "false", "no", "off")
+        from .. import receipts
+        res = receipts.attach(res, config=config, domain=dom, enabled=seal_on)
+        telemetry.record("verify", surface=surface, verdict=res.get("verdict"),
+                         mode=str(body.get("mode") or "steps"), sealed=bool(res.get("seal")))
         return _ok(res)
 
     if method == "POST" and path == "/mcp":
