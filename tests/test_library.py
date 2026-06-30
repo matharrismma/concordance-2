@@ -72,6 +72,29 @@ def test_mcp_tools():
     assert {"card_get", "cards_browse", "cards_stats", "daily_card"} <= set(names)
 
 
+def test_connections_locate_health():
+    _inject()
+    r = corpus.connections("c1")
+    assert r is not None and r["id"] == "c1" and r["shelf"] == "theology" and isinstance(r["same_shelf"], list)
+    assert corpus.connections("nope") is None
+    assert corpus.locate("c1")["by"] == "id"
+    jl = corpus.locate("justice")
+    assert jl["by"] == "title" and jl["matches"][0]["id"] == "c2"
+    h = corpus.health()
+    assert h["ok"] and h["total"] == 3 and h["with_body"] == 3
+
+
+def test_remaining_http_mcp():
+    _inject()
+    from concordance.mcp.server import handle
+    from concordance.web.api import dispatch
+    assert dispatch("GET", "/card/connections", {"id": "c1"}, None, SEC)[1]["shelf"] == "theology"
+    assert dispatch("GET", "/locate", {"q": "Atom"}, None, SEC)[1]["matches"][0]["id"] == "c3"
+    assert dispatch("GET", "/library/health", {}, None, SEC)[1]["total"] == 3
+    names = [t["name"] for t in handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, SEC)["result"]["tools"]]
+    assert {"card_connections", "locate", "library_health"} <= set(names)
+
+
 def test_cleanup():
     corpus._DEFAULT = None  # don't leak the injected corpus to other test modules
 

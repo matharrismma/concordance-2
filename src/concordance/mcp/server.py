@@ -66,6 +66,15 @@ def _secular_tools() -> List[dict]:
         {"name": "grid_dimension",
          "description": "The axes that sit on a given scaffold member (dimension).",
          "inputSchema": {"type": "object", "properties": {"dimension": {"type": "string"}}, "required": ["dimension"]}},
+        {"name": "card_connections",
+         "description": "Cards related to one card — its explicit links + same-shelf siblings.",
+         "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
+        {"name": "locate",
+         "description": "Find the card for a query — by exact id, then title, else ranked search.",
+         "inputSchema": {"type": "object", "properties": {"q": {"type": "string"}}, "required": ["q"]}},
+        {"name": "library_health",
+         "description": "Corpus health — is the keeping loaded and sound (totals, shelves, surfaces).",
+         "inputSchema": {"type": "object", "properties": {}}},
     ]
 
 
@@ -135,6 +144,13 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
         from .. import grid
         d = args.get("dimension", "")
         return {"dimension": d, "axes": grid.dimension_axes(d)}
+    if name == "card_connections":
+        r = corpus.connections(args.get("id", ""))
+        return r if r is not None else {"error": "card not found"}
+    if name == "locate":
+        return corpus.locate(args.get("q", ""))
+    if name == "library_health":
+        return corpus.health()
     if name == "resolve" and config.witness_surfaced:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.resolve_ref(args.get("ref", ""))

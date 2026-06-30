@@ -174,6 +174,17 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         c = corpus.daily(query.get("seed") or None)
         return _ok(c) if c is not None else _err(404, "the keeping is empty")
 
+    if method == "GET" and path == "/card/connections":
+        cid = (query.get("id") or "").strip()
+        if not cid:
+            return _err(400, "id required")
+        r = corpus.connections(cid)
+        return _ok(r) if r is not None else _err(404, "card not found")
+    if method == "GET" and path == "/locate":
+        return _ok(corpus.locate(query.get("q") or ""))
+    if method == "GET" and path == "/library/health":
+        return _ok(corpus.health())
+
     # Atlas / grid — the map, read-only.
     if method == "GET" and path == "/grid":
         from .. import grid
@@ -221,7 +232,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
 
 _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word_study",
-                  "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension"}
+                  "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
+                  "/card/connections", "/locate", "/library/health"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",

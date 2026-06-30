@@ -209,3 +209,40 @@ def daily(seed: Optional[str] = None) -> Optional[dict]:
         seed = _time.strftime("%Y-%m-%d", _time.gmtime())
     idx = int(hashlib.sha256(seed.encode("utf-8")).hexdigest(), 16) % len(ids)
     return default_corpus().cards[ids[idx]]
+
+
+def connections(card_id: str, limit: int = 10) -> Optional[Dict[str, Any]]:
+    """Cards related to one card — its explicit links plus same-shelf siblings. None if absent."""
+    c = get_card(card_id)
+    if c is None:
+        return None
+    shelf = c.get("shelf")
+    sibs = [_brief(x) for x in default_corpus().cards.values()
+            if x.get("id") != card_id and x.get("shelf") == shelf][:max(1, min(limit, 50))]
+    links = c.get("links") or c.get("connections") or c.get("refs") or []
+    return {"id": card_id, "shelf": shelf, "links": links, "same_shelf": sibs}
+
+
+def locate(q: str, limit: int = 5) -> Dict[str, Any]:
+    """Find the card for a query: exact id, then title match, else fall back to ranked search."""
+    q = (q or "").strip()
+    if not q:
+        return {"query": q, "by": "none", "matches": []}
+    cards = default_corpus().cards
+    if q in cards:
+        return {"query": q, "by": "id", "matches": [_brief(cards[q])]}
+    ql = q.lower()
+    title_hits = [_brief(c) for c in cards.values() if ql in (c.get("title") or "").lower()]
+    if title_hits:
+        return {"query": q, "by": "title", "matches": title_hits[:limit]}
+    return {"query": q, "by": "search", "matches": [_brief(c) for c in search(q, limit=limit)]}
+
+
+def health() -> Dict[str, Any]:
+    """Corpus health — is the keeping loaded and sound."""
+    cards = list(default_corpus().cards.values())
+    n = len(cards)
+    return {"ok": n > 0, "total": n,
+            "with_body": sum(1 for c in cards if (c.get("body") or "").strip()),
+            "shelves": len({c.get("shelf") for c in cards}),
+            "surfaces": sorted({(c.get("surface") or "?") for c in cards})}
