@@ -11,6 +11,7 @@ venv/
 
 # runtime data (kept out of source; the contracts live in docs/)
 data/cas/
+data/ledger/
 data/cards.jsonl
 data/*.jsonl
 data/*.db
@@ -18,3 +19,8 @@ data/strongs/
 data/*.db-wal
 data/*.db-shm
 *.log
+
+# vendored ML assets for the opt-in Rampart layer (~90 MB binaries; reproduce with
+# tools/vendor_rampart.sh — kept out of source like the runtime data)
+site/vendor/
+site/models/

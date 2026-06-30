@@ -142,6 +142,13 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
     from pathlib import Path
     from urllib.parse import parse_qs, urlparse
 
+    # Correct MIME for the self-hosted ML assets: ESM modules are MIME-strict (a browser
+    # refuses an .mjs served as octet-stream), and .wasm should be application/wasm.
+    mimetypes.add_type("text/javascript", ".mjs")
+    mimetypes.add_type("text/javascript", ".js")
+    mimetypes.add_type("application/wasm", ".wasm")
+    mimetypes.add_type("application/json", ".json")
+
     from .. import ratelimit
 
     config = EngineConfig(surface)

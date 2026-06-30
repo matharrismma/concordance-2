@@ -6,6 +6,11 @@
 <title>Narrow Highway — wisdom by narrowing the possibilities</title>
 <meta name="description" content="A verification engine. It narrows the possibilities — eliminating what is not the answer so what survives stands on its own — and hands you a receipt you can re-verify.">
 <link rel="stylesheet" href="styles.css">
+<!-- Resolves Rampart's bare "@huggingface/transformers" import to the self-hosted runtime
+     (used only by the opt-in name-detection layer; see rampart-ml.js). -->
+<script type="importmap">
+{ "imports": { "@huggingface/transformers": "/vendor/transformers/transformers.web.min.js" } }
+</script>
 </head>
 <body>
 <header class="site"><div class="wrap" style="padding:.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center">
@@ -138,7 +143,8 @@ if (_mlBtn) _mlBtn.addEventListener('click', async () => {
   _mlBtn.disabled = true;
   try {
     mlGuard = await RampartML.load(m => { _mlSt.textContent = m; });
-    _mlSt.textContent = '✓ name detection on'; _mlSt.style.color = 'var(--pass)';
+    _mlSt.textContent = '✓ name detection on — ' + (RampartML.path() === 'self-hosted' ? 'self-hosted (sovereign)' : 'CDN fallback');
+    _mlSt.style.color = 'var(--pass)';
     _mlBtn.style.display = 'none';
     redactDemo();
   } catch (e) {
