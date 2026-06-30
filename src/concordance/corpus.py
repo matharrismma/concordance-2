@@ -161,3 +161,51 @@ def search(query: str, limit: int = 25, include_witness: bool = True) -> List[di
     The keeping is shared across both surfaces by default (the .com includes the religious
     cards too); pass include_witness=False for an optional secular-only view."""
     return default_corpus().search(query, limit, include_witness)
+
+
+# ── Library primitives (ported from 1.0's card tools, over the same corpus) ──────────────
+
+def _brief(c: dict) -> Dict[str, Any]:
+    return {"id": c.get("id"), "title": c.get("title"), "shelf": c.get("shelf"),
+            "surface": c.get("surface"), "snippet": (c.get("body", "") or "")[:200]}
+
+
+def get_card(card_id: str) -> Optional[dict]:
+    """Fetch one card (the full record) by id, or None."""
+    return default_corpus().cards.get((card_id or "").strip())
+
+
+def browse(shelf: Optional[str] = None, limit: int = 20, offset: int = 0) -> Dict[str, Any]:
+    """Paginated browse over the keeping, optionally filtered to a shelf. Returns briefs."""
+    cards = list(default_corpus().cards.values())
+    if shelf:
+        cards = [c for c in cards if (c.get("shelf") or "").lower() == shelf.lower()]
+    cards.sort(key=lambda c: ((c.get("shelf") or ""), (c.get("title") or c.get("id") or "")))
+    total = len(cards)
+    offset = max(0, offset)
+    limit = max(1, min(limit, 100))
+    return {"total": total, "offset": offset, "limit": limit,
+            "shelf": shelf, "cards": [_brief(c) for c in cards[offset:offset + limit]]}
+
+
+def stats() -> Dict[str, Any]:
+    """Counts over the keeping — total, by shelf, by surface."""
+    from collections import Counter
+    cards = list(default_corpus().cards.values())
+    return {"total": len(cards),
+            "by_shelf": dict(Counter((c.get("shelf") or "?") for c in cards).most_common(40)),
+            "by_surface": dict(Counter((c.get("surface") or "?") for c in cards))}
+
+
+def daily(seed: Optional[str] = None) -> Optional[dict]:
+    """A deterministic 'card of the day' — same card all day, different each day. Stable: the
+    seed (default today's UTC date) hashes to an index, so it needs no stored state."""
+    import hashlib
+    import time as _time
+    ids = sorted(default_corpus().cards.keys())
+    if not ids:
+        return None
+    if seed is None:
+        seed = _time.strftime("%Y-%m-%d", _time.gmtime())
+    idx = int(hashlib.sha256(seed.encode("utf-8")).hexdigest(), 16) % len(ids)
+    return default_corpus().cards[ids[idx]]

@@ -46,6 +46,19 @@ def _secular_tools() -> List[dict]:
                          "engine (the text never leaves your machine) or use the client libraries — "
                          "the strip belongs at your edge. Deterministic; pair with verify for a receipt."),
          "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]}},
+        {"name": "card_get",
+         "description": "Fetch one card (the full record) from the keeping by id.",
+         "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
+        {"name": "cards_browse",
+         "description": "Browse the keeping — paginated, optional shelf filter. Returns card briefs.",
+         "inputSchema": {"type": "object", "properties": {
+             "shelf": {"type": "string"}, "limit": {"type": "integer"}, "offset": {"type": "integer"}}}},
+        {"name": "cards_stats",
+         "description": "Counts over the keeping — total, by shelf, by surface.",
+         "inputSchema": {"type": "object", "properties": {}}},
+        {"name": "daily_card",
+         "description": "The deterministic card of the day from the keeping (same all day).",
+         "inputSchema": {"type": "object", "properties": {"seed": {"type": "string"}}}},
     ]
 
 
@@ -93,6 +106,17 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
         from .. import redact as _redact  # the strip-context-then-reapply gateway
         clean, mapping = _redact.redact(args.get("text", ""))
         return {"clean": clean, "mapping": mapping, "count": len(mapping)}
+    if name == "card_get":
+        c = corpus.get_card(args.get("id", ""))
+        return c if c is not None else {"error": "card not found"}
+    if name == "cards_browse":
+        return corpus.browse(shelf=args.get("shelf"), limit=int(args.get("limit", 20)),
+                             offset=int(args.get("offset", 0)))
+    if name == "cards_stats":
+        return corpus.stats()
+    if name == "daily_card":
+        c = corpus.daily(args.get("seed"))
+        return c if c is not None else {"error": "the keeping is empty"}
     if name == "resolve" and config.witness_surfaced:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.resolve_ref(args.get("ref", ""))

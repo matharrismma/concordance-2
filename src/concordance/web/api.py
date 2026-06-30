@@ -151,6 +151,29 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         telemetry.record("search", surface=surface, query=q, count=len(res))
         return _ok({"query": q, "count": len(res), "results": [_card_brief(c) for c in res]})
 
+    # Library / keeping tools (ported from 1.0, additive — over the same shared corpus).
+    if method == "GET" and path == "/cards/stats":
+        return _ok(corpus.stats())
+    if method == "GET" and path == "/cards":
+        try:
+            limit = int(query.get("limit", "20"))
+        except (TypeError, ValueError):
+            limit = 20
+        try:
+            offset = int(query.get("offset", "0"))
+        except (TypeError, ValueError):
+            offset = 0
+        return _ok(corpus.browse(shelf=(query.get("shelf") or None), limit=limit, offset=offset))
+    if method == "GET" and path == "/card":
+        cid = (query.get("id") or "").strip()
+        if not cid:
+            return _err(400, "id required")
+        c = corpus.get_card(cid)
+        return _ok(c) if c is not None else _err(404, "card not found")
+    if method == "GET" and path == "/daily":
+        c = corpus.daily(query.get("seed") or None)
+        return _ok(c) if c is not None else _err(404, "the keeping is empty")
+
     if method == "GET" and path == "/seal":
         h = (query.get("hash") or "").strip()
         if not h:
@@ -182,7 +205,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     return _err(404, "not found")
 
 
-_API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word_study"}
+_API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word_study",
+                  "/card", "/cards", "/cards/stats", "/daily"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
