@@ -22,7 +22,7 @@ import os
 import threading
 from typing import Any, Dict, Optional
 
-from . import cas, ledger
+from . import cas, ledger, redact
 from .config import EngineConfig
 from .packet import GateResult
 from .record import WitnessRecord, axis_coords_for, with_permanent_ref
@@ -51,7 +51,7 @@ def _auto_summary(result: Dict[str, Any], domain: str) -> str:
         if e.get("claim"):
             claim = str(e["claim"])
             break
-    base = claim or f"{domain} derivation"
+    base = redact.redact(claim)[0] if claim else f"{domain} derivation"  # never seal PII in the summary
     return f"{base} — {result.get('verdict')} ({result.get('confirmed_steps', 0)}/{result.get('steps', 0)} steps)"
 
 
@@ -70,7 +70,9 @@ def record_from_derivation(result: Dict[str, Any], *, domain: str = "mathematics
             name=str(e.get("id") or f"s{i}"),
             status=str(e.get("status") or "ERROR"),
             detail=str(e.get("detail") or ""),
-            data={"claim": e.get("claim", ""), "domain": e.get("domain", ""),
+            # redact the human claim text before it enters the permanent, public seal — the
+            # seal records the stripped form; the PII never reaches the ledger (math is untouched).
+            data={"claim": redact.redact(str(e.get("claim", "")))[0], "domain": e.get("domain", ""),
                   "uses": e.get("uses", []), "link_ok": e.get("link_ok", True)},
         )
         for i, e in enumerate(trail)
