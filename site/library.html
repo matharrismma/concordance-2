@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The keeping — Narrow Highway</title>
+<meta name="description" content="Browse the keeping — the kept library behind the verification engine. Filter by shelf, open any card.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site"><div class="wrap" style="padding:.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center">
+  <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
+  <nav class="site"><a href="/#verify">Verify</a><a href="/library.html">Library</a><a href="/seal.html">Seal</a></nav>
+</div></header>
+
+<main class="wrap">
+  <h1>The keeping</h1>
+  <p class="lede">The kept library behind the engine — <span id="total" class="mono">…</span> cards.
+  Filter by shelf, open any card. Search ranked retrieval is on the <a href="/#search">home page</a>.</p>
+
+  <section>
+    <div class="row">
+      <select id="shelf" aria-label="shelf filter"><option value="">all shelves</option></select>
+      <button onclick="load(0)">Browse</button>
+    </div>
+    <div id="list" style="margin-top:1rem"></div>
+    <div id="pager" style="margin-top:.8rem;display:flex;gap:.6rem;align-items:center"></div>
+    <div id="detail" style="margin-top:1rem"></div>
+  </section>
+
+  <footer class="site">
+    <p>The keeping is the substrate — verified, attributed, kept. The engine finds what survives;
+    it does not generate the answer. The fuller witness is at <a href="https://narrowhighway.org">narrowhighway.org</a>.</p>
+  </footer>
+</main>
+
+<script>
+const API = "";
+let offset = 0, limit = 20, total = 0;
+function esc(s){const d=document.createElement('div');d.textContent=String(s==null?"":s);return d.innerHTML;}
+
+async function init(){
+  try{
+    const s = await (await fetch(API + "/cards/stats")).json();
+    document.getElementById('total').textContent = (s.total||0).toLocaleString();
+    const sel = document.getElementById('shelf');
+    Object.keys(s.by_shelf||{}).sort().forEach(sh => {
+      const o = document.createElement('option'); o.value = sh; o.textContent = sh + " (" + s.by_shelf[sh] + ")"; sel.appendChild(o);
+    });
+  }catch(e){ document.getElementById('total').textContent = "?"; }
+  load(0);
+}
+
+async function load(off){
+  offset = Math.max(0, off);
+  const shelf = document.getElementById('shelf').value;
+  const list = document.getElementById('list');
+  list.innerHTML = '<p class="muted">loading…</p>';
+  document.getElementById('detail').innerHTML = "";
+  try{
+    const q = "/cards?limit=" + limit + "&offset=" + offset + (shelf ? "&shelf=" + encodeURIComponent(shelf) : "");
+    const d = await (await fetch(API + q)).json();
+    total = d.total || 0;
+    if(!d.cards || !d.cards.length){ list.innerHTML = '<p class="muted">no cards on that shelf.</p>'; document.getElementById('pager').innerHTML=""; return; }
+    list.innerHTML = d.cards.map(c =>
+      '<div class="result" style="cursor:pointer" onclick="openCard(\'' + esc(c.id) + '\')">' +
+      '<span class="shelf">' + esc(c.shelf || "") + '</span>' +
+      '<div class="t">' + esc(c.title || c.id) + '</div>' +
+      '<div class="s">' + esc((c.snippet || "").slice(0,150)) + '</div></div>').join("");
+    const page = Math.floor(offset/limit)+1, pages = Math.max(1, Math.ceil(total/limit));
+    document.getElementById('pager').innerHTML =
+      '<button ' + (offset<=0?'disabled':'') + ' onclick="load(' + (offset-limit) + ')">← prev</button>' +
+      '<span class="muted">page ' + page + ' / ' + pages + ' · ' + total.toLocaleString() + ' cards</span>' +
+      '<button ' + (offset+limit>=total?'disabled':'') + ' onclick="load(' + (offset+limit) + ')">next →</button>';
+  }catch(e){ list.innerHTML = '<p class="muted">API unreachable.</p>'; }
+}
+
+async function openCard(id){
+  const det = document.getElementById('detail');
+  det.innerHTML = '<p class="muted">opening…</p>';
+  try{
+    const c = await (await fetch(API + "/card?id=" + encodeURIComponent(id))).json();
+    if(c.error){ det.innerHTML = '<p class="muted">' + esc(c.error) + '</p>'; return; }
+    det.innerHTML = '<div class="card"><div class="shelf">' + esc(c.shelf||"") + (c.surface?' · '+esc(c.surface):'') + '</div>' +
+      '<div class="verdict" style="font-size:1.1rem">' + esc(c.title || c.id) + '</div>' +
+      '<p style="white-space:pre-wrap;margin-top:.5rem">' + esc(c.body || "(no body)") + '</p>' +
+      '<div class="muted mono" style="font-size:.78rem;margin-top:.6rem">' + esc(c.id) + '</div></div>';
+    det.scrollIntoView({behavior:"smooth", block:"nearest"});
+  }catch(e){ det.innerHTML = '<p class="muted">could not open that card.</p>'; }
+}
+init();
+</script>
+</body>
+</html>
