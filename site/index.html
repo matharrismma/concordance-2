@@ -24,6 +24,28 @@
   <p class="lede">A deterministic verification engine. Bring a claim — it checks it, shows the worked
   reasoning, and hands you a receipt you can re-verify. No "trust me." Just what holds, and why.</p>
 
+  <section class="triad" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;margin:1.5rem 0">
+    <div class="card">
+      <div class="verdict holds" style="font-size:1.05rem">✓ Verifiable</div>
+      <p class="muted" style="font-size:.9rem;margin:.4rem 0 0">Every answer is a re-checkable
+      <strong>receipt</strong> — verdict, worked trail, sealed hash — not "trust me."
+      <strong>0 false-positives</strong> across the moat + 22 domains; tamper-evident chain.
+      <a href="#verify">Try it ↓</a></p>
+    </div>
+    <div class="card">
+      <div class="verdict holds" style="font-size:1.05rem">✓ Private</div>
+      <p class="muted" style="font-size:.9rem;margin:.4rem 0 0">Personal details are
+      <strong>stripped before anything is sent</strong> and reapplied locally — your data never
+      leaves your device. <a href="#privacy">See it ↓</a></p>
+    </div>
+    <div class="card">
+      <div class="verdict holds" style="font-size:1.05rem">✓ Sovereign</div>
+      <p class="muted" style="font-size:.9rem;margin:.4rem 0 0">Runs on <strong>your own box,
+      offline</strong> — no provider, no per-call cost, no one watching. You can run the whole
+      thing yourself.</p>
+    </div>
+  </section>
+
   <div id="witness-banner" class="card" hidden style="border-left:4px solid var(--gold)">
     <strong>The witness face.</strong> Built on the Word — Jesus Christ, the narrow way
     (Matthew 7:14). The same engine that reaches the world on
@@ -95,9 +117,12 @@ async function verify() {
     const v = (d.verdict || "ERROR");
     const cls = v === "HOLDS" ? "holds" : (v === "BROKEN" ? "broken" : "error");
     const step = (d.trail && d.trail[0]) || {};
+    const seal = d.seal ? '<div class="muted" style="font-size:.82rem;margin-top:.5rem">🔒 receipt: ' +
+      '<a class="mono" href="' + esc(d.seal.cite_url) + '">' + esc((d.seal.content_hash || "").slice(0, 24)) +
+      '…</a> — re-checkable, tamper-evident</div>' : '';
     out.innerHTML = '<div class="card"><div class="verdict ' + cls + '">' +
       (v === "HOLDS" ? "✓ HOLDS" : (v === "BROKEN" ? "✗ BROKEN" : v)) + '</div>' +
-      '<div class="trail">' + esc(step.detail || d.detail || "") + '</div></div>';
+      '<div class="trail">' + esc(step.detail || d.detail || "") + '</div>' + seal + '</div>';
   } catch (e) { out.innerHTML = '<p class="muted">API unreachable — start it with <span class="mono">python -m concordance serve</span></p>'; }
 }
 async function search() {
