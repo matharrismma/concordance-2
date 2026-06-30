@@ -814,6 +814,27 @@ def umbrella_children(parent: str) -> Tuple[str, ...]:
     return UMBRELLAS.get(parent, ())
 
 
+def axis_view(name: str):
+    """A read-only view of one axis: its members, depth, neighbors, and umbrella children.
+    Accepts a canonical name or an alias; returns None for an unknown axis."""
+    canon = canonical(name or "")
+    if canon not in AXIS_DIMENSIONS:
+        return None
+    return {
+        "axis": canon,
+        "dimensions": sorted(AXIS_DIMENSIONS[canon]),
+        "depth": depth(canon),
+        "adjacent": [{"axis": a, "shared": sorted(s)} for a, s in adjacent(canon)[:12]],
+        "umbrella_children": list(umbrella_children(canon)),
+    }
+
+
+def overview():
+    """The map at a glance: all axes + the declared members."""
+    return {"count": len(AXIS_DIMENSIONS), "axes": sorted(AXIS_DIMENSIONS.keys()),
+            "dimensions": list(DIMENSIONS)}
+
+
 def verify_umbrella_coherence() -> Dict[str, List[str]]:
     """Verify each umbrella's dimensions cover the union of its
     subsystems' dimensions.

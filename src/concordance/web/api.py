@@ -174,6 +174,21 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         c = corpus.daily(query.get("seed") or None)
         return _ok(c) if c is not None else _err(404, "the keeping is empty")
 
+    # Atlas / grid — the map, read-only.
+    if method == "GET" and path == "/grid":
+        from .. import grid
+        ax = (query.get("axis") or "").strip()
+        if ax:
+            v = grid.axis_view(ax)
+            return _ok(v) if v is not None else _err(404, "unknown axis")
+        return _ok(grid.overview())
+    if method == "GET" and path == "/grid/dimension":
+        from .. import grid
+        d = (query.get("d") or query.get("dimension") or "").strip()
+        if not d:
+            return _err(400, "d (dimension) required")
+        return _ok({"dimension": d, "axes": grid.dimension_axes(d)})
+
     if method == "GET" and path == "/seal":
         h = (query.get("hash") or "").strip()
         if not h:
@@ -206,7 +221,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
 
 _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word_study",
-                  "/card", "/cards", "/cards/stats", "/daily"}
+                  "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",

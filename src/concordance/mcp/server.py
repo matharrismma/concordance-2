@@ -59,6 +59,13 @@ def _secular_tools() -> List[dict]:
         {"name": "daily_card",
          "description": "The deterministic card of the day from the keeping (same all day).",
          "inputSchema": {"type": "object", "properties": {"seed": {"type": "string"}}}},
+        {"name": "grid_axis",
+         "description": "The map: a read-only view of one axis (its scaffold members, depth, "
+                        "neighbors, umbrella children). Omit `axis` for an overview of all axes.",
+         "inputSchema": {"type": "object", "properties": {"axis": {"type": "string"}}}},
+        {"name": "grid_dimension",
+         "description": "The axes that sit on a given scaffold member (dimension).",
+         "inputSchema": {"type": "object", "properties": {"dimension": {"type": "string"}}, "required": ["dimension"]}},
     ]
 
 
@@ -117,6 +124,17 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
     if name == "daily_card":
         c = corpus.daily(args.get("seed"))
         return c if c is not None else {"error": "the keeping is empty"}
+    if name == "grid_axis":
+        from .. import grid
+        ax = args.get("axis")
+        if ax:
+            v = grid.axis_view(ax)
+            return v if v is not None else {"error": "unknown axis"}
+        return grid.overview()
+    if name == "grid_dimension":
+        from .. import grid
+        d = args.get("dimension", "")
+        return {"dimension": d, "axes": grid.dimension_axes(d)}
     if name == "resolve" and config.witness_surfaced:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.resolve_ref(args.get("ref", ""))
