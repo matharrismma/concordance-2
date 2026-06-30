@@ -56,8 +56,14 @@
     details never enter the permanent ledger. The same shape as
     <a href="https://github.com/nationaldesignstudio/rampart">Rampart</a> (National Design Studio,
     CC&nbsp;BY&nbsp;4.0); this is the deterministic layer, running entirely in your browser.</p>
-    <textarea id="pii-in" rows="3" aria-label="text to strip">email me at a@b.com about card 4111 1111 1111 1111</textarea>
+    <textarea id="pii-in" rows="3" aria-label="text to strip">email Dr. Sarah Johnson at sarah.j@clinic.org about card 4111 1111 1111 1111</textarea>
     <div id="pii-out" style="margin-top:.6rem"></div>
+    <p style="font-size:.85rem;margin-top:.7rem">
+      <button id="ml-btn" type="button" style="margin:0">⊕ Add name detection (Rampart model, ~15&nbsp;MB)</button>
+      <span id="ml-status" class="muted" style="margin-left:.6rem"></span></p>
+    <p class="muted" style="font-size:.78rem">Baseline (always on, sovereign, same-origin): emails, SSNs,
+    cards, IPs, URLs. The optional <a href="https://github.com/nationaldesignstudio/rampart">Rampart</a>
+    model adds <strong>names &amp; phone numbers</strong> — it loads on demand and runs entirely on your device.</p>
   </section>
 
   <footer class="site">
@@ -68,6 +74,7 @@
 </main>
 
 <script src="redact.js"></script>
+<script src="rampart-ml.js"></script>
 <script>
 const API = ""; // same-origin when served by `python -m concordance serve`; set to http://127.0.0.1:8000 otherwise
 async function verify() {
@@ -103,21 +110,42 @@ async function search() {
   } catch (e) { out.innerHTML = '<p class="muted">API unreachable.</p>'; }
 }
 function esc(s){const d=document.createElement('div');d.textContent=String(s==null?"":s);return d.innerHTML;}
-function redactDemo(){
+let mlGuard = null; // the optional Rampart guard, once loaded
+async function redactDemo(){
   const t = document.getElementById('pii-in').value;
-  const {clean, map} = Rampart.protect(t);
-  const keys = Object.keys(map);
+  let clean, revealed, items;
+  if (mlGuard) {
+    const out = await mlGuard.protect(t);      // deterministic + ML (names/phones)
+    clean = out.text; revealed = mlGuard.reveal(out.text); items = out.placeholders || [];
+  } else {
+    const r = Rampart.protect(t);              // sovereign deterministic baseline
+    clean = r.clean; revealed = Rampart.reveal(r.clean, r.map); items = Object.keys(r.map);
+  }
   document.getElementById('pii-out').innerHTML =
-    '<div class="card"><div class="muted" style="font-size:.78rem">SENT / SEALED — stripped:</div>' +
+    '<div class="card"><div class="muted" style="font-size:.78rem">SENT / SEALED — stripped' +
+    (mlGuard ? ' (Rampart: deterministic + model)' : ' (deterministic baseline)') + ':</div>' +
     '<div class="mono" style="margin:.25rem 0 .6rem">' + esc(clean) + '</div>' +
     '<div class="muted" style="font-size:.78rem">REAPPLIED locally — reveal():</div>' +
-    '<div class="mono" style="margin:.25rem 0 .6rem">' + esc(Rampart.reveal(clean, map)) + '</div>' +
+    '<div class="mono" style="margin:.25rem 0 .6rem">' + esc(revealed) + '</div>' +
     '<div class="muted" style="font-size:.78rem">' +
-    (keys.length ? '✓ ' + keys.length + ' stripped: ' + esc(keys.join(', ')) : 'no personal details found') +
+    (items.length ? '✓ ' + items.length + ' stripped: ' + esc(items.join(', ')) : 'no personal details found') +
     '</div></div>';
 }
 const _pii = document.getElementById('pii-in');
-if (_pii) { _pii.addEventListener('input', redactDemo); redactDemo(); }
+if (_pii) { _pii.addEventListener('input', () => { redactDemo(); }); redactDemo(); }
+const _mlBtn = document.getElementById('ml-btn'), _mlSt = document.getElementById('ml-status');
+if (_mlBtn) _mlBtn.addEventListener('click', async () => {
+  _mlBtn.disabled = true;
+  try {
+    mlGuard = await RampartML.load(m => { _mlSt.textContent = m; });
+    _mlSt.textContent = '✓ name detection on'; _mlSt.style.color = 'var(--pass)';
+    _mlBtn.style.display = 'none';
+    redactDemo();
+  } catch (e) {
+    _mlSt.textContent = "couldn't load — the baseline still protects"; _mlSt.style.color = 'var(--fail)';
+    _mlBtn.disabled = false;
+  }
+});
 // Surface-aware: the same static page is served on both faces. On the witness surface
 // (.org) name the foundation; the secular reach (.com) stays accessible. We are not hiding.
 async function init(){
