@@ -39,6 +39,13 @@ def _secular_tools() -> List[dict]:
         {"name": "seal_fetch",
          "description": "Fetch a sealed verification record (the receipt) by its content hash.",
          "inputSchema": {"type": "object", "properties": {"hash": {"type": "string"}}, "required": ["hash"]}},
+        {"name": "redact",
+         "description": ("Strip PII (emails, SSNs, credit cards, IPs, URLs) from text to stable "
+                         "placeholders before you pass it onward; the mapping is returned so YOU "
+                         "reveal replies locally. For true privacy run this on a LOCAL/sovereign "
+                         "engine (the text never leaves your machine) or use the client libraries — "
+                         "the strip belongs at your edge. Deterministic; pair with verify for a receipt."),
+         "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]}},
     ]
 
 
@@ -82,6 +89,10 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
     if name == "seal_fetch":
         rec = cas.fetch(args.get("hash", ""))
         return rec if rec is not None else {"error": "seal not found"}
+    if name == "redact":
+        from .. import redact as _redact  # the strip-context-then-reapply gateway
+        clean, mapping = _redact.redact(args.get("text", ""))
+        return {"clean": clean, "mapping": mapping, "count": len(mapping)}
     if name == "resolve" and config.witness_surfaced:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.resolve_ref(args.get("ref", ""))
