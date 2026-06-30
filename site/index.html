@@ -49,6 +49,17 @@
     <div id="results" style="margin-top:.8rem"></div>
   </section>
 
+  <section id="privacy">
+    <h2>Stripped before it's sent</h2>
+    <p class="muted">Personal details are stripped to stable placeholders before anything is sent or
+    sealed — then reapplied for you locally. The engine seals only the stripped form, so your
+    details never enter the permanent ledger. The same shape as
+    <a href="https://github.com/nationaldesignstudio/rampart">Rampart</a> (National Design Studio,
+    CC&nbsp;BY&nbsp;4.0); this is the deterministic layer, running entirely in your browser.</p>
+    <textarea id="pii-in" rows="3" aria-label="text to strip">email me at a@b.com about card 4111 1111 1111 1111</textarea>
+    <div id="pii-out" style="margin-top:.6rem"></div>
+  </section>
+
   <footer class="site">
     <p>Narrow Highway narrows the possibilities so the way is clear. The engine verifies; it does
     not generate the answer — it finds what survives.</p>
@@ -56,6 +67,7 @@
   </footer>
 </main>
 
+<script src="redact.js"></script>
 <script>
 const API = ""; // same-origin when served by `python -m concordance serve`; set to http://127.0.0.1:8000 otherwise
 async function verify() {
@@ -91,6 +103,21 @@ async function search() {
   } catch (e) { out.innerHTML = '<p class="muted">API unreachable.</p>'; }
 }
 function esc(s){const d=document.createElement('div');d.textContent=String(s==null?"":s);return d.innerHTML;}
+function redactDemo(){
+  const t = document.getElementById('pii-in').value;
+  const {clean, map} = Rampart.protect(t);
+  const keys = Object.keys(map);
+  document.getElementById('pii-out').innerHTML =
+    '<div class="card"><div class="muted" style="font-size:.78rem">SENT / SEALED — stripped:</div>' +
+    '<div class="mono" style="margin:.25rem 0 .6rem">' + esc(clean) + '</div>' +
+    '<div class="muted" style="font-size:.78rem">REAPPLIED locally — reveal():</div>' +
+    '<div class="mono" style="margin:.25rem 0 .6rem">' + esc(Rampart.reveal(clean, map)) + '</div>' +
+    '<div class="muted" style="font-size:.78rem">' +
+    (keys.length ? '✓ ' + keys.length + ' stripped: ' + esc(keys.join(', ')) : 'no personal details found') +
+    '</div></div>';
+}
+const _pii = document.getElementById('pii-in');
+if (_pii) { _pii.addEventListener('input', redactDemo); redactDemo(); }
 // Surface-aware: the same static page is served on both faces. On the witness surface
 // (.org) name the foundation; the secular reach (.com) stays accessible. We are not hiding.
 async function init(){
