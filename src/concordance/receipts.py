@@ -115,7 +115,9 @@ def mint(result: Dict[str, Any], *, config: EngineConfig, domain: str = "mathema
                 except Exception:  # noqa: BLE001 — ledger append failed; the CAS seal still stands
                     ledgered = False
         return {"ok": True, "content_hash": content_hash, "ledgered": ledgered,
-                "cite_url": f"{_public_base(config)}/seal?hash={content_hash}"}
+                # /s/<hash> is the human-readable, crawlable, citable receipt page (server-rendered);
+                # /seal?hash= remains the raw JSON for machines.
+                "cite_url": f"{_public_base(config)}/s/{content_hash}"}
     except Exception as exc:  # noqa: BLE001 — never break a verdict because sealing failed
         return {"ok": False, "error": f"{type(exc).__name__}: {str(exc)[:160]}"}
 

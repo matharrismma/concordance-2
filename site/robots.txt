@@ -1,5 +1,9 @@
 # Narrow Highway — a public verification engine; agents and crawlers welcome.
 User-agent: *
 Allow: /
+# The operator console is not a public surface:
+Disallow: /keep
+Disallow: /keep.html
 
 # What this is, for machines: /llms.txt
+Sitemap: https://narrowhighway.org/sitemap.xml

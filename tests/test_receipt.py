@@ -88,7 +88,7 @@ def test_public_base_override():
     _isolate()
     os.environ["CONCORDANCE_PUBLIC_BASE"] = "https://example.test/x/"
     _, p = _verify({"mode": "equality", "params": {"expr_a": "1", "expr_b": "1", "variables": {}}})
-    assert p["seal"]["cite_url"].startswith("https://example.test/x/seal?hash=")
+    assert p["seal"]["cite_url"].startswith("https://example.test/x/s/")
     os.environ.pop("CONCORDANCE_PUBLIC_BASE", None)
 
 

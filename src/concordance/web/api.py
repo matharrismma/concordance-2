@@ -41,6 +41,59 @@ def _card_brief(c: dict) -> Dict[str, Any]:
             "surface": c.get("surface"), "snippet": (c.get("body", "") or "")[:200]}
 
 
+def _esc(s: Any) -> str:
+    return (str("" if s is None else s).replace("&", "&amp;").replace("<", "&lt;")
+            .replace(">", "&gt;").replace('"', "&quot;"))
+
+
+def render_seal_html(content_hash: str, record: Optional[Dict[str, Any]]) -> Tuple[int, str]:
+    """Server-render a sealed receipt as a crawlable, citable HTML page (data in the markup,
+    not client-JS) so search engines and LLMs can read + cite a verification. (status, html)."""
+    short = _esc((content_hash or "")[:16])
+    head = ("<!doctype html><html lang=en><head><meta charset=utf-8>"
+            "<meta name=viewport content=\"width=device-width,initial-scale=1\">"
+            "<link rel=stylesheet href=/styles.css>")
+    if record is None:
+        html = (f"{head}<title>Seal not found — Narrow Highway</title><meta name=robots content=noindex>"
+                f"</head><body><main class=wrap><h1>No such seal</h1>"
+                f"<p class=muted>No sealed record matches <span class=mono>{short}…</span>. A seal is "
+                f"content-addressed — if it existed, this hash would fetch it.</p>"
+                f"<p><a href=/>← Narrow Highway</a></p></main></body></html>")
+        return 404, html
+    overall = record.get("overall", "?")
+    vcls = "holds" if overall == "PASS" else "broken"
+    label = {"PASS": "✓ HOLDS", "REJECT": "✗ BROKEN", "QUARANTINE": "◷ INCOMPLETE"}.get(overall, _esc(overall))
+    rows = []
+    for v in record.get("verifier_results", []):
+        claim = _esc((v.get("data") or {}).get("claim") or v.get("name") or "")
+        rows.append(f"<div class=result><span class=s>{_esc(v.get('status', ''))}</span> "
+                    f"<span class=t>{claim}</span><div class=trail>{_esc(v.get('detail', ''))}</div></div>")
+    trail_html = "".join(rows) or "<p class=muted>(no verifier trail)</p>"
+    gates = ", ".join(f"{_esc(g.get('gate'))}:{_esc(g.get('status'))}" for g in record.get("gate_results", []))
+    desc = (f"A re-checkable verification receipt — verdict {_esc(overall)}, sealed {short}. "
+            f"Narrow Highway: every answer is a receipt, not 'trust me'.")
+    html = (f"{head}<title>Receipt {short}… · {label} · Narrow Highway</title>"
+            f"<meta name=description content=\"{desc}\">"
+            f"<meta property=\"og:title\" content=\"Verification receipt · {label}\">"
+            f"<meta property=\"og:description\" content=\"{desc}\"></head><body>"
+            f"<header class=site><div class=wrap style=\"padding:.9rem 1.2rem;display:flex;"
+            f"justify-content:space-between;align-items:center\"><a class=brand href=/>Narrow"
+            f"<span class=road>Highway</span></a><nav class=site><a href=/#verify>Verify</a>"
+            f"<a href=/seal.html>Seal</a></nav></div></header><main class=wrap>"
+            f"<h1>The receipt</h1><div class=\"verdict {vcls}\" style=\"font-size:1.4rem\">{label}</div>"
+            f"<p class=lede>A permanent, tamper-evident record of a verification. The content hash IS "
+            f"the proof — re-fetch it and the bytes must match, or it is not this record.</p>"
+            f"<section><h2>Worked trail</h2>{trail_html}</section>"
+            f"<section class=card><div class=muted style=\"font-size:.8rem\">gates</div>"
+            f"<div class=mono>{gates}</div><div class=muted style=\"font-size:.8rem;margin-top:.5rem\">"
+            f"content hash (the seal)</div><div class=mono style=\"word-break:break-all\">{_esc(content_hash)}</div>"
+            f"<p style=\"margin-top:.6rem\"><a href=\"/seal?hash={_esc(content_hash)}\">raw JSON ↗</a> · "
+            f"re-check: <span class=mono>GET /seal?hash={short}…</span></p></section>"
+            f"<footer class=site><p>Every answer is a receipt, not \"trust me.\" The engine verifies; "
+            f"it does not generate the answer. <a href=/>Narrow Highway →</a></p></footer></main></body></html>")
+    return 200, html
+
+
 def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
              config: EngineConfig) -> Response:
     """Pure request dispatch — (method, path, query, body, config) → (status, payload)."""
@@ -183,6 +236,15 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
             self.end_headers()
             self.wfile.write(body)
 
+        def _html(self, status: int, html: str) -> None:
+            body = html.encode("utf-8")
+            self.send_response(status)
+            self.send_header("content-type", "text/html; charset=utf-8")
+            self.send_header("x-content-type-options", "nosniff")
+            self.send_header("content-length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
         def _rl_key(self) -> str:
             """Rate-limit key: the real client (Caddy sets X-Forwarded-For to it), else peer."""
             xff = (self.headers.get("x-forwarded-for") or "").split(",")[0].strip()
@@ -216,6 +278,10 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
                     return self._json(413, {"error": f"request body too large (> {MAX_BODY} bytes)"})
             if method == "GET" and u.path in ("/keep", "/keep.html", "/keep.json"):
                 return self._keep(u)  # operator-gated dashboard
+            if method == "GET" and u.path.startswith("/s/"):  # server-rendered citable receipt
+                h = u.path[3:].split("/")[0].strip()
+                status, html = render_seal_html(h, cas.fetch(h))
+                return self._html(status, html)
             # rate limit the compute / IO paths, keyed by the real client
             if u.path in RATELIMITED:
                 key = self._rl_key()

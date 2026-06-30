@@ -1,0 +1,12 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.matharrismma/concordance",
+  "description": "A deterministic verification engine: every answer is a re-checkable receipt (verdict + worked trail + sealed hash), not 'trust me'. Tools to verify claims, search the keeping, fetch sealed receipts, and redact PII at your edge. Witness surface adds Scripture + original-language study. Sovereign, offline-capable.",
+  "version": "2.0.0a0",
+  "repository": { "url": "https://github.com/matharrismma/concordance", "source": "github" },
+  "websiteUrl": "https://narrowhighway.com",
+  "remotes": [
+    { "type": "streamable-http", "url": "https://narrowhighway.com/mcp" },
+    { "type": "streamable-http", "url": "https://narrowhighway.org/mcp" }
+  ]
+}

@@ -1,30 +1,46 @@
 # Narrow Highway
 
-> Wisdom and discernment by narrowing the possibilities. A deterministic verification engine: it
-> eliminates what is not the answer, shows the worked reasoning, and hands you a receipt you can
-> re-verify — no "trust me." Sovereign, offline-capable, stdlib-first.
+> A deterministic verification engine. Every answer is a **receipt, not "trust me"**: it
+> eliminates what is not the answer, shows the worked reasoning, and hands you a permanent,
+> re-checkable seal. **Private in, verified out** — personal context is stripped before text
+> is stored or sent, and reapplied locally. Sovereign: runs on your own box, offline,
+> stdlib-first, no provider, no per-call cost.
 
-One engine, two surfaces: **narrowhighway.com** (the reach — accessible to all) and
-**narrowhighway.org** (the witness — Scripture, the original languages, Christ at the foundation).
-The engine verifies and finds; it does not generate the answer.
+The rare part is the combination: **verifiable + private + sovereign** — together. One engine,
+two surfaces: **narrowhighway.com** (the reach — accessible to all) and **narrowhighway.org**
+(the witness — Scripture, the original languages, Christ at the foundation). The engine verifies
+and finds; it does not generate the answer.
+
+## Citable receipts
+Every verification is sealed and addressable. Cite a result by its content hash:
+- `GET /s/<hash>` — the human-readable, crawlable receipt page (verdict + worked trail + seal).
+- `GET /seal?hash=<hash>` — the same record as raw JSON. The hash is the proof: re-fetch and the
+  bytes must match, or it is not that record. Claim text is redacted before sealing — receipts
+  carry no personal data.
 
 ## API (JSON over HTTP, same-origin)
-
 - `POST /verify` — verify a claim. Body `{"mode":"equality|inequality|derivative|integral|limit|solve","params":{...}}`
-  or `{"steps":[...]}`. Returns `{verdict: HOLDS|BROKEN|INCOMPLETE, trail, ...}`. The math moat holds
-  0 false-positives — e.g. `x/x = 1` is caught (undefined at x=0), not sealed as an identity.
+  or `{"steps":[...]}`. Returns `{verdict: HOLDS|BROKEN|INCOMPLETE, trail, seal:{content_hash, cite_url}}`.
+  The math moat holds **0 false-positives** (e.g. `x/x = 1` is caught — undefined at x=0 — not sealed).
 - `GET /search?q=&limit=` — ranked retrieval over the keeping (the kept library).
-- `GET /seal?hash=` — fetch a sealed verification record (the receipt) by its content hash.
-- `GET /identity` — what this surface is. `GET /health` — status.
+- `GET /identity` — what this surface is. `GET /health` — status + `schema_active`.
 
 ### Witness surface only (narrowhighway.org)
 - `GET /resolve?ref=John 3:16` — resolve a Scripture reference to its World English Bible text.
 - `GET /word_study?strongs=G26` — Strong's original-language definition + every occurrence.
 
-## For agents
-MCP server (stdio JSON-RPC, no SDK dependency): `python -m concordance mcp`.
-Tools: `verify`, `search`, `seal_fetch` — plus `resolve`, `word_study` on the witness surface.
+## Privacy gateway (embeddable, runs at your edge)
+Strip personal context before any AI call, reapply locally — the data never has to reach us.
+- Browser: `redact.js` (`Rampart.protect/reveal/guard`) + an opt-in self-hosted Rampart model
+  for names/phones.
+- Python: `from concordance.gateway import scrub, restore, guard`.
+- Drop-in examples (browser / Python / MCP): docs/GATEWAY.md in the source repo.
+
+## For agents (MCP)
+MCP server (stdio JSON-RPC, no SDK dependency): `python -m concordance mcp`, or Streamable-HTTP
+at `POST /mcp`. Tools: `verify`, `search`, `seal_fetch`, `redact` — plus `resolve`, `word_study`
+on the witness surface. Run a local/sovereign engine for true privacy.
 
 ## Foundation
-It serves truth because Truth is a Person (John 14:6); a conduit, not the source. The fuller
-witness is at https://narrowhighway.org.
+It serves truth because Truth is a Person (John 14:6); a conduit, not the source. A window, not
+a wall. The fuller witness is at https://narrowhighway.org.
