@@ -136,24 +136,30 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _err(400, "text required")
         from .. import ask as _ask, threads as _threads
         text = str(body["text"])
-        r = _ask.respond(text, config)  # routing keys ONLY on current text (deterministic, unchanged)
-        # The Deck: append this exchange so the conversation is one continuous, resumable chain
-        # ("never feel like we started over"). Verbatim user text + the exact response; nothing is
-        # generated or summarized. Persistence is best-effort and OFF TO THE SIDE — it never alters
-        # the answer (crisis/ultimate are untouched) and never breaks it if the write fails.
         tid = body.get("thread_id") if isinstance(body.get("thread_id"), str) else None
+        # The Gate (Ask/Seek/Knock, Mt 7:7): facts by default; once the person's own seeking opens
+        # the door, bring the Word — and keep bringing it. The open state lives on the thread (the
+        # Deck remembers), so the door, once opened, stays open. We present; we do not cross.
+        rec = _threads.get(tid) if tid else None
+        prior_open = bool(rec and rec.get("gate_open")) or (surface == "witness")
+        gate_open = prior_open or _ask.gate_signal(text)
+        just_opened = gate_open and not prior_open
+        r = _ask.respond(text, config, gate_open=gate_open, gate_just_opened=just_opened)
+        # The Deck: append this exchange (verbatim user text + the exact response) so the
+        # conversation is one continuous, resumable chain, carrying the sticky gate state. Nothing
+        # generated. Best-effort, OFF TO THE SIDE — never alters the answer, never breaks it.
         try:
             if not tid:
                 tid = _threads.new_thread(surface)["thread_id"]
             try:
-                _threads.append(tid, text, r, surface=surface)
+                _threads.append(tid, text, r, surface=surface, gate_open=gate_open)
             except ValueError:  # a malformed client-held id — start a fresh deck instead of failing
                 tid = _threads.new_thread(surface)["thread_id"]
-                _threads.append(tid, text, r, surface=surface)
+                _threads.append(tid, text, r, surface=surface, gate_open=gate_open)
             r = {**r, "thread_id": tid}
         except Exception:  # noqa: BLE001 — the conduit answer stands even if the deck write fails
             pass
-        telemetry.record("ask", surface=surface, kind=r.get("kind"), thread=tid)
+        telemetry.record("ask", surface=surface, kind=r.get("kind"), thread=tid, gate=gate_open)
         return _ok(r)
 
     if method == "POST" and path == "/mcp":

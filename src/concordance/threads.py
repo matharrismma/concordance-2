@@ -79,7 +79,8 @@ def _new_record(thread_id: str, surface: str = "secular") -> Dict[str, Any]:
     now = _now()
     return {"schema": SCHEMA, "thread_id": thread_id,
             "surface": surface if surface in ("secular", "witness") else "secular",
-            "created_at": now, "updated_at": now, "title": "", "exchanges": [], "head_hash": ""}
+            "created_at": now, "updated_at": now, "title": "", "exchanges": [], "head_hash": "",
+            "gate_open": False}  # the Gate (Mt 7:7): once the person's seeking opens it, it stays open
 
 
 def _exchange_hash(ex: Dict[str, Any]) -> str:
@@ -119,16 +120,19 @@ def get(thread_id: str) -> Optional[Dict[str, Any]]:
 
 
 def append(thread_id: str, user_text: str, response: Any, *,
-           surface: str = "secular", generated: bool = False) -> Dict[str, Any]:
+           surface: str = "secular", generated: bool = False, gate_open: bool = False) -> Dict[str, Any]:
     """Append an exchange to a deck (creating it if a valid client-held id is unknown to this
     box — so a browser-held id always keeps working). Returns the new exchange.
 
     The exchange is the VERBATIM user text + the EXACT response dict — the note, not a summary.
+    gate_open is STICKY: once the door is opened it stays open on this deck.
     Raises ValueError on an invalid thread_id (never touches the filesystem with it)."""
     if not _valid_id(thread_id):
         raise ValueError("invalid thread_id")
     with _THREADS_LOCK:
         rec = get(thread_id) or _new_record(thread_id, surface)
+        if gate_open:
+            rec["gate_open"] = True
         exchanges = rec.get("exchanges", [])
         kind = ""
         if isinstance(response, dict):

@@ -141,40 +141,44 @@ function render(d){
   if(d.kind === 'crisis'){
     return '<div class="crisis"><strong>'+esc(d.message)+'</strong><div style="margin-top:.6rem">'+
       (d.resources||[]).map(r => '· '+(r.ref?'<a href="'+esc(r.ref)+'">'+esc(r.label)+'</a>':esc(r.label))).join('<br>')+
-      '</div></div>';
+      '</div></div>';  // crisis stands alone — help first, never enriched
   }
+  let html;
   if(d.kind === 'ultimate'){
-    return esc(d.message)+
+    html = esc(d.message)+
       '<div style="margin-top:.7rem">'+(d.scripture||[]).map(v =>
         '<div class="verse"><span class="ref">'+esc(v.ref)+'</span> — '+esc(v.text)+'</div>').join('')+'</div>'+
       '<div class="dim" style="font-size:.9rem;margin-top:.5rem">Walk with: '+(d.real_help||[]).map(esc).join(' · ')+'</div>'+
       (d.also_in_the_keeping&&d.also_in_the_keeping.length?
-        '<div class="role" style="margin-top:.9rem">also in the keeping</div>'+renderCards(d.also_in_the_keeping):'')+note;
-  }
-  if(d.verify){
+        '<div class="role" style="margin-top:.9rem">also in the keeping</div>'+renderCards(d.also_in_the_keeping):'');
+  } else if(d.verify){
     const v=d.verify, verdict=v.verdict||'ERROR';
     const cls = verdict==='HOLDS'?'holds':(verdict==='BROKEN'?'broken':'error');
     const step = (v.trail&&v.trail[0])||{};
     const seal = v.seal ? '<div class="receipt">seal: <a href="'+esc(v.seal.cite_url)+'">'+
       esc((v.seal.content_hash||'').slice(0,20))+'…</a> — re-checkable, tamper-evident</div>' : '';
-    return '<div class="verdict '+cls+'">'+(verdict==='HOLDS'?'✓ Holds':(verdict==='BROKEN'?'✗ Broken':esc(verdict)))+'</div>'+
-      '<div class="trail">'+esc(step.detail||v.detail||'')+'</div>'+seal+note;
-  }
-  if(d.scripture){
+    html = '<div class="verdict '+cls+'">'+(verdict==='HOLDS'?'✓ Holds':(verdict==='BROKEN'?'✗ Broken':esc(verdict)))+'</div>'+
+      '<div class="trail">'+esc(step.detail||v.detail||'')+'</div>'+seal;
+  } else if(d.scripture){
     const s=d.scripture;
-    return '<div class="verse"><span class="ref">'+esc(s.ref||'')+'</span> — '+esc(s.text||s.error||'(not found)')+'</div>'+note;
-  }
-  if(d.word_study){
+    html = '<div class="verse"><span class="ref">'+esc(s.ref||'')+'</span> — '+esc(s.text||s.error||'(not found)')+'</div>';
+  } else if(d.word_study){
     const w=d.word_study;
-    return '<div class="cite"><strong>'+esc(w.lemma||w.strongs||'')+'</strong> '+esc(w.transliteration||'')+
+    html = '<div class="cite"><strong>'+esc(w.lemma||w.strongs||'')+'</strong> '+esc(w.transliteration||'')+
       '<div>'+esc(w.definition||w.gloss||w.error||'')+'</div>'+
-      (w.occurrences!=null?'<div class="dim" style="font-size:.88rem">'+esc(w.occurrences)+' occurrences</div>':'')+'</div>'+note;
+      (w.occurrences!=null?'<div class="dim" style="font-size:.88rem">'+esc(w.occurrences)+' occurrences</div>':'')+'</div>';
+  } else if(d.kind === 'found'){
+    html = (d.results&&d.results.length ? renderCards(d.results)
+      : '<span class="dim">Nothing in the keeping matched — try different words.</span>');
+  } else {
+    html = '<span class="dim">'+esc(JSON.stringify(d))+'</span>';
   }
-  if(d.kind === 'found'){
-    return (d.results&&d.results.length ? renderCards(d.results)
-      : '<span class="dim">Nothing in the keeping matched — try different words.</span>')+note;
-  }
-  return '<span class="dim">'+esc(JSON.stringify(d))+'</span>';
+  // The Gate: when the door opens (Ask/Seek/Knock), His word comes — and keeps coming.
+  const thr = d.threshold ? '<div class="verse" style="margin-bottom:1.1rem"><span class="ref">'+esc(d.threshold.ref)+
+    '</span> — '+esc(d.threshold.text)+'<div style="color:#c9a24a;font-size:.85rem;margin-top:.4rem">'+esc(d.threshold.note)+'</div></div>' : '';
+  const refs = (d.scripture_refs&&d.scripture_refs.length)
+    ? '<div class="role" style="margin-top:1rem">a word on this</div>'+renderCards(d.scripture_refs) : '';
+  return thr + html + note + refs;
 }
 
 function addTurn(userText){

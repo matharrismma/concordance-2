@@ -76,13 +76,84 @@ def classify(text: str) -> str:
 _NOTE = ("This finds and verifies; it does not generate the answer. A window, not a wall — "
          "the wisdom is in Christ, not this tool.")
 
+# ── The Gate (Ask/Seek/Knock, Matthew 7:7) ────────────────────────────────────────────────
+# Facts by default. When the person's OWN conversation seeks — the God-ward / ultimate questions —
+# the door opens and the Word comes (scripture resolves + references), and KEEPS coming. We present
+# the paths; we do not cross them (never coerce). Gate closed → genuinely useful, never preachy.
+# Crisis is ALWAYS help-first and is never gated or enriched (people before Scripture-as-fix).
+_GATE_WORDS = (
+    "god", "jesus", "christ", "gospel", "scripture", "bible", "biblical", "psalm", "faith",
+    "pray", "prayer", "sinner", "soul", "heaven", "hell", "salvation", "saved", "savior",
+    "saviour", "believe", "belief", "church", "holy spirit", "the spirit", "worship", "eternal",
+    "eternity", "repent", "grace", "mercy", "the cross", "disciple", "kingdom of god", "born again",
+    "the word", "word of god", "creator", "the lord", "spiritual", "religion", "the gospel",
+)
+_THRESHOLD_REF = "Matthew 7:7-8"
+_THRESHOLD_TEXT = ("Ask, and it will be given you. Seek, and you will find. Knock, and it will be "
+                   "opened for you. For everyone who asks receives. He who seeks finds. To him who "
+                   "knocks it will be opened.")
+_THRESHOLD_NOTE = "You knocked. The door is open — and His word stays with you now."
 
-def respond(text: str, config: EngineConfig) -> Dict[str, Any]:
-    """Compose a conduit response: found + verified + cited + curated material only. No LLM."""
+_VERSE_RE = re.compile(r"\b[1-3]?\s?[A-Za-z]{2,}\.?\s+\d{1,3}:\d{1,3}")
+
+
+def gate_signal(text: str) -> bool:
+    """Does this message knock (Ask/Seek/Knock)? True when the conversation turns God-ward or to
+    ultimate matters — the person's own seeking opens the door. We never force it."""
+    if classify(text or "") in ("ultimate", "scripture", "word_study"):
+        return True
+    t = " " + (text or "").lower() + " "
+    return any(w in t for w in _GATE_WORDS)
+
+
+def _is_scripture_card(c: Dict[str, Any]) -> bool:
+    src = c.get("source") or {}
+    if str(c.get("shelf", "")).lower() in ("scripture", "bible", "word", "verse", "gospel", "psalms"):
+        return True
+    if str(c.get("kind", "")).lower() in ("scripture", "verse"):
+        return True
+    return bool(_VERSE_RE.search(str(src.get("ref", "")) or "") or _VERSE_RE.search(str(c.get("title", "")) or ""))
+
+
+def _scripture_from_keeping(text: str, limit: int = 2):
+    """Best-effort: real scripture cards from the keeping on this topic — found + cited, never
+    generated. Returns [] if none match (we don't force an irrelevant verse)."""
+    out = []
+    for c in corpus.search(text, limit=8):
+        if _is_scripture_card(c):
+            out.append(corpus._brief(c))
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _witnessed(r: Dict[str, Any], text: str, witness: bool, just_opened: bool,
+               topical: bool = True) -> Dict[str, Any]:
+    """Once the door is open, bring the Word — and keep bringing it. Present, don't cross."""
+    if not witness:
+        return r
+    if just_opened:
+        r["threshold"] = {"ref": _THRESHOLD_REF, "text": _THRESHOLD_TEXT, "note": _THRESHOLD_NOTE}
+    if topical:
+        refs = _scripture_from_keeping(text)
+        if refs:
+            r["scripture_refs"] = refs
+    return r
+
+
+def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
+            gate_just_opened: bool = False) -> Dict[str, Any]:
+    """Compose a conduit response: found + verified + cited + curated material only. No LLM.
+
+    The Gate: on the witness surface — or once a .com conversation has opened the door — the full
+    witness is surfaced (scripture resolves, references come). Routing still keys ONLY on the
+    current text, so crisis and ultimate are byte-identical regardless of gate state."""
     kind = classify(text or "")
-    base: Dict[str, Any] = {"kind": kind, "note": _NOTE}
+    witness = bool(config.witness_surfaced or gate_open)  # the gate opens the full .org experience on .com
+    base: Dict[str, Any] = {"kind": kind, "note": _NOTE, "gate_open": witness}
 
     if kind == "crisis":
+        # Always help-first — never gated, never enriched, never Scripture-as-fix.
         return {**base, "message": "You matter, and you don't have to carry this alone. Please "
                 "reach a real person right now — someone who can be with you.",
                 "resources": _CRISIS_RESOURCES}
@@ -99,15 +170,20 @@ def respond(text: str, config: EngineConfig) -> Dict[str, Any]:
         m = _MATH_EQ.match(text)
         res = _verify({"mode": "equality",
                        "params": {"expr_a": m.group(1).strip(), "expr_b": m.group(2).strip(), "variables": {}}})
-        return {**base, "verify": attach(res, config=config, domain="mathematics")}
+        return _witnessed({**base, "verify": attach(res, config=config, domain="mathematics")},
+                          text, witness, gate_just_opened)
 
-    if kind == "word_study" and config.witness_surfaced:
+    if kind == "word_study" and witness:
         from .verifiers import scripture
-        return {**base, "word_study": scripture.word_study(_STRONGS.search(text).group(1).upper())}
+        return _witnessed({**base, "word_study": scripture.word_study(_STRONGS.search(text).group(1).upper())},
+                          text, witness, gate_just_opened, topical=False)
 
-    if kind == "scripture" and config.witness_surfaced:
+    if kind == "scripture" and witness:
         from .verifiers import scripture
-        return {**base, "scripture": scripture.resolve_ref(_REF.search(text).group(0))}
+        return _witnessed({**base, "scripture": scripture.resolve_ref(_REF.search(text).group(0))},
+                          text, witness, gate_just_opened, topical=False)
 
-    # default — and the secular fallback for scripture/word_study: search the shared keeping
-    return {**base, "kind": "found", "results": [corpus._brief(c) for c in corpus.search(text, limit=6)]}
+    # default — and the secular fallback for scripture/word_study when the gate is closed
+    return _witnessed({**base, "kind": "found",
+                       "results": [corpus._brief(c) for c in corpus.search(text, limit=6)]},
+                      text, witness, gate_just_opened)

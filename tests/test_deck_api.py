@@ -97,6 +97,42 @@ def test_crisis_invariant_regardless_of_thread_or_surface():
         assert any("988" in x["label"] for x in r["resources"])
 
 
+def test_gate_stays_closed_on_ordinary_questions():
+    # Facts by default — gate closed, never preachy, no scripture pushed.
+    st, p = _ask("how tall is the tallest mountain")
+    assert st == 200 and p["gate_open"] is False and "threshold" not in p
+
+
+def test_gate_opens_on_seeking_and_persists():
+    _st, p0 = _ask("a good recipe for sourdough")  # ordinary → closed
+    tid = p0["thread_id"]
+    assert p0["gate_open"] is False
+    _st, p1 = _ask("who is Jesus", thread_id=tid)  # the person knocks (Ask/Seek/Knock)
+    assert p1["gate_open"] is True
+    assert p1.get("threshold", {}).get("ref") == "Matthew 7:7-8"  # the Word comes
+    _st, p2 = _ask("2+2 = 4", thread_id=tid)  # door stays open; threshold shown only once
+    assert p2["gate_open"] is True and "threshold" not in p2
+    assert threads.get(tid).get("gate_open") is True  # the Deck remembers the open door
+
+
+def test_gate_open_brings_the_full_experience_on_secular():
+    _st, p = _ask("I want to know God")  # opens the gate on .com
+    tid = p["thread_id"]
+    assert p["gate_open"] is True
+    _st, s = _ask("John 3:16", thread_id=tid)  # now scripture resolves on the SECULAR surface
+    assert "scripture" in s
+
+
+def test_witness_surface_is_open_by_default():
+    _st, p = _ask("hello", config=WIT)
+    assert p["gate_open"] is True
+
+
+def test_crisis_never_opens_a_gate_or_gets_enriched():
+    _st, p = _ask("sometimes I want to die")
+    assert p["kind"] == "crisis" and "threshold" not in p and "scripture_refs" not in p
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:
