@@ -172,6 +172,36 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         telemetry.record("journal", surface=surface, kind=str(body.get("kind") or "idea"))
         return _ok(r)
 
+    if method == "POST" and path == "/steward/budget":
+        # Steward: the honest arithmetic of a household, sealed. It shows; it never moves money.
+        if not isinstance(body, dict):
+            return _err(400, "JSON object required")
+        from .. import steward
+        b = steward.budget(body.get("income"), body.get("expenses") or [])
+        # Seal the math in exact integer cents — a receipt for your money (the moat applied to finance).
+        inc_c, tot_c, net_c = round(b["income"] * 100), round(b["total_expenses"] * 100), round(b["net"] * 100)
+        from ..derivation import verify as _verify
+        from .. import receipts
+        res = _verify({"mode": "equality",
+                       "params": {"expr_a": str(net_c), "expr_b": f"({inc_c})-({tot_c})", "variables": {}}})
+        b["seal"] = receipts.attach(res, config=config, domain="mathematics").get("seal")
+        telemetry.record("steward", surface=surface, op="budget", sealed=bool(b.get("seal")))
+        return _ok(b)
+
+    if method == "POST" and path == "/steward/cost-destroyed":
+        if not isinstance(body, dict):
+            return _err(400, "JSON object required")
+        from .. import steward
+        return _ok(steward.cost_destroyed(body.get("items") or []))
+
+    if method == "POST" and path == "/steward/ask":
+        # Free-text to Steward: the boundary, enforced — money-move/advice is declined + pointed back.
+        if not isinstance(body, dict) or not str(body.get("text") or "").strip():
+            return _err(400, "text required")
+        from .. import steward
+        g = steward.money_guardrail(str(body["text"]))
+        return _ok(g if g else {"kind": "ok", **steward.guidance()})
+
     if method == "POST" and path == "/mcp":
         # Remote MCP over HTTP — reuse the pure JSON-RPC handler, surface-gated. Stateless
         # request/response (initialize · tools/list · tools/call). Notifications get 202.
@@ -281,6 +311,10 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import stacks
         return _ok({"dates": stacks.journal_dates()})
 
+    if method == "GET" and path == "/steward":
+        from .. import steward
+        return _ok(steward.guidance())
+
     # Atlas / grid — the map, read-only.
     if method == "GET" and path == "/grid":
         from .. import grid
@@ -387,7 +421,7 @@ _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word
                   "/card/connections", "/locate", "/library/health",
                   "/thread", "/threads", "/threads/search", "/thread/verify", "/passage",
                   "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
-                  "/commentary", "/journal", "/journal/dates"}
+                  "/commentary", "/journal", "/journal/dates", "/steward"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",

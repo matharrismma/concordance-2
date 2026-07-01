@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Steward — Narrow Highway</title>
+<meta name="description" content="Steward helps you manage your money — a budget, a savings rate, cost destroyed — verified and sealed. It shows and plans; it never moves your money, and gives no personalized investment advice.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.11), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.7 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:720px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1rem; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:720px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.66rem; margin-top:2.4rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2rem; margin:.5rem 0 .4rem}
+  .lede{color:var(--dim); font-size:1.02rem; max-width:40rem}
+  .boundary{border:1px solid var(--line); border-left:2px solid var(--gold); padding:.8rem 1rem; margin:1.6rem 0; font-size:.9rem; color:var(--dim)}
+  .boundary b{color:var(--ink); font-weight:400}
+  h2{font-weight:400; color:var(--gold); font-size:1.15rem; letter-spacing:.04em; margin:2.2rem 0 .8rem}
+  label{display:block; color:var(--dim); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; margin:.6rem 0 .2rem}
+  input,select{background:rgba(255,255,255,.02); border:1px solid var(--line); color:var(--ink); font:inherit; padding:.55rem .6rem; outline:none}
+  input:focus,select:focus{border-color:var(--gold)}
+  .erow{display:flex; gap:.4rem; margin:.35rem 0}
+  .erow .lbl{flex:1} .erow .amt{width:7rem} .erow .cat{width:8rem}
+  button{background:transparent; border:1px solid var(--line); color:var(--gold); font:inherit; letter-spacing:.12em; text-transform:uppercase; font-size:.7rem; padding:.5rem 1rem; cursor:pointer}
+  button:hover{color:var(--ink); border-color:var(--gold)}
+  .ghost{border:0; color:var(--dim); padding:.3rem .4rem}
+  .out{margin-top:1.2rem}
+  .stat{display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding:.45rem 0}
+  .stat .k{color:var(--dim)} .stat .v{color:var(--ink)}
+  .net{font-size:1.3rem} .net.pos{color:var(--pass)}
+  .receipt{font-size:.74rem; color:var(--dim); margin-top:.7rem}
+  .receipt a{font-family:ui-monospace,Consolas,monospace}
+  .dim{color:var(--dim)}
+  footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:2.6rem; padding-top:1.3rem; line-height:1.7}
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow <span class="road">Highway</span></a>
+  <nav class="site"><a href="/ask.html">Ask</a><a href="/bible.html">Bible</a><a href="/journal.html">Journal</a><a href="/steward.html">Steward</a><a href="/library.html">Library</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="kicker">Stewarded</div>
+  <h1>Steward your money</h1>
+  <p class="lede">The honest arithmetic of a household — a budget, a savings rate, and cost destroyed
+  (money you did <em>not</em> spend) — verified and sealed, a receipt for your money.</p>
+
+  <div class="boundary"><b>Steward shows and plans — it never moves your money.</b> No buying,
+  selling, transferring, paying, or investing (that stays your action, in your own bank). And no
+  personalized investment advice — for that, see a licensed professional. A conduit, not your banker.</div>
+
+  <h2>Budget</h2>
+  <label for="income">Monthly income</label>
+  <input id="income" type="number" inputmode="decimal" placeholder="0" style="width:10rem">
+  <label>Expenses</label>
+  <div id="rows"></div>
+  <p><button class="ghost" id="addrow">+ add expense</button></p>
+  <button id="compute">Compute + seal</button>
+  <div class="out" id="budgetout"></div>
+
+  <h2>Cost destroyed</h2>
+  <p class="dim" style="font-size:.9rem;margin:0 0 .5rem">Money you kept — what a thing used to cost you (was) versus now.</p>
+  <div id="cdrows"></div>
+  <p><button class="ghost" id="addcd">+ add item</button></p>
+  <button id="computecd">Total saved</button>
+  <div class="out" id="cdout"></div>
+
+  <footer class="site"><p>Value returned as cost destroyed — money kept in your currency, not metered
+  by us. Kill rent, not profit. Your details are stripped before anything is sent; the math is sealed
+  so you can re-check it. Steward stewards; it does not transact.</p></footer>
+</main>
+
+<script src="redact.js"></script>
+<script>
+const API = "";
+const rowsEl = document.getElementById('rows');
+const cdrowsEl = document.getElementById('cdrows');
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
+function money(n){ return (Math.round(Number(n)*100)/100).toLocaleString(undefined,{style:'currency',currency:'USD'}); }
+function clean(s){ return (window.Rampart ? Rampart.protect(s).clean : s); }
+
+function addRow(){
+  const d=document.createElement('div'); d.className='erow';
+  d.innerHTML='<input class="lbl" placeholder="what (e.g. rent)"><input class="amt" type="number" inputmode="decimal" placeholder="0">'+
+    '<select class="cat"><option>housing</option><option>food</option><option>transport</option><option>utilities</option><option>giving</option><option>debt</option><option>savings</option><option>other</option></select>';
+  rowsEl.appendChild(d);
+}
+function addCd(){
+  const d=document.createElement('div'); d.className='erow';
+  d.innerHTML='<input class="lbl" placeholder="what (e.g. subscription)"><input class="was" type="number" inputmode="decimal" placeholder="was"><input class="now" type="number" inputmode="decimal" placeholder="now">';
+  cdrowsEl.appendChild(d);
+}
+
+async function compute(){
+  const income = Number(document.getElementById('income').value || 0);
+  const expenses = [...rowsEl.querySelectorAll('.erow')].map(r => ({
+    label: clean(r.querySelector('.lbl').value || ''),
+    amount: Number(r.querySelector('.amt').value || 0),
+    category: r.querySelector('.cat').value,
+  })).filter(e => e.amount);
+  const out = document.getElementById('budgetout');
+  out.innerHTML = '<p class="dim">computing…</p>';
+  try{
+    const r = await fetch(API+'/steward/budget', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({income, expenses})});
+    const d = await r.json();
+    const netcls = d.net >= 0 ? 'net pos' : 'net';
+    const cats = Object.entries(d.by_category||{}).map(([k,v]) => '<div class="stat"><span class="k">'+esc(k)+'</span><span class="v">'+money(v)+'</span></div>').join('');
+    const seal = d.seal ? '<div class="receipt">🔒 receipt: <a href="'+esc(d.seal.cite_url)+'">'+esc((d.seal.content_hash||'').slice(0,20))+'…</a> — re-checkable</div>' : '';
+    out.innerHTML =
+      '<div class="stat"><span class="k">income</span><span class="v">'+money(d.income)+'</span></div>'+
+      '<div class="stat"><span class="k">expenses</span><span class="v">'+money(d.total_expenses)+'</span></div>'+
+      '<div class="stat"><span class="k">net</span><span class="v '+netcls+'">'+money(d.net)+'</span></div>'+
+      '<div class="stat"><span class="k">savings rate</span><span class="v">'+esc(d.savings_rate_pct)+'%</span></div>'+
+      (cats ? '<div style="margin-top:.6rem" class="dim">by category</div>'+cats : '')+ seal;
+  }catch(e){ out.innerHTML = '<p class="dim">The engine is unreachable right now.</p>'; }
+}
+
+async function computeCd(){
+  const items = [...cdrowsEl.querySelectorAll('.erow')].map(r => ({
+    label: clean(r.querySelector('.lbl').value || ''),
+    was: Number(r.querySelector('.was').value || 0),
+    now: Number(r.querySelector('.now').value || 0),
+  })).filter(i => i.was || i.now);
+  const out = document.getElementById('cdout');
+  try{
+    const r = await fetch(API+'/steward/cost-destroyed', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({items})});
+    const d = await r.json();
+    const rows = (d.items||[]).map(i => '<div class="stat"><span class="k">'+esc(i.label||'item')+'</span><span class="v">'+money(i.saved)+'</span></div>').join('');
+    out.innerHTML = rows + '<div class="stat"><span class="k">cost destroyed</span><span class="v net pos">'+money(d.total_saved)+'</span></div>';
+  }catch(e){ out.innerHTML = '<p class="dim">The engine is unreachable right now.</p>'; }
+}
+
+document.getElementById('addrow').addEventListener('click', addRow);
+document.getElementById('addcd').addEventListener('click', addCd);
+document.getElementById('compute').addEventListener('click', compute);
+document.getElementById('computecd').addEventListener('click', computeCd);
+addRow(); addRow(); addRow(); addCd();
+</script>
+</body>
+</html>

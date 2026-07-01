@@ -79,6 +79,14 @@ def _secular_tools() -> List[dict]:
          "description": ("A synthesized pronunciation guide (respelling + approximate IPA) for a "
                          "transliteration or word — honestly labeled, not a native speaker."),
          "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]}},
+        {"name": "steward_budget",
+         "description": ("Steward — a household budget (income, expenses -> net, savings rate, by "
+                         "category). Shows and plans; NEVER moves money."),
+         "inputSchema": {"type": "object", "properties": {
+             "income": {"type": "number"}, "expenses": {"type": "array"}}, "required": ["income"]}},
+        {"name": "steward_cost_destroyed",
+         "description": "Steward — cost destroyed: money you did NOT spend (was -> now), kept in your currency.",
+         "inputSchema": {"type": "object", "properties": {"items": {"type": "array"}}, "required": ["items"]}},
     ]
 
 
@@ -175,6 +183,12 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
     if name == "pronounce":
         from .. import pronounce as _pron  # neutral phonetic helper, both surfaces
         return _pron.guide(args.get("text", ""))
+    if name == "steward_budget":
+        from .. import steward  # shows + plans; never moves money
+        return steward.budget(args.get("income"), args.get("expenses") or [])
+    if name == "steward_cost_destroyed":
+        from .. import steward
+        return steward.cost_destroyed(args.get("items") or [])
     if name == "resolve" and config.witness_surfaced:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.resolve_ref(args.get("ref", ""))
