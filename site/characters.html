@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bible Dictionary — Narrow Highway</title>
+<meta name="description" content="Every figure of Scripture — people, places, and terms — from Easton's Bible Dictionary (1897, public domain). Look up any name and see its summary and every verse that speaks of it. Found and cited, never generated.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.11), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.7 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:760px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1rem; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:760px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.66rem; margin-top:2.4rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2rem; margin:.5rem 0 .4rem}
+  .lede{color:var(--dim); font-size:1.02rem; max-width:40rem}
+  .searchrow{display:flex; gap:.4rem; border:1px solid var(--line); background:rgba(255,255,255,.02); padding:.15rem; margin-top:1.5rem}
+  .searchrow input{flex:1; background:transparent; border:0; color:var(--ink); font:inherit; padding:.6rem .8rem; outline:none}
+  .searchrow input::placeholder{color:var(--dim)}
+  .searchrow button{background:transparent; border:0; color:var(--gold); font:inherit; letter-spacing:.14em; text-transform:uppercase; font-size:.7rem; padding:0 1rem; cursor:pointer}
+  .az{margin:.9rem 0 0; line-height:2}
+  .az button{background:none; border:0; color:var(--dim); font:inherit; cursor:pointer; padding:0 .28rem; font-size:.9rem}
+  .az button:hover{color:var(--gold)}
+  .cols{display:grid; grid-template-columns:1fr 1.3fr; gap:1.4rem; margin-top:1.4rem}
+  @media (max-width:640px){ .cols{grid-template-columns:1fr} }
+  .item{display:block; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid var(--line); color:var(--ink); font:inherit; padding:.5rem 0; cursor:pointer}
+  .item:hover{color:var(--gold)}
+  .item .rc{color:var(--dim); font-size:.72rem; margin-left:.4rem}
+  .panel{border-left:2px solid var(--line); padding:.2rem 0 0 1rem}
+  .panel .nm{font-size:1.4rem}
+  .panel .cat{color:var(--goldsoft); letter-spacing:.18em; text-transform:uppercase; font-size:.6rem; margin-left:.5rem}
+  .panel .txt{margin-top:.7rem; line-height:1.75; white-space:pre-wrap}
+  .panel .reflabel{color:var(--goldsoft); letter-spacing:.2em; text-transform:uppercase; font-size:.62rem; margin:1rem 0 .5rem}
+  .refchip{display:inline-block; color:var(--gold); border:1px solid var(--line); font-size:.78rem; padding:.1rem .45rem; margin:.15rem .2rem 0 0; border-radius:2px; cursor:pointer}
+  .refchip:hover{border-color:var(--gold)}
+  .attr{color:var(--goldsoft); font-size:.72rem; font-style:italic; margin-top:1rem}
+  .dim{color:var(--dim)}
+  footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:2.6rem; padding-top:1.3rem; line-height:1.7}
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow <span class="road">Highway</span></a>
+  <nav class="site"><a href="/ask.html">Ask</a><a href="/bible.html">Bible</a><a href="/journal.html">Journal</a><a href="/steward.html">Steward</a><a href="/library.html">Library</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="kicker">Who &amp; what</div>
+  <h1>Bible dictionary</h1>
+  <p class="lede">Every figure of Scripture — people, places, and terms — from Easton's Bible
+  Dictionary (1897, public domain). Look up any name to see its summary and every verse that speaks
+  of it. Found and cited, never generated.</p>
+
+  <div class="searchrow">
+    <input id="q" placeholder="A name — Moses, Bethlehem, grace…" aria-label="search" autocomplete="off">
+    <button id="go">Find</button>
+  </div>
+  <div class="az" id="az"></div>
+
+  <div class="cols">
+    <div id="list"><p class="dim">Search a name, or pick a letter.</p></div>
+    <div id="entry"></div>
+  </div>
+
+  <footer class="site"><p>Source: Easton's Bible Dictionary (1897, public domain); parse from
+  neuu-org/bible-dictionary-dataset (CC BY 4.0). Category labels are Easton's own and imperfect —
+  lookup ignores them, so every figure resolves. The verse references cross into the reader on the
+  <a href="/bible.html">Bible</a> page. Conduit: found and attributed, never generated.</p></footer>
+</main>
+
+<script>
+const API = "";
+const listEl = document.getElementById('list');
+const entryEl = document.getElementById('entry');
+const qEl = document.getElementById('q');
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
+async function getJSON(p){ const r=await fetch(API+p); if(!r.ok) return null; try{return await r.json();}catch(e){return null;} }
+
+function renderList(d){
+  const items = (d && d.items) || [];
+  listEl.innerHTML = items.length
+    ? items.map(i => '<button class="item" data-name="'+esc(i.name)+'">'+esc(i.name)+
+        '<span class="rc">'+i.ref_count+'</span></button>').join('')
+    : '<p class="dim">Nothing matched.</p>';
+}
+async function search(){
+  const q = qEl.value.trim();
+  listEl.innerHTML = '<p class="dim">searching…</p>';
+  renderList(await getJSON('/characters?search=' + encodeURIComponent(q) + '&limit=60'));
+}
+async function byLetter(L){
+  listEl.innerHTML = '<p class="dim">loading…</p>';
+  renderList(await getJSON('/characters?letter=' + encodeURIComponent(L) + '&limit=200'));
+}
+async function show(name){
+  entryEl.innerHTML = '<p class="dim">opening…</p>';
+  const d = await getJSON('/character?name=' + encodeURIComponent(name));
+  if(!d){ entryEl.innerHTML = '<p class="dim">Not found in Easton\'s.</p>'; return; }
+  const refs = (d.scripture_refs||[]).map(r => '<span class="refchip" data-ref="'+esc(r)+'">'+esc(r)+'</span>').join('');
+  entryEl.innerHTML = '<div class="panel"><div><span class="nm">'+esc(d.name)+'</span>'+
+    (d.category?'<span class="cat">'+esc(d.category)+'</span>':'')+'</div>'+
+    '<div class="txt">'+esc(d.text||d.summary||'')+'</div>'+
+    (refs?'<div class="reflabel">every verse ('+ (d.ref_count||0) +')</div>'+refs:'')+
+    '<div class="attr">'+esc(d.attribution||'')+'</div></div>';
+  entryEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+document.getElementById('go').addEventListener('click', search);
+qEl.addEventListener('keydown', e => { if(e.key==='Enter') search(); });
+const az = document.getElementById('az');
+az.innerHTML = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(L => '<button data-l="'+L+'">'+L+'</button>').join('');
+az.addEventListener('click', e => { const b=e.target.closest('button[data-l]'); if(b) byLetter(b.dataset.l); });
+listEl.addEventListener('click', e => { const b=e.target.closest('.item'); if(b) show(b.dataset.name); });
+entryEl.addEventListener('click', e => { const c=e.target.closest('.refchip'); if(c) location.href='/bible.html'; });
+</script>
+</body>
+</html>

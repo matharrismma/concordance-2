@@ -427,6 +427,28 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import xrefs
         return _ok(xrefs.for_ref(ref, limit=limit))
 
+    if method == "GET" and path == "/character":
+        # A Bible figure from Easton's (1897, PD) — summary + every verse that speaks of them.
+        if not config.witness_surfaced:
+            return _err(404, "not found")
+        name = (query.get("name") or "").strip()
+        if not name:
+            return _err(400, "name required")
+        from .. import characters
+        rec = characters.get(name)
+        return _ok(rec) if rec is not None else _err(404, "not found in Easton's")
+
+    if method == "GET" and path == "/characters":
+        if not config.witness_surfaced:
+            return _err(404, "not found")
+        from .. import characters
+        try:
+            limit = int(query.get("limit", "100"))
+        except (TypeError, ValueError):
+            limit = 100
+        return _ok(characters.browse(letter=(query.get("letter") or None),
+                                     search=(query.get("search") or None), limit=limit))
+
     return _err(404, "not found")
 
 
@@ -435,7 +457,8 @@ _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word
                   "/card/connections", "/locate", "/library/health",
                   "/thread", "/threads", "/threads/search", "/thread/verify", "/passage",
                   "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
-                  "/commentary", "/journal", "/journal/dates", "/steward", "/tsk"}
+                  "/commentary", "/journal", "/journal/dates", "/steward", "/tsk",
+                  "/character", "/characters"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",

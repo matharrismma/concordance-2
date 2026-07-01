@@ -121,6 +121,14 @@ def _witness_tools() -> List[dict]:
                          "the public-domain TSK), ranked by relevance votes. Found + attributed."),
          "inputSchema": {"type": "object", "properties": {
              "ref": {"type": "string"}, "limit": {"type": "integer"}}, "required": ["ref"]}},
+        {"name": "character_get",
+         "description": ("A Bible figure from Easton's Bible Dictionary (1897, PD) — summary + every "
+                         "verse that speaks of them (found + attributed; category tag is imperfect)."),
+         "inputSchema": {"type": "object", "properties": {"name": {"type": "string"}}, "required": ["name"]}},
+        {"name": "characters_browse",
+         "description": "Browse/search Easton's Bible Dictionary (people, places, terms).",
+         "inputSchema": {"type": "object", "properties": {
+             "letter": {"type": "string"}, "search": {"type": "string"}, "limit": {"type": "integer"}}}},
     ]
 
 
@@ -215,6 +223,14 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
     if name == "tsk_cross_references" and config.witness_surfaced:
         from .. import xrefs  # lazy: witness-only
         return xrefs.for_ref(args.get("ref", ""), limit=int(args.get("limit", 20)))
+    if name == "character_get" and config.witness_surfaced:
+        from .. import characters  # lazy: witness-only
+        rec = characters.get(args.get("name", ""))
+        return rec if rec is not None else {"error": "not found in Easton's"}
+    if name == "characters_browse" and config.witness_surfaced:
+        from .. import characters  # lazy: witness-only
+        return characters.browse(letter=args.get("letter"), search=args.get("search"),
+                                 limit=int(args.get("limit", 100)))
     raise KeyError(f"unknown tool {name!r} (on the {config.surface} surface)")
 
 

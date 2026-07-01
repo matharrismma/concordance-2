@@ -17,6 +17,7 @@ data/threads/
 data/commentary/
 data/stacks/
 data/xrefs/
+data/characters/
 data/cards.jsonl
 data/*.jsonl
 data/*.db
