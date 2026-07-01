@@ -1,0 +1,23 @@
+# LIVE (enabled 2026-07-01). narrowhighway.com is served by this — 2.0 SECULAR on :8002 —
+# with a Caddy path fallback to 1.0 (:8000) for the cited per-card permalinks. This is the
+# .com -> 2.0 cutover (Matt's chosen "flip to 2.0, keep 1.0 fallback"). It does NOT replace
+# 1.0: nh-engine keeps running on :8000 to serve card.html/nh-* and api./tv.
+# Rollback of .com to 1.0: restore /etc/caddy/Caddyfile.bak.pre2cut and reload caddy.
+# Supersedes the old (never-enabled) nh-com.service, which was a full :8000 replacement.
+[Unit]
+Description=Narrow Highway — .com (2.0 secular face)
+After=network.target
+
+[Service]
+User=nh
+WorkingDirectory=/home/nh/concordance-2
+EnvironmentFile=-/home/nh/concordance-2/.env
+Environment=PYTHONPATH=/home/nh/concordance-2/src
+Environment=CONCORDANCE_DATA_DIR=/home/nh/concordance-2/data
+Environment=CONCORDANCE_STRONGS_DIR=/home/nh/concordance-2/data/strongs
+ExecStart=/home/nh/concordance-2/.venv/bin/python -m concordance serve --host 127.0.0.1 --port 8002 --surface secular
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

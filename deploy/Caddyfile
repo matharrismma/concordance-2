@@ -1,25 +1,74 @@
 # Narrow Highway — Caddy reverse proxy (auto-TLS via Let's Encrypt).
 # Two faces, one engine: .com is the secular reach, .org is the witness.
 #
-# CURRENT LIVE REALITY (2026-06-28): narrowhighway.com is served by 1.0 (the `nh-engine`
-# service) on :8000. The `nh-com.service` (2.0 secular) in this directory is PREPARED but
-# NOT enabled — the .com cutover is gated on 2.0 reaching feature parity with 1.0 (the keep,
-# library, workspace, etc.). So the .com block below points at :8000 = whatever runs there
-# (currently 1.0). narrowhighway.org IS 2.0 — the witness face (`nh-org` on :8001).
-#
-# `header_up X-Forwarded-For {remote_host}` OVERRIDES any client-sent value — defense-in-depth
-# for the operator keep gate (which also ignores X-Forwarded-For in code; see web/keep.py).
+# CURRENT LIVE REALITY (2026-07-01): the .com -> 2.0 cutover is DONE. narrowhighway.com is
+# served by 2.0 SECULAR (`nh-com-2` on :8002), with a path fallback to 1.0 (`nh-engine` on
+# :8000) for the cited/crawled per-card permalinks so nothing indexed 404s. narrowhighway.org
+# is 2.0 WITNESS (`nh-org` on :8001). api.narrowhighway.com and narrowhighway.tv stay on 1.0.
+# Rollback of .com to 1.0: restore /etc/caddy/Caddyfile.bak.pre2cut and reload caddy.
 
-narrowhighway.com, www.narrowhighway.com {
-	encode gzip
+api.narrowhighway.com {
 	reverse_proxy 127.0.0.1:8000 {
-		header_up X-Forwarded-For {remote_host}
+		lb_try_duration 10s
+		lb_try_interval 250ms
+	}
+	encode gzip zstd
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+	log {
+		output file /var/log/caddy/api.access.log
+		format json
 	}
 }
 
-narrowhighway.org, www.narrowhighway.org {
-	encode gzip
-	reverse_proxy 127.0.0.1:8001 {
-		header_up X-Forwarded-For {remote_host}
+narrowhighway.com {
+	encode gzip zstd
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
 	}
+
+	# Preserve 1.0's cited/crawled per-card permalinks and their own assets so the
+	# indexed card pages and ~186 AI citations never 404. These paths are 1.0-only
+	# (2.0 uses /styles.css and its own paths) -> no collision with the new face.
+	@onezero path /card.html* /card/* /nh-*
+	handle @onezero {
+		reverse_proxy 127.0.0.1:8000 {
+			lb_try_duration 10s
+			lb_try_interval 250ms
+		}
+	}
+
+	# The new face: 2.0 secular owns the front door, the app, the engine, and the seals.
+	handle {
+		reverse_proxy 127.0.0.1:8002 {
+			lb_try_duration 10s
+			lb_try_interval 250ms
+		}
+	}
+
+	log {
+		output file /var/log/caddy/site.access.log
+		format json
+	}
+}
+
+narrowhighway.org {
+	reverse_proxy 127.0.0.1:8001 {
+		lb_try_duration 10s
+		lb_try_interval 250ms
+	}
+	encode gzip zstd
+}
+
+narrowhighway.tv {
+	reverse_proxy 127.0.0.1:8000 {
+		lb_try_duration 10s
+		lb_try_interval 250ms
+	}
+	encode gzip zstd
 }

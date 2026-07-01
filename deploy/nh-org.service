@@ -5,6 +5,7 @@ After=network.target
 [Service]
 User=nh
 WorkingDirectory=/home/nh/concordance-2
+EnvironmentFile=-/home/nh/concordance-2/.env
 Environment=PYTHONPATH=/home/nh/concordance-2/src
 Environment=CONCORDANCE_DATA_DIR=/home/nh/concordance-2/data
 Environment=CONCORDANCE_STRONGS_DIR=/home/nh/concordance-2/data/strongs

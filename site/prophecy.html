@@ -65,6 +65,9 @@
 
 <script>
 const API = "";
+// The Word lives on the witness face: on the secular domain (.com) these are gated, so
+// cross to narrowhighway.org for the full experience.
+if (location.hostname === 'narrowhighway.com') location.replace('https://narrowhighway.org' + location.pathname + location.search);
 const tracesEl = document.getElementById('traces');
 const panelEl = document.getElementById('panel');
 function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
