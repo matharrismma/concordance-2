@@ -496,7 +496,7 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
     site = Path(site_dir).resolve() if site_dir else None
     limiter = ratelimit.from_env()
     MAX_BODY = int(os.environ.get("CONCORDANCE_MAX_BODY", str(256 * 1024)) or 256 * 1024)
-    RATELIMITED = ("/verify", "/derivation/verify", "/search", "/mcp", "/ask")
+    RATELIMITED = ("/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak")
 
     class Handler(BaseHTTPRequestHandler):
         def _json(self, status: int, payload: dict, extra: dict = None) -> None:
@@ -590,6 +590,30 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
                 self.end_headers()
                 if body:
                     self.wfile.write(body)
+                return
+            if u.path == "/speak":  # optional voice ceiling — returns audio/mpeg, else 503 -> floor
+                text = (parse_qs(u.query).get("text", [""]) or [""])[0]
+                if method == "POST":
+                    n = int(self.headers.get("content-length") or 0)
+                    raw = self.rfile.read(n) if n else b""
+                    try:
+                        text = (json.loads(raw or b"{}") or {}).get("text", text)
+                    except (ValueError, TypeError):
+                        pass
+                from ..voice import speak as _speak
+                res = _speak(text)
+                if not res:
+                    return self._json(503, {"audio": False,
+                                            "reason": "voice ceiling unavailable — use the browser floor"})
+                audio, state = res
+                self.send_response(200)
+                self.send_header("content-type", "audio/mpeg")
+                self.send_header("x-content-type-options", "nosniff")
+                self.send_header("cache-control", "public, max-age=31536000, immutable")
+                self.send_header("x-voice-cache", state)
+                self.send_header("content-length", str(len(audio)))
+                self.end_headers()
+                self.wfile.write(audio)
                 return
             # static site (GET only) for non-API paths, when a site dir is configured
             if method == "GET" and site is not None and u.path not in _API_GET_PATHS:

@@ -112,6 +112,7 @@ const refEl = document.getElementById('ref');
 const passageEl = document.getElementById('passage');
 const hintEl = document.getElementById('hint');
 const ribbonEl = document.getElementById('ribbon');
+let _passageText = '';   // the current passage, for read-aloud (kept off the DOM to avoid quote-escaping)
 
 function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
 
@@ -131,7 +132,9 @@ async function read(){
     passageEl.innerHTML = '<p class="dim">' + esc((d && d.detail) || 'Nothing found for that reference.') + '</p>';
     return;
   }
-  let html = '<div class="pref">' + esc(d.ref) + '</div>';
+  _passageText = d.verses.map(v => v.text).join(' ');
+  let html = '<div class="pref">' + esc(d.ref) +
+    '<button class="hear readaloud" style="margin-left:.8rem" title="Read this passage aloud">▶ Read aloud</button></div>';
   d.verses.forEach(v => {
     html += '<div class="verse-row" data-ref="' + esc(v.ref) + '"><sup class="vn">' + esc(v.verse) +
             '</sup><span class="vt">' + esc(v.text) + '</span></div>' +
@@ -226,7 +229,10 @@ passageEl.addEventListener('click', e => {
     return;
   }
   const hear = e.target.closest('.hear');
-  if(hear){ if(window.NHSpeak) NHSpeak.say(hear.dataset.speak); return; }
+  if(hear){
+    if(window.NHSpeak) NHSpeak.play(hear.classList.contains('readaloud') ? _passageText : hear.dataset.speak);
+    return;
+  }
   const xref = e.target.closest('.xref');
   if(xref){ refEl.value = xref.dataset.ref; read(); window.scrollTo({top:0, behavior:'smooth'}); return; }
   const row = e.target.closest('.verse-row');

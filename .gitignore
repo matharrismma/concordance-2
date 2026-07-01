@@ -19,6 +19,7 @@ data/stacks/
 data/xrefs/
 data/characters/
 data/prophecy/
+data/audio/
 data/cards.jsonl
 data/*.jsonl
 data/*.db
@@ -26,6 +27,8 @@ data/strongs/
 data/*.db-wal
 data/*.db-shm
 *.log
+.env
+.env.*
 
 # vendored ML assets for the opt-in Rampart layer (~90 MB binaries; reproduce with
 # tools/vendor_rampart.sh — kept out of source like the runtime data)
