@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Narrow Highway — Watch · Listen · Learn</title>
+<meta name="description" content="The Word read aloud in a living voice, a reading tutor that grows with the student, and a library to learn from. Found and cited, never generated. Watch, listen, and learn.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(66% 46% at 50% -8%, rgba(201,162,74,.13), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:820px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.2rem; font-size:.72rem; letter-spacing:.13em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:820px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.36em; text-transform:uppercase; font-size:.68rem; margin-top:2.6rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2.3rem; margin:.5rem 0 .5rem}
+  .lede{color:var(--dim); font-size:1.06rem; max-width:42rem}
+  section.band{margin-top:3rem; border-top:1px solid var(--line); padding-top:1.5rem}
+  .slabel{color:var(--goldsoft); letter-spacing:.24em; text-transform:uppercase; font-size:.64rem}
+  h2{font-weight:400; font-size:1.5rem; margin:.35rem 0 .5rem}
+  .sub{color:var(--dim); font-size:.96rem; margin:0 0 1rem; max-width:40rem}
+  .row{display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; margin:.8rem 0}
+  input,select{background:rgba(255,255,255,.02); border:1px solid var(--line); color:var(--ink); font:inherit; padding:.6rem .7rem; outline:none}
+  input{flex:1; min-width:12rem} input::placeholder{color:var(--dim)}
+  .btn{background:transparent; border:1px solid var(--line); color:var(--gold); font:inherit; letter-spacing:.12em;
+    text-transform:uppercase; font-size:.72rem; padding:.55rem 1.1rem; cursor:pointer; border-radius:2px}
+  .btn:hover{color:var(--ink); border-color:var(--gold)}
+  .btn.play{border-color:var(--gold); color:var(--gold)}
+  .chips{display:flex; gap:.4rem; flex-wrap:wrap; margin:.5rem 0}
+  .chip{background:none; border:1px solid var(--line); color:var(--dim); font:inherit; font-size:.78rem; padding:.28rem .6rem; cursor:pointer; border-radius:2px}
+  .chip:hover{color:var(--gold); border-color:var(--gold)}
+  .reader{margin-top:1rem}
+  .pref{color:var(--gold); letter-spacing:.05em; font-size:1.15rem; margin:.4rem 0 .8rem}
+  .verse{padding:.35rem 0 .35rem .95rem; border-left:2px solid transparent; transition:border-color .2s,background .2s}
+  .verse .vn{color:var(--goldsoft); font-size:.72rem; vertical-align:super; margin-right:.35rem}
+  .verse.on{border-left-color:var(--gold); background:rgba(201,162,74,.06)}
+  .now{color:var(--dim); font-size:.78rem; margin-top:.6rem; min-height:1.1em}
+  .now .live{color:var(--pass)}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:.7rem; margin-top:1rem}
+  .card{border:1px solid var(--line); padding:.9rem 1rem; border-radius:3px}
+  .card h3{font-weight:400; font-size:1.05rem; margin:0 0 .3rem}
+  .card p{color:var(--dim); font-size:.85rem; margin:0 0 .7rem}
+  .result{border-left:1px solid var(--line); padding:.3rem 0 .3rem .8rem; margin:.5rem 0}
+  .result .t{color:var(--ink)} .result .s{color:var(--dim); font-size:.85rem}
+  .shelf{color:var(--goldsoft); text-transform:uppercase; letter-spacing:.13em; font-size:.6rem}
+  .dim{color:var(--dim)}
+  footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:3rem; padding-top:1.3rem; line-height:1.7}
+  @media (max-width:640px){
+    body{font-size:16px; line-height:1.7}
+    header .bar{flex-direction:column; align-items:flex-start; gap:.6rem; padding:.9rem 1rem}
+    nav.site{display:flex; flex-wrap:wrap; margin:0} nav.site a{margin:0 1rem .1rem 0; font-size:.68rem; letter-spacing:.1em}
+    .wrap{padding:1rem 1rem 4rem} .kicker{margin-top:1.9rem} h1{font-size:1.7rem} .lede{font-size:.99rem}
+    .row{flex-direction:column; align-items:stretch} input{min-width:0; width:100%} .btn{width:100%; padding:.7rem 0}
+  }
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow <span class="road">Highway ✚</span></a>
+  <nav class="site"><a href="#listen">Listen</a><a href="#read">Read</a><a href="#learn">Learn</a><a href="https://narrowhighway.org/bible.html">Bible</a><a href="https://narrowhighway.org/ask.html">Ask</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="kicker">Watch · Listen · Learn</div>
+  <h1>The Word, read aloud — and a way to learn.</h1>
+  <p class="lede">Scripture spoken in a living voice, a reading tutor that grows with the student, and a
+  library to learn from. Everything here is <em>found and cited, never generated</em> — the engine
+  gives it a voice; it does not make it up. A window, not a wall: the wisdom is in Christ.</p>
+
+  <!-- ── LISTEN: the Word in a living voice ─────────────────────────── -->
+  <section class="band" id="listen">
+    <div class="slabel">Listen</div>
+    <h2>The Word, in a living voice</h2>
+    <p class="sub">Choose a passage and hear it read aloud — the words highlight as they are spoken.
+    The voice is the ceiling; if it isn't reachable, your device reads it (the floor). Always the
+    real, public-domain text.</p>
+    <div class="row">
+      <input id="ref" placeholder="A passage — e.g. John 1:1-14, Psalm 23, Romans 8" aria-label="passage">
+      <button class="btn" id="loadbtn">Open</button>
+      <button class="btn play" id="playbtn" hidden>▶ Play</button>
+      <button class="btn" id="stopbtn" hidden>■ Stop</button>
+    </div>
+    <div class="chips" id="quick"></div>
+    <div class="now" id="now"></div>
+    <div class="reader" id="reader"></div>
+  </section>
+
+  <!-- ── CHANNELS: curated read-along ───────────────────────────────── -->
+  <section class="band" id="channels">
+    <div class="slabel">Channels</div>
+    <h2>Read-along channels</h2>
+    <p class="sub">Curated passages, played one after another in the living voice. Sit and listen.</p>
+    <div class="grid" id="chan"></div>
+  </section>
+
+  <!-- ── READ: the reading tutor ────────────────────────────────────── -->
+  <section class="band" id="read">
+    <div class="slabel">Read</div>
+    <h2>Learn to read — and keep growing</h2>
+    <p class="sub">A reading tutor that meets a new reader at the beginning and grows with them.
+    Found lessons, a continuing path — never a grade on a child.</p>
+    <div id="tracks" class="grid"><p class="dim">loading the path…</p></div>
+    <p style="margin-top:1rem"><a class="btn" href="/read.html" style="display:inline-block">Open the reading tutor →</a></p>
+  </section>
+
+  <!-- ── LEARN: the library ─────────────────────────────────────────── -->
+  <section class="band" id="learn">
+    <div class="slabel">Learn</div>
+    <h2>A library to learn from</h2>
+    <p class="sub">Search the keeping — the kept library of found, cited material.</p>
+    <div class="row">
+      <input id="q" placeholder="e.g. love, justice, bread, courage" aria-label="search">
+      <button class="btn" id="searchbtn">Search</button>
+    </div>
+    <div id="results"></div>
+  </section>
+
+  <footer class="site"><p>Watch, listen, and learn. The engine finds, verifies, and voices — it does
+  not generate the Word. The living voice is a gift for hearing; the wisdom is in Christ, not this
+  tool. The fuller witness is at <a href="https://narrowhighway.org">narrowhighway.org</a>.</p></footer>
+</main>
+
+<script src="speak.js"></script>
+<script>
+const API = "";
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
+async function getJSON(p){ const r=await fetch(API+p); if(!r.ok) return null; try{return await r.json();}catch(e){return null;} }
+
+// ── the sequential read-along player (ceiling → floor, awaits each clip's END) ──
+let verses = [], playing = false, cancelFlag = false, curAudio = null;
+const readerEl = document.getElementById('reader'), nowEl = document.getElementById('now');
+const playBtn = document.getElementById('playbtn'), stopBtn = document.getElementById('stopbtn');
+
+function stopPlay(){
+  cancelFlag = true; playing = false;
+  try{ if(curAudio){ curAudio.pause(); curAudio=null; } }catch(e){}
+  try{ window.speechSynthesis && speechSynthesis.cancel(); }catch(e){}
+  document.querySelectorAll('.verse.on').forEach(v=>v.classList.remove('on'));
+  nowEl.innerHTML = ''; playBtn.hidden = false; stopBtn.hidden = true;
+}
+
+function playClip(text){
+  return new Promise(async (resolve)=>{
+    try{
+      const r = await fetch(API+'/speak',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text})});
+      if(r.ok && (r.headers.get('content-type')||'').indexOf('audio')!==-1){
+        const url = URL.createObjectURL(await r.blob());
+        const a = new Audio(url); curAudio = a;
+        a.onended = a.onerror = ()=>{ try{URL.revokeObjectURL(url);}catch(e){} resolve(); };
+        a.play(); return;
+      }
+    }catch(e){}
+    // floor: the device's own voice
+    try{
+      const u = new SpeechSynthesisUtterance(text); u.rate=0.95;
+      u.onend = u.onerror = ()=>resolve(); speechSynthesis.cancel(); speechSynthesis.speak(u);
+    }catch(e){ resolve(); }
+  });
+}
+
+async function playFrom(i){
+  if(playing) return;
+  playing = true; cancelFlag = false; playBtn.hidden = true; stopBtn.hidden = false;
+  for(let k=i; k<verses.length; k++){
+    if(cancelFlag) break;
+    const row = readerEl.querySelector('[data-i="'+k+'"]');
+    document.querySelectorAll('.verse.on').forEach(v=>v.classList.remove('on'));
+    if(row){ row.classList.add('on'); row.scrollIntoView({behavior:'smooth',block:'center'}); }
+    nowEl.innerHTML = '<span class="live">● now reading</span> · ' + esc(verses[k].ref||'');
+    await playClip(verses[k].text);
+  }
+  if(!cancelFlag){ nowEl.textContent = 'finished.'; }
+  playing = false; playBtn.hidden = false; stopBtn.hidden = true;
+  document.querySelectorAll('.verse.on').forEach(v=>v.classList.remove('on'));
+}
+
+async function openPassage(ref){
+  stopPlay();
+  readerEl.innerHTML = '<p class="dim">opening…</p>'; nowEl.textContent='';
+  const d = await getJSON('/passage?ref=' + encodeURIComponent(ref));
+  if(!d || d.status!=='ok' || !d.verses || !d.verses.length){
+    readerEl.innerHTML = '<p class="dim">'+esc((d&&d.detail)||'Nothing found for that reference.')+'</p>';
+    playBtn.hidden = true; return;
+  }
+  verses = d.verses;
+  readerEl.innerHTML = '<div class="pref">'+esc(d.ref)+'</div>' + verses.map((v,i)=>
+    '<div class="verse" data-i="'+i+'"><span class="vn">'+esc(v.verse)+'</span>'+esc(v.text)+'</div>').join('');
+  playBtn.hidden = false; playBtn.textContent = '▶ Play';
+  readerEl.querySelectorAll('.verse').forEach(el=>el.addEventListener('click',()=>{ stopPlay(); playFrom(+el.dataset.i); }));
+}
+
+document.getElementById('loadbtn').addEventListener('click',()=>{ const r=document.getElementById('ref').value.trim(); if(r) openPassage(r); });
+document.getElementById('ref').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const r=e.target.value.trim(); if(r) openPassage(r); } });
+playBtn.addEventListener('click',()=>playFrom(0));
+stopBtn.addEventListener('click',stopPlay);
+
+const QUICK = ['Psalm 23','John 1:1-14','Matthew 5:1-12','Romans 8:31-39','Philippians 4:4-9','Isaiah 40:28-31'];
+document.getElementById('quick').innerHTML = QUICK.map(r=>'<button class="chip" data-ref="'+esc(r)+'">'+esc(r)+'</button>').join('');
+document.getElementById('quick').addEventListener('click',e=>{ const c=e.target.closest('.chip'); if(c){ document.getElementById('ref').value=c.dataset.ref; openPassage(c.dataset.ref); document.getElementById('listen').scrollIntoView({behavior:'smooth'}); } });
+
+// ── channels: curated read-along playlists (real passages, played in sequence) ──
+const CHANNELS = [
+  {title:'The Gospel of John', note:'The Word made flesh — read aloud.', refs:['John 1:1-18','John 3:1-21','John 14:1-14','John 15:1-17']},
+  {title:'Psalms of comfort', note:'For a heavy day.', refs:['Psalm 23','Psalm 91','Psalm 121','Psalm 46']},
+  {title:'The Sermon on the Mount', note:'The teaching of Jesus.', refs:['Matthew 5:1-16','Matthew 6:5-15','Matthew 6:25-34','Matthew 7:7-14']},
+];
+const chanEl = document.getElementById('chan');
+chanEl.innerHTML = CHANNELS.map((c,i)=>'<div class="card"><h3>'+esc(c.title)+'</h3><p>'+esc(c.note)+'</p>'+
+  '<button class="btn play" data-ch="'+i+'">▶ Play channel</button></div>').join('');
+chanEl.addEventListener('click', async e=>{
+  const b = e.target.closest('button[data-ch]'); if(!b) return;
+  const ch = CHANNELS[+b.dataset.ch];
+  stopPlay(); document.getElementById('listen').scrollIntoView({behavior:'smooth'});
+  // gather all passages in the channel into one read-along
+  readerEl.innerHTML = '<p class="dim">gathering '+esc(ch.title)+'…</p>';
+  let all = [];
+  for(const ref of ch.refs){
+    const d = await getJSON('/passage?ref='+encodeURIComponent(ref));
+    if(d && d.verses) all = all.concat(d.verses);
+  }
+  if(!all.length){ readerEl.innerHTML='<p class="dim">Could not gather this channel.</p>'; return; }
+  verses = all;
+  readerEl.innerHTML = '<div class="pref">'+esc(ch.title)+'</div>' + verses.map((v,i)=>
+    '<div class="verse" data-i="'+i+'"><span class="vn">'+esc(v.ref||v.verse)+'</span>'+esc(v.text)+'</div>').join('');
+  readerEl.querySelectorAll('.verse').forEach(el=>el.addEventListener('click',()=>{ stopPlay(); playFrom(+el.dataset.i); }));
+  playBtn.hidden=false; playFrom(0);
+});
+
+// ── read: the reading tutor path ──
+(async function(){
+  const d = await getJSON('/coach/overview');
+  const el = document.getElementById('tracks');
+  if(!d || !d.units){ el.innerHTML='<p class="dim">The reading tutor is at <a href="/read.html">read.html</a>.</p>'; return; }
+  const tracks = d.tracks || [];
+  el.innerHTML = (tracks.length
+    ? tracks.map(t=>'<div class="card"><h3>'+esc(t.title||t.name||t)+'</h3><p>'+esc((t.detail||t.note||'')||'')+'</p></div>').join('')
+    : '<div class="card"><h3>'+esc(d.count)+' lessons</h3><p>A path from the first letters onward.</p></div>');
+})();
+
+// ── learn: search the keeping ──
+async function doSearch(){
+  const q = document.getElementById('q').value.trim(); const out = document.getElementById('results');
+  if(!q) return; out.innerHTML='<p class="dim">searching…</p>';
+  const d = await getJSON('/search?q='+encodeURIComponent(q)+'&limit=8');
+  if(!d || !d.results || !d.results.length){ out.innerHTML='<p class="dim">Nothing matched.</p>'; return; }
+  out.innerHTML = d.results.map(c=>'<div class="result"><span class="shelf">'+esc(c.shelf||'')+'</span>'+
+    '<div class="t">'+esc(c.title||'')+'</div><div class="s">'+esc((c.snippet||'').slice(0,150))+'</div></div>').join('');
+}
+document.getElementById('searchbtn').addEventListener('click',doSearch);
+document.getElementById('q').addEventListener('keydown',e=>{ if(e.key==='Enter') doSearch(); });
+</script>
+</body>
+</html>

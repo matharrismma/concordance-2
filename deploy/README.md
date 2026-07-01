@@ -11,7 +11,7 @@ TLS and reverse-proxies each host to a backend.
 | ↳ `/card.html*`, `/card/*`, `/nh-*` | `:8000` (1.0) | **1.0 fallback** — preserves cited/crawled per-card permalinks + their assets (no 404s) |
 | `narrowhighway.org`      | `:8001` (2.0)      | **2.0 witness face** — the full Word (scripture, dictionary, signposts, the Gate) |
 | `api.narrowhighway.com`  | `:8000` (1.0)      | 1.0 API / MCP (unchanged)                    |
-| `narrowhighway.tv`       | `:8000` (1.0)      | 1.0 media center (unchanged)                 |
+| `narrowhighway.tv`       | `:8001` (2.0)      | **2.0 watch/listen/learn face** — `tv.html` landing on the witness engine (the Word read aloud in Matt's voice, reading tutor, literacy). No longer on 1.0. |
 
 The `.com → 2.0` cutover (2026-07-01) made 2.0 the world-facing face while keeping every
 cited 1.0 URL alive via the path fallback. There is **no asset collision**: 1.0's

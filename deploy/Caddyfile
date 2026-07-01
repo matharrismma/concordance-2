@@ -66,9 +66,23 @@ narrowhighway.org {
 }
 
 narrowhighway.tv {
-	reverse_proxy 127.0.0.1:8000 {
+	encode gzip zstd
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	# The watch/listen/learn face on the 2.0 WITNESS engine (:8001); its landing is tv.html.
+	# Frees nh-engine (1.0) from .tv — the last app dependency blocking 1.0 retirement.
+	@root path /
+	rewrite @root /tv.html
+	reverse_proxy 127.0.0.1:8001 {
 		lb_try_duration 10s
 		lb_try_interval 250ms
 	}
-	encode gzip zstd
+	log {
+		output file /var/log/caddy/tv.access.log
+		format json
+	}
 }
