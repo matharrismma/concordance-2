@@ -289,6 +289,16 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from ..verifiers import scripture  # lazy: witness-only
         return _ok(scripture.resolve_ref(ref))
 
+    if method == "GET" and path == "/passage":
+        # Read a passage (verse / range / whole chapter) — the Bible reading primitive.
+        if not config.witness_surfaced:
+            return _err(404, "not found")
+        ref = (query.get("ref") or "").strip()
+        if not ref:
+            return _err(400, "ref required")
+        from ..verifiers import scripture  # lazy: witness-only
+        return _ok(scripture.read_passage(ref))
+
     if method == "GET" and path == "/word_study":
         if not config.witness_surfaced:
             return _err(404, "not found")
@@ -304,7 +314,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word_study",
                   "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
                   "/card/connections", "/locate", "/library/health",
-                  "/thread", "/threads", "/threads/search", "/thread/verify"}
+                  "/thread", "/threads", "/threads/search", "/thread/verify", "/passage"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",

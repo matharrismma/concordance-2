@@ -244,10 +244,16 @@ class Concordance:
         strongs_num = strongs_num.strip().upper()
         entry = self._lex_entry(strongs_num)
 
+        translit = entry.get("translit", entry.get("xlit", "")) if entry else ""
         result = {
             "strongs": strongs_num,
             "word": entry.get("lemma", entry.get("word", "")) if entry else "",
-            "transliteration": entry.get("translit", entry.get("xlit", "")) if entry else "",
+            "transliteration": translit,
+            # The live path returned no pronunciation at all (the tapped-word reader was left mute).
+            # This lexicon carries no separate Greek pron field — the transliteration IS the phonetic
+            # guide — so use the native pron when present (Hebrew), else fall back to the translit.
+            # B2 upgrades this into a clearly-labeled respelling + IPA guide.
+            "pronunciation": (entry.get("pron", entry.get("pronunciation", "")) or translit) if entry else "",
             "definition": entry.get("strongs_def", entry.get("kjv_def", "")) if entry else "",
             "derivation": entry.get("derivation", "") if entry else "",
         }

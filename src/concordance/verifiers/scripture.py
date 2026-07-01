@@ -54,6 +54,11 @@ def _parse_ref(ref: str) -> Optional[Tuple[str, int, int]]:
     return m.group(1), int(m.group(2)), int(m.group(3))
 
 
+# A passage: a single verse, a verse range, or a whole chapter.
+#   "John 3:16" · "John 3:16-18" · "John 3" · "1 John 1:9"
+_PASSAGE_RE = re.compile(r"^\s*([1-3]?\s*[A-Za-z.]+)\s*(\d+)(?::(\d+)(?:\s*-\s*(\d+))?)?\s*$")
+
+
 class Bible:
     """An indexed WEB Bible: (book, chapter, verse) -> text, plus a book-alias map."""
 
@@ -99,6 +104,48 @@ class Bible:
             return {"ref": ref, "text": "", "status": "not_found",
                     "detail": f"{canon} {ch}:{v} not in the WEB"}
         return {"ref": f"{canon} {ch}:{v}", "text": text, "status": "ok", "detail": ""}
+
+    def passage(self, ref: str) -> Dict[str, Any]:
+        """Read a whole passage — a single verse, a verse range, or a whole chapter — as an
+        ordered list of WEB verses. Found, never generated; degrades gracefully when unprovisioned.
+        The Bible is the focus: 'we hold every thread so you can take your time and comprehend.'"""
+        if not self.idx:
+            return {"ref": ref, "verses": [], "count": 0, "status": "source_missing",
+                    "detail": "bible_en.jsonl not provisioned (run tools/migrate_bible.py)"}
+        m = _PASSAGE_RE.match(ref or "")
+        if not m:
+            return {"ref": ref, "verses": [], "count": 0, "status": "not_found",
+                    "detail": "could not parse passage"}
+        book_raw, ch = m.group(1), int(m.group(2))
+        canon = self.alias.get(_norm_book(book_raw))
+        if not canon:
+            return {"ref": ref, "verses": [], "count": 0, "status": "not_found",
+                    "detail": f"unknown book {book_raw!r}"}
+        if m.group(3) is None:  # whole chapter — scan every verse present (robust to gaps / non-1 start)
+            found = sorted(((vv, t) for (bk, cc, vv), t in self.idx.items()
+                            if bk == canon and cc == ch), key=lambda x: x[0])
+            if not found:
+                return {"ref": ref, "verses": [], "count": 0, "status": "not_found",
+                        "detail": f"{canon} {ch} not in the WEB"}
+            verses = [{"ref": f"{canon} {ch}:{vv}", "verse": vv, "text": t} for vv, t in found]
+            return {"ref": f"{canon} {ch}", "book": canon, "chapter": ch,
+                    "verses": verses, "count": len(verses), "status": "ok"}
+        v_start = int(m.group(3))
+        v_end = int(m.group(4)) if m.group(4) else v_start
+        if v_end < v_start:
+            v_start, v_end = v_end, v_start
+        v_end = min(v_end, v_start + 200)  # cap the span
+        verses = []
+        for v in range(v_start, v_end + 1):
+            t = self.idx.get((canon, ch, v))
+            if t is not None:
+                verses.append({"ref": f"{canon} {ch}:{v}", "verse": v, "text": t})
+        if not verses:
+            return {"ref": ref, "verses": [], "count": 0, "status": "not_found",
+                    "detail": f"{canon} {ch}:{v_start}-{v_end} not in the WEB"}
+        out_ref = f"{canon} {ch}:{v_start}" if v_end == v_start else f"{canon} {ch}:{v_start}-{v_end}"
+        return {"ref": out_ref, "book": canon, "chapter": ch,
+                "verses": verses, "count": len(verses), "status": "ok"}
 
 
 # ── module-level default Bible (lazy, from bible_en.jsonl) ───────────────
@@ -146,6 +193,12 @@ def _reset() -> None:
 def resolve_ref(ref: str) -> Dict[str, Any]:
     """Resolve a reference to its WEB text: {ref, text, status: ok|not_found|source_missing}."""
     return default_bible().resolve(ref)
+
+
+def read_passage(ref: str) -> Dict[str, Any]:
+    """Read a passage (single verse / range / whole chapter) of the WEB — {ref, verses, count,
+    status}. The core reading primitive the study experience is built on."""
+    return default_bible().passage(ref)
 
 
 def word_study(strongs_num: str) -> Dict[str, Any]:
