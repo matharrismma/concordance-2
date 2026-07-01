@@ -59,6 +59,12 @@
     </section>
 
     <section>
+      <h2>Where they come from &amp; where they go <span class="muted" style="font-size:.68rem;font-weight:400">· humans / agents / bots · advisory ops data from the access logs</span></h2>
+      <p class="muted" id="traffic-meta" style="font-size:.82rem"></p>
+      <div class="grid" id="traffic" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))"></div>
+    </section>
+
+    <section>
       <h2>Live activity <span class="muted" style="font-size:.68rem;font-weight:400">· advisory ops log, not the integrity record</span></h2>
       <p class="muted" id="feed-empty" hidden>No activity recorded yet. As the engine
       verifies, searches, and seals, it will appear here.</p>
@@ -131,6 +137,8 @@ async function refresh() {
     ae.appendChild(el);
   }
 
+  renderTraffic(d.traffic);
+
   // live feed
   const feed = document.getElementById("feed");
   const recent = d.activity?.recent || [];
@@ -157,6 +165,40 @@ async function refresh() {
   document.getElementById("live-dot").style.background = "var(--pass)";
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function renderTraffic(tf){
+  const el = document.getElementById("traffic"), meta = document.getElementById("traffic-meta");
+  if(!el) return;
+  if(!tf){ el.innerHTML = '<p class="muted">No traffic rollup yet — it runs on a timer from the access logs.</p>'; if(meta) meta.textContent=""; return; }
+  const T = tf.totals || {};
+  const n = x => (x==null?0:x).toLocaleString();
+  if(meta) meta.textContent = n(T.requests) + " requests over " + tf.window_days + "d · " +
+    n(T.human) + " human · " + n(T.agent) + " agent · " + n(T.bot) + " bot · " + n(T.unique_ips) +
+    " unique sources" + (tf.geo_available ? "" : " · (add a geo dataset to see countries)");
+  const rows = list => (list && list.length)
+    ? list.map(r => '<div style="display:flex;justify-content:space-between;gap:.6rem;font-size:.86rem">' +
+        '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(r[0]) +
+        '</span><span class="muted">' + n(r[1]) + '</span></div>').join('')
+    : '<div class="muted" style="font-size:.86rem">—</div>';
+  const sub = t => '<div class="k" style="color:var(--accent);margin-top:.5rem">' + t + '</div>';
+  const order = [["human","Humans"],["agent","Agents"],["bot","Bots"]];
+  el.innerHTML = order.map(([k,label]) => {
+    const c = (tf.classes || {})[k] || {}, from = c.from || {}, going = c.going || {};
+    let f = "";
+    if(k === "human"){
+      if(from.countries && from.countries.length){ f += sub("from — countries") + rows(from.countries); }
+      f += sub("from — referrers") + rows(from.referrers);
+      f += sub("from — networks") + rows((from.networks||[]).slice(0,6));
+    } else {
+      f += sub("who") + rows(from.who);
+      if(from.referrers && from.referrers.length){ f += sub("referred by") + rows(from.referrers); }
+    }
+    return '<div class="stat" style="text-align:left">' +
+      '<div class="n" style="font-size:1.15rem">' + label + ' <span class="muted" style="font-size:.72rem">' +
+        n(c.requests) + " req · " + n(c.unique_ips) + ' src</span></div>' +
+      f + sub("going — pages") + rows(going.paths) + '</div>';
+  }).join('');
+}
 refresh();
 setInterval(refresh, 15000);
 </script>

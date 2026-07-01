@@ -70,6 +70,19 @@ def _read_integrity_status() -> Optional[Dict[str, Any]]:
         return None
 
 
+def _read_traffic() -> Optional[Dict[str, Any]]:
+    """The last traffic rollup (tools/traffic_rollup.py writes it) — where visitors come from and
+    go, split human/bot/agent. Advisory ops data (from the access logs), not the integrity chain."""
+    import json
+    base = os.environ.get("CONCORDANCE_DATA_DIR", "").strip() or "data"
+    path = os.path.join(base, "traffic.json")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return None
+
+
 def dashboard(config: EngineConfig) -> Dict[str, Any]:
     """The live state — what the operator needs to see at a glance. All best-effort."""
     try:
@@ -110,6 +123,7 @@ def dashboard(config: EngineConfig) -> Dict[str, Any]:
             "verified": chain.get("verified"),
         },
         "integrity": _read_integrity_status(),  # last scheduled check (tools/integrity_check.py)
+        "traffic": _read_traffic(),  # where visitors come from / go, human/bot/agent (tools/traffic_rollup.py)
         "activity": {
             "stats": telemetry.stats(),
             "recent": list(reversed(telemetry.recent(50))),  # newest first for the feed

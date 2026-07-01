@@ -1,0 +1,13 @@
+# Traffic rollup — reads the Caddy access logs and writes data/traffic.json for the keep.
+# Runs as root because /var/log/caddy/*.access.log is caddy:caddy 0600 (nh can't read it).
+# Oneshot, fired by nh-traffic.timer. Advisory ops data, not the integrity chain.
+[Unit]
+Description=Narrow Highway — traffic rollup (Caddy access logs -> data/traffic.json)
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/home/nh/concordance-2
+Environment=CONCORDANCE_DATA_DIR=/home/nh/concordance-2/data
+ExecStart=/home/nh/concordance-2/.venv/bin/python -m tools.traffic_rollup --days 7

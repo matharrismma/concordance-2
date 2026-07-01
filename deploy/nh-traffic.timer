@@ -1,0 +1,12 @@
+# Fires the traffic rollup every 10 minutes (and ~2 min after boot). Enable with:
+#   sudo systemctl enable --now nh-traffic.timer
+[Unit]
+Description=Run the Narrow Highway traffic rollup every 10 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=10min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -23,6 +23,7 @@ data/curriculum/
 data/audio/
 data/cards.jsonl
 data/*.jsonl
+data/*.json
 data/*.db
 data/strongs/
 data/*.db-wal
