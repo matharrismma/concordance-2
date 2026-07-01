@@ -47,3 +47,17 @@ footer.site { border-top: 1px solid var(--line); color: var(--muted); font-size:
 footer.site a { color: var(--accent); }
 .muted { color: var(--muted); }
 .mono { font-family: ui-monospace, Consolas, monospace; font-size: .85rem; }
+
+@media (max-width: 640px) {
+  header.site .wrap { flex-direction: column; align-items: flex-start; gap: .6rem; padding: .9rem 1rem !important; }
+  nav.site { display: flex; flex-wrap: wrap; }
+  nav.site a { margin: 0 1rem .1rem 0; font-size: .85rem; }
+  .wrap { padding: 1.4rem 1rem 3rem; }
+  h1 { font-size: 1.6rem; }
+  .tagline { font-size: 1.05rem; }
+  .lede { font-size: 1rem; }
+  .row { flex-direction: column; }
+  .row input, .row button, .row span { width: 100%; }
+  .row button { margin-top: 0; }
+  input, textarea, select { font-size: 16px; }  /* prevents iOS zoom-on-focus */
+}

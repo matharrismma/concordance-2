@@ -19,6 +19,7 @@ data/stacks/
 data/xrefs/
 data/characters/
 data/prophecy/
+data/curriculum/
 data/audio/
 data/cards.jsonl
 data/*.jsonl

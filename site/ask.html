@@ -66,9 +66,42 @@
   .threadlink .meta{color:var(--dim); font-size:.72rem}
   .hint{color:var(--dim); font-size:.8rem; margin-top:1rem}
   footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:2.4rem; padding-top:1.3rem; line-height:1.7}
+  .onboard{border:1px solid var(--line); border-left:2px solid var(--gold); padding:1.1rem 1.15rem; margin:2rem 0 0}
+  .onboard .olabel{color:var(--gold); letter-spacing:.28em; text-transform:uppercase; font-size:.62rem}
+  .onboard h2{font-weight:400; font-size:1.15rem; margin:.5rem 0 .3rem; letter-spacing:.02em}
+  .onboard p{color:var(--dim); font-size:.92rem; margin:0 0 .9rem}
+  .onboard .ex{display:block; width:100%; text-align:left; background:rgba(201,162,74,.04); border:1px solid var(--line);
+    color:var(--ink); font:inherit; font-size:.95rem; padding:.6rem .8rem; margin:.4rem 0; cursor:pointer; border-radius:2px}
+  .onboard .ex:hover{border-color:var(--gold); color:var(--gold)}
+  .onboard .ex .arrow{color:var(--goldsoft); float:right}
+  .onboard .dismiss{background:none; border:0; color:var(--dim); font:inherit; font-size:.74rem; letter-spacing:.1em;
+    text-transform:uppercase; cursor:pointer; margin-top:.6rem; padding:0}
+  .onboard .dismiss:hover{color:var(--gold)}
+  .hearline{margin-top:.7rem}
+  .hearbtn{background:none; border:1px solid var(--line); color:var(--gold); font:inherit; font-size:.66rem;
+    letter-spacing:.12em; text-transform:uppercase; padding:.22rem .7rem; cursor:pointer; border-radius:2px}
+  .hearbtn:hover{color:var(--ink); border-color:var(--gold)}
   @media (prefers-reduced-motion:no-preference){
     .turn{animation:rise .5s ease both}
     @keyframes rise{from{opacity:0; transform:translateY(7px)} to{opacity:1; transform:none}}
+  }
+  @media (max-width:640px){
+    body{font-size:16px; line-height:1.7}
+    header .bar{flex-direction:column; align-items:flex-start; gap:.6rem; padding:.9rem 1rem}
+    nav.site{display:flex; flex-wrap:wrap; margin:0}
+    nav.site a{margin:0 1rem .1rem 0; font-size:.68rem; letter-spacing:.1em}
+    .wrap{padding:1rem 1rem 3rem}
+    .kicker{margin-top:1.8rem}
+    h1{font-size:1.6rem}
+    .lede{font-size:.98rem}
+    .askbar{padding:.9rem 0 1rem}
+    .askrow{flex-wrap:wrap}
+    .askrow input{flex:1 1 100%; padding:.75rem .7rem}
+    .askrow button{flex:1 1 100%; padding:.6rem 0; border-top:1px solid var(--line)}
+    .deckbar{flex-direction:column; align-items:flex-start; gap:.5rem}
+    .deckbar .state{max-width:100%}
+    .deckbar button{margin:0 1.1rem 0 0}
+    .onboard .ex .arrow{float:none; margin-left:.4rem}
   }
 </style>
 </head>
@@ -84,6 +117,8 @@
   <p class="lede">It finds, verifies, and cites — it does not make things up, and it hands you the sources.
   We keep the thread, so you never start over: come back and pull up right where you were. Your personal
   details are stripped before anything is sent. A window to the truth, not the source of it.</p>
+
+  <div id="onboard" class="onboard" hidden></div>
 
   <div class="chain" id="chain"></div>
   <p class="hint" id="hint">Begin anywhere — a claim to check (<span class="dim">2+2 = 4</span>), a verse
@@ -114,9 +149,12 @@
 </main>
 
 <script src="redact.js"></script>
+<script src="speak.js"></script>
+<script src="gate.js"></script>
 <script>
 const API = "";
 const TID_KEY = "nh_thread";
+const ONBOARD_KEY = "nh_onboarded";
 let threadId = localStorage.getItem(TID_KEY) || null;
 
 const chainEl = document.getElementById('chain');
@@ -135,16 +173,25 @@ function renderCards(arr){
     esc(c.title||c.id)+'<div class="dim" style="font-size:.92rem">'+esc((c.snippet||'').slice(0,180))+'</div></div>').join('');
 }
 
+// A "hear it" affordance for spoken prose (floor via Web Speech, ceiling via /speak).
+// The text rides in a data attribute (esc-safe); a delegated handler reads it back verbatim.
+function hearBtn(text){
+  text = String(text==null?'':text).trim();
+  if(!text || !(window.NHSpeak && NHSpeak.available)) return '';
+  return '<div class="hearline"><button class="hearbtn" data-hear="'+esc(text)+'">▶ hear it</button></div>';
+}
+
 function render(d){
   if(!d || typeof d!=='object') return '<span class="dim">(no answer)</span>';
   const note = d.note ? '<div class="note">'+esc(d.note)+'</div>' : '';
   if(d.kind === 'crisis'){
     return '<div class="crisis"><strong>'+esc(d.message)+'</strong><div style="margin-top:.6rem">'+
       (d.resources||[]).map(r => '· '+(r.ref?'<a href="'+esc(r.ref)+'">'+esc(r.label)+'</a>':esc(r.label))).join('<br>')+
-      '</div></div>';  // crisis stands alone — help first, never enriched
+      '</div></div>';  // crisis stands alone — help first, never enriched, never spoken over
   }
-  let html;
+  let html, hear='';
   if(d.kind === 'ultimate'){
+    hear = hearBtn(d.message);
     html = esc(d.message)+
       '<div style="margin-top:.7rem">'+(d.scripture||[]).map(v =>
         '<div class="verse"><span class="ref">'+esc(v.ref)+'</span> — '+esc(v.text)+'</div>').join('')+'</div>'+
@@ -155,18 +202,24 @@ function render(d){
     const v=d.verify, verdict=v.verdict||'ERROR';
     const cls = verdict==='HOLDS'?'holds':(verdict==='BROKEN'?'broken':'error');
     const step = (v.trail&&v.trail[0])||{};
+    const detail = step.detail||v.detail||'';
     const seal = v.seal ? '<div class="receipt">seal: <a href="'+esc(v.seal.cite_url)+'">'+
       esc((v.seal.content_hash||'').slice(0,20))+'…</a> — re-checkable, tamper-evident</div>' : '';
     html = '<div class="verdict '+cls+'">'+(verdict==='HOLDS'?'✓ Holds':(verdict==='BROKEN'?'✗ Broken':esc(verdict)))+'</div>'+
-      '<div class="trail">'+esc(step.detail||v.detail||'')+'</div>'+seal;
+      '<div class="trail">'+esc(detail)+'</div>'+seal;
+    hear = hearBtn(((verdict==='HOLDS'?'Holds. ':verdict==='BROKEN'?'Broken. ':'')+detail).trim());
   } else if(d.scripture){
     const s=d.scripture;
-    html = '<div class="verse"><span class="ref">'+esc(s.ref||'')+'</span> — '+esc(s.text||s.error||'(not found)')+'</div>';
+    const vt = s.text||s.error||'(not found)';
+    html = '<div class="verse"><span class="ref">'+esc(s.ref||'')+'</span> — '+esc(vt)+'</div>';
+    if(!s.error) hear = hearBtn(((s.ref?s.ref+'. ':'')+vt));
   } else if(d.word_study){
     const w=d.word_study;
+    const def = w.definition||w.gloss||w.error||'';
     html = '<div class="cite"><strong>'+esc(w.lemma||w.strongs||'')+'</strong> '+esc(w.transliteration||'')+
-      '<div>'+esc(w.definition||w.gloss||w.error||'')+'</div>'+
+      '<div>'+esc(def)+'</div>'+
       (w.occurrences!=null?'<div class="dim" style="font-size:.88rem">'+esc(w.occurrences)+' occurrences</div>':'')+'</div>';
+    if(!w.error) hear = hearBtn(((w.lemma||w.transliteration||'')+'. '+def).trim());
   } else if(d.kind === 'found'){
     html = (d.results&&d.results.length ? renderCards(d.results)
       : '<span class="dim">Nothing in the keeping matched — try different words.</span>');
@@ -178,7 +231,7 @@ function render(d){
     '</span> — '+esc(d.threshold.text)+'<div style="color:#c9a24a;font-size:.85rem;margin-top:.4rem">'+esc(d.threshold.note)+'</div></div>' : '';
   const refs = (d.scripture_refs&&d.scripture_refs.length)
     ? '<div class="role" style="margin-top:1rem">a word on this</div>'+renderCards(d.scripture_refs) : '';
-  return thr + html + note + refs;
+  return thr + html + hear + note + refs;
 }
 
 function addTurn(userText){
@@ -221,6 +274,9 @@ async function ask(){
     const payload = {text: clean};
     if(threadId) payload.thread_id = threadId;
     const r = await fetch(API+'/ask', {method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(payload)});
+    // A witness request before the Gate has opened returns a closed gate — show the invitation to seek,
+    // never a dead end. Asking about God or Scripture is itself what opens the way (Matthew 7:7).
+    if(window.NHGate && await NHGate.isClosed(r)) return;
     const d = await r.json();
     if(d.thread_id){ threadId=d.thread_id; localStorage.setItem(TID_KEY, threadId); }
     body.className='body'; body.innerHTML=render(d);
@@ -262,6 +318,11 @@ async function searchDecks(q){
 document.getElementById('askbtn').addEventListener('click', ask);
 input.addEventListener('keydown', e => { if(e.key==='Enter') ask(); });
 document.getElementById('newbtn').addEventListener('click', newThread);
+// "hear it": speak the found/verified prose — browser voice (floor) or the operator's voice (ceiling).
+chainEl.addEventListener('click', e => {
+  const h = e.target.closest('.hearbtn');
+  if(h && window.NHSpeak){ NHSpeak.play(h.dataset.hear); }
+});
 document.getElementById('decktoggle').addEventListener('click', () => {
   panel.classList.toggle('open');
   if(panel.classList.contains('open')){ loadDeckList(); deckSearch.focus(); }
@@ -280,7 +341,47 @@ verifyBtn.addEventListener('click', async () => {
   verifyBtn.textContent='verify this deck';
 });
 
+// ── first-run onboarding ─────────────────────────────────────────────
+// An INVITATION to seek — not a switch. Three real prompts you can tap to run; the last one
+// naturally turns the conversation toward God, and so opens the Gate (Ask/Seek/Knock, Matt 7:7).
+// Shown once (localStorage flag), and only on a genuinely new, empty conversation.
+const onboardEl = document.getElementById('onboard');
+const EXAMPLES = [
+  { label: 'Is 2 + 2 = 4?', run: '2 + 2 = 4' },
+  { label: 'Read John 3:16', run: 'John 3:16' },
+  { label: 'What does the Bible say about grace?', run: 'What does the Bible say about grace?' },
+];
+function runExample(text){
+  input.value = text;
+  dismissOnboard();      // clearing the invitation once they begin to seek
+  ask();
+}
+function dismissOnboard(){
+  onboardEl.hidden = true;
+  onboardEl.innerHTML = '';
+  try{ localStorage.setItem(ONBOARD_KEY, '1'); }catch(e){}
+}
+function maybeOnboard(){
+  if(threadId) return;                                   // returning to a kept conversation — no onboarding
+  try{ if(localStorage.getItem(ONBOARD_KEY)) return; }catch(e){ return; }
+  onboardEl.hidden = false;
+  onboardEl.innerHTML =
+    '<div class="olabel">Ask · Seek · Knock</div>'+
+    '<h2>Begin with a question</h2>'+
+    '<p>Tap one to try it — or type your own above. The engine finds, verifies, and cites; '+
+      'it never makes the answer up.</p>'+
+    EXAMPLES.map((ex,i) => '<button class="ex" data-ex="'+i+'">'+esc(ex.label)+
+      '<span class="arrow">run →</span></button>').join('')+
+    '<button class="dismiss" id="obdismiss">I’ll start on my own</button>';
+}
+onboardEl.addEventListener('click', e => {
+  const b = e.target.closest('.ex');
+  if(b){ const ex = EXAMPLES[+b.dataset.ex]; if(ex) runExample(ex.run); return; }
+  if(e.target.closest('#obdismiss')) dismissOnboard();
+});
+
 loadThread();
+maybeOnboard();
 </script>
 </body>
 </html>

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learn to Read — Narrow Highway</title>
+<meta name="description" content="A reading tutor that grows with the student. The lessons are found and presented, one continuing path at a time — never generated, and never a grade on a child. A window to reading, not a wall.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --fail:#c98a8a;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.11), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink);
+    font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:760px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.2rem; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:760px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.66rem; margin-top:2.4rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2rem; margin:.5rem 0 .4rem}
+  .lede{color:var(--dim); font-size:1.02rem; max-width:40rem}
+  .row{display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1.6rem}
+  .btn{background:transparent; border:1px solid var(--line); color:var(--gold); font:inherit; letter-spacing:.14em; text-transform:uppercase; font-size:.72rem; padding:.7rem 1.1rem; cursor:pointer}
+  .btn:hover{color:var(--ink); border-color:var(--gold)}
+  .hint{color:var(--dim); font-size:.8rem; margin-top:.7rem}
+
+  .lesson{margin:2.2rem 0 0}
+  .lpos{color:var(--goldsoft); letter-spacing:.2em; text-transform:uppercase; font-size:.62rem; margin-bottom:.4rem}
+  .ltitle{color:var(--gold); font-size:1.35rem; margin-bottom:.2rem}
+  .ltrack{color:var(--dim); font-size:.78rem; font-style:italic; margin-bottom:1rem}
+  .slabel{color:var(--goldsoft); letter-spacing:.2em; text-transform:uppercase; font-size:.62rem; margin:1.1rem 0 .5rem}
+  .rule{line-height:1.8}
+  .example{display:block; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid var(--line); color:var(--ink); font:inherit; padding:.45rem 0; cursor:pointer; font-size:1rem}
+  .example:hover{color:var(--gold)}
+  .decodable{border-left:2px solid var(--line); padding:.7rem 1rem; margin-top:.6rem; font-size:1.1rem; cursor:pointer}
+  .decodable:hover{background:rgba(201,162,74,.05)}
+  .hear{background:none; border:1px solid var(--line); color:var(--gold); font:inherit; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; padding:.2rem .6rem; cursor:pointer; margin-left:.6rem}
+  .hear:hover{color:var(--ink); border-color:var(--gold)}
+  .checks li, .wedges li{margin:.3rem 0}
+  .navrow{display:flex; gap:.6rem; margin-top:1.8rem; border-top:1px solid var(--line); padding-top:1.2rem}
+
+  .ribbon{margin:1.4rem 0 0; border:1px solid var(--line); padding:.7rem .9rem; font-size:.82rem; color:var(--dim)}
+  .ribbon .core{color:var(--gold); letter-spacing:.14em; text-transform:uppercase; font-size:.68rem}
+  .mastery{color:var(--goldsoft)}
+  .mastery .seal{color:var(--dim); font-size:.72rem; font-style:italic; margin-left:.5rem}
+
+  .guard{margin:1.4rem 0 0; border:1px solid var(--line); border-left:3px solid var(--goldsoft); padding:1rem 1.1rem; display:none}
+  .guard.open{display:block}
+  .guard .gmsg{color:var(--ink)}
+  .guard .glabel{color:var(--goldsoft); letter-spacing:.2em; text-transform:uppercase; font-size:.62rem; margin:.8rem 0 .4rem}
+  .guard ul{margin:.2rem 0 0 1rem; color:var(--dim); font-size:.92rem}
+  .dim{color:var(--dim)}
+  footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:2.6rem; padding-top:1.3rem; line-height:1.7}
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow <span class="road">Highway</span></a>
+  <nav class="site"><a href="/ask.html">Ask</a><a href="/bible.html">Bible</a><a href="/read.html">Read</a><a href="/characters.html">Dictionary</a><a href="/journal.html">Journal</a><a href="/steward.html">Steward</a><a href="/#verify">Verify</a><a href="/library.html">Library</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="kicker">The Coach</div>
+  <h1>Learn to Read</h1>
+  <p class="lede">A reading tutor that grows with the student. Every lesson is <em>found and presented</em>,
+  one continuing path at a time — never generated, and never a grade on a child. A window to reading,
+  not a wall; the goal is the day the child needs the tool less.</p>
+
+  <div class="row">
+    <button class="btn" id="startbtn">Begin the path</button>
+    <button class="btn" id="mapbtn">See the whole path</button>
+  </div>
+  <p class="hint" id="hint">Tap a word, an example, or the sentence to hear it read aloud.</p>
+
+  <div class="ribbon" id="ribbon" hidden></div>
+  <div class="lesson" id="lesson"></div>
+  <div class="guard" id="guard"></div>
+
+  <footer class="site">
+    <p>The curriculum is the offline Read-school teaching, ported verbatim. The engine finds, orders,
+    and presents the lessons; it does not generate them, and it will never grade, rank, or label a child.</p>
+    <p>Pronunciation is a synthesized guide, not a native speaker. A window to reading, not a wall.
+    <a href="https://narrowhighway.org">narrowhighway.org</a></p>
+  </footer>
+</main>
+
+<script src="speak.js"></script>
+<script src="gate.js"></script>
+<script>
+const API = "";
+const lessonEl = document.getElementById('lesson');
+const ribbonEl = document.getElementById('ribbon');
+const guardEl  = document.getElementById('guard');
+const hintEl   = document.getElementById('hint');
+let _completed = [];        // ids the learner has finished this session (kept client-side)
+let _thread = null;         // the continuing lesson chain (threads.py); one path, never restarts
+
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
+
+async function getJSON(path){
+  const r = await fetch(API + path);
+  if(!r.ok){ if(window.NHGate) await NHGate.isClosed(r); return null; }
+  try { return await r.json(); } catch(e){ return null; }
+}
+
+// The coach guardrail lives on the SERVER; but if a caller ever posts a grading question here, the
+// server returns kind:grade_declined — we render it as a gentle pointer, never a verdict on the child.
+function renderGuard(g){
+  let html = '<div class="gmsg">' + esc(g.message) + '</div>';
+  if(g.point_to && g.point_to.length){
+    html += '<div class="glabel">where real help is</div><ul>' +
+      g.point_to.map(p => '<li>' + esc(p) + '</li>').join('') + '</ul>';
+  }
+  if(g.do_instead){ html += '<div class="glabel">what we can do</div><div class="dim">' + esc(g.do_instead) + '</div>'; }
+  guardEl.innerHTML = html;
+  guardEl.classList.add('open');
+}
+
+function renderLesson(d){
+  guardEl.classList.remove('open');
+  const u = d.unit || d;   // /coach/next wraps the unit; /coach/unit returns it directly
+  if(!u || !u.id){
+    lessonEl.innerHTML = '<p class="dim">' + esc((d && d.message) || 'No lesson found.') + '</p>';
+    return;
+  }
+  const pos = (d.position && d.of) ? ('Unit ' + esc(d.position) + ' of ' + esc(d.of)) :
+              (u.unit_seq ? ('Unit ' + esc(u.unit_seq)) : 'Lesson');
+  let html = '<div class="lpos">' + pos + '</div>' +
+             '<div class="ltitle">' + esc(u.title || u.id) + '</div>' +
+             (u.track ? '<div class="ltrack">track: ' + esc(u.track) + '</div>' : '');
+  if(u.rule){ html += '<div class="slabel">the rule</div><div class="rule">' + esc(u.rule) + '</div>'; }
+  if(u.examples && u.examples.length){
+    html += '<div class="slabel">examples — tap to hear</div>' +
+      u.examples.map(x => '<button class="example" data-speak="' + esc(x) + '">' + esc(x) + '</button>').join('');
+  }
+  if(u.decodable_sentence){
+    html += '<div class="slabel">read this sentence</div>' +
+      '<div class="decodable" data-speak="' + esc(u.decodable_sentence) + '">' + esc(u.decodable_sentence) +
+      '<button class="hear" data-speak="' + esc(u.decodable_sentence) + '">▶ hear</button></div>';
+  }
+  if(u.check && u.check.length){
+    html += '<div class="slabel">check for understanding</div><ul class="checks">' +
+      u.check.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul>';
+  }
+  if(u.wedges && u.wedges.length){
+    html += '<div class="slabel">gentle helps</div><ul class="wedges">' +
+      u.wedges.map(w => '<li>' + esc(w) + '</li>').join('') + '</ul>';
+  }
+  html += '<div class="navrow">' +
+    '<button class="btn" id="donebtn" data-id="' + esc(u.id) + '">I finished this — next lesson</button>' +
+    '<button class="btn" id="allbtn">See the whole path</button></div>';
+  lessonEl.innerHTML = html;
+  lessonEl.dataset.cur = u.id;
+}
+
+function renderMastery(){
+  if(!_completed.length){ ribbonEl.hidden = true; return; }
+  ribbonEl.hidden = false;
+  ribbonEl.innerHTML = '<span class="core">progress</span> ' +
+    '<span class="mastery">' + esc(_completed.length) + ' unit' + (_completed.length===1?'':'s') +
+    ' completed</span>';
+}
+
+async function start(){
+  hintEl.style.display = 'none';
+  lessonEl.innerHTML = '<p class="dim">finding the first lesson…</p>';
+  const d = await getJSON('/coach/next');           // after=None -> the first unit
+  if(d) renderLesson(d);
+}
+
+async function goNext(afterId){
+  lessonEl.innerHTML = '<p class="dim">finding the next lesson…</p>';
+  const d = await getJSON('/coach/next?after=' + encodeURIComponent(afterId));
+  if(!d){ lessonEl.innerHTML = '<p class="dim">Could not load the next lesson.</p>'; return; }
+  if(d.kind === 'coach_complete'){
+    lessonEl.innerHTML = '<div class="lpos">the path</div><div class="ltitle">Well done.</div>' +
+      '<p class="rule">' + esc(d.message) + '</p>';
+    return;
+  }
+  renderLesson(d);
+}
+
+async function showMap(){
+  hintEl.style.display = 'none';
+  lessonEl.innerHTML = '<p class="dim">gathering the whole path…</p>';
+  const d = await getJSON('/coach/overview');
+  if(!d || !d.units){ lessonEl.innerHTML = '<p class="dim">Could not load the path.</p>'; return; }
+  let html = '<div class="lpos">the whole path — ' + esc(d.count) + ' units</div>';
+  html += d.units.map(u =>
+    '<button class="example" data-unit="' + esc(u.id) + '">' + esc(u.title || u.id) + '</button>').join('');
+  lessonEl.innerHTML = html;
+}
+
+async function openUnit(id){
+  lessonEl.innerHTML = '<p class="dim">opening the lesson…</p>';
+  const d = await getJSON('/coach/unit?id=' + encodeURIComponent(id));
+  if(d) renderLesson(d);
+}
+
+// ── events (delegation) ─────────────────────────────────────────────
+document.getElementById('startbtn').addEventListener('click', start);
+document.getElementById('mapbtn').addEventListener('click', showMap);
+
+document.body.addEventListener('click', e => {
+  const hear = e.target.closest('.hear');
+  if(hear){ if(window.NHSpeak) NHSpeak.play(hear.dataset.speak); return; }
+  const done = e.target.closest('#donebtn');
+  if(done){
+    const id = done.dataset.id;
+    if(id && _completed.indexOf(id) < 0){ _completed.push(id); renderMastery(); }
+    goNext(id);
+    return;
+  }
+  if(e.target.closest('#allbtn')){ showMap(); return; }
+  const ex = e.target.closest('.example');
+  if(ex){
+    if(ex.dataset.unit){ openUnit(ex.dataset.unit); return; }
+    if(window.NHSpeak && ex.dataset.speak) NHSpeak.play(ex.dataset.speak);
+    return;
+  }
+  const dec = e.target.closest('.decodable');
+  if(dec && !e.target.closest('.hear')){ if(window.NHSpeak) NHSpeak.play(dec.dataset.speak); return; }
+});
+</script>
+</body>
+</html>

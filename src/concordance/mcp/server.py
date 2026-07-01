@@ -87,6 +87,69 @@ def _secular_tools() -> List[dict]:
         {"name": "steward_cost_destroyed",
          "description": "Steward — cost destroyed: money you did NOT spend (was -> now), kept in your currency.",
          "inputSchema": {"type": "object", "properties": {"items": {"type": "array"}}, "required": ["items"]}},
+        {"name": "coach_overview",
+         "description": ("Coach (K-3 reading tutor) — the whole path: unit count, tracks, and the "
+                         "ordered unit briefs. Found + presented verbatim; never generated, never grades a child."),
+         "inputSchema": {"type": "object", "properties": {}}},
+        {"name": "coach_unit",
+         "description": "Coach — one unit, VERBATIM as authored (rule, examples, decodable sentence, checks).",
+         "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
+        {"name": "coach_next",
+         "description": ("Coach — the next lesson to teach, deterministically. Omit `after` for the "
+                         "first unit; pass a unit id for the one that follows it."),
+         "inputSchema": {"type": "object", "properties": {"after": {"type": "string"}}}},
+        {"name": "coach_mastery",
+         "description": ("Coach — seal an HONEST INTEGER count of completed units (a receipt for "
+                         "progress, never a grade on the child). Returns a re-checkable seal."),
+         "inputSchema": {"type": "object", "properties": {"completed": {"type": "array"}}}},
+        {"name": "coach_guidance",
+         "description": "Coach — what it does and the boundary it will not cross (never grades a child).",
+         "inputSchema": {"type": "object", "properties": {}}},
+        {"name": "identity_create",
+         "description": ("Mint a SOVEREIGN, PORTABLE identity the person OWNS — {id, public_key, "
+                         "private_key, signing_available}. The private_key is returned ONCE and is "
+                         "NEVER stored server-side; hand it to the user and forget it."),
+         "inputSchema": {"type": "object", "properties": {}}},
+        {"name": "identity_verify",
+         "description": "Verify a signature over a message against a public key (never raises; True/False).",
+         "inputSchema": {"type": "object", "properties": {
+             "public_key": {"type": "string"}, "message": {"type": "string"}, "sig": {"type": "string"}},
+             "required": ["public_key", "message", "sig"]}},
+        {"name": "identity_fingerprint",
+         "description": "Derive the stable public fingerprint id from a public key (deterministic).",
+         "inputSchema": {"type": "object", "properties": {"public_key": {"type": "string"}},
+                         "required": ["public_key"]}},
+        {"name": "badges_issue",
+         "description": ("Issue a badge over already-sealed checks — a re-checkable receipt that points "
+                         "at N seals that STILL STAND. States EXACTLY N; NEVER a competency claim."),
+         "inputSchema": {"type": "object", "properties": {
+             "seal_hashes": {"type": "array"}, "subject_id": {"type": "string"},
+             "title": {"type": "string"}, "private_key": {"type": "string"}},
+             "required": ["seal_hashes"]}},
+        {"name": "badges_verify",
+         "description": ("Re-check a badge from the store — re-verifies every seal it references and "
+                         "returns the count that still stands (N recomputed, not trusted)."),
+         "inputSchema": {"type": "object", "properties": {"hash": {"type": "string"}}, "required": ["hash"]}},
+        {"name": "self_attest",
+         "description": ("Record a person's OWN words about their study — a DISTINCTLY TYPED record that "
+                         "can NEVER count as a sealed check or satisfy an auto-graded requirement."),
+         "inputSchema": {"type": "object", "properties": {
+             "subject_id": {"type": "string"}, "statement": {"type": "string"}, "study": {"type": "string"}},
+             "required": ["subject_id", "statement"]}},
+        {"name": "study_create",
+         "description": ("Create/extend a shared study (superposition stack) — each entry mints ONE card "
+                         "that lives once and is referenced by key; no duplication."),
+         "inputSchema": {"type": "object", "properties": {
+             "key": {"type": "string"}, "cards": {"type": "array"}}, "required": ["key"]}},
+        {"name": "study_export",
+         "description": "Export a study as a self-contained, portable bundle (optionally signed).",
+         "inputSchema": {"type": "object", "properties": {
+             "key": {"type": "string"}, "private_key": {"type": "string"}}, "required": ["key"]}},
+        {"name": "study_import",
+         "description": "Import an exported study bundle — re-materializes its cards (each lives once).",
+         "inputSchema": {"type": "object", "properties": {
+             "bundle": {"type": "object"}, "key": {"type": "string"},
+             "verify_signature": {"type": "boolean"}}, "required": ["bundle"]}},
     ]
 
 
@@ -208,6 +271,58 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
     if name == "steward_cost_destroyed":
         from .. import steward
         return steward.cost_destroyed(args.get("items") or [])
+    if name == "coach_overview":
+        from .. import coach  # find + present the curriculum; never generate, never grade
+        return coach.overview()
+    if name == "coach_unit":
+        from .. import coach
+        return coach.unit(args.get("id", ""))
+    if name == "coach_next":
+        from .. import coach
+        return coach.next_unit(args.get("after"))
+    if name == "coach_mastery":
+        # Seal the HONEST integer count of completed units — same receipts path the endpoint uses.
+        from .. import coach, receipts
+        out = coach.mastery(args.get("completed") or [])
+        m = coach.mastery_result(args.get("completed") or [])
+        out["seal"] = receipts.attach(m["result"], config=config, domain="mathematics").get("seal")
+        return out
+    if name == "coach_guidance":
+        from .. import coach
+        return coach.guidance()
+    if name == "identity_create":
+        # Sovereign: the private_key is returned ONCE to the caller and NEVER persisted/logged here.
+        from .. import identity
+        return identity.create_identity()
+    if name == "identity_verify":
+        from .. import identity
+        return {"ok": bool(identity.verify(args.get("public_key", ""), args.get("message", ""),
+                                           args.get("sig", "")))}
+    if name == "identity_fingerprint":
+        from .. import identity
+        return {"id": identity.fingerprint(args.get("public_key", ""))}
+    if name == "badges_issue":
+        # private_key (if passed) is in-memory only — used to attest, NEVER persisted or echoed.
+        from .. import badges
+        return badges.issue_badge(args.get("seal_hashes") or [], subject_id=args.get("subject_id"),
+                                  title=str(args.get("title") or ""), private_key=args.get("private_key"))
+    if name == "badges_verify":
+        from .. import badges
+        return badges.verify_badge(args.get("hash", ""))
+    if name == "self_attest":
+        from .. import badges
+        return badges.self_attest(str(args.get("subject_id") or ""),
+                                  str(args.get("statement") or ""), study=args.get("study"))
+    if name == "study_create":
+        from .. import badges
+        return badges.study_create(str(args.get("key") or ""), args.get("cards") or [])
+    if name == "study_export":
+        from .. import badges
+        return badges.study_export(str(args.get("key") or ""), private_key=args.get("private_key"))
+    if name == "study_import":
+        from .. import badges
+        return badges.study_import(args.get("bundle") or {}, study_key=args.get("key"),
+                                   verify_signature=bool(args.get("verify_signature")))
     if name == "resolve" and config.witness_surfaced:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.resolve_ref(args.get("ref", ""))

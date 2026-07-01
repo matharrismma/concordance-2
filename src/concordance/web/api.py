@@ -17,7 +17,7 @@ Endpoints:
 """
 from __future__ import annotations
 
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from .. import __version__, cas, corpus, telemetry
 from ..config import EngineConfig
@@ -100,6 +100,142 @@ def render_seal_html(content_hash: str, record: Optional[Dict[str, Any]]) -> Tup
             f"re-check: <span class=mono>GET /seal?hash={short}…</span></p></section>"
             f"<footer class=site><p>Every answer is a receipt, not \"trust me.\" The engine verifies; "
             f"it does not generate the answer. <a href=/>Narrow Highway →</a></p></footer></main></body></html>")
+    return 200, html
+
+
+def render_badge_html(badge_hash: str, verify_result: Optional[Dict[str, Any]]) -> Tuple[int, str]:
+    """Server-render a badge as a crawlable, citable HTML page (data in the markup) — MIRRORS
+    render_seal_html. A badge points at N seals that STILL STAND; the page states EXACTLY N (the
+    result's own copy, VERBATIM — no competency noun) and links each sealed check to its /s/<hash>
+    seal page so anyone can re-check the evidence. (status, html)."""
+    short = _esc((badge_hash or "")[:16])
+    head = ("<!doctype html><html lang=en><head><meta charset=utf-8>"
+            "<meta name=viewport content=\"width=device-width,initial-scale=1\">"
+            "<link rel=stylesheet href=/styles.css>")
+    if verify_result is None or not verify_result.get("ok"):
+        html = (f"{head}<title>Badge not found — Narrow Highway</title><meta name=robots content=noindex>"
+                f"</head><body><main class=wrap><h1>No such badge</h1>"
+                f"<p class=muted>No badge matches <span class=mono>{short}…</span>. A badge is "
+                f"content-addressed — if it existed, this hash would fetch it, and every seal it "
+                f"points at would re-verify.</p>"
+                f"<p><a href=/>← Narrow Highway</a></p></main></body></html>")
+        return 404, html
+    n = verify_result.get("checks", 0)
+    copy = _esc(verify_result.get("copy") or "")   # the result's own copy — VERBATIM, no competency noun
+    title = _esc(verify_result.get("title") or "")
+    rows = []
+    for h in verify_result.get("sealed_checks", []):
+        hs = _esc(str(h))
+        hshort = _esc(str(h)[:16])
+        rows.append(f"<div class=result><a class=mono href=\"/s/{hs}\">{hshort}… ↗</a>"
+                    f"<div class=trail>a sealed verification that re-verifies in the store</div></div>")
+    checks_html = "".join(rows) or "<p class=muted>(no sealed checks stand)</p>"
+    desc = (f"A re-checkable badge — {copy}, content-addressed {short}. Every referenced seal "
+            f"re-verifies from the floor. Narrow Highway: a receipt you own, not a rank we grant.")
+    heading = title if title else "The badge"
+    html = (f"{head}<title>Badge {short}… · {copy} · Narrow Highway</title>"
+            f"<meta name=description content=\"{desc}\">"
+            f"<meta property=\"og:title\" content=\"Badge · {copy}\">"
+            f"<meta property=\"og:description\" content=\"{desc}\"></head><body>"
+            f"<header class=site><div class=wrap style=\"padding:.9rem 1.2rem;display:flex;"
+            f"justify-content:space-between;align-items:center\"><a class=brand href=/>Narrow"
+            f"<span class=road>Highway</span></a><nav class=site><a href=/#verify>Verify</a>"
+            f"<a href=/seal.html>Seal</a></nav></div></header><main class=wrap>"
+            f"<h1>{_esc(heading)}</h1><div class=\"verdict holds\" style=\"font-size:1.4rem\">{copy}</div>"
+            f"<p class=lede>A badge is a receipt you OWN. It claims no mastery, skill, or level — only "
+            f"that {_esc(str(n))} sealed verifications still stand when you re-check them. The evidence "
+            f"is the seals below; re-fetch any one and its bytes must match, or it does not count.</p>"
+            f"<section><h2>Sealed checks ({_esc(str(n))})</h2>{checks_html}</section>"
+            f"<section class=card><div class=muted style=\"font-size:.8rem\">badge hash (content address)</div>"
+            f"<div class=mono style=\"word-break:break-all\">{_esc(badge_hash)}</div>"
+            f"<p style=\"margin-top:.6rem\"><a href=\"/badges?hash={_esc(badge_hash)}\">raw JSON ↗</a> · "
+            f"re-check: <span class=mono>GET /badges?hash={short}…</span></p></section>"
+            f"<footer class=site><p>A badge reports, re-checkably, how many verifications you sealed — "
+            f"nothing about how good you are. Success is needing the tool less (John 3:30). "
+            f"<a href=/>Narrow Highway →</a></p></footer></main></body></html>")
+    return 200, html
+
+
+def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int, str]:
+    """Server-render a keeping card as a crawlable, citable HTML page (data IN the markup, not
+    client-JS) — MIRRORS render_seal_html. The first artifact of 2.0 standing alone: only FOUND
+    fields render (title, body, the cited source line) — cite-fair, generate nothing. Carries a
+    canonical link, description + og tags, a schema.org CreativeWork (with citation) JSON-LD, and a
+    cross-link to /search. 404 page carries meta robots noindex. (status, html)."""
+    import json as _json
+    short = _esc((card_id or "")[:24])
+    head = ("<!doctype html><html lang=en><head><meta charset=utf-8>"
+            "<meta name=viewport content=\"width=device-width,initial-scale=1\">"
+            "<link rel=stylesheet href=/styles.css>")
+    if card is None:
+        html = (f"{head}<title>Card not found — Narrow Highway</title><meta name=robots content=noindex>"
+                f"</head><body><main class=wrap><h1>No such record</h1>"
+                f"<p class=muted>No card matches <span class=mono>{short}</span> in the keeping.</p>"
+                f"<p><a href=/search>← Search the keeping</a></p></main></body></html>")
+        return 404, html
+    title = _esc(card.get("title") or card_id)
+    body_txt = card.get("body") or ""
+    body_html = f"<p>{_esc(body_txt)}</p>" if body_txt else ""
+    src = card.get("source") or {}
+    src_ref = str(src.get("ref") or "").strip()
+    src_label = str(src.get("label") or "").strip()
+    src_url = str(src.get("url") or "").strip()
+    # The cited source line — cite-fair: render only what is found, generate nothing.
+    cite_bits = []
+    if src_label:
+        cite_bits.append(_esc(src_label))
+    if src_ref:
+        cite_bits.append(_esc(src_ref))
+    cite_text = " · ".join(cite_bits)
+    if cite_text and src_url:
+        source_html = (f"<div class=muted style=\"font-size:.8rem\">source</div>"
+                       f"<div><a href=\"{_esc(src_url)}\">{cite_text} ↗</a></div>")
+    elif cite_text:
+        source_html = (f"<div class=muted style=\"font-size:.8rem\">source</div>"
+                       f"<div>{cite_text}</div>")
+    else:
+        source_html = ""
+    # Related seal cross-link, if this card carries one (found only).
+    seal_hash = str((card.get("extra") or {}).get("seal_hash") or card.get("source_hash") or "").strip()
+    canonical = f"/card/{_esc(card_id)}"
+    desc = _esc((body_txt or (card.get("title") or ""))[:200])
+    # schema.org CreativeWork — a citation-carrying record, machine-readable.
+    ld: Dict[str, Any] = {"@context": "https://schema.org", "@type": "CreativeWork",
+                          "identifier": card_id, "name": card.get("title") or card_id}
+    if body_txt:
+        ld["text"] = body_txt
+    if src_label or src_ref or src_url:
+        citation = {"@type": "CreativeWork"}
+        if src_label:
+            citation["name"] = src_label
+        if src_url:
+            citation["url"] = src_url
+        if src_ref:
+            citation["citation"] = src_ref
+        ld["citation"] = citation
+    ld_json = _esc(_json.dumps(ld, ensure_ascii=False))
+    related = (f"<p style=\"margin-top:.6rem\"><a href=\"/search?q={_esc((card.get('title') or '')[:60])}\">"
+               f"related in the keeping ↗</a>")
+    if seal_hash:
+        related += f" · <a href=\"/s/{_esc(seal_hash)}\">its seal ↗</a>"
+    related += f" · <a href=\"/card?id={_esc(card_id)}\">raw JSON ↗</a></p>"
+    html = (f"{head}<title>{title} · Narrow Highway</title>"
+            f"<link rel=canonical href=\"{canonical}\">"
+            f"<meta name=description content=\"{desc}\">"
+            f"<meta property=\"og:title\" content=\"{title}\">"
+            f"<meta property=\"og:description\" content=\"{desc}\">"
+            f"<meta property=\"og:type\" content=article>"
+            f"<script type=\"application/ld+json\">{ld_json}</script></head><body>"
+            f"<header class=site><div class=wrap style=\"padding:.9rem 1.2rem;display:flex;"
+            f"justify-content:space-between;align-items:center\"><a class=brand href=/>Narrow"
+            f"<span class=road>Highway</span></a><nav class=site><a href=/search>Search</a>"
+            f"<a href=/#verify>Verify</a></nav></div></header><main class=wrap>"
+            f"<h1>{title}</h1>{body_html}"
+            f"<section class=card>{source_html}"
+            f"<div class=muted style=\"font-size:.8rem;margin-top:.5rem\">card id</div>"
+            f"<div class=mono style=\"word-break:break-all\">{_esc(card_id)}</div>{related}</section>"
+            f"<footer class=site><p>A record from the keeping — found and cited, never generated. "
+            f"<a href=/search>Search the keeping →</a></p></footer></main></body></html>")
     return 200, html
 
 
@@ -219,6 +355,84 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         g = steward.money_guardrail(str(body["text"]))
         return _ok(g if g else {"kind": "ok", **steward.guidance()})
 
+    # Coach — the Shepherd as a K-3 reading tutor. READ-ONLY teaching is the floor (NOT gated); it
+    # finds + presents the operator's authored curriculum, never generates a lesson, never grades a child.
+    if method == "POST" and path == "/coach/mastery":
+        # Seal an HONEST INTEGER count of completed units — the moat's math applied to progress, never
+        # to the person. Mirrors /steward/budget EXACTLY: hand the derivation-shaped result to
+        # receipts.attach (it reads verdict+trail; re-runs NO verifier), so no derivation import here.
+        if not isinstance(body, dict):
+            return _err(400, "JSON object required")
+        from .. import coach, receipts
+        out = coach.mastery(body.get("completed") or [])
+        m = coach.mastery_result(body.get("completed") or [])
+        out["seal"] = receipts.attach(m["result"], config=config, domain="mathematics").get("seal")
+        telemetry.record("coach", surface=surface, op="mastery", sealed=bool(out.get("seal")))
+        return _ok(out)
+
+    # Sovereign, portable identity — the person owns a keypair; we reference only the fingerprint.
+    # SOVEREIGNTY CONTRACT: the private_key is returned ONCE to the client and NEVER persisted/logged.
+    if method == "POST" and path == "/identity/create":
+        from .. import identity
+        idn = identity.create_identity()  # full dict incl private_key returned ONCE; NOT stored here
+        telemetry.record("identity", surface=surface, op="create",
+                         signing=bool(idn.get("signing_available")))
+        return _ok(idn)
+
+    if method == "POST" and path == "/identity/verify":
+        if not isinstance(body, dict):
+            return _err(400, "JSON object required")
+        from .. import identity
+        ok = identity.verify(str(body.get("public_key") or ""), body.get("message") or "",
+                             str(body.get("sig") or ""))
+        return _ok({"ok": bool(ok)})
+
+    # Badges — a re-checkable receipt pointing at N seals that still stand. NEVER a competency claim.
+    if method == "POST" and path == "/badges":
+        if not isinstance(body, dict):
+            return _err(400, "JSON object required")
+        seal_hashes = body.get("seal_hashes")
+        if not isinstance(seal_hashes, list):
+            return _err(400, "seal_hashes (list) required")
+        from .. import badges
+        # private_key (if passed) is in-memory only — used to attest, NEVER persisted or echoed back.
+        out = badges.issue_badge(seal_hashes, subject_id=body.get("subject_id"),
+                                 title=str(body.get("title") or ""),
+                                 private_key=body.get("private_key"))
+        telemetry.record("badge", surface=surface, op="issue", checks=int(out.get("checks", 0)))
+        return _ok(out)
+
+    if method == "POST" and path == "/self-attest":
+        # A person's OWN words — a DISTINCTLY TYPED record that can NEVER count as a sealed check.
+        if not isinstance(body, dict):
+            return _err(400, "JSON object required")
+        from .. import badges
+        return _ok(badges.self_attest(str(body.get("subject_id") or ""),
+                                      str(body.get("statement") or ""),
+                                      study=body.get("study")))
+
+    # Shared study — a superposition stack: one card lives once, referenced; portable, optionally signed.
+    if method == "POST" and path == "/study":
+        if not isinstance(body, dict) or not str(body.get("key") or "").strip():
+            return _err(400, "key required")
+        from .. import badges
+        return _ok(badges.study_create(str(body["key"]), body.get("cards") or []))
+
+    if method == "POST" and path == "/study/export":
+        if not isinstance(body, dict) or not str(body.get("key") or "").strip():
+            return _err(400, "key required")
+        from .. import badges
+        # private_key (if passed) is in-memory only — used to sign the bundle, NEVER persisted/echoed.
+        return _ok(badges.study_export(str(body["key"]), private_key=body.get("private_key")))
+
+    if method == "POST" and path == "/study/import":
+        if not isinstance(body, dict):
+            return _err(400, "JSON object required")
+        from .. import badges
+        return _ok(badges.study_import(body.get("bundle") or body,
+                                       study_key=body.get("key"),
+                                       verify_signature=bool(body.get("verify_signature"))))
+
     if method == "POST" and path == "/mcp":
         # Remote MCP over HTTP — reuse the pure JSON-RPC handler, surface-gated. Stateless
         # request/response (initialize · tools/list · tools/call). Notifications get 202.
@@ -331,6 +545,48 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/steward":
         from .. import steward
         return _ok(steward.guidance())
+
+    # Coach GETs — read-only teaching, NOT gated (teaching is the floor on both surfaces).
+    if method == "GET" and path == "/coach/overview":
+        from .. import coach
+        return _ok(coach.overview())
+    if method == "GET" and path == "/coach/unit":
+        from .. import coach
+        return _ok(coach.unit(query.get("id", "")))
+    if method == "GET" and path == "/coach/next":
+        from .. import coach
+        return _ok(coach.next_unit(query.get("after")))
+    if method == "GET" and path == "/coach/guidance":
+        from .. import coach
+        return _ok(coach.guidance())
+
+    # Identity GETs — capabilities + fingerprint derivation (public key only; no secret involved).
+    if method == "GET" and path == "/identity/fingerprint":
+        from .. import identity
+        pk = (query.get("public_key") or "").strip()
+        if not pk:
+            return _err(400, "public_key required")
+        return _ok({"id": identity.fingerprint(pk)})
+    if method == "GET" and path == "/identity/describe":
+        from .. import identity
+        return _ok(identity.describe())
+
+    # Badge verify (machine JSON) — re-checks a badge from the store; 404 when it does not stand.
+    if method == "GET" and path == "/badges":
+        h = (query.get("hash") or "").strip()
+        if not h:
+            return _err(400, "hash required")
+        from .. import badges
+        rec = badges.verify_badge(h)
+        return _ok(rec) if rec.get("ok") else _err(404, "badge not found")
+
+    # Study resolve (machine JSON) — the cards referenced by a study (they live once).
+    if method == "GET" and path == "/study":
+        key = (query.get("key") or "").strip()
+        if not key:
+            return _err(400, "key required")
+        from .. import badges
+        return _ok(badges.study_get(key))
 
     # Atlas / grid — the map, read-only.
     if method == "GET" and path == "/grid":
@@ -487,7 +743,9 @@ _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word
                   "/thread", "/threads", "/threads/search", "/thread/verify", "/passage",
                   "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
                   "/commentary", "/journal", "/journal/dates", "/steward", "/tsk",
-                  "/character", "/characters", "/prophecy"}
+                  "/character", "/characters", "/prophecy",
+                  "/coach/overview", "/coach/unit", "/coach/next", "/coach/guidance",
+                  "/identity/fingerprint", "/identity/describe", "/badges", "/study", "/card.html"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
@@ -513,7 +771,9 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
     site = Path(site_dir).resolve() if site_dir else None
     limiter = ratelimit.from_env()
     MAX_BODY = int(os.environ.get("CONCORDANCE_MAX_BODY", str(256 * 1024)) or 256 * 1024)
-    RATELIMITED = ("/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak")
+    RATELIMITED = ("/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak",
+                   "/coach/mastery", "/identity/create", "/identity/verify", "/badges",
+                   "/study", "/study/export", "/study/import")
 
     class Handler(BaseHTTPRequestHandler):
         def _json(self, status: int, payload: dict, extra: dict = None) -> None:
@@ -586,6 +846,22 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
             if method == "GET" and u.path.startswith("/s/"):  # server-rendered citable receipt
                 h = u.path[3:].split("/")[0].strip()
                 status, html = render_seal_html(h, cas.fetch(h))
+                return self._html(status, html)
+            if method == "GET" and u.path.startswith("/b/"):  # server-rendered citable badge (mirrors /s/)
+                h = u.path[3:].split("/")[0].strip()
+                from .. import badges as _badges
+                status, html = render_badge_html(h, _badges.verify_badge(h))
+                return self._html(status, html)
+            # Card pages (server-rendered HTML). CRITICAL: /card/connections stays JSON — match it
+            # BEFORE the generic /card/<id> HTML prefix. /card (no slug) also stays JSON (falls through).
+            if method == "GET" and u.path == "/card.html":  # ?id=<id>  → HTML
+                cid = (parse_qs(u.query).get("id", [""]) or [""])[0].strip()
+                status, html = render_card_html(cid, corpus.get_card(cid) if cid else None)
+                return self._html(status, html)
+            if (method == "GET" and u.path.startswith("/card/")
+                    and u.path != "/card/connections"):  # /card/<id>  → HTML (JSON routes excluded)
+                cid = u.path[len("/card/"):].split("/")[0].strip()
+                status, html = render_card_html(cid, corpus.get_card(cid) if cid else None)
                 return self._html(status, html)
             # rate limit the compute / IO paths, keyed by the real client
             if u.path in RATELIMITED:
