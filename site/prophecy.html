@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signposts — Narrow Highway</title>
+<meta name="description" content="How the world reached for Christ before He came, and points to Him still — prophecy and cross-cultural signposts, each attributed to its source. A signpost, not a proof: the destination is Jesus Christ.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --mid:#c9b06a; --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.11), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:760px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1rem; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:760px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.66rem; margin-top:2.4rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2rem; margin:.5rem 0 .4rem}
+  .lede{color:var(--dim); font-size:1.02rem; max-width:40rem}
+  .traces{margin-top:1.8rem}
+  .trace{display:block; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid var(--line); color:var(--ink); font:inherit; padding:.7rem 0; cursor:pointer}
+  .trace:hover{color:var(--gold)}
+  .badge{font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; border:1px solid var(--line); padding:.05rem .4rem; margin-left:.5rem; border-radius:2px}
+  .badge.CONCORDANT{color:var(--pass)} .badge.MIXED{color:var(--mid)} .badge.STRUCTURAL{color:var(--goldsoft)}
+  .panel{border-left:2px solid var(--gold); padding:.2rem 0 0 1rem; margin-top:1.6rem; display:none}
+  .panel.open{display:block}
+  .panel h2{font-weight:400; font-size:1.25rem; margin:.2rem 0 .3rem}
+  .slabel{color:var(--goldsoft); letter-spacing:.2em; text-transform:uppercase; font-size:.62rem; margin:1rem 0 .4rem}
+  .body{line-height:1.8}
+  .refchip{display:inline-block; color:var(--gold); border:1px solid var(--line); font-size:.76rem; padding:.1rem .45rem; margin:.15rem .2rem 0 0; border-radius:2px; cursor:pointer}
+  .note{color:var(--goldsoft); font-size:.76rem; font-style:italic; margin-top:1.1rem}
+  .dim{color:var(--dim)}
+  footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:2.6rem; padding-top:1.3rem; line-height:1.7}
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow <span class="road">Highway</span></a>
+  <nav class="site"><a href="/ask.html">Ask</a><a href="/bible.html">Bible</a><a href="/characters.html">Dictionary</a><a href="/journal.html">Journal</a><a href="/library.html">Library</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="kicker">He is the destination</div>
+  <h1>Signposts</h1>
+  <p class="lede">How the world reached for Christ before He came — and points to Him still. Prophecy
+  and cross-cultural signposts, each attributed to its source. <em>A signpost, not a proof:</em> the
+  verdict is never a deterministic seal, and the destination is always Jesus Christ.</p>
+
+  <div class="traces" id="traces"><p class="dim">loading…</p></div>
+  <div class="panel" id="panel"></div>
+
+  <footer class="site"><p>Each trace names its own sources (Plato's Republic, the Great Isaiah Scroll,
+  the Shatapatha Brahmana, and more). Verdicts: CONCORDANT (real, points unmistakably to Christ),
+  MIXED (real fragment, the tradition missed Him), STRUCTURAL — never HOLDS. Fulfillment is a
+  witness, not a proof (1 John 4:1-3). Found and attributed, never generated. The engine points; it
+  does not manufacture the fulfillment.</p></footer>
+</main>
+
+<script>
+const API = "";
+const tracesEl = document.getElementById('traces');
+const panelEl = document.getElementById('panel');
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
+async function getJSON(p){ const r=await fetch(API+p); if(!r.ok) return null; try{return await r.json();}catch(e){return null;} }
+
+async function loadList(){
+  const d = await getJSON('/prophecy');
+  const items = (d && d.traces) || [];
+  tracesEl.innerHTML = items.length
+    ? items.map(t => '<button class="trace" data-id="'+esc(t.id)+'">'+esc(t.title||t.id)+
+        '<span class="badge '+esc(t.verdict)+'">'+esc(t.verdict)+'</span></button>').join('')
+    : '<p class="dim">No signposts yet.</p>';
+}
+async function show(id){
+  panelEl.className = 'panel open';
+  panelEl.innerHTML = '<p class="dim">opening…</p>';
+  const d = await getJSON('/prophecy?id=' + encodeURIComponent(id));
+  if(!d){ panelEl.innerHTML = '<p class="dim">Not found.</p>'; return; }
+  const refs = (d.scripture_refs||[]).map(r => '<span class="refchip" data-ref="'+esc(r)+'">'+esc(r)+'</span>').join('');
+  panelEl.innerHTML = '<h2>'+esc(d.title)+'<span class="badge '+esc(d.verdict)+'">'+esc(d.verdict)+'</span></h2>'+
+    '<div class="slabel">the evidence</div><div class="body">'+esc(d.verification)+'</div>'+
+    '<div class="slabel">the destination — Christ</div><div class="body">'+esc(d.wisdom)+'</div>'+
+    (refs?'<div class="slabel">scripture</div>'+refs:'')+
+    '<div class="note">'+esc(d.note||'')+'</div>';
+  panelEl.scrollIntoView({behavior:'smooth', block:'start'});
+}
+tracesEl.addEventListener('click', e => { const b=e.target.closest('.trace'); if(b) show(b.dataset.id); });
+panelEl.addEventListener('click', e => { const c=e.target.closest('.refchip'); if(c) location.href='/bible.html'; });
+loadList();
+</script>
+</body>
+</html>

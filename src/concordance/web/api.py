@@ -449,6 +449,18 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(characters.browse(letter=(query.get("letter") or None),
                                      search=(query.get("search") or None), limit=limit))
 
+    if method == "GET" and path == "/prophecy":
+        # Christ-signpost traces — attributed, verdict CONCORDANT/MIXED, NEVER HOLDS (a signpost, not a proof).
+        if not config.witness_surfaced:
+            return _err(404, "not found")
+        from .. import prophecy
+        tid = (query.get("id") or "").strip()
+        if tid:
+            rec = prophecy.get(tid)
+            return _ok(rec) if rec is not None else _err(404, "trace not found")
+        q = (query.get("q") or "").strip()
+        return _ok(prophecy.search(q) if q else prophecy.list_traces())
+
     return _err(404, "not found")
 
 
@@ -458,7 +470,7 @@ _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word
                   "/thread", "/threads", "/threads/search", "/thread/verify", "/passage",
                   "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
                   "/commentary", "/journal", "/journal/dates", "/steward", "/tsk",
-                  "/character", "/characters"}
+                  "/character", "/characters", "/prophecy"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",

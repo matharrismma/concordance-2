@@ -18,6 +18,7 @@ data/commentary/
 data/stacks/
 data/xrefs/
 data/characters/
+data/prophecy/
 data/cards.jsonl
 data/*.jsonl
 data/*.db

@@ -129,6 +129,12 @@ def _witness_tools() -> List[dict]:
          "description": "Browse/search Easton's Bible Dictionary (people, places, terms).",
          "inputSchema": {"type": "object", "properties": {
              "letter": {"type": "string"}, "search": {"type": "string"}, "limit": {"type": "integer"}}}},
+        {"name": "prophecy_traces",
+         "description": ("Christ-signpost traces (prophecy/cross-cultural pointers to Jesus) — "
+                         "attributed, verdict CONCORDANT/MIXED, NEVER HOLDS (a signpost, not a proof). "
+                         "Pass id for one trace, q to search, else lists all."),
+         "inputSchema": {"type": "object", "properties": {
+             "id": {"type": "string"}, "q": {"type": "string"}}}},
     ]
 
 
@@ -231,6 +237,12 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
         from .. import characters  # lazy: witness-only
         return characters.browse(letter=args.get("letter"), search=args.get("search"),
                                  limit=int(args.get("limit", 100)))
+    if name == "prophecy_traces" and config.witness_surfaced:
+        from .. import prophecy  # lazy: witness-only
+        if args.get("id"):
+            rec = prophecy.get(args["id"])
+            return rec if rec is not None else {"error": "trace not found"}
+        return prophecy.search(args["q"]) if args.get("q") else prophecy.list_traces()
     raise KeyError(f"unknown tool {name!r} (on the {config.surface} surface)")
 
 
