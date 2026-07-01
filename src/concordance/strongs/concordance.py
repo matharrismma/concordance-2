@@ -68,6 +68,10 @@ BOOK_NAMES = {
     62:"1 John",63:"2 John",64:"3 John",65:"Jude",66:"Revelation",
 }
 
+# Reverse lookup (normalized book name -> number) + a reference parser, for cross-references.
+_NAME_TO_NUM = {re.sub(r"[^a-z0-9]", "", n.lower()): b for b, n in BOOK_NAMES.items()}
+_CROSSREF_RE = re.compile(r"^\s*([1-3]?\s*[A-Za-z. ]+?)\s+(\d+):(\d+)\s*$")
+
 
 class Concordance:
     """
@@ -268,6 +272,71 @@ class Concordance:
         result["study_complete"] = conc_result.get("status") == "ok"
 
         return result
+
+    # ------------------------------------------------------------------
+    # Cross-references — the dots, connected (by shared original words)
+    # ------------------------------------------------------------------
+
+    def _ref_to_bcv(self, ref: str):
+        m = _CROSSREF_RE.match(ref or "")
+        if not m:
+            return None
+        b = _NAME_TO_NUM.get(re.sub(r"[^a-z0-9]", "", m.group(1).lower()))
+        if not b:
+            return None
+        return b, int(m.group(2)), int(m.group(3))
+
+    def verse_strongs(self, b: int, c: int, v: int) -> list:
+        """The Strong's numbers tagged in a verse, in word order."""
+        conc = self._get_conc()
+        if conc is None:
+            return []
+        rows = conc.execute(
+            "SELECT strongs FROM concordance WHERE b=? AND c=? AND v=? ORDER BY word_pos",
+            (b, c, v)).fetchall()
+        return [r[0] for r in rows if r[0]]
+
+    def word_occurrences(self, strongs_num: str, limit: int = 200) -> dict:
+        """Every verse where a Strong's word occurs (the concordance) — alias of strongs_verses."""
+        return self.strongs_verses(strongs_num, limit=limit)
+
+    def cross_references(self, ref: str, limit: int = 20, per_word_cap: int = 500) -> dict:
+        """Verses connected to a verse by SHARED original words (Strong's) — the dots, connected.
+        Deterministic and FOUND (never generated): ranks other verses by how many of this verse's
+        original words they share. Requires concordance.db; degrades gracefully without it."""
+        conc = self._get_conc()
+        if conc is None:
+            return {"ref": ref, "status": "concordance_not_built", "cross_references": [],
+                    "detail": "the Strong's concordance (concordance.db) is not built"}
+        bcv = self._ref_to_bcv(ref)
+        if not bcv:
+            return {"ref": ref, "status": "not_found", "cross_references": [],
+                    "detail": "could not parse/resolve reference"}
+        b, c, v = bcv
+        source = self.verse_strongs(b, c, v)
+        if not source:
+            return {"ref": f"{BOOK_NAMES.get(b, b)} {c}:{v}", "status": "no_words",
+                    "cross_references": [], "detail": "no tagged original words for this verse"}
+        uniq = list(dict.fromkeys(source))  # unique, in word order
+        shared: dict = {}
+        for s in uniq:
+            for (bb, cc, vv) in conc.execute(
+                    "SELECT b,c,v FROM concordance WHERE strongs=? LIMIT ?", (s, per_word_cap)).fetchall():
+                if (bb, cc, vv) == (b, c, v):
+                    continue
+                shared.setdefault((bb, cc, vv), set()).add(s)
+        web = self._get_web()
+        ranked = sorted(shared.items(), key=lambda kv: (-len(kv[1]), kv[0]))[:max(1, int(limit))]
+        out = []
+        for (bb, cc, vv), sset in ranked:
+            text = ""
+            if web:
+                row = web.execute("SELECT t FROM t_web WHERE b=? AND c=? AND v=?", (bb, cc, vv)).fetchone()
+                text = row[0] if row else ""
+            out.append({"ref": f"{BOOK_NAMES.get(bb, bb)} {cc}:{vv}", "shared_count": len(sset),
+                        "shared_strongs": sorted(sset), "web_text": text})
+        return {"ref": f"{BOOK_NAMES.get(b, b)} {c}:{v}", "status": "ok", "source_strongs": uniq,
+                "count": len(out), "cross_references": out}
 
     def ready(self) -> dict:
         return {

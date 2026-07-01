@@ -316,6 +316,24 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from ..verifiers import scripture  # lazy: witness-only
         return _ok(scripture.word_study(s))
 
+    if method == "GET" and path == "/cross_refs":
+        if not config.witness_surfaced:
+            return _err(404, "not found")
+        ref = (query.get("ref") or "").strip()
+        if not ref:
+            return _err(400, "ref required")
+        from ..verifiers import scripture  # lazy: witness-only
+        return _ok(scripture.cross_references(ref))
+
+    if method == "GET" and path == "/word_occurrences":
+        if not config.witness_surfaced:
+            return _err(404, "not found")
+        s = (query.get("strongs") or "").strip()
+        if not s:
+            return _err(400, "strongs required")
+        from ..verifiers import scripture  # lazy: witness-only
+        return _ok(scripture.word_occurrences(s))
+
     return _err(404, "not found")
 
 
@@ -323,7 +341,7 @@ _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word
                   "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
                   "/card/connections", "/locate", "/library/health",
                   "/thread", "/threads", "/threads/search", "/thread/verify", "/passage",
-                  "/pronounce"}
+                  "/pronounce", "/cross_refs", "/word_occurrences"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",

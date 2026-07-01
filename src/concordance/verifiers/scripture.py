@@ -226,6 +226,30 @@ def word_study(strongs_num: str) -> Dict[str, Any]:
     return result
 
 
+def cross_references(ref: str) -> Dict[str, Any]:
+    """Verses connected to a reference by shared original words (Strong's) — via the backend."""
+    try:
+        from ..strongs import Concordance
+    except Exception as e:  # noqa: BLE001
+        return {"status": "unavailable", "detail": f"strongs backend not importable: {e}"}
+    try:
+        return Concordance().cross_references(ref)
+    except Exception as e:  # noqa: BLE001
+        return {"status": "unavailable", "detail": str(e)[:200]}
+
+
+def word_occurrences(strongs_num: str) -> Dict[str, Any]:
+    """Every verse where a Strong's word occurs (the concordance) — via the backend."""
+    try:
+        from ..strongs import Concordance
+    except Exception as e:  # noqa: BLE001
+        return {"status": "unavailable", "detail": f"strongs backend not importable: {e}"}
+    try:
+        return Concordance().word_occurrences(strongs_num)
+    except Exception as e:  # noqa: BLE001
+        return {"status": "unavailable", "detail": str(e)[:200]}
+
+
 def _verify_anchor(anchor: Any) -> VerifierResult:
     name = "scripture.anchor"
     if isinstance(anchor, str):

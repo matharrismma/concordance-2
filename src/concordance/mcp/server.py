@@ -75,6 +75,10 @@ def _secular_tools() -> List[dict]:
         {"name": "library_health",
          "description": "Corpus health — is the keeping loaded and sound (totals, shelves, surfaces).",
          "inputSchema": {"type": "object", "properties": {}}},
+        {"name": "pronounce",
+         "description": ("A synthesized pronunciation guide (respelling + approximate IPA) for a "
+                         "transliteration or word — honestly labeled, not a native speaker."),
+         "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]}},
     ]
 
 
@@ -83,8 +87,20 @@ def _witness_tools() -> List[dict]:
         {"name": "resolve",
          "description": "Resolve a Scripture reference to its World English Bible text.",
          "inputSchema": {"type": "object", "properties": {"ref": {"type": "string"}}, "required": ["ref"]}},
+        {"name": "read_passage",
+         "description": ("Read a passage of the WEB — a single verse, a range (John 3:16-18), or a "
+                         "whole chapter (John 3)."),
+         "inputSchema": {"type": "object", "properties": {"ref": {"type": "string"}}, "required": ["ref"]}},
         {"name": "word_study",
-         "description": "Strong's word study — original-language definition + every occurrence.",
+         "description": "Strong's word study — original-language definition + pronunciation + every occurrence.",
+         "inputSchema": {"type": "object", "properties": {
+             "strongs": {"type": "string", "description": "e.g. G26, H2617"}}, "required": ["strongs"]}},
+        {"name": "cross_references",
+         "description": ("Verses connected to a reference by SHARED original words (Strong's) — the "
+                         "dots, connected; deterministic and found, ranked by shared-word count."),
+         "inputSchema": {"type": "object", "properties": {"ref": {"type": "string"}}, "required": ["ref"]}},
+        {"name": "word_occurrences",
+         "description": "Every verse where a Strong's word occurs (the concordance).",
          "inputSchema": {"type": "object", "properties": {
              "strongs": {"type": "string", "description": "e.g. G26, H2617"}}, "required": ["strongs"]}},
     ]
@@ -151,12 +167,24 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
         return corpus.locate(args.get("q", ""))
     if name == "library_health":
         return corpus.health()
+    if name == "pronounce":
+        from .. import pronounce as _pron  # neutral phonetic helper, both surfaces
+        return _pron.guide(args.get("text", ""))
     if name == "resolve" and config.witness_surfaced:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.resolve_ref(args.get("ref", ""))
+    if name == "read_passage" and config.witness_surfaced:
+        from ..verifiers import scripture  # lazy: witness-only
+        return scripture.read_passage(args.get("ref", ""))
     if name == "word_study" and config.witness_surfaced:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.word_study(args.get("strongs", ""))
+    if name == "cross_references" and config.witness_surfaced:
+        from ..verifiers import scripture  # lazy: witness-only
+        return scripture.cross_references(args.get("ref", ""))
+    if name == "word_occurrences" and config.witness_surfaced:
+        from ..verifiers import scripture  # lazy: witness-only
+        return scripture.word_occurrences(args.get("strongs", ""))
     raise KeyError(f"unknown tool {name!r} (on the {config.surface} surface)")
 
 
