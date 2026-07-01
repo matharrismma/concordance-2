@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ask — Narrow Highway</title>
+<meta name="description" content="Ask the concordance. It finds, verifies, and cites — it does not make things up. Your personal details are stripped before anything is sent.">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .bubble { border:1px solid var(--line); border-radius:12px; padding:.7rem .9rem; margin:.5rem 0; }
+  .you { background:var(--bg); margin-left:2rem; }
+  .me { background:var(--paper); margin-right:1rem; }
+  .cite { border-left:3px solid var(--accent); padding-left:.7rem; margin:.5rem 0; }
+  .crisis { border-left:4px solid var(--fail); }
+  .verse { border-left:3px solid var(--gold); padding-left:.7rem; margin:.4rem 0; }
+  .k { font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+  .note { font-size:.76rem; color:var(--muted); margin-top:.5rem; font-style:italic; }
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap" style="padding:.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center">
+  <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
+  <nav class="site"><a href="/ask.html">Ask</a><a href="/#verify">Verify</a><a href="/library.html">Library</a><a href="/seal.html">Seal</a></nav>
+</div></header>
+
+<main class="wrap">
+  <h1>Ask the concordance</h1>
+  <p class="lede">It <strong>finds, verifies, and cites</strong> — it does not make things up, and it hands
+  you the sources. Your personal details are stripped before anything is sent. It is a window to the
+  truth, not the source of it.</p>
+
+  <div id="chat" style="margin:1rem 0"></div>
+  <div class="row">
+    <input id="q" placeholder="Ask anything — a claim to check, a verse, a topic…" aria-label="your question">
+    <button onclick="ask()">Ask</button>
+  </div>
+  <p class="muted" style="font-size:.78rem;margin-top:.5rem">Try: <span class="mono">2+2 = 4</span> ·
+  <span class="mono">John 3:16</span> · <span class="mono">grace</span> · a question that matters to you.</p>
+
+  <footer class="site"><p>The engine verifies and finds; it does not generate the answer. On the deepest
+  questions it points to Christ, to Scripture, and to real people. The fuller witness is at
+  <a href="https://narrowhighway.org">narrowhighway.org</a>.</p></footer>
+</main>
+
+<script src="redact.js"></script>
+<script>
+const API = "";
+const chat = document.getElementById('chat');
+function esc(s){const d=document.createElement('div');d.textContent=String(s==null?"":s);return d.innerHTML;}
+function add(html, cls){ const d=document.createElement('div'); d.className='bubble '+cls; d.innerHTML=html; chat.appendChild(d); d.scrollIntoView({behavior:'smooth',block:'nearest'}); return d; }
+
+function renderCards(arr){
+  return (arr||[]).map(c => '<div class="cite"><span class="k">'+esc(c.shelf||'')+'</span> <strong>'+
+    esc(c.title||c.id)+'</strong><div class="s">'+esc((c.snippet||'').slice(0,160))+'</div></div>').join('');
+}
+function render(d){
+  const note = '<div class="note">'+esc(d.note||'')+'</div>';
+  if (d.kind === 'crisis') {
+    return '<div class="crisis"><strong>'+esc(d.message)+'</strong>'+
+      '<div style="margin-top:.5rem">'+ (d.resources||[]).map(r =>
+        '• '+(r.ref?'<a href="'+esc(r.ref)+'">'+esc(r.label)+'</a>':esc(r.label))).join('<br>') +'</div></div>';
+  }
+  if (d.kind === 'ultimate') {
+    return esc(d.message) +
+      '<div style="margin-top:.5rem">'+ (d.scripture||[]).map(v =>
+        '<div class="verse"><strong>'+esc(v.ref)+'</strong> — '+esc(v.text)+'</div>').join('') +'</div>'+
+      '<div class="muted" style="font-size:.85rem;margin-top:.4rem">Walk with: '+
+        (d.real_help||[]).map(esc).join(' · ')+'</div>'+
+      (d.also_in_the_keeping&&d.also_in_the_keeping.length?'<div class="k" style="margin-top:.6rem">also in the keeping</div>'+renderCards(d.also_in_the_keeping):'')+
+      note;
+  }
+  if (d.verify) {
+    const v = d.verify, verdict = v.verdict||'ERROR';
+    const cls = verdict==='HOLDS'?'holds':(verdict==='BROKEN'?'broken':'error');
+    const step = (v.trail&&v.trail[0])||{};
+    const seal = v.seal ? '<div class="note">🔒 receipt: <a class="mono" href="'+esc(v.seal.cite_url)+'">'+esc((v.seal.content_hash||'').slice(0,20))+'…</a></div>' : '';
+    return '<div class="verdict '+cls+'">'+(verdict==='HOLDS'?'✓ HOLDS':(verdict==='BROKEN'?'✗ BROKEN':verdict))+'</div>'+
+      '<div class="trail">'+esc(step.detail||'')+'</div>'+seal+note;
+  }
+  if (d.scripture) {
+    const s = d.scripture;
+    return '<div class="verse"><strong>'+esc(s.ref||'')+'</strong> — '+esc(s.text|| s.error ||'(not found)')+'</div>'+note;
+  }
+  if (d.word_study) {
+    const w = d.word_study;
+    return '<div class="cite"><strong>'+esc(w.lemma||w.strongs||'')+'</strong> '+esc(w.transliteration||'')+
+      '<div>'+esc(w.definition||w.gloss||w.error||'')+'</div>'+
+      (w.occurrences!=null?'<div class="muted" style="font-size:.85rem">'+esc(w.occurrences)+' occurrences</div>':'')+'</div>'+note;
+  }
+  if (d.kind === 'found') {
+    return (d.results&&d.results.length? renderCards(d.results) : '<span class="muted">Nothing in the keeping matched — try different words.</span>')+note;
+  }
+  return '<span class="muted">'+esc(JSON.stringify(d))+'</span>';
+}
+
+async function ask(){
+  const el = document.getElementById('q'), text = el.value.trim();
+  if (!text) return;
+  add(esc(text), 'you'); el.value='';
+  const thinking = add('<span class="muted">finding…</span>', 'me');
+  try {
+    const {clean} = (window.Rampart ? Rampart.protect(text) : {clean:text});  // strip PII before it leaves
+    const r = await fetch(API + '/ask', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({text: clean})});
+    const d = await r.json();
+    thinking.innerHTML = render(d);
+  } catch(e){ thinking.innerHTML = '<span class="muted">The engine is unreachable right now.</span>'; }
+}
+document.getElementById('q').addEventListener('keydown', e => { if(e.key==='Enter') ask(); });
+</script>
+</body>
+</html>

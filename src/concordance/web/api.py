@@ -130,6 +130,15 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                          mode=str(body.get("mode") or "steps"), sealed=bool(res.get("seal")))
         return _ok(res)
 
+    if method == "POST" and path == "/ask":
+        # The conduit front door: find + verify + cite, never generate. Deterministic router.
+        if not isinstance(body, dict) or not str(body.get("text") or "").strip():
+            return _err(400, "text required")
+        from .. import ask as _ask
+        r = _ask.respond(str(body["text"]), config)
+        telemetry.record("ask", surface=surface, kind=r.get("kind"))
+        return _ok(r)
+
     if method == "POST" and path == "/mcp":
         # Remote MCP over HTTP — reuse the pure JSON-RPC handler, surface-gated. Stateless
         # request/response (initialize · tools/list · tools/call). Notifications get 202.
@@ -259,7 +268,7 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
     site = Path(site_dir).resolve() if site_dir else None
     limiter = ratelimit.from_env()
     MAX_BODY = int(os.environ.get("CONCORDANCE_MAX_BODY", str(256 * 1024)) or 256 * 1024)
-    RATELIMITED = ("/verify", "/derivation/verify", "/search", "/mcp")
+    RATELIMITED = ("/verify", "/derivation/verify", "/search", "/mcp", "/ask")
 
     class Handler(BaseHTTPRequestHandler):
         def _json(self, status: int, payload: dict, extra: dict = None) -> None:
