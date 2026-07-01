@@ -36,6 +36,15 @@ def _err(status: int, msg: str) -> Response:
     return status, {"error": msg}
 
 
+def _gate_closed() -> Response:
+    """A witness endpoint reached before the person's seeking has opened the gate (Ask/Seek/Knock,
+    Mt 7:7). Still 404 — the Word is not surfaced yet — but MARKED, so a client can invite them to
+    open it rather than showing a dead end. We present the path; we never cross it."""
+    return 404, {"error": "gate_closed", "gate": "closed",
+                 "detail": "The Word opens as you seek it — bring up Scripture in the conversation, "
+                           "and the way opens."}
+
+
 def _card_brief(c: dict) -> Dict[str, Any]:
     return {"id": c.get("id"), "title": c.get("title"), "shelf": c.get("shelf"),
             "surface": c.get("surface"), "snippet": (c.get("body", "") or "")[:200]}
@@ -95,11 +104,19 @@ def render_seal_html(content_hash: str, record: Optional[Dict[str, Any]]) -> Tup
 
 
 def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
-             config: EngineConfig) -> Response:
-    """Pure request dispatch — (method, path, query, body, config) → (status, payload)."""
+             config: EngineConfig, session_gate_open: bool = False) -> Response:
+    """Pure request dispatch — (method, path, query, body, config, session_gate_open) → (status, payload).
+
+    session_gate_open carries the Gate across a conversation: once the person's own seeking has
+    opened the door (Ask/Seek/Knock — see /ask), the witness content is surfaced on the secular
+    reach too, not just the witness face."""
     method = (method or "GET").upper()
     path = path.rstrip("/") or "/"
     surface = config.surface
+    # The Gate (Mt 7:7): witness content opens on the witness face, OR once the conversation has
+    # opened the gate. The FOUNDATION is load-bearing on both faces regardless; this governs only
+    # what is surfaced. We present the path; we do not cross it.
+    allow_witness = config.witness_surfaced or session_gate_open
 
     if method == "GET" and path in ("/", "/health"):
         from ..validate import _HAS_JSONSCHEMA, schema_active
@@ -141,7 +158,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # the door, bring the Word — and keep bringing it. The open state lives on the thread (the
         # Deck remembers), so the door, once opened, stays open. We present; we do not cross.
         rec = _threads.get(tid) if tid else None
-        prior_open = bool(rec and rec.get("gate_open")) or (surface == "witness")
+        prior_open = bool(rec and rec.get("gate_open")) or (surface == "witness") or session_gate_open
         gate_open = prior_open or _ask.gate_signal(text)
         just_opened = gate_open and not prior_open
         r = _ask.respond(text, config, gate_open=gate_open, gate_just_opened=just_opened)
@@ -341,8 +358,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(rec)
 
     if method == "GET" and path == "/resolve":
-        if not config.witness_surfaced:
-            return _err(404, "not found")
+        if not allow_witness:
+            return _gate_closed()
         ref = (query.get("ref") or "").strip()
         if not ref:
             return _err(400, "ref required")
@@ -351,8 +368,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
     if method == "GET" and path == "/passage":
         # Read a passage (verse / range / whole chapter) — the Bible reading primitive.
-        if not config.witness_surfaced:
-            return _err(404, "not found")
+        if not allow_witness:
+            return _gate_closed()
         ref = (query.get("ref") or "").strip()
         if not ref:
             return _err(400, "ref required")
@@ -360,8 +377,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(scripture.read_passage(ref))
 
     if method == "GET" and path == "/word_study":
-        if not config.witness_surfaced:
-            return _err(404, "not found")
+        if not allow_witness:
+            return _gate_closed()
         s = (query.get("strongs") or "").strip()
         if not s:
             return _err(400, "strongs required")
@@ -369,8 +386,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(scripture.word_study(s))
 
     if method == "GET" and path == "/cross_refs":
-        if not config.witness_surfaced:
-            return _err(404, "not found")
+        if not allow_witness:
+            return _gate_closed()
         ref = (query.get("ref") or "").strip()
         if not ref:
             return _err(400, "ref required")
@@ -378,8 +395,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(scripture.cross_references(ref))
 
     if method == "GET" and path == "/word_occurrences":
-        if not config.witness_surfaced:
-            return _err(404, "not found")
+        if not allow_witness:
+            return _gate_closed()
         s = (query.get("strongs") or "").strip()
         if not s:
             return _err(400, "strongs required")
@@ -387,8 +404,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(scripture.word_occurrences(s))
 
     if method == "GET" and path == "/original":
-        if not config.witness_surfaced:
-            return _err(404, "not found")
+        if not allow_witness:
+            return _gate_closed()
         ref = (query.get("ref") or "").strip()
         if not ref:
             return _err(400, "ref required")
@@ -397,16 +414,16 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
     if method == "GET" and path == "/canon":
         # The canon as concentric layers — the 66 core + disputed books, framed, never merged.
-        if not config.witness_surfaced:
-            return _err(404, "not found")
+        if not allow_witness:
+            return _gate_closed()
         from .. import canon
         book = (query.get("book") or "").strip()
         return _ok(canon.canon_status(book) if book else canon.overview())
 
     if method == "GET" and path == "/commentary":
         # Public-domain, attributed commentary (Matthew Henry) — the father's own words, found.
-        if not config.witness_surfaced:
-            return _err(404, "not found")
+        if not allow_witness:
+            return _gate_closed()
         ref = (query.get("ref") or "").strip()
         if not ref:
             return _err(400, "ref required")
@@ -415,8 +432,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
     if method == "GET" and path == "/tsk":
         # Editorial cross-references (openbible.info, CC BY — expansion of the public-domain TSK).
-        if not config.witness_surfaced:
-            return _err(404, "not found")
+        if not allow_witness:
+            return _gate_closed()
         ref = (query.get("ref") or "").strip()
         if not ref:
             return _err(400, "ref required")
@@ -429,8 +446,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
     if method == "GET" and path == "/character":
         # A Bible figure from Easton's (1897, PD) — summary + every verse that speaks of them.
-        if not config.witness_surfaced:
-            return _err(404, "not found")
+        if not allow_witness:
+            return _gate_closed()
         name = (query.get("name") or "").strip()
         if not name:
             return _err(400, "name required")
@@ -439,8 +456,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(rec) if rec is not None else _err(404, "not found in Easton's")
 
     if method == "GET" and path == "/characters":
-        if not config.witness_surfaced:
-            return _err(404, "not found")
+        if not allow_witness:
+            return _gate_closed()
         from .. import characters
         try:
             limit = int(query.get("limit", "100"))
@@ -451,8 +468,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
     if method == "GET" and path == "/prophecy":
         # Christ-signpost traces — attributed, verdict CONCORDANT/MIXED, NEVER HOLDS (a signpost, not a proof).
-        if not config.witness_surfaced:
-            return _err(404, "not found")
+        if not allow_witness:
+            return _gate_closed()
         from .. import prophecy
         tid = (query.get("id") or "").strip()
         if tid:
@@ -627,8 +644,16 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
                     body = json.loads(raw or b"{}")
                 except (ValueError, TypeError):
                     body = {}
-            status, payload = dispatch(method, u.path, q, body, config)
-            self._json(status, payload)
+            # The Gate carried across the conversation: a simple session flag set by the server when
+            # /ask opens the door (Ask/Seek/Knock). Once open, the witness content is surfaced on
+            # this reach too. Not an access secret — the gate opens on seeking; this only remembers it.
+            session_gate_open = "nh_gate=open" in (self.headers.get("cookie") or "")
+            status, payload = dispatch(method, u.path, q, body, config, session_gate_open=session_gate_open)
+            extra = None
+            if (u.path == "/ask" and isinstance(payload, dict) and payload.get("gate_open")
+                    and not session_gate_open):
+                extra = {"Set-Cookie": "nh_gate=open; Path=/; Max-Age=31536000; SameSite=Lax"}
+            self._json(status, payload, extra)
 
         def do_GET(self) -> None:
             self._do("GET")

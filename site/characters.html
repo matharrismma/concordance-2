@@ -78,16 +78,14 @@
   <a href="/bible.html">Bible</a> page. Conduit: found and attributed, never generated.</p></footer>
 </main>
 
+<script src="/gate.js"></script>
 <script>
 const API = "";
-// The Word lives on the witness face: on the secular domain (.com) these are gated, so
-// cross to narrowhighway.org for the full experience.
-if (location.hostname === 'narrowhighway.com') location.replace('https://narrowhighway.org' + location.pathname + location.search);
 const listEl = document.getElementById('list');
 const entryEl = document.getElementById('entry');
 const qEl = document.getElementById('q');
 function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
-async function getJSON(p){ const r=await fetch(API+p); if(!r.ok) return null; try{return await r.json();}catch(e){return null;} }
+async function getJSON(p){ const r=await fetch(API+p); if(!r.ok){ if(window.NHGate) await NHGate.isClosed(r); return null; } try{return await r.json();}catch(e){return null;} }
 
 function renderList(d){
   const items = (d && d.items) || [];

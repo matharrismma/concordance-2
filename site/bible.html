@@ -106,11 +106,9 @@
 </main>
 
 <script src="speak.js"></script>
+<script src="gate.js"></script>
 <script>
 const API = "";
-// The Word lives on the witness face: on the secular domain (.com) the scripture APIs are
-// gated, so cross to narrowhighway.org for the full reading experience.
-if (location.hostname === 'narrowhighway.com') location.replace('https://narrowhighway.org' + location.pathname + location.search);
 const refEl = document.getElementById('ref');
 const passageEl = document.getElementById('passage');
 const hintEl = document.getElementById('hint');
@@ -121,7 +119,7 @@ function esc(s){ const d=document.createElement('div'); d.textContent=String(s==
 
 async function getJSON(path){
   const r = await fetch(API + path);
-  if(!r.ok) return null;
+  if(!r.ok){ if(window.NHGate) await NHGate.isClosed(r); return null; }  // closed gate -> invitation
   try { return await r.json(); } catch(e){ return null; }
 }
 
