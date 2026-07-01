@@ -217,6 +217,14 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/library/health":
         return _ok(corpus.health())
 
+    # Pronunciation guide (synthesized, honest floor) — a neutral phonetic helper, both surfaces.
+    if method == "GET" and path == "/pronounce":
+        from .. import pronounce
+        text = (query.get("text") or query.get("word") or "").strip()
+        if not text:
+            return _err(400, "text required")
+        return _ok(pronounce.guide(text))
+
     # The Deck — a conversation as a resumable, searchable, tamper-evident chain (threads).
     if method == "GET" and path == "/thread":
         from .. import threads as _threads
@@ -314,7 +322,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word_study",
                   "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
                   "/card/connections", "/locate", "/library/health",
-                  "/thread", "/threads", "/threads/search", "/thread/verify", "/passage"}
+                  "/thread", "/threads", "/threads/search", "/thread/verify", "/passage",
+                  "/pronounce"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",

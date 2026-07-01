@@ -212,9 +212,18 @@ def word_study(strongs_num: str) -> Dict[str, Any]:
     except Exception as e:  # noqa: BLE001
         return {"status": "unavailable", "detail": f"strongs backend not importable: {e}"}
     try:
-        return Concordance().word_study(strongs_num)
+        result = Concordance().word_study(strongs_num)
     except Exception as e:  # noqa: BLE001
         return {"status": "unavailable", "detail": str(e)[:200]}
+    # B2: enrich with a synthesized pronunciation guide from the transliteration (honest floor).
+    try:
+        from .. import pronounce
+        src = result.get("pronunciation") or result.get("transliteration") or ""
+        if src:
+            result["pronunciation_guide"] = pronounce.guide(src)
+    except Exception:  # noqa: BLE001 — never break the word study over a pronunciation nicety
+        pass
+    return result
 
 
 def _verify_anchor(anchor: Any) -> VerifierResult:
