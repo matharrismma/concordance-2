@@ -371,3 +371,21 @@ def all_disputed_books() -> Dict[str, List[str]]:
             if canonical not in seen:
                 seen[canonical] = _holders_for_canonical(canonical)
     return seen
+
+
+def overview() -> Dict[str, Any]:
+    """The canon as concentric LAYERS for display: the shared 66 core + each tradition's
+    additions, kept SEPARATE, historically framed, never merged. Shows; does not rule."""
+    return {
+        "undisputed_66": {
+            "count": 66,
+            "note": "The 66-book core shared by all major Christian traditions — this engine's validated core.",
+        },
+        "traditions": [
+            {"key": k, "label": t["label"], "frame": t["frame"], "books": list(t["books"].keys())}
+            for k, t in TRADITION_ADDITIONS.items()
+        ],
+        "note": ("Disputed books are shown on their own layer, historically framed, and are NEVER "
+                 "merged into the 66. The engine shows who holds what plus the history; it does not "
+                 "rule which canon is correct — conduit, not arbiter."),
+    }

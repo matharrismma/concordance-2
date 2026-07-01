@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Word — Narrow Highway</title>
+<meta name="description" content="Read the Scripture with its inherent context restored: parallel public-domain text, the original words you can tap to hear and study, cross-references that connect the dots, and an honest canon layer. Found and cited, never generated.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --fail:#c98a8a;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.11), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink);
+    font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:760px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.2rem; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:760px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.66rem; margin-top:2.4rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2rem; margin:.5rem 0 .4rem}
+  .lede{color:var(--dim); font-size:1.02rem; max-width:40rem}
+  .askrow{display:flex; gap:.4rem; border:1px solid var(--line); background:rgba(255,255,255,.02); padding:.15rem; margin-top:1.6rem}
+  .askrow input{flex:1; background:transparent; border:0; color:var(--ink); font:inherit; padding:.7rem .8rem; outline:none}
+  .askrow input::placeholder{color:var(--dim)}
+  .askrow button{background:transparent; border:0; color:var(--gold); font:inherit; letter-spacing:.16em; text-transform:uppercase; font-size:.72rem; padding:0 1.1rem; cursor:pointer}
+  .askrow button:hover{color:var(--ink)}
+  .hint{color:var(--dim); font-size:.8rem; margin-top:.7rem}
+  .ribbon{margin:1.4rem 0 0; border:1px solid var(--line); padding:.7rem .9rem; font-size:.78rem; color:var(--dim)}
+  .ribbon .core{color:var(--gold); letter-spacing:.14em; text-transform:uppercase; font-size:.68rem}
+  .ribbon button{background:none; border:0; color:var(--dim); cursor:pointer; font:inherit; margin-left:.9rem; border-bottom:1px dotted var(--line)}
+  .ribbon button:hover{color:var(--gold)}
+  .frame{margin-top:.7rem; padding-top:.7rem; border-top:1px solid var(--line); color:var(--dim); font-size:.82rem; display:none}
+  .frame.open{display:block}
+  .frame .flabel{color:var(--goldsoft)}
+  .frame .fbooks{color:var(--dim); font-style:italic; margin-top:.25rem; font-size:.78rem}
+  .passage{margin:2.2rem 0 0}
+  .pref{color:var(--gold); letter-spacing:.06em; font-size:1.15rem; margin-bottom:1rem}
+  .verse-row{padding:.35rem .2rem; border-radius:2px; cursor:pointer}
+  .verse-row:hover{background:rgba(201,162,74,.05)}
+  .verse-row.open{background:rgba(201,162,74,.06)}
+  .vn{color:var(--goldsoft); font-size:.68rem; vertical-align:.5em; margin-right:.35rem}
+  .study{margin:.4rem 0 1rem 1rem; padding:.9rem 1rem; border-left:2px solid var(--line); display:none}
+  .study.open{display:block}
+  .slabel{color:var(--goldsoft); letter-spacing:.2em; text-transform:uppercase; font-size:.62rem; margin:.2rem 0 .5rem}
+  .chip{display:inline-block; background:rgba(201,162,74,.06); border:1px solid var(--line); color:var(--ink); font:inherit; font-size:.95rem; padding:.2rem .5rem; margin:.15rem; cursor:pointer; border-radius:2px}
+  .chip:hover{border-color:var(--gold)}
+  .chip .sn{color:var(--goldsoft); font-size:.66rem; margin-left:.35rem}
+  .xref{display:block; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid var(--line); color:var(--ink); font:inherit; padding:.4rem 0; cursor:pointer; font-size:.92rem}
+  .xref:hover{color:var(--gold)}
+  .xref .sc{color:var(--dim); font-size:.72rem; margin-left:.5rem}
+  .ws{margin-top:.8rem; border:1px solid var(--line); padding:.8rem .9rem}
+  .ws-head{display:flex; align-items:baseline; gap:.7rem; flex-wrap:wrap}
+  .ws-word{font-size:1.25rem; color:var(--ink)}
+  .ws-tr{color:var(--gold)}
+  .hear{background:none; border:1px solid var(--line); color:var(--gold); font:inherit; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; padding:.2rem .6rem; cursor:pointer; margin-left:auto}
+  .hear:hover{color:var(--ink); border-color:var(--gold)}
+  .ws-pron{color:var(--dim); font-size:.9rem; margin-top:.35rem}
+  .ws-pron .synth{color:var(--goldsoft); font-size:.72rem; font-style:italic; margin-left:.4rem}
+  .ws-def{margin-top:.5rem}
+  .ws-occ{color:var(--dim); font-size:.82rem; margin-top:.4rem}
+  .dim{color:var(--dim)}
+  footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:2.6rem; padding-top:1.3rem; line-height:1.7}
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow <span class="road">Highway</span></a>
+  <nav class="site"><a href="/ask.html">Ask</a><a href="/bible.html">Bible</a><a href="/#verify">Verify</a><a href="/library.html">Library</a><a href="/seal.html">Seal</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="kicker">The Word</div>
+  <h1>Read the Scripture</h1>
+  <p class="lede">The public-domain text, and beneath each verse the <em>original words</em> — tap one to
+  hear it and study its meaning across all of Scripture — with the cross-references that connect the
+  dots. Found and cited, never generated. The Word is the focus; everything here serves it.</p>
+
+  <div class="askrow">
+    <input id="ref" placeholder="A reference — John 3, Psalm 23, John 3:16-18" aria-label="reference" autocomplete="off">
+    <button id="readbtn">Read</button>
+  </div>
+  <p class="hint" id="hint">Try <span class="dim">John 3:16</span>, <span class="dim">Psalm 23</span>, or a whole chapter like <span class="dim">Romans 8</span>.</p>
+
+  <div class="ribbon" id="ribbon" hidden></div>
+  <div class="passage" id="passage"></div>
+
+  <footer class="site">
+    <p>Scripture text: the World English Bible (WEB), public domain. Original-language words and
+    definitions from public-domain Strong's data; pronunciation is a synthesized guide, not a native
+    speaker. Church tradition on the canon is shown historically, never as a verdict.</p>
+    <p>The engine finds, verifies, and cites; it does not generate the Word. A window to Him, not a
+    wall. <a href="https://narrowhighway.org">narrowhighway.org</a></p>
+  </footer>
+</main>
+
+<script src="speak.js"></script>
+<script>
+const API = "";
+const refEl = document.getElementById('ref');
+const passageEl = document.getElementById('passage');
+const hintEl = document.getElementById('hint');
+const ribbonEl = document.getElementById('ribbon');
+
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
+
+async function getJSON(path){
+  const r = await fetch(API + path);
+  if(!r.ok) return null;
+  try { return await r.json(); } catch(e){ return null; }
+}
+
+async function read(){
+  const ref = refEl.value.trim();
+  if(!ref) return;
+  hintEl.style.display='none';
+  passageEl.innerHTML = '<p class="dim">reading…</p>';
+  const d = await getJSON('/passage?ref=' + encodeURIComponent(ref));
+  if(!d || d.status !== 'ok' || !d.verses || !d.verses.length){
+    passageEl.innerHTML = '<p class="dim">' + esc((d && d.detail) || 'Nothing found for that reference.') + '</p>';
+    return;
+  }
+  let html = '<div class="pref">' + esc(d.ref) + '</div>';
+  d.verses.forEach(v => {
+    html += '<div class="verse-row" data-ref="' + esc(v.ref) + '"><sup class="vn">' + esc(v.verse) +
+            '</sup><span class="vt">' + esc(v.text) + '</span></div>' +
+            '<div class="study" data-for="' + esc(v.ref) + '"></div>';
+  });
+  passageEl.innerHTML = html;
+}
+
+async function openStudy(ref, rowEl, studyEl){
+  if(studyEl.classList.contains('open')){
+    studyEl.classList.remove('open'); rowEl.classList.remove('open'); return;
+  }
+  rowEl.classList.add('open'); studyEl.classList.add('open');
+  if(studyEl.dataset.loaded){ return; }
+  studyEl.innerHTML = '<p class="dim">gathering the original words…</p>';
+  const [orig, xref] = await Promise.all([
+    getJSON('/original?ref=' + encodeURIComponent(ref)),
+    getJSON('/cross_refs?ref=' + encodeURIComponent(ref)),
+  ]);
+  let html = '';
+  if(orig && orig.words && orig.words.length){
+    html += '<div class="slabel">the original words</div><div class="chips">' +
+      orig.words.map(w => '<button class="chip" data-strongs="' + esc(w.strongs) + '">' +
+        esc(w.word) + '<span class="sn">' + esc(w.strongs) + '</span></button>').join('') + '</div>';
+  } else {
+    html += '<div class="dim" style="font-size:.85rem">No tagged original words for this verse.</div>';
+  }
+  html += '<div class="wordpanel"></div>';
+  if(xref && xref.cross_references && xref.cross_references.length){
+    html += '<div class="slabel" style="margin-top:1rem">cross-references — shared original words</div>' +
+      xref.cross_references.slice(0,12).map(x =>
+        '<button class="xref" data-ref="' + esc(x.ref) + '">' + esc(x.ref) +
+        '<span class="sc">shares ' + esc(x.shared_count) + '</span></button>').join('');
+  }
+  studyEl.innerHTML = html;
+  studyEl.dataset.loaded = '1';
+}
+
+async function showWord(strongs, panelEl){
+  panelEl.innerHTML = '<p class="dim" style="margin-top:.6rem">opening the word…</p>';
+  const w = await getJSON('/word_study?strongs=' + encodeURIComponent(strongs));
+  if(!w){ panelEl.innerHTML = '<p class="dim">Could not load this word.</p>'; return; }
+  const g = w.pronunciation_guide || {};
+  const pron = [g.respelling, g.ipa].filter(Boolean).join('  ·  ');
+  const speak = g.speakable || w.transliteration || w.word || '';
+  panelEl.innerHTML =
+    '<div class="ws"><div class="ws-head">' +
+      '<span class="ws-word">' + esc(w.word || w.strongs) + '</span>' +
+      (w.transliteration ? '<span class="ws-tr">' + esc(w.transliteration) + '</span>' : '') +
+      (speak ? '<button class="hear" data-speak="' + esc(speak) + '">▶ hear</button>' : '') +
+    '</div>' +
+    (pron ? '<div class="ws-pron">' + esc(pron) + '<span class="synth">synthesized guide</span></div>' : '') +
+    (w.definition ? '<div class="ws-def">' + esc(w.definition) + '</div>' : '') +
+    (w.occurrence_count != null ? '<div class="ws-occ">' + esc(w.occurrence_count) + ' occurrences across Scripture</div>' : '') +
+    '</div>';
+}
+
+async function loadRibbon(){
+  const c = await getJSON('/canon');
+  if(!c || !c.traditions){ return; }   // secular surface returns 404 — ribbon simply stays hidden
+  ribbonEl.hidden = false;
+  ribbonEl.innerHTML =
+    '<span class="core">66 core</span>' +
+    c.traditions.map((t,i) => '<button data-trad="' + i + '">+ ' + esc(t.label.split(' (')[0]) + '</button>').join('') +
+    '<div class="frame" id="canonframe"></div>';
+  ribbonEl._traditions = c.traditions;
+}
+
+// ── events (delegation) ─────────────────────────────────────────────
+document.getElementById('readbtn').addEventListener('click', read);
+refEl.addEventListener('keydown', e => { if(e.key === 'Enter') read(); });
+
+passageEl.addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if(chip){
+    const panel = chip.closest('.study').querySelector('.wordpanel');
+    showWord(chip.dataset.strongs, panel);
+    return;
+  }
+  const hear = e.target.closest('.hear');
+  if(hear){ if(window.NHSpeak) NHSpeak.say(hear.dataset.speak); return; }
+  const xref = e.target.closest('.xref');
+  if(xref){ refEl.value = xref.dataset.ref; read(); window.scrollTo({top:0, behavior:'smooth'}); return; }
+  const row = e.target.closest('.verse-row');
+  if(row){
+    const studyEl = row.nextElementSibling;
+    if(studyEl && studyEl.classList.contains('study')) openStudy(row.dataset.ref, row, studyEl);
+  }
+});
+
+ribbonEl.addEventListener('click', e => {
+  const b = e.target.closest('button[data-trad]');
+  if(!b) return;
+  const t = (ribbonEl._traditions || [])[+b.dataset.trad];
+  const frame = document.getElementById('canonframe');
+  if(!t || !frame) return;
+  if(frame.dataset.cur === b.dataset.trad && frame.classList.contains('open')){
+    frame.classList.remove('open'); return;
+  }
+  frame.dataset.cur = b.dataset.trad;
+  frame.innerHTML = '<div class="flabel">' + esc(t.label) + '</div><div>' + esc(t.frame) + '</div>' +
+    (t.books && t.books.length ? '<div class="fbooks">' + esc(t.books.join(', ')) + '</div>' : '');
+  frame.classList.add('open');
+});
+
+loadRibbon();
+</script>
+</body>
+</html>

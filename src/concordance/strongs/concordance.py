@@ -300,6 +300,17 @@ class Concordance:
         """Every verse where a Strong's word occurs (the concordance) — alias of strongs_verses."""
         return self.strongs_verses(strongs_num, limit=limit)
 
+    def verse_words(self, b: int, c: int, v: int) -> list:
+        """The tagged ORIGINAL words of a verse, in order: [{word_pos, word, strongs}].
+        This is what makes a word tappable in the reader — the original word, not the gloss."""
+        conc = self._get_conc()
+        if conc is None:
+            return []
+        rows = conc.execute(
+            "SELECT word_pos, word, strongs FROM concordance WHERE b=? AND c=? AND v=? ORDER BY word_pos",
+            (b, c, v)).fetchall()
+        return [{"word_pos": p, "word": w, "strongs": s} for (p, w, s) in rows]
+
     def cross_references(self, ref: str, limit: int = 20, per_word_cap: int = 500) -> dict:
         """Verses connected to a verse by SHARED original words (Strong's) — the dots, connected.
         Deterministic and FOUND (never generated): ranks other verses by how many of this verse's

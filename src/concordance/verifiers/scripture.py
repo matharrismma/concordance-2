@@ -250,6 +250,25 @@ def word_occurrences(strongs_num: str) -> Dict[str, Any]:
         return {"status": "unavailable", "detail": str(e)[:200]}
 
 
+def original_words(ref: str) -> Dict[str, Any]:
+    """The tagged original words of a single verse — {ref, words:[{word_pos,word,strongs}], status}.
+    Lets the reader tap the ORIGINAL word (not the English gloss) to open its study."""
+    try:
+        from ..strongs import Concordance
+    except Exception as e:  # noqa: BLE001
+        return {"status": "unavailable", "detail": f"strongs backend not importable: {e}"}
+    try:
+        c = Concordance()
+        bcv = c._ref_to_bcv(ref)
+        if not bcv:
+            return {"ref": ref, "status": "not_found", "words": [], "detail": "could not parse reference"}
+        b, ch, v = bcv
+        words = c.verse_words(b, ch, v)
+        return {"ref": ref, "status": "ok" if words else "no_words", "count": len(words), "words": words}
+    except Exception as e:  # noqa: BLE001
+        return {"status": "unavailable", "detail": str(e)[:200]}
+
+
 def _verify_anchor(anchor: Any) -> VerifierResult:
     name = "scripture.anchor"
     if isinstance(anchor, str):

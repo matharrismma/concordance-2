@@ -334,6 +334,23 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from ..verifiers import scripture  # lazy: witness-only
         return _ok(scripture.word_occurrences(s))
 
+    if method == "GET" and path == "/original":
+        if not config.witness_surfaced:
+            return _err(404, "not found")
+        ref = (query.get("ref") or "").strip()
+        if not ref:
+            return _err(400, "ref required")
+        from ..verifiers import scripture  # lazy: witness-only
+        return _ok(scripture.original_words(ref))
+
+    if method == "GET" and path == "/canon":
+        # The canon as concentric layers — the 66 core + disputed books, framed, never merged.
+        if not config.witness_surfaced:
+            return _err(404, "not found")
+        from .. import canon
+        book = (query.get("book") or "").strip()
+        return _ok(canon.canon_status(book) if book else canon.overview())
+
     return _err(404, "not found")
 
 
@@ -341,7 +358,7 @@ _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word
                   "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
                   "/card/connections", "/locate", "/library/health",
                   "/thread", "/threads", "/threads/search", "/thread/verify", "/passage",
-                  "/pronounce", "/cross_refs", "/word_occurrences"}
+                  "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
