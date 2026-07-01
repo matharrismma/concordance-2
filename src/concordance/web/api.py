@@ -413,6 +413,20 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import commentary
         return _ok(commentary.for_ref(ref, source=(query.get("source") or commentary.DEFAULT_SOURCE)))
 
+    if method == "GET" and path == "/tsk":
+        # Editorial cross-references (openbible.info, CC BY — expansion of the public-domain TSK).
+        if not config.witness_surfaced:
+            return _err(404, "not found")
+        ref = (query.get("ref") or "").strip()
+        if not ref:
+            return _err(400, "ref required")
+        try:
+            limit = int(query.get("limit", "20"))
+        except (TypeError, ValueError):
+            limit = 20
+        from .. import xrefs
+        return _ok(xrefs.for_ref(ref, limit=limit))
+
     return _err(404, "not found")
 
 
@@ -421,7 +435,7 @@ _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word
                   "/card/connections", "/locate", "/library/health",
                   "/thread", "/threads", "/threads/search", "/thread/verify", "/passage",
                   "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
-                  "/commentary", "/journal", "/journal/dates", "/steward"}
+                  "/commentary", "/journal", "/journal/dates", "/steward", "/tsk"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",

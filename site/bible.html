@@ -147,10 +147,11 @@ async function openStudy(ref, rowEl, studyEl){
   rowEl.classList.add('open'); studyEl.classList.add('open');
   if(studyEl.dataset.loaded){ return; }
   studyEl.innerHTML = '<p class="dim">gathering the original words, the commentary, and the connections…</p>';
-  const [orig, cmt, xref] = await Promise.all([
+  const [orig, cmt, xref, tsk] = await Promise.all([
     getJSON('/original?ref=' + encodeURIComponent(ref)),
     getJSON('/commentary?ref=' + encodeURIComponent(ref)),
     getJSON('/cross_refs?ref=' + encodeURIComponent(ref)),
+    getJSON('/tsk?ref=' + encodeURIComponent(ref)),
   ]);
   let html = '';
   if(orig && orig.words && orig.words.length){
@@ -172,6 +173,12 @@ async function openStudy(ref, rowEl, studyEl){
       xref.cross_references.slice(0,12).map(x =>
         '<button class="xref" data-ref="' + esc(x.ref) + '">' + esc(x.ref) +
         '<span class="sc">shares ' + esc(x.shared_count) + '</span></button>').join('');
+  }
+  if(tsk && tsk.cross_references && tsk.cross_references.length){
+    html += '<div class="slabel" style="margin-top:1rem">cross-references — editorial (openbible / TSK, CC BY)</div>' +
+      tsk.cross_references.slice(0,12).map(x =>
+        '<button class="xref" data-ref="' + esc(x.ref) + '">' + esc(x.ref) +
+        (x.votes ? '<span class="sc">votes ' + esc(x.votes) + '</span>' : '') + '</button>').join('');
   }
   studyEl.innerHTML = html;
   studyEl.dataset.loaded = '1';

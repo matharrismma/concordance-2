@@ -116,6 +116,11 @@ def _witness_tools() -> List[dict]:
                          "commentator's own words, found and cited, never generated."),
          "inputSchema": {"type": "object", "properties": {
              "ref": {"type": "string"}, "source": {"type": "string"}}, "required": ["ref"]}},
+        {"name": "tsk_cross_references",
+         "description": ("Editorial cross-references for a verse (openbible.info, CC BY — expansion of "
+                         "the public-domain TSK), ranked by relevance votes. Found + attributed."),
+         "inputSchema": {"type": "object", "properties": {
+             "ref": {"type": "string"}, "limit": {"type": "integer"}}, "required": ["ref"]}},
     ]
 
 
@@ -207,6 +212,9 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
     if name == "commentary" and config.witness_surfaced:
         from .. import commentary  # lazy: witness-only
         return commentary.for_ref(args.get("ref", ""), source=args.get("source") or commentary.DEFAULT_SOURCE)
+    if name == "tsk_cross_references" and config.witness_surfaced:
+        from .. import xrefs  # lazy: witness-only
+        return xrefs.for_ref(args.get("ref", ""), limit=int(args.get("limit", 20)))
     raise KeyError(f"unknown tool {name!r} (on the {config.surface} surface)")
 
 
