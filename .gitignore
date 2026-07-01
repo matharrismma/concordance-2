@@ -15,6 +15,7 @@ data/cas/
 data/ledger/
 data/threads/
 data/commentary/
+data/stacks/
 data/cards.jsonl
 data/*.jsonl
 data/*.db

@@ -162,6 +162,16 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         telemetry.record("ask", surface=surface, kind=r.get("kind"), thread=tid, gate=gate_open)
         return _ok(r)
 
+    if method == "POST" and path == "/journal":
+        # The Journal: keep the day's ideas/writings — the extra that rescues what chats waste.
+        if not isinstance(body, dict) or not str(body.get("text") or "").strip():
+            return _err(400, "text required")
+        from .. import stacks
+        topics = body.get("topics") if isinstance(body.get("topics"), list) else None
+        r = stacks.journal_add(str(body["text"]), kind=str(body.get("kind") or "idea"), topics=topics)
+        telemetry.record("journal", surface=surface, kind=str(body.get("kind") or "idea"))
+        return _ok(r)
+
     if method == "POST" and path == "/mcp":
         # Remote MCP over HTTP — reuse the pure JSON-RPC handler, surface-gated. Stateless
         # request/response (initialize · tools/list · tools/call). Notifications get 202.
@@ -262,6 +272,14 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # Right-to-be-forgotten: the client holds the id; anyone with it may forget the deck.
         from .. import threads as _threads
         return _ok({"deleted": _threads.delete((query.get("id") or "").strip())})
+
+    # The Journal — a date-stack of the day's ideas/writings + the Deck's exchanges (superposition).
+    if method == "GET" and path == "/journal":
+        from .. import stacks
+        return _ok(stacks.journal_day(query.get("date") or None))
+    if method == "GET" and path == "/journal/dates":
+        from .. import stacks
+        return _ok({"dates": stacks.journal_dates()})
 
     # Atlas / grid — the map, read-only.
     if method == "GET" and path == "/grid":
@@ -369,7 +387,7 @@ _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word
                   "/card/connections", "/locate", "/library/health",
                   "/thread", "/threads", "/threads/search", "/thread/verify", "/passage",
                   "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
-                  "/commentary"}
+                  "/commentary", "/journal", "/journal/dates"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
