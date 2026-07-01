@@ -134,9 +134,26 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # The conduit front door: find + verify + cite, never generate. Deterministic router.
         if not isinstance(body, dict) or not str(body.get("text") or "").strip():
             return _err(400, "text required")
-        from .. import ask as _ask
-        r = _ask.respond(str(body["text"]), config)
-        telemetry.record("ask", surface=surface, kind=r.get("kind"))
+        from .. import ask as _ask, threads as _threads
+        text = str(body["text"])
+        r = _ask.respond(text, config)  # routing keys ONLY on current text (deterministic, unchanged)
+        # The Deck: append this exchange so the conversation is one continuous, resumable chain
+        # ("never feel like we started over"). Verbatim user text + the exact response; nothing is
+        # generated or summarized. Persistence is best-effort and OFF TO THE SIDE — it never alters
+        # the answer (crisis/ultimate are untouched) and never breaks it if the write fails.
+        tid = body.get("thread_id") if isinstance(body.get("thread_id"), str) else None
+        try:
+            if not tid:
+                tid = _threads.new_thread(surface)["thread_id"]
+            try:
+                _threads.append(tid, text, r, surface=surface)
+            except ValueError:  # a malformed client-held id — start a fresh deck instead of failing
+                tid = _threads.new_thread(surface)["thread_id"]
+                _threads.append(tid, text, r, surface=surface)
+            r = {**r, "thread_id": tid}
+        except Exception:  # noqa: BLE001 — the conduit answer stands even if the deck write fails
+            pass
+        telemetry.record("ask", surface=surface, kind=r.get("kind"), thread=tid)
         return _ok(r)
 
     if method == "POST" and path == "/mcp":
@@ -194,6 +211,44 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/library/health":
         return _ok(corpus.health())
 
+    # The Deck — a conversation as a resumable, searchable, tamper-evident chain (threads).
+    if method == "GET" and path == "/thread":
+        from .. import threads as _threads
+        tid = (query.get("id") or "").strip()
+        if not tid:
+            return _err(400, "id required")
+        rec = _threads.get(tid)
+        return _ok(rec) if rec is not None else _err(404, "thread not found")
+    if method == "GET" and path == "/threads":
+        from .. import threads as _threads
+        try:
+            limit = int(query.get("limit", "50"))
+        except (TypeError, ValueError):
+            limit = 50
+        return _ok({"threads": _threads.list_threads(limit=limit)})
+    if method == "GET" and path == "/threads/search":
+        from .. import threads as _threads
+        q = (query.get("q") or "").strip()
+        if not q:
+            return _err(400, "q required")
+        try:
+            limit = int(query.get("limit", "10"))
+        except (TypeError, ValueError):
+            limit = 10
+        res = _threads.search(q, limit=limit)
+        return _ok({"query": q, "count": len(res), "results": res})
+    if method == "GET" and path == "/thread/verify":
+        from .. import threads as _threads
+        tid = (query.get("id") or "").strip()
+        if not tid:
+            return _err(400, "id required")
+        ok, detail = _threads.verify_thread(tid)
+        return _ok({"thread_id": tid, "ok": ok, "detail": detail})
+    if method == "DELETE" and path == "/thread":
+        # Right-to-be-forgotten: the client holds the id; anyone with it may forget the deck.
+        from .. import threads as _threads
+        return _ok({"deleted": _threads.delete((query.get("id") or "").strip())})
+
     # Atlas / grid — the map, read-only.
     if method == "GET" and path == "/grid":
         from .. import grid
@@ -242,7 +297,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
 _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word_study",
                   "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
-                  "/card/connections", "/locate", "/library/health"}
+                  "/card/connections", "/locate", "/library/health",
+                  "/thread", "/threads", "/threads/search", "/thread/verify"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",

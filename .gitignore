@@ -8,10 +8,12 @@ dist/
 venv/
 .pytest_cache/
 .mypy_cache/
+.coverage
 
 # runtime data (kept out of source; the contracts live in docs/)
 data/cas/
 data/ledger/
+data/threads/
 data/cards.jsonl
 data/*.jsonl
 data/*.db

@@ -4,108 +4,279 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ask — Narrow Highway</title>
-<meta name="description" content="Ask the concordance. It finds, verifies, and cites — it does not make things up. Your personal details are stripped before anything is sent.">
-<link rel="stylesheet" href="styles.css">
+<meta name="description" content="Ask the concordance. It finds, verifies, and cites — it does not make things up. One continuous conversation you can always return to; your personal details are stripped before anything is sent.">
 <style>
-  .bubble { border:1px solid var(--line); border-radius:12px; padding:.7rem .9rem; margin:.5rem 0; }
-  .you { background:var(--bg); margin-left:2rem; }
-  .me { background:var(--paper); margin-right:1rem; }
-  .cite { border-left:3px solid var(--accent); padding-left:.7rem; margin:.5rem 0; }
-  .crisis { border-left:4px solid var(--fail); }
-  .verse { border-left:3px solid var(--gold); padding-left:.7rem; margin:.4rem 0; }
-  .k { font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
-  .note { font-size:.76rem; color:var(--muted); margin-top:.5rem; font-style:italic; }
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --fail:#c98a8a;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.11), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink);
+    font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:720px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.3rem; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:720px; margin:0 auto; padding:1rem 1.3rem 3rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.66rem; margin-top:2.6rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2rem; margin:.5rem 0 .4rem}
+  .lede{color:var(--dim); font-size:1.02rem; max-width:38rem}
+  .chain{margin:2.6rem 0 0}
+  .turn{margin:0 0 2.3rem; padding:0 0 2.3rem; border-bottom:1px solid var(--line)}
+  .turn:last-child{border-bottom:0}
+  .role{color:var(--goldsoft); letter-spacing:.26em; text-transform:uppercase; font-size:.62rem; margin-bottom:.55rem}
+  .said{color:var(--ink)}
+  .me{margin-top:1.4rem}
+  .dim{color:var(--dim)}
+  .verse{border-left:2px solid var(--gold); padding-left:.95rem; margin:.6rem 0}
+  .verse .ref{color:var(--gold)}
+  .cite{border-left:1px solid var(--line); padding-left:.95rem; margin:.6rem 0}
+  .cite .k,.shelf{color:var(--goldsoft); text-transform:uppercase; letter-spacing:.14em; font-size:.6rem}
+  .verdict{letter-spacing:.08em; font-size:1.05rem}
+  .verdict.holds{color:var(--pass)} .verdict.broken,.verdict.error{color:var(--fail)}
+  .trail{font-family:ui-monospace,Consolas,monospace; font-size:.8rem; color:var(--dim); white-space:pre-wrap; margin-top:.5rem}
+  .crisis{border-left:3px solid var(--fail); padding-left:.95rem}
+  .receipt{font-size:.74rem; color:var(--dim); margin-top:.7rem}
+  .receipt a{font-family:ui-monospace,Consolas,monospace}
+  .note{font-size:.73rem; color:var(--dim); font-style:italic; margin-top:.8rem}
+  .askbar{position:sticky; bottom:0; background:linear-gradient(to top, var(--void) 72%, rgba(10,11,16,0)); padding:1.1rem 0 1.3rem}
+  .askrow{display:flex; gap:.4rem; border:1px solid var(--line); background:rgba(255,255,255,.02); padding:.15rem}
+  .askrow input{flex:1; background:transparent; border:0; color:var(--ink); font:inherit; padding:.7rem .8rem; outline:none}
+  .askrow input::placeholder{color:var(--dim)}
+  .askrow button{background:transparent; border:0; color:var(--gold); font:inherit; letter-spacing:.16em; text-transform:uppercase; font-size:.7rem; padding:0 1.1rem; cursor:pointer}
+  .askrow button:hover{color:var(--ink)}
+  .deckbar{display:flex; justify-content:space-between; align-items:center; margin-top:.75rem; gap:.6rem; font-size:.7rem}
+  .deckbar .state{color:var(--dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .deckbar button{background:none; border:0; color:var(--dim); cursor:pointer; font:inherit; letter-spacing:.12em; text-transform:uppercase; font-size:.66rem; margin-left:1.1rem}
+  .deckbar button:hover{color:var(--gold)}
+  .panel{margin-top:.9rem; border:1px solid var(--line); padding:.95rem; display:none}
+  .panel.open{display:block}
+  .panel input{width:100%; background:transparent; border:0; border-bottom:1px solid var(--line); color:var(--ink); font:inherit; padding:.5rem 0; outline:none; margin-bottom:.5rem}
+  .panel input::placeholder{color:var(--dim)}
+  .threadlink{display:block; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid var(--line); color:var(--ink); font:inherit; padding:.5rem 0; cursor:pointer}
+  .threadlink:hover{color:var(--gold)}
+  .threadlink .meta{color:var(--dim); font-size:.72rem}
+  .hint{color:var(--dim); font-size:.8rem; margin-top:1rem}
+  footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:2.4rem; padding-top:1.3rem; line-height:1.7}
+  @media (prefers-reduced-motion:no-preference){
+    .turn{animation:rise .5s ease both}
+    @keyframes rise{from{opacity:0; transform:translateY(7px)} to{opacity:1; transform:none}}
+  }
 </style>
 </head>
 <body>
-<header class="site"><div class="wrap" style="padding:.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center">
-  <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow <span class="road">Highway</span></a>
   <nav class="site"><a href="/ask.html">Ask</a><a href="/#verify">Verify</a><a href="/library.html">Library</a><a href="/seal.html">Seal</a></nav>
 </div></header>
 
 <main class="wrap">
+  <div class="kicker">One conversation</div>
   <h1>Ask the concordance</h1>
-  <p class="lede">It <strong>finds, verifies, and cites</strong> — it does not make things up, and it hands
-  you the sources. Your personal details are stripped before anything is sent. It is a window to the
-  truth, not the source of it.</p>
+  <p class="lede">It finds, verifies, and cites — it does not make things up, and it hands you the sources.
+  We keep the thread, so you never start over: come back and pull up right where you were. Your personal
+  details are stripped before anything is sent. A window to the truth, not the source of it.</p>
 
-  <div id="chat" style="margin:1rem 0"></div>
-  <div class="row">
-    <input id="q" placeholder="Ask anything — a claim to check, a verse, a topic…" aria-label="your question">
-    <button onclick="ask()">Ask</button>
+  <div class="chain" id="chain"></div>
+  <p class="hint" id="hint">Begin anywhere — a claim to check (<span class="dim">2+2 = 4</span>), a verse
+  (<span class="dim">John 3:16</span>), a word, or a question that matters to you.</p>
+
+  <div class="askbar">
+    <div class="askrow">
+      <input id="q" placeholder="Ask anything…" aria-label="your question" autocomplete="off">
+      <button id="askbtn">Ask</button>
+    </div>
+    <div class="deckbar">
+      <span class="state" id="state">a new conversation</span>
+      <span style="white-space:nowrap">
+        <button id="verifybtn" hidden>verify this deck</button>
+        <button id="decktoggle">your conversations</button>
+        <button id="newbtn">new</button>
+      </span>
+    </div>
+    <div class="panel" id="panel">
+      <input id="decksearch" placeholder="search your past conversations…" autocomplete="off">
+      <div id="decklist"></div>
+    </div>
   </div>
-  <p class="muted" style="font-size:.78rem;margin-top:.5rem">Try: <span class="mono">2+2 = 4</span> ·
-  <span class="mono">John 3:16</span> · <span class="mono">grace</span> · a question that matters to you.</p>
 
   <footer class="site"><p>The engine verifies and finds; it does not generate the answer. On the deepest
-  questions it points to Christ, to Scripture, and to real people. The fuller witness is at
-  <a href="https://narrowhighway.org">narrowhighway.org</a>.</p></footer>
+  questions it points to Christ, to Scripture, and to real people. Every kept note is the exact exchange —
+  nothing invented. The fuller witness is at <a href="https://narrowhighway.org">narrowhighway.org</a>.</p></footer>
 </main>
 
 <script src="redact.js"></script>
 <script>
 const API = "";
-const chat = document.getElementById('chat');
-function esc(s){const d=document.createElement('div');d.textContent=String(s==null?"":s);return d.innerHTML;}
-function add(html, cls){ const d=document.createElement('div'); d.className='bubble '+cls; d.innerHTML=html; chat.appendChild(d); d.scrollIntoView({behavior:'smooth',block:'nearest'}); return d; }
+const TID_KEY = "nh_thread";
+let threadId = localStorage.getItem(TID_KEY) || null;
+
+const chainEl = document.getElementById('chain');
+const hintEl = document.getElementById('hint');
+const input = document.getElementById('q');
+const stateEl = document.getElementById('state');
+const verifyBtn = document.getElementById('verifybtn');
+const panel = document.getElementById('panel');
+const deckList = document.getElementById('decklist');
+const deckSearch = document.getElementById('decksearch');
+
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
 
 function renderCards(arr){
-  return (arr||[]).map(c => '<div class="cite"><span class="k">'+esc(c.shelf||'')+'</span> <strong>'+
-    esc(c.title||c.id)+'</strong><div class="s">'+esc((c.snippet||'').slice(0,160))+'</div></div>').join('');
+  return (arr||[]).map(c => '<div class="cite"><span class="k">'+esc(c.shelf||'')+'</span> '+
+    esc(c.title||c.id)+'<div class="dim" style="font-size:.92rem">'+esc((c.snippet||'').slice(0,180))+'</div></div>').join('');
 }
+
 function render(d){
-  const note = '<div class="note">'+esc(d.note||'')+'</div>';
-  if (d.kind === 'crisis') {
-    return '<div class="crisis"><strong>'+esc(d.message)+'</strong>'+
-      '<div style="margin-top:.5rem">'+ (d.resources||[]).map(r =>
-        '• '+(r.ref?'<a href="'+esc(r.ref)+'">'+esc(r.label)+'</a>':esc(r.label))).join('<br>') +'</div></div>';
+  if(!d || typeof d!=='object') return '<span class="dim">(no answer)</span>';
+  const note = d.note ? '<div class="note">'+esc(d.note)+'</div>' : '';
+  if(d.kind === 'crisis'){
+    return '<div class="crisis"><strong>'+esc(d.message)+'</strong><div style="margin-top:.6rem">'+
+      (d.resources||[]).map(r => '· '+(r.ref?'<a href="'+esc(r.ref)+'">'+esc(r.label)+'</a>':esc(r.label))).join('<br>')+
+      '</div></div>';
   }
-  if (d.kind === 'ultimate') {
-    return esc(d.message) +
-      '<div style="margin-top:.5rem">'+ (d.scripture||[]).map(v =>
-        '<div class="verse"><strong>'+esc(v.ref)+'</strong> — '+esc(v.text)+'</div>').join('') +'</div>'+
-      '<div class="muted" style="font-size:.85rem;margin-top:.4rem">Walk with: '+
-        (d.real_help||[]).map(esc).join(' · ')+'</div>'+
-      (d.also_in_the_keeping&&d.also_in_the_keeping.length?'<div class="k" style="margin-top:.6rem">also in the keeping</div>'+renderCards(d.also_in_the_keeping):'')+
-      note;
+  if(d.kind === 'ultimate'){
+    return esc(d.message)+
+      '<div style="margin-top:.7rem">'+(d.scripture||[]).map(v =>
+        '<div class="verse"><span class="ref">'+esc(v.ref)+'</span> — '+esc(v.text)+'</div>').join('')+'</div>'+
+      '<div class="dim" style="font-size:.9rem;margin-top:.5rem">Walk with: '+(d.real_help||[]).map(esc).join(' · ')+'</div>'+
+      (d.also_in_the_keeping&&d.also_in_the_keeping.length?
+        '<div class="role" style="margin-top:.9rem">also in the keeping</div>'+renderCards(d.also_in_the_keeping):'')+note;
   }
-  if (d.verify) {
-    const v = d.verify, verdict = v.verdict||'ERROR';
+  if(d.verify){
+    const v=d.verify, verdict=v.verdict||'ERROR';
     const cls = verdict==='HOLDS'?'holds':(verdict==='BROKEN'?'broken':'error');
     const step = (v.trail&&v.trail[0])||{};
-    const seal = v.seal ? '<div class="note">🔒 receipt: <a class="mono" href="'+esc(v.seal.cite_url)+'">'+esc((v.seal.content_hash||'').slice(0,20))+'…</a></div>' : '';
-    return '<div class="verdict '+cls+'">'+(verdict==='HOLDS'?'✓ HOLDS':(verdict==='BROKEN'?'✗ BROKEN':verdict))+'</div>'+
-      '<div class="trail">'+esc(step.detail||'')+'</div>'+seal+note;
+    const seal = v.seal ? '<div class="receipt">seal: <a href="'+esc(v.seal.cite_url)+'">'+
+      esc((v.seal.content_hash||'').slice(0,20))+'…</a> — re-checkable, tamper-evident</div>' : '';
+    return '<div class="verdict '+cls+'">'+(verdict==='HOLDS'?'✓ Holds':(verdict==='BROKEN'?'✗ Broken':esc(verdict)))+'</div>'+
+      '<div class="trail">'+esc(step.detail||v.detail||'')+'</div>'+seal+note;
   }
-  if (d.scripture) {
-    const s = d.scripture;
-    return '<div class="verse"><strong>'+esc(s.ref||'')+'</strong> — '+esc(s.text|| s.error ||'(not found)')+'</div>'+note;
+  if(d.scripture){
+    const s=d.scripture;
+    return '<div class="verse"><span class="ref">'+esc(s.ref||'')+'</span> — '+esc(s.text||s.error||'(not found)')+'</div>'+note;
   }
-  if (d.word_study) {
-    const w = d.word_study;
+  if(d.word_study){
+    const w=d.word_study;
     return '<div class="cite"><strong>'+esc(w.lemma||w.strongs||'')+'</strong> '+esc(w.transliteration||'')+
       '<div>'+esc(w.definition||w.gloss||w.error||'')+'</div>'+
-      (w.occurrences!=null?'<div class="muted" style="font-size:.85rem">'+esc(w.occurrences)+' occurrences</div>':'')+'</div>'+note;
+      (w.occurrences!=null?'<div class="dim" style="font-size:.88rem">'+esc(w.occurrences)+' occurrences</div>':'')+'</div>'+note;
   }
-  if (d.kind === 'found') {
-    return (d.results&&d.results.length? renderCards(d.results) : '<span class="muted">Nothing in the keeping matched — try different words.</span>')+note;
+  if(d.kind === 'found'){
+    return (d.results&&d.results.length ? renderCards(d.results)
+      : '<span class="dim">Nothing in the keeping matched — try different words.</span>')+note;
   }
-  return '<span class="muted">'+esc(JSON.stringify(d))+'</span>';
+  return '<span class="dim">'+esc(JSON.stringify(d))+'</span>';
+}
+
+function addTurn(userText){
+  hintEl.style.display='none';
+  const t=document.createElement('div'); t.className='turn';
+  t.innerHTML='<div class="role">you</div><div class="said">'+esc(userText)+'</div>'+
+              '<div class="me"><div class="role">the concordance</div><div class="body dim">finding…</div></div>';
+  chainEl.appendChild(t);
+  const body=t.querySelector('.me .body');
+  t.scrollIntoView({behavior:'smooth', block:'end'});
+  return body;
+}
+
+function setState(rec){
+  if(rec && rec.title){ stateEl.textContent = '“'+rec.title+'”'; verifyBtn.hidden=false; }
+  else if(threadId){ stateEl.textContent='this conversation'; verifyBtn.hidden=false; }
+  else { stateEl.textContent='a new conversation'; verifyBtn.hidden=true; }
+}
+
+async function loadThread(){
+  chainEl.innerHTML='';
+  if(!threadId){ hintEl.style.display=''; setState(null); return; }
+  try{
+    const r = await fetch(API+'/thread?id='+encodeURIComponent(threadId));
+    if(!r.ok){ localStorage.removeItem(TID_KEY); threadId=null; hintEl.style.display=''; setState(null); return; }
+    const d = await r.json();
+    (d.exchanges||[]).forEach(ex => { const b=addTurn(ex.user); b.className='body'; b.innerHTML=render(ex.response); });
+    setState(d);
+    if(!(d.exchanges||[]).length) hintEl.style.display='';
+  }catch(e){ hintEl.style.display=''; setState(null); }
 }
 
 async function ask(){
-  const el = document.getElementById('q'), text = el.value.trim();
-  if (!text) return;
-  add(esc(text), 'you'); el.value='';
-  const thinking = add('<span class="muted">finding…</span>', 'me');
-  try {
-    const {clean} = (window.Rampart ? Rampart.protect(text) : {clean:text});  // strip PII before it leaves
-    const r = await fetch(API + '/ask', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({text: clean})});
+  const text = input.value.trim();
+  if(!text) return;
+  input.value='';
+  const body = addTurn(text);
+  try{
+    const {clean} = (window.Rampart ? Rampart.protect(text) : {clean:text});  // strip PII before it leaves the device
+    const payload = {text: clean};
+    if(threadId) payload.thread_id = threadId;
+    const r = await fetch(API+'/ask', {method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(payload)});
     const d = await r.json();
-    thinking.innerHTML = render(d);
-  } catch(e){ thinking.innerHTML = '<span class="muted">The engine is unreachable right now.</span>'; }
+    if(d.thread_id){ threadId=d.thread_id; localStorage.setItem(TID_KEY, threadId); }
+    body.className='body'; body.innerHTML=render(d);
+    setState({title: (input.dataset.title||'')});
+    if(threadId && stateEl.textContent==='a new conversation') stateEl.textContent='this conversation';
+    verifyBtn.hidden = !threadId;
+  }catch(e){ body.innerHTML='<span class="dim">The engine is unreachable right now.</span>'; }
 }
-document.getElementById('q').addEventListener('keydown', e => { if(e.key==='Enter') ask(); });
+
+function newThread(){
+  threadId=null; localStorage.removeItem(TID_KEY);
+  chainEl.innerHTML=''; hintEl.style.display=''; setState(null);
+  panel.classList.remove('open'); input.focus();
+}
+
+function pull(id){
+  threadId=id; localStorage.setItem(TID_KEY, id);
+  panel.classList.remove('open');
+  loadThread();
+}
+
+function renderDeckList(items, kind){
+  if(!items || !items.length){ deckList.innerHTML='<div class="dim" style="padding:.5rem 0">'+(kind==='search'?'Nothing matched.':'No conversations yet.')+'</div>'; return; }
+  deckList.innerHTML = items.map(t => '<button class="threadlink" data-id="'+esc(t.thread_id)+'">'+
+    esc(t.title||'(untitled)')+'<div class="meta">'+(t.exchanges!=null?esc(t.exchanges)+' exchange'+(t.exchanges===1?'':'s'):'')+
+    (t.match?' · '+esc(t.match):'')+'</div></button>').join('');
+}
+
+async function loadDeckList(){
+  try{ const r=await fetch(API+'/threads?limit=50'); const d=await r.json(); renderDeckList(d.threads||[], 'list'); }
+  catch(e){ deckList.innerHTML='<div class="dim">Could not load.</div>'; }
+}
+async function searchDecks(q){
+  if(!q.trim()){ loadDeckList(); return; }
+  try{ const r=await fetch(API+'/threads/search?q='+encodeURIComponent(q)); const d=await r.json(); renderDeckList(d.results||[], 'search'); }
+  catch(e){ deckList.innerHTML='<div class="dim">Could not search.</div>'; }
+}
+
+document.getElementById('askbtn').addEventListener('click', ask);
+input.addEventListener('keydown', e => { if(e.key==='Enter') ask(); });
+document.getElementById('newbtn').addEventListener('click', newThread);
+document.getElementById('decktoggle').addEventListener('click', () => {
+  panel.classList.toggle('open');
+  if(panel.classList.contains('open')){ loadDeckList(); deckSearch.focus(); }
+});
+deckSearch.addEventListener('input', () => searchDecks(deckSearch.value));
+deckList.addEventListener('click', e => {
+  const b = e.target.closest('.threadlink'); if(b) pull(b.dataset.id);
+});
+verifyBtn.addEventListener('click', async () => {
+  if(!threadId) return;
+  verifyBtn.textContent='checking…';
+  try{
+    const r=await fetch(API+'/thread/verify?id='+encodeURIComponent(threadId)); const d=await r.json();
+    stateEl.textContent = d.ok ? '✓ this deck is intact — '+esc(d.detail) : '✗ the chain was altered';
+  }catch(e){ stateEl.textContent='could not verify'; }
+  verifyBtn.textContent='verify this deck';
+});
+
+loadThread();
 </script>
 </body>
 </html>
