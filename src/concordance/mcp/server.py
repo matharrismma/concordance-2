@@ -103,6 +103,11 @@ def _witness_tools() -> List[dict]:
          "description": "Every verse where a Strong's word occurs (the concordance).",
          "inputSchema": {"type": "object", "properties": {
              "strongs": {"type": "string", "description": "e.g. G26, H2617"}}, "required": ["strongs"]}},
+        {"name": "commentary",
+         "description": ("Public-domain, attributed commentary (Matthew Henry) on a reference — the "
+                         "commentator's own words, found and cited, never generated."),
+         "inputSchema": {"type": "object", "properties": {
+             "ref": {"type": "string"}, "source": {"type": "string"}}, "required": ["ref"]}},
     ]
 
 
@@ -185,6 +190,9 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
     if name == "word_occurrences" and config.witness_surfaced:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.word_occurrences(args.get("strongs", ""))
+    if name == "commentary" and config.witness_surfaced:
+        from .. import commentary  # lazy: witness-only
+        return commentary.for_ref(args.get("ref", ""), source=args.get("source") or commentary.DEFAULT_SOURCE)
     raise KeyError(f"unknown tool {name!r} (on the {config.surface} surface)")
 
 
