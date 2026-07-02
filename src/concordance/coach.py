@@ -26,53 +26,96 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-# ── curriculum load (verbatim data, cached) ─────────────────────────────────────────────────
+# ── curriculum load (verbatim data, cached, MULTI-SUBJECT) ──────────────────────────────────
+# Each subject is one <subject>_en.json in the curriculum dir, ported verbatim by migrate_school.
+# 'read' (phonics) is the default door in; the others (mcguffey, aesop, founding, pilgrims, es, …)
+# grow with the student. Subjects are DISCOVERED from the files present — drop in a new *_en.json
+# and it appears, no code change. Conduit: found content, never generated.
 
-_CURRICULUM: Optional[List[Dict[str, Any]]] = None
+DEFAULT_SUBJECT = "read"
+_LABELS = {
+    "read": "Learn to Read (phonics)", "mcguffey": "McGuffey Readers", "aesop": "Aesop's Fables",
+    "founding": "Founding Documents", "pilgrims": "Pilgrim's Progress", "es": "Español (Spanish)",
+    "bible": "Bible Study",
+}
+_CACHE: Dict[str, List[Dict[str, Any]]] = {}
+_SUBJECTS: Optional[List[str]] = None
 
 
-def _file() -> Path:
-    """The curriculum path. CONCORDANCE_CURRICULUM_DIR / CONCORDANCE_DATA_DIR override the default."""
+def _curr_dir() -> Path:
+    """The curriculum directory. CONCORDANCE_CURRICULUM_DIR / CONCORDANCE_DATA_DIR override the default."""
     env = os.environ.get("CONCORDANCE_CURRICULUM_DIR", "").strip()
     if env:
-        return Path(env) / "read_en.json"
+        return Path(env)
     data = os.environ.get("CONCORDANCE_DATA_DIR", "").strip()
-    if data:
-        return Path(data) / "curriculum" / "read_en.json"
-    return Path("data") / "curriculum" / "read_en.json"
+    return (Path(data) / "curriculum") if data else (Path("data") / "curriculum")
 
 
-def _load() -> List[Dict[str, Any]]:
-    """Load the units verbatim from read_en.json (cached). Missing/unreadable -> empty (never raises)."""
-    global _CURRICULUM
-    if _CURRICULUM is not None:
-        return _CURRICULUM
-    p = _file()
+def _file(subject: str = DEFAULT_SUBJECT) -> Path:
+    """The path for one subject's curriculum (<subject>_en.json)."""
+    return _curr_dir() / (str(subject or DEFAULT_SUBJECT) + "_en.json")
+
+
+def _discover() -> List[str]:
+    """The subjects present, as <subject> stems of the *_en.json files. 'read' first if present."""
+    global _SUBJECTS
+    if _SUBJECTS is not None:
+        return _SUBJECTS
+    found: List[str] = []
     try:
-        data = json.loads(p.read_text(encoding="utf-8"))
+        for p in sorted(_curr_dir().glob("*_en.json")):
+            found.append(p.name[:-len("_en.json")])
+    except OSError:
+        found = []
+    if DEFAULT_SUBJECT in found:
+        found = [DEFAULT_SUBJECT] + [s for s in found if s != DEFAULT_SUBJECT]
+    _SUBJECTS = found
+    return _SUBJECTS
+
+
+def _load(subject: str = DEFAULT_SUBJECT) -> List[Dict[str, Any]]:
+    """Load one subject's units verbatim (cached). Missing/unreadable -> empty (never raises)."""
+    subject = str(subject or DEFAULT_SUBJECT)
+    if subject in _CACHE:
+        return _CACHE[subject]
+    try:
+        data = json.loads(_file(subject).read_text(encoding="utf-8"))
         units = data if isinstance(data, list) else []
     except (OSError, json.JSONDecodeError):
         units = []
-    _CURRICULUM = [u for u in units if isinstance(u, dict) and u.get("id")]
-    return _CURRICULUM
+    _CACHE[subject] = [u for u in units if isinstance(u, dict) and u.get("id")]
+    return _CACHE[subject]
 
 
 def reload() -> int:
-    """Drop the cache and re-read from disk (for the migrator/tests). Returns the unit count."""
-    global _CURRICULUM
-    _CURRICULUM = None
-    return len(_load())
+    """Drop all caches and re-read from disk (for the migrator/tests). Returns the default subject's count."""
+    global _CACHE, _SUBJECTS
+    _CACHE = {}
+    _SUBJECTS = None
+    return len(_load(DEFAULT_SUBJECT))
 
 
-def _ordered() -> List[Dict[str, Any]]:
-    """Units in a STABLE, deterministic teaching order: by unit_seq, then id (unit_seq repeats
-    across tracks, so id is the tiebreak — the same order on every box, every time)."""
+def subjects() -> Dict[str, Any]:
+    """The subjects a learner can study — the door in ('read') plus whatever else is present."""
+    out = [{"id": s, "title": _LABELS.get(s, s.replace("_", " ").title()), "count": len(_load(s))}
+           for s in _discover()]
+    return {"kind": "coach_subjects", "subjects": out, "default": DEFAULT_SUBJECT,
+            "note": _NOTE, "generated": False}
+
+
+def _all_unit_ids() -> set:
+    """Every unit id across every subject — so a completed count is honest across the whole school."""
+    return {str(u.get("id")) for s in _discover() for u in _load(s)}
+
+
+def _ordered(subject: str = DEFAULT_SUBJECT) -> List[Dict[str, Any]]:
+    """One subject's units in a STABLE, deterministic teaching order: by unit_seq, then id."""
     def _seq(u: Dict[str, Any]) -> int:
         try:
             return int(u.get("unit_seq", 10 ** 9))
         except (TypeError, ValueError):
             return 10 ** 9
-    return sorted(_load(), key=lambda u: (_seq(u), str(u.get("id", ""))))
+    return sorted(_load(subject), key=lambda u: (_seq(u), str(u.get("id", ""))))
 
 
 # ── find + present (never generate) ─────────────────────────────────────────────────────────
@@ -80,10 +123,11 @@ def _ordered() -> List[Dict[str, Any]]:
 _NOTE = "Coach finds and presents the lesson; it never generates it, and never grades a child."
 
 
-def overview() -> Dict[str, Any]:
-    """The map of the whole path: how many units, the tracks, and the ordered list of unit briefs.
-    Found and cited, never generated."""
-    units = _ordered()
+def overview(subject: str = DEFAULT_SUBJECT) -> Dict[str, Any]:
+    """The map of one subject's path: how many units, the tracks, and the ordered unit briefs.
+    Found and cited, never generated. subject defaults to the reading path ('read')."""
+    subject = str(subject or DEFAULT_SUBJECT)
+    units = _ordered(subject)
     tracks: List[str] = []
     for u in units:
         t = str(u.get("track") or "")
@@ -94,70 +138,82 @@ def overview() -> Dict[str, Any]:
                "next": u.get("next")} for u in units]
     return {
         "kind": "coach_overview",
+        "subject": subject,
+        "subject_title": _LABELS.get(subject, subject.replace("_", " ").title()),
         "count": len(units),
         "tracks": tracks,
         "units": briefs,
-        "source": "Read school curriculum (offline), ported verbatim.",
+        "source": "Read-school curriculum (offline), ported verbatim.",
         "note": _NOTE,
         "generated": False,
     }
 
 
-def unit(unit_id: str) -> Dict[str, Any]:
+def unit(unit_id: str, subject: str = DEFAULT_SUBJECT) -> Dict[str, Any]:
     """One unit, VERBATIM as authored — the rule, examples, decodable sentence, checks, next.
-    Returns kind:coach_unit_not_found (never a guess) when the id is unknown."""
+    Searches the given subject first, then any subject (ids are subject-unique), so a caller need not
+    know the subject. Returns kind:coach_unit_not_found (never a guess) when the id is unknown."""
     uid = str(unit_id or "")
-    for u in _load():
-        if u.get("id") == uid:
-            out = dict(u)  # the operator's teaching, unaltered
-            out["kind"] = "coach_unit"
-            out["note"] = _NOTE
-            out["generated"] = False
-            return out
+    order = [str(subject or DEFAULT_SUBJECT)] + [s for s in _discover() if s != subject]
+    for subj in order:
+        for u in _load(subj):
+            if u.get("id") == uid:
+                out = dict(u)  # the operator's teaching, unaltered
+                out["kind"] = "coach_unit"
+                out["subject"] = subj
+                out["note"] = _NOTE
+                out["generated"] = False
+                return out
     return {"kind": "coach_unit_not_found", "id": uid,
             "message": "No unit by that id. See /coach/overview for the path.",
             "note": _NOTE, "generated": False}
 
 
-def next_unit(after: Optional[str] = None) -> Dict[str, Any]:
-    """The next lesson to teach, deterministically. after=None -> the first unit; after=<id> ->
-    the unit that follows it in the stable teaching order. Past the end -> kind:coach_complete.
+def next_unit(after: Optional[str] = None, subject: str = DEFAULT_SUBJECT) -> Dict[str, Any]:
+    """The next lesson to teach, deterministically, within a subject. after=None -> the first unit;
+    after=<id> -> the unit that follows it in the stable teaching order. Past the end -> coach_complete.
     A lesson is a continuing chain (ride threads.py for continuity); this only decides WHICH unit."""
-    units = _ordered()
+    subject = str(subject or DEFAULT_SUBJECT)
+    units = _ordered(subject)
     if not units:
         return {"kind": "coach_empty", "message": "No curriculum is loaded yet.",
                 "note": _NOTE, "generated": False}
     if after is None or str(after) == "":
         first = units[0]
-        return {"kind": "coach_next", "after": None, "unit": unit(str(first.get("id"))),
+        return {"kind": "coach_next", "after": None, "subject": subject,
+                "unit": unit(str(first.get("id")), subject),
                 "position": 1, "of": len(units), "note": _NOTE, "generated": False}
     ids = [str(u.get("id")) for u in units]
     aid = str(after)
     if aid not in ids:
         # Unknown anchor — do not guess. Point back to the map.
-        return {"kind": "coach_next_unknown_anchor", "after": aid,
+        return {"kind": "coach_next_unknown_anchor", "after": aid, "subject": subject,
                 "message": "That unit id isn't in the path. See /coach/overview.",
                 "note": _NOTE, "generated": False}
     idx = ids.index(aid)
     if idx + 1 >= len(units):
-        return {"kind": "coach_complete", "after": aid,
+        return {"kind": "coach_complete", "after": aid, "subject": subject,
                 "message": "That was the last unit in this path. Well done — keep reading.",
                 "position": len(units), "of": len(units), "note": _NOTE, "generated": False}
     nxt = units[idx + 1]
-    return {"kind": "coach_next", "after": aid, "unit": unit(str(nxt.get("id"))),
+    return {"kind": "coach_next", "after": aid, "subject": subject,
+            "unit": unit(str(nxt.get("id")), subject),
             "position": idx + 2, "of": len(units), "note": _NOTE, "generated": False}
 
 
-def recommend(completed_ids: Optional[List[str]] = None) -> Dict[str, Any]:
-    """Adaptive 'where you are / what's next': given the units already completed, point to the next
-    lesson whose prerequisites are all met — grows with the student. Deterministic and FOUND: it
-    only chooses WHICH authored unit comes next; it never generates a lesson or judges the child. The
-    caller holds progress (no personal data server-side). All done -> kind:coach_complete."""
+def recommend(completed_ids: Optional[List[str]] = None, subject: str = DEFAULT_SUBJECT) -> Dict[str, Any]:
+    """Adaptive 'where you are / what's next' within a subject: given the units already completed,
+    point to the next lesson whose prerequisites are all met — grows with the student. Deterministic
+    and FOUND: it only chooses WHICH authored unit comes next; never generates or judges the child.
+    The caller holds progress (no personal data server-side). All done -> kind:coach_complete."""
+    subject = str(subject or DEFAULT_SUBJECT)
     done = {str(x) for x in (completed_ids or [])}
-    units = _ordered()
+    units = _ordered(subject)
     if not units:
-        return {"kind": "coach_empty", "message": "No curriculum is loaded yet.", "note": _NOTE, "generated": False}
+        return {"kind": "coach_empty", "subject": subject, "message": "No curriculum is loaded yet.",
+                "note": _NOTE, "generated": False}
     total = len(units)
+    here = done & {str(u.get("id")) for u in units}   # completed within THIS subject
     # First un-done unit whose prerequisites are satisfied (the natural next step).
     for i, u in enumerate(units):
         uid = str(u.get("id"))
@@ -165,17 +221,17 @@ def recommend(completed_ids: Optional[List[str]] = None) -> Dict[str, Any]:
             continue
         prereqs = [str(p) for p in (u.get("prerequisites") or [])]
         if all(p in done for p in prereqs):
-            return {"kind": "coach_recommend", "unit": unit(uid), "completed": len(done & {str(x.get('id')) for x in units}),
-                    "position": i + 1, "of": total, "note": _NOTE, "generated": False}
+            return {"kind": "coach_recommend", "subject": subject, "unit": unit(uid, subject),
+                    "completed": len(here), "position": i + 1, "of": total, "note": _NOTE, "generated": False}
     # None with met prerequisites: either everything is done, or a gap. Never guess past the end.
-    if len(done & {str(u.get("id")) for u in units}) >= total:
-        return {"kind": "coach_complete", "completed": total, "of": total,
+    if len(here) >= total:
+        return {"kind": "coach_complete", "subject": subject, "completed": total, "of": total,
                 "message": "Every unit in this path is complete. Well done — keep reading.",
                 "note": _NOTE, "generated": False}
     for i, u in enumerate(units):  # fall back to the first un-done unit in order (prereqs unmet upstream)
         if str(u.get("id")) not in done:
-            return {"kind": "coach_recommend", "unit": unit(str(u.get("id"))),
-                    "completed": len(done & {str(x.get('id')) for x in units}),
+            return {"kind": "coach_recommend", "subject": subject, "unit": unit(str(u.get("id")), subject),
+                    "completed": len(here),
                     "position": i + 1, "of": total, "note": _NOTE, "generated": False}
     return {"kind": "coach_complete", "completed": total, "of": total, "note": _NOTE, "generated": False}
 
@@ -193,7 +249,7 @@ def mastery_result(completed_ids: List[str]) -> Dict[str, Any]:
 
     Returns {result, count, completed} — result is the receipts-ready dict; count is the honest int.
     """
-    valid = {str(u.get("id")) for u in _load()}
+    valid = _all_unit_ids()   # honest across every subject present (read, mcguffey, aesop, …)
     seen: List[str] = []
     for cid in (completed_ids or []):
         c = str(cid)

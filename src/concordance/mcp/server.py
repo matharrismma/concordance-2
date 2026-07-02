@@ -87,21 +87,25 @@ def _secular_tools() -> List[dict]:
         {"name": "steward_cost_destroyed",
          "description": "Steward — cost destroyed: money you did NOT spend (was -> now), kept in your currency.",
          "inputSchema": {"type": "object", "properties": {"items": {"type": "array"}}, "required": ["items"]}},
-        {"name": "coach_overview",
-         "description": ("Coach (K-3 reading tutor) — the whole path: unit count, tracks, and the "
-                         "ordered unit briefs. Found + presented verbatim; never generated, never grades a child."),
+        {"name": "coach_subjects",
+         "description": ("Coach — the subjects a learner can study (read / mcguffey / aesop / founding / "
+                         "pilgrims / es / …), each with its unit count. 'read' is the door in."),
          "inputSchema": {"type": "object", "properties": {}}},
+        {"name": "coach_overview",
+         "description": ("Coach (K-3 tutor) — one subject's whole path: unit count, tracks, ordered unit "
+                         "briefs. ?subject= selects the path (default 'read'). Verbatim; never generated."),
+         "inputSchema": {"type": "object", "properties": {"subject": {"type": "string"}}}},
         {"name": "coach_unit",
          "description": "Coach — one unit, VERBATIM as authored (rule, examples, decodable sentence, checks).",
-         "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
+         "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}, "subject": {"type": "string"}}, "required": ["id"]}},
         {"name": "coach_next",
-         "description": ("Coach — the next lesson to teach, deterministically. Omit `after` for the "
-                         "first unit; pass a unit id for the one that follows it."),
-         "inputSchema": {"type": "object", "properties": {"after": {"type": "string"}}}},
+         "description": ("Coach — the next lesson in a subject, deterministically. Omit `after` for the "
+                         "first unit; pass a unit id for the one that follows it. `subject` selects the path."),
+         "inputSchema": {"type": "object", "properties": {"after": {"type": "string"}, "subject": {"type": "string"}}}},
         {"name": "coach_recommend",
-         "description": ("Coach — adaptive 'what's next': given the completed unit ids, the next lesson "
-                         "whose prerequisites are met (grows with the student). Found, never generated."),
-         "inputSchema": {"type": "object", "properties": {"completed": {"type": "array"}}}},
+         "description": ("Coach — adaptive 'what's next' in a subject: given completed unit ids, the next "
+                         "lesson whose prerequisites are met (grows with the student). Found, never generated."),
+         "inputSchema": {"type": "object", "properties": {"completed": {"type": "array"}, "subject": {"type": "string"}}}},
         {"name": "coach_mastery",
          "description": ("Coach — seal an HONEST INTEGER count of completed units (a receipt for "
                          "progress, never a grade on the child). Returns a re-checkable seal."),
@@ -301,18 +305,21 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
     if name == "steward_cost_destroyed":
         from .. import steward
         return steward.cost_destroyed(args.get("items") or [])
+    if name == "coach_subjects":
+        from .. import coach  # the subjects available (read / mcguffey / aesop / …)
+        return coach.subjects()
     if name == "coach_overview":
         from .. import coach  # find + present the curriculum; never generate, never grade
-        return coach.overview()
+        return coach.overview(args.get("subject") or coach.DEFAULT_SUBJECT)
     if name == "coach_unit":
         from .. import coach
-        return coach.unit(args.get("id", ""))
+        return coach.unit(args.get("id", ""), args.get("subject") or coach.DEFAULT_SUBJECT)
     if name == "coach_next":
         from .. import coach
-        return coach.next_unit(args.get("after"))
+        return coach.next_unit(args.get("after"), args.get("subject") or coach.DEFAULT_SUBJECT)
     if name == "coach_recommend":
         from .. import coach
-        return coach.recommend(args.get("completed") or [])
+        return coach.recommend(args.get("completed") or [], args.get("subject") or coach.DEFAULT_SUBJECT)
     if name == "coach_mastery":
         # Seal the HONEST integer count of completed units — same receipts path the endpoint uses.
         from .. import coach, receipts

@@ -592,21 +592,25 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import steward
         return _ok(steward.guidance())
 
-    # Coach GETs — read-only teaching, NOT gated (teaching is the floor on both surfaces).
+    # Coach GETs — read-only teaching, NOT gated (teaching is the floor on both surfaces). ?subject=
+    # selects the path (read / mcguffey / aesop / founding / pilgrims / es); default is the reading path.
+    if method == "GET" and path == "/coach/subjects":
+        from .. import coach
+        return _ok(coach.subjects())
     if method == "GET" and path == "/coach/overview":
         from .. import coach
-        return _ok(coach.overview())
+        return _ok(coach.overview(query.get("subject") or coach.DEFAULT_SUBJECT))
     if method == "GET" and path == "/coach/unit":
         from .. import coach
-        return _ok(coach.unit(query.get("id", "")))
+        return _ok(coach.unit(query.get("id", ""), query.get("subject") or coach.DEFAULT_SUBJECT))
     if method == "GET" and path == "/coach/next":
         from .. import coach
-        return _ok(coach.next_unit(query.get("after")))
+        return _ok(coach.next_unit(query.get("after"), query.get("subject") or coach.DEFAULT_SUBJECT))
     if method == "GET" and path == "/coach/recommend":
-        # Adaptive next: pass ?done=id1,id2,... (the caller holds progress — no personal data here).
+        # Adaptive next: ?done=id1,id2,...&subject= (the caller holds progress — no personal data here).
         from .. import coach
         done = [x for x in (query.get("done") or "").split(",") if x.strip()]
-        return _ok(coach.recommend(done))
+        return _ok(coach.recommend(done, query.get("subject") or coach.DEFAULT_SUBJECT))
     if method == "GET" and path == "/coach/guidance":
         from .. import coach
         return _ok(coach.guidance())
@@ -795,7 +799,7 @@ _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word
                   "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
                   "/commentary", "/journal", "/journal/dates", "/steward", "/tsk",
                   "/character", "/characters", "/prophecy",
-                  "/coach/overview", "/coach/unit", "/coach/next", "/coach/recommend", "/coach/guidance",
+                  "/coach/subjects", "/coach/overview", "/coach/unit", "/coach/next", "/coach/recommend", "/coach/guidance",
                   "/identity/fingerprint", "/identity/describe", "/badges", "/study", "/card.html",
                   "/groups", "/group"}
 

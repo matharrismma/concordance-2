@@ -81,6 +81,7 @@
   child. It remembers where you are, so the path never starts over. <span class="dim">For a parent and
   child together.</span></p>
 
+  <div class="row" id="subjects" style="margin-top:1.4rem"></div>
   <div class="row" id="home">
     <button class="btn big primary" id="continuebtn" hidden>Continue where you left off</button>
     <button class="btn big" id="startbtn">Begin the path</button>
@@ -112,7 +113,20 @@ async function getJSON(p){ const r=await fetch(API+p); if(!r.ok){ if(window.NHGa
 // progress lives on THIS device — no account, no personal data (child-safety + sovereignty)
 function done(){ try{ return JSON.parse(localStorage.getItem('nh_read_done')||'[]'); }catch(e){ return []; } }
 function markDone(id){ const d=done(); if(id && d.indexOf(id)<0){ d.push(id); localStorage.setItem('nh_read_done', JSON.stringify(d)); } }
-let OVERVIEW=null;
+let SUBJECT='read';                 // the current path (read / mcguffey / aesop / …)
+let _ovCache={};
+const sq = ()=> '&subject='+encodeURIComponent(SUBJECT);
+
+async function loadSubjects(){
+  const d=await getJSON('/coach/subjects'); const el=document.getElementById('subjects');
+  if(!d||!d.subjects||d.subjects.length<2){ el.innerHTML=''; return; }   // only show a picker when there's a choice
+  el.innerHTML='<span class="dim" style="align-self:center;font-size:.78rem;margin-right:.3rem">Subject:</span>'+
+    d.subjects.map(s=>'<button class="btn subj'+(s.id===SUBJECT?' primary':'')+'" data-subj="'+esc(s.id)+'">'+esc(s.title)+' <span class="dim">('+s.count+')</span></button>').join('');
+}
+document.getElementById('subjects').addEventListener('click', e=>{
+  const b=e.target.closest('[data-subj]'); if(!b) return;
+  SUBJECT=b.dataset.subj; delete _ovCache[SUBJECT]; loadSubjects(); goHome();
+});
 
 function say(t){ if(window.NHSpeak && t) NHSpeak.play(t); }
 
@@ -158,7 +172,7 @@ playerEl.addEventListener('click', e=>{
 });
 async function finishLesson(){
   markDone(_unit.id);
-  const rec = await getJSON('/coach/recommend?done='+encodeURIComponent(done().join(',')));
+  const rec = await getJSON('/coach/recommend?done='+encodeURIComponent(done().join(','))+sq());
   const complete = rec && rec.kind==='coach_complete';
   playerEl.innerHTML =
     '<div class="pos">well done</div>'+
@@ -177,13 +191,13 @@ async function finishLesson(){
 }
 
 // ── adaptive map: where you are / what's next ───────────────────────────
-async function loadOverview(){ if(!OVERVIEW) OVERVIEW = await getJSON('/coach/overview'); return OVERVIEW; }
+async function loadOverview(){ if(!_ovCache[SUBJECT]) _ovCache[SUBJECT]=await getJSON('/coach/overview?subject='+encodeURIComponent(SUBJECT)); return _ovCache[SUBJECT]; }
 async function showMap(){
   homeEl.style.display='none'; playerEl.className='player'; mapEl.className='map on';
   const o = await loadOverview();
   if(!o||!o.units){ mapEl.innerHTML='<p class="dim">Could not load the path.</p>'; return; }
   const d=new Set(done());
-  const rec = await getJSON('/coach/recommend?done='+encodeURIComponent([...d].join(',')));
+  const rec = await getJSON('/coach/recommend?done='+encodeURIComponent([...d].join(','))+sq());
   const nextId = rec && rec.unit ? rec.unit.id : (o.units.find(u=>!d.has(u.id))||{}).id;
   mapEl.innerHTML = '<div class="pos">the whole path — '+esc(o.count)+' lessons ('+d.size+' done)</div>'+
     o.units.map(u=>{
@@ -199,7 +213,7 @@ async function showMap(){
 }
 mapEl.addEventListener('click', async e=>{
   const b=e.target.closest('.unit[data-unit]'); if(!b) return;
-  const u=await getJSON('/coach/unit?id='+encodeURIComponent(b.dataset.unit)); if(u&&u.id) startLesson(u);
+  const u=await getJSON('/coach/unit?id='+encodeURIComponent(b.dataset.unit)+sq()); if(u&&u.id) startLesson(u);
 });
 
 async function sealProgress(){
@@ -220,12 +234,12 @@ function renderRibbon(){
 
 // ── home ────────────────────────────────────────────────────────────────
 function goHome(){ playerEl.className='player'; mapEl.className='map'; homeEl.style.display='flex'; renderRibbon(); }
-async function begin(){ const r=await getJSON('/coach/next'); if(r&&r.unit) startLesson(r.unit); }
-async function cont(){ const rec=await getJSON('/coach/recommend?done='+encodeURIComponent(done().join(','))); if(rec&&rec.unit) startLesson(rec.unit); else begin(); }
+async function begin(){ const r=await getJSON('/coach/next?subject='+encodeURIComponent(SUBJECT)); if(r&&r.unit) startLesson(r.unit); }
+async function cont(){ const rec=await getJSON('/coach/recommend?done='+encodeURIComponent(done().join(','))+sq()); if(rec&&rec.unit) startLesson(rec.unit); else begin(); }
 document.getElementById('startbtn').addEventListener('click', begin);
 document.getElementById('mapbtn').addEventListener('click', showMap);
 document.getElementById('continuebtn').addEventListener('click', cont);
-(function init(){ if(done().length){ document.getElementById('continuebtn').hidden=false; } renderRibbon(); })();
+(function init(){ if(done().length){ document.getElementById('continuebtn').hidden=false; } renderRibbon(); loadSubjects(); })();
 </script>
 </body>
 </html>
