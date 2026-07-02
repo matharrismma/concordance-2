@@ -173,19 +173,19 @@ function renderTraffic(tf){
   const T = tf.totals || {};
   const n = x => (x==null?0:x).toLocaleString();
   if(meta) meta.textContent = n(T.requests) + " requests over " + tf.window_days + "d · " +
-    n(T.human) + " human · " + n(T.agent) + " agent · " + n(T.bot) + " bot · " + n(T.unique_ips) +
-    " unique sources" + (tf.geo_available ? "" : " · (add a geo dataset to see countries)");
+    n(T.human) + " human · " + n(T.agent) + " agent · " + n(T.monitor) + " monitor · " + n(T.bot) + " bot · " +
+    n(T.unique_ips) + " unique sources" + (tf.geo_available ? " · countries via DB-IP (CC BY)" : " · (countries load once the geo set is in place)");
   const rows = list => (list && list.length)
     ? list.map(r => '<div style="display:flex;justify-content:space-between;gap:.6rem;font-size:.86rem">' +
         '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(r[0]) +
         '</span><span class="muted">' + n(r[1]) + '</span></div>').join('')
     : '<div class="muted" style="font-size:.86rem">—</div>';
   const sub = t => '<div class="k" style="color:var(--accent);margin-top:.5rem">' + t + '</div>';
-  const order = [["human","Humans"],["agent","Agents"],["bot","Bots"]];
+  const order = [["human","Humans"],["agent","Agents"],["monitor","Monitors"],["bot","Bots"]];
   el.innerHTML = order.map(([k,label]) => {
     const c = (tf.classes || {})[k] || {}, from = c.from || {}, going = c.going || {};
     let f = "";
-    if(k === "human"){
+    if(k === "human" || k === "monitor"){
       if(from.countries && from.countries.length){ f += sub("from — countries") + rows(from.countries); }
       f += sub("from — referrers") + rows(from.referrers);
       f += sub("from — networks") + rows((from.networks||[]).slice(0,6));

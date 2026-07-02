@@ -62,6 +62,21 @@ def test_rollup_from_and_going():
     assert dict(agent["going"]["paths"]).get("/card.html") == 2   # query stripped, grouped
 
 
+def test_monitor_reclassification():
+    # one browser-UA IP hammering an ops endpoint far past the threshold → monitor, not human
+    ua = "Mozilla/5.0 Chrome/120 Safari"
+    lines = [_line("50.0.0.1", "/health", ua) for _ in range(600)]
+    lines += [_line("7.7.7.7", "/bible.html", ua, "https://www.google.com/")]   # a real person
+    p = Path(tempfile.mkdtemp(prefix="nh-traffic-")) / "s.log"
+    p.write_text("\n".join(lines), encoding="utf-8")
+    out = rollup([str(p)], days=3650, now=20_000, monitor_threshold=500)
+    t = out["totals"]
+    assert t["monitor"] == 600 and t["human"] == 1          # the poller split out of humans
+    assert out["classes"]["monitor"]["unique_ips"] == 1
+    assert dict(out["classes"]["monitor"]["going"]["paths"]).get("/health") == 600
+    assert dict(out["classes"]["human"]["going"]["paths"]).get("/bible.html") == 1
+
+
 def test_window_excludes_old():
     p = Path(tempfile.mkdtemp(prefix="nh-traffic-")) / "a.log"
     p.write_text(_line("5.5.5.5", "/", "Chrome/120 Safari Mozilla", ts=1000), encoding="utf-8")

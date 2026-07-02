@@ -132,21 +132,28 @@ def _uri_path(uri: str) -> str:
     return p if len(p) <= 80 else p[:80] + "…"
 
 
+_RANK = {"human": 1, "bot": 2, "agent": 3}
+
+
+def _stronger(a: str, b: str) -> str:
+    """When one IP shows more than one kind of user-agent, keep the strongest signal
+    (agent > bot > human) so a single stray browser hit can't relabel a crawler."""
+    return a if _RANK.get(a, 0) >= _RANK.get(b, 0) else b
+
+
 def rollup(log_paths, days: int = 7, now: Optional[int] = None,
            our_hosts=("narrowhighway.com", "narrowhighway.org", "narrowhighway.tv",
-                      "api.narrowhighway.com", "www.narrowhighway.com")) -> Dict[str, Any]:
+                      "api.narrowhighway.com", "www.narrowhighway.com"),
+           monitor_threshold: int = 500) -> Dict[str, Any]:
+    """Aggregate per SOURCE IP first, then reduce into classes. A human-agent IP whose volume
+    exceeds monitor_threshold in the window is reclassified 'monitor' (automated polling, not a
+    person) — so the human view is real people. Humans/monitors are only ever aggregated (network
+    /24, country, referrer), never listed by raw IP."""
     now = int(now if now is not None else time.time())
     cutoff = now - days * 86400
     our = set(our_hosts)
 
-    tot = Counter()
-    uniq = defaultdict(set)          # class → set of ips (for unique counts; not persisted raw)
-    ref = defaultdict(Counter)       # class → referrer host → count
-    nets = defaultdict(Counter)      # class → /24 → count
-    ctry = defaultdict(Counter)      # class → country → count
-    paths = defaultdict(Counter)     # class → path → count
-    who = defaultdict(Counter)       # class → agent/bot name → count
-
+    ips: Dict[str, Dict[str, Any]] = {}
     for path in log_paths:
         try:
             f = open(path, "r", encoding="utf-8", errors="replace")
@@ -166,48 +173,73 @@ def rollup(log_paths, days: int = 7, now: Optional[int] = None,
                 req = d.get("request") or {}
                 uri = req.get("uri") or "/"
                 headers = req.get("headers") or {}
-                ua = (headers.get("User-Agent") or [""])[0] if isinstance(headers.get("User-Agent"), list) else (headers.get("User-Agent") or "")
-                referer = (headers.get("Referer") or [""])[0] if isinstance(headers.get("Referer"), list) else (headers.get("Referer") or "")
-                ip = req.get("client_ip") or req.get("remote_ip") or ""
+
+                def _h(name):
+                    v = headers.get(name)
+                    return (v[0] if v else "") if isinstance(v, list) else (v or "")
+
+                ua, referer = _h("User-Agent"), _h("Referer")
+                ip = req.get("client_ip") or req.get("remote_ip") or "?"
                 cls, name = classify(ua, uri)
-                tot[cls] += 1; tot["requests"] += 1
-                if ip:
-                    uniq[cls].add(ip)
-                paths[cls][_uri_path(uri)] += 1
-                if cls == "human":
-                    rh = _ref_host(referer, our)
-                    ref["human"][rh or "(direct / none)"] += 1
-                    nets["human"][_net24(ip)] += 1
-                    c = _country(ip)
-                    if c:
-                        ctry["human"][c] += 1
+                rec = ips.get(ip)
+                if rec is None:
+                    rec = {"cls": cls, "n": 0, "paths": Counter(), "refs": Counter(), "who": Counter()}
+                    ips[ip] = rec
                 else:
-                    who[cls][name] += 1
-                    rh = _ref_host(referer, our)
-                    if rh:
-                        ref[cls][rh] += 1
+                    rec["cls"] = _stronger(rec["cls"], cls)
+                rec["n"] += 1
+                rec["paths"][_uri_path(uri)] += 1
+                rh = _ref_host(referer, our)
+                if rh:
+                    rec["refs"][rh] += 1
+                if cls != "human":
+                    rec["who"][name] += 1
+
+    CLASSES = ("human", "monitor", "agent", "bot")
+    B = {c: {"requests": 0, "ips": 0, "paths": Counter(), "refs": Counter(),
+             "nets": Counter(), "ctry": Counter(), "who": Counter()} for c in CLASSES}
+    for ip, rec in ips.items():
+        cls = rec["cls"]
+        if cls == "human" and rec["n"] >= monitor_threshold:  # automated poller, not a person
+            cls = "monitor"
+        b = B[cls]
+        b["requests"] += rec["n"]; b["ips"] += 1
+        b["paths"].update(rec["paths"]); b["refs"].update(rec["refs"])
+        if cls in ("human", "monitor"):
+            b["nets"][_net24(ip)] += rec["n"]
+            c = _country(ip)
+            if c:
+                b["ctry"][c] += rec["n"]
+        else:
+            b["who"].update(rec["who"])
 
     def top(counter, n=12):
         return counter.most_common(n)
 
+    total_req = sum(B[c]["requests"] for c in CLASSES)
     out: Dict[str, Any] = {
-        "generated_at": now, "window_days": days,
-        "totals": {"requests": tot["requests"], "human": tot["human"], "bot": tot["bot"],
-                   "agent": tot["agent"], "unique_ips": sum(len(v) for v in uniq.values())},
+        "generated_at": now, "window_days": days, "monitor_threshold": monitor_threshold,
+        "totals": {"requests": total_req, "unique_ips": len(ips),
+                   **{c: B[c]["requests"] for c in CLASSES}},
         "geo_available": _geo_db() is not None,
         "classes": {},
     }
-    for cls in ("human", "bot", "agent"):
+    for cls in CLASSES:
+        b = B[cls]
+        if cls in ("human", "monitor"):  # reconstruct "direct / none" = requests with no external referrer
+            direct = b["requests"] - sum(b["refs"].values())
+            if direct > 0:
+                b["refs"]["(direct / none)"] += direct
         block: Dict[str, Any] = {
-            "requests": tot[cls], "unique_ips": len(uniq[cls]),
-            "going": {"paths": top(paths[cls])},
-            "from": {"referrers": top(ref[cls])},
+            "requests": b["requests"], "unique_ips": b["ips"],
+            "going": {"paths": top(b["paths"])},
+            "from": {"referrers": top(b["refs"])},
         }
-        if cls == "human":
-            block["from"]["networks"] = top(nets["human"])
-            block["from"]["countries"] = top(ctry["human"])
+        if cls in ("human", "monitor"):
+            block["from"]["networks"] = top(b["nets"])
+            block["from"]["countries"] = top(b["ctry"])
         else:
-            block["from"]["who"] = top(who[cls])
+            block["from"]["who"] = top(b["who"])
         out["classes"][cls] = block
     return out
 
@@ -228,8 +260,8 @@ def main() -> int:
     with open(out, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     t = data["totals"]
-    print(f"traffic rollup → {out}: {t['requests']} reqs · {t['human']} human · {t['bot']} bot · {t['agent']} agent "
-          f"({data['window_days']}d, geo={'on' if data['geo_available'] else 'off'})")
+    print(f"traffic rollup → {out}: {t['requests']} reqs · {t['human']} human · {t['monitor']} monitor · "
+          f"{t['bot']} bot · {t['agent']} agent ({data['window_days']}d, geo={'on' if data['geo_available'] else 'off'})")
     return 0
 
 
