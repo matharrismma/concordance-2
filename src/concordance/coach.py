@@ -90,7 +90,8 @@ def overview() -> Dict[str, Any]:
         if t and t not in tracks:
             tracks.append(t)
     briefs = [{"id": u.get("id"), "title": u.get("title"), "unit_seq": u.get("unit_seq"),
-               "track": u.get("track")} for u in units]
+               "track": u.get("track"), "prerequisites": list(u.get("prerequisites") or []),
+               "next": u.get("next")} for u in units]
     return {
         "kind": "coach_overview",
         "count": len(units),
@@ -145,6 +146,38 @@ def next_unit(after: Optional[str] = None) -> Dict[str, Any]:
     nxt = units[idx + 1]
     return {"kind": "coach_next", "after": aid, "unit": unit(str(nxt.get("id"))),
             "position": idx + 2, "of": len(units), "note": _NOTE, "generated": False}
+
+
+def recommend(completed_ids: Optional[List[str]] = None) -> Dict[str, Any]:
+    """Adaptive 'where you are / what's next': given the units already completed, point to the next
+    lesson whose prerequisites are all met — grows with the student. Deterministic and FOUND: it
+    only chooses WHICH authored unit comes next; it never generates a lesson or judges the child. The
+    caller holds progress (no personal data server-side). All done -> kind:coach_complete."""
+    done = {str(x) for x in (completed_ids or [])}
+    units = _ordered()
+    if not units:
+        return {"kind": "coach_empty", "message": "No curriculum is loaded yet.", "note": _NOTE, "generated": False}
+    total = len(units)
+    # First un-done unit whose prerequisites are satisfied (the natural next step).
+    for i, u in enumerate(units):
+        uid = str(u.get("id"))
+        if uid in done:
+            continue
+        prereqs = [str(p) for p in (u.get("prerequisites") or [])]
+        if all(p in done for p in prereqs):
+            return {"kind": "coach_recommend", "unit": unit(uid), "completed": len(done & {str(x.get('id')) for x in units}),
+                    "position": i + 1, "of": total, "note": _NOTE, "generated": False}
+    # None with met prerequisites: either everything is done, or a gap. Never guess past the end.
+    if len(done & {str(u.get("id")) for u in units}) >= total:
+        return {"kind": "coach_complete", "completed": total, "of": total,
+                "message": "Every unit in this path is complete. Well done — keep reading.",
+                "note": _NOTE, "generated": False}
+    for i, u in enumerate(units):  # fall back to the first un-done unit in order (prereqs unmet upstream)
+        if str(u.get("id")) not in done:
+            return {"kind": "coach_recommend", "unit": unit(str(u.get("id"))),
+                    "completed": len(done & {str(x.get('id')) for x in units}),
+                    "position": i + 1, "of": total, "note": _NOTE, "generated": False}
+    return {"kind": "coach_complete", "completed": total, "of": total, "note": _NOTE, "generated": False}
 
 
 # ── mastery: seal an HONEST INTEGER count (the moat applied to progress, never to the person) ──

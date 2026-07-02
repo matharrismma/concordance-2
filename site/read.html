@@ -4,93 +4,99 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Learn to Read — Narrow Highway</title>
-<meta name="description" content="A reading tutor that grows with the student. The lessons are found and presented, one continuing path at a time — never generated, and never a grade on a child. A window to reading, not a wall.">
+<meta name="description" content="A reading tutor that grows with the student. Lessons are found and presented one step at a time — voiced, paced, never generated and never a grade on a child. It remembers where you are, so the path never restarts.">
 <style>
   :root{
     --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
-    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --fail:#c98a8a;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f;
     --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
   }
-  *{box-sizing:border-box}
-  html,body{margin:0}
-  body{
-    background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.11), rgba(201,162,74,0) 70%), var(--void);
-    background-attachment:fixed; color:var(--ink);
-    font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased;
-  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.11), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased}
   a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
   header.site{border-bottom:1px solid var(--line)}
   header .bar{max-width:760px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
   .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
   .brand .road{color:var(--gold)}
-  nav.site a{color:var(--dim); margin-left:1.2rem; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase}
+  nav.site a{color:var(--dim); margin-left:1.1rem; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
   nav.site a:hover{color:var(--ink); text-decoration:none}
   .wrap{max-width:760px; margin:0 auto; padding:1rem 1.3rem 5rem}
   .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.66rem; margin-top:2.4rem}
   h1{font-weight:400; letter-spacing:.02em; font-size:2rem; margin:.5rem 0 .4rem}
   .lede{color:var(--dim); font-size:1.02rem; max-width:40rem}
-  .row{display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1.6rem}
-  .btn{background:transparent; border:1px solid var(--line); color:var(--gold); font:inherit; letter-spacing:.14em; text-transform:uppercase; font-size:.72rem; padding:.7rem 1.1rem; cursor:pointer}
+  .btn{background:transparent; border:1px solid var(--line); color:var(--gold); font:inherit; letter-spacing:.1em; text-transform:uppercase; font-size:.72rem; padding:.7rem 1.2rem; cursor:pointer; border-radius:3px}
   .btn:hover{color:var(--ink); border-color:var(--gold)}
-  .hint{color:var(--dim); font-size:.8rem; margin-top:.7rem}
-
-  .lesson{margin:2.2rem 0 0}
-  .lpos{color:var(--goldsoft); letter-spacing:.2em; text-transform:uppercase; font-size:.62rem; margin-bottom:.4rem}
-  .ltitle{color:var(--gold); font-size:1.35rem; margin-bottom:.2rem}
-  .ltrack{color:var(--dim); font-size:.78rem; font-style:italic; margin-bottom:1rem}
-  .slabel{color:var(--goldsoft); letter-spacing:.2em; text-transform:uppercase; font-size:.62rem; margin:1.1rem 0 .5rem}
-  .rule{line-height:1.8}
-  .example{display:block; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid var(--line); color:var(--ink); font:inherit; padding:.45rem 0; cursor:pointer; font-size:1rem}
-  .example:hover{color:var(--gold)}
-  .decodable{border-left:2px solid var(--line); padding:.7rem 1rem; margin-top:.6rem; font-size:1.1rem; cursor:pointer}
-  .decodable:hover{background:rgba(201,162,74,.05)}
-  .hear{background:none; border:1px solid var(--line); color:var(--gold); font:inherit; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; padding:.2rem .6rem; cursor:pointer; margin-left:.6rem}
-  .hear:hover{color:var(--ink); border-color:var(--gold)}
-  .checks li, .wedges li{margin:.3rem 0}
-  .navrow{display:flex; gap:.6rem; margin-top:1.8rem; border-top:1px solid var(--line); padding-top:1.2rem}
-
-  .ribbon{margin:1.4rem 0 0; border:1px solid var(--line); padding:.7rem .9rem; font-size:.82rem; color:var(--dim)}
-  .ribbon .core{color:var(--gold); letter-spacing:.14em; text-transform:uppercase; font-size:.68rem}
-  .mastery{color:var(--goldsoft)}
-  .mastery .seal{color:var(--dim); font-size:.72rem; font-style:italic; margin-left:.5rem}
-
-  .guard{margin:1.4rem 0 0; border:1px solid var(--line); border-left:3px solid var(--goldsoft); padding:1rem 1.1rem; display:none}
-  .guard.open{display:block}
-  .guard .gmsg{color:var(--ink)}
-  .guard .glabel{color:var(--goldsoft); letter-spacing:.2em; text-transform:uppercase; font-size:.62rem; margin:.8rem 0 .4rem}
-  .guard ul{margin:.2rem 0 0 1rem; color:var(--dim); font-size:.92rem}
+  .btn.big{font-size:.9rem; padding:.9rem 1.6rem}
+  .btn.primary{border-color:var(--gold); color:var(--gold)}
+  .row{display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1.6rem}
   .dim{color:var(--dim)}
+
+  /* the player */
+  .player{margin-top:2rem; display:none} .player.on{display:block}
+  .pos{color:var(--goldsoft); letter-spacing:.2em; text-transform:uppercase; font-size:.62rem}
+  .ptitle{color:var(--gold); font-size:1.3rem; margin:.2rem 0 .1rem}
+  .prog{height:3px; background:var(--line); border-radius:2px; margin:.9rem 0 1.4rem; overflow:hidden}
+  .prog > i{display:block; height:100%; background:var(--gold); width:0; transition:width .3s}
+  .steplabel{color:var(--goldsoft); letter-spacing:.2em; text-transform:uppercase; font-size:.62rem; margin-bottom:.6rem}
+  .stage{min-height:8rem; display:flex; flex-direction:column; justify-content:center; align-items:flex-start;
+    border-left:2px solid var(--gold); padding:1rem 0 1rem 1.2rem; margin:.4rem 0 1rem}
+  .stage .big{font-size:2rem; line-height:1.4} .stage .norm{font-size:1.08rem; line-height:1.8}
+  .stepnav{display:flex; gap:.6rem; align-items:center; flex-wrap:wrap}
+  .hear{background:none; border:1px solid var(--line); color:var(--gold); font:inherit; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; padding:.5rem 1rem; cursor:pointer; border-radius:3px}
+  .hear:hover{color:var(--ink); border-color:var(--gold)}
+  .backlink{background:none;border:0;color:var(--dim);font:inherit;cursor:pointer;font-size:.8rem;margin-top:1.4rem;padding:0}
+  .backlink:hover{color:var(--gold)}
+
+  /* the adaptive map */
+  .map{margin-top:2rem; display:none} .map.on{display:block}
+  .unit{display:flex; align-items:center; gap:.7rem; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid var(--line); color:var(--ink); font:inherit; padding:.6rem 0; cursor:pointer}
+  .unit:hover{color:var(--gold)} .unit.locked{color:var(--dim); cursor:default} .unit.locked:hover{color:var(--dim)}
+  .mark{width:1.4rem; text-align:center; flex:0 0 auto}
+  .mark.done{color:var(--pass)} .mark.now{color:var(--gold)} .mark.lock{color:var(--goldsoft); opacity:.5}
+  .utrack{color:var(--dim); font-size:.72rem}
+  .ribbon{margin:1.5rem 0 0; border:1px solid var(--line); padding:.8rem 1rem; font-size:.85rem; color:var(--dim)}
+  .ribbon .n{color:var(--gold)}
+  .seal{color:var(--dim); font-size:.76rem; font-style:italic; margin-top:.4rem}
   footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:2.6rem; padding-top:1.3rem; line-height:1.7}
+  @media (max-width:640px){
+    body{font-size:16px} header .bar{flex-direction:column; align-items:flex-start; gap:.6rem; padding:.9rem 1rem}
+    nav.site{display:flex; flex-wrap:wrap; margin:0} nav.site a{margin:0 1rem .1rem 0; font-size:.68rem}
+    .wrap{padding:1rem 1rem 4rem} h1{font-size:1.6rem} .stage .big{font-size:1.7rem}
+    .row,.stepnav{flex-direction:column; align-items:stretch} .btn,.hear{width:100%; text-align:center}
+  }
 </style>
 </head>
 <body>
 <header class="site"><div class="bar">
   <a class="brand" href="/">Narrow <span class="road">Highway</span></a>
-  <nav class="site"><a href="/ask.html">Ask</a><a href="/bible.html">Bible</a><a href="/read.html">Read</a><a href="/characters.html">Dictionary</a><a href="/journal.html">Journal</a><a href="/steward.html">Steward</a><a href="/#verify">Verify</a><a href="/library.html">Library</a></nav>
+  <nav class="site"><a href="/ask.html">Ask</a><a href="/bible.html">Bible</a><a href="/read.html">Read</a><a href="/journal.html">Journal</a><a href="/community.html">Community</a><a href="/library.html">Library</a></nav>
 </div></header>
 
 <main class="wrap">
   <div class="kicker">The Coach</div>
   <h1>Learn to Read</h1>
-  <p class="lede">A reading tutor that grows with the student. Every lesson is <em>found and presented</em>,
-  one continuing path at a time — never generated, and never a grade on a child. A window to reading,
-  not a wall; the goal is the day the child needs the tool less.</p>
+  <p class="lede">A reading tutor that grows with the student — one step at a time, read aloud, at the
+  child's pace. Every lesson is <em>found and presented</em>, never generated, and never a grade on a
+  child. It remembers where you are, so the path never starts over. <span class="dim">For a parent and
+  child together.</span></p>
 
-  <div class="row">
-    <button class="btn" id="startbtn">Begin the path</button>
-    <button class="btn" id="mapbtn">See the whole path</button>
+  <div class="row" id="home">
+    <button class="btn big primary" id="continuebtn" hidden>Continue where you left off</button>
+    <button class="btn big" id="startbtn">Begin the path</button>
+    <button class="btn big" id="mapbtn">See the whole path</button>
   </div>
-  <p class="hint" id="hint">Tap a word, an example, or the sentence to hear it read aloud.</p>
-
   <div class="ribbon" id="ribbon" hidden></div>
-  <div class="lesson" id="lesson"></div>
-  <div class="guard" id="guard"></div>
+
+  <div class="player" id="player"></div>
+  <div class="map" id="map"></div>
 
   <footer class="site">
-    <p>The curriculum is the offline Read-school teaching, ported verbatim. The engine finds, orders,
-    and presents the lessons; it does not generate them, and it will never grade, rank, or label a child.</p>
-    <p>Pronunciation is a synthesized guide, not a native speaker. A window to reading, not a wall.
-    <a href="https://narrowhighway.org">narrowhighway.org</a></p>
+    <p>The curriculum is the offline Read‑school teaching, ported verbatim. The engine finds, orders,
+    and presents the lessons and reads them aloud; it does not generate them, and it will never grade,
+    rank, or label a child. Progress is kept on <em>this device</em> — no account, no personal data.</p>
+    <p>Pronunciation is a synthesized guide (or Matt's voice when available), not a native speaker.
+    A window to reading, not a wall. <a href="https://narrowhighway.org">narrowhighway.org</a></p>
   </footer>
 </main>
 
@@ -98,139 +104,128 @@
 <script src="gate.js"></script>
 <script>
 const API = "";
-const lessonEl = document.getElementById('lesson');
-const ribbonEl = document.getElementById('ribbon');
-const guardEl  = document.getElementById('guard');
-const hintEl   = document.getElementById('hint');
-let _completed = [];        // ids the learner has finished this session (kept client-side)
-let _thread = null;         // the continuing lesson chain (threads.py); one path, never restarts
-
+const playerEl=document.getElementById('player'), mapEl=document.getElementById('map'),
+      homeEl=document.getElementById('home'), ribbonEl=document.getElementById('ribbon');
 function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
+async function getJSON(p){ const r=await fetch(API+p); if(!r.ok){ if(window.NHGate) await NHGate.isClosed(r); return null; } try{return await r.json();}catch(e){return null;} }
 
-async function getJSON(path){
-  const r = await fetch(API + path);
-  if(!r.ok){ if(window.NHGate) await NHGate.isClosed(r); return null; }
-  try { return await r.json(); } catch(e){ return null; }
+// progress lives on THIS device — no account, no personal data (child-safety + sovereignty)
+function done(){ try{ return JSON.parse(localStorage.getItem('nh_read_done')||'[]'); }catch(e){ return []; } }
+function markDone(id){ const d=done(); if(id && d.indexOf(id)<0){ d.push(id); localStorage.setItem('nh_read_done', JSON.stringify(d)); } }
+let OVERVIEW=null;
+
+function say(t){ if(window.NHSpeak && t) NHSpeak.play(t); }
+
+// ── the step-through player ─────────────────────────────────────────────
+let _unit=null, _steps=[], _i=0;
+function buildSteps(u){
+  const s=[];
+  if(u.rule) s.push({label:'the rule — read it together', text:u.rule, big:false});
+  (u.examples||[]).forEach(x=> s.push({label:'sound it out', text:x, big:true, speak:x}));
+  if(u.decodable_sentence) s.push({label:'now read this sentence', text:u.decodable_sentence, big:true, speak:u.decodable_sentence});
+  if(u.check && u.check.length) s.push({label:'can you do this?', text:u.check.join('  ·  '), big:false});
+  return s;
 }
-
-// The coach guardrail lives on the SERVER; but if a caller ever posts a grading question here, the
-// server returns kind:grade_declined — we render it as a gentle pointer, never a verdict on the child.
-function renderGuard(g){
-  let html = '<div class="gmsg">' + esc(g.message) + '</div>';
-  if(g.point_to && g.point_to.length){
-    html += '<div class="glabel">where real help is</div><ul>' +
-      g.point_to.map(p => '<li>' + esc(p) + '</li>').join('') + '</ul>';
-  }
-  if(g.do_instead){ html += '<div class="glabel">what we can do</div><div class="dim">' + esc(g.do_instead) + '</div>'; }
-  guardEl.innerHTML = html;
-  guardEl.classList.add('open');
+function startLesson(u){
+  _unit=u; _steps=buildSteps(u); _i=0;
+  homeEl.style.display='none'; mapEl.className='map'; playerEl.className='player on';
+  renderStep();
 }
-
-function renderLesson(d){
-  guardEl.classList.remove('open');
-  const u = d.unit || d;   // /coach/next wraps the unit; /coach/unit returns it directly
-  if(!u || !u.id){
-    lessonEl.innerHTML = '<p class="dim">' + esc((d && d.message) || 'No lesson found.') + '</p>';
-    return;
-  }
-  const pos = (d.position && d.of) ? ('Unit ' + esc(d.position) + ' of ' + esc(d.of)) :
-              (u.unit_seq ? ('Unit ' + esc(u.unit_seq)) : 'Lesson');
-  let html = '<div class="lpos">' + pos + '</div>' +
-             '<div class="ltitle">' + esc(u.title || u.id) + '</div>' +
-             (u.track ? '<div class="ltrack">track: ' + esc(u.track) + '</div>' : '');
-  if(u.rule){ html += '<div class="slabel">the rule</div><div class="rule">' + esc(u.rule) + '</div>'; }
-  if(u.examples && u.examples.length){
-    html += '<div class="slabel">examples — tap to hear</div>' +
-      u.examples.map(x => '<button class="example" data-speak="' + esc(x) + '">' + esc(x) + '</button>').join('');
-  }
-  if(u.decodable_sentence){
-    html += '<div class="slabel">read this sentence</div>' +
-      '<div class="decodable" data-speak="' + esc(u.decodable_sentence) + '">' + esc(u.decodable_sentence) +
-      '<button class="hear" data-speak="' + esc(u.decodable_sentence) + '">▶ hear</button></div>';
-  }
-  if(u.check && u.check.length){
-    html += '<div class="slabel">check for understanding</div><ul class="checks">' +
-      u.check.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul>';
-  }
-  if(u.wedges && u.wedges.length){
-    html += '<div class="slabel">gentle helps</div><ul class="wedges">' +
-      u.wedges.map(w => '<li>' + esc(w) + '</li>').join('') + '</ul>';
-  }
-  html += '<div class="navrow">' +
-    '<button class="btn" id="donebtn" data-id="' + esc(u.id) + '">I finished this — next lesson</button>' +
-    '<button class="btn" id="allbtn">See the whole path</button></div>';
-  lessonEl.innerHTML = html;
-  lessonEl.dataset.cur = u.id;
+function renderStep(){
+  const pos = (_unit.unit_seq? ('Unit '+esc(_unit.unit_seq)) : 'Lesson');
+  const pct = Math.round(((_i+1)/_steps.length)*100);
+  const st=_steps[_i]||{}; const last=_i>=_steps.length-1;
+  playerEl.innerHTML =
+    '<div class="pos">'+pos+' · step '+(_i+1)+' of '+_steps.length+'</div>'+
+    '<div class="ptitle">'+esc(_unit.title||_unit.id)+'</div>'+
+    '<div class="prog"><i style="width:'+pct+'%"></i></div>'+
+    '<div class="steplabel">'+esc(st.label||'')+'</div>'+
+    '<div class="stage"><div class="'+(st.big?'big':'norm')+'">'+esc(st.text||'')+'</div></div>'+
+    '<div class="stepnav">'+
+      (st.speak?'<button class="hear" data-say="'+esc(st.speak)+'">▶ hear it</button>':'')+
+      (_i>0?'<button class="btn" id="prevstep">← back</button>':'')+
+      (last?'<button class="btn primary" id="finish">I read it ✓</button>':'<button class="btn primary" id="nextstep">Next →</button>')+
+    '</div>'+
+    '<button class="backlink" id="toMap">▪ the whole path</button>';
+  if(st.speak) say(st.speak);   // read the item aloud when it appears
 }
-
-function renderMastery(){
-  if(!_completed.length){ ribbonEl.hidden = true; return; }
-  ribbonEl.hidden = false;
-  ribbonEl.innerHTML = '<span class="core">progress</span> ' +
-    '<span class="mastery">' + esc(_completed.length) + ' unit' + (_completed.length===1?'':'s') +
-    ' completed</span>';
-}
-
-async function start(){
-  hintEl.style.display = 'none';
-  lessonEl.innerHTML = '<p class="dim">finding the first lesson…</p>';
-  const d = await getJSON('/coach/next');           // after=None -> the first unit
-  if(d) renderLesson(d);
-}
-
-async function goNext(afterId){
-  lessonEl.innerHTML = '<p class="dim">finding the next lesson…</p>';
-  const d = await getJSON('/coach/next?after=' + encodeURIComponent(afterId));
-  if(!d){ lessonEl.innerHTML = '<p class="dim">Could not load the next lesson.</p>'; return; }
-  if(d.kind === 'coach_complete'){
-    lessonEl.innerHTML = '<div class="lpos">the path</div><div class="ltitle">Well done.</div>' +
-      '<p class="rule">' + esc(d.message) + '</p>';
-    return;
-  }
-  renderLesson(d);
-}
-
-async function showMap(){
-  hintEl.style.display = 'none';
-  lessonEl.innerHTML = '<p class="dim">gathering the whole path…</p>';
-  const d = await getJSON('/coach/overview');
-  if(!d || !d.units){ lessonEl.innerHTML = '<p class="dim">Could not load the path.</p>'; return; }
-  let html = '<div class="lpos">the whole path — ' + esc(d.count) + ' units</div>';
-  html += d.units.map(u =>
-    '<button class="example" data-unit="' + esc(u.id) + '">' + esc(u.title || u.id) + '</button>').join('');
-  lessonEl.innerHTML = html;
-}
-
-async function openUnit(id){
-  lessonEl.innerHTML = '<p class="dim">opening the lesson…</p>';
-  const d = await getJSON('/coach/unit?id=' + encodeURIComponent(id));
-  if(d) renderLesson(d);
-}
-
-// ── events (delegation) ─────────────────────────────────────────────
-document.getElementById('startbtn').addEventListener('click', start);
-document.getElementById('mapbtn').addEventListener('click', showMap);
-
-document.body.addEventListener('click', e => {
-  const hear = e.target.closest('.hear');
-  if(hear){ if(window.NHSpeak) NHSpeak.play(hear.dataset.speak); return; }
-  const done = e.target.closest('#donebtn');
-  if(done){
-    const id = done.dataset.id;
-    if(id && _completed.indexOf(id) < 0){ _completed.push(id); renderMastery(); }
-    goNext(id);
-    return;
-  }
-  if(e.target.closest('#allbtn')){ showMap(); return; }
-  const ex = e.target.closest('.example');
-  if(ex){
-    if(ex.dataset.unit){ openUnit(ex.dataset.unit); return; }
-    if(window.NHSpeak && ex.dataset.speak) NHSpeak.play(ex.dataset.speak);
-    return;
-  }
-  const dec = e.target.closest('.decodable');
-  if(dec && !e.target.closest('.hear')){ if(window.NHSpeak) NHSpeak.play(dec.dataset.speak); return; }
+playerEl.addEventListener('click', e=>{
+  const h=e.target.closest('[data-say]'); if(h){ say(h.dataset.say); return; }
+  if(e.target.closest('#nextstep')){ _i=Math.min(_i+1,_steps.length-1); renderStep(); return; }
+  if(e.target.closest('#prevstep')){ _i=Math.max(_i-1,0); renderStep(); return; }
+  if(e.target.closest('#toMap')){ showMap(); return; }
+  if(e.target.closest('#finish')){ finishLesson(); return; }
 });
+async function finishLesson(){
+  markDone(_unit.id);
+  const rec = await getJSON('/coach/recommend?done='+encodeURIComponent(done().join(',')));
+  const complete = rec && rec.kind==='coach_complete';
+  playerEl.innerHTML =
+    '<div class="pos">well done</div>'+
+    '<div class="ptitle">'+esc(_unit.title||_unit.id)+' — finished ✓</div>'+
+    '<div class="stage"><div class="norm">'+(complete
+        ? 'That was the last lesson in the path. Keep reading together — the goal is the day it isn’t needed.'
+        : 'Great work. Ready for the next one?')+'</div></div>'+
+    '<div class="stepnav">'+
+      (complete?'':'<button class="btn primary big" id="cont">Next lesson →</button>')+
+      '<button class="btn" id="toMap2">See the whole path</button>'+
+      '<button class="btn" id="sealbtn">Seal progress</button></div>';
+  renderRibbon();
+  playerEl.querySelector('#cont') && playerEl.querySelector('#cont').addEventListener('click', ()=>{ if(rec&&rec.unit) startLesson(rec.unit); });
+  playerEl.querySelector('#toMap2').addEventListener('click', showMap);
+  playerEl.querySelector('#sealbtn').addEventListener('click', sealProgress);
+}
+
+// ── adaptive map: where you are / what's next ───────────────────────────
+async function loadOverview(){ if(!OVERVIEW) OVERVIEW = await getJSON('/coach/overview'); return OVERVIEW; }
+async function showMap(){
+  homeEl.style.display='none'; playerEl.className='player'; mapEl.className='map on';
+  const o = await loadOverview();
+  if(!o||!o.units){ mapEl.innerHTML='<p class="dim">Could not load the path.</p>'; return; }
+  const d=new Set(done());
+  const rec = await getJSON('/coach/recommend?done='+encodeURIComponent([...d].join(',')));
+  const nextId = rec && rec.unit ? rec.unit.id : (o.units.find(u=>!d.has(u.id))||{}).id;
+  mapEl.innerHTML = '<div class="pos">the whole path — '+esc(o.count)+' lessons ('+d.size+' done)</div>'+
+    o.units.map(u=>{
+      const isDone=d.has(u.id), isNow=u.id===nextId;
+      const prereqOk=(u.prerequisites||[]).every(p=>d.has(p));
+      const locked = !isDone && !isNow && !prereqOk;
+      const mark = isDone?'<span class="mark done">✓</span>':(isNow?'<span class="mark now">▸</span>':(locked?'<span class="mark lock">•</span>':'<span class="mark">•</span>'));
+      return '<button class="unit'+(locked?' locked':'')+'"'+(locked?' disabled':' data-unit="'+esc(u.id)+'"')+'>'+
+        mark+'<span>'+esc(u.title||u.id)+'<span class="utrack"> · '+esc(u.track||'')+'</span></span></button>';
+    }).join('')+
+    '<div class="row"><button class="btn" id="homebtn">← back</button></div>';
+  mapEl.querySelector('#homebtn').addEventListener('click', goHome);
+}
+mapEl.addEventListener('click', async e=>{
+  const b=e.target.closest('.unit[data-unit]'); if(!b) return;
+  const u=await getJSON('/coach/unit?id='+encodeURIComponent(b.dataset.unit)); if(u&&u.id) startLesson(u);
+});
+
+async function sealProgress(){
+  const d=done(); if(!d.length) return;
+  const r=await fetch(API+'/coach/mastery',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({completed:d})});
+  const j=await r.json().catch(()=>null);
+  const seal=j&&j.seal; const n=(j&&j.count!=null)?j.count:d.length;
+  ribbonEl.hidden=false;
+  ribbonEl.innerHTML='<span class="n">'+esc(n)+' unit'+(n==1?'':'s')+' completed</span> — sealed'+
+    (seal&&seal.cite_url?' · <a href="'+esc(seal.cite_url)+'">receipt ↗</a>':'')+
+    '<div class="seal">An honest count you can re-check — never a grade on the child. Success is the day the tool isn’t needed (John 3:30).</div>';
+}
+function renderRibbon(){
+  const n=done().length; ribbonEl.hidden=n===0;
+  if(n) ribbonEl.innerHTML='<span class="n">'+n+' unit'+(n===1?'':'s')+' completed</span> on this device · <button class="backlink" id="sealrib" style="margin:0">seal it</button>';
+  const s=ribbonEl.querySelector('#sealrib'); if(s) s.addEventListener('click', sealProgress);
+}
+
+// ── home ────────────────────────────────────────────────────────────────
+function goHome(){ playerEl.className='player'; mapEl.className='map'; homeEl.style.display='flex'; renderRibbon(); }
+async function begin(){ const r=await getJSON('/coach/next'); if(r&&r.unit) startLesson(r.unit); }
+async function cont(){ const rec=await getJSON('/coach/recommend?done='+encodeURIComponent(done().join(','))); if(rec&&rec.unit) startLesson(rec.unit); else begin(); }
+document.getElementById('startbtn').addEventListener('click', begin);
+document.getElementById('mapbtn').addEventListener('click', showMap);
+document.getElementById('continuebtn').addEventListener('click', cont);
+(function init(){ if(done().length){ document.getElementById('continuebtn').hidden=false; } renderRibbon(); })();
 </script>
 </body>
 </html>

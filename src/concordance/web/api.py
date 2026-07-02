@@ -602,6 +602,11 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/coach/next":
         from .. import coach
         return _ok(coach.next_unit(query.get("after")))
+    if method == "GET" and path == "/coach/recommend":
+        # Adaptive next: pass ?done=id1,id2,... (the caller holds progress — no personal data here).
+        from .. import coach
+        done = [x for x in (query.get("done") or "").split(",") if x.strip()]
+        return _ok(coach.recommend(done))
     if method == "GET" and path == "/coach/guidance":
         from .. import coach
         return _ok(coach.guidance())
@@ -790,7 +795,7 @@ _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word
                   "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
                   "/commentary", "/journal", "/journal/dates", "/steward", "/tsk",
                   "/character", "/characters", "/prophecy",
-                  "/coach/overview", "/coach/unit", "/coach/next", "/coach/guidance",
+                  "/coach/overview", "/coach/unit", "/coach/next", "/coach/recommend", "/coach/guidance",
                   "/identity/fingerprint", "/identity/describe", "/badges", "/study", "/card.html",
                   "/groups", "/group"}
 

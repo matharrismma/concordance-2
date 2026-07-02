@@ -98,6 +98,10 @@ def _secular_tools() -> List[dict]:
          "description": ("Coach — the next lesson to teach, deterministically. Omit `after` for the "
                          "first unit; pass a unit id for the one that follows it."),
          "inputSchema": {"type": "object", "properties": {"after": {"type": "string"}}}},
+        {"name": "coach_recommend",
+         "description": ("Coach — adaptive 'what's next': given the completed unit ids, the next lesson "
+                         "whose prerequisites are met (grows with the student). Found, never generated."),
+         "inputSchema": {"type": "object", "properties": {"completed": {"type": "array"}}}},
         {"name": "coach_mastery",
          "description": ("Coach — seal an HONEST INTEGER count of completed units (a receipt for "
                          "progress, never a grade on the child). Returns a re-checkable seal."),
@@ -306,6 +310,9 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
     if name == "coach_next":
         from .. import coach
         return coach.next_unit(args.get("after"))
+    if name == "coach_recommend":
+        from .. import coach
+        return coach.recommend(args.get("completed") or [])
     if name == "coach_mastery":
         # Seal the HONEST integer count of completed units — same receipts path the endpoint uses.
         from .. import coach, receipts

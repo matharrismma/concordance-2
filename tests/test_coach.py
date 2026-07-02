@@ -160,6 +160,25 @@ def test_no_import_of_verifiers_or_derivation():
     assert "receipts" in src
 
 
+def test_recommend_adaptive_next():
+    _ensure_curriculum()
+    order = [b["id"] for b in coach.overview()["units"]]
+    # nothing done -> recommend the first unit (its prerequisites are met by definition)
+    r0 = coach.recommend([])
+    assert r0["kind"] == "coach_recommend" and r0["unit"]["id"] == order[0]
+    assert r0["generated"] is False
+    # after finishing the first, it advances to a not-yet-done unit whose prerequisites are satisfied
+    r1 = coach.recommend([order[0]])
+    assert r1["kind"] == "coach_recommend"
+    assert r1["unit"]["id"] != order[0], "should not re-recommend a completed unit"
+    # everything done -> complete, never a guess past the end
+    allc = coach.recommend(order)
+    assert allc["kind"] == "coach_complete" and allc["of"] == 35 and allc["generated"] is False
+    # overview briefs now carry prerequisites + next (so the client can render the adaptive map)
+    b = coach.overview()["units"][0]
+    assert "prerequisites" in b and "next" in b
+
+
 def test_guidance_states_the_boundary():
     g = coach.guidance()
     assert g["generated"] is False
