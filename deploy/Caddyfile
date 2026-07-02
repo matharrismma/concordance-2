@@ -1,22 +1,26 @@
 # Narrow Highway — Caddy reverse proxy (auto-TLS via Let's Encrypt).
-# Two faces, one engine: .com is the secular reach, .org is the witness.
 #
-# CURRENT LIVE REALITY (2026-07-01): the .com -> 2.0 cutover is DONE. narrowhighway.com is
-# served by 2.0 SECULAR (`nh-com-2` on :8002), with a path fallback to 1.0 (`nh-engine` on
-# :8000) for the cited/crawled per-card permalinks so nothing indexed 404s. narrowhighway.org
-# is 2.0 WITNESS (`nh-org` on :8001). api.narrowhighway.com and narrowhighway.tv stay on 1.0.
-# Rollback of .com to 1.0: restore /etc/caddy/Caddyfile.bak.pre2cut and reload caddy.
+# CURRENT LIVE REALITY (2026-07-02): 1.0 (nh-engine :8000) is RETIRED — everything is 2.0.
+#   narrowhighway.com      -> :8002  (2.0 secular; front door, app, engine, seals, card permalinks)
+#   api.narrowhighway.com  -> :8002  (2.0 secular; verify/derivation.verify/search/seal/mcp/identity)
+#   narrowhighway.org      -> :8001  (2.0 witness)
+#   narrowhighway.tv       -> :8001  (2.0 witness; tv.html landing — watch/listen/learn)
+# 1.0 files remain at /home/nh/Lighthouse (+ archive ~/backups/lighthouse-1.0-full-*.tar.gz);
+# re-enable with `sudo systemctl enable --now nh-engine` and restore this file from a backup.
+# Rollback points: .pre2cut (.com cutover), .pretv (.tv), .pre1retire (this 1.0 retirement).
 
 api.narrowhighway.com {
-	reverse_proxy 127.0.0.1:8000 {
-		lb_try_duration 10s
-		lb_try_interval 250ms
-	}
 	encode gzip zstd
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+	# 1.0 retired — api served by 2.0 secular. 1.0-only granular endpoints are intentionally gone
+	# (accepted MCP tool-parity delta: ~103 granular 1.0 tools -> 2.0's consolidated set).
+	reverse_proxy 127.0.0.1:8002 {
+		lb_try_duration 10s
+		lb_try_interval 250ms
 	}
 	log {
 		output file /var/log/caddy/api.access.log
@@ -32,25 +36,16 @@ narrowhighway.com {
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
 
-	# Preserve 1.0's cited/crawled per-card permalinks and their own assets so the
-	# indexed card pages and ~186 AI citations never 404. These paths are 1.0-only
-	# (2.0 uses /styles.css and its own paths) -> no collision with the new face.
-	@onezero path /card.html* /card/* /nh-*
-	handle @onezero {
-		reverse_proxy 127.0.0.1:8000 {
-			lb_try_duration 10s
-			lb_try_interval 250ms
-		}
-	}
+	# Retired 1.0 lifestyle pages -> home (content archived, recoverable) so cited links don't hard-404.
+	@legacy path /almanac.html /apothecary.html /walk.html /kept.html /enter.html /packets.html /breath.html /missions.html /search.html /voices
+	redir @legacy / 301
 
-	# The new face: 2.0 secular owns the front door, the app, the engine, and the seals.
-	handle {
-		reverse_proxy 127.0.0.1:8002 {
-			lb_try_duration 10s
-			lb_try_interval 250ms
-		}
+	# 2.0 secular serves everything — front door, app, engine, seals, AND the card permalinks
+	# (render_card_html at /card.html?id= and /card/<id>). No more 1.0 fallback.
+	reverse_proxy 127.0.0.1:8002 {
+		lb_try_duration 10s
+		lb_try_interval 250ms
 	}
-
 	log {
 		output file /var/log/caddy/site.access.log
 		format json
@@ -74,7 +69,6 @@ narrowhighway.tv {
 	}
 
 	# The watch/listen/learn face on the 2.0 WITNESS engine (:8001); its landing is tv.html.
-	# Frees nh-engine (1.0) from .tv — the last app dependency blocking 1.0 retirement.
 	@root path /
 	rewrite @root /tv.html
 	reverse_proxy 127.0.0.1:8001 {
