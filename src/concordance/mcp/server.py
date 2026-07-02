@@ -150,6 +150,32 @@ def _secular_tools() -> List[dict]:
          "inputSchema": {"type": "object", "properties": {
              "bundle": {"type": "object"}, "key": {"type": "string"},
              "verify_signature": {"type": "boolean"}}, "required": ["bundle"]}},
+        {"name": "groups_list",
+         "description": ("Discover pseudonymous shared-study groups by TOPIC (not by person). Optional q "
+                         "filters over topic/title/description. Members are handles only — no PII."),
+         "inputSchema": {"type": "object", "properties": {"q": {"type": "string"}}}},
+        {"name": "group_get",
+         "description": "A study group: topic, member handles (no ids/PII), and the shared-study cards.",
+         "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
+        {"name": "group_create",
+         "description": ("Open a study group around a topic (pseudonymous; a handle, no personal info). "
+                         "For grown believers — the children's coach is a separate, never-joined surface."),
+         "inputSchema": {"type": "object", "properties": {
+             "topic": {"type": "string"}, "title": {"type": "string"}, "description": {"type": "string"},
+             "handle": {"type": "string"}, "subject_id": {"type": "string"}}, "required": ["topic"]}},
+        {"name": "group_join",
+         "description": "Join a study group (consent-based, pseudonymous; idempotent).",
+         "inputSchema": {"type": "object", "properties": {
+             "id": {"type": "string"}, "handle": {"type": "string"}, "subject_id": {"type": "string"}},
+             "required": ["id"]}},
+        {"name": "group_contribute",
+         "description": ("Add a verse/note/question to a group's shared study — attributed to your handle, "
+                         "optionally signed. Verbatim; a member's own words, not engine-verified."),
+         "inputSchema": {"type": "object", "properties": {
+             "id": {"type": "string"}, "text": {"type": "string"}, "kind": {"type": "string"},
+             "handle": {"type": "string"}, "subject_id": {"type": "string"},
+             "topics": {"type": "array"}, "refs": {"type": "array"}, "private_key": {"type": "string"}},
+             "required": ["id", "text"]}},
     ]
 
 
@@ -323,6 +349,28 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
         from .. import badges
         return badges.study_import(args.get("bundle") or {}, study_key=args.get("key"),
                                    verify_signature=bool(args.get("verify_signature")))
+    if name == "groups_list":
+        from .. import groups
+        return groups.list_groups(str(args.get("q") or ""))
+    if name == "group_get":
+        from .. import groups
+        return groups.get_group(str(args.get("id") or "")) or {"error": "group not found"}
+    if name == "group_create":
+        from .. import groups
+        return groups.create_group(str(args.get("topic") or ""), title=str(args.get("title") or ""),
+                                   description=str(args.get("description") or ""),
+                                   creator_id=str(args.get("subject_id") or ""),
+                                   handle=str(args.get("handle") or ""))
+    if name == "group_join":
+        from .. import groups
+        return groups.join_group(str(args.get("id") or ""), member_id=str(args.get("subject_id") or ""),
+                                 handle=str(args.get("handle") or "")) or {"error": "group not found"}
+    if name == "group_contribute":
+        from .. import groups
+        return groups.contribute(str(args.get("id") or ""), member_id=str(args.get("subject_id") or ""),
+                                 handle=str(args.get("handle") or ""), text=str(args.get("text") or ""),
+                                 kind=str(args.get("kind") or "note"), topics=args.get("topics") or [],
+                                 refs=args.get("refs") or [], private_key=args.get("private_key")) or {"error": "group not found"}
     if name == "resolve" and config.witness_surfaced:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.resolve_ref(args.get("ref", ""))

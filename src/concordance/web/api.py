@@ -355,6 +355,41 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         g = steward.money_guardrail(str(body["text"]))
         return _ok(g if g else {"kind": "ok", **steward.guidance()})
 
+    # Groups — pseudonymous shared-study groups (community: connect around what you study). NOT gated
+    # (an opt-in connection surface, both faces); anonymity is the floor (handles, never PII); the
+    # Coach/children are a SEPARATE, never-joined surface. Member content is attributed, not verified.
+    if method == "POST" and path == "/groups":
+        if not isinstance(body, dict) or not str(body.get("topic") or "").strip():
+            return _err(400, "topic required")
+        from .. import groups
+        return _ok(groups.create_group(str(body["topic"]), title=str(body.get("title") or ""),
+                                       description=str(body.get("description") or ""),
+                                       creator_id=str(body.get("subject_id") or ""),
+                                       handle=str(body.get("handle") or "")))
+    if method == "GET" and path == "/groups":
+        from .. import groups
+        return _ok(groups.list_groups(query.get("q") or ""))
+    if method == "GET" and path == "/group":
+        from .. import groups
+        g = groups.get_group((query.get("id") or "").strip())
+        return _ok(g) if g is not None else _err(404, "group not found")
+    if method == "POST" and path == "/group/join":
+        if not isinstance(body, dict) or not str(body.get("id") or "").strip():
+            return _err(400, "id required")
+        from .. import groups
+        g = groups.join_group(str(body["id"]), member_id=str(body.get("subject_id") or ""),
+                              handle=str(body.get("handle") or ""))
+        return _ok(g) if g is not None else _err(404, "group not found")
+    if method == "POST" and path == "/group/contribute":
+        if not isinstance(body, dict) or not str(body.get("id") or "").strip():
+            return _err(400, "id required")
+        from .. import groups
+        r = groups.contribute(str(body["id"]), member_id=str(body.get("subject_id") or ""),
+                              handle=str(body.get("handle") or ""), text=str(body.get("text") or ""),
+                              kind=str(body.get("kind") or "note"), topics=body.get("topics") or [],
+                              refs=body.get("refs") or [], private_key=body.get("private_key"))
+        return _ok(r) if r is not None else _err(404, "group not found")
+
     # Coach — the Shepherd as a K-3 reading tutor. READ-ONLY teaching is the floor (NOT gated); it
     # finds + presents the operator's authored curriculum, never generates a lesson, never grades a child.
     if method == "POST" and path == "/coach/mastery":
@@ -745,7 +780,8 @@ _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word
                   "/commentary", "/journal", "/journal/dates", "/steward", "/tsk",
                   "/character", "/characters", "/prophecy",
                   "/coach/overview", "/coach/unit", "/coach/next", "/coach/guidance",
-                  "/identity/fingerprint", "/identity/describe", "/badges", "/study", "/card.html"}
+                  "/identity/fingerprint", "/identity/describe", "/badges", "/study", "/card.html",
+                  "/groups", "/group"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
@@ -773,7 +809,8 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
     MAX_BODY = int(os.environ.get("CONCORDANCE_MAX_BODY", str(256 * 1024)) or 256 * 1024)
     RATELIMITED = ("/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak",
                    "/coach/mastery", "/identity/create", "/identity/verify", "/badges",
-                   "/study", "/study/export", "/study/import")
+                   "/study", "/study/export", "/study/import",
+                   "/groups", "/group", "/group/join", "/group/contribute")
 
     class Handler(BaseHTTPRequestHandler):
         def _json(self, status: int, payload: dict, extra: dict = None) -> None:

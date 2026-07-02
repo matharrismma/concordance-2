@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Study together — Narrow Highway</title>
+<meta name="description" content="Find others studying what you're studying and gather around the Word — pseudonymously. A handle, no personal information. Connection is a door you open, a rung at a time.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.11), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:820px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.1rem; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:820px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.66rem; margin-top:2.4rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2rem; margin:.5rem 0 .4rem}
+  .lede{color:var(--dim); font-size:1.02rem; max-width:42rem}
+  .you{border:1px solid var(--line); border-left:2px solid var(--gold); padding:.7rem .9rem; margin:1.6rem 0; display:flex; gap:.6rem; align-items:center; flex-wrap:wrap}
+  .you label{color:var(--goldsoft); letter-spacing:.14em; text-transform:uppercase; font-size:.62rem}
+  input,select,textarea{background:rgba(255,255,255,.02); border:1px solid var(--line); color:var(--ink); font:inherit; padding:.5rem .7rem; outline:none}
+  input::placeholder,textarea::placeholder{color:var(--dim)}
+  .btn{background:transparent; border:1px solid var(--line); color:var(--gold); font:inherit; letter-spacing:.1em; text-transform:uppercase; font-size:.7rem; padding:.5rem 1rem; cursor:pointer; border-radius:2px}
+  .btn:hover{color:var(--ink); border-color:var(--gold)}
+  section.band{margin-top:2.4rem; border-top:1px solid var(--line); padding-top:1.3rem}
+  .slabel{color:var(--goldsoft); letter-spacing:.22em; text-transform:uppercase; font-size:.64rem; margin-bottom:.5rem}
+  .row{display:flex; gap:.5rem; align-items:center; flex-wrap:wrap}
+  .row input{flex:1; min-width:12rem}
+  .grp{display:block; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid var(--line); color:var(--ink); font:inherit; padding:.7rem 0; cursor:pointer}
+  .grp:hover{color:var(--gold)}
+  .grp .t{font-size:1.05rem} .grp .m{color:var(--dim); font-size:.8rem}
+  .panel{border-left:2px solid var(--gold); padding:.3rem 0 0 1rem; margin-top:1.6rem; display:none}
+  .panel.open{display:block}
+  .panel h2{font-weight:400; font-size:1.3rem; margin:.2rem 0 .2rem}
+  .members{color:var(--goldsoft); font-size:.82rem; margin:.3rem 0 .8rem}
+  .card{border-left:1px solid var(--line); padding:.35rem 0 .35rem .85rem; margin:.55rem 0}
+  .card .by{color:var(--goldsoft); text-transform:uppercase; letter-spacing:.12em; font-size:.58rem}
+  .card .tx{white-space:pre-wrap}
+  .card .sig{color:var(--pass); font-size:.62rem}
+  .create{display:none; margin-top:1rem} .create.open{display:block}
+  .create input,.create textarea{width:100%; margin:.35rem 0}
+  .dim{color:var(--dim)} .hint{color:var(--dim); font-size:.78rem; margin-top:.5rem}
+  footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:2.6rem; padding-top:1.3rem; line-height:1.7}
+  @media (max-width:640px){
+    body{font-size:16px; line-height:1.7}
+    header .bar{flex-direction:column; align-items:flex-start; gap:.6rem; padding:.9rem 1rem}
+    nav.site{display:flex; flex-wrap:wrap; margin:0} nav.site a{margin:0 1rem .1rem 0; font-size:.68rem; letter-spacing:.1em}
+    .wrap{padding:1rem 1rem 4rem} h1{font-size:1.6rem} .lede{font-size:.98rem}
+    .row{flex-direction:column; align-items:stretch} .row input{min-width:0; width:100%} .btn{width:100%}
+  }
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow <span class="road">Highway</span></a>
+  <nav class="site"><a href="/ask.html">Ask</a><a href="/bible.html">Bible</a><a href="/read.html">Read</a><a href="/journal.html">Journal</a><a href="/community.html">Community</a><a href="/library.html">Library</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="kicker">Two or three gathered</div>
+  <h1>Study together — anonymously</h1>
+  <p class="lede">Find others studying what you're studying, and gather around the Word. You are a
+  <em>handle, not a name</em> — no email, no account, no personal information. Connection is a door
+  you open a rung at a time; you choose what to share. <span class="dim">This is a place for grown
+  believers to meet; the children's reading tutor is separate and private.</span></p>
+
+  <div class="you">
+    <label for="handle">You are</label>
+    <input id="handle" placeholder="choose a handle (e.g. Pilgrim)" autocomplete="off" style="flex:0 1 16rem">
+    <button class="btn" id="savehandle">Save</button>
+    <span class="dim" id="whoami" style="font-size:.8rem"></span>
+  </div>
+
+  <section class="band">
+    <div class="slabel">Find a study</div>
+    <div class="row">
+      <input id="q" placeholder="a topic — e.g. John, grace, the Psalms, prayer" aria-label="search topics">
+      <button class="btn" id="searchbtn">Search</button>
+      <button class="btn" id="newbtn">+ Start one</button>
+    </div>
+    <div class="create" id="create">
+      <input id="c-topic" placeholder="topic (e.g. The Gospel of John)" autocomplete="off">
+      <input id="c-title" placeholder="title (optional)" autocomplete="off">
+      <textarea id="c-desc" rows="2" placeholder="what is this study about? (optional)"></textarea>
+      <button class="btn" id="createbtn">Create the study</button>
+    </div>
+    <div id="groups" style="margin-top:1rem"><p class="dim">loading studies…</p></div>
+  </section>
+
+  <div class="panel" id="panel"></div>
+
+  <footer class="site"><p>Anonymity is the floor; connection is a door you open. Members are
+  pseudonymous, and contributions are members' own words — attributed, not engine-verified (the engine
+  can check a scripture reference; a member's note stays a member's note). Success is real fellowship,
+  pointing to the body of Christ, never replacing it (John 3:30).</p></footer>
+</main>
+
+<script>
+const API = "";
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
+async function getJSON(p){ const r=await fetch(API+p); if(!r.ok) return null; try{return await r.json();}catch(e){return null;} }
+async function postJSON(p,b){ const r=await fetch(API+p,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)}); try{return await r.json();}catch(e){return null;} }
+
+// pseudonymous identity, held locally — a handle + a stable local id (no PII, no account)
+function sid(){ let s=localStorage.getItem('nh_sid'); if(!s){ s='nh_'+Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b=>b.toString(16).padStart(2,'0')).join(''); localStorage.setItem('nh_sid',s);} return s; }
+const handleEl=document.getElementById('handle'), whoami=document.getElementById('whoami');
+handleEl.value = localStorage.getItem('nh_handle') || '';
+function refreshWho(){ const h=localStorage.getItem('nh_handle'); whoami.textContent = h ? ('· pseudonymous, no personal info stored') : '· pick a handle to join or contribute'; }
+refreshWho();
+document.getElementById('savehandle').addEventListener('click',()=>{ const h=handleEl.value.trim(); if(h){ localStorage.setItem('nh_handle',h); refreshWho(); } });
+function myHandle(){ return (localStorage.getItem('nh_handle')||handleEl.value.trim()||'').trim(); }
+function needHandle(){ if(!myHandle()){ handleEl.focus(); whoami.textContent='· choose a handle first'; return false; } return true; }
+
+// discover
+async function loadGroups(q){
+  const el=document.getElementById('groups');
+  const d=await getJSON('/groups'+(q?('?q='+encodeURIComponent(q)):''));
+  const gs=(d&&d.groups)||[];
+  el.innerHTML = gs.length ? gs.map(g=>'<button class="grp" data-id="'+esc(g.id)+'"><div class="t">'+esc(g.title)+
+    '</div><div class="m">'+esc(g.topic)+' · '+g.member_count+' member'+(g.member_count==1?'':'s')+' · '+g.card_count+' shared</div></button>').join('')
+    : '<p class="dim">No studies yet on that. Be the first — start one.</p>';
+}
+document.getElementById('searchbtn').addEventListener('click',()=>loadGroups(document.getElementById('q').value.trim()));
+document.getElementById('q').addEventListener('keydown',e=>{ if(e.key==='Enter') loadGroups(e.target.value.trim()); });
+document.getElementById('newbtn').addEventListener('click',()=>document.getElementById('create').classList.toggle('open'));
+document.getElementById('createbtn').addEventListener('click',async()=>{
+  if(!needHandle()) return;
+  const topic=document.getElementById('c-topic').value.trim(); if(!topic){ document.getElementById('c-topic').focus(); return; }
+  const d=await postJSON('/groups',{topic, title:document.getElementById('c-title').value.trim(),
+    description:document.getElementById('c-desc').value.trim(), handle:myHandle(), subject_id:sid()});
+  if(d&&d.id){ document.getElementById('create').classList.remove('open'); document.getElementById('c-topic').value=''; document.getElementById('c-title').value=''; document.getElementById('c-desc').value=''; await loadGroups(''); openGroup(d.id); }
+});
+
+// a group
+document.getElementById('groups').addEventListener('click',e=>{ const b=e.target.closest('.grp'); if(b) openGroup(b.dataset.id); });
+async function openGroup(id){
+  const panel=document.getElementById('panel'); panel.className='panel open'; panel.innerHTML='<p class="dim">opening…</p>';
+  const g=await getJSON('/group?id='+encodeURIComponent(id));
+  if(!g){ panel.innerHTML='<p class="dim">Not found.</p>'; return; }
+  render(g);
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function render(g){
+  const panel=document.getElementById('panel');
+  const cards=(g.cards||[]).map(c=>'<div class="card"><div class="by">'+esc((c.source||'').replace(/^member:/,'')||'member')+
+    (c.source&&c.source.startsWith('member:')?'':'')+'</div><div class="tx">'+esc(c.text)+'</div></div>').join('') || '<p class="dim">No contributions yet — add the first.</p>';
+  const members=(g.members||[]).map(m=>esc(m.handle)+(m.role==='founder'?' ✦':'')).join(' · ');
+  panel.innerHTML='<h2>'+esc(g.title)+'</h2>'+
+    '<div class="dim" style="font-size:.85rem">'+esc(g.topic)+(g.description?(' — '+esc(g.description)):'')+'</div>'+
+    '<div class="members">'+esc(g.member_count)+' gathered: '+members+'</div>'+
+    '<div class="row" style="margin:.6rem 0"><button class="btn" id="joinbtn">Join this study</button></div>'+
+    '<div class="slabel" style="margin-top:1rem">Shared study</div>'+cards+
+    '<div style="margin-top:1rem"><textarea id="contrib" rows="3" placeholder="add a verse, a note, a question…" style="width:100%"></textarea>'+
+    '<div class="row" style="margin-top:.4rem"><select id="ckind"><option value="verse">verse</option><option value="note">note</option><option value="question">question</option></select>'+
+    '<button class="btn" id="contribbtn">Contribute</button></div>'+
+    '<p class="hint">Your words, attributed to your handle. Verbatim — not generated, not graded.</p></div>';
+  document.getElementById('joinbtn').addEventListener('click',async()=>{ if(!needHandle())return; const r=await postJSON('/group/join',{id:g.id, handle:myHandle(), subject_id:sid()}); if(r) render(r); });
+  document.getElementById('contribbtn').addEventListener('click',async()=>{
+    if(!needHandle())return; const t=document.getElementById('contrib').value.trim(); if(!t)return;
+    const r=await postJSON('/group/contribute',{id:g.id, handle:myHandle(), subject_id:sid(), text:t, kind:document.getElementById('ckind').value});
+    if(r&&r.ok){ openGroup(g.id); }
+  });
+}
+loadGroups('');
+</script>
+</body>
+</html>

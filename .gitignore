@@ -22,6 +22,7 @@ data/prophecy/
 data/curriculum/
 data/audio/
 data/geo/
+data/groups/
 data/cards.jsonl
 data/*.jsonl
 data/*.json

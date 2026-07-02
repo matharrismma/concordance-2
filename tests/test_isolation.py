@@ -44,7 +44,7 @@ _SRC = Path(__file__).resolve().parent.parent / "src"
 sys.path.insert(0, str(_SRC))
 
 # The side-modules under guard. Adding any of these must never touch the moat.
-SIDE_MODULES = ["concordance.identity", "concordance.coach", "concordance.badges"]
+SIDE_MODULES = ["concordance.identity", "concordance.coach", "concordance.badges", "concordance.groups"]
 
 # The moat machinery no side-module may reach.
 FORBIDDEN_ROOTS = ("concordance.verifiers", "concordance.derivation")
