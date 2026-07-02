@@ -231,7 +231,14 @@ function render(d){
     '</span> — '+esc(d.threshold.text)+'<div style="color:#c9a24a;font-size:.85rem;margin-top:.4rem">'+esc(d.threshold.note)+'</div></div>' : '';
   const refs = (d.scripture_refs&&d.scripture_refs.length)
     ? '<div class="role" style="margin-top:1rem">a word on this</div>'+renderCards(d.scripture_refs) : '';
-  return thr + html + hear + note + refs;
+  // Fellowship: others are already studying this — a door into real community (found, not generated).
+  const fellow = (d.fellowship&&d.fellowship.length)
+    ? '<div class="role" style="margin-top:1rem">you’re not alone — others are studying this</div>'+
+      d.fellowship.map(g=>'<a href="/community.html?g='+encodeURIComponent(g.id)+
+        '" style="display:block;border-left:2px solid var(--goldsoft);padding:.4rem 0 .4rem .95rem;margin:.4rem 0;color:var(--ink)">'+
+        esc(g.title)+' <span class="dim" style="font-size:.85rem">— '+esc(g.topic)+' · '+g.member_count+' gathered → join</span></a>').join('')
+    : '';
+  return thr + html + hear + note + refs + fellow;
 }
 
 function addTurn(userText){

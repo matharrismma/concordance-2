@@ -312,6 +312,17 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             r = {**r, "thread_id": tid}
         except Exception:  # noqa: BLE001 — the conduit answer stands even if the deck write fails
             pass
+        # Fellowship: if others are already studying this, point to them — the conversation opens into
+        # real community (John 3:30). FOUND, never generated; off to the side; never breaks the answer;
+        # never for crisis (help-first stays clean). Only when the door is open (they're seeking).
+        if r.get("kind") != "crisis" and (gate_open or r.get("kind") in ("ultimate", "scripture")):
+            try:
+                from .. import groups as _groups
+                fs = _groups.suggest(text).get("groups", [])
+                if fs:
+                    r["fellowship"] = fs
+            except Exception:  # noqa: BLE001 — a pointer to community is a bonus, never load-bearing
+                pass
         telemetry.record("ask", surface=surface, kind=r.get("kind"), thread=tid, gate=gate_open)
         return _ok(r)
 

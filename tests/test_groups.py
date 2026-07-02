@@ -66,6 +66,17 @@ def test_handle_is_sanitized_never_pii_shaped():
     assert groups.create_group("X", handle="")["members"][0]["handle"] == "anon"
 
 
+def test_suggest_finds_relevant_groups_by_keyword():
+    groups.create_group("The Gospel of John", creator_id="nh_1", handle="A")
+    groups.create_group("Grace and the Epistles", creator_id="nh_2", handle="B")
+    # a seeker's message keywords overlap the group topic -> found (not a substring match)
+    s = groups.suggest("what does the Bible say about grace and mercy?")
+    assert any("Grace" in g["title"] for g in s["groups"])
+    # nothing genuinely relevant -> empty (never force an irrelevant group)
+    assert groups.suggest("quantum chromodynamics and thermodynamics")["groups"] == []
+    assert groups.suggest("")["groups"] == []
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:

@@ -196,6 +196,36 @@ def contribute(gid: str, *, member_id: str = "", handle: str = "", text: str = "
     return {"ok": True, "group": gid, "card_id": card["id"], "by": handle, "signed": signed}
 
 
+_STOP = {"the", "and", "for", "you", "your", "what", "does", "say", "about", "with", "that", "this",
+         "are", "was", "how", "why", "who", "can", "will", "there", "here", "have", "has", "from",
+         "not", "but", "his", "her", "him", "our", "out", "get", "got", "would", "could", "should",
+         "when", "where", "which", "into", "than", "then", "them", "they", "been", "were", "some"}
+
+
+def _words(s: str) -> set:
+    return {w for w in re.findall(r"[a-z]{3,}", str(s or "").lower()) if w not in _STOP}
+
+
+def suggest(text: str, limit: int = 3) -> Dict[str, Any]:
+    """Given what a person is seeking, FIND live study groups whose topic overlaps — so Shepherd can
+    point them to real fellowship (found, never generated). Empty if nothing genuinely matches; we
+    never invent a group or force an irrelevant one."""
+    want = _words(text)
+    if not want:
+        return {"groups": []}
+    scored = []
+    for fp in _dir().glob("grp_*.json"):
+        try:
+            g = json.loads(fp.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        overlap = len(want & _words(g.get("topic", "") + " " + g.get("title", "")))
+        if overlap:
+            scored.append((overlap, len(g.get("members", [])), g))
+    scored.sort(key=lambda t: (-t[0], -t[1]))
+    return {"groups": [_public(g) for _, _, g in scored[:max(1, limit)]]}
+
+
 def guidance() -> Dict[str, Any]:
     return {
         "identity": "A study group is people gathered around a TOPIC, pseudonymously — connect without giving up who you are.",
@@ -214,4 +244,4 @@ def guidance() -> Dict[str, Any]:
     }
 
 
-__all__ = ["create_group", "list_groups", "get_group", "join_group", "contribute", "guidance"]
+__all__ = ["create_group", "list_groups", "get_group", "join_group", "contribute", "suggest", "guidance"]

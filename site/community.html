@@ -171,6 +171,9 @@ function render(g){
   });
 }
 loadGroups('');
+// Deep-link from Shepherd's fellowship pointer: /community.html?g=<id> opens that study.
+const _g = new URLSearchParams(location.search).get('g');
+if(_g) openGroup(_g);
 </script>
 </body>
 </html>
