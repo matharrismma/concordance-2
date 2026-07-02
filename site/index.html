@@ -29,8 +29,8 @@
       <div class="verdict holds" style="font-size:1.05rem">✓ Verifiable</div>
       <p class="muted" style="font-size:.9rem;margin:.4rem 0 0">Every answer is a re-checkable
       <strong>receipt</strong> — verdict, worked trail, sealed hash — not "trust me."
-      <strong>0 false-positives</strong> across the moat + 22 domains; tamper-evident chain.
-      <a href="#verify">Try it ↓</a></p>
+      <strong>0 false-positives</strong> across the 58-check moat (64 domains); tamper-evident chain.
+      <a href="#verify">Try it ↓</a> · <a href="/guarantees.html">what we prove →</a></p>
     </div>
     <div class="card">
       <div class="verdict holds" style="font-size:1.05rem">✓ Private</div>
@@ -55,8 +55,13 @@
 
   <section id="verify">
     <h2>Bring a claim → get a receipt</h2>
-    <p class="muted">Symbolic math, checked exactly. Try <span class="mono">2+2 = 4</span> (holds),
-    <span class="mono">2+2 = 5</span> (caught), or <span class="mono">x/x = 1</span> (caught — undefined at x=0).</p>
+    <p class="muted">Symbolic math, checked exactly — then sealed into a receipt you can re-fetch by its
+    hash. Tap an example to see one succeed, one caught, and one edge case — or type your own:</p>
+    <div class="row" style="gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem">
+      <button class="ex" style="font-size:.82rem;padding:.35rem .8rem" data-a="(x-1)*(x+1)" data-b="x**2-1">a true claim → HOLDS ✓</button>
+      <button class="ex" style="font-size:.82rem;padding:.35rem .8rem" data-a="2+2" data-b="5">a false claim → BROKEN ✗</button>
+      <button class="ex" style="font-size:.82rem;padding:.35rem .8rem" data-a="x/x" data-b="1">an edge case → caught</button>
+    </div>
     <div class="row">
       <input id="a" value="(x-1)*(x+1)" aria-label="left side">
       <span style="align-self:center" class="muted">=</span>
@@ -64,6 +69,9 @@
       <button onclick="verify()">Verify</button>
     </div>
     <div id="verdict" style="margin-top:1rem"></div>
+    <p class="muted" style="font-size:.85rem;margin-top:.7rem">Every result on Narrow Highway shows its
+    kind — verified, found &amp; cited, a signpost, or your own. <a href="/guarantees.html">See exactly what
+    we prove, and what we don't →</a></p>
   </section>
 
   <section id="search">
@@ -189,6 +197,15 @@ async function init(){
     }
   }catch(e){ /* API not reachable yet — the secular page stands on its own */ }
 }
+// Receipt-first: one-tap example claims fill the box and run — a true one, a caught false one, an edge case.
+document.addEventListener('click', e => {
+  const b = e.target.closest('.ex');
+  if(!b) return;
+  document.getElementById('a').value = b.dataset.a;
+  document.getElementById('b').value = b.dataset.b;
+  verify();
+  document.getElementById('verify').scrollIntoView({behavior:'smooth', block:'start'});
+});
 init();
 </script>
 </body>

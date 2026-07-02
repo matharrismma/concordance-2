@@ -39,6 +39,20 @@ narrowhighway.com {
 	# Retired 1.0 lifestyle pages -> home (content archived, recoverable) so cited links don't hard-404.
 	@legacy path /almanac.html /apothecary.html /walk.html /kept.html /enter.html /packets.html /breath.html /missions.html /search.html /voices
 	redir @legacy / 301
+	# Retired 1.0 pages -> their nearest 2.0 home (preserve crawl equity; no hard 404).
+	redir /about.html /guarantees.html 301
+	redir /today.html /journal.html 301
+	redir /curriculum.html /read.html 301
+	redir /submit-curriculum.html /read.html 301
+	redir /workshop.html /read.html 301
+	redir /guidance.html /ask.html 301
+	redir /canon.html /bible.html 301
+	redir /bibles.html /bible.html 301
+	redir /bible-trivia.html /bible.html 301
+	redir /reach.html /community.html 301
+	redir /outreach.html /community.html 301
+	redir /assembly.html /community.html 301
+	redir /media-center.html https://narrowhighway.tv/ 301
 
 	# 2.0 secular serves everything — front door, app, engine, seals, AND the card permalinks
 	# (render_card_html at /card.html?id= and /card/<id>). No more 1.0 fallback.
