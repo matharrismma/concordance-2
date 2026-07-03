@@ -232,6 +232,13 @@ def _witness_tools() -> List[dict]:
                          "Pass id for one trace, q to search, else lists all."),
          "inputSchema": {"type": "object", "properties": {
              "id": {"type": "string"}, "q": {"type": "string"}}}},
+        {"name": "seeds",
+         "description": ("Seeds of the Word (the Areopagus / logos spermatikos pass) — true fragments "
+                         "mined from the nations, ATTRIBUTED, CONCORDANT/signpost NEVER HOLDS; each names "
+                         "the idol it refuses and points to Christ (Acts 17; 1 John 4:1-3). Pass id for one "
+                         "seed, q to search, tradition to filter, else lists all with Paul's 7-step method."),
+         "inputSchema": {"type": "object", "properties": {
+             "id": {"type": "string"}, "q": {"type": "string"}, "tradition": {"type": "string"}}}},
     ]
 
 
@@ -420,6 +427,16 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
             rec = prophecy.get(args["id"])
             return rec if rec is not None else {"error": "trace not found"}
         return prophecy.search(args["q"]) if args.get("q") else prophecy.list_traces()
+    if name == "seeds" and config.witness_surfaced:
+        from .. import seeds  # lazy: witness-only
+        if args.get("id"):
+            rec = seeds.get(args["id"])
+            return rec if rec is not None else {"error": "seed not found"}
+        if args.get("q"):
+            return seeds.search(args["q"])
+        base = seeds.list_seeds(args.get("tradition", ""))
+        base["areopagus"] = seeds.method()
+        return base
     raise KeyError(f"unknown tool {name!r} (on the {config.surface} surface)")
 
 
