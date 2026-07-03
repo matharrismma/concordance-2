@@ -23,6 +23,7 @@ data/curriculum/
 data/audio/
 data/geo/
 data/groups/
+data/seeds/
 data/cards.jsonl
 data/*.jsonl
 data/*.json

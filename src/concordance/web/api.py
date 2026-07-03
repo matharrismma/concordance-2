@@ -789,6 +789,24 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         q = (query.get("q") or "").strip()
         return _ok(prophecy.search(q) if q else prophecy.list_traces())
 
+    if method == "GET" and path == "/seeds":
+        # Seeds of the Word — the Areopagus / logos spermatikos pass. Attributed, CONCORDANT/signpost,
+        # NEVER HOLDS; the idol named and refused, the Source named — Jesus Christ (Acts 17; 1 John 4:1-3).
+        if not allow_witness:
+            return _gate_closed()
+        from .. import seeds as seeds_mod
+        sid = (query.get("id") or "").strip()
+        if sid:
+            rec = seeds_mod.get(sid)
+            return _ok(rec) if rec is not None else _err(404, "seed not found")
+        q = (query.get("q") or "").strip()
+        if q:
+            return _ok(seeds_mod.search(q))
+        trad = (query.get("tradition") or "").strip()
+        base = seeds_mod.list_seeds(trad)
+        base["areopagus"] = seeds_mod.method()
+        return _ok(base)
+
     return _err(404, "not found")
 
 
@@ -801,7 +819,7 @@ _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word
                   "/character", "/characters", "/prophecy",
                   "/coach/subjects", "/coach/overview", "/coach/unit", "/coach/next", "/coach/recommend", "/coach/guidance",
                   "/identity/fingerprint", "/identity/describe", "/badges", "/study", "/card.html",
-                  "/groups", "/group"}
+                  "/groups", "/group", "/seeds"}
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
