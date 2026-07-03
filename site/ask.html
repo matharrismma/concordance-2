@@ -151,6 +151,7 @@
 <script src="redact.js"></script>
 <script src="speak.js"></script>
 <script src="gate.js"></script>
+<script src="kinds.js"></script>
 <script>
 const API = "";
 const TID_KEY = "nh_thread";
@@ -238,7 +239,13 @@ function render(d){
         '" style="display:block;border-left:2px solid var(--goldsoft);padding:.4rem 0 .4rem .95rem;margin:.4rem 0;color:var(--ink)">'+
         esc(g.title)+' <span class="dim" style="font-size:.85rem">— '+esc(g.topic)+' · '+g.member_count+' gathered → join</span></a>').join('')
     : '';
-  return thr + html + hear + note + refs + fellow;
+  // Every result wears its kind (conduit-not-source, made visible). Crisis returned early — never badged.
+  let kind = 'cited';
+  if(d.verify) kind = 'verified';
+  else if(d.kind === 'ultimate' || d.scripture) kind = 'scripture';
+  // word_study (lexicon) and found (the keeping) are found & cited -> the default 'cited'.
+  const kindBadge = window.NHKind ? '<div style="margin-bottom:.7rem">'+NHKind.badge(kind)+'</div>' : '';
+  return kindBadge + thr + html + hear + note + refs + fellow;
 }
 
 function addTurn(userText){

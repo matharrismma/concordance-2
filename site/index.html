@@ -68,6 +68,7 @@
       <input id="b" value="x**2-1" aria-label="right side">
       <button onclick="verify()">Verify</button>
     </div>
+    <div style="margin:.6rem 0"><span data-nhkind="verified"></span></div>
     <div id="verdict" style="margin-top:1rem"></div>
     <p class="muted" style="font-size:.85rem;margin-top:.7rem">Every result on Narrow Highway shows its
     kind — verified, found &amp; cited, a signpost, or your own. <a href="/guarantees.html">See exactly what
@@ -81,6 +82,7 @@
       <input id="q" placeholder="e.g. love, justice, baptism" aria-label="search query">
       <button onclick="search()">Search</button>
     </div>
+    <div style="margin:.6rem 0"><span data-nhkind="cited" data-nhnote="the keeping"></span></div>
     <div id="results" style="margin-top:.8rem"></div>
   </section>
 
@@ -110,6 +112,7 @@
 
 <script src="redact.js"></script>
 <script src="rampart-ml.js"></script>
+<script src="/kinds.js"></script>
 <script>
 const API = ""; // same-origin when served by `python -m concordance serve`; set to http://127.0.0.1:8000 otherwise
 async function verify() {

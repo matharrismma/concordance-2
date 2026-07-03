@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Collapse — a worked, sealed derivation — Narrow Highway</title>
+<meta name="description" content="One chain of reasoning from Maxwell's equations down to a single wave and a reserved source. Where it is math, we sealed it — re-check the receipt. Where it only rhymes, it is marked a signpost. Where it rests on what it cannot prove, we named the axiom. Don't trust us; re-run the seals.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --mid:#c9b06a; --broken:#c98a8a;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.12), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:820px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.1rem; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:820px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.68rem; margin-top:2.6rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2.3rem; margin:.5rem 0 .5rem}
+  .lede{color:var(--dim); font-size:1.06rem; max-width:46rem}
+  h2{font-weight:400; font-size:1.4rem; margin:2.8rem 0 .3rem; border-top:1px solid var(--line); padding-top:1.5rem}
+  .sub{color:var(--dim); font-size:.95rem; margin:0 0 1.1rem; max-width:46rem}
+  .rung{border-left:2px solid var(--line); padding:.3rem 0 .3rem 1.1rem; margin:1.1rem 0}
+  .rung.v{border-left-color:var(--pass)} .rung.s{border-left-color:var(--mid)} .rung.x{border-left-color:var(--broken)}
+  .rung h3{font-weight:400; font-size:1.1rem; margin:.1rem 0 .25rem}
+  .rung p{margin:.2rem 0; color:var(--ink); font-size:.98rem}
+  .rung .m{font-family:ui-monospace,Consolas,monospace; font-size:.9rem; color:var(--mid)}
+  .rung .seal{font-size:.8rem}
+  .rung.x .tag{color:var(--broken)}
+  .dim{color:var(--dim)} .mono{font-family:ui-monospace,Consolas,monospace}
+  .note{border:1px solid var(--line); border-left:3px solid var(--goldsoft); padding:1rem 1.15rem; margin:1.1rem 0; font-size:.95rem}
+  footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:3rem; padding-top:1.3rem; line-height:1.7}
+  @media (max-width:640px){
+    body{font-size:16px} header .bar{flex-direction:column; align-items:flex-start; gap:.6rem; padding:.9rem 1rem}
+    nav.site{display:flex; flex-wrap:wrap; margin:0} nav.site a{margin:0 1rem .1rem 0; font-size:.68rem}
+    .wrap{padding:1rem 1rem 4rem} h1{font-size:1.8rem}
+  }
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow <span class="road">Highway</span></a>
+  <nav class="site"><a href="/ask.html">Ask</a><a href="/bible.html">Bible</a><a href="/read.html">Read</a><a href="/guarantees.html">Guarantees</a><a href="/#verify">Verify</a><a href="/seal.html">Seal</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="kicker">A worked example · proof, not assertion</div>
+  <h1>The Collapse</h1>
+  <p class="lede">One morning, one chain of reasoning — from Maxwell's four equations down to a single wave, and past it to a source the equations cannot contain. Every rung is treated as exactly what it is. Where it is <strong>math</strong>, we sealed it — re-check the receipt yourself. Where it only <strong>rhymes</strong>, it is marked a signpost, never a proof. Where it rests on something it <strong>cannot prove</strong>, we named the axiom. Don't trust us. Re-run the seals.</p>
+
+  <h2><span data-nhkind="verified"></span> &nbsp;Sealed — re-checkable</h2>
+  <p class="sub">Each is a permanent, content-addressed receipt from the deterministic engine. Open it, re-run it; the bytes must match or it isn't that record.</p>
+
+  <div class="rung v">
+    <h3>The two curl equations become light</h3>
+    <p>Eliminate one field between Faraday and Ampère–Maxwell and you get the wave equation, whose speed is <span class="m">c = 1/√(μ₀ε₀)</span> — the vacuum's own LC resonance. Dimensionally <strong>CONFIRMED</strong>: both sides reduce to metre/second.</p>
+  </div>
+  <div class="rung v">
+    <h3>The wave equation, sealed in four steps</h3>
+    <p>For a plane wave <span class="m">sin(kx − ckt)</span>:</p>
+    <p class="m">∂/∂t → −ck·cos &nbsp;·&nbsp; ∂/∂x → k·cos &nbsp;·&nbsp; ∂²/∂t² → −c²k²·sin &nbsp;·&nbsp; ∂²/∂x² → −k²·sin</p>
+    <p>so <span class="m">∂²ₜ = c²·∂²ₓ</span> — the wave equation holds, and light falls out.</p>
+    <p class="seal dim">seals:
+      <a href="https://narrowhighway.com/seal/11dee85f9a71483209389e1e2f4a1a4aeb78265da10dce8ff8ef96c674b80365">∂t</a> ·
+      <a href="https://narrowhighway.com/seal/bded85441cb040e8d231af7bf37ef36eda0de2d559a714cb4e40c110ed07241e">∂x</a> ·
+      <a href="https://narrowhighway.com/seal/607f7997c59067ae6fe116edc722f86cdd27f016ba8b21e009de0cc8aa2cab45">∂²t</a> ·
+      <a href="https://narrowhighway.com/seal/5d846a6bdb45743bd98e771b48842b4a0ece6a1bd50f50f48a70d05bdb54802f">∂²x</a></p>
+  </div>
+  <div class="rung v">
+    <h3>The invariant survives the change of point of view</h3>
+    <p>Under a boost, position and time change — but the interval does not: <span class="m">(t−βx)² − (x−βt)² = (1−β²)(t²−x²)</span>. Multiply by γ² and it is the invariance of the spacetime interval. The measure is relative; the invariant is not.</p>
+    <p class="seal dim">seal: <a href="https://narrowhighway.com/seal/794bc17d1d2893bc02f64d28a44ebd4c7fdef4b3369d14530aa70de4c3d77501">794bc17…</a></p>
+  </div>
+  <div class="rung v">
+    <h3>The inverse-square is the fingerprint of 3-space</h3>
+    <p>Double the radius, quadruple the sphere, quarter the intensity: <span class="m">4π(2r)² = 4·(4πr²)</span>. The 1/r² law is space telling you its own dimension — which is why gravity and electricity share the same equation.</p>
+    <p class="seal dim">seal: <a href="https://narrowhighway.com/seal/1bd3a5bf2519accc65e02e2505c37088788e3c8d331466d2b00b43feb334fd6f">1bd3a5b…</a></p>
+  </div>
+  <div class="rung v">
+    <h3>Trace a point by shooting tracers</h3>
+    <p>Three tracer lines, their coefficient determinant zero, meet at exactly one point. You locate a point by the convergence of what points to it — never by touching it.</p>
+    <p class="seal dim">seal: <a href="https://narrowhighway.com/seal/c5e6c269b111fd285b53f95def724498ad86cf8c893eba97581c75a0576191c4">c5e6c26…</a></p>
+  </div>
+  <div class="rung x">
+    <h3><span class="tag">The refusals — proof includes what it rejects</span></h3>
+    <p>Two "clean" identities were fed to the engine; it caught the removable singularities its builder had glossed and sealed the <strong>BROKEN</strong> verdicts. A machine that refuses its own author's errors is the whole reason the "holds" mean anything.</p>
+    <p class="seal dim">refused:
+      <a href="https://narrowhighway.com/seal/b80c713373f0172940fcbf41c4cc12ccf0f4704d87dfcc7e7a1bd93deec1e34d">b80c713…</a> ·
+      <a href="https://narrowhighway.com/seal/fdcce91ec83a693d55a7552026ac4e497a42cdbcd565e018c35610d376794ab0">fdcce91…</a></p>
+  </div>
+
+  <h2><span data-nhkind="signpost"></span> &nbsp;Signposts — not proof</h2>
+  <p class="sub">Real structural rhymes between the physics and the older text. They point; they do not prove. Attributed, and held loosely.</p>
+  <div class="rung s"><h3>Two are one → the join is reserved</h3><p>E and B are one field seen from two frames; the two curl equations are one wave. The pattern of two-that-are-one, whose union is reserved to a higher vantage. (John 1; the two trees over one Logos.)</p></div>
+  <div class="rung s"><h3>Remove distance → communion, not collapse</h3><p>Crush distinct things to zero and you get a singularity; unite them coherently and you get one that stays two — a laser, a marriage, <em>perichoresis</em> (John 17:21; Genesis 2:24).</p></div>
+  <div class="rung s"><h3>Scale → point of view → measure; the Invariant is reserved</h3><p>Every measure is a projection from a vantage a scale selects; what stays the same across all of them is real — "the Father of lights, with whom is no shadow of turning" (James 1:17; Hebrews 13:8).</p></div>
+  <div class="rung s"><h3>One realm — layered, not flat</h3><p>Invariant → Trinity → tribes → nations → realm: a holarchy, each whole nested in the next. Union preserves distinction (Revelation 21:24–26); flattening it is Babel, not the Kingdom.</p></div>
+  <div class="rung s"><h3>The antenna — reception is being tuned</h3><p>The signal fills everything; whether you receive depends on resonance — the open path, the good soil, "ears to hear" (Psalm 19:1–4; Romans 10:18).</p></div>
+
+  <h2>Open — here be dragons</h2>
+  <p class="sub">Where the map honestly stops. Naming the frontier is part of the proof.</p>
+  <div class="rung"><p><strong>Gravity + electromagnetism</strong> — not unified; the great open problem (Kaluza–Klein unites them one dimension up in mathematics only).</p></div>
+  <div class="rung"><p><strong>Navier–Stokes blow-up</strong> — whether smooth flow can concentrate into a singular point in finite time is an unsolved Millennium Problem.</p></div>
+  <div class="rung"><p><strong>The cosmological constant</strong> — summed zero-point energy overshoots the observed vacuum energy by ~10¹²⁰. The worst prediction in physics.</p></div>
+  <div class="rung"><p><strong>Magnetic monopoles</strong> — none found; the one asymmetry keeping Maxwell's duality from being perfect.</p></div>
+
+  <h2>The axiom — received, not proven</h2>
+  <div class="note">
+    <p>The field collapses to one equation, but the source <span class="mono">J</span> stays on the other side — the point every tracer converges on and none can reach. Everything above rests on a ground it cannot seal from within: no system proves its own foundation (Gödel). The summit — <em>"He is Invariant"</em> — is therefore marked <strong>axiom, not lemma.</strong> The right name for holding it is faith, and the wonder is that the Invariant crossed the distance Himself: <em>"the Word became flesh"</em> (John 1:14).</p>
+  </div>
+
+  <h2>What we refused</h2>
+  <div class="note"><p>No <strong>free energy</strong> from the vacuum floor (thermodynamics holds). No <strong>god-of-the-gaps</strong> — an open problem is not a proof, and if physics closes it tomorrow the map is only fuller. No <strong>numerology</strong> — a pattern is noticed, never forced into doctrine. No <strong>pantheism</strong> — He fills and upholds the field; He is not the field. The engine finds, verifies, cites, and points; it does not generate the answer.</p></div>
+
+  <footer class="site"><p>Every seal here re-checks without trusting us — re-run <span class="mono">python tools/check.py</span>, or re-fetch any hash. The math is ours to show; the Source is not ours to seal. <a href="/guarantees.html">What we prove, and what we don't →</a></p></footer>
+</main>
+<script src="/kinds.js"></script>
+</body>
+</html>
