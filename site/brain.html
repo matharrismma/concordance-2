@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Visual Brain — the map of the keeping — Narrow Highway</title>
+<meta name="description" content="A living map of the keeping: cards as nodes, the sealed connections between them as edges. Search a node, then grow the graph by touching it. A lens on the concordance, not the source — every node opens to its real card.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --mid:#c9b06a; --serif:Georgia,"Palatino Linotype",Palatino,serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0;height:100%}
+  body{background:radial-gradient(60% 40% at 50% -8%, rgba(201,162,74,.10), rgba(201,162,74,0) 70%), var(--void);
+    color:var(--ink); font:16px/1.6 var(--serif); -webkit-font-smoothing:antialiased; display:flex; flex-direction:column; height:100vh}
+  a{color:var(--gold);text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line); flex:0 0 auto}
+  header .bar{max-width:1100px;margin:0 auto;padding:.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem}
+  .brand{letter-spacing:.2em;text-transform:uppercase;font-size:.9rem} .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim);margin-left:1rem;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase}
+  .controls{max-width:1100px;margin:0 auto;width:100%;padding:.6rem 1.2rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;flex:0 0 auto}
+  .controls input{background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--ink);
+    font:inherit;padding:.45rem .7rem;border-radius:3px;min-width:16rem;flex:1 1 16rem}
+  .controls button{background:transparent;border:1px solid var(--line);color:var(--gold);font:inherit;
+    padding:.45rem .8rem;border-radius:3px;cursor:pointer;letter-spacing:.04em}
+  .controls button:hover{border-color:var(--gold)}
+  .controls .meta{color:var(--dim);font-size:.8rem;margin-left:auto}
+  .stage{flex:1 1 auto;position:relative;overflow:hidden}
+  svg{width:100%;height:100%;display:block;cursor:grab}
+  .edge{stroke:rgba(201,162,74,.22);stroke-width:1}
+  .node circle{stroke:var(--void);stroke-width:1.5;cursor:pointer}
+  .node text{fill:var(--ink);font-size:11px;pointer-events:none;paint-order:stroke;stroke:var(--void);stroke-width:3px}
+  .panel{position:absolute;top:10px;right:10px;width:min(320px,72vw);background:rgba(10,11,16,.92);
+    border:1px solid var(--line);border-radius:4px;padding:.9rem 1rem;font-size:.9rem;display:none}
+  .panel h3{font-weight:400;margin:.1rem 0 .3rem;font-size:1.05rem} .panel .sh{color:var(--gold);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase}
+  .panel p{color:var(--dim);margin:.4rem 0} .panel a{font-size:.85rem}
+  .note{max-width:1100px;margin:0 auto;width:100%;padding:.3rem 1.2rem .7rem;color:var(--dim);font-size:.78rem;flex:0 0 auto}
+  .legend{display:inline-flex;gap:.8rem;flex-wrap:wrap;margin-left:.4rem}
+  .legend b{font-weight:400} .dot{display:inline-block;width:.6rem;height:.6rem;border-radius:50%;vertical-align:baseline;margin-right:.25rem}
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow <span class="road">Highway</span></a>
+  <nav class="site"><a href="/ask.html">Ask</a><a href="/bible.html">Bible</a><a href="/library.html">Library</a><a href="/collapse.html">Collapse</a><a href="/seal.html">Seal</a></nav>
+</div></header>
+
+<div class="controls">
+  <input id="q" placeholder="Search a card to begin — e.g. true vine, Melchizedek, John 15" autocomplete="off">
+  <button id="go">Focus</button>
+  <button id="reset">Reset</button>
+  <span class="meta" id="meta">—</span>
+</div>
+
+<div class="stage">
+  <svg id="svg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"><g id="edges"></g><g id="nodes"></g></svg>
+  <div class="panel" id="panel"></div>
+</div>
+
+<div class="note">
+  A map of the keeping — cards as nodes, the <em>sealed</em> connections between them as edges. Click a node to
+  <strong>grow</strong> the graph outward; click again to open its card. A lens on the concordance, not its source — the
+  wisdom is in the Word and the cards, never in the picture.
+  <span class="legend" id="legend"></span>
+</div>
+
+<script>
+(function(){
+  var SVG=document.getElementById('svg'), EDG=document.getElementById('edges'), NOD=document.getElementById('nodes');
+  var PANEL=document.getElementById('panel'), META=document.getElementById('meta');
+  var W=1000,H=700,CAP=70;
+  var nodes=[], links=[], byId={}, order=[];
+  var SHELF={connections:'#8f8a7c',dictionary:'#c9a24a',codex:'#d8c07a',classics:'#a98a3f',
+             patristics:'#8bbf8f',hymns:'#c98a8a',domains:'#c9b06a',maker:'#7fa8c9',atlas:'#e9e3d4'};
+  function color(s){return SHELF[s]||'#9a8f6a';}
+  function esc(x){var d=document.createElement('div');d.textContent=String(x==null?'':x);return d.innerHTML;}
+
+  // legend
+  (function(){var L=document.getElementById('legend');
+    ['codex','dictionary','classics','connections','patristics'].forEach(function(s){
+      L.innerHTML+='<b><span class="dot" style="background:'+color(s)+'"></span>'+s+'</b>';});})();
+
+  async function jget(u){ try{ var r=await fetch(u); if(!r.ok) return null; return await r.json(); }catch(e){ return null; } }
+
+  function addNode(id,title,shelf,near){
+    if(byId[id]) return byId[id];
+    var n={id:id,title:title||id,shelf:shelf||'',
+      x:(near?near.x:W/2)+(Math.random()*80-40), y:(near?near.y:H/2)+(Math.random()*80-40),
+      vx:0,vy:0,focus:false};
+    nodes.push(n); byId[id]=n; order.push(id); prune(); return n;
+  }
+  function addLink(a,b,rel){
+    if(!byId[a]||!byId[b]||a===b) return;
+    for(var i=0;i<links.length;i++){ var l=links[i]; if((l.a===a&&l.b===b)||(l.a===b&&l.b===a)) return; }
+    links.push({a:a,b:b,rel:rel||''});
+  }
+  function prune(){
+    while(nodes.length>CAP){
+      var rid=null;
+      for(var i=0;i<order.length;i++){ if(!byId[order[i]]) {order.splice(i,1);i--;continue;} if(!byId[order[i]].focus){rid=order[i];break;} }
+      if(!rid) break;
+      nodes=nodes.filter(function(n){return n.id!==rid;});
+      links=links.filter(function(l){return l.a!==rid&&l.b!==rid;});
+      delete byId[rid]; order=order.filter(function(x){return x!==rid;});
+    }
+  }
+
+  var busy=false;
+  async function expand(id){
+    if(busy) return; busy=true; META.textContent='…';
+    var parent=byId[id];
+    var c=await jget('/card?id='+encodeURIComponent(id));
+    var conns=(c&&c.connections)||[];
+    if(!conns.length){ var cc=await jget('/card/connections?id='+encodeURIComponent(id)); conns=(cc&&cc.links)||[]; }
+    for(var i=0;i<conns.length && i<14;i++){
+      var nid=conns[i].to_card_id; if(!nid||byId[nid]){ if(byId[nid]) addLink(id,nid,conns[i].relationship); continue; }
+      var nc=await jget('/card?id='+encodeURIComponent(nid));
+      if(!nc) continue;
+      addNode(nid,nc.title,nc.shelf,parent); addLink(id,nid,conns[i].relationship);
+    }
+    if(byId[id]) byId[id].expanded=true;
+    busy=false; render(); META.textContent=nodes.length+' nodes · '+links.length+' links';
+  }
+
+  async function focusOn(id,title,shelf){
+    var n=addNode(id,title,shelf); nodes.forEach(function(x){x.focus=false;}); n.focus=true; n.x=W/2; n.y=H/2;
+    render(); await expand(id); showPanel(id);
+  }
+  async function search(q){
+    if(!q) return; META.textContent='searching…';
+    var r=await jget('/search?q='+encodeURIComponent(q)+'&limit=1');
+    if(r&&r.results&&r.results.length){ var s=r.results[0]; reset(true); await focusOn(s.id,s.title,s.shelf); }
+    else META.textContent='no card found';
+  }
+  function reset(quiet){ nodes=[];links=[];byId={};order=[];render(); if(!quiet)META.textContent='—'; PANEL.style.display='none'; }
+
+  async function showPanel(id){
+    var c=await jget('/card?id='+encodeURIComponent(id)); if(!c) return;
+    PANEL.style.display='block';
+    PANEL.innerHTML='<div class="sh">'+esc(c.shelf||'')+'</div><h3>'+esc(c.title||id)+'</h3>'+
+      '<p>'+esc((c.body||c.snippet||'').slice(0,240))+(c.body&&c.body.length>240?'…':'')+'</p>'+
+      '<a href="/card.html?id='+encodeURIComponent(id)+'" target="_blank">open full card →</a>';
+  }
+
+  // --- tiny force simulation (dependency-free) ---
+  var alpha=1;
+  function tick(){
+    var i,j,a,b,dx,dy,d,f;
+    for(i=0;i<nodes.length;i++){ a=nodes[i];
+      for(j=i+1;j<nodes.length;j++){ b=nodes[j];
+        dx=a.x-b.x; dy=a.y-b.y; d=Math.sqrt(dx*dx+dy*dy)||0.01;
+        f=2600/(d*d); var ux=dx/d, uy=dy/d;
+        a.vx+=ux*f; a.vy+=uy*f; b.vx-=ux*f; b.vy-=uy*f;
+      }
+      // centering
+      a.vx+=(W/2-a.x)*0.006; a.vy+=(H/2-a.y)*0.006;
+    }
+    for(i=0;i<links.length;i++){ var l=links[i]; a=byId[l.a]; b=byId[l.b]; if(!a||!b) continue;
+      dx=b.x-a.x; dy=b.y-a.y; d=Math.sqrt(dx*dx+dy*dy)||0.01; f=(d-90)*0.02;
+      var vx=dx/d*f, vy=dy/d*f; a.vx+=vx; a.vy+=vy; b.vx-=vx; b.vy-=vy;
+    }
+    for(i=0;i<nodes.length;i++){ a=nodes[i]; if(a===drag) continue;
+      a.vx*=0.86; a.vy*=0.86; a.x+=a.vx*alpha; a.y+=a.vy*alpha;
+      a.x=Math.max(20,Math.min(W-20,a.x)); a.y=Math.max(20,Math.min(H-20,a.y));
+    }
+    paint();
+  }
+  function paint(){
+    var e='';
+    for(var i=0;i<links.length;i++){ var l=links[i],a=byId[l.a],b=byId[l.b]; if(!a||!b)continue;
+      e+='<line class="edge" x1="'+a.x.toFixed(1)+'" y1="'+a.y.toFixed(1)+'" x2="'+b.x.toFixed(1)+'" y2="'+b.y.toFixed(1)+'"/>';}
+    EDG.innerHTML=e;
+    var s='';
+    for(var k=0;k<nodes.length;k++){ var n=nodes[k]; var r=n.focus?9:(n.expanded?6:5);
+      var t=(n.title||'').length>26?(n.title.slice(0,25)+'…'):n.title;
+      s+='<g class="node" data-id="'+esc(n.id)+'">'+
+         '<circle cx="'+n.x.toFixed(1)+'" cy="'+n.y.toFixed(1)+'" r="'+r+'" fill="'+color(n.shelf)+'" '+
+         (n.focus?'stroke="#c9a24a" stroke-width="2"':'')+'/>'+
+         '<text x="'+(n.x+r+3).toFixed(1)+'" y="'+(n.y+4).toFixed(1)+'">'+esc(t)+'</text></g>';
+    }
+    NOD.innerHTML=s;
+  }
+  function loop(){ tick(); requestAnimationFrame(loop); }
+  function render(){ alpha=1; }
+
+  // interaction: click node = expand (first click) then open panel; drag to move
+  var drag=null, dragMoved=false, pt=SVG.createSVGPoint();
+  function svgXY(ev){ pt.x=ev.clientX; pt.y=ev.clientY; var m=SVG.getScreenCTM().inverse(); var p=pt.matrixTransform(m); return {x:p.x,y:p.y}; }
+  function nodeAt(ev){ var g=ev.target.closest('.node'); return g?byId[g.getAttribute('data-id')]:null; }
+  SVG.addEventListener('mousedown',function(ev){ var n=nodeAt(ev); if(n){ drag=n; dragMoved=false; SVG.style.cursor='grabbing'; } });
+  SVG.addEventListener('mousemove',function(ev){ if(!drag)return; var p=svgXY(ev); drag.x=p.x; drag.y=p.y; drag.vx=0; drag.vy=0; dragMoved=true; alpha=1; });
+  window.addEventListener('mouseup',function(ev){
+    if(drag && !dragMoved){ var n=drag; if(!n.expanded){ expand(n.id); showPanel(n.id); } else showPanel(n.id); }
+    drag=null; SVG.style.cursor='grab';
+  });
+
+  document.getElementById('go').onclick=function(){ search(document.getElementById('q').value.trim()); };
+  document.getElementById('reset').onclick=function(){ reset(false); };
+  document.getElementById('q').addEventListener('keydown',function(e){ if(e.key==='Enter') search(this.value.trim()); });
+
+  loop();
+  // initial focus: ?id= or ?q= or a default seed
+  var p=new URLSearchParams(location.search);
+  if(p.get('id')) focusOn(p.get('id'));
+  else search(p.get('q') || 'vine');
+})();
+</script>
+</body>
+</html>
