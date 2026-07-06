@@ -234,8 +234,18 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             f"<section class=card>{source_html}"
             f"<div class=muted style=\"font-size:.8rem;margin-top:.5rem\">card id</div>"
             f"<div class=mono style=\"word-break:break-all\">{_esc(card_id)}</div>{related}</section>"
+            # Local connection-graph — progressive enhancement (hidden until JS finds a real
+            # neighborhood, so the crawlable page stands alone). Each edge links to its seal.
+            f"<section class=card id=nhconn data-cid=\"{_esc(card_id)}\" style=\"margin-top:1rem;display:none\">"
+            f"<div class=muted style=\"font-size:.8rem\">connections</div>"
+            f"<canvas id=nhlg style=\"width:100%;height:320px;display:block;margin:.4rem 0\"></canvas>"
+            f"<p class=muted id=nhlg-cap style=\"font-size:.75rem\"></p></section>"
             f"<footer class=site><p>A record from the keeping — found and cited, never generated. "
-            f"<a href=/search>Search the keeping →</a></p></footer></main></body></html>")
+            f"<a href=/search>Search the keeping →</a></p></footer></main>"
+            f"<script src=/graph.js defer></script>"
+            f"<script>addEventListener('load',function(){{var s=document.getElementById('nhconn');"
+            f"if(window.NHGraph&&s)NHGraph.local('nhconn','nhlg',s.getAttribute('data-cid'));}});</script>"
+            f"</body></html>")
     return 200, html
 
 
@@ -529,6 +539,26 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _err(400, "id required")
         r = corpus.connections(cid)
         return _ok(r) if r is not None else _err(404, "card not found")
+
+    # The map — the connection-graph over the keeping (found edges, each sealed). Public on
+    # both surfaces (one shared library). scope=overview (default) | shelf | card.
+    if method == "GET" and path == "/graph":
+        from .. import graph as _graph
+        scope = (query.get("scope") or "overview").strip()
+        if scope == "overview":
+            return _ok(_graph.overview())
+        if scope == "shelf":
+            sh = (query.get("shelf") or "").strip()
+            if not sh:
+                return _err(400, "shelf required")
+            return _ok(_graph.shelf_graph(sh))
+        if scope == "card":
+            cid = (query.get("id") or "").strip()
+            if not cid:
+                return _err(400, "id required")
+            r = _graph.neighborhood(cid)
+            return _ok(r) if r is not None else _err(404, "card not found")
+        return _err(400, "unknown scope")
     if method == "GET" and path == "/locate":
         return _ok(corpus.locate(query.get("q") or ""))
     if method == "GET" and path == "/library/health":
@@ -812,7 +842,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
 _API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word_study",
                   "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
-                  "/card/connections", "/locate", "/library/health",
+                  "/card/connections", "/graph", "/locate", "/library/health",
                   "/thread", "/threads", "/threads/search", "/thread/verify", "/passage",
                   "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
                   "/commentary", "/journal", "/journal/dates", "/steward", "/tsk",
