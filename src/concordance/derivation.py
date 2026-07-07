@@ -14,6 +14,7 @@ from __future__ import annotations
 import concurrent.futures as _futures
 import json
 import os
+import threading as _threading
 from typing import Any, Dict, List
 
 from .verifiers import mathematics as _math
@@ -26,14 +27,32 @@ _MAX_SPEC_CHARS = int(os.environ.get("CONCORDANCE_MAX_EXPR_CHARS", "4000") or 40
 _VERIFY_TIMEOUT_S = float(os.environ.get("CONCORDANCE_VERIFY_TIMEOUT_S", "8") or 8)
 
 
+# Bounded, PROCESS-WIDE verify pool: at most _MAX_WORKERS sympy workers run at once. A
+# timed-out worker is not killable (sympy is C-bound), so it keeps its slot until it finishes
+# — which IS the bound: under a many-IP flood, excess verifications get an immediate "busy"
+# ERROR (never HOLDS) instead of piling up unkillable threads that pin every core.
+_MAX_WORKERS = max(1, int(os.environ.get("CONCORDANCE_VERIFY_WORKERS", "4") or 4))
+_POOL = _futures.ThreadPoolExecutor(max_workers=_MAX_WORKERS, thread_name_prefix="verify")
+_SLOTS = _threading.BoundedSemaphore(_MAX_WORKERS)
+
+
+class _Saturated(Exception):
+    """All verify slots are busy — shed load rather than queue unbounded work."""
+
+
 def _call_with_timeout(fn, arg):
-    """Run a verifier with a hard wall-clock bound. The worker is not killable (sympy is
-    C-bound), but result() returns control on timeout so the request never hangs."""
-    ex = _futures.ThreadPoolExecutor(max_workers=1)
-    try:
-        return ex.submit(fn, arg).result(timeout=_VERIFY_TIMEOUT_S)
-    finally:
-        ex.shutdown(wait=False)
+    """Run a verifier with a hard wall-clock bound on a bounded shared pool. result() returns
+    control on timeout so the request never hangs; the worker releases its slot when it ends."""
+    if not _SLOTS.acquire(blocking=False):
+        raise _Saturated()
+
+    def _run():
+        try:
+            return fn(arg)
+        finally:
+            _SLOTS.release()
+
+    return _POOL.submit(_run).result(timeout=_VERIFY_TIMEOUT_S)
 
 # math mode -> verifier function. params (the spec body) is passed straight in.
 _MATH_MODES = {
@@ -56,9 +75,11 @@ def verify_math(spec: Dict[str, Any]) -> Dict[str, str]:
     if len(json.dumps(params, default=str)) > _MAX_SPEC_CHARS:  # DoS guard, before sympy
         return {"status": "ERROR", "detail": f"expression too large (> {_MAX_SPEC_CHARS} chars)"}
     try:
-        res = _call_with_timeout(fn, params)  # a VerifierResult, time-bounded
+        res = _call_with_timeout(fn, params)  # a VerifierResult, time- and pool-bounded
     except _futures.TimeoutError:
         return {"status": "ERROR", "detail": f"verification timed out (> {_VERIFY_TIMEOUT_S}s)"}
+    except _Saturated:
+        return {"status": "ERROR", "detail": "verifier busy (too many concurrent verifications) — retry shortly"}
     return {"status": res.status, "detail": (res.detail or "")[:300]}
 
 
