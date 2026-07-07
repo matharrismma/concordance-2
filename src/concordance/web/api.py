@@ -879,16 +879,86 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     return _err(404, "not found")
 
 
-_API_GET_PATHS = {"/health", "/identity", "/search", "/seal", "/resolve", "/word_study",
-                  "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
-                  "/card/connections", "/graph", "/locate", "/library/health",
-                  "/thread", "/threads", "/threads/search", "/thread/verify", "/passage",
-                  "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
-                  "/commentary", "/journal", "/journal/dates", "/steward", "/tsk",
-                  "/character", "/characters", "/prophecy",
-                  "/coach/subjects", "/coach/overview", "/coach/unit", "/coach/next", "/coach/recommend", "/coach/guidance",
-                  "/identity/fingerprint", "/identity/describe", "/badges", "/study", "/card.html",
-                  "/groups", "/group", "/seeds"}
+# ── Route registry — ONE declaration per route ───────────────────────────
+# Each entry carries a route's methods + metadata: api = a JSON/API GET that must be served
+# even when the static site is mounted (else it would fall through to the site handler);
+# rl = rate-limited; serve = handled in the serve() Handler rather than dispatch() (e.g. the
+# streamed /speak, the site-or-json /card.html). The two sets the server actually consults
+# (_API_GET_PATHS, RATELIMITED) are DERIVED below, so a route's metadata lives in exactly one
+# place. tests/test_routes.py locks the derivation to the historical values AND asserts every
+# path dispatch() handles is registered here — so the two can never silently drift apart.
+ROUTES = [
+    {"path": "/", "methods": ("GET",)},
+    {"path": "/health", "methods": ("GET",), "api": True},
+    {"path": "/identity", "methods": ("GET",), "api": True},
+    {"path": "/verify", "methods": ("POST",), "rl": True},
+    {"path": "/derivation/verify", "methods": ("POST",), "rl": True},
+    {"path": "/ask", "methods": ("POST",), "rl": True},
+    {"path": "/journal", "methods": ("GET", "POST"), "api": True},
+    {"path": "/steward/budget", "methods": ("POST",)},
+    {"path": "/steward/cost-destroyed", "methods": ("POST",)},
+    {"path": "/steward/ask", "methods": ("POST",)},
+    {"path": "/groups", "methods": ("GET", "POST"), "api": True, "rl": True},
+    {"path": "/group", "methods": ("GET",), "api": True, "rl": True},
+    {"path": "/group/join", "methods": ("POST",), "rl": True},
+    {"path": "/group/contribute", "methods": ("POST",), "rl": True},
+    {"path": "/coach/mastery", "methods": ("POST",), "rl": True},
+    {"path": "/identity/create", "methods": ("POST",), "rl": True},
+    {"path": "/identity/verify", "methods": ("POST",), "rl": True},
+    {"path": "/badges", "methods": ("GET", "POST"), "api": True, "rl": True},
+    {"path": "/self-attest", "methods": ("POST",)},
+    {"path": "/study", "methods": ("GET", "POST"), "api": True, "rl": True},
+    {"path": "/study/export", "methods": ("POST",), "rl": True},
+    {"path": "/study/import", "methods": ("POST",), "rl": True},
+    {"path": "/mcp", "methods": ("POST",), "rl": True},
+    {"path": "/search", "methods": ("GET",), "api": True, "rl": True},
+    {"path": "/cards/stats", "methods": ("GET",), "api": True},
+    {"path": "/cards", "methods": ("GET",), "api": True},
+    {"path": "/card", "methods": ("GET",), "api": True},
+    {"path": "/daily", "methods": ("GET",), "api": True},
+    {"path": "/card/connections", "methods": ("GET",), "api": True},
+    {"path": "/graph", "methods": ("GET",), "api": True},
+    {"path": "/locate", "methods": ("GET",), "api": True},
+    {"path": "/library/health", "methods": ("GET",), "api": True},
+    {"path": "/pronounce", "methods": ("GET",), "api": True},
+    {"path": "/thread", "methods": ("DELETE", "GET"), "api": True},
+    {"path": "/threads", "methods": ("GET",), "api": True, "rl": True},
+    {"path": "/threads/search", "methods": ("GET",), "api": True, "rl": True},
+    {"path": "/thread/verify", "methods": ("GET",), "api": True},
+    {"path": "/journal/dates", "methods": ("GET",), "api": True},
+    {"path": "/steward", "methods": ("GET",), "api": True},
+    {"path": "/coach/subjects", "methods": ("GET",), "api": True},
+    {"path": "/coach/overview", "methods": ("GET",), "api": True},
+    {"path": "/coach/unit", "methods": ("GET",), "api": True},
+    {"path": "/coach/next", "methods": ("GET",), "api": True},
+    {"path": "/coach/recommend", "methods": ("GET",), "api": True},
+    {"path": "/coach/guidance", "methods": ("GET",), "api": True},
+    {"path": "/identity/fingerprint", "methods": ("GET",), "api": True},
+    {"path": "/identity/describe", "methods": ("GET",), "api": True},
+    {"path": "/grid", "methods": ("GET",), "api": True},
+    {"path": "/grid/dimension", "methods": ("GET",), "api": True},
+    {"path": "/seal", "methods": ("GET",), "api": True},
+    {"path": "/resolve", "methods": ("GET",), "api": True},
+    {"path": "/passage", "methods": ("GET",), "api": True},
+    {"path": "/word_study", "methods": ("GET",), "api": True},
+    {"path": "/cross_refs", "methods": ("GET",), "api": True},
+    {"path": "/word_occurrences", "methods": ("GET",), "api": True},
+    {"path": "/original", "methods": ("GET",), "api": True},
+    {"path": "/canon", "methods": ("GET",), "api": True},
+    {"path": "/commentary", "methods": ("GET",), "api": True},
+    {"path": "/tsk", "methods": ("GET",), "api": True},
+    {"path": "/character", "methods": ("GET",), "api": True},
+    {"path": "/characters", "methods": ("GET",), "api": True},
+    {"path": "/prophecy", "methods": ("GET",), "api": True},
+    {"path": "/seeds", "methods": ("GET",), "api": True},
+    {"path": "/card.html", "methods": ("GET",), "api": True, "serve": True},
+    {"path": "/speak", "methods": ("POST",), "rl": True, "serve": True},
+]
+
+# The JSON/API GET paths (served even with a static site mounted) — DERIVED from ROUTES.
+_API_GET_PATHS = frozenset(r["path"] for r in ROUTES if r.get("api"))
+# The rate-limited paths (consulted in serve()) — DERIVED from ROUTES.
+RATELIMITED = tuple(r["path"] for r in ROUTES if r.get("rl"))
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
@@ -914,11 +984,7 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
     site = Path(site_dir).resolve() if site_dir else None
     limiter = ratelimit.from_env()
     MAX_BODY = int(os.environ.get("CONCORDANCE_MAX_BODY", str(256 * 1024)) or 256 * 1024)
-    RATELIMITED = ("/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak",
-                   "/threads", "/threads/search",
-                   "/coach/mastery", "/identity/create", "/identity/verify", "/badges",
-                   "/study", "/study/export", "/study/import",
-                   "/groups", "/group", "/group/join", "/group/contribute")
+    # RATELIMITED is derived from the ROUTES registry (module-level) — single source of truth.
 
     class Handler(BaseHTTPRequestHandler):
         # Don't advertise the exact Python/http.server version (aids targeted attacks).
