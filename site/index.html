@@ -179,7 +179,7 @@ if (_mlBtn) _mlBtn.addEventListener('click', async () => {
   _mlBtn.disabled = true;
   try {
     mlGuard = await RampartML.load(m => { _mlSt.textContent = m; });
-    _mlSt.textContent = '✓ name detection on — ' + (RampartML.path() === 'self-hosted' ? 'self-hosted (sovereign)' : 'CDN fallback');
+    _mlSt.textContent = '✓ name detection on — self-hosted (sovereign)';
     _mlSt.style.color = 'var(--pass)';
     _mlBtn.style.display = 'none';
     redactDemo();

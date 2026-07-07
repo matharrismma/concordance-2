@@ -3,15 +3,14 @@
 //
 // The sovereign deterministic baseline (redact.js, window.Rampart) is ALWAYS on, same-origin,
 // offline. This layer adds the National Design Studio's Rampart model (CC BY 4.0, ~15 MB int8
-// ONNX). It tries the FULLY SELF-HOSTED path first (model + transformers.js runtime + ONNX
-// WASM all served from this origin — no CDN, no Hugging Face), and only falls back to a pinned
-// CDN if that fails, so this can improve sovereignty but never regress the feature. The guard
-// runs entirely on-device either way. `RampartML.path()` reports which path loaded.
+// ONNX), served FULLY SELF-HOSTED (model + transformers.js runtime + ONNX WASM all from this
+// origin — no CDN, no Hugging Face). If the vendored assets are absent, this layer simply fails
+// and the UI stays on the always-on deterministic baseline — it NEVER reaches out to a CDN.
+// The guard runs entirely on-device. `RampartML.path()` reports which path loaded.
 //
 // Self-hosting requires an import map in the page resolving "@huggingface/transformers" to the
 // vendored runtime (see index.html). Assets are produced by tools/vendor_rampart.sh.
 (function (global) {
-  var CDN = "https://cdn.jsdelivr.net/npm/@nationaldesignstudio/rampart@0.1.3/+esm";
   var guardPromise = null;
   var loadedPath = null;
 
@@ -29,24 +28,11 @@
     return guard;
   }
 
-  async function viaCdn(onStatus) {
-    if (onStatus) onStatus("loading Rampart (CDN fallback)…");
-    var mod = await import(CDN);
-    var guard = await mod.createGuard();
-    loadedPath = "cdn";
-    return guard;
-  }
-
   function load(onStatus) {
+    // Self-hosted ONLY. On failure we reject so the caller degrades to the deterministic
+    // baseline (always on) — we NEVER fall back to a CDN. Nulling the promise allows retry.
     if (!guardPromise) {
-      guardPromise = (async function () {
-        try {
-          return await selfHosted(onStatus);
-        } catch (e) {
-          console.warn("Rampart self-hosted load failed; falling back to CDN:", e);
-          return await viaCdn(onStatus);
-        }
-      })().catch(function (e) { guardPromise = null; throw e; });  // allow retry
+      guardPromise = selfHosted(onStatus).catch(function (e) { guardPromise = null; throw e; });
     }
     return guardPromise;
   }
