@@ -17,7 +17,12 @@
     'padding:.12rem .5rem;text-decoration:none;line-height:1.5;white-space:nowrap}' +
     '.nhk:hover{text-decoration:none;border-color:var(--gold,#c9a24a)}' +
     '.nhk-v{color:var(--pass,#8bbf8f)} .nhk-c{color:var(--goldsoft,#a98a3f)}' +
-    '.nhk-s{color:var(--mid,#c9b06a)} .nhk-y{color:var(--dim,#8f8a7c)}';
+    '.nhk-s{color:var(--mid,#c9b06a)} .nhk-y{color:var(--dim,#8f8a7c)}' +
+    // Visible keyboard focus everywhere this script loads (the dark inline-styled pages don't
+    // link styles.css). WCAG 2.4.7 — a keyboard/low-vision user can see where they are.
+    ':focus-visible{outline:2px solid var(--gold,#c9a24a);outline-offset:2px}' +
+    'input:focus,textarea:focus,select:focus{border-color:var(--gold,#c9a24a);' +
+    'box-shadow:0 0 0 2px rgba(201,162,74,.35)}';
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
   var K = {
     verified:  { s: '✓', l: 'Verified · sealed', c: 'v' },

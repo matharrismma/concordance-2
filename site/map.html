@@ -29,6 +29,8 @@
   .controls input{background:var(--panel); border:1px solid var(--line); color:var(--ink); font:inherit;
     font-size:.95rem; padding:.5rem .8rem; border-radius:3px; min-width:15rem; flex:1}
   .controls input::placeholder{color:var(--dim)}
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+  .controls input:focus{border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,162,74,.35)}
   .btn{background:transparent; border:1px solid var(--line); color:var(--gold); font:inherit; font-size:.8rem;
     letter-spacing:.08em; text-transform:uppercase; padding:.5rem .9rem; border-radius:3px; cursor:pointer}
   .btn:hover{background:var(--panel)}
