@@ -26,12 +26,18 @@ def _secular_tools() -> List[dict]:
          "description": ("Verify a claim deterministically — returns a verdict "
                          "(HOLDS / BROKEN / INCOMPLETE), the worked trail, AND a sealed receipt "
                          "{content_hash, cite_url} you can re-fetch and re-verify (seal_fetch). "
+                         "Two forms: (a) MATH — {mode, params}; (b) ANY DOMAIN — pass `steps`, a "
+                         "list of {id, domain, spec} where spec is that domain's packet (e.g. "
+                         "{domain:'physics', spec:{PHYS_VERIFY:{mass_kg, acceleration_m_per_s2, "
+                         "claimed_force_N}}}). ~60 secular domains are covered (physics, medicine, "
+                         "finance, chemistry, ...); find_verifier(keyword) locates the right one. "
                          "The engine eliminates what is not the answer; it does not generate it."),
          "inputSchema": {"type": "object", "properties": {
-             "mode": {"type": "string", "description": "equality | inequality | derivative | integral | limit | solve"},
-             "params": {"type": "object", "description": "e.g. {expr_a, expr_b, variables} for equality"},
-             "seal": {"type": "boolean", "description": "mint a re-checkable seal (default true)"}},
-             "required": ["mode", "params"]}},
+             "mode": {"type": "string", "description": "MATH form: equality | inequality | derivative | integral | limit | solve"},
+             "params": {"type": "object", "description": "MATH form: e.g. {expr_a, expr_b, variables} for equality"},
+             "steps": {"type": "array", "description": "DOMAIN form: [{id, domain, spec}] — spec is the domain's packet",
+                       "items": {"type": "object"}},
+             "seal": {"type": "boolean", "description": "mint a re-checkable seal (default true)"}}}},
         {"name": "search",
          "description": "Ranked search over the keeping (the kept library).",
          "inputSchema": {"type": "object", "properties": {

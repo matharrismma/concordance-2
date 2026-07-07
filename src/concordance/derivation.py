@@ -5,7 +5,11 @@ HOLDS / BROKEN / INCOMPLETE. The metric that matters most is the FALSE-POSITIVE 
 — it must never return HOLDS for a falsehood (including removable-singularity traps
 like x/x == 1). The engine verifies; it does not generate the answer.
 
-A spec is `{mode, params}`; `params` is passed straight to the matching verifier.
+A math step's spec is `{mode, params}`; a non-math step's spec is the domain PACKET
+(the artifact keys the domain verifier reads, e.g. {"PHYS_VERIFY": {...}}). Math routes
+to the sympy verifiers; every other domain routes to its deterministic fleet verifier via
+run_for_domain — on the SECULAR surface only, so the witness verifiers (theology /
+scripture / witness — signposts, CONCORDANT-never-HOLDS) can never mint a HOLDS seal here.
 Ported from 1.0 api/derivation.py (verify_step/verify_derivation), routed directly to
 the 2.0 verifiers (no agent_manifest indirection).
 """
@@ -17,6 +21,7 @@ import os
 import threading as _threading
 from typing import Any, Dict, List
 
+from . import verifiers as _verifiers
 from .verifiers import mathematics as _math
 
 _TERMINAL_FAIL = ("MISMATCH", "ERROR")
@@ -83,16 +88,55 @@ def verify_math(spec: Dict[str, Any]) -> Dict[str, str]:
     return {"status": res.status, "detail": (res.detail or "")[:300]}
 
 
+def _reduce_domain_results(results: List[Any]) -> Dict[str, str]:
+    """Reduce a domain's list of VerifierResult to ONE moat status. A contradiction is the
+    cardinal signal, so MISMATCH wins over ERROR wins over CONFIRMED; only an all-CONFIRMED
+    applicable set is CONFIRMED. No applicable verifier -> NOT_APPLICABLE (an honest gap, an
+    INCOMPLETE composite — never a false HOLDS). Mirrors test_fp_gate._status exactly."""
+    applicable = [r for r in results if r.applicable]
+    if not applicable:
+        return {"status": "NOT_APPLICABLE",
+                "detail": "no applicable secular verifier for this domain/artifact"}
+    mism = [r for r in applicable if r.status == "MISMATCH"]
+    if mism:
+        return {"status": "MISMATCH", "detail": "; ".join(f"{r.name}: {r.detail}" for r in mism)[:300]}
+    errs = [r for r in applicable if r.status == "ERROR"]
+    if errs:
+        return {"status": "ERROR", "detail": "; ".join(f"{r.name}: {r.detail}" for r in errs)[:300]}
+    return {"status": "CONFIRMED",
+            "detail": "; ".join(f"{r.name}: {r.detail}" for r in applicable if r.passed)[:300]}
+
+
+def verify_domain(domain: str, spec: Dict[str, Any]) -> Dict[str, str]:
+    """Route a non-math domain claim to its deterministic fleet verifier(s) via
+    run_for_domain, on the SECULAR surface only. Same DoS bounds as the math path (size guard
+    + shared bounded pool + wall-clock timeout). The FP gate proves 0 false-positives across
+    every domain this reaches, so a CONFIRMED here is as trustworthy as a math CONFIRMED."""
+    packet = spec or {}
+    if len(json.dumps(packet, default=str)) > _MAX_SPEC_CHARS:  # DoS guard, before any verifier
+        return {"status": "ERROR", "detail": f"packet too large (> {_MAX_SPEC_CHARS} chars)"}
+    try:
+        results = _call_with_timeout(
+            lambda p: _verifiers.run_for_domain(domain, p, surface="secular"), packet)
+    except _futures.TimeoutError:
+        return {"status": "ERROR", "detail": f"verification timed out (> {_VERIFY_TIMEOUT_S}s)"}
+    except _Saturated:
+        return {"status": "ERROR", "detail": "verifier busy (too many concurrent verifications) — retry shortly"}
+    return _reduce_domain_results(results)
+
+
 def verify_step(domain: str, spec: Dict[str, Any]) -> Dict[str, str]:
     """Run one step's verifier and reduce to a single status. Fail closed: a verifier
-    that raises becomes ERROR (a failed step), never a crash and never a silent pass."""
+    that raises becomes ERROR (a failed step), never a crash and never a silent pass.
+    Mathematics routes to the sympy moat; every other (secular) domain routes to its
+    deterministic fleet verifier."""
     domain = (domain or "").strip().lower()
     if not domain:
         return {"status": "ERROR", "detail": "step missing 'domain'"}
-    if domain != "mathematics":
-        return {"status": "ERROR", "detail": f"unsupported domain {domain!r} (mathematics only, for now)"}
     try:
-        return verify_math(spec or {})
+        if domain in ("mathematics", "math"):
+            return verify_math(spec or {})
+        return verify_domain(domain, spec or {})
     except Exception as exc:  # noqa: BLE001 — fail closed
         return {"status": "ERROR", "detail": f"verifier raised: {type(exc).__name__}: {str(exc)[:200]}"}
 

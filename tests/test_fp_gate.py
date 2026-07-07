@@ -1,12 +1,13 @@
 """The false-positive gate, extended beyond mathematics.
 
 The cardinal sin of a verification engine is sealing a falsehood. The moat benchmark
-proves 0 false-positives for mathematics (60 claims); this proves it for 22 more domains
+proves 0 false-positives for mathematics (60 claims); this proves it for 60 more domains
 — each with a known-TRUE packet (the verifier must CONFIRM) and a known-FALSE packet (it
 must CATCH). The aggregate false-positive count across every domain must be exactly 0.
 
 High-stakes domains are covered first (medicine, law, statistics, cryptography,
-nuclear_physics, ...). Every TRUE value was computed from the verifier's own formula and
+nuclear_physics, ...); the rest of the registry follows so coverage is the WHOLE fleet, not
+just the head. Every TRUE value was computed from the verifier's own formula and
 re-validated by running it through the same run_for_domain path the engine uses. A second
 test proves the 122 registered aliases route to the right module (same verdict via every
 alias). Runnable with pytest OR `python tests/test_fp_gate.py`.
@@ -103,6 +104,48 @@ CASES = [
     ("exercise_science",
      {"EX_VERIFY": {"age_years": 30, "claimed_max_hr": 187}},
      {"EX_VERIFY": {"age_years": 30, "claimed_max_hr": 190}}),
+    # --- The rest of the fleet: every remaining domain verifier gets a golden true/false
+    # packet so the FP gate covers the WHOLE registry, not just the high-stakes head. Each
+    # TRUE value was computed from the verifier's own formula and re-validated through
+    # run_for_domain (true -> CONFIRM, false -> CATCH, aggregate false-positives == 0).
+    ("acoustics", {"ACOUS_VERIFY": {"fundamental_hz": 110, "harmonic_n": 4, "claimed_harmonic_hz": 440}}, {"ACOUS_VERIFY": {"fundamental_hz": 110, "harmonic_n": 4, "claimed_harmonic_hz": 445}}),
+    ("agriculture", {"AG_VERIFY": {"crop": "tomato", "soil_ph": 6.5}}, {"AG_VERIFY": {"crop": "tomato", "soil_ph": 8.0}}),
+    ("architecture", {"ARCH_VERIFY": {"total_floor_area_m2": 2000, "lot_area_m2": 1000, "claimed_far": 2.0}}, {"ARCH_VERIFY": {"total_floor_area_m2": 2000, "lot_area_m2": 1000, "claimed_far": 3.0}}),
+    ("atomic", {"ATOM_VERIFY": {"shell_n": 3, "claimed_shell_capacity": 18}}, {"ATOM_VERIFY": {"shell_n": 3, "claimed_shell_capacity": 20}}),
+    ("biology", {"BIO_VERIFY": {"molarity": {"mass_g": 58.44, "mw_g_per_mol": 58.44, "volume_L": 1.0, "claimed_molarity": 1.0}}}, {"BIO_VERIFY": {"molarity": {"mass_g": 58.44, "mw_g_per_mol": 58.44, "volume_L": 1.0, "claimed_molarity": 2.0}}}),
+    ("calendar_time", {"CAL_VERIFY": {"year": 2024, "claimed_leap": True}}, {"CAL_VERIFY": {"year": 2024, "claimed_leap": False}}),
+    ("combinatorics", {"COMB_VERIFY": {"comb_n": 5, "comb_k": 2, "claimed_combinations": 10}}, {"COMB_VERIFY": {"comb_n": 5, "comb_k": 2, "claimed_combinations": 11}}),
+    ("construction", {"CONSTR_VERIFY": {"length_m": 10, "width_m": 5, "depth_m": 0.15, "claimed_concrete_m3": 7.5}}, {"CONSTR_VERIFY": {"length_m": 10, "width_m": 5, "depth_m": 0.15, "claimed_concrete_m3": 8.0}}),
+    ("cybersecurity", {"CYBER_VERIFY": {"cidr_prefix": 24, "claimed_host_count": 254}}, {"CYBER_VERIFY": {"cidr_prefix": 24, "claimed_host_count": 256}}),
+    ("document_validation", {"DOC_VERIFY": {"isbn10": "0306406152", "claimed_isbn10_valid": True}}, {"DOC_VERIFY": {"isbn10": "0306406152", "claimed_isbn10_valid": False}}),
+    ("energy", {"ENERGY_VERIFY": {"battery_wh": 1200, "load_W": 100, "claimed_runtime_hours": 12}}, {"ENERGY_VERIFY": {"battery_wh": 1200, "load_W": 100, "claimed_runtime_hours": 10}}),
+    ("ephemeris", {"EPH_VERIFY": {"year": 2024, "event": "summer_solstice", "claimed_event_iso": "2024-06-20"}}, {"EPH_VERIFY": {"year": 2024, "event": "summer_solstice", "claimed_event_iso": "2024-07-15"}}),
+    ("finance", {"FIN_VERIFY": {"assets": 1000.0, "liabilities": 600.0, "equity": 400.0}}, {"FIN_VERIFY": {"assets": 1000.0, "liabilities": 600.0, "equity": 300.0}}),
+    ("geography", {"GEO_LOC_VERIFY": {"longitude_for_utm": -85.0, "claimed_utm_zone": 16}}, {"GEO_LOC_VERIFY": {"longitude_for_utm": -85.0, "claimed_utm_zone": 17}}),
+    ("geology", {"GEO_VERIFY": {"richter_M1": 5.0, "richter_M2": 7.0, "claimed_amplitude_ratio": 100.0}}, {"GEO_VERIFY": {"richter_M1": 5.0, "richter_M2": 7.0, "claimed_amplitude_ratio": 50.0}}),
+    ("geometry", {"GEOM_VERIFY": {"pyth_a": 3, "pyth_b": 4, "pyth_c": 5, "claimed_right_triangle": True}}, {"GEOM_VERIFY": {"pyth_a": 3, "pyth_b": 4, "pyth_c": 5, "claimed_right_triangle": False}}),
+    ("governance", {"DECISION_PACKET": {"title": "Adopt weekly mesh sync", "scope": "local", "red_items": ["no secrets in packet"], "floor_items": ["publish agenda 24h ahead"], "way_path": "Sync every Monday over the local mesh to align tasks.", "execution_steps": ["announce", "run sync", "log outcome"], "witnesses": ["Alice", "Bob"]}}, {"DECISION_PACKET": {"title": "Adopt weekly mesh sync", "scope": "local", "red_items": [], "floor_items": [], "way_path": "short", "execution_steps": [], "witnesses": []}}),
+    ("history_chronology", {"HIST_VERIFY": {"from_year": 1500, "to_year": 2000, "claimed_elapsed_years": 500}}, {"HIST_VERIFY": {"from_year": 1500, "to_year": 2000, "claimed_elapsed_years": 400}}),
+    ("information_theory", {"INFO_VERIFY": {"probabilities": [0.5, 0.5], "claimed_entropy_bits": 1.0}}, {"INFO_VERIFY": {"probabilities": [0.5, 0.5], "claimed_entropy_bits": 0.5}}),
+    ("labor", {"LABOR_VERIFY": {"hourly_rate": 18.50, "regular_hours": 40, "overtime_hours": 5, "claimed_overtime_pay": 878.75}}, {"LABOR_VERIFY": {"hourly_rate": 18.50, "regular_hours": 40, "overtime_hours": 5, "claimed_overtime_pay": 800.0}}),
+    ("linguistics", {"LING_VERIFY": {"transliteration_a": "agape", "transliteration_b": "agāpē"}}, {"LING_VERIFY": {"transliteration_a": "agape", "transliteration_b": "logos"}}),
+    ("manufacturing", {"MFG_VERIFY": {"tolerances": [0.01, 0.02, 0.015], "claimed_rss": 0.0269258}}, {"MFG_VERIFY": {"tolerances": [0.01, 0.02, 0.015], "claimed_rss": 0.045}}),
+    ("molecular_geometry", {"VSEPR_VERIFY": {"bonding_domains": 4, "lone_pairs": 0, "claimed_geometry": "tetrahedral", "claimed_bond_angle_deg": 109.47}}, {"VSEPR_VERIFY": {"bonding_domains": 4, "lone_pairs": 0, "claimed_geometry": "octahedral", "claimed_bond_angle_deg": 90.0}}),
+    ("music_theory", {"MUS_VERIFY": {"midi_note": 60, "claimed_frequency_hz": 261.6256}}, {"MUS_VERIFY": {"midi_note": 60, "claimed_frequency_hz": 440.0}}),
+    ("number_theory", {"NUM_VERIFY": {"gcd_a": 48, "gcd_b": 36, "claimed_gcd": 12}}, {"NUM_VERIFY": {"gcd_a": 48, "gcd_b": 36, "claimed_gcd": 10}}),
+    ("nutrition", {"NUT_VERIFY": {"calories_claimed": 500, "carb_g": 50, "protein_g": 30, "fat_g": 20}}, {"NUT_VERIFY": {"calories_claimed": 600, "carb_g": 50, "protein_g": 30, "fat_g": 20}}),
+    ("oceanography", {"OCEAN_VERIFY": {"depth_m": 100, "claimed_pressure_Pa": 1106850.0}}, {"OCEAN_VERIFY": {"depth_m": 100, "claimed_pressure_Pa": 1200000.0}}),
+    ("operations_research", {"OR_VERIFY": {"assignment": [[0, 1], [1, 0]], "cost_matrix": [[9, 2], [6, 4]], "claimed_total_cost": 8}}, {"OR_VERIFY": {"assignment": [[0, 1], [1, 0]], "cost_matrix": [[9, 2], [6, 4]], "claimed_total_cost": 11}}),
+    ("periodic_table", {"PT_VERIFY": {"symbol": "Fe", "claimed_atomic_number": 26, "claimed_name": "iron"}}, {"PT_VERIFY": {"symbol": "Fe", "claimed_atomic_number": 27, "claimed_name": "cobalt"}}),
+    ("philosophy", {"PHIL_VERIFY": {"framework_name": "consequentialist", "claimed_focuses_on_outcomes": True}}, {"PHIL_VERIFY": {"framework_name": "consequentialist", "claimed_focuses_on_outcomes": False}}),
+    ("photography", {"PHOTO_VERIFY": {"f_number": 8.0, "shutter_seconds": 1.0 / 250.0, "claimed_exposure_value": 13.966}}, {"PHOTO_VERIFY": {"f_number": 8.0, "shutter_seconds": 1.0 / 250.0, "claimed_exposure_value": 13.0}}),
+    ("physical_constants", {"CONST_VERIFY": {"constant": "speed_of_light", "claimed_value": 299792458.0, "claimed_unit": "m/s"}}, {"CONST_VERIFY": {"constant": "speed_of_light", "claimed_value": 300000000.0, "claimed_unit": "m/s"}}),
+    ("physics", {"PHYS_VERIFY": {"mass_kg": 10.0, "acceleration_m_per_s2": 9.8, "claimed_force_N": 98.0}}, {"PHYS_VERIFY": {"mass_kg": 10.0, "acceleration_m_per_s2": 9.8, "claimed_force_N": 90.0}}),
+    ("quantum_computing", {"QCOMP_VERIFY": {"amplitudes": [0.6, 0.8], "claimed_normalized": True}}, {"QCOMP_VERIFY": {"amplitudes": [0.6, 0.8], "claimed_normalized": False}}),
+    ("real_estate", {"RE_VERIFY": {"net_operating_income": 24000, "property_value": 400000, "claimed_cap_rate": 0.06}}, {"RE_VERIFY": {"net_operating_income": 24000, "property_value": 400000, "claimed_cap_rate": 0.08}}),
+    ("rhetoric", {"RHET_VERIFY": {"fallacy_name": "ad hominem", "claimed_is_formal_fallacy": False}}, {"RHET_VERIFY": {"fallacy_name": "ad hominem", "claimed_is_formal_fallacy": True}}),
+    ("soil_science", {"SOIL_VERIFY": {"reference_et0_mm_per_day": 5.0, "crop_coefficient": 1.15, "claimed_etc_mm_per_day": 5.75}}, {"SOIL_VERIFY": {"reference_et0_mm_per_day": 5.0, "crop_coefficient": 1.15, "claimed_etc_mm_per_day": 6.5}}),
+    ("sports_analytics", {"SPORT_VERIFY": {"runs_scored": 750, "runs_allowed": 600, "pythag_exponent": 2.0, "claimed_winning_pct": 0.6098}}, {"SPORT_VERIFY": {"runs_scored": 750, "runs_allowed": 600, "pythag_exponent": 2.0, "claimed_winning_pct": 0.65}}),
 ]
 
 

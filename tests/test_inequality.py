@@ -3,10 +3,14 @@
 Regression for the confirmed false-positive: a finite sample grid returned CONFIRMED for
 inequalities that are false only between/at unsampled points. The fix decides symbolically
 and uses sampling ONLY to disprove — never to confirm. Hermetic; sympy required.
+Runnable with pytest OR `python tests/test_inequality.py` (sovereign — no pytest needed).
 """
-import pytest
+import sys
+from pathlib import Path
 
-from concordance.verifiers import mathematics as m
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
+from concordance.verifiers import mathematics as m  # noqa: E402
 
 
 def _status(lhs, rhs, op, **extra):
@@ -43,3 +47,11 @@ def test_parse_guards_apply_to_inequality():
     # the DoS/injection guards that equality uses must also cover inequality
     assert _status("9**9**9", "0", ">") == "ERROR"           # power tower rejected
     assert _status("x #comment", "0", ">") == "ERROR"        # '#'-truncation rejected
+
+
+if __name__ == "__main__":
+    fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
+    for fn in fns:
+        fn()
+        print(f"  ok  {fn.__name__}")
+    print(f"\n{len(fns)} inequality tests passed — no false-positive survives the sampling path.")
