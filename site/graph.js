@@ -14,7 +14,7 @@
     codex: "#c9a24a", classics: "#9b7bc0", dictionary: "#4f93c0", patristics: "#ce7f4f",
     hymns: "#5fb089", recipes: "#b89152", maker: "#c56aa0", animation: "#8fae52", atlas: "#4fb0a8"
   };
-  var REL = { cites: "#c9a24a", proof_text: "#5fb089", see_also: "#8592a4", parallels: "#9b7bc0", illuminates: "#cf9f5a" };
+  var REL = { references: "#c9a24a", cites: "#c9a24a", proof_text: "#5fb089", see_also: "#8592a4", parallels: "#9b7bc0", illuminates: "#cf9f5a" };
   function shelfColor(s) { return SHELF[s] || "#8a93a3"; }
   function relColor(k) { return REL[k] || "#8592a4"; }
 
