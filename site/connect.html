@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connect your agent — Narrow Highway</title>
+<meta name="description" content="Give any AI agent a deterministic verification engine: verdict, worked trail, and a permanent receipt you can re-check. 60 domains, 0 false positives, benchmarked. One URL — no SDK, no key.">
+<meta property="og:title" content="Connect your agent — Narrow Highway">
+<meta property="og:description" content="A verification engine for agents: verdict + worked trail + a re-checkable receipt. 60 domains, 0 false positives. Add one MCP URL.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="/connect.html">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --broken:#c98a8a;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --mono:ui-monospace,Consolas,"Cascadia Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.12), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:820px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.1rem; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:820px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.68rem; margin-top:2.6rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2.3rem; margin:.5rem 0 .5rem}
+  .lede{color:var(--dim); font-size:1.06rem; max-width:46rem}
+  h2{font-weight:400; font-size:1.4rem; margin:2.8rem 0 .3rem; border-top:1px solid var(--line); padding-top:1.5rem}
+  .sub{color:var(--dim); font-size:.95rem; margin:0 0 1.1rem; max-width:46rem}
+  pre{background:rgba(201,162,74,.06); border:1px solid var(--line); border-radius:6px;
+    padding:.9rem 1rem; overflow-x:auto; font:.82rem/1.6 var(--mono); color:var(--ink)}
+  code{font-family:var(--mono); font-size:.88em; color:var(--gold)}
+  .step{border-left:2px solid var(--line); padding:.2rem 0 .2rem 1.1rem; margin:1.2rem 0}
+  .step b{font-weight:400; color:var(--gold)}
+  ul{max-width:46rem} li{margin:.35rem 0}
+  .note{border:1px solid var(--line); border-radius:6px; padding:1rem 1.2rem; margin:1.4rem 0; color:var(--dim); font-size:.95rem}
+  footer.site{border-top:1px solid var(--line); margin-top:3.5rem; padding-top:1.4rem; color:var(--dim); font-size:.9rem}
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
+  <nav class="site"><a href="/#verify">Verify</a><a href="/corrected.html">The Record</a><a href="/guarantees.html">Guarantees</a><a href="/map.html">Map</a><a href="/seal.html">Seal</a></nav>
+</div></header>
+<main class="wrap">
+  <div class="kicker">For agents · The door</div>
+  <h1>Connect your agent</h1>
+  <p class="lede">Language models generate; they do not verify. This engine is the other half:
+  hand it a claim and it returns a <b>verdict</b>, the <b>worked trail</b>, and a permanent
+  <b>receipt</b> anyone can re-check — deterministic math and rules, no model in the loop.
+  Sixty domains. A public benchmark holding <b>0&nbsp;false&nbsp;positives</b>: it has never
+  sealed a falsehood. One URL. No SDK, no key, no cost.</p>
+
+  <h2>Add it as a connector (MCP)</h2>
+  <p class="sub">The engine speaks MCP over Streamable&nbsp;HTTP — most agent clients can add it in seconds.</p>
+
+  <div class="step"><b>Claude (claude.ai / desktop)</b><br>
+    Settings → Connectors → <i>Add custom connector</i> → paste:
+    <pre>https://narrowhighway.com/mcp</pre></div>
+
+  <div class="step"><b>Claude Code</b>
+    <pre>claude mcp add --transport http narrow-highway https://narrowhighway.com/mcp</pre></div>
+
+  <div class="step"><b>Any MCP client</b> — Streamable HTTP, JSON-RPC, no auth:
+    <pre>POST https://narrowhighway.com/mcp</pre></div>
+
+  <p class="sub">Your agent gains <code>verify</code> (verdict + trail + sealed receipt),
+  <code>search</code> over the kept library, <code>seal_fetch</code> (re-check any receipt by
+  hash), <code>redact</code> (strip personal data before it travels), and ~30 more —
+  cards, the connection graph, the grid, daily readings.
+  The witness surface, <code>https://narrowhighway.org/mcp</code>, adds Scripture tools:
+  passage reading, original-language word studies, cross-references.</p>
+
+  <h2>Or raw HTTP — one call</h2>
+  <p class="sub">Everything the connector does is plain JSON over HTTP.</p>
+
+  <div class="step"><b>Verify mathematics</b>
+    <pre>curl -X POST https://narrowhighway.com/verify \
+  -H "Content-Type: application/json" \
+  -d '{"mode":"equality","params":{"expr_a":"sin(x)**2+cos(x)**2","expr_b":"1","variables":["x"]}}'</pre></div>
+
+  <div class="step"><b>Verify any domain</b> — physics, medicine, finance, chemistry, law,
+    statistics, nutrition, cryptography, &hellip; (~60):
+    <pre>curl -X POST https://narrowhighway.com/verify \
+  -H "Content-Type: application/json" \
+  -d '{"steps":[{"id":"a","domain":"physics",
+       "spec":{"PHYS_VERIFY":{"mass_kg":10.0,"acceleration_m_per_s2":9.8,"claimed_force_N":98.0}}}]}'</pre></div>
+
+  <div class="step"><b>The receipt</b> — every verify returns
+    <code>seal.cite_url</code>. Re-fetch it and the bytes must match, or it is not that record:
+    <pre>GET https://narrowhighway.com/s/&lt;content_hash&gt;      # human-readable receipt page
+GET https://narrowhighway.com/seal?hash=&lt;hash&gt;      # the same record, raw JSON</pre></div>
+
+  <h2>What it will not do</h2>
+  <ul>
+    <li><b>It does not generate answers.</b> It verifies a claim you provide, eliminating what
+      is not the answer. The trail is the reasoning.</li>
+    <li><b>It cannot be talked into a pass.</b> Tolerances are clamped — a caller may tighten a
+      check, never loosen it. The false-positive benchmark runs across every domain.</li>
+    <li><b>It does not seal matters of faith.</b> On the witness surface, theology tools mark
+      concordance — a signpost, never a mathematical verdict.</li>
+    <li><b>It does not keep your data.</b> Claim text is redacted before sealing; receipts carry
+      no personal context. For full sovereignty, run your own: the engine is stdlib-first Python
+      and serves the same API offline.</li>
+  </ul>
+
+  <div class="note">Rate limits apply to keep the door open for everyone. If your agent needs
+  volume, run the engine on your own box — same tools, no network, no dependence on us.</div>
+
+  <footer class="site">
+    <p>Every answer is a receipt, not &ldquo;trust me.&rdquo; See
+    <a href="/guarantees.html">what we prove</a> — and
+    <a href="/corrected.html">the day the engine corrected its own record</a>.
+    A conduit, not the source. <a href="/">Narrow Highway →</a></p>
+  </footer>
+</main>
+</body>
+</html>

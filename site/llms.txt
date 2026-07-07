@@ -19,10 +19,19 @@ Every verification is sealed and addressable. Cite a result by its content hash:
   carry no personal data.
 
 ## API (JSON over HTTP, same-origin)
-- `POST /verify` — verify a claim. Body `{"mode":"equality|inequality|derivative|integral|limit|solve","params":{...}}`
-  or `{"steps":[...]}`. Returns `{verdict: HOLDS|BROKEN|INCOMPLETE, trail, seal:{content_hash, cite_url}}`.
-  The math moat holds **0 false-positives** (e.g. `x/x = 1` is caught — undefined at x=0 — not sealed).
+- `POST /verify` — verify a claim across **~60 domains**, not just math.
+  MATH form: `{"mode":"equality|inequality|derivative|integral|limit|solve","params":{...}}`.
+  DOMAIN form: `{"steps":[{"id":"a","domain":"physics","spec":{"PHYS_VERIFY":{"mass_kg":10.0,
+  "acceleration_m_per_s2":9.8,"claimed_force_N":98.0}}}]}` — domains include physics, medicine,
+  finance, chemistry, law, statistics, nutrition, cryptography, geometry, astronomy, energy,
+  networking, music_theory, ... Each domain reads its own artifact key (e.g. `MED_VERIFY`,
+  `FIN_VERIFY`); the MCP `verify` tool description documents the shape.
+  Returns `{verdict: HOLDS|BROKEN|INCOMPLETE, trail, seal:{content_hash, cite_url}}`.
+  A public benchmark holds **0 false-positives across every domain** — the engine has never
+  sealed a falsehood (e.g. `x/x = 1` is caught — undefined at x=0 — not sealed). Tolerances are
+  clamped: a caller may tighten a check, never loosen one.
 - `GET /search?q=&limit=` — ranked retrieval over the keeping (the kept library).
+- `GET /graph?scope=overview|shelf|card` — the public connection map (every edge carries its seal).
 - `GET /identity` — what this surface is. `GET /health` — status + `schema_active`.
 
 ### Witness surface only (narrowhighway.org)
@@ -36,10 +45,19 @@ Strip personal context before any AI call, reapply locally — the data never ha
 - Python: `from concordance.gateway import scrub, restore, guard`.
 - Drop-in examples (browser / Python / MCP): docs/GATEWAY.md in the source repo.
 
-## For agents (MCP)
-MCP server (stdio JSON-RPC, no SDK dependency): `python -m concordance mcp`, or Streamable-HTTP
-at `POST /mcp`. Tools: `verify`, `search`, `seal_fetch`, `redact` — plus `resolve`, `word_study`
-on the witness surface. Run a local/sovereign engine for true privacy.
+## For agents (MCP) — add one URL
+A live remote MCP server (Streamable HTTP, JSON-RPC, no auth, no SDK):
+
+    https://narrowhighway.com/mcp
+
+- Claude (claude.ai / desktop): Settings → Connectors → Add custom connector → paste the URL.
+- Claude Code: `claude mcp add --transport http narrow-highway https://narrowhighway.com/mcp`
+- ~37 tools: `verify` (verdict + trail + sealed receipt), `search`, `seal_fetch` (re-check any
+  receipt by hash), `redact` (strip PII before it travels), cards/graph/grid/daily and more.
+- The witness surface `https://narrowhighway.org/mcp` adds Scripture tools: passage reading,
+  original-language word studies, cross-references, characters, prophecy signposts.
+- Sovereign option: `python -m concordance mcp` (stdio) — the same tools on your own box,
+  offline. Human setup guide: /connect.html. The correction record: /corrected.html.
 
 ## Foundation
 It serves truth because Truth is a Person (John 14:6); a conduit, not the source. A window, not
