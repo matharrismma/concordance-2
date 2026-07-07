@@ -66,19 +66,39 @@ def _safe_url(u: Any) -> str:
     return ""
 
 
+# ── Server-rendered page shell (shared by render_seal/badge/card_html) ────
+# ONE definition of the crawlable page chrome — the <head>, the site header+nav, and the
+# not-found body — so the three server-rendered pages don't each re-declare it. Data stays in
+# the markup (no client-JS), so search engines and LLMs can read + cite the page.
+_HEAD = ("<!doctype html><html lang=en><head><meta charset=utf-8>"
+         "<meta name=viewport content=\"width=device-width,initial-scale=1\">"
+         "<link rel=stylesheet href=/styles.css>")
+
+
+def _site_header(nav_inner: str) -> str:
+    """The brand + nav header bar. `nav_inner` is the page-appropriate set of <a> links."""
+    return ("<header class=site><div class=wrap style=\"padding:.9rem 1.2rem;display:flex;"
+            "justify-content:space-between;align-items:center\"><a class=brand href=/>Narrow"
+            f"<span class=road>Highway</span></a><nav class=site>{nav_inner}</nav></div></header>")
+
+
+def _notfound_page(title: str, body_html: str) -> str:
+    """A 404 page: the shared head + a noindex meta + a minimal body. `title`/`body_html` pre-escaped."""
+    return (f"{_HEAD}<title>{title} — Narrow Highway</title><meta name=robots content=noindex>"
+            f"</head><body><main class=wrap>{body_html}</main></body></html>")
+
+
 def render_seal_html(content_hash: str, record: Optional[Dict[str, Any]]) -> Tuple[int, str]:
     """Server-render a sealed receipt as a crawlable, citable HTML page (data in the markup,
     not client-JS) so search engines and LLMs can read + cite a verification. (status, html)."""
     short = _esc((content_hash or "")[:16])
-    head = ("<!doctype html><html lang=en><head><meta charset=utf-8>"
-            "<meta name=viewport content=\"width=device-width,initial-scale=1\">"
-            "<link rel=stylesheet href=/styles.css>")
+    head = _HEAD
     if record is None:
-        html = (f"{head}<title>Seal not found — Narrow Highway</title><meta name=robots content=noindex>"
-                f"</head><body><main class=wrap><h1>No such seal</h1>"
+        html = _notfound_page("Seal not found",
+                f"<h1>No such seal</h1>"
                 f"<p class=muted>No sealed record matches <span class=mono>{short}…</span>. A seal is "
                 f"content-addressed — if it existed, this hash would fetch it.</p>"
-                f"<p><a href=/>← Narrow Highway</a></p></main></body></html>")
+                f"<p><a href=/>← Narrow Highway</a></p>")
         return 404, html
     overall = record.get("overall", "?")
     vcls = "holds" if overall == "PASS" else "broken"
@@ -99,10 +119,7 @@ def render_seal_html(content_hash: str, record: Optional[Dict[str, Any]]) -> Tup
             f"<link rel=canonical href=\"/s/{_esc(content_hash)}\">"
             f"<meta property=\"og:type\" content=article>"
             f"<meta name=\"twitter:card\" content=\"summary\"></head><body>"
-            f"<header class=site><div class=wrap style=\"padding:.9rem 1.2rem;display:flex;"
-            f"justify-content:space-between;align-items:center\"><a class=brand href=/>Narrow"
-            f"<span class=road>Highway</span></a><nav class=site><a href=/#verify>Verify</a>"
-            f"<a href=/seal.html>Seal</a></nav></div></header><main class=wrap>"
+            f"{_site_header('<a href=/#verify>Verify</a><a href=/seal.html>Seal</a>')}<main class=wrap>"
             f"<h1>The receipt</h1><div class=\"verdict {vcls}\" style=\"font-size:1.4rem\">{label}</div>"
             f"<p class=lede>A permanent, tamper-evident record of a verification. The content hash IS "
             f"the proof — re-fetch it and the bytes must match, or it is not this record.</p>"
@@ -123,16 +140,14 @@ def render_badge_html(badge_hash: str, verify_result: Optional[Dict[str, Any]]) 
     result's own copy, VERBATIM — no competency noun) and links each sealed check to its /s/<hash>
     seal page so anyone can re-check the evidence. (status, html)."""
     short = _esc((badge_hash or "")[:16])
-    head = ("<!doctype html><html lang=en><head><meta charset=utf-8>"
-            "<meta name=viewport content=\"width=device-width,initial-scale=1\">"
-            "<link rel=stylesheet href=/styles.css>")
+    head = _HEAD
     if verify_result is None or not verify_result.get("ok"):
-        html = (f"{head}<title>Badge not found — Narrow Highway</title><meta name=robots content=noindex>"
-                f"</head><body><main class=wrap><h1>No such badge</h1>"
+        html = _notfound_page("Badge not found",
+                f"<h1>No such badge</h1>"
                 f"<p class=muted>No badge matches <span class=mono>{short}…</span>. A badge is "
                 f"content-addressed — if it existed, this hash would fetch it, and every seal it "
                 f"points at would re-verify.</p>"
-                f"<p><a href=/>← Narrow Highway</a></p></main></body></html>")
+                f"<p><a href=/>← Narrow Highway</a></p>")
         return 404, html
     n = verify_result.get("checks", 0)
     copy = _esc(verify_result.get("copy") or "")   # the result's own copy — VERBATIM, no competency noun
@@ -151,10 +166,7 @@ def render_badge_html(badge_hash: str, verify_result: Optional[Dict[str, Any]]) 
             f"<meta name=description content=\"{desc}\">"
             f"<meta property=\"og:title\" content=\"Badge · {copy}\">"
             f"<meta property=\"og:description\" content=\"{desc}\"></head><body>"
-            f"<header class=site><div class=wrap style=\"padding:.9rem 1.2rem;display:flex;"
-            f"justify-content:space-between;align-items:center\"><a class=brand href=/>Narrow"
-            f"<span class=road>Highway</span></a><nav class=site><a href=/#verify>Verify</a>"
-            f"<a href=/seal.html>Seal</a></nav></div></header><main class=wrap>"
+            f"{_site_header('<a href=/#verify>Verify</a><a href=/seal.html>Seal</a>')}<main class=wrap>"
             f"<h1>{_esc(heading)}</h1><div class=\"verdict holds\" style=\"font-size:1.4rem\">{copy}</div>"
             f"<p class=lede>A badge is a receipt you OWN. It claims no mastery, skill, or level — only "
             f"that {_esc(str(n))} sealed verifications still stand when you re-check them. The evidence "
@@ -178,14 +190,12 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
     cross-link to /search. 404 page carries meta robots noindex. (status, html)."""
     import json as _json
     short = _esc((card_id or "")[:24])
-    head = ("<!doctype html><html lang=en><head><meta charset=utf-8>"
-            "<meta name=viewport content=\"width=device-width,initial-scale=1\">"
-            "<link rel=stylesheet href=/styles.css>")
+    head = _HEAD
     if card is None:
-        html = (f"{head}<title>Card not found — Narrow Highway</title><meta name=robots content=noindex>"
-                f"</head><body><main class=wrap><h1>No such record</h1>"
+        html = _notfound_page("Card not found",
+                f"<h1>No such record</h1>"
                 f"<p class=muted>No card matches <span class=mono>{short}</span> in the keeping.</p>"
-                f"<p><a href=/search>← Search the keeping</a></p></main></body></html>")
+                f"<p><a href=/search>← Search the keeping</a></p>")
         return 404, html
     title = _esc(card.get("title") or card_id)
     body_txt = card.get("body") or ""
@@ -242,10 +252,7 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             f"<meta property=\"og:url\" content=\"{canonical}\">"
             f"<meta name=\"twitter:card\" content=\"summary\">"
             f"<script type=\"application/ld+json\">{ld_json}</script></head><body>"
-            f"<header class=site><div class=wrap style=\"padding:.9rem 1.2rem;display:flex;"
-            f"justify-content:space-between;align-items:center\"><a class=brand href=/>Narrow"
-            f"<span class=road>Highway</span></a><nav class=site><a href=/search>Search</a>"
-            f"<a href=/#verify>Verify</a></nav></div></header><main class=wrap>"
+            f"{_site_header('<a href=/search>Search</a><a href=/#verify>Verify</a>')}<main class=wrap>"
             f"<h1>{title}</h1>{body_html}"
             f"<section class=card>{source_html}"
             f"<div class=muted style=\"font-size:.8rem;margin-top:.5rem\">card id</div>"
