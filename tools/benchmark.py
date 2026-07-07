@@ -82,6 +82,10 @@ CLAIMS = [
     (False, iq("exp(1)", "2", "<"), "e<2"),
     (False, iq("2**10", "1000", "<"), "2^10<1000"),
     (False, iq("8*sqrt(3)", "16", ">"), "hexagon > square (wrong)"),
+    # finite-sampling traps — false only between/at unsampled points; MUST NOT seal HOLDS
+    # (permanent regression guard for the inequality false-positive fix).
+    (False, iq("(x-3)**2", "0", ">"), "(x-3)^2>0 -- false only at x=3 (sampling trap)"),
+    (False, iq("sin(x)", "0.9999", "<="), "sin(x)<=0.9999 -- false near pi/2 (sampling trap)"),
     # --- DERIVATIVE: TRUE ---
     (True,  dv("cos(t)", "t", "-sin(t)"), "d/dt cos"),
     (True,  dv("sin(t)", "t", "cos(t)"), "d/dt sin"),

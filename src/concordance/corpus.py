@@ -40,6 +40,20 @@ def _card_text(card: dict) -> str:
     ]).lower()
 
 
+PUBLIC_STAGES = frozenset({"public", "featured"})
+
+
+def is_public(card: dict) -> bool:
+    """True iff a card may appear on ANY public read path — an ALLOWLIST, not a denylist.
+    ONE source of truth (graph.py imports this too, so the two can never diverge): every
+    stage except public/featured — private, public_review, archived, quarantine, retracted —
+    is withheld. A denylist here (archived/quarantine only) is exactly what leaked the
+    operator's private cards onto the public surface."""
+    if not isinstance(card, dict) or card.get("retracted"):
+        return False
+    return (card.get("lifecycle_stage") or "public") in PUBLIC_STAGES
+
+
 class Corpus:
     """An indexed, searchable set of cards (id -> card dict)."""
 
@@ -48,7 +62,7 @@ class Corpus:
         self.min_idf = min_idf
         self._by_token: Dict[str, List[str]] = {}
         for cid, c in cards.items():
-            if c.get("retracted") or c.get("lifecycle_stage") in ("archived", "quarantine"):
+            if not is_public(c):
                 continue
             for t in set(_tokens(_card_text(c))):
                 self._by_token.setdefault(t, []).append(cid)
@@ -103,9 +117,7 @@ class Corpus:
         scored = []
         for cid in self._candidates(query_tokens):
             c = self.cards.get(cid)
-            if not c or c.get("retracted"):
-                continue
-            if c.get("lifecycle_stage") in ("archived", "quarantine"):
+            if not c or not is_public(c):
                 continue
             if not include_witness and c.get("surface") == "witness":
                 continue
@@ -171,13 +183,16 @@ def _brief(c: dict) -> Dict[str, Any]:
 
 
 def get_card(card_id: str) -> Optional[dict]:
-    """Fetch one card (the full record) by id, or None."""
-    return default_corpus().cards.get((card_id or "").strip())
+    """Fetch one PUBLIC card (the full record) by id, or None. Non-public cards
+    (private / public_review / archived / quarantine / retracted) are never returned —
+    this is the boundary render_card_html and /card rely on."""
+    c = default_corpus().cards.get((card_id or "").strip())
+    return c if (c is not None and is_public(c)) else None
 
 
 def browse(shelf: Optional[str] = None, limit: int = 20, offset: int = 0) -> Dict[str, Any]:
     """Paginated browse over the keeping, optionally filtered to a shelf. Returns briefs."""
-    cards = list(default_corpus().cards.values())
+    cards = [c for c in default_corpus().cards.values() if is_public(c)]
     if shelf:
         cards = [c for c in cards if (c.get("shelf") or "").lower() == shelf.lower()]
     cards.sort(key=lambda c: ((c.get("shelf") or ""), (c.get("title") or c.get("id") or "")))
@@ -191,7 +206,7 @@ def browse(shelf: Optional[str] = None, limit: int = 20, offset: int = 0) -> Dic
 def stats() -> Dict[str, Any]:
     """Counts over the keeping — total, by shelf, by surface."""
     from collections import Counter
-    cards = list(default_corpus().cards.values())
+    cards = [c for c in default_corpus().cards.values() if is_public(c)]
     return {"total": len(cards),
             "by_shelf": dict(Counter((c.get("shelf") or "?") for c in cards).most_common(40)),
             "by_surface": dict(Counter((c.get("surface") or "?") for c in cards))}
@@ -202,7 +217,7 @@ def daily(seed: Optional[str] = None) -> Optional[dict]:
     seed (default today's UTC date) hashes to an index, so it needs no stored state."""
     import hashlib
     import time as _time
-    ids = sorted(default_corpus().cards.keys())
+    ids = sorted(cid for cid, c in default_corpus().cards.items() if is_public(c))
     if not ids:
         return None
     if seed is None:
@@ -218,7 +233,7 @@ def connections(card_id: str, limit: int = 10) -> Optional[Dict[str, Any]]:
         return None
     shelf = c.get("shelf")
     sibs = [_brief(x) for x in default_corpus().cards.values()
-            if x.get("id") != card_id and x.get("shelf") == shelf][:max(1, min(limit, 50))]
+            if x.get("id") != card_id and x.get("shelf") == shelf and is_public(x)][:max(1, min(limit, 50))]
     links = c.get("links") or c.get("connections") or c.get("refs") or []
     return {"id": card_id, "shelf": shelf, "links": links, "same_shelf": sibs}
 
@@ -229,10 +244,10 @@ def locate(q: str, limit: int = 5) -> Dict[str, Any]:
     if not q:
         return {"query": q, "by": "none", "matches": []}
     cards = default_corpus().cards
-    if q in cards:
+    if q in cards and is_public(cards[q]):
         return {"query": q, "by": "id", "matches": [_brief(cards[q])]}
     ql = q.lower()
-    title_hits = [_brief(c) for c in cards.values() if ql in (c.get("title") or "").lower()]
+    title_hits = [_brief(c) for c in cards.values() if is_public(c) and ql in (c.get("title") or "").lower()]
     if title_hits:
         return {"query": q, "by": "title", "matches": title_hits[:limit]}
     return {"query": q, "by": "search", "matches": [_brief(c) for c in search(q, limit=limit)]}
@@ -240,7 +255,7 @@ def locate(q: str, limit: int = 5) -> Dict[str, Any]:
 
 def health() -> Dict[str, Any]:
     """Corpus health — is the keeping loaded and sound."""
-    cards = list(default_corpus().cards.values())
+    cards = [c for c in default_corpus().cards.values() if is_public(c)]
     n = len(cards)
     return {"ok": n > 0, "total": n,
             "with_body": sum(1 for c in cards if (c.get("body") or "").strip()),

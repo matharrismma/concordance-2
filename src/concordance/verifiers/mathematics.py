@@ -283,63 +283,72 @@ def verify_solve(spec: Dict[str, Any]) -> VerifierResult:
 
 
 def verify_inequality(spec):
-    """Verify a claimed inequality. Symbolic first, sampling fallback."""
+    """Verify a claimed inequality by SYMBOLIC DECISION only.
+
+    Sampling is used solely to DISPROVE — a violation at any point makes a universal claim
+    false (sound). It is NEVER used to confirm, because finite sampling can miss a violation
+    between points: (x-3)**2 > 0 is false only at x=3; sin(x) <= 0.9999 only near x=pi/2.
+    A truth we cannot decide symbolically is returned INCONCLUSIVE (a safe false-negative),
+    never sealed as HOLDS — the 0-false-positive guarantee comes before coverage."""
+    _ensure_sympy()
     import sympy as sp
-    lhs = spec.get("lhs")
-    rhs = spec.get("rhs")
+    lhs, rhs = spec.get("lhs"), spec.get("rhs")
     op = spec.get("op", "<=")
     var = spec.get("variable", "x")
     if lhs is None or rhs is None:
         return na("mathematics.inequality")
-    x = sp.Symbol(var, real=True)
-    L = sp.sympify(lhs, locals={var: x})
-    R = sp.sympify(rhs, locals={var: x})
-    diff_ = sp.simplify(L - R)
     if op not in ("<", "<=", ">", ">="):
         return error("mathematics.inequality", f"bad op {op!r}")
     try:
-        if op == "<=":
-            ok = sp.simplify(diff_ <= 0) is sp.true
-        elif op == ">=":
-            ok = sp.simplify(diff_ >= 0) is sp.true
-        elif op == "<":
-            ok = sp.simplify(diff_ < 0) is sp.true
-        else:
-            ok = sp.simplify(diff_ > 0) is sp.true
-    except Exception:
-        ok = False
+        # SAME guards as equality (rejects '#'-truncation, giant exponents, oversized ASTs)
+        L, R = _parse(lhs, [var]), _parse(rhs, [var])
+    except _PARSE_ERRORS as e:
+        return error("mathematics.inequality", f"parse error: {e}")
+    x = sp.Symbol(var, real=True)
+    L, R = L.subs(sp.Symbol(var), x), R.subs(sp.Symbol(var), x)
+    diff_ = sp.simplify(L - R)
+    rel = {"<=": diff_ <= 0, ">=": diff_ >= 0, "<": diff_ < 0, ">": diff_ > 0}[op]
 
-    if not ok:
-        domain = spec.get("domain", "Reals")
-        samples = [-1000, -10, -1, -0.5, 0, 0.5, 1, 10, 1000]
-        if domain == "Positive":
-            samples = [s for s in samples if s > 0]
-        elif domain == "Nonneg":
-            samples = [s for s in samples if s >= 0]
-        all_ok = True
-        for s in samples:
-            try:
-                d = float(diff_.subs(x, s))
-                if op == "<=" and not d <= 1e-9:
-                    all_ok = False
-                    break
-                if op == "<" and not d < -1e-12:
-                    all_ok = False
-                    break
-                if op == ">=" and not d >= -1e-9:
-                    all_ok = False
-                    break
-                if op == ">" and not d > 1e-12:
-                    all_ok = False
-                    break
-            except Exception:
-                pass
-        if all_ok:
-            return confirm("mathematics.inequality",
-                           f"{lhs} {op} {rhs} holds on sampled points (symbolic inconclusive)",
-                           {"method": "sampling"})
-        return mismatch("mathematics.inequality", f"{lhs} {op} {rhs} fails", {"method": "sampling"})
-    return confirm("mathematics.inequality", f"{lhs} {op} {rhs} holds symbolically")
+    # 1) direct symbolic decision — settles every constant comparison and many universals
+    try:
+        truth = sp.simplify(rel)
+        if truth is sp.true:
+            return confirm("mathematics.inequality", f"{lhs} {op} {rhs} holds (symbolic)")
+        if truth is sp.false:
+            return mismatch("mathematics.inequality", f"{lhs} {op} {rhs} is false (symbolic)")
+    except Exception:
+        pass
+
+    # 2) solution-set decision for a univariate claim over the stated domain
+    dom_name = spec.get("domain", "Reals")
+    dom = {"Positive": sp.Interval.open(0, sp.oo),
+           "Nonneg": sp.Interval(0, sp.oo)}.get(dom_name, sp.S.Reals)
+    if diff_.free_symbols <= {x}:
+        try:
+            sol = sp.solve_univariate_inequality(rel, x, relational=False, domain=dom)
+            if dom.is_subset(sol):
+                return confirm("mathematics.inequality",
+                               f"{lhs} {op} {rhs} holds on {dom_name} (solved)")
+            return mismatch("mathematics.inequality",
+                            f"{lhs} {op} {rhs} does not hold on all of {dom_name} (solved)")
+        except Exception:
+            pass
+
+    # 3) counterexample search — SOUND for disproof only (a violation => genuinely false)
+    for s in (-1000, -10, -1, -0.5, 0, 0.5, 1, 10, 1000):
+        try:
+            if dom is not sp.S.Reals and s not in dom:
+                continue
+            d = float(diff_.subs(x, s))
+        except Exception:
+            continue
+        if ((op == "<=" and d > 1e-9) or (op == "<" and d >= 0)
+                or (op == ">=" and d < -1e-9) or (op == ">" and d <= 0)):
+            return mismatch("mathematics.inequality", f"{lhs} {op} {rhs} fails at {var}={s}")
+
+    # 4) genuinely inconclusive — NEVER confirm from finite sampling
+    return na("mathematics.inequality",
+              f"{lhs} {op} {rhs}: symbolic decision inconclusive — not sealed")
 
 
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:

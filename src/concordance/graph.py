@@ -21,9 +21,9 @@ from typing import Any, Dict, List, Optional
 
 from . import corpus
 
-# Lifecycle stages that are public enough to appear on the map. Private (personal),
-# archived, quarantine, retracted, and public_review are all withheld.
-_PUBLIC_STAGES = {"public", "featured"}
+# Public-visibility is decided by corpus.is_public — ONE source of truth shared with the
+# corpus read paths, so this map and the rest of the engine can never disagree on what is
+# public (private / public_review / archived / quarantine / retracted are all withheld).
 
 # Caps — keep every view tractable in the browser (no hairball) and honest about it.
 _SHELF_SEED_CAP = 260      # top-degree members of a shelf used as the seed set
@@ -38,9 +38,7 @@ def _tier(c: dict) -> str:
 
 
 def _is_public(c: dict) -> bool:
-    if c.get("retracted"):
-        return False
-    return (c.get("lifecycle_stage") or "public") in _PUBLIC_STAGES
+    return corpus.is_public(c)  # ONE source of truth (see corpus.is_public)
 
 
 def _build() -> Dict[str, Any]:
