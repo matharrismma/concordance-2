@@ -45,7 +45,7 @@ EX_VERIFY packet shape (any subset of fields):
 from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 # Public-domain reference MET values for common activities.
@@ -101,7 +101,7 @@ def verify_energy_expenditure(spec: Dict[str, Any]) -> VerifierResult:
     if m <= 0 or w <= 0 or d < 0:
         return error(name, f"MET, weight must be > 0; duration >= 0 (got {m}, {w}, {d})")
     actual = m * w * d
-    tol = float(spec.get("tolerance_kcal", 5.0))
+    tol = clamp_tol(spec, "tolerance_kcal", 5.0)
     diff = abs(actual - c)
     data = {"actual_kcal": actual, "claimed_kcal": c, "diff_kcal": diff,
             "met": m, "weight_kg": w, "duration_hours": d, "tolerance_kcal": tol}
@@ -129,7 +129,7 @@ def verify_max_heart_rate(spec: Dict[str, Any]) -> VerifierResult:
     if a < 0 or a > 130:
         return error(name, f"age out of plausible range [0, 130], got {a}")
     actual = 208.0 - 0.7 * a
-    tol = float(spec.get("tolerance_bpm", 2.0))
+    tol = clamp_tol(spec, "tolerance_bpm", 2.0)
     diff = abs(actual - c)
     data = {"actual_bpm": actual, "claimed_bpm": c, "diff_bpm": diff,
             "age_years": a, "formula": "Tanaka 2001 (208 - 0.7·age)"}
@@ -176,7 +176,7 @@ def verify_target_heart_rate_zone(spec: Dict[str, Any]) -> VerifierResult:
     hrr = hrmax - rest_v
     actual_low = (hrr * il) + rest_v
     actual_high = (hrr * ih) + rest_v
-    tol = float(spec.get("tolerance_bpm", 1.0))
+    tol = clamp_tol(spec, "tolerance_bpm", 1.0)
     data = {"hrmax": hrmax, "hrr": hrr,
             "actual_low_bpm": actual_low, "actual_high_bpm": actual_high,
             "claimed_low_bpm": cl, "claimed_high_bpm": ch,
@@ -206,7 +206,7 @@ def verify_met_lookup(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, f"claimed_met must be numeric, got {claimed!r}")
     actual = _MET_TABLE[activity]
-    tol = float(spec.get("tolerance_met", 0.5))
+    tol = clamp_tol(spec, "tolerance_met", 0.5)
     diff = abs(actual - c)
     data = {"activity": activity, "actual_met": actual, "claimed_met": c,
             "diff": diff, "tolerance_met": tol}

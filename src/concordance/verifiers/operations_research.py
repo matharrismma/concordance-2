@@ -43,7 +43,7 @@ OR_VERIFY packet shape (any subset):
 from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 # ---------------------------------------------------------------------------
@@ -183,7 +183,7 @@ def verify_critical_path(spec: Dict[str, Any]) -> VerifierResult:
         earliest_finish[tid] = start + t["duration"]
 
     actual_makespan = max(earliest_finish.values())
-    tol = float(spec.get("tolerance_relative", 1e-3)) * max(1.0, abs(actual_makespan))
+    tol = clamp_tol(spec, "tolerance_relative", 1e-3) * max(1.0, abs(actual_makespan))
 
     data = {
         "tasks":            tasks,
@@ -255,7 +255,7 @@ def verify_knapsack_01(spec: Dict[str, Any]) -> VerifierResult:
                 best = max(best, total_v)
         actual_val = best
 
-    tol = float(spec.get("tolerance_relative", 1e-3)) * max(1.0, abs(actual_val))
+    tol = clamp_tol(spec, "tolerance_relative", 1e-3) * max(1.0, abs(actual_val))
 
     data = {
         "items":                items,
@@ -304,7 +304,7 @@ def verify_assignment_cost(spec: Dict[str, Any]) -> VerifierResult:
     except (IndexError, TypeError, ValueError) as exc:
         return error(name, f"invalid assignment or cost_matrix entry: {exc}")
 
-    tol = float(spec.get("tolerance_relative", 1e-3)) * max(1.0, abs(total))
+    tol = clamp_tol(spec, "tolerance_relative", 1e-3) * max(1.0, abs(total))
 
     data = {
         "assignment":        assignment,

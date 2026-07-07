@@ -37,7 +37,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def verify_monthly_mortgage(spec: Dict[str, Any]) -> VerifierResult:
@@ -57,7 +57,7 @@ def verify_monthly_mortgage(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "loan_principal, annual_rate, and loan_term_months must be positive")
     r = ar / 12.0
     actual = Pf * (r * (1 + r) ** nf) / ((1 + r) ** nf - 1)
-    tol = float(spec.get("tolerance", max(0.01, actual * 0.001)))
+    tol = clamp_tol(spec, "tolerance", max(0.01, actual * 0.001))
     data = {"loan_principal": Pf, "annual_rate": ar, "monthly_rate": round(r, 6),
             "loan_term_months": nf,
             "actual_monthly_payment": round(actual, 2), "claimed_monthly_payment": c,
@@ -82,7 +82,7 @@ def verify_cap_rate(spec: Dict[str, Any]) -> VerifierResult:
     if pvf <= 0:
         return error(name, f"property_value must be > 0, got {pvf}")
     actual = nf / pvf
-    tol = float(spec.get("tolerance", 0.001))
+    tol = clamp_tol(spec, "tolerance", 0.001)
     data = {"noi": nf, "property_value": pvf,
             "actual_cap_rate": round(actual, 6), "claimed_cap_rate": c,
             "formula": "cap_rate = NOI / property_value"}
@@ -106,7 +106,7 @@ def verify_gross_rent_multiplier(spec: Dict[str, Any]) -> VerifierResult:
     if rf <= 0:
         return error(name, f"annual_gross_rent must be > 0, got {rf}")
     actual = pf / rf
-    tol = float(spec.get("tolerance", 0.05))
+    tol = clamp_tol(spec, "tolerance", 0.05)
     data = {"property_price": pf, "annual_gross_rent": rf,
             "actual_grm": round(actual, 4), "claimed_grm": c,
             "formula": "GRM = property_price / annual_gross_rent"}
@@ -130,7 +130,7 @@ def verify_loan_to_value(spec: Dict[str, Any]) -> VerifierResult:
     if af <= 0:
         return error(name, f"appraised_value must be > 0, got {af}")
     actual = lf / af
-    tol = float(spec.get("tolerance", 0.001))
+    tol = clamp_tol(spec, "tolerance", 0.001)
     pmi_required = actual > 0.80
     data = {"loan_amount": lf, "appraised_value": af,
             "actual_ltv": round(actual, 6), "claimed_ltv": c,
@@ -156,7 +156,7 @@ def verify_dscr(spec: Dict[str, Any]) -> VerifierResult:
     if af <= 0:
         return error(name, f"annual_debt_service must be > 0, got {af}")
     actual = nf / af
-    tol = float(spec.get("tolerance", 0.005))
+    tol = clamp_tol(spec, "tolerance", 0.005)
     data = {"noi": nf, "annual_debt_service": af,
             "actual_dscr": round(actual, 4), "claimed_dscr": c,
             "lender_threshold": 1.25,
@@ -182,7 +182,7 @@ def verify_rental_yield(spec: Dict[str, Any]) -> VerifierResult:
     if pvf <= 0:
         return error(name, f"property_value must be > 0, got {pvf}")
     actual = rf / pvf
-    tol = float(spec.get("tolerance", 0.001))
+    tol = clamp_tol(spec, "tolerance", 0.001)
     data = {"annual_rent": rf, "property_value": pvf,
             "actual_yield": round(actual, 6), "claimed_yield": c,
             "formula": "yield = annual_rent / property_value"}

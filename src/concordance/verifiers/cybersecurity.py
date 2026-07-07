@@ -29,7 +29,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 # ── Password entropy ──────────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ def verify_password_entropy(spec: Dict[str, Any]) -> VerifierResult:
     if N < 2:
         return error(name, f"charset_size must be >= 2, got {N}")
     actual = L * math.log2(N)
-    tol = float(spec.get("tolerance_bits", 0.5))
+    tol = clamp_tol(spec, "tolerance_bits", 0.5)
     diff = abs(actual - c)
     data = {"length": L, "charset_size": N,
             "actual_entropy_bits": round(actual, 2), "claimed_entropy_bits": c,

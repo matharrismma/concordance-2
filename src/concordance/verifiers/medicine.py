@@ -38,7 +38,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 # ── BMI ──────────────────────────────────────────────────────────────────────
 
@@ -73,7 +73,7 @@ def verify_bmi(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, f"height_m must be positive, got {hf}")
     bmi = wf / (hf ** 2)
     bmi_cat = _bmi_class(bmi)
-    tol = float(spec.get("tolerance_bmi", 0.1))
+    tol = clamp_tol(spec, "tolerance_bmi", 0.1)
     data = {"weight_kg": wf, "height_m": hf, "bmi": round(bmi, 2),
             "classification": bmi_cat,
             "formula": "BMI = weight_kg / height_m^2"}
@@ -109,7 +109,7 @@ def verify_drug_dosage(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "dose_mg_per_kg, weight_kg, claimed_dose_mg must be numeric")
     actual = dpk * wf
-    tol = float(spec.get("tolerance_mg", max(0.5, actual * 0.02)))  # 2% or 0.5mg
+    tol = clamp_tol(spec, "tolerance_mg", max(0.5, actual * 0.02))  # 2% or 0.5mg
     diff = abs(actual - c)
     data = {"dose_mg_per_kg": dpk, "weight_kg": wf,
             "actual_dose_mg": actual, "claimed_dose_mg": c,
@@ -178,7 +178,7 @@ def verify_a1c_to_eag(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "a1c_pct and claimed_eag_mg_dl must be numeric")
     actual = 28.7 * af - 46.7
-    tol = float(spec.get("tolerance_mg_dl", 3.0))
+    tol = clamp_tol(spec, "tolerance_mg_dl", 3.0)
     diff = abs(actual - c)
     data = {"a1c_pct": af, "actual_eag_mg_dl": round(actual, 1),
             "claimed_eag_mg_dl": c, "diff_mg_dl": diff,
@@ -210,7 +210,7 @@ def verify_egfr_cockcroft(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, f"serum_creatinine must be > 0, got {cr}")
     sex_factor = 0.85 if sex == "female" else 1.0
     actual = ((140 - af) * wf * sex_factor) / (72 * cr)
-    tol = float(spec.get("tolerance_egfr", 5.0))  # ±5 mL/min
+    tol = clamp_tol(spec, "tolerance_egfr", 5.0)  # ±5 mL/min
     diff = abs(actual - c)
     data = {"age_years": af, "weight_kg": wf, "serum_creatinine": cr,
             "sex": sex, "sex_factor": sex_factor,
@@ -240,7 +240,7 @@ def verify_ibw_devine(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "height_in and claimed_ibw_kg must be numeric")
     base = 50.0 if sex == "male" else 45.5
     actual = base + 2.3 * (hf - 60)
-    tol = float(spec.get("tolerance_ibw_kg", 1.0))
+    tol = clamp_tol(spec, "tolerance_ibw_kg", 1.0)
     diff = abs(actual - c)
     data = {"height_in": hf, "sex": sex, "base_kg": base,
             "actual_ibw_kg": round(actual, 1), "claimed_ibw_kg": c,
@@ -265,7 +265,7 @@ def verify_map(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "systolic, diastolic, claimed_map_mmhg must be numeric")
     actual = df + (sf - df) / 3.0
-    tol = float(spec.get("tolerance_map_mmhg", 1.0))
+    tol = clamp_tol(spec, "tolerance_map_mmhg", 1.0)
     diff = abs(actual - c)
     data = {"systolic": sf, "diastolic": df,
             "actual_map_mmhg": round(actual, 2), "claimed_map_mmhg": c,

@@ -42,7 +42,7 @@ import math
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 # ── Julian Day ─────────────────────────────────────────────────────────
@@ -133,7 +133,7 @@ def verify_moon_phase(spec: Dict[str, Any]) -> VerifierResult:
     jd = _julian_day(y, m, d + 0.5)
     age = _moon_phase_age_days(jd)
     # Phase tolerance: half day on either side of the named instant by default
-    tol = float(spec.get("phase_tolerance_days") or 1.5)
+    tol = clamp_tol(spec, "phase_tolerance_days", 1.5)
     center = _PHASE_CENTERS[claimed]
     # Wrap-around distance
     raw = abs(age - center)
@@ -239,7 +239,7 @@ def verify_equinox_solstice(spec: Dict[str, Any]) -> VerifierResult:
     # Tolerance is ±2 days: the algorithm gives mean equinox/solstice
     # without applying the table of periodic terms (which would tighten
     # this to ~minutes). Date-level claims survive at ±2 d.
-    tol = int(spec.get("tolerance_days") or 2)
+    tol = int(clamp_tol(spec, "tolerance_days", 2))
     data = {
         "year": yi, "event": event,
         "actual_iso": actual_iso,

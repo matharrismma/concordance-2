@@ -34,7 +34,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 # Physical constants
 _RHO_SEAWATER = 1025.0   # kg/m³ standard seawater density
@@ -61,8 +61,8 @@ def verify_pressure_at_depth(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, f"depth_m must be non-negative, got {df}")
     actual_pa = _P_ATM + _RHO_SEAWATER * _G * df
     actual_atm = actual_pa / _P_ATM
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
 
     if claimed_pa is not None:
         try:
@@ -158,8 +158,8 @@ def verify_deep_water_wave_speed(spec: Dict[str, Any]) -> VerifierResult:
     if lamf <= 0:
         return error(name, f"wavelength_m must be positive, got {lamf}")
     actual = math.sqrt(_G * lamf / (2 * math.pi))
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - c)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {"formula": "c = √(g·λ / 2π)",

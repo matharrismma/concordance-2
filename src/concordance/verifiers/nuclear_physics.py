@@ -32,7 +32,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 _LN2 = math.log(2)
 _AMU_TO_MEV = 931.5  # MeV per amu (unified atomic mass unit)
@@ -57,8 +57,8 @@ def verify_radioactive_decay(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "elapsed_seconds and initial_count must be non-negative")
     lam = _LN2 / Tf
     actual = N0f * math.exp(-lam * tf)
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - cl)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {
@@ -103,8 +103,8 @@ def verify_binding_energy_per_nucleon(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, f"nucleon_count must be a positive integer, got {Af}")
     binding_energy_MeV = mdf * _AMU_TO_MEV
     actual = binding_energy_MeV / Af
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - cl)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {
@@ -147,8 +147,8 @@ def verify_half_life_from_activity(spec: Dict[str, Any]) -> VerifierResult:
     if Nf <= 0:
         return error(name, f"atom_count must be positive, got {Nf}")
     actual = _LN2 * Nf / Af
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - cl)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {
@@ -186,8 +186,8 @@ def verify_decay_constant(spec: Dict[str, Any]) -> VerifierResult:
     if Tf <= 0:
         return error(name, f"half_life_seconds must be positive, got {Tf}")
     actual = _LN2 / Tf
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - cl)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {

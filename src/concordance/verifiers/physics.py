@@ -187,8 +187,8 @@ def verify_kinematic_motion(spec: Dict[str, Any]) -> VerifierResult:
     if t_f < 0:
         return mismatch(name, f"time must be non-negative, got {t_f}")
     actual = v0_f * t_f + 0.5 * a_f * t_f * t_f
-    rel_tol = float(spec.get("tolerance_relative", 1e-6))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-6)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - c_f)
     if diff <= max(abs_tol, rel_tol * max(abs(actual), abs(c_f))):
         return confirm(name,

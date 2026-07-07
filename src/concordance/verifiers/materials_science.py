@@ -45,7 +45,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def verify_stress_strain(spec: Dict[str, Any]) -> VerifierResult:
@@ -56,8 +56,8 @@ def verify_stress_strain(spec: Dict[str, Any]) -> VerifierResult:
     Case 3: claimed_stress_Pa with force_N + area_m2 → σ = F/A
     """
     name = "materials_science.stress_strain"
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
 
     # Case 3: force → stress (check before case 1 to avoid ambiguity)
     if (spec.get("force_N") is not None and spec.get("area_m2") is not None
@@ -142,8 +142,8 @@ def verify_thermal_expansion(spec: Dict[str, Any]) -> VerifierResult:
     if L0f < 0:
         return error(name, f"original_length_m must be non-negative, got {L0f}")
     actual = af * L0f * dTf
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - c)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {"formula": "ΔL = α · L₀ · ΔT",
@@ -162,8 +162,8 @@ def verify_thermal_expansion(spec: Dict[str, Any]) -> VerifierResult:
 def verify_density(spec: Dict[str, Any]) -> VerifierResult:
     """ρ = m/V or m = ρ·V depending on which claimed_* key is present."""
     name = "materials_science.density"
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
 
     # Case 1: mass + volume → density
     if (spec.get("mass_kg") is not None and spec.get("volume_m3") is not None

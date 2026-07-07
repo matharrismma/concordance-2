@@ -44,7 +44,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 # Newtonian gravitational constant (SI: m³ kg⁻¹ s⁻²). CODATA 2018.
@@ -76,7 +76,7 @@ def verify_kepler_third_law(spec: Dict[str, Any]) -> VerifierResult:
     T_squared = Tf * Tf
     a_cubed = af ** 3
     rel_diff = abs(T_squared - a_cubed) / a_cubed
-    tol = float(spec.get("tolerance_relative", 0.05))
+    tol = clamp_tol(spec, "tolerance_relative", 0.05)
     consistent = rel_diff <= tol
     data = {"orbital_period_years": Tf, "semi_major_axis_au": af,
             "T_squared": T_squared, "a_cubed": a_cubed,
@@ -115,7 +115,7 @@ def verify_gravitational_force(spec: Dict[str, Any]) -> VerifierResult:
     if rf <= 0:
         return error(name, f"separation must be positive (got {rf})")
     actual = _G * m1f * m2f / (rf * rf)
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     diff = abs(actual - cf)
     threshold = rel_tol * abs(actual)
     data = {"mass_1_kg": m1f, "mass_2_kg": m2f, "separation_m": rf,
@@ -145,7 +145,7 @@ def verify_parallax_distance(spec: Dict[str, Any]) -> VerifierResult:
     if pf <= 0:
         return error(name, f"parallax must be positive, got {pf}")
     actual = 1.0 / pf
-    rel_tol = float(spec.get("tolerance_relative", 1e-2))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-2)
     diff = abs(actual - cf)
     threshold = max(0.01, rel_tol * abs(actual))
     data = {"parallax_arcsec": pf, "actual_distance_parsec": actual,
@@ -180,7 +180,7 @@ def verify_distance_modulus(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "magnitudes and distance must be numeric")
     # m - M = 5·log10(d) - 5  ⇒  d = 10^((m - M + 5) / 5)
     actual = 10.0 ** ((mf - Mf + 5.0) / 5.0)
-    rel_tol = float(spec.get("tolerance_relative", 5e-2))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 5e-2)
     diff = abs(actual - cf)
     threshold = max(0.5, rel_tol * abs(actual))
     data = {"apparent_magnitude": mf, "absolute_magnitude": Mf,

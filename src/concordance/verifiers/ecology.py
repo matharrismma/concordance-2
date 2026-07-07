@@ -35,7 +35,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def verify_logistic_growth(spec: Dict[str, Any]) -> VerifierResult:
@@ -70,8 +70,8 @@ def verify_logistic_growth(spec: Dict[str, Any]) -> VerifierResult:
     if denom == 0:
         return error(name, "logistic denominator is zero; check inputs")
     actual = Kf / denom
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - cl)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {
@@ -117,8 +117,8 @@ def verify_trophic_efficiency(spec: Dict[str, Any]) -> VerifierResult:
     if not (0.0 < eff <= 1.0):
         return error(name, f"trophic_efficiency must be in (0, 1], got {eff}")
     actual = Ef * (eff ** int(lf))
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - cl)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {
@@ -161,7 +161,7 @@ def verify_shannon_diversity(spec: Dict[str, Any]) -> VerifierResult:
     if any(p < 0 for p in props):
         return error(name, "all species_proportions must be non-negative")
     total = sum(props)
-    sum_tol = float(spec.get("tolerance_absolute", 0.001))
+    sum_tol = clamp_tol(spec, "tolerance_absolute", 0.001)
     if abs(total - 1.0) > sum_tol:
         return error(
             name,
@@ -173,8 +173,8 @@ def verify_shannon_diversity(spec: Dict[str, Any]) -> VerifierResult:
         if p > 0:
             H -= p * math.log(p)
     actual = H
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - cl)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {
@@ -217,8 +217,8 @@ def verify_carbon_footprint_transport(spec: Dict[str, Any]) -> VerifierResult:
     if ff < 0:
         return error(name, f"emission_factor_kg_per_km must be non-negative, got {ff}")
     actual = df * ff
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - cl)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {

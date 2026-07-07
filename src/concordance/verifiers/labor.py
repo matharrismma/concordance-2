@@ -33,7 +33,7 @@ LABOR_VERIFY packet shape (any subset):
 from __future__ import annotations
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 # US federal minimum wage (effective 2009, public law)
 _US_FEDERAL_MIN_WAGE = 7.25
@@ -55,7 +55,7 @@ def verify_gross_pay(spec: Dict[str, Any]) -> VerifierResult:
     if rf < 0 or hf < 0:
         return error(name, "hourly_rate and hours_worked must be non-negative")
     actual = rf * hf
-    tol = float(spec.get("tolerance", max(0.01, actual * 0.001)))
+    tol = clamp_tol(spec, "tolerance", max(0.01, actual * 0.001))
     data = {"hourly_rate": rf, "hours_worked": hf,
             "actual_gross_pay": round(actual, 2), "claimed_gross_pay": c,
             "formula": "gross = hourly_rate * hours_worked"}
@@ -80,7 +80,7 @@ def verify_overtime_pay(spec: Dict[str, Any]) -> VerifierResult:
     if rf < 0 or rh < 0 or oh < 0:
         return error(name, "all inputs must be non-negative")
     actual = rf * rh + rf * 1.5 * oh
-    tol = float(spec.get("tolerance", max(0.01, actual * 0.001)))
+    tol = clamp_tol(spec, "tolerance", max(0.01, actual * 0.001))
     data = {"hourly_rate": rf, "regular_hours": rh, "overtime_hours": oh,
             "overtime_multiplier": 1.5,
             "actual_total_pay": round(actual, 2), "claimed_total_pay": c,
@@ -106,7 +106,7 @@ def verify_annual_to_hourly(spec: Dict[str, Any]) -> VerifierResult:
     if annual_hours <= 0:
         return error(name, f"annual_hours must be > 0, got {annual_hours}")
     actual = af / annual_hours
-    tol = float(spec.get("tolerance", max(0.01, actual * 0.001)))
+    tol = clamp_tol(spec, "tolerance", max(0.01, actual * 0.001))
     data = {"annual_salary": af, "annual_hours": annual_hours,
             "actual_hourly": round(actual, 4), "claimed_hourly": c,
             "formula": f"hourly = annual / {annual_hours}"}
@@ -130,7 +130,7 @@ def verify_take_home_pay(spec: Dict[str, Any]) -> VerifierResult:
     if not (0.0 <= tf < 1.0):
         return error(name, f"total_tax_rate must be 0.0–0.99, got {tf}")
     actual = gf * (1.0 - tf)
-    tol = float(spec.get("tolerance", max(0.01, actual * 0.001)))
+    tol = clamp_tol(spec, "tolerance", max(0.01, actual * 0.001))
     data = {"gross_pay": gf, "total_tax_rate": tf,
             "actual_take_home": round(actual, 2), "claimed_take_home": c,
             "formula": "take_home = gross * (1 - total_tax_rate)"}

@@ -26,7 +26,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def _h2(p: float) -> float:
@@ -55,8 +55,8 @@ def verify_shannon_entropy(spec: Dict[str, Any]) -> VerifierResult:
     if abs(s - 1.0) > 1e-6:
         return error(name, f"probabilities must sum to 1, got {s}")
     actual = -sum(p * math.log2(p) for p in ps if p > 0)
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-6))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-6)
     diff = abs(actual - c)
     threshold = max(abs_tol, rel_tol * abs(actual))
     data = {"probabilities": ps, "actual_entropy_bits": actual,
@@ -86,8 +86,8 @@ def verify_bsc_capacity(spec: Dict[str, Any]) -> VerifierResult:
     if not (0 <= pf <= 1):
         return error(name, f"bit-flip rate must be in [0, 1], got {pf}")
     actual = 1.0 - _h2(pf)
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-3)
     diff = abs(actual - c)
     threshold = max(abs_tol, rel_tol * abs(actual))
     data = {"bsc_error_rate": pf, "actual_capacity_bits": actual,

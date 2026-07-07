@@ -46,7 +46,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def verify_simple_interest(spec: Dict[str, Any]) -> VerifierResult:
@@ -63,7 +63,7 @@ def verify_simple_interest(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "principal, rate, time_years, claimed_simple_interest must be numeric")
     actual = Pf * rf * tf
-    tol = float(spec.get("tolerance", max(0.01, abs(actual) * 0.001)))
+    tol = clamp_tol(spec, "tolerance", max(0.01, abs(actual) * 0.001))
     data = {"principal": Pf, "rate": rf, "time_years": tf,
             "actual_interest": round(actual, 4), "claimed_interest": c,
             "formula": "I = P * r * t"}
@@ -89,7 +89,7 @@ def verify_compound_interest(spec: Dict[str, Any]) -> VerifierResult:
     if nf <= 0:
         return error(name, f"compounding_periods must be > 0, got {nf}")
     actual = Pf * (1 + rf / nf) ** (nf * tf)
-    tol = float(spec.get("tolerance", max(0.01, abs(actual) * 0.001)))
+    tol = clamp_tol(spec, "tolerance", max(0.01, abs(actual) * 0.001))
     data = {"principal": Pf, "rate": rf, "time_years": tf,
             "compounding_periods": nf,
             "actual_amount": round(actual, 4), "claimed_amount": c,
@@ -115,7 +115,7 @@ def verify_present_value(spec: Dict[str, Any]) -> VerifierResult:
     if (1 + rf) ** tf == 0:
         return error(name, "discount rate produces zero denominator")
     actual = FVf / (1 + rf) ** tf
-    tol = float(spec.get("tolerance", max(0.01, abs(actual) * 0.001)))
+    tol = clamp_tol(spec, "tolerance", max(0.01, abs(actual) * 0.001))
     data = {"future_value": FVf, "discount_rate": rf, "time_years": tf,
             "actual_pv": round(actual, 4), "claimed_pv": c,
             "formula": "PV = FV / (1 + r)^t"}
@@ -138,7 +138,7 @@ def verify_future_value(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "present_value, growth_rate, time_years, claimed_future_value must be numeric")
     actual = PVf * (1 + rf) ** tf
-    tol = float(spec.get("tolerance", max(0.01, abs(actual) * 0.001)))
+    tol = clamp_tol(spec, "tolerance", max(0.01, abs(actual) * 0.001))
     data = {"present_value": PVf, "growth_rate": rf, "time_years": tf,
             "actual_fv": round(actual, 4), "claimed_fv": c,
             "formula": "FV = PV * (1 + r)^t"}
@@ -161,7 +161,7 @@ def verify_rule_of_72(spec: Dict[str, Any]) -> VerifierResult:
     if rp <= 0:
         return error(name, f"rate_percent must be > 0, got {rp}")
     actual = 72.0 / rp
-    tol = float(spec.get("tolerance", 0.5))
+    tol = clamp_tol(spec, "tolerance", 0.5)
     data = {"rate_percent": rp, "actual_doubling_years": round(actual, 2),
             "claimed_doubling_years": c, "formula": "years ≈ 72 / rate_percent"}
     if abs(actual - c) <= tol:
@@ -183,7 +183,7 @@ def verify_inflation_adjusted(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "nominal_value, inflation_rate, years, claimed_real_value must be numeric")
     actual = nf / (1 + rf) ** yf
-    tol = float(spec.get("tolerance", max(0.01, abs(actual) * 0.001)))
+    tol = clamp_tol(spec, "tolerance", max(0.01, abs(actual) * 0.001))
     data = {"nominal_value": nf, "inflation_rate": rf, "years": yf,
             "actual_real_value": round(actual, 4), "claimed_real_value": c,
             "formula": "real = nominal / (1 + inflation_rate)^years"}
@@ -216,7 +216,7 @@ def verify_inflation_rate(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "cpi_previous cannot be zero (division)")
     actual_frac = (ct - cp) / cp
     actual_pct = actual_frac * 100.0
-    tol_frac = float(spec.get("tolerance", 0.0005))
+    tol_frac = clamp_tol(spec, "tolerance", 0.0005)
     tol_pct = tol_frac * 100.0
     matched = abs(actual_frac - c) <= tol_frac or abs(actual_pct - c) <= tol_pct
     data = {"cpi_current": ct, "cpi_previous": cp,
@@ -244,7 +244,7 @@ def verify_gdp_per_capita(spec: Dict[str, Any]) -> VerifierResult:
     if pf <= 0:
         return error(name, f"population must be > 0, got {pf}")
     actual = gf / pf
-    tol = float(spec.get("tolerance", max(1.0, abs(actual) * 0.005)))
+    tol = clamp_tol(spec, "tolerance", max(1.0, abs(actual) * 0.005))
     data = {"gdp": gf, "population": pf,
             "actual_gdp_per_capita": round(actual, 2), "claimed_gdp_per_capita": c,
             "formula": "GDP per capita = GDP / population"}
@@ -268,7 +268,7 @@ def verify_price_elasticity(spec: Dict[str, Any]) -> VerifierResult:
     if pf == 0:
         return error(name, "pct_change_price cannot be zero")
     actual = qf / pf
-    tol = float(spec.get("tolerance", 0.05))
+    tol = clamp_tol(spec, "tolerance", 0.05)
     data = {"pct_change_quantity": qf, "pct_change_price": pf,
             "actual_ped": round(actual, 4), "claimed_ped": c,
             "interpretation": "elastic" if abs(actual) > 1 else "inelastic",

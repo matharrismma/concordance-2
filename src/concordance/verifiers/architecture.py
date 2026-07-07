@@ -38,7 +38,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def verify_floor_area_ratio(spec: Dict[str, Any]) -> VerifierResult:
@@ -58,8 +58,8 @@ def verify_floor_area_ratio(spec: Dict[str, Any]) -> VerifierResult:
     if tfaf < 0:
         return error(name, f"total_floor_area_m2 must be non-negative, got {tfaf}")
     actual = tfaf / lotf
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - c)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {"formula": "FAR = total_floor_area / lot_area",
@@ -146,8 +146,8 @@ def verify_window_wall_ratio(spec: Dict[str, Any]) -> VerifierResult:
     if winf < 0:
         return error(name, f"window_area_m2 must be non-negative, got {winf}")
     actual = winf / wallf
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - c)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {"formula": "WWR = window_area / gross_wall_area",
@@ -176,8 +176,8 @@ def verify_structural_load(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "snow_load_kPa must be numeric")
     actual = df + lf + sf
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - c)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {"formula": "total = dead + live + snow",

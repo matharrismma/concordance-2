@@ -33,7 +33,7 @@ GENETICS_VERIFY packet shape (any subset of fields, all optional):
 from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 # ── Standard genetic code (NCBI translation table 1) ──────────────────────
@@ -160,7 +160,7 @@ def verify_gc_content(spec: Dict[str, Any]) -> VerifierResult:
                         {"claimed": claimed_f})
     gc = sum(1 for c in seq if c in "GCgc")
     actual = gc / len(seq)
-    tol = float(spec.get("tolerance", 1e-3))
+    tol = clamp_tol(spec, "tolerance", 1e-3)
     if abs(actual - claimed_f) <= tol:
         return confirm(name,
                        f"GC fraction {actual:.4f} matches claim {claimed_f:.4f} (tol {tol})",

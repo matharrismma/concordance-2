@@ -31,7 +31,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 # Note name → semitones above C (0..11).
@@ -144,7 +144,7 @@ def verify_frequency_ratio(spec: Dict[str, Any]) -> VerifierResult:
         return na(name, f"unknown interval name {claimed!r}; supported: {sorted(_INTERVAL_RATIOS.keys())}")
     expected = _INTERVAL_RATIOS[cn]
     actual = bf / af
-    rel_tol = float(spec.get("tolerance_relative", 0.02))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 0.02)
     diff = abs(actual - expected)
     threshold = max(1e-3, rel_tol * expected)
     data = {"freq_a": af, "freq_b": bf, "actual_ratio": actual,
@@ -174,7 +174,7 @@ def verify_equal_temperament_freq(spec: Dict[str, Any]) -> VerifierResult:
     if not (0 <= nf <= 127):
         return error(name, f"MIDI note must be 0-127, got {nf}")
     actual = 440.0 * (2.0 ** ((nf - 69) / 12.0))
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     diff = abs(actual - c)
     threshold = max(0.01, rel_tol * abs(actual))
     data = {"midi_note": nf, "actual_freq_hz": actual,

@@ -20,7 +20,7 @@ from __future__ import annotations
 import re
 from fractions import Fraction
 from typing import Dict, List, Tuple, Any
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 # regex pieces ---------------------------------------------------------------
 
@@ -381,7 +381,7 @@ def verify_ph_classification(spec: Dict[str, Any]) -> VerifierResult:
     if not (0.0 <= pH_f <= 14.0):
         return mismatch(name, f"pH {pH_f} out of valid range [0, 14]",
                         {"pH": pH_f})
-    tol = float(spec.get("neutral_tolerance", 0.5))
+    tol = clamp_tol(spec, "neutral_tolerance", 0.5)
     if abs(pH_f - 7.0) <= tol:
         actual = "neutral"
     elif pH_f < 7.0:

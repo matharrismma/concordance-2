@@ -22,7 +22,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch
+from .base import VerifierResult, na, confirm, mismatch, clamp_tol
 
 
 # Each entry: (canonical_value, unit, is_exact, source_note)
@@ -178,7 +178,7 @@ def verify_physical_constant(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return na(name)
     actual = record["value"]
-    rel_tol = float(spec.get("rel_tol") or 1e-4)
+    rel_tol = clamp_tol(spec, "rel_tol", 1e-4)
     if actual == 0:
         threshold = 1e-12
     else:

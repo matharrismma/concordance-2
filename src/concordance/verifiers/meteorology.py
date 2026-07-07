@@ -29,7 +29,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 _MAGNUS_A = 17.625
@@ -56,7 +56,7 @@ def verify_dew_point(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, f"RH must be in (0, 100], got {Rf}")
     gamma = (_MAGNUS_A * Tf) / (_MAGNUS_B + Tf) + math.log(Rf / 100.0)
     actual = (_MAGNUS_B * gamma) / (_MAGNUS_A - gamma)
-    tol = float(spec.get("tolerance_c", 0.5))
+    tol = clamp_tol(spec, "tolerance_c", 0.5)
     diff = abs(actual - c)
     data = {"temperature_c": Tf, "relative_humidity_pct": Rf,
             "actual_dew_point_c": actual, "claimed_dew_point_c": c,
@@ -101,7 +101,7 @@ def verify_heat_index(spec: Dict[str, Any]) -> VerifierResult:
         + 8.5282e-4 * Tf * Rf * Rf
         - 1.99e-6 * Tf * Tf * Rf * Rf
     )
-    tol = float(spec.get("tolerance_f", 1.5))
+    tol = clamp_tol(spec, "tolerance_f", 1.5)
     diff = abs(actual - c)
     data = {"temperature_f": Tf, "relative_humidity_pct": Rf,
             "actual_heat_index_f": actual, "claimed_heat_index_f": c,
@@ -135,7 +135,7 @@ def verify_wind_chill(spec: Dict[str, Any]) -> VerifierResult:
                      f"NWS WC valid only for T ≤ 50°F and V > 3 mph; got T={Tf}, V={Vf}")
     v_pow = Vf ** 0.16
     actual = 35.74 + 0.6215 * Tf - 35.75 * v_pow + 0.4275 * Tf * v_pow
-    tol = float(spec.get("tolerance_f", 1.0))
+    tol = clamp_tol(spec, "tolerance_f", 1.0)
     diff = abs(actual - c)
     data = {"temperature_f": Tf, "wind_speed_mph": Vf,
             "actual_wind_chill_f": actual, "claimed_wind_chill_f": c,
@@ -179,7 +179,7 @@ def verify_wind_chill_metric(spec: Dict[str, Any]) -> VerifierResult:
             c = float(claimed_wc)
         except (TypeError, ValueError):
             return error(name, "claimed_wc_c must be numeric")
-        tol = float(spec.get("tolerance_c", 0.5))
+        tol = clamp_tol(spec, "tolerance_c", 0.5)
         diff = abs(wc - c)
         if diff <= tol:
             return confirm(name, f"WC = {wc:.2f}°C (matches claim {c})", data)
@@ -214,7 +214,7 @@ def verify_saturation_vapor_pressure(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "T and claim must be numeric")
     actual = _saturation_vapor_pressure_hpa(Tf)
-    rel_tol = float(spec.get("tolerance_relative", 0.02))  # 2%
+    rel_tol = clamp_tol(spec, "tolerance_relative", 0.02)  # 2%
     diff = abs(actual - c)
     threshold = max(0.05, rel_tol * actual)
     data = {"temperature_c": Tf, "actual_es_hpa": actual,

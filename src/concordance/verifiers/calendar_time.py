@@ -45,7 +45,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 _WEEKDAY_NAMES = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
@@ -164,7 +164,7 @@ def verify_duration_addition(spec: Dict[str, Any]) -> VerifierResult:
         actual_utc = actual
         claimed_utc = dt_claimed
     diff_sec = abs((actual_utc - claimed_utc).total_seconds())
-    tol = float(spec.get("tolerance_seconds", 0))
+    tol = clamp_tol(spec, "tolerance_seconds", 0)
     data = {"start": dt_start.isoformat(), "duration_seconds": d,
             "actual_end": actual.isoformat(), "claimed_end": dt_claimed.isoformat(),
             "diff_seconds": diff_sec, "tolerance_seconds": tol}
@@ -218,7 +218,7 @@ def verify_utc_offset(spec: Dict[str, Any]) -> VerifierResult:
         co = float(claimed_offset)
     except (TypeError, ValueError):
         return error(name, "claimed_utc_offset_hours must be numeric")
-    tol = float(spec.get("offset_tolerance_hours") or 0.001)
+    tol = clamp_tol(spec, "offset_tolerance_hours", 0.001)
     data = {
         "timezone": tz, "at": iso,
         "actual_offset_hours": actual_offset,

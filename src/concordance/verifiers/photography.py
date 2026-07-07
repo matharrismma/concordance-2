@@ -31,7 +31,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def _ev(N: float, t: float) -> float:
@@ -53,7 +53,7 @@ def verify_exposure_value(spec: Dict[str, Any]) -> VerifierResult:
     if Nf <= 0 or tf <= 0:
         return error(name, "f-number and shutter must be positive")
     actual = _ev(Nf, tf)
-    tol = float(spec.get("tolerance_ev", 0.1))
+    tol = clamp_tol(spec, "tolerance_ev", 0.1)
     diff = abs(actual - c)
     data = {"f_number": Nf, "shutter_seconds": tf,
             "actual_ev": actual, "claimed_ev": c, "diff": diff,
@@ -83,7 +83,7 @@ def verify_reciprocity_equivalent(spec: Dict[str, Any]) -> VerifierResult:
     if Na <= 0 or ta <= 0 or Nb <= 0 or tb <= 0:
         return error(name, "f-numbers and shutters must be positive")
     eva, evb = _ev(Na, ta), _ev(Nb, tb)
-    tol = float(spec.get("tolerance_ev", 0.1))
+    tol = clamp_tol(spec, "tolerance_ev", 0.1)
     actual = abs(eva - evb) <= tol
     data = {"settings_a": [Na, ta], "ev_a": eva,
             "settings_b": [Nb, tb], "ev_b": evb,
@@ -114,7 +114,7 @@ def verify_angle_of_view(spec: Dict[str, Any]) -> VerifierResult:
     if ff <= 0 or df <= 0:
         return error(name, "focal length and sensor dimension must be positive")
     actual = 2.0 * math.degrees(math.atan(df / (2.0 * ff)))
-    tol = float(spec.get("tolerance_deg", 0.5))
+    tol = clamp_tol(spec, "tolerance_deg", 0.5)
     diff = abs(actual - c)
     data = {"focal_length_mm": ff, "sensor_dim_mm": df,
             "actual_aov_deg": actual, "claimed_aov_deg": c, "diff_deg": diff,
@@ -142,7 +142,7 @@ def verify_hyperfocal_distance(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "focal length, f-number, and CoC must be positive")
     H_mm = (ff * ff) / (Nf * cf) + ff
     actual_m = H_mm / 1000.0
-    rel_tol = float(spec.get("tolerance_relative", 0.02))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 0.02)
     diff = abs(actual_m - cl)
     threshold = max(0.05, rel_tol * actual_m)
     data = {"focal_length_mm": ff, "f_number": Nf, "coc_mm": cf,

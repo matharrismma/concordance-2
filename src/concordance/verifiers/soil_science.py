@@ -31,7 +31,7 @@ SOIL_VERIFY packet shape (any subset):
 from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 # ── Crop pH tolerance (public-domain, USDA / FAO) ────────────────────────────
@@ -171,7 +171,7 @@ def verify_npk_requirement(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "area_hectares must be numeric")
     N_ref, P_ref, K_ref = ref
     actual_n, actual_p, actual_k = N_ref * af, P_ref * af, K_ref * af
-    tol_pct = float(spec.get("tolerance_pct", 10.0))
+    tol_pct = clamp_tol(spec, "tolerance_pct", 10.0)
     results_detail = []
     mismatches = []
     data = {"crop": crop, "area_ha": af,
@@ -207,7 +207,7 @@ def verify_irrigation_req(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "reference_et0_mm_per_day, crop_coefficient, claimed_etc_mm_per_day must be numeric")
     actual = et0f * kcf
-    tol = float(spec.get("tolerance_mm", max(0.05, actual * 0.02)))
+    tol = clamp_tol(spec, "tolerance_mm", max(0.05, actual * 0.02))
     data = {"et0_mm_per_day": et0f, "crop_coefficient_kc": kcf,
             "actual_etc_mm_per_day": round(actual, 4), "claimed_etc": c,
             "formula": "ETc = ET0 × Kc (FAO-56)", "source": "FAO Irrigation and Drainage Paper 56"}
@@ -236,7 +236,7 @@ def verify_lime_requirement(spec: Dict[str, Any]) -> VerifierResult:
     if delta <= 0:
         return na(name, f"target_ph ({tpf}) must be > current_ph ({cpf}) for liming")
     actual = delta * rate
-    tol = float(spec.get("tolerance_t", max(0.1, actual * 0.10)))
+    tol = clamp_tol(spec, "tolerance_t", max(0.1, actual * 0.10))
     data = {"current_ph": cpf, "target_ph": tpf, "delta_ph": delta,
             "soil_type": soil_type, "rate_t_per_ha_per_ph_unit": rate,
             "actual_lime_t_per_ha": round(actual, 2), "claimed_lime_t_per_ha": c,

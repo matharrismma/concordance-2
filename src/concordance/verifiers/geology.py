@@ -28,7 +28,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def verify_radiometric_decay(spec: Dict[str, Any]) -> VerifierResult:
@@ -48,8 +48,8 @@ def verify_radiometric_decay(spec: Dict[str, Any]) -> VerifierResult:
     if tf < 0 or N0f < 0:
         return error(name, "elapsed_years and initial_amount must be non-negative")
     actual = N0f * (0.5 ** (tf / Tf))
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - c)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {"half_life_years": Tf, "elapsed_years": tf,
@@ -107,7 +107,7 @@ def verify_richter_amplitude(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "magnitudes and claimed_amplitude_ratio must be numeric")
     actual = 10.0 ** (M2f - M1f)
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     diff = abs(actual - c)
     threshold = max(1e-6, rel_tol * abs(actual))
     data = {"M1": M1f, "M2": M2f, "actual_ratio": actual,

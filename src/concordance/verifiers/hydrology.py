@@ -29,7 +29,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 _G = 9.80665  # standard gravity m/s²
@@ -50,7 +50,7 @@ def verify_manning_velocity(spec: Dict[str, Any]) -> VerifierResult:
     if nf <= 0 or Rf <= 0 or Sf < 0:
         return error(name, "n>0, R>0, S>=0 required")
     actual = (1.0 / nf) * (Rf ** (2.0 / 3.0)) * (Sf ** 0.5)
-    rel_tol = float(spec.get("tolerance_relative", 0.01))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 0.01)
     diff = abs(actual - c)
     threshold = max(1e-6, rel_tol * actual) if actual > 0 else 1e-6
     data = {"n": nf, "R_m": Rf, "S": Sf,
@@ -75,7 +75,7 @@ def verify_darcy_velocity(spec: Dict[str, Any]) -> VerifierResult:
     if Kf < 0:
         return error(name, "hydraulic conductivity must be non-negative")
     actual = Kf * ig
-    rel_tol = float(spec.get("tolerance_relative", 0.01))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 0.01)
     diff = abs(actual - c)
     threshold = max(1e-15, rel_tol * abs(actual)) if actual != 0 else 1e-15
     data = {"K_m_s": Kf, "i": ig,
@@ -104,7 +104,7 @@ def verify_rational_runoff(spec: Dict[str, Any]) -> VerifierResult:
     if If < 0 or Af < 0:
         return error(name, "rainfall intensity and area must be non-negative")
     actual = Cf * If * Af
-    rel_tol = float(spec.get("tolerance_relative", 0.01))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 0.01)
     diff = abs(actual - c)
     threshold = max(1e-6, rel_tol * actual) if actual > 0 else 1e-6
     data = {"C": Cf, "i": If, "A": Af,
@@ -132,7 +132,7 @@ def verify_bernoulli_head(spec: Dict[str, Any]) -> VerifierResult:
     if rf <= 0:
         return error(name, "fluid density must be positive")
     actual = zf + pf / (rf * _G) + (vf * vf) / (2 * _G)
-    rel_tol = float(spec.get("tolerance_relative", 0.01))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 0.01)
     diff = abs(actual - c)
     threshold = max(1e-3, rel_tol * abs(actual)) if actual != 0 else 1e-3
     data = {"z_m": zf, "p_pa": pf, "v_m_s": vf, "rho_kg_m3": rf,

@@ -29,7 +29,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 _EARTH_RADIUS_KM = 6371.0
@@ -79,7 +79,7 @@ def verify_haversine_distance(spec: Dict[str, Any]) -> VerifierResult:
     dlam = math.radians(o2 - o1)
     h = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlam / 2) ** 2
     actual = 2 * _EARTH_RADIUS_KM * math.asin(math.sqrt(h))
-    rel_tol = float(spec.get("tolerance_relative", 0.01))  # 1% default
+    rel_tol = clamp_tol(spec, "tolerance_relative", 0.01)  # 1% default
     diff = abs(actual - c)
     threshold = max(0.5, rel_tol * actual)  # absolute floor 0.5 km
     data = {"lat1": a1, "lon1": o1, "lat2": a2, "lon2": o2,
@@ -114,7 +114,7 @@ def verify_initial_bearing(spec: Dict[str, Any]) -> VerifierResult:
     x = math.cos(phi1) * math.sin(phi2) - math.sin(phi1) * math.cos(phi2) * math.cos(dlam)
     actual = (math.degrees(math.atan2(y, x)) + 360.0) % 360.0
     diff = min(abs(actual - c), 360.0 - abs(actual - c))  # circular diff
-    tol = float(spec.get("tolerance_deg", 1.0))
+    tol = clamp_tol(spec, "tolerance_deg", 1.0)
     data = {"lat1": a1, "lon1": o1, "lat2": a2, "lon2": o2,
             "actual_bearing_deg": actual, "claimed_bearing_deg": c,
             "diff_deg": diff, "tolerance_deg": tol,

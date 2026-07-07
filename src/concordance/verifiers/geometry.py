@@ -70,7 +70,7 @@ def verify_pythagorean(spec: Dict[str, Any]) -> VerifierResult:
     # c is hypotenuse — must be the largest.
     sides_squared_sum = af * af + bf * bf
     c_squared = cf * cf
-    rel_tol = float(spec.get("tolerance_relative", 1e-6))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-6)
     diff = abs(sides_squared_sum - c_squared)
     threshold = max(1e-9, rel_tol * c_squared)
     actual = (diff <= threshold) and (cf >= af and cf >= bf)
@@ -103,7 +103,7 @@ def verify_polygon_angle_sum(spec: Dict[str, Any]) -> VerifierResult:
     if nf < 3:
         return error(name, f"polygon must have at least 3 sides, got {nf}")
     actual = (nf - 2) * 180.0
-    rel_tol = float(spec.get("tolerance_relative", 1e-6))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-6)
     diff = abs(actual - c)
     threshold = max(1e-6, rel_tol * actual)
     data = {"n": nf, "actual_sum_deg": actual, "claimed_sum_deg": c,
@@ -131,7 +131,7 @@ def verify_circle_properties(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "radius must be numeric")
     if rf < 0:
         return error(name, "radius must be non-negative")
-    rel_tol = float(spec.get("tolerance_relative", 1e-4))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-4)
     actual_area = math.pi * rf * rf
     actual_circ = 2.0 * math.pi * rf
     data: Dict[str, Any] = {

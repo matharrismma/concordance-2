@@ -96,7 +96,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def _close(actual: float, claimed: float, rel_tol: float = 1e-3,
@@ -123,7 +123,7 @@ def verify_power_balance(spec: Dict[str, Any]) -> VerifierResult:
     name = "energy.power_balance"
     gen = _num(spec.get("generation_kwh_day"))
     cons = _num(spec.get("consumption_kwh_day"))
-    losses = _num(spec.get("losses_kwh_day")) or 0.0
+    losses = clamp_tol(spec, "losses_kwh_day", 0.0)
     claimed = _num(spec.get("claimed_balance_kwh_day"))
     if gen is None or cons is None or claimed is None:
         return na(name)
@@ -132,8 +132,8 @@ def verify_power_balance(spec: Dict[str, Any]) -> VerifierResult:
                      f"all values must be non-negative; "
                      f"got gen={gen}, cons={cons}, losses={losses}")
     actual = gen - cons - losses
-    rel_tol = _num(spec.get("tolerance_relative")) or 1e-3
-    abs_tol = _num(spec.get("tolerance_absolute")) or 1e-3
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-3)
     threshold = max(abs_tol, rel_tol * max(abs(actual), 1.0))
     diff = abs(actual - claimed)
     data = {
@@ -183,7 +183,7 @@ def verify_battery_sizing(spec: Dict[str, Any]) -> VerifierResult:
     if sys_v <= 0:
         return error(name, f"system_voltage_V must be positive; got {sys_v}")
     actual_ah = (daily_kwh * days * 1000.0) / (sys_v * dod)
-    rel_tol = _num(spec.get("tolerance_relative")) or 5e-3
+    rel_tol = clamp_tol(spec, "tolerance_relative", 5e-3)
     threshold = max(0.5, rel_tol * actual_ah)  # ≥0.5 Ah floor
     diff = abs(actual_ah - claimed)
     data = {
@@ -227,7 +227,7 @@ def verify_solar_daily_yield(spec: Dict[str, Any]) -> VerifierResult:
         return error(name,
                      f"system_efficiency must be in (0, 1.0]; got {eta}")
     actual = (panel * psh * eta) / 1000.0
-    rel_tol = _num(spec.get("tolerance_relative")) or 1e-3
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     threshold = max(1e-3, rel_tol * actual)
     diff = abs(actual - claimed)
     data = {
@@ -272,7 +272,7 @@ def verify_wire_voltage_drop(spec: Dict[str, Any]) -> VerifierResult:
     claimed_pct = _num(spec.get("claimed_drop_pct"))
     if claimed_drop is None and claimed_pct is None:
         return na(name, "need claimed_drop_V or claimed_drop_pct")
-    rel_tol = _num(spec.get("tolerance_relative")) or 1e-2
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-2)
     data = {
         "wire_resistance_ohm_per_m": r_per_m,
         "distance_m": length,
@@ -320,7 +320,7 @@ def verify_kwh_wh_consistency(spec: Dict[str, Any]) -> VerifierResult:
     if kwh is None or wh is None:
         return na(name)
     actual_wh = kwh * 1000.0
-    rel_tol = _num(spec.get("tolerance_relative")) or 1e-6
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-6)
     threshold = max(1e-3, rel_tol * abs(actual_wh))
     diff = abs(actual_wh - wh)
     data = {"kwh": kwh, "actual_wh": actual_wh, "claimed_wh": wh,
@@ -358,7 +358,7 @@ def verify_efficiency(spec: Dict[str, Any]) -> VerifierResult:
                      f"efficiency = {out}/{inp} = {actual:.4f} > 1.0 "
                      "(perpetual motion violation; if this is a heat pump, "
                      "set is_heat_pump=true)")
-    rel_tol = _num(spec.get("tolerance_relative")) or 1e-3
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     threshold = max(1e-4, rel_tol * abs(actual))
     diff = abs(actual - claimed)
     label = "COP" if is_hp else "efficiency η"
@@ -395,7 +395,7 @@ def verify_runtime(spec: Dict[str, Any]) -> VerifierResult:
     if load <= 0:
         return error(name, f"load_W must be positive; got {load}")
     actual = bat / load
-    rel_tol = _num(spec.get("tolerance_relative")) or 1e-3
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     threshold = max(1e-3, rel_tol * actual)
     diff = abs(actual - claimed)
     data = {"battery_wh": bat, "load_W": load,

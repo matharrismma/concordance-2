@@ -29,7 +29,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def _close(a, b, rel_tol=1e-3, abs_tol=1e-9):
@@ -70,7 +70,7 @@ def verify_snell_law(spec: Dict[str, Any]) -> VerifierResult:
                         f"refraction occurs (θ₂={actual:.3f}°), claimed TIR",
                         {"actual_theta2_deg": actual, "claimed": "TIR"})
     diff = abs(actual - c)
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     threshold = max(0.05, rel_tol * abs(actual))
     data = {"n1": n1f, "n2": n2f, "theta1_deg": t1f,
             "actual_theta2_deg": actual, "claimed_theta2_deg": c,
@@ -102,7 +102,7 @@ def verify_thin_lens(spec: Dict[str, Any]) -> VerifierResult:
     rhs = (1.0 / dof) + (1.0 / dif)
     lhs = 1.0 / ff
     diff = abs(lhs - rhs)
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     threshold = max(1e-6, rel_tol * abs(lhs))
     consistent = diff <= threshold
     data = {"focal_length": ff, "object_distance": dof, "image_distance": dif,
@@ -134,7 +134,7 @@ def verify_magnification(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "object distance cannot be zero")
     actual = -dif / dof
     diff = abs(actual - c)
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     threshold = max(1e-3, rel_tol * abs(actual))
     data = {"object_distance": dof, "image_distance": dif,
             "actual_magnification": actual, "claimed_magnification": c,
@@ -164,7 +164,7 @@ def verify_rayleigh_diffraction(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "wavelength and aperture must be positive")
     actual = 1.22 * lf / Df
     diff = abs(actual - c)
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     threshold = max(1e-9, rel_tol * abs(actual))
     data = {"wavelength_m": lf, "aperture_m": Df,
             "actual_diffraction_rad": actual, "claimed_diffraction_rad": c,
@@ -197,7 +197,7 @@ def verify_double_slit(spec: Dict[str, Any]) -> VerifierResult:
     if lf <= 0 or df <= 0 or Lf <= 0:
         return error(name, "wavelength, slit separation, and screen distance must be positive")
     actual = lf * Lf / df
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     data = {"wavelength_m": lf, "slit_separation_m": df, "screen_distance_m": Lf,
             "actual_fringe_spacing_m": actual, "claimed_fringe_spacing_m": c, "formula": "Δy = λ·L/d"}
     if abs(actual - c) <= max(1e-12, rel_tol * abs(actual)):
@@ -226,7 +226,7 @@ def verify_photon_energy(spec: Dict[str, Any]) -> VerifierResult:
             actual, basis = _H * ff, f"hf (f={ff:.3g} Hz)"
     except (TypeError, ValueError):
         return error(name, "inputs must be numeric")
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     data = {"actual_photon_energy_j": actual, "claimed_photon_energy_j": c, "formula": "E = hc/λ = hf"}
     if abs(actual - c) <= max(1e-30, rel_tol * abs(actual)):
         return confirm(name, f"E = {basis} = {actual:.3e} J (matches claim)", data)
@@ -253,7 +253,7 @@ def verify_de_broglie(spec: Dict[str, Any]) -> VerifierResult:
         actual = _H / pf
     except (TypeError, ValueError):
         return error(name, "inputs must be numeric")
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     data = {"momentum_kg_m_s": pf, "actual_de_broglie_m": actual,
             "claimed_de_broglie_m": c, "formula": "λ = h/p"}
     if abs(actual - c) <= max(1e-30, rel_tol * abs(actual)):
@@ -278,7 +278,7 @@ def verify_critical_angle(spec: Dict[str, Any]) -> VerifierResult:
     if nclf >= ncf:
         return mismatch(name, f"no TIR: cladding index {nclf} must be < core index {ncf}")
     actual = math.degrees(math.asin(nclf / ncf))
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     data = {"n_core": ncf, "n_cladding": nclf, "actual_critical_angle_deg": actual,
             "claimed_critical_angle_deg": c, "formula": "theta_c = arcsin(n_clad/n_core)"}
     if abs(actual - c) <= max(1e-6, rel_tol * abs(actual)):
@@ -300,7 +300,7 @@ def verify_numerical_aperture(spec: Dict[str, Any]) -> VerifierResult:
     if ncf <= nclf:
         return error(name, "core index must exceed cladding index")
     actual = math.sqrt(ncf * ncf - nclf * nclf)
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     data = {"actual_numerical_aperture": actual, "claimed_numerical_aperture": c,
             "formula": "NA = sqrt(n_core^2 - n_clad^2)"}
     if abs(actual - c) <= max(1e-6, rel_tol * abs(actual)):
@@ -330,7 +330,7 @@ def verify_fiber_attenuation(spec: Dict[str, Any]) -> VerifierResult:
             return na(name)
     except (TypeError, ValueError):
         return error(name, "inputs must be numeric")
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     data = {"actual_loss_db": actual, "claimed_loss_db": c, "formula": "loss = alpha*L = 10log10(Pin/Pout)"}
     if abs(actual - c) <= max(1e-6, rel_tol * abs(actual)):
         return confirm(name, f"loss = {basis} = {actual:.4g} dB (matches claim)", data)
@@ -352,7 +352,7 @@ def verify_wdm_capacity(spec: Dict[str, Any]) -> VerifierResult:
     if nf <= 0 or rf <= 0:
         return error(name, "channels and bitrate must be positive")
     actual = nf * rf
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     data = {"actual_total_gbps": actual, "claimed_total_gbps": c,
             "formula": "total = num_channels x bitrate_per_channel"}
     if abs(actual - c) <= max(1e-6, rel_tol * abs(actual)):

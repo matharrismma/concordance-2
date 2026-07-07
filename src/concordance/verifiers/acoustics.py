@@ -23,7 +23,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def _close(actual, claimed, rel_tol=1e-3, abs_tol=1e-6):
@@ -45,7 +45,7 @@ def verify_wave_relation(spec: Dict[str, Any]) -> VerifierResult:
     if cf <= 0 or ff <= 0 or lf <= 0:
         return error(name, f"speed/frequency/wavelength must be positive (got {cf}, {ff}, {lf})")
     actual = ff * lf
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     diff = abs(actual - cf)
     data = {"speed": cf, "frequency": ff, "wavelength": lf,
             "f_times_lambda": actual, "diff": diff,
@@ -76,7 +76,7 @@ def verify_decibel_ratio(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, f"db_kind must be 'intensity', 'pressure', or 'power'; got {kind!r}")
     multiplier = 20.0 if kind == "pressure" else 10.0
     actual = multiplier * math.log10(v / rf)
-    tol = float(spec.get("tolerance_db", 0.1))
+    tol = clamp_tol(spec, "tolerance_db", 0.1)
     diff = abs(actual - c)
     data = {"value": v, "reference": rf, "kind": kind,
             "actual_db": actual, "claimed_db": c, "diff_db": diff,
@@ -113,7 +113,7 @@ def verify_doppler_shift(spec: Dict[str, Any]) -> VerifierResult:
     if denom == 0:
         return error(name, "source moving at -c is unphysical (denominator zero)")
     actual = fs * (c + vo) / denom
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     diff = abs(actual - fo_c)
     data = {"f_source": fs, "v_observer": vo, "v_source": vs,
             "speed_medium": c, "actual_f_observed": actual,
@@ -148,7 +148,7 @@ def verify_harmonic_frequency(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "harmonic_n must be >= 1")
     actual = nf * f1f
     diff = abs(actual - c)
-    rel_tol = float(spec.get("tolerance_relative", 1e-6))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-6)
     data = {"fundamental": f1f, "n": nf, "actual_harmonic": actual,
             "claimed_harmonic": c, "diff": diff,
             "formula": "f_n = n · f_1"}

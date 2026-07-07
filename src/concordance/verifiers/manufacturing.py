@@ -52,7 +52,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 # Sigma-level → DPMO table (public-domain, 1.5σ shift convention).
@@ -105,7 +105,7 @@ def verify_sigma_level(spec: Dict[str, Any]) -> VerifierResult:
     if d < 0:
         return error(name, f"DPMO must be non-negative, got {d}")
     actual = _dpmo_to_sigma(d)
-    tol = float(spec.get("tolerance_sigma", 0.2))
+    tol = clamp_tol(spec, "tolerance_sigma", 0.2)
     diff = abs(actual - c)
     data = {"dpmo": d, "actual_sigma": actual, "claimed_sigma": c,
             "diff_sigma": diff, "tolerance_sigma": tol}
@@ -139,8 +139,8 @@ def verify_spc_control_limits(spec: Dict[str, Any]) -> VerifierResult:
     k = float(spec.get("k", 3))
     actual_ucl = m + k * s
     actual_lcl = m - k * s
-    tol = float(spec.get("tolerance", 1e-6))
-    rel_tol = float(spec.get("tolerance_relative", 1e-6))
+    tol = clamp_tol(spec, "tolerance", 1e-6)
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-6)
     diff_u = abs(actual_ucl - u)
     diff_l = abs(actual_lcl - l)
     data = {"mean": m, "sigma": s, "k": k,
@@ -218,8 +218,8 @@ def verify_tolerance_stack_rss(spec: Dict[str, Any]) -> VerifierResult:
     if any(t < 0 for t in ts):
         return error(name, "individual tolerances must be non-negative")
     actual = math.sqrt(sum(t * t for t in ts))
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-6))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-6)
     diff = abs(actual - c)
     data = {"tolerances": ts, "actual_rss": actual, "claimed_rss": c,
             "diff": diff, "worst_case_sum": sum(ts)}

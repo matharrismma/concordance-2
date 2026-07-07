@@ -36,7 +36,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def verify_replicates(spec: Dict[str, Any]) -> VerifierResult:
@@ -232,7 +232,7 @@ def verify_molarity(spec):
     cl = spec.get("claimed_molarity")
     if cl is None:
         return na("biology.molarity")
-    tol = float(spec.get("tolerance", 1e-3))
+    tol = clamp_tol(spec, "tolerance", 1e-3)
     try:
         if "moles" in spec:
             moles = float(spec["moles"])

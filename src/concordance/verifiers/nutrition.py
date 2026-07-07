@@ -42,7 +42,7 @@ NUT_VERIFY packet shape (any subset of fields):
 from __future__ import annotations
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 # Calorie content per gram (Atwater factors, public-domain USDA convention).
@@ -132,7 +132,7 @@ def verify_macronutrient_calories(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "macronutrient grams cannot be negative")
     actual = (cg * _CAL_PER_G_CARB + pg * _CAL_PER_G_PROTEIN
               + fg * _CAL_PER_G_FAT + ag * _CAL_PER_G_ALCOHOL)
-    tol = float(spec.get("tolerance_kcal", 5.0))
+    tol = clamp_tol(spec, "tolerance_kcal", 5.0)
     diff = abs(actual - c)
     data = {"actual_kcal": actual, "claimed_kcal": c, "diff_kcal": diff,
             "carb_g": cg, "protein_g": pg, "fat_g": fg, "alcohol_g": ag,
@@ -199,7 +199,7 @@ def verify_energy_balance(spec: Dict[str, Any]) -> VerifierResult:
     if i < 0 or e < 0:
         return error(name, "intake/expenditure cannot be negative")
     actual = i - e
-    tol = float(spec.get("tolerance_kcal", 5.0))
+    tol = clamp_tol(spec, "tolerance_kcal", 5.0)
     diff = abs(actual - c)
     data = {"intake_kcal": i, "expenditure_kcal": e,
             "actual_balance_kcal": actual, "claimed_balance_kcal": c,

@@ -45,7 +45,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 # ── qubit state normalization ────────────────────────────────────────────────
@@ -64,7 +64,7 @@ def verify_qubit_normalization(spec: Dict[str, Any]) -> VerifierResult:
     if not vals:
         return error(name, "amplitudes list is empty")
     norm_sq = sum(abs(a) ** 2 for a in vals)
-    tol = float(spec.get("tolerance", 1e-6))
+    tol = clamp_tol(spec, "tolerance", 1e-6)
     is_normalized = abs(norm_sq - 1.0) <= tol
     data = {"n_amplitudes": len(vals), "norm_squared": norm_sq,
             "tolerance": tol, "is_normalized": is_normalized}
@@ -210,7 +210,7 @@ def verify_von_neumann_entropy(spec: Dict[str, Any]) -> VerifierResult:
     if abs(total - 1.0) > 1e-4:
         return error(name, f"eigenvalues must sum to 1, got {total:.6f}")
     entropy = -sum(lam * math.log2(lam) for lam in lambdas if lam > 1e-15)
-    tol = float(spec.get("tolerance_bits", 0.005))
+    tol = clamp_tol(spec, "tolerance_bits", 0.005)
     diff = abs(entropy - c)
     data = {"eigenvalues": lambdas, "computed_entropy_bits": entropy,
             "claimed_entropy_bits": c, "diff_bits": diff, "tolerance_bits": tol}
@@ -238,7 +238,7 @@ def verify_quantum_fidelity(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError) as ex:
         return error(name, f"inner_product and claimed_fidelity must be numeric: {ex}")
     fidelity = abs(ip_v) ** 2
-    tol = float(spec.get("tolerance", 1e-4))
+    tol = clamp_tol(spec, "tolerance", 1e-4)
     diff = abs(fidelity - c)
     data = {"inner_product": str(ip_v), "computed_fidelity": fidelity,
             "claimed_fidelity": c, "diff": diff}

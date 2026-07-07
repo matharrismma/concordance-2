@@ -20,7 +20,7 @@ import math
 import time
 from typing import Any, Callable, Dict, List, Tuple
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 # ----- Static checks (AST-based) -------------------------------------------
@@ -218,7 +218,7 @@ def verify_runtime_complexity(spec: Dict[str, Any]) -> VerifierResult:
     fn_name = spec.get("function_name")
     gen_code = spec.get("input_generator")
     claimed = (spec.get("claimed_class") or "").replace(" ", "").lower()
-    tol = spec.get("tolerance", 0.40)
+    tol = clamp_tol(spec, "tolerance", 0.40)
     target_s = spec.get("target_seconds", 0.05)
     if not code or not fn_name or not gen_code:
         return na("cs.runtime_complexity")
@@ -399,7 +399,7 @@ def verify_space_complexity(spec):
     code = spec.get("code"); fn_name = spec.get("function_name")
     gen_code = spec.get("input_generator")
     claimed = (spec.get("claimed_space_class") or "").replace(" ", "").lower()
-    tol = spec.get("tolerance", 0.40)
+    tol = clamp_tol(spec, "tolerance", 0.40)
     if not code or not fn_name or not gen_code or not claimed:
         return na("cs.space_complexity")
     default_sizes = {

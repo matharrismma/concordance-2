@@ -42,7 +42,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def verify_accounting_identity(spec: Dict[str, Any]) -> VerifierResult:
@@ -57,7 +57,7 @@ def verify_accounting_identity(spec: Dict[str, Any]) -> VerifierResult:
         af, lf, ef = float(a), float(l), float(e)
     except (TypeError, ValueError):
         return error(name, "assets/liabilities/equity must be numeric")
-    tol = float(spec.get("tolerance", 1e-2))
+    tol = clamp_tol(spec, "tolerance", 1e-2)
     actual_le = lf + ef
     diff = abs(af - actual_le)
     data = {"assets": af, "liabilities": lf, "equity": ef,
@@ -97,8 +97,8 @@ def verify_compound_interest(spec: Dict[str, Any]) -> VerifierResult:
     if tf < 0:
         return error(name, f"years cannot be negative ({tf})")
     actual = pf * (1.0 + rf / nf) ** (nf * tf)
-    rel_tol = float(spec.get("tolerance_relative", 1e-4))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-2))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-4)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-2)
     diff = abs(actual - cf)
     threshold = max(abs_tol, rel_tol * abs(actual))
     data = {"principal": pf, "rate": rf, "compounding_per_year": nf, "years": tf,
@@ -132,8 +132,8 @@ def verify_npv(spec: Dict[str, Any]) -> VerifierResult:
     if r <= -1.0:
         return error(name, f"discount_rate must be > -1, got {r}")
     actual = sum(cf / ((1 + r) ** t) for t, cf in enumerate(cfs_f))
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 0.5))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 0.5)
     diff = abs(actual - c)
     threshold = max(abs_tol, rel_tol * abs(actual))
     data = {"cashflows": cfs_f, "discount_rate": r,
@@ -170,8 +170,8 @@ def verify_present_value(spec: Dict[str, Any]) -> VerifierResult:
     if tf < 0:
         return error(name, f"periods cannot be negative ({tf})")
     actual = fvf / ((1 + rf) ** tf)
-    rel_tol = float(spec.get("tolerance_relative", 1e-4))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-2))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-4)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-2)
     diff = abs(actual - cf)
     threshold = max(abs_tol, rel_tol * abs(actual))
     data = {"future_value": fvf, "discount_rate": rf, "periods": tf,

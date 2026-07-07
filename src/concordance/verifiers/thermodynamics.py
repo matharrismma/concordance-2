@@ -45,7 +45,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 _R = 8.314  # J / (mol · K)
 
@@ -67,8 +67,8 @@ def verify_carnot_efficiency(spec: Dict[str, Any]) -> VerifierResult:
     if Th <= Tc:
         return error(name, f"T_hot_K ({Th}) must be greater than T_cold_K ({Tc})")
     actual = 1.0 - Tc / Th
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - c)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {
@@ -149,8 +149,8 @@ def verify_ideal_gas_law(spec: Dict[str, Any]) -> VerifierResult:
         actual = Pf * Vf / (nf * _R)
         formula = "T = PV / (nR)"
 
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - claimed_f)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {
@@ -191,8 +191,8 @@ def verify_specific_heat(spec: Dict[str, Any]) -> VerifierResult:
     if mf < 0 or cf < 0:
         return error(name, "mass_kg and specific_heat_J_per_kgK must be non-negative")
     actual = mf * cf * dTf
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - cl)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {
@@ -232,8 +232,8 @@ def verify_entropy_change(spec: Dict[str, Any]) -> VerifierResult:
     if Tf <= 0:
         return error(name, f"temperature_K must be > 0 K, got {Tf}")
     actual = Qf / Tf
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-9))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-9)
     diff = abs(actual - cl)
     threshold = max(abs_tol, rel_tol * abs(actual) if actual else abs_tol)
     data = {
@@ -288,8 +288,8 @@ def verify_clausius_clapeyron(spec: Dict[str, Any]) -> VerifierResult:
     if inv_T2 <= 0:
         return error(name, "inputs imply a non-physical (≤0 K) boiling point; check L / reference / pressure")
     T2_pred = 1.0 / inv_T2
-    rel_tol = float(spec.get("tolerance_relative", 0.02))   # constant-L approximation
-    abs_tol = float(spec.get("tolerance_absolute", 0.5))    # 0.5 K floor
+    rel_tol = clamp_tol(spec, "tolerance_relative", 0.02)   # constant-L approximation
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 0.5)    # 0.5 K floor
     diff = abs(T2_pred - cT2)
     threshold = max(abs_tol, rel_tol * abs(T2_pred))
     data = {

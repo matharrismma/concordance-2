@@ -30,7 +30,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 # (atomic_number, symbol, name, standard_atomic_weight)
@@ -306,7 +306,7 @@ def verify_atomic_mass_weighted_average(spec: Dict[str, Any]) -> VerifierResult:
     if abs(total - 1.0) > 0.02:
         return error(name, f"abundances must sum to ~1 (or ~100%); got {ab_sum}")
     actual = sum(m * a for m, a in norm)
-    tol = float(spec.get("mass_abs_tol", 0.01))
+    tol = clamp_tol(spec, "mass_abs_tol", 0.01)
     data = {"isotopes": [{"mass": m, "abundance": a} for m, a in pairs],
             "abundance_basis": basis,
             "actual_weighted_mass": round(actual, 5),

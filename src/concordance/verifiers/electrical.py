@@ -38,7 +38,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def _close(actual: float, claimed: float, rel_tol: float = 1e-3, abs_tol: float = 1e-6) -> bool:
@@ -64,7 +64,7 @@ def verify_ohms_law(spec: Dict[str, Any]) -> VerifierResult:
             return error(name, f"resistance must be non-negative, got {Rf}")
     actual_V = If * Rf
     diff = abs(actual_V - Vf)
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     threshold = max(1e-6, rel_tol * abs(actual_V) if actual_V else 1e-6)
     data = {"voltage_V": Vf, "current_A": If, "resistance_ohm": Rf,
             "actual_V_from_IR": actual_V, "diff_V": diff,
@@ -112,7 +112,7 @@ def verify_power(spec: Dict[str, Any]) -> VerifierResult:
         c = float(claimed)
     except (TypeError, ValueError):
         return error(name, f"power_W_claim must be numeric, got {claimed!r}")
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     matches = [(label, p, abs(p - c)) for (label, p) in forms]
     all_match = all(_close(p, c, rel_tol=rel_tol) for (_, p, _) in matches)
     data = {"forms": [{"label": label, "value": p, "diff": d} for (label, p, d) in matches],
@@ -142,8 +142,8 @@ def verify_kirchhoff_voltage_loop(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "voltages must be numeric")
     actual = sum(vs)
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-6))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-6)
     threshold = max(abs_tol, rel_tol * max(abs(actual), 1.0))
     diff = abs(actual - c)
     data = {"voltages_in_loop": vs, "actual_sum": actual, "claimed_sum": c,
@@ -177,8 +177,8 @@ def verify_rc_time_constant(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, f"elapsed time cannot be negative, got {tf}")
     tau = Rf * Cf
     actual = Vf * (1.0 - math.exp(-tf / tau))
-    rel_tol = float(spec.get("tolerance_relative", 1e-3))
-    abs_tol = float(spec.get("tolerance_absolute", 1e-3))
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    abs_tol = clamp_tol(spec, "tolerance_absolute", 1e-3)
     threshold = max(abs_tol, rel_tol * abs(actual))
     diff = abs(actual - cf)
     data = {"R": Rf, "C": Cf, "elapsed_s": tf, "supply_V": Vf,

@@ -31,7 +31,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def verify_pythagorean_expectation(spec: Dict[str, Any]) -> VerifierResult:
@@ -53,7 +53,7 @@ def verify_pythagorean_expectation(spec: Dict[str, Any]) -> VerifierResult:
     if kf <= 0:
         return error(name, "exponent must be positive")
     actual = (rsf ** kf) / ((rsf ** kf) + (raf ** kf))
-    tol = float(spec.get("tolerance_pct", 0.005))
+    tol = clamp_tol(spec, "tolerance_pct", 0.005)
     diff = abs(actual - c)
     data = {"runs_scored": rsf, "runs_allowed": raf, "exponent": kf,
             "actual_winning_pct": actual, "claimed_winning_pct": c,
@@ -76,7 +76,7 @@ def verify_elo_expected_score(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "ratings and claim must be numeric")
     actual = 1.0 / (1.0 + 10 ** ((Rbf - Raf) / 400.0))
-    tol = float(spec.get("tolerance", 0.005))
+    tol = clamp_tol(spec, "tolerance", 0.005)
     diff = abs(actual - c)
     data = {"elo_a": Raf, "elo_b": Rbf,
             "actual_expected": actual, "claimed_expected": c, "diff": diff,
@@ -107,7 +107,7 @@ def verify_elo_rating_update(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "K must be positive")
     Ea = 1.0 / (1.0 + 10 ** ((Rbf - Raf) / 400.0))
     actual = Raf + Kf * (Saf - Ea)
-    tol = float(spec.get("tolerance_rating", 0.5))
+    tol = clamp_tol(spec, "tolerance_rating", 0.5)
     diff = abs(actual - c)
     data = {"elo_a_pre": Raf, "elo_b_pre": Rbf, "actual_score_a": Saf,
             "K": Kf, "expected_score_a": Ea,
@@ -138,7 +138,7 @@ def verify_games_behind(spec: Dict[str, Any]) -> VerifierResult:
         if v < 0:
             return error(name, f"{n} must be non-negative")
     actual = ((Wlf - Wtf) + (Ltf - Llf)) / 2.0
-    tol = float(spec.get("tolerance_games", 0.0))
+    tol = clamp_tol(spec, "tolerance_games", 0.0)
     diff = abs(actual - c)
     data = {"leader_record": [Wlf, Llf], "team_record": [Wtf, Ltf],
             "actual_games_behind": actual, "claimed_games_behind": c,

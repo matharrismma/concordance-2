@@ -43,7 +43,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def verify_concrete_volume(spec: Dict[str, Any]) -> VerifierResult:
@@ -62,7 +62,7 @@ def verify_concrete_volume(spec: Dict[str, Any]) -> VerifierResult:
     if any(v <= 0 for v in (Lf, Wf, Df)):
         return error(name, "length_m, width_m, and depth_m must be positive")
     actual = Lf * Wf * Df
-    tol = float(spec.get("tolerance_m3", max(0.001, actual * 0.005)))
+    tol = clamp_tol(spec, "tolerance_m3", max(0.001, actual * 0.005))
     data = {"length_m": Lf, "width_m": Wf, "depth_m": Df,
             "actual_volume_m3": round(actual, 4), "claimed_volume_m3": c,
             "formula": "V = L × W × D"}
@@ -84,7 +84,7 @@ def verify_rectangular_area(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "length_m, width_m, claimed_rect_area_m2 must be numeric")
     actual = Lf * Wf
-    tol = float(spec.get("tolerance_m2", max(0.001, actual * 0.005)))
+    tol = clamp_tol(spec, "tolerance_m2", max(0.001, actual * 0.005))
     data = {"length_m": Lf, "width_m": Wf,
             "actual_area_m2": round(actual, 4), "claimed_area_m2": c,
             "formula": "A = L × W"}
@@ -107,7 +107,7 @@ def verify_circular_area(spec: Dict[str, Any]) -> VerifierResult:
     if rf <= 0:
         return error(name, f"radius_m must be > 0, got {rf}")
     actual = math.pi * rf ** 2
-    tol = float(spec.get("tolerance_m2", max(0.001, actual * 0.005)))
+    tol = clamp_tol(spec, "tolerance_m2", max(0.001, actual * 0.005))
     data = {"radius_m": rf, "actual_area_m2": round(actual, 4), "claimed_area_m2": c,
             "formula": "A = π × r²"}
     if abs(actual - c) <= tol:
@@ -128,7 +128,7 @@ def verify_rebar_weight(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "rebar_length_m, rebar_unit_weight_kg_per_m, claimed_rebar_weight_kg must be numeric")
     actual = lf * uwf
-    tol = float(spec.get("tolerance_kg", max(0.01, actual * 0.005)))
+    tol = clamp_tol(spec, "tolerance_kg", max(0.01, actual * 0.005))
     data = {"rebar_length_m": lf, "unit_weight_kg_per_m": uwf,
             "actual_weight_kg": round(actual, 3), "claimed_weight_kg": c,
             "formula": "W = length × unit_weight"}
@@ -151,7 +151,7 @@ def verify_wall_area(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "perimeter_m, wall_height_m, claimed_wall_area_m2 must be numeric")
     actual = pf * hf - of
-    tol = float(spec.get("tolerance_m2", max(0.01, abs(actual) * 0.005)))
+    tol = clamp_tol(spec, "tolerance_m2", max(0.01, abs(actual) * 0.005))
     data = {"perimeter_m": pf, "wall_height_m": hf, "openings_m2": of,
             "actual_wall_area_m2": round(actual, 4), "claimed_wall_area_m2": c,
             "formula": "wall_area = perimeter × height − openings"}
@@ -223,7 +223,7 @@ def verify_beam_load(spec: Dict[str, Any]) -> VerifierResult:
     if sf <= 0:
         return error(name, f"span_m must be > 0, got {sf}")
     actual = lf / sf
-    tol = float(spec.get("tolerance_kn_per_m", max(0.001, actual * 0.005)))
+    tol = clamp_tol(spec, "tolerance_kn_per_m", max(0.001, actual * 0.005))
     data = {"total_load_kn": lf, "span_m": sf,
             "actual_intensity_kn_per_m": round(actual, 4), "claimed_intensity": c,
             "formula": "intensity = total_load / span"}
