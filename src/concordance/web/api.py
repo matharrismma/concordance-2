@@ -95,7 +95,10 @@ def render_seal_html(content_hash: str, record: Optional[Dict[str, Any]]) -> Tup
     html = (f"{head}<title>Receipt {short}… · {label} · Narrow Highway</title>"
             f"<meta name=description content=\"{desc}\">"
             f"<meta property=\"og:title\" content=\"Verification receipt · {label}\">"
-            f"<meta property=\"og:description\" content=\"{desc}\"></head><body>"
+            f"<meta property=\"og:description\" content=\"{desc}\">"
+            f"<link rel=canonical href=\"/s/{_esc(content_hash)}\">"
+            f"<meta property=\"og:type\" content=article>"
+            f"<meta name=\"twitter:card\" content=\"summary\"></head><body>"
             f"<header class=site><div class=wrap style=\"padding:.9rem 1.2rem;display:flex;"
             f"justify-content:space-between;align-items:center\"><a class=brand href=/>Narrow"
             f"<span class=road>Highway</span></a><nav class=site><a href=/#verify>Verify</a>"
@@ -236,6 +239,8 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             f"<meta property=\"og:title\" content=\"{title}\">"
             f"<meta property=\"og:description\" content=\"{desc}\">"
             f"<meta property=\"og:type\" content=article>"
+            f"<meta property=\"og:url\" content=\"{canonical}\">"
+            f"<meta name=\"twitter:card\" content=\"summary\">"
             f"<script type=\"application/ld+json\">{ld_json}</script></head><body>"
             f"<header class=site><div class=wrap style=\"padding:.9rem 1.2rem;display:flex;"
             f"justify-content:space-between;align-items:center\"><a class=brand href=/>Narrow"
@@ -258,6 +263,29 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             f"if(window.NHGraph&&s)NHGraph.local('nhconn','nhlg',s.getAttribute('data-cid'));}});</script>"
             f"</body></html>")
     return 200, html
+
+
+_SITEMAP_PAGES = ("/", "/ask.html", "/bible.html", "/read.html", "/characters.html",
+                  "/prophecy.html", "/journal.html", "/map.html", "/steward.html",
+                  "/community.html", "/library.html", "/guarantees.html", "/collapse.html",
+                  "/seeds.html", "/seal.html")
+
+
+def build_sitemap(base_url: str) -> str:
+    """A crawlable sitemap of the main pages + EVERY public card permalink (/card/<id>) —
+    so the ~5k citable, JSON-LD-bearing card pages are discoverable by search + LLM crawlers
+    instead of orphaned behind JS. base_url is per-host (each surface advertises its own)."""
+    urls = [f"{base_url}{p}" for p in _SITEMAP_PAGES]
+    try:
+        for c in corpus.default_corpus().cards.values():
+            if c.get("kind") == "note" and corpus.is_public(c):
+                urls.append(f"{base_url}/card/{c.get('id')}")
+    except Exception:
+        pass
+    rows = "\n".join(f"  <url><loc>{_esc(u)}</loc></url>" for u in urls)
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            f"{rows}\n</urlset>\n")
 
 
 def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
@@ -977,6 +1005,25 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
                     clen = 0
                 if clen > MAX_BODY:
                     return self._json(413, {"error": f"request body too large (> {MAX_BODY} bytes)"})
+            if method == "GET" and u.path in ("/robots.txt", "/sitemap.xml"):
+                # Surface-aware: each host advertises ITS OWN sitemap + absolute URLs, so the
+                # .com reach is crawled (not pointed at .org), and every card permalink is listed.
+                host = (self.headers.get("host") or "narrowhighway.com").split(":")[0] or "narrowhighway.com"
+                base = "https://" + host
+                if u.path == "/robots.txt":
+                    b = ("User-agent: *\nAllow: /\nDisallow: /keep\nDisallow: /keep.html\n"
+                         f"Sitemap: {base}/sitemap.xml\n").encode("utf-8")
+                    ctype = "text/plain; charset=utf-8"
+                else:
+                    b = build_sitemap(base).encode("utf-8")
+                    ctype = "application/xml; charset=utf-8"
+                self.send_response(200)
+                self.send_header("content-type", ctype)
+                self.send_header("x-content-type-options", "nosniff")
+                self.send_header("content-length", str(len(b)))
+                self.end_headers()
+                self.wfile.write(b)
+                return
             if method == "GET" and u.path in ("/keep", "/keep.html", "/keep.json"):
                 return self._keep(u)  # operator-gated dashboard
             if method == "GET" and u.path.startswith("/s/"):  # server-rendered citable receipt

@@ -65,10 +65,10 @@ async function load(off){
     total = d.total || 0;
     if(!d.cards || !d.cards.length){ list.innerHTML = '<p class="muted">no cards on that shelf.</p>'; document.getElementById('pager').innerHTML=""; return; }
     list.innerHTML = d.cards.map(c =>
-      '<div class="result" style="cursor:pointer" onclick="openCard(\'' + esc(c.id) + '\')">' +
+      '<a href="/card/' + encodeURIComponent(c.id) + '" class="result" style="display:block;text-decoration:none;color:inherit;cursor:pointer" onclick="openCard(\'' + esc(c.id) + '\');return false;">' +
       '<span class="shelf">' + esc(c.shelf || "") + '</span>' +
       '<div class="t">' + esc(c.title || c.id) + '</div>' +
-      '<div class="s">' + esc((c.snippet || "").slice(0,150)) + '</div></div>').join("");
+      '<div class="s">' + esc((c.snippet || "").slice(0,150)) + '</div></a>').join("");
     const page = Math.floor(offset/limit)+1, pages = Math.max(1, Math.ceil(total/limit));
     document.getElementById('pager').innerHTML =
       '<button ' + (offset<=0?'disabled':'') + ' onclick="load(' + (offset-limit) + ')">← prev</button>' +
