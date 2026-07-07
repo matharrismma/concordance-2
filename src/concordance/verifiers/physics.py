@@ -20,7 +20,7 @@ Conservation format:
 """
 from __future__ import annotations
 from typing import Any, Dict, List, Optional
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 # sympy (with sympy.physics.units) is a ~4s import. Only the dimensional-
 # consistency check needs it, so it loads on first use rather than at module
@@ -264,8 +264,8 @@ def verify_newtons_second_law(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "mass_kg, acceleration_m_per_s2, and claimed_force_N must be numeric")
     actual_F = mf * af
-    rel_tol = float(spec.get("rel_tol") or 1e-3)
-    abs_tol = float(spec.get("abs_tol") or 1e-6)
+    rel_tol = clamp_tol(spec, "rel_tol", 1e-3)
+    abs_tol = clamp_tol(spec, "abs_tol", 1e-6)
     threshold = max(abs_tol, abs(actual_F) * rel_tol)
     diff = abs(actual_F - Ff)
     data = {
@@ -307,8 +307,8 @@ def verify_kinetic_energy_basic(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "mass_kg, velocity_m_per_s, claimed_kinetic_energy_J must be numeric")
     actual = 0.5 * mf * vf * vf
-    rel_tol = float(spec.get("rel_tol") or 1e-3)
-    abs_tol = float(spec.get("abs_tol") or 1e-6)
+    rel_tol = clamp_tol(spec, "rel_tol", 1e-3)
+    abs_tol = clamp_tol(spec, "abs_tol", 1e-6)
     threshold = max(abs_tol, abs(actual) * rel_tol)
     diff = abs(actual - Kf)
     data = {

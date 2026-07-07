@@ -25,6 +25,13 @@ _DEFAULT_SRC = Path(r"C:\Users\hdven\OneDrive\Documents\Claude\Projects\Lighthou
 WITNESS_SHELVES = {"codex", "patristics", "hymns"}
 WITNESS_TIERS = {"words_in_red", "scripture", "creed", "catechism", "father"}
 
+# Provenance allowlist — only public-domain / CC0 / operator-own tiers migrate. A card whose
+# authority_tier is missing or not on this list is SKIPPED + logged, so the PD-only gate is
+# MECHANICAL at ingestion, not a trust-me policy. Extend deliberately, only when a new
+# PD/CC0 source is vetted (see docs/DATA_SOURCES.md).
+PD_TIERS = {"scripture", "words_in_red", "creed", "catechism", "father",
+            "external_aligned", "engine_derived", "matt"}
+
 
 def surface_for(card: dict) -> str:
     shelf = (card.get("shelf") or "").lower()
@@ -45,6 +52,7 @@ def main() -> int:
 
     n = 0
     skipped = 0
+    nonpd = 0
     surf = {"secular": 0, "witness": 0}
     with open(out, "w", encoding="utf-8") as w:
         for f in sorted(glob.glob(str(src / "*.json"))):
@@ -59,11 +67,14 @@ def main() -> int:
             if c.get("retracted") or c.get("lifecycle_stage") in ("archived", "quarantine"):
                 skipped += 1
                 continue
+            if (((c.get("source") or {}).get("authority_tier") or "").lower()) not in PD_TIERS:
+                nonpd += 1  # PD-only gate: unlicensed / unknown-provenance card, skipped + logged
+                continue
             c["surface"] = surface_for(c)
             surf[c["surface"]] += 1
             w.write(json.dumps(c, ensure_ascii=False) + "\n")
             n += 1
-    print(f"wrote {n} cards -> {out} (skipped {skipped}) | "
+    print(f"wrote {n} cards -> {out} (skipped {skipped}, non-PD {nonpd}) | "
           f"secular={surf['secular']} witness={surf['witness']}")
     return 0
 

@@ -20,7 +20,7 @@ from __future__ import annotations
 from typing import Any, Dict, List
 import math
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 # numpy + scipy.stats are heavy imports (scipy.stats ~1.5s). They load on
 # first use (via _ensure_stats) so the engine's cold start stays fast.
@@ -71,7 +71,7 @@ def verify_pvalue_calibration(spec: Dict[str, Any]) -> VerifierResult:
     # Default tolerance raised from 1e-3 to 5e-3: published p-values are typically
     # rounded to 2-3 decimal places, so a 0.001 window rejects legitimate claims
     # whose reported p differs from the recomputed p only by rounding.
-    tol = spec.get("tolerance", 5e-3)
+    tol = clamp_tol(spec, "tolerance", 5e-3)
 
     try:
         if test in ("two_sample_t", "welch_t"):
@@ -389,7 +389,7 @@ def verify_confidence_interval(spec: Dict[str, Any]) -> VerifierResult:
     sd = spec.get("sd")
     n = spec.get("n")
     conf = float(spec.get("conf_level", 0.95))
-    tol = float(spec.get("tolerance", 5e-3))
+    tol = clamp_tol(spec, "tolerance", 5e-3)
     if sd is not None and n is not None and n >= 2:
         df = spec.get("df", n - 1)
         try:

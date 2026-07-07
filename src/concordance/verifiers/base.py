@@ -53,3 +53,16 @@ def mismatch(name: str, detail: str, data: Optional[Dict[str, Any]] = None) -> V
 
 def error(name: str, detail: str, data: Optional[Dict[str, Any]] = None) -> VerifierResult:
     return VerifierResult(name=name, status="ERROR", detail=detail, data=data)
+
+
+def clamp_tol(spec: Dict[str, Any], key: str, default: float) -> float:
+    """Caller-supplied tolerance, clamped: a caller may TIGHTEN a tolerance but never LOOSEN
+    it past the verifier's default — otherwise an adversarial caller could widen the window to
+    force a CONFIRMED on a value that is actually wrong. Missing/malformed -> the default."""
+    try:
+        v = spec.get(key)
+        if v is None:
+            return default
+        return min(abs(float(v)), abs(default))
+    except (TypeError, ValueError):
+        return default

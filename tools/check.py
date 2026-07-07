@@ -34,7 +34,7 @@ def _has(mod: str) -> bool:
 
 def main() -> int:
     rc = 0
-    # 1. The moat — the hard gate: 58/58, 0 false-positives (benchmark exits non-zero otherwise).
+    # 1. The moat — the hard gate: 60/60, 0 false-positives (benchmark exits non-zero otherwise).
     rc |= _run([sys.executable, "tools/benchmark.py"])
 
     # 2. The suite + coverage floor (preferred), else a sovereign fallback.

@@ -27,7 +27,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 
 
 def verify_triangle_inequality(spec: Dict[str, Any]) -> VerifierResult:
@@ -183,7 +183,7 @@ def verify_rectangle_properties(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, f"rectangle dimensions must be non-negative; got l={lf}, w={wf}")
     actual_area = lf * wf
     actual_perim = 2.0 * (lf + wf)
-    rel_tol = float(spec.get("rel_tol") or 1e-4)
+    rel_tol = clamp_tol(spec, "rel_tol", 1e-4)
     mismatches: List[str] = []
     data: Dict[str, Any] = {
         "l": lf, "w": wf,
@@ -237,7 +237,7 @@ def verify_sphere_properties(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, f"sphere_radius must be non-negative; got {rf}")
     actual_vol = (4.0 / 3.0) * math.pi * rf**3
     actual_area = 4.0 * math.pi * rf**2
-    rel_tol = float(spec.get("rel_tol") or 1e-4)
+    rel_tol = clamp_tol(spec, "rel_tol", 1e-4)
     mismatches: List[str] = []
     data: Dict[str, Any] = {
         "r": rf,
@@ -292,7 +292,7 @@ def verify_cylinder_properties(spec: Dict[str, Any]) -> VerifierResult:
     actual_vol = math.pi * rf**2 * hf
     actual_lat = 2.0 * math.pi * rf * hf
     actual_tot = 2.0 * math.pi * rf**2 + actual_lat
-    rel_tol = float(spec.get("rel_tol") or 1e-4)
+    rel_tol = clamp_tol(spec, "rel_tol", 1e-4)
     mismatches: List[str] = []
     data: Dict[str, Any] = {
         "r": rf, "h": hf,
@@ -334,7 +334,7 @@ def verify_cube_properties(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, f"cube_side must be non-negative; got {sf}")
     actual_vol = sf**3
     actual_area = 6.0 * sf**2
-    rel_tol = float(spec.get("rel_tol") or 1e-4)
+    rel_tol = clamp_tol(spec, "rel_tol", 1e-4)
     mismatches: List[str] = []
     data: Dict[str, Any] = {
         "s": sf,
