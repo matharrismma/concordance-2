@@ -8,8 +8,12 @@ version = "2.0.0a0"
 description = "A deterministic verification engine — a verdict, the worked reasoning, and a re-checkable seal."
 license = {text = "AGPL-3.0-or-later"}
 requires-python = ">=3.10"
-# Sovereign: the core hot path is stdlib-only. Heavy deps are optional and lazy-loaded,
-# pulled in ONLY when a math/physics/stats claim actually needs them.
+# Sovereign: ZERO required dependencies — the engine imports, serves, seals, and keeps the
+# corpus on the stdlib alone. Heavy deps are optional + lazy-loaded. NOTE: the derivation
+# MOAT (math/physics/stats verification) needs the `math` extra (sympy/scipy/numpy); without
+# it those verifiers return NOT_APPLICABLE/ERROR — never a false HOLDS — but also can't
+# confirm math. Install `.[math]` for the full moat. The claim is "no required deps," not
+# "the moat runs on the stdlib."
 dependencies = []
 
 [project.optional-dependencies]
