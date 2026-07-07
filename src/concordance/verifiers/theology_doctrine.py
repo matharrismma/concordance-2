@@ -47,6 +47,8 @@ from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error
 
+_SCOPE = ("checks that the CLAIMED fields are internally consistent with the plain public-domain text/rule cited — NOT an attestation that the doctrine is TRUE. A structural-completeness check and a signpost to the sources; the truth is in the Word and in Christ, not in this tool.")
+
 
 # ---------------------------------------------------------------------------
 # theology_doctrine.gospel_core_facts
@@ -86,6 +88,7 @@ def verify_gospel_core_facts(spec: Dict[str, Any]) -> VerifierResult:
     if not b: missing.append("was_buried")
     if not r: missing.append("rose_third_day")
     data = {
+        "scope": _SCOPE,
         "rule": _GOSPEL_RULE,
         "anchor": _GOSPEL_CORE_ANCHOR,
         "claimed_died_for_sins": d,
@@ -155,6 +158,7 @@ def verify_trinitarian_formula(spec: Dict[str, Any]) -> VerifierResult:
     missing  = [label for label, found in zip(_PERSON_LABELS, presence) if not found]
     actual_complete = all(presence)
     data = {
+        "scope": _SCOPE,
         "rule": _TRINITARIAN_RULE,
         "anchor": _TRINITARIAN_ANCHOR,
         "persons_named": persons,
@@ -208,6 +212,7 @@ def verify_salvation_by_grace(spec: Dict[str, Any]) -> VerifierResult:
     mech_str = str(mechanism).lower().strip()
     actual_excludes_works = mech_str in _GRACE_MECHANISMS
     data = {
+        "scope": _SCOPE,
         "rule": _SALVATION_RULE,
         "anchor": _SALVATION_ANCHOR,
         "claimed_salvation_mechanism": mech_str,
@@ -261,6 +266,7 @@ def verify_bodily_resurrection(spec: Dict[str, Any]) -> VerifierResult:
     rt = str(res_type).lower().strip()
     actual_is_bodily = (rt == "bodily")
     data = {
+        "scope": _SCOPE,
         "rule": _RESURRECTION_RULE,
         "anchor": _RESURRECTION_ANCHOR,
         "claimed_resurrection_type": rt,
@@ -312,6 +318,7 @@ def verify_creation_ex_nihilo(spec: Dict[str, Any]) -> VerifierResult:
     cn = bool(claimed_nihilo)
     actual_ex_nihilo = not fp
     data = {
+        "scope": _SCOPE,
         "rule": _EX_NIHILO_RULE,
         "anchor": _EX_NIHILO_ANCHOR,
         "claimed_creation_from_preexisting_matter": fp,
