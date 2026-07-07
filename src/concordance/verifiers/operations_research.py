@@ -44,6 +44,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 # ---------------------------------------------------------------------------
@@ -322,23 +323,13 @@ def verify_assignment_cost(spec: Dict[str, Any]) -> VerifierResult:
 # Entry point
 # ---------------------------------------------------------------------------
 
+_RULES = [
+    (lambda ov: ("variable_values" in ov and "constraints" in ov and "claimed_feasible" in ov), verify_lp_feasibility),
+    (lambda ov: ("tasks" in ov and "claimed_makespan" in ov), verify_critical_path),
+    (lambda ov: ("items" in ov and "capacity" in ov and "claimed_optimal_value" in ov), verify_knapsack_01),
+    (lambda ov: ("assignment" in ov and "cost_matrix" in ov and "claimed_total_cost" in ov), verify_assignment_cost),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    """Dispatch all applicable OR checks for the OR_VERIFY block."""
-    results: List[VerifierResult] = []
-    ov = packet.get("OR_VERIFY") or {}
-
-    if "variable_values" in ov and "constraints" in ov and "claimed_feasible" in ov:
-        results.append(verify_lp_feasibility(ov))
-
-    if "tasks" in ov and "claimed_makespan" in ov:
-        results.append(verify_critical_path(ov))
-
-    if "items" in ov and "capacity" in ov and "claimed_optimal_value" in ov:
-        results.append(verify_knapsack_01(ov))
-
-    if "assignment" in ov and "cost_matrix" in ov and "claimed_total_cost" in ov:
-        results.append(verify_assignment_cost(ov))
-
-    if not results:
-        results.append(na("operations_research", "no OR_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'OR_VERIFY', _RULES, domain='operations_research', none_reason='no OR_VERIFY artifacts present')

@@ -39,6 +39,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 def verify_floor_area_ratio(spec: Dict[str, Any]) -> VerifierResult:
@@ -192,27 +193,16 @@ def verify_structural_load(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+_RULES = [
+    (lambda av: (all(av.get(k) is not None for k in ("total_floor_area_m2", "lot_area_m2", "claimed_far"))), verify_floor_area_ratio),
+    (lambda av: (all(av.get(k) is not None for k in ("floor_area_m2", "occupant_load_factor_m2_per_person",
+                                            "claimed_occupant_count"))), verify_occupant_load),
+    (lambda av: (all(av.get(k) is not None for k in ("riser_height_mm", "tread_depth_mm", "claimed_compliant"))), verify_stair_compliance),
+    (lambda av: (all(av.get(k) is not None for k in ("window_area_m2", "gross_wall_area_m2", "claimed_wwr"))), verify_window_wall_ratio),
+    (lambda av: (all(av.get(k) is not None for k in ("dead_load_kPa", "live_load_kPa",
+                                            "claimed_total_load_kPa"))), verify_structural_load),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    av = packet.get("ARCH_VERIFY") or {}
-
-    if all(av.get(k) is not None for k in ("total_floor_area_m2", "lot_area_m2", "claimed_far")):
-        results.append(verify_floor_area_ratio(av))
-
-    if all(av.get(k) is not None for k in ("floor_area_m2", "occupant_load_factor_m2_per_person",
-                                            "claimed_occupant_count")):
-        results.append(verify_occupant_load(av))
-
-    if all(av.get(k) is not None for k in ("riser_height_mm", "tread_depth_mm", "claimed_compliant")):
-        results.append(verify_stair_compliance(av))
-
-    if all(av.get(k) is not None for k in ("window_area_m2", "gross_wall_area_m2", "claimed_wwr")):
-        results.append(verify_window_wall_ratio(av))
-
-    if all(av.get(k) is not None for k in ("dead_load_kPa", "live_load_kPa",
-                                            "claimed_total_load_kPa")):
-        results.append(verify_structural_load(av))
-
-    if not results:
-        results.append(na("architecture", "no ARCH_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'ARCH_VERIFY', _RULES, domain='architecture', none_reason='no ARCH_VERIFY artifacts present')

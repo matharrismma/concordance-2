@@ -32,6 +32,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 # Note name → semitones above C (0..11).
@@ -221,17 +222,13 @@ def verify_scale_membership(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+_RULES = [
+    (lambda mv: (all(mv.get(k) is not None for k in ("note_a", "note_b", "claimed_semitones"))), verify_interval_semitones),
+    (lambda mv: (all(mv.get(k) is not None for k in ("freq_a", "freq_b", "claimed_interval"))), verify_frequency_ratio),
+    (lambda mv: (all(mv.get(k) is not None for k in ("midi_note", "claimed_frequency_hz"))), verify_equal_temperament_freq),
+    (lambda mv: (all(mv.get(k) is not None for k in ("key", "note", "claimed_in_scale"))), verify_scale_membership),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    mv = packet.get("MUS_VERIFY") or {}
-    if all(mv.get(k) is not None for k in ("note_a", "note_b", "claimed_semitones")):
-        results.append(verify_interval_semitones(mv))
-    if all(mv.get(k) is not None for k in ("freq_a", "freq_b", "claimed_interval")):
-        results.append(verify_frequency_ratio(mv))
-    if all(mv.get(k) is not None for k in ("midi_note", "claimed_frequency_hz")):
-        results.append(verify_equal_temperament_freq(mv))
-    if all(mv.get(k) is not None for k in ("key", "note", "claimed_in_scale")):
-        results.append(verify_scale_membership(mv))
-    if not results:
-        results.append(na("music_theory", "no MUS_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'MUS_VERIFY', _RULES, domain='music_theory', none_reason='no MUS_VERIFY artifacts present')

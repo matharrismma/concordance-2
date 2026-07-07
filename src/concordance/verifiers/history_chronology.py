@@ -35,6 +35,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error
+from .base import dispatch  # declarative run() driver
 
 
 # ---------------------------------------------------------------------------
@@ -278,27 +279,14 @@ def verify_decade_assignment(spec: Dict[str, Any]) -> VerifierResult:
 # run()
 # ---------------------------------------------------------------------------
 
+_RULES = [
+    (lambda hv: (all(k in hv for k in ("from_year", "to_year", "claimed_elapsed_years"))), verify_year_arithmetic),
+    (lambda hv: ("year_CE" in hv and "claimed_century" in hv), verify_century_assignment),
+    (lambda hv: ("year" in hv and "claimed_era" in hv), verify_era_classification),
+    (lambda hv: (all(k in hv for k in ("from_BCE", "to_CE", "claimed_elapsed"))), verify_elapsed_years_bce_to_ce),
+    (lambda hv: ("year_CE" in hv and "claimed_decade_start" in hv), verify_decade_assignment),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    hv = packet.get("HIST_VERIFY") or {}
-
-    if all(k in hv for k in ("from_year", "to_year", "claimed_elapsed_years")):
-        results.append(verify_year_arithmetic(hv))
-
-    # century_assignment and decade_assignment share year_CE; trigger independently
-    # by checking for the discriminating field
-    if "year_CE" in hv and "claimed_century" in hv:
-        results.append(verify_century_assignment(hv))
-
-    if "year" in hv and "claimed_era" in hv:
-        results.append(verify_era_classification(hv))
-
-    if all(k in hv for k in ("from_BCE", "to_CE", "claimed_elapsed")):
-        results.append(verify_elapsed_years_bce_to_ce(hv))
-
-    if "year_CE" in hv and "claimed_decade_start" in hv:
-        results.append(verify_decade_assignment(hv))
-
-    if not results:
-        results.append(na("history_chronology", "no HIST_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'HIST_VERIFY', _RULES, domain='history_chronology', none_reason='no HIST_VERIFY artifacts present')

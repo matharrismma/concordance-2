@@ -24,6 +24,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 def _close(actual, claimed, rel_tol=1e-3, abs_tol=1e-6):
@@ -161,21 +162,15 @@ def verify_harmonic_frequency(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
-def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    av = packet.get("ACOUS_VERIFY") or {}
-
-    if all(av.get(k) is not None for k in ("speed_of_wave", "frequency_hz", "wavelength_m")):
-        results.append(verify_wave_relation(av))
-    if all(av.get(k) is not None for k in ("value", "reference", "claimed_db")):
-        results.append(verify_decibel_ratio(av))
-    if all(av.get(k) is not None for k in ("f_source_hz", "v_observer_mps",
+_RULES = [
+    (lambda av: (all(av.get(k) is not None for k in ("speed_of_wave", "frequency_hz", "wavelength_m"))), verify_wave_relation),
+    (lambda av: (all(av.get(k) is not None for k in ("value", "reference", "claimed_db"))), verify_decibel_ratio),
+    (lambda av: (all(av.get(k) is not None for k in ("f_source_hz", "v_observer_mps",
                                             "v_source_mps", "speed_medium_mps",
-                                            "claimed_f_observed_hz")):
-        results.append(verify_doppler_shift(av))
-    if all(av.get(k) is not None for k in ("fundamental_hz", "harmonic_n", "claimed_harmonic_hz")):
-        results.append(verify_harmonic_frequency(av))
+                                            "claimed_f_observed_hz"))), verify_doppler_shift),
+    (lambda av: (all(av.get(k) is not None for k in ("fundamental_hz", "harmonic_n", "claimed_harmonic_hz"))), verify_harmonic_frequency),
+]
 
-    if not results:
-        results.append(na("acoustics", "no ACOUS_VERIFY artifacts present"))
-    return results
+
+def run(packet: Dict[str, Any]) -> List[VerifierResult]:
+    return dispatch(packet, 'ACOUS_VERIFY', _RULES, domain='acoustics', none_reason='no ACOUS_VERIFY artifacts present')

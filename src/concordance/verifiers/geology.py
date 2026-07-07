@@ -29,6 +29,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 def verify_radiometric_decay(spec: Dict[str, Any]) -> VerifierResult:
@@ -122,16 +123,13 @@ def verify_richter_amplitude(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+_RULES = [
+    (lambda gv: (all(gv.get(k) is not None for k in ("isotope_half_life_years", "elapsed_years",
+                                            "initial_amount", "claimed_remaining_amount"))), verify_radiometric_decay),
+    (lambda gv: (all(gv.get(k) is not None for k in ("harder_mineral_mohs", "softer_mineral_mohs", "claimed_can_scratch"))), verify_mohs_scratch),
+    (lambda gv: (all(gv.get(k) is not None for k in ("richter_M1", "richter_M2", "claimed_amplitude_ratio"))), verify_richter_amplitude),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    gv = packet.get("GEO_VERIFY") or {}
-    if all(gv.get(k) is not None for k in ("isotope_half_life_years", "elapsed_years",
-                                            "initial_amount", "claimed_remaining_amount")):
-        results.append(verify_radiometric_decay(gv))
-    if all(gv.get(k) is not None for k in ("harder_mineral_mohs", "softer_mineral_mohs", "claimed_can_scratch")):
-        results.append(verify_mohs_scratch(gv))
-    if all(gv.get(k) is not None for k in ("richter_M1", "richter_M2", "claimed_amplitude_ratio")):
-        results.append(verify_richter_amplitude(gv))
-    if not results:
-        results.append(na("geology", "no GEO_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'GEO_VERIFY', _RULES, domain='geology', none_reason='no GEO_VERIFY artifacts present')

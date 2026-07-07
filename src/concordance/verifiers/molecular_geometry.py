@@ -21,6 +21,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error
+from .base import dispatch  # declarative run() driver
 
 # (steric_number, lone_pairs) -> (geometry, ideal_bond_angle_deg | None if multi-angle).
 # Angles for 0-lone-pair cases are exact ideals; lone-pair cases are nominal
@@ -84,11 +85,10 @@ def verify_vsepr(spec: Dict[str, Any]) -> VerifierResult:
     return confirm(name, detail, data)
 
 
+_RULES = [
+    (lambda mv: ("bonding_domains" in mv and ("claimed_geometry" in mv or "claimed_bond_angle_deg" in mv)), verify_vsepr),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    mv = packet.get("VSEPR_VERIFY") or {}
-    results: List[VerifierResult] = []
-    if "bonding_domains" in mv and ("claimed_geometry" in mv or "claimed_bond_angle_deg" in mv):
-        results.append(verify_vsepr(mv))
-    if not results:
-        results.append(na("molecular_geometry", "no VSEPR_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'VSEPR_VERIFY', _RULES, domain='molecular_geometry', none_reason='no VSEPR_VERIFY artifacts present')

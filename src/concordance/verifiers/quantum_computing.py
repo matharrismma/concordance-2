@@ -46,6 +46,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 # ── qubit state normalization ────────────────────────────────────────────────
@@ -253,23 +254,15 @@ def verify_quantum_fidelity(spec: Dict[str, Any]) -> VerifierResult:
 
 # ── runner ────────────────────────────────────────────────────────────────────
 
+_RULES = [
+    (lambda qv: ("amplitudes" in qv and "claimed_normalized" in qv), verify_qubit_normalization),
+    (lambda qv: ("n_items" in qv and "claimed_grover_iterations" in qv), verify_grover_iterations),
+    (lambda qv: (all(k in qv for k in ("shor_a", "shor_N", "shor_r", "claimed_period_valid"))), verify_shor_period),
+    (lambda qv: ("qber" in qv and "claimed_secure" in qv), verify_bb84_security),
+    (lambda qv: ("density_eigenvalues" in qv and "claimed_entropy_bits" in qv), verify_von_neumann_entropy),
+    (lambda qv: ("inner_product" in qv and "claimed_fidelity" in qv), verify_quantum_fidelity),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    qv = packet.get("QCOMP_VERIFY") or {}
-
-    if "amplitudes" in qv and "claimed_normalized" in qv:
-        results.append(verify_qubit_normalization(qv))
-    if "n_items" in qv and "claimed_grover_iterations" in qv:
-        results.append(verify_grover_iterations(qv))
-    if all(k in qv for k in ("shor_a", "shor_N", "shor_r", "claimed_period_valid")):
-        results.append(verify_shor_period(qv))
-    if "qber" in qv and "claimed_secure" in qv:
-        results.append(verify_bb84_security(qv))
-    if "density_eigenvalues" in qv and "claimed_entropy_bits" in qv:
-        results.append(verify_von_neumann_entropy(qv))
-    if "inner_product" in qv and "claimed_fidelity" in qv:
-        results.append(verify_quantum_fidelity(qv))
-
-    if not results:
-        results.append(na("quantum_computing", "no QCOMP_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'QCOMP_VERIFY', _RULES, domain='quantum_computing', none_reason='no QCOMP_VERIFY artifacts present')

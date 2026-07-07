@@ -32,6 +32,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 def verify_pythagorean_expectation(spec: Dict[str, Any]) -> VerifierResult:
@@ -149,18 +150,14 @@ def verify_games_behind(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"GB = {actual}, claimed {c} (diff {diff})", data)
 
 
+_RULES = [
+    (lambda sv: (all(k in sv for k in ("runs_scored", "runs_allowed", "claimed_winning_pct"))), verify_pythagorean_expectation),
+    (lambda sv: (all(k in sv for k in ("elo_a", "elo_b", "claimed_expected_score_a"))), verify_elo_expected_score),
+    (lambda sv: (all(k in sv for k in ("elo_a_pre", "elo_b_pre", "actual_score_a", "elo_K", "claimed_elo_a_post"))), verify_elo_rating_update),
+    (lambda sv: (all(k in sv for k in ("leader_wins", "leader_losses", "team_wins",
+                              "team_losses", "claimed_games_behind"))), verify_games_behind),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    sv = packet.get("SPORT_VERIFY") or {}
-    if all(k in sv for k in ("runs_scored", "runs_allowed", "claimed_winning_pct")):
-        results.append(verify_pythagorean_expectation(sv))
-    if all(k in sv for k in ("elo_a", "elo_b", "claimed_expected_score_a")):
-        results.append(verify_elo_expected_score(sv))
-    if all(k in sv for k in ("elo_a_pre", "elo_b_pre", "actual_score_a", "elo_K", "claimed_elo_a_post")):
-        results.append(verify_elo_rating_update(sv))
-    if all(k in sv for k in ("leader_wins", "leader_losses", "team_wins",
-                              "team_losses", "claimed_games_behind")):
-        results.append(verify_games_behind(sv))
-    if not results:
-        results.append(na("sports_analytics", "no SPORT_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'SPORT_VERIFY', _RULES, domain='sports_analytics', none_reason='no SPORT_VERIFY artifacts present')

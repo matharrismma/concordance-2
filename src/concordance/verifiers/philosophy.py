@@ -31,6 +31,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, Set
 
 from .base import VerifierResult, na, confirm, mismatch, error
+from .base import dispatch  # declarative run() driver
 
 
 # ---------------------------------------------------------------------------
@@ -223,25 +224,15 @@ def verify_identity_principle(spec: Dict[str, Any]) -> VerifierResult:
 # Entry point
 # ---------------------------------------------------------------------------
 
+_RULES = [
+    (lambda pv: ("is_necessarily_true" in pv and "is_possibly_true" in pv
+            and "claimed_consistent" in pv), verify_modal_logic_validity),
+    (lambda pv: ("framework_name" in pv and "claimed_focuses_on_outcomes" in pv), verify_ethical_framework),
+    (lambda pv: ("claim_requires_observation" in pv and "claimed_is_a_priori" in pv), verify_epistemic_claim_type),
+    (lambda pv: ("object_a_properties" in pv and "object_b_properties" in pv
+            and "claimed_are_identical" in pv), verify_identity_principle),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    """Dispatch all applicable philosophy checks for the PHIL_VERIFY block."""
-    results: List[VerifierResult] = []
-    pv = packet.get("PHIL_VERIFY") or {}
-
-    if ("is_necessarily_true" in pv and "is_possibly_true" in pv
-            and "claimed_consistent" in pv):
-        results.append(verify_modal_logic_validity(pv))
-
-    if "framework_name" in pv and "claimed_focuses_on_outcomes" in pv:
-        results.append(verify_ethical_framework(pv))
-
-    if "claim_requires_observation" in pv and "claimed_is_a_priori" in pv:
-        results.append(verify_epistemic_claim_type(pv))
-
-    if ("object_a_properties" in pv and "object_b_properties" in pv
-            and "claimed_are_identical" in pv):
-        results.append(verify_identity_principle(pv))
-
-    if not results:
-        results.append(na("philosophy", "no PHIL_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'PHIL_VERIFY', _RULES, domain='philosophy', none_reason='no PHIL_VERIFY artifacts present')

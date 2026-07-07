@@ -22,6 +22,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error
+from .base import dispatch  # declarative run() driver
 
 
 def _is_prime(n: int) -> bool:
@@ -244,21 +245,15 @@ def verify_perfect_number(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"is_perfect({nf}) = {actual}, claimed {cl}", data)
 
 
+_RULES = [
+    (lambda nv: ("n_prime" in nv and "claimed_prime" in nv), verify_primality),
+    (lambda nv: (all(k in nv for k in ("gcd_a", "gcd_b", "claimed_gcd"))), verify_gcd),
+    (lambda nv: ("factorial_n" in nv and "claimed_factorial" in nv), verify_factorial),
+    (lambda nv: (all(k in nv for k in ("mod_a", "mod_m", "claimed_inverse"))), verify_modular_inverse),
+    (lambda nv: (all(k in nv for k in ("sequence", "sequence_index", "claimed_term"))), verify_sequence_term),
+    (lambda nv: ("n_perfect" in nv and "claimed_perfect" in nv), verify_perfect_number),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    nv = packet.get("NUM_VERIFY") or {}
-    if "n_prime" in nv and "claimed_prime" in nv:
-        results.append(verify_primality(nv))
-    if all(k in nv for k in ("gcd_a", "gcd_b", "claimed_gcd")):
-        results.append(verify_gcd(nv))
-    if "factorial_n" in nv and "claimed_factorial" in nv:
-        results.append(verify_factorial(nv))
-    if all(k in nv for k in ("mod_a", "mod_m", "claimed_inverse")):
-        results.append(verify_modular_inverse(nv))
-    if all(k in nv for k in ("sequence", "sequence_index", "claimed_term")):
-        results.append(verify_sequence_term(nv))
-    if "n_perfect" in nv and "claimed_perfect" in nv:
-        results.append(verify_perfect_number(nv))
-    if not results:
-        results.append(na("number_theory", "no NUM_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'NUM_VERIFY', _RULES, domain='number_theory', none_reason='no NUM_VERIFY artifacts present')

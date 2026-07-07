@@ -23,6 +23,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 # Each entry: (canonical_value, unit, is_exact, source_note)
@@ -237,11 +238,10 @@ def list_constants() -> List[Dict[str, Any]]:
     return sorted(out, key=lambda x: x["constant"])
 
 
+_RULES = [
+    (lambda cv: (cv.get("constant") and cv.get("claimed_value") is not None), verify_physical_constant),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    cv = packet.get("CONST_VERIFY") or {}
-    if cv.get("constant") and cv.get("claimed_value") is not None:
-        results.append(verify_physical_constant(cv))
-    if not results:
-        results.append(na("physical_constants"))
-    return results
+    return dispatch(packet, 'CONST_VERIFY', _RULES, domain='physical_constants', none_reason='no artifact provided')

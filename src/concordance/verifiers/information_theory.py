@@ -27,6 +27,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 def _h2(p: float) -> float:
@@ -131,15 +132,12 @@ def verify_hamming_distance(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+_RULES = [
+    (lambda iv: ("probabilities" in iv and "claimed_entropy_bits" in iv), verify_shannon_entropy),
+    (lambda iv: ("bsc_error_rate" in iv and "claimed_capacity_bits" in iv), verify_bsc_capacity),
+    (lambda iv: (all(k in iv for k in ("string_a", "string_b", "claimed_hamming"))), verify_hamming_distance),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    iv = packet.get("INFO_VERIFY") or {}
-    if "probabilities" in iv and "claimed_entropy_bits" in iv:
-        results.append(verify_shannon_entropy(iv))
-    if "bsc_error_rate" in iv and "claimed_capacity_bits" in iv:
-        results.append(verify_bsc_capacity(iv))
-    if all(k in iv for k in ("string_a", "string_b", "claimed_hamming")):
-        results.append(verify_hamming_distance(iv))
-    if not results:
-        results.append(na("information_theory", "no INFO_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'INFO_VERIFY', _RULES, domain='information_theory', none_reason='no INFO_VERIFY artifacts present')

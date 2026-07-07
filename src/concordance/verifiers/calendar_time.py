@@ -46,6 +46,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 _WEEKDAY_NAMES = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
@@ -239,21 +240,14 @@ def verify_utc_offset(spec: Dict[str, Any]) -> VerifierResult:
     )
 
 
+_RULES = [
+    (lambda cv: ("year" in cv and ("claimed_leap" in cv or "claimed_is_leap_year" in cv)), verify_leap_year),
+    (lambda cv: ("iso8601_string" in cv and "claimed_iso8601_valid" in cv), verify_iso8601_valid),
+    (lambda cv: ("date_iso" in cv and "claimed_day_of_week" in cv), verify_day_of_week),
+    (lambda cv: (all(k in cv for k in ("start_iso", "duration_seconds", "claimed_end_iso"))), verify_duration_addition),
+    (lambda cv: ("timezone" in cv and "at_iso" in cv and "claimed_utc_offset_hours" in cv), verify_utc_offset),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    cv = packet.get("CAL_VERIFY") or {}
-
-    if "year" in cv and ("claimed_leap" in cv or "claimed_is_leap_year" in cv):
-        results.append(verify_leap_year(cv))
-    if "iso8601_string" in cv and "claimed_iso8601_valid" in cv:
-        results.append(verify_iso8601_valid(cv))
-    if "date_iso" in cv and "claimed_day_of_week" in cv:
-        results.append(verify_day_of_week(cv))
-    if all(k in cv for k in ("start_iso", "duration_seconds", "claimed_end_iso")):
-        results.append(verify_duration_addition(cv))
-    if "timezone" in cv and "at_iso" in cv and "claimed_utc_offset_hours" in cv:
-        results.append(verify_utc_offset(cv))
-
-    if not results:
-        results.append(na("calendar_time", "no CAL_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'CAL_VERIFY', _RULES, domain='calendar_time', none_reason='no CAL_VERIFY artifacts present')

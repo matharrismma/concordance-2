@@ -30,6 +30,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 _G = 9.80665  # standard gravity m/s²
@@ -143,18 +144,14 @@ def verify_bernoulli_head(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"head = {actual:.4f} m, claimed {c} (diff {diff:.4f})", data)
 
 
+_RULES = [
+    (lambda hv: (all(k in hv for k in ("manning_n", "hydraulic_radius_m", "slope", "claimed_velocity_m_s"))), verify_manning_velocity),
+    (lambda hv: (all(k in hv for k in ("darcy_K_m_s", "hydraulic_gradient", "claimed_darcy_velocity_m_s"))), verify_darcy_velocity),
+    (lambda hv: (all(k in hv for k in ("runoff_coefficient", "rainfall_intensity", "drainage_area", "claimed_runoff"))), verify_rational_runoff),
+    (lambda hv: (all(k in hv for k in ("elevation_m", "pressure_pa", "velocity_m_s",
+                              "fluid_density_kg_m3", "claimed_total_head_m"))), verify_bernoulli_head),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    hv = packet.get("HYD_VERIFY") or {}
-    if all(k in hv for k in ("manning_n", "hydraulic_radius_m", "slope", "claimed_velocity_m_s")):
-        results.append(verify_manning_velocity(hv))
-    if all(k in hv for k in ("darcy_K_m_s", "hydraulic_gradient", "claimed_darcy_velocity_m_s")):
-        results.append(verify_darcy_velocity(hv))
-    if all(k in hv for k in ("runoff_coefficient", "rainfall_intensity", "drainage_area", "claimed_runoff")):
-        results.append(verify_rational_runoff(hv))
-    if all(k in hv for k in ("elevation_m", "pressure_pa", "velocity_m_s",
-                              "fluid_density_kg_m3", "claimed_total_head_m")):
-        results.append(verify_bernoulli_head(hv))
-    if not results:
-        results.append(na("hydrology", "no HYD_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'HYD_VERIFY', _RULES, domain='hydrology', none_reason='no HYD_VERIFY artifacts present')

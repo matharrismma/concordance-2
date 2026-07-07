@@ -46,6 +46,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 _R = 8.314  # J / (mol · K)
 
@@ -304,39 +305,20 @@ def verify_clausius_clapeyron(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"predicted {T2_pred:.2f} K, claimed {cT2} K (Δ {diff:.2f} K)", data)
 
 
-def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    tv = packet.get("THERMO_VERIFY") or {}
-
-    if all(tv.get(k) is not None for k in ("T_hot_K", "T_cold_K", "claimed_efficiency")):
-        results.append(verify_carnot_efficiency(tv))
-
-    # Ideal gas: dispatch if any claimed_* key present alongside enough known vars
-    if (tv.get("claimed_pressure_Pa") is not None
+_RULES = [
+    (lambda tv: (all(tv.get(k) is not None for k in ("T_hot_K", "T_cold_K", "claimed_efficiency"))), verify_carnot_efficiency),
+    (lambda tv: (tv.get("claimed_pressure_Pa") is not None
             or tv.get("claimed_volume_m3") is not None
-            or tv.get("claimed_temperature_K") is not None):
-        results.append(verify_ideal_gas_law(tv))
-
-    if all(tv.get(k) is not None for k in ("mass_kg", "specific_heat_J_per_kgK",
-                                             "delta_T_K", "claimed_heat_J")):
-        results.append(verify_specific_heat(tv))
-
-    if all(tv.get(k) is not None for k in ("heat_J", "temperature_K",
-                                             "claimed_entropy_change_J_per_K")):
-        results.append(verify_entropy_change(tv))
-
-    if all(tv.get(k) is not None for k in ("latent_heat_J_per_mol", "t_ref_K",
+            or tv.get("claimed_temperature_K") is not None), verify_ideal_gas_law),
+    (lambda tv: (all(tv.get(k) is not None for k in ("mass_kg", "specific_heat_J_per_kgK",
+                                             "delta_T_K", "claimed_heat_J"))), verify_specific_heat),
+    (lambda tv: (all(tv.get(k) is not None for k in ("heat_J", "temperature_K",
+                                             "claimed_entropy_change_J_per_K"))), verify_entropy_change),
+    (lambda tv: (all(tv.get(k) is not None for k in ("latent_heat_J_per_mol", "t_ref_K",
                                              "p_ref", "pressure",
-                                             "claimed_boiling_point_K")):
-        results.append(verify_clausius_clapeyron(tv))
+                                             "claimed_boiling_point_K"))), verify_clausius_clapeyron),
+]
 
-    # Phase points (water boils at 100°C, iron melts at 1538°C) are MEASURED
-    # values and are NOT looked up — a bare phase-point claim stays out of
-    # scope. But given an operator-supplied latent heat + reference point, the
-    # Clausius-Clapeyron relationship IS confirmable (verify_clausius_clapeyron
-    # above). Closed bq-phase-equilibrium 2026-06-06.
 
-    if not results:
-        # NA, not error — verifier doesn't apply to this spec shape.
-        results.append(na("thermodynamics"))
-    return results
+def run(packet: Dict[str, Any]) -> List[VerifierResult]:
+    return dispatch(packet, 'THERMO_VERIFY', _RULES, domain='thermodynamics', none_reason='no artifact provided')

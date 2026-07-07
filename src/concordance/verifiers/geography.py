@@ -30,6 +30,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 _EARTH_RADIUS_KM = 6371.0
@@ -152,17 +153,13 @@ def verify_utm_zone(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"longitude {lf}° → UTM zone {actual}, claimed {c}", data)
 
 
+_RULES = [
+    (lambda gv: (all(k in gv for k in ("lat", "lon", "claimed_coords_valid"))), verify_lat_lon_validity),
+    (lambda gv: (all(k in gv for k in ("lat1", "lon1", "lat2", "lon2", "claimed_distance_km"))), verify_haversine_distance),
+    (lambda gv: (all(k in gv for k in ("lat1", "lon1", "lat2", "lon2", "claimed_bearing_deg"))), verify_initial_bearing),
+    (lambda gv: (all(k in gv for k in ("longitude_for_utm", "claimed_utm_zone"))), verify_utm_zone),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    gv = packet.get("GEO_LOC_VERIFY") or {}
-    if all(k in gv for k in ("lat", "lon", "claimed_coords_valid")):
-        results.append(verify_lat_lon_validity(gv))
-    if all(k in gv for k in ("lat1", "lon1", "lat2", "lon2", "claimed_distance_km")):
-        results.append(verify_haversine_distance(gv))
-    if all(k in gv for k in ("lat1", "lon1", "lat2", "lon2", "claimed_bearing_deg")):
-        results.append(verify_initial_bearing(gv))
-    if all(k in gv for k in ("longitude_for_utm", "claimed_utm_zone")):
-        results.append(verify_utm_zone(gv))
-    if not results:
-        results.append(na("geography", "no GEO_LOC_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'GEO_LOC_VERIFY', _RULES, domain='geography', none_reason='no GEO_LOC_VERIFY artifacts present')

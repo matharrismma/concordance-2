@@ -33,6 +33,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 _LN2 = math.log(2)
 _AMU_TO_MEV = 931.5  # MeV per amu (unified atomic mass unit)
@@ -210,25 +211,16 @@ def verify_decay_constant(spec: Dict[str, Any]) -> VerifierResult:
     )
 
 
+_RULES = [
+    (lambda nv: (all(nv.get(k) is not None for k in ("half_life_seconds", "elapsed_seconds",
+                                             "initial_count", "claimed_remaining_count"))), verify_radioactive_decay),
+    (lambda nv: (all(nv.get(k) is not None for k in ("mass_defect_amu", "nucleon_count",
+                                             "claimed_binding_energy_MeV_per_nucleon"))), verify_binding_energy_per_nucleon),
+    (lambda nv: (all(nv.get(k) is not None for k in ("activity_Bq", "atom_count",
+                                             "claimed_half_life_seconds"))), verify_half_life_from_activity),
+    (lambda nv: (all(nv.get(k) is not None for k in ("half_life_seconds", "claimed_decay_constant"))), verify_decay_constant),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    nv = packet.get("NUCLEAR_VERIFY") or {}
-
-    if all(nv.get(k) is not None for k in ("half_life_seconds", "elapsed_seconds",
-                                             "initial_count", "claimed_remaining_count")):
-        results.append(verify_radioactive_decay(nv))
-
-    if all(nv.get(k) is not None for k in ("mass_defect_amu", "nucleon_count",
-                                             "claimed_binding_energy_MeV_per_nucleon")):
-        results.append(verify_binding_energy_per_nucleon(nv))
-
-    if all(nv.get(k) is not None for k in ("activity_Bq", "atom_count",
-                                             "claimed_half_life_seconds")):
-        results.append(verify_half_life_from_activity(nv))
-
-    if all(nv.get(k) is not None for k in ("half_life_seconds", "claimed_decay_constant")):
-        results.append(verify_decay_constant(nv))
-
-    if not results:
-        results.append(na("nuclear_physics", "no NUCLEAR_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'NUCLEAR_VERIFY', _RULES, domain='nuclear_physics', none_reason='no NUCLEAR_VERIFY artifacts present')

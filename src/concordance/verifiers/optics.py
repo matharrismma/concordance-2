@@ -30,6 +30,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 def _close(a, b, rel_tol=1e-3, abs_tol=1e-9):
@@ -360,38 +361,25 @@ def verify_wdm_capacity(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"total = {actual:.6g} Gbps, claimed {c:.6g}", data)
 
 
-def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    ov = packet.get("OPT_VERIFY") or {}
-
-    if all(ov.get(k) is not None for k in ("n1", "n2", "theta1_deg", "claimed_theta2_deg")):
-        results.append(verify_snell_law(ov))
-    if all(ov.get(k) is not None for k in ("focal_length_m", "object_distance_m",
-                                            "image_distance_m", "claimed_thin_lens_consistent")):
-        results.append(verify_thin_lens(ov))
-    if all(ov.get(k) is not None for k in ("object_distance_for_M", "image_distance_for_M", "claimed_magnification")):
-        results.append(verify_magnification(ov))
-    if all(ov.get(k) is not None for k in ("wavelength_m", "aperture_m", "claimed_diffraction_rad")):
-        results.append(verify_rayleigh_diffraction(ov))
-    if all(ov.get(k) is not None for k in ("wavelength_m", "slit_separation_m",
-                                           "screen_distance_m", "claimed_fringe_spacing_m")):
-        results.append(verify_double_slit(ov))
-    if ov.get("claimed_photon_energy_j") is not None and \
-       (ov.get("wavelength_m") is not None or ov.get("frequency_hz") is not None):
-        results.append(verify_photon_energy(ov))
-    if ov.get("claimed_de_broglie_m") is not None:
-        results.append(verify_de_broglie(ov))
-    if all(ov.get(k) is not None for k in ("n_core", "n_cladding", "claimed_critical_angle_deg")):
-        results.append(verify_critical_angle(ov))
-    if all(ov.get(k) is not None for k in ("n_core", "n_cladding", "claimed_numerical_aperture")):
-        results.append(verify_numerical_aperture(ov))
-    if ov.get("claimed_loss_db") is not None and (
+_RULES = [
+    (lambda ov: (all(ov.get(k) is not None for k in ("n1", "n2", "theta1_deg", "claimed_theta2_deg"))), verify_snell_law),
+    (lambda ov: (all(ov.get(k) is not None for k in ("focal_length_m", "object_distance_m",
+                                            "image_distance_m", "claimed_thin_lens_consistent"))), verify_thin_lens),
+    (lambda ov: (all(ov.get(k) is not None for k in ("object_distance_for_M", "image_distance_for_M", "claimed_magnification"))), verify_magnification),
+    (lambda ov: (all(ov.get(k) is not None for k in ("wavelength_m", "aperture_m", "claimed_diffraction_rad"))), verify_rayleigh_diffraction),
+    (lambda ov: (all(ov.get(k) is not None for k in ("wavelength_m", "slit_separation_m",
+                                           "screen_distance_m", "claimed_fringe_spacing_m"))), verify_double_slit),
+    (lambda ov: (ov.get("claimed_photon_energy_j") is not None and \
+       (ov.get("wavelength_m") is not None or ov.get("frequency_hz") is not None)), verify_photon_energy),
+    (lambda ov: (ov.get("claimed_de_broglie_m") is not None), verify_de_broglie),
+    (lambda ov: (all(ov.get(k) is not None for k in ("n_core", "n_cladding", "claimed_critical_angle_deg"))), verify_critical_angle),
+    (lambda ov: (all(ov.get(k) is not None for k in ("n_core", "n_cladding", "claimed_numerical_aperture"))), verify_numerical_aperture),
+    (lambda ov: (ov.get("claimed_loss_db") is not None and (
         (ov.get("attenuation_db_per_km") is not None and ov.get("length_km") is not None) or
-        (ov.get("power_in_mw") is not None and ov.get("power_out_mw") is not None)):
-        results.append(verify_fiber_attenuation(ov))
-    if all(ov.get(k) is not None for k in ("num_channels", "bitrate_per_channel_gbps", "claimed_total_gbps")):
-        results.append(verify_wdm_capacity(ov))
+        (ov.get("power_in_mw") is not None and ov.get("power_out_mw") is not None))), verify_fiber_attenuation),
+    (lambda ov: (all(ov.get(k) is not None for k in ("num_channels", "bitrate_per_channel_gbps", "claimed_total_gbps"))), verify_wdm_capacity),
+]
 
-    if not results:
-        results.append(na("optics", "no OPT_VERIFY artifacts present"))
-    return results
+
+def run(packet: Dict[str, Any]) -> List[VerifierResult]:
+    return dispatch(packet, 'OPT_VERIFY', _RULES, domain='optics', none_reason='no OPT_VERIFY artifacts present')

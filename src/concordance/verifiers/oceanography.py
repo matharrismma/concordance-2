@@ -35,6 +35,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 # Physical constants
 _RHO_SEAWATER = 1025.0   # kg/m³ standard seawater density
@@ -255,28 +256,16 @@ def verify_thermocline_depth_classification(spec: Dict[str, Any]) -> VerifierRes
                     data)
 
 
-def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    ov = packet.get("OCEAN_VERIFY") or {}
-
-    if ov.get("depth_m") is not None and (
+_RULES = [
+    (lambda ov: (ov.get("depth_m") is not None and (
             ov.get("claimed_pressure_Pa") is not None
-            or ov.get("claimed_pressure_atm") is not None):
-        results.append(verify_pressure_at_depth(ov))
+            or ov.get("claimed_pressure_atm") is not None)), verify_pressure_at_depth),
+    (lambda ov: (all(ov.get(k) is not None for k in ("salinity_ppt", "claimed_classification"))), verify_salinity_classification),
+    (lambda ov: (all(ov.get(k) is not None for k in ("wavelength_m", "claimed_wave_speed_m_per_s"))), verify_deep_water_wave_speed),
+    (lambda ov: (all(ov.get(k) is not None for k in ("tidal_range_m", "claimed_tidal_type"))), verify_tidal_range_classification),
+    (lambda ov: (all(ov.get(k) is not None for k in ("depth_m", "claimed_zone"))), verify_thermocline_depth_classification),
+]
 
-    if all(ov.get(k) is not None for k in ("salinity_ppt", "claimed_classification")):
-        results.append(verify_salinity_classification(ov))
 
-    if all(ov.get(k) is not None for k in ("wavelength_m", "claimed_wave_speed_m_per_s")):
-        results.append(verify_deep_water_wave_speed(ov))
-
-    if all(ov.get(k) is not None for k in ("tidal_range_m", "claimed_tidal_type")):
-        results.append(verify_tidal_range_classification(ov))
-
-    # thermocline: depth_m overlaps with pressure check; distinguish by claimed_zone
-    if all(ov.get(k) is not None for k in ("depth_m", "claimed_zone")):
-        results.append(verify_thermocline_depth_classification(ov))
-
-    if not results:
-        results.append(na("oceanography", "no OCEAN_VERIFY artifacts present"))
-    return results
+def run(packet: Dict[str, Any]) -> List[VerifierResult]:
+    return dispatch(packet, 'OCEAN_VERIFY', _RULES, domain='oceanography', none_reason='no OCEAN_VERIFY artifacts present')

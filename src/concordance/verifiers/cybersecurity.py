@@ -30,6 +30,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 # ── Password entropy ──────────────────────────────────────────────────────────
@@ -200,19 +201,14 @@ def verify_port_class(spec: Dict[str, Any]) -> VerifierResult:
 
 # ── run ───────────────────────────────────────────────────────────────────────
 
+_RULES = [
+    (lambda cv: ("password_length" in cv and "claimed_entropy_bits" in cv), verify_password_entropy),
+    (lambda cv: ("tls_version" in cv and "claimed_tls_status" in cv), verify_tls_version),
+    (lambda cv: ("cvss_base_score" in cv and "claimed_cvss_severity" in cv), verify_cvss_severity),
+    (lambda cv: ("cidr_prefix" in cv and "claimed_host_count" in cv), verify_subnet_hosts),
+    (lambda cv: ("port_number" in cv and "claimed_port_class" in cv), verify_port_class),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    cv = packet.get("CYBER_VERIFY") or {}
-    if "password_length" in cv and "claimed_entropy_bits" in cv:
-        results.append(verify_password_entropy(cv))
-    if "tls_version" in cv and "claimed_tls_status" in cv:
-        results.append(verify_tls_version(cv))
-    if "cvss_base_score" in cv and "claimed_cvss_severity" in cv:
-        results.append(verify_cvss_severity(cv))
-    if "cidr_prefix" in cv and "claimed_host_count" in cv:
-        results.append(verify_subnet_hosts(cv))
-    if "port_number" in cv and "claimed_port_class" in cv:
-        results.append(verify_port_class(cv))
-    if not results:
-        results.append(na("cybersecurity", "no CYBER_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'CYBER_VERIFY', _RULES, domain='cybersecurity', none_reason='no CYBER_VERIFY artifacts present')

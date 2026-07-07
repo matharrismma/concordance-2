@@ -46,6 +46,7 @@ import re
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error
+from .base import dispatch  # declarative run() driver
 
 
 # Three common MAC formats: colon, hyphen, and Cisco dot-quad nibble.
@@ -166,19 +167,13 @@ def verify_mac_format(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+_RULES = [
+    (lambda nv: ("address" in nv and "claimed_format_valid" in nv), verify_ip_format),
+    (lambda nv: (all(k in nv for k in ("cidr", "ip_to_check", "claimed_in_subnet"))), verify_cidr_membership),
+    (lambda nv: ("subnet_prefix" in nv and "claimed_usable_hosts" in nv), verify_subnet_host_count),
+    (lambda nv: ("mac" in nv and "claimed_mac_valid" in nv), verify_mac_format),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    nv = packet.get("NET_VERIFY") or {}
-
-    if "address" in nv and "claimed_format_valid" in nv:
-        results.append(verify_ip_format(nv))
-    if all(k in nv for k in ("cidr", "ip_to_check", "claimed_in_subnet")):
-        results.append(verify_cidr_membership(nv))
-    if "subnet_prefix" in nv and "claimed_usable_hosts" in nv:
-        results.append(verify_subnet_host_count(nv))
-    if "mac" in nv and "claimed_mac_valid" in nv:
-        results.append(verify_mac_format(nv))
-
-    if not results:
-        results.append(na("networking", "no NET_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'NET_VERIFY', _RULES, domain='networking', none_reason='no NET_VERIFY artifacts present')

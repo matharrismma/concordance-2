@@ -30,6 +30,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 _MAGNUS_A = 17.625
@@ -230,19 +231,14 @@ def verify_saturation_vapor_pressure(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+_RULES = [
+    (lambda mv: (all(k in mv for k in ("temperature_c", "relative_humidity_pct", "claimed_dew_point_c"))), verify_dew_point),
+    (lambda mv: (all(k in mv for k in ("temperature_f", "relative_humidity_pct_for_hi", "claimed_heat_index_f"))), verify_heat_index),
+    (lambda mv: (all(k in mv for k in ("temperature_f_for_wc", "wind_speed_mph", "claimed_wind_chill_f"))), verify_wind_chill),
+    (lambda mv: (all(k in mv for k in ("temperature_c_for_es", "claimed_saturation_vapor_pressure_hpa"))), verify_saturation_vapor_pressure),
+    (lambda mv: ("temp_c" in mv and "wind_kmh" in mv), verify_wind_chill_metric),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    mv = packet.get("MET_VERIFY") or {}
-    if all(k in mv for k in ("temperature_c", "relative_humidity_pct", "claimed_dew_point_c")):
-        results.append(verify_dew_point(mv))
-    if all(k in mv for k in ("temperature_f", "relative_humidity_pct_for_hi", "claimed_heat_index_f")):
-        results.append(verify_heat_index(mv))
-    if all(k in mv for k in ("temperature_f_for_wc", "wind_speed_mph", "claimed_wind_chill_f")):
-        results.append(verify_wind_chill(mv))
-    if all(k in mv for k in ("temperature_c_for_es", "claimed_saturation_vapor_pressure_hpa")):
-        results.append(verify_saturation_vapor_pressure(mv))
-    if "temp_c" in mv and "wind_kmh" in mv:
-        results.append(verify_wind_chill_metric(mv))
-    if not results:
-        results.append(na("meteorology", "no MET_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'MET_VERIFY', _RULES, domain='meteorology', none_reason='no MET_VERIFY artifacts present')

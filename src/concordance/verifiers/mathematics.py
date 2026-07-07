@@ -16,6 +16,7 @@ import re as _re
 from typing import Any, Dict, List
 
 from .base import VerifierResult, confirm, error, mismatch, na
+from .base import dispatch  # declarative run() driver
 
 sympify = simplify = diff = integrate = limit = solve = None
 Symbol = oo = S = expand = _SympifyError = None
@@ -351,21 +352,15 @@ def verify_inequality(spec):
               f"{lhs} {op} {rhs}: symbolic decision inconclusive — not sealed")
 
 
+_RULES = [
+    (lambda mv: ("expr_a" in mv and "expr_b" in mv), verify_equality),
+    (lambda mv: ("function" in mv and "claimed_derivative" in mv), verify_derivative),
+    (lambda mv: ("integrand" in mv and "claimed_antiderivative" in mv), verify_integral),
+    (lambda mv: ("function" in mv and "point" in mv and "claimed_limit" in mv), verify_limit),
+    (lambda mv: ("equation" in mv and "claimed_solutions" in mv), verify_solve),
+    (lambda mv: ("lhs" in mv and "rhs" in mv and "op" in mv), verify_inequality),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    mv = packet.get("MATH_VERIFY") or {}
-    if "expr_a" in mv and "expr_b" in mv:
-        results.append(verify_equality(mv))
-    if "function" in mv and "claimed_derivative" in mv:
-        results.append(verify_derivative(mv))
-    if "integrand" in mv and "claimed_antiderivative" in mv:
-        results.append(verify_integral(mv))
-    if "function" in mv and "point" in mv and "claimed_limit" in mv:
-        results.append(verify_limit(mv))
-    if "equation" in mv and "claimed_solutions" in mv:
-        results.append(verify_solve(mv))
-    if "lhs" in mv and "rhs" in mv and "op" in mv:
-        results.append(verify_inequality(mv))
-    if not results:
-        results.append(na("mathematics", "no MATH_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'MATH_VERIFY', _RULES, domain='mathematics', none_reason='no MATH_VERIFY artifacts present')

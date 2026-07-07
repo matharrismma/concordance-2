@@ -32,6 +32,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 def _ev(N: float, t: float) -> float:
@@ -154,18 +155,14 @@ def verify_hyperfocal_distance(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"H = {actual_m:.3f} m, claimed {cl} (diff {diff:.3f})", data)
 
 
+_RULES = [
+    (lambda pv: (all(k in pv for k in ("f_number", "shutter_seconds", "claimed_exposure_value"))), verify_exposure_value),
+    (lambda pv: (all(k in pv for k in ("settings_a", "settings_b", "claimed_equivalent"))), verify_reciprocity_equivalent),
+    (lambda pv: (all(k in pv for k in ("focal_length_mm", "sensor_dimension_mm", "claimed_angle_of_view_deg"))), verify_angle_of_view),
+    (lambda pv: (all(k in pv for k in ("focal_length_mm_for_h", "f_number_for_h",
+                              "circle_of_confusion_mm", "claimed_hyperfocal_distance_m"))), verify_hyperfocal_distance),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    pv = packet.get("PHOTO_VERIFY") or {}
-    if all(k in pv for k in ("f_number", "shutter_seconds", "claimed_exposure_value")):
-        results.append(verify_exposure_value(pv))
-    if all(k in pv for k in ("settings_a", "settings_b", "claimed_equivalent")):
-        results.append(verify_reciprocity_equivalent(pv))
-    if all(k in pv for k in ("focal_length_mm", "sensor_dimension_mm", "claimed_angle_of_view_deg")):
-        results.append(verify_angle_of_view(pv))
-    if all(k in pv for k in ("focal_length_mm_for_h", "f_number_for_h",
-                              "circle_of_confusion_mm", "claimed_hyperfocal_distance_m")):
-        results.append(verify_hyperfocal_distance(pv))
-    if not results:
-        results.append(na("photography", "no PHOTO_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'PHOTO_VERIFY', _RULES, domain='photography', none_reason='no PHOTO_VERIFY artifacts present')

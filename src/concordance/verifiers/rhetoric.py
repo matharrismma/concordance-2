@@ -29,6 +29,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple
 
 from .base import VerifierResult, na, confirm, mismatch, error
+from .base import dispatch  # declarative run() driver
 
 # ---------------------------------------------------------------------------
 # Fallacy catalogue
@@ -281,22 +282,14 @@ def verify_argument_structure(spec: Dict[str, Any]) -> VerifierResult:
 # Entry point
 # ---------------------------------------------------------------------------
 
+_RULES = [
+    (lambda rv: ("fallacy_name" in rv and "claimed_is_formal_fallacy" in rv), verify_fallacy_classification),
+    (lambda rv: ("major_premise" in rv and "minor_premise" in rv
+            and "conclusion" in rv and "claimed_valid" in rv), verify_syllogism_validity),
+    (lambda rv: ("has_premise" in rv and "has_conclusion" in rv
+            and "claimed_is_complete_argument" in rv), verify_argument_structure),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    """Dispatch all applicable rhetoric checks for the RHET_VERIFY block."""
-    results: List[VerifierResult] = []
-    rv = packet.get("RHET_VERIFY") or {}
-
-    if "fallacy_name" in rv and "claimed_is_formal_fallacy" in rv:
-        results.append(verify_fallacy_classification(rv))
-
-    if ("major_premise" in rv and "minor_premise" in rv
-            and "conclusion" in rv and "claimed_valid" in rv):
-        results.append(verify_syllogism_validity(rv))
-
-    if ("has_premise" in rv and "has_conclusion" in rv
-            and "claimed_is_complete_argument" in rv):
-        results.append(verify_argument_structure(rv))
-
-    if not results:
-        results.append(na("rhetoric", "no RHET_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'RHET_VERIFY', _RULES, domain='rhetoric', none_reason='no RHET_VERIFY artifacts present')

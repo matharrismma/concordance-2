@@ -46,6 +46,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 # Public-domain reference MET values for common activities.
@@ -219,21 +220,15 @@ def verify_met_lookup(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
-def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    ev = packet.get("EX_VERIFY") or {}
-
-    if all(k in ev for k in ("claimed_met", "weight_kg", "duration_hours", "claimed_kcal")):
-        results.append(verify_energy_expenditure(ev))
-    if "age_years" in ev and "claimed_max_hr" in ev:
-        results.append(verify_max_heart_rate(ev))
-    if all(k in ev for k in ("age_years", "resting_hr", "intensity_low",
+_RULES = [
+    (lambda ev: (all(k in ev for k in ("claimed_met", "weight_kg", "duration_hours", "claimed_kcal"))), verify_energy_expenditure),
+    (lambda ev: ("age_years" in ev and "claimed_max_hr" in ev), verify_max_heart_rate),
+    (lambda ev: (all(k in ev for k in ("age_years", "resting_hr", "intensity_low",
                              "intensity_high", "claimed_zone_low_bpm",
-                             "claimed_zone_high_bpm")):
-        results.append(verify_target_heart_rate_zone(ev))
-    if "activity" in ev and "claimed_met" in ev:
-        results.append(verify_met_lookup(ev))
+                             "claimed_zone_high_bpm"))), verify_target_heart_rate_zone),
+    (lambda ev: ("activity" in ev and "claimed_met" in ev), verify_met_lookup),
+]
 
-    if not results:
-        results.append(na("exercise_science", "no EX_VERIFY artifacts present"))
-    return results
+
+def run(packet: Dict[str, Any]) -> List[VerifierResult]:
+    return dispatch(packet, 'EX_VERIFY', _RULES, domain='exercise_science', none_reason='no EX_VERIFY artifacts present')

@@ -43,6 +43,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 # ── Julian Day ─────────────────────────────────────────────────────────
@@ -370,17 +371,13 @@ def verify_sunrise_sunset(spec: Dict[str, Any]) -> VerifierResult:
     )
 
 
+_RULES = [
+    (lambda ev: (ev.get("iso_date") and ev.get("claimed_julian_day") is not None), verify_julian_day),
+    (lambda ev: (ev.get("iso_date") and ev.get("claimed_moon_phase")), verify_moon_phase),
+    (lambda ev: (ev.get("year") is not None and ev.get("event") and ev.get("claimed_event_iso")), verify_equinox_solstice),
+    (lambda ev: (ev.get("iso_date") and ev.get("lat") is not None and ev.get("lon") is not None and ev.get("tz_offset_hours") is not None), verify_sunrise_sunset),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    ev = packet.get("EPH_VERIFY") or {}
-    if ev.get("iso_date") and ev.get("claimed_julian_day") is not None:
-        results.append(verify_julian_day(ev))
-    if ev.get("iso_date") and ev.get("claimed_moon_phase"):
-        results.append(verify_moon_phase(ev))
-    if ev.get("year") is not None and ev.get("event") and ev.get("claimed_event_iso"):
-        results.append(verify_equinox_solstice(ev))
-    if ev.get("iso_date") and ev.get("lat") is not None and ev.get("lon") is not None and ev.get("tz_offset_hours") is not None:
-        results.append(verify_sunrise_sunset(ev))
-    if not results:
-        results.append(na("ephemeris"))
-    return results
+    return dispatch(packet, 'EPH_VERIFY', _RULES, domain='ephemeris', none_reason='no artifact provided')

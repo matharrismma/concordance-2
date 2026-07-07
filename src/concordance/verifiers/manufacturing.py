@@ -53,6 +53,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 # Sigma-level → DPMO table (public-domain, 1.5σ shift convention).
@@ -232,19 +233,13 @@ def verify_tolerance_stack_rss(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+_RULES = [
+    (lambda mv: ("dpmo" in mv and "claimed_sigma" in mv), verify_sigma_level),
+    (lambda mv: (all(k in mv for k in ("mean", "sigma", "claimed_ucl", "claimed_lcl"))), verify_spc_control_limits),
+    (lambda mv: (all(k in mv for k in ("usl", "lsl", "process_mean", "process_sigma", "claimed_cp_capable"))), verify_process_capability),
+    (lambda mv: ("tolerances" in mv and "claimed_rss" in mv), verify_tolerance_stack_rss),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    mv = packet.get("MFG_VERIFY") or {}
-
-    if "dpmo" in mv and "claimed_sigma" in mv:
-        results.append(verify_sigma_level(mv))
-    if all(k in mv for k in ("mean", "sigma", "claimed_ucl", "claimed_lcl")):
-        results.append(verify_spc_control_limits(mv))
-    if all(k in mv for k in ("usl", "lsl", "process_mean", "process_sigma", "claimed_cp_capable")):
-        results.append(verify_process_capability(mv))
-    if "tolerances" in mv and "claimed_rss" in mv:
-        results.append(verify_tolerance_stack_rss(mv))
-
-    if not results:
-        results.append(na("manufacturing", "no MFG_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'MFG_VERIFY', _RULES, domain='manufacturing', none_reason='no MFG_VERIFY artifacts present')

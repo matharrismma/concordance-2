@@ -43,6 +43,7 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 # Calorie content per gram (Atwater factors, public-domain USDA convention).
@@ -242,19 +243,13 @@ def verify_bmi_classification(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+_RULES = [
+    (lambda nv: ("calories_claimed" in nv), verify_macronutrient_calories),
+    (lambda nv: ("nutrient" in nv and "claimed_status" in nv), verify_rda_compliance),
+    (lambda nv: ("intake_kcal" in nv and "expenditure_kcal" in nv and "claimed_balance_kcal" in nv), verify_energy_balance),
+    (lambda nv: ("weight_kg" in nv and "height_m" in nv and "claimed_bmi_class" in nv), verify_bmi_classification),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    nv = packet.get("NUT_VERIFY") or {}
-
-    if "calories_claimed" in nv:
-        results.append(verify_macronutrient_calories(nv))
-    if "nutrient" in nv and "claimed_status" in nv:
-        results.append(verify_rda_compliance(nv))
-    if "intake_kcal" in nv and "expenditure_kcal" in nv and "claimed_balance_kcal" in nv:
-        results.append(verify_energy_balance(nv))
-    if "weight_kg" in nv and "height_m" in nv and "claimed_bmi_class" in nv:
-        results.append(verify_bmi_classification(nv))
-
-    if not results:
-        results.append(na("nutrition", "no NUT_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'NUT_VERIFY', _RULES, domain='nutrition', none_reason='no NUT_VERIFY artifacts present')

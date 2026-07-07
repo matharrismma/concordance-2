@@ -19,6 +19,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, confirm, error, mismatch, na
+from .base import dispatch  # declarative run() driver
 
 
 def _derangements(n: int) -> int:
@@ -123,17 +124,13 @@ def verify_multinomial(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"multinomial({gs}) = {actual}, claimed {c}", data)
 
 
+_RULES = [
+    (lambda cv: (all(k in cv for k in ("perm_n", "perm_k", "claimed_permutations"))), verify_permutations),
+    (lambda cv: (all(k in cv for k in ("comb_n", "comb_k", "claimed_combinations"))), verify_combinations),
+    (lambda cv: ("derangement_n" in cv and "claimed_derangements" in cv), verify_derangements),
+    (lambda cv: ("multinomial_groups" in cv and "claimed_multinomial" in cv), verify_multinomial),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    cv = packet.get("COMB_VERIFY") or {}
-    if all(k in cv for k in ("perm_n", "perm_k", "claimed_permutations")):
-        results.append(verify_permutations(cv))
-    if all(k in cv for k in ("comb_n", "comb_k", "claimed_combinations")):
-        results.append(verify_combinations(cv))
-    if "derangement_n" in cv and "claimed_derangements" in cv:
-        results.append(verify_derangements(cv))
-    if "multinomial_groups" in cv and "claimed_multinomial" in cv:
-        results.append(verify_multinomial(cv))
-    if not results:
-        results.append(na("combinatorics", "no COMB_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'COMB_VERIFY', _RULES, domain='combinatorics', none_reason='no COMB_VERIFY artifacts present')

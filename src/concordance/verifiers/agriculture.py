@@ -38,6 +38,7 @@ import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from .base import VerifierResult, na, confirm, mismatch, error
+from .base import dispatch  # declarative run() driver
 
 
 # ── Reference data (public-domain) ─────────────────────────────────────
@@ -296,20 +297,13 @@ def verify_stocking_density(spec: Dict[str, Any]) -> VerifierResult:
                     {"animal": animal, "per_acre": per, "min": lo, "max": hi})
 
 
+_RULES = [
+    (lambda av: ("claimed_zone" in av), verify_hardiness_zone),
+    (lambda av: ("soil_ph" in av), verify_soil_ph),
+    (lambda av: ("rotation" in av), verify_rotation),
+    (lambda av: ("stocking_per_acre" in av), verify_stocking_density),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    """Dispatch every applicable agriculture check for the AG_VERIFY block."""
-    results: List[VerifierResult] = []
-    av = packet.get("AG_VERIFY") or {}
-
-    if "claimed_zone" in av:
-        results.append(verify_hardiness_zone(av))
-    if "soil_ph" in av:
-        results.append(verify_soil_ph(av))
-    if "rotation" in av:
-        results.append(verify_rotation(av))
-    if "stocking_per_acre" in av:
-        results.append(verify_stocking_density(av))
-
-    if not results:
-        results.append(na("agriculture", "no AG_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'AG_VERIFY', _RULES, domain='agriculture', none_reason='no AG_VERIFY artifacts present')

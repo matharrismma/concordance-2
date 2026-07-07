@@ -43,6 +43,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 def verify_accounting_identity(spec: Dict[str, Any]) -> VerifierResult:
@@ -186,19 +187,13 @@ def verify_present_value(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+_RULES = [
+    (lambda fv: (all(k in fv for k in ("assets", "liabilities", "equity"))), verify_accounting_identity),
+    (lambda fv: (all(k in fv for k in ("principal", "rate", "years", "claimed_future_value"))), verify_compound_interest),
+    (lambda fv: (all(k in fv for k in ("cashflows", "discount_rate", "claimed_npv"))), verify_npv),
+    (lambda fv: (all(k in fv for k in ("future_value", "pv_discount_rate", "pv_periods", "claimed_present_value"))), verify_present_value),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    fv = packet.get("FIN_VERIFY") or {}
-
-    if all(k in fv for k in ("assets", "liabilities", "equity")):
-        results.append(verify_accounting_identity(fv))
-    if all(k in fv for k in ("principal", "rate", "years", "claimed_future_value")):
-        results.append(verify_compound_interest(fv))
-    if all(k in fv for k in ("cashflows", "discount_rate", "claimed_npv")):
-        results.append(verify_npv(fv))
-    if all(k in fv for k in ("future_value", "pv_discount_rate", "pv_periods", "claimed_present_value")):
-        results.append(verify_present_value(fv))
-
-    if not results:
-        results.append(na("finance", "no FIN_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'FIN_VERIFY', _RULES, domain='finance', none_reason='no FIN_VERIFY artifacts present')

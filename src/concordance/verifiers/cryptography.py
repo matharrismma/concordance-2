@@ -59,6 +59,7 @@ import hmac
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error
+from .base import dispatch  # declarative run() driver
 
 
 # NIST hash classification (informal — based on current public guidance).
@@ -228,22 +229,14 @@ def verify_key_strength(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+_RULES = [
+    (lambda cv: ("claimed_hash_hex" in cv), verify_hash_match),
+    (lambda cv: ("claimed_hash_strength" in cv), verify_hash_strength),
+    (lambda cv: ("claimed_hmac_hex" in cv), verify_hmac_match),
+    (lambda cv: ("claimed_decoded" in cv), verify_encoding_roundtrip),
+    (lambda cv: ("claimed_key_strength" in cv), verify_key_strength),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    """Dispatch every applicable cryptography check."""
-    results: List[VerifierResult] = []
-    cv = packet.get("CRYPTO_VERIFY") or {}
-
-    if "claimed_hash_hex" in cv:
-        results.append(verify_hash_match(cv))
-    if "claimed_hash_strength" in cv:
-        results.append(verify_hash_strength(cv))
-    if "claimed_hmac_hex" in cv:
-        results.append(verify_hmac_match(cv))
-    if "claimed_decoded" in cv:
-        results.append(verify_encoding_roundtrip(cv))
-    if "claimed_key_strength" in cv:
-        results.append(verify_key_strength(cv))
-
-    if not results:
-        results.append(na("cryptography", "no CRYPTO_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'CRYPTO_VERIFY', _RULES, domain='cryptography', none_reason='no CRYPTO_VERIFY artifacts present')

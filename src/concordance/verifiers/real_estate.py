@@ -38,6 +38,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 def verify_monthly_mortgage(spec: Dict[str, Any]) -> VerifierResult:
@@ -191,21 +192,15 @@ def verify_rental_yield(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"rental yield = {actual:.4f}, claimed {c:.4f}", data)
 
 
+_RULES = [
+    (lambda rv: ("loan_principal" in rv and "annual_rate" in rv and "claimed_monthly_payment" in rv), verify_monthly_mortgage),
+    (lambda rv: ("net_operating_income" in rv and "property_value" in rv and "claimed_cap_rate" in rv), verify_cap_rate),
+    (lambda rv: ("property_price" in rv and "annual_gross_rent" in rv and "claimed_grm" in rv), verify_gross_rent_multiplier),
+    (lambda rv: ("loan_amount" in rv and "appraised_value" in rv and "claimed_ltv" in rv), verify_loan_to_value),
+    (lambda rv: ("net_operating_income" in rv and "annual_debt_service" in rv and "claimed_dscr" in rv), verify_dscr),
+    (lambda rv: ("annual_rent" in rv and "property_value" in rv and "claimed_rental_yield" in rv), verify_rental_yield),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    rv = packet.get("RE_VERIFY") or {}
-    if "loan_principal" in rv and "annual_rate" in rv and "claimed_monthly_payment" in rv:
-        results.append(verify_monthly_mortgage(rv))
-    if "net_operating_income" in rv and "property_value" in rv and "claimed_cap_rate" in rv:
-        results.append(verify_cap_rate(rv))
-    if "property_price" in rv and "annual_gross_rent" in rv and "claimed_grm" in rv:
-        results.append(verify_gross_rent_multiplier(rv))
-    if "loan_amount" in rv and "appraised_value" in rv and "claimed_ltv" in rv:
-        results.append(verify_loan_to_value(rv))
-    if "net_operating_income" in rv and "annual_debt_service" in rv and "claimed_dscr" in rv:
-        results.append(verify_dscr(rv))
-    if "annual_rent" in rv and "property_value" in rv and "claimed_rental_yield" in rv:
-        results.append(verify_rental_yield(rv))
-    if not results:
-        results.append(na("real_estate", "no RE_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'RE_VERIFY', _RULES, domain='real_estate', none_reason='no RE_VERIFY artifacts present')

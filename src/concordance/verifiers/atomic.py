@@ -33,6 +33,7 @@ import re
 from typing import Any, Dict, List, Optional
 
 from .base import VerifierResult, na, confirm, mismatch, error
+from .base import dispatch  # declarative run() driver
 
 # Madelung (n+l, then n) fill order, covering Z = 1..118.
 _MADELUNG = [
@@ -211,16 +212,13 @@ def verify_electron_configuration(spec: Dict[str, Any]) -> VerifierResult:
                     {"ground_state": _fmt(truth), "claimed": _fmt(parsed)})
 
 
+_RULES = [
+    (lambda av: ("n" in av and "l" in av), verify_quantum_numbers),
+    (lambda av: (("shell_n" in av and "claimed_shell_capacity" in av) or \
+       ("subshell_l" in av and "claimed_subshell_capacity" in av)), verify_shell_capacity),
+    (lambda av: (("atomic_number" in av or "Z" in av) and "claimed_configuration" in av), verify_electron_configuration),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    av = packet.get("ATOM_VERIFY") or {}
-    results: List[VerifierResult] = []
-    if "n" in av and "l" in av:
-        results.append(verify_quantum_numbers(av))
-    if ("shell_n" in av and "claimed_shell_capacity" in av) or \
-       ("subshell_l" in av and "claimed_subshell_capacity" in av):
-        results.append(verify_shell_capacity(av))
-    if ("atomic_number" in av or "Z" in av) and "claimed_configuration" in av:
-        results.append(verify_electron_configuration(av))
-    if not results:
-        results.append(na("atomic", "no ATOM_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'ATOM_VERIFY', _RULES, domain='atomic', none_reason='no ATOM_VERIFY artifacts present')

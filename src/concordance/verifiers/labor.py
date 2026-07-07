@@ -34,6 +34,7 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 # US federal minimum wage (effective 2009, public law)
 _US_FEDERAL_MIN_WAGE = 7.25
@@ -164,19 +165,14 @@ def verify_minimum_wage_check(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+_RULES = [
+    (lambda lv: ("hourly_rate" in lv and "hours_worked" in lv and "claimed_gross_pay" in lv), verify_gross_pay),
+    (lambda lv: ("hourly_rate" in lv and "regular_hours" in lv and "claimed_overtime_pay" in lv), verify_overtime_pay),
+    (lambda lv: ("annual_salary" in lv and "claimed_hourly_equivalent" in lv), verify_annual_to_hourly),
+    (lambda lv: ("gross_pay" in lv and "total_tax_rate" in lv and "claimed_take_home" in lv), verify_take_home_pay),
+    (lambda lv: ("claimed_hourly_rate" in lv and "claimed_compliant" in lv), verify_minimum_wage_check),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    lv = packet.get("LABOR_VERIFY") or {}
-    if "hourly_rate" in lv and "hours_worked" in lv and "claimed_gross_pay" in lv:
-        results.append(verify_gross_pay(lv))
-    if "hourly_rate" in lv and "regular_hours" in lv and "claimed_overtime_pay" in lv:
-        results.append(verify_overtime_pay(lv))
-    if "annual_salary" in lv and "claimed_hourly_equivalent" in lv:
-        results.append(verify_annual_to_hourly(lv))
-    if "gross_pay" in lv and "total_tax_rate" in lv and "claimed_take_home" in lv:
-        results.append(verify_take_home_pay(lv))
-    if "claimed_hourly_rate" in lv and "claimed_compliant" in lv:
-        results.append(verify_minimum_wage_check(lv))
-    if not results:
-        results.append(na("labor", "no LABOR_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'LABOR_VERIFY', _RULES, domain='labor', none_reason='no LABOR_VERIFY artifacts present')

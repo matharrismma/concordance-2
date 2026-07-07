@@ -39,6 +39,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 def _close(actual: float, claimed: float, rel_tol: float = 1e-3, abs_tol: float = 1e-6) -> bool:
@@ -193,20 +194,14 @@ def verify_rc_time_constant(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+_RULES = [
+    (lambda ev: (all(ev.get(k) is not None for k in ("voltage_V", "current_A", "resistance_ohm"))), verify_ohms_law),
+    (lambda ev: ("power_W_claim" in ev), verify_power),
+    (lambda ev: ("voltages_in_loop" in ev and "claimed_loop_sum_V" in ev), verify_kirchhoff_voltage_loop),
+    (lambda ev: (all(k in ev for k in ("resistance_ohm_rc", "capacitance_F", "elapsed_s",
+                             "supply_V", "claimed_capacitor_voltage_V"))), verify_rc_time_constant),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    ev = packet.get("ELEC_VERIFY") or {}
-
-    if all(ev.get(k) is not None for k in ("voltage_V", "current_A", "resistance_ohm")):
-        results.append(verify_ohms_law(ev))
-    if "power_W_claim" in ev:
-        results.append(verify_power(ev))
-    if "voltages_in_loop" in ev and "claimed_loop_sum_V" in ev:
-        results.append(verify_kirchhoff_voltage_loop(ev))
-    if all(k in ev for k in ("resistance_ohm_rc", "capacitance_F", "elapsed_s",
-                             "supply_V", "claimed_capacitor_voltage_V")):
-        results.append(verify_rc_time_constant(ev))
-
-    if not results:
-        results.append(na("electrical", "no ELEC_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'ELEC_VERIFY', _RULES, domain='electrical', none_reason='no ELEC_VERIFY artifacts present')

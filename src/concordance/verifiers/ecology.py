@@ -36,6 +36,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 def verify_logistic_growth(spec: Dict[str, Any]) -> VerifierResult:
@@ -242,25 +243,16 @@ def verify_carbon_footprint_transport(spec: Dict[str, Any]) -> VerifierResult:
     )
 
 
+_RULES = [
+    (lambda ev: (all(ev.get(k) is not None for k in ("carrying_capacity_K", "initial_population_N0",
+                                             "growth_rate_r", "time_t", "claimed_population"))), verify_logistic_growth),
+    (lambda ev: (all(ev.get(k) is not None for k in ("energy_input", "trophic_levels_up",
+                                             "claimed_energy_output"))), verify_trophic_efficiency),
+    (lambda ev: (all(ev.get(k) is not None for k in ("species_proportions", "claimed_shannon_index"))), verify_shannon_diversity),
+    (lambda ev: (all(ev.get(k) is not None for k in ("distance_km", "emission_factor_kg_per_km",
+                                             "claimed_co2_kg"))), verify_carbon_footprint_transport),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    ev = packet.get("ECO_VERIFY") or {}
-
-    if all(ev.get(k) is not None for k in ("carrying_capacity_K", "initial_population_N0",
-                                             "growth_rate_r", "time_t", "claimed_population")):
-        results.append(verify_logistic_growth(ev))
-
-    if all(ev.get(k) is not None for k in ("energy_input", "trophic_levels_up",
-                                             "claimed_energy_output")):
-        results.append(verify_trophic_efficiency(ev))
-
-    if all(ev.get(k) is not None for k in ("species_proportions", "claimed_shannon_index")):
-        results.append(verify_shannon_diversity(ev))
-
-    if all(ev.get(k) is not None for k in ("distance_km", "emission_factor_kg_per_km",
-                                             "claimed_co2_kg")):
-        results.append(verify_carbon_footprint_transport(ev))
-
-    if not results:
-        results.append(na("ecology", "no ECO_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'ECO_VERIFY', _RULES, domain='ecology', none_reason='no ECO_VERIFY artifacts present')

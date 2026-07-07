@@ -30,6 +30,7 @@ import re
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error
+from .base import dispatch  # declarative run() driver
 
 
 def _digits_only(s: str) -> str:
@@ -152,17 +153,13 @@ def verify_ean_upc(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"EAN/UPC {s!r} valid={actual}, claimed {bool(claimed)}", data)
 
 
+_RULES = [
+    (lambda dv: ("isbn10" in dv and "claimed_isbn10_valid" in dv), verify_isbn10),
+    (lambda dv: ("isbn13" in dv and "claimed_isbn13_valid" in dv), verify_isbn13),
+    (lambda dv: ("luhn_number" in dv and "claimed_luhn_valid" in dv), verify_luhn),
+    (lambda dv: ("ean_or_upc" in dv and "claimed_ean_valid" in dv), verify_ean_upc),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    dv = packet.get("DOC_VERIFY") or {}
-    if "isbn10" in dv and "claimed_isbn10_valid" in dv:
-        results.append(verify_isbn10(dv))
-    if "isbn13" in dv and "claimed_isbn13_valid" in dv:
-        results.append(verify_isbn13(dv))
-    if "luhn_number" in dv and "claimed_luhn_valid" in dv:
-        results.append(verify_luhn(dv))
-    if "ean_or_upc" in dv and "claimed_ean_valid" in dv:
-        results.append(verify_ean_upc(dv))
-    if not results:
-        results.append(na("document_validation", "no DOC_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'DOC_VERIFY', _RULES, domain='document_validation', none_reason='no DOC_VERIFY artifacts present')

@@ -28,6 +28,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 def verify_triangle_inequality(spec: Dict[str, Any]) -> VerifierResult:
@@ -407,38 +408,29 @@ def verify_coordination_geometry(spec: Dict[str, Any]) -> VerifierResult:
                     {"ideal_central_angle_deg": ideal})
 
 
-def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    gv = packet.get("GEOM_VERIFY") or {}
-    if "coordination" in gv and "claimed_central_angle_deg" in gv:
-        results.append(verify_coordination_geometry(gv))
-    if all(k in gv for k in ("tri_a", "tri_b", "tri_c", "claimed_valid_triangle")):
-        results.append(verify_triangle_inequality(gv))
-    if all(k in gv for k in ("pyth_a", "pyth_b", "pyth_c", "claimed_right_triangle")):
-        results.append(verify_pythagorean(gv))
-    if "polygon_n" in gv and "claimed_interior_angle_sum_deg" in gv:
-        results.append(verify_polygon_angle_sum(gv))
-    if "circle_radius" in gv and (
+_RULES = [
+    (lambda gv: ("coordination" in gv and "claimed_central_angle_deg" in gv), verify_coordination_geometry),
+    (lambda gv: (all(k in gv for k in ("tri_a", "tri_b", "tri_c", "claimed_valid_triangle"))), verify_triangle_inequality),
+    (lambda gv: (all(k in gv for k in ("pyth_a", "pyth_b", "pyth_c", "claimed_right_triangle"))), verify_pythagorean),
+    (lambda gv: ("polygon_n" in gv and "claimed_interior_angle_sum_deg" in gv), verify_polygon_angle_sum),
+    (lambda gv: ("circle_radius" in gv and (
         "claimed_circle_area" in gv or "claimed_circle_circumference" in gv
-    ):
-        results.append(verify_circle_properties(gv))
-    if (gv.get("rect_length") is not None or gv.get("rect_l") is not None) and (
+    )), verify_circle_properties),
+    (lambda gv: ((gv.get("rect_length") is not None or gv.get("rect_l") is not None) and (
         gv.get("rect_width") is not None or gv.get("rect_w") is not None
     ) and (
         gv.get("claimed_rect_area") is not None or gv.get("claimed_rect_perimeter") is not None
-    ):
-        results.append(verify_rectangle_properties(gv))
-    if gv.get("sphere_radius") is not None and (
+    )), verify_rectangle_properties),
+    (lambda gv: (gv.get("sphere_radius") is not None and (
         gv.get("claimed_sphere_volume") is not None
         or gv.get("claimed_sphere_surface_area") is not None
-    ):
-        results.append(verify_sphere_properties(gv))
-    if gv.get("cyl_radius") is not None and gv.get("cyl_height") is not None and gv.get("claimed_cyl_volume") is not None:
-        results.append(verify_cylinder_properties(gv))
-    if gv.get("cube_side") is not None and (
+    )), verify_sphere_properties),
+    (lambda gv: (gv.get("cyl_radius") is not None and gv.get("cyl_height") is not None and gv.get("claimed_cyl_volume") is not None), verify_cylinder_properties),
+    (lambda gv: (gv.get("cube_side") is not None and (
         gv.get("claimed_cube_volume") is not None or gv.get("claimed_cube_surface_area") is not None
-    ):
-        results.append(verify_cube_properties(gv))
-    if not results:
-        results.append(na("geometry", "no GEOM_VERIFY artifacts present"))
-    return results
+    )), verify_cube_properties),
+]
+
+
+def run(packet: Dict[str, Any]) -> List[VerifierResult]:
+    return dispatch(packet, 'GEOM_VERIFY', _RULES, domain='geometry', none_reason='no GEOM_VERIFY artifacts present')

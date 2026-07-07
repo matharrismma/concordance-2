@@ -34,6 +34,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 # ── Standard genetic code (NCBI translation table 1) ──────────────────────
@@ -280,24 +281,15 @@ def verify_orf_bounds(spec: Dict[str, Any]) -> VerifierResult:
                     "stop_codon": stop_codon})
 
 
+_RULES = [
+    (lambda gv: ("claimed_complement" in gv), verify_complementarity),
+    (lambda gv: ("claimed_reverse_complement" in gv), verify_reverse_complement),
+    (lambda gv: ("claimed_gc_fraction" in gv), verify_gc_content),
+    (lambda gv: ("claimed_protein" in gv), verify_codon_translation),
+    (lambda gv: ("codon" in gv and "claimed_amino_acid" in gv), verify_codon_amino_acid),
+    (lambda gv: ("claimed_orf" in gv), verify_orf_bounds),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    """Dispatch every applicable genetics check for the GENETICS_VERIFY block."""
-    results: List[VerifierResult] = []
-    gv = packet.get("GENETICS_VERIFY") or {}
-
-    if "claimed_complement" in gv:
-        results.append(verify_complementarity(gv))
-    if "claimed_reverse_complement" in gv:
-        results.append(verify_reverse_complement(gv))
-    if "claimed_gc_fraction" in gv:
-        results.append(verify_gc_content(gv))
-    if "claimed_protein" in gv:
-        results.append(verify_codon_translation(gv))
-    if "codon" in gv and "claimed_amino_acid" in gv:
-        results.append(verify_codon_amino_acid(gv))
-    if "claimed_orf" in gv:
-        results.append(verify_orf_bounds(gv))
-
-    if not results:
-        results.append(na("genetics", "no GENETICS_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'GENETICS_VERIFY', _RULES, domain='genetics', none_reason='no GENETICS_VERIFY artifacts present')

@@ -32,6 +32,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import dispatch  # declarative run() driver
 
 
 # ── Crop pH tolerance (public-domain, USDA / FAO) ────────────────────────────
@@ -272,19 +273,14 @@ def verify_soil_texture(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"soil texture = '{actual}', claimed '{claimed}'", data)
 
 
+_RULES = [
+    (lambda sv: ("crop" in sv and "soil_ph" in sv and "claimed_ph_suitable" in sv), verify_ph_suitability),
+    (lambda sv: ("crop_npk" in sv and "area_hectares" in sv), verify_npk_requirement),
+    (lambda sv: ("reference_et0_mm_per_day" in sv and "crop_coefficient" in sv and "claimed_etc_mm_per_day" in sv), verify_irrigation_req),
+    (lambda sv: ("current_ph" in sv and "target_ph" in sv and "claimed_lime_t_per_ha" in sv), verify_lime_requirement),
+    (lambda sv: ("sand_pct" in sv and "silt_pct" in sv and "clay_pct" in sv and "claimed_texture_class" in sv), verify_soil_texture),
+]
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
-    results: List[VerifierResult] = []
-    sv = packet.get("SOIL_VERIFY") or {}
-    if "crop" in sv and "soil_ph" in sv and "claimed_ph_suitable" in sv:
-        results.append(verify_ph_suitability(sv))
-    if "crop_npk" in sv and "area_hectares" in sv:
-        results.append(verify_npk_requirement(sv))
-    if "reference_et0_mm_per_day" in sv and "crop_coefficient" in sv and "claimed_etc_mm_per_day" in sv:
-        results.append(verify_irrigation_req(sv))
-    if "current_ph" in sv and "target_ph" in sv and "claimed_lime_t_per_ha" in sv:
-        results.append(verify_lime_requirement(sv))
-    if "sand_pct" in sv and "silt_pct" in sv and "clay_pct" in sv and "claimed_texture_class" in sv:
-        results.append(verify_soil_texture(sv))
-    if not results:
-        results.append(na("soil_science", "no SOIL_VERIFY artifacts present"))
-    return results
+    return dispatch(packet, 'SOIL_VERIFY', _RULES, domain='soil_science', none_reason='no SOIL_VERIFY artifacts present')
