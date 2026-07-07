@@ -16,6 +16,7 @@ public keeping. Built once per process (the corpus is immutable at runtime) and 
 """
 from __future__ import annotations
 
+import threading
 from collections import Counter, defaultdict
 from typing import Any, Dict, List, Optional
 
@@ -31,6 +32,7 @@ _SHELF_NODE_CAP = 560      # total nodes (seed + their neighbors) in a shelf vie
 _NEIGHBOR_CAP = 90         # neighbors shown around one card in the local graph
 
 _GRAPH: Optional[Dict[str, Any]] = None
+_GRAPH_LOCK = threading.Lock()
 
 
 def _tier(c: dict) -> str:
@@ -80,8 +82,10 @@ def _build() -> Dict[str, Any]:
 
 def _graph() -> Dict[str, Any]:
     global _GRAPH
-    if _GRAPH is None:
-        _GRAPH = _build()
+    if _GRAPH is None:  # double-checked lock: build once, even under concurrent first-hits
+        with _GRAPH_LOCK:
+            if _GRAPH is None:
+                _GRAPH = _build()
     return _GRAPH
 
 

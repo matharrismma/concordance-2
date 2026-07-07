@@ -915,6 +915,7 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
     limiter = ratelimit.from_env()
     MAX_BODY = int(os.environ.get("CONCORDANCE_MAX_BODY", str(256 * 1024)) or 256 * 1024)
     RATELIMITED = ("/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak",
+                   "/threads", "/threads/search",
                    "/coach/mastery", "/identity/create", "/identity/verify", "/badges",
                    "/study", "/study/export", "/study/import",
                    "/groups", "/group", "/group/join", "/group/contribute")
@@ -1129,6 +1130,15 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
     class _QuietServer(ThreadingHTTPServer):
         def handle_error(self, request, client_address):
             pass  # no stderr tracebacks (info leak); handlers already return clean JSON 500s
+
+    # Warm the heavy singletons at boot (behind their locks) so the first request skips the
+    # ~5s corpus+graph build, and concurrent first-hits can't stampede it.
+    try:
+        corpus.default_corpus()
+        from .. import graph as _graph_warm
+        _graph_warm._graph()
+    except Exception:
+        pass
 
     where = f" + site {site}" if site else ""
     print(f"Narrow Highway API ({surface}) on http://{host}:{port}{where}")

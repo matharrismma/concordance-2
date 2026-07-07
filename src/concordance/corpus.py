@@ -15,6 +15,7 @@ import json
 import math
 import os
 import re
+import threading
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -131,6 +132,7 @@ class Corpus:
 # ── module-level default corpus (lazy, from cards.jsonl) ─────────────────
 
 _DEFAULT: Optional[Corpus] = None
+_DEFAULT_LOCK = threading.Lock()
 
 
 def _cards_path() -> Path:
@@ -163,8 +165,10 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
 
 def default_corpus(path: Optional[Path] = None) -> Corpus:
     global _DEFAULT
-    if _DEFAULT is None:
-        _DEFAULT = Corpus(load_cards(path))
+    if _DEFAULT is None:  # double-checked lock: build once, even under concurrent first-hits
+        with _DEFAULT_LOCK:
+            if _DEFAULT is None:
+                _DEFAULT = Corpus(load_cards(path))
     return _DEFAULT
 
 
