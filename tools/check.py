@@ -42,6 +42,10 @@ def main() -> int:
         rc |= _run([sys.executable, "-m", "coverage", "run", "--source=src/concordance", "-m", "pytest", "-q"])
         _run([sys.executable, "-m", "coverage", "report"])
         rc |= _run([sys.executable, "-m", "coverage", "report", f"--include={CORE}", f"--fail-under={FLOOR}"])
+        # Per-file floor for the two safety-critical stores (the hash-chain + content-addressed
+        # store): the aggregate floor can mask a weak individual file, and these two must not slip.
+        for _crit in ("*/ledger.py", "*/cas.py"):
+            rc |= _run([sys.executable, "-m", "coverage", "report", f"--include={_crit}", f"--fail-under={FLOOR}"])
     elif _has("pytest"):
         print("\n(coverage not installed — running suite without the coverage floor)")
         rc |= _run([sys.executable, "-m", "pytest", "-q"])
