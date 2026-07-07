@@ -1,57 +1,72 @@
 :root {
-  --ink: #1a2230; --muted: #5a6678; --line: #d9dee6; --bg: #f7f8fa;
-  --paper: #ffffff; --accent: #1a3a52; --pass: #2f7d4f; --fail: #b03b3b;
-  --gold: #8a6d3b;
+  /* Cathedral palette — unified dark void + gold (2026-07). Every legacy var name is kept
+     (so inline var(--x) across index/seal/library/keep + the server-rendered card/seal pages
+     re-themes automatically); values point at the void/gold scheme, with aliases added. */
+  --void: #0a0b10; --bg: #0a0b10;
+  --ink: #e9e3d4;
+  --dim: #8f8a7c; --muted: #8f8a7c;
+  --gold: #c9a24a; --goldsoft: #a98a3f; --accent: #c9a24a; --mid: #c9b06a;
+  --line: rgba(201,162,74,.16); --panel: rgba(201,162,74,.05); --paper: rgba(201,162,74,.05);
+  --pass: #8bbf8f; --fail: #cf7a5a;
+  --serif: Georgia, "Palatino Linotype", Palatino, "Times New Roman", serif;
 }
 * { box-sizing: border-box; }
+html, body { margin: 0; }
 body {
-  margin: 0; background: var(--bg); color: var(--ink);
-  font: 16px/1.6 -apple-system, "Segoe UI", system-ui, sans-serif;
+  background: radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.12), rgba(201,162,74,0) 70%), var(--void);
+  background-attachment: fixed; color: var(--ink);
+  font: 17px/1.7 var(--serif); -webkit-font-smoothing: antialiased;
 }
+a { color: var(--gold); text-decoration: none; }
+a:hover { text-decoration: underline; }
 .wrap { max-width: 760px; margin: 0 auto; padding: 2.2rem 1.2rem 4rem; }
 header.site { border-bottom: 1px solid var(--line); }
-.brand { font-weight: 700; letter-spacing: .02em; color: var(--accent); text-decoration: none; }
+.brand { font-weight: 400; letter-spacing: .2em; text-transform: uppercase; font-size: .92rem;
+  color: var(--ink); text-decoration: none; }
 .brand .road { color: var(--gold); }
-nav.site a { color: var(--muted); text-decoration: none; margin-left: 1.1rem; font-size: .92rem; }
-nav.site a:hover { color: var(--ink); }
-h1 { font-size: 2.05rem; line-height: 1.2; margin: .2em 0 .1em; }
-.tagline { font-size: 1.18rem; color: var(--accent); margin: .2em 0 1.1em; }
-.lede { color: var(--muted); font-size: 1.04rem; }
+nav.site a { color: var(--dim); text-decoration: none; margin-left: 1.1rem; font-size: .72rem;
+  letter-spacing: .12em; text-transform: uppercase; }
+nav.site a:hover { color: var(--ink); text-decoration: none; }
+h1 { font-weight: 400; font-size: 2.2rem; line-height: 1.2; margin: .2em 0 .1em; letter-spacing: .02em; }
+.tagline { font-size: 1.18rem; color: var(--gold); margin: .2em 0 1.1em; }
+.lede { color: var(--dim); font-size: 1.04rem; }
 section { margin: 2.2rem 0; }
-h2 { font-size: 1.15rem; margin: 0 0 .5em; }
-label { display: block; font-size: .85rem; color: var(--muted); margin: .6rem 0 .25rem; }
+h2 { font-weight: 400; font-size: 1.3rem; margin: 0 0 .5em; }
+label { display: block; font-size: .85rem; color: var(--dim); margin: .6rem 0 .25rem; }
 input, textarea, select, button {
   font: inherit; width: 100%; padding: .55rem .7rem; border: 1px solid var(--line);
-  border-radius: 8px; background: var(--paper); color: var(--ink);
+  border-radius: 6px; background: var(--panel); color: var(--ink);
 }
+input::placeholder, textarea::placeholder { color: var(--dim); }
 button {
-  width: auto; background: var(--accent); color: #fff; border: 0; cursor: pointer;
-  padding: .55rem 1.1rem; margin-top: .7rem;
+  width: auto; background: transparent; color: var(--gold); border: 1px solid var(--line);
+  cursor: pointer; padding: .55rem 1.1rem; margin-top: .7rem; letter-spacing: .06em;
 }
-button:hover { filter: brightness(1.08); }
+button:hover { background: var(--panel); }
 .row { display: flex; gap: .6rem; }
 .row input { flex: 1; }
 .row button { margin-top: 0; }
-.card { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 1rem 1.1rem; }
 .verdict { font-weight: 700; font-size: 1.1rem; }
 .verdict.holds { color: var(--pass); }
 .verdict.broken, .verdict.error { color: var(--fail); }
 .trail { font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: .82rem;
-  white-space: pre-wrap; color: var(--muted); margin-top: .5rem; }
+  white-space: pre-wrap; color: var(--dim); margin-top: .5rem; }
 .result { border-top: 1px solid var(--line); padding: .6rem 0; }
 .result .t { font-weight: 600; }
-.result .s { color: var(--muted); font-size: .9rem; }
+.result .s { color: var(--dim); font-size: .9rem; }
 .shelf { font-size: .72rem; color: var(--gold); text-transform: uppercase; letter-spacing: .08em; }
-footer.site { border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem;
+footer.site { border-top: 1px solid var(--line); color: var(--dim); font-size: .9rem;
   margin-top: 3rem; padding-top: 1.2rem; }
-footer.site a { color: var(--accent); }
-.muted { color: var(--muted); }
+footer.site a { color: var(--gold); }
+.muted { color: var(--dim); }
 .mono { font-family: ui-monospace, Consolas, monospace; font-size: .85rem; }
 
 @media (max-width: 640px) {
+  body { font-size: 16px; }
   header.site .wrap { flex-direction: column; align-items: flex-start; gap: .6rem; padding: .9rem 1rem !important; }
   nav.site { display: flex; flex-wrap: wrap; }
-  nav.site a { margin: 0 1rem .1rem 0; font-size: .85rem; }
+  nav.site a { margin: 0 1rem .1rem 0; font-size: .72rem; }
   .wrap { padding: 1.4rem 1rem 3rem; }
   h1 { font-size: 1.6rem; }
   .tagline { font-size: 1.05rem; }

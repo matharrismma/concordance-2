@@ -230,7 +230,7 @@
     api("/graph?scope=card&id=" + encodeURIComponent(cardId)).then(function (d) {
       if (!d || !d.nodes || d.nodes.length < 2) { section.style.display = "none"; return; }
       section.style.display = "";
-      var v = new View(cv, "light"); v.setData(d.nodes, d.links, d.center);
+      var v = new View(cv, "dark"); v.setData(d.nodes, d.links, d.center);
       var cap = document.getElementById(canvasId + "-cap");
       if (cap) {
         var more = d.total > d.shown ? (" (showing the " + d.shown + " most-connected of " + d.total + ")") : "";
