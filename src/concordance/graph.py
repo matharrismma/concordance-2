@@ -96,8 +96,12 @@ def _node_payload(n: Dict[str, Any]) -> Dict[str, Any]:
 
 def overview() -> Dict[str, Any]:
     """The constellation: one super-node per shelf (sized by card count), with weighted
-    links between shelves (how many connections cross from one shelf to another)."""
+    links between shelves (how many connections cross from one shelf to another).
+    Memoized on the immutable graph — computed once per process, not per request (it was a
+    per-call O(nodes+edges) recompute on an un-rate-limited public endpoint)."""
     g = _graph()
+    if "_overview" in g:
+        return g["_overview"]
     shelf_count: Counter = Counter()
     shelf_tiers: Dict[str, Counter] = defaultdict(Counter)
     for n in g["nodes"].values():
@@ -113,8 +117,9 @@ def overview() -> Dict[str, Any]:
     clusters = [{"shelf": s, "count": shelf_count[s], "tiers": dict(shelf_tiers[s])}
                 for s in sorted(shelf_count, key=lambda x: -shelf_count[x])]
     links = [{"source": a, "target": b, "weight": w} for (a, b), w in pair.items()]
-    return {"scope": "overview", "clusters": clusters, "links": links,
-            "total_nodes": len(g["nodes"]), "total_edges": len(g["edges"])}
+    g["_overview"] = {"scope": "overview", "clusters": clusters, "links": links,
+                      "total_nodes": len(g["nodes"]), "total_edges": len(g["edges"])}
+    return g["_overview"]
 
 
 def shelf_graph(shelf: str, seed_cap: int = _SHELF_SEED_CAP,
@@ -123,6 +128,10 @@ def shelf_graph(shelf: str, seed_cap: int = _SHELF_SEED_CAP,
     neighbors (of any shelf), capped and honestly reported."""
     g = _graph()
     shelf = (shelf or "").strip()
+    cache = g.setdefault("_shelf_cache", {})
+    ckey = (shelf.lower(), seed_cap, node_cap)
+    if ckey in cache:
+        return cache[ckey]
     members = [n for n in g["nodes"].values() if (n["shelf"] or "").lower() == shelf.lower()]
     total = len(members)
     members.sort(key=lambda n: -n["degree"])
@@ -141,9 +150,11 @@ def shelf_graph(shelf: str, seed_cap: int = _SHELF_SEED_CAP,
 
     links = [e for e in g["edges"] if e["source"] in keep and e["target"] in keep]
     nodes = [_node_payload(n) for n in keep.values()]
-    return {"scope": "shelf", "shelf": shelf, "nodes": nodes, "links": links,
-            "shown_from_shelf": len(seed), "total_in_shelf": total,
-            "nodes_shown": len(nodes)}
+    out = {"scope": "shelf", "shelf": shelf, "nodes": nodes, "links": links,
+           "shown_from_shelf": len(seed), "total_in_shelf": total,
+           "nodes_shown": len(nodes)}
+    cache[ckey] = out
+    return out
 
 
 def neighborhood(card_id: str, limit: int = _NEIGHBOR_CAP) -> Optional[Dict[str, Any]]:
