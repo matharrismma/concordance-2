@@ -42,6 +42,17 @@ def content_hash_of(record_dict: Dict[str, Any]) -> str:
     return _canonical(record_dict, exclude=("content_hash", "permanent_ref"))
 
 
+import re as _re
+# A content hash is always 64 lowercase hex (SHA-256). Validating the caller-supplied hash
+# BEFORE it touches the filesystem blocks path traversal via /seal?hash=../.., /s/<h>, /b/<h>
+# — this was the one store that took a raw hash straight into a path (the others validate ids).
+_HASH_RE = _re.compile(r"[0-9a-f]{64}\Z")
+
+
+def _valid_hash(h: str) -> bool:
+    return bool(_HASH_RE.match(h or ""))
+
+
 def _record_path(base: Path, h: str) -> Path:
     return base / h[:2] / f"{h[2:]}.json"
 
@@ -64,6 +75,8 @@ def store(record_dict: Dict[str, Any], *, base_dir: Optional[Path] = None,
 
 def fetch(content_hash: str, *, base_dir: Optional[Path] = None) -> Optional[Dict[str, Any]]:
     """Fetch a record by its content hash, or None if not found."""
+    if not _valid_hash(content_hash):
+        return None
     base = base_dir or _cas_dir()
     path = _record_path(base, content_hash)
     if not path.exists():
@@ -75,6 +88,8 @@ def fetch(content_hash: str, *, base_dir: Optional[Path] = None) -> Optional[Dic
 
 
 def exists(content_hash: str, *, base_dir: Optional[Path] = None) -> bool:
+    if not _valid_hash(content_hash):
+        return False
     base = base_dir or _cas_dir()
     return _record_path(base, content_hash).exists()
 

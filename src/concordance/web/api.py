@@ -55,6 +55,17 @@ def _esc(s: Any) -> str:
             .replace(">", "&gt;").replace('"', "&quot;"))
 
 
+def _safe_url(u: Any) -> str:
+    """Allowlist URL schemes before a value reaches an href/src — blocks javascript:, data:,
+    vbscript: and other script-executing schemes. Returns "" for anything not clearly safe.
+    _esc handles the quote/angle-bracket context; this handles the URL-scheme context."""
+    s = str("" if u is None else u).strip()
+    low = s.lower().replace("\t", "").replace("\n", "").replace("\r", "")
+    if low.startswith(("http://", "https://", "mailto:", "/", "#", "?", "./")):
+        return s
+    return ""
+
+
 def render_seal_html(content_hash: str, record: Optional[Dict[str, Any]]) -> Tuple[int, str]:
     """Server-render a sealed receipt as a crawlable, citable HTML page (data in the markup,
     not client-JS) so search engines and LLMs can read + cite a verification. (status, html)."""
@@ -179,7 +190,7 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
     src = card.get("source") or {}
     src_ref = str(src.get("ref") or "").strip()
     src_label = str(src.get("label") or "").strip()
-    src_url = str(src.get("url") or "").strip()
+    src_url = _safe_url(src.get("url"))  # scheme-allowlisted — no javascript:/data: into href
     # The cited source line — cite-fair: render only what is found, generate nothing.
     cite_bits = []
     if src_label:
@@ -922,9 +933,11 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
             self.wfile.write(body)
 
         def _rl_key(self) -> str:
-            """Rate-limit key: the real client (Caddy sets X-Forwarded-For to it), else peer."""
-            xff = (self.headers.get("x-forwarded-for") or "").split(",")[0].strip()
-            return xff or (self.client_address[0] if self.client_address else "?")
+            """Rate-limit key: the REAL client. Caddy (the single trusted proxy) APPENDS the peer
+            to X-Forwarded-For, so the real client is the LAST hop — a client-supplied XFF prefix
+            can't forge a fresh bucket. Falls back to the socket peer if XFF is absent."""
+            parts = [p.strip() for p in (self.headers.get("x-forwarded-for") or "").split(",") if p.strip()]
+            return (parts[-1] if parts else "") or (self.client_address[0] if self.client_address else "?")
 
         def _keep(self, u) -> None:
             """The operator's window — gated. 404 to non-operators (hide-existence).
@@ -943,6 +956,18 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
             return self._json(404, {"error": "not found"})
 
         def _do(self, method: str) -> None:
+            # Catch-all: any unhandled exception becomes a clean JSON 500, never a dropped
+            # connection with a stderr traceback (which would leak internals + defeat the
+            # Server-header hardening). The server also silences handle_error (see _QuietServer).
+            try:
+                self._do_inner(method)
+            except Exception:
+                try:
+                    self._json(500, {"error": "internal error"})
+                except Exception:
+                    pass
+
+        def _do_inner(self, method: str) -> None:
             u = urlparse(self.path)
             # DoS guard: reject oversized bodies before reading a single byte
             if method == "POST":
@@ -1054,6 +1079,10 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
         def log_message(self, *args) -> None:  # quiet
             pass
 
+    class _QuietServer(ThreadingHTTPServer):
+        def handle_error(self, request, client_address):
+            pass  # no stderr tracebacks (info leak); handlers already return clean JSON 500s
+
     where = f" + site {site}" if site else ""
     print(f"Narrow Highway API ({surface}) on http://{host}:{port}{where}")
-    ThreadingHTTPServer((host, port), Handler).serve_forever()
+    _QuietServer((host, port), Handler).serve_forever()
