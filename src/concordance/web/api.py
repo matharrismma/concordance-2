@@ -238,7 +238,7 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             # neighborhood, so the crawlable page stands alone). Each edge links to its seal.
             f"<section class=card id=nhconn data-cid=\"{_esc(card_id)}\" style=\"margin-top:1rem;display:none\">"
             f"<div class=muted style=\"font-size:.8rem\">connections</div>"
-            f"<canvas id=nhlg style=\"width:100%;height:320px;display:block;margin:.4rem 0\"></canvas>"
+            f"<canvas id=nhlg role=img aria-label=\"Connection graph — this card and its linked records\" style=\"width:100%;height:320px;display:block;margin:.4rem 0\"></canvas>"
             f"<p class=muted id=nhlg-cap style=\"font-size:.75rem\"></p></section>"
             f"<footer class=site><p>A record from the keeping — found and cited, never generated. "
             f"<a href=/search>Search the keeping →</a></p></footer></main>"
@@ -881,6 +881,10 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
                    "/groups", "/group", "/group/join", "/group/contribute")
 
     class Handler(BaseHTTPRequestHandler):
+        # Don't advertise the exact Python/http.server version (aids targeted attacks).
+        server_version = "NarrowHighway"
+        sys_version = ""
+
         def _json(self, status: int, payload: dict, extra: dict = None) -> None:
             data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
             self.send_response(status)
@@ -895,7 +899,9 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
         def _static(self, path: str) -> None:
             rel = path.lstrip("/") or "index.html"
             fp = (site / rel).resolve()
-            if not str(fp).startswith(str(site)) or not fp.is_file():  # traversal guard + existence
+            # traversal guard (is_relative_to, NOT startswith — a sibling dir whose name merely
+            # begins with the site path must not pass) + existence
+            if not fp.is_relative_to(site) or not fp.is_file():
                 return self._json(404, {"error": "not found"})
             body = fp.read_bytes()
             ctype = mimetypes.guess_type(str(fp))[0] or "application/octet-stream"
