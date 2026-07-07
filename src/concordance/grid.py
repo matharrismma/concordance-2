@@ -935,7 +935,7 @@ def _main(argv: List[str]) -> int:
     if cmd == "dimension" and len(argv) >= 3:
         print(render_dimension(argv[2]))
         return 0
-    print("usage: python -m concordance_engine.grid [depth | adjacent <axis> | dimension <dim>]")
+    print("usage: python -m concordance.grid [depth | adjacent <axis> | dimension <dim>]")
     return 2
 
 

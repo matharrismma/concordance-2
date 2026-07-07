@@ -1,7 +1,7 @@
 """The false-positive gate, extended beyond mathematics.
 
 The cardinal sin of a verification engine is sealing a falsehood. The moat benchmark
-proves 0 false-positives for mathematics (58 claims); this proves it for 22 more domains
+proves 0 false-positives for mathematics (60 claims); this proves it for 22 more domains
 — each with a known-TRUE packet (the verifier must CONFIRM) and a known-FALSE packet (it
 must CATCH). The aggregate false-positive count across every domain must be exactly 0.
 
@@ -157,4 +157,4 @@ if __name__ == "__main__":
     print(f"  ok  {len(CASES)} domains: each confirms a truth, catches a falsehood, 0 false-positives")
     test_aliases_route_to_the_right_verifier()
     print("  ok  aliases route to the right verifier")
-    print(f"\nFalse-positive gate: mathematics (58 moat) + {len(CASES)} domains, 0 false-positives.")
+    print(f"\nFalse-positive gate: mathematics (60 moat) + {len(CASES)} domains, 0 false-positives.")

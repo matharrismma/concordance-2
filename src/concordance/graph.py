@@ -54,6 +54,7 @@ def _build() -> Dict[str, Any]:
 
     edges: List[Dict[str, str]] = []
     adj: Dict[str, List[tuple]] = defaultdict(list)
+    seen_edges = set()  # dedupe: one logical (source, target, kind) edge, not N connection cards
     for cid, c in cards.items():
         if c.get("kind") != "connection" or not _is_public(c):
             continue
@@ -65,6 +66,9 @@ def _build() -> Dict[str, Any]:
         if a not in nodes or b not in nodes:
             continue
         kind = ex.get("relationship_kind") or "see_also"
+        if (a, b, kind) in seen_edges:
+            continue  # a duplicate connection card for an edge already counted — skip
+        seen_edges.add((a, b, kind))
         edges.append({"source": a, "target": b, "kind": kind, "seal": cid})
         nodes[a]["degree"] += 1
         nodes[b]["degree"] += 1

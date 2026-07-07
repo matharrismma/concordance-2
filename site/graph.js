@@ -72,7 +72,14 @@
     }
     this.nodes = nodes; this.links = links || [];
     this.alpha = 1; this.fitted = false;
-    this._loop();
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      // Respect prefers-reduced-motion: settle the layout silently, then paint once (no animation).
+      for (var s = 0; s < 400 && this.alpha > 0; s++) this.step();
+      this.alpha = 0; this.fit(); this.draw();
+    } else {
+      this._loop();
+    }
   };
 
   View.prototype.step = function () {

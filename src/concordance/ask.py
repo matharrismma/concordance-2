@@ -150,7 +150,9 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     current text, so crisis and ultimate are byte-identical regardless of gate state."""
     kind = classify(text or "")
     witness = bool(config.witness_surfaced or gate_open)  # the gate opens the full .org experience on .com
-    base: Dict[str, Any] = {"kind": kind, "note": _NOTE, "gate_open": witness}
+    # generated:false is machine-checkable proof of the conduit contract — the front door
+    # carries the same flag the coach/verify payloads do (this engine finds; it never generates).
+    base: Dict[str, Any] = {"kind": kind, "note": _NOTE, "gate_open": witness, "generated": False}
 
     if kind == "crisis":
         # Always help-first — never gated, never enriched, never Scripture-as-fix.

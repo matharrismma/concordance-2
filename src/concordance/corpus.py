@@ -16,7 +16,7 @@ import math
 import os
 import re
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 # A query token must be at least this distinctive (high IDF) to count as a real hit.
 # Tuned for a large corpus; lower it for small fixtures.
