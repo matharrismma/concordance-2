@@ -229,6 +229,36 @@ what is computed and what is only believed.
 corrected, all HELD/INCOMPLETE. Running total: **208 theories, 152 HOLDS, 30 null-refused,
 26 partial — 0 false HOLDS.**
 
+---
+
+# Batch 4 — theories 209–248 (2026-07-08, /loop)
+
+More untouched sub-verifiers + the first **composed multi-step derivations** + false null tests.
+**Outcome: 32/32 checkable → HOLDS · 2/2 composed → HOLDS · 3/3 false → BROKEN · 3/3 OOS → INCOMPLETE (40/40).**
+
+Checkable (209–240): construction circular + wall area · matrix addition/multiplication/inverse ·
+linear system · **optics magnification** · numerical aperture · **quantum fidelity** · **Elo update** ·
+binomial mean · interval semitones · frequency ratio · decade · expected value · drug dosage ·
+**eGFR (Cockcroft–Gault)** · IBW (Devine) · blood-pressure class · **knapsack 0/1** · **binding energy/
+nucleon** · GC content · DNA complement · era (BCE) · CVSS severity · future value · trophic
+efficiency · **tautology (excluded middle)** · password entropy · port class · CIDR membership ·
+haversine bearing.
+
+**Composed multi-step (241–242) — one sealed trail from a chain of theories:** Pythagoras →
+hypotenuse (`3²+4²=25`, then `√25=5`, second step building on the confirmed first); F=ma → work
+(`F=98 N` confirmed, then `98·5=490 J` built on it). This is the moat's `uses:` links doing what
+they were built for — lemma → theorem, sealed end to end.
+
+**False null tests (243–245), all BROKEN:** F=ma mis-stated · non-right triangle claimed right ·
+accounting identity violated. **OOS (246–248), all INCOMPLETE:** dark energy · panspermia ·
+libertarian free will.
+
+**Discipline:** 11 initial flags, every one my own wrong key/label/format (matrix uses `mat_a`;
+elo needs `elo_K`; knapsack items are dicts; magnification uses `object_distance_for_M`; era uses
+`year`; port label is `well_known`; tautology needs sympy boolean `p | ~p`; …) — read the
+verifier, correct, all 11 HELD. Running total: **248 theories, 186 HOLDS (incl. 2 composed),
+33 out-of-scope, deliberate-false all BROKEN — 0 false HOLDS.**
+
 **One honest robustness finding (not a correctness bug):** on the first assay run, #13 (Central
 Limit Theorem, statistics) read BROKEN; a second run gave HOLDS, and it held in isolation. Cause:
 a cold heavy-dependency import (scipy/numpy) inside the pool's 8s wall-clock bound can, under
