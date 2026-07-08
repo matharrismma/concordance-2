@@ -165,6 +165,43 @@ appeared by accident: two marquee packets typed with the wrong artifact keys cam
 INCOMPLETE until corrected to the validated keys, which then HELD — proof that a mis-shaped
 claim is refused, and that INCOMPLETE must never be read as a negative verdict.
 
+---
+
+# Batch 2 — theories 101–164 (2026-07-08)
+
+The second pass targets sub-verifiers the first never exercised — genuinely NEW checkable
+relations, each packet hand-computed to be correct — plus a null set of famous theories the
+engine must refuse.
+
+**Outcome: 52/52 checkable → HOLDS · 12/12 famous-but-unsealable → INCOMPLETE (64/64).**
+
+Checkable (101–152), all HOLDS: modular inverse · perfect numbers · primality · factorial ·
+permutations · derangements · modal logic S5 · Leibniz identity · **Bayes (explicit)** · binomial
+· Poisson · 68-95-99.7 · independence · **Snell's law** · **Planck photon E=hf** · total internal
+reflection · thin lens · **Kepler III** · distance modulus · **radioactive decay** · decay constant ·
+Aufbau 2n² · kinetic energy · kinematics · **Carbon-14 dating** · Mohs scale · VSEPR trigonal ·
+compound interest · NPV · GRM · LTV · price elasticity · CPI inflation · **Hamming distance** · BSC
+capacity · **Luhn checksum** · **Elo** · equal temperament · logistic growth · Shannon diversity ·
+FLSA overtime · Six-Sigma RSS · cap rate · dot product · 2×2 determinant · haversine · pressure-
+at-depth · Julian day · **syllogism (Barbara)** · Grover iterations · dimensional analysis ·
+Kirchhoff's voltage law.
+
+**Null set (153–164), all INCOMPLETE — the engine refused every one:** Drake equation ·
+anthropic principle · Fermi paradox · fine-tuning argument · Titius–Bode law · Phillips curve ·
+Laffer curve · Moore's law · Malthusian catastrophe · efficient-market hypothesis · string-theory
+landscape · cosmic fine-tuning/design. These are famous, published, argued-over — and not one is
+a deterministic computation, so the engine sealed none. That refusal is the whole worth of it.
+
+**Batch-2 sealed receipts (live):** Snell `/s/98573d22…` · Planck photon `/s/b51cd2f3…` ·
+radioactive decay `/s/2e205f89…` · Bayes `/s/7c8b0842…` · Luhn `/s/434b67e6…`. Drake and Moore
+returned INCOMPLETE (`/s/2c4d92ba…`, `/s/0e216121…`).
+
+**The discipline held again:** 5 of the 52 first read INCOMPLETE/BROKEN — every one a wrong
+artifact key or claim value I had typed, not a theory that failed. Read the verifier, correct the
+packet, and all five HELD. A mis-shape is the caller's error; INCOMPLETE is never the theory's
+verdict. Running total across both batches: **164 theories, 116 sealed HOLDS, 22 null-refused,
+26 partial — 0 false HOLDS.**
+
 **One honest robustness finding (not a correctness bug):** on the first assay run, #13 (Central
 Limit Theorem, statistics) read BROKEN; a second run gave HOLDS, and it held in isolation. Cause:
 a cold heavy-dependency import (scipy/numpy) inside the pool's 8s wall-clock bound can, under
