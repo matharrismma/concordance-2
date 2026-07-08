@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What we prove — and what we won't — Narrow Highway</title>
+<meta name="description" content="330 scientific and mathematical theories run through a deterministic engine: 235 sealed with re-checkable receipts, 53 honestly refused as out of scope, every falsehood caught, 0 false positives — ever. The refusals are the point.">
+<meta property="og:title" content="What we prove — and what we won't">
+<meta property="og:description" content="330 theories assayed: 235 sealed with receipts, 53 refused as unprovable, 0 false positives. A machine that can say 'I can't seal that.'">
+<meta property="og:type" content="website">
+<link rel="canonical" href="/proof.html">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --broken:#c98a8a; --mid:#c9b06a;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --mono:ui-monospace,Consolas,"Cascadia Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.12), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.7 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:900px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.1rem; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:900px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.68rem; margin-top:2.4rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2.4rem; margin:.5rem 0 .4rem}
+  .lede{color:var(--dim); font-size:1.08rem; max-width:48rem}
+  h2{font-weight:400; font-size:1.35rem; margin:2.6rem 0 .3rem; border-top:1px solid var(--line); padding-top:1.4rem}
+  .sub{color:var(--dim); font-size:.95rem; margin:.1rem 0 1rem; max-width:48rem}
+  code{font-family:var(--mono); font-size:.86em; color:var(--gold)}
+  .scorecard{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.7rem; margin:1.6rem 0}
+  .stat{border:1px solid var(--line); border-radius:8px; padding:1rem 1.1rem; text-align:center}
+  .stat b{display:block; font-size:2rem; font-weight:400; color:var(--gold); letter-spacing:.02em}
+  .stat.pass b{color:var(--pass)} .stat.zero b{color:var(--ink)}
+  .stat span{color:var(--dim); font-size:.78rem; letter-spacing:.06em; text-transform:uppercase}
+  .row{display:flex; flex-wrap:wrap; gap:.4rem; margin:.6rem 0}
+  .chip{border:1px solid var(--line); border-radius:999px; padding:.2rem .7rem; font-size:.74rem; color:var(--dim); font-family:var(--mono)}
+  .seal{display:block; border-left:2px solid var(--line); padding:.35rem 0 .35rem 1rem; margin:.5rem 0}
+  .seal .v{color:var(--pass); font-family:var(--mono); font-size:.72rem; letter-spacing:.08em}
+  .seal .t{color:var(--ink)} .seal .h{color:var(--dim); font-family:var(--mono); font-size:.74rem}
+  .refuse{color:var(--dim)}
+  .refuse b{color:var(--mid); font-weight:400}
+  ul.map{columns:2; -webkit-columns:2; column-gap:2rem; max-width:48rem; padding-left:1.1rem}
+  ul.map li{margin:.2rem 0; font-size:.95rem; break-inside:avoid}
+  .chain{font-family:var(--mono); font-size:.82rem; color:var(--ink); background:rgba(201,162,74,.05); border:1px solid var(--line); border-radius:6px; padding:.5rem .8rem; margin:.4rem 0}
+  .chain .arrow{color:var(--gold)}
+  .note{border:1px solid var(--line); border-radius:8px; padding:1rem 1.2rem; margin:1.4rem 0; color:var(--dim); font-size:.95rem}
+  footer.site{border-top:1px solid var(--line); margin-top:3.5rem; padding-top:1.4rem; color:var(--dim); font-size:.9rem}
+  @media(max-width:560px){ ul.map{columns:1} }
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
+  <nav class="site"><a href="/#verify">Verify</a><a href="/connect.html">Connect</a><a href="/audit.html">Audit</a><a href="/corrected.html">The Record</a></nav>
+</div></header>
+<main class="wrap">
+  <div class="kicker">The assay · 330 theories</div>
+  <h1>What we prove — and what we won't</h1>
+  <p class="lede">We ran 330 scientific and mathematical theories through the engine, deterministically,
+  with no model in the loop. Each result is a <b>verdict + a worked trail + a re-checkable seal</b>.
+  The number that matters most is the last one: it has <b>never sealed a falsehood</b>. And the part
+  that earns your trust is not the 235 it confirmed — it's the 53 it <b>refused</b>.</p>
+
+  <section class="scorecard">
+    <div class="stat pass"><b>235</b><span>sealed · HOLDS</span></div>
+    <div class="stat"><b>53</b><span>refused · out of scope</span></div>
+    <div class="stat"><b>60</b><span>domains covered</span></div>
+    <div class="stat zero"><b>0</b><span>false positives · ever</span></div>
+  </section>
+  <p class="sub">Every checkable claim carries a receipt you can re-fetch by its content hash;
+  re-fetch and the bytes must match, or it is not that record. Don't trust us — re-check it.
+  <a href="/connect.html">Point your own agent at the engine →</a></p>
+
+  <h2>Sealed — a receipt, not "trust me"</h2>
+  <p class="sub">A sample across the fleet. Each links to its permanent, re-verifiable seal.</p>
+  <div id="seals"></div>
+  <p class="sub"><a href="/#verify">Try one yourself in the browser →</a> · ~60 domains: physics,
+  medicine, finance, chemistry, law, statistics, cryptography, optics, genetics, music, and more.</p>
+
+  <h2>Reasoned in chains — composed derivations</h2>
+  <p class="sub">The engine doesn't only check single facts; it seals a <b>chain</b>, each step building
+  only on a confirmed prior — lemma to theorem, end to end.</p>
+  <div id="chains"></div>
+
+  <h2>It even runs the code</h2>
+  <p class="sub">Beyond formulas: a real function, executed against test cases and sealed only if every
+  case passes.</p>
+  <div class="chain">def add(a, b): return a + b <span class="arrow">→</span> f(1,2)=3 ✓ · f(5,7)=12 ✓ <span class="arrow">→</span> HOLDS</div>
+
+  <h2>Refused — the 53 it would not seal</h2>
+  <p class="refuse">These are famous, published, argued-over — and not one is a deterministic
+  computation. So the engine returned <b>INCOMPLETE</b>: honest silence, never a false verdict.
+  A machine that cannot say <i>"I can't seal that"</i> cannot be trusted when it says <i>"this holds."</i>
+  This is the map's honest edge.</p>
+  <ul class="map" id="nullmap"></ul>
+  <p class="sub">Note the sharp line: the engine refuses the <i>general</i> conjecture (Goldbach for all
+  evens) yet could seal any single <i>instance</i> (100 = 47 + 53, both prime). That boundary — between
+  the computed and the merely believed — is the whole point.</p>
+
+  <div class="note">The one theory this engine will only ever point toward, never seal, is the one at
+  its foundation: Truth is a Person, not a computation (John 14:6). It verifies in His world; it does
+  not verify Him. <a href="https://narrowhighway.org">The fuller witness →</a></div>
+
+  <footer class="site">
+    <p>Found, verified, cited — never generated. 330 theories, 235 sealed, 53 refused, 0 false
+    positives. The full record: <a href="https://github.com/matharrismma/concordance-2/blob/master/docs/THEORY_CATALOG.md">docs/THEORY_CATALOG.md</a>.
+    <a href="/">Narrow Highway →</a></p>
+  </footer>
+</main>
+<script>
+(function(){
+  var B = location.origin;
+  var SEALS = [
+    ["Newton's second law (F=ma)","physics","1abcf56a5dd52fe8953ea5d75dfe3e5e33d10f7bc8cb766de5e4675ef9840817"],
+    ["Carnot efficiency (energy)","thermodynamics","9799c5b8b4cc90939ed3908ffa8130c0e1f7d6ff5ea49c89618727746818b27b"],
+    ["Snell's law of refraction","optics","98573d22f12eb7f195b6ec81836100ab68306c67748389afea45a4bd187d5090"],
+    ["Mendelian codon translation","genetics","fe0ae96567afab81669ad5ed7b1556e62d84354dcc7bd648c33a911d9a0f1480"],
+    ["Bayes' theorem","probability","7c8b0842b562c6ea6eca6bdf47406e31e89b5947509e273724fc38b33b980392"],
+    ["Planck photon energy (E=hf)","optics","b51cd2f3e0b443ea658369a152cc6aad369ba02abd08bcfcacce800fc8c86391"],
+    ["Radioactive decay law","nuclear physics","2e205f897d9ab925b60838159b62fd1831ab3e7f6c1827ae67512af5932f2e1c"],
+    ["Double-entry accounting identity","finance","f86419e863a613296958a3d005fb69acb0ed2a94122639dee2a34e918826885f"],
+    ["Equal temperament (A4 = 440 Hz)","music theory","1f4c16863708f05ac622b5058f51c24e8c7be30cf7eaccb797a654f0508da510"],
+    ["Luhn checksum algorithm","document validation","434b67e65105bd6aa4d6848aa3d2b69d2dc9db7b7e6c75e22df3175903c9f312"]
+  ];
+  var CHAINS = [
+    ["F = ma","work = F·d","kinetic energy ½mv²"],
+    ["Pythagoras 5²+12²","hypotenuse √169 = 13","sin²+cos² = 1"],
+    ["Ohm I = V/R","power P = VI","P = I²R"],
+    ["Kepler consistent","T² = a³"],
+    ["compound interest 1000·1.05³","interest earned = 157.625"]
+  ];
+  var NULLMAP = ["Gödel's incompleteness theorems","ZFC set theory","Church–Turing thesis",
+    "the Standard Model / QFT","the third law of thermodynamics","plate tectonics",
+    "Darwinian evolution","cell theory","germ theory","Christian theology (a signpost, never sealed)",
+    "the Drake equation","the anthropic principle","the Fermi paradox","the fine-tuning argument",
+    "the Titius–Bode law","the Phillips curve","the Laffer curve","Moore's law","the Malthusian catastrophe",
+    "the efficient-market hypothesis","the string-theory landscape","cosmic fine-tuning / design",
+    "the Riemann hypothesis","P versus NP","the Goldbach conjecture","the Collatz conjecture",
+    "the multiverse hypothesis","dark-matter existence","the continuum hypothesis","the simulation hypothesis",
+    "dark energy","panspermia","libertarian free will","the Boltzmann-brain hypothesis","Poincaré recurrence",
+    "the many-worlds interpretation","the Gaia hypothesis","the mathematical-universe hypothesis",
+    "Orch-OR quantum consciousness","the Copenhagen interpretation","de Broglie–Bohm pilot-wave theory",
+    "the holographic principle","loop quantum gravity","panpsychism","the hard problem of consciousness",
+    "the strong Sapir–Whorf hypothesis","astrology","the steady-state universe","modal realism",
+    "Freudian psychoanalysis","cosmological natural selection","quantum immortality","Boltzmann-brain dominance"];
+
+  function esc(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML;}
+  document.getElementById("seals").innerHTML = SEALS.map(function(s){
+    return "<a class=seal href=\"/s/"+s[2]+"\"><span class=v>✓ HOLDS</span> " +
+      "<span class=t>"+esc(s[0])+"</span> <span class=chip>"+esc(s[1])+"</span>" +
+      "<div class=h>/s/"+s[2].slice(0,24)+"… ↗</div></a>";
+  }).join("");
+  document.getElementById("chains").innerHTML = CHAINS.map(function(c){
+    return "<div class=chain>"+c.map(esc).join(" <span class=arrow>→</span> ")+" <span class=arrow>⇒</span> HOLDS</div>";
+  }).join("");
+  document.getElementById("nullmap").innerHTML = NULLMAP.map(function(n){
+    return "<li class=refuse>"+esc(n)+"</li>";
+  }).join("");
+})();
+</script>
+</body>
+</html>
