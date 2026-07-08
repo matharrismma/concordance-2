@@ -283,6 +283,29 @@ canonical keyword sets; codon includes the stop) — corrected, all HELD. Runnin
 **282 theories, 211 HOLDS (incl. 3 composed multi-step), 39 out-of-scope, every falsehood
 BROKEN — 0 false HOLDS.**
 
+---
+
+# Batch 6 — theories 283–304 (2026-07-08, /loop)
+
+Composed multi-step derivations (lead) + last reliable sub-verifiers + deeper null-set.
+**Outcome: 5/5 composed → HOLDS · 7/7 checkable → HOLDS · 8/8 OOS → INCOMPLETE · 2/2 false → BROKEN (22/22).**
+
+**Composed (283–287) — chained theories, one sealed trail each:** F=ma → work → kinetic energy ·
+compound interest → interest earned · **Pythagoras → hypotenuse → sin²+cos²=1** (the trig identity
+falling out of a right-triangle chain) · Kepler-consistent → T²=a³ · Ohm I=V/R → P=VI → P=I²R.
+Each step builds only on a CONFIRMED prior via `uses:`.
+
+Checkable (288–294): **Bonferroni multiple comparisons** · **double-slit fringe spacing** ·
+**de Broglie wavelength** · Bernoulli total head · scale membership · ideal-gas volume (STP) ·
+tidal-range class. **OOS (295–302):** Copenhagen · pilot-wave · holographic principle · loop
+quantum gravity · panpsychism · the hard problem of consciousness · strong Sapir–Whorf ·
+astrology — all INCOMPLETE. False (303–304) all BROKEN.
+
+**Discipline:** 2 flags — a float-precision artifact in my own numbers (`1.05**3` in binary;
+fixed with exact rationals) and a unit-case key (`pressure_Pa`/`temperature_K`). Corrected, both
+HELD. Running total: **304 theories, 223 HOLDS (incl. 8 composed multi-step), 47 out-of-scope,
+every falsehood BROKEN — 0 false HOLDS.**
+
 **One honest robustness finding (not a correctness bug):** on the first assay run, #13 (Central
 Limit Theorem, statistics) read BROKEN; a second run gave HOLDS, and it held in isolation. Cause:
 a cold heavy-dependency import (scipy/numpy) inside the pool's 8s wall-clock bound can, under
