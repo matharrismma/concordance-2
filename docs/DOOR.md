@@ -27,15 +27,23 @@ ready to paste.
 - **Categories:** verification · math · research · trust & safety · knowledge base
 - **Maintainer:** M. Harris — mharris.wcs@icloud.com
 
-## Where to submit (in rough order of value)
+## Where to submit — grounded against what's already listed (checked 2026-07-07)
 
+0. **mcp.so — UPDATE, don't duplicate.** Matt's past submission is live at
+   `mcp.so/server/concordance-engine/matharrismma` but describes the 1.0 engine
+   ("eleven verifier tools", stdio). Update it in place (keeps any accumulated standing):
+   new name Narrow Highway, the REMOTE url `https://narrowhighway.com/mcp`, 38 tools,
+   ~60 domains, the copy above.
 1. **Official MCP servers list** — github.com/modelcontextprotocol/servers → PR adding one
    line under "Community Servers" using the copy above. Highest trust signal; agents and
-   client vendors read this list.
-2. **Smithery** (smithery.ai) — "Add server", paste URL + copy. Indexes remote servers.
-3. **PulseMCP** (pulsemcp.com) — community directory, submission form.
+   client vendors read this list. NOT currently listed.
+2. **Smithery** (smithery.ai) — "Add server", paste URL + copy. NOT currently listed.
+3. **PulseMCP** (pulsemcp.com) — community directory, submission form. NOT currently listed.
 4. **Glama** (glama.ai/mcp/servers) — directory with health checks; remote URL supported.
-5. **mcp.so** — community directory, submission form.
+   NOT currently listed.
+
+Naming note: searches for "Lighthouse" in these directories drown in Google-Lighthouse
+performance tools — the 1.0 name was uncitable there. "Narrow Highway" has no collisions.
 
 ## After listing (watch the fruit)
 
