@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import concurrent.futures as _futures
 import json
+import logging
 import os
 import threading as _threading
 from typing import Any, Dict, List
@@ -24,6 +25,7 @@ from typing import Any, Dict, List
 from . import verifiers as _verifiers
 from .verifiers import mathematics as _math
 
+_log = logging.getLogger("concordance")
 _TERMINAL_FAIL = ("MISMATCH", "ERROR")
 
 # DoS guards: reject oversized expressions before sympy sees them, and bound compute time
@@ -59,6 +61,29 @@ def _call_with_timeout(fn, arg):
 
     return _POOL.submit(_run).result(timeout=_VERIFY_TIMEOUT_S)
 
+
+# The heavy scientific C-extensions the fleet lazy-imports on first use. If the FIRST heavy
+# verification in a fresh worker pays that import INSIDE the wall-clock bound, it can — under
+# load — exceed it and turn a TRUE claim into a transient ERROR (errs SAFE, never a false HOLDS,
+# but a false negative all the same). warm() pre-pays it at BOOT, outside the timed path.
+_HEAVY_LIBS = ("sympy", "numpy", "scipy.stats", "scipy.optimize", "scipy.linalg", "scipy.special")
+
+
+def warm() -> None:
+    """Pre-import the heavy verify deps at boot so no request pays a cold C-extension import
+    inside the per-verification timeout. Best-effort: a minimal sovereign install without these
+    still boots (the affected domains simply return NOT_APPLICABLE, never a false result)."""
+    import importlib
+    warmed = []
+    for lib in _HEAVY_LIBS:
+        try:
+            importlib.import_module(lib)
+            warmed.append(lib)
+        except Exception:  # noqa: BLE001 — warming is optional
+            pass
+    _log.info("verify deps warmed: %s", ", ".join(warmed) or "(none available)")
+
+
 # math mode -> verifier function. params (the spec body) is passed straight in.
 _MATH_MODES = {
     "equality": _math.verify_equality,
@@ -82,8 +107,11 @@ def verify_math(spec: Dict[str, Any]) -> Dict[str, str]:
     try:
         res = _call_with_timeout(fn, params)  # a VerifierResult, time- and pool-bounded
     except _futures.TimeoutError:
+        _log.warning("verify timed out (>%.0fs) mode=%s — shed to ERROR (errs safe, never a false HOLDS)",
+                     _VERIFY_TIMEOUT_S, mode)
         return {"status": "ERROR", "detail": f"verification timed out (> {_VERIFY_TIMEOUT_S}s)"}
     except _Saturated:
+        _log.warning("verify pool saturated mode=%s — shed to ERROR (errs safe)", mode)
         return {"status": "ERROR", "detail": "verifier busy (too many concurrent verifications) — retry shortly"}
     return {"status": res.status, "detail": (res.detail or "")[:300]}
 
@@ -119,8 +147,11 @@ def verify_domain(domain: str, spec: Dict[str, Any]) -> Dict[str, str]:
         results = _call_with_timeout(
             lambda p: _verifiers.run_for_domain(domain, p, surface="secular"), packet)
     except _futures.TimeoutError:
+        _log.warning("verify timed out (>%.0fs) domain=%s — shed to ERROR (errs safe, never a false HOLDS)",
+                     _VERIFY_TIMEOUT_S, domain)
         return {"status": "ERROR", "detail": f"verification timed out (> {_VERIFY_TIMEOUT_S}s)"}
     except _Saturated:
+        _log.warning("verify pool saturated domain=%s — shed to ERROR (errs safe)", domain)
         return {"status": "ERROR", "detail": "verifier busy (too many concurrent verifications) — retry shortly"}
     return _reduce_domain_results(results)
 

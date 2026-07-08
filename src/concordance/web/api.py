@@ -1219,11 +1219,16 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
             pass  # no stderr tracebacks (info leak); handlers already return clean JSON 500s
 
     # Warm the heavy singletons at boot (behind their locks) so the first request skips the
-    # ~5s corpus+graph build, and concurrent first-hits can't stampede it.
+    # ~5s corpus+graph build, and concurrent first-hits can't stampede it. Also pre-import the
+    # heavy verify deps (sympy/scipy/numpy) so the FIRST heavy-domain verification never pays a
+    # cold C-extension import inside the per-verification timeout (which could shed a TRUE claim
+    # to a transient ERROR — errs safe, but a false negative). See derivation.warm().
     try:
         corpus.default_corpus()
         from .. import graph as _graph_warm
         _graph_warm._graph()
+        from ..derivation import warm as _warm_verify
+        _warm_verify()
     except Exception:
         pass
 

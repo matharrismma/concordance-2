@@ -34,3 +34,48 @@ def test_card_page_never_emits_script_url():
             "source": {"label": "L", "ref": "R", "url": "javascript:alert(document.cookie)"}}
     _st, html = render_card_html("card_n_x", card)
     assert "javascript:" not in html and 'href="javascript' not in html
+
+
+def test_verify_warm_preimports_heavy_deps():
+    """warm() must pre-import the heavy verify C-extensions so the first heavy verification
+    never pays a cold import inside the per-verification timeout (the assay's cold-start finding:
+    a TRUE claim transiently sheds to ERROR — errs safe, but a false negative)."""
+    import sys as _sys
+    from concordance import derivation
+    derivation.warm()
+    # sympy backs the math moat and is a hard dep — it must be resident after warm().
+    assert "sympy" in _sys.modules, "warm() did not import sympy"
+    derivation.warm()  # idempotent — a second warm must not raise
+
+
+def test_verify_saturation_sheds_to_error_and_logs():
+    """When the pool is saturated the load-shed must (a) return ERROR — never a false HOLDS on a
+    TRUE claim — and (b) LOG a warning, so the transient is observable in production, not silent.
+    Saturation is forced deterministically by draining every slot."""
+    import logging as _logging
+    from concordance import derivation as D
+
+    msgs = []
+
+    class _Cap(_logging.Handler):
+        def emit(self, r):
+            msgs.append(r.getMessage())
+
+    lg = _logging.getLogger("concordance")
+    h = _Cap()
+    lg.addHandler(h)
+    held = 0
+    try:
+        while D._SLOTS.acquire(blocking=False):   # drain every verify slot
+            held += 1
+        # a claim that WOULD confirm now has no slot -> must shed to ERROR, and say so
+        res = D.verify_domain("statistics", {"STAT_VERIFY": {"estimate": 1.0, "ci_low": 0.0, "ci_high": 2.0}})
+        assert res["status"] == "ERROR", res              # errs safe — never HOLDS/MISMATCH
+        assert any("saturated" in m for m in msgs), msgs  # and it was logged
+        msgs.clear()
+        res2 = D.verify_math({"mode": "equality", "params": {"expr_a": "x", "expr_b": "x", "variables": ["x"]}})
+        assert res2["status"] == "ERROR" and any("saturated" in m for m in msgs)
+    finally:
+        for _ in range(held):
+            D._SLOTS.release()
+        lg.removeHandler(h)
