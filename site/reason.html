@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify an argument or a function — Narrow Highway</title>
+<meta name="description" content="Not just single facts — verify a whole chain of reasoning (and see exactly where it breaks) or run a function against test cases. Deterministic, sealed, re-checkable. No model in the loop.">
+<meta property="og:title" content="Verify an argument or a function — Narrow Highway">
+<meta property="og:description" content="Check a chain of reasoning step by step, or execute code against tests — each sealed and re-checkable.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="/reason.html">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --broken:#c98a8a; --mid:#c9b06a;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --mono:ui-monospace,Consolas,"Cascadia Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.12), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.7 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  a:focus-visible,button:focus-visible,textarea:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:860px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.1rem; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:860px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.68rem; margin-top:2.4rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2.3rem; margin:.5rem 0 .4rem}
+  .lede{color:var(--dim); font-size:1.06rem; max-width:46rem}
+  .tabs{display:flex; gap:.5rem; margin:1.6rem 0 .6rem}
+  .tab{background:transparent; color:var(--dim); border:1px solid var(--line); border-radius:6px; padding:.45rem 1.1rem; font:600 .9rem var(--serif); cursor:pointer}
+  .tab.on{background:rgba(201,162,74,.12); color:var(--ink); border-color:var(--goldsoft)}
+  .pane{display:none} .pane.on{display:block}
+  label{display:block; color:var(--dim); font-size:.82rem; letter-spacing:.06em; text-transform:uppercase; margin:.8rem 0 .3rem}
+  textarea{width:100%; background:rgba(201,162,74,.05); border:1px solid var(--line); border-radius:6px;
+    color:var(--ink); font:.9rem/1.6 var(--mono); padding:.8rem 1rem; resize:vertical}
+  #arg{min-height:8rem} #code{min-height:8rem} #tests{min-height:4rem} #fn{width:100%;background:rgba(201,162,74,.05);border:1px solid var(--line);border-radius:6px;color:var(--ink);font:.9rem var(--mono);padding:.5rem .8rem}
+  button.go{background:var(--gold); color:#141310; border:0; border-radius:6px; padding:.55rem 1.4rem; font:600 .95rem var(--serif); cursor:pointer; margin-top:.7rem}
+  button.go:hover{background:#d9b25a}
+  .muted{color:var(--dim)} .mono{font-family:var(--mono)}
+  .verdict{font-size:1.2rem; margin:1rem 0 .3rem}
+  .verdict.holds{color:var(--pass)} .verdict.broken{color:var(--broken)} .verdict.inc{color:var(--mid)}
+  .step{border-left:2px solid var(--line); padding:.35rem 0 .35rem 1rem; margin:.5rem 0}
+  .step.at{border-left-color:var(--broken)}
+  .step .s{font-family:var(--mono); font-size:.74rem; letter-spacing:.08em}
+  .step .s.ok{color:var(--pass)} .step .s.no{color:var(--broken)} .step .s.na{color:var(--mid)}
+  .step .c{color:var(--ink)} .step .d{color:var(--dim); font-size:.82rem; font-family:var(--mono)}
+  .seal-line{margin-top:.6rem}
+  footer.site{border-top:1px solid var(--line); margin-top:3.2rem; padding-top:1.4rem; color:var(--dim); font-size:.9rem}
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
+  <nav class="site"><a href="/#verify">Verify</a><a href="/audit.html">Audit</a><a href="/proof.html">Proof</a><a href="/connect.html">Connect</a></nav>
+</div></header>
+<main class="wrap">
+  <div class="kicker">The auditor · reasoning &amp; code</div>
+  <h1>Verify an argument. Or a function.</h1>
+  <p class="lede">A single fact is easy. The engine also checks a <b>chain of reasoning</b> — step by
+  step, each built on the last — and tells you <b>exactly where it breaks</b>. Or it <b>runs your
+  code</b> against test cases. Deterministic, sealed, re-checkable. No model in the loop.</p>
+
+  <div class="tabs">
+    <button class="tab on" data-p="argp">Verify an argument</button>
+    <button class="tab" data-p="codep">Verify code</button>
+  </div>
+
+  <section class="pane on" id="argp">
+    <label for="arg">One equation per line — each step may build on the ones before it</label>
+    <textarea id="arg" spellcheck="false">3**2 + 4**2 = 25
+sqrt(25) = 5
+5 * 2 = 10</textarea>
+    <p class="muted" style="font-size:.85rem">Each line is checked exactly (symbolic math). The chain
+    HOLDS only if every step holds; otherwise it names the first step where trust breaks.</p>
+    <button class="go" id="goarg">Check the argument</button>
+    <div id="argout"></div>
+  </section>
+
+  <section class="pane" id="codep">
+    <label for="fn">Function name</label>
+    <input id="fn" spellcheck="false" value="square">
+    <label for="code">Code (Python)</label>
+    <textarea id="code" spellcheck="false">def square(n):
+    return n * n</textarea>
+    <label for="tests">Test cases — one per line, <span class="mono">args =&gt; expected</span> (args comma-separated)</label>
+    <textarea id="tests" spellcheck="false">3 => 9
+5 => 25
+-4 => 16</textarea>
+    <button class="go" id="gocode">Run &amp; verify</button>
+    <div id="codeout"></div>
+  </section>
+
+  <footer class="site">
+    <p>The same engine, deeper verbs: a fact, a whole argument, or a function — each a re-checkable
+    receipt. Agents get these too — <a href="/connect.html">connect →</a>. See the whole assay:
+    <a href="/proof.html">what we prove →</a></p>
+  </footer>
+</main>
+<script>
+(function(){
+  function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+  document.querySelectorAll(".tab").forEach(function(t){
+    t.addEventListener("click", function(){
+      document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("on");});
+      document.querySelectorAll(".pane").forEach(function(x){x.classList.remove("on");});
+      t.classList.add("on"); document.getElementById(t.dataset.p).classList.add("on");
+    });
+  });
+  function post(body){ return fetch("/verify",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}).then(function(r){return r.json();}); }
+
+  // ── argument: one equation per line -> chained math equality steps ──
+  document.getElementById("goarg").addEventListener("click", function(){
+    var lines = document.getElementById("arg").value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
+    var out = document.getElementById("argout");
+    var steps = [], ok = true;
+    for (var i=0;i<lines.length;i++){
+      var eq = lines[i].split("=");
+      if (eq.length !== 2){ out.innerHTML="<div class=verdict broken>Line "+(i+1)+" is not an equation (need one “=”).</div>"; ok=false; break; }
+      var step = {id:"s"+(i+1), domain:"mathematics", spec:{mode:"equality", params:{expr_a:eq[0].trim(), expr_b:eq[1].trim()}}};
+      if (i>0) step.uses=["s"+i];
+      steps.push(step);
+    }
+    if (!ok) return;
+    out.innerHTML = "<p class=muted>checking…</p>";
+    post({steps:steps}).then(function(d){
+      var cls = d.verdict==="HOLDS"?"holds":(d.verdict==="INCOMPLETE"?"inc":"broken");
+      var h = "<div class=\"verdict "+cls+"\">"+esc(d.verdict)+
+        (d.broken_at?" — trust breaks at step "+esc(d.broken_at.replace('s','')):"")+"</div>";
+      (d.trail||[]).forEach(function(t,i){
+        var sc = t.status==="CONFIRMED"?"ok":(t.status==="NOT_APPLICABLE"?"na":"no");
+        var at = (d.broken_at===t.id)?" at":"";
+        h += "<div class=\"step"+at+"\"><span class=\"s "+sc+"\">"+esc(t.status)+"</span> "+
+             "<span class=c>"+esc(lines[i])+"</span><div class=d>"+esc(t.detail||"")+"</div></div>";
+      });
+      if (d.seal && d.seal.cite_url) h += "<p class=seal-line><a href=\""+esc(d.seal.cite_url)+"\">sealed receipt ↗</a></p>";
+      out.innerHTML = h;
+    }).catch(function(){ out.innerHTML="<p class=muted>The engine is resting — try again.</p>"; });
+  });
+
+  // ── code: function + tests -> functional_correctness ──
+  document.getElementById("gocode").addEventListener("click", function(){
+    var code = document.getElementById("code").value;
+    var fn = document.getElementById("fn").value.trim();
+    var tlines = document.getElementById("tests").value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
+    var out = document.getElementById("codeout");
+    var cases = [];
+    for (var i=0;i<tlines.length;i++){
+      var parts = tlines[i].split("=>");
+      if (parts.length !== 2){ out.innerHTML="<div class=verdict broken>Test "+(i+1)+" needs the form <span class=mono>args =&gt; expected</span>.</div>"; return; }
+      try {
+        var args = JSON.parse("["+parts[0].trim()+"]");
+        var expected = JSON.parse(parts[1].trim());
+        cases.push({args:args, expected:expected});
+      } catch(e){ out.innerHTML="<div class=verdict broken>Test "+(i+1)+": could not parse numbers.</div>"; return; }
+    }
+    out.innerHTML = "<p class=muted>running…</p>";
+    post({steps:[{id:"a", domain:"computer_science", spec:{CS_VERIFY:{function_name:fn, code:code, test_cases:cases}}}]}).then(function(d){
+      var cls = d.verdict==="HOLDS"?"holds":(d.verdict==="INCOMPLETE"?"inc":"broken");
+      var t = (d.trail&&d.trail[0])||{};
+      var h = "<div class=\"verdict "+cls+"\">"+esc(d.verdict)+"</div>"+
+              "<div class=step><span class=\"s "+(d.verdict==="HOLDS"?"ok":"no")+"\">"+esc(t.status||"")+"</span>"+
+              "<div class=d>"+esc(t.detail||"")+"</div></div>";
+      if (d.seal && d.seal.cite_url) h += "<p class=seal-line><a href=\""+esc(d.seal.cite_url)+"\">sealed receipt ↗</a></p>";
+      out.innerHTML = h;
+    }).catch(function(){ out.innerHTML="<p class=muted>The engine is resting — try again.</p>"; });
+  });
+})();
+</script>
+</body>
+</html>
