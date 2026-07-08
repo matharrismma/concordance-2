@@ -1,0 +1,152 @@
+{
+  "modes": {
+    "domain_confirmed": 60,
+    "domain_refused": 16,
+    "dimension": 8,
+    "verdict": 2
+  },
+  "nnz": 277,
+  "dimensions": [
+    "encoding",
+    "metabolism",
+    "reasoning",
+    "physical_substance",
+    "authority_trust",
+    "time_sequence",
+    "conservation_balance",
+    "discreteness"
+  ],
+  "dimension_domain_counts": {
+    "encoding": 20,
+    "metabolism": 20,
+    "reasoning": 41,
+    "physical_substance": 39,
+    "authority_trust": 22,
+    "time_sequence": 38,
+    "conservation_balance": 39,
+    "discreteness": 1
+  },
+  "refused_count": 53,
+  "refused_domains": [
+    "astronomy",
+    "biology",
+    "computer_science",
+    "ecology",
+    "economics",
+    "finance",
+    "formal_logic",
+    "geology",
+    "linguistics",
+    "medicine",
+    "nuclear_physics",
+    "number_theory",
+    "philosophy",
+    "physics",
+    "theology_doctrine",
+    "thermodynamics"
+  ],
+  "boundary": {
+    "refusing_and_confirming_domains": [
+      "astronomy",
+      "biology",
+      "computer_science",
+      "ecology",
+      "economics",
+      "finance",
+      "formal_logic",
+      "geology",
+      "linguistics",
+      "medicine",
+      "nuclear_physics",
+      "number_theory",
+      "philosophy",
+      "physics",
+      "thermodynamics"
+    ],
+    "overlap_fraction": 0.938,
+    "modal": true,
+    "finding": "MODAL, not spatial — 15/16 domains that refused a theory ALSO sealed one. The unmappable is not a region of the map; it is a KIND of claim (a proposition, an interpretation, an unfalsifiable) that appears in EVERY region. That is why the boundary can't be drawn as a line on the domain/dimension grid — it runs through every cell."
+  },
+  "why_labels": {
+    "conjecture": "Unproven conjecture — true or false, but no one has shown which",
+    "foundation": "Foundational axiom / meta-theorem — the ground you reason FROM, not a claim you check",
+    "interpretation": "Interpretation of settled math — same equations, rival stories",
+    "empirical": "Empirical / historical — established by observation, not computation",
+    "speculative": "Speculative / unfalsifiable — no deterministic test exists",
+    "heuristic": "Heuristic / social regularity — a trend, not a law",
+    "mind": "Mind / value — consciousness, meaning, the will",
+    "faith": "Faith — a Person, not a proposition (John 14:6); pointed to, never sealed"
+  },
+  "refusals_by_why": {
+    "conjecture": [
+      "P versus NP",
+      "the Collatz conjecture",
+      "the Goldbach conjecture",
+      "the Riemann hypothesis",
+      "the continuum hypothesis"
+    ],
+    "foundation": [
+      "Church-Turing thesis",
+      "Godel's incompleteness theorems",
+      "ZFC set theory",
+      "the third law of thermodynamics"
+    ],
+    "interpretation": [
+      "de Broglie-Bohm pilot-wave theory",
+      "quantum immortality",
+      "the Copenhagen interpretation",
+      "the many-worlds interpretation"
+    ],
+    "empirical": [
+      "Darwinian evolution",
+      "cell theory",
+      "germ theory",
+      "plate tectonics",
+      "the Standard Model / QFT",
+      "the steady-state universe"
+    ],
+    "speculative": [
+      "Boltzmann-brain dominance",
+      "Poincare recurrence",
+      "cosmic fine-tuning / design",
+      "cosmological natural selection",
+      "dark energy",
+      "dark-matter existence",
+      "loop quantum gravity",
+      "panspermia",
+      "the Boltzmann-brain hypothesis",
+      "the Drake equation",
+      "the Fermi paradox",
+      "the Gaia hypothesis",
+      "the anthropic principle",
+      "the fine-tuning argument",
+      "the holographic principle",
+      "the mathematical-universe hypothesis",
+      "the multiverse hypothesis",
+      "the simulation hypothesis",
+      "the string-theory landscape"
+    ],
+    "heuristic": [
+      "Freudian psychoanalysis",
+      "Moore's law",
+      "astrology",
+      "the Laffer curve",
+      "the Malthusian catastrophe",
+      "the Phillips curve",
+      "the Titius-Bode law",
+      "the efficient-market hypothesis",
+      "the strong Sapir-Whorf hypothesis"
+    ],
+    "mind": [
+      "Orch-OR quantum consciousness",
+      "libertarian free will",
+      "modal realism",
+      "panpsychism",
+      "the hard problem of consciousness"
+    ],
+    "faith": [
+      "Christian theology"
+    ]
+  },
+  "note": "Cross-domain dimension recurrence (e.g. conservation across physics, finance, ecology) is RESONANCE — a map aid, never a proof; the 0-false-positive rule governs the map as strictly as the seals."
+}

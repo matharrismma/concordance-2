@@ -276,7 +276,7 @@ _SITEMAP_PAGES = ("/", "/ask.html", "/bible.html", "/read.html", "/characters.ht
                   "/prophecy.html", "/journal.html", "/map.html", "/steward.html",
                   "/community.html", "/library.html", "/guarantees.html", "/collapse.html",
                   "/seeds.html", "/seal.html", "/connect.html", "/corrected.html", "/audit.html",
-                  "/proof.html", "/reason.html")
+                  "/proof.html", "/reason.html", "/boundary.html")
 
 
 def build_sitemap(base_url: str) -> str:

@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where the map ends — Narrow Highway</title>
+<meta name="description" content="An honest map of what the engine will NOT seal — 53 refused theories grouped by why they're unsealable. Structured as a tensor: domain × dimension × verdict. The boundary isn't a region; it's a kind of claim, and it runs through every domain.">
+<meta property="og:title" content="Where the map ends — Narrow Highway">
+<meta property="og:description" content="53 refusals, grouped by why. The boundary of the mappable is modal, not spatial — computed, not asserted.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="/boundary.html">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --broken:#c98a8a; --mid:#c9b06a;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --mono:ui-monospace,Consolas,"Cascadia Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.12), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.7 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:900px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.1rem; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:900px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.68rem; margin-top:2.4rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2.5rem; margin:.5rem 0 .4rem}
+  .lede{color:var(--dim); font-size:1.08rem; max-width:48rem}
+  h2{font-weight:400; font-size:1.5rem; margin:2.8rem 0 .5rem; letter-spacing:.01em}
+  h2 .n{color:var(--gold); font-family:var(--mono); font-size:1rem; margin-right:.5rem}
+  p{max-width:48rem}
+  .muted{color:var(--dim)} .mono{font-family:var(--mono)}
+
+  /* the tensor lift diagram */
+  .lift{display:flex; gap:1rem; align-items:stretch; flex-wrap:wrap; margin:1.4rem 0}
+  .node{flex:1 1 240px; border:1px solid var(--line); border-radius:8px; padding:1rem 1.2rem;
+    background:rgba(201,162,74,.04)}
+  .node .t{color:var(--gold); font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
+  .node .m{font-size:1.15rem; margin:.35rem 0 .2rem}
+  .node .d{color:var(--dim); font-size:.86rem}
+  .arrow{align-self:center; color:var(--goldsoft); font-size:1.4rem}
+
+  /* finding card */
+  .finding{border:1px solid var(--goldsoft); border-radius:10px; padding:1.3rem 1.5rem; margin:1.4rem 0;
+    background:linear-gradient(180deg, rgba(201,162,74,.08), rgba(201,162,74,.02))}
+  .finding .verdict{color:var(--gold); font-family:var(--mono); letter-spacing:.16em; text-transform:uppercase; font-size:.78rem}
+  .finding .big{font-size:1.35rem; margin:.4rem 0 .3rem}
+
+  /* dimension bars */
+  .bars{margin:1rem 0}
+  .row{display:grid; grid-template-columns:12rem 1fr 3rem; align-items:center; gap:.7rem; margin:.32rem 0; font-size:.9rem}
+  .row .lab{color:var(--ink); font-family:var(--mono); font-size:.8rem; text-align:right}
+  .row .track{background:rgba(201,162,74,.07); border-radius:4px; height:.85rem; overflow:hidden}
+  .row .fill{height:100%; background:linear-gradient(90deg, var(--goldsoft), var(--gold))}
+  .row .ct{color:var(--dim); font-family:var(--mono); font-size:.78rem}
+  .row.solo .fill{background:var(--broken)}
+
+  /* refusal groups */
+  .grp{border-left:2px solid var(--line); padding:.2rem 0 .2rem 1.1rem; margin:1.2rem 0}
+  .grp h3{font-weight:400; font-size:1.12rem; margin:.2rem 0 .1rem; color:var(--ink)}
+  .grp .why{color:var(--dim); font-size:.9rem; margin:0 0 .5rem}
+  .grp.faith{border-left-color:var(--gold)}
+  .chips{display:flex; flex-wrap:wrap; gap:.4rem}
+  .chip{border:1px solid var(--line); border-radius:5px; padding:.22rem .6rem; font-size:.82rem; color:var(--ink);
+    background:rgba(201,162,74,.04)}
+  .chip.faith{border-color:var(--goldsoft); color:var(--gold)}
+  .cnt{color:var(--goldsoft); font-family:var(--mono); font-size:.78rem; margin-left:.4rem}
+
+  .note{border-top:1px solid var(--line); margin-top:2.4rem; padding-top:1rem; color:var(--dim); font-size:.92rem; max-width:48rem}
+  footer.site{border-top:1px solid var(--line); margin-top:3.2rem; padding-top:1.4rem; color:var(--dim); font-size:.9rem}
+  @media(max-width:640px){ .row{grid-template-columns:8.5rem 1fr 2.6rem} h1{font-size:2rem} }
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
+  <nav class="site"><a href="/#verify">Verify</a><a href="/reason.html">Reason</a><a href="/proof.html">Proof</a><a href="/boundary.html">Boundary</a><a href="/connect.html">Connect</a></nav>
+</div></header>
+<main class="wrap">
+  <div class="kicker">The boundary · what the map cannot seal</div>
+  <h1>Where the map ends.</h1>
+  <p class="lede">An engine that seals every claim seals nothing. The strength of this one is the
+  line it will not cross. Here is that line, drawn honestly: <b id="nref">53</b> named theories the
+  engine <b>refuses</b> to seal — grouped not by domain, but by <b>why</b> each is unsealable. And
+  one measured question: is the unmappable a <i>place</i> on the map, or a <i>kind</i> of claim?</p>
+
+  <h2><span class="n">01</span>The matrix, lifted to a tensor</h2>
+  <p>The coordinate map has always been a two-mode matrix — <span class="mono">domain × dimension</span>,
+  a sparse grid of which of the 8 shared dimensions each domain touches. The assay adds a third
+  mode: the <b>verdict</b>. That turns the matrix into a 3-tensor, stored as a sovereign coordinate
+  list — no new dependencies, just the coordinates that are non-zero.</p>
+  <div class="lift">
+    <div class="node"><div class="t">2-mode · matrix</div><div class="m">domain × dimension</div>
+      <div class="d">which dimensions each domain touches</div></div>
+    <div class="arrow">→</div>
+    <div class="node"><div class="t">3-mode · tensor</div><div class="m">domain × dimension × <b style="color:var(--gold)">verdict</b></div>
+      <div class="d"><span id="nnz">—</span> non-zero coordinates · confirmed vs refused</div></div>
+  </div>
+
+  <h2><span class="n">02</span>Is the boundary a place — or a kind?</h2>
+  <p>If the unmappable were a <i>region</i> — some corner of reality the engine simply can't reach —
+  then the domains that refuse a theory would be different from the domains that seal one. So we
+  measured it directly: of the domains that produced a refusal, how many <b>also</b> sealed a claim?</p>
+  <div class="finding">
+    <div class="verdict" id="v-kind">—</div>
+    <div class="big" id="v-big">—</div>
+    <p class="muted" id="v-detail" style="margin:.3rem 0 0"></p>
+  </div>
+  <p class="muted">One domain refuses and never seals: <b>theology</b> — and that is not a gap in the
+  map, it is the design. A Person is pointed to, never sealed (John 14:6). On the world-facing
+  surface the engine mints no verdict on faith at all. The discipline shows up <i>in the data</i>.</p>
+
+  <h2><span class="n">03</span>The dimensions everything shares</h2>
+  <p>Across the 60 sealed domains, the same 8 dimensions recur — reasoning, conservation,
+  time-sequence, physical-substance, and the rest. That recurrence is <b>RESONANCE</b>: it makes the
+  map navigable, but it is <i>never</i> a proof of hidden unity. The 0-false-positive rule governs
+  the map as strictly as it governs the seals.</p>
+  <div class="bars" id="bars"></div>
+
+  <h2><span class="n">04</span>The 53 refusals, by why</h2>
+  <p>Every one of these is a real, named theory in working use. None is dismissed. Each is placed by
+  the <b>kind</b> of thing it is — the reason it cannot be reduced to a sealed receipt. That reason
+  is the honest boundary.</p>
+  <div id="groups"></div>
+
+  <p class="note" id="note">—</p>
+
+  <footer class="site">
+    <p>This is the null-map: the shape of what we will not claim. See the seals it complements —
+    <a href="/proof.html">what we prove →</a> — or put your own argument to the same test —
+    <a href="/reason.html">verify a chain →</a>.</p>
+  </footer>
+</main>
+<script>
+(function(){
+  function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+  var ORDER = ["conjecture","foundation","interpretation","empirical","speculative","heuristic","mind","faith"];
+  var TITLE = {conjecture:"Unproven conjectures", foundation:"Foundational axioms & meta-theorems",
+    interpretation:"Interpretations of settled math", empirical:"Empirical & historical",
+    speculative:"Speculative / unfalsifiable", heuristic:"Heuristics & social regularities",
+    mind:"Mind, meaning & the will", faith:"Faith"};
+
+  fetch("/tensor.json").then(function(r){return r.json();}).then(function(T){
+    document.getElementById("nref").textContent = T.refused_count;
+    document.getElementById("nnz").textContent = T.nnz.toLocaleString();
+
+    // finding card
+    var b = T.boundary;
+    document.getElementById("v-kind").textContent = b.modal ? "Modal — not spatial" : "Spatial";
+    var pct = Math.round(b.overlap_fraction*100);
+    document.getElementById("v-big").textContent =
+      b.refusing_and_confirming_domains.length + " of " + T.modes.domain_refused +
+      " refusing domains ALSO seal claims (" + pct + "%).";
+    document.getElementById("v-detail").textContent =
+      "The unmappable is not a corner of reality — it appears in nearly every domain, side by side " +
+      "with sealed truth. The boundary is the KIND of claim (a conjecture, an interpretation, an " +
+      "unfalsifiable, a Person), not a region. That is why it can't be drawn as a line on the grid: " +
+      "it runs through every cell.";
+
+    // dimension bars
+    var counts = T.dimension_domain_counts, dims = T.dimensions;
+    var max = Math.max.apply(null, dims.map(function(d){return counts[d];}));
+    var bars = document.getElementById("bars"), html="";
+    dims.forEach(function(d){
+      var c = counts[d], w = Math.max(2, Math.round(c/max*100)), solo = c<=1?" solo":"";
+      html += "<div class=\"row"+solo+"\"><div class=lab>"+esc(d)+"</div>"+
+        "<div class=track><div class=fill style=\"width:"+w+"%\"></div></div>"+
+        "<div class=ct>"+c+"</div></div>";
+    });
+    bars.innerHTML = html;
+
+    // refusal groups
+    var g = document.getElementById("groups"), out="";
+    ORDER.forEach(function(why){
+      var items = (T.refusals_by_why||{})[why]||[];
+      if(!items.length) return;
+      var faith = why==="faith"?" faith":"";
+      out += "<div class=\"grp"+faith+"\">";
+      out += "<h3>"+esc(TITLE[why]||why)+"<span class=cnt>"+items.length+"</span></h3>";
+      out += "<p class=why>"+esc(T.why_labels[why]||"")+"</p><div class=chips>";
+      items.forEach(function(n){ out += "<span class=\"chip"+faith+"\">"+esc(n)+"</span>"; });
+      out += "</div></div>";
+    });
+    g.innerHTML = out;
+
+    document.getElementById("note").textContent = T.note;
+  }).catch(function(){
+    document.getElementById("v-big").textContent = "The engine is resting — reload to draw the boundary.";
+  });
+})();
+</script>
+</body>
+</html>
