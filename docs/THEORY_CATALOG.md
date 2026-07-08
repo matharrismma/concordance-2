@@ -202,6 +202,33 @@ packet, and all five HELD. A mis-shape is the caller's error; INCOMPLETE is neve
 verdict. Running total across both batches: **164 theories, 116 sealed HOLDS, 22 null-refused,
 26 partial — 0 false HOLDS.**
 
+---
+
+# Batch 3 — theories 165–208 (2026-07-08, /loop)
+
+More untouched sub-verifiers + a null set of the famous unproven/unfalsifiable.
+**Outcome: 36/36 checkable → HOLDS · 8/8 null → INCOMPLETE (44/44).**
+
+Checkable (165–200), all HOLDS: circle area · sphere volume + surface · cube volume · cylinder
+volume · rectangle area + perimeter · triangle inequality · polygon angle sum · vector cross ·
+magnitude · matrix trace · eigenvalues · orthogonality angle · mean arterial pressure · A1c→eAG ·
+IPv4 format · MAC format · GDP per capita · present value · normal CDF · significance @ α=.05 ·
+games-behind · energy balance · BMI class · MET expenditure · century assignment · rental yield ·
+DSCR · **von Neumann entropy** · multinomial coefficient · ISBN-13 · deep-water wave speed ·
+simple interest · salinity class · heat index.
+
+**Null set (201–208), all INCOMPLETE:** Riemann hypothesis · P vs NP · Goldbach · Collatz ·
+multiverse · dark-matter existence · continuum hypothesis · simulation hypothesis. Note the
+sharp edge: the engine refuses the *general conjecture* (Goldbach for all evens → INCOMPLETE)
+while it could seal any single *instance* (100 = 47 + 53, both prime) — the exact line between
+what is computed and what is only believed.
+
+**Discipline:** 5 initial flags, all my errors (present-value needs `time_years`;
+`claimed_significance` is the string "significant" not a bool; century uses `year_CE`; salinity
+35 ppt is "marine" not "ocean"; Riemann belongs under number_theory, not the math-mode path) —
+corrected, all HELD/INCOMPLETE. Running total: **208 theories, 152 HOLDS, 30 null-refused,
+26 partial — 0 false HOLDS.**
+
 **One honest robustness finding (not a correctness bug):** on the first assay run, #13 (Central
 Limit Theorem, statistics) read BROKEN; a second run gave HOLDS, and it held in isolation. Cause:
 a cold heavy-dependency import (scipy/numpy) inside the pool's 8s wall-clock bound can, under
