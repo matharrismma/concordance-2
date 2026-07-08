@@ -259,6 +259,30 @@ elo needs `elo_K`; knapsack items are dicts; magnification uses `object_distance
 verifier, correct, all 11 HELD. Running total: **248 theories, 186 HOLDS (incl. 2 composed),
 33 out-of-scope, deliberate-false all BROKEN — 0 false HOLDS.**
 
+---
+
+# Batch 5 — theories 249–282 (2026-07-08, /loop)
+
+The long tail of untouched sub-verifiers + a 3-step composed derivation + a deeper null-set.
+**Outcome: 24/24 checkable → HOLDS · 1/1 composed → HOLDS · 3/3 false → BROKEN · 6/6 OOS → INCOMPLETE (34/34).**
+
+Checkable (249–272): acoustic wave relation · decibel ratio · ISO-8601 validity · duration
+addition · kWh/Wh · occupant load · window-wall ratio · constitutional age · **DNA reverse
+complement** · angle of view · **Rayleigh diffraction limit** · **fiber attenuation** · WDM capacity ·
+**BB84 QKD** · **Shor period** · saturation vapor pressure · soil texture · **weighted atomic mass** ·
+relativistic speed limit · discrete variance · rational runoff · stair compliance · **Miranda
+completeness** · codon translation.
+
+**Composed (273):** a 3-step trail — Pythagoras (`6²+8²=100`) → distance (`√100=10`) → speed
+(`10/2=5`), each step building on the confirmed prior. **OOS (277–282):** Boltzmann brain ·
+Poincaré recurrence · many-worlds · Gaia hypothesis · mathematical-universe hypothesis ·
+Orch-OR quantum consciousness — all INCOMPLETE. False (274–276) all BROKEN.
+
+**Discipline:** pre-reading the keys first cut flags to 3 (isotopes want dicts; Miranda checks
+canonical keyword sets; codon includes the stop) — corrected, all HELD. Running total:
+**282 theories, 211 HOLDS (incl. 3 composed multi-step), 39 out-of-scope, every falsehood
+BROKEN — 0 false HOLDS.**
+
 **One honest robustness finding (not a correctness bug):** on the first assay run, #13 (Central
 Limit Theorem, statistics) read BROKEN; a second run gave HOLDS, and it held in isolation. Cause:
 a cold heavy-dependency import (scipy/numpy) inside the pool's 8s wall-clock bound can, under
