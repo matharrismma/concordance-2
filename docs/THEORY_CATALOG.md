@@ -306,6 +306,48 @@ fixed with exact rationals) and a unit-case key (`pressure_Pa`/`temperature_K`).
 HELD. Running total: **304 theories, 223 HOLDS (incl. 8 composed multi-step), 47 out-of-scope,
 every falsehood BROKEN — 0 false HOLDS.**
 
+---
+
+# Batch 7 — theories 305–330 (2026-07-08, /loop) — the finisher
+
+The last sub-verifier tail, incl. the first **code-execution** check.
+**Outcome: 12/18 checkable → HOLDS · 1 code-execution → HOLDS · 6/6 OOS → INCOMPLETE · 2/2 false → BROKEN.**
+(6 checkable deferred — see below.)
+
+Checkable HOLDS: specific heat Q=mcΔT · **HMAC-SHA256** (computed in-script) · **base64 roundtrip** ·
+rebar weight · beam-load intensity · paint coverage · floor tiles · **EAN/UPC checksum** · key
+strength (AES-256) · hash strength · energy efficiency · **functional correctness — real Python
+`def add` executed against test cases** (a distinct modality: the engine RAN the code and checked
+the outputs). OOS (323–328): steady-state universe · modal realism · Freudian psychoanalysis ·
+cosmological natural selection · quantum immortality · Boltzmann-brain dominance — all INCOMPLETE.
+False (329–330) BROKEN.
+
+**Honestly deferred (checkable, NOT out-of-scope — each needs the verifier's internal lookup
+table or the server's tz database, which is a data lookup not a theory question):** coordination
+geometry (angle map), target-HR zone (HRmax convention), UTC offset (needs server tzdata — a local
+artifact), TLS status label, MET activity table, thermocline zone label. Left un-forced rather
+than guessed.
+
+Running total: **330 theories, 235 HOLDS (incl. 8 composed + 1 code-execution), 53 out-of-scope,
+6 deferred-for-data, every falsehood BROKEN — 0 false HOLDS.**
+
+---
+
+# ▣ Assay complete (2026-07-08)
+
+Seven batches. **Every one of the 60 domains and the large majority of their ~250 sub-verifiers
+have been exercised at least once** — single claims, composed multi-step derivations, and a live
+code-execution check — alongside a 53-strong null-map of the famous-but-unsealable and a running
+set of deliberate falsehoods.
+
+**Final: 330 theories · 235 sealed HOLDS · 53 refused as out-of-scope (INCOMPLETE) · every planted
+falsehood BROKEN · 6 checkable checks deferred for a data lookup · 0 false HOLDS — ever.**
+
+The map is filled to its honest edge. What the engine can compute, it sealed and can re-check;
+what is a proposition, an interpretation, or an unfalsifiable, it refused to seal — and never once
+sealed a falsehood. The ~6 deferred are a data-table errand, not a gap in the theory. Further
+batches would only rename already-sealed checks, so the assay stops here. **Done.**
+
 **One honest robustness finding (not a correctness bug):** on the first assay run, #13 (Central
 Limit Theorem, statistics) read BROKEN; a second run gave HOLDS, and it held in isolation. Cause:
 a cold heavy-dependency import (scipy/numpy) inside the pool's 8s wall-clock bound can, under
