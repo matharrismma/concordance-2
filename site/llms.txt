@@ -63,7 +63,8 @@ A live remote MCP server (Streamable HTTP, JSON-RPC, no auth, no SDK):
 - The witness surface `https://narrowhighway.org/mcp` adds Scripture tools: passage reading,
   original-language word studies, cross-references, characters, prophecy signposts.
 - Sovereign option: `python -m concordance mcp` (stdio) — the same tools on your own box,
-  offline. Human setup guide: /connect.html. The correction record: /corrected.html.
+  offline. Source: https://github.com/matharrismma/concordance-2 (stdlib-first Python).
+  Human setup guide: /connect.html. The correction record: /corrected.html.
 
 ## Foundation
 It serves truth because Truth is a Person (John 14:6); a conduit, not the source. A window, not
