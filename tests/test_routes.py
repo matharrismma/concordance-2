@@ -40,6 +40,7 @@ GOLDEN_RATELIMITED = {
     "/coach/mastery", "/identity/create", "/identity/verify", "/badges",
     "/study", "/study/export", "/study/import",
     "/groups", "/group", "/group/join", "/group/contribute",
+    "/audit",   # deliberate addition (the Auditor) — goldens update ONLY with a new route
 }
 
 

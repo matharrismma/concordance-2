@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Auditor — paste anything, get a receipt — Narrow Highway</title>
+<meta name="description" content="Paste a paycheck, a receipt, a label, an article. Deterministic extractors find every checkable claim, the engine verifies them all, and you get one sealed report — per-claim verdict, worked trail, re-checkable receipt. No AI in the loop.">
+<meta property="og:title" content="The Auditor — paste anything, get a receipt">
+<meta property="og:description" content="Every checkable number in your text, verified deterministically, sealed into one re-checkable report.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="/audit.html">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --broken:#c98a8a;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --mono:ui-monospace,Consolas,"Cascadia Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.12), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  a:focus-visible,button:focus-visible,textarea:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:820px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.1rem; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:820px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.68rem; margin-top:2.6rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2.3rem; margin:.5rem 0 .5rem}
+  .lede{color:var(--dim); font-size:1.06rem; max-width:46rem}
+  h2{font-weight:400; font-size:1.4rem; margin:2.6rem 0 .3rem; border-top:1px solid var(--line); padding-top:1.4rem}
+  textarea{width:100%; min-height:11rem; background:rgba(201,162,74,.05); border:1px solid var(--line);
+    border-radius:6px; color:var(--ink); font:.9rem/1.6 var(--mono); padding:.9rem 1rem; resize:vertical}
+  button{background:var(--gold); color:#141310; border:0; border-radius:6px; padding:.55rem 1.4rem;
+    font:600 .95rem var(--serif); cursor:pointer; letter-spacing:.04em}
+  button:hover{background:#d9b25a}
+  button.ex{background:transparent; color:var(--dim); border:1px solid var(--line); font-weight:400; font-size:.8rem; padding:.35rem .9rem}
+  button.ex:hover{color:var(--ink); background:rgba(201,162,74,.07)}
+  .row{display:flex; gap:.6rem; flex-wrap:wrap; margin:.7rem 0}
+  .result{border-left:2px solid var(--line); padding:.45rem 0 .45rem 1rem; margin:.8rem 0}
+  .v{font-family:var(--mono); font-size:.75rem; letter-spacing:.1em; padding:.1rem .5rem; border-radius:4px}
+  .v.ok{color:var(--pass); border:1px solid rgba(139,191,143,.4)}
+  .v.bad{color:var(--broken); border:1px solid rgba(201,138,138,.4)}
+  .quote{color:var(--ink)} .trail{color:var(--dim); font-size:.85rem; font-family:var(--mono); margin-top:.15rem}
+  .summary{border:1px solid var(--line); border-radius:6px; padding:1rem 1.2rem; margin:1.2rem 0}
+  .muted{color:var(--dim)} .mono{font-family:var(--mono)}
+  footer.site{border-top:1px solid var(--line); margin-top:3.5rem; padding-top:1.4rem; color:var(--dim); font-size:.9rem}
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
+  <nav class="site"><a href="/#verify">Verify</a><a href="/connect.html">Connect</a><a href="/guarantees.html">Guarantees</a><a href="/corrected.html">The Record</a></nav>
+</div></header>
+<main class="wrap">
+  <div class="kicker">The auditor</div>
+  <h1>Paste anything. Get a receipt.</h1>
+  <p class="lede">A paycheck stub, a store receipt, a nutrition label, an article full of numbers.
+  The auditor finds every claim it can check <b>with certainty</b>, verifies each one
+  deterministically — no AI in the loop — and seals the whole report so anyone can re-check it.
+  It would rather miss a claim than check the wrong one.</p>
+
+  <div class="row">
+    <button class="ex" data-ex="paycheck">a paycheck</button>
+    <button class="ex" data-ex="article">an article</button>
+    <button class="ex" data-ex="label">a nutrition label</button>
+  </div>
+  <textarea id="text" aria-label="Text to audit" placeholder="Paste your text here…"></textarea>
+  <div class="row"><button id="go">Audit it</button><span id="busy" class="muted" hidden>reading…</span></div>
+
+  <div id="out"></div>
+
+  <h2>What it checks (v1)</h2>
+  <p class="muted" style="font-size:.95rem">Explicit sums and products · percentages (“15% of 80 is 12”)
+  · hourly pay (“40 hours at $18.50/hr = $740”) · salary ↔ hourly · compound interest (the word
+  “compound” must appear — anything less is ambiguous, and ambiguity is skipped, not guessed)
+  · rule of 72 · elapsed years (“4 years (1914–1918)”) · “July 4, 1776 was a Thursday” · leap
+  years · nutrition labels (calories vs. the 4-9-4 macro math). The report always states how many
+  claims it checked — it never implies it read everything.</p>
+
+  <footer class="site">
+    <p>Verified means <i>machine-checked and sealed</i>, nothing more — and nothing less.
+    <a href="/guarantees.html">What we prove →</a> · Agents can do this too:
+    <a href="/connect.html">connect →</a></p>
+  </footer>
+</main>
+<script>
+(function(){
+  var EX = {
+    paycheck: "PAY STATEMENT\nRegular: 40 hours at $18.50/hr = $740.00\nDeductions: 12.50 + 8.75 + 33.05 = 54.30\nNote: your salary of $52,000 a year is $25.00 an hour.",
+    article: "The loan grows fast: $1,000 at 5% compounded annually for 10 years grows to $1,628.89. At 6% your money doubles in 12 years. The war lasted 4 years (1914-1918). July 4, 1776 was a Thursday, and 1900 was a leap year.",
+    label: "Nutrition Facts\nServing size 1 bar\nCalories 250\nTotal Fat 10g\nTotal Carbohydrates 30g\nProtein 5g"
+  };
+  document.querySelectorAll("button.ex").forEach(function(b){
+    b.addEventListener("click", function(){ document.getElementById("text").value = EX[b.dataset.ex]; run(); });
+  });
+  function esc(s){ var d=document.createElement("div"); d.textContent=s==null?"":String(s); return d.innerHTML; }
+  function run(){
+    var t = document.getElementById("text").value.trim();
+    if (!t) return;
+    var out = document.getElementById("out"); out.innerHTML = "";
+    document.getElementById("busy").hidden = false;
+    fetch("/audit", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({text:t})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        document.getElementById("busy").hidden = true;
+        if (d.claims_found === 0) {
+          out.innerHTML = "<div class=summary><span class=muted>" + esc(d.note) + "</span></div>"; return;
+        }
+        var h = "<div class=summary><b>" + d.claims_found + " claim(s) checked</b> — " +
+                "<span style=\"color:var(--pass)\">" + d.held + " hold</span>" +
+                (d.broken_or_unchecked ? " · <span style=\"color:var(--broken)\">" + d.broken_or_unchecked + " do not</span>" : "") +
+                "<div class=muted style=\"font-size:.85rem;margin-top:.3rem\">" + esc(d.note) + "</div>" +
+                (d.seal && d.seal.cite_url ? "<div style=\"margin-top:.5rem\"><a href=\"" + esc(d.seal.cite_url) + "\">the sealed receipt for this report ↗</a></div>" : "") +
+                "</div>";
+        d.results.forEach(function(r){
+          var ok = r.status === "CONFIRMED";
+          h += "<div class=result><span class=\"v " + (ok?"ok":"bad") + "\">" + (ok?"HOLDS":"BROKEN") + "</span> " +
+               "<span class=quote>&ldquo;" + esc(r.claim) + "&rdquo;</span>" +
+               "<div class=trail>" + esc(r.detail) + "</div></div>";
+        });
+        out.innerHTML = h;
+      })
+      .catch(function(){ document.getElementById("busy").hidden = true;
+        out.innerHTML = "<div class=summary class=muted>The auditor is resting — try again shortly.</div>"; });
+  }
+  document.getElementById("go").addEventListener("click", run);
+})();
+</script>
+</body>
+</html>

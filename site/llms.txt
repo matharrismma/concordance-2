@@ -30,6 +30,12 @@ Every verification is sealed and addressable. Cite a result by its content hash:
   A public benchmark holds **0 false-positives across every domain** — the engine has never
   sealed a falsehood (e.g. `x/x = 1` is caught — undefined at x=0 — not sealed). Tolerances are
   clamped: a caller may tighten a check, never loosen one.
+- `POST /audit` — the Auditor: body `{"text":"..."}` (a paycheck, receipt, label, article).
+  Deterministic extractors find every UNAMBIGUOUSLY checkable claim (sums, percentages, hourly/
+  annual pay, compound interest, rule-of-72, elapsed years, weekdays, leap years, nutrition
+  labels), the engine verifies the lot, and ONE sealed coverage report returns: per-claim source
+  quote + verdict + trail. It states how many claims it checked — never implies full coverage,
+  never guesses. Human page: /audit.html.
 - `GET /search?q=&limit=` — ranked retrieval over the keeping (the kept library).
 - `GET /graph?scope=overview|shelf|card` — the public connection map (every edge carries its seal).
 - `GET /identity` — what this surface is. `GET /health` — status + `schema_active`.

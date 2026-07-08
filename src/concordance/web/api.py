@@ -275,7 +275,7 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
 _SITEMAP_PAGES = ("/", "/ask.html", "/bible.html", "/read.html", "/characters.html",
                   "/prophecy.html", "/journal.html", "/map.html", "/steward.html",
                   "/community.html", "/library.html", "/guarantees.html", "/collapse.html",
-                  "/seeds.html", "/seal.html", "/connect.html", "/corrected.html")
+                  "/seeds.html", "/seal.html", "/connect.html", "/corrected.html", "/audit.html")
 
 
 def build_sitemap(base_url: str) -> str:
@@ -337,6 +337,19 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         res = receipts.attach(res, config=config, domain=dom, enabled=seal_on)
         telemetry.record("verify", surface=surface, verdict=res.get("verdict"),
                          mode=str(body.get("mode") or "steps"), sealed=bool(res.get("seal")))
+        return _ok(res)
+
+    if method == "POST" and path == "/audit":
+        # The Auditor: deterministic extractors find every checkable claim in a pasted text,
+        # the moat verifies the lot, one sealed coverage report comes back. Extraction is
+        # conservative — it would rather miss a claim than check the wrong one.
+        if not isinstance(body, dict) or not str(body.get("text") or "").strip():
+            return _err(400, "text required")
+        from .. import audit as _audit
+        seal_on = str(query.get("seal", "1")).lower() not in ("0", "false", "no", "off")
+        res = _audit.audit(str(body["text"]), config, seal=seal_on)
+        telemetry.record("audit", surface=surface, verdict=res.get("verdict"),
+                         claims=res.get("claims_found", 0), sealed=bool(res.get("seal")))
         return _ok(res)
 
     if method == "POST" and path == "/ask":
@@ -900,6 +913,7 @@ ROUTES = [
     {"path": "/identity", "methods": ("GET",), "api": True},
     {"path": "/verify", "methods": ("POST",), "rl": True},
     {"path": "/derivation/verify", "methods": ("POST",), "rl": True},
+    {"path": "/audit", "methods": ("POST",), "rl": True},
     {"path": "/ask", "methods": ("POST",), "rl": True},
     {"path": "/journal", "methods": ("GET", "POST"), "api": True},
     {"path": "/steward/budget", "methods": ("POST",)},

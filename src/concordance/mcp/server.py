@@ -38,6 +38,18 @@ def _secular_tools() -> List[dict]:
              "steps": {"type": "array", "description": "DOMAIN form: [{id, domain, spec}] — spec is the domain's packet",
                        "items": {"type": "object"}},
              "seal": {"type": "boolean", "description": "mint a re-checkable seal (default true)"}}}},
+        {"name": "audit",
+         "description": ("Audit a whole text: deterministic extractors find every checkable "
+                         "quantitative claim (sums, percentages, hourly/annual pay, compound "
+                         "interest, rule-of-72, elapsed years, day-of-week, leap years, nutrition "
+                         "labels), the engine verifies the lot, and ONE sealed coverage report "
+                         "returns — per-claim source quote + verdict + trail. Conservative by "
+                         "design: it only extracts unambiguous patterns and says how many claims "
+                         "it checked; it never guesses and never implies full coverage."),
+         "inputSchema": {"type": "object", "properties": {
+             "text": {"type": "string", "description": "the document/text to audit"},
+             "seal": {"type": "boolean", "description": "mint a re-checkable seal (default true)"}},
+             "required": ["text"]}},
         {"name": "search",
          "description": "Ranked search over the keeping (the kept library).",
          "inputSchema": {"type": "object", "properties": {
@@ -268,6 +280,9 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
         # Agents get a receipt too: a re-checkable seal, not just a verdict. seal:false opts out.
         from .. import receipts
         return receipts.attach(res, config=config, domain=dom, enabled=args.get("seal", True) is not False)
+    if name == "audit":
+        from .. import audit as _audit  # the document-level coverage report
+        return _audit.audit(args.get("text", ""), config, seal=args.get("seal", True) is not False)
     if name == "search":
         res = corpus.search(args.get("query", ""), limit=int(args.get("limit", 10)))
         return {"count": len(res), "results": [
