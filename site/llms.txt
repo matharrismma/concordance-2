@@ -19,6 +19,11 @@ Every verification is sealed and addressable. Cite a result by its content hash:
   carry no personal data.
 
 ## API (JSON over HTTP, same-origin)
+**Start here — no schema needed:** `POST /audit` with `{"text":"<any prose with numbers>"}`.
+The engine extracts every unambiguously checkable claim from plain text, verifies the lot, and
+returns ONE sealed report (per-claim quote + verdict + worked trail + re-checkable seal). The
+fastest path from "I have a sentence" to "I have a receipt." Graduate to `POST /verify` when you
+can shape a structured claim.
 - `POST /verify` — verify a claim across **~60 domains**, not just math.
   MATH form: `{"mode":"equality|inequality|derivative|integral|limit|solve","params":{...}}`.
   DOMAIN form: `{"steps":[{"id":"a","domain":"physics","spec":{"PHYS_VERIFY":{"mass_kg":10.0,
