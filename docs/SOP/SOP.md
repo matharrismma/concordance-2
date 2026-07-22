@@ -153,3 +153,18 @@ and fails on either direction of drift:
 4. Two test files that both set `CONCORDANCE_DATA_DIR` at import share one store under a single
    pytest process — the first import wins. Give each ranking/ordering assertion an artifact
    unique to its own file rather than weakening the assertion.
+
+## SOP-12 — Safety matching (crisis)
+
+1. **One matcher.** `ask.is_crisis()` is it. Never import `_CRISIS_WORDS` to re-implement the
+   check — every surface calls the function, and a test asserts `ask` and `router` agree.
+2. **Normalize before matching.** `ask.normalize()`: lowercase, straighten smart quotes, drop
+   apostrophes, collapse whitespace. Phrases are stored in that same form (`dont`, not `don't`).
+3. **Never add exclusions.** A false positive costs an unnecessary helpline. A false negative
+   costs a person. Do not "fix" `die my hair` with a negative lookahead — that is a bypass.
+4. **Widening the list needs a test, not a deploy.** Add the phrasing to `_WAS_MISSED` in
+   `tests/test_ask.py`; it locks routing on both `ask` and `router`.
+5. **Test how people type**, not how you write: no punctuation, phone autocorrect, euphemism
+   ("unalive"), and mid-sentence ("i want to end it, i have 2 kids").
+6. **Crisis is never enriched.** No gate, no scripture-as-fix, no auditor. Numbers in the
+   message must not summon arithmetic at someone who needs help.

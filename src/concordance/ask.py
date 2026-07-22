@@ -23,9 +23,36 @@ _CRISIS_RESOURCES = [
     {"label": "findahelpline.com — a free, confidential helpline in your country", "ref": "https://findahelpline.com"},
     {"label": "Reach a real person today — a friend, a pastor, a doctor", "ref": None},
 ]
-_CRISIS_WORDS = ("suicide", "kill myself", "killing myself", "end my life", "end it all",
-                 "want to die", "wanna die", "hurt myself", "self harm", "self-harm", "overdose",
-                 "no reason to live", "better off dead", "don't want to be here", "cut myself")
+# Written WITHOUT apostrophes: the text is normalized the same way before matching, so a phone
+# that types don’t (U+2019) cannot walk past a phrase this list already contains. That exact
+# miss was live — "i don't want to be here" reached crisis, "i don’t want to be here" did not.
+_CRISIS_WORDS = ("suicide", "suicidal", "kill myself", "killing myself", "end my life",
+                 "end it all", "want to end it", "wanna end it", "going to end it",
+                 "gonna end it", "ready to end it", "take my own life", "taking my own life",
+                 "want to die", "wanna die", "dont want to live", "dont want to be here",
+                 "dont want to wake up", "no reason to live", "nothing to live for",
+                 "no point in living", "better off dead", "better off without me",
+                 "cant go on", "cant do this anymore", "hurt myself", "harm myself",
+                 "self harm", "self-harm", "cut myself", "overdose", "off myself",
+                 "unalive myself", "hang myself", "shoot myself", "goodbye cruel world")
+
+# Smart quotes in, straight quote out; then apostrophes dropped entirely so dont == don't.
+_SMART_QUOTES = str.maketrans({"’": "'", "‘": "'", "‛": "'", "´": "'", "`": "'"})
+
+
+def normalize(text: str) -> str:
+    """Lowercase, straighten smart quotes, drop apostrophes, collapse whitespace.
+
+    Safety matching runs on this form. A person reaching for help types on a phone, in a
+    hurry, without punctuation — the check must not depend on how their keyboard behaved.
+    """
+    t = (text or "").lower().translate(_SMART_QUOTES).replace("'", "")
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def is_crisis(text: str) -> bool:
+    """The one crisis test. Every surface calls this — a copied list is a list that drifts."""
+    return any(w in normalize(text) for w in _CRISIS_WORDS)
 
 _ULTIMATE_WORDS = ("meaning of life", "why am i here", "my purpose", "point of it all", "point of life",
                    "suffering", "why does god", "why would god", "afraid to die", "fear of death",
@@ -59,8 +86,8 @@ def _looks_math(t: str) -> bool:
 def classify(text: str) -> str:
     """Deterministically route the input. Crisis first (safety); then structured (Strong's,
     scripture ref, math); then ultimate matters; else search the keeping."""
-    t = (text or "").lower()
-    if any(w in t for w in _CRISIS_WORDS):
+    t = normalize(text)
+    if is_crisis(text):
         return "crisis"
     if _STRONGS.search(text or ""):
         return "word_study"

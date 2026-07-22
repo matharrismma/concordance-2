@@ -172,6 +172,21 @@ Two docs with the same name may serve different purposes — the fix is to split
 (`DEPLOY.md` = bootstrap, `RUNBOOK.md` = daily path), not to flatten one onto the other.
 → SOP-4, SOP-5.
 
+### 2026-07-22 · A phone's apostrophe walked past the crisis check — live
+Found while spot-checking something else: "i want to end it" routed to an ordinary keyword
+SEARCH. Worse, `don't want to be here` was already IN the crisis list, and the curly apostrophe
+(U+2019) every phone substitutes meant `don’t want to be here` did not match it. Also missed:
+"cant go on", "take my own life", "nothing to live for", "unalive myself", "i am suicidal".
+**Why:** the safety list was matched against raw lowercased text, so it depended on how the
+person's keyboard behaved — and it was tested only with the phrasings its author had thought of.
+**Guard:** `ask.normalize()` straightens smart quotes and drops apostrophes; the list is stored
+in the same form. `ask.is_crisis()` is the ONE matcher — `router` imports it rather than the
+list, so the two can never drift; a test asserts they agree. Deliberate asymmetry, written into
+the tests: help offered unnecessarily is a small cost, a missed person is not, so NO exclusion
+logic goes into a safety check even for obvious false positives ("die my hair") — exclusions are
+how bypasses get built. Test safety paths with how people actually type: no punctuation, phone
+autocorrect, euphemism. → SOP-8, SOP-12.
+
 ### 2026-07-22 · GATE PASS covered 71% of the suite — for months
 The deploy target is not a git checkout; test files arrive by `scp`. 21 of 72 files had never
 been copied, so `tools/check.py` globbed `tests/` and cheerfully passed on what happened to be

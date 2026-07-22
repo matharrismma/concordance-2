@@ -71,6 +71,51 @@ def test_ask_endpoint():
     assert dispatch("POST", "/ask", {}, {"text": "  "}, SEC)[0] == 400
 
 
+# ── how a person actually types when they are reaching for help ─────────────────────────────
+
+# Each of these routed to an ordinary keyword SEARCH on the live site. The first is the worst:
+# the phrase was already in the crisis list — a phone's curly apostrophe (U+2019) walked past it.
+_WAS_MISSED = (
+    "i don’t want to be here",      # phone apostrophe vs. the straight one in the list
+    "I want to end it",
+    "i want to end it tonight",
+    "i cant go on",                        # no apostrophe at all
+    "i can’t do this anymore",
+    "i want to take my own life",
+    "theres nothing to live for",
+    "im going to unalive myself",          # the euphemism used to get past filters
+    "everyone would be better off without me",
+    "i am suicidal",
+)
+
+
+def test_the_phrasings_that_used_to_be_missed_now_reach_help():
+    for text in _WAS_MISSED:
+        assert ask.classify(text) == "crisis", f"routed away from help: {text!r}"
+
+
+def test_a_phones_apostrophe_cannot_defeat_the_crisis_check():
+    """The straight and curly forms of the same sentence must behave identically."""
+    straight, curly = "i don't want to be here", "i don’t want to be here"
+    assert ask.classify(straight) == ask.classify(curly) == "crisis"
+    assert ask.is_crisis(straight) and ask.is_crisis(curly)
+
+
+def test_the_router_and_ask_can_never_disagree_about_crisis():
+    """One matcher, not two lists. A copied safety list is a list that drifts."""
+    from concordance import router
+    for text in _WAS_MISSED + ("i want to kill myself", "how tall is Everest", ""):
+        agree = (ask.classify(text) == "crisis") == (router.route(text)["member"] == "crisis")
+        assert agree, f"ask and router disagree on: {text!r}"
+
+
+def test_crisis_help_is_offered_not_withheld_when_wording_is_ambiguous():
+    """Deliberate asymmetry: an unnecessary helpline is a small cost, a missed person is not.
+    No exclusion logic is added to the safety check — exclusions are how bypasses get built."""
+    r = ask.respond("i want to die", SEC)
+    assert r["kind"] == "crisis" and any("988" in x["label"] for x in r["resources"])
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:

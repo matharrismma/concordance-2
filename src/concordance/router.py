@@ -22,7 +22,7 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List, Tuple
 
-from .ask import _CRISIS_WORDS, _ULTIMATE_WORDS, _looks_math, _REF, _STRONGS
+from .ask import _ULTIMATE_WORDS, _looks_math, _REF, _STRONGS, is_crisis, normalize
 
 # member -> what it is for. Kept honest: every member here exists as a module today.
 MEMBERS: Dict[str, str] = {
@@ -61,7 +61,7 @@ _CONVERT = re.compile(r"\b(convert|how many)\b.*\b(to|in)\b", re.I)
 def _hits(text: str) -> List[Tuple[int, str, str]]:
     """All rules that matched, as (priority, member, why). Crisis short-circuits upstream."""
     t = text or ""
-    low = t.lower()
+    low = normalize(t)
     out: List[Tuple[int, str, str]] = []
 
     # 10s — structured signals. Unambiguous shapes, so they outrank keywords.
@@ -99,8 +99,7 @@ def route(text: str) -> Dict[str, Any]:
     low = t.lower()
 
     # 1. Crisis outranks everything. Never routed anywhere but real help.
-    hit = next((w for w in _CRISIS_WORDS if w in low), None)
-    if hit:
+    if is_crisis(t):
         return {"member": "crisis", "why": "someone may be in danger — real people first",
                 "alternatives": [], "considered": ["crisis"], "answered_here": False}
 
