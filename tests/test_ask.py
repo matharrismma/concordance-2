@@ -11,7 +11,10 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-os.environ["CONCORDANCE_DATA_DIR"] = tempfile.mkdtemp(prefix="nh-ask-")  # isolate seal writes
+os.environ["CONCORDANCE_DATA_DIR"] = tempfile.mkdtemp(prefix="nh-ask-")
+# Discernment validates loose references against the real canon; the deck stays isolated in
+# the temp dir above, but the Bible itself comes from the repo data (droplet-primary, not git).
+os.environ["CONCORDANCE_BIBLE_EN"] = str(Path(__file__).resolve().parent.parent / "data" / "bible_en.jsonl")  # isolate seal writes
 
 from concordance import ask  # noqa: E402
 from concordance.config import EngineConfig  # noqa: E402
@@ -144,6 +147,44 @@ def test_every_kind_returns_something_the_page_can_show():
         r = ask.respond(text, SEC)
         shown = [k for k in RENDERABLE if k in r]
         assert shown, f"{r.get('kind')!r} for {text!r} renders as an empty turn (keys: {sorted(r)})"
+
+
+# ── discernment: a verse question answered however a person writes it ───────────────────────
+
+def test_discerns_a_phone_typed_reference():
+    """A phone buries the colon two keyboard layers deep; dictation never produces one.
+    "John 3 16" and "John 3.16" are the same ask as "John 3:16"."""
+    for t in ("explain John 3 16", "John 3.16", "what does John 3 16 mean"):
+        assert ask.classify(t) == "scripture", t
+        r = ask.respond(t, WIT)
+        assert (r.get("scripture") or [{}])[0].get("ref") == "John 3:16", t
+
+
+def test_discerns_the_churchs_own_passage_names():
+    """"The prodigal son" has meant Luke 15 for two thousand years. Returning keyword junk
+    for it was a failure of discernment, not phrasing."""
+    cases = {"what does the parable of the sower mean": "Matthew 13:",
+             "the prodigal son": "Luke 15:",
+             "explain the good samaritan": "Luke 10:"}
+    for t, prefix in cases.items():
+        assert ask.classify(t) == "scripture", t
+        rows = ask.respond(t, WIT).get("scripture") or []
+        assert rows and rows[0]["ref"].startswith(prefix), (t, rows[:1])
+
+
+def test_a_room_number_is_never_mistaken_for_scripture():
+    """The loose form is trusted only when the canon resolves it."""
+    assert ask.classify("meet me in Room 12 14") == "search"
+
+
+def test_a_discerned_verse_never_ships_keyword_junk():
+    r = ask.respond("what does the parable of the sower mean", WIT)
+    assert r["kind"] == "scripture" and "results" not in r
+
+
+def test_explain_reads_the_passage_not_one_line():
+    rows = ask.respond("explain the prodigal son", WIT).get("scripture") or []
+    assert len(rows) >= 20, "a named passage is the whole passage, not a single verse"
 
 
 if __name__ == "__main__":

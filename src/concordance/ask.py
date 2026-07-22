@@ -70,6 +70,81 @@ _ULTIMATE_SCRIPTURE = [
     ("Psalm 34:18", "Yahweh is near to those who have a broken heart, and saves those who have a crushed spirit."),
 ]
 
+# ── discernment: which Scripture is being asked about, however a person writes it ───────────
+# A phone keyboard buries the colon two layers deep, so people type "John 3 16"; dictation
+# produces the same. And the church has named its passages for centuries — "the prodigal son"
+# IS Luke 15:11-32. All deterministic: a loose numeric form is trusted only when the canon
+# actually resolves it, so "Room 12 14" is never mistaken for a book.
+_REF_LOOSE = re.compile(
+    r"\b([1-3]?\s?[A-Za-z]{2,})\.?\s+(\d{1,3})\s*(?:[:.,]|v(?:erse)?\s*|\s)\s*"
+    r"(\d{1,3})(?:\s*[-\u2013]\s*(\d{1,3}))?\b")
+
+# The names the church already uses — gathered, not authored. Longest match first, so
+# "parable of the lost sheep" never half-matches a shorter key.
+_PASSAGES = {
+    "parable of the sower": "Matthew 13:1-23", "the sower": "Matthew 13:1-23",
+    "prodigal son": "Luke 15:11-32", "good samaritan": "Luke 10:25-37",
+    "parable of the lost sheep": "Luke 15:1-7", "lost sheep": "Luke 15:1-7",
+    "mustard seed": "Matthew 13:31-32", "ten virgins": "Matthew 25:1-13",
+    "parable of the talents": "Matthew 25:14-30", "rich fool": "Luke 12:13-21",
+    "lords prayer": "Matthew 6:9-13", "beatitudes": "Matthew 5:3-12",
+    "sermon on the mount": "Matthew 5:1-12", "golden rule": "Matthew 7:12",
+    "great commission": "Matthew 28:18-20", "greatest commandment": "Matthew 22:36-40",
+    "great commandment": "Matthew 22:36-40", "ten commandments": "Exodus 20:1-17",
+    "the fall": "Genesis 3:1-24", "noahs ark": "Genesis 6:9-22",
+    "the flood": "Genesis 7:1-24", "tower of babel": "Genesis 11:1-9",
+    "david and goliath": "1 Samuel 17:32-51", "shepherds psalm": "Psalm 23:1-6",
+    "twenty third psalm": "Psalm 23:1-6", "valley of dry bones": "Ezekiel 37:1-14",
+    "lions den": "Daniel 6:16-23", "fiery furnace": "Daniel 3:16-28",
+    "jonah and the whale": "Jonah 1:1-17", "jonah and the fish": "Jonah 1:1-17",
+    "parting of the red sea": "Exodus 14:21-31", "red sea": "Exodus 14:21-31",
+    "burning bush": "Exodus 3:1-14", "pentecost": "Acts 2:1-21",
+    "road to damascus": "Acts 9:1-19", "damascus road": "Acts 9:1-19",
+    "doubting thomas": "John 20:24-29", "walking on water": "Matthew 14:22-33",
+    "walks on water": "Matthew 14:22-33",
+    "feeding of the five thousand": "Matthew 14:13-21",
+    "feeds the five thousand": "Matthew 14:13-21",
+    "water into wine": "John 2:1-11", "wedding at cana": "John 2:1-11",
+    "raising of lazarus": "John 11:38-44", "last supper": "Luke 22:14-23",
+    "the crucifixion": "John 19:16-30", "the resurrection": "Luke 24:1-12",
+    "the ascension": "Acts 1:6-11", "born again": "John 3:1-21",
+    "nicodemus": "John 3:1-21", "woman at the well": "John 4:7-26",
+    "fruit of the spirit": "Galatians 5:22-23", "armor of god": "Ephesians 6:10-18",
+    "love chapter": "1 Corinthians 13:1-13", "love is patient": "1 Corinthians 13:4-8",
+    "hall of faith": "Hebrews 11:1-40", "faith chapter": "Hebrews 11:1-40",
+    "by grace through faith": "Ephesians 2:8-9", "the word became flesh": "John 1:1-14",
+    "creation": "Genesis 1:1-31",
+}
+_PASSAGE_KEYS = sorted(_PASSAGES, key=len, reverse=True)
+
+_EXPLAIN = re.compile(
+    r"\b(explain|mean(?:s|ing)?|understand|study|teach|what does|what is|tell me about"
+    r"|help me with)\b", re.I)
+
+
+def find_ref(text: str):
+    """The one place a scripture reference is discerned from prose. Strict form first, then
+    the church passage names, then phone-typed loose forms validated against the canon."""
+    t = text or ""
+    m = _REF.search(t)
+    if m:
+        return m.group(0)
+    low = " " + normalize(t) + " "
+    for name in _PASSAGE_KEYS:
+        if (" " + name + " ") in low or low.rstrip().endswith(" " + name):
+            return _PASSAGES[name]
+    m = _REF_LOOSE.search(t)
+    if m:
+        cand = m.group(1).strip() + " " + m.group(2) + ":" + m.group(3)
+        try:
+            from .verifiers import scripture as _s
+            if _s.resolve_ref(cand).get("status") == "ok":
+                return cand + (("-" + m.group(4)) if m.group(4) else "")
+        except Exception:  # noqa: BLE001
+            return None
+    return None
+
+
 _MATH_EQ = re.compile(r"^\s*(.+?)\s*=\s*(.+?)\s*$")
 _REF = re.compile(r"\b[1-3]?\s?[A-Za-z]{2,}\.?\s+\d{1,3}:\d{1,3}\b")
 _STRONGS = re.compile(r"\b([GHgh]\d{1,4})\b")
@@ -91,7 +166,7 @@ def classify(text: str) -> str:
         return "crisis"
     if _STRONGS.search(text or ""):
         return "word_study"
-    if _REF.search(text or ""):
+    if find_ref(text or ""):
         return "scripture"
     if _looks_math(text or ""):
         return "verify"
@@ -209,8 +284,59 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
 
     if kind == "scripture" and witness:
         from .verifiers import scripture
-        return _witnessed({**base, "scripture": scripture.resolve_ref(_REF.search(text).group(0))},
-                          text, witness, gate_just_opened, topical=False)
+        ref = find_ref(text) or ""
+        study = bool(_EXPLAIN.search(text or ""))
+        # a range, or any ask for meaning, reads the passage; a bare ref reads the verse
+        if "-" in ref or study:
+            p = scripture.read_passage(ref)
+            verses = p.get("verses") or []
+            rows = [{"ref": v.get("ref", ref), "text": v.get("text", "")} for v in verses[:24]]
+            if len(verses) > 24:
+                rows.append({"ref": "", "text": "… and %d more verses in %s" % (len(verses) - 24, ref)})
+        else:
+            one = scripture.resolve_ref(ref)
+            rows = ([{"ref": one.get("ref", ref), "text": one.get("text", "")}]
+                    if one.get("status") == "ok" else [])
+        out = {**base, "scripture": rows}
+        # asking for meaning earns the study: what Scripture itself says elsewhere (TSK), and
+        # a public-domain commentator in his own words — found and attributed, never generated
+        if study and rows:
+            anchor_ref = rows[0]["ref"] or ref
+            try:
+                # TSK's editorial cross-references, ranked by centuries of votes — the parallels
+                # a pastor would actually name — with each verse's own words resolved beside it
+                from . import xrefs as _x
+                xr = _x.for_ref(anchor_ref, limit=6)
+                picks = []
+                for c in (xr.get("cross_references") or [])[:5]:
+                    cref = c.get("ref", "")
+                    first = cref.split("-")[0].strip()      # a range reads from its first verse
+                    got = scripture.resolve_ref(first)
+                    picks.append({"ref": cref,
+                                  "text": (got.get("text") or "")[:160] if got.get("status") == "ok" else ""})
+                if picks:
+                    out["cross_refs"] = picks
+            except Exception:  # noqa: BLE001
+                pass
+            try:
+                from . import commentary as _c
+                cm = _c.for_ref(anchor_ref)
+                blocks = cm.get("commentary") or []
+                if cm.get("status") == "ok" and blocks:
+                    try:
+                        want_v = int(anchor_ref.rsplit(":", 1)[1].split("-")[0])
+                    except (IndexError, ValueError):
+                        want_v = 1
+                    block = max((b for b in blocks if (b.get("verse") or 1) <= want_v),
+                                key=lambda b: b.get("verse") or 1, default=blocks[0])
+                    txt = (block.get("text") or "").strip()
+                    if len(txt) > 1100:
+                        txt = txt[:1100].rsplit(". ", 1)[0] + ". …"
+                    out["commentary"] = {"attribution": cm.get("attribution") or "Commentary",
+                                         "license": cm.get("license"), "text": txt}
+            except Exception:  # noqa: BLE001
+                pass
+        return _witnessed(out, text, witness, gate_just_opened, topical=False)
 
     # default — and the secular fallback for scripture/word_study when the gate is closed
     return _witnessed({**base, "kind": "found",

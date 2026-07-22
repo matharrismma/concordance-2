@@ -293,6 +293,16 @@
     if(d.scripture && d.scripture.length)
       h += d.scripture.map(function(s){
         return '<div class="hit"><b>'+esc(s.ref||s.title||'')+'</b><span class="sn">'+esc(s.text||s.snippet||'')+'</span></div>'; }).join('');
+    // the study, when it was asked for: a public-domain commentator in his own words,
+    // and where Scripture itself speaks to the same thing — found and attributed
+    if(d.commentary && d.commentary.text)
+      h += '<div class="hit"><b>'+esc(d.commentary.attribution||'Commentary')+'</b>'+
+           '<span class="sn">'+esc(d.commentary.text)+'</span></div>';
+    if(d.cross_refs && d.cross_refs.length)
+      h += '<div class="hit"><b>Scripture speaks to it elsewhere</b>'+
+           d.cross_refs.map(function(c){
+             return '<span class="sn"><b>'+esc(c.ref)+'</b> — '+esc(c.text)+'</span>'; }).join('')+
+           '</div>';
     // when the claim was checked, the check IS the answer — a fuzzy keyword match is not.
     // And a DOCUMENT is not a question: sending a fence quote once dumped six "gate" keyword
     // hits under it because one row said "Gate latch". Writing is kept, not answered.
