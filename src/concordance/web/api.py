@@ -276,7 +276,8 @@ _SITEMAP_PAGES = ("/", "/ask.html", "/bible.html", "/read.html", "/characters.ht
                   "/prophecy.html", "/journal.html", "/map.html", "/steward.html",
                   "/community.html", "/library.html", "/guarantees.html", "/collapse.html",
                   "/seeds.html", "/seal.html", "/connect.html", "/corrected.html", "/audit.html",
-                  "/proof.html", "/reason.html", "/boundary.html")
+                  "/proof.html", "/reason.html", "/boundary.html", "/almanac.html", "/codex.html",
+                  "/teachings.html", "/brain.html")
 
 
 def build_sitemap(base_url: str) -> str:
@@ -318,6 +319,175 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                     "jsonschema": _HAS_JSONSCHEMA})
     if method == "GET" and path == "/identity":
         return _ok({"surface": surface, "identity": config.identity})
+
+    if method == "GET" and path == "/route":
+        # The Router — names the member who should answer, and hands off. It NEVER answers.
+        # Rule-based and deterministic (no model), so the body keeps its zero-dependency
+        # property; every decision carries the evidence that produced it. No `q` -> the
+        # directory of the body. See docs/THE_COMPANION.md §3.
+        from .. import router as router_mod
+        q = (query.get("q") or "").strip()
+        if not q:
+            return _ok({"surface": surface, "members": router_mod.members(),
+                        "note": "pass ?q= to route an input; the Router names a member, it never answers"})
+        return _ok({"surface": surface, "query": q, **router_mod.route(q)})
+
+    if method == "GET" and path == "/bind/challenge":
+        # A single-use nonce. Sign it with the private key on your drive to prove possession.
+        from .. import binding as binding_mod
+        return _ok(binding_mod.challenge((query.get("public_key") or "").strip()))
+
+    if method == "POST" and path == "/bind":
+        # The key on your drive IS the identity (docs/THE_COMPANION.md §4.2). No account, no
+        # password, no row about you: we store a public key and the ids of threads we already
+        # hold. Possession of the drive is the whole proof — and there is no recovery backdoor,
+        # because a backdoor we could open for you can be opened without you.
+        from .. import binding as binding_mod
+        if not isinstance(body, dict):
+            return _err(400, "JSON object body required")
+        r = binding_mod.claim((body.get("public_key") or "").strip(), body.get("nonce"),
+                              body.get("signature"),
+                              (body.get("thread_id") or "").strip() or None)
+        return _ok(r) if r.get("ok") else _err(403, r.get("error", "not proven"))
+
+    if method == "POST" and path == "/book":
+        # The Book of Days — answers only to the key on your drive. Written by you, indexed by
+        # us: notes are stored verbatim, derived pointers are labelled with what produced them,
+        # amend keeps the prior text, forget is a real delete, export hands you everything.
+        # Every op spends a single-use challenge, so send each proof exactly once.
+        from .. import binding as binding_mod, bookofdays as book_mod
+        if not isinstance(body, dict):
+            return _err(400, "JSON object body required")
+        owner = binding_mod.prove((body.get("public_key") or "").strip(),
+                                  body.get("nonce"), body.get("signature"))
+        if not owner:
+            return _err(403, "not proven — sign a fresh challenge with the key on your drive")
+        op = str(body.get("op") or "read").strip()
+        try:
+            limit = max(1, min(int(body.get("limit") or 100), 500))
+        except (TypeError, ValueError):
+            limit = 100
+        if op == "read":
+            return _ok(book_mod.entries(owner, limit=limit))
+        if op == "export":
+            return _ok(book_mod.export(owner))
+        if op == "write":
+            r = book_mod.write(owner, body.get("text") or "")
+        elif op == "amend":
+            r = book_mod.amend(owner, str(body.get("entry_id") or "").strip(),
+                               body.get("text") or "")
+        elif op == "forget":
+            r = book_mod.forget(owner, str(body.get("entry_id") or "").strip())
+        elif op == "derive":
+            r = book_mod.derive(owner, str(body.get("thread_id") or "").strip())
+        else:
+            return _err(400, "unknown op — read|write|amend|forget|derive|export")
+        return _ok(r) if r.get("ok") else _err(400, r.get("error", "refused"))
+
+    if method == "POST" and path == "/inlet":
+        # Bring anything. The Router names the member, the Scribe records it verbatim, and the
+        # receipt says exactly where it went — nothing is filed invisibly. Answers to your key.
+        from .. import binding as binding_mod, inlet as inlet_mod
+        if not isinstance(body, dict):
+            return _err(400, "JSON object body required")
+        who = binding_mod.prove((body.get("public_key") or "").strip(),
+                                body.get("nonce"), body.get("signature"))
+        if not who:
+            return _err(403, "not proven — sign a fresh challenge with the key on your drive")
+        r = inlet_mod.receive(who, body.get("text") or "",
+                              thread_id=str(body.get("thread_id") or "").strip(),
+                              surface=surface)
+        return _ok(r) if r.get("ok") else _err(400, r.get("error", "nothing brought"))
+
+    if method == "POST" and path == "/returns":
+        # What should come back right now, and why — time (a deferral came due), state (sealed
+        # work gone quiet), or concordance (the keeping speaks to what you keep carrying).
+        # Every item answers "why now?"; nothing is inferred and nothing is generated.
+        from .. import binding as binding_mod, inlet as inlet_mod
+        if not isinstance(body, dict):
+            return _err(400, "JSON object body required")
+        who = binding_mod.prove((body.get("public_key") or "").strip(),
+                                body.get("nonce"), body.get("signature"))
+        if not who:
+            return _err(403, "not proven — sign a fresh challenge with the key on your drive")
+        try:
+            limit = max(1, min(int(body.get("limit") or 10), 50))
+        except (TypeError, ValueError):
+            limit = 10
+        return _ok(inlet_mod.returns(who, limit=limit))
+
+    if method == "POST" and path == "/fork":
+        # Branch a thread at a turn. The shared past keeps its hashes, so ancestry is PROVABLE
+        # rather than asserted. A thread bound to a key may only be forked by that key.
+        from .. import binding as binding_mod, branch as branch_mod
+        if not isinstance(body, dict):
+            return _err(400, "JSON object body required")
+        tid = str(body.get("thread_id") or "").strip()
+        bound_to = binding_mod.owner_of(tid)
+        if bound_to:
+            who = binding_mod.prove((body.get("public_key") or "").strip(),
+                                    body.get("nonce"), body.get("signature"))
+            if who != bound_to:
+                return _err(403, "this thread is bound to a key — prove it to fork it")
+        seq = body.get("seq")
+        try:
+            seq = None if seq is None else int(seq)
+        except (TypeError, ValueError):
+            return _err(400, "seq must be an integer")
+        r = branch_mod.fork(tid, seq)
+        return _ok(r) if r.get("ok") else _err(400, r.get("error", "refused"))
+
+    if method == "GET" and path == "/thread/lineage":
+        # Where a thread came from, and how much of the past it genuinely shares (by hash).
+        from .. import branch as branch_mod
+        r = branch_mod.lineage((query.get("id") or query.get("thread_id") or "").strip())
+        return _ok(r) if r.get("ok") else _err(404, r.get("error", "no such thread"))
+
+    if method == "POST" and path == "/defer":
+        # Hand a thread or a note forward to a member and a time — "the Steward has this in
+        # April". `due` is what lets the companion bring something back when it matters.
+        from .. import binding as binding_mod, branch as branch_mod
+        if not isinstance(body, dict):
+            return _err(400, "JSON object body required")
+        who = binding_mod.prove((body.get("public_key") or "").strip(),
+                                body.get("nonce"), body.get("signature"))
+        if not who:
+            return _err(403, "not proven — sign a fresh challenge with the key on your drive")
+        op = str(body.get("op") or "due").strip()
+        if op == "due":
+            return _ok(branch_mod.due(who))
+        if op == "pending":
+            return _ok(branch_mod.pending(who))
+        if op == "defer":
+            r = branch_mod.defer(who, member=str(body.get("member") or ""),
+                                 when=body.get("when"), note=str(body.get("note") or ""),
+                                 thread_id=str(body.get("thread_id") or "").strip())
+        elif op == "release":
+            r = branch_mod.release(who, str(body.get("item_id") or "").strip())
+        else:
+            return _err(400, "unknown op — defer|due|pending|release")
+        return _ok(r) if r.get("ok") else _err(400, r.get("error", "refused"))
+
+    if method == "GET" and path == "/thread/digest":
+        # An INDEX of a thread, never a summary: what was verified and sealed, what Scripture
+        # it cited, which words recur, whether the chain is intact. Counted, not judged —
+        # nothing is compressed away, because summarising would mean generating.
+        from .. import distill as distill_mod
+        tid = (query.get("id") or query.get("thread_id") or "").strip()
+        r = distill_mod.digest(tid)
+        return _ok(r) if r.get("ok") else _err(404, r.get("error", "no such thread"))
+
+    if method == "GET" and path == "/thread/recall":
+        # Retrieval INTO the chain — the exchanges themselves, verbatim, with why each matched.
+        # This is what replaces "summarise the old turns": the past is retrieved, not rewritten.
+        from .. import distill as distill_mod
+        tid = (query.get("id") or query.get("thread_id") or "").strip()
+        try:
+            limit = max(1, min(int(query.get("limit", "5")), 25))
+        except (TypeError, ValueError):
+            limit = 5
+        r = distill_mod.recall(tid, query.get("q") or "", limit=limit)
+        return _ok(r) if r.get("ok") else _err(404, r.get("error", "no such thread"))
 
     if method == "POST" and path in ("/verify", "/derivation/verify"):
         # /derivation/verify is the 1.0-compatible alias (preserves the public moat contract).
@@ -897,6 +1067,61 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         base["areopagus"] = seeds_mod.method()
         return _ok(base)
 
+    if method == "GET" and path == "/almanac":
+        # The Almanac — 1.0 claims RE-SEALED on the live 2.0 engine (verified-only). Secular,
+        # freely surfaced: every entry carries a fresh live receipt, nothing archived-pending.
+        from .. import almanac as almanac_mod
+        aid = (query.get("id") or "").strip()
+        if aid:
+            rec = almanac_mod.get(aid)
+            return _ok(rec) if rec is not None else _err(404, "almanac entry not found")
+        q = (query.get("q") or "").strip()
+        if q:
+            return _ok(almanac_mod.search(q))
+        cat = (query.get("category") or "").strip()
+        return _ok(almanac_mod.list_entries(cat))
+
+    if method == "GET" and path == "/codex":
+        # The Codex — the project as a compiled, signed, cross-referenced manuscript.
+        # Compiled not authored; witnessed cross-refs + the sealed spine; tier-graded.
+        from .. import codex as codex_mod
+        return _ok(codex_mod.overview())
+    if method == "GET" and path == "/codex/scripture":
+        from .. import codex as codex_mod
+        b = (query.get("book") or "").strip()
+        if b:
+            rec = codex_mod.scripture_book(b)
+            return _ok(rec) if rec is not None else _err(404, "book not in index")
+        return _ok(codex_mod.scripture_summary())
+    if method == "GET" and path == "/codex/themes":
+        from .. import codex as codex_mod
+        t = (query.get("theme") or "").strip()
+        if t:
+            rec = codex_mod.theme(t)
+            return _ok(rec) if rec is not None else _err(404, "theme not found")
+        return _ok(codex_mod.load_themes())
+    if method == "GET" and path == "/codex/connections":
+        from .. import codex as codex_mod
+        return _ok(codex_mod.load_connections())
+    if method == "GET" and path == "/codex/artifact":
+        from .. import codex as codex_mod
+        return _ok(codex_mod.load_artifact())
+    if method == "GET" and path == "/codex/verify":
+        from .. import codex as codex_mod
+        return _ok(codex_mod.verify_artifact())
+
+    if method == "GET" and path == "/teachings":
+        # Phase 3 — the teaching-review workspace (Words in Red). Witness content: the engine
+        # assembles the frozen Greek anchor + existing sites; the operator records the reading.
+        if not allow_witness:
+            return _gate_closed()
+        from .. import teachings as teachings_mod
+        tid = (query.get("id") or "").strip()
+        if tid:
+            rec = teachings_mod.get(tid)
+            return _ok(rec) if rec is not None else _err(404, "teaching not found")
+        return _ok(teachings_mod.queue())
+
     return _err(404, "not found")
 
 
@@ -912,6 +1137,17 @@ ROUTES = [
     {"path": "/", "methods": ("GET",)},
     {"path": "/health", "methods": ("GET",), "api": True},
     {"path": "/identity", "methods": ("GET",), "api": True},
+    {"path": "/route", "methods": ("GET",), "api": True},
+    {"path": "/bind/challenge", "methods": ("GET",), "api": True},
+    {"path": "/bind", "methods": ("POST",), "rl": True},
+    {"path": "/book", "methods": ("POST",), "rl": True},
+    {"path": "/inlet", "methods": ("POST",), "rl": True},
+    {"path": "/returns", "methods": ("POST",), "rl": True},
+    {"path": "/fork", "methods": ("POST",), "rl": True},
+    {"path": "/defer", "methods": ("POST",), "rl": True},
+    {"path": "/thread/lineage", "methods": ("GET",), "api": True},
+    {"path": "/thread/digest", "methods": ("GET",), "api": True},
+    {"path": "/thread/recall", "methods": ("GET",), "api": True},
     {"path": "/verify", "methods": ("POST",), "rl": True},
     {"path": "/derivation/verify", "methods": ("POST",), "rl": True},
     {"path": "/audit", "methods": ("POST",), "rl": True},
@@ -973,6 +1209,14 @@ ROUTES = [
     {"path": "/characters", "methods": ("GET",), "api": True},
     {"path": "/prophecy", "methods": ("GET",), "api": True},
     {"path": "/seeds", "methods": ("GET",), "api": True},
+    {"path": "/almanac", "methods": ("GET",), "api": True},
+    {"path": "/codex", "methods": ("GET",), "api": True},
+    {"path": "/codex/scripture", "methods": ("GET",), "api": True},
+    {"path": "/codex/themes", "methods": ("GET",), "api": True},
+    {"path": "/codex/connections", "methods": ("GET",), "api": True},
+    {"path": "/codex/artifact", "methods": ("GET",), "api": True},
+    {"path": "/codex/verify", "methods": ("GET",), "api": True},
+    {"path": "/teachings", "methods": ("GET",), "api": True},
     {"path": "/card.html", "methods": ("GET",), "api": True, "serve": True},
     {"path": "/speak", "methods": ("POST",), "rl": True, "serve": True},
 ]

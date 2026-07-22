@@ -23,7 +23,8 @@ from concordance.web import api  # noqa: E402
 # The historical hand-maintained values, verbatim — the behavior the server had before the
 # registry refactor. The derived sets must equal these exactly.
 GOLDEN_API_GET = {
-    "/health", "/identity", "/search", "/seal", "/resolve", "/word_study",
+    "/health", "/identity", "/route", "/bind/challenge", "/thread/digest", "/thread/recall", "/thread/lineage",
+    "/search", "/seal", "/resolve", "/word_study",
     "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
     "/card/connections", "/graph", "/locate", "/library/health",
     "/thread", "/threads", "/threads/search", "/thread/verify", "/passage",
@@ -32,10 +33,12 @@ GOLDEN_API_GET = {
     "/character", "/characters", "/prophecy",
     "/coach/subjects", "/coach/overview", "/coach/unit", "/coach/next", "/coach/recommend", "/coach/guidance",
     "/identity/fingerprint", "/identity/describe", "/badges", "/study", "/card.html",
-    "/groups", "/group", "/seeds",
+    "/groups", "/group", "/seeds", "/almanac",
+    "/codex", "/codex/scripture", "/codex/themes", "/codex/connections", "/codex/artifact", "/codex/verify",
+    "/teachings",
 }
 GOLDEN_RATELIMITED = {
-    "/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak",
+    "/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns",
     "/threads", "/threads/search",
     "/coach/mastery", "/identity/create", "/identity/verify", "/badges",
     "/study", "/study/export", "/study/import",
