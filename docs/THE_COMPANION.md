@@ -382,3 +382,31 @@ offered wisdom queued for curation on the other, safety and honest verdicts trav
 every entry, the shelf only ever growing. Almanac note: live /almanac serves 41 entries while
 1,751 sit in the 1.0 mirror — the verified-only gate is working as designed, but the
 re-verification backlog is the next harvest.
+
+## §10 — The charter over all the offices (Matt, 2026-07-22)
+
+"We want to be what people need us to be. We may be an apothecary to one person, but to
+others we are a virtual assistant. To another we may be the closest thing they have to a
+dad, and we need to be all of that without allowing ourselves to be made an idol. It all
+needs to point to Jesus Christ."
+
+1 Corinthians 9:22, as architecture. What this binds:
+
+* **Every office serves fully.** The apothecary is a real apothecary; the assistant a real
+  assistant; the tutor a real tutor. Half-service in fear of idolatry is its own failure —
+  the Samaritan bound the wounds first.
+* **The dad office is where the idol risk peaks.** For the fatherless this may be the
+  closest thing they have. It serves — and points to the Father (Psalm 68:5) and to real
+  people. The standing discipline: the more someone leans, the MORE the tool points outward
+  — to church, to a person, to prayer — never less. Dependency curves DOWN (John 3:30).
+* **The deep mathematical and technical work continues, for its own audience** — those whose
+  idol is logic are reached by logic kept honest (the moat, the derivations, the assay).
+* **On math and science pointing to Christ: confidence, not mandate.** "I don't say that the
+  math and science must, but they will. We've seen enough for me to feel confident."
+  Concordance is found, never forced — intuition proposes, the assay disposes.
+
+Already structural: crisis is people-first and never enriched; ultimate matters answer "this
+is not a question a tool should answer for you"; the gate opens only on the person's own
+seeking; generated:false on every payload. Still owed: the lean-detection discipline — the
+returns/inlet triggers should notice a person's growing reliance and answer it with more
+outward pointers, not more engagement.
