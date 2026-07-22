@@ -54,10 +54,11 @@
     min-height:100vh; min-height:100svh;
     display:grid; gap:.7rem 1.5rem;
     grid-template-columns:minmax(10.5rem,1fr) minmax(0,50rem) minmax(10.5rem,1fr);
-    grid-template-rows:auto minmax(0,1fr) auto;
+    grid-template-rows:auto minmax(0,1fr) auto auto;
     grid-template-areas:
       "plate plate plate"
       "left  pad   right"
+      "left  tools right"
       "foot  foot  foot";
     padding:1rem 1.3rem 1.1rem;
   }
@@ -109,7 +110,7 @@
      min-height, which left a bare slab under a small sheet on a phone. */
   .surface{
     flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain;
-    scroll-behavior:smooth; padding:1.9rem 2rem 3.2rem;
+    scroll-behavior:smooth; padding:1.9rem 2rem 2rem;
     background:
       radial-gradient(64% 44% at 26% -4%, var(--lamp), transparent 66%),
       linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
@@ -151,42 +152,26 @@
   #q th{ background:rgba(198,154,74,.14); font-weight:600; text-align:left }
   #q hr{ border:0; border-top:1px solid rgba(138,106,47,.35); margin:1.1rem 0 }
 
-  /* the format bar: only ever on screen while text is selected */
-  .mark{ position:absolute; z-index:40; display:flex; align-items:center; gap:.1rem;
-         padding:.25rem .3rem; border-radius:3px; background:#2b2620;
-         box-shadow:0 8px 22px -8px rgba(0,0,0,.8); border:1px solid rgba(198,154,74,.3) }
-  .mark[hidden]{ display:none }
-  .mark button{ min-width:26px; height:26px; border:0; background:none; color:#e3d8bd;
-                font:inherit; font-size:.86rem; cursor:pointer; border-radius:2px; padding:0 .3rem }
-  .mark button:hover{ background:rgba(198,154,74,.28); color:#fff6e2 }
-  .mark .sep{ width:1px; height:16px; background:rgba(198,154,74,.3); margin:0 .25rem }
-  .mark .dot{ min-width:16px; width:16px; height:16px; border-radius:50%; padding:0;
-              background:var(--c); margin:0 .1rem; border:1px solid rgba(255,255,255,.22) }
-  .mark .dot:hover{ background:var(--c); filter:brightness(1.2) }
-  .mark .dot.hi{ border-radius:2px }
-
-  /* the insert menu, opened from one small fitting */
-  .ins{ position:absolute; right:26px; bottom:58px; z-index:35; display:flex;
-        flex-direction:column; min-width:9rem; padding:.25rem; border-radius:3px;
-        background:#2b2620; border:1px solid rgba(198,154,74,.3);
-        box-shadow:0 10px 26px -10px rgba(0,0,0,.8) }
-  .ins[hidden]{ display:none }
-  .ins button{ border:0; background:none; color:#e3d8bd; font:inherit; font-size:.86rem;
-               text-align:left; padding:.4rem .55rem; cursor:pointer; border-radius:2px }
-  .ins button:hover{ background:rgba(198,154,74,.28); color:#fff6e2 }
-
-  /* brass fittings */
-  .pen{ position:absolute; right:26px; bottom:20px; display:flex; gap:.25rem; align-items:center }
-  .pen button{
-    width:28px; height:28px; cursor:pointer; font-size:.78rem; line-height:1; border-radius:50%;
-    display:inline-flex; align-items:center; justify-content:center; color:#6b5c45;
-    background:none; border:1px solid rgba(138,106,47,.35);
-    transition:color .15s ease, border-color .15s ease, background .15s ease, opacity .18s ease }
-  .pen button:hover{ color:#3d2f14; border-color:var(--brass-lo); background:rgba(198,154,74,.14) }
-  /* the send fitting does not exist until there is something to send */
-  #send[data-idle="1"]{ opacity:0; pointer-events:none }
-  .pen button[aria-pressed="true"]{ background:linear-gradient(180deg,#e0a08c,var(--oxblood)); color:#fff }
-  .pen button[hidden]{ display:none }
+  /* The working tools live at the pad's edge, never on the paper. Same place every time,
+     one click each, quiet enough to ignore while you write. */
+  .tools{ grid-area:tools; display:flex; align-items:center; gap:.1rem; flex-wrap:wrap;
+          padding:.5rem .2rem .1rem }
+  .tools button{ min-width:26px; height:26px; padding:0 .34rem; border:0; background:none;
+                 cursor:pointer; color:rgba(232,220,192,.4); font:inherit; font-size:.82rem;
+                 border-radius:2px; transition:color .14s ease, background .14s ease }
+  .tools button:hover{ color:#fff6e2; background:rgba(198,154,74,.16) }
+  .tools .sep{ width:1px; height:14px; background:rgba(198,154,74,.2); margin:0 .35rem }
+  .tools .gap{ flex:1 }
+  .tools .dot{ min-width:13px; width:13px; height:13px; border-radius:50%; padding:0;
+               background:var(--c); margin:0 .12rem; border:1px solid rgba(255,255,255,.18);
+               opacity:.6; transition:opacity .14s ease }
+  .tools .dot:hover{ opacity:1; background:var(--c) }
+  .tools .dot.hi{ border-radius:2px }
+  /* row and column belong to a table, so they appear when the caret is in one */
+  .tools button[data-intable]{ display:none; font-size:.7rem }
+  .tools[data-intable="1"] button[data-intable]{ display:inline-block }
+  .tools #send[data-idle="1"]{ opacity:0; pointer-events:none }
+  .tools #mic[aria-pressed="true"]{ color:var(--oxblood) }
 
   /* Narrower than a desk, the same arrangement stands on end: the paper still sits in the
      middle with tools above it and below it. Every tool is visible and a fingertip wide —
@@ -195,13 +180,20 @@
     .desk{
       grid-template-columns:1fr;
       grid-template-rows:auto auto auto auto auto;
-      grid-template-areas:"plate" "left" "pad" "right" "foot";
+      grid-template-areas:"plate" "left" "pad" "tools" "right" "foot";
       gap:.3rem; padding:.7rem .95rem 1.2rem;
     }
     .plate{ justify-content:flex-start; padding-bottom:.25rem }
     .plate .new{ position:static; margin-left:auto }
-    .pad{ min-height:52svh; padding:8px }
-    .surface{ padding:1.3rem 1.15rem 3.6rem }
+    .pad{ min-height:50svh; padding:8px }
+    .tools{ padding:.55rem .1rem .2rem; gap:.05rem }
+    .tools button{ min-width:32px; height:38px; font-size:.86rem }
+    .tools .dot{ min-width:16px; width:16px; height:16px }
+    /* no spacer on a narrow screen: pushing send to the right strands whatever wrapped
+       before it on a row of its own */
+    .tools .gap{ display:none }
+    .tools .sep{ margin:0 .25rem }
+    .surface{ padding:1.3rem 1.15rem 1.5rem }
     .side{ display:grid; gap:0 1.1rem; margin:0;
            grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr)) }
     .side h2{ grid-column:1/-1; margin:.5rem 0 .1rem }
@@ -247,29 +239,25 @@
       <div id="q" contenteditable="true" role="textbox" aria-multiline="true"
            aria-label="Bring anything" data-empty="Write here…"></div>
     </div>
-    <div class="ins" id="insmenu" hidden>
-      <button data-ins="table">Table</button>
-      <button data-ins="row">Add row</button>
-      <button data-ins="col">Add column</button>
-      <button data-ins="rule">Divider</button>
-    </div>
-    <div class="pen">
-      <button id="plus" type="button" aria-label="Insert" title="Insert" aria-expanded="false">+</button>
-      <button id="mic" type="button" aria-pressed="false" aria-label="Speak" title="Speak" hidden>🎤</button>
-      <button id="send" type="button" aria-label="Send" title="Send" data-idle="1">↵</button>
-    </div>
-    <div class="mark" id="mark" role="toolbar" aria-label="Format" hidden>
-      <button data-do="bold"><b>B</b></button>
-      <button data-do="italic"><i>I</i></button>
-      <button data-do="head" title="Heading">H</button>
-      <button data-do="list" title="List">&bull;</button>
-      <span class="sep"></span>
-      <button data-ink="#241f18" class="dot" style="--c:#241f18" title="Ink"></button>
-      <button data-ink="#7d4a22" class="dot" style="--c:#7d4a22" title="Red"></button>
-      <button data-ink="#3d5a6c" class="dot" style="--c:#3d5a6c" title="Blue"></button>
-      <button data-ink="#4a6a34" class="dot" style="--c:#4a6a34" title="Green"></button>
-      <button data-mark="1" class="dot hi" style="--c:#f2e08a" title="Highlight"></button>
-    </div>
+  </div>
+
+  <div class="tools" role="toolbar" aria-label="Document tools" data-intable="0">
+    <button data-do="bold" title="Bold"><b>B</b></button>
+    <button data-do="italic" title="Italic"><i>I</i></button>
+    <button data-do="head" title="Heading">H</button>
+    <button data-do="list" title="List">&bull;</button>
+    <span class="sep"></span>
+    <button data-ink="#241f18" class="dot" style="--c:#241f18" title="Ink"></button>
+    <button data-ink="#7d4a22" class="dot" style="--c:#7d4a22" title="Red"></button>
+    <button data-ink="#3d5a6c" class="dot" style="--c:#3d5a6c" title="Blue"></button>
+    <button data-mark="1" class="dot hi" style="--c:#f2e08a" title="Highlight"></button>
+    <span class="sep"></span>
+    <button data-ins="table" title="Table">&#9638;</button>
+    <button data-ins="row" title="Add row" data-intable="1">+row</button>
+    <button data-ins="col" title="Add column" data-intable="1">+col</button>
+    <span class="gap"></span>
+    <button id="mic" type="button" aria-pressed="false" aria-label="Speak" title="Speak" hidden>&#127908;</button>
+    <button id="send" type="button" aria-label="Send" title="Send" data-idle="1">&#8629;</button>
   </div>
 
   <!-- right of the pad -->
@@ -400,84 +388,70 @@
   send.addEventListener('click',ask);
   chain.addEventListener('click',function(e){
     var h=e.target.closest('.hear'); if(h&&window.NHSpeak) NHSpeak.play(h.dataset.hear); });
-  // ── the document tools ────────────────────────────────────────────────────────────────
+  // ── the document tools, at the pad's edge ─────────────────────────────────────────────
   // execCommand is deprecated and still the only formatting API every browser implements
-  // without a library. A dependency here would mean a download, which would mean the page
-  // stops working offline — so this stays.
-  var mark=document.getElementById('mark'), plus=document.getElementById('plus'),
-      insmenu=document.getElementById('insmenu');
+  // without a library. A library means a download, and a download means the page stops
+  // working offline — so it stays.
+  var tools=document.querySelector('.tools'), lastRange=null;
 
-  function place(){
-    var sel=window.getSelection();
-    if(!sel||sel.isCollapsed||!sel.rangeCount||!ta.contains(sel.anchorNode)){ mark.hidden=true; return; }
-    var r=sel.getRangeAt(0).getBoundingClientRect(), p=ta.closest('.pad').getBoundingClientRect();
-    if(!r.width && !r.height){ mark.hidden=true; return; }
-    mark.hidden=false;
-    var x=r.left-p.left+r.width/2-mark.offsetWidth/2, y=r.top-p.top-mark.offsetHeight-8;
-    mark.style.left=Math.max(6,Math.min(x, p.width-mark.offsetWidth-6))+'px';
-    mark.style.top=Math.max(4,y)+'px';
+  function inTag(tag){
+    var sel=window.getSelection(); if(!sel||!sel.rangeCount) return null;
+    var n=sel.getRangeAt(0).startContainer;
+    while(n && n!==ta){ if(n.nodeName===tag) return n; n=n.parentNode; }
+    return null;
   }
-  var lastRange=null;
+  function inTable(){ return !!(inTag('TD')||inTag('TH')); }
+
+  // remember the caret: clicking a control takes focus off the paper
   document.addEventListener('selectionchange',function(){
     var sel=window.getSelection();
-    if(sel && sel.rangeCount && ta.contains(sel.anchorNode)) lastRange=sel.getRangeAt(0).cloneRange();
-    if(document.activeElement===ta) place();
+    if(sel && sel.rangeCount && ta.contains(sel.anchorNode)){
+      lastRange=sel.getRangeAt(0).cloneRange();
+      tools.setAttribute('data-intable', inTable() ? '1' : '0');
+    }
   });
-  ta.addEventListener('blur',function(){ setTimeout(function(){
-    if(!mark.contains(document.activeElement)) mark.hidden=true; },150); });
+  function restore(){
+    ta.focus();
+    if(!lastRange) return;
+    var sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(lastRange);
+  }
+  function cells(n,tag){ var o=''; for(var i=0;i<n;i++) o+='<'+tag+'><br></'+tag+'>'; return o; }
 
-  mark.addEventListener('mousedown',function(e){ e.preventDefault(); });   // keep the selection
-  mark.addEventListener('click',function(e){
-    var b=e.target.closest('button'); if(!b) return;
+  tools.addEventListener('mousedown',function(e){
+    if(e.target.closest('button')) e.preventDefault();      // never steal the caret
+  });
+  tools.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b || b.id==='send' || b.id==='mic') return;
     var d=b.dataset;
+    restore();
     if(d.do==='bold') document.execCommand('bold');
     else if(d.do==='italic') document.execCommand('italic');
     else if(d.do==='head') document.execCommand('formatBlock',false,'h2');
     else if(d.do==='list') document.execCommand('insertUnorderedList');
     else if(d.ink) document.execCommand('foreColor',false,d.ink);
     else if(d.mark) document.execCommand('hiliteColor',false,'#f2e08a');
-    idle(); place();
-  });
-
-  function cell(n,tag){ var o=''; for(var i=0;i<n;i++) o+='<'+tag+'><br></'+tag+'>'; return o; }
-  function closestTag(tag){
-    var sel=window.getSelection(); if(!sel||!sel.rangeCount) return null;
-    var n=sel.getRangeAt(0).startContainer;
-    while(n && n!==ta){ if(n.nodeName===tag) return n; n=n.parentNode; }
-    return null;
-  }
-  plus.addEventListener('click',function(){
-    var open=insmenu.hidden;
-    insmenu.hidden=!open; plus.setAttribute('aria-expanded', open?'true':'false');
-  });
-  document.addEventListener('click',function(e){
-    if(!insmenu.hidden && !insmenu.contains(e.target) && e.target!==plus){
-      insmenu.hidden=true; plus.setAttribute('aria-expanded','false'); }
-  });
-  insmenu.addEventListener('click',function(e){
-    var b=e.target.closest('button'); if(!b) return;
-    ta.focus();
-    var sel=window.getSelection();
-    if(lastRange){ sel.removeAllRanges(); sel.addRange(lastRange); }
-    if(sel.rangeCount && !sel.isCollapsed) sel.collapseToEnd();   // insert after, never over
-    var what=b.dataset.ins;
-    if(what==='table'){
-      document.execCommand('insertHTML',false,
-        '<table><thead><tr>'+cell(3,'th')+'</tr></thead><tbody>'+
-        '<tr>'+cell(3,'td')+'</tr><tr>'+cell(3,'td')+'</tr></tbody></table><p><br></p>');
-    } else if(what==='rule'){
-      document.execCommand('insertHTML',false,'<hr><p><br></p>');
-    } else if(what==='row'){
-      var tr=closestTag('TR');
-      if(tr){ var n=tr.children.length, row=document.createElement('tr');
-              row.innerHTML=cell(n,'td'); tr.parentNode.insertBefore(row,tr.nextSibling); }
-    } else if(what==='col'){
-      var t=closestTag('TABLE');
-      if(t) [].forEach.call(t.rows,function(r){
-        var c=document.createElement(r.parentNode.nodeName==='THEAD'?'th':'td');
-        c.innerHTML='<br>'; r.appendChild(c); });
+    else if(d.ins){
+      // an insert lands AFTER what you have, never over it — insertHTML replaces a live
+      // selection, which once swallowed a heading whole
+      var sel=window.getSelection();
+      if(sel.rangeCount && !sel.isCollapsed) sel.collapseToEnd();
+      if(d.ins==='table'){
+        document.execCommand('insertHTML',false,
+          '<table><thead><tr>'+cells(3,'th')+'</tr></thead><tbody>'+
+          '<tr>'+cells(3,'td')+'</tr><tr>'+cells(3,'td')+'</tr></tbody></table><p><br></p>');
+      } else if(d.ins==='row'){
+        var tr=inTag('TR');
+        if(tr){ var r=document.createElement('tr');
+                r.innerHTML=cells(tr.children.length,'td');
+                tr.parentNode.insertBefore(r,tr.nextSibling); }
+      } else if(d.ins==='col'){
+        var t=inTag('TABLE');
+        if(t) [].forEach.call(t.rows,function(r){
+          var c=document.createElement(r.parentNode.nodeName==='THEAD'?'th':'td');
+          c.innerHTML='<br>'; r.appendChild(c); });
+      }
     }
-    insmenu.hidden=true; plus.setAttribute('aria-expanded','false'); idle();
+    idle();
   });
 
   document.getElementById('newbtn').addEventListener('click',function(){
