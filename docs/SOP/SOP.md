@@ -168,3 +168,20 @@ and fails on either direction of drift:
    ("unalive"), and mid-sentence ("i want to end it, i have 2 kids").
 6. **Crisis is never enriched.** No gate, no scripture-as-fix, no auditor. Numbers in the
    message must not summon arithmetic at someone who needs help.
+
+## SOP-13 — Newest everywhere, provably
+
+The standing state is: local HEAD == origin/master == every deployed file == the drive's
+`current` archive. Not assumed — measured. After any deploy session:
+
+1. `git status -sb` shows `## master...origin/master` with nothing ahead/behind, tree clean.
+2. Full parity manifest (per-file scp is how 4 stragglers drifted unseen):
+   `git ls-files site/ src/ tests/ tools/ > /tmp/f && scp /tmp/f nh:/tmp/f`
+   then hash the same list on both sides and diff. Windows sha256sum writes `hash *path`
+   (binary marker); Linux writes `hash  path` — normalise the `*` away or every line
+   false-differs.
+3. `POST /mcp tools/list` returns the tool count; both /health endpoints ok after restart.
+4. Run `release_archive.ps1` so the drive's current matches HEAD.
+
+Reverts: only uncommitted working-tree mistakes are ever reverted (`git checkout --`).
+Committed work is never rolled back — the line moves forward only.
