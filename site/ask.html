@@ -292,7 +292,8 @@ async function ask(){
     // never a dead end. Asking about God or Scripture is itself what opens the way (Matthew 7:7).
     if(window.NHGate && await NHGate.isClosed(r)) return;
     const d = await r.json();
-    if(d.thread_id){ threadId=d.thread_id; localStorage.setItem(TID_KEY, threadId); }
+    if(d.thread_id){ threadId=d.thread_id; localStorage.setItem(TID_KEY, threadId);
+      rosterPut(threadId, (input.dataset.title||text||'').slice(0,80)); }
     body.className='body'; body.innerHTML=render(d);
     setState({title: (input.dataset.title||'')});
     if(threadId && stateEl.textContent==='a new conversation') stateEl.textContent='this conversation';
@@ -307,9 +308,21 @@ function newThread(){
 }
 
 function pull(id){
-  threadId=id; localStorage.setItem(TID_KEY, id);
+  threadId=id; localStorage.setItem(TID_KEY, id); rosterPut(id, '');
   panel.classList.remove('open');
   loadThread();
+}
+
+/* Your conversations live in THIS browser, not in a public list. /threads used to enumerate
+   every conversation on the box — it is closed now, so the roster is local by construction:
+   private because the server is never asked "what conversations exist?" */
+const ROSTER_KEY = 'nh_ask_roster';
+function roster(){ try{ return JSON.parse(localStorage.getItem(ROSTER_KEY) || '[]'); }catch(e){ return []; } }
+function rosterPut(id, title, exchanges){
+  if(!id) return;
+  const list = roster().filter(t => t.thread_id !== id);
+  list.unshift({thread_id:id, title:(title||'').slice(0,80), exchanges:exchanges||null, at:Date.now()});
+  try{ localStorage.setItem(ROSTER_KEY, JSON.stringify(list.slice(0,50))); }catch(e){}
 }
 
 function renderDeckList(items, kind){
@@ -319,14 +332,11 @@ function renderDeckList(items, kind){
     (t.match?' · '+esc(t.match):'')+'</div></button>').join('');
 }
 
-async function loadDeckList(){
-  try{ const r=await fetch(API+'/threads?limit=50'); const d=await r.json(); renderDeckList(d.threads||[], 'list'); }
-  catch(e){ deckList.innerHTML='<div class="dim">Could not load.</div>'; }
-}
-async function searchDecks(q){
-  if(!q.trim()){ loadDeckList(); return; }
-  try{ const r=await fetch(API+'/threads/search?q='+encodeURIComponent(q)); const d=await r.json(); renderDeckList(d.results||[], 'search'); }
-  catch(e){ deckList.innerHTML='<div class="dim">Could not search.</div>'; }
+function loadDeckList(){ renderDeckList(roster(), 'list'); }
+function searchDecks(q){
+  const term = (q||'').trim().toLowerCase();
+  if(!term){ loadDeckList(); return; }
+  renderDeckList(roster().filter(t => (t.title||'').toLowerCase().includes(term)), 'search');
 }
 
 document.getElementById('askbtn').addEventListener('click', ask);
@@ -396,6 +406,15 @@ onboardEl.addEventListener('click', e => {
 
 loadThread();
 maybeOnboard();
+</script>
+<script>
+// The landing is a blank page with an input; it hands the first question here as ?q=.
+(function(){
+  try{
+    const q = new URLSearchParams(location.search).get('q');
+    if(q && q.trim()){ input.value = q.trim(); history.replaceState(null,'',location.pathname); setTimeout(ask, 60); }
+  }catch(e){}
+})();
 </script>
 </body>
 </html>
