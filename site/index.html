@@ -56,6 +56,11 @@
   .hit b{ font-weight:600; color:#f0e6cf }
   .hit .sn{ display:block; color:rgba(232,220,192,.55); font-size:.9rem }
   .note{ font-size:.76rem; color:rgba(232,220,192,.34); margin-top:.6rem }
+  .word{ margin:.1rem 0 .5rem }
+  .word .heb{ font-size:1.5rem; color:#f4ead2 }
+  .word .tl{ font-style:italic; color:var(--parch) }
+  .word .pr{ color:rgba(232,220,192,.5) }
+  .word .sg{ font-size:.72rem; color:var(--brass-lo) }
   .res a{ color:var(--brass-hi) }
   .hear{ background:none; border:0; color:rgba(232,220,192,.4); font:inherit; font-size:1rem;
          cursor:pointer; padding:.2rem .4rem 0 0; line-height:1 }
@@ -71,7 +76,10 @@
   }
   #q{ display:block; border:0; outline:0; background:transparent; color:var(--ink);
       font:inherit; font-size:1.05rem; line-height:1.75;
-      padding:1.5rem 1.6rem .8rem; min-height:11rem; max-height:56vh; overflow-y:auto }
+      padding:1.5rem 1.6rem .8rem; min-height:4.6rem; max-height:56vh; overflow-y:auto;
+      transition:min-height .18s ease }
+  /* wide open while the page is empty; once there is a conversation the room belongs to it */
+  .col.empty #q{ min-height:11rem }
   #q:empty::before{ content:attr(data-empty); color:var(--ink-faint); pointer-events:none }
   #q h2{ font-size:1.1rem; font-weight:600; margin:.9rem 0 .3rem }
   #q ul,#q ol{ margin:.4rem 0; padding-left:1.4rem }
@@ -106,7 +114,8 @@
 
   @media (max-width:900px){
     .desk{ padding:1rem .7rem .7rem }
-    #q{ padding:1.1rem 1.05rem .6rem; font-size:1rem; min-height:9rem; max-height:48vh }
+    #q{ padding:1.1rem 1.05rem .6rem; font-size:1rem; min-height:4rem; max-height:48vh }
+    .col.empty #q{ min-height:9rem }
     /* every control has to fit the width — the mic was falling off the right edge */
     .tools{ padding:.15rem .3rem .4rem; gap:0 }
     .tools button{ min-width:29px; height:34px; font-size:.82rem; padding:0 .2rem }
@@ -200,6 +209,23 @@
       h += '<div class="note">only the claim'+(d.audit.results.length>1?'s':'')+' above '+
            (d.audit.results.length>1?'were':'was')+' checked</div>';
     }
+    // A word study: the word itself, how it sounds, what it means, and how often it is used.
+    // This had no renderer at all — it only ever showed the standing note, so removing that
+    // note left every Hebrew and Greek lookup blank on screen.
+    if(d.word_study && d.word_study.word){
+      var w=d.word_study, def=(w.definition&&(w.definition.strongs_def||w.definition.kjv_def))||'';
+      h += '<div class="word"><span class="heb">'+esc(w.word)+'</span> '+
+           '<span class="tl">'+esc(w.transliteration||'')+'</span>'+
+           (w.pronunciation?' <span class="pr">'+esc(w.pronunciation)+'</span>':'')+
+           ' <span class="sg">'+esc(w.strongs||'')+'</span></div>';
+      if(def) h += '<div class="said">'+esc(def)+'</div>';
+      if(w.derivation) h += '<div class="trail">'+esc(w.derivation)+'</div>';
+      if(w.occurrence_count) h += '<div class="note">used in '+esc(w.occurrence_count)+' verses</div>';
+      if(w.verses && w.verses.length)
+        h += w.verses.slice(0,3).map(function(v){
+          return '<div class="hit"><b>'+esc(v.ref||'')+'</b><span class="sn">'+
+                 esc((v.web_text||'').slice(0,190))+'</span></div>'; }).join('');
+    }
     if(d.resources && d.resources.length)
       h += '<div class="res">'+d.resources.map(function(r){
         return r.ref ? '<div class="hit"><a href="'+esc(r.ref)+'">'+esc(r.label)+'</a></div>'
@@ -218,6 +244,9 @@
     if(!spoken && d.verify) spoken='The verdict is '+(d.verify.verdict||'')+'.';
     if(!spoken && d.scripture && d.scripture[0]) spoken=(d.scripture[0].ref||'')+'. '+(d.scripture[0].text||'');
     if(!spoken && d.results && d.results[0]) spoken=d.results[0].title+'. '+(d.results[0].snippet||'');
+    // never return an empty answer silently — a blank turn looks like a failure and hides one
+    if(!h) h = '<div class="note">Nothing came back for that. Try naming a verse, a word, or a '+
+               'claim to check.</div>';
     if(spoken && window.NHSpeak && NHSpeak.available)
       h += '<button class="hear" data-hear="'+esc(spoken.slice(0,600))+'" '+
            'aria-label="Hear this" title="Hear this">♪</button>';

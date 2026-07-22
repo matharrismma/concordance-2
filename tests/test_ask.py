@@ -116,6 +116,36 @@ def test_crisis_help_is_offered_not_withheld_when_wording_is_ambiguous():
     assert r["kind"] == "crisis" and any("988" in x["label"] for x in r["resources"])
 
 
+# ── whatever comes back has to be showable ──────────────────────────────────────────────────
+
+# The fields site/index.html knows how to draw. A response carrying none of them renders as an
+# empty turn: the page looks broken and the failure is invisible.
+#
+# This checks PRESENCE, not content — whether a lookup finds anything depends on which corpora
+# are on the machine, and a test that demanded results would fail on a bare checkout for a
+# reason that has nothing to do with the bug.
+#
+# Being straight about the limit: this cannot catch a field the CLIENT forgot to render, which
+# is exactly what went wrong — word_study was always in the response, and index.html had no
+# branch for it, so it rode along on the standing note until that note was removed. The guard
+# for that half lives in the page itself, where a render producing no HTML now says so instead
+# of drawing a blank.
+RENDERABLE = ("message", "verify", "audit", "word_study", "scripture", "resources", "results")
+
+
+def test_every_kind_returns_something_the_page_can_show():
+    asks = ("is 0.1 + 0.2 = 0.3",              # verify
+            "what does chesed mean in H2617",  # word_study
+            "read John 3:16",                  # scripture
+            "tell me about covenant",          # found / search
+            "what is the meaning of life",     # ultimate
+            "sometimes I want to die")         # crisis
+    for text in asks:
+        r = ask.respond(text, SEC)
+        shown = [k for k in RENDERABLE if k in r]
+        assert shown, f"{r.get('kind')!r} for {text!r} renders as an empty turn (keys: {sorted(r)})"
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:
