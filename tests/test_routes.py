@@ -27,7 +27,7 @@ GOLDEN_API_GET = {
     "/search", "/seal", "/resolve", "/word_study",
     "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
     "/card/connections", "/graph", "/locate", "/library/health",
-    "/thread", "/threads", "/threads/search", "/thread/verify", "/passage",
+    "/thread", "/threads", "/threads/search", "/thread/verify", "/passage", "/apothecary",
     "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
     "/commentary", "/journal", "/journal/dates", "/steward", "/tsk",
     "/character", "/characters", "/prophecy",
@@ -38,7 +38,7 @@ GOLDEN_API_GET = {
     "/teachings",
 }
 GOLDEN_RATELIMITED = {
-    "/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days",
+    "/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose",
     "/threads", "/threads/search",
     "/coach/mastery", "/identity/create", "/identity/verify", "/badges",
     "/study", "/study/export", "/study/import",

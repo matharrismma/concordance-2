@@ -2,6 +2,7 @@
 # being gated — the deploy target receives tests by scp, not by checkout, so 'whatever is
 # on disk' is not a suite. Add a line when you add a test file; the gate refuses unlisted ones.
 test_api.py
+test_apothecary.py
 test_ask.py
 test_attestation.py
 test_audit.py

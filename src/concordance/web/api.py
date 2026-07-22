@@ -582,6 +582,26 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         telemetry.record("days", surface=surface, threads=res.get("threads_found", 0))
         return _ok(res)
 
+    if method == "GET" and path == "/apothecary":
+        # The Apothecary: read + search the living-with-the-land shelf. ?q= searches,
+        # ?id= opens one monograph, bare browses. Safety and verdicts travel with every entry.
+        from .. import apothecary as _apo
+        if query.get("id"):
+            res = _apo.get(str(query["id"]))
+            return _ok(res) if res.get("ok") else _err(404, res.get("error", "not found"))
+        if query.get("q"):
+            return _ok(_apo.search(str(query["q"])))
+        return _ok(_apo.browse())
+
+    if method == "POST" and path == "/apothecary/propose":
+        # the write side: received and queued for the keeper — never self-publishing
+        if not isinstance(body, dict) or not str(body.get("text") or "").strip():
+            return _err(400, "text required")
+        from .. import apothecary as _apo
+        res = _apo.propose(str(body["text"]), name=str(body.get("name") or ""),
+                           kind=str(body.get("kind") or ""))
+        return _ok(res) if res.get("ok") else _err(400, res.get("error", "refused"))
+
     if method == "POST" and path == "/ask":
         # The conduit front door: find + verify + cite, never generate. Deterministic router.
         if not isinstance(body, dict) or not str(body.get("text") or "").strip():
@@ -1295,6 +1315,8 @@ ROUTES = [
     {"path": "/prophecy", "methods": ("GET",), "api": True},
     {"path": "/seeds", "methods": ("GET",), "api": True},
     {"path": "/almanac", "methods": ("GET",), "api": True},
+    {"path": "/apothecary", "methods": ("GET",), "api": True},
+    {"path": "/apothecary/propose", "methods": ("POST",), "rl": True},
     {"path": "/codex", "methods": ("GET",), "api": True},
     {"path": "/codex/scripture", "methods": ("GET",), "api": True},
     {"path": "/codex/themes", "methods": ("GET",), "api": True},

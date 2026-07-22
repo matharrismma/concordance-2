@@ -1,0 +1,189 @@
+<meta charset="utf-8">
+<title>The Apothecary · Narrow Highway</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Living with the land, the old way — herb monographs with preparations, planting, safety, and honest evidence. Found and kept, never generated.">
+<style>
+  /* the same leather book as the landing: hide at the edges, one paper page in the middle */
+  :root{
+    --paper:#f5f1e6; --paper-2:#e9e3d3;
+    --brass:#c69a4a; --brass-hi:#eed69b; --brass-lo:#8a6a2f;
+    --ink:#241c12; --ink-soft:#6b5c45; --ink-faint:#9b8a6d; --oxblood:#7d4a22;
+    --lamp:rgba(255,231,176,.30);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; height:100%; font-size:17px; color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    background:
+      radial-gradient(130% 100% at 50% -20%, rgba(255,214,150,.10), transparent 55%),
+      radial-gradient(130% 160% at 108% 108%, rgba(0,0,0,.45), transparent 55%),
+      repeating-linear-gradient(23deg, rgba(255,235,200,.018) 0 2px, transparent 2px 5px),
+      repeating-linear-gradient(-31deg, rgba(0,0,0,.06) 0 1px, transparent 1px 4px),
+      linear-gradient(160deg, #4a2318 0%, #38180f 45%, #240d08 100%);
+    padding:1.5rem 1.7rem;
+  }
+  body::before{ content:""; position:fixed; inset:.6rem; pointer-events:none; z-index:6;
+    border:1px solid rgba(198,154,74,.45); border-radius:3px }
+  a{color:inherit}
+  .caps{ font-family:Futura,"Century Gothic","Avenir Next",Avenir,"Trebuchet MS",sans-serif;
+         text-transform:uppercase; letter-spacing:.24em; font-weight:600 }
+  .page{
+    height:100%; overflow-y:auto; scroll-behavior:smooth;
+    display:flex; flex-direction:column; align-items:center; padding:2rem 3rem 1.4rem;
+    background:
+      radial-gradient(70% 46% at 28% -4%, var(--lamp), transparent 65%),
+      linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+    border-radius:2px 5px 5px 2px;
+    box-shadow:2.5px 2.5px 0 #e8dfc9, 5px 5px 0 #ddd3b9, 7.5px 7.5px 0 #d0c5a7,
+      12px 14px 30px -8px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.65),
+      inset 16px 0 30px -22px rgba(60,40,20,.5);
+  }
+  .col{ width:min(44rem,100%) }
+  h1{ font-size:1.45rem; font-weight:600; margin:0 }
+  .sub{ color:var(--ink-soft); font-style:italic; margin:.3rem 0 1.4rem }
+
+  /* search first — the shelf answers the trouble you name */
+  #q{ display:block; width:100%; border:0; border-bottom:1px solid rgba(138,106,47,.4);
+      outline:0; background:transparent; color:var(--ink); font:inherit; font-size:1.05rem;
+      padding:.4rem .1rem .5rem; margin-bottom:1.4rem }
+  #q::placeholder{ color:var(--ink-faint) }
+
+  .entry{ border-top:1px solid rgba(138,106,47,.22); padding:1rem 0; cursor:pointer }
+  .entry:hover b{ color:var(--oxblood) }
+  .entry b{ font-weight:600 }
+  .entry .sci{ font-style:italic; color:var(--ink-soft); font-size:.88rem }
+  .entry .sn{ color:var(--ink-soft); font-size:.92rem; margin-top:.25rem }
+  .caution{ color:var(--oxblood); font-size:.8rem; margin-top:.3rem }
+
+  /* one monograph, opened */
+  .mono h2{ font-size:1.3rem; margin:.2rem 0 0 }
+  .mono .sci{ font-style:italic; color:var(--ink-soft) }
+  .mono h3{ font-size:.62rem; letter-spacing:.2em; text-transform:uppercase;
+            color:var(--brass-lo); margin:1.3rem 0 .4rem;
+            font-family:Futura,"Century Gothic","Avenir Next",Avenir,sans-serif }
+  .mono ul{ margin:.2rem 0; padding-left:1.3rem }
+  .mono li{ margin:.22rem 0 }
+  .mono .safety li{ color:var(--oxblood) }
+  .verdict{ font-weight:700; font-size:.72rem; letter-spacing:.06em }
+  .verdict.SUPPORTED{ color:#4a6a34 } .verdict.MIXED{ color:#8a6a2f } .verdict.TRADITIONAL{ color:var(--ink-faint) }
+  .mono .fig{ float:right; width:110px; margin:0 0 .6rem 1rem; color:var(--brass-lo) }
+  .back{ background:none; border:0; color:var(--ink-faint); font:inherit; font-size:.8rem;
+         cursor:pointer; padding:0 0 .8rem }
+  .back:hover{ color:var(--ink) }
+
+  /* offer wisdom — written, then curated; nothing publishes itself */
+  details{ margin:2rem 0 1rem; border-top:1px solid rgba(138,106,47,.22); padding-top:.9rem }
+  summary{ cursor:pointer; color:var(--ink-soft); font-size:.9rem }
+  details textarea{ width:100%; min-height:6rem; margin-top:.7rem; border:1px solid rgba(138,106,47,.35);
+    border-radius:4px; background:rgba(255,255,255,.5); font:inherit; font-size:.95rem;
+    color:var(--ink); padding:.6rem .7rem; outline:0; resize:vertical }
+  details .row{ display:flex; gap:.6rem; margin-top:.5rem; align-items:center }
+  details input{ flex:1; border:0; border-bottom:1px solid rgba(138,106,47,.3); background:transparent;
+    font:inherit; font-size:.86rem; color:var(--ink); padding:.25rem .1rem; outline:0 }
+  details button{ border:1px solid rgba(138,106,47,.4); background:none; color:var(--ink-soft);
+    font:inherit; font-size:.82rem; padding:.3rem .9rem; border-radius:4px; cursor:pointer }
+  details button:hover{ color:var(--ink); border-color:var(--brass-lo) }
+  .thanks{ color:#4a6a34; font-size:.85rem; margin-top:.5rem }
+
+  .note{ font-size:.74rem; color:var(--ink-faint); margin:1.2rem 0 .5rem }
+  @media (max-width:900px){
+    body{ padding:.65rem .7rem } body::before{ inset:.3rem }
+    .page{ padding:2.9rem 1.05rem .9rem }   /* room for the fixed Home control */
+    .mono .fig{ width:84px }
+  }
+</style>
+
+<div class="page"><div class="col">
+  <h1>The Apothecary</h1>
+  <p class="sub">Living with the land, the old way — kept with its cautions and its honest evidence.</p>
+
+  <input id="q" type="search" placeholder="Name the trouble, or the plant — sleeping, nausea, when to plant garlic…"
+         aria-label="Search the apothecary" autocomplete="off">
+
+  <div id="out"></div>
+
+  <details id="offer">
+    <summary>Offer what you know — a remedy, a planting rule, the old way of doing a thing</summary>
+    <textarea id="ptext" placeholder="What you know, how you learned it, and what it is for…"></textarea>
+    <div class="row">
+      <input id="pname" placeholder="What is it called? (optional)">
+      <button id="psend" type="button">Offer it</button>
+    </div>
+    <div class="thanks" id="pthanks" hidden>Received, with thanks. It goes to the keeper for curation — nothing publishes itself.</div>
+  </details>
+
+  <p class="note">Traditional knowledge, found and kept — never generated, and not medical advice.
+  Every entry carries its safety notes and an honest verdict on the evidence.</p>
+</div></div>
+
+<script src="/nh-home.js"></script>
+<script src="/nh-tools.js"></script>
+<script>
+(function(){
+  var out=document.getElementById('out'), q=document.getElementById('q'), all=[];
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  function rows(list){
+    if(!list.length){ out.innerHTML='<p class="sub">Nothing on the shelf answers that yet — the shelf only ever grows. Offer what you know below.</p>'; return; }
+    out.innerHTML=list.map(function(h){
+      return '<div class="entry" data-id="'+esc(h.id)+'"><b>'+esc(h.name)+'</b> '+
+        '<span class="sci">'+esc(h.scientific_name||'')+'</span>'+
+        '<div class="sn">'+esc(h.summary||'')+'</div>'+
+        (h.safety_notes&&h.safety_notes[0]?'<div class="caution">⚠ '+esc(h.safety_notes[0])+'</div>':'')+
+        '</div>'; }).join('');
+  }
+
+  function mono(h){
+    function ul(items,cls){ return items&&items.length?'<ul class="'+(cls||'')+'">'+items.map(function(i){
+      return '<li>'+esc(i)+'</li>';}).join('')+'</ul>':''; }
+    var v=(h.evidence_verdicts||[]).map(function(e){
+      return '<li><span class="verdict '+esc(e.verdict)+'">'+esc(e.verdict)+'</span> '+esc(e.claim)+
+             (e.note?' <span class="sci">— '+esc(e.note)+'</span>':'')+'</li>'; }).join('');
+    out.innerHTML='<div class="mono">'+
+      '<button class="back" type="button">← back to the shelf</button>'+
+      (h.svg_diagram?'<div class="fig">'+h.svg_diagram+'</div>':'')+
+      '<h2>'+esc(h.name)+'</h2><div class="sci">'+esc(h.scientific_name||'')+
+      (h.common_names&&h.common_names.length?' · '+esc(h.common_names.join(', ')):'')+'</div>'+
+      '<h3>What it has been used for</h3>'+ul(h.traditional_uses)+
+      '<h3>What the evidence honestly says</h3><ul>'+v+'</ul>'+
+      '<h3>Preparations</h3>'+ul(h.preparations)+
+      '<h3>Growing it</h3><p>'+esc(h.growing||'')+'</p>'+
+      '<h3>Cautions</h3>'+ul(h.safety_notes,'safety')+
+      '</div>';
+  }
+
+  out.addEventListener('click',function(e){
+    var b=e.target.closest('.back'); if(b){ rows(all); return; }
+    var el=e.target.closest('.entry'); if(!el) return;
+    fetch('/apothecary?id='+encodeURIComponent(el.dataset.id))
+      .then(function(r){return r.json();})
+      .then(function(d){ if(d.herb) mono(d.herb); document.querySelector('.page').scrollTop=0; });
+  });
+
+  var t=null;
+  q.addEventListener('input',function(){
+    clearTimeout(t);
+    t=setTimeout(function(){
+      var v=q.value.trim();
+      if(!v){ rows(all); return; }
+      fetch('/apothecary?q='+encodeURIComponent(v))
+        .then(function(r){return r.json();})
+        .then(function(d){ rows(d.results||[]); });
+    },220);
+  });
+
+  document.getElementById('psend').addEventListener('click',function(){
+    var text=document.getElementById('ptext').value.trim(); if(!text) return;
+    fetch('/apothecary/propose',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({text:text,name:document.getElementById('pname').value.trim()})})
+      .then(function(r){return r.json();})
+      .then(function(){ document.getElementById('pthanks').hidden=false;
+        document.getElementById('ptext').value=''; });
+  });
+
+  fetch('/apothecary').then(function(r){return r.json();})
+    .then(function(d){ all=d.herbs||[]; rows(all); });
+})();
+</script>

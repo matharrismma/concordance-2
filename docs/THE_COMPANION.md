@@ -360,3 +360,25 @@ inscription, hand-drawn maps, red and black ink on cream.
 
 Each step ships behind the gate, deploys per [SOP-1](SOP/SOP.md), and is archived per
 [SOP-3](SOP/SOP.md) — first, previous, current.
+
+## §9 — The book that organizes you (next build, recorded 2026-07-22)
+
+Matt: "My mind goes a lot of directions. I need the tool that keeps them all straight."
+The page stays one book; the DISCERNMENT decides where things live. All deterministic:
+
+* **A shopping list** (short lines, leading dashes/quantities, imperative nouns) → lands in a
+  PINNED stack, shown at the top of the page next time it opens, until crossed off.
+* **A reflection** (first person, past tense, feeling words) → filed with the reflections;
+  journaling mode: the composer stops shrinking, optimizes for long form.
+* **A search** (interrogatives, few words) → search mode; results land as cards
+  (recall.land — we pay for a search once).
+* **Reading** (a book opened from the keeping) → keeps your page; notes file beside the work
+  as commentary, never inside it.
+* **Superposition throughout**: one card, many stacks (stacks.py already does this); the
+  visual map of paths-to-answers renders from the existing card graph (brain.html machinery).
+
+The Apothecary (shipped today) is the pattern for every wisdom shelf: read + search one side,
+offered wisdom queued for curation on the other, safety and honest verdicts traveling with
+every entry, the shelf only ever growing. Almanac note: live /almanac serves 41 entries while
+1,751 sit in the 1.0 mirror — the verified-only gate is working as designed, but the
+re-verification backlog is the next harvest.

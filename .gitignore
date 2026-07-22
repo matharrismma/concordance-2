@@ -50,3 +50,5 @@ data/bookofdays/
 data/*.bak
 data/cards.jsonl.*
 data/easton/
+data/herbs/
+data/apothecary_proposals/
