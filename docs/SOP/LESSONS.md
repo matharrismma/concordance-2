@@ -7,6 +7,37 @@ Format: `date · what happened · why it happened · guard (SOP ref)`
 
 ---
 
+### 2026-07-22 · A public endpoint listed every conversation on the box
+`GET /threads` returned every thread — id, timestamps, and the **title, which is the person's
+first message verbatim**. `GET /thread?id=` then returned the whole conversation. So any
+stranger could enumerate and read anything. 21 threads were exposed, one titled *"i want to
+kill myself"* — the most sensitive category of data this project will ever hold. They happened
+to be my own test messages, so no real person was harmed; the hole was structural and any user
+would have been equally exposed. I **widened** it by adding `/thread/digest` and
+`/thread/recall` without auth.
+**Why:** the listing endpoint was built when threads were browser-held and the id was the only
+handle — a reasonable design that silently became an enumeration oracle once threads persisted.
+Nobody re-asked "who can see this?" when the surrounding assumptions changed. I then added
+read endpoints by pattern-matching the existing ones instead of asking that question myself.
+**Guard:** (1) **enumeration is never public** — listing endpoints require proof of the key and
+return only the caller's own; the old handlers were **deleted, not gated**, because dead code
+that still knows how to enumerate is one edit from live. (2) A thread bound to a key refuses
+unauthenticated reads, and `inlet` binds every thread it creates: protection by *ownership*,
+not by an unguessable id. (3) **Before shipping any read endpoint, state who may call it and
+what they can enumerate with it.** → SOP-1, SOP-10.
+
+### 2026-07-22 · I published the operator's device IPs to a public repo
+Committing `tools/traffic_rollup.py` (an earlier session's file) pushed three Tailnet addresses
+of the operator's own devices to a public GitHub repo. I had scanned the diff for *credentials*
+and found none — but never asked whether it contained *personal identifiers*.
+**Why:** "no secrets" is a narrower question than "nothing private". A Tailnet address is not a
+credential; it is device topology.
+**Guard:** before pushing, scan for **identifiers as well as credentials** — IPs, hostnames,
+emails, device names, paths containing a person's name. Operator-specific values belong in the
+environment, never in source. Note the asymmetry that makes this expensive: a push is
+effectively irreversible, since removing a value going forward does not erase it from history,
+and the rewrite that would is itself a hazard. → SOP-3, SOP-9.
+
 ### 2026-07-22 · My verification harness double-sent the request and hid the success
 Verifying the key-binding flow live, my helper called `urlopen(req)` **twice** — once to read
 `.status`, once to read the body. That sent the POST twice: the first spent the single-use

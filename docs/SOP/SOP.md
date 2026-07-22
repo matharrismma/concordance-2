@@ -104,6 +104,26 @@ corpus — never trust the source artifact:
 Both endpoints must be public NOTE cards; dedupe against existing edges. Theology is
 sealed as CONCORDANT, never HOLDS.
 
+## SOP-10 — Who can see this?
+
+Answer these **before** shipping any endpoint that reads or lists:
+
+1. **Who may call it?** Public, or only the holder of the key? Anonymous-by-default is a
+   decision, not an absence of one.
+2. **What can be enumerated with it?** A listing endpoint is an oracle. If it returns ids,
+   assume every id will be fetched. Never list other people's records publicly — return only
+   the caller's own, proven by key.
+3. **What is in the summary field?** Titles are the trap: a thread's title is the person's
+   first message verbatim, so "just the titles" leaked crisis disclosures.
+4. **Protected by secrecy or by ownership?** An unguessable id is secrecy — it fails the moment
+   anything enumerates it. Bind the record to a key and check the key.
+5. **Has the surrounding assumption changed?** `/threads` was safe when threads were
+   browser-held and ephemeral, and became a breach when they persisted. Re-ask on every change
+   of storage, identity or persistence.
+
+When removing such an endpoint, **delete it** rather than gating it: dead code that still knows
+how to enumerate is one edit away from being live again.
+
 ## SOP-9 — Environment traps (Windows/PowerShell)
 
 - Python heredocs: use **forward slashes** (`D:/path`) — `\v`, `\i`, `\k` become escapes.
