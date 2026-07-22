@@ -23,7 +23,7 @@ from concordance.web import api  # noqa: E402
 # The historical hand-maintained values, verbatim — the behavior the server had before the
 # registry refactor. The derived sets must equal these exactly.
 GOLDEN_API_GET = {
-    "/health", "/identity", "/route", "/bind/challenge", "/thread/digest", "/thread/recall", "/thread/lineage", "/thread/recalled",
+    "/health", "/identity", "/route", "/bind/challenge", "/thread/digest", "/thread/recall", "/thread/lineage", "/thread/recalled", "/land", "/cards/for-the-group",
     "/search", "/seal", "/resolve", "/word_study",
     "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
     "/card/connections", "/graph", "/locate", "/library/health",

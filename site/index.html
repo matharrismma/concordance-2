@@ -70,6 +70,12 @@
   .kept{ font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft);
          margin:.6rem 0 0 }
   .kept span{ border:1px solid var(--line); border-radius:999px; padding:.1rem .5rem; margin-right:.3rem }
+  /* a card already held — landed on instead of searched again */
+  .landed{ font-size:.84rem; color:var(--ink-soft); border-left:2px solid var(--gold);
+           padding:.35rem 0 .35rem .7rem; margin:0 0 .6rem }
+  .landed .lb{ font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--gold);
+               margin-right:.4rem }
+  .landed i{ font-style:normal; font-size:.72rem; opacity:.75 }
   .res a{ color:var(--rubric) }
   .hear{ background:none;border:1px solid var(--line);color:var(--ink-soft);border-radius:999px;
          font:inherit;font-size:.74rem;padding:.2rem .6rem;cursor:pointer;margin-top:.5rem }
@@ -181,6 +187,11 @@
   function render(d){
     var h='', kind=d.kind||'found';
     h += '<div class="kindline">'+esc(kind)+'</div>';
+    // We search once. If a card is already held for this, it comes back first.
+    if(d.landed && d.landed.length){
+      h += '<div class="landed"><span class="lb">held</span> '+d.landed.map(function(c){
+        return esc(c.text)+' <i>'+esc(c.scope)+' · '+esc(c.tier)+'</i>'; }).join(' · ')+'</div>';
+    }
     if(d.message) h += '<div>'+esc(d.message)+'</div>';
     if(d.verify){
       var v=d.verify;
@@ -208,7 +219,7 @@
     }
     if(d.recalled && d.recalled.length){
       h += '<div class="kept">kept · '+d.recalled.map(function(c){
-        return '<span>'+esc(c.kind)+'</span>'; }).join(' ')+'</div>';
+        return '<span>'+esc(c.kind)+(c.scope?' · '+esc(c.scope):'')+'</span>'; }).join(' ')+'</div>';
     }
     if(d.note) h += '<div class="note">'+esc(d.note)+'</div>';
     // Everything the engine can answer should be speakable — a verdict is an answer too.

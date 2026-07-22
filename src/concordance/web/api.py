@@ -480,6 +480,22 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _err(400, "unknown op — defer|due|pending|release")
         return _ok(r) if r.get("ok") else _err(400, r.get("error", "refused"))
 
+    if method == "GET" and path == "/land":
+        # Do we already hold a card for this? Then land on it rather than searching again.
+        from .. import recall as _recall
+        return _ok(_recall.land((query.get("q") or "").strip()))
+
+    if method == "GET" and path == "/cards/for-the-group":
+        # Communal cards proven useful across several DIFFERENT conversations — the honest
+        # candidates for the shared keeping. Candidates only: nothing is published
+        # automatically, and a personal card can never appear here.
+        from .. import recall as _recall
+        try:
+            n = max(2, min(int(query.get("min") or 3), 50))
+        except (TypeError, ValueError):
+            n = 3
+        return _ok(_recall.for_the_group(min_conversations=n))
+
     if method == "GET" and path == "/thread/recalled":
         # What this conversation left behind that was worth recalling — seals, verses, words.
         _tid = (query.get("id") or query.get("thread_id") or "").strip()
@@ -582,6 +598,11 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             # Off to the side, like the deck write: never alters or breaks the answer.
             try:
                 from .. import recall as _recall
+                # We search once. If a card is already held for what this names, land on it —
+                # it comes back first, and the use is counted toward what the card has earned.
+                landed = _recall.land(text, thread_id=tid)
+                if landed.get("landed"):
+                    r["landed"] = landed["cards"]
                 kept = _recall.remember(tid)
                 if kept.get("ok") and kept.get("count"):
                     r["recalled"] = kept["kept"]
@@ -1176,6 +1197,8 @@ ROUTES = [
     {"path": "/fork", "methods": ("POST",), "rl": True},
     {"path": "/defer", "methods": ("POST",), "rl": True},
     {"path": "/thread/lineage", "methods": ("GET",), "api": True},
+    {"path": "/land", "methods": ("GET",), "api": True},
+    {"path": "/cards/for-the-group", "methods": ("GET",), "api": True},
     {"path": "/thread/recalled", "methods": ("GET",), "api": True},
     {"path": "/thread/digest", "methods": ("GET",), "api": True},
     {"path": "/thread/recall", "methods": ("GET",), "api": True},

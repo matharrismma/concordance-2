@@ -114,6 +114,19 @@ def get_card(cid: str, bump: bool = True) -> Optional[Dict[str, Any]]:
     return card
 
 
+def update_card(cid: str, fields: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Merge fields into a stored card. The card still lives ONCE — this edits it in place
+    rather than minting a copy, so every stack referencing it sees the change."""
+    with _LOCK:
+        card = _read(_card_path(cid))
+        if card is None:
+            return None
+        card.update(fields or {})
+        card["last_touched"] = _now()
+        _write(_card_path(cid), card)
+        return card
+
+
 def _brief(card: Dict[str, Any]) -> Dict[str, Any]:
     return {"id": card.get("id"), "kind": card.get("kind"),
             "text": (card.get("text") or "")[:280], "topics": card.get("topics") or [],
