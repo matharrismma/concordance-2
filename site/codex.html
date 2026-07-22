@@ -3,19 +3,182 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Keeping — Narrow Highway</title>
-<meta name="robots" content="noindex">
-<!-- Compatibility redirect: legacy card source links cite /codex.html (the 1.0 codex page); the
-     catechism/confession cards live in 2.0's keeping — forward to the library, carrying the reference. -->
+<title>The Codex — the compiled manuscript — Narrow Highway</title>
+<meta name="description" content="The Codex — the whole work as a compiled, signed, cross-referenced manuscript. Not authored — compiled: the engine binds and indexes the chosen body (Scripture, the Fathers, the lens); it never opines. Witnessed cross-references plus the sealed spine. Graded by the four-tier authority spine.">
+<!-- Compat: legacy card source links cite /codex.html?ref=X (the 1.0 codex page). Preserve that
+     forward to library search; only render the Codex when there is NO ref. -->
 <script>
-  var ref = new URLSearchParams(location.search).get('ref') || '';
-  location.replace('/library.html' + (ref ? ('?q=' + encodeURIComponent(ref)) : ''));
+  (function(){ var ref=new URLSearchParams(location.search).get('ref');
+    if(ref){ location.replace('/library.html?q='+encodeURIComponent(ref)); } })();
 </script>
-<meta http-equiv="refresh" content="0; url=/library.html">
-<style>body{font-family:Georgia,"Times New Roman",serif;background:#0a0b10;color:#e9e3d4;padding:2rem;line-height:1.7}
-a{color:#c9a24a}</style>
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --mid:#c9b06a;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.12), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:900px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.1rem; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink)}
+  .wrap{max-width:900px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.68rem; margin-top:2.6rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2.4rem; margin:.5rem 0 .5rem}
+  .lede{color:var(--dim); font-size:1.06rem; max-width:50rem}
+  .spine{display:flex; flex-wrap:wrap; gap:8px; margin:1.4rem 0}
+  .tier{font-family:var(--mono); font-size:.72rem; border:1px solid var(--line); border-radius:6px; padding:.3rem .6rem; color:var(--dim)}
+  .tier b{color:var(--gold); font-weight:600}
+  .tier.t1{border-color:rgba(201,162,74,.5)} .tier.t1 b{color:var(--ink)}
+  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin:1.6rem 0}
+  .stat{border:1px solid var(--line); border-radius:8px; padding:.8rem 1rem}
+  .stat .n{font-family:var(--mono); font-size:1.5rem; color:var(--gold)}
+  .stat .l{color:var(--dim); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em}
+  .tabs{display:flex; flex-wrap:wrap; gap:6px; margin:2.4rem 0 1.2rem; border-bottom:1px solid var(--line); padding-bottom:.6rem}
+  .tab{font-family:var(--mono); font-size:.78rem; letter-spacing:.06em; color:var(--dim); background:none; border:1px solid var(--line);
+    border-radius:6px 6px 0 0; padding:.4rem .9rem; cursor:pointer}
+  .tab.on{color:#161206; background:var(--gold); border-color:var(--gold)}
+  h2{font-weight:400; font-size:1.3rem; margin:1.4rem 0 .3rem}
+  .row{display:flex; flex-wrap:wrap; gap:5px; margin:.8rem 0}
+  .pill{font-family:var(--mono); font-size:.72rem; color:var(--dim); border:1px solid var(--line); border-radius:999px; padding:.26rem .7rem; cursor:pointer; background:none}
+  .pill:hover{color:var(--ink)} .pill .c{color:var(--goldsoft)}
+  .xref{border-left:2px solid var(--mid); padding:.35rem 0 .4rem 1rem; margin:.7rem 0}
+  .xref .by{color:var(--ink); font-size:.98rem}
+  .xref .m{font-family:var(--mono); font-size:.68rem; color:var(--dim); display:flex; flex-wrap:wrap; gap:.6rem; margin-top:.15rem}
+  .xref .rel{color:var(--goldsoft)} .xref .tierlab{text-transform:uppercase; letter-spacing:.08em}
+  .xref .seal{color:var(--pass)}
+  .sealed .s{border-left:2px solid var(--pass); padding:.3rem 0 .35rem 1rem; margin:.5rem 0}
+  .sealed .s .t{color:var(--ink); font-size:.96rem}
+  .sealed .s a{font-family:var(--mono); font-size:.7rem}
+  .art{border:1px solid var(--line); border-left:3px solid var(--gold); padding:1.1rem 1.3rem; margin:1rem 0; font-family:var(--mono); font-size:.82rem}
+  .art div{margin:.2rem 0} .art .k{color:var(--dim)} .art .v{color:var(--ink)} .ok{color:var(--pass)}
+  .muted{color:var(--dim)} .hidden{display:none}
+  footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:3rem; padding:1.3rem 1.3rem 0; max-width:900px; margin-left:auto; margin-right:auto; line-height:1.7}
+  @media (max-width:640px){ nav.site{display:flex; flex-wrap:wrap; margin:0} nav.site a{margin:0 1rem .1rem 0; font-size:.68rem} h1{font-size:1.9rem} }
+</style>
 </head>
 <body>
-<p>Opening the library… <a href="/library.html">continue →</a></p>
+  <header class="site"><div class="bar">
+    <a class="brand" href="/"><span class="road">▲</span> Narrow Highway</a>
+    <nav class="site"><a href="/ask.html">Ask</a><a href="/bible.html">Bible</a><a href="/almanac.html">Almanac</a><a href="/map.html">Map</a><a href="/proof.html">Proof</a><a href="/guarantees.html">Guarantees</a></nav>
+  </div></header>
+
+  <div class="wrap">
+    <div class="kicker">The Codex</div>
+    <h1>The whole work, compiled</h1>
+    <p class="lede">Not a book <em>about</em> the project — the project itself, in manuscript form. The engine binds and indexes the chosen body (Scripture in the original tongues, the Fathers, the Didache, the lens) and cross-references it against itself. <strong>Compiled, never authored</strong> — the indexes surface; they never opine. Every citation is graded by the authority spine, and where a claim carries a live receipt, the manuscript is not only witnessed but <strong>sealed</strong>.</p>
+
+    <div class="spine">
+      <span class="tier t1">1 · <b>Words in Red</b> — always wins</span>
+      <span class="tier">2 · <b>The Bible</b></span>
+      <span class="tier">3 · <b>Disciples · Didache · Fathers</b></span>
+      <span class="tier">4 · <b>Matt's writing</b> — lens, never authority</span>
+    </div>
+
+    <div class="stats" id="stats"><p class="muted">Compiling the manuscript…</p></div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-t="scripture">Scripture index</button>
+      <button class="tab" data-t="themes">Theme web</button>
+      <button class="tab" data-t="sealed">Sealed spine</button>
+      <button class="tab" data-t="artifact">Signed artifact</button>
+    </div>
+
+    <section id="pane-scripture"><p class="muted">Loading books…</p></section>
+    <section id="pane-themes" class="hidden"><p class="muted">Loading themes…</p></section>
+    <section id="pane-sealed" class="hidden"><p class="muted">Loading the sealed spine…</p></section>
+    <section id="pane-artifact" class="hidden"><p class="muted">Loading the seal…</p></section>
+  </div>
+
+  <footer class="site"><p>The Codex is what the engine produces — centuries-old monastic keeping with modern binding. Witnessed cross-references passed the two-or-three-witnesses gate (Deut 19:15) before binding; the sealed spine carries re-checkable receipts. Tier 4 illustrates the lens and never establishes doctrine. The join of the two trees (Colossians 1:17) is reserved for the operator. What is not proof is <a href="/guarantees.html">named as such</a>.</p></footer>
+
+<script>
+(function(){
+  if(new URLSearchParams(location.search).get('ref')) return; // compat redirect handles this
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function hash(u){var m=/\/s\/([0-9a-f]{6,})/.exec(u||'');return m?m[1].slice(0,12):'';}
+  var panes={}; ['scripture','themes','sealed','artifact'].forEach(function(t){panes[t]=document.getElementById('pane-'+t);});
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(b){
+    b.onclick=function(){
+      Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(x){x.classList.remove('on');});
+      b.classList.add('on');
+      for(var k in panes){panes[k].classList.toggle('hidden', k!==b.getAttribute('data-t'));}
+    };
+  });
+  fetch('/codex').then(function(r){return r.json();}).then(function(d){
+    var s=d.scripture||{}, t=d.themes||{}, c=d.connections||{}, a=d.artifact||{};
+    document.getElementById('stats').innerHTML=[
+      ['Scripture cross-refs', s.cross_references, (s.witnessed||0)+' witnessed'],
+      ['Books indexed', s.books_indexed, (s.verse_level||0)+' verse-level'],
+      ['Themes', t.themes, (t.cross_tradition||0)+' cross-tradition'],
+      ['Sealed cards', c.sealed_cards, 'live receipts'],
+      ['Witnessed hubs', c.witnessed_hubs, (c.witnessed_sources||0)+' sources'],
+      ['Artifact', a.signed?'signed':'unsigned', a.fingerprint||'']
+    ].map(function(x){return '<div class="stat"><div class="n">'+esc(x[1]==null?'—':x[1])+'</div><div class="l">'+esc(x[0])+'</div><div class="l" style="color:var(--goldsoft)">'+esc(x[2]||'')+'</div></div>';}).join('');
+  });
+  fetch('/codex/scripture').then(function(r){return r.json();}).then(function(d){
+    var books=d.books||{}, names=Object.keys(books);
+    panes.scripture.innerHTML='<h2>Every verse, every witnessed citation across the body</h2>'+
+      '<div class="row" id="books">'+names.map(function(n){return '<button class="pill" data-b="'+esc(n)+'">'+esc(n)+' <span class="c">'+books[n]+'</span></button>';}).join('')+'</div><div id="bookdetail"></div>';
+    panes.scripture.querySelector('#books').addEventListener('click',function(e){
+      var b=e.target.closest('.pill'); if(!b)return;
+      var name=b.getAttribute('data-b'), det=panes.scripture.querySelector('#bookdetail');
+      det.innerHTML='<p class="muted">Loading '+esc(name)+'…</p>';
+      fetch('/codex/scripture?book='+encodeURIComponent(name)).then(function(r){return r.json();}).then(function(bd){
+        var refs=bd.cross_references||[];
+        det.innerHTML='<h2>'+esc(name)+' — '+refs.length+' cross-references</h2>'+refs.slice(0,300).map(function(x){
+          return '<div class="xref"><div class="by">'+esc(x.by||'')+'</div><div class="m">'+
+            '<span class="rel">'+esc(x.relationship||'')+'</span>'+
+            (x.verse_refs&&x.verse_refs.length?'<span>'+esc(x.verse_refs.join(', '))+'</span>':'')+
+            (x.tier?'<span class="tierlab">'+esc(x.tier)+'</span>':'')+
+            (x.witness_status==='passed'?'<span class="seal">witnessed</span>':'')+
+            (x.seal?'<a class="seal" href="'+esc(x.seal)+'" target="_blank" rel="noopener">receipt '+esc(hash(x.seal))+'…</a>':'')+
+            '</div></div>';
+        }).join('');
+        window.scrollTo(0, det.offsetTop-20);
+      });
+    });
+  });
+  fetch('/codex/themes').then(function(r){return r.json();}).then(function(d){
+    var th=d.themes||{}, keys=Object.keys(th).slice(0,140);
+    panes.themes.innerHTML='<h2>Themes drawn from the body — not authored, inverted from its own tags</h2>'+
+      '<div class="row" id="themerow">'+keys.map(function(k){return '<button class="pill" data-k="'+esc(k)+'">'+esc(th[k].label||k)+' <span class="c">'+th[k].count+'</span></button>';}).join('')+'</div><div id="themedetail"></div>';
+    panes.themes.querySelector('#themerow').addEventListener('click',function(e){
+      var b=e.target.closest('.pill'); if(!b)return;
+      var k=b.getAttribute('data-k'), det=panes.themes.querySelector('#themedetail');
+      fetch('/codex/themes?theme='+encodeURIComponent(k)).then(function(r){return r.json();}).then(function(t){
+        det.innerHTML='<h2>'+esc(t.label||k)+' — '+t.count+' sites · '+(t.span||1)+' tradition(s)'+(t.sealed?' · '+t.sealed+' sealed':'')+'</h2>'+
+          (t.cards||[]).slice(0,120).map(function(c){return '<div class="xref"><div class="by">'+esc(c.title||c.id)+'</div><div class="m"><span class="tierlab">'+esc(c.shelf||'')+'</span>'+(c.tier?'<span>'+esc(c.tier)+'</span>':'')+(c.seal?'<a class="seal" href="'+esc(c.seal)+'" target="_blank" rel="noopener">receipt</a>':'')+'</div></div>';}).join('');
+        window.scrollTo(0, det.offsetTop-20);
+      });
+    });
+  });
+  fetch('/codex/connections').then(function(r){return r.json();}).then(function(d){
+    var sealed=d.sealed||[];
+    panes.sealed.innerHTML='<h2>The sealed spine — '+sealed.length+' cards backed by a live, re-checkable receipt</h2>'+
+      '<p class="muted">Where the manuscript is not only witnessed but computed: each carries a seal you can re-run.</p><div class="sealed">'+
+      sealed.map(function(s){return '<div class="s"><div class="t">'+esc(s.title)+'</div><a href="'+esc(s.seal)+'" target="_blank" rel="noopener">receipt '+esc(hash(s.seal))+'… · '+esc(s.box||s.shelf)+'</a></div>';}).join('')+'</div>';
+  });
+  fetch('/codex/artifact').then(function(r){return r.json();}).then(function(d){
+    var m=d.manifest||{}, b=m.body||{};
+    fetch('/codex/verify').then(function(r){return r.json();}).then(function(v){
+      panes.artifact.innerHTML='<h2>The signed artifact — the codex as of a date, Ed25519-sealed</h2>'+
+        '<div class="art">'+
+        '<div><span class="k">generated</span> <span class="v">'+esc(m.generated||'—')+'</span></div>'+
+        '<div><span class="k">public cards</span> <span class="v">'+esc(b.public_cards||'—')+'</span> · <span class="k">sealed</span> <span class="v">'+esc(b.sealed_cards||0)+'</span></div>'+
+        '<div><span class="k">body fingerprint</span> <span class="v">'+esc((b.body_hash||'').slice(0,32))+'…</span></div>'+
+        '<div><span class="k">signature</span> <span class="v">'+(d.signed?'<span class="ok">Ed25519 ✓ '+esc(d.fingerprint||'')+'</span>':'unsigned')+'</span></div>'+
+        '<div><span class="k">verify</span> <span class="v">'+(v.ok?'<span class="ok">holds — signature + hash re-checked'+(v.body_drift_since_seal?', body has grown since seal':'')+'</span>':'drift')+'</span></div>'+
+        '</div><p class="muted">Tamper-evident: any change to the manifest fails verification. Re-seal on the node: <span style="font-family:var(--mono)">python -m concordance.codex build</span>.</p>';
+    });
+  });
+})();
+</script>
 </body>
 </html>

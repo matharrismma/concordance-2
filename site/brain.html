@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Brain — the whole project, rendered — Narrow Highway</title>
+<meta name="description" content="The mind of the project as a rose window, rendered from its own live state: the Logos at the center, the lobes ringed around it and graded by the authority spine, the real connections woven through the middle as chords. The Word on one side, the world on the other, everything converging on one Source.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --red:#d08a72; --pass:#8bbf8f; --lens:#8592a4; --line:rgba(201,162,74,.16);
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(60% 50% at 50% 46%, rgba(201,162,74,.10), rgba(201,162,74,0) 72%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.7 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:1120px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.1rem; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
+  .wrap{max-width:1120px; margin:0 auto; padding:1rem 1.3rem 4rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.68rem; margin-top:2rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2.2rem; margin:.4rem 0 .4rem}
+  .lede{color:var(--dim); font-size:1.02rem; max-width:54rem}
+  .stats{display:flex; flex-wrap:wrap; gap:1.4rem; margin:1.2rem 0 .4rem; font-family:var(--mono); font-size:.74rem; color:var(--dim)}
+  .stats b{color:var(--gold); font-size:1.05rem; font-weight:600}
+  .stage{border:1px solid var(--line); border-radius:12px; background:radial-gradient(46% 46% at 50% 50%, rgba(201,162,74,.05), rgba(0,0,0,.22)); margin:1rem 0; overflow:hidden}
+  svg#brain{width:100%; height:auto; display:block}
+  #brain line.ray{stroke:rgba(201,162,74,.14)}
+  #brain path.chord{fill:none; stroke:var(--gold); stroke-linecap:round}
+  #brain circle.selfring{fill:none}
+  #brain .lobe{cursor:pointer} #brain .lobe:hover circle.core{stroke:var(--ink); stroke-width:2}
+  #brain .lobe text.nm{fill:var(--ink); font:12.5px var(--serif)}
+  #brain .lobe text.ct{fill:var(--dim); font:9px var(--mono)}
+  #brain text.treelbl{fill:var(--goldsoft); font:italic 13px var(--serif); opacity:.85}
+  .doors{display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center; margin:.3rem 0 .2rem}
+  .doors a{font-family:var(--mono); font-size:.74rem; color:var(--dim); border:1px solid var(--line); border-radius:6px; padding:.35rem .8rem}
+  .doors a:hover{color:var(--ink); border-color:var(--gold); text-decoration:none}
+  .legend{display:flex; flex-wrap:wrap; gap:.5rem 1.2rem; margin:.7rem 0 0; font-family:var(--mono); font-size:.7rem; color:var(--dim); justify-content:center}
+  .legend .sw{display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:.35rem; vertical-align:baseline}
+  .tip{min-height:1.4rem; color:var(--dim); font-size:.9rem; margin:.6rem 0; text-align:center}
+  .tip b{color:var(--ink); font-weight:400}
+  footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:2.4rem; padding-top:1.3rem; line-height:1.7}
+  @media (max-width:640px){ nav.site{display:flex; flex-wrap:wrap; margin:0} nav.site a{margin:0 1rem .1rem 0; font-size:.68rem} h1{font-size:1.8rem} }
+</style>
+</head>
+<body>
+  <header class="site"><div class="bar">
+    <a class="brand" href="/"><span class="road">▲</span> Narrow Highway</a>
+    <nav class="site"><a href="/map.html">Map</a><a href="/codex.html">Codex</a><a href="/almanac.html">Almanac</a><a href="/teachings.html">Teachings</a><a href="/proof.html">Proof</a></nav>
+  </div></header>
+
+  <div class="wrap">
+    <div class="kicker">The brain of the project</div>
+    <h1>The whole thing, rendered from its own state</h1>
+    <p class="lede">A rose window read live from the engine. The Logos at the center — "in whom all things hold together." Around it, the regions of the keeping, graded by the authority spine and sized by their weight; the Word on one side, the world on the other; and woven through the middle, the real connections the engine has drawn between them. Everything ringed around, and converging on, one Source.</p>
+
+    <div class="stats" id="stats"><span>reading the engine…</span></div>
+    <div class="stage"><svg id="brain" viewBox="0 0 1120 760" role="img" aria-label="A rose window of the whole project: the Logos at center, the regions ringed around it, the connections woven through the middle."></svg></div>
+    <div class="tip" id="tip">Hover a region or a woven connection to read it. Each region's color is its place on the authority spine; its size is its weight; its ring is its own internal density.</div>
+    <div class="doors" id="doors"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <footer class="site"><p>Rendered accurately or not at all — every count, color, and position is derived from the live corpus; nothing is decorative. The map renders reality; it does not rewrite it. The two sides join only in the One at the center (Colossians 1:17 / John 1) — that join is His; the chords here are the concordances the cards themselves already named. For the raw mesh of every card, see the <a href="/map.html">detailed map</a>.</p></footer>
+
+<script>
+(function(){
+  var SVG=document.getElementById('brain'), NS='http://www.w3.org/2000/svg';
+  var CX=560, CY=384, R=250;
+  var TIER={ words_in_red:['#e0a07a','Words in Red'], scripture:['#e8c26a','Scripture'],
+    father:['#c9a24a','Fathers'], catechism:['#b89a4a','Catechism/Creed'], creed:['#b89a4a','Catechism/Creed'],
+    external_aligned:['#b6975c','Wisdom gathered (aligned)'], operator:['#9c8f6a','Operator'],
+    reference:['#7f8794','Reference'], engine_derived:['#8bbf8f','Sealed (the moat)'], matt:['#8592a4','The lens'] };
+  var WORD={codex:1,patristics:1,classics:1,dictionary:1,hymns:1};
+  var LABEL={codex:'The Word & traditions',classics:'Philosophers & fathers',dictionary:'The wisdom lexicon',
+    patristics:'The Fathers',science:'The sealed moat',domains:'The domains',reference:'Reference',hymns:'Hymns',
+    maker:'The maker',recipes:'The table',concepts:'Concepts'};
+  var DOORS=[['Codex','/codex.html'],['Almanac','/almanac.html'],['Teachings','/teachings.html'],['Bible','/bible.html'],['Map','/map.html']];
+  function el(n,a){var e=document.createElementNS(NS,n); for(var k in a)e.setAttribute(k,a[k]); return e;}
+  function dom(t){var b=null,bv=-1; for(var k in t){if(t[k]>bv){bv=t[k];b=k;}} return b;}
+  function tip(t){document.getElementById('tip').innerHTML=t;}
+  function P(o){return o.toFixed(1);}
+
+  fetch('/graph').then(function(r){return r.json();}).then(function(d){
+    var clusters=(d.clusters||[]).slice().sort(function(a,b){return b.count-a.count;});
+    document.getElementById('stats').innerHTML=
+      '<span><b>'+(d.total_nodes||0).toLocaleString()+'</b> nodes</span>'+
+      '<span><b>'+(d.total_edges||0).toLocaleString()+'</b> connections</span>'+
+      '<span><b>'+clusters.length+'</b> regions</span>'+
+      '<span><b>'+((clusters.filter(function(c){return c.shelf==='science';})[0]||{}).count||0)+'</b> sealed (the moat)</span>'+
+      '<span>density <b>'+((d.total_edges||0)/(d.total_nodes||1)).toFixed(1)+'</b> edges/node</span>';
+    var maxc=Math.max.apply(null, clusters.map(function(c){return c.count;}));
+    function rOf(c){return 16+Math.sqrt(c/maxc)*26;}
+    var links=d.links||[];
+    var selfw={}; links.forEach(function(l){ if(l.source===l.target) selfw[l.source]=l.weight; });
+    var maxs=Math.max.apply(null, Object.keys(selfw).map(function(k){return selfw[k];}).concat([1]));
+    var cross=links.filter(function(l){ return l.source!==l.target; });
+    var maxw=Math.max.apply(null, cross.map(function(l){return l.weight;}).concat([1]));
+
+    // ── radial layout: each region gets arc-room ∝ its size (no crowding); the Word tree and the
+    //    world tree are each a CONTIGUOUS arc, so the two read as two portions of the one window ──
+    var word=clusters.filter(function(c){return WORD[c.shelf];});
+    var world=clusters.filter(function(c){return !WORD[c.shelf];});
+    var ordered=word.concat(world), TWO=Math.PI*2, N=ordered.length;
+    var spans={word:[9,-9],world:[9,-9]};
+    var nodes=ordered.map(function(c,i){
+      var ang=-Math.PI*0.5 + (i/N)*TWO;                       // evenly spaced petals
+      var grp=WORD[c.shelf]?'word':'world';
+      if(ang<spans[grp][0])spans[grp][0]=ang; if(ang>spans[grp][1])spans[grp][1]=ang;
+      return {shelf:c.shelf, c:c, r:rOf(c.count), ang:ang, x:CX+R*Math.cos(ang), y:CY+R*Math.sin(ang)};
+    });
+    var byN={}; nodes.forEach(function(n){byN[n.shelf]=n;});
+
+    // rays from the center to each region (light radiating from / converging on the Logos)
+    nodes.forEach(function(l){ SVG.appendChild(el('line',{class:'ray',x1:CX,y1:CY,x2:P(l.x),y2:P(l.y)})); });
+    // the CONNECTIONS woven through the middle as chords (bowing toward the center), weighted
+    cross.forEach(function(l){ var a=byN[l.source],b=byN[l.target]; if(!a||!b)return;
+      var mx=(a.x+b.x)/2,my=(a.y+b.y)/2, cxp=mx+(CX-mx)*0.72, cyp=my+(CY-my)*0.72;
+      var lf=Math.log(l.weight+1)/Math.log(maxw+1), w=(1+lf*4.6).toFixed(1), op=(0.2+lf*0.42).toFixed(2);
+      var p=el('path',{class:'chord', d:'M'+P(a.x)+' '+P(a.y)+' Q'+P(cxp)+' '+P(cyp)+' '+P(b.x)+' '+P(b.y),'stroke-width':w,'stroke-opacity':op});
+      p.addEventListener('mouseenter',function(){tip('<b>'+l.weight.toLocaleString()+'</b> connections woven · '+(LABEL[l.source]||l.source)+' ↔ '+(LABEL[l.target]||l.target));});
+      SVG.appendChild(p);
+    });
+    // tree labels at each arc's midpoint (placed where the two trees actually landed)
+    ['word','world'].forEach(function(grp){
+      var mid=(spans[grp][0]+spans[grp][1])/2, lr=R+46;
+      var t=el('text',{class:'treelbl','text-anchor':'middle',x:P(CX+lr*Math.cos(mid)),y:P(CY+lr*Math.sin(mid)+4)});
+      t.textContent=grp==='word'?'the tree of Life · the Word':'the tree of Knowledge · the world'; SVG.appendChild(t);
+    });
+    // the regions (petals of the window)
+    nodes.forEach(function(l){
+      var c=l.c, tier=dom(c.tiers||{}), col=(TIER[tier]||['#8a93a3',''])[0];
+      var g=el('g',{class:'lobe'});
+      g.appendChild(el('circle',{class:'core',cx:P(l.x),cy:P(l.y),r:P(l.r),fill:col,'fill-opacity':.22,stroke:col,'stroke-width':1.5}));
+      var sd=selfw[l.shelf];
+      if(sd) g.appendChild(el('circle',{class:'selfring',cx:P(l.x),cy:P(l.y),r:P(l.r+5),stroke:col,'stroke-opacity':(0.18+(sd/maxs)*0.5).toFixed(2),'stroke-width':(1+(sd/maxs)*2.5).toFixed(1)}));
+      g.appendChild(function(){var t=el('text',{class:'nm','text-anchor':'middle',x:P(l.x),y:P(l.y-1)});t.textContent=LABEL[l.shelf]||l.shelf;return t;}());
+      g.appendChild(function(){var t=el('text',{class:'ct','text-anchor':'middle',x:P(l.x),y:P(l.y+13)});t.textContent=c.count.toLocaleString();return t;}());
+      g.addEventListener('mouseenter',function(){
+        var tiers=Object.keys(c.tiers||{}).map(function(k){return (TIER[k]?TIER[k][1]:k)+' '+c.tiers[k];}).join(' · ');
+        tip('<b>'+(LABEL[l.shelf]||l.shelf)+'</b> — '+c.count.toLocaleString()+' cards'+(sd?', '+sd.toLocaleString()+' internal links':'')+'. '+tiers+'.');
+      });
+      g.addEventListener('click',function(){location.href='/map.html?shelf='+encodeURIComponent(l.shelf);});
+      SVG.appendChild(g);
+    });
+    // the Logos at the true center — a sun with a soft glow
+    var defs=el('defs',{}); var rg=el('radialGradient',{id:'sun'});
+    rg.appendChild(el('stop',{offset:'0%','stop-color':'rgba(201,162,74,.55)'}));
+    rg.appendChild(el('stop',{offset:'100%','stop-color':'rgba(201,162,74,0)'})); defs.appendChild(rg); SVG.appendChild(defs);
+    SVG.appendChild(el('circle',{cx:CX,cy:CY,r:120,fill:'url(#sun)'}));
+    SVG.appendChild(el('circle',{cx:CX,cy:CY,r:54,fill:'rgba(201,162,74,.14)',stroke:'var(--gold)','stroke-width':1.8}));
+    var l1=el('text',{'text-anchor':'middle',x:CX,y:CY-4,fill:'var(--gold)',style:'font:600 14px var(--mono);letter-spacing:.12em'}); l1.textContent='THE LOGOS'; SVG.appendChild(l1);
+    var l2=el('text',{'text-anchor':'middle',x:CX,y:CY+17,fill:'var(--ink)',style:'font:italic 12px var(--serif)'}); l2.textContent='all things hold together'; SVG.appendChild(l2);
+
+    document.getElementById('doors').innerHTML=DOORS.map(function(dr){return '<a href="'+dr[1]+'">'+dr[0]+'</a>';}).join('');
+    var order=['words_in_red','scripture','father','catechism','external_aligned','engine_derived','matt','reference'];
+    document.getElementById('legend').innerHTML='<span style="color:var(--goldsoft)">the authority spine →</span>'+
+      order.map(function(k){return '<span><span class="sw" style="background:'+TIER[k][0]+'"></span>'+TIER[k][1]+'</span>';}).join('');
+  }).catch(function(){ document.getElementById('stats').innerHTML='<span>the brain is resting — could not reach the engine.</span>'; });
+})();
+</script>
+</body>
+</html>

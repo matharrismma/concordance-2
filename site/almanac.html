@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Almanac — claims the engine re-verified — Narrow Highway</title>
+<meta name="description" content="The Almanac — folk wisdom and standing claims the engine has worked through, each one RE-VERIFIED on the live engine with a fresh, re-checkable receipt. Verified-only: nothing appears here that did not re-seal. The Almanac does not panic.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --mid:#c9b06a; --broken:#c98a8a;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.12), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:860px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.1rem; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:860px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.68rem; margin-top:2.6rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2.3rem; margin:.5rem 0 .5rem}
+  .lede{color:var(--dim); font-size:1.06rem; max-width:48rem}
+  .controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:1.8rem 0 .4rem}
+  #q{flex:1; min-width:240px; background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:8px;
+     padding:.6rem .8rem; color:var(--ink); font:15px var(--serif)}
+  #q:focus{outline:none; border-color:var(--gold)}
+  .count{color:var(--dim); font-size:.85rem; font-family:var(--mono)}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:.6rem 0 1.4rem}
+  .chip{font-family:var(--mono); font-size:.7rem; letter-spacing:.04em; color:var(--dim);
+    border:1px solid var(--line); border-radius:999px; padding:.28rem .7rem; cursor:pointer; background:none}
+  .chip:hover{color:var(--ink)} .chip.on{color:#161206; background:var(--gold); border-color:var(--gold)}
+  .entry{border-left:2px solid var(--mid); padding:.5rem 0 .7rem 1.15rem; margin:1.3rem 0}
+  .entry h3{font-weight:400; font-size:1.16rem; margin:.1rem 0 .35rem; color:var(--ink)}
+  .entry .wisdom{font-size:.99rem; margin:.2rem 0 .5rem}
+  .entry .meta{display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; font-family:var(--mono); font-size:.7rem}
+  .badge{color:var(--pass); border:1px solid rgba(139,191,143,.4); border-radius:5px; padding:.1rem .45rem; letter-spacing:.08em}
+  .cat{color:var(--dim); text-transform:uppercase; letter-spacing:.1em}
+  .entry .seal{color:var(--goldsoft)} .entry .claim{color:var(--dim); font-size:.86rem; font-family:var(--mono); margin:.1rem 0 .3rem; word-break:break-word}
+  .note{border:1px solid var(--line); border-left:3px solid var(--gold); padding:1rem 1.2rem; margin:1.6rem 0; color:var(--dim); font-size:.92rem}
+  .dim{color:var(--dim)}
+  footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:3rem; padding-top:1.3rem; line-height:1.7; max-width:860px; margin-left:auto; margin-right:auto; padding-left:1.3rem; padding-right:1.3rem}
+  @media (max-width:640px){ nav.site{display:flex; flex-wrap:wrap; margin:0} nav.site a{margin:0 1rem .1rem 0; font-size:.68rem} h1{font-size:1.9rem} }
+</style>
+</head>
+<body>
+  <header class="site"><div class="bar">
+    <a class="brand" href="/"><span class="road">▲</span> Narrow Highway</a>
+    <nav class="site"><a href="/ask.html">Ask</a><a href="/bible.html">Bible</a><a href="/proof.html">Proof</a><a href="/map.html">Map</a><a href="/boundary.html">Boundary</a><a href="/guarantees.html">Guarantees</a></nav>
+  </div></header>
+
+  <div class="wrap">
+    <div class="kicker">The Almanac</div>
+    <h1>What the engine has worked through</h1>
+    <p class="lede">Standing claims and folk wisdom, each one <strong>re-verified on the live engine</strong> with a fresh, re-checkable receipt. These entries came back from the retired 1.0 almanac — but their old seals were retired with the old ledger, so every claim here was <em>re-checked</em>, and only the ones that held are shown. Verified-only. The Almanac does not panic.</p>
+
+    <div class="controls">
+      <input id="q" type="search" placeholder="Search the almanac — e.g. Pythagoras, prime, ratio, entropy…" autocomplete="off">
+      <span class="count" id="count"></span>
+    </div>
+    <div class="chips" id="chips"></div>
+
+    <div id="list"><p class="dim">Loading the almanac…</p></div>
+
+    <div class="note" id="foot"></div>
+  </div>
+
+  <footer class="site"><p>Every entry is a <span class="badge" style="font-family:var(--mono)">HOLDS</span> with a live receipt you can re-run. This is a re-check, not a claim to authority — the engine keeps what survived verification, and shows its work. A signpost to the method, not a shrine — see <a href="/guarantees.html">what we prove, and what we don't</a>.</p></footer>
+
+<script>
+(function(){
+  var LIST=document.getElementById('list'), CHIPS=document.getElementById('chips'),
+      Q=document.getElementById('q'), COUNT=document.getElementById('count'), FOOT=document.getElementById('foot');
+  var state={cat:'', q:''}, all=[], cats=[], note='';
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function sealHash(u){var m=/\/s\/([0-9a-f]{6,})/.exec(u||'');return m?m[1].slice(0,12):'';}
+  function render(items){
+    COUNT.textContent=items.length+' verified';
+    if(!items.length){LIST.innerHTML='<p class="dim">No entries match.</p>';return;}
+    LIST.innerHTML=items.map(function(e){
+      var seal=e.seal||'', h=sealHash(seal);
+      return '<div class="entry"><h3>'+esc(e.title)+'</h3>'+
+        (e.wisdom?'<p class="wisdom">'+esc(e.wisdom)+'</p>':'')+
+        '<div class="meta"><span class="badge">HOLDS</span>'+
+        (e.category?'<span class="cat">'+esc(e.category)+'</span>':'')+
+        (seal?'<a class="seal" href="'+esc(seal)+'" target="_blank" rel="noopener">receipt · '+esc(h)+'…</a>':'')+
+        '</div></div>';
+    }).join('');
+  }
+  function apply(){
+    var items=all.filter(function(e){
+      if(state.cat && (e.category||'')!==state.cat) return false;
+      if(state.q){var hay=((e.title||'')+' '+(e.category||'')+' '+((e.domains||[]).join(' '))).toLowerCase();
+        if(hay.indexOf(state.q)<0) return false;}
+      return true;
+    });
+    render(items);
+  }
+  function drawChips(){
+    CHIPS.innerHTML='<button class="chip'+(state.cat?'':' on')+'" data-c="">all</button>'+
+      cats.map(function(c){return '<button class="chip'+(state.cat===c.category?' on':'')+'" data-c="'+esc(c.category)+'">'+esc(c.category)+' · '+c.count+'</button>';}).join('');
+    Array.prototype.forEach.call(CHIPS.querySelectorAll('.chip'),function(b){
+      b.onclick=function(){state.cat=b.getAttribute('data-c'); drawChips(); apply();};});
+  }
+  Q.addEventListener('input',function(){state.q=Q.value.trim().toLowerCase(); apply();});
+  fetch('/almanac').then(function(r){return r.json();}).then(function(d){
+    all=d.entries||[]; cats=d.categories||[]; note=d.note||'';
+    FOOT.textContent=note;
+    drawChips(); apply();
+  }).catch(function(){LIST.innerHTML='<p class="dim">The almanac is being tended. Check back shortly.</p>';});
+})();
+</script>
+</body>
+</html>

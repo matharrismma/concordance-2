@@ -54,3 +54,14 @@
   else document.addEventListener('DOMContentLoaded', function () { fill(); });
   window.NHKind = { badge: badge, fill: fill };
 })();
+
+/* Offline (docs/THE_COMPANION.md §6b, Tier 1) — the surfaces keep working with no network.
+   Registered here because every surface already loads this file. Fails silent by design:
+   an unsupported or blocked worker must never break the page. */
+(function () {
+  if (!('serviceWorker' in navigator)) return;
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js').catch(function () { /* offline is a bonus, never a requirement */ });
+  });
+})();

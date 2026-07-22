@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Teachings of Christ — the Word calibrates, the wisdom opens — Narrow Highway</title>
+<meta name="description" content="Two things at once: the Words of Jesus calibrate the one who looks, and the wisdom God seeded across all history is gathered around them. First the Word aligns your seeing; then history's wisdom — Stoic and rabbi, father and Puritan — opens, all of it orbiting the one teaching, because reality has one Source.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --red:#d08a72; --line:rgba(201,162,74,.16); --pass:#8bbf8f; --mid:#c9b06a;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+    --greek:"Palatino Linotype",Palatino,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.12), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.7 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:1080px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.1rem; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
+  .wrap{max-width:1080px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.68rem; margin-top:2.2rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2.2rem; margin:.4rem 0 .4rem}
+  .lede{color:var(--dim); font-size:1.02rem; max-width:53rem}
+  .grid{display:grid; grid-template-columns:260px 1fr; gap:22px; margin-top:1.6rem}
+  @media (max-width:820px){ .grid{grid-template-columns:1fr} }
+  .queue{border:1px solid var(--line); border-radius:8px; padding:.6rem; max-height:80vh; overflow:auto; position:sticky; top:10px}
+  .qgroup{color:var(--gold); font-family:var(--mono); font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; margin:.8rem .4rem .3rem}
+  .qitem{display:flex; gap:.5rem; align-items:baseline; padding:.32rem .5rem; border-radius:6px; cursor:pointer; font-size:.9rem}
+  .qitem:hover{background:rgba(201,162,74,.07)} .qitem.on{background:rgba(201,162,74,.14)}
+  .qitem .rf{color:var(--dim); font-family:var(--mono); font-size:.62rem; margin-left:auto}
+  .ws{min-height:60vh}
+  .ws .t{font-size:1.55rem; margin:.2rem 0} .ws .rf{color:var(--goldsoft); font-family:var(--mono); font-size:.8rem}
+  .step{border-top:1px solid var(--line); margin-top:1.5rem; padding-top:1rem}
+  .step .n{color:var(--gold); font-family:var(--mono); font-size:.7rem; letter-spacing:.1em; text-transform:uppercase}
+  .step h3{font-weight:400; font-size:1.14rem; margin:.15rem 0 .5rem}
+  .step .hint{color:var(--dim); font-size:.84rem; margin:-.3rem 0 .7rem; max-width:48rem}
+  .verse{margin:.25rem 0} .verse .vn{color:var(--goldsoft); font-family:var(--mono); font-size:.7rem; margin-right:.4rem} .verse .txt{color:var(--red)}
+  .greek{display:flex; flex-wrap:wrap; gap:.3rem; margin:.6rem 0}
+  .gw{font-family:var(--greek); font-size:1.14rem; color:var(--ink); border-bottom:1px dotted var(--line); cursor:pointer; padding:.05rem .1rem}
+  .gw:hover{color:var(--gold); border-color:var(--gold)}
+  .gloss{border:1px solid var(--line); border-radius:6px; padding:.5rem .8rem; margin:.4rem 0; font-size:.9rem; min-height:1.1rem}
+  .gloss .w{font-family:var(--greek); color:var(--gold); font-size:1.1rem} .gloss .tr{color:var(--dim); font-style:italic}
+  .locked{opacity:.4; pointer-events:none; filter:blur(.6px)}
+  .openbtn{display:inline-block; margin:.4rem 0 .2rem; font-family:var(--mono); font-size:.74rem; color:#161206; background:var(--gold); border:none; border-radius:6px; padding:.5rem 1rem; cursor:pointer; letter-spacing:.03em}
+  .openbtn.done{background:none; color:var(--pass); border:1px solid rgba(139,191,143,.5)}
+  /* the concordance map */
+  .cmap{width:100%; max-width:720px; height:auto; display:block; margin:.4rem auto}
+  .cmap line{stroke:rgba(201,162,74,.16)}
+  .cmap .sun{fill:rgba(201,162,74,.14); stroke:var(--gold); stroke-width:1.4}
+  .cmap .wordlbl{fill:var(--gold); font:600 12px var(--mono); letter-spacing:.1em; text-transform:uppercase}
+  .cmap .wordsub{fill:var(--ink); font:13px var(--serif)}
+  .cmap .mnode circle{fill:var(--goldsoft); cursor:pointer; transition:.15s}
+  .cmap .mnode:hover circle{fill:var(--gold); r:7}
+  .cmap .mnode text{fill:var(--dim); font:10px var(--mono); cursor:pointer}
+  .cmap .mnode:hover text{fill:var(--ink)}
+  .ribbon{display:flex; flex-wrap:wrap; gap:6px; margin:.4rem 0 1rem}
+  .era{font-family:var(--mono); font-size:.66rem; color:var(--goldsoft); border:1px solid var(--line); border-radius:999px; padding:.24rem .6rem}
+  .wisdom{border-left:2px solid var(--mid); padding:.4rem 0 .5rem 1.05rem; margin:1rem 0; transition:background .3s}
+  .wisdom.flash{background:rgba(201,162,74,.12)}
+  .wisdom .era2{font-family:var(--mono); font-size:.66rem; color:var(--gold); letter-spacing:.04em; text-transform:uppercase}
+  .wisdom .src{color:var(--ink); font-size:.98rem; margin:.05rem 0 .2rem}
+  .wisdom .ex{color:var(--dim); font-size:.92rem}
+  .wisdom .act{display:flex; gap:.7rem; margin-top:.3rem; font-family:var(--mono); font-size:.68rem; align-items:center}
+  .wisdom .act a{color:var(--goldsoft)} .wisdom .act button{background:none;border:1px solid var(--line);border-radius:5px;color:var(--dim);cursor:pointer;padding:.1rem .45rem;font:inherit}
+  .wisdom.kept{border-color:var(--pass)} .wisdom.kept .keepb{color:var(--pass);border-color:rgba(139,191,143,.5)}
+  .wisdom.aside{opacity:.5} .scr{color:var(--dim); font-size:.88rem; margin:.3rem 0}
+  .muted{color:var(--dim)} .hidden{display:none}
+  .bound{border:1px solid var(--line); border-left:3px solid var(--gold); padding:.7rem 1rem; margin:1rem 0 0; color:var(--dim); font-size:.86rem; max-width:53rem}
+  footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:3rem; padding-top:1.3rem; line-height:1.7}
+  @media (max-width:640px){ nav.site{display:flex; flex-wrap:wrap; margin:0} nav.site a{margin:0 1rem .1rem 0; font-size:.68rem} }
+</style>
+</head>
+<body>
+  <header class="site"><div class="bar">
+    <a class="brand" href="/"><span class="road">▲</span> Narrow Highway</a>
+    <nav class="site"><a href="/bible.html">Bible</a><a href="/codex.html">Codex</a><a href="/map.html">Map</a><a href="/ask.html">Ask</a></nav>
+  </div></header>
+
+  <div class="wrap">
+    <div class="kicker">The teachings of Christ · calibrate, then see</div>
+    <h1>First the Word aligns you; then history opens</h1>
+    <p class="lede">Two things at once. God seeded wisdom across every age — but a perfect concordance shown to an unaligned eye stays invisible ("seeing they see not"). So the Words of Jesus come <strong>first</strong>, to calibrate the one who looks; and then the wisdom of all history opens — Stoic and rabbi, father and Puritan — every fragment orbiting the one teaching, because reality has one Source.</p>
+
+    <div class="grid">
+      <aside class="queue" id="queue"><p class="muted">Loading the teachings…</p></aside>
+      <main class="ws" id="ws"><p class="muted">Choose a teaching. First the Word will be laid before you to align your seeing; then the wisdom of all history opens around it.</p></main>
+    </div>
+  </div>
+
+  <footer class="site"><p>The Words of Jesus guide us exactly. They are not merely what the gathered wisdom aligns <em>to</em> — they align the one who reads, so the concord can be seen at all. The seed is never the variable; the soil is (the parable of the sower). What is a found concord and what is proof are <a href="/guarantees.html">kept distinct</a>; the tool is a window to Christ, never the wall.</p></footer>
+
+<script>
+(function(){
+  if(new URLSearchParams(location.search).get('ref')) return;
+  var Q=document.getElementById('queue'), WS=document.getElementById('ws');
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function hash(u){var m=/\/s\/([0-9a-f]{6,})/.exec(u||'');return m?m[1].slice(0,10):'';}
+  function yr(y){return y<0?(Math.abs(y)+' BC'):(y+(y<1000?' AD':''));}
+  function shortSrc(s){return String(s||'').split(/,| §|:| \d/)[0].slice(0,20);}
+  var QUEUE=[];
+  function curKey(t){return 'nh_curate_'+t;} function calKey(t){return 'nh_calib_'+t;}
+  function curOf(t){try{return JSON.parse(localStorage.getItem(curKey(t))||'{}');}catch(e){return {};}}
+  function gate(msg){WS.innerHTML='<p class="muted">'+esc(msg)+'</p><p class="muted">The teachings open on the witness face (narrowhighway.org), or once the Gate is opened in conversation (<a href="/ask.html">Ask</a>).</p>';}
+
+  function buildMap(title, items){
+    var arr=items.filter(function(x){return x.year!=null;}).sort(function(a,b){return a.year-b.year;});
+    if(arr.length<2) return '';
+    var W=720,H=430,cx=360,cy=205,R=150,n=arr.length;
+    var nodes=arr.map(function(x,i){var a=(i/n)*2*Math.PI-Math.PI/2;return {x:cx+R*Math.cos(a),y:cy+R*Math.sin(a),a:a,d:x};});
+    var lines=nodes.map(function(nd){return '<line x1="'+cx+'" y1="'+cy+'" x2="'+nd.x.toFixed(1)+'" y2="'+nd.y.toFixed(1)+'"/>';}).join('');
+    var pts=nodes.map(function(nd){
+      var lx=cx+(R+16)*Math.cos(nd.a), ly=cy+(R+16)*Math.sin(nd.a)+3;
+      var anc=Math.cos(nd.a)>0.25?'start':(Math.cos(nd.a)<-0.25?'end':'middle');
+      return '<g class="mnode" data-id="'+esc(nd.d.id)+'"><circle cx="'+nd.x.toFixed(1)+'" cy="'+nd.y.toFixed(1)+'" r="5"/>'+
+        '<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" text-anchor="'+anc+'">'+esc(shortSrc(nd.d.source))+' · '+esc(yr(nd.d.year))+'</text></g>';
+    }).join('');
+    return '<svg viewBox="0 0 '+W+' '+H+'" class="cmap" role="img" aria-label="History gathered around the Word">'+lines+
+      '<circle cx="'+cx+'" cy="'+cy+'" r="36" class="sun"/>'+
+      '<text x="'+cx+'" y="'+(cy-3)+'" text-anchor="middle" class="wordlbl">The Word</text>'+
+      '<text x="'+cx+'" y="'+(cy+15)+'" text-anchor="middle" class="wordsub">'+esc(String(title).slice(0,22))+'</text>'+pts+'</svg>';
+  }
+
+  function open(t){
+    Array.prototype.forEach.call(Q.querySelectorAll('.qitem'),function(el){el.classList.toggle('on', el.getAttribute('data-id')===t.id);});
+    var calibrated = localStorage.getItem(calKey(t.id))==='1';
+    WS.innerHTML='<div class="t">'+esc(t.title)+'</div><div class="rf">'+esc(t.ref)+'</div>'+
+      '<div class="step"><div class="n">First · the Word calibrates</div><h3>Sit under this before you look wider</h3>'+
+        '<div class="hint">Let the teaching align your seeing. This is the plumb-line — the standard the gathered wisdom is measured by, and the light you see it by. Tap a Greek word for its root.</div>'+
+        '<div id="passage"><span class="muted">Assembling the Word…</span></div>'+
+        '<div class="greek" id="greek"></div><div class="gloss hidden" id="gloss"></div>'+
+        '<button class="openbtn'+(calibrated?' done':'')+'" id="openbtn">'+(calibrated?'✓ the wisdom is open':'I have sat with the Word — open the wisdom')+'</button></div>'+
+      '<div class="step '+(calibrated?'':'locked')+'" id="wisdomstep"><div class="n">Then · gathered from all history</div>'+
+        '<h3>The wisdom already seeded, opened to eyes prepared</h3>'+
+        '<div class="hint">Found across the body and attributed — never written here. All of it orbits the one Word; walk the map by clicking a light. Tap ✓ to keep what aligns, or set a fragment apart.</div>'+
+        '<div id="map"></div><div class="ribbon" id="ribbon"></div><div id="wisdom"><span class="muted">Searching all of history…</span></div><div id="scripture"></div></div>'+
+      '<div class="bound">Even shown, wisdom is unseen by the unaligned eye. The Word comes first not as ritual but as calibration — the receiver aligned to the Source, so the concord can be perceived. "He who has ears to hear, let him hear."</div>';
+    var cur=curOf(t.id);
+    fetch('/passage?ref='+encodeURIComponent(t.ref)).then(function(r){return r.json();}).then(function(d){
+      if(d.error){gate('This teaching is witness content.'); return;}
+      document.getElementById('passage').innerHTML=(d.verses||[]).map(function(v){return '<div class="verse"><span class="vn">'+esc(v.verse)+'</span><span class="txt">'+esc(v.text)+'</span></div>';}).join('');
+    }).catch(function(){gate('Could not reach the scripture engine.');});
+    fetch('/original?ref='+encodeURIComponent(t.ref)).then(function(r){return r.json();}).then(function(d){
+      var g=document.getElementById('greek'); if(!g)return;
+      g.innerHTML=(d.words||[]).filter(function(w){return w.strongs;}).map(function(w){return '<span class="gw" data-s="'+esc(w.strongs)+'">'+esc(w.word)+'</span>';}).join('');
+      g.addEventListener('click',function(e){var el=e.target.closest('.gw'); if(el)wordStudy(el.getAttribute('data-s'));});
+    }).catch(function(){});
+    document.getElementById('openbtn').addEventListener('click',function(){
+      localStorage.setItem(calKey(t.id),'1');
+      document.getElementById('wisdomstep').classList.remove('locked');
+      this.classList.add('done'); this.textContent='✓ the wisdom is open';
+      document.getElementById('wisdomstep').scrollIntoView({behavior:'smooth',block:'start'});
+    });
+    fetch('/teachings?id='+encodeURIComponent(t.id)).then(function(r){return r.json();}).then(function(d){
+      if(d.error)return;
+      var items=d.wisdom||[];
+      document.getElementById('map').innerHTML=buildMap(t.title, items);
+      document.getElementById('ribbon').innerHTML=(d.traditions||[]).map(function(x){return '<span class="era">'+esc(x)+'</span>';}).join('');
+      var w=document.getElementById('wisdom');
+      w.innerHTML=items.length?items.map(function(x){
+        var kept=cur[x.id]; var cls=kept==='keep'?' kept':(kept==='aside'?' aside':'');
+        return '<div class="wisdom'+cls+'" id="w_'+esc(x.id)+'" data-id="'+esc(x.id)+'"><div class="era2">'+esc(x.tradition)+'</div>'+
+          '<div class="src">'+esc(x.source)+'</div><div class="ex">“'+esc(x.excerpt)+'…”</div>'+
+          '<div class="act"><a href="/card/'+esc(x.id)+'" target="_blank" rel="noopener">read the source →</a>'+
+          (x.seal?'<a href="'+esc(x.seal)+'" target="_blank" rel="noopener">receipt '+esc(hash(x.seal))+'</a>':'')+
+          '<button class="keepb" data-a="keep">✓ aligns</button><button data-a="aside">set apart</button></div></div>';
+      }).join(''):'<span class="muted">No cross-history wisdom gathered for this one yet.</span>';
+      // map node -> flash its fragment
+      var mp=document.getElementById('map');
+      mp.addEventListener('click',function(e){var g=e.target.closest('.mnode'); if(!g)return;
+        var el=document.getElementById('w_'+g.getAttribute('data-id')); if(el){el.scrollIntoView({behavior:'smooth',block:'center'}); el.classList.add('flash'); setTimeout(function(){el.classList.remove('flash');},1400);}});
+      w.addEventListener('click',function(e){var b=e.target.closest('button'); if(!b)return;
+        var card=b.closest('.wisdom'), id=card.getAttribute('data-id'), a=b.getAttribute('data-a');
+        var c=curOf(t.id); c[id]=(c[id]===a?null:a); if(!c[id])delete c[id];
+        localStorage.setItem(curKey(t.id), JSON.stringify(c));
+        card.classList.toggle('kept', c[id]==='keep'); card.classList.toggle('aside', c[id]==='aside');});
+      var sc=d.scripture_concord||[];
+      document.getElementById('scripture').innerHTML=sc.length?'<div class="hint" style="margin-top:1rem">And Scripture concords with itself —</div>'+sc.map(function(s){return '<div class="scr">• <a href="/card/'+esc(s.id)+'" target="_blank" rel="noopener">'+esc(s.source)+'</a></div>';}).join(''):'';
+    }).catch(function(){});
+  }
+  function wordStudy(strongs){
+    var box=document.getElementById('gloss'); box.classList.remove('hidden'); box.innerHTML='<span class="muted">…</span>';
+    fetch('/word_study?strongs='+encodeURIComponent(strongs)).then(function(r){return r.json();}).then(function(d){
+      if(d.error){box.innerHTML='<span class="muted">'+esc(strongs)+'</span>'; return;}
+      box.innerHTML='<span class="w">'+esc(d.word||'')+'</span> <span class="tr">'+esc(d.transliteration||'')+'</span> · <span class="muted">'+esc(strongs)+' · '+esc(d.occurrence_count||0)+'×</span><br>'+esc(d.definition||d.derivation||'');
+    }).catch(function(){box.innerHTML='<span class="muted">could not load</span>';});
+  }
+  fetch('/teachings').then(function(r){return r.json();}).then(function(d){
+    if(d.error){gate('The teachings are witness content.'); Q.innerHTML=''; return;}
+    Q.innerHTML=(d.groups||[]).map(function(g){
+      return '<div class="qgroup">'+esc(g.group)+'</div>'+g.teachings.map(function(t){
+        QUEUE.push(t);
+        return '<div class="qitem" data-id="'+esc(t.id)+'"><span>'+esc(t.title)+'</span><span class="rf">'+esc(t.ref)+'</span></div>';
+      }).join('');
+    }).join('');
+    Q.addEventListener('click',function(e){var el=e.target.closest('.qitem'); if(!el)return;
+      var t=QUEUE.filter(function(x){return x.id===el.getAttribute('data-id');})[0]; if(t)open(t);});
+  }).catch(function(){gate('Could not reach the engine.');});
+})();
+</script>
+</body>
+</html>

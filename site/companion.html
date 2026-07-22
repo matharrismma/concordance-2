@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Companion — Narrow Highway</title>
+<meta name="description" content="The Concordance for a life. A body of many specialists, one who knows whom to call, and one who records. You carry your own data.">
+<style>
+  :root{
+    --vellum:#f5edda; --vellum-2:#efe4cd; --ink:#2c2318; --ink-soft:#5b4c39;
+    --rubric:#8c2f1f; --gold:#a9822b; --rule:#cbb894;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --vellum:#14110d; --vellum-2:#1b1712; --ink:#e6d7b8; --ink-soft:#b9a684;
+           --rubric:#c4573f; --gold:#d8ad4e; --rule:#4a3d29; }
+  }
+  :root[data-theme="light"]{ --vellum:#f5edda; --vellum-2:#efe4cd; --ink:#2c2318; --ink-soft:#5b4c39;
+    --rubric:#8c2f1f; --gold:#a9822b; --rule:#cbb894; }
+  :root[data-theme="dark"]{ --vellum:#14110d; --vellum-2:#1b1712; --ink:#e6d7b8; --ink-soft:#b9a684;
+    --rubric:#c4573f; --gold:#d8ad4e; --rule:#4a3d29; }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--vellum); color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    font-size:19px; line-height:1.72;
+    background-image:
+      radial-gradient(ellipse at 12% 4%, rgba(0,0,0,.035), transparent 55%),
+      radial-gradient(ellipse at 88% 96%, rgba(0,0,0,.04), transparent 55%);
+  }
+  .page{max-width:44rem; margin:0 auto; padding:4.5rem 1.4rem 6rem}
+  @media(max-width:640px){ body{font-size:17.5px} .page{padding:2.75rem 1.15rem 4rem} }
+
+  .folio{ text-align:center; color:var(--ink-soft); font-size:.72rem;
+    letter-spacing:.3em; text-transform:uppercase; margin-bottom:2.6rem }
+  h1{ font-size:clamp(2rem,6vw,2.9rem); line-height:1.15; text-align:center;
+      margin:0 0 .4rem; font-weight:400 }
+  .sub{ text-align:center; color:var(--ink-soft); font-style:italic; margin:0 0 2.2rem }
+
+  /* the double rule — structural ornament, not chrome */
+  .rule{ border:0; height:0; border-top:1px solid var(--rule);
+         border-bottom:1px solid var(--rule); height:3px; margin:2.6rem 0 }
+  .rule.short{ width:38%; margin-left:auto; margin-right:auto }
+
+  h2{ font-size:.85rem; letter-spacing:.24em; text-transform:uppercase;
+      color:var(--rubric); font-weight:700; margin:3rem 0 .9rem }
+
+  /* the inscription — used ONCE, as the vow */
+  .inscription{
+    text-align:center; color:var(--gold); font-size:.94rem; letter-spacing:.22em;
+    text-transform:uppercase; line-height:2.1; margin:2.4rem 0; padding:1.5rem 1rem;
+    border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);
+  }
+  .drop::first-letter{
+    float:left; font-size:4.1rem; line-height:.82; padding:.16rem .6rem .1rem 0;
+    color:var(--rubric); font-weight:700;
+  }
+  blockquote{ margin:1.6rem 0; padding-left:1.1rem; border-left:2px solid var(--rubric);
+    font-style:italic; color:var(--ink-soft) }
+  /* marginalia — the gloss, as in a manuscript */
+  .gloss{ float:right; width:12rem; margin:.35rem -13.5rem .8rem 1.4rem;
+    font-size:.78rem; line-height:1.55; color:var(--ink-soft); font-style:italic;
+    border-left:1px solid var(--rule); padding-left:.8rem }
+  @media(max-width:1100px){ .gloss{ float:none; width:auto; margin:1.1rem 0;
+    border-left:2px solid var(--rule) } }
+
+  table{ width:100%; border-collapse:collapse; margin:1.4rem 0; font-size:.92rem }
+  th,td{ text-align:left; padding:.55rem .5rem; border-bottom:1px solid var(--rule);
+         vertical-align:top }
+  th{ color:var(--rubric); font-weight:700; font-size:.74rem; letter-spacing:.13em;
+      text-transform:uppercase }
+  .num{ white-space:nowrap; color:var(--gold); font-weight:700 }
+  .wrap{ overflow-x:auto }
+  ol,ul{ padding-left:1.3rem } li{ margin:.42rem 0 }
+  strong{ color:var(--ink) }
+  a{ color:var(--rubric) }
+  .seal{ text-align:center; color:var(--ink-soft); font-size:.78rem;
+    letter-spacing:.16em; text-transform:uppercase; margin-top:3.2rem }
+  .seal b{ color:var(--gold) }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <p class="folio">Narrow Highway · The Companion</p>
+  <h1>The Concordance for&nbsp;a&nbsp;Life</h1>
+  <p class="sub">It routes everything in the background,<br>and brings you what you need when you need it.</p>
+  <hr class="rule short">
+
+  <p class="drop">The engine already indexes and concords the Word and the world. The Companion
+  turns that same instrument on one life: it takes in everything you bring, files it without
+  asking you to file it, and returns the right thing at the right moment.</p>
+
+  <p>It does not claim to be the friend you wish had answered. It claims to be
+  <em>present</em> — the one who stopped on the road. That humility is the whole design:
+  it is always there, and it always points past itself.</p>
+
+  <blockquote>It is the Good Samaritan that may not be who you wish was there,
+  but it is always there.</blockquote>
+
+  <div class="inscription">
+    One conversation · It never resets<br>
+    You carry your own record · It points past itself
+  </div>
+
+  <hr class="rule">
+
+  <h2>The Body — many members, not one generalist</h2>
+  <p class="gloss">“The body is not one member, but many.” — 1 Cor 12:14</p>
+  <p>This is not one large model wearing six hats. It is a body: many small specialists,
+  each excellent at one narrow thing; <strong>one who knows whom to call and when</strong>;
+  and <strong>one who records</strong>. That is why it stays light.</p>
+
+  <ul>
+    <li><strong>The Router</strong> — small, fast, cheap. Its only work is discernment:
+      read what you brought, choose the member, hand off. <em>It never answers.</em>
+      A router that begins answering has become the generalist we are avoiding.</li>
+    <li><strong>The Members</strong> — mostly deterministic, and therefore free: 71 verifiers
+      (mathematics, physics, chemistry, medicine, finance, law), scripture and lexicon,
+      the concordance and its map, almanac, steward, coach, shepherd.</li>
+    <li><strong>The Scribe</strong> — records every exchange into a hash chain, and
+      <em>never interprets</em>. It is why the conversation can be verified rather than
+      merely trusted.</li>
+  </ul>
+
+  <p>Ask whether <em>0.1 + 0.2 = 0.3</em>, what <em>chesed</em> means, when a bill falls due,
+  or what the next phonics step is — and no language model is touched at all. It is answered
+  exactly, and sealed.</p>
+
+  <hr class="rule">
+
+  <h2>Nothing here generates</h2>
+  <p class="gloss">The front door, in its own words: <em>“It finds, verifies, and cites; it
+  never generates the answer. No LLM. No runtime generation.”</em></p>
+  <p>The front door is a conduit, not an author. Every word it returns is either a fixed
+  frame or material that was found, verified, and cited. Routing itself is deterministic.
+  <strong>There is no member that invents.</strong></p>
+
+  <p>Which settles the question of independence: <strong>the most independent option is the
+  one already built — no model at all.</strong> Nothing to license, meter, rate-limit,
+  deprecate, or revoke; nothing that another party can switch off. Not a temporary state but
+  a commitment: <em>recombine, don't generate — attributed pieces; generation is the last
+  resort.</em></p>
+
+  <p>Should a generating member ever be added, it must be optional, local-only, permissively
+  licensed, behind a stable interface, and labelled on screen as <em>drafted, not verified</em>.
+  It would be a step <em>down</em> in independence, to be argued for rather than assumed.</p>
+
+  <hr class="rule">
+
+  <h2>You carry your own data</h2>
+  <p class="gloss">Privacy that is physical rather than promised. A seized server yields the
+  public corpus and nothing else.</p>
+  <p>The common substrate lives on the site. <strong>Everything that is yours lives on a drive
+  in your pocket</strong> — a USB-C stick or a microSD. Plug it in and the companion is yours;
+  unplug it and the site knows nothing about you. The key on the drive <em>is</em> the identity:
+  no account, no password, no row in someone's database.</p>
+
+  <div class="wrap">
+  <table>
+    <tr><th>What</th><th>Lives where</th><th>Measured</th></tr>
+    <tr><td>The common — Bible, Strong's, the concordance and map, almanac, the 71 verifiers</td>
+        <td>the site, or your own copy</td><td class="num">233 MB</td></tr>
+    <tr><td>The engine and its surfaces</td><td>the site</td><td class="num">94 MB</td></tr>
+    <tr><td><strong>Yours</strong> — the conversation, the record, your keys</td>
+        <td><strong>your drive</strong></td><td class="num">120 KB</td></tr>
+  </table>
+  </div>
+
+  <p>A lifetime fits in a pocket. Fifty exchanges a day is roughly <strong>36 MB a year</strong>;
+  fifty years is under <strong>2 GB</strong>. A five-dollar card holds the entire public
+  substrate <em>and</em> a lifetime of conversation more than a dozen times over. The data
+  centre everyone assumes is required simply is not — text is small, and the heavy part is
+  the shared part, which needs no copy per person.</p>
+
+  <p>So it can be given to people who have nothing, it answers with no network at all, and
+  what was never on our disk cannot be taken from us.</p>
+
+  <hr class="rule">
+
+  <h2>It works with no network</h2>
+  <p class="gloss">Audited every module for outbound calls. Exactly one file touches the
+  network — the optional spoken voice.</p>
+  <p>The whole thing must work with no connection at all, and it very nearly does already.
+  <strong>All seventy-one verifiers, scripture and lexicon, the concordance and its map,
+  almanac, steward, coach, and the record are network-free</strong> — they compute locally
+  and always did. That is the payoff of building a body of specialists instead of one
+  generalist: most of the value never depended on a network, or on a model.</p>
+
+  <ul>
+    <li><strong>The text floor</strong> — Scripture and the keeping as plain text. Runs on
+      anything, including paper.</li>
+    <li><strong>The drive</strong> — the site and substrate read straight off the card.</li>
+    <li><strong>Self-hosted</strong> — one command stands up the full deterministic body on
+      a laptop or a Raspberry Pi. <em>This works today; nothing phones home.</em></li>
+    <li><strong>No model rung</strong> — there is nothing to run. Because nothing generates,
+      the self-hosted tier <em>is</em> the complete system.</li>
+    <li><strong>Mesh</strong> — LoRa and Reticulum, to reach neighbours when there is no
+      internet at all.</li>
+  </ul>
+
+  <p>Offline you lose only the spoken voice — the one optional hosted call, and on-device
+  speech covers it. Nothing else degrades, because nothing else reaches out. You keep
+  verification and its seals, Scripture, the map, the steward, the coach, and your whole
+  verifiable record. <strong>The body still answers.</strong></p>
+
+  <div class="wrap">
+  <table>
+    <tr><th>To carry it all</th><th>Size</th></tr>
+    <tr><td>The engine</td><td class="num">3.6 MB</td></tr>
+    <tr><td>The surfaces</td><td class="num">90 MB</td></tr>
+    <tr><td>The common substrate</td><td class="num">233 MB</td></tr>
+    <tr><td>Its libraries</td><td class="num">322 MB</td></tr>
+    <tr><td><strong>Everything, installed</strong></td><td class="num"><strong>649 MB</strong></td></tr>
+  </table>
+  </div>
+
+  <hr class="rule">
+
+  <h2>What is built, and what is not</h2>
+  <div class="wrap">
+  <table>
+    <tr><th>Capability</th><th>State</th></tr>
+    <tr><td>Hash-chained conversation record</td><td>live</td></tr>
+    <tr><td>The conversation surface</td><td>live</td></tr>
+    <tr><td>Portable Ed25519 identity</td><td>module exists</td></tr>
+    <tr><td>The members — verifiers, scripture, steward, coach, shepherd</td><td>live</td></tr>
+    <tr><td><strong>The Router</strong> — the one who knows whom to call</td><td><strong>built &amp; live</strong></td></tr>
+    <tr><td>Key-on-the-drive → your thread</td><td><strong>built &amp; live</strong></td></tr>
+    <tr><td>A conversation that never resets — indexed, never summarised</td><td><strong>built &amp; live</strong></td></tr>
+    <tr><td>A record that learns you across time — you write it, we only index it</td><td><strong>built &amp; live</strong></td></tr>
+    <tr><td>Fork a conversation; hand work forward to a member and a time</td><td><strong>built &amp; live</strong></td></tr>
+    <tr><td>One inlet — you bring it, it is filed for you; it returns when it matters</td><td><strong>built &amp; live</strong></td></tr>
+  </table>
+  </div>
+  <p>The body is now whole: the members, the Scribe, and the Router that joins them — which is what turns a
+  pile of tools into a body. It names the member and hands off — it never answers — and every
+  decision carries the evidence that produced it, which a rule-based router can always give
+  and a model cannot. Where two members genuinely fit, it asks you rather than guessing.</p>
+
+  <hr class="rule short">
+  <p class="seal">Sealed by the engine · <b>Conduit, not source</b> · Verified 2026-07-12</p>
+
+</main>
+<script src="/kinds.js"></script>
+</body>
+</html>
