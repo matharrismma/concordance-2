@@ -45,6 +45,13 @@
   .col{ width:min(48rem,100%); display:flex; flex-direction:column; margin:auto 0 0 }
   .col.empty{ margin:auto 0 }              /* nothing said yet — the card sits in the middle */
 
+  /* the welcome: who this is and what it does, gone once you are talking */
+  .hello{ display:none; text-align:center; padding-bottom:1.6rem }
+  .col.empty .hello{ display:block }
+  .hello .nm{ font-size:.68rem; letter-spacing:.34em; color:rgba(238,214,155,.5) }
+  .hello .nm b{ font-weight:600; color:var(--brass-hi) }
+  .hello .ask{ margin-top:.9rem; font-size:1.35rem; color:#f0e6cf }
+
   /* the conversation, straight on the wood */
   #chain{ padding:0 .2rem 1.4rem }
   .turn{ margin:0 0 1.9rem }
@@ -129,11 +136,16 @@
 <div class="desk" id="desk">
   <div class="col empty" id="col">
 
+    <div class="hello">
+      <div class="caps nm">Narrow <b>Highway</b></div>
+      <div class="ask">What can I check, find, or study for you?</div>
+    </div>
+
     <div id="chain"></div>
 
     <div class="card">
       <div id="q" contenteditable="true" role="textbox" aria-multiline="true"
-           aria-label="Bring anything" data-empty="Bring anything…"></div>
+           aria-label="Bring anything" data-empty="Write here — a question, a claim, a verse…"></div>
       <div class="tools" role="toolbar" aria-label="Tools" data-intable="0">
         <button data-do="bold" title="Bold"><b>B</b></button>
         <button data-do="italic" title="Italic"><i>I</i></button>
