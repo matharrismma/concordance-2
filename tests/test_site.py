@@ -8,6 +8,7 @@ Runnable with `pytest` OR `python tests/test_site.py`.
 from __future__ import annotations
 
 import sys
+import re
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parent.parent
@@ -54,6 +55,48 @@ def test_cli_entrypoint_importable():
     sys.path.insert(0, str(_ROOT / "src"))
     import concordance.__main__ as m
     assert hasattr(m, "main")
+
+
+# ── the tools have to actually be reachable ─────────────────────────────────────────────────
+
+def _palette():
+    """Every entry in the Ctrl-K list: (href, name)."""
+    js = (SITE / "nh-tools.js").read_text(encoding="utf-8")
+    return re.findall(r"\{ h: '([^']+)',\s*n: '([^']+)'", js)
+
+
+def test_every_tool_in_the_palette_exists():
+    """A list that points at a page which is not there is worse than no list."""
+    for href, name in _palette():
+        if href == "/":
+            continue
+        assert (SITE / href.lstrip("/")).exists(), f"{name!r} points at a missing page: {href}"
+
+
+def test_the_palette_never_offers_a_page_that_is_not_public():
+    """keep.html is the operator's own surface: noindex, and 404 to the world. Listing it would
+    hand every visitor a door that opens onto nothing — or worse, onto something private."""
+    for href, name in _palette():
+        assert "keep.html" not in href, f"{name!r} exposes the operator surface"
+
+
+def test_the_palette_reaches_every_public_page():
+    """Anything shipped in site/ should be findable, or deliberately excluded with a reason
+    written in nh-tools.js. Silence is how a page becomes unreachable without anyone noticing."""
+    listed = {h.lstrip("/") for h, _n in _palette()}
+    # documented exclusions — see the comment above TOOLS in nh-tools.js
+    excused = {"index.html", "keep.html", "ask.html", "encyclopedia.html"}
+    unreachable = sorted(
+        p.name for p in SITE.glob("*.html") if p.name not in listed and p.name not in excused)
+    assert not unreachable, f"no way to reach: {unreachable} (list them or excuse them by name)"
+
+
+def test_the_palette_is_on_every_page_that_has_the_home_control():
+    """Reachable from where you are standing, not only from the landing."""
+    for p in SITE.glob("*.html"):
+        t = p.read_text(encoding="utf-8")
+        if "nh-home.js" in t:
+            assert "nh-tools.js" in t, f"{p.name} can go home but cannot reach the tools"
 
 
 if __name__ == "__main__":

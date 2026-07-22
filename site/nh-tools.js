@@ -11,6 +11,10 @@
   if (window.__nhTools) return;
   window.__nhTools = true;
 
+  // Deliberately absent: keep.html is the operator's own surface and carries noindex — a
+  // public list is not the place for it. ask.html is the landing's predecessor, and
+  // encyclopedia.html is a redirect stub onto characters.html; both would be a second door
+  // onto a room already listed here.
   var TOOLS = [
     { h: '/',                n: 'Write',            k: 'ask new page home chat conversation start' },
     { h: '/bible.html',      n: 'Scripture',        k: 'bible verse passage read canon testament word' },
@@ -25,8 +29,12 @@
     { h: '/steward.html',    n: 'Steward',          k: 'money budget spend save cost debt finance' },
     { h: '/seal.html',       n: 'Seals',            k: 'receipts proof verified cite citation' },
     { h: '/audit.html',      n: 'Audit a document', k: 'check claims paste text verify article' },
+    { h: '/reason.html',     n: 'Check an argument', k: 'reasoning chain logic function code derivation steps' },
+    { h: '/collapse.html',   n: 'A worked proof',    k: 'derivation maxwell sealed example chain show me' },
+    { h: '/connect.html',    n: 'Connect an agent',  k: 'api mcp developer integrate build llm tool' },
+    { h: '/corrected.html',  n: 'What we got wrong', k: 'corrections honest record demoted overclaiming mistakes' },
+    { h: '/seeds.html',      n: 'Seeds of the Word', k: 'areopagus athens nations fragments paul philosophy' },
     { h: '/check.html',      n: 'Check a claim',    k: 'verify true false math fact' },
-    { h: '/encyclopedia.html', n: 'Encyclopedia',   k: 'articles topics subjects reference' },
     { h: '/teachings.html',  n: 'Teachings',        k: 'jesus christ words sayings gospel' },
     { h: '/prophecy.html',   n: 'Prophecy',         k: 'traces fulfilment signposts' },
     { h: '/codex.html',      n: 'The Codex',        k: 'manuscript compiled book document' },
