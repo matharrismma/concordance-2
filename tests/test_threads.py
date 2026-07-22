@@ -90,12 +90,15 @@ def test_list_and_delete():
 def test_past_exchanges_are_searchable():
     from concordance.corpus import Corpus
     tid = threads.new_thread("secular")["thread_id"]
-    threads.append(tid, "photosynthesis in the chloroplast", _resp())
+    # A term no other test file writes. Both this file and test_deck_api set CONCORDANCE_DATA_DIR
+    # at import, so under one pytest process the first import wins and they share a store — two
+    # threads saying "photosynthesis" made hits[0] a coin flip. The ranking assertion stays strict.
+    threads.append(tid, "thylakoid stacking in the chloroplast", _resp())
     for junk in ("grace and mercy", "justice and law", "wind and rain", "bread and wine", "time and tide"):
         threads.append(threads.new_thread("secular")["thread_id"], junk, _resp())
     cards = threads.all_cards()
     assert any(c["kind"] == "exchange" for c in cards.values())
-    hits = Corpus(cards, min_idf=0.5).search("photosynthesis", limit=5)  # same ranker as the keeping
+    hits = Corpus(cards, min_idf=0.5).search("thylakoid", limit=5)  # same ranker as the keeping
     assert hits and hits[0]["thread_id"] == tid
 
 

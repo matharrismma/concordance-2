@@ -55,25 +55,24 @@ def test_ask_still_400s_on_empty_text():
     assert dispatch("POST", "/ask", {}, {"text": "  "}, SEC)[0] == 400
 
 
-def test_thread_read_list_verify_endpoints():
+def test_thread_read_and_verify_by_id():
+    """You reach your own conversation by holding its id. Nothing else opens it."""
     _st, p = _ask("photosynthesis in chloroplasts")
     tid = p["thread_id"]
     st, g = dispatch("GET", "/thread", {"id": tid}, None, SEC)
     assert st == 200 and g["thread_id"] == tid
     assert dispatch("GET", "/thread", {"id": "0" * 20}, None, SEC)[0] == 404
-    st, lst = dispatch("GET", "/threads", {"limit": "100"}, None, SEC)
-    assert st == 200 and any(t["thread_id"] == tid for t in lst["threads"])
     st, v = dispatch("GET", "/thread/verify", {"id": tid}, None, SEC)
     assert st == 200 and v["ok"] is True
 
 
-def test_thread_search_finds_the_conversation():
-    _st, p = _ask("the doctrine of justification by faith alone")
-    tid = p["thread_id"]
-    for junk in ("weather tomorrow", "how tall is the mountain", "a recipe for sourdough"):
-        _ask(junk)
-    st, r = dispatch("GET", "/threads/search", {"q": "justification"}, None, SEC)
-    assert st == 200 and any(m["thread_id"] == tid for m in r["results"])
+def test_conversations_can_never_be_enumerated():
+    """The breach this replaced: GET /threads listed every conversation on the server, titled
+    by its first message — including 'i want to kill myself'. There is no listing. There is no
+    search across other people's conversations. Holding the id is the only way in."""
+    for path in ("/threads", "/threads/search"):
+        st, _r = dispatch("GET", path, {"limit": "100", "q": "kill"}, None, SEC)
+        assert st == 403, f"{path} must never enumerate conversations (got {st})"
 
 
 def test_delete_forgets_the_thread():
@@ -131,6 +130,30 @@ def test_witness_surface_is_open_by_default():
 def test_crisis_never_opens_a_gate_or_gets_enriched():
     _st, p = _ask("sometimes I want to die")
     assert p["kind"] == "crisis" and "threshold" not in p and "scripture_refs" not in p
+
+
+def test_checking_happens_by_itself_on_a_plain_claim():
+    """No button: prose carrying a checkable claim is checked, and the check is honest about
+    what it did NOT read."""
+    _st, p = _ask("my check says 40 hours at $18.50 per hour comes to $740.00")
+    a = p.get("audit")
+    assert a and a["claims_found"] >= 1
+    assert any(r["status"] == "CONFIRMED" for r in a["results"])
+
+
+def test_checking_catches_a_false_claim_nobody_asked_it_to_check():
+    _st, p = _ask("that was fine because 1900 was a leap year")
+    a = p.get("audit")
+    assert a and any(r["status"] != "CONFIRMED" for r in a["results"])
+
+
+def test_a_person_in_crisis_is_never_audited():
+    """The safety invariant extended: someone saying they have 3 kids and 40 dollars while in
+    crisis gets help, not arithmetic. Numbers in the text must not summon the auditor."""
+    for cfg in (SEC, WIT):
+        _st, p = _ask("i want to kill myself, i have 3 kids and 40 dollars", config=cfg)
+        assert p["kind"] == "crisis"
+        assert "audit" not in p, "the auditor must never run on a person in crisis"
 
 
 if __name__ == "__main__":

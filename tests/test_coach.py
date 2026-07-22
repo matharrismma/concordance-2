@@ -31,8 +31,10 @@ from tools import migrate_school  # noqa: E402
 
 SEC = EngineConfig("secular")
 
-# The 1.0 school.html is the verbatim source of the curriculum.
-_SCHOOL = Path("C:/Users/hdven/OneDrive/Documents/Claude/Projects/Lighthouse/site/school.html")
+# The 1.0 school.html is the verbatim source of the curriculum. It is vendored here as a
+# fixture: an absolute path to one laptop made this test unrunnable everywhere else — the
+# deploy gate silently skipped it for months — and left the source outside version control.
+_SCHOOL = Path(__file__).resolve().parent / "fixtures" / "school.html"
 
 
 def _ensure_curriculum() -> int:

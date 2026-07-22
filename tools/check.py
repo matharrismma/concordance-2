@@ -32,8 +32,35 @@ def _has(mod: str) -> bool:
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
 
 
+def _suite_is_whole() -> int:
+    """A gate that runs whatever happens to be on disk reports PASS on a suite with holes.
+
+    The deploy target is not a git checkout — tests arrive by scp — so 21 of 72 files (the
+    moat-guard isolation test, the crisis invariant, the gate tests) were simply absent there
+    and never ran, for months, under a green GATE PASS. MANIFEST lists what the suite IS;
+    a missing file now fails the gate instead of quietly shrinking it.
+    """
+    man = os.path.join(ROOT, "tests", "MANIFEST.txt")
+    if not os.path.exists(man):
+        print("\nMISSING tests/MANIFEST.txt — cannot prove the suite is whole", flush=True)
+        return 1
+    with open(man, encoding="utf-8") as fh:
+        want = {ln.strip() for ln in fh if ln.strip() and not ln.startswith("#")}
+    have = {os.path.basename(p) for p in glob.glob(os.path.join(ROOT, "tests", "test_*.py"))}
+    missing, extra = sorted(want - have), sorted(have - want)
+    print(f"\n$ suite integrity: {len(have)}/{len(want)} test files present", flush=True)
+    for m in missing:
+        print(f"  MISSING (never ran): {m}", flush=True)
+    for e in extra:
+        print(f"  UNLISTED (add to tests/MANIFEST.txt): {e}", flush=True)
+    return 1 if (missing or extra) else 0
+
+
 def main() -> int:
     rc = 0
+    # 0. The suite must be whole before its result means anything.
+    rc |= _suite_is_whole()
+
     # 1. The moat — the hard gate: 60/60, 0 false-positives (benchmark exits non-zero otherwise).
     rc |= _run([sys.executable, "tools/benchmark.py"])
 

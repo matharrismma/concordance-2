@@ -136,3 +136,20 @@ how to enumerate is one edit away from being live again.
 ---
 
 *Verified live 2026-07-12.*
+
+## SOP-11 — The suite must be whole before its result means anything
+
+`tests/MANIFEST.txt` is the declared suite. `tools/check.py` compares it to what is on disk
+and fails on either direction of drift:
+
+* **listed but absent** — the file never ran; the gate would otherwise report PASS without it
+* **present but unlisted** — a new test file that nobody declared
+
+1. Adding a test file: add its name to `tests/MANIFEST.txt` in the same commit.
+2. Deploying: sync the **whole** `tests/` directory (and `tests/fixtures/`), not single files —
+   `scp -r tests/ nh@5.78.186.55:/home/nh/concordance-2/`
+3. Never reference a fixture by absolute path. Vendor it under `tests/fixtures/` so the test
+   runs on every machine, and the source lives in version control.
+4. Two test files that both set `CONCORDANCE_DATA_DIR` at import share one store under a single
+   pytest process — the first import wins. Give each ranking/ordering assertion an artifact
+   unique to its own file rather than weakening the assertion.

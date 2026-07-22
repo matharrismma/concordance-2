@@ -172,6 +172,20 @@ Two docs with the same name may serve different purposes — the fix is to split
 (`DEPLOY.md` = bootstrap, `RUNBOOK.md` = daily path), not to flatten one onto the other.
 → SOP-4, SOP-5.
 
+### 2026-07-22 · GATE PASS covered 71% of the suite — for months
+The deploy target is not a git checkout; test files arrive by `scp`. 21 of 72 files had never
+been copied, so `tools/check.py` globbed `tests/` and cheerfully passed on what happened to be
+there. Among the absent: `test_isolation.py` (the moat guard), `test_gate.py`, and
+`test_deck_api.py` (the crisis invariant). A broken test in that set survived a privacy fix
+undetected, and `test_coach.py` carried an absolute path to one laptop so it could never run
+anywhere else.
+**Why:** a gate that runs "whatever is on disk" cannot tell a passing suite from a shrinking one.
+**Guard:** `tests/MANIFEST.txt` declares the suite; `tools/check.py` fails on any listed file
+that is absent AND on any unlisted file present. Deploying tests means syncing the whole
+directory, never a file at a time. Test fixtures are vendored into the repo — never referenced
+by absolute path. Proven by hiding `test_isolation.py` and watching the gate name it and fail.
+→ SOP-1, SOP-11.
+
 ### 2026-07-12 · Two copies of DEPLOY.md — the drift source itself
 The runbook existed at both `Desktop\DEPLOY.md` and `concordance-2\docs\DEPLOY.md`.
 Duplicated docs are precisely how the first lesson above happened.
