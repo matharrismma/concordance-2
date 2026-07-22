@@ -7,6 +7,29 @@ Format: `date · what happened · why it happened · guard (SOP ref)`
 
 ---
 
+### 2026-07-22 · A blank landing quietly dropped the link to the witness
+Rebuilding the front door as a chatbox removed a line the site test guarded:
+`assert "narrowhighway.org" in t, "honest link to the witness — not hiding"`. Making the page
+blank had silently made it *hide* something the project had decided must never be hidden, and
+also dropped the surface-aware naming of the foundation when served on .org.
+**Why:** "minimal" was treated as a purely visual instruction, so content was removed by
+category (anything that wasn't the input) rather than by asking what each line was *for*.
+**Guard:** the gate caught it because the principle was written as a test, not a preference —
+which is the lesson worth generalising: **encode a commitment as an assertion, and a later
+redesign cannot quietly drop it.** When a test fails after a deliberate redesign, separate the
+*mechanics* it asserts (which may legitimately move) from the *principle* (which does not):
+here the demo genuinely moved to /check.html, but "never hide the witness" did not. → SOP-4.
+
+### 2026-07-22 · I nearly overwrote an existing test by naming collision
+I wrote a new module `keep.py` and went to add `tests/test_keep.py` — which already existed,
+covering "the keep" (the operator gate and dashboard). The write was refused because the file
+had not been read this session; had it been a new path, I would have destroyed a test.
+"The keep" and "the keeping" were both already taken terms in this project.
+**Why:** named a module from the feature description without checking whether the word was
+already spoken for.
+**Guard:** before naming a module, grep the codebase for the word. The read-before-write gate
+is the backstop, not the plan. Renamed to `recall.py` — the operator's own word for it. → SOP-4.
+
 ### 2026-07-22 · A public endpoint listed every conversation on the box
 `GET /threads` returned every thread — id, timestamps, and the **title, which is the person's
 first message verbatim**. `GET /thread?id=` then returned the whole conversation. So any

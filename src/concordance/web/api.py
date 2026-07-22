@@ -480,6 +480,14 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _err(400, "unknown op — defer|due|pending|release")
         return _ok(r) if r.get("ok") else _err(400, r.get("error", "refused"))
 
+    if method == "GET" and path == "/thread/recalled":
+        # What this conversation left behind that was worth recalling — seals, verses, words.
+        _tid = (query.get("id") or query.get("thread_id") or "").strip()
+        if _tid and _thread_is_private(_tid):
+            return _err(403, "this conversation is bound to a key — it is not readable without it")
+        from .. import recall as _recall
+        return _ok(_recall.recalled(_tid))
+
     if method == "GET" and path == "/thread/digest":
         _tid = (query.get("id") or query.get("thread_id") or "").strip()
         if _tid and _thread_is_private(_tid):
@@ -568,6 +576,17 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                 tid = _threads.new_thread(surface)["thread_id"]
                 _threads.append(tid, text, r, surface=surface, gate_open=gate_open)
             r = {**r, "thread_id": tid}
+            # Recall: promote what this exchange left behind — a sealed receipt, a verse
+            # reached for, a word studied — into cards. We cannot recall everything; we
+            # recall what is worth recalling. The chain keeps every word regardless.
+            # Off to the side, like the deck write: never alters or breaks the answer.
+            try:
+                from .. import recall as _recall
+                kept = _recall.remember(tid)
+                if kept.get("ok") and kept.get("count"):
+                    r["recalled"] = kept["kept"]
+            except Exception:  # noqa: BLE001
+                pass
         except Exception:  # noqa: BLE001 — the conduit answer stands even if the deck write fails
             pass
         # Fellowship: if others are already studying this, point to them — the conversation opens into
@@ -1157,6 +1176,7 @@ ROUTES = [
     {"path": "/fork", "methods": ("POST",), "rl": True},
     {"path": "/defer", "methods": ("POST",), "rl": True},
     {"path": "/thread/lineage", "methods": ("GET",), "api": True},
+    {"path": "/thread/recalled", "methods": ("GET",), "api": True},
     {"path": "/thread/digest", "methods": ("GET",), "api": True},
     {"path": "/thread/recall", "methods": ("GET",), "api": True},
     {"path": "/verify", "methods": ("POST",), "rl": True},

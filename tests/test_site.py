@@ -20,11 +20,29 @@ def test_site_files_exist():
 
 
 def test_index_named_positioned_and_wired():
+    """The landing is now the conversation itself, not a product page — but the principles it
+    had to satisfy are unchanged: it names itself, states its positioning, calls the engine,
+    and never hides the witness. The interactive demo moved to /check.html (below)."""
     t = (SITE / "index.html").read_text(encoding="utf-8")
     assert "Narrow" in t and "narrowing the possibilities" in t, "name + positioning"
-    assert "/verify" in t and "/search" in t, "the demo must call the API"
+    assert "/ask" in t, "the landing must call the engine — it IS the conversation"
     assert "narrowhighway.org" in t, "honest link to the witness — not hiding"
-    assert "witness-banner" in t and "/identity" in t, "surface-aware: name the foundation on .org"
+    assert "narrowhighway.org" in t and "Christ" in t, "surface-aware: name the foundation on .org"
+
+
+def test_check_page_still_carries_the_demo():
+    """The proof-first demo was relocated, not deleted: a blank landing must not cost the
+    thing that makes the claim checkable by a stranger."""
+    t = (SITE / "check.html").read_text(encoding="utf-8")
+    assert "/verify" in t and "/search" in t, "the demo must call the API"
+    assert "checkAnything" in t, "the paste-anything demo must still work"
+
+
+def test_every_page_offers_a_way_home():
+    """One identical home control, injected everywhere, so it cannot drift per page."""
+    missing = [f.name for f in SITE.glob("*.html")
+               if f.name != "index.html" and "nh-home.js" not in f.read_text(encoding="utf-8")]
+    assert not missing, f"pages with no way home: {missing}"
 
 
 def test_seal_page_calls_seal_endpoint():

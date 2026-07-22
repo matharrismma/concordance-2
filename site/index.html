@@ -38,10 +38,14 @@
   .toplinks button{ background:none;border:0;font:inherit;color:inherit;cursor:pointer;padding:0 }
   @media(max-width:660px){ .toplinks a.opt{ display:none } }
 
+  /* The transcript scrolls; the composer stays put. Before the first message the stage is
+     centred (a blank page); once talking it sits at the top and the text moves up as it grows,
+     newest just above the composer. */
   main{ flex:1 1 auto; display:flex; flex-direction:column; align-items:center;
-        width:100%; overflow-y:auto; padding:0 1.2rem }
+        width:100%; min-height:0; overflow-y:auto; padding:0 1.2rem;
+        overscroll-behavior:contain; scroll-behavior:smooth }
   .stage{ width:100%; max-width:44rem; margin:auto 0; padding:1rem 0 }
-  .stage.talking{ margin:0; padding-top:1rem }
+  .stage.talking{ margin:0 0 auto; padding:1rem 0 .5rem }
 
   /* the blank state — a line, then the tools where the space is */
   .greet{ text-align:center; margin:0 0 1.6rem }
@@ -62,6 +66,10 @@
   .hit{ border-top:1px solid var(--line); padding:.6rem 0 }
   .hit b{ font-weight:600 } .hit .sn{ display:block; color:var(--ink-soft); font-size:.88rem }
   .note{ font-size:.78rem; color:var(--ink-soft); font-style:italic; margin:.7rem 0 0 }
+  /* what this exchange left behind, worth recalling later */
+  .kept{ font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft);
+         margin:.6rem 0 0 }
+  .kept span{ border:1px solid var(--line); border-radius:999px; padding:.1rem .5rem; margin-right:.3rem }
   .res a{ color:var(--rubric) }
   .hear{ background:none;border:1px solid var(--line);color:var(--ink-soft);border-radius:999px;
          font:inherit;font-size:.74rem;padding:.2rem .6rem;cursor:pointer;margin-top:.5rem }
@@ -140,7 +148,13 @@
       <a class="tool" href="/read.html"><span class="g">✎</span> Learn</a>
       <a class="tool" href="/seal.html"><span class="g">✧</span> Seals</a>
     </div>
-    <div class="foot" id="foot">A conduit, not a source · nothing here is generated</div>
+    <div class="foot" id="foot">
+      <span id="found">A conduit, not a source · nothing here is generated</span><br>
+      <span style="opacity:.85">Wisdom by <em>narrowing the possibilities</em> — what survives elimination stands on its own.
+      <a href="https://narrowhighway.org" style="color:inherit">The witness</a> ·
+      <a href="/guarantees.html" style="color:inherit">What it guarantees</a> ·
+      <a href="/boundary.html" style="color:inherit">Where it stops</a></span>
+    </div>
   </div>
 </main>
 
@@ -160,7 +174,7 @@
   function fit(){ ta.style.height='auto'; ta.style.height=Math.min(ta.scrollHeight,128)+'px'; }
   function talking(){ if(!chain.children.length) return;
     greet.hidden=true; tools.hidden=true; stage.classList.add('talking'); }
-  function scroll(){ main.scrollTop = main.scrollHeight; }
+  function scroll(){ requestAnimationFrame(function(){ main.scrollTop = main.scrollHeight; }); }
 
   // Render the engine's answer. Every branch shows found/verified material or a fixed frame —
   // there is nothing to render for "generated", because nothing is.
@@ -191,6 +205,10 @@
       h += d.results.slice(0,6).map(function(r){
         return '<div class="hit"><b><a href="/card.html?id='+encodeURIComponent(r.id)+'">'+esc(r.title)+'</a></b>'+
                '<span class="sn">'+esc((r.snippet||'').slice(0,190))+'</span></div>'; }).join('');
+    }
+    if(d.recalled && d.recalled.length){
+      h += '<div class="kept">kept · '+d.recalled.map(function(c){
+        return '<span>'+esc(c.kind)+'</span>'; }).join(' ')+'</div>';
     }
     if(d.note) h += '<div class="note">'+esc(d.note)+'</div>';
     // Everything the engine can answer should be speakable — a verdict is an answer too.
@@ -239,6 +257,15 @@
     threadId=null; try{ localStorage.removeItem(TID); }catch(e){}
     chain.innerHTML=''; greet.hidden=false; tools.hidden=false;
     stage.classList.remove('talking'); ta.focus(); });
+
+  // The witness plane names its foundation openly (Acts 17: name the Source). On the secular
+  // face the link to it stays in the footer — quiet, but never hidden.
+  try{
+    if(/(^|\.)narrowhighway\.org$/i.test(location.hostname)){
+      var f=document.getElementById('found');
+      if(f) f.innerHTML='A conduit, not a source · the wisdom is in Christ, not this tool';
+    }
+  }catch(e){}
 
   // ---- voice in: dictation, on-device, only if the browser offers it ----
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
