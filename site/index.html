@@ -70,12 +70,20 @@
   .col{ width:min(44rem,100%); display:flex; flex-direction:column; margin:auto 0 0 }
   .col.empty{ margin:auto 0 }
 
-  /* the welcome, in ink, gone once you are talking */
-  .hello{ display:none; text-align:center; padding-bottom:1.7rem }
-  .col.empty .hello{ display:block }
-  .hello .nm{ font-size:.66rem; letter-spacing:.34em; color:var(--ink-faint) }
-  .hello .nm b{ font-weight:600; color:var(--brass-lo) }
-  .hello .ask{ margin-top:.9rem; font-size:1.4rem; color:var(--ink) }
+  /* the top edge of the page: the name and a few small doors, staying put while you scroll */
+  .top{
+    position:sticky; top:-2.4rem; z-index:4; align-self:stretch;
+    display:flex; align-items:center; gap:1.1rem; flex-wrap:wrap;
+    margin:-2.4rem -3rem 1.2rem; padding:.55rem 1.4rem .5rem;
+    background:linear-gradient(180deg, var(--paper) 78%, transparent);
+  }
+  .top .nm{ font-size:.6rem; letter-spacing:.3em; color:var(--ink-faint) }
+  .top .nm b{ font-weight:600; color:var(--brass-lo) }
+  .top .gap{ flex:1 }
+  .top a, .top button{
+    border:0; background:none; padding:.2rem 0; cursor:pointer; font:inherit;
+    font-size:.76rem; color:var(--ink-faint); transition:color .14s ease }
+  .top a:hover, .top button:hover{ color:var(--ink) }
 
   /* the conversation, in ink on the page */
   #chain{ padding:0 .2rem 1.5rem }
@@ -152,6 +160,11 @@
     .desk{ padding:1.3rem 1.05rem .8rem; border-radius:2px 4px 4px 2px;
            box-shadow:2px 2px 0 #e8dfc9, 4px 4px 0 #ddd3b9,
                       8px 9px 22px -8px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.65) }
+    /* the top row was cut for the desktop page margins and spilled off a phone's edges;
+       the name lives on the cover, so up here the room belongs to the doors */
+    .top{ margin:-1.3rem -1.05rem .9rem; padding:.5rem .9rem .45rem; gap:.7rem; top:-1.3rem }
+    .top .nm{ display:none }
+    .top a,.top button{ font-size:.74rem; padding:.3rem 0; min-height:30px }
     #q{ padding:1.05rem 1rem .6rem; font-size:1rem; min-height:4rem; max-height:48vh }
     .col.empty #q{ min-height:8.5rem }
     .tools{ padding:.15rem .3rem .4rem; gap:0 }
@@ -164,18 +177,23 @@
 <body>
 
 <div class="desk" id="desk">
+  <nav class="top" aria-label="Navigate">
+    <span class="caps nm">Narrow <b>Highway</b></span>
+    <span class="gap"></span>
+    <button id="newbtn" type="button">New</button>
+    <a href="/bible.html">Scripture</a>
+    <a href="/journal.html">Journal</a>
+    <a href="/days.html">Your days</a>
+    <a href="/library.html">The keeping</a>
+    <button id="doors" type="button" title="Everything (Ctrl-K)" aria-label="Everything">&#8943;</button>
+  </nav>
   <div class="col empty" id="col">
-
-    <div class="hello">
-      <div class="caps nm">Narrow <b>Highway</b></div>
-      <div class="ask">What can I check, find, or study for you?</div>
-    </div>
 
     <div id="chain"></div>
 
     <div class="card">
       <div id="q" contenteditable="true" role="textbox" aria-multiline="true"
-           aria-label="Bring anything" data-empty="Write here — a question, a claim, a verse…"></div>
+           aria-label="Bring anything" data-empty="Write here…"></div>
       <div class="tools" role="toolbar" aria-label="Tools" data-intable="0">
         <button data-do="bold" title="Bold"><b>B</b></button>
         <button data-do="italic" title="Italic"><i>I</i></button>
@@ -192,8 +210,6 @@
           <button data-mark="1" class="dot hi" style="--c:#f2e08a" title="Highlight"></button>
         </span>
         <span class="gap"></span>
-        <button id="doors" type="button" title="Everything else" aria-label="Everything else">&#8943;</button>
-        <button id="newbtn" type="button" title="New page" aria-label="New page">&#43;</button>
         <button id="mic" type="button" aria-pressed="false" aria-label="Speak" title="Speak" hidden>&#127908;</button>
         <button id="send" type="button" aria-label="Send" title="Send" data-idle="1">&#8629;</button>
       </div>
