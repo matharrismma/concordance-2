@@ -19,6 +19,7 @@ test_commentary.py
 test_core.py
 test_corpus.py
 test_crossref.py
+test_days.py
 test_deck_api.py
 test_distill.py
 test_engine.py

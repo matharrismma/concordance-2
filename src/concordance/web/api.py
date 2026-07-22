@@ -565,6 +565,23 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                          claims=res.get("claims_found", 0), sealed=bool(res.get("seal")))
         return _ok(res)
 
+    if method == "POST" and path == "/days":
+        # Your days: time + concentration, counted from the conversations THIS BROWSER holds.
+        # POST, not GET, because a roster of thread ids is personal and belongs in a body rather
+        # than a query string that lands in access logs and history. Nothing is enumerated here:
+        # ids the caller does not hold simply return nothing, and crisis is never charted.
+        if not isinstance(body, dict) or not isinstance(body.get("thread_ids"), list):
+            return _err(400, "thread_ids (a list) required")
+        try:
+            tz = int(body.get("tz_offset_minutes") or 0)
+        except (TypeError, ValueError):
+            tz = 0
+        tz = max(-840, min(840, tz))
+        from .. import days as _days
+        res = _days.chart(body["thread_ids"], tz_offset_minutes=tz)
+        telemetry.record("days", surface=surface, threads=res.get("threads_found", 0))
+        return _ok(res)
+
     if method == "POST" and path == "/ask":
         # The conduit front door: find + verify + cite, never generate. Deterministic router.
         if not isinstance(body, dict) or not str(body.get("text") or "").strip():
@@ -580,6 +597,19 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         gate_open = prior_open or _ask.gate_signal(text)
         just_opened = gate_open and not prior_open
         r = _ask.respond(text, config, gate_open=gate_open, gate_just_opened=just_opened)
+        # Checking should not need a button. If the person wrote prose carrying numbers and the
+        # router did not already send it to a verifier, the Auditor extracts the checkable claims
+        # and checks them. This runs BEFORE the deck write so the stored exchange is the response
+        # the person actually saw — attaching it afterwards left the record missing the check.
+        # Never on crisis: numbers in "i have 3 kids and 40 dollars" must not summon arithmetic.
+        if r.get("kind") not in ("verify", "crisis") and any(c.isdigit() for c in text):
+            try:
+                from .. import audit as _audit
+                _a = _audit.audit(text, config, seal=False)
+                if _a.get("claims_found"):
+                    r["audit"] = _a
+            except Exception:  # noqa: BLE001
+                pass
         # The Deck: append this exchange (verbatim user text + the exact response) so the
         # conversation is one continuous, resumable chain, carrying the sticky gate state. Nothing
         # generated. Best-effort, OFF TO THE SIDE — never alters the answer, never breaks it.
@@ -597,18 +627,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             # recall what is worth recalling. The chain keeps every word regardless.
             # Off to the side, like the deck write: never alters or breaks the answer.
             try:
-                # Checking should not need a button. If the person wrote prose carrying
-                # numbers and the router did not already send it to a verifier, the Auditor
-                # extracts the checkable claims and checks them. Off to the side, like the
-                # deck write: it can never alter or break the answer. Never on crisis.
-                if r.get("kind") not in ("verify", "crisis") and any(c.isdigit() for c in text):
-                    try:
-                        from .. import audit as _audit
-                        a = _audit.audit(text, config, seal=False)
-                        if a.get("claims_found"):
-                            r["audit"] = a
-                    except Exception:  # noqa: BLE001
-                        pass
                 from .. import recall as _recall
                 # We search once. If a card is already held for what this names, land on it —
                 # it comes back first, and the use is counted toward what the card has earned.
@@ -1217,6 +1235,7 @@ ROUTES = [
     {"path": "/verify", "methods": ("POST",), "rl": True},
     {"path": "/derivation/verify", "methods": ("POST",), "rl": True},
     {"path": "/audit", "methods": ("POST",), "rl": True},
+    {"path": "/days", "methods": ("POST",), "rl": True},
     {"path": "/ask", "methods": ("POST",), "rl": True},
     {"path": "/journal", "methods": ("GET", "POST"), "api": True},
     {"path": "/steward/budget", "methods": ("POST",)},

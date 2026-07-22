@@ -156,6 +156,17 @@ def test_a_person_in_crisis_is_never_audited():
         assert "audit" not in p, "the auditor must never run on a person in crisis"
 
 
+def test_the_record_holds_exactly_what_the_person_saw():
+    """The deck stores 'the exact response'. The check ran AFTER the append at first, so the
+    stored exchange was missing the very thing on screen — and anything reading the record
+    later (your days, recall, an export) could not see the work."""
+    _st, p = _ask("40 hours at $18.50 per hour is $740.00")
+    stored = threads.get(p["thread_id"])["exchanges"][0]["response"]
+    assert "audit" in p, "the person saw a check"
+    assert "audit" in stored, "so the record must hold that check too"
+    assert stored["audit"]["claims_found"] == p["audit"]["claims_found"]
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:

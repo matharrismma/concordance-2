@@ -1,0 +1,208 @@
+<meta charset="utf-8">
+<title>Your days · Narrow Highway</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<style>
+  /* Same room as the desk: walnut, stone, brass, marble-white paper. */
+  :root{
+    --walnut:#2b1a10; --walnut-2:#170d07; --walnut-hi:#3b2415;
+    --slab:#6f6355; --slab-hi:#847766; --slab-lo:#514739;
+    --paper:#f5f1e6; --paper-2:#e9e3d3;
+    --brass:#c69a4a; --brass-hi:#eed69b; --brass-lo:#8a6a2f;
+    --ink:#241f18; --ink-soft:#6b5c45; --ink-faint:#9b8a6d;
+    --oxblood:#7d4a22;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; color:var(--ink); font-size:17px; min-height:100%;
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    background:
+      repeating-linear-gradient(90deg, rgba(0,0,0,.22) 0 1px, transparent 1px 172px),
+      linear-gradient(180deg, var(--walnut-hi) 0%, var(--walnut) 42%, var(--walnut-2) 100%),
+      var(--walnut-2);
+    padding:2rem 1.2rem 3rem;
+  }
+  a{color:inherit}
+  .caps{ font-family:Futura,"Century Gothic","Avenir Next",Avenir,"Trebuchet MS",sans-serif;
+         text-transform:uppercase; letter-spacing:.24em; font-weight:600 }
+  .sheet{
+    max-width:62rem; margin:0 auto; padding:12px; border-radius:3px;
+    background:
+      linear-gradient(101deg, transparent 33%, rgba(255,250,235,.055) 34.5%, transparent 36%),
+      linear-gradient(180deg, var(--slab-hi) 0%, var(--slab) 58%, var(--slab-lo) 100%);
+    box-shadow:0 30px 70px -30px #000, 0 6px 18px -10px rgba(0,0,0,.8);
+  }
+  .page{
+    background:linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+    padding:2.2rem 2.2rem 2.6rem; border-radius:1px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.55);
+  }
+  h1{ font-size:1.5rem; margin:0 0 .2rem; font-weight:600 }
+  .sub{ color:var(--ink-soft); font-style:italic; margin:0 0 1.8rem }
+  h2{ font-size:.6rem; color:var(--brass-lo); margin:2rem 0 .7rem;
+      display:flex; align-items:center; gap:.6rem }
+  h2::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg,var(--brass-lo),transparent) }
+
+  .tally{ display:flex; flex-wrap:wrap; gap:2.2rem; margin:.2rem 0 .4rem }
+  .tally div{ min-width:5rem }
+  .tally b{ display:block; font-size:1.9rem; font-weight:600; line-height:1.1 }
+  .tally span{ font-size:.76rem; color:var(--ink-soft) }
+
+  /* the year: one square a day, ink darkening with the work done */
+  .cal{ display:flex; gap:3px; overflow-x:auto; padding-bottom:.4rem }
+  .wk{ display:grid; grid-template-rows:repeat(7,11px); gap:3px }
+  .d{ width:11px; height:11px; border-radius:2px; background:rgba(36,31,24,.07) }
+  .d[data-n="1"]{ background:rgba(138,106,47,.30) }
+  .d[data-n="2"]{ background:rgba(138,106,47,.52) }
+  .d[data-n="3"]{ background:rgba(125,74,34,.74) }
+  .d[data-n="4"]{ background:rgba(125,74,34,.95) }
+  .legend{ font-size:.72rem; color:var(--ink-faint); margin-top:.5rem }
+
+  /* the clock: when the work actually happens */
+  .hours{ display:grid; grid-template-columns:repeat(24,1fr); gap:2px; align-items:end; height:84px }
+  .hr{ background:linear-gradient(180deg,var(--brass),var(--brass-lo)); border-radius:1px 1px 0 0; min-height:2px }
+  .hrx{ display:grid; grid-template-columns:repeat(24,1fr); gap:2px; font-size:.58rem;
+        color:var(--ink-faint); margin-top:.3rem; text-align:center }
+
+  /* concentration: what you came back to, weighted by days not repeats */
+  .terms{ display:flex; flex-wrap:wrap; gap:.45rem }
+  .term{ border:1px solid rgba(138,106,47,.35); border-radius:2px; padding:.28rem .6rem;
+         background:rgba(255,255,255,.4) }
+  .term b{ font-weight:600 } .term i{ font-style:normal; color:var(--ink-faint); font-size:.76rem }
+
+  table{ border-collapse:collapse; width:100%; font-size:.92rem }
+  th,td{ text-align:left; padding:.4rem .5rem; border-bottom:1px solid rgba(138,106,47,.18) }
+  th{ font-size:.6rem; color:var(--brass-lo); letter-spacing:.14em; text-transform:uppercase }
+  td.n{ text-align:right; font-variant-numeric:tabular-nums; color:var(--ink-soft) }
+
+  .note{ font-size:.8rem; color:var(--ink-faint); font-style:italic; margin-top:1.6rem;
+         border-top:1px solid rgba(138,106,47,.2); padding-top:.8rem }
+  .empty{ color:var(--ink-soft); font-style:italic }
+  .cols{ display:grid; grid-template-columns:1fr 1fr; gap:2.4rem }
+  @media (max-width:760px){ .cols{ grid-template-columns:1fr; gap:0 } .page{ padding:1.4rem 1.1rem } }
+</style>
+
+<div class="sheet"><div class="page">
+  <h1>Your days</h1>
+  <p class="sub" id="sub">Counting…</p>
+
+  <div class="tally" id="tally"></div>
+
+  <h2 class="caps">The year</h2>
+  <div class="cal" id="cal"></div>
+  <div class="legend">One square a day. Darker means more done.</div>
+
+  <h2 class="caps">When you work</h2>
+  <div class="hours" id="hours"></div>
+  <div class="hrx" id="hrx"></div>
+
+  <h2 class="caps">What you keep coming back to</h2>
+  <div class="terms" id="terms"></div>
+
+  <div class="cols">
+    <div>
+      <h2 class="caps">Scripture you returned to</h2>
+      <table id="scr"><tbody></tbody></table>
+    </div>
+    <div>
+      <h2 class="caps">Words you studied</h2>
+      <table id="str"><tbody></tbody></table>
+    </div>
+  </div>
+
+  <p class="note" id="note"></p>
+</div></div>
+
+<script src="/nh-home.js"></script>
+<script src="/nh-tools.js"></script>
+<script>
+(function(){
+  var ROSTER='nh_ask_roster', TID='nh_tid';
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  // Your own ids, held by this browser. The server is never asked "whose days exist".
+  var ids=[];
+  try{
+    ids=(JSON.parse(localStorage.getItem(ROSTER)||'[]')||[]).map(function(t){return t.thread_id;});
+    var cur=localStorage.getItem(TID); if(cur && ids.indexOf(cur)<0) ids.unshift(cur);
+  }catch(e){}
+  ids=ids.filter(Boolean);
+
+  function el(id){ return document.getElementById(id); }
+
+  function paint(d){
+    var made=d.made||{}, sp=d.span||{};
+    el('sub').textContent = d.exchanges
+      ? (sp.first===sp.last ? 'Everything on this browser, from '+sp.first
+         : 'Everything on this browser, '+sp.first+' to '+sp.last)
+      : 'Nothing recorded on this browser yet.';
+
+    el('tally').innerHTML =
+      [[d.exchanges,'things you did'],
+       [sp.days_active,'days worked'],
+       [made.checked||0,'claims checked'],
+       [(d.scripture||[]).length,'passages'],
+       [(d.strongs||[]).length,'words studied']]
+      .map(function(r){ return '<div><b>'+r[0]+'</b><span>'+r[1]+'</span></div>'; }).join('');
+
+    // 26 weeks back through today, Sunday-first columns
+    var by={}; (d.days||[]).forEach(function(x){ by[x.date]=x.count; });
+    var today=new Date(), cells=[];
+    var end=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+    end.setDate(end.getDate()+(6-end.getDay()));
+    for(var i=181;i>=0;i--){
+      var dt=new Date(end); dt.setDate(end.getDate()-i);
+      var key=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+      var n=by[key]||0, lvl=n===0?0:n<3?1:n<8?2:n<16?3:4;
+      cells.push({key:key,n:n,lvl:lvl});
+    }
+    var html='', wk='';
+    cells.forEach(function(c,i){
+      wk+='<div class="d" data-n="'+c.lvl+'" title="'+c.key+' · '+c.n+'"></div>';
+      if(i%7===6){ html+='<div class="wk">'+wk+'</div>'; wk=''; }
+    });
+    if(wk) html+='<div class="wk">'+wk+'</div>';
+    el('cal').innerHTML=html;
+
+    var hrs=d.hours||[], max=Math.max.apply(null,hrs.concat([1]));
+    el('hours').innerHTML=hrs.map(function(n){
+      return '<div class="hr" style="height:'+Math.max(2,Math.round(n/max*84))+'px" title="'+n+'"></div>'; }).join('');
+    el('hrx').innerHTML=hrs.map(function(_,h){ return '<div>'+(h%6===0?h:'')+'</div>'; }).join('');
+
+    // Concentration means RETURNING to something. A word used ten times in one sitting is a
+    // topic, not a concentration — showing it as one would flatter the number.
+    var all=d.concentration||[], back=all.filter(function(t){ return t.days>1; });
+    var terms=back.length?back:all.slice(0,8);
+    el('terms').innerHTML = terms.length
+      ? terms.map(function(t){ return '<span class="term"><b>'+esc(t.term)+'</b> <i>'+
+          t.days+(t.days===1?' day':' days')+'</i></span>'; }).join('') +
+        (back.length ? '' : '<div class="legend" style="width:100%">Only one day so far — this '+
+          'becomes what you keep coming back to as the days add up.</div>')
+      : '<span class="empty">Not enough yet — this fills in as you work.</span>';
+
+    function rows(sel, list, key){
+      var b=el(sel).querySelector('tbody');
+      b.innerHTML = list.length
+        ? list.map(function(x){ return '<tr><td>'+esc(x[key])+'</td><td class="n">'+x.count+'</td></tr>'; }).join('')
+        : '<tr><td class="empty">Nothing yet.</td><td></td></tr>';
+    }
+    rows('scr', d.scripture||[], 'ref');
+    rows('str', d.strongs||[], 'strongs');
+
+    var extra = d.excluded_private
+      ? ' '+d.excluded_private+' private exchange'+(d.excluded_private===1?' is':'s are')+' deliberately left out of every count above.'
+      : '';
+    el('note').textContent=(d.note||'')+extra;
+  }
+
+  if(!ids.length){ paint({exchanges:0,span:{},days:[],hours:new Array(24).fill(0),
+      note:'Nothing on this browser yet. Your days fill in as you use the page.'}); return; }
+
+  fetch('/days',{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({thread_ids:ids, tz_offset_minutes:-new Date().getTimezoneOffset()})})
+    .then(function(r){ return r.json(); })
+    .then(paint)
+    .catch(function(){ el('sub').textContent='Could not read your days just now.'; });
+})();
+</script>
