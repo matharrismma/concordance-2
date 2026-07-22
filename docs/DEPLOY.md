@@ -6,13 +6,15 @@ Two faces, one engine: **narrowhighway.com** (the secular reach) and **narrowhig
 These configs are *prepared*. **Deployment is the operator's** — it is outward-facing and
 touches DNS, the server, and live traffic. Nothing here deploys anything by itself.
 
-> **Current live reality (2026-06-28).** `narrowhighway.org` runs **2.0** (the witness face,
-> `nh-org` on :8001). `narrowhighway.com` still runs **1.0** (the `nh-engine` service on :8000) —
-> the `nh-com.service` (2.0 secular) here is prepared but **not enabled**. The .com cutover is
-> **gated on 2.0 reaching feature parity with 1.0** (the keep, library, workspace, …); cutting
-> over now would replace the live 1.0 site with 2.0's leaner one. Rollback from a cutover is
-> `sudo systemctl enable --now nh-engine`. So the `.com` examples below describe the *target*
-> 2.0 secular surface, not what `.com` serves today.
+> **Current live reality — verified live 2026-07-12.** The cutover is **done**. Both faces
+> run 2.0: `nh-com-2.service` (narrowhighway.com) and `nh-org.service` (narrowhighway.org),
+> behind `caddy.service`. 1.0 (`nh-engine`) is retired. `.tv` also resolves and serves.
+> Cloudflare is in front as **DNS only (grey cloud)** — TLS terminates on our Caddy.
+> **There is no git repo on the box**: `/home/nh/concordance-2` is not version-controlled,
+> so pushing to `main` deploys nothing — deploys are **scp + `systemctl restart`**.
+>
+> This document is the **bootstrap** (standing a box up from scratch). For how a change
+> goes live day to day — and what is currently live vs 404 — see **[RUNBOOK.md](RUNBOOK.md)**.
 
 ## Prerequisites (operator)
 - A server (the droplet) with Python ≥ 3.10 and Caddy installed.
