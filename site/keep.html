@@ -54,6 +54,12 @@
     </section>
 
     <section>
+      <h2>Fruit — is the door being walked through? <span class="muted" style="font-size:.68rem;font-weight:400">· external only · our own IPs + bots/curl excluded</span></h2>
+      <div class="grid" id="fruit"></div>
+      <p class="muted" id="fruit-note" style="font-size:.8rem;margin-top:.4rem"></p>
+    </section>
+
+    <section>
       <h2>What the engine is doing</h2>
       <div class="grid" id="actions"></div>
     </section>
@@ -138,6 +144,7 @@ async function refresh() {
   }
 
   renderTraffic(d.traffic);
+  renderFruit(d.traffic);
 
   // live feed
   const feed = document.getElementById("feed");
@@ -166,6 +173,31 @@ async function refresh() {
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
+function renderFruit(tf){
+  const el = document.getElementById("fruit"), note = document.getElementById("fruit-note");
+  if(!el) return;
+  const fr = tf && tf.fruit;
+  if(!fr){ el.innerHTML = '<p class="muted" style="font-size:.86rem">No fruit rollup yet — regenerates on the traffic timer.</p>'; if(note) note.textContent=""; return; }
+  const ex = fr.external || {};
+  const n = x => (x==null?"—":x);
+  const cards = [
+    ["external verifies", ex.verify, "someone-not-us used the moat"],
+    ["MCP clients", fr.mcp_distinct_clients, "distinct agents that found /mcp"],
+    ["external audits", ex.audit, "/audit walked through"],
+    ["external searches", ex.search, "library queried, not us"],
+  ];
+  el.innerHTML = cards.map(([k,v,sub]) =>
+    '<div class="stat"><div class="n' + ((v>0)?" ok":"") + '">' + n(v) + '</div>' +
+    '<div class="k">' + k + '</div><div class="muted" style="font-size:.7rem;margin-top:.2rem">' + sub + '</div></div>'
+  ).join('');
+  const top = (fr.mcp_top||[]).map(t => escapeHtml(t[0])+" ("+t[1]+")").join(" · ");
+  const doorHits = Object.entries(fr.doors||{})
+    .map(([p,c]) => escapeHtml(p)+" <span class='muted'>"+((c.human||0)+(c.agent||0))+"</span>").join("  ·  ");
+  if(note) note.innerHTML =
+    (top ? "<strong>/mcp by client:</strong> " + top + " <span style='font-size:.7rem'>(one crawler dominating ≠ broad adoption)</span><br>" : "") +
+    "<strong>doors (human+agent hits):</strong> " + (doorHits || "none yet") +
+    "<br><span style='font-size:.7rem'>Excludes " + (fr.first_party_excluded||0) + " first-party IPs and all bot/curl traffic · window " + fr.window_days + "d.</span>";
+}
 function renderTraffic(tf){
   const el = document.getElementById("traffic"), meta = document.getElementById("traffic-meta");
   if(!el) return;

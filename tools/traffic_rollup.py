@@ -49,6 +49,16 @@ _BOTS: Tuple[Tuple[str, str], ...] = (
 )
 
 
+# Conversion "fruit" watchlist — the paths that mean the door was actually walked THROUGH
+# (not just landed on). The operator's real question: is anyone but us using the moat?
+_WATCH = ("/verify", "/audit", "/mcp", "/search", "/proof.html", "/reason.html",
+          "/boundary.html", "/connect.html", "/ask", "/almanac.html")
+# First-party IPs — the operator's own devices/hosts (Tailscale + the box's public IP + local).
+# EXCLUDED from the external fruit counts so our own testing never reads as adoption.
+_FIRST_PARTY = frozenset({"127.0.0.1", "::1", "::ffff:127.0.0.1",
+                          "100.69.145.38", "100.77.142.75", "100.107.218.110", "5.78.186.55"})
+
+
 def classify(user_agent: str, uri: str) -> Tuple[str, str]:
     """(class, who) — class in {agent, bot, human}; who names the agent/bot (humans → 'human')."""
     ua = (user_agent or "").lower()
@@ -154,6 +164,10 @@ def rollup(log_paths, days: int = 7, now: Optional[int] = None,
     our = set(our_hosts)
 
     ips: Dict[str, Dict[str, Any]] = {}
+    fruit_by_path: Dict[str, Counter] = defaultdict(Counter)   # watch path -> Counter(class)
+    fruit_external: Counter = Counter()                        # watch path -> non-first-party human+agent hits
+    mcp_clients: set = set()                                   # distinct non-first-party IPs that reached /mcp
+    mcp_ua: Counter = Counter()                                # /mcp requests by user-agent family (who is discovering)
     for path in log_paths:
         try:
             f = open(path, "r", encoding="utf-8", errors="replace")
@@ -181,6 +195,15 @@ def rollup(log_paths, days: int = 7, now: Optional[int] = None,
                 ua, referer = _h("User-Agent"), _h("Referer")
                 ip = req.get("client_ip") or req.get("remote_ip") or "?"
                 cls, name = classify(ua, uri)
+                pbase = (uri or "/").split("?")[0].rstrip("/") or "/"
+                if pbase in _WATCH:
+                    fruit_by_path[pbase][cls] += 1
+                    if ip not in _FIRST_PARTY and cls in ("human", "agent"):
+                        fruit_external[pbase] += 1
+                if pbase == "/mcp":
+                    if ip not in _FIRST_PARTY:
+                        mcp_clients.add(ip)
+                    mcp_ua[(ua.split("/")[0].strip()[:24] or "unknown")] += 1
                 rec = ips.get(ip)
                 if rec is None:
                     rec = {"cls": cls, "n": 0, "paths": Counter(), "refs": Counter(), "who": Counter()}
@@ -241,6 +264,24 @@ def rollup(log_paths, days: int = 7, now: Optional[int] = None,
         else:
             block["from"]["who"] = top(b["who"])
         out["classes"][cls] = block
+
+    # FRUIT — the operator's real question: is anyone but US walking through the doors? Every
+    # count here excludes first-party IPs AND bot/curl traffic, so the operator's own testing
+    # (and scanners) can never read as adoption. mcp_distinct_clients is BREADTH (how many
+    # different agents found /mcp), which one hammering crawler cannot inflate.
+    out["fruit"] = {
+        "window_days": days,
+        "external": {  # non-first-party, non-bot hits on the conversion paths
+            "verify": fruit_external.get("/verify", 0),
+            "audit": fruit_external.get("/audit", 0),
+            "mcp": fruit_external.get("/mcp", 0),
+            "search": fruit_external.get("/search", 0),
+        },
+        "mcp_distinct_clients": len(mcp_clients),
+        "mcp_top": mcp_ua.most_common(4),
+        "doors": {p: dict(fruit_by_path[p]) for p in _WATCH if p in fruit_by_path},
+        "first_party_excluded": len(_FIRST_PARTY),
+    }
     return out
 
 
