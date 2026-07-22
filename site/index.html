@@ -26,79 +26,106 @@
   .caps{ font-family:Futura,"Century Gothic","Avenir Next",Avenir,"Trebuchet MS",sans-serif;
          text-transform:uppercase; letter-spacing:.24em; font-weight:600 }
 
-  /* One quiet room, one small card. The composer sits in the middle of an empty field until
-     there is something to say; after that the conversation fills the column above it and the
-     card settles to the bottom. Everything that is not writing lives inside the card's own
-     lower edge, or behind one control that opens the whole list. */
-  html,body{ height:100% }
+  /* THE BOOK. The whole screen is one leather-bound volume lying open: deep hide at the
+     edges with two gilt rules pressed into it, the block of closed pages showing along the
+     right, and a single paper page filling the middle where everything happens. The
+     conversation is written on the page in ink; the composer is the foot of the same page.
+     Chatbox in behaviour, notebook in feel, bound like something worth keeping. */
   body{
-    margin:0; color:var(--parch); font-size:17px;
+    margin:0; height:100%; font-size:17px; color:var(--ink);
     font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
     background:
-      radial-gradient(120% 80% at 50% -10%, rgba(255,225,170,.07), transparent 62%),
-      repeating-linear-gradient(90deg, rgba(0,0,0,.20) 0 1px, transparent 1px 176px),
-      linear-gradient(180deg, var(--walnut-hi) 0%, var(--walnut) 44%, var(--walnut-2) 100%),
-      var(--walnut-2);
+      radial-gradient(130% 100% at 50% -20%, rgba(255,214,150,.10), transparent 55%),
+      radial-gradient(130% 160% at 108% 108%, rgba(0,0,0,.45), transparent 55%),
+      repeating-linear-gradient(23deg, rgba(255,235,200,.018) 0 2px, transparent 2px 5px),
+      repeating-linear-gradient(-31deg, rgba(0,0,0,.06) 0 1px, transparent 1px 4px),
+      linear-gradient(160deg, #4a2318 0%, #38180f 45%, #240d08 100%);
+    padding:1.5rem 1.7rem;
   }
-  .desk{ height:100%; overflow-y:auto; display:flex; flex-direction:column; align-items:center;
-         padding:2rem 1.1rem 1.1rem }
-  .col{ width:min(48rem,100%); display:flex; flex-direction:column; margin:auto 0 0 }
-  .col.empty{ margin:auto 0 }              /* nothing said yet — the card sits in the middle */
+  /* blind tooling: a bright rule and a faint echo, the way a binder finishes a cover */
+  body::before{
+    content:""; position:fixed; inset:.6rem; pointer-events:none; z-index:6;
+    border:1px solid rgba(198,154,74,.45); border-radius:3px;
+  }
+  body::after{
+    content:""; position:fixed; inset:.95rem; pointer-events:none; z-index:6;
+    border:1px solid rgba(198,154,74,.15); border-radius:2px;
+  }
 
-  /* the welcome: who this is and what it does, gone once you are talking */
-  .hello{ display:none; text-align:center; padding-bottom:1.6rem }
+  /* THE PAGE — paper filling the book, the closed pages stacked beneath its right edge */
+  .desk{
+    height:100%; overflow-y:auto; scroll-behavior:smooth; overscroll-behavior:contain;
+    display:flex; flex-direction:column; align-items:center;
+    padding:2.4rem 3rem 1.2rem;
+    background:
+      radial-gradient(70% 46% at 28% -4%, var(--lamp), transparent 65%),
+      linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+    border-radius:2px 5px 5px 2px;
+    box-shadow:
+      2.5px 2.5px 0 #e8dfc9, 5px 5px 0 #ddd3b9, 7.5px 7.5px 0 #d0c5a7,
+      12px 14px 30px -8px rgba(0,0,0,.7),
+      inset 0 1px 0 rgba(255,255,255,.65),
+      inset 16px 0 30px -22px rgba(60,40,20,.5);
+  }
+  .col{ width:min(44rem,100%); display:flex; flex-direction:column; margin:auto 0 0 }
+  .col.empty{ margin:auto 0 }
+
+  /* the welcome, in ink, gone once you are talking */
+  .hello{ display:none; text-align:center; padding-bottom:1.7rem }
   .col.empty .hello{ display:block }
-  .hello .nm{ font-size:.68rem; letter-spacing:.34em; color:rgba(238,214,155,.5) }
-  .hello .nm b{ font-weight:600; color:var(--brass-hi) }
-  .hello .ask{ margin-top:.9rem; font-size:1.35rem; color:#f0e6cf }
+  .hello .nm{ font-size:.66rem; letter-spacing:.34em; color:var(--ink-faint) }
+  .hello .nm b{ font-weight:600; color:var(--brass-lo) }
+  .hello .ask{ margin-top:.9rem; font-size:1.4rem; color:var(--ink) }
 
-  /* the conversation, straight on the wood */
-  #chain{ padding:0 .2rem 1.4rem }
-  .turn{ margin:0 0 1.9rem }
-  .you{ color:#f0e6cf; font-weight:600 }
-  .said{ margin:.35rem 0 0; color:var(--parch) }
-  .verdict{ font-weight:700 } .verdict.HOLDS{ color:#a8c48a } .verdict.BROKEN{ color:#e0a08c }
-  .trail{ color:rgba(232,220,192,.5); font-size:.9rem }
-  .hit{ border-top:1px solid rgba(198,154,74,.16); padding:.6rem 0 }
-  .hit b{ font-weight:600; color:#f0e6cf }
-  .hit .sn{ display:block; color:rgba(232,220,192,.55); font-size:.9rem }
-  .note{ font-size:.76rem; color:rgba(232,220,192,.34); margin-top:.6rem }
+  /* the conversation, in ink on the page */
+  #chain{ padding:0 .2rem 1.5rem }
+  .turn{ margin:0 0 2rem }
+  .you{ color:var(--ink); font-weight:600 }
+  .said{ margin:.4rem 0 0; color:#3d3426 }
+  .verdict{ font-weight:700 } .verdict.HOLDS{ color:#4a6a34 } .verdict.BROKEN{ color:#8a3b1e }
+  .trail{ color:var(--ink-soft); font-size:.9rem }
+  .hit{ border-top:1px solid rgba(138,106,47,.22); padding:.6rem 0 }
+  .hit b{ font-weight:600; color:var(--ink) }
+  .hit .sn{ display:block; color:var(--ink-soft); font-size:.9rem }
+  .note{ font-size:.76rem; color:var(--ink-faint); margin-top:.6rem }
   .word{ margin:.1rem 0 .5rem }
-  .word .heb{ font-size:1.5rem; color:#f4ead2 }
-  .word .tl{ font-style:italic; color:var(--parch) }
-  .word .pr{ color:rgba(232,220,192,.5) }
+  .word .heb{ font-size:1.5rem; color:var(--ink) }
+  .word .tl{ font-style:italic; color:var(--ink-soft) }
+  .word .pr{ color:var(--ink-faint) }
   .word .sg{ font-size:.72rem; color:var(--brass-lo) }
-  .res a{ color:var(--brass-hi) }
-  .hear{ background:none; border:0; color:rgba(232,220,192,.4); font:inherit; font-size:1rem;
+  .res a{ color:var(--oxblood) }
+  .hear{ background:none; border:0; color:var(--ink-faint); font:inherit; font-size:1rem;
          cursor:pointer; padding:.2rem .4rem 0 0; line-height:1 }
-  .hear:hover{ color:var(--brass-hi) }
+  .hear:hover{ color:var(--brass-lo) }
 
-  /* THE CARD — paper, and the only bright thing on the desk */
+  /* THE COMPOSER — the foot of the same page, set apart by nothing louder than a rule */
   .card{
-    background:linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
-    border:1px solid rgba(198,154,74,.4); border-radius:10px;
-    box-shadow:0 18px 40px -22px #000, 0 2px 6px -3px rgba(0,0,0,.5),
-               inset 0 1px 0 rgba(255,255,255,.6);
+    background:linear-gradient(180deg, rgba(255,255,255,.55), rgba(240,232,212,.35));
+    border:1px solid rgba(138,106,47,.3); border-radius:9px;
+    box-shadow:0 8px 22px -14px rgba(60,40,20,.55), inset 0 1px 0 rgba(255,255,255,.75);
     overflow:hidden;
   }
   #q{ display:block; border:0; outline:0; background:transparent; color:var(--ink);
       font:inherit; font-size:1.05rem; line-height:1.75;
-      padding:1.5rem 1.6rem .8rem; min-height:4.6rem; max-height:56vh; overflow-y:auto;
+      padding:1.4rem 1.5rem .8rem; min-height:4.6rem; max-height:56vh; overflow-y:auto;
       transition:min-height .18s ease }
-  /* wide open while the page is empty; once there is a conversation the room belongs to it */
-  .col.empty #q{ min-height:11rem }
+  .col.empty #q{ min-height:10rem }
   #q:empty::before{ content:attr(data-empty); color:var(--ink-faint); pointer-events:none }
   #q h2{ font-size:1.1rem; font-weight:600; margin:.9rem 0 .3rem }
   #q ul,#q ol{ margin:.4rem 0; padding-left:1.4rem }
-  #q table{ border-collapse:collapse; margin:.7rem 0; width:100%; font-size:.94rem }
-  #q td,#q th{ border:1px solid rgba(138,106,47,.4); padding:.35rem .5rem; min-width:3rem }
-  #q th{ background:rgba(198,154,74,.14); font-weight:600; text-align:left }
-  #q hr{ border:0; border-top:1px solid rgba(138,106,47,.35); margin:1rem 0 }
+  #q table,.you table{ border-collapse:collapse; margin:.7rem 0; width:100%; font-size:.94rem }
+  #q td,#q th,.you td,.you th{ border:1px solid rgba(138,106,47,.4); padding:.35rem .5rem;
+                               min-width:3rem; font-weight:400 }
+  #q th,.you th{ background:rgba(198,154,74,.14); font-weight:600; text-align:left }
+  #q tr[data-total] td,.you tr[data-total] td{ font-weight:600;
+      border-top:2px solid rgba(138,106,47,.55); background:rgba(198,154,74,.08) }
+  #q hr,.you hr{ border:0; border-top:1px solid rgba(138,106,47,.35); margin:1rem 0 }
+  .you h2{ font-size:1.1rem; font-weight:600; margin:0 0 .3rem }
+  .you ul,.you ol{ margin:.4rem 0; padding-left:1.4rem; font-weight:400 }
 
-  /* the controls, inside the card's lower edge */
   .tools{ display:flex; align-items:center; gap:.05rem; padding:.2rem .8rem .6rem }
   .tools button{ min-width:26px; height:26px; padding:0 .32rem; border:0; background:none;
-                 cursor:pointer; color:rgba(36,31,24,.3); font:inherit; font-size:.8rem;
+                 cursor:pointer; color:rgba(36,31,24,.32); font:inherit; font-size:.8rem;
                  border-radius:3px; transition:color .14s ease, background .14s ease }
   .tools button:hover{ color:var(--ink); background:rgba(138,106,47,.12) }
   .tools .gap{ flex:1 }
@@ -115,15 +142,18 @@
   .tools #mic[aria-pressed="true"]{ color:var(--oxblood) }
 
   .foot{ display:flex; gap:.9rem; justify-content:center; font-size:.58rem;
-         color:rgba(232,220,192,.2); padding:.7rem 0 .2rem }
-  .foot a{ color:rgba(232,220,192,.3) }
-  .foot a:hover{ color:var(--brass-hi) }
+         color:var(--ink-faint); opacity:.75; padding:.8rem 0 .2rem }
+  .foot a{ color:var(--ink-faint) }
+  .foot a:hover{ color:var(--brass-lo) }
 
   @media (max-width:900px){
-    .desk{ padding:1rem .7rem .7rem }
-    #q{ padding:1.1rem 1.05rem .6rem; font-size:1rem; min-height:4rem; max-height:48vh }
-    .col.empty #q{ min-height:9rem }
-    /* every control has to fit the width — the mic was falling off the right edge */
+    body{ padding:.65rem .7rem }
+    body::before{ inset:.3rem } body::after{ display:none }
+    .desk{ padding:1.3rem 1.05rem .8rem; border-radius:2px 4px 4px 2px;
+           box-shadow:2px 2px 0 #e8dfc9, 4px 4px 0 #ddd3b9,
+                      8px 9px 22px -8px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.65) }
+    #q{ padding:1.05rem 1rem .6rem; font-size:1rem; min-height:4rem; max-height:48vh }
+    .col.empty #q{ min-height:8.5rem }
     .tools{ padding:.15rem .3rem .4rem; gap:0 }
     .tools button{ min-width:29px; height:34px; font-size:.82rem; padding:0 .2rem }
     .tools .dot{ min-width:14px; width:14px; height:14px; margin:0 .07rem }
@@ -154,6 +184,7 @@
         <button data-ins="table" title="Table">&#9638;</button>
         <button data-ins="row" title="Add row" data-intable="1">+row</button>
         <button data-ins="col" title="Add column" data-intable="1">+col</button>
+        <button data-ins="sum" title="Total the columns" data-intable="1">&Sigma;</button>
         <span class="inks">
           <button data-ink="#241f18" class="dot" style="--c:#241f18" title="Ink"></button>
           <button data-ink="#7d4a22" class="dot" style="--c:#7d4a22" title="Red"></button>
@@ -198,7 +229,7 @@
   // to settle at the bottom
   function settle(){ col.classList.toggle('empty', !chain.firstChild); }
 
-  function render(d){
+  function render(d,isDoc){
     var h='';
     if(d.message) h += '<div>'+esc(d.message)+'</div>';
     if(d.verify){
@@ -245,9 +276,10 @@
     if(d.scripture && d.scripture.length)
       h += d.scripture.map(function(s){
         return '<div class="hit"><b>'+esc(s.ref||s.title||'')+'</b><span class="sn">'+esc(s.text||s.snippet||'')+'</span></div>'; }).join('');
-    // when the claim was checked, the check IS the answer — a fuzzy keyword match is not,
-    // and stacking six of them under a verdict buries the one thing that was asked
-    if(d.results && d.results.length && !checked)
+    // when the claim was checked, the check IS the answer — a fuzzy keyword match is not.
+    // And a DOCUMENT is not a question: sending a fence quote once dumped six "gate" keyword
+    // hits under it because one row said "Gate latch". Writing is kept, not answered.
+    if(d.results && d.results.length && !checked && !isDoc)
       h += d.results.slice(0,6).map(function(r){
         return '<div class="hit"><b><a href="/card.html?id='+encodeURIComponent(r.id)+'">'+esc(r.title)+'</a></b>'+
                '<span class="sn">'+esc((r.snippet||'').slice(0,180))+'</span></div>'; }).join('');
@@ -257,8 +289,10 @@
     if(!spoken && d.scripture && d.scripture[0]) spoken=(d.scripture[0].ref||'')+'. '+(d.scripture[0].text||'');
     if(!spoken && d.results && d.results[0]) spoken=d.results[0].title+'. '+(d.results[0].snippet||'');
     // never return an empty answer silently — a blank turn looks like a failure and hides one
-    if(!h) h = '<div class="note">Nothing came back for that. Try naming a verse, a word, or a '+
-               'claim to check.</div>';
+    if(!h) h = isDoc
+      ? '<div class="note">Kept. It is in the record and the journal.</div>'
+      : '<div class="note">Nothing came back for that. Try naming a verse, a word, or a '+
+        'claim to check.</div>';
     if(spoken && window.NHSpeak && NHSpeak.available)
       h += '<button class="hear" data-hear="'+esc(spoken.slice(0,600))+'" '+
            'aria-label="Hear this" title="Hear this">♪</button>';
@@ -274,9 +308,13 @@
 
   async function ask(){
     var text=said(); if(!text) return;
+    var isDoc=!!ta.querySelector('table,h2');   // formatted writing, not a question
+    var docHtml=isDoc?ta.innerHTML:null;
     ta.innerHTML=''; idle();
     var turn=document.createElement('div'); turn.className='turn';
-    turn.innerHTML='<div class="you">'+esc(text)+'</div><div class="said"><span class="note">…</span></div>';
+    turn.innerHTML='<div class="you"></div><div class="said"><span class="note">…</span></div>';
+    if(docHtml) turn.querySelector('.you').innerHTML=docHtml;
+    else turn.querySelector('.you').textContent=text;
     chain.appendChild(turn); settle(); scroll();
     var body=turn.querySelector('.said');
     try{
@@ -285,7 +323,7 @@
       var r=await fetch(API+'/ask',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)});
       var d=await r.json();
       if(d.thread_id){ threadId=d.thread_id; try{ localStorage.setItem(TID,threadId);}catch(e){} rosterPut(threadId,text); }
-      body.innerHTML=render(d); settle(); scroll(); ta.focus();
+      body.innerHTML=render(d,isDoc); settle(); scroll(); ta.focus();
     }catch(e){ body.innerHTML='<span class="note">The engine is unreachable right now.</span>'; }
   }
 
@@ -372,6 +410,36 @@
         if(t) [].forEach.call(t.rows,function(r){
           var c=document.createElement(r.parentNode.nodeName==='THEAD'?'th':'td');
           c.innerHTML='<br>'; r.appendChild(c); });
+      } else if(d.ins==='sum'){
+        // the Excel that matters most: total the numeric columns, deterministically. Sums are
+        // carried in integer minor units (cents) so 0.10 + 0.20 is 0.30, never 0.30000000004 —
+        // this page checks other people's arithmetic and must not fumble its own.
+        var tb=inTag('TABLE');
+        if(tb){
+          var oldrow=tb.querySelector('tr[data-total]');
+          if(oldrow) oldrow.parentNode.removeChild(oldrow);
+          var body=tb.tBodies[0]||tb, rows=[].slice.call(body.rows), ncols=0;
+          rows.forEach(function(r){ ncols=Math.max(ncols,r.cells.length); });
+          var NUM=/^([$€£]?)\s*(-?\d+(?:\.\d+)?)$/;
+          var tr=document.createElement('tr'); tr.setAttribute('data-total','1');
+          for(var c=0;c<ncols;c++){
+            var vals=[],pre='',dec=0;
+            rows.forEach(function(r){
+              var cell=r.cells[c]; if(!cell) return;
+              var m=(cell.textContent||'').trim().replace(/,/g,'').match(NUM);
+              if(m){ vals.push(m[2]); pre=pre||m[1];
+                     dec=Math.max(dec,(m[2].split('.')[1]||'').length); }
+            });
+            var td=document.createElement('td');
+            if(vals.length){
+              var scale=Math.pow(10,dec);
+              var total=vals.reduce(function(a,v){ return a+Math.round(parseFloat(v)*scale); },0);
+              td.textContent=pre+(total/scale).toFixed(dec);
+            } else if(c===0){ td.textContent='Total'; }
+            tr.appendChild(td);
+          }
+          body.appendChild(tr);
+        }
       }
     }
     idle();
