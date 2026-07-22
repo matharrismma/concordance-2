@@ -39,3 +39,14 @@ data/*.db-shm
 # tools/vendor_rampart.sh — kept out of source like the runtime data)
 site/vendor/
 site/models/
+
+# Personal data written by the companion modules — NEVER committed.
+# binding = public keys + thread ids; deferred = what someone handed forward;
+# bookofdays = a person's private record. These are theirs, not ours (docs/THE_COMPANION.md §6a).
+data/bindings/
+data/deferred/
+data/bookofdays/
+# corpus backups + bulk reference data belong beside the engine, not in source
+data/*.bak
+data/cards.jsonl.*
+data/easton/
