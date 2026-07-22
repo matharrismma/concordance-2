@@ -77,7 +77,7 @@
   .t.rule{ margin-top:1.1rem; padding-top:1.1rem; position:relative }
   .t.rule::before{ content:""; position:absolute; top:0; left:0; width:2.2rem; height:1px;
                    background:rgba(198,154,74,.45) }
-  .t{ display:block; padding:.34rem 0; font-size:.9rem; color:#c3b394; border:0;
+  .t{ display:block; padding:.28rem 0; font-size:.8rem; color:#a4937a; border:0;
       background:none; cursor:pointer; font-family:inherit; width:100%; text-align:left;
       line-height:1.3; transition:color .14s ease }
   .t:hover{ color:#fff6e2 }
@@ -138,15 +138,47 @@
   .hear:hover{ color:var(--brass-lo) }
 
   /* the box IS the page — a caret on paper, no field, no border */
-  #q{ display:block; width:100%; border:0; outline:0; resize:none; background:transparent;
+  /* the paper you can actually write on: bold, colour, lists, tables — the document tools,
+     not another row of navigation. Nothing shows until you select something. */
+  #q{ display:block; width:100%; border:0; outline:0; background:transparent;
       color:var(--ink); font:inherit; font-size:1.06rem; line-height:1.8; padding:0;
-      overflow:hidden; min-height:1.8em }
-  #q::placeholder{ color:var(--ink-faint) }
+      min-height:1.8em }
+  #q:empty::before{ content:attr(data-empty); color:var(--ink-faint); pointer-events:none }
+  #q h2{ font-size:1.12rem; font-weight:600; margin:1.1rem 0 .3rem }
+  #q ul,#q ol{ margin:.4rem 0; padding-left:1.4rem }
+  #q table{ border-collapse:collapse; margin:.8rem 0; width:100%; font-size:.95rem }
+  #q td,#q th{ border:1px solid rgba(138,106,47,.4); padding:.4rem .55rem; min-width:3rem }
+  #q th{ background:rgba(198,154,74,.14); font-weight:600; text-align:left }
+  #q hr{ border:0; border-top:1px solid rgba(138,106,47,.35); margin:1.1rem 0 }
+
+  /* the format bar: only ever on screen while text is selected */
+  .mark{ position:absolute; z-index:40; display:flex; align-items:center; gap:.1rem;
+         padding:.25rem .3rem; border-radius:3px; background:#2b2620;
+         box-shadow:0 8px 22px -8px rgba(0,0,0,.8); border:1px solid rgba(198,154,74,.3) }
+  .mark[hidden]{ display:none }
+  .mark button{ min-width:26px; height:26px; border:0; background:none; color:#e3d8bd;
+                font:inherit; font-size:.86rem; cursor:pointer; border-radius:2px; padding:0 .3rem }
+  .mark button:hover{ background:rgba(198,154,74,.28); color:#fff6e2 }
+  .mark .sep{ width:1px; height:16px; background:rgba(198,154,74,.3); margin:0 .25rem }
+  .mark .dot{ min-width:16px; width:16px; height:16px; border-radius:50%; padding:0;
+              background:var(--c); margin:0 .1rem; border:1px solid rgba(255,255,255,.22) }
+  .mark .dot:hover{ background:var(--c); filter:brightness(1.2) }
+  .mark .dot.hi{ border-radius:2px }
+
+  /* the insert menu, opened from one small fitting */
+  .ins{ position:absolute; right:26px; bottom:58px; z-index:35; display:flex;
+        flex-direction:column; min-width:9rem; padding:.25rem; border-radius:3px;
+        background:#2b2620; border:1px solid rgba(198,154,74,.3);
+        box-shadow:0 10px 26px -10px rgba(0,0,0,.8) }
+  .ins[hidden]{ display:none }
+  .ins button{ border:0; background:none; color:#e3d8bd; font:inherit; font-size:.86rem;
+               text-align:left; padding:.4rem .55rem; cursor:pointer; border-radius:2px }
+  .ins button:hover{ background:rgba(198,154,74,.28); color:#fff6e2 }
 
   /* brass fittings */
-  .pen{ position:absolute; right:26px; bottom:22px; display:flex; gap:.3rem; align-items:center }
+  .pen{ position:absolute; right:26px; bottom:20px; display:flex; gap:.25rem; align-items:center }
   .pen button{
-    width:34px; height:34px; cursor:pointer; font-size:.82rem; line-height:1; border-radius:50%;
+    width:28px; height:28px; cursor:pointer; font-size:.78rem; line-height:1; border-radius:50%;
     display:inline-flex; align-items:center; justify-content:center; color:#6b5c45;
     background:none; border:1px solid rgba(138,106,47,.35);
     transition:color .15s ease, border-color .15s ease, background .15s ease, opacity .18s ease }
@@ -174,7 +206,7 @@
            grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr)) }
     .side h2{ grid-column:1/-1; margin:.5rem 0 .1rem }
     .side h2:first-child{ margin-top:.2rem }
-    .t{ padding:.55rem 0; min-height:44px; font-size:.92rem; display:flex; align-items:center }
+    .t{ padding:.5rem 0; min-height:44px; font-size:.84rem; display:flex; align-items:center }
     /* a group break has to start a row, or the two columns interleave the groups and the
        hairline ends up marking one cell instead of a division */
     .t.rule{ grid-column:1; margin-top:.5rem; padding-top:.85rem }
@@ -212,11 +244,31 @@
   <div class="pad">
     <div class="surface" id="surface">
       <div id="chain"></div>
-      <textarea id="q" rows="1" autofocus placeholder="Write here…" aria-label="Bring anything"></textarea>
+      <div id="q" contenteditable="true" role="textbox" aria-multiline="true"
+           aria-label="Bring anything" data-empty="Write here…"></div>
+    </div>
+    <div class="ins" id="insmenu" hidden>
+      <button data-ins="table">Table</button>
+      <button data-ins="row">Add row</button>
+      <button data-ins="col">Add column</button>
+      <button data-ins="rule">Divider</button>
     </div>
     <div class="pen">
+      <button id="plus" type="button" aria-label="Insert" title="Insert" aria-expanded="false">+</button>
       <button id="mic" type="button" aria-pressed="false" aria-label="Speak" title="Speak" hidden>🎤</button>
       <button id="send" type="button" aria-label="Send" title="Send" data-idle="1">↵</button>
+    </div>
+    <div class="mark" id="mark" role="toolbar" aria-label="Format" hidden>
+      <button data-do="bold"><b>B</b></button>
+      <button data-do="italic"><i>I</i></button>
+      <button data-do="head" title="Heading">H</button>
+      <button data-do="list" title="List">&bull;</button>
+      <span class="sep"></span>
+      <button data-ink="#241f18" class="dot" style="--c:#241f18" title="Ink"></button>
+      <button data-ink="#7d4a22" class="dot" style="--c:#7d4a22" title="Red"></button>
+      <button data-ink="#3d5a6c" class="dot" style="--c:#3d5a6c" title="Blue"></button>
+      <button data-ink="#4a6a34" class="dot" style="--c:#4a6a34" title="Green"></button>
+      <button data-mark="1" class="dot hi" style="--c:#f2e08a" title="Highlight"></button>
     </div>
   </div>
 
@@ -251,7 +303,8 @@
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
-  function fit(){ ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; }
+  function fit(){}                       // a contenteditable grows on its own
+  function said(){ return (ta.innerText||'').replace(/ /g,' ').trim(); }
   function scroll(){ requestAnimationFrame(function(){ surface.scrollTop=surface.scrollHeight; }); }
 
   function render(d){
@@ -309,8 +362,8 @@
   }
 
   async function ask(){
-    var text=(ta.value||'').trim(); if(!text) return;
-    ta.value=''; fit();
+    var text=said(); if(!text) return;
+    ta.innerHTML=''; idle();
     var turn=document.createElement('div'); turn.className='turn';
     turn.innerHTML='<div class="you">'+esc(text)+'</div><div class="said"><span class="note">…</span></div>';
     chain.appendChild(turn); scroll();
@@ -325,16 +378,111 @@
     }catch(e){ body.innerHTML='<span class="note">The engine is unreachable right now.</span>'; }
   }
 
-  function idle(){ send.setAttribute('data-idle', ta.value.trim() ? '0' : '1'); }
-  ta.addEventListener('input',function(){ fit(); idle(); }); fit(); idle();
+  function idle(){ send.setAttribute('data-idle', said() ? '0' : '1'); }
+  ta.addEventListener('input',idle); idle();
+  function inTable(){
+    var s=window.getSelection(); if(!s||!s.rangeCount) return false;
+    var n=s.getRangeAt(0).startContainer;
+    while(n && n!==ta){ if(n.nodeName==='TD'||n.nodeName==='TH') return true; n=n.parentNode; }
+    return false;
+  }
   ta.addEventListener('keydown',function(e){
-    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); ask(); } });
+    // Enter sends, as it always has. Inside a table it is a line break — a table is a place
+    // you are still building, not a message you are finishing.
+    if(e.key==='Enter' && !e.shiftKey && !inTable()){ e.preventDefault(); ask(); }
+  });
+  // pasted text arrives as text: a paste carrying someone else's stylesheet is not writing
+  ta.addEventListener('paste',function(e){
+    e.preventDefault();
+    var t=(e.clipboardData||window.clipboardData).getData('text/plain');
+    document.execCommand('insertText', false, t);
+  });
   send.addEventListener('click',ask);
   chain.addEventListener('click',function(e){
     var h=e.target.closest('.hear'); if(h&&window.NHSpeak) NHSpeak.play(h.dataset.hear); });
+  // ── the document tools ────────────────────────────────────────────────────────────────
+  // execCommand is deprecated and still the only formatting API every browser implements
+  // without a library. A dependency here would mean a download, which would mean the page
+  // stops working offline — so this stays.
+  var mark=document.getElementById('mark'), plus=document.getElementById('plus'),
+      insmenu=document.getElementById('insmenu');
+
+  function place(){
+    var sel=window.getSelection();
+    if(!sel||sel.isCollapsed||!sel.rangeCount||!ta.contains(sel.anchorNode)){ mark.hidden=true; return; }
+    var r=sel.getRangeAt(0).getBoundingClientRect(), p=ta.closest('.pad').getBoundingClientRect();
+    if(!r.width && !r.height){ mark.hidden=true; return; }
+    mark.hidden=false;
+    var x=r.left-p.left+r.width/2-mark.offsetWidth/2, y=r.top-p.top-mark.offsetHeight-8;
+    mark.style.left=Math.max(6,Math.min(x, p.width-mark.offsetWidth-6))+'px';
+    mark.style.top=Math.max(4,y)+'px';
+  }
+  var lastRange=null;
+  document.addEventListener('selectionchange',function(){
+    var sel=window.getSelection();
+    if(sel && sel.rangeCount && ta.contains(sel.anchorNode)) lastRange=sel.getRangeAt(0).cloneRange();
+    if(document.activeElement===ta) place();
+  });
+  ta.addEventListener('blur',function(){ setTimeout(function(){
+    if(!mark.contains(document.activeElement)) mark.hidden=true; },150); });
+
+  mark.addEventListener('mousedown',function(e){ e.preventDefault(); });   // keep the selection
+  mark.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    var d=b.dataset;
+    if(d.do==='bold') document.execCommand('bold');
+    else if(d.do==='italic') document.execCommand('italic');
+    else if(d.do==='head') document.execCommand('formatBlock',false,'h2');
+    else if(d.do==='list') document.execCommand('insertUnorderedList');
+    else if(d.ink) document.execCommand('foreColor',false,d.ink);
+    else if(d.mark) document.execCommand('hiliteColor',false,'#f2e08a');
+    idle(); place();
+  });
+
+  function cell(n,tag){ var o=''; for(var i=0;i<n;i++) o+='<'+tag+'><br></'+tag+'>'; return o; }
+  function closestTag(tag){
+    var sel=window.getSelection(); if(!sel||!sel.rangeCount) return null;
+    var n=sel.getRangeAt(0).startContainer;
+    while(n && n!==ta){ if(n.nodeName===tag) return n; n=n.parentNode; }
+    return null;
+  }
+  plus.addEventListener('click',function(){
+    var open=insmenu.hidden;
+    insmenu.hidden=!open; plus.setAttribute('aria-expanded', open?'true':'false');
+  });
+  document.addEventListener('click',function(e){
+    if(!insmenu.hidden && !insmenu.contains(e.target) && e.target!==plus){
+      insmenu.hidden=true; plus.setAttribute('aria-expanded','false'); }
+  });
+  insmenu.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    ta.focus();
+    var sel=window.getSelection();
+    if(lastRange){ sel.removeAllRanges(); sel.addRange(lastRange); }
+    if(sel.rangeCount && !sel.isCollapsed) sel.collapseToEnd();   // insert after, never over
+    var what=b.dataset.ins;
+    if(what==='table'){
+      document.execCommand('insertHTML',false,
+        '<table><thead><tr>'+cell(3,'th')+'</tr></thead><tbody>'+
+        '<tr>'+cell(3,'td')+'</tr><tr>'+cell(3,'td')+'</tr></tbody></table><p><br></p>');
+    } else if(what==='rule'){
+      document.execCommand('insertHTML',false,'<hr><p><br></p>');
+    } else if(what==='row'){
+      var tr=closestTag('TR');
+      if(tr){ var n=tr.children.length, row=document.createElement('tr');
+              row.innerHTML=cell(n,'td'); tr.parentNode.insertBefore(row,tr.nextSibling); }
+    } else if(what==='col'){
+      var t=closestTag('TABLE');
+      if(t) [].forEach.call(t.rows,function(r){
+        var c=document.createElement(r.parentNode.nodeName==='THEAD'?'th':'td');
+        c.innerHTML='<br>'; r.appendChild(c); });
+    }
+    insmenu.hidden=true; plus.setAttribute('aria-expanded','false'); idle();
+  });
+
   document.getElementById('newbtn').addEventListener('click',function(){
     threadId=null; try{ localStorage.removeItem(TID);}catch(e){}
-    chain.innerHTML=''; ta.value=''; fit(); ta.focus(); });
+    chain.innerHTML=''; ta.innerHTML=''; idle(); ta.focus(); });
   surface.addEventListener('click',function(e){
     if(e.target===surface||e.target===chain) ta.focus(); });
 
@@ -352,11 +500,11 @@
     var listening=false, base='';
     rec.onresult=function(ev){ var s='';
       for(var i=ev.resultIndex;i<ev.results.length;i++) s+=ev.results[i][0].transcript;
-      ta.value=(base?base+' ':'')+s; fit(); };
+      ta.textContent=(base?base+' ':'')+s; idle(); };
     rec.onend=rec.onerror=function(){ listening=false; mic.setAttribute('aria-pressed','false'); };
     mic.addEventListener('click',function(){
       if(listening){ rec.stop(); return; }
-      base=(ta.value||'').trim(); listening=true; mic.setAttribute('aria-pressed','true');
+      base=said(); listening=true; mic.setAttribute('aria-pressed','true');
       try{ rec.start(); }catch(e){ listening=false; mic.setAttribute('aria-pressed','false'); } });
   }
 })();
