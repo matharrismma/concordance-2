@@ -55,8 +55,13 @@ _WATCH = ("/verify", "/audit", "/mcp", "/search", "/proof.html", "/reason.html",
           "/boundary.html", "/connect.html", "/ask", "/almanac.html")
 # First-party IPs — the operator's own devices/hosts (Tailscale + the box's public IP + local).
 # EXCLUDED from the external fruit counts so our own testing never reads as adoption.
-_FIRST_PARTY = frozenset({"127.0.0.1", "::1", "::ffff:127.0.0.1",
-                          "100.69.145.38", "100.77.142.75", "100.107.218.110", "5.78.186.55"})
+# First-party addresses to exclude from "fruit" counts. The operator's own device addresses
+# are PRIVATE (a Tailnet reveals device topology), so they are read from the environment and
+# never committed:  NH_FIRST_PARTY_IPS="100.x.y.z,100.a.b.c"
+_FIRST_PARTY = frozenset(
+    {"127.0.0.1", "::1", "::ffff:127.0.0.1", "5.78.186.55"}          # loopback + the box's public IP (already public via DNS)
+    | {ip.strip() for ip in os.environ.get("NH_FIRST_PARTY_IPS", "").split(",") if ip.strip()}
+)
 
 
 def classify(user_agent: str, uri: str) -> Tuple[str, str]:

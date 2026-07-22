@@ -44,7 +44,13 @@ def receive(owner: str, text: str, *, thread_id: str = "",
 
     # The Scribe records it verbatim — the note, not a summary. Crisis is never filed away
     # quietly: it is surfaced immediately and marked, because a person may be in danger.
-    tid = thread_id or threads.new_thread(surface=surface)["thread_id"]
+    tid = thread_id
+    if not tid:
+        tid = threads.new_thread(surface=surface)["thread_id"]
+        # Bind it to them from the very first exchange. A thread protected only by an
+        # unguessable id is protected by secrecy; bound, it is protected by ownership.
+        from . import binding as _binding
+        _binding.attach(owner, tid)
     ex = threads.append(tid, text,
                         {"kind": member, "message": "", "filed_by": "inlet",
                          "why": decision.get("why"), "generated": False},

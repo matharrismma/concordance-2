@@ -297,6 +297,15 @@ def build_sitemap(base_url: str) -> str:
             f"{rows}\n</urlset>\n")
 
 
+
+def _thread_is_private(thread_id: str) -> bool:
+    """True if this thread is bound to someone's key — then only that key may read it."""
+    try:
+        from .. import binding as _b
+        return bool(_b.owner_of(thread_id))
+    except Exception:
+        return False
+
 def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
              config: EngineConfig, session_gate_open: bool = False) -> Response:
     """Pure request dispatch — (method, path, query, body, config, session_gate_open) → (status, payload).
@@ -438,6 +447,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(r) if r.get("ok") else _err(400, r.get("error", "refused"))
 
     if method == "GET" and path == "/thread/lineage":
+        _tid = (query.get("id") or query.get("thread_id") or "").strip()
+        if _tid and _thread_is_private(_tid):
+            return _err(403, "this conversation is bound to a key — it is not readable without it")
         # Where a thread came from, and how much of the past it genuinely shares (by hash).
         from .. import branch as branch_mod
         r = branch_mod.lineage((query.get("id") or query.get("thread_id") or "").strip())
@@ -469,6 +481,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(r) if r.get("ok") else _err(400, r.get("error", "refused"))
 
     if method == "GET" and path == "/thread/digest":
+        _tid = (query.get("id") or query.get("thread_id") or "").strip()
+        if _tid and _thread_is_private(_tid):
+            return _err(403, "this conversation is bound to a key — it is not readable without it")
         # An INDEX of a thread, never a summary: what was verified and sealed, what Scripture
         # it cited, which words recur, whether the chain is intact. Counted, not judged —
         # nothing is compressed away, because summarising would mean generating.
@@ -478,6 +493,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(r) if r.get("ok") else _err(404, r.get("error", "no such thread"))
 
     if method == "GET" and path == "/thread/recall":
+        _tid = (query.get("id") or query.get("thread_id") or "").strip()
+        if _tid and _thread_is_private(_tid):
+            return _err(403, "this conversation is bound to a key — it is not readable without it")
         # Retrieval INTO the chain — the exchanges themselves, verbatim, with why each matched.
         # This is what replaces "summarise the old turns": the past is retrieved, not rewritten.
         from .. import distill as distill_mod
@@ -804,30 +822,23 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
     # The Deck — a conversation as a resumable, searchable, tamper-evident chain (threads).
     if method == "GET" and path == "/thread":
+        _tid = (query.get("id") or query.get("thread_id") or "").strip()
+        if _tid and _thread_is_private(_tid):
+            return _err(403, "this conversation is bound to a key — it is not readable without it")
         from .. import threads as _threads
         tid = (query.get("id") or "").strip()
         if not tid:
             return _err(400, "id required")
         rec = _threads.get(tid)
         return _ok(rec) if rec is not None else _err(404, "thread not found")
-    if method == "GET" and path == "/threads":
-        from .. import threads as _threads
-        try:
-            limit = int(query.get("limit", "50"))
-        except (TypeError, ValueError):
-            limit = 50
-        return _ok({"threads": _threads.list_threads(limit=limit)})
-    if method == "GET" and path == "/threads/search":
-        from .. import threads as _threads
-        q = (query.get("q") or "").strip()
-        if not q:
-            return _err(400, "q required")
-        try:
-            limit = int(query.get("limit", "10"))
-        except (TypeError, ValueError):
-            limit = 10
-        res = _threads.search(q, limit=limit)
-        return _ok({"query": q, "count": len(res), "results": res})
+    if method == "GET" and path in ("/threads", "/threads/search"):
+        # PRIVACY: these used to list/search EVERY conversation on the box, with the person's
+        # first message as the title — a stranger could enumerate ids and then read the whole
+        # thread. Enumeration is now refused outright. Your own threads come back from
+        # POST /bind, which requires the key on your drive.
+        return _err(403, "listing conversations is not public — prove your key at POST /bind "
+                         "to get your own threads")
+
     if method == "GET" and path == "/thread/verify":
         from .. import threads as _threads
         tid = (query.get("id") or "").strip()

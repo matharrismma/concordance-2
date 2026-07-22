@@ -149,6 +149,29 @@ def claim(public_key: str, nonce: Any, signature: Any,
             "note": "possession of the drive is the proof; no account, no password, nothing stored about you"}
 
 
+def attach(owner: str, thread_id: str) -> bool:
+    """Bind a thread to an already-proven owner (the caller proved the key this request).
+
+    Used by surfaces that create a thread on a person's behalf — the thread must belong to
+    them from the first exchange, not merely be protected by an unguessable id.
+    """
+    if not owner or not thread_id:
+        return False
+    existing = _read(_thread_path(thread_id))
+    if existing and existing.get("owner") != owner:
+        return False                      # never re-home someone else's thread
+    if not existing:
+        _write(_thread_path(thread_id), {"thread_id": thread_id, "owner": owner,
+                                         "bound_at": round(time.time(), 3)})
+    rec = _read(_owner_path(owner)) or {"id": owner, "public_key": "", "threads": [],
+                                        "created_at": round(time.time(), 3)}
+    if thread_id not in rec["threads"]:
+        rec["threads"].append(thread_id)
+    rec["updated_at"] = round(time.time(), 3)
+    _write(_owner_path(owner), rec)
+    return True
+
+
 def owner_of(thread_id: str) -> Optional[str]:
     """The fingerprint that owns this thread, if any."""
     rec = _read(_thread_path(thread_id or ""))
