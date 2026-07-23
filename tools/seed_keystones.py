@@ -95,7 +95,47 @@ FLOOR_OF_DISCOVERY = {
     "surface": "witness", "generated": False,
 }
 
-SEEDS = [FOUR_GATES, FLOOR_OF_DISCOVERY]
+NCS_VALIDATION = {
+    "id": "card_k_ncs_validation",
+    "kind": "note",
+    "title": "Nested Control Systems — a pre-registered falsification program (NHANES)",
+    "body": (
+        "STATUS: pre-registered protocol, frozen 2026-03-04 — NOT yet executed. No verdict is "
+        "claimed; this seed records the TEST, not a result.\n"
+        "The nested-control-systems framework (the autonomic spine) is bound to a real, frozen, "
+        "falsifiable validation against NHANES 2011–2018 — with operational definitions pinned to "
+        "specific NHANES variables and explicit falsifiers set BEFORE the data are touched:\n"
+        "• H1 — the upstream manifold predicts 10-year mortality. Falsifier: AUC < 0.60 OR "
+        "ΔAUC ≤ 0 vs age+sex.\n"
+        "• H2 — hyperglycemia is mechanistically heterogeneous (clusters). Falsifier: best_k < 2 "
+        "OR medication χ² p > 0.05 OR bootstrap ARI < 0.40.\n"
+        "• H3 — Layer 5 (systemic) adds predictive lift for diabetes. Falsifier: ΔAUC_L5 < 0.015 "
+        "pooled OR negative in any adequately-powered cycle; clinical bar ΔAUC ≥ 0.02 to be SUPPORTED.\n"
+        "The rubric forbids self-declaration: no hypothesis may be labeled SUPPORTED without "
+        "surviving its full truth-suite (primary + stability + sensitivity). Three outcomes only — "
+        "SUPPORTED / FALSIFIED / INCONCLUSIVE.\n"
+        "Acknowledged limit: NHANES has no direct L1 (cellular-stress) markers — the L1 layer uses a "
+        "downstream proxy and does NOT test the framework's mechanistic L1 claims; a molecular cohort "
+        "(UK Biobank Olink proteomics) is the honest next step.\n"
+        "This is the FLOOR and BROTHERS gates made concrete: the claim is exposed to physical reality "
+        "with falsifiers named in advance, and to external witness. Defining what would break it — "
+        "before looking — is the rigor, whether or not it has yet been run.\n"
+        "Tamper-evident: the frozen package is fingerprinted (SHA-256 below); re-hashing the same "
+        "files reproduces it exactly."
+    ),
+    "source": {"label": "Operator's artifact (Matt) — framework_validation_v3_final, frozen 2026-03-04",
+               "url": "", "ref": "ncs_validation", "authority_tier": "matt",
+               "content_sha256": "a5fd8452486bd3f781313adc3a960dda2342710edcb9fe9ae5863de686dc99c6"},
+    "shelf": "science", "box": "medicine",
+    "bands": ["validation", "falsifiable", "pre-registered", "NHANES", "nested control systems",
+              "autonomic", "HRV", "mortality", "diabetes", "H1", "H2", "H3",
+              "status: not yet executed", "operator_artifact"],
+    "connections": [], "author": "matt", "created_at": 0.0, "updated_at": 0.0,
+    "visibility": "public", "lifecycle_stage": "public", "volatility": "durable",
+    "surface": "secular", "generated": False,
+}
+
+SEEDS = [FOUR_GATES, FLOOR_OF_DISCOVERY, NCS_VALIDATION]
 
 # reciprocal bridges into the existing floor (target ids verified live, 2026-07-22)
 BRIDGES = [
@@ -125,6 +165,17 @@ BRIDGES = [
     {"a": "card_k_four_gates", "b": "card_n_653e4ac3ff00",
      "relationship": "culminates_in",
      "evidence": "GOD: final submission to the Architect (Proverbs 9:10)"},
+    # the validation program <-> the science it tests (the autonomic spine + chronic-disease seed)
+    {"a": "card_k_ncs_validation", "b": "card_n_fe27e59e1804",
+     "relationship": "pre_registered_validation_of",
+     "evidence": "frozen NHANES falsification program for the nested-control / autonomic-spine framework"},
+    {"a": "card_k_ncs_validation", "b": "card_n_e41105aaa59f",
+     "relationship": "pre_registered_validation_of",
+     "evidence": "chronic disease as nested control-system failure — the claim these hypotheses test"},
+    # the validation <-> the gates it embodies (FLOOR: physical reality; BROTHERS: external witness)
+    {"a": "card_k_ncs_validation", "b": "card_k_four_gates",
+     "relationship": "embodies",
+     "evidence": "falsifiers named in advance + external validation = the FLOOR and BROTHERS gates"},
 ]
 
 

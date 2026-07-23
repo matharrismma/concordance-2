@@ -25,7 +25,13 @@ import seed_keystones as sk  # noqa: E402
 def test_the_keystones_are_matts_own_seeds_not_generated():
     for s in sk.SEEDS:
         assert s["author"] == "matt" and s["generated"] is False
-        assert s["source"]["authority_tier"] == "matt" and s["surface"] == "witness"
+        assert s["source"]["authority_tier"] == "matt"
+        assert s["surface"] in ("witness", "secular")   # theology on witness, the science on secular
+    # the two framing keystones are witness; the validation is secular science
+    by = {s["id"]: s for s in sk.SEEDS}
+    assert by["card_k_four_gates"]["surface"] == "witness"
+    assert by["card_k_floor_of_discovery"]["surface"] == "witness"
+    assert by["card_k_ncs_validation"]["surface"] == "secular"
 
 
 def test_four_gates_carries_the_fixed_order():
@@ -40,6 +46,34 @@ def test_floor_of_discovery_is_one_floor_leading_to_the_fear_of_God():
     assert "one floor" in fd["body"]
     assert "fear of the LORD is the beginning of wisdom" in fd["body"]
     assert "Proverbs 9:10" in fd["body"] and "idol" in fd["body"]  # never the idol
+
+
+def test_validation_seed_records_the_test_not_a_verdict():
+    """Honest binding: the seed records a pre-registered, falsifiable program — never a claim of
+    'confirmed'. It carries the falsifiers and a tamper-evident fingerprint, and says plainly it
+    has not been executed."""
+    v = next(s for s in sk.SEEDS if s["id"] == "card_k_ncs_validation")
+    body = v["body"]
+    assert "NOT yet executed" in body and "No verdict is claimed" in body
+    # it must not self-declare success
+    assert "SUPPORTED without surviving" in body           # the rubric, quoted — not a verdict
+    # the falsifiers are recorded (what would break each hypothesis)
+    for f in ("AUC < 0.60", "best_k < 2", "ΔAUC_L5 < 0.015"):
+        assert f in body
+    # honest about its own limit
+    assert "no direct L1" in body and "UK Biobank" in body
+    # tamper-evident fingerprint present and well-formed
+    h = v["source"]["content_sha256"]
+    assert len(h) == 64 and all(c in "0123456789abcdef" for c in h)
+    assert v["author"] == "matt" and v["generated"] is False
+
+
+def test_validation_bridges_bind_to_the_science_it_tests():
+    bridges = {(b["a"], b["b"]): b for b in sk.BRIDGES}
+    assert ("card_k_ncs_validation", "card_n_fe27e59e1804") in bridges  # the autonomic spine
+    assert ("card_k_ncs_validation", "card_n_e41105aaa59f") in bridges  # chronic-disease seed
+    assert bridges[("card_k_ncs_validation", "card_n_fe27e59e1804")]["relationship"] \
+        == "pre_registered_validation_of"
 
 
 def test_bridges_graft_the_keystones_into_the_floor_reciprocally():
