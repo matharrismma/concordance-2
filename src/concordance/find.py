@@ -7,16 +7,18 @@ We are the tortoise."
 
 So this is not a web-scraper that hands back whatever a search engine says. It is a slow, sure path:
 
-  1. Ask only PRIMARY / HIGH-QUALITY, openly-licensed sources — never arbitrary copyrighted pages
-     (that would break the moat: [[strict PD-only]]). Today: the Library of Congress (primary
-     documents, largely public domain) and Wikipedia (a high-quality reference, CC BY-SA — cacheable
-     WITH attribution). The provider list is meant to grow (Gutenberg, government archives, OA
-     scholarship) — always openly licensed, always attributed.
-  2. Run the finding through OUR OWN TOOLS before we vouch for it (the Auditor extracts checkable
-     claims and verifies them). We are good at telling what is false — so we frame by falsification:
-     anything our checks break is flagged; what survives stands, labeled "not our verified keeping".
-  3. Keep what we find. A card is minted (attributed, tiered `web_unverified`, carrying its check
-     verdict) so next time the keeping already holds it — the tool fills its own gaps.
+  1. Ask only PRIMARY, openly-licensed sources — NEVER Wikipedia or the current (everyone else
+     leans on that; we don't). We'd rather be slower and find a real source. Today: the Library of
+     Congress, the Internet Archive (public-domain texts, the tried-and-true 1850–1964 window), and
+     Project Gutenberg. Never arbitrary copyrighted pages (that would break the moat: [[strict
+     PD-only]]). The provider list is meant to grow — always openly licensed, always attributed.
+  2. Our own science answers what it can, UPSTREAM of here — the keeping + the verifiers construct
+     and verify (we already have the science; we don't need to always rely on the outside). This
+     runs only for what we don't yet hold, and it POINTS to primary sources rather than manufacturing
+     an answer from a summary.
+  3. Keep what we find. A public-domain source is minted as a `practical`/`source` card (tier
+     `primary_pd`, never masquerading as the verified keeping) so the library grows and can be
+     carried OFFLINE — the tool fills its own gaps, and works when the internet is not there.
 
 Sovereign and offline-first: this only runs when the keeping had no answer AND the network is
 reachable; every failure degrades to the honest "I don't have that". Server-side (the query leaves
@@ -102,39 +104,6 @@ def _get(url: str) -> Optional[str]:
 
 
 # ── providers: openly-licensed, primary / high-quality only ─────────────────────────────────
-def wikipedia(query: str) -> Optional[Dict[str, Any]]:
-    """A high-quality reference summary (CC BY-SA 4.0), attributed and cacheable. The plain answer."""
-    q = urllib.parse.quote(_topic(query))
-    # full-text search (not opensearch, which only matches titles) — so a natural-language question
-    # like "who invented the telephone" finds the right article
-    raw = _get(f"https://en.wikipedia.org/w/api.php?action=query&format=json&list=search"
-               f"&srlimit=1&srprop=&srsearch={q}")
-    if not raw:
-        return None
-    try:
-        hits = (json.loads(raw).get("query") or {}).get("search") or []
-        title = hits[0]["title"] if hits else None
-    except (ValueError, KeyError, IndexError):
-        return None
-    if not title:
-        return None
-    s = _get("https://en.wikipedia.org/api/rest_v1/page/summary/"
-             + urllib.parse.quote(title.replace(" ", "_")))
-    if not s:
-        return None
-    try:
-        d = json.loads(s)
-    except ValueError:
-        return None
-    extract = (d.get("extract") or "").strip()
-    if not extract or d.get("type") == "disambiguation":
-        return None
-    page = ((d.get("content_urls") or {}).get("desktop") or {}).get("page") \
-        or ("https://en.wikipedia.org/wiki/" + urllib.parse.quote(title.replace(" ", "_")))
-    return {"title": d.get("title") or title, "url": page, "extract": extract,
-            "source": "Wikipedia", "license": "CC BY-SA 4.0", "tier": "reference"}
-
-
 def library_of_congress(query: str, limit: int = 3) -> List[Dict[str, Any]]:
     """Primary documents from the Library of Congress — largely public domain. Not an 'answer';
     the original sources to go deeper, attributed and linked."""
@@ -237,52 +206,7 @@ def _store_path():
     return Path(base) / "web_cache.jsonl"
 
 
-def _mint(query: str, answer: Dict[str, Any], checks: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """Keep the finding so the keeping holds it next time — clearly tiered as web-sourced and
-    UNVERIFIED (never masquerading as the verified keeping), carrying its check verdict."""
-    try:
-        url = answer.get("url") or ""
-        cid = "card_web_" + hashlib.sha256((answer.get("source", "") + "|" + url).encode()).hexdigest()[:12]
-        verdict = (checks or {}).get("verdict") or "UNCHECKED"
-        broken = (checks or {}).get("broken_or_unchecked", 0)
-        body = (answer.get("extract", "") + "\n\nSource: " + answer.get("source", "") + " — "
-                + url + " (" + answer.get("license", "") + "). Open source, NOT the verified "
-                "keeping. Our checks: " + verdict
-                + (f" — {broken} claim(s) our tools could not confirm." if broken else "."))
-        card = {"id": cid, "kind": "web", "title": answer.get("title", "")[:100], "body": body,
-                "source": {"label": answer.get("source", "") + " (open web)", "url": url,
-                           "license": answer.get("license", ""), "authority_tier": "web_unverified",
-                           "checked": verdict},
-                "shelf": "web", "box": "web_cache",
-                "bands": ["web", "unverified", answer.get("source", "").lower()] + sorted(_tokens(query))[:6],
-                "connections": [], "author": "web", "created_at": time.time(), "updated_at": time.time(),
-                "visibility": "public", "lifecycle_stage": "public", "volatility": "cached",
-                "surface": "secular", "generated": False, "verified": False}
-        p = _store_path()
-        p.parent.mkdir(parents=True, exist_ok=True)
-        existing = set()
-        if p.exists():
-            for ln in p.read_text(encoding="utf-8").splitlines():
-                ln = ln.strip()
-                if ln:
-                    try:
-                        existing.add(json.loads(ln).get("id"))
-                    except ValueError:
-                        pass
-        if cid not in existing:
-            with open(p, "a", encoding="utf-8") as fh:
-                fh.write(json.dumps(card, ensure_ascii=False) + "\n")
-            try:
-                from . import corpus as _c
-                _c.add_to_default(card)
-            except Exception:  # noqa: BLE001
-                pass
-        return card
-    except Exception:  # noqa: BLE001
-        return None
-
-
-def _mint_doc(query: str, doc: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def _mint_doc(query: str, doc: Dict[str, Any], practical: bool = True) -> Optional[Dict[str, Any]]:
     """Keep a tried-and-true public-domain practical source in the keeping — a higher tier than the
     open web (primary + PD), so the practical library grows and can be carried offline."""
     try:
@@ -290,15 +214,19 @@ def _mint_doc(query: str, doc: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         cid = "card_pd_" + hashlib.sha256((doc.get("source", "") + "|" + url).encode()).hexdigest()[:12]
         yr = (" (" + doc["year"] + ")") if doc.get("year") else ""
         who = (" — " + doc["creator"]) if doc.get("creator") else ""
-        body = (doc.get("title", "") + yr + who + "\n\nA tried-and-true, public-domain source: "
-                + doc.get("source", "") + " — " + url + ". Carry the torch of Foxfire — practical "
-                "knowledge that has stood the test of time. Public domain (" + doc.get("license", "")
+        tag = ("Carry the torch of Foxfire — practical knowledge that has stood the test of time."
+               if practical else "A primary source — go to the original, not a summary.")
+        body = (doc.get("title", "") + yr + who + "\n\nA public-domain source: " + doc.get("source", "")
+                + " — " + url + ". " + tag + " Public domain (" + doc.get("license", "")
                 + "), so it can be kept and used offline.")
-        card = {"id": cid, "kind": "practical", "title": doc.get("title", "")[:100], "body": body,
+        card = {"id": cid, "kind": "practical" if practical else "source",
+                "title": doc.get("title", "")[:100], "body": body,
                 "source": {"label": doc.get("source", "") + (yr or ""), "url": url,
                            "license": doc.get("license", ""), "authority_tier": "primary_pd"},
-                "shelf": "practical", "box": "foxfire",
-                "bands": ["practical", "foxfire", "public domain", doc.get("source", "").lower()]
+                "shelf": "practical" if practical else "sources",
+                "box": "foxfire" if practical else "primary",
+                "bands": (["practical", "foxfire"] if practical else ["source", "primary"])
+                + ["public domain", doc.get("source", "").lower()]
                 + ([doc["year"]] if doc.get("year") else []) + sorted(_tokens(query))[:6],
                 "connections": [], "author": "archive", "created_at": time.time(),
                 "updated_at": time.time(), "visibility": "public", "lifecycle_stage": "public",
@@ -332,57 +260,27 @@ def find_and_check(query: str, config) -> Optional[Dict[str, Any]]:
     if not enabled():
         return None
     try:
-        # Practical / how-to → carry the torch of Foxfire: tried-and-true, PUBLIC-DOMAIN sources
-        # (1920s–1950s), not the current. We don't lean on the latest — everyone else does that.
-        if is_practical(query):
-            docs = internet_archive(query) + project_gutenberg(query) + library_of_congress(query)
-            if docs:
-                for d in docs[:2]:
-                    _mint_doc(query, d)
-                return {
-                    "source_note": ("The keeping doesn't hold this yet. For practical knowledge we "
-                                    "carry the torch of Foxfire — we look back before the modern "
-                                    "inputs, to the tried-and-true (the 1920s–1950s), public-domain "
-                                    "and proven. Not the latest; everyone else does that. Slower, "
-                                    "surer. We are the tortoise."),
-                    "answer": None, "framed": "", "checks_verdict": None, "documents": docs,
-                }
-            # nothing practical found — fall through to the general path
-        answer = wikipedia(query)
-        if answer and not _relevant(query, answer.get("title", ""), answer.get("extract", "")):
-            answer = None
-        docs = library_of_congress(query)
-        if not answer and not docs:
+        practical = is_practical(query)
+        # PRIMARY, public-domain sources only — never Wikipedia, never the latest. We'd rather be
+        # slower and send you to a real source than lean on a summary. Our own science answers what
+        # it can, upstream of here (the keeping + verifiers — we construct and verify); this points
+        # to primary sources for what we don't yet hold.
+        docs = internet_archive(query) + project_gutenberg(query) + library_of_congress(query)
+        if not docs:
             return None
-
-        checks = {"verdict": "NOTHING_TO_CHECK"}
-        framed = ""
-        if answer:
-            try:
-                from . import audit as _audit
-                checks = _audit.audit(answer["extract"], config, seal=False)
-            except Exception:  # noqa: BLE001
-                checks = {"verdict": "NOTHING_TO_CHECK", "results": []}
-            broken = [r for r in (checks.get("results") or []) if r.get("status") != "CONFIRMED"]
-            held = [r for r in (checks.get("results") or []) if r.get("status") == "CONFIRMED"]
-            # we are good at telling what is false — so we lead with it
-            if broken:
-                framed = ("⚠ Our checks flag part of this as false or unconfirmed: "
-                          + "; ".join((b.get("claim") or "")[:80] for b in broken[:2]))
-            elif held:
-                framed = (f"We checked {len(held)} claim(s) in this and they hold "
-                          "(survived our verification — not the same as proven beyond all doubt).")
-            else:
-                framed = ("We could not independently check the specifics — treat it as an open "
-                          "source, not our verified keeping.")
-            _mint(query, answer, checks)
-
-        return {
-            "source_note": ("The keeping doesn't hold a verified answer for that. So we do the slow, "
-                            "sure thing — search primary and high-quality sources, and run what we "
-                            "find through our own checks. We are the tortoise, not the hare."),
-            "answer": answer, "framed": framed, "checks_verdict": checks.get("verdict"),
-            "documents": docs,
-        }
+        for d in docs[:3]:
+            _mint_doc(query, d, practical=practical)
+        if practical:
+            note = ("The keeping doesn't hold this yet. For practical knowledge we carry the torch of "
+                    "Foxfire — we look back before the modern inputs, to the tried-and-true (the "
+                    "1920s–1950s), public-domain and proven. Not the latest; everyone else does that. "
+                    "Slower, surer. We are the tortoise.")
+        else:
+            note = ("The keeping doesn't hold a verified answer for that yet. We construct and verify "
+                    "from our own science where we can; the rest we won't fetch from a summary — we'd "
+                    "rather be slower and send you to primary, public-domain sources. We are the "
+                    "tortoise.")
+        return {"source_note": note, "answer": None, "framed": "", "checks_verdict": None,
+                "documents": docs}
     except Exception:  # noqa: BLE001
         return None

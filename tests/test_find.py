@@ -21,8 +21,7 @@ from concordance import find  # noqa: E402
 from concordance.config import EngineConfig  # noqa: E402
 
 SEC = EngineConfig("secular")
-_WIKI, _LOC = find.wikipedia, find.library_of_congress
-_IA, _GUT = find.internet_archive, find.project_gutenberg
+_LOC, _IA, _GUT = find.library_of_congress, find.internet_archive, find.project_gutenberg
 
 
 def _enable():
@@ -30,8 +29,7 @@ def _enable():
 
 
 def _restore():
-    find.wikipedia, find.library_of_congress = _WIKI, _LOC
-    find.internet_archive, find.project_gutenberg = _IA, _GUT
+    find.library_of_congress, find.internet_archive, find.project_gutenberg = _LOC, _IA, _GUT
     os.environ["WEB_FIND_DISABLED"] = "1"             # back to the test-wide default (off)
 
 
@@ -40,39 +38,24 @@ def test_relevance_keeps_only_what_matches():
     assert not find._relevant("speed of light", "a novel about sailing pirates")
 
 
-def test_find_runs_through_checks_and_keeps_a_web_tier_card():
+def test_no_wikipedia_only_primary_public_domain_sources():
+    """No Wikipedia, no summary — a factual question we don't hold points to PRIMARY, public-domain
+    sources, kept as a primary_pd 'source' card (never masquerading as the verified keeping)."""
     _enable()
-    find.wikipedia = lambda q: {"title": "Speed of light", "url": "https://en.wikipedia.org/wiki/Speed_of_light",
-                                "extract": "The speed of light is a universal physical constant.",
-                                "source": "Wikipedia", "license": "CC BY-SA 4.0", "tier": "reference"}
+    find.internet_archive = lambda q, limit=3: []
+    find.project_gutenberg = lambda q, limit=3: []
     find.library_of_congress = lambda q, limit=3: [
-        {"title": "Stillness at the Speed of Light", "url": "http://www.loc.gov/item/x/",
-         "format": "photo", "source": "Library of Congress", "license": "PD", "tier": "primary"}]
+        {"title": "The sinking of the Titanic", "url": "http://www.loc.gov/item/titanic/",
+         "format": "book", "source": "Library of Congress", "license": "PD", "tier": "primary"}]
     try:
-        r = find.find_and_check("what is the speed of light", SEC)
-        assert r and r["answer"]["source"] == "Wikipedia"
-        assert "tortoise" in r["source_note"]
-        assert r["documents"] and r["documents"][0]["source"] == "Library of Congress"
-        # it was kept — as an UNVERIFIED, web-tier card, never as the verified keeping
+        r = find.find_and_check("what year did the Titanic sink", SEC)
+        assert r and r["answer"] is None                     # we don't manufacture an answer
+        assert "Wikipedia" not in json.dumps(r)              # never Wikipedia
+        assert r["documents"][0]["source"] == "Library of Congress"
         cards = [json.loads(l) for l in find._store_path().read_text(encoding="utf-8").splitlines() if l.strip()]
-        c = next(c for c in cards if c["title"] == "Speed of light")
-        assert c["kind"] == "web" and c["verified"] is False
-        assert c["source"]["authority_tier"] == "web_unverified"
-        assert "not the verified keeping" in c["body"].lower()
-    finally:
-        _restore()
-
-
-def test_falsehood_in_a_finding_is_flagged_our_strength():
-    # a finding whose arithmetic is wrong — the Auditor catches it and we frame by the falsehood
-    _enable()
-    find.wikipedia = lambda q: {"title": "A bad figure", "url": "https://en.wikipedia.org/wiki/x",
-                                "extract": "This percent report says 15% of 200 is 25, an error.",
-                                "source": "Wikipedia", "license": "CC BY-SA 4.0", "tier": "reference"}
-    find.library_of_congress = lambda q, limit=3: []
-    try:
-        r = find.find_and_check("the percent report", SEC)
-        assert r and ("flag" in r["framed"].lower() or "false" in r["framed"].lower())
+        c = next(c for c in cards if c["title"] == "The sinking of the Titanic")
+        assert c["kind"] == "source" and c["source"]["authority_tier"] == "primary_pd"
+        assert c["verified"] is False
     finally:
         _restore()
 
