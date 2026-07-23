@@ -14,7 +14,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 os.environ["CONCORDANCE_DATA_DIR"] = tempfile.mkdtemp(prefix="nh-ask-")
 # Discernment validates loose references against the real canon; the deck stays isolated in
 # the temp dir above, but the Bible itself comes from the repo data (droplet-primary, not git).
-os.environ["CONCORDANCE_BIBLE_EN"] = str(Path(__file__).resolve().parent.parent / "data" / "bible_en.jsonl")  # isolate seal writes
+os.environ["CONCORDANCE_BIBLE_EN"] = str(Path(__file__).resolve().parent.parent / "data" / "bible_en.jsonl")
+# the Body's characters member reads Easton's from the repo data (droplet-primary, not git)
+os.environ["CONCORDANCE_CHARACTERS_DIR"] = str(
+    Path(__file__).resolve().parent.parent / "data" / "characters")
+os.environ["CONCORDANCE_PROPHECY_DIR"] = str(
+    Path(__file__).resolve().parent.parent / "data" / "prophecy")  # isolate seal writes
 
 from concordance import ask  # noqa: E402
 from concordance.config import EngineConfig  # noqa: E402
@@ -185,6 +190,49 @@ def test_a_discerned_verse_never_ships_keyword_junk():
 def test_explain_reads_the_passage_not_one_line():
     rows = ask.respond("explain the prodigal son", WIT).get("scripture") or []
     assert len(rows) >= 20, "a named passage is the whole passage, not a single verse"
+
+
+# ── the Body: prose reaches every member, and a routed ask never ships junk ─────────────────
+
+def test_the_body_answers_money_teaching_people_and_prophecy():
+    """Member data paths resolve at CALL time, so the repo-data overrides are set inside the
+    test — under one pytest process the module-level env belongs to whichever test file
+    imported last (SOP-11), and this test must not depend on collection order."""
+    repo = Path(__file__).resolve().parent.parent / "data"
+    saved = {k: os.environ.get(k) for k in
+             ("CONCORDANCE_CHARACTERS_DIR", "CONCORDANCE_PROPHECY_DIR")}
+    os.environ["CONCORDANCE_CHARACTERS_DIR"] = str(repo / "characters")
+    os.environ["CONCORDANCE_PROPHECY_DIR"] = str(repo / "prophecy")
+    try:
+        cases = {"help me budget my money": "steward",
+                 "I cant afford groceries this month": "steward",
+                 "teach me fractions": "coach",
+                 "who was Moses": "characters",
+                 "prophecies about the messiah": "prophecy"}
+        for text, want in cases.items():
+            r = ask.respond(text, SEC)
+            assert r["kind"] == want, (text, r["kind"])
+            assert r.get("message") or r.get("resources"), f"{want} answered with nothing"
+            assert "results" not in r, f"{want} shipped keyword junk under its answer"
+    finally:
+        for k, v in saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+
+def test_a_member_with_nothing_falls_through_to_an_honest_search():
+    """No specialist bluffs: a characters ask for nobody real ends in search, not a shrug."""
+    r = ask.respond("who was Zaphenath the imaginary", SEC)
+    assert r["kind"] == "found"
+
+
+def test_crisis_outranks_every_member():
+    """Money words plus crisis words is a person in crisis, not a budget question."""
+    r = ask.respond("i cant afford rent and i want to end it", SEC)
+    assert r["kind"] == "crisis"
+    assert any("988" in x["label"] for x in r["resources"])
 
 
 if __name__ == "__main__":

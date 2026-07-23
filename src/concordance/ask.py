@@ -338,6 +338,85 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                 pass
         return _witnessed(out, text, witness, gate_just_opened, topical=False)
 
+    # ── the Body (1 Cor 12): no core kind claimed it, so ask the Router which member it
+    # belongs to. Each specialist answers in fields the page already renders (message +
+    # resources) — and a routed ask never ships keyword junk underneath its answer.
+    member = ""
+    if kind == "search":
+        from . import router as _router          # lazy: router imports ask at module load
+        try:
+            member = _router.route(text or "").get("member", "")
+        except Exception:  # noqa: BLE001
+            member = ""
+
+    if member == "steward":
+        from . import steward as _st
+        g = _st.guidance()
+        does = [{"label": d, "ref": "/steward.html"} for d in (g.get("does") or [])[:3]]
+        return _witnessed({**base, "kind": "steward",
+                           "message": g.get("identity", "The Steward helps you manage money — it never moves it."),
+                           "resources": [{"label": "Open the Steward and build it with real numbers",
+                                          "ref": "/steward.html"}] + does},
+                          text, witness, gate_just_opened)
+
+    if member == "coach":
+        from . import coach as _co
+        unit = {}
+        try:
+            unit = (_co.recommend(text) or {}).get("unit") or {}
+        except Exception:  # noqa: BLE001
+            unit = {}
+        msg = ("A place to start: " + unit["title"]) if unit.get("title") else             "The Coach teaches at the learner's level — reading first, then onward."
+        return _witnessed({**base, "kind": "coach", "message": msg,
+                           "resources": [{"label": "Open the Coach — the lesson and the next step",
+                                          "ref": "/read.html"}]},
+                          text, witness, gate_just_opened)
+
+    if member == "characters":
+        from . import characters as _ch
+        # the name is what is left when the question words are taken away
+        name = re.sub(r"\b(who|was|is|were|the|a|an|in|of|bible|scripture|tell|me|about)\b",
+                      " ", text or "", flags=re.I)
+        name = re.sub(r"[^A-Za-z ]", " ", name)
+        name = " ".join(w for w in name.split() if w)[:60]
+        rec = _ch.get(name) if name else None
+        if not rec and name:
+            hits = (_ch.browse(search=name, limit=1) or {}).get("characters") or []
+            rec = _ch.get(hits[0]["name"]) if hits else None
+        if rec:
+            return _witnessed({**base, "kind": "characters",
+                               "message": rec.get("name", name) + " — " + (rec.get("summary") or ""),
+                               "resources": [{"label": "The full entry, and everyone else",
+                                              "ref": "/characters.html?search=" + (rec.get("slug") or "")}]},
+                              text, witness, gate_just_opened)
+        member = ""  # nobody by that name — fall through to an honest search
+
+    if member == "almanac":
+        from . import almanac as _al
+        entries = (_al.search(text or "") or {}).get("entries") or []
+        if entries:
+            return _witnessed({**base, "kind": "almanac",
+                               "message": "From the almanac — verified entries only:",
+                               "resources": [{"label": e.get("title", ""), "ref": "/almanac.html"}
+                                             for e in entries[:4]]},
+                              text, witness, gate_just_opened)
+        member = ""
+
+    if member == "prophecy":
+        from . import prophecy as _pr
+        # the words that ROUTED here would drown the search — "prophecies about the messiah"
+        # must reach the traces by "messiah", not by "prophecies"
+        topic = re.sub(r"\b(prophec\w*|fulfil\w*|traces?|about|the|of|what|which|are|is|in)\b",
+                       " ", text or "", flags=re.I).strip()
+        traces = (_pr.search(topic or text or "") or {}).get("traces") or []
+        if traces:
+            return _witnessed({**base, "kind": "prophecy",
+                               "message": "Traces kept, with their fulfilment:",
+                               "resources": [{"label": t.get("title", ""), "ref": "/prophecy.html"}
+                                             for t in traces[:4]]},
+                              text, witness, gate_just_opened)
+        member = ""
+
     # default — and the secular fallback for scripture/word_study when the gate is closed
     return _witnessed({**base, "kind": "found",
                        "results": [corpus._brief(c) for c in corpus.search(text, limit=6)]},

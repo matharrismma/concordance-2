@@ -44,7 +44,7 @@ MEMBERS: Dict[str, str] = {
 
 # (priority, member, pattern, why). Lower priority wins. Same priority + different member = tie.
 _KEYWORD_RULES: List[Tuple[int, str, str, str]] = [
-    (20, "steward", r"\b(bill|bills|budget|rent|invoice|owe|debt|tithe|offering|paycheck|expense|ledger)\b", "money/resources"),
+    (20, "steward", r"\b(bill|bills|budget|rent|invoice|owe|debt|tithe|offering|paycheck|expense|ledger|afford|groceries|savings|spend|spending)\b", "money/resources"),
     (20, "coach", r"\b(teach|lesson|phonics|spelling|spell|curriculum|grade|homework|learn to read|next step)\b", "teaching"),
     (21, "cross_refs", r"\b(cross[- ]?refs?|cross[- ]?references?|related verses?|parallel passages?)\b", "cross-reference"),
     (21, "commentary", r"\b(commentary|commentaries|exposition|what did the fathers say)\b", "commentary"),
