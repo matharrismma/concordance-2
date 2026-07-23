@@ -193,7 +193,7 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
     #                           on github, not only in the code
     if path is None:
         for extra in ("verified_cards.jsonl", "reference_cards.jsonl", "keystone_seeds.jsonl",
-                      "nesting_seeds.jsonl"):
+                      "nesting_seeds.jsonl", "web_cache.jsonl"):
             xp = p.parent / extra
             if not xp.exists():
                 continue

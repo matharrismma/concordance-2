@@ -178,12 +178,16 @@ def _is_question(text: str) -> bool:
 
 
 def _shares_a_word(text: str, card: Dict[str, Any]) -> bool:
-    """Does the keeping's hit actually share a content word with what was asked?"""
+    """Does the keeping's hit actually share a DISTINCTIVE word with what was asked? A match on a
+    common word ('year', 'day') is not enough — 'what year did the Titanic sink' must be carried by
+    a hit that names the Titanic, not merely one that says 'year'. So when the question has specific
+    words (≥5 letters), require one of THOSE to match; only fall back to any-word when it has none."""
     q = _content_tokens(text)
     if not q:
         return True                                   # nothing specific asked — don't second-guess
     hay = _content_tokens((card.get("title") or "") + " " + (card.get("body") or ""))
-    return bool(q & hay)
+    distinctive = {w for w in q if len(w) >= 5}
+    return bool(distinctive & hay) if distinctive else bool(q & hay)
 
 
 def find_ref(text: str):
@@ -586,8 +590,22 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     hits = corpus.search(text, limit=6)
     weak = (not hits) or not _shares_a_word(text, hits[0])
     if weak:
-        # An honest "I don't have that" beats a confident irrelevant hit (the "sore throat ->
-        # Marcus Aurelius" failure). If it was a question, offer the real next steps instead.
+        # The tortoise: the keeping doesn't hold it, so go FIND it — surely. Primary / high-quality
+        # sources only, run through our own tools, false claims flagged, and kept for next time.
+        try:
+            from . import find as _find
+            found = _find.find_and_check(text, config)
+        except Exception:  # noqa: BLE001
+            found = None
+        if found and (found.get("answer") or found.get("documents")):
+            return _witnessed({**base, "kind": "web", "message": found.get("source_note", ""),
+                               "web": {"answer": found.get("answer"),
+                                       "framed": found.get("framed", ""),
+                                       "checks": found.get("checks_verdict"),
+                                       "documents": found.get("documents") or []}},
+                              text, witness, gate_just_opened)
+        # nothing high-quality found (or offline). An honest "I don't have that" beats a confident
+        # irrelevant hit (the "sore throat -> Marcus Aurelius" failure).
         if _is_question(text):
             return _witnessed({**base, "kind": "found", "results": [],
                                "message": "I don't have a verified answer for that, and I won't "

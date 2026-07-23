@@ -298,6 +298,24 @@
   function render(d,isDoc){
     var h='';
     if(d.message) h += '<div>'+esc(d.message)+'</div>';
+    // the tortoise: a finding from primary / high-quality open sources, run through our checks
+    if(d.web){
+      var wa=d.web.answer;
+      if(wa){
+        h += '<div class="hit"><b><a href="'+esc(wa.url)+'" target="_blank" rel="noopener">'+
+             esc(wa.title)+'</a></b><span class="sn">'+esc((wa.extract||'').slice(0,600))+'</span></div>';
+        h += '<div class="note">'+esc(wa.source)+' · '+esc(wa.license)+
+             ' · an open source, not our verified keeping</div>';
+      }
+      if(d.web.framed) h += '<div class="note"><b>'+esc(d.web.framed)+'</b></div>';
+      if(d.web.documents && d.web.documents.length)
+        h += '<div class="res"><div class="note" style="margin:.3rem 0 .15rem">'+
+             'Primary documents — Library of Congress:</div>'+
+             d.web.documents.map(function(x){
+               return '<div class="hit"><a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+
+                      esc(x.title)+'</a>'+(x.format?'<span class="sn">'+esc(x.format)+'</span>':'')+
+                      '</div>'; }).join('')+'</div>';
+    }
     if(d.verify){
       var v=d.verify;
       h += '<div><span class="verdict '+esc(v.verdict)+'">'+esc(v.verdict)+'</span>'+
