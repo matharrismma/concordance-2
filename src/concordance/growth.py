@@ -50,11 +50,16 @@ def norm_ref(book: str, ch: str, vs: str) -> str:
     return f"{_BOOK.get(key, book.strip())} {int(ch)}:{int(vs)}"
 
 
+def refs_in_text(text: str) -> Set[str]:
+    """Every distinct, normalized verse named in a string. The one place text -> verses lives."""
+    return {norm_ref(m.group(1), m.group(2), m.group(3)) for m in _REF.finditer(text or "")}
+
+
 def refs_of(card: Dict[str, Any]) -> Set[str]:
     """Every distinct, normalized verse a card names — in its source ref, bands, or title."""
     hay = " ".join([str((card.get("source") or {}).get("ref", "")),
                     " ".join(card.get("bands") or []), str(card.get("title", ""))])
-    return {norm_ref(m.group(1), m.group(2), m.group(3)) for m in _REF.finditer(hay)}
+    return refs_in_text(hay)
 
 
 def _links(card: Dict[str, Any]) -> List[Dict[str, Any]]:

@@ -251,6 +251,26 @@ def _witnessed(r: Dict[str, Any], text: str, witness: bool, just_opened: bool,
     return r
 
 
+def _connected_cloud(card_id: str, *, limit: int = 5) -> List[Dict[str, Any]]:
+    """The keeping's strength: who else in the tradition is connected to this card. Verified
+    links only (shared scripture, cites) resolved to titles. Empty when nothing connects."""
+    if not card_id:
+        return []
+    conn = corpus.connections(card_id, limit=limit + 3) or {}
+    cloud, seen = [], set()
+    for ln in (conn.get("links") or []):
+        tid = ln.get("to_card_id")
+        if not tid or tid in seen:
+            continue
+        seen.add(tid)
+        wc = corpus.get_card(tid)
+        if wc:
+            cloud.append({"id": tid, "title": wc.get("title", ""), "shares": ln.get("evidence", "")})
+        if len(cloud) >= limit:
+            break
+    return cloud
+
+
 def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
             gate_just_opened: bool = False) -> Dict[str, Any]:
     """Compose a conduit response: found + verified + cited + curated material only. No LLM.
@@ -322,6 +342,16 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
             rows = ([{"ref": one.get("ref", ref), "text": one.get("text", "")}]
                     if one.get("status") == "ok" else [])
         out = {**base, "scripture": rows}
+        # the strength, on the answer people seek most: the verse, verified, WITH the cloud of
+        # witnesses the keeping connects to it. The exact-reference boost makes search(ref) find
+        # the verse's own card first, so its links are the tradition around this passage.
+        try:
+            anchor_hit = corpus.search(rows[0]["ref"], limit=1) if rows else []
+            cloud = _connected_cloud(anchor_hit[0].get("id")) if anchor_hit else []
+            if cloud:
+                out["cloud"] = {"around": rows[0]["ref"], "witnesses": cloud}
+        except Exception:  # noqa: BLE001
+            pass
         # asking for meaning earns the study: what Scripture itself says elsewhere (TSK), and
         # a public-domain commentator in his own words — found and attributed, never generated
         if study and rows:
@@ -441,7 +471,14 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                               text, witness, gate_just_opened)
         member = ""
 
-    # default — and the secular fallback for scripture/word_study when the gate is closed
-    return _witnessed({**base, "kind": "found",
-                       "results": [corpus._brief(c) for c in corpus.search(text, limit=6)]},
-                      text, witness, gate_just_opened)
+    # default — and the secular fallback for scripture/word_study when the gate is closed.
+    # The strength the traffic revealed: 87% of use is search, and the unrepeatable thing we do
+    # is return the hit WITH its connected cloud — the communion of witnesses the graph already
+    # holds around it. So the top result carries who else in the keeping speaks to the same thing.
+    hits = corpus.search(text, limit=6)
+    out = {**base, "kind": "found", "results": [corpus._brief(c) for c in hits]}
+    if hits:
+        cloud = _connected_cloud(hits[0].get("id"))
+        if cloud:
+            out["cloud"] = {"around": hits[0].get("title", ""), "witnesses": cloud}
+    return _witnessed(out, text, witness, gate_just_opened)

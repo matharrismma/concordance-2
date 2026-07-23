@@ -327,6 +327,13 @@
       h += d.results.slice(0,6).map(function(r){
         return '<div class="hit"><b><a href="/card.html?id='+encodeURIComponent(r.id)+'">'+esc(r.title)+'</a></b>'+
                '<span class="sn">'+esc((r.snippet||'').slice(0,180))+'</span></div>'; }).join('');
+    // the connected cloud — the keeping's strength: who else in the tradition speaks to this
+    if(d.cloud && d.cloud.witnesses && d.cloud.witnesses.length)
+      h += '<div class="hit"><b>Connected in the keeping</b>'+
+           d.cloud.witnesses.map(function(w){
+             return '<span class="sn"><a href="/card.html?id='+encodeURIComponent(w.id)+'">'+
+                    esc(w.title)+'</a>'+(w.shares?' — '+esc(w.shares):'')+'</span>'; }).join('')+
+           '</div>';
 
     var spoken=d.message||'';
     if(!spoken && d.verify) spoken='The verdict is '+(d.verify.verdict||'')+'.';

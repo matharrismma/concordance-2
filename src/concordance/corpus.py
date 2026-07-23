@@ -115,6 +115,12 @@ class Corpus:
         if not query_tokens:
             return []
         idf = self._idf(query_tokens)
+        # exact-match targets: the query as typed, and its canonical verse forms — so a verse
+        # lookup ("Philippians 4:13", the most common human search) ranks the verse card first
+        # instead of a fuzzy book match. Reuses the growth engine's one verse canonicalizer.
+        from . import growth as _growth
+        qn = " ".join((query or "").lower().split())
+        q_exact = {qn} | {r.lower() for r in _growth.refs_in_text(query or "")}
         scored = []
         for cid in self._candidates(query_tokens):
             c = self.cards.get(cid)
@@ -124,6 +130,12 @@ class Corpus:
                 continue
             s = self._score(c, query_tokens, idf)
             if s > 0:
+                title_n = " ".join(str(c.get("title", "")).lower().split())
+                ref_n = " ".join(str((c.get("source") or {}).get("ref", "")).lower().split())
+                if title_n in q_exact or (ref_n and ref_n in q_exact and title_n in q_exact):
+                    s *= 9.0                              # THE card for this exact reference/title
+                elif q_exact and (title_n in q_exact or ref_n in q_exact):
+                    s *= 4.0
                 scored.append((s, c))
         scored.sort(key=lambda x: -x[0])
         return [c for _s, c in scored[:max(1, int(limit))]]

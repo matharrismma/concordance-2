@@ -19,7 +19,9 @@ os.environ["CONCORDANCE_BIBLE_EN"] = str(Path(__file__).resolve().parent.parent 
 os.environ["CONCORDANCE_CHARACTERS_DIR"] = str(
     Path(__file__).resolve().parent.parent / "data" / "characters")
 os.environ["CONCORDANCE_PROPHECY_DIR"] = str(
-    Path(__file__).resolve().parent.parent / "data" / "prophecy")  # isolate seal writes
+    Path(__file__).resolve().parent.parent / "data" / "prophecy")
+os.environ["CONCORDANCE_CARDS_JSONL"] = str(
+    Path(__file__).resolve().parent.parent / "data" / "cards.jsonl")  # isolate seal writes
 
 from concordance import ask  # noqa: E402
 from concordance.config import EngineConfig  # noqa: E402
@@ -256,6 +258,27 @@ def test_stream_of_consciousness_is_kept_quietly():
 def test_a_crisis_reminder_is_a_crisis():
     r = ask.respond("remind me to end it all", SEC)
     assert r["kind"] == "crisis"
+
+
+# ── leaning into the strength the traffic showed: verified, connected verse search ──────────
+
+def test_an_exact_reference_ranks_the_verse_card_first():
+    """87% of use is search, and its commonest human shape is a verse reference. The card that
+    IS Philippians 4:13 must beat a card that merely says 'Philippians' more often."""
+    from concordance import corpus
+    hits = corpus.search("Philippians 4:13", limit=5)
+    assert hits, "no results"
+    top = " ".join(str(hits[0].get("title", "")).lower().split())
+    assert top == "philippians 4:13", f"exact verse did not rank first: {hits[0].get('title')!r}"
+
+
+def test_the_search_answer_carries_its_connected_cloud():
+    """The unrepeatable strength: a hit returns WITH the witnesses connected to it."""
+    r = ask.respond("Philippians 4:13", SEC)
+    if r["kind"] == "found" and r.get("results"):
+        cloud = r.get("cloud")
+        assert cloud and cloud.get("witnesses"), "the top hit shipped no connected cloud"
+        assert all(w.get("id") and w.get("title") for w in cloud["witnesses"])
 
 
 if __name__ == "__main__":
