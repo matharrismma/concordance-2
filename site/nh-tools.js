@@ -62,7 +62,18 @@
     '#nh-pal li[aria-selected="true"]{background:rgba(198,154,74,.24)}' +
     '#nh-pal li span{color:#9b8a6d;font-size:.78rem}' +
     '#nh-pal .hint{padding:.45rem 1rem;font-size:.72rem;color:#9b8a6d;' +
-      'border-top:1px solid rgba(138,106,47,.2)}';
+      'border-top:1px solid rgba(138,106,47,.2)}' +
+    /* the always-there, thumb-sized way in — so every tool is reachable from every page without a
+       keyboard. Injected only where the page has no visible trigger of its own. */
+    '#nh-fab{position:fixed;right:14px;bottom:14px;z-index:2147481500;width:48px;height:48px;' +
+      'border-radius:50%;border:0;cursor:pointer;background:linear-gradient(180deg,#c69a4a,#8a6a2f);' +
+      'color:#fff;font-size:1.4rem;line-height:1;box-shadow:0 3px 10px -2px rgba(0,0,0,.5);' +
+      'opacity:.62;transition:opacity .15s ease,transform .15s ease;' +
+      'display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0}' +
+    '#nh-fab:hover,#nh-fab:focus{opacity:1;transform:scale(1.06);outline:0}' +
+    '@media (max-width:900px){#nh-fab{width:54px;height:54px;right:12px;bottom:12px;opacity:.85;' +
+      'font-size:1.6rem}}' +
+    '@media print{#nh-fab{display:none}}';
   document.head.appendChild(css);
 
   var wrap = document.createElement('div');
@@ -139,6 +150,27 @@
         if (wrap.dataset.open === '1') close(); else open();
       }
     });
+
+    // any page can open the palette directly (cleaner than a synthetic Ctrl-K), and any element
+    // marked data-nh-open becomes a trigger
+    window.__nhPalOpen = open;
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest && e.target.closest('[data-nh-open]');
+      if (t) { e.preventDefault(); open(); }
+    });
+
+    // the visible way in, for fingers: a floating button on every page that has none of its own,
+    // so no page is a dead-end on a phone. Pages with a top-nav trigger (#doors) keep theirs.
+    if (!document.getElementById('doors') && !document.querySelector('[data-nh-open]')) {
+      var fab = document.createElement('button');
+      fab.id = 'nh-fab';
+      fab.type = 'button';
+      fab.setAttribute('aria-label', 'Every tool');
+      fab.setAttribute('title', 'Every tool');
+      fab.innerHTML = '&#8943;';
+      fab.addEventListener('click', open);
+      document.body.appendChild(fab);
+    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
