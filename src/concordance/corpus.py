@@ -186,21 +186,27 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                 continue
             if isinstance(c, dict) and c.get("id"):
                 out[c["id"]] = c
-    # the second source: cards minted from verifications (verified_cards.jsonl) — the science
-    # and math joining the same graph as Scripture and the tradition
-    vp = p.parent / "verified_cards.jsonl"
-    if path is None and vp.exists():
-        with open(vp, encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    c = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-                if isinstance(c, dict) and c.get("id"):
-                    out[c["id"]] = c
+    # further sources that join the SAME graph as Scripture and the tradition:
+    #   verified_cards.jsonl — minted live from sealed verifications (data-only, gitignored)
+    #   reference_cards.jsonl — the deep reference work already in the verifiers (periodic table,
+    #                           physical constants, …), carded and GIT-TRACKED so the content is
+    #                           on github, not only in the code
+    if path is None:
+        for extra in ("verified_cards.jsonl", "reference_cards.jsonl"):
+            xp = p.parent / extra
+            if not xp.exists():
+                continue
+            with open(xp, encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        c = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if isinstance(c, dict) and c.get("id"):
+                        out[c["id"]] = c
     return out
 
 

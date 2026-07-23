@@ -53,3 +53,5 @@ data/easton/
 data/herbs/
 data/apothecary_proposals/
 data/verified_cards.jsonl
+# reference_cards.jsonl is the deep verifier reference data carded — the CONTENT belongs on github
+!data/reference_cards.jsonl

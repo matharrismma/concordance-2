@@ -57,6 +57,7 @@ test_redact.py
 test_router.py
 test_routes.py
 test_schema.py
+test_reference_cards.py
 test_science_cards.py
 test_scripture.py
 test_seal_page.py
