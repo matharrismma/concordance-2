@@ -922,6 +922,15 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _err(400, "unknown scope")
     if method == "GET" and path == "/locate":
         return _ok(corpus.locate(query.get("q") or ""))
+    if method == "GET" and path == "/growth":
+        # the standing steering report: corpus health + how much safe growth remains. Aggregate
+        # only, read-only — the keeper reads it; the harvester (tools/grow.py) is operator-run.
+        from .. import corpus as _corpus, growth as _growth
+        cards = list(_corpus.default_corpus().cards.values())
+        m = _growth.measure(cards)
+        m["recent"] = _growth.ledger_read(limit=8)
+        return _ok(m)
+
     if method == "GET" and path == "/library/health":
         return _ok(corpus.health())
 
@@ -1306,6 +1315,7 @@ ROUTES = [
     {"path": "/graph", "methods": ("GET",), "api": True},
     {"path": "/locate", "methods": ("GET",), "api": True},
     {"path": "/library/health", "methods": ("GET",), "api": True},
+    {"path": "/growth", "methods": ("GET",), "api": True},
     {"path": "/pronounce", "methods": ("GET",), "api": True},
     {"path": "/thread", "methods": ("DELETE", "GET"), "api": True},
     {"path": "/threads", "methods": ("GET",), "api": True, "rl": True},

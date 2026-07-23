@@ -31,6 +31,7 @@ test_graph.py
 test_grid.py
 test_grid_atlas.py
 test_groups.py
+test_growth.py
 test_hardening.py
 test_identity.py
 test_inequality.py

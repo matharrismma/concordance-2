@@ -26,7 +26,7 @@ GOLDEN_API_GET = {
     "/health", "/identity", "/route", "/bind/challenge", "/thread/digest", "/thread/recall", "/thread/lineage", "/thread/recalled", "/land", "/cards/for-the-group",
     "/search", "/seal", "/resolve", "/word_study",
     "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
-    "/card/connections", "/graph", "/locate", "/library/health",
+    "/card/connections", "/graph", "/locate", "/library/health", "/growth",
     "/thread", "/threads", "/threads/search", "/thread/verify", "/passage", "/apothecary",
     "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
     "/commentary", "/journal", "/journal/dates", "/steward", "/tsk",
