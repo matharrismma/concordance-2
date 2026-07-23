@@ -214,6 +214,16 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
     return out
 
 
+# inverse labels for DIRECTIONAL (hierarchical) edges, so the reciprocal points the other way and
+# the floor can be walked as a tree. Anything not here is treated as symmetric (lateral) — the
+# reciprocal keeps the same label (shares_scripture, same_family, names_the_created_thing, …).
+_INVERSE_REL = {
+    "member_of": "has_member", "part_of": "has_part", "nested_in": "contains",
+    "figure_of": "has_figure", "pre_registered_validation_of": "validated_by",
+    "leads_to": "reached_from", "points_beyond_itself": "pointed_to_by",
+}
+
+
 def _apply_bridges(cards: Dict[str, dict], overlay: Path) -> None:
     """Graft the two trees: apply the git-tracked reference→Scripture bridges reciprocally onto
     both cards' connection lists at load time. The 25k cards.jsonl is never mutated on disk — the
@@ -235,10 +245,14 @@ def _apply_bridges(cards: Dict[str, dict], overlay: Path) -> None:
         ca, cb = cards.get(a), cards.get(b)
         if not ca or not cb:
             continue
-        for src, dst in ((ca, b), (cb, a)):
+        # hierarchical edges are DIRECTIONAL — the reciprocal carries the inverse label so the floor
+        # can be walked as a tree (up = member_of/part_of/…, down = has_member/has_part/…). Lateral
+        # edges (shares_scripture, same_family, names_the_created_thing) stay symmetric.
+        rev = _INVERSE_REL.get(rel, rel)
+        for src, dst, r in ((ca, b, rel), (cb, a, rev)):
             links = src.setdefault("connections", [])
             if not any(isinstance(x, dict) and x.get("to_card_id") == dst for x in links):
-                links.append({"to_card_id": dst, "relationship": rel, "evidence": ev})
+                links.append({"to_card_id": dst, "relationship": r, "evidence": ev})
 
 
 def add_to_default(card: dict) -> None:
