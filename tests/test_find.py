@@ -22,6 +22,7 @@ from concordance.config import EngineConfig  # noqa: E402
 
 SEC = EngineConfig("secular")
 _WIKI, _LOC = find.wikipedia, find.library_of_congress
+_IA, _GUT = find.internet_archive, find.project_gutenberg
 
 
 def _enable():
@@ -30,6 +31,7 @@ def _enable():
 
 def _restore():
     find.wikipedia, find.library_of_congress = _WIKI, _LOC
+    find.internet_archive, find.project_gutenberg = _IA, _GUT
     os.environ["WEB_FIND_DISABLED"] = "1"             # back to the test-wide default (off)
 
 
@@ -71,6 +73,34 @@ def test_falsehood_in_a_finding_is_flagged_our_strength():
     try:
         r = find.find_and_check("the percent report", SEC)
         assert r and ("flag" in r["framed"].lower() or "false" in r["framed"].lower())
+    finally:
+        _restore()
+
+
+def test_practical_carries_the_torch_of_foxfire():
+    """A how-to question goes to tried-and-true, public-domain sources (Internet Archive +
+    Gutenberg) — not the current — and keeps them as a higher-tier practical/PD card."""
+    assert find.is_practical("how to preserve food for winter")
+    assert not find.is_practical("what year did the Titanic sink")
+    _enable()
+    find.internet_archive = lambda q, limit=3: [
+        {"title": "Food Preservation", "url": "https://archive.org/details/foodpres",
+         "year": "1922", "source": "Internet Archive",
+         "license": "Public domain (verify per item)", "tier": "primary"}]
+    find.project_gutenberg = lambda q, limit=3: [
+        {"title": "Woman's Institute Library of Cookery", "url": "https://www.gutenberg.org/ebooks/1",
+         "year": "", "creator": "—", "source": "Project Gutenberg", "license": "Public domain",
+         "tier": "primary"}]
+    try:
+        r = find.find_and_check("how to preserve food for winter", SEC)
+        assert r and r["answer"] is None                     # practical points to sources, no single answer
+        assert "Foxfire" in r["source_note"] and "tortoise" in r["source_note"]
+        assert any(d["source"] == "Internet Archive" for d in r["documents"])
+        # kept as a PD practical card — a higher tier than the open web
+        cards = [json.loads(l) for l in find._store_path().read_text(encoding="utf-8").splitlines() if l.strip()]
+        c = next(c for c in cards if c["title"] == "Food Preservation")
+        assert c["kind"] == "practical" and c["shelf"] == "practical"
+        assert c["source"]["authority_tier"] == "primary_pd" and "foxfire" in c["box"]
     finally:
         _restore()
 

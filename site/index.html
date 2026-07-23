@@ -310,10 +310,11 @@
       if(d.web.framed) h += '<div class="note"><b>'+esc(d.web.framed)+'</b></div>';
       if(d.web.documents && d.web.documents.length)
         h += '<div class="res"><div class="note" style="margin:.3rem 0 .15rem">'+
-             'Primary documents — Library of Congress:</div>'+
+             'Tried-and-true sources — go to the original:</div>'+
              d.web.documents.map(function(x){
+               var meta=[x.source,x.year,x.creator,x.format].filter(Boolean).join(' · ');
                return '<div class="hit"><a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+
-                      esc(x.title)+'</a>'+(x.format?'<span class="sn">'+esc(x.format)+'</span>':'')+
+                      esc(x.title)+'</a>'+(meta?'<span class="sn">'+esc(meta)+'</span>':'')+
                       '</div>'; }).join('')+'</div>';
     }
     if(d.verify){
