@@ -57,3 +57,6 @@ data/verified_cards.jsonl
 !data/reference_cards.jsonl
 # reference_bridges.jsonl grafts the reference cards to Scripture (the two trees) — CONTENT, on github
 !data/reference_bridges.jsonl
+# keystone seeds (the Four Gates + the Floor of Discovery) and their bridges — CONTENT, on github
+!data/keystone_seeds.jsonl
+!data/keystone_bridges.jsonl

@@ -1,0 +1,7 @@
+{"a": "card_k_floor_of_discovery", "b": "card_k_four_gates", "relationship": "verified_by", "evidence": "the floor is confirmed through the four gates"}
+{"a": "card_k_floor_of_discovery", "b": "card_n_653e4ac3ff00", "relationship": "leads_to", "evidence": "seeing the design → the fear of God (Proverbs 9:10)"}
+{"a": "card_k_floor_of_discovery", "b": "card_ref_el_079", "relationship": "instance_of_one_floor", "evidence": "gold — named in Scripture and measured as element 79 — one floor"}
+{"a": "card_k_floor_of_discovery", "b": "card_n_ras7gate0recv", "relationship": "concords_with", "evidence": "the RAS is the bodily gate of reception — eyes to see the design (Matthew 6:22)"}
+{"a": "card_k_floor_of_discovery", "b": "card_c_dc106b73342f", "relationship": "points_beyond_itself", "evidence": "incompleteness: the floor points past itself to the Logos"}
+{"a": "card_k_four_gates", "b": "card_n_556191d135e7", "relationship": "embodies", "evidence": "BROTHERS: two or three witnesses establish a matter (Deuteronomy 19:15)"}
+{"a": "card_k_four_gates", "b": "card_n_653e4ac3ff00", "relationship": "culminates_in", "evidence": "GOD: final submission to the Architect (Proverbs 9:10)"}
