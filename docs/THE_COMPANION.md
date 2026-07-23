@@ -410,3 +410,24 @@ is not a question a tool should answer for you"; the gate opens only on the pers
 seeking; generated:false on every payload. Still owed: the lean-detection discipline — the
 returns/inlet triggers should notice a person's growing reliance and answer it with more
 outward pointers, not more engagement.
+
+## §11 — The parasitic connector (Matt, 2026-07-23)
+
+"It can use my google drive, my calendar. It can use all of my other apps. It just connects
+them. It is parasitic in that way."
+
+The assistant is the organizing intelligence ACROSS the person's existing apps — never
+another silo. What this binds:
+
+* **Connect, discern, organize — never absorb.** Drive stays Drive; Calendar stays Calendar.
+  The Companion reads through them live and files what it learns as cards/stacks; the
+  originals are never copied into our store.
+* **Tokens live with the person** — on their device or their carry drive, never in the repo,
+  never on our server, never echoed. Losing our server must cost them no data and no secrets.
+* **One conversation on any device** ties through the person's own Ed25519 key (binding.py),
+  not an identity provider account.
+* **Privacy is the constraint, not a feature**: read-through beats ingest; the only durable
+  store is what the person deliberately keeps, and that store is theirs (microSD carry, §6a).
+
+First connectors when Move 3 reaches them: Google Drive (find my notes wherever they live)
+and Calendar (remember the stuff I don't have time for → deferrals land as real events).
