@@ -192,7 +192,8 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
     #                           physical constants, …), carded and GIT-TRACKED so the content is
     #                           on github, not only in the code
     if path is None:
-        for extra in ("verified_cards.jsonl", "reference_cards.jsonl", "keystone_seeds.jsonl"):
+        for extra in ("verified_cards.jsonl", "reference_cards.jsonl", "keystone_seeds.jsonl",
+                      "nesting_seeds.jsonl"):
             xp = p.parent / extra
             if not xp.exists():
                 continue
@@ -207,7 +208,8 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                         continue
                     if isinstance(c, dict) and c.get("id"):
                         out[c["id"]] = c
-        for overlay in ("reference_bridges.jsonl", "keystone_bridges.jsonl"):
+        for overlay in ("reference_bridges.jsonl", "keystone_bridges.jsonl",
+                        "nesting_bridges.jsonl"):
             _apply_bridges(out, p.parent / overlay)
     return out
 

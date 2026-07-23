@@ -97,7 +97,9 @@ def card_for(result: Dict[str, Any], domain: str, seal: Dict[str, Any]) -> Optio
                    "ref": refs[0] if refs else "", "domain": dom, "authority_tier": "engine"},
         "shelf": dom, "box": "verified",
         "bands": ["verified", dom, verdict] + refs[:3],
-        "connections": [],
+        # born nested — every verified seed hangs from the created order, never an orphan on the floor
+        "connections": [{"to_card_id": "card_k_spine_created_order", "relationship": "part_of",
+                         "evidence": f"a verified seed of the created order ({dom})"}],
         "author": "engine", "created_at": time.time(), "updated_at": time.time(),
         "visibility": "public", "lifecycle_stage": "public", "volatility": "durable",
         "surface": "secular", "generated": False,

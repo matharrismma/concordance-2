@@ -1,0 +1,609 @@
+{"a": "card_ref_crop_alfalfa", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_apple", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_artichoke", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_barley", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_bean", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_beet", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_blueberry", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_broccoli", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_cabbage", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_carrot", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_cauliflower", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_celery", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_citrus", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_clover", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_corn", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_cotton", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_cucumber", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_eggplant", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_garlic", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_kale", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_leek", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_lentil", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_lettuce", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_melon", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_oat", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_okra", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_olive", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_onion", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_parsley", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_pea", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_peach", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_peanut", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_pecan", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_pepper", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_potato", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_pumpkin", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_radish", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_rice", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_rye", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_sorghum", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_soybean", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_spinach", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_squash", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_strawberry", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_sugarcane", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_sunflower", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_sweet_potato", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_swiss_chard", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_tobacco", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_tomato", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_turnip", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_watermelon", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_crop_wheat", "b": "card_k_spine_crops", "relationship": "member_of", "evidence": "a crop of the field"}
+{"a": "card_ref_el_001", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_002", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_003", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_004", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_005", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_006", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_007", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_008", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_009", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_010", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_011", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_012", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_013", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_014", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_015", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_016", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_017", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_018", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_019", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_020", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_021", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_022", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_023", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_024", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_025", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_026", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_027", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_028", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_029", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_030", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_031", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_032", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_033", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_034", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_035", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_036", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_037", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_038", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_039", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_040", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_041", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_042", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_043", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_044", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_045", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_046", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_047", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_048", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_049", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_050", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_051", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_052", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_053", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_054", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_055", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_056", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_057", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_058", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_059", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_060", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_061", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_062", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_063", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_064", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_065", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_066", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_067", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_068", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_069", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_070", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_071", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_072", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_073", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_074", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_075", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_076", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_077", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_078", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_079", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_080", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_081", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_082", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_083", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_084", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_085", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_086", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_087", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_088", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_089", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_090", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_091", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_092", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_093", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_094", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_095", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_096", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_097", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_098", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_099", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_100", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_101", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_102", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_103", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_104", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_105", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_106", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_107", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_108", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_109", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_110", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_111", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_112", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_113", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_114", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_115", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_116", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_117", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_el_118", "b": "card_n_6e7a5b14e556", "relationship": "member_of", "evidence": "an element of the periodic table"}
+{"a": "card_ref_pc_atmosphere", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_atomic_mass_unit", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_avogadro_constant", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_bohr_radius", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_boltzmann_constant", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_electron_mass", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_elementary_charge", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_faraday_constant", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_fine_structure_constant", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_gas_constant", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_gravitational_constant", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_molar_volume_stp", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_neutron_mass", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_planck_constant", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_proton_mass", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_reduced_planck_constant", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_rydberg_constant", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_speed_of_light", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_standard_gravity", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_stefan_boltzmann_constant", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_vacuum_permeability", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_vacuum_permittivity", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_pc_wien_displacement_constant", "b": "card_k_spine_constants", "relationship": "member_of", "evidence": "a physical constant"}
+{"a": "card_ref_rda_calcium", "b": "card_k_spine_nutrition", "relationship": "member_of", "evidence": "a nutrient the body needs"}
+{"a": "card_ref_rda_iron", "b": "card_k_spine_nutrition", "relationship": "member_of", "evidence": "a nutrient the body needs"}
+{"a": "card_ref_rda_vitamin_c", "b": "card_k_spine_nutrition", "relationship": "member_of", "evidence": "a nutrient the body needs"}
+{"a": "card_ref_rda_vitamin_d", "b": "card_k_spine_nutrition", "relationship": "member_of", "evidence": "a nutrient the body needs"}
+{"a": "card_n_6e7a5b14e556", "b": "card_n_4d5234cab477", "relationship": "part_of", "evidence": "the periodic table is the map of chemistry"}
+{"a": "card_n_4d5234cab477", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "chemistry is part of the created order"}
+{"a": "card_k_spine_constants", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a spine of the created order"}
+{"a": "card_k_spine_crops", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a spine of the created order"}
+{"a": "card_k_spine_nutrition", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a spine of the created order"}
+{"a": "card_k_spine_created_order", "b": "card_k_floor_of_discovery", "relationship": "nested_in", "evidence": "the created order is rooted in the one floor (Romans 1:20)"}
+{"a": "card_n_0be5414e0c37", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_0e27ffed7685", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_5292dfecea18", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_5e4190e4815e", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_84ee70059175", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_88ac7219a4a9", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_ff27b07c4577", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_8530c72a2201", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_91f3b5881075", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_cdb747a427d2", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_99e293a30ed9", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_6f5aa0b22245", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_0fa594da0bff", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_c39a51a03b6f", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_f9e74aa145cc", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_73d989606f90", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_51ecbfa0bb5a", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_ba6d9264fa3c", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_a735e61f7ca1", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_a7ae37960cae", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_9ab6ee5e792c", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_e8186ce33d19", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_35c4c17b6f86", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_7b9fe7aaa620", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_d6d3480c8cf2", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_0659d133d839", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_b04a994d0276", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_08a41f6b5ab9", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_bbecbbc24fb6", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_cfb57dd6b005", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_0fd6d5654d74", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_cda0b1e1a364", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_22f6cb5bf619", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_e1bb89d871cc", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_8cc93c245790", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_48f380838b48", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_9911d47ec7d2", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_5c477e45f8d5", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_14a11b44c682", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_bbd5dfda4135", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_19134a4fa9de", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_ebe4c25c22ae", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_639fcf317634", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_ea9e3f380756", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_9d42516b140c", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_a84694b9ae04", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_b10117556d41", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_e58898b8fc38", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_77d37f00f1dd", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_49d1ebe5ba6a", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_5d1c28bd4ea5", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_ae08bd563c6e", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_de34fa421022", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_18b53f98f008", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_789214dd088e", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_3bf9fc4ff957", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_dcb1a67c26e8", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_232eb0029ad3", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_bc8d104f3593", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_13147996cd2f", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_36048aaa9a1b", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_bf1b1d4a5b77", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_30396c2ab5a0", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_3ad1586f0bbf", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_b8242751064c", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_da20796077e5", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_b1fe0fcce85f", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_39dc3d761434", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_0a41c0e3298d", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_d8471389950e", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_8a1d7924121c", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_770170ab1111", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_6ca595e0a722", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_f69fb7c82462", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_e41105aaa59f", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_50a5aa72df98", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_fe27e59e1804", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_7898952343a9", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_5c1a80013c17", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_e7c1d7f721bb", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_k_ncs_validation", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
+{"a": "card_n_92a3bf533367", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_4b8250d3571a", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_3df9cadb44a4", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_e212a508aeb1", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_8b8bf6ae4ebb", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_8b16e5186f33", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_ea5725d67984", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_ed1b61c25ab7", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_43ce6f5292a1", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_4d809fef42c2", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_cf582aac7b6d", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_74dba7c005f7", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_1100130413ab", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_65a5bd511d27", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_c180a0c53a10", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_d025499fc999", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_f0bafed54207", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_62eb388b9b67", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_4ab28a27c153", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_a44b6bc5aade", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_38199a4eed49", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_8d483e664d1c", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_b7f8999e6a36", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_c8fa3acd3731", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_cd9e76f415e0", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_416a0ee2264d", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_440d163fbef0", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_549b1b10d669", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_10e0d719020f", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_c9cbcafb2dfc", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_182e7452566e", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_df07989eae54", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_23818bc5d8fe", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_e5c841c02410", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_f2c9365bdedf", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_23ec117624fc", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_7f99bc358c45", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_6f8626f8a063", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_1a69343d884c", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_bb89dbd4d157", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_6589cacd0acb", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_b3dff7685a9e", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_e586205d665c", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_ec6dc6d5b92f", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_915a4bb7dd8d", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_e20007f8e81a", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_9c78781d718f", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_17ba1fbceeda", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_9906f77428f7", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_7f0e373db3d6", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_41c5287a97b2", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_04502b1ebf95", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_47bb4f1e56b0", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_5cc788344ecd", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_0c29d0e6bba0", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_8ecd78874f5b", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_90ab16a347bd", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_61bf8457ea27", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_7fc1166cbd90", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_ebd9f46f16cd", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_34d672ea36f4", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_e518ae8c8e4c", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_a4f4879a436b", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_03b4338c56b8", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_b031c4b9ef92", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_3ff4bf122956", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_1e4b38fc12d4", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_5251cf7a9b90", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_152adfad178f", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_7195b6d9f8f7", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_018fa951559a", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_ba0392c94b0e", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_f1c2cf8a54d5", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_d020834a87f2", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_effe4bf87816", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_c98e4733373b", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_c89b1dca1f02", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_f8186323a970", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_e6c59d573e97", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_a9b95338eb36", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_de582c7ac9a4", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_4543b0454ea6", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_c8454734e99f", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_e7e731e3225d", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_4b288385a28c", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_5294ef904e9f", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_fcc56a2cbd8a", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_0f0d0bd1e226", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_eed69ae1df64", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_8b6256f0ebba", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_2a58c312be03", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_d346f6fb05a9", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_f5147fe899f7", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_1c81307d0e25", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_5335d3c35271", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_1ccb13110ae0", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_8cf619b3f99d", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_7e147a414035", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_5b1b498f6ae0", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_653e4ac3ff00", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_c8d9efdb47ac", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_84a2b7853573", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_0868417efbfa", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_3664c8c8b024", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_1140c9fe707a", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_70e9d4c2ce55", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_e9423db7082b", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_967ca336e8b1", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_ad1729369430", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_556191d135e7", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_bf6f4fb41c27", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_fa548a5d3281", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_1b387b23edd7", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_1c4189e4cc5c", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_adee400cbc0c", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_e8456df230cb", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_369fb12c5cb0", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_a445cad711aa", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_34126d730002", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_d18dfc6d89ac", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_43652ad7f6eb", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_f3830fc2cbb6", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_39ecbfc103e2", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_e7ff14517719", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_1db668db797f", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_287c51473993", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_9cd8aca9e998", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_c889ded90bd4", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_364e9c65cd8c", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_148b0aeba422", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_22dd90698c25", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_40152de5a116", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_dc50b5adaab5", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_ef7014671fb2", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_a75285c7c285", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_c68d96ab05ef", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_48dd1fef4ca8", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_2445a5f3ab02", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_e749d7800ae0", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_11f0c5734c91", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_841d3d10610b", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_cbc8473a895e", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_f9baa8b824f1", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_94d285f8ff97", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_15a8336a6fb0", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_95995eb4c762", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_1d3b51f65df3", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_5ac1502e8926", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_ab3cbd1936cf", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_977df2afbe8d", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_fff1362a47de", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_fc7e53421012", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_18b70eabee39", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_e7c86a3bfa3a", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_b47dd78d35f4", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_a6d2fa25ebc4", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_aef9ddf02a7d", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_91ff02935a03", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_937927508157", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_84dfa69b2189", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_0634ead0600e", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_d4e01398510c", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_ab7d5fb3e128", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_b1ef42620964", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_dfe230563b45", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_1df236ca2eca", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_1ff993845f19", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_2ded8e0393c0", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_28847889aab7", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_68c117206c61", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_b93c03f1c73b", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_9a9d2ab718c0", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_2f0cd8684e0d", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_77b52a3f6db0", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_2161f479a6eb", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_0f03c52b2172", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_e404eaf22fda", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_bc5740c4f798", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_cb561b7563c2", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_5b517bc5b472", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_bac748e07a36", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_912488fc2a4c", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_7696ecaf475a", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_64ece7afe8e3", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_412be3cde52f", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_7ec804667ef9", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_e68c0300b9ce", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_da50e6c26b71", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_03cbd6955cea", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_fc55d1720cc9", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_407459a5a8c8", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_874dc8515c26", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_8ce0bccb9935", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_bb40604cf92a", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_a521ed3787c2", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_ef285ee8d9ad", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_25e5a7f31fe2", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_a730a8d8d406", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_6f1307069448", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_ced9c8397b8c", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_bf2e1ce37eb2", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_28b7b3c2401f", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_2b2029563619", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_a76aedf29b6b", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_73329658e5e6", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_4cebd0745565", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_4404d35c817e", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_d6580f0827b2", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_a8a9243dd38f", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_84d4b12996d1", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_b780b795f2d6", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_1892dd45b108", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_34397023f15d", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_0e3a3f2a7cdf", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_27a91ce70388", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_d13e7fcfa038", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_201921dc2852", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_5e36cd96ede3", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
+{"a": "card_n_fd0e95c4fa83", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_n_61213be989a5", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_k_four_gates", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_k_floor_of_discovery", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
+{"a": "card_k_spine_archetypes", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "the archetypes are figures of the Word"}
+{"a": "card_k_spine_the_word", "b": "card_k_floor_of_discovery", "relationship": "nested_in", "evidence": "the Word is the other half of the one floor"}
+{"a": "card_ref_crop_eggplant", "b": "card_ref_crop_pepper", "relationship": "same_family", "evidence": "both of the solanaceae family (rotation siblings)"}
+{"a": "card_ref_crop_eggplant", "b": "card_ref_crop_potato", "relationship": "same_family", "evidence": "both of the solanaceae family (rotation siblings)"}
+{"a": "card_ref_crop_eggplant", "b": "card_ref_crop_tobacco", "relationship": "same_family", "evidence": "both of the solanaceae family (rotation siblings)"}
+{"a": "card_ref_crop_eggplant", "b": "card_ref_crop_tomato", "relationship": "same_family", "evidence": "both of the solanaceae family (rotation siblings)"}
+{"a": "card_ref_crop_pepper", "b": "card_ref_crop_potato", "relationship": "same_family", "evidence": "both of the solanaceae family (rotation siblings)"}
+{"a": "card_ref_crop_pepper", "b": "card_ref_crop_tobacco", "relationship": "same_family", "evidence": "both of the solanaceae family (rotation siblings)"}
+{"a": "card_ref_crop_pepper", "b": "card_ref_crop_tomato", "relationship": "same_family", "evidence": "both of the solanaceae family (rotation siblings)"}
+{"a": "card_ref_crop_potato", "b": "card_ref_crop_tobacco", "relationship": "same_family", "evidence": "both of the solanaceae family (rotation siblings)"}
+{"a": "card_ref_crop_potato", "b": "card_ref_crop_tomato", "relationship": "same_family", "evidence": "both of the solanaceae family (rotation siblings)"}
+{"a": "card_ref_crop_tobacco", "b": "card_ref_crop_tomato", "relationship": "same_family", "evidence": "both of the solanaceae family (rotation siblings)"}
+{"a": "card_ref_crop_broccoli", "b": "card_ref_crop_cabbage", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_broccoli", "b": "card_ref_crop_cauliflower", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_broccoli", "b": "card_ref_crop_kale", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_broccoli", "b": "card_ref_crop_radish", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_broccoli", "b": "card_ref_crop_turnip", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_cabbage", "b": "card_ref_crop_cauliflower", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_cabbage", "b": "card_ref_crop_kale", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_cabbage", "b": "card_ref_crop_radish", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_cabbage", "b": "card_ref_crop_turnip", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_cauliflower", "b": "card_ref_crop_kale", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_cauliflower", "b": "card_ref_crop_radish", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_cauliflower", "b": "card_ref_crop_turnip", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_kale", "b": "card_ref_crop_radish", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_kale", "b": "card_ref_crop_turnip", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_radish", "b": "card_ref_crop_turnip", "relationship": "same_family", "evidence": "both of the brassicaceae family (rotation siblings)"}
+{"a": "card_ref_crop_alfalfa", "b": "card_ref_crop_bean", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_alfalfa", "b": "card_ref_crop_clover", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_alfalfa", "b": "card_ref_crop_lentil", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_alfalfa", "b": "card_ref_crop_pea", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_alfalfa", "b": "card_ref_crop_peanut", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_alfalfa", "b": "card_ref_crop_soybean", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_bean", "b": "card_ref_crop_clover", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_bean", "b": "card_ref_crop_lentil", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_bean", "b": "card_ref_crop_pea", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_bean", "b": "card_ref_crop_peanut", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_bean", "b": "card_ref_crop_soybean", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_clover", "b": "card_ref_crop_lentil", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_clover", "b": "card_ref_crop_pea", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_clover", "b": "card_ref_crop_peanut", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_clover", "b": "card_ref_crop_soybean", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_lentil", "b": "card_ref_crop_pea", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_lentil", "b": "card_ref_crop_peanut", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_lentil", "b": "card_ref_crop_soybean", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_pea", "b": "card_ref_crop_peanut", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_pea", "b": "card_ref_crop_soybean", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_peanut", "b": "card_ref_crop_soybean", "relationship": "same_family", "evidence": "both of the fabaceae family (rotation siblings)"}
+{"a": "card_ref_crop_cucumber", "b": "card_ref_crop_melon", "relationship": "same_family", "evidence": "both of the cucurbitaceae family (rotation siblings)"}
+{"a": "card_ref_crop_cucumber", "b": "card_ref_crop_pumpkin", "relationship": "same_family", "evidence": "both of the cucurbitaceae family (rotation siblings)"}
+{"a": "card_ref_crop_cucumber", "b": "card_ref_crop_squash", "relationship": "same_family", "evidence": "both of the cucurbitaceae family (rotation siblings)"}
+{"a": "card_ref_crop_cucumber", "b": "card_ref_crop_watermelon", "relationship": "same_family", "evidence": "both of the cucurbitaceae family (rotation siblings)"}
+{"a": "card_ref_crop_melon", "b": "card_ref_crop_pumpkin", "relationship": "same_family", "evidence": "both of the cucurbitaceae family (rotation siblings)"}
+{"a": "card_ref_crop_melon", "b": "card_ref_crop_squash", "relationship": "same_family", "evidence": "both of the cucurbitaceae family (rotation siblings)"}
+{"a": "card_ref_crop_melon", "b": "card_ref_crop_watermelon", "relationship": "same_family", "evidence": "both of the cucurbitaceae family (rotation siblings)"}
+{"a": "card_ref_crop_pumpkin", "b": "card_ref_crop_squash", "relationship": "same_family", "evidence": "both of the cucurbitaceae family (rotation siblings)"}
+{"a": "card_ref_crop_pumpkin", "b": "card_ref_crop_watermelon", "relationship": "same_family", "evidence": "both of the cucurbitaceae family (rotation siblings)"}
+{"a": "card_ref_crop_squash", "b": "card_ref_crop_watermelon", "relationship": "same_family", "evidence": "both of the cucurbitaceae family (rotation siblings)"}
+{"a": "card_ref_crop_barley", "b": "card_ref_crop_corn", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_barley", "b": "card_ref_crop_oat", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_barley", "b": "card_ref_crop_rice", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_barley", "b": "card_ref_crop_rye", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_barley", "b": "card_ref_crop_sorghum", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_barley", "b": "card_ref_crop_sugarcane", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_barley", "b": "card_ref_crop_wheat", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_corn", "b": "card_ref_crop_oat", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_corn", "b": "card_ref_crop_rice", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_corn", "b": "card_ref_crop_rye", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_corn", "b": "card_ref_crop_sorghum", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_corn", "b": "card_ref_crop_sugarcane", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_corn", "b": "card_ref_crop_wheat", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_oat", "b": "card_ref_crop_rice", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_oat", "b": "card_ref_crop_rye", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_oat", "b": "card_ref_crop_sorghum", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_oat", "b": "card_ref_crop_sugarcane", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_oat", "b": "card_ref_crop_wheat", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_rice", "b": "card_ref_crop_rye", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_rice", "b": "card_ref_crop_sorghum", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_rice", "b": "card_ref_crop_sugarcane", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_rice", "b": "card_ref_crop_wheat", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_rye", "b": "card_ref_crop_sorghum", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_rye", "b": "card_ref_crop_sugarcane", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_rye", "b": "card_ref_crop_wheat", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_sorghum", "b": "card_ref_crop_sugarcane", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_sorghum", "b": "card_ref_crop_wheat", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_sugarcane", "b": "card_ref_crop_wheat", "relationship": "same_family", "evidence": "both of the poaceae family (rotation siblings)"}
+{"a": "card_ref_crop_artichoke", "b": "card_ref_crop_lettuce", "relationship": "same_family", "evidence": "both of the asteraceae family (rotation siblings)"}
+{"a": "card_ref_crop_artichoke", "b": "card_ref_crop_sunflower", "relationship": "same_family", "evidence": "both of the asteraceae family (rotation siblings)"}
+{"a": "card_ref_crop_lettuce", "b": "card_ref_crop_sunflower", "relationship": "same_family", "evidence": "both of the asteraceae family (rotation siblings)"}
+{"a": "card_ref_crop_carrot", "b": "card_ref_crop_celery", "relationship": "same_family", "evidence": "both of the apiaceae family (rotation siblings)"}
+{"a": "card_ref_crop_carrot", "b": "card_ref_crop_parsley", "relationship": "same_family", "evidence": "both of the apiaceae family (rotation siblings)"}
+{"a": "card_ref_crop_celery", "b": "card_ref_crop_parsley", "relationship": "same_family", "evidence": "both of the apiaceae family (rotation siblings)"}
+{"a": "card_ref_crop_garlic", "b": "card_ref_crop_leek", "relationship": "same_family", "evidence": "both of the amaryllidaceae family (rotation siblings)"}
+{"a": "card_ref_crop_garlic", "b": "card_ref_crop_onion", "relationship": "same_family", "evidence": "both of the amaryllidaceae family (rotation siblings)"}
+{"a": "card_ref_crop_leek", "b": "card_ref_crop_onion", "relationship": "same_family", "evidence": "both of the amaryllidaceae family (rotation siblings)"}
+{"a": "card_ref_crop_beet", "b": "card_ref_crop_spinach", "relationship": "same_family", "evidence": "both of the amaranthaceae family (rotation siblings)"}
+{"a": "card_ref_crop_beet", "b": "card_ref_crop_swiss_chard", "relationship": "same_family", "evidence": "both of the amaranthaceae family (rotation siblings)"}
+{"a": "card_ref_crop_spinach", "b": "card_ref_crop_swiss_chard", "relationship": "same_family", "evidence": "both of the amaranthaceae family (rotation siblings)"}
+{"a": "card_ref_crop_apple", "b": "card_ref_crop_peach", "relationship": "same_family", "evidence": "both of the rosaceae family (rotation siblings)"}
+{"a": "card_ref_crop_apple", "b": "card_ref_crop_strawberry", "relationship": "same_family", "evidence": "both of the rosaceae family (rotation siblings)"}
+{"a": "card_ref_crop_peach", "b": "card_ref_crop_strawberry", "relationship": "same_family", "evidence": "both of the rosaceae family (rotation siblings)"}
+{"a": "card_ref_crop_cotton", "b": "card_ref_crop_okra", "relationship": "same_family", "evidence": "both of the malvaceae family (rotation siblings)"}
