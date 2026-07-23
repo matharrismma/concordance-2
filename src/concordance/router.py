@@ -36,6 +36,7 @@ MEMBERS: Dict[str, str] = {
     "characters": "a person of Scripture",
     "prophecy": "a prophetic thread and its fulfilment",
     "steward": "money, bills, resources — never moves money",
+    "apothecary": "an ailment or a plant -> traditional remedies, with their cautions",
     "coach": "teaching — a lesson, a next step, at the learner's level",
     "teachings": "the Word, when the weight is ultimate",
     "search": "the keeping — find, attribute, cite",
@@ -45,6 +46,12 @@ MEMBERS: Dict[str, str] = {
 # (priority, member, pattern, why). Lower priority wins. Same priority + different member = tie.
 _KEYWORD_RULES: List[Tuple[int, str, str, str]] = [
     (20, "steward", r"\b(bill|bills|budget|rent|invoice|owe|debt|tithe|offering|paycheck|expense|ledger|afford|groceries|savings|spend|spending)\b", "money/resources"),
+    (19, "apothecary", r"\b(remed(y|ies)|herbal|herbs?|tincture|poultice|salve|tonic|"
+                       r"sore throat|cough|congest\w*|runny nose|head\s?ache|migraine|"
+                       r"nause\w*|indigestion|heartburn|upset stomach|bloat\w*|insomnia|sleepless|"
+                       r"sunburn|burns?|rash|bruise|sprain|cramps?|sore muscles?|"
+                       r"(what|which)\s+(herb|plant|tea|remedy|helps?|is good|can i take|to take)\b[^?]*"
+                       r"(throat|cough|cold|head|sleep|nause|stomach|pain|nerves?|skin))\b", "an ailment or a plant"),
     (20, "coach", r"\b(teach|lesson|phonics|spelling|spell|curriculum|grade|homework|learn to read|next step)\b", "teaching"),
     (21, "cross_refs", r"\b(cross[- ]?refs?|cross[- ]?references?|related verses?|parallel passages?)\b", "cross-reference"),
     (21, "commentary", r"\b(commentary|commentaries|exposition|what did the fathers say)\b", "commentary"),

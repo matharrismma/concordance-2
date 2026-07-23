@@ -122,6 +122,37 @@ _EXPLAIN = re.compile(
     r"\b(explain|mean(?:s|ing)?|understand|study|teach|what does|what is|tell me about"
     r"|help me with)\b", re.I)
 
+# A person bringing their own hurt is not a search query. Below crisis (which outranks everything
+# and is handled first), discern first-person distress and meet it with a fitting word of
+# Scripture — gently, pointing to Christ. The verse is RESOLVED live from the canon, never
+# hardcoded, so it is found and attributed, not generated.
+_COMFORT_VERSE = {
+    "anxious": "Philippians 4:6-7", "anxiety": "Philippians 4:6-7", "worried": "Matthew 6:34",
+    "worry": "Matthew 6:34", "afraid": "Isaiah 41:10", "fear": "Isaiah 41:10",
+    "scared": "Isaiah 41:10", "fearful": "Isaiah 41:10", "alone": "Deuteronomy 31:6",
+    "lonely": "Hebrews 13:5", "abandoned": "Hebrews 13:5", "weary": "Matthew 11:28",
+    "exhausted": "Matthew 11:28", "overwhelmed": "Psalm 61:2", "hopeless": "Romans 15:13",
+    "despair": "Romans 15:13", "grief": "Psalm 34:18", "grieving": "Psalm 34:18",
+    "mourning": "Matthew 5:4", "sad": "Psalm 34:18", "depressed": "Psalm 42:11",
+    "broken": "Psalm 147:3", "heartbroken": "Psalm 147:3", "ashamed": "Romans 8:1",
+    "guilty": "Romans 8:1", "lost": "Luke 19:10", "empty": "Psalm 23:1", "hurting": "Psalm 34:18",
+    "discouraged": "Joshua 1:9", "helpless": "Psalm 46:1", "restless": "Matthew 11:28",
+}
+_DISTRESS_WORDS = tuple(_COMFORT_VERSE.keys())
+_FIRST_PERSON = re.compile(r"\b(i|im|i'm|i\s*am|my|me|ive|i've|feel|feeling)\b", re.I)
+
+
+def distress_ref(text: str) -> str:
+    """If someone brings their OWN hurt (first-person + a feeling word) and it is NOT a crisis,
+    the fitting comfort verse — a canon reference to resolve. Else ''. Never fabricates."""
+    if is_crisis(text) or not _FIRST_PERSON.search(text or ""):
+        return ""
+    low = " " + normalize(text) + " "
+    for w in _DISTRESS_WORDS:
+        if (" " + w) in low:
+            return _COMFORT_VERSE[w]
+    return ""
+
 
 def find_ref(text: str):
     """The one place a scripture reference is discerned from prose. Strict form first, then
@@ -176,6 +207,8 @@ def classify(text: str) -> str:
         return "scripture"
     if _looks_math(text or ""):
         return "verify"
+    if distress_ref(text or ""):
+        return "comfort"
     if any(w in t for w in _ULTIMATE_WORDS):
         return "ultimate"
     if _pins.looks_like_note(text or ""):
@@ -210,7 +243,7 @@ _VERSE_RE = re.compile(r"\b[1-3]?\s?[A-Za-z]{2,}\.?\s+\d{1,3}:\d{1,3}")
 def gate_signal(text: str) -> bool:
     """Does this message knock (Ask/Seek/Knock)? True when the conversation turns God-ward or to
     ultimate matters — the person's own seeking opens the door. We never force it."""
-    if classify(text or "") in ("ultimate", "scripture", "word_study"):
+    if classify(text or "") in ("ultimate", "scripture", "word_study", "comfort"):
         return True
     t = " " + (text or "").lower() + " "
     return any(w in t for w in _GATE_WORDS)
@@ -312,6 +345,27 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                 "real_help": ["A pastor, or a local church", "Someone who loves you", "Prayer — He hears"],
                 "also_in_the_keeping": [corpus._brief(c) for c in corpus.search(text, limit=4)]}
 
+    if kind == "comfort":
+        # someone brought their own hurt. Not a search — a fitting word, gently, and real people
+        # first. The verse is resolved from the canon (found, attributed, never generated).
+        from .verifiers import scripture as _sc
+        ref = distress_ref(text) or ""
+        if ref and "-" in ref:                               # a range (e.g. Philippians 4:6-7)
+            verse = [{"ref": v.get("ref", ref), "text": v.get("text", "")}
+                     for v in (_sc.read_passage(ref).get("verses") or [])[:4]]
+        else:
+            one = _sc.resolve_ref(ref) if ref else {}
+            verse = ([{"ref": one.get("ref", ref), "text": one.get("text", "")}]
+                     if one.get("status") == "ok" else [])
+        return _witnessed({**base, "kind": "comfort",
+                           "message": "I'm sorry it's heavy right now — you are not carrying it "
+                                      "alone. Here is a word to hold on to:",
+                           "scripture": verse,
+                           "real_help": ["Someone who loves you — tell them how you are",
+                                         "A pastor, or a local church",
+                                         "Prayer — He hears, and He is near to the brokenhearted"]},
+                          text, witness, gate_just_opened, topical=False)
+
     if kind == "verify":
         from .derivation import verify as _verify
         from .receipts import attach
@@ -402,6 +456,28 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
             member = _router.route(text or "").get("member", "")
         except Exception:  # noqa: BLE001
             member = ""
+
+    if member == "apothecary":
+        from . import apothecary as _ap
+        res = (_ap.search(text or "") or {}).get("results") or []
+        if res:
+            top = res[0]
+            uses = "; ".join(top.get("traditional_uses") or [])
+            safety = "; ".join(top.get("safety_notes") or [])
+            name = top.get("name", "")
+            sci = top.get("scientific_name") or ""
+            msg = name + (" (" + sci + ")" if sci else "") + \
+                (" — " + top["summary"] if top.get("summary") else "")
+            resources = []
+            if uses:
+                resources.append({"label": "Traditionally used for: " + uses, "ref": "/apothecary.html"})
+            if safety:
+                resources.append({"label": "⚠ " + safety, "ref": "/apothecary.html"})
+            resources.append({"label": "The Apothecary — every plant, with its cautions",
+                              "ref": "/apothecary.html"})
+            return _witnessed({**base, "kind": "apothecary", "message": msg, "resources": resources},
+                              text, witness, gate_just_opened)
+        member = ""   # the apothecary held nothing for this — honest fallthrough to search
 
     if member == "steward":
         from . import steward as _st

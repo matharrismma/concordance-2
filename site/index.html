@@ -332,6 +332,11 @@
     if(d.scripture && d.scripture.length)
       h += d.scripture.map(function(s){
         return '<div class="hit"><b>'+esc(s.ref||s.title||'')+'</b><span class="sn">'+esc(s.text||s.snippet||'')+'</span></div>'; }).join('');
+    // real people, first — the word comes, then the tool points beyond itself (a window, not a wall)
+    if(d.real_help && d.real_help.length)
+      h += '<div class="res"><div class="note" style="margin:.35rem 0 .15rem">'+
+           'You don’t have to carry it alone — reach for real people:</div>'+
+           d.real_help.map(function(x){ return '<div class="hit">'+esc(x)+'</div>'; }).join('')+'</div>';
     // the study, when it was asked for: a public-domain commentator in his own words,
     // and where Scripture itself speaks to the same thing — found and attributed
     if(d.commentary && d.commentary.text)

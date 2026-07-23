@@ -39,6 +39,34 @@ def test_classify_routes():
     assert ask.classify("grace and truth") == "search"
 
 
+def test_comfort_meets_distress_with_a_word_not_a_search():
+    """Someone bringing their own hurt is discerned and met gently — a fitting verse and real
+    people first — instead of being handed a keyword search."""
+    assert ask.classify("I feel anxious and afraid") == "comfort"
+    assert ask.classify("I am so lonely") == "comfort"
+    r = ask.respond("I feel anxious and afraid", SEC)
+    assert r["kind"] == "comfort"
+    assert "not carrying it alone" in r["message"]
+    assert r.get("real_help") and any("church" in x.lower() for x in r["real_help"])
+    assert "scripture" in r                                   # a verse is offered (text may be data-dependent)
+
+
+def test_distress_never_overrides_crisis():
+    """Crisis outranks the comfort lane — a mild feeling word cannot mask real danger."""
+    assert ask.classify("I feel hopeless and I want to die") == "crisis"
+    assert ask.distress_ref("I want to end my life") == ""    # crisis short-circuits before comfort
+
+
+def test_a_remedy_question_reaches_the_apothecary():
+    """An ailment or remedy is discerned to the Apothecary, not dumped into a classics search."""
+    from concordance import router
+    assert router.route("what helps a sore throat")["member"] == "apothecary"
+    assert router.route("best tea for a cough")["member"] == "apothecary"
+    assert router.route("a remedy for insomnia")["member"] == "apothecary"
+    # and it does not steal ordinary study questions
+    assert router.route("what does grace mean")["member"] != "apothecary"
+
+
 def test_crisis_puts_real_help_first():
     r = ask.respond("sometimes I want to die", SEC)
     assert r["kind"] == "crisis"
