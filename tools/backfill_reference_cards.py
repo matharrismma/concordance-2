@@ -33,14 +33,19 @@ def _out_path() -> Path:
     return Path(base) / "reference_cards.jsonl"
 
 
-def _card(cid, title, body, shelf, domain, bands):
-    return {"id": cid, "kind": "reference", "title": title, "body": body,
-            "source": {"label": f"Verified reference — {domain}", "url": "",
-                       "domain": domain, "authority_tier": "reference"},
-            "shelf": shelf, "box": "reference", "bands": bands, "connections": [],
-            "author": "engine", "created_at": 0.0, "updated_at": 0.0,
-            "visibility": "public", "lifecycle_stage": "public", "volatility": "permanent",
-            "surface": "secular", "generated": False}
+def _card(cid, title, body, shelf, domain, bands, subject=""):
+    c = {"id": cid, "kind": "reference", "title": title, "body": body,
+         "source": {"label": f"Verified reference — {domain}", "url": "",
+                    "domain": domain, "authority_tier": "reference"},
+         "shelf": shelf, "box": "reference", "bands": bands, "connections": [],
+         "author": "engine", "created_at": 0.0, "updated_at": 0.0,
+         "visibility": "public", "lifecycle_stage": "public", "volatility": "permanent",
+         "surface": "secular", "generated": False}
+    if subject:
+        # the ONE created thing this card is about — the exact key the Scripture-bridge matches on
+        # (an element or a crop that the Bible also names), so no stray-token false positives
+        c["subject"] = subject
+    return c
 
 
 def _elements():
@@ -52,7 +57,7 @@ def _elements():
                 f"The {name} atom carries {z} proton{'s' if z != 1 else ''} in its nucleus; "
                 f"its place in the periodic table is fixed by that count. Verified reference data.")
         out.append(_card(f"card_ref_el_{z:03d}", title, body, "chemistry", "chemistry",
-                         ["reference", "chemistry", "periodic table", sym, name]))
+                         ["reference", "chemistry", "periodic table", sym, name], subject=name))
     return out
 
 
@@ -92,7 +97,7 @@ def _crops():
         out.append(_card(f"card_ref_crop_{crop}", f"{disp.capitalize()} — growing reference",
                          body, "agriculture", "agriculture",
                          ["reference", "agriculture", "crop", disp] +
-                         ([fam[crop]] if crop in fam else [])))
+                         ([fam[crop]] if crop in fam else []), subject=disp))
     return out
 
 

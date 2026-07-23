@@ -207,7 +207,35 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                         continue
                     if isinstance(c, dict) and c.get("id"):
                         out[c["id"]] = c
+        _apply_bridges(out, p.parent / "reference_bridges.jsonl")
     return out
+
+
+def _apply_bridges(cards: Dict[str, dict], overlay: Path) -> None:
+    """Graft the two trees: apply the git-tracked reference→Scripture bridges reciprocally onto
+    both cards' connection lists at load time. The 25k cards.jsonl is never mutated on disk — the
+    edges live in their own small overlay so they survive any regeneration of the reference cards.
+    0-FP: each bridge is an exact-subject match (an element or crop the Bible also names)."""
+    if not overlay.exists():
+        return
+    for line in overlay.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            e = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        a, b = e.get("a"), e.get("b")
+        rel = e.get("relationship") or "names_the_created_thing"
+        ev = e.get("evidence") or ""
+        ca, cb = cards.get(a), cards.get(b)
+        if not ca or not cb:
+            continue
+        for src, dst in ((ca, b), (cb, a)):
+            links = src.setdefault("connections", [])
+            if not any(isinstance(x, dict) and x.get("to_card_id") == dst for x in links):
+                links.append({"to_card_id": dst, "relationship": rel, "evidence": ev})
 
 
 def add_to_default(card: dict) -> None:

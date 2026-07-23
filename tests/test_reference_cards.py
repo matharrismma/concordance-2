@@ -86,6 +86,49 @@ def test_corpus_merges_reference_cards_as_a_source():
     assert cards["card_ref_el_001"]["kind"] == "reference"
 
 
+def test_bridges_graft_the_two_trees_reciprocally():
+    """A reference card and the Easton card of the same subject are linked BOTH ways at load,
+    without mutating cards.jsonl — the science points to Scripture and Scripture to the science."""
+    from concordance import corpus
+    d = Path(tempfile.mkdtemp(prefix="nh-refbridge-"))
+    gold_ref = {"id": "card_ref_el_079", "kind": "reference", "title": "Gold (Au) — element 79",
+                "shelf": "chemistry", "subject": "gold"}
+    (d / "cards.jsonl").write_text(
+        json.dumps({"id": "card_easton_gold", "kind": "dictionary", "shelf": "dictionary",
+                    "title": "Easton: Gold"}) + "\n", encoding="utf-8")
+    (d / "reference_cards.jsonl").write_text(json.dumps(gold_ref) + "\n", encoding="utf-8")
+    (d / "reference_bridges.jsonl").write_text(
+        json.dumps({"a": "card_ref_el_079", "b": "card_easton_gold",
+                    "relationship": "names_the_created_thing", "evidence": "Scripture names gold."})
+        + "\n", encoding="utf-8")
+    saved = os.environ.get("CONCORDANCE_CARDS_JSONL")
+    os.environ["CONCORDANCE_CARDS_JSONL"] = str(d / "cards.jsonl")
+    try:
+        cards = corpus.load_cards()
+    finally:
+        if saved is None:
+            os.environ.pop("CONCORDANCE_CARDS_JSONL", None)
+        else:
+            os.environ["CONCORDANCE_CARDS_JSONL"] = saved
+    # the element card links to the Easton card...
+    assert any(x["to_card_id"] == "card_easton_gold"
+               for x in cards["card_ref_el_079"]["connections"])
+    # ...and the Easton card links back to the element card (reciprocal, cards.jsonl untouched)
+    assert any(x["to_card_id"] == "card_ref_el_079"
+               for x in cards["card_easton_gold"]["connections"])
+
+
+def test_bridge_compute_is_exact_subject_only_no_false_positives():
+    from bridge_reference_to_scripture import compute
+    refs = [{"id": "r1", "subject": "gold", "title": "Gold (Au) — element 79"},
+            {"id": "r2", "subject": "argon", "title": "Argon (Ar) — element 18"}]
+    base = [{"id": "e1", "shelf": "dictionary", "title": "Easton: Gold"},
+            {"id": "e2", "shelf": "dictionary", "title": "Easton: No"},      # stopword, never a bridge
+            {"id": "e3", "shelf": "classics", "title": "Gold"}]              # not a dictionary card
+    edges = compute(refs, base)
+    assert len(edges) == 1 and edges[0]["a"] == "r1" and edges[0]["b"] == "e1"  # only gold->Easton:Gold
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:

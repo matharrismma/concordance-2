@@ -55,3 +55,5 @@ data/apothecary_proposals/
 data/verified_cards.jsonl
 # reference_cards.jsonl is the deep verifier reference data carded — the CONTENT belongs on github
 !data/reference_cards.jsonl
+# reference_bridges.jsonl grafts the reference cards to Scripture (the two trees) — CONTENT, on github
+!data/reference_bridges.jsonl
