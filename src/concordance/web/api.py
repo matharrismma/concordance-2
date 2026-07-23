@@ -602,6 +602,20 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                            kind=str(body.get("kind") or ""))
         return _ok(res) if res.get("ok") else _err(400, res.get("error", "refused"))
 
+    if method == "POST" and path == "/pins":
+        # what the pages this browser holds are still carrying. POST: ids are personal.
+        if not isinstance(body, dict) or not isinstance(body.get("thread_ids"), list):
+            return _err(400, "thread_ids (a list) required")
+        from .. import pins as _pins
+        return _ok(_pins.collect(body["thread_ids"]))
+
+    if method == "POST" and path == "/pins/done":
+        if not isinstance(body, dict) or not body.get("thread_id") or not body.get("id"):
+            return _err(400, "thread_id and id required")
+        from .. import pins as _pins
+        res = _pins.done(str(body["thread_id"]), str(body["id"]))
+        return _ok(res) if res.get("ok") else _err(404, res.get("error", "not found"))
+
     if method == "POST" and path == "/ask":
         # The conduit front door: find + verify + cite, never generate. Deterministic router.
         if not isinstance(body, dict) or not str(body.get("text") or "").strip():
@@ -642,6 +656,15 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                 tid = _threads.new_thread(surface)["thread_id"]
                 _threads.append(tid, text, r, surface=surface, gate_open=gate_open)
             r = {**r, "thread_id": tid}
+            # the organizing book: a list or reminder the responder discerned is pinned to
+            # THIS page, so it greets the person at the next open. Off to the side — a pin
+            # failure never breaks the answer.
+            if r.get("pin"):
+                try:
+                    from .. import pins as _pins
+                    _pins.add(tid, r["pin"]["kind"], r["pin"]["text"], due=r["pin"].get("due"))
+                except Exception:  # noqa: BLE001
+                    pass
             # Recall: promote what this exchange left behind — a sealed receipt, a verse
             # reached for, a word studied — into cards. We cannot recall everything; we
             # recall what is worth recalling. The chain keeps every word regardless.
@@ -1317,6 +1340,8 @@ ROUTES = [
     {"path": "/almanac", "methods": ("GET",), "api": True},
     {"path": "/apothecary", "methods": ("GET",), "api": True},
     {"path": "/apothecary/propose", "methods": ("POST",), "rl": True},
+    {"path": "/pins", "methods": ("POST",), "rl": True},
+    {"path": "/pins/done", "methods": ("POST",), "rl": True},
     {"path": "/codex", "methods": ("GET",), "api": True},
     {"path": "/codex/scripture", "methods": ("GET",), "api": True},
     {"path": "/codex/themes", "methods": ("GET",), "api": True},

@@ -235,6 +235,29 @@ def test_crisis_outranks_every_member():
     assert any("988" in x["label"] for x in r["resources"])
 
 
+# ── the organizing book: writing is kept and pinned, never answered with junk ───────────────
+
+def test_a_list_is_pinned_not_searched():
+    r = ask.respond("milk\neggs\nbread\nchicken feed", SEC)
+    assert r["kind"] == "kept_list" and r["pin"]["kind"] == "list"
+    assert "results" not in r
+
+
+def test_a_reminder_knows_its_day():
+    r = ask.respond("remind me to call the bank on Thursday", SEC)
+    assert r["kind"] == "reminder" and r["pin"]["due"] is not None
+
+
+def test_stream_of_consciousness_is_kept_quietly():
+    r = ask.respond("I keep circling the same thought about the barn and I want it down before it goes", SEC)
+    assert r["kind"] == "kept_note" and "results" not in r
+
+
+def test_a_crisis_reminder_is_a_crisis():
+    r = ask.respond("remind me to end it all", SEC)
+    assert r["kind"] == "crisis"
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:

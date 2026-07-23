@@ -43,6 +43,7 @@ test_library.py
 test_mcp.py
 test_mcp_http.py
 test_mention_web.py
+test_pins.py
 test_precedent.py
 test_privacy.py
 test_pronounce.py

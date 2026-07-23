@@ -12,6 +12,7 @@ word_study, search — plus curated, attributed pointers.
 from __future__ import annotations
 
 import re
+import time
 from typing import Any, Dict
 
 from . import corpus
@@ -164,6 +165,11 @@ def classify(text: str) -> str:
     t = normalize(text)
     if is_crisis(text):
         return "crisis"
+    from . import pins as _pins
+    if _pins.looks_like_reminder(text or ""):
+        return "reminder"
+    if _pins.looks_like_list(text or ""):
+        return "kept_list"
     if _STRONGS.search(text or ""):
         return "word_study"
     if find_ref(text or ""):
@@ -172,6 +178,8 @@ def classify(text: str) -> str:
         return "verify"
     if any(w in t for w in _ULTIMATE_WORDS):
         return "ultimate"
+    if _pins.looks_like_note(text or ""):
+        return "kept_note"
     return "search"
 
 
@@ -261,6 +269,22 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
         return {**base, "message": "You matter, and you don't have to carry this alone. Please "
                 "reach a real person right now — someone who can be with you.",
                 "resources": _CRISIS_RESOURCES}
+
+    if kind == "reminder":
+        from . import pins as _pins
+        due = _pins.parse_when(text or "")
+        when = time.strftime("%A %b %d", time.localtime(due)) if due else "until you cross it off"
+        return {**base, "message": "I will have it out for you — " + when + ".",
+                "pin": {"kind": "reminder", "text": (text or "").strip(), "due": due}}
+
+    if kind == "kept_list":
+        lines = [ln.strip() for ln in (text or "").splitlines() if ln.strip()]
+        return {**base, "message": "Pinned — it will be at the top of the page when you come back.",
+                "pin": {"kind": "list", "text": (text or "").strip(), "due": None,
+                        "count": len(lines)}}
+
+    if kind == "kept_note":
+        return {**base, "message": "Kept. It is in the record and the journal."}
 
     if kind == "ultimate":
         return {**base, "message": _ULTIMATE_MESSAGE,

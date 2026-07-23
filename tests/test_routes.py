@@ -38,7 +38,7 @@ GOLDEN_API_GET = {
     "/teachings",
 }
 GOLDEN_RATELIMITED = {
-    "/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose",
+    "/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose", "/pins", "/pins/done",
     "/threads", "/threads/search",
     "/coach/mastery", "/identity/create", "/identity/verify", "/badges",
     "/study", "/study/export", "/study/import",

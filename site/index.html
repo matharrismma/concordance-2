@@ -85,6 +85,21 @@
     font-size:.76rem; color:var(--ink-faint); transition:color .14s ease }
   .top a:hover, .top button:hover{ color:var(--ink) }
 
+  /* what the page is carrying for you: open lists and due reminders, gone when crossed off */
+  #carried{ margin:0 .2rem 1.6rem; border:1px solid rgba(138,106,47,.3); border-radius:8px;
+            background:rgba(255,255,255,.4); padding:.7rem .95rem }
+  #carried .cap{ font-size:.56rem; letter-spacing:.22em; text-transform:uppercase;
+                 color:var(--brass-lo); margin-bottom:.35rem;
+                 font-family:Futura,"Century Gothic","Avenir Next",Avenir,sans-serif }
+  #carried .pin{ display:flex; gap:.6rem; align-items:flex-start; padding:.28rem 0 }
+  #carried .pin+.pin{ border-top:1px solid rgba(138,106,47,.14) }
+  #carried .tx{ flex:1; white-space:pre-wrap; font-size:.95rem; color:var(--ink) }
+  #carried .due{ font-size:.72rem; color:var(--oxblood); white-space:nowrap; padding-top:.15rem }
+  #carried .ok{ border:1px solid rgba(138,106,47,.35); background:none; border-radius:50%;
+                width:22px; height:22px; min-width:22px; cursor:pointer; color:var(--ink-faint);
+                font-size:.7rem; line-height:1 }
+  #carried .ok:hover{ color:#4a6a34; border-color:#4a6a34 }
+
   /* the conversation, in ink on the page */
   #chain{ padding:0 .2rem 1.5rem }
   .turn{ margin:0 0 2rem }
@@ -189,6 +204,8 @@
     <button id="doors" type="button" title="Everything (Ctrl-K)" aria-label="Everything">&#8943;</button>
   </nav>
   <div class="col empty" id="col">
+
+    <div id="carried" hidden></div>
 
     <div id="chain"></div>
 
@@ -351,6 +368,7 @@
       var d=await r.json();
       if(d.thread_id){ threadId=d.thread_id; try{ localStorage.setItem(TID,threadId);}catch(e){} rosterPut(threadId,text); }
       body.innerHTML=render(d,isDoc); settle(); scroll(); ta.focus();
+      if(d.pin) loadPins();
     }catch(e){ body.innerHTML='<span class="note">The engine is unreachable right now.</span>'; }
   }
 
@@ -479,6 +497,50 @@
   document.getElementById('newbtn').addEventListener('click',function(){
     threadId=null; try{ localStorage.removeItem(TID);}catch(e){}
     chain.innerHTML=''; ta.innerHTML=''; idle(); settle(); ta.focus(); });
+  // the carried strip: what your pages are holding for you, out on the table at open
+  var carried=document.getElementById('carried');
+  function heldIds(){
+    var ids=[];
+    try{
+      ids=(JSON.parse(localStorage.getItem(ROSTER)||'[]')||[]).map(function(t){return t.thread_id;});
+      if(threadId && ids.indexOf(threadId)<0) ids.unshift(threadId);
+    }catch(e){}
+    return ids.filter(Boolean);
+  }
+  function fmtDue(d){
+    if(!d) return '';
+    var dt=new Date(d*1000), now=new Date();
+    var days=Math.round((dt-now)/86400000);
+    if(days<=0) return 'today';
+    if(days===1) return 'tomorrow';
+    return dt.toLocaleDateString(undefined,{weekday:'short'});
+  }
+  function drawPins(list){
+    list=(list||[]).filter(function(p){return !p.waiting;});
+    if(!list.length){ carried.hidden=true; carried.innerHTML=''; return; }
+    carried.hidden=false;
+    carried.innerHTML='<div class="cap">Carried</div>'+list.map(function(p){
+      return '<div class="pin" data-t="'+esc(p.thread_id)+'" data-i="'+esc(p.id)+'">'+
+        '<button class="ok" title="Cross it off" aria-label="Cross it off">✓</button>'+
+        '<div class="tx">'+esc(p.text)+'</div>'+
+        (p.due?'<div class="due">'+esc(fmtDue(p.due))+'</div>':'')+'</div>'; }).join('');
+  }
+  function loadPins(){
+    var ids=heldIds(); if(!ids.length){ drawPins([]); return; }
+    fetch('/pins',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({thread_ids:ids})})
+      .then(function(r){return r.json();})
+      .then(function(d){ drawPins(d.pins||[]); }).catch(function(){});
+  }
+  carried.addEventListener('click',function(e){
+    var b=e.target.closest('.ok'); if(!b) return;
+    var el=b.closest('.pin');
+    fetch('/pins/done',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({thread_id:el.dataset.t,id:el.dataset.i})})
+      .then(function(){ loadPins(); });
+  });
+  loadPins();
+
   desk.addEventListener('click',function(e){
     if(e.target===desk||e.target===col||e.target===chain) ta.focus(); });
 
