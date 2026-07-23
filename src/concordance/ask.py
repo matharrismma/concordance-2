@@ -154,6 +154,38 @@ def distress_ref(text: str) -> str:
     return ""
 
 
+# Honest fallback — a random classic is worse than an honest "I don't know". When the keeping's
+# best hit shares no real word with the question, say so plainly instead of dumping it.
+_STOP = frozenset((
+    "the", "a", "an", "of", "to", "in", "is", "are", "was", "were", "do", "does", "did", "how",
+    "what", "why", "who", "when", "where", "which", "that", "this", "it", "its", "for", "and",
+    "or", "on", "at", "by", "with", "about", "i", "you", "my", "me", "we", "can", "could",
+    "should", "would", "will", "tell", "explain", "mean", "means", "meaning", "so", "if", "be",
+    "am", "as", "from", "into", "than", "then", "there", "here", "some", "any", "old", "new"))
+_WORD3 = re.compile(r"[a-z]{3,}")
+_QUESTION = re.compile(
+    r"^\s*(is|are|was|were|do|does|did|can|could|how|why|when|where|which|will|should|has|have)\b",
+    re.I)
+
+
+def _content_tokens(s: str) -> set:
+    return {w for w in _WORD3.findall((s or "").lower()) if w not in _STOP}
+
+
+def _is_question(text: str) -> bool:
+    t = (text or "").strip()
+    return t.endswith("?") or bool(_QUESTION.match(t))
+
+
+def _shares_a_word(text: str, card: Dict[str, Any]) -> bool:
+    """Does the keeping's hit actually share a content word with what was asked?"""
+    q = _content_tokens(text)
+    if not q:
+        return True                                   # nothing specific asked — don't second-guess
+    hay = _content_tokens((card.get("title") or "") + " " + (card.get("body") or ""))
+    return bool(q & hay)
+
+
 def find_ref(text: str):
     """The one place a scripture reference is discerned from prose. Strict form first, then
     the church passage names, then phone-typed loose forms validated against the canon."""
@@ -552,9 +584,26 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     # is return the hit WITH its connected cloud — the communion of witnesses the graph already
     # holds around it. So the top result carries who else in the keeping speaks to the same thing.
     hits = corpus.search(text, limit=6)
+    weak = (not hits) or not _shares_a_word(text, hits[0])
+    if weak:
+        # An honest "I don't have that" beats a confident irrelevant hit (the "sore throat ->
+        # Marcus Aurelius" failure). If it was a question, offer the real next steps instead.
+        if _is_question(text):
+            return _witnessed({**base, "kind": "found", "results": [],
+                               "message": "I don't have a verified answer for that, and I won't "
+                                          "invent one. You can check a specific claim, read a "
+                                          "passage, or see how the pieces connect.",
+                               "resources": [{"label": "Check a specific claim", "ref": "/check.html"},
+                                             {"label": "Read Scripture", "ref": "/bible.html"},
+                                             {"label": "The map — how it all connects", "ref": "/map.html"}]},
+                              text, witness, gate_just_opened)
+        # not a question — a topic the keeping is thin on. Show the nearest, but say it plainly.
+        out = {**base, "kind": "found", "results": [corpus._brief(c) for c in hits],
+               "message": "Nothing on that directly — here is the nearest in the keeping:"}
+        return _witnessed(out, text, witness, gate_just_opened)
+
     out = {**base, "kind": "found", "results": [corpus._brief(c) for c in hits]}
-    if hits:
-        cloud = _connected_cloud(hits[0].get("id"))
-        if cloud:
-            out["cloud"] = {"around": hits[0].get("title", ""), "witnesses": cloud}
+    cloud = _connected_cloud(hits[0].get("id"))
+    if cloud:
+        out["cloud"] = {"around": hits[0].get("title", ""), "witnesses": cloud}
     return _witnessed(out, text, witness, gate_just_opened)

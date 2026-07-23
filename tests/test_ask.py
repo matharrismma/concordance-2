@@ -67,6 +67,16 @@ def test_a_remedy_question_reaches_the_apothecary():
     assert router.route("what does grace mean")["member"] != "apothecary"
 
 
+def test_honest_when_it_does_not_know_a_question():
+    """A random classic is worse than honesty. A question the keeping can't match says so plainly
+    and offers the real next steps, instead of dumping an irrelevant hit."""
+    r = ask.respond("is xqzptn wibbleforp glorptastic", SEC)   # a question with no keeping match
+    assert r["kind"] == "found"
+    assert not r.get("results")                              # no confident irrelevant dump
+    assert "won't invent" in r["message"] or "don't have a verified" in r["message"]
+    assert any("check" in (x.get("label", "").lower()) for x in (r.get("resources") or []))
+
+
 def test_crisis_puts_real_help_first():
     r = ask.respond("sometimes I want to die", SEC)
     assert r["kind"] == "crisis"
