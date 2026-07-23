@@ -69,6 +69,20 @@ class Corpus:
                 self._by_token.setdefault(t, []).append(cid)
         self._n = max(1, len(self._index_card_ids()))
 
+    def add_card(self, card: dict) -> None:
+        """Insert one card into the live corpus AND its token index — so a just-minted
+        verification is searchable immediately, no restart. Idempotent by id."""
+        cid = card.get("id")
+        if not cid:
+            return
+        self.cards[cid] = card
+        if is_public(card):
+            for t in set(_tokens(_card_text(card))):
+                self._by_token.setdefault(t, [])
+                if cid not in self._by_token[t]:
+                    self._by_token[t].append(cid)
+            self._n = max(1, len(self._index_card_ids()))
+
     def _index_card_ids(self) -> set:
         ids: set = set()
         for cids in self._by_token.values():
@@ -172,7 +186,28 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                 continue
             if isinstance(c, dict) and c.get("id"):
                 out[c["id"]] = c
+    # the second source: cards minted from verifications (verified_cards.jsonl) — the science
+    # and math joining the same graph as Scripture and the tradition
+    vp = p.parent / "verified_cards.jsonl"
+    if path is None and vp.exists():
+        with open(vp, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    c = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(c, dict) and c.get("id"):
+                    out[c["id"]] = c
     return out
+
+
+def add_to_default(card: dict) -> None:
+    """Add one card to the live default corpus if it is already built (best-effort)."""
+    if _DEFAULT is not None:
+        _DEFAULT.add_card(card)
 
 
 def default_corpus(path: Optional[Path] = None) -> Corpus:

@@ -135,6 +135,14 @@ def attach(result: Dict[str, Any], *, config: EngineConfig, domain: str = "mathe
     if s.get("ok"):
         out["seal"] = {"content_hash": s["content_hash"], "cite_url": s["cite_url"],
                        "ledgered": s.get("ledgered", False)}
+        # Every verifier produces a card: the sealed result joins the one keeping, so the
+        # science and math live in the same graph as Scripture. Off to the side — a mint
+        # failure never touches the seal — and idempotent (the same fact is one card).
+        try:
+            from . import science_cards
+            science_cards.mint(result, domain, out["seal"])
+        except Exception:  # noqa: BLE001
+            pass
     else:
         out["seal"] = None
         out["seal_error"] = s.get("error", "seal could not be minted")

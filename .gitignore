@@ -52,3 +52,4 @@ data/cards.jsonl.*
 data/easton/
 data/herbs/
 data/apothecary_proposals/
+data/verified_cards.jsonl
