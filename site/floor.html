@@ -117,10 +117,12 @@
       var rad=SIZE[Math.min(n._d,SIZE.length-1)];
       nodes+='<g class="'+cls+'" data-t="'+esc(n.title)+'" data-c="'+(n.child_count||0)+'" '+
              'transform="translate('+n._x+','+n._y+')"><circle r="'+rad+'"></circle>';
-      if(n._d<=2){
+      // name the structure — the root, the two halves, and the named spines. The leaf-seeds stay
+      // quiet points of light, so the design reads at a glance instead of a wall of labels.
+      if(n._d<=1 || (n._d===2 && (n.child_count||0)>0)){
         var t=n.title.split(' — ')[0].split(' (')[0];
         if(t.length>26) t=t.slice(0,25)+'…';
-        var dy=(n._y<CY? -rad-7 : rad+15);
+        var dy=(n._y<CY? -rad-8 : rad+16);
         nodes+='<text class="lbl'+(n._d===2?' small':'')+'" text-anchor="middle" y="'+dy+'">'+esc(t)+'</text>';
       }
       nodes+='</g>';
