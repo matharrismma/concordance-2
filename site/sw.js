@@ -22,7 +22,7 @@ const CACHE = 'nh-offline-v4';
 const CORE = [
   '/', '/index.html', '/companion.html', '/ask.html',
   '/floor.html', '/read.html', '/bible.html', '/apothecary.html',
-  '/journal.html', '/days.html', '/almanac.html', '/library.html',
+  '/journal.html', '/days.html', '/almanac.html', '/library.html', '/works.html', '/codex.html',
   '/kinds.js', '/nh-tools.js', '/nh-home.js', '/speak.js', '/gate.js', '/redact.js', '/nh-search.js',
   '/manifest.webmanifest', '/icon.svg',
   '/floor', '/coach/journey', '/coach/subjects', '/apothecary', '/almanac'
@@ -66,7 +66,7 @@ self.addEventListener('fetch', (e) => {
   // almanac, Scripture and its helps, the dictionary, the map, the codex.
   const isData = ['/graph', '/search', '/card', '/threads', '/floor', '/coach', '/apothecary',
                   '/passage', '/commentary', '/cross_refs', '/original', '/canon', '/almanac',
-                  '/character', '/prophecy', '/seeds', '/codex', '/locate', '/library/health',
+                  '/character', '/prophecy', '/seeds', '/codex', '/works', '/locate', '/library/health',
                   '/daily', '/resolve', '/word_study'].some((p) => url.pathname.startsWith(p));
 
   if (isDoc || isData) {

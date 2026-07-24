@@ -49,6 +49,10 @@ site/search-index.json
 data/bindings/
 data/deferred/
 data/bookofdays/
+# The Works — the technical volume is COMPILED from the engine (real runs + minted seals),
+# like the codex; the demonstrations' source is compendium.py, the sealed output is generated.
+data/compendium/
+data/codex/
 # corpus backups + bulk reference data belong beside the engine, not in source
 data/*.bak
 data/cards.jsonl.*

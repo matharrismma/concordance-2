@@ -277,7 +277,7 @@ _SITEMAP_PAGES = ("/", "/ask.html", "/bible.html", "/read.html", "/characters.ht
                   "/community.html", "/library.html", "/guarantees.html", "/collapse.html",
                   "/seeds.html", "/seal.html", "/connect.html", "/corrected.html", "/audit.html",
                   "/proof.html", "/reason.html", "/boundary.html", "/almanac.html", "/codex.html",
-                  "/teachings.html", "/brain.html", "/floor.html")
+                  "/teachings.html", "/brain.html", "/floor.html", "/works.html")
 
 
 def build_sitemap(base_url: str) -> str:
@@ -1254,6 +1254,23 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import codex as codex_mod
         return _ok(codex_mod.verify_artifact())
 
+    if method == "GET" and path == "/works":
+        # The Works — a technical volume of the one book: real worked demonstrations of the
+        # depth of mathematics, science and engineering the tools reach, each run through the
+        # engine and sealed. Proof, not assertion. Grows as demonstrations are added.
+        from .. import compendium as works_mod
+        return _ok({"overview": works_mod.overview(), "demonstrations": works_mod.demonstrations()})
+    if method == "GET" and path == "/works/item":
+        from .. import compendium as works_mod
+        rec = works_mod.demonstration((query.get("id") or "").strip())
+        return _ok(rec) if rec is not None else _err(404, "demonstration not found")
+    if method == "GET" and path == "/works/artifact":
+        from .. import compendium as works_mod
+        return _ok(works_mod.artifact())
+    if method == "GET" and path == "/works/verify":
+        from .. import compendium as works_mod
+        return _ok(works_mod.verify_artifact())
+
     if method == "GET" and path == "/teachings":
         # Phase 3 — the teaching-review workspace (Words in Red). Witness content: the engine
         # assembles the frozen Greek anchor + existing sites; the operator records the reading.
@@ -1371,6 +1388,10 @@ ROUTES = [
     {"path": "/codex/connections", "methods": ("GET",), "api": True},
     {"path": "/codex/artifact", "methods": ("GET",), "api": True},
     {"path": "/codex/verify", "methods": ("GET",), "api": True},
+    {"path": "/works", "methods": ("GET",), "api": True},
+    {"path": "/works/item", "methods": ("GET",), "api": True},
+    {"path": "/works/artifact", "methods": ("GET",), "api": True},
+    {"path": "/works/verify", "methods": ("GET",), "api": True},
     {"path": "/teachings", "methods": ("GET",), "api": True},
     {"path": "/card.html", "methods": ("GET",), "api": True, "serve": True},
     {"path": "/speak", "methods": ("POST",), "rl": True, "serve": True},

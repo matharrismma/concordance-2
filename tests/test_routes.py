@@ -35,6 +35,7 @@ GOLDEN_API_GET = {
     "/identity/fingerprint", "/identity/describe", "/badges", "/study", "/card.html",
     "/groups", "/group", "/seeds", "/almanac",
     "/codex", "/codex/scripture", "/codex/themes", "/codex/connections", "/codex/artifact", "/codex/verify",
+    "/works", "/works/item", "/works/artifact", "/works/verify",
     "/teachings",
 }
 GOLDEN_RATELIMITED = {
