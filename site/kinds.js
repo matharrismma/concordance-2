@@ -62,6 +62,22 @@
   if (!('serviceWorker' in navigator)) return;
   if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('/sw.js').catch(function () { /* offline is a bonus, never a requirement */ });
+    navigator.serviceWorker.register('/sw.js').then(function (reg) {
+      // once the worker is in control, the flagship experience is carried on this device — say so,
+      // gently, ONE time. So the person knows they can walk away from the internet and still have it.
+      if (!navigator.serviceWorker.controller) return;            // not controlling yet (first load)
+      try { if (localStorage.getItem('nh_offline_told')) return; } catch (e) { return; }
+      var t = document.createElement('div');
+      t.setAttribute('role', 'status');
+      t.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:2147481400;' +
+        'background:rgba(20,14,7,.94);color:#efe7d3;border:1px solid rgba(198,154,74,.5);border-radius:999px;' +
+        'padding:.5rem 1rem;font:14px/1.3 "Iowan Old Style",Palatino,Georgia,serif;box-shadow:0 6px 20px -6px #000;' +
+        'opacity:0;transition:opacity .4s ease;max-width:92vw;text-align:center';
+      t.textContent = '✓ Ready to use offline — carry it with you.';
+      document.body.appendChild(t);
+      requestAnimationFrame(function () { t.style.opacity = '1'; });
+      setTimeout(function () { t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 500); }, 4200);
+      try { localStorage.setItem('nh_offline_told', '1'); } catch (e) {}
+    }).catch(function () { /* offline is a bonus, never a requirement */ });
   });
 })();

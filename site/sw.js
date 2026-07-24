@@ -11,13 +11,20 @@
  *   - GET + same-origin only. Never caches errors, opaque responses, or the seal/verify path.
  * Bump CACHE to purge every old cache on activate.
  */
-const CACHE = 'nh-offline-v1';
+const CACHE = 'nh-offline-v2';
 
-/* The floor: what must be there with no network at all. Best-effort — a miss never
-   fails the install (a failed install would leave the site with no worker at all). */
+/* The floor: what must be there with no network at all — precached on install so the whole flagship
+   experience (the door, the Floor of Discovery, the Coach, the Apothecary, Scripture, the journal)
+   is CARRIED with you, ready before you ever go offline. We take the internet when it is there and
+   fall back to this when it is not. Best-effort — a miss never fails the install (a failed install
+   would leave the site with no worker at all). Paramless knowledge endpoints are precached too, so
+   the pages have their data offline; per-item data (a passage, a lesson) caches as it is visited. */
 const CORE = [
   '/', '/index.html', '/companion.html', '/ask.html',
-  '/kinds.js', '/speak.js', '/gate.js'
+  '/floor.html', '/read.html', '/bible.html', '/apothecary.html',
+  '/journal.html', '/days.html', '/almanac.html', '/library.html',
+  '/kinds.js', '/nh-tools.js', '/nh-home.js', '/speak.js', '/gate.js', '/redact.js',
+  '/floor', '/coach/journey', '/coach/subjects', '/apothecary', '/almanac'
 ];
 
 /* Never cache: anything that must be live-verified or is per-request. */
@@ -53,8 +60,13 @@ self.addEventListener('fetch', (e) => {
 
   const isDoc = req.mode === 'navigate' ||
                 (req.headers.get('accept') || '').includes('text/html');
-  const isData = url.pathname.startsWith('/graph') || url.pathname.startsWith('/search') ||
-                 url.pathname.startsWith('/card') || url.pathname.startsWith('/threads');
+  // the read-only KEEPING — network-first (fresh when there is a network, the last good copy when
+  // there is not). The whole keeping travels with you: the floor, the coach, the apothecary, the
+  // almanac, Scripture and its helps, the dictionary, the map, the codex.
+  const isData = ['/graph', '/search', '/card', '/threads', '/floor', '/coach', '/apothecary',
+                  '/passage', '/commentary', '/cross_refs', '/original', '/canon', '/almanac',
+                  '/character', '/prophecy', '/seeds', '/codex', '/locate', '/library/health',
+                  '/daily', '/resolve', '/word_study'].some((p) => url.pathname.startsWith(p));
 
   if (isDoc || isData) {
     // NETWORK FIRST — fresh whenever there is a network; cached copy when there is not.
