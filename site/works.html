@@ -98,20 +98,20 @@
 <script>
 (function(){
   function esc(s){ var d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
-  var DISC = [
-    {key:'mathematics', label:'I · Mathematics'},
-    {key:'science',     label:'II · Science'},
-    {key:'engineering', label:'III · Engineering'}
-  ];
 
   fetch('/works').then(function(r){return r.json();}).then(function(d){
     var ov = d.overview || {}, demos = d.demonstrations || [];
     var by = ov.by_discipline || {};
-    document.getElementById('stats').innerHTML =
-      '<div class="stat"><span class="n">'+esc(ov.published||demos.length)+'</span><span class="l">demonstrations</span></div>'+
-      '<div class="stat"><span class="n">'+esc(by.mathematics||0)+'</span><span class="l">mathematics</span></div>'+
-      '<div class="stat"><span class="n">'+esc(by.science||0)+'</span><span class="l">science</span></div>'+
-      '<div class="stat"><span class="n">'+esc(by.engineering||0)+'</span><span class="l">engineering</span></div>';
+    var labels = ov.part_labels || {};
+    var order = (ov.discipline_order && ov.discipline_order.length) ? ov.discipline_order : Object.keys(by);
+    var DISC = order.map(function(k){ return { key:k, label: labels[k] || k }; });
+    // stats: the total, then one tile per part (short label — the numeral)
+    var tiles = '<div class="stat"><span class="n">'+esc(ov.published||demos.length)+'</span><span class="l">demonstrations</span></div>';
+    DISC.forEach(function(sec){
+      var short = (sec.label.split(' · ')[1] || sec.label);
+      tiles += '<div class="stat"><span class="n">'+esc(by[sec.key]||0)+'</span><span class="l">'+esc(short)+'</span></div>';
+    });
+    document.getElementById('stats').innerHTML = tiles;
     document.getElementById('frontnote').textContent = ov.note || '';
 
     var vol = document.getElementById('volume'), html = '';
