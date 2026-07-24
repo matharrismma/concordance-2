@@ -56,6 +56,15 @@
   .mark.done{color:var(--pass)} .mark.now{color:var(--gold)} .mark.lock{color:var(--goldsoft); opacity:.5}
   .utrack{color:var(--dim); font-size:.72rem}
   .ribbon{margin:1.5rem 0 0; border:1px solid var(--line); padding:.8rem 1rem; font-size:.85rem; color:var(--dim)}
+  .journey{display:flex; flex-wrap:wrap; gap:.35rem; align-items:center; margin:1.2rem 0 .2rem}
+  .journey .st{display:inline-flex; align-items:center; gap:.4rem; font-size:.82rem; color:var(--dim);
+               text-decoration:none; padding:.15rem 0}
+  .journey .st .dot{width:9px; height:9px; border-radius:50%; background:var(--line); flex:0 0 auto}
+  .journey .st.done .dot{background:var(--gold); opacity:.45}
+  .journey .st.here{color:var(--ink); font-weight:600}
+  .journey .st.here .dot{background:var(--gold); box-shadow:0 0 0 3px rgba(198,154,74,.2)}
+  a.st:hover{color:var(--gold)}
+  .journey .arrow{color:var(--line); font-size:.85rem}
   .ribbon .n{color:var(--gold)}
   .seal{color:var(--dim); font-size:.76rem; font-style:italic; margin-top:.4rem}
   footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:2.6rem; padding-top:1.3rem; line-height:1.7}
@@ -74,12 +83,15 @@
 </div></header>
 
 <main class="wrap">
-  <div class="kicker">The Coach</div>
-  <h1>Learn to Read</h1>
-  <p class="lede">A reading tutor that grows with the student — one step at a time, read aloud, at the
-  child's pace. Every lesson is <em>found and presented</em>, never generated, and never a grade on a
-  child. It remembers where you are, so the path never starts over. <span class="dim">For a parent and
-  child together.</span></p>
+  <div class="kicker">The Coach — for any age</div>
+  <h1>Start where you are</h1>
+  <p class="lede">For any age. It begins at the very first letter — for the youngest, and for anyone
+  learning to read late — and <em>stays with you</em>, climbing from letters through the great readers
+  and up into the whole keeping: Scripture, and the floor of all discovery. Every lesson is
+  <em>found and presented</em>, never generated, and never a grade on anyone. It remembers where you
+  are, so the path never starts over.</p>
+
+  <div class="journey" id="journey" hidden></div>
 
   <div class="row" id="subjects" style="margin-top:1.4rem"></div>
   <div class="row" id="home">
@@ -241,7 +253,26 @@ async function cont(){ const rec=await getJSON('/coach/recommend?done='+encodeUR
 document.getElementById('startbtn').addEventListener('click', begin);
 document.getElementById('mapbtn').addEventListener('click', showMap);
 document.getElementById('continuebtn').addEventListener('click', cont);
-(function init(){ if(done().length){ document.getElementById('continuebtn').hidden=false; } renderRibbon(); loadSubjects(); })();
+// the one lifelong arc, made visible — where you are on the path from the first letter up into
+// the whole keeping. Progress is this device's (no account) — so it stays with YOU.
+async function renderJourney(){
+  try{
+    const j = await getJSON('/coach/journey?done='+encodeURIComponent(done().join(',')));
+    const el=document.getElementById('journey'); if(!j||!j.stages||!j.stages.length){ return; }
+    const wn=j.where_next||{};
+    let reached=false;
+    el.innerHTML = j.stages.map(function(s,i){
+      const here = (wn.subject && s.subject===wn.subject) || (!wn.subject && wn.ref && s.ref===wn.ref);
+      let cls='st'; if(here){ cls+=' here'; reached=true; } else if(!reached){ cls+=' done'; }
+      const inner='<span class="dot"></span>'+esc(s.title);
+      const chip = s.ref ? ('<a class="'+cls+'" href="'+esc(s.ref)+'" title="'+esc(s.note||'')+'">'+inner+'</a>')
+                         : ('<span class="'+cls+'" title="'+esc(s.note||'')+'">'+inner+'</span>');
+      return (i? '<span class="arrow">›</span>':'')+chip;
+    }).join('');
+    el.hidden=false;
+  }catch(e){}
+}
+(function init(){ if(done().length){ document.getElementById('continuebtn').hidden=false; } renderRibbon(); renderJourney(); loadSubjects(); })();
 </script>
 <script src="/nh-home.js"></script>
 <script src="/nh-tools.js"></script>

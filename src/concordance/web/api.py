@@ -998,6 +998,12 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/coach/overview":
         from .. import coach
         return _ok(coach.overview(query.get("subject") or coach.DEFAULT_SUBJECT))
+    if method == "GET" and path == "/coach/journey":
+        # the one lifelong arc, for any age; ?done=id1,id2,... names where the learner is + next step.
+        # Caller holds progress (no personal data). Starts youngest, stays with you, opens the keeping.
+        from .. import coach
+        done = [x for x in (query.get("done") or "").split(",") if x.strip()]
+        return _ok(coach.journey(done))
     if method == "GET" and path == "/coach/unit":
         from .. import coach
         return _ok(coach.unit(query.get("id", ""), query.get("subject") or coach.DEFAULT_SUBJECT))
@@ -1331,6 +1337,7 @@ ROUTES = [
     {"path": "/steward", "methods": ("GET",), "api": True},
     {"path": "/coach/subjects", "methods": ("GET",), "api": True},
     {"path": "/coach/overview", "methods": ("GET",), "api": True},
+    {"path": "/coach/journey", "methods": ("GET",), "api": True},
     {"path": "/coach/unit", "methods": ("GET",), "api": True},
     {"path": "/coach/next", "methods": ("GET",), "api": True},
     {"path": "/coach/recommend", "methods": ("GET",), "api": True},

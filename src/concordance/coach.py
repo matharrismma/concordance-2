@@ -149,6 +149,75 @@ def overview(subject: str = DEFAULT_SUBJECT) -> Dict[str, Any]:
     }
 
 
+# ── the one lifelong journey ─────────────────────────────────────────────────────────────────
+# Coach is for ANY AGE. It starts at the very youngest (the first letter) and STAYS WITH YOU —
+# the separate subjects are one arc that climbs from letters, through the readers and the great
+# works, and opens into the whole keeping: the Word, and the floor of all discovery. You can enter
+# at the beginning or wherever you already are; it never graduates you out. Success is the day you
+# no longer need it (John 3:30) — and the path still points on, to Christ.
+_JOURNEY = [
+    ("read", "subject", "Learn to read",
+     "the very first letters and their sounds — for the youngest, and for anyone beginning"),
+    ("mcguffey", "subject", "First readers", "words into sentences, and sentences into stories"),
+    ("aesop", "subject", "Fables", "short stories that carry wisdom"),
+    ("pilgrims", "subject", "Pilgrim's Progress", "the great allegory of the journey home"),
+    ("founding", "subject", "Founding documents", "the words a free people stand on"),
+    ("/bible.html", "keeping", "The Word",
+     "Scripture itself — where the whole path has been leading"),
+    ("/floor.html", "keeping", "The whole floor",
+     "the sciences, history, the created order — all of it, connected, and how it points to the Maker"),
+]
+_OPENING = ("For any age. A child at their first letter, someone learning to read late, or anyone "
+            "climbing higher — start at the very beginning, or wherever you already are. I will "
+            "stay with you, as far as you want to go.")
+
+
+def journey(done_ids: Optional[List[str]] = None) -> Dict[str, Any]:
+    """The one lifelong arc — the stages a learner climbs, at any age, from the first letter up into
+    the whole keeping. If `done_ids` is given, also names WHERE the learner is and the next step, so
+    the path stays with them across the whole journey. Progress is caller-held (no personal data)."""
+    present = set(_discover())
+    stages: List[Dict[str, Any]] = []
+    for ident, kind, title, note in _JOURNEY:
+        if kind == "subject" and ident not in present:
+            continue
+        st = {"kind": kind, "title": title, "note": note}
+        if kind == "subject":
+            st["subject"] = ident
+            st["count"] = len(_load(ident))
+        else:
+            st["ref"] = ident
+        stages.append(st)
+    out = {"kind": "coach_journey", "for_any_age": True, "opening": _OPENING,
+           "stages": stages, "note": _NOTE, "generated": False}
+    if done_ids is not None:
+        out["where_next"] = where_next(done_ids)
+    return out
+
+
+def where_next(done_ids: Optional[List[str]] = None) -> Dict[str, Any]:
+    """The single next step across the WHOLE journey. Walks the arc; inside a subject returns the
+    next un-done unit; when a subject is finished it advances; when all the school is done it opens
+    the keeping — which never ends. Never a grade, never a coin flip — just the next step."""
+    done = {str(x) for x in (done_ids or []) if x}
+    present = set(_discover())
+    for ident, kind, title, note in _JOURNEY:
+        if kind == "keeping":
+            return {"kind": "coach_journey_next", "stage": "keeping", "title": title, "note": note,
+                    "ref": ident, "generated": False}
+        if ident not in present:
+            continue
+        remaining = [u for u in _ordered(ident) if str(u.get("id")) not in done]
+        if remaining:
+            u = remaining[0]
+            return {"kind": "coach_journey_next", "stage": ident, "subject": ident,
+                    "stage_title": title, "note": note,
+                    "next_unit": {"id": u.get("id"), "title": u.get("title")}, "generated": False}
+    return {"kind": "coach_journey_next", "stage": "keeping", "title": "The whole floor",
+            "ref": "/floor.html", "note": "The school is walked; the keeping is open, and it stays "
+            "with you.", "generated": False}
+
+
 def unit(unit_id: str, subject: str = DEFAULT_SUBJECT) -> Dict[str, Any]:
     """One unit, VERBATIM as authored — the rule, examples, decodable sentence, checks, next.
     Searches the given subject first, then any subject (ids are subject-unique), so a caller need not

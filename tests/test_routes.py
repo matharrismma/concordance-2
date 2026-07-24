@@ -31,7 +31,7 @@ GOLDEN_API_GET = {
     "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
     "/commentary", "/journal", "/journal/dates", "/steward", "/tsk",
     "/character", "/characters", "/prophecy",
-    "/coach/subjects", "/coach/overview", "/coach/unit", "/coach/next", "/coach/recommend", "/coach/guidance",
+    "/coach/subjects", "/coach/overview", "/coach/journey", "/coach/unit", "/coach/next", "/coach/recommend", "/coach/guidance",
     "/identity/fingerprint", "/identity/describe", "/badges", "/study", "/card.html",
     "/groups", "/group", "/seeds", "/almanac",
     "/codex", "/codex/scripture", "/codex/themes", "/codex/connections", "/codex/artifact", "/codex/verify",

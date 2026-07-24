@@ -188,6 +188,29 @@ def test_guidance_states_the_boundary():
     assert "grade" in joined and "generate" in joined
 
 
+def test_journey_is_for_any_age_starts_youngest_and_climbs_into_the_keeping():
+    """One lifelong arc: it opens 'for any age', begins at the very first letter, and ends by
+    opening the keeping (the Word, the floor) — it never graduates the learner out."""
+    j = coach.journey([])
+    assert j["for_any_age"] is True and "any age" in j["opening"].lower()
+    kinds = [s["kind"] for s in j["stages"]]
+    assert kinds[0] == "subject" and "keeping" in kinds          # starts in a subject, opens the keeping
+    refs = [s.get("ref") for s in j["stages"] if s["kind"] == "keeping"]
+    assert "/bible.html" in refs and "/floor.html" in refs       # the Word, then the whole floor
+    # nothing done -> the very first step is the youngest one
+    first = j["where_next"]
+    assert first["stage"] == "read" and first["next_unit"]["id"]
+    assert coach._ordered("read")[0]["id"] == first["next_unit"]["id"]
+
+
+def test_journey_stays_with_you_across_stages():
+    """Finishing a whole subject advances the one path to the next stage — it stays with you."""
+    read_done = [u["id"] for u in coach._ordered("read")]
+    wn = coach.where_next(read_done)
+    assert wn["stage"] != "read"                                  # advanced beyond reading
+    assert wn.get("next_unit") or wn.get("ref")                   # there is always a next step
+
+
 def _run_all():
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     passed = 0
