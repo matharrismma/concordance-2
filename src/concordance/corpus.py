@@ -192,8 +192,10 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
     #                           physical constants, …), carded and GIT-TRACKED so the content is
     #                           on github, not only in the code
     if path is None:
+        #   works_cards.jsonl — The Works: every worked, engine-sealed demonstration carded as a
+        #                       seed in the keeping (minted by compendium.build_all, data-only)
         for extra in ("verified_cards.jsonl", "reference_cards.jsonl", "keystone_seeds.jsonl",
-                      "nesting_seeds.jsonl", "web_cache.jsonl"):
+                      "nesting_seeds.jsonl", "works_cards.jsonl", "web_cache.jsonl"):
             xp = p.parent / extra
             if not xp.exists():
                 continue
@@ -209,7 +211,7 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                     if isinstance(c, dict) and c.get("id"):
                         out[c["id"]] = c
         for overlay in ("reference_bridges.jsonl", "keystone_bridges.jsonl",
-                        "nesting_bridges.jsonl"):
+                        "nesting_bridges.jsonl", "works_bridges.jsonl"):
             _apply_bridges(out, p.parent / overlay)
     return out
 

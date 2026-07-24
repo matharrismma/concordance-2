@@ -178,6 +178,22 @@ DEMONSTRATIONS: List[Dict[str, Any]] = [
        [{"id": "st1", "domain": "statistics",
          "spec": {"p_value": 0.03, "alpha": 0.05, "claimed_significance": "significant"},
          "claim": "p = 0.03 ≤ α = 0.05 → significant"}]),
+    _M("works_bayes", "Probability / Bayes",
+       "The base rate a doctor must not forget",
+       "A disease affects 1 in 100. A test is 90% sensitive and has a 5% false-positive rate. A "
+       "positive result feels alarming — yet Bayes' theorem shows the chance of actually being "
+       "ill is only about 15%. The base rate rules.",
+       [{"id": "by1", "domain": "probability",
+         "spec": {"p_a": 0.01, "p_b_given_a": 0.9, "p_b_given_not_a": 0.05,
+                  "claimed_p_a_given_b": 0.15384615384615385},
+         "claim": "P(ill | +) = (.9·.01)/(.9·.01 + .05·.99) ≈ 0.154"}]),
+    _M("works_polygon", "Plane geometry",
+       "The angles inside a hexagon",
+       "The interior angles of any n-sided polygon sum to (n−2)·180°. For a hexagon that is 720° — "
+       "the reason six equilateral triangles, or a honeycomb, tile the plane.",
+       [{"id": "pg1", "domain": "geometry",
+         "spec": {"polygon_n": 6, "claimed_interior_angle_sum_deg": 720},
+         "claim": "(6−2)·180° = 720°"}]),
 
     # ══════════════ II · PHYSICAL SCIENCE ══════════════
     _P("works_mechanics", "Classical mechanics",
@@ -284,6 +300,27 @@ DEMONSTRATIONS: List[Dict[str, Any]] = [
          "spec": {"constant": "speed_of_light", "claimed_value": 299792458.0, "claimed_unit": "m/s",
                   "exact": True},
          "claim": "c = 299,792,458 m/s (exact)"}]),
+    _P("works_atom", "Atomic physics",
+       "The electrons of sodium, shell by shell",
+       "Sodium's eleven electrons fill the shells in a fixed order — 1s² 2s² 2p⁶ 3s¹ — and that "
+       "one lonely outer electron is the whole reason sodium is so reactive.",
+       [{"id": "at1", "domain": "atomic",
+         "spec": {"atomic_number": 11, "claimed_configuration": "1s2 2s2 2p6 3s1"},
+         "claim": "Z=11 ground state = 1s² 2s² 2p⁶ 3s¹"}]),
+    _P("works_element", "Periodic table",
+       "Carbon, by definition",
+       "An element's identity is definitional, not measured: the element with six protons is "
+       "carbon, symbol C. Identity, reduced to a proton count.",
+       [{"id": "el1", "domain": "periodic_table",
+         "spec": {"atomic_number": 6, "claimed_symbol": "C"},
+         "claim": "Z = 6 ↔ carbon (C)"}]),
+    _P("works_julian_day", "Positional astronomy",
+       "The running day-count astronomers keep",
+       "Astronomers count time in Julian days — an unbroken tally of days. Noon on 1 January 2000 "
+       "is Julian day 2,451,545, the modern epoch J2000.",
+       [{"id": "jd1", "domain": "ephemeris",
+         "spec": {"iso_date": "2000-01-01", "claimed_julian_day": 2451545.0},
+         "claim": "JD(2000-01-01) = 2,451,545"}]),
 
     # ══════════════ III · EARTH, SKY & LIFE ══════════════
     _L("works_radiometric", "Geochronology",
@@ -295,12 +332,13 @@ DEMONSTRATIONS: List[Dict[str, Any]] = [
                   "claimed_remaining_amount": 50},
          "claim": "N = 100·½¹ = 50 after one half-life"}]),
     _L("works_haversine", "Geodesy",
-       "A degree of longitude at the equator",
-       "The great-circle (haversine) distance for one degree of longitude at the equator is about "
-       "111.2 km — the number behind every map scale and GPS fix.",
+       "The great-circle distance from New York to London",
+       "Across the curved Earth, the shortest path (the haversine great-circle distance) from New "
+       "York to London is about 5,570 km — the number behind every flight plan and GPS fix.",
        [{"id": "hv1", "domain": "geography",
-         "spec": {"lat1": 0, "lon1": 0, "lat2": 0, "lon2": 1, "claimed_distance_km": 111.19492664455873},
-         "claim": "haversine(0,0 → 0,1°) ≈ 111.19 km"}]),
+         "spec": {"lat1": 40.7128, "lon1": -74.0060, "lat2": 51.5074, "lon2": -0.1278,
+                  "claimed_distance_km": 5570.222179737958},
+         "claim": "haversine(NYC → London) ≈ 5,570 km"}]),
     _L("works_dew_point", "Meteorology",
        "When dew forms: the dew point",
        "Air at 20 °C and 50% humidity will bead with dew once it cools to about 9.26 °C — the "
@@ -364,6 +402,17 @@ DEMONSTRATIONS: List[Dict[str, Any]] = [
        [{"id": "hr1", "domain": "exercise_science",
          "spec": {"age_years": 30, "claimed_max_hr": 187.0},
          "claim": "HRmax = 208 − 0.7·30 = 187 bpm"}]),
+    _L("works_medicine", "Clinical medicine",
+       "The body's numbers: mean pressure and a safe dose",
+       "Mean arterial pressure — what actually perfuses the organs — is DBP + (SBP−DBP)/3, about "
+       "93 mmHg at 120/80. And a 10 mg/kg drug in a 70 kg adult is a 700 mg dose. The bedside "
+       "arithmetic that must not be wrong.",
+       [{"id": "mp1", "domain": "medicine",
+         "spec": {"systolic": 120, "diastolic": 80, "claimed_map_mmhg": 93.33},
+         "claim": "MAP = 80 + (120−80)/3 ≈ 93.3 mmHg"},
+        {"id": "dd1", "domain": "medicine",
+         "spec": {"dose_mg_per_kg": 10, "weight_kg": 70, "claimed_dose_mg": 700},
+         "claim": "dose = 10 mg/kg · 70 kg = 700 mg", "uses": ["mp1"]}]),
 
     # ══════════════ IV · ENGINEERING & COMPUTATION ══════════════
     _E("works_ohms_law", "Electrical engineering",
@@ -433,13 +482,37 @@ DEMONSTRATIONS: List[Dict[str, Any]] = [
          "spec": {"subnet_prefix": 24, "claimed_usable_hosts": 254},
          "claim": "/24 → 2⁸ − 2 = 254 usable hosts"}]),
     _E("works_hash", "Cryptography",
-       "A SHA-256 fingerprint, byte for byte",
-       "SHA-256 of the three letters 'abc' is a fixed 256-bit fingerprint. Change one bit of "
-       "input and it changes utterly — the property this whole engine's seals rest on.",
+       "Cryptographic strength: a fingerprint and a cipher",
+       "SHA-256 of the three letters 'abc' is a fixed 256-bit fingerprint — change one bit and it "
+       "changes utterly (the property this engine's seals rest on) — and a 256-bit AES key is, by "
+       "the standard, strong.",
        [{"id": "hh1", "domain": "cryptography",
          "spec": {"hash_algorithm": "sha256", "data": "abc",
                   "claimed_hash_hex": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"},
-         "claim": "SHA-256('abc') = ba7816bf…20015ad"}]),
+         "claim": "SHA-256('abc') = ba7816bf…20015ad"},
+        {"id": "ks1", "domain": "cryptography",
+         "spec": {"cipher": "AES", "key_bits": 256, "claimed_key_strength": "strong"},
+         "claim": "AES-256 → strong", "uses": ["hh1"]}]),
+    _E("works_password", "Cybersecurity",
+       "The strength of a password, in bits",
+       "A 12-character password from a 95-symbol keyboard carries about 79 bits of entropy — "
+       "H = L·log₂(N); and a CVSS score of 9.1 is, by the standard, a critical vulnerability.",
+       [{"id": "pe1", "domain": "cybersecurity",
+         "spec": {"password_length": 12, "charset_size": 95, "claimed_entropy_bits": 78.84},
+         "claim": "H = 12·log₂(95) ≈ 78.84 bits"},
+        {"id": "cv1", "domain": "cybersecurity",
+         "spec": {"cvss_base_score": 9.1, "claimed_cvss_severity": "critical"},
+         "claim": "CVSS 9.1 → critical", "uses": ["pe1"]}]),
+    _E("works_knapsack", "Operations research",
+       "The best a knapsack can carry",
+       "Given items of weight and value and a fixed capacity, the 0-1 knapsack picks the most "
+       "valuable subset that fits — here a total value of 7 within a weight of 5. The core of "
+       "scheduling, budgeting and cargo-loading.",
+       [{"id": "kn1", "domain": "operations_research",
+         "spec": {"items": [{"weight": 2, "value": 3}, {"weight": 3, "value": 4},
+                            {"weight": 4, "value": 5}, {"weight": 5, "value": 6}],
+                  "capacity": 5, "claimed_optimal_value": 7},
+         "claim": "0-1 knapsack (cap 5) → optimal value 7"}]),
     _E("works_luhn", "Computation / validation",
        "The check digit that catches a mistyped number",
        "The Luhn and ISBN algorithms embed a check digit so a single wrong digit is caught before "
@@ -483,12 +556,16 @@ DEMONSTRATIONS: List[Dict[str, Any]] = [
          "spec": {"net_operating_income": 50000, "property_value": 1000000, "claimed_cap_rate": 0.05},
          "claim": "cap rate = 50,000 / 1,000,000 = 5%"}]),
     _S("works_gross_pay", "Labor",
-       "A week's gross pay",
-       "Forty hours at $20 an hour is $800 gross — rate times hours, the first line of every "
-       "paycheck.",
+       "A paycheck, plain and with overtime",
+       "Forty hours at $20 is $800 gross; add ten hours of overtime at the FLSA time-and-a-half "
+       "rate and the week totals $1,100. The arithmetic every paycheck must get right.",
        [{"id": "gp1", "domain": "labor",
          "spec": {"hourly_rate": 20, "hours_worked": 40, "claimed_gross_pay": 800},
-         "claim": "gross = 20·40 = $800"}]),
+         "claim": "gross = 20·40 = $800"},
+        {"id": "ot1", "domain": "labor",
+         "spec": {"hourly_rate": 20, "regular_hours": 40, "overtime_hours": 10,
+                  "claimed_overtime_pay": 1100},
+         "claim": "with 10 h OT: 800 + 20·1.5·10 = $1,100", "uses": ["gp1"]}]),
     _S("works_chronology", "History / chronology",
        "Counting the years and naming the century",
        "From 1900 to 2000 is 100 years; and 1969 falls in the 20th century (the hundred years "
@@ -500,11 +577,14 @@ DEMONSTRATIONS: List[Dict[str, Any]] = [
          "spec": {"year_CE": 1969, "claimed_century": 20},
          "claim": "1969 CE → 20th century", "uses": ["yr1"]}]),
     _S("works_leap_year", "Calendar",
-       "Why 2000 was a leap year",
-       "The Gregorian rule: divisible by 4, except centuries, except every fourth century. 2000 "
-       "passes the exception-to-the-exception — a leap year where 1900 was not.",
+       "The calendar's rules: a leap year and a weekday",
+       "The Gregorian rule makes 2000 a leap year (divisible by 400) where 1900 was not; and the "
+       "same calendar fixes that 1 January 2000 fell on a Saturday. Rules, not lore.",
        [{"id": "ly1", "domain": "calendar_time", "spec": {"year": 2000, "claimed_leap": True},
-         "claim": "2000 is a leap year (÷400)"}]),
+         "claim": "2000 is a leap year (÷400)"},
+        {"id": "dw1", "domain": "calendar_time",
+         "spec": {"date_iso": "2000-01-01", "claimed_day_of_week": "saturday"},
+         "claim": "2000-01-01 was a Saturday", "uses": ["ly1"]}]),
     _S("works_music", "Music theory",
        "The perfect fifth and the pitch of A",
        "From C to G is seven semitones — the perfect fifth; and MIDI note 69 is concert A at "
@@ -530,6 +610,31 @@ DEMONSTRATIONS: List[Dict[str, Any]] = [
          "spec": {"runs_scored": 800, "runs_allowed": 700, "pythag_exponent": 2,
                   "claimed_winning_pct": 0.5663716814159292},
          "claim": "W% = 800² / (800² + 700²) ≈ .566"}]),
+    _S("works_money_over_time", "Economics",
+       "Money over time: interest earned, value eroded",
+       "Simple interest on $1,000 at 5% for three years is $150; meanwhile a jump in the price "
+       "index from 100 to 110 is 10% inflation. What money earns, and what it quietly loses.",
+       [{"id": "si1", "domain": "economics",
+         "spec": {"principal": 1000, "rate": 0.05, "time_years": 3, "claimed_simple_interest": 150},
+         "claim": "I = P·r·t = 1000·0.05·3 = $150"},
+        {"id": "if1", "domain": "economics",
+         "spec": {"cpi_current": 110, "cpi_previous": 100, "claimed_inflation_rate": 0.10},
+         "claim": "inflation = (110−100)/100 = 10%", "uses": ["si1"]}]),
+    _S("works_law_age", "Constitutional law",
+       "The age the Constitution sets for the presidency",
+       "Article II sets a minimum age of 35 for the President; a candidate of 40 meets it. A rule "
+       "read straight from the public-domain text of the Constitution.",
+       [{"id": "la1", "domain": "law",
+         "spec": {"office": "president", "age": 40, "claimed_meets_age_requirement": True},
+         "claim": "age 40 ≥ 35 (Art. II §1) → eligible"}]),
+    _S("works_ethics", "Philosophy",
+       "What an ethical framework weighs",
+       "Deontology locates the moral worth of an act in duties and rules, not in its consequences "
+       "— the opposite of a consequentialist's ledger of outcomes. The engine classifies the "
+       "framework, it does not adjudicate the ethics.",
+       [{"id": "et1", "domain": "philosophy",
+         "spec": {"framework_name": "deontological", "claimed_focuses_on_outcomes": False},
+         "claim": "deontology judges by duty, not outcomes"}]),
 ]
 
 
@@ -577,6 +682,9 @@ _ARTIFACT_KEY = {
     "economics": "ECON_VERIFY", "real_estate": "RE_VERIFY", "labor": "LABOR_VERIFY",
     "history_chronology": "HIST_VERIFY", "calendar_time": "CAL_VERIFY", "music_theory": "MUS_VERIFY",
     "rhetoric": "RHET_VERIFY", "sports_analytics": "SPORT_VERIFY",
+    "medicine": "MED_VERIFY", "law": "LAW_VERIFY", "ephemeris": "EPH_VERIFY",
+    "operations_research": "OR_VERIFY", "atomic": "ATOM_VERIFY", "periodic_table": "PT_VERIFY",
+    "philosophy": "PHIL_VERIFY",
 }
 
 
@@ -656,8 +764,57 @@ def build_all() -> Dict[str, Any]:
     tmp = p.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     os.replace(tmp, p)
+    _emit_cards(published)  # every demonstration becomes a seed in the keeping — cards as we build
     _log.info("compendium: published %d, dropped %d -> %s", len(published), len(dropped), p)
     return payload
+
+
+# The Floor of Discovery keystone (data/keystone_seeds.jsonl) — every worked, sealed demonstration
+# is a paving-stone of the one floor of reality, so each Works card grafts to it.
+_FLOOR_KEYSTONE = "card_k_floor_of_discovery"
+
+
+def _emit_cards(published: List[Dict[str, Any]]) -> None:
+    """Card each published demonstration into the keeping (data/works_cards.jsonl) and graft it to
+    the Floor of Discovery (data/works_bridges.jsonl). "Cards are created as we build" — a worked,
+    engine-sealed demonstration is a seed like any other, findable in the library and on the map.
+    Conduit, not source: generated=False — it is FOUND and verified, never generated."""
+    cards: List[Dict[str, Any]] = []
+    bridges: List[Dict[str, Any]] = []
+    for r in published:
+        cid = "card_" + str(r["id"])
+        doms = sorted({str(t.get("domain", "")) for t in (r.get("trail") or []) if t.get("domain")})
+        claims = " · ".join(t.get("claim", "") for t in (r.get("trail") or []) if t.get("claim"))
+        seal = r.get("seal") or {}
+        body = (str(r.get("narrative", "")) + "  Worked & sealed by the engine — " + claims +
+                (".  [HOLDS; open the seal to re-check.]" if seal.get("cite_url") else "."))
+        bands = ["the-works", str(r["discipline"])] + doms + str(r.get("field", "")).lower().split()
+        cards.append({
+            "id": cid, "kind": "verified", "title": r["title"], "body": body,
+            "source": {"label": "The Works — worked & sealed", "url": seal.get("cite_url") or "",
+                       "domain": (doms[0] if doms else ""), "authority_tier": "verified"},
+            "shelf": "the-works", "box": str(r["discipline"]),
+            "bands": bands, "connections": [], "author": "engine",
+            "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
+            "lifecycle_stage": "public", "volatility": "permanent", "surface": "secular",
+            "generated": False, "subject": str(r.get("field", "")),
+            "extra": {"seal_hash": seal.get("content_hash"), "cite_url": seal.get("cite_url"),
+                      "demonstration_id": r["id"], "verdict": r.get("verdict")},
+        })
+        bridges.append({
+            "a": cid, "b": _FLOOR_KEYSTONE, "subject": str(r.get("field", "")),
+            "relationship": "paves",
+            "evidence": "A worked, engine-sealed demonstration — a paving-stone of the floor of reality.",
+            "a_title": r["title"],
+        })
+    d = _data_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    for name, rows in (("works_cards.jsonl", cards), ("works_bridges.jsonl", bridges)):
+        fp = d / name
+        tmp = fp.with_suffix(fp.suffix + ".tmp")
+        tmp.write_text("\n".join(json.dumps(x, ensure_ascii=False) for x in rows) + "\n", encoding="utf-8")
+        os.replace(tmp, fp)
+    _log.info("compendium: emitted %d works cards + %d bridges to the keeping", len(cards), len(bridges))
 
 
 def _sign(payload: Dict[str, Any]) -> None:
