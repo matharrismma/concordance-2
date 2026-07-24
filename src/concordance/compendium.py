@@ -402,6 +402,20 @@ DEMONSTRATIONS: List[Dict[str, Any]] = [
        [{"id": "hr1", "domain": "exercise_science",
          "spec": {"age_years": 30, "claimed_max_hr": 187.0},
          "claim": "HRmax = 208 − 0.7·30 = 187 bpm"}]),
+    _L("works_nested_control", "Systems biology / regulation",
+       "The nested control-systems rule: meet a failure at its own layer",
+       "From Matt's Nested Control-Systems Framework: regulation is a stack of layers, and the "
+       "layers do not compete — they nest. Two validity rules follow, and the engine checks them. "
+       "First, a failure at a high layer (say the executive-autonomic control loop, L4) cannot be "
+       "fixed from below — an intervention must reach that layer or above. Second, if you claim a "
+       "shifted set-point, you must NAME the biological mechanism; a set-point drift with no stated "
+       "mechanism does not hold. Falsifiable by construction, not protected by complexity.",
+       [{"id": "cl1", "domain": "biology",
+         "spec": {"failure_layer": "L4", "intervention_layers": ["L4", "L2"]},
+         "claim": "an L4 failure is met at L4 (≥ the failing layer), not by L1/L2 alone"},
+        {"id": "sp1", "domain": "biology",
+         "spec": {"failure_mode": "setpoint_drift", "setpoint_shift_mechanism_stated": True},
+         "claim": "a set-point drift holds only if its mechanism is stated", "uses": ["cl1"]}]),
     _L("works_medicine", "Clinical medicine",
        "The body's numbers: mean pressure and a safe dose",
        "Mean arterial pressure — what actually perfuses the organs — is DBP + (SBP−DBP)/3, about "
@@ -684,7 +698,7 @@ _ARTIFACT_KEY = {
     "rhetoric": "RHET_VERIFY", "sports_analytics": "SPORT_VERIFY",
     "medicine": "MED_VERIFY", "law": "LAW_VERIFY", "ephemeris": "EPH_VERIFY",
     "operations_research": "OR_VERIFY", "atomic": "ATOM_VERIFY", "periodic_table": "PT_VERIFY",
-    "philosophy": "PHIL_VERIFY",
+    "philosophy": "PHIL_VERIFY", "biology": "BIO_CONTROL",
 }
 
 

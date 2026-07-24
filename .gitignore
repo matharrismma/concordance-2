@@ -72,3 +72,6 @@ data/verified_cards.jsonl
 !data/nesting_bridges.jsonl
 # the periodic table nested — element sequence + created-order spine (no element an orphan) — CONTENT
 !data/element_bridges.jsonl
+# the Nested Control-Systems spine theories (the Closest Theories packet), seeded + nested — CONTENT
+!data/ncs_seeds.jsonl
+!data/ncs_bridges.jsonl
