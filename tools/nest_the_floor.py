@@ -160,7 +160,9 @@ def compute(cards):
     # 3b. the WORD half — the archetypes and the orphan codex seeds root in the one floor too
     for c in cards:
         cid = c.get("id", "")
-        if cid in SPINE_IDS:
+        # never nest a STRUCTURAL seed (card_k_*): the Floor of Discovery is itself a codex seed with
+        # file-empty links, and must NOT be pulled UNDER the Word — it is the root above both halves.
+        if cid in SPINE_IDS or str(cid).startswith("card_k_"):
             continue
         if c.get("box") == "archetypes" and len(links(c)) == 0:
             add(cid, ARCHETYPES, "figure_of", "a figure of the Word")
@@ -171,11 +173,14 @@ def compute(cards):
 
     # 3c. catch-all: no seed left outside the floor. Any remaining orphan roots in the created
     # order (or the Word, if it is a witness seed) — every seed is on the one floor.
+    linked_ids = {e["a"] for e in edges} | {e["b"] for e in edges}
     for c in cards:
         cid = c.get("id", "")
-        if cid in SPINE_IDS or len(links(c)) != 0:
+        # never re-nest a STRUCTURAL seed — the floor, the halves, the keystones (card_k_*) are the
+        # roots the tree hangs from; their connections are applied at load, so they look empty here.
+        if cid in SPINE_IDS or str(cid).startswith("card_k_") or len(links(c)) != 0:
             continue
-        if any(e["a"] == cid or e["b"] == cid for e in edges):
+        if cid in linked_ids:
             continue
         root = THE_WORD if c.get("surface") == "witness" else CREATED_ORDER
         add(cid, root, "part_of", "a seed on the one floor")

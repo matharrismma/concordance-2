@@ -269,9 +269,7 @@
 {"a": "card_n_b8242751064c", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
 {"a": "card_n_da20796077e5", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
 {"a": "card_n_b1fe0fcce85f", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
-{"a": "card_n_39dc3d761434", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
 {"a": "card_n_0a41c0e3298d", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
-{"a": "card_n_d8471389950e", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
 {"a": "card_n_8a1d7924121c", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
 {"a": "card_n_770170ab1111", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
 {"a": "card_n_6ca595e0a722", "b": "card_k_spine_created_order", "relationship": "part_of", "evidence": "a seed of the created order"}
@@ -286,29 +284,16 @@
 {"a": "card_n_92a3bf533367", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_4b8250d3571a", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_3df9cadb44a4", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_n_e212a508aeb1", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_8b8bf6ae4ebb", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_8b16e5186f33", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_ea5725d67984", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_n_ed1b61c25ab7", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_n_43ce6f5292a1", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_n_4d809fef42c2", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_n_cf582aac7b6d", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_74dba7c005f7", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_1100130413ab", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_n_65a5bd511d27", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_n_c180a0c53a10", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_n_d025499fc999", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_n_f0bafed54207", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_62eb388b9b67", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_4ab28a27c153", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_a44b6bc5aade", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_38199a4eed49", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_8d483e664d1c", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_n_b7f8999e6a36", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_n_c8fa3acd3731", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_n_cd9e76f415e0", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_n_416a0ee2264d", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_440d163fbef0", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_549b1b10d669", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_10e0d719020f", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
@@ -503,8 +488,6 @@
 {"a": "card_n_5e36cd96ede3", "b": "card_k_spine_archetypes", "relationship": "figure_of", "evidence": "a figure of the Word"}
 {"a": "card_n_fd0e95c4fa83", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_n_61213be989a5", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_k_four_gates", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
-{"a": "card_k_floor_of_discovery", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "a seed of the Word"}
 {"a": "card_k_spine_archetypes", "b": "card_k_spine_the_word", "relationship": "part_of", "evidence": "the archetypes are figures of the Word"}
 {"a": "card_k_spine_the_word", "b": "card_k_floor_of_discovery", "relationship": "nested_in", "evidence": "the Word is the other half of the one floor"}
 {"a": "card_ref_crop_eggplant", "b": "card_ref_crop_pepper", "relationship": "same_family", "evidence": "both of the solanaceae family (rotation siblings)"}

@@ -277,7 +277,7 @@ _SITEMAP_PAGES = ("/", "/ask.html", "/bible.html", "/read.html", "/characters.ht
                   "/community.html", "/library.html", "/guarantees.html", "/collapse.html",
                   "/seeds.html", "/seal.html", "/connect.html", "/corrected.html", "/audit.html",
                   "/proof.html", "/reason.html", "/boundary.html", "/almanac.html", "/codex.html",
-                  "/teachings.html", "/brain.html")
+                  "/teachings.html", "/brain.html", "/floor.html")
 
 
 def build_sitemap(base_url: str) -> str:
@@ -920,6 +920,11 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             r = _graph.neighborhood(cid)
             return _ok(r) if r is not None else _err(404, "card not found")
         return _err(400, "unknown scope")
+    if method == "GET" and path == "/floor":
+        # the floor, made visible — the rooted design (both halves) + the two-tree grafts, so a
+        # visitor SEES the coherence and is turned upward (Proverbs 9:10).
+        from .. import floor as _floor
+        return _ok(_floor.payload())
     if method == "GET" and path == "/locate":
         return _ok(corpus.locate(query.get("q") or ""))
     if method == "GET" and path == "/growth":
@@ -1313,6 +1318,7 @@ ROUTES = [
     {"path": "/daily", "methods": ("GET",), "api": True},
     {"path": "/card/connections", "methods": ("GET",), "api": True},
     {"path": "/graph", "methods": ("GET",), "api": True},
+    {"path": "/floor", "methods": ("GET",), "api": True},
     {"path": "/locate", "methods": ("GET",), "api": True},
     {"path": "/library/health", "methods": ("GET",), "api": True},
     {"path": "/growth", "methods": ("GET",), "api": True},

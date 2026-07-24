@@ -23,6 +23,7 @@
     { h: '/library.html',    n: 'The keeping',      k: 'library cards corpus browse search everything' },
     { h: '/almanac.html',    n: 'Almanac',          k: 'facts figures reference tables data' },
     { h: '/apothecary.html', n: 'The Apothecary',   k: 'herbs remedies tonics planting garden grow land old way tea' },
+    { h: '/floor.html',      n: 'The Floor of Discovery', k: 'floor design one floor seeds nesting created order the word fear of god wisdom see the design' },
     { h: '/map.html',        n: 'The map',          k: 'connections graph atlas structure links' },
     { h: '/brain.html',      n: 'The brain',        k: 'graph visual network nodes force' },
     { h: '/journal.html',    n: 'Journal',          k: 'writing entries past dates diary notes wrote' },
