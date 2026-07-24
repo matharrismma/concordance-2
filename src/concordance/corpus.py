@@ -211,7 +211,7 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                     if isinstance(c, dict) and c.get("id"):
                         out[c["id"]] = c
         for overlay in ("reference_bridges.jsonl", "keystone_bridges.jsonl",
-                        "nesting_bridges.jsonl", "works_bridges.jsonl"):
+                        "nesting_bridges.jsonl", "works_bridges.jsonl", "element_bridges.jsonl"):
             _apply_bridges(out, p.parent / overlay)
     return out
 

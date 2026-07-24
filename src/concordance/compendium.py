@@ -775,20 +775,61 @@ _FLOOR_KEYSTONE = "card_k_floor_of_discovery"
 
 
 def _emit_cards(published: List[Dict[str, Any]]) -> None:
-    """Card each published demonstration into the keeping (data/works_cards.jsonl) and graft it to
-    the Floor of Discovery (data/works_bridges.jsonl). "Cards are created as we build" — a worked,
-    engine-sealed demonstration is a seed like any other, findable in the library and on the map.
-    Conduit, not source: generated=False — it is FOUND and verified, never generated."""
+    """Card each published demonstration into the keeping (data/works_cards.jsonl) and WEAVE it into
+    the one graph (data/works_bridges.jsonl). "Cards are created as we build … no more orphans — one
+    tool, all integrated." So each demonstration is not a lonely spoke: it grafts to the Floor of
+    Discovery (its root) AND to the existing cards of the SAME domain (the weave) AND to its sibling
+    demonstrations. Conduit, not source: generated=False — it is FOUND and verified, never generated.
+
+    Every edge is TRUE by construction (same verifier domain), so the 0-false-positive discipline
+    holds; token overlap only RANKS which same-domain cards are the closest, it never invents a link."""
+    from . import corpus as _corpus  # existing keeping, to find true same-domain neighbours
+
+    def _doms(r):
+        return sorted({str(t.get("domain", "")) for t in (r.get("trail") or []) if t.get("domain")})
+
+    # index the existing keeping by verifier domain (source.domain), and the works cards by domain
+    try:
+        existing = _corpus.load_cards()
+    except Exception:  # a fresh box with no cards.jsonl — the Floor edge alone still integrates
+        existing = {}
+    by_domain: Dict[str, List[str]] = {}
+    text_of: Dict[str, set] = {}
+    for cid_e, c in existing.items():
+        if c.get("shelf") == "the-works":  # prior works cards are handled as siblings, not "existing"
+            continue
+        dm = str((c.get("source") or {}).get("domain") or "")
+        if dm:
+            by_domain.setdefault(dm, []).append(cid_e)
+            text_of[cid_e] = set(_corpus._tokens(_corpus._card_text(c)))
+    works_by_domain: Dict[str, List[str]] = {}
+    for r in published:
+        for dm in _doms(r):
+            works_by_domain.setdefault(dm, []).append(r["id"])
+
     cards: List[Dict[str, Any]] = []
     bridges: List[Dict[str, Any]] = []
+    seen_edge: set = set()
+    wtoks: Dict[str, set] = {}        # each works card's tokens (for the part weave)
+    wtitle: Dict[str, str] = {}
+    by_part: Dict[str, List[str]] = {}
+
+    def _edge(a, b, rel, ev, a_title):
+        key = tuple(sorted((a, b))) + (rel,)
+        if a == b or key in seen_edge:
+            return
+        seen_edge.add(key)
+        bridges.append({"a": a, "b": b, "relationship": rel, "evidence": ev, "a_title": a_title})
+
     for r in published:
         cid = "card_" + str(r["id"])
-        doms = sorted({str(t.get("domain", "")) for t in (r.get("trail") or []) if t.get("domain")})
+        doms = _doms(r)
+        field = str(r.get("field", ""))
         claims = " · ".join(t.get("claim", "") for t in (r.get("trail") or []) if t.get("claim"))
         seal = r.get("seal") or {}
         body = (str(r.get("narrative", "")) + "  Worked & sealed by the engine — " + claims +
                 (".  [HOLDS; open the seal to re-check.]" if seal.get("cite_url") else "."))
-        bands = ["the-works", str(r["discipline"])] + doms + str(r.get("field", "")).lower().split()
+        bands = ["the-works", str(r["discipline"])] + doms + field.lower().split()
         cards.append({
             "id": cid, "kind": "verified", "title": r["title"], "body": body,
             "source": {"label": "The Works — worked & sealed", "url": seal.get("cite_url") or "",
@@ -797,16 +838,42 @@ def _emit_cards(published: List[Dict[str, Any]]) -> None:
             "bands": bands, "connections": [], "author": "engine",
             "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
             "lifecycle_stage": "public", "volatility": "permanent", "surface": "secular",
-            "generated": False, "subject": str(r.get("field", "")),
+            "generated": False, "subject": field,
             "extra": {"seal_hash": seal.get("content_hash"), "cite_url": seal.get("cite_url"),
                       "demonstration_id": r["id"], "verdict": r.get("verdict")},
         })
-        bridges.append({
-            "a": cid, "b": _FLOOR_KEYSTONE, "subject": str(r.get("field", "")),
-            "relationship": "paves",
-            "evidence": "A worked, engine-sealed demonstration — a paving-stone of the floor of reality.",
-            "a_title": r["title"],
-        })
+        # (1) root: every stone paves the one floor of reality
+        _edge(cid, _FLOOR_KEYSTONE, "paves",
+              "A worked, engine-sealed demonstration — a paving-stone of the floor of reality.", r["title"])
+        my_toks = set(_corpus._tokens((r["title"] + " " + field + " " + body)))
+        wtoks[cid] = my_toks
+        wtitle[cid] = r["title"]
+        by_part.setdefault(str(r["discipline"]), []).append(cid)
+        for dm in doms:
+            # (2) the weave: connect to the closest existing cards of the SAME domain (true edge)
+            cands = [c for c in by_domain.get(dm, []) if c != cid]
+            cands.sort(key=lambda c: len(my_toks & text_of.get(c, set())), reverse=True)
+            for target in cands[:3]:
+                _edge(cid, target, "demonstrates",
+                      f"A worked demonstration in the same field ({dm}).", r["title"])
+            # (3) kindred: sibling demonstrations of the same domain
+            for other in works_by_domain.get(dm, []):
+                if other != r["id"]:
+                    _edge(cid, "card_" + other, "kindred",
+                          f"A sibling worked demonstration in {dm}.", r["title"])
+
+    # (4) the part weave: within each part of the volume, connect every demonstration to its two
+    # closest part-mates (by token overlap) — so each part is a woven cluster, not a fan of spokes,
+    # and even a lone-domain demonstration (no reference card, no sibling) is integrated, never an
+    # orphan hanging off the hub. Same part = the same broad discipline, so the edge is true.
+    for part, members in by_part.items():
+        for cid in members:
+            mates = sorted((m for m in members if m != cid),
+                           key=lambda m: len(wtoks[cid] & wtoks[m]), reverse=True)
+            for mate in mates[:2]:
+                _edge(cid, mate, "adjacent",
+                      f"Neighbouring worked demonstrations in the same part of the volume.", wtitle[cid])
+
     d = _data_dir()
     d.mkdir(parents=True, exist_ok=True)
     for name, rows in (("works_cards.jsonl", cards), ("works_bridges.jsonl", bridges)):
@@ -814,7 +881,8 @@ def _emit_cards(published: List[Dict[str, Any]]) -> None:
         tmp = fp.with_suffix(fp.suffix + ".tmp")
         tmp.write_text("\n".join(json.dumps(x, ensure_ascii=False) for x in rows) + "\n", encoding="utf-8")
         os.replace(tmp, fp)
-    _log.info("compendium: emitted %d works cards + %d bridges to the keeping", len(cards), len(bridges))
+    _log.info("compendium: emitted %d works cards + %d bridges (floor + same-domain weave + siblings)",
+              len(cards), len(bridges))
 
 
 def _sign(payload: Dict[str, Any]) -> None:

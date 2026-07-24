@@ -70,3 +70,5 @@ data/verified_cards.jsonl
 # the Nesting — domain spines + the edges that root the science half in the one floor — CONTENT
 !data/nesting_seeds.jsonl
 !data/nesting_bridges.jsonl
+# the periodic table nested — element sequence + created-order spine (no element an orphan) — CONTENT
+!data/element_bridges.jsonl

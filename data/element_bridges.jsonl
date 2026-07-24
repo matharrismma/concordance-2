@@ -1,0 +1,236 @@
+{"a": "card_ref_el_001", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Hydrogen (H) — element 1"}
+{"a": "card_ref_el_001", "b": "card_ref_el_002", "relationship": "precedes", "evidence": "the next element by atomic number (Z 1 → 2)", "a_title": "Hydrogen (H) — element 1"}
+{"a": "card_ref_el_002", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Helium (He) — element 2"}
+{"a": "card_ref_el_002", "b": "card_ref_el_003", "relationship": "precedes", "evidence": "the next element by atomic number (Z 2 → 3)", "a_title": "Helium (He) — element 2"}
+{"a": "card_ref_el_003", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Lithium (Li) — element 3"}
+{"a": "card_ref_el_003", "b": "card_ref_el_004", "relationship": "precedes", "evidence": "the next element by atomic number (Z 3 → 4)", "a_title": "Lithium (Li) — element 3"}
+{"a": "card_ref_el_004", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Beryllium (Be) — element 4"}
+{"a": "card_ref_el_004", "b": "card_ref_el_005", "relationship": "precedes", "evidence": "the next element by atomic number (Z 4 → 5)", "a_title": "Beryllium (Be) — element 4"}
+{"a": "card_ref_el_005", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Boron (B) — element 5"}
+{"a": "card_ref_el_005", "b": "card_ref_el_006", "relationship": "precedes", "evidence": "the next element by atomic number (Z 5 → 6)", "a_title": "Boron (B) — element 5"}
+{"a": "card_ref_el_006", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Carbon (C) — element 6"}
+{"a": "card_ref_el_006", "b": "card_ref_el_007", "relationship": "precedes", "evidence": "the next element by atomic number (Z 6 → 7)", "a_title": "Carbon (C) — element 6"}
+{"a": "card_ref_el_006", "b": "card_works_element", "relationship": "demonstrated_by", "evidence": "carbon's identity, worked and sealed in The Works", "a_title": "Carbon (C) — element 6"}
+{"a": "card_ref_el_007", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Nitrogen (N) — element 7"}
+{"a": "card_ref_el_007", "b": "card_ref_el_008", "relationship": "precedes", "evidence": "the next element by atomic number (Z 7 → 8)", "a_title": "Nitrogen (N) — element 7"}
+{"a": "card_ref_el_008", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Oxygen (O) — element 8"}
+{"a": "card_ref_el_008", "b": "card_ref_el_009", "relationship": "precedes", "evidence": "the next element by atomic number (Z 8 → 9)", "a_title": "Oxygen (O) — element 8"}
+{"a": "card_ref_el_009", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Fluorine (F) — element 9"}
+{"a": "card_ref_el_009", "b": "card_ref_el_010", "relationship": "precedes", "evidence": "the next element by atomic number (Z 9 → 10)", "a_title": "Fluorine (F) — element 9"}
+{"a": "card_ref_el_010", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Neon (Ne) — element 10"}
+{"a": "card_ref_el_010", "b": "card_ref_el_011", "relationship": "precedes", "evidence": "the next element by atomic number (Z 10 → 11)", "a_title": "Neon (Ne) — element 10"}
+{"a": "card_ref_el_011", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Sodium (Na) — element 11"}
+{"a": "card_ref_el_011", "b": "card_ref_el_012", "relationship": "precedes", "evidence": "the next element by atomic number (Z 11 → 12)", "a_title": "Sodium (Na) — element 11"}
+{"a": "card_ref_el_012", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Magnesium (Mg) — element 12"}
+{"a": "card_ref_el_012", "b": "card_ref_el_013", "relationship": "precedes", "evidence": "the next element by atomic number (Z 12 → 13)", "a_title": "Magnesium (Mg) — element 12"}
+{"a": "card_ref_el_013", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Aluminum (Al) — element 13"}
+{"a": "card_ref_el_013", "b": "card_ref_el_014", "relationship": "precedes", "evidence": "the next element by atomic number (Z 13 → 14)", "a_title": "Aluminum (Al) — element 13"}
+{"a": "card_ref_el_014", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Silicon (Si) — element 14"}
+{"a": "card_ref_el_014", "b": "card_ref_el_015", "relationship": "precedes", "evidence": "the next element by atomic number (Z 14 → 15)", "a_title": "Silicon (Si) — element 14"}
+{"a": "card_ref_el_015", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Phosphorus (P) — element 15"}
+{"a": "card_ref_el_015", "b": "card_ref_el_016", "relationship": "precedes", "evidence": "the next element by atomic number (Z 15 → 16)", "a_title": "Phosphorus (P) — element 15"}
+{"a": "card_ref_el_016", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Sulfur (S) — element 16"}
+{"a": "card_ref_el_016", "b": "card_ref_el_017", "relationship": "precedes", "evidence": "the next element by atomic number (Z 16 → 17)", "a_title": "Sulfur (S) — element 16"}
+{"a": "card_ref_el_017", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Chlorine (Cl) — element 17"}
+{"a": "card_ref_el_017", "b": "card_ref_el_018", "relationship": "precedes", "evidence": "the next element by atomic number (Z 17 → 18)", "a_title": "Chlorine (Cl) — element 17"}
+{"a": "card_ref_el_018", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Argon (Ar) — element 18"}
+{"a": "card_ref_el_018", "b": "card_ref_el_019", "relationship": "precedes", "evidence": "the next element by atomic number (Z 18 → 19)", "a_title": "Argon (Ar) — element 18"}
+{"a": "card_ref_el_019", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Potassium (K) — element 19"}
+{"a": "card_ref_el_019", "b": "card_ref_el_020", "relationship": "precedes", "evidence": "the next element by atomic number (Z 19 → 20)", "a_title": "Potassium (K) — element 19"}
+{"a": "card_ref_el_020", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Calcium (Ca) — element 20"}
+{"a": "card_ref_el_020", "b": "card_ref_el_021", "relationship": "precedes", "evidence": "the next element by atomic number (Z 20 → 21)", "a_title": "Calcium (Ca) — element 20"}
+{"a": "card_ref_el_021", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Scandium (Sc) — element 21"}
+{"a": "card_ref_el_021", "b": "card_ref_el_022", "relationship": "precedes", "evidence": "the next element by atomic number (Z 21 → 22)", "a_title": "Scandium (Sc) — element 21"}
+{"a": "card_ref_el_022", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Titanium (Ti) — element 22"}
+{"a": "card_ref_el_022", "b": "card_ref_el_023", "relationship": "precedes", "evidence": "the next element by atomic number (Z 22 → 23)", "a_title": "Titanium (Ti) — element 22"}
+{"a": "card_ref_el_023", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Vanadium (V) — element 23"}
+{"a": "card_ref_el_023", "b": "card_ref_el_024", "relationship": "precedes", "evidence": "the next element by atomic number (Z 23 → 24)", "a_title": "Vanadium (V) — element 23"}
+{"a": "card_ref_el_024", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Chromium (Cr) — element 24"}
+{"a": "card_ref_el_024", "b": "card_ref_el_025", "relationship": "precedes", "evidence": "the next element by atomic number (Z 24 → 25)", "a_title": "Chromium (Cr) — element 24"}
+{"a": "card_ref_el_025", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Manganese (Mn) — element 25"}
+{"a": "card_ref_el_025", "b": "card_ref_el_026", "relationship": "precedes", "evidence": "the next element by atomic number (Z 25 → 26)", "a_title": "Manganese (Mn) — element 25"}
+{"a": "card_ref_el_026", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Iron (Fe) — element 26"}
+{"a": "card_ref_el_026", "b": "card_ref_el_027", "relationship": "precedes", "evidence": "the next element by atomic number (Z 26 → 27)", "a_title": "Iron (Fe) — element 26"}
+{"a": "card_ref_el_027", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Cobalt (Co) — element 27"}
+{"a": "card_ref_el_027", "b": "card_ref_el_028", "relationship": "precedes", "evidence": "the next element by atomic number (Z 27 → 28)", "a_title": "Cobalt (Co) — element 27"}
+{"a": "card_ref_el_028", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Nickel (Ni) — element 28"}
+{"a": "card_ref_el_028", "b": "card_ref_el_029", "relationship": "precedes", "evidence": "the next element by atomic number (Z 28 → 29)", "a_title": "Nickel (Ni) — element 28"}
+{"a": "card_ref_el_029", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Copper (Cu) — element 29"}
+{"a": "card_ref_el_029", "b": "card_ref_el_030", "relationship": "precedes", "evidence": "the next element by atomic number (Z 29 → 30)", "a_title": "Copper (Cu) — element 29"}
+{"a": "card_ref_el_030", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Zinc (Zn) — element 30"}
+{"a": "card_ref_el_030", "b": "card_ref_el_031", "relationship": "precedes", "evidence": "the next element by atomic number (Z 30 → 31)", "a_title": "Zinc (Zn) — element 30"}
+{"a": "card_ref_el_031", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Gallium (Ga) — element 31"}
+{"a": "card_ref_el_031", "b": "card_ref_el_032", "relationship": "precedes", "evidence": "the next element by atomic number (Z 31 → 32)", "a_title": "Gallium (Ga) — element 31"}
+{"a": "card_ref_el_032", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Germanium (Ge) — element 32"}
+{"a": "card_ref_el_032", "b": "card_ref_el_033", "relationship": "precedes", "evidence": "the next element by atomic number (Z 32 → 33)", "a_title": "Germanium (Ge) — element 32"}
+{"a": "card_ref_el_033", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Arsenic (As) — element 33"}
+{"a": "card_ref_el_033", "b": "card_ref_el_034", "relationship": "precedes", "evidence": "the next element by atomic number (Z 33 → 34)", "a_title": "Arsenic (As) — element 33"}
+{"a": "card_ref_el_034", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Selenium (Se) — element 34"}
+{"a": "card_ref_el_034", "b": "card_ref_el_035", "relationship": "precedes", "evidence": "the next element by atomic number (Z 34 → 35)", "a_title": "Selenium (Se) — element 34"}
+{"a": "card_ref_el_035", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Bromine (Br) — element 35"}
+{"a": "card_ref_el_035", "b": "card_ref_el_036", "relationship": "precedes", "evidence": "the next element by atomic number (Z 35 → 36)", "a_title": "Bromine (Br) — element 35"}
+{"a": "card_ref_el_036", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Krypton (Kr) — element 36"}
+{"a": "card_ref_el_036", "b": "card_ref_el_037", "relationship": "precedes", "evidence": "the next element by atomic number (Z 36 → 37)", "a_title": "Krypton (Kr) — element 36"}
+{"a": "card_ref_el_037", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Rubidium (Rb) — element 37"}
+{"a": "card_ref_el_037", "b": "card_ref_el_038", "relationship": "precedes", "evidence": "the next element by atomic number (Z 37 → 38)", "a_title": "Rubidium (Rb) — element 37"}
+{"a": "card_ref_el_038", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Strontium (Sr) — element 38"}
+{"a": "card_ref_el_038", "b": "card_ref_el_039", "relationship": "precedes", "evidence": "the next element by atomic number (Z 38 → 39)", "a_title": "Strontium (Sr) — element 38"}
+{"a": "card_ref_el_039", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Yttrium (Y) — element 39"}
+{"a": "card_ref_el_039", "b": "card_ref_el_040", "relationship": "precedes", "evidence": "the next element by atomic number (Z 39 → 40)", "a_title": "Yttrium (Y) — element 39"}
+{"a": "card_ref_el_040", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Zirconium (Zr) — element 40"}
+{"a": "card_ref_el_040", "b": "card_ref_el_041", "relationship": "precedes", "evidence": "the next element by atomic number (Z 40 → 41)", "a_title": "Zirconium (Zr) — element 40"}
+{"a": "card_ref_el_041", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Niobium (Nb) — element 41"}
+{"a": "card_ref_el_041", "b": "card_ref_el_042", "relationship": "precedes", "evidence": "the next element by atomic number (Z 41 → 42)", "a_title": "Niobium (Nb) — element 41"}
+{"a": "card_ref_el_042", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Molybdenum (Mo) — element 42"}
+{"a": "card_ref_el_042", "b": "card_ref_el_043", "relationship": "precedes", "evidence": "the next element by atomic number (Z 42 → 43)", "a_title": "Molybdenum (Mo) — element 42"}
+{"a": "card_ref_el_043", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Technetium (Tc) — element 43"}
+{"a": "card_ref_el_043", "b": "card_ref_el_044", "relationship": "precedes", "evidence": "the next element by atomic number (Z 43 → 44)", "a_title": "Technetium (Tc) — element 43"}
+{"a": "card_ref_el_044", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Ruthenium (Ru) — element 44"}
+{"a": "card_ref_el_044", "b": "card_ref_el_045", "relationship": "precedes", "evidence": "the next element by atomic number (Z 44 → 45)", "a_title": "Ruthenium (Ru) — element 44"}
+{"a": "card_ref_el_045", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Rhodium (Rh) — element 45"}
+{"a": "card_ref_el_045", "b": "card_ref_el_046", "relationship": "precedes", "evidence": "the next element by atomic number (Z 45 → 46)", "a_title": "Rhodium (Rh) — element 45"}
+{"a": "card_ref_el_046", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Palladium (Pd) — element 46"}
+{"a": "card_ref_el_046", "b": "card_ref_el_047", "relationship": "precedes", "evidence": "the next element by atomic number (Z 46 → 47)", "a_title": "Palladium (Pd) — element 46"}
+{"a": "card_ref_el_047", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Silver (Ag) — element 47"}
+{"a": "card_ref_el_047", "b": "card_ref_el_048", "relationship": "precedes", "evidence": "the next element by atomic number (Z 47 → 48)", "a_title": "Silver (Ag) — element 47"}
+{"a": "card_ref_el_048", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Cadmium (Cd) — element 48"}
+{"a": "card_ref_el_048", "b": "card_ref_el_049", "relationship": "precedes", "evidence": "the next element by atomic number (Z 48 → 49)", "a_title": "Cadmium (Cd) — element 48"}
+{"a": "card_ref_el_049", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Indium (In) — element 49"}
+{"a": "card_ref_el_049", "b": "card_ref_el_050", "relationship": "precedes", "evidence": "the next element by atomic number (Z 49 → 50)", "a_title": "Indium (In) — element 49"}
+{"a": "card_ref_el_050", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Tin (Sn) — element 50"}
+{"a": "card_ref_el_050", "b": "card_ref_el_051", "relationship": "precedes", "evidence": "the next element by atomic number (Z 50 → 51)", "a_title": "Tin (Sn) — element 50"}
+{"a": "card_ref_el_051", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Antimony (Sb) — element 51"}
+{"a": "card_ref_el_051", "b": "card_ref_el_052", "relationship": "precedes", "evidence": "the next element by atomic number (Z 51 → 52)", "a_title": "Antimony (Sb) — element 51"}
+{"a": "card_ref_el_052", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Tellurium (Te) — element 52"}
+{"a": "card_ref_el_052", "b": "card_ref_el_053", "relationship": "precedes", "evidence": "the next element by atomic number (Z 52 → 53)", "a_title": "Tellurium (Te) — element 52"}
+{"a": "card_ref_el_053", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Iodine (I) — element 53"}
+{"a": "card_ref_el_053", "b": "card_ref_el_054", "relationship": "precedes", "evidence": "the next element by atomic number (Z 53 → 54)", "a_title": "Iodine (I) — element 53"}
+{"a": "card_ref_el_054", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Xenon (Xe) — element 54"}
+{"a": "card_ref_el_054", "b": "card_ref_el_055", "relationship": "precedes", "evidence": "the next element by atomic number (Z 54 → 55)", "a_title": "Xenon (Xe) — element 54"}
+{"a": "card_ref_el_055", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Cesium (Cs) — element 55"}
+{"a": "card_ref_el_055", "b": "card_ref_el_056", "relationship": "precedes", "evidence": "the next element by atomic number (Z 55 → 56)", "a_title": "Cesium (Cs) — element 55"}
+{"a": "card_ref_el_056", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Barium (Ba) — element 56"}
+{"a": "card_ref_el_056", "b": "card_ref_el_057", "relationship": "precedes", "evidence": "the next element by atomic number (Z 56 → 57)", "a_title": "Barium (Ba) — element 56"}
+{"a": "card_ref_el_057", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Lanthanum (La) — element 57"}
+{"a": "card_ref_el_057", "b": "card_ref_el_058", "relationship": "precedes", "evidence": "the next element by atomic number (Z 57 → 58)", "a_title": "Lanthanum (La) — element 57"}
+{"a": "card_ref_el_058", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Cerium (Ce) — element 58"}
+{"a": "card_ref_el_058", "b": "card_ref_el_059", "relationship": "precedes", "evidence": "the next element by atomic number (Z 58 → 59)", "a_title": "Cerium (Ce) — element 58"}
+{"a": "card_ref_el_059", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Praseodymium (Pr) — element 59"}
+{"a": "card_ref_el_059", "b": "card_ref_el_060", "relationship": "precedes", "evidence": "the next element by atomic number (Z 59 → 60)", "a_title": "Praseodymium (Pr) — element 59"}
+{"a": "card_ref_el_060", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Neodymium (Nd) — element 60"}
+{"a": "card_ref_el_060", "b": "card_ref_el_061", "relationship": "precedes", "evidence": "the next element by atomic number (Z 60 → 61)", "a_title": "Neodymium (Nd) — element 60"}
+{"a": "card_ref_el_061", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Promethium (Pm) — element 61"}
+{"a": "card_ref_el_061", "b": "card_ref_el_062", "relationship": "precedes", "evidence": "the next element by atomic number (Z 61 → 62)", "a_title": "Promethium (Pm) — element 61"}
+{"a": "card_ref_el_062", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Samarium (Sm) — element 62"}
+{"a": "card_ref_el_062", "b": "card_ref_el_063", "relationship": "precedes", "evidence": "the next element by atomic number (Z 62 → 63)", "a_title": "Samarium (Sm) — element 62"}
+{"a": "card_ref_el_063", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Europium (Eu) — element 63"}
+{"a": "card_ref_el_063", "b": "card_ref_el_064", "relationship": "precedes", "evidence": "the next element by atomic number (Z 63 → 64)", "a_title": "Europium (Eu) — element 63"}
+{"a": "card_ref_el_064", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Gadolinium (Gd) — element 64"}
+{"a": "card_ref_el_064", "b": "card_ref_el_065", "relationship": "precedes", "evidence": "the next element by atomic number (Z 64 → 65)", "a_title": "Gadolinium (Gd) — element 64"}
+{"a": "card_ref_el_065", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Terbium (Tb) — element 65"}
+{"a": "card_ref_el_065", "b": "card_ref_el_066", "relationship": "precedes", "evidence": "the next element by atomic number (Z 65 → 66)", "a_title": "Terbium (Tb) — element 65"}
+{"a": "card_ref_el_066", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Dysprosium (Dy) — element 66"}
+{"a": "card_ref_el_066", "b": "card_ref_el_067", "relationship": "precedes", "evidence": "the next element by atomic number (Z 66 → 67)", "a_title": "Dysprosium (Dy) — element 66"}
+{"a": "card_ref_el_067", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Holmium (Ho) — element 67"}
+{"a": "card_ref_el_067", "b": "card_ref_el_068", "relationship": "precedes", "evidence": "the next element by atomic number (Z 67 → 68)", "a_title": "Holmium (Ho) — element 67"}
+{"a": "card_ref_el_068", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Erbium (Er) — element 68"}
+{"a": "card_ref_el_068", "b": "card_ref_el_069", "relationship": "precedes", "evidence": "the next element by atomic number (Z 68 → 69)", "a_title": "Erbium (Er) — element 68"}
+{"a": "card_ref_el_069", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Thulium (Tm) — element 69"}
+{"a": "card_ref_el_069", "b": "card_ref_el_070", "relationship": "precedes", "evidence": "the next element by atomic number (Z 69 → 70)", "a_title": "Thulium (Tm) — element 69"}
+{"a": "card_ref_el_070", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Ytterbium (Yb) — element 70"}
+{"a": "card_ref_el_070", "b": "card_ref_el_071", "relationship": "precedes", "evidence": "the next element by atomic number (Z 70 → 71)", "a_title": "Ytterbium (Yb) — element 70"}
+{"a": "card_ref_el_071", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Lutetium (Lu) — element 71"}
+{"a": "card_ref_el_071", "b": "card_ref_el_072", "relationship": "precedes", "evidence": "the next element by atomic number (Z 71 → 72)", "a_title": "Lutetium (Lu) — element 71"}
+{"a": "card_ref_el_072", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Hafnium (Hf) — element 72"}
+{"a": "card_ref_el_072", "b": "card_ref_el_073", "relationship": "precedes", "evidence": "the next element by atomic number (Z 72 → 73)", "a_title": "Hafnium (Hf) — element 72"}
+{"a": "card_ref_el_073", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Tantalum (Ta) — element 73"}
+{"a": "card_ref_el_073", "b": "card_ref_el_074", "relationship": "precedes", "evidence": "the next element by atomic number (Z 73 → 74)", "a_title": "Tantalum (Ta) — element 73"}
+{"a": "card_ref_el_074", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Tungsten (W) — element 74"}
+{"a": "card_ref_el_074", "b": "card_ref_el_075", "relationship": "precedes", "evidence": "the next element by atomic number (Z 74 → 75)", "a_title": "Tungsten (W) — element 74"}
+{"a": "card_ref_el_075", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Rhenium (Re) — element 75"}
+{"a": "card_ref_el_075", "b": "card_ref_el_076", "relationship": "precedes", "evidence": "the next element by atomic number (Z 75 → 76)", "a_title": "Rhenium (Re) — element 75"}
+{"a": "card_ref_el_076", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Osmium (Os) — element 76"}
+{"a": "card_ref_el_076", "b": "card_ref_el_077", "relationship": "precedes", "evidence": "the next element by atomic number (Z 76 → 77)", "a_title": "Osmium (Os) — element 76"}
+{"a": "card_ref_el_077", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Iridium (Ir) — element 77"}
+{"a": "card_ref_el_077", "b": "card_ref_el_078", "relationship": "precedes", "evidence": "the next element by atomic number (Z 77 → 78)", "a_title": "Iridium (Ir) — element 77"}
+{"a": "card_ref_el_078", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Platinum (Pt) — element 78"}
+{"a": "card_ref_el_078", "b": "card_ref_el_079", "relationship": "precedes", "evidence": "the next element by atomic number (Z 78 → 79)", "a_title": "Platinum (Pt) — element 78"}
+{"a": "card_ref_el_079", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Gold (Au) — element 79"}
+{"a": "card_ref_el_079", "b": "card_ref_el_080", "relationship": "precedes", "evidence": "the next element by atomic number (Z 79 → 80)", "a_title": "Gold (Au) — element 79"}
+{"a": "card_ref_el_080", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Mercury (Hg) — element 80"}
+{"a": "card_ref_el_080", "b": "card_ref_el_081", "relationship": "precedes", "evidence": "the next element by atomic number (Z 80 → 81)", "a_title": "Mercury (Hg) — element 80"}
+{"a": "card_ref_el_081", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Thallium (Tl) — element 81"}
+{"a": "card_ref_el_081", "b": "card_ref_el_082", "relationship": "precedes", "evidence": "the next element by atomic number (Z 81 → 82)", "a_title": "Thallium (Tl) — element 81"}
+{"a": "card_ref_el_082", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Lead (Pb) — element 82"}
+{"a": "card_ref_el_082", "b": "card_ref_el_083", "relationship": "precedes", "evidence": "the next element by atomic number (Z 82 → 83)", "a_title": "Lead (Pb) — element 82"}
+{"a": "card_ref_el_083", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Bismuth (Bi) — element 83"}
+{"a": "card_ref_el_083", "b": "card_ref_el_084", "relationship": "precedes", "evidence": "the next element by atomic number (Z 83 → 84)", "a_title": "Bismuth (Bi) — element 83"}
+{"a": "card_ref_el_084", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Polonium (Po) — element 84"}
+{"a": "card_ref_el_084", "b": "card_ref_el_085", "relationship": "precedes", "evidence": "the next element by atomic number (Z 84 → 85)", "a_title": "Polonium (Po) — element 84"}
+{"a": "card_ref_el_085", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Astatine (At) — element 85"}
+{"a": "card_ref_el_085", "b": "card_ref_el_086", "relationship": "precedes", "evidence": "the next element by atomic number (Z 85 → 86)", "a_title": "Astatine (At) — element 85"}
+{"a": "card_ref_el_086", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Radon (Rn) — element 86"}
+{"a": "card_ref_el_086", "b": "card_ref_el_087", "relationship": "precedes", "evidence": "the next element by atomic number (Z 86 → 87)", "a_title": "Radon (Rn) — element 86"}
+{"a": "card_ref_el_087", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Francium (Fr) — element 87"}
+{"a": "card_ref_el_087", "b": "card_ref_el_088", "relationship": "precedes", "evidence": "the next element by atomic number (Z 87 → 88)", "a_title": "Francium (Fr) — element 87"}
+{"a": "card_ref_el_088", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Radium (Ra) — element 88"}
+{"a": "card_ref_el_088", "b": "card_ref_el_089", "relationship": "precedes", "evidence": "the next element by atomic number (Z 88 → 89)", "a_title": "Radium (Ra) — element 88"}
+{"a": "card_ref_el_089", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Actinium (Ac) — element 89"}
+{"a": "card_ref_el_089", "b": "card_ref_el_090", "relationship": "precedes", "evidence": "the next element by atomic number (Z 89 → 90)", "a_title": "Actinium (Ac) — element 89"}
+{"a": "card_ref_el_090", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Thorium (Th) — element 90"}
+{"a": "card_ref_el_090", "b": "card_ref_el_091", "relationship": "precedes", "evidence": "the next element by atomic number (Z 90 → 91)", "a_title": "Thorium (Th) — element 90"}
+{"a": "card_ref_el_091", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Protactinium (Pa) — element 91"}
+{"a": "card_ref_el_091", "b": "card_ref_el_092", "relationship": "precedes", "evidence": "the next element by atomic number (Z 91 → 92)", "a_title": "Protactinium (Pa) — element 91"}
+{"a": "card_ref_el_092", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Uranium (U) — element 92"}
+{"a": "card_ref_el_092", "b": "card_ref_el_093", "relationship": "precedes", "evidence": "the next element by atomic number (Z 92 → 93)", "a_title": "Uranium (U) — element 92"}
+{"a": "card_ref_el_093", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Neptunium (Np) — element 93"}
+{"a": "card_ref_el_093", "b": "card_ref_el_094", "relationship": "precedes", "evidence": "the next element by atomic number (Z 93 → 94)", "a_title": "Neptunium (Np) — element 93"}
+{"a": "card_ref_el_094", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Plutonium (Pu) — element 94"}
+{"a": "card_ref_el_094", "b": "card_ref_el_095", "relationship": "precedes", "evidence": "the next element by atomic number (Z 94 → 95)", "a_title": "Plutonium (Pu) — element 94"}
+{"a": "card_ref_el_095", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Americium (Am) — element 95"}
+{"a": "card_ref_el_095", "b": "card_ref_el_096", "relationship": "precedes", "evidence": "the next element by atomic number (Z 95 → 96)", "a_title": "Americium (Am) — element 95"}
+{"a": "card_ref_el_096", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Curium (Cm) — element 96"}
+{"a": "card_ref_el_096", "b": "card_ref_el_097", "relationship": "precedes", "evidence": "the next element by atomic number (Z 96 → 97)", "a_title": "Curium (Cm) — element 96"}
+{"a": "card_ref_el_097", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Berkelium (Bk) — element 97"}
+{"a": "card_ref_el_097", "b": "card_ref_el_098", "relationship": "precedes", "evidence": "the next element by atomic number (Z 97 → 98)", "a_title": "Berkelium (Bk) — element 97"}
+{"a": "card_ref_el_098", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Californium (Cf) — element 98"}
+{"a": "card_ref_el_098", "b": "card_ref_el_099", "relationship": "precedes", "evidence": "the next element by atomic number (Z 98 → 99)", "a_title": "Californium (Cf) — element 98"}
+{"a": "card_ref_el_099", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Einsteinium (Es) — element 99"}
+{"a": "card_ref_el_099", "b": "card_ref_el_100", "relationship": "precedes", "evidence": "the next element by atomic number (Z 99 → 100)", "a_title": "Einsteinium (Es) — element 99"}
+{"a": "card_ref_el_100", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Fermium (Fm) — element 100"}
+{"a": "card_ref_el_100", "b": "card_ref_el_101", "relationship": "precedes", "evidence": "the next element by atomic number (Z 100 → 101)", "a_title": "Fermium (Fm) — element 100"}
+{"a": "card_ref_el_101", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Mendelevium (Md) — element 101"}
+{"a": "card_ref_el_101", "b": "card_ref_el_102", "relationship": "precedes", "evidence": "the next element by atomic number (Z 101 → 102)", "a_title": "Mendelevium (Md) — element 101"}
+{"a": "card_ref_el_102", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Nobelium (No) — element 102"}
+{"a": "card_ref_el_102", "b": "card_ref_el_103", "relationship": "precedes", "evidence": "the next element by atomic number (Z 102 → 103)", "a_title": "Nobelium (No) — element 102"}
+{"a": "card_ref_el_103", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Lawrencium (Lr) — element 103"}
+{"a": "card_ref_el_103", "b": "card_ref_el_104", "relationship": "precedes", "evidence": "the next element by atomic number (Z 103 → 104)", "a_title": "Lawrencium (Lr) — element 103"}
+{"a": "card_ref_el_104", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Rutherfordium (Rf) — element 104"}
+{"a": "card_ref_el_104", "b": "card_ref_el_105", "relationship": "precedes", "evidence": "the next element by atomic number (Z 104 → 105)", "a_title": "Rutherfordium (Rf) — element 104"}
+{"a": "card_ref_el_105", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Dubnium (Db) — element 105"}
+{"a": "card_ref_el_105", "b": "card_ref_el_106", "relationship": "precedes", "evidence": "the next element by atomic number (Z 105 → 106)", "a_title": "Dubnium (Db) — element 105"}
+{"a": "card_ref_el_106", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Seaborgium (Sg) — element 106"}
+{"a": "card_ref_el_106", "b": "card_ref_el_107", "relationship": "precedes", "evidence": "the next element by atomic number (Z 106 → 107)", "a_title": "Seaborgium (Sg) — element 106"}
+{"a": "card_ref_el_107", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Bohrium (Bh) — element 107"}
+{"a": "card_ref_el_107", "b": "card_ref_el_108", "relationship": "precedes", "evidence": "the next element by atomic number (Z 107 → 108)", "a_title": "Bohrium (Bh) — element 107"}
+{"a": "card_ref_el_108", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Hassium (Hs) — element 108"}
+{"a": "card_ref_el_108", "b": "card_ref_el_109", "relationship": "precedes", "evidence": "the next element by atomic number (Z 108 → 109)", "a_title": "Hassium (Hs) — element 108"}
+{"a": "card_ref_el_109", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Meitnerium (Mt) — element 109"}
+{"a": "card_ref_el_109", "b": "card_ref_el_110", "relationship": "precedes", "evidence": "the next element by atomic number (Z 109 → 110)", "a_title": "Meitnerium (Mt) — element 109"}
+{"a": "card_ref_el_110", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Darmstadtium (Ds) — element 110"}
+{"a": "card_ref_el_110", "b": "card_ref_el_111", "relationship": "precedes", "evidence": "the next element by atomic number (Z 110 → 111)", "a_title": "Darmstadtium (Ds) — element 110"}
+{"a": "card_ref_el_111", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Roentgenium (Rg) — element 111"}
+{"a": "card_ref_el_111", "b": "card_ref_el_112", "relationship": "precedes", "evidence": "the next element by atomic number (Z 111 → 112)", "a_title": "Roentgenium (Rg) — element 111"}
+{"a": "card_ref_el_112", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Copernicium (Cn) — element 112"}
+{"a": "card_ref_el_112", "b": "card_ref_el_113", "relationship": "precedes", "evidence": "the next element by atomic number (Z 112 → 113)", "a_title": "Copernicium (Cn) — element 112"}
+{"a": "card_ref_el_113", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Nihonium (Nh) — element 113"}
+{"a": "card_ref_el_113", "b": "card_ref_el_114", "relationship": "precedes", "evidence": "the next element by atomic number (Z 113 → 114)", "a_title": "Nihonium (Nh) — element 113"}
+{"a": "card_ref_el_114", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Flerovium (Fl) — element 114"}
+{"a": "card_ref_el_114", "b": "card_ref_el_115", "relationship": "precedes", "evidence": "the next element by atomic number (Z 114 → 115)", "a_title": "Flerovium (Fl) — element 114"}
+{"a": "card_ref_el_115", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Moscovium (Mc) — element 115"}
+{"a": "card_ref_el_115", "b": "card_ref_el_116", "relationship": "precedes", "evidence": "the next element by atomic number (Z 115 → 116)", "a_title": "Moscovium (Mc) — element 115"}
+{"a": "card_ref_el_116", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Livermorium (Lv) — element 116"}
+{"a": "card_ref_el_116", "b": "card_ref_el_117", "relationship": "precedes", "evidence": "the next element by atomic number (Z 116 → 117)", "a_title": "Livermorium (Lv) — element 116"}
+{"a": "card_ref_el_117", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Tennessine (Ts) — element 117"}
+{"a": "card_ref_el_117", "b": "card_ref_el_118", "relationship": "precedes", "evidence": "the next element by atomic number (Z 117 → 118)", "a_title": "Tennessine (Ts) — element 117"}
+{"a": "card_ref_el_118", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "an element of the created order (Genesis 1) — matter God spoke into being", "a_title": "Oganesson (Og) — element 118"}
