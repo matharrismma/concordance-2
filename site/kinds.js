@@ -9,6 +9,28 @@
      yours     ✎  your own words, kept verbatim — never graded, never verified
    Each badge links to /guarantees.html so the boundary is one click from being fully explained.
    Self-styling (injects its CSS once); uses the page's austere theme vars with safe fallbacks. */
+/* Installable — the app IS the carrying. Inject the manifest, icon, and theme once, on every page
+   (so we don't hand-edit thirty <head>s), and a browser can install Narrow Highway to the home
+   screen and launch it standalone, offline. Never blocks the page. */
+(function () {
+  try {
+    var h = document.head; if (!h) return;
+    function link(rel, href, extra) {
+      if (document.querySelector('link[rel="' + rel + '"]')) return;
+      var l = document.createElement('link'); l.rel = rel; l.href = href;
+      if (extra) for (var k in extra) l.setAttribute(k, extra[k]);
+      h.appendChild(l);
+    }
+    link('manifest', '/manifest.webmanifest');
+    link('icon', '/icon.svg', { type: 'image/svg+xml' });
+    link('apple-touch-icon', '/icon.svg');
+    if (!document.querySelector('meta[name="theme-color"]')) {
+      var m = document.createElement('meta'); m.name = 'theme-color'; m.content = '#0c0906';
+      h.appendChild(m);
+    }
+  } catch (e) { /* installability is a bonus, never a requirement */ }
+})();
+
 (function () {
   if (window.NHKind) return;
   var css =

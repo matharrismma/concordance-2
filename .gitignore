@@ -39,6 +39,9 @@ data/*.db-shm
 # tools/vendor_rampart.sh — kept out of source like the runtime data)
 site/vendor/
 site/models/
+# the offline finding index — droplet-generated from the live corpus (~4.6 MB / 0.9 MB gz),
+# like cards.jsonl. Reproduce with tools/build_offline_index.py; never committed.
+site/search-index.json
 
 # Personal data written by the companion modules — NEVER committed.
 # binding = public keys + thread ids; deferred = what someone handed forward;

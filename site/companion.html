@@ -77,6 +77,18 @@
   .seal{ text-align:center; color:var(--ink-soft); font-size:.78rem;
     letter-spacing:.16em; text-transform:uppercase; margin-top:3.2rem }
   .seal b{ color:var(--gold) }
+
+  /* carry-offline — a deliberate download, in the manuscript's own hand */
+  .carry{ margin:2rem 0 .4rem; padding:1.5rem 1.4rem; text-align:center;
+    border:1px solid var(--rule); border-radius:4px; background:var(--vellum-2) }
+  .carry-lead{ margin:0 0 1.1rem; font-size:.92rem; color:var(--ink-soft) }
+  .carry-btn{ font-family:inherit; font-size:1rem; color:var(--vellum);
+    background:var(--rubric); border:1px solid var(--rubric); border-radius:3px;
+    padding:.8rem 1.6rem; cursor:pointer; letter-spacing:.04em;
+    min-height:48px; min-width:15rem; transition:opacity .15s ease }
+  .carry-btn:hover{ opacity:.9 } .carry-btn:disabled{ opacity:.6; cursor:default }
+  .carry-note{ margin:.9rem 0 0; min-height:1.2em; font-size:.86rem;
+    font-style:italic; color:var(--gold) }
 </style>
 </head>
 <body>
@@ -204,6 +216,14 @@
   verification and its seals, Scripture, the map, the steward, the coach, and your whole
   verifiable record. <strong>The body still answers.</strong></p>
 
+  <div class="carry">
+    <p class="carry-lead">Carry the finding with you. One tap downloads a small index of the
+      whole keeping to <em>this</em> device — then you can search every seed by name or word
+      with no network at all. Opening a seed then reads from what you have already visited.</p>
+    <button id="carry" class="carry-btn" type="button">Carry the keeping offline</button>
+    <p id="carry-note" class="carry-note" role="status"></p>
+  </div>
+
   <div class="wrap">
   <table>
     <tr><th>To carry it all</th><th>Size</th></tr>
@@ -244,6 +264,34 @@
 </main>
 <script src="/kinds.js"></script>
 <script src="/nh-home.js"></script>
+<script src="/nh-search.js"></script>
 <script src="/nh-tools.js"></script>
+<script>
+/* Carry the keeping — fetch the offline finding index onto this device (the service worker
+   caches it), and warm the flagship surfaces so the whole thing answers with no network.
+   Best-effort and honest: it reports what actually landed, and never blocks the page. */
+(function () {
+  var btn = document.getElementById('carry'), note = document.getElementById('carry-note');
+  if (!btn || !note) return;
+  var WARM = ['/', '/index.html', '/floor.html', '/read.html', '/bible.html',
+              '/apothecary.html', '/almanac.html', '/floor', '/coach/journey'];
+  btn.addEventListener('click', function () {
+    btn.disabled = true; note.textContent = 'Gathering the keeping onto this device…';
+    var jobs = [ (window.NHSearch ? NHSearch.download() : Promise.resolve(0)) ];
+    // touch the flagship surfaces so the service worker precaches them too (best-effort)
+    WARM.forEach(function (u) { jobs.push(fetch(u).catch(function () { return null; })); });
+    Promise.all(jobs).then(function (r) {
+      var n = (typeof r[0] === 'number') ? r[0] : 0;
+      note.textContent = n
+        ? '✓ Carried — ' + n.toLocaleString() + ' seeds are now findable on this device with no network.'
+        : '✓ Carried — the surfaces are on this device. (The finding index will load next time you are online.)';
+      btn.textContent = 'Carried';
+    }).catch(function () {
+      note.textContent = 'Could not finish — check your connection and try once more.';
+      btn.disabled = false;
+    });
+  });
+})();
+</script>
 </body>
 </html>

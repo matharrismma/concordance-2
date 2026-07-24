@@ -277,6 +277,7 @@
 <script src="/kinds.js"></script>
 <script src="/speak.js"></script>
 <script src="/redact.js"></script>
+<script src="/nh-search.js"></script>
 <script src="/nh-tools.js"></script>
 <script>
 (function(){
@@ -432,7 +433,22 @@
       if(d.thread_id){ threadId=d.thread_id; try{ localStorage.setItem(TID,threadId);}catch(e){} rosterPut(threadId,text); }
       body.innerHTML=render(d,isDoc); settle(); scroll(); ta.focus();
       if(d.pin) loadPins();
-    }catch(e){ body.innerHTML='<span class="note">The engine is unreachable right now.</span>'; }
+    }catch(e){
+      // offline: fall back to the keeping carried on THIS device — found, never generated
+      var found=[];
+      try{ found = window.NHSearch ? await NHSearch.find(text,8) : []; }catch(_){}
+      if(found && found.length){
+        body.innerHTML='<div class="note">You’re offline — found in the keeping on this device:</div>'+
+          found.map(function(r){ return '<div class="hit"><b><a href="/card.html?id='+
+            encodeURIComponent(r.id)+'">'+esc(r.title)+'</a></b>'+
+            (r.snippet?'<span class="sn">'+esc(r.snippet)+'</span>':'')+'</div>'; }).join('');
+      } else {
+        body.innerHTML='<span class="note">You’re offline. Connect once and open '+
+          '<a href="/companion.html">Carry it with you</a> to download the keeping — then search '+
+          'works on this device even with no internet.</span>';
+      }
+      settle(); scroll();
+    }
   }
 
   function idle(){ send.setAttribute('data-idle', said() ? '0' : '1'); }

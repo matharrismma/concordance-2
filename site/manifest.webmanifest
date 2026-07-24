@@ -1,0 +1,16 @@
+{
+  "name": "Narrow Highway",
+  "short_name": "Narrow Highway",
+  "description": "A conduit that finds and verifies — Scripture and the created order, one floor. Carry it with you; it works offline.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0c0906",
+  "theme_color": "#0c0906",
+  "categories": ["education", "reference", "books"],
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

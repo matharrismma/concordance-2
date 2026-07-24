@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Narrow Highway">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="34%" r="75%">
+      <stop offset="0%" stop-color="#2a1e10"/><stop offset="60%" stop-color="#191108"/>
+      <stop offset="100%" stop-color="#0c0906"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e7c877"/><stop offset="100%" stop-color="#8a6a2f"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="104" fill="url(#g)"/>
+  <!-- the seal: a ring of light -->
+  <circle cx="256" cy="256" r="150" fill="none" stroke="url(#gold)" stroke-width="10" opacity="0.85"/>
+  <!-- the narrow way: a path that narrows as it rises, toward a point of light -->
+  <path d="M180 372 L238 200 L274 200 L332 372 Z" fill="none" stroke="url(#gold)" stroke-width="9"
+        stroke-linejoin="round"/>
+  <path d="M238 200 L274 200" stroke="url(#gold)" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="256" cy="150" r="15" fill="#e7c877"/>
+</svg>
