@@ -630,7 +630,19 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     # The strength the traffic revealed: 87% of use is search, and the unrepeatable thing we do
     # is return the hit WITH its connected cloud — the communion of witnesses the graph already
     # holds around it. So the top result carries who else in the keeping speaks to the same thing.
-    hits = corpus.search(text, limit=6)
+    # the Hare: the volumes act as always-optimized decks. Predict the volume this asks for and
+    # search THAT first (fast, on-topic); if it isn't clearly good, search the whole keeping — so
+    # speed never costs correctness (the Tortoise still reaches everything). Name the volume, so the
+    # page knows which one answered.
+    from . import decks as _decks
+    _vol = (_decks.predict(text, k=1) or [None])[0]
+    hits = []
+    if _vol:
+        hits = corpus.search(text, limit=6, shelves=_decks.deck_shelves(_vol["id"]))
+    if len(hits) < 3 or (hits and not _shares_a_word(text, hits[0])):
+        hits = corpus.search(text, limit=6)
+    if _vol:
+        base = {**base, "volume": {"id": _vol["id"], "name": _vol["name"]}}
     weak = (not hits) or not _shares_a_word(text, hits[0])
     if weak:
         # The tortoise: the keeping doesn't hold it, so go FIND it — surely. Primary / high-quality
