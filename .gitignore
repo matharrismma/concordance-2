@@ -103,3 +103,5 @@ data/verified_cards.jsonl
 !data/fieldkit_cards.jsonl
 # The Fractal Playbook — Matt's authored framework (atomic unit + Four Gates) — CONTENT (git-tracked)
 !data/playbook_cards.jsonl
+# The systems of the world — the recurring form (effort/flow, shared equations, the shadow) — CONTENT
+!data/systems_cards.jsonl
