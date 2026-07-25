@@ -34,6 +34,7 @@ test_groups.py
 test_growth.py
 test_hardening.py
 test_identity.py
+test_formation.py
 test_inequality.py
 test_mesh.py
 test_inlet.py

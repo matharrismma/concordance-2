@@ -842,6 +842,18 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import mesh
         return _ok(mesh.read_door((query.get("fp") or "").strip(), limit=int(query.get("limit") or 100)))
 
+    # Formation — "make a wish for life"; the tool FINDS the fitting practice, then points off the
+    # screen. Stateless (stores nothing about a person's life); found/attributed, never generated.
+    if method == "GET" and path == "/formation":
+        from .. import formation
+        return _ok(formation.guidance())
+    if method == "GET" and path == "/formation/kinds":
+        from .. import formation
+        return _ok(formation.kinds())
+    if method == "GET" and path == "/formation/help":
+        from .. import formation
+        return _ok(formation.help((query.get("wish") or "").strip(), kind=(query.get("kind") or "become").strip()))
+
     # Coach — the Shepherd as a K-3 reading tutor. READ-ONLY teaching is the floor (NOT gated); it
     # finds + presents the operator's authored curriculum, never generates a lesson, never grades a child.
     if method == "POST" and path == "/coach/mastery":
@@ -1433,6 +1445,9 @@ ROUTES = [
     {"path": "/mesh/invite", "methods": ("POST",), "rl": True},
     {"path": "/mesh/redeem", "methods": ("POST",), "rl": True},
     {"path": "/mesh/door", "methods": ("GET", "POST"), "api": True, "rl": True},
+    {"path": "/formation", "methods": ("GET",), "api": True},
+    {"path": "/formation/kinds", "methods": ("GET",), "api": True},
+    {"path": "/formation/help", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/coach/mastery", "methods": ("POST",), "rl": True},
     {"path": "/identity/create", "methods": ("POST",), "rl": True},
     {"path": "/identity/verify", "methods": ("POST",), "rl": True},

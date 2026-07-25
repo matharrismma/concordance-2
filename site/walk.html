@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Walk — make a wish for life — Narrow Highway</title>
+<meta name="description" content="Make a wish for life — who you want to become, what to overcome, where to go — and the tool finds the fitting practice, then points you off the screen into a real week, with real people. Online is the tool, not the end game.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f; --pass:#8bbf8f;
+    --line:rgba(201,162,74,.16); --panel:rgba(201,162,74,.05);
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(60% 50% at 50% 22%, rgba(201,162,74,.10), rgba(201,162,74,0) 72%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.7 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:820px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.68rem; text-align:center; margin-top:1.4rem}
+  h1{font-weight:400; font-size:2rem; margin:.4rem 0 .3rem; text-align:center}
+  .lede{color:var(--dim); font-size:1rem; max-width:40rem; margin:.2rem auto 1.2rem; text-align:center}
+  .verse{font-style:italic; color:var(--goldsoft); text-align:center; margin:.2rem 0 1.4rem; font-size:.9rem}
+  .card{border:1px solid var(--line); border-radius:12px; background:var(--panel); padding:1.2rem 1.3rem; margin:1rem 0}
+  label{display:block; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin:.7rem 0 .3rem}
+  input,select{width:100%; background:rgba(0,0,0,.28); border:1px solid var(--line); border-radius:8px; color:var(--ink); font:16px/1.5 var(--serif); padding:.6rem .7rem}
+  button{cursor:pointer; background:linear-gradient(180deg, rgba(201,162,74,.22), rgba(201,162,74,.08)); border:1px solid var(--gold); color:var(--ink); border-radius:9px; font:.82rem var(--mono); letter-spacing:.06em; text-transform:uppercase; padding:.7rem 1.2rem; margin-top:1rem}
+  button.ghost{background:none; border-color:var(--line); color:var(--dim); text-transform:none; letter-spacing:0; padding:.4rem .7rem; margin:0}
+  .step{border-left:3px solid var(--pass); padding:.5rem 0 .5rem .9rem; margin:.8rem 0; color:var(--ink)}
+  .step .k{font-family:var(--mono); font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--pass); display:block}
+  .people{border-left:3px solid var(--gold); padding:.4rem 0 .4rem .9rem; margin:.6rem 0; color:var(--dim); font-size:.94rem}
+  .hit{border-top:1px solid var(--line); padding:.55rem 0}
+  .hit b{color:var(--ink); font-weight:400}
+  .hit .sn{display:block; color:var(--dim); font-size:.86rem}
+  .pill{display:inline-block; font-family:var(--mono); font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; border:1px solid var(--line); border-radius:999px; padding:.1rem .5rem; color:var(--gold); margin-right:.3rem}
+  .note{color:var(--dim); font-size:.9rem; margin-top:.8rem; font-style:italic}
+  .walk .row{display:flex; justify-content:space-between; gap:.6rem; border-top:1px solid var(--line); padding:.5rem 0; align-items:center}
+  .walk .row .w{color:var(--ink)} .walk .row .k{font-family:var(--mono); font-size:.64rem; color:var(--dim)}
+  .fruit{display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.6rem}
+  .fruit .f{font:.66rem var(--mono); border:1px solid var(--line); border-radius:6px; padding:.25rem .5rem; color:var(--dim)}
+  footer{border-top:1px solid var(--line); color:var(--dim); font-size:.78rem; margin-top:2.4rem; padding-top:1.2rem; text-align:center; line-height:1.7}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="kicker">Make a wish for life</div>
+    <h1>What are you reaching for?</h1>
+    <p class="verse">Delight yourself in the LORD, and he will give you the desires of your heart. — Psalm 37:4</p>
+    <p class="lede">Tell it plainly — who you want to become, something to overcome, a relationship to mend, where you
+      want to go. The tool finds the fitting practice and hands it to you. Then close the screen and go live it.</p>
+
+    <div class="card">
+      <label for="kind">This is…</label>
+      <select id="kind"><option value="become">who I want to become</option></select>
+      <label for="wish">In your own words</label>
+      <input id="wish" placeholder="e.g. I want to stop losing my temper with my kids" maxlength="200">
+      <button id="go">Find my practice</button>
+    </div>
+
+    <div id="out"></div>
+
+    <div class="card walk" id="walkCard" hidden>
+      <div class="kicker" style="text-align:left;margin:0 0 .3rem">Your walk</div>
+      <div id="walk"></div>
+      <div class="kicker" style="text-align:left;margin:1rem 0 .2rem">Where your heart is set</div>
+      <div class="fruit" id="fruit"></div>
+      <button class="ghost" id="clear" style="margin-top:1rem">Clear my walk</button>
+    </div>
+  </div>
+
+  <footer>
+    Your wish and your walk are kept on this device only — we store nothing about your life.
+    Online is the tool; music, community, family and friends are the end. <a href="/">Narrow Highway</a>
+  </footer>
+
+<script>
+const $ = s => document.querySelector(s);
+const api = p => fetch(p, {headers:{accept:"application/json"}}).then(r=>r.json());
+const LS = "nh_walk";
+const KLABEL = {become:"become", overcome:"overcome", mend:"mend", place:"go", learn:"learn", serve:"serve"};
+function esc(s){ const d=document.createElement("div"); d.textContent=s==null?"":String(s); return d.innerHTML; }
+function load(){ try{ return JSON.parse(localStorage.getItem(LS)||"[]"); }catch(e){ return []; } }
+function save(w){ localStorage.setItem(LS, JSON.stringify(w)); }
+
+api("/formation/kinds").then(d=>{
+  if(d && d.kinds) $("#kind").innerHTML = d.kinds.map(k=>'<option value="'+esc(k.id)+'">'+esc(k.label)+'</option>').join("");
+}).catch(()=>{});
+
+$("#go").onclick = async () => {
+  const wish = $("#wish").value.trim(), kind = $("#kind").value;
+  if(!wish){ return; }
+  $("#out").innerHTML = '<div class="card"><p class="note">finding the fitting practice…</p></div>';
+  const r = await api("/formation/help?wish="+encodeURIComponent(wish)+"&kind="+encodeURIComponent(kind));
+  if(!r.ok){ $("#out").innerHTML = '<div class="card"><p class="note">'+esc(r.error||"tell me what you are reaching for")+'</p></div>'; return; }
+  let h = '<div class="card"><div class="kicker" style="text-align:left;margin:0 0 .3rem">To '+esc(KLABEL[r.kind]||r.kind)+': “'+esc(r.wish)+'”</div>';
+  h += '<div class="step"><span class="k">Your first step — off the screen, this week</span>'+esc(r.first_step)+'</div>';
+  h += '<div class="people">'+esc(r.with_people)+'</div>';
+  if(r.practices && r.practices.length){
+    h += '<div class="kicker" style="text-align:left;margin:.9rem 0 .1rem">The practice</div>';
+    h += r.practices.map(c=>'<div class="hit"><span class="pill">practice</span><b>'+esc(c.title||c.subject||c.id)+'</b><span class="sn">'+esc((c.body||c.snippet||"").slice(0,240))+'</span></div>').join("");
+  }
+  if(r.also_in_the_keeping && r.also_in_the_keeping.length){
+    h += '<div class="kicker" style="text-align:left;margin:.9rem 0 .1rem">Also in the keeping</div>';
+    h += r.also_in_the_keeping.map(c=>'<div class="hit"><b>'+esc(c.title||c.subject||c.id)+'</b><span class="sn">'+esc((c.body||c.snippet||"").slice(0,160))+'</span></div>').join("");
+  }
+  h += '<p class="note">'+esc(r.note)+'</p>';
+  h += '<button id="commit">I\'ll walk this</button></div>';
+  $("#out").innerHTML = h;
+  $("#commit").onclick = ()=>{ const w=load(); w.unshift({wish:r.wish, kind:r.kind, ts:Date.now()}); save(w); $("#wish").value=""; $("#out").innerHTML='<div class="card"><p class="note">Kept. Now go — close this, and do it with someone real.</p></div>'; renderWalk(); };
+};
+
+function renderWalk(){
+  const w = load();
+  if(!w.length){ $("#walkCard").hidden = true; return; }
+  $("#walkCard").hidden = false;
+  $("#walk").innerHTML = w.slice(0,12).map(x=>'<div class="row"><span class="w">'+esc(x.wish)+'</span><span class="k">'+esc(KLABEL[x.kind]||x.kind)+'</span></div>').join("");
+  const tally = {}; w.forEach(x=>{ tally[x.kind]=(tally[x.kind]||0)+1; });
+  $("#fruit").innerHTML = Object.keys(tally).sort((a,b)=>tally[b]-tally[a]).map(k=>'<span class="f">'+esc(KLABEL[k]||k)+' · '+tally[k]+'</span>').join("");
+}
+$("#clear").onclick = ()=>{ if(confirm("Clear your walk on this device?")){ save([]); renderWalk(); } };
+renderWalk();
+</script>
+<script src="/nh-home.js"></script>
+<script src="/nh-tools.js"></script>
+</body>
+</html>
