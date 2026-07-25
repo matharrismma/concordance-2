@@ -111,3 +111,7 @@ data/verified_cards.jsonl
 !data/access_tools_cards.jsonl
 # The churches, calibrated from their own confessions (not judged) — CONTENT (git-tracked)
 !data/church_cards.jsonl
+# The builders of the Floor — historians/scientists/mathematicians credited with love — CONTENT (git-tracked)
+!data/contributors_cards.jsonl
+# The pre-Christian faiths as foreshadow (Acts 17) + the test of the spirits (1 John 4) — CONTENT (git-tracked)
+!data/religions_cards.jsonl

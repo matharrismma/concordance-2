@@ -206,6 +206,8 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                       "fieldkit_cards.jsonl", "playbook_cards.jsonl", "systems_cards.jsonl",
                       "access_tools_cards.jsonl",   # the connection to lawful free tools (logistics: tag onto paid carriers)
                       "church_cards.jsonl",         # the churches, calibrated from their own confessions (not judged)
+                      "contributors_cards.jsonl",   # the builders of the Floor (historians/scientists/mathematicians), credited with love
+                      "religions_cards.jsonl",      # the pre-Christian faiths as foreshadow (Acts 17) + the test of the spirits (1 John 4)
                       # The plumb-line: the whole Bible in the original tongues (Greek NT + Hebrew OT),
                       # one card per verse. Academics first. Spines root in the Word.
                       "scripture_spines.jsonl", "scripture_cards.jsonl",

@@ -131,6 +131,22 @@ _DECKS: List[Dict[str, Any]] = [
      "keywords": {"church", "denomination", "tradition", "confession", "catholic", "orthodox", "protestant",
                   "lutheran", "reformed", "presbyterian", "anglican", "baptist", "methodist", "pentecostal",
                   "anabaptist", "creed", "denominations", "which church", "difference between"}},
+    {"id": "builders", "name": "The Builders of the Floor — credited with love",
+     "desc": "The historians, scientists and mathematicians who mapped the Floor of Discovery — each credited "
+             "magnanimously for the truth they kept, their shortfalls named honestly, all held with love. "
+             "Many were worshippers thinking God's thoughts after Him.",
+     "shelves": {"builders"},
+     "keywords": {"scientist", "mathematician", "historian", "newton", "kepler", "euclid", "gödel", "godel",
+                  "darwin", "einstein", "aristotle", "pascal", "leibniz", "euler", "faraday", "maxwell",
+                  "cantor", "turing", "contribution", "who discovered", "credit", "genius", "builders"}},
+    {"id": "foreshadows", "name": "The Nations' Foreshadows — seeds of the Word, fulfilled in Christ",
+     "desc": "The faiths that came before Christ, credited magnanimously where they contributed — the seeds "
+             "and shadows scattered among the nations (Acts 17), the fulfillment named plainly. What arose "
+             "after is measured by the test of the spirits (1 John 4:2-3), always in love.",
+     "shelves": {"foreshadows"},
+     "keywords": {"religion", "religions", "foreshadow", "praeparatio", "paganism", "greek philosophy", "plato",
+                  "stoic", "zoroastrian", "magi", "hinduism", "buddhism", "confucius", "daoism", "the way",
+                  "islam", "mystery religions", "true myth", "unknown god", "world religions", "other religions"}},
     {"id": "playbook", "name": "The Fractal Playbook — obedience, confirmed",
      "desc": "The Body's memory of faithful obedience: the atomic Playbook Entry (Confession, Anchors, "
              "Action, Outcome, Witness, Wait, Status) and the Four Gates — RED, FLOOR, BROTHERS, GOD.",
