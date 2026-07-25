@@ -331,6 +331,9 @@ def classify(text: str) -> str:
         return "scripture"
     if _looks_math(text or "") or _primality_claim(text or "") is not None:
         return "verify"
+    from . import compute as _compute            # arithmetic, %, roots, unit + temperature conversion
+    if _compute.answer(text or "") is not None:
+        return "compute"
     if distress_ref(text or ""):
         return "comfort"
     if _wants_a_companion(text or ""):     # broaden: meet a first-person struggle as a servant
@@ -539,6 +542,17 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                        "params": {"expr_a": m.group(1).strip(), "expr_b": m.group(2).strip(), "variables": {}}})
         return _witnessed({**base, "verify": attach(res, config=config, domain="mathematics")},
                           text, witness, gate_just_opened)
+
+    if kind == "compute":
+        # A direct, exact, computed answer — arithmetic, percentages, roots, unit + temperature
+        # conversion. Computed deterministically, never generated; declines if it cannot be exact.
+        from . import compute as _compute
+        ans = _compute.answer(text)
+        if ans:
+            return {**base, "message": ans,
+                    "note": "Computed exactly — a conduit for arithmetic, not a source. " + _NOTE}
+        # fell through (shouldn't, classify gated on it) — degrade to search
+        return {**base, "results": [corpus._brief(c) for c in corpus.search(text, limit=6)]}
 
     if kind == "define":
         # Look the TERM up on the word shelves (the tongues + the dictionary), not the whole
