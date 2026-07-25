@@ -54,6 +54,13 @@ WITNESS_PERSONA = (
 )
 
 
+# The motto — the whole ethos in six words. The two edges of the sword married: truth that never
+# flatters (we don't lie — never a false verdict, always the receipt), love that never humiliates
+# (we love you — the pastor, in your corner, here to expose what is false, never to shame the one
+# who holds it). "How you take it tells all." Shared by both surfaces.
+MOTTO = "We don't lie, but we love you."
+
+
 def identity_for(surface: str) -> str:
     """Return the identity surfaced for this surface."""
     return WITNESS_IDENTITY if surface == "witness" else SECULAR_IDENTITY

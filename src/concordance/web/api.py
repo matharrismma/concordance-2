@@ -329,7 +329,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/identity":
         # identity = what the engine IS (the dry, efficient truth); persona = WHO it is to talk to
         # (the separate voice / movie-style experience). The card system stays pure efficiency.
-        return _ok({"surface": surface, "identity": config.identity, "persona": config.persona})
+        from .. import branding as _branding
+        return _ok({"surface": surface, "identity": config.identity, "persona": config.persona,
+                    "motto": _branding.MOTTO})
 
     if method == "GET" and path == "/route":
         # The Router — names the member who should answer, and hands off. It NEVER answers.
