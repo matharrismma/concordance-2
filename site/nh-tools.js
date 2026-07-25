@@ -22,6 +22,7 @@
     { h: '/characters.html', n: 'Dictionary',       k: 'define meaning people names who character lexicon' },
     { h: '/library.html',    n: 'The keeping',      k: 'library cards corpus browse search everything' },
     { h: '/almanac.html',    n: 'Almanac',          k: 'facts figures reference tables data' },
+    { h: '/game.html',       n: 'The Field Kit game', k: 'card game deck play draw practice scripture fieldkit obedience protocol sermon mount' },
     { h: '/apothecary.html', n: 'The Apothecary',   k: 'herbs remedies tonics planting garden grow land old way tea' },
     { h: '/floor.html',      n: 'The Floor of Discovery', k: 'floor design one floor seeds nesting created order the word fear of god wisdom see the design' },
     { h: '/map.html',        n: 'The map',          k: 'connections graph atlas structure links' },

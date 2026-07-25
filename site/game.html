@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Field Kit — draw a card, do the Word — Narrow Highway</title>
+<meta name="description" content="A card game on the Lighthouse Field Kit: draw a Scripture protocol card, keep it by PRACTICING it. Not chance — obedience. Gather all thirty by hearing and doing (Matthew 7:24).">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --epic:#9a6cc9; --rare:#6c9ac9; --common:#8a93a3; --pass:#8bbf8f;
+    --line:rgba(201,162,74,.16); --panel:rgba(201,162,74,.05);
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(60% 50% at 50% 20%, rgba(201,162,74,.10), rgba(201,162,74,0) 72%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.7 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:900px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.68rem; text-align:center; margin-top:1.4rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2rem; margin:.4rem 0 .3rem; text-align:center}
+  .lede{color:var(--dim); font-size:1rem; max-width:42rem; margin:.2rem auto 1.4rem; text-align:center}
+  .verse{font-style:italic; color:var(--goldsoft); text-align:center; margin:.2rem 0 1.4rem; font-size:.92rem}
+  .bar{display:flex; gap:.6rem; justify-content:center; align-items:center; flex-wrap:wrap; margin:1rem 0}
+  button{cursor:pointer; background:linear-gradient(180deg, rgba(201,162,74,.22), rgba(201,162,74,.08));
+    border:1px solid var(--gold); color:var(--ink); border-radius:9px; font:.82rem var(--mono); letter-spacing:.06em;
+    text-transform:uppercase; padding:.7rem 1.3rem}
+  button:disabled{opacity:.4; cursor:default}
+  button.ghost{background:none; border-color:var(--line); color:var(--dim); text-transform:none; letter-spacing:0}
+  .progress{font-family:var(--mono); font-size:.76rem; color:var(--dim); text-align:center; margin:.3rem 0 0}
+  .progress b{color:var(--gold)}
+  /* the card */
+  .stage{display:flex; justify-content:center; margin:1.4rem 0 1rem; min-height:20rem}
+  .card{width:min(360px,86vw); border-radius:16px; border:2px solid var(--line); background:linear-gradient(180deg,#14140f,#0c0d11);
+    padding:1.2rem 1.3rem 1.3rem; box-shadow:0 12px 40px rgba(0,0,0,.5); position:relative; transition:transform .15s}
+  .card.back{display:flex; align-items:center; justify-content:center; min-height:20rem; cursor:pointer;
+    background:radial-gradient(60% 40% at 50% 40%, rgba(201,162,74,.14), rgba(0,0,0,.4)); text-align:center}
+  .card.back .mark{font-size:2.4rem; color:var(--gold)}
+  .card.back .lbl{font-family:var(--mono); font-size:.66rem; letter-spacing:.2em; text-transform:uppercase; color:var(--dim); margin-top:.6rem}
+  .card.legendary{border-color:var(--gold); box-shadow:0 0 34px rgba(201,162,74,.34)}
+  .card.epic{border-color:var(--epic); box-shadow:0 0 28px rgba(154,108,201,.28)}
+  .card.rare{border-color:var(--rare); box-shadow:0 0 22px rgba(108,154,201,.22)}
+  .card.common{border-color:var(--common)}
+  .rarity{font-family:var(--mono); font-size:.62rem; letter-spacing:.18em; text-transform:uppercase; float:right}
+  .legendary .rarity{color:var(--gold)} .epic .rarity{color:var(--epic)} .rare .rarity{color:var(--rare)} .common .rarity{color:var(--common)}
+  .card h2{font-weight:400; font-size:1.5rem; margin:.1rem 0 .1rem}
+  .anchor{color:var(--goldsoft); font-style:italic; font-size:.96rem; margin:0 0 .7rem}
+  .field{margin:.5rem 0; font-size:.92rem}
+  .field .k{font-family:var(--mono); font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); display:block}
+  .field.floor .k{color:var(--common)} .field.practice .k{color:var(--pass)} .field.prompt .k{color:var(--gold)}
+  .kept-badge{position:absolute; top:-10px; left:-10px; background:var(--pass); color:#0a0b10; font:.6rem var(--mono);
+    letter-spacing:.1em; text-transform:uppercase; padding:.2rem .5rem; border-radius:999px}
+  /* collection */
+  .coll{margin-top:2rem; border-top:1px solid var(--line); padding-top:1.2rem}
+  .coll h3{font-weight:400; font-size:1.1rem; text-align:center; color:var(--dim)}
+  .grid{display:flex; flex-wrap:wrap; gap:.4rem; justify-content:center; margin-top:.7rem}
+  .chip{font:.66rem var(--mono); border:1px solid var(--line); border-radius:6px; padding:.25rem .5rem; color:var(--dim)}
+  .chip.legendary{border-color:var(--gold); color:var(--gold)} .chip.epic{border-color:var(--epic); color:var(--epic)}
+  .chip.rare{border-color:var(--rare); color:var(--rare)} .chip.common{color:var(--ink)}
+  .tip{min-height:1.3rem; text-align:center; color:var(--dim); font-size:.9rem; margin:.5rem 0}
+  footer{border-top:1px solid var(--line); color:var(--dim); font-size:.78rem; margin-top:2.4rem; padding-top:1.2rem; text-align:center; line-height:1.7}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="kicker">A game on the Lighthouse Field Kit</div>
+    <h1>Draw a card. Do the Word.</h1>
+    <p class="verse">Everyone who hears these words of mine and does them is like a wise man who built his house on the rock. — Matthew 7:24</p>
+    <p class="lede">Thirty protocol cards from the Sermon on the Mount and the Epistles. This is not a game of chance —
+      you don't win a card by luck, you <b>keep</b> it by <b>practicing</b> it. Gather all thirty by doing them.</p>
+
+    <div class="progress" id="progress">—</div>
+    <div class="bar">
+      <button id="draw">Draw a card</button>
+      <button id="week" class="ghost">Deal a week (7)</button>
+      <button id="reset" class="ghost">Reset my walk</button>
+    </div>
+
+    <div class="stage" id="stage"></div>
+    <div class="tip" id="tip"></div>
+
+    <div class="coll" id="coll" hidden>
+      <h3>Your walk — cards you've kept by practicing</h3>
+      <div class="grid" id="grid"></div>
+    </div>
+  </div>
+
+  <footer>
+    The cards are Matt Harris's authored Lighthouse Field Kit, gathered here — a tool for obedience, never a
+    substitute for it. Your walk is kept on this device only. <a href="/">Narrow Highway</a>
+  </footer>
+
+<script>
+const $ = s => document.querySelector(s);
+const api = p => fetch(p, {headers:{accept:"application/json"}}).then(r=>r.json());
+const LS = "nh_fieldkit_kept";
+const rank = {legendary:0, epic:1, rare:2, common:3};
+let deck = [];            // [{id,title}] face-down
+let bag = [];             // shuffled draw order (indices remaining)
+let kept = new Set(load());
+let current = null;
+
+function load(){ try{ return JSON.parse(localStorage.getItem(LS)||"[]"); }catch(e){ return []; } }
+function persist(){ localStorage.setItem(LS, JSON.stringify([...kept])); }
+function esc(s){ const d=document.createElement("div"); d.textContent=s==null?"":String(s); return d.innerHTML; }
+// deterministic shuffle seeded off a rotating counter (Math.random is fine on the client)
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+async function boot(){
+  const d = await api("/cards?shelf=fieldkit&limit=40");
+  const rows = d.cards || d.results || (Array.isArray(d)?d:[]);
+  // drop the "How to Use This Deck" cover card from the play deck (it's the rules, not a protocol)
+  deck = rows.filter(r => !/how to use this deck/i.test(r.title||"")).map(r => ({id:r.id, title:r.title}));
+  refill();
+  renderProgress(); renderCollection();
+  $("#tip").textContent = "The deck is shuffled. Draw a card, and this week — do it.";
+}
+function refill(){ bag = shuffle(deck.map((_,i)=>i)); }
+
+async function draw(){
+  if(!deck.length) return;
+  if(!bag.length){ refill(); $("#tip").textContent = "The deck came around again — the walk repeats the hardest cards."; }
+  const idx = bag.pop();
+  const meta = deck[idx];
+  $("#stage").innerHTML = '<div class="card back"><div><div class="mark">▲</div><div class="lbl">drawing…</div></div></div>';
+  const full = await api("/card?id="+encodeURIComponent(meta.id));
+  const c = full.card || full;
+  current = c;
+  renderCard(c);
+}
+
+function renderCard(c){
+  const e = c.extra || {};
+  const rar = (e.rarity||"common");
+  const isKept = kept.has(c.id);
+  $("#stage").innerHTML =
+    '<div class="card '+rar+'">'+
+      (isKept?'<div class="kept-badge">practiced ✓</div>':'')+
+      '<span class="rarity">'+esc(rar)+'</span>'+
+      '<h2>'+esc(c.title)+'</h2>'+
+      '<div class="anchor">'+esc(e.scripture||'')+(e.scripture_label?' · '+esc(e.scripture_label):'')+'</div>'+
+      (e.source_line?'<div class="field"><span class="k">Source</span>'+esc(e.source_line)+'</div>':'')+
+      (e.floor?'<div class="field floor"><span class="k">Floor — no drift</span>'+esc(e.floor)+'</div>':'')+
+      (e.practice_7day?'<div class="field practice"><span class="k">Practice · 7 days</span>'+esc(e.practice_7day)+'</div>':'')+
+      (e.prompt?'<div class="field prompt"><span class="k">Ask yourself</span>'+esc(e.prompt)+'</div>':'')+
+    '</div>';
+  $("#tip").innerHTML = isKept
+    ? 'You have kept this one. Draw another, or keep practicing it.'
+    : '';
+  // action bar under the card
+  const bar = document.createElement("div"); bar.className="bar";
+  bar.innerHTML = (isKept?'':'<button id="keep">I will practice this — keep it</button>')+
+                  '<button id="again" class="ghost">Draw another</button>';
+  $("#stage").after(bar);
+  // clear any previous action bar
+  const bars = document.querySelectorAll(".stage ~ .bar"); // none; handled below
+  const keepBtn = bar.querySelector("#keep");
+  if(keepBtn) keepBtn.onclick = ()=>{ kept.add(c.id); persist(); renderCard(c); renderProgress(); renderCollection(); cleanupBars(bar); };
+  bar.querySelector("#again").onclick = ()=>{ cleanupBars(bar); draw(); };
+  cleanupBars(bar);
+}
+function cleanupBars(keep){ document.querySelectorAll(".wrap > .bar").forEach(b=>{}); // top bar stays
+  // remove stale action bars (any .bar that is a sibling after .tip except the one we just made)
+  document.querySelectorAll(".bar").forEach(b=>{ if(b!==keep && b.querySelector && (b.querySelector("#keep")||b.querySelector("#again"))) b.remove(); });
+}
+
+async function week(){
+  cleanupBars(null);
+  $("#stage").innerHTML=""; $("#tip").textContent="A week's walk — seven cards. Practice one a day; on day seven, review the fruit.";
+  refill();
+  const picks = bag.splice(-7);
+  const cards = await Promise.all(picks.map(i=>api("/card?id="+encodeURIComponent(deck[i].id)).then(f=>f.card||f)));
+  cards.sort((a,b)=> (rank[(a.extra||{}).rarity]||9)-(rank[(b.extra||{}).rarity]||9));
+  const wrap = document.createElement("div"); wrap.className="grid";
+  wrap.style.gap=".8rem";
+  cards.forEach((c,i)=>{ const e=c.extra||{}; const rar=e.rarity||"common";
+    const el=document.createElement("div"); el.className="card "+rar; el.style.width="min(240px,86vw)"; el.style.padding=".9rem 1rem";
+    el.innerHTML='<span class="rarity">Day '+(i+1)+' · '+esc(rar)+'</span><h2 style="font-size:1.15rem">'+esc(c.title)+'</h2>'+
+      '<div class="anchor" style="font-size:.85rem">'+esc(e.scripture||'')+'</div>'+
+      (e.prompt?'<div class="field prompt" style="font-size:.82rem"><span class="k">Ask</span>'+esc(e.prompt)+'</div>':'');
+    wrap.appendChild(el); });
+  $("#stage").appendChild(wrap);
+}
+
+function renderProgress(){
+  const total = deck.length || 29;
+  $("#progress").innerHTML = '<b>'+kept.size+'</b> of '+total+' cards kept by practice';
+}
+function renderCollection(){
+  const coll=$("#coll"), grid=$("#grid");
+  if(!kept.size){ coll.hidden=true; return; }
+  coll.hidden=false;
+  const items = deck.filter(d=>kept.has(d.id));
+  grid.innerHTML = items.map(d=>'<span class="chip">'+esc(d.title)+'</span>').join("");
+}
+$("#draw").onclick = draw;
+$("#week").onclick = week;
+$("#reset").onclick = ()=>{ if(confirm("Clear the cards you've kept? Your walk starts fresh.")){ kept=new Set(); persist(); renderProgress(); renderCollection(); $("#stage").innerHTML=""; cleanupBars(null); } };
+boot();
+</script>
+<script src="/nh-home.js"></script>
+<script src="/nh-tools.js"></script>
+</body>
+</html>
