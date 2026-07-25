@@ -55,6 +55,30 @@ def is_crisis(text: str) -> bool:
     """The one crisis test. Every surface calls this — a copied list is a list that drifts."""
     return any(w in normalize(text) for w in _CRISIS_WORDS)
 
+
+# The Fellowship Mesh ("The Way") is hidden — never advertised. The agent opens the door ONLY when
+# someone types something that shows they are seeking the body: a longing for other believers, or a
+# confession of Christ. Ask, seek, knock (Matthew 7:7); treasure hidden in a field (Matthew 13:44).
+_WAY_PHRASES = (
+    "other believers", "fellow believers", "community of believers", "network of believers",
+    "find believers", "meet believers", "connect with believers", "find fellowship", "a fellowship",
+    "meet other christians", "connect with christians", "find other christians", "the remnant",
+    "gather with believers", "find my people", "body of christ", "the flock",
+    "fellowship of believers", "other christians near", "christians near me")
+
+
+def _seeks_the_way(text: str) -> bool:
+    """Does this utterance seek the hidden fellowship — a longing for the body, or a confession? Kept
+    specific so the door does not open to the merely curious; the crisis path has already returned."""
+    t = normalize(text)
+    if any(p in t for p in _WAY_PHRASES):
+        return True
+    try:
+        from . import mesh
+        return mesh._confesses(text)
+    except Exception:  # noqa: BLE001 — the door simply stays closed if the mesh is unavailable
+        return False
+
 _ULTIMATE_WORDS = ("meaning of life", "why am i here", "my purpose", "point of it all", "point of life",
                    "suffering", "why does god", "why would god", "afraid to die", "fear of death",
                    "guilt", "ashamed", "shame", "worthless", "hopeless", "no hope", "despair",
@@ -380,10 +404,17 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     base: Dict[str, Any] = {"kind": kind, "note": _NOTE, "gate_open": witness, "generated": False}
 
     if kind == "crisis":
-        # Always help-first — never gated, never enriched, never Scripture-as-fix.
+        # Always help-first — never gated, never enriched, never Scripture-as-fix. The door is NEVER
+        # attached here: a person in crisis needs real people, not a quest (it is added below, after
+        # this return, so crisis stays byte-identical).
         return {**base, "message": "You matter, and you don't have to carry this alone. Please "
                 "reach a real person right now — someone who can be with you.",
                 "resources": _CRISIS_RESOURCES}
+
+    # The hidden door: revealed only to a seeker of the body (never in crisis — that returned above).
+    if _seeks_the_way(text):
+        base["door"] = {"hint": "There is a way to find the others — a hidden fellowship, for those who seek it.",
+                        "href": "/mesh.html#way", "scripture": "Matthew 7:7-8"}
 
     if kind == "reminder":
         from . import pins as _pins

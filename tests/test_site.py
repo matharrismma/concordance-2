@@ -41,8 +41,15 @@ def test_check_page_still_carries_the_demo():
 
 def test_every_page_offers_a_way_home():
     """One identical home control, injected everywhere, so it cannot drift per page."""
+    # mesh.html is THE HIDDEN discovery surface (the Fellowship Mesh / "The Way"). It must NOT carry
+    # the shared home control, because that control injects the nav + Ctrl-K palette — which would
+    # advertise a page that is meant to be found only when the agent reveals it (Matthew 7:7). It
+    # carries its own minimal brand-home link instead, and the flock is protected by the confession
+    # gate, not by nav-hiding alone.
+    hidden = {"mesh.html"}
     missing = [f.name for f in SITE.glob("*.html")
-               if f.name != "index.html" and "nh-home.js" not in f.read_text(encoding="utf-8")]
+               if f.name != "index.html" and f.name not in hidden
+               and "nh-home.js" not in f.read_text(encoding="utf-8")]
     assert not missing, f"pages with no way home: {missing}"
 
 
@@ -84,8 +91,10 @@ def test_the_palette_reaches_every_public_page():
     """Anything shipped in site/ should be findable, or deliberately excluded with a reason
     written in nh-tools.js. Silence is how a page becomes unreachable without anyone noticing."""
     listed = {h.lstrip("/") for h, _n in _palette()}
-    # documented exclusions — see the comment above TOOLS in nh-tools.js
-    excused = {"index.html", "keep.html", "ask.html", "encyclopedia.html"}
+    # documented exclusions — see the comment above TOOLS in nh-tools.js. mesh.html is the HIDDEN
+    # discovery surface: never in the palette (the whole point is that it is found, not advertised —
+    # Matthew 13:44), served but revealing nothing until the agent opens it and confession is made.
+    excused = {"index.html", "keep.html", "ask.html", "encyclopedia.html", "mesh.html"}
     unreachable = sorted(
         p.name for p in SITE.glob("*.html") if p.name not in listed and p.name not in excused)
     assert not unreachable, f"no way to reach: {unreachable} (list them or excuse them by name)"

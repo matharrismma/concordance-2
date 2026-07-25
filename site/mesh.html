@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>The Gate</title>
+<meta name="description" content="A path with gates. Ask, seek, knock.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --red:#d08a72; --pass:#8bbf8f; --line:rgba(201,162,74,.16); --panel:rgba(201,162,74,.05);
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(60% 50% at 50% 32%, rgba(201,162,74,.10), rgba(201,162,74,0) 72%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.7 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  .brand{display:block; text-align:center; letter-spacing:.28em; text-transform:uppercase; font-size:.72rem; color:var(--dim); padding:1.2rem}
+  .brand .road{color:var(--gold)}
+  .wrap{max-width:940px; margin:0 auto; padding:.5rem 1.3rem 4rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.68rem; text-align:center; margin-top:1.4rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2.1rem; margin:.5rem 0 .5rem; text-align:center}
+  .lede{color:var(--dim); font-size:1.02rem; max-width:44rem; margin:.2rem auto 1.6rem; text-align:center}
+  .verse{font-style:italic; color:var(--goldsoft); text-align:center; margin:.4rem 0 1.6rem}
+  .card{border:1px solid var(--line); border-radius:12px; background:var(--panel); padding:1.2rem 1.3rem; margin:1rem 0}
+  label{display:block; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin:.9rem 0 .3rem}
+  input,select,textarea{width:100%; background:rgba(0,0,0,.28); border:1px solid var(--line); border-radius:8px;
+    color:var(--ink); font:16px/1.5 var(--serif); padding:.6rem .7rem}
+  textarea{min-height:4.5rem; resize:vertical}
+  .row{display:flex; gap:.6rem; flex-wrap:wrap}
+  .row > *{flex:1; min-width:8rem}
+  button{cursor:pointer; background:linear-gradient(180deg, rgba(201,162,74,.22), rgba(201,162,74,.08));
+    border:1px solid var(--gold); color:var(--ink); border-radius:8px; font:.82rem var(--mono); letter-spacing:.06em;
+    text-transform:uppercase; padding:.6rem 1rem; margin-top:1rem}
+  button.small{margin:0; padding:.4rem .7rem; font-size:.7rem}
+  button.ghost{background:none; border-color:var(--line); color:var(--dim); text-transform:none; letter-spacing:0}
+  .path{list-style:none; margin:.4rem 0 0; padding:0}
+  .path li{border-left:2px solid var(--line); padding:.5rem 0 .5rem 1rem; margin-left:.4rem}
+  .path li .st{font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold)}
+  .path li.locked .st{color:var(--dim)}
+  .path li .sc{font-style:italic; color:var(--goldsoft); font-size:.86rem}
+  .path li .op{color:var(--ink); font-size:.94rem}
+  .path li .gt{color:var(--dim); font-size:.86rem}
+  #stage{border:1px solid var(--line); border-radius:12px; background:radial-gradient(46% 46% at 50% 42%, rgba(201,162,74,.06), rgba(0,0,0,.25)); margin:1rem 0; overflow:hidden}
+  canvas#map{width:100%; height:auto; display:block; touch-action:none}
+  .mono{font-family:var(--mono); font-size:.78rem; color:var(--dim); word-break:break-all}
+  .pill{display:inline-block; font-family:var(--mono); font-size:.64rem; letter-spacing:.08em; text-transform:uppercase;
+    border:1px solid var(--line); border-radius:999px; padding:.1rem .5rem; margin:.1rem .2rem .1rem 0; color:var(--dim)}
+  .pill.ok{color:var(--pass); border-color:rgba(139,191,143,.4)} .pill.warn{color:var(--red); border-color:rgba(208,138,114,.4)}
+  .pill.gold{color:var(--gold); border-color:rgba(201,162,74,.4)}
+  .msg{border-top:1px solid var(--line); padding:.7rem 0}
+  .msg .who{color:var(--ink)} .msg .txt{color:var(--dim); margin:.2rem 0}
+  .tip{min-height:1.3rem; color:var(--dim); font-size:.88rem; text-align:center; margin:.5rem 0}
+  .tip b{color:var(--ink); font-weight:400}
+  .crisis{border:1px solid rgba(208,138,114,.5); background:rgba(208,138,114,.06); border-radius:10px; padding:.8rem 1rem; margin:.8rem 0}
+  .crisis a{color:var(--red)}
+  .hide{display:none}
+  footer{border-top:1px solid var(--line); color:var(--dim); font-size:.78rem; margin-top:2.4rem; padding-top:1.2rem; text-align:center; line-height:1.7}
+</style>
+</head>
+<body>
+  <a class="brand" href="/"><span class="road">▲</span> Narrow Highway</a>
+  <div class="wrap">
+
+    <!-- ── QUIET (the default: a wanderer or a crawler sees only this) ──────── -->
+    <section id="quiet">
+      <p class="lede" style="margin-top:3rem">Seek, and you will find. Knock, and it will be opened to you.</p>
+      <p class="verse">— Matthew 7:7</p>
+    </section>
+
+    <!-- ── THE GATE (revealed only when the agent opens it; network stays hidden) -->
+    <section id="gate" class="hide">
+      <div class="kicker">A path with gates</div>
+      <h1>Ask, and it will be given. Seek, and you will find. Knock, and it will be opened.</h1>
+      <p class="verse">— Matthew 7:7</p>
+      <p class="lede">This way is not advertised; it is found. What lies past the gate is kept for a flock, and
+        protected. The path opens court by court as you walk it — we do not show the whole way at once.</p>
+
+      <div class="card" id="pathCard">
+        <div class="kicker" style="text-align:left;margin:0 0 .3rem">The way in</div>
+        <ul class="path" id="pathList"><li class="mono">reading the path…</li></ul>
+      </div>
+
+      <div class="card">
+        <div class="kicker" style="text-align:left;margin:0 0 .3rem">The gate</div>
+        <p style="color:var(--dim);margin:.2rem 0 .4rem">The inner court opens to those who confess Jesus Christ as
+          Lord and Messiah (Romans 10:9). The rest of the tool is already yours; this is kept for His own. We do not
+          judge the heart — God does (1 Samuel 16:7). We only ask that the confession be made.</p>
+        <label for="callsign">A callsign (a name for the map — never your real name)</label>
+        <input id="callsign" placeholder="e.g. Berean, or Grace Chapel" maxlength="40">
+        <label for="ntype">You are a…</label>
+        <select id="ntype">
+          <option value="believer">a believer</option>
+          <option value="church">a church</option>
+          <option value="ministry">a ministry</option>
+          <option value="fellowship">a fellowship</option>
+        </select>
+        <label for="confession">The confession</label>
+        <input id="confession" placeholder="Jesus Christ is Lord and Messiah">
+        <button id="enter">Confess, and enter</button>
+        <div class="tip" id="gateTip"></div>
+      </div>
+    </section>
+
+    <!-- ── THE MAP (revealed only to a confessor, only as far as their walk) ── -->
+    <section id="fold" class="hide">
+      <div class="kicker">The fold</div>
+      <h1 id="foldTitle">The nodes around you</h1>
+      <p class="tip" id="stageTip"></p>
+      <div id="stage"><canvas id="map" width="900" height="520"></canvas></div>
+      <div class="tip" id="mapTip">Your node, and the believers around you. The way widens as you are known and serve.</div>
+
+      <div class="card">
+        <div class="kicker" style="text-align:left;margin:0 0 .3rem">Your node</div>
+        <p class="mono" id="myId">—</p>
+        <div class="row">
+          <button class="small ghost" id="copyId">Copy my node id</button>
+          <button class="small ghost" id="refresh">Refresh the map</button>
+        </div>
+        <p style="color:var(--dim);font-size:.86rem;margin:.6rem 0 0">Hand your node id to a believer you know so they can
+          link to you. There is no directory — you are found only by those you tell.</p>
+        <label for="neighbor">Link a neighbor (paste their node id)</label>
+        <div class="row"><input id="neighbor" placeholder="nh_…"><button class="small" id="link">Link</button></div>
+        <div class="tip" id="linkTip"></div>
+      </div>
+
+      <div class="card">
+        <div class="kicker" style="text-align:left;margin:0 0 .3rem">Serve the nodes around you</div>
+        <div class="row">
+          <select id="kind">
+            <option value="offer">an offer — my gift: I can give / help with…</option>
+            <option value="need">a need — I am seeking… (a ride, a tire, an advocate)</option>
+            <option value="word">a word</option>
+            <option value="blessing">a blessing</option>
+            <option value="content">content — something to share</option>
+            <option value="broadcast">an emergency broadcast — to the farthest fold</option>
+          </select>
+          <select id="ttl"><option value="1">near (1 hop)</option><option value="2" selected>around (2 hops)</option><option value="3">wider (3)</option><option value="4">farthest (4)</option></select>
+        </div>
+        <textarea id="post" placeholder="Offer what you have. Ask for what you need. Everything here is a gift freely given."></textarea>
+        <button id="send">Send to the fold</button>
+        <div id="postOut"></div>
+      </div>
+
+      <div class="card">
+        <div class="kicker" style="text-align:left;margin:0 0 .3rem">What reached you</div>
+        <div id="inbox"><p class="tip">nothing yet — the fold is quiet</p></div>
+      </div>
+    </section>
+
+    <footer>
+      Sovereign — the key is minted in your browser and kept there; we never store it. No account, no email, no PII.
+      A door toward the body of Christ, not a replacement for it (John 3:30). For immediate danger, call local
+      emergency services first.
+    </footer>
+  </div>
+
+<script>
+const $ = s => document.querySelector(s);
+const api = (p, opt) => fetch(p, Object.assign({headers:{accept:"application/json","content-type":"application/json"}}, opt||{})).then(r=>r.json());
+const LS = "nh_mesh_node";
+function load(){ try{ return JSON.parse(localStorage.getItem(LS)||"null"); }catch(e){ return null; } }
+function save(o){ localStorage.setItem(LS, JSON.stringify(o)); }
+let me = load();      // {pub, priv, fp, callsign}
+let lastMap = null;
+
+// ── The path (rendered from the engine so the gate always tells the truth) ──
+api("/mesh").then(g=>{
+  const gates = (g && g.path && g.path.gates) || [];
+  $("#pathList").innerHTML = gates.map(x =>
+    `<li class="${x.locked?'locked':''}"><span class="st">${x.stage}${x.locked?' · being prepared':''}</span>
+       <div class="op">${x.opens}</div>
+       <div class="gt">the gate: ${x.gate}</div>
+       <div class="sc">${x.scripture||''}</div></li>`).join("");
+}).catch(()=>{});
+
+// ── The gate: confess and enter ─────────────────────────────────────────────
+$("#enter").onclick = async () => {
+  const callsign = $("#callsign").value.trim();
+  const confession = $("#confession").value.trim();
+  const type = $("#ntype").value;
+  $("#gateTip").textContent = "…";
+  try{
+    if(!me || !me.pub){
+      const idn = await api("/identity/create", {method:"POST", body:JSON.stringify({})});
+      me = {pub: idn.public_key, priv: idn.private_key, fp:"", callsign};
+    }
+    const r = await api("/mesh/node", {method:"POST", body:JSON.stringify({public_key: me.pub, callsign, type, confession})});
+    if(r.gated){ $("#gateTip").innerHTML = "<b>The gate holds.</b> " + (r.message||""); return; }
+    if(!r.ok){ $("#gateTip").textContent = r.error || "could not enter"; return; }
+    me.fp = r.fp; me.callsign = r.callsign; save(me);
+    enterFold();
+  }catch(e){ $("#gateTip").textContent = "the gate could not be reached"; }
+};
+
+function enterFold(){
+  $("#gate").classList.add("hide");
+  $("#fold").classList.remove("hide");
+  $("#myId").textContent = me.fp;
+  drawMap();
+  loadInbox();
+}
+
+// ── Link a neighbor ─────────────────────────────────────────────────────────
+$("#link").onclick = async () => {
+  const neighbor = $("#neighbor").value.trim();
+  if(!neighbor){ return; }
+  $("#linkTip").textContent = "…";
+  const r = await api("/mesh/link", {method:"POST", body:JSON.stringify({fp: me.fp, neighbor})});
+  $("#linkTip").textContent = r.ok ? ("Linked to " + (r.neighbor_callsign||"a believer") + ".") : (r.error||"could not link");
+  if(r.ok){ $("#neighbor").value=""; drawMap(); }
+};
+$("#copyId").onclick = () => { navigator.clipboard && navigator.clipboard.writeText(me.fp); $("#copyId").textContent="copied ✓"; setTimeout(()=>$("#copyId").textContent="Copy my node id",1400); };
+$("#refresh").onclick = () => { drawMap(); loadInbox(); };
+
+// ── Post to the fold ────────────────────────────────────────────────────────
+$("#send").onclick = async () => {
+  const text = $("#post").value.trim(); if(!text) return;
+  const kind = $("#kind").value, ttl = +$("#ttl").value;
+  const r = await api("/mesh/post", {method:"POST", body:JSON.stringify({fp: me.fp, text, kind, ttl})});
+  let html = "";
+  if(r.ok){
+    $("#post").value = "";
+    html = `<div class="tip"><b>Sent</b> — reached ${r.reach} node(s). <span class="pill ${r.signed?'ok':''}">${r.signed?'signed':'tamper-evident'}</span></div>`;
+    if(r.advisory) html += `<div class="crisis">${r.advisory}</div>`;
+    if(r.crisis) html += `<div class="crisis"><b>You are not alone.</b><br>` + r.crisis.help.map(h=>h.ref?`<a href="${h.ref}">${h.label}</a>`:h.label).join("<br>") + `</div>`;
+    drawMap();
+  } else { html = `<div class="tip">${r.error||'could not send'}</div>`; }
+  $("#postOut").innerHTML = html;
+};
+
+// ── The inbox — with the offline verification shown, not asserted ────────────
+async function loadInbox(){
+  const r = await api("/mesh/inbox?fp=" + encodeURIComponent(me.fp));
+  if(!r.ok || !r.messages || !r.messages.length){ $("#inbox").innerHTML = '<p class="tip">nothing yet — the fold is quiet</p>'; return; }
+  $("#inbox").innerHTML = r.messages.map(m=>{
+    const v = m.verify||{};
+    const badges = `<span class="pill ${v.unaltered?'ok':'warn'}">${v.unaltered?'unaltered ✓':'altered ✗'}</span>` +
+      (v.signed ? `<span class="pill ${v.authentic?'ok':'warn'}">${v.authentic?'authentic ✓':'bad signature ✗'}</span>` : `<span class="pill">unsigned</span>`);
+    return `<div class="msg"><div class="who"><b>${esc(m.callsign)}</b> <span class="pill gold">${m.kind}</span> <span class="pill">${m.hops_away} hop(s)</span></div>
+      <div class="txt">${esc(m.text)}</div>${badges}</div>`;
+  }).join("");
+}
+
+function esc(s){ const d=document.createElement("div"); d.textContent=s==null?"":String(s); return d.innerHTML; }
+
+// ── The map — concentric by hops; houses & hotels; guides & guardians ───────
+async function drawMap(){
+  const r = await api("/mesh/map?fp=" + encodeURIComponent(me.fp) + "&hops=4");
+  if(r.gated){ me=null; localStorage.removeItem(LS); $("#fold").classList.add("hide"); $("#gate").classList.remove("hide"); return; }
+  lastMap = r;
+  $("#stageTip").innerHTML = `You walk as <b>${r.stage}</b>.` + (r.next_gate ? ` Next gate — <i>${r.next_gate.stage}</i>: ${r.next_gate.gate} (${r.next_gate.scripture}).` : ` The way turns outward: you are sent (Matthew 28:19).`);
+  const cv = $("#map"), ctx = cv.getContext("2d");
+  const dpr = Math.min(2, window.devicePixelRatio||1);
+  const W = cv.clientWidth||900, H = 520; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2, cy=H/2, maxHop=Math.max(1, r.hops);
+  const pos={}; const byHop={};
+  (r.nodes||[]).forEach(n=>{ (byHop[n.hops]=byHop[n.hops]||[]).push(n); });
+  Object.keys(byHop).forEach(h=>{
+    const arr=byHop[h], R = h==0?0 : (Math.min(cx,cy)-60) * (h/maxHop);
+    arr.forEach((n,i)=>{ const a = -Math.PI/2 + (i/arr.length)*Math.PI*2 + (h*0.6);
+      pos[n.fp] = h==0 ? {x:cx,y:cy} : {x:cx+R*Math.cos(a), y:cy+R*Math.sin(a)}; });
+  });
+  // edges
+  ctx.strokeStyle="rgba(201,162,74,.18)"; ctx.lineWidth=1;
+  (r.edges||[]).forEach(e=>{ const a=pos[e[0]],b=pos[e[1]]; if(a&&b){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); } });
+  // nodes
+  (r.nodes||[]).forEach(n=>{
+    const p=pos[n.fp]; if(!p) return; const est=n.estate||{houses:1,hotel:false};
+    const rad = n.you?15:(est.hotel?14:9+est.houses);
+    // role ring: guide = gold, guardian = dashed
+    if(n.role==="guide"){ ctx.strokeStyle="var(--gold)"; }
+    ctx.beginPath(); ctx.arc(p.x,p.y,rad+4,0,7);
+    if(n.role==="guardian"){ ctx.setLineDash([3,3]); ctx.strokeStyle="rgba(139,191,143,.7)"; ctx.lineWidth=2; ctx.stroke(); ctx.setLineDash([]); }
+    else if(n.role==="guide"){ ctx.strokeStyle="rgba(201,162,74,.9)"; ctx.lineWidth=2; ctx.stroke(); }
+    // node body
+    ctx.beginPath(); ctx.arc(p.x,p.y,rad,0,7);
+    ctx.fillStyle = n.you?"rgba(201,162,74,.9)":(est.hotel?"rgba(208,138,114,.85)":"rgba(233,227,212,.82)");
+    ctx.fill();
+    // house/hotel glyph
+    ctx.fillStyle="rgba(10,11,16,.9)";
+    if(est.hotel){ ctx.fillRect(p.x-5,p.y-3,10,6); }
+    else { for(let h=0;h<est.houses;h++){ ctx.fillRect(p.x-6+h*3.2, p.y-1.5, 2.2, 3); } }
+    // label
+    ctx.fillStyle = n.you?"var(--gold)":"rgba(233,227,212,.9)";
+    ctx.font = "12px Georgia, serif"; ctx.textAlign="center";
+    ctx.fillText((n.callsign||"?") + (n.reaching_you?" ·"+n.reaching_you:""), p.x, p.y+rad+15);
+  });
+  $("#mapTip").innerHTML = `<b>${r.count}</b> node(s) within your horizon of ${r.horizon} hop(s). Houses grow as a node serves; a hub becomes a hotel. <span class="pill gold">guide</span> leads · <span class="pill ok">guardian</span> guards.`;
+}
+
+// boot — the protection layer: The Way stays hidden until you arrive having sought it. The agent
+// opens the door (it hands you /mesh.html#way when you type something that shows you are seeking);
+// a wanderer or a crawler who merely lands here sees only the quiet verse.
+function reveal(){ $("#quiet").classList.add("hide"); $("#gate").classList.remove("hide"); }
+const _revealed = /(^|#).*(way|seek|knock|ask)/i.test(location.hash);
+if(me && me.fp){ $("#quiet").classList.add("hide"); enterFold(); }
+else if(_revealed){ reveal(); }
+window.addEventListener("resize", ()=>{ if(lastMap) drawMap(); });
+</script>
+</body>
+</html>

@@ -776,6 +776,49 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                               refs=body.get("refs") or [], private_key=body.get("private_key"))
         return _ok(r) if r is not None else _err(404, "group not found")
 
+    # The Fellowship Mesh — a network of believers who serve each other (offer / need / collaborate /
+    # create). NOT a church, NOT a tithe (a framing so no one is scared off; we support the churches —
+    # a church that serves here is just another node). Sovereign: the key on your drive is your node,
+    # no account, no PII, no directory of persons. Posts are content-addressed (unaltered) + optionally
+    # signed (authentic), hop-limited like a LoRa mesh. Personal data lives in data/mesh/ — never committed.
+    if method == "GET" and path == "/mesh":
+        from .. import mesh
+        return _ok(mesh.guidance())
+    if method == "POST" and path == "/mesh/node":
+        if not isinstance(body, dict) or not str(body.get("public_key") or "").strip():
+            return _err(400, "public_key required (the key on your drive is your identity)")
+        from .. import mesh
+        return _ok(mesh.register_node(str(body["public_key"]), callsign=str(body.get("callsign") or ""),
+                                      node_type=str(body.get("type") or "believer"),
+                                      confession=str(body.get("confession") or ""),
+                                      confession_sig=body.get("confession_sig")))
+    if method == "POST" and path == "/mesh/link":
+        if not isinstance(body, dict) or not str(body.get("fp") or "").strip() \
+           or not str(body.get("neighbor") or "").strip():
+            return _err(400, "fp and neighbor (fingerprints) required")
+        from .. import mesh
+        return _ok(mesh.link(str(body["fp"]), str(body["neighbor"]), op=str(body.get("op") or "link")))
+    if method == "GET" and path == "/mesh/map":
+        from .. import mesh
+        return _ok(mesh.map_around((query.get("fp") or "").strip(), hops=int(query.get("hops") or 2)))
+    if method == "POST" and path == "/mesh/post":
+        if not isinstance(body, dict) or not str(body.get("fp") or "").strip() \
+           or not str(body.get("text") or "").strip():
+            return _err(400, "fp and text required")
+        from .. import mesh
+        return _ok(mesh.post_message(str(body["fp"]), str(body["text"]), kind=str(body.get("kind") or "word"),
+                                     refs=body.get("refs") or [], ttl=int(body.get("ttl") or 2),
+                                     private_key=body.get("private_key")))
+    if method == "GET" and path == "/mesh/inbox":
+        from .. import mesh
+        return _ok(mesh.inbox((query.get("fp") or "").strip(), limit=int(query.get("limit") or 100)))
+    if method == "POST" and path == "/mesh/tend":
+        if not isinstance(body, dict) or not str(body.get("fp") or "").strip() \
+           or not str(body.get("target") or "").strip():
+            return _err(400, "fp (a Guide) and target (the node) required")
+        from .. import mesh
+        return _ok(mesh.tend(str(body["fp"]), str(body["target"]), str(body.get("role") or "member")))
+
     # Coach — the Shepherd as a K-3 reading tutor. READ-ONLY teaching is the floor (NOT gated); it
     # finds + presents the operator's authored curriculum, never generates a lesson, never grades a child.
     if method == "POST" and path == "/coach/mastery":
@@ -1357,6 +1400,13 @@ ROUTES = [
     {"path": "/group", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/group/join", "methods": ("POST",), "rl": True},
     {"path": "/group/contribute", "methods": ("POST",), "rl": True},
+    {"path": "/mesh", "methods": ("GET",), "api": True},
+    {"path": "/mesh/node", "methods": ("POST",), "rl": True},
+    {"path": "/mesh/link", "methods": ("POST",), "rl": True},
+    {"path": "/mesh/map", "methods": ("GET",), "api": True},
+    {"path": "/mesh/post", "methods": ("POST",), "rl": True},
+    {"path": "/mesh/inbox", "methods": ("GET",), "api": True},
+    {"path": "/mesh/tend", "methods": ("POST",), "rl": True},
     {"path": "/coach/mastery", "methods": ("POST",), "rl": True},
     {"path": "/identity/create", "methods": ("POST",), "rl": True},
     {"path": "/identity/verify", "methods": ("POST",), "rl": True},

@@ -35,6 +35,7 @@ test_growth.py
 test_hardening.py
 test_identity.py
 test_inequality.py
+test_mesh.py
 test_inlet.py
 test_integrity.py
 test_isolation.py
