@@ -42,12 +42,24 @@ def _base() -> Path:
 
 
 def _sparql(qid: str, per: int) -> list:
-    q = (f'SELECT ?e ?eLabel ?date ?eDescription WHERE {{ ?e wdt:P31 wd:{qid} ; wdt:P585 ?date . '
-         f'SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }} }} LIMIT {per}')
+    # The WITNESS gate at acquisition (Deuteronomy 19:15): only take events borne witness to by at least
+    # two independent language communities (sitelinks >= 2). This both enforces the two-witness threshold
+    # AND shrinks the result set so ORDER BY the attestation breadth does not blow the endpoint's timeout;
+    # the best-witnessed events come first.
+    q = (f'SELECT ?e ?eLabel ?date ?eDescription ?sl WHERE {{ ?e wdt:P31 wd:{qid} ; wdt:P585 ?date ; '
+         f'wikibase:sitelinks ?sl . FILTER(?sl >= 2) '
+         f'SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }} }} ORDER BY DESC(?sl) LIMIT {per}')
     url = "https://query.wikidata.org/sparql?" + urllib.parse.urlencode({"query": q, "format": "json"})
     req = urllib.request.Request(url, headers={"User-Agent": _UA, "Accept": "application/sparql-results+json"})
-    with urllib.request.urlopen(req, timeout=90) as r:
-        return json.load(r)["results"]["bindings"]
+    last = None
+    for attempt in range(3):  # the endpoint 502s intermittently under load; be patient, be polite
+        try:
+            with urllib.request.urlopen(req, timeout=120) as r:
+                return json.load(r)["results"]["bindings"]
+        except Exception as e:  # noqa: BLE001
+            last = e
+            time.sleep(3.0 * (attempt + 1))
+    raise last
 
 
 def main() -> int:
@@ -64,8 +76,12 @@ def main() -> int:
                 label = b.get("eLabel", {}).get("value", "")
                 if not label or label == q:            # skip unlabeled entities
                     continue
+                try:
+                    sl = int(float(b.get("sl", {}).get("value", "0") or 0))
+                except ValueError:
+                    sl = 0
                 raw[q] = {"qid": q, "label": label, "date": b.get("date", {}).get("value", "")[:10],
-                          "desc": b.get("eDescription", {}).get("value", ""), "kind": kind, "url": qurl}
+                          "desc": b.get("eDescription", {}).get("value", ""), "kind": kind, "url": qurl, "sl": sl}
             print(f"  {kind:18s} {len(rows):>6,} rows | total {len(raw):,}")
             time.sleep(1.0)
         except Exception as e:  # noqa: BLE001 — a class that errors is skipped, the rest proceed
@@ -79,27 +95,59 @@ def main() -> int:
 
     out = Path("data")
     spine = {
-        "id": SPINE, "kind": "reference", "title": "History — the dated events of the world",
-        "body": ("The battles, wars, treaties, disasters and turning points of history, each with its "
-                 "date and a link to the full record. A spine of the Floor of Discovery at the scale of "
-                 "time — for there is nothing new under the sun (Ecclesiastes 1:9), and the LORD is Lord "
-                 "of history (Daniel 2:21)."),
+        "id": SPINE, "kind": "reference", "title": "History — established by the witness gate",
+        "body": ("The dated events of the world — battles, wars, treaties, disasters, turning points. "
+                 "History does NOT pass the deterministic gate: an event cannot be sealed like a sum. It "
+                 "passes the WITNESS gate — a matter is established by two or three witnesses (Deuteronomy "
+                 "19:15; Matthew 18:16; 2 Corinthians 13:1). Each event here carries its ATTESTATION (how "
+                 "many independent records bear witness), and its link points to the sources so the reader "
+                 "may weigh the witnesses. The LORD is Lord of history (Daniel 2:21)."),
         "source": {"label": "Wikidata (CC0)", "url": "https://www.wikidata.org", "domain": "history", "authority_tier": "reference"},
-        "shelf": "spine", "box": "spine", "bands": ["history", "events", "chronology", "time", "spine"],
+        "shelf": "spine", "box": "spine", "bands": ["history", "events", "witness", "attestation", "time", "spine"],
         "subject": "history",
         "connections": [{"to_card_id": FLOOR, "relationship": "part_of",
                          "evidence": "the events of time, a spine of the Floor of Discovery"}],
         "author": "engine", "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
         "lifecycle_stage": "public", "volatility": "permanent", "surface": "secular", "generated": False,
     }
-    (out / "history_spine.jsonl").write_text(json.dumps(spine, ensure_ascii=False) + "\n", encoding="utf-8")
+    method = {
+        "id": "card_history_the_witness_gate", "kind": "reference",
+        "title": "The witness gate — how the events of history are established",
+        "body": ("History cannot go through the same gate as mathematics and physics: you cannot SEAL that "
+                 "the Battle of Hastings occurred the way you seal 2+2=4. History has two layers. Its "
+                 "SKELETON — the dates and the calendar — is sealable (calendar arithmetic passes the "
+                 "deterministic gate). Its BODY — that the event happened — is ATTESTED, established by the "
+                 "WITNESS gate: two or three independent witnesses (Deuteronomy 19:15; Matthew 18:16; 2 "
+                 "Corinthians 13:1). This is exactly the historical method — multiple independent "
+                 "attestation, primary sources near the event, physical evidence, coherence — and it is the "
+                 "Playbook's BROTHERS gate applied to the past. Luke names his method (Luke 1:1-4); Paul "
+                 "appeals to 500 living witnesses (1 Corinthians 15:6); Peter refuses cleverly devised myths "
+                 "for eyewitness testimony (2 Peter 1:16). So: we do not claim to SEAL an event; we count "
+                 "its witnesses and point to the sources. One witness is not enough to establish a matter; "
+                 "two or three begin to. Weigh them."),
+        "source": {"label": "The witness gate — the historical method + Deuteronomy 19:15",
+                   "url": "", "domain": "history", "authority_tier": "reference"},
+        "shelf": "history", "box": "principle",
+        "bands": ["witness", "gate", "attestation", "historical method", "deuteronomy", "evidence", "history"],
+        "subject": "the witness gate",
+        "connections": [{"to_card_id": SPINE, "relationship": "member_of", "evidence": "how history is established"}],
+        "author": "engine", "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
+        "lifecycle_stage": "public", "volatility": "permanent", "surface": "secular", "generated": False,
+    }
+    (out / "history_spine.jsonl").write_text(
+        json.dumps(spine, ensure_ascii=False) + "\n" + json.dumps(method, ensure_ascii=False) + "\n", encoding="utf-8")
     n = 0
     with (out / "history_cards.jsonl.tmp").open("w", encoding="utf-8") as f:
         for e in raw.values():
             year = (e["date"][:5].rstrip("-") or e["date"][:4]) if e["date"] else ""
             title = f"{e['label']}" + (f" ({year})" if year else "")
+            sl = e.get("sl", 0)
+            wclass = ("widely attested" if sl >= 10 else "well attested" if sl >= 5
+                      else "attested by three or more witnesses" if sl >= 3 else "attested by two witnesses")
             body = (f"{e['label']}" + (f" — {e['desc']}" if e["desc"] else "") + f". A {e['kind']}"
-                    + (f", {e['date']}" if e["date"] else "") + f". Full record: {e['url']}")
+                    + (f", {e['date']}" if e["date"] else "") + f". Attestation: {wclass}"
+                    + (f" ({sl} independent records)." if sl else ".")
+                    + f" History passes the witness gate, not the seal — weigh the witnesses at the record: {e['url']}")
             f.write(json.dumps({
                 "id": f"card_src_hist_{e['qid'].lower()}", "kind": "reference", "title": title[:180], "body": body,
                 "source": {"label": "Wikidata (CC0)", "url": e["url"], "domain": "history", "authority_tier": "reference"},
