@@ -83,6 +83,9 @@ data/verified_cards.jsonl
 # The Corpus — the domain SPINES for the stored-source cards are CONTENT (git-tracked); the source
 # cards themselves (data/source_cards.jsonl) are large + generated from the HD sources (gitignored).
 !data/source_spines.jsonl
+# The original-language Scripture (Greek NT + Hebrew OT, one card per verse) — the spines are CONTENT
+# (git-tracked); the 31k verse cards are large + generated from the HD, like source_cards (gitignored).
+!data/scripture_spines.jsonl
 # The theory assay carded — the calibration (not judgment) of the academy's theories — CONTENT
 !data/theory_cards.jsonl
 # The Lighthouse Field Kit — Matt's authored deck of 30 Scripture protocol cards — CONTENT (git-tracked)

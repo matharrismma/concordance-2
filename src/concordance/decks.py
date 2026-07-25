@@ -25,6 +25,13 @@ def _toks(s: str) -> Set[str]:
 
 # id, name, description, shelves (the cards it holds), keywords (what routes a query TO it)
 _DECKS: List[Dict[str, Any]] = [
+    {"id": "scripture-original", "name": "Scripture in the Original Tongues — verse by verse",
+     "desc": "The whole Bible in the languages it was given in: the Greek New Testament (SBLGNT) and "
+             "the Hebrew Bible (Leningrad), one verse at a time, each with its Strong's numbers.",
+     "shelves": {"greek_nt", "hebrew_ot"},
+     "keywords": {"hebrew", "greek", "verse", "original", "septuagint", "masoretic", "leningrad",
+                  "sblgnt", "tanakh", "torah", "gospel", "epistle", "genesis", "psalm", "john",
+                  "strongs", "morphology", "lemma", "manuscript", "text"}},
     {"id": "tongues", "name": "The Original Tongues — Hebrew & Greek",
      "desc": "The lexicon: every Strong's word, its transliteration and lexical range — the plumb-line.",
      "shelves": {"lexicon"},
