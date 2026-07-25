@@ -46,9 +46,23 @@ def _is_public(c: dict) -> bool:
 def _build() -> Dict[str, Any]:
     """Scan the corpus once: note cards → nodes, connection cards → edges."""
     cards = corpus.default_corpus().cards
+    # The endpoints any connection card references — only these can be nodes, so we never build
+    # 400k dicts for unconnected cards. Any public card (ANY kind but connection) may be a node;
+    # connection cards ARE the edges. This was note-only, which hid every reference deck (history,
+    # the builders, the foreshadows, the churches, the acquired sources) from the map.
+    endpoints: set = set()
+    for c in cards.values():
+        if c.get("kind") != "connection" or not _is_public(c):
+            continue
+        ex = c.get("extra") or {}
+        a, b = ex.get("left_card_id"), ex.get("right_card_id")
+        if a and b:
+            endpoints.add(a)
+            endpoints.add(b)
     nodes: Dict[str, Dict[str, Any]] = {}
-    for cid, c in cards.items():
-        if c.get("kind") != "note" or not _is_public(c):
+    for cid in endpoints:
+        c = cards.get(cid)
+        if not c or c.get("kind") == "connection" or not _is_public(c):
             continue
         nodes[cid] = {"id": cid, "title": c.get("title") or cid,
                       "shelf": c.get("shelf") or "?", "box": c.get("box") or "",
@@ -77,6 +91,10 @@ def _build() -> Dict[str, Any]:
         adj[a].append((b, kind, cid, "out"))
         adj[b].append((a, kind, cid, "in"))
 
+    # The map is the CONNECTED keeping — drop isolated nodes (degree 0) so the constellation is the
+    # web that actually exists, and grows exactly as connections are found or minted. (Now that any
+    # kind can be a node, without this the 400k+ unconnected cards would swamp the view.)
+    nodes = {cid: n for cid, n in nodes.items() if n["degree"] > 0}
     return {"nodes": nodes, "edges": edges, "adj": adj}
 
 

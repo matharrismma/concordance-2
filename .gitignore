@@ -115,3 +115,5 @@ data/verified_cards.jsonl
 !data/contributors_cards.jsonl
 # The pre-Christian faiths as foreshadow (Acts 17) + the test of the spirits (1 John 4) — CONTENT (git-tracked)
 !data/religions_cards.jsonl
+# The harvested map — inline semantic edges minted as sealed connection cards; large + generated
+# from the corpus (like source_cards), reproduce with tools/mint_edges.py. Gitignored.

@@ -226,7 +226,11 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                       "history_spine.jsonl", "history_cards.jsonl",
                       # The Corpus — technical, academic cards minted from the stored sources
                       # (nuclides, stars, foods, ports, indicators, …); always growing.
-                      "source_spines.jsonl", "source_cards.jsonl", "web_cache.jsonl"):
+                      "source_spines.jsonl", "source_cards.jsonl", "web_cache.jsonl",
+                      # The harvested map — inline SEMANTIC edges minted as sealed connection cards
+                      # (cites, proof-texts, sections, families, grafts) so the constellation reflects
+                      # the whole keeping. The member_of skeleton stays the floor tree's (tools/mint_edges.py).
+                      "minted_edges.jsonl"):
             xp = p.parent / extra
             if not xp.exists():
                 continue
