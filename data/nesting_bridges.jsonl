@@ -590,3 +590,7 @@
 {"a": "card_ref_crop_apple", "b": "card_ref_crop_strawberry", "relationship": "same_family", "evidence": "both of the rosaceae family (rotation siblings)"}
 {"a": "card_ref_crop_peach", "b": "card_ref_crop_strawberry", "relationship": "same_family", "evidence": "both of the rosaceae family (rotation siblings)"}
 {"a": "card_ref_crop_cotton", "b": "card_ref_crop_okra", "relationship": "same_family", "evidence": "both of the malvaceae family (rotation siblings)"}
+{"a": "card_spine_builders", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "the builders who mapped the created order, credited with love"}
+{"a": "card_spine_history", "b": "card_k_spine_created_order", "relationship": "member_of", "evidence": "the dated events of the created order in time, established by witnesses"}
+{"a": "card_spine_foreshadows", "b": "card_k_spine_the_word", "relationship": "member_of", "evidence": "the nations foreshadows, rooted in and fulfilled by the Word"}
+{"a": "card_spine_churches", "b": "card_k_spine_the_word", "relationship": "member_of", "evidence": "the traditions of the one Church, rooted in the Word"}
