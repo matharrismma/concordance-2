@@ -274,6 +274,28 @@ def _wants_a_companion(text: str) -> bool:
     return _arch.best(t) is not None
 
 
+# "What does X mean?" / "define X" / "the meaning of X" — a request to DEFINE a term. We look the
+# term up on the WORD shelves (lexicon = the tongues, dictionary = English) instead of keyword-matching
+# the whole sentence — which once answered "what does agape mean" with "mean deviation from the mean".
+_DEFINE_ASK = re.compile(
+    r"(?:what\s+do(?:es)?\s+(?:the\s+word\s+|the\s+term\s+|an?\s+)?['\"]?(?P<a>[^?'\".]+?)['\"]?\s+"
+    r"(?:mean|means|stand\s+for|signify|denote|refer\s+to)"
+    r"|(?:define|definition\s+of|meaning\s+of|what\s+is\s+the\s+(?:meaning|definition)\s+of)\s+"
+    r"(?:the\s+word\s+|the\s+term\s+)?['\"]?(?P<b>[^?'\".]+?)['\"]?)\s*[?.!]?\s*$", re.I)
+_WORD_SHELVES = {"dictionary", "lexicon", "tongues", "word", "hebrew_ot", "greek_nt", "thesaurus"}
+
+
+def define_term(text: str) -> Optional[str]:
+    """The term someone asked us to define, or None. A TERM (1-3 words), not a clause."""
+    m = _DEFINE_ASK.search((text or "").strip())
+    if not m:
+        return None
+    term = (m.group("a") or m.group("b") or "").strip().strip(".?!\"' ")
+    if term and 1 <= len(term.split()) <= 3 and re.search(r"[A-Za-zͰ-Ͽ֐-׿]", term):
+        return term
+    return None
+
+
 def classify(text: str) -> str:
     """Deterministically route the input. Crisis first (safety); then structured (Strong's,
     scripture ref, math); then ultimate matters; else search the keeping."""
@@ -297,6 +319,8 @@ def classify(text: str) -> str:
         return "comfort"
     if any(w in t for w in _ULTIMATE_WORDS):
         return "ultimate"
+    if define_term(text or ""):            # "what does X mean" / "define X" → a term lookup, not FTS
+        return "define"
     if _pins.looks_like_note(text or ""):
         return "kept_note"
     return "search"
@@ -484,6 +508,15 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                        "params": {"expr_a": m.group(1).strip(), "expr_b": m.group(2).strip(), "variables": {}}})
         return _witnessed({**base, "verify": attach(res, config=config, domain="mathematics")},
                           text, witness, gate_just_opened)
+
+    if kind == "define":
+        # Look the TERM up on the word shelves (the tongues + the dictionary), not the whole
+        # sentence. Found + attributed; the definition IS the answer, never generated.
+        term = define_term(text) or (text or "").strip()
+        hits = corpus.search(term, limit=6, shelves=_WORD_SHELVES) or corpus.search(term, limit=6)
+        return {**base, "message": ("The meaning of “" + term + "”, as it is kept:")
+                if hits else ("Nothing is kept under “" + term + "” yet."),
+                "results": [corpus._brief(c) for c in hits]}
 
     if kind == "word_study" and witness:
         from .verifiers import scripture
