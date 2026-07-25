@@ -117,6 +117,13 @@ _DECKS: List[Dict[str, Any]] = [
      "shelves": {"oeis"},
      "keywords": {"sequence", "integer", "oeis", "fibonacci", "catalan", "prime", "primes", "partition",
                   "series", "recurrence", "combinatorics", "number", "triangular", "factorial", "terms"}},
+    {"id": "churches", "name": "The Churches — one Lord, many traditions (calibrated)",
+     "desc": "Every major tradition of the Church, gathered from its own confession and measured against "
+             "the one plumb-line — calibrated, not judged; each tradition's gift, and the creeds held in common.",
+     "shelves": {"churches"},
+     "keywords": {"church", "denomination", "tradition", "confession", "catholic", "orthodox", "protestant",
+                  "lutheran", "reformed", "presbyterian", "anglican", "baptist", "methodist", "pentecostal",
+                  "anabaptist", "creed", "denominations", "which church", "difference between"}},
     {"id": "playbook", "name": "The Fractal Playbook — obedience, confirmed",
      "desc": "The Body's memory of faithful obedience: the atomic Playbook Entry (Confession, Anchors, "
              "Action, Outcome, Witness, Wait, Status) and the Four Gates — RED, FLOOR, BROTHERS, GOD.",

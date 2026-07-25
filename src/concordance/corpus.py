@@ -205,6 +205,7 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                       "nesting_seeds.jsonl", "ncs_seeds.jsonl", "works_cards.jsonl", "theory_cards.jsonl",
                       "fieldkit_cards.jsonl", "playbook_cards.jsonl", "systems_cards.jsonl",
                       "access_tools_cards.jsonl",   # the connection to lawful free tools (logistics: tag onto paid carriers)
+                      "church_cards.jsonl",         # the churches, calibrated from their own confessions (not judged)
                       # The plumb-line: the whole Bible in the original tongues (Greek NT + Hebrew OT),
                       # one card per verse. Academics first. Spines root in the Word.
                       "scripture_spines.jsonl", "scripture_cards.jsonl",

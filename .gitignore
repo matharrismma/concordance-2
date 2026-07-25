@@ -107,3 +107,5 @@ data/verified_cards.jsonl
 !data/systems_cards.jsonl
 # The free-access catalogue — the lawful free tools we connect people to (logistics layer) — CONTENT
 !data/access_tools_cards.jsonl
+# The churches, calibrated from their own confessions (not judged) — CONTENT (git-tracked)
+!data/church_cards.jsonl
