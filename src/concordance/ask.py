@@ -250,6 +250,24 @@ def _looks_math(t: str) -> bool:
     return bool(re.search(r"[0-9x+\-*/^()]", sides)) and not re.search(r"[A-Za-z]{4,}", sides)
 
 
+# A checkable primality claim/question — "is 17 prime?", "17 is prime", "is 15 composite", "15 is not
+# prime". A verification engine should VERIFY it (17 → HOLDS), not return keyword-matched sequences.
+_PRIME_Q = re.compile(r"\bis\s+(\d{1,12})\s+(?:an?\s+)?(prime|composite)(?:\s+number)?\b", re.I)
+_PRIME_D = re.compile(r"\b(\d{1,12})\s+is\s+(not\s+)?(?:an?\s+)?(prime|composite)(?:\s+number)?\b", re.I)
+
+
+def _primality_claim(text: str):
+    """(n, claimed_prime) if the text asks/claims a primality, else None."""
+    m = _PRIME_Q.search(text or "")
+    if m:
+        return int(m.group(1)), (m.group(2).lower() == "prime")
+    m = _PRIME_D.search(text or "")
+    if m:
+        claim = (m.group(3).lower() == "prime")
+        return int(m.group(1)), (not claim if m.group(2) else claim)
+    return None
+
+
 # A posture of service (Matt: "it is more of a posture of service than anything"). Beyond the
 # narrow distress words, when someone speaks a FIRST-PERSON struggle — and is NOT asking a factual
 # question — we meet them as a servant would: sit with them, offer the companion who walked it, let
@@ -311,7 +329,7 @@ def classify(text: str) -> str:
         return "word_study"
     if find_ref(text or ""):
         return "scripture"
-    if _looks_math(text or ""):
+    if _looks_math(text or "") or _primality_claim(text or "") is not None:
         return "verify"
     if distress_ref(text or ""):
         return "comfort"
@@ -501,8 +519,21 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                           text, witness, gate_just_opened, topical=False)
 
     if kind == "verify":
-        from .derivation import verify as _verify
         from .receipts import attach
+        pc = _primality_claim(text)
+        if pc is not None:                       # "is 17 prime?" → verify it, deterministically
+            from .derivation import verify_domain
+            raw = verify_domain("number_theory",
+                                {"NUM_VERIFY": {"n_prime": pc[0], "claimed_prime": pc[1]}})
+            status = raw.get("status", "ERROR")
+            verdict = {"CONFIRMED": "HOLDS", "PASS": "HOLDS",
+                       "MISMATCH": "BROKEN", "REJECT": "BROKEN"}.get(status, status)
+            res = {"verdict": verdict, "steps": 1, "confirmed_steps": 1 if verdict == "HOLDS" else 0,
+                   "detail": raw.get("detail", ""),
+                   "trail": [{"domain": "number theory", "note": raw.get("detail", ""), "status": status}]}
+            return _witnessed({**base, "verify": attach(res, config=config, domain="number_theory")},
+                              text, witness, gate_just_opened)
+        from .derivation import verify as _verify
         m = _MATH_EQ.match(text)
         res = _verify({"mode": "equality",
                        "params": {"expr_a": m.group(1).strip(), "expr_b": m.group(2).strip(), "variables": {}}})
