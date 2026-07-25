@@ -393,10 +393,27 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
             one = _sc.resolve_ref(ref) if ref else {}
             verse = ([{"ref": one.get("ref", ref), "text": one.get("text", "")}]
                      if one.get("status") == "ok" else [])
+        # Name the position: meet them where a biblical character stood — and let that character's
+        # own Scripture speak. Found + resolved from the canon (never generated); a gentle seat, not
+        # a diagnosis. Crisis is a separate, higher lane and never reaches here.
+        from . import archetypes as _arch
+        seat = _arch.best(text)
+        if seat:
+            for r in seat.get("scripture", [])[:2]:
+                got = _sc.read_passage(r) if "-" in r else None
+                if got and got.get("verses"):
+                    verse.extend({"ref": v.get("ref", r), "text": v.get("text", "")}
+                                 for v in got["verses"][:3])
+                else:
+                    one = _sc.resolve_ref(r)
+                    if one.get("status") == "ok":
+                        verse.append({"ref": one.get("ref", r), "text": one.get("text", "")})
+            seat = {"character": seat["character"], "moment": seat["moment"], "frame": seat["frame"]}
         return _witnessed({**base, "kind": "comfort",
                            "message": "I'm sorry it's heavy right now — you are not carrying it "
                                       "alone. Here is a word to hold on to:",
-                           "scripture": verse,
+                           "seat": seat,
+                           "scripture": verse[:6],
                            "real_help": ["Someone who loves you — tell them how you are",
                                          "A pastor, or a local church",
                                          "Prayer — He hears, and He is near to the brokenhearted"]},

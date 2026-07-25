@@ -37,6 +37,7 @@ GOLDEN_API_GET = {
     "/codex", "/codex/scripture", "/codex/themes", "/codex/connections", "/codex/artifact", "/codex/verify",
     "/works", "/works/item", "/works/artifact", "/works/verify",
     "/decks", "/decks/predict", "/deck",
+    "/archetypes", "/archetypes/match", "/archetype",
     "/teachings",
 }
 GOLDEN_RATELIMITED = {

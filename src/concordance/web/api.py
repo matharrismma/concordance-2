@@ -1289,6 +1289,20 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         lim = min(50, max(1, int(query.get("limit") or 12)))
         return _ok(_decks.search(query.get("q", ""), (query.get("id") or "").strip() or None, lim))
 
+    if method == "GET" and path == "/archetypes":
+        # The characters of the Bible + their micropositions (the pastoral decks).
+        from .. import archetypes as _arch
+        return _ok({"archetypes": _arch.archetypes()})
+    if method == "GET" and path == "/archetypes/match":
+        # Name the position: which biblical moment does this person's need match? The fitting
+        # Scripture references come back; the verse — not us — is the answer.
+        from .. import archetypes as _arch
+        return _ok({"need": query.get("need", ""), "matches": _arch.match(query.get("need", ""), k=3)})
+    if method == "GET" and path == "/archetype":
+        from .. import archetypes as _arch
+        rec = _arch.get((query.get("id") or "").strip())
+        return _ok(rec) if rec is not None else _err(404, "microposition not found")
+
     if method == "GET" and path == "/teachings":
         # Phase 3 — the teaching-review workspace (Words in Red). Witness content: the engine
         # assembles the frozen Greek anchor + existing sites; the operator records the reading.
@@ -1413,6 +1427,9 @@ ROUTES = [
     {"path": "/decks", "methods": ("GET",), "api": True},
     {"path": "/decks/predict", "methods": ("GET",), "api": True},
     {"path": "/deck", "methods": ("GET",), "api": True},
+    {"path": "/archetypes", "methods": ("GET",), "api": True},
+    {"path": "/archetypes/match", "methods": ("GET",), "api": True},
+    {"path": "/archetype", "methods": ("GET",), "api": True},
     {"path": "/teachings", "methods": ("GET",), "api": True},
     {"path": "/card.html", "methods": ("GET",), "api": True, "serve": True},
     {"path": "/speak", "methods": ("POST",), "rl": True, "serve": True},
