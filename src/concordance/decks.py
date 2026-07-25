@@ -123,6 +123,14 @@ _DECKS: List[Dict[str, Any]] = [
      "shelves": {"playbook"},
      "keywords": {"playbook", "obedience", "confession", "witness", "wait", "quarantine", "confirmed",
                   "four", "gates", "prune", "pruning", "governance", "decision", "confirm", "faithful"}},
+    {"id": "free-access", "name": "Free Tools — the connection to lawful free access",
+     "desc": "Where to get books, textbooks, research and media FREE and legally — public libraries, "
+             "open textbooks, open access, the public domain, and the tools that won in court. Everything "
+             "up to the line, nothing on it.",
+     "shelves": {"access"},
+     "keywords": {"free", "library", "libby", "textbook", "openstax", "borrow", "download", "open access",
+                  "paper", "pdf", "read", "tool", "legal", "gutenberg", "hoopla", "kanopy", "hathitrust",
+                  "unpaywall", "where can i get", "how to get", "for free", "without paying"}},
     # The systems of the world — one design cascading over planes (the recurring form).
     {"id": "systems", "name": "The Systems of the World — one design, many planes",
      "desc": "Electrical, fluid, thermal, mechanical, control, wave — the same effort-and-flow form, "

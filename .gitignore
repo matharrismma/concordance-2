@@ -105,3 +105,5 @@ data/verified_cards.jsonl
 !data/playbook_cards.jsonl
 # The systems of the world — the recurring form (effort/flow, shared equations, the shadow) — CONTENT
 !data/systems_cards.jsonl
+# The free-access catalogue — the lawful free tools we connect people to (logistics layer) — CONTENT
+!data/access_tools_cards.jsonl
