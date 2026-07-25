@@ -112,31 +112,64 @@ def _node_payload(n: Dict[str, Any]) -> Dict[str, Any]:
             "tier": n["tier"], "degree": n["degree"]}
 
 
+# the nesting-plane relationships (the skeleton) — the plane on which EVERYTHING connects: every
+# card is member_of its spine, every spine part_of the Floor/Word. Nothing is an orphan; it may only
+# be on a different plane (Matt, 2026-07-25).
+_NESTING = {"member_of", "part_of", "nested_in", "figure_of",
+            "has_member", "has_part", "contains", "has_figure"}
+
+
 def overview() -> Dict[str, Any]:
-    """The constellation: one super-node per shelf (sized by card count), with weighted
-    links between shelves (how many connections cross from one shelf to another).
-    Memoized on the immutable graph — computed once per process, not per request (it was a
-    per-call O(nodes+edges) recompute on an un-rate-limited public endpoint)."""
+    """The constellation, PLANAR: one super-node per shelf sized by its FULL card count (every card
+    belongs to a shelf — nothing is missing), with inter-shelf links on two planes:
+      • nesting  — the member_of/part_of skeleton; everything converges on the Floor.
+      • semantic — the found connection cards (cites, proof-texts, families, grafts).
+    Everything connects; it may only be on a different plane. Memoized (O(cards+edges), once)."""
     g = _graph()
     if "_overview" in g:
         return g["_overview"]
+    cards = corpus.default_corpus().cards
     shelf_count: Counter = Counter()
     shelf_tiers: Dict[str, Counter] = defaultdict(Counter)
-    for n in g["nodes"].values():
-        shelf_count[n["shelf"]] += 1
-        shelf_tiers[n["shelf"]][n["tier"]] += 1
+    nest_pair: Counter = Counter()
+    for cid, c in cards.items():
+        if c.get("kind") == "connection" or not _is_public(c):
+            continue
+        sh = c.get("shelf") or "?"
+        shelf_count[sh] += 1
+        shelf_tiers[sh][_tier(c)] += 1
+        # the nesting plane: this card's structural edges, aggregated per shelf-pair
+        for l in (c.get("connections") or []):
+            if not isinstance(l, dict) or l.get("relationship") not in _NESTING:
+                continue
+            tc = cards.get(l.get("to_card_id"))
+            if tc is None or tc.get("kind") == "connection" or not _is_public(tc):
+                continue
+            tsh = tc.get("shelf") or "?"
+            if tsh != sh:
+                nest_pair[tuple(sorted((sh, tsh)))] += 1
 
-    pair: Counter = Counter()
+    # the semantic plane: the found connection-card edges, per shelf-pair
+    sem_pair: Counter = Counter()
     for e in g["edges"]:
         sa = g["nodes"][e["source"]]["shelf"]
         sb = g["nodes"][e["target"]]["shelf"]
-        pair[tuple(sorted((sa, sb)))] += 1
+        sem_pair[tuple(sorted((sa, sb)))] += 1
 
-    clusters = [{"shelf": s, "count": shelf_count[s], "tiers": dict(shelf_tiers[s])}
+    connected: Counter = Counter(n["shelf"] for n in g["nodes"].values())
+    clusters = [{"shelf": s, "count": shelf_count[s], "tiers": dict(shelf_tiers[s]),
+                 "connected": connected.get(s, 0)}
                 for s in sorted(shelf_count, key=lambda x: -shelf_count[x])]
-    links = [{"source": a, "target": b, "weight": w} for (a, b), w in pair.items()]
-    g["_overview"] = {"scope": "overview", "clusters": clusters, "links": links,
-                      "total_nodes": len(g["nodes"]), "total_edges": len(g["edges"])}
+    sem_links = [{"source": a, "target": b, "weight": w, "plane": "semantic"}
+                 for (a, b), w in sem_pair.items()]
+    nest_links = [{"source": a, "target": b, "weight": w, "plane": "nesting"}
+                  for (a, b), w in nest_pair.items()]
+    g["_overview"] = {"scope": "overview", "clusters": clusters,
+                      "links": sem_links,   # default (back-compat): the semantic plane
+                      "planes": {"nesting": nest_links, "semantic": sem_links},
+                      "total_nodes": sum(shelf_count.values()),   # the WHOLE keeping — nothing isolated
+                      "total_edges": len(g["edges"]),
+                      "connected_nodes": len(g["nodes"])}
     return g["_overview"]
 
 

@@ -31,6 +31,16 @@
   .controls input::placeholder{color:var(--dim)}
   :focus-visible{outline:2px solid var(--gold); outline-offset:2px}
   .controls input:focus{border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,162,74,.35)}
+  /* the transparencies — each a plane/system; lit when stacked into the picture */
+  .layers{display:flex; flex-wrap:wrap; gap:.5rem; margin:.7rem 0 .2rem}
+  .layers .layer{display:inline-flex; align-items:center; gap:.45rem; background:transparent;
+    border:1px solid var(--line); color:var(--dim); font:inherit; font-size:.8rem; cursor:pointer;
+    padding:.4rem .75rem; border-radius:20px; transition:all .14s ease}
+  .layers .layer i{width:.65rem; height:.65rem; border-radius:50%; opacity:.35; transition:opacity .14s}
+  .layers .layer span{color:var(--dim); font-size:.72rem; opacity:.8}
+  .layers .layer.on{color:var(--ink); border-color:var(--goldsoft); background:var(--panel)}
+  .layers .layer.on i{opacity:1}
+  .layers .layer:hover{border-color:var(--gold)}
   .btn{background:transparent; border:1px solid var(--line); color:var(--gold); font:inherit; font-size:.8rem;
     letter-spacing:.08em; text-transform:uppercase; padding:.5rem .9rem; border-radius:3px; cursor:pointer}
   .btn:hover{background:var(--panel)}
@@ -62,14 +72,16 @@
 <main class="wrap">
   <div class="kicker">The map</div>
   <h1>The keeping, connected.</h1>
-  <p class="lede">Every idea in the keeping, and the connections found between them — the way a
-  catechism leans on a proof-text, a father cites an epistle, a dictionary entry points back to the Word.
-  Land on the constellation of shelves; open one; or search for any card and travel its links.</p>
+  <p class="lede">Every idea in the keeping — and everything connects; it may only be on a different
+  plane. Think of the map as a <em>stack of transparencies</em>: each layer is one system — the nesting
+  (all roots run to the Floor), the found links between ideas (a catechism leans on a proof-text, a
+  father cites an epistle). Lift one to study that system alone, or stack them for the whole picture.</p>
 
   <div class="controls">
     <input id="q" type="search" placeholder="Search the keeping — a book, a doctrine, a name…" autocomplete="off" spellcheck="false">
     <button id="back" class="btn" style="display:none">← Overview</button>
   </div>
+  <div id="layers" class="layers" aria-label="Layers — the transparencies"></div>
   <div id="status"></div>
 
   <div class="stage"><canvas id="map" role="img" aria-label="Interactive map of the keeping — shelves and the connections between them. Use the search field above to open any card."></canvas></div>
@@ -88,7 +100,7 @@
 
 <script src="/graph.js"></script>
 <script>
-  NHGraph.map({ canvas:"map", status:"status", back:"back", search:"q", legend:"legend" });
+  NHGraph.map({ canvas:"map", status:"status", back:"back", search:"q", legend:"legend", layers:"layers" });
 </script>
 <script src="/nh-home.js"></script>
 <script src="/nh-tools.js"></script>

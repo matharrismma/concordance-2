@@ -14,7 +14,9 @@
     codex: "#c9a24a", classics: "#9b7bc0", dictionary: "#4f93c0", patristics: "#ce7f4f",
     hymns: "#5fb089", recipes: "#b89152", maker: "#c56aa0", animation: "#8fae52", atlas: "#4fb0a8"
   };
-  var REL = { references: "#c9a24a", cites: "#c9a24a", proof_text: "#5fb089", see_also: "#8592a4", parallels: "#9b7bc0", illuminates: "#cf9f5a" };
+  var REL = { references: "#c9a24a", cites: "#c9a24a", proof_text: "#5fb089", see_also: "#8592a4", parallels: "#9b7bc0", illuminates: "#cf9f5a",
+    // the planes (transparencies): nesting = the Floor's gold, found links = green
+    nested: "#c9a24a", found: "#5fb089" };
   function shelfColor(s) { return SHELF[s] || "#8a93a3"; }
   function relColor(k) { return REL[k] || "#8592a4"; }
 
@@ -256,24 +258,63 @@
     var legend = document.getElementById(cfg.legend);
     var v = new View(cv, "dark");
     var state = { level: "overview", label: "" };
+    var layersEl = document.getElementById(cfg.layers);
+    // The transparencies — each a plane/system; view one alone, or stack them for the whole picture.
+    var LAYERS = {
+      nesting: { on: true, kind: "nested", label: "Nesting", note: "all root in the Floor" },
+      semantic: { on: true, kind: "found", label: "Found links", note: "cites · proofs · families" }
+    };
+    var overviewData = null;
 
     function setStatus(html) { if (status) status.innerHTML = html; }
     function showBack(on) { if (back) back.style.display = on ? "" : "none"; }
 
-    // overview clusters become clickable super-nodes (one per shelf)
+    function renderLayers() {
+      if (!layersEl) return;
+      layersEl.innerHTML = Object.keys(LAYERS).map(function (k) {
+        var L = LAYERS[k];
+        return '<button type="button" class="layer' + (L.on ? " on" : "") + '" data-layer="' + k +
+          '" aria-pressed="' + L.on + '"><i style="background:' + relColor(L.kind) + '"></i>' +
+          esc(L.label) + ' <span>' + esc(L.note) + '</span></button>';
+      }).join("");
+    }
+    if (layersEl) layersEl.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-layer]"); if (!b) return;
+      var k = b.dataset.layer; LAYERS[k].on = !LAYERS[k].on;
+      b.classList.toggle("on", LAYERS[k].on); b.setAttribute("aria-pressed", LAYERS[k].on);
+      if (state.level === "overview" && overviewData) applyOverview();
+    });
+
+    // stack the active transparencies into one picture (or show one plane alone)
+    function applyOverview() {
+      var d = overviewData;
+      var nodes = d.clusters.map(function (c) {
+        return { id: "shelf:" + c.shelf, title: c.shelf + " · " + (c.count || 0).toLocaleString(),
+                 shelf: c.shelf, degree: Math.sqrt(c.count || 1) * 3 };
+      });
+      var planes = d.planes || { semantic: d.links || [], nesting: [] };
+      var links = [];
+      Object.keys(LAYERS).forEach(function (k) {
+        if (!LAYERS[k].on) return;
+        (planes[k] || []).forEach(function (l) {
+          if (l.source !== l.target)
+            links.push({ source: "shelf:" + l.source, target: "shelf:" + l.target, kind: LAYERS[k].kind, weight: l.weight });
+        });
+      });
+      v.onpick = function (n) { loadShelf(n.shelf); };
+      v.setData(nodes, links, null);
+      var active = Object.keys(LAYERS).filter(function (k) { return LAYERS[k].on; });
+      setStatus("The keeping — <strong>" + d.total_nodes.toLocaleString() + "</strong> ideas across <strong>" +
+        d.clusters.length + "</strong> shelves. Everything connects — it may only be on a different plane. " +
+        "Stack the transparencies below, or lift one to see that system alone. " +
+        "<em>" + (active.length ? active.map(function (k) { return LAYERS[k].label.toLowerCase(); }).join(" + ") : "no layers") + " shown.</em>");
+    }
+
+    // overview clusters become clickable super-nodes (one per shelf), layered by plane
     function loadOverview() {
       state.level = "overview"; showBack(false);
       api("/graph?scope=overview").then(function (d) {
-        var nodes = d.clusters.map(function (c) {
-          return { id: "shelf:" + c.shelf, title: c.shelf + " · " + c.count, shelf: c.shelf, degree: Math.sqrt(c.count) * 3 };
-        });
-        var links = d.links.filter(function (l) { return l.source !== l.target; }).map(function (l) {
-          return { source: "shelf:" + l.source, target: "shelf:" + l.target, kind: "see_also", weight: l.weight };
-        });
-        v.onpick = function (n) { loadShelf(n.shelf); };
-        v.setData(nodes, links, null);
-        setStatus("The keeping — <strong>" + d.total_nodes.toLocaleString() + "</strong> ideas, <strong>" +
-          d.total_edges.toLocaleString() + "</strong> found connections. Click a shelf to open it, or search below.");
+        overviewData = d; renderLayers(); applyOverview();
       }).catch(function () { setStatus("The map is resting. Try again in a moment."); });
     }
 
