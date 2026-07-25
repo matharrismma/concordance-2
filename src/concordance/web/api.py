@@ -854,6 +854,23 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import formation
         return _ok(formation.help((query.get("wish") or "").strip(), kind=(query.get("kind") or "become").strip()))
 
+    # Web Push — a word on your door becomes a notification. Sovereign (RFC 8291/8292, our own crypto);
+    # the network hop is OFF by default and isolated in push.send. No PII (a subscription, not a number).
+    if method == "GET" and path == "/push/key":
+        from .. import push
+        return _ok({"key": push.public_key_b64(), "enabled": push.enabled()})
+    if method == "POST" and path == "/push/subscribe":
+        if not isinstance(body, dict) or not str(body.get("fp") or "").strip() \
+           or not isinstance(body.get("subscription"), dict):
+            return _err(400, "fp and subscription required")
+        from .. import push
+        return _ok(push.subscribe(str(body["fp"]), body["subscription"]))
+    if method == "POST" and path == "/push/unsubscribe":
+        if not isinstance(body, dict) or not str(body.get("fp") or "").strip():
+            return _err(400, "fp required")
+        from .. import push
+        return _ok(push.unsubscribe(str(body["fp"]), endpoint=str(body.get("endpoint") or "")))
+
     # Coach — the Shepherd as a K-3 reading tutor. READ-ONLY teaching is the floor (NOT gated); it
     # finds + presents the operator's authored curriculum, never generates a lesson, never grades a child.
     if method == "POST" and path == "/coach/mastery":
@@ -1448,6 +1465,9 @@ ROUTES = [
     {"path": "/formation", "methods": ("GET",), "api": True},
     {"path": "/formation/kinds", "methods": ("GET",), "api": True},
     {"path": "/formation/help", "methods": ("GET",), "api": True, "rl": True},
+    {"path": "/push/key", "methods": ("GET",), "api": True},
+    {"path": "/push/subscribe", "methods": ("POST",), "rl": True},
+    {"path": "/push/unsubscribe", "methods": ("POST",), "rl": True},
     {"path": "/coach/mastery", "methods": ("POST",), "rl": True},
     {"path": "/identity/create", "methods": ("POST",), "rl": True},
     {"path": "/identity/verify", "methods": ("POST",), "rl": True},

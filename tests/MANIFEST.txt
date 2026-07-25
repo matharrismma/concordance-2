@@ -50,6 +50,7 @@ test_pins.py
 test_precedent.py
 test_privacy.py
 test_pronounce.py
+test_push.py
 test_prophecy.py
 test_reason.py
 test_recall.py

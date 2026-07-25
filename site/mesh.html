@@ -127,6 +127,9 @@
         <label>Or invite a believer (hand them a link — they're linked to you when they enter)</label>
         <div class="row"><button class="small ghost" id="invite">Make an invite link</button></div>
         <div class="tip" id="inviteOut"></div>
+        <label>Notifications (a word on your door reaches you, even when the app is closed)</label>
+        <div class="row"><button class="small ghost" id="pushOn">Turn on notifications</button></div>
+        <div class="tip" id="pushTip"></div>
         <label for="doorTarget">Leave a word on a believer's door (their node id)</label>
         <div class="row"><input id="doorTarget" placeholder="nh_…"></div>
         <div class="row"><input id="doorText" placeholder="a word of encouragement, a blessing"><button class="small" id="leave">Leave it</button></div>
@@ -226,6 +229,27 @@ async function redeemFromHash(){
   const r = await api("/mesh/redeem", {method:"POST", body:JSON.stringify({fp: me.fp, token: m[1]})});
   if(r.ok){ $("#linkTip").textContent = "You were invited — now linked to " + (r.neighbor_callsign||"a believer") + "."; drawMap(); }
 }
+
+// Web Push — a word on your door reaches you even when the app is closed. Sovereign: no phone
+// number. On iPhone this needs the app added to the home screen first (iOS 16.4+).
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("/sw.js").catch(()=>{}); }
+function urlB64ToUint8(b){ const pad="=".repeat((4-b.length%4)%4); const s=(b+pad).replace(/-/g,"+").replace(/_/g,"/");
+  const raw=atob(s); return Uint8Array.from(Array.prototype.map.call(raw, c=>c.charCodeAt(0))); }
+$("#pushOn").onclick = async () => {
+  if(!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)){
+    $("#pushTip").textContent = "This device can't do notifications yet. On iPhone, add this app to your home screen first."; return; }
+  try{
+    const perm = await Notification.requestPermission();
+    if(perm !== "granted"){ $("#pushTip").textContent = "Notifications were not allowed."; return; }
+    const reg = await navigator.serviceWorker.ready;
+    const k = await api("/push/key");
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: urlB64ToUint8(k.key) });
+    const r = await api("/push/subscribe", {method:"POST", body:JSON.stringify({fp: me.fp, subscription: sub.toJSON()})});
+    $("#pushTip").textContent = r.ok
+      ? (k.enabled ? "Notifications are on — a word on your door will reach you." : "Subscribed. Delivery turns on soon.")
+      : (r.error || "could not turn on notifications");
+  }catch(e){ $("#pushTip").textContent = "On iPhone, add this app to your home screen, then try again."; }
+};
 
 $("#invite").onclick = async () => {
   const r = await api("/mesh/invite", {method:"POST", body:JSON.stringify({fp: me.fp})});

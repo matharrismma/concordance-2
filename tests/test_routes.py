@@ -40,6 +40,7 @@ GOLDEN_API_GET = {
     "/archetypes", "/archetypes/match", "/archetype",
     "/mesh", "/mesh/map", "/mesh/inbox", "/mesh/door",
     "/formation", "/formation/kinds", "/formation/help",
+    "/push/key",
     "/teachings",
 }
 GOLDEN_RATELIMITED = {
@@ -50,6 +51,7 @@ GOLDEN_RATELIMITED = {
     "/groups", "/group", "/group/join", "/group/contribute",
     "/mesh/node", "/mesh/link", "/mesh/post", "/mesh/tend",
     "/mesh/invite", "/mesh/redeem", "/mesh/door", "/formation/help",
+    "/push/subscribe", "/push/unsubscribe",
     "/audit",   # deliberate addition (the Auditor) — goldens update ONLY with a new route
 }
 

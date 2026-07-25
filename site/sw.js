@@ -101,3 +101,26 @@ self.addEventListener('fetch', (e) => {
     })
   );
 });
+
+/* Web Push — a word on your door becomes a notification. The browser decrypts the aes128gcm payload
+   (RFC 8291); we read {title, body, url} and show it. A servant signal, never bait. */
+self.addEventListener('push', (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (_) { d = { body: (e.data && e.data.text()) || '' }; }
+  const opts = {
+    body: d.body || '', icon: '/icon.svg', badge: '/icon.svg',
+    tag: d.tag || 'nh-mesh', data: { url: d.url || '/mesh.html#way' }
+  };
+  e.waitUntil(self.registration.showNotification(d.title || 'Narrow Highway', opts));
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || '/mesh.html#way';
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
+      for (const w of wins) { if (w.url.includes('/mesh.html') && 'focus' in w) return w.focus(); }
+      return clients.openWindow(url);
+    })
+  );
+});

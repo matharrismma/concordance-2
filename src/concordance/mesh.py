@@ -677,6 +677,13 @@ def leave_on_door(from_fp: str, target_fp: str, text: str, *, kind: str = "bless
             f.write(json.dumps(stored, ensure_ascii=False) + "\n")
     out = {"ok": True, "id": mid, "signed": signed, "on_door_of": tgt.get("callsign", "anon"),
            "note": "Left on their door — they will see it when they come home."}
+    # A servant signal, never bait: notify the one whose door it is (best-effort, off unless enabled).
+    try:
+        from . import push as _push
+        _push.notify(target_fp, f"A word on your door from {frm.get('callsign', 'a believer')}",
+                     text[:80], url="/mesh.html#way")
+    except Exception:  # noqa: BLE001 — a failed/disabled push never breaks leaving the word
+        pass
     from .ask import is_crisis, _CRISIS_RESOURCES
     if is_crisis(text):
         out["crisis"] = {"help": list(_CRISIS_RESOURCES),

@@ -52,6 +52,8 @@ data/bookofdays/
 # The Fellowship Mesh — nodes (pubkey + callsign, no PII) and the relay's message queue are the
 # believers' own, held in data/mesh/. A seized server yields only the public corpus (docs/THE_COMPANION.md §6a).
 data/mesh/
+# Web Push — the VAPID server key (a secret) and each node's push subscriptions (theirs, no PII).
+data/push/
 # The Works — the technical volume is COMPILED from the engine (real runs + minted seals),
 # like the codex; the demonstrations' source is compendium.py, the sealed output is generated.
 data/compendium/
