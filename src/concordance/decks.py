@@ -92,6 +92,13 @@ _DECKS: List[Dict[str, Any]] = [
      "shelves": {"agriculture", "recipes", "maker"},
      "keywords": {"crop", "plant", "garden", "soil", "grow", "farm", "harvest", "recipe", "cook",
                   "make", "build", "tool", "repair", "seed", "rotation"}},
+    {"id": "history", "name": "History — the dated events of the world",
+     "desc": "Battles, wars, treaties, disasters and turning points, each with its date and a link to "
+             "the full record — for the LORD is Lord of history (Daniel 2:21).",
+     "shelves": {"history"},
+     "keywords": {"history", "historical", "event", "battle", "war", "treaty", "siege", "revolution",
+                  "when did", "what happened", "year", "century", "ancient", "medieval", "modern",
+                  "empire", "dynasty", "date of", "timeline"}},
     {"id": "books", "name": "The Great Books",
      "desc": "The great literature of the world, in the public domain — some 77,000 works from Project "
              "Gutenberg, each a click from its full text.",
