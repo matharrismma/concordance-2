@@ -87,6 +87,13 @@ _DECKS: List[Dict[str, Any]] = [
      "shelves": {"classics"},
      "keywords": {"literature", "book", "classic", "novel", "story", "poem", "author", "chapter",
                   "read", "text"}},
+    {"id": "fieldkit", "name": "The Field Kit — Scripture protocols to practice",
+     "desc": "An authored deck: 30 protocol cards from the Sermon on the Mount and the Epistles — "
+             "each an anchor Scripture, a floor, and a seven-day practice. Hearing plus doing.",
+     "shelves": {"fieldkit"},
+     "keywords": {"practice", "protocol", "obedience", "obey", "discipline", "habit", "walk", "doing",
+                  "sermon", "mount", "beatitude", "fruit", "drift", "accountability", "fieldkit",
+                  "sanctification", "discipleship", "grow", "struggle", "temptation"}},
 ]
 
 _BY_ID = {d["id"]: d for d in _DECKS}

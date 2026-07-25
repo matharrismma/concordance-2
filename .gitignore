@@ -83,3 +83,5 @@ data/verified_cards.jsonl
 !data/source_spines.jsonl
 # The theory assay carded — the calibration (not judgment) of the academy's theories — CONTENT
 !data/theory_cards.jsonl
+# The Lighthouse Field Kit — Matt's authored deck of 30 Scripture protocol cards — CONTENT (git-tracked)
+!data/fieldkit_cards.jsonl
