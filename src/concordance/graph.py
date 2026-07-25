@@ -164,9 +164,29 @@ def overview() -> Dict[str, Any]:
                  for (a, b), w in sem_pair.items()]
     nest_links = [{"source": a, "target": b, "weight": w, "plane": "nesting"}
                   for (a, b), w in nest_pair.items()]
+    # The CROSSINGS — the vias. Not every pair; the deliberate, specific points where the
+    # transparencies register (Matt: "crossings between the layers but very specific"). A crossing
+    # is a shelf-pair bound on MORE THAN ONE plane (skeleton AND semantic web both), OR joined by a
+    # two-tree GRAFT — the relationship that names a created thing beside the Scripture that names it
+    # (gold the metal ⟷ gold the word). Grafts are the archetypal via between the created order and
+    # the Word; they are few and precious, and the concordance grows by finding more of them.
+    graft_pair: Counter = Counter()
+    for e in g["edges"]:
+        if e["kind"] == "names_the_created_thing":
+            sa = g["nodes"][e["source"]]["shelf"]
+            sb = g["nodes"][e["target"]]["shelf"]
+            if sa != sb:
+                graft_pair[tuple(sorted((sa, sb)))] += 1
+    cross_keys = (set(nest_pair) & set(sem_pair)) | set(graft_pair)
+    cross_links = [{"source": a, "target": b, "nesting": nest_pair.get((a, b), 0),
+                    "semantic": sem_pair.get((a, b), 0), "graft": graft_pair.get((a, b), 0),
+                    "weight": nest_pair.get((a, b), 0) + sem_pair.get((a, b), 0) + graft_pair.get((a, b), 0),
+                    "plane": "crossing"}
+                   for (a, b) in sorted(cross_keys)]
     g["_overview"] = {"scope": "overview", "clusters": clusters,
                       "links": sem_links,   # default (back-compat): the semantic plane
-                      "planes": {"nesting": nest_links, "semantic": sem_links},
+                      "planes": {"nesting": nest_links, "semantic": sem_links, "crossing": cross_links},
+                      "crossings": len(cross_links),
                       "total_nodes": sum(shelf_count.values()),   # the WHOLE keeping — nothing isolated
                       "total_edges": len(g["edges"]),
                       "connected_nodes": len(g["nodes"])}

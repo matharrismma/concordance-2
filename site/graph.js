@@ -15,8 +15,9 @@
     hymns: "#5fb089", recipes: "#b89152", maker: "#c56aa0", animation: "#8fae52", atlas: "#4fb0a8"
   };
   var REL = { references: "#c9a24a", cites: "#c9a24a", proof_text: "#5fb089", see_also: "#8592a4", parallels: "#9b7bc0", illuminates: "#cf9f5a",
-    // the planes (transparencies): nesting = the Floor's gold, found links = green
-    nested: "#c9a24a", found: "#5fb089" };
+    // the planes (transparencies): nesting = the Floor's gold, found links = green,
+    // crossings = bright brass — the vias, where the layers register
+    nested: "#c9a24a", found: "#5fb089", crossing: "#eed69b" };
   function shelfColor(s) { return SHELF[s] || "#8a93a3"; }
   function relColor(k) { return REL[k] || "#8592a4"; }
 
@@ -262,7 +263,8 @@
     // The transparencies — each a plane/system; view one alone, or stack them for the whole picture.
     var LAYERS = {
       nesting: { on: true, kind: "nested", label: "Nesting", note: "all root in the Floor" },
-      semantic: { on: true, kind: "found", label: "Found links", note: "cites · proofs · families" }
+      semantic: { on: true, kind: "found", label: "Found links", note: "cites · proofs · families" },
+      crossing: { on: true, kind: "crossing", label: "Crossings", note: "the vias — where the planes register" }
     };
     var overviewData = null;
 
