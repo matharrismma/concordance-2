@@ -207,6 +207,8 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                       # The plumb-line: the whole Bible in the original tongues (Greek NT + Hebrew OT),
                       # one card per verse. Academics first. Spines root in the Word.
                       "scripture_spines.jsonl", "scripture_cards.jsonl",
+                      # The OEIS core — the foundational integer sequences (academics: mathematics).
+                      "oeis_spine.jsonl", "oeis_cards.jsonl",
                       # The Corpus — technical, academic cards minted from the stored sources
                       # (nuclides, stars, foods, ports, indicators, …); always growing.
                       "source_spines.jsonl", "source_cards.jsonl", "web_cache.jsonl"):

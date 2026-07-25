@@ -94,6 +94,12 @@ _DECKS: List[Dict[str, Any]] = [
      "shelves": {"classics"},
      "keywords": {"literature", "book", "classic", "novel", "story", "poem", "author", "chapter",
                   "read", "text"}},
+    {"id": "sequences", "name": "Integer Sequences — the OEIS core",
+     "desc": "The foundational integer sequences: the primes, Fibonacci, Catalan, the partitions, and "
+             "thousands more the whole of number theory keeps returning to.",
+     "shelves": {"oeis"},
+     "keywords": {"sequence", "integer", "oeis", "fibonacci", "catalan", "prime", "primes", "partition",
+                  "series", "recurrence", "combinatorics", "number", "triangular", "factorial", "terms"}},
     {"id": "playbook", "name": "The Fractal Playbook — obedience, confirmed",
      "desc": "The Body's memory of faithful obedience: the atomic Playbook Entry (Confession, Anchors, "
              "Action, Outcome, Witness, Wait, Status) and the Four Gates — RED, FLOOR, BROTHERS, GOD.",
