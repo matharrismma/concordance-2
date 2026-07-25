@@ -3,35 +3,85 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The keeping — Narrow Highway</title>
-<meta name="description" content="Browse the keeping — the kept library behind the verification engine. Filter by shelf, open any card.">
+<title>The Keeping — Narrow Highway</title>
+<meta name="description" content="Browse the keeping — the kept library behind the verification engine, laid out as an atlas. Search a deck, filter by shelf, open any card.">
 <link rel="stylesheet" href="styles.css">
+<style>
+  /* The atlas — the keeping laid out as rooms of one house, not a flat drawer. Gold is light
+     and seal; the sovereign serif carries the headings. Materials, not pictures. */
+  .lede-row{ display:flex; flex-wrap:wrap; gap:1.4rem; align-items:baseline; margin:.2rem 0 1.2rem }
+  .lede-row .big{ font-size:2.1rem; font-weight:700; color:var(--accent); line-height:1 }
+  .lede-row .k{ font-size:.74rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted) }
+  .find{ display:flex; gap:.5rem; margin:.4rem 0 1.6rem }
+  .find input{ flex:1; min-width:0; padding:.7rem .9rem; font:inherit; font-size:1rem;
+    background:var(--paper); color:var(--ink,inherit); border:1px solid var(--line); border-radius:9px }
+  .find input:focus{ outline:0; border-color:var(--accent) }
+  .find button{ white-space:nowrap }
+  #found-note{ font-size:.82rem; color:var(--muted); margin:-1rem 0 1.2rem; min-height:1.1rem }
+
+  .band{ margin:1.7rem 0 }
+  .band > h2{ font-size:1.12rem; margin:0 0 .1rem; letter-spacing:.01em }
+  .band > .bnote{ font-size:.86rem; color:var(--muted); margin:0 0 .8rem; max-width:52rem }
+  .decks{ display:grid; grid-template-columns:repeat(auto-fill, minmax(215px,1fr)); gap:.7rem }
+  .deck{ text-align:left; cursor:pointer; background:var(--paper); border:1px solid var(--line);
+    border-radius:11px; padding:.8rem .9rem .85rem; font:inherit; color:inherit; position:relative;
+    transition:border-color .14s ease, transform .14s ease, box-shadow .14s ease; display:block; width:100% }
+  .deck:hover{ border-color:var(--accent); transform:translateY(-1px);
+    box-shadow:0 10px 26px -18px rgba(0,0,0,.5) }
+  .deck .dn{ display:block; font-weight:600; font-size:.98rem; line-height:1.25; padding-right:3.2rem }
+  .deck .dc{ position:absolute; top:.7rem; right:.85rem; font-size:.8rem; font-weight:700;
+    color:var(--accent); font-variant-numeric:tabular-nums }
+  .deck .dd{ display:block; font-size:.79rem; color:var(--muted); margin-top:.35rem; line-height:1.35 }
+  .deck[data-active="1"]{ border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset }
+
+  details.browse{ margin-top:2rem; border-top:1px solid var(--line); padding-top:1rem }
+  details.browse > summary{ cursor:pointer; font-weight:600; color:var(--muted) }
+  details.browse[open] > summary{ color:inherit }
+  #shelf-wrap{ margin:1rem 0 }
+</style>
 </head>
 <body>
 <header class="site"><div class="wrap" style="padding:.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center">
   <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
-  <nav class="site"><a href="/ask.html">Ask</a><a href="/bible.html">Bible</a><a href="/read.html">Read</a><a href="/characters.html">Dictionary</a><a href="/prophecy.html">Signposts</a><a href="/journal.html">Journal</a><a href="/map.html">Map</a><a href="/steward.html">Steward</a><a href="/community.html">Community</a><a href="/#verify">Verify</a><a href="/library.html">Library</a><a href="/seal.html">Seal</a></nav>
+  <nav class="site"><a href="/">Write</a><a href="/bible.html">Scripture</a><a href="/characters.html">Dictionary</a><a href="/floor.html">The Floor</a><a href="/map.html">Map</a><a href="/brain.html">Brain</a><a href="/seal.html">Seals</a></nav>
 </div></header>
 
 <main class="wrap">
-  <h1>The keeping</h1>
-  <p class="lede">The kept library behind the engine — <span id="total" class="mono">…</span> cards.
-  Filter by shelf, open any card. Search ranked retrieval is on the <a href="/#search">home page</a>.</p>
+  <h1>The Keeping</h1>
+  <p class="lede">The kept library behind the engine — verified, attributed, kept. The engine finds
+  what survives; it never generates the answer. This is the whole of it, laid out as an atlas.</p>
 
-  <section>
-    <div class="row">
+  <div class="lede-row">
+    <div><div class="big" id="total">…</div><div class="k">cards kept</div></div>
+    <div><div class="big" id="ndecks">…</div><div class="k">decks</div></div>
+    <div><div class="big" id="nshelves">…</div><div class="k">shelves</div></div>
+  </div>
+
+  <div class="find">
+    <input id="q" type="search" placeholder="Search the keeping — a word, a name, a claim…"
+           aria-label="Search the keeping" autocomplete="off">
+    <button onclick="findIt()">Search</button>
+  </div>
+  <div id="found-note"></div>
+  <div data-nhkind="cited" data-nhnote="the keeping" style="margin:-.6rem 0 1rem"></div>
+
+  <div id="atlas"><p class="muted">Opening the atlas…</p></div>
+
+  <details class="browse">
+    <summary>Or browse every shelf, card by card</summary>
+    <div id="shelf-wrap" class="row">
       <select id="shelf" aria-label="shelf filter"><option value="">all shelves</option></select>
       <button onclick="load(0)">Browse</button>
     </div>
-    <div style="margin:.6rem 0"><span data-nhkind="cited" data-nhnote="the keeping"></span></div>
-    <div id="list" style="margin-top:1rem"></div>
+    <div id="list"></div>
     <div id="pager" style="margin-top:.8rem;display:flex;gap:.6rem;align-items:center"></div>
-    <div id="detail" style="margin-top:1rem"></div>
-  </section>
+  </details>
+
+  <div id="detail" style="margin-top:1.2rem"></div>
 
   <footer class="site">
-    <p>The keeping is the substrate — verified, attributed, kept. The engine finds what survives;
-    it does not generate the answer. The fuller witness is at <a href="https://narrowhighway.org">narrowhighway.org</a>.</p>
+    <p>The keeping is the substrate — the engine finds what survives; it does not generate the answer.
+    The fuller witness is at <a href="https://narrowhighway.org">narrowhighway.org</a>.</p>
   </footer>
 </main>
 
@@ -39,18 +89,120 @@
 <script>
 const API = "";
 let offset = 0, limit = 20, total = 0;
+const DECKMETA = {};           // id -> {name, desc, shelves, cards}
 function esc(s){const d=document.createElement('div');d.textContent=String(s==null?"":s);return d.innerHTML;}
+function num(n){ return (n||0).toLocaleString(); }
+
+// The rooms of the house — the atlas grouped by the structure of reality. Any deck not named
+// here falls to "More in the keeping", so new decks always appear without touching this file.
+const SECTIONS = [
+  { title:"The Word — the plumb-line",
+    note:"Scripture and the tongues it was given in. The measure against which everything else is calibrated.",
+    ids:["scripture","scripture-original","tongues","word"] },
+  { title:"The Floor of Discovery — the created order",
+    note:"What He made, mapped and measured: life, the earth, the body, matter, the heavens, number, language, the nations.",
+    ids:["life","earth","body","matter","heavens","sequences","languages","networks","nations"] },
+  { title:"The Systems of the World — one design, many planes",
+    note:"The recurring form of His design across engineering — effort and flow, the same equations again and again, even in the shadow and the inverse.",
+    ids:["systems","electronics","fluids","thermal","mechanical","waves","control"] },
+  { title:"Calibration — gathered wisdom, measured with love",
+    note:"The traditions, the builders, the foreshadows, the protocols — each credited magnanimously and held to the one plumb-line. We calibrate; we do not judge.",
+    ids:["churches","builders","foreshadows","fieldkit","playbook"] },
+  { title:"The Archive — acquired to the shelf",
+    note:"The great books and the dated events of history. A stub card here; the full source a link away, held on the drive.",
+    ids:["books","history"] },
+  { title:"The Practice — tools for the road",
+    note:"Lawful free access, the land, and the worked-and-sealed demonstrations of the moat.",
+    ids:["free-access","land","works"] },
+];
 
 async function init(){
-  try{
-    const s = await (await fetch(API + "/cards/stats")).json();
-    document.getElementById('total').textContent = (s.total||0).toLocaleString();
-    const sel = document.getElementById('shelf');
-    Object.keys(s.by_shelf||{}).sort().forEach(sh => {
-      const o = document.createElement('option'); o.value = sh; o.textContent = sh + " (" + s.by_shelf[sh] + ")"; sel.appendChild(o);
-    });
-  }catch(e){ document.getElementById('total').textContent = "?"; }
+  let stats = {by_shelf:{}, total:0}, decks = [];
+  try{ stats = await (await fetch(API + "/cards/stats")).json(); }catch(e){}
+  try{ decks = (await (await fetch(API + "/decks")).json()).decks || []; }catch(e){}
+
+  document.getElementById('total').textContent = num(stats.total);
+  document.getElementById('ndecks').textContent = num(decks.length);
+  const shelves = Object.keys(stats.by_shelf || {});
+  document.getElementById('nshelves').textContent = num(shelves.length);
+
+  // the shelf dropdown (full browse)
+  const sel = document.getElementById('shelf');
+  shelves.sort().forEach(sh => {
+    const o = document.createElement('option'); o.value = sh;
+    o.textContent = sh + " (" + stats.by_shelf[sh] + ")"; sel.appendChild(o);
+  });
+
+  decks.forEach(d => DECKMETA[d.id] = d);
+  renderAtlas(decks);
+}
+
+function deckDoor(d){
+  if(!d) return "";
+  const shelves = (d.shelves||[]).join(",");
+  return '<button class="deck" data-id="' + esc(d.id) + '" data-shelves="' + esc(shelves) + '" '+
+    'onclick="openDeck(this)">' +
+    '<span class="dc">' + num(d.cards) + '</span>' +
+    '<span class="dn">' + esc(d.name) + '</span>' +
+    '<span class="dd">' + esc(d.desc || "") + '</span></button>';
+}
+
+function renderAtlas(decks){
+  const placed = new Set();
+  let html = "";
+  for(const sec of SECTIONS){
+    const inSec = sec.ids.map(id => DECKMETA[id]).filter(Boolean);
+    if(!inSec.length) continue;
+    inSec.forEach(d => placed.add(d.id));
+    html += '<section class="band"><h2>' + esc(sec.title) + '</h2>' +
+            '<p class="bnote">' + esc(sec.note) + '</p><div class="decks">' +
+            inSec.map(deckDoor).join("") + '</div></section>';
+  }
+  const rest = decks.filter(d => !placed.has(d.id)).sort((a,b)=>b.cards-a.cards);
+  if(rest.length){
+    html += '<section class="band"><h2>More in the keeping</h2>' +
+            '<p class="bnote">Further decks over the same shared corpus.</p><div class="decks">' +
+            rest.map(deckDoor).join("") + '</div></section>';
+  }
+  document.getElementById('atlas').innerHTML = html || '<p class="muted">No decks yet.</p>';
+}
+
+// Clicking a deck door filters the browse to that deck's shelves and scrolls there.
+function openDeck(btn){
+  document.querySelectorAll('.deck[data-active="1"]').forEach(e => e.removeAttribute('data-active'));
+  btn.setAttribute('data-active','1');
+  const shelves = (btn.dataset.shelves||"").split(",").filter(Boolean);
+  const det = document.querySelector('details.browse'); if(det) det.open = true;
+  const sel = document.getElementById('shelf');
+  // browse the deck's first (dominant) shelf; the search box reaches every shelf at once
+  if(shelves.length){ sel.value = shelves[0]; }
   load(0);
+  document.getElementById('shelf-wrap').scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+async function findIt(){
+  const q = document.getElementById('q').value.trim();
+  const note = document.getElementById('found-note');
+  if(!q){ note.textContent = ""; return; }
+  note.textContent = "Searching…";
+  document.getElementById('detail').innerHTML = "";
+  try{
+    const d = await (await fetch(API + "/deck?q=" + encodeURIComponent(q) + "&limit=24")).json();
+    const res = d.results || [];
+    const via = d.deck ? ('the ' + esc(DECKMETA[d.deck]?.name || d.deck) + ' deck' + (d.fell_back_to_full ? ', then the whole keeping' : '')) : 'the whole keeping';
+    note.innerHTML = res.length
+      ? num(d.count) + ' found — searched ' + via + '. <span class="muted">The Hare runs the likely deck first; the Tortoise reaches everything.</span>'
+      : 'Nothing came back for “' + esc(q) + '”. Try a name, a word, or a claim.';
+    const list = document.getElementById('list');
+    list.innerHTML = res.map(c =>
+      '<a href="/card/' + encodeURIComponent(c.id) + '" class="result" style="display:block;text-decoration:none;color:inherit;cursor:pointer" onclick="openCard(\'' + esc(c.id) + '\');return false;">' +
+      '<span class="shelf">' + esc(c.shelf || "") + '</span>' +
+      '<div class="t">' + esc(c.title || c.id) + '</div>' +
+      '<div class="s">' + esc((c.snippet || "").slice(0,160)) + '</div></a>').join("");
+    document.getElementById('pager').innerHTML = "";
+    const det = document.querySelector('details.browse'); if(det) det.open = true;
+    document.getElementById('found-note').scrollIntoView({behavior:"smooth", block:"nearest"});
+  }catch(e){ note.textContent = "Search is unreachable right now."; }
 }
 
 async function load(off){
@@ -72,7 +224,7 @@ async function load(off){
     const page = Math.floor(offset/limit)+1, pages = Math.max(1, Math.ceil(total/limit));
     document.getElementById('pager').innerHTML =
       '<button ' + (offset<=0?'disabled':'') + ' onclick="load(' + (offset-limit) + ')">← prev</button>' +
-      '<span class="muted">page ' + page + ' / ' + pages + ' · ' + total.toLocaleString() + ' cards</span>' +
+      '<span class="muted">page ' + page + ' / ' + pages + ' · ' + num(total) + ' cards</span>' +
       '<button ' + (offset+limit>=total?'disabled':'') + ' onclick="load(' + (offset+limit) + ')">next →</button>';
   }catch(e){ list.innerHTML = '<p class="muted">API unreachable.</p>'; }
 }
@@ -90,6 +242,8 @@ async function openCard(id){
     det.scrollIntoView({behavior:"smooth", block:"nearest"});
   }catch(e){ det.innerHTML = '<p class="muted">could not open that card.</p>'; }
 }
+
+document.getElementById('q').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); findIt(); } });
 init();
 </script>
 <script src="/nh-home.js"></script>
