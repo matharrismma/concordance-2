@@ -202,7 +202,7 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
         #   works_cards.jsonl — The Works: every worked, engine-sealed demonstration carded as a
         #                       seed in the keeping (minted by compendium.build_all, data-only)
         for extra in ("verified_cards.jsonl", "reference_cards.jsonl", "keystone_seeds.jsonl",
-                      "nesting_seeds.jsonl", "ncs_seeds.jsonl", "works_cards.jsonl",
+                      "nesting_seeds.jsonl", "ncs_seeds.jsonl", "works_cards.jsonl", "theory_cards.jsonl",
                       # The Corpus — technical, academic cards minted from the stored sources
                       # (nuclides, stars, foods, ports, indicators, …); always growing.
                       "source_spines.jsonl", "source_cards.jsonl", "web_cache.jsonl"):

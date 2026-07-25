@@ -78,3 +78,5 @@ data/verified_cards.jsonl
 # The Corpus — the domain SPINES for the stored-source cards are CONTENT (git-tracked); the source
 # cards themselves (data/source_cards.jsonl) are large + generated from the HD sources (gitignored).
 !data/source_spines.jsonl
+# The theory assay carded — the calibration (not judgment) of the academy's theories — CONTENT
+!data/theory_cards.jsonl
