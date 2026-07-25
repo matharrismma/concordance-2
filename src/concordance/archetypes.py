@@ -181,8 +181,10 @@ def _serve(m: Dict[str, Any], matched: Optional[List[str]] = None) -> Dict[str, 
     return {"id": m["id"], "character": m["character"], "condition": m["condition"],
             "moment": m["moment"], "meets": m["meets"], "scripture": list(m["scripture"]),
             "matched": matched or [],
-            # a MINIMAL frame — the verse does the speaking; we only name the seat and point on.
-            "frame": f"You are where {m['character']} stood — {m['moment']}."}
+            # a posture of SERVICE, not a diagnosis: we OFFER a companion who walked something like
+            # this, gently — the verse does the speaking, and we never stamp a label on a person.
+            "frame": f"Someone in the Book walked something like this — {m['character']}, "
+                     f"{m['moment']}. Here is the word that met that hour."}
 
 
 def get(micro_id: str) -> Optional[Dict[str, Any]]:

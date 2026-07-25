@@ -226,6 +226,30 @@ def _looks_math(t: str) -> bool:
     return bool(re.search(r"[0-9x+\-*/^()]", sides)) and not re.search(r"[A-Za-z]{4,}", sides)
 
 
+# A posture of service (Matt: "it is more of a posture of service than anything"). Beyond the
+# narrow distress words, when someone speaks a FIRST-PERSON struggle — and is NOT asking a factual
+# question — we meet them as a servant would: sit with them, offer the companion who walked it, let
+# the Word speak. Conservative on purpose: a factual query ("what was Goliath", "look up grief")
+# is served as a fact, never seated; crisis is a higher lane and is decided first.
+_FACTUAL_INTENT = re.compile(
+    r"\b(learn|teach|tell me|what('?s| is| are| was| were)|who('?s| is| was| were)|where "
+    r"(is|was)|when (did|was)|how (do|does|did|to|many|much)|define|definition|explain|look up|"
+    r"search|list|meaning of|history of|about the|difference between)\b", re.I)
+_FIRST_PERSON_STATE = re.compile(
+    r"\b(i feel|i'?m |im |i am |i can'?t|i cant|i failed|i lost|i'?ve |i have been|i keep|i just|"
+    r"i don'?t know|i dont know|my heart|i messed|i ruined|i hate myself|i give up|i'?m not|"
+    r"i can not|i wander|i doubt|i'?m so|i feel like)\b", re.I)
+
+
+def _wants_a_companion(text: str) -> bool:
+    """A first-person struggle (not a factual question) that a biblical moment can sit with."""
+    t = text or ""
+    if _FACTUAL_INTENT.search(t) or not _FIRST_PERSON_STATE.search(t):
+        return False
+    from . import archetypes as _arch
+    return _arch.best(t) is not None
+
+
 def classify(text: str) -> str:
     """Deterministically route the input. Crisis first (safety); then structured (Strong's,
     scripture ref, math); then ultimate matters; else search the keeping."""
@@ -244,6 +268,8 @@ def classify(text: str) -> str:
     if _looks_math(text or ""):
         return "verify"
     if distress_ref(text or ""):
+        return "comfort"
+    if _wants_a_companion(text or ""):     # broaden: meet a first-person struggle as a servant
         return "comfort"
     if any(w in t for w in _ULTIMATE_WORDS):
         return "ultimate"
@@ -410,8 +436,8 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                         verse.append({"ref": one.get("ref", r), "text": one.get("text", "")})
             seat = {"character": seat["character"], "moment": seat["moment"], "frame": seat["frame"]}
         return _witnessed({**base, "kind": "comfort",
-                           "message": "I'm sorry it's heavy right now — you are not carrying it "
-                                      "alone. Here is a word to hold on to:",
+                           "message": "I'm here, and you're not carrying it alone. Let me sit "
+                                      "with you a minute — and tell me what you need; I'll help.",
                            "seat": seat,
                            "scripture": verse[:6],
                            "real_help": ["Someone who loves you — tell them how you are",
