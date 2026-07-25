@@ -211,6 +211,8 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                       "oeis_spine.jsonl", "oeis_cards.jsonl",
                       # The tree of life — the recognizable organisms (academics: biology).
                       "taxonomy_spine.jsonl", "taxonomy_cards.jsonl",
+                      # The languages of the earth — PHOIBLE/Glottolog (academics: linguistics).
+                      "language_spine.jsonl", "language_cards.jsonl",
                       # The Corpus — technical, academic cards minted from the stored sources
                       # (nuclides, stars, foods, ports, indicators, …); always growing.
                       "source_spines.jsonl", "source_cards.jsonl", "web_cache.jsonl"):

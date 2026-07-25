@@ -94,6 +94,12 @@ _DECKS: List[Dict[str, Any]] = [
      "shelves": {"classics"},
      "keywords": {"literature", "book", "classic", "novel", "story", "poem", "author", "chapter",
                   "read", "text"}},
+    {"id": "languages", "name": "The Languages of the Earth",
+     "desc": "The world's languages by family and region, each with its phonological inventory — the "
+             "consonants, vowels and tones it is spoken with.",
+     "shelves": {"languages"},
+     "keywords": {"language", "tongue", "phoneme", "consonant", "vowel", "dialect", "linguistics",
+                  "family", "glottolog", "phoible", "spoken", "accent", "phonology", "ipa", "speak"}},
     {"id": "life", "name": "The Tree of Life — the living kinds",
      "desc": "Every creature with a common name — mammals, birds, fish, plants, the microbes we know "
              "by name — with its scientific name, rank and place in the tree of life.",
