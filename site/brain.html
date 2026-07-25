@@ -85,14 +85,23 @@
   function tip(t){document.getElementById('tip').innerHTML=t;}
   function P(o){return o.toFixed(1);}
 
-  fetch('/graph').then(function(r){return r.json();}).then(function(d){
-    var clusters=(d.clusters||[]).slice().sort(function(a,b){return b.count-a.count;});
+  Promise.all([fetch('/graph').then(function(r){return r.json();}),
+               fetch('/cards/stats').then(function(r){return r.json();}).catch(function(){return {};})])
+    .then(function(res){
+    var d=res[0], st=res[1]||{}, by=st.by_shelf||{};
+    var connected=d.total_nodes||0;
+    // size each region by the TRUE shelf count (the whole keeping — 478k), not just the ~5k connected
+    // cards; keep /graph's real connection links woven between them.
+    var cl=(d.clusters||[]).map(function(c){return {shelf:c.shelf,count:(by[c.shelf]||c.count),tiers:c.tiers};});
+    var have={}; cl.forEach(function(c){have[c.shelf]=1;});
+    Object.keys(by).forEach(function(s){ if(!have[s]) cl.push({shelf:s,count:by[s],tiers:{}}); });
+    var clusters=cl.slice().sort(function(a,b){return b.count-a.count;});
     document.getElementById('stats').innerHTML=
-      '<span><b>'+(d.total_nodes||0).toLocaleString()+'</b> nodes</span>'+
+      '<span><b>'+((st.total||connected)).toLocaleString()+'</b> cards</span>'+
       '<span><b>'+(d.total_edges||0).toLocaleString()+'</b> connections</span>'+
       '<span><b>'+clusters.length+'</b> regions</span>'+
       '<span><b>'+((clusters.filter(function(c){return c.shelf==='science';})[0]||{}).count||0)+'</b> sealed (the moat)</span>'+
-      '<span>density <b>'+((d.total_edges||0)/(d.total_nodes||1)).toFixed(1)+'</b> edges/node</span>';
+      '<span>density <b>'+((d.total_edges||0)/(connected||1)).toFixed(1)+'</b> edges/connected node</span>';
     var maxc=Math.max.apply(null, clusters.map(function(c){return c.count;}));
     function rOf(c){return 16+Math.sqrt(c/maxc)*26;}
     var links=d.links||[];
