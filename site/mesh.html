@@ -171,6 +171,8 @@
 
 <script>
 const $ = s => document.querySelector(s);
+// the avatar levels up — appearance grows with the walk (estate.level 1..5); Psalm 92:12
+const RANKS = {1:"Seedling", 2:"Sapling", 3:"Rooted", 4:"Grove", 5:"Cedar"};
 const api = (p, opt) => fetch(p, Object.assign({headers:{accept:"application/json","content-type":"application/json"}}, opt||{})).then(r=>r.json());
 const LS = "nh_mesh_node";
 function load(){ try{ return JSON.parse(localStorage.getItem(LS)||"null"); }catch(e){ return null; } }
@@ -303,7 +305,9 @@ async function drawMap(){
   const r = await api("/mesh/map?fp=" + encodeURIComponent(me.fp) + "&hops=4");
   if(r.gated){ me=null; localStorage.removeItem(LS); $("#fold").classList.add("hide"); $("#gate").classList.remove("hide"); return; }
   lastMap = r;
-  $("#stageTip").innerHTML = `You walk as <b>${r.stage}</b>.` + (r.next_gate ? ` Next gate — <i>${r.next_gate.stage}</i>: ${r.next_gate.gate} (${r.next_gate.scripture}).` : ` The way turns outward: you are sent (Matthew 28:19).`);
+  const meNode = (r.nodes||[]).find(n=>n.you) || {};
+  const myLvl = (meNode.estate||{}).level || 1;
+  $("#stageTip").innerHTML = `You walk as <b>${r.stage}</b> — a <b>${RANKS[myLvl]||"Seedling"}</b> (level ${myLvl}/5).` + (r.next_gate ? ` Next gate — <i>${r.next_gate.stage}</i>: ${r.next_gate.gate} (${r.next_gate.scripture}).` : ` The way turns outward: you are sent (Matthew 28:19).`);
   const cv = $("#map"), ctx = cv.getContext("2d");
   const dpr = Math.min(2, window.devicePixelRatio||1);
   const W = cv.clientWidth||900, H = 520; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -328,6 +332,10 @@ async function drawMap(){
     ctx.beginPath(); ctx.arc(p.x,p.y,rad+4,0,7);
     if(n.role==="guardian"){ ctx.setLineDash([3,3]); ctx.strokeStyle="rgba(139,191,143,.7)"; ctx.lineWidth=2; ctx.stroke(); ctx.setLineDash([]); }
     else if(n.role==="guide"){ ctx.strokeStyle="rgba(201,162,74,.9)"; ctx.lineWidth=2; ctx.stroke(); }
+    // the avatar levels up: one faint growth-ring per level (Seedling..Cedar)
+    var lvl = est.level||1;
+    for(var L=1; L<lvl; L++){ ctx.beginPath(); ctx.arc(p.x,p.y,rad+7+L*3,0,7);
+      ctx.strokeStyle="rgba(201,162,74,"+(0.16-L*0.02)+")"; ctx.lineWidth=1; ctx.stroke(); }
     // node body
     ctx.beginPath(); ctx.arc(p.x,p.y,rad,0,7);
     ctx.fillStyle = n.you?"rgba(201,162,74,.9)":(est.hotel?"rgba(208,138,114,.85)":"rgba(233,227,212,.82)");

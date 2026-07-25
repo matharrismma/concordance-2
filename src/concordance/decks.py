@@ -87,6 +87,12 @@ _DECKS: List[Dict[str, Any]] = [
      "shelves": {"classics"},
      "keywords": {"literature", "book", "classic", "novel", "story", "poem", "author", "chapter",
                   "read", "text"}},
+    {"id": "playbook", "name": "The Fractal Playbook — obedience, confirmed",
+     "desc": "The Body's memory of faithful obedience: the atomic Playbook Entry (Confession, Anchors, "
+             "Action, Outcome, Witness, Wait, Status) and the Four Gates — RED, FLOOR, BROTHERS, GOD.",
+     "shelves": {"playbook"},
+     "keywords": {"playbook", "obedience", "confession", "witness", "wait", "quarantine", "confirmed",
+                  "four", "gates", "prune", "pruning", "governance", "decision", "confirm", "faithful"}},
     {"id": "fieldkit", "name": "The Field Kit — Scripture protocols to practice",
      "desc": "An authored deck: 30 protocol cards from the Sermon on the Mount and the Epistles — "
              "each an anchor Scripture, a floor, and a seven-day practice. Hearing plus doing.",
