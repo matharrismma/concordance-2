@@ -124,6 +124,13 @@
         <label for="neighbor">Link a neighbor (paste their node id)</label>
         <div class="row"><input id="neighbor" placeholder="nh_…"><button class="small" id="link">Link</button></div>
         <div class="tip" id="linkTip"></div>
+        <label>Or invite a believer (hand them a link — they're linked to you when they enter)</label>
+        <div class="row"><button class="small ghost" id="invite">Make an invite link</button></div>
+        <div class="tip" id="inviteOut"></div>
+        <label for="doorTarget">Leave a word on a believer's door (their node id)</label>
+        <div class="row"><input id="doorTarget" placeholder="nh_…"></div>
+        <div class="row"><input id="doorText" placeholder="a word of encouragement, a blessing"><button class="small" id="leave">Leave it</button></div>
+        <div class="tip" id="doorOut"></div>
       </div>
 
       <div class="card">
@@ -142,6 +149,11 @@
         <textarea id="post" placeholder="Offer what you have. Ask for what you need. Everything here is a gift freely given."></textarea>
         <button id="send">Send to the fold</button>
         <div id="postOut"></div>
+      </div>
+
+      <div class="card">
+        <div class="kicker" style="text-align:left;margin:0 0 .3rem">The whiteboard on your door</div>
+        <div id="door"><p class="tip">nothing on your door yet — a believer can leave you a word</p></div>
       </div>
 
       <div class="card">
@@ -201,6 +213,46 @@ function enterFold(){
   $("#myId").textContent = me.fp;
   drawMap();
   loadInbox();
+  loadDoor();
+  redeemFromHash();
+}
+
+// If they arrived on an invite link (#way&invite=nhi_…), link them to the inviter automatically.
+async function redeemFromHash(){
+  const m = /invite=(nhi_[0-9a-f]+)/i.exec(location.hash || "");
+  if(!m) return;
+  const r = await api("/mesh/redeem", {method:"POST", body:JSON.stringify({fp: me.fp, token: m[1]})});
+  if(r.ok){ $("#linkTip").textContent = "You were invited — now linked to " + (r.neighbor_callsign||"a believer") + "."; drawMap(); }
+}
+
+$("#invite").onclick = async () => {
+  const r = await api("/mesh/invite", {method:"POST", body:JSON.stringify({fp: me.fp})});
+  if(r.ok){
+    const url = location.origin + r.link;
+    $("#inviteOut").innerHTML = 'Share this: <span class="mono">'+esc(url)+'</span>';
+    if(navigator.clipboard) navigator.clipboard.writeText(url);
+  } else { $("#inviteOut").textContent = r.error || "could not make an invite"; }
+};
+
+$("#leave").onclick = async () => {
+  const target = $("#doorTarget").value.trim(), text = $("#doorText").value.trim();
+  if(!target || !text) return;
+  const r = await api("/mesh/door", {method:"POST", body:JSON.stringify({fp: me.fp, target, text, kind:"blessing"})});
+  if(r.ok){ $("#doorOut").innerHTML = 'Left on '+esc(r.on_door_of||'their')+' door <span class="pill '+(r.signed?'ok':'')+'">'+(r.signed?'signed':'tamper-evident')+'</span>'; $("#doorText").value=""; }
+  else { $("#doorOut").textContent = r.error || "could not leave it"; }
+  if(r && r.crisis){ $("#doorOut").innerHTML += '<div class="crisis"><b>You are not alone.</b><br>'+r.crisis.help.map(h=>h.ref?'<a href="'+h.ref+'">'+esc(h.label)+'</a>':esc(h.label)).join("<br>")+'</div>'; }
+};
+
+async function loadDoor(){
+  const r = await api("/mesh/door?fp=" + encodeURIComponent(me.fp));
+  if(!r.ok || !r.notes || !r.notes.length){ $("#door").innerHTML = '<p class="tip">nothing on your door yet — a believer can leave you a word</p>'; return; }
+  $("#door").innerHTML = r.notes.map(function(m){
+    const v = m.verify||{};
+    const badges = '<span class="pill '+(v.unaltered?'ok':'warn')+'">'+(v.unaltered?'unaltered ✓':'altered ✗')+'</span>'+
+      (v.signed ? '<span class="pill '+(v.authentic?'ok':'warn')+'">'+(v.authentic?'authentic ✓':'bad signature ✗')+'</span>' : '<span class="pill">unsigned</span>');
+    return '<div class="msg"><div class="who"><b>'+esc(m.callsign)+'</b> <span class="pill gold">'+esc(m.kind)+'</span></div>'+
+      '<div class="txt">'+esc(m.text)+'</div>'+badges+'</div>';
+  }).join("");
 }
 
 // ── Link a neighbor ─────────────────────────────────────────────────────────

@@ -818,6 +818,29 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _err(400, "fp (a Guide) and target (the node) required")
         from .. import mesh
         return _ok(mesh.tend(str(body["fp"]), str(body["target"]), str(body.get("role") or "member")))
+    if method == "POST" and path == "/mesh/invite":
+        if not isinstance(body, dict) or not str(body.get("fp") or "").strip():
+            return _err(400, "fp required")
+        from .. import mesh
+        return _ok(mesh.make_invite(str(body["fp"]), max_uses=int(body.get("max_uses") or 0),
+                                    ttl_days=int(body.get("ttl_days") or 30)))
+    if method == "POST" and path == "/mesh/redeem":
+        if not isinstance(body, dict) or not str(body.get("fp") or "").strip() \
+           or not str(body.get("token") or "").strip():
+            return _err(400, "fp and token required")
+        from .. import mesh
+        return _ok(mesh.redeem_invite(str(body["token"]), str(body["fp"])))
+    if method == "POST" and path == "/mesh/door":
+        if not isinstance(body, dict) or not str(body.get("fp") or "").strip() \
+           or not str(body.get("target") or "").strip() or not str(body.get("text") or "").strip():
+            return _err(400, "fp, target and text required")
+        from .. import mesh
+        return _ok(mesh.leave_on_door(str(body["fp"]), str(body["target"]), str(body["text"]),
+                                      kind=str(body.get("kind") or "blessing"),
+                                      private_key=body.get("private_key")))
+    if method == "GET" and path == "/mesh/door":
+        from .. import mesh
+        return _ok(mesh.read_door((query.get("fp") or "").strip(), limit=int(query.get("limit") or 100)))
 
     # Coach — the Shepherd as a K-3 reading tutor. READ-ONLY teaching is the floor (NOT gated); it
     # finds + presents the operator's authored curriculum, never generates a lesson, never grades a child.
@@ -1407,6 +1430,9 @@ ROUTES = [
     {"path": "/mesh/post", "methods": ("POST",), "rl": True},
     {"path": "/mesh/inbox", "methods": ("GET",), "api": True},
     {"path": "/mesh/tend", "methods": ("POST",), "rl": True},
+    {"path": "/mesh/invite", "methods": ("POST",), "rl": True},
+    {"path": "/mesh/redeem", "methods": ("POST",), "rl": True},
+    {"path": "/mesh/door", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/coach/mastery", "methods": ("POST",), "rl": True},
     {"path": "/identity/create", "methods": ("POST",), "rl": True},
     {"path": "/identity/verify", "methods": ("POST",), "rl": True},

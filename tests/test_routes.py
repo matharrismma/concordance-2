@@ -38,7 +38,7 @@ GOLDEN_API_GET = {
     "/works", "/works/item", "/works/artifact", "/works/verify",
     "/decks", "/decks/predict", "/deck",
     "/archetypes", "/archetypes/match", "/archetype",
-    "/mesh", "/mesh/map", "/mesh/inbox",
+    "/mesh", "/mesh/map", "/mesh/inbox", "/mesh/door",
     "/teachings",
 }
 GOLDEN_RATELIMITED = {
@@ -48,6 +48,7 @@ GOLDEN_RATELIMITED = {
     "/study", "/study/export", "/study/import",
     "/groups", "/group", "/group/join", "/group/contribute",
     "/mesh/node", "/mesh/link", "/mesh/post", "/mesh/tend",
+    "/mesh/invite", "/mesh/redeem", "/mesh/door",
     "/audit",   # deliberate addition (the Auditor) — goldens update ONLY with a new route
 }
 

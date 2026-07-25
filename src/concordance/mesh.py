@@ -574,6 +574,156 @@ def inbox(fp: str, limit: int = 100) -> Dict[str, Any]:
     return {"ok": True, "you": fp, "count": len(msgs), "messages": msgs[:max(1, int(limit or 100))]}
 
 
+# ── Invites — hand a believer a link, not a raw fingerprint ───────────────
+_INVITE_RE = re.compile(r"nhi_[0-9a-f]{8,32}")
+
+
+def _invite_path(token: str) -> Path:
+    return _dir() / "invites" / (token + ".json")
+
+
+def make_invite(fp: str, max_uses: int = 0, ttl_days: int = 30) -> Dict[str, Any]:
+    """Mint a shareable invite. Hand it to a believer you know; when they enter, they are linked to
+    you — no need to exchange raw fingerprints. Gated: only a node in the fold may invite."""
+    node = _read_node(fp)
+    if not node or not node.get("confessed"):
+        return _gate()
+    (_dir() / "invites").mkdir(parents=True, exist_ok=True)
+    token = "nhi_" + secrets.token_hex(8)
+    rec = {"token": token, "inviter": fp, "created_at": _now(),
+           "expires_at": _now() + max(1, int(ttl_days or 30)) * 86400,
+           "max_uses": max(0, int(max_uses or 0)), "uses": 0}
+    _write_json(_invite_path(token), rec)
+    return {"ok": True, "token": token, "inviter": fp,
+            "link": "/mesh.html#way&invite=" + token,
+            "note": "Hand this link to a believer you know. When they confess and enter, they are linked to you."}
+
+
+def redeem_invite(token: str, fp: str) -> Dict[str, Any]:
+    """Redeem an invite: the invitee (fp, already in the fold) is linked to the inviter."""
+    token = str(token or "").strip()
+    if not _INVITE_RE.fullmatch(token):
+        return {"ok": False, "error": "not a valid invite"}
+    node = _read_node(fp)
+    if not node or not node.get("confessed"):
+        return _gate()
+    rec = _read_json(_invite_path(token))
+    if not rec:
+        return {"ok": False, "error": "invite not found or already spent"}
+    if int(rec.get("expires_at", 0)) < _now():
+        return {"ok": False, "error": "this invite has expired"}
+    if rec.get("max_uses") and int(rec.get("uses", 0)) >= int(rec["max_uses"]):
+        return {"ok": False, "error": "this invite has been fully used"}
+    inviter = rec.get("inviter")
+    if inviter == fp:
+        return {"ok": False, "error": "you cannot redeem your own invite"}
+    r = link(fp, inviter)
+    if not r.get("ok"):
+        return r
+    with _LOCK:
+        rec = _read_json(_invite_path(token)) or rec
+        rec["uses"] = int(rec.get("uses", 0)) + 1
+        _write_json(_invite_path(token), rec)
+    return {"ok": True, "linked_to": inviter, "neighbor_callsign": r.get("neighbor_callsign", "anon"),
+            "note": "Welcome — you are linked to the believer who invited you."}
+
+
+# ── The whiteboard on your door — leave a word for one another ─────────────
+def _door_path(target_fp: str) -> Path:
+    return _dir() / "doors" / (target_fp + ".jsonl")
+
+
+def _door_core(from_fp: str, callsign: str, to_fp: str, kind: str, text: str,
+               created_at: int, nonce: str) -> Dict[str, Any]:
+    return {"v": 1, "door": 1, "from": from_fp, "callsign": callsign, "to": to_fp,
+            "kind": kind, "text": text, "created_at": created_at, "nonce": nonce}
+
+
+def leave_on_door(from_fp: str, target_fp: str, text: str, *, kind: str = "blessing",
+                  private_key: Optional[str] = None) -> Dict[str, Any]:
+    """Leave a word on a believer's door — a directed encouragement (or word/need/offer), the
+    whiteboard on their door. You need their node id; it is not a broadcast. Signed + content-
+    addressed like every post, so they can verify it offline. Crisis is surfaced to real people."""
+    text = str(text or "").strip()[:_MAX_TEXT]
+    if not text:
+        return {"ok": False, "error": "text required"}
+    frm = _read_node(from_fp)
+    if not frm or not frm.get("confessed"):
+        return _gate()
+    tgt = _read_node(target_fp)
+    if not tgt:
+        return {"ok": False, "error": "no node with that id — check the door you were given"}
+    kind = kind if kind in _KINDS else "blessing"
+    core = _door_core(from_fp, frm.get("callsign", "anon"), target_fp, kind, text,
+                      _now(), secrets.token_hex(8))
+    canon, mid = _seal_core(core)
+    signature, signed = None, False
+    if private_key:
+        try:
+            if identity.signing_available():
+                signature = signing.sign_bytes(canon, private_key)
+                signed = signing.verify_bytes(canon, signature, frm.get("public_key", ""))
+                if not signed:
+                    return {"ok": False, "error": "signature does not match your node"}
+        except Exception:  # noqa: BLE001
+            signature, signed = None, False
+    stored = dict(core)
+    stored["id"] = mid
+    stored["signature"] = signature
+    stored["signed"] = signed
+    (_dir() / "doors").mkdir(parents=True, exist_ok=True)
+    with _LOCK:
+        with _door_path(target_fp).open("a", encoding="utf-8") as f:
+            f.write(json.dumps(stored, ensure_ascii=False) + "\n")
+    out = {"ok": True, "id": mid, "signed": signed, "on_door_of": tgt.get("callsign", "anon"),
+           "note": "Left on their door — they will see it when they come home."}
+    from .ask import is_crisis, _CRISIS_RESOURCES
+    if is_crisis(text):
+        out["crisis"] = {"help": list(_CRISIS_RESOURCES),
+                         "message": "They will see this — and please reach a real person right now."}
+    return out
+
+
+def _verify_door(m: Dict[str, Any]) -> Dict[str, Any]:
+    core = _door_core(m.get("from", ""), m.get("callsign", ""), m.get("to", ""),
+                      m.get("kind", "blessing"), m.get("text", ""),
+                      int(m.get("created_at", 0)), m.get("nonce", ""))
+    canon, mid = _seal_core(core)
+    unaltered = (mid == m.get("id"))
+    authentic = False
+    sig = m.get("signature")
+    if sig:
+        node = _read_node(m.get("from", ""))
+        if node:
+            authentic = signing.verify_bytes(canon, sig, node.get("public_key", ""))
+    return {"unaltered": unaltered, "authentic": authentic, "signed": bool(sig)}
+
+
+def read_door(fp: str, limit: int = 100) -> Dict[str, Any]:
+    """Read the words left on YOUR door — each with its offline verification."""
+    me = _read_node(fp)
+    if not me or not me.get("confessed"):
+        return _gate()
+    notes = []
+    p = _door_path(fp)
+    if p.exists():
+        for ln in p.read_text(encoding="utf-8").splitlines():
+            if not ln.strip():
+                continue
+            try:
+                m = json.loads(ln)
+            except ValueError:
+                continue
+            src = _read_node(m.get("from", ""))
+            notes.append({"id": m.get("id"), "from": m.get("from"), "callsign": m.get("callsign", "anon"),
+                          "kind": m.get("kind", "blessing"), "text": m.get("text", ""),
+                          "created_at": m.get("created_at"),
+                          "from_callsign_current": (src or {}).get("callsign"),
+                          "verify": _verify_door(m)})
+    notes.sort(key=lambda x: -(x.get("created_at") or 0))
+    return {"ok": True, "you": fp, "count": len(notes), "notes": notes[:max(1, int(limit or 100))]}
+
+
 def guidance() -> Dict[str, Any]:
     return {
         "identity": "The Fellowship Mesh — a network of believers who serve each other. Each of you is a "
@@ -640,4 +790,5 @@ def guidance() -> Dict[str, Any]:
 
 
 __all__ = ["register_node", "link", "tend", "map_around", "post_message", "inbox",
-           "verify_message", "guidance", "path", "CONFESSION"]
+           "verify_message", "make_invite", "redeem_invite", "leave_on_door", "read_door",
+           "guidance", "path", "CONFESSION"]

@@ -156,6 +156,36 @@ def test_route_forwards_the_confession(mesh_dir):
     assert ok.get("ok") is True and ok.get("fp") and ok.get("confession_signed") is True
 
 
+def test_invite_links_two_believers(mesh_dir):
+    a, afp = _node("Inviter")
+    b, bfp = _node("Invitee")
+    inv = mesh.make_invite(afp)
+    assert inv["ok"] and inv["token"].startswith("nhi_")
+    # the invitee redeems → mutually linked to the inviter
+    r = mesh.redeem_invite(inv["token"], bfp)
+    assert r["ok"] and r["linked_to"] == afp
+    assert bfp in (mesh._read_node(afp) or {}).get("links", [])
+    # a spent/absent token is refused; you cannot redeem your own
+    assert mesh.redeem_invite("nhi_deadbeef", bfp)["ok"] is False
+    assert mesh.make_invite(afp) and mesh.redeem_invite(mesh.make_invite(afp)["token"], afp)["ok"] is False
+
+
+def test_door_whiteboard_directed_and_verifiable(mesh_dir):
+    a, afp = _node("Neighbor")
+    b, bfp = _node("Homeowner")
+    r = mesh.leave_on_door(afp, bfp, "Grace and peace on your house.", private_key=a["private_key"])
+    assert r["ok"] and r["signed"] and r["on_door_of"] == "Homeowner"
+    door = mesh.read_door(bfp)
+    assert door["count"] == 1
+    note = door["notes"][0]
+    assert note["callsign"] == "Neighbor"
+    assert note["verify"] == {"unaltered": True, "authentic": True, "signed": True}
+    # the note is on B's door, not A's; the unconfessed see nothing
+    assert mesh.read_door(afp)["count"] == 0
+    other = identity.create_identity()
+    assert mesh.read_door(identity.fingerprint(other["public_key"])).get("gated") is True
+
+
 def test_church_node_and_estate_ladder(mesh_dir):
     _idn, cfp = _node("GraceChapel", node_type="church")
     m = mesh.map_around(cfp, hops=1)
