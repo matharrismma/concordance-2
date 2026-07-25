@@ -1,0 +1,161 @@
+"""Decks — the Hare. Many curated card SETS; predict the one this interaction needs; search it
+first for speed; fall back to the whole keeping so nothing is ever missed (the Tortoise).
+
+Matt: "We can have many sets of cards, so we predict which card deck you need or will need in this
+interaction — it optimizes the search and gets more speed. Think of it like having many Pokémon
+decks depending on the situation and the opponent. Name the position; more positions allow faster
+decisions." (The Pressure Fighting System, applied to retrieval.)
+
+This first cut builds DOMAIN decks from the corpus's own shelves — safe and non-interpretive. The
+ARCHETYPE decks (the characters of the Bible) and their micropositions layer on top next, grounded
+in Scripture. The predictor only reorders what we already hold, and the fallback guarantees the
+Tortoise still reaches everything — it just gets there second. Conduit, not source.
+"""
+from __future__ import annotations
+
+import re
+from typing import Any, Dict, List, Optional, Set
+
+_TOK = re.compile(r"[a-z0-9]{2,}")
+
+
+def _toks(s: str) -> Set[str]:
+    return set(_TOK.findall(str(s or "").lower()))
+
+
+# id, name, description, shelves (the cards it holds), keywords (what routes a query TO it)
+_DECKS: List[Dict[str, Any]] = [
+    {"id": "tongues", "name": "The Original Tongues — Hebrew & Greek",
+     "desc": "The lexicon: every Strong's word, its transliteration and lexical range — the plumb-line.",
+     "shelves": {"lexicon"},
+     "keywords": {"hebrew", "greek", "strongs", "strong", "lexicon", "transliteration", "aramaic",
+                  "septuagint", "word", "study", "meaning", "root", "original", "tongue", "language"}},
+    {"id": "word", "name": "The Dictionary & Thesaurus",
+     "desc": "Every word: what it means, and the words that stand with it.",
+     "shelves": {"dictionary"},
+     "keywords": {"define", "definition", "meaning", "synonym", "antonym", "thesaurus", "word",
+                  "spell", "vocabulary", "term", "means"}},
+    {"id": "scripture", "name": "Scripture & the Word",
+     "desc": "The Bible, the fathers, the confessions, the hymns — the Word and its witnesses.",
+     "shelves": {"codex", "patristics", "connections", "hymns"},
+     "keywords": {"scripture", "bible", "verse", "gospel", "jesus", "christ", "god", "lord", "faith",
+                  "church", "father", "doctrine", "psalm", "hymn", "prayer", "sin", "grace", "holy",
+                  "testament", "apostle", "prophet", "salvation", "cross", "spirit", "heaven"}},
+    {"id": "body", "name": "The Medicines & the Body",
+     "desc": "Medicines and their class, and foods and their nourishment — for the keeping of the body.",
+     "shelves": {"medicine", "nutrition"},
+     "keywords": {"drug", "dose", "dosage", "medicine", "medication", "pill", "symptom", "disease",
+                  "treatment", "health", "vitamin", "calorie", "food", "nutrition", "diet", "protein",
+                  "pain", "fever", "blood", "heart", "sick", "remedy"}},
+    {"id": "heavens", "name": "The Heavens",
+     "desc": "Named and naked-eye stars: position, distance, brightness, spectral type.",
+     "shelves": {"astronomy"},
+     "keywords": {"star", "planet", "constellation", "galaxy", "magnitude", "spectral", "sky",
+                  "night", "nebula", "orbit", "celestial", "astronomy", "cosmos"}},
+    {"id": "matter", "name": "Matter & the Atom",
+     "desc": "The nuclides, the elements and the physical laws.",
+     "shelves": {"nuclear physics", "chemistry", "physics"},
+     "keywords": {"nuclide", "isotope", "half", "life", "element", "atom", "atomic", "decay",
+                  "radioactive", "proton", "neutron", "physics", "chemistry", "reaction", "energy"}},
+    {"id": "earth", "name": "The Earth & its Places",
+     "desc": "Named places of the earth — country, coordinates, population.",
+     "shelves": {"geography"},
+     "keywords": {"place", "city", "country", "location", "latitude", "longitude", "town", "map",
+                  "where", "capital", "region", "nation", "geography", "population"}},
+    {"id": "networks", "name": "Networks & Machines",
+     "desc": "The IANA registry of service names and port numbers.",
+     "shelves": {"networking"},
+     "keywords": {"port", "protocol", "tcp", "udp", "ip", "network", "service", "computer", "socket",
+                  "packet", "server", "dns", "http", "ssh"}},
+    {"id": "nations", "name": "Money & the Nations",
+     "desc": "World Bank open indicators — economies across countries and years.",
+     "shelves": {"economics"},
+     "keywords": {"gdp", "economy", "economic", "inflation", "indicator", "world", "bank",
+                  "development", "economics", "trade", "income", "growth", "poverty"}},
+    {"id": "works", "name": "The Works — worked & sealed",
+     "desc": "Real worked demonstrations of mathematics, science and engineering, each sealed.",
+     "shelves": {"the-works"},
+     "keywords": {"proof", "worked", "sealed", "demonstration", "theorem", "math", "mathematics",
+                  "engineering", "derivation", "verify", "seal", "calculate"}},
+    {"id": "land", "name": "The Land — grow, make, keep",
+     "desc": "Crops, soil, recipes and maker knowledge — the practical arts.",
+     "shelves": {"agriculture", "recipes", "maker"},
+     "keywords": {"crop", "plant", "garden", "soil", "grow", "farm", "harvest", "recipe", "cook",
+                  "make", "build", "tool", "repair", "seed", "rotation"}},
+    {"id": "books", "name": "The Great Books",
+     "desc": "The great literature of the age, in the public domain.",
+     "shelves": {"classics"},
+     "keywords": {"literature", "book", "classic", "novel", "story", "poem", "author", "chapter",
+                  "read", "text"}},
+]
+
+_BY_ID = {d["id"]: d for d in _DECKS}
+# precompute the routing vocabulary for each deck (keywords + name + shelf words)
+for _d in _DECKS:
+    _d["_route"] = set(_d["keywords"]) | _toks(_d["name"]) | {w for s in _d["shelves"] for w in _toks(s)}
+
+
+def all_decks() -> List[Dict[str, Any]]:
+    """Every deck, with a live card count (the atlas can render these)."""
+    from . import corpus
+    cor = corpus.default_corpus()
+    counts: Dict[str, int] = {}
+    for c in cor.cards.values():
+        if corpus.is_public(c):
+            counts[c.get("shelf", "")] = counts.get(c.get("shelf", ""), 0) + 1
+    return [{"id": d["id"], "name": d["name"], "desc": d["desc"],
+             "shelves": sorted(d["shelves"]),
+             "cards": sum(counts.get(s, 0) for s in d["shelves"])}
+            for d in _DECKS]
+
+
+def predict(query: str, k: int = 3) -> List[Dict[str, Any]]:
+    """Name the position: which deck(s) does this interaction call for? Scores each deck by how
+    much the query overlaps its routing vocabulary. Returns the top-k that match (possibly none —
+    then the caller searches the whole keeping, the Tortoise)."""
+    qt = _toks(query)
+    if not qt:
+        return []
+    scored = []
+    for d in _DECKS:
+        overlap = qt & d["_route"]
+        if overlap:
+            scored.append((len(overlap), d, sorted(overlap)))
+    scored.sort(key=lambda x: -x[0])
+    return [{"id": d["id"], "name": d["name"], "score": s, "matched": m}
+            for s, d, m in scored[:max(1, int(k))]]
+
+
+def deck_shelves(deck_id: str) -> Optional[Set[str]]:
+    d = _BY_ID.get(deck_id)
+    return set(d["shelves"]) if d else None
+
+
+def search(query: str, deck_id: Optional[str] = None, limit: int = 12) -> Dict[str, Any]:
+    """Search a deck first (the Hare), falling back to the whole keeping if the deck comes up
+    short (the Tortoise). If no deck is given, predict it. Always honest about which ran."""
+    from . import corpus
+    predicted = predict(query, k=1)
+    if not deck_id and predicted:
+        deck_id = predicted[0]["id"]
+    shelves = deck_shelves(deck_id) if deck_id else None
+
+    hits: List[dict] = []
+    if shelves:
+        hits = corpus.search(query, limit=limit, shelves=shelves)
+    fell_back = False
+    if len(hits) < max(3, limit // 3):          # deck too thin → the Tortoise reaches everything
+        fell_back = True
+        seen = {h.get("id") for h in hits}
+        for h in corpus.search(query, limit=limit):
+            if h.get("id") not in seen:
+                hits.append(h)
+                if len(hits) >= limit:
+                    break
+
+    def _brief(c):
+        return {"id": c.get("id"), "title": c.get("title"), "shelf": c.get("shelf"),
+                "snippet": (c.get("body") or "")[:140]}
+    return {"query": query, "deck": deck_id, "predicted": predicted,
+            "fell_back_to_full": fell_back, "count": len(hits[:limit]),
+            "results": [_brief(c) for c in hits[:limit]]}

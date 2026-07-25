@@ -1275,6 +1275,20 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import compendium as works_mod
         return _ok(works_mod.verify_artifact())
 
+    if method == "GET" and path == "/decks":
+        # The Hare: the curated card sets (decks) with live counts — the atlas renders these.
+        from .. import decks as _decks
+        return _ok({"decks": _decks.all_decks()})
+    if method == "GET" and path == "/decks/predict":
+        # "Name the position": which deck(s) does this query call for?
+        from .. import decks as _decks
+        return _ok({"query": query.get("q", ""), "predicted": _decks.predict(query.get("q", ""), k=3)})
+    if method == "GET" and path == "/deck":
+        # Search a deck first (fast), fall back to the whole keeping if it comes up short.
+        from .. import decks as _decks
+        lim = min(50, max(1, int(query.get("limit") or 12)))
+        return _ok(_decks.search(query.get("q", ""), (query.get("id") or "").strip() or None, lim))
+
     if method == "GET" and path == "/teachings":
         # Phase 3 — the teaching-review workspace (Words in Red). Witness content: the engine
         # assembles the frozen Greek anchor + existing sites; the operator records the reading.
@@ -1396,6 +1410,9 @@ ROUTES = [
     {"path": "/works/item", "methods": ("GET",), "api": True},
     {"path": "/works/artifact", "methods": ("GET",), "api": True},
     {"path": "/works/verify", "methods": ("GET",), "api": True},
+    {"path": "/decks", "methods": ("GET",), "api": True},
+    {"path": "/decks/predict", "methods": ("GET",), "api": True},
+    {"path": "/deck", "methods": ("GET",), "api": True},
     {"path": "/teachings", "methods": ("GET",), "api": True},
     {"path": "/card.html", "methods": ("GET",), "api": True, "serve": True},
     {"path": "/speak", "methods": ("POST",), "rl": True, "serve": True},

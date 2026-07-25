@@ -36,6 +36,7 @@ GOLDEN_API_GET = {
     "/groups", "/group", "/seeds", "/almanac",
     "/codex", "/codex/scripture", "/codex/themes", "/codex/connections", "/codex/artifact", "/codex/verify",
     "/works", "/works/item", "/works/artifact", "/works/verify",
+    "/decks", "/decks/predict", "/deck",
     "/teachings",
 }
 GOLDEN_RATELIMITED = {

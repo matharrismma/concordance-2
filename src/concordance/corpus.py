@@ -118,13 +118,18 @@ class Corpus:
             score *= 1.5
         return float(score)
 
-    def search(self, query: str, limit: int = 25, include_witness: bool = True) -> List[dict]:
+    def search(self, query: str, limit: int = 25, include_witness: bool = True,
+               shelves: Optional[set] = None) -> List[dict]:
         """Ranked search over the keeping.
 
         The keeping is ONE SHARED library: by default BOTH surfaces draw the whole thing
         — the .com includes the religious cards too (Matt, 2026-06-26: "the religious
         cards can be included"; "we are not hiding anything"). `include_witness=False`
-        gives an optional scrubbed view if a caller ever wants secular-only results."""
+        gives an optional scrubbed view if a caller ever wants secular-only results.
+
+        `shelves` (a set) restricts the search to those shelves — the DECK fast-path (the Hare):
+        scoring only the deck's cards instead of the whole keeping. None = the whole library
+        (the Tortoise). A deck search that comes up short can always fall back to the full one."""
         query_tokens = set(_tokens(query or ""))
         if not query_tokens:
             return []
@@ -141,6 +146,8 @@ class Corpus:
             if not c or not is_public(c):
                 continue
             if not include_witness and c.get("surface") == "witness":
+                continue
+            if shelves is not None and c.get("shelf") not in shelves:
                 continue
             s = self._score(c, query_tokens, idf)
             if s > 0:
@@ -276,11 +283,13 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
     return _DEFAULT
 
 
-def search(query: str, limit: int = 25, include_witness: bool = True) -> List[dict]:
+def search(query: str, limit: int = 25, include_witness: bool = True,
+           shelves: Optional[set] = None) -> List[dict]:
     """Ranked search over the default corpus (cards.jsonl) — the floor's retrieval primitive.
     The keeping is shared across both surfaces by default (the .com includes the religious
-    cards too); pass include_witness=False for an optional secular-only view."""
-    return default_corpus().search(query, limit, include_witness)
+    cards too); pass include_witness=False for an optional secular-only view. `shelves` scopes
+    the search to a deck (the Hare fast-path)."""
+    return default_corpus().search(query, limit, include_witness, shelves)
 
 
 # ── Library primitives (ported from 1.0's card tools, over the same corpus) ──────────────
