@@ -94,6 +94,9 @@ data/verified_cards.jsonl
 !data/language_spine.jsonl
 # More stored sources (RFCs, Matthew Henry, Spurgeon, activities) — spines CONTENT (git-tracked); cards generated (gitignored).
 !data/reference_extra_spines.jsonl
+# The Great Books (Project Gutenberg catalogue, acquired to the HD) — spine CONTENT (git-tracked);
+# the 77k stub cards are generated (gitignored). The full texts live at the links, fetched on demand.
+!data/gutenberg_spine.jsonl
 # The theory assay carded — the calibration (not judgment) of the academy's theories — CONTENT
 !data/theory_cards.jsonl
 # The Lighthouse Field Kit — Matt's authored deck of 30 Scripture protocol cards — CONTENT (git-tracked)

@@ -93,10 +93,11 @@ _DECKS: List[Dict[str, Any]] = [
      "keywords": {"crop", "plant", "garden", "soil", "grow", "farm", "harvest", "recipe", "cook",
                   "make", "build", "tool", "repair", "seed", "rotation"}},
     {"id": "books", "name": "The Great Books",
-     "desc": "The great literature of the age, in the public domain.",
-     "shelves": {"classics"},
+     "desc": "The great literature of the world, in the public domain — some 77,000 works from Project "
+             "Gutenberg, each a click from its full text.",
+     "shelves": {"classics", "gutenberg"},
      "keywords": {"literature", "book", "classic", "novel", "story", "poem", "author", "chapter",
-                  "read", "text"}},
+                  "read", "text", "gutenberg", "fiction", "essay", "play", "poetry", "volume"}},
     {"id": "languages", "name": "The Languages of the Earth",
      "desc": "The world's languages by family and region, each with its phonological inventory — the "
              "consonants, vowels and tones it is spoken with.",

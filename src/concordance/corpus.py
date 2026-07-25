@@ -216,6 +216,8 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                       # More stored sources — RFCs (internet standards), Matthew Henry commentary,
                       # Spurgeon sermons, and the Compendium of Physical Activities (METs).
                       "reference_extra_spines.jsonl", "reference_extra_cards.jsonl",
+                      # Acquired: the Great Books — Project Gutenberg (~77k stub cards -> the full text).
+                      "gutenberg_spine.jsonl", "gutenberg_cards.jsonl",
                       # The Corpus — technical, academic cards minted from the stored sources
                       # (nuclides, stars, foods, ports, indicators, …); always growing.
                       "source_spines.jsonl", "source_cards.jsonl", "web_cache.jsonl"):
