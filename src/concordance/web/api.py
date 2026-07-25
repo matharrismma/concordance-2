@@ -327,7 +327,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                     "schema_active": schema_active(config.schema_path, config.skip_schema_validation),
                     "jsonschema": _HAS_JSONSCHEMA})
     if method == "GET" and path == "/identity":
-        return _ok({"surface": surface, "identity": config.identity})
+        # identity = what the engine IS (the dry, efficient truth); persona = WHO it is to talk to
+        # (the separate voice / movie-style experience). The card system stays pure efficiency.
+        return _ok({"surface": surface, "identity": config.identity, "persona": config.persona})
 
     if method == "GET" and path == "/route":
         # The Router — names the member who should answer, and hands off. It NEVER answers.

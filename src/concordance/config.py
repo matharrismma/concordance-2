@@ -44,6 +44,13 @@ class EngineConfig:
         return branding.identity_for(self.surface)
 
     @property
+    def persona(self) -> str:
+        """The VOICE — the agent's sense of self (the movie-style experience). A layer entirely
+        separate from the card system (which stays dry, factual, pure efficiency): the personality
+        lives here, never in the data. See branding.persona_for."""
+        return branding.persona_for(self.surface)
+
+    @property
     def source_layers(self) -> tuple[str, ...]:
         """The provenance layers surfaced on this face."""
         return layers.layers_for(self.surface)
