@@ -18,7 +18,9 @@ test_characters.py
 test_coach.py
 test_commentary.py
 test_core.py
+test_airlock.py
 test_corpus.py
+test_corpus_db.py
 test_crossref.py
 test_days.py
 test_deck_api.py
