@@ -209,6 +209,8 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                       "scripture_spines.jsonl", "scripture_cards.jsonl",
                       # The OEIS core — the foundational integer sequences (academics: mathematics).
                       "oeis_spine.jsonl", "oeis_cards.jsonl",
+                      # The tree of life — the recognizable organisms (academics: biology).
+                      "taxonomy_spine.jsonl", "taxonomy_cards.jsonl",
                       # The Corpus — technical, academic cards minted from the stored sources
                       # (nuclides, stars, foods, ports, indicators, …); always growing.
                       "source_spines.jsonl", "source_cards.jsonl", "web_cache.jsonl"):

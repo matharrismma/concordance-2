@@ -94,6 +94,13 @@ _DECKS: List[Dict[str, Any]] = [
      "shelves": {"classics"},
      "keywords": {"literature", "book", "classic", "novel", "story", "poem", "author", "chapter",
                   "read", "text"}},
+    {"id": "life", "name": "The Tree of Life — the living kinds",
+     "desc": "Every creature with a common name — mammals, birds, fish, plants, the microbes we know "
+             "by name — with its scientific name, rank and place in the tree of life.",
+     "shelves": {"taxonomy"},
+     "keywords": {"animal", "plant", "species", "organism", "creature", "genus", "mammal", "bird",
+                  "fish", "insect", "tree", "flower", "taxonomy", "scientific", "kingdom", "life",
+                  "reptile", "amphibian", "fungus", "bacteria"}},
     {"id": "sequences", "name": "Integer Sequences — the OEIS core",
      "desc": "The foundational integer sequences: the primes, Fibonacci, Catalan, the partitions, and "
              "thousands more the whole of number theory keeps returning to.",
