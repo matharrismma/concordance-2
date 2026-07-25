@@ -108,6 +108,14 @@ SPINES = [
            "Medicines and their class, form and route — a pharmacopeia so a caregiver with no "
            "doctor still has the reference.", FLOOR,
            ["medicine", "drugs", "pharmacology", "pharmacopeia", "spine"]),
+    # The plumb-line: the original tongues. Rooted in the Word (special revelation), not the Floor —
+    # everything runs THROUGH Hebrew and Greek. Matt: "Everything through hebrew and greek. We are
+    # the tool to bring the Academics and jewish people to Christ through logic and coherence."
+    _spine("card_spine_lexicon", "The Original Tongues — Hebrew & Greek",
+           "Every word of the Biblical languages: Strong's number, the word itself, its "
+           "transliteration and its lexical range. The plumb-line the whole map is measured "
+           "against — Scripture in the tongues it was given in.", "card_k_spine_the_word",
+           ["hebrew", "greek", "lexicon", "strongs", "original language", "the Word", "spine"]),
 ]
 
 
@@ -274,9 +282,28 @@ def gen_drugs():
                     spine="card_spine_drugs", domain="medicine")
 
 
+def gen_lexicon():
+    """The plumb-line: every Strong's entry — Hebrew and Greek — with its word, transliteration,
+    gloss and lexical range. Everything runs through the original tongues."""
+    c = _conn("lexicon_bdbt")
+    for (strongs, word, translit, gloss, definition) in c.execute(
+            "select strongs,word,translit,gloss,definition from entries"):
+        if not strongs:
+            continue
+        lang = "hebrew" if str(strongs).upper().startswith("H") else "greek"
+        body = f"{word} ({translit}), Strong's {strongs}: {gloss}. {definition}"
+        yield _card(f"card_src_lex_{_sk(strongs)}",
+                    f"{strongs} — {word} ({translit}): {gloss}", body,
+                    shelf="lexicon", subject=str(word),
+                    bands=[str(strongs).lower(), str(word), str(translit), str(gloss), lang,
+                           "lexicon", "original language"],
+                    source_label="STEPBible TBESH/TBESG — Extended Strong's lexicon (CC-BY, Tyndale House)",
+                    spine="card_spine_lexicon", domain="linguistics")
+
+
 GENERATORS = {"nuclides": gen_nuclides, "stars": gen_stars, "ports": gen_ports,
               "worldbank": gen_worldbank, "foods": gen_foods, "words": gen_words,
-              "places": gen_places, "drugs": gen_drugs}
+              "places": gen_places, "drugs": gen_drugs, "lexicon": gen_lexicon}
 
 
 def main() -> int:
