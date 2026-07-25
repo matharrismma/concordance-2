@@ -97,6 +97,17 @@ SPINES = [
     _spine("card_spine_worldbank", "World development indicators",
            "World Bank open indicators — economies measured across countries and years.", FLOOR,
            ["economics", "development", "world bank", "indicators", "spine"]),
+    _spine("card_spine_words", "The Dictionary & Thesaurus",
+           "Every word: what it means, and the words that stand with it. A dictionary and a "
+           "thesaurus in one — so language itself is carried on the ark.", FLOOR,
+           ["dictionary", "thesaurus", "words", "language", "wordnet", "spine"]),
+    _spine("card_spine_places", "The places of the earth",
+           "Named places of the earth — country, coordinates, population. A gazetteer for the ark.",
+           FLOOR, ["geography", "places", "gazetteer", "geonames", "spine"]),
+    _spine("card_spine_drugs", "The medicines",
+           "Medicines and their class, form and route — a pharmacopeia so a caregiver with no "
+           "doctor still has the reference.", FLOOR,
+           ["medicine", "drugs", "pharmacology", "pharmacopeia", "spine"]),
 ]
 
 
@@ -199,8 +210,73 @@ def gen_foods():
                     spine="card_spine_foods", domain="nutrition")
 
 
+def gen_words():
+    """The Dictionary & Thesaurus — WordNet: one card per lemma, all senses (definitions) plus
+    the words that stand with it (synonyms)."""
+    c = _conn("wordnet")
+    for (lemma, data) in c.execute("select lemma,data from senses"):
+        try:
+            senses = json.loads(data)
+        except Exception:
+            continue
+        if not senses:
+            continue
+        parts, poss = [], set()
+        for s in senses[:6]:
+            pos, d = s.get("pos", ""), s.get("definition", "")
+            poss.add(pos)
+            sy = s.get("synonyms") or []
+            parts.append(f"({pos}) {d}" + (f" — syn: {', '.join(sy[:6])}" if sy else ""))
+        body = f"{lemma}: " + " · ".join(parts)
+        yield _card(f"card_src_word_{_sk(lemma)}", str(lemma), body,
+                    shelf="dictionary", subject=str(lemma),
+                    bands=[str(lemma).lower(), "dictionary", "thesaurus", "word"] + [p for p in poss if p],
+                    source_label="WordNet 3.0, Princeton University (WordNet License)",
+                    spine="card_spine_words", domain="linguistics")
+
+
+def gen_places():
+    c = _conn("geonames")
+    for (gid, name, ascii_, lat, lon, cc, admin1, fcode, pop, tz) in c.execute(
+            "select geonameid,name,ascii,lat,lon,cc,admin1,fcode,population,tz from places"):
+        if not name:
+            continue
+        pop_s = f", population {pop:,}" if pop else ""
+        body = (f"{name}: a place in {cc}{(', ' + admin1) if admin1 else ''} at "
+                f"{lat:.3f}, {lon:.3f}{pop_s}. Feature {fcode}, timezone {tz}.")
+        yield _card(f"card_src_place_{_sk(gid)}", str(name), body,
+                    shelf="geography", subject=str(name),
+                    bands=[str(name).lower(), str(cc), "place", "geography", str(fcode)],
+                    source_label="GeoNames (CC-BY 4.0)",
+                    spine="card_spine_places", domain="geography")
+
+
+def gen_drugs():
+    c = _conn("openfda_ndc")
+    seen = set()
+    for (ndc, brand, generic, form, route, ptype, dea, ingr, pharm, labeler) in c.execute(
+            "select product_ndc,brand_name,generic_name,dosage_form,route,product_type,"
+            "dea_schedule,active_ingredients,pharm_class,labeler_name from drugs where generic_name is not null"):
+        key = str(generic or "").strip().lower()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        body = (f"{generic}: a {ptype or 'drug'}" + (f", {form.lower()}" if form else "") +
+                (f" given by the {route.lower()} route" if route else "") + "." +
+                (f" Pharmacologic class: {pharm}." if pharm else "") +
+                (f" DEA schedule {dea}." if dea else ""))
+        bands = [key, "drug", "medicine", "pharmacology"]
+        if brand and brand.lower() != key:
+            bands.append(brand.lower())
+        yield _card(f"card_src_drug_{_sk(key)}", str(generic).title(), body,
+                    shelf="medicine", subject=str(generic),
+                    bands=bands, source_label="openFDA / FDA NDC Directory (public domain)",
+                    spine="card_spine_drugs", domain="medicine")
+
+
 GENERATORS = {"nuclides": gen_nuclides, "stars": gen_stars, "ports": gen_ports,
-              "worldbank": gen_worldbank, "foods": gen_foods}
+              "worldbank": gen_worldbank, "foods": gen_foods, "words": gen_words,
+              "places": gen_places, "drugs": gen_drugs}
 
 
 def main() -> int:
