@@ -168,6 +168,12 @@ def rollup(log_paths, days: int = 7, now: Optional[int] = None,
     cutoff = now - days * 86400
     our = set(our_hosts)
 
+    # The last 24 hours, hour by hour (clock-aligned): a live pulse of the door. Bucketed by each
+    # request's own class (human / agent / bot) so the operator sees WHEN, and by WHOM, at a glance.
+    cur_hour = (now // 3600) * 3600
+    h24_start = cur_hour - 23 * 3600
+    h24: Dict[str, Any] = {c: [0] * 24 for c in ("human", "agent", "bot")}
+
     ips: Dict[str, Dict[str, Any]] = {}
     fruit_by_path: Dict[str, Counter] = defaultdict(Counter)   # watch path -> Counter(class)
     fruit_external: Counter = Counter()                        # watch path -> non-first-party human+agent hits
@@ -200,6 +206,11 @@ def rollup(log_paths, days: int = 7, now: Optional[int] = None,
                 ua, referer = _h("User-Agent"), _h("Referer")
                 ip = req.get("client_ip") or req.get("remote_ip") or "?"
                 cls, name = classify(ua, uri)
+                ts = d.get("ts")
+                if ts and ts >= h24_start:                       # the last-24h hourly pulse
+                    _i = int((ts - h24_start) // 3600)
+                    if 0 <= _i < 24:
+                        h24[cls if cls in h24 else "bot"][_i] += 1
                 pbase = (uri or "/").split("?")[0].rstrip("/") or "/"
                 if pbase in _WATCH:
                     fruit_by_path[pbase][cls] += 1
@@ -286,6 +297,14 @@ def rollup(log_paths, days: int = 7, now: Optional[int] = None,
         "mcp_top": mcp_ua.most_common(4),
         "doors": {p: dict(fruit_by_path[p]) for p in _WATCH if p in fruit_by_path},
         "first_party_excluded": len(_FIRST_PARTY),
+    }
+    _tot = [h24["human"][i] + h24["agent"][i] + h24["bot"][i] for i in range(24)]
+    out["last_24h"] = {
+        "hour_ts": [h24_start + i * 3600 for i in range(24)],   # unix start of each hourly bucket (UTC)
+        "by_class": h24,                                        # human / agent / bot, 24 hourly buckets each
+        "total": _tot,
+        "peak": max(_tot, default=0),
+        "requests": sum(_tot),
     }
     return out
 

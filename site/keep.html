@@ -20,6 +20,18 @@
   .pill.BROKEN, .pill.ERROR { color: var(--fail); border-color: var(--fail); }
   .dot { display:inline-block; width:.6rem; height:.6rem; border-radius:50%; background: var(--pass); margin-right:.4rem; }
   #closed { display:none; }
+  /* the last-24-hours pulse — hourly stacked bars (human / agent / bot) */
+  .h24 { display:flex; align-items:flex-end; gap:2px; height:120px; border-bottom:1px solid var(--line); }
+  .h24 .col { flex:1 1 0; min-width:0; display:flex; flex-direction:column; justify-content:flex-end; }
+  .h24 .col:hover { background:rgba(198,154,74,.08); }
+  .h24 .seg { width:100%; }
+  .h24 .seg.human { background:var(--accent); }
+  .h24 .seg.agent { background:var(--pass); }
+  .h24 .seg.bot   { background:var(--line); }
+  .h24-labels { display:flex; gap:2px; margin-top:.25rem; }
+  .h24-labels span { flex:1 1 0; text-align:center; font-size:.58rem; color:var(--muted); font-family:ui-monospace,Consolas,monospace; }
+  .h24-legend { display:flex; gap:1.1rem; font-size:.74rem; color:var(--muted); margin-top:.5rem; }
+  .h24-legend i { display:inline-block; width:.6rem; height:.6rem; border-radius:2px; margin-right:.35rem; vertical-align:middle; }
 </style>
 </head>
 <body>
@@ -51,6 +63,12 @@
         content-addressed, independently re-verifiable. <strong>Recent events</strong> are an
         advisory ops log (best-effort, tamperable) — not part of the integrity chain.</p>
       <p id="integrity-line" style="font-size:.82rem;margin-top:.2rem"></p>
+    </section>
+
+    <section>
+      <h2>Last 24 hours <span class="muted" style="font-size:.68rem;font-weight:400">· hourly · human / agent / bot · advisory ops data from the access logs</span></h2>
+      <p class="muted" id="h24-meta" style="font-size:.82rem;margin:.2rem 0 .5rem"></p>
+      <div id="h24"></div>
     </section>
 
     <section>
@@ -143,6 +161,7 @@ async function refresh() {
     ae.appendChild(el);
   }
 
+  renderH24(d.traffic);
   renderTraffic(d.traffic);
   renderFruit(d.traffic);
 
@@ -172,6 +191,38 @@ async function refresh() {
   document.getElementById("live-dot").style.background = "var(--pass)";
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function renderH24(tf){
+  var el = document.getElementById('h24'), meta = document.getElementById('h24-meta');
+  if(!el) return;
+  var h = tf && tf.last_24h;
+  if(!h || !h.total || !h.total.length){
+    el.innerHTML = '<p class="muted" style="font-size:.86rem">No 24-hour data yet — the traffic rollup writes it on its timer.</p>';
+    if(meta) meta.textContent = ""; return;
+  }
+  var by = h.by_class || {human:[], agent:[], bot:[]};
+  var peak = Math.max(1, h.peak || 1);
+  var cols = "";
+  for(var i=0;i<24;i++){
+    var hu=by.human[i]||0, ag=by.agent[i]||0, bo=by.bot[i]||0, tot=hu+ag+bo;
+    var t = new Date((h.hour_ts[i]||0)*1000);
+    var lbl = t.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+    function seg(cls,n){ return n ? '<div class="seg '+cls+'" style="height:'+Math.max(1,Math.round((n/peak)*116))+'px"></div>' : ''; }
+    cols += '<div class="col" title="'+escapeHtml(lbl)+' · '+tot+' req ('+hu+' human · '+ag+' agent · '+bo+' bot)">'+
+            seg('human',hu)+seg('agent',ag)+seg('bot',bo)+'</div>';
+  }
+  var labels = "";
+  for(var j=0;j<24;j++){
+    var lt = new Date((h.hour_ts[j]||0)*1000);
+    labels += '<span>'+(j%4===0 ? lt.toLocaleTimeString([], {hour:"2-digit"}) : "")+'</span>';
+  }
+  el.innerHTML = '<div class="h24">'+cols+'</div><div class="h24-labels">'+labels+'</div>'+
+    '<div class="h24-legend"><span><i style="background:var(--accent)"></i>human</span>'+
+    '<span><i style="background:var(--pass)"></i>agent</span>'+
+    '<span><i style="background:var(--line)"></i>bot</span></div>';
+  if(meta) meta.textContent = (h.requests||0).toLocaleString() + " requests over 24h · peak " +
+    (h.peak||0) + "/hr · times in your local zone";
+}
 
 function renderFruit(tf){
   const el = document.getElementById("fruit"), note = document.getElementById("fruit-note");
