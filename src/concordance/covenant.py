@@ -19,9 +19,10 @@ THE HONEST SECURITY MODEL (stated plainly, like a seed phrase):
   • Four verses are the SECRET. Anyone who knows your exact four verses can BE you — guard them like a
     seed phrase, and there is no "forgot my verses" recovery: lose them and the identity is gone.
   • Entropy: four verses chosen from ~31,000 give ~50 bits. That is NOT enough on its own against an
-    offline attacker who has your public key — so the derivation is deliberately MEMORY-HARD (scrypt),
-    making each guess cost real time + memory, and an optional personal passphrase adds entropy. Choose
-    verses that are yours, not the four most-quoted verses in Christendom.
+    offline attacker who has your public key — so the derivation is deliberately SLOW (PBKDF2-HMAC-
+    SHA256, 600k iterations, chosen so the browser and Python derive the same key), making each guess
+    cost real time; an optional personal passphrase adds entropy. A memory-hard KDF (scrypt/argon2) is
+    a planned hardening. Choose verses that are yours, not the four most-quoted in Christendom.
   • Order does NOT matter (a set, not a sequence) — forgiving to remember; the entropy above is the
     unordered count.
 """
@@ -37,9 +38,11 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey,
 
 _SALT = b"narrowhighway/covenant/v1"        # domain separation (public, not a secret)
 _MIN_VERSES = 4
-# scrypt cost — memory-hard, ~50-100ms + ~64MB per guess, so brute force over verse-sets is expensive
-_N, _R, _P = 2 ** 15, 8, 1
-_MAXMEM = 128 * _N * _R + (1 << 20)
+# PBKDF2-HMAC-SHA256, 600k iterations (OWASP-grade). Chosen so the SAME key derives byte-for-byte in
+# the browser (WebCrypto PBKDF2) and in Python (hashlib) — RFC 2898 is identical on both, and needs no
+# vendored crypto (CSP-safe, sovereign). Deliberately SLOW so each brute-force guess is expensive;
+# a memory-hard KDF (scrypt/argon2) is a planned hardening once a matching client impl is vetted.
+_ITERATIONS = 600_000
 
 # The 66, in canonical order — canonical name → accepted forms (lower-cased, spaces removed on lookup).
 # The book's ORDINAL (its 1-based position) is what the derivation uses, so "Rom"/"Romans"/"romans" all
@@ -124,8 +127,7 @@ def _material(verses: List[str], passphrase: str = "") -> bytes:
 
 
 def _seed(verses: List[str], passphrase: str = "") -> bytes:
-    return hashlib.scrypt(_material(verses, passphrase), salt=_SALT,
-                          n=_N, r=_R, p=_P, dklen=32, maxmem=_MAXMEM)
+    return hashlib.pbkdf2_hmac("sha256", _material(verses, passphrase), _SALT, _ITERATIONS, dklen=32)
 
 
 def derive(verses: List[str], passphrase: str = "") -> Ed25519PrivateKey:

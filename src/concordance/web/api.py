@@ -1634,17 +1634,21 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
             return (parts[-1] if parts else "") or (self.client_address[0] if self.client_address else "?")
 
         def _keep(self, u) -> None:
-            """The operator's window — gated. 404 to non-operators (hide-existence).
-            SECURITY: the operator decision uses the REAL socket peer + token only; the
-            spoofable X-Forwarded-For is never consulted for access (see keep.is_operator)."""
+            """The operator's window. The DATA (/keep.json) is operator-gated; the sign-in SHELL
+            (/keep.html) is served publicly so the operator can sign in from any device — no operator
+            data is exposed until /keep.json authenticates. (Trades the old hide-existence for a real
+            sign-in, per operator decision 2026-07-25.) SECURITY: the operator decision uses the REAL
+            socket peer + token (?token= or the X-Keep-Token header) only; the spoofable
+            X-Forwarded-For is never consulted for access (see keep.is_operator)."""
             from .keep import dashboard as _keep_dash
             from .keep import request_is_operator
             q = {k: v[0] for k, v in parse_qs(u.query).items()}
             peer_ip = self.client_address[0] if self.client_address else ""
-            if not request_is_operator(peer_ip, self.headers, q):
-                return self._json(404, {"error": "not found"})
             if u.path == "/keep.json":
+                if not request_is_operator(peer_ip, self.headers, q):
+                    return self._json(404, {"error": "not found"})   # the DATA stays gated
                 return self._json(200, _keep_dash(config), {"cache-control": "no-store"})
+            # the SHELL — only a sign-in prompt; reveals no operator data
             if site is not None:
                 return self._static("keep.html")
             return self._json(404, {"error": "not found"})
