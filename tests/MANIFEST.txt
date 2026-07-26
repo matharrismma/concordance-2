@@ -18,6 +18,7 @@ test_characters.py
 test_coach.py
 test_commentary.py
 test_compute.py
+test_covenant.py
 test_core.py
 test_airlock.py
 test_corpus.py
