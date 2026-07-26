@@ -648,6 +648,14 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                     r["audit"] = _a
             except Exception:  # noqa: BLE001
                 pass
+        # Anticipate — a step ahead: the likely next question, as clickable follow-ups. Best-effort,
+        # off to the side; never on crisis/grief (anticipate() returns nothing there).
+        try:
+            _nxt = _ask.anticipate(text, r)
+            if _nxt:
+                r["next"] = _nxt
+        except Exception:  # noqa: BLE001
+            pass
         # The Deck: append this exchange (verbatim user text + the exact response) so the
         # conversation is one continuous, resumable chain, carrying the sticky gate state. Nothing
         # generated. Best-effort, OFF TO THE SIDE — never alters the answer, never breaks it.

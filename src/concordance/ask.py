@@ -314,6 +314,58 @@ def define_term(text: str) -> Optional[str]:
     return None
 
 
+# Understanding what they're ASKING — the subject is what remains when the question-scaffolding is
+# taken away. "how far away is the moon" is a question about the MOON; searching the whole sentence
+# lets "far/away/is/the" drown it (and even mis-predict the deck). We keep the content words.
+_STOP = {"how", "what", "when", "where", "who", "whom", "whose", "why", "which",
+         "is", "are", "was", "were", "be", "been", "am", "do", "does", "did", "done",
+         "has", "have", "had", "will", "would", "shall", "should", "can", "could", "may", "might", "must",
+         "the", "a", "an", "of", "to", "in", "on", "at", "for", "and", "or", "but", "about",
+         "as", "by", "with", "from", "into", "please", "tell", "me", "us", "give", "show",
+         "there", "that", "this", "these", "those", "it", "its", "i", "you", "we", "they",
+         "far", "away", "many", "much", "really", "actually", "exactly", "some", "any"}
+
+
+def subject(text: str) -> str:
+    """What the person is actually asking about — content words, question-scaffolding removed."""
+    words = re.findall(r"[A-Za-z0-9']+", (text or "").lower())
+    return " ".join(w for w in words if w not in _STOP).strip()
+
+
+def anticipate(text: str, r: Dict[str, Any]) -> list:
+    """Be a step ahead: the likely NEXT thing to ask, as clickable follow-ups. A concierge, never a
+    salesman — NOTHING on crisis or grief (you don't upsell someone who is hurting), and never more
+    than three. Each is {label, prompt}; the prompt routes through this same conduit."""
+    kind = r.get("kind")
+    if kind in ("crisis", "comfort", "reminder", "kept_list", "kept_note"):
+        return []
+    subj = subject(text)
+    if kind == "scripture" and r.get("scripture"):
+        ref = (r["scripture"][0].get("ref") or "").strip()
+        base = ref.split(":")[0] if ref else ""
+        out = []
+        if base:
+            out.append({"label": "Read the whole chapter", "prompt": base})
+        if ref:
+            out.append({"label": "What does it mean?", "prompt": "explain " + ref})
+            out.append({"label": "The original words", "prompt": "the original words of " + ref})
+        return out[:3]
+    if kind in ("define", "word_study"):
+        term = define_term(text) or (r.get("word_study") or {}).get("word") or subj
+        if not term:
+            return []
+        return [{"label": 'Where "%s" is used' % term, "prompt": term + " in the bible"},
+                {"label": "In the original tongue", "prompt": "the Greek or Hebrew word for " + term}]
+    if kind == "verify" and (r.get("verify") or {}).get("verdict"):
+        return [{"label": "Show the worked proof", "prompt": "show me the worked proof"}]
+    if kind == "compute":
+        return []                                  # a number is a complete answer — no clutter
+    if subj:                                        # a search/fact — where to go deeper
+        return [{"label": "What connects to this?", "prompt": "what connects to " + subj},
+                {"label": "See it in the keeping", "prompt": subj}]
+    return []
+
+
 def classify(text: str) -> str:
     """Deterministically route the input. Crisis first (safety); then structured (Strong's,
     scripture ref, math); then ultimate matters; else search the keeping."""
@@ -744,15 +796,18 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     # speed never costs correctness (the Tortoise still reaches everything). Name the volume, so the
     # page knows which one answered.
     from . import decks as _decks
-    _vol = (_decks.predict(text, k=1) or [None])[0]
+    subj = subject(text) or (text or "")          # understand: search what they're ASKING about
+    _vol = (_decks.predict(subj, k=1) or [None])[0]
     hits = []
     if _vol:
-        hits = corpus.search(text, limit=6, shelves=_decks.deck_shelves(_vol["id"]))
-    if len(hits) < 3 or (hits and not _shares_a_word(text, hits[0])):
+        hits = corpus.search(subj, limit=6, shelves=_decks.deck_shelves(_vol["id"]))
+    if len(hits) < 3 or (hits and not _shares_a_word(subj, hits[0])):
+        hits = corpus.search(subj, limit=6)
+    if not hits and subj != (text or ""):         # last resort — the raw words as typed
         hits = corpus.search(text, limit=6)
     if _vol:
         base = {**base, "volume": {"id": _vol["id"], "name": _vol["name"]}}
-    weak = (not hits) or not _shares_a_word(text, hits[0])
+    weak = (not hits) or not _shares_a_word(subj, hits[0])
     if weak:
         # The tortoise: the keeping doesn't hold it, so go FIND it — surely. Primary / high-quality
         # sources only, run through our own tools, false claims flagged, and kept for next time.

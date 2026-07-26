@@ -83,6 +83,7 @@ test_strongs.py
 test_threads.py
 test_tolerance.py
 test_traffic.py
+test_understanding.py
 test_validate.py
 test_verifier_consistency.py
 test_verifiers.py

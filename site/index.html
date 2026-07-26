@@ -145,6 +145,12 @@
          font-size:.82rem; cursor:pointer; padding:.42rem .85rem; line-height:1; border-radius:999px;
          min-height:40px; display:inline-flex; align-items:center; gap:.35rem; margin-top:.55rem }
   .hear:hover{ color:#fff; background:var(--brass-lo); border-color:var(--brass-lo) }
+  /* anticipation — the likely next question, offered as quiet chips */
+  .next{ display:flex; flex-wrap:wrap; gap:.4rem; margin:.8rem 0 .1rem }
+  .nextchip{ background:none; border:1px solid rgba(138,106,47,.4); color:var(--brass-lo); font:inherit;
+    font-size:.8rem; cursor:pointer; padding:.34rem .72rem; border-radius:999px; line-height:1.2;
+    min-height:32px; transition:color .14s ease, background .14s ease }
+  .nextchip:hover{ color:#fff; background:var(--brass-lo); border-color:var(--brass-lo) }
 
   /* THE COMPOSER — the foot of the same page, set apart by nothing louder than a rule */
   .card{
@@ -425,6 +431,13 @@
                     esc(w.title)+'</a>'+(w.shares?' — '+esc(w.shares):'')+'</span>'; }).join('')+
            '</div>';
 
+    // anticipation — a step ahead: the likely next question, as clickable chips (a concierge, not
+    // a salesman; the engine never attaches these to crisis or grief)
+    if(d.next && d.next.length)
+      h += '<div class="next">'+d.next.map(function(n){
+        return '<button type="button" class="nextchip" data-prompt="'+esc(n.prompt||'')+'">'+
+               esc(n.label||'')+'</button>'; }).join('')+'</div>';
+
     var spoken=d.message||'';
     if(!spoken && d.verify) spoken='The verdict is '+(d.verify.verdict||'')+'.';
     if(!spoken && d.scripture && d.scripture[0]) spoken=(d.scripture[0].ref||'')+'. '+(d.scripture[0].text||'');
@@ -459,7 +472,8 @@
     if(flip) flip.setAttribute('aria-pressed',on?'true':'false'); if(on) renderPage(); scroll(); }
   if(flip) flip.addEventListener('click',function(){ setPage(!(col&&col.classList.contains('pagemode'))); });
   if(pageEl) pageEl.addEventListener('click',function(e){
-    var h=e.target.closest('.hear'); if(h&&window.NHSpeak) NHSpeak.play(h.dataset.hear); });
+    var h=e.target.closest('.hear'); if(h&&window.NHSpeak){ NHSpeak.play(h.dataset.hear); return; }
+    var n=e.target.closest('.nextchip'); if(n){ ta.textContent=n.dataset.prompt||''; idle(); ask(); } });
 
   function rosterPut(id,title){
     if(!id) return;
@@ -528,7 +542,9 @@
   });
   send.addEventListener('click',ask);
   chain.addEventListener('click',function(e){
-    var h=e.target.closest('.hear'); if(h&&window.NHSpeak) NHSpeak.play(h.dataset.hear); });
+    var h=e.target.closest('.hear'); if(h&&window.NHSpeak){ NHSpeak.play(h.dataset.hear); return; }
+    var n=e.target.closest('.nextchip'); if(n){ ta.textContent=n.dataset.prompt||''; idle(); ask(); }
+  });
   // ── the document tools, at the pad's edge ─────────────────────────────────────────────
   // execCommand is deprecated and still the only formatting API every browser implements
   // without a library. A library means a download, and a download means the page stops
