@@ -42,6 +42,7 @@ GOLDEN_API_GET = {
     "/formation", "/formation/kinds", "/formation/help",
     "/push/key",
     "/teachings",
+    "/path",   # deliberate addition (wayfinding — the floorplan of the keeping)
 }
 GOLDEN_RATELIMITED = {
     "/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose", "/pins", "/pins/done",

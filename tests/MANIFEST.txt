@@ -92,5 +92,6 @@ test_validate.py
 test_verifier_consistency.py
 test_verifiers.py
 test_voice.py
+test_wayfind.py
 test_witness.py
 test_xrefs.py

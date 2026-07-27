@@ -593,6 +593,14 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                          sealed=bool(res.get("seal")))
         return _ok(res)
 
+    if method == "GET" and path == "/path":
+        # Wayfinding — a floorplan of the keeping. Given what you're asking (q) and optionally the
+        # thread you're in, return where you stand, the connected rooms (on-topic by construction),
+        # where you've been, and the next step. Deterministic; reads only.
+        from .. import wayfind as _wf
+        return _ok(_wf.path(q=(query.get("q") or "").strip() or None,
+                            thread_id=(query.get("thread") or "").strip() or None))
+
     if method == "POST" and path == "/audit":
         # The Auditor: deterministic extractors find every checkable claim in a pasted text,
         # the moat verifies the lot, one sealed coverage report comes back. Extraction is
@@ -1490,6 +1498,7 @@ ROUTES = [
     {"path": "/derivation/verify", "methods": ("POST",), "rl": True},
     {"path": "/audit", "methods": ("POST",), "rl": True},
     {"path": "/chess", "methods": ("POST",), "rl": True},
+    {"path": "/path", "methods": ("GET",), "api": True},
     {"path": "/days", "methods": ("POST",), "rl": True},
     {"path": "/ask", "methods": ("POST",), "rl": True},
     {"path": "/journal", "methods": ("GET", "POST"), "api": True},
