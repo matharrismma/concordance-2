@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -51,9 +52,23 @@ def _curr_dir() -> Path:
     return (Path(data) / "curriculum") if data else (Path("data") / "curriculum")
 
 
+_SUBJECT_RE = re.compile(r"[a-z0-9_\-]{1,64}")
+
+
+def _safe_subject(subject: str) -> str:
+    """Normalize a subject to a safe filename token — every real subject (read/mcguffey/aesop/…,
+    see _LABELS) is already lowercase alnum, so this costs nothing legitimate. Found reachable via
+    a public GET query param (?subject=) with NO validation at all, unlike every sibling module
+    (stacks._safe_key, pins/mesh/threads' fingerprint regexes) — the one place in the codebase a
+    caller-supplied string reached a file path unsanitized."""
+    s = str(subject or "").strip().lower()
+    m = _SUBJECT_RE.match(s)
+    return m.group(0) if m and m.group(0) == s else DEFAULT_SUBJECT
+
+
 def _file(subject: str = DEFAULT_SUBJECT) -> Path:
     """The path for one subject's curriculum (<subject>_en.json)."""
-    return _curr_dir() / (str(subject or DEFAULT_SUBJECT) + "_en.json")
+    return _curr_dir() / (_safe_subject(subject) + "_en.json")
 
 
 def _discover() -> List[str]:
@@ -75,7 +90,13 @@ def _discover() -> List[str]:
 
 def _load(subject: str = DEFAULT_SUBJECT) -> List[Dict[str, Any]]:
     """Load one subject's units verbatim (cached). Missing/unreadable -> empty (never raises)."""
-    subject = str(subject or DEFAULT_SUBJECT)
+    subject = _safe_subject(subject)
+    # Cache ONLY real, discovered subjects (read/mcguffey/aesop/…, a small fixed set) — keying the
+    # cache by whatever string a caller sent would let every distinct garbage ?subject= value grow
+    # _CACHE by one entry, forever (the same unbounded-growth shape as the MCP session registry,
+    # found and fixed earlier this sweep). An unknown subject just returns empty, uncached.
+    if subject not in _discover():
+        return []
     if subject in _CACHE:
         return _CACHE[subject]
     try:

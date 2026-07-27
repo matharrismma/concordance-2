@@ -45,6 +45,29 @@ def _ensure_curriculum() -> int:
     return coach.reload()
 
 
+def test_subject_path_traversal_is_neutralized():
+    # ?subject= reaches _file() straight from a public query param with no validation, unlike every
+    # sibling module (stacks._safe_key, pins/mesh/threads' fingerprint regexes) — found the one place
+    # a caller-supplied string reached a filesystem path unsanitized. Every traversal shape must
+    # collapse to the safe default path, never escape the curriculum directory.
+    safe = coach._file(coach.DEFAULT_SUBJECT)
+    for bad in ("../../../etc/passwd", "../../data/cards", "read/../../../etc",
+                "a" * 500, None, "", "  READ  "):
+        assert coach._file(bad) == safe, f"{bad!r} escaped the curriculum directory"
+    # a well-formed but nonexistent subject is left alone (not a traversal, just unknown)
+    assert coach._file("nonexistent123").name == "nonexistent123_en.json"
+
+
+def test_unknown_subject_never_grows_the_cache():
+    # _load() keyed its cache by the RAW caller string — every distinct garbage ?subject= value
+    # would add one permanent entry, an unbounded memory leak (the same shape as the MCP session
+    # registry found and fixed earlier this sweep). Only real, discovered subjects may be cached.
+    before = len(coach._CACHE)
+    for i in range(50):
+        assert coach._load(f"garbage-subject-{i}") == []
+    assert len(coach._CACHE) == before
+
+
 def test_units_load_verbatim_35():
     n = _ensure_curriculum()
     assert n == 35, f"expected 35 units, loaded {n}"
