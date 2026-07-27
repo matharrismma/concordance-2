@@ -55,6 +55,18 @@ def test_how_to_queries_reach_the_field_library():
         "a how-to question should reach the field library, not shortcut past it"
 
 
+def test_concierge_points_to_sources_but_not_on_verified_answers():
+    cfg = EngineConfig()
+    # a VERIFIED answer (compute) is the answer — it must NOT carry a 'find it elsewhere' pointer
+    c = ask.respond("what is 8 times 7", cfg, gate_open=True)
+    assert c.get("kind") == "compute" and not c.get("resources")
+    # no verified answer (a nonsense question always declines) → the concierge points to the free
+    # libraries, deterministically, regardless of what the corpus holds
+    d = ask.respond("is xqzptn wibbleforp glorptastic", cfg, gate_open=True)
+    refs = [r.get("ref") for r in (d.get("resources") or [])]
+    assert "/library.html" in refs, "point to where a verified answer can be found"
+
+
 def test_anticipate_offers_next_for_content():
     cfg = EngineConfig()
     d = ask.respond("John 3:16", cfg, gate_open=True)

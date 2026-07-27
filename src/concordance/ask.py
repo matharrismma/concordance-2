@@ -890,15 +890,19 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                                        "documents": found.get("documents") or []}},
                               text, witness, gate_just_opened)
         # nothing high-quality found (or offline). An honest "I don't have that" beats a confident
-        # irrelevant hit (the "sore throat -> Marcus Aurelius" failure).
+        # irrelevant hit (the "sore throat -> Marcus Aurelius" failure). But we don't just shrug —
+        # when we have no VERIFIED answer we POINT to the best places to find it (the nearest in the
+        # keeping + the free, lawful libraries and references). Pointing well is courtesy, not a gap.
         if _is_question(text):
+            # No confident dump of irrelevant cards — but we POINT, politely, to where a verified
+            # answer lives (the free libraries; a claim check). Sources go in `resources`, not results.
             return _witnessed({**base, "kind": "found", "results": [],
                                "message": "I don't have a verified answer for that, and I won't "
-                                          "invent one. You can check a specific claim, read a "
-                                          "passage, or see how the pieces connect.",
-                               "resources": [{"label": "Check a specific claim", "ref": "/check.html"},
-                                             {"label": "Read Scripture", "ref": "/bible.html"},
-                                             {"label": "The map — how it all connects", "ref": "/map.html"}]},
+                                          "invent one — but here is where to find it, in sources you "
+                                          "can trust:",
+                               "resources": [{"label": "The free libraries & references", "ref": "/library.html"},
+                                             {"label": "Check a specific claim, verified", "ref": "/check.html"},
+                                             {"label": "Read Scripture", "ref": "/bible.html"}]},
                               text, witness, gate_just_opened)
         # not a question — a topic the keeping is thin on. Show the nearest, but say it plainly.
         out = {**base, "kind": "found", "results": [corpus._brief(c) for c in hits],
@@ -909,4 +913,9 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     cloud = _connected_cloud(hits[0].get("id"))
     if cloud:
         out["cloud"] = {"around": hits[0].get("title", ""), "witnesses": cloud}
+    # The concierge: a search result is RELATED material, not a VERIFIED answer. For a question,
+    # point — politely — to where a verified answer can be found (the free libraries; a claim check).
+    if _is_question(text):
+        out["resources"] = [{"label": "The free libraries & references", "ref": "/library.html"},
+                            {"label": "Check a specific claim, verified", "ref": "/check.html"}]
     return _witnessed(out, text, witness, gate_just_opened)
