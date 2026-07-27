@@ -47,7 +47,12 @@ def normalize(text: str) -> str:
     Safety matching runs on this form. A person reaching for help types on a phone, in a
     hurry, without punctuation — the check must not depend on how their keyboard behaved.
     """
-    t = (text or "").lower().translate(_SMART_QUOTES).replace("'", "")
+    # found: "text or ''" only substitutes the fallback for a FALSY text — a truthy non-string
+    # (an int/list from an uncoerced caller) survives past that guard and crashes on ".lower()".
+    # is_crisis() (the safety-critical function built on this) must never crash instead of
+    # answering — every current caller happens to coerce first, but this is the one place that
+    # should defend its own contract regardless, matching corpus.search()'s identical fix.
+    t = (str(text) if text else "").lower().translate(_SMART_QUOTES).replace("'", "")
     return re.sub(r"\s+", " ", t).strip()
 
 

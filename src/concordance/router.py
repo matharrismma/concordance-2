@@ -102,7 +102,11 @@ def route(text: str) -> Dict[str, Any]:
 
     -> {member, why, alternatives, considered, answered_here=False}
     """
-    t = (text or "").strip()
+    # found: "text or ''" only substitutes the fallback for a FALSY text — a truthy non-string
+    # (e.g. an int) survives past that guard and crashes on ".strip()". Every current caller
+    # already coerces first, but route() is meant to be a reusable, safety-adjacent primitive
+    # (crisis is checked first, below) and should defend its own contract regardless.
+    t = (str(text) if text else "").strip()
     low = t.lower()
 
     # 1. Crisis outranks everything. Never routed anywhere but real help.

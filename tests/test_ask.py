@@ -149,6 +149,16 @@ def test_a_phones_apostrophe_cannot_defeat_the_crisis_check():
     assert ask.is_crisis(straight) and ask.is_crisis(curly)
 
 
+def test_is_crisis_never_crashes_on_a_truthy_non_string():
+    # found: normalize()'s "text or ''" only substitutes the fallback for a FALSY text — a
+    # truthy non-string (an int/list from an uncoerced caller) survived past that guard and
+    # crashed on ".lower()". is_crisis() is the one safety-critical check every surface calls
+    # ("a copied list is a list that drifts") — it must never crash instead of answering.
+    for bad in (123, 45.6, ["a", "b"], {"x": 1}):
+        assert ask.is_crisis(bad) is False
+        assert isinstance(ask.normalize(bad), str)
+
+
 def test_the_router_and_ask_can_never_disagree_about_crisis():
     """One matcher, not two lists. A copied safety list is a list that drifts."""
     from concordance import router

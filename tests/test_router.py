@@ -26,6 +26,16 @@ def test_crisis_outranks_every_other_signal():
         assert router.route(noisy)["member"] == "crisis", noisy
 
 
+def test_route_never_crashes_on_a_truthy_non_string():
+    # found: "text or ''" only substitutes the fallback for a FALSY text — a truthy non-string
+    # (e.g. an int) survives past that guard and crashes on ".strip()". route() sits right in
+    # front of the crisis check and is documented as a reusable primitive; it must decline
+    # rather than crash regardless of what a caller passes in.
+    for bad in (123, 45.6, ["a", "b"], {"x": 1}):
+        r = router.route(bad)
+        assert r["member"]
+
+
 # --- 2. Structured signals ------------------------------------------------------------------
 
 def test_strongs_goes_to_word_study():
