@@ -1,10 +1,24 @@
 # Narrow Highway
 
-> A deterministic verification engine. Every answer is a **receipt, not "trust me"**: it
-> eliminates what is not the answer, shows the worked reasoning, and hands you a permanent,
-> re-checkable seal. **Private in, verified out** — personal context is stripped before text
-> is stored or sent, and reapplied locally. Sovereign: runs on your own box, offline,
-> stdlib-first, no provider, no per-call cost.
+> **Narrow Highway gives humans and agents a governed way to find, check, use, and preserve
+> information without losing its source, authority, or history.** We serve families, children, and
+> communities that need us first — the people who cannot afford to be without it; the tool is free
+> and needs no account.
+>
+> Every answer is a **receipt, not "trust me"**: it eliminates what is not the answer, shows the
+> worked reasoning, and hands you a permanent, re-checkable seal. **Private in, verified out** —
+> personal context is stripped before text is stored or sent, and reapplied locally. Sovereign: runs
+> on your own box, offline, stdlib-first, no provider, no per-call cost.
+
+## Agent covenant (the law of the agent plane — read GET /identity for the canonical form)
+
+If you are an agent using Narrow Highway, you are bound by this: **(1)** retrieve from corpora first;
+**(2)** distinguish citation from proof; **(3)** quarantine generated material; **(4)** request human
+authorization before writes; **(5)** produce a receipt for consequential actions; **(6)** carry
+provenance through every transformation; **(7)** respect local data and identity boundaries; **(8)**
+stop when evidence is incomplete. The kernel beneath it: find · distinguish · verify · preserve the
+trail · never silently upgrade authority. Identity keys are born on YOUR device — the server never
+mints or returns a private key; it holds only public keys and verifies signed challenges.
 
 The rare part is the combination: **verifiable + private + sovereign** — together. One engine,
 two surfaces: **narrowhighway.com** (the reach — accessible to all) and **narrowhighway.org**

@@ -329,9 +329,28 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/identity":
         # identity = what the engine IS (the dry, efficient truth); persona = WHO it is to talk to
         # (the separate voice / movie-style experience). The card system stays pure efficiency.
+        # The FROZEN mission + kernel + agent covenant (Matt, 2026-07-25) are served here so any
+        # agent that reads /identity reads the law it is bound by.
         from .. import branding as _branding
         return _ok({"surface": surface, "identity": config.identity, "persona": config.persona,
-                    "motto": _branding.MOTTO})
+                    "motto": _branding.MOTTO,
+                    "mission": ("Narrow Highway gives humans and agents a governed way to find, check, "
+                                "use, and preserve information without losing its source, authority, "
+                                "or history."),
+                    "serves_first": ("Families, children, and communities that need us — the people "
+                                     "who cannot afford to be without it. Free, no account."),
+                    "kernel": ["find what is relevant", "distinguish what kind of thing it is",
+                               "verify what can actually be verified", "preserve the trail",
+                               "prevent authority from being silently upgraded"],
+                    "agent_covenant": [
+                        "retrieve from corpora first",
+                        "distinguish citation from proof",
+                        "quarantine generated material",
+                        "request human authorization before writes",
+                        "produce a receipt for consequential actions",
+                        "carry provenance through every transformation",
+                        "respect local data and identity boundaries",
+                        "stop when evidence is incomplete"]})
 
     if method == "GET" and path == "/route":
         # The Router — names the member who should answer, and hands off. It NEVER answers.
