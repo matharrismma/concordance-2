@@ -71,7 +71,10 @@ def budget(income: Any, expenses: List[Dict[str, Any]]) -> Dict[str, Any]:
     Pure arithmetic — the endpoint seals it into a receipt."""
     inc = _num(income)
     items: List[Dict[str, Any]] = []
-    for e in (expenses or []):
+    # found: "expenses or []" only substitutes the fallback for a FALSY expenses — a truthy
+    # non-list (an int/str/dict from an uncoerced caller, e.g. POST /steward/budget with
+    # {"expenses": 123}) survives past that guard and crashes "for e in 123" with a TypeError.
+    for e in (expenses if isinstance(expenses, list) else []):
         if not isinstance(e, dict):
             continue
         amt = _num(e.get("amount"))
@@ -95,7 +98,10 @@ def cost_destroyed(items: List[Dict[str, Any]]) -> Dict[str, Any]:
     your currency — kill rent, not profit."""
     out: List[Dict[str, Any]] = []
     total = 0.0
-    for it in (items or []):
+    # found: "items or []" only substitutes the fallback for a FALSY items — a truthy non-list
+    # (e.g. POST /steward/cost-destroyed with {"items": 123}) survives past that guard and
+    # crashes "for it in 123" with a TypeError. Same shape as budget()'s expenses, above.
+    for it in (items if isinstance(items, list) else []):
         if not isinstance(it, dict):
             continue
         was, now = _num(it.get("was")), _num(it.get("now"))

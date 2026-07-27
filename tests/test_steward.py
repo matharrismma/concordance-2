@@ -35,6 +35,17 @@ def test_cost_destroyed_math():
     assert d["total_saved"] == 45.0 and d["items"][0]["saved"] == 15.0
 
 
+def test_a_non_list_expenses_or_items_declines_instead_of_crashing():
+    # found: "expenses or []" / "items or []" only substitutes the fallback for a FALSY value —
+    # a truthy non-list (e.g. POST /steward/budget with {"expenses": 123}) survived past that
+    # guard and crashed "for e in 123" with a TypeError. Both routes require no authentication.
+    for bad in (123, "not a list", {"a": 1}):
+        b = steward.budget(1000, bad)
+        assert b["total_expenses"] == 0
+        d = steward.cost_destroyed(bad)
+        assert d["total_saved"] == 0.0
+
+
 def test_extreme_numeric_input_never_produces_inf_or_nan():
     # found: float("1"+"0"*400) parses to inf without raising (float() only rejects unparseable
     # strings, not magnitude). That inf then broke two callers: json.dumps() emits the

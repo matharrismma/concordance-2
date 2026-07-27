@@ -164,6 +164,16 @@ def test_mastery_counts_honestly_and_seals_via_receipts():
     assert sealed["seal"]["cite_url"].endswith(sealed["seal"]["content_hash"])
 
 
+def test_mastery_declines_a_non_list_completed_instead_of_crashing():
+    # found: "completed_ids or []" only substitutes the fallback for a FALSY value — a truthy
+    # non-list (e.g. POST /coach/mastery with {"completed": 123}) survived past that guard and
+    # crashed "for cid in 123" with a TypeError. The route requires no authentication.
+    _ensure_curriculum()
+    for bad in (123, "not a list", {"a": 1}):
+        assert coach.mastery(bad)["completed_count"] == 0
+        assert coach.mastery_result(bad)["count"] == 0
+
+
 def test_no_import_of_verifiers_or_derivation():
     """Guardrail (b): coach.py must not IMPORT from verifiers/derivation — seal only via receipts.
 

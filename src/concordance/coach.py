@@ -341,7 +341,10 @@ def mastery_result(completed_ids: List[str]) -> Dict[str, Any]:
     """
     valid = _all_unit_ids()   # honest across every subject present (read, mcguffey, aesop, …)
     seen: List[str] = []
-    for cid in (completed_ids or []):
+    # found: "completed_ids or []" only substitutes the fallback for a FALSY value — a truthy
+    # non-list (e.g. POST /coach/mastery with {"completed": 123}) survives past that guard and
+    # crashes "for cid in 123" with a TypeError.
+    for cid in (completed_ids if isinstance(completed_ids, list) else []):
         c = str(cid)
         if c in valid and c not in seen:
             seen.append(c)
