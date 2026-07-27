@@ -28,12 +28,24 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import secrets
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 SCHEMA = "bookofdays/1"
+# owner is always identity.fingerprint(public_key) at the one call site (api.py's /book route,
+# via binding.prove() — never a raw caller string), so this is safe by construction TODAY. But
+# _path()/_load()/_save() should not rely solely on the caller getting that right forever — every
+# sibling module that touches a filesystem path this way (groups._read, mesh's fingerprint regex,
+# stacks._safe_key) validates its own key INSIDE itself. Matching that here, cheaply, defends the
+# module's own contract regardless of what a future caller passes.
+_OWNER_RE = re.compile(r"[A-Za-z0-9_\-]{1,80}\Z")
+
+
+def _valid_owner(owner: Any) -> bool:
+    return isinstance(owner, str) and bool(_OWNER_RE.match(owner))
 
 
 def _dir() -> Path:
@@ -55,13 +67,18 @@ def _now() -> float:
 
 
 def _load(owner: str) -> Dict[str, Any]:
+    fresh = {"schema": SCHEMA, "owner": owner, "entries": [], "created_at": _now()}
+    if not _valid_owner(owner):
+        return fresh
     try:
         return json.loads(_path(owner).read_text(encoding="utf-8"))
     except (OSError, ValueError):
-        return {"schema": SCHEMA, "owner": owner, "entries": [], "created_at": _now()}
+        return fresh
 
 
 def _save(rec: Dict[str, Any]) -> None:
+    if not _valid_owner(rec.get("owner")):
+        return  # refuse silently — every public fn reads back via _load(), so this is a no-op
     p = _path(rec["owner"])
     p.parent.mkdir(parents=True, exist_ok=True)
     rec["updated_at"] = _now()

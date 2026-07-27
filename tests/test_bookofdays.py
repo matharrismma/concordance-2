@@ -145,3 +145,30 @@ def test_a_fresh_book_is_empty_not_an_error():
 def test_books_are_separate_per_owner():
     book.write("nh_ownerA", "mine only")
     assert book.entries("nh_ownerB")["count"] == 0
+
+
+# --- owner is validated before it ever reaches a filesystem path -----------------------------
+
+def test_valid_owner_accepts_real_fingerprint_shape():
+    # identity.fingerprint() always returns "nh_" + 32 lowercase hex chars — the one shape every
+    # real caller (api.py's /book route, via binding.prove()) ever produces.
+    assert book._valid_owner("nh_" + "a" * 32) is True
+    assert book._valid_owner(OWNER) is True
+
+
+def test_valid_owner_rejects_traversal_and_malformed_input():
+    for bad in ("../../../etc/passwd", "../secrets", "a/b/c", "", "a" * 500, None, 123, ["x"]):
+        assert book._valid_owner(bad) is False, f"{bad!r} should not validate as an owner"
+
+
+def test_traversal_shaped_owner_never_touches_the_filesystem():
+    # found: _path(owner) built a path from the raw caller string with zero validation, the same
+    # shape as coach.py's ?subject= bug found earlier this sweep. A traversal-shaped owner must
+    # neither write nor read outside its own would-be file, and must never create ANY file.
+    before = set(os.listdir(_TMP)) if os.path.isdir(_TMP) else set()
+    for bad in ("../../../etc/passwd", "../escaped", "a/b/../c"):
+        r = book.write(bad, "malicious entry")
+        assert r["ok"] is True                       # write() itself still reports structurally
+        assert book.entries(bad)["count"] == 0        # ...but nothing persisted for a bad owner
+    after = set(os.listdir(_TMP)) if os.path.isdir(_TMP) else set()
+    assert after == before, f"a traversal-shaped owner created files: {after - before}"
