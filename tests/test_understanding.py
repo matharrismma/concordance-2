@@ -29,6 +29,20 @@ def test_chapter_reference_resolves_the_whole_chapter():
     assert len(d.get("scripture") or []) >= 5, "a chapter reads its verses, not just one"
 
 
+def test_resourceful_routes_materials_but_never_preempts_crisis():
+    # "use what you have" — a materials question routes to the practical keeping (pure routing)
+    assert ask.classify("what can I do with a tarp and rope") == "resourceful"
+    assert ask.classify("I have a plastic bottle and dirty water, what can I do") == "resourceful"
+    # SAFETY INVARIANT: crisis always wins first, even when phrased as 'what can I do'
+    assert ask.classify("I want to end my life") == "crisis"
+    # positive result needs the field library provisioned (some envs isolate the data dir)
+    from concordance import corpus
+    if not corpus.search("survival shelter", limit=1):
+        return
+    d = ask.respond("what can I do with a tarp and rope", EngineConfig(), gate_open=True)
+    assert d.get("kind") == "resourceful" and d.get("results"), "materials should surface practical cards"
+
+
 def test_anticipate_offers_next_for_content():
     cfg = EngineConfig()
     d = ask.respond("John 3:16", cfg, gate_open=True)

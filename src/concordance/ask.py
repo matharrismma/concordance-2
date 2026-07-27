@@ -373,10 +373,34 @@ def anticipate(text: str, r: Dict[str, Any]) -> list:
         return [{"label": "Show the worked proof", "prompt": "show me the worked proof"}]
     if kind == "compute":
         return []                                  # a number is a complete answer — no clutter
+    if kind == "resourceful":                      # keep first things first when improvising
+        return [{"label": "What keeps me alive first?", "prompt": "the rule of threes"}]
     if subj:                                        # a search/fact — where to go deeper
         return [{"label": "What connects to this?", "prompt": "what connects to " + subj},
                 {"label": "See it in the keeping", "prompt": subj}]
     return []
+
+
+# Resourcefulness — "use what is available to accomplish the task" (Matt, 2026-07-26: so that even
+# someone with nothing could figure out a solution from what they have on hand). The practical
+# shelves of the keeping — the field library, the apothecary, the almanac, the free tools — hold
+# what a named resource enables. We SURFACE that knowledge; we never invent a plan.
+_PRACTICAL_SHELVES = frozenset({"survival", "apothecary", "almanac", "access", "medicine",
+                                "nutrition", "reference"})
+_RESOURCEFUL = re.compile(
+    r"(what (?:can|could|should) i (?:do|make|build|use|create|cook|fix|craft)\b.*\b(?:with|from|out of)\b"
+    r"|(?:make|build|create|improvise|fix|cook|craft)\b.+\b(?:with|from|out of)\b"
+    r"|all i (?:have|got)\b|i only have\b|i just have\b|i've only got\b|with (?:only|just)\b)", re.I)
+
+
+def _wants_resourceful(text: str) -> bool:
+    """A 'what can I do with what I have' question — material resources named, a solution sought.
+    Placed AFTER crisis/comfort/ultimate in classify, so hurt and ultimate questions are met first;
+    if it wrongly fires, the practical-shelf search simply finds nothing and degrades gently."""
+    t = normalize(text or "")
+    if _RESOURCEFUL.search(t):
+        return True
+    return bool(re.search(r"\bi have\b.+\bwhat (?:can|could|should|do) i\b", t))
 
 
 def classify(text: str) -> str:
@@ -405,6 +429,8 @@ def classify(text: str) -> str:
         return "comfort"
     if any(w in t for w in _ULTIMATE_WORDS):
         return "ultimate"
+    if _wants_resourceful(text or ""):     # "what can I do with what I have" → the practical keeping
+        return "resourceful"
     if define_term(text or ""):            # "what does X mean" / "define X" → a term lookup, not FTS
         return "define"
     if _pins.looks_like_note(text or ""):
@@ -625,6 +651,20 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                     "note": "Computed exactly, and sealed so anyone can re-check it."}
         # fell through (shouldn't, classify gated on it) — degrade to search
         return {**base, "results": [corpus._brief(c) for c in corpus.search(text, limit=6)]}
+
+    if kind == "resourceful":
+        # "What can I do with what I have?" — surface the practical keeping (the field library,
+        # apothecary, almanac, free tools) for the resources named. FOUND and attributed, never a
+        # plan we invented. Restrict to the practical shelves, then fall back to the whole keeping.
+        res = subject(text) or (text or "").strip()
+        hits = corpus.search(res, limit=8, shelves=set(_PRACTICAL_SHELVES)) or corpus.search(res, limit=8)
+        msg = ("With what you have on hand, here is what the keeping holds — found and attributed, "
+               "never invented. First things first: breathing, then shelter, then water, then food."
+               if hits else
+               "Tell me what you have on hand — even a few things — and I'll show you what the "
+               "keeping holds that you can do with them.")
+        return {**base, "kind": "resourceful", "message": msg,
+                "results": [corpus._brief(c) for c in hits], "note": _NOTE}
 
     if kind == "define":
         # Look the TERM up on the word shelves (the tongues + the dictionary), not the whole

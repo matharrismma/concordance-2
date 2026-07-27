@@ -53,7 +53,7 @@ CARDS = [
      "food. Exposure — not hunger — is the usual killer. Fix breathing and bleeding, then shelter and "
      "warmth, then water, then food. Stop, think, observe, plan before you move."),
     ("purify_water", "Making water safe to drink", "water", CDC_WATER, "https://www.cdc.gov/healthywater/emergency/making-water-safe.html",
-     "purify water safe drink boil bleach disinfect clean dirty contaminated giardia treat filter purification how to",
+     "purify water safe drink boil bleach disinfect clean dirty contaminated giardia treat filter purification bottle container pot how to",
      "Boiling is surest: bring clear water to a ROLLING boil for 1 minute (3 minutes above ~6,500 ft), "
      "let cool. No fire? Use unscented household bleach (5–9% sodium hypochlorite): 2 drops per quart/"
      "liter of clear water (4 drops if cold or cloudy), stir, wait 30 minutes — it should smell faintly "
@@ -66,13 +66,13 @@ CARDS = [
      "stagnant. A clear plastic bag tied over a leafy live branch collects clean transpired water in a "
      "day. Avoid water near dead animals or heavy algae. Purify all of it before drinking."),
     ("make_fire", "Making and keeping a fire", "fire", FM2176, "",
-     "make build fire start tinder kindling fuel spark friction matches lay teepee warmth cook how to",
+     "make build fire start tinder kindling fuel spark friction matches lighter flint steel ferro lens magnifying warmth cook how to",
      "Gather far more than you think: fine dry TINDER (birch bark, dry grass, fatwood shavings, char "
      "cloth), pencil-thin KINDLING, then FUEL wood. Build a small nest, take your spark or flame to the "
      "tinder low and shielded from wind, and feed it from small to large. Keep a dry reserve under cover. "
      "Site it on bare earth or stone, clear of overhanging brush, and never leave it unattended."),
     ("build_shelter", "Building a survival shelter", "shelter", FM2176, "",
-     "build shelter survival lean-to debris hut warmth exposure cold insulate ground protection how to",
+     "build shelter survival lean-to debris hut warmth exposure cold insulate ground protection tarp poncho rope cord branches leaves how to",
      "Shelter beats almost everything but breathing — exposure kills fast. Get out of wind and wet, and "
      "INSULATE yourself from the ground (a foot of dry leaves or boughs) — you lose more heat to the cold "
      "earth than to the air. Keep the space SMALL so your body heats it. A leaning ridgepole thatched "
