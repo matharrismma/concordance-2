@@ -403,7 +403,10 @@ def connections(card_id: str, limit: int = 10) -> Optional[Dict[str, Any]]:
 
 def locate(q: str, limit: int = 5) -> Dict[str, Any]:
     """Find the card for a query: exact id, then title match, else fall back to ranked search."""
-    q = (q or "").strip()
+    # found: "q or ''" only substitutes the fallback for a FALSY q — a truthy non-string (an
+    # int from an uncoerced MCP tool call arg) survives past that guard and crashes on
+    # ".strip()". Matches corpus.search()'s fix, same module.
+    q = (str(q) if q else "").strip()
     if not q:
         return {"query": q, "by": "none", "matches": []}
     cards = default_corpus().cards

@@ -135,7 +135,10 @@ def method() -> Dict[str, Any]:
 
 def list_seeds(tradition: str = "") -> Dict[str, Any]:
     """Brief of every kept seed; optionally filtered by tradition."""
-    t = (tradition or "").strip().lower()
+    # found: "tradition or ''" only substitutes the fallback for a FALSY tradition — a truthy
+    # non-string (an int from an uncoerced MCP tool call arg) survives past that guard and
+    # crashes on ".strip()". Matches corpus.search()'s fix.
+    t = (str(tradition) if tradition else "").strip().lower()
     items = [_brief(r) for r in _load() if not t or t in str(r.get("tradition", "")).lower()]
     return {"total": len(items), "note": NOTE, "method": "Areopagus (Acts 17)", "seeds": items}
 

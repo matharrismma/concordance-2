@@ -134,7 +134,10 @@ def for_ref(ref: str, source: str = DEFAULT_SOURCE) -> Dict[str, Any]:
     base = {"ref": ref, "source": source, "attribution": meta.get("name"),
             "author": meta.get("author"), "license": meta.get("license"), "via": meta.get("via"),
             "note": "The commentator's own public-domain words — found and attributed, never generated."}
-    m = _REF_RE.match(ref or "")
+    # found: "ref or ''" only substitutes the fallback for a FALSY ref — a truthy non-string
+    # (an int from an uncoerced MCP tool call arg) survives past that guard and crashes
+    # re.match() ("expected string or bytes-like object"). Matches corpus.search()'s fix.
+    m = _REF_RE.match(str(ref) if ref else "")
     if not m:
         return {**base, "status": "not_found", "detail": "could not parse reference", "commentary": []}
     book_raw, chapter = m.group(1), int(m.group(2))

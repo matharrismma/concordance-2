@@ -46,6 +46,14 @@ def test_get_by_slug_and_missing():
     assert characters.get("Nonesuch") is None
 
 
+def test_get_declines_a_non_string_name_instead_of_crashing():
+    # found: "name or ''" only substitutes the fallback for a FALSY name — a truthy non-string
+    # (an int from an uncoerced MCP tool call arg) survived past that guard and crashed on
+    # ".strip()". Matches corpus.search()'s fix.
+    for bad in (123, 45.6, ["a"], {"x": 1}):
+        assert characters.get(bad) is None
+
+
 def test_browse_letter_and_search():
     assert any(i["name"] == "David" for i in characters.browse(letter="D")["items"])
     assert any(i["name"] == "Bethlehem" for i in characters.browse(search="bread")["items"])

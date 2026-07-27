@@ -12,6 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from concordance import corpus as _corpus_mod  # noqa: E402
 from concordance.corpus import Corpus  # noqa: E402
 
 FIXTURE = {
@@ -59,6 +60,15 @@ def test_non_string_query_declines_instead_of_crashing():
     c = _corpus()
     for bad in (123, 45.6, None, ["not", "a", "string"], {"k": "v"}):
         assert c.search(bad) == [] or isinstance(c.search(bad), list)  # never raises
+
+
+def test_locate_declines_a_non_string_query_instead_of_crashing():
+    # found: "q or ''" only substitutes the fallback for a FALSY q — a truthy non-string (an
+    # int from an uncoerced MCP tool call arg) survived past that guard and crashed on
+    # ".strip()". Same module as the query-coercion fix above, different function.
+    for bad in (123, 45.6, ["a"], {"x": 1}):
+        r = _corpus_mod.locate(bad)
+        assert isinstance(r, dict) and "matches" in r
 
 
 def test_limit_respected():

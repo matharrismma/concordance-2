@@ -85,7 +85,10 @@ def _summary(text: str, sentences: int = 2, cap: int = 400) -> str:
 def get(name: str) -> Optional[Dict[str, Any]]:
     """Chart one character by name or slug — summary + every verse Easton cites for them."""
     idx = _index()
-    key = (name or "").strip().lower()
+    # found: "name or ''" only substitutes the fallback for a FALSY name — a truthy non-string
+    # (an int from an uncoerced MCP tool call arg) survives past that guard and crashes on
+    # ".strip()". Matches corpus.search()'s fix.
+    key = (str(name) if name else "").strip().lower()
     if not key:
         return None
     slug = key if key in idx else _NAME2SLUG.get(key)

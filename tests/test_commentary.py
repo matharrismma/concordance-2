@@ -82,6 +82,14 @@ def test_for_ref_unmigrated_and_bad():
     assert commentary.for_ref("garbage")["status"] == "not_found"   # unparseable
 
 
+def test_for_ref_declines_a_non_string_ref_instead_of_crashing():
+    # found: "ref or ''" only substitutes the fallback for a FALSY ref — a truthy non-string
+    # (an int from an uncoerced MCP tool call arg) survived past that guard and crashed
+    # re.match() ("expected string or bytes-like object"). Matches corpus.search()'s fix.
+    for bad in (123, 45.6, ["a"], {"x": 1}):
+        assert commentary.for_ref(bad)["status"] == "not_found"
+
+
 def test_for_ref_resolves_singular_plural_alias():
     # "Psalm 23" must resolve even though the source book is "Psalms" (singular/plural nudge).
     assert commentary.for_ref("Psalm 23")["status"] == "ok"

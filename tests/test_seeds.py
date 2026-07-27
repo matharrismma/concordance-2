@@ -14,6 +14,15 @@ def test_every_seed_has_the_required_shape():
             assert c.get("ref"), "each concordance entry needs a Scripture ref"
 
 
+def test_list_seeds_declines_a_non_string_tradition_instead_of_crashing():
+    # found: "tradition or ''" only substitutes the fallback for a FALSY tradition — a truthy
+    # non-string (an int from an uncoerced MCP tool call arg) survived past that guard and
+    # crashed on ".strip()". Matches corpus.search()'s fix.
+    for bad in (123, 45.6, ["a"], {"x": 1}):
+        r = seeds.list_seeds(bad)
+        assert r["total"] == 0
+
+
 def test_rating_is_always_concordant_never_holds():
     # CONCORDANT / signpost, NEVER HOLDS — religious material is never sealed as math.
     for r in seeds._load():
