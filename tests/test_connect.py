@@ -112,6 +112,17 @@ def test_empty_and_garbage_are_safe():
     assert connect.parse_ics("not a calendar at all", on=date(2026, 7, 26)) == []
 
 
+def test_corrupt_dates_decline_instead_of_crashing():
+    # A real calendar can carry one bad field (typo'd year, a nonexistent Feb 30) — this must
+    # decline that field, never raise (found: an uncaught ValueError from strptime).
+    for bad in (
+        _ics(_vevent(SUMMARY="bad year", DTSTART=";VALUE=DATE:99999999")),
+        _ics(_vevent(SUMMARY="no such day", DTSTART=";VALUE=DATE:20260230")),   # Feb 30
+        _ics(_vevent(SUMMARY="bad timed", DTSTART="20269999T999999Z")),
+    ):
+        assert connect.parse_ics(bad, on=date(2026, 7, 26)) == []  # unparseable -> excluded, not raised
+
+
 def test_read_calendar_from_file(tmp_path):
     p = tmp_path / "cal.ics"
     p.write_text(_ics(_vevent(SUMMARY="From a file", DTSTART=";VALUE=DATE:20260726")), encoding="utf-8")

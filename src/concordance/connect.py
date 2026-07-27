@@ -76,10 +76,16 @@ def _unescape(v: str) -> str:
 
 
 def _parse_dt(value: str, params: dict):
-    """Return (datetime|date, all_day: bool). Handles UTC (Z), floating, TZID, and VALUE=DATE."""
+    """Return (datetime|date, all_day: bool), or (None, False) if the field cannot be read — a
+    real-world calendar can carry one corrupt or unrepresentable field (bad month/day, a leap-day
+    typo); this must never raise, only decline that single field. Handles UTC (Z), floating, TZID,
+    and VALUE=DATE."""
     v = value.strip()
     if params.get("VALUE") == "DATE" or (len(v) == 8 and v.isdigit()):
-        return datetime.strptime(v[:8], "%Y%m%d").date(), True
+        try:
+            return datetime.strptime(v[:8], "%Y%m%d").date(), True
+        except ValueError:
+            return None, False
     m = re.match(r"^(\d{8}T\d{6})(Z?)$", v)
     if not m:
         # Unknown/partial form — fall back to the date if we can read one.
@@ -87,7 +93,10 @@ def _parse_dt(value: str, params: dict):
             return datetime.strptime(v[:8], "%Y%m%d").date(), True
         except ValueError:
             return None, False
-    dt = datetime.strptime(m.group(1), "%Y%m%dT%H%M%S")
+    try:
+        dt = datetime.strptime(m.group(1), "%Y%m%dT%H%M%S")
+    except ValueError:
+        return None, False
     if m.group(2) == "Z":
         return dt.replace(tzinfo=timezone.utc), False
     tzid = params.get("TZID")
@@ -373,21 +382,36 @@ def _print_calendar(evs):
 
 
 def run(argv: list[str]) -> int:
+    # Real-world tools fail in real-world ways (a dead calendar link, a mail server timeout, a
+    # permissions error on a folder) — each source is isolated so one bad connection never crashes
+    # the whole brief; the person still sees whatever DID come through (matches day_brief()'s pattern).
     what = argv[0] if argv else "all"
     have = sources()
     if what in ("all", "calendar") and have["calendar"]:
         print("Today —")
-        _print_calendar(read_calendar())
+        try:
+            _print_calendar(read_calendar())
+        except Exception as e:  # noqa: BLE001 — a bad calendar link/feed must not crash the brief
+            print(f"  (could not read your calendar: {type(e).__name__})")
     if what in ("all", "email") and have["email"]:
         print("Inbox —")
-        msgs = read_email()
+        try:
+            msgs = read_email()
+        except Exception as e:  # noqa: BLE001 — a bad mail server/credential must not crash the brief
+            print(f"  (could not read your inbox: {type(e).__name__})")
+            msgs = []
         if not msgs:
             print("  (nothing unread that needs you)")
         for m in msgs:
             print(f"  {m['from'][:28]:<28}  {m['subject'][:60]}")
     if what in ("all", "storage") and have["storage"]:
         print("Recent files —")
-        for f in read_storage():
+        try:
+            files = read_storage()
+        except Exception as e:  # noqa: BLE001 — a permissions/IO error must not crash the brief
+            print(f"  (could not read your files: {type(e).__name__})")
+            files = []
+        for f in files:
             print(f"  {f['modified']}  {f['rel']}")
     if not any(have.values()):
         print("Nothing connected yet. Point Narrow Highway at your own tools (local, private):")

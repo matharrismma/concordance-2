@@ -212,6 +212,12 @@ def _arith(t: str) -> Optional[str]:
         return None
     if not re.search(r"[+\-*/%]|sqrt|cbrt", s):     # must be an actual computation, not a lone number
         return None
+    # Decline BEFORE computing an absurd exponent — "2 ** 99999999" is a valid expression but its
+    # result has no exact, displayable answer (and computing/formatting it wastes CPU for nothing).
+    # A bound here also protects the process: without it, a large-enough exponent raises later during
+    # formatting (see below) — caught, but only after paying for the giant intermediate integer.
+    if any(abs(float(e)) > 1000 for e in re.findall(r"\*\*\s*(-?\d+(?:\.\d+)?)", s)):
+        return None
     try:
         tree = ast.parse(s, mode="eval")
         val = _safe_eval(tree.body)
@@ -223,7 +229,14 @@ def _arith(t: str) -> Optional[str]:
         canon = ast.unparse(tree.body)             # canonical form — spacing/phrasing no longer matters
     except Exception:  # noqa: BLE001 — ast.unparse is 3.9+; fall back to the normalized expression
         canon = s
-    return f"{_pretty(canon)} = {_fmt(float(val))}"
+    try:
+        # a result too large to represent as a float (or to format) is not an EXACT answer either —
+        # decline rather than crash (OverflowError on huge ints; ValueError on Python's int-str digit
+        # limit for enormous values reached through other operators, e.g. repeated multiplication).
+        shown = _fmt(float(val))
+    except (OverflowError, ValueError):
+        return None
+    return f"{_pretty(canon)} = {shown}"
 
 
 def answer(text: str) -> Optional[str]:

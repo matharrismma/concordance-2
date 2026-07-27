@@ -57,6 +57,15 @@ def test_declines_non_math_and_nonsense():
         assert compute.answer(q) is None, q
 
 
+def test_declines_absurd_results_instead_of_crashing():
+    # a result too large to represent must DECLINE, never raise (found live: a raw 500 on /ask)
+    assert compute.answer("what is 2 to the power of 99999999") is None
+    assert compute.answer("what is 2**99999999") is None
+    assert compute.answer("what is 2 to the power of 100000000000") is None
+    # ordinary powers must still compute exactly
+    assert compute.answer("what is 2 to the power of 10").endswith("= 1024")
+
+
 def test_no_arbitrary_code_execution():
     # the evaluator is ast-numeric only — names/calls other than sqrt/cbrt never execute
     for q in ["__import__('os').system('x')", "what is open('x')", "what is a.b.c"]:
