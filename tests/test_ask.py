@@ -90,6 +90,39 @@ def test_ultimate_points_to_christ_and_people():
     assert r["real_help"] and "also_in_the_keeping" in r
 
 
+def test_decision_is_more_specific_than_ultimate_and_opens_the_gate():
+    """Someone ready to respond in faith right now gets the Romans Road, not the generic
+    'ultimate matters' bucket — and it opens the Gate itself (this IS the knock, Mt 7:7-8)."""
+    phrasings = ("I want to be saved", "how do I become a christian",
+                 "I want to accept Jesus as my Lord and Savior",
+                 "i want to give my life to christ", "sinners prayer",
+                 "I want to ask Jesus into my heart")
+    for p in phrasings:
+        assert ask.classify(p) == "decision", p
+        assert ask.gate_signal(p) is True, p
+    # a generic ultimate question is NOT swallowed into "decision"
+    assert ask.classify("what is the meaning of life") == "ultimate"
+
+
+def test_decision_response_carries_the_romans_road_in_order_and_points_to_a_real_person():
+    r = ask.respond("I want to be saved", SEC, gate_open=True, gate_just_opened=False)
+    assert r["kind"] == "decision"
+    refs = [v["ref"] for v in r["romans_road"]]
+    assert refs == ["Romans 3:23", "Romans 6:23", "Romans 5:8", "Romans 10:9", "Romans 10:10", "Romans 10:13"]
+    for v in r["romans_road"]:
+        assert v["text"], f"{v['ref']} must carry real, verbatim text"
+    assert r["real_help"] and any("pastor" in x.lower() or "church" in x.lower() for x in r["real_help"])
+    # the tool presents Scripture and points away from itself — it never writes a prayer to say
+    assert "amen" not in r["message"].lower() and "dear god" not in r["message"].lower()
+
+
+def test_decision_is_never_shadowed_by_crisis_but_crisis_always_wins():
+    """Safety is not negotiable: real danger outranks a decision-of-faith statement too."""
+    assert ask.classify("I want to kill myself but I also want to be saved") == "crisis"
+    r = ask.respond("I want to kill myself but I also want to be saved", SEC)
+    assert r["kind"] == "crisis" and "romans_road" not in r
+
+
 def test_verify_hands_a_receipt_and_catches_falsehood():
     good = ask.respond("2+2 = 4", SEC)
     assert good["verify"]["verdict"] == "HOLDS" and good["verify"].get("seal")

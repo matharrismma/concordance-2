@@ -100,6 +100,57 @@ _ULTIMATE_SCRIPTURE = [
     ("Psalm 34:18", "Yahweh is near to those who have a broken heart, and saves those who have a crushed spirit."),
 ]
 
+# ── the one decision no tool can make, or complete, for a person ────────────────────────────
+# When someone says, plainly, that they are ready to respond in faith — not asking about
+# salvation in the abstract (that's "ultimate"), but ready NOW — the fitting thing is not more
+# of this tool's own words. It is Scripture, in the order the Church has long walked people
+# through it (the Romans Road), and a real person to go to next. Checked BEFORE _ULTIMATE_WORDS
+# in classify() so this more specific, more urgent moment is never swallowed by the general
+# "ultimate matters" bucket — and it opens the Gate itself (Ask/Seek/Knock): this IS the knock.
+_DECISION_PHRASES = (
+    "i want to accept jesus", "i want to accept christ", "accept jesus as my savior",
+    "accept jesus as my personal savior", "accept christ as my savior", "accept christ as my lord",
+    "i want to be saved", "how can i be saved", "how do i get saved", "how do i become saved",
+    "i want to ask jesus into my heart", "ask jesus into my heart", "invite jesus into my heart",
+    "i want to give my life to christ", "give my life to jesus", "give my life to god",
+    "i want to become a christian", "how do i become a christian",
+    "i want to follow jesus", "i want to follow christ",
+    "i want to be born again", "how do i get born again",
+    "i want to receive christ", "i want to receive jesus",
+    "i want to trust jesus", "i want to trust in jesus", "i want to trust christ",
+    "i want to confess my faith", "profession of faith", "statement of faith",
+    "declare my faith in christ", "declare my faith in jesus",
+    "sinners prayer", "pray the sinners prayer",
+    "i want to make a decision for christ", "decision for christ",
+    "how do i get right with god", "i want to give my heart to jesus",
+    "i want to surrender my life to christ", "i want to surrender my life to jesus",
+)
+
+
+def wants_to_decide(text: str) -> bool:
+    """Is this person saying, plainly, that they are ready to respond in faith right now? Not
+    "ultimate" musing — a decision. The Romans Road answers this, not this tool's own words."""
+    t = " " + normalize(text) + " "
+    return any((" " + p + " ") in t for p in _DECISION_PHRASES)
+
+
+# The Romans Road — God's own word, in order; found and cited from the WEB (public domain),
+# never generated or paraphrased. This tool presents it and points to a real person; it never
+# prays it for you, completes it for you, or claims the authority to declare the outcome.
+_DECISION_MESSAGE = ("This is the one decision no tool can make for you, or complete for you. "
+                     "Here is God's own word on it, in the order the Church has long walked "
+                     "people through — the Romans Road. Read it, then find a real person: a "
+                     "pastor, an elder, a Christian near you. Tell them. That is where this goes "
+                     "next — not here.")
+_ROMANS_ROAD = [
+    ("Romans 3:23", "for all have sinned, and fall short of the glory of God;"),
+    ("Romans 6:23", "For the wages of sin is death, but the free gift of God is eternal life in Christ Jesus our Lord."),
+    ("Romans 5:8", "But God commends his own love toward us, in that while we were yet sinners, Christ died for us."),
+    ("Romans 10:9", "that if you will confess with your mouth that Jesus is Lord and believe in your heart that God raised him from the dead, you will be saved."),
+    ("Romans 10:10", "For with the heart one believes resulting in righteousness; and with the mouth confession is made resulting in salvation."),
+    ("Romans 10:13", "For, “Whoever will call on the name of the Lord will be saved.”"),
+]
+
 # ── discernment: which Scripture is being asked about, however a person writes it ───────────
 # A phone keyboard buries the colon two layers deep, so people type "John 3 16"; dictation
 # produces the same. And the church has named its passages for centuries — "the prodigal son"
@@ -433,6 +484,9 @@ def classify(text: str) -> str:
     from . import dates as _dates                # "when did X happen" for major, verified events
     if _dates.answer(text or "") is not None:
         return "date"
+    if wants_to_decide(text or ""):        # ready to respond in faith NOW — an explicit, deliberate
+        return "decision"                  # statement; checked BEFORE comfort's broad archetype
+                                            # match (e.g. "...into my heart" also fires _wants_a_companion)
     if distress_ref(text or ""):
         return "comfort"
     if _wants_a_companion(text or ""):     # broaden: meet a first-person struggle as a servant
@@ -475,7 +529,7 @@ _VERSE_RE = re.compile(r"\b[1-3]?\s?[A-Za-z]{2,}\.?\s+\d{1,3}:\d{1,3}")
 def gate_signal(text: str) -> bool:
     """Does this message knock (Ask/Seek/Knock)? True when the conversation turns God-ward or to
     ultimate matters — the person's own seeking opens the door. We never force it."""
-    if classify(text or "") in ("ultimate", "scripture", "word_study", "comfort"):
+    if classify(text or "") in ("ultimate", "scripture", "word_study", "comfort", "decision"):
         return True
     t = " " + (text or "").lower() + " "
     return any(w in t for w in _GATE_WORDS)
@@ -577,6 +631,16 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
 
     if kind == "kept_note":
         return {**base, "message": "Kept. It is in the record and the journal."}
+
+    if kind == "decision":
+        # Ready to respond in faith, right now. Not more of this tool's own words — God's own
+        # word, in order (the Romans Road), and a real person to go to next. gate_signal()
+        # already counts "decision" as a knock (Matthew 7:7-8), so base["gate_open"] is already
+        # true by the time we get here — this IS the moment the Gate exists for.
+        return {**base, "message": _DECISION_MESSAGE,
+                "romans_road": [{"ref": r, "text": t} for r, t in _ROMANS_ROAD],
+                "real_help": ["A pastor, or a local church", "An elder or a Christian near you",
+                             "Prayer — tell Him now, in your own words"]}
 
     if kind == "ultimate":
         return {**base, "message": _ULTIMATE_MESSAGE,

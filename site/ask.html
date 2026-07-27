@@ -191,7 +191,15 @@ function render(d){
       '</div></div>';  // crisis stands alone — help first, never enriched, never spoken over
   }
   let html, hear='';
-  if(d.kind === 'ultimate'){
+  if(d.kind === 'decision'){
+    // Ready to respond in faith, right now. God's own word, in order (the Romans Road) —
+    // never this tool's own words, never a prayer written FOR them.
+    hear = hearBtn(d.message);
+    html = esc(d.message)+
+      '<div style="margin-top:.7rem">'+(d.romans_road||[]).map(v =>
+        '<div class="verse"><span class="ref">'+esc(v.ref)+'</span> — '+esc(v.text)+'</div>').join('')+'</div>'+
+      '<div class="dim" style="font-size:.9rem;margin-top:.5rem">Go to: '+(d.real_help||[]).map(esc).join(' · ')+'</div>';
+  } else if(d.kind === 'ultimate'){
     hear = hearBtn(d.message);
     html = esc(d.message)+
       '<div style="margin-top:.7rem">'+(d.scripture||[]).map(v =>
@@ -242,7 +250,7 @@ function render(d){
   // Every result wears its kind (conduit-not-source, made visible). Crisis returned early — never badged.
   let kind = 'cited';
   if(d.verify) kind = 'verified';
-  else if(d.kind === 'ultimate' || d.scripture) kind = 'scripture';
+  else if(d.kind === 'ultimate' || d.kind === 'decision' || d.scripture) kind = 'scripture';
   // word_study (lexicon) and found (the keeping) are found & cited -> the default 'cited'.
   const kindBadge = window.NHKind ? '<div style="margin-bottom:.7rem">'+NHKind.badge(kind)+'</div>' : '';
   return kindBadge + thr + html + hear + note + refs + fellow;
