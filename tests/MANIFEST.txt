@@ -26,6 +26,7 @@ test_airlock.py
 test_corpus.py
 test_corpus_db.py
 test_crossref.py
+test_dates.py
 test_days.py
 test_deck_api.py
 test_distill.py

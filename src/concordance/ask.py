@@ -425,6 +425,9 @@ def classify(text: str) -> str:
     from . import compute as _compute            # arithmetic, %, roots, unit + temperature conversion
     if _compute.answer(text or "") is not None:
         return "compute"
+    from . import dates as _dates                # "when did X happen" for major, verified events
+    if _dates.answer(text or "") is not None:
+        return "date"
     if distress_ref(text or ""):
         return "comfort"
     if _wants_a_companion(text or ""):     # broaden: meet a first-person struggle as a servant
@@ -652,6 +655,17 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                     "verify": attach(res, config=config, domain="mathematics"),
                     "note": "Computed exactly, and sealed so anyone can re-check it."}
         # fell through (shouldn't, classify gated on it) — degrade to search
+        return {**base, "results": [corpus._brief(c) for c in corpus.search(text, limit=6)]}
+
+    if kind == "date":
+        # A verified date for a major event, from the established historical record. Answered ONLY
+        # on a confident match (dates.answer declines the unknown) — so it is never a guessed year.
+        from . import dates as _dates
+        ans = _dates.answer(text)
+        if ans:
+            return {**base, "message": ans,
+                    "note": "From the established historical record — a stated reference fact, "
+                            "attributed. " + _NOTE}
         return {**base, "results": [corpus._brief(c) for c in corpus.search(text, limit=6)]}
 
     if kind == "resourceful":
