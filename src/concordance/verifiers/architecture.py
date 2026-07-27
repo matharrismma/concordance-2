@@ -84,6 +84,13 @@ def verify_occupant_load(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "floor_area_m2, occupant_load_factor_m2_per_person, "
                            "claimed_occupant_count must be numeric")
+    # found: a caller-supplied number large enough to overflow float() to inf (e.g. a 300+ digit
+    # string) parses without raising here, then crashes downstream — math.ceil(areaf/factorf) and
+    # int(round(c)) both raise OverflowError on infinity. Decline (like the other invalid-input
+    # branches below) rather than crash.
+    if not (math.isfinite(areaf) and math.isfinite(factorf) and math.isfinite(c)):
+        return error(name, "floor_area_m2, occupant_load_factor_m2_per_person, "
+                           "claimed_occupant_count must be finite numbers")
     if factorf <= 0:
         return error(name, f"occupant_load_factor_m2_per_person must be positive, got {factorf}")
     if areaf < 0:

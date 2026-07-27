@@ -93,6 +93,7 @@ test_understanding.py
 test_validate.py
 test_verifier_consistency.py
 test_verifiers.py
+test_verify_architecture.py
 test_voice.py
 test_wayfind.py
 test_witness.py
