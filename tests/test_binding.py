@@ -146,3 +146,23 @@ def test_invalid_thread_id_is_refused():
 
 def test_challenge_requires_a_public_key():
     assert binding.challenge("")["ok"] is False
+
+
+# --- owner_of() must not build a path from an unvalidated caller string ----------------------
+
+def test_owner_of_refuses_malformed_ids_without_touching_disk():
+    for bad in ("../../../etc/passwd", "../secret", "a/b/c", "", None, "a" * 500, "not-hex-!!"):
+        assert binding.owner_of(bad) is None
+
+
+def test_owner_of_traversal_cannot_reach_a_file_outside_its_own_directory():
+    # found: owner_of(thread_id) built _dir()/"threads"/f"{thread_id}.json" with ZERO
+    # validation, unlike claim() (same module) which already checks threads._valid_id() first.
+    # This was reachable from api.py's UNAUTHENTICATED /fork route via bound_to =
+    # binding_mod.owner_of(tid) — a raw, unvalidated body["thread_id"]. A traversal-shaped id
+    # must never escape the bindings/threads directory to read some other file's "owner" field.
+    planted = os.path.join(_TMP, "planted_secret.json")
+    with open(planted, "w", encoding="utf-8") as f:
+        json.dump({"owner": "nh_shouldneverbereturned"}, f)
+    assert binding.owner_of("../planted_secret") is None
+    os.remove(planted)

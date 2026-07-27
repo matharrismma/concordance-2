@@ -155,7 +155,8 @@ def attach(owner: str, thread_id: str) -> bool:
     Used by surfaces that create a thread on a person's behalf — the thread must belong to
     them from the first exchange, not merely be protected by an unguessable id.
     """
-    if not owner or not thread_id:
+    from . import threads as threads_mod
+    if not owner or not threads_mod._valid_id(thread_id):
         return False
     existing = _read(_thread_path(thread_id))
     if existing and existing.get("owner") != owner:
@@ -174,7 +175,10 @@ def attach(owner: str, thread_id: str) -> bool:
 
 def owner_of(thread_id: str) -> Optional[str]:
     """The fingerprint that owns this thread, if any."""
-    rec = _read(_thread_path(thread_id or ""))
+    from . import threads as threads_mod
+    if not threads_mod._valid_id(thread_id):
+        return None
+    rec = _read(_thread_path(thread_id))
     return (rec or {}).get("owner")
 
 
