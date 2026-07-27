@@ -161,7 +161,7 @@ CARDS = [
      "twisting plant fibers (inner bark, nettle, yucca) into a two-ply reverse-wrap. Keep steel dry and "
      "oiled against rust. A dull tool is more dangerous than a sharp one — it slips."),
     ("canning", "Preserving food: safe home canning", "homestead", USDA_CAN, "https://nchfp.uga.edu/how/can_home.html",
-     "canning preserve food jars water bath pressure botulism acid vegetables meat fruit store homestead how to",
+     "canning can preserve food jars water bath pressure botulism acid vegetables meat fruit store safely safe homestead how to",
      "Two methods, and choosing wrong can be deadly. HIGH-ACID foods (fruits, jams, pickles, properly "
      "acidified tomatoes) are safe by BOILING-WATER-BATH canning. LOW-ACID foods (vegetables, meats, "
      "beans, soups) MUST be PRESSURE canned — boiling alone will not kill botulism spores. Use tested, "

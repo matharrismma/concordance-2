@@ -43,6 +43,18 @@ def test_resourceful_routes_materials_but_never_preempts_crisis():
     assert d.get("kind") == "resourceful" and d.get("results"), "materials should surface practical cards"
 
 
+def test_how_to_queries_reach_the_field_library():
+    # A practical/how-to question must consult the WHOLE keeping (not shortcut to a mis-predicted
+    # deck), so the field library competes and wins. Positive check guarded on provisioned data.
+    from concordance import corpus
+    if not corpus.search("survival shelter", limit=1):
+        return
+    d = ask.respond("how to build a fire", EngineConfig(), gate_open=True)
+    results = d.get("results") or []
+    assert any(r.get("shelf") == "survival" for r in results), \
+        "a how-to question should reach the field library, not shortcut past it"
+
+
 def test_anticipate_offers_next_for_content():
     cfg = EngineConfig()
     d = ask.respond("John 3:16", cfg, gate_open=True)

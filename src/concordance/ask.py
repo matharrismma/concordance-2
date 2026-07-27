@@ -385,8 +385,10 @@ def anticipate(text: str, r: Dict[str, Any]) -> list:
 # someone with nothing could figure out a solution from what they have on hand). The practical
 # shelves of the keeping — the field library, the apothecary, the almanac, the free tools — hold
 # what a named resource enables. We SURFACE that knowledge; we never invent a plan.
-_PRACTICAL_SHELVES = frozenset({"survival", "apothecary", "almanac", "access", "medicine",
-                                "nutrition", "reference"})
+# The genuinely practical/how-to shelves — the field library, herbs, the almanac, the free tools.
+# Deliberately NOT "reference"/"medicine"/"nutrition": those are dictionary/drug/food-row data that
+# add noise ("Judas Iscariot", "Bottle Brush") to a 'what can I do with this' answer, not help.
+_PRACTICAL_SHELVES = frozenset({"survival", "apothecary", "almanac", "access"})
 _RESOURCEFUL = re.compile(
     r"(what (?:can|could|should) i (?:do|make|build|use|create|cook|fix|craft)\b.*\b(?:with|from|out of)\b"
     r"|(?:make|build|create|improvise|fix|cook|craft)\b.+\b(?:with|from|out of)\b"
@@ -857,11 +859,15 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     # page knows which one answered.
     from . import decks as _decks
     subj = subject(text) or (text or "")          # understand: search what they're ASKING about
+    # A practical/how-to question ("how to build a fire", "purify water") must consult the WHOLE
+    # keeping, not a single predicted deck — otherwise a mis-predicted volume (maker "Build a …")
+    # shortcuts past the field library before the practical boost can lift it. Skip the Hare here.
+    practical = bool(corpus._PRACTICAL & set(subj.lower().split()))
     _vol = (_decks.predict(subj, k=1) or [None])[0]
     hits = []
-    if _vol:
+    if _vol and not practical:
         hits = corpus.search(subj, limit=6, shelves=_decks.deck_shelves(_vol["id"]))
-    if len(hits) < 3 or (hits and not _shares_a_word(subj, hits[0])):
+    if practical or len(hits) < 3 or (hits and not _shares_a_word(subj, hits[0])):
         hits = corpus.search(subj, limit=6)
     if not hits and subj != (text or ""):         # last resort — the raw words as typed
         hits = corpus.search(text, limit=6)
