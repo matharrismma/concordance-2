@@ -172,6 +172,11 @@ def verify_paint_coverage(spec: Dict[str, Any]) -> VerifierResult:
         af, cf_cov, c = float(area), float(coverage), float(claimed)
     except (TypeError, ValueError):
         return error(name, "paint_area_m2, coverage_m2_per_can, claimed_paint_cans must be numeric")
+    # found: a caller-supplied number large enough to overflow float() to inf (e.g. a 300+ digit
+    # string) parses without raising here, then crashes at math.ceil()/int() (both raise
+    # OverflowError on infinity) — same shape as the architecture.py verifier fixed earlier.
+    if not (math.isfinite(af) and math.isfinite(cf_cov) and math.isfinite(c)):
+        return error(name, "paint_area_m2, coverage_m2_per_can, claimed_paint_cans must be finite numbers")
     if cf_cov <= 0:
         return error(name, f"coverage_m2_per_can must be > 0, got {cf_cov}")
     actual = math.ceil(af / cf_cov)
@@ -196,6 +201,9 @@ def verify_floor_tiles(spec: Dict[str, Any]) -> VerifierResult:
         af, tsf, wf, c = float(area), float(tile_size), float(waste), float(claimed)
     except (TypeError, ValueError):
         return error(name, "tile_area_m2, tile_size_m2, claimed_tile_count must be numeric")
+    if not (math.isfinite(af) and math.isfinite(tsf) and math.isfinite(wf) and math.isfinite(c)):
+        return error(name, "tile_area_m2, tile_size_m2, waste_factor, claimed_tile_count "
+                           "must be finite numbers")
     if tsf <= 0:
         return error(name, f"tile_size_m2 must be > 0, got {tsf}")
     base_tiles = math.ceil(af / tsf)

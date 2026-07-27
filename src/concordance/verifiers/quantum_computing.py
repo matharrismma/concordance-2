@@ -96,7 +96,13 @@ def verify_grover_iterations(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "n_items and claimed_grover_iterations must be integers")
     if n <= 0:
         return error(name, f"n_items must be positive, got {n}")
-    optimal = math.floor(math.pi * math.sqrt(n) / 4)
+    try:
+        # found: int(n_items) handles an arbitrarily large caller string with no overflow (Python
+        # ints are unbounded), but math.sqrt(n) needs to convert n to a float first and raises
+        # OverflowError once n exceeds float's representable range — a crash, not a decline.
+        optimal = math.floor(math.pi * math.sqrt(n) / 4)
+    except OverflowError:
+        return error(name, f"n_items is too large to compute Grover iterations for: {n}")
     data = {"n_items": n, "optimal_iterations": optimal,
             "claimed_iterations": c, "formula": "T = floor(π√N/4)"}
     if c == optimal:

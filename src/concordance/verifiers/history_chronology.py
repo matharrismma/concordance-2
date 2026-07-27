@@ -115,7 +115,13 @@ def verify_century_assignment(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "year_CE / claimed_century must be integers")
     if y <= 0:
         return error(name, f"year_CE must be a positive CE year, got {y}")
-    actual = math.ceil(y / 100)
+    try:
+        # found: int(year_CE) handles an arbitrarily large caller string with no overflow (Python
+        # ints are unbounded), but y / 100 (true division promotes to float) then raises
+        # OverflowError once y exceeds float's representable range — a crash, not a decline.
+        actual = math.ceil(y / 100)
+    except OverflowError:
+        return error(name, f"year_CE is too large to compute a century for: {y}")
     data = {
         "rule": _CENTURY_RULE,
         "year_CE": y,
