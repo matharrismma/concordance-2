@@ -52,7 +52,11 @@ _RULES: List[Tuple[str, "re.Pattern[str]", object]] = [
     ("URL", re.compile(r"\bhttps?://[^\s<>\")]+", re.I), None),
     ("EMAIL", re.compile(r"\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}\b"), None),
     ("SSN", re.compile(r"\b\d{3}-\d{2}-\d{4}\b"), None),
-    ("CARD", re.compile(r"\b(?:\d[ -]?){13,19}\b"), _luhn_ok),
+    # digit, THEN (separator-digit) pairs — a separator can only fall BETWEEN two digits, never
+    # trail the match. The naive "(?:\d[ -]?){13,19}" is greedy and a trailing space is ALSO a
+    # valid \b boundary (space-then-word-char), so it would swallow the space after the card
+    # number in ordinary prose ("card 4532...66 ssn" -> "[CARD_1]ssn", jamming the words together).
+    ("CARD", re.compile(r"\b\d(?:[ -]?\d){12,18}\b"), _luhn_ok),
     ("IP", re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b"), _ipv4_ok),
 ]
 

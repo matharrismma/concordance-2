@@ -41,6 +41,18 @@ def test_luhn_and_ipv4_guards():
     assert not m_ip  # out-of-range octet -> not an IP
 
 
+def test_card_redaction_preserves_surrounding_spacing():
+    # The card regex must never swallow the space AFTER the number — found: greedy "(?:\d[ -]?){13,19}"
+    # would eat a trailing space whenever a card number was followed by a word (i.e. almost always
+    # in prose), jamming the next word onto the placeholder ("[CARD_1]ssn" instead of "[CARD_1] ssn").
+    clean, _ = redact.redact(f"card {VALID_CARD} ssn 123-45-6789")
+    assert "[CARD_1] ssn" in clean, f"space after the card token was swallowed: {clean!r}"
+    # dashed and space-grouped forms must still redact correctly
+    dashed = VALID_CARD[:4] + "-" + VALID_CARD[4:8] + "-" + VALID_CARD[8:12] + "-" + VALID_CARD[12:]
+    clean_dashed, m_dashed = redact.redact(f"card: {dashed} thanks")
+    assert "[CARD_1] thanks" in clean_dashed and m_dashed
+
+
 def test_math_text_is_untouched():
     text = "(x-1)*(x+1) = x**2-1"
     clean, m = redact.redact(text)
