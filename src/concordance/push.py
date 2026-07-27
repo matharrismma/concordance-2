@@ -141,7 +141,12 @@ def encrypt(payload: bytes, p256dh_b64: str, auth_b64: str) -> bytes:
 
 
 # ── Subscriptions — the recipient's own, keyed by their node fingerprint ────
-def _sub_path(fp: str) -> Path:
+def _sub_path(fp: str) -> Optional[Path]:
+    # unsubscribe() below can unlink() the file this resolves to — an unvalidated fp here was an
+    # UNAUTHENTICATED arbitrary-file-DELETE (POST /push/unsubscribe requires no proof at all).
+    # None on an invalid shape makes every caller's existing "not found" path the safe default.
+    if not _FP_RE.fullmatch(str(fp or "")):
+        return None
     return _dir() / "subs" / (fp + ".json")
 
 
@@ -170,7 +175,7 @@ def subscribe(fp: str, subscription: Dict[str, Any]) -> Dict[str, Any]:
 def unsubscribe(fp: str, endpoint: str = "") -> Dict[str, Any]:
     with _LOCK:
         p = _sub_path(fp)
-        if not p.exists():
+        if p is None or not p.exists():
             return {"ok": True, "devices": 0}
         if not endpoint:
             p.unlink()
@@ -185,7 +190,7 @@ def unsubscribe(fp: str, endpoint: str = "") -> Dict[str, Any]:
 
 def _subs_for(fp: str) -> List[Dict[str, Any]]:
     p = _sub_path(fp)
-    if not p.exists():
+    if p is None or not p.exists():
         return []
     try:
         return json.loads(p.read_text(encoding="utf-8"))

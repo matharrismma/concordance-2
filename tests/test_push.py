@@ -85,3 +85,29 @@ def test_network_hop_is_off_by_default(push_dir):
     push.subscribe(fp, {"endpoint": "https://example.com/e", "keys": {"p256dh": _b64e(os.urandom(65)), "auth": _b64e(os.urandom(16))}})
     r = push.notify(fp, "test", "test")                        # must NOT touch the network
     assert r["ok"] is True and r["sent"] == 0 and r["enabled"] is False
+
+
+# --- fp is validated before it ever reaches a filesystem path (unsubscribe can unlink()) -----
+
+def test_sub_path_refuses_malformed_fp():
+    for bad in ("../vapid", "../../etc/passwd", "", None, "a" * 500, "has space", "x" * 7):
+        assert push._sub_path(bad) is None, f"{bad!r} should not resolve to a path"
+
+
+def test_unsubscribe_traversal_cannot_delete_a_file_outside_subs_dir(push_dir, monkeypatch):
+    # found: POST /push/unsubscribe requires NO authentication at all (api.py only checks that
+    # body["fp"] is a non-empty string) and unsubscribe(fp, endpoint="") calls p.unlink()
+    # unconditionally when the subscription file exists. _sub_path(fp) built the path with ZERO
+    # validation, unlike subscribe() (same module) which already checks _FP_RE first. Confirmed
+    # live: unsubscribe("../vapid", endpoint="") deleted data/push/vapid.json — the server's own
+    # VAPID identity key — with no credentials of any kind. The most severe finding of this sweep.
+    push_root = os.environ["CONCORDANCE_PUSH_DIR"]
+    target = os.path.join(push_root, "vapid.json")
+    with open(target, "w", encoding="utf-8") as f:
+        f.write('{"private": "SENSITIVE_KEY_MATERIAL"}')
+
+    r = push.unsubscribe("../vapid", endpoint="")
+    assert r == {"ok": True, "devices": 0}          # reports as if simply "not found" — no crash
+    assert os.path.exists(target), "a traversal-shaped fp deleted a file outside subs/"
+    with open(target, encoding="utf-8") as f:
+        assert "SENSITIVE_KEY_MATERIAL" in f.read()
