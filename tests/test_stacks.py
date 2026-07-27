@@ -30,6 +30,22 @@ def test_card_lives_once_and_touch_makes_it_hot():
     assert got["use_count"] == 1  # touching bumps use
 
 
+def test_get_card_bump_survives_a_concurrency_race():
+    """use_count must reach exactly N after N concurrent bumps — found: the read happened OUTSIDE
+    the lock and only the increment+write were inside it, so two racing bumps could both start
+    from the same use_count and lose one increment (same shape as the mesh.py invite race)."""
+    import threading
+    c = stacks.put_card("bumped concurrently", kind="idea")
+    N = 20
+    threads_ = [threading.Thread(target=lambda: stacks.get_card(c["id"], bump=True)) for _ in range(N)]
+    for t in threads_:
+        t.start()
+    for t in threads_:
+        t.join()
+    final = stacks.get_card(c["id"], bump=False)
+    assert final["use_count"] == N, f"lost updates: expected {N}, got {final['use_count']}"
+
+
 def test_one_card_many_stacks_no_duplication():
     c = stacks.put_card("grace and truth", kind="note")
     stacks.add_to_stack("date", "2026-07-01", c["id"])

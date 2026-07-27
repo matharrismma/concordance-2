@@ -102,16 +102,21 @@ def put_card(text: str, kind: str = "note", topics: Optional[List[str]] = None,
 
 def get_card(cid: str, bump: bool = True) -> Optional[Dict[str, Any]]:
     """Fetch a card; touching it makes it hot (tiering by use)."""
-    card = _read(_card_path(cid))
-    if card is None:
-        return None
-    if bump:
-        with _LOCK:
-            card["use_count"] = int(card.get("use_count", 0)) + 1
-            card["last_touched"] = _now()
-            card["tier"] = "hot"
-            _write(_card_path(cid), card)
-    return card
+    if not bump:
+        return _read(_card_path(cid))
+    # Re-read INSIDE the lock before incrementing — a read-then-later-lock split let two
+    # concurrent bumps both start from the same use_count and lose one increment (found: the
+    # same stale-read-outside-the-lock shape as the mesh.py invite race). Harmless in effect
+    # (a display/tiering counter drifting slightly), but the same class of bug, fixed the same way.
+    with _LOCK:
+        card = _read(_card_path(cid))
+        if card is None:
+            return None
+        card["use_count"] = int(card.get("use_count", 0)) + 1
+        card["last_touched"] = _now()
+        card["tier"] = "hot"
+        _write(_card_path(cid), card)
+        return card
 
 
 def update_card(cid: str, fields: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -233,13 +238,18 @@ def tier_sweep(cold_after_days: float = 30.0) -> int:
         if not prefix.is_dir():
             continue
         for f in prefix.glob("*.json"):
-            c = _read(f)
-            if not c or c.get("tier") == "cold":
-                continue
-            if float(c.get("last_touched", 0)) < cutoff:
-                c["tier"] = "cold"
-                _write(f, c)
-                moved += 1
+            # Lock the read-check-write together — unlocked, this background sweep could read a
+            # card a moment before a concurrent get_card/update_card writes it, then clobber that
+            # write with its own stale copy (same race shape fixed above; the sweep runs against
+            # live traffic, not offline).
+            with _LOCK:
+                c = _read(f)
+                if not c or c.get("tier") == "cold":
+                    continue
+                if float(c.get("last_touched", 0)) < cutoff:
+                    c["tier"] = "cold"
+                    _write(f, c)
+                    moved += 1
     return moved
 
 
