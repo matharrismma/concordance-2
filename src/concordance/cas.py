@@ -120,6 +120,8 @@ def list_hashes(*, base_dir: Optional[Path] = None) -> List[str]:
 
 def delete(content_hash: str, *, base_dir: Optional[Path] = None) -> bool:
     """Remove a record. Returns True if it existed. (Use sparingly — append-only by design.)"""
+    if not _valid_hash(content_hash):
+        return False
     base = base_dir or _cas_dir()
     path = _record_path(base, content_hash)
     if not path.exists():
