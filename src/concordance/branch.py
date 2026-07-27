@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import secrets
 import time
 from datetime import datetime, timezone
@@ -30,6 +31,16 @@ from . import threads
 _HANDABLE = {"steward", "coach", "shepherd", "teachings", "scripture", "word_study",
              "verify", "almanac", "characters", "prophecy", "cross_refs", "commentary",
              "search", "self"}
+
+# owner is always identity.fingerprint(public_key) at every real call site (api.py's /defer and
+# /returns routes, both via binding.prove()), never a raw caller string — safe by construction
+# TODAY. Validated here anyway so _path()/_load()/_save() defend their own contract regardless
+# of the caller, matching bookofdays.py's identical shape.
+_OWNER_RE = re.compile(r"[A-Za-z0-9_\-]{1,80}\Z")
+
+
+def _valid_owner(owner: Any) -> bool:
+    return isinstance(owner, str) and bool(_OWNER_RE.match(owner))
 
 
 def _dir() -> Path:
@@ -47,13 +58,18 @@ def _now() -> float:
 
 
 def _load(owner: str) -> Dict[str, Any]:
+    fresh = {"owner": owner, "items": [], "created_at": _now()}
+    if not _valid_owner(owner):
+        return fresh
     try:
         return json.loads((_dir() / f"{owner}.json").read_text(encoding="utf-8"))
     except (OSError, ValueError):
-        return {"owner": owner, "items": [], "created_at": _now()}
+        return fresh
 
 
 def _save(rec: Dict[str, Any]) -> None:
+    if not _valid_owner(rec.get("owner")):
+        return  # refuse silently — every public fn reads back via _load(), so this is a no-op
     p = _dir() / f"{rec['owner']}.json"
     p.parent.mkdir(parents=True, exist_ok=True)
     rec["updated_at"] = _now()

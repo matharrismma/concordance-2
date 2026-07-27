@@ -147,3 +147,29 @@ def test_due_is_ordered_and_deterministic():
 def test_queues_are_separate_per_owner():
     branch.defer("nh_ownA", member="steward", when=1.0, note="mine")
     assert branch.due("nh_ownB", now=9e9)["count"] == 0
+
+
+# --- owner is validated before it ever reaches a filesystem path -----------------------------
+
+def test_valid_owner_accepts_real_fingerprint_shape():
+    assert branch._valid_owner("nh_" + "a" * 32) is True
+    assert branch._valid_owner(OWNER) is True
+
+
+def test_valid_owner_rejects_traversal_and_malformed_input():
+    for bad in ("../../../etc/passwd", "../secrets", "a/b/c", "", "a" * 500, None, 123, ["x"]):
+        assert branch._valid_owner(bad) is False, f"{bad!r} should not validate as an owner"
+
+
+def test_traversal_shaped_owner_never_touches_the_filesystem():
+    # same shape as bookofdays.py's owner bug found earlier this sweep: _load()/_save() built a
+    # path straight from the caller string with zero validation. A traversal-shaped owner must
+    # never write, never read someone else's file, and never create ANY file on disk.
+    ddir = os.environ["CONCORDANCE_DEFERRED_DIR"]
+    before = set(os.listdir(ddir)) if os.path.isdir(ddir) else set()
+    for bad in ("../../../etc/passwd", "../escaped", "a/b/../c"):
+        r = branch.defer(bad, member="steward", when=1.0, note="malicious")
+        assert r["ok"] is True                          # defer() itself still reports structurally
+        assert branch.pending(bad)["count"] == 0         # ...but nothing persisted for a bad owner
+    after = set(os.listdir(ddir)) if os.path.isdir(ddir) else set()
+    assert after == before, f"a traversal-shaped owner created files: {after - before}"
