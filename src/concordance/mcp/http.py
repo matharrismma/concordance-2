@@ -41,10 +41,17 @@ def _origin_allowed(origin: str) -> bool:
 # In-memory session registry. Lightweight: the tools are stateless, so a session is just
 # a validity token + the negotiated protocol version. Cleared on restart.
 _SESSIONS: Dict[str, Dict[str, Any]] = {}
+# A bound on total tracked sessions — nothing here is security-critical (an unknown id still
+# serves, see handle_http's docstring), but with NO cap `initialize` calls accumulate forever
+# with no eviction (unlike ratelimit.py's own periodic sweep), a slow, unbounded memory leak
+# over a long-running process. Evict oldest first (dicts are insertion-ordered) once past the cap.
+_MAX_SESSIONS = 10_000
 
 
 def _new_session(protocol_version: str) -> str:
     sid = secrets.token_hex(16)
+    if len(_SESSIONS) >= _MAX_SESSIONS:
+        _SESSIONS.pop(next(iter(_SESSIONS)), None)
     _SESSIONS[sid] = {"protocol": protocol_version or PROTOCOL_VERSION}
     return sid
 

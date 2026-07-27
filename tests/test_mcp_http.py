@@ -30,6 +30,23 @@ def test_initialize_mints_session():
     assert json.loads(b)["result"]["serverInfo"]["name"] == "narrow-highway"
 
 
+def test_session_registry_is_bounded():
+    # A session per initialize() call must not accumulate forever — found: no eviction at all
+    # (unlike ratelimit.py's own periodic sweep), an unbounded memory leak over a long-running
+    # process. Push well past the cap and confirm the registry never grows beyond it.
+    from concordance.mcp import http as mcp_http
+    before = mcp_http._MAX_SESSIONS
+    try:
+        mcp_http._MAX_SESSIONS = 50   # shrink the cap so the test is fast or fast tests
+        mcp_http._SESSIONS.clear()
+        for i in range(200):
+            _post({"jsonrpc": "2.0", "id": i, "method": "initialize"})
+        assert len(mcp_http._SESSIONS) <= mcp_http._MAX_SESSIONS
+    finally:
+        mcp_http._MAX_SESSIONS = before
+        mcp_http._SESSIONS.clear()
+
+
 def test_tools_call_json():
     st, h, b = _post({"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {
         "name": "verify", "arguments": {"mode": "equality",
