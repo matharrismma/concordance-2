@@ -25,6 +25,30 @@ def test_one_verse_different_is_a_different_identity():
     assert cov.public_id(ME) != cov.public_id(["Romans 12:1-2", "Matthew 7:7", "John 1:1", "Psalm 73"])
 
 
+def test_canonical_never_raises_beyond_valueerror_on_bad_types():
+    # a non-string ref (a malformed client body field) must fail the SAME documented contract
+    # (ValueError), never a raw TypeError — found: "123 or ''" is truthy, so it reached re.match(123)
+    for bad in (123, ["John 1:1"], {}, 4.5):
+        with pytest.raises(ValueError):
+            cov.canonical(bad)
+
+
+def test_verify_never_raises_on_malformed_or_wrong_type_fields():
+    # a security boundary function must FAIL CLOSED (return False), never crash — found:
+    # bytes.fromhex(None/int) raises TypeError, which the original except (InvalidSignature,
+    # ValueError) did not catch.
+    pub = cov.public_id(ME)
+    sig = cov.sign(ME, "hello")
+    for bad_pub, bad_msg, bad_sig in (
+        (None, "hello", sig), (123, "hello", sig),
+        (pub, "hello", None), (pub, "hello", 123),
+        ("not hex", "hello", sig),
+    ):
+        assert cov.verify(bad_pub, bad_msg, bad_sig) is False
+    # the real, valid case still verifies true
+    assert cov.verify(pub, "hello", sig) is True
+
+
 def test_challenge_response_proves_possession():
     pub = cov.public_id(ME)
     sig = cov.sign(ME, "nh-challenge-xyz")

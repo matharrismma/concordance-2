@@ -99,7 +99,10 @@ _REF = re.compile(r"^\s*([0-9]?\s*[A-Za-z][A-Za-z ]*?)\s*"          # book (opt.
 def canonical(ref: str) -> str:
     """A verse reference in a bulletproof canonical token: '<booknum> <chap>[:<v1>[-<v2>]]'. Book
     name/abbreviation and separators are normalized so every spelling of the same verse agrees.
-    Raises ValueError on anything not a recognizable reference in the 66."""
+    Raises ValueError on anything not a recognizable reference in the 66 (including a non-string
+    input — a malformed client body must fail this contract the SAME way, never a raw TypeError)."""
+    if not isinstance(ref, str):
+        raise ValueError(f"not a verse reference: {ref!r}")
     m = _REF.match(ref or "")
     if not m:
         raise ValueError(f"not a verse reference: {ref!r}")
@@ -147,10 +150,13 @@ def sign(verses: List[str], message: str, passphrase: str = "") -> str:
 
 
 def verify(public_hex: str, message: str, signature_hex: str) -> bool:
-    """Server side: does this signature prove the holder of `public_hex`? No secret is held here."""
+    """Server side: does this signature prove the holder of `public_hex`? No secret is held here.
+    Never raises — a malformed/wrong-type field from a client body is exactly the kind of input
+    this boundary function must fail closed on, not crash on (bytes.fromhex raises TypeError, not
+    ValueError, for a non-str/bytes argument — e.g. a JSON body field that came through as null)."""
     try:
         pub = Ed25519PublicKey.from_public_bytes(bytes.fromhex(public_hex))
         pub.verify(bytes.fromhex(signature_hex), (message or "").encode("utf-8"))
         return True
-    except (InvalidSignature, ValueError):
+    except (InvalidSignature, ValueError, TypeError):
         return False
