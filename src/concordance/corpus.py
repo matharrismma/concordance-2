@@ -139,7 +139,14 @@ class Corpus:
         `shelves` (a set) restricts the search to those shelves — the DECK fast-path (the Hare):
         scoring only the deck's cards instead of the whole keeping. None = the whole library
         (the Tortoise). A deck search that comes up short can always fall back to the full one."""
-        query_tokens = set(_tokens(query or ""))
+        # A truthy non-string query (e.g. an int from an uncoerced MCP tool call — args.get("query")
+        # with no str() at the call site) would otherwise crash here: "query or ''" only substitutes
+        # the fallback for a FALSY query, so a non-empty int/list survives and .lower() raises
+        # AttributeError deep inside _tokens(). This is the one shared search entry point (the HTTP
+        # /search route and /ask already coerce before calling in, but the MCP search tool does not)
+        # — coerce once, here, so every caller is safe regardless of what reaches this function.
+        query = str(query) if query else ""
+        query_tokens = set(_tokens(query))
         if not query_tokens:
             return []
         idf = self._idf(query_tokens)

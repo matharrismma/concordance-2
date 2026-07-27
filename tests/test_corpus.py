@@ -51,6 +51,16 @@ def test_empty_query_returns_nothing():
     assert _corpus().search("") == []
 
 
+def test_non_string_query_declines_instead_of_crashing():
+    # found: "query or ''" only substitutes the fallback for a FALSY query — a truthy non-string
+    # (an int/list from an uncoerced caller, e.g. an MCP tool's args.get("query") with no str())
+    # survived past that guard and crashed deep inside _tokens() on "123.lower()". Every shared
+    # search entry point must be safe regardless of what a caller passes in.
+    c = _corpus()
+    for bad in (123, 45.6, None, ["not", "a", "string"], {"k": "v"}):
+        assert c.search(bad) == [] or isinstance(c.search(bad), list)  # never raises
+
+
 def test_limit_respected():
     res = _corpus().search("energy", limit=1)
     assert len(res) <= 1
