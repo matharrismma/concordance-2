@@ -575,6 +575,24 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                          mode=str(body.get("mode") or "steps"), sealed=bool(res.get("seal")))
         return _ok(res)
 
+    if method == "POST" and path == "/chess":
+        # Chess as a deterministic verifier (game theory, applied): is this move legal, is the side
+        # to move in check / checkmate / stalemate, what is the material — decided by the rules of
+        # chess (move generator proven by perft), and sealed like any other verdict. It does not
+        # play; it states what is true. Body: {fen, claim, move?}; claim ∈
+        # {legal_move, check, checkmate, stalemate, material}.
+        if not isinstance(body, dict) or not str(body.get("fen") or "").strip():
+            return _err(400, "fen required")
+        from .. import chess as _chess
+        res = _chess.verify(str(body["fen"]), str(body.get("claim") or "check"),
+                            move=(str(body["move"]) if body.get("move") else None))
+        seal_on = str(query.get("seal", "1")).lower() not in ("0", "false", "no", "off")
+        from .. import receipts
+        res = receipts.attach(res, config=config, domain="chess", enabled=seal_on)
+        telemetry.record("chess", surface=surface, verdict=res.get("verdict"),
+                         sealed=bool(res.get("seal")))
+        return _ok(res)
+
     if method == "POST" and path == "/audit":
         # The Auditor: deterministic extractors find every checkable claim in a pasted text,
         # the moat verifies the lot, one sealed coverage report comes back. Extraction is
@@ -1471,6 +1489,7 @@ ROUTES = [
     {"path": "/verify", "methods": ("POST",), "rl": True},
     {"path": "/derivation/verify", "methods": ("POST",), "rl": True},
     {"path": "/audit", "methods": ("POST",), "rl": True},
+    {"path": "/chess", "methods": ("POST",), "rl": True},
     {"path": "/days", "methods": ("POST",), "rl": True},
     {"path": "/ask", "methods": ("POST",), "rl": True},
     {"path": "/journal", "methods": ("GET", "POST"), "api": True},

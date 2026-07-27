@@ -53,6 +53,7 @@ GOLDEN_RATELIMITED = {
     "/mesh/invite", "/mesh/redeem", "/mesh/door", "/formation/help",
     "/push/subscribe", "/push/unsubscribe",
     "/audit",   # deliberate addition (the Auditor) — goldens update ONLY with a new route
+    "/chess",   # deliberate addition (the chess verifier) — game theory, applied and sealable
 }
 
 

@@ -15,6 +15,7 @@ test_branch.py
 test_canon_original.py
 test_canonical.py
 test_characters.py
+test_chess.py
 test_coach.py
 test_commentary.py
 test_compute.py
