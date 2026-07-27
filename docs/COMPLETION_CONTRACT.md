@@ -80,6 +80,14 @@ Discoveries outside scope → the drift ledger.
 5. Result taxonomy on the surface: HOLDS / BROKEN_CLAIM / INCOMPLETE / OUT_OF_SCOPE / SYSTEM_ERROR.
 6. Facts coverage (moon distance, boiling point, dates) so factual questions get the number.
 7. Human plane: authority by shape+badge, gate explanations, first-success, WCAG AA pass.
+8. **The "use" pillar — connect the user's OWN tools (Matt, 2026-07-26).** A pass-through to the
+   tools they already carry — their calendar, email, storage — so Narrow Highway can *use*
+   information without owning it. Bring-your-own-credential over standard protocols (iCalendar/
+   CalDAV, IMAP, folder/WebDAV) now; OAuth one-click later (additive). Invariant: it is an EDGE
+   capability — credentials stay on the user's box, reads happen in the moment, and **nothing is
+   stored** (join their apps, never absorb their data). `src/concordance/connect.py`, read-only,
+   store-nothing enforced by `tests/test_connect.py`. Write-back to a user's tools stays gated
+   behind the agent-covenant write-consent path (worklist item 2).
 
 ## 7. Drift ledger (discoveries out of scope — recorded, not chased)
 

@@ -98,10 +98,32 @@
     <pre>GET https://narrowhighway.com/s/&lt;content_hash&gt;      # human-readable receipt page
 GET https://narrowhighway.com/seal?hash=&lt;hash&gt;      # the same record, raw JSON</pre></div>
 
+  <h2>Connect your own tools</h2>
+  <p class="sub">Narrow Highway can read the tools you already use — your <b>calendar</b>, your
+  <b>email</b>, your <b>storage</b> — to serve you in the moment, and it keeps <b>nothing</b>.
+  This runs on <i>your</i> box, over standard protocols, with a credential you bring — so it works
+  with every provider (Google, Apple, Outlook, Proton, Nextcloud) and your credential never touches
+  our server. Join your apps; never absorb your data.</p>
+
+  <div class="step"><b>Point it at your own tools, then ask for your day</b>
+    <pre>export NH_CALENDAR_ICS='https://…/basic.ics'      # your private calendar link (.ics / webcal)
+export NH_IMAP_HOST='imap.gmail.com' NH_IMAP_USER='you@…' NH_IMAP_PASSWORD='&lt;app-password&gt;'
+export NH_STORAGE_PATH='~/Documents'
+
+python -m concordance connect            # your day — calendar, inbox, recent files
+python -m concordance connect calendar    # just today's events</pre></div>
+
+  <p class="sub">Read-only and pass-through: email is fetched without ever marking a message seen;
+  calendar and files are read in the moment and nothing is stored, sealed, or sent to us. Writing
+  back to your tools stays behind the write-consent path. (One-click OAuth connect is coming as an
+  additional option; this sovereign path is the foundation.)</p>
+
   <h2>What it will not do</h2>
   <ul>
     <li><b>It does not generate answers.</b> It verifies a claim you provide, eliminating what
       is not the answer. The trail is the reasoning.</li>
+    <li><b>It does not keep what it reads from your tools.</b> The connector is a pass-through —
+      your calendar, inbox, and files are read at the edge and never stored.</li>
     <li><b>It cannot be talked into a pass.</b> Tolerances are clamped — a caller may tighten a
       check, never loosen it. The false-positive benchmark runs across every domain.</li>
     <li><b>It does not seal matters of faith.</b> On the witness surface, theology tools mark

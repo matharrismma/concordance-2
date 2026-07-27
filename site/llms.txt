@@ -70,6 +70,21 @@ Strip personal context before any AI call, reapply locally — the data never ha
 - Python: `from concordance.gateway import scrub, restore, guard`.
 - Drop-in examples (browser / Python / MCP): docs/GATEWAY.md in the source repo.
 
+## Connect your own tools (edge capability — your credential never touches our server)
+Narrow Highway can read the tools you already use — your calendar, email, and storage — to serve
+you in the moment, and it **keeps nothing**. This runs on YOUR box (sovereign mode), over standard
+protocols, bring-your-own-credential: calendar via iCalendar (.ics/CalDAV), email via IMAP (read
+-only, never marks a message seen), storage via a local folder or WebDAV. Works with every provider
+(Google, Apple, Outlook, Proton, Nextcloud) — no per-provider OAuth app.
+
+    export NH_CALENDAR_ICS='https://…/basic.ics'   # your private calendar link
+    export NH_IMAP_HOST=… NH_IMAP_USER=… NH_IMAP_PASSWORD=<app-password>
+    export NH_STORAGE_PATH='~/Documents'
+    python -m concordance connect                   # your day, from your own tools
+
+Join your apps, never absorb your data: reads pass through, nothing is stored, sealed, or sent to
+us. Writing back to your tools stays behind the agent-covenant write-consent path.
+
 ## For agents (MCP) — add one URL
 A live remote MCP server (Streamable HTTP, JSON-RPC, no auth, no SDK):
 

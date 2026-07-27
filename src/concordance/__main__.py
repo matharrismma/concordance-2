@@ -14,12 +14,16 @@ from .web import serve
 
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    usage = ("usage: python -m concordance <serve|mcp> ...\n"
+    usage = ("usage: python -m concordance <serve|mcp|connect> ...\n"
              "  serve [--surface secular|witness] [--port N] [--host H] [--site DIR|--no-site]\n"
-             "  mcp   [--surface secular|witness]   (MCP server over stdio, for agents)")
+             "  mcp   [--surface secular|witness]   (MCP server over stdio, for agents)\n"
+             "  connect [calendar|email|storage]    (read YOUR own tools, locally; keeps nothing)")
     if not argv:
         print(usage)
         return 0
+    if argv[0] == "connect":
+        from .connect import run as connect_run
+        return connect_run(argv[1:])
     if argv[0] == "mcp":
         from .mcp import serve_stdio
         surface = "secular"
