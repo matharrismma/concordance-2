@@ -95,6 +95,34 @@ def test_commentary_endpoint_witness_gated():
     assert st == 200 and p["status"] == "ok"
 
 
+def test_source_is_validated_before_it_ever_reaches_a_filesystem_path():
+    # found: for_ref()'s source param reached _dir()/source/... with ZERO validation, straight
+    # from api.py's UNAUTHENTICATED GET /commentary?source= query param. Confirmed live: planting
+    # a _books.json + chapter file OUTSIDE the commentary dir and pointing source at it via ".."
+    # returned that file's content. Every traversal shape must be refused before touching disk.
+    for bad in ("../../../etc", "../escaped", "a/b/c", "", "a" * 500, "UPPER", "has space"):
+        assert commentary._valid_source(bad) is False, f"{bad!r} should not validate as a source"
+    assert commentary._valid_source("matthew-henry") is True
+
+
+def test_traversal_shaped_source_cannot_read_outside_the_commentary_dir():
+    outside = Path(_TMP).parent / "nh-cmt-outside"
+    outside.mkdir(parents=True, exist_ok=True)
+    (outside / "_books.json").write_text(json.dumps(
+        [{"code": "GEN", "name": "Genesis", "commonName": "Genesis", "chapters": 50}]), encoding="utf-8")
+    (outside / "GEN").mkdir(exist_ok=True)
+    (outside / "GEN" / "1.json").write_text(json.dumps(
+        {"introduction": "LEAKED CONTENT", "blocks": []}), encoding="utf-8")
+
+    rel = os.path.relpath(str(outside), str(Path(_TMP)))
+    r = commentary.for_ref("Genesis 1", source=rel)
+    assert r["status"] == "no_source", f"traversal source escaped the commentary dir: {r}"
+
+    # the same traversal shape must be refused at the real, unauthenticated HTTP route too
+    st, p = dispatch("GET", "/commentary", {"ref": "Genesis 1", "source": rel}, None, WIT)
+    assert st == 200 and p["status"] == "no_source"
+
+
 def test_mcp_commentary_tool():
     def names(cfg):
         r = mcp.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, cfg)

@@ -30,6 +30,16 @@ DEFAULT_SOURCE = "matthew-henry"
 
 _REF_RE = re.compile(r"^\s*([1-3]?\s*[A-Za-z. ]+?)\s+(\d+)(?::(\d+))?\s*$")
 
+# source reaches _books_index()/_load_chapter() straight from api.py's GET /commentary?source=
+# query param, unauthenticated and unvalidated, and was used to build _dir()/source/... — a
+# caller could read files outside the commentary directory (e.g. source="../other_place").
+# Every real source directory name matches this shape (SOURCE_META's own keys do too).
+_SOURCE_RE = re.compile(r"[a-z0-9_\-]{1,64}\Z")
+
+
+def _valid_source(source: Any) -> bool:
+    return isinstance(source, str) and bool(_SOURCE_RE.match(source))
+
 
 def _dir() -> Path:
     env = os.environ.get("CONCORDANCE_COMMENTARY_DIR", "").strip()
@@ -55,6 +65,8 @@ def parse_chapter(chapter_json: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _books_index(source: str) -> List[Dict[str, Any]]:
+    if not _valid_source(source):
+        return []
     p = _dir() / source / "_books.json"
     if not p.exists():
         return []
@@ -97,6 +109,8 @@ def _resolve_code(source: str, book_raw: str) -> Optional[str]:
 
 
 def _load_chapter(source: str, code: str, chapter: int) -> Optional[Dict[str, Any]]:
+    if not _valid_source(source):
+        return None
     p = _dir() / source / code / f"{chapter}.json"
     if not p.exists():
         return None
