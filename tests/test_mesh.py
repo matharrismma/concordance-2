@@ -170,6 +170,37 @@ def test_invite_links_two_believers(mesh_dir):
     assert mesh.make_invite(afp) and mesh.redeem_invite(mesh.make_invite(afp)["token"], afp)["ok"] is False
 
 
+def test_single_use_invite_survives_a_concurrency_race(mesh_dir):
+    """A max_uses=1 invite must be redeemable exactly ONCE even under concurrent requests — found:
+    the validate-then-increment was two separate steps (a read/check outside the lock, only the
+    final increment inside it), so N threads racing the same instant could ALL pass the max_uses
+    check before any of them incremented it, redeeming a 'single-use' invite N times. The server
+    is multi-threaded (ThreadingHTTPServer), so this is a real, reachable race, not a theoretical
+    one. Fired at 16 threads to make the race window easy to hit if the fix regresses."""
+    import threading
+    a, afp = _node("Inviter")
+    invitees = [_node(f"Invitee{i}") for i in range(16)]
+    inv = mesh.make_invite(afp, max_uses=1)
+    assert inv["ok"]
+    token = inv["token"]
+
+    results = [None] * len(invitees)
+
+    def _redeem(i, fp):
+        results[i] = mesh.redeem_invite(token, fp)
+
+    threads = [threading.Thread(target=_redeem, args=(i, fp)) for i, (_idn, fp) in enumerate(invitees)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    successes = [r for r in results if r and r.get("ok")]
+    assert len(successes) == 1, f"a single-use invite was redeemed {len(successes)} times: {results}"
+    rec = mesh._read_json(mesh._invite_path(token))
+    assert rec["uses"] == 1
+
+
 def test_door_whiteboard_directed_and_verifiable(mesh_dir):
     a, afp = _node("Neighbor")
     b, bfp = _node("Homeowner")

@@ -607,23 +607,27 @@ def redeem_invite(token: str, fp: str) -> Dict[str, Any]:
     node = _read_node(fp)
     if not node or not node.get("confessed"):
         return _gate()
-    rec = _read_json(_invite_path(token))
-    if not rec:
-        return {"ok": False, "error": "invite not found or already spent"}
-    if int(rec.get("expires_at", 0)) < _now():
-        return {"ok": False, "error": "this invite has expired"}
-    if rec.get("max_uses") and int(rec.get("uses", 0)) >= int(rec["max_uses"]):
-        return {"ok": False, "error": "this invite has been fully used"}
-    inviter = rec.get("inviter")
-    if inviter == fp:
-        return {"ok": False, "error": "you cannot redeem your own invite"}
+    # Validate AND reserve the use atomically, in ONE lock acquisition — checking max_uses/expiry
+    # and then incrementing must not be two separate steps, or two concurrent redeemers of a
+    # single-use invite (max_uses=1) can both pass the check before either increments, redeeming
+    # it twice. link() below takes the SAME lock internally, so it must be called AFTER this
+    # block ends (mesh._LOCK is a plain, non-reentrant Lock — holding it into link() deadlocks).
+    with _LOCK:
+        rec = _read_json(_invite_path(token))
+        if not rec:
+            return {"ok": False, "error": "invite not found or already spent"}
+        if int(rec.get("expires_at", 0)) < _now():
+            return {"ok": False, "error": "this invite has expired"}
+        if rec.get("max_uses") and int(rec.get("uses", 0)) >= int(rec["max_uses"]):
+            return {"ok": False, "error": "this invite has been fully used"}
+        inviter = rec.get("inviter")
+        if inviter == fp:
+            return {"ok": False, "error": "you cannot redeem your own invite"}
+        rec["uses"] = int(rec.get("uses", 0)) + 1
+        _write_json(_invite_path(token), rec)
     r = link(fp, inviter)
     if not r.get("ok"):
         return r
-    with _LOCK:
-        rec = _read_json(_invite_path(token)) or rec
-        rec["uses"] = int(rec.get("uses", 0)) + 1
-        _write_json(_invite_path(token), rec)
     return {"ok": True, "linked_to": inviter, "neighbor_callsign": r.get("neighbor_callsign", "anon"),
             "note": "Welcome — you are linked to the believer who invited you."}
 
