@@ -19,6 +19,16 @@ def test_canonical_is_sorted_tight_and_raw_utf8():
     assert "ἀγάπη".encode("utf-8") in validate.canonical_json_bytes({"k": "ἀγάπη"})  # raw, not \u-escaped
 
 
+def test_canonical_bytes_never_raises_on_a_lone_surrogate():
+    # A lone UTF-16 surrogate is invalid Unicode but a real pattern from buggy upstream truncation
+    # of a surrogate pair — this must never cost a caller their seal entirely (found: an uncaught
+    # UnicodeEncodeError from a bare .encode("utf-8") with no errors= policy).
+    b = validate.canonical_json_bytes({"claim": "weird \ud800 text"})
+    assert isinstance(b, bytes) and b  # sealed with the invalid char replaced, not raised
+    # well-formed non-ASCII (the witness surface's normal case) is completely unaffected
+    assert "ἀγάπη".encode("utf-8") in validate.canonical_json_bytes({"k": "ἀγάπη"})
+
+
 def test_content_hash_excludes_named_fields():
     h1 = validate.content_hash({"x": 1, "content_hash": "zzz", "permanent_ref": "p"},
                                exclude=("content_hash", "permanent_ref"))

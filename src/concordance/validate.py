@@ -27,8 +27,16 @@ def canonical_json_bytes(obj: Any) -> bytes:
     """THE one canonical JSON form for the whole floor: sorted keys, tight separators,
     ensure_ascii=False. ensure_ascii=False is load-bearing — Greek/Hebrew (the witness
     surface) stays human-readable in stored seals AND hashes identically everywhere. A
-    content-addressed integrity system must have exactly one canonical form; this is it."""
-    return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    content-addressed integrity system must have exactly one canonical form; this is it.
+
+    errors="replace" on the final encode: a lone UTF-16 surrogate (invalid Unicode, but a real
+    pattern from buggy upstream truncation of surrogate pairs) would otherwise raise here and
+    silently cost the caller their receipt entirely (a HOLDS/BROKEN verdict returned with no
+    seal) — the one thing this engine promises never to skip. Sealing WITH the character mapped
+    to U+FFFD beats not sealing at all; well-formed text (the overwhelming case, including every
+    Greek/Hebrew witness card) is completely unaffected."""
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"),
+                      ensure_ascii=False).encode("utf-8", errors="replace")
 
 
 def content_hash(obj: Any, *, exclude: tuple = ()) -> str:
