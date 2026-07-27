@@ -107,6 +107,10 @@ def _grade(q, sig, d):
 
 
 def main() -> int:
+    try:                                          # the report uses → · — ; keep it legible on any console
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:  # noqa: BLE001 — older stdout without reconfigure
+        pass
     live = "--live" in sys.argv
     ask = _ask_live if live else _ask_local
     print(f"Usefulness probe — {'LIVE' if live else 'local'} · {len(BATTERY)} real questions\n")

@@ -234,11 +234,24 @@ def find_ref(text: str):
                 return cand + (("-" + m.group(4)) if m.group(4) else "")
         except Exception:  # noqa: BLE001
             return None
+    # chapter-only — "Psalm 23", "what does John 3 say", "read Romans 8" — trusted ONLY when the
+    # canon actually resolves it, so "have 3 apples" or "Route 66" never becomes Scripture. The
+    # whole chapter is read downstream.
+    try:
+        from .verifiers import scripture as _sc2
+        for mc in _CHAPTER.finditer(t):
+            cand = re.sub(r"\s+", " ", mc.group(1).strip()) + " " + mc.group(2)
+            if _sc2.read_passage(cand).get("verses"):
+                return cand
+    except Exception:  # noqa: BLE001
+        pass
     return None
 
 
 _MATH_EQ = re.compile(r"^\s*(.+?)\s*=\s*(.+?)\s*$")
 _REF = re.compile(r"\b[1-3]?\s?[A-Za-z]{2,}\.?\s+\d{1,3}:\d{1,3}\b")
+# a bare "<book> <chapter>" (no verse) — validated against the canon in find_ref before it is trusted
+_CHAPTER = re.compile(r"\b([1-3]?\s?[A-Za-z]{2,})\.?\s+(\d{1,3})\b")
 _STRONGS = re.compile(r"\b([GHgh]\d{1,4})\b")
 
 
@@ -631,8 +644,8 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
         from .verifiers import scripture
         ref = find_ref(text) or ""
         study = bool(_EXPLAIN.search(text or ""))
-        # a range, or any ask for meaning, reads the passage; a bare ref reads the verse
-        if "-" in ref or study:
+        # a range, a chapter (no verse), or any ask for meaning reads the passage; a bare verse reads the verse
+        if "-" in ref or study or (ref and ":" not in ref):
             p = scripture.read_passage(ref)
             verses = p.get("verses") or []
             rows = [{"ref": v.get("ref", ref), "text": v.get("text", "")} for v in verses[:24]]

@@ -12,6 +12,23 @@ def test_subject_strips_the_scaffolding():
     assert ask.subject("what is it") == ""
 
 
+def test_chapter_reference_resolves_the_whole_chapter():
+    # A chapter is trusted ONLY when the canon resolves it, so a look-alike is never Scripture —
+    # this holds with or without provisioned bible text, and must always be true.
+    assert ask.find_ref("I have 3 apples") is None
+    assert ask.find_ref("meet me at 7") is None
+    # The positive case needs the WEB text present (some test envs isolate the data dir); when it
+    # is there, real phrasing — a chapter, no verse — resolves and reads the WHOLE chapter.
+    from concordance.verifiers import scripture as _s
+    if not (_s.read_passage("Psalm 23").get("verses")):
+        return
+    assert ask.find_ref("what does Psalm 23 say") == "Psalm 23"
+    assert ask.find_ref("read Romans 8")
+    d = ask.respond("what does Psalm 23 say", EngineConfig(), gate_open=True)
+    assert d.get("kind") == "scripture"
+    assert len(d.get("scripture") or []) >= 5, "a chapter reads its verses, not just one"
+
+
 def test_anticipate_offers_next_for_content():
     cfg = EngineConfig()
     d = ask.respond("John 3:16", cfg, gate_open=True)
