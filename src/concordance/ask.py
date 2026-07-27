@@ -598,11 +598,18 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     if kind == "compute":
         # A direct, exact, computed answer — arithmetic, percentages, roots, unit + temperature
         # conversion. Computed deterministically, never generated; declines if it cannot be exact.
+        # A sealable response seals ITSELF: the exact statement is minted into a re-checkable
+        # receipt (same machinery as /verify), so a number speaks the project's one language.
         from . import compute as _compute
         ans = _compute.answer(text)
         if ans:
+            from .receipts import attach
+            res = {"verdict": "HOLDS", "steps": 1, "confirmed_steps": 1, "detail": ans,
+                   "trail": [{"id": "compute", "domain": "arithmetic", "status": "PASS",
+                              "claim": ans, "detail": "computed deterministically"}]}
             return {**base, "message": ans,
-                    "note": "Computed exactly — a conduit for arithmetic, not a source. " + _NOTE}
+                    "verify": attach(res, config=config, domain="mathematics"),
+                    "note": "Computed exactly, and sealed so anyone can re-check it."}
         # fell through (shouldn't, classify gated on it) — degrade to search
         return {**base, "results": [corpus._brief(c) for c in corpus.search(text, limit=6)]}
 

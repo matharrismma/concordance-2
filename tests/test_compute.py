@@ -3,11 +3,40 @@ from concordance import compute
 
 
 def test_arithmetic_and_percentages():
-    assert compute.answer("what is 8 times 7") == "8 times 7 = 56"
+    # output is CANONICAL — phrasing is normalized to one statement (× ÷ ^), not echoed back
+    assert compute.answer("what is 8 times 7") == "8 × 7 = 56"
     assert compute.answer("what is 15 percent of 240") == "15% of 240 = 36"
-    assert compute.answer("what is 12 divided by 4") == "12 divided by 4 = 3"
+    assert compute.answer("what is 12 divided by 4") == "12 ÷ 4 = 3"
     assert compute.answer("what is 2 to the power of 10").endswith("= 1024")
     assert compute.answer("what is the square root of 144").endswith("= 12")
+
+
+def test_flexible_phrasing():
+    # real people say it many ways — each must compute EXACTLY, or decline
+    assert compute.answer("add 3 and 4") == "3 + 4 = 7"
+    assert compute.answer("the product of 6 and 7") == "6 × 7 = 42"
+    assert compute.answer("subtract 4 from 10") == "10 − 4 = 6"
+    assert compute.answer("half of 60") == "half of 60 = 30"
+    assert compute.answer("double 21") == "double 21 = 42"
+    assert compute.answer("20% off 50") == "20% off 50 = 40"
+    assert compute.answer("increase 200 by 15%") == "200 increased by 15% = 230"
+    assert compute.answer("average of 2, 4, 6") == "average of 2, 4, 6 = 4"
+    assert compute.answer("what is 1,000 + 2,500") == "1000 + 2500 = 3500"   # thousands commas
+    assert compute.answer("$50 + $20") == "50 + 20 = 70"                       # currency signs
+
+
+def test_phrasing_is_consistent():
+    """The method for consistent parsing: equivalence classes — many phrasings, ONE canonical
+    statement (and therefore ONE seal). Widen the normalizer until each class collapses to a point."""
+    classes = [
+        ["3 + 4", "3+4", "3  +  4", "add 3 and 4", "3 plus 4", "sum of 3 and 4"],
+        ["8 * 7", "8x7", "8 times 7", "multiply 8 by 7", "the product of 8 and 7", "8 × 7"],
+        ["12 / 4", "12 divided by 4", "divide 12 by 4", "12 ÷ 4"],
+    ]
+    for group in classes:
+        outs = {compute.answer(q) for q in group}
+        assert len(outs) == 1, f"phrasings did not converge: {group} -> {outs}"
+        assert None not in outs, f"a phrasing failed to compute: {group}"
 
 
 def test_unit_conversion():

@@ -95,10 +95,11 @@ def _convert(t: str) -> Optional[str]:
 
 # ── arithmetic — a SAFE evaluator (ast, numeric only; never eval()) ──
 _LEAD = re.compile(r"^\s*(?:what\s+is|what's|whats|calculate|compute|evaluate|solve|how much is|"
-                   r"what\s+does|what's the value of)\s+", re.I)
+                   r"what\s+does|what's the value of|whats the value of|work out|figure out)\s+", re.I)
 _OPS = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul,
         ast.Div: operator.truediv, ast.Pow: operator.pow, ast.Mod: operator.mod,
         ast.USub: operator.neg, ast.UAdd: operator.pos}
+_N = r"-?\d+(?:\.\d+)?"
 
 
 def _safe_eval(node):
@@ -116,11 +117,86 @@ def _safe_eval(node):
     raise ValueError("unsupported")
 
 
+def _denumber(t: str) -> str:
+    """Normalize the ways people write numbers so phrasing does not change the answer: thousands
+    commas, a leading currency sign, and the × ÷ symbols all fold to a canonical form."""
+    t = t.replace("×", " x ").replace("÷", " / ").replace("·", "*")
+    t = re.sub(r"(?<=\d),(?=\d{3}(?:\D|$))", "", t)   # 1,000 -> 1000 (only true thousands groups)
+    t = re.sub(r"[$£€](?=\d)", "", t)                  # $50 -> 50
+    return t
+
+
+def _val(s: str) -> float:
+    return float(s)
+
+
+def _worded(body: str) -> Optional[str]:
+    """Plain-English arithmetic → ONE canonical statement, so 'add 3 and 4', '3 plus 4' and '3 + 4'
+    all read '3 + 4 = 7' (and therefore seal to the same receipt). Every case is exact or declines."""
+    b = re.sub(r"\s+", " ", body.strip().rstrip("?.! ")).lower()
+    N = _N
+    m = re.match(rf"^(?:the\s+)?({N})\s*(?:percent|%)\s+of\s+({N})$", b)
+    if m:
+        return f"{m[1]}% of {m[2]} = {_fmt(_val(m[1]) / 100 * _val(m[2]))}"
+    m = re.match(rf"^({N})\s*(?:percent|%)\s+off(?:\s+of)?\s+({N})$", b)
+    if m:
+        return f"{m[1]}% off {m[2]} = {_fmt(_val(m[2]) * (1 - _val(m[1]) / 100))}"
+    m = re.match(rf"^(?:increase\s+)?({N})\s+(?:increased\s+)?by\s+({N})\s*(?:percent|%)$", b)
+    if m and "increas" in b:      # require the keyword — never guess "increase" from a bare "N by M%"
+        return f"{m[1]} increased by {m[2]}% = {_fmt(_val(m[1]) * (1 + _val(m[2]) / 100))}"
+    m = re.match(rf"^(?:decrease|reduce)\s+({N})\s+by\s+({N})\s*(?:percent|%)$", b) \
+        or re.match(rf"^({N})\s+(?:decreased|reduced)\s+by\s+({N})\s*(?:percent|%)$", b)
+    if m:
+        return f"{m[1]} decreased by {m[2]}% = {_fmt(_val(m[1]) * (1 - _val(m[2]) / 100))}"
+    for word, div in (("a half", 2), ("half", 2), ("a third", 3), ("third", 3),
+                      ("a quarter", 4), ("quarter", 4)):
+        m = re.match(rf"^{word}\s+of\s+({N})$", b)
+        if m:
+            return f"{word} of {m[1]} = {_fmt(_val(m[1]) / div)}"
+    m = re.match(rf"^(?:double|twice)\s+({N})$", b)
+    if m:
+        return f"double {m[1]} = {_fmt(_val(m[1]) * 2)}"
+    m = re.match(rf"^triple\s+({N})$", b)
+    if m:
+        return f"triple {m[1]} = {_fmt(_val(m[1]) * 3)}"
+    m = re.match(rf"^(?:add|sum of)\s+({N})\s+(?:and|to|\+)\s+({N})$", b)
+    if m:
+        return f"{m[1]} + {m[2]} = {_fmt(_val(m[1]) + _val(m[2]))}"
+    m = re.match(rf"^(?:the\s+)?product of\s+({N})\s+and\s+({N})$", b) \
+        or re.match(rf"^multiply\s+({N})\s+by\s+({N})$", b)
+    if m:
+        return f"{m[1]} × {m[2]} = {_fmt(_val(m[1]) * _val(m[2]))}"
+    m = re.match(rf"^(?:the\s+)?difference (?:of|between)\s+({N})\s+and\s+({N})$", b)
+    if m:
+        return f"{m[1]} − {m[2]} = {_fmt(_val(m[1]) - _val(m[2]))}"
+    m = re.match(rf"^subtract\s+({N})\s+from\s+({N})$", b)
+    if m:
+        return f"{m[2]} − {m[1]} = {_fmt(_val(m[2]) - _val(m[1]))}"
+    m = re.match(rf"^divide\s+({N})\s+by\s+({N})$", b)
+    if m and _val(m[2]) != 0:
+        return f"{m[1]} ÷ {m[2]} = {_fmt(_val(m[1]) / _val(m[2]))}"
+    m = re.match(r"^(?:the\s+)?(?:average|mean)\s+of\s+(.+)$", b)
+    if m:
+        nums = re.findall(N, m[1])
+        if len(nums) >= 2:
+            vals = [_val(x) for x in nums]
+            return f"average of {', '.join(nums)} = {_fmt(sum(vals) / len(vals))}"
+    return None
+
+
+def _pretty(expr: str) -> str:
+    """Canonical arithmetic, prettified for reading: '8 * 7' → '8 × 7', 'sqrt(144)' → '√144'."""
+    e = re.sub(r"\bsqrt\(([^()]*)\)", r"√\1", expr)
+    e = re.sub(r"\bcbrt\(([^()]*)\)", r"∛\1", e)
+    e = e.replace("**", " ^ ").replace("*", " × ").replace("/", " ÷ ").replace("%", " mod ")
+    return re.sub(r"\s+", " ", e).strip()
+
+
 def _arith(t: str) -> Optional[str]:
     body = _LEAD.sub("", t.strip().rstrip("?.! ")).strip()
-    mp = re.match(r"^(?:the\s+)?(-?\d+(?:\.\d+)?)\s*(?:percent|%)\s+of\s+(-?\d+(?:\.\d+)?)$", body, re.I)
-    if mp:
-        return f"{mp.group(1)}% of {mp.group(2)} = {_fmt(float(mp.group(1)) / 100 * float(mp.group(2)))}"
+    worded = _worded(body)                        # plain-English forms → one canonical statement
+    if worded:
+        return worded
     s = body.lower()
     # phrase → operator FIRST ("to the power of" needs its 'the'); strip leftover articles AFTER
     s = re.sub(r"square\s+root\s+of\s+(-?\d+(?:\.\d+)?)", r"sqrt(\1)", s)
@@ -128,27 +204,32 @@ def _arith(t: str) -> Optional[str]:
     s = re.sub(r"(\d)\s*squared\b", r"\1**2", s)
     s = re.sub(r"(\d)\s*cubed\b", r"\1**3", s)
     s = (s.replace("to the power of", "**").replace("multiplied by", "*").replace("times", "*")
-         .replace("divided by", "/").replace("plus", "+").replace("minus", "-")
-         .replace("^", "**").replace("x", "*"))
+         .replace("divided by", "/").replace("plus", "+").replace("minus", "-").replace("^", "**"))
+    s = re.sub(r"(?<=\d)\s*x\s*(?=\d)", "*", s)     # 8x7 → 8*7, but never touch letters in words
     s = re.sub(r"\s+", " ", re.sub(r"\bthe\b", " ", s)).strip()   # collapse ws — ast.parse(eval) rejects leading indent
-    body = re.sub(r"\s+", " ", re.sub(r"\bthe\b", " ", body)).strip()   # clean display too
     # a numeric expression only — digits, operators, parens, dot, and the two root functions
     if not re.search(r"\d", s) or not re.fullmatch(r"[0-9+\-*/%(). sqrtcb]*", s):
         return None
     if not re.search(r"[+\-*/%]|sqrt|cbrt", s):     # must be an actual computation, not a lone number
         return None
     try:
-        val = _safe_eval(ast.parse(s, mode="eval").body)
+        tree = ast.parse(s, mode="eval")
+        val = _safe_eval(tree.body)
     except Exception:  # noqa: BLE001 — anything unparseable: decline, never guess
         return None
     if not isinstance(val, (int, float)) or val != val or val in (float("inf"), float("-inf")):
         return None
-    return f"{body} = {_fmt(float(val))}"
+    try:
+        canon = ast.unparse(tree.body)             # canonical form — spacing/phrasing no longer matters
+    except Exception:  # noqa: BLE001 — ast.unparse is 3.9+; fall back to the normalized expression
+        canon = s
+    return f"{_pretty(canon)} = {_fmt(float(val))}"
 
 
 def answer(text: str) -> Optional[str]:
     """A direct, exact answer to a computational question, or None to fall through to search."""
-    t = (text or "").strip().rstrip("?.! ").lower()
+    raw = _denumber((text or "").strip())
+    t = raw.rstrip("?.! ").lower()
     if not t:
         return None
-    return _convert(t) or _arith(text or "")
+    return _convert(t) or _arith(raw)
