@@ -132,9 +132,10 @@ def _secular_tools() -> List[dict]:
          "description": "Coach — what it does and the boundary it will not cross (never grades a child).",
          "inputSchema": {"type": "object", "properties": {}}},
         {"name": "identity_create",
-         "description": ("Mint a SOVEREIGN, PORTABLE identity the person OWNS — {id, public_key, "
-                         "private_key, signing_available}. The private_key is returned ONCE and is "
-                         "NEVER stored server-side; hand it to the user and forget it."),
+         "description": ("Explains how to create a SOVEREIGN identity — keys are born on the USER'S "
+                         "device (never on the server; no private key crosses the wire). Returns "
+                         "guidance, not a key. The server only handles public keys (identity_verify, "
+                         "identity_fingerprint)."),
          "inputSchema": {"type": "object", "properties": {}}},
         {"name": "identity_verify",
          "description": "Verify a signature over a message against a public key (never raises; True/False).",
@@ -359,9 +360,17 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
         from .. import coach
         return coach.guidance()
     if name == "identity_create":
-        # Sovereign: the private_key is returned ONCE to the caller and NEVER persisted/logged here.
-        from .. import identity
-        return identity.create_identity()
+        # SECURITY (red-team P0, 2026-07-25): a private key must be BORN ON THE DEVICE — never minted
+        # on the server and returned across a remote call, where it would transit the server and land
+        # in the caller's/agent's context. The server only ever handles PUBLIC keys. Create yours
+        # locally (the covenant client from your four verses, or a local keygen), then prove possession
+        # with identity_verify. Kept as a tool so callers get this guidance instead of a leak.
+        return {"error": "key_creation_is_local",
+                "message": ("Your identity key is created on YOUR device, never on the server — no "
+                            "private key ever crosses the wire. Derive it from your four covenant "
+                            "verses, or generate one locally; the server only ever sees your PUBLIC "
+                            "key and verifies signatures (identity_verify)."),
+                "verify_with": "identity_verify", "fingerprint_with": "identity_fingerprint"}
     if name == "identity_verify":
         from .. import identity
         return {"ok": bool(identity.verify(args.get("public_key", ""), args.get("message", ""),

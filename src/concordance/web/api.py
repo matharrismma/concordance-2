@@ -894,14 +894,16 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         telemetry.record("coach", surface=surface, op="mastery", sealed=bool(out.get("seal")))
         return _ok(out)
 
-    # Sovereign, portable identity — the person owns a keypair; we reference only the fingerprint.
-    # SOVEREIGNTY CONTRACT: the private_key is returned ONCE to the client and NEVER persisted/logged.
+    # Sovereign, portable identity — the person owns a keypair; we reference only the public key.
+    # SECURITY (red-team P0, 2026-07-25): keys are BORN ON THE DEVICE. The server never mints and
+    # returns a private key over the wire (it would transit the server + land in an agent's context).
+    # Create yours client-side (the covenant client from four verses, or a local keygen); the server
+    # only ever verifies PUBLIC keys.
     if method == "POST" and path == "/identity/create":
-        from .. import identity
-        idn = identity.create_identity()  # full dict incl private_key returned ONCE; NOT stored here
-        telemetry.record("identity", surface=surface, op="create",
-                         signing=bool(idn.get("signing_available")))
-        return _ok(idn)
+        telemetry.record("identity", surface=surface, op="create_refused_remote")
+        return _err(400, "identity keys are created on your device — never by the server. Derive one "
+                         "from your four covenant verses (the covenant client) or generate one "
+                         "locally; the server only verifies public keys (/identity/verify).")
 
     if method == "POST" and path == "/identity/verify":
         if not isinstance(body, dict):
