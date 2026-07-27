@@ -15,6 +15,7 @@ Sovereign stdlib; deterministic; conduit — it computes and shows, it does not 
 """
 from __future__ import annotations
 
+import math
 from typing import Any, Dict, List, Optional
 
 # Language that would MOVE money — Steward refuses and points the action back to the person.
@@ -52,10 +53,17 @@ def money_guardrail(text: str) -> Optional[Dict[str, Any]]:
 
 
 def _num(x: Any, default: float = 0.0) -> float:
+    # found: an extreme numeric string (e.g. "1" + "0"*400) parses to inf/nan without raising —
+    # float() only raises on a truly unparseable string, not on magnitude — and inf/nan then broke
+    # two callers downstream: /steward/budget's round(income*100) (single-arg round() -> int)
+    # raised OverflowError on inf, and json.dumps() emits the non-standard Infinity/NaN tokens a
+    # strict JSON.parse() rejects. Reject non-finite results at the one place every caller here
+    # converts a caller number, matching compute.py's exponent-magnitude guard.
     try:
-        return round(float(x), 2)
-    except (TypeError, ValueError):
+        v = round(float(x), 2)
+    except (TypeError, ValueError, OverflowError):
         return default
+    return v if math.isfinite(v) else default
 
 
 def budget(income: Any, expenses: List[Dict[str, Any]]) -> Dict[str, Any]:

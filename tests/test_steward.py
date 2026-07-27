@@ -35,6 +35,30 @@ def test_cost_destroyed_math():
     assert d["total_saved"] == 45.0 and d["items"][0]["saved"] == 15.0
 
 
+def test_extreme_numeric_input_never_produces_inf_or_nan():
+    # found: float("1"+"0"*400) parses to inf without raising (float() only rejects unparseable
+    # strings, not magnitude). That inf then broke two callers: json.dumps() emits the
+    # non-standard Infinity/NaN tokens a strict JSON.parse() rejects, and /steward/budget's
+    # round(income*100) (single-arg round() -> int) raised OverflowError on inf — an unhandled
+    # 500 for a caller-reachable, unauthenticated POST route. _num() must reject non-finite
+    # results at the one place every caller here converts a number.
+    huge = "1" + "0" * 400
+    b = steward.budget(huge, [{"label": "x", "amount": huge}])
+    for v in (b["income"], b["total_expenses"], b["net"], b["savings_rate_pct"]):
+        assert v == v and abs(v) != float("inf")          # v == v is False for NaN
+    json.dumps(b)                                          # must not emit Infinity/NaN tokens
+
+    d = steward.cost_destroyed([{"label": "y", "was": huge, "now": 1}])
+    assert d["items"][0]["was"] == 0.0 and d["total_saved"] == -1.0
+    json.dumps(d)
+
+
+def test_budget_endpoint_survives_extreme_income_without_crashing():
+    huge = "1" + "0" * 400
+    st, p = dispatch("POST", "/steward/budget", {}, {"income": huge, "expenses": []}, SEC)
+    assert st == 200, f"expected a clean 200, got {st}: {p}"          # not an unhandled 500
+
+
 def test_money_guardrail_declines_moves_and_advice():
     assert steward.money_guardrail("please transfer $500 to my landlord")["kind"] == "move_declined"
     assert steward.money_guardrail("buy bitcoin for me")["kind"] == "move_declined"
