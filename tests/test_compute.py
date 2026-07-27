@@ -66,6 +66,22 @@ def test_declines_absurd_results_instead_of_crashing():
     assert compute.answer("what is 2 to the power of 10").endswith("= 1024")
 
 
+def test_worded_and_convert_phrasings_decline_on_overflow_instead_of_crashing():
+    # found: _worded() ("double X", "multiply X by Y", ...), _temperature(), and _do_convert()
+    # each call _fmt() directly on a caller-supplied number with no finiteness check — unlike
+    # _arith()'s ast-expression path, which already declines on inf/nan before formatting. A
+    # large-enough literal (300+ digits) overflows float() to inf, and _fmt()'s round(x)
+    # (single-arg -> int) then raises OverflowError. Confirmed live via POST /ask.
+    huge = "9" * 320
+    for q in (f"double {huge}", f"triple {huge}", f"multiply {huge} by {huge}",
+              f"add {huge} and {huge}", f"{huge} percent of {huge}",
+              f"convert {huge} miles to kilometers", f"{huge} fahrenheit to celsius"):
+        assert compute.answer(q) is None, q          # decline, never raise
+    # ordinary worded/convert phrasings still compute exactly
+    assert compute.answer("double 21").endswith("= 42")
+    assert compute.answer("100 fahrenheit in celsius") is not None
+
+
 def test_no_arbitrary_code_execution():
     # the evaluator is ast-numeric only — names/calls other than sqrt/cbrt never execute
     for q in ["__import__('os').system('x')", "what is open('x')", "what is a.b.c"]:

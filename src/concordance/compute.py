@@ -245,4 +245,13 @@ def answer(text: str) -> Optional[str]:
     t = raw.rstrip("?.! ").lower()
     if not t:
         return None
-    return _convert(t) or _arith(raw)
+    try:
+        return _convert(t) or _arith(raw)
+    except (OverflowError, ValueError):
+        # found: _worded() ("double X", "multiply X by Y", ...), _temperature(), and _do_convert()
+        # each call _fmt() straight on a caller-supplied number with no finiteness check — unlike
+        # _arith()'s own ast-expression path, which already declines on inf/nan before formatting.
+        # A large-enough literal (e.g. a 300+ digit number) overflows float() to inf, and _fmt()'s
+        # round(x) (single-arg -> int) then raises OverflowError. Confirmed live via POST /ask
+        # ("double " + "9"*320). Decline rather than crash, matching this module's own philosophy.
+        return None
