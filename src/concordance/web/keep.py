@@ -12,8 +12,15 @@ Operator-gated, like 1.0's keep: it serves only to the operator and returns 404 
 everyone else (hide-existence — the keep is not a public surface). Operator =
   - localhost on the box (the box itself is always trusted), OR
   - a request carrying the right token (env CONCORDANCE_KEEP_TOKEN), passed as
-    ?token=… or the X-Keep-Token header.
-No token set + non-localhost  →  the keep is closed (404 to all). Sovereign: stdlib only.
+    ?token=… or the X-Keep-Token header, OR
+  - a request from an allow-listed IP (env CONCORDANCE_KEEP_IPS, comma-separated). Behind our
+    own proxy the real client IP is the LAST hop Caddy appends to X-Forwarded-For — trusted
+    ONLY because the socket peer is our loopback proxy (an outside attacker can never be that).
+No credential set + non-localhost  →  the keep is closed (404 to all). Sovereign: stdlib only.
+
+CAVEAT for the IP tie: a residential IP can rotate (you re-set it), and if your ISP uses CGNAT
+your public IP is SHARED with strangers who would then reach the keep — so an IP allowlist is a
+convenience, not a substitute for the token/covenant on an untrusted network.
 """
 from __future__ import annotations
 
@@ -26,6 +33,22 @@ from ..config import EngineConfig
 
 _TRUE = {"1", "true", "yes", "on"}
 _LOOPBACK = {"127.0.0.1", "::1"}
+
+
+def _allowed_ips() -> set:
+    raw = os.environ.get("CONCORDANCE_KEEP_IPS", "")
+    return {ip.strip() for ip in raw.replace(";", ",").split(",") if ip.strip()}
+
+
+def _client_ip(peer_ip: Optional[str], headers: Any) -> Optional[str]:
+    """The real client IP. Behind our proxy the socket peer is loopback, so the true client is the
+    LAST hop Caddy appended to X-Forwarded-For (earlier hops are client-spoofable and ignored). We
+    trust that hop ONLY when the peer is loopback — a direct outside connection can never be."""
+    if peer_ip in _LOOPBACK and headers is not None:
+        xff = (headers.get("x-forwarded-for") or "").strip()
+        if xff:
+            return xff.split(",")[-1].strip()
+    return peer_ip
 
 
 def is_operator(token: Optional[str], peer_ip: Optional[str]) -> bool:
@@ -54,7 +77,16 @@ def request_is_operator(peer_ip: Optional[str], headers: Any, query: Optional[di
         token = query.get("token")
     if not token and headers is not None:
         token = headers.get("x-keep-token")
-    return is_operator(token, peer_ip)
+    if is_operator(token, peer_ip):
+        return True
+    # the IP tie — additive, and inert unless CONCORDANCE_KEEP_IPS is set. The client IP is resolved
+    # from the trusted proxy hop (never the spoofable first X-Forwarded-For entry).
+    ips = _allowed_ips()
+    if ips:
+        cip = _client_ip(peer_ip, headers)
+        if cip and cip in ips:
+            return True
+    return False
 
 
 def _read_integrity_status() -> Optional[Dict[str, Any]]:

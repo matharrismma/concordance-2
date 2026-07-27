@@ -72,6 +72,25 @@ def test_xff_is_ignored_for_auth():
     os.environ.pop("CONCORDANCE_KEEP_TOKEN", None)
 
 
+def test_ip_allowlist_tie_and_its_spoof_resistance():
+    from concordance.web import keep
+    os.environ.pop("CONCORDANCE_KEEP_TOKEN", None)
+    os.environ["CONCORDANCE_KEEP_IPS"] = "203.0.113.50"
+    try:
+        # behind our proxy: peer is loopback, the real client is the LAST X-Forwarded-For hop
+        assert keep.request_is_operator("127.0.0.1", {"x-forwarded-for": "203.0.113.50"}, {}) is True
+        # a client spoofing the FIRST hop must NOT get in — the real (last) hop is what counts
+        assert keep.request_is_operator("127.0.0.1", {"x-forwarded-for": "203.0.113.50, 9.9.9.9"}, {}) is False
+        # a direct remote peer (not loopback) can forge the header but it is ignored
+        assert keep.request_is_operator("9.9.9.9", {"x-forwarded-for": "203.0.113.50"}, {}) is False
+        # a different real client stays closed
+        assert keep.request_is_operator("127.0.0.1", {"x-forwarded-for": "8.8.8.8"}, {}) is False
+    finally:
+        os.environ.pop("CONCORDANCE_KEEP_IPS", None)
+    # inert when unset — the existing 'XFF ignored' guarantee is preserved
+    assert keep.request_is_operator("127.0.0.1", {"x-forwarded-for": "203.0.113.50"}, {}) is False
+
+
 def test_gate_closed_to_remote_without_token():
     os.environ.pop("CONCORDANCE_KEEP_TOKEN", None)
     from concordance.web import keep
