@@ -162,6 +162,21 @@ TOOLS = [
      "Free, open 3D modeling and parametric CAD — design real parts to print or build."),
     ("Ready.gov", "https://www.ready.gov", "prep", "free (US government)",
      "Free, sober guidance to prepare a household for emergencies — water, food, plan, kit. Prudence, not fear (Prov 22:3)."),
+    # ── Self-reliance library — the full works, lawfully (the field library points here for depth) ──
+    ("U.S. Army Survival Manual (FM 21-76)", "https://archive.org/details/fm-21-76-survival", "self_reliance", "public domain (US government)",
+     "The complete Army survival manual — water, fire, shelter, food, first aid, navigation, signaling — free and public domain to read or download."),
+    ("Boy Scouts Handbook (1911)", "https://www.gutenberg.org/ebooks/29558", "self_reliance", "public domain",
+     "The original 1911 scouting handbook — woodcraft, camping, first aid, knots, nature — full text, free, public domain."),
+    ("Nessmuk & Kephart — Woodcraft", "https://www.gutenberg.org/ebooks/40638", "self_reliance", "public domain",
+     "The classic woodcraft manuals (Nessmuk 1884; Kephart) — camping light, the axe and knife, shelter and fire — free, public domain."),
+    ("USDA Complete Guide to Home Canning", "https://nchfp.uga.edu/how/can_home.html", "self_reliance", "public domain (US government)",
+     "The authoritative, free guide to SAFE home canning and food preservation — water-bath vs. pressure, tested times, botulism safety."),
+    ("Where There Is No Doctor", "https://hesperian.org/books-and-resources/", "self_reliance", "free (Hesperian, openly licensed)",
+     "The trusted village health-care handbook — diagnosis and care where no clinic is near. Free to download from Hesperian."),
+    ("The Foxfire series", "https://archive.org/search?query=foxfire+book", "self_reliance", "borrow (library lending / Internet Archive)",
+     "Appalachian self-reliance recorded from the elders — building, planting by the signs, food, old skills. Borrow free from your library (Libby) or the Internet Archive; we point, we don't copy."),
+    ("The Encyclopedia of Country Living", "https://search.worldcat.org/search?q=encyclopedia+of+country+living", "self_reliance", "borrow (library / first-sale)",
+     "Carla Emery's homesteading bible — growing, raising, preserving, making. Find and borrow a copy free through your library."),
 ]
 
 BOUNDARY = (

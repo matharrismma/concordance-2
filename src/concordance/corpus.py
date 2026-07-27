@@ -25,6 +25,15 @@ MIN_DISTINCTIVE_IDF = 1.5
 
 _FIELDS = ("title", "body", "bands", "source")
 
+# How-to INTENT markers (verbs only — no nouns like "fire"/"water", so this never hijacks a topic
+# search). Used only to lift the practical field library when a question is clearly practical; and
+# safe by construction — the boost multiplies a survival card only if it ALREADY matched the query.
+_PRACTICAL = frozenset({
+    "how", "build", "make", "start", "light", "purify", "treat", "cure", "stop", "find", "tie",
+    "preserve", "store", "grow", "plant", "raise", "signal", "navigate", "cook", "fix", "repair",
+    "survive", "forage", "trap", "prepare", "canning", "dry", "sharpen", "filter", "splint",
+})
+
 
 def _tokens(text: str) -> List[str]:
     return re.findall(r"[a-zA-Z][a-zA-Z']{1,}", (text or "").lower())
@@ -157,6 +166,10 @@ class Corpus:
                     s *= 9.0                              # THE card for this exact reference/title
                 elif q_exact and (title_n in q_exact or ref_n in q_exact):
                     s *= 4.0
+                # a practical/how-to question prefers the practical field library over an
+                # incidentally-titled book or species (so "build a fire" gets the how-to, not fire ants)
+                if c.get("shelf") == "survival" and (_PRACTICAL & query_tokens):
+                    s *= 3.0
                 scored.append((s, c))
         scored.sort(key=lambda x: -x[0])
         return [c for _s, c in scored[:max(1, int(limit))]]
@@ -208,6 +221,7 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                       "church_cards.jsonl",         # the churches, calibrated from their own confessions (not judged)
                       "contributors_cards.jsonl",   # the builders of the Floor (historians/scientists/mathematicians), credited with love
                       "religions_cards.jsonl",      # the pre-Christian faiths as foreshadow (Acts 17) + the test of the spirits (1 John 4)
+                      "survival_cards.jsonl",       # the field library — outdoor/survival/bushcraft/homestead, PD sources (serve the off-grid + destitute)
                       # The plumb-line: the whole Bible in the original tongues (Greek NT + Hebrew OT),
                       # one card per verse. Academics first. Spines root in the Word.
                       "scripture_spines.jsonl", "scripture_cards.jsonl",

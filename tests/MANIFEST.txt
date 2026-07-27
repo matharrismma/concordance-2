@@ -82,6 +82,7 @@ test_site.py
 test_stacks.py
 test_steward.py
 test_strongs.py
+test_survival.py
 test_threads.py
 test_tolerance.py
 test_traffic.py
