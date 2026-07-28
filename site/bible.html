@@ -150,6 +150,18 @@ async function read(){
   hintEl.style.display='none';
   passageEl.innerHTML = '<p class="dim">reading…</p>';
   const d = await getJSON('/passage?ref=' + encodeURIComponent(ref));
+  if(d && d.status === 'ambiguous' && d.candidates && d.candidates.length){
+    // The book is always on the right page — or we ask which of two possibilities. The last
+    // mile belongs to the reader: name the candidates as one-tap choices, never a silent guess.
+    passageEl.innerHTML = '<p class="dim">' + esc(ref) + ' could be more than one book — which did you mean?</p>' +
+      '<p>' + d.candidates.map(function(c){
+        return '<button class="hear" style="margin:.2rem .5rem .2rem 0" data-pick="' + esc(c) + '">' + esc(c) + '</button>';
+      }).join('') + '</p>';
+    Array.prototype.forEach.call(passageEl.querySelectorAll('[data-pick]'), function(b){
+      b.addEventListener('click', function(){ refEl.value = b.dataset.pick; read(); });
+    });
+    return;
+  }
   if(!d || d.status !== 'ok' || !d.verses || !d.verses.length){
     passageEl.innerHTML = '<p class="dim">' + esc((d && d.detail) || 'Nothing found for that reference.') + '</p>';
     return;

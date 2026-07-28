@@ -42,6 +42,8 @@
     { h: '/teachings.html',  n: 'Teachings',        k: 'jesus christ words sayings gospel' },
     { h: '/harmony.html',    n: 'Harmony',          k: 'gospels matthew mark luke john timeline life of christ events' },
     { h: '/timeline.html',   n: 'Timeline',         k: 'old testament new testament church history chronology dates creation today' },
+    { h: '/backmatter.html', n: 'Study tables',     k: 'weights measures names of god parables miracles book introductions topical index back matter' },
+    { h: '/places.html',     n: 'Atlas',            k: 'map atlas places geography coordinates jerusalem babylon rome sinai holy land' },
     { h: '/prophecy.html',   n: 'Prophecy',         k: 'traces fulfilment signposts' },
     { h: '/codex.html',      n: 'The Codex',        k: 'manuscript compiled book document' },
     { h: '/works.html',      n: 'The Works',         k: 'technical math science engineering worked sealed demonstrations depth proof derivation' },

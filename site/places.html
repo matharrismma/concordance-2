@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas — Narrow Highway</title>
+<meta name="description" content="The places of the Bible with real coordinates — verified against an independent gazetteer; disputed sites name their candidates, unlocatable places stay honest blanks.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.11), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  header.site{border-bottom:1px solid var(--line)}
+  header .bar{max-width:960px; margin:0 auto; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1rem; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  .wrap{max-width:960px; margin:0 auto; padding:1rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.66rem; margin-top:2.4rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2rem; margin:.5rem 0 .4rem}
+  .lede{color:var(--dim); font-size:1.02rem; max-width:46rem}
+  .mapbox{border:1px solid var(--line); border-radius:4px; margin-top:1.6rem; background:rgba(201,162,74,.02)}
+  svg{display:block; width:100%; height:auto}
+  .dot{cursor:pointer}
+  .dot circle{fill:var(--gold)} .dot.disputed circle{fill:none; stroke:var(--goldsoft); stroke-width:1.4}
+  .dot text{fill:var(--dim); font-size:9.5px; font-family:var(--serif)}
+  .dot:hover text,.dot.on text{fill:var(--ink)}
+  .legend{display:flex; gap:1.4rem; color:var(--dim); font-size:.8rem; padding:.6rem 1rem; border-top:1px solid var(--line)}
+  .legend .swatch{display:inline-block; width:.6rem; height:.6rem; border-radius:50%; margin-right:.35rem; vertical-align:baseline}
+  .panel{border-left:2px solid var(--gold); padding:.2rem 0 0 1rem; margin-top:1.6rem; display:none}
+  .panel.open{display:block}
+  .panel h2{font-weight:400; font-size:1.25rem; margin:.2rem 0 .2rem}
+  .panel .meta{color:var(--dim); font-size:.85rem; margin-bottom:.6rem}
+  .panel .cands{margin:.4rem 0 .8rem; padding-left:1rem; color:var(--ink)}
+  .panel .cands li{margin-bottom:.3rem}
+  .panel .refs a{margin-right:.6rem}
+  h2.section{font-weight:400; font-size:1.3rem; color:var(--gold); margin:2.4rem 0 .5rem}
+  .blank{border-bottom:1px solid var(--line); padding:.55rem 0}
+  .blank .name{color:var(--ink)} .blank .why{color:var(--dim); font-size:.92rem}
+  .blank .refs a{margin-right:.55rem; font-size:.88rem}
+  .dim{color:var(--dim)}
+  footer.site{border-top:1px solid var(--line); color:var(--dim); font-size:.8rem; margin-top:2.6rem; padding-top:1.3rem; line-height:1.7}
+  @media (max-width:640px){
+    body{font-size:16px}
+    header .bar{flex-direction:column; align-items:flex-start; gap:.6rem; padding:.9rem 1rem}
+    nav.site{display:flex; flex-wrap:wrap; margin:0}
+    nav.site a{margin:0 1rem .1rem 0; font-size:.68rem}
+    .wrap{padding:1rem 1rem 4rem}
+    h1{font-size:1.6rem}
+  }
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow <span class="road">Highway</span></a>
+  <nav class="site"><a href="/">Ask</a><a href="/bible.html">Bible</a><a href="/read.html">Read</a><a href="/characters.html">Dictionary</a><a href="/harmony.html">Harmony</a><a href="/timeline.html">Timeline</a><a href="/backmatter.html">Tables</a><a href="/places.html">Atlas</a><a href="/library.html">Library</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="kicker">From Ur to Rome</div>
+  <h1>Atlas — the places of the Bible</h1>
+  <p class="lede">Real coordinates, honestly held. A solid mark is a secure identification. A hollow
+  mark is a genuinely disputed site — tap it and the candidates are named, none silently chosen.
+  And some places (Eden, Emmaus, Tarshish, Ophir) are listed with <em>no</em> mark at all, because
+  an honest blank beats a confident guess. Every coordinate is cross-checked against an independent
+  gazetteer in this project's test suite.</p>
+
+  <div class="mapbox">
+    <svg id="map" viewBox="0 0 940 420" role="img" aria-label="Map of biblical places"></svg>
+    <div class="legend">
+      <span><span class="swatch" style="background:var(--gold)"></span>located</span>
+      <span><span class="swatch" style="border:1.4px solid var(--goldsoft)"></span>disputed — candidates named</span>
+      <span class="dim">graticule at 5° · equirectangular</span>
+    </div>
+  </div>
+
+  <div class="panel" id="panel"></div>
+
+  <h2 class="section">The honest blanks</h2>
+  <p class="dim" style="margin-top:0">Places Scripture names that no one can place on a map — listed
+  without coordinates, with the candidates people argue for.</p>
+  <div id="blanks"><p class="dim">loading…</p></div>
+
+  <footer class="site"><p>Coordinates are given only where identification is secure; disputed sites
+  carry their candidates; unlocatable places stay blank. Found and attributed, never generated.</p></footer>
+</main>
+
+<script src="/gate.js"></script>
+<script>
+const API="";
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
+async function getJSON(p){ const r=await fetch(API+p); if(!r.ok){ if(window.NHGate) await NHGate.isClosed(r); return null; } try{return await r.json();}catch(e){return null;} }
+function refLinks(list){ return (list||[]).map(function(r){ return '<a href="/bible.html?ref='+encodeURIComponent(r)+'">'+esc(r)+'</a>'; }).join(' '); }
+
+// Equirectangular: lon 12–50 → x, lat 27–42.5 → y (inverted). The coordinates ARE the map —
+// no tiles, no external anything; a graticule gives the eye its bearings.
+const LON0=12, LON1=50, LAT0=27, LAT1=42.5, W=940, H=420, PAD=14;
+function X(lon){ return PAD + (lon-LON0)/(LON1-LON0)*(W-2*PAD); }
+function Y(lat){ return H-PAD - (lat-LAT0)/(LAT1-LAT0)*(H-2*PAD); }
+
+function showPanel(p){
+  const el=document.getElementById('panel');
+  let h='<h2>'+esc(p.name)+'</h2>';
+  h+='<div class="meta">'+esc(p.status)+(p.modern?' — '+esc(p.modern):'')+
+     (('lat' in p)?' · '+p.lat.toFixed(3)+'°N, '+p.lon.toFixed(3)+'°E':'')+'</div>';
+  if(p.candidates){ h+='<div class="dim">the candidates:</div><ul class="cands">'+
+    p.candidates.map(function(c){return '<li>'+esc(c)+'</li>';}).join('')+'</ul>'; }
+  if(p.note) h+='<p class="dim">'+esc(p.note)+'</p>';
+  h+='<p class="refs">'+refLinks(p.refs)+'</p>';
+  el.innerHTML=h; el.classList.add('open');
+  Array.prototype.forEach.call(document.querySelectorAll('.dot'), function(g){ g.classList.toggle('on', g.dataset.n===p.name); });
+}
+
+(async function(){
+  const d=await getJSON('/places');
+  const blanksEl=document.getElementById('blanks');
+  if(!d){ blanksEl.innerHTML='<p class="dim">The atlas lives behind the Gate on this surface — <a href="/">ask, and it opens</a>.</p>'; return; }
+  const svg=document.getElementById('map');
+  let s='';
+  // graticule
+  for(let lon=15; lon<LON1; lon+=5) s+='<line x1="'+X(lon)+'" y1="'+Y(LAT0)+'" x2="'+X(lon)+'" y2="'+Y(LAT1)+'" stroke="rgba(201,162,74,.08)"/>';
+  for(let lat=30; lat<LAT1; lat+=5) s+='<line x1="'+X(LON0)+'" y1="'+Y(lat)+'" x2="'+X(LON1)+'" y2="'+Y(lat)+'" stroke="rgba(201,162,74,.08)"/>';
+  svg.innerHTML=s;
+  const placed=(d.places||[]).filter(function(p){return 'lat' in p;});
+  placed.forEach(function(p){
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('class','dot'+(p.status==='disputed'?' disputed':''));
+    g.dataset.n=p.name;
+    const big=['Jerusalem','Babylon','Rome','Ephesus','Damascus','Mount Sinai (Horeb)','Antioch (Syrian)','Athens'].indexOf(p.name)>=0;
+    g.innerHTML='<circle cx="'+X(p.lon)+'" cy="'+Y(p.lat)+'" r="'+(big?4.4:3.2)+'"></circle>'+
+      (big?'<text x="'+(X(p.lon)+6)+'" y="'+(Y(p.lat)+3)+'">'+esc(p.name.replace(/ \(.*\)$/,''))+'</text>':'');
+    g.addEventListener('click', function(){ showPanel(p); });
+    svg.appendChild(g);
+  });
+  const blanks=(d.places||[]).filter(function(p){return p.status==='unlocated';});
+  blanksEl.innerHTML=blanks.map(function(p){
+    return '<div class="blank"><span class="name">'+esc(p.name)+'</span>'+
+      (p.candidates?' <span class="why">— argued: '+esc(p.candidates.join('; '))+'</span>':'')+
+      (p.note?' <div class="why">'+esc(p.note)+'</div>':'')+
+      '<div class="refs">'+refLinks(p.refs)+'</div></div>';
+  }).join('');
+  const want=new URLSearchParams(location.search).get('name');
+  if(want){ const p=(d.places||[]).find(function(x){return x.name.toLowerCase()===want.toLowerCase();}); if(p) showPanel(p); }
+})();
+</script>
+<script src="/nh-home.js"></script>
+<script src="/nh-tools.js"></script>
+</body>
+</html>

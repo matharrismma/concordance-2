@@ -81,6 +81,9 @@ test_floor.py
 test_keystones.py
 test_no_keys_on_the_wire.py
 test_system_error_distinct.py
+test_bible_places.py
+test_last_mile.py
+test_backmatter.py
 test_mission_string.py
 test_reachable_from_the_floor.py
 test_nothing_is_isolated.py

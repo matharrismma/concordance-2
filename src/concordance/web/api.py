@@ -308,7 +308,7 @@ _SITEMAP_PAGES = ("/", "/ask.html", "/bible.html", "/read.html", "/characters.ht
                   "/seeds.html", "/seal.html", "/connect.html", "/corrected.html", "/audit.html",
                   "/proof.html", "/reason.html", "/boundary.html", "/almanac.html", "/codex.html",
                   "/teachings.html", "/brain.html", "/floor.html", "/works.html",
-                  "/harmony.html", "/timeline.html")
+                  "/harmony.html", "/timeline.html", "/backmatter.html", "/places.html")
 
 
 def build_sitemap(base_url: str) -> str:
@@ -1575,6 +1575,32 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _ok(rec) if rec is not None else _err(404, "event not found")
         return _ok(timeline_mod.eras())
 
+    if method == "GET" and path == "/backmatter":
+        # Back-matter reference tables — weights & measures, names of God, parables, miracles,
+        # book introductions, topical index. Disputes carried, refs verified, Strong's linked.
+        # Witness content: the same gate as /harmony and /timeline.
+        if not allow_witness:
+            return _gate_closed()
+        from .. import backmatter as backmatter_mod
+        key = (query.get("table") or "").strip()
+        if key:
+            rec = backmatter_mod.get_table(key)
+            return _ok(rec) if rec is not None else _err(404, "table not found")
+        return _ok(backmatter_mod.tables())
+
+    if method == "GET" and path == "/places":
+        # The Atlas — real biblical place coordinates, honest uncertainty. Located places carry
+        # coordinates; disputed sites name their candidates; unlocatable places stay blanks.
+        # Witness content: the same gate as /harmony, /timeline, /backmatter.
+        if not allow_witness:
+            return _gate_closed()
+        from .. import bible_places as places_mod
+        nm = (query.get("name") or "").strip()
+        if nm:
+            rec = places_mod.get(nm)
+            return _ok(rec) if rec is not None else _err(404, "place not found")
+        return _ok(places_mod.places())
+
     if method == "GET" and path == "/teachings":
         # Phase 3 — the teaching-review workspace (Words in Red). Witness content: the engine
         # assembles the frozen Greek anchor + existing sites; the operator records the reading.
@@ -1700,6 +1726,8 @@ ROUTES = [
     {"path": "/prophecy", "methods": ("GET",), "api": True},
     {"path": "/harmony", "methods": ("GET",), "api": True},
     {"path": "/timeline", "methods": ("GET",), "api": True},
+    {"path": "/backmatter", "methods": ("GET",), "api": True},
+    {"path": "/places", "methods": ("GET",), "api": True},
     {"path": "/capabilities", "methods": ("GET",), "api": True},
     {"path": "/mesh/signable", "methods": ("GET",), "api": True},
     {"path": "/attest", "methods": ("GET", "POST"), "api": True, "rl": True},

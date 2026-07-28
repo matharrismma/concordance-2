@@ -379,6 +379,21 @@ def _witness_tools() -> List[dict]:
                          "the date of Revelation, etc.) carry both positions, never one verdict. Pass id "
                          "for one event; else lists every event grouped by era and period."),
          "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}}},
+        {"name": "backmatter",
+         "description": ("Back-matter reference tables: weights_measures, names_of_god, parables, "
+                         "miracles, book_intros, topical_index. Disputes carried (a cubit's two "
+                         "lengths, a book's two datings), refs verified against the corpus, names "
+                         "of God carry Strong's numbers that open in word_study. Pass table for one "
+                         "table; else the index of all six."),
+         "inputSchema": {"type": "object", "properties": {"table": {"type": "string"}}}},
+        {"name": "bible_places",
+         "description": ("The Atlas — biblical places with REAL coordinates, honestly held: "
+                         "located places carry lat/lon (cross-checked against an independent "
+                         "gazetteer); disputed sites (Mount Sinai, Cana, Golgotha) NAME their "
+                         "candidates instead of planting one flag; unlocatable places (Eden, "
+                         "Emmaus, Tarshish, Ophir) are honest blanks with no coordinates. Pass "
+                         "name for one place; else all places with by_status counts."),
+         "inputSchema": {"type": "object", "properties": {"name": {"type": "string"}}}},
         # Parity: every witness page a human can read is a tool an agent can call. These three
         # had HTTP routes but no twin — an agent could not reach what a person could see.
         {"name": "original_words",
@@ -749,6 +764,18 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
             rec = timeline.get(args["id"])
             return rec if rec is not None else {"error": "event not found"}
         return timeline.eras()
+    if name == "backmatter" and allow_witness:
+        from .. import backmatter as _bm  # lazy: witness-only
+        if args.get("table"):
+            rec = _bm.get_table(str(args["table"]))
+            return rec if rec is not None else {"error": "table not found"}
+        return _bm.tables()
+    if name == "bible_places" and allow_witness:
+        from .. import bible_places as _bp  # lazy: witness-only
+        if args.get("name"):
+            rec = _bp.get(str(args["name"]))
+            return rec if rec is not None else {"error": "place not found"}
+        return _bp.places()
     if name == "original_words" and allow_witness:
         from ..verifiers import scripture as _scr  # lazy: witness-only
         ref = str(args.get("ref") or "").strip()

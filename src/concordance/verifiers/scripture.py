@@ -44,7 +44,11 @@ def _norm_text(s: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[^\w\s]", "", (s or "").lower())).strip()
 
 
-_REF_RE = re.compile(r"^\s*([1-3]?\s*[A-Za-z.]+)\s*(\d+):(\d+)\s*$")
+# The book group must admit SPACES: "Song of Solomon" is the one space-bearing book with no leading
+# digit, and the old class [A-Za-z.]+ made the entire book unreachable through every passage surface
+# (found 2026-07-28 when the back-matter tables validated their refs). commentary.py, xrefs.py and
+# teachings.py already used the space-tolerant form — the core reader was the one left behind.
+_REF_RE = re.compile(r"^\s*([1-3]?\s*[A-Za-z][A-Za-z. ]*?)\s*(\d+):(\d+)\s*$")
 
 
 def _parse_ref(ref: str) -> Optional[Tuple[str, int, int]]:
@@ -56,7 +60,7 @@ def _parse_ref(ref: str) -> Optional[Tuple[str, int, int]]:
 
 # A passage: a single verse, a verse range, or a whole chapter.
 #   "John 3:16" · "John 3:16-18" · "John 3" · "1 John 1:9"
-_PASSAGE_RE = re.compile(r"^\s*([1-3]?\s*[A-Za-z.]+)\s*(\d+)(?::(\d+)(?:\s*-\s*(\d+))?)?\s*$")
+_PASSAGE_RE = re.compile(r"^\s*([1-3]?\s*[A-Za-z][A-Za-z. ]*?)\s*(\d+)(?::(\d+)(?:\s*-\s*(\d+))?)?\s*$")
 
 
 class Bible:
@@ -85,6 +89,60 @@ class Bible:
         for ab, target in _COMMON_ABBREV.items():
             if target in known:
                 self.alias.setdefault(ab, target)
+        # Full names are the never-questioned tier; the known set gates the curated abbreviations.
+        self._fullnames = {_norm_book(b): b for b in known}
+        self._known_books = known
+
+    def book_candidates(self, raw: str) -> list:
+        """Every book the given name could mean — exact aliases plus name prefixes, deduped.
+
+        Prefix inference needs THREE letters. Two-letter fragments are ordinary English words —
+        the gate's own test caught 'what is 15 percent of 240' resolving as ISAIAH 15 the day this
+        tier was added, which would have made mundane arithmetic open the witness gate. Every
+        legitimate two-letter form (Ps, Mt, Mk, Lk, Jn, Ex, Pr, Dt) is already deliberate
+        convention in the curated table, so nothing real is lost."""
+        n = _norm_book(raw)
+        if not n:
+            return []
+        hits = {canon for key, canon in self.alias.items() if len(n) >= 3 and key.startswith(n)}
+        exact = self.alias.get(n)
+        if exact:
+            hits.add(exact)
+        return sorted(hits)
+
+    def _pick_book(self, raw: str, have_page=None):
+        """The book is always on the right page — or we ask which of two possibilities.
+
+        (canonical_book | None, candidates). The tiers, in order of trust:
+          1. a FULL book name typed out ('Judges', 'Jude') is exact — never questioned;
+          2. this project's curated abbreviation table ('Phil' → Philippians, 'Mt' → Matthew) is
+             deliberate convention — the right page by long custom;
+          3. otherwise gather every book the name could mean (corpus-declared abbreviations AND
+             name prefixes: 'Jud' → Jude or Judges), then use everything the request tells us —
+             if exactly ONE candidate actually HAS the requested chapter and verse, that is the
+             right page ('Jud 5' can only be Judges; Jude has one chapter);
+          4. and when two or more could hold the page, ASK — return the candidates and let the
+             human go the last mile. A silent guess opens the wrong book for someone, confidently.
+        """
+        n = _norm_book(raw)
+        full = self._fullnames.get(n)
+        if full:
+            return full, []
+        curated = _COMMON_ABBREV.get(n)
+        if curated and curated in self._known_books:
+            return curated, []
+        hits = self.book_candidates(raw)
+        if len(hits) == 1:
+            return hits[0], []
+        if not hits:
+            return None, []
+        if have_page is not None:
+            viable = [b for b in hits if have_page(b)]
+            if len(viable) == 1:
+                return viable[0], []
+            if viable:
+                hits = viable
+        return None, hits
 
     def resolve(self, ref: str) -> Dict[str, Any]:
         if not self.idx:
@@ -95,8 +153,13 @@ class Bible:
             return {"ref": ref, "text": "", "status": "not_found",
                     "detail": "could not parse reference"}
         book_raw, ch, v = p
-        canon = self.alias.get(_norm_book(book_raw))
+        canon, hits = self._pick_book(book_raw, have_page=lambda b: (b, ch, v) in self.idx)
         if not canon:
+            if hits:
+                return {"ref": ref, "text": "", "status": "ambiguous",
+                        "candidates": [f"{b} {ch}:{v}" for b in hits],
+                        "detail": f"{book_raw!r} could be " + " or ".join(hits) +
+                                  " — which did you mean? The last mile is yours."}
             return {"ref": ref, "text": "", "status": "not_found",
                     "detail": f"unknown book {book_raw!r}"}
         text = self.idx.get((canon, ch, v))
@@ -117,8 +180,20 @@ class Bible:
             return {"ref": ref, "verses": [], "count": 0, "status": "not_found",
                     "detail": "could not parse passage"}
         book_raw, ch = m.group(1), int(m.group(2))
-        canon = self.alias.get(_norm_book(book_raw))
+        if m.group(3) is not None:
+            _v = int(m.group(3))
+            _has = lambda b: (b, ch, _v) in self.idx  # noqa: E731
+        else:
+            _has = lambda b: any(k[0] == b and k[1] == ch for k in self.idx)  # noqa: E731
+        canon, hits = self._pick_book(book_raw, have_page=_has)
         if not canon:
+            if hits:
+                tail = f" {ch}" + (f":{m.group(3)}" if m.group(3) else "") + \
+                       (f"-{m.group(4)}" if m.group(4) else "")
+                return {"ref": ref, "verses": [], "count": 0, "status": "ambiguous",
+                        "candidates": [b + tail for b in hits],
+                        "detail": f"{book_raw!r} could be " + " or ".join(hits) +
+                                  " — which did you mean? The last mile is yours."}
             return {"ref": ref, "verses": [], "count": 0, "status": "not_found",
                     "detail": f"unknown book {book_raw!r}"}
         if m.group(3) is None:  # whole chapter — scan every verse present (robust to gaps / non-1 start)
