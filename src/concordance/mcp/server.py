@@ -242,6 +242,33 @@ def _secular_tools() -> List[dict]:
                          "with its verification. Requires fp + confession."),
          "inputSchema": {"type": "object", "properties": {
              "fp": {"type": "string"}, "limit": {"type": "integer"}}, "required": ["fp"]}},
+        # SPEECH INTO THE MESH — proof-of-possession, never a transmitted secret. Two steps, because
+        # the second one must be signed: mesh_signable hands you the exact canonical bytes; you sign
+        # them with YOUR key on YOUR machine; mesh_post carries only the signature. This tool will
+        # NOT accept a private key — an agent that would send its key to a server has already lost
+        # the thing that made it sovereign. Unsigned speech is refused, because an unsigned word in
+        # a fellowship is worth nothing (contract worklist item 2: proof-of-possession).
+        {"name": "mesh_signable",
+         "description": ("Step 1 of speaking to your fellowship: get the exact canonical bytes to "
+                         "sign for a message (returned base64url, with the nonce and created_at to "
+                         "send back). Sign them locally with your own key. Reproducible offline — "
+                         "sorted-key JSON — so you can compute and check it yourself."),
+         "inputSchema": {"type": "object", "properties": {
+             "fp": {"type": "string"}, "text": {"type": "string"},
+             "kind": {"type": "string", "description": "word | offer | need | blessing | content"},
+             "ttl": {"type": "integer"}}, "required": ["fp", "text"]}},
+        {"name": "mesh_post",
+         "description": ("Step 2: speak to the nodes around you, carrying only your SIGNATURE — your "
+                         "private key never leaves your machine and this tool will not take one. "
+                         "Pass the same text/kind/ttl plus the nonce, created_at and signature from "
+                         "mesh_signable. Refused unless the signature verifies against your node's "
+                         "public key. Your own words, attributed — never generated."),
+         "inputSchema": {"type": "object", "properties": {
+             "fp": {"type": "string"}, "text": {"type": "string"}, "kind": {"type": "string"},
+             "ttl": {"type": "integer"}, "refs": {"type": "array"},
+             "nonce": {"type": "string"}, "created_at": {"type": "integer"},
+             "signature": {"type": "string"}},
+             "required": ["fp", "text", "nonce", "created_at", "signature"]}},
         {"name": "ask",
          "description": ("Bring anything — a question, a claim to check, a word to study, or what is "
                          "actually on your mind. The engine discerns what KIND of thing you brought "
@@ -416,6 +443,40 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     if name == "capabilities":
         from .. import capabilities as _caps  # both surfaces: the statement is never gated
         return _caps.statement(config.surface)
+    if name == "mesh_signable":
+        from .. import mesh as _mesh
+        fp = str(args.get("fp") or "").strip()
+        text = str(args.get("text") or "").strip()
+        if not fp or not text:
+            return {"error": "fp and text required"}
+        try:
+            ttl = int(args.get("ttl") or 2)
+        except (TypeError, ValueError):
+            ttl = 2
+        return _mesh.signable_message(fp, text, kind=str(args.get("kind") or "word"), ttl=ttl)
+    if name == "mesh_post":
+        from .. import mesh as _mesh
+        fp = str(args.get("fp") or "").strip()
+        text = str(args.get("text") or "").strip()
+        sig = str(args.get("signature") or "").strip()
+        if not fp or not text:
+            return {"error": "fp and text required"}
+        if not sig:
+            return {"error": ("a signature is required — get the canonical bytes from "
+                              "mesh_signable, sign them with your own key, and send the signature. "
+                              "Unsigned speech is not carried.")}
+        if args.get("private_key"):
+            # Refused on principle, not as a technicality: the whole point is that the key stays
+            # yours. Accepting it here would undo the sovereignty this path exists to protect.
+            return {"error": ("do not send a private key — this path never needs one. Sign the "
+                              "canonical bytes locally and send only the signature.")}
+        try:
+            ttl = int(args.get("ttl") or 2)
+        except (TypeError, ValueError):
+            ttl = 2
+        return _mesh.post_message(fp, text, kind=str(args.get("kind") or "word"),
+                                  refs=args.get("refs") or [], ttl=ttl, signature=sig,
+                                  nonce=args.get("nonce"), created_at=args.get("created_at"))
     if name in ("mesh_map", "mesh_inbox", "mesh_door"):
         # Read-only. mesh.py gates each on the confession bound to this fingerprint and returns the
         # invitation (never the network) when it is absent — so the door keeps itself.

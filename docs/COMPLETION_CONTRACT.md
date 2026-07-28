@@ -75,6 +75,10 @@ Discoveries outside scope → the drift ledger.
 
 1. Wire the covenant into the Way (confession → establish key → node identity). *(in flight)*
 2. Gate the state-changing MCP tools (badges/study_import/group_*) behind proof-of-possession + consent.
+   *(The MECHANISM is built and proven on the mesh message path — detached signatures: the caller
+   signs canonical bytes locally and sends only the signature, and `mesh_post` refuses a private key.
+   See `mesh.signable_message()` + `tests/test_mesh_signed_speech.py`. Remaining: apply that same
+   shape to badges/study_import/group_* and retire the `private_key` parameter — see the drift ledger.)*
 3. One `capabilities-manifest.json`; all public counts derive from it.
 4. Import/community quarantine + a minimal moderation floor (report/block) before any public community.
 5. Result taxonomy on the surface: HOLDS / BROKEN_CLAIM / INCOMPLETE / OUT_OF_SCOPE / SYSTEM_ERROR.
@@ -109,7 +113,22 @@ Discoveries outside scope → the drift ledger.
 
 ## 7. Drift ledger (discoveries out of scope — recorded, not chased)
 
-- _(append here as found; do not repair unless it is a security-critical dependency of the current item)_
+- **§5's "no private key ever crosses the wire" was being read too narrowly (found 2026-07-28).**
+  The server never *returns* a private key — but it *accepts* one in the request body at six places:
+  `POST /mesh/post`, `/mesh/tend`, `/mesh/door`, `/badges` (attest), `/study/export`, and
+  `/group/contribute`. Inbound is still "on the wire", and §3 says keys "are born on the device… the
+  server holds only public keys and verifies signed challenges". Root cause: those flows built the
+  signable body server-side (minting the nonce and timestamp *after* the request), so no client
+  could have signed the stored bytes — handing over the key was the only way to get a signature.
+  **Fixed for the mesh message path** this round: `mesh.signable_message()` gives the caller the exact
+  canonical bytes, the caller signs locally and sends only the signature (`GET /mesh/signable` +
+  `signature`/`nonce`/`created_at` on `POST /mesh/post`), and the agent tool `mesh_post` **refuses a
+  private key outright**. The legacy `private_key` parameter is kept ONLY so the existing browser
+  client keeps working. **Still to do:** port the same detached-signature shape to `/mesh/tend`,
+  `/mesh/door`, badges-attest, study-export and group-contribute, then remove the `private_key`
+  parameter entirely and update `site/mesh.html` to sign in the browser (WebCrypto). Until that is
+  done, §5's identity line should be read as "the server never returns one, and the mesh message path
+  never needs one" — not as the full claim.
 
 ---
 

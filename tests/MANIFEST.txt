@@ -48,6 +48,7 @@ test_identity.py
 test_formation.py
 test_inequality.py
 test_mesh.py
+test_mesh_signed_speech.py
 test_inlet.py
 test_integrity.py
 test_isolation.py

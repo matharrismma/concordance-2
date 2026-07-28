@@ -26,6 +26,7 @@ replaces it (John 3:30). Crisis is surfaced to real people first, never filed aw
 """
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import os
@@ -437,7 +438,9 @@ def _seal_core(core: Dict[str, Any]) -> Tuple[bytes, str]:
 
 
 def post_message(from_fp: str, text: str, *, kind: str = "word", refs: Optional[List[str]] = None,
-                 ttl: int = 2, private_key: Optional[str] = None) -> Dict[str, Any]:
+                 ttl: int = 2, private_key: Optional[str] = None,
+                 signature: Optional[str] = None, nonce: Optional[str] = None,
+                 created_at: Optional[int] = None) -> Dict[str, Any]:
     """Post to the nodes around you. `kind` is how believers serve each other: a WORD, an OFFER (I
     can give / help with this), a NEED (I am seeking this), a BLESSING, or CONTENT (something made
     to share) — everything offering-based, no obligation. It reaches every node within `ttl` hops of
@@ -456,19 +459,52 @@ def post_message(from_fp: str, text: str, *, kind: str = "word", refs: Optional[
     ttl = max(1, min(_MAX_TTL, int(ttl or 2)))
     if kind == "broadcast":
         ttl = _MAX_TTL                     # the Emergency Broadcast reaches the farthest fold
-    core = _message_core(from_fp, node.get("callsign", "anon"), kind, text,
-                         list(refs or []), ttl, _now(), secrets.token_hex(8))
-    canon, mid = _seal_core(core)
-    signature, signed = None, False
-    if private_key:
+    # DETACHED SIGNATURE — the sovereign path, and the only one offered to agents.
+    #
+    # The caller signs on ITS OWN machine and sends only the signature; the private key never
+    # crosses the wire (contract §3: "keys are born on the device… the server holds only public
+    # keys"). For that to be possible the caller must own the whole signable body, so it supplies
+    # the nonce and created_at too — otherwise the server would invent them AFTER the request and
+    # no client could have signed the bytes. The id stays the content hash, so a replay of the same
+    # body is the same id (an idempotent overwrite, not a duplicate), and only the holder of this
+    # node's key can author as this node.
+    if signature:
+        if not nonce or created_at is None:
+            return {"ok": False, "error": ("nonce and created_at are required with a detached "
+                                           "signature — you must sign the exact body stored")}
         try:
-            if identity.signing_available():
-                signature = signing.sign_bytes(canon, private_key)
-                signed = signing.verify_bytes(canon, signature, node.get("public_key", ""))
-                if not signed:            # a key that is not this node's does not get to speak as it
-                    return {"ok": False, "error": "signature does not match this node's public key"}
-        except Exception:  # noqa: BLE001 — signing is optional; a message never fails for it
-            signature, signed = None, False
+            ts = int(created_at)
+        except (TypeError, ValueError):
+            return {"ok": False, "error": "created_at must be an integer epoch second"}
+        core = _message_core(from_fp, node.get("callsign", "anon"), kind, text,
+                             list(refs or []), ttl, ts, str(nonce))
+        canon, mid = _seal_core(core)
+        try:
+            ok = signing.verify_bytes(canon, signature, node.get("public_key", ""))
+        except Exception:  # noqa: BLE001
+            ok = False
+        if not ok:
+            return {"ok": False, "error": ("signature does not verify against this node's public "
+                                           "key over the canonical body")}
+        signed = True
+    else:
+        core = _message_core(from_fp, node.get("callsign", "anon"), kind, text,
+                             list(refs or []), ttl, _now(), secrets.token_hex(8))
+        canon, mid = _seal_core(core)
+        signature, signed = None, False
+        if private_key:
+            # LEGACY path (the browser flow). Accepting a private key means a secret crosses the
+            # wire, which §3 forbids; it is kept only so existing human clients keep working and is
+            # NEVER offered over MCP. Superseded by the detached signature above — see the drift
+            # ledger in docs/COMPLETION_CONTRACT.md.
+            try:
+                if identity.signing_available():
+                    signature = signing.sign_bytes(canon, private_key)
+                    signed = signing.verify_bytes(canon, signature, node.get("public_key", ""))
+                    if not signed:        # a key that is not this node's does not get to speak as it
+                        return {"ok": False, "error": "signature does not match this node's public key"}
+            except Exception:  # noqa: BLE001 — signing is optional; a message never fails for it
+                signature, signed = None, False
     stored = dict(core)
     stored["id"] = mid
     stored["signature"] = signature
@@ -532,6 +568,36 @@ def _outgoing_counts() -> Dict[str, int]:
         if src:
             counts[src] = counts.get(src, 0) + 1
     return counts
+
+
+def signable_message(from_fp: str, text: str, *, kind: str = "word",
+                     refs: Optional[List[str]] = None, ttl: int = 2,
+                     nonce: Optional[str] = None,
+                     created_at: Optional[int] = None) -> Dict[str, Any]:
+    """The exact bytes to sign for a detached-signature post — so a caller can speak without ever
+    sending its key.
+
+    Returns the body, the canonical bytes (base64url) that must be signed, and the nonce/created_at
+    to send back with the signature. Reproducible offline on any machine: the canonicalization is
+    sorted-key JSON, so a client with the same values gets the same bytes without asking us. We hand
+    it over as a convenience, not as an authority — verify it yourself if you like.
+    """
+    node = _read_node(from_fp)
+    callsign = (node or {}).get("callsign", "anon")
+    kind = kind if kind in _KINDS else "word"
+    ttl = _MAX_TTL if kind == "broadcast" else max(1, min(_MAX_TTL, int(ttl or 2)))
+    n = str(nonce or secrets.token_hex(8))
+    ts = int(created_at) if created_at is not None else _now()
+    core = _message_core(from_fp, callsign, kind, str(text or "").strip()[:_MAX_TEXT],
+                         list(refs or []), ttl, ts, n)
+    canon, mid = _seal_core(core)
+    return {"ok": True, "body": core, "nonce": n, "created_at": ts, "ttl": ttl, "kind": kind,
+            "canonical_b64u": base64.urlsafe_b64encode(canon).decode().rstrip("="),
+            "would_be_id": mid,
+            "note": ("Sign these canonical bytes with YOUR private key on YOUR machine, then post "
+                     "text/kind/refs/ttl/nonce/created_at plus the signature. Your key never "
+                     "leaves your device. The id is the hash of this body, so anyone can re-check "
+                     "it offline with no key at all.")}
 
 
 def verify_message(m: Dict[str, Any]) -> Dict[str, Any]:

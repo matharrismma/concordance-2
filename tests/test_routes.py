@@ -46,6 +46,7 @@ GOLDEN_API_GET = {
     "/harmony",   # deliberate addition (Harmony of the Gospels — every gospel witness, side by side)
     "/timeline",  # deliberate addition (OT/NT/Church History — one spine, creation to today)
     "/capabilities",  # deliberate addition (the live capability statement — restored from 1.0)
+    "/mesh/signable",  # deliberate addition (the bytes to sign, so a key never crosses the wire)
 }
 GOLDEN_RATELIMITED = {
     "/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose", "/pins", "/pins/done",

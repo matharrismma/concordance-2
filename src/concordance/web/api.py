@@ -864,9 +864,32 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
            or not str(body.get("text") or "").strip():
             return _err(400, "fp and text required")
         from .. import mesh
+        try:
+            ttl = int(body.get("ttl") or 2)
+        except (TypeError, ValueError):
+            ttl = 2
+        # `signature` is the sovereign path: the caller signed the canonical body on its OWN machine
+        # (see GET /mesh/signable) and its key never travelled. `private_key` is the legacy browser
+        # path and is kept only for compatibility — see the drift ledger.
         return _ok(mesh.post_message(str(body["fp"]), str(body["text"]), kind=str(body.get("kind") or "word"),
-                                     refs=body.get("refs") or [], ttl=int(body.get("ttl") or 2),
-                                     private_key=body.get("private_key")))
+                                     refs=body.get("refs") or [], ttl=ttl,
+                                     private_key=body.get("private_key"),
+                                     signature=body.get("signature"),
+                                     nonce=body.get("nonce"),
+                                     created_at=body.get("created_at")))
+    if method == "GET" and path == "/mesh/signable":
+        # The exact bytes to sign, so anyone — human or agent — can speak without sending a secret.
+        from .. import mesh
+        fp = (query.get("fp") or "").strip()
+        text = query.get("text") or ""
+        if not fp or not str(text).strip():
+            return _err(400, "fp and text required")
+        try:
+            ttl = int(query.get("ttl") or 2)
+        except (TypeError, ValueError):
+            ttl = 2
+        return _ok(mesh.signable_message(fp, str(text), kind=str(query.get("kind") or "word"),
+                                         ttl=ttl))
     if method == "GET" and path == "/mesh/inbox":
         from .. import mesh
         try:
@@ -1626,6 +1649,7 @@ ROUTES = [
     {"path": "/harmony", "methods": ("GET",), "api": True},
     {"path": "/timeline", "methods": ("GET",), "api": True},
     {"path": "/capabilities", "methods": ("GET",), "api": True},
+    {"path": "/mesh/signable", "methods": ("GET",), "api": True},
     {"path": "/seeds", "methods": ("GET",), "api": True},
     {"path": "/almanac", "methods": ("GET",), "api": True},
     {"path": "/apothecary", "methods": ("GET",), "api": True},
