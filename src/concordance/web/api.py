@@ -308,7 +308,8 @@ _SITEMAP_PAGES = ("/", "/ask.html", "/bible.html", "/read.html", "/characters.ht
                   "/seeds.html", "/seal.html", "/connect.html", "/corrected.html", "/audit.html",
                   "/proof.html", "/reason.html", "/boundary.html", "/almanac.html", "/codex.html",
                   "/teachings.html", "/brain.html", "/floor.html", "/works.html",
-                  "/harmony.html", "/timeline.html", "/backmatter.html", "/places.html")
+                  "/harmony.html", "/timeline.html", "/backmatter.html", "/places.html",
+                  "/narratives.html", "/catalog.html")
 
 
 def build_sitemap(base_url: str) -> str:
@@ -1407,7 +1408,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         except (TypeError, ValueError):
             limit = 100
         return _ok(characters.browse(letter=(query.get("letter") or None),
-                                     search=(query.get("search") or None), limit=limit))
+                                     search=(query.get("search") or None), limit=limit,
+                                     category=(query.get("category") or None)))
 
     if method == "GET" and path == "/prophecy":
         # Christ-signpost traces — attributed, verdict CONCORDANT/MIXED, NEVER HOLDS (a signpost, not a proof).
@@ -1544,6 +1546,58 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _err(400, "hash required")
         return _ok(_attest.witnesses(h))
 
+    if method == "GET" and path == "/consent/signable":
+        # Step 1 of a consent grant: the human asks for the exact canonical bytes, signs them ON
+        # THEIR DEVICE, and submits only the signature. The key never travels — the mesh's own
+        # detached-signature pattern, applied before the bug can exist.
+        from .. import consent as _consent
+        scope = [s for s in (query.get("scope") or "").split(",") if s.strip()]
+        try:
+            ttl = int(query.get("ttl_s") or 86400)
+        except (TypeError, ValueError):
+            ttl = 86400
+        r = _consent.signable_grant(query.get("grantor") or "", query.get("agent") or "",
+                                    scope, ttl_s=ttl)
+        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "bad request")
+    if method == "POST" and path == "/consent":
+        # Step 2: verify the grantor's detached signature over those bytes; keep the grant.
+        from .. import consent as _consent
+        if not isinstance(body, dict):
+            return _err(400, "fields and signature required")
+        r = _consent.grant(body.get("fields") or {}, str(body.get("signature") or ""))
+        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
+    if method == "GET" and path == "/consent":
+        from .. import consent as _consent
+        return _ok(_consent.check(query.get("agent") or "", query.get("verb") or "",
+                                  query.get("grantor") or ""))
+    if method == "POST" and path == "/consent/revoke":
+        from .. import consent as _consent
+        if not isinstance(body, dict):
+            return _err(400, "agent, grant_id, grantor, signature required")
+        r = _consent.revoke(str(body.get("agent") or ""), str(body.get("grant_id") or ""),
+                            str(body.get("grantor") or ""), str(body.get("signature") or ""))
+        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
+
+    if method == "POST" and path == "/report":
+        # The moderation floor: anyone may report; nobody's report is a verdict. One report is a
+        # claim; three distinct reporters hold the item for a HUMAN steward (Deut 19:15).
+        from .. import moderation as _mod
+        if not isinstance(body, dict):
+            return _err(400, "kind, target_id, reason, reporter required")
+        r = _mod.report(str(body.get("kind") or ""), str(body.get("target_id") or ""),
+                        str(body.get("reason") or ""), str(body.get("reporter") or ""),
+                        note=str(body.get("note") or ""))
+        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
+    if method == "POST" and path == "/block":
+        # Viewer-side and sovereign: filters what YOU see. A boundary, not a verdict.
+        from .. import moderation as _mod
+        if not isinstance(body, dict):
+            return _err(400, "viewer and handle required")
+        if body.get("off"):
+            return _ok(_mod.unblock(str(body.get("viewer") or ""), str(body.get("handle") or "")))
+        r = _mod.block(str(body.get("viewer") or ""), str(body.get("handle") or ""))
+        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
+
     if method == "GET" and path == "/capabilities":
         # The live capability statement — every public number computed now, with its definition
         # attached. UNGATED on both surfaces by design: what this engine can and cannot do is not
@@ -1600,6 +1654,30 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             rec = places_mod.get(nm)
             return _ok(rec) if rec is not None else _err(404, "place not found")
         return _ok(places_mod.places())
+
+    if method == "GET" and path == "/narratives":
+        # The storyboards — the common narratives charted in the Bible; components (movements)
+        # isolate and recombine. Reference points, never identities. Witness content.
+        if not allow_witness:
+            return _gate_closed()
+        from .. import narratives as narr_mod
+        nid = (query.get("id") or "").strip()
+        mv = (query.get("movement") or "").strip()
+        if nid:
+            rec = narr_mod.get(nid)
+            return _ok(rec) if rec is not None else _err(404, "storyboard not found")
+        if mv:
+            rec = narr_mod.by_movement(mv)
+            return _ok(rec) if rec is not None else _err(404, "movement not found")
+        return _ok(narr_mod.storyboards())
+
+    if method == "GET" and path == "/study_find":
+        # The quick-find index — one lookup across the whole reference section (archetypes,
+        # storyboards, tables, atlas, harmony, timeline, encyclopedia). Witness content.
+        if not allow_witness:
+            return _gate_closed()
+        from .. import study_index as si_mod
+        return _ok(si_mod.find(query.get("q") or "", limit=40))
 
     if method == "GET" and path == "/teachings":
         # Phase 3 — the teaching-review workspace (Words in Red). Witness content: the engine
@@ -1728,9 +1806,16 @@ ROUTES = [
     {"path": "/timeline", "methods": ("GET",), "api": True},
     {"path": "/backmatter", "methods": ("GET",), "api": True},
     {"path": "/places", "methods": ("GET",), "api": True},
+    {"path": "/narratives", "methods": ("GET",), "api": True},
+    {"path": "/study_find", "methods": ("GET",), "api": True},
     {"path": "/capabilities", "methods": ("GET",), "api": True},
     {"path": "/mesh/signable", "methods": ("GET",), "api": True},
     {"path": "/attest", "methods": ("GET", "POST"), "api": True, "rl": True},
+    {"path": "/consent/signable", "methods": ("GET",), "api": True, "rl": True},
+    {"path": "/consent", "methods": ("GET", "POST"), "api": True, "rl": True},
+    {"path": "/consent/revoke", "methods": ("POST",), "api": True, "rl": True},
+    {"path": "/report", "methods": ("POST",), "api": True, "rl": True},
+    {"path": "/block", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/seeds", "methods": ("GET",), "api": True},
     {"path": "/almanac", "methods": ("GET",), "api": True},
     {"path": "/apothecary", "methods": ("GET",), "api": True},

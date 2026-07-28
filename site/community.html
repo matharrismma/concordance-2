@@ -162,6 +162,10 @@ function render(g){
   const cards=(g.cards||[]).map(c=>'<div class="card"><div class="by">'+esc(c.by||(c.source||'').replace(/^member:/,'')||'member')+
     ' <span class="attn '+(c.signed?'ok':'')+'" title="'+esc(c.attribution||'')+'">'+(c.signed?'signed ✓':'claimed')+'</span>'+
     (c.signed&&c.attested_by?'<span class="fp" title="the key that signed it">'+esc(String(c.attested_by).slice(0,14))+'</span>':'')+
+    // The moderation floor, visible where it matters: one report is a claim, never a verdict;
+    // three distinct reporters hold the item for a human steward. The button teaches as it asks.
+    (c.id?' <button class="rpt" data-id="'+esc(c.id)+'" title="Report this to a human steward — one report is a claim; three hold it for review" '+
+    'style="background:none;border:0;color:var(--dim);cursor:pointer;font-size:.72rem;float:right">report</button>':'')+
     '</div><div class="tx">'+esc(c.text)+'</div></div>').join('') || '<p class="dim">No contributions yet — add the first.</p>';
   const members=(g.members||[]).map(m=>esc(m.handle)+(m.role==='founder'?' ✦':'')).join(' · ');
   panel.innerHTML='<h2>'+esc(g.title)+'</h2>'+
@@ -174,6 +178,15 @@ function render(g){
     '<button class="btn" id="contribbtn">Contribute</button></div>'+
     '<p class="hint">Your words, attributed to your handle. Verbatim — not generated, not graded.</p></div>';
   document.getElementById('joinbtn').addEventListener('click',async()=>{ if(!needHandle())return; const r=await postJSON('/group/join',{id:g.id, handle:myHandle(), subject_id:sid()}); if(r) render(r); });
+  Array.prototype.forEach.call(panel.querySelectorAll('.rpt'), function(b){
+    b.addEventListener('click', async function(){
+      if(!needHandle()) return;
+      const why = window.prompt('Report this to a human steward. Why? (harmful, spam, impersonation, private_info, other)', 'other');
+      if(why === null) return;
+      const r = await postJSON('/report', {kind:'group_contribution', target_id:b.dataset.id, reason:why.trim()||'other', reporter:myHandle()});
+      if(r) b.textContent = 'reported — ' + (r.held_for_review ? 'held for a human steward' : 'a claim, recorded (' + r.reporters + ' of 3)');
+    });
+  });
   document.getElementById('contribbtn').addEventListener('click',async()=>{
     if(!needHandle())return; const t=document.getElementById('contrib').value.trim(); if(!t)return;
     const r=await postJSON('/group/contribute',{id:g.id, handle:myHandle(), subject_id:sid(), text:t, kind:document.getElementById('ckind').value});

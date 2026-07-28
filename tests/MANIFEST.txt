@@ -83,6 +83,11 @@ test_no_keys_on_the_wire.py
 test_system_error_distinct.py
 test_bible_places.py
 test_last_mile.py
+test_moderation.py
+test_consent.py
+test_encyclopedia_and_voices.py
+test_study_index.py
+test_narratives.py
 test_backmatter.py
 test_mission_string.py
 test_reachable_from_the_floor.py

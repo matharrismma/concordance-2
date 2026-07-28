@@ -47,6 +47,10 @@ GOLDEN_API_GET = {
     "/timeline",  # deliberate addition (OT/NT/Church History — one spine, creation to today)
     "/backmatter",  # deliberate addition (back-matter tables: weights, names, parables, miracles, intros, topics)
     "/places",    # deliberate addition (the Atlas: real biblical place coordinates, honest uncertainty)
+    "/consent", "/consent/signable", "/consent/revoke",  # the human-authorized write path (worklist item 2)
+    "/report", "/block",  # the moderation floor (worklist item 4)
+    "/narratives",  # deliberate addition (storyboards: common narratives charted in the Bible; movements mix and match)
+    "/study_find",  # deliberate addition (the quick-find index across the whole reference section)
     "/capabilities",  # deliberate addition (the live capability statement — restored from 1.0)
     "/mesh/signable",  # deliberate addition (the bytes to sign, so a key never crosses the wire)
     "/attest",  # deliberate addition (bear witness to a record you hold; GET lists the witnesses)
@@ -60,6 +64,8 @@ GOLDEN_RATELIMITED = {
     "/mesh/node", "/mesh/link", "/mesh/post", "/mesh/tend",
     "/mesh/invite", "/mesh/redeem", "/mesh/door", "/formation/help",
     "/push/subscribe", "/push/unsubscribe",
+    "/consent/signable", "/consent", "/consent/revoke",  # the human-authorized write path (worklist item 2)
+    "/report", "/block",  # the moderation floor (worklist item 4)
     "/audit",   # deliberate addition (the Auditor) — goldens update ONLY with a new route
     "/chess",   # deliberate addition (the chess verifier) — game theory, applied and sealable
     "/attest",  # deliberate addition — a write, so rate-limited like every other write

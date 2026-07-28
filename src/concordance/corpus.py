@@ -250,6 +250,10 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                       # walkable in the graph/brain, routable by wayfinding — and not marooned
                       # behind their own two routes. Minted by tools/card_study_tables.py.
                       "study_spines.jsonl", "study_cards.jsonl",
+                      # The Biblical Encyclopedia as Cards — Easton's 3,962 entries, stub+link
+                      # into /characters, boxed by category (the card-catalog drawers). Minted by
+                      # tools/card_encyclopedia.py.
+                      "encyclopedia_cards.jsonl",
                       # The Corpus — technical, academic cards minted from the stored sources
                       # (nuclides, stars, foods, ports, indicators, …); always growing.
                       "source_spines.jsonl", "source_cards.jsonl", "web_cache.jsonl",

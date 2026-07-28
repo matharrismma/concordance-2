@@ -104,11 +104,15 @@ def get(name: str) -> Optional[Dict[str, Any]]:
             "source": SOURCE, "license": LICENSE, "attribution": ATTRIBUTION}
 
 
-def browse(letter: Optional[str] = None, search: Optional[str] = None, limit: int = 100) -> Dict[str, Any]:
-    """Index of characters — A-Z / substring; briefs for a scannable directory."""
+def browse(letter: Optional[str] = None, search: Optional[str] = None, limit: int = 100,
+           category: Optional[str] = None) -> Dict[str, Any]:
+    """Index of characters — A-Z / substring / category drawer; briefs for a scannable directory.
+    `category` filters by Easton's OWN label (person / place / concept / object — surfaced, never
+    trusted for anything beyond drawer membership) — the card-catalog's drawers."""
     idx = _index()
     init = (letter or "").strip().upper()[:1]
     needle = (search or "").strip().lower()
+    drawer = (category or "").strip().lower()
     items: List[Dict[str, Any]] = []
     for slug, rec in sorted(idx.items(), key=lambda kv: (kv[1].get("name") or kv[0])):
         name = rec.get("name") or slug
@@ -116,7 +120,10 @@ def browse(letter: Optional[str] = None, search: Optional[str] = None, limit: in
             continue
         if needle and needle not in name.lower() and needle not in (rec.get("text") or "").lower():
             continue
+        if drawer and (rec.get("category") or "").strip().lower() != drawer:
+            continue
         items.append({"slug": slug, "name": name, "preview": _summary(rec.get("text") or "", 1, 200),
+                      "category": rec.get("category") or "",
                       "ref_count": len(rec.get("scripture_refs") or [])})
         if len(items) >= max(1, int(limit)):
             break

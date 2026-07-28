@@ -108,9 +108,19 @@ A live remote MCP server (Streamable HTTP, JSON-RPC, no auth, no SDK):
   `GET /capabilities` — a number written here would drift the moment a tool is added.
 - The witness tools — passage reading, original-language word studies, cross-references,
   characters, prophecy signposts, the `harmony` of the Gospels (one event, every gospel that
-  witnesses it), and the `timeline` (Old Testament, New Testament, and Church History — one spine
+  witnesses it), the `timeline` (Old Testament, New Testament, and Church History — one spine
   from creation to today, with genuinely disputed dates carrying BOTH scholarly positions, never
-  one flattened verdict) — are reachable **two ways**, and asking is one of them:
+  one flattened verdict), the `backmatter` study tables (weights & measures, names of God with
+  Strong's numbers, parables, miracles, book introductions, topical index — disputes carried),
+  `bible_places` (the Atlas: real coordinates only where identification is secure; disputed sites
+  NAME their candidates; unlocatable places are honest blanks), `narratives` (the storyboards —
+  common narratives charted in the Bible; 17 shared movements that isolate and recombine; ALWAYS
+  a reference point, never an identity assignment), and `study_find` (ONE quick-find across the
+  whole reference section) — are reachable **two ways**, and asking is one of them.
+  Note also: the passage reader either opens the right page or ASKS — an ambiguous book name
+  ("Jud 1:2") returns `status: "ambiguous"` with `candidates`; present them to your human and let
+  them go the last mile. Never pick silently.
+  They are reachable:
     * `https://narrowhighway.org/mcp` — the witness surface; they are simply there.
     * **`ask` — the door.** Call `ask` with what you are actually bringing. If what you ask turns
       toward God, the Gate opens for the rest of your session and those tools become listable and

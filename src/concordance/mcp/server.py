@@ -216,6 +216,29 @@ def _secular_tools() -> List[dict]:
         # For an agent or a robot, the STRUCTURE is how it sees what this engine is: what it can
         # check, what it refuses, how big the keeping is — every number computed now, each carrying
         # the definition of what was counted so none can be misread. Ungated on both surfaces.
+        {"name": "consent_check",
+         "description": ("Check whether a human has authorized YOU (this agent's key fingerprint) "
+                         "for a named verb — the agent covenant's 'request human authorization "
+                         "before writes'. Speaking as YOURSELF (your own key, your own words) "
+                         "needs no consent: a member is not a proxy. Consent governs only acting "
+                         "on a human's behalf with their data. If unauthorized, the response "
+                         "teaches the way: the human issues a grant via GET /consent/signable, "
+                         "signs on their device, POSTs to /consent."),
+         "inputSchema": {"type": "object", "properties": {
+             "agent_fp": {"type": "string"}, "verb": {"type": "string"},
+             "grantor_pubkey": {"type": "string"}},
+             "required": ["agent_fp", "verb", "grantor_pubkey"]}},
+        {"name": "report",
+         "description": ("Report a community item (group_contribution, mesh_message, door_note) "
+                         "to the moderation floor. One report is a claim, never a verdict; at "
+                         "three DISTINCT reporters the item is held for a HUMAN steward's review "
+                         "(Deut 19:15). The counter never judges — it decides when a person must "
+                         "look."),
+         "inputSchema": {"type": "object", "properties": {
+             "kind": {"type": "string"}, "target_id": {"type": "string"},
+             "reason": {"type": "string"}, "reporter": {"type": "string"},
+             "note": {"type": "string"}},
+             "required": ["kind", "target_id", "reason", "reporter"]}},
         {"name": "attest_record",
          "description": ("Bind your identity to a record you already hold — phase 2 of the sovereign "
                          "flow. Do the thing unsigned (badges_issue, study_export, group_contribute), "
@@ -394,6 +417,25 @@ def _witness_tools() -> List[dict]:
                          "Emmaus, Tarshish, Ophir) are honest blanks with no coordinates. Pass "
                          "name for one place; else all places with by_status counts."),
          "inputSchema": {"type": "object", "properties": {"name": {"type": "string"}}}},
+        {"name": "narratives",
+         "description": ("The storyboards — the common narratives charted in the Bible FIRST "
+                         "(exile-and-return, the barren woman bears, down-to-the-pit-raised, the "
+                         "great reversal...), each instance real people with verified refs. The 17 "
+                         "movements are one shared vocabulary, so components isolate and recombine: "
+                         "pass movement='testing' to walk it across every storyboard. Pass id for "
+                         "one storyboard; else the index. FRAMING, always: a person may display "
+                         "characteristics of many of these at times of their life — a reference "
+                         "point, NEVER an identity assignment."),
+         "inputSchema": {"type": "object", "properties": {"id": {"type": "string"},
+                                                          "movement": {"type": "string"}}}},
+        {"name": "study_find",
+         "description": ("The quick-find index — ONE lookup across the whole reference section: "
+                         "archetypes, storyboards, movements, the six study tables, the atlas, "
+                         "harmony, timeline, and the encyclopedia. Each hit is a pointer to the "
+                         "real entry, which carries its own refs and its own honesty. The index "
+                         "finds; it never ranks truth."),
+         "inputSchema": {"type": "object", "properties": {"q": {"type": "string"}},
+                         "required": ["q"]}},
         # Parity: every witness page a human can read is a tool an agent can call. These three
         # had HTTP routes but no twin — an agent could not reach what a person could see.
         {"name": "original_words",
@@ -512,6 +554,15 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         return corpus.locate(args.get("q", ""))
     if name == "library_health":
         return corpus.health()
+    if name == "consent_check":
+        from .. import consent as _consent
+        return _consent.guard(str(args.get("agent_fp") or ""), str(args.get("verb") or ""),
+                              str(args.get("grantor_pubkey") or ""))
+    if name == "report":
+        from .. import moderation as _mod
+        return _mod.report(str(args.get("kind") or ""), str(args.get("target_id") or ""),
+                           str(args.get("reason") or ""), str(args.get("reporter") or ""),
+                           note=str(args.get("note") or ""))
     if name == "attest_record":
         from .. import attest as _attest
         if args.get("private_key"):
@@ -776,6 +827,18 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
             rec = _bp.get(str(args["name"]))
             return rec if rec is not None else {"error": "place not found"}
         return _bp.places()
+    if name == "narratives" and allow_witness:
+        from .. import narratives as _narr  # lazy: witness-only
+        if args.get("id"):
+            rec = _narr.get(str(args["id"]))
+            return rec if rec is not None else {"error": "storyboard not found"}
+        if args.get("movement"):
+            rec = _narr.by_movement(str(args["movement"]))
+            return rec if rec is not None else {"error": "movement not found"}
+        return _narr.storyboards()
+    if name == "study_find" and allow_witness:
+        from .. import study_index as _si  # lazy: witness-only
+        return _si.find(str(args.get("q") or ""), limit=40)
     if name == "original_words" and allow_witness:
         from ..verifiers import scripture as _scr  # lazy: witness-only
         ref = str(args.get("ref") or "").strip()

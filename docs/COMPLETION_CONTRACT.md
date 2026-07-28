@@ -338,6 +338,24 @@ Discoveries outside scope → the drift ledger.
   `scope=shelf` takes different shelf names again. The first two readings would have been reported
   confidently and been wrong.
 
+- **The box's memory, MEASURED (2026-07-28, task: shard decision groundwork).** `systemctl` on the
+  droplet: `nh-org` Main PID at **2.0 GB RSS, peak 3.2 GB, swap 734 MB (peak 1012 MB)**; `nh-com-2`
+  at **1.7 GB, peak 2.6 GB, swap 916 MB**. The box IS swapping at peaks. What was previously
+  "~2.8 GB measured, mostly-corpus inferred" is now: combined peaks ~5.8 GB against physical RAM
+  plus ~1 GB of swap in use. The shard engine (`corpus_db.py`, built and unwired) is no longer a
+  nice-to-have question; it is a dated capacity finding. Still true: *which* structures dominate
+  the RSS is unprofiled — measure per-structure before promising a specific reclaim.
+
+- **Gill & Clarke, EVALUATED (2026-07-28, contract §6 item 9 "evaluate adding Gill/Clarke").**
+  Both are public domain (John Gill d. 1771; Adam Clarke d. 1832). The house already has the whole
+  pattern: `commentary.py` is registry-driven (`SOURCES` dict, one entry per commentary) and
+  Matthew Henry's migration (source db in the lw base → per-verse sqlite) is the template. Adding
+  either = (1) a fetch recipe into the lw source base from a verified PD digitization (CCEL hosts
+  both; the SPECIFIC digitization's provenance should be checked deliberately, not assumed), (2) a
+  migrate run producing `gill.db`/`clarke.db`, (3) one `SOURCES` entry each. Bounded work; deferred
+  because it requires a network acquisition Matt should see land, not because anything is unknown.
+  Recorded so the next session starts from a plan rather than a survey.
+
 ---
 
 *Completion is reached when §5 all pass against one named commit. The implementing model does not

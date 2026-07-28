@@ -66,6 +66,13 @@
   cubit is, when a book was written — both positions are carried, never one flattened verdict.
   Names of God carry their Strong's numbers and open into the real lexicon.</p>
 
+  <div style="display:flex; gap:.6rem; margin:1.4rem 0 .2rem">
+    <input id="qf" type="search" placeholder="Quick find across the whole reference section — archetypes, storyboards, tables, atlas, encyclopedia…"
+      style="flex:1; background:rgba(201,162,74,.04); border:1px solid var(--line); color:var(--ink); font:inherit; padding:.5rem .9rem; border-radius:4px">
+    <button id="qfgo" class="tab" style="border-color:var(--gold); color:var(--gold)">Find</button>
+  </div>
+  <div id="qfhits"></div>
+
   <div class="tabs" id="tabs"></div>
   <div class="meanline" id="meanline"></div>
   <div class="tablewrap" id="out"><p class="dim">loading…</p></div>
@@ -144,7 +151,23 @@ async function showTable(key){
   outEl.innerHTML = (RENDER[key]||RENDER.topical_index)(d.entries||[]);
   try{ history.replaceState(null,'','/backmatter.html?table='+encodeURIComponent(key)); }catch(e){}
 }
+async function quickfind(){
+  const q = document.getElementById('qf').value.trim();
+  const out = document.getElementById('qfhits');
+  if(!q){ out.innerHTML=''; return; }
+  const d = await getJSON('/study_find?q='+encodeURIComponent(q));
+  if(!d){ out.innerHTML='<p class="dim">The reference section lives behind the Gate here — <a href="/">ask, and it opens</a>.</p>'; return; }
+  out.innerHTML = (d.hits||[]).map(function(h){
+    return '<div style="border-bottom:1px solid var(--line); padding:.45rem 0; font-size:.93rem">'+
+      '<span style="color:var(--goldsoft); font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; margin-right:.6rem">'+esc(h.kind)+'</span>'+
+      '<a href="'+esc(h.open)+'">'+esc(h.title)+'</a>'+
+      (h.snippet?' <span class="dim">— '+esc(h.snippet)+'</span>':'')+'</div>';
+  }).join('') || '<p class="dim">Nothing in the reference section speaks to that word.</p>';
+}
+
 (async function(){
+  document.getElementById('qfgo').addEventListener('click', quickfind);
+  document.getElementById('qf').addEventListener('keydown', function(e){ if(e.key==='Enter') quickfind(); });
   const idx = await getJSON('/backmatter');
   if(!idx){ outEl.innerHTML = '<p class="dim">The tables live behind the Gate on this surface — <a href="/">ask, and it opens</a>.</p>'; return; }
   tabsEl.innerHTML = (idx.tables||[]).map(function(t){ return '<button class="tab" data-k="'+esc(t.key)+'">'+esc(t.title)+'</button>'; }).join('');
