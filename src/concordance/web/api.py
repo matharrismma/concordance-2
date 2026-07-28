@@ -827,7 +827,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         r = groups.contribute(str(body["id"]), member_id=str(body.get("subject_id") or ""),
                               handle=str(body.get("handle") or ""), text=str(body.get("text") or ""),
                               kind=str(body.get("kind") or "note"), topics=body.get("topics") or [],
-                              refs=body.get("refs") or [], private_key=body.get("private_key"))
+                              refs=body.get("refs") or [])
         return _ok(r) if r is not None else _err(404, "group not found")
 
     # The Fellowship Mesh — a network of believers who serve each other (offer / need / collaborate /
@@ -868,12 +868,11 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             ttl = int(body.get("ttl") or 2)
         except (TypeError, ValueError):
             ttl = 2
-        # `signature` is the sovereign path: the caller signed the canonical body on its OWN machine
-        # (see GET /mesh/signable) and its key never travelled. `private_key` is the legacy browser
-        # path and is kept only for compatibility — see the drift ledger.
+        # ONE way in over the wire: you signed the canonical body on your OWN machine (see
+        # GET /mesh/signable) and send only the signature. The legacy `private_key` parameter is gone
+        # — no client ever sent it, and a secret in a request body is a secret on the wire (§3).
         return _ok(mesh.post_message(str(body["fp"]), str(body["text"]), kind=str(body.get("kind") or "word"),
                                      refs=body.get("refs") or [], ttl=ttl,
-                                     private_key=body.get("private_key"),
                                      signature=body.get("signature"),
                                      nonce=body.get("nonce"),
                                      created_at=body.get("created_at")))
@@ -926,7 +925,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import mesh
         return _ok(mesh.leave_on_door(str(body["fp"]), str(body["target"]), str(body["text"]),
                                       kind=str(body.get("kind") or "blessing"),
-                                      private_key=body.get("private_key"),
                                       signature=body.get("signature"),
                                       nonce=body.get("nonce"),
                                       created_at=body.get("created_at")))
@@ -1009,10 +1007,11 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not isinstance(seal_hashes, list):
             return _err(400, "seal_hashes (list) required")
         from .. import badges
-        # private_key (if passed) is in-memory only — used to attest, NEVER persisted or echoed back.
+        # Issues UNSIGNED — "the evidence, not the signature, is the badge". Bind your identity
+        # afterward by signing the returned content_hash locally and POSTing it to /attest.
         out = badges.issue_badge(seal_hashes, subject_id=body.get("subject_id"),
                                  title=str(body.get("title") or ""),
-                                 private_key=body.get("private_key"))
+                                 )
         telemetry.record("badge", surface=surface, op="issue", checks=int(out.get("checks", 0)))
         return _ok(out)
 
@@ -1036,8 +1035,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not isinstance(body, dict) or not str(body.get("key") or "").strip():
             return _err(400, "key required")
         from .. import badges
-        # private_key (if passed) is in-memory only — used to sign the bundle, NEVER persisted/echoed.
-        return _ok(badges.study_export(str(body["key"]), private_key=body.get("private_key")))
+        # Returns the bundle and its content_hash; sign that hash locally and POST /attest to bind
+        # your identity to it. No private key crosses the wire.
+        return _ok(badges.study_export(str(body["key"])))
 
     if method == "POST" and path == "/study/import":
         if not isinstance(body, dict):

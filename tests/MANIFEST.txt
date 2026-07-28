@@ -78,6 +78,7 @@ test_schema.py
 test_find.py
 test_floor.py
 test_keystones.py
+test_no_keys_on_the_wire.py
 test_nesting.py
 test_reference_cards.py
 test_science_cards.py
