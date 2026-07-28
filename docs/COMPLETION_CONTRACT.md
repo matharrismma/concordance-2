@@ -75,10 +75,14 @@ Discoveries outside scope → the drift ledger.
 
 1. Wire the covenant into the Way (confession → establish key → node identity). *(in flight)*
 2. Gate the state-changing MCP tools (badges/study_import/group_*) behind proof-of-possession + consent.
-   *(The MECHANISM is built and proven on the mesh message path — detached signatures: the caller
-   signs canonical bytes locally and sends only the signature, and `mesh_post` refuses a private key.
-   See `mesh.signable_message()` + `tests/test_mesh_signed_speech.py`. Remaining: apply that same
-   shape to badges/study_import/group_* and retire the `private_key` parameter — see the drift ledger.)*
+   *(**Proof-of-possession: DONE 2026-07-28.** Two mechanisms, both proven: detached signatures for
+   messages (`mesh.signable_message`, `signable_door_note`) and two-phase attestation for
+   server-built records (`attest.bear_witness` + `POST /attest`). No agent tool asks for or accepts a
+   private key (`ccce761`); no HTTP handler does either (`af52593`); the browser signs locally
+   (`4a86cf8`). Guards: `tests/test_mcp_no_private_keys.py`, `tests/test_no_keys_on_the_wire.py`,
+   `tests/test_mesh_signed_speech.py`, `tests/test_attest_witnesses.py`.
+   **Remaining for this item: CONSENT** — a human-authorized write path for agents (the agent covenant's
+   "request human authorization before writes"). Possession is proven; permission is not yet asked.)*
 3. One `capabilities-manifest.json`; all public counts derive from it.
 4. Import/community quarantine + a minimal moderation floor (report/block) before any public community.
 5. Result taxonomy on the surface: HOLDS / BROKEN_CLAIM / INCOMPLETE / OUT_OF_SCOPE / SYSTEM_ERROR.
@@ -122,15 +126,34 @@ Discoveries outside scope → the drift ledger.
   server holds only public keys and verifies signed challenges". Root cause: those flows built the
   signable body server-side (minting the nonce and timestamp *after* the request), so no client
   could have signed the stored bytes — handing over the key was the only way to get a signature.
-  **Fixed for the mesh message path** this round: `mesh.signable_message()` gives the caller the exact
-  canonical bytes, the caller signs locally and sends only the signature (`GET /mesh/signable` +
-  `signature`/`nonce`/`created_at` on `POST /mesh/post`), and the agent tool `mesh_post` **refuses a
-  private key outright**. The legacy `private_key` parameter is kept ONLY so the existing browser
-  client keeps working. **Still to do:** port the same detached-signature shape to `/mesh/tend`,
-  `/mesh/door`, badges-attest, study-export and group-contribute, then remove the `private_key`
-  parameter entirely and update `site/mesh.html` to sign in the browser (WebCrypto). Until that is
-  done, §5's identity line should be read as "the server never returns one, and the mesh message path
-  never needs one" — not as the full claim.
+  **RESOLVED 2026-07-28 — §5's identity line now reads true as written.** The fix, in the order it had
+  to happen:
+  1. `mesh.signable_message()` / `signable_door_note()` — the caller gets the exact canonical bytes,
+     signs locally, sends only the signature (`GET /mesh/signable`; `signature`/`nonce`/`created_at`
+     on `POST /mesh/post` and `/mesh/door`). Commits `fe40334`, `498ff6a`.
+  2. `src/concordance/attest.py` + `POST /attest` — the two-phase path for records whose hash the
+     server builds (badges, study bundles, contributions): act unsigned → sign the returned
+     `content_hash` locally → submit the attestation. Because attestations live beside the record
+     rather than inside it, MANY parties can bear witness to one record, so `established` flips at two
+     (Deut 19:15) instead of holding a single issuer signature. Commit `5c1feff`.
+  3. No agent tool asks for a key: the three schemas that ADVERTISED `private_key` no longer do, and
+     all refuse one — a schema is documentation an agent imitates. Commit `ccce761`.
+  4. `site/nh-keys.js` — the key is born in the browser and never leaves it. This also fixed a LIVE
+     BUG: `mesh.html` was calling `POST /identity/create` (which rightly 400s), so **human mesh
+     onboarding was broken**. Commit `4a86cf8`.
+  5. Only then: the `private_key` parameter removed from all five HTTP handlers (`af52593`). Order
+     mattered — removing it before step 4 would have broken real users to satisfy a checklist.
+
+  **The distinction kept deliberately:** `private_key` remains on the MODULE signatures, because on
+  your own box, with nothing travelling, handing the library your own key is legitimate. It is gone
+  only from the wire. Guarded by `tests/test_no_keys_on_the_wire.py`, which walks the HTTP layer by
+  AST and flags ANY request-sourced key-shaped read (so a sixth handler cannot add one quietly), and
+  which also asserts the local parameters still exist — if that assertion fails, the retirement went
+  too far.
+
+  **Corrected along the way:** an earlier draft of this entry listed `/mesh/tend` among the offenders.
+  It never took a key. The count was FIVE, not six. Verify with
+  `grep -n private_key src/concordance/web/api.py`.
 
 ---
 
