@@ -160,6 +160,57 @@ def test_the_endpoint_and_agent_tools_carry_the_same_rules():
                                                        "private_key": "AAAA"}).get("error", "")).lower()
 
 
+def test_the_receipt_page_shows_who_bore_witness_without_overclaiming():
+    """The attestation store existed but no reader of a receipt could see it — and /s/<hash> is
+    exactly where someone lands to CHECK a claim (it is what cite_url points at). A witness nobody
+    can see is not a witness.
+
+    The wording is load-bearing: ONE witness must read as a claim, TWO as beginning to be
+    established (Deut 19:15) — and the page must never tell the reader the matter is settled."""
+    attest, cas, identity, signing = _mods()
+    from concordance.web.api import render_seal_html
+    rec = {"overall": "PASS",
+           "verifier_results": [{"status": "CONFIRMED", "name": "arith", "detail": "2+2=4"}],
+           "gate_results": [{"gate": "floor", "status": "PASS"}]}
+    h = cas.store(rec)
+
+    _st, html = render_seal_html(h, rec)
+    assert "borne witness" not in html, "an empty witness section should not clutter the receipt"
+
+    A, B = identity.create_identity(), identity.create_identity()
+    attest.bear_witness(h, signing.sign_seal(h, A["private_key"]))
+    _st, html = render_seal_html(h, rec)
+    assert "borne witness" in html
+    assert "a claim, not yet established" in html, "one signature must not read as established"
+
+    attest.bear_witness(h, signing.sign_seal(h, B["private_key"]))
+    _st, html = render_seal_html(h, rec)
+    assert "begins to be established" in html and "Deuteronomy 19:15" in html
+    assert html.count("nh_") >= 2, "each witness's key should be identifiable"
+    # the only mention of "settled" is the refusal to claim it
+    assert "do not tell you the matter is settled" in html
+
+
+def test_a_tampered_attestation_is_shown_as_broken_on_the_receipt():
+    """Dropping it silently would leave the reader with a tidier page and less truth."""
+    import json
+    attest, cas, identity, signing = _mods()
+    from concordance.web.api import render_seal_html
+    rec = {"overall": "PASS", "verifier_results": [], "gate_results": []}
+    h = cas.store(rec)
+    A = identity.create_identity()
+    attest.bear_witness(h, signing.sign_seal(h, A["private_key"]))
+    p = Path(os.environ["CONCORDANCE_DATA_DIR"]) / "attestations" / h[:2] / f"{h}.jsonl"
+    e = json.loads(p.read_text(encoding="utf-8").strip())
+    e["sig"] = e["sig"][:-4] + "AAAA"
+    p.write_text(json.dumps(e) + "\n", encoding="utf-8")
+
+    _st, html = render_seal_html(h, rec)
+    assert "borne witness" in html, "a broken attestation must still be reported, not hidden"
+    assert "no longer verify" in html
+    assert ">✗<" in html
+
+
 if __name__ == "__main__":
     os.environ.setdefault("CONCORDANCE_DATA_DIR", tempfile.mkdtemp())
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]

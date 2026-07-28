@@ -110,6 +110,35 @@ def render_seal_html(content_hash: str, record: Optional[Dict[str, Any]]) -> Tup
                     f"<span class=t>{claim}</span><div class=trail>{_esc(v.get('detail', ''))}</div></div>")
     trail_html = "".join(rows) or "<p class=muted>(no verifier trail)</p>"
     gates = ", ".join(f"{_esc(g.get('gate'))}:{_esc(g.get('status'))}" for g in record.get("gate_results", []))
+
+    # WHO HAS BORNE WITNESS. The attestation store existed but no reader of a receipt could see it —
+    # and this page is precisely where someone lands to CHECK a claim (it is what cite_url points at).
+    # A witness nobody can see is not a witness. Each signature is re-verified as this renders; an
+    # entry that no longer checks is shown as broken rather than quietly dropped.
+    witness_html = ""
+    try:
+        from .. import attest as _attest
+        w = _attest.witnesses(content_hash)
+        n = int(w.get("witnesses") or 0)
+        bad = int(w.get("invalid") or 0)
+        if n or bad:
+            items = "".join(
+                f"<div class=result><span class=s>{'✓' if a.get('valid') else '✗'}</span> "
+                f"<span class=t>{_esc(a.get('fingerprint') or (a.get('pubkey') or '')[:16])}</span>"
+                f"<div class=trail>{_esc(a.get('detail') or '')}</div></div>"
+                for a in (w.get("attestations") or []))
+            established = ("<b>two or three witnesses</b> — this begins to be established "
+                           "(Deuteronomy 19:15)" if n >= 2 else
+                           "<b>one witness</b> — a claim, not yet established (Deuteronomy 19:15 "
+                           "asks two or three)")
+            warn = (f" <span class=muted>{bad} attestation(s) no longer verify.</span>" if bad else "")
+            witness_html = (f"<section><h2>Who has borne witness</h2>"
+                            f"<p class=lede>{established}.{warn} We count the witnesses and show "
+                            f"their keys; we do not tell you the matter is settled — weigh them "
+                            f"yourself. Every signature here was re-checked as this page rendered.</p>"
+                            f"{items}</section>")
+    except Exception:  # noqa: BLE001 — a receipt renders with or without an attestation store
+        witness_html = ""
     desc = (f"A re-checkable verification receipt — verdict {_esc(overall)}, sealed {short}. "
             f"Narrow Highway: every answer is a receipt, not 'trust me'.")
     html = (f"{head}<title>Receipt {short}… · {label} · Narrow Highway</title>"
@@ -124,6 +153,7 @@ def render_seal_html(content_hash: str, record: Optional[Dict[str, Any]]) -> Tup
             f"<p class=lede>A permanent, tamper-evident record of a verification. The content hash IS "
             f"the proof — re-fetch it and the bytes must match, or it is not this record.</p>"
             f"<section><h2>Worked trail</h2>{trail_html}</section>"
+            f"{witness_html}"
             f"<section class=card><div class=muted style=\"font-size:.8rem\">gates</div>"
             f"<div class=mono>{gates}</div><div class=muted style=\"font-size:.8rem;margin-top:.5rem\">"
             f"content hash (the seal)</div><div class=mono style=\"word-break:break-all\">{_esc(content_hash)}</div>"
