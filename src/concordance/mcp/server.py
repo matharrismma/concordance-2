@@ -262,6 +262,26 @@ def _witness_tools() -> List[dict]:
                          "the date of Revelation, etc.) carry both positions, never one verdict. Pass id "
                          "for one event; else lists every event grouped by era and period."),
          "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}}},
+        # Parity: every witness page a human can read is a tool an agent can call. These three
+        # had HTTP routes but no twin — an agent could not reach what a person could see.
+        {"name": "original_words",
+         "description": ("The original-language words behind a verse (Hebrew/Greek, with Strong's "
+                         "where known) — FOUND in the lexicon, never generated. Pass ref, e.g. "
+                         "'John 3:16'."),
+         "inputSchema": {"type": "object", "properties": {"ref": {"type": "string"}},
+                         "required": ["ref"]}},
+        {"name": "canon",
+         "description": ("The canon as concentric layers — the undisputed 66 that all major "
+                         "traditions share, plus the books held BEYOND it by particular traditions, "
+                         "each framed on its own layer and never merged. REPORTS who holds what "
+                         "with the history; does not judge which canon is correct. Pass book for one "
+                         "book's status; else the overview."),
+         "inputSchema": {"type": "object", "properties": {"book": {"type": "string"}}}},
+        {"name": "teachings",
+         "description": ("The teachings of Christ (Words in Red) — the frozen Greek anchor plus the "
+                         "history that ALIGNS to each teaching, gathered and attributed, never "
+                         "authored. Pass id for one teaching; else the queue."),
+         "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}}},
         {"name": "seeds",
          "description": ("Seeds of the Word (the Areopagus / logos spermatikos pass) — true fragments "
                          "mined from the nations, ATTRIBUTED, CONCORDANT/signpost NEVER HOLDS; each names "
@@ -480,6 +500,20 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
             rec = timeline.get(args["id"])
             return rec if rec is not None else {"error": "event not found"}
         return timeline.eras()
+    if name == "original_words" and config.witness_surfaced:
+        from ..verifiers import scripture as _scr  # lazy: witness-only
+        ref = str(args.get("ref") or "").strip()
+        return _scr.original_words(ref) if ref else {"error": "ref required"}
+    if name == "canon" and config.witness_surfaced:
+        from .. import canon as _canon  # lazy: witness-only
+        book = str(args.get("book") or "").strip()
+        return _canon.canon_status(book) if book else _canon.overview()
+    if name == "teachings" and config.witness_surfaced:
+        from .. import teachings as _teach  # lazy: witness-only
+        if args.get("id"):
+            rec = _teach.get(str(args["id"]))
+            return rec if rec is not None else {"error": "teaching not found"}
+        return _teach.queue()
     if name == "seeds" and config.witness_surfaced:
         from .. import seeds  # lazy: witness-only
         if args.get("id"):

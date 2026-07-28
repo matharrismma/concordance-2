@@ -95,7 +95,12 @@ A live remote MCP server (Streamable HTTP, JSON-RPC, no auth, no SDK):
 - ~37 tools: `verify` (verdict + trail + sealed receipt), `search`, `seal_fetch` (re-check any
   receipt by hash), `redact` (strip PII before it travels), cards/graph/grid/daily and more.
 - The witness surface `https://narrowhighway.org/mcp` adds Scripture tools: passage reading,
-  original-language word studies, cross-references, characters, prophecy signposts.
+  original-language word studies, cross-references, characters, prophecy signposts, the
+  `harmony` of the Gospels (one event, every gospel that witnesses it) and the `timeline`
+  (Old Testament, New Testament, and Church History — one spine from creation to today, with
+  genuinely disputed dates carrying BOTH scholarly positions, never one flattened verdict).
+- Every study surface a human reads as a page, an agent reads as a tool over the same data —
+  same substance, same gate, same refusals. Nothing is agent-only and nothing is human-only.
 - Sovereign option: `python -m concordance mcp` (stdio) — the same tools on your own box,
   offline. Source: https://github.com/matharrismma/concordance-2 (stdlib-first Python).
   Human setup guide: /connect.html. The correction record: /corrected.html.
