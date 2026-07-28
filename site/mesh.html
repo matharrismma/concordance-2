@@ -172,6 +172,7 @@
     </footer>
   </div>
 
+<script src="/nh-keys.js"></script>
 <script>
 const $ = s => document.querySelector(s);
 // the avatar levels up — appearance grows with the walk (estate.level 1..5); Psalm 92:12
@@ -201,8 +202,13 @@ $("#enter").onclick = async () => {
   $("#gateTip").textContent = "…";
   try{
     if(!me || !me.pub){
-      const idn = await api("/identity/create", {method:"POST", body:JSON.stringify({})});
-      me = {pub: idn.public_key, priv: idn.private_key, fp:"", callsign};
+      // Your key is BORN HERE, on your device, and never leaves it. (This page used to ask the
+      // server to mint one; the server rightly refuses — "identity keys are created on your
+      // device, never by the server" — which had left this gate broken. Now we do it properly.)
+      const born = await NHKeys.create();
+      if(!born){ $("#gateTip").textContent =
+        "this browser cannot create an Ed25519 key — try a current Firefox, Safari or Chrome"; return; }
+      me = {pub: born.public_key, priv: born.private_key, fp:"", callsign};
     }
     const r = await api("/mesh/node", {method:"POST", body:JSON.stringify({public_key: me.pub, callsign, type, confession})});
     if(r.gated){ $("#gateTip").innerHTML = "<b>The gate holds.</b> " + (r.message||""); return; }
@@ -263,7 +269,8 @@ $("#invite").onclick = async () => {
 $("#leave").onclick = async () => {
   const target = $("#doorTarget").value.trim(), text = $("#doorText").value.trim();
   if(!target || !text) return;
-  const r = await api("/mesh/door", {method:"POST", body:JSON.stringify({fp: me.fp, target, text, kind:"blessing"})});
+  const extra = await signedFields({text, kind:"blessing", target}) || {};
+  const r = await api("/mesh/door", {method:"POST", body:JSON.stringify(Object.assign({fp: me.fp, target, text, kind:"blessing"}, extra))});
   if(r.ok){ $("#doorOut").innerHTML = 'Left on '+esc(r.on_door_of||'their')+' door <span class="pill '+(r.signed?'ok':'')+'">'+(r.signed?'signed':'tamper-evident')+'</span>'; $("#doorText").value=""; }
   else { $("#doorOut").textContent = r.error || "could not leave it"; }
   if(r && r.crisis){ $("#doorOut").innerHTML += '<div class="crisis"><b>You are not alone.</b><br>'+r.crisis.help.map(h=>h.ref?'<a href="'+h.ref+'">'+esc(h.label)+'</a>':esc(h.label)).join("<br>")+'</div>'; }
@@ -294,10 +301,28 @@ $("#copyId").onclick = () => { navigator.clipboard && navigator.clipboard.writeT
 $("#refresh").onclick = () => { drawMap(); loadInbox(); };
 
 // ── Post to the fold ────────────────────────────────────────────────────────
+/* Sign what you send, here, with your own key — the key never goes to the server.
+   Ask for the canonical bytes, sign them locally, send only the signature. If this browser has no
+   Ed25519 we send unsigned rather than pretend: the message is still tamper-evident (its id is the
+   hash of its body), and the badge says "tamper-evident" instead of "signed". Honest either way. */
+async function signedFields(body){
+  try{
+    if(!me || !me.priv || !window.NHKeys || !NHKeys.available()) return null;
+    const q = new URLSearchParams({fp: me.fp, text: body.text, kind: body.kind || "word"});
+    if(body.ttl) q.set("ttl", String(body.ttl));
+    if(body.target) q.set("target", body.target);
+    const s = await api("/mesh/signable?" + q.toString());
+    if(!s || !s.ok || !s.canonical_b64u) return null;
+    const sig = await NHKeys.signB64uBytes(me.priv, s.canonical_b64u);
+    return sig ? {signature: sig, nonce: s.nonce, created_at: s.created_at} : null;
+  }catch(e){ return null; }
+}
+
 $("#send").onclick = async () => {
   const text = $("#post").value.trim(); if(!text) return;
   const kind = $("#kind").value, ttl = +$("#ttl").value;
-  const r = await api("/mesh/post", {method:"POST", body:JSON.stringify({fp: me.fp, text, kind, ttl})});
+  const extra = await signedFields({text, kind, ttl}) || {};
+  const r = await api("/mesh/post", {method:"POST", body:JSON.stringify(Object.assign({fp: me.fp, text, kind, ttl}, extra))});
   let html = "";
   if(r.ok){
     $("#post").value = "";
