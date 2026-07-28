@@ -827,7 +827,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         r = groups.contribute(str(body["id"]), member_id=str(body.get("subject_id") or ""),
                               handle=str(body.get("handle") or ""), text=str(body.get("text") or ""),
                               kind=str(body.get("kind") or "note"), topics=body.get("topics") or [],
-                              refs=body.get("refs") or [])
+                              refs=body.get("refs") or [],
+                              attestation=body.get("attestation"))
         return _ok(r) if r is not None else _err(404, "group not found")
 
     # The Fellowship Mesh — a network of believers who serve each other (offer / need / collaborate /

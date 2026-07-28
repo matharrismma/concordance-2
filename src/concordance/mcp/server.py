@@ -203,7 +203,10 @@ def _secular_tools() -> List[dict]:
          "inputSchema": {"type": "object", "properties": {
              "id": {"type": "string"}, "text": {"type": "string"}, "kind": {"type": "string"},
              "handle": {"type": "string"}, "subject_id": {"type": "string"},
-             "topics": {"type": "array"}, "refs": {"type": "array"}},
+             "topics": {"type": "array"}, "refs": {"type": "array"},
+             "attestation": {"type": "object", "description": ("optional: sign sha256(text) with "
+                 "your own key (signing.sign_seal) and pass it here — a handle alone is only a "
+                 "claim, a signature makes your authorship checkable. Never send a private key.")}},
              "required": ["id", "text"]}},
         # For an agent or a robot, the STRUCTURE is how it sees what this engine is: what it can
         # check, what it refuses, how big the keeping is — every number computed now, each carrying
@@ -692,7 +695,8 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         return groups.contribute(str(args.get("id") or ""), member_id=str(args.get("subject_id") or ""),
                                  handle=str(args.get("handle") or ""), text=str(args.get("text") or ""),
                                  kind=str(args.get("kind") or "note"), topics=args.get("topics") or [],
-                                 refs=args.get("refs") or []) or {"error": "group not found"}
+                                 refs=args.get("refs") or [],
+                                 attestation=args.get("attestation")) or {"error": "group not found"}
     if name == "resolve" and allow_witness:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.resolve_ref(args.get("ref", ""))

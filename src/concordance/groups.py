@@ -161,11 +161,33 @@ def join_group(gid: str, *, member_id: str = "", handle: str = "") -> Optional[D
     return get_group(gid)
 
 
+def text_hash(text: str) -> str:
+    """The hash a contributor signs to prove they wrote this text — sha256 of the stored text.
+
+    No round trip is needed: you already have the text, so you can compute this yourself and check
+    ours against it. Note the text is trimmed to the stored form first, so what you sign is exactly
+    what is kept.
+    """
+    return hashlib.sha256(str(text or "").strip()[:_MAX_TEXT].encode("utf-8")).hexdigest()
+
+
 def contribute(gid: str, *, member_id: str = "", handle: str = "", text: str = "",
                kind: str = "note", topics: Optional[List[str]] = None,
-               refs: Optional[List[str]] = None, private_key: Optional[str] = None) -> Optional[Dict[str, Any]]:
+               refs: Optional[List[str]] = None, private_key: Optional[str] = None,
+               attestation: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
     """Add a card (verse / note / question) to the group's shared study — attributed to the member's
-    handle, optionally SIGNED (binds their key to the text hash; still no PII). Conduit: verbatim."""
+    handle, optionally SIGNED (binds their key to the text hash; still no PII). Conduit: verbatim.
+
+    A handle on its own is a CLAIM: groups are pseudonymous and nothing stops anyone typing any
+    name. `signed` is what turns a claim into something checkable — so it is recorded honestly and
+    surfaces to readers, rather than letting a bare handle read as if it were established.
+
+    Two ways to sign, and neither needs a secret on the wire:
+      * `attestation` — sign `text_hash(text)` on YOUR machine (signing.sign_seal) and pass the
+        attestation. You can compute that hash yourself from the text; no round trip.
+      * `private_key` — LOCAL library use only, when you are running the engine on your own box.
+        The HTTP and MCP layers no longer accept one (see the drift ledger).
+    """
     text = str(text or "").strip()[:_MAX_TEXT]
     if not text:
         return {"ok": False, "error": "text required"}
@@ -174,10 +196,18 @@ def contribute(gid: str, *, member_id: str = "", handle: str = "", text: str = "
         return None
     handle = _clean_handle(handle)
     signed, att = False, None
-    if private_key:
+    th = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    if attestation:
+        # Detached: verified against the text we are about to store, so a signature cannot be
+        # harvested from one contribution and pasted onto another.
+        ok, _detail = signing.verify_seal(th, attestation)
+        if not ok:
+            return {"ok": False, "error": ("attestation does not verify over this text — sign "
+                                           "groups.text_hash(text) with your own key")}
+        att, signed = dict(attestation), True
+    elif private_key:
         try:
             if identity.signing_available():
-                th = hashlib.sha256(text.encode("utf-8")).hexdigest()
                 att = signing.sign_seal(th, private_key)
                 signed = True
         except Exception:  # noqa: BLE001 — signing is optional; a contribution never fails for it
