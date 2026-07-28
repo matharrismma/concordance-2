@@ -196,8 +196,57 @@ Discoveries outside scope → the drift ledger.
   reader can feel. The load-bearing half of §5.6 — the distinction a person actually relies on — is
   what was implemented.
 
-- **§5.3 passes as written, and the principle behind it has a large measured gap (found 2026-07-28).**
-  Recording both halves, because reporting only one would be a different kind of dishonesty.
+- **⚠ THE ENTRY BELOW WAS WRONG — corrected 2026-07-28, same night, before it was acted on.**
+  It reported "313,944 cards with no edge" and "1.15% connected". **The real number of unconnected
+  cards is 15.** Of 466,006 non-connection cards, **465,991 carry an inline `connections` array** —
+  460,707 `member_of` their shelf spine, plus 4,384 `cites`, 1,752 `proof_text`, 7,099 `same_section`,
+  234 `precedes`.
+
+  What I had actually measured was `graph.overview`'s `connected` count, and **the graph builder reads
+  only cards of `kind == "connection"` (17,182 of them); it never looks at the inline `connections`
+  field.** So "not rendered on the map" got reported as "unconnected in the keeping". Those are
+  different claims, and only the second one would have been alarming.
+
+  This is the SECOND time a ledger entry of mine overstated (the first: `/mesh/tend` in the
+  private-key entry above). A ledger that overstates is the drift it exists to catch. Both times the
+  cause was identical — **reporting a probe's output as if it were the thing the probe was named
+  after.** Before writing a number here, state what was literally counted.
+
+  **What survives as real findings:**
+  1. **A LEAK, not a backlog — and it was worse in production. RESOLVED 2026-07-28.** The 15 local
+     strays all came from ONE path: `find._mint_doc` (the tortoise, which fetches public-domain
+     sources when the corpus cannot answer) wrote a literal `"connections": []`. Every source it kept
+     was born an orphan, one more per fetch. **The live box had 41.** Fixed at the source: two spines
+     (`card_spine_practical`, `card_spine_sources`) defined **in code, not in a data file** — because
+     `data/web_cache.jsonl` is untracked, so a data-file spine would be absent on a fresh box and the
+     leak would return — written before the card that hangs off them. The `member_of` restates a fact
+     the card already carries (its shelf), so it cannot be a weak edge.
+     `tools/graft_orphans.py` backfilled from the live corpus. **Box: 41 → 4. Local: 15 → 0.**
+     Guarded by `tests/test_nothing_is_isolated.py`, which pins the MINT PATH end-to-end, not the
+     instances — reverting `find.py` to `"connections": []` fails it.
+
+     **The 4 that remain need Matt's decision, and the tool refused to guess.** Running it on the box
+     surfaced a third shelf that does not exist locally: `web`, holding four Wikipedia cards
+     (`Telephone`, `Sinking of the Titanic`, `Printing press`, `Food preservation`), created
+     2026-07-23, `verified: false`. **No code in `src/` on either side mints them any more** — they
+     are residue of a retired open-web fetch path, and Wikipedia is CC-BY-SA, not public domain,
+     which collides with the standing PD-only gate. So the options are to give `web` a spine that
+     states its real (unverified, non-PD) authority tier, or to remove the four. That is a doctrinal
+     call plus a data deletion, so it was left flagged rather than defaulted. The tool now grafts
+     what is certain, names what is not, and exits non-zero — holding 37 unambiguous cards hostage
+     to 4 unclear ones would have been its own kind of failure.
+  2. **The map under-reports the nesting**, by design but undocumented: `graph.overview` shows the
+     authored constellation (connection cards), not the `member_of` tree. Anyone reading that endpoint
+     to answer "is anything orphaned?" will get the wrong answer, as I did.
+  3. The **verse↔lemma relation is fully served** (`/word_study?strongs=` → occurrences;
+     `/original?ref=` → tagged words) with **370,833 verse↔lemma pairs resolving and ZERO
+     unresolved**, so minting those as connection cards would add nothing a reader cannot already get
+     while inflating the corpus 77% and burying the authored edges. **Deliberately not minted.**
+
+  *(Original entry retained below, struck, so the correction is auditable rather than tidied away.)*
+
+- **~~§5.3 passes as written, and the principle behind it has a large measured gap (found 2026-07-28).~~**
+  ~~Recording both halves, because reporting only one would be a different kind of dishonesty.~~
 
   **Passes as written:** `/floor` is reachable and carries 14 grafts; every structural spine hangs off
   it. The criterion says "every *spine* reachable from the Floor" and that is true.

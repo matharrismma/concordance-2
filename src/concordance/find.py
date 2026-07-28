@@ -206,6 +206,52 @@ def _store_path():
     return Path(base) / "web_cache.jsonl"
 
 
+FLOOR = "card_k_floor_of_discovery"
+
+# What the tortoise brings back must be NESTED like everything else. Every other card in the
+# keeping is `member_of` its shelf spine; these two shelves had no spine, so `_mint_doc` was
+# writing `"connections": []` and every card it kept was born an orphan — not a one-off backlog
+# but an ongoing leak, one more each time the tortoise ran. The spines are defined HERE, in code,
+# rather than in a data file, because web_cache.jsonl is data-only and untracked: on a fresh box
+# a data-file spine would simply be absent and the leak would return.
+_SPINES = {
+    "practical": ("card_spine_practical", "The practical library — knowledge that has been used",
+                  "Public-domain practical sources the tortoise went and found: how things are "
+                  "actually done, kept so they can be carried offline. Carry the torch of Foxfire.",
+                  ["practical", "foxfire", "public domain", "spine"]),
+    "sources": ("card_spine_sources", "The primary sources — go to the original",
+                "Public-domain primary sources the tortoise went and found, kept whole rather than "
+                "summarised. Go to the original, not to someone's account of it.",
+                ["source", "primary", "public domain", "spine"]),
+}
+
+
+def _spine_card(shelf: str) -> Optional[Dict[str, Any]]:
+    spec = _SPINES.get(shelf)
+    if not spec:
+        return None
+    cid, title, body, bands = spec
+    return {"id": cid, "kind": "reference", "title": title, "body": body,
+            "source": {"label": "The keeping — a spine of what the tortoise brought back",
+                       "url": "", "domain": "", "authority_tier": "reference"},
+            "shelf": "spine", "box": "spine", "bands": bands, "subject": title,
+            "connections": [{"to_card_id": FLOOR, "relationship": "part_of",
+                             "evidence": "a spine of the keeping, rooted in the Floor of Discovery"}],
+            "author": "engine", "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
+            "lifecycle_stage": "public", "volatility": "permanent", "surface": "secular",
+            "generated": False}
+
+
+def _member_of(shelf: str) -> list:
+    """The nesting for a card on this shelf — a FOUND relation ("this card is on this shelf"),
+    never an authored judgement, so it cannot be a weak edge."""
+    spec = _SPINES.get(shelf)
+    if not spec:
+        return []
+    return [{"to_card_id": spec[0], "relationship": "member_of",
+             "evidence": "a member of the " + shelf + " shelf in the keeping"}]
+
+
 def _mint_doc(query: str, doc: Dict[str, Any], practical: bool = True) -> Optional[Dict[str, Any]]:
     """Keep a tried-and-true public-domain practical source in the keeping — a higher tier than the
     open web (primary + PD), so the practical library grows and can be carried offline."""
@@ -228,7 +274,8 @@ def _mint_doc(query: str, doc: Dict[str, Any], practical: bool = True) -> Option
                 "bands": (["practical", "foxfire"] if practical else ["source", "primary"])
                 + ["public domain", doc.get("source", "").lower()]
                 + ([doc["year"]] if doc.get("year") else []) + sorted(_tokens(query))[:6],
-                "connections": [], "author": "archive", "created_at": time.time(),
+                "connections": _member_of("practical" if practical else "sources"),
+                "author": "archive", "created_at": time.time(),
                 "updated_at": time.time(), "visibility": "public", "lifecycle_stage": "public",
                 "volatility": "durable", "surface": "secular", "generated": False, "verified": False}
         p = _store_path()
@@ -241,6 +288,17 @@ def _mint_doc(query: str, doc: Dict[str, Any], practical: bool = True) -> Option
                         existing.add(json.loads(ln).get("id"))
                     except ValueError:
                         pass
+        # The spine must exist before the card that hangs off it, or the graft dangles.
+        spine = _spine_card(card["shelf"])
+        if spine and spine["id"] not in existing:
+            with open(p, "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(spine, ensure_ascii=False) + "\n")
+            existing.add(spine["id"])
+            try:
+                from . import corpus as _c
+                _c.add_to_default(spine)
+            except Exception:  # noqa: BLE001
+                pass
         if cid not in existing:
             with open(p, "a", encoding="utf-8") as fh:
                 fh.write(json.dumps(card, ensure_ascii=False) + "\n")
