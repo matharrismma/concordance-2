@@ -196,6 +196,41 @@ Discoveries outside scope → the drift ledger.
   reader can feel. The load-bearing half of §5.6 — the distinction a person actually relies on — is
   what was implemented.
 
+- **§5.3 passes as written, and the principle behind it has a large measured gap (found 2026-07-28).**
+  Recording both halves, because reporting only one would be a different kind of dishonesty.
+
+  **Passes as written:** `/floor` is reachable and carries 14 grafts; every structural spine hangs off
+  it. The criterion says "every *spine* reachable from the Floor" and that is true.
+
+  **The gap:** measured live at `b5b9794` via `GET /graph?scope=overview` —
+
+      total cards       466,393
+      connected cards     5,384   (1.15%)
+      shelves                90
+      shelves with ZERO connected cards: 78, holding 313,944 cards
+
+  Largest with nothing connected: `gutenberg` 77,700 · `geography` 69,135 · `taxonomy` 37,933 ·
+  `hebrew_ot` 23,213 · `lexicon` 19,570 · `medicine` 18,596 · `greek_nt` 7,927. Only twelve shelves
+  connect at all, and those are the authored ones (`codex`, `scripture`, `classics`, `patristics`,
+  `science`, `domains`).
+
+  This does not violate §5.3, but it does sit against the standing rule that *everything connects —
+  no orphans, never say "isolated"*. The sharpest instance: `hebrew_ot`, `greek_nt` and `lexicon`
+  (50,710 cards) carry no edges, while "original language FIRST" and "the lexicon is the plumb-line"
+  are core. Strong's numbers already bind lexicon entries to specific verses, so that graft is
+  available and cheap — the edges were simply never minted.
+
+  **Not chased in this round** (the round's scope was auditing §5 and fixing what it found). Named
+  here so the next round starts from a measurement rather than an impression. **Do not "fix" this by
+  minting weak edges** — [[fruit ranking]] and the 53-false-edge cleanup are the precedent: an edge
+  that does not carry a real relation is worse than an absent one, because it makes the map lie.
+
+  **Check the check, recorded:** three probe shapes were wrong before this measurement was trustworthy
+  — `/graph?scope=overview` returns `clusters`/`links`, not `nodes`/`edges` (a naive read reported
+  "0 orphans out of 0 nodes", which proves nothing); clusters are keyed by `shelf`, not `id`; and
+  `scope=shelf` takes different shelf names again. The first two readings would have been reported
+  confidently and been wrong.
+
 ---
 
 *Completion is reached when §5 all pass against one named commit. The implementing model does not
