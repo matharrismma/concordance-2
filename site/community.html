@@ -44,6 +44,10 @@
   .members{color:var(--goldsoft); font-size:.82rem; margin:.3rem 0 .8rem}
   .card{border-left:1px solid var(--line); padding:.35rem 0 .35rem .85rem; margin:.55rem 0}
   .card .by{color:var(--goldsoft); text-transform:uppercase; letter-spacing:.12em; font-size:.58rem}
+  .attn{display:inline-block; border:1px solid var(--line); border-radius:999px; padding:.02rem .42rem;
+    margin-left:.4rem; font-size:.54rem; letter-spacing:.06em; color:var(--dim); text-transform:uppercase}
+  .attn.ok{color:#8bbf8f; border-color:rgba(139,191,143,.42)}
+  .fp{margin-left:.34rem; font-size:.52rem; letter-spacing:.04em; color:var(--dim); opacity:.75; text-transform:none}
   .card .tx{white-space:pre-wrap}
   .card .sig{color:var(--pass); font-size:.62rem}
   .create{display:none; margin-top:1rem} .create.open{display:block}
@@ -153,8 +157,12 @@ async function openGroup(id){
 }
 function render(g){
   const panel=document.getElementById('panel');
-  const cards=(g.cards||[]).map(c=>'<div class="card"><div class="by">'+esc((c.source||'').replace(/^member:/,'')||'member')+
-    (c.source&&c.source.startsWith('member:')?'':'')+'</div><div class="tx">'+esc(c.text)+'</div></div>').join('') || '<p class="dim">No contributions yet — add the first.</p>';
+  // A handle alone is a CLAIM — groups are pseudonymous and anyone can type any name. Show whether
+  // the key behind the handle actually signed THIS text, so a claim never reads as a proof.
+  const cards=(g.cards||[]).map(c=>'<div class="card"><div class="by">'+esc(c.by||(c.source||'').replace(/^member:/,'')||'member')+
+    ' <span class="attn '+(c.signed?'ok':'')+'" title="'+esc(c.attribution||'')+'">'+(c.signed?'signed ✓':'claimed')+'</span>'+
+    (c.signed&&c.attested_by?'<span class="fp" title="the key that signed it">'+esc(String(c.attested_by).slice(0,14))+'</span>':'')+
+    '</div><div class="tx">'+esc(c.text)+'</div></div>').join('') || '<p class="dim">No contributions yet — add the first.</p>';
   const members=(g.members||[]).map(m=>esc(m.handle)+(m.role==='founder'?' ✦':'')).join(' · ');
   panel.innerHTML='<h2>'+esc(g.title)+'</h2>'+
     '<div class="dim" style="font-size:.85rem">'+esc(g.topic)+(g.description?(' — '+esc(g.description)):'')+'</div>'+

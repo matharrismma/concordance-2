@@ -130,6 +130,56 @@ def test_the_agent_tool_offers_attestation_and_never_a_private_key():
     assert _signed_flag(body) is True
 
 
+def test_a_reader_can_tell_a_proof_from_a_claim():
+    """The signature is worthless if it never reaches the reader. Before this, /group returned only
+    the handle — a signed contribution and one anybody could have typed looked identical, which is a
+    claim rendered as if established (the kernel's fifth part forbids exactly that)."""
+    groups, identity, signing, cfg, dispatch, gid = _setup()
+    me = identity.create_identity()
+    att = signing.sign_seal(groups.text_hash(TEXT), me["private_key"])
+    dispatch("POST", "/group/contribute", {},
+             {"id": gid, "text": TEXT, "handle": "Berean", "attestation": att}, cfg)
+    dispatch("POST", "/group/contribute", {},
+             {"id": gid, "text": "anyone could type this", "handle": "Anyone"}, cfg)
+
+    st, g = dispatch("GET", "/group", {"id": gid}, None, cfg)
+    assert st == 200
+    assert g["signed_count"] == 1 and g["card_count"] == 2
+    by = {c["by"]: c for c in g["cards"]}
+    assert by["Berean"]["signed"] is True
+    assert by["Berean"]["attested_by"], "the signing key should be identifiable"
+    assert "signed" in by["Berean"]["attribution"]
+    assert by["Anyone"]["signed"] is False
+    assert "claimed" in by["Anyone"]["attribution"] and by["Anyone"].get("attested_by") is None
+
+
+def test_the_signature_is_reverified_on_read_not_trusted_from_storage():
+    """A stored `signed: true` only records what happened at write time — and a file can be edited
+    afterwards. Tampering with the stored text must drop the card back to 'claimed'."""
+    import json
+    from concordance import stacks
+    groups, identity, signing, cfg, dispatch, gid = _setup()
+    me = identity.create_identity()
+    att = signing.sign_seal(groups.text_hash(TEXT), me["private_key"])
+    r = dispatch("POST", "/group/contribute", {},
+                 {"id": gid, "text": TEXT, "handle": "Berean", "attestation": att}, cfg)[1]
+    assert dispatch("GET", "/group", {"id": gid}, None, cfg)[1]["signed_count"] == 1
+
+    # Ask stacks where the card actually lives rather than guessing a root: CONCORDANCE_STACKS_DIR
+    # takes precedence over CONCORDANCE_DATA_DIR and an earlier test file may leave it set, so a
+    # walk of the "obvious" directory finds nothing in a full-suite run. (This test passed alone and
+    # failed in the suite for exactly that reason.)
+    f = stacks._card_path(r["card_id"])
+    assert f.exists(), f"card file not found at {f}"
+    o = json.loads(f.read_text(encoding="utf-8"))
+    o["text"] = "TAMPERED after signing"
+    f.write_text(json.dumps(o), encoding="utf-8")
+
+    g = dispatch("GET", "/group", {"id": gid}, None, cfg)[1]
+    assert g["signed_count"] == 0, "a tampered contribution still claimed to be signed"
+    assert all("claimed" in c["attribution"] for c in g["cards"])
+
+
 if __name__ == "__main__":
     os.environ.setdefault("CONCORDANCE_DATA_DIR", tempfile.mkdtemp())
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]

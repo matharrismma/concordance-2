@@ -96,8 +96,46 @@ def _public(g: Dict[str, Any], with_cards: bool = False) -> Dict[str, Any]:
     }
     if with_cards:
         st = stacks.get_stack(_STUDY_KIND, g["study_key"])
-        out["cards"] = st["cards"]
+        out["cards"] = [_with_attribution(c) for c in st["cards"]]
         out["card_count"] = st["count"]
+        out["signed_count"] = sum(1 for c in out["cards"] if c.get("signed"))
+    return out
+
+
+def _with_attribution(brief: Dict[str, Any]) -> Dict[str, Any]:
+    """Add the honest attribution state to a card brief: is this authorship PROVEN, or merely claimed?
+
+    Without this the reader sees only a handle, and a signed contribution looks exactly like one
+    anybody could have typed — a claim rendered as if it were established, which is precisely what
+    the kernel's fifth part forbids. `stacks._brief` drops `extra` (rightly — it is shared by other
+    surfaces), so the full card is read here rather than widening that shape for everyone.
+
+    The signature is RE-VERIFIED here, not trusted from storage: a stored `signed: true` is only a
+    record of what happened at write time, and a file can be edited afterwards.
+    """
+    out = dict(brief)
+    cid = brief.get("id")
+    full = (stacks.get_card(cid) or {}) if cid else {}
+    # stacks.put_card FLATTENS `extra` onto the card, so these sit at the top level; the nested
+    # lookup is kept as a fallback in case that shape ever changes back.
+    ex = full if full.get("attestation") or full.get("by") else (full.get("extra") or {})
+    att = ex.get("attestation") or {}
+    signed = False
+    if att:
+        try:
+            signed, _detail = signing.verify_seal(
+                hashlib.sha256(str(full.get("text") or "").encode("utf-8")).hexdigest(), att)
+        except Exception:  # noqa: BLE001 — an unreadable attestation is simply not proof
+            signed = False
+    out["signed"] = bool(signed)
+    out["by"] = ex.get("by") or str(brief.get("source") or "").replace("member:", "") or "member"
+    if signed and att.get("pubkey"):
+        try:
+            out["attested_by"] = identity.fingerprint(att["pubkey"])
+        except Exception:  # noqa: BLE001
+            out["attested_by"] = None
+    out["attribution"] = ("signed — this handle's key signed this exact text" if signed
+                          else "claimed — a pseudonymous handle, not proven")
     return out
 
 
