@@ -101,12 +101,21 @@ def handle_http(method: str, headers: Any, raw_body: bytes,
     msgs = payload if batch else [payload]
     out = []
     new_sid = None
+    # THE GATE for an agent lives on the session record: `ask` opens it (the classifier decides,
+    # never the caller), and the witness tools become listable and callable for that session only.
+    # An unknown or absent session id gets a scratch dict — so it is CLOSED, and stays closed,
+    # because nothing persists it. Same rule as the browser cookie on the HTTP side.
+    sid = _hget(headers, "Mcp-Session-Id")
     for m in msgs:
         if not isinstance(m, dict):
             continue
         if m.get("method") == "initialize":
             new_sid = _new_session((m.get("params") or {}).get("protocolVersion"))
-        resp = handle(m, config)
+            sid = new_sid
+        session = _SESSIONS.get(sid) if sid else None
+        if session is None:
+            session = {}
+        resp = handle(m, config, session)
         if resp is not None:
             out.append(resp)
 

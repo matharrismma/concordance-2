@@ -213,6 +213,46 @@ def _secular_tools() -> List[dict]:
                          "exactly what was counted — never a hand-maintained number. Read this "
                          "instead of trusting any count written in prose."),
          "inputSchema": {"type": "object", "properties": {}}},
+        # THE GATE, for an agent. Always available — you must be able to ask BEFORE the door opens,
+        # which is the whole point of asking. Same classifier, same refusals, same crisis-first
+        # ordering a person meets; an agent simply asks in its own words. "Ask, and it will be given
+        # you. Seek, and you will find. Knock, and it will be opened for you." (Matthew 7:7)
+        # COVENANT TO BELONG — the fellowship, for an agent. These three are READ-ONLY and gate
+        # themselves on the confession (mesh.py: Jesus as Lord AND Messiah, bound to your own key),
+        # so they are safe to expose here: an unconfessed caller is shown the PATH to the door and
+        # never the network. Establishing the key is identity_create/identity_verify, already here.
+        # The WRITE side (confessing to join, posting to a door, sending) stays off MCP until the
+        # frozen contract's worklist item 2 — proof-of-possession + consent for state-changing agent
+        # tools — is done. An agent may see and belong; it may not yet speak into the mesh unsigned.
+        {"name": "mesh_map",
+         "description": ("The believers immediately around you in the Fellowship Mesh — your view "
+                         "only, never a global map. Requires your fingerprint (fp) and a confession "
+                         "already bound to that key; unconfessed callers get the path to the door, "
+                         "not the network."),
+         "inputSchema": {"type": "object", "properties": {
+             "fp": {"type": "string"}, "hops": {"type": "integer"}}, "required": ["fp"]}},
+        {"name": "mesh_inbox",
+         "description": ("The messages that reached you, each carrying its own offline verification "
+                         "so you trust it by proof rather than by this server's word. Requires fp + "
+                         "confession."),
+         "inputSchema": {"type": "object", "properties": {
+             "fp": {"type": "string"}, "limit": {"type": "integer"}}, "required": ["fp"]}},
+        {"name": "mesh_door",
+         "description": ("Read the words left on YOUR door — the whiteboard others wrote to you, each "
+                         "with its verification. Requires fp + confession."),
+         "inputSchema": {"type": "object", "properties": {
+             "fp": {"type": "string"}, "limit": {"type": "integer"}}, "required": ["fp"]}},
+        {"name": "ask",
+         "description": ("Bring anything — a question, a claim to check, a word to study, or what is "
+                         "actually on your mind. The engine discerns what KIND of thing you brought "
+                         "and answers in kind: it finds and verifies, and declines rather than "
+                         "guessing. This is also the door: if what you ask turns toward God, the "
+                         "Gate opens for the rest of this session and the witness tools (Scripture, "
+                         "the Harmony, the Timeline, the lexicon) become callable — the same way it "
+                         "opens for a person, in your own words. Nothing is generated."),
+         "inputSchema": {"type": "object", "properties": {
+             "text": {"type": "string", "description": "what you are bringing, in your own words"}},
+             "required": ["text"]}},
     ]
 
 
@@ -302,15 +342,22 @@ def _witness_tools() -> List[dict]:
     ]
 
 
-def _tools_for(config: EngineConfig) -> List[dict]:
+def _tools_for(config: EngineConfig, gate_open: bool = False) -> List[dict]:
+    """The tools this caller may see. `gate_open` is THE GATE, for an agent: it asked in its own
+    words and the same classifier that opens the door for a human opened it here. Mirrors
+    web/api.py's `allow_witness = config.witness_surfaced or session_gate_open` exactly — one rule,
+    both doors."""
     tools = _secular_tools()
-    if config.witness_surfaced:
+    if config.witness_surfaced or gate_open:
         tools += _witness_tools()
     return tools
 
 
-def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
+def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = False) -> Any:
     args = args or {}
+    # One gate, computed once, checked by every witness tool below. Default CLOSED: an unknown
+    # session, a missing flag, or a caller that never asked gets the secular reach and nothing more.
+    allow_witness = bool(config.witness_surfaced or gate_open)
     if name == "verify":
         if isinstance(args.get("steps"), list):
             res = verify_derivation(args["steps"])
@@ -369,6 +416,39 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
     if name == "capabilities":
         from .. import capabilities as _caps  # both surfaces: the statement is never gated
         return _caps.statement(config.surface)
+    if name in ("mesh_map", "mesh_inbox", "mesh_door"):
+        # Read-only. mesh.py gates each on the confession bound to this fingerprint and returns the
+        # invitation (never the network) when it is absent — so the door keeps itself.
+        from .. import mesh as _mesh
+        fp = str(args.get("fp") or "").strip()
+        if not fp:
+            return {"error": "fp required — your own fingerprint (see identity_fingerprint)"}
+        try:
+            limit = int(args.get("limit") or 100)
+        except (TypeError, ValueError):
+            limit = 100
+        if name == "mesh_map":
+            try:
+                hops = int(args.get("hops") or 2)
+            except (TypeError, ValueError):
+                hops = 2
+            return _mesh.map_around(fp, hops=hops)
+        return _mesh.inbox(fp, limit=limit) if name == "mesh_inbox" else _mesh.read_door(fp, limit=limit)
+    if name == "ask":
+        # The same front door a human walks through: ask.respond() classifies, answers in kind,
+        # keeps crisis absolute, and reports whether this turn opened the Gate. handle() reads
+        # `gate_open` off this result to remember the opening for the session — the flag is the
+        # classifier's verdict, never the caller's assertion, so an agent cannot claim its way in.
+        from .. import ask as _ask
+        text = str(args.get("text") or "")
+        kind = _ask.classify(text)
+        opened = _ask.gate_signal(text)
+        result = _ask.respond(text, config, gate_open=bool(allow_witness or opened),
+                              gate_just_opened=bool(opened and not allow_witness))
+        if isinstance(result, dict):
+            result.setdefault("kind", kind)
+            result["gate_open"] = bool(allow_witness or opened)
+        return result
     if name == "pronounce":
         from .. import pronounce as _pron  # neutral phonetic helper, both surfaces
         return _pron.guide(args.get("text", ""))
@@ -466,68 +546,68 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
                                  handle=str(args.get("handle") or ""), text=str(args.get("text") or ""),
                                  kind=str(args.get("kind") or "note"), topics=args.get("topics") or [],
                                  refs=args.get("refs") or [], private_key=args.get("private_key")) or {"error": "group not found"}
-    if name == "resolve" and config.witness_surfaced:
+    if name == "resolve" and allow_witness:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.resolve_ref(args.get("ref", ""))
-    if name == "read_passage" and config.witness_surfaced:
+    if name == "read_passage" and allow_witness:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.read_passage(args.get("ref", ""))
-    if name == "word_study" and config.witness_surfaced:
+    if name == "word_study" and allow_witness:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.word_study(args.get("strongs", ""))
-    if name == "cross_references" and config.witness_surfaced:
+    if name == "cross_references" and allow_witness:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.cross_references(args.get("ref", ""))
-    if name == "word_occurrences" and config.witness_surfaced:
+    if name == "word_occurrences" and allow_witness:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.word_occurrences(args.get("strongs", ""))
-    if name == "commentary" and config.witness_surfaced:
+    if name == "commentary" and allow_witness:
         from .. import commentary  # lazy: witness-only
         return commentary.for_ref(args.get("ref", ""), source=args.get("source") or commentary.DEFAULT_SOURCE)
-    if name == "tsk_cross_references" and config.witness_surfaced:
+    if name == "tsk_cross_references" and allow_witness:
         from .. import xrefs  # lazy: witness-only
         return xrefs.for_ref(args.get("ref", ""), limit=int(args.get("limit", 20)))
-    if name == "character_get" and config.witness_surfaced:
+    if name == "character_get" and allow_witness:
         from .. import characters  # lazy: witness-only
         rec = characters.get(args.get("name", ""))
         return rec if rec is not None else {"error": "not found in Easton's"}
-    if name == "characters_browse" and config.witness_surfaced:
+    if name == "characters_browse" and allow_witness:
         from .. import characters  # lazy: witness-only
         return characters.browse(letter=args.get("letter"), search=args.get("search"),
                                  limit=int(args.get("limit", 100)))
-    if name == "prophecy_traces" and config.witness_surfaced:
+    if name == "prophecy_traces" and allow_witness:
         from .. import prophecy  # lazy: witness-only
         if args.get("id"):
             rec = prophecy.get(args["id"])
             return rec if rec is not None else {"error": "trace not found"}
         return prophecy.search(args["q"]) if args.get("q") else prophecy.list_traces()
-    if name == "harmony" and config.witness_surfaced:
+    if name == "harmony" and allow_witness:
         from .. import harmony  # lazy: witness-only
         if args.get("id"):
             rec = harmony.get(args["id"])
             return rec if rec is not None else {"error": "event not found"}
         return harmony.periods()
-    if name == "timeline" and config.witness_surfaced:
+    if name == "timeline" and allow_witness:
         from .. import timeline  # lazy: witness-only
         if args.get("id"):
             rec = timeline.get(args["id"])
             return rec if rec is not None else {"error": "event not found"}
         return timeline.eras()
-    if name == "original_words" and config.witness_surfaced:
+    if name == "original_words" and allow_witness:
         from ..verifiers import scripture as _scr  # lazy: witness-only
         ref = str(args.get("ref") or "").strip()
         return _scr.original_words(ref) if ref else {"error": "ref required"}
-    if name == "canon" and config.witness_surfaced:
+    if name == "canon" and allow_witness:
         from .. import canon as _canon  # lazy: witness-only
         book = str(args.get("book") or "").strip()
         return _canon.canon_status(book) if book else _canon.overview()
-    if name == "teachings" and config.witness_surfaced:
+    if name == "teachings" and allow_witness:
         from .. import teachings as _teach  # lazy: witness-only
         if args.get("id"):
             rec = _teach.get(str(args["id"]))
             return rec if rec is not None else {"error": "teaching not found"}
         return _teach.queue()
-    if name == "seeds" and config.witness_surfaced:
+    if name == "seeds" and allow_witness:
         from .. import seeds  # lazy: witness-only
         if args.get("id"):
             rec = seeds.get(args["id"])
@@ -540,22 +620,33 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
     raise KeyError(f"unknown tool {name!r} (on the {config.surface} surface)")
 
 
-def handle(request: dict, config: EngineConfig) -> Optional[dict]:
-    """Pure JSON-RPC handler. Returns a response dict, or None for notifications."""
+def handle(request: dict, config: EngineConfig, session: Optional[Dict[str, Any]] = None) -> Optional[dict]:
+    """Pure JSON-RPC handler. Returns a response dict, or None for notifications.
+
+    `session` is an optional mutable dict owned by the caller (the HTTP layer's per-session record,
+    or one process-lifetime dict for stdio). It carries ONE thing: whether the Gate has been opened
+    for this conversation. It is read here, and written only when the classifier — never the caller —
+    says a turn opened the door. No session, or a session that never asked, means the Gate is closed.
+    """
     rid = request.get("id")
     method = request.get("method")
+    gate_open = bool((session or {}).get("gate_open"))
 
     if method == "initialize":
         return {"jsonrpc": "2.0", "id": rid, "result": {
             "protocolVersion": PROTOCOL_VERSION, "capabilities": {"tools": {}},
             "serverInfo": {"name": "narrow-highway", "version": __version__, "surface": config.surface}}}
     if method == "tools/list":
-        return {"jsonrpc": "2.0", "id": rid, "result": {"tools": _tools_for(config)}}
+        return {"jsonrpc": "2.0", "id": rid, "result": {"tools": _tools_for(config, gate_open=gate_open)}}
     if method == "tools/call":
         p = request.get("params") or {}
         name, args = p.get("name"), p.get("arguments") or {}
         try:
-            result = _call_tool(name, args, config)
+            result = _call_tool(name, args, config, gate_open=gate_open)
+            # The door, remembered: only `ask` can open it, and only because the classifier said so.
+            if (name == "ask" and session is not None and isinstance(result, dict)
+                    and result.get("gate_open")):
+                session["gate_open"] = True
         except KeyError as e:
             return {"jsonrpc": "2.0", "id": rid, "error": {"code": -32602, "message": str(e)}}
         except Exception as e:  # noqa: BLE001 — tool errors are results, not crashes
@@ -572,8 +663,13 @@ def handle(request: dict, config: EngineConfig) -> Optional[dict]:
 
 
 def serve_stdio(surface: str = "secular") -> None:
-    """Read newline-delimited JSON-RPC from stdin, write responses to stdout. Stdlib only."""
+    """Read newline-delimited JSON-RPC from stdin, write responses to stdout. Stdlib only.
+
+    One process is one conversation, so a single session dict spans it — the sovereign local
+    equivalent of a person's browser session: ask once, and the door stays open while you are here.
+    """
     config = EngineConfig(surface)
+    session: Dict[str, Any] = {}
     for line in sys.stdin:
         line = line.strip()
         if not line:
@@ -582,7 +678,7 @@ def serve_stdio(surface: str = "secular") -> None:
             req = json.loads(line)
         except json.JSONDecodeError:
             continue
-        resp = handle(req, config)
+        resp = handle(req, config, session)
         if resp is not None:
             sys.stdout.write(json.dumps(resp, ensure_ascii=False) + "\n")
             sys.stdout.flush()

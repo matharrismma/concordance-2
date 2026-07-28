@@ -55,6 +55,7 @@ test_keep.py
 test_ledger.py
 test_library.py
 test_mcp.py
+test_mcp_gate.py
 test_mcp_http.py
 test_mention_web.py
 test_pins.py
