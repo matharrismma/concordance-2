@@ -1499,6 +1499,20 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         rec = _arch.get((query.get("id") or "").strip())
         return _ok(rec) if rec is not None else _err(404, "microposition not found")
 
+    if method == "POST" and path == "/attest":
+        # Phase 2 of binding an identity to a record: you signed its content_hash on your own
+        # machine; we verify and record the witness. No private key is accepted here or anywhere.
+        if not isinstance(body, dict) or not str(body.get("content_hash") or "").strip():
+            return _err(400, "content_hash and attestation required")
+        from .. import attest as _attest
+        return _ok(_attest.bear_witness(str(body["content_hash"]), body.get("attestation") or {}))
+    if method == "GET" and path == "/attest":
+        from .. import attest as _attest
+        h = (query.get("hash") or query.get("content_hash") or "").strip()
+        if not h:
+            return _err(400, "hash required")
+        return _ok(_attest.witnesses(h))
+
     if method == "GET" and path == "/capabilities":
         # The live capability statement — every public number computed now, with its definition
         # attached. UNGATED on both surfaces by design: what this engine can and cannot do is not
@@ -1657,6 +1671,7 @@ ROUTES = [
     {"path": "/timeline", "methods": ("GET",), "api": True},
     {"path": "/capabilities", "methods": ("GET",), "api": True},
     {"path": "/mesh/signable", "methods": ("GET",), "api": True},
+    {"path": "/attest", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/seeds", "methods": ("GET",), "api": True},
     {"path": "/almanac", "methods": ("GET",), "api": True},
     {"path": "/apothecary", "methods": ("GET",), "api": True},

@@ -5,6 +5,7 @@ test_api.py
 test_apothecary.py
 test_ask.py
 test_attestation.py
+test_attest_witnesses.py
 test_audit.py
 test_badges.py
 test_benchmark.py

@@ -208,6 +208,23 @@ def _secular_tools() -> List[dict]:
         # For an agent or a robot, the STRUCTURE is how it sees what this engine is: what it can
         # check, what it refuses, how big the keeping is — every number computed now, each carrying
         # the definition of what was counted so none can be misread. Ungated on both surfaces.
+        {"name": "attest_record",
+         "description": ("Bind your identity to a record you already hold — phase 2 of the sovereign "
+                         "flow. Do the thing unsigned (badges_issue, study_export, group_contribute), "
+                         "take the returned content_hash, sign THAT hash with your own key on your own "
+                         "machine, and submit only the attestation {alg, over, content_hash, pubkey, "
+                         "sig}. Never send a private key. Several parties may attest to one record: "
+                         "one signature is a claim, two or three witnesses begin to establish a "
+                         "matter (Deuteronomy 19:15)."),
+         "inputSchema": {"type": "object", "properties": {
+             "content_hash": {"type": "string"},
+             "attestation": {"type": "object", "description": "the dict from signing.sign_seal, built locally"}},
+             "required": ["content_hash", "attestation"]}},
+        {"name": "witnesses",
+         "description": ("Who has borne witness to a record, each signature re-verified as it is read "
+                         "(storage is never trusted). Reports invalid entries rather than hiding them."),
+         "inputSchema": {"type": "object", "properties": {"content_hash": {"type": "string"}},
+                         "required": ["content_hash"]}},
         {"name": "capabilities",
          "description": ("The live capability statement: what this engine can verify, what tools and "
                          "endpoints exist, how large the keeping is, and where its boundaries are. "
@@ -472,6 +489,15 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         return corpus.locate(args.get("q", ""))
     if name == "library_health":
         return corpus.health()
+    if name == "attest_record":
+        from .. import attest as _attest
+        if args.get("private_key"):
+            return _no_private_key("attest_record")
+        return _attest.bear_witness(str(args.get("content_hash") or ""),
+                                    args.get("attestation") or {})
+    if name == "witnesses":
+        from .. import attest as _attest
+        return _attest.witnesses(str(args.get("content_hash") or ""))
     if name == "capabilities":
         from .. import capabilities as _caps  # both surfaces: the statement is never gated
         return _caps.statement(config.surface)

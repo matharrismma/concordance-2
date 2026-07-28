@@ -47,6 +47,7 @@ GOLDEN_API_GET = {
     "/timeline",  # deliberate addition (OT/NT/Church History — one spine, creation to today)
     "/capabilities",  # deliberate addition (the live capability statement — restored from 1.0)
     "/mesh/signable",  # deliberate addition (the bytes to sign, so a key never crosses the wire)
+    "/attest",  # deliberate addition (bear witness to a record you hold; GET lists the witnesses)
 }
 GOLDEN_RATELIMITED = {
     "/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose", "/pins", "/pins/done",
@@ -59,6 +60,7 @@ GOLDEN_RATELIMITED = {
     "/push/subscribe", "/push/unsubscribe",
     "/audit",   # deliberate addition (the Auditor) — goldens update ONLY with a new route
     "/chess",   # deliberate addition (the chess verifier) — game theory, applied and sealable
+    "/attest",  # deliberate addition — a write, so rate-limited like every other write
 }
 
 
