@@ -1469,6 +1469,13 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         rec = _arch.get((query.get("id") or "").strip())
         return _ok(rec) if rec is not None else _err(404, "microposition not found")
 
+    if method == "GET" and path == "/capabilities":
+        # The live capability statement — every public number computed now, with its definition
+        # attached. UNGATED on both surfaces by design: what this engine can and cannot do is not
+        # witness content, and a reader who cannot check our claims cannot trust them.
+        from .. import capabilities as _caps
+        return _ok(_caps.statement(surface))
+
     if method == "GET" and path == "/harmony":
         # Harmony of the Gospels — one event, every gospel that witnesses it, side by side.
         # Witness content: the same gate as /teachings, /prophecy, /commentary.
@@ -1618,6 +1625,7 @@ ROUTES = [
     {"path": "/prophecy", "methods": ("GET",), "api": True},
     {"path": "/harmony", "methods": ("GET",), "api": True},
     {"path": "/timeline", "methods": ("GET",), "api": True},
+    {"path": "/capabilities", "methods": ("GET",), "api": True},
     {"path": "/seeds", "methods": ("GET",), "api": True},
     {"path": "/almanac", "methods": ("GET",), "api": True},
     {"path": "/apothecary", "methods": ("GET",), "api": True},

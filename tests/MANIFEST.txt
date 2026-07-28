@@ -12,6 +12,7 @@ test_bible.py
 test_binding.py
 test_bookofdays.py
 test_branch.py
+test_capabilities.py
 test_canon_original.py
 test_canonical.py
 test_cas.py

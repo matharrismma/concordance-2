@@ -38,6 +38,10 @@ The engine extracts every unambiguously checkable claim from plain text, verifie
 returns ONE sealed report (per-claim quote + verdict + worked trail + re-checkable seal). The
 fastest path from "I have a sentence" to "I have a receipt." Graduate to `POST /verify` when you
 can shape a structured claim.
+- `GET /capabilities` — **the authoritative count of everything here, computed live.** Every number
+  carries a `means` line defining exactly what was counted (module vs. router alias vs. file), so a
+  count can neither go stale nor be misread. Read this rather than trusting any number written in
+  prose — including the round numbers below.
 - `POST /verify` — verify a claim across **~60 domains**, not just math.
   MATH form: `{"mode":"equality|inequality|derivative|integral|limit|solve","params":{...}}`.
   DOMAIN form: `{"steps":[{"id":"a","domain":"physics","spec":{"PHYS_VERIFY":{"mass_kg":10.0,

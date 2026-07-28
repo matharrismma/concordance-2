@@ -203,6 +203,16 @@ def _secular_tools() -> List[dict]:
              "handle": {"type": "string"}, "subject_id": {"type": "string"},
              "topics": {"type": "array"}, "refs": {"type": "array"}, "private_key": {"type": "string"}},
              "required": ["id", "text"]}},
+        # For an agent or a robot, the STRUCTURE is how it sees what this engine is: what it can
+        # check, what it refuses, how big the keeping is — every number computed now, each carrying
+        # the definition of what was counted so none can be misread. Ungated on both surfaces.
+        {"name": "capabilities",
+         "description": ("The live capability statement: what this engine can verify, what tools and "
+                         "endpoints exist, how large the keeping is, and where its boundaries are. "
+                         "Every count is computed at call time and carries a 'means' line defining "
+                         "exactly what was counted — never a hand-maintained number. Read this "
+                         "instead of trusting any count written in prose."),
+         "inputSchema": {"type": "object", "properties": {}}},
     ]
 
 
@@ -356,6 +366,9 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
         return corpus.locate(args.get("q", ""))
     if name == "library_health":
         return corpus.health()
+    if name == "capabilities":
+        from .. import capabilities as _caps  # both surfaces: the statement is never gated
+        return _caps.statement(config.surface)
     if name == "pronounce":
         from .. import pronounce as _pron  # neutral phonetic helper, both surfaces
         return _pron.guide(args.get("text", ""))

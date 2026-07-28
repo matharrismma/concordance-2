@@ -45,6 +45,7 @@ GOLDEN_API_GET = {
     "/path",   # deliberate addition (wayfinding — the floorplan of the keeping)
     "/harmony",   # deliberate addition (Harmony of the Gospels — every gospel witness, side by side)
     "/timeline",  # deliberate addition (OT/NT/Church History — one spine, creation to today)
+    "/capabilities",  # deliberate addition (the live capability statement — restored from 1.0)
 }
 GOLDEN_RATELIMITED = {
     "/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose", "/pins", "/pins/done",
