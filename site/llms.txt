@@ -96,8 +96,10 @@ A live remote MCP server (Streamable HTTP, JSON-RPC, no auth, no SDK):
 
 - Claude (claude.ai / desktop): Settings → Connectors → Add custom connector → paste the URL.
 - Claude Code: `claude mcp add --transport http narrow-highway https://narrowhighway.com/mcp`
-- ~37 tools: `verify` (verdict + trail + sealed receipt), `search`, `seal_fetch` (re-check any
-  receipt by hash), `redact` (strip PII before it travels), cards/graph/grid/daily and more.
+- Tools include `verify` (verdict + trail + sealed receipt), `search`, `seal_fetch` (re-check any
+  receipt by hash), `redact` (strip PII before it travels), `capabilities` (the live statement),
+  cards/graph/grid/daily and more. For the exact count on each surface, call `capabilities` or
+  `GET /capabilities` — a number written here would drift the moment a tool is added.
 - The witness surface `https://narrowhighway.org/mcp` adds Scripture tools: passage reading,
   original-language word studies, cross-references, characters, prophecy signposts, the
   `harmony` of the Gospels (one event, every gospel that witnesses it) and the `timeline`
