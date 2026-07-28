@@ -11,13 +11,15 @@ public endpoint on services already holding ~2.8 GB RSS, so paying that on a req
 memoized — is the wrong trade. The gate can afford twelve seconds; a reader cannot.
 
 The state it pins, honestly:
-  * `isolated` (carries NO relation at all) must be **0**. Strict, and currently true.
-  * `unreachable from the Floor` is **not** zero — 552 cards sit in closed ISLANDS: codex notes and
-    Boethius sections bound to one another by `same_section` with no edge out to anything rooted.
-    None of their edges dangle; the clusters are simply unrooted. Grafting e.g. the codex note
-    "Revelation 5" to its scripture card is a real relation, but CHOOSING that match is authoring,
-    not finding — so this ratchets the number instead of pretending it is solved. If it drops, lower
-    the constant. If it rises, something new was stranded and that is a regression.
+  * `isolated` (carries NO relation at all) must be **0**. Strict, and true.
+  * `unreachable from the Floor` must also be **0** — RESOLVED 2026-07-28. The 552 island cards
+    (codex notes and Boethius sections bound by `same_section`, on 1.0-era shelves minted before the
+    spine convention) were rooted by Matt's decision with SHELF SPINES — the found relation, same
+    rule as the tortoise fix: "this card is on this shelf" is a fact the card already carries.
+    `tools/graft_shelf_spines.py` minted nine spines rooted in the Floor, redirected dictionary's
+    and chemistry's bare cards to their siblings' established parents, and grafted 5,187 cards.
+    The per-card scripture matching (codex "Revelation 5" -> that scripture card) remains NOT done —
+    choosing the match is authoring, and rooting did not require it.
 
 Runnable with pytest OR directly.
 """
@@ -32,8 +34,9 @@ sys.path.insert(0, str(ROOT / "src"))
 
 FLOOR = "card_k_floor_of_discovery"
 
-# Measured 2026-07-28 against the local corpus. A RATCHET, not a target: never let it grow.
-KNOWN_ISLAND_CARDS = 552
+# Was 552 (measured 2026-07-28); lowered to 0 the same day after the shelf-spine graft. A RATCHET:
+# any rise means something new was stranded, and the fix is the minting path, not this constant.
+KNOWN_ISLAND_CARDS = 0
 
 
 def _walk():

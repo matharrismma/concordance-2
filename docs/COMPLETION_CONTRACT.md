@@ -252,6 +252,36 @@ Discoveries outside scope → the drift ledger.
      `connected_nodes` explicitly warning against the misreading that happened. Computed in the
      existing single pass — no extra cost.
 
+  2b′. **RESOLVED 2026-07-28 by Matt's decision (final refinement).** Matt chose, from explicit
+     options: **(a)** the four Wikipedia cards are **removed** (consistent with the standing PD-only
+     rule; the mint path was already retired); **(b)** the islands are rooted with **shelf spines,
+     the found relation** — `tools/graft_shelf_spines.py` minted nine spines (`codex`, `classics`,
+     `patristics`, `the-works`, `animation`, `hymns`, `maker`, `recipes`, `atlas`) rooted `part_of`
+     the Floor, redirected `dictionary`'s 2,619 and `chemistry`'s 1 structurally-bare cards to their
+     siblings' established parents (`card_spine_words`, `card_k_spine_created_order`), and grafted
+     **5,187 cards** across six data stores; **(c)** per-page navs stay as they are — the prior
+     decision stands. After the graft: **unreachable 552 → 0; every card nested; the ratchet in
+     `tests/test_reachable_from_the_floor.py` lowered to 0.** The per-card scripture matching (codex
+     "Revelation 5" → that scripture card) remains deliberately NOT done — rooting did not require
+     authoring matches.
+
+     **The box then surfaced 24 more of the same class** (verified live, checked the check first):
+     old-vintage cards existing only in the droplet's data — 17 `domains` ("Pressure Architecture"
+     notes, a shelf with ZERO local cards), 6 `science` and 1 `labor` runtime mints from before
+     `science_cards.py` carried `part_of card_k_spine_created_order` (it does now — the path is
+     already fixed; these were residue). Handled under the same decision: a tenth spine (`domains`)
+     plus two redirects (`science`, `labor` → the created order, their established parent on both
+     vintages). Box graft: 24/24. The four Wikipedia cards were removed by title, per (a).
+
+     **FINAL STATE, live on both surfaces 2026-07-28:**
+
+         total = 466,401   nested = 466,401   semantic_only = 0   isolated = 0
+
+     Nothing in the keeping is isolated, and everything walks back to the Floor — no longer a
+     slogan; the overview reports it and two test files plus the ratchet guard it.
+
+     The entry below is the pre-decision record, kept for the trail.
+
   2b. **552 cards sit in unrooted ISLANDS — a real gap, ratcheted not papered over.** Walking both
      planes from `card_k_floor_of_discovery`, 465,456 of 466,008 cards are reachable; **552 are not**
      — `codex` 451, `classics` 39, `animation` 24, `maker` 11, `recipes` 11, `hymns` 10,
