@@ -88,6 +88,22 @@ Discoveries outside scope → the drift ledger.
    stored** (join their apps, never absorb their data). `src/concordance/connect.py`, read-only,
    store-nothing enforced by `tests/test_connect.py`. Write-back to a user's tools stays gated
    behind the agent-covenant write-consent path (worklist item 2).
+9. **The last large build for V1 (Matt, 2026-07-27): "Like X-ray when you watch movies. We have
+   everything that you can research. Already organized."** Every Bible-study back-matter resource,
+   found and organized under the same invariants as the rest of the contract — real sourced text,
+   never generated; disputed points shown as disputed, never flattened ("We live in the nuance").
+   - Harmony of the Gospels — every gospel witness to an event, side by side. **DONE** (shipped
+     2026-07-27, `src/concordance/harmony.py`, witness-gated `/harmony` + MCP tool + `harmony.html`).
+   - OT / NT (Acts–Revelation) / church-history unified timeline — from creation through today.
+     Where chronology systems genuinely disagree (Ussher vs. others on OT dates, early vs. late
+     Revelation dating, etc.), present the competing systems side by side, not one settled view.
+   - Maps/Atlas — real biblical place coordinates.
+   - Back-matter reference material — topical index, weights/measures, parables/miracles lists,
+     book introductions, names of God.
+   - Commentaries — migrate Matthew Henry's data locally; evaluate adding Gill/Clarke.
+   - Biblical Encyclopedia — built AS Cards in the existing corpus/Cards system (not a separate
+     structure), with a clean card-catalog browsing interface ("the entire reference and
+     nonfiction section of the library in a card catalog").
 
 ## 7. Drift ledger (discoveries out of scope — recorded, not chased)
 
