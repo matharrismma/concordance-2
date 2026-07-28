@@ -251,6 +251,11 @@ def _witness_tools() -> List[dict]:
                          "Pass id for one trace, q to search, else lists all."),
          "inputSchema": {"type": "object", "properties": {
              "id": {"type": "string"}, "q": {"type": "string"}}}},
+        {"name": "harmony",
+         "description": ("Harmony of the Gospels — one event of Christ's life, every gospel that "
+                         "records it, side by side (found, verbatim WEB text, never generated). Pass "
+                         "id for one event; else lists every event grouped by phase of the ministry."),
+         "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}}},
         {"name": "seeds",
          "description": ("Seeds of the Word (the Areopagus / logos spermatikos pass) — true fragments "
                          "mined from the nations, ATTRIBUTED, CONCORDANT/signpost NEVER HOLDS; each names "
@@ -457,6 +462,12 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
             rec = prophecy.get(args["id"])
             return rec if rec is not None else {"error": "trace not found"}
         return prophecy.search(args["q"]) if args.get("q") else prophecy.list_traces()
+    if name == "harmony" and config.witness_surfaced:
+        from .. import harmony  # lazy: witness-only
+        if args.get("id"):
+            rec = harmony.get(args["id"])
+            return rec if rec is not None else {"error": "event not found"}
+        return harmony.periods()
     if name == "seeds" and config.witness_surfaced:
         from .. import seeds  # lazy: witness-only
         if args.get("id"):

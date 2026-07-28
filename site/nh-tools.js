@@ -40,6 +40,7 @@
     { h: '/seeds.html',      n: 'Seeds of the Word', k: 'areopagus athens nations fragments paul philosophy' },
     { h: '/check.html',      n: 'Check a claim',    k: 'verify true false math fact' },
     { h: '/teachings.html',  n: 'Teachings',        k: 'jesus christ words sayings gospel' },
+    { h: '/harmony.html',    n: 'Harmony',          k: 'gospels matthew mark luke john timeline life of christ events' },
     { h: '/prophecy.html',   n: 'Prophecy',         k: 'traces fulfilment signposts' },
     { h: '/codex.html',      n: 'The Codex',        k: 'manuscript compiled book document' },
     { h: '/works.html',      n: 'The Works',         k: 'technical math science engineering worked sealed demonstrations depth proof derivation' },

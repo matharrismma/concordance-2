@@ -1453,6 +1453,18 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         rec = _arch.get((query.get("id") or "").strip())
         return _ok(rec) if rec is not None else _err(404, "microposition not found")
 
+    if method == "GET" and path == "/harmony":
+        # Harmony of the Gospels — one event, every gospel that witnesses it, side by side.
+        # Witness content: the same gate as /teachings, /prophecy, /commentary.
+        if not allow_witness:
+            return _gate_closed()
+        from .. import harmony as harmony_mod
+        eid = (query.get("id") or "").strip()
+        if eid:
+            rec = harmony_mod.get(eid)
+            return _ok(rec) if rec is not None else _err(404, "event not found")
+        return _ok(harmony_mod.periods())
+
     if method == "GET" and path == "/teachings":
         # Phase 3 — the teaching-review workspace (Words in Red). Witness content: the engine
         # assembles the frozen Greek anchor + existing sites; the operator records the reading.
@@ -1576,6 +1588,7 @@ ROUTES = [
     {"path": "/character", "methods": ("GET",), "api": True},
     {"path": "/characters", "methods": ("GET",), "api": True},
     {"path": "/prophecy", "methods": ("GET",), "api": True},
+    {"path": "/harmony", "methods": ("GET",), "api": True},
     {"path": "/seeds", "methods": ("GET",), "api": True},
     {"path": "/almanac", "methods": ("GET",), "api": True},
     {"path": "/apothecary", "methods": ("GET",), "api": True},
