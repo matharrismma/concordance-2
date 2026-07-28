@@ -88,6 +88,7 @@ test_steward.py
 test_strongs.py
 test_survival.py
 test_threads.py
+test_timeline.py
 test_tolerance.py
 test_traffic.py
 test_understanding.py

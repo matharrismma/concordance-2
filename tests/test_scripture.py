@@ -15,8 +15,26 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+import pytest  # noqa: E402
+
 from concordance.verifiers import run_for_domain  # noqa: E402
 from concordance.verifiers import scripture as S  # noqa: E402
+
+
+@pytest.fixture(autouse=True, scope="module")
+def _restore_bible_env_after_module():
+    # Every test below points CONCORDANCE_BIBLE_EN at a tempdir that is deleted the moment its own
+    # `with` block exits, leaving the env var (process-wide, not test-scoped) dangling at a now-gone
+    # path. Restore whatever this module found on entry once all its tests are done, so a test file
+    # collected later (alphabetically after "scripture") never inherits a broken bible path.
+    prior = os.environ.get("CONCORDANCE_BIBLE_EN")
+    yield
+    if prior is None:
+        os.environ.pop("CONCORDANCE_BIBLE_EN", None)
+    else:
+        os.environ["CONCORDANCE_BIBLE_EN"] = prior
+    S._reset()
+
 
 FIXTURE = [
     {"book": "John", "book_abbr": "JHN", "chapter": 3, "verse": 16,

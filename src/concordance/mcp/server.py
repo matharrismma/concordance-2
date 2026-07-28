@@ -256,6 +256,12 @@ def _witness_tools() -> List[dict]:
                          "records it, side by side (found, verbatim WEB text, never generated). Pass "
                          "id for one event; else lists every event grouped by phase of the ministry."),
          "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}}},
+        {"name": "timeline",
+         "description": ("Timeline — Old Testament, New Testament (Acts onward), and Church History, "
+                         "one spine from creation to today. Genuinely disputed dates (early/late Exodus, "
+                         "the date of Revelation, etc.) carry both positions, never one verdict. Pass id "
+                         "for one event; else lists every event grouped by era and period."),
+         "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}}},
         {"name": "seeds",
          "description": ("Seeds of the Word (the Areopagus / logos spermatikos pass) — true fragments "
                          "mined from the nations, ATTRIBUTED, CONCORDANT/signpost NEVER HOLDS; each names "
@@ -468,6 +474,12 @@ def _call_tool(name: str, args: dict, config: EngineConfig) -> Any:
             rec = harmony.get(args["id"])
             return rec if rec is not None else {"error": "event not found"}
         return harmony.periods()
+    if name == "timeline" and config.witness_surfaced:
+        from .. import timeline  # lazy: witness-only
+        if args.get("id"):
+            rec = timeline.get(args["id"])
+            return rec if rec is not None else {"error": "event not found"}
+        return timeline.eras()
     if name == "seeds" and config.witness_surfaced:
         from .. import seeds  # lazy: witness-only
         if args.get("id"):
