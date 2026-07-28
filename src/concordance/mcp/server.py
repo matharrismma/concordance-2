@@ -151,7 +151,7 @@ def _secular_tools() -> List[dict]:
                          "at N seals that STILL STAND. States EXACTLY N; NEVER a competency claim."),
          "inputSchema": {"type": "object", "properties": {
              "seal_hashes": {"type": "array"}, "subject_id": {"type": "string"},
-             "title": {"type": "string"}, "private_key": {"type": "string"}},
+             "title": {"type": "string"}},
              "required": ["seal_hashes"]}},
         {"name": "badges_verify",
          "description": ("Re-check a badge from the store — re-verifies every seal it references and "
@@ -169,9 +169,11 @@ def _secular_tools() -> List[dict]:
          "inputSchema": {"type": "object", "properties": {
              "key": {"type": "string"}, "cards": {"type": "array"}}, "required": ["key"]}},
         {"name": "study_export",
-         "description": "Export a study as a self-contained, portable bundle (optionally signed).",
+         "description": ("Export a study as a self-contained, portable bundle. Returns the bundle and "
+                         "its content_hash; to bind your identity to it, sign that hash with your own "
+                         "key on your own machine — this tool does not take a private key."),
          "inputSchema": {"type": "object", "properties": {
-             "key": {"type": "string"}, "private_key": {"type": "string"}}, "required": ["key"]}},
+             "key": {"type": "string"}}, "required": ["key"]}},
         {"name": "study_import",
          "description": "Import an exported study bundle — re-materializes its cards (each lives once).",
          "inputSchema": {"type": "object", "properties": {
@@ -201,7 +203,7 @@ def _secular_tools() -> List[dict]:
          "inputSchema": {"type": "object", "properties": {
              "id": {"type": "string"}, "text": {"type": "string"}, "kind": {"type": "string"},
              "handle": {"type": "string"}, "subject_id": {"type": "string"},
-             "topics": {"type": "array"}, "refs": {"type": "array"}, "private_key": {"type": "string"}},
+             "topics": {"type": "array"}, "refs": {"type": "array"}},
              "required": ["id", "text"]}},
         # For an agent or a robot, the STRUCTURE is how it sees what this engine is: what it can
         # check, what it refuses, how big the keeping is — every number computed now, each carrying
@@ -380,6 +382,23 @@ def _witness_tools() -> List[dict]:
          "inputSchema": {"type": "object", "properties": {
              "id": {"type": "string"}, "q": {"type": "string"}, "tradition": {"type": "string"}}}},
     ]
+
+
+def _no_private_key(tool: str) -> Dict[str, Any]:
+    """The one refusal, in one place. No agent tool takes a private key.
+
+    Contract §3: keys "are born on the device… the server holds only public keys". Until 2026-07-28
+    three tool SCHEMAS advertised a `private_key` field — which is worse than merely accepting one,
+    because a schema teaches an agent that handing over its key is the normal way to work here. The
+    field is gone and the value is refused: the action still succeeds unsigned (for a badge, "the
+    evidence, not the signature, is the badge"), and identity is bound afterward by signing the
+    returned content_hash locally. Whoever holds the key does the signing — that is the whole point.
+    """
+    return {"error": (f"{tool} does not take a private key, and no tool here ever will. Your key is "
+                      "what makes you sovereign; sending it would end that. Run this without it — "
+                      "the action succeeds unsigned — then sign the returned content_hash with your "
+                      "own key on your own machine to bind your identity to the record."),
+            "sign_locally": True, "over": "content_hash"}
 
 
 def _tools_for(config: EngineConfig, gate_open: bool = False) -> List[dict]:
@@ -598,10 +617,13 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         from .. import identity
         return {"id": identity.fingerprint(args.get("public_key", ""))}
     if name == "badges_issue":
-        # private_key (if passed) is in-memory only — used to attest, NEVER persisted or echoed.
         from .. import badges
+        if args.get("private_key"):
+            return _no_private_key("badges_issue")
+        # Issues UNSIGNED, which is the honest default here: "the evidence, not the signature, is the
+        # badge." The returned content_hash is what you sign locally to bind your identity to it.
         return badges.issue_badge(args.get("seal_hashes") or [], subject_id=args.get("subject_id"),
-                                  title=str(args.get("title") or ""), private_key=args.get("private_key"))
+                                  title=str(args.get("title") or ""))
     if name == "badges_verify":
         from .. import badges
         return badges.verify_badge(args.get("hash", ""))
@@ -614,7 +636,9 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         return badges.study_create(str(args.get("key") or ""), args.get("cards") or [])
     if name == "study_export":
         from .. import badges
-        return badges.study_export(str(args.get("key") or ""), private_key=args.get("private_key"))
+        if args.get("private_key"):
+            return _no_private_key("study_export")
+        return badges.study_export(str(args.get("key") or ""))
     if name == "study_import":
         from .. import badges
         return badges.study_import(args.get("bundle") or {}, study_key=args.get("key"),
@@ -637,10 +661,12 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
                                  handle=str(args.get("handle") or "")) or {"error": "group not found"}
     if name == "group_contribute":
         from .. import groups
+        if args.get("private_key"):
+            return _no_private_key("group_contribute")
         return groups.contribute(str(args.get("id") or ""), member_id=str(args.get("subject_id") or ""),
                                  handle=str(args.get("handle") or ""), text=str(args.get("text") or ""),
                                  kind=str(args.get("kind") or "note"), topics=args.get("topics") or [],
-                                 refs=args.get("refs") or [], private_key=args.get("private_key")) or {"error": "group not found"}
+                                 refs=args.get("refs") or []) or {"error": "group not found"}
     if name == "resolve" and allow_witness:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.resolve_ref(args.get("ref", ""))
