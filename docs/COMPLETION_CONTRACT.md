@@ -114,9 +114,11 @@ Discoveries outside scope → the drift ledger.
 ## 7. Drift ledger (discoveries out of scope — recorded, not chased)
 
 - **§5's "no private key ever crosses the wire" was being read too narrowly (found 2026-07-28).**
-  The server never *returns* a private key — but it *accepts* one in the request body at six places:
-  `POST /mesh/post`, `/mesh/tend`, `/mesh/door`, `/badges` (attest), `/study/export`, and
-  `/group/contribute`. Inbound is still "on the wire", and §3 says keys "are born on the device… the
+  The server never *returns* a private key — but it *accepts* one in the request body at **five**
+  places: `POST /mesh/post`, `POST /mesh/door`, `/badges` (attest), `/study/export`, and
+  `/group/contribute`. (Corrected 2026-07-28: an earlier draft of this entry also listed
+  `/mesh/tend` — that was wrong, it passes only fp/target/role. Verified by grepping
+  `private_key` in `web/api.py`.) Inbound is still "on the wire", and §3 says keys "are born on the device… the
   server holds only public keys and verifies signed challenges". Root cause: those flows built the
   signable body server-side (minting the nonce and timestamp *after* the request), so no client
   could have signed the stored bytes — handing over the key was the only way to get a signature.

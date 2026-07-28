@@ -888,6 +888,10 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             ttl = int(query.get("ttl") or 2)
         except (TypeError, ValueError):
             ttl = 2
+        target = (query.get("target") or "").strip()
+        if target:   # a door note to a specific believer, rather than a post to those around you
+            return _ok(mesh.signable_door_note(fp, target, str(text),
+                                               kind=str(query.get("kind") or "blessing")))
         return _ok(mesh.signable_message(fp, str(text), kind=str(query.get("kind") or "word"),
                                          ttl=ttl))
     if method == "GET" and path == "/mesh/inbox":
@@ -922,7 +926,10 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import mesh
         return _ok(mesh.leave_on_door(str(body["fp"]), str(body["target"]), str(body["text"]),
                                       kind=str(body.get("kind") or "blessing"),
-                                      private_key=body.get("private_key")))
+                                      private_key=body.get("private_key"),
+                                      signature=body.get("signature"),
+                                      nonce=body.get("nonce"),
+                                      created_at=body.get("created_at")))
     if method == "GET" and path == "/mesh/door":
         from .. import mesh
         try:

@@ -256,7 +256,20 @@ def _secular_tools() -> List[dict]:
          "inputSchema": {"type": "object", "properties": {
              "fp": {"type": "string"}, "text": {"type": "string"},
              "kind": {"type": "string", "description": "word | offer | need | blessing | content"},
-             "ttl": {"type": "integer"}}, "required": ["fp", "text"]}},
+             "ttl": {"type": "integer"},
+             "target": {"type": "string", "description": ("pass a believer's node id to sign a note "
+                                                          "for THEIR door instead of a broadcast")}},
+             "required": ["fp", "text"]}},
+        {"name": "mesh_leave_on_door",
+         "description": ("Leave a word on one believer's door — directed encouragement rather than a "
+                         "post to everyone near you. Same sovereign shape: get the bytes from "
+                         "mesh_signable (with target), sign locally, send only the signature. Will "
+                         "not accept a private key; unsigned notes are refused."),
+         "inputSchema": {"type": "object", "properties": {
+             "fp": {"type": "string"}, "target": {"type": "string"}, "text": {"type": "string"},
+             "kind": {"type": "string"}, "nonce": {"type": "string"},
+             "created_at": {"type": "integer"}, "signature": {"type": "string"}},
+             "required": ["fp", "target", "text", "nonce", "created_at", "signature"]}},
         {"name": "mesh_post",
          "description": ("Step 2: speak to the nodes around you, carrying only your SIGNATURE — your "
                          "private key never leaves your machine and this tool will not take one. "
@@ -449,11 +462,32 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         text = str(args.get("text") or "").strip()
         if not fp or not text:
             return {"error": "fp and text required"}
+        target = str(args.get("target") or "").strip()
+        if target:  # a word on one believer's door, rather than a post to those around you
+            return _mesh.signable_door_note(fp, target, text,
+                                            kind=str(args.get("kind") or "blessing"))
         try:
             ttl = int(args.get("ttl") or 2)
         except (TypeError, ValueError):
             ttl = 2
         return _mesh.signable_message(fp, text, kind=str(args.get("kind") or "word"), ttl=ttl)
+    if name == "mesh_leave_on_door":
+        from .. import mesh as _mesh
+        fp = str(args.get("fp") or "").strip()
+        target = str(args.get("target") or "").strip()
+        text = str(args.get("text") or "").strip()
+        sig = str(args.get("signature") or "").strip()
+        if not fp or not target or not text:
+            return {"error": "fp, target and text required"}
+        if not sig:
+            return {"error": ("a signature is required — get the canonical bytes from mesh_signable "
+                              "(pass target), sign them with your own key, and send the signature.")}
+        if args.get("private_key"):
+            return {"error": ("do not send a private key — this path never needs one. Sign the "
+                              "canonical bytes locally and send only the signature.")}
+        return _mesh.leave_on_door(fp, target, text, kind=str(args.get("kind") or "blessing"),
+                                   signature=sig, nonce=args.get("nonce"),
+                                   created_at=args.get("created_at"))
     if name == "mesh_post":
         from .. import mesh as _mesh
         fp = str(args.get("fp") or "").strip()

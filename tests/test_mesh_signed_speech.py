@@ -154,6 +154,31 @@ def test_the_agent_tool_refuses_a_private_key_even_when_offered():
     assert "signature is required" in str(unsigned.get("error", "")).lower()
 
 
+def test_a_door_note_is_signed_the_same_sovereign_way():
+    """The second write path ported: a directed word on one believer's door. Same shape, so there is
+    one way to speak in this system rather than one per endpoint."""
+    _d, ident, fp, mesh, signing, identity = _fresh()
+    other = identity.create_identity()
+    target = mesh.register_node(other["public_key"], "agent-b", confession=CONFESSION)["fp"]
+    TXT = "The Lord bless you and keep you"
+    s = mesh.signable_door_note(fp, target, TXT, kind="blessing")
+    assert s["body"]["door"] == 1, "this must be a door note, not a broadcast"
+    canon = base64.urlsafe_b64decode(s["canonical_b64u"] + "==")
+    sig = signing.sign_bytes(canon, ident["private_key"])
+    r = mesh.leave_on_door(fp, target, TXT, kind="blessing", signature=sig,
+                           nonce=s["nonce"], created_at=s["created_at"])
+    assert r["ok"] is True and r["signed"] is True
+    assert r["id"] == s["would_be_id"]
+    # the recipient actually has it
+    assert (mesh.read_door(target) or {}).get("count", 0) >= 1
+
+    # and the target's own key cannot sign as the sender
+    forged = signing.sign_bytes(canon, other["private_key"])
+    bad = mesh.leave_on_door(fp, target, TXT, kind="blessing", signature=forged,
+                             nonce=s["nonce"], created_at=s["created_at"])
+    assert bad["ok"] is False and "does not verify" in bad["error"]
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:

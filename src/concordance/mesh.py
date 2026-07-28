@@ -709,8 +709,29 @@ def _door_core(from_fp: str, callsign: str, to_fp: str, kind: str, text: str,
             "kind": kind, "text": text, "created_at": created_at, "nonce": nonce}
 
 
+def signable_door_note(from_fp: str, target_fp: str, text: str, *, kind: str = "blessing",
+                       nonce: Optional[str] = None,
+                       created_at: Optional[int] = None) -> Dict[str, Any]:
+    """The exact bytes to sign for a detached-signature door note — the same sovereign shape as
+    signable_message(), so leaving a word on someone's door never needs your key either."""
+    frm = _read_node(from_fp)
+    kind = kind if kind in _KINDS else "blessing"
+    n = str(nonce or secrets.token_hex(8))
+    ts = int(created_at) if created_at is not None else _now()
+    core = _door_core(from_fp, (frm or {}).get("callsign", "anon"), target_fp, kind,
+                      str(text or "").strip()[:_MAX_TEXT], ts, n)
+    canon, mid = _seal_core(core)
+    return {"ok": True, "body": core, "nonce": n, "created_at": ts, "kind": kind,
+            "canonical_b64u": base64.urlsafe_b64encode(canon).decode().rstrip("="),
+            "would_be_id": mid,
+            "note": ("Sign these canonical bytes with YOUR private key on YOUR machine, then post "
+                     "text/kind/nonce/created_at plus the signature. Your key never leaves your "
+                     "device; the recipient can verify the note offline with no key at all.")}
+
+
 def leave_on_door(from_fp: str, target_fp: str, text: str, *, kind: str = "blessing",
-                  private_key: Optional[str] = None) -> Dict[str, Any]:
+                  private_key: Optional[str] = None, signature: Optional[str] = None,
+                  nonce: Optional[str] = None, created_at: Optional[int] = None) -> Dict[str, Any]:
     """Leave a word on a believer's door — a directed encouragement (or word/need/offer), the
     whiteboard on their door. You need their node id; it is not a broadcast. Signed + content-
     addressed like every post, so they can verify it offline. Crisis is surfaced to real people."""
@@ -724,19 +745,42 @@ def leave_on_door(from_fp: str, target_fp: str, text: str, *, kind: str = "bless
     if not tgt:
         return {"ok": False, "error": "no node with that id — check the door you were given"}
     kind = kind if kind in _KINDS else "blessing"
-    core = _door_core(from_fp, frm.get("callsign", "anon"), target_fp, kind, text,
-                      _now(), secrets.token_hex(8))
-    canon, mid = _seal_core(core)
-    signature, signed = None, False
-    if private_key:
+    # Detached signature — the sovereign path (see signable_door_note): the caller signed the
+    # canonical body on its own machine and its key never travelled.
+    if signature:
+        if not nonce or created_at is None:
+            return {"ok": False, "error": ("nonce and created_at are required with a detached "
+                                           "signature — you must sign the exact body stored")}
         try:
-            if identity.signing_available():
-                signature = signing.sign_bytes(canon, private_key)
-                signed = signing.verify_bytes(canon, signature, frm.get("public_key", ""))
-                if not signed:
-                    return {"ok": False, "error": "signature does not match your node"}
+            ts = int(created_at)
+        except (TypeError, ValueError):
+            return {"ok": False, "error": "created_at must be an integer epoch second"}
+        core = _door_core(from_fp, frm.get("callsign", "anon"), target_fp, kind, text, ts, str(nonce))
+        canon, mid = _seal_core(core)
+        try:
+            ok = signing.verify_bytes(canon, signature, frm.get("public_key", ""))
         except Exception:  # noqa: BLE001
-            signature, signed = None, False
+            ok = False
+        if not ok:
+            return {"ok": False, "error": ("signature does not verify against your node's public "
+                                           "key over the canonical body")}
+        signed = True
+    else:
+        core = _door_core(from_fp, frm.get("callsign", "anon"), target_fp, kind, text,
+                          _now(), secrets.token_hex(8))
+        canon, mid = _seal_core(core)
+        signature, signed = None, False
+        if private_key:
+            # LEGACY browser path — a secret on the wire, kept only for compatibility. See the
+            # drift ledger in docs/COMPLETION_CONTRACT.md; superseded by the detached signature.
+            try:
+                if identity.signing_available():
+                    signature = signing.sign_bytes(canon, private_key)
+                    signed = signing.verify_bytes(canon, signature, frm.get("public_key", ""))
+                    if not signed:
+                        return {"ok": False, "error": "signature does not match your node"}
+            except Exception:  # noqa: BLE001
+                signature, signed = None, False
     stored = dict(core)
     stored["id"] = mid
     stored["signature"] = signature
