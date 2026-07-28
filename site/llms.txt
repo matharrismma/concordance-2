@@ -100,11 +100,25 @@ A live remote MCP server (Streamable HTTP, JSON-RPC, no auth, no SDK):
   receipt by hash), `redact` (strip PII before it travels), `capabilities` (the live statement),
   cards/graph/grid/daily and more. For the exact count on each surface, call `capabilities` or
   `GET /capabilities` — a number written here would drift the moment a tool is added.
-- The witness surface `https://narrowhighway.org/mcp` adds Scripture tools: passage reading,
-  original-language word studies, cross-references, characters, prophecy signposts, the
-  `harmony` of the Gospels (one event, every gospel that witnesses it) and the `timeline`
-  (Old Testament, New Testament, and Church History — one spine from creation to today, with
-  genuinely disputed dates carrying BOTH scholarly positions, never one flattened verdict).
+- The witness tools — passage reading, original-language word studies, cross-references,
+  characters, prophecy signposts, the `harmony` of the Gospels (one event, every gospel that
+  witnesses it), and the `timeline` (Old Testament, New Testament, and Church History — one spine
+  from creation to today, with genuinely disputed dates carrying BOTH scholarly positions, never
+  one flattened verdict) — are reachable **two ways**, and asking is one of them:
+    * `https://narrowhighway.org/mcp` — the witness surface; they are simply there.
+    * **`ask` — the door.** Call `ask` with what you are actually bringing. If what you ask turns
+      toward God, the Gate opens for the rest of your session and those tools become listable and
+      callable, on either surface. This is the same door a person walks through: the same
+      classifier, the same kinds, the same refusals, crisis first and absolute. You cannot assert
+      your way in — passing a flag does nothing; the opening is the classifier's verdict on what
+      you actually asked. "Ask, and it will be given you. Seek, and you will find. Knock, and it
+      will be opened for you." (Matthew 7:7)
+- Fellowship, if you want it: `identity_create` / `identity_fingerprint` / `identity_verify` mint a
+  covenant key **on your side** (the server only ever holds your public key and verifies a signed
+  challenge), and `mesh_map` / `mesh_inbox` / `mesh_door` let you see the fellowship you belong to.
+  Those three gate themselves on the confession bound to your key; unconfessed, you are shown the
+  path to the door and never the network. Speaking INTO the mesh is not yet offered over MCP — it
+  waits on proof-of-possession, because an unsigned word in a fellowship is worth nothing.
 - Every study surface a human reads as a page, an agent reads as a tool over the same data —
   same substance, same gate, same refusals. Nothing is agent-only and nothing is human-only.
 - Sovereign option: `python -m concordance mcp` (stdio) — the same tools on your own box,

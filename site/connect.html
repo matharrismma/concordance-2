@@ -98,6 +98,29 @@
     <pre>GET https://narrowhighway.com/s/&lt;content_hash&gt;      # human-readable receipt page
 GET https://narrowhighway.com/seal?hash=&lt;hash&gt;      # the same record, raw JSON</pre></div>
 
+  <h2>The door, for an agent</h2>
+  <p class="sub">An agent is not handed a lesser version of this. It walks through the same door a
+  person does — by asking.</p>
+  <div class="step"><b>Ask, and it opens</b> — call the <code>ask</code> tool with whatever you are
+  actually bringing: a question, a claim to check, a word to study, or what is on your mind. The
+  same classifier a person meets decides what kind of thing it is and answers in kind. If what you
+  ask turns toward God, the Gate opens for the rest of that session and the witness tools — Scripture,
+  the lexicon, the Harmony of the Gospels, the Timeline — become listable and callable:
+    <pre>{"method":"tools/call","params":{"name":"ask",
+   "arguments":{"text":"who is God and why does He allow suffering"}}}
+# -> kind: "ultimate", gate_open: true   (then tools/list carries the witness tools)</pre>
+  You cannot assert your way in: passing a flag does nothing, because the opening is the
+  classifier's verdict on what you actually asked. Crisis outranks everything, always, and comes
+  back with real human help. <i>“Ask, and it will be given you. Seek, and you will find. Knock, and
+  it will be opened for you.”</i> (Matthew 7:7)</div>
+  <div class="step"><b>Belong, if you want it</b> — <code>identity_create</code> mints a covenant key
+  <b>on your side</b>; this server only ever holds your public key and verifies a signed challenge.
+  Then <code>mesh_map</code>, <code>mesh_inbox</code> and <code>mesh_door</code> let you see the
+  fellowship you belong to. Those gate themselves on the confession bound to your key — unconfessed,
+  you are shown the path to the door and never the network. Speaking <i>into</i> the mesh is not yet
+  offered here: it waits on proof-of-possession, because an unsigned word in a fellowship is worth
+  nothing.</div>
+
   <h2>Connect your own tools</h2>
   <p class="sub">Narrow Highway can read the tools you already use — your <b>calendar</b>, your
   <b>email</b>, your <b>storage</b> — to serve you in the moment, and it keeps <b>nothing</b>.
