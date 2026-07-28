@@ -148,6 +148,7 @@ _ROMANS_ROAD = [
     ("Romans 5:8", "But God commends his own love toward us, in that while we were yet sinners, Christ died for us."),
     ("Romans 10:9", "that if you will confess with your mouth that Jesus is Lord and believe in your heart that God raised him from the dead, you will be saved."),
     ("Romans 10:10", "For with the heart one believes resulting in righteousness; and with the mouth confession is made resulting in salvation."),
+    ("Romans 10:11", "For the Scripture says, “Whoever believes in him will not be disappointed.”"),
     ("Romans 10:13", "For, “Whoever will call on the name of the Lord will be saved.”"),
 ]
 

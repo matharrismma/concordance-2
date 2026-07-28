@@ -108,7 +108,8 @@ def test_decision_response_carries_the_romans_road_in_order_and_points_to_a_real
     r = ask.respond("I want to be saved", SEC, gate_open=True, gate_just_opened=False)
     assert r["kind"] == "decision"
     refs = [v["ref"] for v in r["romans_road"]]
-    assert refs == ["Romans 3:23", "Romans 6:23", "Romans 5:8", "Romans 10:9", "Romans 10:10", "Romans 10:13"]
+    assert refs == ["Romans 3:23", "Romans 6:23", "Romans 5:8", "Romans 10:9", "Romans 10:10",
+                     "Romans 10:11", "Romans 10:13"]
     for v in r["romans_road"]:
         assert v["text"], f"{v['ref']} must carry real, verbatim text"
     assert r["real_help"] and any("pastor" in x.lower() or "church" in x.lower() for x in r["real_help"])
