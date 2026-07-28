@@ -235,9 +235,37 @@ Discoveries outside scope → the drift ledger.
      call plus a data deletion, so it was left flagged rather than defaulted. The tool now grafts
      what is certain, names what is not, and exits non-zero — holding 37 unambiguous cards hostage
      to 4 unclear ones would have been its own kind of failure.
-  2. **The map under-reports the nesting**, by design but undocumented: `graph.overview` shows the
-     authored constellation (connection cards), not the `member_of` tree. Anyone reading that endpoint
-     to answer "is anything orphaned?" will get the wrong answer, as I did.
+  2. **The map under-reported the nesting. RESOLVED 2026-07-28.** `graph.overview` showed the
+     authored constellation (connection cards) and not the `member_of` tree, so anyone reading it to
+     answer "is anything orphaned?" got the wrong answer — as I did. The design was right and the
+     numbers did not carry it: `planes.nesting` already held the skeleton, and the code's own comment
+     said "the WHOLE keeping — nothing isolated". Only `connected` was reported, and a fully-nested
+     shelf with no authored edges (`gutenberg`, 77,700 cards) read as `connected: 0` and looked
+     abandoned.
+
+     Every card now falls in **exactly one** bucket, per shelf and in total, so no category can hide
+     in a difference — `nested + semantic_only + isolated == total_nodes`, asserted:
+
+         total 465,983 = nested 460,821 + semantic_only 5,162 + isolated 0
+
+     and each count carries a `means` line (the rule `/capabilities` already follows), with
+     `connected_nodes` explicitly warning against the misreading that happened. Computed in the
+     existing single pass — no extra cost.
+
+  2b. **552 cards sit in unrooted ISLANDS — a real gap, ratcheted not papered over.** Walking both
+     planes from `card_k_floor_of_discovery`, 465,456 of 466,008 cards are reachable; **552 are not**
+     — `codex` 451, `classics` 39, `animation` 24, `maker` 11, `recipes` 11, `hymns` 10,
+     `patristics` 4, `dictionary` 2. They are not broken: **zero dangling edges**, every reference
+     resolves. They are closed clusters (codex notes and Boethius sections bound by `same_section`)
+     with no edge out to anything rooted. Grafting e.g. the codex note "Revelation 5" to its
+     scripture card is a real relation, but *choosing* that match is authoring rather than finding,
+     so it is left for a deliberate pass. `tests/test_reachable_from_the_floor.py` ratchets the
+     number and also asserts the islands stay whole (dangling references would be a worse bug).
+
+     **Why the real walk is a TEST and not part of the endpoint:** measured — adjacency + BFS costs
+     **11.7 s and ~162 MB peak**. `overview()` serves a public route on services already at ~2.8 GB
+     RSS. The gate can afford twelve seconds; a reader cannot. Recorded so the trade is not
+     re-litigated from an impression.
   3. The **verse↔lemma relation is fully served** (`/word_study?strongs=` → occurrences;
      `/original?ref=` → tagged words) with **370,833 verse↔lemma pairs resolving and ZERO
      unresolved**, so minting those as connection cards would add nothing a reader cannot already get

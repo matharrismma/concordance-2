@@ -132,14 +132,33 @@ def overview() -> Dict[str, Any]:
     shelf_count: Counter = Counter()
     shelf_tiers: Dict[str, Counter] = defaultdict(Counter)
     nest_pair: Counter = Counter()
+    # A card is NESTED if it carries any structural relation at all — that is what lets it be walked
+    # back to the Floor. Counted per shelf in the same pass, because the only number that answers
+    # "is anything orphaned?" is the count of cards carrying NOTHING, and the overview did not
+    # report it. (2026-07-28: reading `connected` as that number is exactly the mistake it invites —
+    # `connected` counts the SEMANTIC constellation only, so a fully nested shelf with no authored
+    # edges reads as 0 and looks abandoned. That misreading was made, recorded, and corrected in the
+    # contract's drift ledger.)
+    shelf_nested: Counter = Counter()
+    shelf_isolated: Counter = Counter()
+    shelf_semantic_only: Counter = Counter()   # bound, but by meaning rather than by structure
     for cid, c in cards.items():
         if c.get("kind") == "connection" or not _is_public(c):
             continue
         sh = c.get("shelf") or "?"
         shelf_count[sh] += 1
         shelf_tiers[sh][_tier(c)] += 1
+        links = c.get("connections") or []
+        # Exactly one bucket each, so nested + semantic_only + isolated == count and the arithmetic
+        # cannot quietly hide a fourth category.
+        if any(isinstance(l, dict) and l.get("relationship") in _NESTING for l in links):
+            shelf_nested[sh] += 1
+        elif links:
+            shelf_semantic_only[sh] += 1
+        else:
+            shelf_isolated[sh] += 1
         # the nesting plane: this card's structural edges, aggregated per shelf-pair
-        for l in (c.get("connections") or []):
+        for l in links:
             if not isinstance(l, dict) or l.get("relationship") not in _NESTING:
                 continue
             tc = cards.get(l.get("to_card_id"))
@@ -158,7 +177,10 @@ def overview() -> Dict[str, Any]:
 
     connected: Counter = Counter(n["shelf"] for n in g["nodes"].values())
     clusters = [{"shelf": s, "count": shelf_count[s], "tiers": dict(shelf_tiers[s]),
-                 "connected": connected.get(s, 0)}
+                 "connected": connected.get(s, 0),      # on the SEMANTIC plane only
+                 "nested": shelf_nested.get(s, 0),      # carries a structural relation -> walks to the Floor
+                 "semantic_only": shelf_semantic_only.get(s, 0),
+                 "isolated": shelf_isolated.get(s, 0)}  # carries NOTHING — the real orphans
                 for s in sorted(shelf_count, key=lambda x: -shelf_count[x])]
     sem_links = [{"source": a, "target": b, "weight": w, "plane": "semantic"}
                  for (a, b), w in sem_pair.items()]
@@ -187,9 +209,35 @@ def overview() -> Dict[str, Any]:
                       "links": sem_links,   # default (back-compat): the semantic plane
                       "planes": {"nesting": nest_links, "semantic": sem_links, "crossing": cross_links},
                       "crossings": len(cross_links),
-                      "total_nodes": sum(shelf_count.values()),   # the WHOLE keeping — nothing isolated
+                      "total_nodes": sum(shelf_count.values()),
                       "total_edges": len(g["edges"]),
-                      "connected_nodes": len(g["nodes"])}
+                      "connected_nodes": len(g["nodes"]),
+                      "nested_nodes": sum(shelf_nested.values()),
+                      "semantic_only_nodes": sum(shelf_semantic_only.values()),
+                      "isolated_nodes": sum(shelf_isolated.values()),
+                      # Every count says what it counted, so it can neither go stale nor be misread
+                      # — the same rule /capabilities follows. Written because `connected_nodes` WAS
+                      # misread here (as "how much of the keeping is connected") and the wrong number
+                      # was reported before the mistake was caught.
+                      "means": {
+                          "total_nodes": "every public, non-connection card in the keeping",
+                          "total_edges": "edges on the SEMANTIC plane — found connection cards "
+                                         "(cites, proof-texts, grafts). NOT the nesting skeleton.",
+                          "connected_nodes": "cards appearing on the SEMANTIC plane. A card absent "
+                                             "here is NOT unconnected — most of the keeping is bound "
+                                             "by the nesting skeleton instead. Do not read this as "
+                                             "an orphan count.",
+                          "nested_nodes": "cards carrying a structural relation (member_of/part_of/…) "
+                                          "— these can be walked back to the Floor.",
+                          "semantic_only_nodes": "cards bound only by meaning (cites, proof_text, …) "
+                                                 "and not by structure — connected, but reachable "
+                                                 "from the Floor only through another card.",
+                          "isolated_nodes": "cards carrying NO relation of any kind. THIS is the "
+                                            "orphan count, and it should be zero.",
+                          "arithmetic": "nested + semantic_only + isolated == total_nodes, exactly. "
+                                        "Every card sits in one bucket, so no fourth category can "
+                                        "hide in the difference.",
+                      }}
     return g["_overview"]
 
 

@@ -306,8 +306,16 @@
       v.onpick = function (n) { loadShelf(n.shelf); };
       v.setData(nodes, links, null);
       var active = Object.keys(LAYERS).filter(function (k) { return LAYERS[k].on; });
+      // "Everything connects" was a claim the page asserted; /graph now returns the number that
+      // backs it, so state it. A receipt, not a slogan — and if it is ever non-zero, say so plainly
+      // rather than keep the reassuring sentence.
+      var iso = d.isolated_nodes;
+      var connects = (iso === 0)
+        ? "Everything connects — <strong>not one</strong> of them stands alone; it may only be on a different plane. "
+        : (iso > 0 ? "<strong>" + iso.toLocaleString() + "</strong> of them stand alone and still need grafting. "
+                   : "Everything connects — it may only be on a different plane. ");
       setStatus("The keeping — <strong>" + d.total_nodes.toLocaleString() + "</strong> ideas across <strong>" +
-        d.clusters.length + "</strong> shelves. Everything connects — it may only be on a different plane. " +
+        d.clusters.length + "</strong> shelves. " + connects +
         "Stack the transparencies below, or lift one to see that system alone. " +
         "<em>" + (active.length ? active.map(function (k) { return LAYERS[k].label.toLowerCase(); }).join(" + ") : "no layers") + " shown.</em>");
     }
