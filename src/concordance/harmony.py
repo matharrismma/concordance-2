@@ -15,9 +15,6 @@ question scholarship still holds open.
 """
 from __future__ import annotations
 
-import json
-import os
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 NOTE = ("Every gospel that records this event, side by side — found in the Word itself, never "
@@ -236,53 +233,13 @@ _BY_ID = {h["id"]: h for h in _HARMONY}
 _PERIOD_ORDER = list(dict.fromkeys(h["period"] for h in _HARMONY))  # first-seen order, stable
 
 
-def _bible_path() -> Optional[Path]:
-    env = os.environ.get("CONCORDANCE_BIBLE_EN", "").strip()
-    if env:
-        return Path(env)
-    d = os.environ.get("CONCORDANCE_DATA_DIR", "").strip()
-    p = (Path(d) if d else Path("data")) / "bible_en.jsonl"
-    return p if p.exists() else None
-
-
-def _parse_ref(ref: str):
-    """A single 'Book ch:v-v' reference (no comma-lists, no multi-chapter ranges) -> (book, ch, v1, v2)."""
-    import re
-    m = re.match(r"^(\d?\s?[A-Za-z]+)\s+(\d+):(\d+)(?:-(\d+))?$", ref.strip())
-    if not m:
-        return None
-    book, ch, v1, v2 = m.group(1).strip(), int(m.group(2)), int(m.group(3)), m.group(4)
-    return book, ch, v1, int(v2) if v2 else v1
-
-
 def _passage_text(ref: str) -> str:
     """The WEB text for a single-chapter reference. Multi-chapter/comma refs (e.g. '5:1-7:29',
-    '26:1-5,14-16') are display-only in the table; we don't attempt verbatim inline text for those
-    here — the reference itself links out to the full passage reader."""
-    if not ref:
-        return ""
-    parsed = _parse_ref(ref)
-    if not parsed:
-        return ""
-    book, ch, v1, v2 = parsed
-    p = _bible_path()
-    if not p:
-        return ""
-    out: List[str] = []
-    try:
-        for line in p.read_text(encoding="utf-8", errors="replace").splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                r = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if r.get("book") == book and r.get("chapter") == ch and v1 <= (r.get("verse") or 0) <= v2:
-                out.append(r.get("text") or "")
-    except OSError:
-        return ""
-    return " ".join(out)
+    '26:1-5,14-16') are display-only in the table — the shared helper declines those and the
+    reference itself links out to the full passage reader. One cached corpus read serves every
+    caller (verifiers.scripture.passage_text), instead of a per-request scan of the whole corpus."""
+    from .verifiers.scripture import passage_text
+    return passage_text(ref)
 
 
 def periods() -> Dict[str, Any]:

@@ -926,19 +926,24 @@ _CACHE: Optional[Dict[str, Any]] = None
 
 
 def load(force: bool = False) -> Dict[str, Any]:
-    """The compiled volume. Reads the sealed file; builds it lazily if absent. Cached in-process."""
+    """The compiled volume, read from the sealed file. Serving NEVER builds: a GET must not write
+    files or mint signing keys (the covenant's write-consent boundary), and build_all() does both.
+    When no volume has been compiled yet, an honest empty record comes back and every route says so
+    plainly — building is an operator action (`python -m concordance.compendium`), not a side effect
+    of being visited. The empty record is deliberately NOT cached, so the first request after the
+    operator ships the file picks it up."""
     global _CACHE
     if _CACHE is not None and not force:
         return _CACHE
     p = _compiled_path()
-    if p.exists() and not force:
+    if p.exists():
         try:
             _CACHE = json.loads(p.read_text(encoding="utf-8"))
             return _CACHE
-        except Exception:  # corrupt file — rebuild
-            pass
-    _CACHE = build_all()
-    return _CACHE
+        except Exception:  # corrupt file — say so; never rebuild on the serve path
+            return {"manifest": None, "signed": False,
+                    "error": "compiled volume unreadable — recompile via the operator CLI"}
+    return {"manifest": None, "signed": False}
 
 
 def overview() -> Dict[str, Any]:
@@ -992,15 +997,20 @@ def verify_artifact() -> Dict[str, Any]:
     recomputed = hashlib.sha256(
         json.dumps(man, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     hash_ok = recomputed == v.get("manifest_sha256")
+    # Authority is never silently upgraded (the kernel's fifth part): an artifact that CLAIMS a
+    # signature must have that claim actually verified for ok — an unverifiable claimed signature
+    # (crypto backend absent, malformed key) is NOT ok. An honestly-unsigned artifact may still
+    # pass on the hash alone; `signature_claimed`/`signature_ok` say exactly which case this is.
+    claimed = bool(v.get("signature") and v.get("public_key"))
     sig_ok = None
-    if v.get("signature") and v.get("public_key"):
+    if claimed:
         try:
             from . import identity as _id
             sig_ok = _id.verify(v["public_key"], v["manifest_sha256"], v["signature"])
         except Exception:
             sig_ok = None
-    return {"ok": bool(hash_ok and (sig_ok is not False)),
-            "manifest_hash_ok": hash_ok, "signature_ok": sig_ok,
+    return {"ok": bool(hash_ok and (sig_ok is True or not claimed)),
+            "manifest_hash_ok": hash_ok, "signature_claimed": claimed, "signature_ok": sig_ok,
             "published": man.get("published"), "generated": man.get("generated")}
 
 

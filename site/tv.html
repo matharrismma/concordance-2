@@ -131,10 +131,12 @@
 </main>
 
 <script src="speak.js"></script>
+<script src="/gate.js"></script>
 <script>
 const API = "";
 function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
-async function getJSON(p){ const r=await fetch(API+p); if(!r.ok) return null; try{return await r.json();}catch(e){return null;} }
+// A closed gate shows the shared invitation instead of a silent dead end (/passage is gated on .com).
+async function getJSON(p){ const r=await fetch(API+p); if(!r.ok){ if(window.NHGate) await NHGate.isClosed(r); return null; } try{return await r.json();}catch(e){return null;} }
 
 // ── the sequential read-along player (ceiling → floor, awaits each clip's END) ──
 let verses = [], playing = false, cancelFlag = false, curAudio = null;

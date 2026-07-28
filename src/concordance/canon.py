@@ -39,36 +39,32 @@ from typing import Any, Dict, List, Optional
 # ---------------------------------------------------------------------------
 # UNDISPUTED 66 — the shared core.
 # ---------------------------------------------------------------------------
-# We do NOT re-type the 66 here; we derive the name/abbreviation set from the
-# verifier's existing _CANON_BOOKS so there is a single source of truth. If the
-# import ever fails (e.g. the canon module is used in isolation), we fall back
-# to a minimal mirror so canon_status still functions — but the primary path is
-# the import, keeping the two in lockstep.
-try:  # pragma: no cover - import wiring
-    from .verifiers.scripture import _CANON_BOOKS as _UNDISPUTED_66_FORMS
-except Exception:  # pragma: no cover - defensive fallback only
-    # Minimal fallback mirror (full names only). The verifier's set is the
-    # authoritative one; this exists solely so the module never hard-crashes
-    # if imported before/without the verifier package.
-    _UNDISPUTED_66_FORMS = {
-        "genesis", "exodus", "leviticus", "numbers", "deuteronomy",
-        "joshua", "judges", "ruth", "1 samuel", "2 samuel",
-        "1 kings", "2 kings", "1 chronicles", "2 chronicles", "ezra",
-        "nehemiah", "esther", "job", "psalms", "proverbs", "ecclesiastes",
-        "song of solomon", "isaiah", "jeremiah", "lamentations", "ezekiel",
-        "daniel", "hosea", "joel", "amos", "obadiah", "jonah", "micah",
-        "nahum", "habakkuk", "zephaniah", "haggai", "zechariah", "malachi",
-        "matthew", "mark", "luke", "john", "acts", "romans",
-        "1 corinthians", "2 corinthians", "galatians", "ephesians",
-        "philippians", "colossians", "1 thessalonians", "2 thessalonians",
-        "1 timothy", "2 timothy", "titus", "philemon", "hebrews", "james",
-        "1 peter", "2 peter", "1 john", "2 john", "3 john", "jude",
-        "revelation",
-    }
+# THIS literal is the single source of truth for the undisputed 66 book names.
+# (An earlier comment here claimed the set was imported from the scripture
+# verifier's _CANON_BOOKS with this as a fallback — that name never existed, so
+# the import always failed and this literal was always the live path. The dead
+# import is gone; the honest state is: the canon list lives here, the verifier
+# derives its book index from the corpus data itself.)
+_UNDISPUTED_66_FORMS = {
+    "genesis", "exodus", "leviticus", "numbers", "deuteronomy",
+    "joshua", "judges", "ruth", "1 samuel", "2 samuel",
+    "1 kings", "2 kings", "1 chronicles", "2 chronicles", "ezra",
+    "nehemiah", "esther", "job", "psalms", "proverbs", "ecclesiastes",
+    "song of solomon", "isaiah", "jeremiah", "lamentations", "ezekiel",
+    "daniel", "hosea", "joel", "amos", "obadiah", "jonah", "micah",
+    "nahum", "habakkuk", "zephaniah", "haggai", "zechariah", "malachi",
+    "matthew", "mark", "luke", "john", "acts", "romans",
+    "1 corinthians", "2 corinthians", "galatians", "ephesians",
+    "philippians", "colossians", "1 thessalonians", "2 thessalonians",
+    "1 timothy", "2 timothy", "titus", "philemon", "hebrews", "james",
+    "1 peter", "2 peter", "1 john", "2 john", "3 john", "jude",
+    "revelation",
+}
 
-# A frozenset of all accepted name/abbreviation forms for the 66, lower-cased.
-# This includes the abbreviations the verifier already accepts ("gen", "jn",
-# "1cor", ...), so canon_status agrees with the verifier on what is "in the 66".
+# A frozenset of the 66 full book names, lower-cased. canon_status() matches
+# these after its own light normalization (lowercase, collapse whitespace,
+# strip a trailing period); abbreviation forms ("gen", "jn") are not matched
+# here — that has always been this module's live behavior.
 UNDISPUTED_66: frozenset = frozenset(b.lower() for b in _UNDISPUTED_66_FORMS)
 
 

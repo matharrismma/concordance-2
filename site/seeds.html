@@ -108,9 +108,16 @@
       'Or begin at <a href="/">Ask</a>.</p></div>';
   }
 
-  fetch('/seeds').then(function(r){ return r.json(); }).then(function(d){
+  fetch('/seeds').then(async function(r){
     var el = document.getElementById('body');
-    if(!d || d.gate === 'closed' || (window.NHGate && NHGate.isClosed && NHGate.isClosed(d))){
+    // Examine the Response first, like every sibling page: NHGate.isClosed takes the
+    // Response (not the parsed body) and MUST be awaited — it is async.
+    if(!r.ok){
+      if(window.NHGate && NHGate.isClosed) await NHGate.isClosed(r);
+      el.innerHTML = renderInvite(null); return;
+    }
+    var d = await r.json().catch(function(){ return null; });
+    if(!d || d.gate === 'closed'){
       el.innerHTML = renderInvite(d); return;
     }
     var seeds = d.seeds || [];

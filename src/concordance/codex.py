@@ -391,8 +391,11 @@ def verify_artifact() -> Dict[str, Any]:
     recomputed = hashlib.sha256(
         json.dumps(man, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     hash_ok = recomputed == art.get("manifest_sha256")
+    # Same rule as compendium.verify_artifact — authority is never silently upgraded: a CLAIMED
+    # signature must actually verify for ok; only an honestly-unsigned artifact passes on hash alone.
+    claimed = bool(art.get("signature") and art.get("public_key"))
     sig_ok = None
-    if art.get("signature") and art.get("public_key"):
+    if claimed:
         try:
             from . import identity as _id
             sig_ok = _id.verify(art["public_key"], art["manifest_sha256"], art["signature"])
@@ -400,8 +403,8 @@ def verify_artifact() -> Dict[str, Any]:
             sig_ok = None
     live_body = _body_fingerprint().get("body_hash")
     drift = live_body != (man.get("body") or {}).get("body_hash")
-    return {"ok": bool(hash_ok and (sig_ok is not False)), "manifest_hash_ok": hash_ok,
-            "signature_ok": sig_ok, "body_drift_since_seal": drift,
+    return {"ok": bool(hash_ok and (sig_ok is True or not claimed)), "manifest_hash_ok": hash_ok,
+            "signature_claimed": claimed, "signature_ok": sig_ok, "body_drift_since_seal": drift,
             "generated": man.get("generated")}
 
 

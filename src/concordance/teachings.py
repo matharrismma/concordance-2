@@ -141,33 +141,11 @@ def _parse_ref(ref: str):
 
 
 def _passage_text(ref: str) -> str:
-    """The WEB text of the teaching — the Word's own words become the query that gathers its echoes."""
-    parsed = _parse_ref(ref)
-    if not parsed:
-        return ""
-    book, ch, v1, v2 = parsed
-    import json
-    from pathlib import Path
-    import os
-    d = os.environ.get("CONCORDANCE_DATA_DIR", "").strip()
-    p = (Path(d) if d else Path("data")) / "bible_en.jsonl"
-    if not p.exists():
-        return ""
-    out: List[str] = []
-    try:
-        for line in p.read_text(encoding="utf-8", errors="replace").splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                r = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if r.get("book") == book and r.get("chapter") == ch and v1 <= (r.get("verse") or 0) <= v2:
-                out.append(r.get("text") or "")
-    except OSError:
-        return ""
-    return " ".join(out)
+    """The WEB text of the teaching — the Word's own words become the query that gathers its echoes.
+    Delegates to the one shared, cached helper (verifiers.scripture.passage_text), which also honors
+    CONCORDANCE_BIBLE_EN — the hand-rolled copy this replaces silently ignored that env var."""
+    from .verifiers.scripture import passage_text
+    return passage_text(ref)
 
 
 def gather(teaching_id: str, limit: int = 14) -> Optional[Dict[str, Any]]:

@@ -277,7 +277,8 @@ _SITEMAP_PAGES = ("/", "/ask.html", "/bible.html", "/read.html", "/characters.ht
                   "/community.html", "/library.html", "/guarantees.html", "/collapse.html",
                   "/seeds.html", "/seal.html", "/connect.html", "/corrected.html", "/audit.html",
                   "/proof.html", "/reason.html", "/boundary.html", "/almanac.html", "/codex.html",
-                  "/teachings.html", "/brain.html", "/floor.html", "/works.html")
+                  "/teachings.html", "/brain.html", "/floor.html", "/works.html",
+                  "/harmony.html", "/timeline.html")
 
 
 def build_sitemap(base_url: str) -> str:
@@ -853,7 +854,11 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(mesh.link(str(body["fp"]), str(body["neighbor"]), op=str(body.get("op") or "link")))
     if method == "GET" and path == "/mesh/map":
         from .. import mesh
-        return _ok(mesh.map_around((query.get("fp") or "").strip(), hops=int(query.get("hops") or 2)))
+        try:
+            hops = int(query.get("hops") or 2)
+        except (TypeError, ValueError):
+            hops = 2
+        return _ok(mesh.map_around((query.get("fp") or "").strip(), hops=hops))
     if method == "POST" and path == "/mesh/post":
         if not isinstance(body, dict) or not str(body.get("fp") or "").strip() \
            or not str(body.get("text") or "").strip():
@@ -864,7 +869,11 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                                      private_key=body.get("private_key")))
     if method == "GET" and path == "/mesh/inbox":
         from .. import mesh
-        return _ok(mesh.inbox((query.get("fp") or "").strip(), limit=int(query.get("limit") or 100)))
+        try:
+            limit = int(query.get("limit") or 100)
+        except (TypeError, ValueError):
+            limit = 100
+        return _ok(mesh.inbox((query.get("fp") or "").strip(), limit=limit))
     if method == "POST" and path == "/mesh/tend":
         if not isinstance(body, dict) or not str(body.get("fp") or "").strip() \
            or not str(body.get("target") or "").strip():
@@ -893,7 +902,11 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                                       private_key=body.get("private_key")))
     if method == "GET" and path == "/mesh/door":
         from .. import mesh
-        return _ok(mesh.read_door((query.get("fp") or "").strip(), limit=int(query.get("limit") or 100)))
+        try:
+            limit = int(query.get("limit") or 100)
+        except (TypeError, ValueError):
+            limit = 100
+        return _ok(mesh.read_door((query.get("fp") or "").strip(), limit=limit))
 
     # Formation — "make a wish for life"; the tool FINDS the fitting practice, then points off the
     # screen. Stateless (stores nothing about a person's life); found/attributed, never generated.
@@ -1436,7 +1449,10 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/deck":
         # Search a deck first (fast), fall back to the whole keeping if it comes up short.
         from .. import decks as _decks
-        lim = min(50, max(1, int(query.get("limit") or 12)))
+        try:
+            lim = min(50, max(1, int(query.get("limit") or 12)))
+        except (TypeError, ValueError):
+            lim = 12
         return _ok(_decks.search(query.get("q", ""), (query.get("id") or "").strip() or None, lim))
 
     if method == "GET" and path == "/archetypes":

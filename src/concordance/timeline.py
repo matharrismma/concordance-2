@@ -15,10 +15,6 @@ reflects the ordinary consensus this project could find no live scholarly argume
 """
 from __future__ import annotations
 
-import json
-import os
-import re
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 NOTE = ("Old Testament, New Testament (Acts onward), and Church History — one spine, creation to "
@@ -488,52 +484,12 @@ _TIMELINE: List[Dict[str, Any]] = [
 _BY_ID = {t["id"]: t for t in _TIMELINE}
 
 
-def _bible_path() -> Optional[Path]:
-    env = os.environ.get("CONCORDANCE_BIBLE_EN", "").strip()
-    if env:
-        return Path(env)
-    d = os.environ.get("CONCORDANCE_DATA_DIR", "").strip()
-    p = (Path(d) if d else Path("data")) / "bible_en.jsonl"
-    return p if p.exists() else None
-
-
-def _parse_ref(ref: str):
-    """A single 'Book ch:v-v' reference (no comma-lists, no multi-chapter ranges) -> (book, ch, v1, v2)."""
-    m = re.match(r"^(\d?\s?[A-Za-z]+)\s+(\d+):(\d+)(?:-(\d+))?$", ref.strip())
-    if not m:
-        return None
-    book, ch, v1, v2 = m.group(1).strip(), int(m.group(2)), int(m.group(3)), m.group(4)
-    return book, ch, v1, int(v2) if v2 else v1
-
-
 def _passage_text(ref: str) -> str:
-    """The WEB text for a single-chapter reference. Multi-chapter/whole-book refs are display-only in
-    the table; we don't attempt verbatim inline text for those — the reference links out to the full
-    passage reader instead."""
-    if not ref:
-        return ""
-    parsed = _parse_ref(ref)
-    if not parsed:
-        return ""
-    book, ch, v1, v2 = parsed
-    p = _bible_path()
-    if not p:
-        return ""
-    out: List[str] = []
-    try:
-        for line in p.read_text(encoding="utf-8", errors="replace").splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                r = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if r.get("book") == book and r.get("chapter") == ch and v1 <= (r.get("verse") or 0) <= v2:
-                out.append(r.get("text") or "")
-    except OSError:
-        return ""
-    return " ".join(out)
+    """The WEB text for a single-chapter reference. Multi-chapter/whole-book refs are display-only
+    in the table — the shared helper declines those and the reference links out to the full passage
+    reader instead. One cached corpus read serves every caller (verifiers.scripture.passage_text)."""
+    from .verifiers.scripture import passage_text
+    return passage_text(ref)
 
 
 def eras() -> Dict[str, Any]:

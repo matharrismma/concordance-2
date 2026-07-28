@@ -201,6 +201,22 @@ def read_passage(ref: str) -> Dict[str, Any]:
     return default_bible().passage(ref)
 
 
+def passage_text(ref: str) -> str:
+    """The joined WEB text of a single-chapter reference, or "" when the ref doesn't parse
+    (cross-chapter ranges, comma-lists) or isn't found — the display-only decline the study
+    tables (harmony, timeline, teachings) rely on. One cached read of the corpus serves all
+    callers; this is THE shared passage-text helper — do not hand-roll another."""
+    if not ref:
+        return ""
+    try:
+        p = read_passage(ref)
+    except Exception:  # noqa: BLE001 — a missing/corrupt corpus declines, never crashes a table
+        return ""
+    if p.get("status") != "ok":
+        return ""
+    return " ".join(v.get("text") or "" for v in p.get("verses") or [])
+
+
 def word_study(strongs_num: str) -> Dict[str, Any]:
     """Strong's word study — the original-language definition + every occurrence — via the
     triangulation backend (concordance.strongs). The agent in the original source: it FINDS
