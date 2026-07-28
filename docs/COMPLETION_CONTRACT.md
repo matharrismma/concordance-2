@@ -97,6 +97,8 @@ Discoveries outside scope → the drift ledger.
    - OT / NT (Acts–Revelation) / church-history unified timeline — from creation through today.
      Where chronology systems genuinely disagree (Ussher vs. others on OT dates, early vs. late
      Revelation dating, etc.), present the competing systems side by side, not one settled view.
+     **DONE** (shipped 2026-07-27, `src/concordance/timeline.py`, 100 events, witness-gated
+     `/timeline` + MCP tool + `timeline.html`).
    - Maps/Atlas — real biblical place coordinates.
    - Back-matter reference material — topical index, weights/measures, parables/miracles lists,
      book introductions, names of God.
