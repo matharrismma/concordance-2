@@ -155,6 +155,47 @@ Discoveries outside scope → the drift ledger.
   It never took a key. The count was FIVE, not six. Verify with
   `grep -n private_key src/concordance/web/api.py`.
 
+- **§5.6's "SYSTEM_ERROR distinct from BROKEN" had never been implemented (found 2026-07-28).**
+  Found by auditing §5 line by line instead of declaring it. `SYSTEM_ERROR` appeared in **zero**
+  source files, and `verify_derivation` collapsed three different things into one word — its own
+  comment admitted it: `else:  # MISMATCH / ERROR / broken link`. Reproduced through the public API:
+
+      speed_of_wave=343,      frequency_hz=440, wavelength_m=99     -> BROKEN, broken_at='a'
+      speed_of_wave="fast",   frequency_hz=440, wavelength_m=0.7795 -> BROKEN, broken_at='a'
+
+  The first is a real falsehood. The second is **our verifier failing to parse an input**. Identical
+  output. Someone checking a dose, a wage, or a load rating would be told their claim was false when
+  the truth was that we could not check it. This is the mirror of the kernel's fifth clause: we guard
+  against silently upgrading OUR authority, and here we were silently downgrading THEIR claim on the
+  strength of our own bug. `receipts.py` compounded it — `"ERROR": "REJECT"` sealed engine failures as
+  permanent, citable rejections — and `audit.html` labelled every non-confirmed claim `BROKEN` from a
+  server field whose name already confessed the merge, `broken_or_unchecked`.
+
+  **RESOLVED 2026-07-28.** `verify_derivation` now returns `SYSTEM_ERROR` with `error_at` and a
+  `means` line; precedence is **BROKEN > SYSTEM_ERROR > INCOMPLETE > HOLDS** so honesty runs both
+  ways — an engine error never becomes a hiding place for a genuine falsehood. `SYSTEM_ERROR` seals
+  as QUARANTINE, never REJECT. The auditor now counts `broken` and `unchecked` separately (the sum is
+  kept for existing callers). Every surface says it in words rather than showing a raw enum:
+  `audit.html` ("NOT CHECKED", dashed, never the failure colour), `check.html`, `ask.html`, and — for
+  parity — the MCP `verify` description and `llms.txt` both instruct agents never to relay it as a
+  refutation. Guarded by `tests/test_system_error_distinct.py` (three of its tests fail against the
+  pre-fix engine; verified by reverting).
+
+  **A second, live instance surfaced when the gate ran.** `tests/test_security.py::test_expression_size_guard`
+  asserted `verdict == "BROKEN"` for an expression over the 4k cap. So the same conflation was already
+  reaching real callers by a different road: someone submitting a large but perfectly **true**
+  expression was told their claim was false, when all that happened is that we declined to evaluate
+  it. The test now asserts what it actually guards — refused cheaply, never evaluated, never sealed as
+  holding — plus `broken_at is None` ("we found nothing false; we declined to look"). Worth noting the
+  discipline: the expected value was changed only after confirming the *security* property still
+  holds (refused in 0.000s, never HOLDS), not to make a red test go green.
+
+  **Deliberately NOT done:** the §7 taxonomy also names `BROKEN_CLAIM` and `OUT_OF_SCOPE`, but the
+  live vocabulary is `BROKEN` / `INCOMPLETE` across the engine, seals, tests and five pages. A
+  sweeping rename for cosmetic conformance to a word would risk real breakage and buy nothing a
+  reader can feel. The load-bearing half of §5.6 — the distinction a person actually relies on — is
+  what was implemented.
+
 ---
 
 *Completion is reached when §5 all pass against one named commit. The implementing model does not

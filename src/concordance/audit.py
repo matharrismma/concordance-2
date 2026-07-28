@@ -226,15 +226,25 @@ def audit(text: str, config, seal: bool = True) -> Dict[str, Any]:
     from .derivation import verify_derivation
     dres = verify_derivation([{k: s[k] for k in ("id", "domain", "spec", "claim")} for s in steps])
     results = []
-    held = broken = 0
+    held = broken = unchecked = 0
     for s, t in zip(steps, dres["trail"]):
-        ok = t["status"] == "CONFIRMED"
-        held += 1 if ok else 0
-        broken += 0 if ok else 1
+        st = t["status"]
+        if st == "CONFIRMED":
+            held += 1
+        elif st == "MISMATCH":
+            broken += 1
+        else:  # NOT_APPLICABLE / ERROR — we did not get a result, which is not a finding
+            unchecked += 1
         results.append({"claim": s["claim"], "extractor": s["extractor"], "domain": s["domain"],
-                        "status": t["status"], "detail": t["detail"]})
+                        "status": st, "detail": t["detail"]})
     out: Dict[str, Any] = {
-        "claims_found": len(steps), "held": held, "broken_or_unchecked": broken,
+        "claims_found": len(steps), "held": held,
+        # `broken` is a finding about the CLAIM; `unchecked` is a fact about US. The old single
+        # `broken_or_unchecked` counter merged the two and the page then labelled every one of
+        # them "BROKEN" — telling people their true claim was false whenever we simply failed.
+        # Kept as the sum for callers that already read it; read the split instead.
+        "broken": broken, "unchecked": unchecked,
+        "broken_or_unchecked": broken + unchecked,
         "results": results, "verdict": dres["verdict"],
         "note": (f"{len(steps)} claim(s) checked — the rest of the text was NOT. "
                  "Every claim shows its source quote; nothing was generated."),

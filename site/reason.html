@@ -128,12 +128,18 @@ sqrt(25) = 5
     if (!ok) return;
     out.innerHTML = "<p class=muted>checking…</p>";
     post({steps:steps}).then(function(d){
-      var cls = d.verdict==="HOLDS"?"holds":(d.verdict==="INCOMPLETE"?"inc":"broken");
-      var h = "<div class=\"verdict "+cls+"\">"+esc(d.verdict)+
-        (d.broken_at?" — trust breaks at step "+esc(d.broken_at.replace('s','')):"")+"</div>";
+      // SYSTEM_ERROR is our failure — it must not wear "broken", which reads as "your claim is
+      // false", and it needs `error_at` to say where, since `broken_at` is correctly null.
+      var sysErr = d.verdict==="SYSTEM_ERROR";
+      var cls = d.verdict==="HOLDS"?"holds":((d.verdict==="INCOMPLETE"||sysErr)?"inc":"broken");
+      var stopped = d.broken_at || (sysErr ? d.error_at : null);
+      var h = "<div class=\"verdict "+cls+"\">"+(sysErr?"WE COULD NOT CHECK THIS":esc(d.verdict))+
+        (stopped?" — "+(sysErr?"our engine stopped at step ":"trust breaks at step ")+
+          esc(String(stopped).replace('s','')):"")+"</div>"+
+        (sysErr?"<p class=muted>"+esc(d.means||"A limit on our side. It says nothing about whether the claim is true.")+"</p>":"");
       (d.trail||[]).forEach(function(t,i){
         var sc = t.status==="CONFIRMED"?"ok":(t.status==="NOT_APPLICABLE"?"na":"no");
-        var at = (d.broken_at===t.id)?" at":"";
+        var at = (stopped===t.id)?" at":"";
         h += "<div class=\"step"+at+"\"><span class=\"s "+sc+"\">"+esc(t.status)+"</span> "+
              "<span class=c>"+esc(lines[i])+"</span><div class=d>"+esc(t.detail||"")+"</div></div>";
       });

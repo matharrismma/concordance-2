@@ -214,9 +214,17 @@ function render(d){
     const detail = step.detail||v.detail||'';
     const seal = v.seal ? '<div class="receipt">seal: <a href="'+esc(v.seal.cite_url)+'">'+
       esc((v.seal.content_hash||'').slice(0,20))+'…</a> — re-checkable, tamper-evident</div>' : '';
-    html = '<div class="verdict '+cls+'">'+(verdict==='HOLDS'?'✓ Holds':(verdict==='BROKEN'?'✗ Broken':esc(verdict)))+'</div>'+
-      '<div class="trail">'+esc(detail)+'</div>'+seal;
-    hear = hearBtn(((verdict==='HOLDS'?'Holds. ':verdict==='BROKEN'?'Broken. ':'')+detail).trim());
+    // "We could not check this" must never be spoken — or shown — as "Broken."
+    const label = verdict==='HOLDS' ? '✓ Holds'
+                : verdict==='BROKEN' ? '✗ Broken'
+                : verdict==='SYSTEM_ERROR' ? '⚠ We could not check this' : esc(verdict);
+    const ours = verdict==='SYSTEM_ERROR'
+      ? '<div class="trail"><em>'+esc(v.means||'A limit on our side — it says nothing about whether the claim is true.')+'</em></div>'
+      : '';
+    html = '<div class="verdict '+cls+'">'+label+'</div>'+
+      '<div class="trail">'+esc(detail)+'</div>'+ours+seal;
+    hear = hearBtn(((verdict==='HOLDS'?'Holds. ':verdict==='BROKEN'?'Broken. ':
+      verdict==='SYSTEM_ERROR'?'We could not check this. ':'')+detail).trim());
   } else if(d.scripture){
     const s=d.scripture;
     const vt = s.text||s.error||'(not found)';

@@ -35,11 +35,22 @@ def test_rate_limiter_window_slides():
 
 
 def test_expression_size_guard():
+    """The guard exists to stop a huge expression from ever reaching the evaluator (DoS). What it
+    must guarantee is that the input is REFUSED, cheaply, and never sealed as holding.
+
+    Expected verdict changed BROKEN -> SYSTEM_ERROR on 2026-07-28, and the change is the point:
+    declining to evaluate something is a fact about OUR limit, not a finding that the caller's claim
+    is false. Under the old behaviour a large but perfectly true expression was told it was BROKEN —
+    the same conflation that fix removed (contract §5.6, tests/test_system_error_distinct.py).
+    """
     from concordance.derivation import verify
     big = "x+" * 5000 + "1"                              # ~10k chars, over the 4k cap
     r = verify({"mode": "equality", "params": {"expr_a": big, "expr_b": "1", "variables": {}}})
-    assert r["verdict"] == "BROKEN"                      # an ERROR step governs the composite
-    assert any("too large" in (s.get("detail", "")) for s in r["trail"])
+    assert r["verdict"] != "HOLDS", "an unevaluated expression must never be sealed as holding"
+    assert r["verdict"] == "SYSTEM_ERROR", "our cap is ours to own — not a verdict on the claim"
+    assert r["broken_at"] is None, "we found nothing false; we declined to look"
+    assert r["error_at"] is not None, "and we say WHERE we stopped"
+    assert any("too large" in (s.get("detail", "")) for s in r["trail"]), "and why, in the trail"
 
 
 def test_mcp_origin_is_validated():

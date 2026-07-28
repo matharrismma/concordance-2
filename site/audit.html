@@ -44,6 +44,8 @@
   .v{font-family:var(--mono); font-size:.75rem; letter-spacing:.1em; padding:.1rem .5rem; border-radius:4px}
   .v.ok{color:var(--pass); border:1px solid rgba(139,191,143,.4)}
   .v.bad{color:var(--broken); border:1px solid rgba(201,138,138,.4)}
+  /* neither pass nor fail — the engine's own limit, so it must not wear the failure colour */
+  .v.unchecked{color:var(--muted); border:1px dashed rgba(150,150,150,.45)}
   .quote{color:var(--ink)} .trail{color:var(--dim); font-size:.85rem; font-family:var(--mono); margin-top:.15rem}
   .summary{border:1px solid var(--line); border-radius:6px; padding:1rem 1.2rem; margin:1.2rem 0}
   .muted{color:var(--dim)} .mono{font-family:var(--mono)}
@@ -110,17 +112,30 @@
         if (d.claims_found === 0) {
           out.innerHTML = "<div class=summary><span class=muted>" + esc(d.note) + "</span></div>"; return;
         }
+        var nUnchecked = (d.unchecked != null) ? d.unchecked : 0;
+        var nBroken = (d.broken != null) ? d.broken : (d.broken_or_unchecked || 0) - nUnchecked;
         var h = "<div class=summary><b>" + d.claims_found + " claim(s) checked</b> — " +
                 "<span style=\"color:var(--pass)\">" + d.held + " hold</span>" +
-                (d.broken_or_unchecked ? " · <span style=\"color:var(--broken)\">" + d.broken_or_unchecked + " do not</span>" : "") +
+                (nBroken ? " · <span style=\"color:var(--broken)\">" + nBroken + " do not</span>" : "") +
+                (nUnchecked ? " · <span class=muted>" + nUnchecked + " we could not check</span>" : "") +
                 "<div class=muted style=\"font-size:.85rem;margin-top:.3rem\">" + esc(d.note) + "</div>" +
                 (d.seal && d.seal.cite_url ? "<div style=\"margin-top:.5rem\"><a href=\"" + esc(d.seal.cite_url) + "\">the sealed receipt for this report ↗</a></div>" : "") +
                 "</div>";
         d.results.forEach(function(r){
-          var ok = r.status === "CONFIRMED";
-          h += "<div class=result><span class=\"v " + (ok?"ok":"bad") + "\">" + (ok?"HOLDS":"BROKEN") + "</span> " +
+          // Three states, not two. "We could not check this" is a fact about the engine and must
+          // never be shown as BROKEN — that would tell someone their true claim is false because
+          // our verifier failed. Anything that is neither CONFIRMED nor MISMATCH is ours to own.
+          var cls, label, aside = "";
+          if (r.status === "CONFIRMED") { cls = "ok"; label = "HOLDS"; }
+          else if (r.status === "MISMATCH") { cls = "bad"; label = "BROKEN"; }
+          else {
+            cls = "unchecked"; label = "NOT CHECKED";
+            aside = "<div class=trail><em>Our engine could not check this one — that is a limit "
+                  + "on our side and says nothing about whether the claim is true.</em></div>";
+          }
+          h += "<div class=result><span class=\"v " + cls + "\">" + label + "</span> " +
                "<span class=quote>&ldquo;" + esc(r.claim) + "&rdquo;</span>" +
-               "<div class=trail>" + esc(r.detail) + "</div></div>";
+               "<div class=trail>" + esc(r.detail) + "</div>" + aside + "</div>";
         });
         out.innerHTML = h;
       })

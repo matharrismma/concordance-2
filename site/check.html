@@ -156,9 +156,17 @@ async function verify() {
     const seal = d.seal ? '<div class="muted" style="font-size:.82rem;margin-top:.5rem">🔒 receipt: ' +
       '<a class="mono" href="' + esc(d.seal.cite_url) + '">' + esc((d.seal.content_hash || "").slice(0, 24)) +
       '…</a> — re-checkable, tamper-evident</div>' : '';
-    out.innerHTML = '<div class="card"><div class="verdict ' + cls + '">' +
-      (v === "HOLDS" ? "✓ HOLDS" : (v === "BROKEN" ? "✗ BROKEN" : v)) + '</div>' +
-      '<div class="trail">' + esc(step.detail || d.detail || "") + '</div>' + seal + '</div>';
+    // SYSTEM_ERROR is OUR failure, so it says so plainly rather than showing a raw enum —
+    // and never wears the BROKEN mark, which would read as "your claim is false."
+    const label = v === "HOLDS" ? "✓ HOLDS"
+                : v === "BROKEN" ? "✗ BROKEN"
+                : v === "SYSTEM_ERROR" ? "⚠ WE COULD NOT CHECK THIS" : v;
+    const ours = v === "SYSTEM_ERROR"
+      ? '<div class="muted" style="font-size:.85rem;margin-top:.4rem">' +
+        esc(d.means || "This is a limit on our side. It says nothing about whether the claim is true.") +
+        '</div>' : '';
+    out.innerHTML = '<div class="card"><div class="verdict ' + cls + '">' + label + '</div>' +
+      '<div class="trail">' + esc(step.detail || d.detail || "") + '</div>' + ours + seal + '</div>';
   } catch (e) { out.innerHTML = '<p class="muted">API unreachable — start it with <span class="mono">python -m concordance serve</span></p>'; }
 }
 async function checkAnything() {

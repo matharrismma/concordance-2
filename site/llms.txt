@@ -1,7 +1,8 @@
 # Narrow Highway
 
-> **Narrow Highway gives humans and agents a governed way to find, check, use, and preserve
-> information without losing its source, authority, or history.** We serve families, children, and
+> **Narrow Highway gives humans and agents a governed way to find, check, use, and preserve information without losing its source, authority, or history.**
+>
+> We serve families, children, and
 > communities that need us first — the people who cannot afford to be without it; the tool is free
 > and needs no account.
 >
@@ -49,7 +50,12 @@ can shape a structured claim.
   finance, chemistry, law, statistics, nutrition, cryptography, geometry, astronomy, energy,
   networking, music_theory, ... Each domain reads its own artifact key (e.g. `MED_VERIFY`,
   `FIN_VERIFY`); the MCP `verify` tool description documents the shape.
-  Returns `{verdict: HOLDS|BROKEN|INCOMPLETE, trail, seal:{content_hash, cite_url}}`.
+  Returns `{verdict: HOLDS|BROKEN|INCOMPLETE|SYSTEM_ERROR, trail, seal:{content_hash, cite_url}}`.
+  **`SYSTEM_ERROR` is ours, not yours.** `BROKEN` means we checked and the claim does not hold;
+  `SYSTEM_ERROR` means OUR verifier could not run at all, and says nothing about whether the claim
+  is true. Do not report it to a user as a refutation, and do not retry it as though the claim were
+  at fault — it carries a `means` line and an `error_at` naming the step we failed on. `INCOMPLETE`
+  means no verifier applied (`gap_at`). Only `BROKEN` is a finding about the caller.
   A public benchmark holds **0 false-positives across every domain** — the engine has never
   sealed a falsehood (e.g. `x/x = 1` is caught — undefined at x=0 — not sealed). Tolerances are
   clamped: a caller may tighten a check, never loosen one.

@@ -24,14 +24,19 @@ def _secular_tools() -> List[dict]:
     return [
         {"name": "verify",
          "description": ("Verify a claim deterministically — returns a verdict "
-                         "(HOLDS / BROKEN / INCOMPLETE), the worked trail, AND a sealed receipt "
+                         "(HOLDS / BROKEN / INCOMPLETE / SYSTEM_ERROR), the worked trail, AND a "
+                         "sealed receipt "
                          "{content_hash, cite_url} you can re-fetch and re-verify (seal_fetch). "
                          "Two forms: (a) MATH — {mode, params}; (b) ANY DOMAIN — pass `steps`, a "
                          "list of {id, domain, spec} where spec is that domain's packet (e.g. "
                          "{domain:'physics', spec:{PHYS_VERIFY:{mass_kg, acceleration_m_per_s2, "
                          "claimed_force_N}}}). ~60 secular domains are covered (physics, medicine, "
                          "finance, chemistry, ...); find_verifier(keyword) locates the right one. "
-                         "The engine eliminates what is not the answer; it does not generate it."),
+                         "The engine eliminates what is not the answer; it does not generate it. "
+                         "READ THE VERDICT EXACTLY: only BROKEN is a finding about the claim. "
+                         "SYSTEM_ERROR means OUR verifier could not run (see `means` and `error_at`) "
+                         "and says NOTHING about whether the claim is true — never relay it to a "
+                         "human as a refutation. INCOMPLETE means no verifier applied (`gap_at`)."),
          "inputSchema": {"type": "object", "properties": {
              "mode": {"type": "string", "description": "MATH form: equality | inequality | derivative | integral | limit | solve"},
              "params": {"type": "object", "description": "MATH form: e.g. {expr_a, expr_b, variables} for equality"},

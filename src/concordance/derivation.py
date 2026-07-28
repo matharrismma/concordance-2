@@ -173,17 +173,33 @@ def verify_step(domain: str, spec: Dict[str, Any]) -> Dict[str, str]:
 
 
 def verify_derivation(steps: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Verify an ordered derivation. The full trail is returned, but the COMPOSITE
-    verdict is governed by the FIRST step that breaks — where trust stops."""
+    """Verify an ordered derivation. The full trail is always returned; the COMPOSITE verdict
+    reports the most serious thing that happened, and `broken_at` / `error_at` / `gap_at` each
+    name the FIRST step of their kind — where trust stopped, and why.
+
+    "Our engine could not check this" is NOT "your claim is false." Those are different
+    sentences about different things, and only one of them is about the caller. A verifier
+    that ERRORs — unusable input, a raise, a missing domain — is a failure of OURS, so it
+    returns SYSTEM_ERROR, never BROKEN (contract §5.6, and the taxonomy in §7). Collapsing
+    them would be the inverse of the kernel's fifth clause: instead of silently upgrading our
+    authority, we would be silently downgrading the caller's claim on the strength of our own
+    bug. Someone checking a dosage deserves to know which of the two happened.
+
+    Precedence, so honesty runs BOTH ways:
+        BROKEN > SYSTEM_ERROR > INCOMPLETE > HOLDS
+    A genuine MISMATCH anywhere still governs — an engine error elsewhere in the derivation
+    must not become a place for a real falsehood to hide.
+    """
     if not isinstance(steps, list) or not steps:
-        return {"verdict": "ERROR", "detail": "no steps provided", "trail": []}
+        return {"verdict": "SYSTEM_ERROR", "detail": "no steps provided", "trail": [],
+                "means": "the engine was given nothing to check — this says nothing about any claim"}
 
     trail: List[Dict[str, Any]] = []
     seen_ids: set = set()
     confirmed_ids: set = set()
-    verdict = "HOLDS"
     broken_at = None
     gap_at = None
+    error_at = None
 
     for i, step in enumerate(steps):
         sid = str(step.get("id") or f"s{i}")
@@ -211,23 +227,48 @@ def verify_derivation(steps: List[Dict[str, Any]]) -> Dict[str, Any]:
 
         if st == "CONFIRMED" and link_ok:
             confirmed_ids.add(sid)
-        elif verdict == "HOLDS":  # first break governs the composite
-            if st == "NOT_APPLICABLE":
-                verdict, gap_at = "INCOMPLETE", sid
-            else:  # MISMATCH / ERROR / broken link
-                verdict, broken_at = "BROKEN", sid
+        elif st == "ERROR" and link_ok:
+            # OUR failure, not the caller's. Recorded separately so it can never be reported
+            # as a falsehood about their claim.
+            if error_at is None:
+                error_at = sid
+        elif st == "NOT_APPLICABLE":
+            # No verifier applied, so there is no result to call sound or unsound — a gap,
+            # whatever the links did. (Unchanged from before: do not harden a gap into a
+            # falsehood, which is the very thing this function was fixed to stop doing.)
+            if gap_at is None:
+                gap_at = sid
+        else:  # MISMATCH, or a step building on something unconfirmed — a real break
+            if broken_at is None:
+                broken_at = sid
 
-    return {
+    # Precedence: a real falsehood governs even if our engine also stumbled elsewhere.
+    if broken_at is not None:
+        verdict = "BROKEN"
+    elif error_at is not None:
+        verdict = "SYSTEM_ERROR"
+    elif gap_at is not None:
+        verdict = "INCOMPLETE"
+    else:
+        verdict = "HOLDS"
+
+    out = {
         "verdict": verdict,
         "steps": len(steps),
         "confirmed_steps": len(confirmed_ids),
         "broken_at": broken_at,
         "gap_at": gap_at,
+        "error_at": error_at,
         "trail": trail,
         "note": ("The trail is the trust: each step is machine-verified and may build "
                  "only on confirmed prior steps. The engine verifies a provided "
                  "derivation; it does not generate the answer."),
     }
+    if verdict == "SYSTEM_ERROR":
+        out["means"] = ("OUR engine could not perform this check — this is a failure on our side "
+                        "and says NOTHING about whether the claim is true. Do not read it as a "
+                        "refutation.")
+    return out
 
 
 def verify(spec: Dict[str, Any], domain: str = "mathematics") -> Dict[str, Any]:

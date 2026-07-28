@@ -28,9 +28,12 @@ from .packet import GateResult
 from .record import WitnessRecord, axis_coords_for, with_permanent_ref
 from .verifiers.base import VerifierResult
 
-# verify_derivation verdicts -> the sealed record's DecisionStatus
+# verify_derivation verdicts -> the sealed record's DecisionStatus.
+# SYSTEM_ERROR maps to QUARANTINE, never REJECT: REJECT is a finding ABOUT THE CLAIM, and an
+# engine failure is a fact about US. Sealing our own bug as a rejection would put a permanent,
+# citable "this was rejected" on something we never actually checked. Held, unjudged, is honest.
 _VERDICT_TO_OVERALL = {"HOLDS": "PASS", "BROKEN": "REJECT", "INCOMPLETE": "QUARANTINE",
-                       "ERROR": "REJECT"}
+                       "SYSTEM_ERROR": "QUARANTINE", "ERROR": "QUARANTINE"}
 
 # Appending to the hash chain is read-then-write; serialize it within the process so
 # concurrent /verify requests cannot fork the chain (ThreadingHTTPServer is one process).
@@ -83,7 +86,11 @@ def record_from_derivation(result: Dict[str, Any], *, domain: str = "mathematics
         reasons=[f"derivation verdict: {verdict}"],
         details={"verdict": verdict, "steps": result.get("steps"),
                  "confirmed_steps": result.get("confirmed_steps"),
-                 "broken_at": result.get("broken_at"), "gap_at": result.get("gap_at")},
+                 # error_at travels with the seal too: for a SYSTEM_ERROR, broken_at is correctly
+                 # null, so without this the permanent record would name no step at all and
+                 # anyone re-fetching it could not tell where our engine gave out.
+                 "broken_at": result.get("broken_at"), "gap_at": result.get("gap_at"),
+                 "error_at": result.get("error_at")},
     )
     return WitnessRecord(overall=overall, gate_results=(gate,), verifier_results=vrs,
                          axis_coords=axis_coords_for(domain), packet_id=packet_id)

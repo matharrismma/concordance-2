@@ -695,8 +695,11 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
             raw = verify_domain("number_theory",
                                 {"NUM_VERIFY": {"n_prime": pc[0], "claimed_prime": pc[1]}})
             status = raw.get("status", "ERROR")
+            # One vocabulary with verify_derivation: ERROR is ours, so it becomes SYSTEM_ERROR
+            # and never BROKEN — the caller asked a question, they did not make a false claim.
             verdict = {"CONFIRMED": "HOLDS", "PASS": "HOLDS",
-                       "MISMATCH": "BROKEN", "REJECT": "BROKEN"}.get(status, status)
+                       "MISMATCH": "BROKEN", "REJECT": "BROKEN",
+                       "ERROR": "SYSTEM_ERROR", "NOT_APPLICABLE": "INCOMPLETE"}.get(status, status)
             res = {"verdict": verdict, "steps": 1, "confirmed_steps": 1 if verdict == "HOLDS" else 0,
                    "detail": raw.get("detail", ""),
                    "trail": [{"domain": "number theory", "note": raw.get("detail", ""), "status": status}]}
