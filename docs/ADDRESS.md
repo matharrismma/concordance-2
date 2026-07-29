@@ -161,3 +161,30 @@ science is absent.
 **Status: v1 measured and rejected. `src/concordance/address.py` is STAGED — imported by
 nothing, stored nowhere.** Next session: replace the hand-written plane tables with the derived
 classification above, re-measure, and only proceed past 90% placement.
+
+## v3 — MEASURED AND ACCEPTED, 2026-07-29
+
+| version | addressed | what changed |
+|---|---:|---|
+| v1 | 55.1% | hand-written plane tables — **rejected** |
+| v2 | 96.8% | planes DERIVED from `SHARD_ASSIGN` × the verifier registry; non-Latin titles fall back to ref/id; a named source implies REF authority |
+| **v3** | **99.97%** | added `REL` — a minted edge is a *relation*, not a subject; split `card_src_` so a dictionary headword is `FCT` and a book is `TXT` |
+
+**548,440 of 548,585 cards addressed. 145 UNPLACED (0.03%)**, each named by shelf (the-works 66,
+sources 12, mathematics 7, atlas 3, chemistry 3) rather than absorbed into a default.
+
+Facet spread — the test of whether a facet is real: `FCT` 360,898 · `TXT` 115,939 ·
+`EXP` 49,495 · `REL` 17,182 · `IDX` 4,690 · `CHK` 123 · `OBJ` 101 · `MON` 12. In v2 `TXT` alone
+was 84% of everything, which meant the kind facet distinguished nothing; the fact/text split
+fixed it. **23,789 coordinates collide across sources** — the same subject witnessed twice.
+
+Gated by `tests/test_address.py` (6 tests): the parser round-trips, every prefix is a query,
+derivation is deterministic across repeated calls, a card with nothing to go on still comes back
+`UNPLACED`, coverage holds above a 90% floor over the REAL corpus, and **no single facet value
+may exceed 90% of the library** — so the collapse that made v2 useless fails the gate instead of
+passing quietly.
+
+**Still STAGED, deliberately**: nothing stores the address yet. Steps 4–6 (render it on the card
+page, `/search` output, and the MCP surface; then a prefix-query route; then the shard column)
+remain — because an index the reader cannot see is a private index, and that is the one failure
+this project keeps re-learning.

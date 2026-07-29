@@ -31,7 +31,7 @@ from typing import Any, Dict, Optional, Tuple
 
 # ── the closed vocabularies ──────────────────────────────────────────────────────────────────
 PLANES = ("WIT", "SCI", "PRA", "HUM", "OPS")
-KINDS = ("FCT", "CHK", "EXP", "IDX", "MON", "TXT", "MBR", "OBJ")
+KINDS = ("FCT", "CHK", "EXP", "IDX", "MON", "TXT", "MBR", "OBJ", "REL")
 AUTHORITIES = ("SCR", "REF", "MBR", "WEB")
 VERIFICATIONS = ("CONFIRMED", "WITNESSED", "UNCHECKED", "COULD-NOT-CHECK", "BROKEN", "MIXED")
 UNPLACED = "UNPLACED"
@@ -63,14 +63,23 @@ def _slug(s: Any, limit: int = 48) -> str:
     return _SLUG.sub("-", str(s or "").lower()).strip("-")[:limit]
 
 
+# v1 measured 44.9% UNPLACED, 204,136 of them on the plane alone, because these tables were
+# hand-written and missed the LARGEST shelves in the keeping (dictionary 149,490 · geography
+# 69,135 · taxonomy 37,933). Hand-maintained vocabularies rot; derived ones cannot. So the
+# tables below are now OVERRIDES ONLY, and the general case comes from machinery that already
+# classifies every shelf: corpus_db.SHARD_ASSIGN (the shard tiers) crossed with the verifier
+# registry. A shelf neither names nor implies remains UNPLACED and is reported.
+_SHARD_PLANE = {"word": "WIT", "science": "SCI", "world": "SCI",
+                "dictionary": "HUM", "books": "HUM", "core": None}
+
+
 def plane_of(card: Dict[str, Any]) -> Optional[str]:
     """WIT / SCI / PRA / HUM / OPS — or None (never a default)."""
     shelf = (card.get("shelf") or "").strip().lower()
     if not shelf:
         return None
+    # 1. explicit overrides, where our own doctrine differs from the shard tiering
     if shelf in _WITNESS_SHELVES:
-        # A spine belongs to the plane of what it holds; witness is the safe read for the
-        # scriptural spines, and `surface` disambiguates the rest.
         if shelf == "spine" and (card.get("surface") or "") != "witness":
             return "OPS"
         return "WIT"
@@ -80,15 +89,26 @@ def plane_of(card: Dict[str, Any]) -> Optional[str]:
         return "HUM"
     if shelf in _OPS_SHELVES:
         return "OPS"
-    # A shelf that names a verifier domain is science by construction.
+    # 2. a shelf that names a verifier domain is science by construction
     try:
         from . import verifiers
         if shelf in verifiers.VERIFIERS:
             return "SCI"
     except Exception:  # noqa: BLE001 — verifiers unavailable is not a reason to guess
         pass
+    # 3. DERIVED: the shard the builder assigns this shelf to already encodes its character
+    try:
+        from . import corpus_db
+        tier = corpus_db.SHARD_ASSIGN.get(shelf)
+        if tier and _SHARD_PLANE.get(tier):
+            return _SHARD_PLANE[tier]
+    except Exception:  # noqa: BLE001
+        pass
+    # 4. last resort: the surface a card is served on
     if (card.get("surface") or "") == "witness":
         return "WIT"
+    if (card.get("surface") or "") == "secular":
+        return "SCI"
     return None
 
 
@@ -96,6 +116,11 @@ def kind_of(card: Dict[str, Any]) -> Optional[str]:
     """The card's kind, read from what it IS — box and id prefix are the honest signals."""
     cid = str(card.get("id") or "")
     box = (card.get("box") or "").strip().lower()
+    # A minted edge is a RELATION, not a subject — 17,182 of them were UNPLACED in v2 because
+    # the vocabulary had no word for what they are. Adding the word is honest; forcing them into
+    # FCT would not be.
+    if (card.get("shelf") or "").lower() == "connections" or cid.startswith("card_edge_"):
+        return "REL"
     if cid.startswith("card_domchk_"):
         return "CHK"
     if cid.startswith(("card_comm_",)):
@@ -108,7 +133,16 @@ def kind_of(card: Dict[str, Any]) -> Optional[str]:
         return "MON"
     if cid.startswith(("card_alm_", "card_lesson_", "card_enc_", "card_isbe_", "card_dict_")):
         return "FCT"
-    if cid.startswith("card_src_") or (card.get("kind") or "") == "verse":
+    # `card_src_` covers a third of the keeping, and calling all of it TXT made one facet value
+    # 84% of the library — a facet that does not discriminate is not a facet. So it splits by
+    # what the entry IS: a dictionary headword or a species record is a FACT; a book or a verse
+    # is primary TEXT.
+    if cid.startswith("card_src_"):
+        shelf = (card.get("shelf") or "").lower()
+        if shelf in {"gutenberg", "classics", "scripture", "hebrew_ot", "greek_nt", "history"}:
+            return "TXT"
+        return "FCT"
+    if (card.get("kind") or "") == "verse":
         return "TXT"
     if (card.get("author") or "") == "member" or (card.get("authority_tier") or "") == "member":
         return "MBR"
@@ -119,10 +153,22 @@ def kind_of(card: Dict[str, Any]) -> Optional[str]:
 
 
 def authority_of(card: Dict[str, Any]) -> Optional[str]:
+    """SCR / REF / MBR / WEB. A card with no declared tier but a NAMED SOURCE is reference
+    authority — that is what a waybill means. Only a card with neither is UNPLACED."""
     tier = ((card.get("source") or {}).get("authority_tier")
             or card.get("authority_tier") or "").strip().lower()
-    return {"scripture": "SCR", "creed": "SCR", "reference": "REF", "matt": "REF",
-            "member": "MBR", "web": "WEB", "web_unverified": "WEB"}.get(tier)
+    mapped = {"scripture": "SCR", "creed": "SCR", "reference": "REF", "matt": "REF",
+              "member": "MBR", "web": "WEB", "web_unverified": "WEB"}.get(tier)
+    if mapped:
+        return mapped
+    if (card.get("author") or "") == "member":
+        return "MBR"
+    src = card.get("source") or {}
+    if str(src.get("label") or "").strip():
+        return "REF"
+    if str(src.get("url") or "").strip():
+        return "WEB"        # a URL with no label is exactly what web_unverified means
+    return None
 
 
 def verification_of(card: Dict[str, Any]) -> str:
@@ -167,9 +213,15 @@ def derive(card: Dict[str, Any]) -> Tuple[str, Optional[str]]:
     if missing:
         return UNPLACED, "cannot determine " + ", ".join(missing)
     domain = _slug(card.get("shelf"), 24) or "unfiled"
-    subject = _slug(card.get("subject") or card.get("title") or card.get("id"))
+    # v1 reported 20,200 cards with "no subject". They were not nameless — their titles are in
+    # HEBREW AND GREEK, and an ASCII slug of Hebrew is the empty string. The fix is not to skip
+    # them (that would drop the plumb-line's own verse cards); it is to fall back to the source
+    # ref, then the id, so a non-Latin card is addressable by the coordinate it already carries.
+    subject = (_slug(card.get("subject")) or _slug(card.get("title"))
+               or _slug((card.get("source") or {}).get("ref"))
+               or _slug(str(card.get("id")).replace("card_", "", 1)))
     if not subject:
-        return UNPLACED, "no subject"
+        return UNPLACED, "no subject, ref, or usable id"
     v = verification_of(card)
     return f"{p}.{domain}.{k}/{subject}/{a}.{v}@{source_of(card)}", None
 

@@ -1,6 +1,7 @@
 # The suite, declared. tools/check.py fails if any listed file is absent from the machine
 # being gated — the deploy target receives tests by scp, not by checkout, so 'whatever is
 # on disk' is not a suite. Add a line when you add a test file; the gate refuses unlisted ones.
+test_address.py
 test_airlock.py
 test_api.py
 test_apothecary.py
