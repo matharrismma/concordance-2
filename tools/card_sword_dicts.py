@@ -75,22 +75,65 @@ MODULES = {
 
 
 def _mod_paths(zf):
-    """The four zLD files inside the zip, whatever the module's internal directory is called."""
+    """The module's files AND which driver they imply.
+
+    zLD is compressed (idx/dat/zdx/zdt); **RawLD is not** (idx/dat only, the text sitting in dat
+    directly). Torrey is RawLD, and the first version of this reader assumed zLD for everything
+    and recovered ZERO entries from it — reported as UNPARSED rather than silently zero, which
+    is how the real cause got found instead of guessed."""
     names = zf.namelist()
     idx = next((n for n in names if n.endswith(".idx") and "/lexdict/" in n), None)
     if not idx:
         return None
     base = idx[:-4]
-    need = [base + e for e in (".idx", ".dat", ".zdx", ".zdt")]
-    return need if all(n in names for n in need) else None
+    z = [base + e for e in (".idx", ".dat", ".zdx", ".zdt")]
+    if all(n in names for n in z):
+        return ("zld", z)
+    r = [base + e for e in (".idx", ".dat")]
+    if all(n in names for n in r):
+        return ("rawld", r)
+    return None
+
+
+def _clean(raw: str) -> str:
+    """Markup out, entities in, NULs gone — the same normalisation for both drivers."""
+    text = _break.sub("\n", raw)
+    text = _tag.sub(" ", text)
+    for a, b in (("&amp;", "&"), ("&lt;", "<"), ("&gt;", ">"), ("&quot;", '"'),
+                 ("&apos;", "'"), ("&nbsp;", " ")):
+        text = text.replace(a, b)
+    text = "\n".join(_ws.sub(" ", ln).strip() for ln in text.split("\n"))
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.replace("\x00", "").strip()
+
+
+def _read_rawld(idx: bytes, dat: bytes):
+    """RawLD: 8-byte (offset,size) records into an UNCOMPRESSED dat, each entry being
+    "KEY<newline><text>". No block table, no zlib — a different driver, not a broken zLD."""
+    out = []
+    for i in range(len(idx) // 8):
+        off, size = struct.unpack_from("<II", idx, i * 8)
+        rec = dat[off:off + size]
+        sep = b"\r\n" if b"\r\n" in rec else (b"\n" if b"\n" in rec else None)
+        if sep is None:
+            continue
+        key, _, body = rec.partition(sep)
+        text = _clean(body.decode("utf-8", "replace"))
+        head = key.decode("utf-8", "replace").strip()
+        if head and len(text) >= 3:
+            out.append((head, text))
+    return out
 
 
 def read_module(zip_path: Path):
     """(headword, plain text) for every entry — the same zLD walk proven on ISBE."""
     zf = zipfile.ZipFile(zip_path)
-    paths = _mod_paths(zf)
-    if not paths:
+    found = _mod_paths(zf)
+    if not found:
         return []
+    driver, paths = found
+    if driver == "rawld":
+        return _read_rawld(*(zf.read(p) for p in paths))
     idx, dat, zdx, zdt = (zf.read(p) for p in paths)
     blocks = {}
 
@@ -126,9 +169,13 @@ def read_module(zip_path: Path):
                      ("&apos;", "'"), ("&nbsp;", " ")):
             text = text.replace(a, b)
         text = "\n".join(_ws.sub(" ", ln).strip() for ln in text.split("\n"))
-        text = re.sub(r"\n{3,}", "\n\n", text).strip()
+        text = re.sub(r"\n{3,}", "\n\n", text).replace("\x00", "").strip()
         head = key.decode("utf-8", "replace").strip()
-        if head and len(text) >= 60:          # a headword with no article is not substance
+        # A MEANING IS OFTEN SHORT. This filter was `>= 60` and silently ate 2,609 of
+        # Hitchcock's 2,616 entries — "Aaron: a teacher; lofty" is 23 characters and is the
+        # WHOLE datum. It looked like a block-boundary bug; it was my own threshold. Only a
+        # genuinely empty entry is dropped now. (Check the check, seventh time today.)
+        if head and len(text) >= 3:
             out.append((head, text))
     return out
 
