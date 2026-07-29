@@ -349,6 +349,10 @@ def load_cards(path: Optional[Path] = None,
                       # edge). Rides the `commentary` shelf -> the `word` shard, so the bodies
                       # are frozen freight and the resident cost is a stub.
                       "commentary_verse_cards.jsonl",
+                      # The practical stores carded (seeding loop, practical pass 1): the
+                      # apothecary monographs, the verified almanac, the coach curriculum —
+                      # substance we already held that had no card at all.
+                      "practical_cards.jsonl",
                       # ISBE 1915 (D5) — 9,380 scholarly stub cards; the full public-domain
                       # article renders from data/acquisitions/isbe.db on the card page.
                       "isbe_cards.jsonl",
