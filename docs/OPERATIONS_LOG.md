@@ -19,6 +19,23 @@ Three standing rules:
 
 ## 2026-07-29
 
+**D7 CAPSTONE · the null assay — three rings.**
+- Ring A (99 theories): 1 finding — *Agricultural science* claimed `seals` with zero sealed runs
+  in the keeping. Corrected to `partial`, reason on the card, restorable when a real run seals.
+  99/99 aligned AFTER the correction. Tool: `tools/null_assay.py` (rerunnable, `--json`).
+- The instrument lied first: draft 1 asked only "does a verifier exist?" → 9 false findings
+  (Gödel, ZFC, evolution, germ theory…). Corrected; pinned by `tests/test_null_assay.py` so it
+  cannot drift back into flattering us. **Check the check before you trust it.**
+- Ring B (our own theses): 3 findings AGAINST US — the RAS bridge recorded CONFIRMED (science
+  yes, the Mt 6:22 bridge is RESONANCE), "the tune is the truth-CRITERION" (a heuristic; name
+  its null test), coherence-as-proof (a consistent fiction is coherent). All three memories
+  corrected the same night.
+- Ring C (adjacent families): nothing contradicts the engine's narrow claims; every tension
+  lands on the same seam — deterministic checks are safe, interpretive bridges stay marked.
+- Report: `docs/NULL_ASSAY.md`. Gate: 916 passed. Commit `6b2c6e6`.
+
+**Corpus count: 496,559 cards — 49.7% of the 1M goal** (ISBE contributed 9,381 today).
+
 **D6 · security sweep over the new surfaces** — two real holes found and closed.
 - ICS injection (`connect_write`): `start_iso`/`end_iso` interpolated into DTSTART/DTEND with no
   escaping and no validation; `_esc` did not escape a bare `\r`. One consented event write could
