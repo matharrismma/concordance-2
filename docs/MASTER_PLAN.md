@@ -125,6 +125,10 @@ us. Full design + legal lines: memory `project_social_first_member_shelves_lendi
 **Stage C1 — the shelf and the commons (build first; all on existing machinery)**
 - Member shelves: signed member-authored cards (`authority_tier: member`, never silently
   upgraded), `/shelf/<fingerprint>` pages.
+- Identity doctrine (Matt 2026-07-28): REAL NAMES as the community norm on shelves
+  (self-asserted, key-signed; no ID documents collected). Known when you speak, unseen
+  when you read: identification on work, never surveillance of reading. Name is the only
+  profile field; readers always anonymous; aggregate tallies only; nothing tracked or sold.
 - Drops: ANY link — videos (platform embeds only), quotes (short+attributed), book recs
   (PD recs point INTO the keeping), curated pages (stub+link + curator note + fetched-at +
   content hash; archives via Wayback save-page-now — we never host the bytes).
@@ -164,6 +168,28 @@ us. Full design + legal lines: memory `project_social_first_member_shelves_lendi
 - Agents/robots: the same shelf model via MCP — Acts church for agents (parity of
   substance, difference of form); an agent stocks receipts, lends verified cards.
 
+## §3.5 The feature metabolism (Matt, 2026-07-28)
+
+"If it is requested and it aligns we build and add. Use of the feature gets it promoted.
+Unused aspects go in cold storage."
+
+- SUGGEST — a feature request is a member drop (kind: suggestion), signed, in their own
+  words; rides the standard curation gate; duplicates cluster visibly by overlap.
+- ALIGN — assayed against the plumb-line (the frozen mission string + kernel); verdict
+  RECORDED with reasons: ALIGNED (build) / NOT ALIGNED (say why plainly, keep the record) /
+  NOT YET (parked with what would change the answer). The suggester stays on the receipt
+  trail — a shipped suggestion is value created (payment substrate applies).
+- PROMOTE — aggregate route tallies (never reader identities) earn placement: nav, front
+  page, docs. Promotion is a recorded act with the numbers attached (elevation pattern).
+- COLD STORAGE — unused features FREEZE, never delete (the shard-freeze pattern applied to
+  features: disk, not attention): code stays in git, the route answers "in cold storage —
+  ask and it reopens", data compresses to archive, the freeze is recorded WITH the usage
+  numbers. Dependency audit runs BEFORE any freeze (a passing gate != a safe removal).
+  Revival is cheap by design; one aligned request can thaw a room.
+- Cadence: one steward decision per season per feature; everything reversible + receipted.
+- SOP-FEATURES joins the §5 worklist (ships with the first /suggest surface, Commons C1 —
+  suggestions are drops, so C1 carries them natively).
+
 ## §4 LATER / horizon (recorded, not scheduled)
 
 - Denominational voices completion (one major voice per tradition, their own reckoning).
@@ -188,6 +214,8 @@ Also operative: DEPLOY.md, RUNBOOK.md, SELF_HOST.md, the gate ritual (§1 Operat
   elevation sign-offs; never a bot.
 - SOP-LIVE — session listing rules, guardian-present policy, live report/block handling.
 - SOP-RECEIPTS — what every Commons feature must emit; payout-completeness check.
+- SOP-FEATURES — the metabolism end to end: suggestion intake, alignment assay verdicts,
+  promotion thresholds, the cold-storage freeze/thaw ritual + dependency audit.
 
 **Maps** (drawn, kept current):
 - The Nesting (one rooted tree) — live at /brain + /map; counts in the manifest.
