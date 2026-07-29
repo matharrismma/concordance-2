@@ -99,11 +99,14 @@ Each line: system — where it lives — what it guarantees.
 ## §2 NOW — the current build series (in flight, in order)
 
 1. ~~Trust-kernel coverage ≥90 + floor raised~~ — DONE 2026-07-28 (commit eb40812).
-2. **D4 wire the shards** — code done + gated (44fb324); remaining: fresh shard build,
-   droplet rollout (shards + env drop-ins + staggered restart), live RSS + probe verify.
-   Measured locally: −540MB RSS per process, battery 33/33, IDF-identical.
-3. **D5 acquisitions** — ISBE 1915 first (CrossWire SWORD, PD, verified), then Gill, then
-   Clarke → commentary registry.
+2. ~~D4 wire the shards~~ — DONE 2026-07-29, LIVE: RSS 2834/2809 → 1893/1908 MB per
+   process (~1.85 GB freed; box available 1.7 → 3.5 GB); battery 33/33; IDF-identical;
+   found live: corpus_db.py had never been deployed (scp target ≠ checkout — the MANIFEST
+   lesson, src side).
+3. ~~D5 acquisitions~~ — DONE 2026-07-29, LIVE: ISBE 1915 (9,380 articles, SWORD zLD
+   parsed stdlib-only, full article on every card page) + Adam Clarke (854 ch) + John
+   Gill (1,189 ch) via helloao into the commentary registry. Gill was NOT on CrossWire —
+   helloao was the lawful road for both.
 4. **D6 security sweep** — over the new surfaces: consent, report/block, study routes,
    ambiguous-ref, write-back pilot. (Now doubly important: the Commons will reuse all of it.)
 5. **D7 CAPSTONE null assay** — three rings: 103 kept theory cards (recover+classify), the

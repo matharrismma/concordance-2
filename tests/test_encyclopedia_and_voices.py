@@ -30,24 +30,42 @@ def _cards():
 
 
 def test_the_encyclopedia_is_nested_in_the_keeping():
+    """The reference section holds TWO encyclopedias since D5 (Easton 1897 + ISBE 1915) —
+    the invariant is not 'one spine' but ZERO ORPHANS: every entry hangs member_of a spine,
+    and every spine roots in the Floor."""
     cards = _cards()
-    spine = cards.get("card_spine_encyclopedia")
-    assert spine is not None, "the encyclopedia spine must exist"
-    assert spine["connections"][0]["to_card_id"] == "card_k_floor_of_discovery"
+    spines = {"card_spine_encyclopedia", "card_spine_isbe"}
+    for sid in spines:
+        spine = cards.get(sid)
+        if spine is None and sid == "card_spine_isbe":
+            spines = {"card_spine_encyclopedia"}   # ISBE data not minted on this machine — Easton still gates
+            continue
+        assert spine is not None, f"{sid} must exist"
+        assert any(l.get("to_card_id") == "card_k_floor_of_discovery" and
+                   l.get("relationship") == "part_of" for l in spine["connections"]), \
+            f"{sid} roots in the Floor of Discovery"
     enc = [c for c in cards.values() if c.get("shelf") == "encyclopedia"]
-    assert len(enc) >= 3900, f"expected ~3,962 entries carded; found {len(enc)}"
+    assert len(enc) >= 3900, f"expected the encyclopedias carded; found {len(enc)}"
     stray = [c["id"] for c in enc
-             if not any(l.get("to_card_id") == "card_spine_encyclopedia" and
+             if not any(l.get("to_card_id") in spines and
                         l.get("relationship") == "member_of" for l in c.get("connections") or [])]
-    assert not stray, f"{len(stray)} encyclopedia card(s) not nested under the spine: {stray[:4]}"
+    assert not stray, f"{len(stray)} encyclopedia card(s) not nested under a spine: {stray[:4]}"
 
 
-def test_the_drawers_match_eastons_own_categories():
+def test_the_drawers_match_the_sources_own_categories():
+    """Easton's entries keep Easton's own four drawers; ISBE entries sit in the isbe drawer.
+    No source's categories are ever remixed into another's (found, never re-authored)."""
     from collections import Counter
     cards = _cards()
-    boxes = Counter(c.get("box") for c in cards.values() if c.get("shelf") == "encyclopedia")
-    assert set(boxes) == {"person", "place", "concept", "object"}, boxes
-    assert boxes["person"] >= 900 and boxes["place"] >= 900 and boxes["concept"] >= 2000
+    easton = Counter(c.get("box") for c in cards.values()
+                     if c.get("shelf") == "encyclopedia" and str(c.get("id", "")).startswith("card_enc_"))
+    assert set(easton) == {"person", "place", "concept", "object"}, easton
+    assert easton["person"] >= 900 and easton["place"] >= 900 and easton["concept"] >= 2000
+    isbe = [c for c in cards.values()
+            if c.get("shelf") == "encyclopedia" and str(c.get("id", "")).startswith("card_isbe_")]
+    if isbe:   # minted only where the acquisition ran
+        assert all(c.get("box") == "isbe" for c in isbe), "ISBE entries keep their own drawer"
+        assert len(isbe) > 9000, f"the whole ISBE came across (got {len(isbe)})"
 
 
 def test_the_catalog_drawer_filter_serves():

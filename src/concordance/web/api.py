@@ -229,7 +229,19 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
         return 404, html
     title = _esc(card.get("title") or card_id)
     body_txt = card.get("body") or ""
-    body_html = f"<p>{_esc(body_txt)}</p>" if body_txt else ""
+    # An ISBE stub opens into the FULL 1915 article at render time (found, attributed — the
+    # guarantee reaches the reader; the resident card stays ~600 bytes). If the acquisition
+    # db cannot answer, the stub renders — a shorter answer, never a broken page.
+    _isbe_head = str((card.get("extra") or {}).get("isbe_headword") or "").strip()
+    if _isbe_head:
+        from .. import isbe as _isbe_mod
+        _full = _isbe_mod.get(_isbe_head)
+        if _full and _full.get("text"):
+            body_txt = _full["text"]
+    if _isbe_head and "\n" in body_txt:
+        body_html = "".join(f"<p>{_esc(p)}</p>" for p in body_txt.split("\n\n") if p.strip())
+    else:
+        body_html = f"<p>{_esc(body_txt)}</p>" if body_txt else ""
     src = card.get("source") or {}
     src_ref = str(src.get("ref") or "").strip()
     src_label = str(src.get("label") or "").strip()

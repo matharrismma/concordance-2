@@ -339,6 +339,9 @@ def load_cards(path: Optional[Path] = None,
                       # into /characters, boxed by category (the card-catalog drawers). Minted by
                       # tools/card_encyclopedia.py.
                       "encyclopedia_cards.jsonl",
+                      # ISBE 1915 (D5) — 9,380 scholarly stub cards; the full public-domain
+                      # article renders from data/acquisitions/isbe.db on the card page.
+                      "isbe_cards.jsonl",
                       # The Corpus — technical, academic cards minted from the stored sources
                       # (nuclides, stars, foods, ports, indicators, …); always growing.
                       "source_spines.jsonl", "source_cards.jsonl", "web_cache.jsonl",

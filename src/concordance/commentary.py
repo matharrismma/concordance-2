@@ -25,6 +25,19 @@ SOURCE_META: Dict[str, Dict[str, str]] = {
         "license": "Public Domain (Public Domain Mark 1.0)",
         "via": "bible.helloao.org",
     },
+    # D5 (Matt, 2026-07-28): the registry widens — Clarke and Gill, same road as Henry.
+    "adam-clarke": {
+        "name": "Adam Clarke's Commentary on the Bible",
+        "author": "Adam Clarke (1762–1832)",
+        "license": "Public Domain",
+        "via": "bible.helloao.org",
+    },
+    "john-gill": {
+        "name": "John Gill's Exposition of the Old and New Testaments",
+        "author": "John Gill (1697–1771)",
+        "license": "Public Domain",
+        "via": "bible.helloao.org",
+    },
 }
 DEFAULT_SOURCE = "matthew-henry"
 

@@ -59,6 +59,7 @@ test_identity.py
 test_inequality.py
 test_inlet.py
 test_integrity.py
+test_isbe.py
 test_isolation.py
 test_keep.py
 test_keystones.py

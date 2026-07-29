@@ -141,6 +141,42 @@ def test_mcp_commentary_tool():
     assert json.loads(r["result"]["content"][0]["text"])["status"] == "ok"
 
 
+def test_the_registry_widened_to_clarke_and_gill_d5():
+    """D5 (Matt, 2026-07-28): Clarke and Gill join Henry — same road (helloao), same registry,
+    same cite-fair discipline. Metadata is registered unconditionally; the stores serve where
+    the acquisition ran, and a machine without them skips honestly rather than passing silently."""
+    from pathlib import Path
+    import pytest as _pytest
+    from concordance import commentary
+    for s in ("adam-clarke", "john-gill"):
+        assert s in commentary.SOURCE_META, f"{s} must be registered"
+        meta = commentary.SOURCE_META[s]
+        assert "Public Domain" in meta["license"] and meta["author"], f"{s}: attribution travels"
+    root = Path(__file__).resolve().parent.parent / "data" / "commentary"
+    if not (root / "adam-clarke" / "_books.json").exists():
+        _pytest.skip("clarke store not migrated on this machine")
+    import os as _os
+    prior = _os.environ.get("CONCORDANCE_COMMENTARY_DIR")
+    _os.environ["CONCORDANCE_COMMENTARY_DIR"] = str(root)   # the real store, not this file's fixture
+    try:
+        r = commentary.for_ref("John 3:16", source="adam-clarke")
+        assert r.get("status") == "ok" and "Clarke" in (r.get("author") or "")
+        ctext = " ".join(str(b.get("text") or "") for b in (r.get("commentary") or [])
+                         if isinstance(b, dict))
+        assert "loved the world" in ctext, "Clarke's own words on John 3:16 reach the caller"
+        g = commentary.for_ref("John 3:16", source="john-gill")
+        assert g.get("status") == "ok" and "Gill" in (g.get("author") or ""), \
+            "Gill answers too — all 1,189 chapters migrated"
+        gtext = " ".join(str(b.get("text") or "") for b in (g.get("commentary") or [])
+                         if isinstance(b, dict))
+        assert gtext.strip(), "Gill's words arrive, not an empty shell"
+    finally:
+        if prior is None:
+            _os.environ.pop("CONCORDANCE_COMMENTARY_DIR", None)
+        else:
+            _os.environ["CONCORDANCE_COMMENTARY_DIR"] = prior
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:
