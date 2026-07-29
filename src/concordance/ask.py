@@ -689,6 +689,15 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
             storyboard = None
         if storyboard:
             base = {**base, "storyboard": storyboard}
+        # Never kindness with no word: when no seat matched (so no character's verses came), the
+        # two anchors that fit every ache still come — found and resolved, like everything else.
+        # (The seeker probe caught comfort answers carrying ZERO scripture, 2026-07-28.)
+        if not verse:
+            for r in ("Psalm 34:18", "Matthew 11:28-29"):
+                one = _sc.read_passage(r)
+                if one.get("status") == "ok":
+                    verse.extend({"ref": v.get("ref", r), "text": v.get("text", "")}
+                                 for v in (one.get("verses") or [])[:2])
         return _witnessed({**base, "kind": "comfort",
                            "message": "I'm here, and you're not carrying it alone. Let me sit "
                                       "with you a minute — and tell me what you need; I'll help.",
@@ -962,6 +971,31 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     # keeping, not a single predicted deck — otherwise a mis-predicted volume (maker "Build a …")
     # shortcuts past the field library before the practical boost can lift it. Skip the Hare here.
     practical = bool(corpus._PRACTICAL & set(subj.lower().split()))
+    # THE GREAT QUESTIONS OUTRANK THE CARD SEARCH (Matt, 2026-07-28: "we are after sinners not
+    # saints"). "Is god even real" matches thousands of cards by keyword — and a card list is the
+    # WRONG answer to a person asking their biggest question. The probe caught nine of twelve
+    # seeker questions routed to keyword results; the person the mission is aimed at asked, and
+    # the site handed them a filing cabinet. Curated plain-language answers, honest about what a
+    # tool cannot settle; the actual text beside every claim; demonstrate, never preach.
+    try:
+        from . import seekers as _seek
+        great = _seek.match(text)
+    except Exception:  # noqa: BLE001
+        great = None
+    if great:
+        from .verifiers import scripture as _scr2
+        verses = []
+        for r in great["refs"][:3]:
+            got = _scr2.read_passage(r)
+            if got.get("status") == "ok":
+                verses.extend({"ref": v.get("ref", r), "text": v.get("text", "")}
+                              for v in (got.get("verses") or [])[:2])
+        return _witnessed({**base, "kind": "seeker", "message": great["answer"],
+                           "scripture": verses, "generated": False,
+                           "note": ("A curated answer to a question people have always asked — "
+                                    "written plainly, honest about what a tool cannot settle. "
+                                    "The verses are the actual text; the weighing is yours.")},
+                          text, witness, gate_just_opened)
     _vol = (_decks.predict(subj, k=1) or [None])[0]
     hits = []
     if _vol and not practical:

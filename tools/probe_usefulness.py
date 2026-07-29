@@ -60,6 +60,22 @@ BATTERY = [
     ("when did World War 2 end", "fact"),
     # — pastoral —
     ("I feel like I have failed everyone", "pastoral"),
+    # — seeker (Matt, 2026-07-28: "we are after sinners not saints") — the questions a person who
+    #   has never opened a Bible actually types. A useful answer is a real, plain-language answer
+    #   with the actual text beside it — never a keyword-search shrug. When first added, SIX of
+    #   NINE dead-ended in "the keeping doesn't hold a verified answer."
+    ("is God even real", "seeker"),
+    ("what happens when we die", "seeker"),
+    ("why do bad things happen to good people", "seeker"),
+    ("is there any point to all this", "seeker"),
+    ("how do I forgive someone who hurt me", "seeker"),
+    ("how do I start over", "seeker"),
+    ("who is jesus really", "seeker"),
+    ("how do I pray", "seeker"),
+    ("am I good enough for God", "seeker"),
+    ("why is there so much evil in the world", "seeker"),
+    ("why does my life feel so empty", "seeker"),
+    ("how do I stop feeling so alone", "seeker"),
 ]
 
 
@@ -103,6 +119,14 @@ def _grade(q, sig, d):
         return bool(results) and any(t in top for t in terms)
     if sig == "pastoral":
         return d.get("kind") in ("comfort", "crisis") and bool(d.get("real_help") or d.get("scripture"))
+    if sig == "seeker":
+        # A stranger's biggest question deserves a real answer in plain words WITH the actual text
+        # beside it — comfort (with help or a word) also counts; a web/found shrug never does.
+        if d.get("kind") == "seeker":
+            return len(d.get("message") or "") > 80 and bool(d.get("scripture"))
+        if d.get("kind") in ("comfort", "crisis"):
+            return bool(d.get("real_help")) and bool(d.get("scripture"))
+        return False
     return False
 
 
