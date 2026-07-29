@@ -47,9 +47,12 @@ name it in this list when it ships.
 Each line: system — where it lives — what it guarantees.
 
 **The floor**
-- Verification engine — `src/concordance/verifiers/` (~60 domains), `grid.py`, `check` entry
-  — deterministic verdict + worked trail + sealed receipt; 0 false positives, benchmarked
-  every gate (`tools/benchmark.py`, 60/60).
+- Verification engine — `src/concordance/verifiers/` (~64 domains), `grid.py`, `check` entry
+  — deterministic verdict + worked trail + sealed receipt. The DERIVATION MOAT is benchmarked
+  every gate: `tools/benchmark.py` is **60 claims across three modes** (equality 30,
+  inequality 14, derivative 16), 0 false positives. That is the moat's scope — it is NOT a
+  60-domain sweep, and this line previously implied it was (corrected 2026-07-29, see
+  docs/GAPS.md G5). Per-domain golden cases are a named gap, not a shipped guarantee.
 - Trust kernel — `cas.py, ledger.py, record.py, signing.py, validate.py, receipts.py,
   derivation.py` — hash-chained precedent ledger, content-addressed store, detached
   signatures; coverage floor ENFORCED ≥90 per module (2026-07-28).
@@ -93,7 +96,7 @@ Each line: system — where it lives — what it guarantees.
   EDGE, store nothing.
 
 **Operations**
-- Gate — `tools/check.py`: MANIFEST-whole suite (899 tests), moat 60/60, kernel coverage
+- Gate — `tools/check.py`: MANIFEST-whole suite (916 tests), derivation moat 60/60, kernel coverage
   floor 90; full gate before EVERY deploy. Probe — `tools/probe_usefulness.py`: 33/33, the
   mission carried as an instrument (seeker category permanent).
 - Deploy — `tools/deploy.sh`: tar-over-ssh, STAGGERED restarts, patient health polling.
