@@ -405,6 +405,23 @@
     if(d.scripture && d.scripture.length)
       h += d.scripture.map(function(s){
         return '<div class="hit"><b>'+esc(s.ref||s.title||'')+'</b><span class="sn">'+esc(s.text||s.snippet||'')+'</span></div>'; }).join('');
+    // The seat: a biblical character stood here too. Server-side since the archetypes shipped —
+    // but never RENDERED until 2026-07-28: the guarantee has to reach the reader.
+    if(d.seat && d.seat.character)
+      h += '<div class="note" style="border-left:2px solid var(--gold,#c9a24a); padding-left:.8rem; margin:.5rem 0">'+
+           esc(d.seat.character)+' stood here — '+esc(d.seat.moment)+
+           (d.seat.frame?'<br><span style="opacity:.8">'+esc(d.seat.frame)+'</span>':'')+'</div>';
+    // The storyboard beneath the seat: the movement this person may be standing in, and who stood
+    // there before them. The framing ALWAYS shows — a reference point, never an identity.
+    if(d.storyboard && d.storyboard.movement){
+      h += '<div class="note" style="border-left:2px solid rgba(201,162,74,.4); padding-left:.8rem; margin:.5rem 0">'+
+           'You may be standing in <b>'+esc(d.storyboard.movement)+'</b> — '+esc(d.storyboard.means)+'.<br>'+
+           (d.storyboard.who_stood_here||[]).map(function(x){
+             return esc(x.who)+' <span style="opacity:.7">('+esc(x.narrative)+')</span> '+
+               (x.refs||[]).map(function(r){ return '<a href="/bible.html?ref='+encodeURIComponent(r)+'">'+esc(r)+'</a>'; }).join(' ');
+           }).join('<br>')+
+           '<br><span style="opacity:.65; font-size:.85em">'+esc(d.storyboard.framing||'')+'</span></div>';
+    }
     // real people, first — the word comes, then the tool points beyond itself (a window, not a wall)
     if(d.real_help && d.real_help.length)
       h += '<div class="res"><div class="note" style="margin:.35rem 0 .15rem">'+

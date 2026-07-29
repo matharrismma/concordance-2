@@ -46,6 +46,7 @@
     { h: '/places.html',     n: 'Atlas',            k: 'map atlas places geography coordinates jerusalem babylon rome sinai holy land' },
     { h: '/narratives.html', n: 'Storyboards',      k: 'narratives storyboards archetypes movements exile return wilderness reversal patterns' },
     { h: '/catalog.html',    n: 'Card catalog',     k: 'encyclopedia card catalog easton dictionary reference drawers person place concept' },
+    { h: '/voices.html',     n: 'Voices',           k: 'church traditions denominations voices luther calvin wesley spurgeon white graham unity' },
     { h: '/prophecy.html',   n: 'Prophecy',         k: 'traces fulfilment signposts' },
     { h: '/codex.html',      n: 'The Codex',        k: 'manuscript compiled book document' },
     { h: '/works.html',      n: 'The Works',         k: 'technical math science engineering worked sealed demonstrations depth proof derivation' },

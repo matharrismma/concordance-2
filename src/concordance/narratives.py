@@ -195,6 +195,67 @@ def by_movement(movement: str) -> Optional[Dict[str, Any]]:
             "count": len(hits), "framing": FRAMING}
 
 
+# ── Meeting a person where they stand (Matt's step 3: application) ──────────────────────────────
+# Keywords route a first-person situation to the MOVEMENT the person may be standing in — the same
+# discipline as the archetype micropositions: plain words a person actually uses, matched by token
+# overlap, with a threshold so mundane text never matches. The payload always carries the FRAMING:
+# a reference point, never an identity; and crisis is a separate, higher lane that never reaches
+# this code at all (ask.py routes it first).
+import re as _re
+
+_TOK = _re.compile(r"[a-z']{3,}")
+_MOVEMENT_MEETS: Dict[str, set] = {
+    "exile":       {"exile", "displaced", "homeless", "belong", "outsider", "outcast", "far",
+                    "home", "homesick", "foreign", "stranger", "cut", "off"},
+    "testing":     {"tested", "testing", "wilderness", "stuck", "dry", "barren", "endless",
+                    "wandering", "years", "long", "trial", "proving"},
+    "silence":     {"silent", "silence", "absent", "distant", "hear", "answer", "unanswered",
+                    "empty", "abandoned", "forgotten", "hiding", "withdrawn"},
+    "delay":       {"waiting", "wait", "delayed", "delay", "still", "promise", "promised",
+                    "years", "never", "happens", "someday", "late"},
+    "descent":     {"pit", "bottom", "rock", "lowest", "prison", "trapped", "sinking", "drowning",
+                    "dark", "depths", "falling", "fell"},
+    "reversal":    {"unfair", "injustice", "cheated", "betrayed", "passed", "over", "overlooked",
+                    "enemies", "winning", "losing", "upside"},
+    "return":      {"return", "returning", "back", "come", "coming", "home", "restore", "again",
+                    "prodigal", "wandered", "away"},
+    "restoration": {"rebuild", "rebuilding", "restore", "restored", "recover", "recovering",
+                    "starting", "over", "ruins", "broken", "pieces"},
+    "provision":   {"provide", "provision", "need", "needs", "bills", "food", "afford", "empty",
+                    "running", "out", "enough", "scarce"},
+    "call":        {"called", "calling", "purpose", "supposed", "meant", "direction", "path",
+                    "lead", "leading", "next", "step"},
+    "reluctance":  {"afraid", "unqualified", "inadequate", "ready", "capable", "excuse",
+                    "someone", "else", "hide", "running"},
+}
+
+
+def match(text: str) -> Optional[Dict[str, Any]]:
+    """The storyboard movement a first-person situation may be standing in, or None.
+
+    Threshold ≥2 overlapping tokens on purpose: 'what is 8 times 7' must never be met with a
+    wilderness — the lesson the last-mile fix taught ('is 15' once resolved as Isaiah 15). Mundane
+    text stays mundane; only a real overlap earns a seat in a story."""
+    toks = {t for t in _TOK.findall((text or "").lower())}
+    if not toks:
+        return None
+    best_mv, best_score = None, 0
+    for mv, kws in _MOVEMENT_MEETS.items():
+        score = len(toks & kws)
+        if score > best_score:
+            best_mv, best_score = mv, score
+    if best_mv is None or best_score < 2:
+        return None
+    trace = by_movement(best_mv)
+    if not trace or not trace["appearances"]:
+        return None
+    apps = trace["appearances"][:3]
+    return {"movement": best_mv, "means": MOVEMENTS[best_mv],
+            "who_stood_here": [{"who": a["who"], "narrative": a["narrative"],
+                                "refs": a["refs"][:2]} for a in apps],
+            "framing": FRAMING}
+
+
 def all_refs() -> List[str]:
     """Every reference in every storyboard — the test suite walks these against the corpus."""
     out: List[str] = []

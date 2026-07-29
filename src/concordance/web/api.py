@@ -309,7 +309,7 @@ _SITEMAP_PAGES = ("/", "/ask.html", "/bible.html", "/read.html", "/characters.ht
                   "/proof.html", "/reason.html", "/boundary.html", "/almanac.html", "/codex.html",
                   "/teachings.html", "/brain.html", "/floor.html", "/works.html",
                   "/harmony.html", "/timeline.html", "/backmatter.html", "/places.html",
-                  "/narratives.html", "/catalog.html")
+                  "/narratives.html", "/catalog.html", "/voices.html")
 
 
 def build_sitemap(base_url: str) -> str:
@@ -1578,6 +1578,21 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                             str(body.get("grantor") or ""), str(body.get("signature") or ""))
         return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
 
+    if method == "POST" and path == "/connect/event":
+        # The calendar pilot — the ONE on-behalf write, behind the consent lock. The event lands
+        # in the calendar the USER named (their .ics or their CalDAV); nothing is stored here.
+        from .. import connect_write as _cw
+        if not isinstance(body, dict):
+            return _err(400, "grantor, agent, summary, start_iso required")
+        r = _cw.create_event(str(body.get("grantor") or ""), str(body.get("agent") or ""),
+                             str(body.get("summary") or ""), str(body.get("start_iso") or ""),
+                             end_iso=(body.get("end_iso") or None),
+                             description=str(body.get("description") or ""))
+        if r.get("ok"):
+            return _ok(r)
+        # A consent refusal is 403 with the teaching attached — not a silent 400.
+        return (403, r) if r.get("refused") else _err(400, r.get("error") or "refused")
+
     if method == "POST" and path == "/report":
         # The moderation floor: anyone may report; nobody's report is a verdict. One report is a
         # claim; three distinct reporters hold the item for a HUMAN steward (Deut 19:15).
@@ -1814,6 +1829,7 @@ ROUTES = [
     {"path": "/consent/signable", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/consent", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/consent/revoke", "methods": ("POST",), "api": True, "rl": True},
+    {"path": "/connect/event", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/report", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/block", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/seeds", "methods": ("GET",), "api": True},

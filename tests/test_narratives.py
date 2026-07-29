@@ -96,6 +96,58 @@ def test_the_gate_holds_and_agents_get_the_same_boards():
     assert body["count"] >= 3 and "not an identity" in body["framing"]
 
 
+def test_the_matcher_meets_a_person_and_ignores_the_mundane():
+    """Matt's step 3: application. A first-person situation finds the movement it stands in;
+    mundane text finds NOTHING — the 'is 15 = Isaiah 15' lesson, applied before the bug exists."""
+    m = narratives.match("I feel so far from home, like I do not belong anywhere anymore")
+    assert m and m["movement"] == "exile"
+    assert any("Jacob" in x["who"] or "Israel" in x["who"] for x in m["who_stood_here"])
+    assert "not an identity" in m["framing"], "the framing rides the payload, always"
+    m2 = narratives.match("I have been waiting for years and the promise still has not come")
+    assert m2 and m2["movement"] == "delay"
+    assert narratives.match("what is 8 times 7") is None
+    assert narratives.match("the weather is nice today") is None
+    assert narratives.match("") is None
+
+
+def test_comfort_carries_the_storyboard_and_crisis_never_does():
+    """The storyboard sits BENEATH the seat in the comfort lane. Crisis is a separate, higher lane
+    and must never be met with a narrative — a person in danger gets the real help, nothing else."""
+    import os
+    import tempfile
+    from concordance import ask
+    from concordance.config import EngineConfig
+    prior = os.environ.get("CONCORDANCE_DATA_DIR")
+    os.environ["CONCORDANCE_DATA_DIR"] = tempfile.mkdtemp()
+    try:
+        cfg = EngineConfig("witness")
+        d = ask.respond("I feel so far from home and from God, cut off from everyone",
+                        cfg, gate_open=True)
+        assert d.get("kind") == "comfort"
+        assert (d.get("storyboard") or {}).get("movement") == "exile"
+        assert "not an identity" in d["storyboard"]["framing"]
+        d2 = ask.respond("I want to end my life", cfg, gate_open=True)
+        assert d2.get("kind") == "crisis"
+        assert "storyboard" not in d2, "crisis must never be met with a narrative"
+    finally:
+        if prior is None:
+            os.environ.pop("CONCORDANCE_DATA_DIR", None)
+        else:
+            os.environ["CONCORDANCE_DATA_DIR"] = prior
+
+
+def test_the_seat_and_storyboard_reach_the_reader():
+    """Found 2026-07-28: the archetype SEAT had been attached server-side since the archetypes
+    shipped and NO page ever rendered it — the guarantee stopped short of the reader, again
+    (the sixth instance of the pattern this project has now caught). Pinned so neither the seat
+    nor the storyboard can go invisible twice."""
+    html = (ROOT / "site" / "index.html").read_text(encoding="utf-8")
+    assert "d.seat" in html, "the front door must render the seat"
+    assert "d.storyboard" in html, "the front door must render the storyboard"
+    assert "never an identity" in html or "not an identity" in html.lower() or \
+           "framing" in html, "the framing must be shown, not merely carried"
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:

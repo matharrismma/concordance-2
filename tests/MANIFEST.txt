@@ -84,6 +84,7 @@ test_system_error_distinct.py
 test_bible_places.py
 test_last_mile.py
 test_moderation.py
+test_connect_write.py
 test_consent.py
 test_encyclopedia_and_voices.py
 test_study_index.py

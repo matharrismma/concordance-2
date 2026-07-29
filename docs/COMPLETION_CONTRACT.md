@@ -356,6 +356,50 @@ Discoveries outside scope → the drift ledger.
   because it requires a network acquisition Matt should see land, not because anything is unknown.
   Recorded so the next session starts from a plan rather than a survey.
 
+  **ISBE source VERIFIED (2026-07-28):** the CrossWire SWORD module `ISBE` (v2.2, 2009) — the
+  International Standard Bible Encyclopedia, James Orr ed., distribution status **Public Domain**
+  per the module's own metadata page. Structured and machine-readable (a SWORD dictionary module:
+  headword-keyed), which beats OCR'd page scans for carding. The fetch itself is D5's first act,
+  done where Matt can see it land; the parser is a bounded read of the RawLD/zLD key index.
+
+  **Per-shelf memory ATTRIBUTION (2026-07-28) — the shard freeze list, measured:** serialized
+  payload of the whole keeping is 535 MB (RSS multiplies this ~4× through Python object overhead).
+  `dictionary` 128.5 MB (24.0%) + `gutenberg` 120.5 (22.5%) + `geography` 51.3 (9.6%) +
+  `taxonomy` 39.1 (7.3%) = **63% in four cold reference decks** — the freeze set. Hot shelves stay
+  resident (lexicon is only 18.9 MB; scripture, codex, the originals). Expected effect: roughly
+  halving each service's corpus footprint. Means: `len(json.dumps(card))` summed per shelf over the
+  live local corpus — a proxy for resident size, not a direct RSS measurement per structure.
+
+- **MATT'S SEVEN DECISIONS (2026-07-28, asked directly — "grill me" — and answered):**
+  1. **Memory: wire the shards** (profile per-structure first; freeze cold shelves; the measured
+     peaks above are the warrant).
+  2. **Acquisitions: ALL THREE — ISBE 1915 FIRST**, then Gill's Exposition, then Clarke.
+  3. **Write-back: calendar-only pilot** behind `consent.guard()` — the least dangerous verb,
+     reversible, proves the grant flow end to end. Email/storage wait.
+  4. **Storyboards: wire into the companion/ask layer** — the pastoral layer may meet a person with
+     the movement they stand in, with the framing guard ALWAYS attached; crisis still outranks all.
+  5. **Voices: build voices.html** — the visible face of "one system meant to unify the church."
+  6. **Security sweep: resume as the next loop**, over the NEW surfaces especially.
+  7. **proof.html: leave the historical run** — re-assay only when the fleet changes materially.
+  8. **THE CAPSTONE (Matt, 2026-07-28, scope widened same day): once the program is complete, run
+     a NULL THEORY ASSAY ACROSS THE ENTIRE PROJECT** — "all theories that could be associated with
+     the topics we cover." The universe under review, all three rings:
+       a. **The kept theories** — every theory card in the keeping (the assay-330 lineage and
+          whatever joined since).
+       b. **The project's OWN theses** — the two trees, coherence-as-closure, the recurring form,
+          the RAS reception bridge, the body-systems/spirit-archetypes mapping, the numbers/bases
+          triangulation, the QM+formal-logic dig, the hydromechanics readings, the storyboard/
+          archetype design itself — nothing of ours is exempt; a null test that spares the house's
+          own beams proves nothing.
+       c. **The associated theory families per covered topic** — the standard competing theories in
+          each domain the verifiers span, where they touch claims we card or serve.
+     The opposite polarity of the sealed 330: not celebrating what held, but HUNTING what fails.
+     Verdicts on the standing scale — CONFIRMED / PLAUSIBLE / RESONANCE / COINCIDENCE — plus the
+     honest third state throughout: "we could not check" is a fact about US, never a verdict on
+     the theory. The misaligned are NAMED, plainly ("say 'dead end' plainly" — the fruit test),
+     including our own if they fail. Deliverable: the misalignment list with worked reasons.
+     Distinct from item 7: proof.html's history stands; this is a fresh REVIEW.
+
 ---
 
 *Completion is reached when §5 all pass against one named commit. The implementing model does not

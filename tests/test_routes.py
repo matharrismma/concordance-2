@@ -49,6 +49,7 @@ GOLDEN_API_GET = {
     "/places",    # deliberate addition (the Atlas: real biblical place coordinates, honest uncertainty)
     "/consent", "/consent/signable", "/consent/revoke",  # the human-authorized write path (worklist item 2)
     "/report", "/block",  # the moderation floor (worklist item 4)
+    "/connect/event",  # the calendar pilot — the one on-behalf write, behind the consent lock
     "/narratives",  # deliberate addition (storyboards: common narratives charted in the Bible; movements mix and match)
     "/study_find",  # deliberate addition (the quick-find index across the whole reference section)
     "/capabilities",  # deliberate addition (the live capability statement — restored from 1.0)
@@ -66,6 +67,7 @@ GOLDEN_RATELIMITED = {
     "/push/subscribe", "/push/unsubscribe",
     "/consent/signable", "/consent", "/consent/revoke",  # the human-authorized write path (worklist item 2)
     "/report", "/block",  # the moderation floor (worklist item 4)
+    "/connect/event",  # the calendar pilot — the one on-behalf write, behind the consent lock
     "/audit",   # deliberate addition (the Auditor) — goldens update ONLY with a new route
     "/chess",   # deliberate addition (the chess verifier) — game theory, applied and sealable
     "/attest",  # deliberate addition — a write, so rate-limited like every other write

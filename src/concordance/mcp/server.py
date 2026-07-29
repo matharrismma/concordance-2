@@ -216,6 +216,20 @@ def _secular_tools() -> List[dict]:
         # For an agent or a robot, the STRUCTURE is how it sees what this engine is: what it can
         # check, what it refuses, how big the keeping is — every number computed now, each carrying
         # the definition of what was counted so none can be misread. Ungated on both surfaces.
+        {"name": "calendar_create",
+         "description": ("Create ONE event in a human's calendar — the pilot on-behalf write, and "
+                         "the only one. Requires a LIVE consent grant: the human signed a scoped, "
+                         "expiring calendar_write grant for YOUR key fingerprint on their own "
+                         "device (GET /consent/signable → sign locally → POST /consent). Without "
+                         "it this refuses and teaches the way in. The event lands only in the "
+                         "calendar THEY configured (their .ics file or CalDAV); nothing is stored "
+                         "here, and the receipt names the grant that authorized it. Deleting the "
+                         "event in their calendar removes it everywhere."),
+         "inputSchema": {"type": "object", "properties": {
+             "grantor_pubkey": {"type": "string"}, "agent_fp": {"type": "string"},
+             "summary": {"type": "string"}, "start_iso": {"type": "string"},
+             "end_iso": {"type": "string"}, "description": {"type": "string"}},
+             "required": ["grantor_pubkey", "agent_fp", "summary", "start_iso"]}},
         {"name": "consent_check",
          "description": ("Check whether a human has authorized YOU (this agent's key fingerprint) "
                          "for a named verb — the agent covenant's 'request human authorization "
@@ -554,6 +568,13 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         return corpus.locate(args.get("q", ""))
     if name == "library_health":
         return corpus.health()
+    if name == "calendar_create":
+        from .. import connect_write as _cw
+        return _cw.create_event(str(args.get("grantor_pubkey") or ""),
+                                str(args.get("agent_fp") or ""),
+                                str(args.get("summary") or ""), str(args.get("start_iso") or ""),
+                                end_iso=(args.get("end_iso") or None),
+                                description=str(args.get("description") or ""))
     if name == "consent_check":
         from .. import consent as _consent
         return _consent.guard(str(args.get("agent_fp") or ""), str(args.get("verb") or ""),

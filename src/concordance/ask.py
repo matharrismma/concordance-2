@@ -677,6 +677,18 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                     if one.get("status") == "ok":
                         verse.append({"ref": one.get("ref", r), "text": one.get("text", "")})
             seat = {"character": seat["character"], "moment": seat["moment"], "frame": seat["frame"]}
+        # The storyboard beneath the seat (Matt, 2026-07-28): the movement this person may be
+        # standing in, and who stood there before them — Israel between deliverance and
+        # inheritance, Hannah in the delay. FRAMING always attached: a reference point, never an
+        # identity. Crisis never reaches this branch; the higher lane routed it already.
+        storyboard = None
+        try:
+            from . import narratives as _narr
+            storyboard = _narr.match(text)
+        except Exception:  # noqa: BLE001 — comfort must not break if the boards cannot load
+            storyboard = None
+        if storyboard:
+            base = {**base, "storyboard": storyboard}
         return _witnessed({**base, "kind": "comfort",
                            "message": "I'm here, and you're not carrying it alone. Let me sit "
                                       "with you a minute — and tell me what you need; I'll help.",
