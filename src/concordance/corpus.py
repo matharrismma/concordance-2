@@ -64,13 +64,63 @@ def is_public(card: dict) -> bool:
     return (card.get("lifecycle_stage") or "public") in PUBLIC_STAGES
 
 
+# ── The freeze (D4) — the heavy shelves ride the shards, the graph stays home ────────────
+# Matt, 2026-07-27/28: the two processes held ~2.8 GB RSS each with every shelf resident.
+# Profiled per-structure (2026-07-28): dictionary/gutenberg/geography/taxonomy carry 258.7 MB
+# serialized, and ~70% of it is body/bands/extra/source — none of which the GRAPH needs.
+# With CONCORDANCE_FREEZE_SHELVES set (and shards present), those shelves load as STUBS:
+# identity + connections stay resident so the nesting stays whole (zero orphans, titles
+# findable); bodies, bands, and provenance rehydrate from the SQLite shards on read.
+# Opt-in and reversible: unset the env and everything loads resident exactly as before.
+
+# What a stub keeps: identity, the public/withheld boundary, and the graph. `retracted`
+# and `lifecycle_stage` stay so is_public() judges a stub exactly as it judges the full card.
+_STUB_KEEPS = frozenset({"id", "title", "shelf", "surface", "kind", "box", "visibility",
+                         "lifecycle_stage", "retracted", "generated", "connections"})
+
+
+def frozen_shelves() -> frozenset:
+    """The shelves currently riding the shards — empty unless BOTH the env names them AND the
+    shards exist (bodies are never shed without a place to rehydrate from)."""
+    env = os.environ.get("CONCORDANCE_FREEZE_SHELVES", "").strip()
+    if not env:
+        return frozenset()
+    from . import corpus_db
+    if not corpus_db.available():
+        return frozenset()
+    return frozenset(s.strip() for s in env.split(",") if s.strip())
+
+
+def rehydrate(card: Optional[dict]) -> Optional[dict]:
+    """The FULL card for a frozen stub — body, bands, provenance — read from its shard.
+    The resident stub is never mutated; the LIVE graph (bridges, minted edges) carries over
+    the stored copy. If the shard cannot answer, the stub itself returns — id, title, and
+    connections in hand, never a silent hole."""
+    if not card or not card.get("frozen"):
+        return card
+    from . import corpus_db
+    if not corpus_db.available():
+        return card
+    corpus_db.thaw_for(card.get("shelf") or "")
+    full = corpus_db.get_card(card.get("id", ""))
+    if not isinstance(full, dict):
+        return card
+    full["connections"] = card.get("connections", full.get("connections") or [])
+    return full
+
+
 class Corpus:
     """An indexed, searchable set of cards (id -> card dict)."""
 
-    def __init__(self, cards: Dict[str, dict], min_idf: float = MIN_DISTINCTIVE_IDF):
+    def __init__(self, cards: Dict[str, dict], min_idf: float = MIN_DISTINCTIVE_IDF,
+                 df_extra: Optional[Dict[str, int]] = None):
         self.cards = cards
         self.min_idf = min_idf
         self._by_token: Dict[str, List[str]] = {}
+        # extra document frequency from frozen stubs' full text (streamed out of load_cards) —
+        # the tokens themselves live on the shard, but their COUNTS stay here so the corpus-wide
+        # IDF statistics are identical whether a shelf is frozen or resident
+        self._df_extra: Dict[str, int] = dict(df_extra) if df_extra else {}
         for cid, c in cards.items():
             if not is_public(c):
                 continue
@@ -99,7 +149,8 @@ class Corpus:
         return ids
 
     def _idf(self, query_tokens: set) -> Dict[str, float]:
-        return {t: max(0.0, math.log(self._n / (len(self._by_token.get(t, ())) + 1)))
+        return {t: max(0.0, math.log(self._n / (len(self._by_token.get(t, ()))
+                                                + self._df_extra.get(t, 0) + 1)))
                 for t in query_tokens}
 
     def _candidates(self, query_tokens: set, max_candidates: int = 600) -> List[str]:
@@ -122,7 +173,13 @@ class Corpus:
         for t in doc_tokens:
             if t in counts:
                 counts[t] += 1
-        score = sum(counts[t] * idf.get(t, 0.0) for t in common) / math.log(len(doc_tokens) + 10)
+        # A frozen stub's text is its TITLE alone — scoring it by its real (tiny) length would
+        # hand it an artificial length-normalization boost over full resident cards (caught by
+        # the probe battery: gutenberg title stubs outscored the Bible-facts answerer). Score
+        # stubs against a typical FULL card's document length instead, so freezing a shelf
+        # never changes its cards' rank.
+        doc_len = max(len(doc_tokens), 150) if card.get("frozen") else len(doc_tokens)
+        score = sum(counts[t] * idf.get(t, 0.0) for t in common) / math.log(doc_len + 10)
         if len(common) == len(query_tokens):
             score *= 1.5
         return float(score)
@@ -166,6 +223,14 @@ class Corpus:
             if shelves is not None and c.get("shelf") not in shelves:
                 continue
             s = self._score(c, query_tokens, idf)
+            if s > 0 and c.get("frozen"):
+                # rank-neutral freezing: a stub that matched on TITLE is re-scored on its real
+                # text from the shard, so freezing a shelf never reorders results. Only stubs
+                # passing the distinctiveness floor pay the point lookup (a handful per query).
+                full = rehydrate(c)
+                if full is not c:
+                    c = full
+                    s = self._score(c, query_tokens, idf)
             if s > 0:
                 title_n = " ".join(str(c.get("title", "")).lower().split())
                 ref_n = " ".join(str((c.get("source") or {}).get("ref", "")).lower().split())
@@ -196,12 +261,32 @@ def _cards_path() -> Path:
     return (Path(data) if data else Path("data")) / "cards.jsonl"
 
 
-def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
-    """Load cards from a JSONL file into an id -> card dict. Empty if absent."""
+def load_cards(path: Optional[Path] = None,
+               _df_out: Optional[Dict[str, int]] = None) -> Dict[str, dict]:
+    """Load cards from a JSONL file into an id -> card dict. Empty if absent.
+
+    `_df_out` (internal — default_corpus passes it): a dict that receives the document
+    frequency of each frozen card's full-text-only tokens, streamed during the load so no
+    per-card token list ever materializes. Corpus takes it as `df_extra`, keeping the
+    corpus-wide IDF statistics identical whether a shelf is frozen or resident (the probe
+    battery caught title-only indexing re-ranking two RESIDENT cards on an unrelated query)."""
     p = path or _cards_path()
     out: Dict[str, dict] = {}
     if not p.exists():
         return out
+    frozen = frozen_shelves()
+
+    def _keep(c: dict) -> None:
+        # a frozen-shelf card loads as a stub — the graph resident, the weight on the shard
+        if c.get("shelf") in frozen:
+            full_toks = set(_tokens(_card_text(c)))
+            c = {k: v for k, v in c.items() if k in _STUB_KEEPS}
+            c["frozen"] = True
+            if _df_out is not None:
+                for t in full_toks - set(_tokens(_card_text(c))):
+                    _df_out[t] = _df_out.get(t, 0) + 1
+        out[c["id"]] = c
+
     with open(p, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -212,7 +297,7 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
             except json.JSONDecodeError:
                 continue
             if isinstance(c, dict) and c.get("id"):
-                out[c["id"]] = c
+                _keep(c)
     # further sources that join the SAME graph as Scripture and the tradition:
     #   verified_cards.jsonl — minted live from sealed verifications (data-only, gitignored)
     #   reference_cards.jsonl — the deep reference work already in the verifiers (periodic table,
@@ -274,7 +359,7 @@ def load_cards(path: Optional[Path] = None) -> Dict[str, dict]:
                     except json.JSONDecodeError:
                         continue
                     if isinstance(c, dict) and c.get("id"):
-                        out[c["id"]] = c
+                        _keep(c)
         for overlay in ("reference_bridges.jsonl", "keystone_bridges.jsonl",
                         "nesting_bridges.jsonl", "works_bridges.jsonl", "element_bridges.jsonl",
                         "ncs_bridges.jsonl"):
@@ -334,7 +419,8 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
     if _DEFAULT is None:  # double-checked lock: build once, even under concurrent first-hits
         with _DEFAULT_LOCK:
             if _DEFAULT is None:
-                _DEFAULT = Corpus(load_cards(path))
+                df: Dict[str, int] = {}
+                _DEFAULT = Corpus(load_cards(path, _df_out=df), df_extra=df)
     return _DEFAULT
 
 
@@ -343,8 +429,28 @@ def search(query: str, limit: int = 25, include_witness: bool = True,
     """Ranked search over the default corpus (cards.jsonl) — the floor's retrieval primitive.
     The keeping is shared across both surfaces by default (the .com includes the religious
     cards too); pass include_witness=False for an optional secular-only view. `shelves` scopes
-    the search to a deck (the Hare fast-path)."""
-    return default_corpus().search(query, limit, include_witness, shelves)
+    the search to a deck (the Hare fast-path).
+
+    When shelves are FROZEN (riding the shards), their resident stubs only match on title —
+    so the shard FTS (which indexes the full text) fills the remaining slots, and any stub
+    that made the cut is rehydrated. The reader never sees a lighter answer because the
+    shelf rode the shard."""
+    out = default_corpus().search(query, limit, include_witness, shelves)
+    frozen = frozen_shelves()
+    if frozen and (shelves is None or (set(shelves) & frozen)) and len(out) < limit:
+        from . import corpus_db
+        corpus_db.thaw_for(*frozen)
+        have = {c.get("id") for c in out}
+        for hit in corpus_db.search(query, limit=limit, include_witness=include_witness):
+            if (hit.get("shelf") not in frozen or hit.get("id") in have
+                    or (shelves is not None and hit.get("shelf") not in shelves)
+                    or not is_public(hit)):
+                continue        # resident shelves are already fully scored — merge only frozen freight
+            out.append(hit)
+            have.add(hit.get("id"))
+            if len(out) >= limit:
+                break
+    return [rehydrate(c) for c in out]
 
 
 # ── Library primitives (ported from 1.0's card tools, over the same corpus) ──────────────
@@ -359,7 +465,7 @@ def get_card(card_id: str) -> Optional[dict]:
     (private / public_review / archived / quarantine / retracted) are never returned —
     this is the boundary render_card_html and /card rely on."""
     c = default_corpus().cards.get((card_id or "").strip())
-    return c if (c is not None and is_public(c)) else None
+    return rehydrate(c) if (c is not None and is_public(c)) else None
 
 
 def browse(shelf: Optional[str] = None, limit: int = 20, offset: int = 0) -> Dict[str, Any]:
@@ -372,16 +478,22 @@ def browse(shelf: Optional[str] = None, limit: int = 20, offset: int = 0) -> Dic
     offset = max(0, offset)
     limit = max(1, min(limit, 100))
     return {"total": total, "offset": offset, "limit": limit,
-            "shelf": shelf, "cards": [_brief(c) for c in cards[offset:offset + limit]]}
+            "shelf": shelf, "cards": [_brief(rehydrate(c)) for c in cards[offset:offset + limit]]}
 
 
 def stats() -> Dict[str, Any]:
     """Counts over the keeping — total, by shelf, by surface."""
     from collections import Counter
     cards = [c for c in default_corpus().cards.values() if is_public(c)]
-    return {"total": len(cards),
-            "by_shelf": dict(Counter((c.get("shelf") or "?") for c in cards).most_common(40)),
-            "by_surface": dict(Counter((c.get("surface") or "?") for c in cards))}
+    out = {"total": len(cards),
+           "by_shelf": dict(Counter((c.get("shelf") or "?") for c in cards).most_common(40)),
+           "by_surface": dict(Counter((c.get("surface") or "?") for c in cards))}
+    fz = frozen_shelves()
+    if fz:
+        # named, never silent: these shelves are resident as stubs (graph + titles), full
+        # bodies riding the SQLite shards and rehydrated on read
+        out["frozen_shelves"] = sorted(fz)
+    return out
 
 
 def daily(seed: Optional[str] = None) -> Optional[dict]:
@@ -395,7 +507,7 @@ def daily(seed: Optional[str] = None) -> Optional[dict]:
     if seed is None:
         seed = _time.strftime("%Y-%m-%d", _time.gmtime())
     idx = int(hashlib.sha256(seed.encode("utf-8")).hexdigest(), 16) % len(ids)
-    return default_corpus().cards[ids[idx]]
+    return rehydrate(default_corpus().cards[ids[idx]])
 
 
 def connections(card_id: str, limit: int = 10) -> Optional[Dict[str, Any]]:

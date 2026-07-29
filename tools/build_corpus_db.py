@@ -51,6 +51,10 @@ def _finish(db: sqlite3.Connection):
 
 
 def main() -> int:
+    # The builder must see the FULL corpus. If the freeze env is set (as it is on the deploy
+    # box), loading would yield STUBS for the frozen shelves — and shards rebuilt from stubs
+    # would destroy the very bodies they exist to keep. Disarm it for this process, always.
+    os.environ.pop("CONCORDANCE_FREEZE_SHELVES", None)
     from concordance import corpus, corpus_db
     single = "--single" in sys.argv
     out = Path(sys.argv[sys.argv.index("--out") + 1]) if "--out" in sys.argv else (
