@@ -79,6 +79,7 @@ test_narratives.py
 test_nesting.py
 test_no_keys_on_the_wire.py
 test_nothing_is_isolated.py
+test_null_assay.py
 test_pins.py
 test_precedent.py
 test_privacy.py
