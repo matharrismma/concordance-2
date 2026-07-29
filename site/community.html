@@ -110,6 +110,7 @@
 </main>
 
 <script src="/kinds.js"></script>
+<script src="/nh-keys.js"></script>
 <script>
 const API = "";
 function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?"":s); return d.innerHTML; }
@@ -124,6 +125,29 @@ function refreshWho(){ const h=localStorage.getItem('nh_handle'); whoami.textCon
 refreshWho();
 document.getElementById('savehandle').addEventListener('click',()=>{ const h=handleEl.value.trim(); if(h){ localStorage.setItem('nh_handle',h); refreshWho(); } });
 function myHandle(){ return (localStorage.getItem('nh_handle')||handleEl.value.trim()||'').trim(); }
+// A reporting key, born on THIS device and never sent anywhere — it exists so a report can be
+// signed. Deut 19:15 counts witnesses, and a witness is a key, not a name anyone can type.
+// Cached in localStorage so you stay the same witness tomorrow (and repeating yourself still
+// counts once). Minted lazily: a reader who never reports never makes one.
+let _rptKey = null;
+function reportKey(){
+  if(_rptKey) return _rptKey;
+  if(typeof NHKeys === 'undefined' || !NHKeys.available()) return null;
+  try{
+    const saved = localStorage.getItem('nh_report_key');
+    if(saved){ _rptKey = JSON.parse(saved); return _rptKey; }
+  }catch(e){ /* unreadable store — mint a fresh one below */ }
+  return null;
+}
+async function ensureReportKey(){
+  if(reportKey()) return _rptKey;
+  if(typeof NHKeys === 'undefined' || !NHKeys.available()) return null;
+  const k = await NHKeys.create();
+  if(!k) return null;
+  _rptKey = k;
+  try{ localStorage.setItem('nh_report_key', JSON.stringify(k)); }catch(e){ /* private mode: session-only */ }
+  return _rptKey;
+}
 function needHandle(){ if(!myHandle()){ handleEl.focus(); whoami.textContent='· choose a handle first'; return false; } return true; }
 
 // discover
@@ -183,7 +207,18 @@ function render(g){
       if(!needHandle()) return;
       const why = window.prompt('Report this to a human steward. Why? (harmful, spam, impersonation, private_info, other)', 'other');
       if(why === null) return;
-      const r = await postJSON('/report', {kind:'group_contribution', target_id:b.dataset.id, reason:why.trim()||'other', reporter:myHandle()});
+      // A report is SIGNED with a key born on this device: three witnesses means three KEYS
+      // (Deut 19:15), so no one person with three names can hide what is true. The key never
+      // leaves — we fetch the exact bytes, sign them here, and send only the signature.
+      const key = await ensureReportKey();
+      if(!key){ b.textContent = 'reporting needs a current browser (Ed25519)'; return; }
+      const sg = await getJSON('/moderation/signable?action=report&target_id=' +
+                               encodeURIComponent(b.dataset.id) + '&actor=' + encodeURIComponent(key.public_key));
+      if(!sg || !sg.signable){ b.textContent = 'could not prepare the report'; return; }
+      const sig = await NHKeys.signB64uBytes(key.private_key, sg.signable);
+      if(!sig){ b.textContent = 'could not sign the report on this device'; return; }
+      const r = await postJSON('/report', {kind:'group_contribution', target_id:b.dataset.id,
+                                           reason:why.trim()||'other', fields:sg.fields, signature:sig});
       if(r) b.textContent = 'reported — ' + (r.held_for_review ? 'held for a human steward' : 'a claim, recorded (' + r.reporters + ' of 3)');
     });
   });

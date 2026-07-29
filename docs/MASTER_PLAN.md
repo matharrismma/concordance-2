@@ -34,6 +34,8 @@ uneven gets one. Named capacitors, standing and planned:
 - **Receipts ledger** — value accumulates signed and traceable until (if ever) payment
   discharges along the waybill.
 - **Caches + Wayback archives** — capacitors against link rot and upstream outage.
+- **The airlock chamber** (C2.5) — untrusted freight charges into quarantine; only cards,
+  a map, and a hash discharge into the keeping. The bytes never enter the core.
 - **Rate limits** = current limiters; **the moat** = the diode (falsehood cannot pass in
   either direction of pressure).
 
@@ -84,8 +86,9 @@ Each line: system — where it lives — what it guarantees.
   substrate planned (Reticulum).
 - Consent — `consent.py`: signed grants (closed verb set, TTL≤30d, revocation tombstones,
   storage re-verified); write-back pilot: calendar events (`connect_write.py`), D3.
-- Moderation floor — `moderation.py`: report (1=claim, 3 distinct=held for HUMAN steward,
-  Deut 19:15), block (viewer-side sovereign boundary).
+- Moderation floor — `moderation.py`: report (1=claim, 3 distinct SIGNING witnesses=held for a
+  HUMAN steward, Deut 19:15), block/unblock (viewer-side sovereign boundary). Every act carries
+  a fresh detached signature over canonical bytes — a witness is a key, never a typed name.
 - Connect — `connect.py`: read-only pass-through to the user's OWN calendar/email/storage;
   EDGE, store nothing.
 
@@ -107,8 +110,15 @@ Each line: system — where it lives — what it guarantees.
    parsed stdlib-only, full article on every card page) + Adam Clarke (854 ch) + John
    Gill (1,189 ch) via helloao into the commentary registry. Gill was NOT on CrossWire —
    helloao was the lawful road for both.
-4. **D6 security sweep** — over the new surfaces: consent, report/block, study routes,
-   ambiguous-ref, write-back pilot. (Now doubly important: the Commons will reuse all of it.)
+4. ~~D6 security sweep~~ — DONE 2026-07-29. Two real holes found and closed: ICS injection in
+   the calendar pilot (unvalidated DTSTART/DTEND + unescaped 
+) and UNSIGNED WITNESSES in the
+   moderation floor (three invented names could quarantine true content; anyone could edit
+   another viewer's block list). Report/block/unblock now require fresh detached signatures
+   naming their exact target, and site/community.html mints a device-local reporting key so
+   the fix reaches the reader. Probed clean: consent (wrong signer / tampered scope / cross-
+   agent / cross-verb / TTL cap / private-key smuggling), study routes (traversal, injection,
+   oversize, NUL), card render (attribute breakout, javascript: URLs), ambiguous-ref last mile.
 5. **D7 CAPSTONE null assay** — three rings: 103 kept theory cards (recover+classify), the
    project's OWN theses, associated theory families per covered topic. Verdicts
    CONFIRMED/PLAUSIBLE/RESONANCE/COINCIDENCE + honest could-not-check; say "dead end" plainly.
@@ -161,6 +171,51 @@ us. Full design + legal lines: memory `project_social_first_member_shelves_lendi
   never elevate on feedback alone).
 - Receipt substrate for payments: every value act emits a signed receipt complete enough to
   compute payouts retroactively. Pay for FRUIT, never traffic; readers stay anonymous.
+
+**Stage C2.5 — THE DISTRIBUTED AIRLOCK (Matt, 2026-07-29)** — the substrate under lending
+- Seed exists: `airlock.py` (mint cards+map in the chamber, kick the FILE back out, 2026-07-25)
+  and `corpus_db.airlock_search` (thaw one shard, pull only what we need, seal it back). The
+  same discipline one plane up — a member's own cloud folder instead of a shard.
+- INTAKE: a folder link (Drive / Dropbox / Nextcloud / S3 / self-hosted) opened in QUARANTINE —
+  size caps, type allowlist, no executables, blocklists, text extraction only. Out come cards +
+  a map + a CONTENT HASH; the chamber seals and the bytes are dropped.
+- PATH NOT PAYLOAD: the card holds the origin URL, a fetch recipe, and the hash. Another member
+  retrieves FROM THE ORIGINATOR (client-direct where possible — the bytes never transit us).
+  The broker holds the waybill, never the cargo; no copy is made, so the lending problem
+  dissolves.
+- TAMPER-EVIDENT: a retriever checks the bytes against the carded hash; a mismatch is said
+  plainly. No other file-sharing network can make that claim.
+- THE ORIGIN'S PERMISSIONS ARE THE ONLY PERMISSIONS: read on the named folder, never a crawl
+  beyond it, and revocation must actually work — found / source gone / could-not-check. Never
+  cache to paper over an outage.
+- REPLICATION BY CONSENT: PD/CC0/member-authored work may be mirrored by volunteers (seeded
+  resilience); anything else stays one copy, at its owner's.
+- Intake lands in `public_review` behind the curation gate, marked unverified until checked.
+
+**Stage C2.6 — THE DISTRIBUTED CORPUS (Matt, 2026-07-29)** — knowledge across many devices
+"Some can act as nodes and backups. Some may only want personal. Others may want to curate a
+specific aspect of the corpus." The D4 shards ARE the distribution unit (self-contained SQLite
+FTS + manifest; a device thaws only what it holds) — this adds the role layer and the trust layer.
+- ROLES: **personal** (core.db = 69 MB: the whole map, every title and connection, offline on a
+  phone; add the wings you love; serves nothing) · **node** (holds many shards, serves peers who
+  ask — a backup by construction, not a separate feature) · **curator** (owns a slice: a shelf +
+  its spine, tends and elevates into it, signs it, publishes it as a shard others subscribe to).
+- TRUST LAYER (do not skip — an unsigned distributed corpus is a rumor mill): every shard carries
+  a content hash, the manifest carries every shard's hash, and the manifest is SIGNED. A device
+  verifies what it received against what the manifest says (the airlock's tamper-evidence, the
+  same kernel that gates our releases). NO NODE IS AUTHORITATIVE: verification is local, so any
+  device checks any card's seal without reaching us. If we vanish, the library keeps proving itself.
+- BUILD EARLY: a **coverage map** (how many known nodes hold each shard — an honest seed count so
+  the community can volunteer where it is thin, never a leaderboard) and **versioned deltas** (pull
+  only what changed, not a fresh 200 MB shard).
+- DISCOVERY rides what exists: the Fellowship Mesh over IP; LoRa/Reticulum where there is no
+  internet. Shards travel by microSD as well as by wire — the ark is a set of files you can hand
+  to a neighbor.
+- MEASURED (from the live manifest, 2026-07-29): core 68.9 MB / 30,063 cards (the personal floor
+  — the whole map on any phone) · science 96.9 · word 166.7 · world 177.7 · dictionary 226.8 ·
+  books 227.8. FULL NODE = 964.8 MB / 487,178 cards — the entire keeping fits on an $8 microSD.
+  A curator carries core + their one wing. This is why "spread across many devices" is real and
+  not aspirational: the cost of holding the library is a rounding error on any modern device.
 
 **Stage C3 — when reached**
 - Live lessons P2P: WebRTC 1-on-1/small workshops — server does signaling only, video bytes

@@ -242,17 +242,30 @@ def _secular_tools() -> List[dict]:
              "agent_fp": {"type": "string"}, "verb": {"type": "string"},
              "grantor_pubkey": {"type": "string"}},
              "required": ["agent_fp", "verb", "grantor_pubkey"]}},
+        {"name": "moderation_signable",
+         "description": ("Step 1 of a report or a block: the exact canonical bytes to sign with "
+                         "your own key, on your own machine. Returns {fields, signable}. Sign the "
+                         "decoded `signable` bytes and pass BOTH fields and signature to `report`. "
+                         "The private key never travels."),
+         "inputSchema": {"type": "object", "properties": {
+             "action": {"type": "string", "description": "report | block | unblock"},
+             "target_id": {"type": "string"}, "actor": {"type": "string",
+                                                        "description": "your public key"},
+             "extra": {"type": "string"}},
+             "required": ["action", "target_id", "actor"]}},
         {"name": "report",
          "description": ("Report a community item (group_contribution, mesh_message, door_note) "
                          "to the moderation floor. One report is a claim, never a verdict; at "
                          "three DISTINCT reporters the item is held for a HUMAN steward's review "
                          "(Deut 19:15). The counter never judges — it decides when a person must "
-                         "look."),
+                         "look. A report must be SIGNED (call moderation_signable first): three "
+                         "witnesses means three keys, never three invented names."),
          "inputSchema": {"type": "object", "properties": {
              "kind": {"type": "string"}, "target_id": {"type": "string"},
-             "reason": {"type": "string"}, "reporter": {"type": "string"},
-             "note": {"type": "string"}},
-             "required": ["kind", "target_id", "reason", "reporter"]}},
+             "reason": {"type": "string"}, "note": {"type": "string"},
+             "fields": {"type": "object", "description": "the exact fields from moderation_signable"},
+             "signature": {"type": "string", "description": "detached signature over those bytes"}},
+             "required": ["kind", "target_id", "reason", "fields", "signature"]}},
         {"name": "attest_record",
          "description": ("Bind your identity to a record you already hold — phase 2 of the sovereign "
                          "flow. Do the thing unsigned (badges_issue, study_export, group_contribute), "
@@ -579,11 +592,19 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         from .. import consent as _consent
         return _consent.guard(str(args.get("agent_fp") or ""), str(args.get("verb") or ""),
                               str(args.get("grantor_pubkey") or ""))
+    if name == "moderation_signable":
+        from .. import moderation as _mod
+        return _mod.signable(str(args.get("action") or ""), str(args.get("target_id") or ""),
+                             str(args.get("actor") or ""), extra=str(args.get("extra") or ""))
     if name == "report":
         from .. import moderation as _mod
+        if args.get("private_key"):
+            return _no_private_key("report")
         return _mod.report(str(args.get("kind") or ""), str(args.get("target_id") or ""),
-                           str(args.get("reason") or ""), str(args.get("reporter") or ""),
-                           note=str(args.get("note") or ""))
+                           str(args.get("reason") or ""),
+                           note=str(args.get("note") or ""),
+                           fields=args.get("fields") if isinstance(args.get("fields"), dict) else None,
+                           signature=str(args.get("signature") or ""))
     if name == "attest_record":
         from .. import attest as _attest
         if args.get("private_key"):

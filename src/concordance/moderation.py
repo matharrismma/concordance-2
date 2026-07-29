@@ -18,6 +18,7 @@ fresh on every call — this is a floor, not a scale.
 """
 from __future__ import annotations
 
+import base64
 import json
 import os
 import time
@@ -25,6 +26,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 HOLD_AT = 3          # distinct reporters that HOLD an item for human review (Deut 19:15)
+SIGNATURE_TTL_S = 900   # signed bytes are good for 15 minutes — a replay window, not a lifetime
 REASONS = ("harmful", "spam", "impersonation", "false_teaching_claim", "private_info", "other")
 
 _KINDS = ("group_contribution", "mesh_message", "door_note")
@@ -56,20 +58,79 @@ def _read(name: str) -> List[Dict[str, Any]]:
     return out
 
 
-def report(kind: str, target_id: str, reason: str, reporter: str,
-           note: str = "") -> Dict[str, Any]:
+_SIGNED_FIELDS = ("action", "actor", "at", "extra", "target_id")
+
+
+def _canon(fields: Dict[str, Any]) -> bytes:
+    """The exact bytes both sides sign and verify — sorted-key JSON, nothing else (the same
+    canonicalization consent and the mesh use, so one signing routine serves the whole house)."""
+    return json.dumps({k: fields.get(k) for k in _SIGNED_FIELDS}, sort_keys=True,
+                      separators=(",", ":")).encode("utf-8")
+
+
+def signable(action: str, target_id: str, actor: str, extra: str = "") -> Dict[str, Any]:
+    """The canonical bytes an actor signs to prove a report or a block is THEIRS.
+
+    D6 (2026-07-28) found the hole: `reporter` and `viewer` were self-asserted strings, so
+    (a) one person with three invented names could reach HOLD_AT and quarantine true content
+    from public reads — a censorship lever inside the witness rule — and (b) anyone could
+    append blocks to ANOTHER viewer's list, silently filtering what that person sees. Deut
+    19:15 counts WITNESSES, not strings: a witness is a key that signed. Same detached-
+    signature discipline as consent and the mesh — the private key never travels."""
+    fields = {"action": action, "target_id": (target_id or "").strip(),
+              "actor": (actor or "").strip(), "extra": (extra or "").strip(),
+              "at": int(time.time())}
+    return {"ok": True, "fields": fields,
+            "signable": base64.urlsafe_b64encode(_canon(fields)).decode("ascii"),
+            "note": "sign these exact bytes with your covenant key ON YOUR DEVICE, then send "
+                    "the fields plus the signature. The private key never travels."}
+
+
+def _verified_actor(fields: Optional[Dict[str, Any]], signature: str,
+                    action: str, target_id: str) -> Dict[str, Any]:
+    """(ok, actor) — the actor named by fields IF their signature over those exact bytes holds
+    and the bytes are fresh. Unsigned calls are refused, with the way in."""
+    if not isinstance(fields, dict) or not isinstance(signature, str) or not signature.strip():
+        return {"ok": False, "error": "signed fields are required — call signable() first, sign "
+                                      "those bytes with your key, and send fields + signature"}
+    actor = str(fields.get("actor") or "").strip()
+    if not actor:
+        return {"ok": False, "error": "the signed fields must name the actor"}
+    if fields.get("action") != action or str(fields.get("target_id") or "") != (target_id or "").strip():
+        return {"ok": False, "error": "the signed bytes do not match this request"}
+    try:
+        at = int(fields.get("at") or 0)
+    except (TypeError, ValueError):
+        return {"ok": False, "error": "the signed bytes carry no readable timestamp"}
+    now = int(time.time())
+    if not (now - SIGNATURE_TTL_S <= at <= now + 300):
+        return {"ok": False, "error": "these signed bytes are stale — sign a fresh set"}
+    from . import signing
+    if not signing.verify_bytes(_canon(fields), signature.strip(), actor):
+        return {"ok": False, "error": "that signature does not verify against the named key"}
+    return {"ok": True, "actor": actor}
+
+
+def report(kind: str, target_id: str, reason: str, reporter: str = "",
+           note: str = "", fields: Optional[Dict[str, Any]] = None,
+           signature: str = "") -> Dict[str, Any]:
     """File a report. Anyone may report; nobody's report is a verdict. The same reporter
-    repeating themselves stays ONE witness — the mesh's own rule."""
+    repeating themselves stays ONE witness — the mesh's own rule. The reporter must SIGN:
+    three witnesses means three keys, never three invented names."""
     kind = (kind or "").strip()
     if kind not in _KINDS:
         return {"ok": False, "error": f"kind must be one of {_KINDS}"}
-    if not (target_id or "").strip() or not (reporter or "").strip():
-        return {"ok": False, "error": "target_id and reporter are both required"}
+    if not (target_id or "").strip():
+        return {"ok": False, "error": "target_id is required"}
+    v = _verified_actor(fields if fields is not None else None, signature, "report", target_id)
+    if not v.get("ok"):
+        return {"ok": False, "error": v["error"]}
+    reporter = v["actor"]
     reason = (reason or "other").strip()
     if reason not in REASONS:
         reason = "other"
     _append("reports.jsonl", {"kind": kind, "target_id": target_id.strip(),
-                              "reason": reason, "reporter": reporter.strip(),
+                              "reason": reason, "reporter": reporter,
                               "note": (note or "")[:500], "at": int(time.time())})
     st = status(kind, target_id)
     return {"ok": True, **st,
@@ -130,19 +191,33 @@ def review_queue() -> Dict[str, Any]:
 
 # ── Block: a viewer's own boundary, sovereign and threshold-free ────────────────────────────────
 
-def block(viewer: str, blocked_handle: str) -> Dict[str, Any]:
-    if not (viewer or "").strip() or not (blocked_handle or "").strip():
-        return {"ok": False, "error": "viewer and blocked_handle are both required"}
-    _append("blocks.jsonl", {"viewer": viewer.strip(), "blocked": blocked_handle.strip(),
+def block(viewer: str = "", blocked_handle: str = "", fields: Optional[Dict[str, Any]] = None,
+          signature: str = "") -> Dict[str, Any]:
+    """Your own boundary — and only YOURS. The viewer signs, so nobody can write blocks into
+    another person's list and quietly filter what that person sees."""
+    if not (blocked_handle or "").strip():
+        return {"ok": False, "error": "blocked_handle is required"}
+    v = _verified_actor(fields if fields is not None else None, signature, "block", blocked_handle)
+    if not v.get("ok"):
+        return {"ok": False, "error": v["error"]}
+    _append("blocks.jsonl", {"viewer": v["actor"], "blocked": blocked_handle.strip(),
                              "at": int(time.time()), "on": True})
     return {"ok": True, "blocked": blocked_handle.strip(),
             "note": "This filters what YOU see. It is a boundary of yours, not a verdict on them."}
 
 
-def unblock(viewer: str, blocked_handle: str) -> Dict[str, Any]:
-    _append("blocks.jsonl", {"viewer": (viewer or "").strip(), "blocked": (blocked_handle or "").strip(),
+def unblock(viewer: str = "", blocked_handle: str = "", fields: Optional[Dict[str, Any]] = None,
+            signature: str = "") -> Dict[str, Any]:
+    """Lifting your own boundary is as signed as raising it — otherwise anyone could tear down
+    a person's blocks and force what they see back into view."""
+    if not (blocked_handle or "").strip():
+        return {"ok": False, "error": "blocked_handle is required"}
+    v = _verified_actor(fields if fields is not None else None, signature, "unblock", blocked_handle)
+    if not v.get("ok"):
+        return {"ok": False, "error": v["error"]}
+    _append("blocks.jsonl", {"viewer": v["actor"], "blocked": blocked_handle.strip(),
                              "at": int(time.time()), "on": False})
-    return {"ok": True, "unblocked": (blocked_handle or "").strip()}
+    return {"ok": True, "unblocked": blocked_handle.strip()}
 
 
 def blocked_by(viewer: str) -> set:

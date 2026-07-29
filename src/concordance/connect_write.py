@@ -24,6 +24,7 @@ Configuration is the user's, on the user's box:
 from __future__ import annotations
 
 import os
+import re
 import secrets
 import time
 import urllib.request
@@ -48,25 +49,51 @@ def _fold(line: str) -> str:
 
 
 def _esc(v: str) -> str:
-    return (v or "").replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
+    """RFC 5545 §3.3.11 text escaping. Every newline form — \\r, \\n, \\r\\n, and the Unicode
+    line separators a JSON body can carry — collapses to the escaped \\n, because a RAW break
+    inside a value ends the content line and everything after it is parsed as a NEW PROPERTY.
+    That is calendar-injection: a summary could otherwise append ATTENDEE, ORGANIZER, URL, or a
+    whole second VEVENT to a write the user consented to once."""
+    v = (v or "").replace("\\", "\\\\")
+    for brk in ("\r\n", "\r", "\n", " ", " "):
+        v = v.replace(brk, "\\n")
+    return v.replace(";", "\\;").replace(",", "\\,")
+
+
+_DT = re.compile(r"\A\d{8}(T\d{6}Z?)?\Z")
+
+
+def _dt(raw: str) -> Optional[str]:
+    """An ICS date/date-time, or None. Property VALUES take no escaping — so they must be
+    VALIDATED instead: anything not exactly YYYYMMDD[THHMMSS[Z]] is refused rather than
+    interpolated. (Before this, start_iso/end_iso reached DTSTART/DTEND unescaped AND
+    unvalidated — the widest injection point in the pilot.)"""
+    s = (raw or "").strip().replace("-", "").replace(":", "")
+    return s if _DT.match(s) else None
 
 
 def build_vevent(summary: str, start_iso: str, end_iso: Optional[str] = None,
                  description: str = "") -> Dict[str, str]:
-    """A standard VEVENT. Date-only starts become all-day events. Returns {uid, vevent}."""
+    """A standard VEVENT. Date-only starts become all-day events. Returns {uid, vevent},
+    or {error} if the times are not real ICS timestamps."""
     uid = f"nh-{secrets.token_hex(8)}@narrowhighway"
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
-    s = (start_iso or "").strip().replace("-", "").replace(":", "")
+    s = _dt(start_iso)
+    if not s:
+        return {"error": "start_iso must be YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS[Z]"}
+    e = _dt(end_iso) if (end_iso or "").strip() else None
+    if (end_iso or "").strip() and not e:
+        return {"error": "end_iso must be YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS[Z]"}
     all_day = len(s) == 8
     lines = ["BEGIN:VEVENT", f"UID:{uid}", f"DTSTAMP:{stamp}"]
     if all_day:
         lines.append(f"DTSTART;VALUE=DATE:{s}")
-        if end_iso:
-            lines.append(f"DTEND;VALUE=DATE:{(end_iso or '').strip().replace('-', '')}")
+        if e:
+            lines.append(f"DTEND;VALUE=DATE:{e[:8]}")
     else:
         lines.append(f"DTSTART:{s}")
-        if end_iso:
-            lines.append(f"DTEND:{(end_iso or '').strip().replace('-', '').replace(':', '')}")
+        if e:
+            lines.append(f"DTEND:{e}")
     lines.append(_fold(f"SUMMARY:{_esc(summary)}"))
     if description:
         lines.append(_fold(f"DESCRIPTION:{_esc(description)}"))
@@ -91,6 +118,8 @@ def create_event(grantor_pubkey: str, agent_fp: str, summary: str, start_iso: st
         return {"ok": False, "error": f"{ENV_TARGET} is not configured — the user names WHERE "
                                       f"their calendar lives; we never guess a destination"}
     ev = build_vevent(summary, start_iso, end_iso, description)
+    if ev.get("error"):
+        return {"ok": False, "error": ev["error"]}
 
     if dest.lower().startswith(("http://", "https://")):
         # CalDAV: PUT one .ics resource into the user's collection.

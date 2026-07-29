@@ -201,6 +201,27 @@ directory, never a file at a time. Test fixtures are vendored into the repo — 
 by absolute path. Proven by hiding `test_isolation.py` and watching the gate name it and fail.
 → SOP-1, SOP-11.
 
+### 2026-07-29 · D6 sweep — a witness must be a KEY, and a value must not become a line
+Two real holes in surfaces built the same week, found by sweeping them adversarially rather
+than by any failing test:
+1. `connect_write` interpolated `start_iso`/`end_iso` into DTSTART/DTEND with no escaping AND
+   no validation, and `_esc` did not escape a bare ``. A raw break ENDS an ICS content line,
+   so one consented "create an event" could have written ATTENDEE/ORGANIZER/URL — or a whole
+   second VEVENT — into the person's calendar.
+2. `moderation` trusted self-asserted `reporter`/`viewer` strings. One person with three
+   invented names could reach HOLD_AT and quarantine TRUE content from public reads (a
+   censorship lever hidden inside the witness rule), and anyone could append blocks to another
+   viewer's list, silently filtering what that person sees.
+**Why:** the discipline "detached signatures everywhere" had been applied to consent and the
+mesh but not carried across to the floor built next to them; and text escaping was reviewed
+for the value that looked dangerous (summary) but not the ones that looked structural (dates).
+**Guard:** ICS values are validated against their grammar, never escaped-by-hope; every newline
+form collapses. Report/block/unblock require a fresh detached signature over canonical bytes
+that names the exact target — three witnesses now means three keys (Deut 19:15). And the fix
+was carried to the READER: `site/community.html` mints a device-local reporting key and signs,
+because a server-side rule the UI cannot satisfy is a broken feature, not a hardened one.
+→ SOP-CURATION (queued), the covenant's rule 4.
+
 ### 2026-07-12 · Two copies of DEPLOY.md — the drift source itself
 The runbook existed at both `Desktop\DEPLOY.md` and `concordance-2\docs\DEPLOY.md`.
 Duplicated docs are precisely how the first lesson above happened.

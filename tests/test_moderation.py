@@ -10,6 +10,8 @@ Pinned here:
     resolution carries the steward's name — no anonymous judgement;
   * block is viewer-side and sovereign: it filters what YOU see, needs no threshold, and a
     public read with no viewer filters NOTHING (your boundary is not the world's verdict);
+  * D6 (2026-07-28): every report and block is SIGNED — a witness is a key, not a string, so
+    three invented names can never hold true content and nobody can edit another's eyes;
   * the review queue shows exactly what waits on a human.
 
 Runnable with pytest OR directly.
@@ -23,7 +25,35 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+import base64  # noqa: E402
 import pytest  # noqa: E402
+
+_KEYS: dict = {}
+
+
+def _key(name: str):
+    """A stable keypair per test-persona — the signed equivalent of the old bare handle."""
+    from concordance import signing
+    if name not in _KEYS:
+        try:
+            _KEYS[name] = signing.generate_keypair()
+        except Exception:  # noqa: BLE001 — no cryptography on this box
+            pytest.skip("signing unavailable in this build")
+    return _KEYS[name]
+
+
+def _sign(action: str, target: str, who: str):
+    """(fields, signature, pubkey) for `who` over this exact action+target."""
+    from concordance import moderation, signing
+    priv, pub = _key(who)
+    sg = moderation.signable(action, target, pub)
+    return sg["fields"], signing.sign_bytes(base64.urlsafe_b64decode(sg["signable"]), priv), pub
+
+
+def _report(kind: str, target: str, reason: str, who: str):
+    from concordance import moderation
+    f, sig, _pub = _sign("report", target, who)
+    return moderation.report(kind, target, reason, fields=f, signature=sig)
 
 
 @pytest.fixture(autouse=True, scope="module")
@@ -39,7 +69,7 @@ def _isolate_data_dir():
 
 def test_one_report_is_a_claim_and_hides_nothing():
     from concordance import moderation as m
-    r = m.report("group_contribution", "c-1", "spam", "alice")
+    r = _report("group_contribution", "c-1", "spam", "alice")
     assert r["ok"] is True and r["reporters"] == 1 and r["held_for_review"] is False
     assert m.held("group_contribution", "c-1") is False
 
@@ -47,7 +77,7 @@ def test_one_report_is_a_claim_and_hides_nothing():
 def test_the_same_reporter_repeating_is_one_witness():
     from concordance import moderation as m
     for _ in range(5):
-        m.report("group_contribution", "c-2", "spam", "bob")
+        _report("group_contribution", "c-2", "spam", "bob")
     st = m.status("group_contribution", "c-2")
     assert st["reporters"] == 1 and st["held_for_review"] is False, \
         "a voice cannot become three witnesses by shouting"
@@ -56,7 +86,7 @@ def test_the_same_reporter_repeating_is_one_witness():
 def test_three_distinct_reporters_hold_for_a_human_not_a_verdict():
     from concordance import moderation as m
     for who in ("alice", "bob", "carol"):
-        m.report("mesh_message", "msg-9", "harmful", who)
+        _report("mesh_message", "msg-9", "harmful", who)
     st = m.status("mesh_message", "msg-9")
     assert st["held_for_review"] is True and st["steward_action"] is None
     assert m.held("mesh_message", "msg-9") is True
@@ -67,7 +97,7 @@ def test_three_distinct_reporters_hold_for_a_human_not_a_verdict():
 def test_a_steward_restore_beats_the_counter_and_remove_holds():
     from concordance import moderation as m
     for who in ("a", "b", "c"):
-        m.report("door_note", "note-1", "other", who)
+        _report("door_note", "note-1", "other", who)
     assert m.held("door_note", "note-1") is True
     anon = m.resolve("door_note", "note-1", "restore", "")
     assert anon["ok"] is False, "no anonymous judgement"
@@ -79,23 +109,25 @@ def test_a_steward_restore_beats_the_counter_and_remove_holds():
 
 def test_bad_report_shapes_are_refused():
     from concordance import moderation as m
-    assert m.report("nonsense_kind", "x", "spam", "a")["ok"] is False
-    assert m.report("mesh_message", "", "spam", "a")["ok"] is False
-    assert m.report("mesh_message", "x", "spam", "")["ok"] is False
+    assert _report("nonsense_kind", "x", "spam", "a")["ok"] is False
+    assert _report("mesh_message", "", "spam", "a")["ok"] is False
+    assert m.report("mesh_message", "x", "spam")["ok"] is False, "unsigned is refused"
 
 
 def test_block_is_a_viewers_own_boundary():
     from concordance import moderation as m
     items = [{"handle": "kind-friend", "text": "hello"},
              {"handle": "loud-stranger", "text": "noise"}]
-    m.block("me", "loud-stranger")
-    assert [i["handle"] for i in m.filter_for("me", items)] == ["kind-friend"]
+    f, sig, me = _sign("block", "loud-stranger", "me")
+    assert m.block(blocked_handle="loud-stranger", fields=f, signature=sig)["ok"] is True
+    assert [i["handle"] for i in m.filter_for(me, items)] == ["kind-friend"]
     # a public read with NO viewer filters nothing — my boundary is not the world's verdict
     assert len(m.filter_for(None, items)) == 2
     # another viewer sees everything
     assert len(m.filter_for("someone-else", items)) == 2
-    m.unblock("me", "loud-stranger")
-    assert len(m.filter_for("me", items)) == 2
+    f2, sig2, _ = _sign("unblock", "loud-stranger", "me")
+    assert m.unblock(blocked_handle="loud-stranger", fields=f2, signature=sig2)["ok"] is True
+    assert len(m.filter_for(me, items)) == 2
 
 
 if __name__ == "__main__":

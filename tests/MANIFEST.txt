@@ -101,6 +101,7 @@ test_seal_page.py
 test_seam.py
 test_seam_lazy.py
 test_security.py
+test_security_sweep_d6.py
 test_seeds.py
 test_seekers.py
 test_signing.py

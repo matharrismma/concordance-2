@@ -48,6 +48,7 @@ GOLDEN_API_GET = {
     "/backmatter",  # deliberate addition (back-matter tables: weights, names, parables, miracles, intros, topics)
     "/places",    # deliberate addition (the Atlas: real biblical place coordinates, honest uncertainty)
     "/consent", "/consent/signable", "/consent/revoke",  # the human-authorized write path (worklist item 2)
+    "/moderation/signable",
     "/report", "/block",  # the moderation floor (worklist item 4)
     "/connect/event",  # the calendar pilot — the one on-behalf write, behind the consent lock
     "/narratives",  # deliberate addition (storyboards: common narratives charted in the Bible; movements mix and match)
@@ -66,6 +67,7 @@ GOLDEN_RATELIMITED = {
     "/mesh/invite", "/mesh/redeem", "/mesh/door", "/formation/help",
     "/push/subscribe", "/push/unsubscribe",
     "/consent/signable", "/consent", "/consent/revoke",  # the human-authorized write path (worklist item 2)
+    "/moderation/signable",
     "/report", "/block",  # the moderation floor (worklist item 4)
     "/connect/event",  # the calendar pilot — the one on-behalf write, behind the consent lock
     "/audit",   # deliberate addition (the Auditor) — goldens update ONLY with a new route

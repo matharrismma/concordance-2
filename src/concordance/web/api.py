@@ -1605,24 +1605,35 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # A consent refusal is 403 with the teaching attached — not a silent 400.
         return (403, r) if r.get("refused") else _err(400, r.get("error") or "refused")
 
+    if method == "GET" and path == "/moderation/signable":
+        # Step 1 of a report or a block: the exact canonical bytes to sign ON THE DEVICE. Three
+        # witnesses means three KEYS (Deut 19:15) — never three invented names.
+        from .. import moderation as _mod
+        return _ok(_mod.signable((query.get("action") or "").strip(),
+                                 query.get("target_id") or "", query.get("actor") or "",
+                                 extra=query.get("extra") or ""))
     if method == "POST" and path == "/report":
         # The moderation floor: anyone may report; nobody's report is a verdict. One report is a
-        # claim; three distinct reporters hold the item for a HUMAN steward (Deut 19:15).
+        # claim; three distinct SIGNING reporters hold the item for a HUMAN steward (Deut 19:15).
         from .. import moderation as _mod
         if not isinstance(body, dict):
-            return _err(400, "kind, target_id, reason, reporter required")
+            return _err(400, "kind, target_id, reason, signed fields + signature required")
         r = _mod.report(str(body.get("kind") or ""), str(body.get("target_id") or ""),
-                        str(body.get("reason") or ""), str(body.get("reporter") or ""),
-                        note=str(body.get("note") or ""))
+                        str(body.get("reason") or ""),
+                        note=str(body.get("note") or ""),
+                        fields=body.get("fields") if isinstance(body.get("fields"), dict) else None,
+                        signature=str(body.get("signature") or ""))
         return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
     if method == "POST" and path == "/block":
-        # Viewer-side and sovereign: filters what YOU see. A boundary, not a verdict.
+        # Viewer-side and sovereign: filters what YOU see. A boundary, not a verdict — and only
+        # the viewer's own signature may raise or lift it (nobody edits another person's eyes).
         from .. import moderation as _mod
         if not isinstance(body, dict):
-            return _err(400, "viewer and handle required")
-        if body.get("off"):
-            return _ok(_mod.unblock(str(body.get("viewer") or ""), str(body.get("handle") or "")))
-        r = _mod.block(str(body.get("viewer") or ""), str(body.get("handle") or ""))
+            return _err(400, "handle, signed fields + signature required")
+        fn = _mod.unblock if body.get("off") else _mod.block
+        r = fn(blocked_handle=str(body.get("handle") or ""),
+               fields=body.get("fields") if isinstance(body.get("fields"), dict) else None,
+               signature=str(body.get("signature") or ""))
         return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
 
     if method == "GET" and path == "/capabilities":
@@ -1842,6 +1853,7 @@ ROUTES = [
     {"path": "/consent", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/consent/revoke", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/connect/event", "methods": ("POST",), "api": True, "rl": True},
+    {"path": "/moderation/signable", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/report", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/block", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/seeds", "methods": ("GET",), "api": True},
