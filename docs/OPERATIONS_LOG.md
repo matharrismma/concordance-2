@@ -19,6 +19,27 @@ Three standing rules:
 
 ## 2026-07-29
 
+**SEEDING BEGUN (Matt: "get started") — the commentaries carded verse by verse.**
+- The deepest substance already on our disk was reachable only through `/commentary`: not
+  searchable, not in the graph, invisible unless you knew to ask. Now **44,371 verse cards**
+  — Clarke 13,318 · Gill 29,707 · Henry 1,346 — average **1,462 chars** of the commentator's
+  OWN public-domain words, `generated: false`, licence travelling with each card.
+- **44,031 carry a `comments_on` edge to their verse card** — FOUND (the commentary file says
+  which verse it expounds), never invented.
+- Henry's store existed only on the box; pulled down so all three could be carded.
+- Count, both numbers as the discipline requires: **541,103 total · 311,040 substance (57.5%)**,
+  up from 268,033 (54.0%). +43,007 substance in one pass. To 1M substance: 688,960.
+- Shards rebuilt on the BOX (cheaper than shipping ~1 GB): 544,260 cards, `word` shard 387 MB.
+- LIVE: Gill on John 3:16 renders **14,578 bytes** of his own words; commentary is searchable;
+  RSS 1572/1560 MB — still ~1.2 GB below where the night began, with 44k more cards.
+- TWO CORRECTIONS MY OWN GATE FORCED (checks 4 and 5 of the day): I asserted "every body ≥120
+  chars", which failed **330 real cards** — Clarke on 1 Chr 1:12 is *"Caphthorim — 'The
+  Cappadocians.' — T."*, 37 characters and the whole of what he wrote. The wrong response
+  would have been dropping genuine exposition to satisfy an instrument. And the shard test
+  inherited the same bad threshold; it now asks the real question — does the shard serve
+  EXACTLY what was minted, byte for byte.
+- Gate: 926 passed.
+
 **THE FREEZE WIDENED — the runway to 1M, taken.**
 - Measured first (never guessed): maximal freeze = **985 MB/process** locally for 496,730 cards
   vs ~1,980 MB with four shelves — 2.03 KB/card, so **1M cards projects to 1,984 MB/process**,

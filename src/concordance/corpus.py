@@ -344,6 +344,11 @@ def load_cards(path: Optional[Path] = None,
                       # the engine's verdict, and the falsehood it refuses. Substance minted from
                       # runs that happened; nothing minted for an unproven domain.
                       "domain_core_cards.jsonl",
+                      # The commentaries carded VERSE BY VERSE (44,371 cards, avg 1,462 chars of
+                      # the commentator's own PD words, 99% linked to their verse by a found
+                      # edge). Rides the `commentary` shelf -> the `word` shard, so the bodies
+                      # are frozen freight and the resident cost is a stub.
+                      "commentary_verse_cards.jsonl",
                       # ISBE 1915 (D5) — 9,380 scholarly stub cards; the full public-domain
                       # article renders from data/acquisitions/isbe.db on the card page.
                       "isbe_cards.jsonl",

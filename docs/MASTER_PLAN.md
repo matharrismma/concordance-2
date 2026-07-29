@@ -256,7 +256,21 @@ Unused aspects go in cold storage."
 "Our goal is 1M cards. Once everything is complete on the list, begin seeding all of the
 identified possible uses."
 
-Measured 2026-07-29: **496,559 cards — 49.7%.** The second half is not a stretch; it is a
+SEEDING BEGAN 2026-07-29 (Matt: "get started"). Progress, in BOTH numbers, always:
+
+| when | total | substance | stubs |
+|---|---:|---:|---:|
+| before seeding | 496,730 | 268,033 (54.0%) | 228,697 |
+| + domain cores (48 domains, worked checks) | 496,730 | 268,033 | — |
+| **+ commentaries carded verse by verse** | **541,103** | **311,040 (57.5%)** | 230,063 |
+
+The commentary pass took the deepest substance we already held — Clarke, Gill, and Henry,
+public domain, stored as chapter files nobody could search — and made 44,371 verse cards of
+it, average ~1,460 characters of the commentator's own words, 44,031 of them linked to their
+verse by a FOUND edge (`comments_on`, asserted by the commentary file itself). One pass,
++43,007 substance. Remaining to a million SUBSTANCE cards: 688,960.
+
+Measured before seeding: **496,559 cards — 49.7%.** The second half is not a stretch; it is a
 worklist of sources already identified and lawful (PD/CC0/open), plus a card per identified USE.
 
 ORDER (after the list — the D-series capstone and the queued tasks — is complete):

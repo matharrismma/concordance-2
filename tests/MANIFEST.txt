@@ -24,6 +24,7 @@ test_characters.py
 test_chess.py
 test_coach.py
 test_commentary.py
+test_commentary_cards.py
 test_compendium.py
 test_compute.py
 test_connect.py
