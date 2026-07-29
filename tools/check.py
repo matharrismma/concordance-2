@@ -19,7 +19,8 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENV = dict(os.environ, PYTHONPATH=os.path.join(ROOT, "src"))
 CORE = "*/cas.py,*/ledger.py,*/record.py,*/signing.py,*/validate.py,*/receipts.py,*/derivation.py"
-FLOOR = "75"
+FLOOR = "90"  # raised from 75 (Matt, 2026-07-28: "all aspects above 90%") — the trust kernel's
+              # honesty paths are now tested as behavior in tests/test_trust_kernel_edges.py
 
 
 def _run(cmd: list) -> int:

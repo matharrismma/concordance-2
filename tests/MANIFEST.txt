@@ -88,6 +88,7 @@ test_connect_write.py
 test_consent.py
 test_encyclopedia_and_voices.py
 test_study_index.py
+test_trust_kernel_edges.py
 test_seekers.py
 test_narratives.py
 test_backmatter.py
