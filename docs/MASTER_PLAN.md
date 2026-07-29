@@ -111,8 +111,8 @@ Each line: system — where it lives — what it guarantees.
    Gill (1,189 ch) via helloao into the commentary registry. Gill was NOT on CrossWire —
    helloao was the lawful road for both.
 4. ~~D6 security sweep~~ — DONE 2026-07-29. Two real holes found and closed: ICS injection in
-   the calendar pilot (unvalidated DTSTART/DTEND + unescaped 
-) and UNSIGNED WITNESSES in the
+   the calendar pilot (unvalidated DTSTART/DTEND + an unescaped
+   carriage return) and UNSIGNED WITNESSES in the
    moderation floor (three invented names could quarantine true content; anyone could edit
    another viewer's block list). Report/block/unblock now require fresh detached signatures
    naming their exact target, and site/community.html mints a device-local reporting key so
@@ -327,3 +327,11 @@ Also operative: DEPLOY.md, RUNBOOK.md, SELF_HOST.md, the gate ritual (§1 Operat
   flight); Commons arc recorded and staged (C1/C2/C3); SOP/map worklist added. Source
   directives: Matt's social-first series (shelves, lending, curation, hobbies, elevation,
   music/art wings, receipts→payments, giving, live teaching, this plan itself).
+- 2026-07-29 — **The D-series closed and accepted.** Kernel floor 90 · D4 shards live (~1.85 GB
+  freed) · D5 ISBE+Clarke+Gill live · D6 two vulnerabilities closed · D7 null assay complete
+  with three findings against our own theses (record corrected, not defended). Four gates:
+  892 → 899 → 903 → 912 → 916. New standing doctrine recorded the same day: the mechanical
+  system (§0 capacitors), the Commons (§3), the feature metabolism (§3.5), the million (§3.9),
+  the distributed airlock (C2.5) and distributed corpus roles (C2.6), real names without
+  tracking, and the operations log. Queued next: #102 Commons · #103 Distributed · #104 Card
+  every piece · then seeding toward 1M.

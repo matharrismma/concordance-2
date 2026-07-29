@@ -402,5 +402,28 @@ Discoveries outside scope → the drift ledger.
 
 ---
 
+## §8 CLOSE-OUT — the D-series, run and gated (2026-07-29, accepted by Matt)
+
+Recorded here because the contract is the frozen record and this is what happened against it.
+Every line is a gate result or a live measurement, never prose.
+
+| item | outcome | gate | evidence |
+|---|---|---|---|
+| Trust-kernel coverage floor | 75 → **90** enforced | 892 | cas 93 · derivation 90 · ledger 91 · receipts 95 · record 93 · signing 98 · validate 93 |
+| D4 · wire the shards | LIVE | 899 | RSS 2834/2809 → 1893/1908 MB per process; battery 33/33; IDF identical frozen vs resident |
+| D5 · acquisitions | LIVE | 903 | ISBE 1915 (9,380 articles, PD) + Clarke 854 ch + Gill 1,189 ch, all attributed |
+| D6 · security sweep | LIVE | 912 | 2 real holes closed (ICS injection; unsigned witnesses); signed report verified end-to-end in a browser |
+| D7 · null assay capstone | COMPLETE | 916 | `docs/NULL_ASSAY.md`; 1 unbacked claim corrected; **3 findings against our own theses**, memories corrected |
+
+**What this close-out does NOT claim.** §5 is not declared done by this session:
+- **§3/§5 private-key-on-the-wire: 5 endpoints still accept `private_key` inbound.** Mesh
+  messages were fixed by detached signatures; the rest are not. Do not read the D6 sweep as
+  closing this.
+- Overall test coverage is 52% (the kernel is ≥90). Almanac sits at 20%.
+- No src-side deploy manifest exists yet; `corpus_db.py` was absent from the droplet for days
+  under a green gate, and only a rollout failure revealed it.
+
+The gates declare completion, not this table. These lines are the record of the run.
+
 *Completion is reached when §5 all pass against one named commit. The implementing model does not
 declare completion in prose; the gates declare it.*
