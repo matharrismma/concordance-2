@@ -339,6 +339,11 @@ def load_cards(path: Optional[Path] = None,
                       # into /characters, boxed by category (the card-catalog drawers). Minted by
                       # tools/card_encyclopedia.py.
                       "encyclopedia_cards.jsonl",
+                      # The domain reference cores (GAPS G1/G2): a spine per domain the engine
+                      # can actually check, plus one WORKED-CHECK card per claim — the inputs,
+                      # the engine's verdict, and the falsehood it refuses. Substance minted from
+                      # runs that happened; nothing minted for an unproven domain.
+                      "domain_core_cards.jsonl",
                       # ISBE 1915 (D5) — 9,380 scholarly stub cards; the full public-domain
                       # article renders from data/acquisitions/isbe.db on the card page.
                       "isbe_cards.jsonl",

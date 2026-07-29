@@ -1,0 +1,114 @@
+"""Reachability — a capability nobody can reach is not shipped.
+
+GAPS.md G4, measured 2026-07-29: 51 of 140 API routes were referenced by no page at all, and 8
+pages (including `mesh.html`, a V1 capstone) were linked from nowhere. Correct server-side and
+invisible to the person is the failure this project has hit more than any other — five times in
+one night in July, and this was the sixth shape of it.
+
+So reachability becomes a gate, with the same shape as the route goldens: every route is either
+REACHED by a page or DECLARED agent-only; every page is either LINKED from another page or
+DECLARED deliberately unlisted. Both declarations live here, in the open, with reasons — so the
+next person adding a route has to say which it is, and drift fails loudly instead of quietly
+burying the work.
+
+Runnable with pytest OR directly.
+"""
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "src"))
+
+import pytest  # noqa: E402
+
+SITE = ROOT / "site"
+
+# Routes that exist for AGENTS and machines, not for a page. Each is reachable through the MCP
+# tool surface, llms.txt, or a documented HTTP call — a human page would add nothing.
+AGENT_ONLY = {
+    "/health", "/capabilities", "/identity/create", "/identity/describe",
+    "/identity/fingerprint", "/identity/verify", "/attest", "/self-attest",
+    "/bind", "/bind/challenge", "/consent", "/consent/signable", "/consent/revoke",
+    "/connect/event", "/moderation/signable", "/derivation/verify", "/grid",
+    "/grid/dimension", "/locate", "/resolve", "/route", "/path", "/inlet", "/land",
+    "/defer", "/fork", "/returns", "/steward/ask", "/mesh/tend", "/mesh/signable",
+    "/push/unsubscribe", "/study/export", "/study/import", "/card/connections",
+    "/cards/for-the-group", "/decks/predict", "/thread/digest", "/thread/lineage",
+    "/thread/recall", "/thread/recalled", "/threads/search", "/word_occurrences",
+    "/works/item", "/library/health", "/growth", "/daily", "/pronounce", "/book",
+    "/badges", "/archetype", "/archetypes", "/archetypes/match", "/coach/guidance",
+    "/chess", "/report", "/block",
+}
+
+# Pages reachable by design without an in-site link: entered by URL, by QR, by an app shell,
+# or deliberately quiet. Named so "unlinked" is a decision, never an accident.
+UNLISTED_PAGES = {
+    "offline.html",       # served by the service worker when the network is gone
+    "404.html",
+    "keep.html",          # the operator's own surface, noindex — a public list is not its place
+    "encyclopedia.html",  # a redirect stub onto characters.html; a second door to one room
+    "ask.html",           # the landing's predecessor, kept for old links
+}
+
+
+def _pages():
+    return sorted(p for p in SITE.glob("*.html"))
+
+
+def _all_markup():
+    """Pages AND scripts. The first run of this check read only `*.html` and reported 51
+    unreachable routes and 8 orphan pages — but most routes are called from scripts, and
+    `nh-tools.js` IS a reachability surface (the Everything palette). Measuring the wrong
+    surface manufactures findings: check the check first."""
+    return "\n".join(p.read_text(encoding="utf-8", errors="ignore")
+                     for p in _pages() + sorted(SITE.glob("*.js")))
+
+
+def _palette():
+    """The Everything palette (Ctrl-K) — a page listed there is reachable from every page."""
+    js = SITE / "nh-tools.js"
+    if not js.exists():
+        return set()
+    return set(re.findall(r"h: '/([a-z0-9_-]+\.html)", js.read_text(encoding="utf-8")))
+
+
+def test_every_api_route_is_reachable_or_declared_agent_only():
+    from concordance.web import api
+    markup = _all_markup()
+    unreachable = []
+    for r in api.ROUTES:
+        path = r["path"]
+        if path in AGENT_ONLY or path.startswith("/s/"):
+            continue
+        if path not in markup:
+            unreachable.append(path)
+    assert not unreachable, (
+        "routes no page can reach — add them to a page, or declare them in AGENT_ONLY with a "
+        "reason: " + ", ".join(sorted(unreachable)))
+
+
+def test_agent_only_declarations_are_real_routes():
+    """A stale declaration would silently excuse a route that no longer exists — and worse,
+    would let a NEW route inherit an old exemption by name."""
+    from concordance.web import api
+    live = {r["path"] for r in api.ROUTES}
+    stale = sorted(AGENT_ONLY - live)
+    assert not stale, f"AGENT_ONLY names routes that no longer exist: {stale}"
+
+
+def test_every_page_is_linked_or_declared_unlisted():
+    markup = _all_markup()
+    linked = set(re.findall(r'href="/?([a-z0-9_\-]+\.html)"', markup)) | _palette()
+    orphans = [p.name for p in _pages()
+               if p.name not in linked and p.name != "index.html"
+               and p.name not in UNLISTED_PAGES]
+    assert not orphans, (
+        "pages linked from nowhere — link them, or declare them in UNLISTED_PAGES with a "
+        "reason: " + ", ".join(sorted(orphans)))
+
+
+if __name__ == "__main__":
+    sys.exit(int(pytest.main([__file__, "-q"])))

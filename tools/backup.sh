@@ -15,14 +15,26 @@ set -euo pipefail
 ROOT="${CONCORDANCE_HOME:-/home/nh/concordance-2}"
 DATA="$ROOT/data"
 DEST="${NH_BACKUP_DIR:-/home/nh/backups}"
-KEEP="${NH_BACKUP_KEEP:-14}"
+KEEP="${NH_BACKUP_KEEP:-7}"   # the tar is ~30x larger now; 7 days of the WHOLE keeping
 TS="$(date +%Y%m%d-%H%M%S)"
 
 mkdir -p "$DEST"
+
+# 2026-07-29 — WIDENED, because the old list was a false comfort. It named six items
+# (cas ledger activity.jsonl cards.jsonl bible_en.jsonl strongs) and produced an 18 MB tar,
+# while the data directory held 1.9 GB: every ACQUISITION — source_cards 227M, gutenberg 116M,
+# scripture_cards 52M, taxonomy 38M, ISBE, OEIS, the minted edges — was backed up NOWHERE.
+# (The weekly "full" on this box belongs to Lighthouse 1.0 and covers none of it.) A green
+# backup log meant the receipts were safe and the library was not.
+#
+# Now: the WHOLE data directory, minus what is derived and rebuildable —
+#   shards/       rebuilt from the jsonl by tools/build_corpus_db.py (~2 min)
+#   acquisitions/ upstream archives, re-fetchable from their public sources
+#   *.tmp/*.part  work in progress
 ITEMS=()
-for p in cas ledger activity.jsonl cards.jsonl bible_en.jsonl strongs; do
-  [ -e "$DATA/$p" ] && ITEMS+=("$p")
-done
+while IFS= read -r p; do ITEMS+=("$p"); done < <(
+  cd "$DATA" && ls -A | grep -vE '^(shards|acquisitions)$' | grep -vE '\.(tmp|part)$'
+)
 if [ "${#ITEMS[@]}" -eq 0 ]; then
   echo "backup: nothing to back up in $DATA"; exit 0
 fi
@@ -30,7 +42,7 @@ fi
 TAR="$DEST/nh-2.0-data-$TS.tar.gz"
 tar czf "$TAR" -C "$DATA" "${ITEMS[@]}"
 ( cd "$DEST" && sha256sum "$(basename "$TAR")" > "$(basename "$TAR").sha256" )
-echo "backup: $TAR ($(du -h "$TAR" | cut -f1)) — items: ${ITEMS[*]}"
+echo "backup: $TAR ($(du -h "$TAR" | cut -f1)) — ${#ITEMS[@]} items"
 cat "$TAR.sha256"
 
 # Prune: keep the newest $KEEP

@@ -39,6 +39,7 @@ test_dates.py
 test_days.py
 test_deck_api.py
 test_distill.py
+test_domain_goldens.py
 test_encyclopedia_and_voices.py
 test_engine.py
 test_find.py
@@ -86,6 +87,7 @@ test_privacy.py
 test_pronounce.py
 test_prophecy.py
 test_push.py
+test_reachability.py
 test_reachable_from_the_floor.py
 test_reason.py
 test_recall.py

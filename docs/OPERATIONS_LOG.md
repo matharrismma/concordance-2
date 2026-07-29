@@ -19,6 +19,36 @@ Three standing rules:
 
 ## 2026-07-29
 
+**DURABILITY · the ark is real, and a green backup log was hiding a hole.**
+- FOUND: the daily backup named 6 items (`cas ledger activity.jsonl cards.jsonl bible_en.jsonl
+  strongs`) = 18 MB, while data/ held 1.9 GB. **Every acquisition was backed up nowhere** —
+  source_cards 227M, gutenberg 116M, scripture_cards 52M, taxonomy 38M, ISBE, OEIS, minted
+  edges. The weekly "full" on the box belongs to Lighthouse 1.0 and covers none of 2.0.
+  A green backup log meant the receipts were safe and the library was not.
+- FIXED: `tools/backup.sh` now takes the whole data dir minus the derivable (shards rebuild in
+  ~2 min; acquisitions re-fetch). Measured after the change: **86 items, 133 MB compressed**.
+- OFFSITE: `tools/ark_pull.sh` pulls the newest tarball to the 12 TB drive and RE-HASHES the
+  landed copy against the box's signature. First run: **VERIFIED
+  eeaab915afb324c5… · 134 MB**, plus all 7 shards and the source archives.
+- RESTORE REHEARSED (an untested backup is a hope): unpacked the ark's copy to a scratch dir →
+  **499,716 cards loaded, search answered, ISBE card present.**
+- ALSO FOUND: the deploy path corrupts shell scripts — Windows CRLF broke `set -euo pipefail`
+  the moment backup.sh was deployed; the nightly cron would have failed silently. Normalized,
+  and `.gitattributes` pins `*.sh` to LF.
+- The three tiers Matt named are now the topology: **Hetzner** serves · **12 TB** is the ark ·
+  **this device** builds. Node roles (task #103) generalize it.
+
+**GAP PROGRAM (docs/GAPS.md) — G5, G2, G4, G6 closed.**
+- G5: 48 domains carry a PROVEN golden pair (derived from each verifier's own documented
+  example, run, kept only if it held). **0 false positives.** Gated.
+- G1/G2: 171 substance cards minted from those runs (avg 565 chars: inputs, verdict, refused
+  falsehood). Shelves holding exactly one card: **33 → 20**.
+- G4: reachability gated — but the first measurement was WRONG (read only *.html, ignoring
+  `nh-tools.js`, the Everything palette). True count: one page genuinely lost (`mesh.html`),
+  now listed. Third "check the check" correction of the day.
+- G6: `tools/verify_deploy.py` proves the box matches the repo; first run found **airlock.py
+  never deployed**, web/keep.py stale, 3 dead files from a July 25-26 refactor.
+
 **D7 CAPSTONE · the null assay — three rings.**
 - Ring A (99 theories): 1 finding — *Agricultural science* claimed `seals` with zero sealed runs
   in the keeping. Corrected to `partial`, reason on the card, restorable when a real run seals.

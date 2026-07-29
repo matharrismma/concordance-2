@@ -1,0 +1,1524 @@
+{
+ "acoustics": {
+  "false": {
+   "claimed_db": 247.5,
+   "claimed_f_observed_hz": 913.16,
+   "claimed_harmonic_hz": 887.5,
+   "db_kind": "intensity",
+   "f_source_hz": 440,
+   "frequency_hz": 440,
+   "fundamental_hz": 110,
+   "harmonic_n": 4,
+   "reference": 1e-12,
+   "speed_medium_mps": 343,
+   "speed_of_wave": 343.0,
+   "v_observer_mps": 10,
+   "v_source_mps": 0,
+   "value": 1.0,
+   "wavelength_m": 0.7795
+  },
+  "packet_key": "ACOUS_VERIFY",
+  "true": {
+   "claimed_db": 120,
+   "claimed_f_observed_hz": 452.83,
+   "claimed_harmonic_hz": 440,
+   "db_kind": "intensity",
+   "f_source_hz": 440,
+   "frequency_hz": 440,
+   "fundamental_hz": 110,
+   "harmonic_n": 4,
+   "reference": 1e-12,
+   "speed_medium_mps": 343,
+   "speed_of_wave": 343.0,
+   "v_observer_mps": 10,
+   "v_source_mps": 0,
+   "value": 1.0,
+   "wavelength_m": 0.7795
+  }
+ },
+ "architecture": {
+  "false": {
+   "claimed_compliant": false,
+   "claimed_far": 11.5,
+   "claimed_occupant_count": 225.5,
+   "claimed_total_load_kPa": 21.3,
+   "claimed_wwr": 8.0,
+   "dead_load_kPa": 3.5,
+   "floor_area_m2": 500,
+   "gross_wall_area_m2": 600,
+   "live_load_kPa": 2.4,
+   "lot_area_m2": 1000,
+   "occupant_load_factor_m2_per_person": 4.6,
+   "riser_height_mm": 170,
+   "snow_load_kPa": 1.0,
+   "total_floor_area_m2": 2000,
+   "tread_depth_mm": 280,
+   "window_area_m2": 150
+  },
+  "packet_key": "ARCH_VERIFY",
+  "true": {
+   "claimed_compliant": true,
+   "claimed_far": 2.0,
+   "claimed_occupant_count": 109,
+   "claimed_total_load_kPa": 6.9,
+   "claimed_wwr": 0.25,
+   "dead_load_kPa": 3.5,
+   "floor_area_m2": 500,
+   "gross_wall_area_m2": 600,
+   "live_load_kPa": 2.4,
+   "lot_area_m2": 1000,
+   "occupant_load_factor_m2_per_person": 4.6,
+   "riser_height_mm": 170,
+   "snow_load_kPa": 1.0,
+   "total_floor_area_m2": 2000,
+   "tread_depth_mm": 280,
+   "window_area_m2": 150
+  }
+ },
+ "astronomy": {
+  "false": {
+   "absolute_magnitude": 4.83,
+   "apparent_magnitude": 5.0,
+   "claimed_kepler_consistent": false,
+   "mass_1_kg": 5.972e+24,
+   "mass_2_kg": 7.342e+22,
+   "orbital_period_years": 1.0,
+   "parallax_arcsec": 0.769,
+   "semi_major_axis_au": 1.0,
+   "separation_m": 384000000.0
+  },
+  "packet_key": "ASTRO_VERIFY",
+  "true": {
+   "absolute_magnitude": 4.83,
+   "apparent_magnitude": 5.0,
+   "claimed_kepler_consistent": true,
+   "mass_1_kg": 5.972e+24,
+   "mass_2_kg": 7.342e+22,
+   "orbital_period_years": 1.0,
+   "parallax_arcsec": 0.769,
+   "semi_major_axis_au": 1.0,
+   "separation_m": 384000000.0
+  }
+ },
+ "atomic": {
+  "false": {
+   "atomic_number": 24,
+   "claimed_configuration": "[Ar] 3d5 4s1_NOT",
+   "claimed_shell_capacity": 43.5,
+   "claimed_subshell_capacity": 27.5,
+   "claimed_valid_quantum_numbers": false,
+   "l": 2,
+   "m_l": -1,
+   "m_s": 0.5,
+   "n": 3,
+   "shell_n": 3,
+   "subshell_l": 2
+  },
+  "packet_key": "ATOM_VERIFY",
+  "true": {
+   "atomic_number": 24,
+   "claimed_configuration": "[Ar] 3d5 4s1",
+   "claimed_shell_capacity": 18,
+   "claimed_subshell_capacity": 10,
+   "claimed_valid_quantum_numbers": true,
+   "l": 2,
+   "m_l": -1,
+   "m_s": 0.5,
+   "n": 3,
+   "shell_n": 3,
+   "subshell_l": 2
+  }
+ },
+ "calendar_time": {
+  "false": {
+   "claimed_day_of_week": "Saturday_NOT",
+   "claimed_end_iso": "2026-05-03T00:00:00Z_NOT",
+   "claimed_iso8601_valid": false,
+   "claimed_leap": false,
+   "date_iso": "2026-05-02",
+   "duration_seconds": 86400,
+   "iso8601_string": "2026-05-02T15:30:00Z",
+   "start_iso": "2026-05-02T00:00:00Z",
+   "year": 2024
+  },
+  "packet_key": "CAL_VERIFY",
+  "true": {
+   "claimed_day_of_week": "Saturday",
+   "claimed_end_iso": "2026-05-03T00:00:00Z",
+   "claimed_iso8601_valid": true,
+   "claimed_leap": true,
+   "date_iso": "2026-05-02",
+   "duration_seconds": 86400,
+   "iso8601_string": "2026-05-02T15:30:00Z",
+   "start_iso": "2026-05-02T00:00:00Z",
+   "year": 2024
+  }
+ },
+ "combinatorics": {
+  "false": {
+   "claimed_combinations": 27.5,
+   "claimed_derangements": 25.5,
+   "claimed_multinomial": 67.5,
+   "claimed_permutations": 47.5,
+   "comb_k": 2,
+   "comb_n": 5,
+   "derangement_n": 4,
+   "multinomial_groups": [
+    2,
+    2,
+    1
+   ],
+   "perm_k": 2,
+   "perm_n": 5
+  },
+  "packet_key": "COMB_VERIFY",
+  "true": {
+   "claimed_combinations": 10,
+   "claimed_derangements": 9,
+   "claimed_multinomial": 30,
+   "claimed_permutations": 20,
+   "comb_k": 2,
+   "comb_n": 5,
+   "derangement_n": 4,
+   "multinomial_groups": [
+    2,
+    2,
+    1
+   ],
+   "perm_k": 2,
+   "perm_n": 5
+  }
+ },
+ "construction": {
+  "false": {
+   "claimed_concrete_m3": 22.5,
+   "coverage_m2_per_can": 10,
+   "depth_m": 0.15,
+   "length_m": 10,
+   "openings_m2": 12,
+   "paint_area_m2": 80,
+   "perimeter_m": 30,
+   "radius_m": 3.5,
+   "rebar_length_m": 100,
+   "rebar_unit_weight_kg_per_m": 0.617,
+   "span_m": 6,
+   "tile_area_m2": 50,
+   "tile_size_m2": 0.25,
+   "total_load_kn": 120,
+   "wall_height_m": 3,
+   "waste_factor": 0.1,
+   "width_m": 5
+  },
+  "packet_key": "CONSTR_VERIFY",
+  "true": {
+   "claimed_concrete_m3": 7.5,
+   "coverage_m2_per_can": 10,
+   "depth_m": 0.15,
+   "length_m": 10,
+   "openings_m2": 12,
+   "paint_area_m2": 80,
+   "perimeter_m": 30,
+   "radius_m": 3.5,
+   "rebar_length_m": 100,
+   "rebar_unit_weight_kg_per_m": 0.617,
+   "span_m": 6,
+   "tile_area_m2": 50,
+   "tile_size_m2": 0.25,
+   "total_load_kn": 120,
+   "wall_height_m": 3,
+   "waste_factor": 0.1,
+   "width_m": 5
+  }
+ },
+ "cryptography": {
+  "false": {
+   "cipher": "AES",
+   "claimed_hash_strength": "broken_NOT",
+   "data": "hello world",
+   "encoded": "aGVsbG8=",
+   "encoded_form": "base64",
+   "hash_algorithm": "sha256",
+   "hash_strength_algorithm": "md5",
+   "hmac_algorithm": "sha256",
+   "hmac_data": "hello",
+   "hmac_key": "secret",
+   "key_bits": 256
+  },
+  "packet_key": "CRYPTO_VERIFY",
+  "true": {
+   "cipher": "AES",
+   "claimed_hash_strength": "broken",
+   "data": "hello world",
+   "encoded": "aGVsbG8=",
+   "encoded_form": "base64",
+   "hash_algorithm": "sha256",
+   "hash_strength_algorithm": "md5",
+   "hmac_algorithm": "sha256",
+   "hmac_data": "hello",
+   "hmac_key": "secret",
+   "key_bits": 256
+  }
+ },
+ "cybersecurity": {
+  "false": {
+   "charset_size": 94,
+   "cidr_prefix": 24,
+   "claimed_cvss_severity": "critical_NOT",
+   "claimed_entropy_bits": 217.3,
+   "claimed_host_count": 515.5,
+   "claimed_port_class": "well_known_NOT",
+   "claimed_tls_status": "current_NOT",
+   "cvss_base_score": 9.1,
+   "password_length": 16,
+   "port_number": 443,
+   "tls_version": "1.2"
+  },
+  "packet_key": "CYBER_VERIFY",
+  "true": {
+   "charset_size": 94,
+   "cidr_prefix": 24,
+   "claimed_cvss_severity": "critical",
+   "claimed_entropy_bits": 104.9,
+   "claimed_host_count": 254,
+   "claimed_port_class": "well_known",
+   "claimed_tls_status": "current",
+   "cvss_base_score": 9.1,
+   "password_length": 16,
+   "port_number": 443,
+   "tls_version": "1.2"
+  }
+ },
+ "document_validation": {
+  "false": {
+   "claimed_ean_valid": false,
+   "claimed_isbn10_valid": false,
+   "claimed_isbn13_valid": false,
+   "claimed_luhn_valid": false,
+   "ean_or_upc": "036000291452",
+   "isbn10": "0306406152",
+   "isbn13": "9780306406157",
+   "luhn_number": "4532015112830366"
+  },
+  "packet_key": "DOC_VERIFY",
+  "true": {
+   "claimed_ean_valid": true,
+   "claimed_isbn10_valid": true,
+   "claimed_isbn13_valid": true,
+   "claimed_luhn_valid": true,
+   "ean_or_upc": "036000291452",
+   "isbn10": "0306406152",
+   "isbn13": "9780306406157",
+   "luhn_number": "4532015112830366"
+  }
+ },
+ "ecology": {
+  "false": {
+   "carrying_capacity_K": 1000.0,
+   "claimed_energy_output": 207.5,
+   "distance_km": 500.0,
+   "emission_factor_kg_per_km": 0.21,
+   "energy_input": 10000.0,
+   "growth_rate_r": 0.1,
+   "initial_population_N0": 100.0,
+   "species_proportions": [
+    0.5,
+    0.3,
+    0.2
+   ],
+   "time_t": 20.0,
+   "trophic_efficiency": 0.1,
+   "trophic_levels_up": 2
+  },
+  "packet_key": "ECO_VERIFY",
+  "true": {
+   "carrying_capacity_K": 1000.0,
+   "claimed_energy_output": 100.0,
+   "distance_km": 500.0,
+   "emission_factor_kg_per_km": 0.21,
+   "energy_input": 10000.0,
+   "growth_rate_r": 0.1,
+   "initial_population_N0": 100.0,
+   "species_proportions": [
+    0.5,
+    0.3,
+    0.2
+   ],
+   "time_t": 20.0,
+   "trophic_efficiency": 0.1,
+   "trophic_levels_up": 2
+  }
+ },
+ "economics": {
+  "false": {
+   "claimed_compound_amount": 2330.74,
+   "claimed_doubling_years": 28.1,
+   "claimed_future_value": 2322.76,
+   "claimed_gdp_per_capita": 126895.5,
+   "claimed_present_value": 1735.18,
+   "claimed_price_elasticity": 3.5,
+   "claimed_real_value": 1495.68,
+   "claimed_simple_interest": 307.5,
+   "compounding_periods": 12,
+   "discount_rate": 0.05,
+   "future_value": 1000,
+   "gdp": 21000000000000,
+   "growth_rate": 0.05,
+   "inflation_rate": 0.03,
+   "nominal_value": 1000,
+   "pct_change_price": 5,
+   "pct_change_quantity": -10,
+   "population": 331000000,
+   "present_value": 1000,
+   "principal": 1000,
+   "rate": 0.05,
+   "rate_percent": 7,
+   "time_years": 3,
+   "years": 10
+  },
+  "packet_key": "ECON_VERIFY",
+  "true": {
+   "claimed_compound_amount": 1161.62,
+   "claimed_doubling_years": 10.3,
+   "claimed_future_value": 1157.63,
+   "claimed_gdp_per_capita": 63444,
+   "claimed_present_value": 863.84,
+   "claimed_price_elasticity": -2.0,
+   "claimed_real_value": 744.09,
+   "claimed_simple_interest": 150,
+   "compounding_periods": 12,
+   "discount_rate": 0.05,
+   "future_value": 1000,
+   "gdp": 21000000000000,
+   "growth_rate": 0.05,
+   "inflation_rate": 0.03,
+   "nominal_value": 1000,
+   "pct_change_price": 5,
+   "pct_change_quantity": -10,
+   "population": 331000000,
+   "present_value": 1000,
+   "principal": 1000,
+   "rate": 0.05,
+   "rate_percent": 7,
+   "time_years": 3,
+   "years": 10
+  }
+ },
+ "electrical": {
+  "false": {
+   "capacitance_F": 1e-06,
+   "claimed_capacitor_voltage_V": 13.82,
+   "claimed_loop_sum_V": 42.0,
+   "current_A": 0.5,
+   "elapsed_s": 0.001,
+   "power_W_claim": 6.0,
+   "resistance_ohm": 24.0,
+   "resistance_ohm_rc": 1000,
+   "supply_V": 5.0,
+   "voltage_V": 12.0,
+   "voltages_in_loop": [
+    9,
+    -4.5,
+    -4.5
+   ]
+  },
+  "packet_key": "ELEC_VERIFY",
+  "true": {
+   "capacitance_F": 1e-06,
+   "claimed_capacitor_voltage_V": 3.16,
+   "claimed_loop_sum_V": 0.0,
+   "current_A": 0.5,
+   "elapsed_s": 0.001,
+   "power_W_claim": 6.0,
+   "resistance_ohm": 24.0,
+   "resistance_ohm_rc": 1000,
+   "supply_V": 5.0,
+   "voltage_V": 12.0,
+   "voltages_in_loop": [
+    9,
+    -4.5,
+    -4.5
+   ]
+  }
+ },
+ "exercise_science": {
+  "false": {
+   "activity": "running_6mph",
+   "age_years": 30,
+   "claimed_kcal": 693.5,
+   "claimed_max_hr": 381.5,
+   "claimed_met": 27.1,
+   "claimed_zone_high_bpm": 305.5,
+   "claimed_zone_low_bpm": 255.5,
+   "duration_hours": 0.5,
+   "intensity_high": 0.7,
+   "intensity_low": 0.5,
+   "resting_hr": 60,
+   "tolerance_bpm": 1,
+   "tolerance_kcal": 5,
+   "weight_kg": 70
+  },
+  "packet_key": "EX_VERIFY",
+  "true": {
+   "activity": "running_6mph",
+   "age_years": 30,
+   "claimed_kcal": 343,
+   "claimed_max_hr": 187,
+   "claimed_met": 9.8,
+   "claimed_zone_high_bpm": 149,
+   "claimed_zone_low_bpm": 124,
+   "duration_hours": 0.5,
+   "intensity_high": 0.7,
+   "intensity_low": 0.5,
+   "resting_hr": 60,
+   "tolerance_bpm": 1,
+   "tolerance_kcal": 5,
+   "weight_kg": 70
+  }
+ },
+ "finance": {
+  "false": {
+   "assets": 1000.0,
+   "cashflows": [
+    -1000,
+    300,
+    400,
+    500,
+    200
+   ],
+   "claimed_future_value": 3301.52,
+   "compounding_per_year": 12,
+   "discount_rate": 0.1,
+   "equity": 400.0,
+   "future_value": 1100.0,
+   "liabilities": 600.0,
+   "principal": 1000.0,
+   "pv_discount_rate": 0.1,
+   "pv_periods": 1,
+   "rate": 0.05,
+   "tolerance": 0.01,
+   "years": 10
+  },
+  "packet_key": "FIN_VERIFY",
+  "true": {
+   "assets": 1000.0,
+   "cashflows": [
+    -1000,
+    300,
+    400,
+    500,
+    200
+   ],
+   "claimed_future_value": 1647.01,
+   "compounding_per_year": 12,
+   "discount_rate": 0.1,
+   "equity": 400.0,
+   "future_value": 1100.0,
+   "liabilities": 600.0,
+   "principal": 1000.0,
+   "pv_discount_rate": 0.1,
+   "pv_periods": 1,
+   "rate": 0.05,
+   "tolerance": 0.01,
+   "years": 10
+  }
+ },
+ "formal_logic": {
+  "false": {
+   "claimed_contradiction": true,
+   "claimed_entailment": false,
+   "claimed_equivalent": false,
+   "claimed_satisfiable": false,
+   "claimed_tautology": true,
+   "conclusion": "q",
+   "formula": "p & q",
+   "formula_a": "p | q",
+   "formula_b": "~(~p & ~q)",
+   "premises": [
+    "p",
+    "p >> q"
+   ],
+   "variables": [
+    "p",
+    "q",
+    "r"
+   ]
+  },
+  "packet_key": "LOGIC_VERIFY",
+  "true": {
+   "claimed_contradiction": false,
+   "claimed_entailment": true,
+   "claimed_equivalent": true,
+   "claimed_satisfiable": true,
+   "claimed_tautology": false,
+   "conclusion": "q",
+   "formula": "p & q",
+   "formula_a": "p | q",
+   "formula_b": "~(~p & ~q)",
+   "premises": [
+    "p",
+    "p >> q"
+   ],
+   "variables": [
+    "p",
+    "q",
+    "r"
+   ]
+  }
+ },
+ "genetics": {
+  "false": {
+   "claimed_amino_acid": "M_NOT",
+   "codon": "ATG",
+   "rna": false,
+   "sequence": "ATGGCC"
+  },
+  "packet_key": "GENETICS_VERIFY",
+  "true": {
+   "claimed_amino_acid": "M",
+   "codon": "ATG",
+   "rna": false,
+   "sequence": "ATGGCC"
+  }
+ },
+ "geology": {
+  "false": {
+   "claimed_amplitude_ratio": 207.5,
+   "claimed_can_scratch": false,
+   "claimed_remaining_amount": 8.5,
+   "elapsed_years": 5730,
+   "harder_mineral_mohs": 7,
+   "initial_amount": 1.0,
+   "isotope_half_life_years": 5730,
+   "richter_M1": 5.0,
+   "richter_M2": 7.0,
+   "softer_mineral_mohs": 5
+  },
+  "packet_key": "GEO_VERIFY",
+  "true": {
+   "claimed_amplitude_ratio": 100.0,
+   "claimed_can_scratch": true,
+   "claimed_remaining_amount": 0.5,
+   "elapsed_years": 5730,
+   "harder_mineral_mohs": 7,
+   "initial_amount": 1.0,
+   "isotope_half_life_years": 5730,
+   "richter_M1": 5.0,
+   "richter_M2": 7.0,
+   "softer_mineral_mohs": 5
+  }
+ },
+ "geometry": {
+  "false": {
+   "circle_radius": 5.0,
+   "claimed_circle_area": 164.5796,
+   "claimed_circle_circumference": 70.3318,
+   "claimed_interior_angle_sum_deg": 1447.5,
+   "claimed_right_triangle": false,
+   "claimed_valid_triangle": false,
+   "polygon_n": 6,
+   "pyth_a": 3,
+   "pyth_b": 4,
+   "pyth_c": 5,
+   "tri_a": 3,
+   "tri_b": 4,
+   "tri_c": 5
+  },
+  "packet_key": "GEOM_VERIFY",
+  "true": {
+   "circle_radius": 5.0,
+   "claimed_circle_area": 78.5398,
+   "claimed_circle_circumference": 31.4159,
+   "claimed_interior_angle_sum_deg": 720,
+   "claimed_right_triangle": true,
+   "claimed_valid_triangle": true,
+   "polygon_n": 6,
+   "pyth_a": 3,
+   "pyth_b": 4,
+   "pyth_c": 5,
+   "tri_a": 3,
+   "tri_b": 4,
+   "tri_c": 5
+  }
+ },
+ "history_chronology": {
+  "false": {
+   "claimed_elapsed_years": 3001.5,
+   "from_BCE": 44,
+   "from_year": -44,
+   "to_CE": 1453,
+   "to_year": 1453,
+   "year": -44,
+   "year_CE": 1985
+  },
+  "packet_key": "HIST_VERIFY",
+  "true": {
+   "claimed_elapsed_years": 1497,
+   "from_BCE": 44,
+   "from_year": -44,
+   "to_CE": 1453,
+   "to_year": 1453,
+   "year": -44,
+   "year_CE": 1985
+  }
+ },
+ "hydrology": {
+  "false": {
+   "claimed_darcy_velocity_m_s": 7.500002,
+   "claimed_runoff": 7007.5,
+   "claimed_total_head_m": 48.568,
+   "claimed_velocity_m_s": 12.36,
+   "darcy_K_m_s": 0.0001,
+   "drainage_area": 100.0,
+   "elevation_m": 10.0,
+   "fluid_density_kg_m3": 1000.0,
+   "hydraulic_gradient": 0.01,
+   "hydraulic_radius_m": 1.0,
+   "manning_n": 0.013,
+   "pressure_pa": 101325.0,
+   "rainfall_intensity": 50.0,
+   "runoff_coefficient": 0.7,
+   "slope": 0.001,
+   "velocity_m_s": 2.0
+  },
+  "packet_key": "HYD_VERIFY",
+  "true": {
+   "claimed_darcy_velocity_m_s": 1e-06,
+   "claimed_runoff": 3500.0,
+   "claimed_total_head_m": 20.534,
+   "claimed_velocity_m_s": 2.43,
+   "darcy_K_m_s": 0.0001,
+   "drainage_area": 100.0,
+   "elevation_m": 10.0,
+   "fluid_density_kg_m3": 1000.0,
+   "hydraulic_gradient": 0.01,
+   "hydraulic_radius_m": 1.0,
+   "manning_n": 0.013,
+   "pressure_pa": 101325.0,
+   "rainfall_intensity": 50.0,
+   "runoff_coefficient": 0.7,
+   "slope": 0.001,
+   "velocity_m_s": 2.0
+  }
+ },
+ "information_theory": {
+  "false": {
+   "bsc_error_rate": 0.1,
+   "claimed_entropy_bits": 9.5,
+   "probabilities": [
+    0.5,
+    0.5
+   ],
+   "string_a": "10101010",
+   "string_b": "10100100"
+  },
+  "packet_key": "INFO_VERIFY",
+  "true": {
+   "bsc_error_rate": 0.1,
+   "claimed_entropy_bits": 1.0,
+   "probabilities": [
+    0.5,
+    0.5
+   ],
+   "string_a": "10101010",
+   "string_b": "10100100"
+  }
+ },
+ "labor": {
+  "false": {
+   "annual_salary": 52000,
+   "claimed_overtime_pay": 1765.0,
+   "gross_pay": 1000,
+   "hourly_rate": 18.5,
+   "hours_worked": 45,
+   "minimum_wage_threshold": 7.25,
+   "overtime_hours": 5,
+   "regular_hours": 40,
+   "total_tax_rate": 0.28
+  },
+  "packet_key": "LABOR_VERIFY",
+  "true": {
+   "annual_salary": 52000,
+   "claimed_overtime_pay": 878.75,
+   "gross_pay": 1000,
+   "hourly_rate": 18.5,
+   "hours_worked": 45,
+   "minimum_wage_threshold": 7.25,
+   "overtime_hours": 5,
+   "regular_hours": 40,
+   "total_tax_rate": 0.28
+  }
+ },
+ "law": {
+  "false": {
+   "age": 36,
+   "claimed_contract_valid": false,
+   "has_acceptance": true,
+   "has_capacity": true,
+   "has_consideration": true,
+   "has_legality": true,
+   "has_offer": true,
+   "hours_worked": 48,
+   "office": "president",
+   "regular_rate": 20.0,
+   "warnings_given": [
+    "You have the right to remain silent. "
+   ]
+  },
+  "packet_key": "LAW_VERIFY",
+  "true": {
+   "age": 36,
+   "claimed_contract_valid": true,
+   "has_acceptance": true,
+   "has_capacity": true,
+   "has_consideration": true,
+   "has_legality": true,
+   "has_offer": true,
+   "hours_worked": 48,
+   "office": "president",
+   "regular_rate": 20.0,
+   "warnings_given": [
+    "You have the right to remain silent. "
+   ]
+  }
+ },
+ "linear_algebra": {
+  "false": {
+   "claimed_dot_product": 71.5,
+   "vec_a": [
+    1,
+    2,
+    3
+   ],
+   "vec_b": [
+    4,
+    5,
+    6
+   ]
+  },
+  "packet_key": "LIN_VERIFY",
+  "true": {
+   "claimed_dot_product": 32,
+   "vec_a": [
+    1,
+    2,
+    3
+   ],
+   "vec_b": [
+    4,
+    5,
+    6
+   ]
+  }
+ },
+ "linguistics": {
+  "false": {
+   "claimed_count": 79.5,
+   "cognate_pair": [
+    "G25",
+    "G26"
+   ],
+   "gloss_claim": "love",
+   "strongs": "G26",
+   "transliteration_claim": "agape"
+  },
+  "packet_key": "LING_VERIFY",
+  "true": {
+   "claimed_count": 36,
+   "cognate_pair": [
+    "G25",
+    "G26"
+   ],
+   "gloss_claim": "love",
+   "strongs": "G26",
+   "transliteration_claim": "agape"
+  }
+ },
+ "manufacturing": {
+  "false": {
+   "claimed_sigma": 17.5,
+   "dpmo": 233,
+   "k": 3,
+   "lsl": 90.0,
+   "mean": 100.0,
+   "process_mean": 100.0,
+   "process_sigma": 2.0,
+   "sigma": 2.0,
+   "tolerance_sigma": 0.1,
+   "tolerances": [
+    0.01,
+    0.02,
+    0.015
+   ],
+   "usl": 110.0
+  },
+  "packet_key": "MFG_VERIFY",
+  "true": {
+   "claimed_sigma": 5.0,
+   "dpmo": 233,
+   "k": 3,
+   "lsl": 90.0,
+   "mean": 100.0,
+   "process_mean": 100.0,
+   "process_sigma": 2.0,
+   "sigma": 2.0,
+   "tolerance_sigma": 0.1,
+   "tolerances": [
+    0.01,
+    0.02,
+    0.015
+   ],
+   "usl": 110.0
+  }
+ },
+ "materials_science": {
+  "false": {
+   "area_m2": 0.01,
+   "claimed_strain": 7.502,
+   "delta_T_K": 50,
+   "density_kg_per_m3": 2500,
+   "force_N": 1000,
+   "mass_kg": 5.0,
+   "material_a_hardness": 700,
+   "material_b_hardness": 400,
+   "original_length_m": 2.0,
+   "strain": 0.001,
+   "stress_Pa": 200000000.0,
+   "thermal_expansion_coeff": 1.2e-05,
+   "volume_m3": 0.002,
+   "youngs_modulus_Pa": 200000000000.0
+  },
+  "packet_key": "MAT_VERIFY",
+  "true": {
+   "area_m2": 0.01,
+   "claimed_strain": 0.001,
+   "delta_T_K": 50,
+   "density_kg_per_m3": 2500,
+   "force_N": 1000,
+   "mass_kg": 5.0,
+   "material_a_hardness": 700,
+   "material_b_hardness": 400,
+   "original_length_m": 2.0,
+   "strain": 0.001,
+   "stress_Pa": 200000000.0,
+   "thermal_expansion_coeff": 1.2e-05,
+   "volume_m3": 0.002,
+   "youngs_modulus_Pa": 200000000000.0
+  }
+ },
+ "medicine": {
+  "false": {
+   "a1c_pct": 7.0,
+   "age_years": 45,
+   "claimed_bmi": 53.3,
+   "diastolic": 82,
+   "dose_mg_per_kg": 5.0,
+   "height_in": 70,
+   "height_m": 1.75,
+   "serum_creatinine": 1.1,
+   "sex": "male",
+   "sex_ibw": "male",
+   "systolic": 125,
+   "weight_kg": 70.0
+  },
+  "packet_key": "MED_VERIFY",
+  "true": {
+   "a1c_pct": 7.0,
+   "age_years": 45,
+   "claimed_bmi": 22.9,
+   "diastolic": 82,
+   "dose_mg_per_kg": 5.0,
+   "height_in": 70,
+   "height_m": 1.75,
+   "serum_creatinine": 1.1,
+   "sex": "male",
+   "sex_ibw": "male",
+   "systolic": 125,
+   "weight_kg": 70.0
+  }
+ },
+ "meteorology": {
+  "false": {
+   "claimed_dew_point_c": 40.9,
+   "claimed_heat_index_f": 217.5,
+   "claimed_saturation_vapor_pressure_hpa": 70.9,
+   "claimed_wind_chill_f": 19.5,
+   "relative_humidity_pct": 60.0,
+   "relative_humidity_pct_for_hi": 70.0,
+   "temperature_c": 25.0,
+   "temperature_c_for_es": 25.0,
+   "temperature_f": 90.0,
+   "temperature_f_for_wc": 20.0,
+   "wind_speed_mph": 15.0
+  },
+  "packet_key": "MET_VERIFY",
+  "true": {
+   "claimed_dew_point_c": 16.7,
+   "claimed_heat_index_f": 105.0,
+   "claimed_saturation_vapor_pressure_hpa": 31.7,
+   "claimed_wind_chill_f": 6.0,
+   "relative_humidity_pct": 60.0,
+   "relative_humidity_pct_for_hi": 70.0,
+   "temperature_c": 25.0,
+   "temperature_c_for_es": 25.0,
+   "temperature_f": 90.0,
+   "temperature_f_for_wc": 20.0,
+   "wind_speed_mph": 15.0
+  }
+ },
+ "molecular_geometry": {
+  "false": {
+   "bonding_domains": 4,
+   "claimed_bond_angle_deg": 226.44,
+   "claimed_geometry": "tetrahedral_NOT",
+   "lone_pairs": 0
+  },
+  "packet_key": "VSEPR_VERIFY",
+  "true": {
+   "bonding_domains": 4,
+   "claimed_bond_angle_deg": 109.47,
+   "claimed_geometry": "tetrahedral",
+   "lone_pairs": 0
+  }
+ },
+ "music_theory": {
+  "false": {
+   "claimed_frequency_hz": 887.5,
+   "claimed_in_scale": false,
+   "claimed_interval": "octave_NOT",
+   "claimed_semitones": 21.5,
+   "freq_a": 440,
+   "freq_b": 880,
+   "key": "C",
+   "midi_note": 69,
+   "mode": "major",
+   "note": "E",
+   "note_a": "C4",
+   "note_b": "G4"
+  },
+  "packet_key": "MUS_VERIFY",
+  "true": {
+   "claimed_frequency_hz": 440.0,
+   "claimed_in_scale": true,
+   "claimed_interval": "octave",
+   "claimed_semitones": 7,
+   "freq_a": 440,
+   "freq_b": 880,
+   "key": "C",
+   "midi_note": 69,
+   "mode": "major",
+   "note": "E",
+   "note_a": "C4",
+   "note_b": "G4"
+  }
+ },
+ "networking": {
+  "false": {
+   "address": "192.168.1.1",
+   "cidr": "192.168.1.0/24",
+   "claimed_format_valid": false,
+   "claimed_in_subnet": false,
+   "claimed_mac_valid": false,
+   "claimed_usable_hosts": 515.5,
+   "ip_to_check": "192.168.1.42",
+   "mac": "00:1A:2B:3C:4D:5E",
+   "subnet_prefix": 24
+  },
+  "packet_key": "NET_VERIFY",
+  "true": {
+   "address": "192.168.1.1",
+   "cidr": "192.168.1.0/24",
+   "claimed_format_valid": true,
+   "claimed_in_subnet": true,
+   "claimed_mac_valid": true,
+   "claimed_usable_hosts": 254,
+   "ip_to_check": "192.168.1.42",
+   "mac": "00:1A:2B:3C:4D:5E",
+   "subnet_prefix": 24
+  }
+ },
+ "nuclear_physics": {
+  "false": {
+   "activity_Bq": 10000000000.0,
+   "atom_count": 23100000000000.0,
+   "claimed_remaining_count": 1000000000007.5,
+   "elapsed_seconds": 1600.0,
+   "half_life_seconds": 1600.0,
+   "initial_count": 1000000000000.0,
+   "mass_defect_amu": 0.0988,
+   "nucleon_count": 56
+  },
+  "packet_key": "NUCLEAR_VERIFY",
+  "true": {
+   "activity_Bq": 10000000000.0,
+   "atom_count": 23100000000000.0,
+   "claimed_remaining_count": 500000000000.0,
+   "elapsed_seconds": 1600.0,
+   "half_life_seconds": 1600.0,
+   "initial_count": 1000000000000.0,
+   "mass_defect_amu": 0.0988,
+   "nucleon_count": 56
+  }
+ },
+ "number_theory": {
+  "false": {
+   "claimed_factorial": 247.5,
+   "claimed_gcd": 19.5,
+   "claimed_inverse": 15.5,
+   "claimed_prime": false,
+   "factorial_n": 5,
+   "gcd_a": 12,
+   "gcd_b": 18,
+   "mod_a": 3,
+   "mod_m": 11,
+   "n_prime": 17
+  },
+  "packet_key": "NUM_VERIFY",
+  "true": {
+   "claimed_factorial": 120,
+   "claimed_gcd": 6,
+   "claimed_inverse": 4,
+   "claimed_prime": true,
+   "factorial_n": 5,
+   "gcd_a": 12,
+   "gcd_b": 18,
+   "mod_a": 3,
+   "mod_m": 11,
+   "n_prime": 17
+  }
+ },
+ "nutrition": {
+  "false": {
+   "age_sex_group": "adult_male",
+   "alcohol_g": 0,
+   "calories_claimed": 500,
+   "carb_g": 50,
+   "claimed_balance_kcal": -992.5,
+   "claimed_bmi_class": "normal_NOT",
+   "claimed_status": "sufficient_NOT",
+   "expenditure_kcal": 2000,
+   "fat_g": 20,
+   "height_m": 1.75,
+   "intake_kcal": 1500,
+   "intake_mg": 90,
+   "nutrient": "vitamin_c",
+   "protein_g": 30,
+   "tolerance_kcal": 5,
+   "weight_kg": 75
+  },
+  "packet_key": "NUT_VERIFY",
+  "true": {
+   "age_sex_group": "adult_male",
+   "alcohol_g": 0,
+   "calories_claimed": 500,
+   "carb_g": 50,
+   "claimed_balance_kcal": -500,
+   "claimed_bmi_class": "normal",
+   "claimed_status": "sufficient",
+   "expenditure_kcal": 2000,
+   "fat_g": 20,
+   "height_m": 1.75,
+   "intake_kcal": 1500,
+   "intake_mg": 90,
+   "nutrient": "vitamin_c",
+   "protein_g": 30,
+   "tolerance_kcal": 5,
+   "weight_kg": 75
+  }
+ },
+ "oceanography": {
+  "false": {
+   "claimed_classification": "marine_NOT",
+   "depth_m": 500,
+   "salinity_ppt": 35,
+   "tidal_range_m": 3.0,
+   "wavelength_m": 100
+  },
+  "packet_key": "OCEAN_VERIFY",
+  "true": {
+   "claimed_classification": "marine",
+   "depth_m": 500,
+   "salinity_ppt": 35,
+   "tidal_range_m": 3.0,
+   "wavelength_m": 100
+  }
+ },
+ "optics": {
+  "false": {
+   "aperture_m": 0.1,
+   "claimed_diffraction_rad": 7.50001342,
+   "claimed_magnification": 5.5,
+   "claimed_theta2_deg": 46.44,
+   "claimed_thin_lens_consistent": false,
+   "focal_length_m": 0.05,
+   "image_distance_for_M": 0.1,
+   "image_distance_m": 0.1,
+   "n1": 1.0,
+   "n2": 1.5,
+   "object_distance_for_M": 0.1,
+   "object_distance_m": 0.1,
+   "theta1_deg": 30,
+   "wavelength_m": 5.5e-07
+  },
+  "packet_key": "OPT_VERIFY",
+  "true": {
+   "aperture_m": 0.1,
+   "claimed_diffraction_rad": 6.71e-06,
+   "claimed_magnification": -1.0,
+   "claimed_theta2_deg": 19.47,
+   "claimed_thin_lens_consistent": true,
+   "focal_length_m": 0.05,
+   "image_distance_for_M": 0.1,
+   "image_distance_m": 0.1,
+   "n1": 1.0,
+   "n2": 1.5,
+   "object_distance_for_M": 0.1,
+   "object_distance_m": 0.1,
+   "theta1_deg": 30,
+   "wavelength_m": 5.5e-07
+  }
+ },
+ "periodic_table": {
+  "false": {
+   "claimed_atomic_mass": 119.19,
+   "claimed_atomic_number": 59.5,
+   "claimed_name": "iron_NOT",
+   "isotopes": [
+    {
+     "abundance": 5.845,
+     "mass": 53.9396
+    },
+    {
+     "abundance": 91.754,
+     "mass": 55.9349
+    },
+    {
+     "abundance": 2.119,
+     "mass": 56.9354
+    },
+    {
+     "abundance": 0.282,
+     "mass": 57.9333
+    }
+   ],
+   "mass_abs_tol": 0.01,
+   "symbol": "Fe"
+  },
+  "packet_key": "PT_VERIFY",
+  "true": {
+   "claimed_atomic_mass": 55.845,
+   "claimed_atomic_number": 26,
+   "claimed_name": "iron",
+   "isotopes": [
+    {
+     "abundance": 5.845,
+     "mass": 53.9396
+    },
+    {
+     "abundance": 91.754,
+     "mass": 55.9349
+    },
+    {
+     "abundance": 2.119,
+     "mass": 56.9354
+    },
+    {
+     "abundance": 0.282,
+     "mass": 57.9333
+    }
+   ],
+   "mass_abs_tol": 0.01,
+   "symbol": "Fe"
+  }
+ },
+ "philosophy": {
+  "false": {
+   "claim_requires_observation": true,
+   "claimed_are_identical": false,
+   "claimed_consistent": false,
+   "claimed_focuses_on_outcomes": false,
+   "claimed_is_a_priori": false,
+   "framework_name": "consequentialist",
+   "is_necessarily_True": true,
+   "is_possibly_True": true,
+   "object_a_properties": [
+    "red",
+    "round",
+    "heavy"
+   ],
+   "object_b_properties": [
+    "round",
+    "red",
+    "heavy"
+   ]
+  },
+  "packet_key": "PHIL_VERIFY",
+  "true": {
+   "claim_requires_observation": false,
+   "claimed_are_identical": true,
+   "claimed_consistent": true,
+   "claimed_focuses_on_outcomes": true,
+   "claimed_is_a_priori": true,
+   "framework_name": "consequentialist",
+   "is_necessarily_True": true,
+   "is_possibly_True": true,
+   "object_a_properties": [
+    "red",
+    "round",
+    "heavy"
+   ],
+   "object_b_properties": [
+    "round",
+    "red",
+    "heavy"
+   ]
+  }
+ },
+ "physical_constants": {
+  "false": {
+   "claimed_unit": "m/s_NOT",
+   "claimed_value": 599584923.5,
+   "constant": "speed_of_light",
+   "rel_tol": 0.0001
+  },
+  "packet_key": "CONST_VERIFY",
+  "true": {
+   "claimed_unit": "m/s",
+   "claimed_value": 299792458,
+   "constant": "speed_of_light",
+   "rel_tol": 0.0001
+  }
+ },
+ "probability": {
+  "false": {
+   "binomial_k": 5,
+   "binomial_n": 10,
+   "binomial_p": 0.5,
+   "claimed_binomial_probability": 7.9921875
+  },
+  "packet_key": "PROB_VERIFY",
+  "true": {
+   "binomial_k": 5,
+   "binomial_n": 10,
+   "binomial_p": 0.5,
+   "claimed_binomial_probability": 0.24609375
+  }
+ },
+ "quantum_computing": {
+  "false": {
+   "amplitudes": [
+    0.6,
+    0.8
+   ],
+   "claimed_normalized": false,
+   "density_eigenvalues": [
+    0.5,
+    0.5
+   ],
+   "inner_product": 0.707,
+   "n_items": 64,
+   "qber": 0.09,
+   "qber_threshold": 0.11,
+   "shor_N": 15,
+   "shor_a": 2,
+   "shor_r": 4
+  },
+  "packet_key": "QCOMP_VERIFY",
+  "true": {
+   "amplitudes": [
+    0.6,
+    0.8
+   ],
+   "claimed_normalized": true,
+   "density_eigenvalues": [
+    0.5,
+    0.5
+   ],
+   "inner_product": 0.707,
+   "n_items": 64,
+   "qber": 0.09,
+   "qber_threshold": 0.11,
+   "shor_N": 15,
+   "shor_a": 2,
+   "shor_r": 4
+  }
+ },
+ "real_estate": {
+  "false": {
+   "annual_debt_service": 22755,
+   "annual_gross_rent": 24000,
+   "annual_rate": 0.065,
+   "annual_rent": 18000,
+   "appraised_value": 300000,
+   "claimed_cap_rate": 7.62,
+   "claimed_dscr": 9.61,
+   "claimed_grm": 32.5,
+   "claimed_ltv": 9.1,
+   "claimed_monthly_payment": 3799.9,
+   "claimed_rental_yield": 7.59,
+   "loan_amount": 240000,
+   "loan_principal": 300000,
+   "loan_term_months": 360,
+   "net_operating_income": 24000,
+   "property_price": 300000,
+   "property_value": 400000
+  },
+  "packet_key": "RE_VERIFY",
+  "true": {
+   "annual_debt_service": 22755,
+   "annual_gross_rent": 24000,
+   "annual_rate": 0.065,
+   "annual_rent": 18000,
+   "appraised_value": 300000,
+   "claimed_cap_rate": 0.06,
+   "claimed_dscr": 1.055,
+   "claimed_grm": 12.5,
+   "claimed_ltv": 0.8,
+   "claimed_monthly_payment": 1896.2,
+   "claimed_rental_yield": 0.045,
+   "loan_amount": 240000,
+   "loan_principal": 300000,
+   "loan_term_months": 360,
+   "net_operating_income": 24000,
+   "property_price": 300000,
+   "property_value": 400000
+  }
+ },
+ "rhetoric": {
+  "false": {
+   "claimed_is_complete_argument": false,
+   "claimed_is_formal_fallacy": true,
+   "claimed_valid": false,
+   "conclusion": "All S are P",
+   "fallacy_name": "ad hominem",
+   "has_conclusion": true,
+   "has_premise": true,
+   "has_warrant": false,
+   "major_premise": "All M are P",
+   "minor_premise": "All S are M"
+  },
+  "packet_key": "RHET_VERIFY",
+  "true": {
+   "claimed_is_complete_argument": true,
+   "claimed_is_formal_fallacy": false,
+   "claimed_valid": true,
+   "conclusion": "All S are P",
+   "fallacy_name": "ad hominem",
+   "has_conclusion": true,
+   "has_premise": true,
+   "has_warrant": false,
+   "major_premise": "All M are P",
+   "minor_premise": "All S are M"
+  }
+ },
+ "soil_science": {
+  "false": {
+   "area_hectares": 2.0,
+   "claimed_ph_suitable": false,
+   "clay_pct": 20,
+   "crop": "maize",
+   "crop_coefficient": 1.15,
+   "crop_npk": "maize",
+   "current_ph": 5.5,
+   "reference_et0_mm_per_day": 5.0,
+   "sand_pct": 40,
+   "silt_pct": 40,
+   "soil_ph": 6.2,
+   "soil_type": "clay_loam",
+   "target_ph": 6.5
+  },
+  "packet_key": "SOIL_VERIFY",
+  "true": {
+   "area_hectares": 2.0,
+   "claimed_ph_suitable": true,
+   "clay_pct": 20,
+   "crop": "maize",
+   "crop_coefficient": 1.15,
+   "crop_npk": "maize",
+   "current_ph": 5.5,
+   "reference_et0_mm_per_day": 5.0,
+   "sand_pct": 40,
+   "silt_pct": 40,
+   "soil_ph": 6.2,
+   "soil_type": "clay_loam",
+   "target_ph": 6.5
+  }
+ },
+ "sports_analytics": {
+  "false": {
+   "actual_score_a": 1.0,
+   "claimed_elo_a_post": 3230.52,
+   "claimed_expected_score_a": 8.78,
+   "claimed_games_behind": 17.5,
+   "claimed_winning_pct": 8.72,
+   "elo_K": 32,
+   "elo_a": 1600,
+   "elo_a_pre": 1600,
+   "elo_b": 1500,
+   "elo_b_pre": 1500,
+   "leader_losses": 30,
+   "leader_wins": 50,
+   "pythag_exponent": 2.0,
+   "runs_allowed": 600,
+   "runs_scored": 750,
+   "team_losses": 35,
+   "team_wins": 45
+  },
+  "packet_key": "SPORT_VERIFY",
+  "true": {
+   "actual_score_a": 1.0,
+   "claimed_elo_a_post": 1611.51,
+   "claimed_expected_score_a": 0.64,
+   "claimed_games_behind": 5.0,
+   "claimed_winning_pct": 0.61,
+   "elo_K": 32,
+   "elo_a": 1600,
+   "elo_a_pre": 1600,
+   "elo_b": 1500,
+   "elo_b_pre": 1500,
+   "leader_losses": 30,
+   "leader_wins": 50,
+   "pythag_exponent": 2.0,
+   "runs_allowed": 600,
+   "runs_scored": 750,
+   "team_losses": 35,
+   "team_wins": 45
+  }
+ },
+ "thermodynamics": {
+  "false": {
+   "T_cold_K": 300.0,
+   "T_hot_K": 600.0,
+   "claimed_efficiency": 8.5,
+   "delta_T_K": 10.0,
+   "heat_J": 1000.0,
+   "latent_heat_J_per_mol": 40660.0,
+   "mass_kg": 1.0,
+   "moles": 1.0,
+   "p_ref": 101325.0,
+   "pressure": 70000.0,
+   "pressure_Pa": 101325.0,
+   "specific_heat_J_per_kgK": 4186.0,
+   "t_ref_K": 373.15,
+   "temperature_K": 300.0,
+   "volume_m3": 0.0224
+  },
+  "packet_key": "THERMO_VERIFY",
+  "true": {
+   "T_cold_K": 300.0,
+   "T_hot_K": 600.0,
+   "claimed_efficiency": 0.5,
+   "delta_T_K": 10.0,
+   "heat_J": 1000.0,
+   "latent_heat_J_per_mol": 40660.0,
+   "mass_kg": 1.0,
+   "moles": 1.0,
+   "p_ref": 101325.0,
+   "pressure": 70000.0,
+   "pressure_Pa": 101325.0,
+   "specific_heat_J_per_kgK": 4186.0,
+   "t_ref_K": 373.15,
+   "temperature_K": 300.0,
+   "volume_m3": 0.0224
+  }
+ }
+}

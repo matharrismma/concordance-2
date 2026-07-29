@@ -45,22 +45,25 @@ community-by-shelf-overlap is **doctrine with zero cards and zero code**.
 **Fix:** wings ship *with* their seed cards (PD sheet music, method books, chord charts,
 color theory, PD cookery) — never a wing announced before it is stocked.
 
-## G4 · 51 OF 140 API ROUTES ARE UNREACHABLE FROM ANY PAGE
-Capabilities that exist and no reader can find: `/archetypes`, `/archetypes/match`, `/badges`,
-`/daily`, `/growth`, `/library/health`, `/pronounce`, `/chess`, `/coach/guidance`,
-`/decks/predict`, `/works/item`, `/study/export`, `/study/import`, `/threads/search`,
-`/word_occurrences`, `/locate`, `/grid`, `/capabilities`, and 33 more.
+## G4 · REACHABILITY — CORRECTED, THEN GATED  ✅ closed 2026-07-29
+**My first measurement was wrong, and the correction is the finding.** It read only `*.html`,
+so it reported 51 unreachable routes and 8 orphan pages. But most routes are called from
+scripts, and `site/nh-tools.js` — the Everything palette (Ctrl-K) — *is* a reachability
+surface listing 39 pages, with its deliberate exclusions already documented in a comment.
 
-**8 pages are not linked from any other page**: `apothecary.html`, `check.html`,
-`encyclopedia.html`, `game.html`, `keep.html`, `mesh.html`, `tv.html`, `walk.html`. The
-Fellowship Mesh — a V1 capstone — is invisible unless you know the URL.
+**The true numbers:** of 8 "orphan" pages, `keep.html` (operator surface, noindex),
+`encyclopedia.html` (redirect stub onto characters.html) and `ask.html` (kept for old links)
+were documented decisions. **Exactly one page was genuinely lost: `mesh.html`** — the
+Fellowship Mesh, a V1 capstone, reachable only by typing the URL. It is now in the palette
+("The Way"). Routes: the remainder are agent/machine surfaces (identity, consent, attest,
+thread internals), now declared as such, by name, with a reason.
 
-This is the recurring lesson at scale: *correct server-side + invisible to the person = not
-done*. It was found five times in one night in July; this is the sixth shape of it.
+`tests/test_reachability.py` gates all three from here: every route is REACHED or DECLARED
+agent-only; every page is LINKED (href or palette) or DECLARED unlisted; and a declaration
+naming a route that no longer exists fails too, so exemptions cannot rot.
 
-**Fix:** a reachability gate — every `api:True` route either appears in a page or is declared
-agent-only in the registry; every page is linked from somewhere or declared deliberately
-unlisted. Make the gate fail on drift, exactly like the route goldens.
+*The lesson, twice in one day (see also the null assay's first draft): an instrument that
+measures the wrong surface manufactures findings. Check the check before you trust it.*
 
 ## G5 · THE VERIFIERS THEMSELVES ARE THE LEAST-TESTED CODE
 From the last gate's coverage: **foundation 0% · witness verifier 13% · teachings 14% ·

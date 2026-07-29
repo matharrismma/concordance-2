@@ -55,3 +55,10 @@ ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "sudo systemctl restart nh-com-2"
 poll 8002 "secular"
 
 echo "-- deployed: $* --"
+
+# 4. PROVE the box matches the repo, module for module. The deploy target is not a checkout:
+#    corpus_db.py was absent from it for days under a green gate, and airlock.py was found
+#    missing the first time this guard ran. A deploy that ends on hope is how that happens.
+#    Advisory (never fails the deploy — the files you just sent are already there); it prints
+#    the drift so it cannot hide.
+python "$REPO/tools/verify_deploy.py" --soft || true

@@ -24,6 +24,7 @@
     { h: '/almanac.html',    n: 'Almanac',          k: 'facts figures reference tables data' },
     { h: '/game.html',       n: 'The Field Kit game', k: 'card game deck play draw practice scripture fieldkit obedience protocol sermon mount' },
     { h: '/walk.html',       n: 'Make a wish for life', k: 'walk goal become overcome addiction diet relationship mend change grow habit practice life wish' },
+    { h: '/mesh.html',       n: 'The Way',          k: 'mesh fellowship map nearby near me neighbours neighbors gather meet believers door message' },
     { h: '/apothecary.html', n: 'The Apothecary',   k: 'herbs remedies tonics planting garden grow land old way tea' },
     { h: '/floor.html',      n: 'The Floor of Discovery', k: 'floor design one floor seeds nesting created order the word fear of god wisdom see the design' },
     { h: '/map.html',        n: 'The map',          k: 'connections graph atlas structure links' },
