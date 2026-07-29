@@ -248,6 +248,32 @@ Unused aspects go in cold storage."
 - SOP-FEATURES joins the §5 worklist (ships with the first /suggest surface, Commons C1 —
   suggestions are drops, so C1 carries them natively).
 
+## §3.9 THE MILLION (Matt, 2026-07-29) — the growth target and the seeding order
+
+"Our goal is 1M cards. Once everything is complete on the list, begin seeding all of the
+identified possible uses."
+
+Measured 2026-07-29: **496,559 cards — 49.7%.** The second half is not a stretch; it is a
+worklist of sources already identified and lawful (PD/CC0/open), plus a card per identified USE.
+
+ORDER (after the list — the D-series capstone and the queued tasks — is complete):
+1. **Seed every identified use.** Each use case we have named gets its cards: the hobby wings
+   (recipes, music by instrument, art by medium), the field library's practical how-tos, the
+   storyboards + archetypes + their movements, the access-tools catalog, the SOPs and
+   operational objects (§104). A use with no card is a use we cannot find.
+2. **Deepen what is already stubbed.** Gutenberg's 77,700 volumes are one card each — chapter
+   and section cards multiply that severalfold. Commentary (Henry + Clarke + Gill) at verse
+   granularity is tens of thousands more, each attributed to its author.
+3. **The remaining PD reference shelf.** McClintock & Strong (12 vols), Schaff-Herzog, Smith's,
+   Fausset's, Nave's, Torrey's — the same ISBE road, already proven tonight.
+4. **The open scientific commons.** Taxonomy beyond the recognizable subset (GBIF/Catalogue of
+   Life), OEIS beyond the core, IMSLP's PD scores for the music wing, Wikidata's dated events.
+5. **The community's own hands.** Member shelves, curated finds, elevated contributions — the
+   only source that grows without us, and the reason the Commons matters to the count.
+
+RULE FOR EVERY SEED (unchanged): found, attributed, nested (zero orphans), 0-FP, and honest
+about what was not checked. A million cards of slop would be worse than 496,559 true ones.
+
 ## §4 LATER / horizon (recorded, not scheduled)
 
 - Denominational voices completion (one major voice per tradition, their own reckoning).
