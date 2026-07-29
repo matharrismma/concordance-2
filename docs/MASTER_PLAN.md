@@ -16,6 +16,30 @@ we are. The Bible is the focus; all else a tool at the right time.
 
 ---
 
+## §0 Design principle — the mechanical system (Matt, 2026-07-28)
+
+"Think of it like a mechanical system. Capacitors to even flow across the project."
+The recurring form (effort ↔ flow) has a storage element, and every seam where flow is
+uneven gets one. Named capacitors, standing and planned:
+
+- **Shard freeze** (D4) — RAM surge absorbed into a disk reservoir; thaw/freeze/rebalance
+  is the charge–discharge cycle; the LRU rebalancer is the load leveler.
+- **Curation gate** (C1) — member drops arrive in bursts; the review queue absorbs the
+  surge and the commons receives a steady, evaluated flow.
+- **Elevation ladder** (C2) — community enthusiasm charges; the reference library only
+  receives what the witnesses + verifiers + trusted reviewers discharge.
+- **Steward review queue** — reports accumulate; the 3-witness threshold is the breakdown
+  voltage that discharges to a human.
+- **Decks / the Hare** — pre-charged retrieval: predicted top-of-deck absorbs latency.
+- **Receipts ledger** — value accumulates signed and traceable until (if ever) payment
+  discharges along the waybill.
+- **Caches + Wayback archives** — capacitors against link rot and upstream outage.
+- **Rate limits** = current limiters; **the moat** = the diode (falsehood cannot pass in
+  either direction of pressure).
+
+Rule for new features: find the uneven flow first, place the capacitor at the seam, and
+name it in this list when it ships.
+
 ## §1 The standing systems (shipped, gated, live)
 
 Each line: system — where it lives — what it guarantees.
