@@ -19,6 +19,21 @@ Three standing rules:
 
 ## 2026-07-29
 
+**THE FREEZE WIDENED — the runway to 1M, taken.**
+- Measured first (never guessed): maximal freeze = **985 MB/process** locally for 496,730 cards
+  vs ~1,980 MB with four shelves — 2.03 KB/card, so **1M cards projects to 1,984 MB/process**,
+  ~3.97 GB for both, inside a 7.75 GB box. Probe battery **33/33 under maximal freeze** before
+  any change was made.
+- Applied: `CONCORDANCE_FREEZE_SHELVES` 4 → **24 shelves**, `.env` backed up first, value QUOTED
+  (one shelf is literally `nuclear physics` — unquoted it would have truncated the list in the
+  systemd EnvironmentFile, silently freezing less). Parse verified: 24 shelves, space intact.
+- LIVE RESULT: **2018/1940 → 1448/1466 MB per process**; box available **3,355 → 4,326 MB**.
+  Since the night began: 2834/2809 → 1448/1466 MB (**~2.7 GB freed**).
+- Reader loses nothing, verified live on both surfaces: frozen-shelf search (dictionary),
+  ISBE full article 19,521 bytes, Gill on John 3:16, a domain-core card showing its CONFIRMED
+  worked math, the seeker path, and passage lookup.
+- Rollback: `.env.bak-*` on the box; unset the env and everything loads resident as before.
+
 **DURABILITY · the ark is real, and a green backup log was hiding a hole.**
 - FOUND: the daily backup named 6 items (`cas ledger activity.jsonl cards.jsonl bible_en.jsonl
   strongs`) = 18 MB, while data/ held 1.9 GB. **Every acquisition was backed up nowhere** —
