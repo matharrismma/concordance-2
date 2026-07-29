@@ -353,6 +353,9 @@ def load_cards(path: Optional[Path] = None,
                       # apothecary monographs, the verified almanac, the coach curriculum —
                       # substance we already held that had no card at all.
                       "practical_cards.jsonl",
+                      # Nave topical index SCANNED into topics + speaks_to edges (structure
+                      # taken, the work's own text left with the work).
+                      "topical_cards.jsonl",
                       # ISBE 1915 (D5) — 9,380 scholarly stub cards; the full public-domain
                       # article renders from data/acquisitions/isbe.db on the card page.
                       "isbe_cards.jsonl",

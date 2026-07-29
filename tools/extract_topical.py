@@ -91,7 +91,9 @@ def _card(cid, title, body, box, bands, spine, subject, attribution, conns):
     return {"id": cid, "kind": "reference", "title": title[:180], "body": body,
             "source": {"label": attribution, "url": "", "domain": "scripture",
                        "authority_tier": "reference"},
-            "shelf": "encyclopedia", "box": box, "bands": bands, "subject": subject,
+            # Its OWN shelf: a topical index is not an encyclopedia entry, and the zero-orphan
+            # gate rightly refused to let it hang under the encyclopedia spines.
+            "shelf": "topical", "box": box, "bands": bands, "subject": subject,
             "connections": conns, "author": "engine", "created_at": 0.0, "updated_at": 0.0,
             "visibility": "public", "lifecycle_stage": "public", "volatility": "permanent",
             "surface": "witness", "generated": False}
@@ -102,7 +104,7 @@ def _spine(cid, title, body, box, attribution):
             "source": {"label": attribution, "url": "", "domain": "scripture",
                        "authority_tier": "reference"},
             "shelf": "spine", "box": "spine",
-            "bands": ["encyclopedia", box, "topical", "spine"], "subject": title,
+            "bands": ["topical", box, "index", "spine"], "subject": title,
             "connections": [{"to_card_id": FLOOR, "relationship": "part_of",
                              "evidence": "the reference section of the keeping"}],
             "author": "engine", "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
