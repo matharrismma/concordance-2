@@ -304,6 +304,62 @@ and no page text anywhere in the card.
 
 ---
 
+## 2026-07-30 · TRAFFIC, measured — who is actually using this
+
+Read from the Caddy access logs on the box (127,377 requests across api/site/tv), not guessed.
+
+**The dominant reader is an AI agent, by a wide margin.**
+
+| who | requests | share |
+|---|---:|---:|
+| **ClaudeBot** | 44,439 | 35% |
+| SemrushBot (SEO crawler) | 26,894 | 21% |
+| real browsers | ~20,725 | 16% |
+| GPTBot | 2,203 | 2% |
+| no user-agent | 5,252 | 4% |
+
+**What is used** (status 200 unless noted): `/card` **46,190** · `/search` **16,210** ·
+`/encyclopedia.html` 4,037 · `/keep.json` 3,879 · `/mcp` **3,037** · `/canon.html` 2,899 · `/` 608.
+The card permalink is the single most-used thing this project has built, and search is second. Both
+were built for agents to cite; both are being used that way.
+
+**The MCP surface is being INDEXED, not just called.** `/mcp` callers: SentinelOracle liveness prober
+(1,398), python-httpx (875), node (240), undici (121), Bun (64), agent-tools.cloud-crawler (61),
+**MCPScoringEngine (50)**. Agent registries are discovering and scoring us.
+
+**Volume stepped up hard on 2026-07-27**: 26.6k · 30.2k · 14.8k · 11.0k per day, against ~1k/day the
+week before.
+
+**Health:** 217 × 429 (rate-limited `/search`), 18 × 502 on `/card`, 8 × 502 on `/search` — small but
+real. 37,052 × 404 (29% of all traffic) is almost entirely hostile scanning (`.env` ×112 and 8 more
+variants, `.git/config` ×63, `.aws/credentials` ×36, `phpinfo.php`) — correctly refused.
+
+### FINDING — 246 live cards carry a literal placeholder in their title
+
+The search log is not human queries. It is crawlers searching **our own card titles**, which is how
+this surfaced: the top "searches" are strings like `Aurelius, Meditations §aur_07_xxx` and
+`Augustine, Confessions §aug_conf_`. Measured against the live corpus (548,585 cards):
+
+- **246 titles contain `_xxx`** — a placeholder marker that shipped and is now indexed.
+- **2,177 titles carry a raw internal `§slug`** (`§aur_10_i`, `§aug_conf_`).
+- Some connection titles are slug-mash truncated mid-token: `Aurelius, Meditations §aur_10_i: O m →
+  Aurelius, Meditations §aur_`.
+
+The BODIES are genuine (real Meditations text); it is the titles that are machine leftovers. This is
+the [[placeholders→truth]] failure recurring in a place nobody looked, and it is what ClaudeBot and
+GPTBot are reading. Not yet fixed — a carder-side title repair, sized and queued rather than done
+mid-report.
+
+### NOT ATTRIBUTED — 784 requests to `/card/null` and `/null`
+
+`Sec-Fetch-Dest: image`, 781 of 784 on narrowhighway.tv, referred by our own card pages and
+`characters.html`. But the served HTML contains **no** null-valued `src`/`href`/`content`, and
+`render_card_html` emits none when given null connections. So it looks like ours and I cannot yet
+show that it is — a browser extension or preview crawler injecting a null image is equally
+consistent. Recorded as unattributed rather than claimed as a fix.
+
+---
+
 ## OPEN — logged because unfinished is a fact, not a silence
 
 - **Operational carding** (task #104): shards, nodes, curators, sources, deploys, SOPs each get a
