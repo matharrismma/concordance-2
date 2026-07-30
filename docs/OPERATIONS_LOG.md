@@ -334,21 +334,39 @@ week before.
 real. 37,052 × 404 (29% of all traffic) is almost entirely hostile scanning (`.env` ×112 and 8 more
 variants, `.git/config` ×63, `.aws/credentials` ×36, `phpinfo.php`) — correctly refused.
 
-### FINDING — 246 live cards carry a literal placeholder in their title
+### ~~FINDING — 246 live cards carry a literal placeholder in their title~~ — **RETRACTED, I WAS WRONG**
+
+**`_xxx` is the Roman numeral XXX.** `§aur_07_xxx` is *Meditations* Book 7, section 30. All 246
+verified: the tail after the section number is a Roman numeral every time (`i`, `xxxi`, `xxxiii`,
+`xxxix`). And the "titles truncated mid-slug" were my terminal truncating a search snippet — the
+real count of titles ending mid-token is **0**.
+
+There is no defect here. The titles carry a structured citation (work · book · section), which is
+the provenance discipline this project is built on, working as intended.
+
+I concluded "placeholder" from a SUBSTRING — the exact error
+[[feedback_science_math_is_the_core_2026-07-08]] exists to forbid ("never conclude 'no science' from
+a substring"), and I made it while reporting confidently with numbers attached. The measured facts
+below were right; the interpretation was not. The one thing worth carrying forward from it is a
+**polish** item, not a defect: `§aur_04_xxxviii` is honest but unreadable, and `Meditations 4.38`
+would serve a reader and an agent better. Low priority, and NOT the top of any list.
+
+The original claim, kept because the record is append-only:
+
+> ~~The search log is not human queries. It is crawlers searching **our own card titles**, which is
+> how this surfaced... **246 titles contain `_xxx`** — a placeholder marker that shipped.~~
 
 The search log is not human queries. It is crawlers searching **our own card titles**, which is how
 this surfaced: the top "searches" are strings like `Aurelius, Meditations §aur_07_xxx` and
 `Augustine, Confessions §aug_conf_`. Measured against the live corpus (548,585 cards):
 
-- **246 titles contain `_xxx`** — a placeholder marker that shipped and is now indexed.
-- **2,177 titles carry a raw internal `§slug`** (`§aur_10_i`, `§aug_conf_`).
-- Some connection titles are slug-mash truncated mid-token: `Aurelius, Meditations §aur_10_i: O m →
-  Aurelius, Meditations §aur_`.
+- 246 titles contain `_xxx` — **all 246 are the Roman numeral XXX**, verified.
+- 2,177 titles carry a `§slug` — a legitimate work·book·section citation.
+- The "truncated" titles were a search-snippet artifact in my terminal; real count is 0.
 
-The BODIES are genuine (real Meditations text); it is the titles that are machine leftovers. This is
-the [[placeholders→truth]] failure recurring in a place nobody looked, and it is what ClaudeBot and
-GPTBot are reading. Not yet fixed — a carder-side title repair, sized and queued rather than done
-mid-report.
+What IS true and useful from this: the search log is not human queries — it is crawlers reading our
+own card titles back to us. That tells us titles ARE the product for our largest audience, which
+makes readability (`Meditations 4.38` over `§aur_04_xxxviii`) a real if minor improvement.
 
 ### NOT ATTRIBUTED — 784 requests to `/card/null` and `/null`
 
