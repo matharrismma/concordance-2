@@ -146,5 +146,49 @@ def test_attach_never_mutates_the_card_it_was_given():
     assert "presentation" not in card, "attach mutated the caller's card — the store is next"
 
 
+
+
+def test_the_adjoining_cards_are_real_links_for_a_reader_and_an_agent():
+    """Matt, 2026-07-30: "Links to adjoining cards as well for agents and users."
+
+    The edges existed but reached a reader ONLY through a JS canvas that stays hidden until scripts
+    run — so every crawler, every no-JS reader, and the 35% of traffic that is ClaudeBot hit a dead
+    end on 46,190 card views. A graph nobody can traverse is not a graph."""
+    from concordance import present
+    card = {"id": "c", "updated_at": 1.0, "connections": [
+        {"to_card_id": "card_a", "relationship": "comments_on", "evidence": "expounds this verse"},
+        {"to_card_id": "card_missing", "relationship": "cites"},
+        {"to_card_id": "card_a", "relationship": "cites"},          # duplicate target
+        {"junk": True},                                              # unusable edge
+    ]}
+    known = {"card_a": {"id": "card_a", "title": "Gill on John 3:16"}}
+    n = present.neighbors(card, resolve=known.get)
+
+    assert len(n) == 2, "a duplicate target or an unusable edge was not dropped"
+    assert n[0]["href"] == "/card/card_a" and n[0]["title"] == "Gill on John 3:16"
+    assert n[0]["relationship"] == "comments on", "the relation must read as words, not a slug"
+    assert n[0]["why"] == "expounds this verse"
+    # an edge we cannot resolve is KEPT with its id and NO invented title
+    assert n[1]["id"] == "card_missing" and n[1]["title"] == "" and n[1]["resolved"] is False
+    assert n[1]["href"] == "/card/card_missing", "an unresolved neighbour is still walkable"
+
+
+def test_an_unknown_relationship_is_never_renamed():
+    from concordance import present
+    n = present.neighbors({"connections": [{"to_card_id": "x", "relationship": "weighs_against"}]},
+                          resolve=lambda i: None)
+    assert n[0]["relationship"] == "weighs against", "de-slugged, not reinterpreted"
+
+
+def test_neighbors_survives_a_resolver_that_throws():
+    """One bad lookup must not cost the whole page."""
+    from concordance import present
+    def boom(_):
+        raise RuntimeError("shard is locked")
+    n = present.neighbors({"connections": [{"to_card_id": "x", "relationship": "cites"}]},
+                          resolve=boom)
+    assert n and n[0]["id"] == "x" and n[0]["resolved"] is False
+
+
 if __name__ == "__main__":
     sys.exit(int(pytest.main([__file__, "-q"])))

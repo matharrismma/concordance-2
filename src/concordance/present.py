@@ -222,6 +222,64 @@ def derive(card: Dict[str, Any], now: Optional[int] = None) -> Dict[str, Any]:
     return out
 
 
+def _relate(rel: str) -> str:
+    """A relationship in a reader's words. Unknown relations pass through de-slugged rather than
+    being renamed into something the edge does not claim."""
+    known = {
+        "comments_on": "comments on", "cites": "cites", "supersedes": "supersedes",
+        "retracts": "retracts", "see_also": "see also", "member_of": "on the shelf of",
+        "derives_from": "derives from", "verifies": "verifies", "contradicts": "contradicts",
+        "fulfills": "fulfills", "parallels": "parallels", "defines": "defines",
+        "mentions": "mentions", "part_of": "part of", "translates": "translates",
+    }
+    r = str(rel or "").strip()
+    return known.get(r, r.replace("_", " ")) or "connects to"
+
+
+def neighbors(card: Dict[str, Any], resolve=None, limit: int = 8) -> List[Dict[str, Any]]:
+    """THE ADJOINING CARDS, resolved into something a person or an agent can actually follow.
+
+    Matt, 2026-07-30: *"Links to adjoining cards as well for agents and users."*
+
+    A stored edge is `{to_card_id, relationship, evidence}` — an id and nothing readable. Until now
+    those edges reached a reader ONLY through a JS canvas that stays hidden until scripts run, which
+    means the 35% of our traffic that is ClaudeBot, every crawler, and every reader without
+    JavaScript hit a dead end on 46,190 card views. A graph nobody can traverse is not a graph.
+
+    `resolve(card_id) -> card | None` is injected so this module stays free of I/O and of the corpus
+    import; the caller decides how a lookup happens. An edge whose target cannot be resolved is kept
+    with its id and NO invented title — a link we cannot describe is still a link, and pretending to
+    know its name would be worse than admitting we do not.
+    """
+    out: List[Dict[str, Any]] = []
+    seen = set()
+    edges = (card or {}).get("connections") or (card or {}).get("links") or []
+    for e in edges:
+        if not isinstance(e, dict):
+            continue
+        tid = str(e.get("to_card_id") or e.get("id") or "").strip()
+        if not tid or tid in seen:
+            continue
+        seen.add(tid)
+        target = None
+        if resolve is not None:
+            try:
+                target = resolve(tid)
+            except Exception:  # noqa: BLE001 — one unresolvable edge must not cost the whole page
+                target = None
+        out.append({
+            "id": tid,
+            "title": str((target or {}).get("title") or ""),   # "" means unresolved, never guessed
+            "relationship": _relate(e.get("relationship")),
+            "why": str(e.get("evidence") or "")[:200],
+            "href": f"/card/{tid}",
+            "resolved": bool(target),
+        })
+        if len(out) >= max(1, min(int(limit), 50)):
+            break
+    return out
+
+
 def attach(cards, now: Optional[int] = None):
     """Attach `presentation` to each card IN THE RESPONSE ONLY — a shallow copy per card, so the
     stored record is never touched. This is the one place a read path should call."""
@@ -234,4 +292,4 @@ def attach(cards, now: Optional[int] = None):
     return out
 
 
-__all__ = ["derive", "attach", "when"]
+__all__ = ["derive", "attach", "when", "neighbors"]

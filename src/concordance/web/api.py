@@ -281,6 +281,37 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
     # Related seal cross-link, if this card carries one (found only).
     seal_hash = str((card.get("extra") or {}).get("seal_hash") or card.get("source_hash") or "").strip()
     canonical = f"/card/{_esc(card_id)}"
+    # ── THE OVERLAY + THE ADJOINING CARDS ────────────────────────────────────────────────────
+    # Matt, 2026-07-30: "Add an overlay for each card when it is pulled by a human. Links to
+    # adjoining cards as well for agents and users."
+    #
+    # The edges were already on the card, but they reached a reader ONLY through the JS canvas
+    # below — which stays hidden until scripts run. So on 46,190 card views, every crawler, every
+    # reader without JavaScript, and the 35% of our traffic that is ClaudeBot arrived at a dead
+    # end. These are now real <a href> in the markup, so the graph is walkable by anything that can
+    # read HTML. The canvas stays as enhancement for those who get it.
+    from .. import present as _present
+    _over = _present.derive(card)
+    _nb = _present.neighbors(card, resolve=corpus.get_card, limit=8)
+    overlay = ""
+    bits = [b for b in (_over.get("kind_label"), _over.get("posted"), _over.get("standing")) if b]
+    if bits:
+        overlay = (f"<p class=muted style=\"font-size:.78rem;margin:.1rem 0 .6rem\">"
+                   f"{_esc(' · '.join(bits))}</p>")
+    adjoining = ""
+    if _nb:
+        rows = "".join(
+            f"<li style=\"margin:.28rem 0\">"
+            f"<span class=muted style=\"font-size:.72rem\">{_esc(n['relationship'])} →</span> "
+            f"<a href=\"{_esc(n['href'])}\">{_esc(n['title'] or n['id'])}</a>"
+            + (f" <span class=muted style=\"font-size:.72rem\">— {_esc(n['why'][:90])}</span>"
+               if n.get("why") else "")
+            + "</li>"
+            for n in _nb)
+        adjoining = (f"<section class=card style=\"margin-top:1rem\">"
+                     f"<div class=muted style=\"font-size:.8rem\">adjoining cards</div>"
+                     f"<ul style=\"list-style:none;padding-left:0;margin:.4rem 0 0\">{rows}</ul>"
+                     f"</section>")
     desc = _esc((body_txt or (card.get("title") or ""))[:200])
     # schema.org CreativeWork — a citation-carrying record, machine-readable.
     ld: Dict[str, Any] = {"@context": "https://schema.org", "@type": "CreativeWork",
@@ -296,6 +327,10 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
         if src_ref:
             citation["citation"] = src_ref
         ld["citation"] = citation
+    # The adjoining cards, for an agent parsing structured data rather than markup. Same edges,
+    # same order, so the two surfaces cannot drift apart.
+    if _nb:
+        ld["relatedLink"] = [f"{canonical.rsplit('/card/', 1)[0]}/card/{n['id']}" for n in _nb]
     ld_json = _esc(_json.dumps(ld, ensure_ascii=False))
     related = (f"<p style=\"margin-top:.6rem\"><a href=\"/search?q={_esc((card.get('title') or '')[:60])}\">"
                f"related in the keeping ↗</a>")
@@ -312,10 +347,11 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             f"<meta name=\"twitter:card\" content=\"summary\">"
             f"<script type=\"application/ld+json\">{ld_json}</script></head><body>"
             f"{_site_header('<a href=/search>Search</a><a href=/#verify>Verify</a>')}<main class=wrap>"
-            f"<h1>{title}</h1>{body_html}"
+            f"<h1>{title}</h1>{overlay}{body_html}"
             f"<section class=card>{source_html}"
             f"<div class=muted style=\"font-size:.8rem;margin-top:.5rem\">card id</div>"
             f"<div class=mono style=\"word-break:break-all\">{_esc(card_id)}</div>{related}</section>"
+            f"{adjoining}"
             # Local connection-graph — progressive enhancement (hidden until JS finds a real
             # neighborhood, so the crawlable page stands alone). Each edge links to its seal.
             f"<section class=card id=nhconn data-cid=\"{_esc(card_id)}\" style=\"margin-top:1rem;display:none\">"
@@ -1156,7 +1192,14 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not cid:
             return _err(400, "id required")
         c = corpus.get_card(cid)
-        return _ok(c) if c is not None else _err(404, "card not found")
+        if c is None:
+            return _err(404, "card not found")
+        # The same overlay and the same adjoining cards the HTML page shows — so an agent reading
+        # JSON and a person reading the page are looking at one thing, and the graph is walkable
+        # from either. Both are DERIVED on the way out; the stored card is untouched.
+        from .. import present as _present
+        return _ok(dict(c, presentation=_present.derive(c),
+                        neighbors=_present.neighbors(c, resolve=corpus.get_card, limit=8)))
     if method == "GET" and path == "/daily":
         c = corpus.daily(query.get("seed") or None)
         return _ok(c) if c is not None else _err(404, "the keeping is empty")
