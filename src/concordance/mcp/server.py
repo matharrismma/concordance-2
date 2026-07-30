@@ -284,15 +284,28 @@ def _secular_tools() -> List[dict]:
          "description": ("What waits on a HUMAN steward. The counter never promotes; it only "
                          "decides when a person must look."),
          "inputSchema": {"type": "object", "properties": {}, "required": []}},
+        {"name": "curate_signable",
+         "description": ("The canonical bytes for withdrawing YOUR OWN card. A member never needs "
+                         "permission to take their own words down — the proof is the same key that "
+                         "signed the drop. Sign these bytes, then call `curate` with them."),
+         "inputSchema": {"type": "object", "properties": {
+             "card_id": {"type": "string"}, "member": {"type": "string"}},
+             "required": ["card_id", "member"]}},
         {"name": "curate",
-         "description": ("A steward's recorded act: `promoted` · `refused` · `withdrawn`. Both a "
-                         "steward name AND a reason are required — there is no anonymous "
-                         "judgement, and a refusal without a reason teaches the community "
-                         "nothing. A refusal withholds amplification only; the drop stays on the "
-                         "member's own shelf. Acts are appended, never replaced."),
+         "description": ("A recorded act on one drop: `promoted` · `refused` · `withdrawn`. A name "
+                         "AND a reason are always required — no anonymous judgement, and a refusal "
+                         "without a reason teaches the community nothing. WHO MAY ACT: promoting or "
+                         "refusing needs the steward `token` (these decide what the whole library "
+                         "amplifies); withdrawing your own card needs `fields`+`signature` from "
+                         "`curate_signable` instead. A typed name is not authority. A refusal "
+                         "withholds amplification only — the drop stays on the member's own shelf. "
+                         "Acts are appended, never replaced."),
          "inputSchema": {"type": "object", "properties": {
              "card_id": {"type": "string"}, "action": {"type": "string"},
-             "steward": {"type": "string"}, "reason": {"type": "string"}},
+             "steward": {"type": "string"}, "reason": {"type": "string"},
+             "token": {"type": "string", "description": "steward token — promote/refuse only"},
+             "fields": {"type": "object", "description": "from curate_signable, to withdraw"},
+             "signature": {"type": "string", "description": "detached, over those fields"}},
              "required": ["card_id", "action", "steward", "reason"]}},
         {"name": "moderation_signable",
          "description": ("Step 1 of a report or a block: the exact canonical bytes to sign with "
@@ -670,7 +683,15 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     if name == "curate":
         from .. import shelves as _sh
         return _sh.curate(str(args.get("card_id") or ""), str(args.get("action") or ""),
-                          str(args.get("steward") or ""), reason=str(args.get("reason") or ""))
+                          str(args.get("steward") or ""), reason=str(args.get("reason") or ""),
+                          token=str(args.get("token") or ""),
+                          fields=(args.get("fields") if isinstance(args.get("fields"), dict)
+                                  else None),
+                          signature=str(args.get("signature") or ""))
+    if name == "curate_signable":
+        from .. import shelves as _sh
+        return _sh.signable_curate(str(args.get("card_id") or ""), str(args.get("member") or ""),
+                                   str(args.get("action") or "withdrawn"))
     if name == "moderation_signable":
         from .. import moderation as _mod
         return _mod.signable(str(args.get("action") or ""), str(args.get("target_id") or ""),

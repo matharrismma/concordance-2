@@ -53,6 +53,7 @@ GOLDEN_API_GET = {
     "/shelf",
     "/commons",
     "/curate/queue",
+    "/curate/signable",
     "/curate",
     "/moderation/signable",
     "/report", "/block",  # the moderation floor (worklist item 4)
@@ -75,6 +76,7 @@ GOLDEN_RATELIMITED = {
     "/consent/signable", "/consent", "/consent/revoke",  # the human-authorized write path (worklist item 2)
     "/drop/signable",
     "/drop",
+    "/curate/signable",
     "/curate",
     "/moderation/signable",
     "/report", "/block",  # the moderation floor (worklist item 4)

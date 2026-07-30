@@ -6,7 +6,14 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["tools/serve_local.py"],
       "port": 8099,
-      "autoPort": true
+      "autoPort": false
+    },
+    {
+      "name": "nhmap",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["tools/serve_local.py"],
+      "port": 8098,
+      "autoPort": false
     }
   ]
 }

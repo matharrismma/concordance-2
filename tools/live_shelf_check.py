@@ -36,6 +36,11 @@ def get(path, **q):
         return r.status, json.loads(r.read())
 
 
+def _sign(signable_b64u, priv_key):
+    """Sign the exact bytes the SERVER minted, here on this device. The key never travels."""
+    return signing.sign_bytes(base64.urlsafe_b64decode(signable_b64u), priv_key)
+
+
 def post(path, body):
     req = urllib.request.Request(f"{BASE}{path}", data=json.dumps(body).encode(),
                                 headers={"Content-Type": "application/json"}, method="POST")
@@ -155,17 +160,33 @@ with urllib.request.urlopen(f"{BASE}/llms.txt", timeout=45) as rr:
 check("llms.txt documents the Commons",
       "/drop/signable" in llms and "authority_tier: member" in llms)
 
-# 9 · leave the box clean. A verification drop sitting in the real steward queue would be a live
-# instrument reporting work that nobody asked for. Withdrawing is the honest exit: the card leaves
-# the views, and the act stays in the record WITH ITS REASON — nothing is deleted.
+# 9 · A TYPED NAME IS NOT AUTHORITY. Promoting decides what the whole library amplifies, so it
+# needs the steward token — which this probe deliberately does not hold. It must be refused live.
+st, bare = post("/curate", {"card_id": held.get("card_id"), "action": "promoted",
+                            "steward": "matt", "reason": "trying it without the token"})
+check("promoting without the steward token is refused 403",
+      st == 403 and "not authorized" in bare.get("error", ""), str(bare)[:140])
+check("and nothing was amplified", get("/commons")[1].get("count") == before)
+
+# 10 · leave the box clean — by the MEMBER's own signature, which is the whole point: a member
+# never needs anyone's permission to take their own words down. A verification drop left sitting in
+# the real steward queue would be a live instrument reporting work nobody asked for. Withdrawing is
+# the honest exit: the card leaves the views and the act stays in the record WITH ITS REASON.
 for cid in (card_id, held.get("card_id"), a_r.get("card_id")):
-    if cid:
-        w = post("/curate", {"card_id": cid, "action": "withdrawn", "steward": "matt",
-                             "reason": "C1b live verification artifact — withdrawn after the check"})
-        print(f"  cleanup withdrawn {cid[-8:]}: {w[1].get('ok')}")
-check("the steward queue is left clean", get("/curate/queue")[1].get("count") == 0)
-check("the withdrawal is in the record, with its reason",
+    if not cid:
+        continue
+    st, sg_w = get("/curate/signable", card_id=cid, member=pub)
+    if not sg_w.get("ok"):
+        print(f"  cleanup {cid[-8:]}: could not prepare — {sg_w.get('error')}")
+        continue
+    w = post("/curate", {"card_id": cid, "action": "withdrawn", "steward": "the member",
+                         "reason": "C1c live verification artifact — withdrawn after the check",
+                         "fields": sg_w["fields"],
+                         "signature": _sign(sg_w["signable"], priv)})
+    print(f"  cleanup withdrawn {cid[-8:]}: ok={w[1].get('ok')} by={w[1].get('by')}")
+check("a member withdraws their own cards with their own key",
       get("/shelf", member=pub)[1].get("count") == 0)
+check("the steward queue is left clean", get("/curate/queue")[1].get("count") == 0)
 
 print(f"\n  {len(ok)} passed, {len(bad)} failed"
       f"{'' if not bad else ' — ' + ', '.join(bad)}")

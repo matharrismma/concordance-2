@@ -214,6 +214,55 @@ Gate PASS (kernel 93%, 60/60 moat). Deploy reported the same 3 known EXTRA files
 
 ---
 
+## 2026-07-29 · C1c — `shelf.html`, and two things it uncovered
+
+The page: a key born in the browser, a name you choose, three rings, your own shelf, the commons,
+someone else's shelf by address, and the steward queue. `nh-tools.js` lists it, so the six shelf
+routes came **off** the `AGENT_ONLY` declaration C1b put them on — which is what that declaration
+was for.
+
+**FINDING 1 — `POST /curate` was open, and I shipped it that way.** C1a took the steward's name on
+faith; `steward` is a string anyone can type. C1b deployed that to the live box, so for the window
+between that deploy and this fix, any passer-by could have promoted their own drop into the commons
+or pulled someone else's card down. Nothing was: the live store held only my 9 verification drops
+and 7 curations, checked directly on the box.
+
+Closed with two authorizations and nothing else, **in `shelves.curate` so the MCP door cannot
+bypass what the HTTP door enforces**:
+- `promoted` / `refused` → the steward token (reuses `CONCORDANCE_KEEP_TOKEN`, the gate the keep
+  already uses — one authority, one place to rotate). **Fails closed**: no token configured, no
+  promotion.
+- `withdrawn` → the steward token OR the member's own signature over `/curate/signable` bytes. A
+  member never needs permission to take their own words down.
+
+`tests/test_shelves.py` grew 4 tests, including "a typed name is not authority" and "one member
+cannot pull down another's card".
+
+**FINDING 2 — no JSON response on this server had ever carried a `cache-control` header, on any
+route, ever.** Surfaced as a shelf that was exactly ONE WRITE BEHIND in a real browser: a member
+withdrew their card, the store recorded it with its reason, and the page still showed the card.
+The reader was being told the opposite of the record.
+
+Diagnosis took three wrong turns, each corrected by measuring instead of reasoning:
+1. "It's a race" — no; `await`ing the refresh did not fix it (the `await` was still right).
+2. "It's the store" — no; append-then-read is correct in one process, in the OneDrive working copy
+   *and* in a plain temp dir. Measured both.
+3. "It's the missing header" — the header was genuinely missing and now `no-store` ships on every
+   JSON answer including errors (a cached 403 is worse than a cached 200) — **but it did not fix
+   it either.** The decisive measurement: same url → 0 (stale), url + unique query → 1 (true), with
+   `cache:'no-store'` on the request AND `cache-control: no-store` on the response.
+
+So the client ignored both directives. Some client, proxy, or middlebox always will — which means
+**a page whose correctness depends on a fresh read must carry that in the url itself**. `getJSON`
+in `shelf.html` now appends a unique token. Both fixes stand: the header because it is correct for
+every client, the url because the guarantee has to reach the reader regardless.
+
+`api.serve()` was split into `build_server()` + `serve()` so a test can bind port 0 and check the
+real wire — `tests/test_no_stale_reads.py` (3 tests). A dispatch-level test would have passed for
+as long as the wire stayed silent.
+
+---
+
 ## OPEN — logged because unfinished is a fact, not a silence
 
 - **Operational carding** (task #104): shards, nodes, curators, sources, deploys, SOPs each get a
@@ -224,4 +273,10 @@ Gate PASS (kernel 93%, 60/60 moat). Deploy reported the same 3 known EXTRA files
 - **Private key on the wire**: 5 endpoints still accept `private_key` inbound (contract §3/§5).
   Mesh messages were fixed via detached signatures; **§5 is NOT done** — do not claim it.
 - Overall test coverage 52% (kernel ≥90). Worst user-facing module: almanac 20%.
+- **Stale-read sweep across the other pages.** `shelf.html` now busts the cache in its own
+  `getJSON`; every other page has its own copy of that helper and does NOT. Any page that reads
+  after a write on the same url can show a stale answer — `community.html` (groups, contributions),
+  `mesh.html` (inbox, doors), `journal.html`, `walk.html` are the read-after-write candidates. The
+  right fix is one shared helper rather than eight copies. Measured on one page; NOT yet measured on
+  the others, so this is a suspicion with a mechanism, not a finding.
 - OneDrive drag on the working copy; nav single-source; manifest counts.

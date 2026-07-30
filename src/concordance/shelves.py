@@ -279,12 +279,78 @@ def review_queue() -> Dict[str, Any]:
             "note": "A steward promotes or refuses, and either way says why."}
 
 
-def curate(card_id: str, action: str, steward: str, reason: str = "") -> Dict[str, Any]:
-    """A steward's recorded act. `promoted` · `refused` · `withdrawn`.
+_CURATE_FIELDS = ("action", "at", "card_id", "member", "nonce")
 
-    Every act names a steward and carries a reason — there is no anonymous judgement here, and a
-    refusal that gives no reason teaches the community nothing. Acts are appended, never
-    replaced: a later act supersedes an earlier one and both remain readable.
+
+def signable_curate(card_id: str, member: str, action: str = "withdrawn") -> Dict[str, Any]:
+    """The canonical bytes for a MEMBER's own act on their OWN card — today, withdrawal.
+
+    A member does not need anyone's permission to take their own words down, so this path exists
+    beside the steward token: the proof is the same key that signed the drop in the first place."""
+    card_id, member, action = (card_id or "").strip(), (member or "").strip(), (action or "").strip()
+    if action != "withdrawn":
+        return {"ok": False, "error": "a member may withdraw their own card; promoting and "
+                                      "refusing are a steward's acts"}
+    if not card_id or not member:
+        return {"ok": False, "error": "which card, and whose?"}
+    fields = {"card_id": card_id, "member": member, "action": action,
+              "nonce": secrets.token_urlsafe(12), "at": int(time.time())}
+    canon = json.dumps({k: fields.get(k) for k in _CURATE_FIELDS}, sort_keys=True,
+                       separators=(",", ":")).encode("utf-8")
+    return {"ok": True, "fields": fields,
+            "signable": base64.urlsafe_b64encode(canon).decode("ascii"),
+            "note": "sign these exact bytes with the same key that signed the drop"}
+
+
+def _steward_authorized(token: str) -> bool:
+    """A steward's act needs a steward. Reuses the operator gate the keep already uses
+    (`CONCORDANCE_KEEP_TOKEN`, constant-time compare) rather than inventing a second secret —
+    one authority, one place to rotate it. FAILS CLOSED: no token configured, no promotion."""
+    from .web import keep as _keep
+    return _keep.is_operator(token, None)
+
+
+def _member_authorized(card_id: str, fields: Optional[Dict[str, Any]], signature: str) -> bool:
+    """A member withdrawing their own card, proven by the key that signed the drop."""
+    if not isinstance(fields, dict) or not signature:
+        return False
+    if str(fields.get("card_id") or "") != card_id or str(fields.get("action") or "") != "withdrawn":
+        return False
+    at = fields.get("at")
+    if not isinstance(at, int) or abs(int(time.time()) - at) > SIGNATURE_TTL_S:
+        return False
+    member = str(fields.get("member") or "")
+    owner = next((d for d in _read("drops.jsonl") if d.get("id") == card_id), None)
+    if not owner or (owner.get("extra") or {}).get("member") != member:
+        return False   # you may withdraw YOUR card, not someone else's
+    canon = json.dumps({k: fields.get(k) for k in _CURATE_FIELDS}, sort_keys=True,
+                       separators=(",", ":")).encode("utf-8")
+    from . import signing
+    try:
+        return bool(signing.verify_bytes(canon, signature, member))
+    except Exception:  # noqa: BLE001 — an unusable signature is simply not authorization
+        return False
+
+
+def curate(card_id: str, action: str, steward: str, reason: str = "", token: str = "",
+           fields: Optional[Dict[str, Any]] = None, signature: str = "") -> Dict[str, Any]:
+    """A recorded act on one drop: `promoted` · `refused` · `withdrawn`.
+
+    Every act names who did it and carries a reason — there is no anonymous judgement here, and a
+    refusal that gives no reason teaches the community nothing. Acts are appended, never replaced:
+    a later act supersedes an earlier one and both remain readable.
+
+    WHO MAY ACT. C1a took the name on faith, and C1b shipped that to the live box for a few
+    minutes: any passer-by could have promoted their own drop into the commons or pulled someone
+    else's card down, because a name is a string anyone can type. Two authorizations now, and
+    nothing else:
+
+      * `promoted` / `refused` — the STEWARD token. These decide what the whole library amplifies,
+        so they belong to whoever answers for the library.
+      * `withdrawn` — the steward token OR the member's own signature over `signable_curate`
+        bytes. A member never needs permission to take their own words down.
+
+    Fails closed: no token and no valid member signature means no act.
     """
     card_id, action, steward = (card_id or "").strip(), (action or "").strip(), (steward or "").strip()
     if action not in ("promoted", "refused", "withdrawn"):
@@ -299,8 +365,18 @@ def curate(card_id: str, action: str, steward: str, reason: str = "") -> Dict[st
                                       "nothing"}
     if not any(d["id"] == card_id for d in _read("drops.jsonl")):
         return {"ok": False, "error": "no such drop"}
+    by_steward = _steward_authorized(token)
+    by_member = (action == "withdrawn"
+                 and not by_steward
+                 and _member_authorized(card_id, fields, signature))
+    if not (by_steward or by_member):
+        return {"ok": False, "error": (
+            "not authorized. Promoting or refusing is a steward's act and needs the steward token; "
+            "withdrawing your own card needs your own signature over /curate/signable bytes. A "
+            "typed name is not authority — anyone can type a name.")}
     rec = {"card_id": card_id, "action": action, "steward": steward,
-           "reason": reason.strip()[:500], "at": int(time.time())}
+           "reason": reason.strip()[:500], "at": int(time.time()),
+           "by": "steward" if by_steward else "member"}
     _append("curation.jsonl", rec)
     return {"ok": True, **rec,
             "note": ("Promoted to the commons — still the member's own words, at the member "
@@ -318,5 +394,5 @@ def history(card_id: str) -> Dict[str, Any]:
     return {"ok": True, "card_id": card_id, "acts": acts, "count": len(acts)}
 
 
-__all__ = ["signable_drop", "drop", "shelf_of", "commons", "review_queue", "curate", "history",
-           "RINGS", "KINDS", "MEMBER_TIER", "SIGNATURE_TTL_S"]
+__all__ = ["signable_drop", "signable_curate", "drop", "shelf_of", "commons", "review_queue",
+           "curate", "history", "RINGS", "KINDS", "MEMBER_TIER", "SIGNATURE_TTL_S"]

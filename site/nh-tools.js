@@ -51,6 +51,7 @@
     { h: '/prophecy.html',   n: 'Prophecy',         k: 'traces fulfilment signposts' },
     { h: '/codex.html',      n: 'The Codex',        k: 'manuscript compiled book document' },
     { h: '/works.html',      n: 'The Works',         k: 'technical math science engineering worked sealed demonstrations depth proof derivation' },
+    { h: '/shelf.html',      n: 'Your shelf (the Commons)', k: 'shelf commons stock write publish share mine recipe build note question link member author lend borrow curate steward my words' },
     { h: '/community.html',  n: 'Community',        k: 'groups study together share people' },
     { h: '/proof.html',      n: 'What it proves',   k: 'refusals limits catalog guarantees honest' },
     { h: '/boundary.html',   n: 'The boundary',     k: 'limits cannot mappable edge' },

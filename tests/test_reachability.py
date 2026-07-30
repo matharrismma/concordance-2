@@ -41,9 +41,9 @@ AGENT_ONLY = {
     "/works/item", "/library/health", "/growth", "/daily", "/pronounce", "/book",
     "/badges", "/archetype", "/archetypes", "/archetypes/match", "/coach/guidance",
     "/chess", "/report", "/block",
-    # THE COMMONS C1b: the shelf flow is agent-reachable now; `shelf.html` lands in C1c and
-    # these move out of this list then. Declared rather than left silent, so the gate holds.
-    "/drop/signable", "/drop", "/shelf", "/commons", "/curate/queue", "/curate",
+    # THE COMMONS: nothing here is agent-only any more. C1b declared the six shelf routes on this
+    # list with a promise that `shelf.html` would land in C1c and they would come off it — C1c
+    # landed, and they came off. That is what the declaration was for.
 }
 
 # Pages reachable by design without an in-site link: entered by URL, by QR, by an app shell,

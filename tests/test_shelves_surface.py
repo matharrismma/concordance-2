@@ -27,15 +27,21 @@ sys.path.insert(0, str(ROOT / "src"))
 import pytest  # noqa: E402
 
 
+STEWARD_TOKEN = "steward-token-for-this-test-only"
+
+
 @pytest.fixture(autouse=True)
 def _isolated():
     prior = os.environ.get("CONCORDANCE_DATA_DIR")
+    prior_tok = os.environ.get("CONCORDANCE_KEEP_TOKEN")
     os.environ["CONCORDANCE_DATA_DIR"] = tempfile.mkdtemp()
+    os.environ["CONCORDANCE_KEEP_TOKEN"] = STEWARD_TOKEN
     yield
-    if prior is None:
-        os.environ.pop("CONCORDANCE_DATA_DIR", None)
-    else:
-        os.environ["CONCORDANCE_DATA_DIR"] = prior
+    for k, v in (("CONCORDANCE_DATA_DIR", prior), ("CONCORDANCE_KEEP_TOKEN", prior_tok)):
+        if v is None:
+            os.environ.pop(k, None)
+        else:
+            os.environ[k] = v
 
 
 def _key():
@@ -94,8 +100,13 @@ def test_the_commons_waits_for_a_human_over_http():
 
     st, q = _http("/curate/queue")
     assert st == 200 and q["count"] == 1
+    # a typed name is not authority — the steward token is
+    st, bare = _http("/curate", "POST", {"card_id": r["card_id"], "action": "promoted",
+                                         "steward": "matt", "reason": "true, and kindly put"})
+    assert st == 403 and "not authorized" in bare.get("error", ""), (st, bare)
     st, act = _http("/curate", "POST", {"card_id": r["card_id"], "action": "promoted",
-                                        "steward": "matt", "reason": "true, and kindly put"})
+                                        "steward": "matt", "reason": "true, and kindly put",
+                                        "token": STEWARD_TOKEN})
     assert st == 200 and act.get("ok"), (st, act)
     c = _http("/commons")[1]
     assert c["count"] == 1 and c["authority"] == "member"
@@ -191,8 +202,13 @@ def test_one_store_two_doors():
     q = _mcp("curate_queue", {})
     assert q["count"] == 1 and q["items"][0]["card_id"] == r2["card_id"], \
         "HTTP wrote, the agent cannot see it"
+    # the agent door enforces the SAME rule — the authorization lives in the module, not the route
+    assert "not authorized" in str(_mcp("curate", {
+        "card_id": r2["card_id"], "action": "promoted", "steward": "matt",
+        "reason": "a real question from someone doing the work"}).get("error", ""))
     act = _mcp("curate", {"card_id": r2["card_id"], "action": "promoted", "steward": "matt",
-                          "reason": "a real question from someone doing the work"})
+                          "reason": "a real question from someone doing the work",
+                          "token": STEWARD_TOKEN})
     assert act.get("ok"), act
     assert _http("/commons")[1]["count"] == 1, "the agent's act is invisible over HTTP"
 

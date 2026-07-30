@@ -1636,15 +1636,32 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             lim = 40
         return _ok(_sh.commons(limit=lim))
     if method == "GET" and path == "/curate/queue":
+        # Open on purpose: what waits on a steward is public, so the queue can be watched. Only
+        # ACTING on it is gated.
         from .. import shelves as _sh
         return _ok(_sh.review_queue())
+    if method == "GET" and path == "/curate/signable":
+        # A member taking their OWN card down needs nobody's permission — only their own key.
+        from .. import shelves as _sh
+        r = _sh.signable_curate(query.get("card_id") or "", query.get("member") or "",
+                                query.get("action") or "withdrawn")
+        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "bad request")
     if method == "POST" and path == "/curate":
+        # Authorization lives in shelves.curate, not here, so the MCP door cannot bypass it: a
+        # steward token to promote or refuse, or the member's own signature to withdraw. A typed
+        # name is not authority. 403 for "not you", 400 for a malformed act.
         from .. import shelves as _sh
         if not isinstance(body, dict):
             return _err(400, "card_id, action, steward, reason required")
         r = _sh.curate(str(body.get("card_id") or ""), str(body.get("action") or ""),
-                       str(body.get("steward") or ""), str(body.get("reason") or ""))
-        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
+                       str(body.get("steward") or ""), str(body.get("reason") or ""),
+                       token=str(body.get("token") or ""),
+                       fields=body.get("fields") if isinstance(body.get("fields"), dict) else None,
+                       signature=str(body.get("signature") or ""))
+        if r.get("ok"):
+            return _ok(r)
+        return _err(403 if "not authorized" in (r.get("error") or "") else 400,
+                    r.get("error") or "refused")
 
     if method == "GET" and path == "/moderation/signable":
         # Step 1 of a report or a block: the exact canonical bytes to sign ON THE DEVICE. Three
@@ -1900,6 +1917,7 @@ ROUTES = [
     {"path": "/shelf", "methods": ("GET",), "api": True},
     {"path": "/commons", "methods": ("GET",), "api": True},
     {"path": "/curate/queue", "methods": ("GET",), "api": True},
+    {"path": "/curate/signable", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/curate", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/moderation/signable", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/report", "methods": ("POST",), "api": True, "rl": True},
@@ -1937,9 +1955,15 @@ _API_GET_PATHS = frozenset(r["path"] for r in ROUTES if r.get("api"))
 RATELIMITED = tuple(r["path"] for r in ROUTES if r.get("rl"))
 
 
-def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
-          site_dir: str = None) -> None:
-    """Thin http.server shell: the API + (optionally) the static site, same-origin. Stdlib only."""
+def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
+                 site_dir: str = None, warm: bool = True):
+    """The configured server, built but NOT started — so a test can bind port 0 and drive the real
+    wire. `serve()` below is this plus `serve_forever()`.
+
+    Split out 2026-07-29: some guarantees live in the request handler, not in `dispatch()` — the
+    `cache-control` header is one. A dispatch-level test would have passed the whole time the wire
+    stayed silent about caching, which is how a stale shelf reached a real browser. Pass
+    `warm=False` to skip the ~5s corpus/verifier warm when a test does not need it."""
     import json
     import mimetypes
     import os
@@ -1968,10 +1992,24 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
         sys_version = ""
 
         def _json(self, status: int, payload: dict, extra: dict = None) -> None:
+            """Every JSON answer here is computed fresh, so every one says so.
+
+            Until 2026-07-29 no API response carried a `cache-control` header at all. A response
+            with no directive is HEURISTICALLY cacheable: a browser, a proxy, or a CDN may serve a
+            stale copy and be within spec. That surfaced on the Commons as a shelf that was exactly
+            one write behind — a member withdrew a card, the store recorded it, and the page still
+            showed the card. The reader was told the opposite of the record.
+
+            It was never a shelf bug. It was every read endpoint on this server, so the fix belongs
+            here in the one place they all pass through rather than as a cache-buster on one page.
+            `extra` still wins, so a route that genuinely wants to be cached can say so out loud.
+            """
             data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
             self.send_response(status)
             self.send_header("content-type", "application/json; charset=utf-8")
             self.send_header("x-content-type-options", "nosniff")
+            if "cache-control" not in {k.lower() for k in (extra or {})}:
+                self.send_header("cache-control", "no-store")
             for k, v in (extra or {}).items():
                 self.send_header(k, v)
             self.send_header("content-length", str(len(data)))
@@ -2182,15 +2220,23 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
     # heavy verify deps (sympy/scipy/numpy) so the FIRST heavy-domain verification never pays a
     # cold C-extension import inside the per-verification timeout (which could shed a TRUE claim
     # to a transient ERROR — errs safe, but a false negative). See derivation.warm().
-    try:
-        corpus.default_corpus()
-        from .. import graph as _graph_warm
-        _graph_warm._graph()
-        from ..derivation import warm as _warm_verify
-        _warm_verify()
-    except Exception:
-        pass
+    if warm:
+        try:
+            corpus.default_corpus()
+            from .. import graph as _graph_warm
+            _graph_warm._graph()
+            from ..derivation import warm as _warm_verify
+            _warm_verify()
+        except Exception:
+            pass
 
-    where = f" + site {site}" if site else ""
+    return _QuietServer((host, port), Handler)
+
+
+def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
+          site_dir: str = None) -> None:
+    """Thin http.server shell: the API + (optionally) the static site, same-origin. Stdlib only."""
+    httpd = build_server(host, port, surface, site_dir)
+    where = f" + site {site_dir}" if site_dir else ""
     print(f"Narrow Highway API ({surface}) on http://{host}:{port}{where}")
-    _QuietServer((host, port), Handler).serve_forever()
+    httpd.serve_forever()
