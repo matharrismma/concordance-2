@@ -113,6 +113,7 @@ test_security.py
 test_security_sweep_d6.py
 test_seeds.py
 test_seekers.py
+test_shard_concurrency.py
 test_shelves.py
 test_shelves_surface.py
 test_signing.py

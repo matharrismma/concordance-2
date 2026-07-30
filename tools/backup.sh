@@ -31,9 +31,14 @@ mkdir -p "$DEST"
 #   shards/       rebuilt from the jsonl by tools/build_corpus_db.py (~2 min)
 #   acquisitions/ upstream archives, re-fetchable from their public sources
 #   *.tmp/*.part  work in progress
+#   *.bak         pre-change snapshots of a file that is already backed up here in full. Seven of
+#                 them (232 MB of cards.jsonl copies) were riding along in EVERY nightly tarball,
+#                 so the same history was paid for again each night. Archived once to the ark
+#                 (verified 8/8 by sha256, 2026-07-30) and removed from the box; excluded here so
+#                 a future .bak cannot quietly start refilling the backups.
 ITEMS=()
 while IFS= read -r p; do ITEMS+=("$p"); done < <(
-  cd "$DATA" && ls -A | grep -vE '^(shards|acquisitions)$' | grep -vE '\.(tmp|part)$'
+  cd "$DATA" && ls -A | grep -vE '^(shards|acquisitions)$' | grep -vE '\.(tmp|part|bak)$'
 )
 if [ "${#ITEMS[@]}" -eq 0 ]; then
   echo "backup: nothing to back up in $DATA"; exit 0

@@ -27,7 +27,52 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 _LOCK = threading.Lock()
-_OPEN: Dict[str, sqlite3.Connection] = {}     # shard name -> connection (a thawed shard)
+
+# THAWED SHARDS: name -> file path. NOT name -> connection, and the difference is a real bug.
+#
+# This module used to hold ONE connection per shard and hand it to every thread of the threading
+# HTTP server. Telemetry caught the first symptom (`OperationalError: database is locked`), but
+# driving 12 concurrent readers at one shared connection showed something worse underneath:
+# `InterfaceError: bad parameter or other API misuse`, and `fetchone()` returning None for a row
+# that certainly exists. That is not an outage, it is a WRONG ANSWER — a card reported missing
+# while it sits in the file — and a library that quietly denies holding what it holds has failed at
+# the one thing it is for.
+#
+# A sqlite3 connection is not safe for concurrent use across threads; `check_same_thread=False`
+# only silences the guard, it does not make it true. So each thread opens its own connection to the
+# same file. With `immutable=1` that is nearly free: no locks to take, and the OS page cache is
+# shared across them all, so N threads do not mean N copies of the shard in memory.
+_OPEN: Dict[str, str] = {}                    # shard name -> path (a thawed shard)
+_TL = threading.local()                       # per-thread: {shard name: connection}
+
+
+def _conn(name: str) -> Optional[sqlite3.Connection]:
+    """This thread's connection to a thawed shard, opened on first use."""
+    path = _OPEN.get(name)
+    if not path:
+        return None
+    cache = getattr(_TL, "conns", None)
+    if cache is None:
+        cache = _TL.conns = {}
+    c = cache.get(name)
+    if c is None:
+        try:
+            c = cache[name] = _open_db(path)
+        except sqlite3.Error:
+            return None
+    return c
+
+
+def _conns() -> List[tuple]:
+    """(name, connection) for every thawed shard, for the CALLING thread."""
+    out = []
+    for name in list(_OPEN):
+        c = _conn(name)
+        if c is not None:
+            out.append((name, c))
+    return out
+
+
 _MANIFEST: Optional[Dict[str, Any]] = None
 _WORD = re.compile(r"[A-Za-z0-9']{2,}")
 
@@ -77,7 +122,27 @@ def manifest() -> Dict[str, Any]:
 
 
 def _open_db(path: str) -> sqlite3.Connection:
-    c = sqlite3.connect(f"file:{path}?mode=ro", uri=True, check_same_thread=False)
+    """Open one shard, read-only and lock-free.
+
+    THE BUG THIS FIXES, recorded by our own telemetry 2026-07-29 16:55:
+    `cards_browse — OperationalError: database is locked`. One connection per shard is shared
+    across every thread of a ThreadingHTTPServer (`check_same_thread=False`), and under the
+    30k-request days at the end of July, concurrent readers collided on SQLite's file locks. An
+    agent asked and got an error instead of the library.
+
+    `immutable=1` is the honest fix rather than a longer timeout, because it states something TRUE
+    about these files: a shard is built offline by tools/build_corpus_db.py and shipped: nothing
+    writes to it while the server runs. Told that, SQLite skips locking entirely — no shared cache,
+    no WAL, no lock file, no contention possible. It is also faster, but correctness is the point.
+
+    THE ONE OBLIGATION `immutable=1` CREATES: if a shard file is REBUILT underneath a running
+    process, that process may read stale pages or garbage, because it has been promised the bytes
+    cannot change. So a rebuild must be followed by a restart. `tools/deploy.sh` already restarts
+    both services, and shards were last rebuilt on the box during a deploy — but the requirement is
+    written here because the next person rebuilding shards by hand will not know it otherwise.
+    """
+    c = sqlite3.connect(f"file:{path}?mode=ro&immutable=1", uri=True,
+                        check_same_thread=False, timeout=10.0)
     c.execute("pragma query_only=on")
     c.execute("pragma mmap_size=134217728")    # 128 MB mmap window per shard — read from disk
     return c
@@ -95,9 +160,9 @@ def unfreeze(*names: str) -> List[str]:
                 info = shards.get(name)
                 f = d / (info["file"] if info else f"{name}.db")
                 if f.exists():
-                    _OPEN[name] = _open_db(str(f))
+                    _OPEN[name] = str(f)              # thawed = registered; threads open their own
         elif _single_db() and "all" not in _OPEN:
-            _OPEN["all"] = _open_db(_single_db())     # single mode: one connection answers everything
+            _OPEN["all"] = _single_db()               # single mode: one file answers everything
         return list(_OPEN)
 
 
@@ -106,8 +171,12 @@ def freeze(*names: str) -> List[str]:
     with _LOCK:
         for name in names:
             if name != CORE and name in _OPEN:
+                _OPEN.pop(name, None)
+                # Close the calling thread's handle now; other threads drop theirs when they next
+                # look and find the shard unregistered. Nothing leaks: a connection dies with its
+                # thread, and re-thawing simply reopens.
                 try:
-                    _OPEN.pop(name).close()
+                    (getattr(_TL, "conns", None) or {}).pop(name).close()
                 except Exception:  # noqa: BLE001
                     pass
         return list(_OPEN)
@@ -170,7 +239,7 @@ def search(query: str, limit: int = 25, include_witness: bool = True) -> List[di
     where = "where fts match ?" + ("" if include_witness else " and c.surface != 'witness'")
     sql = f"select bm25(fts) as s, c.json from fts join cards c on c.id = fts.id {where} order by s limit ?"
     hits: List[tuple] = []
-    for name, conn in list(_OPEN.items()):
+    for name, conn in _conns():
         try:
             rows = conn.execute(sql, (m, int(limit))).fetchall()
             if rows:
@@ -203,7 +272,7 @@ def airlock_search(query: str, limit: int = 25, shards: Optional[List[str]] = No
     where = "where fts match ?" + ("" if include_witness else " and c.surface != 'witness'")
     sql = f"select bm25(fts) as s, c.json from fts join cards c on c.id = fts.id {where} order by s limit ?"
     hits: List[tuple] = []
-    for name, conn in list(_OPEN.items()):                # the resident set (core, always)
+    for name, conn in _conns():                           # the resident set (core, always)
         try:
             rows = conn.execute(sql, (m, int(limit))).fetchall()
             if rows:
@@ -238,7 +307,7 @@ def airlock_search(query: str, limit: int = 25, shards: Optional[List[str]] = No
 
 def get_card(card_id: str) -> Optional[dict]:
     _ensure_core()
-    for conn in list(_OPEN.values()):
+    for _name, conn in _conns():
         r = conn.execute("select json from cards where id = ?", (str(card_id),)).fetchone()
         if r:
             try:
@@ -252,7 +321,7 @@ def stats() -> Dict[str, Any]:
     man = manifest()
     thawed_names = thawed()
     total = 0
-    for conn in _OPEN.values():
+    for _name, conn in _conns():
         try:
             total += int(conn.execute("select count(*) from cards").fetchone()[0])
         except sqlite3.Error:
