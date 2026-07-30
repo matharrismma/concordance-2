@@ -69,6 +69,7 @@ test_keystones.py
 test_last_mile.py
 test_ledger.py
 test_library.py
+test_linkdrop.py
 test_mcp.py
 test_mcp_gate.py
 test_mcp_http.py
@@ -86,6 +87,7 @@ test_nothing_is_isolated.py
 test_null_assay.py
 test_pins.py
 test_precedent.py
+test_present.py
 test_privacy.py
 test_pronounce.py
 test_prophecy.py

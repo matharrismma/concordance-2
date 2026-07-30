@@ -1612,7 +1612,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import shelves as _sh
         r = _sh.signable_drop(query.get("member") or "", query.get("kind") or "note",
                               query.get("subject") or "", query.get("body") or "",
-                              query.get("ring") or "shelf")
+                              query.get("ring") or "shelf",
+                              url=query.get("url") or "", quote=query.get("quote") or "",
+                              attribution=query.get("attribution") or "")
         return _ok(r) if r.get("ok") else _err(400, r.get("error") or "bad request")
     if method == "POST" and path == "/drop":
         from .. import shelves as _sh

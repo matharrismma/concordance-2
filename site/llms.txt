@@ -115,7 +115,20 @@ no password, no profile beyond a display name you choose. Nothing records who re
   cite a commons card as though the engine had sealed it — check the tier.
 - **Refusals carry reasons, and never silence anyone.** A refused drop stays on the member's own
   shelf; only amplification is withheld. Every curation act names a steward and a why, and the
-  record is append-only.
+  record is append-only. Promoting or refusing needs the steward token; withdrawing your OWN card
+  needs only your own signature over `GET /curate/signable` bytes.
+- **A link drop carries a waybill, not a copy.** `kind=link` with a `url`: we open it once in an
+  airlock and keep only facts about it — its address, its own `<title>`, `bytes`, `sha256`,
+  `fetched_at`, `status` — then discard the bytes. No excerpt, no description, no page text, ever.
+  An optional short `quote` is allowed *with* `attribution`, because a member typing a cited line is
+  a citation, not a copy. The `body` is still required: a bare link is not curation.
+  **Nothing is embedded** — an iframe would hand the reader's IP and referrer to the provider, and
+  nothing here records who read what. If we could not reach the link, the drop still lands carrying
+  `reach: SYSTEM_ERROR`; that is a fact about US and says nothing about the link.
+- **Every read hands back a derived `presentation` block** beside the bare card — glyph, kind label,
+  who, how long ago, standing, and for a link its provider and a readable waybill line. It is
+  computed on the way out and **never stored**: the card holds facts, the presentation holds
+  phrasing. Render from it and you match every other surface; ignore it and you lose only polish.
 
 ## For agents (MCP) — add one URL
 A live remote MCP server (Streamable HTTP, JSON-RPC, no auth, no SDK):

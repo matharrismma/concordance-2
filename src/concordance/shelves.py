@@ -48,7 +48,12 @@ RINGS = ("private", "shelf", "commons")
 KINDS = ("note", "writing", "recipe", "build", "field_note", "question", "link", "suggestion")
 SIGNATURE_TTL_S = 900          # signed bytes are good for 15 minutes — a replay window, not a life
 MAX_BODY = 20000
-_SIGNED_FIELDS = ("at", "body", "kind", "member", "nonce", "ring", "subject")
+# `url`, `quote`, and `attribution` join the signed bytes for C1d link drops, and are the empty
+# string on every other kind. They MUST be signed: a link swapped after signing would put a
+# destination the member never chose under their name, which is the same wrong as putting words on
+# their shelf. Empty-but-present keeps one canonicalisation for all kinds.
+_SIGNED_FIELDS = ("at", "attribution", "body", "kind", "member", "nonce", "quote", "ring",
+                  "subject", "url")
 _SLUG = re.compile(r"[^a-z0-9]+")
 
 # The one honest authority tier for member work. It is never raised — not by promotion to the
@@ -94,10 +99,18 @@ def _slug(s: Any, limit: int = 60) -> str:
 
 
 def signable_drop(member: str, kind: str, subject: str, body: str,
-                  ring: str = "shelf") -> Dict[str, Any]:
+                  ring: str = "shelf", url: str = "", quote: str = "",
+                  attribution: str = "") -> Dict[str, Any]:
     """Step 1: the canonical bytes of a drop, ready to sign ON THE DEVICE. The server mints the
     nonce and the clock so the stored drop and the signed bytes cannot drift; the key never
-    travels."""
+    travels.
+
+    C1d: a `link` drop also carries the `url`, and optionally a short attributed `quote`. Both are
+    inside the signed bytes — a destination swapped after signing would stand under the member's
+    name, which is the same wrong as putting words on their shelf. The body is still required: a
+    bare link is not curation, and this library exists because a person said why something is worth
+    your time.
+    """
     member, kind, ring = (member or "").strip(), (kind or "").strip(), (ring or "").strip()
     if not member:
         return {"ok": False, "error": "a drop needs the member's public key — a shelf belongs to "
@@ -112,9 +125,24 @@ def signable_drop(member: str, kind: str, subject: str, body: str,
         return {"ok": False, "error": "a drop with no words is not a drop"}
     if len(body) > MAX_BODY:
         return {"ok": False, "error": f"body over {MAX_BODY} chars — split it into more than one"}
+    url, quote, attribution = (url or "").strip(), (quote or "").strip(), (attribution or "").strip()
+    from . import linkdrop as _ld
+    if kind == "link" and not url:
+        return {"ok": False, "error": "a link drop needs the link"}
+    if url and kind != "link":
+        return {"ok": False, "error": "only a `link` drop carries a url — pick that kind"}
+    if url:
+        target, why = _ld._safe_target(url)
+        if not target:
+            return {"ok": False, "error": why}
+        url = target
+    q_ok, q_why = _ld.quote_ok(quote, attribution)
+    if not q_ok:
+        return {"ok": False, "error": q_why}
     fields = {"member": member, "kind": kind, "subject": (subject or "").strip()[:180],
               "body": body, "ring": ring, "nonce": secrets.token_urlsafe(12),
-              "at": int(time.time())}
+              "at": int(time.time()), "url": url, "quote": quote[:_ld.MAX_QUOTE],
+              "attribution": attribution[:180]}
     return {"ok": True, "fields": fields,
             "signable": base64.urlsafe_b64encode(_canon(fields)).decode("ascii"),
             "note": "sign these exact bytes with your own key ON YOUR DEVICE, then send the "
@@ -170,13 +198,38 @@ def drop(fields: Optional[Dict[str, Any]] = None, signature: str = "",
     member, f = v["member"], dict(fields or {})
     ring = f["ring"]
     card_id = f"card_shelf_{_slug(member, 24)}_{f['nonce']}"
+    # C1d — a link drop gets its waybill here, at the moment of stocking, so `fetched_at` means
+    # "when the library looked" and not "when someone claimed it looked". The page is opened in the
+    # airlock and let go; if we cannot reach it the drop STILL LANDS, carrying an honest
+    # `reach: SYSTEM_ERROR` — our outage must never silence a member's link.
+    link_extra: Dict[str, Any] = {}
+    if f.get("url"):
+        from . import linkdrop as _ld
+        wb = _ld.waybill(str(f["url"]))
+        if wb.get("ok"):
+            clean, problems = _ld.no_page_bytes_kept(wb["waybill"])
+            if not clean:
+                return {"ok": False, "error": "; ".join(problems)}
+            link_extra = {"url": f["url"], "waybill": wb["waybill"], "reach": "FETCHED",
+                          "embed": _ld.EMBED_POLICY}
+        else:
+            link_extra = {"url": f["url"], "waybill": {}, "reach": wb.get("state") or "SYSTEM_ERROR",
+                          "reach_error": wb.get("error", ""), "embed": _ld.EMBED_POLICY}
+    if f.get("quote"):
+        from . import linkdrop as _ld2
+        link_extra["quote"] = str(f["quote"])[:_ld2.MAX_QUOTE]
+        link_extra["attribution"] = str(f.get("attribution") or "")[:180]
     card = {
         "id": card_id, "kind": "note",
         "title": (f.get("subject") or f["body"][:60]).strip()[:180],
         "body": f["body"],
+        # A link drop's `source.url` is the ARTIFACT's address, not ours: the card is a catalogue
+        # entry pointing at something we do not hold. The label still names the member, because the
+        # curation — the reason it is worth your time — is theirs.
         "source": {"label": (f"{display_name.strip()} — a member of the Commons"
                              if display_name.strip() else "A member of the Commons"),
-                   "url": "", "ref": member[:16], "authority_tier": MEMBER_TIER},
+                   "url": str(f.get("url") or ""), "ref": member[:16],
+                   "authority_tier": MEMBER_TIER},
         "shelf": "commons", "box": f["kind"],
         "bands": ["commons", "member", f["kind"]] + _slug(f.get("subject")).split("-")[:3],
         "subject": f.get("subject") or f["body"][:60],
@@ -189,7 +242,7 @@ def drop(fields: Optional[Dict[str, Any]] = None, signature: str = "",
         "volatility": "durable", "surface": "secular", "generated": False,
         "extra": {"member": member, "ring": ring, "display_name": display_name.strip()[:80],
                   "signature": signature.strip(), "drop_kind": f["kind"],
-                  "signed_at": f["at"]},
+                  "signed_at": f["at"], **link_extra},
     }
     _append("drops.jsonl", card)
     return {"ok": True, "card_id": card_id, "ring": ring,
@@ -239,8 +292,14 @@ def shelf_of(member: str, viewer: Optional[str] = None) -> Dict[str, Any]:
                                  promoted_reason=act.get("reason"), promoted_at=act.get("at"))
         cards.append(card)
     cards.sort(key=lambda c: -(c.get("created_at") or 0))
+    # THE EXPERIENCE LAYER, attached on the way OUT (Matt, 2026-07-29: "we want our card to be bare,
+    # but we want the user experience to be a bit magical"). `present.attach` shallow-copies each
+    # card and hangs a derived `presentation` block on the copy — pure string work, no I/O, and not
+    # one byte of it reaches the store.
+    from . import present as _present
     return {"ok": True, "member": member, "own_view": own, "count": len(cards),
-            "awaiting_review": held if not own else None, "cards": cards,
+            "awaiting_review": held if not own else None,
+            "cards": _present.attach(cards),
             "note": "A shelf is a key with cards on it. Nothing here records who read them."}
 
 
@@ -259,7 +318,9 @@ def commons(limit: int = 40) -> Dict[str, Any]:
                              promoted_reason=act.get("reason"))
         out.append(card)
     out.sort(key=lambda c: -(c.get("created_at") or 0))
-    return {"ok": True, "count": len(out), "cards": out[:max(1, min(int(limit), 200))],
+    from . import present as _present
+    return {"ok": True, "count": len(out),
+            "cards": _present.attach(out[:max(1, min(int(limit), 200))]),
             "authority": MEMBER_TIER,
             "note": "Every card here is a member's own work, carried at the member tier. The "
                     "library amplified it; the library did not verify it."}

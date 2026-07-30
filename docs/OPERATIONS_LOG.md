@@ -263,6 +263,47 @@ as long as the wire stayed silent.
 
 ---
 
+## 2026-07-29 · C1d — a link becomes a card with a waybill · and THE EXPERIENCE LAYER
+
+**`linkdrop.py`.** A member drops a URL; we open it once in the airlock, write down what is true
+*about* it, and throw the bytes away. The waybill is a closed list — address, the page's own
+`<title>`, content type, `bytes`, `sha256`, `fetched_at`, `status` — and `no_page_bytes_kept()`
+checks against that list rather than against a remembered set, so a later hand cannot add `excerpt`
+and quietly turn a pointer into a copy. An attributed `quote` is allowed and capped; unattributed is
+refused. The `body` is still required — a bare link is not curation.
+
+**The fetch is the dangerous part**, and it is guarded as such: a member-supplied URL fetched by our
+server is an SSRF primitive. `_safe_target` refuses non-http(s) schemes, credentials in the URL, and
+any host that *resolves* to loopback/private/link-local/multicast/reserved — every address the name
+returns, not just the first — and redirects are followed by hand so each hop is re-checked. Verified
+through the live page: `127.0.0.1:8099/keep.json`, `169.254.169.254` (cloud metadata),
+`file:///etc/passwd`, and `localhost` were each refused with the rule they broke.
+
+**No embed, by design.** An iframe or remote image would hand the reader's IP, user-agent, and
+referrer to the provider the instant the page painted. This library promises nothing records who
+read what; we cannot make that promise and then place a beacon. A link renders as a card with its
+waybill and a plain link, and `EMBED_POLICY` says so in the payload so no client has to guess.
+
+**`present.py` — the experience layer** (Matt, mid-build: *"We want our card to be bare, but we want
+the user experience to be a bit magical, so we can take the cards and add an experience layer on top
+without slowing the process down too much."*). Cards hold facts; presentation holds phrasing, and
+the two never mix. `derive(card)` returns a separate block — glyph, kind label, who, "3 minutes
+ago", standing, provider name, a readable waybill line, who vouched and why — and `attach()`
+shallow-copies each card so the store is never touched. A test reads `drops.jsonl` **as bytes** and
+fails if any presentation field is in it.
+
+Pure functions, no I/O, cached on `(id, updated_at)`. Two bugs of my own, both caught by my own
+tests: `derive({})` returned a block of plausible defaults ("A member of the Commons", "on this
+member's shelf") for a card that said neither — invention, now silence; and the cache collided for
+two different cards sharing an id with no `updated_at`, so a versionless card is no longer cached at
+all. Correctness before speed.
+
+Verified on a real fetch (Project Gutenberg): waybill 24,270 bytes + sha256 + status 200, page title
+taken, provider named, `looked at just now · 24 KB · fingerprint b577fb153136…`, quote attributed,
+and no page text anywhere in the card.
+
+---
+
 ## OPEN — logged because unfinished is a fact, not a silence
 
 - **Operational carding** (task #104): shards, nodes, curators, sources, deploys, SOPs each get a

@@ -50,6 +50,17 @@
   .card .by{color:var(--goldsoft); text-transform:uppercase; letter-spacing:.12em; font-size:.58rem; margin:.15rem 0 .35rem}
   .card .tx{white-space:pre-wrap; color:var(--ink)}
   .card .acts{margin-top:.45rem}
+  .card .glyph{color:var(--goldsoft); font-size:.9em; margin-right:.1rem}
+  /* a link drop: the door, and its waybill. No embed — see present.py / linkdrop.py */
+  .linkbox{border:1px solid var(--line); border-left:2px solid var(--goldsoft); padding:.5rem .7rem; margin:.6rem 0 .2rem}
+  .linkbox .dest{display:block; font-size:.98rem; word-break:break-word}
+  .linkbox .dest-meta{color:var(--goldsoft); font-size:.68rem; letter-spacing:.04em; margin-top:.2rem;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .linkbox .dest-note{color:var(--dim); font-size:.7rem; margin-top:.35rem; font-style:italic}
+  blockquote.q{margin:.6rem 0 .2rem; padding:.1rem 0 .1rem .9rem; border-left:2px solid var(--line); color:var(--ink)}
+  blockquote.q cite{display:block; color:var(--goldsoft); font-size:.74rem; font-style:normal;
+    letter-spacing:.06em; margin-top:.25rem}
+  .vouch{color:var(--pass); font-size:.72rem; margin-top:.4rem}
   .tag{display:inline-block; border:1px solid var(--line); border-radius:999px; padding:.02rem .48rem; margin-left:.4rem;
     font-size:.54rem; letter-spacing:.08em; color:var(--dim); text-transform:uppercase; vertical-align:.1em}
   .tag.member{color:var(--goldsoft); border-color:rgba(201,162,74,.34)}
@@ -133,6 +144,18 @@
       </div>
       <input id="subject" placeholder="What is it called?" autocomplete="off">
       <textarea id="body" placeholder="In your own words. Nobody rewrites this and nothing generates it — it is yours."></textarea>
+      <div id="linkfields" style="display:none">
+        <input id="url" placeholder="https://… the link itself" autocomplete="off" style="width:100%">
+        <div class="two" style="margin-top:.5rem">
+          <input id="quote" placeholder="a short line worth citing (optional)" autocomplete="off">
+          <input id="attribution" placeholder="whose words are they?" autocomplete="off" style="flex:0 1 14rem">
+        </div>
+        <p class="hint">We open the link once, write down its address, its own title, its size and
+        fingerprint, and when we looked — then let it go. <strong>No page of anyone else's is
+        stored, and nothing is embedded:</strong> an embed would hand your IP to the provider before
+        you decided to go there. Say in your own words why it is worth someone's time; a bare link
+        is not curation.</p>
+      </div>
     </div>
     <p class="ring-note" id="ringnote"></p>
     <div class="row"><button class="btn" id="drop">Sign it and put it on the shelf</button></div>
@@ -283,6 +306,9 @@ const RING_NOTE = {
 };
 function ringNote(){ $('ringnote').textContent = RING_NOTE[$('ring').value]||''; }
 $('ring').addEventListener('change', ringNote);
+// the link fields appear only for a link drop — the kind decides what the form asks for
+function kindFields(){ $('linkfields').style.display = ($('kind').value==='link') ? 'block' : 'none'; }
+$('kind').addEventListener('change', kindFields);
 
 // ── stock the shelf: the server mints the bytes, THIS DEVICE signs them.
 $('drop').addEventListener('click', async ()=>{
@@ -293,36 +319,71 @@ $('drop').addEventListener('click', async ()=>{
     const k=await ensureKey();
     if(!k) return say('dropsay','This browser cannot create a signing key, so nothing can be signed here.');
     const q=new URLSearchParams({member:k.public_key, kind:$('kind').value, subject:$('subject').value.trim(),
-                                body:body, ring:$('ring').value});
+                                body:body, ring:$('ring').value,
+                                url:($('kind').value==='link' ? $('url').value.trim() : ''),
+                                quote:$('quote').value.trim(), attribution:$('attribution').value.trim()});
     const sg=await getJSON('/drop/signable?'+q.toString());
     if(!sg||!sg.ok) return say('dropsay',(sg&&sg.error)||'The library would not prepare that.');
     const sig=await NHKeys.signB64uBytes(k.private_key, sg.signable);
     const r=await postJSON('/drop',{fields:sg.fields, signature:sig, display_name:myName()});
     if(!r||!r.ok) return say('dropsay',(r&&r.error)||'Refused.');
     $('body').value=''; $('subject').value='';
+    $('url').value=''; $('quote').value=''; $('attribution').value='';
     say('dropsay', r.stage==='public_review'
       ? 'On your shelf and offered to the commons — it waits for a person now, and you will see it under “Your shelf”.'
       : 'On your shelf, signed by you.', true);
   } finally { btn.disabled=false; }
 });
 
-// ── rendering a card. `tier` is shown on every single one: amplified is not verified.
+// ── rendering a card. THE CARD IS BARE; the server hands back a derived `presentation` block
+// alongside it (src/concordance/present.py) and this page renders THAT. So the polish lives in one
+// place instead of being re-invented per surface, and nothing decorative is ever stored on a card.
+// `authority` is shown on every single one: amplified is not verified.
 function cardHTML(c, opts){
-  const x=c.extra||{}, src=c.source||{};
+  const x=c.extra||{}, src=c.source||{}, p=c.presentation||{};
   const ring = x.ring||'shelf';
   const held = c.lifecycle_stage==='public_review';
-  let tags = '<span class="tag member">'+esc(src.authority_tier||'member')+'</span>';
+  let tags = '<span class="tag member">'+esc(p.authority||src.authority_tier||'member')+'</span>';
   if(ring==='commons' && c.lifecycle_stage==='public') tags += '<span class="tag commons">on the commons</span>';
   else if(held) tags += '<span class="tag held">waiting for a steward</span>';
   else if(ring==='private') tags += '<span class="tag priv">private</span>';
-  if(x.drop_kind) tags += '<span class="tag">'+esc(String(x.drop_kind).replace('_',' '))+'</span>';
+  if(p.kind_label) tags += '<span class="tag">'+esc(p.kind_label)+'</span>';
+
+  // a link drop: the door, its provenance, and why we do not open it for you
+  let link='';
+  if(p.link && p.link.url){
+    const L=p.link;
+    const where = L.provider || L.host || 'the link';
+    link = '<div class="linkbox">'
+      + '<a class="dest" href="'+esc(L.url)+'" target="_blank" rel="noopener noreferrer nofollow ugc">'
+      + esc(L.titled || L.url)+'</a>'
+      + '<div class="dest-meta">'+esc(where)
+      + (L.waybill_line ? ' · '+esc(L.waybill_line) : '')+'</div>'
+      + (L.reach && L.reach!=='FETCHED' ? '' : '<div class="dest-note">'+esc(L.embed||'')+'</div>')
+      + '</div>';
+  }
+  let quote='';
+  if(p.quote && p.quote.text){
+    quote = '<blockquote class="q">'+esc(p.quote.text)
+      + (p.quote.attribution ? '<cite>— '+esc(p.quote.attribution)+'</cite>' : '')+'</blockquote>';
+  }
+  let vouch='';
+  if(p.vouched && p.vouched.by){
+    vouch = '<div class="vouch">Carried by '+esc(p.vouched.by)
+      + (p.vouched.reason ? ' — “'+esc(p.vouched.reason)+'”' : '')+'</div>';
+  }
+
   let acts='';
   if(opts&&opts.mine) acts = '<div class="acts"><button class="btn small withdraw" data-id="'+esc(c.id)+'">Take it down</button></div>';
   if(opts&&opts.steward && held) acts = '<div class="acts"><button class="btn small promote" data-id="'+esc(c.id)+'">Promote</button> '
     + '<button class="btn small refuse" data-id="'+esc(c.id)+'">Refuse</button></div>';
-  return '<div class="card"><div class="t">'+esc(c.title||'(untitled)')+tags+'</div>'
-    + '<div class="by">'+esc(src.label||'a member')+'</div>'
-    + '<div class="tx">'+esc(c.body||'')+'</div>'+acts+'</div>';
+  return '<div class="card"><div class="t">'
+    + (p.glyph ? '<span class="glyph">'+esc(p.glyph)+'</span> ' : '')
+    + esc(c.title||'(untitled)')+tags+'</div>'
+    + '<div class="by">'+esc(p.by||src.label||'a member')
+    + (p.posted ? ' · '+esc(p.posted) : '')+'</div>'
+    + '<div class="tx">'+esc(c.body||'')+'</div>'
+    + quote + link + vouch + acts + '</div>';
 }
 function renderInto(el, d, opts, emptyMsg){
   const cards=(d&&d.cards)||[];
@@ -439,7 +500,7 @@ document.addEventListener('click', e=>{
 
 // a shelf address in the URL opens straight onto that shelf — that is how lending travels
 (function(){
-  showMe(); ringNote();
+  showMe(); ringNote(); kindFields();
   const m=new URLSearchParams(location.search).get('member');
   if(m){
     $('visitkey').value=m;

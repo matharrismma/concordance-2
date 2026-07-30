@@ -255,7 +255,18 @@ def _secular_tools() -> List[dict]:
              "kind": {"type": "string", "description": "note|writing|recipe|build|field_note|"
                                                        "question|link|suggestion"},
              "subject": {"type": "string"}, "body": {"type": "string"},
-             "ring": {"type": "string", "description": "private|shelf|commons"}},
+             "ring": {"type": "string", "description": "private|shelf|commons"},
+             "url": {"type": "string", "description": "kind=link only — the address. We open it "
+                                                      "once in an airlock, keep the WAYBILL (its "
+                                                      "own title, size, sha256, when we looked) "
+                                                      "and discard the bytes. No page of anyone "
+                                                      "else's is stored, and nothing is embedded: "
+                                                      "an iframe would hand the reader's IP to the "
+                                                      "provider. The body is still required — a "
+                                                      "bare link is not curation."},
+             "quote": {"type": "string", "description": "optional short passage YOU typed, capped; "
+                                                        "requires `attribution`"},
+             "attribution": {"type": "string", "description": "whose words the quote is"}},
              "required": ["member", "kind", "body"]}},
         {"name": "shelf_drop",
          "description": ("Step 2 — stock the shelf. Send the fields from shelf_signable plus a "
@@ -661,7 +672,10 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         from .. import shelves as _sh
         return _sh.signable_drop(str(args.get("member") or ""), str(args.get("kind") or ""),
                                  str(args.get("subject") or ""), str(args.get("body") or ""),
-                                 ring=str(args.get("ring") or "shelf"))
+                                 ring=str(args.get("ring") or "shelf"),
+                                 url=str(args.get("url") or ""),
+                                 quote=str(args.get("quote") or ""),
+                                 attribution=str(args.get("attribution") or ""))
     if name == "shelf_drop":
         from .. import shelves as _sh
         if args.get("private_key") or (isinstance(args.get("fields"), dict)

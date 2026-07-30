@@ -29,11 +29,16 @@ BASE = (sys.argv[1].rstrip("/") if len(sys.argv) > 1 else "https://narrowhighway
 
 
 def get(path, **q):
+    """A 4xx is an ANSWER here, not a crash — the SSRF checks below expect 400, and a probe that
+    dies on the very response it is testing for reports a failure that did not happen."""
     url = f"{BASE}{path}"
     if q:
         url += "?" + urllib.parse.urlencode(q)
-    with urllib.request.urlopen(url, timeout=45) as r:
-        return r.status, json.loads(r.read())
+    try:
+        with urllib.request.urlopen(url, timeout=45) as r:
+            return r.status, json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        return e.code, json.loads(e.read())
 
 
 def _sign(signable_b64u, priv_key):
@@ -160,6 +165,46 @@ with urllib.request.urlopen(f"{BASE}/llms.txt", timeout=45) as rr:
 check("llms.txt documents the Commons",
       "/drop/signable" in llms and "authority_tier: member" in llms)
 
+# 8b · C1d — a LINK drop, on the live box, against a real page. The waybill must be facts only,
+# the SSRF guard must hold at the live door, and the experience layer must come back derived.
+st, sg_l = get("/drop/signable", member=pub, kind="link",
+               subject="Pride and Prejudice, free at Project Gutenberg",
+               body="A first line worth learning by heart, and the whole book for nothing — this is "
+                    "what the public domain is for.",
+               ring="shelf", url="https://www.gutenberg.org/ebooks/1342",
+               quote="It is a truth universally acknowledged, that a single man in possession of a "
+                     "good fortune, must be in want of a wife.",
+               attribution="Jane Austen, Pride and Prejudice")
+check("a link drop is prepared for signing", st == 200 and sg_l.get("ok"), str(sg_l)[:140])
+st, lr = post("/drop", {"fields": sg_l["fields"], "signature": _sign(sg_l["signable"], priv),
+                        "display_name": "Matt Harris"})
+check("the link drop lands", st == 200 and lr.get("ok"), str(lr)[:160])
+lview = get("/shelf", member=pub, viewer=pub)[1]
+lcard = next((c for c in lview.get("cards", [])
+              if (c.get("extra") or {}).get("drop_kind") == "link"), {})
+lx, lp = lcard.get("extra") or {}, lcard.get("presentation") or {}
+check("it carries a waybill with a fingerprint",
+      lx.get("reach") == "FETCHED" and len((lx.get("waybill") or {}).get("sha256") or "") == 64,
+      str(lx.get("waybill"))[:160])
+check("the waybill holds ONLY facts about the page",
+      set(lx.get("waybill") or {}) <= {"url", "host", "page_title", "content_type", "bytes",
+                                       "sha256", "fetched_at", "status", "redirected_to"},
+      str(sorted(lx.get("waybill") or {})))
+check("no page text was kept",
+      not any(t in json.dumps(lcard).lower() for t in ("<html", "<p>", "<div", "<script")))
+check("nothing is embedded, and the page says why",
+      "iframe would hand" in (lx.get("embed") or ""))
+check("the experience layer comes back derived, not stored",
+      bool(lp.get("glyph")) and lp.get("link", {}).get("provider") == "Project Gutenberg"
+      and "fingerprint" in lp.get("link", {}).get("waybill_line", ""),
+      str(lp.get("link"))[:160])
+for inward in ("http://127.0.0.1:8002/keep.json", "http://169.254.169.254/latest/meta-data/",
+               "file:///etc/passwd"):
+    st_i, r_i = get("/drop/signable", member=pub, kind="link", subject="x",
+                    body="trying to make the live server fetch inward", ring="shelf", url=inward)
+    check(f"the live door refuses {inward.split('/')[2] if '//' in inward else inward}",
+          st_i == 400 and not r_i.get("ok"), str(r_i.get("error"))[:90])
+
 # 9 · A TYPED NAME IS NOT AUTHORITY. Promoting decides what the whole library amplifies, so it
 # needs the steward token — which this probe deliberately does not hold. It must be refused live.
 st, bare = post("/curate", {"card_id": held.get("card_id"), "action": "promoted",
@@ -172,7 +217,7 @@ check("and nothing was amplified", get("/commons")[1].get("count") == before)
 # never needs anyone's permission to take their own words down. A verification drop left sitting in
 # the real steward queue would be a live instrument reporting work nobody asked for. Withdrawing is
 # the honest exit: the card leaves the views and the act stays in the record WITH ITS REASON.
-for cid in (card_id, held.get("card_id"), a_r.get("card_id")):
+for cid in (card_id, held.get("card_id"), a_r.get("card_id"), lr.get("card_id")):
     if not cid:
         continue
     st, sg_w = get("/curate/signable", card_id=cid, member=pub)
