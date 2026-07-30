@@ -19,6 +19,31 @@ Three standing rules:
 
 ## 2026-07-29
 
+**PUNCH LIST item 1 · THE COMMONS · C1a — the member shelf. DONE, live.**
+- `shelves.py` + 9 tests. A shelf is a covenant key with signed cards on it, not an account.
+- Three rings: private / **shelf (UNGATED — the gate is on amplification, never on speech)** /
+  commons (enters `public_review`, waits for a HUMAN steward).
+- VERIFIED LIVE on the box, whole flow: signable → signed on the member's side → drop lands
+  `public_review` at tier `member` → commons count 0 (nothing uncurated reaches it) → review
+  queue 1 → **a signature from another key was REFUSED** ("nobody can put words on another
+  member's shelf") → steward promoted with a reason → commons 1, **tier still `member`**.
+- Member tier is never upgraded: the library amplified it; the library did not verify it.
+- Every curation act names a steward AND a reason. A refusal withholds amplification but leaves
+  the member's words on their own shelf. Append-only, so a withdrawal keeps the record.
+- `corpus.is_public` independently withholds private drops — two agreeing checks, not one.
+- The deploy guard caught `address.py` absent from the box and it was shipped: STAGED means "not
+  wired into the loader", not "not present", and a box deliberately unlike the repo defeats the
+  guard's whole purpose.
+- Live-test drops were removed afterward: a verification is not content.
+- Gate: **941 passed.**
+
+**Ground recorded: Romans 12:1-2.** Matt: "Romans 12:1 was the beginning of all of this...
+12:1 leads to 12:2. Maybe we also build in opportunities to serve?" λογικὴν λατρείαν (reasoned
+service, present your BODIES) → δοκιμάζειν (the assayer's word: PROVE what is good). Offering,
+then assay. C1f added to the punch list: needs & offers matched by proximity and capability,
+never profiling; attested BY THE ONE SERVED; **no leaderboards** (service is not currency) and
+the act **recorded but unseen by default** (Mt 6:3).
+
 **SEEDING BEGUN (Matt: "get started") — the commentaries carded verse by verse.**
 - The deepest substance already on our disk was reachable only through `/commentary`: not
   searchable, not in the graph, invisible unless you knew to ask. Now **44,371 verse cards**
