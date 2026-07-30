@@ -46,8 +46,25 @@ def _gate_closed() -> Response:
 
 
 def _card_brief(c: dict) -> Dict[str, Any]:
+    """A search hit, with enough to know what may be CLAIMED from it.
+
+    Traffic, measured 2026-07-30: `/search` is our second-most-used endpoint (16,210) and 35% of
+    all traffic is ClaudeBot. The brief carried title, shelf, and a snippet — nothing about
+    AUTHORITY. So an agent had to fetch the full card just to learn whether the thing it had found
+    was a sealed record, a public-domain source, or a member's own opinion. That is a wasted
+    round-trip on the hottest path, and worse, it is the moment where an agent in a hurry cites
+    something at the wrong weight.
+
+    `authority_tier` and `generated` are the two facts that govern what a reader may say next, so
+    they travel with the hit. Both are read straight off the card — nothing new is computed, and
+    nothing is asserted that the card does not already carry.
+    """
+    src = c.get("source") or {}
     return {"id": c.get("id"), "title": c.get("title"), "shelf": c.get("shelf"),
-            "surface": c.get("surface"), "snippet": (c.get("body", "") or "")[:200]}
+            "surface": c.get("surface"), "snippet": (c.get("body", "") or "")[:200],
+            "authority_tier": src.get("authority_tier") or "",
+            "source": src.get("label") or "",
+            "generated": bool(c.get("generated", False))}
 
 
 def _esc(s: Any) -> str:
@@ -305,8 +322,17 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             f"<div class=muted style=\"font-size:.8rem\">connections</div>"
             f"<canvas id=nhlg role=img aria-label=\"Connection graph — this card and its linked records\" style=\"width:100%;height:320px;display:block;margin:.4rem 0\"></canvas>"
             f"<p class=muted id=nhlg-cap style=\"font-size:.75rem\"></p></section>"
+            # THE FRONT DOOR IS HERE, not on `/`. Measured 2026-07-30: 46,190 card views against
+            # 608 on the homepage, and 35% of all traffic is ClaudeBot. The card page was offering
+            # only its own seal and raw JSON — so the most-read surface we have said nothing about
+            # the engine that makes it worth trusting, or the room where people put their own work.
+            # Three doors, named plainly, in the page's own voice. No pitch.
             f"<footer class=site><p>A record from the keeping — found and cited, never generated. "
-            f"<a href=/search>Search the keeping →</a></p></footer></main>"
+            f"<a href=/search>Search the keeping →</a></p>"
+            f"<p class=muted style=\"font-size:.82rem\">"
+            f"Every claim here can be checked: <a href=\"/#verify\">verify one yourself ↗</a>"
+            f" · members keep their own shelves in <a href=\"/shelf.html\">the Commons ↗</a>"
+            f" · <a href=\"/llms.txt\">if you are an agent, start here ↗</a></p></footer></main>"
             f"<script src=/graph.js defer></script>"
             f"<script>addEventListener('load',function(){{var s=document.getElementById('nhconn');"
             f"if(window.NHGraph&&s)NHGraph.local('nhconn','nhlg',s.getAttribute('data-cid'));}});</script>"
@@ -2098,8 +2124,27 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 host = (self.headers.get("host") or "narrowhighway.com").split(":")[0] or "narrowhighway.com"
                 base = "https://" + host
                 if u.path == "/robots.txt":
-                    b = ("User-agent: *\nAllow: /\nDisallow: /keep\nDisallow: /keep.html\n"
-                         f"Sitemap: {base}/sitemap.xml\n").encode("utf-8")
+                    # SERVED FROM HERE, not from site/robots.txt — editing the file does nothing,
+                    # which is how the first attempt at this change silently failed. Kept generated
+                    # because the Sitemap line must name the requesting host.
+                    #
+                    # Readers and AI agents: welcome, explicitly. Measured 2026-07-30, 35% of all
+                    # our traffic is ClaudeBot and the card permalink is the most-used thing we
+                    # serve — that is the intended use.
+                    #
+                    # SEO backlink crawlers: refused by name. SemrushBot alone was 26,894 requests,
+                    # 21% of ALL traffic, indexing us for a marketing product nobody here uses.
+                    # This is a free library on one small box; that capacity belongs to readers and
+                    # to agents that actually cite us. Named individually, never a blanket rule, so
+                    # a genuine reader is never caught by it.
+                    seo = ("SemrushBot", "AhrefsBot", "MJ12bot", "DotBot", "BLEXBot")
+                    b = ("# Narrow Highway — a public verification engine.\n"
+                         "# Agents: read /llms.txt, then use /search and /card. No login, and\n"
+                         "# nothing here records who read what.\n"
+                         "User-agent: *\nAllow: /\nDisallow: /keep\nDisallow: /keep.html\n\n"
+                         "# SEO backlink crawlers — this capacity belongs to readers.\n"
+                         + "".join(f"User-agent: {n}\nDisallow: /\n" for n in seo)
+                         + f"\nSitemap: {base}/sitemap.xml\n").encode("utf-8")
                     ctype = "text/plain; charset=utf-8"
                 else:
                     b = build_sitemap(base).encode("utf-8")
