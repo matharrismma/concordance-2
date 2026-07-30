@@ -103,6 +103,18 @@ def test_mesh_write_tools_also_refuse_keys():
         assert "private key" in str(r.get("error", "")).lower()
 
 
+def test_the_shelf_refuses_a_key_even_smuggled_inside_the_signed_fields():
+    """THE COMMONS C1b. `shelf_drop` takes a `fields` OBJECT, so the top-level check the older write
+    tools use is not enough on its own — a key one level down would sail past it. Both depths are
+    checked, and this test is why."""
+    for args in ({"fields": {"member": "m"}, "signature": "s", "private_key": "AAAA"},
+                 {"fields": {"member": "m", "private_key": "AAAA"}, "signature": "s"}):
+        r = _call("shelf_drop", args)
+        assert "does not take a private key" in str(r.get("error", "")), \
+            f"shelf_drop accepted a key: {r}"
+        assert r.get("sign_locally") is True
+
+
 if __name__ == "__main__":
     os.environ.setdefault("CONCORDANCE_DATA_DIR", tempfile.mkdtemp())
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]

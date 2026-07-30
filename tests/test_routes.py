@@ -48,6 +48,12 @@ GOLDEN_API_GET = {
     "/backmatter",  # deliberate addition (back-matter tables: weights, names, parables, miracles, intros, topics)
     "/places",    # deliberate addition (the Atlas: real biblical place coordinates, honest uncertainty)
     "/consent", "/consent/signable", "/consent/revoke",  # the human-authorized write path (worklist item 2)
+    "/drop/signable",
+    "/drop",
+    "/shelf",
+    "/commons",
+    "/curate/queue",
+    "/curate",
     "/moderation/signable",
     "/report", "/block",  # the moderation floor (worklist item 4)
     "/connect/event",  # the calendar pilot — the one on-behalf write, behind the consent lock
@@ -67,6 +73,9 @@ GOLDEN_RATELIMITED = {
     "/mesh/invite", "/mesh/redeem", "/mesh/door", "/formation/help",
     "/push/subscribe", "/push/unsubscribe",
     "/consent/signable", "/consent", "/consent/revoke",  # the human-authorized write path (worklist item 2)
+    "/drop/signable",
+    "/drop",
+    "/curate",
     "/moderation/signable",
     "/report", "/block",  # the moderation floor (worklist item 4)
     "/connect/event",  # the calendar pilot — the one on-behalf write, behind the consent lock

@@ -242,6 +242,58 @@ def _secular_tools() -> List[dict]:
              "agent_fp": {"type": "string"}, "verb": {"type": "string"},
              "grantor_pubkey": {"type": "string"}},
              "required": ["agent_fp", "verb", "grantor_pubkey"]}},
+        {"name": "shelf_signable",
+         "description": ("THE COMMONS — step 1 of stocking your own shelf. Returns {fields, "
+                         "signable}: the exact canonical bytes to sign with YOUR key on YOUR "
+                         "machine. A shelf is a covenant key with cards on it, not an account. "
+                         "Rings: `private` (only you) · `shelf` (you and the friends who chose "
+                         "you — UNGATED, live the moment you sign) · `commons` (site-wide, waits "
+                         "for a human steward). The gate is on what the library AMPLIFIES, never "
+                         "on what you may say."),
+         "inputSchema": {"type": "object", "properties": {
+             "member": {"type": "string", "description": "your public key — the shelf is the key"},
+             "kind": {"type": "string", "description": "note|writing|recipe|build|field_note|"
+                                                       "question|link|suggestion"},
+             "subject": {"type": "string"}, "body": {"type": "string"},
+             "ring": {"type": "string", "description": "private|shelf|commons"}},
+             "required": ["member", "kind", "body"]}},
+        {"name": "shelf_drop",
+         "description": ("Step 2 — stock the shelf. Send the fields from shelf_signable plus a "
+                         "detached signature over those bytes; the private key never travels. "
+                         "Your words stay at the `member` tier forever: promotion to the commons "
+                         "carries them further, it does not make them the library's claim. "
+                         "`display_name` is the ONLY profile field there is."),
+         "inputSchema": {"type": "object", "properties": {
+             "fields": {"type": "object"}, "signature": {"type": "string"},
+             "display_name": {"type": "string"}},
+             "required": ["fields", "signature"]}},
+        {"name": "shelf_read",
+         "description": ("Read one member's shelf. Pass `viewer` (your own key) to see your own "
+                         "private drops; anyone else sees the shelf ring and promoted commons "
+                         "cards only. Nothing anywhere records who read what."),
+         "inputSchema": {"type": "object", "properties": {
+             "member": {"type": "string"}, "viewer": {"type": "string"}},
+             "required": ["member"]}},
+        {"name": "commons_read",
+         "description": ("What the fellowship has put on the commons — promoted member work, "
+                         "newest first. Every card is a member's own work at the `member` tier: "
+                         "the library amplified it; the library did not verify it."),
+         "inputSchema": {"type": "object", "properties": {
+             "limit": {"type": "integer"}}, "required": []}},
+        {"name": "curate_queue",
+         "description": ("What waits on a HUMAN steward. The counter never promotes; it only "
+                         "decides when a person must look."),
+         "inputSchema": {"type": "object", "properties": {}, "required": []}},
+        {"name": "curate",
+         "description": ("A steward's recorded act: `promoted` · `refused` · `withdrawn`. Both a "
+                         "steward name AND a reason are required — there is no anonymous "
+                         "judgement, and a refusal without a reason teaches the community "
+                         "nothing. A refusal withholds amplification only; the drop stays on the "
+                         "member's own shelf. Acts are appended, never replaced."),
+         "inputSchema": {"type": "object", "properties": {
+             "card_id": {"type": "string"}, "action": {"type": "string"},
+             "steward": {"type": "string"}, "reason": {"type": "string"}},
+             "required": ["card_id", "action", "steward", "reason"]}},
         {"name": "moderation_signable",
          "description": ("Step 1 of a report or a block: the exact canonical bytes to sign with "
                          "your own key, on your own machine. Returns {fields, signable}. Sign the "
@@ -592,6 +644,33 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         from .. import consent as _consent
         return _consent.guard(str(args.get("agent_fp") or ""), str(args.get("verb") or ""),
                               str(args.get("grantor_pubkey") or ""))
+    if name == "shelf_signable":
+        from .. import shelves as _sh
+        return _sh.signable_drop(str(args.get("member") or ""), str(args.get("kind") or ""),
+                                 str(args.get("subject") or ""), str(args.get("body") or ""),
+                                 ring=str(args.get("ring") or "shelf"))
+    if name == "shelf_drop":
+        from .. import shelves as _sh
+        if args.get("private_key") or (isinstance(args.get("fields"), dict)
+                                       and args["fields"].get("private_key")):
+            return _no_private_key("shelf_drop")
+        return _sh.drop(args.get("fields") if isinstance(args.get("fields"), dict) else None,
+                        str(args.get("signature") or ""),
+                        display_name=str(args.get("display_name") or ""))
+    if name == "shelf_read":
+        from .. import shelves as _sh
+        return _sh.shelf_of(str(args.get("member") or ""),
+                            viewer=(str(args["viewer"]) if args.get("viewer") else None))
+    if name == "commons_read":
+        from .. import shelves as _sh
+        return _sh.commons(limit=int(args.get("limit", 40) or 40))
+    if name == "curate_queue":
+        from .. import shelves as _sh
+        return _sh.review_queue()
+    if name == "curate":
+        from .. import shelves as _sh
+        return _sh.curate(str(args.get("card_id") or ""), str(args.get("action") or ""),
+                          str(args.get("steward") or ""), reason=str(args.get("reason") or ""))
     if name == "moderation_signable":
         from .. import moderation as _mod
         return _mod.signable(str(args.get("action") or ""), str(args.get("target_id") or ""),

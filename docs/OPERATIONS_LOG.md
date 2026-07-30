@@ -182,6 +182,38 @@ the act **recorded but unseen by default** (Mt 6:3).
 
 ---
 
+## 2026-07-29 · C1b — THE COMMONS reaches HTTP and the agent surface
+
+**Six routes, six MCP tools, one store.** `GET /drop/signable` · `POST /drop` · `GET /shelf` ·
+`GET /commons` · `GET /curate/queue` · `POST /curate`, and `shelf_signable` · `shelf_drop` ·
+`shelf_read` · `commons_read` · `curate_queue` · `curate` for agents. Rate limiting on the three
+write paths only — reading a shelf is not a write, and `viewer` decides what is SERVED without
+being kept anywhere. A test asserts the string `viewer` never appears in the store.
+
+**Measured live** (`tools/live_shelf_check.py` against narrowhighway.com, 18/18):
+a key born on this device signed bytes the server minted; the drop landed; a forged signature was
+refused 400 with its reason; a `private_key` was refused at the live door and again when smuggled
+inside `fields`; a commons drop sat in `public_review` and the commons stayed at 0; the agent door
+and the HTTP door saw the same store in both directions. Every card the probe made was **withdrawn**
+at the end — the queue is back to 0 and each act is in the record with its reason. Nothing deleted.
+
+**Two things I got wrong, both caught by checking the check:**
+- the first live run "failed" two assertions asserting a stranger sees ≥2 cards on that shelf. A
+  stranger sees ONE — the commons drop is awaiting a steward and correctly withheld, surfacing only
+  as `awaiting_review`. The system was right; the expectation was wrong.
+- the first golden patch put all six paths in `GOLDEN_RATELIMITED`, including the three read-only
+  ones. The route-golden test caught it immediately.
+
+`shelf_drop` needed a second private-key check one level down, inside `fields` — the top-level guard
+the older write tools use would not have seen it. `tests/test_mcp_no_private_keys.py` now pins both
+depths. The Commons tools are on the **secular** surface: a maker who never opened the Gate still
+gets a shelf.
+
+Gate PASS (kernel 93%, 60/60 moat). Deploy reported the same 3 known EXTRA files on the box
+(`web/ask.py`, `branding.py`, `config.py` — punch-list item 4, awaiting Matt's word to archive).
+
+---
+
 ## OPEN — logged because unfinished is a fact, not a silence
 
 - **Operational carding** (task #104): shards, nodes, curators, sources, deploys, SOPs each get a

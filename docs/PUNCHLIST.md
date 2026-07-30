@@ -20,7 +20,7 @@ Broken into units that each stand alone:
 | unit | what it is | done when |
 |---|---|---|
 | **C1a** | `shelves.py` — the member shelf: signed drops, the three rings, the curation state machine | a member can stock a shelf with a signed card, a commons drop lands in `public_review`, a steward's promotion is a recorded act, and every refusal carries its reason — gated |
-| **C1b** | routes + MCP: `/shelf`, `/drop/signable`, `/drop`, `/curate` | the whole flow works over HTTP and through an agent; goldens updated |
+| **C1b** ✅ | routes + MCP: `/shelf`, `/drop/signable`, `/drop`, `/curate` | ~~the whole flow works over HTTP and through an agent; goldens updated~~ **DONE 2026-07-29** — 6 routes + 6 MCP tools, gate PASS, deployed, `tools/live_shelf_check.py` walks it on the live box 18/18 and leaves the steward queue clean |
 | **C1c** | `shelf.html` + the commons surface | a real person can stock a shelf and read someone else's in a browser, key born on device |
 | **C1d** | drops that are links: embeds, quotes, curated pages with fetched-at + content hash | a video/quote/page drop renders with its waybill; no byte of anyone else's page is stored |
 | **C1e** | first wings stocked: recipes · music · art (PD seed cards) | each wing has real cards before it is announced — never an empty room |

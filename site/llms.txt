@@ -95,6 +95,28 @@ protocols, bring-your-own-credential: calendar via iCalendar (.ics/CalDAV), emai
 Join your apps, never absorb your data: reads pass through, nothing is stored, sealed, or sent to
 us. Writing back to your tools stays behind the agent-covenant write-consent path.
 
+## The Commons (member shelves) — every member stocks their own shelf
+This is a library where the members are also authors. A shelf is a KEY, not an account: no email,
+no password, no profile beyond a display name you choose. Nothing records who read what.
+
+    GET  /drop/signable?member=<pubkey>&kind=recipe&subject=…&body=…&ring=shelf
+    POST /drop           {"fields": <from above>, "signature": "<detached>", "display_name": "…"}
+    GET  /shelf?member=<pubkey>[&viewer=<your pubkey>]
+    GET  /commons        · GET /curate/queue · POST /curate
+
+- **Sign on your own machine.** `/drop/signable` returns the exact canonical bytes; you sign them
+  with your key and send only the signature. No endpoint here takes a private key, ever. A signature
+  over different bytes does not transfer — nobody can put words on another member's shelf.
+- **Three rings.** `private` (only you) · `shelf` (you and whoever you point at it — UNGATED, live
+  the moment you sign) · `commons` (site-wide, and it waits for a HUMAN steward). The gate is on
+  what the library AMPLIFIES, never on what a member may say.
+- **Member tier is never upgraded.** A promoted card stays at `authority_tier: member` and carries
+  its author's name. Promotion means we carried it further; it does not mean we verified it. Do not
+  cite a commons card as though the engine had sealed it — check the tier.
+- **Refusals carry reasons, and never silence anyone.** A refused drop stays on the member's own
+  shelf; only amplification is withheld. Every curation act names a steward and a why, and the
+  record is append-only.
+
 ## For agents (MCP) — add one URL
 A live remote MCP server (Streamable HTTP, JSON-RPC, no auth, no SDK):
 

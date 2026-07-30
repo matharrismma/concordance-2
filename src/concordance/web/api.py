@@ -1605,6 +1605,47 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # A consent refusal is 403 with the teaching attached — not a silent 400.
         return (403, r) if r.get("refused") else _err(400, r.get("error") or "refused")
 
+    # ── THE COMMONS · C1b — the member shelf over HTTP ──────────────────────────────────────
+    # A shelf is a covenant key with signed cards on it. The gate is on AMPLIFICATION only:
+    # a `shelf` drop is live the moment it is signed; a `commons` drop waits for a human.
+    if method == "GET" and path == "/drop/signable":
+        from .. import shelves as _sh
+        r = _sh.signable_drop(query.get("member") or "", query.get("kind") or "note",
+                              query.get("subject") or "", query.get("body") or "",
+                              query.get("ring") or "shelf")
+        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "bad request")
+    if method == "POST" and path == "/drop":
+        from .. import shelves as _sh
+        if not isinstance(body, dict):
+            return _err(400, "signed fields and signature required")
+        r = _sh.drop(body.get("fields") if isinstance(body.get("fields"), dict) else None,
+                     str(body.get("signature") or ""),
+                     display_name=str(body.get("display_name") or ""))
+        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
+    if method == "GET" and path == "/shelf":
+        # `viewer` is supplied by the reader and used ONLY to decide what is served. Nothing
+        # records that they looked — known when you speak, unseen when you read.
+        from .. import shelves as _sh
+        r = _sh.shelf_of(query.get("member") or "", viewer=(query.get("viewer") or None))
+        return _ok(r) if r.get("ok") else _err(404, r.get("error") or "no such shelf")
+    if method == "GET" and path == "/commons":
+        from .. import shelves as _sh
+        try:
+            lim = int(query.get("limit") or 40)
+        except (TypeError, ValueError):
+            lim = 40
+        return _ok(_sh.commons(limit=lim))
+    if method == "GET" and path == "/curate/queue":
+        from .. import shelves as _sh
+        return _ok(_sh.review_queue())
+    if method == "POST" and path == "/curate":
+        from .. import shelves as _sh
+        if not isinstance(body, dict):
+            return _err(400, "card_id, action, steward, reason required")
+        r = _sh.curate(str(body.get("card_id") or ""), str(body.get("action") or ""),
+                       str(body.get("steward") or ""), str(body.get("reason") or ""))
+        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
+
     if method == "GET" and path == "/moderation/signable":
         # Step 1 of a report or a block: the exact canonical bytes to sign ON THE DEVICE. Three
         # witnesses means three KEYS (Deut 19:15) — never three invented names.
@@ -1853,6 +1894,13 @@ ROUTES = [
     {"path": "/consent", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/consent/revoke", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/connect/event", "methods": ("POST",), "api": True, "rl": True},
+    # THE COMMONS (C1b): the shelf, the drops, the curation desk.
+    {"path": "/drop/signable", "methods": ("GET",), "api": True, "rl": True},
+    {"path": "/drop", "methods": ("POST",), "api": True, "rl": True},
+    {"path": "/shelf", "methods": ("GET",), "api": True},
+    {"path": "/commons", "methods": ("GET",), "api": True},
+    {"path": "/curate/queue", "methods": ("GET",), "api": True},
+    {"path": "/curate", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/moderation/signable", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/report", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/block", "methods": ("POST",), "api": True, "rl": True},
