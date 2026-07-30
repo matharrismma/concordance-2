@@ -6,6 +6,7 @@ test_airlock.py
 test_api.py
 test_apothecary.py
 test_ask.py
+test_assay.py
 test_attest_witnesses.py
 test_attestation.py
 test_audit.py
