@@ -47,6 +47,31 @@ def test_claim_text_is_escaped():
     assert "<script>evil()</script>" not in html and "&lt;script&gt;" in html
 
 
+def test_a_card_never_advertises_a_seal_it_does_not_have():
+    """A `source_hash` fingerprints the SOURCE TEXT; a seal is a sealed verification record in the
+    CAS. They are different objects, and the card renderer used to fall back from one to the other.
+
+    Measured 2026-07-31: 66 cards carried a real seal_hash; **11,084 carried only a source_hash and
+    were given an "its seal" link anyway**, every one resolving to 404. Offering a receipt that was
+    never minted is worse than offering none — it is a claim of verification we did not perform, on
+    the surface built to prove we do not do that. A fingerprint is not a verdict.
+    """
+    from concordance.web import api
+
+    # a card with ONLY a source_hash must show no seal link at all
+    _st, html = api.render_card_html("c1", {
+        "id": "c1", "title": "T", "body": "b", "source": {"label": "S"},
+        "source_hash": "5d451e97f1b39f72e46f0000000000000000000000000000000000000000aaaa"})
+    assert "its seal" not in html, "a source_hash was rendered as a seal"
+    assert "/s/5d451e97" not in html
+
+    # a card with a REAL seal keeps it
+    _st, html2 = api.render_card_html("c2", {
+        "id": "c2", "title": "T", "body": "b", "source": {"label": "S"},
+        "extra": {"seal_hash": "809fbaa9498918cf30440000000000000000000000000000000000000000bbbb"}})
+    assert "its seal" in html2 and "/s/809fbaa9" in html2
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:

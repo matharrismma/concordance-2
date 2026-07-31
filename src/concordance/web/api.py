@@ -279,7 +279,15 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
     else:
         source_html = ""
     # Related seal cross-link, if this card carries one (found only).
-    seal_hash = str((card.get("extra") or {}).get("seal_hash") or card.get("source_hash") or "").strip()
+    # A SEAL, AND ONLY A SEAL. This used to fall back to `source_hash`, and the fallback was a
+    # false claim: a `source_hash` fingerprints the SOURCE TEXT, while a seal is a sealed
+    # verification record in the CAS. They are different objects. Measured 2026-07-31: 66 cards
+    # carry a real `seal_hash`; **11,084 carried only a source_hash and were shown a
+    # "its seal ↗" link anyway** — and every one of those resolved to 404, because the receipt was
+    # never minted. Offering a receipt that does not exist is worse than offering none: it is a
+    # claim of verification we never performed, on the surface built to prove we do not do that,
+    # read mostly by agents. A fingerprint is not a verdict — never silently upgrade authority.
+    seal_hash = str((card.get("extra") or {}).get("seal_hash") or "").strip()
     canonical = f"/card/{_esc(card_id)}"
     # ── THE OVERLAY + THE ADJOINING CARDS ────────────────────────────────────────────────────
     # Matt, 2026-07-30: "Add an overlay for each card when it is pulled by a human. Links to
