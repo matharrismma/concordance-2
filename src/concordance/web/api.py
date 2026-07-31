@@ -1413,7 +1413,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         h = (query.get("hash") or "").strip()
         if not h:
             return _err(400, "hash required")
-        rec = cas.fetch(h)
+        rec = cas.fetch_anywhere(h)   # the CAS object, or the card that carries it
         telemetry.record("seal_fetch", surface=surface, found=rec is not None)
         if rec is None:
             return _err(404, "seal not found")
@@ -2027,6 +2027,11 @@ ROUTES = [
     {"path": "/catalog.html", "methods": ("GET",), "serve": True, "retired": True},
     {"path": "/codex.html", "methods": ("GET",), "serve": True, "retired": True},
     {"path": "/works.html", "methods": ("GET",), "serve": True, "retired": True},
+    # The 1.0 canon reader. Caddy has been 301ing this to /bible.html since the cutover and
+    # DROPPING the ?ref= on the way — 3,020 hard 404s on the witness host, and on the secular host
+    # a reader landing on a generic Bible page with the reference silently gone. Handled here now
+    # so the reference travels; the Caddy line is removed.
+    {"path": "/canon.html", "methods": ("GET",), "serve": True, "retired": True},
 ]
 
 # A page that existed and is gone is NOT a 404. Each entry names where its content actually
@@ -2038,6 +2043,7 @@ _RETIRED = {
     "/catalog.html": "/corpus.html?section=drawers",      # the reference section, A–Z
     "/codex.html": "/corpus.html?section=manuscript",     # the compiled manuscript
     "/works.html": "/corpus.html?section=volume",         # the worked, sealed demonstrations
+    "/canon.html": "/bible.html",                         # the Word — and ?ref= now arrives with it
 }
 
 
@@ -2263,7 +2269,7 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 return self._keep(u)  # operator-gated dashboard
             if method == "GET" and u.path.startswith("/s/"):  # server-rendered citable receipt
                 h = u.path[3:].split("/")[0].strip()
-                status, html = render_seal_html(h, cas.fetch(h))
+                status, html = render_seal_html(h, cas.fetch_anywhere(h))
                 return self._html(status, html)
             if method == "GET" and u.path.startswith("/b/"):  # server-rendered citable badge (mirrors /s/)
                 h = u.path[3:].split("/")[0].strip()

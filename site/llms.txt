@@ -26,6 +26,15 @@ two surfaces: **narrowhighway.com** (the reach — accessible to all) and **narr
 (the witness — Scripture, the original languages, Christ at the foundation). The engine verifies
 and finds; it does not generate the answer.
 
+**Nothing is hidden.** The two surfaces differ in VOICE — how a reader is met — never in what they
+will show you. Every route and every one of the 79 MCP tools answers on both. Until 2026-07-31 the
+Word, the dictionary, the canon and the lexicon were held behind a conversational gate on the
+secular surface; twenty tools were invisible to any agent reading .com. That is over: we do not
+hide knowledge. What is still governed is not knowledge — the operator console is authority, a
+member's private shelf is theirs, joining the fellowship mesh is a confession, and writes want a
+signature. Abuse is refused by instruments built for it, not by a gate: **600 reads/min** and
+120 writes/min per client, and named SEO crawlers refused in robots.txt.
+
 ## Citable receipts
 Every verification is sealed and addressable. Cite a result by its content hash:
 - `GET /s/<hash>` — the human-readable, crawlable receipt page (verdict + worked trail + seal).
@@ -69,9 +78,23 @@ can shape a structured claim.
 - `GET /graph?scope=overview|shelf|card` — the public connection map (every edge carries its seal).
 - `GET /identity` — what this surface is. `GET /health` — status + `schema_active`.
 
-### Witness surface only (narrowhighway.org)
-- `GET /resolve?ref=John 3:16` — resolve a Scripture reference to its World English Bible text.
+### Scripture and its apparatus (BOTH surfaces since 2026-07-31)
+- `GET /passage?ref=John 3:16` — the World English Bible text.
+- `GET /resolve?ref=John 3:16` — resolve a Scripture reference to its text.
+- `GET /original?ref=John 3:16` — the Greek/Hebrew of that verse, word by word.
 - `GET /word_study?strongs=G26` — Strong's original-language definition + every occurrence.
+- `GET /characters?search=Aaron` · `GET /character?name=Aaron` — Easton's Bible Dictionary (1897,
+  public domain), the entry and every verse that speaks of it.
+- `GET /canon` · `/cross_refs` · `/tsk` · `/word_occurrences` · `/commentary` · `/harmony` ·
+  `/timeline` · `/backmatter` · `/places` · `/prophecy` · `/seeds` · `/narratives` · `/teachings`.
+
+## The Corpus — the whole body, browsable
+`/corpus.html` holds the keeping in four sections over one body: **the shelves** (551,756 cards
+across 106 shelves and 30 decks), **the drawers** (the reference section walked A–Z), **the
+manuscript** (the compiled, cross-indexed body with its authority spine), and **the worked volume**
+(sealed demonstrations you can re-check). It replaced four pages that were doing one job — the old
+addresses `/library.html`, `/catalog.html`, `/codex.html` and `/works.html` all 301 onto it and
+**carry their query with them**, so a link that named something still names it on arrival.
 
 ## Privacy gateway (embeddable, runs at your edge)
 Strip personal context before any AI call, reapply locally — the data never has to reach us.
