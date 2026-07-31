@@ -356,6 +356,11 @@ def load_cards(path: Optional[Path] = None,
                       # Nave topical index SCANNED into topics + speaks_to edges (structure
                       # taken, the work's own text left with the work).
                       "topical_cards.jsonl",
+                      # THE RECURRING ARCHITECTURE (tools/card_doctrine.py) — concepts gathered
+                      # from Matt's six planning documents, which describe one pattern in six
+                      # materials. Carried as concepts, never adopted as policy: each card names
+                      # its document and says where the idea already bears weight here.
+                      "doctrine_cards.jsonl",
                       # ISBE 1915 (D5) — 9,380 scholarly stub cards; the full public-domain
                       # article renders from data/acquisitions/isbe.db on the card page.
                       "isbe_cards.jsonl",
