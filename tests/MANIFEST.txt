@@ -101,6 +101,7 @@ test_receipt.py
 test_recite.py
 test_redact.py
 test_reference_cards.py
+test_repair_cards.py
 test_retired_pages.py
 test_router.py
 test_routes.py
