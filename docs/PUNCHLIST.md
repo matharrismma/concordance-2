@@ -9,7 +9,14 @@ Each item names its own completion test, so "done" is not a judgement call.
 
 ---
 
-## 1 · THE COMMONS  ← IN PROGRESS
+## 0 · THE HARDENING  ← NEXT (from the lessons)
+
+`docs/LESSONS_AND_HARDENING.md` — thirteen measured lessons from 2026-07-30 and the seven units they
+obligate (H1–H7). It goes FIRST because three of its items are things that are currently **wrong**,
+not merely missing: a steward token that never expires, a stale-read helper duplicated across eight
+pages, and a gate that names no owner. The Commons resumes at C1e once H1–H3 are closed.
+
+## 1 · THE COMMONS  ← C1a–C1d DONE and live
 
 The page becomes social first: every member stocks their own shelf, writes and is read, and the
 commons is what the fellowship has chosen to put on it. Design: `MASTER_PLAN.md` §3 and memory
