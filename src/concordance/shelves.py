@@ -363,12 +363,14 @@ def signable_curate(card_id: str, member: str, action: str = "withdrawn") -> Dic
             "note": "sign these exact bytes with the same key that signed the drop"}
 
 
-def _steward_authorized(token: str) -> bool:
-    """A steward's act needs a steward. Reuses the operator gate the keep already uses
-    (`CONCORDANCE_KEEP_TOKEN`, constant-time compare) rather than inventing a second secret —
-    one authority, one place to rotate it. FAILS CLOSED: no token configured, no promotion."""
-    from .web import keep as _keep
-    return _keep.is_operator(token, None)
+def _steward_warrant(token: str) -> Dict[str, Any]:
+    """WHO is acting, and is their term still running? (H1 / L11 — authority sunsets.)
+
+    This used to be a bool over one permanent secret. A bool cannot say who acted, cannot end, and
+    cannot be rotated — so the record could not name a steward and the grant could not expire.
+    `warrant.identify` returns a NAME and a term instead, never the secret. FAILS CLOSED."""
+    from . import warrant as _w
+    return _w.identify(token)
 
 
 def _member_authorized(card_id: str, fields: Optional[Dict[str, Any]], signature: str) -> bool:
@@ -424,20 +426,34 @@ def curate(card_id: str, action: str, steward: str, reason: str = "", token: str
         return {"ok": False, "error": "a reason is required; a refusal without one teaches the "
                                       "community nothing and an approval without one teaches us "
                                       "nothing"}
-    if not any(d["id"] == card_id for d in _read("drops.jsonl")):
-        return {"ok": False, "error": "no such drop"}
-    by_steward = _steward_authorized(token)
+    # AUTHORITY BEFORE EXISTENCE. This ran the other way round until a live check showed all three
+    # cases — no token, wrong token, real token — answering "no such drop". Two faults in one
+    # ordering: every refusal was misleading, and an unauthenticated caller could learn WHICH card
+    # ids exist by comparing errors. Nothing about the store is disclosed before authority is shown.
+    w = _steward_warrant(token) if token else {"ok": False}
+    by_steward = bool(w.get("ok"))
     by_member = (action == "withdrawn"
                  and not by_steward
                  and _member_authorized(card_id, fields, signature))
     if not (by_steward or by_member):
+        # An ENDED TERM gets its own sentence. A steward whose warrant expired is not an impostor,
+        # and telling them "not authorized" would send them hunting for a typo, not a renewal.
+        if w.get("expired"):
+            return {"ok": False, "expired": True, "error": w.get("error")}
         return {"ok": False, "error": (
-            "not authorized. Promoting or refusing is a steward's act and needs the steward token; "
+            "not authorized. Promoting or refusing is a steward's act and needs a valid warrant; "
             "withdrawing your own card needs your own signature over /curate/signable bytes. A "
             "typed name is not authority — anyone can type a name.")}
+    if not any(d["id"] == card_id for d in _read("drops.jsonl")):
+        return {"ok": False, "error": "no such drop"}
     rec = {"card_id": card_id, "action": action, "steward": steward,
            "reason": reason.strip()[:500], "at": int(time.time()),
            "by": "steward" if by_steward else "member"}
+    if by_steward:
+        # WHICH identity acted, never the secret. Without this the record says an act happened and
+        # cannot say whose — the gap L11 named in The Way.
+        rec["by_identity"] = w.get("name", "")
+        rec["authority_sunsets"] = bool(w.get("sunsets"))
     _append("curation.jsonl", rec)
     return {"ok": True, **rec,
             "note": ("Promoted to the commons — still the member's own words, at the member "
