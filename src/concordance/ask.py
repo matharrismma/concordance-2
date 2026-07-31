@@ -1033,7 +1033,7 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                                "message": "I don't have a verified answer for that, and I won't "
                                           "invent one — but here is where to find it, in sources you "
                                           "can trust:",
-                               "resources": [{"label": "The free libraries & references", "ref": "/library.html"},
+                               "resources": [{"label": "The free libraries & references", "ref": "/corpus.html"},
                                              {"label": "Check a specific claim, verified", "ref": "/check.html"},
                                              {"label": "Read Scripture", "ref": "/bible.html"}]},
                               text, witness, gate_just_opened)
@@ -1049,6 +1049,6 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     # The concierge: a search result is RELATED material, not a VERIFIED answer. For a question,
     # point — politely — to where a verified answer can be found (the free libraries; a claim check).
     if _is_question(text):
-        out["resources"] = [{"label": "The free libraries & references", "ref": "/library.html"},
+        out["resources"] = [{"label": "The free libraries & references", "ref": "/corpus.html"},
                             {"label": "Check a specific claim, verified", "ref": "/check.html"}]
     return _witnessed(out, text, witness, gate_just_opened)

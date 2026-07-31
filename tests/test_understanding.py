@@ -64,7 +64,7 @@ def test_concierge_points_to_sources_but_not_on_verified_answers():
     # libraries, deterministically, regardless of what the corpus holds
     d = ask.respond("is xqzptn wibbleforp glorptastic", cfg, gate_open=True)
     refs = [r.get("ref") for r in (d.get("resources") or [])]
-    assert "/library.html" in refs, "point to where a verified answer can be found"
+    assert "/corpus.html" in refs, "point to where a verified answer can be found"
 
 
 def test_anticipate_offers_next_for_content():

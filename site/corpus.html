@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Corpus — the whole body, browsable — Narrow Highway</title>
+<meta name="description" content="The whole kept body in one place: the shelves it is kept on, the drawers of the reference section, the manuscript it compiles into, and the volume of worked and sealed demonstrations.">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* THE CORPUS — one body, four views.
+     This page is `library` + `catalog` + `codex` + `works`, which were four pages doing one job
+     under four invented names. Each is a SECTION here, and a section loads its data only when it
+     is opened: arriving costs one fetch, not four. */
+  .parts{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:.6rem;
+    margin:1.6rem 0 1.4rem; border-bottom:1px solid var(--line); padding-bottom:1rem }
+  .part{ text-align:left; background:var(--paper); border:1px solid var(--line); border-radius:9px;
+    padding:.6rem .8rem .65rem; font:inherit; color:inherit; cursor:pointer; display:block;
+    transition:border-color .14s ease, transform .14s ease }
+  .part:hover{ border-color:var(--accent); transform:translateY(-1px) }
+  .part.on{ border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset }
+  .part small{ display:block; color:var(--muted); font-size:.76rem; margin-top:.15rem; line-height:1.35 }
+  .hidden{ display:none }
+
+  /* the shelves (was library.html) */
+  .lede-row{ display:flex; flex-wrap:wrap; gap:1.4rem; align-items:baseline; margin:.2rem 0 1.2rem }
+  .lede-row .big{ font-size:2.1rem; font-weight:700; color:var(--accent); line-height:1 }
+  .lede-row .k{ font-size:.74rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted) }
+  .find{ display:flex; gap:.5rem; margin:.4rem 0 1.6rem }
+  .find input{ flex:1; min-width:0; padding:.7rem .9rem; font:inherit; font-size:1rem;
+    background:var(--paper); color:var(--ink,inherit); border:1px solid var(--line); border-radius:9px }
+  .find input:focus{ outline:0; border-color:var(--accent) }
+  .find button{ white-space:nowrap }
+  #found-note{ font-size:.82rem; color:var(--muted); margin:-1rem 0 1.2rem; min-height:1.1rem }
+  .band{ margin:1.7rem 0 }
+  .band > h2{ font-size:1.12rem; margin:0 0 .1rem; letter-spacing:.01em }
+  .band > .bnote{ font-size:.86rem; color:var(--muted); margin:0 0 .8rem; max-width:52rem }
+  .decks{ display:grid; grid-template-columns:repeat(auto-fill, minmax(215px,1fr)); gap:.7rem }
+  .deck{ text-align:left; cursor:pointer; background:var(--paper); border:1px solid var(--line);
+    border-radius:11px; padding:.8rem .9rem .85rem; font:inherit; color:inherit; position:relative;
+    transition:border-color .14s ease, transform .14s ease, box-shadow .14s ease; display:block; width:100% }
+  .deck:hover{ border-color:var(--accent); transform:translateY(-1px); box-shadow:0 10px 26px -18px rgba(0,0,0,.5) }
+  .deck .dn{ display:block; font-weight:600; font-size:.98rem; line-height:1.25; padding-right:3.2rem }
+  .deck .dc{ position:absolute; top:.7rem; right:.85rem; font-size:.8rem; font-weight:700;
+    color:var(--accent); font-variant-numeric:tabular-nums }
+  .deck .dd{ display:block; font-size:.79rem; color:var(--muted); margin-top:.35rem; line-height:1.35 }
+  .deck[data-active="1"]{ border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset }
+  details.browse{ margin-top:2rem; border-top:1px solid var(--line); padding-top:1rem }
+  details.browse > summary{ cursor:pointer; font-weight:600; color:var(--muted) }
+  details.browse[open] > summary{ color:inherit }
+  #shelf-wrap{ margin:1rem 0 }
+
+  /* the drawers (was catalog.html) */
+  .drawers{ display:grid; grid-template-columns:repeat(4,1fr); gap:.8rem; margin:1.6rem 0 1rem }
+  .drawer{ border:1px solid var(--line); border-radius:5px; padding:1rem .9rem .8rem; cursor:pointer;
+    text-align:center; background:linear-gradient(180deg, rgba(201,162,74,.05), rgba(201,162,74,0)) }
+  .drawer:hover{ border-color:var(--gold) }
+  .drawer.on{ border-color:var(--gold); background:linear-gradient(180deg, rgba(201,162,74,.12), rgba(201,162,74,.02)) }
+  .drawer .label{ color:var(--ink); letter-spacing:.14em; text-transform:uppercase; font-size:.8rem }
+  .drawer .pull{ display:block; width:2.2rem; height:4px; border:1px solid var(--goldsoft); border-radius:2px; margin:.55rem auto 0 }
+  .rail{ display:flex; flex-wrap:wrap; gap:.15rem; margin:.6rem 0 1rem }
+  .rail button{ background:none; border:0; color:var(--dim); font:inherit; font-size:.85rem; padding:.15rem .45rem; cursor:pointer }
+  .rail button:hover,.rail button.on{ color:var(--gold) }
+  .cardrow{ border-bottom:1px solid var(--line); padding:.55rem 0 }
+  .cardrow .name{ color:var(--ink) }
+  .cardrow .cat{ color:var(--goldsoft); font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; margin-left:.5rem }
+  .cardrow .prev{ color:var(--dim); font-size:.92rem }
+
+  /* the manuscript (was codex.html) + the worked volume (was works.html) */
+  .stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin:1.6rem 0 }
+  .stat{ border:1px solid var(--line); border-radius:8px; padding:.8rem 1rem }
+  .stat .n{ font-family:var(--mono,ui-monospace); font-size:1.5rem; color:var(--gold) }
+  .stat .l{ color:var(--dim); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em }
+  .tabs{ display:flex; flex-wrap:wrap; gap:6px; margin:1.8rem 0 1.2rem; border-bottom:1px solid var(--line); padding-bottom:.6rem }
+  .tab{ font-family:var(--mono,ui-monospace); font-size:.78rem; letter-spacing:.06em; color:var(--dim);
+    background:none; border:1px solid var(--line); border-radius:6px 6px 0 0; padding:.4rem .9rem; cursor:pointer }
+  .tab.on{ color:#161206; background:var(--gold); border-color:var(--gold) }
+  .row{ display:flex; flex-wrap:wrap; gap:5px; margin:.8rem 0 }
+  .pill{ font-family:var(--mono,ui-monospace); font-size:.72rem; color:var(--dim); border:1px solid var(--line);
+    border-radius:999px; padding:.26rem .7rem; cursor:pointer; background:none }
+  .pill:hover{ color:var(--ink) } .pill .c{ color:var(--goldsoft) }
+  .xref{ border-left:2px solid var(--mid); padding:.35rem 0 .4rem 1rem; margin:.7rem 0 }
+  .xref .by{ color:var(--ink); font-size:.98rem }
+  .xref .m{ font-family:var(--mono,ui-monospace); font-size:.68rem; color:var(--dim); display:flex;
+    flex-wrap:wrap; gap:.6rem; margin-top:.15rem }
+  .xref .rel{ color:var(--goldsoft) } .xref .tierlab{ text-transform:uppercase; letter-spacing:.08em }
+  .xref .seal{ color:var(--pass) }
+  .sealed .s{ border-left:2px solid var(--pass); padding:.3rem 0 .35rem 1rem; margin:.5rem 0 }
+  .sealed .s .t{ color:var(--ink); font-size:.96rem }
+  .sealed .s a{ font-family:var(--mono,ui-monospace); font-size:.7rem }
+  .art{ border:1px solid var(--line); border-left:3px solid var(--gold); padding:1.1rem 1.3rem; margin:1rem 0;
+    font-family:var(--mono,ui-monospace); font-size:.82rem }
+  .art div{ margin:.2rem 0 } .art .k{ color:var(--dim) } .art .v{ color:var(--ink) } .ok{ color:var(--pass) }
+  .note{ border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:6px;
+    padding:.9rem 1.1rem; margin:1.4rem 0 2rem; color:var(--dim); font-size:.94rem }
+  h2.disc{ font-weight:400; font-size:1.5rem; color:var(--ink); letter-spacing:.02em;
+    margin:3rem 0 .3rem; padding-bottom:.5rem; border-bottom:1px solid var(--line) }
+  h2.disc .c{ font-family:var(--mono,ui-monospace); font-size:.8rem; color:var(--goldsoft); letter-spacing:.06em }
+  .demo{ border:1px solid var(--line); border-radius:10px; padding:1.2rem 1.3rem; margin:1.3rem 0;
+    background:rgba(255,255,255,.012) }
+  .demo .field{ font-family:var(--mono,ui-monospace); font-size:.68rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--goldsoft) }
+  .demo h3{ font-weight:400; font-size:1.24rem; margin:.25rem 0 .5rem; color:var(--ink) }
+  .demo .nar{ color:var(--dim); font-size:.96rem; margin:0 0 1rem }
+  .trail{ list-style:none; padding:0; margin:0 }
+  .trail li{ display:flex; gap:.7rem; align-items:flex-start; padding:.55rem 0; border-top:1px solid rgba(201,162,74,.09) }
+  .trail li:first-child{ border-top:0 }
+  .tick{ color:var(--pass); font-family:var(--mono,ui-monospace); font-size:.9rem; margin-top:.15rem; flex:0 0 auto }
+  .line .claim{ color:var(--ink); font-size:1rem }
+  .line .work{ font-family:var(--mono,ui-monospace); font-size:.76rem; color:var(--dim); margin-top:.2rem; word-break:break-word }
+  .demo .seal{ display:flex; flex-wrap:wrap; align-items:center; gap:.6rem; margin-top:1rem;
+    border-top:1px solid var(--line); padding-top:.8rem; font-size:.78rem; color:var(--dim) }
+  .demo .seal .v{ color:var(--pass); font-family:var(--mono,ui-monospace) }
+  .demo .seal .hash{ color:var(--dim); font-family:var(--mono,ui-monospace); font-size:.66rem; word-break:break-all }
+  .signblock{ border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:6px;
+    padding:1rem 1.2rem; margin:2.6rem 0 0; font-family:var(--mono,ui-monospace); font-size:.78rem; color:var(--dim) }
+  .signblock .val{ color:var(--ink); word-break:break-all }
+  @media (max-width:640px){ .drawers{ grid-template-columns:repeat(2,1fr) } }
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap" style="padding:.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center">
+  <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
+  <nav class="site"><a href="/">Write</a><a href="/bible.html">Scripture</a><a href="/characters.html">Dictionary</a><a href="/floor.html">The Floor</a><a href="/shelf.html">Your shelf</a><a href="/map.html">Map</a><a href="/brain.html">Brain</a><a href="/seal.html">Seals</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="kicker">The Corpus · the whole body</div>
+  <h1>The Corpus</h1>
+  <p class="lede">Everything the engine keeps, in one place — the shelves it is kept on, the drawers
+  of the reference section, the manuscript it compiles into, and the volume of worked and sealed
+  demonstrations. Four views of one body. Found and attributed; never generated.</p>
+
+  <nav class="parts" id="parts">
+    <button class="part on" data-s="shelves">The shelves<small>browse and search the whole keeping</small></button>
+    <button class="part" data-s="drawers">The drawers<small>the reference section, walked A–Z</small></button>
+    <button class="part" data-s="manuscript">The manuscript<small>compiled, cross-indexed, sealed</small></button>
+    <button class="part" data-s="volume">The worked volume<small>demonstrations you can re-check</small></button>
+  </nav>
+
+  <!-- THE SHELVES ------------------------------------------------------------------------ -->
+  <section id="sec-shelves">
+    <div class="lede-row">
+      <div><div class="big" id="total">…</div><div class="k">cards kept</div></div>
+      <div><div class="big" id="ndecks">…</div><div class="k">decks</div></div>
+      <div><div class="big" id="nshelves">…</div><div class="k">shelves</div></div>
+    </div>
+
+    <div class="find">
+      <input id="q" type="search" placeholder="Search the keeping — a word, a name, a claim…"
+             aria-label="Search the keeping" autocomplete="off">
+      <button onclick="findIt()">Search</button>
+    </div>
+    <div id="found-note"></div>
+    <div data-nhkind="cited" data-nhnote="the keeping" style="margin:-.6rem 0 1rem"></div>
+
+    <div id="atlas"><p class="muted">Opening the atlas…</p></div>
+
+    <details class="browse">
+      <summary>Or browse every shelf, card by card</summary>
+      <div id="shelf-wrap" class="row">
+        <select id="shelf" aria-label="shelf filter"><option value="">all shelves</option></select>
+        <button onclick="load(0)">Browse</button>
+      </div>
+      <div id="list"></div>
+      <div id="pager" style="margin-top:.8rem;display:flex;gap:.6rem;align-items:center"></div>
+    </details>
+
+    <div id="detail" style="margin-top:1.2rem"></div>
+  </section>
+
+  <!-- THE DRAWERS ------------------------------------------------------------------------ -->
+  <section id="sec-drawers" class="hidden">
+    <p class="lede">The Biblical Encyclopedia — Easton's Bible Dictionary (1897, public domain),
+    every entry a card in the keeping, in four drawers, the way a library once put its whole
+    reference section at your fingertips. Pull a drawer, walk the alphabet, open an entry; each
+    one carries its verses.</p>
+    <div class="drawers" id="cat-drawers"></div>
+    <div class="find"><input id="cq" type="search" placeholder="Or look it up straight — a name, a place, a word…" aria-label="Look up an entry"></div>
+    <div class="rail" id="cat-rail"></div>
+    <div id="cat-cards"><p class="muted">loading…</p></div>
+  </section>
+
+  <!-- THE MANUSCRIPT --------------------------------------------------------------------- -->
+  <section id="sec-manuscript" class="hidden">
+    <p class="lede">Not a book <em>about</em> the project — the project itself, in manuscript form.
+    The engine binds and indexes the chosen body (Scripture in the original tongues, the Fathers,
+    the Didache, the lens) and cross-references it against itself. <strong>Compiled, never
+    authored</strong> — the indexes surface; they never opine. Every citation is graded by the
+    authority spine, and where a claim carries a live receipt the manuscript is not only witnessed
+    but <strong>sealed</strong>.</p>
+    <div class="stats" id="mx-stats"><p class="muted">Compiling the manuscript…</p></div>
+    <div class="tabs" id="mx-tabs">
+      <button class="tab on" data-t="scripture">Scripture</button>
+      <button class="tab" data-t="themes">Themes</button>
+      <button class="tab" data-t="sealed">The sealed spine</button>
+      <button class="tab" data-t="artifact">The signed artifact</button>
+    </div>
+    <div id="pane-scripture"><p class="muted">Loading books…</p></div>
+    <div id="pane-themes" class="hidden"><p class="muted">Loading themes…</p></div>
+    <div id="pane-sealed" class="hidden"><p class="muted">Loading the sealed spine…</p></div>
+    <div id="pane-artifact" class="hidden"><p class="muted">Loading the seal…</p></div>
+  </section>
+
+  <!-- THE WORKED VOLUME ------------------------------------------------------------------ -->
+  <section id="sec-volume" class="hidden">
+    <p class="lede">Not a page that <em>claims</em> what the tools can do. A set of worked
+    demonstrations, each run through the same engine that guards the moat, each carrying a
+    permanent seal you can open and re-check yourself. The engine verifies a provided derivation,
+    line by line; it never generates the answer.</p>
+    <div class="stats" id="wv-stats"><div class="stat"><span class="n">…</span><span class="l">loading</span></div></div>
+    <div class="note" id="wv-note">Loading the volume…</div>
+    <div id="wv-volume"></div>
+    <div class="signblock" id="wv-sign"></div>
+  </section>
+
+  <footer class="site">
+    <p>The keeping is the substrate — the engine finds what survives; it does not generate the
+    answer. Every demonstration in the worked volume was verified by the deterministic engine and
+    sealed to a content-addressed receipt (<span class="muted">/s/&lt;hash&gt;</span>); re-fetch any
+    seal and check it yourself. The fuller witness is at
+    <a href="https://narrowhighway.org">narrowhighway.org</a>.</p>
+  </footer>
+</main>
+
+<script src="/kinds.js"></script>
+<script>
+const API = "";
+function esc(s){const d=document.createElement('div');d.textContent=String(s==null?"":s);return d.innerHTML;}
+function num(n){ return (n||0).toLocaleString(); }
+async function getJSON(p){ const r=await fetch(API+p); if(!r.ok){ if(window.NHGate) await NHGate.isClosed(r); return null; } try{return await r.json();}catch(e){return null;} }
+
+/* ── the parts ────────────────────────────────────────────────────────────────────────────
+   Four sections, one body. A section fetches nothing until it is opened, so arriving at the
+   Corpus costs what arriving at ONE of the four old pages cost — the merge must not be paid
+   for in load time. `?section=` names the part so a link can point straight at it. */
+const PARTS = {shelves:null, drawers:null, manuscript:null, volume:null};
+let shown = 'shelves';
+
+function showPart(name, push){
+  if(!(name in PARTS)) name = 'shelves';
+  shown = name;
+  for(const k in PARTS){
+    document.getElementById('sec-'+k).classList.toggle('hidden', k !== name);
+  }
+  document.querySelectorAll('.part').forEach(b => b.classList.toggle('on', b.dataset.s === name));
+  if(typeof PARTS[name] === 'function'){ const init = PARTS[name]; PARTS[name] = 'done'; init(); }
+  if(push){
+    const u = new URL(location.href);
+    if(name === 'shelves') u.searchParams.delete('section'); else u.searchParams.set('section', name);
+    history.replaceState(null, '', u);
+  }
+}
+document.getElementById('parts').addEventListener('click', e => {
+  const b = e.target.closest('.part'); if(b) showPart(b.dataset.s, true);
+});
+
+/* ── the shelves ──────────────────────────────────────────────────────────────────────── */
+let offset = 0, limit = 20, total = 0;
+const DECKMETA = {};
+
+// The rooms of the house — the atlas grouped by the structure of reality. Any deck not named
+// here falls to "More in the keeping", so new decks always appear without touching this file.
+const SECTIONS = [
+  { title:"The Word — the plumb-line",
+    note:"Scripture and the tongues it was given in. The measure against which everything else is calibrated.",
+    ids:["scripture","scripture-original","tongues","word"] },
+  { title:"The Floor of Discovery — the created order",
+    note:"What He made, mapped and measured: life, the earth, the body, matter, the heavens, number, language, the nations.",
+    ids:["life","earth","body","matter","heavens","sequences","languages","networks","nations"] },
+  { title:"The Systems of the World — one design, many planes",
+    note:"The recurring form of His design across engineering — effort and flow, the same equations again and again, even in the shadow and the inverse.",
+    ids:["systems","electronics","fluids","thermal","mechanical","waves","control"] },
+  { title:"Calibration — gathered wisdom, measured with love",
+    note:"The traditions, the builders, the foreshadows, the protocols — each credited magnanimously and held to the one plumb-line. We calibrate; we do not judge.",
+    ids:["churches","builders","foreshadows","fieldkit","playbook"] },
+  { title:"The Archive — acquired to the shelf",
+    note:"The great books and the dated events of history. A stub card here; the full source a link away, held on the drive.",
+    ids:["books","history"] },
+  { title:"The Practice — tools for the road",
+    note:"Lawful free access, the land, and the worked-and-sealed demonstrations of the moat.",
+    ids:["free-access","land","works"] },
+];
+
+async function initShelves(){
+  let stats = {by_shelf:{}, total:0}, decks = [];
+  try{ stats = await (await fetch(API + "/cards/stats")).json(); }catch(e){}
+  try{ decks = (await (await fetch(API + "/decks")).json()).decks || []; }catch(e){}
+
+  document.getElementById('total').textContent = num(stats.total);
+  document.getElementById('ndecks').textContent = num(decks.length);
+  const shelves = Object.keys(stats.by_shelf || {});
+  document.getElementById('nshelves').textContent = num(shelves.length);
+
+  const sel = document.getElementById('shelf');
+  shelves.sort().forEach(sh => {
+    const o = document.createElement('option'); o.value = sh;
+    o.textContent = sh + " (" + stats.by_shelf[sh] + ")"; sel.appendChild(o);
+  });
+
+  decks.forEach(d => DECKMETA[d.id] = d);
+  renderAtlas(decks);
+}
+
+function deckDoor(d){
+  if(!d) return "";
+  const shelves = (d.shelves||[]).join(",");
+  return '<button class="deck" data-id="' + esc(d.id) + '" data-shelves="' + esc(shelves) + '" '+
+    'onclick="openDeck(this)">' +
+    '<span class="dc">' + num(d.cards) + '</span>' +
+    '<span class="dn">' + esc(d.name) + '</span>' +
+    '<span class="dd">' + esc(d.desc || "") + '</span></button>';
+}
+
+function renderAtlas(decks){
+  const placed = new Set();
+  let html = "";
+  for(const sec of SECTIONS){
+    const inSec = sec.ids.map(id => DECKMETA[id]).filter(Boolean);
+    if(!inSec.length) continue;
+    inSec.forEach(d => placed.add(d.id));
+    html += '<section class="band"><h2>' + esc(sec.title) + '</h2>' +
+            '<p class="bnote">' + esc(sec.note) + '</p><div class="decks">' +
+            inSec.map(deckDoor).join("") + '</div></section>';
+  }
+  const rest = decks.filter(d => !placed.has(d.id)).sort((a,b)=>b.cards-a.cards);
+  if(rest.length){
+    html += '<section class="band"><h2>More in the keeping</h2>' +
+            '<p class="bnote">Further decks over the same shared corpus.</p><div class="decks">' +
+            rest.map(deckDoor).join("") + '</div></section>';
+  }
+  document.getElementById('atlas').innerHTML = html || '<p class="muted">No decks yet.</p>';
+}
+
+function openDeck(btn){
+  document.querySelectorAll('.deck[data-active="1"]').forEach(e => e.removeAttribute('data-active'));
+  btn.setAttribute('data-active','1');
+  const shelves = (btn.dataset.shelves||"").split(",").filter(Boolean);
+  const det = document.querySelector('details.browse'); if(det) det.open = true;
+  const sel = document.getElementById('shelf');
+  if(shelves.length){ sel.value = shelves[0]; }
+  load(0);
+  document.getElementById('shelf-wrap').scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+async function findIt(){
+  showPart('shelves', true);
+  const q = document.getElementById('q').value.trim();
+  const note = document.getElementById('found-note');
+  if(!q){ note.textContent = ""; return; }
+  note.textContent = "Searching…";
+  document.getElementById('detail').innerHTML = "";
+  try{
+    const d = await (await fetch(API + "/deck?q=" + encodeURIComponent(q) + "&limit=24")).json();
+    const res = d.results || [];
+    const via = d.deck ? ('the ' + esc(DECKMETA[d.deck]?.name || d.deck) + ' deck' + (d.fell_back_to_full ? ', then the whole keeping' : '')) : 'the whole keeping';
+    note.innerHTML = res.length
+      ? num(d.count) + ' found — searched ' + via + '. <span class="muted">The Hare runs the likely deck first; the Tortoise reaches everything.</span>'
+      : 'Nothing came back for “' + esc(q) + '”. Try a name, a word, or a claim.';
+    const list = document.getElementById('list');
+    list.innerHTML = res.map(c =>
+      '<a href="/card/' + encodeURIComponent(c.id) + '" class="result" style="display:block;text-decoration:none;color:inherit;cursor:pointer" onclick="openCard(\'' + esc(c.id) + '\');return false;">' +
+      '<span class="shelf">' + esc(c.shelf || "") + '</span>' +
+      '<div class="t">' + esc(c.title || c.id) + '</div>' +
+      '<div class="s">' + esc((c.snippet || "").slice(0,160)) + '</div></a>').join("");
+    document.getElementById('pager').innerHTML = "";
+    const det = document.querySelector('details.browse'); if(det) det.open = true;
+    document.getElementById('found-note').scrollIntoView({behavior:"smooth", block:"nearest"});
+  }catch(e){ note.textContent = "Search is unreachable right now."; }
+}
+
+async function load(off){
+  offset = Math.max(0, off);
+  const shelf = document.getElementById('shelf').value;
+  const list = document.getElementById('list');
+  list.innerHTML = '<p class="muted">loading…</p>';
+  document.getElementById('detail').innerHTML = "";
+  try{
+    const q = "/cards?limit=" + limit + "&offset=" + offset + (shelf ? "&shelf=" + encodeURIComponent(shelf) : "");
+    const d = await (await fetch(API + q)).json();
+    total = d.total || 0;
+    if(!d.cards || !d.cards.length){ list.innerHTML = '<p class="muted">no cards on that shelf.</p>'; document.getElementById('pager').innerHTML=""; return; }
+    list.innerHTML = d.cards.map(c =>
+      '<a href="/card/' + encodeURIComponent(c.id) + '" class="result" style="display:block;text-decoration:none;color:inherit;cursor:pointer" onclick="openCard(\'' + esc(c.id) + '\');return false;">' +
+      '<span class="shelf">' + esc(c.shelf || "") + '</span>' +
+      '<div class="t">' + esc(c.title || c.id) + '</div>' +
+      '<div class="s">' + esc((c.snippet || "").slice(0,150)) + '</div></a>').join("");
+    const page = Math.floor(offset/limit)+1, pages = Math.max(1, Math.ceil(total/limit));
+    document.getElementById('pager').innerHTML =
+      '<button ' + (offset<=0?'disabled':'') + ' onclick="load(' + (offset-limit) + ')">← prev</button>' +
+      '<span class="muted">page ' + page + ' / ' + pages + ' · ' + num(total) + ' cards</span>' +
+      '<button ' + (offset+limit>=total?'disabled':'') + ' onclick="load(' + (offset+limit) + ')">next →</button>';
+  }catch(e){ list.innerHTML = '<p class="muted">API unreachable.</p>'; }
+}
+
+async function openCard(id){
+  const det = document.getElementById('detail');
+  det.innerHTML = '<p class="muted">opening…</p>';
+  try{
+    const c = await (await fetch(API + "/card?id=" + encodeURIComponent(id))).json();
+    if(c.error){ det.innerHTML = '<p class="muted">' + esc(c.error) + '</p>'; return; }
+    det.innerHTML = '<div class="card"><div class="shelf">' + esc(c.shelf||"") + (c.surface?' · '+esc(c.surface):'') + '</div>' +
+      '<div class="verdict" style="font-size:1.1rem">' + esc(c.title || c.id) + '</div>' +
+      '<p style="white-space:pre-wrap;margin-top:.5rem">' + esc(c.body || "(no body)") + '</p>' +
+      '<div class="muted mono" style="font-size:.78rem;margin-top:.6rem">' + esc(c.id) + '</div></div>';
+    det.scrollIntoView({behavior:"smooth", block:"nearest"});
+  }catch(e){ det.innerHTML = '<p class="muted">could not open that card.</p>'; }
+}
+
+document.getElementById('q').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); findIt(); } });
+
+/* ── the drawers ──────────────────────────────────────────────────────────────────────── */
+PARTS.drawers = function(){
+  const DRAWERS=[["person","Persons"],["place","Places"],["concept","Concepts"],["object","Objects"]];
+  let CAT="person", LETTER="A";
+  const qEl = document.getElementById('cq');
+
+  async function draw(){
+    const q = qEl.value.trim();
+    const el = document.getElementById('cat-cards');
+    el.innerHTML = '<p class="muted">reading the drawer…</p>';
+    const url = q ? '/characters?search='+encodeURIComponent(q)+'&limit=60'
+                  : '/characters?category='+encodeURIComponent(CAT)+'&letter='+encodeURIComponent(LETTER)+'&limit=100';
+    const d = await getJSON(url);
+    if(!d){ el.innerHTML='<p class="muted">The reference section lives behind the Gate on this surface — <a href="/">ask, and it opens</a>.</p>'; return; }
+    el.innerHTML = (d.items||[]).map(function(it){
+      return '<div class="cardrow"><a class="name" href="/characters.html?search='+encodeURIComponent(it.name)+'">'+esc(it.name)+'</a>'+
+        (it.category?'<span class="cat">'+esc(it.category)+'</span>':'')+
+        '<span class="cat">'+it.ref_count+' refs</span>'+
+        '<div class="prev">'+esc(it.preview||'')+'</div></div>';
+    }).join('') || '<p class="muted">This drawer is empty at '+esc(LETTER)+' — try another letter.</p>';
+  }
+
+  const dr = document.getElementById('cat-drawers');
+  dr.innerHTML = DRAWERS.map(function(x){
+    return '<div class="drawer'+(x[0]===CAT?' on':'')+'" data-c="'+x[0]+'"><span class="label">'+x[1]+'</span>'+
+      '<span class="pull"></span></div>';
+  }).join('');
+  dr.addEventListener('click', function(e){
+    const b = e.target.closest('.drawer'); if(!b) return;
+    CAT = b.dataset.c; qEl.value = '';
+    Array.prototype.forEach.call(dr.querySelectorAll('.drawer'), x => x.classList.toggle('on', x===b));
+    draw();
+  });
+
+  const rail = document.getElementById('cat-rail');
+  rail.innerHTML = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(function(L){
+    return '<button data-l="'+L+'"'+(L===LETTER?' class="on"':'')+'>'+L+'</button>';
+  }).join('');
+  rail.addEventListener('click', function(e){
+    const b = e.target.closest('button[data-l]'); if(!b) return;
+    LETTER = b.dataset.l; qEl.value = '';
+    Array.prototype.forEach.call(rail.querySelectorAll('button'), x => x.classList.toggle('on', x===b));
+    draw();
+  });
+
+  let t = null;
+  qEl.addEventListener('input', function(){ clearTimeout(t); t = setTimeout(draw, 250); });
+  draw();
+};
+
+/* ── the manuscript ───────────────────────────────────────────────────────────────────── */
+PARTS.manuscript = function(){
+  function hash(u){ var m=/\/s\/([0-9a-f]{6,})/.exec(u||''); return m?m[1].slice(0,12):''; }
+  var panes = {};
+  ['scripture','themes','sealed','artifact'].forEach(function(t){ panes[t]=document.getElementById('pane-'+t); });
+  document.getElementById('mx-tabs').addEventListener('click', function(e){
+    var b = e.target.closest('.tab'); if(!b) return;
+    Array.prototype.forEach.call(document.querySelectorAll('#mx-tabs .tab'), function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    for(var k in panes){ panes[k].classList.toggle('hidden', k !== b.getAttribute('data-t')); }
+  });
+
+  fetch('/codex').then(function(r){return r.json();}).then(function(d){
+    var s=d.scripture||{}, t=d.themes||{}, c=d.connections||{}, a=d.artifact||{};
+    document.getElementById('mx-stats').innerHTML=[
+      ['Scripture cross-refs', s.cross_references, (s.witnessed||0)+' witnessed'],
+      ['Books indexed', s.books_indexed, (s.verse_level||0)+' verse-level'],
+      ['Themes', t.themes, (t.cross_tradition||0)+' cross-tradition'],
+      ['Sealed cards', c.sealed_cards, 'live receipts'],
+      ['Witnessed hubs', c.witnessed_hubs, (c.witnessed_sources||0)+' sources'],
+      ['Artifact', a.signed?'signed':'unsigned', a.fingerprint||'']
+    ].map(function(x){return '<div class="stat"><div class="n">'+esc(x[1]==null?'—':x[1])+'</div><div class="l">'+esc(x[0])+'</div><div class="l" style="color:var(--goldsoft)">'+esc(x[2]||'')+'</div></div>';}).join('');
+  });
+
+  fetch('/codex/scripture').then(function(r){return r.json();}).then(function(d){
+    var books=d.books||{}, names=Object.keys(books);
+    panes.scripture.innerHTML='<h2>Every verse, every witnessed citation across the body</h2>'+
+      '<div class="row" id="books">'+names.map(function(n){return '<button class="pill" data-b="'+esc(n)+'">'+esc(n)+' <span class="c">'+books[n]+'</span></button>';}).join('')+'</div><div id="bookdetail"></div>';
+    panes.scripture.querySelector('#books').addEventListener('click',function(e){
+      var b=e.target.closest('.pill'); if(!b)return;
+      var name=b.getAttribute('data-b'), det=panes.scripture.querySelector('#bookdetail');
+      det.innerHTML='<p class="muted">Loading '+esc(name)+'…</p>';
+      fetch('/codex/scripture?book='+encodeURIComponent(name)).then(function(r){return r.json();}).then(function(bd){
+        var refs=bd.cross_references||[];
+        det.innerHTML='<h2>'+esc(name)+' — '+refs.length+' cross-references</h2>'+refs.slice(0,300).map(function(x){
+          return '<div class="xref"><div class="by">'+esc(x.by||'')+'</div><div class="m">'+
+            '<span class="rel">'+esc(x.relationship||'')+'</span>'+
+            (x.verse_refs&&x.verse_refs.length?'<span>'+esc(x.verse_refs.join(', '))+'</span>':'')+
+            (x.tier?'<span class="tierlab">'+esc(x.tier)+'</span>':'')+
+            (x.witness_status==='passed'?'<span class="seal">witnessed</span>':'')+
+            (x.seal?'<a class="seal" href="'+esc(x.seal)+'" target="_blank" rel="noopener">receipt '+esc(hash(x.seal))+'…</a>':'')+
+            '</div></div>';
+        }).join('');
+      });
+    });
+  });
+
+  fetch('/codex/themes').then(function(r){return r.json();}).then(function(d){
+    var th=d.themes||{}, keys=Object.keys(th).slice(0,140);
+    panes.themes.innerHTML='<h2>Themes drawn from the body — not authored, inverted from its own tags</h2>'+
+      '<div class="row" id="themerow">'+keys.map(function(k){return '<button class="pill" data-k="'+esc(k)+'">'+esc(th[k].label||k)+' <span class="c">'+th[k].count+'</span></button>';}).join('')+'</div><div id="themedetail"></div>';
+    panes.themes.querySelector('#themerow').addEventListener('click',function(e){
+      var b=e.target.closest('.pill'); if(!b)return;
+      var k=b.getAttribute('data-k'), det=panes.themes.querySelector('#themedetail');
+      fetch('/codex/themes?theme='+encodeURIComponent(k)).then(function(r){return r.json();}).then(function(t){
+        det.innerHTML='<h2>'+esc(t.label||k)+' — '+t.count+' sites · '+(t.span||1)+' tradition(s)'+(t.sealed?' · '+t.sealed+' sealed':'')+'</h2>'+
+          (t.cards||[]).slice(0,120).map(function(c){return '<div class="xref"><div class="by">'+esc(c.title||c.id)+'</div><div class="m"><span class="tierlab">'+esc(c.shelf||'')+'</span>'+(c.tier?'<span>'+esc(c.tier)+'</span>':'')+(c.seal?'<a class="seal" href="'+esc(c.seal)+'" target="_blank" rel="noopener">receipt</a>':'')+'</div></div>';}).join('');
+      });
+    });
+  });
+
+  fetch('/codex/connections').then(function(r){return r.json();}).then(function(d){
+    var sealed=d.sealed||[];
+    panes.sealed.innerHTML='<h2>The sealed spine — '+sealed.length+' cards backed by a live, re-checkable receipt</h2>'+
+      '<p class="muted">Where the manuscript is not only witnessed but computed: each carries a seal you can re-run.</p><div class="sealed">'+
+      sealed.map(function(s){return '<div class="s"><div class="t">'+esc(s.title)+'</div><a href="'+esc(s.seal)+'" target="_blank" rel="noopener">receipt '+esc(hash(s.seal))+'… · '+esc(s.box||s.shelf)+'</a></div>';}).join('')+'</div>';
+  });
+
+  fetch('/codex/artifact').then(function(r){return r.json();}).then(function(d){
+    var m=d.manifest||{}, b=m.body||{};
+    fetch('/codex/verify').then(function(r){return r.json();}).then(function(v){
+      panes.artifact.innerHTML='<h2>The signed artifact — the codex as of a date, Ed25519-sealed</h2>'+
+        '<div class="art">'+
+        '<div><span class="k">generated</span> <span class="v">'+esc(m.generated||'—')+'</span></div>'+
+        '<div><span class="k">public cards</span> <span class="v">'+esc(b.public_cards||'—')+'</span> · <span class="k">sealed</span> <span class="v">'+esc(b.sealed_cards||0)+'</span></div>'+
+        '<div><span class="k">body fingerprint</span> <span class="v">'+esc((b.body_hash||'').slice(0,32))+'…</span></div>'+
+        '<div><span class="k">signature</span> <span class="v">'+(d.signed?'<span class="ok">Ed25519 ✓ '+esc(d.fingerprint||'')+'</span>':'unsigned')+'</span></div>'+
+        '<div><span class="k">verify</span> <span class="v">'+(v.ok?'<span class="ok">holds — signature + hash re-checked'+(v.body_drift_since_seal?', body has grown since seal':'')+'</span>':'drift')+'</span></div>'+
+        '</div><p class="muted">Tamper-evident: any change to the manifest fails verification. Re-seal on the node: <span style="font-family:var(--mono,ui-monospace)">python -m concordance.codex build</span>.</p>';
+    });
+  });
+};
+
+/* ── the worked volume ────────────────────────────────────────────────────────────────── */
+PARTS.volume = function(){
+  fetch('/works').then(function(r){return r.json();}).then(function(d){
+    var ov = d.overview || {}, demos = d.demonstrations || [];
+    var by = ov.by_discipline || {};
+    var labels = ov.part_labels || {};
+    var order = (ov.discipline_order && ov.discipline_order.length) ? ov.discipline_order : Object.keys(by);
+    var DISC = order.map(function(k){ return { key:k, label: labels[k] || k }; });
+    var tiles = '<div class="stat"><span class="n">'+esc(ov.published||demos.length)+'</span><span class="l">demonstrations</span></div>';
+    DISC.forEach(function(sec){
+      var short = (sec.label.split(' · ')[1] || sec.label);
+      tiles += '<div class="stat"><span class="n">'+esc(by[sec.key]||0)+'</span><span class="l">'+esc(short)+'</span></div>';
+    });
+    document.getElementById('wv-stats').innerHTML = tiles;
+    document.getElementById('wv-note').textContent = ov.note || '';
+
+    var vol = document.getElementById('wv-volume'), html = '';
+    DISC.forEach(function(sec){
+      var group = demos.filter(function(x){ return x.discipline === sec.key; });
+      if(!group.length) return;
+      html += '<h2 class="disc">'+esc(sec.label)+' <span class="c">'+group.length+' worked &amp; sealed</span></h2>';
+      group.forEach(function(x){
+        html += '<article class="demo" id="'+esc(x.id)+'">'+
+          '<div class="field">'+esc(x.field||'')+'</div>'+
+          '<h3>'+esc(x.title)+'</h3>'+
+          '<p class="nar">'+esc(x.narrative||'')+'</p>'+
+          '<ul class="trail">'+
+          (x.trail||[]).map(function(t){
+            return '<li><span class="tick">'+(t.status==='CONFIRMED'?'✓':'·')+'</span>'+
+              '<span class="line"><span class="claim">'+esc(t.claim||'')+'</span>'+
+              (t.detail?'<span class="work">'+esc(t.detail)+'</span>':'')+'</span></li>';
+          }).join('')+
+          '</ul>';
+        var seal = x.seal || {};
+        if(seal.cite_url){
+          html += '<div class="seal"><span class="v">HOLDS · '+esc(x.confirmed_steps)+'/'+esc(x.steps)+' steps sealed</span>'+
+            '<a href="'+esc(seal.cite_url)+'">re-check this receipt ↗</a>'+
+            '<span class="hash">'+esc((seal.content_hash||'').slice(0,24))+'…</span></div>';
+        }
+        html += '</article>';
+      });
+    });
+    vol.innerHTML = html || '<p class="muted">No demonstrations compiled yet.</p>';
+
+    fetch('/works/artifact').then(function(r){return r.json();}).then(function(a){
+      var man = a.manifest || {};
+      document.getElementById('wv-sign').innerHTML =
+        '<div><span class="k">the works · signed volume</span></div>'+
+        '<div><span class="k">generated </span><span class="val">'+esc(man.generated||'—')+'</span></div>'+
+        '<div><span class="k">manifest sha256 </span><span class="val">'+esc((a.manifest_sha256||'').slice(0,32))+'…</span></div>'+
+        '<div><span class="k">signature </span><span class="val">'+(a.signed?'Ed25519 ✓':'unsigned')+'</span>'+
+        (a.fingerprint?' · <span class="val">'+esc(a.fingerprint)+'</span>':'')+'</div>'+
+        '<div style="margin-top:.5rem"><a href="/works/artifact">download the signed volume (JSON) ↗</a> · '+
+        '<a href="/works/verify">re-verify the signature ↗</a></div>';
+    }).catch(function(){});
+  }).catch(function(){
+    document.getElementById('wv-note').textContent = 'The volume could not be loaded right now.';
+  });
+};
+
+/* ── deep links ───────────────────────────────────────────────────────────────────────────
+   The shared adopter (nh-home.js) hands us whatever the URL asked for. A search or a shelf is
+   the shelves' business, so switch there first — a reader who followed a link to a shelf must
+   not land on a section that cannot show it. */
+window.NHDeepLink = function(v){ showPart('shelves', false); document.getElementById('q').value = v; findIt(); };
+window.NHDeepLinkShelf = function(s){
+  showPart('shelves', false);
+  const det = document.querySelector('details.browse'); if(det) det.open = true;
+  const sel = document.getElementById('shelf');
+  const go = () => { sel.value = s; load(0);
+    document.getElementById('shelf-wrap').scrollIntoView({behavior:"smooth", block:"start"}); };
+  (function wait(n){
+    if(Array.prototype.some.call(sel.options, o => o.value === s)) return go();
+    if(sel.options.length > 1){
+      // The dropdown is built from /cards/stats and arrived without this shelf. /cards?shelf=
+      // serves it anyway, so add the option rather than refuse the link — a shelf the reader was
+      // sent to is not made unreal by being absent from a list.
+      const o = document.createElement('option'); o.value = s; o.textContent = s;
+      sel.appendChild(o); return go();
+    }
+    if(n < 40) setTimeout(() => wait(n+1), 100);
+  })(0);
+};
+
+initShelves();
+showPart(new URLSearchParams(location.search).get('section') || 'shelves', false);
+</script>
+<script src="/nh-home.js"></script>
+<script src="/nh-tools.js"></script>
+</body>
+</html>

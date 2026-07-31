@@ -22,7 +22,9 @@ const CACHE = 'nh-offline-v5';  // v5: precache harmony.html + timeline.html
 const CORE = [
   '/', '/index.html', '/companion.html', '/ask.html',
   '/floor.html', '/read.html', '/bible.html', '/apothecary.html',
-  '/journal.html', '/days.html', '/almanac.html', '/library.html', '/works.html', '/codex.html',
+  // one entry for the Corpus, not one per section: the sections are views of a single document,
+  // so `?section=` would precache the same bytes three times under three cache keys
+  '/journal.html', '/days.html', '/almanac.html', '/corpus.html',
   '/harmony.html', '/timeline.html',
   '/kinds.js', '/nh-tools.js', '/nh-home.js', '/speak.js', '/gate.js', '/redact.js', '/nh-search.js',
   '/manifest.webmanifest', '/icon.svg',

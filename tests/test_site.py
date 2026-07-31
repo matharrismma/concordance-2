@@ -77,7 +77,10 @@ def test_every_tool_in_the_palette_exists():
     for href, name in _palette():
         if href == "/":
             continue
-        assert (SITE / href.lstrip("/")).exists(), f"{name!r} points at a missing page: {href}"
+        # a palette entry may be a DEEP link (/corpus.html?section=drawers) — the page has to
+        # exist, the query does not name a file
+        page = href.split("?")[0].split("#")[0]
+        assert (SITE / page.lstrip("/")).exists(), f"{name!r} points at a missing page: {href}"
 
 
 def test_the_palette_never_offers_a_page_that_is_not_public():

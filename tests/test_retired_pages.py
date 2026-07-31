@@ -112,7 +112,42 @@ def test_daily_html_says_which_side_failed_when_the_keeping_is_empty(server):
 def test_hymns_html_goes_to_the_hymn_shelf(server):
     status, h = _raw_get(server, "/hymns.html")
     assert status == 301, f"expected a permanent redirect, got {status}"
-    assert h.get("location") == "/library.html?shelf=hymns"
+    assert h.get("location") == "/corpus.html?shelf=hymns"
+
+
+def test_the_four_pages_of_the_corpus_still_answer(server):
+    """library · catalog · codex · works were four pages doing one job. Each is a section of the
+    Corpus now, and each old address still resolves to its own section."""
+    for path, section in (("/library.html", None), ("/catalog.html", "drawers"),
+                          ("/codex.html", "manuscript"), ("/works.html", "volume")):
+        status, h = _raw_get(server, path)
+        assert status == 301, f"{path} answers {status}"
+        loc = h.get("location", "")
+        assert loc.startswith("/corpus.html"), f"{path} -> {loc}"
+        if section:
+            assert f"section={section}" in loc, f"{path} lost its section: {loc}"
+
+
+def test_a_retired_page_carries_what_it_was_asked_for(server):
+    """The /canon.html failure, refused at the source: a redirect that drops the query lands the
+    reader on a plausible page with the reference thrown away."""
+    status, h = _raw_get(server, "/library.html?q=Aaron&shelf=hymns")
+    assert status == 301
+    loc = h.get("location", "")
+    assert "q=Aaron" in loc and "shelf=hymns" in loc, f"the query was dropped: {loc}"
+    # and the incoming side wins over the destination's own default
+    status, h = _raw_get(server, "/codex.html?section=drawers")
+    assert h.get("location", "").count("section=") == 1, "merged query has a duplicated key"
+    assert "section=drawers" in h.get("location", ""), "the link's own section was overridden"
+
+
+def test_no_retired_page_points_at_another_retired_page(server):
+    """A chain through a page that is itself gone is a hop nobody can follow twice. Every
+    destination has to be the real one."""
+    from concordance.web import api
+    for src, dest in api._RETIRED.items():
+        head = dest.split("?")[0]
+        assert head not in api._RETIRED, f"{src} -> {dest}, which is itself retired"
 
 
 def test_no_retired_page_still_404s(server):
@@ -158,7 +193,7 @@ def test_the_shared_adopter_is_on_the_pages_that_are_cited():
     """The dictionary is the destination of 2,619 card citations and the library of the hymn
     redirect. Both must read the URL, or every one of those links silently shows the unfiltered
     page."""
-    for page in ("characters.html", "library.html"):
+    for page in ("characters.html", "corpus.html"):
         assert _page_honours_params(page), f"{page} does not honour a deep link"
 
 

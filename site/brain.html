@@ -50,7 +50,7 @@
 <body>
   <header class="site"><div class="bar">
     <a class="brand" href="/"><span class="road">▲</span> Narrow Highway</a>
-    <nav class="site"><a href="/map.html">Map</a><a href="/codex.html">Codex</a><a href="/almanac.html">Almanac</a><a href="/teachings.html">Teachings</a><a href="/proof.html">Proof</a></nav>
+    <nav class="site"><a href="/map.html">Map</a><a href="/corpus.html?section=manuscript">Codex</a><a href="/almanac.html">Almanac</a><a href="/teachings.html">Teachings</a><a href="/proof.html">Proof</a></nav>
   </div></header>
 
   <div class="wrap">
@@ -79,7 +79,7 @@
   var LABEL={codex:'The Word & traditions',classics:'Philosophers & fathers',dictionary:'The wisdom lexicon',
     patristics:'The Fathers',science:'The sealed moat',domains:'The domains',reference:'Reference',hymns:'Hymns',
     maker:'The maker',recipes:'The table',concepts:'Concepts'};
-  var DOORS=[['Codex','/codex.html'],['Almanac','/almanac.html'],['Teachings','/teachings.html'],['Bible','/bible.html'],['Map','/map.html']];
+  var DOORS=[['Codex','/corpus.html?section=manuscript'],['Almanac','/almanac.html'],['Teachings','/teachings.html'],['Bible','/bible.html'],['Map','/map.html']];
   function el(n,a){var e=document.createElementNS(NS,n); for(var k in a)e.setAttribute(k,a[k]); return e;}
   function dom(t){var b=null,bv=-1; for(var k in t){if(t[k]>bv){bv=t[k];b=k;}} return b;}
   function tip(t){document.getElementById('tip').innerHTML=t;}

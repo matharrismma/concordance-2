@@ -18,6 +18,7 @@ Endpoints:
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple
+from urllib.parse import parse_qsl, urlencode
 
 from .. import __version__, cas, corpus, telemetry
 from ..config import EngineConfig
@@ -386,12 +387,12 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
 
 _SITEMAP_PAGES = ("/", "/ask.html", "/bible.html", "/read.html", "/characters.html",
                   "/prophecy.html", "/journal.html", "/map.html", "/steward.html",
-                  "/community.html", "/library.html", "/guarantees.html", "/collapse.html",
+                  "/community.html", "/corpus.html", "/guarantees.html", "/collapse.html",
                   "/seeds.html", "/seal.html", "/connect.html", "/corrected.html", "/audit.html",
-                  "/proof.html", "/reason.html", "/boundary.html", "/almanac.html", "/codex.html",
-                  "/teachings.html", "/brain.html", "/floor.html", "/works.html",
+                  "/proof.html", "/reason.html", "/boundary.html", "/almanac.html", 
+                  "/teachings.html", "/brain.html", "/floor.html", 
                   "/harmony.html", "/timeline.html", "/backmatter.html", "/places.html",
-                  "/narratives.html", "/catalog.html", "/voices.html")
+                  "/narratives.html",  "/voices.html")
 
 
 def build_sitemap(base_url: str) -> str:
@@ -2032,14 +2033,44 @@ ROUTES = [
     # linking to one would be the drift — pointing readers at a tombstone instead of the destination.
     {"path": "/daily.html", "methods": ("GET",), "serve": True, "retired": True},
     {"path": "/hymns.html", "methods": ("GET",), "serve": True, "retired": True},
+    # THE CORPUS: four pages were doing one job under four invented names. They are now four
+    # sections of /corpus.html, and every old address still resolves.
+    {"path": "/library.html", "methods": ("GET",), "serve": True, "retired": True},
+    {"path": "/catalog.html", "methods": ("GET",), "serve": True, "retired": True},
+    {"path": "/codex.html", "methods": ("GET",), "serve": True, "retired": True},
+    {"path": "/works.html", "methods": ("GET",), "serve": True, "retired": True},
 ]
 
 # A page that existed and is gone is NOT a 404. Each entry names where its content actually
 # lives now — and only pages with a real successor belong here. When nothing holds the content
 # any more, the honest answer is to leave it 404 rather than send a reader somewhere plausible.
 _RETIRED = {
-    "/hymns.html": "/library.html?shelf=hymns",   # 97 hymn cards, a real shelf in the keeping
+    "/hymns.html": "/corpus.html?shelf=hymns",    # 97 hymn cards, a real shelf in the keeping
+    "/library.html": "/corpus.html",                      # the shelves
+    "/catalog.html": "/corpus.html?section=drawers",      # the reference section, A–Z
+    "/codex.html": "/corpus.html?section=manuscript",     # the compiled manuscript
+    "/works.html": "/corpus.html?section=volume",         # the worked, sealed demonstrations
 }
+
+
+def _retire_to(path: str, query: str) -> str:
+    """Where a retired path goes, CARRYING WHAT IT WAS ASKED FOR.
+
+    A redirect that drops the query is the /canon.html failure: `?ref=X` 301s to a generic page,
+    the reader lands somewhere plausible with the reference gone, and nothing reports it. So the
+    incoming query is merged onto the destination's own, and the incoming side wins — a link that
+    says `?ref=Aaron` means Aaron, whatever section the destination would have opened by default.
+
+    Each destination is the FINAL one, not a hop into another retired page: /hymns.html goes
+    straight to the Corpus with its shelf, not through library.html on the way.
+    """
+    dest = _RETIRED[path]
+    if not query:
+        return dest
+    base, _, own = dest.partition("?")
+    merged = dict(parse_qsl(own, keep_blank_values=True))
+    merged.update(dict(parse_qsl(query, keep_blank_values=True)))
+    return base + ("?" + urlencode(merged) if merged else "")
 
 # The JSON/API GET paths (served even with a static site mounted) — DERIVED from ROUTES.
 _API_GET_PATHS = frozenset(r["path"] for r in ROUTES if r.get("api"))
@@ -2315,7 +2346,7 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                     return self._redirect(302, "/card/" + quote(str(c["id"]), safe=""))
                 return self._json(404, {"error": "the keeping is empty"})
             if method == "GET" and u.path in _RETIRED:
-                return self._redirect(301, _RETIRED[u.path])
+                return self._redirect(301, _retire_to(u.path, u.query))
             # static site (GET only) for non-API paths, when a site dir is configured
             if method == "GET" and site is not None and u.path not in _API_GET_PATHS:
                 return self._static(u.path)
