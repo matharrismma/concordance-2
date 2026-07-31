@@ -1936,7 +1936,7 @@ ROUTES = [
     {"path": "/study/export", "methods": ("POST",), "rl": True},
     {"path": "/study/import", "methods": ("POST",), "rl": True},
     {"path": "/mcp", "methods": ("POST",), "rl": True},
-    {"path": "/search", "methods": ("GET",), "api": True, "rl": True},
+    {"path": "/search", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/cards/stats", "methods": ("GET",), "api": True},
     {"path": "/cards", "methods": ("GET",), "api": True},
     {"path": "/card", "methods": ("GET",), "api": True},
@@ -2075,7 +2075,17 @@ def _retire_to(path: str, query: str) -> str:
 # The JSON/API GET paths (served even with a static site mounted) — DERIVED from ROUTES.
 _API_GET_PATHS = frozenset(r["path"] for r in ROUTES if r.get("api"))
 # The rate-limited paths (consulted in serve()) — DERIVED from ROUTES.
-RATELIMITED = tuple(r["path"] for r in ROUTES if r.get("rl"))
+#
+# TWO buckets, because a read and a write are not the same risk. Both were sharing one 120/min
+# cap per client, and the client it refused most was ClaudeBot: 7,100 requests, 3,368 of them
+# searches, 75 refused. Agents are 35% of our traffic and the MCP surface is how we are read —
+# refusing them on the search path is refusing the use we asked for.
+#
+# The ceiling is not removed, it is separated and raised. /search runs FTS across the shards; an
+# unbounded one on a 7 GB box is a real exposure, so one source still cannot exhaust it. Writes
+# keep the tighter cap they always had.
+RATELIMITED = tuple(r["path"] for r in ROUTES if r.get("rl") is True)
+READ_LIMITED = tuple(r["path"] for r in ROUTES if r.get("rl") == "read")
 
 
 def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
@@ -2106,6 +2116,7 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
     config = EngineConfig(surface)
     site = Path(site_dir).resolve() if site_dir else None
     limiter = ratelimit.from_env()
+    read_limiter = ratelimit.from_env(read=True)   # the generous bucket — see READ_LIMITED
     MAX_BODY = int(os.environ.get("CONCORDANCE_MAX_BODY", str(256 * 1024)) or 256 * 1024)
     # RATELIMITED is derived from the ROUTES registry (module-level) — single source of truth.
 
@@ -2283,11 +2294,13 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 status, html = render_card_html(cid, corpus.get_card(cid) if cid else None)
                 return self._html(status, html)
             # rate limit the compute / IO paths, keyed by the real client
-            if u.path in RATELIMITED:
+            if u.path in RATELIMITED or u.path in READ_LIMITED:
+                read = u.path in READ_LIMITED
+                lim = read_limiter if read else limiter
                 key = self._rl_key()
-                if not limiter.allow(key):
+                if not lim.allow(key):
                     return self._json(429, {"error": "rate limit exceeded"},
-                                      {"retry-after": str(limiter.retry_after(key))})
+                                      {"retry-after": str(lim.retry_after(key))})
             if u.path == "/mcp":  # full Streamable-HTTP MCP transport (POST/GET/DELETE)
                 raw = b""
                 if method == "POST":

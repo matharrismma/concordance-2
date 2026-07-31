@@ -55,11 +55,23 @@ class RateLimiter:
             return max(1, int(self.window - (t - q[0])) + 1)
 
 
-def from_env() -> RateLimiter:
+def from_env(read: bool = False) -> RateLimiter:
+    """The write bucket, or — with read=True — the generous read bucket.
+
+    One cap used to cover both. Measured 2026-07-31: every 429 we have ever served was on
+    /search, and the client refused most was ClaudeBot — 7,100 requests, 3,368 searches, 75 of
+    them refused. Agents are 35% of the traffic and reading is what we built this for, so a read
+    now gets its own, far larger window while a write keeps the cap it always had.
+
+    Still a ceiling, not an exemption: /search runs FTS across the shards, and one source must
+    not be able to exhaust a 7 GB box.
+    """
+    key_max = "CONCORDANCE_READ_RATE_MAX" if read else "CONCORDANCE_RATE_MAX"
+    default = "600" if read else "120"
     try:
-        mx = int(os.environ.get("CONCORDANCE_RATE_MAX", "120") or 120)
+        mx = int(os.environ.get(key_max, default) or default)
     except ValueError:
-        mx = 120
+        mx = int(default)
     try:
         win = float(os.environ.get("CONCORDANCE_RATE_WINDOW_S", "60") or 60)
     except ValueError:

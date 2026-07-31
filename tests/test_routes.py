@@ -64,8 +64,10 @@ GOLDEN_API_GET = {
     "/mesh/signable",  # deliberate addition (the bytes to sign, so a key never crosses the wire)
     "/attest",  # deliberate addition (bear witness to a record you hold; GET lists the witnesses)
 }
+# /search moved OUT of this set on 2026-07-31 and into GOLDEN_READ_LIMITED — a read and a write
+# are not the same risk, and the one client the shared cap refused most was ClaudeBot.
 GOLDEN_RATELIMITED = {
-    "/verify", "/derivation/verify", "/search", "/mcp", "/ask", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose", "/pins", "/pins/done",
+    "/verify", "/derivation/verify", "/mcp", "/ask", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose", "/pins", "/pins/done",
     "/threads", "/threads/search",
     "/coach/mastery", "/identity/create", "/identity/verify", "/badges",
     "/study", "/study/export", "/study/import",
@@ -85,6 +87,21 @@ GOLDEN_RATELIMITED = {
     "/chess",   # deliberate addition (the chess verifier) — game theory, applied and sealable
     "/attest",  # deliberate addition — a write, so rate-limited like every other write
 }
+
+
+GOLDEN_READ_LIMITED = {"/search"}
+
+
+def test_the_read_bucket_is_separate_and_larger():
+    """Every 429 this server has ever served was on /search, and 75 of them refused ClaudeBot
+    mid-crawl — 3,368 searches from the audience we built the surface for. The cap is not removed
+    (an unbounded FTS on a 7 GB box is a real exposure); it is separated, so a write cannot spend
+    a reader's budget and a reader cannot spend a writer's."""
+    from concordance import ratelimit
+    assert set(api.READ_LIMITED) == GOLDEN_READ_LIMITED
+    assert not (set(api.READ_LIMITED) & set(api.RATELIMITED)), "a path in both buckets"
+    assert ratelimit.from_env(read=True).max > ratelimit.from_env().max, (
+        "the read bucket must be larger than the write bucket, or the split bought nothing")
 
 
 def test_derived_sets_match_history():
