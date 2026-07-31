@@ -117,3 +117,24 @@ data/verified_cards.jsonl
 !data/religions_cards.jsonl
 # The harvested map — inline semantic edges minted as sealed connection cards; large + generated
 # from the corpus (like source_cards), reproduce with tools/mint_edges.py. Gitignored.
+
+# --- data/ is the KEEPING, not the code (2026-07-31) ------------------------------------------
+# `git add -A` swept 28 of these into a commit: 1.2 GB of SQLite shards, eight acquisition
+# archives, nine gzipped card files, and a MEMBER'S SIGNED CONSENT RECORD. It was caught before
+# the push, but the reason it was possible is that the rules above match `data/*.jsonl` and
+# `data/*.db` — top level only. Nothing covered data/shards/, data/acquisitions/, data/consents/,
+# or the .gz files.
+#
+# So the rule is inverted: everything under data/ is ignored, and the handful of files that are
+# genuinely source (the spines, the seeds, the bridges, the goldens) are named back in below.
+# A new subdirectory of the keeping is now ignored by default instead of by luck.
+data/**
+!data/*.jsonl
+!data/*.json
+data/cards.jsonl
+data/*.jsonl.gz
+data/**/*.jsonl
+data/**/*.json
+data/**/*.db
+data/**/*.zip
+data/**/*.gz

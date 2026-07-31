@@ -395,3 +395,42 @@ consistent. Recorded as unattributed rather than claimed as a fix.
   right fix is one shared helper rather than eight copies. Measured on one page; NOT yet measured on
   the others, so this is a suspicion with a mechanism, not a finding.
 - OneDrive drag on the working copy; nav single-source; manifest counts.
+
+## 2026-07-31 · The 4,743 citations that resolved to nothing
+
+**What was wrong.** 2,619 cards cited `/encyclopedia.html?ref=X` — a 1,000-byte `noindex`
+JavaScript stub, and the #1 page in the access log at 4,209 hits. 2,124 cited `/canon.html?ref=X`,
+which was 3,020 hard 404s on the witness host and, on the secular host, a 301 to `/bible.html` that
+**dropped the `?ref=`** — the reader landing on a generic Bible page with the reference silently
+gone. The second failure is the worse one: nothing reports it.
+
+**What measuring changed.** The plan was one rule for the canon citations: send them to the card
+permalink. Measuring split them. 468 name a real passage ("Revelation 5") — the Word can show that.
+1,656 name an internal slug (`aurelius_aur_07_xxiii`) that no page has ever resolved, and for those
+**the citing card IS the passage**: Aurelius §7.23 is the body of that card. Pointing its source at
+its own permalink would close a circle — a provenance chain whose evidence is itself. So the URL is
+cleared and the label kept. Checking first showed this erases nothing: `source.ref` already holds
+`aur_07_xxiii` beside the label, so the reference and the authority both survive.
+
+| n | citation | now |
+|---:|---|---|
+| 2,619 | `/encyclopedia.html?ref=Slave` | `/characters.html?search=Slave` — the Dictionary entry, with its verses |
+| 468 | `/canon.html?ref=Revelation 5` | `/bible.html?ref=Revelation 5` — the passage itself |
+| 1,656 | `/canon.html?ref=aurelius_aur_07_xxiii` | no url; the label and `ref` stand alone |
+
+**The half that was nearly missed.** After `data/cards.jsonl` was repointed and the services
+restarted, the codex cards served the new citation and the dictionary and classics cards still
+served the old one. **24 shelves are FROZEN** — their bodies ride SQLite shards and are rehydrated
+on read, so the shard's copy is what a reader gets. 4,039 of the 4,743 were still broken, and a
+check that only read the file would have reported the job done. The shards were updated in place
+(a full rebuild wants ~2.7 GB on a box with 3 GB free), with both services stopped first because
+the server opens those files `immutable=1` — a promise that they do not change underneath it.
+
+**Verified live**, not inferred: `/characters.html?search=Slave` on .org opens Easton's entry for
+Slave; `/bible.html?ref=Revelation 5` opens the chapter; the Aurelius card page shows
+"Marcus Aurelius, Meditations (c. AD 170) · aur_07_xxiii" with no link at all.
+
+**Still open for Matt:** on the secular surface `/characters` answers `gate_closed`, so a reader
+following one of the 2,619 citations on .com meets the Gate — while the cards themselves are
+public there. The content is published and the page that shows it is gated. That inconsistency is
+a decision, not a bug, and it is his to make.

@@ -255,6 +255,11 @@ async function loadRibbon(){
 document.getElementById('readbtn').addEventListener('click', read);
 refEl.addEventListener('keydown', e => { if(e.key === 'Enter') read(); });
 
+/* A link that names a passage opens that passage (the shared adopter in nh-home.js calls this).
+   468 cards cite a verse — "Revelation 5", "John 3:16" — and until now the reference was dropped
+   on arrival and the reader got the empty reader instead of the text they were sent to. */
+window.NHDeepLink = function(v){ refEl.value = v; read(); };
+
 passageEl.addEventListener('click', e => {
   const chip = e.target.closest('.chip');
   if(chip){
