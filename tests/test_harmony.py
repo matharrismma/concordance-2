@@ -81,11 +81,14 @@ def test_endpoint_is_witness_gated():
     assert dispatch("GET", "/harmony", {"id": "nope"}, None, WIT)[0] == 404
 
 
-def test_mcp_harmony_tool_is_witness_only():
+def test_mcp_harmony_tool_is_on_both_doors():
+    """Was `..._is_witness_only`. 2026-07-31: the gospels side by side are knowledge, and an agent
+    on the secular surface could not see this tool at all until the agent door was opened with the
+    human one."""
     r = mcp.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, WIT)
     assert "harmony" in {t["name"] for t in r["result"]["tools"]}
     r2 = mcp.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, SEC)
-    assert "harmony" not in {t["name"] for t in r2["result"]["tools"]}
+    assert "harmony" in {t["name"] for t in r2["result"]["tools"]}
     c = mcp.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/call",
                     "params": {"name": "harmony", "arguments": {"id": "h075"}}}, WIT)
     assert json.loads(c["result"]["content"][0]["text"])["event"] == "The triumphal entry into Jerusalem"

@@ -55,7 +55,10 @@ def test_search():
 
 
 def test_endpoints_witness_gated():
-    assert dispatch("GET", "/prophecy", {}, None, SEC)[0] == 404
+    # 2026-07-31: knowledge is open on BOTH doors — "we don't hide knowledge, we aren't a
+    # secret society". This asserted the tool was hidden from the secular surface; it now
+    # asserts the parity that replaced it.
+    assert dispatch("GET", "/prophecy", {}, None, SEC)[0] == 200
     st, p = dispatch("GET", "/prophecy", {}, None, WIT)
     assert st == 200 and p["total"] == 2
     st2, g = dispatch("GET", "/prophecy", {"id": "signpost_isaiah"}, None, WIT)

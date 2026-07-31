@@ -591,17 +591,31 @@ def _tools_for(config: EngineConfig, gate_open: bool = False) -> List[dict]:
     words and the same classifier that opens the door for a human opened it here. Mirrors
     web/api.py's `allow_witness = config.witness_surfaced or session_gate_open` exactly — one rule,
     both doors."""
-    tools = _secular_tools()
-    if config.witness_surfaced or gate_open:
-        tools += _witness_tools()
-    return tools
+    # THE SAME LINE, ON THE AGENT'S DOOR. Matt, 2026-07-31: "We don't hide knowledge. We aren't a
+    # secret society. Everyone is a part of the group. They experience what they want of it."
+    #
+    # This is where the HTTP fix would have died quietly. web/api.py opened; twenty tools here
+    # stayed shut, so an agent — 35% of our traffic, and the surface we ask to be read by — could
+    # not so much as SEE read_passage, character_get, canon or word_study on the secular surface.
+    # Correct server-side and invisible to the caller is the failure this project keeps meeting.
+    #
+    # `gate_open` survives as the invitation it always was: it still tells ask.py how to meet
+    # someone. It no longer decides what exists.
+    return _secular_tools() + _witness_tools()
 
 
 def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = False) -> Any:
     args = args or {}
     # One gate, computed once, checked by every witness tool below. Default CLOSED: an unknown
     # session, a missing flag, or a caller that never asked gets the secular reach and nothing more.
+    # THE CLASSIFIER'S VERDICT, never the caller's assertion. This decides the VOICE — how ask.py
+    # meets someone — and nothing else. It briefly decided access too, on 2026-07-31, when opening
+    # knowledge was done by forcing this True; that let an agent claim its way in and the gate
+    # tests caught it within the hour. Access and voice are different questions.
     allow_witness = bool(config.witness_surfaced or gate_open)
+    # Knowledge is open to everyone (see _tools_for). A tool that only READS the keeping must not
+    # consult the flag above.
+    knowledge = True
     if name == "verify":
         if isinstance(args.get("steps"), list):
             res = verify_derivation(args["steps"])
@@ -924,66 +938,66 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
                                  kind=str(args.get("kind") or "note"), topics=args.get("topics") or [],
                                  refs=args.get("refs") or [],
                                  attestation=args.get("attestation")) or {"error": "group not found"}
-    if name == "resolve" and allow_witness:
+    if name == "resolve" and knowledge:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.resolve_ref(args.get("ref", ""))
-    if name == "read_passage" and allow_witness:
+    if name == "read_passage" and knowledge:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.read_passage(args.get("ref", ""))
-    if name == "word_study" and allow_witness:
+    if name == "word_study" and knowledge:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.word_study(args.get("strongs", ""))
-    if name == "cross_references" and allow_witness:
+    if name == "cross_references" and knowledge:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.cross_references(args.get("ref", ""))
-    if name == "word_occurrences" and allow_witness:
+    if name == "word_occurrences" and knowledge:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.word_occurrences(args.get("strongs", ""))
-    if name == "commentary" and allow_witness:
+    if name == "commentary" and knowledge:
         from .. import commentary  # lazy: witness-only
         return commentary.for_ref(args.get("ref", ""), source=args.get("source") or commentary.DEFAULT_SOURCE)
-    if name == "tsk_cross_references" and allow_witness:
+    if name == "tsk_cross_references" and knowledge:
         from .. import xrefs  # lazy: witness-only
         return xrefs.for_ref(args.get("ref", ""), limit=int(args.get("limit", 20)))
-    if name == "character_get" and allow_witness:
+    if name == "character_get" and knowledge:
         from .. import characters  # lazy: witness-only
         rec = characters.get(args.get("name", ""))
         return rec if rec is not None else {"error": "not found in Easton's"}
-    if name == "characters_browse" and allow_witness:
+    if name == "characters_browse" and knowledge:
         from .. import characters  # lazy: witness-only
         return characters.browse(letter=args.get("letter"), search=args.get("search"),
                                  limit=int(args.get("limit", 100)))
-    if name == "prophecy_traces" and allow_witness:
+    if name == "prophecy_traces" and knowledge:
         from .. import prophecy  # lazy: witness-only
         if args.get("id"):
             rec = prophecy.get(args["id"])
             return rec if rec is not None else {"error": "trace not found"}
         return prophecy.search(args["q"]) if args.get("q") else prophecy.list_traces()
-    if name == "harmony" and allow_witness:
+    if name == "harmony" and knowledge:
         from .. import harmony  # lazy: witness-only
         if args.get("id"):
             rec = harmony.get(args["id"])
             return rec if rec is not None else {"error": "event not found"}
         return harmony.periods()
-    if name == "timeline" and allow_witness:
+    if name == "timeline" and knowledge:
         from .. import timeline  # lazy: witness-only
         if args.get("id"):
             rec = timeline.get(args["id"])
             return rec if rec is not None else {"error": "event not found"}
         return timeline.eras()
-    if name == "backmatter" and allow_witness:
+    if name == "backmatter" and knowledge:
         from .. import backmatter as _bm  # lazy: witness-only
         if args.get("table"):
             rec = _bm.get_table(str(args["table"]))
             return rec if rec is not None else {"error": "table not found"}
         return _bm.tables()
-    if name == "bible_places" and allow_witness:
+    if name == "bible_places" and knowledge:
         from .. import bible_places as _bp  # lazy: witness-only
         if args.get("name"):
             rec = _bp.get(str(args["name"]))
             return rec if rec is not None else {"error": "place not found"}
         return _bp.places()
-    if name == "narratives" and allow_witness:
+    if name == "narratives" and knowledge:
         from .. import narratives as _narr  # lazy: witness-only
         if args.get("id"):
             rec = _narr.get(str(args["id"]))
@@ -992,24 +1006,24 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
             rec = _narr.by_movement(str(args["movement"]))
             return rec if rec is not None else {"error": "movement not found"}
         return _narr.storyboards()
-    if name == "study_find" and allow_witness:
+    if name == "study_find" and knowledge:
         from .. import study_index as _si  # lazy: witness-only
         return _si.find(str(args.get("q") or ""), limit=40)
-    if name == "original_words" and allow_witness:
+    if name == "original_words" and knowledge:
         from ..verifiers import scripture as _scr  # lazy: witness-only
         ref = str(args.get("ref") or "").strip()
         return _scr.original_words(ref) if ref else {"error": "ref required"}
-    if name == "canon" and allow_witness:
+    if name == "canon" and knowledge:
         from .. import canon as _canon  # lazy: witness-only
         book = str(args.get("book") or "").strip()
         return _canon.canon_status(book) if book else _canon.overview()
-    if name == "teachings" and allow_witness:
+    if name == "teachings" and knowledge:
         from .. import teachings as _teach  # lazy: witness-only
         if args.get("id"):
             rec = _teach.get(str(args["id"]))
             return rec if rec is not None else {"error": "teaching not found"}
         return _teach.queue()
-    if name == "seeds" and allow_witness:
+    if name == "seeds" and knowledge:
         from .. import seeds  # lazy: witness-only
         if args.get("id"):
             rec = seeds.get(args["id"])

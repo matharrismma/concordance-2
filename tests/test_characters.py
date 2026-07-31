@@ -78,7 +78,7 @@ def test_mcp_tools():
     r = mcp.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, WIT)
     names = {t["name"] for t in r["result"]["tools"]}
     assert {"character_get", "characters_browse"} <= names
-    assert "character_get" not in {t["name"] for t in
+    assert "character_get" in {t["name"] for t in
                                    mcp.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, SEC)["result"]["tools"]}
     c = mcp.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/call",
                     "params": {"name": "character_get", "arguments": {"name": "Moses"}}}, WIT)

@@ -125,7 +125,10 @@ def test_agents_get_the_same_tables_humans_do():
     # and on the secular surface without the gate open, the tool is not listed
     sec_names = {t["name"] for t in mcp.handle(
         {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, EngineConfig("secular"), {})["result"]["tools"]}
-    assert "backmatter" not in sec_names, "witness tool leaked onto the closed secular surface"
+    # 2026-07-31: knowledge is open on BOTH doors — "we don't hide knowledge, we aren't a
+    # secret society". This asserted the tool was hidden from the secular surface; it now
+    # asserts the parity that replaced it.
+    assert "backmatter" in sec_names, "an agent on the secular surface cannot reach the tables"
 
 
 if __name__ == "__main__":

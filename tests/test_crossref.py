@@ -84,7 +84,10 @@ def test_mcp_lists_and_calls_new_tools():
     wit = names(WIT)
     assert {"read_passage", "cross_references", "word_occurrences", "pronounce"} <= wit
     sec = names(SEC)
-    assert "pronounce" in sec and "cross_references" not in sec   # witness tool hidden on secular
+    # 2026-07-31: knowledge is open on BOTH doors — "we don't hide knowledge, we aren't a
+    # secret society". This asserted the tool was hidden from the secular surface; it now
+    # asserts the parity that replaced it.
+    assert "pronounce" in sec and "cross_references" in sec
     r = mcp.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/call",
                     "params": {"name": "pronounce", "arguments": {"text": "agape"}}}, SEC)
     payload = json.loads(r["result"]["content"][0]["text"])

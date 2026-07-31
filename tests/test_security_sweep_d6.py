@@ -189,18 +189,19 @@ def test_signed_bytes_go_stale_and_cannot_be_replayed_elsewhere():
 
 # ── 3. the read surfaces keep their gate ────────────────────────────────────────────────────────
 
-def test_the_new_study_routes_stay_behind_the_gate_on_the_secular_surface():
+def test_the_study_routes_refuse_nobody_on_either_surface():
+    """This test used to require these four to answer `gate_closed` on the secular surface.
+
+    Matt, 2026-07-31: *"We don't hide knowledge. We aren't a secret society. Everyone is a part of
+    the group. They experience what they want of it."* The back-matter tables, the Atlas, the
+    quick-find index and the storyboards are knowledge; refusing them refused use. What this file
+    guards is the SECURITY surface — authority, privacy, injection, traversal — and none of those
+    were ever the Gate's job.
+    """
     from concordance.config import EngineConfig
     from concordance.web.api import dispatch
     sec = EngineConfig("secular")
-    # Only the deeper reading now. /backmatter (weights, measures, the names of God), /places
-    # (the Atlas) and /study_find (the quick-find index) are reference — seeing — and came out
-    # from behind the Gate on 2026-07-31: "we don't need to refuse use, we refuse abuse".
-    for p in ("/narratives",):
-        st, payload = dispatch("GET", p, {"q": "aaron"}, None, sec)
-        assert st == 404 and payload.get("gate") == "closed", \
-            f"{p} must answer the closed gate honestly on the secular surface, got {st}"
-    for p in ("/backmatter", "/places", "/study_find"):
+    for p in ("/backmatter", "/places", "/study_find", "/narratives"):
         st, payload = dispatch("GET", p, {"q": "aaron"}, None, sec)
         assert payload.get("gate") != "closed", f"{p} refuses use, not abuse"
 

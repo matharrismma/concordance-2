@@ -97,7 +97,10 @@ def test_for_ref_resolves_singular_plural_alias():
 
 
 def test_commentary_endpoint_witness_gated():
-    assert dispatch("GET", "/commentary", {"ref": "John 3:16"}, None, SEC)[0] == 404
+    # 2026-07-31: knowledge is open on BOTH doors — "we don't hide knowledge, we aren't a
+    # secret society". This asserted the tool was hidden from the secular surface; it now
+    # asserts the parity that replaced it.
+    assert dispatch("GET", "/commentary", {"ref": "John 3:16"}, None, SEC)[0] == 200
     assert dispatch("GET", "/commentary", {}, None, WIT)[0] == 400
     st, p = dispatch("GET", "/commentary", {"ref": "John 3:16"}, None, WIT)
     assert st == 200 and p["status"] == "ok"
@@ -135,7 +138,10 @@ def test_mcp_commentary_tool():
     def names(cfg):
         r = mcp.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, cfg)
         return {t["name"] for t in r["result"]["tools"]}
-    assert "commentary" in names(WIT) and "commentary" not in names(SEC)
+    # 2026-07-31: knowledge is open on BOTH doors — "we don't hide knowledge, we aren't a
+    # secret society". This asserted the tool was hidden from the secular surface; it now
+    # asserts the parity that replaced it.
+    assert "commentary" in names(WIT) and "commentary" in names(SEC)
     r = mcp.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/call",
                     "params": {"name": "commentary", "arguments": {"ref": "John 3:16"}}}, WIT)
     assert json.loads(r["result"]["content"][0]["text"])["status"] == "ok"

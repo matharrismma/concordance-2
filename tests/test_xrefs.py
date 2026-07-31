@@ -69,7 +69,7 @@ def test_endpoint_witness_gated():
 def test_mcp_tsk_tool():
     r = mcp.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, WIT)
     assert "tsk_cross_references" in {t["name"] for t in r["result"]["tools"]}
-    assert "tsk_cross_references" not in {t["name"] for t in
+    assert "tsk_cross_references" in {t["name"] for t in
                                          mcp.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, SEC)["result"]["tools"]}
     c = mcp.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/call",
                     "params": {"name": "tsk_cross_references", "arguments": {"ref": "John 3:16"}}}, WIT)

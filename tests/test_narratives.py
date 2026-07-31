@@ -80,7 +80,10 @@ def test_the_gate_holds_and_agents_get_the_same_boards():
     from concordance.config import EngineConfig
     from concordance.web.api import dispatch
     st, body = dispatch("GET", "/narratives", {}, None, EngineConfig("secular"))
-    assert st == 404 and body.get("gate") == "closed"
+    # 2026-07-31: knowledge is open on BOTH doors — "we don't hide knowledge, we aren't a
+    # secret society". This asserted the tool was hidden from the secular surface; it now
+    # asserts the parity that replaced it.
+    assert st == 200 and body.get("gate") != "closed"
     st2, body2 = dispatch("GET", "/narratives", {}, None, EngineConfig("witness"))
     assert st2 == 200 and body2["count"] == len(narratives.NARRATIVES)
     st3, body3 = dispatch("GET", "/narratives", {"movement": "reversal"}, None, EngineConfig("witness"))

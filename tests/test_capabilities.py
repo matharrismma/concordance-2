@@ -86,9 +86,15 @@ def test_statement_is_ungated_on_both_surfaces_but_surface_aware():
     st_wit, wit = dispatch("GET", "/capabilities", {}, None, WIT)
     assert st_sec == 200 and st_wit == 200, "the capability statement must never be gated"
     assert sec["surface"] == "secular" and wit["surface"] == "witness"
-    # the witness surface genuinely exposes more tools; the statement must say so, not flatten it
-    assert wit["tools"]["count"] > sec["tools"]["count"]
-    assert "harmony" in wit["tools"]["names"] and "harmony" not in sec["tools"]["names"]
+    # This used to require the witness surface to expose MORE tools. 2026-07-31: both doors carry
+    # the same knowledge — "we aren't a secret society" — so the statement must say THAT, honestly,
+    # rather than advertise a difference that no longer exists.
+    assert wit["tools"]["count"] == sec["tools"]["count"], \
+        "the two surfaces differ in VOICE, not in what they will show you"
+    # 2026-07-31: knowledge is open on BOTH doors — "we don't hide knowledge, we aren't a
+    # secret society". This asserted the tool was hidden from the secular surface; it now
+    # asserts the parity that replaced it.
+    assert "harmony" in wit["tools"]["names"] and "harmony" in sec["tools"]["names"]
 
 
 def test_the_mission_string_is_the_frozen_one():

@@ -108,7 +108,10 @@ def test_mcp_timeline_tool_is_witness_only():
     r = mcp.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, WIT)
     assert "timeline" in {t["name"] for t in r["result"]["tools"]}
     r2 = mcp.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, SEC)
-    assert "timeline" not in {t["name"] for t in r2["result"]["tools"]}
+    # 2026-07-31: knowledge is open on BOTH doors — "we don't hide knowledge, we aren't a
+    # secret society". This asserted the tool was hidden from the secular surface; it now
+    # asserts the parity that replaced it.
+    assert "timeline" in {t["name"] for t in r2["result"]["tools"]}
     c = mcp.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/call",
                     "params": {"name": "timeline", "arguments": {"id": "t054"}}}, WIT)
     assert json.loads(c["result"]["content"][0]["text"])["event"] == "John's exile on Patmos; the writing of Revelation"

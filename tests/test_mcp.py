@@ -1,7 +1,7 @@
 """MCP server test — the agent surface (pure JSON-RPC handler, no stdio needed).
 
-Proves: initialize handshake; tools/list is surface-gated (witness tools only on witness);
-tools/call runs verify (HOLDS/BROKEN) over MCP; witness tools are gated off the secular
+Proves: initialize handshake; tools/list is the SAME on both surfaces (2026-07-31);
+tools/call runs verify (HOLDS/BROKEN) over MCP; the surfaces differ in voice, not in the
 surface; notifications get no response; unknown methods error. Runnable with `pytest` OR
 `python tests/test_mcp.py`.
 """
@@ -34,8 +34,11 @@ def test_tools_list_is_surface_gated():
     sec = [t["name"] for t in _call("tools/list", config=SEC)["result"]["tools"]]
     wit = [t["name"] for t in _call("tools/list", config=WIT)["result"]["tools"]]
     assert {"verify", "search", "seal_fetch"} <= set(sec)
-    assert "word_study" not in sec and "resolve" not in sec
-    assert "word_study" in wit and "resolve" in wit
+    # 2026-07-31: the list is no longer SURFACE-GATED — it is the same list. The surfaces differ
+    # in voice (how a reader is met), never in what they will show. Twenty tools sat invisible to
+    # every agent on .com until this changed.
+    assert "word_study" in sec and "resolve" in sec
+    assert set(sec) == set(wit), "the two doors drifted apart"
 
 
 def test_tools_call_verify():
@@ -50,7 +53,10 @@ def test_tools_call_verify():
 
 def test_witness_tool_gated_off_secular():
     r = _call("tools/call", {"name": "word_study", "arguments": {"strongs": "G26"}}, config=SEC)
-    assert "error" in r, "witness tool must be ungettable on the secular surface"
+    # 2026-07-31: knowledge is open on BOTH doors — "we don't hide knowledge, we aren't a
+    # secret society". This asserted the tool was hidden from the secular surface; it now
+    # asserts the parity that replaced it.
+    assert "error" not in r, "an agent on the secular surface was refused knowledge"
     # on witness it is reachable (a result, not the gating error) — regardless of data state
     rw = _call("tools/call", {"name": "word_study", "arguments": {"strongs": "G26"}}, config=WIT)
     assert "result" in rw and isinstance(json.loads(rw["result"]["content"][0]["text"]), dict)

@@ -34,11 +34,18 @@ SEEING_PATHS = ("/passage", "/character", "/characters", "/canon", "/original", 
                 "/resolve", "/cross_refs", "/tsk")
 
 
-def test_secular_witness_closed_by_default_and_marked():
-    for p in WITNESS_PATHS:
-        st, body = dispatch("GET", p, {"ref": "John 3:16", "strongs": "G26", "name": "Moses"}, None, SEC)
-        assert st == 404, p
-        assert body.get("gate") == "closed", (p, body)   # marked, so a client invites (not a dead end)
+def test_nothing_is_behind_the_gate():
+    """Matt, 2026-07-31: "We don't hide knowledge. We aren't a secret society. Everyone is a part
+    of the group. They experience what they want of it." The set is empty and stays empty."""
+    assert set(api.AFTER_THE_GATE) == set(),         f"knowledge went back behind the Gate: {sorted(api.AFTER_THE_GATE)}"
+
+
+def test_the_deeper_reading_is_not_refused_either():
+    """The five that survived the first pass — exposition and the tracing of meaning. A person is
+    not made ready by being refused."""
+    for p in ("/commentary", "/prophecy", "/seeds", "/narratives", "/teachings"):
+        st, body = dispatch("GET", p, {"ref": "John 3:16"}, None, SEC)
+        assert body.get("gate") != "closed", f"{p} still refuses on the secular surface"
 
 
 def test_the_text_itself_is_never_behind_the_gate():

@@ -37,31 +37,31 @@ def _err(status: int, msg: str) -> Response:
     return status, {"error": msg}
 
 
-# WHAT THE GATE IS FOR.
+# WHAT THE GATE IS FOR — AND WHAT IT NEVER WAS.
 #
-# Matt, 2026-07-31: *"I think seeing them is fine. Understanding the deeper meaning comes after the
-# gate."* · *"We don't need to refuse use. We refuse abuse."*
+# Matt, 2026-07-31, in three passes:
+#   "I think seeing them is fine. Understanding the deeper meaning comes after the gate."
+#   "We don't need to refuse use. We refuse abuse."
+#   "We don't hide knowledge. We aren't a secret society. Everyone is a part of the group.
+#    They experience what they want of it."
 #
-# The Gate used to hold twenty paths, and fifteen of them were the TEXT or its reference
-# apparatus: the passage itself, the original tongues, the dictionary entry, the canon list, the
-# cross-references, the places, the dates, the tables. Refusing those refused USE — a person came
-# to read Scripture and was handed a door. That was found by following a citation: 2,619 cards
-# cite the Dictionary and a reader on the secular surface met "gate_closed" instead of the entry,
-# while the cards themselves were public on that very surface.
+# The Gate held twenty paths. The first pass freed fifteen — the text and its reference apparatus,
+# which are seeing. The third pass freed the last five, and it is the one that settles the matter:
+# a person is not made ready by being refused. Everyone is already part of the group; the depth
+# they go to is theirs to choose, not ours to ration.
 #
-# What remains behind the Gate is the second layer — the exposition and the tracing of meaning.
-# Not because it is precious, but because it is the part that only lands when it is sought.
+# So NOTHING here is behind the Gate. This set is empty and stays empty, and the test walks the
+# code to prove it. The Gate itself remains — as the INVITATION it always should have been. The
+# conversation that opens into Scripture still opens; ask.py still meets a reader in kind; the
+# .org surface still leads with the witness and .com still leads with the proof. What is gone is
+# the refusal.
 #
-# Abuse is still refused, and by the means built for it: the rate ceiling, the named crawler
-# refusals in robots.txt, the operator token, the steward warrants, the moderation floor. A gate
-# is a poor instrument against abuse and a very good one against the curious.
-AFTER_THE_GATE = frozenset({
-    "/commentary",   # Gill, Clarke — exposition
-    "/prophecy",     # the signposts: how the world reached toward Christ
-    "/seeds",        # logos spermatikos, calibrated to the plumb-line
-    "/narratives",   # the storyboards — narrative movements charted
-    "/teachings",    # what is drawn out of the body
-})
+# Abuse is still refused, by the instruments built for it: the read and write ceilings, the named
+# crawler refusals in robots.txt, the operator token, the steward warrants with their terms, the
+# moderation floor. And what is NOT knowledge is still governed — the operator console is
+# authority, a member's private shelf is theirs, and the mesh asks for a confession because
+# joining a fellowship is a covenant, not a lookup.
+AFTER_THE_GATE = frozenset()
 
 
 def _gate_closed() -> Response:
@@ -1470,8 +1470,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
     if method == "GET" and path == "/commentary":
         # Public-domain, attributed commentary (Matthew Henry) — the father's own words, found.
-        if not allow_witness:
-            return _gate_closed()
         ref = (query.get("ref") or "").strip()
         if not ref:
             return _err(400, "ref required")
@@ -1511,8 +1509,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
     if method == "GET" and path == "/prophecy":
         # Christ-signpost traces — attributed, verdict CONCORDANT/MIXED, NEVER HOLDS (a signpost, not a proof).
-        if not allow_witness:
-            return _gate_closed()
         from .. import prophecy
         tid = (query.get("id") or "").strip()
         if tid:
@@ -1524,8 +1520,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/seeds":
         # Seeds of the Word — the Areopagus / logos spermatikos pass. Attributed, CONCORDANT/signpost,
         # NEVER HOLDS; the idol named and refused, the Source named — Jesus Christ (Acts 17; 1 John 4:1-3).
-        if not allow_witness:
-            return _gate_closed()
         from .. import seeds as seeds_mod
         sid = (query.get("id") or "").strip()
         if sid:
@@ -1834,8 +1828,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/narratives":
         # The storyboards — the common narratives charted in the Bible; components (movements)
         # isolate and recombine. Reference points, never identities. Witness content.
-        if not allow_witness:
-            return _gate_closed()
         from .. import narratives as narr_mod
         nid = (query.get("id") or "").strip()
         mv = (query.get("movement") or "").strip()
@@ -1856,8 +1848,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/teachings":
         # Phase 3 — the teaching-review workspace (Words in Red). Witness content: the engine
         # assembles the frozen Greek anchor + existing sites; the operator records the reading.
-        if not allow_witness:
-            return _gate_closed()
         from .. import teachings as teachings_mod
         tid = (query.get("id") or "").strip()
         if tid:
