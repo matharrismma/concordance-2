@@ -244,6 +244,29 @@ async function openCard(id){
 }
 
 document.getElementById('q').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); findIt(); } });
+
+/* Deep links land where they pointed (the shared adopter in nh-home.js calls these).
+   The shelf browser lives inside a collapsed <details> and its options arrive from /cards/stats
+   after load — so this opens the panel and waits for ITS OWN option rather than setting a value
+   on an empty list, which the browser discards without a word. */
+window.NHDeepLink = function(v){ document.getElementById('q').value = v; findIt(); };
+window.NHDeepLinkShelf = function(s){
+  const det = document.querySelector('details.browse'); if(det) det.open = true;
+  const sel = document.getElementById('shelf');
+  const go = () => { sel.value = s; load(0);
+    document.getElementById('shelf-wrap').scrollIntoView({behavior:"smooth", block:"start"}); };
+  (function wait(n){
+    if(Array.prototype.some.call(sel.options, o => o.value === s)) return go();
+    if(sel.options.length > 1){
+      // The dropdown is built from /cards/stats and has arrived without this shelf. /cards?shelf=
+      // serves it anyway, so add the option rather than refuse the link — a shelf the reader was
+      // sent to is not made unreal by being absent from a list.
+      const o = document.createElement('option'); o.value = s; o.textContent = s;
+      sel.appendChild(o); return go();
+    }
+    if(n < 40) setTimeout(() => wait(n+1), 100);
+  })(0);
+};
 init();
 </script>
 <script src="/nh-home.js"></script>

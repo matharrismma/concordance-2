@@ -41,3 +41,81 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
   else inject();
 })();
+
+/* Arrive where the link pointed.
+ *
+ * A URL carrying ?q= / ?search= / ?ref= / ?shelf= is a reader — or a citation — asking for one
+ * specific thing. Every page here has a search control and NOT ONE of them read the URL, so such
+ * a link silently produced the unfiltered page instead. That is the same failure that makes 2,124
+ * card citations to /canon.html?ref=… land on a generic Bible page with the reference thrown
+ * away: the reader arrives somewhere plausible and wrong, and nothing reports it.
+ *
+ * One adopter on the shared shell fixes every page at once and cannot drift back. A page that
+ * knows better takes over by defining window.NHDeepLink(value) / window.NHDeepLinkShelf(shelf) —
+ * then it owns the waiting, and this stops after one call.
+ *
+ * Fails silent: no matching control -> nothing happens, and the page is exactly what it was.
+ */
+(function () {
+  var P;
+  try { P = new URLSearchParams(location.search); } catch (e) { return; }
+  var term = '';
+  var KEYS = ['q', 'search', 'ref', 'term', 'name'];
+  for (var i = 0; i < KEYS.length && !term; i++) term = P.get(KEYS[i]) || '';
+  var shelf = P.get('shelf') || '';
+  if (!term && !shelf) return;
+
+  // Ordered, not a comma-selector: querySelector with a list returns the first match in DOCUMENT
+  // order, which on some pages is the wrong box entirely.
+  var INPUTS = ['[data-deeplink]', '#q', '#search', 'input[type=search]'];
+  function firstOf(sels) {
+    for (var i = 0; i < sels.length; i++) {
+      var el = document.querySelector(sels[i]);
+      if (el) return el;
+    }
+    return null;
+  }
+
+  var tries = 0;
+  function apply() {
+    var settled = true;
+
+    if (term) {
+      if (typeof window.NHDeepLink === 'function') {
+        window.NHDeepLink(term); term = '';
+      } else {
+        var input = firstOf(INPUTS);
+        if (input) {
+          input.value = term; term = '';
+          var go = document.getElementById('go');
+          if (go) go.click();
+          else {
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+          }
+        } else settled = false;
+      }
+    }
+
+    if (shelf) {
+      if (typeof window.NHDeepLinkShelf === 'function') {
+        window.NHDeepLinkShelf(shelf); shelf = '';
+      } else {
+        // the dropdown is filled from /cards/stats AFTER load — wait for OUR option, not just
+        // for the <select>, or the value is set on an empty list and silently discarded
+        var sel = firstOf(['[data-deeplink-shelf]', 'select#shelf']);
+        var has = sel && Array.prototype.some.call(sel.options, function (o) { return o.value === shelf; });
+        if (has) {
+          sel.value = shelf; shelf = '';
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+        } else settled = false;
+      }
+    }
+
+    if (settled || ++tries > 40) return;   // ~4s of waiting, then give up quietly
+    setTimeout(apply, 100);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
+  else apply();
+})();

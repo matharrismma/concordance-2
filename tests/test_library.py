@@ -46,6 +46,22 @@ def test_stats():
     assert s["total"] == 3 and s["by_surface"]["secular"] == 2 and s["by_shelf"]["theology"] == 1
 
 
+def test_stats_hides_no_shelf():
+    """`by_shelf` was `most_common(40)`. The library's browse dropdown is built from it, so 63 of
+    103 shelves could not be reached by browsing — `hymns` among them, which is where a retired
+    page now sends its readers. /cards?shelf= served every one of them the whole time, so the cap
+    hid the keeping from the one control meant for reaching it, and read as "this is all there is".
+    """
+    _inject()
+    many = {f"c{i}": {"id": f"c{i}", "title": f"T{i}", "shelf": f"shelf_{i}",
+                      "surface": "secular", "body": "x"} for i in range(60)}
+    corpus._DEFAULT = corpus.Corpus(many)
+    s = corpus.stats()
+    assert len(s["by_shelf"]) == 60, (
+        f"stats reports {len(s['by_shelf'])} of 60 shelves — a browse control built from this "
+        f"cannot reach the rest")
+
+
 def test_daily_is_deterministic_per_seed():
     _inject()
     assert corpus.daily("2026-06-28")["id"] == corpus.daily("2026-06-28")["id"]

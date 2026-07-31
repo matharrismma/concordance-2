@@ -32,6 +32,23 @@ const CORE = [
 /* Never cache: anything that must be live-verified or is per-request. */
 const NEVER = [/^\/verify/, /^\/seal/, /^\/s\//, /^\/audit/, /^\/speak/];
 
+/* THE SHELL — the scripts that decide what a page DOES, network-first like the pages themselves.
+ *
+ * Measured 2026-07-31, in a browser, right after deploying the deep-link adopter into nh-home.js:
+ * /hymns.html redirected correctly, the page loaded, and the adopter did not run. The service
+ * worker had served YESTERDAY's nh-home.js from stale-while-revalidate; the fix arrived in the
+ * cache in the background and worked on the NEXT load. One-load-behind — the same shape as the
+ * shelf bug in July, which was one WRITE behind.
+ *
+ * Stale-while-revalidate is right for bytes that only have to look the same. It is wrong for the
+ * bytes that decide whether a citation resolves: the reader gets the old behaviour once, sees the
+ * wrong page, and never knows a newer answer existed. These files are 2–12 KB, so the cost of
+ * asking the network first is small, and the cached copy still answers when there is no network —
+ * offline loses nothing. The cache is NOT bumped for this: purging would take the keeping off the
+ * device of someone who carried it deliberately, which is a worse harm than one stale load.
+ */
+const SHELL = ['/nh-home.js', '/nh-tools.js', '/nh-search.js', '/kinds.js', '/gate.js', '/sw.js'];
+
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE)
@@ -70,7 +87,9 @@ self.addEventListener('fetch', (e) => {
                   '/character', '/prophecy', '/seeds', '/codex', '/works', '/locate', '/library/health',
                   '/daily', '/resolve', '/word_study'].some((p) => url.pathname.startsWith(p));
 
-  if (isDoc || isData) {
+  const isShell = SHELL.includes(url.pathname);
+
+  if (isDoc || isData || isShell) {
     // NETWORK FIRST — fresh whenever there is a network; cached copy when there is not.
     e.respondWith(
       fetch(req)
@@ -81,7 +100,10 @@ self.addEventListener('fetch', (e) => {
           }
           return res;
         })
-        .catch(() => caches.match(req).then((hit) => hit || caches.match('/companion.html')))
+        // A document with no network falls back to the companion page. A SCRIPT must not — handing
+        // HTML to a <script> tag is a syntax error, and the page would lose the shell entirely.
+        .catch(() => caches.match(req)
+          .then((hit) => hit || (isShell ? Response.error() : caches.match('/companion.html'))))
     );
     return;
   }

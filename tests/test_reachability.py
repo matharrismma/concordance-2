@@ -86,6 +86,10 @@ def test_every_api_route_is_reachable_or_declared_agent_only():
         path = r["path"]
         if path in AGENT_ONLY or path.startswith("/s/"):
             continue
+        # A retired path is unlinked ON PURPOSE — it catches inbound links we do not control and
+        # forwards them. Requiring a page to link it would put a tombstone in the navigation.
+        if r.get("retired"):
+            continue
         if path not in markup:
             unreachable.append(path)
     assert not unreachable, (

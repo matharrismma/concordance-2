@@ -2026,7 +2026,20 @@ ROUTES = [
     {"path": "/teachings", "methods": ("GET",), "api": True},
     {"path": "/card.html", "methods": ("GET",), "api": True, "serve": True},
     {"path": "/speak", "methods": ("POST",), "rl": True, "serve": True},
+    # Retired pages — see _RETIRED and the /daily.html handler in serve(). `retired` marks a path
+    # that is deliberately linked from NOWHERE: it exists to catch inbound links we do not control
+    # (bookmarks, old indexes, crawlers) and send them where the content actually went. A live page
+    # linking to one would be the drift — pointing readers at a tombstone instead of the destination.
+    {"path": "/daily.html", "methods": ("GET",), "serve": True, "retired": True},
+    {"path": "/hymns.html", "methods": ("GET",), "serve": True, "retired": True},
 ]
+
+# A page that existed and is gone is NOT a 404. Each entry names where its content actually
+# lives now — and only pages with a real successor belong here. When nothing holds the content
+# any more, the honest answer is to leave it 404 rather than send a reader somewhere plausible.
+_RETIRED = {
+    "/hymns.html": "/library.html?shelf=hymns",   # 97 hymn cards, a real shelf in the keeping
+}
 
 # The JSON/API GET paths (served even with a static site mounted) — DERIVED from ROUTES.
 _API_GET_PATHS = frozenset(r["path"] for r in ROUTES if r.get("api"))
@@ -2048,7 +2061,7 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
     import os
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
     from pathlib import Path
-    from urllib.parse import parse_qs, urlparse
+    from urllib.parse import parse_qs, quote, urlparse
 
     # Correct MIME for the self-hosted ML assets: ESM modules are MIME-strict (a browser
     # refuses an .mjs served as octet-stream), and .wasm should be application/wasm.
@@ -2110,6 +2123,15 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             self.send_header("content-length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+
+        def _redirect(self, status: int, location: str) -> None:
+            self.send_response(status)
+            self.send_header("location", location)
+            self.send_header("content-length", "0")
+            # a 302 must not be cached — its destination is computed per request
+            if status != 301:
+                self.send_header("cache-control", "no-store")
+            self.end_headers()
 
         def _html(self, status: int, html: str) -> None:
             body = html.encode("utf-8")
@@ -2274,6 +2296,26 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 self.end_headers()
                 self.wfile.write(audio)
                 return
+            # RETIRED PAGES — answered with where the content WENT.
+            #
+            # Both are 1.0 pages on narrowhighway.tv, and both were 404ing: 70 requests for
+            # /daily.html and 63 for /hymns.html, every one of them with no referrer — bookmarks,
+            # crawlers, and old indexes still asking. A 404 says "no such thing ever existed",
+            # which is false. So each is sent to what actually holds its content now.
+            #
+            # The discipline is the one /canon.html breaks: a redirect must land on the thing that
+            # was asked for. /canon.html?ref=X 301s to bible.html having dropped the ref, so the
+            # reader arrives somewhere plausible and wrong. These two have real successors — 97
+            # hymn cards on a shelf, and the daily card itself — so the redirect is honest.
+            if method == "GET" and u.path == "/daily.html":
+                # 302, never 301: today's card is a different card tomorrow, and a permanent
+                # redirect would be cached in browsers pointing at one frozen day forever.
+                c = corpus.daily(None)
+                if c and c.get("id"):
+                    return self._redirect(302, "/card/" + quote(str(c["id"]), safe=""))
+                return self._json(404, {"error": "the keeping is empty"})
+            if method == "GET" and u.path in _RETIRED:
+                return self._redirect(301, _RETIRED[u.path])
             # static site (GET only) for non-API paths, when a site dir is configured
             if method == "GET" and site is not None and u.path not in _API_GET_PATHS:
                 return self._static(u.path)

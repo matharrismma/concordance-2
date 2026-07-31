@@ -135,6 +135,21 @@ async function show(name){
   entryEl.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
+/* A citation arriving here names ONE entry — open it, don't just filter to it. Cards cite this
+   page as /characters.html?search=Aaron; landing on an unfiltered dictionary would drop the
+   reference exactly the way /canon.html does. Ambiguous name -> the filtered list, which is the
+   honest answer when we cannot tell which one was meant. */
+window.NHDeepLink = async function (v) {
+  qEl.value = v;
+  listEl.innerHTML = '<p class="dim">searching…</p>';
+  const d = await getJSON('/characters?search=' + encodeURIComponent(v) + '&limit=60');
+  renderList(d);
+  const items = (d && d.items) || [];
+  const exact = items.find(i => String(i.name).toLowerCase() === String(v).toLowerCase());
+  if (exact) show(exact.name);
+  else if (items.length === 1) show(items[0].name);
+};
+
 document.getElementById('go').addEventListener('click', search);
 qEl.addEventListener('keydown', e => { if(e.key==='Enter') search(); });
 const az = document.getElementById('az');

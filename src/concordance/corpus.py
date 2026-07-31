@@ -511,7 +511,12 @@ def stats() -> Dict[str, Any]:
     from collections import Counter
     cards = [c for c in default_corpus().cards.values() if is_public(c)]
     out = {"total": len(cards),
-           "by_shelf": dict(Counter((c.get("shelf") or "?") for c in cards).most_common(40)),
+           # EVERY shelf, not the largest 40. This was `most_common(40)`, and the library's browse
+           # dropdown is built from it — so 63 of 103 shelves could not be reached by browsing at
+           # all, while /cards?shelf=X served them perfectly well. A cap that hides two-thirds of
+           # the keeping from the one control meant for reaching it is a silent truncation, and it
+           # reads to a visitor as "this is all there is".
+           "by_shelf": dict(Counter((c.get("shelf") or "?") for c in cards).most_common()),
            "by_surface": dict(Counter((c.get("surface") or "?") for c in cards))}
     fz = frozen_shelves()
     if fz:
