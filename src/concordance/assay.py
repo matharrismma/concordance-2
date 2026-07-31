@@ -143,11 +143,84 @@ def assay(card: Dict[str, Any]) -> Dict[str, Any]:
     return {"verdict": STANDS, "reason": "complete, sourced, and says something on its own"}
 
 
-def survey(cards, limit_examples: int = 3) -> Dict[str, Any]:
+# Paths that answer a request but deliver nothing usable — a redirect shim or a JS-only stub. A
+# citation pointing here is not a broken link in the ordinary sense: the server says 200 or 301 and
+# the reader still arrives nowhere. Measured 2026-07-31: 4,743 cards cite one of these.
+DEAD_ENDS = ("/encyclopedia.html", "/canon.html")
+
+
+def resolves(card: Dict[str, Any], resolve_card=None, resolve_seal=None) -> List[Dict[str, str]]:
+    """Does what this card POINTS AT actually arrive? Returns a list of named repairs.
+
+    THE PATTERN THIS EXISTS TO CLOSE. Three defects in one night, all the same shape — we checked
+    that a field was PRESENT and never that it RESOLVED:
+
+        the card has a source        …  4,743 cited a redirect shim that drops the reference
+        the card has a seal hash     …  11,084 advertised a receipt that was never minted
+        the response is correct      …  the reader was shown the opposite of the record
+
+    A field that exists and leads nowhere is worse than an absent one, because it reads as
+    provenance. `assay()` judges what a card SAYS; this judges what it PROMISES.
+
+    Resolvers are injected — `resolve_card(id) -> card|None`, `resolve_seal(hash) -> record|None` —
+    so this module keeps its no-I/O discipline and the caller decides how lookup happens (the same
+    arrangement as `present.neighbors`). A resolver that is not supplied means that class is NOT
+    CHECKED, and it is silently skipped rather than reported as passing: an unchecked thing must
+    never be counted as sound.
+
+    NO NETWORK, EVER. Over half a million cards, fetching would be absurd; external URLs are judged
+    on shape alone, and only against destinations we KNOW are dead because we serve them ourselves.
+    """
+    out: List[Dict[str, str]] = []
+    if not isinstance(card, dict):
+        return out
+    src = card.get("source") or {}
+
+    url = str(src.get("url") or "")
+    if url and any(url.startswith(d) for d in DEAD_ENDS):
+        out.append({"kind": "repoint_citation", "target": url,
+                    "how": "this citation points at a shim that answers but delivers nothing — "
+                           "send it to the page that actually holds the entry"})
+
+    seal = str((card.get("extra") or {}).get("seal_hash") or "")
+    if seal and resolve_seal is not None:
+        try:
+            found = resolve_seal(seal)
+        except Exception:  # noqa: BLE001 — an unusable resolver is a fact about us, not the card
+            found = None
+        if found is None:
+            out.append({"kind": "mint_or_drop_seal", "target": seal[:16],
+                        "how": "the card advertises a receipt that is not in the keeping — mint the "
+                               "verification, or stop claiming it. A fingerprint is not a verdict"})
+
+    if resolve_card is not None:
+        for e in (card.get("connections") or []):
+            if not isinstance(e, dict):
+                continue
+            tid = str(e.get("to_card_id") or "").strip()
+            if not tid:
+                continue
+            try:
+                target = resolve_card(tid)
+            except Exception:  # noqa: BLE001
+                target = None
+            if target is None:
+                out.append({"kind": "resolve_edge", "target": tid,
+                            "how": "an edge points at a card that is not in the keeping — restore "
+                                   "the target or drop the edge"})
+    return out
+
+
+def survey(cards, limit_examples: int = 3, resolve_card=None, resolve_seal=None) -> Dict[str, Any]:
     """Assay many cards and report the shape of the library. Reporting only — the point of a
-    process is that the judgement and the act are separate steps."""
+    process is that the judgement and the act are separate steps.
+
+    Pass the resolvers to also check what each card PROMISES (see `resolves`). Omitted resolvers
+    mean that class is NOT CHECKED, and `unchecked` names which — never counted as sound."""
     counts: Dict[str, int] = {STANDS: 0, IMPROVABLE: 0, EMPTY: 0, CANNOT_CHECK: 0}
     by_improvement: Dict[str, int] = {}
+    broken_promises: Dict[str, int] = {}
+    cards_with_a_broken_promise = 0
     examples: Dict[str, List[Dict[str, str]]] = {}
     by_shelf: Dict[str, Dict[str, int]] = {}
     n = 0
@@ -162,12 +235,20 @@ def survey(cards, limit_examples: int = 3) -> Dict[str, Any]:
         if v == IMPROVABLE:
             k = (a.get("improvement") or {}).get("kind", "?")
             by_improvement[k] = by_improvement.get(k, 0) + 1
+        for pr in resolves(c, resolve_card, resolve_seal):
+            broken_promises[pr["kind"]] = broken_promises.get(pr["kind"], 0) + 1
+        if resolves(c, resolve_card, resolve_seal):
+            cards_with_a_broken_promise += 1
         if v != STANDS and len(examples.setdefault(v, [])) < limit_examples:
             examples[v].append({"id": str((c or {}).get("id") or ""),
                                 "title": str((c or {}).get("title") or "")[:70],
                                 "reason": a["reason"]})
+    unchecked = [k for k, r in (("seals", resolve_seal), ("edges", resolve_card)) if r is None]
     return {"total": n, "counts": counts, "improvements": by_improvement,
-            "examples": examples, "by_shelf": by_shelf}
+            "examples": examples, "by_shelf": by_shelf,
+            "broken_promises": broken_promises,
+            "cards_with_a_broken_promise": cards_with_a_broken_promise,
+            "unchecked": unchecked}
 
 
 def retraction(card_id: str, reason: str, by: str) -> Dict[str, Any]:
@@ -204,4 +285,4 @@ def retraction(card_id: str, reason: str, by: str) -> Dict[str, Any]:
     }}
 
 
-__all__ = ["assay", "survey", "retraction", "STANDS", "IMPROVABLE", "EMPTY", "CANNOT_CHECK"]
+__all__ = ["assay", "survey", "resolves", "retraction", "DEAD_ENDS", "STANDS", "IMPROVABLE", "EMPTY", "CANNOT_CHECK"]

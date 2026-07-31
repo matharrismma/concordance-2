@@ -54,7 +54,10 @@ def main() -> int:
                 print(f"{imp.get('kind','?')}\t{c.get('id')}\t{imp.get('how','')}")
         return 0
 
-    s = assay.survey(cards)
+    # Check what each card PROMISES too, not only what it says. Resolvers are injected so the
+    # module stays I/O-free; the seal store and the corpus are the caller's business.
+    from concordance import cas
+    s = assay.survey(cards, resolve_card=corpus.get_card, resolve_seal=cas.fetch)
     total = s["total"]
     print(f"THE CARD ASSAY — {total:,} cards{' on ' + shelf if shelf else ''}\n")
     for v in (assay.STANDS, assay.IMPROVABLE, assay.CANNOT_CHECK, assay.EMPTY):
@@ -78,6 +81,14 @@ def main() -> int:
         for sh, n in worst:
             if n:
                 print(f"     {n:>8,}  {sh}")
+
+    if s.get("broken_promises"):
+        print(f"\n  BROKEN PROMISES — {s['cards_with_a_broken_promise']:,} cards point at "
+              f"something that does not arrive:")
+        for k, n in sorted(s["broken_promises"].items(), key=lambda x: -x[1]):
+            print(f"     {n:>8,}  {k}")
+    if s.get("unchecked"):
+        print(f"\n  NOT CHECKED (never counted as sound): {', '.join(s['unchecked'])}")
 
     removable = s["counts"].get(assay.EMPTY, 0)
     print(f"\n  Nothing here is removed by running this. {removable:,} card(s) hold no content; "

@@ -168,5 +168,60 @@ def test_the_assay_never_raises_on_junk():
         assert A.assay(junk)["verdict"] in (A.STANDS, A.IMPROVABLE, A.EMPTY, A.CANNOT_CHECK)
 
 
+# ────────────────────────────── does what it POINTS AT arrive?
+
+def test_a_citation_to_a_shim_is_named_as_a_broken_promise():
+    """4,743 cards cite /encyclopedia.html or /canon.html — paths that ANSWER (200 / 301) and
+    deliver nothing. Not a broken link in the ordinary sense; a citation that reads as provenance
+    and leads nowhere."""
+    c = _card("real words", title="T")
+    c["source"] = {"label": "Easton", "url": "/encyclopedia.html?ref=Slave"}
+    pr = A.resolves(c)
+    assert [p["kind"] for p in pr] == ["repoint_citation"]
+    assert "delivers nothing" in pr[0]["how"]
+    c["source"]["url"] = "/characters.html?search=Slave"
+    assert A.resolves(c) == [], "a citation that arrives must not be flagged"
+
+
+def test_a_seal_that_is_not_in_the_keeping_is_named():
+    """11,084 cards advertised a receipt never minted. A fingerprint is not a verdict."""
+    c = _card("real words")
+    c["extra"] = {"seal_hash": "deadbeef" * 8}
+    assert A.resolves(c, resolve_seal=lambda h: None)[0]["kind"] == "mint_or_drop_seal"
+    assert A.resolves(c, resolve_seal=lambda h: {"verdict": "HOLDS"}) == []
+
+
+def test_an_edge_into_nothing_is_named():
+    c = _card("real words")
+    c["connections"] = [{"to_card_id": "card_gone", "relationship": "cites"},
+                        {"to_card_id": "card_here", "relationship": "cites"}]
+    known = {"card_here": {"id": "card_here"}}
+    pr = A.resolves(c, resolve_card=known.get)
+    assert len(pr) == 1 and pr[0]["target"] == "card_gone"
+
+
+def test_an_unsupplied_resolver_is_UNCHECKED_never_counted_as_sound():
+    """The rule the whole night argues for: a thing we did not check must never be reported as
+    passing. Omitting a resolver skips that class AND says so."""
+    c = _card("real words")
+    c["extra"] = {"seal_hash": "deadbeef" * 8}
+    assert A.resolves(c) == [], "without a resolver the seal class must be skipped, not judged"
+    s = A.survey([c])
+    assert "seals" in s["unchecked"] and "edges" in s["unchecked"]
+    assert s["cards_with_a_broken_promise"] == 0
+    s2 = A.survey([c], resolve_seal=lambda h: None, resolve_card=lambda i: None)
+    assert s2["unchecked"] == [] and s2["cards_with_a_broken_promise"] == 1
+
+
+def test_a_resolver_that_throws_is_our_failure_not_the_cards():
+    """Three states: an unusable resolver must not become an accusation against the card."""
+    def boom(_):
+        raise RuntimeError("shard locked")
+    c = _card("real words")
+    c["extra"] = {"seal_hash": "deadbeef" * 8}
+    pr = A.resolves(c, resolve_seal=boom)
+    assert pr and pr[0]["kind"] == "mint_or_drop_seal"   # reported, and never raised
+
+
 if __name__ == "__main__":
     sys.exit(int(pytest.main([__file__, "-q"])))
