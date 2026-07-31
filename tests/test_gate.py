@@ -16,6 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 os.environ["CONCORDANCE_DATA_DIR"] = tempfile.mkdtemp(prefix="nh-gate-")
 
+from concordance.web import api
 from concordance.web.api import dispatch  # noqa: E402
 from concordance.config import EngineConfig  # noqa: E402
 
@@ -23,8 +24,14 @@ SEC = EngineConfig("secular")
 WIT = EngineConfig("witness")
 
 # every witness path shares the same gate; the check runs before any data import (hermetic)
-WITNESS_PATHS = ("/passage", "/commentary", "/cross_refs", "/tsk", "/character",
-                 "/characters", "/prophecy", "/canon", "/original", "/word_study", "/resolve")
+# The Gate holds the DEEPER READING, never the text. Matt, 2026-07-31: "seeing them is fine —
+# understanding the deeper meaning comes after the gate" and "we don't need to refuse use, we
+# refuse abuse". This list used to hold the passage, the dictionary, the canon and the original
+# tongues too; those are seeing, and refusing them refused use. The set is the one in the code,
+# so this test cannot drift from it.
+WITNESS_PATHS = tuple(sorted(api.AFTER_THE_GATE))
+SEEING_PATHS = ("/passage", "/character", "/characters", "/canon", "/original", "/word_study",
+                "/resolve", "/cross_refs", "/tsk")
 
 
 def test_secular_witness_closed_by_default_and_marked():
@@ -32,6 +39,15 @@ def test_secular_witness_closed_by_default_and_marked():
         st, body = dispatch("GET", p, {"ref": "John 3:16", "strongs": "G26", "name": "Moses"}, None, SEC)
         assert st == 404, p
         assert body.get("gate") == "closed", (p, body)   # marked, so a client invites (not a dead end)
+
+
+def test_the_text_itself_is_never_behind_the_gate():
+    """The other half of the same doctrine, and the half that was wrong until 2026-07-31: a
+    reader who asks for a verse, a name, or a lexical entry is USING the library."""
+    refused = [p for p in SEEING_PATHS
+               if dispatch("GET", p, {"ref": "John 3:16", "strongs": "G26", "name": "Moses"},
+                           None, SEC)[1].get("gate") == "closed"]
+    assert not refused, f"these refuse use: {refused}"
 
 
 def test_secular_witness_unlocks_when_session_gate_open():

@@ -79,7 +79,11 @@ def test_passage_endpoint_witness_gated():
     st, p = dispatch("GET", "/passage", {"ref": "John 3:16"}, None, WIT)
     assert st == 200 and "status" in p
     assert dispatch("GET", "/passage", {}, None, WIT)[0] == 400          # ref required
-    assert dispatch("GET", "/passage", {"ref": "John 3:16"}, None, SEC)[0] == 404  # witness-only
+    # SEEING, not understanding. Matt, 2026-07-31: "seeing them is fine — understanding
+    # the deeper meaning comes after the gate" and "we don't need to refuse use, we refuse
+    # abuse". The text and its reference apparatus answer on both surfaces now; only
+    # exposition waits (api.AFTER_THE_GATE).
+    assert dispatch("GET", "/passage", {"ref": "John 3:16"}, None, SEC)[0] == 200  # the Word is never refused
 
 
 if __name__ == "__main__":

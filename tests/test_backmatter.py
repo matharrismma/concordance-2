@@ -95,11 +95,13 @@ def test_book_intros_cover_all_66_in_canon_order():
 def test_the_gate_holds_and_opens():
     from concordance.config import EngineConfig
     from concordance.web.api import dispatch
-    # The closed gate answers 404 marked gate:closed — deliberately NOT 401/403, so the room's
-    # existence is never revealed to someone who has not sought it (fails closed, invites the ask).
+    # SEEING, not understanding. Matt, 2026-07-31: "seeing them is fine — understanding the deeper
+    # meaning comes after the gate" and "we don't need to refuse use, we refuse abuse". Weights,
+    # measures, the names of God, the parables — these are reference tables. Refusing them refused
+    # use. Only exposition waits now (api.AFTER_THE_GATE).
     st, body = dispatch("GET", "/backmatter", {}, None, EngineConfig("secular"))
-    assert st == 404 and body.get("gate") == "closed", \
-        "the tables must live behind the Gate on the secular surface"
+    assert st == 200 and body.get("gate") != "closed", \
+        "the back-matter tables are reference — refusing them refuses use"
     st2, body2 = dispatch("GET", "/backmatter", {}, None, EngineConfig("witness"))
     assert st2 == 200 and len(body2["tables"]) == 6
     st3, body3 = dispatch("GET", "/backmatter", {"table": "names_of_god"}, None, EngineConfig("witness"))

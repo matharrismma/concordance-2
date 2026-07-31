@@ -69,7 +69,11 @@ def test_unknown_id_declines_rather_than_guessing():
 
 
 def test_endpoint_is_witness_gated():
-    assert dispatch("GET", "/harmony", {}, None, SEC)[0] == 404
+    # SEEING, not understanding. Matt, 2026-07-31: "seeing them is fine — understanding
+    # the deeper meaning comes after the gate" and "we don't need to refuse use, we refuse
+    # abuse". The text and its reference apparatus answer on both surfaces now; only
+    # exposition waits (api.AFTER_THE_GATE).
+    assert dispatch("GET", "/harmony", {}, None, SEC)[0] == 200
     st, p = dispatch("GET", "/harmony", {}, None, WIT)
     assert st == 200 and p["total"] > 90
     st2, g = dispatch("GET", "/harmony", {"id": "h089"}, None, WIT)

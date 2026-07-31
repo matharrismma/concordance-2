@@ -193,10 +193,16 @@ def test_the_new_study_routes_stay_behind_the_gate_on_the_secular_surface():
     from concordance.config import EngineConfig
     from concordance.web.api import dispatch
     sec = EngineConfig("secular")
-    for p in ("/backmatter", "/places", "/narratives", "/study_find"):
+    # Only the deeper reading now. /backmatter (weights, measures, the names of God), /places
+    # (the Atlas) and /study_find (the quick-find index) are reference — seeing — and came out
+    # from behind the Gate on 2026-07-31: "we don't need to refuse use, we refuse abuse".
+    for p in ("/narratives",):
         st, payload = dispatch("GET", p, {"q": "aaron"}, None, sec)
         assert st == 404 and payload.get("gate") == "closed", \
             f"{p} must answer the closed gate honestly on the secular surface, got {st}"
+    for p in ("/backmatter", "/places", "/study_find"):
+        st, payload = dispatch("GET", p, {"q": "aaron"}, None, sec)
+        assert payload.get("gate") != "closed", f"{p} refuses use, not abuse"
 
 
 if __name__ == "__main__":

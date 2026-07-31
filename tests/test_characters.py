@@ -60,7 +60,12 @@ def test_browse_letter_and_search():
 
 
 def test_endpoints_witness_gated():
-    assert dispatch("GET", "/character", {"name": "Moses"}, None, SEC)[0] == 404
+    # SEEING, not understanding. Matt, 2026-07-31: "seeing them is fine — understanding
+    # the deeper meaning comes after the gate" and "we don't need to refuse use, we refuse
+    # abuse". The text and its reference apparatus answer on both surfaces now; only
+    # exposition waits (api.AFTER_THE_GATE).
+    # 2,619 cards cite this page; it has to answer on the surface they are published on.
+    assert dispatch("GET", "/character", {"name": "Moses"}, None, SEC)[0] == 200
     assert dispatch("GET", "/character", {}, None, WIT)[0] == 400
     st, p = dispatch("GET", "/character", {"name": "Moses"}, None, WIT)
     assert st == 200 and p["ref_count"] == 2

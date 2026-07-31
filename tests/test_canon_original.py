@@ -44,7 +44,11 @@ def test_canon_endpoint_witness_gated():
     assert st == 200 and p["undisputed_66"]["count"] == 66
     st2, p2 = dispatch("GET", "/canon", {"book": "Tobit"}, None, WIT)
     assert st2 == 200 and p2["in_undisputed_66"] is False
-    assert dispatch("GET", "/canon", {}, None, SEC)[0] == 404
+    # SEEING, not understanding. Matt, 2026-07-31: "seeing them is fine — understanding
+    # the deeper meaning comes after the gate" and "we don't need to refuse use, we refuse
+    # abuse". The text and its reference apparatus answer on both surfaces now; only
+    # exposition waits (api.AFTER_THE_GATE).
+    assert dispatch("GET", "/canon", {}, None, SEC)[0] == 200
 
 
 def _conc_with_fixture() -> Concordance:
@@ -66,7 +70,11 @@ def test_verse_words_returns_tagged_originals():
 
 
 def test_original_endpoint_witness_gated():
-    assert dispatch("GET", "/original", {"ref": "John 3:16"}, None, SEC)[0] == 404
+    # SEEING, not understanding. Matt, 2026-07-31: "seeing them is fine — understanding
+    # the deeper meaning comes after the gate" and "we don't need to refuse use, we refuse
+    # abuse". The text and its reference apparatus answer on both surfaces now; only
+    # exposition waits (api.AFTER_THE_GATE).
+    assert dispatch("GET", "/original", {"ref": "John 3:16"}, None, SEC)[0] == 200
     assert dispatch("GET", "/original", {}, None, WIT)[0] == 400
     st, p = dispatch("GET", "/original", {"ref": "John 3:16"}, None, WIT)
     assert st == 200 and "status" in p and "words" in p

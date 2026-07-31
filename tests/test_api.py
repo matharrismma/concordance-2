@@ -57,8 +57,12 @@ def test_seal_404_on_bogus_hash():
 
 def test_witness_endpoints_gated_to_witness_surface():
     # secular reach: witness endpoints are 404
-    assert dispatch("GET", "/resolve", {"ref": "John 3:16"}, None, SEC)[0] == 404
-    assert dispatch("GET", "/word_study", {"strongs": "G26"}, None, SEC)[0] == 404
+    # SEEING, not understanding. Matt, 2026-07-31: "seeing them is fine — understanding
+    # the deeper meaning comes after the gate" and "we don't need to refuse use, we refuse
+    # abuse". The text and its reference apparatus answer on both surfaces now; only
+    # exposition waits (api.AFTER_THE_GATE).
+    assert dispatch("GET", "/resolve", {"ref": "John 3:16"}, None, SEC)[0] == 200
+    assert dispatch("GET", "/word_study", {"strongs": "G26"}, None, SEC)[0] == 200
     # witness surface: available (200 with a status field, whatever the data state)
     sr = dispatch("GET", "/resolve", {"ref": "John 3:16"}, None, WIT)
     assert sr[0] == 200 and "status" in sr[1]

@@ -103,7 +103,11 @@ def test_the_gate_holds_and_the_route_serves():
     from concordance.config import EngineConfig
     from concordance.web.api import dispatch
     st, body = dispatch("GET", "/places", {}, None, EngineConfig("secular"))
-    assert st == 404 and body.get("gate") == "closed"
+    # SEEING, not understanding. Matt, 2026-07-31: "seeing them is fine — understanding
+    # the deeper meaning comes after the gate" and "we don't need to refuse use, we refuse
+    # abuse". The text and its reference apparatus answer on both surfaces now; only
+    # exposition waits (api.AFTER_THE_GATE).
+    assert st == 200 and body.get("gate") != "closed"   # the Atlas is seeing
     st2, body2 = dispatch("GET", "/places", {}, None, EngineConfig("witness"))
     assert st2 == 200 and body2["count"] == len(bible_places.PLACES)
     st3, body3 = dispatch("GET", "/places", {"name": "Jerusalem"}, None, EngineConfig("witness"))

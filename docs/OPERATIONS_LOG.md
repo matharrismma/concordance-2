@@ -434,3 +434,37 @@ Slave; `/bible.html?ref=Revelation 5` opens the chapter; the Aurelius card page 
 following one of the 2,619 citations on .com meets the Gate — while the cards themselves are
 public there. The content is published and the page that shows it is gated. That inconsistency is
 a decision, not a bug, and it is his to make.
+
+## 2026-07-31 · The Gate holds the deeper reading, never the text
+
+Matt: *"I think seeing them is fine. Understanding the deeper meaning comes after the gate."* ·
+*"We don't need to refuse use. We refuse abuse."*
+
+The Gate held twenty paths, and fifteen of them were the text or its reference apparatus. A reader
+on the secular surface who asked for John 3:16 was handed a door. A reader who followed one of the
+2,619 citations to the Bible Dictionary met `gate_closed` — while the cards those citations live on
+were public on that very surface. We were publishing the content and gating the page that shows it.
+
+**Out from behind the Gate (seeing):** `/passage` · `/original` · `/canon` · `/character` ·
+`/characters` · `/cross_refs` · `/tsk` · `/word_study` · `/word_occurrences` · `/resolve` ·
+`/places` · `/harmony` · `/timeline` · `/backmatter` · `/study_find`
+
+**Still after the Gate (understanding):** `/commentary` · `/prophecy` · `/seeds` · `/narratives` ·
+`/teachings` — exposition and the tracing of meaning. Not withheld because it is precious;
+withheld because it only lands when it is sought.
+
+The refusal text changed too. It used to say "The Word opens as you seek it". It now says
+"**The text itself is already yours**" — because that is now true, and a refusal that does not
+name what IS available reads as a locked door.
+
+**Abuse is still refused**, by the instruments built for it: the rate ceiling (600/min read,
+120/min write), the named crawler refusals in robots.txt, the operator token, the steward warrants
+with their terms, the moderation floor. A gate is a poor instrument against abuse and a very good
+one against the curious.
+
+The line lives in one place now — `api.AFTER_THE_GATE` — and a test walks the code to prove no
+path drifts across it in either direction. Fifteen tests encoded the old rule and were rewritten,
+not deleted: each now asserts the opposite, with the reason written beside it.
+
+**1,037 tests. Verified live on .com:** all fifteen answer; all five still wait; and
+`/characters.html?search=Slave` opens Easton's entry for Slave with its verses.

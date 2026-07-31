@@ -37,13 +37,41 @@ def _err(status: int, msg: str) -> Response:
     return status, {"error": msg}
 
 
+# WHAT THE GATE IS FOR.
+#
+# Matt, 2026-07-31: *"I think seeing them is fine. Understanding the deeper meaning comes after the
+# gate."* · *"We don't need to refuse use. We refuse abuse."*
+#
+# The Gate used to hold twenty paths, and fifteen of them were the TEXT or its reference
+# apparatus: the passage itself, the original tongues, the dictionary entry, the canon list, the
+# cross-references, the places, the dates, the tables. Refusing those refused USE — a person came
+# to read Scripture and was handed a door. That was found by following a citation: 2,619 cards
+# cite the Dictionary and a reader on the secular surface met "gate_closed" instead of the entry,
+# while the cards themselves were public on that very surface.
+#
+# What remains behind the Gate is the second layer — the exposition and the tracing of meaning.
+# Not because it is precious, but because it is the part that only lands when it is sought.
+#
+# Abuse is still refused, and by the means built for it: the rate ceiling, the named crawler
+# refusals in robots.txt, the operator token, the steward warrants, the moderation floor. A gate
+# is a poor instrument against abuse and a very good one against the curious.
+AFTER_THE_GATE = frozenset({
+    "/commentary",   # Gill, Clarke — exposition
+    "/prophecy",     # the signposts: how the world reached toward Christ
+    "/seeds",        # logos spermatikos, calibrated to the plumb-line
+    "/narratives",   # the storyboards — narrative movements charted
+    "/teachings",    # what is drawn out of the body
+})
+
+
 def _gate_closed() -> Response:
-    """A witness endpoint reached before the person's seeking has opened the gate (Ask/Seek/Knock,
-    Mt 7:7). Still 404 — the Word is not surfaced yet — but MARKED, so a client can invite them to
-    open it rather than showing a dead end. We present the path; we never cross it."""
+    """A path of UNDERSTANDING reached before the person's seeking has opened the gate
+    (Ask/Seek/Knock, Mt 7:7). Still 404 — the meaning is not surfaced yet — but MARKED, so a client
+    can invite them to open it rather than showing a dead end. We present the path; we never cross
+    it. The text itself is never behind this: see AFTER_THE_GATE."""
     return 404, {"error": "gate_closed", "gate": "closed",
-                 "detail": "The Word opens as you seek it — bring up Scripture in the conversation, "
-                           "and the way opens."}
+                 "detail": "The deeper reading opens as you seek it — bring up Scripture in the "
+                           "conversation, and the way opens. The text itself is already yours."}
 
 
 def _card_brief(c: dict) -> Dict[str, Any]:
@@ -1392,8 +1420,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(rec)
 
     if method == "GET" and path == "/resolve":
-        if not allow_witness:
-            return _gate_closed()
         ref = (query.get("ref") or "").strip()
         if not ref:
             return _err(400, "ref required")
@@ -1402,8 +1428,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
     if method == "GET" and path == "/passage":
         # Read a passage (verse / range / whole chapter) — the Bible reading primitive.
-        if not allow_witness:
-            return _gate_closed()
         ref = (query.get("ref") or "").strip()
         if not ref:
             return _err(400, "ref required")
@@ -1411,8 +1435,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(scripture.read_passage(ref))
 
     if method == "GET" and path == "/word_study":
-        if not allow_witness:
-            return _gate_closed()
         s = (query.get("strongs") or "").strip()
         if not s:
             return _err(400, "strongs required")
@@ -1420,8 +1442,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(scripture.word_study(s))
 
     if method == "GET" and path == "/cross_refs":
-        if not allow_witness:
-            return _gate_closed()
         ref = (query.get("ref") or "").strip()
         if not ref:
             return _err(400, "ref required")
@@ -1429,8 +1449,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(scripture.cross_references(ref))
 
     if method == "GET" and path == "/word_occurrences":
-        if not allow_witness:
-            return _gate_closed()
         s = (query.get("strongs") or "").strip()
         if not s:
             return _err(400, "strongs required")
@@ -1438,8 +1456,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(scripture.word_occurrences(s))
 
     if method == "GET" and path == "/original":
-        if not allow_witness:
-            return _gate_closed()
         ref = (query.get("ref") or "").strip()
         if not ref:
             return _err(400, "ref required")
@@ -1448,8 +1464,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
     if method == "GET" and path == "/canon":
         # The canon as concentric layers — the 66 core + disputed books, framed, never merged.
-        if not allow_witness:
-            return _gate_closed()
         from .. import canon
         book = (query.get("book") or "").strip()
         return _ok(canon.canon_status(book) if book else canon.overview())
@@ -1466,8 +1480,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
     if method == "GET" and path == "/tsk":
         # Editorial cross-references (openbible.info, CC BY — expansion of the public-domain TSK).
-        if not allow_witness:
-            return _gate_closed()
         ref = (query.get("ref") or "").strip()
         if not ref:
             return _err(400, "ref required")
@@ -1480,8 +1492,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
     if method == "GET" and path == "/character":
         # A Bible figure from Easton's (1897, PD) — summary + every verse that speaks of them.
-        if not allow_witness:
-            return _gate_closed()
         name = (query.get("name") or "").strip()
         if not name:
             return _err(400, "name required")
@@ -1490,8 +1500,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(rec) if rec is not None else _err(404, "not found in Easton's")
 
     if method == "GET" and path == "/characters":
-        if not allow_witness:
-            return _gate_closed()
         from .. import characters
         try:
             limit = int(query.get("limit", "100"))
@@ -1784,8 +1792,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/harmony":
         # Harmony of the Gospels — one event, every gospel that witnesses it, side by side.
         # Witness content: the same gate as /teachings, /prophecy, /commentary.
-        if not allow_witness:
-            return _gate_closed()
         from .. import harmony as harmony_mod
         eid = (query.get("id") or "").strip()
         if eid:
@@ -1796,8 +1802,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/timeline":
         # Timeline — Old Testament, New Testament (Acts onward), and Church History, one spine.
         # Witness content: the same gate as /harmony, /teachings, /prophecy, /commentary.
-        if not allow_witness:
-            return _gate_closed()
         from .. import timeline as timeline_mod
         eid = (query.get("id") or "").strip()
         if eid:
@@ -1809,8 +1813,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # Back-matter reference tables — weights & measures, names of God, parables, miracles,
         # book introductions, topical index. Disputes carried, refs verified, Strong's linked.
         # Witness content: the same gate as /harmony and /timeline.
-        if not allow_witness:
-            return _gate_closed()
         from .. import backmatter as backmatter_mod
         key = (query.get("table") or "").strip()
         if key:
@@ -1822,8 +1824,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # The Atlas — real biblical place coordinates, honest uncertainty. Located places carry
         # coordinates; disputed sites name their candidates; unlocatable places stay blanks.
         # Witness content: the same gate as /harmony, /timeline, /backmatter.
-        if not allow_witness:
-            return _gate_closed()
         from .. import bible_places as places_mod
         nm = (query.get("name") or "").strip()
         if nm:
@@ -1850,8 +1850,6 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/study_find":
         # The quick-find index — one lookup across the whole reference section (archetypes,
         # storyboards, tables, atlas, harmony, timeline, encyclopedia). Witness content.
-        if not allow_witness:
-            return _gate_closed()
         from .. import study_index as si_mod
         return _ok(si_mod.find(query.get("q") or "", limit=40))
 

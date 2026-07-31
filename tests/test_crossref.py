@@ -65,11 +65,15 @@ def test_cross_references_bad_ref():
 
 
 def test_endpoints_witness_gated():
-    assert dispatch("GET", "/cross_refs", {"ref": "John 3:16"}, None, SEC)[0] == 404
+    # SEEING, not understanding. Matt, 2026-07-31: "seeing them is fine — understanding
+    # the deeper meaning comes after the gate" and "we don't need to refuse use, we refuse
+    # abuse". The text and its reference apparatus answer on both surfaces now; only
+    # exposition waits (api.AFTER_THE_GATE).
+    assert dispatch("GET", "/cross_refs", {"ref": "John 3:16"}, None, SEC)[0] == 200
     assert dispatch("GET", "/cross_refs", {}, None, WIT)[0] == 400
     st, p = dispatch("GET", "/cross_refs", {"ref": "John 3:16"}, None, WIT)
     assert st == 200 and "status" in p
-    assert dispatch("GET", "/word_occurrences", {"strongs": "G26"}, None, SEC)[0] == 404
+    assert dispatch("GET", "/word_occurrences", {"strongs": "G26"}, None, SEC)[0] == 200
     assert dispatch("GET", "/word_occurrences", {}, None, WIT)[0] == 400
 
 
