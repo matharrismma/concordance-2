@@ -63,6 +63,7 @@ GOLDEN_API_GET = {
     "/capabilities",  # deliberate addition (the live capability statement — restored from 1.0)
     "/mesh/signable",  # deliberate addition (the bytes to sign, so a key never crosses the wire)
     "/attest",  # deliberate addition (bear witness to a record you hold; GET lists the witnesses)
+    "/wants",   # deliberate addition (the WANT LIST — the library grows by its misses; 2026-08-01)
 }
 # /search moved OUT of this set on 2026-07-31 and into GOLDEN_READ_LIMITED — a read and a write
 # are not the same risk, and the one client the shared cap refused most was ClaudeBot.
@@ -86,6 +87,7 @@ GOLDEN_RATELIMITED = {
     "/audit",   # deliberate addition (the Auditor) — goldens update ONLY with a new route
     "/chess",   # deliberate addition (the chess verifier) — game theory, applied and sealable
     "/attest",  # deliberate addition — a write, so rate-limited like every other write
+    "/want",    # deliberate addition — opening a want is a write (the hive's return-point)
 }
 
 

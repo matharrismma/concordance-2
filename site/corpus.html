@@ -355,7 +355,8 @@ async function findIt(){
     const via = d.deck ? ('the ' + esc(DECKMETA[d.deck]?.name || d.deck) + ' deck' + (d.fell_back_to_full ? ', then the whole keeping' : '')) : 'the whole keeping';
     note.innerHTML = res.length
       ? num(d.count) + ' found — searched ' + via + '. <span class="muted">The Hare runs the likely deck first; the Tortoise reaches everything.</span>'
-      : 'Nothing came back for “' + esc(q) + '”. Try a name, a word, or a claim.';
+      : 'Nothing came back for “' + esc(q) + '”. Try a name, a word, or a claim. ' +
+        '<button onclick="askLibrary()" style="font:inherit;font-size:.85rem">Ask the library to acquire it</button>';
     const list = document.getElementById('list');
     list.innerHTML = res.map(c =>
       '<a href="/card/' + encodeURIComponent(c.id) + '" class="result" style="display:block;text-decoration:none;color:inherit;cursor:pointer" onclick="openCard(\'' + esc(c.id) + '\');return false;">' +
@@ -605,6 +606,21 @@ PARTS.volume = function(){
    The shared adopter (nh-home.js) hands us whatever the URL asked for. A search or a shelf is
    the shelves' business, so switch there first — a reader who followed a link to a shelf must
    not land on a section that cannot show it. */
+/* THE WANT — a miss becomes a recorded want on an EXPLICIT click only: bot noise must never
+   write the acquisition queue. The library grows by its misses; the shepherd's rounds do the
+   digging, and everything they bring back passes filtration before anyone breathes it. */
+async function askLibrary(){
+  const q = document.getElementById('q').value.trim();
+  const note = document.getElementById('found-note');
+  try{
+    const r = await fetch('/want', {method:'POST', headers:{'content-type':'application/json'},
+                                    body: JSON.stringify({kind:'missing', query:q})});
+    const d = await r.json();
+    note.textContent = d.ok ? 'Recorded — the library grows by its misses. The shepherd will seek it out.'
+                            : (d.error || 'Could not record that.');
+  }catch(e){ note.textContent = 'Could not reach the want list right now.'; }
+}
+
 window.NHDeepLink = function(v){ showPart('shelves', false); document.getElementById('q').value = v; findIt(); };
 window.NHDeepLinkShelf = function(s){
   showPart('shelves', false);

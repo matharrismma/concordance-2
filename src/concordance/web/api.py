@@ -418,6 +418,18 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             # only its own seal and raw JSON — so the most-read surface we have said nothing about
             # the engine that makes it worth trusting, or the room where people put their own work.
             # Three doors, named plainly, in the page's own voice. No pitch.
+            # THE FLAG — "the user can also flag our card as incomplete and that will trigger
+            # Steward to call out for more information and expand" (Matt, 2026-08-01). One dumb
+            # control opening a want of kind `expand`; the Steward's rounds do the rest.
+            f"<p class=muted style=\"font-size:.78rem\"><a href=\"#\" id=nh-flag>"
+            f"Is this card incomplete? Tell the library — it will call out for more ↗</a></p>"
+            f"<script>document.getElementById('nh-flag').addEventListener('click',function(e){{"
+            f"e.preventDefault();var el=this;"
+            f"fetch('/want',{{method:'POST',headers:{{'content-type':'application/json'}},"
+            f"body:JSON.stringify({{kind:'expand',card_id:document.getElementById('nhconn').dataset.cid}})}})"
+            f".then(function(r){{return r.json()}}).then(function(d){{"
+            f"el.textContent=d.ok?'Noted — the library will seek more on this.':(d.error||'Could not record that.')}})"
+            f".catch(function(){{el.textContent='Could not reach the want list right now.'}})}});</script>"
             f"<footer class=site><p>A record from the keeping — found and cited, never generated. "
             f"<a href=/search>Search the keeping →</a></p>"
             f"<p class=muted style=\"font-size:.82rem\">"
@@ -1770,6 +1782,23 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(_mod.signable((query.get("action") or "").strip(),
                                  query.get("target_id") or "", query.get("actor") or "",
                                  extra=query.get("extra") or ""))
+    if method == "POST" and path == "/want":
+        # THE WANT LIST — the library grows by its misses. Explicit human asks only; the queue is
+        # the hive's return-point, and wants.py enforces the covenant by shape, not judgement.
+        from .. import wants as _wants
+        if not isinstance(body, dict):
+            return _err(400, "query (kind=missing) or card_id (kind=expand) required")
+        r = _wants.open_want(query=str(body.get("query") or ""),
+                             kind=str(body.get("kind") or "missing"),
+                             card_id=str(body.get("card_id") or ""),
+                             note=str(body.get("note") or ""))
+        return (_ok(r) if r.get("ok") else _err(400, r.get("error", "could not record the want")))
+
+    if method == "GET" and path == "/wants":
+        # The desiderata list, posted at the desk — a library is honest about its gaps.
+        from .. import wants as _wants
+        return _ok(_wants.listing(state=(query.get("state") or None)))
+
     if method == "POST" and path == "/report":
         # The moderation floor: anyone may report; nobody's report is a verdict. One report is a
         # claim; three distinct SIGNING reporters hold the item for a HUMAN steward (Deut 19:15).
@@ -2006,6 +2035,8 @@ ROUTES = [
     {"path": "/curate/signable", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/curate", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/moderation/signable", "methods": ("GET",), "api": True, "rl": True},
+    {"path": "/want", "methods": ("POST",), "rl": True},
+    {"path": "/wants", "methods": ("GET",), "api": True},
     {"path": "/report", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/block", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/seeds", "methods": ("GET",), "api": True},

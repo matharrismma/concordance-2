@@ -307,6 +307,8 @@ def load_cards(path: Optional[Path] = None,
         #   works_cards.jsonl — The Works: every worked, engine-sealed demonstration carded as a
         #                       seed in the keeping (minted by compendium.build_all, data-only)
         for extra in ("receipt_cards.jsonl",     # every minted seal, carded — see cas._mint_receipt_card
+                      "acquired_cards.jsonl",    # cards a person CHOSE from the want list's options
+                                                 # (tools/shepherd_rounds.py --choose; source-to-source)
                       "verified_cards.jsonl", "reference_cards.jsonl", "keystone_seeds.jsonl",
                       "nesting_seeds.jsonl", "ncs_seeds.jsonl", "works_cards.jsonl", "theory_cards.jsonl",
                       "fieldkit_cards.jsonl", "playbook_cards.jsonl", "systems_cards.jsonl",

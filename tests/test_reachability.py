@@ -41,6 +41,9 @@ AGENT_ONLY = {
     "/works/item", "/library/health", "/growth", "/daily", "/pronounce", "/book",
     "/badges", "/archetype", "/archetypes", "/archetypes/match", "/coach/guidance",
     "/chess", "/report", "/block",
+    "/wants",   # the desiderata ledger — read by the Steward's rounds and the mint; humans reach
+                # the WRITE side (/want) from the empty-search offer and the card flag
+
     # THE COMMONS: nothing here is agent-only any more. C1b declared the six shelf routes on this
     # list with a promise that `shelf.html` would land in C1c and they would come off it — C1c
     # landed, and they came off. That is what the declaration was for.

@@ -142,6 +142,7 @@ test_verify_construction.py
 test_verify_history_chronology.py
 test_verify_quantum_computing.py
 test_voice.py
+test_wants.py
 test_warrant.py
 test_wayfind.py
 test_witness.py
