@@ -60,6 +60,12 @@ SCRIPTURE_REF = re.compile(r"^[1-3]?\s*[A-Za-z][A-Za-z ]+\s+\d{1,3}(?::\d{1,3})?
 ENCYCLOPEDIA = "/encyclopedia.html"
 CANON = "/canon.html"
 
+# Destinations that no longer exist on this build. Each was VERIFIED gone over the wire
+# (404) before being listed here — divergence.py names a suspect, it does not convict.
+RETIRED_PAGES = ("/maker.html", "/recipes.html", "/sermons.html",
+                 "/scripts/dimx_05_knock_animation")
+PLACEHOLDER = "/placeholders"
+
 
 def _ref_of(url: str) -> str:
     q = urllib.parse.urlparse(url).query
@@ -88,6 +94,31 @@ def decide(card: dict):
         # An internal slug names no page anywhere, and this card IS the passage. Keep the label,
         # drop the door that goes nowhere. NOT a self-link: a source that cites itself is a circle.
         return "", "slug -> label only (no self-citation)"
+
+    # ── THE RETIRED PAGES, found by tools/divergence.py 2026-08-01 ────────────────────────────
+    # 57 cards (in BOTH the keeping and shard/core — 114 records) cite five destinations that no
+    # longer exist. Verified before repairing, because an instrument that mistakes its own reading
+    # for a defect accuses the thing it measures: maker.html, recipes.html and sermons.html were
+    # each fetched over the wire and each answered 404. They are genuinely gone.
+    #
+    # THE SAME JUDGEMENT AS THE SLUG RULE ABOVE, for the same reason. "Build a Crystal Radio" was
+    # a section of a page that no longer exists — but the card IS the instruction; the recipe card
+    # IS the recipe; the storyboard card IS the storyboard; the sermon card IS the sermon. There
+    # is no better page to send a reader to, and pointing a card's source at its own permalink
+    # would close a provenance circle, which this project exists to prevent.
+    #
+    # So the label stands and the dead door comes down — the same call as removing the seal claim
+    # from 11,084 cards rather than redirecting it somewhere plausible.
+    for gone in RETIRED_PAGES:
+        if url.startswith(gone):
+            return "", f"retired page {gone} -> label only (the card IS the content)"
+
+    # `/placeholders` is NOT a dead page — it is a promise nobody kept: a stub minted with a
+    # placeholder where a source belonged. Clearing it is right, and it must be COUNTED
+    # SEPARATELY, because "we never had a source for this" is a different fact about the keeping
+    # than "the page we cited went away", and a reader deserves the true one.
+    if url.startswith(PLACEHOLDER):
+        return "", "placeholder -> label only (no source was ever recorded)"
     return None
 
 

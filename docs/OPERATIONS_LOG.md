@@ -17,6 +17,67 @@ Three standing rules:
 
 ---
 
+## 2026-08-01 (22:16Z) — THE 54-SECOND OUTAGE: 57 dead citations, both drawers
+
+Matt authorised the outage. Taken deliberately, kept to 54 seconds (22:16:48 -> 22:17:42Z).
+
+**VERIFIED BEFORE REPAIRING.** `tools/divergence.py` named five dead destinations; an instrument
+that mistakes its own reading for a defect accuses the thing it measures, so `maker.html`,
+`recipes.html` and `sermons.html` were each fetched over the wire first. All three answered 404.
+Genuinely gone.
+
+**THE RULE, added to `tools/repoint_citations.py` — one rule per KIND, never one for all.** The
+card IS the content: "Build a Crystal Radio" was a section of a page that no longer exists, but
+the card holds the instruction; the recipe card IS the recipe; the sermon card IS the sermon.
+So the label stands and the dead door comes down — the same judgement as clearing the seal claim
+from 11,084 cards rather than redirecting it somewhere plausible. Pointing a card's source at its
+own permalink would close a provenance circle, which this project exists to prevent.
+
+`/placeholders` is counted SEPARATELY and deliberately: that is not a page that went away, it is
+a source that was never recorded. Different fact about the keeping, and the reader deserves the
+true one.
+
+**BOTH DRAWERS, because fixing one is how 4,039 went stale in July:**
+
+    57 in data/cards.jsonl          (24 storyboard, 12 maker, 11 recipes, 7 placeholder, 3 sermons)
+    57 in data/shards/core.db       (0 in the other five shards)
+
+Backup taken first (/tmp/cards.jsonl.bak, 25,087 lines). Services stopped because the shards are
+opened `immutable=1` — a promise the bytes do not change underneath a reader.
+
+**AFTER, every instrument clean:**
+  divergence   5 of 5 agree  (first fully clean run; was 2 diverged this morning)
+  watchman     10 hold on BOTH hosts
+  calibration  OFFSET 0 / 0
+  the reader   "Buttermilk Biscuits · The White House Cook Book · 1887" — authority kept, no dead door
+
+---
+
+## 2026-08-01 — nh-steward: a retired 1.0 job running for a month, writing nothing
+
+Asked "could anything from the outside be influencing our work?" The answer was no, but finding it
+took real evidence rather than reassurance.
+
+`nh-steward.timer` fired every 15 minutes from `/home/nh/Lighthouse` — the 1.0 tree, recorded
+retired under task #37 — burning **50s CPU per run (5.6% of a core, continuously)** and reporting
+`ok=True` on find_connections / codex_refresh / craft_tools.
+
+**IT WROTE NOTHING.** No file under `concordance-2/data` changed in its run window; its OWN 1.0
+data files were last modified **Jul 1 and Jun 28**. A month of work landing nowhere. Disabled
+(reversible; nothing deleted).
+
+**WHAT IS GENUINELY WORTH UPGRADING FROM IT** is in the unit's own Description, which I read past
+twice: *"resource governor"*. Its three jobs are all things 2.0 already does better — but NOTHING
+IN 2.0 GOVERNS. No part senses load and throttles input. That is Watt's flyball on the steam
+engine, and it matters more now than when it was written, because the tortoise and the shepherd's
+rounds fire on LIVE TRAFFIC rather than a schedule. The belt had come off a governor; the fix is
+to reconnect it, not to port the other three jobs.
+
+Also cleared in the same sweep: the box was missing 21 of 154 test files, so it could not verify
+itself — the exact condition the MANIFEST guard exists to catch. Now 154 of 154.
+
+---
+
 ## 2026-08-01 — LEVER 3: THE WATCHMAN (the system reports on itself)
 
 Matt ordered the levers: landmine, flywheel, then 3/4/5/2. This is 3.
