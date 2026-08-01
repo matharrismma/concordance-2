@@ -59,12 +59,13 @@ _LOCK = threading.Lock()
 
 
 def _public_base() -> str:
-    """The re-checkable base URL for a badge's cite_url. Overridable; defaults to the secular reach
-    (the badge surface is world-facing). Mirrors receipts._public_base's env override."""
+    """The re-checkable base URL for a badge's cite_url. Overridable; defaults to the WITNESS —
+    a badge is a record, and .org keeps the records (Matt, 2026-08-01). Mirrors
+    receipts._public_base's env override."""
     env = os.environ.get("CONCORDANCE_PUBLIC_BASE", "").strip()
     if env:
         return env.rstrip("/")
-    return "https://narrowhighway.com"
+    return "https://narrowhighway.org"
 
 
 def _standing_seals(seal_hashes: List[str]) -> List[str]:

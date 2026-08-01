@@ -41,11 +41,15 @@ _LEDGER_LOCK = threading.Lock()
 
 
 def _public_base(config: EngineConfig) -> str:
-    """The re-checkable base URL for cite_url. Overridable; defaults by surface."""
+    """The re-checkable base URL for cite_url. Overridable; defaults to the WITNESS.
+
+    Matt, 2026-08-01: "We could also make the .org keep the receipts." This used to default by
+    minting surface, so the same kind of record claimed two different homes. The witness keeps
+    the testimony — every new seal names .org, whichever surface minted it."""
     env = os.environ.get("CONCORDANCE_PUBLIC_BASE", "").strip()
     if env:
         return env.rstrip("/")
-    return "https://narrowhighway.org" if config.surface == "witness" else "https://narrowhighway.com"
+    return "https://narrowhighway.org"
 
 
 def _auto_summary(result: Dict[str, Any], domain: str) -> str:

@@ -134,6 +134,23 @@ def _notfound_page(title: str, body_html: str) -> str:
             f"</head><body><main class=wrap>{body_html}</main></body></html>")
 
 
+# THE TWO KEEPERS. Matt, 2026-08-01: ".tv isn't the priority. We focus on .com and then .org." —
+# and, the same night: "We could also make the .org keep the receipts."
+#
+# The pages used PATH-relative canonicals, so the same page served on .com, .tv and api. declared
+# three different "true addresses" and split its standing three ways. Now each addressable thing
+# names its ONE keeper, whichever door served it — concentration, not redirection:
+#   the LIBRARY lives on .com  — cards, the corpus, the engine;
+#   the RECORD lives on .org   — seals and badges. The witness keeps the testimony; that is the
+#   job description matching the domain name, and receipts.py already minted witness-surface
+#   cite_urls onto .org before this constant existed.
+# Old sealed records carry .com cite_urls INSIDE their hashed content — unrewritable by
+# construction, and still resolving (every door serves /s/). New records name their keeper.
+CANONICAL_LIBRARY = "https://narrowhighway.com"
+CANONICAL_WITNESS = "https://narrowhighway.org"
+CANONICAL_HOST = CANONICAL_LIBRARY   # cards and pages of the library
+
+
 def render_seal_html(content_hash: str, record: Optional[Dict[str, Any]]) -> Tuple[int, str]:
     """Server-render a sealed receipt as a crawlable, citable HTML page (data in the markup,
     not client-JS) so search engines and LLMs can read + cite a verification. (status, html)."""
@@ -191,7 +208,7 @@ def render_seal_html(content_hash: str, record: Optional[Dict[str, Any]]) -> Tup
             f"<meta name=description content=\"{desc}\">"
             f"<meta property=\"og:title\" content=\"Verification receipt · {label}\">"
             f"<meta property=\"og:description\" content=\"{desc}\">"
-            f"<link rel=canonical href=\"/s/{_esc(content_hash)}\">"
+            f"<link rel=canonical href=\"{CANONICAL_WITNESS}/s/{_esc(content_hash)}\">"
             f"<meta property=\"og:type\" content=article>"
             f"<meta name=\"twitter:card\" content=\"summary\"></head><body>"
             f"{_site_header('<a href=/#verify>Verify</a><a href=/seal.html>Seal</a>')}<main class=wrap>"
@@ -317,7 +334,7 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
     # claim of verification we never performed, on the surface built to prove we do not do that,
     # read mostly by agents. A fingerprint is not a verdict — never silently upgrade authority.
     seal_hash = str((card.get("extra") or {}).get("seal_hash") or "").strip()
-    canonical = f"/card/{_esc(card_id)}"
+    canonical = f"{CANONICAL_HOST}/card/{_esc(card_id)}"
     # ── THE OVERLAY + THE ADJOINING CARDS ────────────────────────────────────────────────────
     # Matt, 2026-07-30: "Add an overlay for each card when it is pulled by a human. Links to
     # adjoining cards as well for agents and users."

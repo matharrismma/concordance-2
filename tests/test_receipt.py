@@ -77,11 +77,14 @@ def test_seal_opt_out():
 
 def test_cite_url_is_surface_correct():
     _isolate()
+    # ".org keeps the receipts" (Matt, 2026-08-01): BOTH surfaces mint their seals onto the
+    # witness. This used to assert per-surface homes — the same kind of record claiming two
+    # different keepers, which is exactly the split the change removed.
     _, p = _verify({"mode": "equality", "params": {"expr_a": "1", "expr_b": "1", "variables": {}}}, config=WIT)
     assert "narrowhighway.org" in p["seal"]["cite_url"]
     _isolate()
     _, p2 = _verify({"mode": "equality", "params": {"expr_a": "1", "expr_b": "1", "variables": {}}}, config=SEC)
-    assert "narrowhighway.com" in p2["seal"]["cite_url"]
+    assert "narrowhighway.org" in p2["seal"]["cite_url"], "a secular-minted seal must still name its keeper"
 
 
 def test_public_base_override():

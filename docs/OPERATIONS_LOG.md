@@ -509,3 +509,17 @@ the stale clients are on the devices, not the server.
 
 **The rule this buys, now in memory:** a measurement that can silently cover a subset must report
 its own coverage — file list, row count, date window — before any conclusion is drawn from it.
+
+## 2026-08-01 · THE TWO KEEPERS — the library lives on .com, the record lives on .org
+
+Matt: *"We could also make the .org keep the receipts."* Done, and verified from the far side:
+a seal minted through the SECULAR door now carries `cite_url: https://narrowhighway.org/s/…`,
+and the witness serves it. Cards still canonicalize to `https://narrowhighway.com`. The system
+half-believed this before the change — witness-minted seals already named .org; now the record
+has ONE keeper whichever surface mints. Old sealed records carry .com cite_urls inside hashed
+content — unrewritable by construction, still resolving on every door. Badges follow the same
+rule: a badge is a record.
+
+This gives .org its job without waiting for traffic: **the witness keeps the testimony.** Every
+receipt any reader or agent ever cites now points at .org by name — reach that grows with every
+verification performed.

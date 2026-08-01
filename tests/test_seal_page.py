@@ -78,3 +78,21 @@ if __name__ == "__main__":
         fn()
         print(f"  ok  {fn.__name__}")
     print(f"\n{len(fns)} seal-page tests passed — citable receipts, server-rendered + safe.")
+
+
+def test_every_addressable_page_names_com_as_its_one_true_address():
+    """The card and seal pages used PATH-relative canonicals, so the same card served on .com,
+    .tv and api. declared three different "true addresses" and split the library's search
+    standing three ways. Matt, 2026-08-01: ".tv isn't the priority. We focus on .com and then
+    .org." Whichever door serves the page, the claim of where it LIVES is one address."""
+    from concordance.web.api import CANONICAL_HOST, render_card_html, render_seal_html
+    assert CANONICAL_HOST == "https://narrowhighway.com"
+    card = {"id": "card_x", "title": "T", "body": "B", "shelf": "test",
+            "source": {"label": "L", "url": ""}}
+    _, html = render_card_html("card_x", card)
+    assert 'rel=canonical href="https://narrowhighway.com/card/card_x"' in html
+    _, shtml = render_seal_html("a" * 64, {"overall": "HOLDS"})
+    # the RECORD's keeper is the witness — cards live on .com, seals live on .org
+    assert 'rel=canonical href="https://narrowhighway.org/s/' + "a" * 64 + '"' in shtml
+    # and no path-relative canonical survives anywhere in either page
+    assert 'rel=canonical href="/' not in html and 'rel=canonical href="/' not in shtml
