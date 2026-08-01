@@ -96,8 +96,29 @@ def test_the_cell_holds_a_few_not_a_results_page():
     from concordance import wants
     w = wants.open_want(query="the letters of pliny the younger")
     for i in range(wants._MAX_OPTIONS):
-        assert wants.add_option(w["id"], {"label": f"src {i}"})["ok"]
-    assert not wants.add_option(w["id"], {"label": "one too many"})["ok"]
+        assert wants.add_option(w["id"], {"label": f"src {i}",
+                                          "url": f"https://example.org/{i}"})["ok"]
+    assert not wants.add_option(w["id"], {"label": "one too many",
+                                          "url": "https://example.org/x"})["ok"]
+
+
+def test_an_option_nobody_can_open_is_refused():
+    """A urlless option is a broken miner wearing a valid shape.
+
+    This test used to file `{"label": "src N"}` with no url at all, and passed — which is exactly
+    how the tortoise miner filed empty option after empty option unnoticed: it read keys
+    `find_and_check` never returned, produced `label="found source", url=""`, and the ledger
+    accepted them as real finds. Structurally valid, completely unactionable. A person choosing
+    one got nothing, and no check that looked only at FORM could tell.
+    """
+    from concordance import wants
+    w = wants.open_want(query="a want whose miner is broken")
+    r = wants.add_option(w["id"], {"label": "found source"})
+    assert not r["ok"]
+    assert "url" in r["error"]
+    # An internal card reference is still actionable — the catalogue miner returns those.
+    assert wants.add_option(w["id"], {"label": "already in the keeping: x",
+                                      "url": "/card/card_x"})["ok"]
 
 
 def test_closing_carries_a_name_and_the_card_it_produced():

@@ -45,7 +45,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from concordance import corpus, wants  # noqa: E402
+from concordance import corpus, sources, wants  # noqa: E402
 from concordance.config import EngineConfig  # noqa: E402
 
 try:
@@ -75,14 +75,34 @@ def _miner_tortoise(want: dict, config) -> list:
     from concordance import find
     if not find.enabled():
         return []                              # the master canary: no network work when disabled
-    framed = find.find_and_check(want.get("query") or "", config)
-    if not framed:
+    result = find.find_and_check(want.get("query") or "", config)
+    if not result:
         return []
-    src = framed.get("source") or {}
-    return [{"label": str(src.get("label") or framed.get("title") or "found source")[:200],
-             "url": str(src.get("url") or "")[:500],
-             "snippet": str(framed.get("body") or framed.get("snippet") or "")[:600],
-             "domain": str(src.get("domain") or "")[:60], "miner": "tortoise"}]
+
+    # READ THE SHAPE THE FINDER ACTUALLY RETURNS. This miner used to read `source`, `title` and
+    # `body` off the top level — keys `find_and_check` has never produced. It returns
+    # {answer, checks_verdict, documents, framed, source_note}. So EVERY option this miner ever
+    # filed was `label="found source", url="", snippet=""`: unactionable, unanchorable, and
+    # indistinguishable from a real find in the ledger.
+    #
+    # Nothing caught it because the option was structurally VALID — strings, within their caps —
+    # just empty, and no one had ever run `--choose` all the way to a body. A well-formed lie
+    # passes every check that only looks at form. Found 2026-08-01 the first time the loop was
+    # driven end to end against the Rigveda.
+    out = []
+    for d in (result.get("documents") or [])[:5]:      # several, so a person can CHOOSE
+        url = str(d.get("url") or "").strip()
+        if not url:
+            continue                                   # an option nobody can act on is not an option
+        out.append({
+            "label": str(d.get("title") or url)[:200],
+            "url": url[:500],
+            "snippet": (f"{d.get('source') or 'source'} · {d.get('format') or 'document'} · "
+                        f"{d.get('tier') or 'tier?'} · {d.get('license') or 'license unstated'}")[:600],
+            "domain": str(d.get("source") or "")[:60],
+            "miner": "tortoise",
+        })
+    return out
 
 
 MINERS = (("catalogue", _miner_catalogue), )
@@ -151,6 +171,19 @@ def choose(want_id: str, n: int, by: str) -> int:
         print(f"want {want_id} has {len(opts)} option(s); pick 1..{len(opts)}")
         return 2
     o = opts[n - 1]
+
+    # ANCHOR THE BODY, THEN MINT. Until now this minted a card whose body was the miner's
+    # 600-character snippet with the origin in source.url — a POINTER, not a holding. Nothing
+    # landed on a drive, nothing could be read offline, and "heal from what you hold" had nothing
+    # to heal from. The loop ran miss -> want -> forage -> choose and stopped one step short of
+    # an asset.
+    #
+    # The fetch is allowed to fail, and the card is minted either way — it simply says which.
+    # A card that claims to hold what it does not is worse than a card that admits a gap.
+    ark = sources.fetch(o.get("url") or "", want_id=want_id, chosen_by=by.strip(),
+                        label=o.get("label") or "")
+    anchored = ark.get("status") in (sources.HELD, sources.ALREADY)
+
     card = {
         "id": f"card_acq_{want_id.removeprefix('want_')}_{n}",
         "kind": "reference",
@@ -159,11 +192,23 @@ def choose(want_id: str, n: int, by: str) -> int:
         "title": o["label"][:180],
         "body": (o.get("snippet") or o["label"])
                 + f"\n\n[Acquired by request — want {want_id}, chosen by {by.strip()}. "
-                  f"Source to source: heal by re-mining the origin below, never a copy.]",
+                  f"Source to source: heal by re-mining the origin below, never a copy.]"
+                + (f"\n\nBody anchored: sha256 {ark['sha256'][:16]}… "
+                   f"({ark['bytes']:,} bytes, {ark.get('media_type')}). Any holder of the drive can "
+                   f"re-verify this against its own hash, offline, without trusting us."
+                   if anchored else
+                   f"\n\nBody NOT anchored — {ark.get('reason')}. The reference stands; the full "
+                   f"text is not on this device."),
         "source": {"label": o["label"], "url": o.get("url") or "",
                    "ref": (w.get("query") or w.get("card_id") or "")[:120],
-                   "authority_tier": "external_aligned"},
-        "extra": {"want_id": want_id, "miner": o.get("miner") or "", "run": o.get("run") or ""},
+                   "authority_tier": "external_aligned",
+                   # THE WAYBILL travels with the card: origin + hash, so a reader who holds the
+                   # drive can find the body, and one who does not can still fetch and check it.
+                   "ark": ({"sha256": ark["sha256"], "bytes": ark["bytes"],
+                            "media_type": ark.get("media_type"),
+                            "fetched_at": ark.get("fetched_at")} if anchored else None)},
+        "extra": {"want_id": want_id, "miner": o.get("miner") or "", "run": o.get("run") or "",
+                  "ark_status": ark.get("status"), "ark_reason": ark.get("reason", "")},
         "connections": [{"to_card_id": "card_k_floor_of_discovery", "relationship": "part_of",
                          "evidence": f"acquired on request (want {want_id}) — rooted, never an orphan"}],
     }
@@ -174,6 +219,11 @@ def choose(want_id: str, n: int, by: str) -> int:
         fh.write(json.dumps(card, ensure_ascii=False) + "\n")
     corpus.add_to_default(card)      # live insert IF a corpus is already built (a server); a CLI
     r = wants.close_want(want_id, card["id"], by)     # run relies on the file + restart instead
+    if anchored:
+        print(f"  body anchored: {ark['bytes']:,} bytes -> {ark['path']}")
+        print(f"  sha256 {ark['sha256']}  ({ark['status']})")
+    else:
+        print(f"  body NOT anchored — {ark.get('reason')}  (the card says so, and stands)")
     print(f"minted {card['id']} on the acquisitions shelf"
           + ("" if r.get("ok") else f" (want close refused: {r.get('error')})"))
     print("filed to acquired_cards.jsonl — restart the services so every door serves it")
@@ -185,8 +235,14 @@ def main() -> int:
     ap.add_argument("--apply", action="store_true", help="file the dug options (default: dry-run)")
     ap.add_argument("--limit", type=int, default=20)
     ap.add_argument("--choose", nargs=2, metavar=("WANT_ID", "N"), help="mint option N of a want")
+    ap.add_argument("--drop", nargs=2, metavar=("WANT_ID", "REASON"),
+                    help="a steward refuses a want — recorded with a reason, never erased")
     ap.add_argument("--by", default="", help="who is choosing — required with --choose")
     a = ap.parse_args()
+    if a.drop:
+        r = wants.drop_want(a.drop[0], a.drop[1], a.by)
+        print(f"dropped {a.drop[0]}: {a.drop[1]}" if r.get("ok") else f"refused: {r.get('error')}")
+        return 0 if r.get("ok") else 2
     if a.choose:
         return choose(a.choose[0], int(a.choose[1]), a.by)
     return rounds(a.apply, a.limit)

@@ -223,8 +223,19 @@ def add_option(want_id: str, source: Dict[str, Any]) -> Dict[str, Any]:
     url = str((source or {}).get("url") or "").strip()
     if not label:
         return {"ok": False, "error": "an option names its source"}
-    if url and not url.startswith(("http://", "https://")):
-        return {"ok": False, "error": "an option's url is http(s) or absent"}
+    # AN OPTION NOBODY CAN ACT ON IS NOT AN OPTION. This used to read `if url and not
+    # url.startswith(...)` — it checked the FORM of a url when one was present and permitted its
+    # ABSENCE entirely. The tortoise miner, reading keys the finder never returned, filed option
+    # after option as `label="found source", url=""`: structurally valid, indistinguishable from a
+    # real find in the ledger, and impossible to anchor or open. A person choosing one got nothing.
+    #
+    # Found 2026-08-01 the first time the loop was driven end to end. Closing the class here rather
+    # than fixing the one miner, because the next miner would have done the same.
+    if not url:
+        return {"ok": False, "error": "an option carries a url — a source nobody can open is not "
+                                      "an option, and an empty one hides a broken miner"}
+    if not url.startswith(("http://", "https://", "/")):
+        return {"ok": False, "error": "an option's url is http(s), or an internal /card/... path"}
     # THE SHAFT-TAGS (Matt: "branches that can be cut off, so you don't have to completely
     # rebuild"). Every option records WHICH miner brought it up and on WHICH run — so if a source
     # is later found poisoned, cutting the branch is a query over these tags, not a hunt, and the

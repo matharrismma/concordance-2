@@ -124,6 +124,7 @@ test_shelves.py
 test_shelves_surface.py
 test_signing.py
 test_site.py
+test_sources_ark.py
 test_stacks.py
 test_steward.py
 test_strongs.py
