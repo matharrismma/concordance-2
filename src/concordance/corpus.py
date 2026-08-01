@@ -128,6 +128,75 @@ class Corpus:
                 self._by_token.setdefault(t, []).append(cid)
         self._n = max(1, len(self._index_card_ids()))
 
+    def footprint(self, sample: int = 400) -> Dict[str, Any]:
+        """What this corpus costs in memory, BY STRUCTURE — measured, not believed.
+
+        Matt, 2026-08-01, questioning the freeze: *"The concept is we keep the corpus frozen and
+        only unthaw and carry what is necessary, but that may be a faulty concept."*
+
+        Freezing 24 shelves took each engine from ~2.8 GB to ~1.7 GB, so it worked — but 25,087
+        resident cards costing 1.7 GB is ~68 KB PER CARD, which no card body explains. That points
+        at the index rather than the text, and the difference decides an architecture: if the
+        weight is `_by_token`, moving bodies to shards treated a symptom and one on-disk store
+        would be both smaller and simpler. If it is `cards`, freezing is doing exactly its job.
+
+        A belief cannot settle that. This can, from the live process, without loading anything.
+
+        SAMPLED, AND IT SAYS SO. Walking 25,000 nested dicts on a serving box is not free, so the
+        card cost is measured over `sample` of them and scaled — the returned record carries the
+        sample size and the population so nobody reads an estimate as a census.
+        """
+        import sys as _sys
+
+        def _deep(obj, _seen=None) -> int:
+            """Recursive size of a small object graph — dicts, lists and strings, no cycles here."""
+            _seen = _seen if _seen is not None else set()
+            if id(obj) in _seen:
+                return 0
+            _seen.add(id(obj))
+            total = _sys.getsizeof(obj)
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    total += _deep(k, _seen) + _deep(v, _seen)
+            elif isinstance(obj, (list, tuple, set)):
+                for x in obj:
+                    total += _deep(x, _seen)
+            return total
+
+        ids = list(self.cards)
+        n_cards = len(ids)
+        taken = ids[:max(1, min(sample, n_cards))]
+        per_card = (sum(_deep(self.cards[i]) for i in taken) / len(taken)) if taken else 0
+        cards_bytes = int(per_card * n_cards)
+
+        # The inverted index: token -> [card_id, ...]. The POSTINGS are the thing to count — every
+        # one is a pointer in a list, and the lists themselves carry per-object overhead.
+        postings = sum(len(v) for v in self._by_token.values())
+        idx_bytes = _sys.getsizeof(self._by_token)
+        idx_bytes += sum(_sys.getsizeof(t) + _sys.getsizeof(v) for t, v in
+                         list(self._by_token.items())[:sample])
+        if len(self._by_token) > sample:
+            idx_bytes = int(idx_bytes / max(1, min(sample, len(self._by_token)))
+                            * len(self._by_token))
+        idx_bytes += postings * 8                      # one pointer per posting
+
+        df_bytes = _sys.getsizeof(self._df_extra) + sum(
+            _sys.getsizeof(k) + 28 for k in list(self._df_extra)[:sample])
+
+        return {
+            "cards": n_cards, "tokens": len(self._by_token), "postings": postings,
+            "df_extra_tokens": len(self._df_extra),
+            "bytes": {"cards": cards_bytes, "token_index": idx_bytes, "df_extra": df_bytes,
+                      "total": cards_bytes + idx_bytes + df_bytes},
+            "mb": {"cards": round(cards_bytes / 1048576, 1),
+                   "token_index": round(idx_bytes / 1048576, 1),
+                   "df_extra": round(df_bytes / 1048576, 1),
+                   "total": round((cards_bytes + idx_bytes + df_bytes) / 1048576, 1)},
+            "measured_over": len(taken), "population": n_cards,
+            "note": "card cost is sampled and scaled; index cost is counted postings + sampled "
+                    "key/list overhead. An estimate, and labelled as one.",
+        }
+
     def add_card(self, card: dict) -> None:
         """Insert one card into the live corpus AND its token index — so a just-minted
         verification is searchable immediately, no restart. Idempotent by id."""

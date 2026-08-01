@@ -18,6 +18,7 @@ test_bible_places.py
 test_binding.py
 test_bookofdays.py
 test_branch.py
+test_cabinet.py
 test_canon_original.py
 test_canonical.py
 test_capabilities.py
@@ -124,6 +125,7 @@ test_shard_handles.py
 test_shelves.py
 test_shelves_surface.py
 test_signing.py
+test_single_chapter_refs.py
 test_site.py
 test_sources_ark.py
 test_stacks.py
@@ -149,6 +151,7 @@ test_verify_quantum_computing.py
 test_voice.py
 test_wants.py
 test_warrant.py
+test_watch.py
 test_wayfind.py
 test_witness.py
 test_xrefs.py

@@ -29,7 +29,12 @@ SITE = ROOT / "site"
 # Routes that exist for AGENTS and machines, not for a page. Each is reachable through the MCP
 # tool surface, llms.txt, or a documented HTTP call — a human page would add nothing.
 AGENT_ONLY = {
-    "/health", "/capabilities", "/identity/create", "/identity/describe",
+    "/health",
+    # No page links this and none should: it is an OPERATOR instrument, read by a
+    # person deciding an architecture, not a reader looking something up. Declared
+    # rather than quietly exempted — an undeclared door is how a registry rots.
+    "/health/memory",
+    "/capabilities", "/identity/create", "/identity/describe",
     "/identity/fingerprint", "/identity/verify", "/attest", "/self-attest",
     "/bind", "/bind/challenge", "/consent", "/consent/signable", "/consent/revoke",
     "/connect/event", "/moderation/signable", "/derivation/verify", "/grid",

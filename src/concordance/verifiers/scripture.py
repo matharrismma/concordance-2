@@ -49,6 +49,9 @@ def _norm_text(s: str) -> str:
 # (found 2026-07-28 when the back-matter tables validated their refs). commentary.py, xrefs.py and
 # teachings.py already used the space-tolerant form — the core reader was the one left behind.
 _REF_RE = re.compile(r"^\s*([1-3]?\s*[A-Za-z][A-Za-z. ]*?)\s*(\d+):(\d+)\s*$")
+# `Jude 9` / `Philemon 6` / `Obadiah 1` — a book and ONE number. Only meaningful for a
+# one-chapter book, which Bible._parse_single_chapter asks the corpus about.
+_BARE_VERSE_RE = re.compile(r"^\s*([1-3]?\s*[A-Za-z][A-Za-z. ]*?)\s*(\d+)\s*$")
 
 
 def _parse_ref(ref: str) -> Optional[Tuple[str, int, int]]:
@@ -69,6 +72,7 @@ class Bible:
     def __init__(self, verses: Iterable[dict]):
         self.idx: Dict[Tuple[str, int, int], str] = {}
         self.alias: Dict[str, str] = {}
+        self._one_chapter: Dict[str, bool] = {}   # canon -> is it a one-chapter book
         known: set = set()
         for d in verses:
             book = d.get("book")
@@ -144,11 +148,45 @@ class Bible:
                 hits = viable
         return None, hits
 
+    def _parse_single_chapter(self, ref: str):
+        """`Jude 9` -> (Jude, 1, 9). In a ONE-CHAPTER book a bare number is the verse.
+
+        Found by tools/calibrate.py on its first run, 2026-08-01: `Philemon 6`, `Jude 9` and
+        `Obadiah 1` all answered "could not parse reference". Those are not exotic forms — they
+        are how these books are ALWAYS cited. Nobody writes "Jude 1:9". Three of the five
+        one-chapter books in the canon were unreachable by their ordinary name, and the whole
+        suite was green: it is a calibration failure, not a code failure, which is exactly why
+        only a standard could find it.
+
+        WHICH BOOKS ARE ONE CHAPTER IS ASKED OF THE CORPUS, never hardcoded. A literal list here
+        would be a second source of truth about the canon, free to drift from the text we actually
+        hold — and this project's whole claim is that the text is the standard.
+        """
+        m = _BARE_VERSE_RE.match(ref or "")
+        if not m:
+            return None
+        book_raw, n = m.group(1), int(m.group(2))
+        canon, _hits = self._pick_book(book_raw, have_page=lambda b: (b, 1, n) in self.idx)
+        if not canon:
+            return None
+        if not self._is_single_chapter(canon):
+            return None                      # `John 3` means CHAPTER 3 — that is /passage's job
+        return canon, 1, n
+
+    def _is_single_chapter(self, canon: str) -> bool:
+        cached = self._one_chapter.get(canon)
+        if cached is None:
+            cached = (canon, 2, 1) not in self.idx and (canon, 1, 1) in self.idx
+            self._one_chapter[canon] = cached
+        return cached
+
     def resolve(self, ref: str) -> Dict[str, Any]:
         if not self.idx:
             return {"ref": ref, "text": "", "status": "source_missing",
                     "detail": "bible_en.jsonl not provisioned (run tools/migrate_bible.py)"}
         p = _parse_ref(ref)
+        if not p:
+            p = self._parse_single_chapter(ref)
         if not p:
             return {"ref": ref, "text": "", "status": "not_found",
                     "detail": "could not parse reference"}

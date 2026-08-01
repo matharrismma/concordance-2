@@ -17,6 +17,55 @@ Three standing rules:
 
 ---
 
+## 2026-08-01 — LEVER 3: THE WATCHMAN (the system reports on itself)
+
+Matt ordered the levers: landmine, flywheel, then 3/4/5/2. This is 3.
+
+**Why it was the right one.** Six real defects were found today and THE GATE WAS GREEN THROUGH
+EVERY ONE — 1,000+ tests passing, moat 60/60, while `/verify` answered 500 to every caller for
+over an hour. Each was invisible to static inspection and obvious the moment the system was
+DRIVEN END TO END. Tests prove the code does what it was told; only walking the doors asks whether
+the library still behaves.
+
+**`tools/watch.py` — ten live checks, each one a defect that actually happened**, walked as a
+reader and as an agent, over a real socket:
+
+  front door answers · proving still works (the /verify outage) · handles are not accumulating
+  (the leak itself) · a miss stays a miss (the stopword bug) · the ceiling is announced (the
+  1.67 MB request) · both doors expand (the deaf /search) · the agent plane withholds (the
+  hardcoded lifecycle_stage) · the review desk is reachable (3 held, queue reporting 0) · no tool
+  advertises a private key · the door does not 500 on nonsense
+
+**FIRST RUN, BOTH HOSTS: 10 hold, 0 broken, 0 could-not-check.** Handles 0 open / peak 5,
+verify HOLDS, 82 tools none asking for a key, 4 malformed shapes no 5xx.
+
+**AND THE TENTH CHECK WAS LYING.** `the agent plane withholds` PASSED VACUOUSLY on its first run:
+it searched a nonsense term, got `nothing_found` as it always would, never reached the branch that
+tests withholding, and printed `ok`. The instrument built to catch vacuous passes committed one.
+Rewritten to inspect what is ACTUALLY HELD (take a card the review desk says is waiting, confirm
+the public door will not serve it) and to return CANNOT_CHECK — never HOLDS — when nothing is held.
+
+**THREE STATES, NEVER TWO.** HOLDS / BROKEN / CANNOT_CHECK. A check that could not run is not a
+check that passed. CANNOT_CHECK never fails the unit: crying wolf is how a watchman gets ignored.
+
+**PROVEN TO BARK, not merely to be silent.** Each check was fed a broken world: 900 handles open
+-> BROKEN; /health no longer reporting handles -> BROKEN ("the leak would be invisible again");
+junk for a nonsense question -> BROKEN with the titles named; 200 results and no `limit_capped` ->
+BROKEN; a held card served publicly -> BROKEN; a check that raises -> the run REFUSES to report
+and exits 2. `tests/test_watch.py`, 14 tests — one of which immediately failed on my own
+`check_the_front_door_answers` for having no docstring saying what it guards.
+
+**Hourly (`nh-watch.timer`), and the interval is not habit:** the handle leak took ~81 minutes of
+ordinary traffic to become fatal, so an hourly walk catches that class before a caller does.
+`systemctl is-failed nh-watch.service` is the one-word answer to "is anything wrong".
+`data/watch.json` holds the latest; `watch_history.jsonl` gets one line per run so DRIFT is
+visible over time rather than only the newest snapshot.
+
+Static/store drift stays with `tools/divergence.py`, which runs where the data lives. This is the
+wire.
+
+---
+
 ## 2026-08-01 — THE ANCIENT ASSAY: 1,000 probes, religions and knowledge before 1 AD
 
 Matt: *"Run 1000 test runs... focused mainly on religions and knowledge prior to 1AD. Find errors

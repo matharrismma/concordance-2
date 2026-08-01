@@ -616,8 +616,9 @@ async function askLibrary(){
     const r = await fetch('/want', {method:'POST', headers:{'content-type':'application/json'},
                                     body: JSON.stringify({kind:'missing', query:q})});
     const d = await r.json();
-    note.textContent = d.ok ? 'Recorded — the library grows by its misses. The shepherd will seek it out.'
-                            : (d.error || 'Could not record that.');
+    note.textContent = !d.ok ? (d.error || 'Could not record that.')
+      : d.seconded_agent_want ? 'An agent had asked for this too — your ask confirms it for the library.'
+      : 'Recorded — the library grows by its misses. The shepherd will seek it out.';
   }catch(e){ note.textContent = 'Could not reach the want list right now.'; }
 }
 

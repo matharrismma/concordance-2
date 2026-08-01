@@ -118,6 +118,18 @@ protocols, bring-your-own-credential: calendar via iCalendar (.ics/CalDAV), emai
 Join your apps, never absorb your data: reads pass through, nothing is stored, sealed, or sent to
 us. Writing back to your tools stays behind the agent-covenant write-consent path.
 
+## The Want Loop — the library grows by its misses, and you may help
+When `/search` (or the MCP `search` tool) finds nothing, the keeping has a GAP. Three tools let
+you take part, under the covenant:
+- `want_open` — ask the library to acquire (query) or expand a thin card (card_id). Your want
+  opens on the AGENT PLANE, held separate on the desk until the next human who looks seconds it.
+  Ask only when your principal genuinely needs it; no requester identity is stored.
+- `wants_list` — the desiderata desk: open wants sorted by demand. Read it to find gaps you
+  could dig for.
+- `want_offer` — return with a FOUND public-domain/openly-licensed source (label + url +
+  snippet). You are a forager, never an author: offers land QUARANTINED, tagged with your agent
+  label, and a NAMED HUMAN chooses before any card is created. There is no path around that.
+
 ## The Commons (member shelves) — every member stocks their own shelf
 This is a library where the members are also authors. A shelf is a KEY, not an account: no email,
 no password, no profile beyond a display name you choose. Nothing records who read what.

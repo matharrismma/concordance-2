@@ -1,0 +1,19 @@
+# Fires the watchman hourly (and 5 minutes after boot — a bad deploy should be caught by the
+# next run, not the next person). Enable with:
+#   sudo systemctl enable --now nh-watch.timer
+#
+# HOURLY, deliberately. The handle leak took ~81 minutes of ordinary traffic to become fatal, so
+# an hourly walk catches that class before a caller does. More often than that would be noise on
+# a surface we also ask agents to use.
+[Unit]
+Description=Run the Narrow Highway watchman every hour
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=1h
+# If the box was down at the appointed hour, run once on the way back up rather than skipping —
+# the gap is exactly when something is most likely to have broken.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

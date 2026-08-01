@@ -177,6 +177,11 @@ def _shards(dirname: str, kind: str, dry: bool, show: int) -> int:
 
 
 def main() -> int:
+    # The gate runs alone (tools/check.py holds .gate.lock): a heavy job beside it has produced
+    # three false failures by starving a wire test. Step aside rather than corrupt a verdict.
+    if os.path.exists(os.path.join(ROOT, ".gate.lock")):
+        print("the gate holds the floor — run this after it finishes")
+        return 2
     ap = argparse.ArgumentParser()
     ap.add_argument("path", nargs="?", default=DEFAULT_PATH)
     ap.add_argument("--kind", choices=sorted(KINDS), help="the ONE repair to apply")

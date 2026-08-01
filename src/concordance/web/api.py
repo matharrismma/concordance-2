@@ -535,6 +535,14 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                     "schema_active": schema_active(config.schema_path, config.skip_schema_validation),
                     "jsonschema": _HAS_JSONSCHEMA,
                     "shards": _cdb.open_connections()})
+    if method == "GET" and path == "/health/memory":
+        # WHERE THE RESIDENT CORPUS ACTUALLY SPENDS ITS MEMORY, from the live process. The freeze
+        # design rests on a belief about this and nobody had measured it: 25,087 cards costing
+        # 1.7 GB is ~68 KB each, which no card body explains. If the weight is the token index
+        # rather than the cards, freezing moved the wrong thing. Sampled, and it says so.
+        c = corpus.default_corpus()
+        return _ok({"resident": c.footprint(),
+                    "note": "an estimate from samples, labelled as one — see `measured_over`"})
     if method == "GET" and path == "/identity":
         # identity = what the engine IS (the dry, efficient truth); persona = WHO it is to talk to
         # (the separate voice / movie-style experience). The card system stays pure efficiency.
@@ -1971,6 +1979,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 ROUTES = [
     {"path": "/", "methods": ("GET",)},
     {"path": "/health", "methods": ("GET",), "api": True},
+    {"path": "/health/memory", "methods": ("GET",), "api": True},
     {"path": "/identity", "methods": ("GET",), "api": True},
     {"path": "/route", "methods": ("GET",), "api": True},
     {"path": "/bind/challenge", "methods": ("GET",), "api": True},

@@ -1,0 +1,34 @@
+# THE WATCHMAN — walks the live doors and writes data/watch.json + watch_history.jsonl.
+#
+# Why a standing job rather than more tests: on 2026-08-01 six real defects were found in one day,
+# and the gate was green through every one of them — 1,000+ tests passing while the box answered
+# 500 to every caller of /verify. Each was invisible to inspection and obvious the moment the
+# system was DRIVEN END TO END. This drives it, hourly, so the next one surfaces on its own
+# instead of after hours of hunting.
+#
+# Runs as nh (no privileged reads needed — it only speaks HTTP to the public surfaces, exactly as
+# a reader or an agent would). Oneshot, fired by nh-watch.timer.
+#
+#   sudo systemctl enable --now nh-watch.timer
+#   systemctl list-timers nh-watch.timer
+#   journalctl -u nh-watch.service --since today     # the run, in words
+#
+# A non-zero exit is a BROKEN invariant, so `systemctl is-failed nh-watch.service` is the one-word
+# answer to "is anything wrong". CANNOT_CHECK never fails the unit: a check that could not run is
+# not a check that failed, and crying wolf is how a watchman gets ignored.
+[Unit]
+Description=Narrow Highway — the watchman (live invariants over the wire)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=nh
+WorkingDirectory=/home/nh/concordance-2
+Environment=PYTHONPATH=/home/nh/concordance-2/src
+Environment=CONCORDANCE_DATA_DIR=/home/nh/concordance-2/data
+ExecStart=/home/nh/concordance-2/.venv/bin/python tools/watch.py \
+    --host https://narrowhighway.com --json /home/nh/concordance-2/data/watch.json
+ExecStart=/home/nh/concordance-2/.venv/bin/python tools/watch.py \
+    --host https://narrowhighway.org --json /home/nh/concordance-2/data/watch_org.json
+TimeoutStartSec=600
