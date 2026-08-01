@@ -674,14 +674,29 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         if _capped:
             out["limit_capped"] = _capped
         if not res:
-            # THE MISS TEACHES THE ASK — the library grows by its misses, and an agent's miss
-            # counts when a person genuinely needed the answer. The hint is an offer, never an
-            # auto-log: the agent must still CALL, exactly as a human must still click.
-            out["want_hint"] = ("Nothing in the keeping. If your principal genuinely needs this, "
-                                "call want_open (agent plane; the next human to look may second "
-                                "it). If you can LOCATE a public-domain source yourself, call "
-                                "want_offer on an open want — a named human chooses; only then "
-                                "is a card created.")
+            # SAME MECHANISM AS THE HUMAN DOOR, DIFFERENT PLANE. A miss is a slower answer, not a
+            # chore handed to a person: we go to the public-domain archives now and card what we
+            # find. On the AGENT plane the card enters `public_review`, withheld from every public
+            # read path until a human looks — the agent gets its answer, the shared library waits.
+            #
+            # The want list is only for having NO CONNECTION. Queueing something we could simply
+            # have fetched turns a slower answer into someone's homework, which is backwards.
+            from .. import expand as _expand
+            ex = _expand.expand(args.get("query", ""), config, plane="agent")
+            if ex.get("status") == "acquired":
+                res = corpus.search(args.get("query", ""), limit=_limit)
+                out["count"] = len(res)
+                out["results"] = [{"id": c.get("id"), "title": c.get("title"),
+                                   "shelf": c.get("shelf"),
+                                   "snippet": (c.get("body", "") or "")[:200]} for c in res]
+                out["expanded"] = {
+                    "status": "acquired", "message": ex.get("message"),
+                    "held_for_review": ex.get("held_for_review"),
+                    "documents": [{"title": d.get("title"), "url": d.get("url"),
+                                   "source": d.get("source"), "license": d.get("license")}
+                                  for d in (ex.get("documents") or [])[:5]]}
+            else:
+                out["expanded"] = {k: v for k, v in ex.items() if k != "documents"}
         return out
     if name == "seal_fetch":
         rec = cas.fetch(args.get("hash", ""))

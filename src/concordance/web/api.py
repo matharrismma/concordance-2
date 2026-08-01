@@ -1271,10 +1271,26 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _err(400, "q required")
         limit, capped = bounded_limit(query.get("limit"), 20)
         res = corpus.search(q, limit=limit)  # shared keeping (both surfaces)
+        expansion = None
+        if not res:
+            # THE SAME SLOW LANE /ask HAS ALWAYS HAD. Proven live 2026-08-01: /search?q=Rigveda
+            # returned 0 while two /ask calls found and carded three public-domain Rigveda sources.
+            # Same question, same engine, two doors, two answers — and this was the deaf one.
+            # A miss is a slower answer, not a dead end.
+            from .. import expand as _expand
+            expansion = _expand.expand(q, config, plane="human")
+            if expansion.get("status") == "acquired":
+                res = corpus.search(q, limit=limit)      # it is in the keeping now
         telemetry.record("search", surface=surface, query=q, count=len(res))
         out = {"query": q, "count": len(res), "results": [_card_brief(c) for c in res]}
         if capped:
             out["limit_capped"] = capped
+        if expansion and expansion.get("status") != "acquired":
+            # Never a bare zero: say WHY there is nothing, and whether it is coming.
+            out["expanded"] = {k: v for k, v in expansion.items() if k != "documents"}
+        elif expansion:
+            out["expanded"] = {"status": "acquired", "message": expansion.get("message"),
+                               "found": len(expansion.get("documents") or [])}
         return _ok(out)
 
     # Library / keeping tools (ported from 1.0, additive — over the same shared corpus).

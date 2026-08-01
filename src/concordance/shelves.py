@@ -326,18 +326,68 @@ def commons(limit: int = 40) -> Dict[str, Any]:
                     "library amplified it; the library did not verify it."}
 
 
+def _acquisition_store() -> Path:
+    """Where the tortoise files what it fetched. One place, so the queue and the act agree."""
+    base = os.environ.get("CONCORDANCE_DATA_DIR", "").strip() or "data"
+    return Path(base) / "web_cache.jsonl"
+
+
+def _held_acquisitions() -> List[Dict[str, Any]]:
+    """Agent-plane acquisitions waiting on a human — they live in a different store, not the shelves.
+
+    WHY THEY BELONG IN THIS QUEUE. When an agent's search misses, the tortoise fetches a
+    public-domain source and cards it into `public_review`, withheld from every public read path
+    until a person looks. That was built, and it worked — but nothing SHOWED a person the waiting
+    cards: this queue only ever read the member-shelf drops. Measured on the live box 2026-08-01:
+    three Samkhya sources held, review queue reporting zero.
+
+    A hold with no door is not a wait, it is a grave — the very thing the plane boundary must not
+    become. One queue, so a person looks in one place: a member's commons drop and an agent's
+    acquisition are both "something a human has not yet blessed".
+    """
+    p = _acquisition_store()
+    out: List[Dict[str, Any]] = []
+    if not p.exists():
+        return out
+    try:
+        for ln in p.read_text(encoding="utf-8").splitlines():
+            if not ln.strip():
+                continue
+            try:
+                c = json.loads(ln)
+            except ValueError:
+                continue
+            if c.get("lifecycle_stage") == "public_review":
+                out.append(c)
+    except OSError:
+        return []
+    return out
+
+
 def review_queue() -> Dict[str, Any]:
     """What waits on a HUMAN. The counter never promotes; it only decides when a person looks."""
     acted = {c["card_id"] for c in _read("curation.jsonl")}
     waiting = [d for d in _read("drops.jsonl")
                if (d.get("extra") or {}).get("ring") == "commons" and d["id"] not in acted]
     waiting.sort(key=lambda c: (c.get("created_at") or 0))
-    return {"ok": True, "count": len(waiting),
-            "items": [{"card_id": d["id"], "title": d.get("title"),
-                       "member": (d.get("extra") or {}).get("member"),
-                       "kind": (d.get("extra") or {}).get("drop_kind"),
-                       "at": d.get("created_at")} for d in waiting],
-            "note": "A steward promotes or refuses, and either way says why."}
+    items = [{"card_id": d["id"], "title": d.get("title"),
+              "member": (d.get("extra") or {}).get("member"),
+              "kind": (d.get("extra") or {}).get("drop_kind"),
+              "waiting_on": "a steward", "at": d.get("created_at")} for d in waiting]
+
+    for c in sorted(_held_acquisitions(), key=lambda x: (x.get("created_at") or 0)):
+        if c.get("id") in acted:
+            continue
+        items.append({"card_id": c.get("id"), "title": c.get("title"),
+                      "member": None, "kind": "acquisition",
+                      "source": (c.get("source") or {}).get("label"),
+                      "acquired_by_plane": c.get("acquired_by_plane") or "agent",
+                      "waiting_on": "any human who looks",
+                      "at": c.get("created_at")})
+
+    return {"ok": True, "count": len(items), "items": items,
+            "note": "A steward promotes or refuses, and either way says why. Acquisitions an "
+                    "agent brought in wait here too — the next human to look may release them."}
 
 
 _CURATE_FIELDS = ("action", "at", "card_id", "member", "nonce")
@@ -444,11 +494,29 @@ def curate(card_id: str, action: str, steward: str, reason: str = "", token: str
             "not authorized. Promoting or refusing is a steward's act and needs a valid warrant; "
             "withdrawing your own card needs your own signature over /curate/signable bytes. A "
             "typed name is not authority — anyone can type a name.")}
-    if not any(d["id"] == card_id for d in _read("drops.jsonl")):
+    # TWO STORES, ONE ACT. A member's drop lives in drops.jsonl; an agent's acquisition waits in
+    # web_cache.jsonl. Both appear on one review queue, so both must be ACTABLE from one place —
+    # otherwise the queue is a window, not a door, and "held for review" quietly means "held for
+    # good". Found 2026-08-01: three Samkhya sources on the desk, and `curate` answering
+    # "no such drop" to every attempt to release them.
+    is_drop = any(d["id"] == card_id for d in _read("drops.jsonl"))
+    held = None if is_drop else next(
+        (c for c in _held_acquisitions() if c.get("id") == card_id), None)
+    if not is_drop and held is None:
         return {"ok": False, "error": "no such drop"}
+    if held is not None and action == "withdrawn":
+        return {"ok": False, "error": "an acquisition has no member to withdraw it — promote it "
+                                      "or refuse it, with a reason"}
     rec = {"card_id": card_id, "action": action, "steward": steward,
            "reason": reason.strip()[:500], "at": int(time.time()),
            "by": "steward" if by_steward else "member"}
+    if held is not None:
+        rec["kind"] = "acquisition"
+        from . import find as _find
+        if action == "promoted":
+            _find._promote_to_public(_acquisition_store(), card_id)
+        else:                                     # refused — recorded, never erased
+            _find._set_stage(_acquisition_store(), card_id, "archived")
     if by_steward:
         # WHICH identity acted, never the secret. Without this the record says an act happened and
         # cannot say whose — the gap L11 named in The Way.

@@ -252,9 +252,76 @@ def _member_of(shelf: str) -> list:
              "evidence": "a member of the " + shelf + " shelf in the keeping"}]
 
 
-def _mint_doc(query: str, doc: Dict[str, Any], practical: bool = True) -> Optional[Dict[str, Any]]:
+def _set_stage(store, cid: str, stage: str, only_from: str = "public_review") -> bool:
+    """Move ONE card from `only_from` to `stage`. Returns True if it actually changed.
+
+    Refuses to touch a card in any other stage: a steward's quarantine or retraction must never be
+    undone by an automatic path. Rewrites atomically and refreshes the live corpus so the change is
+    visible on this request rather than after a restart.
+    """
+    try:
+        lines = store.read_text(encoding="utf-8").splitlines() if store.exists() else []
+    except OSError:
+        return False
+    out, changed, card = [], False, None
+    for ln in lines:
+        if not ln.strip():
+            continue
+        try:
+            c = json.loads(ln)
+        except ValueError:
+            out.append(ln)
+            continue
+        if c.get("id") == cid and c.get("lifecycle_stage") == only_from:
+            c["lifecycle_stage"] = stage
+            c["updated_at"] = time.time()
+            changed, card = True, c
+        out.append(json.dumps(c, ensure_ascii=False))
+    if not changed:
+        return False
+    tmp = store.with_suffix(".tmp")
+    tmp.write_text(chr(10).join(out) + chr(10), encoding="utf-8")
+    os.replace(tmp, store)
+    try:
+        from . import corpus as _c
+        _c.add_to_default(card)
+    except Exception:  # noqa: BLE001
+        pass
+    return True
+
+
+def _promote_to_public(store, cid: str) -> bool:
+    """Release a held card into the shared keeping. Returns True if it actually changed.
+
+    The named case of `_set_stage` — one implementation, so the release path and the steward's
+    refusal cannot drift apart. Only ever moves `public_review` -> `public`; a retracted or
+    quarantined card stays exactly where a steward put it.
+    """
+    return _set_stage(store, cid, "public", only_from="public_review")
+
+
+def _mint_doc(query: str, doc: Dict[str, Any], practical: bool = True,
+              plane: str = "human") -> Optional[Dict[str, Any]]:
     """Keep a tried-and-true public-domain practical source in the keeping — a higher tier than the
-    open web (primary + PD), so the practical library grows and can be carried offline."""
+    open web (primary + PD), so the practical library grows and can be carried offline.
+
+    ONE MECHANISM, TWO PLANES (Matt, 2026-08-01: *"It should be the same just different planes."*).
+    The act is identical whoever asks: a miss goes to the tortoise, a public-domain source is found
+    and carded, and the keeping is permanently larger. What differs is who authorised it.
+
+      human plane   the person's own ask IS the authorisation — the card enters `public`.
+      agent plane   the card enters `public_review`, which `corpus.is_public()` withholds from
+                    every public read path, and waits for the next human to look at it.
+
+    This closes a real breach rather than adding ceremony: `lifecycle_stage` was hardcoded
+    `"public"`, so an agent calling the `ask` tool minted straight into the shared keeping with no
+    human ever seeing it — against the covenant's "ask before writes" and against Matt's own rule
+    that the agent plane "stays separate and must be approved by a human. We ask the next human
+    that looks at it."
+
+    Nothing is lost by waiting: the agent still receives the answer it asked for. Only the card's
+    entry into everyone else's library is what waits.
+    """
     try:
         url = doc.get("url") or ""
         cid = "card_pd_" + hashlib.sha256((doc.get("source", "") + "|" + url).encode()).hexdigest()[:12]
@@ -276,7 +343,12 @@ def _mint_doc(query: str, doc: Dict[str, Any], practical: bool = True) -> Option
                 + ([doc["year"]] if doc.get("year") else []) + sorted(_tokens(query))[:6],
                 "connections": _member_of("practical" if practical else "sources"),
                 "author": "archive", "created_at": time.time(),
-                "updated_at": time.time(), "visibility": "public", "lifecycle_stage": "public",
+                "updated_at": time.time(), "visibility": "public",
+                # THE PLANE, and the only thing it changes. A human's own ask authorises itself; an
+                # agent's acquisition waits in `public_review`, which corpus.is_public() withholds
+                # from every public read path until a human looks at it.
+                "lifecycle_stage": ("public" if plane == "human" else "public_review"),
+                "acquired_by_plane": plane,
                 "volatility": "durable", "surface": "secular", "generated": False, "verified": False}
         p = _store_path()
         p.parent.mkdir(parents=True, exist_ok=True)
@@ -307,12 +379,26 @@ def _mint_doc(query: str, doc: Dict[str, Any], practical: bool = True) -> Option
                 _c.add_to_default(card)
             except Exception:  # noqa: BLE001
                 pass
+        elif plane == "human":
+            # A HUMAN ASKING **IS** THE NEXT HUMAN THAT LOOKS AT IT.
+            #
+            # Without this the plane boundary becomes a trap: an agent acquires the source, the
+            # card is held in `public_review`, and every later human ask finds the id ALREADY
+            # PRESENT — so the mint is skipped, the stage never changes, and the material is
+            # invisible to everyone for good. Caught on the live wire 2026-08-01: an agent-plane
+            # `Samkhya` acquisition left a following human /search at count 0 with the cards
+            # sitting right there.
+            #
+            # Withholding is meant to be a WAIT, not a grave. A person asking for exactly this
+            # thing is the review the agent plane was waiting on, so their ask releases it — the
+            # same seconding rule the want desk already uses, applied to acquisitions.
+            _promote_to_public(p, cid)
         return card
     except Exception:  # noqa: BLE001
         return None
 
 
-def find_and_check(query: str, config) -> Optional[Dict[str, Any]]:
+def find_and_check(query: str, config, plane: str = "human") -> Optional[Dict[str, Any]]:
     """The slow, sure path. Returns a framed answer (or None if nothing high-quality was found or
     the network was unreachable). Never raises."""
     if not enabled():
@@ -327,7 +413,7 @@ def find_and_check(query: str, config) -> Optional[Dict[str, Any]]:
         if not docs:
             return None
         for d in docs[:3]:
-            _mint_doc(query, d, practical=practical)
+            _mint_doc(query, d, practical=practical, plane=plane)
         if practical:
             note = ("The keeping doesn't hold this yet. For practical knowledge we carry the torch of "
                     "Foxfire — we look back before the modern inputs, to the tried-and-true (the "
