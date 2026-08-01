@@ -89,3 +89,27 @@ if __name__ == "__main__":
     for fn in fns:
         fn(); print(f"  ok  {fn.__name__}")
     print(f"\n{len(fns)} traffic tests passed — humans aggregated, bots/agents named, from+going roll up.")
+
+
+def test_rollup_splits_by_host(tmp_path):
+    """The operator's console blended .com, .tv and api into one view — and the blend hid that
+    .tv is ~95% bots while .com carries the people (found 2026-08-01, the same night three
+    subset-instruments misled a whole session). Every door is counted separately now, classed by
+    each IP's final class so a poller reads as monitor on every host it touches."""
+    import json
+    lines = []
+    for i in range(3):
+        lines.append(json.dumps({"ts": 10_000, "status": 200,
+            "request": {"host": "narrowhighway.com", "uri": "/", "client_ip": "1.2.3.4",
+                        "headers": {"User-Agent": ["Mozilla/5.0 (Windows NT 10.0) Safari/537.36"]}}}))
+    lines.append(json.dumps({"ts": 10_000, "status": 200,
+        "request": {"host": "narrowhighway.tv", "uri": "/card", "client_ip": "5.6.7.8",
+                    "headers": {"User-Agent": ["Mozilla/5.0 (compatible; SemrushBot/7~bl)"]}}}))
+    p = tmp_path / "a.log"
+    p.write_text("\n".join(lines), encoding="utf-8")
+    out = rollup([str(p)], days=3650, now=20_000)
+    hosts = out["hosts"]
+    assert set(hosts) == {"narrowhighway.com", "narrowhighway.tv"}, hosts
+    assert hosts["narrowhighway.com"]["requests"] == 3
+    assert hosts["narrowhighway.com"]["human"] == 3
+    assert hosts["narrowhighway.tv"]["bot"] == 1 and hosts["narrowhighway.tv"]["human"] == 0

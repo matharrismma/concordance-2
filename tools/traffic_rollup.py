@@ -222,11 +222,13 @@ def rollup(log_paths, days: int = 7, now: Optional[int] = None,
                     mcp_ua[(ua.split("/")[0].strip()[:24] or "unknown")] += 1
                 rec = ips.get(ip)
                 if rec is None:
-                    rec = {"cls": cls, "n": 0, "paths": Counter(), "refs": Counter(), "who": Counter()}
+                    rec = {"cls": cls, "n": 0, "paths": Counter(), "refs": Counter(),
+                           "who": Counter(), "hosts": Counter()}
                     ips[ip] = rec
                 else:
                     rec["cls"] = _stronger(rec["cls"], cls)
                 rec["n"] += 1
+                rec["hosts"][(req.get("host") or "?").split(":")[0]] += 1
                 rec["paths"][_uri_path(uri)] += 1
                 rh = _ref_host(referer, our)
                 if rh:
@@ -237,10 +239,18 @@ def rollup(log_paths, days: int = 7, now: Optional[int] = None,
     CLASSES = ("human", "monitor", "agent", "bot")
     B = {c: {"requests": 0, "ips": 0, "paths": Counter(), "refs": Counter(),
              "nets": Counter(), "ctry": Counter(), "who": Counter()} for c in CLASSES}
+    # PER HOST — which DOOR each request came through. Added 2026-08-01, the day the operator's
+    # console was found blending .com, .tv and api into one view: the blend hid that .tv is ~95%
+    # bots crawling 1.0 residue and that .org was not being measured at all. Classed by each IP's
+    # FINAL class, so the operator's own pollers read as monitor here exactly as they do above.
+    hosts_out: Dict[str, Dict[str, Any]] = {}
     for ip, rec in ips.items():
         cls = rec["cls"]
         if cls == "human" and rec["n"] >= monitor_threshold:  # automated poller, not a person
             cls = "monitor"
+        for hname, hn in rec.get("hosts", {}).items():
+            hb = hosts_out.setdefault(hname, {c: 0 for c in CLASSES})
+            hb[cls] += hn
         b = B[cls]
         b["requests"] += rec["n"]; b["ips"] += 1
         b["paths"].update(rec["paths"]); b["refs"].update(rec["refs"])
@@ -261,6 +271,8 @@ def rollup(log_paths, days: int = 7, now: Optional[int] = None,
         "totals": {"requests": total_req, "unique_ips": len(ips),
                    **{c: B[c]["requests"] for c in CLASSES}},
         "geo_available": _geo_db() is not None,
+        "hosts": {h: {**v, "requests": sum(v.values())}
+                  for h, v in sorted(hosts_out.items(), key=lambda x: -sum(x[1].values()))},
         "classes": {},
     }
     for cls in CLASSES:

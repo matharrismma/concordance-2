@@ -58,10 +58,12 @@ class RateLimiter:
 def from_env(read: bool = False) -> RateLimiter:
     """The write bucket, or — with read=True — the generous read bucket.
 
-    One cap used to cover both. Measured 2026-07-31: every 429 we have ever served was on
-    /search, and the client refused most was ClaudeBot — 7,100 requests, 3,368 searches, 75 of
-    them refused. Agents are 35% of the traffic and reading is what we built this for, so a read
-    now gets its own, far larger window while a write keeps the cap it always had.
+    One cap used to cover both. First measured 2026-07-31 on a partial instrument; re-based
+    2026-08-01 on the FULL logs: 441 refusals ever — 313 to ClaudeBot (mostly /search, across all
+    three hosts) and 128 to Python-urllib on the verify paths. Reading is what we built this for,
+    so a read gets its own, far larger window while a write keeps the cap it always had. The
+    conclusion predates the corrected numbers and survives them: refusing a reader is wrong at
+    any percentage.
 
     Still a ceiling, not an exemption: /search runs FTS across the shards, and one source must
     not be able to exhaust a 7 GB box.

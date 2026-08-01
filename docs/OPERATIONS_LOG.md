@@ -468,3 +468,44 @@ not deleted: each now asserts the opposite, with the reason written beside it.
 
 **1,037 tests. Verified live on .com:** all fifteen answer; all five still wait; and
 `/characters.html?search=Slave` opens Easton's entry for Slave with its verses.
+
+## 2026-08-01 · THREE INSTRUMENT FAILURES, RETRACTED IN THE OPEN
+
+**1 · Every traffic figure quoted 2026-07-30/31 was measured on 9% of traffic.** `site.access.log`
+and `api.access.log` are permission-denied to the deploy user; `cat /var/log/caddy/*.log` silently
+read `tv.access.log` alone and the subset was reported as the whole. Corrected, full logs + ten
+rotated archives (865,371 requests, 2026-06-02 → 2026-08-01):
+
+| host | requests | share | IPs | human | ClaudeBot | SEO |
+|---|---:|---:|---:|---:|---:|---:|
+| narrowhighway.com | 749,040 | 86.6% | 16,624 | 80.6%* | 3.0% | 9.4% |
+| narrowhighway.tv | 77,950 | 9.0% | 1,487 | 5.0% | 28.6% | 34.5% |
+| api.narrowhighway.com | 38,381 | 4.4% | 830 | 32.3% | 58.2% | 0% |
+
+*"human" on .com is inflated: ~64% of .com is machine polling with plain user-agents (see 3).
+Retracted claims now corrected in code and docs: "ClaudeBot is 35% of traffic" (it is ~7.7%
+site-wide); "/card at 46,190 is the front door" (that was .tv; full figure ~39k, and `/` reaches
+2,318 distinct IPs — the widest genuine audience); "SemrushBot 21% of ALL traffic" (34.5% of .tv);
+"134 429s ever" (441: 313 ClaudeBot, 128 Python-urllib on the verify paths).
+
+**2 · "19 of the Codex's 20 receipts answer 404" was false — the test was broken, not the seals.**
+The URL list was written with Windows line endings; every curl got a `\r`-suffixed URL, failed with
+code 000, and the failure was printed under a hardcoded "404" label. All 20 resolve; all 321
+seal-claiming cards on the box have their objects. The 16,146 receipt 404s in the log are 1.0-era
+`/s/` URLs crawled by bots on the retired .tv host — zero overlap with either CAS. The
+receipt-as-card build keeps its structural justification (data/cas is node-local, 127 seals lived
+only on the operator's machine) and loses its false one, in the code comment itself.
+
+**3 · "The canon 404s are on the witness host" — they were on .tv.** And `.org` was never zero
+traffic: its vhost had NO log directive, so absence of instrumentation was reported as absence of
+visitors. Fixed 2026-08-01 — `.org` logs for the first time (org.access.log; the first reload
+failed on file permissions and was completed after pre-creating the file caddy-owned).
+
+**Also found while correcting:** ~480k requests on .com are 1.0-era consoles still polling dead
+endpoints (`/api/testimony/matters` 35,800 · `/misalignments` · `/inbox` · `/robot/all` ·
+`/keep/insights` — none exist in 2.0) from a handful of operator IPs, chiefly 107.127.49.124,
+107.119.65.17, 129.222.255.28. The 2.0 Keep (`/keep.html` + `/keep.json`) is live and answering;
+the stale clients are on the devices, not the server.
+
+**The rule this buys, now in memory:** a measurement that can silently cover a subset must report
+its own coverage — file list, row count, date window — before any conclusion is drawn from it.

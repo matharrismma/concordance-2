@@ -152,8 +152,8 @@ def test_the_adjoining_cards_are_real_links_for_a_reader_and_an_agent():
     """Matt, 2026-07-30: "Links to adjoining cards as well for agents and users."
 
     The edges existed but reached a reader ONLY through a JS canvas that stays hidden until scripts
-    run — so every crawler, every no-JS reader, and the 35% of traffic that is ClaudeBot hit a dead
-    end on 46,190 card views. A graph nobody can traverse is not a graph."""
+    run — so every crawler, every no-JS reader, and ClaudeBot hit a dead end on ~39k card views
+    (full-log figure, 2026-08-01). A graph nobody can traverse is not a graph."""
     from concordance import present
     card = {"id": "c", "updated_at": 1.0, "connections": [
         {"to_card_id": "card_a", "relationship": "comments_on", "evidence": "expounds this verse"},

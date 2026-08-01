@@ -1,12 +1,11 @@
 """A minted receipt becomes a card, so the promise survives leaving this machine.
 
-Measured 2026-07-31: of the twenty receipts the Codex advertises as "backed by a live,
-re-checkable receipt", NINETEEN answered 404. Across the whole access log, **16,146 requests for
-5,394 distinct receipt hashes found nothing** — more than every other 404 on the box combined. The
-strongest claim this project makes was failing in public.
+CORRECTED 2026-08-01: the original justification ("19 of 20 advertised receipts answered 404")
+was a broken measurement — a CRLF artifact, retracted in docs/OPERATIONS_LOG.md. All 20 resolve.
 
-The cause was structural, not a bug. `data/cas/` is not deployed and not backed up, so a seal
-minted on one machine lived only there while the card citing it travelled everywhere. Matt's fix:
+What stands is structural: `data/cas/` is node-local — not deployed, not backed up — so a seal
+minted on one machine lives only there while the card citing it travels everywhere. 127 seals
+existed only on the operator's machine. Matt's fix:
 *"When we mint a receipt, it needs to become a card as well. That would allow us to have both and
 not change a ton."*
 
@@ -75,7 +74,10 @@ def test_the_receipt_resolves_when_the_cas_object_is_gone():
     rec = cas.fetch_anywhere(h)
     assert rec is not None, "the receipt died with its CAS object"
     assert rec["claim"] == "2 + 2 = 4"
-    assert rec.get("_from") == "card", "the fallback must SAY it came from the keeping"
+    # The two stores must be BYTE-IDENTICAL. A `_from` marker here once broke the published
+    # contract — "re-fetch and the bytes must match" — for clients re-hashing /seal responses.
+    assert "_from" not in rec, "the card-served record differs from the CAS-served record"
+    assert cas.content_hash_of(rec) == h, "the fallback record does not recompute to its address"
 
 
 def test_an_unknown_hash_is_still_honestly_absent():

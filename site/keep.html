@@ -96,6 +96,9 @@
     <section>
       <h2>Where they come from &amp; where they go <span class="muted" style="font-size:.68rem;font-weight:400">· humans / agents / bots · advisory ops data from the access logs</span></h2>
       <p class="muted" id="traffic-meta" style="font-size:.82rem"></p>
+      <!-- THE DOORS, before the blend: each host counted on its own. One blended view hid that
+           .tv is ~95% bots while .com carries the people, and steered a whole day's decisions. -->
+      <div class="grid" id="traffic-hosts" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr));margin-bottom:.7rem"></div>
       <div class="grid" id="traffic" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))"></div>
     </section>
 
@@ -276,6 +279,23 @@ function renderTraffic(tf){
   if(!tf){ el.innerHTML = '<p class="muted">No traffic rollup yet — it runs on a timer from the access logs.</p>'; if(meta) meta.textContent=""; return; }
   const T = tf.totals || {};
   const n = x => (x==null?0:x).toLocaleString();
+
+  // THE DOORS — per host, first, because the blended view misled: it hid that .tv is ~95% bots
+  // crawling 1.0 residue while .com carries the people (found 2026-08-01). A host missing from
+  // this list means it is not being measured — a fact about the instrument, not the door.
+  const hostsEl = document.getElementById("traffic-hosts");
+  if(hostsEl){
+    const H = tf.hosts || null;
+    hostsEl.innerHTML = !H ? '<p class="muted" style="font-size:.82rem">No per-host split in this rollup yet (pre-2026-08-01 data).</p>'
+      : Object.keys(H).map(function(h){
+          const v = H[h];
+          return '<div class="stat"><div class="n">' + n(v.requests) + '</div>' +
+            '<div class="k">' + escapeHtml(h) + '</div>' +
+            '<div class="muted" style="font-size:.72rem;margin-top:.2rem">human ' + n(v.human) +
+            ' · monitor ' + n(v.monitor) + ' · agent ' + n(v.agent) + ' · bot ' + n(v.bot) +
+            '</div></div>';
+        }).join("");
+  }
   if(meta) meta.textContent = n(T.requests) + " requests over " + tf.window_days + "d · " +
     n(T.human) + " human · " + n(T.agent) + " agent · " + n(T.monitor) + " monitor · " + n(T.bot) + " bot · " +
     n(T.unique_ips) + " unique sources" + (tf.geo_available ? " · countries via DB-IP (CC BY)" : " · (countries load once the geo set is in place)");

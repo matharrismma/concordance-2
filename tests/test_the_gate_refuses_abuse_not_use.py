@@ -91,7 +91,7 @@ def test_no_path_of_knowledge_can_be_refused():
 
 def test_both_doors_agree():
     """The HTTP surface opened on 2026-07-31 and the AGENT surface did not — twenty tools an agent
-    could not even see, on the surface that is 35% of our traffic. Correct server-side and
+    could not even see, on the surface agents actually read (ClaudeBot: 58% of api.). Correct server-side and
     invisible to the caller is the failure this project keeps meeting, so the two doors are
     checked against each other from now on."""
     from concordance.mcp import server as mcp

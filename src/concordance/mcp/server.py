@@ -595,7 +595,7 @@ def _tools_for(config: EngineConfig, gate_open: bool = False) -> List[dict]:
     # secret society. Everyone is a part of the group. They experience what they want of it."
     #
     # This is where the HTTP fix would have died quietly. web/api.py opened; twenty tools here
-    # stayed shut, so an agent — 35% of our traffic, and the surface we ask to be read by — could
+    # stayed shut, so an agent — ClaudeBot alone is ~67k requests across the hosts, 58% of api.narrowhighway.com — could
     # not so much as SEE read_passage, character_get, canon or word_study on the secular surface.
     # Correct server-side and invisible to the caller is the failure this project keeps meeting.
     #

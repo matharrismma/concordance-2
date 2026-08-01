@@ -17,6 +17,13 @@ is a record, never an erasure.
 > (−7) that no traffic ranking could see. Where two marks disagree, that gap is the finding; the
 > number is revised out loud, never defended.
 
+> **DRIFT, 2026-08-01:** every traffic number in §1 and §5 was measured on `tv.access.log` alone —
+> 9% of traffic (the other logs were permission-denied and the read never reported its coverage).
+> Full-log reality: `/` reaches 2,318 distinct IPs (the widest genuine audience), `/card` is ~39k
+> across hosts, ClaudeBot is ~7.7% site-wide not 35%. The page rankings below are a scribe line
+> drawn with a bent rule — re-cut them from the full logs before acting on them. The NAMING cut
+> (duplicate jobs) is unaffected: it never used traffic.
+
 | surface | now | target | cut |
 |---|---:|---:|---:|
 | **Pages** | 45 | **13** | 32 |

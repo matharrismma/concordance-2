@@ -85,13 +85,16 @@ def store(record_dict: Dict[str, Any], *, base_dir: Optional[Path] = None,
 # Matt, 2026-07-31: *"When we mint a receipt, it needs to become a card as well. That would allow
 # us to have both and not change a ton."*
 #
-# Measured the same day: of the twenty receipts the Codex advertises as "backed by a live,
-# re-checkable receipt", NINETEEN answered 404. Across the whole access log, 16,146 requests for
-# 5,394 distinct receipt hashes found nothing — more than every other 404 on the box combined. The
-# strongest claim this project makes ("re-check it yourself") was failing in public.
+# CORRECTED 2026-08-01: this was first justified by a measurement claiming 19 of the Codex's 20
+# advertised receipts answered 404. That measurement was BROKEN — a CRLF in the test script turned
+# every URL into a connection failure, and the failure was mislabeled 404. All 20 resolve; every
+# seal-claiming card on the box has its object. The retraction is in docs/OPERATIONS_LOG.md.
 #
-# The cause is structural, not a bug: `data/cas/` is not deployed and not backed up. A seal minted
-# on one machine exists only there, while the card that cites it travels everywhere. So the receipt
+# The structural reason stands on its own and is why this code stays: `data/cas/` is node-local —
+# not deployed, not backed up, not in the ark. 127 seals existed only on the operator's machine
+# and would have died with it, while the cards citing them travel everywhere. Growth is bounded by
+# content-addressing (repeat verifications reuse their hash — 886 distinct objects in two months
+# on the box). So the receipt
 # now ALSO lands in the keeping, which is deployed, sharded, replicated and archived — and `/s/`
 # reads the card when the CAS object is not on this node. Two stores, one truth, and the hash still
 # arbitrates: the card carries the record verbatim, so re-hashing it must give back the same
@@ -210,7 +213,10 @@ def fetch_anywhere(content_hash: str, *, base_dir: Optional[Path] = None) -> Opt
         if rec is not None:
             out = dict(rec)
             out["content_hash"] = content_hash
-            out["_from"] = "card"      # named, never silent: this came from the keeping, not the CAS
+            # NO provenance marker on the record itself. The first version added `_from: "card"`
+            # here, and that quietly broke the published contract — "re-fetch and the bytes must
+            # match" — for any client re-hashing what /seal returns. The two stores must be
+            # byte-identical or the fallback is a second authority wearing a copy's clothes.
             return out
     except Exception:  # noqa: BLE001
         pass

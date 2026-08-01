@@ -243,8 +243,8 @@ def neighbors(card: Dict[str, Any], resolve=None, limit: int = 8) -> List[Dict[s
 
     A stored edge is `{to_card_id, relationship, evidence}` — an id and nothing readable. Until now
     those edges reached a reader ONLY through a JS canvas that stays hidden until scripts run, which
-    means the 35% of our traffic that is ClaudeBot, every crawler, and every reader without
-    JavaScript hit a dead end on 46,190 card views. A graph nobody can traverse is not a graph.
+    means ClaudeBot, every crawler, and every reader without JavaScript hit a dead end on ~39k
+    card views (full-log figure, 2026-08-01). A graph nobody can traverse is not a graph.
 
     `resolve(card_id) -> card | None` is injected so this module stays free of I/O and of the corpus
     import; the caller decides how a lookup happens. An edge whose target cannot be resolved is kept

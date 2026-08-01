@@ -77,7 +77,7 @@ def _gate_closed() -> Response:
 def _card_brief(c: dict) -> Dict[str, Any]:
     """A search hit, with enough to know what may be CLAIMED from it.
 
-    Traffic, measured 2026-07-30: `/search` is our second-most-used endpoint (16,210) and 35% of
+    Traffic, measured 2026-07-30: `/search` carries ~34k requests across the three hosts (re-measured 2026-08-01 with FULL logs (the earlier figure was read from tv.access.log alone — the only log file readable without sudo — and covered 9% of traffic)) and agents are a top client of
     all traffic is ClaudeBot. The brief carried title, shelf, and a snippet — nothing about
     AUTHORITY. So an agent had to fetch the full card just to learn whether the thing it had found
     was a sealed record, a public-domain source, or a member's own opinion. That is a wasted
@@ -323,8 +323,8 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
     # adjoining cards as well for agents and users."
     #
     # The edges were already on the card, but they reached a reader ONLY through the JS canvas
-    # below — which stays hidden until scripts run. So on 46,190 card views, every crawler, every
-    # reader without JavaScript, and the 35% of our traffic that is ClaudeBot arrived at a dead
+    # below — which stays hidden until scripts run. So on ~39k card views (full-log figure,
+    # 2026-08-01), every crawler, every reader without JavaScript, and ClaudeBot arrived at a dead
     # end. These are now real <a href> in the markup, so the graph is walkable by anything that can
     # read HTML. The canvas stays as enhancement for those who get it.
     from .. import present as _present
@@ -395,8 +395,9 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             f"<div class=muted style=\"font-size:.8rem\">connections</div>"
             f"<canvas id=nhlg role=img aria-label=\"Connection graph — this card and its linked records\" style=\"width:100%;height:320px;display:block;margin:.4rem 0\"></canvas>"
             f"<p class=muted id=nhlg-cap style=\"font-size:.75rem\"></p></section>"
-            # THE FRONT DOOR IS HERE, not on `/`. Measured 2026-07-30: 46,190 card views against
-            # 608 on the homepage, and 35% of all traffic is ClaudeBot. The card page was offering
+            # A FRONT DOOR, alongside `/`. First measured on a partial instrument; the full logs
+            # (2026-08-01) show ~39k card views across the hosts against ~6k on the homepage —
+            # the homepage from 2,318 distinct IPs, the widest genuine reach we have. The card page was offering
             # only its own seal and raw JSON — so the most-read surface we have said nothing about
             # the engine that makes it worth trusting, or the room where people put their own work.
             # Three doors, named plainly, in the page's own voice. No pitch.
@@ -2071,9 +2072,9 @@ _API_GET_PATHS = frozenset(r["path"] for r in ROUTES if r.get("api"))
 # The rate-limited paths (consulted in serve()) — DERIVED from ROUTES.
 #
 # TWO buckets, because a read and a write are not the same risk. Both were sharing one 120/min
-# cap per client, and the client it refused most was ClaudeBot: 7,100 requests, 3,368 of them
-# searches, 75 refused. Agents are 35% of our traffic and the MCP surface is how we are read —
-# refusing them on the search path is refusing the use we asked for.
+# cap per client. Re-based on the FULL logs (2026-08-01): 441 refusals ever served — 313 to
+# ClaudeBot, mostly /search, across all three hosts. Refusing a reader on the search path is
+# refusing the use we asked for, at any percentage.
 #
 # The ceiling is not removed, it is separated and raised. /search runs FTS across the shards; an
 # unbounded one on a 7 GB box is a real exposure, so one source still cannot exhaust it. Writes
@@ -2237,12 +2238,13 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                     # which is how the first attempt at this change silently failed. Kept generated
                     # because the Sitemap line must name the requesting host.
                     #
-                    # Readers and AI agents: welcome, explicitly. Measured 2026-07-30, 35% of all
-                    # our traffic is ClaudeBot and the card permalink is the most-used thing we
-                    # serve — that is the intended use.
+                    # Readers and AI agents: welcome, explicitly. ClaudeBot is the single largest
+                    # agent we serve (~67k requests across the hosts, full-log 2026-08-01) and the
+                    # card permalink is among the most-used things we have — the intended use.
                     #
-                    # SEO backlink crawlers: refused by name. SemrushBot alone was 26,894 requests,
-                    # 21% of ALL traffic, indexing us for a marketing product nobody here uses.
+                    # SEO backlink crawlers: refused by name. SemrushBot alone was 26,883 requests
+                    # on the .tv host (34.5% of .tv; ~3% site-wide — re-measured 2026-08-01 with FULL logs (the earlier figure was read from tv.access.log alone — the only log file readable without sudo — and covered 9% of traffic)),
+                    # indexing us for a marketing product nobody here uses.
                     # This is a free library on one small box; that capacity belongs to readers and
                     # to agents that actually cite us. Named individually, never a blanket rule, so
                     # a genuine reader is never caught by it.
