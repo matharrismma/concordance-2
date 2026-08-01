@@ -112,11 +112,14 @@ test_scripture.py
 test_seal_page.py
 test_seam.py
 test_seam_lazy.py
+test_search_ceiling.py
+test_search_precision.py
 test_security.py
 test_security_sweep_d6.py
 test_seeds.py
 test_seekers.py
 test_shard_concurrency.py
+test_shard_handles.py
 test_shelves.py
 test_shelves_surface.py
 test_signing.py

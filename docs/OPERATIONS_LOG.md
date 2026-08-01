@@ -17,6 +17,119 @@ Three standing rules:
 
 ---
 
+## 2026-08-01 — THE ANCIENT ASSAY: 1,000 probes, religions and knowledge before 1 AD
+
+Matt: *"Run 1000 test runs... focused mainly on religions and knowledge prior to 1AD. Find errors
+or regression and identify the source."*
+
+**Coverage.** 1,000 probes / 544 distinct terms / 13 domains, live against narrowhighway.com,
+via `tools/assay_ancient.py`. Four verdicts, never two: EMPTY is a GAP (want-list material), only
+ERROR and DEGRADED are defects.
+
+| | before the repairs | after |
+|---|---|---|
+| reached the engine | 811 (188 throttled at 6 workers) | **997** (3 workers) |
+| OK | 59.4% | **85.2%** |
+| DEGRADED | 33.4% | **3.9%** |
+| EMPTY (gaps) | 58 | **106** |
+| engine ERROR | 0 | **0** |
+
+**The gap count ROSE, and that is the system telling the truth.** Junk answers had been masking
+real misses; an honest zero is what feeds the want list.
+
+**THE DEFECT, and its source: a miss was rendered as an answer.**
+
+    q="Mahavira"          -> 0 results + want_hint     CORRECT
+    q="what is Mahavira"  -> Aurelius Meditations 8.51, 8.10, Boethius §boe_03_10
+
+`corpus_db._match` joined every token with OR, stopwords included, so any natural-language question
+matched any card containing "what" or "is". Three classics cards surfaced across ~250 unrelated
+probes. `Zuo Zhuan` returned a PLANT (Xylanche himalaica — "ding zuo cao"); `Mozi` returned a
+homeopathy card. The harm is doctrinal, not cosmetic: the library said "here is what I have" when
+the truth was "I do not hold that", and because results came back `want_hint` never fired — so the
+miss was never recorded and the shepherd loop was silently starved. The library is designed to grow
+by its misses.
+
+**IT LIVED IN TWO PLACES, and fixing one did not fix the site.** After the shard matcher was
+repaired, gated and DEPLOYED, the live wire still answered `what is Mahavira` with Marcus Aurelius.
+The resident in-memory index scores with IDF, which dampens common words but never excludes them —
+log(478k/20k) is about 3.2, nowhere near zero — so with the distinctive word matching nothing,
+"what" and "is" carried unrelated cards on their own. Both doors now filter through ONE shared
+`_STOP` list, imported not copied, with a test asserting the resident door reaches for it.
+Verified on the wire, not asserted: `Mahavira` 0, `what is Mahavira` 0, `what is Zoroaster` ->
+zoroaster, `what is grace` -> Amazing Grace.
+
+**A false alarm, retracted.** The first report said "251 slug_title regressions escaped
+repair_cards.py". Wrong: that was the SAME three classics cards counted repeatedly through this
+bug, and their `§` slugs are ones `render_title` DELIBERATELY DECLINED rather than invent a section
+number. After the fix: 6.
+
+**A second false alarm, retracted.** The first report said "ERRORS 189 — always a defect". 188 of
+those were HTTP 429 — the rate limiter working as designed, a deliberate refusal, not an engine
+failure. Real engine errors across both runs: ZERO. (3 client-side TLS handshake timeouts in the
+second run are ours, not the box's.)
+
+**Remaining, identified but NOT fixed:** 33 off_topic. Part are false positives of the assay's own
+substring test — `Uruk` -> "ISBE: Erech" is the correct scholarly answer, `Maat` -> "Ma'at" fails on
+an apostrophe. The genuine residue is the any-word FALLBACK in `corpus_db.search()` matching a
+query's COMMON word when its distinctive one is absent (`War Scroll` -> "The Black Phalanx ... War
+of Independence"). Fix when taken up: require the highest-IDF term to participate in the fallback.
+
+**106 GAPS — the want list's raw material.** Most striking: all four Vedas (Rigveda, Samaveda,
+Yajurveda, Atharvaveda), Qumran, Enuma Elish, Orphism, Gathas, Mahavira, Tripitaka, Mohism,
+Samkhya, Nyaya, Vaisheshika, Herophilus, Erasistratus, Berossus, Melqart, Meroitic, Ahiqar.
+By domain, the emptiest: india_pre1ad (29), mesopotamia_religion (18), persia_zoroastrian (16).
+
+---
+
+## 2026-08-01 — P1 pressure test: THE FILE-HANDLE LEAK (an outage we caused, found, and closed)
+
+**What happened, measured.** A deliberate read-ceiling burst against `narrowhighway.com` —
+250 × `GET /search?q=grace&limit=1` — returned **249 × 200, 1 × 000 (client timeout), 0 × 429**,
+confirming the split rate limit from R4 holds (the old shared cap refused at 121). The same run
+left the engine broken: a following burst of 60 × `POST /verify` returned **60 × 500**, zero
+successes.
+
+**Cause, from the box, not guessed.** `journalctl` (readable only because the `[500]` stderr
+logger was added earlier the same night):
+
+    OSError: [Errno 24] Too many open files:
+      '/home/nh/concordance-2/src/concordance/receipts.py'
+
+`/proc/<pid>/fd` on nh-com-2: **1023 of 1024 held** — 255 × `dictionary.db`, 255 × `books.db`,
+254 × `world.db`, 254 × `word.db`. nh-org, on lighter traffic, was at 63 and climbing (97 twenty
+minutes later). Nothing was wrong with verification: Python could not open `receipts.py` to
+import it. **Reading knocked out proving.**
+
+**The arithmetic.** `ThreadingHTTPServer` opens a thread per connection; `corpus_db` opened a
+connection per thread per shard; nothing ever closed one. Unbounded by construction — only the
+traffic rate decided the hour. Each half was separately correct: per-thread connections were
+themselves the 2026-07-29 fix for `database is locked` and for `fetchone()` returning None on a
+row that exists. The defect was in their product, which no review of either half would catch.
+
+**Repair, at the source.**
+* `corpus_db.close_this_thread()` — a thread closes what it opened; called from
+  `Handler.handle`'s `finally`, once per CONNECTION so keep-alive still reuses an open shard.
+* `corpus_db.open_connections()` → `{open, peak, shards_thawed}`, **reported by `GET /health`**.
+  This leak was invisible until the process could not open a file; it is now a number anyone
+  can watch.
+* `freeze()` carried the comment *"Nothing leaks: a connection dies with its thread"* — that
+  sentence was the bug, written a second time, and it orphaned every other thread's handle.
+  Corrected, and its close now decrements the count.
+* `LimitNOFILE=65536` on both units — **headroom, explicitly not the cure**. A leak refills.
+
+**Proof the test is real.** `tests/test_shard_handles.py` runs over a real socket (the close
+lives in the handler; a unit test would pass while the wire leaked) and asserts `peak > 0` before
+any verdict — its first version passed having opened ZERO connections, because the suite runs
+with no shards configured. With the close disabled: **60 handles after 60 reads**. Restored: **≤4**.
+
+**Service restored** 15:47Z by restarting nh-com-2 — fds 1023 → **4**; `POST /verify` answered
+`{"verdict": "HOLDS"}`. The fix itself ships with this deploy.
+
+**Not yet done:** the MCP surface fuzz, the last deferred part of P1.
+
+---
+
 ## 2026-07-29
 
 **PUNCH LIST item 1 · THE COMMONS · C1a — the member shelf. DONE, live.**

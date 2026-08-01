@@ -133,5 +133,138 @@ def test_the_wire_works():
     assert st3 == 400, "a wordless want must be refused on the wire too"
 
 
+def test_the_agent_plane_stays_separate_until_the_next_human_seconds():
+    """Matt: "that plane stays separate and must be approved by a human. We ask the next human
+    that looks at it." An agent's want is held apart on the desk; the NEXT HUMAN asking for the
+    same thing seconds it onto the human plane — ambient approval, no queue, no path around."""
+    from concordance import wants
+    a = wants.open_want(query="the antikythera mechanism papers", plane="agent")
+    assert a["ok"] and a["plane"] == "agent"
+    desk_human = wants.listing(plane="human")["wants"]
+    assert not any(w["id"] == a["id"] for w in desk_human), "an agent want leaked onto the human desk"
+    assert any(w["id"] == a["id"] for w in wants.listing(plane="agent")["wants"])
+    # the next human looks, and asks for the same thing
+    b = wants.open_want(query="The Antikythera Mechanism papers!", plane="human")
+    assert b["id"] == a["id"] and b.get("seconded_agent_want") is True
+    w = wants.fold()[a["id"]]
+    assert w["plane"] == "human" and w["asks"] == 2, "the seconding did not promote the plane"
+    # a second agent asking does NOT promote — only a human's look counts
+    c = wants.open_want(query="the venerable bede's reckoning of time", plane="agent")
+    d = wants.open_want(query="the venerable bede's reckoning of time", plane="agent")
+    assert d["id"] == c["id"] and wants.fold()[c["id"]]["plane"] == "agent"
+    assert not wants.open_want(query="anything at all", plane="martian")["ok"]
+
+
+def test_the_agent_tools_work_over_mcp_and_the_gate_holds():
+    """The three tools on the wire — and the covenant in their behavior: want_open lands on the
+    agent plane, want_offer lands quarantined with the agent's shaft-tag, and nothing here can
+    mint a card."""
+    import json
+    from concordance import mcp, wants
+    from concordance.config import EngineConfig
+    sec = EngineConfig("secular")
+
+    def call(name, arguments):
+        r = mcp.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                        "params": {"name": name, "arguments": arguments}}, sec, {})
+        return json.loads(r["result"]["content"][0]["text"])
+
+    o = call("want_open", {"query": "the mcp plane test want"})
+    assert o["ok"] and o["plane"] == "agent"
+    lst = call("wants_list", {"plane": "agent"})
+    assert any(w["id"] == o["id"] for w in lst["wants"])
+    off = call("want_offer", {"want_id": o["id"], "label": "A PD source", "url": "https://example.org/pd",
+                              "snippet": "found, not written", "agent": "claude"})
+    assert off["ok"]
+    cell = wants.fold()[o["id"]]["options"][0]
+    assert cell["miner"] == "agent:claude", "the agent's shaft-tag is missing"
+    from concordance import corpus
+    assert corpus.get_card("card_acq_" + o["id"].removeprefix("want_") + "_1") is None,         "an MCP offer produced a card without a human choosing — the comb was bypassed"
+
+
+# ── PRESSURE TEST FINDINGS, 2026-08-01 — each of these was a real defect, found by pressure ──
+
+def test_an_over_long_ask_is_refused_not_silently_truncated():
+    """8,000 characters used to be cut to 300 and stored as if the person had written that.
+    Storing something they did not say and calling it their want is a small lie; the honest
+    answer names the limit."""
+    from concordance import wants
+    r = wants.open_want(query="A" * 8000)
+    assert not r["ok"] and "300" in r["error"]
+    assert not wants.open_want(query="a fine ask", note="N" * 900)["ok"]
+    assert wants.open_want(query="A" * 300)["ok"], "exactly at the limit must still pass"
+
+
+def test_concurrent_asks_for_one_miss_are_all_counted():
+    """40 concurrent asks were recorded as 32: two threads both saw "no such want", both
+    appended an open, and the second open RESET the count. Demand steers acquisition, so a lost
+    ask is a lost vote. Fixed twice over — the decision is atomic now, AND the fold treats a
+    double-open as an ask so ledgers already written this way heal themselves."""
+    import threading
+    from concordance import wants
+    def ask(_):
+        wants.open_want(query="the one contested want")
+    ts = [threading.Thread(target=ask, args=(i,)) for i in range(40)]
+    [t.start() for t in ts]
+    [t.join() for t in ts]
+    cells = [w for w in wants.fold().values() if w["query"] == "the one contested want"]
+    assert len(cells) == 1, f"{len(cells)} cells for one miss"
+    assert cells[0]["asks"] == 40, f"lost {40 - cells[0]['asks']} ask(s) to the race"
+
+
+def test_the_fold_heals_a_ledger_that_already_has_double_opens():
+    """The self-healing half: an old ledger written before the lock still folds correctly,
+    because the events are the source and the fold reads them honestly."""
+    import json
+    import time
+    from concordance import wants
+    p = wants._path()
+    p.parent.mkdir(parents=True, exist_ok=True)
+    wid = wants._want_id("missing", "an old racy want")
+    with open(p, "a", encoding="utf-8") as fh:
+        for _ in range(3):     # three opens for one id — the shape the race produced
+            fh.write(json.dumps({"ev": "open", "id": wid, "kind": "missing",
+                                 "query": "an old racy want", "card_id": "", "note": "",
+                                 "plane": "human", "at": int(time.time())}) + "\n")
+    w = wants.fold()[wid]
+    assert w["asks"] == 3, "the fold discarded asks from a double-open ledger"
+
+
+def test_a_500_leaves_a_trace_for_the_operator_and_nothing_for_the_caller():
+    """/wants answered 500 on one process while the identical code served 200 on the other, and
+    the log said NOTHING — a restart healed it and took the evidence with it. The caller still
+    learns only 'internal error'; the operator now gets the path and the traceback."""
+    src = (ROOT / "src" / "concordance" / "web" / "api.py").read_text(encoding="utf-8")
+    assert '"[500] "' in src, "the catch-all still swallows the failure"
+    assert "_tb.format_exc()" in src and "_sys.stderr" in src
+    i = src.index('"[500] "')
+    tail = src[i:i + 400]
+    assert "self._json(500, {\"error\": \"internal error\"})" in tail,         "the caller must still learn nothing beyond 'internal error'"
+
+
+def test_the_desk_shows_what_is_still_wanted():
+    """A refused want sat on the live desiderata desk beside the live ones, minutes after `drop`
+    shipped — the drop recorded perfectly and the DESK was the liar. Resolved wants are not
+    hidden, only one explicit state= away, with the reason and the name attached."""
+    from concordance import wants
+    live = wants.open_want(query="a want still wanted")
+    gone = wants.open_want(query="a want a steward refused")
+    done = wants.open_want(query="a want already filled")
+    wants.drop_want(gone["id"], "not something this library should hold", "Matt Harris")
+    wants.close_want(done["id"], "card_made", "Matt Harris")
+
+    desk = {w["id"] for w in wants.listing()["wants"]}
+    assert live["id"] in desk
+    assert gone["id"] not in desk, "a refused want is still on the desk"
+    assert done["id"] not in desk, "a filled want is still on the desk"
+
+    # and nothing is hidden — asking names it, with the record intact
+    dropped = wants.listing(state="dropped")["wants"]
+    assert [w["id"] for w in dropped] == [gone["id"]]
+    assert dropped[0]["reason"] == "not something this library should hold"
+    assert dropped[0]["closed_by"] == "Matt Harris"
+    assert [w["id"] for w in wants.listing(state="closed")["wants"]] == [done["id"]]
+
+
 if __name__ == "__main__":
     sys.exit(int(pytest.main([__file__, "-q"])))

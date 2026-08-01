@@ -57,7 +57,45 @@ def _suite_is_whole() -> int:
     return 1 if (missing or extra) else 0
 
 
+# THE GATE RUNS ALONE — a lock, because resolve failed three times in one night.
+#
+# 2026-08-01: a heavy job was started beside a running gate three separate times. Each time the
+# suite slowed from ~14 minutes to 50+, and each time the SAME wire test (test_no_stale_reads)
+# failed on a 30-second localhost timeout — a false failure costing a full re-run to disprove.
+# The test is right; it measures the wire. The DISCIPLINE was what kept breaking, so it stops
+# being a discipline and becomes a mechanism.
+_LOCK = os.path.join(ROOT, ".gate.lock")
+
+
+def _take_the_floor() -> bool:
+    """True if we hold the floor. A stale lock (dead pid) is reclaimed, said out loud."""
+    if os.path.exists(_LOCK):
+        try:
+            with open(_LOCK, encoding="utf-8") as fh:
+                pid = int((fh.read().split() or ["0"])[0])
+        except (OSError, ValueError):
+            pid = 0
+        alive = False
+        if pid:
+            try:
+                os.kill(pid, 0)                     # signal 0: does that process exist?
+                alive = True
+            except OSError:
+                alive = False
+        if alive:
+            print(f"ANOTHER HEAVY JOB HOLDS THE FLOOR (pid {pid}). The gate runs alone — "
+                  f"contention has produced three false failures. Wait, or remove {_LOCK} "
+                  f"if you know it is dead.", flush=True)
+            return False
+        print(f"(reclaiming a stale lock from pid {pid or '?'})", flush=True)
+    with open(_LOCK, "w", encoding="utf-8") as fh:
+        fh.write(str(os.getpid()) + " check.py\n")
+    return True
+
+
 def main() -> int:
+    if not _take_the_floor():
+        return 2
     rc = 0
     # 0. The suite must be whole before its result means anything.
     rc |= _suite_is_whole()

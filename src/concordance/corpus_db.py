@@ -45,22 +45,160 @@ _LOCK = threading.Lock()
 _OPEN: Dict[str, str] = {}                    # shard name -> path (a thawed shard)
 _TL = threading.local()                       # per-thread: {shard name: connection}
 
+# ...AND A CONNECTION PER THREAD MUST BE CLOSED WHEN THE THREAD ENDS, or the fix above becomes a
+# worse bug than the one it cured.
+#
+# Found by pressure test 2026-08-01, and it is the most serious defect this project has had.
+# 250 rapid, innocent reads of /search took the secular engine's file-descriptor table to 1023 of
+# 1024, and then EVERY /verify answered 500 — not because verification broke, but because Python
+# could no longer open `receipts.py` to import it. A burst of reading knocked out proving.
+#
+# The arithmetic is the whole story: ThreadingHTTPServer opens a THREAD PER CONNECTION, this module
+# opens a CONNECTION PER THREAD PER SHARD, and nothing ever closed one. Thread-per-request times
+# connection-per-thread is unbounded by construction; the only question was how many minutes of
+# traffic it took. 255 handles each on dictionary.db and books.db, 254 each on world.db and word.db.
+#
+# Raising LimitNOFILE would only have bought time — a leak refills. So the count is now BOUNDED at
+# the source (a thread closes what it opened, in Handler.handle's finally) and, because a number
+# nobody can see is a number that climbs again, it is COUNTABLE: `open_connections()` is reported by
+# GET /health, so the next climb is visible before it is fatal.
+#
+# A REGISTRY OF THREADS, NOT A COUNTER OF CONNECTIONS — and it took two wrong instruments to get
+# here, both caught by tests rather than by reasoning.
+#
+#   1st: an integer, incremented on open and decremented on close. It read 16 open when 0 files
+#        were held, because a thread that touched a shard and exited without closing had its
+#        connection reclaimed by the collector, and a hand-kept integer never learns about a
+#        collection. It drifts UP and never comes back down. A number on /health that drifts is
+#        worse than no number — it cries wolf, and the next real climb gets ignored.
+#   2nd: a weakref.WeakSet, so entries would vanish with the object. `sqlite3.Connection` cannot be
+#        weak-referenced: every shard read raised TypeError. tests/test_shard_concurrency.py failed
+#        12 of 12 readers within seconds of the change. I had assumed, not checked.
+#
+# What is registered instead is the THREAD and its cache. Liveness is then a fact we can ask the
+# runtime about (`Thread.is_alive()`), not a number we maintain and hope is right — so the count
+# cannot drift in either direction.
+#
+# And the reaper does real work rather than only measuring: a dead thread's handles are CLOSED, not
+# merely forgotten. `close_this_thread()` is the fast path for the HTTP handler; this is the
+# backstop for every other thread that ever touches a shard, which is what the original leak was.
+_LIVE_LOCK = threading.Lock()
+_CACHES: Dict[int, tuple] = {}                # thread ident -> (thread, {shard: connection})
+_PEAK = 0                                     # the high-water mark since boot — what nearly happened
+_OPENED = 0                                   # LIFETIME opens; monotonic, never decremented
+# `_OPENED` answers a different question from `open`/`peak`, and conflating them cost a gate run.
+# `open` is a gauge (how many now) and `peak` is its high-water mark — both say what the WHOLE
+# PROCESS holds, so neither can tell you whether one particular burst did any work: a test whose
+# burst opened 5 connections could not push a peak another test had already driven to 16, and the
+# coverage guard rightly refused the verdict. A monotonic total can. For an operator it is also the
+# churn rate — opens per hour is what says whether keep-alive is working.
+
+
+def _reap_dead_threads() -> int:
+    """Close shard handles left behind by threads that have exited. Caller holds _LIVE_LOCK."""
+    closed = 0
+    for ident, (t, cache) in list(_CACHES.items()):
+        if t.is_alive():
+            continue
+        for c in list(cache.values()):
+            try:
+                c.close()
+                closed += 1
+            except Exception:  # noqa: BLE001 — one bad close must not strand the rest
+                pass
+        cache.clear()
+        _CACHES.pop(ident, None)
+    return closed
+
+
+def _live_count() -> int:
+    return sum(len(cache) for _t, cache in _CACHES.values())
+
+
+def open_connections() -> Dict[str, int]:
+    """How many shard connections are open right now, and the worst it has been.
+
+    Reaps dead threads' handles first, so the number is current rather than remembered. The leak
+    that motivated this was invisible until the process could not open a file; this makes it a
+    number on /health instead of a 500 with no explanation.
+    """
+    with _LIVE_LOCK:
+        reaped = _reap_dead_threads()
+        return {"open": _live_count(), "peak": _PEAK, "shards_thawed": len(_OPEN),
+                "reaped": reaped, "opened_total": _OPENED}
+
 
 def _conn(name: str) -> Optional[sqlite3.Connection]:
     """This thread's connection to a thawed shard, opened on first use."""
+    global _PEAK, _OPENED
     path = _OPEN.get(name)
     if not path:
         return None
     cache = getattr(_TL, "conns", None)
     if cache is None:
         cache = _TL.conns = {}
+        with _LIVE_LOCK:
+            t = threading.current_thread()
+            _CACHES[t.ident] = (t, cache)
+    # KEYED BY NAME **AND PATH**. Keying on the name alone means a shard re-registered at a new
+    # file — refrozen and rethawed elsewhere, or rebuilt and shipped to a different directory —
+    # keeps being served from the OLD file by every thread that already had it open, silently and
+    # forever. Found 2026-08-01 when two test modules each registered a shard called `core` at
+    # different paths and the second was served the first one's cards. On a live box the same shape
+    # is a reader getting a stale corpus with no error anywhere, which is the failure this module
+    # exists to prevent: a library confidently handing over the wrong thing.
+    paths = getattr(_TL, "paths", None)
+    if paths is None:
+        paths = _TL.paths = {}
+    if paths.get(name) != path and name in cache:
+        try:
+            cache.pop(name).close()
+        except Exception:  # noqa: BLE001
+            pass
+    paths[name] = path
     c = cache.get(name)
     if c is None:
         try:
             c = cache[name] = _open_db(path)
         except sqlite3.Error:
             return None
+        with _LIVE_LOCK:
+            # Reap opportunistically: a process that never serves /health must still self-heal, and
+            # the registry is where dead threads pile up. Cheap — it walks idents, not files.
+            if len(_CACHES) > 64:
+                _reap_dead_threads()
+            _OPENED += 1
+            _PEAK = max(_PEAK, _live_count())
     return c
+
+
+def close_this_thread() -> int:
+    """Close every shard connection THIS thread opened. Returns how many were closed.
+
+    Called from the HTTP handler's `finally` when a connection is finished — once per client
+    connection, not once per request, so keep-alive still reuses an open shard. Safe to call on a
+    thread that never opened one (returns 0), and safe to call twice.
+    """
+    cache = getattr(_TL, "conns", None)
+    if not cache:
+        return 0
+    n = 0
+    for c in list(cache.values()):
+        try:
+            c.close()
+            n += 1
+        except Exception:  # noqa: BLE001 — a close that fails must not strand the rest
+            pass
+    cache.clear()
+    # Drop the thread-local entirely, not just its contents: `_conn` registers a thread in _CACHES
+    # only when it creates the cache, so a thread that closed and then read again would rebuild an
+    # UNREGISTERED cache — invisible to the reaper and to /health, which is the original leak wearing
+    # a different hat. Clearing the local forces re-registration on the next read.
+    _TL.conns = None
+    _TL.paths = None
+    with _LIVE_LOCK:
+        _CACHES.pop(threading.get_ident(), None)   # this thread holds nothing now
+    return n
 
 
 def _conns() -> List[tuple]:
@@ -167,16 +305,29 @@ def unfreeze(*names: str) -> List[str]:
 
 
 def freeze(*names: str) -> List[str]:
-    """Re-freeze (close) shards to release their file handles / mmap. `core` cannot be frozen."""
+    """Re-freeze (close) shards to release their file handles / mmap. `core` cannot be frozen.
+
+    THIS FUNCTION USED TO CLAIM "nothing leaks: a connection dies with its thread." That sentence
+    was the bug. Freezing drops the shard from `_OPEN` and closes the CALLING thread's handle; every
+    other thread's handle to the same file is simply orphaned — unreachable through `_OPEN`, still
+    holding a descriptor. Under thread-per-connection that is one leaked handle per live thread per
+    freeze, on top of the leak fixed in `close_this_thread`. Both were the same false belief written
+    twice, and on 2026-08-01 they took the engine to 1023 of 1024 descriptors.
+
+    A thread's handles are now released by `close_this_thread()` when its connection ends, so the
+    orphans here are bounded and short-lived rather than permanent — and the count is decremented so
+    `open_connections()` stays true.
+    """
     with _LOCK:
         for name in names:
             if name != CORE and name in _OPEN:
                 _OPEN.pop(name, None)
-                # Close the calling thread's handle now; other threads drop theirs when they next
-                # look and find the shard unregistered. Nothing leaks: a connection dies with its
-                # thread, and re-thawing simply reopens.
                 try:
-                    (getattr(_TL, "conns", None) or {}).pop(name).close()
+                    c = (getattr(_TL, "conns", None) or {}).pop(name)
+                except Exception:  # noqa: BLE001 — this thread may never have opened it
+                    continue
+                try:
+                    c.close()
                 except Exception:  # noqa: BLE001
                     pass
         return list(_OPEN)
@@ -225,28 +376,80 @@ def thawed() -> List[str]:
     return list(_OPEN)
 
 
-def _match(query: str) -> str:
+# Words that carry no subject. A query is what remains after these are removed.
+_STOP = frozenset("""
+a an the of and or to in on at by for from with as is are was were be been being am do does did
+this that these those there here it its it's his her hers their theirs our ours your yours my mine
+me i you he she they we us him them who whom whose which what where when why how whether if then
+than so such about into over under again more most other some any all each own same very can could
+should would will shall may might must have has had not no nor only just also too both few
+""".split())
+
+
+def _match(query: str, mode: str = "all") -> str:
+    """Build the FTS expression. `mode="all"` requires every content word; `"any"` is the fallback.
+
+    THE BUG THIS FIXES — found by the 1,000-probe ancient assay, 2026-08-01, and it is a doctrinal
+    failure, not a ranking nicety:
+
+        q="Mahavira"          -> 0 results, and the want_hint offers to record the miss.  CORRECT.
+        q="what is Mahavira"  -> 3 results: Aurelius Meditations 8.51, 8.10, Boethius §boe_03_10.
+
+    The old expression was `" OR ".join(every token)`, stopwords included, so a natural-language
+    question matched any card containing "what" or "is". Three classics cards surfaced across ~250
+    unrelated queries — Sumerian cities, Chinese philosophers, Vedic texts — because they happen to
+    contain common English words.
+
+    THE HARM IS NOT THAT THE RANKING IS POOR. It is that a MISS IS RENDERED AS AN ANSWER. The
+    library says "here is what I have" when the truth is "I do not have that", and because results
+    came back, `want_hint` never fires and the miss is never recorded. The shepherd loop is fed by
+    misses; this silently starved it. It is the same error as sealing our own failure as a verdict:
+    a gap is a third state, and it must be allowed to say so.
+
+    A question made only of stopwords ("what is it") returns "" — no subject was asked about, and
+    matching everything is not an answer.
+    """
     terms = [t.lower() for t in _WORD.findall(query or "")]
-    return " OR ".join(f'"{t}"' for t in terms)
+    content = [t for t in terms if t not in _STOP]
+    if not content:
+        return ""
+    join = " AND " if mode == "all" else " OR "
+    return join.join(f'"{t}"' for t in content)
 
 
 def search(query: str, limit: int = 25, include_witness: bool = True) -> List[dict]:
     """Search across the THAWED shards (unfreeze more first to widen the horizon). FTS5 bm25 ranked."""
     _ensure_core()
-    m = _match(query)
-    if not m:
-        return []
     where = "where fts match ?" + ("" if include_witness else " and c.surface != 'witness'")
     sql = f"select bm25(fts) as s, c.json from fts join cards c on c.id = fts.id {where} order by s limit ?"
+
+    def _run(expr: str) -> List[tuple]:
+        got: List[tuple] = []
+        for name, conn in _conns():
+            try:
+                rows = conn.execute(sql, (expr, int(limit))).fetchall()
+                if rows:
+                    _touch(name)
+                got.extend(rows)
+            except sqlite3.Error:
+                continue
+        return got
+
+    # ALL the content words first, ANY of them only as a fallback. Precision before recall, because
+    # a wrong answer costs more than no answer: an empty result tells the truth and offers to record
+    # the want, while a loose match buries the gap under something irrelevant.
     hits: List[tuple] = []
-    for name, conn in _conns():
-        try:
-            rows = conn.execute(sql, (m, int(limit))).fetchall()
-            if rows:
-                _touch(name)
-            hits.extend(rows)
-        except sqlite3.Error:
-            continue
+    m = _match(query, "all")
+    if m:
+        hits = _run(m)
+    if not hits:
+        m_any = _match(query, "any")
+        # Only worth a second pass when there were several content words to loosen.
+        if m_any and m_any != m:
+            hits = _run(m_any)
+    if not hits:
+        return []
+
     hits.sort(key=lambda r: r[0])                      # merge shards by bm25 (lower = better)
     out = []
     for _s, blob in hits[:int(limit)]:

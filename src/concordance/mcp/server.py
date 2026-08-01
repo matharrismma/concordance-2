@@ -329,6 +329,37 @@ def _secular_tools() -> List[dict]:
                                                         "description": "your public key"},
              "extra": {"type": "string"}},
              "required": ["action", "target_id", "actor"]}},
+        {"name": "want_open",
+         "description": ("Ask the library to ACQUIRE something it does not hold (kind=missing, "
+                         "give query) or to EXPAND a thin card (kind=expand, give card_id). Opens "
+                         "a want on the AGENT PLANE — held separate on the desk until the next "
+                         "human who looks seconds it by asking for the same thing. Call this only "
+                         "when your principal genuinely needs what the keeping lacks; the same "
+                         "miss asked twice is one want asked twice. No requester identity is "
+                         "stored; queries are scrubbed before storage."),
+         "inputSchema": {"type": "object", "properties": {
+             "query": {"type": "string"}, "kind": {"type": "string"},
+             "card_id": {"type": "string"}, "note": {"type": "string"}},
+             "required": []}},
+        {"name": "wants_list",
+         "description": ("The library's desiderata desk — open wants, sorted by demand, agent "
+                         "plane marked and separate. Read it to find gaps you could dig for."),
+         "inputSchema": {"type": "object", "properties": {
+             "state": {"type": "string"}, "plane": {"type": "string"}},
+             "required": []}},
+        {"name": "want_offer",
+         "description": ("Return to the comb with a FOUND source for an open want: label + url + "
+                         "snippet, attributed. You are a forager, not an author — offer only "
+                         "public-domain / openly-licensed sources you actually located, never "
+                         "generated text. The offer lands as a QUARANTINED option cell tagged "
+                         "with your agent label; a NAMED HUMAN chooses, and only then is a card "
+                         "created. There is no path around the comb."),
+         "inputSchema": {"type": "object", "properties": {
+             "want_id": {"type": "string"}, "label": {"type": "string"},
+             "url": {"type": "string"}, "snippet": {"type": "string"},
+             "domain": {"type": "string"}, "agent": {"type": "string",
+                 "description": "your self-declared name, e.g. 'claude' — the shaft-tag a steward can cut a branch by"}},
+             "required": ["want_id", "label"]}},
         {"name": "report",
          "description": ("Report a community item (group_contribution, mesh_message, door_note) "
                          "to the moderation floor. One report is a claim, never a verdict; at "
@@ -631,10 +662,27 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         from .. import audit as _audit  # the document-level coverage report
         return _audit.audit(args.get("text", ""), config, seal=args.get("seal", True) is not False)
     if name == "search":
-        res = corpus.search(args.get("query", ""), limit=int(args.get("limit", 10)))
-        return {"count": len(res), "results": [
+        # Same announced ceiling as GET /search — one rule for both doors, and the agent is TOLD
+        # when it applies rather than left to assume it saw everything. (2026-08-01: this door
+        # served 1.67 MB / 5.1 s for a 200-byte request asking limit=10^9.)
+        from ..web.api import bounded_limit
+        _limit, _capped = bounded_limit(args.get("limit"), 10)
+        res = corpus.search(args.get("query", ""), limit=_limit)
+        out = {"count": len(res), "results": [
             {"id": c.get("id"), "title": c.get("title"), "shelf": c.get("shelf"),
              "snippet": (c.get("body", "") or "")[:200]} for c in res]}
+        if _capped:
+            out["limit_capped"] = _capped
+        if not res:
+            # THE MISS TEACHES THE ASK — the library grows by its misses, and an agent's miss
+            # counts when a person genuinely needed the answer. The hint is an offer, never an
+            # auto-log: the agent must still CALL, exactly as a human must still click.
+            out["want_hint"] = ("Nothing in the keeping. If your principal genuinely needs this, "
+                                "call want_open (agent plane; the next human to look may second "
+                                "it). If you can LOCATE a public-domain source yourself, call "
+                                "want_offer on an open want — a named human chooses; only then "
+                                "is a card created.")
+        return out
     if name == "seal_fetch":
         rec = cas.fetch(args.get("hash", ""))
         return rec if rec is not None else {"error": "seal not found"}
@@ -724,6 +772,24 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         from .. import moderation as _mod
         return _mod.signable(str(args.get("action") or ""), str(args.get("target_id") or ""),
                              str(args.get("actor") or ""), extra=str(args.get("extra") or ""))
+    if name == "want_open":
+        from .. import wants as _wants
+        return _wants.open_want(query=str(args.get("query") or ""),
+                                kind=str(args.get("kind") or "missing"),
+                                card_id=str(args.get("card_id") or ""),
+                                note=str(args.get("note") or ""), plane="agent")
+    if name == "wants_list":
+        from .. import wants as _wants
+        return _wants.listing(state=(str(args.get("state") or "") or None),
+                              plane=(str(args.get("plane") or "") or None))
+    if name == "want_offer":
+        import time as _t
+        from .. import wants as _wants
+        return _wants.add_option(str(args.get("want_id") or ""), {
+            "label": str(args.get("label") or ""), "url": str(args.get("url") or ""),
+            "snippet": str(args.get("snippet") or ""), "domain": str(args.get("domain") or ""),
+            "miner": "agent:" + (str(args.get("agent") or "unnamed")[:24]),
+            "run": _t.strftime("mcp_%Y%m%d", _t.gmtime())})
     if name == "report":
         from .. import moderation as _mod
         if args.get("private_key"):

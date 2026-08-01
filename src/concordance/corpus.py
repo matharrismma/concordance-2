@@ -203,7 +203,21 @@ class Corpus:
         # /search route and /ask already coerce before calling in, but the MCP search tool does not)
         # — coerce once, here, so every caller is safe regardless of what reaches this function.
         query = str(query) if query else ""
-        query_tokens = set(_tokens(query))
+        # STOPWORDS ARE NOT A SUBJECT — the same rule as the shard matcher, from the same list, so
+        # the two doors can never drift apart.
+        #
+        # IDF alone does NOT solve this, which is why the bug survived here after the shard side was
+        # fixed. `_idf` is log(n / (df + 1)): a word in 20k of 478k cards still scores ~3.2, small
+        # next to a rare term but very far from zero. So when the DISTINCTIVE word matches nothing
+        # — "what is Mahavira", and we hold no Mahavira — the only tokens left contributing are
+        # "what" and "is", cards containing them score above zero, and the reader is handed Marcus
+        # Aurelius as though it were an answer. Measured live 2026-08-01 on the 1,000-probe assay.
+        #
+        # A gap must be allowed to report itself; a miss is what feeds the want list. Dropping the
+        # stopwords before candidates or scoring means nothing can be retrieved on their strength
+        # alone. A query made only of stopwords asks about nothing and returns nothing.
+        from .corpus_db import _STOP          # one list, both matchers (corpus_db imports nothing here)
+        query_tokens = {t for t in _tokens(query) if t not in _STOP}
         if not query_tokens:
             return []
         idf = self._idf(query_tokens)

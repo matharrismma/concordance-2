@@ -10,6 +10,12 @@ Environment=PYTHONPATH=/home/nh/concordance-2/src
 Environment=CONCORDANCE_DATA_DIR=/home/nh/concordance-2/data
 Environment=CONCORDANCE_STRONGS_DIR=/home/nh/concordance-2/data/strongs
 ExecStart=/home/nh/concordance-2/.venv/bin/python -m concordance serve --host 127.0.0.1 --port 8001 --surface witness
+# HEADROOM, NOT A FIX. On 2026-08-01 a 250-request read burst took this process to 1023 of
+# 1024 descriptors and every POST /verify then answered 500 — Python could not open receipts.py to
+# import it. The CAUSE was a shard connection per thread that nobody closed, and that is fixed at
+# the source (corpus_db.close_this_thread, called from the handler's finally). This limit is only
+# so a legitimate traffic spike has room; raising it alone would have set a later date, not a cure.
+LimitNOFILE=65536
 Restart=on-failure
 RestartSec=3
 

@@ -146,6 +146,37 @@ def _notfound_page(title: str, body_html: str) -> str:
 #   cite_urls onto .org before this constant existed.
 # Old sealed records carry .com cite_urls INSIDE their hashed content — unrewritable by
 # construction, and still resolving (every door serves /s/). New records name their keeper.
+# THE SEARCH CEILING — announced, never silent.
+#
+# Measured on the live secular host, 2026-08-01: `limit=1,000,000,000` returned 5,007 results in
+# 1.67 MB and 5.1 seconds of server CPU, for a 200-byte request. The read rate limit is deliberately
+# generous (R4 — we asked agents to use this surface), so nothing else stood between a cheap request
+# and an expensive answer. Four other routes in this file already clamp (500, 50, 50, 25); the two
+# BUSIEST doors — GET /search and the MCP `search` tool — were the two with no ceiling at all. That
+# was an oversight, not a decision.
+#
+# 200 is eight times the default and more than any reader needs: we refuse abuse, not use. And when
+# the ceiling is applied the answer SAYS SO (`limit_capped`), because a cap that does not report
+# itself reads as "that was all of them" — the same lie as a silently truncated measurement.
+SEARCH_MAX = 200
+
+
+def bounded_limit(raw, default: int):
+    """(limit, capped-notice-or-None) — clamp a caller's `limit` and hand back what to disclose."""
+    try:
+        asked = int(raw) if raw not in (None, "") else default
+    except (TypeError, ValueError):
+        asked = default
+    if asked < 1:
+        asked = default
+    served = min(asked, SEARCH_MAX)
+    if served < asked:
+        return served, {"asked": asked, "served": served,
+                        "why": f"this door serves at most {SEARCH_MAX} results per request; "
+                               f"page with a narrower query rather than a larger limit"}
+    return served, None
+
+
 CANONICAL_LIBRARY = "https://narrowhighway.com"
 CANONICAL_WITNESS = "https://narrowhighway.org"
 CANONICAL_HOST = CANONICAL_LIBRARY   # cards and pages of the library
@@ -496,9 +527,14 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
     if method == "GET" and path in ("/", "/health"):
         from ..validate import _HAS_JSONSCHEMA, schema_active
+        # `shards` reports open file handles because on 2026-08-01 they climbed to 1023 of 1024
+        # unseen, and the first symptom was every /verify answering 500. A leak that nobody can
+        # watch is a leak that comes back; now health says the number out loud.
+        from .. import corpus_db as _cdb
         return _ok({"ok": True, "version": __version__, "surface": surface,
                     "schema_active": schema_active(config.schema_path, config.skip_schema_validation),
-                    "jsonschema": _HAS_JSONSCHEMA})
+                    "jsonschema": _HAS_JSONSCHEMA,
+                    "shards": _cdb.open_connections()})
     if method == "GET" and path == "/identity":
         # identity = what the engine IS (the dry, efficient truth); persona = WHO it is to talk to
         # (the separate voice / movie-style experience). The card system stays pure efficiency.
@@ -1233,13 +1269,13 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         q = (query.get("q") or "").strip()
         if not q:
             return _err(400, "q required")
-        try:
-            limit = int(query.get("limit", "20"))
-        except (TypeError, ValueError):
-            limit = 20
+        limit, capped = bounded_limit(query.get("limit"), 20)
         res = corpus.search(q, limit=limit)  # shared keeping (both surfaces)
         telemetry.record("search", surface=surface, query=q, count=len(res))
-        return _ok({"query": q, "count": len(res), "results": [_card_brief(c) for c in res]})
+        out = {"query": q, "count": len(res), "results": [_card_brief(c) for c in res]}
+        if capped:
+            out["limit_capped"] = capped
+        return _ok(out)
 
     # Library / keeping tools (ported from 1.0, additive — over the same shared corpus).
     if method == "GET" and path == "/cards/stats":
@@ -1788,16 +1824,19 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import wants as _wants
         if not isinstance(body, dict):
             return _err(400, "query (kind=missing) or card_id (kind=expand) required")
+        # The HTTP door is the HUMAN plane (the button, the flag). Agents come through MCP,
+        # which opens on the agent plane — held separate until the next human seconds it.
         r = _wants.open_want(query=str(body.get("query") or ""),
                              kind=str(body.get("kind") or "missing"),
                              card_id=str(body.get("card_id") or ""),
-                             note=str(body.get("note") or ""))
+                             note=str(body.get("note") or ""), plane="human")
         return (_ok(r) if r.get("ok") else _err(400, r.get("error", "could not record the want")))
 
     if method == "GET" and path == "/wants":
         # The desiderata list, posted at the desk — a library is honest about its gaps.
         from .. import wants as _wants
-        return _ok(_wants.listing(state=(query.get("state") or None)))
+        return _ok(_wants.listing(state=(query.get("state") or None),
+                                  plane=(query.get("plane") or None)))
 
     if method == "POST" and path == "/report":
         # The moderation floor: anyone may report; nobody's report is a verdict. One report is a
@@ -2168,6 +2207,27 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
         server_version = "NarrowHighway"
         sys_version = ""
 
+        def handle(self) -> None:
+            """A thread returns what it borrowed.
+
+            This server is thread-per-connection and corpus_db is connection-per-thread-per-shard,
+            so without this `finally` the two multiply without bound. On 2026-08-01 a 250-request
+            read burst drove the secular engine to 1023 of 1024 file descriptors and every POST
+            /verify then answered 500 — Python could not open receipts.py to import it. Reading
+            knocked out proving. The close belongs here, at the one place every request path ends,
+            rather than in each route that happens to touch a shard.
+
+            Once per CONNECTION, not per request: keep-alive still reuses an open shard.
+            """
+            try:
+                super().handle()
+            finally:
+                try:
+                    from .. import corpus_db as _cdb
+                    _cdb.close_this_thread()
+                except Exception:  # noqa: BLE001 — cleanup must never raise into the socket loop
+                    pass
+
         def _json(self, status: int, payload: dict, extra: dict = None) -> None:
             """Every JSON answer here is computed fresh, so every one says so.
 
@@ -2255,12 +2315,27 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             return self._json(404, {"error": "not found"})
 
         def _do(self, method: str) -> None:
-            # Catch-all: any unhandled exception becomes a clean JSON 500, never a dropped
-            # connection with a stderr traceback (which would leak internals + defeat the
-            # Server-header hardening). The server also silences handle_error (see _QuietServer).
+            """Catch-all: any unhandled exception becomes a clean JSON 500 for the CALLER — never a
+            dropped connection or a leaked traceback (that would defeat the Server-header
+            hardening). But it is logged for US.
+
+            Found by pressure test 2026-08-01: /wants began answering 500 on the secular process
+            while the identical code served 200 on the witness, and the log said NOTHING. A
+            restart healed it and took the evidence with it. A failure that leaves no trace is
+            the same blindness as a log glob that silently reads one file — we could not tell
+            our own fault from the caller's. The caller still learns nothing; the operator now
+            learns everything.
+            """
             try:
                 self._do_inner(method)
             except Exception:
+                try:
+                    import sys as _sys
+                    import traceback as _tb
+                    print("[500] " + method + " " + str(self.path) + "\n" + _tb.format_exc(),
+                          file=_sys.stderr, flush=True)
+                except Exception:  # noqa: BLE001 — logging must never mask the 500 itself
+                    pass
                 try:
                     self._json(500, {"error": "internal error"})
                 except Exception:
