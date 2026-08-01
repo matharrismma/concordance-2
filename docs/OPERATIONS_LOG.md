@@ -523,3 +523,21 @@ rule: a badge is a record.
 This gives .org its job without waiting for traffic: **the witness keeps the testimony.** Every
 receipt any reader or agent ever cites now points at .org by name — reach that grows with every
 verification performed.
+
+## 2026-08-01 · THE LLM LEAVES THE DOORS — disabled on the box, moved to the ark
+
+Matt: *"Disable and move the LLM to the external hard drive."* Measured first: zero references to
+Ollama anywhere in the codebase; qwen2.5:3b + nomic-embed-text sat on the box for seven weeks,
+enabled and never once called. The serving path is deterministic by design — the Gate classifier
+is word-lists, the engine verifies and never generates — so there was never a seat for it at the
+doors.
+
+Executed with the ark rule: store tarred on the box (2.1 GB), pulled to
+`D:\NarrowHighway-Backups\ollama\2026-08-01-box-models\`, sha256 `010325dd…` verified byte-for-byte
+on both sides, THEN removed from the box. Service disabled and inactive; binary left in place (one
+command reverses). Box disk: 4 GB freed, 55 GB available.
+
+The model's future seat, assigned by standing doctrine, not improvised: **the MINT** — at build
+time, on the dedicated workshop machine, embeddings may PROPOSE connection candidates; the assay
+disposes; nothing generative ever serves. The fleet now matches its names: the DOORS serve, the
+MINT makes, the ARK remembers.
