@@ -1023,7 +1023,13 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     from . import compare as _compare
     # `get` rides along so the voice cards arrive FULL — the first live both-sides run presented
     # two voices with body None, because search hands back briefs and nothing rehydrated them.
-    _cmp = _compare.compare(text, search=corpus.search, get=corpus.get_card)
+    # `acquire` is the hand that goes OUT (Matt, 2026-08-02: "I asked it to find the information,
+    # and it couldn't do that"): a side the keeping cannot stand up is pulled and carded ON THE
+    # CALL — the slower answer — and kept, so the next asking never goes out.
+    from . import expand as _expand
+    _cmp = _compare.compare(
+        text, search=corpus.search, get=corpus.get_card,
+        acquire=lambda subject: _expand.pull_and_card(text, subject, config, plane="human"))
     if _cmp:
         out = {**base, "kind": "comparison", "generated": False,
                "message": _cmp["message"], "subjects": _cmp["subjects"],
@@ -1037,6 +1043,11 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                "sides": [{"subject": s["subject"],
                           "held_as_tradition": s["held_as_tradition"],
                           "voice": s.get("voice") or None,
+                          # a side standing on its own documents carries them — the passages ride
+                          # as briefs a reader can open, never silently dropped like the voice was
+                          **({"their_own_documents":
+                              [corpus._brief(c) for c in s["their_own_documents"]]}
+                             if s.get("their_own_documents") else {}),
                           "cards": [corpus._brief(c) for c in s["cards"]]}
                          for s in _cmp["sides"]],
                "missing": _cmp["missing"], "shared_ground": _cmp["shared_ground"],

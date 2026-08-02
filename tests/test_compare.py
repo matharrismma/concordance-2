@@ -167,3 +167,61 @@ def test_nothing_in_the_answer_is_authored():
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── the pull: a missing side stands on its own documents ─────────────────────────────────────
+SPAN = {"id": "card_span_naz1", "title": "PREAMBLE", "shelf": "sources",
+        "body": "the doctrine and experience of sanctification as a second work of grace",
+        "source": {"authority_tier": "primary_pd"}}
+
+
+def test_a_missing_side_stands_on_documents_already_held_without_going_out():
+    """SEARCH ONCE PER QUESTION (Matt, 2026-08-02). The Nazarene Manual's passages sat on the
+    sources shelf while the comparison said "not here" — having the thing and not presenting it
+    is a miss wearing a refusal. And when the keeping already holds the documents, the pull must
+    NOT run: going out for what we hold is the search-once rule broken from the other side."""
+    calls = []
+    def spy_acquire(subject):
+        calls.append(subject)
+        return {"cards": []}
+    r = compare.compare("Nazarene vs Wesleyan",
+                        search=_fake({"nazarene": [SPAN], "wesleyan": [VOICE]}),
+                        acquire=spy_acquire)
+    naz = [s for s in r["sides"] if s["subject"] == "Nazarene"][0]
+    assert naz["held_as_tradition"] is False, "documents are not a curated voice"
+    assert naz.get("their_own_documents"), "held passages were not presented"
+    assert calls == [], "the pull ran for a subject the keeping already holds"
+    assert r["want"] is None, "a side standing on documents does not also beg"
+    assert "its own documents" in r["message"]
+
+
+def test_a_truly_absent_side_is_pulled_on_the_call_and_the_want_dies():
+    """"I asked it to find the information, and it couldn't do that." Now it can: nothing held ->
+    acquire runs -> the passages stand the side up -> no want, because offering a person a chore
+    we just did is the want desk's rule inverted."""
+    def acquire(subject):
+        assert subject == "Nazarene"
+        return {"status": "carded", "cards": [SPAN]}
+    r = compare.compare("Nazarene vs Wesleyan",
+                        search=_fake({"nazarene": [], "wesleyan": [VOICE]}),
+                        acquire=acquire)
+    naz = [s for s in r["sides"] if s["subject"] == "Nazarene"][0]
+    assert naz.get("their_own_documents") == [SPAN]
+    assert r["want"] is None
+    assert "fetched and kept" in r["message"]
+
+
+def test_when_even_the_pull_comes_back_empty_the_refusal_and_the_want_stand():
+    r = compare.compare("Nazarene vs Wesleyan",
+                        search=_fake({"nazarene": [], "wesleyan": [VOICE]}),
+                        acquire=lambda s: {"status": "nothing_found", "cards": []})
+    assert "cannot compare these honestly" in r["message"]
+    assert r["want"] and r["want"]["queries"] == ["Nazarene"]
+
+
+def test_a_pull_that_crashes_leaves_an_honest_refusal_not_a_500():
+    def boom(subject):
+        raise RuntimeError("the archives are down")
+    r = compare.compare("Nazarene vs Wesleyan",
+                        search=_fake({"nazarene": [], "wesleyan": [VOICE]}), acquire=boom)
+    assert r["want"] is not None and "cannot compare" in r["message"]

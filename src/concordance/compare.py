@@ -112,11 +112,13 @@ def _side(subject: str, search, get=None) -> Dict[str, Any]:
     }
 
 
-def compare(query: str, search=None, get=None) -> Optional[Dict[str, Any]]:
+def compare(query: str, search=None, get=None, acquire=None) -> Optional[Dict[str, Any]]:
     """A comparison, or None when the question is not one.
 
-    `search` and `get` are injected so this stays testable and so the caller decides which
-    corpus/surface it reads — this module never reaches for a store of its own until asked.
+    `search`, `get` and `acquire` are injected so this stays testable and so the caller decides
+    which corpus/surface it reads — this module never reaches for a store of its own until asked.
+    `acquire(subject)` is the hand that goes OUT — expand.pull_and_card behind the ask conduit —
+    and is only ever tried for a side the keeping cannot stand up by itself.
     """
     subjects = subjects_of(query)
     if not subjects:
@@ -131,6 +133,35 @@ def compare(query: str, search=None, get=None) -> Optional[Dict[str, Any]]:
 
     sides = [_side(s, search, get=get) for s in subjects]
     missing = [s["subject"] for s in sides if not s["held_as_tradition"]]
+
+    # A MISSING SIDE STANDS ON ITS OWN DOCUMENTS (Matt, 2026-08-02: "It needs to be able to pull
+    # the requested information and then make the card for the future, so we only search once per
+    # question"). Order is the point:
+    #   1. what the keeping ALREADY holds — primary_pd cards cut from the tradition's own texts.
+    #      The Nazarene Manual's passages were sitting on the sources shelf while the comparison
+    #      said "not here"; having the thing and not presenting it is a miss wearing a refusal.
+    #   2. only when nothing is held AND the caller provided an `acquire` hand: go and pull it
+    #      NOW — the slower answer — and the pull KEEPS what it cut, so the next asking lands on
+    #      branch 1 and never goes out. Search once per question.
+    # `held_as_tradition` stays false either way: a curated voice card and a pile of primary
+    # passages are different kinds of holding, and the reader is told which they have.
+    for s in sides:
+        if s["held_as_tradition"]:
+            continue
+        primary = [c for c in (search(s["subject"], limit=8) or [])
+                   if c.get("shelf") == "sources"
+                   or (c.get("source") or {}).get("authority_tier") == "primary_pd"]
+        if not primary and acquire is not None:
+            try:
+                pulled = acquire(s["subject"])
+            except Exception:  # noqa: BLE001 — a failed pull leaves an honest refusal, not a 500
+                pulled = None
+            primary = list((pulled or {}).get("cards") or [])[:5] if isinstance(pulled, dict) \
+                else list(pulled or [])[:5]
+        if primary:
+            s["their_own_documents"] = primary[:5]
+    missing_and_empty = [s["subject"] for s in sides
+                         if not s["held_as_tradition"] and not s.get("their_own_documents")]
 
     # SHARED GROUND, only where both sides actually stand on it. Never asserted — read off the
     # cards' own connection edges, so the common root is evidence rather than a claim.
@@ -152,15 +183,22 @@ def compare(query: str, search=None, get=None) -> Optional[Dict[str, Any]]:
         if len(edges) == 2:
             shared = sorted(edges[0] & edges[1])
 
-    if missing:
+    documented = [s["subject"] for s in sides
+                  if not s["held_as_tradition"] and s.get("their_own_documents")]
+    if missing_and_empty:
         have = "; ".join(
             f"{s['subject']}: {s['mentions']} card(s) on the {', '.join(s['shelves'])} shelf"
-            for s in sides if s["mentions"] and not s["held_as_tradition"])
+            for s in sides if s["mentions"] and s["subject"] in missing_and_empty)
         message = (
             f"I cannot compare these honestly: the keeping has no tradition card for "
-            f"{' and '.join(missing)}. "
+            f"{' and '.join(missing_and_empty)}. "
             + (f"What it does hold under that name is something else — {have}. " if have else "")
             + "I will not set two things side by side when one of them is not here.")
+    elif documented:
+        message = (
+            f"{' and '.join(documented)} is not among the curated tradition voices, so that side "
+            "stands on passages cut from its own documents — fetched and kept, so the next "
+            "asking finds them at once. Every line is a card you can open.")
     else:
         message = ("Both traditions are held. Each column is the tradition's own voice card, in "
                    "its own reckoning, and every line below is a card you can open.")
@@ -172,9 +210,11 @@ def compare(query: str, search=None, get=None) -> Optional[Dict[str, Any]]:
         "missing": missing,
         "shared_ground": shared,
         "message": message,
-        # The offer, not an auto-log: a person asks, a person chooses. Same rule as the want desk.
-        "want": ({"offer": f"open a want for {' and '.join(missing)}", "queries": missing}
-                 if missing else None),
+        # The offer survives ONLY where even the pull came back empty-handed. Offering a person a
+        # chore we could have done — or just did — is the want desk's own rule inverted.
+        "want": ({"offer": f"open a want for {' and '.join(missing_and_empty)}",
+                  "queries": missing_and_empty}
+                 if missing_and_empty else None),
     }
 
 

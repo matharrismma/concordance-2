@@ -206,3 +206,26 @@ def test_a_refusal_names_the_status_code(ark, monkeypatch):
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+def test_a_catalogue_page_resolves_to_the_text_behind_it(ark):
+    """The tortoise finds DETAIL pages; for months the mint carded the citation because nothing
+    could open the book behind it ("I asked it to find the information, and it couldn't do
+    that"). Gutenberg resolves deterministically; archive.org through its metadata — injected
+    here so no test depends on the network."""
+    assert sources.resolve_text_url("https://www.gutenberg.org/ebooks/1342") == \
+        "https://www.gutenberg.org/cache/epub/1342/pg1342.txt"
+    meta = {"metadata": {}, "files": [{"name": "x_scandata.xml"}, {"name": "abc_djvu.txt"}]}
+    assert sources.resolve_text_url("https://archive.org/details/abc", _meta=meta) == \
+        "https://archive.org/download/abc/abc_djvu.txt"
+
+
+def test_a_restricted_or_textless_item_resolves_to_nothing(ark):
+    """None is an honest answer; a guessed URL that 404s would waste the fetch and log a lie."""
+    restricted = {"metadata": {"access-restricted-item": "true"},
+                  "files": [{"name": "abc_djvu.txt"}]}
+    assert sources.resolve_text_url("https://archive.org/details/abc", _meta=restricted) is None
+    no_text = {"metadata": {}, "files": [{"name": "abc.pdf"}, {"name": "abc.gif"}]}
+    assert sources.resolve_text_url("https://archive.org/details/abc", _meta=no_text) is None
+    assert sources.resolve_text_url("https://www.loc.gov/item/12003656/") is None
+    assert sources.resolve_text_url("") is None

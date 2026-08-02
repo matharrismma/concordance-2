@@ -93,4 +93,149 @@ def expand(query: str, config, plane: str = "human",
                            "library." if plane != "human" else ""))}
 
 
-__all__ = ["expand", "offline", "PLANES"]
+def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
+                  providers=None, fetch=None, craft_fn=None) -> Dict[str, Any]:
+    """The WHOLE pull — find a source, open it, cut the cards, keep them. One call.
+
+    Matt, 2026-08-02: *"Right now it only pulls the card. It needs to be able to pull the
+    requested information and then make the card for the future, so we only search once per
+    question. Right now, it just didn't have what it needed on Nazarene, so that was it. I asked
+    it to find the information, and it couldn't do that."*
+
+    He is describing the exact seam this closes. The tortoise found catalogue entries and minted
+    CITATIONS — a pointer to a book, never a page of it. The craft chain (fetch → ark → spans,
+    each span re-readable at its offsets) existed and was proven, but only a person at a terminal
+    ever drove it. So a miss produced "here is a book that exists", which is not the information
+    that was asked for. This function is the citation path and the craft path joined: the same
+    slower answer, now carrying the source's own words — and because the cards are KEPT, the next
+    asking finds them in the keeping and never goes out at all. Search once per question.
+
+    Bounded for use inside a request: at most three candidate documents are tried, the first that
+    yields real cards wins, and every network step carries the fetch layer's own timeout and size
+    ceiling. On a device that anchors no sources (no ark), it says so and the citation behaviour
+    stands — degraded honestly, never silently.
+
+    `providers` / `fetch` / `craft_fn` are injectable for tests; production defaults are the real
+    tortoise, the real ark, the real craft.
+    """
+    from . import craft as _craft
+    from . import find as _find
+    from . import sources as _sources
+    from . import unchecked as _unchecked
+
+    q = str(query or "").strip()
+    subj = str(subject or q).strip()
+    if not q and not subj:
+        return {"status": "nothing_found", "reason": "an empty query asks nothing"}
+    if offline():
+        return {"status": "offline"}
+    if _sources.sources_dir() is None:
+        # No ark on this device — the citation path still works upstream; say what is missing.
+        return {"status": "no_ark",
+                "message": "this device anchors no source bodies, so the text cannot be kept here"}
+
+    fetch = fetch or _sources.fetch
+    craft_fn = craft_fn or _craft.craft
+    if providers is None:
+        providers = (_find.internet_archive, _find.project_gutenberg)
+
+    docs: List[Dict[str, Any]] = []
+    for p in providers:
+        try:
+            docs.extend(p(subj if subj else q, limit=3) or [])
+        except Exception:  # noqa: BLE001 — one deaf provider must not silence the others
+            continue
+
+    tried = 0
+    for doc in docs:
+        if tried >= 3:
+            break
+        text_url = _sources.resolve_text_url(doc.get("url") or "")
+        if not text_url:
+            continue
+        tried += 1
+        wb = fetch(text_url, label=str(doc.get("title") or "")[:200],
+                   license_note=str(doc.get("license") or "public domain source"),
+                   chosen_by=f"pull_and_card: a miss on {subj!r} answered on the call")
+        if wb.get("status") not in ("held", "already"):
+            continue
+        sha = wb["sha256"]
+        parent_id = "card_src_" + sha[:12]
+        r = craft_fn(sha, subj or q, parent_id=parent_id, plane=plane)
+        cards = list(r.get("cards") or [])
+        if len(cards) < 3:
+            continue          # a book that barely speaks to the subject is the wrong book
+        sv = _craft.verify_spans(cards)
+        if sv["false"] or sv["true"] != len(cards):
+            continue          # never keep a card that does not verify — try the next source
+        parent = _unchecked.mark({
+            "id": parent_id, "kind": "reference",
+            "title": str(doc.get("title") or subj)[:140],
+            "body": (f"A public-domain source fetched on the call for {subj!r}: "
+                     f"{str(doc.get('title') or '')[:160]}. Kept whole in the ark; the passages "
+                     "carded beneath this one are cut from it, and each names the exact place it "
+                     "came from."),
+            "source": {"label": str(doc.get("title") or "")[:200],
+                       "url": str(doc.get("url") or ""), "domain": "",
+                       "authority_tier": "primary_pd"},
+            "shelf": "sources", "box": "source", "subject": subj,
+            "bands": sorted({w for w in subj.lower().split() if len(w) > 2})[:10] + ["source"],
+            "connections": [{"to_card_id": "card_spine_sources", "relationship": "member_of",
+                             "evidence": "a primary source the tortoise went and found"}],
+            "author": "engine", "created_at": 0.0, "updated_at": 0.0,
+            "visibility": "public",
+            "lifecycle_stage": "public" if plane == "human" else "public_review",
+            "volatility": "permanent", "surface": "secular", "generated": False,
+            "extra": {"source_sha256": sha, "crafted_from": str(doc.get("url") or ""),
+                      "license": str(doc.get("license") or "")[:120]},
+        })
+        kept = _keep([parent] + cards)
+        return {"status": "carded", "source_card": parent, "cards": cards,
+                "kept": kept, "sha256": sha, "plane": plane,
+                "held_for_review": plane != "human",
+                "message": (f"Not in the keeping, so it was fetched and cut on the call — "
+                            f"{len(cards)} passage(s) from {str(doc.get('title') or '')[:80]!r}, "
+                            "kept so the next asking finds them at once.")}
+
+    return {"status": "nothing_found",
+            "message": "the archives were searched and no openable text spoke to this subject"}
+
+
+def _keep(cards: List[Dict[str, Any]]) -> int:
+    """Write through the mint's own store — the same file and the same live-corpus add that
+    find._mint_doc uses, so pulled cards and minted citations live in one place. Idempotent."""
+    import json as _json
+    import os as _os
+    from pathlib import Path
+
+    base = _os.environ.get("CONCORDANCE_DATA_DIR", "").strip() or "data"
+    p = Path(base) / "web_cache.jsonl"
+    existing = set()
+    if p.is_file():
+        for ln in p.read_text(encoding="utf-8").splitlines():
+            if ln.strip():
+                try:
+                    existing.add(_json.loads(ln).get("id"))
+                except ValueError:
+                    pass
+    wrote = 0
+    try:
+        p.parent.mkdir(parents=True, exist_ok=True)
+        with open(p, "a", encoding="utf-8") as fh:
+            for c in cards:
+                if c.get("id") in existing:
+                    continue
+                fh.write(_json.dumps(c, ensure_ascii=False) + "\n")
+                existing.add(c.get("id"))
+                wrote += 1
+                try:
+                    from . import corpus as _c
+                    _c.add_to_default(c)
+                except Exception:  # noqa: BLE001 — visible next restart rather than lost
+                    pass
+    except OSError:
+        return wrote
+    return wrote
+
+
+__all__ = ["expand", "pull_and_card", "offline", "PLANES"]

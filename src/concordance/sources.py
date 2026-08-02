@@ -44,6 +44,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import time
 import urllib.error
 import urllib.parse
@@ -120,6 +121,47 @@ def path_for(sha: str, ext: str = "") -> Optional[Path]:
     if not base:
         return None
     return base / sha[:2] / (sha + ext)
+
+
+def resolve_text_url(url: str, _meta=None) -> Optional[str]:
+    """The plain-text download behind a catalogue page, or None when there isn't one.
+
+    The tortoise finds DETAIL pages — `archive.org/details/x`, `gutenberg.org/ebooks/n` — and for
+    months the mint carded the citation because nothing could open the book behind it (Matt,
+    2026-08-02: "I asked it to find the information, and it couldn't do that."). This is the
+    missing step: catalogue entry -> the text itself.
+
+      archive.org   the item's metadata names its files; we take the `_djvu.txt` and honour
+                    `access-restricted-item`. `_meta` injects the metadata dict in tests so no
+                    test ever depends on the network.
+      gutenberg     the plain-text URL is deterministic from the ebook number.
+      anything else None — LoC items are largely images and maps; carding a scan as text would
+                    card noise, so the citation stands alone there, honestly.
+    """
+    u = str(url or "")
+    m = re.search(r"gutenberg\.org/ebooks/(\d+)", u)
+    if m:
+        return f"https://www.gutenberg.org/cache/epub/{m.group(1)}/pg{m.group(1)}.txt"
+    m = re.search(r"archive\.org/details/([^/?#]+)", u)
+    if m:
+        ident = m.group(1)
+        meta = _meta
+        if meta is None:
+            try:
+                req = urllib.request.Request(f"https://archive.org/metadata/{ident}",
+                                             headers={"User-Agent": _UA})
+                with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+                    meta = json.loads(r.read().decode("utf-8", "replace"))
+            except Exception:  # noqa: BLE001 — an unreachable catalogue is a miss, not an error page
+                return None
+        md = (meta or {}).get("metadata") or {}
+        if str(md.get("access-restricted-item", "")).lower() in ("true", "1"):
+            return None
+        for f in (meta or {}).get("files") or []:
+            name = str(f.get("name") or "")
+            if name.endswith("_djvu.txt"):
+                return f"https://archive.org/download/{ident}/{name}"
+    return None
 
 
 def held(sha: str) -> Optional[Dict[str, Any]]:
