@@ -378,6 +378,41 @@
   function render(d,isDoc){
     var h='';
     if(d.message) h += '<div>'+esc(d.message)+'</div>';
+    // THE COMPARISON, drawn (2026-08-02). The engine composed this answer for days while the page
+    // drew only the message line above it — Matt: "I asked again, and it didn't put together an
+    // answer." The answer WAS put together; nothing on this surface knew how to show it. Same
+    // lesson as the card graph and the /card JSON: correct on the wire and invisible where the
+    // reader stands is not done. Each side is a column of the tradition's own words — the curated
+    // voice in full, or passages cut from its own documents — and every line links to a card.
+    if(d.kind === 'comparison' && d.sides && d.sides.length){
+      h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.8rem;margin:.8rem 0">';
+      d.sides.forEach(function(s){
+        var col = '<div style="border:1px solid rgba(138,106,47,.28);border-radius:8px;padding:.7rem .85rem;background:rgba(255,255,255,.38)">';
+        col += '<div style="font-weight:600;margin-bottom:.3rem">'+esc(s.subject)+
+               ' <span class="note" style="font-weight:400;opacity:.7">'+
+               (s.held_as_tradition ? 'in its own reckoning' : 'from its own documents')+'</span></div>';
+        if(s.voice && s.voice.body){
+          col += '<div style="font-size:.92em;line-height:1.5">'+esc(s.voice.body)+'</div>';
+          if(s.voice.id) col += '<div class="note" style="margin-top:.35rem"><a href="/card.html?id='+
+                                encodeURIComponent(s.voice.id)+'">open the voice card</a></div>';
+        } else if(s.their_own_documents && s.their_own_documents.length){
+          s.their_own_documents.forEach(function(c){
+            col += '<div class="hit" style="margin:.3rem 0"><b><a href="/card.html?id='+
+                   encodeURIComponent(c.id||'')+'">'+esc(c.title||'')+'</a></b>'+
+                   (c.snippet?'<span class="sn">'+esc(c.snippet)+'</span>':'')+'</div>';
+          });
+        } else {
+          col += '<div class="note">not held — nothing is invented to fill this column</div>';
+        }
+        col += '</div>';
+        h += col;
+      });
+      h += '</div>';
+      if(d.shared_ground && d.shared_ground.length)
+        h += '<div class="note">Shared ground, read from the cards themselves: '+
+             d.shared_ground.map(function(g){ return '<a href="/card.html?id='+
+               encodeURIComponent(g)+'">'+esc(g)+'</a>'; }).join(' · ')+'</div>';
+    }
     // the hidden door — surfaced only when the engine judged this an utterance that seeks the body
     if(d.door && d.door.href)
       h += '<div style="margin:.7rem 0;padding:.7rem .9rem;border:1px solid rgba(201,162,74,.3);border-radius:8px;background:rgba(201,162,74,.05)">'+
