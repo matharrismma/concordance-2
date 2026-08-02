@@ -488,6 +488,14 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             f"<meta name=\"twitter:card\" content=\"summary\">"
             f"<script type=\"application/ld+json\">{ld_json}</script></head><body>"
             f"{_site_header('<a href=/search>Search</a><a href=/#verify>Verify</a>')}<main class=wrap>"
+            # THE INVITATION (Matt, 2026-08-01: "Imagine this is the only site someone has.").
+            # 95% of measured traffic is agents, and the card page is where their citations land a
+            # person — /card/* is the most-hit path on the site. That person arrives mid-library,
+            # cold, with no idea the rest exists. One quiet line says what this place is and that
+            # it costs nothing. Server-rendered like everything else here: no script, no account.
+            "<p class=muted style=\"font-size:.74rem;margin:0 0 .55rem\">"
+            "A card from <a href=\"/\">a free library</a> — ask anything, no account, works "
+            "offline. Every card carries its source.</p>"
             f"<h1>{title}</h1>{overlay}{unchecked_block}{body_html}"
             f"<section class=card>{source_html}"
             f"<div class=muted style=\"font-size:.8rem;margin-top:.5rem\">card id</div>"

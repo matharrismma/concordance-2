@@ -94,6 +94,26 @@
   .col{ width:min(44rem,100%); display:flex; flex-direction:column; margin:auto 0 0 }
   .col.empty{ margin:auto 0 }
 
+  /* THE DESK — the doors of need, part of the empty page only. Once a conversation exists the
+     desk yields to it (same settle() mechanic that centres the composer), so the page never
+     nags a person who already knows where they are going. */
+  #desk{ margin:1.4rem .2rem 0 }
+  .col:not(.empty) #desk{ display:none }
+  .desk-line{ text-align:center; font-size:.8rem; color:var(--ink-soft);
+    letter-spacing:.04em; margin:0 0 .95rem; font-style:italic }
+  .doors{ display:grid; grid-template-columns:repeat(auto-fit,minmax(15rem,1fr)); gap:.6rem }
+  .doors a{ display:block; padding:.7rem .85rem .75rem; border:1px solid rgba(138,106,47,.28);
+    border-radius:8px; background:rgba(255,255,255,.38);
+    transition:border-color .14s ease, background .14s ease }
+  .doors a:hover{ border-color:var(--brass-lo); background:rgba(255,255,255,.62) }
+  .doors b{ display:block; font-weight:600; color:var(--ink); font-size:.95rem;
+    margin-bottom:.15rem }
+  .doors b::after{ content:" →"; color:var(--brass-lo); font-weight:400 }
+  .doors span{ display:block; font-size:.78rem; line-height:1.45; color:var(--ink-soft) }
+  @media (max-width:520px){ .doors{ grid-template-columns:1fr 1fr; gap:.5rem }
+    .doors span{ display:none }  /* a cheap phone gets eight clean doors, not a wall of text */
+    .doors a{ padding:.6rem .7rem } .doors b{ font-size:.88rem; margin:0 } }
+
   /* the top edge of the page: the name and a few small doors, staying put while you scroll */
   .top{
     position:sticky; top:-2.4rem; z-index:4; align-self:stretch;
@@ -272,6 +292,27 @@
       <div id="q" contenteditable="true" role="textbox" aria-multiline="true"
            aria-label="Bring anything" data-empty="Write here…"></div>
     </div>
+
+    <!-- THE DESK (Matt, 2026-08-01: "Imagine this is the only site someone has.") — the doors of
+         need, shown only while the page is empty. A person who lands here cold has a NEED, not a
+         question formed; a blank writing surface asks them to already know what this place is.
+         Plain links on purpose: for a reader without JavaScript the composer above is dead, so
+         these doors are the entire working page — the same lesson as the card graph, where a
+         correct thing behind a script reached nobody. Every door is a page that already exists;
+         this is assembly, not invention. -->
+    <nav id="desk" aria-label="The doors of the library">
+      <p class="desk-line">Free. No account. Works offline. Write anything above — or start at a door.</p>
+      <div class="doors">
+        <a href="/read.html"><b>Learn to read</b><span>Lessons for you or your children, from the first letter up.</span></a>
+        <a href="/bible.html"><b>Study the Bible</b><span>The whole reference desk: original words, maps, timelines, commentaries.</span></a>
+        <a href="/apothecary.html"><b>Health &amp; the land</b><span>Herbs, planting, preparations — the old knowledge, kept with its sources.</span></a>
+        <a href="/steward.html"><b>Handle money</b><span>A budget you own. It never touches your money — it helps you see it.</span></a>
+        <a href="/check.html"><b>Check a claim</b><span>Bring a number, a dose, a deal — the engine shows its work.</span></a>
+        <a href="/community.html"><b>Study together</b><span>Find others in the same book. A handle, no personal information.</span></a>
+        <a href="/corpus.html"><b>The whole library</b><span>Over half a million kept cards, every one carrying its source.</span></a>
+        <a href="/companion.html"><b>Take it with you</b><span>Carry the library on your device for when the internet is not there.</span></a>
+      </div>
+    </nav>
       <div class="tools" role="toolbar" aria-label="Tools" data-intable="0" data-fmt="0">
         <div class="fmt">
           <button data-do="bold" title="Bold"><b>B</b></button>
