@@ -394,3 +394,31 @@ def test_a_crisis_never_receives_a_comparison_table():
     """The comparison hook sits AFTER the crisis path, and must stay there."""
     r = ask.respond("compare and contrast dying vs I want to kill myself", SEC)
     assert r["kind"] == "crisis", "a person in danger was handed a comparison"
+
+
+def test_the_original_dud_query_finally_answers_about_its_subject():
+    """Matt, 2026-08-01: "I asked for information on the Wesleyan Church. Just random cards...
+    right now its a dud." Two fixes later it was STILL a dud on the live wire: the deck router
+    scoped the search to shelves where "wesleyan" never occurs, the local partition fell back to
+    "church", and the weakness guard accepted six confession cards about the church in general
+    because they shared A distinctive word — the generic one. The subject now outranks every
+    other distinctive word: a hit that does not carry "wesleyan" is weak, and weak sends the
+    router back to the unscoped search where the partition holds."""
+    r = ask.respond("Tell me about the Wesleyan Church", SEC)
+    hits = r.get("results") or []
+    assert hits, "the keeping holds a Wesleyan voice card; this must not come back empty"
+    top_text = ((hits[0].get("title") or "") + " " + (hits[0].get("snippet") or "")
+                + " " + (hits[0].get("body") or "")).lower()
+    assert "wesley" in top_text, \
+        f"the top hit is not about the subject asked: {hits[0].get('title')!r}"
+
+
+def test_the_subject_guard_rejects_the_generic_word():
+    """The guard itself, at the unit: a card sharing only the COMMON distinctive word is weak."""
+    generic = {"title": "Belgic Art. 29: The Marks of the True Church",
+               "body": "We believe that we ought diligently to discern the true church."}
+    named = {"title": "Methodist / Wesleyan",
+             "body": "Wesleyan confession: grace freely offered to all."}
+    assert ask._shares_a_word("Tell me about the Wesleyan Church", named) is True
+    assert ask._shares_a_word("Tell me about the Wesleyan Church", generic) is False, \
+        "a hit on 'church' alone carried a question about the Wesleyans"

@@ -262,11 +262,28 @@ def _shares_a_word(text: str, card: Dict[str, Any]) -> bool:
     """Does the keeping's hit actually share a DISTINCTIVE word with what was asked? A match on a
     common word ('year', 'day') is not enough — 'what year did the Titanic sink' must be carried by
     a hit that names the Titanic, not merely one that says 'year'. So when the question has specific
-    words (≥5 letters), require one of THOSE to match; only fall back to any-word when it has none."""
+    words (≥5 letters), require one of THOSE to match; only fall back to any-word when it has none.
+
+    AND THE SUBJECT OUTRANKS EVERY OTHER DISTINCTIVE WORD. "Tell me about the Wesleyan Church" has
+    two distinctive words, and the original guard accepted a hit on either — so the deck-scoped
+    path returned six confession cards about the church in general and this guard waved them
+    through on "church" while "wesleyan" appeared in none of them. The very question that opened
+    this whole arc ("just random cards... right now its a dud") was still a dud two fixes later,
+    because a scoped search cannot see its own blindness: inside a deck with no "wesleyan"
+    anywhere, the local partition falls back to the next word. Only the global corpus knows what
+    the asking was ABOUT, so when it can name the subject, the hit must carry the SUBJECT — and a
+    miss here sends the router back out to the unscoped search, where the partition holds.
+    """
     q = _content_tokens(text)
     if not q:
         return True                                   # nothing specific asked — don't second-guess
     hay = _content_tokens((card.get("title") or "") + " " + (card.get("body") or ""))
+    try:
+        subject = corpus.subject_of(text)
+    except Exception:  # noqa: BLE001 — no corpus loaded is not a reason to reject a hit
+        subject = None
+    if subject and subject in q:
+        return subject in hay
     distinctive = {w for w in q if len(w) >= 5}
     return bool(distinctive & hay) if distinctive else bool(q & hay)
 

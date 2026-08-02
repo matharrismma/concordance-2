@@ -589,6 +589,24 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
     return _DEFAULT
 
 
+def subject_of(query: str) -> Optional[str]:
+    """The single word this asking is ABOUT — the globally rarest content token — or None.
+
+    The same computation the merge partition in search() already performs, exposed so a CALLER
+    can hold results to it. Needed because a scoped search cannot see its own blindness: within a
+    deck whose shelves never contain "wesleyan", the local IDF has no such token, the partition
+    falls back to the next-best word ("church"), and six confession cards about the church in
+    general come back looking relevant. Only the GLOBAL corpus knows what the question was about;
+    this hands that knowledge to the routing layer that chose the scope.
+    """
+    from .corpus_db import _STOP
+    toks = {t for t in _tokens(query) if t not in _STOP}
+    if not toks:
+        return None
+    c = default_corpus()
+    return c._subject_of(toks, c._idf(toks))
+
+
 def search(query: str, limit: int = 25, include_witness: bool = True,
            shelves: Optional[set] = None) -> List[dict]:
     """Ranked search over the default corpus (cards.jsonl) — the floor's retrieval primitive.
