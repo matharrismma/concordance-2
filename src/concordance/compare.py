@@ -82,10 +82,24 @@ def _voice_card(subject: str, cards: List[dict]) -> Optional[dict]:
     return None
 
 
-def _side(subject: str, search) -> Dict[str, Any]:
+def _side(subject: str, search, get=None) -> Dict[str, Any]:
     """One column: what we hold about this subject, and honestly what KIND of holding it is."""
     cards = search(subject, limit=8) or []
     voice = _voice_card(subject, cards)
+    # REHYDRATE THE VOICE. Search hands back BRIEFS — title, shelf, a snippet — and the first
+    # live run of the both-sides path (Baptist vs Presbyterian, 2026-08-01) presented two voice
+    # cards whose body was None: the message promised "the tradition's own voice, in its own
+    # reckoning" and delivered an empty card. The voice is the one card in the column whose whole
+    # point is its CONTENT — confession, emphasis, the gift it has kept — so it is fetched in
+    # full, while the supporting cards stay briefs a reader can open.
+    if voice is not None and get is not None:
+        full = None
+        try:
+            full = get(str(voice.get("id") or ""))
+        except Exception:  # noqa: BLE001 — a failed lookup falls back to the brief, never breaks
+            full = None
+        if isinstance(full, dict) and full.get("body"):
+            voice = full
     return {
         "subject": subject,
         # THE DISTINCTION THAT MATTERS. `held_as_tradition` is the real question for a
@@ -98,11 +112,11 @@ def _side(subject: str, search) -> Dict[str, Any]:
     }
 
 
-def compare(query: str, search=None) -> Optional[Dict[str, Any]]:
+def compare(query: str, search=None, get=None) -> Optional[Dict[str, Any]]:
     """A comparison, or None when the question is not one.
 
-    `search` is injected so this stays testable and so the caller decides which corpus/surface
-    it reads — this module never reaches for a store of its own.
+    `search` and `get` are injected so this stays testable and so the caller decides which
+    corpus/surface it reads — this module never reaches for a store of its own until asked.
     """
     subjects = subjects_of(query)
     if not subjects:
@@ -110,18 +124,31 @@ def compare(query: str, search=None) -> Optional[Dict[str, Any]]:
     if search is None:
         from . import corpus
         search = corpus.search
+        # `get` defaults ONLY alongside `search`: a caller who injected a search surface has
+        # chosen not to touch the resident corpus, and this module must not reach for it anyway.
+        if get is None:
+            get = corpus.get_card
 
-    sides = [_side(s, search) for s in subjects]
+    sides = [_side(s, search, get=get) for s in subjects]
     missing = [s["subject"] for s in sides if not s["held_as_tradition"]]
 
     # SHARED GROUND, only where both sides actually stand on it. Never asserted — read off the
     # cards' own connection edges, so the common root is evidence rather than a claim.
+    #
+    # MEMBERSHIP IS NOT DOCTRINE. The first live run reported the shelf spine as the two
+    # traditions' shared ground — true in the way that two books share a bookcase, and useless in
+    # exactly that way, since every tradition on the shelf carries the same `member_of` edge. A
+    # vacuous truth presented as a finding teaches a reader to stop reading the findings. Spine
+    # edges are excluded; what remains is ground the two actually, specifically share — and when
+    # nothing remains, the list is honestly empty rather than padded with the bookcase.
     shared: List[str] = []
     if not missing:
         edges = []
         for s in sides:
             v = s["voice"] or {}
-            edges.append({str(e.get("to_card_id")) for e in (v.get("connections") or [])})
+            edges.append({str(e.get("to_card_id")) for e in (v.get("connections") or [])
+                          if e.get("relationship") != "member_of"
+                          and not str(e.get("to_card_id", "")).startswith("card_spine_")})
         if len(edges) == 2:
             shared = sorted(edges[0] & edges[1])
 

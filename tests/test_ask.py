@@ -369,3 +369,28 @@ if __name__ == "__main__":
         fn()
         print(f"  ok  {fn.__name__}")
     print(f"\n{len(fns)} ask tests passed — conduit routing: find/verify/cite, help-first, points to Christ.")
+
+
+def test_a_comparison_answer_carries_the_voices_in_full():
+    """THE RESPONSE, not the module. compare.py was correct and covered while TWO live runs
+    delivered empty voices, because the ask hook's response shaping briefed the voice back down —
+    `_brief` keeps a 200-char snippet and drops `body`, so the message promised "the tradition's
+    own voice, in its own reckoning" while the shaping threw the reckoning away. The module's own
+    tests could never see it; only asserting on what ask.respond() actually returns can."""
+    r = ask.respond("compare and contrast Baptist vs Anglican", SEC)
+    assert r["kind"] == "comparison"
+    assert r["missing"] == []
+    for side in r["sides"]:
+        v = side["voice"]
+        assert v is not None, f"{side['subject']} lost its voice"
+        assert v.get("body") and "Confession" in v["body"], \
+            f"{side['subject']}'s voice arrived without its reckoning (body missing or briefed)"
+    # membership is not doctrine: the shelf spine must never be reported as shared ground
+    assert not any(str(g).startswith("card_spine_") for g in r["shared_ground"]), \
+        "the bookcase was reported as common doctrine"
+
+
+def test_a_crisis_never_receives_a_comparison_table():
+    """The comparison hook sits AFTER the crisis path, and must stay there."""
+    r = ask.respond("compare and contrast dying vs I want to kill myself", SEC)
+    assert r["kind"] == "crisis", "a person in danger was handed a comparison"

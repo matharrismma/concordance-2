@@ -103,6 +103,52 @@ def test_shared_ground_is_read_from_the_cards_never_claimed():
     assert "c_x" not in r["shared_ground"], "an edge only one side has is not shared ground"
 
 
+def test_membership_is_not_doctrine():
+    """The first live both-sides run (Baptist vs Presbyterian, 2026-08-01) reported the shelf
+    spine as the traditions' shared ground — true the way two books share a bookcase, and useless
+    in exactly that way, since EVERY tradition on the shelf carries the same member_of edge. A
+    vacuous truth presented as a finding teaches a reader to stop reading the findings."""
+    a = dict(VOICE, connections=[
+        {"to_card_id": "card_spine_churches", "relationship": "member_of"},
+        {"to_card_id": "c_creeds", "relationship": "calibrated_against"}])
+    b = dict(VOICE2, connections=[
+        {"to_card_id": "card_spine_churches", "relationship": "member_of"},
+        {"to_card_id": "c_creeds", "relationship": "calibrated_against"}])
+    r = compare.compare("Baptist vs Wesleyan",
+                        search=_fake({"baptist": [b], "wesleyan": [a]}))
+    assert r["shared_ground"] == ["c_creeds"], "the bookcase was reported as common doctrine"
+
+    # and when the spine is ALL they share, the honest answer is nothing — never padded
+    a2 = dict(VOICE, connections=[{"to_card_id": "card_spine_churches",
+                                   "relationship": "member_of"}])
+    b2 = dict(VOICE2, connections=[{"to_card_id": "card_spine_churches",
+                                    "relationship": "member_of"}])
+    r2 = compare.compare("Baptist vs Wesleyan",
+                         search=_fake({"baptist": [b2], "wesleyan": [a2]}))
+    assert r2["shared_ground"] == []
+
+
+def test_the_voice_arrives_full_not_as_a_brief():
+    """Search hands back BRIEFS; the first live run presented voice cards with body None while
+    the message promised 'the tradition's own voice, in its own reckoning'. The voice is the one
+    card whose whole point is its content, so it is rehydrated through `get` — and a `get` that
+    fails falls back to the brief rather than losing the column."""
+    brief = {"id": "c_wes", "title": "Methodist / Wesleyan", "shelf": "churches", "body": None}
+    full = dict(VOICE, body="Confession: the Articles of Religion. Emphasis: grace freely offered.")
+    r = compare.compare("Baptist vs Wesleyan",
+                        search=_fake({"baptist": [VOICE2], "wesleyan": [brief]}),
+                        get={"c_wes": full, "c_bap": VOICE2}.get)
+    wes = [s for s in r["sides"] if s["subject"] == "Wesleyan"][0]
+    assert wes["voice"]["body"].startswith("Confession:"), "the voice stayed a bodiless brief"
+
+    def boom(_):
+        raise RuntimeError("no corpus here")
+    r2 = compare.compare("Baptist vs Wesleyan",
+                         search=_fake({"baptist": [VOICE2], "wesleyan": [brief]}), get=boom)
+    wes2 = [s for s in r2["sides"] if s["subject"] == "Wesleyan"][0]
+    assert wes2["held_as_tradition"] is True, "a failed lookup must not unmake the tradition"
+
+
 def test_shared_ground_is_not_computed_when_a_side_is_missing():
     """Nothing is shared with something that is not here."""
     r = compare.compare("Nazarene vs Wesleyan",

@@ -1004,13 +1004,22 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     # Placed here deliberately: AFTER the crisis path and the seeker answers, which outrank
     # everything and always will. A person in trouble is never handed a comparison table.
     from . import compare as _compare
-    _cmp = _compare.compare(text, search=corpus.search)
+    # `get` rides along so the voice cards arrive FULL — the first live both-sides run presented
+    # two voices with body None, because search hands back briefs and nothing rehydrated them.
+    _cmp = _compare.compare(text, search=corpus.search, get=corpus.get_card)
     if _cmp:
         out = {**base, "kind": "comparison", "generated": False,
                "message": _cmp["message"], "subjects": _cmp["subjects"],
+               # THE VOICE RIDES FULL; the supporting cards stay briefs. Two live runs delivered
+               # empty voices, and the second proved the cause was HERE: compare.py rehydrated the
+               # voice and this line briefed it right back — `_brief` keeps a 200-char snippet and
+               # drops `body`, so the message promised "the tradition's own voice, in its own
+               # reckoning" while this shaping threw the reckoning away. The voice is the one card
+               # whose CONTENT is the answer; its confession/emphasis/gift/scripture live in
+               # `extra` and travel with it.
                "sides": [{"subject": s["subject"],
                           "held_as_tradition": s["held_as_tradition"],
-                          "voice": corpus._brief(s["voice"]) if s.get("voice") else None,
+                          "voice": s.get("voice") or None,
                           "cards": [corpus._brief(c) for c in s["cards"]]}
                          for s in _cmp["sides"]],
                "missing": _cmp["missing"], "shared_ground": _cmp["shared_ground"],
