@@ -20,9 +20,16 @@ So: nothing here writes a sentence of substance. It selects, aligns, and names w
 HAVING THE WORD IS NOT HAVING THE THING, and this is the trap the Nazarene question exposed.
 Searching "Nazarene" returns five cards — every one about Jesus of Nazareth, the biblical epithet.
 A naive `count > 0` would report the subject held and cheerfully compare a denomination against a
-figure of speech. The `churches` shelf is the registry of traditions we actually cover (28 voices,
-one per tradition, each chosen by that tradition's own reckoning), so THAT is the test for whether
-a tradition is held — not whether its name appears somewhere in the corpus.
+figure of speech. The `churches` shelf is the registry of what we actually cover, so THAT is the
+test for whether a tradition is held — not whether its name appears somewhere in the corpus.
+
+MEASURED 2026-08-01, because the first version of this docstring asserted "28 voices, one per
+tradition" and that was never true: the shelf holds 28 cards, which are **13 traditions**, one
+ecumenical-creeds card naming the shared ground, and **14 individual voices** (Wesley, Calvin,
+Luther, Aquinas, Spurgeon, Chrysostom…). A tradition card and a person card are different objects
+and `_voice_card` will match either, which is correct for orienting a reader and would be wrong
+for counting coverage. Anyone reporting "we cover N traditions" must count `box == "tradition"`
+and subtract the creeds card — not measure the shelf.
 
 When a side is missing we say so plainly, show what we DO hold and what it actually is, and offer
 to go and get the rest. That is the want loop doing the job it exists for.
