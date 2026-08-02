@@ -52,6 +52,11 @@ def _card_text(card: dict) -> str:
 
 PUBLIC_STAGES = frozenset({"public", "featured"})
 
+# Larger than any reachable TF-IDF score, so cards holding the query's rarest word form a
+# strictly higher tier than those that do not. A partition, not a weight: no amount of
+# repeating a common word can cross it.
+SUBJECT_TIER = 1000.0
+
 
 def is_public(card: dict) -> bool:
     """True iff a card may appear on ANY public read path — an ALLOWLIST, not a denylist.
@@ -229,7 +234,38 @@ class Corpus:
                 counts[cid] = counts.get(cid, 0) + 1
         return sorted(counts, key=lambda x: -counts[x])[:max_candidates]
 
+    def _subject_of(self, query_tokens: set, idf: Dict[str, float]) -> Optional[str]:
+        """The rarest query word — what the question is ACTUALLY about.
+
+        "Wesleyan Church" is about Wesleyans. "Church" is in half the library.
+        """
+        if not query_tokens:
+            return None
+        return max(query_tokens, key=lambda t: idf.get(t, 0.0))
+
     def _score(self, card: dict, query_tokens: set, idf: Dict[str, float]) -> float:
+        """TF-IDF over the card text — with a HARD PARTITION on the subject word.
+
+        Matt, 2026-08-01, on asking for the Wesleyan Church: *"It currently gives a bunch of not
+        useful information... just random cards. Right now it's a dud."* He was right, and the
+        cause was here.
+
+        The score is sum(tf x idf) / log(len). TERM FREQUENCY OF A COMMON WORD OVERWHELMS THE
+        PRESENCE OF A RARE ONE: a treatise that says "church" forty times outscores a card that
+        says "Wesleyan" once. So "Wesleyan Church" returned Belgic Article 29 and Heidelberg Q85 —
+        REFORMED confessions — to someone asking about a Wesleyan church. Not merely irrelevant:
+        it hands a reader the tradition that disagrees with theirs, on the points they care about.
+        And because the connection cloud then builds around the top hit, the whole neighbourhood
+        came back Reformed. One bad first card poisons everything downstream.
+
+        A WEIGHT WOULD NOT FIX THIS — any multiplier can be out-shouted by enough repetitions.
+        This is a PARTITION: a card that does not contain the subject word cannot outrank one that
+        does, however often it repeats the rest. The shape decides, not a tuned constant, so no
+        amount of term frequency can reverse the flow. `SUBJECT_TIER` is larger than any reachable
+        TF-IDF score by construction, which makes the two tiers non-overlapping.
+
+        A one-word query is its own subject, so this changes nothing there.
+        """
         doc_tokens = _tokens(_card_text(card))
         if not doc_tokens:
             return 0.0
@@ -251,6 +287,10 @@ class Corpus:
         score = sum(counts[t] * idf.get(t, 0.0) for t in common) / math.log(doc_len + 10)
         if len(common) == len(query_tokens):
             score *= 1.5
+        # THE PARTITION. Holding the subject word puts a card in the upper tier outright.
+        subject = self._subject_of(query_tokens, idf)
+        if subject and subject in common:
+            score += SUBJECT_TIER
         return float(score)
 
     def search(self, query: str, limit: int = 25, include_witness: bool = True,
@@ -327,6 +367,20 @@ class Corpus:
                     s *= 3.0
                 scored.append((s, c))
         scored.sort(key=lambda x: -x[0])
+
+        # NEVER PAD THE TAIL WITH CARDS THAT MISS THE SUBJECT. The partition put subject-holders
+        # in the upper tier, but ranking alone still let the leftovers fill the limit: live,
+        # "Wesleyan Church" came back with six Wesleyan cards and then a Kensington church
+        # directory and "Doctrines Objected to in the Church of Rome" at 7 and 8, purely to reach
+        # eight. Padding a count with things a reader must discard is the same lie as a silent cap
+        # — it reads as "here is what we hold" when two of them are noise.
+        #
+        # So when ANY card holds the subject word, only those are served. Six true results beat
+        # eight with two lies, and the count then means what it says. (The shard merge already
+        # excludes rather than demotes; this makes both halves of the rule behave alike, which
+        # they did not, and that inconsistency is what reached the reader.)
+        if scored and scored[0][0] >= SUBJECT_TIER:
+            scored = [(s, c) for s, c in scored if s >= SUBJECT_TIER]
         return [c for _s, c in scored[:max(1, int(limit))]]
 
 
@@ -546,17 +600,34 @@ def search(query: str, limit: int = 25, include_witness: bool = True,
     so the shard FTS (which indexes the full text) fills the remaining slots, and any stub
     that made the cut is rehydrated. The reader never sees a lighter answer because the
     shelf rode the shard."""
-    out = default_corpus().search(query, limit, include_witness, shelves)
+    corpus = default_corpus()
+    out = corpus.search(query, limit, include_witness, shelves)
     frozen = frozen_shelves()
     if frozen and (shelves is None or (set(shelves) & frozen)) and len(out) < limit:
         from . import corpus_db
         corpus_db.thaw_for(*frozen)
         have = {c.get("id") for c in out}
-        for hit in corpus_db.search(query, limit=limit, include_witness=include_witness):
+
+        # THE SUBJECT PARTITION MUST HOLD ON BOTH SIDES OF THE MERGE, and I learned that the hard
+        # way twice in one day. The resident ranker got the partition and the live wire STILL
+        # answered "Wesleyan Church" with a Kensington church directory and "The war of Antichrist"
+        # at positions 4-8 — because those shelves are frozen, so their hits arrive from the shard's
+        # bm25 and never met the rule. Exactly the shape of the stopword bug this afternoon: two
+        # matchers, one fixed, the reader unchanged.
+        #
+        # The shard cannot apply this itself (FTS5 ranks inside SQLite), so the gate goes HERE, at
+        # the one point every frozen hit must pass through. Cheap: one token test per candidate.
+        from .corpus_db import _STOP          # the one list every matcher uses
+        q_tokens = {t for t in _tokens(query) if t not in _STOP}
+        subject = corpus._subject_of(q_tokens, corpus._idf(q_tokens)) if q_tokens else None
+
+        for hit in corpus_db.search(query, limit=limit * 3, include_witness=include_witness):
             if (hit.get("shelf") not in frozen or hit.get("id") in have
                     or (shelves is not None and hit.get("shelf") not in shelves)
                     or not is_public(hit)):
                 continue        # resident shelves are already fully scored — merge only frozen freight
+            if subject and subject not in set(_tokens(_card_text(hit))):
+                continue        # lacks what the question is about — the same partition, same rule
             out.append(hit)
             have.add(hit.get("id"))
             if len(out) >= limit:

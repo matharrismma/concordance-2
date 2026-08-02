@@ -28,6 +28,7 @@ test_chess.py
 test_coach.py
 test_commentary.py
 test_commentary_cards.py
+test_compare.py
 test_compendium.py
 test_compute.py
 test_connect.py
@@ -38,6 +39,7 @@ test_corpus.py
 test_corpus_db.py
 test_corpus_freeze.py
 test_covenant.py
+test_craft.py
 test_crossref.py
 test_dates.py
 test_days.py

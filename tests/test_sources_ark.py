@@ -95,6 +95,32 @@ def test_the_allowlist_is_the_same_hosts_the_finder_searches(ark):
         assert host in sources.ALLOWED_HOSTS
 
 
+def test_an_archive_storage_node_is_reachable(ark):
+    """THE ARK COULD NOT FETCH FROM ARCHIVE.ORG AT ALL, and nothing said so for as long as it
+    existed. Every `archive.org/download/...` redirects to a numbered storage node chosen per
+    request — ia601905, ia801905, ia902703 — and the allowlist named a single guessed one
+    (`ia801.us.archive.org`). So the redirect check, which is correct, refused every real
+    download: "redirected off the allowlist to ia801905.us.archive.org".
+
+    Found 2026-08-01 on the first acquisition ever attempted through the real fetch (the 1923
+    Manual of the Church of the Nazarene). The same shape as the fd leak and both search fixes —
+    code that looks right on a path nobody walked.
+    """
+    for node in ("ia801905.us.archive.org", "ia601905.us.archive.org", "ia902703.us.archive.org"):
+        assert sources._host_ok(f"https://{node}/0/items/x/x_djvu.txt"), \
+            f"{node} refused — archive.org downloads cannot be fetched"
+
+
+def test_the_widening_did_not_open_the_gate(ark):
+    """A suffix allowlist is only safe if the leading dot is doing its job. Only archive.org
+    controls the archive.org zone; everything else must still be refused."""
+    for host in ("evil.com", "archive.org.evil.com", "notarchive.org",
+                 "evil-us.archive.org.attacker.net", "us.archive.org.evil.net"):
+        assert not sources._host_ok(f"https://{host}/x.txt"), f"{host} was let through"
+    r = sources.fetch("https://archive.org.evil.com/whatever.txt")
+    assert r["status"] == sources.NOT_HELD
+
+
 def test_a_device_that_anchors_nothing_says_so(monkeypatch):
     """A phone carries cards, not the ark — that is legitimate, and must not read as failure."""
     monkeypatch.delenv("CONCORDANCE_SOURCES", raising=False)

@@ -67,10 +67,32 @@ def test_the_stored_card_stays_bare():
     _drop()
     raw = (Path(os.environ["CONCORDANCE_DATA_DIR"]) / "shelves" / "drops.jsonl") \
         .read_text(encoding="utf-8")
-    assert "presentation" not in raw, "the experience layer was written into the record"
-    for leak in ("glyph", "kind_label", "waybill_line", "standing", "ago"):
-        assert leak not in raw, f"presentation field {leak!r} reached the store"
     rec = json.loads(raw.splitlines()[0])
+
+    # CHECK THE KEYS, NOT THE CHARACTERS. This was a substring scan of the whole serialized
+    # record — `assert "ago" not in raw` — and it FAILED A FULL GATE RUN on 2026-08-01 because a
+    # randomly generated member key contained those three letters:
+    #
+    #     V1ocF6KHL7agokLoaDg", "drop_kind": "recipe"
+    #                  ^^^
+    #
+    # Nothing had leaked. Six re-runs passed. A three-letter needle in a haystack of base64 will
+    # coincide sooner or later, and when it does it reads as a real data leak in the store — the
+    # most alarming failure this suite can report, for no reason. Same error as reading a coincidence
+    # as evidence anywhere else: the check must match the THING (a field name), not letters that
+    # happen to spell it.
+    def _keys(obj):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                yield k
+                yield from _keys(v)
+        elif isinstance(obj, list):
+            for v in obj:
+                yield from _keys(v)
+
+    present = set(_keys(rec))
+    for leak in ("presentation", "glyph", "kind_label", "waybill_line", "standing", "ago"):
+        assert leak not in present, f"presentation field {leak!r} reached the store"
     assert set(rec["extra"]) <= {"member", "ring", "display_name", "signature", "drop_kind",
                                  "signed_at", "url", "waybill", "reach", "reach_error", "embed",
                                  "quote", "attribution", "supersedes"}, \

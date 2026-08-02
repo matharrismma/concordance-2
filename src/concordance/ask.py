@@ -996,6 +996,31 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                                     "written plainly, honest about what a tool cannot settle. "
                                     "The verses are the actual text; the weighing is yours.")},
                           text, witness, gate_just_opened)
+    # A COMPARISON IS A DIFFERENT QUESTION, and reading it as one bag of words is why
+    # "compare and contrast Nazarene vs Wesleyan" returned six Wesleyan cards and never mentioned
+    # that the other half was missing. Two subjects must be retrieved SEPARATELY or the answer is
+    # half a question answered as though it were whole.
+    #
+    # Placed here deliberately: AFTER the crisis path and the seeker answers, which outrank
+    # everything and always will. A person in trouble is never handed a comparison table.
+    from . import compare as _compare
+    _cmp = _compare.compare(text, search=corpus.search)
+    if _cmp:
+        out = {**base, "kind": "comparison", "generated": False,
+               "message": _cmp["message"], "subjects": _cmp["subjects"],
+               "sides": [{"subject": s["subject"],
+                          "held_as_tradition": s["held_as_tradition"],
+                          "voice": corpus._brief(s["voice"]) if s.get("voice") else None,
+                          "cards": [corpus._brief(c) for c in s["cards"]]}
+                         for s in _cmp["sides"]],
+               "missing": _cmp["missing"], "shared_ground": _cmp["shared_ground"],
+               "note": ("Composed, not written: every line is a card you can open, in its own "
+                        "tradition's voice. Where a side is missing this says so rather than "
+                        "filling the gap.")}
+        if _cmp.get("want"):
+            out["want"] = _cmp["want"]
+        return _witnessed(out, text, witness, gate_just_opened)
+
     _vol = (_decks.predict(subj, k=1) or [None])[0]
     hits = []
     if _vol and not practical:

@@ -55,9 +55,22 @@ from typing import Any, Dict, Optional
 # and the search gate cannot drift apart.
 ALLOWED_HOSTS = frozenset({
     "www.loc.gov", "loc.gov", "tile.loc.gov",
-    "archive.org", "iaod.archive.org", "ia801.us.archive.org", "web.archive.org",
+    "archive.org", "iaod.archive.org", "web.archive.org",
     "www.gutenberg.org", "gutenberg.org", "aleph.gutenberg.org",
 })
+
+# ARCHIVE.ORG SERVES EVERY DOWNLOAD FROM A NUMBERED STORAGE NODE — ia601905, ia801905, ia902703 —
+# picked per request, so `archive.org/download/...` always redirects to a host chosen at fetch
+# time. The allowlist named ONE guessed node (`ia801.us.archive.org`), which meant the redirect
+# check refused every real download: the ark could not fetch from archive.org at all. Nothing
+# noticed for as long as it existed, because nothing exercised the fetch in production — the same
+# shape as the fd leak and the two search fixes, correct-looking code on a path no one walked.
+#
+# Widened to the SUFFIX rather than to a wildcard. Only archive.org controls the archive.org zone,
+# so `*.us.archive.org` is the same operator and the same trust as `archive.org` itself; a bare
+# `*.archive.org` would be wider than the need. The leading dot is load-bearing: it keeps
+# `evil-us.archive.org`-style lookalikes out while admitting the real storage nodes.
+ALLOWED_SUFFIXES = (".us.archive.org",)
 
 MAX_BYTES = 64 * 1024 * 1024      # 64 MB: a book, not a film. Enforced while streaming.
 TIMEOUT = 30
@@ -85,7 +98,9 @@ def _host_ok(url: str) -> bool:
         host = (urllib.parse.urlparse(url).hostname or "").lower()
     except ValueError:
         return False
-    return host in ALLOWED_HOSTS
+    if host in ALLOWED_HOSTS:
+        return True
+    return any(host.endswith(sfx) for sfx in ALLOWED_SUFFIXES)
 
 
 def _ext_for(url: str, ctype: str) -> str:
