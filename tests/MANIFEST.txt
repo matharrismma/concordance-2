@@ -142,6 +142,8 @@ test_timeline.py
 test_tolerance.py
 test_traffic.py
 test_trust_kernel_edges.py
+test_unchecked.py
+test_unchecked_route.py
 test_understanding.py
 test_validate.py
 test_verifier_consistency.py

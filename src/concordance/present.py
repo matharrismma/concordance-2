@@ -215,6 +215,20 @@ def derive(card: Dict[str, Any], now: Optional[int] = None) -> Dict[str, Any]:
     if x.get("promoted_by"):
         out["vouched"] = {"by": str(x["promoted_by"]), "reason": str(x.get("promoted_reason") or "")}
 
+    # THE OPEN QUESTION AN ENGINE-WRITTEN CARD WEARS (Matt, 2026-08-01: "We put them in, when you
+    # write, but you ask the first person that recalls the cards to verify them."). It rides here
+    # rather than on a route because this block is what BOTH surfaces render from — the card page a
+    # person reads and the /card JSON an agent fetches. A guarantee that reaches the server and not
+    # the reader is not a guarantee, and that has cost this project five separate times.
+    #
+    # `unchecked.question` is deliberately PURE — derived from the card alone, no store read — so
+    # this function keeps its contract: free, cacheable, no I/O. Counting who has answered means
+    # reading the log, and that belongs to the route that is already doing I/O.
+    from . import unchecked as _unchecked
+    ask = _unchecked.question(card)
+    if ask:
+        out["unchecked"] = ask
+
     if cacheable:
         if len(_cache) >= _MAX_CACHE:
             _cache.clear()          # a plain flush beats an eviction policy nobody will tune

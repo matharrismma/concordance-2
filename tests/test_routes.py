@@ -69,10 +69,15 @@ GOLDEN_API_GET = {
     "/mesh/signable",  # deliberate addition (the bytes to sign, so a key never crosses the wire)
     "/attest",  # deliberate addition (bear witness to a record you hold; GET lists the witnesses)
     "/wants",   # deliberate addition (the WANT LIST — the library grows by its misses; 2026-08-01)
+    # deliberate addition 2026-08-01 — what the engine writes goes in wearing its open question,
+    # and the first reader to recall it is asked to close it. `/unchecked` publishes the standing
+    # list; `/unchecked/answer` is the door the ask on every such card points at.
+    "/unchecked", "/unchecked/answer",
 }
 # /search moved OUT of this set on 2026-07-31 and into GOLDEN_READ_LIMITED — a read and a write
 # are not the same risk, and the one client the shared cap refused most was ClaudeBot.
 GOLDEN_RATELIMITED = {
+    "/unchecked/answer",   # deliberate addition 2026-08-01 — anyone may answer, so it is rate-limited
     "/verify", "/derivation/verify", "/mcp", "/ask", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose", "/pins", "/pins/done",
     "/threads", "/threads/search",
     "/coach/mastery", "/identity/create", "/identity/verify", "/badges",

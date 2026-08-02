@@ -306,6 +306,28 @@ def render_badge_html(badge_hash: str, verify_result: Optional[Dict[str, Any]]) 
     return 200, html
 
 
+def _unchecked_live(card_id: str, ask: Dict[str, Any]) -> Dict[str, Any]:
+    """Put the LIVE answer count onto a pure ask block. ONE copy, used by both surfaces.
+
+    `present.derive` is pure and cached by (id, updated_at), so the block it returns can only ever
+    say "nobody has checked this" — it cannot see the log, and the cache would freeze that sentence
+    in place even if it could. Reading the fold belongs to a route, which is already doing I/O.
+    Written once and shared, because the first version of this lived only in the HTML renderer and
+    the JSON surface quietly kept telling agents nothing had been checked.
+    """
+    from .. import unchecked as _u
+    st = _u.state_of(card_id)
+    if st["disputed"]:
+        head = "A reader has disputed this card."
+    elif st["answered"]:
+        head = f"Checked by {st['checked_by']} reader(s) — you may add your own."
+    else:
+        head = ask.get("headline", "")
+    return dict(ask, headline=head, open=not st["answered"],
+                checked_by=st["checked_by"], disputed_by=st["disputed_by"],
+                disputed=st["disputed"])
+
+
 def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int, str]:
     """Server-render a keeping card as a crawlable, citable HTML page (data IN the markup, not
     client-JS) — MIRRORS render_seal_html. The first artifact of 2.0 standing alone: only FOUND
@@ -383,6 +405,40 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
     if bits:
         overlay = (f"<p class=muted style=\"font-size:.78rem;margin:.1rem 0 .6rem\">"
                    f"{_esc(' · '.join(bits))}</p>")
+    # THE OPEN QUESTION, PUT TO THE READER WHO ACTUALLY OPENED THIS CARD (Matt, 2026-08-01: "you
+    # ask the first person that recalls the cards to verify them"). Real <a href>, no JavaScript —
+    # the adjoining-card graph was invisible to every no-JS reader and every crawler across ~39k
+    # views for exactly that reason, and an ask nobody can see is worse than no ask, because the
+    # card then wears the same face as a checked one.
+    unchecked_block = ""
+    _ask = _over.get("unchecked")
+    if _ask:
+        # THE COUNT COMES FROM THE LOG, NOT FROM THE CARD. `present.derive` is pure and cached by
+        # (id, updated_at), so the block it hands back can only ever say "nobody has checked this"
+        # — it has no way to know an answer arrived, and the cache would freeze that sentence in
+        # place besides. Reading the fold HERE, where I/O already happens, is what keeps the page
+        # honest after the first reader answers. Without this the ask would be a lie within a
+        # minute of working correctly.
+        _ask = _unchecked_live(card_id, _ask)
+        _links = " · ".join(
+            f"<a href=\"{_esc(_ask['answers'][v])}\">{_esc(label)}</a>"
+            for v, label in (("holds", "Yes, it holds"), ("wrong", "No, this is wrong"),
+                             ("unsure", "I'm not sure")))
+        _src = _ask.get("source") or {}
+        _cite = _esc(str(_src.get("label") or ""))
+        if _src.get("url"):
+            _cite = f"<a href=\"{_esc(str(_src['url']))}\" rel=nofollow>{_cite}</a>"
+        unchecked_block = (
+            "<div style=\"border:1px solid #d8cfa8;background:#fbf8ee;padding:.7rem .85rem;"
+            "margin:.8rem 0;border-radius:3px\">"
+            f"<p style=\"margin:0 0 .35rem;font-weight:600\">{_esc(_ask['headline'])}</p>"
+            f"<p class=muted style=\"margin:0 0 .45rem;font-size:.82rem\">{_esc(_ask['question'])}</p>"
+            + (f"<p class=muted style=\"margin:0 0 .45rem;font-size:.78rem\">Source: {_cite}</p>"
+               if _cite else "")
+            + f"<p style=\"margin:0 0 .3rem;font-size:.85rem\">{_links}</p>"
+            f"<p class=muted style=\"margin:0;font-size:.72rem\">{_esc(_ask['note'])}</p>"
+            "</div>")
+
     adjoining = ""
     if _nb:
         rows = "".join(
@@ -432,7 +488,7 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             f"<meta name=\"twitter:card\" content=\"summary\">"
             f"<script type=\"application/ld+json\">{ld_json}</script></head><body>"
             f"{_site_header('<a href=/search>Search</a><a href=/#verify>Verify</a>')}<main class=wrap>"
-            f"<h1>{title}</h1>{overlay}{body_html}"
+            f"<h1>{title}</h1>{overlay}{unchecked_block}{body_html}"
             f"<section class=card>{source_html}"
             f"<div class=muted style=\"font-size:.8rem;margin-top:.5rem\">card id</div>"
             f"<div class=mono style=\"word-break:break-all\">{_esc(card_id)}</div>{related}</section>"
@@ -1325,7 +1381,15 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # JSON and a person reading the page are looking at one thing, and the graph is walkable
         # from either. Both are DERIVED on the way out; the stored card is untouched.
         from .. import present as _present
-        return _ok(dict(c, presentation=_present.derive(c),
+        _p = _present.derive(c)
+        if _p.get("unchecked"):
+            # THE SAME LIVE COUNT THE PAGE SHOWS. Fixed here on 2026-08-01 after the HTML surface
+            # was corrected and this one was not — the page would report "checked by 2 readers"
+            # while an agent fetching the identical card was told nobody had ever looked at it.
+            # Correct in one place and absent where the other reader stands is this project's
+            # oldest failure, and agents are about 35% of the traffic.
+            _p = dict(_p, unchecked=_unchecked_live(str(c.get("id") or ""), _p["unchecked"]))
+        return _ok(dict(c, presentation=_p,
                         neighbors=_present.neighbors(c, resolve=corpus.get_card, limit=8)))
     if method == "GET" and path == "/daily":
         c = corpus.daily(query.get("seed") or None)
@@ -1862,6 +1926,29 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(_wants.listing(state=(query.get("state") or None),
                                   plane=(query.get("plane") or None)))
 
+    if path == "/unchecked/answer" and method in ("GET", "POST"):
+        # THE DOOR THE ASK POINTS AT. `present.derive` puts these links on every engine-written
+        # card, so if this route did not exist the guarantee would be a 404 — worse than saying
+        # nothing, because it looks like an invitation and is a dead end.
+        #
+        # GET is accepted deliberately: the link in the card must work for a reader with no
+        # scripts, no account and no key, which is most of the people this is for. Nothing here is
+        # destructive — an answer is an append to a log, and a single verdict cannot erase a card.
+        from .. import unchecked as _unchecked
+        src = body if (method == "POST" and isinstance(body, dict)) else query
+        r = _unchecked.answer(str(src.get("card") or src.get("card_id") or ""),
+                              str(src.get("verdict") or ""),
+                              by=str(src.get("by") or ""), note=str(src.get("note") or ""),
+                              attestation=(src.get("attestation")
+                                           if isinstance(src.get("attestation"), dict) else None))
+        return _ok(r) if r.get("ok") else _err(400, r.get("reason", "could not record the answer"))
+
+    if method == "GET" and path == "/unchecked":
+        # What the engine has written that no one has looked at yet. A library that publishes its
+        # own unchecked list is harder to fool than one that waits to be audited.
+        from .. import unchecked as _unchecked
+        return _ok(_unchecked.standing(limit=int(query.get("limit") or 100)))
+
     if method == "POST" and path == "/report":
         # The moderation floor: anyone may report; nobody's report is a verdict. One report is a
         # claim; three distinct SIGNING reporters hold the item for a HUMAN steward (Deut 19:15).
@@ -2101,6 +2188,8 @@ ROUTES = [
     {"path": "/moderation/signable", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/want", "methods": ("POST",), "rl": True},
     {"path": "/wants", "methods": ("GET",), "api": True},
+    {"path": "/unchecked", "methods": ("GET",), "api": True},
+    {"path": "/unchecked/answer", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/report", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/block", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/seeds", "methods": ("GET",), "api": True},

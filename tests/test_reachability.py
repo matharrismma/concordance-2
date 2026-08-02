@@ -46,6 +46,15 @@ AGENT_ONLY = {
     "/works/item", "/library/health", "/growth", "/daily", "/pronounce", "/book",
     "/badges", "/archetype", "/archetypes", "/archetypes/match", "/coach/guidance",
     "/chess", "/report", "/block",
+    # The open-question pair (Matt, 2026-08-01: "you ask the first person that recalls the cards
+    # to verify them"). `/unchecked` is the standing ledger — a Steward instrument, same shape as
+    # `/wants`. `/unchecked/answer` IS reader-facing and is NOT quietly exempt: it is linked as a
+    # real <a href> from every engine-written card page, which api.render_card_html builds at
+    # request time. This checker reads static markup only (site/*.html, site/*.js), so it cannot
+    # see a server-rendered link — the limit is in the instrument, not in the door, and saying so
+    # here is the point of declaring rather than exempting. tests/test_unchecked_route.py holds
+    # the link itself, by rendering the page and asserting the href is in the HTML.
+    "/unchecked", "/unchecked/answer",
     "/wants",   # the desiderata ledger — read by the Steward's rounds and the mint; humans reach
                 # the WRITE side (/want) from the empty-search offer and the card flag
 

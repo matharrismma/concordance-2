@@ -334,7 +334,9 @@ def card_from_span(sha: str, start: int, end: int, *, subject: str, waybill: Dic
         head = (opening[:cut.start()] if cut else opening[:72]).strip()
     title = (head or subject)[:110]
 
-    return {
+    from . import unchecked
+
+    card = {
         "id": cid,
         "kind": "reference",
         "title": title,
@@ -371,6 +373,9 @@ def card_from_span(sha: str, start: int, end: int, *, subject: str, waybill: Dic
             "crafted_from": origin,
         },
     }
+    # THE CARD GOES IN WEARING ITS QUESTION. Stamped at the mint rather than at the write, so no
+    # path exists by which an engine-written card reaches a store without it.
+    return unchecked.mark(card)
 
 
 def craft(sha: str, subject: str, *, waybill: Optional[Dict[str, Any]] = None,
