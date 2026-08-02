@@ -59,18 +59,22 @@ ALLOWED_HOSTS = frozenset({
     "www.gutenberg.org", "gutenberg.org", "aleph.gutenberg.org",
 })
 
-# ARCHIVE.ORG SERVES EVERY DOWNLOAD FROM A NUMBERED STORAGE NODE — ia601905, ia801905, ia902703 —
-# picked per request, so `archive.org/download/...` always redirects to a host chosen at fetch
-# time. The allowlist named ONE guessed node (`ia801.us.archive.org`), which meant the redirect
-# check refused every real download: the ark could not fetch from archive.org at all. Nothing
-# noticed for as long as it existed, because nothing exercised the fetch in production — the same
-# shape as the fd leak and the two search fixes, correct-looking code on a path no one walked.
+# ARCHIVE.ORG SERVES EVERY DOWNLOAD FROM A NUMBERED STORAGE NODE — ia801905.us, dn790008.ca,
+# dn760107.eu — picked per request, so `archive.org/download/...` always redirects to a host
+# chosen at fetch time. This constant has now been wrong TWICE, both times by generalizing from
+# exactly what had been observed:
 #
-# Widened to the SUFFIX rather than to a wildcard. Only archive.org controls the archive.org zone,
-# so `*.us.archive.org` is the same operator and the same trust as `archive.org` itself; a bare
-# `*.archive.org` would be wider than the need. The leading dot is load-bearing: it keeps
-# `evil-us.archive.org`-style lookalikes out while admitting the real storage nodes.
-ALLOWED_SUFFIXES = (".us.archive.org",)
+#   1. It named ONE guessed node (`ia801.us.archive.org`), so the redirect check — itself correct —
+#      refused every real download, and the ark could not fetch from archive.org at all.
+#   2. Fixed 2026-08-01 to `.us.archive.org`, the suffix of the node observed that morning. The
+#      SAME EVENING a six-book batch was refused entire: the CDN answered from `.ca.` and `.eu.`
+#      nodes. The fix was measured, and measured too narrowly.
+#
+# The trust argument never depended on the continent: only the Internet Archive controls the
+# archive.org DNS zone, so `.archive.org` IS the boundary — anything narrower is an assumption
+# about their CDN topology, which their CDN falsified within hours. The leading dot stays
+# load-bearing: `evil-archive.org` and `archive.org.evil.com` both remain refused.
+ALLOWED_SUFFIXES = (".archive.org",)
 
 MAX_BYTES = 64 * 1024 * 1024      # 64 MB: a book, not a film. Enforced while streaming.
 TIMEOUT = 30

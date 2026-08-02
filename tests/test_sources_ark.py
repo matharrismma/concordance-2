@@ -106,7 +106,12 @@ def test_an_archive_storage_node_is_reachable(ark):
     Manual of the Church of the Nazarene). The same shape as the fd leak and both search fixes —
     code that looks right on a path nobody walked.
     """
-    for node in ("ia801905.us.archive.org", "ia601905.us.archive.org", "ia902703.us.archive.org"):
+    # THREE CONTINENTS, because the first fix admitted only `.us.` — the suffix of the single node
+    # observed that morning — and the same evening a six-book batch was refused entire when the
+    # CDN answered from `.ca.` and `.eu.`. Generalizing from exactly what you saw is how this
+    # constant has been wrong twice; the trust boundary is the DNS zone, not the continent.
+    for node in ("ia801905.us.archive.org", "dn790008.ca.archive.org",
+                 "dn760107.eu.archive.org", "ia902703.us.archive.org"):
         assert sources._host_ok(f"https://{node}/0/items/x/x_djvu.txt"), \
             f"{node} refused — archive.org downloads cannot be fetched"
 
@@ -114,7 +119,7 @@ def test_an_archive_storage_node_is_reachable(ark):
 def test_the_widening_did_not_open_the_gate(ark):
     """A suffix allowlist is only safe if the leading dot is doing its job. Only archive.org
     controls the archive.org zone; everything else must still be refused."""
-    for host in ("evil.com", "archive.org.evil.com", "notarchive.org",
+    for host in ("evil.com", "archive.org.evil.com", "notarchive.org", "evil-archive.org",
                  "evil-us.archive.org.attacker.net", "us.archive.org.evil.net"):
         assert not sources._host_ok(f"https://{host}/x.txt"), f"{host} was let through"
     r = sources.fetch("https://archive.org.evil.com/whatever.txt")
