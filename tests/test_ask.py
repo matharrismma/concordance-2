@@ -422,3 +422,117 @@ def test_the_subject_guard_rejects_the_generic_word():
     assert ask._shares_a_word("Tell me about the Wesleyan Church", named) is True
     assert ask._shares_a_word("Tell me about the Wesleyan Church", generic) is False, \
         "a hit on 'church' alone carried a question about the Wesleyans"
+
+
+def test_baptists_finds_baptist_the_plural_is_not_an_empty_shelf():
+    """"Now it says it doesn't have anything for southern baptists." There is no stemming, so the
+    subject partition demanded the exact token "baptists" — which _idf reads as MAXIMALLY rare
+    precisely because no card contains it (df=0) — and a library full of Baptist material
+    reported an empty shelf. The present form now takes the subject seat, and only when the
+    asked form is absent: expansion adds, never rewrites."""
+    from concordance import corpus
+    # The mechanism, deterministically: a fixture corpus that holds only the singular. The real
+    # corpus happens to contain "baptists" too, so the live assertion below is necessary but not
+    # sufficient — this one pins the df=0 fallback itself.
+    fix = corpus.Corpus({
+        "c1": {"id": "c1", "title": "Baptist", "body": "the baptist tradition confesses",
+               "lifecycle_stage": "public"},
+        "c2": {"id": "c2", "title": "Geography", "body": "the southern hemisphere",
+               "lifecycle_stage": "public"},
+    }, min_idf=0.0)
+    assert fix._present_form("baptists") == "baptist", "the absent plural did not yield the seat"
+    assert fix._present_form("baptist") == "baptist", "a present form must never be rewritten"
+    assert fix._subject_of(fix._with_variants({"southern", "baptists"}),
+                           fix._idf(fix._with_variants({"southern", "baptists"}))) in (
+        "baptist", "southern"), "an absent token held the subject seat"
+    assert corpus.subject_of("Tell me about the Southern Baptists") in ("baptist", "baptists")
+    r = ask.respond("What do Southern Baptists believe", SEC)
+    hits = r.get("results") or []
+    assert hits, "a full library reported an empty shelf on a plural"
+    top = ((hits[0].get("title") or "") + " " + (hits[0].get("snippet") or "")
+           + " " + (hits[0].get("body") or "")).lower()
+    assert "baptist" in top, f"top hit is not about the subject: {hits[0].get('title')!r}"
+
+
+def test_a_true_miss_tries_the_pull_before_the_citation_fallback():
+    """"It should find what I need, when I need it" — on EVERY door. The pull was wired into the
+    comparison path only; a plain question about an absent subject fell through to citations.
+    Spied here: the miss path must attempt pull_and_card, and when it cards, the answer is the
+    cards — not a pointer to a book that exists."""
+    from concordance import expand
+    calls = []
+    fake_cards = [{"id": "card_span_pulltest", "title": "Of the Zorblatt Confession",
+                   "shelf": "sources", "body": "The zorblatt fellowship holds its confession...",
+                   "source": {"authority_tier": "primary_pd"}}]
+    def fake_pull(text, subj, config, plane="human"):
+        calls.append(subj)
+        return {"status": "carded", "cards": fake_cards,
+                "message": "fetched and cut on the call — kept for next time"}
+    orig = expand.pull_and_card
+    expand.pull_and_card = fake_pull
+    try:
+        r = ask.respond("tell me about the zorblatt fellowship", SEC)
+    finally:
+        expand.pull_and_card = orig
+    assert calls, "the miss path never attempted the pull"
+    hits = r.get("results") or []
+    assert any(h.get("id") == "card_span_pulltest" for h in hits), \
+        "the pull carded an answer and the response did not carry it"
+    assert "kept for next time" in (r.get("message") or "")
+
+
+def test_the_candidate_pool_is_deterministic_and_never_starves_the_rare_word():
+    """A HEISENBUG THAT SURVIVED EVERY GATE: candidates were gathered in set-iteration order,
+    which is hash-seed dependent and re-rolls each restart. For "southern baptists" (df 2,702 vs
+    160) whichever token iterated first flooded the 600-candidate cap — one restart returned 8
+    Baptist histories, the next returned 1, same query, same corpus. A ranking that changes with
+    a restart cannot be trusted or tested. Rarest tokens now seed first, deterministically."""
+    from concordance import corpus
+    cards = {}
+    for i in range(700):                     # the common word floods far past the cap
+        cards[f"c{i}"] = {"id": f"c{i}", "title": f"southern note {i}",
+                          "body": "a southern matter", "lifecycle_stage": "public"}
+    for i in range(3):                       # the rare word — the actual subject
+        cards[f"b{i}"] = {"id": f"b{i}", "title": f"Baptists of town {i}",
+                          "body": "the baptists gathered", "lifecycle_stage": "public"}
+    fix = corpus.Corpus(cards, min_idf=0.0)
+    cand = set(fix._candidates({"southern", "baptists"}))
+    for i in range(3):
+        assert f"b{i}" in cand, "the common word starved the subject out of the candidate pool"
+    hits = fix.search("southern baptists", limit=8)
+    got = {h["id"] for h in hits}
+    assert {"b0", "b1", "b2"} <= got, "subject-holding cards missing from the results"
+
+
+def test_the_singular_voice_answers_the_plural_question():
+    """"methodists" must find the card that says "Methodist" — the partition demands the subject
+    in EITHER number, at both partitions and in the guard."""
+    from concordance import corpus
+    fix = corpus.Corpus({
+        "v": {"id": "v", "title": "Methodist / Wesleyan",
+              "body": "the methodist tradition confesses", "lifecycle_stage": "public"},
+        "x": {"id": "x", "title": "Geography", "body": "a southern town",
+              "lifecycle_stage": "public"},
+    }, min_idf=0.0)
+    hits = fix.search("methodists", limit=4)
+    assert hits and hits[0]["id"] == "v", "the singular voice was partitioned out of the plural"
+    assert ask._shares_a_word("tell me about the methodists",
+                              {"title": "Methodist / Wesleyan",
+                               "body": "the methodist tradition"}) is True
+
+
+def test_both_numbers_enter_at_the_tokens_not_just_the_verdict():
+    """Measured live 2026-08-02: "methodists" has df>0, so no singular was added, common came up
+    empty against the singular-only voice card, and the card died at the no-common gate BEFORE
+    the family partition could fire. The family must enter at the tokens."""
+    from concordance import corpus
+    fix = corpus.Corpus({
+        "v": {"id": "v", "title": "Methodist / Wesleyan", "body": "the methodist tradition",
+              "lifecycle_stage": "public"},
+        "p": {"id": "p", "title": "A history", "body": "founder of the methodists",
+              "lifecycle_stage": "public"},
+    }, min_idf=0.0)
+    # both forms present in the index; the plural query must find the singular-only card too
+    got = {h["id"] for h in fix.search("methodists", limit=4)}
+    assert "v" in got, "the singular-only card died at the no-common gate"
+    assert "p" in got

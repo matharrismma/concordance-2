@@ -225,3 +225,60 @@ def test_a_pull_that_crashes_leaves_an_honest_refusal_not_a_500():
     r = compare.compare("Nazarene vs Wesleyan",
                         search=_fake({"nazarene": [], "wesleyan": [VOICE]}), acquire=boom)
     assert r["want"] is not None and "cannot compare" in r["message"]
+
+
+def test_a_plural_finds_the_voice():
+    """"methodists" failed to match the Methodist / Wesleyan voice LIVE, on a shelf that plainly
+    holds the tradition — the plural blindness in its fourth home, the voice matcher."""
+    r = compare.compare("southern baptists vs methodists",
+                        search=_fake({"southern baptists": [],
+                                      "methodists": [VOICE]}))
+    m = [s for s in r["sides"] if s["subject"] == "methodists"][0]
+    assert m["held_as_tradition"] is True, "the plural could not find its tradition"
+    assert m["voice"]["title"] == "Methodist / Wesleyan"
+
+
+def test_a_held_gutenberg_book_counts_as_a_document_to_stand_on():
+    """southern baptists had 8 held PD documents and reported docs=0, because the already-held
+    filter admitted only the sources shelf. A book the library holds whole is exactly what a
+    missing side may stand on."""
+    book = {"id": "g1", "title": "One hundred years with the Baptists of Amherst",
+            "shelf": "gutenberg", "body": "the baptists of amherst..."}
+    r = compare.compare("southern baptists vs Wesleyan",
+                        search=_fake({"southern baptists": [book], "wesleyan": [VOICE]}))
+    sb = [s for s in r["sides"] if s["subject"] == "southern baptists"][0]
+    assert sb["held_as_tradition"] is False
+    assert sb.get("their_own_documents"), "a shelf-full of held PD documents reported as nothing"
+    assert r["want"] is None
+
+
+def test_the_voice_is_asked_of_the_registry_not_won_in_a_popularity_contest():
+    """Live, 2026-08-02: "methodists" ranked five Tyerman volumes above the Methodist / Wesleyan
+    voice card, so the tradition read as undocumented while its registry card sat on the shelf.
+    When the general results miss the voice, the churches shelf is asked DIRECTLY."""
+    tyerman = [{"id": f"t{i}", "title": f"The Life of Wesley vol {i}", "shelf": "gutenberg",
+                "body": "founder of the methodists"} for i in range(8)]
+    def search(q, limit=8, shelves=None):
+        if shelves == {"churches"}:
+            return [VOICE]
+        return tyerman[:limit]
+    r = compare.compare("southern baptists vs methodists",
+                        search=search)
+    m = [s for s in r["sides"] if s["subject"] == "methodists"][0]
+    assert m["held_as_tradition"] is True, \
+        "the registry held the tradition and the popularity contest hid it"
+    assert m["voice"]["title"] == "Methodist / Wesleyan"
+
+
+def test_a_tradition_card_outranks_a_person_for_the_orienting_seat():
+    """Spurgeon was presented as "southern baptists in its own reckoning" — a person is a voice
+    OF a tradition, not the tradition's own reckoning. The person still orients when no
+    tradition card matches at all."""
+    spurgeon = {"id": "sp", "title": "Charles Spurgeon — Baptist", "shelf": "churches",
+                "box": "voice", "body": "the voice baptists themselves hold highest"}
+    tradition = {"id": "tr", "title": "Baptist", "shelf": "churches", "box": "tradition",
+                 "body": "Baptist. Confession: the Second London Baptist Confession."}
+    got = compare._voice_card("southern baptists", [spurgeon, tradition])
+    assert got["id"] == "tr", "a person took the tradition's seat"
+    assert compare._voice_card("southern baptists", [spurgeon])["id"] == "sp", \
+        "with no tradition card, the person must still orient"

@@ -71,21 +71,54 @@ def subjects_of(query: str) -> Optional[List[str]]:
 
 
 def _voice_card(subject: str, cards: List[dict]) -> Optional[dict]:
-    """The orienting card for a tradition — the one written to say what it IS."""
-    want = {w for w in re.findall(r"[a-z]{3,}", subject.lower())}
+    """The orienting card for a tradition — the one written to say what it IS.
+
+    PLURALS COUNT (2026-08-02): "methodists" failed to match the "Methodist / Wesleyan" voice —
+    live, on a shelf that plainly holds the tradition — because matching demanded the exact
+    surface form. Each wanted word also tries its bare singular/plural, nothing more: this is
+    tolerance for how people actually ask, not a stemmer.
+    """
+    want = set()
+    for w in re.findall(r"[a-z]{3,}", subject.lower()):
+        want.add(w)
+        if w.endswith("es") and len(w) > 4:
+            want.add(w[:-2])
+        if w.endswith("s") and len(w) > 3:
+            want.add(w[:-1])
+        want.add(w + "s")
+    # A TRADITION OUTRANKS A PERSON for the orienting seat. The registry holds both kinds — the
+    # "Baptist" tradition card and "Charles Spurgeon — Baptist" — and taking the first match
+    # presented Spurgeon as "southern baptists in its own reckoning" (live, 2026-08-02). A
+    # person is a voice OF a tradition, not the tradition's own reckoning; the person still
+    # orients when no tradition card matches at all.
+    person = None
     for c in cards:
         if c.get("shelf") != VOICE_SHELF:
             continue
         hay = f"{c.get('title', '')} {c.get('body', '')}".lower()
         if any(w in hay for w in want):
-            return c
-    return None
+            if c.get("box") == "tradition":
+                return c
+            person = person or c
+    return person
 
 
 def _side(subject: str, search, get=None) -> Dict[str, Any]:
     """One column: what we hold about this subject, and honestly what KIND of holding it is."""
     cards = search(subject, limit=8) or []
     voice = _voice_card(subject, cards)
+    # ASK THE SHELF DIRECTLY. Fishing the voice out of the general top-8 made the voice a
+    # popularity contest: "methodists" ranked five Tyerman volumes and two dictionary entries
+    # above the Methodist / Wesleyan voice card, so the tradition read as undocumented while its
+    # own registry card sat on the shelf (live, 2026-08-02). The registry is 29 cards; scoping
+    # the lookup to it is cheap and makes "is this tradition held?" a question about the
+    # REGISTRY, which is what it always was.
+    if voice is None:
+        try:
+            shelf_only = search(subject, limit=4, shelves={VOICE_SHELF}) or []
+        except TypeError:  # a test-injected search without a shelves parameter
+            shelf_only = []
+        voice = _voice_card(subject, shelf_only)
     # REHYDRATE THE VOICE. Search hands back BRIEFS — title, shelf, a snippet — and the first
     # live run of the both-sides path (Baptist vs Presbyterian, 2026-08-01) presented two voice
     # cards whose body was None: the message promised "the tradition's own voice, in its own
@@ -148,8 +181,13 @@ def compare(query: str, search=None, get=None, acquire=None) -> Optional[Dict[st
     for s in sides:
         if s["held_as_tradition"]:
             continue
+        # The gutenberg shelf COUNTS (2026-08-02): "southern baptists" had 8 held documents —
+        # public-domain Baptist histories and the dictionary entry — and this filter admitted
+        # only the `sources` shelf, so a side with a shelf-full of primary material reported
+        # docs=0 and refused. Every gutenberg card is public domain by construction; a book the
+        # library holds whole is exactly the kind of document a missing side may stand on.
         primary = [c for c in (search(s["subject"], limit=8) or [])
-                   if c.get("shelf") == "sources"
+                   if c.get("shelf") in ("sources", "gutenberg")
                    or (c.get("source") or {}).get("authority_tier") == "primary_pd"]
         if not primary and acquire is not None:
             try:
@@ -195,10 +233,16 @@ def compare(query: str, search=None, get=None, acquire=None) -> Optional[Dict[st
             + (f"What it does hold under that name is something else — {have}. " if have else "")
             + "I will not set two things side by side when one of them is not here.")
     elif documented:
+        _plural = len(documented) > 1
         message = (
-            f"{' and '.join(documented)} is not among the curated tradition voices, so that side "
-            "stands on passages cut from its own documents — fetched and kept, so the next "
-            "asking finds them at once. Every line is a card you can open.")
+            f"{' and '.join(documented)} "
+            + ("are" if _plural else "is")
+            + " not among the curated tradition voices, so "
+            + ("those sides stand" if _plural else "that side stands")
+            + " on passages cut from "
+            + ("their" if _plural else "its")
+            + " own documents — fetched and kept, so the next asking finds them at once. "
+              "Every line is a card you can open.")
     else:
         message = ("Both traditions are held. Each column is the tradition's own voice card, in "
                    "its own reckoning, and every line below is a card you can open.")

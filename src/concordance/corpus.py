@@ -228,22 +228,106 @@ class Corpus:
                 for t in query_tokens}
 
     def _candidates(self, query_tokens: set, max_candidates: int = 600) -> List[str]:
+        """Candidate cards, RAREST TOKENS FIRST — the cap must never starve the subject.
+
+        This was a heisenbug that survived every gate: tokens were taken in SET-ITERATION order,
+        which is hash-seed dependent and re-rolls on every process restart. For "southern
+        baptists" (df 2,702 vs 160), whichever token iterated first flooded the 600-candidate cap
+        — one restart returned 8 Baptist histories, the next restart returned 1, for the same
+        query on the same corpus. A ranking that changes with a restart is a ranking that cannot
+        be trusted or tested. Iterating by ascending document frequency is deterministic and puts
+        the words the question is actually about beyond starvation: a common word can never crowd
+        out a rare one, only fill the seats the rare ones left.
+        """
         counts: Dict[str, int] = {}
-        for qt in query_tokens:
+        for qt in sorted(query_tokens, key=lambda t: (self._df(t) or 10**9, t)):
             for cid in self._by_token.get(qt, []):
-                counts[cid] = counts.get(cid, 0) + 1
+                if cid in counts:
+                    counts[cid] += 1          # a seated card still collects its later matches
+                elif len(counts) < max_candidates:
+                    counts[cid] = 1
         return sorted(counts, key=lambda x: -counts[x])[:max_candidates]
+
+    def _df(self, token: str) -> int:
+        return len(self._by_token.get(token, ())) + self._df_extra.get(token, 0)
+
+    def _present_form(self, token: str) -> str:
+        """The form of this word the corpus ACTUALLY CONTAINS — naive singular/plural only.
+
+        "Southern Baptists" returned nothing from a library full of Baptist material, because
+        there is no stemming anywhere: the subject partition demanded the exact token "baptists",
+        the corpus says "baptist", and _idf hands an UNSEEN token the highest rarity of all —
+        df=0 is the rarest thing there is — so the absent plural won the subject seat and then
+        partitioned out the entire keeping. An empty shelf reported by a full library.
+
+        Only trailing-s/es variants, only when the token itself is absent, and only toward a form
+        that exists: anything cleverer is a stemmer, and a stemmer quietly rewrites what the
+        person asked.
+        """
+        if self._df(token) > 0 or len(token) < 4:
+            return token
+        candidates = [token + "s", token + "es"]
+        if token.endswith("es"):
+            candidates.append(token[:-2])
+        if token.endswith("s"):
+            candidates.append(token[:-1])
+        for v in candidates:
+            if len(v) >= 3 and self._df(v) > 0:
+                return v
+        return token
+
+    def _with_variants(self, query_tokens: set) -> set:
+        """Query tokens plus BOTH numbers of each, wherever that form exists in the index.
+
+        The first version added a variant only when the asked form was ABSENT (df=0) — which left
+        a hole measured live on 2026-08-02: "methodists" has df=31, so no "methodist" was added,
+        `common = query ∩ doc` came up empty against the singular-only Methodist / Wesleyan voice
+        card, and the card died at the no-common-tokens gate BEFORE the family partition could
+        fire. The partition can only judge what scoring lets through, so the family has to enter
+        at the tokens, not just at the verdict. Only forms the index actually contains are added —
+        expansion never invents a word the corpus has never seen.
+        """
+        out = set(query_tokens)
+        for t in query_tokens:
+            out.add(self._present_form(t))
+            for v in self.subject_family(t):
+                if self._df(v) > 0:
+                    out.add(v)
+        return out
+
+    @staticmethod
+    def subject_family(subject: Optional[str]) -> set:
+        """The subject in both numbers — "methodists" and "methodist" are one subject.
+
+        The partition demanded the exact subject form, so the Methodist / Wesleyan voice card
+        (which says "Methodist", singular) was partitioned OUT of a search for "methodists" —
+        live, on a shelf that plainly holds the tradition. A card about the singular IS about the
+        plural. Trailing s/es only; anything cleverer is a stemmer.
+        """
+        if not subject:
+            return set()
+        fam = {subject, subject + "s"}
+        if subject.endswith("es") and len(subject) > 4:
+            fam.add(subject[:-2])
+        if subject.endswith("s") and len(subject) > 3:
+            fam.add(subject[:-1])
+        return fam
 
     def _subject_of(self, query_tokens: set, idf: Dict[str, float]) -> Optional[str]:
         """The rarest query word — what the question is ACTUALLY about.
 
-        "Wesleyan Church" is about Wesleyans. "Church" is in half the library.
+        "Wesleyan Church" is about Wesleyans. "Church" is in half the library. And the seat must
+        be held by a form the corpus CONTAINS: an absent token has df=0, which _idf reads as
+        maximal rarity, so without the present-form step a typo or a plural would always win the
+        seat and then partition out everything (the Southern Baptists failure).
         """
         if not query_tokens:
             return None
-        return max(query_tokens, key=lambda t: idf.get(t, 0.0))
+        chosen = max(query_tokens, key=lambda t: idf.get(t, 0.0))
+        return self._present_form(chosen)
 
-    def _score(self, card: dict, query_tokens: set, idf: Dict[str, float]) -> float:
+    def _score(self, card: dict, query_tokens: set, idf: Dict[str, float],
+               subject: Optional[str] = None) -> float:
         """TF-IDF over the card text — with a HARD PARTITION on the subject word.
 
         Matt, 2026-08-01, on asking for the Wesleyan Church: *"It currently gives a bunch of not
@@ -287,9 +371,15 @@ class Corpus:
         score = sum(counts[t] * idf.get(t, 0.0) for t in common) / math.log(doc_len + 10)
         if len(common) == len(query_tokens):
             score *= 1.5
-        # THE PARTITION. Holding the subject word puts a card in the upper tier outright.
-        subject = self._subject_of(query_tokens, idf)
-        if subject and subject in common:
+        # THE PARTITION. Holding the subject word puts a card in the upper tier outright —
+        # in EITHER number: a card that says "Methodist" is about "methodists" (the singular-only
+        # voice card was partitioned out of a plural search, live, 2026-08-02). The seat is
+        # chosen among the ASKED words, never among expansion variants — a rare junk variant
+        # ("southerns") once stole the seat from "baptists". Search computes it once and passes
+        # it in; never an instance attribute, because searches run concurrently across threads.
+        if subject is None:
+            subject = self._subject_of(query_tokens, idf)
+        if subject and (self.subject_family(subject) & set(doc_tokens)):
             score += SUBJECT_TIER
         return float(score)
 
@@ -326,7 +416,15 @@ class Corpus:
         # stopwords before candidates or scoring means nothing can be retrieved on their strength
         # alone. A query made only of stopwords asks about nothing and returns nothing.
         from .corpus_db import _STOP          # one list, both matchers (corpus_db imports nothing here)
-        query_tokens = {t for t in _tokens(query) if t not in _STOP}
+        asked = {t for t in _tokens(query) if t not in _STOP}
+        # THE PRESENT FORM RIDES ALONG — for scoring. The SUBJECT SEAT is chosen among the words
+        # actually ASKED: expansion once added "southerns" (a rare variant of a common word,
+        # df tiny so idf huge) and the junk variant stole the seat from "baptists". Variants
+        # widen what can match; they never redefine what the question is about.
+        query_tokens = self._with_variants(asked)
+        # the seat belongs to the words actually asked — computed once, passed to scoring;
+        # never instance state (searches run concurrently across handler threads)
+        seat = self._subject_of(asked, self._idf(asked)) if asked else None
         if not query_tokens:
             return []
         idf = self._idf(query_tokens)
@@ -345,7 +443,7 @@ class Corpus:
                 continue
             if shelves is not None and c.get("shelf") not in shelves:
                 continue
-            s = self._score(c, query_tokens, idf)
+            s = self._score(c, query_tokens, idf, subject=seat)
             if s > 0 and c.get("frozen"):
                 # rank-neutral freezing: a stub that matched on TITLE is re-scored on its real
                 # text from the shard, so freezing a shelf never reorders results. Only stubs
@@ -353,7 +451,7 @@ class Corpus:
                 full = rehydrate(c)
                 if full is not c:
                     c = full
-                    s = self._score(c, query_tokens, idf)
+                    s = self._score(c, query_tokens, idf, subject=seat)
             if s > 0:
                 title_n = " ".join(str(c.get("title", "")).lower().split())
                 ref_n = " ".join(str((c.get("source") or {}).get("ref", "")).lower().split())
@@ -644,7 +742,7 @@ def search(query: str, limit: int = 25, include_witness: bool = True,
                     or (shelves is not None and hit.get("shelf") not in shelves)
                     or not is_public(hit)):
                 continue        # resident shelves are already fully scored — merge only frozen freight
-            if subject and subject not in set(_tokens(_card_text(hit))):
+            if subject and not (Corpus.subject_family(subject) & set(_tokens(_card_text(hit)))):
                 continue        # lacks what the question is about — the same partition, same rule
             out.append(hit)
             have.add(hit.get("id"))

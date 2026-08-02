@@ -282,8 +282,13 @@ def _shares_a_word(text: str, card: Dict[str, Any]) -> bool:
         subject = corpus.subject_of(text)
     except Exception:  # noqa: BLE001 — no corpus loaded is not a reason to reject a hit
         subject = None
-    if subject and subject in q:
-        return subject in hay
+    if subject:
+        # The FAMILY, both numbers — and matched against the family of what was asked, because
+        # the subject seat may hold the present form ("baptist") while the question said the
+        # plural. A hit about either number carries the question.
+        fam = corpus.Corpus.subject_family(subject)
+        if fam & {v for w in q for v in corpus.Corpus.subject_family(w)}:
+            return bool(fam & hay)
     distinctive = {w for w in q if len(w) >= 5}
     return bool(distinctive & hay) if distinctive else bool(q & hay)
 
@@ -1069,6 +1074,32 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     if _vol:
         base = {**base, "volume": {"id": _vol["id"], "name": _vol["name"]}}
     weak = (not hits) or not _shares_a_word(subj, hits[0])
+    if weak:
+        # THE PULL RUNS ON EVERY DOOR, not just the comparison (Matt, 2026-08-02: "Now it says it
+        # doesn't have anything for southern baptists. It should find what I need, when I need
+        # it."). pull_and_card had been wired into the comparison path only, so a plain question
+        # about a subject the keeping lacked still fell through to the citation-only tortoise —
+        # "here is a book that exists" instead of the information asked for. Fetch, cut, KEEP,
+        # answer — and because the cards are kept, the next asking never reaches this branch.
+        try:
+            from . import expand as _expand
+            pulled = _expand.pull_and_card(text, subj, config, plane="human")
+        except Exception:  # noqa: BLE001 — the pull failing must never cost the citation fallback
+            pulled = {"status": "error"}
+        if pulled.get("status") == "carded":
+            # THE PULLED CARDS LEAD. The first wiring re-searched and let whatever the corpus
+            # already ranked displace the passages just cut for THIS question — caught by the
+            # spy test, where "fellowship" hits buried the pulled zorblatt cards entirely. The
+            # spans carry the subject by construction (craft's rank requires it), so they stand
+            # first and the re-search fills the remaining seats.
+            pulled_cards = list(pulled.get("cards") or [])[:6]
+            seen_ids = {c.get("id") for c in pulled_cards}
+            hits = (pulled_cards +
+                    [c for c in (corpus.search(subj, limit=6) or [])
+                     if c.get("id") not in seen_ids])[:6]
+            if hits and _shares_a_word(subj, hits[0]):
+                weak = False
+                base = {**base, "message": pulled.get("message", "")}
     if weak:
         # The tortoise: the keeping doesn't hold it, so go FIND it — surely. Primary / high-quality
         # sources only, run through our own tools, false claims flagged, and kept for next time.
