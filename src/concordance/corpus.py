@@ -131,6 +131,12 @@ class Corpus:
                 continue
             for t in set(_tokens(_card_text(c))):
                 self._by_token.setdefault(t, []).append(cid)
+        # CANONICAL POSTINGS. Two corpora over the same cards must rank identically whatever
+        # order the cards arrived in — invariant I of tests/test_retrieval_invariants.py. Without
+        # this, cap admission and tie order both follow insertion order, and "same corpus, same
+        # query" can rank differently across builds. Sorted once at load; never at query time.
+        for v in self._by_token.values():
+            v.sort()
         self._n = max(1, len(self._index_card_ids()))
 
     def footprint(self, sample: int = 400) -> Dict[str, Any]:
@@ -227,7 +233,8 @@ class Corpus:
                                                 + self._df_extra.get(t, 0) + 1)))
                 for t in query_tokens}
 
-    def _candidates(self, query_tokens: set, max_candidates: int = 600) -> List[str]:
+    def _candidates(self, query_tokens: set, max_candidates: int = 600,
+                    seat_family: Optional[set] = None) -> List[str]:
         """Candidate cards, RAREST TOKENS FIRST — the cap must never starve the subject.
 
         This was a heisenbug that survived every gate: tokens were taken in SET-ITERATION order,
@@ -240,13 +247,21 @@ class Corpus:
         out a rare one, only fill the seats the rare ones left.
         """
         counts: Dict[str, int] = {}
+        exempt = set(seat_family or ())
         for qt in sorted(query_tokens, key=lambda t: (self._df(t) or 10**9, t)):
+            uncapped = qt in exempt
             for cid in self._by_token.get(qt, []):
                 if cid in counts:
                     counts[cid] += 1          # a seated card still collects its later matches
-                elif len(counts) < max_candidates:
+                elif uncapped or len(counts) < max_candidates:
                     counts[cid] = 1
-        return sorted(counts, key=lambda x: -counts[x])[:max_candidates]
+        # THE SEAT IS NEVER CAPPED. The cap is a performance guard for common-word floods; the
+        # partition's upper tier is DEFINED by holding the seat, so every seat-holder must reach
+        # scoring or the tier lies by omission. Found when canonical (id-sorted) postings made
+        # cap admission an alphabetical lottery and the survival how-to card lost it inside its
+        # own token. Worst case is scoring one common seat's full postings (~the resident corpus,
+        # 25k short texts) — the price of a tier that tells the truth.
+        return sorted(counts, key=lambda x: -counts[x])
 
     def _df(self, token: str) -> int:
         return len(self._by_token.get(token, ())) + self._df_extra.get(token, 0)
@@ -435,7 +450,8 @@ class Corpus:
         qn = " ".join((query or "").lower().split())
         q_exact = {qn} | {r.lower() for r in _growth.refs_in_text(query or "")}
         scored = []
-        for cid in self._candidates(query_tokens):
+        for cid in self._candidates(
+                query_tokens, seat_family=(self.subject_family(seat) if seat else None)):
             c = self.cards.get(cid)
             if not c or not is_public(c):
                 continue
@@ -464,7 +480,9 @@ class Corpus:
                 if c.get("shelf") == "survival" and (_PRACTICAL & query_tokens):
                     s *= 3.0
                 scored.append((s, c))
-        scored.sort(key=lambda x: -x[0])
+        # a TOTAL order: equal scores tie-break on id, so the ranking is a function of the
+        # cards and the query alone — never of construction order (invariant I)
+        scored.sort(key=lambda x: (-x[0], str(x[1].get("id") or "")))
 
         # NEVER PAD THE TAIL WITH CARDS THAT MISS THE SUBJECT. The partition put subject-holders
         # in the upper tier, but ranking alone still let the leftovers fill the limit: live,
@@ -851,3 +869,68 @@ def health() -> Dict[str, Any]:
             "with_body": sum(1 for c in cards if (c.get("body") or "").strip()),
             "shelves": len({c.get("shelf") for c in cards}),
             "surfaces": sorted({(c.get("surface") or "?") for c in cards})}
+
+
+def gauges() -> Dict[str, Any]:
+    """THE GAUGE PANEL — every invented ranking constant, located on the measured curve.
+
+    Matt, 2026-08-02: *"Rate functions relate to the total amount collected... All of this is
+    Math. We should be building formulas and verifiers that meet each need."* — and the same day
+    the first measurement through this lens found `min_idf = 1.5` admitting 100.0% of 300,463
+    tokens: a distinctiveness floor tuned when the corpus was small, gone silently vacuous as it
+    grew. A constant is a promise about a distribution; when the distribution moves, the promise
+    rots unless something re-measures it. This does, from the live index, every time it is asked.
+
+    Verdicts are three-state and blunt: VACUOUS (the constant excludes almost nothing — dead
+    weight wearing a guard's uniform), BINDING (doing real work), or the number speaks for
+    itself. It FLAGS; it never auto-tunes — re-deriving a ranking constant is a change to what
+    every reader sees and goes through the gate with a before/after probe battery, not through a
+    monitor. Every figure carries its means, per the coverage rule.
+    """
+    import math as _math
+    c = default_corpus()
+    dfs = sorted((len(v) + c._df_extra.get(k, 0) for k, v in c._by_token.items()),
+                 reverse=True)
+    n_tokens = len(dfs)
+    n_cards = c._n
+
+    # the Zipf fit — the constant-ratio growth law the whole index rides on
+    lo, hi = 10, min(10001, n_tokens)
+    pts = [( _math.log(r), _math.log(dfs[r - 1])) for r in range(lo, hi) if dfs[r - 1] > 0]
+    slope = r2 = None
+    if len(pts) > 100:
+        mx = sum(p[0] for p in pts) / len(pts)
+        my = sum(p[1] for p in pts) / len(pts)
+        denom = sum((x - mx) ** 2 for x, _ in pts)
+        if denom > 0:
+            slope = sum((x - mx) * (y - my) for x, y in pts) / denom
+            ss_res = sum((y - (my + slope * (x - mx))) ** 2 for x, y in pts)
+            ss_tot = sum((y - my) ** 2 for _, y in pts) or 1.0
+            r2 = 1 - ss_res / ss_tot
+
+    # min_idf on the curve: what fraction of the vocabulary does the floor actually admit?
+    cut_df = n_cards / _math.exp(self_min := c.min_idf)
+    admitted = sum(1 for d in dfs if d < cut_df)
+    admit_frac = admitted / n_tokens if n_tokens else 0.0
+
+    # the candidate cap: how many tokens could flood it (the starvation class of bug)
+    flood = sum(1 for d in dfs if d > 600)
+
+    return {
+        "zipf": {"slope": round(slope, 3) if slope is not None else None,
+                 "r2": round(r2, 4) if r2 is not None else None,
+                 "means": f"log-log fit over ranks {lo}-{hi - 1} of {n_tokens:,} tokens"},
+        "min_idf": {"value": self_min, "admits_fraction": round(admit_frac, 4),
+                    "verdict": ("VACUOUS" if admit_frac > 0.99
+                                else "BINDING" if admit_frac < 0.90 else "MARGINAL"),
+                    "means": f"tokens with df < {int(cut_df):,} of {n_cards:,} cards"},
+        "candidate_cap": {"value": 600, "tokens_that_flood": flood,
+                          "means": "tokens with df > cap; rarest-first seeding makes the cap "
+                                   "safe, this counts how often it is exercised"},
+        "subject_tier": {"value": SUBJECT_TIER,
+                         "max_idf": round(max((_math.log(n_cards / (d + 1)) for d in dfs[-1:]),
+                                              default=0.0), 2),
+                         "means": "the tier must exceed any reachable tf-idf sum; max single-"
+                                  "token idf shown for scale"},
+        "population": {"tokens": n_tokens, "cards": n_cards},
+    }

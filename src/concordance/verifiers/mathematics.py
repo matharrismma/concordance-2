@@ -44,7 +44,21 @@ def _ensure_sympy() -> None:
 
 # Characters that are NOT part of any valid math expression string. sympify treats
 # '#' as a comment, silently dropping the rest — reject such inputs early.
-_INVALID_EXPR_RE = _re.compile(r"[#@!$%&\[\]\{\}\\|`]")
+#
+# `%` WAS ON THIS LIST AND DID NOT BELONG THERE (removed 2026-08-02): SymPy evaluates `16 % 9`
+# as Mod natively, and blacklisting it left the fleet unable to check MODULAR ARITHMETIC at all
+# — every "n mod m = k" claim returned INCOMPLETE, found when the vortex-math assay tried to
+# seal the doubling cycle (16→7, 32→5, 64→1 ... mod 9) and could not. Casting out nines is the
+# oldest integrity check in bookkeeping — the ancestor of this project's own hashes — and the
+# fleet could not perform it.
+_INVALID_EXPR_RE = _re.compile(r"[#@!$&\[\]\{\}\\|`]")
+
+# The word form people actually write: "16 mod 9". Normalized to the operator before parsing so
+# every mode (equality, equation, solve, limit) reads it. Word-boundary only, and NEVER before a
+# parenthesis: the first draft's IGNORECASE happily rewrote the function form `Mod(16, 9)` into
+# `%(16, 9)` — the exact thing its own comment promised it would not touch, caught by the test
+# minutes after it was written. The lookahead is the promise, made structural.
+_MOD_WORD_RE = _re.compile(r"\bmod\b(?!\s*\()", _re.IGNORECASE)
 
 # Compute-DoS guards: a short input like 9**9**9 expands to a ~369M-digit bignum.
 _MAX_POW_EXP = 10000
@@ -86,6 +100,7 @@ def _ast_compute_guard(expr: str):
 
 def _parse(expr: str, var_names: List[str] = None):
     _ensure_sympy()
+    expr = _MOD_WORD_RE.sub("%", str(expr))
     if _INVALID_EXPR_RE.search(str(expr)):
         raise _SympifyError(f"invalid characters in expression: {expr!r}")
     _ast_compute_guard(expr)

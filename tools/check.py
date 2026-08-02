@@ -93,9 +93,36 @@ def _take_the_floor() -> bool:
     return True
 
 
+def _yield_the_floor():
+    """Release OUR lock — and only ours. Never releases another process's claim.
+
+    THE LOCK WAS NEVER RELEASED (found 2026-08-02, the third stale-lock refusal in one day):
+    `_take_the_floor` wrote the file and nothing ever removed it, so every gate — pass or fail —
+    orphaned its lock. The design leaned on next-run stale-pid reclaim, but Windows RECYCLES
+    pids: a dead gate's number gets claimed by some unrelated live python, `os.kill(pid, 0)`
+    reports it alive, and the floor is refused for a process that was never a gate. The tell,
+    in hindsight: deploy chains had grown a habitual `rm -f .gate.lock` that nobody questioned —
+    a manual ritual compensating for a missing `finally` is a defect wearing a chore's clothes.
+    """
+    try:
+        with open(_LOCK, encoding="utf-8") as fh:
+            pid = int((fh.read().split() or ["0"])[0])
+        if pid == os.getpid():
+            os.remove(_LOCK)
+    except (OSError, ValueError):
+        pass
+
+
 def main() -> int:
     if not _take_the_floor():
         return 2
+    try:
+        return _gated_main()
+    finally:
+        _yield_the_floor()
+
+
+def _gated_main() -> int:
     rc = 0
     # 0. The suite must be whole before its result means anything.
     rc |= _suite_is_whole()

@@ -536,3 +536,41 @@ def test_both_numbers_enter_at_the_tokens_not_just_the_verdict():
     got = {h["id"] for h in fix.search("methodists", limit=4)}
     assert "v" in got, "the singular-only card died at the no-common gate"
     assert "p" in got
+
+
+def test_a_mod_claim_verifies_through_the_front_door():
+    """The reader's surface, not just the module: "16 mod 9 = 7" typed into ask must seal."""
+    r = ask.respond("16 mod 9 = 7", SEC)
+    assert (r.get("verify") or {}).get("verdict") == "HOLDS", r.get("verify")
+    r2 = ask.respond("16 mod 9 = 3", SEC)
+    assert (r2.get("verify") or {}).get("verdict") == "BROKEN"
+
+
+def test_the_gauge_panel_locates_every_constant_on_the_measured_curve():
+    """A constant is a promise about a distribution; when the distribution moves the promise
+    rots unless something re-measures it. First measurement (2026-08-02) found min_idf=1.5
+    admitting 100.0% of 300,463 live tokens — a floor believed load-bearing, doing nothing.
+    The panel FLAGS and never auto-tunes: re-deriving a ranking constant changes what every
+    reader sees and goes through the gate, not through a monitor."""
+    from concordance import corpus
+    g = corpus.gauges()
+    assert set(g) >= {"zipf", "min_idf", "candidate_cap", "subject_tier", "population"}
+    assert g["min_idf"]["verdict"] in ("VACUOUS", "MARGINAL", "BINDING")
+    for panel in ("zipf", "min_idf", "candidate_cap", "subject_tier"):
+        assert g[panel].get("means"), f"{panel} reports a number without its coverage"
+    # on the real local corpus the floor is measurably vacuous — the finding that started this
+    assert g["min_idf"]["admits_fraction"] > 0.99, \
+        "if this ever fails, the floor became binding: re-run the probe battery before trusting it"
+    fix = corpus.Corpus({
+        "a": {"id": "a", "title": "one", "body": "rare word xylotomy", "lifecycle_stage": "public"},
+        "b": {"id": "b", "title": "two", "body": "the the the", "lifecycle_stage": "public"},
+    }, min_idf=0.0)
+    # the panel must also read a tiny fixture without division blowups
+    import concordance.corpus as _c
+    old = _c.default_corpus
+    _c.default_corpus = lambda: fix
+    try:
+        g2 = _c.gauges()
+        assert g2["population"]["tokens"] > 0
+    finally:
+        _c.default_corpus = old

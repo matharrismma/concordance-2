@@ -81,3 +81,30 @@ if __name__ == "__main__":
     test_all_registered_verifiers_load_and_run()
     from concordance.verifiers import VERIFIERS
     print(f"  ok  all {len(VERIFIERS)} registered domain names load + run on an empty packet")
+
+
+def test_modular_arithmetic_is_in_the_grammar():
+    """The fleet could not check "n mod m = k" AT ALL — '%' sat on the invalid-character list
+    though SymPy computes Mod natively, and every such claim returned INCOMPLETE. Found when the
+    vortex-math assay tried to seal the doubling cycle and could not. Casting out nines is the
+    oldest integrity check in bookkeeping — the ancestor of this project's hashes — and the
+    fleet could not perform it. Word form and operator form both; falsity still breaks."""
+    from concordance.derivation import verify
+
+    # the doubling cycle mod 9: 2^n walks 1,2,4,8,7,5 and repeats — checked, not believed
+    cycle = [(2, 2), (4, 4), (8, 8), (16, 7), (32, 5), (64, 1),
+             (128, 2), (256, 4), (512, 8), (1024, 7)]
+    for n, root in cycle:
+        r = verify({"mode": "equality",
+                    "params": {"expr_a": f"{n} mod 9", "expr_b": str(root), "variables": {}}})
+        assert r.get("verdict") == "HOLDS", f"{n} mod 9 should be {root}: {r}"
+    r = verify({"mode": "equality",
+                "params": {"expr_a": "16 % 9", "expr_b": "7", "variables": {}}})
+    assert r.get("verdict") == "HOLDS", "the operator form must parse too"
+    r = verify({"mode": "equality",
+                "params": {"expr_a": "16 mod 9", "expr_b": "3", "variables": {}}})
+    assert r.get("verdict") == "BROKEN", "a false congruence must still break"
+    # Mod-the-function and ordinary words are untouched by the normalization
+    r = verify({"mode": "equality",
+                "params": {"expr_a": "Mod(16, 9)", "expr_b": "7", "variables": {}}})
+    assert r.get("verdict") == "HOLDS"

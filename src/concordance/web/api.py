@@ -1446,7 +1446,13 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(m)
 
     if method == "GET" and path == "/library/health":
-        return _ok(corpus.health())
+        # `gauges=1` adds the gauge panel: every invented ranking constant located on the
+        # measured distribution, with vacuous/binding verdicts. Opt-in because the panel walks
+        # the whole token index (~300k entries) — an operator's read, not a heartbeat's.
+        h = corpus.health()
+        if str(query.get("gauges") or "") in ("1", "true", "yes"):
+            h["gauges"] = corpus.gauges()
+        return _ok(h)
 
     # Pronunciation guide (synthesized, honest floor) — a neutral phonetic helper, both surfaces.
     if method == "GET" and path == "/pronounce":
