@@ -653,6 +653,72 @@ EDGES += [
      "the same three backwards as evidence of what was meant"),
 ]
 
+# -- BATCH 6: HOW YOU COVER A PLANE (2026-08-03) ------------------------------------------------
+# Matt: "The tiling pattern found in Math and also in archeology has two types of tiles." And an
+# hour before that: "Think of the corpus as a honeycomb filled with honey. The structure matters."
+# Two halves of one question, and the corpus held NEITHER — a probe for penrose / aperiodic /
+# quasicrystal / girih / tiling / tessellation / monotile across all 22,152 cards returned 0.
+#
+# This is the cross-domain case in its strongest form: the SAME structure was reached three times
+# independently — by craftsmen at Isfahan in 1453, by a mathematician in 1974, and by matter itself
+# in an alloy in 1982 — and each time the others were unknown.
+EDGES += [
+    ("Aperiodic tiling (Penrose, and the 2023 monotile)", "rests_on",
+     "Euclidean geometry & the parallel postulate",
+     "the tiles are Euclidean polygons and the matching rules are constraints on their edges and "
+     "angles; aperiodicity is a theorem about the flat plane, and the five-fold symmetry it "
+     "permits is exactly what the crystallographic restriction forbids to a periodic lattice"),
+
+    ("Aperiodic tiling (Penrose, and the 2023 monotile)", "same_form",
+     "Fourier analysis & signal processing",
+     "the deep result is spectral: the Fourier transform of a Penrose tiling is a PURE POINT "
+     "spectrum — genuinely sharp peaks — from a structure with no repeating unit cell. Sharp peaks "
+     "had been taken to prove periodicity; they prove long-range ORDER, which is the weaker and "
+     "correct claim. The tiling and its diffraction pattern are one object seen in two domains"),
+
+    ("Quasicrystals (forbidden symmetry in real matter)", "same_form",
+     "Aperiodic tiling (Penrose, and the 2023 monotile)",
+     "a quasicrystal IS an aperiodic tiling realised in matter: Shechtman's 1982 electron "
+     "diffraction of Al-Mn showed sharp Bragg peaks with ten-fold symmetry, which is precisely "
+     "what the Fourier transform of a Penrose-like structure predicts. Mathematics described the "
+     "object eight years before anyone found it in a crucible, and neither party was looking for "
+     "the other"),
+
+    ("Quasicrystals (forbidden symmetry in real matter)", "rests_on",
+     "Wave optics (Huygens, Snell's law, diffraction)",
+     "the entire evidence for a quasicrystal is a diffraction pattern, so the claim rests on "
+     "diffraction theory: sharpness of the peaks measures the coherence length of the order, and "
+     "their angular arrangement measures its symmetry. Change the optics and the finding "
+     "evaporates"),
+
+    ("Girih tiles — quasi-periodic design in medieval Islamic architecture", "same_form",
+     "Aperiodic tiling (Penrose, and the 2023 monotile)",
+     "Lu and Steinhardt (Science, 2007) showed the Darb-i Imam shrine at Isfahan (1453) carries a "
+     "nearly perfect decagonal quasi-periodic tiling with the self-similar subdivision that "
+     "generates it — the same structure Penrose described in 1974, reached by craft roughly five "
+     "centuries earlier. Held at RESONANCE, not proof of possessing the theory: the tilings "
+     "contain defects and the interpretation is contested"),
+
+    ("Girih tiles — quasi-periodic design in medieval Islamic architecture", "rests_on",
+     "Euclidean geometry & the parallel postulate",
+     "girih are constructed polygons — decagon, pentagon, hexagon, bowtie, rhombus — set out with "
+     "compass-and-straightedge methods recorded in the Topkapı Scroll"),
+
+    ("Optimal packing & the honeycomb conjecture (Hales)", "rests_on",
+     "Euclidean geometry & the parallel postulate",
+     "the statement is a plane-geometry optimisation: among partitions of the plane into equal "
+     "areas, the regular hexagonal grid minimises total perimeter. Conjectured by Pappus c. 300 "
+     "AD, proved by Hales in 1999"),
+
+    ("Optimal packing & the honeycomb conjecture (Hales)", "limits",
+     "Aperiodic tiling (Penrose, and the 2023 monotile)",
+     "the honeycomb theorem fixes the CEILING that any aperiodic tiling must pay to get away from: "
+     "if minimum wall per unit area were the only objective, the answer is settled and it is the "
+     "hexagon. An aperiodic tiling is therefore never the efficient choice — it buys something "
+     "else, an arrangement that is itself information, since in a periodic comb every cell is "
+     "interchangeable and the arrangement says nothing"),
+]
+
 
 def main() -> int:
     ap = argparse.ArgumentParser()
