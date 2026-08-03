@@ -1470,6 +1470,200 @@ EDGES += [
      "clock accumulated rounding error over 100 hours. This is the gap between computable and "
      "computed"),
 
+    # -- BATCH 15: EIGHTEEN THAT ALIGN (2026-08-03) --------------------------------------------
+    # Matt: "18 more theories. Search all theories that could align." Chosen by how many DOMAINS
+    # each crosses rather than by fame. Several close loops the floor had already opened.
+    ("Emergence & self-organization (more is different)", "limits",
+     "Standard Model / quantum field theory",
+     "Anderson's 1972 argument: each level of complexity has its own laws, and reduction to a "
+     "lower level does not CONSTRUCT the higher one. Temperature is meaningless for one molecule; "
+     "a traffic jam moves backward while every car moves forward. This bounds what a complete "
+     "fundamental theory would buy you"),
+
+    ("Condensed matter & semiconductors (band theory and the transistor)", "rests_on",
+     "Emergence & self-organization (more is different)",
+     "superconductivity, magnetism and band structure are properties of the COLLECTIVE that no "
+     "individual atom has -- condensed matter is where emergence stopped being philosophy and "
+     "became a measurement"),
+
+    ("Scaling laws & allometry (Kleiber's law, the square-cube)", "rests_on",
+     "Fractals & self-similarity (Mandelbrot)",
+     "the quarter-power exponent in Kleiber's law is thought to follow from the FRACTAL branching "
+     "of distribution networks -- blood vessels, plant xylem, city infrastructure -- because "
+     "branching packs enormous surface into finite volume. Same exponent in whales and in water "
+     "mains"),
+
+    ("Chemical engineering (unit operations, balances, and scale-up)", "rests_on",
+     "Scaling laws & allometry (Kleiber's law, the square-cube)",
+     "the square-cube law IS the scale-up problem: volume rises as the cube and surface as the "
+     "square, so heat removal per unit volume falls as size grows. Galileo wrote it down in 1638 "
+     "for animal bones and it kills reactors for the same reason"),
+
+    ("Power laws & heavy tails (Zipf, Pareto)", "limits", "Central limit theorem",
+     "the CLT requires FINITE VARIANCE, and many power laws do not have it -- so sums do not "
+     "converge to a normal and models assuming a bell curve catastrophically understate extremes. "
+     "Financial risk, flood defence and pandemic planning have each failed in exactly this way. "
+     "Power laws are where 'average' stops being a useful word"),
+
+    ("Network science (small-world, scale-free, robustness)", "rests_on",
+     "Power laws & heavy tails (Zipf, Pareto)",
+     "scale-free means the DEGREE distribution follows a power law, so a few hubs hold most links "
+     "-- and that single fact produces the robustness asymmetry: extraordinarily resilient to "
+     "random failure, extraordinarily fragile to targeted attack on hubs"),
+
+    ("Network science (small-world, scale-free, robustness)", "rests_on",
+     "Graph theory (Euler, connectivity)",
+     "network science is graph theory applied to measured real networks, where the finding is that "
+     "they are neither regular lattices nor random graphs but a third thing with short paths and "
+     "high clustering"),
+
+    ("Percolation & critical thresholds", "same_form",
+     "Compartmental epidemiology (SIR models and R₀)",
+     "herd immunity IS a percolation threshold: vaccination removes nodes until no connected path "
+     "spans the population. Whether a fire crosses a forest, a disease becomes an epidemic, or a "
+     "doped material conducts are one question -- does a cluster span the system -- with one "
+     "abrupt threshold"),
+
+    ("Percolation & critical thresholds", "same_form", "Phase theory (phase diagrams, Clausius–Clapeyron)",
+     "UNIVERSALITY is the deep claim and the strongest formal evidence on this floor that "
+     "cross-domain alignment is structure rather than analogy: near a critical point the exponents "
+     "describing divergence do NOT depend on microscopic details, so wildly different systems "
+     "share identical critical behaviour"),
+
+    ("Ashby's law of requisite variety (the humility theorem)", "rests_on",
+     "Control theory & cybernetics (feedback, stability)",
+     "ONLY VARIETY CAN ABSORB VARIETY: a regulator must produce at least as many distinct "
+     "responses as the system produces disturbances, so a controller simpler than what it "
+     "controls WILL fail -- by counting, not by poor design"),
+
+    ("Ashby's law of requisite variety (the humility theorem)", "same_form",
+     "Gödel's incompleteness theorems",
+     "THE CYBERNETIC SIBLING OF GÖDEL, and the reason this project keeps both. An engine cannot "
+     "fully model a world that contains it, because it would need more variety than the whole it "
+     "is part of. Any system claiming to be a complete authority over reality is making a claim "
+     "that counting already refutes -- the same shape as a formal system unable to prove its own "
+     "consistency"),
+
+    ("Signal detection theory (sensitivity, criterion, ROC)", "rests_on", "Bayes' theorem",
+     "base rate dominates screening: a highly sensitive test for a rare condition still yields "
+     "mostly false positives because the healthy majority is so much larger. That is Bayes "
+     "arriving from the engineering side"),
+
+    ("Signal detection theory (sensitivity, criterion, ROC)", "limits",
+     "Null-hypothesis significance testing (Fisher / Neyman–Pearson)",
+     "it separates two things NHST conflates: SENSITIVITY is a property of the evidence, CRITERION "
+     "is a VALUE JUDGEMENT about which error costs more. Arguing about a threshold as though it "
+     "were a factual question is a category error, and p < 0.05 is a criterion wearing a fact's "
+     "clothes"),
+
+    ("Explore versus exploit (the multi-armed bandit)", "same_form",
+     "Evolutionary game theory (evolutionarily stable strategies)",
+     "optimal foraging in ecology and clinical trial design are the same mathematics with "
+     "different stakes: every trial spent learning is a trial not spent earning. The HORIZON "
+     "decides the answer -- explore when the future is long, exploit when it is short -- which "
+     "falls out of the mathematics rather than out of sentiment"),
+
+    ("Landauer's principle (erasing information costs heat)", "rests_on",
+     "Second law of thermodynamics (entropy)",
+     "erasing one bit must dissipate at least kT*ln2 as heat, because two possible states "
+     "collapsing to one REDUCES phase-space volume and the second law requires that to be paid "
+     "for. It is the erasure, not the computing: reversible operations have no such floor"),
+
+    ("Landauer's principle (erasing information costs heat)", "same_form",
+     "Shannon information theory (entropy, channel capacity)",
+     "THIS CLOSES THE INFORMATION-THERMODYNAMICS BRIDGE. Boltzmann's entropy and Shannon's are one "
+     "functional; Landauer supplies the EXCHANGE RATE in joules. It also kills Maxwell's demon, "
+     "which stood for eighty years: the demon must measure and, with finite memory, eventually "
+     "ERASE -- and Bennett showed in 1982 that the erasure cost exactly restores the balance"),
+
+    ("Error-correcting codes (Hamming, Reed–Solomon)", "rests_on",
+     "Shannon information theory (entropy, channel capacity)",
+     "Shannon's noisy-channel theorem PROVED such codes must exist below capacity without "
+     "constructing one; Hamming and others found them. Correction is geometry -- place valid "
+     "codewords far enough apart that corruption still lands nearest its original"),
+
+    ("Central dogma of molecular biology (DNA→RNA→protein)", "same_form",
+     "Error-correcting codes (Hamming, Reed–Solomon)",
+     "the genetic code's REDUNDANCY -- several codons per amino acid, arranged so likely "
+     "single-base errors are often silent -- is error tolerance built into the encoding. Biology "
+     "was using the principle for billions of years before Hamming wrote it down"),
+
+    ("Dimensional analysis & similarity (Buckingham Π)", "same_form",
+     "Fluid mechanics (Bernoulli, Reynolds, Navier–Stokes)",
+     "match the dimensionless groups -- Reynolds, Mach, Froude -- and a small model in a tunnel "
+     "behaves like the full-size object, because physics cares about RATIOS and not absolute size. "
+     "This is the formal version of what this floor calls `same_form`: two systems sharing their "
+     "dimensionless groups obey the same equation, which is checkable rather than analogical"),
+
+    ("Map projections (why no flat map is honest)", "limits",
+     "Differential geometry (curvature measured from inside)",
+     "NO FLAT MAP OF A SPHERE PRESERVES BOTH SHAPE AND AREA, and this is not a cartographer's "
+     "failing -- it is Gauss's Theorema Egregium as a practical impossibility. Curvature is "
+     "intrinsic and cannot be removed by bending. Every world map is a lie and the only choice is "
+     "WHICH; a map that does not state its projection is withholding the shape of its own error"),
+
+    ("Compartmental epidemiology (SIR models and R₀)", "rests_on",
+     "Differential equations (the language every physical law is written in)",
+     "SIR is a system of coupled ODEs (Kermack and McKendrick, 1927), and the epidemic curve's "
+     "shape -- including that it turns over BEFORE everyone is infected, as the susceptible pool "
+     "runs down -- is a property of the solutions"),
+
+    ("Vaccination & immune memory (Jenner to eradication)", "rests_on",
+     "Compartmental epidemiology (SIR models and R₀)",
+     "the herd-immunity threshold 1 - 1/R0 is a model output, not a slogan: measles at R0 ~ 12 "
+     "needs about 92% coverage, which is why gaps matter to those who cannot be vaccinated"),
+
+    ("Symbiosis & endosymbiosis (cooperation as a major transition)", "rests_on",
+     "Darwinian evolution by natural selection",
+     "cooperation is not an exception to selection but one of its products: mutualism is stable "
+     "when returns exceed costs, with both parties still pursuing their own reproduction. Margulis "
+     "was ridiculed in 1967 and was right -- mitochondria keep their own circular DNA and divide "
+     "independently, so every complex cell is a former merger"),
+
+    ("Crop rotation & biological nitrogen fixation (the low-input path)", "rests_on",
+     "Symbiosis & endosymbiosis (cooperation as a major transition)",
+     "rhizobia in root nodules and mycorrhizal fungi trading phosphorus for sugar are the "
+     "partnerships that make low-input fertility possible -- and over-tillage, fumigation and "
+     "indiscriminate biocide damage them, which is a cost that does not appear on the input bill"),
+
+    ("Fracture mechanics (Griffith, and why things really break)", "rests_on",
+     "Elasticity (Hooke's law, stress–strain)",
+     "fracture begins where elasticity ends: a crack CONCENTRATES stress at its tip, so failure is "
+     "governed by the worst flaw present rather than by average strength. Past a critical crack "
+     "length propagation becomes self-sustaining and the structure is gone in milliseconds"),
+
+    ("Fracture mechanics (Griffith, and why things really break)", "same_form",
+     "Reliability & tolerance stack-up (RSS)",
+     "both say the same thing: a system is governed by its worst element, not its average one. The "
+     "Comet crashes of 1954 were fatigue cracks starting at SQUARE-CORNERED windows, which is why "
+     "aircraft windows have been rounded ever since -- a sharp internal corner is a design error, "
+     "not a style choice"),
+
+    ("Prospect theory & bounded rationality (Kahneman, Simon)", "limits",
+     "Public choice / decision theory",
+     "decision theory assumes agents maximise expected utility; people demonstrably do not, and "
+     "the deviations are SYSTEMATIC. A loss hurts about twice as much as an equal gain pleases, "
+     "and choices are evaluated from a REFERENCE POINT -- so whoever sets the frame holds "
+     "enormous influence, which is exploited deliberately in pricing and defaults"),
+
+    ("Optimization & gradient descent (following the slope)", "rests_on",
+     "Fundamental theorem of calculus",
+     "the gradient is a derivative and the update step is an integration; convexity decides "
+     "whether downhill reaches THE minimum or merely A minimum. Neural network training is "
+     "non-convex and works for reasons still not fully understood, and saying so is more honest "
+     "than the usual confidence"),
+
+    ("Optimization & gradient descent (following the slope)", "same_form",
+     "Linear programming & duality",
+     "constrained optimisation by LAGRANGE MULTIPLIERS produces exactly the SHADOW PRICES of LP "
+     "duality: the multiplier IS what loosening the constraint is worth. Three fields -- "
+     "optimisation, economics, and Liebig's law of the minimum -- naming one quantity"),
+
+    ("Statistical learning theory (bias-variance, generalization)", "rests_on",
+     "Optimization & gradient descent (following the slope)",
+     "training a model IS running an optimiser over a loss surface, so generalisation depends on "
+     "which minimum the descent found and not only on the objective written down"),
+
     ("Acoustic wave theory (harmonics, Doppler)", "same_form",
      "The electromagnetic spectrum & modulation (radio to gamma, one axis)",
      "identical wave mathematics on a different carrier: frequency, wavelength, superposition, "
