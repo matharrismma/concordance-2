@@ -483,6 +483,43 @@ AXIS_DIMENSIONS = {
     for name, dims in AXIS_DIMENSIONS.items()
 }
 
+# ── v3: populate `discreteness`, which had carried ONE axis since it was declared ──────
+# Matt, 2026-08-03, on the geometric lattice showing the row empty in 8 of 9 sections:
+# "Yes. Do that."
+#
+# THIS WAS A SCAR, NOT A DESIGN. `discreteness` entered as a bug — biology referenced it as
+# an UNDECLARED member (see check_dimension_members, and test_grid's "missing-1 fix"). The
+# repair declared the member and stopped, so for months the dimension carried biology alone
+# while the other seven carried 33 to 75 axes. The lattice at site/theories.html found it
+# without being told where to look, which is what that drawing was rebuilt to do.
+#
+# The criterion is this module's own, from the DIMENSIONS comment above: quantization /
+# countable units / indivisible parts. The test is whether HALF a unit is still the same kind
+# of thing — half an atom is different substance, half a bit is not a bit, half a phoneme is
+# not a quieter phoneme. Where that fails, counting is the right instrument.
+#
+# IN CODE, NOT IN data/grid/axis_extensions.jsonl, and the reason is load-bearing: `data/` is
+# gitignored, so a carrier set written there would be correct on this machine and ABSENT on the
+# box and in the backup — the exact "correct locally, invisible in production" failure this
+# project keeps meeting. Runtime structure belongs in code where the gate can see it.
+_DISCRETENESS_V3 = frozenset({
+    "number_theory", "combinatorics", "formal_logic",     # integers, counts, discrete truth
+    "computer_science", "information_theory",             # bits
+    "atomic", "physics", "nuclear_physics",               # quanta, nucleons
+    "chemistry", "periodic_table", "molecular_geometry",  # atoms, elements, whole bonds
+    "genetics",                                           # codons, alleles
+    "linguistics",                                        # phonemes, morphemes
+    "music_theory",                                       # discrete pitches
+    "networking", "cryptography",                         # packets, blocks
+    "manufacturing",                                      # discrete parts
+    "calendar_time",                                      # whole days
+    "probability",                                        # discrete distributions, counting
+})
+AXIS_DIMENSIONS = {
+    name: frozenset(dims | ({"discreteness"} if name in _DISCRETENESS_V3 else frozenset()))
+    for name, dims in AXIS_DIMENSIONS.items()
+}
+
 
 # ── Axis extensions (loaded from disk) ─────────────────────────────────
 # Axes added by the human via /residue.html → POST /grid/axis/add land

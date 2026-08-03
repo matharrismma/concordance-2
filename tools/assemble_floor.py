@@ -1664,6 +1664,92 @@ EDGES += [
      "training a model IS running an optimiser over a loss surface, so generalisation depends on "
      "which minimum the descent found and not only on the objective written down"),
 
+    # -- BATCH 16: THE DISCRETENESS ROW (2026-08-03) -------------------------------------------
+    # The geometric lattice showed `discreteness` empty in 8 of 9 sections. Tracing that hole into
+    # the code found something better than the hole: grid.py's own docstring records "the class of
+    # bug that left biology on an UNDECLARED 'discreteness'", and test_grid calls the repair "the
+    # missing-1 fix". The fix declared the member and stopped, so the dimension carried ONE axis
+    # while the other seven carried 33-75. A scar, not a design -- and the map found it unprompted.
+    ("Discrete versus continuous (the oldest dividing line)", "limits",
+     "Measure theory (Lebesgue integration)",
+     "Cantor settled the sizes in 1874: integers and rationals are COUNTABLE, the reals are not, "
+     "and there are strictly more points on a line than whole numbers. Measure theory is built to "
+     "handle the larger infinity, and it finds its own edge there -- non-measurable sets exist "
+     "under choice. The gap between the two infinities is where the continuum hypothesis lives, "
+     "proved undecidable from ZFC"),
+
+    ("Discrete versus continuous (the oldest dividing line)", "rests_on",
+     "Counting & the integers (the first abstraction)",
+     "the distinction only becomes sharp once counting is abstracted from the things counted: five "
+     "sheep and five days share something, and the discrete side of the line is what that "
+     "something ranges over"),
+
+    ("Counting & the integers (the first abstraction)", "rests_on", "Peano arithmetic axioms",
+     "Peano DESCRIBES the integers rather than deriving them -- successor and induction take the "
+     "counting numbers as given. Kronecker's remark is the honest placement: God made the "
+     "integers, all else is the work of man, and the reals and complex numbers are CONSTRUCTED "
+     "from them"),
+
+    ("Quantization (why nature comes in whole units)", "rests_on",
+     "Bohr / quantum model of the atom",
+     "quantization is why matter is stable: an electron cannot spiral into the nucleus because "
+     "there is no continuum of states to spiral through. Planck introduced it in 1900 as 'an act "
+     "of desperation' -- the only way to escape the ultraviolet catastrophe -- and disbelieved it "
+     "for years"),
+
+    ("Quantization (why nature comes in whole units)", "same_form",
+     "Discrete versus continuous (the oldest dividing line)",
+     "quantization is the physical instance of the mathematical distinction: certain quantities "
+     "take only integer multiples of a fundamental unit, so counting rather than measurement is "
+     "the right instrument. Electric charge is quantized in units of e and NOBODY KNOWS WHY -- "
+     "measured to extraordinary precision, unexplained by the Standard Model"),
+
+    ("Digital versus analog (why discreteness survives copying)", "rests_on",
+     "Error-correcting codes (Hamming, Reed–Solomon)",
+     "discreteness buys REGENERATION, which is the whole advantage: a voltage that has drifted 30% "
+     "toward the wrong value is still unambiguously a 1 and is rewritten clean, so noise is ERASED "
+     "at every hop instead of accumulating. Copy an analog tape and each generation is worse; copy "
+     "a digital file and it is identical"),
+
+    ("Digital versus analog (why discreteness survives copying)", "rests_on",
+     "Fourier analysis & signal processing",
+     "the cost of discretising is quantifiable: quantization error bounded by bit depth, and "
+     "aliasing if you sample below twice the highest frequency present. Nyquist-Shannon sets where "
+     "the boundary sits"),
+
+    ("Atomism (the idea that matter is not infinitely divisible)", "rests_on",
+     "Dalton's atomic theory",
+     "Dalton revived a 2,200-year-old philosophical guess because the LAW OF MULTIPLE PROPORTIONS "
+     "demanded it -- whole-number mass ratios are what indivisible units predict and are awkward "
+     "otherwise. The irony belongs on the card: the atom turned out to be cuttable, so the name "
+     "was wrong and the idea was right. What matters is that matter is GRAINY"),
+
+    ("Atomism (the idea that matter is not infinitely divisible)", "rests_on",
+     "Statistical mechanics (Boltzmann — why the second law is a counting argument)",
+     "atoms were still disputed in 1900 -- Mach and Ostwald held them a useful fiction, and "
+     "Boltzmann was attacked on exactly that ground. Einstein's 1905 analysis of BROWNIAN MOTION "
+     "as the summed impacts of individual molecules, confirmed by Perrin, settled it and fixed "
+     "Avogadro's number. Boltzmann died in 1906, shortly before"),
+
+    ("Discrete units in living things (codon, gene, species, phoneme)", "rests_on",
+     "Mendelian inheritance",
+     "particulate inheritance rescued Darwin: under blending, a new advantageous variant would be "
+     "halved each generation and diluted away -- an objection Darwin never answered. Discrete "
+     "factors hide and reappear intact, which is what makes cumulative selection possible"),
+
+    ("Discrete units in living things (codon, gene, species, phoneme)", "same_form",
+     "Digital versus analog (why discreteness survives copying)",
+     "LIFE TOOK THE DIGITAL SIDE. Three bases per amino acid from a four-letter alphabet means "
+     "replication is symbol-matching rather than measurement, so proofreading and redundant codons "
+     "can correct error. A continuous hereditary medium could not be copied for four billion years "
+     "without drifting into noise. Where life must copy faithfully, it discretises first"),
+
+    ("Structural & generative linguistics (Saussure, Chomsky)", "rests_on",
+     "Discrete units in living things (codon, gene, species, phoneme)",
+     "PHONEMES are discrete perceptually: a continuously varying sound is heard as one category or "
+     "the other with a sharp boundary, which is why an accent is hard to hear from inside your own "
+     "language. The same discretising move as the genetic code, in perception"),
+
     ("Acoustic wave theory (harmonics, Doppler)", "same_form",
      "The electromagnetic spectrum & modulation (radio to gamma, one axis)",
      "identical wave mathematics on a different carrier: frequency, wavelength, superposition, "
