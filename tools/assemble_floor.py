@@ -719,6 +719,147 @@ EDGES += [
      "interchangeable and the arrangement says nothing"),
 ]
 
+# -- BATCH 7: ASTRONOMY AND SPACE (2026-08-03) --------------------------------------------------
+# Matt: "Astronomy and space." Measured first: 7 cards in the section, ALL SEVEN template-only
+# (207-285 chars against a ~200-char template), and 16 of 19 probed concepts absent. The thinnest
+# section on the floor -- and the one where verify_astronomy and verify_ephemeris can actually
+# seal, which is the worst combination we had.
+#
+# Four cells were DEEPENED rather than duplicated. One card was added: SPECTROSCOPY, because it is
+# not a topic among topics but the instrument that made astronomy a physical science, and nearly
+# every other astronomy claim here silently rests on it. Its absence was the real gap.
+EDGES += [
+    ("Spectroscopy (how we know what a distant thing is made of)", "rests_on",
+     "Wave optics (Huygens, Snell's law, diffraction)",
+     "a spectrum is made by dispersing light with a prism or grating, so the instrument IS "
+     "diffraction and refraction; the resolving power of a grating sets what the astronomer can "
+     "distinguish, and Fraunhofer, who mapped the solar dark lines, invented the diffraction "
+     "grating to do it"),
+
+    ("Spectroscopy (how we know what a distant thing is made of)", "rests_on",
+     "Bohr / quantum model of the atom",
+     "the lines are quantised: an electron falling between allowed levels emits a photon of "
+     "exactly that energy difference, which is why each element's fingerprint is FIXED and "
+     "identical everywhere. Bohr's model gave the first quantitative account of the hydrogen "
+     "series, so the astronomical reading of a star's composition rests on atomic structure"),
+
+    ("Spectroscopy (how we know what a distant thing is made of)", "same_form",
+     "Periodic law (Mendeleev)",
+     "two independent fingerprints of the same underlying fact. Mendeleev sorted elements by "
+     "chemical periodicity; spectroscopy sorts them by line pattern -- and they agree, because "
+     "both are consequences of electron shell structure. Helium was found in the Sun's spectrum "
+     "in 1868 before it was isolated on Earth, and the periodic table had a place waiting"),
+
+    ("Big Bang cosmology & expansion (Hubble's law)", "rests_on",
+     "Spectroscopy (how we know what a distant thing is made of)",
+     "Hubble's law is a spectroscopic measurement before it is a cosmological claim: redshift is "
+     "the Doppler displacement of the whole line pattern, and without identifiable lines there is "
+     "no velocity, no v = H0*d, and no expansion. The evidence for the largest claim in the "
+     "section is a shifted fingerprint"),
+
+    ("Stellar nucleosynthesis & the HR diagram", "rests_on",
+     "Spectroscopy (how we know what a distant thing is made of)",
+     "stellar composition and temperature are both read off the spectrum -- lines give what the "
+     "star is made of, the continuum shape gives how hot it is by Wien's law -- and those two "
+     "axes are exactly what the HR diagram plots"),
+
+    ("Stellar nucleosynthesis & the HR diagram", "rests_on",
+     "Nuclear decay & binding energy",
+     "IRON IS THE HINGE, and it is a binding-energy fact rather than an astronomical one: iron-56 "
+     "sits at the peak of binding energy per nucleon, so fusion pays up to iron and costs beyond "
+     "it. That single curve decides which elements a star can make, and that a star with an iron "
+     "core must collapse"),
+
+    ("Heliocentrism & Kepler's laws", "rests_on",
+     "Newton's law of universal gravitation",
+     "Kepler DESCRIBED the three laws from Brahe's positions (1609-1619); Newton later DERIVED all "
+     "three from the inverse-square law. The order is the lesson: an accurate description that "
+     "cannot yet say why is still knowledge, and waiting for the explanation would have cost "
+     "eighty years"),
+
+    ("Celestial mechanics / ephemeris prediction", "rests_on",
+     "Heliocentrism & Kepler's laws",
+     "an ephemeris is Kepler's elements advanced in time and then perturbed; the two-body solution "
+     "is the analytic backbone every numerical integration corrects from"),
+]
+
+# -- BATCH 8: THE FREQUENCY AXIS (2026-08-03) ---------------------------------------------------
+# Matt, across four messages in one night: "Look at the mechanisms for Radio broadcast. Especially
+# AM." ... "Astronomy and space." ... "frequency as well." ... "Light spectrum."
+#
+# Those are ONE question. Measured: Maxwell, wave optics, acoustics, Fourier and spectroscopy were
+# all on the floor -- and the ELECTROMAGNETIC SPECTRUM itself was absent, as was modulation. Every
+# layer present, the axis running through them missing. This is exactly what Matt described as
+# "the exciting parts... the axes that only show when the layers are aligned."
+EDGES += [
+    ("The electromagnetic spectrum & modulation (radio to gamma, one axis)", "rests_on",
+     "Maxwell's equations / classical electromagnetism",
+     "the spectrum IS Maxwell's wave solution indexed by frequency: the equations give a "
+     "self-propagating field travelling at c = 1/sqrt(mu0*eps0), and c = f*lambda then sorts radio "
+     "through gamma onto one axis. Maxwell's identification of light as an electromagnetic wave is "
+     "what makes them one phenomenon rather than seven"),
+
+    ("Spectroscopy (how we know what a distant thing is made of)", "rests_on",
+     "The electromagnetic spectrum & modulation (radio to gamma, one axis)",
+     "a spectrum is a measurement ALONG this axis: dispersing light sorts photons by frequency, "
+     "and an absorption line is a frequency at which the sample removed energy. Without the axis "
+     "there is no coordinate for the line to sit on"),
+
+    ("Wave optics (Huygens, Snell's law, diffraction)", "rests_on",
+     "The electromagnetic spectrum & modulation (radio to gamma, one axis)",
+     "optics is the roughly one octave of the spectrum the eye happens to detect; refraction, "
+     "diffraction and interference are frequency-dependent behaviours of the same wave, which is "
+     "why a radio dish and a telescope mirror are governed by the same diffraction limit"),
+
+    ("The electromagnetic spectrum & modulation (radio to gamma, one axis)", "same_form",
+     "Fourier analysis & signal processing",
+     "modulation and Fourier are one statement. Multiplying a carrier by a message shifts the "
+     "message's spectrum up to the carrier, producing sidebands at f_c +/- f_m -- so an AM "
+     "signal's bandwidth is twice the highest message frequency, which is the transform theorem "
+     "and not a rule of thumb. The same algebra sets the Doppler broadening of a spectral line: "
+     "AM sidebands and a broadened absorption line are the same mathematics"),
+
+    # -- BATCH 9: WHERE PHYSICS ENDS (2026-08-03) ----------------------------------------------
+    # Matt: "Quantum and Space time." The card was minted and its edges were NOT declared, so
+    # tests/test_floor_connected.py::test_the_floor_is_one_body failed gate 82 with exactly one
+    # island: the quantum-gravity card itself. The ratchet did its job -- a theory nobody can walk
+    # to is not on the floor, it is beside it. These are the edges that were missing.
+    ("Spacetime & the quantum-gravity problem (where physics ends)", "limits",
+     "General relativity",
+     "general relativity predicts its own breakdown: the field equations output SINGULARITIES -- "
+     "infinite curvature at the centre of a black hole and at the start of the expansion -- and "
+     "Penrose and Hawking proved these are generic rather than artefacts of assumed symmetry. A "
+     "theory that returns infinities is naming the boundary of its own validity"),
+
+    ("Spacetime & the quantum-gravity problem (where physics ends)", "limits",
+     "Quantum mechanics (Schrödinger equation)",
+     "quantum theory assumes a FIXED background spacetime for its fields to live on, which fails "
+     "exactly where gravity is strong enough to make geometry dynamical. Quantising gravity by the "
+     "method that worked for the other forces gives a NON-RENORMALIZABLE theory: the infinities "
+     "cannot be absorbed into finitely many measured constants"),
+
+    ("Spacetime & the quantum-gravity problem (where physics ends)", "rests_on",
+     "Special relativity",
+     "spacetime as a single four-dimensional structure with an invariant interval is Minkowski's "
+     "1908 reading of special relativity, and it is the object both candidate theories are trying "
+     "to quantise. Without the interval there is no 'spacetime' to be the subject"),
+
+    ("General relativity", "rests_on", "Special relativity",
+     "general relativity reduces to special relativity locally: the equivalence principle says a "
+     "freely falling frame is indistinguishable from an inertial one, so special relativity holds "
+     "in every sufficiently small patch and the general theory is what happens when those patches "
+     "cannot be combined into one flat frame"),
+
+    ("Acoustic wave theory (harmonics, Doppler)", "same_form",
+     "The electromagnetic spectrum & modulation (radio to gamma, one axis)",
+     "identical wave mathematics on a different carrier: frequency, wavelength, superposition, "
+     "harmonics and Doppler shift all transfer unchanged, which is why the same Fourier tools "
+     "serve music and radio. THE DISANALOGY IS LOAD-BEARING AND IS KEPT: sound is a pressure wave "
+     "requiring a medium and travels at ~343 m/s in air, while an electromagnetic wave needs none "
+     "and travels at c. Same form, different substance -- the resemblance is real and it is not an "
+     "identity"),
+]
+
 
 def main() -> int:
     ap = argparse.ArgumentParser()
