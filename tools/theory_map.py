@@ -132,6 +132,25 @@ def _depth(card) -> float:
     return min(1.0, max(0.0, len(tail.strip()) / 400.0))
 
 
+def _substance(card) -> int:
+    """The SAME measurement as _depth, without the ceiling: characters the card adds to the template.
+
+    _depth() clamps at 400 chars because it answers one question -- "is this still a stub?" -- and
+    for that a ceiling is right. But measured on the live page, 177 of 178 cards now peg at 1.0,
+    so ORDERING by it would arrange the floor by tie-break and present the result as a finding.
+    The unclamped count is the same honest quantity with its range intact.
+    """
+    body = str(card.get("body") or "")
+    if _TEMPLATE_MARK not in body:
+        return len(body)
+    tail = body.split("Calibration:", 1)[-1]
+    for marker in ("never HOLDS.", "seal them.", "map-only", "seals"):
+        if marker in tail:
+            tail = tail.split(marker, 1)[-1]
+            break
+    return len(tail.strip())
+
+
 def gaps(th, edges):
     """What the drawing shows, said in words — so the finding survives without the picture."""
     deg = defaultdict(int)
@@ -327,7 +346,9 @@ def svg(th, edges, W=1160, H=1160):
         r = spread * math.sqrt(k + 0.6)           # +0.6 lifts the first cell clear of the title
         pos[cid] = (cx + r * math.cos(ang), cy + r * math.sin(ang), ang, r)
 
-    parts = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
+    # id=vortex, not role=img, is what the enhancement script selects: the lattice above is ALSO
+    # role="img" and is drawn first, so a role selector would have found the wrong drawing.
+    parts = [f'<svg id="vortex" viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
              f'role="img" aria-label="The floor as a vortex of honeycomb: {len(th)} theories '
              f'joined by {len(edges)} relations, the most-aligned at the centre spiralling out">']
     parts.append('<rect width="100%" height="100%" fill="#12100c"/>')
@@ -361,17 +382,24 @@ def svg(th, edges, W=1160, H=1160):
                      f'opacity="{0.55 if cross else 0.20}"/>')
 
     # The cells. Hexagons: size = relations, brightness = depth, colour = section.
-    for cid in order:
+    #
+    # Each carries data-i, its index into the THEORIES payload emitted with the page. That single
+    # attribute is what lets the reader click a cell and get the card, and lets the layout be
+    # re-sorted from another angle — WITHOUT the page depending on JavaScript to draw anything.
+    # The SVG below is complete and readable with scripting off; the script only enhances it.
+    for k, cid in enumerate(order):
         x, y, ang, _r = pos[cid]
         c = th[cid]
         s = (c.get("extra") or {}).get("section") or "?"
         col = SECTION_COLOR.get(s, "#8a8378")
         rad = 4.0 + min(10.0, deg[cid] * 0.80)
         d = _depth(c)
-        parts.append(f'<polygon points="{_hex_points(x, y, rad, ang)}" fill="{col}" '
-                     f'opacity="{0.32 + 0.63 * d:.2f}" stroke="#12100c" stroke-width="1"/>')
+        parts.append(f'<polygon class="cell" data-i="{k}" points="{_hex_points(x, y, rad, ang)}" '
+                     f'fill="{col}" opacity="{0.32 + 0.63 * d:.2f}" stroke="#12100c" '
+                     f'stroke-width="1"><title>{_esc(str(c.get("title"))[:80])}</title></polygon>')
         if deg[cid] <= 1:      # a beam resting on almost nothing — marked so it cannot hide
-            parts.append(f'<polygon points="{_hex_points(x, y, rad + 5, ang)}" fill="none" '
+            parts.append(f'<polygon class="thinring" data-i="{k}" '
+                         f'points="{_hex_points(x, y, rad + 5, ang)}" fill="none" '
                          f'stroke="#d9534f" stroke-width="1.3" opacity=".85"/>')
 
     # Label only the core. Naming all 172 on a spiral is unreadable; the centre is what the
@@ -411,6 +439,229 @@ def _esc(s):
     return (str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
 
 
+def interactive(th, edges) -> str:
+    """Zoom, other angles, and a card on selection — as ENHANCEMENT, never as the page itself.
+
+    Matt, 2026-08-03: "For the visual model, I want to be able to zoom in and view from other
+    angles. Selecting one should bring up a card to explain."
+
+    The static SVG above is complete on its own: with scripting off the floor is still drawn,
+    still labelled, still readable. That is not an accident and it is not a fallback — this
+    library is for people whose only device may be old, borrowed or locked down, and a page that
+    is blank without JavaScript is a page that has chosen who it serves. So everything here
+    LAYERS ON: the script finds the hexagons already in the document and gives them behaviour.
+
+    WHAT 'ANOTHER ANGLE' MEANS HERE. Not a camera — a re-sort. The spiral encodes ONE ordering at
+    a time, so changing the ordering genuinely changes what the picture asserts: by ALIGNMENT the
+    centre is what the floor leans on most; by DEPTH it is what we actually know most about; by
+    SECTION the fields separate into arms; by CALIBRATION the sealable core sits apart from the
+    map-only rim. Four honest views of the same 178 cells, and each one is a different question.
+    """
+    payload = []
+    deg = defaultdict(int)
+    for a, _r, b in edges:
+        deg[a] += 1
+        deg[b] += 1
+    rel_by = defaultdict(list)
+    for a, rel, b in edges:
+        if a in th and b in th:
+            rel_by[a].append([rel, str(th[b].get("title"))])
+            rel_by[b].append(["← " + rel, str(th[a].get("title"))])
+
+    order = sorted(th, key=lambda i: (-deg[i], str(th[i].get("title"))))
+    for cid in order:
+        c = th[cid]
+        x = c.get("extra") or {}
+        payload.append({
+            "t": str(c.get("title") or ""),
+            "s": str(x.get("section") or "?"),
+            "c": str(x.get("calibration") or "?"),
+            "d": str((c.get("source") or {}).get("domain") or "?"),
+            "g": deg[cid],
+            "w": _substance(c),
+            "b": str(c.get("body") or "")[:1800],
+            "r": rel_by.get(cid, [])[:14],
+        })
+
+    return """
+<div class=controls>
+  <span class=ctl-label>angle</span>
+  <button class="ang on" data-ang="align">alignment</button>
+  <button class=ang data-ang="depth">depth</button>
+  <button class=ang data-ang="section">section</button>
+  <button class=ang data-ang="calib">calibration</button>
+  <span class=ctl-sep></span>
+  <button id=zin title="zoom in">+</button>
+  <button id=zout title="zoom out">&#8722;</button>
+  <button id=zreset>reset</button>
+  <span class=hint>drag to pan &#183; scroll to zoom &#183; click a cell for its card</span>
+</div>
+<div id=cardpane class=cardpane hidden>
+  <button id=cardclose class=cardclose aria-label="close">&#215;</button>
+  <h3 id=cardtitle></h3>
+  <div id=cardmeta class=cardmeta></div>
+  <div id=cardbody class=cardbody></div>
+  <div id=cardrels class=cardrels></div>
+</div>
+<script>
+/* PROGRESSIVE ENHANCEMENT. Everything below decorates an SVG that is already drawn and already
+   readable. If this script never runs, the floor is still there. */
+(function(){
+  var TH = %s;
+  var svg = document.getElementById('vortex');
+  if (!svg || !TH.length) return;
+  var cells = svg.querySelectorAll('.cell');
+  if (!cells.length) return;
+  /* Reveal the controls and their description ONLY once we know the drawing is really here and
+     really wired. Anything that fails above this line leaves the page as a plain static map,
+     which is a complete and honest thing to be. */
+  document.querySelectorAll('.controls,.ifjs').forEach(function(e){ e.classList.add('ready'); });
+
+  /* ── zoom + pan, by moving the viewBox. No library, no dependency. ── */
+  var vb = (svg.getAttribute('viewBox')||'0 0 1160 1160').split(/\\s+/).map(Number);
+  var home = vb.slice(), cur = vb.slice();
+  function apply(){ svg.setAttribute('viewBox', cur.join(' ')); }
+  function zoom(f, cx, cy){
+    var nw = Math.min(home[2]*3, Math.max(home[2]*0.08, cur[2]*f));
+    var nh = nw * (home[3]/home[2]);
+    if (cx === undefined){ cx = cur[0]+cur[2]/2; cy = cur[1]+cur[3]/2; }
+    cur[0] = cx - (cx-cur[0]) * (nw/cur[2]);
+    cur[1] = cy - (cy-cur[1]) * (nh/cur[3]);
+    cur[2] = nw; cur[3] = nh; apply();
+  }
+  function pt(e){
+    var r = svg.getBoundingClientRect();
+    return [cur[0] + (e.clientX-r.left)/r.width*cur[2],
+            cur[1] + (e.clientY-r.top)/r.height*cur[3]];
+  }
+  svg.addEventListener('wheel', function(e){
+    e.preventDefault(); var p = pt(e); zoom(e.deltaY > 0 ? 1.15 : 0.87, p[0], p[1]);
+  }, {passive:false});
+  /* NO setPointerCapture HERE. Capturing on the <svg> made the whole drawing pan correctly and
+     silently killed every cell selection: with capture set, the browser retargets the follow-up
+     click to the capture element, so it fires on the <svg> and never reaches the polygon whose
+     listener opens the card. Source-reading would not have caught it — it took driving the page.
+     Listening on window instead keeps the drag alive past the edge of the drawing without
+     stealing the click. */
+  var drag = null, moved = 0;
+  svg.addEventListener('pointerdown', function(e){ drag = pt(e); moved = 0; });
+  window.addEventListener('pointermove', function(e){
+    if (!drag) return;
+    var p = pt(e);
+    moved += Math.abs(p[0]-drag[0]) + Math.abs(p[1]-drag[1]);
+    cur[0] -= (p[0]-drag[0]); cur[1] -= (p[1]-drag[1]); apply();
+  });
+  window.addEventListener('pointerup', function(){ drag = null; });
+  window.addEventListener('pointercancel', function(){ drag = null; });
+  document.getElementById('zin').onclick = function(){ zoom(0.8); };
+  document.getElementById('zout').onclick = function(){ zoom(1.25); };
+  document.getElementById('zreset').onclick = function(){ cur = home.slice(); apply(); setangle('align'); };
+
+  /* ── the card ── */
+  var pane=document.getElementById('cardpane'), T=document.getElementById('cardtitle'),
+      M=document.getElementById('cardmeta'), B=document.getElementById('cardbody'),
+      R=document.getElementById('cardrels');
+  function esc(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+  function show(i){
+    var t = TH[i]; if (!t) return;
+    T.textContent = t.t;
+    /* The card states the two numbers the angles sort on, so a reader who wonders why a cell sat
+       where it sat can read the reason instead of inferring it from the picture. */
+    M.innerHTML = esc(t.s) + ' &#183; ' + esc(t.d) + ' &#183; <b>' + esc(t.c) + '</b> &#183; ' +
+                  t.g + ' relation' + (t.g===1?'':'s') + ' &#183; ' + t.w + ' chars of its own';
+    B.textContent = t.b;
+    R.innerHTML = t.r.length
+      ? '<h4>joined to</h4>' + t.r.map(function(r){
+          return '<div class=rel><span class=relk>'+esc(r[0])+'</span> '+esc(r[1])+'</div>'; }).join('')
+      : '<div class=rel><span class=relk>no relations</span> this cell rests on nothing yet</div>';
+    pane.hidden = false;
+    cells.forEach(function(c){ c.classList.toggle('sel', +c.getAttribute('data-i') === i); });
+  }
+  document.getElementById('cardclose').onclick = function(){
+    pane.hidden = true; cells.forEach(function(c){ c.classList.remove('sel'); }); };
+  cells.forEach(function(c){ c.style.cursor='pointer'; });
+  /* ONE handler on the drawing, not one per cell, and it selects the NEAREST cell rather than
+     demanding a direct hit. The smallest hexagons are 8px across: on a phone that is well under
+     the ~44px a fingertip can reliably land on, and a map that only answers a perfect tap is a
+     map that answers nobody in a hurry. Beyond a generous radius the click means "nothing here"
+     and is left alone — near-miss forgiveness, not a guess. */
+  svg.addEventListener('click', function(e){
+    if (moved >= 6) return;   /* they were panning, not choosing */
+    var best = null, bestd = Infinity;
+    cells.forEach(function(c){
+      var b = c.getBoundingClientRect();
+      var dx = e.clientX - (b.left + b.width/2), dy = e.clientY - (b.top + b.height/2);
+      var d = Math.sqrt(dx*dx + dy*dy) - Math.max(b.width, b.height)/2;   /* distance to the edge */
+      if (d < bestd){ bestd = d; best = c; }
+    });
+    if (best && bestd < 22) show(+best.getAttribute('data-i'));
+  });
+
+  /* ── other angles: the SAME cells, re-sorted, so the centre means something different ──
+     Position is the assertion, so changing the sort changes the claim the picture makes. */
+  var GA = Math.PI*(3-Math.sqrt(5)), cx0=580, cy0=586;
+  var SEC = {}, secn = 0;
+  TH.forEach(function(t){ if (!(t.s in SEC)) SEC[t.s] = secn++; });
+  var CAL = {'seals':0, 'partial':1, 'map-only':2};
+  var KEYS = {
+    align:   function(t){ return [-t.g, t.t]; },
+    depth:   function(t){ return [-t.w, t.t]; },
+    section: function(t){ return [SEC[t.s], -t.g, t.t]; },
+    calib:   function(t){ return [(t.c in CAL ? CAL[t.c] : 3), -t.g, t.t]; }
+  };
+  function relayout(mode){
+    /* 'align' is the layout the server already drew, so it is restored by REMOVING the transform
+       rather than by recomputing it. Re-deriving it in JS would land within a pixel, but "within
+       a pixel" is a claim I would then have to keep true across two languages' float and sort
+       behaviour. Removing the attribute is exact by construction. */
+    if (mode === 'align'){
+      svg.querySelectorAll('.cell,.thinring').forEach(function(el){ el.removeAttribute('transform'); });
+      svg.querySelectorAll('path').forEach(function(p){ p.style.opacity = ''; });
+      svg.querySelectorAll('text').forEach(function(t){
+        if (t.getAttribute('font-size') === '9.5') t.style.opacity = ''; });
+      return;
+    }
+    var key = KEYS[mode] || KEYS.align;
+    var idx = TH.map(function(t,i){ return i; });
+    idx.sort(function(a,b){
+      var ka=key(TH[a]), kb=key(TH[b]);
+      for (var i=0;i<ka.length;i++){ if (ka[i]<kb[i]) return -1; if (ka[i]>kb[i]) return 1; }
+      return 0;
+    });
+    var spread = 1160*0.455/Math.sqrt(TH.length);
+    var place = {};
+    idx.forEach(function(orig, rank){
+      var a = rank*GA, r = spread*Math.sqrt(rank+0.6);
+      place[orig] = [cx0 + r*Math.cos(a), cy0 + r*Math.sin(a), a];
+    });
+    svg.querySelectorAll('.cell,.thinring').forEach(function(el){
+      var i = +el.getAttribute('data-i'), p = place[i];
+      if (!p) return;
+      var old = el.getAttribute('points').split(' ').map(function(s){ return s.split(',').map(Number); });
+      var ox = old.reduce(function(s,q){ return s+q[0]; },0)/old.length;
+      var oy = old.reduce(function(s,q){ return s+q[1]; },0)/old.length;
+      el.setAttribute('transform', 'translate('+(p[0]-ox).toFixed(1)+','+(p[1]-oy).toFixed(1)+')');
+    });
+    /* The chords are drawn as fixed curves between the ALIGNMENT positions, and the 22 printed
+       names sit at those positions too. Under any other sort both would point at the wrong cells,
+       so they are hidden. A stale line that still looks authoritative is worse than no line. */
+    svg.querySelectorAll('path').forEach(function(p){ p.style.opacity = 0; });
+    svg.querySelectorAll('text').forEach(function(t){
+      if (t.getAttribute('font-size') === '9.5') t.style.opacity = 0;
+    });
+  }
+  function setangle(mode){
+    document.querySelectorAll('.ang').forEach(function(x){
+      x.classList.toggle('on', x.getAttribute('data-ang') === mode); });
+    relayout(mode);
+  }
+  document.querySelectorAll('.ang').forEach(function(b){
+    b.onclick = function(){ setangle(b.getAttribute('data-ang')); };
+  });
+})();
+</script>""" % (json.dumps(payload, ensure_ascii=False).replace("</", "<\\/"),)
+
+
 def page(th, edges, g):
     thin_list = "".join(
         f"<li>{_esc(str(th[c].get('title')))} "
@@ -439,6 +690,48 @@ what limits it, and what shares its form &#8212; drawn so the gaps are visible."
  ul{{margin:.3rem 0;padding-left:1.1rem;line-height:1.65}} li{{font-size:.9rem}}
  .dim{{color:#7d745f}} .num{{color:#e8dfc9}}
  table{{border-collapse:collapse;font-size:.9rem}} td{{padding:.15rem .9rem .15rem 0}}
+ /* ── the enhancement layer. Every rule below styles a control that only appears once the
+    script has run; with scripting off none of these elements exist and nothing shifts. ── */
+ /* HIDDEN UNTIL THE SCRIPT SAYS OTHERWISE. With scripting off these buttons would still paint,
+    and the hint beside them would tell the reader to drag, zoom and click a page that does none
+    of those things. Dead controls that describe themselves as live are worse than no controls:
+    the reader concludes the site is broken rather than that the feature is absent. Same for the
+    .ifjs sentence in the lede. The script adds .ready; nothing else does. */
+ .controls,.ifjs{{display:none}}
+ .controls.ready{{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin:.7rem 0 .5rem;
+        font-family:Georgia,serif;font-size:.85rem}}
+ .ifjs.ready{{display:inline}}
+ .ctl-label{{color:#7d745f;margin-right:.15rem}}
+ .ctl-sep{{width:1px;height:18px;background:#2e2a22;margin:0 .5rem}}
+ .controls button{{background:#171410;color:#a99c82;border:1px solid #2e2a22;border-radius:5px;
+        padding:.24rem .6rem;font-family:Georgia,serif;font-size:.85rem;cursor:pointer}}
+ .controls button:hover{{border-color:#5d564a;color:#e8dfc9}}
+ .controls button.on{{background:#c69a4a;border-color:#c69a4a;color:#12100c}}
+ .hint{{color:#5d564a;font-size:.78rem;margin-left:.3rem}}
+ /* touch-action so a finger drag pans the map instead of scrolling the page; user-select so a
+    drag does not paint the cell labels blue on the way past. */
+ #vortex{{touch-action:none;-webkit-user-select:none;user-select:none}}
+ /* Only the cells are clickable. Measured on the live page: a click aimed at a hexagon landed on
+    a chord instead — 285 relation curves lie across the drawing and each one is a hit target the
+    reader never meant to press. Nothing but a theory should answer a click. */
+ #vortex path,#vortex text,#vortex circle,#vortex .thinring{{pointer-events:none}}
+ .cell.sel{{stroke:#c69a4a;stroke-width:2.5}}
+ .cell,.thinring{{transition:transform .55s cubic-bezier(.4,0,.2,1)}}
+ .cardpane{{position:fixed;right:1rem;bottom:1rem;width:min(27rem,calc(100vw - 2rem));
+        max-height:min(30rem,72vh);overflow:auto;background:#171410;border:1px solid #3a3427;
+        border-radius:9px;padding:1rem 1.1rem 1.1rem;box-shadow:0 8px 34px rgba(0,0,0,.62);z-index:40}}
+ .cardpane[hidden]{{display:none}}
+ .cardclose{{float:right;background:none;border:0;color:#7d745f;font-size:1.3rem;line-height:1;
+        cursor:pointer;padding:0 0 0 .5rem}}
+ .cardclose:hover{{color:#e8dfc9}}
+ .cardpane h3{{margin:0 0 .3rem;font-weight:400;font-size:1.08rem;color:#c69a4a}}
+ .cardmeta{{color:#7d745f;font-size:.79rem;margin-bottom:.6rem}}
+ .cardmeta b{{color:#a99c82;font-weight:400}}
+ .cardbody{{color:#cbbfa4;font-size:.87rem;line-height:1.6;white-space:pre-wrap}}
+ .cardrels h4{{margin:.9rem 0 .35rem;font-weight:400;font-size:.83rem;color:#7d745f}}
+ .rel{{font-size:.84rem;color:#a99c82;line-height:1.5}}
+ .relk{{color:#5d564a}}
+ @media(max-width:640px){{.cardpane{{right:.5rem;left:.5rem;width:auto;max-height:58vh}}}}
 </style></head><body><div class=wrap>
 <h1>The Floor</h1>
 <p class=lede>Every theory the sciences and mathematics actually run on, joined by what it
@@ -461,10 +754,15 @@ row of them is a thin place worth walking to.</p>
 
 <h2 style="font-weight:400;font-size:1.15rem;color:#c69a4a;margin:2rem 0 .2rem">
 How well each theory is joined</h2>
-<p class=lede style="font-size:.92rem;margin:.2rem 0 .8rem">The same 172, arranged by how many
-relations each holds &#8212; most aligned at the centre, spiralling out at the golden angle.
-Distance from the middle is how peripheral a theory is to the assembled floor.</p>
+<p class=lede style="font-size:.92rem;margin:.2rem 0 .8rem">The same {g['theories']}, arranged by
+how many relations each holds &#8212; most aligned at the centre, spiralling out at the golden
+angle. Distance from the middle is how peripheral a theory is to the assembled floor.
+<span class=ifjs><b>Zoom in, turn it to another angle, and click any cell for its card.</b>
+Changing the angle changes the question the picture is answering: by <i>depth</i> the centre is
+what we actually know most about, by <i>calibration</i> the sealable core separates from the
+map-only rim.</span></p>
 {svg(th, edges)}
+{interactive(th, edges)}
 <div class=legend>
   <span><i class=k style="background:#8a7a55"></i>rests on</span>
   <span><i class=k style="background:#a5544a"></i>limits</span>
