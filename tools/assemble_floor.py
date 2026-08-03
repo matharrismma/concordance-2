@@ -459,6 +459,144 @@ EDGES += [
 ]
 
 
+# -- FROM THE FINDER (2026-08-02) --------------------------------------------------------------
+# The first edges this project did not write by hand: tools/propose_edges.py proposed them from
+# co-retrieval over the keeping, and the witnesses it printed are named in the evidence below.
+# 18 proposals -> 3 accepted, 6 redundant, 9 spurious word-collisions.
+EDGES += [
+    ("Second law of thermodynamics (entropy)", "limits",
+     "Conservation of energy (1st law of thermodynamics)",
+     "energy conservation permits a process in EITHER direction -- it would allow heat to flow "
+     "from cold to hot -- and the second law says which way it actually runs. The first law "
+     "cannot answer 'will this reaction go?'; free energy, which is the second law's bookkeeping, "
+     "can. Proposed by the finder; witness: 'Gibbs free energy -- will a reaction go?'"),
+    ("Newton's law of universal gravitation", "rests_on", "Fundamental theorem of calculus",
+     "Newton built the calculus in order to state this law and derive its consequences: an orbit "
+     "is obtained by integrating the inverse-square force, and Kepler's equal-area rule is a "
+     "statement about the integral of angular momentum. Proposed by the finder; witness: the "
+     "keeping's own 'Isaac Newton' card, which both retrievals pulled"),
+    ("Maxwell's equations / classical electromagnetism", "same_form",
+     "Newton's law of universal gravitation",
+     "Coulomb's law and universal gravitation are the SAME inverse-square field: both fall off as "
+     "1/r^2 from a point source, so the same mathematics solves both -- Gauss's flux law, the "
+     "shell theorem (a uniform sphere attracts as though its mass were at the centre), and the "
+     "1/r potential. The sign differs, and the constant, and nothing else. Proposed by the finder"),
+]
+
+
+# -- BATCH 3: THE MISSING FRAMEWORKS AND THE GAME-THEORY / QUANTUM BRIDGE (2026-08-02) ---------
+# Matt: "Game theory and Quantum physics... game theory has been a big component from the
+# beginning." Measured: 16 of 16 probed frameworks absent -- including NOETHER, whose theorem the
+# floor already cited as evidence while holding no card for it. A floor that names a beam it does
+# not contain is lying about itself.
+EDGES += [
+    # -- the bridge, and it is mathematical rather than biographical --
+    ("Game theory (Nash equilibrium)", "rests_on", "Fixed-point theorems (Brouwer, Kakutani)",
+     "Nash's existence proof IS a fixed-point argument (Kakutani), and von Neumann's minimax rests "
+     "on Brouwer: an equilibrium exists because a continuous map of a convex compact set into "
+     "itself must fix a point. The economics is topology wearing a payoff matrix"),
+    ("Quantum mechanics (Schrodinger equation)", "same_form", "Game theory (Nash equilibrium)",
+     "a MIXED STRATEGY and a QUANTUM MIXED STATE are the same object: a probability distribution "
+     "over pure alternatives, non-negative and summing to one, living on a simplex. Density "
+     "matrices and mixed strategies share the convex geometry, and both existence theorems are "
+     "fixed-point arguments over it. Von Neumann proved the minimax theorem in 1928, wrote the "
+     "Mathematical Foundations of Quantum Mechanics in 1932, and Theory of Games in 1944 -- one "
+     "mathematics, applied twice"),
+    ("Quantum information & entanglement (von Neumann entropy)", "rests_on",
+     "Quantum mechanics (Schrodinger equation)",
+     "the density matrix, entanglement and decoherence are all statements in the quantum "
+     "formalism"),
+    ("Quantum information & entanglement (von Neumann entropy)", "same_form",
+     "Shannon information theory (entropy, channel capacity)",
+     "von Neumann entropy S = -Tr(rho log rho) reduces EXACTLY to Shannon's H = -sum p log p in "
+     "the density matrix's eigenbasis -- the same functional, one door further in. Quantum "
+     "channel capacity generalizes Shannon's, and reduces to it for classical channels"),
+    ("Quantum information & entanglement (von Neumann entropy)", "limits",
+     "Cryptographic security (hashing, checksums, PKI)",
+     "Shor's algorithm factors in polynomial time on a quantum computer, so RSA's hardness -- "
+     "unique factorization being hard to reverse -- is a claim about CLASSICAL computers only. "
+     "The honest card says which assumption the security rests on"),
+
+    # -- game theory outward: into biology, into institutions --
+    ("Evolutionary game theory (evolutionarily stable strategies)", "rests_on",
+     "Game theory (Nash equilibrium)",
+     "an ESS is a Nash equilibrium with a stability condition added: no rare mutant strategy can "
+     "invade a population playing it"),
+    ("Evolutionary game theory (evolutionarily stable strategies)", "rests_on",
+     "Darwinian evolution by natural selection",
+     "reproduction does the choosing -- payoffs are fitness, and the equilibrium is reached by "
+     "differential survival rather than by reasoning"),
+    ("Mechanism design & auction theory", "rests_on", "Game theory (Nash equilibrium)",
+     "mechanism design is game theory run backwards: fix the outcome you want, then design rules "
+     "whose equilibrium produces it"),
+    ("Contract theory & rule of law", "rests_on", "Mechanism design & auction theory",
+     "a contract is a mechanism: it changes the payoffs so that keeping the promise is the "
+     "equilibrium play"),
+
+    # -- Noether, the beam the floor was already leaning on --
+    ("Conservation of energy (1st law of thermodynamics)", "rests_on",
+     "Noether's theorem (symmetry and conservation)",
+     "energy conservation is time-translation symmetry; the theorem is the reason the conservation "
+     "laws are not a coincidence but a consequence of the action's symmetries"),
+    ("Conservation of linear & angular momentum", "rests_on",
+     "Noether's theorem (symmetry and conservation)",
+     "space-translation symmetry gives linear momentum, rotational symmetry gives angular "
+     "momentum -- the same theorem, two symmetries"),
+    ("Noether's theorem (symmetry and conservation)", "rests_on",
+     "Standard Model / quantum field theory",
+     "gauge symmetries generate the conserved charges of the Standard Model: electric charge, "
+     "colour, weak isospin -- Noether's argument is how the field content is organized"),
+
+    # -- the mathematical floor under probability, learning and control --
+    ("Kolmogorov probability axioms", "rests_on", "Measure theory (Lebesgue integration)",
+     "a probability IS a measure of total mass one; Kolmogorov's axioms are the measure axioms "
+     "with that normalization"),
+    ("Statistical learning theory (bias-variance, generalization)", "rests_on",
+     "Kolmogorov probability axioms",
+     "generalization bounds are probability statements about unseen samples"),
+    ("Statistical learning theory (bias-variance, generalization)", "rests_on",
+     "Linear programming & duality",
+     "fitting is optimization under constraint; the dual view (support vectors, regularization "
+     "paths) is the same duality"),
+    ("Control theory & cybernetics (feedback, stability)", "rests_on",
+     "Linear algebra (vector spaces, eigenvalues)",
+     "stability of a linear system is decided by where the eigenvalues of its state matrix sit -- "
+     "the loop is stable exactly when they lie in the left half-plane"),
+    ("Homeostasis & physiological regulation", "same_form",
+     "Control theory & cybernetics (feedback, stability)",
+     "a physiological set point with negative feedback IS a control loop: thermoregulation, "
+     "glucose regulation and baroreflex are described with the same block diagram an engineer "
+     "draws for a governor"),
+    ("Dynamical systems & deterministic chaos", "rests_on", "Newton's three laws of motion",
+     "the systems whose sensitivity to initial conditions defines chaos are Newtonian ones -- "
+     "the three-body problem is the original case"),
+    ("Dynamical systems & deterministic chaos", "limits",
+     "Celestial mechanics / ephemeris prediction",
+     "deterministic does not mean predictable: the solar system is chaotic on ~5 million-year "
+     "timescales, so ephemeris accuracy has a horizon no computing power removes"),
+    ("Computational complexity (P, NP, reductions)", "rests_on",
+     "Church-Turing thesis / computability",
+     "complexity classes are defined over the machine model the thesis identifies; computability "
+     "asks whether, complexity asks how expensively"),
+    ("Computational complexity (P, NP, reductions)", "limits",
+     "Cryptographic security (hashing, checksums, PKI)",
+     "every public-key scheme rests on a problem BELIEVED hard; P vs NP is open, so the security "
+     "is conditional and the honest card says which conjecture it is standing on"),
+    ("Fourier analysis & signal processing", "same_form",
+     "Acoustic wave theory (harmonics, Doppler)",
+     "the harmonic series IS the Fourier decomposition of a standing wave; the transform is the "
+     "general statement of what a vibrating string does"),
+    ("Fourier analysis & signal processing", "rests_on", "Fundamental theorem of calculus",
+     "the transform pair is a pair of integrals, and inversion is the fundamental theorem doing "
+     "its work in the frequency domain"),
+    ("Heisenberg uncertainty principle", "same_form", "Fourier analysis & signal processing",
+     "uncertainty is the Fourier bandwidth theorem: a signal narrow in time is broad in frequency, "
+     "and position/momentum are a transform pair. The physical constant hbar sets the scale; the "
+     "inequality itself is mathematics about any conjugate pair, which is why the same limit "
+     "governs radar resolution and note onset in music"),
+]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
