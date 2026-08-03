@@ -850,6 +850,195 @@ EDGES += [
      "in every sufficiently small patch and the general theory is what happens when those patches "
      "cannot be combined into one flat frame"),
 
+    # -- BATCH 10: THE PRACTICAL FLOOR (2026-08-03) --------------------------------------------
+    # Matt: "Agriculture and any other space that is practical for use should be included as
+    # well." Measured: 40 of 75 major figures absent, and the cluster that matters most to someone
+    # with no other option was entirely missing -- Liebig, Haber, Bosch, Borlaug, Jenner,
+    # Semmelweis, Lister, Fleming, Snow. How food is grown and how disease is stopped.
+    ("Haber–Bosch nitrogen fixation (bread from air)", "rests_on",
+     "Chemical kinetics & equilibrium (Arrhenius, Le Chatelier)",
+     "the whole design is a fight with an equilibrium: the reaction is exothermic, so heat speeds "
+     "the kinetics and shifts the equilibrium BACKWARD by Le Chatelier. Haber-Bosch runs at a "
+     "deliberately compromised temperature and buys the loss back with 150-300 atmospheres and an "
+     "iron catalyst. It is the textbook case of engineering against an equilibrium"),
+
+    ("Haber–Bosch nitrogen fixation (bread from air)", "rests_on",
+     "Stoichiometry & the mole concept",
+     "N2 + 3H2 -> 2NH3 is a mole-ratio statement before it is an industry; yield, feed rates and "
+     "recycle are all stoichiometry"),
+
+    ("The Green Revolution (Borlaug, semi-dwarf breeding)", "rests_on",
+     "Haber–Bosch nitrogen fixation (bread from air)",
+     "the two are one package and neither works alone. Fertilising a traditional TALL wheat makes "
+     "it lodge -- fall over under its own grain weight -- so the nitrogen is wasted. A semi-dwarf "
+     "stalk converts that nitrogen into grain instead of straw. Dwarfing is what made industrial "
+     "nitrogen worth applying"),
+
+    ("The Green Revolution (Borlaug, semi-dwarf breeding)", "rests_on",
+     "Mendelian inheritance",
+     "Borlaug's method is selective breeding at scale: crossing for disease resistance, "
+     "photoperiod insensitivity and short stature, then selecting the segregants that carry all "
+     "three. Mendelian ratios are what make that search finite rather than hopeful"),
+
+    ("Crop rotation & biological nitrogen fixation (the low-input path)", "limits",
+     "Haber–Bosch nitrogen fixation (bread from air)",
+     "root nodules do at soil temperature and one atmosphere, by the nitrogenase enzyme, what "
+     "Haber-Bosch needs 400C and 200 atm to do -- so the industrial route is not the only way to "
+     "break the triple bond, only the fastest. This bounds the DEPENDENCY: rotation and "
+     "intercropping buy fertility with knowledge and labour rather than with purchased inputs, "
+     "which is the difference between a farmer who can act and one who cannot"),
+
+    ("Crop rotation & biological nitrogen fixation (the low-input path)", "rests_on",
+     "Nutrient cycling & agronomy (NPK, evapotranspiration)",
+     "rotation is a nutrient-budget strategy: legumes deposit nitrogen, deep-rooted crops lift "
+     "leached minerals, and the sequence is chosen so each course returns what the last removed"),
+
+    ("Liebig's law of the minimum (what actually limits growth)", "rests_on",
+     "Nutrient cycling & agronomy (NPK, evapotranspiration)",
+     "the law is the reason a nutrient BUDGET rather than a nutrient total is the useful object: "
+     "the scarcest element sets the yield, so the budget must be read element by element"),
+
+    ("Agricultural science (yield, soil-pH suitability)", "rests_on",
+     "Liebig's law of the minimum (what actually limits growth)",
+     "yield responds to the binding constraint and to nothing else, so a soil test precedes any "
+     "purchase -- adding nitrogen to a phosphorus-limited field buys nothing"),
+
+    ("Vaccination & immune memory (Jenner to eradication)", "rests_on",
+     "Germ theory of disease",
+     "a vaccine only makes sense if disease is caused by a specific transmissible agent that the "
+     "body can learn to recognise. Jenner acted 60 years before germ theory explained why it "
+     "worked, which is the same order as Kepler before Newton: a reliable effect first, the "
+     "mechanism after"),
+
+    ("Antisepsis & handwashing (Semmelweis, Lister)", "rests_on",
+     "Germ theory of disease",
+     "Lister built antisepsis directly on Pasteur. Semmelweis had the decisive MEASUREMENT twenty "
+     "years earlier -- mortality from ~18% to ~2% on chlorinated-lime handwashing -- and was "
+     "rejected for having no mechanism. A measured effect without a mechanism is still evidence, "
+     "and demanding the mechanism first cost thousands of lives"),
+
+    ("Antibiotics & antimicrobial resistance (Fleming's own warning)", "rests_on",
+     "Darwinian evolution by natural selection",
+     "resistance is not a misuse of the theory, it IS the theory: an antibiotic is a selection "
+     "pressure, the susceptible die, any resistant variant reproduces, and the population shifts "
+     "within days. Fleming warned of exactly this in his 1945 Nobel lecture"),
+
+    ("Antibiotics & antimicrobial resistance (Fleming's own warning)", "rests_on",
+     "Pharmacokinetics (dosing, clearance, half-life)",
+     "the practical rule -- finish the course, and dose adequately -- is pharmacokinetic: "
+     "sub-therapeutic concentrations kill the weakest bacteria and select the rest"),
+
+    ("Sanitation, clean water & oral rehydration (Snow's pump handle)", "rests_on",
+     "Germ theory of disease",
+     "Snow demonstrated waterborne transmission in 1854 from a map and a death count, before the "
+     "organism was seen -- a spatial pattern in data identifying a cause no microscope had yet "
+     "resolved. Germ theory later supplied the agent"),
+
+    ("Sanitation, clean water & oral rehydration (Snow's pump handle)", "rests_on",
+     "Homeostasis & physiological regulation",
+     "cholera kills by dehydration and electrolyte loss rather than by the organism, so the "
+     "treatment is a homeostasis problem. Oral rehydration works because glucose drives sodium "
+     "co-transport across the gut wall EVEN while it is inflamed -- which is why salt, sugar and "
+     "clean water can replace an intravenous drip"),
+
+    # -- BATCH 11: POWER, FLUIDS, HEAT, AND TWO BEAMS WE WERE ALREADY LEANING ON (2026-08-03) ---
+    # Matt: "Tesla first, but there is a deep list." / "Mathematics should cover all known forms."
+    #
+    # GROUP THEORY and TOPOLOGY are the Noether mistake repeated at scale: both were cited as
+    # EVIDENCE on existing edges while no card held them. Noether's theorem is about symmetries;
+    # the crystallographic restriction behind quasicrystals is group theory; the fixed-point
+    # theorems under Nash equilibrium are topological. A floor that names a beam it does not
+    # contain is telling the truth about the world and lying about itself.
+    ("Group theory & symmetry (the mathematics of what stays the same)", "rests_on",
+     "Zermelo–Fraenkel set theory (ZFC)",
+     "a group is a SET with an operation satisfying four axioms; the whole of abstract algebra is "
+     "built on the set-theoretic foundation"),
+
+    ("Noether's theorem (symmetry and conservation)", "rests_on",
+     "Group theory & symmetry (the mathematics of what stays the same)",
+     "THE BEAM, NOW HELD. Noether's theorem says every differentiable SYMMETRY of the action "
+     "yields a conserved quantity -- and symmetries form groups, specifically continuous Lie "
+     "groups here. Time-translation gives energy, space-translation momentum, rotation angular "
+     "momentum. Group theory is why the conservation laws are consequences rather than a list of "
+     "coincidences, and the floor cited this relationship for a day before holding a card for it"),
+
+    ("Quasicrystals (forbidden symmetry in real matter)", "rests_on",
+     "Group theory & symmetry (the mathematics of what stays the same)",
+     "the CRYSTALLOGRAPHIC RESTRICTION THEOREM -- that a periodic lattice admits only 2-, 3-, 4- "
+     "and 6-fold rotational symmetry, never 5-fold -- is a group-theoretic result about which "
+     "rotations can generate a lattice. That theorem is exactly why Shechtman's ten-fold "
+     "diffraction pattern was held to be impossible, and why the resolution had to be that the "
+     "structure is not periodic"),
+
+    ("Fixed-point theorems (Brouwer, Kakutani)", "rests_on",
+     "Topology (what survives stretching)",
+     "THE SECOND BEAM. Brouwer's theorem is topological, not algebraic: it holds for any convex "
+     "compact set because of the SHAPE of that set, and no formula is produced. That is precisely "
+     "why Nash can prove an equilibrium exists while giving no method to find it -- the "
+     "non-constructiveness is inherited from the topology"),
+
+    ("Graph theory (Euler, connectivity)", "same_form",
+     "Topology (what survives stretching)",
+     "graph theory is topology with the geometry discarded: Euler solved the Königsberg bridges by "
+     "keeping only what touches what, and his V - E + F = 2 for convex polyhedra is a property of "
+     "the SPHERE they are drawn on rather than of any solid. This is why one theory serves road "
+     "networks, molecules and a corpus of linked cards alike"),
+
+    ("Electromagnetic induction (Faraday's law — how all electricity is made)", "rests_on",
+     "Maxwell's equations / classical electromagnetism",
+     "Faraday's law is one of Maxwell's four equations; Faraday found it experimentally in 1831 "
+     "and Maxwell gave it its mathematical form thirty years later. The minus sign (Lenz) is "
+     "conservation of energy appearing as a sign: were it positive, cranking a generator would "
+     "yield free energy"),
+
+    ("AC & the polyphase system (Tesla, and why the grid is alternating)", "rests_on",
+     "Electromagnetic induction (Faraday's law — how all electricity is made)",
+     "a transformer needs a CHANGING flux, which is why only alternating current can be stepped "
+     "up and down efficiently -- and since transmission loss is I^2*R, raising voltage tenfold "
+     "cuts loss a hundredfold. That single fact settled the war of currents on engineering rather "
+     "than personality. The rotating magnetic field from three phases 120 degrees apart is "
+     "induction applied again, and it gives a motor with no brushes to wear out"),
+
+    ("AC & the polyphase system (Tesla, and why the grid is alternating)", "same_form",
+     "The electromagnetic spectrum & modulation (radio to gamma, one axis)",
+     "the Tesla coil is a resonant air-core transformer -- two LC circuits tuned to the same "
+     "frequency so energy transfers between them -- which is the SAME resonant selection a radio "
+     "receiver uses to pick one station out of the spectrum. Power engineering and radio "
+     "reception are one principle at different scales"),
+
+    ("Fluid mechanics (Bernoulli, Reynolds, Navier–Stokes)", "rests_on",
+     "Conservation of energy (1st law of thermodynamics)",
+     "Bernoulli's principle IS energy conservation along a streamline: pressure plus kinetic plus "
+     "potential is constant, so where a fluid speeds up its pressure must drop. Not a special "
+     "force -- a bookkeeping identity"),
+
+    ("Fluid mechanics (Bernoulli, Reynolds, Navier–Stokes)", "limits",
+     "Dynamical systems & deterministic chaos",
+     "turbulence is the practical face of chaos: above a Reynolds number of roughly 4,000 the flow "
+     "becomes chaotic and mixing, and whether the Navier-Stokes equations even admit smooth "
+     "solutions in three dimensions is an open Clay Millennium Problem. We design aircraft and "
+     "heart valves with equations whose basic mathematical behaviour is unproven"),
+
+    ("Heat transfer (conduction, convection, radiation)", "rests_on",
+     "Second law of thermodynamics (entropy)",
+     "all three modes run only hot-to-cold unaided, and that direction is the second law. It is "
+     "also why insulation slows heat and never blocks it: you can lengthen the path, not reverse "
+     "the arrow"),
+
+    ("Heat transfer (conduction, convection, radiation)", "same_form",
+     "The electromagnetic spectrum & modulation (radio to gamma, one axis)",
+     "thermal radiation is not a fourth kind of heat but the spectrum again: every body emits "
+     "electromagnetic radiation whose total rises as the FOURTH power of absolute temperature "
+     "(Stefan-Boltzmann) and whose peak wavelength shifts with temperature (Wien). That is the "
+     "same law spectroscopy reads a star's temperature from"),
+
+    ("The Carnot limit (the ceiling on every engine ever built)", "rests_on",
+     "Second law of thermodynamics (entropy)",
+     "the bound eta = 1 - Tc/Th follows from reversibility, and it is why an engine MUST dump heat "
+     "to a cold sink to run at all. Waste heat is a requirement, not a design flaw. Carnot "
+     "published it in 1824, before thermodynamics existed and while heat was still thought to be a "
+     "fluid -- the result outlived the theory it was derived in"),
+
     ("Acoustic wave theory (harmonics, Doppler)", "same_form",
      "The electromagnetic spectrum & modulation (radio to gamma, one axis)",
      "identical wave mathematics on a different carrier: frequency, wavelength, superposition, "
