@@ -162,101 +162,144 @@ def gaps(th, edges):
     }
 
 
-def svg(th, edges, W=1100, H=1100):
-    cx, cy, R = W / 2, H / 2 + 10, min(W, H) * 0.38
-    order, pos = [], {}
-    grouped = defaultdict(list)
-    for cid, c in th.items():
-        grouped[(c.get("extra") or {}).get("section") or "?"].append(cid)
-    sections = [s for s in SECTIONS if grouped.get(s)] + \
-               [s for s in grouped if s not in SECTIONS]
-    for s in sections:
-        order.extend(sorted(grouped[s], key=lambda i: str(th[i].get("title"))))
+# THE GOLDEN ANGLE. 2*pi*(1 - 1/phi) ~= 137.507 degrees. Place each successive cell at this
+# turn and the arrangement never repeats and never leaves a gap -- because phi is the "most
+# irrational" number, the one worst approximated by any fraction, so no whole number of turns
+# ever closes. A sunflower head, a pinecone and a pineapple all use it, and they use it because
+# it is the packing that wastes least. It is also this floor's own subject matter arriving in the
+# floor's own drawing: aperiodic order, the golden ratio of the Penrose tiling, and the honeycomb
+# question of how to fill a plane.
+GOLDEN_ANGLE = math.pi * (3 - math.sqrt(5))
 
-    n = max(1, len(order))
-    gap = 0.035                                   # a wedge of blank between sections, so the
-    idx, start = 0, -math.pi / 2                  # quarters read as quarters
-    seg = (2 * math.pi - gap * len(sections)) / n
-    section_span = {}
-    for s in sections:
-        a0 = start + idx * seg + sections.index(s) * gap
-        for k, cid in enumerate(sorted(grouped[s], key=lambda i: str(th[i].get("title")))):
-            ang = a0 + k * seg
-            pos[cid] = (cx + R * math.cos(ang), cy + R * math.sin(ang), ang)
-        section_span[s] = (a0, a0 + max(0, len(grouped[s]) - 1) * seg)
-        idx += len(grouped[s])
+
+def _hex_points(x, y, r, tilt=0.0):
+    """A honeycomb cell. Six vertices, flat-topped when tilt=0."""
+    return " ".join(
+        "%.1f,%.1f" % (x + r * math.cos(tilt + i * math.pi / 3),
+                       y + r * math.sin(tilt + i * math.pi / 3))
+        for i in range(6))
+
+
+def svg(th, edges, W=1160, H=1160):
+    """THE VORTEX OF HONEYCOMB.
+
+    Matt, 2026-08-03: "Look at the arrangement as a vortex of honeycomb." / "most aligned to
+    spiraling out."
+
+    So the drawing was rebuilt to say something the ring could not. The old layout put every
+    theory on one circle grouped by section, which showed WHICH FIELD each belonged to and hid
+    the thing that actually matters -- how well each one is joined to the rest.
+
+    Now position carries the finding. Cells are ordered by DEGREE, most-connected first, and
+    placed on a phyllotactic spiral at the golden angle: the theories that align with the most
+    others sit at the CENTRE, and alignment decreases as you spiral out. Distance from the middle
+    IS how peripheral a theory is to the assembled floor. Section is still readable, in colour.
+
+    Each cell is drawn as a hexagon rather than a dot, because the corpus was measured as a comb
+    (3.23 walls per cell against a theoretical 3.0) and the drawing should not contradict the
+    measurement.
+    """
+    cx, cy = W / 2, H / 2 + 6
 
     deg = defaultdict(int)
     for a, _r, b in edges:
         deg[a] += 1
         deg[b] += 1
 
+    grouped = defaultdict(list)
+    for cid, c in th.items():
+        grouped[(c.get("extra") or {}).get("section") or "?"].append(cid)
+    sections = [s for s in SECTIONS if grouped.get(s)] + \
+               [s for s in grouped if s not in SECTIONS]
+
+    # MOST ALIGNED FIRST. Ties broken by title so the drawing is deterministic -- the same floor
+    # must always produce the same picture, or a diff of the SVG stops meaning anything.
+    order = sorted(th, key=lambda i: (-deg[i], str(th[i].get("title"))))
+
+    n = max(1, len(order))
+    spread = min(W, H) * 0.455 / math.sqrt(n)     # r = spread*sqrt(k) keeps cell density even
+    pos = {}
+    for k, cid in enumerate(order):
+        ang = k * GOLDEN_ANGLE
+        r = spread * math.sqrt(k + 0.6)           # +0.6 lifts the first cell clear of the title
+        pos[cid] = (cx + r * math.cos(ang), cy + r * math.sin(ang), ang, r)
+
     parts = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
-             f'role="img" aria-label="The floor: {len(th)} theories joined by {len(edges)} '
-             f'relations across the sciences">']
+             f'role="img" aria-label="The floor as a vortex of honeycomb: {len(th)} theories '
+             f'joined by {len(edges)} relations, the most-aligned at the centre spiralling out">']
     parts.append('<rect width="100%" height="100%" fill="#12100c"/>')
 
-    # section arcs + labels
-    for s in sections:
-        a0, a1 = section_span[s]
-        col = SECTION_COLOR.get(s, "#8a8378")
-        rr = R + 46
-        x0, y0 = cx + rr * math.cos(a0), cy + rr * math.sin(a0)
-        x1, y1 = cx + rr * math.cos(a1), cy + rr * math.sin(a1)
-        large = 1 if (a1 - a0) > math.pi else 0
-        parts.append(f'<path d="M {x0:.1f} {y0:.1f} A {rr:.1f} {rr:.1f} 0 {large} 1 '
-                     f'{x1:.1f} {y1:.1f}" fill="none" stroke="{col}" stroke-width="3" '
-                     f'opacity=".55"/>')
-        am = (a0 + a1) / 2
-        lx, ly = cx + (R + 74) * math.cos(am), cy + (R + 74) * math.sin(am)
-        anchor = "start" if math.cos(am) > 0.2 else ("end" if math.cos(am) < -0.2 else "middle")
-        parts.append(f'<text x="{lx:.0f}" y="{ly:.0f}" fill="{col}" font-size="15" '
-                     f'font-family="Georgia,serif" text-anchor="{anchor}" opacity=".92">'
-                     f'{s.split("&")[0].strip()} <tspan opacity=".6">({len(grouped[s])})</tspan></text>')
+    # Faint rings mark where alignment falls off, so "further out = less joined" is legible
+    # rather than implied.
+    for q, lab in ((0.25, "most aligned"), (0.55, ""), (0.85, "least aligned")):
+        rr = spread * math.sqrt(n * q)
+        parts.append(f'<circle cx="{cx:.0f}" cy="{cy:.0f}" r="{rr:.0f}" fill="none" '
+                     f'stroke="#2e2a22" stroke-width="1" opacity=".7"/>')
+        if lab:
+            parts.append(f'<text x="{cx:.0f}" y="{cy - rr - 5:.0f}" fill="#5d564a" '
+                         f'font-size="10.5" font-family="Georgia,serif" text-anchor="middle">'
+                         f'{lab}</text>')
 
-    # the chords: cross-domain drawn brightest, because they are the point
+    # The chords. Bowed toward the centre so the spiral stays readable; cross-domain brightest,
+    # because a relation that crosses a field is the thing this floor exists to find.
     for a, rel, b in edges:
         if a not in pos or b not in pos:
             continue
-        x1, y1, _ = pos[a]
-        x2, y2, _ = pos[b]
+        x1, y1, _a1, _r1 = pos[a]
+        x2, y2, _a2, _r2 = pos[b]
         da = (th[a].get("source") or {}).get("domain")
         db = (th[b].get("source") or {}).get("domain")
         cross = da != db
         col = REL_COLOR.get(rel, "#8a7a55")
-        parts.append(f'<path d="M {x1:.1f} {y1:.1f} Q {cx:.1f} {cy:.1f} {x2:.1f} {y2:.1f}" '
-                     f'fill="none" stroke="{col}" stroke-width="{1.5 if cross else 0.9}" '
-                     f'opacity="{0.62 if cross else 0.24}"/>')
+        mx, my = (x1 + x2) / 2, (y1 + y2) / 2
+        qx, qy = mx + (cx - mx) * 0.45, my + (cy - my) * 0.45
+        parts.append(f'<path d="M {x1:.1f} {y1:.1f} Q {qx:.1f} {qy:.1f} {x2:.1f} {y2:.1f}" '
+                     f'fill="none" stroke="{col}" stroke-width="{1.4 if cross else 0.85}" '
+                     f'opacity="{0.55 if cross else 0.20}"/>')
 
-    # the nodes: size = how many relations, brightness = depth
+    # The cells. Hexagons: size = relations, brightness = depth, colour = section.
     for cid in order:
-        x, y, ang = pos[cid]
+        x, y, ang, _r = pos[cid]
         c = th[cid]
         s = (c.get("extra") or {}).get("section") or "?"
         col = SECTION_COLOR.get(s, "#8a8378")
-        r = 3.2 + min(9.0, deg[cid] * 0.85)
+        rad = 4.0 + min(10.0, deg[cid] * 0.80)
         d = _depth(c)
-        parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r:.1f}" fill="{col}" '
-                     f'opacity="{0.30 + 0.65 * d:.2f}" stroke="#12100c" stroke-width="1"/>')
+        parts.append(f'<polygon points="{_hex_points(x, y, rad, ang)}" fill="{col}" '
+                     f'opacity="{0.32 + 0.63 * d:.2f}" stroke="#12100c" stroke-width="1"/>')
         if deg[cid] <= 1:      # a beam resting on almost nothing — marked so it cannot hide
-            parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r + 5:.1f}" fill="none" '
-                         f'stroke="#d9534f" stroke-width="1.4" opacity=".85"/>')
-        t = str(c.get("title") or "").split("(")[0].strip()[:26]
-        deg_ = math.degrees(ang)
-        flip = 90 < (deg_ % 360) < 270
-        rot = deg_ + 180 if flip else deg_
-        anchor = "end" if flip else "start"
-        off = -(r + 7) if flip else (r + 7)
-        parts.append(f'<text x="{x:.1f}" y="{y:.1f}" fill="#e8dfc9" font-size="9.5" '
-                     f'font-family="Georgia,serif" opacity=".78" text-anchor="{anchor}" '
-                     f'transform="rotate({rot:.1f} {x:.1f} {y:.1f}) translate({off:.1f} 3)">'
+            parts.append(f'<polygon points="{_hex_points(x, y, rad + 5, ang)}" fill="none" '
+                         f'stroke="#d9534f" stroke-width="1.3" opacity=".85"/>')
+
+    # Label only the core. Naming all 172 on a spiral is unreadable; the centre is what the
+    # layout is asserting, so the centre is what gets named.
+    for cid in order[:22]:
+        x, y, ang, _r = pos[cid]
+        t = str(th[cid].get("title") or "").split("(")[0].strip()[:30]
+        anchor = "start" if math.cos(ang) >= 0 else "end"
+        off = 15 if math.cos(ang) >= 0 else -15
+        parts.append(f'<text x="{x + off:.1f}" y="{y + 3:.1f}" fill="#e8dfc9" font-size="9.5" '
+                     f'font-family="Georgia,serif" opacity=".82" text-anchor="{anchor}">'
                      f'{_esc(t)}</text>')
 
-    parts.append(f'<text x="{cx:.0f}" y="{cy - 10:.0f}" fill="#c69a4a" font-size="26" '
+    # Section key, since colour no longer sits in contiguous arcs.
+    ky = 26
+    for s in sections:
+        col = SECTION_COLOR.get(s, "#8a8378")
+        parts.append(f'<polygon points="{_hex_points(24, ky - 3, 5.5)}" fill="{col}" '
+                     f'opacity=".85"/>')
+        parts.append(f'<text x="36" y="{ky:.0f}" fill="{col}" font-size="11.5" '
+                     f'font-family="Georgia,serif" opacity=".9">'
+                     f'{s.split("&")[0].strip()} <tspan opacity=".55">'
+                     f'({len(grouped[s])})</tspan></text>')
+        ky += 18
+
+    parts.append(f'<text x="{cx:.0f}" y="{H - 34:.0f}" fill="#c69a4a" font-size="24" '
                  f'font-family="Georgia,serif" text-anchor="middle">THE FLOOR</text>')
-    parts.append(f'<text x="{cx:.0f}" y="{cy + 16:.0f}" fill="#8a8378" font-size="13" '
+    parts.append(f'<text x="{cx:.0f}" y="{H - 14:.0f}" fill="#8a8378" font-size="12.5" '
                  f'font-family="Georgia,serif" text-anchor="middle">'
-                 f'{len(th)} theories &#183; {len(edges)} relations &#183; one body</text>')
+                 f'{len(th)} theories &#183; {len(edges)} relations &#183; one body '
+                 f'&#183; most aligned at the centre</text>')
     parts.append("</svg>")
     return "\n".join(parts)
 
