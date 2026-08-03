@@ -18,6 +18,15 @@ import sys
 import time
 from pathlib import Path
 
+# The same guard assemble_floor.py and the assay tools already carry. grow.py prints an edge as
+# 'A' ⟷ 'B', and on a console that is not UTF-8 that single character raised UnicodeEncodeError
+# and killed the whole growth cycle -- found 2026-08-02 the first time a scheduler ran this
+# instead of a human. A standing job must not die of a character it was only trying to print.
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:  # noqa: BLE001
+    pass
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from concordance import growth  # noqa: E402
 

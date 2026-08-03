@@ -1,0 +1,52 @@
+# THE HIVE — one turn of the standing cycle: dig what was asked for, fill, refine, find connections.
+#
+# Matt, 2026-08-02: "It should continuously improve and refine. It should not require me to keep
+# building... a hive acting as worker bees filling up the corpus. We want some of the hive working
+# to improve the corpus and find the connections as well."
+#
+# WHY THIS UNIT EXISTS. A survey of the box that same day found the autonomy split across two
+# repos, with the wrong half versioned:
+#
+#     nh-gather.timer  -> tools/gather_cycle.py   WorkingDirectory=/home/nh/Lighthouse   (V1!)
+#     shepherd_rounds.py, grow.py, propose_edges.py      scheduled ZERO times
+#
+# The corpus really was growing on its own — out of the V1 checkout, running code that does not
+# exist in this repo, is not covered by the gate, and would have stopped silently the day that
+# directory was cleaned up. Meanwhile the three workers 2.0 built for this exact job had never
+# once been run by a machine. This unit runs THIS repo's own tools and replaces nh-gather; it does
+# not run beside it. Disable the old one when enabling this:
+#
+#   sudo systemctl disable --now nh-gather.timer
+#   sudo systemctl enable  --now nh-hive.timer
+#   journalctl -u nh-hive.service --since today
+#
+# SPEND IS CAPPED, NOT TRUSTED. Every step declares a conservative MAXIMUM cost and asks
+# tools/spend_guard.py (ported from V1 with this change) whether it fits in the month's remaining
+# budget. Steps that do not fit are skipped with the reason printed. Today all five steps are
+# deterministic and declare $0.00 — they cost CPU and nothing else.
+#
+# NOTHING HERE SEALS. propose_edges proposes; a named steward accepts. The hive gathers and
+# arranges attributed material and stops where judgement begins.
+#
+# A non-zero exit means a WORKER FAILED (the cycle still runs the rest, so one broken step cannot
+# stop the others). `systemctl is-failed nh-hive.service` is the one-word answer.
+[Unit]
+Description=Narrow Highway — the hive (dig, fill, refine, connect)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=nh
+WorkingDirectory=/home/nh/concordance-2
+Environment=PYTHONPATH=/home/nh/concordance-2/src
+Environment=CONCORDANCE_DATA_DIR=/home/nh/concordance-2/data
+Environment=NH_REPO_ROOT=/home/nh/concordance-2
+# Force UTF-8 so a printed character can never kill a standing job. grow.py died exactly this way
+# on 2026-08-02 the first time a scheduler ran it instead of a person: it prints an edge as
+# 'A' ⟷ 'B', and one non-ASCII arrow raised UnicodeEncodeError and took down the whole cycle.
+Environment=PYTHONIOENCODING=utf-8
+ExecStart=/home/nh/concordance-2/.venv/bin/python tools/hive_cycle.py --apply
+# Longer than the watchman: the connection finder alone reads the whole keeping (~1 minute here,
+# more as the corpus grows), and grow.py walks every shelf.
+TimeoutStartSec=3600

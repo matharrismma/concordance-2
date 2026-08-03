@@ -1,0 +1,24 @@
+# Fires the hive daily. Enable with:
+#   sudo systemctl disable --now nh-gather.timer     # the V1 job this replaces
+#   sudo systemctl enable  --now nh-hive.timer
+#
+# DAILY, and deliberately not more often. The hive READS the whole keeping — the connection
+# finder alone walks every card — so this is the expensive standing job, not the cheap one. The
+# watchman runs hourly because a broken door must be caught within the hour; a missing connection
+# is not an outage and can wait a day. Running a heavy pass more often would spend real CPU to
+# re-discover mostly the same proposals.
+#
+# 10:00 keeps the slot the V1 gatherer already used, so the daily rhythm of the box is unchanged
+# and only the code behind it moves — one variable at a time, which is how a cutover stays
+# debuggable.
+[Unit]
+Description=Run the Narrow Highway hive once a day
+
+[Timer]
+OnCalendar=*-*-* 10:00:00
+# If the box was down at 10:00, run on the way back up rather than skipping the day. A skipped
+# cycle is a day the corpus did not grow and nobody was told.
+Persistent=true
+
+[Install]
+WantedBy=timers.target
