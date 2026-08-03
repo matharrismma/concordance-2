@@ -98,6 +98,11 @@ VERIFIERS: Dict[str, str] = {
     "music_theory": _P + "music_theory", "music": _P + "music_theory",
     "rhetoric": _P + "rhetoric", "argumentation": _P + "rhetoric", "fallacy": _P + "rhetoric",
     "philosophy": _P + "philosophy", "ethics": _P + "philosophy", "epistemology": _P + "philosophy",
+    # the fleet turned inward — the library measuring its own finding, on the same terms it
+    # holds everyone else to. Registered as an ordinary domain on purpose: our retrieval gets no
+    # gentler a verifier than a stranger's chemistry.
+    "retrieval": _P + "retrieval", "search_quality": _P + "retrieval",
+    "information_retrieval": _P + "retrieval",
 }
 
 # Witness-surface verifiers — surfaced ONLY when surface == "witness" (the .org overlay).

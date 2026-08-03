@@ -339,6 +339,27 @@ DEMONSTRATIONS: List[Dict[str, Any]] = [
          "spec": {"lat1": 40.7128, "lon1": -74.0060, "lat2": 51.5074, "lon2": -0.1278,
                   "claimed_distance_km": 5570.222179737958},
          "claim": "haversine(NYC → London) ≈ 5,570 km"}]),
+    _L("works_geodesic", "Geodesy",
+       "What the round-Earth shortcut costs you",
+       "The great-circle number above assumes a perfect sphere. The Earth is not one — it bulges "
+       "at the equator — and on the New York to London line the sphere is wrong by about 15 km. "
+       "The engine computes the real geodesic on the WGS84 ellipsoid, the datum your GPS reports "
+       "in, and shows you both numbers rather than quietly replacing one with the other.",
+       [{"id": "gd1", "domain": "geography",
+         "spec": {"lat1": 40.6413, "lon1": -73.7781, "lat2": 51.4700, "lon2": -0.4543,
+                  "claimed_geodesic_km": 5554.909264812851},
+         "claim": "geodesic(JFK → Heathrow) on WGS84 ≈ 5,554.9 km, not the sphere's 5,540.0"}]),
+    _L("works_projection", "Cartography",
+       "Why Greenland is a lie on every phone",
+       "No flat map is honest, and that is a theorem rather than a complaint: Gauss proved a "
+       "curved surface cannot be flattened without stretching. Web Mercator — the projection "
+       "under nearly every map app — chooses to keep angles exact and pay for it entirely in "
+       "area, inflating a feature by sec² of its latitude. At 72°N, where Greenland sits, that "
+       "is 10.5×. Africa is really fourteen Greenlands.",
+       [{"id": "pj1", "domain": "geography",
+         "spec": {"lat_for_projection": 72.0,
+                  "claimed_area_inflation": 10.472135954999587},
+         "claim": "Web Mercator draws latitude 72° at 10.47× its true area"}]),
     _L("works_dew_point", "Meteorology",
        "When dew forms: the dew point",
        "Air at 20 °C and 50% humidity will bead with dew once it cools to about 9.26 °C — the "
@@ -699,6 +720,7 @@ _ARTIFACT_KEY = {
     "medicine": "MED_VERIFY", "law": "LAW_VERIFY", "ephemeris": "EPH_VERIFY",
     "operations_research": "OR_VERIFY", "atomic": "ATOM_VERIFY", "periodic_table": "PT_VERIFY",
     "philosophy": "PHIL_VERIFY", "biology": "BIO_CONTROL",
+    "retrieval": "RET_VERIFY",
 }
 
 

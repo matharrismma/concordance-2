@@ -56,6 +56,8 @@ test_formation.py
 test_fp_gate.py
 test_gate.py
 test_gateway.py
+test_gauge_and_vortex.py
+test_geography_gis.py
 test_graph.py
 test_grid.py
 test_grid_atlas.py
@@ -109,6 +111,7 @@ test_redact.py
 test_reference_cards.py
 test_repair_cards.py
 test_retired_pages.py
+test_retrieval_verifier.py
 test_retrieval_invariants.py
 test_router.py
 test_routes.py
