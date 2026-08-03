@@ -1,7 +1,7 @@
 # THE FLOOR — the theories the sciences and mathematics actually run on
 
-> **110 theories · 131 relations · one connected body · 84 cross-domain pairs**
-> (measured 2026-08-02; `PYTHONPATH=src python tools/floor_map.py` re-measures and redraws)
+> **114 theories · 141 relations · one connected body · 87 cross-domain pairs**
+> (measured 2026-08-02; `PYTHONPATH=src python tools/theory_map.py` re-measures and redraws)
 >
 > This file began as "The 100" and said so for months after the shelf had grown past it. A
 > catalogue that states a count is a catalogue that will be wrong; the count now lives where it

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """THE FLOOR, DRAWN — one page where the gaps are visible instead of counted.
 
-    PYTHONPATH=src python tools/floor_map.py            # writes site/theories.html
-    PYTHONPATH=src python tools/floor_map.py --stdout   # the gap report only
+    PYTHONPATH=src python tools/theory_map.py            # writes site/theories.html
+    PYTHONPATH=src python tools/theory_map.py --stdout   # the gap report only
 
 Matt, 2026-08-02: *"We may be able to see gaps if we create a visual and be able to source a
 theory that fills the gap."*
@@ -344,6 +344,8 @@ def main() -> int:
     # 5a5b3e7), the reader's page on Scripture and the created order as one design. The first
     # version of this tool wrote straight over it. See the note at the top of this file.
     ap.add_argument("--out", default=os.path.join(ROOT, "site", "theories.html"))
+    ap.add_argument("--catalog", default=os.path.join(ROOT, "docs", "THEORY_CATALOG.md"),
+                    help="catalogue whose header count this instrument keeps true")
     ap.add_argument("--stdout", action="store_true", help="print the gap report only")
     args = ap.parse_args()
 
@@ -368,7 +370,38 @@ def main() -> int:
     with open(args.out, "w", encoding="utf-8") as fh:
         fh.write(page(th, edges, g))
     print(f"\nwrote {args.out}")
+
+    if stamp_catalog(g, args.catalog):
+        print(f"stamped  {args.catalog}")
     return 0
+
+
+def stamp_catalog(g, path) -> bool:
+    """Write the measured count INTO the catalogue, so the header cannot rot.
+
+    docs/THEORY_CATALOG.md opens with a count. It has now gone stale twice: it said "The 100"
+    for months after the shelf passed 100, and it said "110 theories / 131 relations" while the
+    shelf actually held 114 / 141 -- inside the very paragraph that warns "Numbers in prose rot."
+    A number a human has to remember to retype is a number that will be wrong.
+
+    So the instrument that COMPUTES these three writes them. Fix the path, not the instance.
+    Only the one marked line is touched; the rest of the catalogue is left exactly as it is.
+    """
+    if not os.path.isfile(path):
+        return False
+    with open(path, encoding="utf-8") as fh:
+        lines = fh.read().split("\n")
+    want = (f"> **{g['theories']} theories · {g['edges']} relations · one connected body "
+            f"· {g['cross_domain']} cross-domain pairs**")
+    for i, line in enumerate(lines[:12]):
+        if line.startswith("> **") and "theories" in line and "relations" in line:
+            if line == want:
+                return False
+            lines[i] = want
+            with open(path, "w", encoding="utf-8", newline="") as fh:
+                fh.write("\n".join(lines))
+            return True
+    return False
 
 
 if __name__ == "__main__":
