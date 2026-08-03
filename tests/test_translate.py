@@ -233,3 +233,64 @@ def test_alignment_of_nothing_is_empty_not_invented():
 
 if __name__ == "__main__":
     sys.exit(int(pytest.main([__file__, "-q"])))
+
+
+# ── deriving a lexicon from verse-aligned scripture ───────────────────────────────────────
+# Matt: "What about a bible as the source of the lexicon for each language? That was the original
+# method." It was — and it is the answer to this module's real limit. A dictionary per language
+# is a licensing problem; a BIBLE per language is solved in ~700 languages, and every translation
+# shares one address scheme, so the alignment is free and exact.
+
+PAR_FOREIGN = {
+    "1:1": ["alpha", "beta"], "1:2": ["alpha", "gamma"], "1:3": ["alpha", "delta"],
+    "1:4": ["beta", "gamma"], "1:5": ["beta", "delta"], "1:6": ["alpha", "beta"],
+}
+PAR_KNOWN = {
+    "1:1": ["light", "water"], "1:2": ["light", "stone"], "1:3": ["light", "tree"],
+    "1:4": ["water", "stone"], "1:5": ["water", "tree"], "1:6": ["light", "water"],
+}
+
+
+def test_derivation_finds_the_planted_correspondence():
+    """GROUND TRUTH: alpha co-occurs with light in every verse it appears; beta with water."""
+    r = T.derive_lexicon(PAR_FOREIGN, PAR_KNOWN, min_count=2, min_dice=0.1)
+    assert r["status"] == "ok"
+    by = {e["form"]: e["candidates"][0]["gloss"] for e in r["entries"]}
+    assert by.get("alpha") == "light", f"alpha should derive to light, got {by.get('alpha')}"
+    assert by.get("beta") == "water", f"beta should derive to water, got {by.get('beta')}"
+
+
+def test_every_derived_entry_carries_checkable_evidence():
+    """An entry a reader cannot go and verify is not worth having. The addresses must be real
+    and must actually contain the claimed gloss."""
+    r = T.derive_lexicon(PAR_FOREIGN, PAR_KNOWN, min_count=2, min_dice=0.1)
+    for e in r["entries"]:
+        assert e["evidence"], f"{e['form']} was derived with no evidence"
+        top = e["candidates"][0]["gloss"]
+        for ref in e["evidence"]:
+            assert ref in PAR_KNOWN, f"evidence cites {ref}, which is not in the corpus"
+            assert top in PAR_KNOWN[ref], (
+                f"{e['form']} cites {ref} as evidence for '{top}', but that verse does not "
+                f"contain it — the evidence must be real")
+
+
+def test_a_form_too_rare_to_judge_is_reported_not_guessed():
+    """A miss must stay a miss: forms below the threshold are counted, never glossed."""
+    r = T.derive_lexicon(PAR_FOREIGN, PAR_KNOWN, min_count=99, min_dice=0.1)
+    assert r["entries"] == []
+    assert r["coverage"]["too_rare_to_judge"] > 0
+
+
+def test_derivation_bands_its_own_confidence():
+    """Both tails of the frequency range are unreliable, for opposite reasons, so a single
+    accuracy figure would mislead. The band must travel with the entry."""
+    r = T.derive_lexicon(PAR_FOREIGN, PAR_KNOWN, min_count=2, min_dice=0.1)
+    for e in r["entries"]:
+        assert e["confidence"], "a derived entry must state how far to trust it"
+        assert any(k in e["confidence"] for k in ("LOW", "MODERATE", "BEST"))
+
+
+def test_texts_that_share_no_addresses_refuse_rather_than_invent():
+    r = T.derive_lexicon({"9:9": ["x"]}, PAR_KNOWN, min_count=1)
+    assert r["status"] == "no_overlap"
+    assert "cannot be aligned" in r["detail"]

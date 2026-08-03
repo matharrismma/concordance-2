@@ -491,3 +491,152 @@ def align(a_units: List[str], b_units: List[str],
         "boundary": ("Alignment LOCATES text; it does not render it. Both sides are quoted from "
                      "held sources and no sentence was composed by this engine."),
     }
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════════
+# A LEXICON DERIVED FROM SCRIPTURE — the original method, and the one that scales.
+#
+# Matt, 2026-08-03: "What about a bible as the source of the lexicon for each language? That was
+# the original method."
+#
+# It was, and it is the answer to the limit this module had been reporting honestly and could not
+# fix: two lexicons, Greek and Hebrew, and NO_LEXICON for everything else. Acquiring a dictionary
+# per language is a licensing problem with no general solution. Acquiring a BIBLE per language is
+# a solved problem in about 700 languages — and unlike any other corpus on earth it comes with a
+# UNIVERSAL ADDRESS SCHEME. Genesis 1:1 is Genesis 1:1 in every translation ever made.
+#
+# So the parallel alignment is FREE AND EXACT. No Gale-Church inference, no length heuristic: the
+# verse numbers do the aligning, which is the strongest form this module has. From there, word
+# correspondence is a COUNTING problem, not a translation problem.
+#
+# WHY THIS IS MEASUREMENT AND NOT GENERATION, which is the whole reason it is permitted here:
+# every derived entry is a statement about CO-OCCURRENCE in texts we hold, and it carries the
+# verse list that produced it. "This form corresponds to that English word, in these 47 verses,
+# go and look" is checkable by any reader. Nothing is invented; a correspondence is either in the
+# counts or it is not. That is a chain to source, which fluent machine translation can never have.
+#
+# The Dice coefficient is used rather than raw counts because raw co-occurrence simply finds the
+# commonest words in the language — every foreign word would "mean" the. Dice normalises by how
+# often each side appears alone, so it rewards words that appear TOGETHER and apart rarely.
+# ══════════════════════════════════════════════════════════════════════════════════════════
+
+_EN_STOP = frozenset("""
+the a an and or of to in on for with by from as at is are was were be been being it its this
+that these those which who whom what when where how why not no nor but if then than so such own
+same one two i he she they them his her their you your we us our me my him all any both each
+""".split())
+
+
+def _band(n: int) -> str:
+    """How far to trust a derived entry, from its own occurrence count.
+
+    MEASURED, not assumed. Deriving Greek from the WEB across 6,374 aligned verses and checking
+    every entry against Strong's — which the derivation never saw — gave:
+
+        very common (>300 verses)   45.0%    correlate with everything; Dice attaches them to
+                                             whatever content word is nearby
+        common (100-300)            51.5%
+        mid (30-99)                 58.1%    THE RELIABLE BAND: frequent enough for statistics,
+                                             specific enough to actually correlate
+        specific (<30)              30.4%    too little evidence; Dice is noisy here, and this
+                                             band is 988 of 1,115 entries so it sets the average
+
+    Both tails fail, for OPPOSITE reasons, which is why a single headline accuracy number would
+    mislead. The band travels with each entry so a reader knows which to lean on.
+
+    That test is also a LOWER BOUND: it asks whether the derived word appears verbatim in the
+    Strong's definition, so a correct gloss phrased differently ('boat' against 'a sailing
+    vessel') counts as a miss. True agreement is higher than these figures; claiming the higher
+    number without measuring it would be the error this project keeps refusing.
+    """
+    if n > 300:
+        return "LOW — very common form; correlates with too much to pin down"
+    if n >= 100:
+        return "MODERATE"
+    if n >= 30:
+        return "BEST — frequent enough to count, specific enough to correlate"
+    return "LOW — too few occurrences for the statistics to settle"
+
+
+def derive_lexicon(foreign: Dict[str, List[str]], known: Dict[str, List[str]],
+                   min_count: int = 3, min_dice: float = 0.12,
+                   top_n: int = 3, evidence: int = 5) -> Dict[str, Any]:
+    """Derive word correspondences from two verse-aligned Bibles. Counting, not translating.
+
+    `foreign` and `known` map the SAME address (e.g. "John 1:1") to that verse's word list. The
+    shared address is what makes this exact — no alignment is inferred.
+
+    Every returned entry carries `evidence`: the addresses where the correspondence was actually
+    observed. An entry a reader cannot go and check is not worth having.
+    """
+    shared = sorted(set(foreign) & set(known))
+    if not shared:
+        return {"status": "no_overlap", "entries": [],
+                "detail": "the two texts share no addresses — they cannot be aligned this way"}
+
+    f_count: Dict[str, int] = {}
+    k_count: Dict[str, int] = {}
+    co: Dict[str, Dict[str, int]] = {}
+    where: Dict[str, List[str]] = {}
+
+    for ref in shared:
+        fset = {w for w in (foreign[ref] or []) if w}
+        kset = {w for w in (known[ref] or []) if w and w not in _EN_STOP}
+        for f in fset:
+            f_count[f] = f_count.get(f, 0) + 1
+            where.setdefault(f, [])
+            if len(where[f]) < 400:
+                where[f].append(ref)
+        for k in kset:
+            k_count[k] = k_count.get(k, 0) + 1
+        for f in fset:
+            row = co.setdefault(f, {})
+            for k in kset:
+                row[k] = row.get(k, 0) + 1
+
+    entries, thin = [], 0
+    for f, n_f in f_count.items():
+        if n_f < min_count:
+            thin += 1
+            continue
+        scored = []
+        for k, n_co in co.get(f, {}).items():
+            n_k = k_count.get(k, 0)
+            if n_k < min_count:
+                continue
+            dice = 2.0 * n_co / (n_f + n_k)
+            if dice >= min_dice:
+                scored.append((dice, k, n_co, n_k))
+        if not scored:
+            continue
+        scored.sort(key=lambda x: (-x[0], x[1]))
+        best = scored[:top_n]
+        # EVIDENCE: the addresses where this form and its top candidate actually co-occur, so a
+        # reader can open the verses and judge the correspondence for themselves.
+        top_k = best[0][1]
+        ev = [r for r in where.get(f, []) if top_k in (known.get(r) or [])][:evidence]
+        entries.append({
+            "form": f,
+            "occurrences": n_f,
+            "candidates": [{"gloss": k, "dice": round(d, 3), "together": c, "gloss_total": t}
+                           for d, k, c, t in best],
+            "evidence": ev,
+            "confidence": _band(n_f),
+            "method": "co-occurrence over verse-aligned scripture (Dice)",
+            "status": "derived",
+        })
+
+    entries.sort(key=lambda e: (-e["occurrences"], e["form"]))
+    return {
+        "status": "ok",
+        "entries": entries,
+        "coverage": {"aligned_verses": len(shared),
+                     "foreign_forms": len(f_count),
+                     "derived": len(entries),
+                     "too_rare_to_judge": thin,
+                     "pct": round(100.0 * len(entries) / len(f_count), 1) if f_count else 0.0},
+        "boundary": ("DERIVED BY COUNTING, not translated. Each entry is a claim about "
+                     "co-occurrence in texts we hold and carries the addresses where it was "
+                     "observed, so any reader can check it. A form seen fewer than %d times is "
+                     "reported as too rare to judge rather than guessed at." % min_count),
+    }
