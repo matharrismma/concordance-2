@@ -8,7 +8,8 @@ Matt, 2026-08-02: *"We should have assembled the aligned theories across domains
 floor. Reality itself mapped... along with a coherent language model that can communicate reality
 effectively."*
 
-MEASURED FIRST, and the measurement is the indictment: 99 theory cards on the shelf, and
+MEASURED FIRST, and the measurement is the indictment (2026-08-02, at the start: 99 cards on
+the shelf, now 110 —
 **zero theory→theory edges — zero of them crossing a domain.** The catalogue was built, the assay
 was run, the cards were minted, and then each one was left standing alone on its own tile. A
 hundred true statements side by side is a *pile*; the floor is what you get when you can walk
@@ -594,6 +595,62 @@ EDGES += [
      "and position/momentum are a transform pair. The physical constant hbar sets the scale; the "
      "inequality itself is mathematics about any conjugate pair, which is why the same limit "
      "governs radar resolution and note onset in music"),
+]
+
+
+# -- HERMENEUTICS AND ITS NEIGHBOURS (2026-08-02) -----------------------------------------------
+# Matt: "Hermeneutics" -- and the measurement was that a shelf of 110 held ZERO theories of
+# interpretation, inside a project whose every working rule is a hermeneutical commitment. Not a
+# field we forgot; the one we were standing on.
+EDGES += [
+    ("Hermeneutics (the theory of interpretation)", "rests_on",
+     "Semiotics (sign, signified, interpretant)",
+     "interpretation presupposes signs that mean at all; Peirce's interpretant -- the effect in a "
+     "mind that takes something AS a sign -- puts interpretation inside the sign's own structure, "
+     "which is where hermeneutics begins"),
+    ("Hermeneutics (the theory of interpretation)", "rests_on",
+     "Formal logic & epistemology (validity, inference)",
+     "a reading is argued: it draws inferences from the text and from context, and the standards "
+     "for a good inference are logic's"),
+    ("Hermeneutics (the theory of interpretation)", "limits",
+     "Structural & generative linguistics (Saussure, Chomsky)",
+     "grammar does not determine meaning. The same well-formed sentence means differently in "
+     "different mouths and moments -- irony, genre, and the speaker's situation decide what "
+     "syntax leaves open -- so a complete account of competence still cannot deliver the sense of "
+     "an utterance. This is the honest boundary between the two, and it runs in this direction"),
+    ("Hermeneutics (the theory of interpretation)", "same_form", "Bayes' theorem",
+     "the hermeneutical circle IS iterative conditioning: pre-understanding is a prior, the text "
+     "is evidence, the revised understanding is a posterior, and you read again with it as the "
+     "new prior. Gadamer's fusion of horizons and Bayesian updating are the same shape -- which "
+     "is also why neither can start from nowhere: a flat prior is still a prior, and a reading "
+     "with no pre-understanding is not a purer reading but an unexamined one"),
+    ("Textual criticism (establishing what the text says)", "rests_on",
+     "Hermeneutics (the theory of interpretation)",
+     "the canons are interpretive judgements -- 'prefer the harder reading' is a claim about what "
+     "a copyist would do, argued from the habits of scribes"),
+    ("Hermeneutics (the theory of interpretation)", "rests_on",
+     "Textual criticism (establishing what the text says)",
+     "you cannot interpret what you have not first established: for any ancient work the reading "
+     "itself is reconstructed from disagreeing copies, so exegesis stands on the apparatus"),
+    ("Translation theory (formal vs dynamic equivalence)", "rests_on",
+     "Hermeneutics (the theory of interpretation)",
+     "every translation decides meanings the source left open; choosing between formal and "
+     "dynamic equivalence IS choosing a hermeneutic and then writing it down"),
+    ("Translation theory (formal vs dynamic equivalence)", "rests_on",
+     "Semiotics (sign, signified, interpretant)",
+     "if the sign-signified link is arbitrary and system-internal, no two languages carve the "
+     "world identically -- which is why untranslatables exist and why equivalence is a trade "
+     "rather than a lookup"),
+    ("Semiotics (sign, signified, interpretant)", "rests_on",
+     "Structural & generative linguistics (Saussure, Chomsky)",
+     "Saussure's arbitrariness of the sign and the system-of-differences account are the "
+     "structural half of semiotics"),
+    ("Aristotelian rhetoric & fallacy taxonomy", "same_form",
+     "Hermeneutics (the theory of interpretation)",
+     "one art faces each way across the same act: rhetoric is the making of a text that will be "
+     "understood as intended, hermeneutics the recovering of that intent from the text. Aristotle "
+     "treats audience, occasion and genre as constraints on composition; the interpreter reads "
+     "the same three backwards as evidence of what was meant"),
 ]
 
 

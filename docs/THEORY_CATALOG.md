@@ -1,4 +1,13 @@
-# The 100 — theories the sciences and math actually run on
+# THE FLOOR — the theories the sciences and mathematics actually run on
+
+> **110 theories · 131 relations · one connected body · 84 cross-domain pairs**
+> (measured 2026-08-02; `PYTHONPATH=src python tools/floor_map.py` re-measures and redraws)
+>
+> This file began as "The 100" and said so for months after the shelf had grown past it. A
+> catalogue that states a count is a catalogue that will be wrong; the count now lives where it
+> can be re-measured, and the drawing at `site/theories.html` is where the gaps are actually
+> visible. (Not `site/floor.html` — that is "The Floor of Discovery", a different page.)
+> Numbers in prose rot. Numbers from an instrument do not.
 
 The corpus for the assay. Each theory is mapped to the engine domain that can touch it, with
 an **expected class** — a hint to be TESTED, never a verdict. The assay disposes.

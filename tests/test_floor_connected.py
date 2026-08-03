@@ -3,7 +3,7 @@
 Matt, 2026-08-02: *"We should have assembled the aligned theories across domains. That was the
 floor. Reality itself mapped."* — and, when 13 theories still stood apart: *"Link them all."*
 
-The measurement that started it: 99 theory cards, **zero** theory→theory edges, zero crossing a
+The measurement that started it (2026-08-02): 99 theory cards, **zero** theory→theory edges, zero crossing a
 domain. The catalogue was built, the assay was run, each card was minted — and every one was left
 alone on its own tile. A hundred true statements side by side is a pile; a floor is what you get
 when you can walk from any one of them to the ones it rests on.

@@ -64,7 +64,8 @@
   <div class="grafts" id="grafts"></div>
 
   <p class="note" id="note"></p>
-  <div class="foot" id="foot">A conduit, not a source · nothing is generated · <a href="/">go to the door</a></div>
+  <div class="foot" id="foot">A conduit, not a source · nothing is generated ·
+    <a href="/theories.html">walk the floor</a> · <a href="/">go to the door</a></div>
 </div>
 
 <script src="/kinds.js"></script>
@@ -87,7 +88,8 @@
     if(d.note) document.getElementById('note').textContent=d.note;
     if(d.stats) document.getElementById('foot').innerHTML=
       esc(d.stats.seeds.toLocaleString())+' seeds · '+esc(d.stats.shelves)+
-      ' domains · one floor &nbsp;·&nbsp; <a href="/">go to the door</a>';
+      ' domains · one floor &nbsp;·&nbsp; <a href="/theories.html">walk the floor</a>' +
+      ' &nbsp;·&nbsp; <a href="/">go to the door</a>';
     render(d.root);
     grafts(d.grafts||[]);
   }).catch(function(){ document.getElementById('note').textContent='The floor could not be reached.'; });

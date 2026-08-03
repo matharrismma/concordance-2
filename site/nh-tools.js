@@ -27,6 +27,7 @@
     { h: '/mesh.html',       n: 'The Way',          k: 'mesh fellowship map nearby near me neighbours neighbors gather meet believers door message' },
     { h: '/apothecary.html', n: 'The Apothecary',   k: 'herbs remedies tonics planting garden grow land old way tea' },
     { h: '/floor.html',      n: 'The Floor of Discovery', k: 'floor design one floor seeds nesting created order the word fear of god wisdom see the design' },
+    { h: '/theories.html',   n: 'The Floor — the theories, joined', k: 'theories floor science mathematics physics chemistry biology aligned across domains rests on limits same form gaps thin what is missing reality mapped' },
     { h: '/map.html',        n: 'The map',          k: 'connections graph atlas structure links' },
     { h: '/brain.html',      n: 'The brain',        k: 'graph visual network nodes force' },
     { h: '/journal.html',    n: 'Journal',          k: 'writing entries past dates diary notes wrote' },
