@@ -1039,6 +1039,110 @@ EDGES += [
      "published it in 1824, before thermodynamics existed and while heat was still thought to be a "
      "fluid -- the result outlived the theory it was derived in"),
 
+    # -- BATCH 12: THE CHEMISTRY OF LIFE AND THE BRIDGES BETWEEN FLOORS (2026-08-03) ------------
+    # Filling measured gaps: organic chemistry, biochemistry, immunology, neuroscience,
+    # statistical mechanics, differential equations, electrochemistry -- plus the double helix,
+    # which the floor referenced through the central dogma while holding no card for the molecule.
+    ("Organic chemistry & functional groups (why life is built on carbon)", "rests_on",
+     "Chemical bonding (valence-bond / molecular-orbital)",
+     "carbon's four near-equal bonds and its unique ability to bond indefinitely to ITSELF "
+     "(catenation) are consequences of its electron configuration. Silicon sits directly below it "
+     "and cannot manage it -- weaker bonds, and an oxide that is a solid rather than a gas -- which "
+     "is why life is carbon"),
+
+    ("Biochemistry & enzymes (catalysis at body temperature)", "rests_on",
+     "Chemical kinetics & equilibrium (Arrhenius, Le Chatelier)",
+     "an enzyme lowers ACTIVATION ENERGY without shifting the equilibrium or supplying energy -- "
+     "it changes how fast the system reaches where it was already going. Rate enhancements of "
+     "10^10 and beyond are routine, which is how a body runs industrial chemistry at 37C and "
+     "neutral pH"),
+
+    ("Crop rotation & biological nitrogen fixation (the low-input path)", "rests_on",
+     "Biochemistry & enzymes (catalysis at body temperature)",
+     "the nitrogenase enzyme in a root nodule breaks the nitrogen triple bond at soil temperature "
+     "and one atmosphere. That is the same bond Haber-Bosch needs 400C and 200 atm to break, and "
+     "the difference is catalysis -- the clearest case on the floor of biology outperforming "
+     "industry on conditions while losing on rate"),
+
+    ("The double helix (structure that explains its own copying)", "rests_on",
+     "Chemical bonding (valence-bond / molecular-orbital)",
+     "base pairing is hydrogen bonding with exact geometry: adenine-thymine by two bonds, "
+     "guanine-cytosine by three, and the pairing is EXCLUSIVE because only those shapes fit. "
+     "Chargaff had measured A=T and G=C before the structure was proposed, which made the pairing "
+     "forced rather than chosen"),
+
+    ("Central dogma of molecular biology (DNA→RNA→protein)", "rests_on",
+     "The double helix (structure that explains its own copying)",
+     "the structure contains its own mechanism: because pairing is exclusive, each strand carries "
+     "the information to rebuild the other, so separating them gives two templates. Watson and "
+     "Crick's closing line noted the structure 'immediately suggests a possible copying mechanism' "
+     "-- heredity explained by geometry"),
+
+    ("The immune system (innate and adaptive, and self versus not-self)", "same_form",
+     "Darwinian evolution by natural selection",
+     "clonal selection is Darwinian machinery running inside one body on a timescale of days: "
+     "lymphocyte receptors are generated at RANDOM, and the ones that happen to match an invader "
+     "are selected and amplified. The body does not design an antibody to fit a pathogen; it makes "
+     "millions of shapes in advance and multiplies whichever fits"),
+
+    ("Vaccination & immune memory (Jenner to eradication)", "rests_on",
+     "The immune system (innate and adaptive, and self versus not-self)",
+     "a vaccine works by exploiting the memory cells left behind after clonal selection, so its "
+     "mechanism is the adaptive system's and nothing else"),
+
+    ("Neurons & the action potential (how a nerve carries a signal)", "same_form",
+     "The electromagnetic spectrum & modulation (radio to gamma, one axis)",
+     "the action potential is ALL-OR-NOTHING, so a nerve encodes intensity as FREQUENCY rather "
+     "than amplitude -- more spikes, not bigger ones. That is the same engineering choice as "
+     "frequency modulation over amplitude modulation, made for the same reason: a frequency code "
+     "survives attenuation that would corrupt an amplitude code. Biology and radio reached it "
+     "independently"),
+
+    ("Statistical mechanics (Boltzmann — why the second law is a counting argument)", "rests_on",
+     "Kolmogorov probability axioms",
+     "S = k log W counts MICROSTATES consistent with an observed macrostate, so the second law "
+     "becomes a probability statement rather than a commandment: heat spreads because "
+     "overwhelmingly more arrangements are spread out than concentrated. At 10^23 particles, "
+     "'overwhelmingly unlikely' becomes 'never observed'"),
+
+    ("Statistical mechanics (Boltzmann — why the second law is a counting argument)", "same_form",
+     "Shannon information theory (entropy, channel capacity)",
+     "Boltzmann's log W and Shannon's -sum p log p are one functional. Both count how much you do "
+     "NOT know about which microstate you are in, which is why thermodynamic and informational "
+     "entropy are the same measure rather than a shared metaphor -- and why erasing a bit has a "
+     "minimum thermodynamic cost"),
+
+    ("Second law of thermodynamics (entropy)", "rests_on",
+     "Statistical mechanics (Boltzmann — why the second law is a counting argument)",
+     "the macroscopic law is derived from the microscopic counting: irreversibility is not a "
+     "separate principle but what probability looks like at Avogadro scale"),
+
+    ("Differential equations (the language every physical law is written in)", "rests_on",
+     "Fundamental theorem of calculus",
+     "solving a differential equation is integration under constraint, and the local-to-global "
+     "move -- a rate specified at every instant determining a whole trajectory -- is the "
+     "fundamental theorem doing its work"),
+
+    ("Newton's three laws of motion", "rests_on",
+     "Differential equations (the language every physical law is written in)",
+     "F = ma is a second-order differential equation in position, and it determines nothing "
+     "without INITIAL CONDITIONS. The law says how things change; the conditions say what is "
+     "actually happening. Chaos is exactly the case where those conditions can never be known "
+     "well enough"),
+
+    ("Electrochemistry & the battery (Volta, Faraday, and stored charge)", "rests_on",
+     "Brønsted–Lowry acid–base theory & pH",
+     "cells run on redox in an electrolyte, and electrode potentials shift with concentration and "
+     "pH by the Nernst equation -- which is why a battery weakens in the cold and why corrosion "
+     "accelerates in salt water"),
+
+    ("Electrochemistry & the battery (Volta, Faraday, and stored charge)", "rests_on",
+     "Ohm's law & circuit theory (Kirchhoff)",
+     "voltage is set by CHEMISTRY and capacity by QUANTITY, which is why cells series for voltage "
+     "and parallel for capacity; internal resistance is why a battery's terminal voltage sags "
+     "under load. Volta's pile (1800) was the first steady current source, and every "
+     "electromagnetic experiment afterwards depended on having one"),
+
     ("Acoustic wave theory (harmonics, Doppler)", "same_form",
      "The electromagnetic spectrum & modulation (radio to gamma, one axis)",
      "identical wave mathematics on a different carrier: frequency, wavelength, superposition, "
