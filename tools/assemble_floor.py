@@ -1143,6 +1143,333 @@ EDGES += [
      "under load. Volta's pile (1800) was the first steady current source, and every "
      "electromagnetic experiment afterwards depended on having one"),
 
+    # -- BATCH 13: THICKEN THE COMB (2026-08-03) -----------------------------------------------
+    # Matt: "Think of the corpus as a honeycomb filled with honey. The structure matters."
+    # Measured after the depth work finished: every one of 144 cards carries real content, and 32
+    # of them still had ONE relation or none. A hexagonal comb has six neighbours per cell and a
+    # median of 2 is a chain, not a comb. These are the joins the starved cells were missing --
+    # each one a relation that was already TRUE and simply never written down.
+    ("Pythagorean theorem", "rests_on", "Euclidean geometry & the parallel postulate",
+     "the theorem is logically EQUIVALENT to the parallel postulate -- it holds exactly when the "
+     "space is flat and fails measurably on a sphere or a saddle. So it is not merely derived from "
+     "Euclid's fifth, it is another way of stating it"),
+
+    ("Non-Euclidean (hyperbolic / elliptic) geometry", "limits",
+     "Euclidean geometry & the parallel postulate",
+     "two thousand years of failed attempts to PROVE the fifth postulate ended when Lobachevsky, "
+     "Bolyai and Riemann denied it without contradiction. Euclidean geometry is therefore one "
+     "choice among consistent alternatives rather than the necessary geometry of space -- and "
+     "which one describes the world became an empirical question"),
+
+    ("General relativity", "rests_on", "Non-Euclidean (hyperbolic / elliptic) geometry",
+     "gravity as CURVATURE requires a geometry in which curvature is meaningful, and the angle sum "
+     "of a triangle reveals it from INSIDE the space with no outside vantage point. A pure "
+     "mathematical rebellion against one axiom became the language of gravity ninety years later"),
+
+    ("Physical oceanography (hydrostatics, tides)", "rests_on",
+     "Newton's law of universal gravitation",
+     "tides are a GRADIENT effect, not a pull: what raises them is the DIFFERENCE in gravitational "
+     "attraction across the Earth's diameter, which is why there are two bulges and two high tides "
+     "a day rather than one. The inverse-square law differentiated is the tide"),
+
+    ("Radiometric dating & uniformitarianism", "rests_on", "Nuclear decay & binding energy",
+     "the entire method rests on decay being a fixed PROBABILITY per unit time, unaffected by "
+     "temperature, pressure or chemistry. That indifference is what makes a nucleus a clock -- and "
+     "it is a nuclear fact, not a geological one"),
+
+    ("Neurons & the action potential (how a nerve carries a signal)", "rests_on",
+     "Electrochemistry & the battery (Volta, Faraday, and stored charge)",
+     "a neuron IS an electrochemical cell: it holds about -70 mV across its membrane by pumping "
+     "ions against their gradients, and the Nernst equation gives that potential from the "
+     "concentration ratio. The action potential is that stored charge discharging through gated "
+     "channels, so the nerve and the battery are the same physics"),
+
+    ("Music theory (harmonic series, equal temperament)", "rests_on",
+     "Acoustic wave theory (harmonics, Doppler)",
+     "the harmonic series is a physical fact about standing waves before it is a musical one: a "
+     "string sounds a fundamental plus integer multiples, and consonant intervals are the simple "
+     "ratios whose overtones coincide rather than beat"),
+
+    ("Music theory (harmonic series, equal temperament)", "same_form",
+     "Fourier analysis & signal processing",
+     "timbre IS a spectrum -- what distinguishes a violin from a flute at the same pitch is the "
+     "relative strength of the harmonics, which is the Fourier decomposition of the waveform heard "
+     "rather than plotted"),
+
+    ("Hess's law / thermochemistry", "rests_on",
+     "Conservation of energy (1st law of thermodynamics)",
+     "path-independence IS energy conservation: if the enthalpy change depended on the route, a "
+     "cycle could be run to create energy from nothing. Enthalpy being a STATE FUNCTION is the "
+     "first law expressed as a bookkeeping property"),
+
+    ("Phase theory (phase diagrams, Clausius–Clapeyron)", "rests_on",
+     "Differential equations (the language every physical law is written in)",
+     "the Clausius-Clapeyron relation is a differential equation for the slope of a phase boundary "
+     "(dP/dT), and integrating it is what predicts a boiling point at altitude"),
+
+    ("Population ecology (Lotka–Volterra, carrying capacity)", "rests_on",
+     "Differential equations (the language every physical law is written in)",
+     "the logistic and predator-prey models ARE coupled differential equations, and their cycles "
+     "and equilibria are properties of the solutions rather than observations added on top"),
+
+    ("Population ecology (Lotka–Volterra, carrying capacity)", "same_form",
+     "Control theory & cybernetics (feedback, stability)",
+     "carrying capacity is negative feedback with a set point, and OVERSHOOT-and-crash is what a "
+     "control loop does when its response lags -- the same delay pathology that makes a shower "
+     "oscillate and a supply chain whipsaw"),
+
+    ("Queueing theory (Little's law)", "rests_on", "Kolmogorov probability axioms",
+     "arrivals and service times are random variables, and every queueing result is a statement "
+     "about their distributions; Little's law holds for ANY stable queue precisely because it does "
+     "not depend on which distributions they are"),
+
+    ("Law of large numbers", "same_form",
+     "Statistical mechanics (Boltzmann — why the second law is a counting argument)",
+     "both say the same thing at different scales: averages over many independent draws converge, "
+     "so at 10^23 particles a thermodynamic quantity has no observable fluctuation. "
+     "Irreversibility IS the law of large numbers with Avogadro's number of trials"),
+
+    ("Bayes' theorem", "limits",
+     "Null-hypothesis significance testing (Fisher / Neyman–Pearson)",
+     "a p-value is P(data|null) and is routinely read as P(null|data). Bayes gives the correct "
+     "inversion and shows it requires a PRIOR that NHST never supplies -- which is why a "
+     "significant result on a rare hypothesis is usually still a false positive. The commonest "
+     "error in published science is this one missing term"),
+
+    ("Modern portfolio theory (Markowitz)", "limits", "Central limit theorem",
+     "the model treats returns as approximately normal, which requires finite variance and "
+     "independence. Market returns are fat-tailed and their correlations converge toward one "
+     "during a crash, so the diversification computed in calm conditions evaporates exactly when "
+     "it is needed. The theorem's CONDITIONS, not the theorem, are what fail"),
+
+    ("Real-estate valuation (cap rate, DCF)", "rests_on", "Time value of money & discounting",
+     "a DCF is discounting applied to rents, and the cap rate is its shorthand -- which is why "
+     "comparing the cap rate to the prevailing interest rate is the test that matters: when "
+     "borrowing costs more than the property yields, the arithmetic only works if prices keep "
+     "rising"),
+
+    ("Labor economics (minimum wage, overtime law)", "rests_on",
+     "Supply & demand / market equilibrium",
+     "the textbook prediction that a wage floor cuts employment is the supply-and-demand diagram "
+     "applied to labour -- and MONOPSONY is what that diagram omits, which is why the empirical "
+     "record refused to match the confident theory"),
+
+    ("Comparative advantage", "same_form", "Linear programming & duality",
+     "opportunity cost IS a shadow price: what you give up to produce a thing is exactly the dual "
+     "variable on your own binding constraint. Ricardo's argument and LP duality are one piece of "
+     "mathematics, which is why comparative advantage scales unchanged from one person's day to "
+     "national trade"),
+
+    ("Public choice / decision theory", "rests_on", "Game theory (Nash equilibrium)",
+     "concentrated benefits with diffuse costs is a game whose equilibrium favours the organised "
+     "minority, and rational ignorance is an equilibrium too -- neither requires conspiracy, only "
+     "each player acting on their own payoffs"),
+
+    ("Double-entry accounting identity (A = L + E)", "same_form",
+     "Cryptographic security (hashing, checksums, PKI)",
+     "the identity is a CHECKSUM: single-entry has no internal test and carries an error silently, "
+     "while double-entry makes most mistakes announce themselves as an imbalance. Error detection "
+     "built into the notation, which is what a parity bit does for a byte -- and neither stops a "
+     "deliberate forgery that alters both sides consistently"),
+
+    ("Exercise physiology (VO₂max, HR zones)", "rests_on",
+     "Bioenergetics / energy balance (calorimetry, 4-9-4)",
+     "VO2max is a measurement of the rate at which oxygen can be delivered to burn fuel, so the "
+     "ceiling on sustained work is a bioenergetic ceiling; the three energy systems are three "
+     "routes to ATP with different rates and capacities"),
+
+    ("Exercise physiology (VO₂max, HR zones)", "rests_on",
+     "Homeostasis & physiological regulation",
+     "progressive overload is homeostasis exploited deliberately: a stress slightly beyond the "
+     "accustomed shifts the set point during RECOVERY. Training without recovery is stress without "
+     "adaptation, which is how overtraining and injury arrive"),
+
+    ("Antisepsis & handwashing (Semmelweis, Lister)", "rests_on", "Cell theory",
+     "sterilisation only works if life comes from life. Pasteur's swan-neck flask showed broth "
+     "stays sterile while air reaches it but dust cannot, disposing of spontaneous generation -- "
+     "and without that clause, boiling instruments would be pointless because organisms would "
+     "simply reappear"),
+
+    ("Biochemistry & enzymes (catalysis at body temperature)", "rests_on",
+     "Organic chemistry & functional groups (why life is built on carbon)",
+     "an enzyme's active site is functional groups arranged in space, and its specificity comes "
+     "from shape and chirality -- the modular behaviour of functional groups is what makes a "
+     "protein's chemistry predictable at all"),
+
+    ("Fundamental theorem of algebra", "rests_on", "Topology (what survives stretching)",
+     "the name is a mild lie: every proof is ultimately analytic or topological, resting on "
+     "continuity or on a WINDING NUMBER argument rather than on algebra alone. A statement about "
+     "polynomial roots turns out to be a statement about the shape of the plane"),
+
+    ("Measure theory (Lebesgue integration)", "rests_on", "Zermelo–Fraenkel set theory (ZFC)",
+     "measure theory is built on sets, and it finds its own edge there: assuming the axiom of "
+     "choice, NON-MEASURABLE sets exist (Vitali) -- objects to which no consistent size can be "
+     "assigned. Not everything can be measured, and the theory is precise about which"),
+
+    ("Historical chronology (era reckoning, elapsed years)", "rests_on",
+     "Calendar theory (Gregorian reform, leap rules)",
+     "elapsed-time arithmetic depends on which calendar the source used, and the Gregorian "
+     "changeover means one day carries two dates depending on the country. A date is a DERIVED "
+     "quantity carrying assumptions, not a raw fact"),
+
+    ("Normative ethics (consequentialism / deontology / virtue)", "rests_on",
+     "Formal logic & epistemology (validity, inference)",
+     "an ethical argument can be perfectly VALID and rest on premises no logic can establish, "
+     "which is exactly why this pair sits together: the engine can check the chain and cannot "
+     "supply the premises, and pretending otherwise would be the failure"),
+
+    ("Photographic exposure theory (exposure value, reciprocity)", "rests_on",
+     "Wave optics (Huygens, Snell's law, diffraction)",
+     "aperture is a diffraction-limited opening, so stopping down past a point costs sharpness "
+     "rather than gaining it -- resolution is bounded by roughly wavelength over aperture, the "
+     "same limit that sets a telescope's"),
+
+    # -- BATCH 14: CLOSE THE NAMED GAPS (2026-08-03) -------------------------------------------
+    # Matt: "All of the still open should be completed." Every branch the coverage audits flagged
+    # and had not yet been filled, plus Archimedes and Harvey -- two figures whose work is
+    # load-bearing and was absent.
+    ("Simple machines & buoyancy (Archimedes)", "rests_on",
+     "Conservation of energy (1st law of thermodynamics)",
+     "a machine trades DISTANCE for FORCE and creates nothing: halve the force and you must double "
+     "the distance, because the work is conserved. Mechanical advantage is that identity read as a "
+     "ratio, and it is why no arrangement of levers and pulleys has ever been a perpetual motion "
+     "machine"),
+
+    ("Simple machines & buoyancy (Archimedes)", "rests_on",
+     "Physical oceanography (hydrostatics, tides)",
+     "buoyancy is hydrostatics: the upward force equals the WEIGHT OF FLUID DISPLACED, which "
+     "follows from pressure increasing with depth so the bottom of a submerged body is pushed "
+     "harder than the top"),
+
+    ("Structural statics (load, moment, floor-area ratio)", "rests_on",
+     "Simple machines & buoyancy (Archimedes)",
+     "moment is force times distance, which is the law of the lever -- and Archimedes gave it a "
+     "PROOF rather than a rule of thumb. Every statics calculation about a beam is that law summed "
+     "around a point"),
+
+    ("Circulation of the blood (Harvey's quantitative argument)", "rests_on",
+     "Homeostasis & physiological regulation",
+     "a closed circulatory loop is what makes regulated internal conditions possible at all: "
+     "delivery of oxygen and nutrients and removal of waste at a controlled rate is the transport "
+     "layer every set point depends on"),
+
+    ("Circulation of the blood (Harvey's quantitative argument)", "same_form",
+     "Fluid mechanics (Bernoulli, Reynolds, Navier–Stokes)",
+     "Harvey's argument was ARITHMETIC -- ejected volume times pulse rate gives several times the "
+     "body's weight in blood per hour, which no organ could manufacture and no tissue consume, so "
+     "the same blood must return. Continuity of flow proved circulation before any capillary was "
+     "seen, and Malpighi confirmed the predicted connection four years after Harvey died"),
+
+    ("Plasma physics (the fourth state, and most of the universe)", "rests_on",
+     "Maxwell's equations / classical electromagnetism",
+     "a plasma's defining property is that its charges are FREE, so it responds to electric and "
+     "magnetic fields as a neutral gas cannot. Magnetohydrodynamics couples fluid flow to Maxwell, "
+     "and the counter-intuitive result -- field lines effectively frozen into a good conductor and "
+     "dragged with the flow -- is how stellar fields wind up and flares store energy"),
+
+    ("Plasma physics (the fourth state, and most of the universe)", "rests_on",
+     "Kinetic theory of gases",
+     "a plasma is a gas whose particles have been ionised, so the kinetic picture still applies "
+     "-- temperature is still average kinetic energy -- with long-range Coulomb forces added to "
+     "the short-range collisions"),
+
+    ("Stellar nucleosynthesis & the HR diagram", "rests_on",
+     "Plasma physics (the fourth state, and most of the universe)",
+     "a star IS a self-gravitating plasma, and its structure, energy transport and confinement are "
+     "plasma physics before they are astronomy"),
+
+    ("Condensed matter & semiconductors (band theory and the transistor)", "rests_on",
+     "Pauli exclusion principle",
+     "bands exist because electrons cannot share states: atomic levels smear into bands as atoms "
+     "approach, and the FILLING of those bands under exclusion is what decides conductor, "
+     "insulator or semiconductor. The transistor is the Pauli principle turned into a switch"),
+
+    ("Condensed matter & semiconductors (band theory and the transistor)", "limits",
+     "Standard Model / quantum field theory",
+     "EMERGENCE bounds reductionism: superconductivity, magnetism and band structure are "
+     "properties of the COLLECTIVE that no individual particle has, so knowing the fundamental "
+     "constituents perfectly does not yield the behaviour of the whole. Anderson's 'more is "
+     "different' is a claim about physics, not about our ignorance"),
+
+    ("Chemical engineering (unit operations, balances, and scale-up)", "rests_on",
+     "Law of conservation of mass (Lavoisier)",
+     "a mass balance around a chosen boundary IS conservation of mass turned into an accounting "
+     "sheet, and it is the working tool of the whole discipline"),
+
+    ("Chemical engineering (unit operations, balances, and scale-up)", "limits",
+     "Heat transfer (conduction, convection, radiation)",
+     "SCALE-UP fails geometrically: multiply linear size by ten and volume rises 1,000-fold while "
+     "surface area rises 100-fold, so heat transfer PER UNIT VOLUME falls tenfold. A reaction "
+     "easily cooled in a flask runs away in a tank. The square-cube law is why the pilot plant "
+     "exists and why 'it worked in the lab' proves nothing about scale"),
+
+    ("Systems engineering (requirements, interfaces, and emergent failure)", "rests_on",
+     "Reliability & tolerance stack-up (RSS)",
+     "series reliability multiplies, so a system of many good parts can be a bad system -- which "
+     "is the quantitative case for simplicity and for hunting COMMON-MODE failure, since two pumps "
+     "on one power supply are not redundant"),
+
+    ("Systems engineering (requirements, interfaces, and emergent failure)", "same_form",
+     "Control theory & cybernetics (feedback, stability)",
+     "both are disciplines of the WHOLE rather than the parts: stability is a property of the loop, "
+     "and emergent behaviour is a property of the system, so testing every component is not testing "
+     "either one. The Mars Climate Orbiter was lost with both subsystems correct and the interface "
+     "unstated"),
+
+    ("Differential geometry (curvature measured from inside)", "rests_on",
+     "Non-Euclidean (hyperbolic / elliptic) geometry",
+     "differential geometry is the general machinery for which hyperbolic and elliptic geometry are "
+     "constant-curvature special cases; Riemann's 1854 lecture generalised them to manifolds of "
+     "arbitrary varying curvature"),
+
+    ("General relativity", "rests_on", "Differential geometry (curvature measured from inside)",
+     "GAUSS'S THEOREMA EGREGIUM is what makes the theory possible: curvature is INTRINSIC and "
+     "measurable from within a surface, with no surrounding space required. So spacetime need not "
+     "curve 'inside' anything, and observers stuck in it can measure its shape. Riemann built the "
+     "mathematics sixty years before Einstein needed it"),
+
+    ("Algebraic geometry (solution sets as shapes)", "same_form",
+     "Euclidean geometry & the parallel postulate",
+     "Descartes put coordinates on the plane in 1637 and made equation and shape one object seen "
+     "two ways -- x^2 + y^2 = 1 is both a formula and a circle. It is the original case of the "
+     "pattern this floor keeps finding: two descriptions of one structure, each doing work the "
+     "other cannot"),
+
+    ("Cryptographic security (hashing, checksums, PKI)", "rests_on",
+     "Algebraic geometry (solution sets as shapes)",
+     "points on an elliptic curve can be ADDED by a geometric rule, forming a group, and the "
+     "difficulty of reversing that addition is what elliptic-curve cryptography rests on -- which "
+     "secures most modern connections and signatures, including this project's seals"),
+
+    ("Category theory (the mathematics of structure-preserving maps)", "rests_on",
+     "Zermelo–Fraenkel set theory (ZFC)",
+     "categories are defined over collections of objects and arrows, and the size questions that "
+     "raises (small versus large categories) are set-theoretic ones the framework has to answer"),
+
+    ("Category theory (the mathematics of structure-preserving maps)", "same_form",
+     "Group theory & symmetry (the mathematics of what stays the same)",
+     "a group IS a category with one object whose every arrow is invertible -- so group theory is "
+     "a special case, and the generalisation is what lets 'same structure' be stated precisely. "
+     "This is the formal theory of what this floor's own `same_form` relation gestures at: when "
+     "Shannon entropy and Boltzmann entropy, or a mixed strategy and a density matrix, turn out to "
+     "share a form, an isomorphism is what would make that checkable rather than merely observed"),
+
+    ("Numerical analysis (why the computer's answer is not the answer)", "limits",
+     "Differential equations (the language every physical law is written in)",
+     "most differential equations of practical interest have no closed-form solution and are "
+     "integrated numerically, so the answer carries discretisation and rounding error. An "
+     "ill-CONDITIONED problem amplifies input error and no algorithm repairs it; an UNSTABLE "
+     "algorithm amplifies rounding error and a better method does. Confusing the two is how bad "
+     "numerics get blamed on the wrong thing"),
+
+    ("Numerical analysis (why the computer's answer is not the answer)", "limits",
+     "Church–Turing thesis / computability",
+     "computability says what a machine could compute given unlimited exact arithmetic; numerical "
+     "analysis says what it actually returns with 64 bits and finite time. 0.1 + 0.2 is not 0.3 in "
+     "binary floating point, and the Patriot failure at Dhahran in 1991 killed 28 people because a "
+     "clock accumulated rounding error over 100 hours. This is the gap between computable and "
+     "computed"),
+
     ("Acoustic wave theory (harmonics, Doppler)", "same_form",
      "The electromagnetic spectrum & modulation (radio to gamma, one axis)",
      "identical wave mathematics on a different carrier: frequency, wavelength, superposition, "
