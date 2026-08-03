@@ -144,5 +144,92 @@ def test_lexicons_are_measured_from_disk_not_claimed():
     assert lx["total_entries"] == sum(h["entries"] for h in lx["held"])
 
 
+# ── parallel alignment ────────────────────────────────────────────────────────────────────
+# Alignment LOCATES text across two languages; it never renders it. Both sides are quoted from
+# held sources, which is why this is composition and is permitted where translation is not.
+
+GREEK_JOHN = [
+    "Ἐν ἀρχῇ ἦν ὁ λόγος, καὶ ὁ λόγος ἦν πρὸς τὸν θεόν, καὶ θεὸς ἦν ὁ λόγος.",
+    "οὗτος ἦν ἐν ἀρχῇ πρὸς τὸν θεόν.",
+    "πάντα διʼ αὐτοῦ ἐγένετο, καὶ χωρὶς αὐτοῦ ἐγένετο οὐδὲ ἕν ὃ γέγονεν.",
+    "ἐν αὐτῷ ζωὴ ἦν, καὶ ἡ ζωὴ ἦν τὸ φῶς τῶν ἀνθρώπων.",
+    "καὶ τὸ φῶς ἐν τῇ σκοτίᾳ φαίνει, καὶ ἡ σκοτία αὐτὸ οὐ κατέλαβεν.",
+]
+ENGLISH_JOHN = [
+    "In the beginning was the Word, and the Word was with God, and the Word was God.",
+    "The same was in the beginning with God.",
+    "All things were made through him. Without him, nothing was made that has been made.",
+    "In him was life, and the life was the light of men.",
+    "The light shines in the darkness, and the darkness hasn’t overcome it.",
+]
+
+
+def test_alignment_by_address_is_a_lookup_not_an_inference():
+    """When both sides carry the same reference scheme, nothing is guessed and the card says so."""
+    refs = ["John 1:%d" % v for v in range(1, 6)]
+    r = T.align(GREEK_JOHN, ENGLISH_JOHN, refs, refs)
+    assert r["method"] == "address"
+    assert r["coverage"]["paired"] == 5
+    assert "EXACT" in r["confidence"]
+    assert all(p["cost"] == 0.0 for p in r["pairs"])
+
+
+def test_alignment_by_length_recovers_known_ground_truth():
+    """GROUND TRUTH: John 1:1-5 is one-to-one between Greek and English.
+
+    Gale & Church works from character counts alone — no dictionary, no model — so recovering
+    this is a real check that the dynamic program is right rather than merely running."""
+    r = T.align(GREEK_JOHN, ENGLISH_JOHN)
+    assert r["method"] == "length"
+    got = [(p["bead"], p["a_index"], p["b_index"]) for p in r["pairs"]]
+    want = [("1-1", [i], [i]) for i in range(5)]
+    assert got == want, f"failed to recover the known 1-1 alignment: {got}"
+    assert r["coverage"]["weak_pairings"] == 0
+
+
+def test_an_omission_is_found_at_the_right_place_and_flagged():
+    """REGRESSION for a real defect. With one Greek verse removed the correct answer needs a 0-1
+    bead, and the first version priced that out: _bead_cost charged a LENGTH penalty on a
+    deletion, where the length difference is the whole unit by definition. Insertions cost ~16
+    against a 4.0 prior, so the aligner preferred merging two unrelated verses (a 1-2 at 4.98).
+    Found by driving the stress case, not by reading the code."""
+    short = [GREEK_JOHN[0]] + GREEK_JOHN[2:]        # verse 2 missing on the Greek side
+    r = T.align(short, ENGLISH_JOHN)
+    beads = [p["bead"] for p in r["pairs"]]
+    assert beads == ["1-1", "0-1", "1-1", "1-1", "1-1"], (
+        f"the omission was not located correctly: {beads}")
+    flagged = [p for p in r["pairs"] if p["flag"]]
+    assert len(flagged) == 1 and flagged[0]["bead"] == "0-1"
+
+
+def test_every_non_one_to_one_bead_is_flagged_whatever_its_cost():
+    """A split, merge or omission is inherently a weaker claim than a clean substitution — the
+    same rule that labels a prefix-stripped gloss weaker than a direct hit. A cost threshold
+    alone let the one doubtful pairing through at 4.98 against a 5.0 cutoff."""
+    short = [GREEK_JOHN[0]] + GREEK_JOHN[2:]
+    r = T.align(short, ENGLISH_JOHN)
+    for p in r["pairs"]:
+        if p["bead"] != "1-1":
+            assert p["flag"], f"a {p['bead']} bead was left unflagged"
+
+
+def test_alignment_composes_nothing():
+    """Both sides must be QUOTED from the inputs. If any returned text is not present in the
+    source it was composed, which this layer may never do."""
+    r = T.align(GREEK_JOHN, ENGLISH_JOHN)
+    a_all, b_all = "\n".join(GREEK_JOHN), "\n".join(ENGLISH_JOHN)
+    for p in r["pairs"]:
+        if p["a"]:
+            assert all(ln in a_all for ln in p["a"].split("\n"))
+        if p["b"]:
+            assert all(ln in b_all for ln in p["b"].split("\n"))
+    assert "does not render" in r["boundary"]
+
+
+def test_alignment_of_nothing_is_empty_not_invented():
+    assert T.align([], ENGLISH_JOHN)["status"] == "empty"
+    assert T.align(GREEK_JOHN, [])["status"] == "empty"
+
+
 if __name__ == "__main__":
     sys.exit(int(pytest.main([__file__, "-q"])))

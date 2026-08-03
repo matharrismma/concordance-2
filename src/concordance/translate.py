@@ -320,3 +320,174 @@ def study(text: str, language: Optional[str] = None) -> Dict[str, Any]:
                  "lexicon. What is shown is real; what is missing is named."),
     }[verdict]
     return g
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════════
+# PARALLEL ALIGNMENT — read a work across two languages without translating either.
+#
+# THIS IS COMPOSITION, NOT GENERATION, which is why it is permitted where translation is not.
+# Both sides already exist and were written by people; alignment only says WHICH PART of one
+# corresponds to WHICH PART of the other. No new sentence is produced and every unit shown is
+# quoted from a held source. A reader who cannot read Greek but can read English can then study
+# the Greek of a particular line, because the line has been LOCATED rather than rendered.
+#
+# TWO MODES, and the honest one is preferred:
+#   BY ADDRESS — when both sides carry the same reference scheme (verse, section), alignment is
+#                EXACT and is not an inference at all. Scripture is this case.
+#   BY LENGTH  — otherwise, Gale & Church (1993): translations preserve LENGTH closely, so a
+#                dynamic program over character counts recovers the correspondence with no
+#                dictionary and no model. Deterministic, offline, language-independent.
+#
+# The length method is a STATISTICAL INFERENCE and is labelled as one. Each pairing carries its
+# cost, and a pairing that fits badly is FLAGGED rather than smoothed over — an alignment nobody
+# can check is worth less than a gap somebody can see.
+# ══════════════════════════════════════════════════════════════════════════════════════════
+
+# Gale & Church bead types: how many units on the left pair with how many on the right, and the
+# prior cost of each. 1-1 dominates real translations; the rest exist because translators split
+# and merge sentences, and a model that forbids that mis-aligns everything after the first split.
+_BEADS = (
+    (1, 1, 0.0),      # substitution — the normal case
+    (1, 0, 4.0),      # deletion: a unit with no counterpart
+    (0, 1, 4.0),      # insertion
+    (2, 1, 3.4),      # two units rendered as one
+    (1, 2, 3.4),      # one unit rendered as two
+    (2, 2, 6.8),      # a genuine tangle
+)
+
+
+def paragraphs(text: str) -> List[str]:
+    """Split into units on blank lines, falling back to lines. Structure, not semantics."""
+    if not text:
+        return []
+    blocks = [b.strip() for b in re.split(r"\n\s*\n", text) if b.strip()]
+    if len(blocks) > 1:
+        return blocks
+    return [ln.strip() for ln in text.splitlines() if ln.strip()]
+
+
+def _bead_cost(la: int, lb: int, ratio: float) -> float:
+    """Cost of pairing la characters with lb, given the corpus's own mean length ratio.
+
+    The ratio is MEASURED from the two texts rather than assumed, because it is
+    language-specific — Greek runs longer than English, Hebrew much shorter — and a hard-coded
+    constant would silently mis-align every pair in a language it was not tuned on.
+    """
+    # A DELETION OR INSERTION CARRIES NO LENGTH EVIDENCE, and charging it anyway was a real bug.
+    # For a 1-0 or 0-1 bead the length difference IS the whole unit by definition, so the old
+    # formula returned ~12 on top of the 4.0 prior — about 16 — which made a genuine omission
+    # more expensive than merging two unrelated units. Found by driving a stress case: with one
+    # Greek verse removed, the aligner chose a 1-2 merge (4.98) over the correct 1-1 plus 0-1,
+    # because the correct answer had been priced out. The prior alone must carry these beads.
+    if la == 0 or lb == 0:
+        return 0.0
+    expected = la * ratio
+    denom = max(1.0, (expected + lb) / 2.0)
+    return abs(expected - lb) / denom * 6.0
+
+
+def align(a_units: List[str], b_units: List[str],
+          a_addresses: Optional[List[str]] = None,
+          b_addresses: Optional[List[str]] = None) -> Dict[str, Any]:
+    """Pair the units of two parallel texts. Exact by address where possible, else by length.
+
+    Every pairing carries its cost, and units that could not be paired are returned explicitly —
+    an unaligned unit is a fact about the texts, not an error to hide.
+    """
+    a_units = [u for u in (a_units or []) if u and u.strip()]
+    b_units = [u for u in (b_units or []) if u and u.strip()]
+    if not a_units or not b_units:
+        return {"status": "empty", "pairs": [],
+                "coverage": {"a_units": len(a_units), "b_units": len(b_units), "paired": 0}}
+
+    # ── exact mode: both sides addressed, so correspondence is looked up, never inferred ──
+    if a_addresses and b_addresses and len(a_addresses) == len(a_units) \
+            and len(b_addresses) == len(b_units):
+        bmap = {addr: (i, b_units[i]) for i, addr in enumerate(b_addresses)}
+        pairs, unmatched_a = [], []
+        for i, addr in enumerate(a_addresses):
+            hit = bmap.pop(addr, None)
+            if hit:
+                pairs.append({"address": addr, "a": a_units[i], "b": hit[1],
+                              "method": "address", "cost": 0.0})
+            else:
+                unmatched_a.append({"address": addr, "a": a_units[i]})
+        return {
+            "status": "ok", "method": "address", "pairs": pairs,
+            "unaligned_a": unmatched_a,
+            "unaligned_b": [{"address": k, "b": v[1]} for k, v in bmap.items()],
+            "coverage": {"a_units": len(a_units), "b_units": len(b_units),
+                         "paired": len(pairs),
+                         "pct": round(100.0 * len(pairs) / len(a_units), 1)},
+            "confidence": ("EXACT — both sides carry the same reference scheme, so this is a "
+                           "lookup rather than an inference. Nothing here was guessed."),
+        }
+
+    # ── length mode: Gale & Church dynamic programming ──
+    la = [len(u) for u in a_units]
+    lb = [len(u) for u in b_units]
+    ratio = (sum(lb) / sum(la)) if sum(la) else 1.0
+
+    n, m = len(a_units), len(b_units)
+    INF = float("inf")
+    d = [[INF] * (m + 1) for _ in range(n + 1)]
+    back: Dict[Any, Any] = {}
+    d[0][0] = 0.0
+    for i in range(n + 1):
+        for j in range(m + 1):
+            if d[i][j] == INF:
+                continue
+            for da, db, prior in _BEADS:
+                ni, nj = i + da, j + db
+                if ni > n or nj > m:
+                    continue
+                step = prior + _bead_cost(sum(la[i:ni]), sum(lb[j:nj]), ratio)
+                if d[i][j] + step < d[ni][nj]:
+                    d[ni][nj] = d[i][j] + step
+                    back[(ni, nj)] = (i, j, da, db, step)
+
+    if d[n][m] == INF:
+        return {"status": "no_alignment", "pairs": [],
+                "coverage": {"a_units": n, "b_units": m, "paired": 0},
+                "detail": "no path through the bead model — the texts may not be parallel"}
+
+    path, i, j = [], n, m
+    while (i, j) != (0, 0):
+        pi, pj, da, db, step = back[(i, j)]
+        path.append((pi, i, pj, j, da, db, step))
+        i, j = pi, pj
+    path.reverse()
+
+    pairs, paired = [], 0
+    for ai, aj, bi, bj, da, db, step in path:
+        if da and db:
+            paired += da
+        pairs.append({
+            "a_index": list(range(ai, aj)), "b_index": list(range(bi, bj)),
+            "a": "\n".join(a_units[ai:aj]) or None,
+            "b": "\n".join(b_units[bi:bj]) or None,
+            "bead": "%d-%d" % (da, db), "cost": round(step, 3), "method": "length",
+            # ANY BEAD THAT IS NOT 1-1 IS FLAGGED, whatever its cost. A split, a merge or an
+            # omission is inherently a weaker claim than a clean substitution — the same reason
+            # a prefix-stripped gloss is labelled weaker than a direct hit. Relying on a cost
+            # threshold alone let the single genuinely doubtful pairing through at 4.98 against
+            # a 5.0 cutoff, which is precisely the case the flag exists to catch.
+            "flag": (("weak — a %d-%d bead is a split, merge or omission rather than a clean "
+                      "one-to-one pairing, and should be read with suspicion" % (da, db))
+                     if (da, db) != (1, 1) else
+                     ("weak — fits the length model poorly" if step > 5.0 else None)),
+        })
+
+    weak = sum(1 for p in pairs if p["flag"])
+    return {
+        "status": "ok", "method": "length", "pairs": pairs,
+        "length_ratio": round(ratio, 3),
+        "coverage": {"a_units": n, "b_units": m, "paired": paired,
+                     "pct": round(100.0 * paired / n, 1) if n else 0.0,
+                     "weak_pairings": weak},
+        "confidence": ("INFERRED — Gale & Church length correspondence (1993), deterministic and "
+                       "dictionary-free. Reliable for prose, weaker for verse, lists and heavy "
+                       "paraphrase. %d pairing(s) fit poorly and are flagged." % weak),
+        "boundary": ("Alignment LOCATES text; it does not render it. Both sides are quoted from "
+                     "held sources and no sentence was composed by this engine."),
+    }
