@@ -116,3 +116,35 @@ def test_V_the_queries_that_failed_live_now_answer_about_their_subject():
 
 if __name__ == "__main__":
     sys.exit(int(pytest.main([__file__, "-q"])))
+
+
+def test_VI_a_theory_outranks_an_incidental_mention():
+    """Matt, 2026-08-02: "Theories should be weighted heavier than a standard card."
+
+    The theories shelf is 99 cards out of ~550,000, each one something the sciences actually run
+    on and each now carrying its place in the assembled floor — what it rests on, what limits it,
+    what shares its form. When a reader's question touches one, the theory is the card that
+    orients everything else, so it must outrank a book that happens to use the same word.
+
+    The boost is applied INSIDE the already-scoring branch, so it can only reorder cards the
+    subject partition already admitted — it can never smuggle in an off-subject hit. That is the
+    property this test pins, in both directions.
+    """
+    cards = {
+        "t": {"id": "t", "title": "Cell theory", "shelf": "theories",
+              "body": "cell theory as the sciences run on it", "lifecycle_stage": "public"},
+        "b": {"id": "b", "title": "A country diary", "shelf": "gutenberg",
+              "body": "the cell of the monk, a cell of bees, cell after cell in the old wall",
+              "lifecycle_stage": "public"},
+        "x": {"id": "x", "title": "Unrelated", "shelf": "gutenberg",
+              "body": "harvesting barley", "lifecycle_stage": "public"},
+    }
+    fix = corpus.Corpus(cards, min_idf=0.0)
+    hits = fix.search("cell", limit=5)
+    assert hits and hits[0]["id"] == "t", (
+        "a book that merely repeats the word outranked the theory: "
+        + ", ".join(h["id"] for h in hits))
+    # and the boost cannot reach a card the partition refused
+    assert all(h["id"] != "x" for h in fix.search("cell", limit=5)), \
+        "an off-subject card was admitted"
+    assert corpus.THEORY_WEIGHT > 1.0

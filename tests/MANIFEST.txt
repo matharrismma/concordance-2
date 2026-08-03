@@ -51,6 +51,7 @@ test_engine.py
 test_expand_on_call.py
 test_find.py
 test_floor.py
+test_floor_connected.py
 test_formation.py
 test_fp_gate.py
 test_gate.py

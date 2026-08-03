@@ -57,6 +57,12 @@ PUBLIC_STAGES = frozenset({"public", "featured"})
 # repeating a common word can cross it.
 SUBJECT_TIER = 1000.0
 
+# A theory card outranks an incidental mention of the same words. Deliberately a WEIGHT and not a
+# tier: the subject partition still decides who is in the running, and this only orders those who
+# already are. Set at 4.0 — above the survival field library's 3.0 (a how-to should still win a
+# how-to question) and well under the exact-title 9.0, so naming a card by its title still wins.
+THEORY_WEIGHT = 4.0
+
 
 def is_public(card: dict) -> bool:
     """True iff a card may appear on ANY public read path — an ALLOWLIST, not a denylist.
@@ -479,6 +485,16 @@ class Corpus:
                 # incidentally-titled book or species (so "build a fire" gets the how-to, not fire ants)
                 if c.get("shelf") == "survival" and (_PRACTICAL & query_tokens):
                     s *= 3.0
+                # A THEORY IS LOAD-BEARING (Matt, 2026-08-02: "Theories should be weighted heavier
+                # than a standard card."). The theories shelf is 99 cards out of 550,000, each one
+                # a thing the sciences actually run on, each now carrying its own place in the
+                # assembled floor — what it rests on, what limits it, what shares its form. When a
+                # reader's question touches one, the theory is the card that orients everything
+                # else, so it outranks an incidental mention in a book that happens to use the
+                # same word. Applied INSIDE the s > 0 branch, so it can only lift a card the
+                # partition already admitted — a boost can never smuggle in an off-subject hit.
+                elif c.get("shelf") == "theories":
+                    s *= THEORY_WEIGHT
                 scored.append((s, c))
         # a TOTAL order: equal scores tie-break on id, so the ranking is a function of the
         # cards and the query alone — never of construction order (invariant I)

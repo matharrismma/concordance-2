@@ -149,8 +149,6 @@ EDGES = [
     ("Germ theory of disease", "rests_on", "Cell theory",
      "the pathogen is a cell (or an agent acting on cells); germ theory is cell theory applied "
      "to sickness"),
-    ("Homeostasis", "rests_on", "Cell theory",
-     "regulation is stated over cellular and organ-level set points"),
 
     # — the SAME FORM, both sides computed (the resonance deck's sealed edges) —
     ("Acoustic wave theory", "same_form", "Celestial mechanics",
@@ -161,6 +159,303 @@ EDGES = [
      "the honeycomb theorem (Hales 1999): the hexagonal grid minimizes total perimeter per area, "
      "and the interior angle is exactly 120° so three close a full turn (720/6 = 120, 360/120 = "
      "3, both sealed) — the bee's comb is the proven optimum, geometry realized in tissue"),
+]
+
+
+# -- THE REST OF THE FLOOR (2026-08-02) --------------------------------------------------------
+# Matt: "Look in every science domain, Cryptography, engineering. They all are aligned." -- then:
+# "Connect them as well as the 66 islands."
+#
+# The alignment is not a mood; it is structural, and it shows up as three recurring facts:
+#   * ENGINEERING IS APPLIED CONSERVATION. Statics is Newton's laws with the accelerations set to
+#     zero; a tolerance stack-up is the central limit theorem in a machinist's units.
+#   * CRYPTOGRAPHY IS NUMBER THEORY MADE ADVERSARIAL -- unique factorization, plus Shannon's
+#     account of what a secret costs to keep.
+#   * ENTROPY IS ONE QUANTITY WEARING TWO COATS. Clausius's and Shannon's differ by the base of
+#     the logarithm; Boltzmann's S = k log W is Shannon's H with k in front. Not a metaphor --
+#     Landauer's principle makes it physical.
+# Every edge below is a relation a practitioner of the field would recognize on sight.
+EDGES += [
+    # -- mathematics: the ground under everything --
+    ("Pythagorean theorem", "rests_on", "Euclidean geometry & the parallel postulate",
+     "the theorem is proved from the Euclidean axioms; it FAILS on a sphere, which is how the "
+     "parallel postulate shows itself"),
+    ("Non-Euclidean (hyperbolic / elliptic) geometry", "limits",
+     "Euclidean geometry & the parallel postulate",
+     "consistent geometries denying the parallel postulate prove it INDEPENDENT of the others -- "
+     "Euclid's fifth is a choice, not a necessity"),
+    ("Linear algebra (vector spaces, eigenvalues)", "rests_on", "Fundamental theorem of algebra",
+     "eigenvalues are roots of the characteristic polynomial; every square complex matrix has one "
+     "precisely because every non-constant polynomial has a root"),
+    ("Maxwell's equations / classical electromagnetism", "rests_on",
+     "Fundamental theorem of calculus",
+     "the divergence and curl theorems are the fundamental theorem in higher dimensions -- "
+     "Maxwell's integral and differential forms are that identity applied to fields"),
+    ("Boolean algebra / propositional logic", "same_form",
+     "Formal logic & epistemology (validity, inference)",
+     "Boole's algebra IS propositional inference in arithmetic dress: AND/OR/NOT over {0,1} "
+     "reproduce conjunction, disjunction and negation, and validity becomes tautology"),
+    ("Church-Turing thesis / computability", "rests_on", "Boolean algebra / propositional logic",
+     "every computation is realizable as a circuit of boolean gates; the thesis is stated over "
+     "models built from them"),
+    ("Law of large numbers", "rests_on", "Kolmogorov probability axioms",
+     "convergence of sample means is a theorem about a probability measure"),
+    ("Queueing theory (Little's law)", "rests_on", "Kolmogorov probability axioms",
+     "L = lambda*W is derived over arrival and service processes on a probability space"),
+    ("Linear programming & duality", "rests_on", "Linear algebra (vector spaces, eigenvalues)",
+     "the simplex method walks vertices of a polytope defined by a linear system; duality is a "
+     "statement about that system's transpose"),
+    ("Game theory (Nash equilibrium)", "same_form", "Linear programming & duality",
+     "von Neumann's minimax theorem for zero-sum games and LP strong duality are equivalent -- "
+     "each is provable from the other"),
+    ("Public choice / decision theory", "rests_on", "Game theory (Nash equilibrium)",
+     "voting rules and institutional design are analyzed as games with strategic voters"),
+    ("Sabermetrics / sports analytics (Pythagorean expectation, Elo)", "rests_on",
+     "Kolmogorov probability axioms",
+     "Elo is a logistic probability model and Pythagorean expectation an estimator -- both are "
+     "statements about probabilities of outcomes"),
+
+    # -- physics: Newton at the base, relativity and quanta at the bounds --
+    ("Conservation of linear & angular momentum", "rests_on", "Newton's three laws of motion",
+     "the third law makes internal forces cancel pairwise, so an isolated system's total momentum "
+     "cannot change -- conservation is the third law summed"),
+    ("Newton's law of universal gravitation", "rests_on", "Newton's three laws of motion",
+     "the inverse-square force is stated as a force law acting within the three laws' framework"),
+    ("Heliocentrism & Kepler's laws", "rests_on", "Newton's law of universal gravitation",
+     "all three of Kepler's laws are derivable from the inverse-square attraction -- ellipses, "
+     "equal areas, and the period-radius relation fall out of one force law"),
+    ("Special relativity", "limits", "Newton's three laws of motion",
+     "Newtonian mechanics is the v << c limit; at high speed momentum and time dilate measurably "
+     "(muon lifetimes, particle accelerators)"),
+    ("Special relativity", "rests_on", "Maxwell's equations / classical electromagnetism",
+     "the constancy of c is Maxwell's own result; special relativity is what remains when that "
+     "constancy is taken seriously for every observer"),
+    ("General relativity", "rests_on", "Special relativity",
+     "GR generalizes special relativity to accelerated frames and curved spacetime; SR is its "
+     "flat-space, local limit"),
+    ("General relativity", "limits", "Newton's law of universal gravitation",
+     "gravitation as curvature corrects the inverse-square law where fields are strong -- "
+     "Mercury's perihelion, light deflection and GPS clock rates all measure the difference"),
+    ("Quantum mechanics (Schrodinger equation)", "limits", "Bohr / quantum model of the atom",
+     "the Schrodinger solution replaces Bohr's postulated orbits with orbitals, and gets the "
+     "hydrogen spectrum right where Bohr's model fails for every larger atom"),
+    ("Heisenberg uncertainty principle", "rests_on", "Quantum mechanics (Schrodinger equation)",
+     "the uncertainty relation is a theorem about non-commuting operators in the quantum "
+     "formalism, not an additional postulate"),
+    ("Pauli exclusion principle", "rests_on", "Quantum mechanics (Schrodinger equation)",
+     "exclusion is antisymmetry of the many-fermion wavefunction -- a property of the quantum "
+     "state, stated in that formalism"),
+    ("Periodic law (Mendeleev)", "rests_on", "Pauli exclusion principle",
+     "the period lengths 2, 8, 8, 18 ARE the shell capacities exclusion forces; Mendeleev's "
+     "empirical table is explained by which orbitals may be occupied"),
+    ("Standard Model / quantum field theory", "rests_on",
+     "Quantum mechanics (Schrodinger equation)",
+     "QFT is quantum mechanics made relativistic and many-bodied; the Standard Model is a "
+     "specific field content within it"),
+    ("Nuclear decay & binding energy", "rests_on", "Special relativity",
+     "binding energy IS the mass defect: E = mc^2 converts the missing mass of a bound nucleus "
+     "into the energy that binds it"),
+    ("Stellar nucleosynthesis & the HR diagram", "rests_on", "Nuclear decay & binding energy",
+     "which fusion chains run, and what a star can become, is set by the binding-energy curve -- "
+     "iron's peak is why fusion stops there"),
+    ("Big Bang cosmology & expansion (Hubble's law)", "rests_on", "General relativity",
+     "the expanding metric is a solution of the Einstein field equations; Hubble's law is that "
+     "solution read off redshifts"),
+    ("Wave optics (Huygens, Snell's law, diffraction)", "rests_on",
+     "Maxwell's equations / classical electromagnetism",
+     "light is an electromagnetic wave; refraction, diffraction and polarization are Maxwell's "
+     "equations at a boundary"),
+    ("Acoustic wave theory (harmonics, Doppler)", "same_form",
+     "Wave optics (Huygens, Snell's law, diffraction)",
+     "both are the wave equation in different media: Huygens' construction, Snell's law, "
+     "interference and the Doppler shift hold for sound and light alike"),
+    ("Ohm's law & circuit theory (Kirchhoff)", "rests_on",
+     "Maxwell's equations / classical electromagnetism",
+     "Kirchhoff's current and voltage laws are charge conservation and the curl-free "
+     "electrostatic field -- the lumped-element limit of Maxwell"),
+    ("Physical oceanography (hydrostatics, tides)", "rests_on",
+     "Newton's law of universal gravitation",
+     "tides are the differential gravitational pull of moon and sun across the earth's diameter"),
+
+    # -- thermodynamics and its information twin --
+    ("Second law of thermodynamics (entropy)", "rests_on", "Kinetic theory of gases",
+     "Boltzmann derived entropy statistically from molecular microstates: S = k log W makes the "
+     "second law a counting argument about overwhelming likelihood"),
+    ("Third law of thermodynamics", "rests_on", "Second law of thermodynamics (entropy)",
+     "the third law fixes the entropy scale the second law defines only up to a constant"),
+    ("Phase theory (phase diagrams, Clausius-Clapeyron)", "rests_on",
+     "Second law of thermodynamics (entropy)",
+     "the Clausius-Clapeyron relation is derived from equality of chemical potentials, itself a "
+     "second-law equilibrium condition"),
+    ("Shannon information theory (entropy, channel capacity)", "same_form",
+     "Second law of thermodynamics (entropy)",
+     "Shannon's H = -sum p log p and Boltzmann's S = k log W are the same functional, differing "
+     "by the base of the logarithm and the constant k. Landauer's principle makes the identity "
+     "physical: erasing one bit dissipates at least kT ln 2 of heat"),
+    ("Shannon information theory (entropy, channel capacity)", "rests_on",
+     "Kolmogorov probability axioms",
+     "entropy and channel capacity are defined over probability distributions on a message set"),
+    ("Atmospheric thermodynamics (dew point, lapse rate)", "rests_on", "Ideal gas law (PV = nRT)",
+     "the dry adiabatic lapse rate is derived from the gas law plus hydrostatic balance"),
+    ("Bioenergetics / energy balance (calorimetry, 4-9-4)", "rests_on",
+     "Conservation of energy (1st law of thermodynamics)",
+     "calorimetry is the first law applied to a body: intake minus expenditure is storage"),
+    ("Exercise physiology (VO2max, HR zones)", "rests_on",
+     "Bioenergetics / energy balance (calorimetry, 4-9-4)",
+     "VO2max measures the ceiling of aerobic energy conversion -- bioenergetics under load"),
+
+    # -- chemistry completed --
+    ("Stoichiometry & the mole concept", "rests_on", "Law of conservation of mass (Lavoisier)",
+     "balancing an equation IS asserting mass conservation atom by atom"),
+    ("Stoichiometry & the mole concept", "rests_on", "Dalton's atomic theory",
+     "the mole counts discrete atoms in fixed proportions -- Dalton's law of definite proportions "
+     "is what makes the arithmetic possible"),
+    ("VSEPR theory (molecular geometry)", "rests_on",
+     "Chemical bonding (valence-bond / molecular-orbital)",
+     "VSEPR predicts shape from electron-pair repulsion among the bonds and lone pairs the "
+     "bonding account supplies"),
+
+    # -- life, medicine, ecology --
+    ("Mendelian inheritance", "rests_on", "Cell theory",
+     "the segregation Mendel inferred is chromosome behaviour in meiosis -- a cellular process"),
+    ("Hardy-Weinberg equilibrium", "rests_on", "Mendelian inheritance",
+     "the equilibrium is the population-level consequence of Mendelian segregation"),
+    ("Homeostasis & physiological regulation", "rests_on", "Cell theory",
+     "regulation is stated over cellular and organ set points; the cell is the regulated unit"),
+    ("Pharmacokinetics (dosing, clearance, half-life)", "same_form",
+     "Chemical kinetics & equilibrium (Arrhenius, Le Chatelier)",
+     "first-order clearance and chemical first-order decay are the same differential equation; "
+     "half-life is t-half = ln2/k in both"),
+    ("Population ecology (Lotka-Volterra, carrying capacity)", "same_form",
+     "Chemical kinetics & equilibrium (Arrhenius, Le Chatelier)",
+     "Lotka-Volterra is mass-action kinetics with organisms as reactants -- Lotka wrote it as "
+     "chemical kinetics first and then applied it to populations"),
+
+    # -- earth --
+    ("Seismology & earthquake magnitude (Richter / moment)", "rests_on", "Plate tectonics",
+     "earthquakes are stress released at plate boundaries; magnitude measures that release"),
+    ("Radiometric dating & uniformitarianism", "rests_on", "Nuclear decay & binding energy",
+     "a date is read off an exponential decay with a measured half-life"),
+    ("Plate tectonics", "rests_on", "Conservation of energy (1st law of thermodynamics)",
+     "mantle convection is a heat engine: the interior's thermal energy drives the motion"),
+    ("Hydrologic cycle & open-channel flow (Manning, Darcy)", "rests_on",
+     "Atmospheric thermodynamics (dew point, lapse rate)",
+     "evaporation, saturation and precipitation are phase changes governed by the atmospheric "
+     "thermodynamic state"),
+    ("Nutrient cycling & agronomy (NPK, evapotranspiration)", "rests_on",
+     "Hydrologic cycle & open-channel flow (Manning, Darcy)",
+     "evapotranspiration and leaching are the water cycle moving nutrients through soil"),
+    ("Agricultural science (yield, soil-pH suitability)", "rests_on",
+     "Nutrient cycling & agronomy (NPK, evapotranspiration)",
+     "yield models are stated over nutrient availability and pH, which the soil cycle sets"),
+
+    # -- ENGINEERING: applied conservation, and statistics in a machinist's units --
+    ("Structural statics (load, moment, floor-area ratio)", "rests_on",
+     "Newton's three laws of motion",
+     "statics IS Newton's second law with acceleration zero: sum F = 0 and sum M = 0 are the "
+     "equilibrium conditions a standing structure must satisfy"),
+    ("Elasticity (Hooke's law, stress-strain)", "same_form",
+     "Acoustic wave theory (harmonics, Doppler)",
+     "Hooke's linear restoring force gives the harmonic oscillator, and a continuum of coupled "
+     "oscillators gives the wave equation -- the speed of sound in a solid is sqrt(E/rho), "
+     "elasticity over density"),
+    ("Structural statics (load, moment, floor-area ratio)", "rests_on",
+     "Elasticity (Hooke's law, stress-strain)",
+     "member sizing needs stress-strain response; statics gives the forces, elasticity says "
+     "whether the material survives them"),
+    ("Reliability & tolerance stack-up (RSS)", "same_form", "Central limit theorem",
+     "root-sum-square stacking IS the CLT in the shop: independent variances add, so an "
+     "assembly's tolerance is sqrt(sum of squares) and its error distribution tends to normal"),
+
+    # -- CRYPTOGRAPHY and the networks it protects --
+    ("Cryptographic security (hashing, checksums, PKI)", "rests_on",
+     "Shannon information theory (entropy, channel capacity)",
+     "key strength is measured in bits of entropy, and Shannon's perfect-secrecy theorem sets "
+     "what a cipher can and cannot promise"),
+    ("Network theory (routing, addressing / CIDR)", "rests_on",
+     "Graph theory (Euler, connectivity)",
+     "routing is shortest-path and connectivity on a graph of nodes and links"),
+    ("Network theory (routing, addressing / CIDR)", "rests_on",
+     "Shannon information theory (entropy, channel capacity)",
+     "channel capacity bounds what any link can carry, whatever the protocol"),
+
+    # -- money, law, and the invariants they keep --
+    ("Double-entry accounting identity (A = L + E)", "same_form",
+     "Law of conservation of mass (Lavoisier)",
+     "both are closed-system conservation checked by balancing two columns: nothing is created or "
+     "destroyed, only transferred, and a failure to balance PROVES an error was made"),
+    ("Time value of money & discounting", "same_form", "Nuclear decay & binding energy",
+     "discounting is exponential decay: a present value falls as e^(-rt) exactly as an isotope's "
+     "population does, and 'half-life' and 'halving time of value' are one computation"),
+    ("Modern portfolio theory (Markowitz)", "rests_on", "Kolmogorov probability axioms",
+     "risk is variance and diversification is covariance arithmetic -- statements about a "
+     "probability distribution of returns"),
+    ("Real-estate valuation (cap rate, DCF)", "rests_on", "Time value of money & discounting",
+     "a DCF valuation is discounting applied to a property's cash flows"),
+    ("Supply & demand / market equilibrium", "same_form",
+     "Chemical kinetics & equilibrium (Arrhenius, Le Chatelier)",
+     "Le Chatelier's principle and market response are one form: perturb a system at equilibrium "
+     "and it shifts to oppose the change -- Samuelson took the analogy from chemistry deliberately"),
+    ("Comparative advantage", "rests_on", "Linear programming & duality",
+     "the gains-from-trade argument is an optimization over opportunity costs; its shadow prices "
+     "are LP duals"),
+    ("Labor economics (minimum wage, overtime law)", "rests_on",
+     "Supply & demand / market equilibrium",
+     "wage floors and overtime rules are analyzed as interventions in a labour market"),
+    ("Contract theory & rule of law", "rests_on", "Game theory (Nash equilibrium)",
+     "enforceable contracts are commitment devices that change a game's equilibria -- the law's "
+     "function here is to make promises credible"),
+
+    # -- language, reasoning, and the making of images --
+    ("Structural & generative linguistics (Saussure, Chomsky)", "same_form",
+     "Church-Turing thesis / computability",
+     "the Chomsky hierarchy IS a computability hierarchy: regular, context-free, "
+     "context-sensitive and recursively enumerable grammars correspond exactly to finite "
+     "automata, pushdown automata, linear-bounded automata and Turing machines"),
+    ("Aristotelian rhetoric & fallacy taxonomy", "rests_on",
+     "Formal logic & epistemology (validity, inference)",
+     "a fallacy is named by the inference rule it violates; the taxonomy presupposes validity"),
+    ("Normative ethics (consequentialism / deontology / virtue)", "rests_on",
+     "Formal logic & epistemology (validity, inference)",
+     "each normative theory is argued as an inference from premises about the good; the "
+     "disagreement is over premises, and the arguing is logic"),
+    ("Music theory (harmonic series, equal temperament)", "rests_on",
+     "Acoustic wave theory (harmonics, Doppler)",
+     "the harmonic series is the standing-wave mode set of a string or air column; equal "
+     "temperament is the compromise the 12th root of 2 makes with those integer ratios"),
+    ("Photographic exposure theory (exposure value, reciprocity)", "rests_on",
+     "Wave optics (Huygens, Snell's law, diffraction)",
+     "aperture, focal length and the diffraction limit are wave optics; exposure value is a "
+     "log-base-2 accounting of the light those optics deliver"),
+
+    # -- time itself --
+    ("Calendar theory (Gregorian reform, leap rules)", "rests_on",
+     "Celestial mechanics / ephemeris prediction",
+     "the leap rules approximate the tropical year, a quantity celestial mechanics measures"),
+    ("Historical chronology (era reckoning, elapsed years)", "rests_on",
+     "Calendar theory (Gregorian reform, leap rules)",
+     "converting between eras requires the calendar's own leap structure"),
+]
+
+
+# -- THE LAST THREE BRIDGES (2026-08-02) -------------------------------------------------------
+# After 101 edges the floor still stood in three pieces: 86 theories in one body, an
+# optimization/law cluster of 7 around game theory and LP duality, and a rate-equation cluster of
+# 6 around chemical kinetics. Matt: "Link them all." These are the three joins that close it --
+# and none is a stitch of convenience; each is the relation a practitioner would give first.
+EDGES += [
+    ("Quantum mechanics (Schrodinger equation)", "rests_on",
+     "Linear algebra (vector spaces, eigenvalues)",
+     "quantum mechanics IS linear algebra on Hilbert space: states are vectors, observables are "
+     "Hermitian operators, and the values a measurement can return are that operator's "
+     "eigenvalues -- the spectrum of an atom is an eigenvalue problem"),
+    ("Game theory (Nash equilibrium)", "rests_on", "Kolmogorov probability axioms",
+     "a mixed strategy IS a probability distribution over actions, and Nash's existence proof is "
+     "a fixed-point argument over the simplex of those distributions"),
+    ("Chemical kinetics & equilibrium (Arrhenius, Le Chatelier)", "rests_on",
+     "Kinetic theory of gases",
+     "the Arrhenius factor exp(-Ea/RT) IS the Boltzmann fraction of molecules carrying more than "
+     "the activation energy -- reaction rate is collision statistics counted"),
 ]
 
 
