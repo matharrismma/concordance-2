@@ -31,8 +31,14 @@ import pytest  # noqa: E402
 
 
 def test_no_card_in_the_keeping_is_isolated():
-    from concordance import corpus
-    cards = corpus.default_corpus().cards
+    # NOT corpus.default_corpus(): under the full gate that singleton is an EMPTY scratch corpus
+    # (the first-collected module points CONCORDANCE_DATA_DIR at a temp dir for the whole run),
+    # so this assertion iterated zero cards and passed while proving nothing. Measured
+    # 2026-08-03. conftest.real_cards() loads the actual keeping regardless of the environment.
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from conftest import real_cards
+    cards = real_cards()
+    assert len(cards) > 100_000, f"only {len(cards):,} cards — this must measure the REAL keeping"
     stranded = [(cid, c.get("shelf"), str(c.get("title"))[:40])
                 for cid, c in cards.items()
                 if c.get("kind") != "connection" and not (c.get("connections") or [])]

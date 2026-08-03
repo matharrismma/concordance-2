@@ -38,10 +38,33 @@ FLOOR = "card_k_floor_of_discovery"
 # any rise means something new was stranded, and the fix is the minting path, not this constant.
 KNOWN_ISLAND_CARDS = 0
 
+# THE REAL KEEPING, LOADED HERE, ON PURPOSE.
+#
+# This file may not read corpus.default_corpus(). That singleton is built once per process from
+# whatever CONCORDANCE_DATA_DIR happened to be set when it was first touched, and 53 test modules
+# point that variable at an empty temp directory in their import preamble. Alphabetical collection
+# means tests/test_apothecary.py wins, so under the full gate this file was walking an EMPTY
+# corpus -- and the walk still "passed", because tests/test_floor.py pins a five-card fake floor
+# into the singleton and never removes it. The Floor this file found was that fixture.
+#
+# Discovered 2026-08-03 while fixing that fixture's missing teardown: removing the pollution made
+# this file fail, which is the correct behaviour and proves the pass had been resting on it. A
+# guarantee that the whole keeping is reachable is worth nothing if it is measured against five
+# cards a sibling invented.
+#
+# So the real cards are loaded straight from the repo's data directory, once, independent of the
+# singleton and of every sibling's environment. The docstring's 11.7 s is the honest price.
+def _real_cards():
+    """One shared loader, in tests/conftest.py — see the note there for why it must not be the
+    process-wide singleton. Imported lazily so this file still runs directly, not only under
+    pytest."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from conftest import real_cards
+    return real_cards()
+
 
 def _walk():
-    from concordance import corpus
-    cards = corpus.default_corpus().cards
+    cards = _real_cards()
     adj: dict = {}
     for cid, c in cards.items():
         if c.get("kind") == "connection":
@@ -65,17 +88,29 @@ def _walk():
 
 def test_the_floor_itself_is_in_the_keeping():
     """If the Floor id ever changes, every assertion below would pass vacuously on an empty walk."""
-    from concordance import corpus
-    assert FLOOR in corpus.default_corpus().cards, "the Floor is missing — the walk would be meaningless"
+    cards = _real_cards()
+    assert FLOOR in cards, "the Floor is missing — the walk would be meaningless"
+    # ...and the corpus must be the real one. Five cards is not a keeping, and a walk over five
+    # cards that reports success is exactly the vacuous pass the line above exists to prevent.
+    assert len(cards) > 100_000, (
+        f"only {len(cards):,} cards loaded — this file must measure the REAL keeping, not a "
+        f"fixture. Check that data/ is present and that nothing redirected the load.")
 
 
 def test_nothing_carries_no_relation_at_all():
-    """The strict invariant. `graph.overview()` reports this cheaply as `isolated_nodes`."""
-    from concordance import graph
-    o = graph.overview()
-    assert o["isolated_nodes"] == 0, (
-        f"{o['isolated_nodes']} card(s) carry no relation at all — see tools/graft_orphans.py, and "
-        f"fix the path that created them")
+    """The strict invariant: no card carries zero relations.
+
+    Computed here from the real cards rather than read from `graph.overview()`. The overview is
+    memoized off the process-wide corpus singleton, so under the gate it answered for whatever a
+    sibling module had loaded — which was an empty temp corpus plus test_floor's fixture. Same
+    definition as the overview's `isolated_nodes`: a card carrying no outbound relation at all.
+    """
+    cards = _real_cards()
+    isolated = [cid for cid, c in cards.items()
+                if c.get("kind") != "connection" and not (c.get("connections") or [])]
+    assert not isolated, (
+        f"{len(isolated)} card(s) carry no relation at all — e.g. {isolated[:5]} — see "
+        f"tools/graft_orphans.py, and fix the path that created them")
 
 
 def test_the_overview_buckets_account_for_every_card():
