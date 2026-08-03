@@ -180,6 +180,109 @@ def _hex_points(x, y, r, tilt=0.0):
         for i in range(6))
 
 
+def lattice(th, W=1240, H=760):
+    """THE GEOMETRIC COMB — a lattice with sites that can be EMPTY, so holes are visible.
+
+    Matt, 2026-08-03: "Close. It should be geometric, so we can use this to find what is missing."
+
+    That is the correction, and it is exact. A phyllotactic spiral fills every position it
+    creates, so it CANNOT show a gap -- however beautiful, it can only draw what exists. To find
+    what is missing you need coordinates that can be VACANT.
+
+    So the frame is the grid this project already carries: `grid.py`'s eight DIMENSIONS down, the
+    catalogue's SECTIONS across, hexagonal cells with offset rows. Every site is a real question
+    -- "what does this section contribute to this dimension?" -- and an empty site is that
+    question with no answer on the shelf.
+
+    AN EMPTY SITE IS A QUESTION, NOT AUTOMATICALLY A GAP, and the drawing says so rather than
+    crying wolf. `metabolism x mathematics` being empty is a category that need not exist.
+    `discreteness` being empty in eight of nine sections is a real hole -- and it matches the
+    independent measurement that discreteness carries ONE axis where the other dimensions carry
+    33 to 75. The instrument found a thin place in our own grid, which is what it is for.
+
+    A theory appears in EVERY dimension its domain touches, so the counts sum to more than the
+    number of theories. That is what a facet means, and the caption states it.
+    """
+    try:
+        from concordance import grid, grid_atlas
+        dims = list(grid.DIMENSIONS)
+    except Exception:                                        # noqa: BLE001
+        return ""                                            # no grid -> no lattice, say nothing
+    cells = defaultdict(list)
+    for cid, c in th.items():
+        s = (c.get("extra") or {}).get("section") or "?"
+        d = (c.get("source") or {}).get("domain")
+        try:
+            ds = grid_atlas.axis_dimensions(d) if d else frozenset()
+        except Exception:                                    # noqa: BLE001
+            ds = frozenset()
+        for dim in ds:
+            cells[(dim, s)].append(cid)
+
+    secs = [s for s in SECTIONS if any((d, s) in cells for d in dims)]
+    secs += sorted({s for (_d, s) in cells if s not in secs})
+    if not secs:
+        return ""
+
+    hx, hy = 96.0, 76.0                        # horizontal pitch, vertical pitch
+    x0, y0 = 268.0, 96.0
+    R = 33.0
+    parts = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" role="img" '
+             f'aria-label="The floor as a geometric comb: eight dimensions by '
+             f'{len(secs)} sections, with empty sites marking what is missing">']
+    parts.append('<rect width="100%" height="100%" fill="#12100c"/>')
+
+    for j, s in enumerate(secs):               # column headings
+        col = SECTION_COLOR.get(s, "#8a8378")
+        cxx = x0 + j * hx
+        parts.append(f'<text x="{cxx:.0f}" y="{y0 - 44:.0f}" fill="{col}" font-size="11" '
+                     f'font-family="Georgia,serif" text-anchor="middle" '
+                     f'transform="rotate(-32 {cxx:.0f} {y0 - 44:.0f})">'
+                     f'{_esc(s.split("&")[0].strip()[:18])}</text>')
+
+    empty = filled = 0
+    for i, dim in enumerate(dims):
+        cy = y0 + i * hy
+        off = (hx / 2) if i % 2 else 0.0       # offset rows -> a true honeycomb, not a chequerboard
+        parts.append(f'<text x="{x0 - 74:.0f}" y="{cy + 4:.0f}" fill="#a99c82" font-size="12" '
+                     f'font-family="Georgia,serif" text-anchor="end">{_esc(dim)}</text>')
+        for j, s in enumerate(secs):
+            cxx = x0 + j * hx + off
+            here = cells.get((dim, s), [])
+            if here:
+                filled += 1
+                col = SECTION_COLOR.get(s, "#8a8378")
+                d = sum(_depth(th[c]) for c in here) / len(here)
+                rad = 12.0 + min(20.0, len(here) * 1.15)
+                parts.append(f'<polygon points="{_hex_points(cxx, cy, rad)}" fill="{col}" '
+                             f'opacity="{0.30 + 0.62 * d:.2f}" stroke="#12100c" '
+                             f'stroke-width="1.2"/>')
+                parts.append(f'<text x="{cxx:.0f}" y="{cy + 4:.0f}" fill="#12100c" '
+                             f'font-size="12" font-family="Georgia,serif" '
+                             f'text-anchor="middle" font-weight="bold">{len(here)}</text>')
+            else:
+                empty += 1
+                # THE HOLE. Dashed, hollow, and deliberately as visible as a filled cell -- the
+                # whole reason this drawing exists is that an absence should be as legible as a
+                # presence.
+                parts.append(f'<polygon points="{_hex_points(cxx, cy, 20)}" fill="none" '
+                             f'stroke="#d9534f" stroke-width="1.5" stroke-dasharray="4 3" '
+                             f'opacity=".72"/>')
+
+    tot = filled + empty
+    parts.append(f'<text x="{x0 - 74:.0f}" y="{y0 + len(dims) * hy + 34:.0f}" fill="#c69a4a" '
+                 f'font-size="15" font-family="Georgia,serif" text-anchor="end">THE COMB</text>')
+    parts.append(f'<text x="{x0 - 60:.0f}" y="{y0 + len(dims) * hy + 34:.0f}" fill="#a99c82" '
+                 f'font-size="12" font-family="Georgia,serif">'
+                 f'{tot} sites &#183; {filled} filled &#183; '
+                 f'<tspan fill="#d9534f">{empty} empty</tspan> '
+                 f'&#8212; a dashed cell is a question with no answer on the shelf. A theory '
+                 f'appears in every dimension its domain touches, so counts exceed '
+                 f'{len(th)}.</text>')
+    parts.append("</svg>")
+    return "\n".join(parts)
+
+
 def svg(th, edges, W=1160, H=1160):
     """THE VORTEX OF HONEYCOMB.
 
@@ -345,6 +448,22 @@ you what is missing &#8212; you would have to already know.</p>
 <p class=lede style="font-size:.92rem">The same floor, read the other way, is
 <a href="/floor.html" style="color:#c69a4a">The Floor of Discovery</a> &#8212; Scripture and the
 created order as one design. That page is for seeing it; this one is for walking it.</p>
+
+<h2 style="font-weight:400;font-size:1.15rem;color:#c69a4a;margin:1.6rem 0 .2rem">
+Where the floor is missing</h2>
+<p class=lede style="font-size:.92rem;margin:.2rem 0 .8rem">A lattice, because a lattice has
+sites that can be <b>empty</b>. Eight dimensions down, the catalogue's sections across; each
+site asks what a section contributes to a dimension, and a <span style="color:#d9534f">dashed
+red cell</span> is that question with nothing on the shelf to answer it. An empty site is a
+question, not automatically a gap &#8212; some combinations need not exist &#8212; but a whole
+row of them is a thin place worth walking to.</p>
+{lattice(th)}
+
+<h2 style="font-weight:400;font-size:1.15rem;color:#c69a4a;margin:2rem 0 .2rem">
+How well each theory is joined</h2>
+<p class=lede style="font-size:.92rem;margin:.2rem 0 .8rem">The same 172, arranged by how many
+relations each holds &#8212; most aligned at the centre, spiralling out at the golden angle.
+Distance from the middle is how peripheral a theory is to the assembled floor.</p>
 {svg(th, edges)}
 <div class=legend>
   <span><i class=k style="background:#8a7a55"></i>rests on</span>
