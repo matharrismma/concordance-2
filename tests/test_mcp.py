@@ -76,3 +76,27 @@ if __name__ == "__main__":
         fn()
         print(f"  ok  {fn.__name__}")
     print(f"\n{len(fns)} MCP tests passed — the agent surface speaks JSON-RPC, surface-gated, sovereign.")
+
+
+def test_protocol_version_is_negotiated_not_dictated():
+    """REGRESSION, from a production outage (2026-08-04). The server answered every client with
+    a hardcoded 2024-11-05, so modern connectors fell back to old-transport expectations (a GET
+    server stream this endpoint 405s by design) and flapped. The wire was fine; the negotiation
+    was the outage. The independent MCP assessment named it (F-03) the same day it bit."""
+    from concordance.mcp.server import SUPPORTED_PROTOCOL_VERSIONS, negotiate_protocol_version
+
+    def init_with(ver):
+        r = handle({"jsonrpc": "2.0", "id": 9, "method": "initialize",
+                    "params": {"protocolVersion": ver}}, SEC)
+        return r["result"]["protocolVersion"]
+
+    # a supported revision is ECHOED — the client's transport decisions stay coherent
+    for ver in SUPPORTED_PROTOCOL_VERSIONS:
+        assert init_with(ver) == ver
+    # unknown or absent -> our NEWEST, per spec, and the client decides
+    newest = SUPPORTED_PROTOCOL_VERSIONS[0]
+    assert init_with("1999-01-01") == newest
+    assert init_with(None) == newest
+    assert negotiate_protocol_version("") == newest
+    # the modern revisions must be first-class, or the fallback recreates the outage
+    assert "2025-06-18" in SUPPORTED_PROTOCOL_VERSIONS

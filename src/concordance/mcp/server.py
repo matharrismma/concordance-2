@@ -17,7 +17,33 @@ from ..derivation import verify_derivation
 # scripture (witness verifier) is imported LAZILY in the witness-gated tool branches below —
 # never at module top, so the secular surface never loads witness code.
 
-PROTOCOL_VERSION = "2024-11-05"
+PROTOCOL_VERSION = "2024-11-05"   # kept as the floor; see SUPPORTED_PROTOCOL_VERSIONS
+
+# NEWEST FIRST. The server hard-returned 2024-11-05 to every client regardless of what the
+# client asked for — and modern clients make TRANSPORT decisions from the negotiated version.
+# A connector requesting 2025-06-18 was answered "2024-11-05", fell back to old-transport
+# expectations (a GET server stream, which this endpoint answers 405 by design), and declared
+# the server dead. Measured 2026-08-04: narrowhighway.com/mcp answered a raw probe perfectly
+# while Claude connectors flapped all day — the wire was fine, the negotiation was the outage.
+# The independent MCP assessment flagged exactly this (F-03) before we felt it in production.
+#
+# What we implement IS Streamable HTTP (POST /mcp, optional SSE response, Mcp-Session-Id,
+# DELETE termination) — the 2025 revisions' transport — so declaring them is honest, and
+# declaring only 2024-11-05 was the overclaim-in-reverse: describing modern behavior with an
+# old label. Batching stays accepted leniently (removed in 2025-06-18; clients on that
+# revision simply never send it).
+SUPPORTED_PROTOCOL_VERSIONS = ("2025-06-18", "2025-03-26", "2024-11-05")
+
+
+def negotiate_protocol_version(requested) -> str:
+    """The client's requested revision if we support it; otherwise our newest.
+
+    Per the MCP spec the server answers an unsupported request with the latest version it DOES
+    support and the client decides whether to proceed. One function, used by both the JSON-RPC
+    handler and the HTTP header path, so the body and the header can never disagree.
+    """
+    r = str(requested or "").strip()
+    return r if r in SUPPORTED_PROTOCOL_VERSIONS else SUPPORTED_PROTOCOL_VERSIONS[0]
 
 
 def _secular_tools() -> List[dict]:
@@ -390,6 +416,18 @@ def _secular_tools() -> List[dict]:
                          "(storage is never trusted). Reports invalid entries rather than hiding them."),
          "inputSchema": {"type": "object", "properties": {"content_hash": {"type": "string"}},
                          "required": ["content_hash"]}},
+        {"name": "now",
+         "description": ("The actual current date and time, fresh at this call — UTC (the clock "
+                         "every seal is stamped in), the library's home zone, and optionally any "
+                         "IANA zone you name. Your own sense of 'today' is months old; this is "
+                         "the correction. Never cached; unresolvable zones are declared, never "
+                         "guessed at."),
+         "inputSchema": {"type": "object", "properties": {
+             "tz": {"type": "string", "maxLength": 64,
+                    "pattern": "^[A-Za-z][A-Za-z0-9_+/\\-]*$",
+                    "description": "IANA zone name, e.g. America/New_York or Europe/Berlin; "
+                                   "omit for UTC + the library's home zone"}},
+             "additionalProperties": False}},
         {"name": "capabilities",
          "description": ("The live capability statement: what this engine can verify, what tools and "
                          "endpoints exist, how large the keeping is, and where its boundaries are. "
@@ -823,6 +861,9 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     if name == "witnesses":
         from .. import attest as _attest
         return _attest.witnesses(str(args.get("content_hash") or ""))
+    if name == "now":
+        from .. import ops as _ops   # both surfaces, never gated: the time of day belongs to all
+        return _ops.now(str(args.get("tz") or "").strip() or None)
     if name == "capabilities":
         from .. import capabilities as _caps  # both surfaces: the statement is never gated
         return _caps.statement(config.surface)
@@ -1130,8 +1171,10 @@ def handle(request: dict, config: EngineConfig, session: Optional[Dict[str, Any]
     gate_open = bool((session or {}).get("gate_open"))
 
     if method == "initialize":
+        negotiated = negotiate_protocol_version(
+            (request.get("params") or {}).get("protocolVersion"))
         return {"jsonrpc": "2.0", "id": rid, "result": {
-            "protocolVersion": PROTOCOL_VERSION, "capabilities": {"tools": {}},
+            "protocolVersion": negotiated, "capabilities": {"tools": {}},
             "serverInfo": {"name": "narrow-highway", "version": __version__, "surface": config.surface}}}
     if method == "tools/list":
         return {"jsonrpc": "2.0", "id": rid, "result": {"tools": _tools_for(config, gate_open=gate_open)}}

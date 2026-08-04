@@ -93,6 +93,7 @@ test_no_keys_on_the_wire.py
 test_no_stale_reads.py
 test_node_roles.py
 test_nothing_is_isolated.py
+test_now.py
 test_null_assay.py
 test_ops_log.py
 test_pins.py

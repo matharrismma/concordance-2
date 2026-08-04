@@ -30,6 +30,11 @@ SITE = ROOT / "site"
 # tool surface, llms.txt, or a documented HTTP call — a human page would add nothing.
 AGENT_ONLY = {
     "/health",
+    # The clock. An agent's own 'today' is its training cutoff — months stale — so this is the
+    # correction an AGENT needs; a human reader has a wall clock and a phone. The MCP `now` tool
+    # is the primary door; this route is the same reading over plain HTTP for scripts and
+    # connectors that speak REST rather than MCP.
+    "/now",
     # No page links this and none should: it is an OPERATOR instrument, read by a
     # person deciding an architecture, not a reader looking something up. Declared
     # rather than quietly exempted — an undeclared door is how a registry rots.

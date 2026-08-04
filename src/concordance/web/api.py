@@ -1630,6 +1630,13 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from ..verifiers import scripture  # lazy: witness-only
         return _ok(scripture.original_words(ref))
 
+    if method == "GET" and path == "/now":
+        # The actual date and time, current at this call. An agent's own clock is months stale
+        # (its training cutoff); a layer that stamps receipts with time must be able to TELL time.
+        # Served no-store by the JSON layer; freshness is the entire point of this route.
+        from .. import ops
+        return _ok(ops.now((query.get("tz") or "").strip() or None))
+
     if method == "GET" and path == "/canon":
         # The canon as concentric layers — the 66 core + disputed books, framed, never merged.
         from .. import canon
@@ -2081,6 +2088,7 @@ ROUTES = [
     {"path": "/", "methods": ("GET",)},
     {"path": "/health", "methods": ("GET",), "api": True},
     {"path": "/health/memory", "methods": ("GET",), "api": True},
+    {"path": "/now", "methods": ("GET",), "api": True},
     {"path": "/identity", "methods": ("GET",), "api": True},
     {"path": "/route", "methods": ("GET",), "api": True},
     {"path": "/bind/challenge", "methods": ("GET",), "api": True},

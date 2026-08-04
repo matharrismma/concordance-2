@@ -191,3 +191,71 @@ def to_card(rec: Mapping[str, Any]) -> Dict[str, Any]:
         "connections": [{"to_card_id": "card_spine_operations", "relationship": "member_of",
                          "evidence": "an operational record kept on the operations shelf"}],
     }
+
+
+# ── the clock ────────────────────────────────────────────────────────────────────────────────
+# Matt, 2026-08-04: "One thing that concordance must have is the actual date and time always
+# current for the time zone you are in." An agent's own sense of "now" is wrong by months — its
+# training cutoff — and a trust layer that stamps receipts with time must also be able to TELL
+# time, or every agent conversation about deadlines, ages, and "today" builds on a stale clock.
+
+HOME_TZ = os.environ.get("CONCORDANCE_HOME_TZ", "").strip() or "America/New_York"
+# The library's home clock — deploys cut over at midnight LOCAL (project doctrine), and this is
+# the local they mean. Overridable by env; always reported by name, never silently assumed.
+
+
+def _zone_now(name: str, at) -> Dict[str, Any]:
+    """One zone's reading of the instant `at` — resolved, or honestly unresolved. Never a guess.
+
+    Three states, never two: a zone resolves (full reading), or the tz database cannot supply it
+    (unresolved + the reason — Windows without tzdata says so rather than serving a wrong
+    offset), or the caller's name is malformed (refused upstream by the schema/route). A silently
+    wrong offset is the worst outcome a clock can produce; "cannot resolve" never is.
+    """
+    try:
+        from zoneinfo import ZoneInfo
+        z = ZoneInfo(name)
+    except Exception as exc:                                   # noqa: BLE001 — the reason ships
+        return {"tz": name, "unresolved": f"{type(exc).__name__}: {exc}",
+                "note": "IANA name required (e.g. America/New_York); on hosts without a tz "
+                        "database only UTC is served — a wrong offset is never served instead"}
+    local = at.astimezone(z)
+    off = local.utcoffset()
+    total = int(off.total_seconds()) if off else 0
+    sign = "+" if total >= 0 else "-"
+    hh, mm = divmod(abs(total) // 60, 60)
+    return {"tz": name,
+            "iso": local.isoformat(timespec="seconds"),
+            "date": local.strftime("%Y-%m-%d"),
+            "time": local.strftime("%H:%M:%S"),
+            "day": local.strftime("%A"),
+            "utc_offset": f"{sign}{hh:02d}:{mm:02d}",
+            "dst_in_effect": bool(local.dst()),
+            "abbreviation": local.tzname()}
+
+
+def now(tz: Optional[str] = None) -> Dict[str, Any]:
+    """The actual date and time, current at THIS call. Never cached, coverage stated.
+
+    Always serves UTC (the receipts' clock) and the library's home zone; serves any requested
+    IANA zone beside them. The reading is computed inside this call — freshness is the point,
+    so nothing here is memoized, and the route serves it no-store.
+    """
+    from datetime import datetime, timezone as _tz
+    at = datetime.now(_tz.utc)
+    out: Dict[str, Any] = {
+        "utc": {"iso": at.isoformat(timespec="seconds"), "unix": int(at.timestamp()),
+                "date": at.strftime("%Y-%m-%d"), "day": at.strftime("%A")},
+        "home": _zone_now(HOME_TZ, at),
+        "clock_source": ("the serving box's system clock, read at this call; NTP sync is the "
+                        "host's duty and is not independently verified here"),
+        "freshness": "computed at call time, never cached, served no-store",
+        "means": {"utc": "the instant in UTC — the clock every seal and ops record is stamped in",
+                  "home": f"the library's home zone ({HOME_TZ}); deploy cutovers are midnight in "
+                          f"this zone",
+                  "requested": "present only when a zone was asked for; resolved or honestly "
+                               "unresolved, never guessed"},
+    }
+    if tz and str(tz).strip():
+        out["requested"] = _zone_now(str(tz).strip(), at)
+    return out

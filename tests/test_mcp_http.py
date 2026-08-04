@@ -96,3 +96,16 @@ if __name__ == "__main__":
         fn()
         print(f"  ok  {fn.__name__}")
     print(f"\n{len(fns)} MCP-HTTP tests passed — Streamable HTTP transport, sessions + SSE, sovereign.")
+
+
+def test_response_header_carries_the_negotiated_version_not_a_constant():
+    """The body says one version and the header must not say another: a 2025-06-18 client
+    reading a constant 2024-11-05 header mid-session is the same mismatch the negotiation fix
+    exists to remove."""
+    init = {"jsonrpc": "2.0", "id": 1, "method": "initialize",
+            "params": {"protocolVersion": "2025-06-18"}}
+    st, h, b = _post(init)
+    assert st == 200
+    assert h.get("MCP-Protocol-Version") == "2025-06-18", h
+    import json as _json
+    assert _json.loads(b)["result"]["protocolVersion"] == "2025-06-18"

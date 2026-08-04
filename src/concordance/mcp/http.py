@@ -21,7 +21,7 @@ import os
 import secrets
 from typing import Any, Dict, Tuple
 
-from .server import PROTOCOL_VERSION, handle
+from .server import PROTOCOL_VERSION, handle, negotiate_protocol_version
 
 _DEFAULT_ORIGINS = {"https://narrowhighway.com", "https://narrowhighway.org",
                     "https://narrowhighway.tv"}
@@ -52,7 +52,9 @@ def _new_session(protocol_version: str) -> str:
     sid = secrets.token_hex(16)
     if len(_SESSIONS) >= _MAX_SESSIONS:
         _SESSIONS.pop(next(iter(_SESSIONS)), None)
-    _SESSIONS[sid] = {"protocol": protocol_version or PROTOCOL_VERSION}
+    # store the NEGOTIATED revision, not the raw client string — the header path reads this
+    # back, and body and header must never disagree about what was agreed
+    _SESSIONS[sid] = {"protocol": negotiate_protocol_version(protocol_version)}
     return sid
 
 
@@ -119,7 +121,10 @@ def handle_http(method: str, headers: Any, raw_body: bytes,
         if resp is not None:
             out.append(resp)
 
-    resp_headers: Dict[str, str] = {"MCP-Protocol-Version": PROTOCOL_VERSION}
+    # the session's negotiated revision; a constant here re-created the very mismatch the
+    # negotiation fix removed (a 2025-06-18 client reading a 2024-11-05 header mid-session)
+    _neg = (_SESSIONS.get(sid) or {}).get("protocol") if sid else None
+    resp_headers: Dict[str, str] = {"MCP-Protocol-Version": _neg or negotiate_protocol_version(None)}
     if new_sid:
         resp_headers["Mcp-Session-Id"] = new_sid
 
