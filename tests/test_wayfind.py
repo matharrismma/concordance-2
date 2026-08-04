@@ -15,14 +15,14 @@ def test_unknown_topic_says_so_never_invents():
     assert r["near"] == [] and r["toward"] == []
 
 
-def test_floorplan_is_on_topic_when_provisioned():
-    # positive check guarded on a provisioned corpus/graph (some envs isolate data)
+def test_floorplan_is_on_topic(real_corpus):
+    # Was "guarded on a provisioned corpus (some envs isolate data)" — an `if not search: return`
+    # that reported a pass. Measured 2026-08-03: under the gate the corpus is ALWAYS empty, so
+    # this assertion had never run. The real_corpus fixture provisions it, so it runs now.
     from concordance import corpus
-    if not corpus.search("water", limit=1):
-        return
+    assert corpus.search("water", limit=1), "the real corpus must answer 'water'"
     r = wayfind.path(q="how to purify water")
-    if r["here"] is None:
-        return  # no graph neighborhood in this env — still valid, nothing to assert
+    assert r["here"] is not None, "wayfind found no neighbourhood in the real keeping"
     assert isinstance(r["near"], list)
     # every "toward" room is drawn from "near" (the connected neighborhood) — never off-topic
     near_ids = {n["id"] for n in r["near"]}

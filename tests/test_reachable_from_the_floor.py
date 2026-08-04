@@ -42,15 +42,19 @@ KNOWN_ISLAND_CARDS = 0
 #
 # This file may not read corpus.default_corpus(). That singleton is built once per process from
 # whatever CONCORDANCE_DATA_DIR happened to be set when it was first touched, and 53 test modules
-# point that variable at an empty temp directory in their import preamble. Alphabetical collection
-# means tests/test_apothecary.py wins, so under the full gate this file was walking an EMPTY
-# corpus -- and the walk still "passed", because tests/test_floor.py pins a five-card fake floor
-# into the singleton and never removes it. The Floor this file found was that fixture.
+# point that variable at a scratch temp directory in their import preamble. Which corpus wins is
+# therefore a race, settled differently depending on what else was collected.
 #
-# Discovered 2026-08-03 while fixing that fixture's missing teardown: removing the pollution made
-# this file fail, which is the correct behaviour and proves the pass had been resting on it. A
-# guarantee that the whole keeping is reachable is worth nothing if it is measured against five
-# cards a sibling invented.
+# MEASURED with tools/vacuity_plugin.py over the whole suite: under the FULL gate the singleton
+# does hold the real keeping — 182 tests called default_corpus() and none received an empty one.
+# An earlier version of this comment claimed the gate was walking an empty corpus; that came from
+# a subset run and was wrong. But in any SUBSET run the hijack does win, this file walks nothing,
+# and a walk over nothing finds nothing wrong and reports a pass.
+#
+# Discovered 2026-08-03 while fixing the missing teardown in tests/test_floor.py, whose five-card
+# fixture DID leak into this file's walk and made it fail or pass by collection order. A guarantee
+# that the whole keeping is reachable is worth nothing if the reader cannot tell which corpus
+# produced it.
 #
 # So the real cards are loaded straight from the repo's data directory, once, independent of the
 # singleton and of every sibling's environment. The docstring's 11.7 s is the honest price.
@@ -101,9 +105,11 @@ def test_nothing_carries_no_relation_at_all():
     """The strict invariant: no card carries zero relations.
 
     Computed here from the real cards rather than read from `graph.overview()`. The overview is
-    memoized off the process-wide corpus singleton, so under the gate it answered for whatever a
-    sibling module had loaded — which was an empty temp corpus plus test_floor's fixture. Same
-    definition as the overview's `isolated_nodes`: a card carrying no outbound relation at all.
+    memoized off the process-wide corpus singleton, so it answers for whatever that singleton
+    happened to hold — which included tests/test_floor.py's five-card fixture whenever that file
+    ran first, and that is precisely how this invariant came to report `1` for a card no one had
+    added to the keeping. Same definition as the overview's `isolated_nodes`: a card carrying no
+    outbound relation at all.
     """
     cards = _real_cards()
     isolated = [cid for cid, c in cards.items()

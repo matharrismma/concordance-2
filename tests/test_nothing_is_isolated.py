@@ -31,10 +31,11 @@ import pytest  # noqa: E402
 
 
 def test_no_card_in_the_keeping_is_isolated():
-    # NOT corpus.default_corpus(): under the full gate that singleton is an EMPTY scratch corpus
-    # (the first-collected module points CONCORDANCE_DATA_DIR at a temp dir for the whole run),
-    # so this assertion iterated zero cards and passed while proving nothing. Measured
-    # 2026-08-03. conftest.real_cards() loads the actual keeping regardless of the environment.
+    # NOT corpus.default_corpus(): which corpus that singleton holds is decided by a race between
+    # module imports (53 files point CONCORDANCE_DATA_DIR at a scratch temp dir). Measured
+    # 2026-08-03: under the full gate it does hold the real keeping, but in any subset run it is
+    # empty and this assertion iterates zero cards and passes. conftest.real_cards() loads the
+    # actual keeping either way, and the count below refuses a vacuous one.
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from conftest import real_cards
     cards = real_cards()

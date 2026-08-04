@@ -29,26 +29,26 @@ def test_chapter_reference_resolves_the_whole_chapter():
     assert len(d.get("scripture") or []) >= 5, "a chapter reads its verses, not just one"
 
 
-def test_resourceful_routes_materials_but_never_preempts_crisis():
+def test_resourceful_routes_materials_but_never_preempts_crisis(real_corpus):
     # "use what you have" — a materials question routes to the practical keeping (pure routing)
     assert ask.classify("what can I do with a tarp and rope") == "resourceful"
     assert ask.classify("I have a plastic bottle and dirty water, what can I do") == "resourceful"
     # SAFETY INVARIANT: crisis always wins first, even when phrased as 'what can I do'
     assert ask.classify("I want to end my life") == "crisis"
-    # positive result needs the field library provisioned (some envs isolate the data dir)
+    # The positive half was an `if not search: return` — a silent pass. Under the gate the corpus
+    # is always empty, so it never ran. real_corpus provisions the field library for real.
     from concordance import corpus
-    if not corpus.search("survival shelter", limit=1):
-        return
+    assert corpus.search("survival shelter", limit=1), "the field library must be reachable"
     d = ask.respond("what can I do with a tarp and rope", EngineConfig(), gate_open=True)
     assert d.get("kind") == "resourceful" and d.get("results"), "materials should surface practical cards"
 
 
-def test_how_to_queries_reach_the_field_library():
+def test_how_to_queries_reach_the_field_library(real_corpus):
     # A practical/how-to question must consult the WHOLE keeping (not shortcut to a mis-predicted
-    # deck), so the field library competes and wins. Positive check guarded on provisioned data.
+    # deck), so the field library competes and wins. This is the check that most needed the real
+    # corpus and was the least likely to get it: the whole claim is that the keeping ANSWERS.
     from concordance import corpus
-    if not corpus.search("survival shelter", limit=1):
-        return
+    assert corpus.search("survival shelter", limit=1), "the field library must be reachable"
     d = ask.respond("how to build a fire", EngineConfig(), gate_open=True)
     results = d.get("results") or []
     assert any(r.get("shelf") == "survival" for r in results), \

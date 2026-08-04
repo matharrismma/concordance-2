@@ -111,8 +111,12 @@ def test_remaining_http_mcp():
     assert {"card_connections", "locate", "library_health"} <= set(names)
 
 
-def test_cleanup():
-    corpus._DEFAULT = None  # don't leak the injected corpus to other test modules
+def teardown_function(_fn):
+    # Was a `test_cleanup()` that asserted nothing and relied on being defined LAST — true today
+    # because pytest runs a file in definition order, false the day someone appends a test below
+    # it, and silent either way. teardown_function runs after every test in this module, including
+    # after a failure, so the injected corpus cannot outlive the file under any ordering.
+    corpus._DEFAULT = None
 
 
 if __name__ == "__main__":

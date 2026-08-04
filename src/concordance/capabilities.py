@@ -111,6 +111,17 @@ def _substrate() -> Dict[str, Any]:
         st = corpus.stats() or {}
         out["cards"] = {"count": st.get("total") or st.get("cards"),
                         "means": "cards in the keeping (the shared corpus, both surfaces)"}
+        # G1 (docs/GAPS.md): a count claimed alone lets the million be hit without a sentence of
+        # substance. So the headline never travels without its split — measured once per process
+        # (ops memoizes; walking 548k bodies per request would knock reading into proving).
+        from . import ops
+        sub = ops.substance_of_the_keeping()
+        out["cards_substance"] = {
+            "count": sub["substance_cards"],
+            "means": sub["means"]["substance_cards"]}
+        out["cards_stubs"] = {
+            "count": sub["stub_cards"],
+            "means": sub["means"]["stub_cards"] + f" — stub_ratio {sub['stub_ratio']}"}
         if st.get("shelves"):
             out["shelves"] = {"count": len(st["shelves"]), "means": "shelves the cards sit on"}
     except Exception as e:  # noqa: BLE001 — a substrate we cannot read is reported, never guessed

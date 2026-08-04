@@ -131,8 +131,21 @@ def _gated_main() -> int:
     rc |= _run([sys.executable, "tools/benchmark.py"])
 
     # 2. The suite + coverage floor (preferred), else a sovereign fallback.
+    #
+    # -p vacuity_plugin rides ALONG with the existing run instead of adding a phase. It wraps the
+    # corpus doors and fails the session if a test PASSED while asserting against a corpus it
+    # never populated — a failure mode pytest cannot see, because the assertion iterates nothing
+    # and reports green. That is exactly how the leaked fixture in tests/test_floor.py stayed
+    # hidden while the reachability guard reported a number for a card nobody had added to the
+    # keeping. One flag, no second suite run. A deliberate empty-corpus test declares itself where
+    # it lives:  @pytest.mark.empty_corpus_ok("mints into it")
+    ENV["VACUITY_ENFORCE"] = "1"
+    ENV["PYTHONPATH"] = os.pathsep.join([os.path.join(ROOT, "src"), os.path.join(ROOT, "tools")])
+    _vac = ["-p", "vacuity_plugin"]
+
     if _has("pytest") and _has("coverage"):
-        rc |= _run([sys.executable, "-m", "coverage", "run", "--source=src/concordance", "-m", "pytest", "-q"])
+        rc |= _run([sys.executable, "-m", "coverage", "run", "--source=src/concordance",
+                    "-m", "pytest", "-q"] + _vac)
         _run([sys.executable, "-m", "coverage", "report"])
         rc |= _run([sys.executable, "-m", "coverage", "report", f"--include={CORE}", f"--fail-under={FLOOR}"])
         # Per-file floor for the two safety-critical stores (the hash-chain + content-addressed
@@ -141,7 +154,7 @@ def _gated_main() -> int:
             rc |= _run([sys.executable, "-m", "coverage", "report", f"--include={_crit}", f"--fail-under={FLOOR}"])
     elif _has("pytest"):
         print("\n(coverage not installed — running suite without the coverage floor)")
-        rc |= _run([sys.executable, "-m", "pytest", "-q"])
+        rc |= _run([sys.executable, "-m", "pytest", "-q"] + _vac)
     else:
         print("\n(pytest not installed — running each test file as a script)")
         for t in sorted(glob.glob(os.path.join(ROOT, "tests", "test_*.py"))):
