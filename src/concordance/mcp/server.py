@@ -744,6 +744,101 @@ PROFILES: Dict[str, Dict[str, Any]] = {
 }
 
 
+# ── THE ERROR TAXONOMY (task #125, assessment F-06) ──────────────────────────────────────────
+# Measured before this existed: 32 sites returned {"error": "card not found"} as ordinary tool
+# data with isError:false, forcing every agent to sniff result bodies to learn whether a call
+# worked. Now the ENVELOPE classifies at the one wrapping point: a business error leaves as an
+# MCP tool error (isError:true) carrying a typed code and what to do about it. The 32 sites
+# keep their plain human messages — the classifier reads them; nothing downstream re-learns 32
+# call sites.
+ERROR_CODES: Dict[str, str] = {
+    "INVALID_SPEC": "correct the arguments and retry — the message names what is missing or malformed",
+    "VERIFIER_NOT_FOUND": "no deterministic verifier covers this domain; consult capabilities for what does",
+    "CLAIM_INCOMPLETE": "supply the missing quantities the trail names; the claim was not testable as given",
+    "SEAL_NOT_FOUND": "the content hash resolves to nothing held; check the hash or the seal may be superseded",
+    "CARD_NOT_FOUND": "no card by that id; use search or locate to find the right one",
+    "AUTHORIZATION_REQUIRED": "this action needs a signed grant or consent record first; see /consent",
+    "GRANT_EXPIRED": "the grant's window has closed; a new signable must be issued and signed",
+    "SIGNATURE_INVALID": "the signature does not verify over the payload; re-sign locally and resend",
+    "SURFACE_FORBIDDEN": "this tool is not served on this surface or plane; the message says where it lives",
+    "RATE_LIMITED": "back off and retry after the stated interval",
+    "INTERNAL_FAILURE": "our fault, not the claim's; retry once, then report it — never read this as a verdict",
+    "UNCLASSIFIED": "read the message; if a pattern is missing from the classifier, that is a bug to file",
+}
+
+# Ordered, first match wins. Patterns are matched lowercase against the site's own message —
+# the classification is DERIVED from what the tool already says, visible here in one table.
+_ERROR_PATTERNS = (
+    ("rate limit", "RATE_LIMITED"),
+    ("not found", "CARD_NOT_FOUND"),
+    ("no card", "CARD_NOT_FOUND"),
+    ("no seal", "SEAL_NOT_FOUND"),
+    ("unknown hash", "SEAL_NOT_FOUND"),
+    ("expired", "GRANT_EXPIRED"),
+    ("signature", "SIGNATURE_INVALID"),
+    ("consent", "AUTHORIZATION_REQUIRED"),
+    ("grant", "AUTHORIZATION_REQUIRED"),
+    ("not in the mounted profile", "SURFACE_FORBIDDEN"),
+    ("witness surface", "SURFACE_FORBIDDEN"),
+    ("gate", "SURFACE_FORBIDDEN"),
+    ("required", "INVALID_SPEC"),
+    ("must be", "INVALID_SPEC"),
+    ("invalid", "INVALID_SPEC"),
+    ("malformed", "INVALID_SPEC"),
+    ("no verifier", "VERIFIER_NOT_FOUND"),
+    ("no applicable", "VERIFIER_NOT_FOUND"),
+    ("incomplete", "CLAIM_INCOMPLETE"),
+    ("tool error", "INTERNAL_FAILURE"),
+)
+
+
+def classify_error(message: str) -> str:
+    m = str(message or "").lower()
+    for pattern, code in _ERROR_PATTERNS:
+        if pattern in m:
+            return code
+    return "UNCLASSIFIED"
+
+
+def _is_business_error(result: Any) -> bool:
+    """A result whose substance is an error report. Kept narrow on purpose: a rich payload that
+    HAPPENS to include an 'error' field beside real data is data, not a failure."""
+    return (isinstance(result, dict) and "error" in result
+            and not (set(result) - {"error", "detail", "why", "hint", "available", "status"}))
+
+
+# ── SCHEMA STRICTNESS FLOOR (task #124, assessment F-05) ─────────────────────────────────────
+# Hand-tightening 83 schemas invites drift; the FLOOR is applied uniformly where the schemas are
+# SERVED, so every listed tool is bounded even if its literal source is loose: objects close
+# (additionalProperties false), bare strings get a length ceiling, bare arrays get items+maxItems,
+# bare numbers get bounds. Vocabulary enums (mode/kind/ring) still belong in the source schemas —
+# that is the remaining half of #124, per tool, where the vocabularies live.
+_STR_MAXLEN = 4000          # a tool argument is an argument, not a document — the airlock takes documents
+_ARR_MAXITEMS = 200
+_NUM_BOUND = 1e12
+
+
+def _strictify(schema: Any) -> Any:
+    if not isinstance(schema, dict):
+        return schema
+    s = dict(schema)
+    t = s.get("type")
+    if t == "object" or "properties" in s:
+        s.setdefault("additionalProperties", False)
+        if isinstance(s.get("properties"), dict):
+            s["properties"] = {k: _strictify(v) for k, v in s["properties"].items()}
+    if t == "string" and not any(k in s for k in ("enum", "pattern", "maxLength", "format", "const")):
+        s["maxLength"] = _STR_MAXLEN
+    if t == "array":
+        s.setdefault("maxItems", _ARR_MAXITEMS)
+        s["items"] = _strictify(s.get("items") if isinstance(s.get("items"), dict)
+                                else {"type": "string", "maxLength": _STR_MAXLEN})
+    if t in ("integer", "number"):
+        s.setdefault("minimum", -_NUM_BOUND)
+        s.setdefault("maximum", _NUM_BOUND)
+    return s
+
+
 def profile_of(tool_name: str) -> Optional[str]:
     for pname, p in PROFILES.items():
         if tool_name in p["tools"]:
@@ -1274,7 +1369,9 @@ def handle(request: dict, config: EngineConfig, session: Optional[Dict[str, Any]
             "protocolVersion": negotiated, "capabilities": {"tools": {}},
             "serverInfo": {"name": "narrow-highway", "version": __version__, "surface": config.surface}}}
     if method == "tools/list":
-        tools = _tools_for(config, gate_open=gate_open)
+        tools = [dict(t, inputSchema=_strictify(t.get("inputSchema") or
+                                                {"type": "object", "properties": {}}))
+                 for t in _tools_for(config, gate_open=gate_open)]
         if profile is not None:
             allowed = PROFILES[profile]["tools"]
             # the mounted plane and nothing else — plus the effect class, machine-readable,
@@ -1305,7 +1402,15 @@ def handle(request: dict, config: EngineConfig, session: Optional[Dict[str, Any]
             telemetry.record("mcp_error", surface=config.surface, tool=str(name),
                              detail=f"{type(e).__name__}: {str(e)[:160]}")
             return {"jsonrpc": "2.0", "id": rid, "result": {
-                "content": [{"type": "text", "text": json.dumps({"error": "tool error"})}], "isError": True}}
+                "content": [{"type": "text", "text": json.dumps(
+                    {"error": "tool error", "code": "INTERNAL_FAILURE",
+                     "remedy": ERROR_CODES["INTERNAL_FAILURE"]})}], "isError": True}}
+        if _is_business_error(result):
+            code = classify_error(result.get("error"))
+            typed = dict(result, code=code, remedy=ERROR_CODES[code])
+            return {"jsonrpc": "2.0", "id": rid, "result": {
+                "content": [{"type": "text", "text": json.dumps(typed, ensure_ascii=False)}],
+                "isError": True}}
         return {"jsonrpc": "2.0", "id": rid, "result": {
             "content": [{"type": "text", "text": json.dumps(result, ensure_ascii=False)}], "isError": False}}
     if method and method.startswith("notifications/"):
