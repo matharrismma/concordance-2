@@ -57,24 +57,40 @@ def substance(cards: Mapping[str, dict]) -> Dict[str, Any]:
     """
     total = 0
     stubs = 0
+    frozen = 0
     for c in cards.values():
         if c.get("kind") == "connection":
             continue
         total += 1
-        if len(str(c.get("body") or "")) < STUB_BODY_CHARS:
+        # A FROZEN card's body lives on its SQLite shard; in memory it is deliberately stripped
+        # to a stub so the graph stays resident and the weight stays on disk. Measuring its
+        # in-memory body length would report a full card as a stub — which is exactly what the
+        # first deploy of this function did on the live box: 91% "stubs" against G1's measured
+        # 46%, because most shelves there are frozen. Our load strategy is not the keeping's
+        # substance. Frozen cards are counted as their own bucket, judged by nobody.
+        if c.get("frozen"):
+            frozen += 1
+        elif len(str(c.get("body") or "")) < STUB_BODY_CHARS:
             stubs += 1
-    sub = total - stubs
+    measured = total - frozen
+    sub = measured - stubs
     return {
         "total": total,
         "substance_cards": sub,
         "stub_cards": stubs,
-        "stub_ratio": round(stubs / total, 4) if total else 0.0,
+        "frozen_cards": frozen,
+        "measured_cards": measured,
+        "stub_ratio": round(stubs / measured, 4) if measured else 0.0,
         "stub_threshold_chars": STUB_BODY_CHARS,
         "means": {
             "total": "cards excluding connection edges",
-            "substance_cards": f"cards whose body is >= {STUB_BODY_CHARS} chars — they answer something",
-            "stub_cards": f"cards whose body is < {STUB_BODY_CHARS} chars — a pointer, not an answer",
-            "stub_ratio": "stub_cards / total; the number G1 requires beside every count claim",
+            "substance_cards": f"measured cards whose body is >= {STUB_BODY_CHARS} chars — they answer something",
+            "stub_cards": f"measured cards whose body is < {STUB_BODY_CHARS} chars — a pointer, not an answer",
+            "frozen_cards": ("cards whose body lives on a shard, not in memory — NOT judged; "
+                             "counting a frozen card as a stub would report our load strategy "
+                             "as the library's poverty"),
+            "measured_cards": "total minus frozen — the only cards this walk could honestly judge",
+            "stub_ratio": "stub_cards / measured_cards; the number G1 requires beside every count claim",
         },
     }
 

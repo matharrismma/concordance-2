@@ -51,6 +51,16 @@ def real_cards() -> dict:
     global _REAL_CARDS
     if not _REAL_CARDS:
         from concordance import corpus
+        # Reuse the singleton's cards when it already holds the real keeping (same guard and
+        # same reasoning as real_corpus_object below): under the full gate this makes the cost
+        # of the honest walk ZERO extra loads instead of a duplicate 548k-card read. The
+        # singleton may carry a handful of cards sibling tests minted in-process; those are
+        # nested by construction, and the walk measuring "files + what this run minted" is the
+        # same coverage the vacuity audit already reports.
+        existing = corpus._DEFAULT
+        if existing is not None and len(getattr(existing, "cards", {}) or {}) > 100_000:
+            _REAL_CARDS = existing.cards
+            return _REAL_CARDS
         prior = os.environ.get("CONCORDANCE_DATA_DIR")
         os.environ["CONCORDANCE_DATA_DIR"] = str(ROOT / "data")
         try:
@@ -73,16 +83,29 @@ def real_corpus_object():
     three test files had not finished after nine minutes. Measured, then fixed — a check nobody
     can afford to run is a check that gets deleted.
     """
-    global _REAL_CORPUS
+    global _REAL_CORPUS, _REAL_CARDS
     if _REAL_CORPUS is None:
         from concordance import corpus
+        # REUSE THE SINGLETON WHEN IT ALREADY HOLDS THE REAL KEEPING. Under the full gate it does
+        # (measured: 182 default_corpus() callers, none empty), and the first version of this
+        # helper built a SECOND identical 548k-card corpus beside it anyway. Two corpora in one
+        # process on a busy machine meant the end-of-run teardown paged for the better part of an
+        # hour — three gate runs in a row looked hung after "[100%]" and two were killed for it.
+        # The duplicate corpus was my design error, and this branch is its removal. The
+        # independent load below remains for subset runs, where the singleton is a scratch or
+        # fixture corpus and reusing it would hand the reachability walk a five-card floor.
+        existing = corpus._DEFAULT
+        if existing is not None and len(getattr(existing, "cards", {}) or {}) > 100_000:
+            _REAL_CORPUS = existing
+            if not _REAL_CARDS:
+                _REAL_CARDS = existing.cards
+            return _REAL_CORPUS
         prior = os.environ.get("CONCORDANCE_DATA_DIR")
         os.environ["CONCORDANCE_DATA_DIR"] = str(ROOT / "data")
         try:
             df: dict = {}
             cards = corpus.load_cards(_df_out=df)
             _REAL_CORPUS = corpus.Corpus(cards, df_extra=df)
-            global _REAL_CARDS
             if not _REAL_CARDS:
                 _REAL_CARDS = cards            # one read serves both helpers
         finally:

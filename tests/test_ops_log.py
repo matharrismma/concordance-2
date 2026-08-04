@@ -33,17 +33,33 @@ _FIX = {
     "b": {"id": "b", "body": "a pointer"},                     # stub
     "c": {"id": "c", "body": ""},                              # stub
     "e": {"id": "e", "kind": "connection", "body": ""},        # edge — excluded entirely
+    "f": {"id": "f", "body": "", "frozen": True},              # body on a shard — NOT a stub
 }
 
 
 def test_substance_counts_the_g1_split_and_says_what_it_counted():
     s = ops.substance(_FIX)
-    assert s["total"] == 3                     # the connection card is an edge, not a holding
+    assert s["total"] == 4                     # the connection card is an edge, not a holding
     assert s["substance_cards"] == 1 and s["stub_cards"] == 2
     assert abs(s["stub_ratio"] - 2 / 3) < 1e-3
     assert s["stub_threshold_chars"] == ops.STUB_BODY_CHARS == 120
-    for k in ("total", "substance_cards", "stub_cards", "stub_ratio"):
+    for k in ("total", "substance_cards", "stub_cards", "frozen_cards",
+              "measured_cards", "stub_ratio"):
         assert s["means"][k], f"{k} reported with no definition — a number waiting to be misread"
+
+
+def test_a_frozen_card_is_never_judged_a_stub():
+    """REGRESSION, from the live box. Frozen-shelf cards load with bodies stripped (the body
+    stays on the SQLite shard), and the first deploy counted every one of them as a stub —
+    91% 'stubs' against G1's measured 46%. The load strategy is not the library's poverty."""
+    s = ops.substance(_FIX)
+    assert s["frozen_cards"] == 1
+    assert s["measured_cards"] == 3            # 4 holdings, 1 unjudgeable
+    assert s["stub_cards"] == 2                # the frozen card is in NEITHER stub nor substance
+    all_frozen = {"x": {"id": "x", "body": "", "frozen": True}}
+    sf = ops.substance(all_frozen)
+    assert sf["stub_ratio"] == 0.0 and sf["measured_cards"] == 0
+    assert "NOT judged" in sf["means"]["frozen_cards"]
 
 
 def test_a_count_claim_is_logged_with_both_numbers_and_where_it_went():
@@ -55,7 +71,7 @@ def test_a_count_claim_is_logged_with_both_numbers_and_where_it_went():
         assert rec["event"] == "count_claimed" and rec["where"] == "/capabilities"
         # the log record itself carries the split — a headline total alone is exactly the
         # single-number claim G1 forbids
-        assert rec["total"] == 3 and rec["substance_cards"] == 1 and rec["stub_cards"] == 2
+        assert rec["total"] == 4 and rec["substance_cards"] == 1 and rec["stub_cards"] == 2
     finally:
         _restore(prior)
 

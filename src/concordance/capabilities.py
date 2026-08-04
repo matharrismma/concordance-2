@@ -122,6 +122,10 @@ def _substrate() -> Dict[str, Any]:
         out["cards_stubs"] = {
             "count": sub["stub_cards"],
             "means": sub["means"]["stub_cards"] + f" — stub_ratio {sub['stub_ratio']}"}
+        if sub.get("frozen_cards"):
+            out["cards_frozen"] = {
+                "count": sub["frozen_cards"],
+                "means": sub["means"]["frozen_cards"]}
         if st.get("shelves"):
             out["shelves"] = {"count": len(st["shelves"]), "means": "shelves the cards sit on"}
     except Exception as e:  # noqa: BLE001 — a substrate we cannot read is reported, never guessed
