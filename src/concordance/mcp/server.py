@@ -655,6 +655,102 @@ def _no_private_key(tool: str) -> Dict[str, Any]:
             "sign_locally": True, "over": "content_hash"}
 
 
+# ── THE PROFILES — mount narrow, not broad ───────────────────────────────────────────────────
+# Task #123, from the adopted external assessment (docs/MCP_ASSESSMENT_2026-08-04.md §3.3) and
+# Matt's 2026-07-30 consolidation directive. One 83-tool connector is an overloaded discovery
+# surface: tool selection degrades, permission review blurs, and a low-risk read shares a door
+# with a consequential write. So the catalog is PARTITIONED — every tool in exactly ONE profile
+# (a test enforces the partition), and a client mounts /mcp/<profile> to see only that plane.
+# /mcp itself still serves the full catalog for existing clients; narrowing it is a later,
+# deliberate cutover, not a silent break.
+#
+# Each tool carries its EFFECT class (assessment §11.1) — machine-readable risk, not prose:
+#   read            fetch what is held
+#   derive          compute from inputs (verify, redact, a calculation)
+#   preserve        append a durable record (seal, study entry, a want) — user intent required
+#   publish         place content where OTHERS see it — the social plane
+#   external_action touch a system OUTSIDE the library (calendar) — consent-gated
+EFFECTS = ("read", "derive", "preserve", "publish", "external_action")
+
+PROFILES: Dict[str, Dict[str, Any]] = {
+    "core": {
+        "version": "1.0.0",
+        "description": "Deterministic checks and receipts: verify a claim, audit a document, "
+                       "fetch and witness seals, read the engine's own capabilities and clock.",
+        "tools": {"verify": "derive", "audit": "derive", "seal_fetch": "read",
+                  "attest_record": "preserve", "witnesses": "read",
+                  "now": "read", "capabilities": "read"},
+    },
+    "library": {
+        "version": "1.0.0",
+        "description": "Read-only retrieval over the keeping: search, cards, the grid, the "
+                       "conversational door. Provenance attached; nothing here writes.",
+        "tools": {"search": "read", "card_get": "read", "cards_browse": "read",
+                  "cards_stats": "read", "daily_card": "read", "grid_axis": "read",
+                  "grid_dimension": "read", "card_connections": "read", "locate": "read",
+                  "library_health": "read", "pronounce": "derive", "study_find": "read",
+                  "seeds": "read", "ask": "read"},
+    },
+    "sovereign": {
+        "version": "1.0.0",
+        "description": "Identity, consent, and personal sovereignty: keys born on the device, "
+                       "signable payloads, the consent lock, private budgeting, redaction — and "
+                       "the one consent-gated external action (calendar).",
+        "tools": {"identity_create": "preserve", "identity_verify": "derive",
+                  "identity_fingerprint": "derive", "badges_issue": "preserve",
+                  "badges_verify": "derive", "self_attest": "preserve",
+                  "consent_check": "read", "redact": "derive",
+                  "steward_budget": "derive", "steward_cost_destroyed": "derive",
+                  "calendar_create": "external_action"},
+    },
+    "coach": {
+        "version": "1.0.0",
+        "description": "Bounded curriculum access and learning records. Kept apart from the "
+                       "community plane on purpose — the assessment's child-surface isolation.",
+        "tools": {"coach_subjects": "read", "coach_overview": "read", "coach_unit": "read",
+                  "coach_next": "read", "coach_recommend": "read", "coach_mastery": "preserve",
+                  "coach_guidance": "read", "study_create": "preserve",
+                  "study_export": "read", "study_import": "preserve"},
+    },
+    "witness": {
+        "version": "1.0.0",
+        "description": "Attributed Scripture study: the text, the original words, the "
+                       "cross-references, the charts — found and cited, never generated. "
+                       "Gate semantics unchanged from the main door.",
+        "tools": {"resolve": "read", "read_passage": "read", "word_study": "read",
+                  "cross_references": "read", "word_occurrences": "read", "commentary": "read",
+                  "tsk_cross_references": "read", "character_get": "read",
+                  "characters_browse": "read", "prophecy_traces": "read", "harmony": "read",
+                  "timeline": "read", "backmatter": "read", "bible_places": "read",
+                  "narratives": "read", "original_words": "read", "canon": "read",
+                  "teachings": "read"},
+    },
+    "community": {
+        "version": "1.0.0",
+        "description": "The social plane: groups, shelves, the commons, the mesh, moderation, "
+                       "and the want loop. Every publish-class tool in the catalog lives here, "
+                       "and this profile is OFF by default on a hosted box — publishing is a "
+                       "separate deployment decision with governance attached.",
+        "tools": {"groups_list": "read", "group_get": "read", "group_create": "publish",
+                  "group_join": "publish", "group_contribute": "publish",
+                  "shelf_signable": "derive", "shelf_drop": "publish", "shelf_read": "read",
+                  "commons_read": "read", "curate_queue": "read", "curate_signable": "derive",
+                  "curate": "publish", "moderation_signable": "derive", "report": "publish",
+                  "mesh_map": "read", "mesh_inbox": "read", "mesh_door": "read",
+                  "mesh_signable": "derive", "mesh_leave_on_door": "publish",
+                  "mesh_post": "publish",
+                  "want_open": "preserve", "wants_list": "read", "want_offer": "publish"},
+    },
+}
+
+
+def profile_of(tool_name: str) -> Optional[str]:
+    for pname, p in PROFILES.items():
+        if tool_name in p["tools"]:
+            return pname
+    return None
+
+
 def _tools_for(config: EngineConfig, gate_open: bool = False) -> List[dict]:
     """The tools this caller may see. `gate_open` is THE GATE, for an agent: it asked in its own
     words and the same classifier that opens the door for a human opened it here. Mirrors
@@ -1158,7 +1254,8 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     raise KeyError(f"unknown tool {name!r} (on the {config.surface} surface)")
 
 
-def handle(request: dict, config: EngineConfig, session: Optional[Dict[str, Any]] = None) -> Optional[dict]:
+def handle(request: dict, config: EngineConfig, session: Optional[Dict[str, Any]] = None,
+           profile: Optional[str] = None) -> Optional[dict]:
     """Pure JSON-RPC handler. Returns a response dict, or None for notifications.
 
     `session` is an optional mutable dict owned by the caller (the HTTP layer's per-session record,
@@ -1177,10 +1274,24 @@ def handle(request: dict, config: EngineConfig, session: Optional[Dict[str, Any]
             "protocolVersion": negotiated, "capabilities": {"tools": {}},
             "serverInfo": {"name": "narrow-highway", "version": __version__, "surface": config.surface}}}
     if method == "tools/list":
-        return {"jsonrpc": "2.0", "id": rid, "result": {"tools": _tools_for(config, gate_open=gate_open)}}
+        tools = _tools_for(config, gate_open=gate_open)
+        if profile is not None:
+            allowed = PROFILES[profile]["tools"]
+            # the mounted plane and nothing else — plus the effect class, machine-readable,
+            # so a client can review risk from the listing instead of from prose
+            tools = [dict(t, effect=allowed[t["name"]]) for t in tools if t["name"] in allowed]
+        return {"jsonrpc": "2.0", "id": rid, "result": {"tools": tools}}
     if method == "tools/call":
         p = request.get("params") or {}
         name, args = p.get("name"), p.get("arguments") or {}
+        if profile is not None and name not in PROFILES[profile]["tools"]:
+            # a mount is a BOUNDARY, not a suggestion: the tool may exist on another plane,
+            # and the refusal says so by name rather than pretending it does not exist
+            home = profile_of(str(name))
+            return {"jsonrpc": "2.0", "id": rid, "error": {
+                "code": -32602,
+                "message": (f"tool '{name}' is not in the mounted profile '{profile}'" +
+                            (f" — it lives on /mcp/{home}" if home else " — no such tool"))}}
         try:
             result = _call_tool(name, args, config, gate_open=gate_open)
             # The door, remembered: only `ask` can open it, and only because the classifier said so.

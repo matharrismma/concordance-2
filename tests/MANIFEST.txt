@@ -82,6 +82,7 @@ test_mcp.py
 test_mcp_gate.py
 test_mcp_http.py
 test_mcp_no_private_keys.py
+test_mcp_profiles.py
 test_mention_web.py
 test_mesh.py
 test_mesh_signed_speech.py

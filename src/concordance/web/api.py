@@ -1328,13 +1328,24 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                                        study_key=body.get("key"),
                                        verify_signature=bool(body.get("verify_signature"))))
 
-    if method == "POST" and path == "/mcp":
+    # The six mounts are ENUMERATED, not pattern-matched, so the route-coverage auditor
+    # (tests/test_routes.py reads these comparisons by AST) can prove each one is dispatched;
+    # test_mcp_profiles pins this tuple to PROFILES so the two cannot drift apart.
+    if method == "POST" and (path == "/mcp" or path in (
+            "/mcp/core", "/mcp/library", "/mcp/sovereign",
+            "/mcp/coach", "/mcp/witness", "/mcp/community")):
         # Remote MCP over HTTP — reuse the pure JSON-RPC handler, surface-gated. Stateless
         # request/response (initialize · tools/list · tools/call). Notifications get 202.
+        # /mcp/<profile> mounts one plane of the catalog (task #123); the same resolution runs
+        # in the streaming Handler, via the one shared helper below.
         from ..mcp import handle as _mcp_handle
+        profile, refusal = resolve_mcp_profile(path)
+        if refusal is not None:
+            return refusal
         req = body if isinstance(body, dict) else {}
-        telemetry.record("mcp", surface=surface, method=str(req.get("method") or ""))
-        resp = _mcp_handle(req, config)
+        telemetry.record("mcp", surface=surface, method=str(req.get("method") or ""),
+                         profile=profile or "full")
+        resp = _mcp_handle(req, config, profile=profile)
         return (200, resp) if resp is not None else (202, {})
 
     if method == "GET" and path == "/search":
@@ -2084,6 +2095,33 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 # (_API_GET_PATHS, RATELIMITED) are DERIVED below, so a route's metadata lives in exactly one
 # place. tests/test_routes.py locks the derivation to the historical values AND asserts every
 # path dispatch() handles is registered here — so the two can never silently drift apart.
+def resolve_mcp_profile(path: str):
+    """(profile_or_None, refusal_or_None) for an /mcp* path — ONE resolution for both doors.
+
+    The streaming Handler and dispatch() must agree about which planes exist and whether the
+    community plane is enabled, or a client would get different boundaries depending on which
+    code path served it. Community is a deployment decision (assessment F-13): publish-class
+    tools need governance with a named owner before a host serves them, so the door is closed
+    unless CONCORDANCE_COMMUNITY_MCP=1 — and the refusal says so, a sign rather than a void.
+    """
+    import os
+    if not path.startswith("/mcp/"):
+        return None, None
+    from ..mcp.server import PROFILES
+    profile = path[len("/mcp/"):]
+    if profile not in PROFILES:
+        return None, (404, {"error": f"unknown MCP profile '{profile}'",
+                            "profiles": sorted(PROFILES)})
+    if profile == "community" and os.environ.get("CONCORDANCE_COMMUNITY_MCP", "").strip() != "1":
+        return None, (403, {
+            "error": "the community profile is not enabled on this host",
+            "why": ("publish-class tools (groups, mesh, commons, moderation) require a "
+                    "deployment decision with governance attached; set "
+                    "CONCORDANCE_COMMUNITY_MCP=1 to serve this plane"),
+            "available": sorted(p for p in PROFILES if p != "community")})
+    return profile, None
+
+
 ROUTES = [
     {"path": "/", "methods": ("GET",)},
     {"path": "/health", "methods": ("GET",), "api": True},
@@ -2144,6 +2182,12 @@ ROUTES = [
     {"path": "/study/export", "methods": ("POST",), "rl": True},
     {"path": "/study/import", "methods": ("POST",), "rl": True},
     {"path": "/mcp", "methods": ("POST",), "rl": True},
+    {"path": "/mcp/core", "methods": ("POST",), "rl": True},
+    {"path": "/mcp/library", "methods": ("POST",), "rl": True},
+    {"path": "/mcp/sovereign", "methods": ("POST",), "rl": True},
+    {"path": "/mcp/coach", "methods": ("POST",), "rl": True},
+    {"path": "/mcp/witness", "methods": ("POST",), "rl": True},
+    {"path": "/mcp/community", "methods": ("POST",), "rl": True},
     {"path": "/search", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/cards/stats", "methods": ("GET",), "api": True},
     {"path": "/cards", "methods": ("GET",), "api": True},
@@ -2556,13 +2600,21 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 if not lim.allow(key):
                     return self._json(429, {"error": "rate limit exceeded"},
                                       {"retry-after": str(lim.retry_after(key))})
-            if u.path == "/mcp":  # full Streamable-HTTP MCP transport (POST/GET/DELETE)
+            if u.path == "/mcp" or u.path.startswith("/mcp/"):
+                # Full catalog on /mcp (existing clients keep working); PROFILE MOUNTS on
+                # /mcp/<name> — the assessment's §3.3 made deployment-real. A client that mounts
+                # /mcp/library sees and may call ONLY the library plane; a call across planes is
+                # refused by name. See docs/MCP_ASSESSMENT_2026-08-04.md and task #123.
+                from ..mcp.http import handle_http
+                profile, refusal = resolve_mcp_profile(u.path)
+                if refusal is not None:
+                    return self._json(refusal[0], refusal[1])
                 raw = b""
                 if method == "POST":
                     n = int(self.headers.get("content-length") or 0)
                     raw = self.rfile.read(n) if n else b""
-                from ..mcp.http import handle_http
-                status, hdrs, body = handle_http(method, self.headers, raw, config)
+                status, hdrs, body = handle_http(method, self.headers, raw, config,
+                                                 profile=profile)
                 self.send_response(status)
                 for k, v in hdrs.items():
                     self.send_header(k, v)

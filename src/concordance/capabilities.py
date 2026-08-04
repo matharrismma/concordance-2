@@ -111,6 +111,19 @@ def _substrate() -> Dict[str, Any]:
         st = corpus.stats() or {}
         out["cards"] = {"count": st.get("total") or st.get("cards"),
                         "means": "cards in the keeping (the shared corpus, both surfaces)"}
+        # The profile mounts (task #123): the capability statement is where a reader learns the
+        # narrow doors exist — a boundary nobody can discover is a boundary that does not reach
+        # the reader.
+        try:
+            from .mcp.server import PROFILES
+            out["mcp_profiles"] = {
+                "count": len(PROFILES),
+                "names": sorted(PROFILES),
+                "means": ("mounts at /mcp/<name>, each serving one plane of the tool catalog "
+                          "(every tool lives in exactly one); /mcp serves the full catalog for "
+                          "existing clients; community is off unless the host enables it")}
+        except Exception:                                      # noqa: BLE001 — never break the statement
+            pass
         # G1 (docs/GAPS.md): a count claimed alone lets the million be hit without a sentence of
         # substance. So the headline never travels without its split — measured once per process
         # (ops memoizes; walking 548k bodies per request would knock reading into proving).

@@ -30,6 +30,10 @@ SITE = ROOT / "site"
 # tool surface, llms.txt, or a documented HTTP call — a human page would add nothing.
 AGENT_ONLY = {
     "/health",
+    # The six MCP profile mounts (task #123): an agent's client mounts one plane by URL;
+    # a human page linking them would be a door drawn for someone who cannot walk through it.
+    # The full /mcp is documented on the connect page; the profiles are documented beside it.
+    "/mcp/core", "/mcp/library", "/mcp/sovereign", "/mcp/coach", "/mcp/witness", "/mcp/community",
     # The clock. An agent's own 'today' is its training cutoff — months stale — so this is the
     # correction an AGENT needs; a human reader has a wall clock and a phone. The MCP `now` tool
     # is the primary door; this route is the same reading over plain HTTP for scripts and

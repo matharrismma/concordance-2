@@ -75,7 +75,7 @@ def _wants_sse(accept: str) -> bool:
 
 
 def handle_http(method: str, headers: Any, raw_body: bytes,
-                config) -> Tuple[int, Dict[str, str], bytes]:
+                config, profile=None) -> Tuple[int, Dict[str, str], bytes]:
     """Handle one Streamable-HTTP MCP request. Returns (status, headers, body_bytes)."""
     method = (method or "GET").upper()
 
@@ -117,7 +117,7 @@ def handle_http(method: str, headers: Any, raw_body: bytes,
         session = _SESSIONS.get(sid) if sid else None
         if session is None:
             session = {}
-        resp = handle(m, config, session)
+        resp = handle(m, config, session, profile=profile)
         if resp is not None:
             out.append(resp)
 
