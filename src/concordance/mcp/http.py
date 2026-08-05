@@ -32,13 +32,32 @@ _DEFAULT_ORIGINS = {"https://narrowhighway.com", "https://narrowhighway.org",
 def _origin_allowed(origin: str) -> bool:
     """DNS-rebinding defense (MCP Streamable-HTTP). Non-browser clients (agents) send no
     Origin and are allowed; a browser Origin must be on the allowlist. Extend via
-    CONCORDANCE_ALLOWED_ORIGINS (comma-separated)."""
+    CONCORDANCE_ALLOWED_ORIGINS (comma-separated).
+
+    PARSED, never prefix-matched (red team 2026-08-05, P0): startswith("http://localhost")
+    accepted http://localhost.evil.com. Scheme, hostname and port are compared exactly;
+    loopback is the literal set {localhost, 127.0.0.1, ::1} over http, any port."""
     if not origin:
         return True
-    o = origin.strip().lower()
-    allowed = {a.strip().lower() for a in os.environ.get("CONCORDANCE_ALLOWED_ORIGINS", "").split(",") if a.strip()}
+    from urllib.parse import urlsplit
+    try:
+        u = urlsplit(origin.strip())
+        scheme = (u.scheme or "").lower()
+        host = (u.hostname or "").rstrip(".").lower()
+        port = u.port  # raises for garbage ports
+    except ValueError:
+        return False
+    if not scheme or not host or u.username or u.password:
+        return False
+    if scheme == "http" and host in ("localhost", "127.0.0.1", "::1"):
+        return True
+    allowed = {a.strip().lower().rstrip("/") for a in
+               os.environ.get("CONCORDANCE_ALLOWED_ORIGINS", "").split(",") if a.strip()}
     allowed |= {a.lower() for a in _DEFAULT_ORIGINS}
-    return o in allowed or o.startswith("http://localhost") or o.startswith("http://127.0.0.1")
+    # normalize the candidate to scheme://host[:port] with default ports elided
+    default = {"http": 80, "https": 443}.get(scheme)
+    norm = f"{scheme}://{host}" if port in (None, default) else f"{scheme}://{host}:{port}"
+    return norm in allowed
 
 # In-memory session registry. Lightweight: the tools are stateless, so a session is just
 # a validity token + the negotiated protocol version. Cleared on restart.

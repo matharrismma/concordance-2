@@ -1,0 +1,17 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "com.narrowhighway/verification-engine",
+  "description": "Deterministic verification with receipts: hand an agent's claim to the engine and get a verdict, the worked trail, and a permanent, independently re-checkable seal. 60 domains, no model in the loop, 0 false positives on the published benchmark. Free, no key.",
+  "status": "active",
+  "repository": {
+    "url": "https://github.com/matharrismma/concordance-2",
+    "source": "github"
+  },
+  "version": "2.0.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://narrowhighway.com/mcp"
+    }
+  ]
+}

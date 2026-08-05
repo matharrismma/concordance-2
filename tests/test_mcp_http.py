@@ -118,3 +118,24 @@ def test_response_header_carries_the_negotiated_version_not_a_constant():
     assert h.get("MCP-Protocol-Version") == "2025-06-18", h
     import json as _json
     assert _json.loads(b)["result"]["protocolVersion"] == "2025-06-18"
+
+
+def test_origin_is_parsed_never_prefix_matched():
+    """Red team 2026-08-05 (P0, confirmed live): startswith("http://localhost") accepted
+    lookalike hosts. Every row here is one of the report's adversarial shapes."""
+    from concordance.mcp.http import _origin_allowed
+    assert _origin_allowed("")                                  # agents send no Origin
+    assert _origin_allowed("http://localhost")
+    assert _origin_allowed("http://localhost:3000")
+    assert _origin_allowed("http://127.0.0.1:8080")
+    assert _origin_allowed("HTTPS://NarrowHighway.COM")         # mixed case
+    assert _origin_allowed("https://narrowhighway.com:443")     # default port elided
+    assert _origin_allowed("https://narrowhighway.org.")        # trailing dot
+    assert not _origin_allowed("http://localhost.evil.com")     # THE lookalike
+    assert not _origin_allowed("http://127.0.0.1.evil.com")
+    assert not _origin_allowed("https://narrowhighway.com.evil.com")
+    assert not _origin_allowed("https://evil.com")
+    assert not _origin_allowed("https://user:pw@narrowhighway.com")  # credentials
+    assert not _origin_allowed("http://localhost:99999")        # garbage port
+    assert not _origin_allowed("null")                          # opaque origin
+    assert not _origin_allowed("file://localhost")

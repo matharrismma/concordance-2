@@ -1,0 +1,25 @@
+{
+  "name": "narrow-highway",
+  "title": "Narrow Highway — deterministic verification with receipts",
+  "description": "Hand any AI agent a claim; get a verdict, the worked trail, and a permanent, independently re-checkable seal. Deterministic math and rules across 60 domains — no model in the loop. 0 false positives on the published benchmark. Free, no key.",
+  "endpoints": {
+    "mcp": "https://narrowhighway.com/mcp",
+    "profiles": {
+      "core": "https://narrowhighway.com/mcp/core",
+      "library": "https://narrowhighway.com/mcp/library",
+      "sovereign": "https://narrowhighway.com/mcp/sovereign",
+      "coach": "https://narrowhighway.com/mcp/coach",
+      "witness": "https://narrowhighway.com/mcp/witness"
+    }
+  },
+  "transport": ["streamable-http"],
+  "authentication": "none",
+  "documentation": {
+    "agents_start_here": "https://narrowhighway.com/llms.txt",
+    "connect": "https://narrowhighway.com/connect.html",
+    "benchmark": "https://github.com/matharrismma/concordance-2/blob/master/docs/BENCHMARK.md",
+    "seal_spec": "https://github.com/matharrismma/concordance-2/blob/master/docs/SEAL_SPEC.md",
+    "independent_verifier": "https://github.com/matharrismma/concordance-2/blob/master/tools/verify_seal.py"
+  },
+  "guarantee": "Every claim is bounded to the published benchmark; every seal is verifiable with ~60 lines of standard-library Python and no Narrow Highway code."
+}
