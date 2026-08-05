@@ -839,6 +839,39 @@ def _strictify(schema: Any) -> Any:
     return s
 
 
+# ── VOCABULARY ENUMS (task #124, the finishing half) ─────────────────────────────────────────
+# Sourced from the modules that OWN each vocabulary at serving time — never copied into schema
+# literals, so the enum and the implementation cannot drift (the vine, not a photograph).
+# ENUM_TODO names the props whose vocabularies exist only as scattered comparisons; each needs
+# its constant established in its own module before it can be wired — a countable remainder,
+# not a vague one.
+ENUM_TODO = {
+    "curate.action": "shelves.py compares 'promoted'/'withdrawn' inline; needs CURATE_ACTIONS",
+    "grid_axis.axis": "dimension names are data-driven and grow; an enum would refuse valid new ones",
+}
+
+
+def _enum_wiring() -> Dict[tuple, list]:
+    from ..derivation import _MATH_MODES
+    from ..shelves import KINDS, RINGS
+    return {
+        ("verify", "mode"): sorted(_MATH_MODES),
+        ("shelf_signable", "kind"): sorted(KINDS),
+        ("shelf_signable", "ring"): sorted(RINGS),
+    }
+
+
+def _apply_enums(tool_name: str, schema: Any) -> Any:
+    if not isinstance(schema, dict) or not isinstance(schema.get("properties"), dict):
+        return schema
+    wiring = _enum_wiring()
+    props = dict(schema["properties"])
+    for (tname, prop), vocab in wiring.items():
+        if tname == tool_name and prop in props and isinstance(props[prop], dict):
+            props[prop] = dict(props[prop], enum=vocab)
+    return dict(schema, properties=props)
+
+
 def profile_of(tool_name: str) -> Optional[str]:
     for pname, p in PROFILES.items():
         if tool_name in p["tools"]:
@@ -1369,8 +1402,8 @@ def handle(request: dict, config: EngineConfig, session: Optional[Dict[str, Any]
             "protocolVersion": negotiated, "capabilities": {"tools": {}},
             "serverInfo": {"name": "narrow-highway", "version": __version__, "surface": config.surface}}}
     if method == "tools/list":
-        tools = [dict(t, inputSchema=_strictify(t.get("inputSchema") or
-                                                {"type": "object", "properties": {}}))
+        tools = [dict(t, inputSchema=_strictify(_apply_enums(t["name"],
+                                    t.get("inputSchema") or {"type": "object", "properties": {}})))
                  for t in _tools_for(config, gate_open=gate_open)]
         if profile is not None:
             allowed = PROFILES[profile]["tools"]

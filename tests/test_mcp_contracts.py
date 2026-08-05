@@ -118,3 +118,21 @@ def test_the_cross_plane_refusal_and_crash_paths_carry_codes_too():
     # a mount refusal is a protocol-level error (the tool is not callable here at all)
     assert "error" in r and "/mcp/core" in r["error"]["message"]
     assert classify_error(r["error"]["message"]) == "SURFACE_FORBIDDEN"
+
+
+def test_vocabulary_enums_are_sourced_not_copied():
+    """#124's finishing half: served enums must EQUAL the owning module's constant — a copy that
+    drifts would refuse valid calls or admit invalid ones, silently."""
+    from concordance.derivation import _MATH_MODES
+    from concordance.shelves import KINDS, RINGS
+    by_name = {t["name"]: t["inputSchema"] for t in _served_tools()}
+    assert by_name["verify"]["properties"]["mode"]["enum"] == sorted(_MATH_MODES)
+    assert by_name["shelf_signable"]["properties"]["kind"]["enum"] == sorted(KINDS)
+    assert by_name["shelf_signable"]["properties"]["ring"]["enum"] == sorted(RINGS)
+
+
+def test_the_enum_remainder_is_declared_with_reasons():
+    """What is NOT wired is named, with why — a countable remainder, never a vague one."""
+    from concordance.mcp.server import ENUM_TODO
+    for prop, reason in ENUM_TODO.items():
+        assert "." in prop and reason.strip()
