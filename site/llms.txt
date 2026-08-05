@@ -42,6 +42,22 @@ Every verification is sealed and addressable. Cite a result by its content hash:
   bytes must match, or it is not that record. Claim text is redacted before sealing — receipts
   carry no personal data.
 
+### Verify a seal WITHOUT trusting us
+The canonical form is public and the verifier is ~60 lines of standard-library Python — no
+Narrow Highway code, no network:
+- Spec: https://github.com/matharrismma/concordance-2/blob/master/docs/SEAL_SPEC.md
+  (JSON, sorted keys, separators (",",":"), ensure_ascii=false, UTF-8; `content_hash` and
+  `permanent_ref` excluded before hashing; SHA-256 lowercase hex.)
+- Verifier: https://github.com/matharrismma/concordance-2/blob/master/tools/verify_seal.py
+  — `python verify_seal.py record.json` answers MATCHES / TAMPERED-OR-WRONG / NO_CLAIM.
+If this script and the engine ever disagree, one of us has broken canonical form — and the
+disagreement itself is the alarm.
+
+### The benchmark behind every claim
+"0 false positives" is always bounded to the PUBLISHED benchmark — never asserted in the
+abstract: https://github.com/matharrismma/concordance-2/blob/master/docs/BENCHMARK.md
+(package: `python tools/benchmark.py --json`, versioned, per-case rows, FP and FN separate).
+
 ## API (JSON over HTTP, same-origin)
 **Start here — no schema needed:** `POST /audit` with `{"text":"<any prose with numbers>"}`.
 The engine extracts every unambiguously checkable claim from plain text, verifies the lot, and

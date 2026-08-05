@@ -56,6 +56,13 @@
   <b>receipt</b> anyone can re-check — deterministic math and rules, no model in the loop.
   Sixty domains. A public benchmark holding <b>0&nbsp;false&nbsp;positives</b>: it has never
   sealed a falsehood. One URL. No SDK, no key, no cost.</p>
+  <p class="muted">The guarantee carries its own proof: the
+  <a href="https://github.com/matharrismma/concordance-2/blob/master/docs/SEAL_SPEC.md">seal spec</a> is public,
+  the <a href="https://github.com/matharrismma/concordance-2/blob/master/tools/verify_seal.py">independent verifier</a>
+  is ~60 lines of standard-library Python with no Narrow Highway code in it, and every
+  false-positive claim is bounded to the
+  <a href="https://github.com/matharrismma/concordance-2/blob/master/docs/BENCHMARK.md">published benchmark</a> —
+  re-check us without trusting us.</p>
 
   <h2>Add it as a connector (MCP)</h2>
   <p class="sub">The engine speaks MCP over Streamable&nbsp;HTTP — most agent clients can add it in seconds.</p>
