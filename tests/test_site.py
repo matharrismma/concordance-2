@@ -16,7 +16,7 @@ SITE = _ROOT / "site"
 
 
 def test_site_files_exist():
-    for f in ("index.html", "seal.html", "styles.css"):
+    for f in ("index.html", "proof.html", "styles.css"):
         assert (SITE / f).is_file(), f"missing site file: {f}"
 
 
@@ -31,14 +31,6 @@ def test_index_named_positioned_and_wired():
     assert "narrowhighway.org" in t and "Christ" in t, "surface-aware: name the foundation on .org"
 
 
-def test_check_page_still_carries_the_demo():
-    """The proof-first demo was relocated, not deleted: a blank landing must not cost the
-    thing that makes the claim checkable by a stranger."""
-    t = (SITE / "check.html").read_text(encoding="utf-8")
-    assert "/verify" in t and "/search" in t, "the demo must call the API"
-    assert "checkAnything" in t, "the paste-anything demo must still work"
-
-
 def test_every_page_offers_a_way_home():
     """One identical home control, injected everywhere, so it cannot drift per page."""
     # mesh.html is THE HIDDEN discovery surface (the Fellowship Mesh / "The Way"). It must NOT carry
@@ -51,11 +43,6 @@ def test_every_page_offers_a_way_home():
                if f.name != "index.html" and f.name not in hidden
                and "nh-home.js" not in f.read_text(encoding="utf-8")]
     assert not missing, f"pages with no way home: {missing}"
-
-
-def test_seal_page_calls_seal_endpoint():
-    t = (SITE / "seal.html").read_text(encoding="utf-8")
-    assert "/seal" in t
 
 
 def test_cli_entrypoint_importable():

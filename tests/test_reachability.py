@@ -29,6 +29,19 @@ SITE = ROOT / "site"
 # Routes that exist for AGENTS and machines, not for a page. Each is reachable through the MCP
 # tool surface, llms.txt, or a documented HTTP call — a human page would add nothing.
 AGENT_ONLY = {
+    # THE CUT of 2026-08-05 (lever 5): these routes' pages were retired — 31 pages earned
+    # fewer than 12 human visits in a week while agents kept calling the ROUTES (MCP tools
+    # map onto many). The features remain as agent/API surface; humans reach the substance
+    # through the desk, the card pages, and search.
+    "/apothecary/propose", "/backmatter", "/codex/artifact", "/codex/connections",
+    "/codex/scripture", "/codex/themes", "/codex/verify", "/commons", "/curate",
+    "/curate/queue", "/curate/signable", "/deck", "/decks", "/drop", "/drop/signable",
+    "/formation", "/formation/help", "/formation/kinds", "/group", "/group/contribute",
+    "/group/join", "/groups", "/journal/dates", "/mesh/door", "/mesh/inbox", "/mesh/invite",
+    "/mesh/link", "/mesh/map", "/mesh/node", "/mesh/post", "/mesh/redeem", "/narratives",
+    "/places", "/push/key", "/push/subscribe", "/shelf", "/steward/budget",
+    "/steward/cost-destroyed", "/study", "/study_find", "/teachings", "/thread/verify",
+    "/want", "/works/artifact", "/works/verify",
     "/health",
     # The six MCP profile mounts (task #123): an agent's client mounts one plane by URL;
     # a human page linking them would be a door drawn for someone who cannot walk through it.

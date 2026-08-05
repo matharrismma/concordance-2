@@ -2306,12 +2306,51 @@ ROUTES = [
 # lives now — and only pages with a real successor belong here. When nothing holds the content
 # any more, the honest answer is to leave it 404 rather than send a reader somewhere plausible.
 _RETIRED = {
-    "/hymns.html": "/corpus.html?shelf=hymns",    # 97 hymn cards, a real shelf in the keeping
-    "/library.html": "/corpus.html",                      # the shelves
-    "/catalog.html": "/corpus.html?section=drawers",      # the reference section, A–Z
-    "/codex.html": "/corpus.html?section=manuscript",     # the compiled manuscript
-    "/works.html": "/corpus.html?section=volume",         # the worked, sealed demonstrations
-    "/canon.html": "/bible.html",                         # the Word — and ?ref= now arrives with it
+    # THE CUT of 2026-08-05 (lever 5, Matt-approved): measured over 7 days of access logs,
+    # 31 pages earned fewer than 12 visits — below the scanner-noise line — while /search,
+    # /card, /encyclopedia, /graph, /characters, /bible and the desk carried the site.
+    # 43 files -> 8 (+ routes). Every entry names the FINAL home of its content, no chains.
+    "/hymns.html": "/?q=hymns",                           # the desk searches the keeping
+    "/library.html": "/",
+    "/catalog.html": "/",
+    "/codex.html": "/",
+    "/works.html": "/proof.html",                         # worked, sealed demonstrations ARE the proof
+    "/canon.html": "/bible.html",                         # the Word — and ?ref= still arrives with it
+    "/corpus.html": "/",                                  # the desk is the one door to the shelves
+    "/almanac.html": "/",
+    "/apothecary.html": "/",
+    "/ask.html": "/",                                     # the desk asks
+    "/audit.html": "/proof.html",
+    "/backmatter.html": "/bible.html",
+    "/boundary.html": "/proof.html",
+    "/brain.html": "/graph",
+    "/check.html": "/connect.html",
+    "/collapse.html": "/proof.html",
+    "/community.html": "/",
+    "/companion.html": "/",
+    "/corrected.html": "/proof.html",
+    "/days.html": "/",
+    "/floor.html": "/graph",
+    "/game.html": "/",
+    "/guarantees.html": "/proof.html",
+    "/harmony.html": "/bible.html",
+    "/journal.html": "/",
+    "/map.html": "/graph",
+    "/mesh.html": "/",
+    "/narratives.html": "/bible.html",
+    "/places.html": "/encyclopedia.html",
+    "/prophecy.html": "/bible.html",
+    "/reason.html": "/proof.html",
+    "/seal.html": "/proof.html",
+    "/seeds.html": "/proof.html",
+    "/shelf.html": "/",
+    "/steward.html": "/",
+    "/teachings.html": "/bible.html",
+    "/theories.html": "/graph",                           # the theory map lives in the constellation
+    "/timeline.html": "/bible.html",
+    "/tv.html": "https://narrowhighway.tv/",
+    "/voices.html": "/bible.html",
+    "/walk.html": "/read.html",
 }
 
 

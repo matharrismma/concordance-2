@@ -144,8 +144,90 @@ def topic_ids(query: str, pages: int = 2) -> list[int]:
     return ids
 
 
+# ── the archive.org side of the storekeeper ──────────────────────────────────────────────────
+# US federal publications (USDA bulletins, military field manuals, NIST/USGS pubs) are public
+# domain under 17 USC §105. Same ark, same waybill discipline, its own store beside gutenberg.
+
+def _ia_ctx():
+    """Python 3.13+ turns on VERIFY_X509_STRICT, which rejects archive.org's CA ("Basic
+    Constraints not marked critical"). Chain and hostname verification stay ON — only the
+    new strictness bit is cleared, for the Archive's chain specifically."""
+    import ssl
+    ctx = ssl.create_default_context()
+    ctx.verify_flags &= ~ssl.VERIFY_X509_STRICT
+    return ctx
+
+
+def _ia_db() -> sqlite3.Connection:
+    d = _base() / "archive_org"
+    d.mkdir(parents=True, exist_ok=True)
+    c = sqlite3.connect(str(d / "texts.db"))
+    c.execute("create table if not exists docs (identifier text primary key, title text, "
+              "query text, raw_bytes integer, gz blob, stored_at text, url text, sha256 text)")
+    c.commit()
+    return c
+
+
+def ia_search(query: str, rows: int = 200) -> list:
+    """[(identifier, title)] from the archive.org advanced-search API, texts only."""
+    url = ("https://archive.org/advancedsearch.php?q=" + urllib.parse.quote(query) +
+           "&fl%5B%5D=identifier&fl%5B%5D=title" +
+           f"&rows={rows}&page=1&output=json&sort%5B%5D=downloads+desc")
+    req = urllib.request.Request(url, headers={"User-Agent": _UA})
+    with urllib.request.urlopen(req, timeout=30, context=_ia_ctx()) as r:
+        docs = json.load(r).get("response", {}).get("docs", [])
+    return [(d["identifier"], str(d.get("title", ""))[:200]) for d in docs if d.get("identifier")]
+
+
+def _ia_fetch_text(ident: str) -> tuple[bytes, str] | None:
+    """The item's plain-text derivative and its exact URL — waybill needs both."""
+    req = urllib.request.Request(f"https://archive.org/metadata/{ident}",
+                                 headers={"User-Agent": _UA})
+    with urllib.request.urlopen(req, timeout=30, context=_ia_ctx()) as r:
+        meta = json.load(r)
+    name = next((f["name"] for f in meta.get("files", [])
+                 if str(f.get("name", "")).endswith("_djvu.txt")), None)
+    if not name:
+        return None
+    url = f"https://archive.org/download/{ident}/{urllib.parse.quote(name)}"
+    req = urllib.request.Request(url, headers={"User-Agent": _UA})
+    with urllib.request.urlopen(req, timeout=60, context=_ia_ctx()) as r:
+        data = r.read()
+    return (data, url) if data and len(data) > 500 else None
+
+
+def ia_store(query: str, limit: int = 200, delay: float = 2.0) -> int:
+    c = _ia_db()
+    have = {r[0] for r in c.execute("select identifier from docs")}
+    n = 0
+    for ident, title in ia_search(query, rows=limit):
+        if ident in have:
+            print(f"  {ident}: already held"); continue
+        try:
+            got = _ia_fetch_text(ident)
+        except Exception as e:  # noqa: BLE001 — item without a text derivative, move on
+            print(f"  {ident}: fetch failed ({e})"); continue
+        if not got:
+            print(f"  {ident}: no text derivative"); continue
+        data, url = got
+        gz = gzip.compress(data, 6)
+        c.execute("insert or replace into docs values (?,?,?,?,?,?,?,?)",
+                  (ident, title, query, len(data), gz,
+                   time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                   url, hashlib.sha256(data).hexdigest()))
+        c.commit()
+        n += 1
+        print(f"  {ident}: stored {len(data):>9,}B -> {len(gz):>9,}B gz  {title[:48]}")
+        time.sleep(delay)                              # polite to the Archive
+    c.close()
+    return n
+
+
 def main() -> int:
     a = sys.argv[1:]
+    if "--ia-query" in a:
+        n = ia_store(a[a.index("--ia-query") + 1])
+        print(f"stored {n} archive.org documents"); return 0
     if "--stats" in a:
         stats(); return 0
     if "--ids" in a:

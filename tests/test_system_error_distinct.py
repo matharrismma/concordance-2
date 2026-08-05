@@ -138,19 +138,14 @@ def test_the_seal_records_WHERE_our_engine_gave_out():
 
 def test_a_person_reading_the_page_is_told_in_words():
     """A raw enum on the screen is not the same as telling someone what happened."""
-    audit_html = (ROOT / "site" / "audit.html").read_text(encoding="utf-8")
-    assert "NOT CHECKED" in audit_html and "says nothing about whether the claim is true" in audit_html
-    assert "v.unchecked" in audit_html, "it must not wear the failure colour"
+    # audit.html was retired in the 2026-08-05 cut (lever 5); the three-state wording is
+    # asserted on the module above — the page-level rendering went with the page.
 
-    for page in ("check.html", "ask.html", "reason.html"):
-        text = (ROOT / "site" / page).read_text(encoding="utf-8")
-        assert "SYSTEM_ERROR" in text, f"{page} does not handle the verdict at all"
-        assert "could not check" in text.lower(), f"{page} shows the enum instead of the meaning"
-
-    # reason.html decided the colour from a chain that had no SYSTEM_ERROR branch, so it fell
-    # through to "broken" — the failure colour on our own bug.
-    reason = (ROOT / "site" / "reason.html").read_text(encoding="utf-8")
-    assert "error_at" in reason, "reason.html cannot say where without error_at"
+    # check/ask/reason/audit retired 2026-08-05 (lever 5). The human surface for verdicts is
+    # now the server-rendered card/seal pages and the desk's /ask flow, whose WORDING is
+    # asserted at the module and seal layers above; agents get the same words via the tool
+    # description (the parity test below). No remaining page renders the raw enum.
+    assert "SYSTEM_ERROR" not in (ROOT / "site" / "index.html").read_text(encoding="utf-8")
 
 
 def test_agents_are_told_the_same_thing_humans_are():

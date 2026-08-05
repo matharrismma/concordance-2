@@ -20,12 +20,8 @@ const CACHE = 'nh-offline-v5';  // v5: precache harmony.html + timeline.html
    would leave the site with no worker at all). Paramless knowledge endpoints are precached too, so
    the pages have their data offline; per-item data (a passage, a lesson) caches as it is visited. */
 const CORE = [
-  '/', '/index.html', '/companion.html', '/ask.html',
-  '/floor.html', '/read.html', '/bible.html', '/apothecary.html',
-  // one entry for the Corpus, not one per section: the sections are views of a single document,
+  '/', '/index.html', '/read.html', '/bible.html', // one entry for the Corpus, not one per section: the sections are views of a single document,
   // so `?section=` would precache the same bytes three times under three cache keys
-  '/journal.html', '/days.html', '/almanac.html', '/corpus.html',
-  '/harmony.html', '/timeline.html',
   '/kinds.js', '/nh-tools.js', '/nh-home.js', '/speak.js', '/gate.js', '/redact.js', '/nh-search.js',
   '/manifest.webmanifest', '/icon.svg',
   '/floor', '/coach/journey', '/coach/subjects', '/apothecary', '/almanac'
@@ -105,7 +101,7 @@ self.addEventListener('fetch', (e) => {
         // A document with no network falls back to the companion page. A SCRIPT must not — handing
         // HTML to a <script> tag is a syntax error, and the page would lose the shell entirely.
         .catch(() => caches.match(req)
-          .then((hit) => hit || (isShell ? Response.error() : caches.match('/companion.html'))))
+          .then((hit) => hit || (isShell ? Response.error() : caches.match())))
     );
     return;
   }
@@ -144,7 +140,7 @@ self.addEventListener('notificationclick', (e) => {
   const url = (e.notification.data && e.notification.data.url) || '/mesh.html#way';
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
-      for (const w of wins) { if (w.url.includes('/mesh.html') && 'focus' in w) return w.focus(); }
+      for (const w of wins) { if (w.url.includes() && 'focus' in w) return w.focus(); }
       return clients.openWindow(url);
     })
   );
