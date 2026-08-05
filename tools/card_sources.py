@@ -108,6 +108,11 @@ SPINES = [
            "Medicines and their class, form and route — a pharmacopeia so a caregiver with no "
            "doctor still has the reference.", FLOOR,
            ["medicine", "drugs", "pharmacology", "pharmacopeia", "spine"]),
+    _spine("card_spine_federal", "The federal shelf — US government publications",
+           "United States federal publications held on the ark — field manuals, farmers' "
+           "bulletins, technical reports and surveys, public domain under 17 USC 105. Practical "
+           "knowledge a family can use, from sources whose authorship makes them free.", FLOOR,
+           ["federal", "government", "public domain", "manuals", "bulletins", "spine"]),
     # The plumb-line: the original tongues. Rooted in the Word (special revelation), not the Floor —
     # everything runs THROUGH Hebrew and Greek. Matt: "Everything through hebrew and greek. We are
     # the tool to bring the Academics and jewish people to Christ through logic and coherence."
@@ -302,9 +307,49 @@ def gen_lexicon():
                     spine="card_spine_lexicon", domain="linguistics")
 
 
+def gen_federal():
+    """The federal shelf of the ark (lever 3, 2026-08-05): US-government publications fetched
+    by store_book.py --ia-query into D:/NarrowHighway-Sources/archive_org/texts.db — public
+    domain under 17 USC 105, every row carrying its waybill (origin URL + sha256). One stub
+    card per held document; the full text is ON the ark, and the card says so."""
+    ark = os.environ.get("CONCORDANCE_ARK_BASE", "").strip() or "D:/NarrowHighway-Sources"
+    db_path = Path(ark) / "archive_org" / "texts.db"
+    if not db_path.exists():
+        raise FileNotFoundError(f"ark store not found at {db_path} (set CONCORDANCE_ARK_BASE)")
+    shelf_of = [  # stored query fragment -> the shelf its documents truly serve
+        ("military-manuals", "practical", "United States military field manuals (PD, 17 USC 105)"),
+        ("Department of Agriculture", "agriculture", "USDA publications (PD, 17 USC 105)"),
+        ("nasa_techdocs", "science", "NASA technical documents (PD, 17 USC 105)"),
+        ("Forest Service", "ecology", "US Forest Service publications (PD, 17 USC 105)"),
+        ("Public Health", "medicine", "US Public Health Service publications (PD, 17 USC 105)"),
+        ("Geological Survey", "geology", "US Geological Survey publications (PD, 17 USC 105)"),
+    ]
+    c = sqlite3.connect(str(db_path))
+    for ident, title, query, raw, url, sha in c.execute(
+            "select identifier, title, query, raw_bytes, url, sha256 from docs order by identifier"):
+        shelf, label = "practical", "US federal publication (PD, 17 USC 105)"
+        for frag, sh, lb in shelf_of:
+            if frag in (query or ""):
+                shelf, label = sh, lb
+                break
+        t = (title or ident).strip() or ident
+        body = (f"{t}. A United States federal publication, public domain (17 USC 105). "
+                f"The full text ({(raw or 0):,} bytes) is held on the ark; waybill sha256 "
+                f"{(sha or '')[:16]}…; origin archive.org/{ident}. A held source: this card "
+                f"is the map, and the drive carries the freight.")
+        card = _card(f"card_src_fed_{_sk(ident)}", t, body,
+                     shelf=shelf, subject=t[:80],
+                     bands=[t[:60], "federal", "public domain", shelf, "ark"],
+                     source_label=label, spine="card_spine_federal", domain=shelf)
+        card["source"]["url"] = url or f"https://archive.org/details/{ident}"
+        yield card
+    c.close()
+
+
 GENERATORS = {"nuclides": gen_nuclides, "stars": gen_stars, "ports": gen_ports,
               "worldbank": gen_worldbank, "foods": gen_foods, "words": gen_words,
-              "places": gen_places, "drugs": gen_drugs, "lexicon": gen_lexicon}
+              "places": gen_places, "drugs": gen_drugs, "lexicon": gen_lexicon,
+              "federal": gen_federal}
 
 
 def main() -> int:
@@ -320,6 +365,7 @@ def main() -> int:
     seen_ids = set()
     n = 0
     per = {}
+    failed = []
     tmp = out / "source_cards.jsonl.tmp"
     with tmp.open("w", encoding="utf-8") as f:
         for name, gen in GENERATORS.items():
@@ -337,9 +383,22 @@ def main() -> int:
                     n += 1
             except Exception as e:  # a bad source must not sink the rest
                 print(f"  !! {name}: {type(e).__name__}: {e}")
+                failed.append(name)
             per[name] = cnt
             print(f"  {name:12s} {cnt:>8,} cards")
-    os.replace(tmp, out / "source_cards.jsonl")
+    # NEVER SHRINK A TRACKED KEEPING SILENTLY (the reference_cards lesson, applied here):
+    # a failed generator or an --only subset would quietly rewrite 282k cards smaller.
+    dest = out / "source_cards.jsonl"
+    if dest.exists():
+        old_n = sum(1 for _ in dest.open(encoding="utf-8"))
+        if n < old_n:
+            print(f"REFUSING to replace: new {n:,} < held {old_n:,} "
+                  f"(failed: {', '.join(failed) or 'none'}; only={sorted(only) if only else 'ALL'}) "
+                  f"— the keeping stays; pass --shrink-ok to override deliberately")
+            if "--shrink-ok" not in sys.argv:
+                tmp.unlink()
+                return 1
+    os.replace(tmp, dest)
     print(f"TOTAL {n:,} technical source cards -> data/source_cards.jsonl  (spines: {len(SPINES)})")
     return 0
 
