@@ -127,18 +127,25 @@ def _nutrients():
     return out
 
 
+# NOTE (2026-08-04): a _nuclides() emitter was written here and REVERTED the same night —
+# the keeping already holds all 3,383 nuclides as card_src_nuclide_* (tools/card_sources.py,
+# spine card_spine_nuclides, in data/source_cards.jsonl). Before adding an emitter for a
+# dataset, grep the established mint paths: card_sources.py carries nuclides, stars, species,
+# ports, RFCs, units, foods, places, drugs, words. What LOOKS starved may be a shelf-name
+# split ("nuclear physics" vs "nuclear_physics"), not an empty shelf.
 EMITTERS = [("periodic table", _elements), ("physical constants", _constants),
             ("crops", _crops), ("nutrients", _nutrients)]
 
 
 def main() -> int:
     check = "--check" in sys.argv
-    cards, per = [], {}
+    cards, per, failed = [], {}, []
     for label, fn in EMITTERS:
         try:
             got = fn()
         except Exception as e:  # noqa: BLE001
             print(f"  {label}: FAILED — {e}")
+            failed.append(label)
             got = []
         per[label] = len(got)
         cards.extend(got)
@@ -152,7 +159,12 @@ def main() -> int:
     print(f"  total reference cards: {len(uniq)}")
     if check:
         print("  --check: nothing written")
-        return 0
+        return 1 if failed else 0
+    if failed:
+        # a missing source would silently SHRINK the tracked jsonl — refuse instead
+        print(f"  REFUSING to write: emitter(s) failed ({', '.join(failed)}); "
+              f"the tracked file keeps its cards")
+        return 1
     p = _out_path()
     p.parent.mkdir(parents=True, exist_ok=True)
     tmp = p.with_suffix(".jsonl.tmp")

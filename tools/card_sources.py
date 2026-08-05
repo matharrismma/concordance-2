@@ -134,7 +134,8 @@ def gen_nuclides():
         body = (f"Nuclide {nuc}: {z} protons, {n} neutrons, mass number A={a}. {stab.capitalize()}."
                 f"{decay}{ab_s}{mass_u}")
         yield _card(f"card_src_nuclide_{_sk(nuc)}", f"{nuc} — {str(el).lower()}-{a}", body,
-                    shelf="nuclear physics", subject=nuc,
+                    shelf="nuclear_physics", subject=nuc,  # underscore: the ONE canonical form
+                    # (was "nuclear physics" — the only shelf split in the keeping; healed 2026-08-04)
                     bands=[nuc, str(el), "isotope", "nuclide", "nuclear physics"],
                     source_label="NNDC / AME nuclide data (public domain)",
                     spine="card_spine_nuclides", domain="nuclear_physics")

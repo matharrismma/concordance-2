@@ -53,12 +53,27 @@ def test_crops_and_nutrients_are_carded_faithfully():
 
 
 def test_ids_are_deterministic_pay_once():
-    def _all():
-        return bf._elements() + bf._constants() + bf._crops() + bf._nutrients()
+    def _all():                                     # every registered emitter, no hand list to drift
+        return [c for _label, fn in bf.EMITTERS for c in fn()]
     a = {c["id"] for c in _all()}
     b = {c["id"] for c in _all()}
     assert a == b                                   # same content, same ids, every run
     assert len(a) == sum(len(fn()) for _, fn in bf.EMITTERS)   # no id collisions across emitters
+
+
+def test_a_failed_emitter_refuses_to_write_never_shrinks(monkeypatch, capsys):
+    """If any emitter's source is unreachable at mint time the tool must exit 1 and write
+    NOTHING — a generator quietly dropping an emitter's cards from a tracked file is a
+    delete in build-step clothes."""
+    def _broken():
+        raise FileNotFoundError("source not provisioned on this machine")
+    monkeypatch.setattr(bf, "EMITTERS", bf.EMITTERS + [("broken", _broken)])
+    monkeypatch.setattr(sys, "argv", ["backfill_reference_cards.py"])
+    out_before = bf._out_path().read_text(encoding="utf-8") if bf._out_path().exists() else None
+    assert bf.main() == 1
+    assert "REFUSING to write" in capsys.readouterr().out
+    out_after = bf._out_path().read_text(encoding="utf-8") if bf._out_path().exists() else None
+    assert out_before == out_after                  # byte-identical: nothing was replaced
 
 
 def test_corpus_merges_reference_cards_as_a_source():
@@ -130,7 +145,9 @@ def test_bridge_compute_is_exact_subject_only_no_false_positives():
 
 
 if __name__ == "__main__":
-    fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
+    import inspect
+    fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)
+           and not inspect.signature(v).parameters]     # fixture tests run under pytest only
     for fn in fns:
         fn()
         print(f"  ok  {fn.__name__}")
