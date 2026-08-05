@@ -2738,6 +2738,20 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
         def do_DELETE(self) -> None:
             self._do("DELETE")
 
+        def do_HEAD(self) -> None:
+            # Health checkers HEAD the MCP mounts (measured 2026-08-05: 501s from the server
+            # class, which knows no do_HEAD). A reachable mount answers 204; everything else
+            # keeps the old behaviour rather than growing an untested HEAD surface.
+            from urllib.parse import urlparse as _up
+            p = _up(self.path).path
+            if p == "/mcp" or p.startswith("/mcp/"):
+                self.send_response(204)
+                self.send_header("Allow", "POST, GET, DELETE")
+                self.end_headers()
+                return
+            self.send_response(501)
+            self.end_headers()
+
         def log_message(self, *args) -> None:  # quiet
             pass
 

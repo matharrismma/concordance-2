@@ -2,7 +2,7 @@
 
 Proves the MCP HTTP semantics: initialize mints an Mcp-Session-Id; tools/call returns
 JSON; SSE is chosen when the client accepts only event-stream; notifications get 202; GET
-is 405; DELETE is 200; batches return an array; witness tools surface on the witness
+serves the SSE stream side; DELETE is 200; batches return an array; witness tools surface on the witness
 config. Runnable with `pytest` OR `python tests/test_mcp_http.py`.
 """
 from __future__ import annotations
@@ -66,9 +66,18 @@ def test_notification_is_202():
     assert st == 202 and b == b""
 
 
-def test_get_is_405():
+def test_get_serves_the_sse_stream_side():
+    """The lost-Claude-traffic fix (2026-08-05): the TS MCP SDK (Bun/node/undici — Claude-side
+    clients) opens the GET stream, and a registry scorer was flunking our 405s at 78->141/day.
+    The stream: 200 text/event-stream with a retry hint, closing cleanly — no held thread."""
     st, h, b = handle_http("GET", {"Accept": "text/event-stream"}, b"", SEC)
-    assert st == 405
+    assert st == 200 and h["Content-Type"] == "text/event-stream"
+    assert b.startswith(b"retry:"), "clients must be told to reconnect gently, not hammer"
+
+
+def test_get_with_unknown_session_is_404_per_spec():
+    st, h, b = handle_http("GET", {"Mcp-Session-Id": "no-such-session"}, b"", SEC)
+    assert st == 404                                # the client re-initializes
 
 
 def test_delete_is_200():

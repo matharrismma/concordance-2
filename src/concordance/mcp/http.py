@@ -7,7 +7,9 @@ connector clients can mount the engine over HTTP:
                  notification-only payload. `initialize` mints an `Mcp-Session-Id`
                  (returned as a header); later requests may carry it (validated
                  leniently — the tools are stateless, so a missing/unknown id still serves).
-  GET    /mcp  — 405: this server initiates no server→client stream (pure tool server).
+  GET    /mcp  — 200 text/event-stream: the SSE half of the transport. We initiate no
+                 server→client messages, so the stream sends a retry hint and closes
+                 cleanly (404 for an unknown Mcp-Session-Id, per spec).
   DELETE /mcp  — terminate the session (200).
 
 Content negotiation: SSE (one `message` event) when the client accepts ONLY
@@ -85,8 +87,18 @@ def handle_http(method: str, headers: Any, raw_body: bytes,
                 b'{"error":"origin not allowed"}')
 
     if method == "GET":
-        return (405, {"Allow": "POST, DELETE", "Content-Type": "application/json"},
-                b'{"error":"this MCP endpoint offers no server stream; use POST"}')
+        # The SSE half of Streamable HTTP. Measured 2026-08-05: 78->141 refusals/day and
+        # rising — Bun/node/undici (the TypeScript MCP SDK: Claude-side clients) open this
+        # stream, and MCPScoringEngine was flunking us 405 by 405. We initiate no
+        # server->client messages, so the honest stream is: 200, a retry hint so clients
+        # reconnect gently instead of hammering, then a clean close — never a held thread
+        # per stream (the fd-exhaustion lesson: reading must not knock out proving).
+        sid = _hget(headers, "Mcp-Session-Id")
+        if sid and sid not in _SESSIONS:
+            return (404, {"Content-Type": "application/json"},
+                    b'{"error":"unknown or expired session; re-initialize"}')
+        return (200, {"Content-Type": "text/event-stream", "Cache-Control": "no-store"},
+                b"retry: 60000\n\n: narrowhighway keeps no server-initiated stream; POST for tools\n\n")
     if method == "DELETE":
         _SESSIONS.pop(_hget(headers, "Mcp-Session-Id"), None)
         return 200, {}, b""
