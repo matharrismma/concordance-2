@@ -20,7 +20,7 @@ Every answer is a `(verdict, trail, seal)` — three things, each independently 
 6. **Ranker** — IDF/full-text retrieval over the keeping
 7. **Surface** — the face over the shared foundation (`secular` reach / `witness`)
 
-The measure: **reproducibility, zero false-positives, re-checkability.**
+The measure: **reproducibility, zero false-positives on the published benchmark (docs/BENCHMARK.md), re-checkability.**
 
 ## One foundation, two surfaces
 

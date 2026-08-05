@@ -107,9 +107,28 @@ CLAIMS = [
 ]
 
 
-def run(verbose: bool = True):
+BENCHMARK_VERSION = "1.0.0"   # the bound every public "0 false positives" claim cites
+
+
+def emit_json(results, false_pos, false_neg):
+    """Machine-readable package (task #126): every case with its expectation and outcome, FP/FN
+    reported separately, versioned — so the claim "0 FP on the published benchmark for release X"
+    is reproducible by anyone with `python tools/benchmark.py --json`."""
+    import json as _j
+    print(_j.dumps({"benchmark_version": BENCHMARK_VERSION,
+                    "reproduce": "PYTHONPATH=src python tools/benchmark.py --json",
+                    "cases": results, "false_positives": false_pos,
+                    "false_negatives": [{"case": d, "verdict": v} for d, v in false_neg],
+                    "totals": {"cases": len(results),
+                               "false_positives": len(false_pos),
+                               "false_negatives": len(false_neg)}},
+                   ensure_ascii=False, indent=1))
+
+
+def run(verbose: bool = True, as_json: bool = False):
     cats = {"equality": [0, 0, 0, 0], "inequality": [0, 0, 0, 0], "derivative": [0, 0, 0, 0]}
     false_pos, false_neg = [], []
+    rows = []
     for label, spec, desc in CLAIMS:
         mode = spec["mode"]
         try:
@@ -118,6 +137,8 @@ def run(verbose: bool = True):
             verdict = "ERROR:" + str(e)[:40]
         holds = (verdict == "HOLDS")
         correct = (holds == label)
+        rows.append({"case": desc, "mode": mode, "expected_holds": bool(label),
+                     "verdict": verdict, "correct": correct})
         c = cats[mode]
         c[0] += 1
         if correct:
@@ -132,6 +153,9 @@ def run(verbose: bool = True):
     corr = sum(c[1] for c in cats.values())
     fp = sum(c[2] for c in cats.values())
     fn = sum(c[3] for c in cats.values())
+    if as_json:
+        emit_json(rows, false_pos, false_neg)
+        return 1 if false_pos else 0
     if verbose:
         print("LOCAL derivation-moat benchmark  (concordance 2.0)")
         print(f"{'mode':12s} {'n':>3s} {'correct':>8s} {'acc':>7s} {'false-pos':>10s} {'false-neg':>10s}")
@@ -149,5 +173,7 @@ def run(verbose: bool = True):
 
 
 if __name__ == "__main__":
+    if "--json" in sys.argv:
+        raise SystemExit(run(verbose=False, as_json=True))
     n, corr, fp, fn = run()
     sys.exit(0 if (corr == n and fp == 0) else 1)
