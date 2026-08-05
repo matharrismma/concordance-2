@@ -14,10 +14,13 @@ seed a set; a full 77k crawl runs slowly over time, polite to Project Gutenberg'
 from __future__ import annotations
 
 import gzip
+import hashlib
+import json
 import os
 import sqlite3
 import sys
 import time
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -38,11 +41,20 @@ def _db() -> sqlite3.Connection:
     c = sqlite3.connect(str(d / "texts.db"))
     c.execute("create table if not exists books (id integer primary key, title text, "
               "raw_bytes integer, gz blob, stored_at text)")
+    # the WAYBILL (two-tier distribution): every held book carries its origin URL and the
+    # sha256 of the exact bytes fetched, so any copy can be re-verified and re-fetched from
+    # what the drive HOLDS. Idempotent column adds for stores minted before the waybill.
+    for col in ("url text", "sha256 text"):
+        try:
+            c.execute(f"alter table books add column {col}")
+        except sqlite3.OperationalError:
+            pass                                        # already present
     c.commit()
     return c
 
 
-def _fetch(gid: int) -> bytes | None:
+def _fetch(gid: int) -> tuple[bytes, str] | None:
+    """The bytes AND the exact mirror URL they came from — the waybill needs both."""
     for url in (f"https://www.gutenberg.org/cache/epub/{gid}/pg{gid}.txt",
                 f"https://www.gutenberg.org/files/{gid}/{gid}-0.txt",
                 f"https://www.gutenberg.org/files/{gid}/{gid}.txt"):
@@ -52,7 +64,7 @@ def _fetch(gid: int) -> bytes | None:
                 if r.status == 200:
                     data = r.read()
                     if data and len(data) > 200:
-                        return data
+                        return data, url
         except Exception:  # noqa: BLE001 — try the next mirror form
             continue
     return None
@@ -72,13 +84,17 @@ def store(ids, delay: float = 1.5) -> int:
     for gid in ids:
         if gid in have:
             print(f"  {gid}: already held"); continue
-        data = _fetch(gid)
-        if not data:
+        got = _fetch(gid)
+        if not got:
             print(f"  {gid}: not found"); continue
+        data, url = got
         text = data.decode("utf-8", errors="replace")
         gz = gzip.compress(data, 6)
-        c.execute("insert or replace into books (id,title,raw_bytes,gz,stored_at) values (?,?,?,?,?)",
-                  (gid, _title(text), len(data), gz, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())))
+        digest = hashlib.sha256(data).hexdigest()
+        c.execute("insert or replace into books (id,title,raw_bytes,gz,stored_at,url,sha256) "
+                  "values (?,?,?,?,?,?,?)",
+                  (gid, _title(text), len(data), gz,
+                   time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), url, digest))
         c.commit()
         n += 1
         print(f"  {gid}: stored {len(data):>9,}B -> {len(gz):>9,}B gz ({len(data)/max(1,len(gz)):.1f}x)  {_title(text)[:48]}")
@@ -102,12 +118,37 @@ def stats():
           f"({raw/max(1,gz):.1f}x compression)")
 
 
+def topic_ids(query: str, pages: int = 2) -> list[int]:
+    """Mine Gutenberg ids for a topic via the Gutendex catalog (any language) — the
+    want-list builder for the technical-first drive fill. Popularity-ordered."""
+    ids: list[int] = []
+    # topic= matches SUBJECTS and BOOKSHELVES (where the technical canon is filed);
+    # search= only matches titles/authors and misses most of it
+    url = "https://gutendex.com/books?topic=" + urllib.parse.quote(query)
+    for _ in range(max(1, pages)):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": _UA})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                page = json.load(r)
+        except Exception as e:  # noqa: BLE001
+            print(f"  gutendex: {e}"); break
+        ids.extend(int(b["id"]) for b in page.get("results", []) if b.get("id"))
+        url = page.get("next") or ""
+        if not url:
+            break
+        time.sleep(1.0)                                # polite to the catalog too
+    return ids
+
+
 def main() -> int:
     a = sys.argv[1:]
     if "--stats" in a:
         stats(); return 0
     if "--ids" in a:
         ids = [int(x) for x in a[a.index("--ids") + 1].split(",") if x.strip().isdigit()]
+    elif "--topic" in a:
+        ids = topic_ids(a[a.index("--topic") + 1])
+        print(f"  topic matched {len(ids)} books")
     elif "--seed" in a:
         ids = _SEED
     else:
