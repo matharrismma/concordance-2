@@ -31,8 +31,12 @@ _SEED = [1342, 84, 1661, 11, 2701, 1400, 98, 74, 76, 345, 1260, 158, 205, 46, 17
 
 
 def _base() -> Path:
-    b = os.environ.get("CONCORDANCE_LW_BASE", "").strip()
-    return Path(b) if b else Path("D:/nh-backup/mirror/repo/lw/00_source")
+    # The ARK anchor — where NEW acquisitions land. NEVER a mirror/backup target: the old
+    # default (D:/nh-backup/mirror/...) was owned by the nightly "NH Substrate Backup" task,
+    # whose delete-sync WIPED 497 stored books on 2026-08-05. A mirror target holds only what
+    # its source holds; new content anchors in a directory nothing else considers authoritative.
+    b = os.environ.get("CONCORDANCE_ARK_BASE", "").strip()
+    return Path(b) if b else Path("D:/NarrowHighway-Sources")
 
 
 def _db() -> sqlite3.Connection:
