@@ -111,12 +111,20 @@ def verify_drug_dosage(spec: Dict[str, Any]) -> VerifierResult:
     actual = dpk * wf
     tol = clamp_tol(spec, "tolerance_mg", max(0.5, actual * 0.02))  # 2% or 0.5mg
     diff = abs(actual - c)
+    # SAFETY (red team 2026-08-06): this verifies the ARITHMETIC of dose = dose_mg_per_kg × weight_kg
+    # ONLY — never that the dose is clinically safe. A correct multiplication can be a lethal dose
+    # (e.g. 150 mg/kg acetaminophen in a toddler). The caveat MUST ride in the headline detail so a
+    # CONFIRMED verdict can never be rendered/sealed as "this dose is right." (Also carried in data.)
+    _clin = ("  Checks the arithmetic only — NOT that this dose is safe or correct for any drug, "
+             "condition, or person. A correct calculation can still be a dangerous dose. Confirm "
+             "with a clinician or pharmacist before giving any medication.")
     data = {"dose_mg_per_kg": dpk, "weight_kg": wf,
             "actual_dose_mg": actual, "claimed_dose_mg": c,
-            "diff_mg": diff, "formula": "dose = dose_mg_per_kg * weight_kg"}
+            "diff_mg": diff, "formula": "dose = dose_mg_per_kg * weight_kg",
+            "scope": ("arithmetic of the stated formula only — not a clinical-safety judgement")}
     if diff <= tol:
-        return confirm(name, f"{dpk} mg/kg × {wf} kg = {actual:.1f} mg (matches claim)", data)
-    return mismatch(name, f"dose = {actual:.1f} mg, claimed {c} mg (diff {diff:.1f})", data)
+        return confirm(name, f"{dpk} mg/kg × {wf} kg = {actual:.1f} mg (arithmetic matches claim)." + _clin, data)
+    return mismatch(name, f"dose = {actual:.1f} mg, claimed {c} mg (diff {diff:.1f})." + _clin, data)
 
 
 # ── Blood pressure classification (AHA 2017) ─────────────────────────────────

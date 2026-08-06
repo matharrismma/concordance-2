@@ -47,7 +47,50 @@ _CRISIS_WORDS = ("suicide", "suicidal", "kill myself", "killing myself", "end my
                  # gate is added — an exclusion on the safety check is how a bypass gets built.
                  "wanted to die", "wanting to die", "wanted to end it", "ending it all",
                  "ending my life", "ending my own life",
-                 "feel like ending it", "felt like ending it")
+                 "feel like ending it", "felt like ending it",
+                 # Red team, 2026-08-06: an adversarial pass of 30 realistic phrasings missed all 30.
+                 # These close the confirmed holes. The asymmetry stands (an unnecessary helpline is a
+                 # small cost; a missed person is not), so this widens coverage and adds no exclusion.
+                 # Attempt IN PROGRESS — the highest-cost miss (a person mid-act must not reach search):
+                 "took a whole bottle", "took a bottle of pills", "swallowed a bottle",
+                 "swallowed a bunch of pills", "took a bunch of pills", "took too many pills",
+                 "took all my pills", "took all the pills", "overdosed", "slit my wrists",
+                 "slitting my wrists", "cut my wrists", "cutting my wrists", "going to jump",
+                 "about to jump", "ready to jump", "jump off a bridge", "jump off the bridge",
+                 "gun to my head", "put a gun to", "end myself",
+                 # The commonest idioms of ideation:
+                 "wish i was dead", "wish i were dead", "wish i could die", "wish i would die",
+                 "want to be dead", "dont want to be alive", "dont want to live anymore",
+                 "dont want to exist", "want to disappear", "want to vanish",
+                 "cant take it anymore", "cant take this anymore", "im a burden",
+                 "burden to everyone", "burden to my family", "done with life",
+                 "want it to be over", "want it all to be over", "nobody would miss me",
+                 "no one would miss me", "better off without me here", "life isnt worth living",
+                 "life is not worth living", "not worth living anymore", "tired of living",
+                 "tired of being alive",
+                 # Abbreviations and euphemisms (the youth/teen demographic). "kms"/"kys" are NOT
+                 # in this substring list: as bare substrings they collide with real, common queries
+                 # ("convert 5 kms to miles" — the unit_convert domain — "i ran 10 kms", "whiskys"),
+                 # so they are matched only as the whole message instead (see _CRISIS_EXACT below).
+                 "unalive", "unaliving", "sewerslide",
+                 # Spanish — an explicit audience (the es_en curriculum). A caught crisis still
+                 # surfaces findahelpline.com (international); localizing the response is a follow-up.
+                 "quiero morir", "me quiero morir", "ya no quiero vivir", "quiero matarme",
+                 "me quiero matar", "quiero acabar con mi vida", "acabar con mi vida",
+                 "no quiero vivir", "no quiero seguir viviendo", "quitarme la vida",
+                 "quiero desaparecer")
+
+# Short self-harm abbreviations ("kms" = kill myself, "kys"). As substrings they collide with real,
+# common queries ("5 kms to the store", the unit_convert domain, "whiskys"), so they count only as
+# the entire normalized message — where the lone word "kms"/"kys" is the self-harm sense, not a
+# distance. This is a targeted inclusion of an ambiguous token in its unambiguous form, NOT an
+# exclusion carved into a crisis phrase: every full phrase in _CRISIS_WORDS still matches anywhere.
+_CRISIS_EXACT = frozenset({"kms", "kys"})
+
+# Requests to grade, rank, or label the user's OWN child are a child-protection matter however they
+# route (checked in respond() before the general search path). Kept here as the cheap pre-filter so
+# coach.py is imported only when a child is actually named. Leading space => word start after norm.
+_CHILD_REFERENTS = (" my kid", " my child", " my son", " my daughter")
 
 # Smart quotes in, straight quote out; then apostrophes dropped entirely so dont == don't.
 _SMART_QUOTES = str.maketrans({"’": "'", "‘": "'", "‛": "'", "´": "'", "`": "'"})
@@ -70,7 +113,8 @@ def normalize(text: str) -> str:
 
 def is_crisis(text: str) -> bool:
     """The one crisis test. Every surface calls this — a copied list is a list that drifts."""
-    return any(w in normalize(text) for w in _CRISIS_WORDS)
+    t = normalize(text)
+    return t in _CRISIS_EXACT or any(w in t for w in _CRISIS_WORDS)
 
 
 # The Fellowship Mesh ("The Way") is hidden — never advertised. The agent opens the door ONLY when
@@ -625,6 +669,16 @@ def _connected_cloud(card_id: str, *, limit: int = 5) -> List[Dict[str, Any]]:
     return cloud
 
 
+def _coach_refusal(base: Dict[str, Any], guard: Dict[str, Any], text: str,
+                   witness: bool, gate_just_opened: bool) -> Dict[str, Any]:
+    """Render the child-protection refusal as a coach turn: Coach teaches; it never grades or
+    labels a person. Shared by the early (a child is named) and in-context (Router→coach) checks."""
+    return _witnessed({**base, "kind": "coach", "message": guard["message"],
+                       "resources": [{"label": p, "ref": None} for p in guard.get("point_to", [])]
+                       + [{"label": guard.get("do_instead", "Ask for the next lesson"), "ref": "/read.html"}]},
+                      text, witness, gate_just_opened)
+
+
 def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
             gate_just_opened: bool = False) -> Dict[str, Any]:
     """Compose a conduit response: found + verified + cited + curated material only. No LLM.
@@ -645,6 +699,18 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
         return {**base, "message": "You matter, and you don't have to carry this alone. Please "
                 "reach a real person right now — someone who can be with you.",
                 "resources": _CRISIS_RESOURCES}
+
+    # SAFETY (red team 2026-08-06): a request to grade, rank, or label the user's OWN child is a
+    # child-protection matter however it would otherwise route. "is my kid behind for his age"
+    # carries no teaching keyword, so the Router never sends it to Coach and the in-coach guardrail
+    # below never runs — it fell through to a generic search. Enforce it here for any text that
+    # names a child. Scoped to a named child so generic phrasings ("what grade level is this book",
+    # "how do I diagnose a car") are untouched. Crisis already returned above and still outranks this.
+    if any(p in " " + normalize(text) for p in _CHILD_REFERENTS):
+        from . import coach as _coach_early
+        _cg = _coach_early.coach_guardrail(text)
+        if _cg is not None:
+            return _coach_refusal(base, _cg, text, witness, gate_just_opened)
 
     # The hidden door: revealed only to a seeker of the body (never in crisis — that returned above).
     if _seeks_the_way(text):
@@ -958,6 +1024,13 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
 
     if member == "coach":
         from . import coach as _co
+        # SAFETY (red team 2026-08-06): a request to grade/rank/label a child is refused earlier in
+        # respond() (the _CHILD_REFERENTS check), which catches it however it routes — including
+        # "is my kid behind for his age", which carries no teaching keyword and never reached here.
+        # It is deliberately NOT re-checked here on the generic judge patterns alone ("grade level",
+        # "reading level"): with no child named, "what grade level is this book" is a legitimate
+        # readability question, and the refusal message speaks of "a child" — firing it on a book
+        # would be a discernment failure (refuse abuse, not use).
         unit = {}
         try:
             unit = (_co.recommend(text) or {}).get("unit") or {}

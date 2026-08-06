@@ -11,6 +11,15 @@ import pytest
 
 os.environ["WEB_FIND_DISABLED"] = "1"
 
+# The computer_science verifier RUNS submitted code — its whole purpose. After the RCE fix (713de33)
+# that execution is refused unless CONCORDANCE_ALLOW_CODE_EXEC=1, so an anonymous caller on the
+# public box can never reach it. The test suite is a controlled environment running only its own
+# fixtures, so it opts in here to exercise the real code-runner (the FP gate, alias parity, and the
+# code-correctness reasoning test all depend on it). Production never loads conftest.py, so this
+# does NOT weaken the secure default — test_review_fixes.py::test_..._refuses_code_exec_by_default
+# clears the var and proves the refusal still holds.
+os.environ["CONCORDANCE_ALLOW_CODE_EXEC"] = "1"
+
 ROOT = Path(__file__).resolve().parent.parent
 
 _REAL_CARDS: dict = {}
