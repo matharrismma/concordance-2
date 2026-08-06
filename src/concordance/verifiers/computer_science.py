@@ -17,6 +17,7 @@ intended for snippets the user controls; do not run untrusted input.
 from __future__ import annotations
 import ast
 import math
+import os
 import time
 from typing import Any, Callable, Dict, List, Tuple
 
@@ -132,8 +133,31 @@ _SAFE_BUILTINS = {
 }
 
 
+# Executing caller-supplied code is OFF by default. A restricted-__builtins__ namespace is NOT a
+# sandbox: real builtins are trivially recovered via object introspection
+# (math.__loader__.__globals__, ().__class__.__bases__[0].__subclasses__()), so exec()'ing a
+# caller's `code` here was an UNAUTHENTICATED remote-code-execution reachable from public
+# POST /verify (red team, 2026-08-06, CRITICAL). No in-process restricted namespace can be made
+# safe. A local/sovereign operator on an ISOLATED box may opt in with CONCORDANCE_ALLOW_CODE_EXEC=1;
+# the hosted engine never runs caller code.
+class _CodeExecutionDisabled(RuntimeError):
+    """Raised when a verifier is asked to run caller-supplied code and exec is not permitted."""
+
+
+def _code_exec_allowed() -> bool:
+    """Read at CALL time (not import) so it is togglable and testable; default OFF."""
+    return os.environ.get("CONCORDANCE_ALLOW_CODE_EXEC") == "1"
+
+
 def _exec_function(code: str, function_name: str) -> Callable:
-    """Execute the snippet in a restricted namespace and return the named function."""
+    """Execute the snippet in a restricted namespace and return the named function.
+
+    Gated: refuses unless CONCORDANCE_ALLOW_CODE_EXEC=1 (see the note above — this ran an
+    unauthenticated RCE on the hosted engine). Callers turn the refusal into a non-verdict."""
+    if not _code_exec_allowed():
+        raise _CodeExecutionDisabled(
+            "executing caller-supplied code is disabled on this engine "
+            "(deterministic verification does not run arbitrary code)")
     ns: Dict[str, Any] = {"__builtins__": _SAFE_BUILTINS}
     # Allow math import explicitly (read-only)
     import math as _m

@@ -65,19 +65,79 @@ _MAX_POW_EXP = 10000
 _MAX_AST_NODES = 2000
 _MAX_AST_DEPTH = 60
 
+# SECURITY (red team 2026-08-06, CRITICAL): sympy.sympify() EVALUATES arbitrary Python — an
+# expr like "__import__('os').system(...)" was an unauthenticated RCE reachable from public
+# POST /verify (the flagship math path). The old blacklist missed '.', '_', '(', quotes. The guard
+# below is now an ALLOWLIST over the parsed AST: only pure mathematics reaches sympify. An escape
+# needs a sink (eval/open/getattr/attribute) or a way to NAME a target (a string/dunder) — all are
+# refused here, so the type-graph and import escapes cannot be expressed. A missing function name
+# yields INCOMPLETE (an honest gap), never a false verdict — add names here as real math needs them.
+_ALLOWED_FUNCS = frozenset({
+    # trig / inverse / hyperbolic
+    "sin", "cos", "tan", "cot", "sec", "csc", "sinc", "asin", "acos", "atan", "acot", "asec",
+    "acsc", "atan2", "sinh", "cosh", "tanh", "coth", "sech", "csch", "asinh", "acosh", "atanh",
+    "acoth", "deg", "rad",
+    # exp / log / roots / powers
+    "exp", "log", "ln", "sqrt", "cbrt", "root", "Pow",
+    # abs / sign / rounding
+    "Abs", "abs", "sign", "floor", "ceiling", "frac", "round",
+    # number theory / combinatorics
+    "Mod", "gcd", "lcm", "igcd", "ilcm", "factorial", "factorial2", "binomial", "totient",
+    "isprime", "factorint", "primerange", "nextprime", "prevprime",
+    # special functions
+    "gamma", "loggamma", "polygamma", "digamma", "beta", "erf", "erfc", "erfi", "zeta",
+    "Ei", "li", "Si", "Ci",
+    # min / max / complex
+    "Min", "Max", "re", "im", "conjugate", "arg",
+    # numbers / symbols
+    "Rational", "Integer", "Float", "Number", "Symbol", "symbols", "Dummy",
+    # relations / logic
+    "Eq", "Ne", "Lt", "Le", "Gt", "Ge", "Equality", "Unequality", "StrictLessThan", "LessThan",
+    "StrictGreaterThan", "GreaterThan", "Relational", "And", "Or", "Not", "Xor", "Nand", "Nor",
+    "Implies", "Equivalent", "ITE", "Piecewise",
+    # calculus
+    "diff", "Derivative", "integrate", "Integral", "limit", "Limit", "Sum", "summation",
+    "Product", "product", "Subs",
+    # algebra / manipulation
+    "simplify", "expand", "factor", "cancel", "together", "apart", "collect", "trigsimp",
+    "radsimp", "nsimplify", "N", "evalf", "Poly", "degree", "solve", "solveset", "roots",
+    # matrices
+    "Matrix", "ImmutableMatrix", "eye", "zeros", "ones", "diag", "Transpose", "det", "trace",
+    "Determinant", "Trace", "Inverse", "transpose",
+    # containers sympy constructors sometimes need
+    "Tuple", "Interval", "FiniteSet", "S",
+})
+
+_UNSAFE_NODES = (_ast.Attribute, _ast.Lambda, _ast.ListComp, _ast.SetComp, _ast.DictComp,
+                 _ast.GeneratorExp, _ast.Await, _ast.Yield, _ast.YieldFrom, _ast.NamedExpr,
+                 _ast.Starred, _ast.JoinedStr, _ast.FormattedValue, _ast.Import, _ast.ImportFrom)
+
 
 def _ast_compute_guard(expr: str):
-    """Reject pathological inputs (giant exponents, power towers, oversized/too-deep
-    expressions) before SymPy evaluates them. Raises _SympifyError on rejection."""
+    """Reject pathological AND dangerous inputs before SymPy evaluates them: giant exponents /
+    power towers / oversized trees (DoS), and — critically — anything that is not pure mathematics
+    (attribute access, string literals, underscore/dunder names, lambdas/comprehensions, or a call
+    to a non-mathematical function), which would be arbitrary code execution via sympify. Raises
+    _SympifyError on rejection. An input Python cannot parse is rejected (never passed to eval)."""
     try:
         tree = _ast.parse(str(expr), mode="eval")
     except SyntaxError:
-        return
+        raise _SympifyError("expression is not parseable as mathematics")
     n = 0
     for node in _ast.walk(tree):
         n += 1
         if n > _MAX_AST_NODES:
             raise _SympifyError("expression too large")
+        if isinstance(node, _UNSAFE_NODES):
+            raise _SympifyError("expression contains a non-mathematical construct")
+        if isinstance(node, _ast.Constant) and isinstance(node.value, (str, bytes)):
+            raise _SympifyError("string literals are not allowed in a math expression")
+        if isinstance(node, _ast.Name) and node.id.startswith("_"):
+            raise _SympifyError("names beginning with underscore are not allowed")
+        if isinstance(node, _ast.Call):
+            fn = node.func
+            if not isinstance(fn, _ast.Name) or fn.id not in _ALLOWED_FUNCS:
+                raise _SympifyError("call to a non-mathematical function is not allowed")
         if isinstance(node, _ast.BinOp) and isinstance(node.op, _ast.Pow):
             ex = node.right
             val = None

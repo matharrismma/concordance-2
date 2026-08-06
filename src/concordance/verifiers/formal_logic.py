@@ -66,6 +66,12 @@ def _parse(formula: str, var_names: List[str]):
         "true": Sym_True, "false": Sym_False,
         "True": Sym_True, "False": Sym_False,
     })
+    # SECURITY (red team 2026-08-06, CRITICAL): sympify evaluates arbitrary Python — this call had
+    # no guard at all. Reuse the math verifier's pure-mathematics AST allowlist (attribute access,
+    # string literals, underscore/dunder names, and non-mathematical calls are refused) so a Boolean
+    # formula can never carry code. Logic constructors (And/Or/Not/Implies/Equivalent/Xor) are on it.
+    from .mathematics import _ast_compute_guard as _guard
+    _guard(formula)
     return sympy.sympify(formula, locals=locals_)
 
 
