@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>What we prove — and what we won't — Narrow Highway</title>
-<meta name="description" content="330 scientific and mathematical theories run through a deterministic engine: 235 sealed with re-checkable receipts, 53 honestly refused as out of scope, every falsehood caught, 0 false positives on the published benchmark, every build. The refusals are the point.">
+<meta name="description" content="178 theories mapped through a deterministic engine, with 285 relations between them: each checkable claim sealed with a re-checkable receipt, or honestly refused as out of scope. 0 false positives in this assay. The refusals are the point.">
 <meta property="og:title" content="What we prove — and what we won't">
-<meta property="og:description" content="330 theories assayed: 235 sealed with receipts, 53 refused as unprovable, 0 false positives. A machine that can say 'I can't seal that.'">
+<meta property="og:description" content="178 theories mapped and assayed through a deterministic engine: checkable claims sealed with receipts, the rest honestly refused as out of scope. 0 false positives in this assay. A machine that can say 'I can't seal that.'">
 <meta property="og:type" content="website">
 <link rel="canonical" href="/proof.html">
 <style>
@@ -58,21 +58,23 @@
 <body>
 <header class="site"><div class="bar">
   <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
-  <nav class="site"><a href="/#verify">Verify</a><a href="/reason.html">Reason</a><a href="/boundary.html">Boundary</a><a href="/connect.html">Connect</a><a href="/audit.html">Audit</a></nav>
+  <nav class="site"><a href="/#verify">Verify</a><a href="/connect.html">Connect</a><a href="/graph">Map</a></nav>
 </div></header>
 <main class="wrap">
-  <div class="kicker">The assay · 330 theories</div>
+  <div class="kicker">The assay · 178 theories mapped</div>
   <h1>What we prove — and what we won't</h1>
-  <p class="lede">We ran 330 scientific and mathematical theories through the engine, deterministically,
-  with no model in the loop. Each result is a <b>verdict + a worked trail + a re-checkable seal</b>.
-  The number that matters most is the last one: it has <b>never sealed a falsehood</b>. And the part
-  that earns your trust is not the 235 it confirmed — it's the 53 it <b>refused</b>.</p>
+  <p class="lede">We mapped <b>178 theories</b> and 285 relations between them through the engine,
+  deterministically, with no model in the loop. Each checkable result is a <b>verdict + a worked
+  trail + a re-checkable seal</b>. The number that matters most: across this assay, <b>0 sealed
+  claims were false</b> — a measured result on this set, not a promise the engine can never err;
+  when it does, we fix it and re-run. And the part that earns your trust is not the ones it
+  confirmed — it's the ones it <b>refused</b>.</p>
 
   <section class="scorecard">
-    <div class="stat pass"><b>235</b><span>sealed · HOLDS</span></div>
-    <div class="stat"><b>53</b><span>refused · out of scope</span></div>
-    <div class="stat"><b>60</b><span>domains covered</span></div>
-    <div class="stat zero"><b>0</b><span>false positives · ever</span></div>
+    <div class="stat pass"><b>178</b><span>theories mapped</span></div>
+    <div class="stat"><b>285</b><span>relations between them</span></div>
+    <div class="stat"><b data-cap="verifiers.secular_modules">62</b><span>domains covered</span></div>
+    <div class="stat zero"><b>0</b><span>false positives · in this assay</span></div>
   </section>
   <p class="sub">Every checkable claim carries a receipt you can re-fetch by its content hash;
   re-fetch and the bytes must match, or it is not that record. Don't trust us — re-check it.
@@ -81,7 +83,7 @@
   <h2>Sealed — a receipt, not "trust me"</h2>
   <p class="sub">A sample across the fleet. Each links to its permanent, re-verifiable seal.</p>
   <div id="seals"></div>
-  <p class="sub"><a href="/#verify">Try one yourself in the browser →</a> · ~60 domains: physics,
+  <p class="sub"><a href="/#verify">Try one yourself in the browser →</a> · dozens of domains: physics,
   medicine, finance, chemistry, law, statistics, cryptography, optics, genetics, music, and more.</p>
 
   <h2>Reasoned in chains — composed derivations</h2>
@@ -94,7 +96,7 @@
   case passes.</p>
   <div class="chain">def add(a, b): return a + b <span class="arrow">→</span> f(1,2)=3 ✓ · f(5,7)=12 ✓ <span class="arrow">→</span> HOLDS</div>
 
-  <h2>Refused — the 53 it would not seal</h2>
+  <h2>Refused — the ones it would not seal</h2>
   <p class="refuse">These are famous, published, argued-over — and not one is a deterministic
   computation. So the engine returned <b>INCOMPLETE</b>: honest silence, never a false verdict.
   A machine that cannot say <i>"I can't seal that"</i> cannot be trusted when it says <i>"this holds."</i>
@@ -109,11 +111,12 @@
   not verify Him. <a href="https://narrowhighway.org">The fuller witness →</a></div>
 
   <footer class="site">
-    <p>Found, verified, cited — never generated. 330 theories, 235 sealed, 53 refused, 0 false
-    positives. The full record: <a href="https://github.com/matharrismma/concordance-2/blob/master/docs/THEORY_CATALOG.md">docs/THEORY_CATALOG.md</a>.
+    <p>Found, verified, cited — never generated. 178 theories mapped, 285 relations, 0 false
+    positives in this assay. The full record: <a href="https://github.com/matharrismma/concordance-2/blob/master/docs/THEORY_CATALOG.md">docs/THEORY_CATALOG.md</a>.
     <a href="/">Narrow Highway →</a></p>
   </footer>
 </main>
+<script src="/nh-caps.js"></script>
 <script>
 (function(){
   var B = location.origin;

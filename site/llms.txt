@@ -29,7 +29,7 @@ two surfaces: **narrowhighway.com** (the reach — accessible to all) and **narr
 and finds; it does not generate the answer.
 
 **Nothing is hidden.** The two surfaces differ in VOICE — how a reader is met — never in what they
-will show you. Every route and every one of the 79 MCP tools answers on both. Until 2026-07-31 the
+will show you. Every route and every MCP tool answers on both. Until 2026-07-31 the
 Word, the dictionary, the canon and the lexicon were held behind a conversational gate on the
 secular surface; twenty tools were invisible to any agent reading .com. That is over: we do not
 hide knowledge. What is still governed is not knowledge — the operator console is authority, a
@@ -70,7 +70,7 @@ can shape a structured claim.
   carries a `means` line defining exactly what was counted (module vs. router alias vs. file), so a
   count can neither go stale nor be misread. Read this rather than trusting any number written in
   prose — including the round numbers below.
-- `POST /verify` — verify a claim across **~60 domains**, not just math.
+- `POST /verify` — verify a claim across **dozens of domains** (call `capabilities` for the live list), not just math.
   MATH form: `{"mode":"equality|inequality|derivative|integral|limit|solve","params":{...}}`.
   DOMAIN form: `{"steps":[{"id":"a","domain":"physics","spec":{"PHYS_VERIFY":{"mass_kg":10.0,
   "acceleration_m_per_s2":9.8,"claimed_force_N":98.0}}}]}` — domains include physics, medicine,
@@ -83,8 +83,9 @@ can shape a structured claim.
   is true. Do not report it to a user as a refutation, and do not retry it as though the claim were
   at fault — it carries a `means` line and an `error_at` naming the step we failed on. `INCOMPLETE`
   means no verifier applied (`gap_at`). Only `BROKEN` is a finding about the caller.
-  A public benchmark holds **0 false-positives across every domain** — the engine has never
-  sealed a falsehood (e.g. `x/x = 1` is caught — undefined at x=0 — not sealed). Tolerances are
+  A public benchmark holds **0 false-positives across its published cases**, every build (e.g.
+  `x/x = 1` is caught — undefined at x=0 — not sealed). That bound is the benchmark's; it is not a
+  claim that the engine cannot err outside it — when it does, we fix it and re-run. Tolerances are
   clamped: a caller may tighten a check, never loosen one.
 - `POST /audit` — the Auditor: body `{"text":"..."}` (a paycheck, receipt, label, article).
   Deterministic extractors find every UNAMBIGUOUSLY checkable claim (sums, percentages, hourly/
@@ -128,8 +129,8 @@ equality/inequality; other claim types quarantine rather than pretend to judge.)
   `/timeline` · `/backmatter` · `/places` · `/prophecy` · `/seeds` · `/narratives` · `/teachings`.
 
 ## The Corpus — the whole body, browsable
-`/corpus.html` holds the keeping in four sections over one body: **the shelves** (551,756 cards
-across 106 shelves and 30 decks), **the drawers** (the reference section walked A–Z), **the
+`/corpus.html` holds the keeping in four sections over one body: **the shelves** (over half a
+million cards across its shelves and decks — call `capabilities` for live counts), **the drawers** (the reference section walked A–Z), **the
 manuscript** (the compiled, cross-indexed body with its authority spine), and **the worked volume**
 (sealed demonstrations you can re-check). It replaced four pages that were doing one job — the old
 addresses `/library.html`, `/catalog.html`, `/codex.html` and `/works.html` all 301 onto it and

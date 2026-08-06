@@ -1,9 +1,9 @@
 # The Door — getting the engine in front of agents
 
 The remote MCP server is live and unauthenticated at `https://narrowhighway.com/mcp`
-(Streamable HTTP; ~37 tools; witness surface at `https://narrowhighway.org/mcp`).
-The on-site doors are `/connect.html` (humans setting up agents), `/llms.txt` (agents
-reading the site), and `/corrected.html` (the trust story).
+(Streamable HTTP; dozens of tools — call `capabilities` for the live count; witness surface at
+`https://narrowhighway.org/mcp`). The on-site doors are `/connect.html` (humans setting up
+agents), `/llms.txt` (agents reading the site), and `/proof.html` (what we prove — and what we won't).
 
 What remains is **publishing** — listing the server where agents and their people already
 look. Submissions are outward-facing, so they are Matt's to send. Everything below is
@@ -13,17 +13,18 @@ ready to paste.
 
 - **Name:** Concordance
 - **Server URL:** `https://narrowhighway.com/mcp` (remote, Streamable HTTP, no auth)
-- **One-liner:** Deterministic verification with receipts — verify claims across ~60 domains
+- **One-liner:** Deterministic verification with receipts — verify claims across dozens of domains
   (math, physics, medicine, finance, law, ...) and get a verdict, the worked trail, and a
   permanent content-addressed seal anyone can re-check. 0 false positives, benchmarked.
 - **Longer description:** Language models generate; Concordance verifies. The `verify`
   tool checks a claim deterministically (no model in the loop) and returns
   HOLDS / BROKEN / INCOMPLETE with the worked reasoning and a sealed receipt
   (`content_hash` + `cite_url`) that re-fetches byte-identical or not at all. Also:
-  ranked `search` over an ~11k-record library, `seal_fetch` to re-verify any receipt,
-  `redact` to strip PII before text travels, and a sealed connection graph. Runs
-  sovereign/offline too (stdlib-first Python). A public false-positive benchmark covers
-  every domain: the engine has never sealed a falsehood. 38 tools live.
+  ranked `search` over a library of over half a million records, `seal_fetch` to re-verify any
+  receipt, `redact` to strip PII before text travels, and a sealed connection graph. Runs
+  sovereign/offline too (stdlib-first Python). The test suite covers every domain; the public
+  false-positive benchmark itself bounds three modes across 60 cases — 0 false positives on that
+  benchmark, every build (not a claim the engine cannot err elsewhere). Dozens of tools live.
 - **Categories:** verification · math · research · trust & safety · knowledge base
 - **Maintainer:** M. Harris — mharris.wcs@icloud.com
 - **Homepage:** `https://narrowhighway.com` (the site brand is Narrow Highway; the engine
@@ -35,7 +36,7 @@ ready to paste.
    `mcp.so/server/concordance-engine/matharrismma` but describes the 1.0 engine
    ("eleven verifier tools", stdio). Update it in place (keeps any accumulated standing +
    the existing `concordance-engine` slug already matches the name): the REMOTE url
-   `https://narrowhighway.com/mcp`, 38 tools, ~60 domains, the copy above.
+   `https://narrowhighway.com/mcp`, 38 tools, dozens of domains, the copy above.
 1. **Official MCP servers list** — github.com/modelcontextprotocol/servers → PR adding one
    line under "Community Servers" using the copy above. Highest trust signal; agents and
    client vendors read this list. NOT currently listed.
@@ -57,7 +58,7 @@ alphabetical — insert at the "C" position). This is the only destination that 
 special one-line markdown format:
 
 ```
-- **[Concordance](https://narrowhighway.com)** – Deterministic verification with receipts across ~60 domains (math, physics, medicine, finance, law…). Returns HOLDS/BROKEN/INCOMPLETE with the worked trail and a permanent, re-checkable content-addressed seal. No model in the loop; 0 false positives, benchmarked.
+- **[Concordance](https://narrowhighway.com)** – Deterministic verification with receipts across dozens of domains (math, physics, medicine, finance, law…). Returns HOLDS/BROKEN/INCOMPLETE with the worked trail and a permanent, re-checkable content-addressed seal. No model in the loop; 0 false positives, benchmarked.
 ```
 PR title: `Add Concordance (deterministic verification server)`
 PR body: one sentence + link to `https://narrowhighway.com/proof.html` as evidence.

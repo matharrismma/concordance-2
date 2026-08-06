@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Connect your agent — Narrow Highway</title>
-<meta name="description" content="Give any AI agent a deterministic verification engine: verdict, worked trail, and a permanent receipt you can re-check. 60 domains, 0 false positives on the published benchmark. One URL — no SDK, no key.">
+<meta name="description" content="Give any AI agent a deterministic verification engine: verdict, worked trail, and a permanent receipt you can re-check. 62 domains, 0 false positives on the published benchmark. One URL — no SDK, no key.">
 <meta property="og:title" content="Connect your agent — Narrow Highway">
-<meta property="og:description" content="A verification engine for agents: verdict + worked trail + a re-checkable receipt. 60 domains, 0 false positives on the published benchmark. Add one MCP URL.">
+<meta property="og:description" content="A verification engine for agents: verdict + worked trail + a re-checkable receipt. 62 domains, 0 false positives on the published benchmark. Add one MCP URL.">
 <meta property="og:type" content="website">
 <link rel="canonical" href="/connect.html">
 <style>
@@ -46,7 +46,7 @@
 <body>
 <header class="site"><div class="bar">
   <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
-  <nav class="site"><a href="/#verify">Verify</a><a href="/corrected.html">The Record</a><a href="/guarantees.html">Guarantees</a><a href="/map.html">Map</a><a href="/seal.html">Seal</a></nav>
+  <nav class="site"><a href="/#verify">Verify</a><a href="/proof.html">What we prove</a><a href="/graph">Map</a></nav>
 </div></header>
 <main class="wrap">
   <div class="kicker">For agents · The door</div>
@@ -54,8 +54,9 @@
   <p class="lede">Language models generate; they do not verify. This engine is the other half:
   hand it a claim and it returns a <b>verdict</b>, the <b>worked trail</b>, and a permanent
   <b>receipt</b> anyone can re-check — deterministic math and rules, no model in the loop.
-  Sixty domains. A public benchmark holding <b>0&nbsp;false&nbsp;positives</b>: it has never
-  sealed a falsehood. One URL. No SDK, no key, no cost.</p>
+  A public benchmark holds <b>0&nbsp;false&nbsp;positives</b> across its published cases, every
+  build — that bound is the benchmark's, not a claim the engine can never err. One URL. No SDK,
+  no key, no cost.</p>
   <p class="muted">The guarantee carries its own proof: the
   <a href="https://github.com/matharrismma/concordance-2/blob/master/docs/SEAL_SPEC.md">seal spec</a> is public,
   the <a href="https://github.com/matharrismma/concordance-2/blob/master/tools/verify_seal.py">independent verifier</a>
@@ -80,8 +81,9 @@
   <p class="sub">Your agent gains <code>verify</code> (verdict + trail + sealed receipt),
   <code>audit</code> (<a href="/audit.html">every checkable claim in a whole text</a>, one sealed
   report), <code>search</code> over the kept library, <code>seal_fetch</code> (re-check any
-  receipt by hash), <code>redact</code> (strip personal data before it travels), and ~30 more —
-  cards, the connection graph, the grid, daily readings.
+  receipt by hash), <code>redact</code> (strip personal data before it travels), and dozens more —
+  cards, the connection graph, the grid, daily readings. Call <code>capabilities</code> for the
+  exact, live tool count.
   The witness surface, <code>https://narrowhighway.org/mcp</code>, adds Scripture tools:
   passage reading, original-language word studies, cross-references.</p>
 
@@ -94,7 +96,7 @@
   -d '{"mode":"equality","params":{"expr_a":"sin(x)**2+cos(x)**2","expr_b":"1","variables":["x"]}}'</pre></div>
 
   <div class="step"><b>Verify any domain</b> — physics, medicine, finance, chemistry, law,
-    statistics, nutrition, cryptography, &hellip; (~60):
+    statistics, nutrition, cryptography, &hellip; (dozens):
     <pre>curl -X POST https://narrowhighway.com/verify \
   -H "Content-Type: application/json" \
   -d '{"steps":[{"id":"a","domain":"physics",
@@ -156,7 +158,8 @@ python -m concordance connect calendar    # just today's events</pre></div>
     <li><b>It does not keep what it reads from your tools.</b> The connector is a pass-through —
       your calendar, inbox, and files are read at the edge and never stored.</li>
     <li><b>It cannot be talked into a pass.</b> Tolerances are clamped — a caller may tighten a
-      check, never loosen it. The false-positive benchmark runs across every domain.</li>
+      check, never loosen it. The test suite covers every domain; the false-positive benchmark
+      itself bounds three modes across 60 published cases (see the benchmark doc).</li>
     <li><b>It does not seal matters of faith.</b> On the witness surface, theology tools mark
       concordance — a signpost, never a mathematical verdict.</li>
     <li><b>It does not keep your data.</b> Claim text is redacted before sealing; receipts carry
@@ -170,8 +173,7 @@ python -m concordance connect calendar    # just today's events</pre></div>
 
   <footer class="site">
     <p>Every answer is a receipt, not &ldquo;trust me.&rdquo; See
-    <a href="/guarantees.html">what we prove</a> — and
-    <a href="/corrected.html">the day the engine corrected its own record</a>.
+    <a href="/proof.html">what we prove — and what we won't</a>.
     A conduit, not the source. <a href="/">Narrow Highway →</a></p>
   </footer>
 </main>

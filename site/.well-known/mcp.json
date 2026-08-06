@@ -1,7 +1,7 @@
 {
   "name": "narrow-highway",
   "title": "Narrow Highway — deterministic verification with receipts",
-  "description": "Hand any AI agent a claim; get a verdict, the worked trail, and a permanent, independently re-checkable seal. Deterministic math and rules across 60 domains — no model in the loop. 0 false positives on the published benchmark. Free, no key.",
+  "description": "Hand any AI agent a claim; get a verdict, the worked trail, and a permanent, independently re-checkable seal. Deterministic math and rules across 62 domains — no model in the loop. 0 false positives on the published benchmark. Free, no key.",
   "endpoints": {
     "mcp": "https://narrowhighway.com/mcp",
     "profiles": {

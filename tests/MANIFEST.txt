@@ -173,3 +173,4 @@ test_watch.py
 test_wayfind.py
 test_witness.py
 test_xrefs.py
+test_caps_fresh.py

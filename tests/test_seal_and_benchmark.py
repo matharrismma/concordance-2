@@ -69,11 +69,14 @@ def test_the_benchmark_package_is_machine_readable_and_versioned():
 
 
 def test_every_public_claim_is_benchmark_bounded():
-    """The wording sweep, pinned: no public surface may claim a bare universal zero again."""
+    """The wording sweep, pinned: no public surface may claim a bare universal zero again — every
+    0-false-positive claim must NAME the set it is bounded to. That set is normally the published
+    benchmark; on proof.html it is the theory ASSAY it reports (a different, honestly-named bound —
+    conflating the two would be less honest, not more). What stays forbidden is an unscoped zero."""
     for f in ("README.md", "site/connect.html", "site/proof.html"):
         text = (ROOT / f).read_text(encoding="utf-8", errors="replace").lower()
         if "false positive" in text or "false-positive" in text:
-            assert "benchmark" in text, f"{f} claims 0 FP without naming the bound"
+            assert "benchmark" in text or "assay" in text, f"{f} claims 0 FP without naming the bound"
 
 
 def test_the_specs_exist_and_state_the_essentials():
