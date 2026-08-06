@@ -197,9 +197,22 @@ def verify_derivation(steps: List[Dict[str, Any]]) -> Dict[str, Any]:
     trail: List[Dict[str, Any]] = []
     seen_ids: set = set()
     confirmed_ids: set = set()
+    outcome_by_id: Dict[str, str] = {}   # sid -> effective outcome (CONFIRMED|BROKEN|ERROR|GAP)
     broken_at = None
     gap_at = None
     error_at = None
+
+    def _worst_dep_outcome(dep_ids: List[str]) -> str:
+        # A step confirmed in isolation but standing on unconfirmed ground inherits the WORST of
+        # what it stands on — but our-failure (ERROR) and a gap (NOT_APPLICABLE / a missing ref)
+        # must NEVER be manufactured into BROKEN. Only a genuine MISMATCH below carries a break up.
+        sev = {"BROKEN": 3, "ERROR": 2, "GAP": 1, "CONFIRMED": 0}
+        worst, wv = "GAP", 1
+        for u in dep_ids:
+            o = outcome_by_id.get(u, "GAP")   # a missing/unseen ref -> cannot evaluate -> GAP
+            if sev.get(o, 1) > wv:
+                worst, wv = o, sev[o]
+        return worst if worst != "CONFIRMED" else "GAP"
 
     for i, step in enumerate(steps):
         sid = str(step.get("id") or f"s{i}")
@@ -225,22 +238,34 @@ def verify_derivation(steps: List[Dict[str, Any]]) -> Dict[str, Any]:
         trail.append(entry)
         seen_ids.add(sid)
 
-        if st == "CONFIRMED" and link_ok:
-            confirmed_ids.add(sid)
-        elif st == "ERROR" and link_ok:
-            # OUR failure, not the caller's. Recorded separately so it can never be reported
-            # as a falsehood about their claim.
-            if error_at is None:
-                error_at = sid
+        # Classify this step's EFFECTIVE outcome. A step that builds on unconfirmed ground cannot
+        # stand — but WHY its ground is unconfirmed decides the honest verdict. Collapsing "our
+        # engine failed on a step you depend on" (ERROR) or "we had no verifier for it" (gap) into
+        # BROKEN would downgrade the caller's claim on the strength of our own failure — the very
+        # inversion of the kernel's fifth clause. Only a genuine MISMATCH may propagate a break.
+        if st == "MISMATCH":
+            outcome = "BROKEN"
+        elif st == "ERROR":
+            outcome = "ERROR"             # our failure, never the caller's falsehood
         elif st == "NOT_APPLICABLE":
-            # No verifier applied, so there is no result to call sound or unsound — a gap,
-            # whatever the links did. (Unchanged from before: do not harden a gap into a
-            # falsehood, which is the very thing this function was fixed to stop doing.)
-            if gap_at is None:
-                gap_at = sid
-        else:  # MISMATCH, or a step building on something unconfirmed — a real break
+            outcome = "GAP"               # no verifier applied — a gap, never a falsehood
+        elif st == "CONFIRMED":
+            outcome = "CONFIRMED" if link_ok else _worst_dep_outcome(uses)
+        else:
+            outcome = "ERROR"             # unknown status = our failure, never the caller's
+
+        outcome_by_id[sid] = outcome
+        if outcome == "CONFIRMED":
+            confirmed_ids.add(sid)
+        elif outcome == "BROKEN":
             if broken_at is None:
                 broken_at = sid
+        elif outcome == "ERROR":
+            if error_at is None:
+                error_at = sid
+        else:  # GAP
+            if gap_at is None:
+                gap_at = sid
 
     # Precedence: a real falsehood governs even if our engine also stumbled elsewhere.
     if broken_at is not None:

@@ -28,6 +28,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+import threading
 import argparse
 from pathlib import Path
 from typing import Optional
@@ -167,6 +168,11 @@ class SourceLayer:
         self._db: Optional[sqlite3.Connection] = None
         self._h: Optional[dict] = None
         self._g: Optional[dict] = None
+        # One shared read-only connection is reused across worker threads (check_same_thread=False).
+        # SQLite forbids concurrent use of a single connection: unserialized, 12 readers produced
+        # "bad parameter or other API misuse" and fetchone() returning None for rows that EXIST
+        # (the corpus_db.py lesson, same class). Serialize every execute()/fetch on this connection.
+        self._lock = threading.Lock()
 
     # ------------------------------------------------------------------
     # Internal accessors
@@ -242,10 +248,11 @@ class SourceLayer:
                 "detail": "WEB SQLite not found. Run: python fetch_sources.py",
             }
 
-        row = db.execute(
-            "SELECT t FROM t_web WHERE b=? AND c=? AND v=?",
-            (book_num, chapter, verse)
-        ).fetchone()
+        with self._lock:
+            row = db.execute(
+                "SELECT t FROM t_web WHERE b=? AND c=? AND v=?",
+                (book_num, chapter, verse)
+            ).fetchone()
 
         if row is None:
             return {
@@ -333,10 +340,11 @@ class SourceLayer:
                 "detail": "WEB SQLite not found. Run: python fetch_sources.py",
             }
 
-        rows = db.execute(
-            "SELECT b, c, v, t FROM t_web WHERE t LIKE ? LIMIT ?",
-            (f"%{keyword}%", limit)
-        ).fetchall()
+        with self._lock:
+            rows = db.execute(
+                "SELECT b, c, v, t FROM t_web WHERE t LIKE ? LIMIT ?",
+                (f"%{keyword}%", limit)
+            ).fetchall()
 
         results = []
         for b, c, v, t in rows:

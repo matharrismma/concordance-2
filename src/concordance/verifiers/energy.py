@@ -123,7 +123,11 @@ def verify_power_balance(spec: Dict[str, Any]) -> VerifierResult:
     name = "energy.power_balance"
     gen = _num(spec.get("generation_kwh_day"))
     cons = _num(spec.get("consumption_kwh_day"))
-    losses = clamp_tol(spec, "losses_kwh_day", 0.0)
+    # losses is a DATA value, not a tolerance — it must be read as-is, never clamped. Running it
+    # through clamp_tol (default 0.0) returned min(abs(losses), 0.0) == 0.0 for every input, so the
+    # losses term was silently discarded, yielding both false HOLDS and false BROKEN. Absent -> 0.
+    _loss = _num(spec.get("losses_kwh_day"))
+    losses = 0.0 if _loss is None else _loss
     claimed = _num(spec.get("claimed_balance_kwh_day"))
     if gen is None or cons is None or claimed is None:
         return na(name)

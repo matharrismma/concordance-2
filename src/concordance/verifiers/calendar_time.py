@@ -205,7 +205,11 @@ def verify_utc_offset(spec: Dict[str, Any]) -> VerifierResult:
     try:
         zi = ZoneInfo(tz)
     except Exception:
-        return mismatch(name, f"timezone {tz!r} not found in tz database", {"timezone": tz})
+        # Cannot resolve the zone HERE — the IANA tz database is absent (the default on Windows
+        # without the `tzdata` package) or the name is unknown. Either way this is a cannot-check,
+        # NOT a verdict: our gap must never be sealed as a falsehood about the caller's claim, and
+        # it must not depend on which machine ran it. (Was a false BROKEN + a determinism leak.)
+        return na(name)
     try:
         dt = datetime.fromisoformat(iso.replace("Z", "+00:00"))
         if dt.tzinfo is None:
