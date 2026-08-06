@@ -359,8 +359,10 @@ def card_from_span(sha: str, start: int, end: int, *, subject: str, waybill: Dic
         "author": "engine",
         "created_at": 0.0, "updated_at": 0.0,
         "visibility": "public",
-        # THE TWO PLANES, unchanged from find.py and expand.py — one mechanism, one rule.
-        "lifecycle_stage": "public" if plane == "human" else "public_review",
+        # BOTH planes wait for review (Matt, 2026-08-06) — one mechanism, one rule, shared with
+        # find.py and expand.py. The human plane is the anonymous /ask conduit, so a fetched
+        # passage is held in public_review until a copyright/PD check clears it for public release.
+        "lifecycle_stage": "public_review",
         "volatility": "permanent",
         "surface": "secular",
         # Not generated, and this is checkable rather than asserted: see verify_spans().
@@ -407,7 +409,7 @@ def craft(sha: str, subject: str, *, waybill: Optional[Dict[str, Any]] = None,
     return {"status": "crafted" if cards else "nothing_relevant",
             "cards": cards, "sha256": sha, "subject": subject,
             "sections_found": len(sections(text, lo, hi)), "chars": len(text),
-            "held_for_review": plane != "human",
+            "held_for_review": True,
             "message": (f"{len(cards)} passage(s) cut from a source we hold, each one addressable."
                         if cards else
                         "The source is held, but nothing in it speaks to this subject. I won't "

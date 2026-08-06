@@ -282,15 +282,18 @@ def test_furniture_is_stripped_from_labels_and_never_from_bodies():
 
 
 # ── THE PLANES ────────────────────────────────────────────────────────────────────────────────
-def test_the_agent_plane_waits_for_a_human():
-    """Same mechanism, different authority — the rule find.py and expand.py already hold."""
-    from concordance import craft
+def test_both_planes_wait_for_review():
+    """Superseded 2026-08-06 (red team): the human plane is the anonymous /ask conduit, so BOTH
+    planes now hold fetched passages in public_review until a copyright/PD check — the rule find.py
+    and expand.py share. The plane records who pulled it; it is no longer a fast public lane."""
+    from concordance import craft, corpus
     sha = _anchor()
     human = craft.craft(sha, "sanctification", plane="human")
     agent = craft.craft(sha, "sanctification", plane="agent")
-    assert all(c["lifecycle_stage"] == "public" for c in human["cards"])
-    assert all(c["lifecycle_stage"] == "public_review" for c in agent["cards"])
-    assert agent["held_for_review"] is True and human["held_for_review"] is False
+    for r in (human, agent):
+        assert all(c["lifecycle_stage"] == "public_review" for c in r["cards"])
+        assert all(corpus.is_public(c) is False for c in r["cards"])
+        assert r["held_for_review"] is True
 
 
 def test_a_crafted_card_carries_its_provenance_and_is_not_an_orphan():

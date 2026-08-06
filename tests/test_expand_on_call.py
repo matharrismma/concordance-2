@@ -12,14 +12,18 @@ engine, two doors, two different answers — and the deaf one is the door agents
 traffic). An agent got `count: 0` and concluded the library held nothing, while the other door was
 busy acquiring it.
 
-THE PLANE IS THE ONLY DIFFERENCE, and it is a real boundary rather than a label:
-  human — the person's own ask authorises it; the card enters `public`.
-  agent — the card enters `public_review`, which `corpus.is_public()` withholds from every public
-          read path until a human looks at it. The agent still receives its answer.
+THE PLANE RECORDS WHO PULLED IT; BOTH WAIT FOR REVIEW (superseded the earlier rule, Matt 2026-08-06):
+  human — the person's own ask; they USE the result now and the card is kept. But the human plane
+          is the anonymous `/ask` conduit, so the card enters `public_review`, not `public`.
+  agent — the card enters `public_review`.
+  Either way `corpus.is_public()` withholds `public_review` from every public read path until a
+  copyright/PD check clears it for release. Carding is not infringement (metadata + a re-readable
+  span pointer); public RELEASE is what waits. The planes now differ ONLY in `acquired_by_plane`.
 
-That closes a live breach: `lifecycle_stage` was hardcoded `"public"`, so an agent calling the
-`ask` tool minted straight into the shared keeping with no human ever seeing it — against the
-covenant's "ask before writes".
+Two breaches closed here: the ORIGINAL one — `lifecycle_stage` hardcoded `"public"` let an agent
+mint straight into the shared keeping unseen (against the covenant's "ask before writes") — and the
+2026-08-06 one: the "human plane" is reachable by any anonymous caller, so `human -> public`
+auto-published unverified, possibly-copyrighted content to the public corpus. Both fail closed now.
 
 AND THE WANT LIST IS THE OFFLINE QUEUE. Queueing something we could simply have fetched turns a
 slower answer into a person's chore, which is backwards.
@@ -98,13 +102,18 @@ def test_the_slow_lane_never_breaks_the_fast_one(monkeypatch, tmp_path):
 
 
 # ── the plane boundary ─────────────────────────────────────────────────────────────────────────
-def test_a_humans_ask_authorises_itself(online_with_a_find):
+def test_a_human_pull_is_used_but_held_for_review(online_with_a_find):
+    """Superseded 2026-08-06 (red team): the "human plane" IS the anonymous /ask conduit, so a pull
+    is USED by the caller (returned to them, and the card is kept so the next asking finds it) but
+    held in `public_review` until a copyright/PD check — it no longer enters the shared PUBLIC
+    library on an anonymous say-so. Carding is not infringement; public RELEASE waits for the check."""
     r = expand.expand("Rigveda", EngineConfig("secular"), plane="human")
     assert r["status"] == "acquired"
-    assert r["held_for_review"] is False
+    assert r["held_for_review"] is True
     card = find._mint_doc("Rigveda", DOC, practical=False, plane="human")
-    assert card["lifecycle_stage"] == "public"
-    assert corpus.is_public(card) is True
+    assert card["lifecycle_stage"] == "public_review"
+    assert corpus.is_public(card) is False
+    assert card.get("acquired_by_plane") == "human"
 
 
 def test_an_agents_acquisition_waits_for_a_human(online_with_a_find):
@@ -123,13 +132,31 @@ def test_an_agents_acquisition_waits_for_a_human(online_with_a_find):
     assert card.get("acquired_by_plane") == "agent"
 
 
-def test_the_two_planes_differ_only_in_authority(online_with_a_find):
-    """Same act, same card, same provenance — one field apart."""
+def test_the_two_planes_differ_only_in_who_pulled_it(online_with_a_find):
+    """Superseded 2026-08-06: both planes now wait for review, so they differ ONLY in
+    `acquired_by_plane` — same act, same card, same provenance, SAME lifecycle. The plane is a
+    provenance mark (who pulled it), never a fast public lane."""
     h = find._mint_doc("Rigveda", DOC, practical=False, plane="human")
     a = find._mint_doc("Rigveda", DOC, practical=False, plane="agent")
-    for field in ("title", "shelf", "kind", "generated", "source"):
-        assert h[field] == a[field], f"the planes must not change {field} — only who authorised it"
-    assert h["lifecycle_stage"] != a["lifecycle_stage"]
+    for field in ("title", "shelf", "kind", "generated", "source", "lifecycle_stage"):
+        assert h[field] == a[field], f"the planes must not change {field}"
+    assert h["lifecycle_stage"] == "public_review" and corpus.is_public(h) is False
+    assert h.get("acquired_by_plane") == "human" and a.get("acquired_by_plane") == "agent"
+
+
+def test_no_carding_path_auto_publishes_by_plane():
+    """Fix-the-path lock-in (red team 2026-08-06). The retired rule appeared at THREE carding sites
+    as `"public" if plane == "human" else "public_review"` (expand.py, craft.py, find.py) — one
+    mechanism, one bug. None may reintroduce a plane-conditional public lane: a web-fetched card is
+    held in public_review until a copyright/PD check, whatever plane pulled it. Guards the whole path
+    in one assertion, so a regression in any of the three files is caught even if its own test drifts."""
+    import re
+    from pathlib import Path
+    src = Path(__file__).resolve().parent.parent / "src" / "concordance"
+    offenders = [name for name in ("expand.py", "craft.py", "find.py")
+                 if re.search(r'"public"\s+if\s+plane\s*==\s*"human"',
+                              (src / name).read_text(encoding="utf-8"))]
+    assert not offenders, f"a carding path re-added a plane-conditional public lane: {offenders}"
 
 
 def test_an_unknown_plane_falls_back_to_the_stricter_one(online_with_a_find):

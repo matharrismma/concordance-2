@@ -21,12 +21,18 @@ other door was busy acquiring it.
 That is this project's recurring failure in its purest form: correct in one place, absent where
 the reader actually stands. So the capability moves here, where every door can call the same thing.
 
-THE TWO PLANES — the act is identical, the authority is not:
+THE TWO PLANES — the act is identical, and BOTH now wait for review (Matt, 2026-08-06):
 
-    human   the person's own ask authorises it. Cards enter `public`.
-    agent   cards enter `public_review`, which `corpus.is_public()` withholds from every public
-            read path until a human looks. The agent still RECEIVES its answer — only the entry
-            into everyone else's library waits. "We ask the next human that looks at it."
+    human   the person pulls and USES it in the moment (it is returned to them, and the card is
+            kept so the next asking finds it). But the "human plane" is the anonymous /ask conduit
+            — any visitor reaches it — so a pull cannot enter everyone else's PUBLIC library on an
+            anonymous say-so. It enters `public_review`, held until a copyright/PD check clears it.
+    agent   same: cards enter `public_review`.
+
+    `corpus.is_public()` withholds `public_review` from every public read path. Carding is not
+    infringement (a card is metadata + a re-readable span pointer, not a republished body); PUBLIC
+    RELEASE is what waits for the check. This supersedes the earlier "human -> public" rule: the
+    two planes now differ only in `acquired_by_plane` (who pulled it), never in what the public sees.
 
 THE WANT LIST IS THE OFFLINE QUEUE, nothing more. If the network is reachable we execute now; a
 want is opened only when we could not reach out at all, so the miss survives until a connection
@@ -86,11 +92,10 @@ def expand(query: str, config, plane: str = "human",
     return {"status": "acquired", "plane": plane, "documents": docs,
             "answer": found.get("answer"), "framed": found.get("framed", ""),
             "checks": found.get("checks_verdict"), "source_note": found.get("source_note") or "",
-            "held_for_review": plane != "human",
+            "held_for_review": True,
             "message": ("Not in the keeping, so I went and found it — public-domain sources, "
-                        "kept for next time."
-                        + (" Carded and waiting for a person to look before it joins the shared "
-                           "library." if plane != "human" else ""))}
+                        "kept for next time. Carded and waiting for a copyright check before it "
+                        "joins the shared public library.")}
 
 
 def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
@@ -171,10 +176,11 @@ def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
         parent = _unchecked.mark({
             "id": parent_id, "kind": "reference",
             "title": str(doc.get("title") or subj)[:140],
-            "body": (f"A public-domain source fetched on the call for {subj!r}: "
-                     f"{str(doc.get('title') or '')[:160]}. Kept whole in the ark; the passages "
-                     "carded beneath this one are cut from it, and each names the exact place it "
-                     "came from."),
+            "body": (f"A source fetched on the call for {subj!r}: "
+                     f"{str(doc.get('title') or '')[:160]} (license as reported by the source: "
+                     f"{str(doc.get('license') or 'unstated')[:60]}; not yet verified — held for "
+                     "review). Kept whole in the ark; the passages carded beneath this one are cut "
+                     "from it, and each names the exact place it came from."),
             "source": {"label": str(doc.get("title") or "")[:200],
                        "url": str(doc.get("url") or ""), "domain": "",
                        "authority_tier": "primary_pd"},
@@ -184,7 +190,10 @@ def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
                              "evidence": "a primary source the tortoise went and found"}],
             "author": "engine", "created_at": 0.0, "updated_at": 0.0,
             "visibility": "public",
-            "lifecycle_stage": "public" if plane == "human" else "public_review",
+            # BOTH planes wait for review (Matt, 2026-08-06). The human plane is the anonymous
+            # /ask conduit, so a pull cannot enter the public library on an anonymous say-so —
+            # it is held in public_review until a copyright/PD check clears it for release.
+            "lifecycle_stage": "public_review",
             "volatility": "permanent", "surface": "secular", "generated": False,
             "extra": {"source_sha256": sha, "crafted_from": str(doc.get("url") or ""),
                       "license": str(doc.get("license") or "")[:120]},
@@ -192,10 +201,11 @@ def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
         kept = _keep([parent] + cards)
         return {"status": "carded", "source_card": parent, "cards": cards,
                 "kept": kept, "sha256": sha, "plane": plane,
-                "held_for_review": plane != "human",
+                "held_for_review": True,
                 "message": (f"Not in the keeping, so it was fetched and cut on the call — "
                             f"{len(cards)} passage(s) from {str(doc.get('title') or '')[:80]!r}, "
-                            "kept so the next asking finds them at once.")}
+                            "kept so the next asking finds them at once. Held for a copyright "
+                            "check before it joins the shared public library.")}
 
     return {"status": "nothing_found",
             "message": "the archives were searched and no openable text spoke to this subject"}

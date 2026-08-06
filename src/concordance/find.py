@@ -344,10 +344,12 @@ def _mint_doc(query: str, doc: Dict[str, Any], practical: bool = True,
                 "connections": _member_of("practical" if practical else "sources"),
                 "author": "archive", "created_at": time.time(),
                 "updated_at": time.time(), "visibility": "public",
-                # THE PLANE, and the only thing it changes. A human's own ask authorises itself; an
-                # agent's acquisition waits in `public_review`, which corpus.is_public() withholds
-                # from every public read path until a human looks at it.
-                "lifecycle_stage": ("public" if plane == "human" else "public_review"),
+                # BOTH planes wait for review (Matt, 2026-08-06). The "human plane" is the anonymous
+                # /ask conduit, so a fetched document cannot enter the public library on an anonymous
+                # say-so; it waits in `public_review`, which corpus.is_public() withholds from every
+                # public read path until a copyright/PD check clears it. `acquired_by_plane` still
+                # records who pulled it — the plane is a provenance mark now, not a fast public lane.
+                "lifecycle_stage": "public_review",
                 "acquired_by_plane": plane,
                 "volatility": "durable", "surface": "secular", "generated": False, "verified": False}
         p = _store_path()
