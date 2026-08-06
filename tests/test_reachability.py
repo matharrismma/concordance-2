@@ -61,6 +61,9 @@ AGENT_ONLY = {
     # (the AST auditor reads only literal links, not fetch strings) — a data
     # endpoint, not a page a human navigates TO. The human surface is /live.html.
     "/activity.json",
+    # /build.json is deployment provenance (red team R-14) — protocol + profiles +
+    # tool_catalog_hash a reviewer compares to the repo; a data endpoint, not a page.
+    "/build.json",
     "/identity/fingerprint", "/identity/verify", "/attest", "/self-attest",
     "/bind", "/bind/challenge", "/consent", "/consent/signable", "/consent/revoke",
     "/connect/event", "/moderation/signable", "/derivation/verify", "/grid",

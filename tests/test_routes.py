@@ -70,6 +70,7 @@ GOLDEN_API_GET = {
     "/study_find",  # deliberate addition (the quick-find index across the whole reference section)
     "/capabilities",  # deliberate addition (the live capability statement — restored from 1.0)
     "/activity.json",  # the .org "under the hood" feed (recent public seals + counts, 2026-08-05)
+    "/build.json",  # deployment provenance: protocol + profiles + tool_catalog_hash (red team R-14, 2026-08-06)
     "/mesh/signable",  # deliberate addition (the bytes to sign, so a key never crosses the wire)
     "/attest",  # deliberate addition (bear witness to a record you hold; GET lists the witnesses)
     "/wants",   # deliberate addition (the WANT LIST — the library grows by its misses; 2026-08-01)
@@ -231,3 +232,30 @@ def test_activity_json_is_public_and_leaks_nothing():
         for forbidden in ("\"body\"", "raw_text", "claim_text", "\"ip\"", "token",
                           "private", "passphrase", "operator", "x-keep-token"):
             assert forbidden not in blob, f"activity.json leaked {forbidden!r}"
+
+
+def test_build_json_is_deployment_provenance_and_leaks_nothing():
+    """The build-provenance endpoint (red team R-14, 2026-08-06). It ties the SERVED contract to a
+    tool_catalog_hash a reviewer can compare against the repo, so a claimed fix can be confirmed in
+    production. It carries protocol/profile metadata ONLY — never a body, key, or personal datum,
+    and the catalog hash is stable and deterministic (sorted name:effect over all profiles)."""
+    import json as _json
+    from concordance.web.api import dispatch
+    from concordance.config import EngineConfig
+    for surface in ("secular", "witness"):
+        st, payload = dispatch("GET", "/build.json", {}, None, EngineConfig(surface))
+        assert st == 200, surface
+        assert set(payload.keys()) <= {"surface", "package_version", "protocol", "profiles",
+                                       "tool_catalog_hash", "note", "unavailable"}
+        assert "unavailable" not in payload, payload
+        assert len(payload["tool_catalog_hash"]) == 64  # sha256 hex
+        assert isinstance(payload["profiles"], dict) and payload["profiles"]
+        # metadata only — no bodies, keys, or personal data may ride along
+        blob = _json.dumps(payload).lower()
+        for forbidden in ("raw_text", "claim_text", "\"ip\"", "private_key", "passphrase",
+                          "x-keep-token", "signature"):
+            assert forbidden not in blob, f"build.json leaked {forbidden!r}"
+    # the hash is deterministic across calls (same code => same catalog)
+    a = dispatch("GET", "/build.json", {}, None, EngineConfig("secular"))[1]["tool_catalog_hash"]
+    b = dispatch("GET", "/build.json", {}, None, EngineConfig("secular"))[1]["tool_catalog_hash"]
+    assert a == b

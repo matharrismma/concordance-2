@@ -2057,6 +2057,40 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                     "note": "Every seal here is already public at /s/<hash>; this is the work, "
                             "in the open. Counts and verdicts only — nothing personal is shown."})
 
+    if method == "GET" and path == "/build.json":
+        # DEPLOYMENT PROVENANCE (red team 2026-08-06, R-14/R-06): tie the SERVED contract to a hash
+        # a reviewer can compare against the repository, so "is this finding fixed in production or
+        # only in source?" is answerable without trusting us. Everything here is derived live from
+        # the running code; it leaks nothing — profile NAMES + tool counts, protocol revisions, and
+        # a catalog hash. No bodies, no keys, no personal data, no per-tool internals.
+        import hashlib as _hl
+        try:
+            from ..mcp import server as _srv
+            catalog = sorted(f"{t}:{eff}" for p in _srv.PROFILES.values()
+                             for t, eff in p["tools"].items())
+            cat_hash = _hl.sha256("\n".join(catalog).encode("utf-8")).hexdigest()
+            profiles = {n: {"version": p.get("version"), "tools": len(p["tools"])}
+                        for n, p in _srv.PROFILES.items()}
+            protocol = {"supported": list(_srv.SUPPORTED_PROTOCOL_VERSIONS),
+                        "default": _srv.negotiate_protocol_version(None)}
+        except Exception as e:  # noqa: BLE001 — provenance must never 500 the surface
+            return _ok({"surface": surface, "unavailable": str(e)[:120]})
+        try:
+            from importlib.metadata import version as _ver
+            pkg = _ver("concordance")
+        except Exception:  # noqa: BLE001
+            pkg = None
+        return _ok({
+            "surface": surface,
+            "package_version": pkg,
+            "protocol": protocol,
+            "profiles": profiles,
+            "tool_catalog_hash": cat_hash,
+            "note": ("Derived live from the running code. Compare tool_catalog_hash against the "
+                     "repository to confirm which catalog is deployed. Profile names and counts "
+                     "only — no bodies, keys, or personal data."),
+        })
+
     if method == "GET" and path == "/capabilities":
         # The live capability statement — every public number computed now, with its definition
         # attached. UNGATED on both surfaces by design: what this engine can and cannot do is not
@@ -2290,6 +2324,7 @@ ROUTES = [
     {"path": "/study_find", "methods": ("GET",), "api": True},
     {"path": "/capabilities", "methods": ("GET",), "api": True},
     {"path": "/activity.json", "methods": ("GET",), "api": True},
+    {"path": "/build.json", "methods": ("GET",), "api": True},
     {"path": "/mesh/signable", "methods": ("GET",), "api": True},
     {"path": "/attest", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/consent/signable", "methods": ("GET",), "api": True, "rl": True},
