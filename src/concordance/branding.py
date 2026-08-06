@@ -8,9 +8,16 @@ the witness.
 """
 from __future__ import annotations
 
+# The one line — what this IS, in six words, defined ONCE here and surfaced verbatim everywhere a
+# person reads the identity (.com landing, the .org ledger, llms.txt). Matt, 2026-08-06:
+# "Deterministic verification engine. We need to reframe and reorganize." The reframe is not a new
+# claim — it is surfacing the claim that was already true and buried, and pinning every face to this
+# single string so it cannot drift (test_site.test_identity_line_is_one_source enforces it).
+IDENTITY_LINE = "A deterministic verification engine."
+
 # The reach (.com): the world's own language — truth, verification, a receipt.
 SECULAR_IDENTITY = (
-    "A deterministic verification engine. It checks what is true and hands you a receipt "
+    IDENTITY_LINE + " It checks what is true and hands you a receipt "
     "you can re-verify — a verdict, the worked reasoning, and a permanent content-addressed "
     "seal. It eliminates what is not the answer so that what survives stands on its own."
 )

@@ -101,6 +101,17 @@
   .col:not(.empty) #desk{ display:none }
   .desk-line{ text-align:center; font-size:.8rem; color:var(--ink-soft);
     letter-spacing:.04em; margin:0 0 .95rem; font-style:italic }
+  /* THE IDENTITY (Matt, 2026-08-06: "Deterministic verification engine.") — what this IS, said
+     plainly and first, on the empty page only. The engine leads; the writing box and the doors
+     below stay the entry. The exact line is pinned to branding.IDENTITY_LINE (one source). */
+  .ident{ text-align:center; margin:.2rem .2rem 1.2rem;
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif }
+  .ident b{ display:block; font-size:1.18rem; line-height:1.25; color:var(--ink); font-weight:600;
+    letter-spacing:.01em }
+  .ident span{ display:block; font-size:.86rem; line-height:1.5; color:var(--ink-soft);
+    margin:.3rem auto 0; max-width:34rem }
+  .col:not(.empty) .ident{ display:none }
+  @media (max-width:900px){ .ident b{ font-size:1.06rem } .ident span{ font-size:.82rem } }
   .doors{ display:grid; grid-template-columns:repeat(auto-fit,minmax(15rem,1fr)); gap:.6rem }
   .doors a{ display:block; padding:.7rem .85rem .75rem; border:1px solid rgba(138,106,47,.28);
     border-radius:8px; background:rgba(255,255,255,.38);
@@ -288,6 +299,10 @@
 
     <div id="page" aria-label="The Concordance page"></div>
 
+    <p class="ident"><b>A deterministic verification engine.</b>
+      <span>Bring a claim — get a verdict, the worked trail, and a receipt you can re-check.
+      No model in the loop.</span></p>
+
     <div class="card">
       <div id="q" contenteditable="true" role="textbox" aria-multiline="true"
            aria-label="Bring anything" data-empty="Write here…"></div>
@@ -343,6 +358,7 @@
     <div class="foot">
       <span id="found">A conduit, not a source · nothing is generated</span>
       <a href="https://narrowhighway.org">the witness</a>
+      <a href="/live.html">under the hood →</a>
       <span hidden>narrowing the possibilities</span>
     </div>
     <div class="foot">

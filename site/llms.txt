@@ -1,5 +1,7 @@
 # Narrow Highway
 
+> **A deterministic verification engine.** Bring a claim; get a verdict, the worked trail, and a permanent receipt you can re-check. No model in the loop.
+>
 > **Narrow Highway gives humans and agents a governed way to find, check, use, and preserve information without losing its source, authority, or history.**
 >
 > We serve families, children, and

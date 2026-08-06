@@ -57,6 +57,10 @@ AGENT_ONLY = {
     # rather than quietly exempted — an undeclared door is how a registry rots.
     "/health/memory",
     "/capabilities", "/identity/create", "/identity/describe",
+    # /activity.json powers the /live.html "under the hood" ledger via fetch()
+    # (the AST auditor reads only literal links, not fetch strings) — a data
+    # endpoint, not a page a human navigates TO. The human surface is /live.html.
+    "/activity.json",
     "/identity/fingerprint", "/identity/verify", "/attest", "/self-attest",
     "/bind", "/bind/challenge", "/consent", "/consent/signable", "/consent/revoke",
     "/connect/event", "/moderation/signable", "/derivation/verify", "/grid",

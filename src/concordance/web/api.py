@@ -2005,6 +2005,58 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                signature=str(body.get("signature") or ""))
         return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
 
+    if method == "GET" and path == "/activity.json":
+        # UNDER THE HOOD (Matt, 2026-08-05): .com is the working surface; .org is the WITNESS,
+        # so .org is where "what we are doing" belongs — a live feed of the work. Every seal is
+        # ALREADY public at /s/<hash>, so a stream of recent seals leaks nothing new. Whitelist
+        # the fields explicitly — hash/short/domain/verdict/kind/when — and NEVER dump a record
+        # (no bodies, no claim text, no operator data; keep.json stays gated). Both surfaces:
+        # the record of the work is not witness-only content.
+        from .. import cas as _cas, capabilities as _caps
+        import os as _os, time as _time
+        base = _cas._cas_dir()
+        rows = []
+        try:
+            files = []
+            if base.exists():
+                for pd in base.iterdir():
+                    if pd.is_dir() and len(pd.name) == 2:
+                        for f in pd.glob("*.json"):
+                            try:
+                                files.append((f.stat().st_mtime, pd.name + f.stem, f))
+                            except OSError:
+                                pass
+            files.sort(key=lambda x: x[0], reverse=True)
+            for mtime, h, f in files[:30]:
+                rec = _cas.fetch(h) or {}
+                gr = (rec.get("gate_results") or [{}])
+                g0 = gr[0] if gr else {}
+                verdict = (rec.get("verdict") or rec.get("overall")
+                           or g0.get("verdict") or g0.get("status") or "sealed")
+                domain = (rec.get("domain") or g0.get("domain") or rec.get("kind") or "")
+                rows.append({"hash": h, "short": h[:16],
+                             "verdict": str(verdict)[:24], "domain": str(domain)[:40],
+                             "kind": str(rec.get("kind") or "seal")[:40],
+                             "when": int(mtime)})
+        except Exception:  # noqa: BLE001 — the feed must never 500 the surface
+            rows = []
+        totals = {}
+        try:
+            sub = _caps._substrate()
+            totals = {"cards": (sub.get("cards") or {}).get("count"),
+                      "seals": (sub.get("seals") or {}).get("count") or _cas.stats().get("count"),
+                      "domains": (sub.get("domains") or {}).get("count")}
+        except Exception:  # noqa: BLE001
+            try:
+                totals = {"seals": _cas.stats().get("count")}
+            except Exception:  # noqa: BLE001
+                totals = {}
+        # freshness lives in the client's cache-busting URL (a browser won't honour no-store on
+        # its own — the stale-read lesson); dispatch()'s Response is (status, payload) only.
+        return _ok({"surface": surface, "recent": rows, "totals": totals,
+                    "note": "Every seal here is already public at /s/<hash>; this is the work, "
+                            "in the open. Counts and verdicts only — nothing personal is shown."})
+
     if method == "GET" and path == "/capabilities":
         # The live capability statement — every public number computed now, with its definition
         # attached. UNGATED on both surfaces by design: what this engine can and cannot do is not
@@ -2237,6 +2289,7 @@ ROUTES = [
     {"path": "/narratives", "methods": ("GET",), "api": True},
     {"path": "/study_find", "methods": ("GET",), "api": True},
     {"path": "/capabilities", "methods": ("GET",), "api": True},
+    {"path": "/activity.json", "methods": ("GET",), "api": True},
     {"path": "/mesh/signable", "methods": ("GET",), "api": True},
     {"path": "/attest", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/consent/signable", "methods": ("GET",), "api": True, "rl": True},

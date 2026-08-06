@@ -69,6 +69,7 @@ GOLDEN_API_GET = {
     "/narratives",  # deliberate addition (storyboards: common narratives charted in the Bible; movements mix and match)
     "/study_find",  # deliberate addition (the quick-find index across the whole reference section)
     "/capabilities",  # deliberate addition (the live capability statement — restored from 1.0)
+    "/activity.json",  # the .org "under the hood" feed (recent public seals + counts, 2026-08-05)
     "/mesh/signable",  # deliberate addition (the bytes to sign, so a key never crosses the wire)
     "/attest",  # deliberate addition (bear witness to a record you hold; GET lists the witnesses)
     "/wants",   # deliberate addition (the WANT LIST — the library grows by its misses; 2026-08-01)
@@ -209,3 +210,24 @@ if __name__ == "__main__":
         fn()
         print(f"  ok  {fn.__name__}")
     print(f"\n{len(fns)} route-registry tests passed — single source of truth, no drift.")
+
+
+def test_activity_json_is_public_and_leaks_nothing():
+    """The .org 'under the hood' feed (2026-08-05). Every seal it lists is ALREADY public at
+    /s/<hash>, so the stream leaks nothing new — but the payload must carry ONLY the whitelisted
+    fields, never a body, claim text, operator datum, IP, or token. Public on BOTH surfaces (the
+    record of the work is not witness-only), and each row's hash is a real re-checkable address."""
+    import json as _json
+    from concordance.web.api import dispatch
+    from concordance.config import EngineConfig
+    for surface in ("secular", "witness"):
+        st, payload = dispatch("GET", "/activity.json", {}, None, EngineConfig(surface))
+        assert st == 200, surface
+        assert set(payload.keys()) <= {"surface", "recent", "totals", "note"}
+        for row in payload["recent"]:
+            assert set(row.keys()) == {"hash", "short", "verdict", "domain", "kind", "when"}, row
+        # the whole payload, serialized, must contain none of these forbidden tokens
+        blob = _json.dumps(payload).lower()
+        for forbidden in ("\"body\"", "raw_text", "claim_text", "\"ip\"", "token",
+                          "private", "passphrase", "operator", "x-keep-token"):
+            assert forbidden not in blob, f"activity.json leaked {forbidden!r}"

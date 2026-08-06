@@ -31,6 +31,33 @@ def test_index_named_positioned_and_wired():
     assert "narrowhighway.org" in t and "Christ" in t, "surface-aware: name the foundation on .org"
 
 
+def test_identity_line_is_one_source():
+    """THE REFRAME (Matt, 2026-08-06: "Deterministic verification engine. We need to reframe and
+    reorganize."). What the engine IS is defined ONCE — branding.IDENTITY_LINE — and surfaced
+    verbatim on every face a person reads it on, so the identity can never rot back into the buried,
+    per-page paraphrases it was before (it lived in a hidden span and a footer, not a headline).
+    The agent-facing descriptors state the SAME identity in machine register — verified here by the
+    two load-bearing claims, not the exact wording: it is a *verification* engine, and there is *no
+    model in the loop*."""
+    import sys as _sys
+    _sys.path.insert(0, str(_ROOT / "src"))
+    from concordance import branding
+    anchor = branding.IDENTITY_LINE
+    assert anchor == "A deterministic verification engine.", anchor
+    # the long-form identity is BUILT from the line — the single source is internally consistent
+    assert branding.SECULAR_IDENTITY.startswith(anchor), "SECULAR_IDENTITY must open with the line"
+    # every human-read surface carries the exact line — one source, no drift
+    for rel in ("site/index.html", "site/live.html", "site/llms.txt"):
+        t = (_ROOT / rel).read_text(encoding="utf-8")
+        assert anchor in t, f"{rel} does not surface the identity line verbatim"
+    # the agent descriptors say the same thing in machine-register: still a verification engine,
+    # still no model in the loop (these two claims are load-bearing; the exact human wording is not)
+    for rel in ("docs/registry/server.json", "site/.well-known/mcp.json", "site/connect.html"):
+        t = (_ROOT / rel).read_text(encoding="utf-8").lower()
+        assert "deterministic verification" in t, f"{rel} lost the engine framing"
+        assert "no model in the loop" in t, f"{rel} lost the 'no model in the loop' guarantee"
+
+
 def test_every_page_offers_a_way_home():
     """One identical home control, injected everywhere, so it cannot drift per page."""
     # mesh.html is THE HIDDEN discovery surface (the Fellowship Mesh / "The Way"). It must NOT carry
@@ -38,7 +65,9 @@ def test_every_page_offers_a_way_home():
     # advertise a page that is meant to be found only when the agent reveals it (Matthew 7:7). It
     # carries its own minimal brand-home link instead, and the flock is protected by the confession
     # gate, not by nav-hiding alone.
-    hidden = {"mesh.html"}
+    # live.html is the austere .org "under the hood" ledger — like mesh.html it carries its own
+    # minimal home link, not the shared nav/palette control (which would clutter the calm feed).
+    hidden = {"mesh.html", "live.html"}
     missing = [f.name for f in SITE.glob("*.html")
                if f.name != "index.html" and f.name not in hidden
                and "nh-home.js" not in f.read_text(encoding="utf-8")]
@@ -84,7 +113,7 @@ def test_the_palette_reaches_every_public_page():
     # documented exclusions — see the comment above TOOLS in nh-tools.js. mesh.html is the HIDDEN
     # discovery surface: never in the palette (the whole point is that it is found, not advertised —
     # Matthew 13:44), served but revealing nothing until the agent opens it and confession is made.
-    excused = {"index.html", "keep.html", "ask.html", "encyclopedia.html", "mesh.html"}
+    excused = {"index.html", "keep.html", "ask.html", "encyclopedia.html", "mesh.html", "live.html"}
     unreachable = sorted(
         p.name for p in SITE.glob("*.html") if p.name not in listed and p.name not in excused)
     assert not unreachable, f"no way to reach: {unreachable} (list them or excuse them by name)"
