@@ -35,7 +35,19 @@ _CRISIS_WORDS = ("suicide", "suicidal", "kill myself", "killing myself", "end my
                  "no point in living", "better off dead", "better off without me",
                  "cant go on", "cant do this anymore", "hurt myself", "harm myself",
                  "self harm", "self-harm", "cut myself", "overdose", "off myself",
-                 "unalive myself", "hang myself", "shoot myself", "goodbye cruel world")
+                 "unalive myself", "hang myself", "shoot myself", "goodbye cruel world",
+                 # Past, perfect, and progressive forms of the ideation already listed above.
+                 # Someone who has carried this for years rarely phrases it as a present-tense
+                 # imperative — "i have wanted to die for 3 years" normalizes to "...wanted to die
+                 # ..." and "want to die" never matches across the "-ed" in "wanted" (verified miss,
+                 # 2026-08-05; it routed to an ordinary search). These are CONJUGATIONS of phrases
+                 # this list already treats as crisis, not new territory, so they add no idiom the
+                 # present tense didn't already accept (the deliberate asymmetry: an unnecessary
+                 # helpline is a small cost, a missed person is not). No first-person or duration
+                 # gate is added — an exclusion on the safety check is how a bypass gets built.
+                 "wanted to die", "wanting to die", "wanted to end it", "ending it all",
+                 "ending my life", "ending my own life",
+                 "feel like ending it", "felt like ending it")
 
 # Smart quotes in, straight quote out; then apostrophes dropped entirely so dont == don't.
 _SMART_QUOTES = str.maketrans({"’": "'", "‘": "'", "‛": "'", "´": "'", "`": "'"})
@@ -877,6 +889,29 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
             except Exception:  # noqa: BLE001
                 pass
         return _witnessed(out, text, witness, gate_just_opened, topical=False)
+
+    # ── The Candidate Engine, invisible (task #136, 2026-08-05): before we fall to keyword
+    # search, if the words carried checkable claims, NARROW them — commit the set, verify each
+    # across the domains, and show what held up, what did not, and what we could not judge
+    # (held, never guessed). The honest answer includes its own rejects. Crisis returned at the
+    # TOP of respond(); every specific kind returned above; this is the general path only.
+    # Additive and safe: no checkable claim -> from_prose returns None -> everything below runs
+    # exactly as before. The narrowing must never break the answer, so it is fully guarded.
+    try:
+        from . import candidates as _cand
+        _cset = _cand.from_prose(text, config=config)
+    except Exception:  # noqa: BLE001 — narrowing is a bonus; the answer path must not depend on it
+        _cset = None
+    if _cset is not None:
+        try:
+            _cand.receipt(_cset, config=config)   # seal the WHOLE narrowing, losers included
+        except Exception:  # noqa: BLE001
+            pass
+        return _witnessed({**base, "kind": "checked",
+                           "audit": _cand.as_checked(_cset),
+                           "message": _cand.checked_message(_cset),
+                           "results": [corpus._brief(c) for c in corpus.search(text, limit=4)]},
+                          text, witness, gate_just_opened, topical=False)
 
     # ── the Body (1 Cor 12): no core kind claimed it, so ask the Router which member it
     # belongs to. Each specialist answers in fields the page already renders (message +

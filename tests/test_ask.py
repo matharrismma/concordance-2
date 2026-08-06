@@ -208,6 +208,47 @@ def test_crisis_help_is_offered_not_withheld_when_wording_is_ambiguous():
     assert r["kind"] == "crisis" and any("988" in x["label"] for x in r["resources"])
 
 
+# ── long-carried, past-tense ideation: the present-tense imperative never fired ──────────────
+# "I have wanted to die for 3 years" routed to an ordinary keyword SEARCH (verified 2026-08-05):
+# the substring "want to die" cannot match across the "-ed" in "wanted", and genuine, settled,
+# long-carried ideation is phrased in exactly this past/perfect/progressive way. Crisis is the
+# highest-cost miss in the system — a person this far in must reach real help, not a search box.
+_DURATION_IDEATION = (
+    "I have wanted to die for 3 years",    # the verified miss
+    "i've wanted to die for years",
+    "for a long time now i have wanted to die",
+    "i have felt like ending it for a long time",
+    "i feel like ending it",
+    "i've been wanting to die",
+    "i keep thinking about ending it all",
+    "i have wanted to end it for years",
+    "ive been thinking of ending my life",
+)
+
+
+def test_long_carried_past_tense_ideation_reaches_help():
+    """Past / perfect / progressive ideation carried for years must reach crisis, not search.
+    The present-tense list ('want to die', 'end it all') never matched across the '-ed'/'-ing'."""
+    for text in _DURATION_IDEATION:
+        assert ask.is_crisis(text), f"is_crisis missed: {text!r}"
+        assert ask.classify(text) == "crisis", f"routed away from help: {text!r}"
+
+
+def test_the_past_tense_additions_do_not_sweep_in_ordinary_study_questions():
+    """The additions are CONJUGATIONS of phrases already treated as crisis, not new concepts, so
+    everyday factual and study queries must still route away from crisis. (Bible narratives where
+    a character longs to die — Jonah, Elijah — share the present-tense list's already-accepted
+    cost and are deliberately out of scope; widening the net is not the same as closing a hole.)"""
+    for text in ("what year did the Titanic sink",
+                 "explain the parable of the sower",
+                 "how far away is the moon",
+                 "what does agape mean",
+                 "when did the Babylonian exile end",       # 'end', not ideation
+                 "how do I end a letter in Koine Greek",     # 'end', not ideation
+                 "the ending of the book of Job"):           # 'ending', not ideation
+        assert ask.classify(text) != "crisis", f"ordinary query swept into crisis: {text!r}"
+
+
 # ── whatever comes back has to be showable ──────────────────────────────────────────────────
 
 # The fields site/index.html knows how to draw. A response carrying none of them renders as an
@@ -574,3 +615,37 @@ def test_the_gauge_panel_locates_every_constant_on_the_measured_curve():
         assert g2["population"]["tokens"] > 0
     finally:
         _c.default_corpus = old
+
+
+# ── The Candidate Engine, invisible under /ask (task #136, 2026-08-05) ───────────────────────
+
+def test_a_prose_claim_is_narrowed_and_shown_as_checked():
+    """A person writes prose carrying a checkable claim; the general path narrows it through the
+    Candidate Engine and returns kind=='checked' with a per-claim audit block the desk renders —
+    the honest answer, not a keyword dump. A true claim reads 'pass'."""
+    r = ask.respond("15% of 80 is 12", SEC)
+    assert r["kind"] == "checked", r.get("kind")
+    results = r["audit"]["results"]
+    assert results and any(x["status"] == "pass" for x in results)
+    assert "checked" in r["message"].lower()
+
+
+def test_a_false_prose_claim_is_shown_broken_not_hidden():
+    """The rejected candidate is shown, never dropped — the answer includes what did not hold."""
+    r = ask.respond("1900 was a leap year", SEC)
+    assert r["kind"] == "checked"
+    assert any(x["status"] == "reject" for x in r["audit"]["results"])
+
+
+def test_the_checked_branch_never_touches_crisis():
+    """The load-bearing safety proof: the narrowing branch lives in the general fallthrough,
+    far below the crisis return at the top of respond(). Crisis stays byte-identical — same
+    message, same resources, never a 'checked' block — even though a crisis line may contain
+    numbers an extractor could otherwise read."""
+    r = ask.respond("sometimes I want to die", SEC)
+    assert r["kind"] == "crisis"
+    assert "audit" not in r and r.get("message", "").startswith("You matter")
+    assert any("988" in x["label"] for x in r["resources"])
+    # a crisis line WITH a number still never reaches the checker
+    r2 = ask.respond("I want to end my life, it has been 3 years", SEC)
+    assert r2["kind"] == "crisis" and "audit" not in r2

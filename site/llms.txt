@@ -94,6 +94,27 @@ can shape a structured claim.
 - `GET /graph?scope=overview|shelf|card` — the public connection map (every edge carries its seal).
 - `GET /identity` — what this surface is. `GET /health` — status + `schema_active`.
 
+## The Candidate Engine — narrow your OWN candidates without laundering confidence
+When you have generated several plausible answers (sampling, multi-model, tail exploration) and
+must pick, do NOT let your own probabilities decide — a model-authored weight is not evidence.
+Hand the whole field to the engine and let deterministic checks narrow it. Two steps, on the
+MCP core profile (this is the point of the whole system: possibility in, checked survivors out,
+the rejected kept):
+1. `candidate_commit` — give the query, the generator, the method, and EVERY raw candidate.
+   `proposal_weight` rides verbatim as UNTRUSTED metadata; it never ranks anything. The complete
+   set is hashed BEFORE any checking, so you cannot quietly drop a candidate afterward. Returns
+   the committed set (born all-quarantined) + a sealed commitment anchor.
+2. `candidate_narrow` — pass that set back verbatim. Verifiers are assigned by a FIXED
+   pre-registered policy (never your choice — no verification shopping); each routed claim runs
+   the deterministic moat; unroutable claims stay quarantined (held, never guessed); and the FULL
+   set — rejected and quarantined included — is sealed with its trace. `candidate_get <hash>`
+   re-fetches the whole preserved path.
+Worked: a set of {"2+2=5" weight 0.9, "2+2=4" weight 0.1} narrows to REJECT the 0.9 and SELECT
+the 0.1 — verification beats the weight, every time, and both survive in the receipt. Present the
+survivors AND the rejected/quarantined to your human; the seal proves the process, never truth.
+Show what did not survive — that honesty is the product. (v0.1 routes arithmetic
+equality/inequality; other claim types quarantine rather than pretend to judge.)
+
 ### Scripture and its apparatus (BOTH surfaces since 2026-07-31)
 - `GET /passage?ref=John 3:16` — the World English Bible text.
 - `GET /resolve?ref=John 3:16` — resolve a Scripture reference to its text.

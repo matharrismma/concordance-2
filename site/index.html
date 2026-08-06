@@ -450,13 +450,19 @@
     var checked = d.audit && d.audit.results && d.audit.results.length;
     if(checked){
       h += d.audit.results.map(function(a){
-        var ok = a.status==='CONFIRMED';
-        return '<div class="hit"><span class="verdict '+(ok?'HOLDS':'BROKEN')+'">'+
-               (ok?'holds':'broken')+'</span> '+esc(a.claim)+
+        // Three honest states from the Candidate Engine (task #136): pass = held up,
+        // reject = did not hold, quarantine = held, not judged (no verifier, or ours failed —
+        // never called false). Back-compat: the old auditor's CONFIRMED still reads as holds.
+        var s = a.status, cls, word;
+        if(s==='pass'||s==='CONFIRMED'){ cls='HOLDS'; word='held up'; }
+        else if(s==='reject'||s==='MISMATCH'){ cls='BROKEN'; word='did not hold'; }
+        else { cls='INCOMPLETE'; word='held — not judged'; }
+        return '<div class="hit"><span class="verdict '+cls+'">'+word+'</span> '+esc(a.claim)+
                '<span class="sn">'+esc(a.detail||'')+'</span></div>'; }).join('');
       // the boundary still has to be visible — but as one short line, not a paragraph
       h += '<div class="note">only the claim'+(d.audit.results.length>1?'s':'')+' above '+
-           (d.audit.results.length>1?'were':'was')+' checked</div>';
+           (d.audit.results.length>1?'were':'was')+' checked'+
+           (d.audit.seal?' · <a href="'+esc(d.audit.seal)+'">receipt</a>':'')+'</div>';
     }
     // A word study: the word itself, how it sounds, what it means, and how often it is used.
     // This had no renderer at all — it only ever showed the standing note, so removing that

@@ -211,3 +211,124 @@ def test_prose_is_held_not_judged():
         assert c["selection_status"] == "retained-alternative"
     quarantined = [e for e in cs["trace"] if e["event"] == "quarantined"]
     assert len(quarantined) == 2 and all(e["why"] for e in quarantined)
+
+
+# ── v0.2: prose narrows across domains, reusing the audit extractors (2026-08-05) ────────────
+#
+# v0.1 routed only arithmetic literals, so it narrowed nothing on real prose. v0.2 registers a
+# second pre-registered policy that keeps every v0.1 rule and adds a prose fallback: a non-
+# arithmetic candidate is read by the SAME deterministic extractor the auditor uses and routed
+# to its domain verifier iff the text is EXACTLY ONE checkable claim. The examples below are
+# grounded in tests/test_audit.py's own TRUE/FALSE documents, so the extractors are known to
+# recognise them: "15% of 80 is 12" HOLDS, "40 hours at $18.50/hr = $740.00" HOLDS, "1900 was a
+# leap year" MISMATCHES. Every covenant from v0.1 still binds the prose path.
+
+def _prose(raw):
+    """A one-candidate committed set carrying a single prose claim (no arithmetic literal)."""
+    return cand.commit(cand.create_set("audit my text", [raw],
+                                       generator="human", generation_method="human"))
+
+
+def test_v02_is_registered_and_v01_is_still_the_default():
+    """v0.2 exists AND includes every v0.1 arithmetic rule; v0.1 remains what an unversioned
+    route() gets, so a prose claim still quarantines under the default exactly as it always
+    did — the new power is opt-in, never a silent change to existing callers."""
+    assert "v0.1" in cand.ROUTING_POLICY and "v0.2" in cand.ROUTING_POLICY
+    v01 = {r[0] for r in cand.ROUTING_POLICY["v0.1"]["rules"]}
+    v02 = {r[0] for r in cand.ROUTING_POLICY["v0.2"]["rules"]}
+    assert v01 <= v02, "v0.2 must include every v0.1 arithmetic rule"
+    assert "prose" in cand.ROUTING_POLICY["v0.2"] and "prose" not in cand.ROUTING_POLICY["v0.1"]
+    cs = _prose("15% of 80 is 12")
+    routing = cand.route(cs)  # no version named -> v0.1
+    assert routing["policy_version"] == "v0.1"
+    assert routing["routes"]["c000"]["mode"] is None, "v0.1 still holds prose in quarantine"
+
+
+def test_a_true_prose_claim_passes_under_v02():
+    """A percentage the auditor can extract, true on the arithmetic: routed by SHAPE (no
+    arithmetic literal) to the audit extractor, then to its domain verifier, then selected —
+    exactly one candidate survived deterministic checking."""
+    cs = _prose("15% of 80 is 12")
+    routing = cand.route(cs, policy_version="v0.2")
+    r = routing["routes"]["c000"]
+    assert r["mode"] == "domain-form" and r["rule"] == "prose"
+    assert r["domain"] == "mathematics" and r["extractor"] == "percent"
+    cand.narrow(cs)
+    c = cs["candidates"][0]
+    assert c["verification_status"] == "pass"
+    assert c["selection_status"] == "selected"
+    assert c["evidence"]["checked_by"] == "concordance.derivation.verify_derivation"
+    assert c["evidence"]["verdict"] == "HOLDS"
+
+
+def test_a_false_prose_claim_is_rejected_under_v02():
+    """The mirror: '15% of 80 is 20' extracts the same way but the arithmetic MISMATCHES, so
+    the composite verdict is BROKEN and the candidate is rejected — a genuine falsehood, the
+    one thing that may reject a candidate."""
+    cs = _prose("15% of 80 is 20")
+    cand.route(cs, policy_version="v0.2")
+    cand.narrow(cs)
+    c = cs["candidates"][0]
+    assert c["verification_status"] == "reject"
+    assert c["selection_status"] == "rejected"
+    assert c["evidence"]["verdict"] == "BROKEN"
+
+
+def test_prose_with_two_claims_is_held_not_judged_under_v02():
+    """Two checkable claims in one candidate is not a single proposition. v0.2 refuses to
+    silently reduce it to one of them: the extractor returns two claims, _route_prose returns
+    None, and the candidate stays quarantined — held, never judged."""
+    cs = _prose("15% of 80 is 12 and 20% of 50 is 10")
+    routing = cand.route(cs, policy_version="v0.2")
+    assert routing["routes"]["c000"]["mode"] is None, "two claims -> held, not judged"
+    cand.narrow(cs)
+    c = cs["candidates"][0]
+    assert c["verification_status"] == "quarantine"
+    assert c["selection_status"] == "retained-alternative"
+
+
+def test_from_prose_narrows_multi_claim_prose_and_retains_the_losers():
+    """The bridge: multi-claim human prose becomes a committed+narrowed set with ONE candidate
+    per extracted claim, checked ACROSS domains (mathematics, labor, calendar_time), and every
+    candidate — including the rejected one — retained. Two survive, so nothing is 'selected'
+    (material alternatives are presented, never a manufactured winner)."""
+    text = "15% of 80 is 12. 40 hours at $18.50/hr = $740.00. 1900 was a leap year."
+    cs = cand.from_prose(text)
+    assert cs is not None
+    assert cs["routing"]["policy_version"] == "v0.2"
+    assert cs["commitment"] and "trace" in cs, "committed and narrowed"
+    assert len(cs["candidates"]) == 3, "one retained candidate per extracted claim"
+    statuses = {c["candidate_id"]: c["verification_status"] for c in cs["candidates"]}
+    assert statuses == {"c000": "pass", "c001": "pass", "c002": "reject"}, statuses
+    domains = {c["evidence"]["domain"] for c in cs["candidates"] if "evidence" in c}
+    assert {"mathematics", "labor", "calendar_time"} <= domains, "narrowed across domains"
+    # the loser is kept, not dropped — winner-only retention refused
+    assert any(c["selection_status"] == "rejected" for c in cs["candidates"])
+    assert not any(c["selection_status"] == "selected" for c in cs["candidates"]), \
+        "two survivors -> no single winner, both retained as alternatives"
+
+
+def test_from_prose_returns_none_when_nothing_is_checkable():
+    """No certain claim -> None, so a caller falls back rather than presenting an empty
+    narrowing as an answer (a miss must stay a miss)."""
+    assert cand.from_prose("the kingdom of heaven is like a mustard seed") is None
+
+
+def test_from_prose_is_deterministic():
+    """Same prose -> same set id: audit.extract is deterministic and create_set is content-
+    addressed with no clock, so the receipt is independently recomputable."""
+    text = "15% of 80 is 12. 1900 was a leap year."
+    a = cand.from_prose(text)
+    b = cand.from_prose(text)
+    assert a["candidate_set_id"] == b["candidate_set_id"]
+    assert len(a["candidates"]) == 2
+
+
+def test_the_prose_path_stays_blind_to_the_generator_weight():
+    """The v0.1 structural proof, extended to every function the prose path added: the
+    untrusted proposal_weight must not appear in the SOURCE of any deciding function. If it
+    does, ranking code has begun reading the generator's number — the laundering §6 prohibits."""
+    for fn in (cand.route, cand.narrow, cand._route_one, cand._route_prose, cand.from_prose,
+               cand._arithmetic_side, cand._assert_committed_and_intact):
+        assert "proposal_weight" not in inspect.getsource(fn), (
+            f"{fn.__name__} reads the untrusted generator weight")

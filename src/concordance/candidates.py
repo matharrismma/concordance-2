@@ -38,6 +38,18 @@ mints the same set id and the same commitment.
 
 Sovereign: stdlib + the floor (validate, cas, derivation, receipts) only. No I/O except the
 best-effort seal in receipt(); everything else is pure functions over dicts.
+
+v0.2, 2026-08-05: prose narrows across domains, reusing the audit extractors. v0.1 routed
+only arithmetic equality/inequality literals, so on real prose it narrowed nothing. v0.2
+registers a second pre-registered policy ("v0.2") that keeps every v0.1 arithmetic rule and
+adds a prose fallback: a candidate whose raw_text is not an arithmetic shape is read by the
+SAME deterministic extractor the auditor uses (audit.extract — plain regex, no model), and
+routed to a domain verifier ONLY when the text yields EXACTLY ONE checkable claim (one
+candidate is one proposition; two claims are not a single checkable thing, so they stay in
+quarantine). from_prose() is the bridge the human /ask verify-branch and agents both use. v0.1
+stays the DEFAULT, so every caller that does not name a version gets v0.1 behaviour exactly,
+and both invariants below — fixed pre-registered policy, and routing blind to proposal_weight
+and status — govern the prose path identically (route() and from_prose() read only raw_text).
 """
 from __future__ import annotations
 
@@ -98,6 +110,24 @@ ROUTING_POLICY: Dict[str, Dict[str, Any]] = {
             ("inequality", "inequality", "two arithmetic sides joined by < <= > or >="),
             ("equality", "equality", "two arithmetic sides joined by = or =="),
         ),
+        "default": "quarantine",      # the unroutable is HELD, never judged
+    },
+    # v0.2, 2026-08-05: prose narrows across domains, reusing the audit extractors. INCLUDES
+    # every v0.1 arithmetic rule verbatim (repeated, not assembled at call time — the table
+    # stays a literal registered WITH the module), then adds the prose fallback so a non-
+    # arithmetic claim is routed by audit.extract iff it yields EXACTLY ONE checkable claim.
+    # v0.1 stays the DEFAULT (route()/from_prose() defaults), so no existing caller changes.
+    "v0.2": {
+        "registered": "2026-08-05",   # same day the red team specified the engine; before any outcome
+        "rules": (
+            ("inequality", "inequality", "two arithmetic sides joined by < <= > or >="),
+            ("equality", "equality", "two arithmetic sides joined by = or =="),
+        ),
+        # The prose fallback, declared here so it is pre-registered like every other rule: read
+        # by _route_prose(), which runs audit.extract on raw_text ALONE and routes to
+        # {domain, spec} only when the text is EXACTLY ONE checkable claim; zero or more-than-one
+        # falls through to `default` (held, never judged — two claims are not one proposition).
+        "prose": "audit.extract(raw_text) -> route iff EXACTLY ONE checkable claim, else default",
         "default": "quarantine",      # the unroutable is HELD, never judged
     },
 }
@@ -347,6 +377,36 @@ def _route_one(raw: str) -> Optional[Tuple[str, str, Dict[str, Any]]]:
     return None
 
 
+def _route_prose(raw: str) -> Optional[Dict[str, Any]]:
+    """v0.2, 2026-08-05: prose narrows across domains, reusing the audit extractors.
+
+    The v0.2 prose fallback for ONE candidate whose raw_text is not an arithmetic shape. The
+    SAME deterministic extractor the auditor uses (audit.extract — plain regex, no model, so
+    the routing decision is content-addressed, never a model's ranking) reads the text. It
+    routes to a domain verifier ONLY when the text yields EXACTLY ONE checkable claim: one
+    candidate is one proposition, and a text carrying two claims is not a single checkable
+    thing, so zero-or-many returns None and the caller holds it in quarantine (never judged),
+    rather than silently reducing two claims to one. Returns a route dict carrying the claim's
+    {domain, spec} for domain-form verification (derivation.verify_derivation), never a math
+    `mode`.
+
+    Reads ONLY raw_text — never a weight, never a status — so the greppable blindness promise
+    that governs route() governs this too. The lazy import breaks no cycle: audit imports
+    derivation/receipts, never candidates.
+    """
+    from . import audit
+    claims = audit.extract(str(raw))
+    if len(claims) != 1:
+        return None
+    claim = claims[0]
+    return {"mode": "domain-form", "rule": "prose",
+            "domain": claim["domain"], "spec": claim["spec"],
+            "extractor": claim["extractor"],
+            "why": (f"no arithmetic shape; the audit {claim['extractor']!r} extractor read "
+                    f"EXACTLY ONE checkable {claim['domain']} claim — routed to domain-form "
+                    f"verification (derivation.verify_derivation)")}
+
+
 def route(cset: Dict[str, Any], policy_version: str = "v0.1") -> Dict[str, Any]:
     """Assign verifiers under the FIXED, PRE-REGISTERED policy — before outcomes exist.
 
@@ -362,6 +422,13 @@ def route(cset: Dict[str, Any], policy_version: str = "v0.1") -> Dict[str, Any]:
 
     v0.1 routes only arithmetic equality/inequality shapes to the sympy moat; everything else
     is assigned the default: quarantine, held and never judged.
+
+    v0.2, 2026-08-05: prose narrows across domains, reusing the audit extractors. Under the
+    v0.2 policy a candidate that matches no arithmetic shape is handed to _route_prose, which
+    runs audit.extract on the SAME raw_text and routes it to {domain, spec} when the text is
+    exactly one checkable claim — still reading raw_text and nothing else, so the blindness
+    promise is unchanged. Any other policy (including the v0.1 default) has no "prose" key, so
+    this branch never runs for it and v0.1 behaviour is byte-identical.
     """
     _assert_committed_and_intact(cset, "route")
     policy = ROUTING_POLICY.get(str(policy_version))
@@ -376,17 +443,24 @@ def route(cset: Dict[str, Any], policy_version: str = "v0.1") -> Dict[str, Any]:
             raise ValueError(f"routing rule {rule!r} names mode {mode!r} which the moat does "
                              f"not serve ({sorted(_MATH_MODES)}) — the policy is broken, and a "
                              f"broken policy must be loud, not lenient")
+    # The prose fallback is available ONLY when this policy version pre-registered it (v0.2).
+    # For v0.1 this stays False, so the loop below is byte-identical to v0.1's behaviour.
+    prose_enabled = "prose" in policy
     routes: Dict[str, Dict[str, Any]] = {}
     for c in cset["candidates"]:
         hit = _route_one(c["raw_text"])
-        if hit is None:
+        if hit is not None:
+            rule, mode, spec = hit
+            routes[c["candidate_id"]] = {"mode": mode, "rule": rule, "spec": spec}
+            continue
+        prose = _route_prose(c["raw_text"]) if prose_enabled else None
+        if prose is not None:
+            routes[c["candidate_id"]] = prose
+        else:
             routes[c["candidate_id"]] = {
                 "mode": None, "rule": policy["default"],
                 "why": "no registered rule matched this claim's shape — held in quarantine, "
                        "never judged"}
-        else:
-            rule, mode, spec = hit
-            routes[c["candidate_id"]] = {"mode": mode, "rule": rule, "spec": spec}
     cset["routing"] = {"policy_version": str(policy_version),
                        "registered": policy["registered"], "routes": routes}
     return cset["routing"]
@@ -419,6 +493,14 @@ def narrow(cset: Dict[str, Any], config: Optional[EngineConfig] = None) -> List[
     promise. `config` is accepted for signature stability with the MCP layer (unused by the
     v0.1 math-only routing; non-math domain verifiers will need its surface when a later
     policy version routes to them).
+
+    v0.2, 2026-08-05: prose narrows across domains, reusing the audit extractors. A prose-
+    routed candidate (mode 'domain-form', carrying the extractor's own {domain, spec}) is
+    verified with derivation.verify_derivation on a single step, and its COMPOSITE verdict is
+    mapped through the SAME _VERDICT_TO_STATUS discipline the arithmetic path uses — HOLDS ->
+    pass, BROKEN -> reject, INCOMPLETE/SYSTEM_ERROR -> quarantine (our-failure-is-not-their-
+    falsehood: a gap or an engine error never rejects the caller's claim). Arithmetic
+    candidates keep the exact v0.1 sympy path below, untouched.
     """
     _assert_committed_and_intact(cset, "narrow")
     if "routing" not in cset:
@@ -440,6 +522,29 @@ def narrow(cset: Dict[str, Any], config: Optional[EngineConfig] = None) -> List[
             c["verification_status"] = "quarantine"
             trace.append({"event": "quarantined", "candidate_id": c["candidate_id"],
                           "why": r["why"]})
+            continue
+        if r["mode"] == "domain-form":
+            # v0.2 prose-routed: domain-form verification via the derivation moat, reusing the
+            # audit extractor's own {domain, spec}. The composite verdict maps through the SAME
+            # _VERDICT_TO_STATUS discipline as the arithmetic path — a gap or engine error
+            # quarantines, never rejects (our-failure-is-not-their-falsehood).
+            dres = derivation.verify_derivation([
+                {"id": c["candidate_id"], "domain": r["domain"], "spec": r["spec"],
+                 "claim": c["raw_text"]}])
+            verdict = str(dres.get("verdict") or "SYSTEM_ERROR")
+            status = _VERDICT_TO_STATUS.get(verdict, "quarantine")
+            detail = ""
+            for e in (dres.get("trail") or []):
+                if e.get("detail"):
+                    detail = str(e["detail"])[:300]
+                    break
+            c["verification_status"] = status
+            c["evidence"] = {"checked_by": "concordance.derivation.verify_derivation",
+                             "domain": r["domain"], "extractor": r.get("extractor"),
+                             "verdict": verdict, "detail": detail}
+            trace.append({"event": "checked", "candidate_id": c["candidate_id"],
+                          "mode": r["mode"], "domain": r["domain"], "verdict": verdict,
+                          "verification_status": status, "detail": detail})
             continue
         res = derivation.verify({"mode": r["mode"], "params": r["spec"]})
         verdict = str(res.get("verdict") or "SYSTEM_ERROR")
@@ -537,6 +642,87 @@ def receipt(cset: Dict[str, Any], config: Optional[EngineConfig] = None) -> Dict
     return out
 
 
+def from_prose(text: str, generator: str = "human", generation_method: str = "human",
+               policy_version: str = "v0.2",
+               config: Optional[EngineConfig] = None) -> Optional[Dict[str, Any]]:
+    """Bridge a human's PROSE into a committed, narrowed CandidateSet — the door the human
+    /ask verify-branch and agents both use (v0.2, 2026-08-05: prose narrows across domains,
+    reusing the audit extractors).
+
+    The auditor's deterministic extractor (audit.extract — plain regex, no model) reads the
+    text and returns every claim it can identify with CERTAINTY. Each becomes ONE candidate,
+    whose raw_text is that claim's own source quote — so the set's membership is exactly the
+    checkable propositions the text contained, one proposition per candidate, nothing
+    generated. Then the ordinary pipeline runs in its registered order:
+    create_set -> commit -> route(policy_version) -> narrow, and the committed+narrowed set is
+    returned with EVERY candidate retained (the rejected and the quarantined ride beside the
+    selected, always).
+
+    Returns None when the text yields no checkable claim, so a caller can fall back to its
+    uncertain path rather than present an empty narrowing as an answer (a miss must stay a
+    miss). Because route() re-reads each candidate's raw_text with the same extractor, routing
+    stays blind to everything but the text — from_prose invents no generator weight (human
+    prose carries none, and inventing one would be authoring the untrusted metadata this module
+    refuses to trust), so the weight-blindness invariant holds end to end.
+
+    Deterministic: audit.extract is deterministic and create_set is content-addressed over the
+    raw material with no clock, so the same prose always mints the same candidate_set_id. The
+    lazy audit import breaks no cycle (audit imports derivation/receipts, never candidates).
+    """
+    from . import audit
+    claims = audit.extract(str(text or ""))
+    if not claims:
+        return None
+    cset = create_set(query=str(text),
+                      candidates=[claim["claim"] for claim in claims],
+                      generator=generator, generation_method=generation_method)
+    commit(cset)
+    route(cset, policy_version=policy_version)
+    narrow(cset, config=config)
+    return cset
+
+
+def as_checked(cset: Dict[str, Any]) -> Dict[str, Any]:
+    """Shape a narrowed set into the desk's answer contract (site/index.html render()):
+    per-claim {claim, status, detail} plus the honest tallies and the seal. The three states
+    are kept DISTINCT — 'held' (verified true), 'broken' (verified false), and 'quarantine'
+    (held, never judged: no verifier applied, or ours failed) — because collapsing the last
+    two would tell a person their true claim was false whenever WE simply could not check it.
+    Reads verification_status only; never a weight."""
+    results, survived, rejected, held = [], 0, 0, 0
+    for c in cset.get("candidates", []):
+        st = c.get("verification_status", "quarantine")
+        if st == "pass":
+            survived += 1
+        elif st == "reject":
+            rejected += 1
+        else:
+            held += 1
+        detail = (c.get("evidence") or {}).get("detail", "")
+        results.append({"claim": c.get("raw_text", ""), "status": st, "detail": detail})
+    return {"results": results, "survived": survived, "rejected": rejected, "held": held,
+            "seal": cset.get("receipt", {}).get("cite_url") or cset.get("receipt", {}).get("content_hash")}
+
+
+def checked_message(cset: Dict[str, Any]) -> str:
+    """One plain sentence over a narrowed set — what checked out, what did not, what is held.
+    No jargon: a person reads 'checked', not 'CandidateSet'."""
+    k = as_checked(cset)
+    n = len(k["results"])
+    if n == 0:
+        return ""
+    parts = []
+    if k["survived"]:
+        parts.append(f"{k['survived']} held up")
+    if k["rejected"]:
+        parts.append(f"{k['rejected']} did not")
+    if k["held"]:
+        parts.append(f"{k['held']} I could not check (held, not judged)")
+    body = "; ".join(parts) if parts else "held"
+    claim_word = "claim" if n == 1 else "claims"
+    return f"I checked {n} {claim_word} in what you wrote — {body}. Here is each, with its receipt."
+
+
 __all__ = [
     "SCHEMA_VERSION",
     "GENERATION_METHODS",
@@ -550,4 +736,7 @@ __all__ = [
     "route",
     "narrow",
     "receipt",
+    "from_prose",
+    "as_checked",
+    "checked_message",
 ]
