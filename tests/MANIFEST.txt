@@ -19,6 +19,7 @@ test_binding.py
 test_bookofdays.py
 test_branch.py
 test_cabinet.py
+test_candidates.py
 test_canon_original.py
 test_canonical.py
 test_capabilities.py

@@ -37,7 +37,7 @@ def _walk(schema, path=""):
 # ── schemas (the #124 floor) ─────────────────────────────────────────────────────────────────
 
 def test_every_served_schema_is_closed_and_bounded():
-    """The floor, on all 83 at once: objects closed, strings bounded (or enum/pattern/format),
+    """The floor, on all 86 at once: objects closed, strings bounded (or enum/pattern/format),
     arrays bounded with typed items, numbers bounded. Applied where schemas are SERVED, so a
     loose literal in the source cannot reach a client."""
     loose = []
@@ -129,6 +129,9 @@ def test_vocabulary_enums_are_sourced_not_copied():
     assert by_name["verify"]["properties"]["mode"]["enum"] == sorted(_MATH_MODES)
     assert by_name["shelf_signable"]["properties"]["kind"]["enum"] == sorted(KINDS)
     assert by_name["shelf_signable"]["properties"]["ring"]["enum"] == sorted(RINGS)
+    from concordance.candidates import GENERATION_METHODS
+    assert by_name["candidate_commit"]["properties"]["generation_method"]["enum"] == \
+        sorted(GENERATION_METHODS)
 
 
 def test_the_enum_remainder_is_declared_with_reasons():

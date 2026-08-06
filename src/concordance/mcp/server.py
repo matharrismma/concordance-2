@@ -515,6 +515,85 @@ def _secular_tools() -> List[dict]:
          "inputSchema": {"type": "object", "properties": {
              "text": {"type": "string", "description": "what you are bringing, in your own words"}},
              "required": ["text"]}},
+        # THE CANDIDATE ENGINE (task #135, docs/RED_TEAM_CANDIDATE_ENGINE_2026-08-05.md).
+        # Zone C between any generator and the moat: commit the complete raw set FIRST, then
+        # narrow under a pre-registered policy, then seal the whole path — winners and losers.
+        # Generation itself never enters these tools; a candidate is data, never instructions.
+        {"name": "candidate_commit",
+         "description": ("Candidate Engine step 1 — commit a COMPLETE raw candidate set "
+                         "BEFORE any evaluation. Give the query, the generator, the method, "
+                         "and EVERY raw candidate; weights ride verbatim as UNTRUSTED "
+                         "metadata (proposal_weight is never confidence and never ranks "
+                         "anything). Returns the committed set: a content-addressed "
+                         "candidate_set_id, the membership commitment hash (also sealed as a "
+                         "durable anchor), and per-candidate ids — all born quarantined. "
+                         "Nothing is verified here; that is the point: a set hashed before "
+                         "checking cannot be selectively disclosed after."),
+         "inputSchema": {"type": "object", "properties": {
+             "query": {"type": "string",
+                       "description": "the user request the candidates answer (hashed; not stored raw)"},
+             "candidates": {"type": "array", "maxItems": 64,
+                            "description": "the COMPLETE raw generator output — omit nothing",
+                            "items": {"type": "object", "properties": {
+                                "raw_text": {"type": "string"},
+                                "proposal_weight": {"type": "number",
+                                    "description": ("generator-verbalized weight, stored "
+                                                    "verbatim; UNTRUSTED metadata, never "
+                                                    "truth confidence")}},
+                                "required": ["raw_text"], "additionalProperties": False}},
+             "generator": {"type": "string",
+                           "description": "model/provider/version or human source (provenance)"},
+             "generation_method": {"type": "string",
+                                   "description": "how the set was produced"},
+             "prompt": {"type": "string",
+                        "description": "the exact generation instructions (hashed, not stored)"}},
+             "required": ["query", "candidates", "generator", "generation_method"]}},
+        {"name": "candidate_narrow",
+         "description": ("Candidate Engine step 2 — narrow a COMMITTED set: verifiers are "
+                         "assigned under the fixed pre-registered routing policy (never your "
+                         "choice — that is what stops verification shopping), each routed "
+                         "claim runs through the deterministic moat, unroutable claims stay "
+                         "quarantined (held, never judged), and the FULL set — rejected and "
+                         "quarantined included — is sealed with its ordered trace. Refuses "
+                         "an uncommitted or altered set. Pass the set exactly as "
+                         "candidate_commit returned it."),
+         "inputSchema": {"type": "object", "properties": {
+             "cset": {"type": "object",
+                      "description": "the committed set, verbatim from candidate_commit",
+                      "properties": {
+                          "schema_version": {"type": "string"},
+                          "candidate_set_id": {"type": "string"},
+                          "query_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                          "generator": {"type": "string"},
+                          "generation_method": {"type": "string"},
+                          "prompt_hash": {"type": ["string", "null"]},
+                          "commitment": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                          "commitment_seal": {"type": ["string", "null"]},
+                          "candidates": {"type": "array", "maxItems": 64,
+                              "items": {"type": "object", "properties": {
+                                  "candidate_id": {"type": "string"},
+                                  "raw_text": {"type": "string"},
+                                  "proposal_weight": {"type": "number"},
+                                  "cluster_id": {"type": ["string", "null"]},
+                                  "safety_status": {"type": "string"},
+                                  "verification_status": {"type": "string"},
+                                  "selection_status": {"type": "string"},
+                                  "parent_ids": {"type": "array",
+                                                 "items": {"type": "string"}}},
+                                  "required": ["candidate_id", "raw_text"],
+                                  "additionalProperties": False}}},
+                      "required": ["candidate_set_id", "query_hash", "generator",
+                                   "generation_method", "commitment", "candidates"],
+                      "additionalProperties": False}},
+             "required": ["cset"]}},
+        {"name": "candidate_get",
+         "description": ("Fetch a sealed candidate record (a narrowing receipt or a "
+                         "commitment anchor) by its content hash — the whole preserved path, "
+                         "losers included, re-checkable offline with tools/verify_seal.py. "
+                         "The seal proves process integrity, never truth."),
+         "inputSchema": {"type": "object", "properties": {
+             "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}},
+             "required": ["hash"]}},
     ]
 
 
@@ -679,7 +758,9 @@ PROFILES: Dict[str, Dict[str, Any]] = {
                        "fetch and witness seals, read the engine's own capabilities and clock.",
         "tools": {"verify": "derive", "audit": "derive", "seal_fetch": "read",
                   "attest_record": "preserve", "witnesses": "read",
-                  "now": "read", "capabilities": "read"},
+                  "now": "read", "capabilities": "read",
+                  "candidate_commit": "preserve", "candidate_narrow": "derive",
+                  "candidate_get": "read"},
     },
     "library": {
         "version": "1.0.0",
@@ -852,12 +933,14 @@ ENUM_TODO = {
 
 
 def _enum_wiring() -> Dict[tuple, list]:
+    from ..candidates import GENERATION_METHODS
     from ..derivation import _MATH_MODES
     from ..shelves import KINDS, RINGS
     return {
         ("verify", "mode"): sorted(_MATH_MODES),
         ("shelf_signable", "kind"): sorted(KINDS),
         ("shelf_signable", "ring"): sorted(RINGS),
+        ("candidate_commit", "generation_method"): sorted(GENERATION_METHODS),
     }
 
 
@@ -1085,6 +1168,58 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     if name == "witnesses":
         from .. import attest as _attest
         return _attest.witnesses(str(args.get("content_hash") or ""))
+    if name == "candidate_commit":
+        from .. import candidates as _cand
+        try:
+            cs = _cand.create_set(str(args.get("query") or ""),
+                                  args.get("candidates") or [],
+                                  generator=str(args.get("generator") or ""),
+                                  generation_method=str(args.get("generation_method") or ""),
+                                  prompt=(str(args["prompt"]) if args.get("prompt") else None))
+            _cand.commit(cs)
+        except ValueError as e:
+            return {"error": str(e)}   # typed by the envelope; messages say what is missing
+        # Seal the commitment NOW, while no evaluation exists anywhere — the durable anchor a
+        # later narrowing receipt must match, so an omitted candidate has nowhere to hide.
+        anchor = {"kind": "candidate_commitment",
+                  "candidate_set_id": cs["candidate_set_id"],
+                  "commitment": cs["commitment"], "query_hash": cs["query_hash"],
+                  "generator": cs["generator"],
+                  "generation_method": cs["generation_method"],
+                  "prompt_hash": cs["prompt_hash"]}
+        try:
+            anchor_hash = cas.store(anchor)
+        except Exception:  # noqa: BLE001 — the commitment stands in the set; the anchor is durability
+            anchor_hash = None
+        out = dict(cs)
+        out["candidates"] = [dict(c) for c in cs["candidates"]]  # tuple -> list for transport
+        out["commitment_seal"] = anchor_hash
+        return out
+    if name == "candidate_narrow":
+        from .. import candidates as _cand
+        cset = args.get("cset")
+        if not isinstance(cset, dict):
+            return {"error": "cset required — the committed set exactly as candidate_commit "
+                             "returned it"}
+        cset = dict(cset)
+        cset.pop("commitment_seal", None)   # transport metadata, not membership
+        try:
+            _cand.route(cset)               # fixed pre-registered policy — never a caller choice
+            trace = _cand.narrow(cset, config)
+        except ValueError as e:
+            return {"error": str(e)}
+        sealed = _cand.receipt(cset, config)
+        sealed.pop("record", None)          # the set below IS the record; do not ship it twice
+        return {"cset": dict(cset, candidates=[dict(c) for c in cset["candidates"]]),
+                "trace": trace, "receipt": sealed}
+    if name == "candidate_get":
+        rec = cas.fetch(str(args.get("hash") or ""))
+        if rec is None:
+            return {"error": "no seal under that hash"}
+        if rec.get("kind") not in ("candidate_set", "candidate_commitment"):
+            return {"error": "no seal of a candidate kind under that hash — seal_fetch serves "
+                             "generic seals"}
+        return rec
     if name == "now":
         from .. import ops as _ops   # both surfaces, never gated: the time of day belongs to all
         return _ops.now(str(args.get("tz") or "").strip() or None)
