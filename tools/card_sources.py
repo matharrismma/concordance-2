@@ -119,6 +119,11 @@ SPINES = [
            "Every word: what it means, and the words that stand with it. A dictionary and a "
            "thesaurus in one — so language itself is carried on the ark.", FLOOR,
            ["dictionary", "thesaurus", "words", "language", "wordnet", "spine"]),
+    _spine("card_spine_pronunciation", "The pronunciations — how the words are spoken",
+           "How words are spoken: the CMU Pronouncing Dictionary rendered in ARPABET. Language "
+           "carried on the ark down to its sound, so a reader can say what they read. Public and "
+           "permissively licensed — the clean-licensed pronunciation shelf.", FLOOR,
+           ["pronunciation", "phonetics", "arpabet", "language", "cmudict", "spine"]),
     _spine("card_spine_places", "The places of the earth",
            "Named places of the earth — country, coordinates, population. A gazetteer for the ark.",
            FLOOR, ["geography", "places", "gazetteer", "geonames", "spine"]),
@@ -267,6 +272,36 @@ def gen_words():
                     spine="card_spine_words", domain="linguistics")
 
 
+def _pron_card(word, prons):
+    prim = prons[0]
+    extra = ("; also " + ", ".join(prons[1:4])) if len(prons) > 1 else ""
+    body = (f"{word}: pronounced (ARPABET) {prim}{extra}. From the CMU Pronouncing Dictionary — "
+            "the standard machine-readable pronunciations of North American English.")
+    return _card(f"card_src_pron_{_sk(word)}", str(word), body,
+                 shelf="pronunciation", subject=str(word),
+                 bands=[str(word).lower(), "pronunciation", "phonetics", "arpabet", "language"],
+                 source_label="CMU Pronouncing Dictionary (cmudict) — BSD-2-Clause, Carnegie Mellon",
+                 spine="card_spine_pronunciation", domain="linguistics")
+
+
+def gen_cmudict():
+    """Pronunciations — the CMU Pronouncing Dictionary: one card per word, its ARPABET
+    pronunciation(s) grouped. Public and permissively licensed (BSD-2-Clause) — a clean-licensed
+    language shelf that stands where the withheld CC-BY-SA PHOIBLE cannot be served."""
+    c = _conn("cmudict")
+    word, prons = None, []
+    for (w, _variant, arpabet) in c.execute(
+            "select word, variant, arpabet from pron order by word, variant"):
+        if w != word:
+            if word and prons and _sk(word):
+                yield _pron_card(word, prons)
+            word, prons = w, []
+        if arpabet:
+            prons.append(arpabet)
+    if word and prons and _sk(word):
+        yield _pron_card(word, prons)
+
+
 def gen_places():
     c = _conn("geonames")
     for (gid, name, ascii_, lat, lon, cc, admin1, fcode, pop, tz) in c.execute(
@@ -369,6 +404,7 @@ def gen_federal():
 # gen_stars_pd once the PD source is anchored on the drive. gen_stars is kept below only as a marker.
 GENERATORS = {"nuclides": gen_nuclides, "ports": gen_ports,
               "worldbank": gen_worldbank, "foods": gen_foods, "words": gen_words,
+              "pronunciation": gen_cmudict,
               "places": gen_places, "drugs": gen_drugs, "lexicon": gen_lexicon,
               "federal": gen_federal}
 
