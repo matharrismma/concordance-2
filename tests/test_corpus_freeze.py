@@ -132,6 +132,26 @@ def test_frozen_shelf_loads_as_stub_and_the_graph_stays_whole(frozen_world):
     assert core.get("frozen") is None and core.get("body"), "resident shelves load untouched"
 
 
+def test_a_share_alike_card_on_a_frozen_shelf_is_withheld(frozen_world):
+    """The license lives in `source`, which a stub drops — so `share_alike` is precomputed at
+    stub-build time. A CC-BY-SA card on a frozen shelf must load as a stub that is_public()
+    withholds; otherwise /search (which runs over stubs) leaks it while card_get withholds it —
+    exactly the divergence found LIVE 2026-08-06 for HYG star cards."""
+    from concordance import corpus
+    sa = {"id": "card_dict_sa", "kind": "reference", "title": "ShareAlikeWord",
+          "body": "a term drawn from a CC-BY-SA source", "shelf": "dictionary", "surface": "secular",
+          "lifecycle_stage": "public", "generated": False,
+          "source": {"label": "Some DB (CC-BY-SA 4.0)", "authority_tier": "reference"},
+          "connections": [{"to_card_id": "card_core_home", "relationship": "member_of",
+                           "evidence": "member"}]}
+    with open(frozen_world / "cards.jsonl", "a", encoding="utf-8") as f:
+        f.write(json.dumps(sa) + "\n")
+    stub = corpus.default_corpus().cards["card_dict_sa"]
+    assert stub.get("frozen") is True and "source" not in stub, "the source label is shed on a stub"
+    assert stub.get("share_alike") is True, "the share-alike bit is precomputed before the label drops"
+    assert corpus.is_public(stub) is False, "a share-alike stub is withheld — search must not leak it"
+
+
 def test_get_card_rehydrates_full_and_the_live_graph_wins(frozen_world):
     from concordance import corpus
     c = corpus.get_card("card_dict_zymurgy")

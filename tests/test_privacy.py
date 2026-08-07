@@ -54,6 +54,44 @@ def test_is_public_is_an_allowlist():
     assert not corpus.is_public("not a dict")
 
 
+def test_share_alike_and_generated_are_withheld():
+    """LICENSE + conduit guards (red team 2026-08-06, Matt: "drop what could get us in trouble").
+    Share-alike (CC-BY-SA) content is a legal issue to REDISTRIBUTE — its copyleft could pull the
+    whole corpus under SA — so it is withheld from every public read path even at stage `public`.
+    PD / CC0 / CC-BY (attribution-only) stay, credited by each card's source label. And a generated
+    card never serves publicly (the conduit contract). Both guards sit ON TOP of the stage allowlist."""
+    pub = {"lifecycle_stage": "public"}
+    # share-alike, whether the marker rides on the source label or extra.license
+    assert not corpus.is_public({**pub, "source": {"label": "HYG stellar database (CC-BY-SA, D. Nash)"}})
+    assert not corpus.is_public({**pub, "source": {"label": "PHOIBLE 2.0 + Glottolog (CC-BY-SA 3.0 / CC-BY 4.0)"}})
+    assert not corpus.is_public({**pub, "extra": {"license": "CC-BY-SA 4.0"}})
+    assert not corpus.is_public({**pub, "source": {"label": "something (Share-Alike)"}})
+    # attribution-only and public-domain licenses ARE served (CC-BY is not CC-BY-SA)
+    assert corpus.is_public({**pub, "source": {"label": "GeoNames (CC-BY 4.0)"}})
+    assert corpus.is_public({**pub, "source": {"label": "STEPBible Strong's (CC-BY, Tyndale House)"}})
+    assert corpus.is_public({**pub, "source": {"label": "NNDC nuclide data (public domain)"}})
+    assert corpus.is_public({**pub, "extra": {"license": "CC0"}})
+    # a generated card is never served publicly; the conduit's generated:false rides through
+    assert not corpus.is_public({**pub, "generated": True})
+    assert corpus.is_public({**pub, "generated": False})
+
+
+def test_a_frozen_stub_still_withholds_share_alike():
+    """A frozen-shelf STUB drops `source`/`extra` to save memory, so is_public() cannot read the
+    license off it — it carries a precomputed `share_alike` bool instead, honoured first. Found LIVE
+    (2026-08-06): without this, /search (which runs over stubs) served CC-BY-SA HYG star cards that
+    card_get correctly withheld — the guard reached full cards but not the stub the index is built on."""
+    stub_sa = {"id": "card_src_star_x", "lifecycle_stage": "public", "shelf": "astronomy",
+               "generated": False, "share_alike": True}          # a stub of an HYG (CC-BY-SA) card
+    assert corpus.is_public(stub_sa) is False
+    stub_ok = {"id": "y", "lifecycle_stage": "public", "shelf": "astronomy",
+               "generated": False, "share_alike": False}          # a stub of an ordinary card
+    assert corpus.is_public(stub_ok) is True
+    # the precomputed flag wins over an (absent) label — a stub never has a source to scan
+    assert corpus._is_share_alike({"share_alike": True}) is True
+    assert corpus._is_share_alike({"share_alike": False, "source": {"label": "x (CC-BY-SA)"}}) is False
+
+
 def test_get_card_hides_nonpublic():
     _setup(_fixture_with_retracted())
     assert corpus.get_card("pub1") is not None

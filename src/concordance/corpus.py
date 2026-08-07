@@ -52,6 +52,31 @@ def _card_text(card: dict) -> str:
 
 PUBLIC_STAGES = frozenset({"public", "featured"})
 
+# Share-alike (copyleft) license markers. CC-BY-SA's viral clause could force the WHOLE corpus
+# under SA if we redistribute it publicly — the one license class that is a legal issue to serve.
+# PD / CC0 / CC-BY (attribution-only) are fine, credited by each card's own source label.
+_SHARE_ALIKE = ("cc-by-sa", "share-alike", "sharealike")
+
+
+def _is_share_alike(card: dict) -> bool:
+    """True iff a card declares a share-alike license. Read from the free-text source label and any
+    `extra.license` — the only license signal cards carry today (a structured `license` field would
+    be more robust; tracked as a follow-up). Only HYG + PHOIBLE match today (~5,234 cards).
+
+    A FROZEN-SHELF STUB drops `source`/`extra` to save memory, so it carries a precomputed
+    `share_alike` bool (set at stub-build time while the label was still present) — honoured here
+    first, so is_public() judges a stub exactly as it judges the full card. Without this, search
+    (which runs over stubs) leaked CC-BY-SA cards that card_get correctly withheld (found live)."""
+    flag = card.get("share_alike")
+    if flag is not None:
+        return bool(flag)
+    src = card.get("source")
+    label = (src.get("label") if isinstance(src, dict) else "") or ""
+    extra = card.get("extra")
+    lic = (extra.get("license") if isinstance(extra, dict) else "") or ""
+    blob = (str(label) + " " + str(lic)).lower()
+    return any(m in blob for m in _SHARE_ALIKE)
+
 # Larger than any reachable TF-IDF score, so cards holding the query's rarest word form a
 # strictly higher tier than those that do not. A partition, not a weight: no amount of
 # repeating a common word can cross it.
@@ -69,10 +94,23 @@ def is_public(card: dict) -> bool:
     ONE source of truth (graph.py imports this too, so the two can never diverge): every
     stage except public/featured — private, public_review, archived, quarantine, retracted —
     is withheld. A denylist here (archived/quarantine only) is exactly what leaked the
-    operator's private cards onto the public surface."""
+    operator's private cards onto the public surface. On top of the stage allowlist, two
+    withholding guards (more restrictive, never less): share-alike-licensed cards (CC-BY-SA —
+    a legal issue to redistribute) and generated cards (the conduit contract) never go public."""
     if not isinstance(card, dict) or card.get("retracted"):
         return False
-    return (card.get("lifecycle_stage") or "public") in PUBLIC_STAGES
+    if (card.get("lifecycle_stage") or "public") not in PUBLIC_STAGES:
+        return False
+    # LICENSE (red team 2026-08-06, Matt's call "drop what could get us in trouble"): never publicly
+    # REDISTRIBUTE share-alike content — its copyleft could pull the whole corpus under SA. Withheld
+    # here, not deleted (the bodies stay archived on the drive). A PD stub card ABOUT each such source
+    # still serves, so the shelf is not a silent hole. See _is_share_alike.
+    if _is_share_alike(card):
+        return False
+    # The conduit contract at the serving boundary: a generated card is never served publicly.
+    if card.get("generated") is True:
+        return False
+    return True
 
 
 # ── The freeze (D4) — the heavy shelves ride the shards, the graph stays home ────────────
@@ -84,10 +122,12 @@ def is_public(card: dict) -> bool:
 # findable); bodies, bands, and provenance rehydrate from the SQLite shards on read.
 # Opt-in and reversible: unset the env and everything loads resident exactly as before.
 
-# What a stub keeps: identity, the public/withheld boundary, and the graph. `retracted`
-# and `lifecycle_stage` stay so is_public() judges a stub exactly as it judges the full card.
+# What a stub keeps: identity, the public/withheld boundary, and the graph. `retracted`,
+# `lifecycle_stage`, `generated`, and the computed `share_alike` bool stay so is_public() judges a
+# stub exactly as it judges the full card — the license lives in `source` (dropped on a stub), so
+# it is precomputed at stub-build time (search runs on stubs; without this it leaked CC-BY-SA).
 _STUB_KEEPS = frozenset({"id", "title", "shelf", "surface", "kind", "box", "visibility",
-                         "lifecycle_stage", "retracted", "generated", "connections"})
+                         "lifecycle_stage", "retracted", "generated", "share_alike", "connections"})
 
 
 def frozen_shelves() -> frozenset:
@@ -549,8 +589,10 @@ def load_cards(path: Optional[Path] = None,
         # a frozen-shelf card loads as a stub — the graph resident, the weight on the shard
         if c.get("shelf") in frozen:
             full_toks = set(_tokens(_card_text(c)))
+            _sa = _is_share_alike(c)   # compute on the FULL card, before the source label is dropped
             c = {k: v for k, v in c.items() if k in _STUB_KEEPS}
             c["frozen"] = True
+            c["share_alike"] = _sa     # so is_public() withholds a share-alike stub too (search runs on stubs)
             if _df_out is not None:
                 for t in full_toks - set(_tokens(_card_text(c))):
                     _df_out[t] = _df_out.get(t, 0) + 1
