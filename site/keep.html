@@ -77,6 +77,19 @@
     </section>
 
     <section>
+      <h2>Composition of the keep <span class="muted" style="font-size:.68rem;font-weight:400">· served vs withheld · by shelf · refreshes ~1×/min</span></h2>
+      <div class="grid" style="margin-bottom:.4rem">
+        <div class="stat"><div class="n ok" id="k-public">—</div><div class="k">served (public)</div></div>
+        <div class="stat"><div class="n" id="k-withheld">—</div><div class="k">withheld</div></div>
+        <div class="stat"><div class="n" id="k-shelves">—</div><div class="k">shelves</div></div>
+        <div class="stat"><div class="n" id="k-orphans">—</div><div class="k">orphans</div></div>
+      </div>
+      <p id="k-withheld-why" class="muted" style="font-size:.78rem;margin:.1rem 0 .6rem"></p>
+      <table class="feed" style="width:100%"><tbody id="k-shelves-body"></tbody></table>
+      <p id="k-shelves-empty" class="muted" hidden style="font-size:.82rem">Composition not computed yet.</p>
+    </section>
+
+    <section>
       <h2>Last 24 hours <span class="muted" style="font-size:.68rem;font-weight:400">· hourly · human / agent / bot · advisory ops data from the access logs</span></h2>
       <p class="muted" id="h24-meta" style="font-size:.82rem;margin:.2rem 0 .5rem"></p>
       <div id="h24"></div>
@@ -157,6 +170,42 @@ async function refresh() {
   document.getElementById("s-ledger").textContent = (lg.verified ?? "—") + (lg.total != null ? "/" + lg.total : "");
   document.getElementById("s-ledger").className = "n " + (lg.ok === false ? "bad" : "ok");
   document.getElementById("s-events").textContent = d.activity?.stats?.events ?? "—";
+
+  // composition of the keep — served vs withheld, by shelf, nesting health
+  const kp = d.keeping || {};
+  const nfmt = v => (v == null ? "—" : Number(v).toLocaleString());
+  const setN = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = nfmt(v); };
+  setN("k-public", kp.public);
+  setN("k-withheld", kp.withheld?.total);
+  setN("k-shelves", kp.shelf_count);
+  const orphEl = document.getElementById("k-orphans");
+  if (orphEl) { orphEl.textContent = nfmt(kp.orphans); orphEl.className = "n " + (kp.orphans ? "bad" : "ok"); }
+  const w = kp.withheld || {}, why = document.getElementById("k-withheld-why");
+  if (why) {
+    const parts = [];
+    if (w.share_alike) parts.push(nfmt(w.share_alike) + " share-alike (CC-BY-SA)");
+    if (w.not_public_stage) parts.push(nfmt(w.not_public_stage) + " held for review / private");
+    if (w.generated) parts.push(nfmt(w.generated) + " generated");
+    if (w.retracted) parts.push(nfmt(w.retracted) + " retracted");
+    why.textContent = parts.length ? ("Withheld from public serving: " + parts.join(" · ")) : "";
+  }
+  const sb = document.getElementById("k-shelves-body"), shelves = kp.shelves || [];
+  const sEmpty = document.getElementById("k-shelves-empty");
+  if (sEmpty) sEmpty.hidden = shelves.length > 0;
+  if (sb) {
+    sb.innerHTML = "";
+    const max = shelves.reduce((m, s) => Math.max(m, s.cards || 0), 1);
+    for (const s of shelves) {
+      const pct = Math.max(1, Math.round(((s.cards || 0) / max) * 100));
+      const wh = (s.cards || 0) - (s.public || 0);
+      const tr = document.createElement("tr");
+      tr.innerHTML = '<td class="mono" style="width:9.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeHtml(s.shelf) + '</td>' +
+        '<td><div style="background:var(--line);border-radius:3px;overflow:hidden;height:.66rem"><div style="height:100%;width:' + pct + '%;background:var(--accent)"></div></div></td>' +
+        '<td class="mono" style="text-align:right;width:5.5rem">' + (s.cards || 0).toLocaleString() + '</td>' +
+        '<td class="muted mono" style="text-align:right;width:5rem" title="withheld from public">' + (wh ? "−" + wh.toLocaleString() : "") + '</td>';
+      sb.appendChild(tr);
+    }
+  }
 
   // integrity (from the scheduled check — tools/integrity_check.py)
   const ig = d.integrity, il = document.getElementById("integrity-line");

@@ -26,7 +26,8 @@ from __future__ import annotations
 
 import hmac
 import os
-from typing import Any, Dict, Optional
+import time
+from typing import Any, Dict, List, Optional
 
 from .. import __version__, cas, corpus, ledger, telemetry
 from ..config import EngineConfig
@@ -115,12 +116,79 @@ def _read_traffic() -> Optional[Dict[str, Any]]:
         return None
 
 
+# One full-corpus scan is ~1–2s at 670k cards; the operator dashboard refreshes on a timer, so the
+# composition is cached and recomputed at most once a minute. Best-effort throughout.
+_KEEP_CACHE: Dict[str, Any] = {"ts": 0.0, "data": None}
+_KEEP_TTL = 60.0
+
+
+def _keeping_stats() -> Dict[str, Any]:
+    """Composition + license boundary + nesting health of the keep, in ONE pass (cached ~60s).
+
+    This is where the corpus-growth and PD/CC0 work becomes VISIBLE to the operator: how many
+    cards, how many are actually SERVED vs withheld and WHY (share-alike / stage / generated /
+    retracted), the makeup by shelf, and whether the nesting still holds (spines, orphans)."""
+    now = time.time()
+    cached = _KEEP_CACHE.get("data")
+    if cached is not None and (now - _KEEP_CACHE.get("ts", 0.0)) < _KEEP_TTL:
+        return cached
+    cards = corpus.default_corpus().cards
+    total = len(cards)
+    public = spines = sa = stage = gen = retr = orphans = 0
+    by_shelf: Dict[str, List[int]] = {}
+    public_ids: set = set()
+    for cid, c in cards.items():
+        shelf = c.get("shelf") or "(none)"
+        row = by_shelf.setdefault(shelf, [0, 0])
+        row[0] += 1
+        sid = str(cid)
+        if shelf == "spine" or sid.startswith("card_spine") or sid.startswith("card_k_spine"):
+            spines += 1
+        if corpus.is_public(c):
+            public += 1
+            row[1] += 1
+            public_ids.add(cid)
+        elif c.get("retracted"):
+            retr += 1
+        elif (c.get("lifecycle_stage") or "public") not in corpus.PUBLIC_STAGES:
+            stage += 1
+        elif corpus._is_share_alike(c):
+            sa += 1
+        elif c.get("generated") is True:
+            gen += 1
+    # a public card whose member/part SPINE target is not itself public = a dangling edge (orphan)
+    for cid in public_ids:
+        for e in (cards[cid].get("connections") or []):
+            if (e.get("relationship") in ("member_of", "part_of")
+                    and (t := e.get("to_card_id")) and t not in public_ids):
+                orphans += 1
+                break
+    shelves = sorted(([s, v[0], v[1]] for s, v in by_shelf.items()), key=lambda r: (-r[1], r[0]))
+    data = {
+        "cards": total,
+        "public": public,
+        "withheld": {"total": total - public, "share_alike": sa,
+                     "not_public_stage": stage, "generated": gen, "retracted": retr},
+        "spines": spines,
+        "shelf_count": len(by_shelf),
+        "orphans": orphans,
+        "shelves": [{"shelf": s, "cards": n, "public": p} for s, n, p in shelves[:24]],
+        "computed_at": now,
+    }
+    _KEEP_CACHE["ts"] = now
+    _KEEP_CACHE["data"] = data
+    return data
+
+
 def dashboard(config: EngineConfig) -> Dict[str, Any]:
     """The live state — what the operator needs to see at a glance. All best-effort."""
     try:
-        cards = len(corpus.default_corpus().cards)
+        keeping = _keeping_stats()
     except Exception:
-        cards = None
+        try:
+            keeping = {"cards": len(corpus.default_corpus().cards)}
+        except Exception:
+            keeping = {"cards": None}
     try:
         seal_stats = cas.stats()
     except Exception:
@@ -144,7 +212,7 @@ def dashboard(config: EngineConfig) -> Dict[str, Any]:
             "authoritative": "ledger + seals (CAS) — hash-chained, content-addressed, re-verifiable",
             "advisory": "activity — a best-effort ops log; tamperable, NOT part of the integrity chain",
         },
-        "keeping": {"cards": cards, "precedents": precedents},
+        "keeping": {**keeping, "precedents": precedents},
         "seals": {
             "count": seal_stats.get("count"),
             "total_bytes": seal_stats.get("total_bytes"),
