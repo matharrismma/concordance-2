@@ -49,7 +49,25 @@ def _sk(*parts) -> str:
     return _slug.sub("_", "-".join(str(p) for p in parts).lower()).strip("_")
 
 
+# The emitter's stated discipline, ENFORCED at the mint (red team 2026-08-06): US-gov public
+# domain, CC0, or CC-BY WITH attribution only. Share-alike (CC-BY-SA — viral copyleft) and
+# non-commercial (CC-BY-NC* — forbids our free-to-all use) can never be publicly redistributed by
+# this project, so they are refused here, loud and closed. This is the mint-side mirror of
+# corpus.is_public()'s serving guard — HYG + PHOIBLE + drugcentral + oeis are exactly what it stops.
+_DISALLOWED_LICENSE = ("cc-by-sa", "cc by-sa", "share-alike", "sharealike",
+                       "cc-by-nc", "cc by-nc", "non-commercial", "noncommercial")
+
+
+def _license_ok(source_label: str) -> bool:
+    t = (source_label or "").lower()
+    return not any(m in t for m in _DISALLOWED_LICENSE)
+
+
 def _card(cid, title, body, *, shelf, subject, bands, source_label, spine, domain):
+    if not _license_ok(source_label):
+        raise ValueError(
+            f"refusing to mint {cid!r} under a disallowed license: {source_label!r}. "
+            "PD / CC0 / CC-BY (attributed) only — no share-alike, no non-commercial.")
     return {
         "id": cid, "kind": "reference", "title": title[:180], "body": body,
         "source": {"label": source_label, "url": "", "domain": domain, "authority_tier": "reference"},
@@ -346,7 +364,10 @@ def gen_federal():
     c.close()
 
 
-GENERATORS = {"nuclides": gen_nuclides, "stars": gen_stars, "ports": gen_ports,
+# "stars" (gen_stars → HYG) is RETIRED: HYG is CC-BY-SA (share-alike), which _card now refuses at
+# the mint (red team 2026-08-06). A public-domain star catalog (Yale BSC) replaces it — added as
+# gen_stars_pd once the PD source is anchored on the drive. gen_stars is kept below only as a marker.
+GENERATORS = {"nuclides": gen_nuclides, "ports": gen_ports,
               "worldbank": gen_worldbank, "foods": gen_foods, "words": gen_words,
               "places": gen_places, "drugs": gen_drugs, "lexicon": gen_lexicon,
               "federal": gen_federal}
