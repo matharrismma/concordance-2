@@ -65,6 +65,7 @@ GOLDEN_API_GET = {
     "/curate",
     "/moderation/signable",
     "/report", "/block",  # the moderation floor (worklist item 4)
+    "/contact",  # deliberate addition — the public contact form (a JSON write, rate-limited)
     "/connect/event",  # the calendar pilot — the one on-behalf write, behind the consent lock
     "/narratives",  # deliberate addition (storyboards: common narratives charted in the Bible; movements mix and match)
     "/study_find",  # deliberate addition (the quick-find index across the whole reference section)
@@ -100,6 +101,7 @@ GOLDEN_RATELIMITED = {
     "/curate",
     "/moderation/signable",
     "/report", "/block",  # the moderation floor (worklist item 4)
+    "/contact",  # deliberate addition — the public contact form (a JSON write, rate-limited)
     "/connect/event",  # the calendar pilot — the one on-behalf write, behind the consent lock
     "/audit",   # deliberate addition (the Auditor) — goldens update ONLY with a new route
     "/chess",   # deliberate addition (the chess verifier) — game theory, applied and sealable

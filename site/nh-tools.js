@@ -21,6 +21,7 @@
     { h: '/read.html',       n: 'Study for a test', k: 'learn school lesson coach tutor curriculum practice' },
     { h: '/characters.html', n: 'Dictionary',       k: 'define meaning people names who character lexicon' },
     { h: '/connect.html',    n: 'Connect an agent',  k: 'api mcp developer integrate build llm tool' },
+    { h: '/contact.html',    n: 'Contact',           k: 'contact reach message write keeper support help feedback' },
     { h: '/proof.html',      n: 'What it proves',   k: 'refusals limits catalog guarantees honest' },
   ];
 

@@ -180,6 +180,16 @@ def _keeping_stats() -> Dict[str, Any]:
     return data
 
 
+def _contact_box() -> Dict[str, Any]:
+    """Contact-form messages, delivered straight to the keep: the total count + the recent
+    messages (newest first), so the operator reads them here instead of by email. Best-effort."""
+    try:
+        from . import contact
+        return {"waiting": contact.inbox_count(), "recent": contact.recent(25)}
+    except Exception:
+        return {"waiting": None, "recent": []}
+
+
 def dashboard(config: EngineConfig) -> Dict[str, Any]:
     """The live state — what the operator needs to see at a glance. All best-effort."""
     try:
@@ -213,6 +223,7 @@ def dashboard(config: EngineConfig) -> Dict[str, Any]:
             "advisory": "activity — a best-effort ops log; tamperable, NOT part of the integrity chain",
         },
         "keeping": {**keeping, "precedents": precedents},
+        "contact": _contact_box(),  # public contact-form messages, delivered to the keep
         "seals": {
             "count": seal_stats.get("count"),
             "total_bytes": seal_stats.get("total_bytes"),

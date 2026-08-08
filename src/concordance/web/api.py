@@ -545,7 +545,7 @@ _SITEMAP_PAGES = ("/", "/ask.html", "/bible.html", "/read.html", "/characters.ht
                   "/proof.html", "/reason.html", "/boundary.html", "/almanac.html", 
                   "/teachings.html", "/brain.html", "/floor.html", 
                   "/harmony.html", "/timeline.html", "/backmatter.html", "/places.html",
-                  "/narratives.html",  "/voices.html")
+                  "/narratives.html",  "/voices.html", "/contact.html")
 
 
 def build_sitemap(base_url: str) -> str:
@@ -1993,6 +1993,13 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                         fields=body.get("fields") if isinstance(body.get("fields"), dict) else None,
                         signature=str(body.get("signature") or ""))
         return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
+    if method == "POST" and path == "/contact":
+        # A public "reach the keeper" form. Messages go straight to the KEEP (the operator window) —
+        # persisted to a durable inbox and shown newest-first at the top of the dashboard. No email,
+        # no address on the page. Honeypot + the rate limiter above guard it.
+        from . import contact as _contact
+        r = _contact.submit(body)
+        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "could not send")
     if method == "POST" and path == "/block":
         # Viewer-side and sovereign: filters what YOU see. A boundary, not a verdict — and only
         # the viewer's own signature may raise or lift it (nobody edits another person's eyes).
@@ -2346,6 +2353,7 @@ ROUTES = [
     {"path": "/unchecked/answer", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/report", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/block", "methods": ("POST",), "api": True, "rl": True},
+    {"path": "/contact", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/seeds", "methods": ("GET",), "api": True},
     {"path": "/almanac", "methods": ("GET",), "api": True},
     {"path": "/apothecary", "methods": ("GET",), "api": True},

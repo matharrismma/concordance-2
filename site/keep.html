@@ -62,6 +62,12 @@
   </div>
 
   <div id="dash" hidden>
+    <section id="msgs-section">
+      <h2>Messages <span class="muted" id="msgs-count" style="font-size:.68rem;font-weight:400"></span></h2>
+      <div id="msgs"></div>
+      <p id="msgs-empty" class="muted" style="font-size:.9rem">No messages yet. When someone writes in via <a href="/contact.html">the contact page</a>, it lands here.</p>
+    </section>
+
     <section>
       <div class="grid">
         <div class="stat"><div class="n" id="s-cards">—</div><div class="k">cards kept</div></div>
@@ -163,6 +169,33 @@ async function refresh() {
   document.getElementById("closed").style.display = "none";
   document.getElementById("dash").hidden = false;
   var so1 = document.getElementById("signout"); if (so1) so1.hidden = false;
+
+  // Messages — from the public contact form, delivered straight to the keep, newest first, at the top.
+  (function(){
+    var box = d.contact || {}, msgs = box.recent || [];
+    var wrap = document.getElementById("msgs"), empty = document.getElementById("msgs-empty"),
+        cnt = document.getElementById("msgs-count");
+    if (cnt) cnt.textContent = box.waiting ? ("· " + Number(box.waiting).toLocaleString() + " in the inbox") : "";
+    if (empty) empty.hidden = msgs.length > 0;
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    for (var i = 0; i < msgs.length; i++) {
+      var m = msgs[i];
+      var when = m.at ? new Date(m.at * 1000).toLocaleString() : (m.at_iso || "");
+      var who = [m.name, m.email].filter(Boolean).map(escapeHtml).join(" · ") || "anonymous";
+      var el = document.createElement("div");
+      el.style.cssText = "border:1px solid var(--line);border-radius:6px;padding:.7rem .85rem;margin:.5rem 0;background:rgba(255,255,255,.02)";
+      el.innerHTML =
+        '<div style="display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap;font-size:.82rem">' +
+          '<strong>' + who + '</strong>' +
+          (m.subject ? ' <span style="color:var(--accent)">' + escapeHtml(m.subject) + '</span>' : '') +
+          '<span class="muted" style="margin-left:auto">' + escapeHtml(when) + '</span>' +
+        '</div>' +
+        '<div style="margin-top:.35rem;white-space:pre-wrap;word-break:break-word;font-size:.94rem">' +
+          escapeHtml(m.message || "") + '</div>';
+      wrap.appendChild(el);
+    }
+  })();
 
   document.getElementById("s-cards").textContent = (d.keeping?.cards ?? "—").toLocaleString?.() ?? d.keeping?.cards ?? "—";
   document.getElementById("s-seals").textContent = d.seals?.count ?? "—";

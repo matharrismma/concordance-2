@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact — Narrow Highway</title>
+<meta name="description" content="Reach the keeper of Narrow Highway. Send a message — we read every one.">
+<link rel="canonical" href="/contact.html">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --broken:#c98a8a;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --mono:ui-monospace,Consolas,"Cascadia Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.12), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.75 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+  header.site{border-bottom:1px solid var(--line)}
+  header.site .bar{max-width:52rem; margin:0 auto; padding:1rem 1.3rem; display:flex; align-items:center; justify-content:space-between}
+  .brand{letter-spacing:.2em; text-transform:uppercase; font-size:.92rem; color:var(--ink)}
+  .brand .road{color:var(--gold)}
+  nav.site a{color:var(--dim); margin-left:1.1rem; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
+  nav.site a:hover{color:var(--ink); text-decoration:none}
+  main.wrap{max-width:44rem; margin:0 auto; padding:0 1.3rem 4rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.68rem; margin-top:2.6rem}
+  h1{font-weight:400; letter-spacing:.02em; font-size:2.3rem; margin:.5rem 0 .5rem}
+  .lede{color:var(--dim); font-size:1.06rem; max-width:40rem}
+  form{margin-top:2rem}
+  .field{margin:0 0 1.15rem}
+  label{display:block; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin:0 0 .4rem}
+  label .req{color:var(--goldsoft)}
+  input[type=text],input[type=email],textarea{
+    width:100%; background:rgba(201,162,74,.05); border:1px solid var(--line); border-radius:6px;
+    color:var(--ink); font:1rem/1.6 var(--serif); padding:.7rem .85rem}
+  input:hover,textarea:hover{border-color:rgba(201,162,74,.3)}
+  input:focus,textarea:focus{border-color:var(--gold); background:rgba(201,162,74,.08)}
+  textarea{min-height:9rem; resize:vertical; font-family:var(--serif)}
+  /* honeypot — hidden from humans, catnip to bots */
+  .hp{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden}
+  button.send{appearance:none; cursor:pointer; background:var(--gold); color:#161200; border:0; border-radius:6px;
+    font:600 .78rem/1 var(--serif); letter-spacing:.1em; text-transform:uppercase; padding:.85rem 1.6rem}
+  button.send:hover{background:#d9b25c}
+  button.send:disabled{opacity:.55; cursor:default}
+  .note{color:var(--dim); font-size:.82rem; margin:1rem 0 0}
+  #status{margin:1.1rem 0 0; font-size:.98rem; min-height:1.4rem}
+  #status.ok{color:var(--pass)} #status.bad{color:var(--broken)}
+  footer.site{border-top:1px solid var(--line); margin-top:3rem}
+  footer.site .bar{max-width:52rem; margin:0 auto; padding:1.4rem 1.3rem; color:var(--dim); font-size:.78rem}
+</style>
+</head>
+<body>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
+  <nav class="site"><a href="/#verify">Verify</a><a href="/proof.html">What we prove</a><a href="/graph">Map</a></nav>
+</div></header>
+
+<main class="wrap">
+  <p class="kicker">Contact</p>
+  <h1>Reach the keeper</h1>
+  <p class="lede">A question, a correction, a source we should hold, a word of encouragement — send it here.
+     We read every one. This is a free library run by hand; a reply may take a little while.</p>
+
+  <form id="f" novalidate>
+    <div class="field">
+      <label for="name">Your name</label>
+      <input type="text" id="name" name="name" autocomplete="name" maxlength="120">
+    </div>
+    <div class="field">
+      <label for="email">Email <span class="dim" style="text-transform:none;letter-spacing:0">(so we can reply — optional)</span></label>
+      <input type="email" id="email" name="email" autocomplete="email" maxlength="200" placeholder="you@example.com">
+    </div>
+    <div class="field">
+      <label for="subject">Subject</label>
+      <input type="text" id="subject" name="subject" maxlength="160">
+    </div>
+    <div class="field">
+      <label for="message">Message <span class="req">*</span></label>
+      <textarea id="message" name="message" maxlength="8000" required></textarea>
+    </div>
+    <!-- honeypot: leave this empty; a real person never sees it -->
+    <div class="hp" aria-hidden="true">
+      <label for="website">Website</label>
+      <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+    </div>
+    <button class="send" id="send" type="submit">Send message</button>
+    <p id="status" role="status" aria-live="polite"></p>
+    <p class="note">Your message goes straight to the keeper's desk and is read by hand.
+       Nothing on this page records who you are.</p>
+  </form>
+
+  <footer class="site"><div class="bar">Narrow Highway — a public verification engine. No account, no tracking.</div></footer>
+</main>
+
+<script>
+(function(){
+  var f = document.getElementById("f"), st = document.getElementById("status"), btn = document.getElementById("send");
+  function say(msg, ok){ st.textContent = msg; st.className = ok ? "ok" : "bad"; }
+  f.addEventListener("submit", async function(e){
+    e.preventDefault();
+    var msg = document.getElementById("message").value.trim();
+    if(!msg){ say("Please write a message first.", false); return; }
+    var payload = {
+      name: document.getElementById("name").value,
+      email: document.getElementById("email").value,
+      subject: document.getElementById("subject").value,
+      message: msg,
+      website: document.getElementById("website").value
+    };
+    btn.disabled = true; say("Sending…", true);
+    try{
+      var r = await fetch("/contact", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify(payload)});
+      var d = await r.json().catch(function(){ return {}; });
+      if(r.ok && d.ok){
+        f.reset();
+        say(d.message || "Thank you — your message was received.", true);
+      } else if(r.status === 429){
+        say("You've sent a few in a row — please wait a moment and try again.", false);
+      } else {
+        say((d && d.error) ? d.error : "Something went wrong sending that. Please try again.", false);
+      }
+    }catch(err){
+      say("Could not reach the server. Please check your connection and try again.", false);
+    }finally{
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
+<script src="/nh-home.js"></script>
+<script src="/nh-tools.js"></script>
+</body>
+</html>
