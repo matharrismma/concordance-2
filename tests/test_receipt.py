@@ -113,6 +113,24 @@ def test_identical_holds_is_idempotent():
     assert a["seal"]["ledgered"] and b["seal"]["ledgered"]
 
 
+def test_seal_binds_the_exact_spec_checked():
+    """A seal commits to a spec_hash of EXACTLY what was verified — not to the free-text claim a
+    caller supplied. So a HOLDS seal cannot be transplanted onto a different spec, and a re-fetcher
+    can rehash the spec they hold to confirm it is the one that was checked."""
+    _isolate()
+    st, p = _verify({"mode": "equality", "params": {"expr_a": "2+2", "expr_b": "4", "variables": {}}})
+    assert p["verdict"] == "HOLDS"
+    sh = p["trail"][0].get("spec_hash")
+    assert sh and len(sh) == 64, "the trail must carry a canonical fingerprint of what was checked"
+    # the sealed record commits to it — the content_hash now binds the exact artifact
+    _, rec = dispatch("GET", "/seal", {"hash": p["seal"]["content_hash"]}, None, SEC)
+    assert sh in json.dumps(rec), "the sealed record must commit to the spec_hash of what was checked"
+    # a DIFFERENT spec that also HOLDS gets a DIFFERENT spec_hash — no seal is reusable across specs
+    _isolate()
+    _, p2 = _verify({"mode": "equality", "params": {"expr_a": "3+3", "expr_b": "6", "variables": {}}})
+    assert p2["trail"][0]["spec_hash"] != sh
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:

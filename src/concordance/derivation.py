@@ -23,10 +23,23 @@ import threading as _threading
 from typing import Any, Dict, List
 
 from . import verifiers as _verifiers
+from .validate import canonical_json_bytes, sha256_bytes
 from .verifiers import mathematics as _math
 
 _log = logging.getLogger("concordance")
 _TERMINAL_FAIL = ("MISMATCH", "ERROR")
+
+
+def _spec_hash(spec: Any) -> str:
+    """Canonical SHA-256 of the exact artifact a step verified — the binding that ties a seal
+    to WHAT was checked, not merely to a human-supplied label. Two steps that verify different
+    specs can never share a spec_hash, so a HOLDS seal cannot be transplanted onto a different
+    claim; a re-fetcher can rehash the spec they hold and confirm it is the one that was checked.
+    Best-effort: an unserializable spec hashes its repr rather than raising."""
+    try:
+        return sha256_bytes(canonical_json_bytes(spec if isinstance(spec, dict) else {"_": spec}))
+    except Exception:  # noqa: BLE001 — a fingerprint must never break a verdict
+        return sha256_bytes(repr(spec).encode("utf-8"))
 
 # DoS guards: reject oversized expressions before sympy sees them, and bound compute time
 # so a pathological-but-small expression cannot pin a request thread forever.
@@ -230,6 +243,9 @@ def verify_derivation(steps: List[Dict[str, Any]]) -> Dict[str, Any]:
         entry: Dict[str, Any] = {
             "id": sid, "domain": domain, "claim": str(step.get("claim", "")),
             "uses": uses, "status": st, "detail": sr.get("detail", ""), "link_ok": link_ok,
+            # the fingerprint of exactly what was checked — travels into the seal so the verdict
+            # is bound to its artifact, not to the free-text claim label a caller supplied.
+            "spec_hash": _spec_hash(spec),
         }
         if missing:
             entry["missing_refs"] = missing

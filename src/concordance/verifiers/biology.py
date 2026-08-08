@@ -76,7 +76,9 @@ def verify_dose_response_monotonicity(spec: Dict[str, Any]) -> VerifierResult:
     doses = dr.get("doses")
     responses = dr.get("responses")
     direction = (dr.get("expected_direction") or "").lower()
-    tolerance = dr.get("tolerance", 0.0)  # allow small noise
+    # clamp: a caller may only TIGHTEN the noise band, never widen it — a large tolerance would
+    # classify every step as "flat" and mask a real sign-reversal into a false CONFIRMED.
+    tolerance = clamp_tol(dr, "tolerance", 0.0)
 
     if not doses or not responses:
         return error("biology.dose_response", "doses or responses missing")

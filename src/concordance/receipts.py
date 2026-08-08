@@ -79,8 +79,12 @@ def record_from_derivation(result: Dict[str, Any], *, domain: str = "mathematics
             detail=str(e.get("detail") or ""),
             # redact the human claim text before it enters the permanent, public seal — the
             # seal records the stripped form; the PII never reaches the ledger (math is untouched).
+            # spec_hash binds the sealed record to the EXACT artifact verified: the content_hash
+            # now commits to it, so a seal cannot be re-presented as proof of a different spec, and
+            # a re-fetcher can rehash the spec they hold to confirm it is the one that was checked.
             data={"claim": redact.redact(str(e.get("claim", "")))[0], "domain": e.get("domain", ""),
-                  "uses": e.get("uses", []), "link_ok": e.get("link_ok", True)},
+                  "uses": e.get("uses", []), "link_ok": e.get("link_ok", True),
+                  "spec_hash": str(e.get("spec_hash", ""))},
         )
         for i, e in enumerate(trail)
     )

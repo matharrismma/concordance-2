@@ -339,14 +339,19 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
         results.append(verify_dimensional_consistency(pv["equation"], pv["symbols"]))
 
     if "before" in pv and "after" in pv:
+        # Clamp caller tolerances at the boundary: a caller may TIGHTEN but never LOOSEN past the
+        # verifier default, else an adversarial packet widens the window to force CONFIRMED on a
+        # quantity that is not actually conserved. (verify_kinematic/relativistic already clamp.)
+        rel_tol = clamp_tol(pv, "tolerance_relative", 1e-6)
+        abs_tol = clamp_tol(pv, "tolerance_absolute", 0.0)
         if pv.get("law"):
             results.append(
                 verify_named_conservation(
                     pv["law"],
                     pv["before"],
                     pv["after"],
-                    tolerance_relative=pv.get("tolerance_relative", 1e-6),
-                    tolerance_absolute=pv.get("tolerance_absolute", 0.0),
+                    tolerance_relative=rel_tol,
+                    tolerance_absolute=abs_tol,
                 )
             )
         else:
@@ -354,8 +359,8 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
                 verify_conservation(
                     pv["before"],
                     pv["after"],
-                    tolerance_relative=pv.get("tolerance_relative", 1e-6),
-                    tolerance_absolute=pv.get("tolerance_absolute", 0.0),
+                    tolerance_relative=rel_tol,
+                    tolerance_absolute=abs_tol,
                 )
             )
 

@@ -143,6 +143,33 @@ def test_find_closest_degenerate():
         assert find_closest({"domain": "not_a_real_domain_xyz"}, ledger_dir=ld) is None  # no axis
 
 
+def test_concurrent_seals_do_not_fork_the_chain():
+    """Many sealers racing on a shared ledger dir must produce one unbroken chain — never two
+    files linked to the same prev_hash, and never a record whose sealed_at precedes the tail it
+    links to. The threads here stand in for the two server processes (nh-org, nh-com-2) that
+    share one data dir in production; without the cross-process lock + in-lock monotonic stamp,
+    verify_chain would report broken_links. Auto stamp (sealed_at=None) exercises the real path."""
+    import concurrent.futures as cf
+
+    with tempfile.TemporaryDirectory() as tmp:
+        ld = Path(tmp) / "ledger"
+        n = 16
+
+        def _seal(i):
+            return seal_to_ledger(_pass(f"c{i}"), summary=f"claim {i}", ledger_dir=ld)
+
+        with cf.ThreadPoolExecutor(max_workers=8) as ex:
+            list(ex.map(_seal, range(n)))
+
+        rep = verify_chain(ledger_dir=ld)
+        assert rep["ok"] is True, f"chain forked/broke under concurrency: {rep}"
+        assert rep["total"] == n and rep["verified"] == n
+        assert not rep["broken_links"] and not rep["tampered"]
+        # every prev_hash is distinct (no two records link to the same parent = no fork)
+        prevs = [p.get("prev_hash") for p in list_precedents(ld)]
+        assert len(prevs) == len(set(prevs)), "two records share a prev_hash — the chain forked"
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:

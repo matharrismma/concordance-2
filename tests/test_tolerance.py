@@ -33,11 +33,15 @@ def test_negative_is_treated_as_magnitude_and_capped():
 
 def test_every_scalar_tolerance_read_goes_through_clamp_tol():
     """No verifier may read a caller tolerance without clamping it — otherwise the
-    FP-widening hole reopens. Scans the verifier sources; fails on any unclamped read."""
+    FP-widening hole reopens. Scans the verifier sources; fails on any unclamped read.
+
+    The receiver is unanchored on purpose: an earlier form matched only `spec.get(...)` and
+    silently missed tolerances pulled from a sub-dict (`pv.get(...)` in physics, `dr.get(...)`
+    in biology) — the exact reads that reopened the hole. Any `.get("...tol...")` is scanned now."""
     import re
     from pathlib import Path
     vdir = Path(__file__).resolve().parent.parent / "src" / "concordance" / "verifiers"
-    pat = re.compile(r'spec\.get\("([^"]*(?:tolerance|_tol|rtol|atol|rel_tol|abs_tol)[^"]*)"')
+    pat = re.compile(r'\.get\("([^"]*(?:tolerance|_tol|rtol|atol|rel_tol|abs_tol)[^"]*)"')
     bad = []
     for f in sorted(vdir.glob("*.py")):
         for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
@@ -50,3 +54,25 @@ def test_every_scalar_tolerance_read_goes_through_clamp_tol():
                 continue
             bad.append(f"{f.name}:{n}: {line.strip()}")
     assert not bad, "unclamped caller tolerance reads:\n" + "\n".join(bad)
+
+
+def test_physics_conservation_ignores_adversarial_wide_tolerance():
+    """A packet claiming energy is conserved while it drops 100 -> 5 must MISMATCH even when the
+    caller widens tolerance_relative/absolute — the driver clamps both to the verifier default."""
+    from concordance.verifiers import physics
+    pkt = {"PHYS_VERIFY": {"before": {"E": 100.0}, "after": {"E": 5.0},
+                           "tolerance_relative": 1e9, "tolerance_absolute": 1e9}}
+    statuses = {r.status for r in physics.run(pkt)}
+    assert "MISMATCH" in statuses, "a widened tolerance forced a false CONFIRMED on non-conservation"
+    # a genuinely conserved quantity still confirms (the clamp tightens, it does not break truth)
+    ok_pkt = {"PHYS_VERIFY": {"before": {"E": 100.0}, "after": {"E": 100.0}}}
+    assert {r.status for r in physics.run(ok_pkt)} == {"CONFIRMED"}
+
+
+def test_biology_dose_response_ignores_adversarial_wide_tolerance():
+    """A clear sign-reversal (1 -> 5 -> 2, declared increasing) must MISMATCH even when the caller
+    passes a huge tolerance meant to classify every step as 'flat' and hide the reversal."""
+    from concordance.verifiers import biology
+    spec = {"dose_response": {"doses": [1, 2, 3], "responses": [1.0, 5.0, 2.0],
+                              "expected_direction": "increasing", "tolerance": 1e9}}
+    assert biology.verify_dose_response_monotonicity(spec).status == "MISMATCH"

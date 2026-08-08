@@ -13,11 +13,12 @@ store) -> ledger (the chain). Sovereign: stdlib only, a directory of JSON files.
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterator, List, Optional
 
 from . import cas, grid
 from .record import ClosestCase, WitnessRecord, with_permanent_ref
@@ -152,6 +153,46 @@ def verify_chain(ledger_dir: Optional[Path] = None, *,
     return report
 
 
+@contextlib.contextmanager
+def _chain_lock(ledger_dir: Path) -> Iterator[None]:
+    """Cross-PROCESS advisory lock over the chain's read-then-write critical section.
+
+    Two server processes (nh-org, nh-com-2) share one ledger dir, so a per-process
+    threading.Lock cannot stop them from reading the same chain tail and forking the chain
+    on the same prev_hash. An OS advisory lock does — and it releases automatically if a
+    holder dies, so a crash never wedges the ledger (no stale lock file to reap). Stdlib
+    only: fcntl.flock on POSIX (the box), msvcrt on Windows (dev/tests)."""
+    ledger_dir.mkdir(parents=True, exist_ok=True)
+    fd = os.open(str(ledger_dir / ".chain.lock"), os.O_CREAT | os.O_RDWR)
+    try:
+        try:
+            import fcntl
+            fcntl.flock(fd, fcntl.LOCK_EX)
+        except ImportError:  # Windows
+            import msvcrt
+            os.lseek(fd, 0, os.SEEK_SET)
+            while True:
+                try:
+                    msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+                    break
+                except OSError:
+                    time.sleep(0.02)
+        yield
+    finally:
+        try:
+            import fcntl
+            fcntl.flock(fd, fcntl.LOCK_UN)
+        except ImportError:  # Windows
+            try:
+                import msvcrt
+                os.lseek(fd, 0, os.SEEK_SET)
+                msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+            except OSError:
+                pass
+        finally:
+            os.close(fd)
+
+
 def _slugify(value: str) -> str:
     """Filesystem-safe slug for precedent file names."""
     out = []
@@ -207,7 +248,9 @@ def seal_to_ledger(record: WitnessRecord, *, summary: str,
         "summary": summary.strip(),
         "anchors": [a.to_dict() for a in record.anchors],
         "reasoning_overlay": overlay,
-        "sealed_at": sealed_at if sealed_at is not None else time.time(),
+        # sealed_at is finalized INSIDE the lock below (an auto stamp must be monotonic with write
+        # order); an explicit caller value is carried through unchanged.
+        "sealed_at": sealed_at,
     }
     # Bind the chain to the actual sealed record in the CAS: the precedent's content_hash
     # now commits to record_hash, so the hash-chain attests the real verdict/trail — not
@@ -218,27 +261,46 @@ def seal_to_ledger(record: WitnessRecord, *, summary: str,
     d = ledger_dir or _default_ledger_dir()
     d.mkdir(parents=True, exist_ok=True)
     target = d / f"{_slugify(precedent_id.replace('ledger://', ''))}.json"
-    if target.exists() and not overwrite:
-        raise FileExistsError(f"precedent file already exists at {target}")
 
-    existing = [f for f in _ledger_chain_files(d) if f != target]
-    if not existing:
-        prev_hash = GENESIS_HASH
-    else:
-        last_data = _read_precedent_file(existing[-1])
-        if last_data and "content_hash" in last_data:
-            prev_hash = last_data["content_hash"]
-        elif last_data:
-            prev_hash = compute_content_hash(last_data)
-        else:
+    # ONE ACT, across processes: the tail read, the sealed_at stamp, the prev_hash computation, and
+    # the write are a single critical section. Without the lock, two sealers (even in different
+    # processes) can read the same tail and link two new files to the same prev_hash — a forked
+    # chain that verify_chain then reports as broken. The file lock serializes them; it self-
+    # releases on process death, so a crash mid-seal never wedges the ledger.
+    with _chain_lock(d):
+        if target.exists() and not overwrite:
+            raise FileExistsError(f"precedent file already exists at {target}")
+
+        existing = [f for f in _ledger_chain_files(d) if f != target]
+        tail_sealed = 0.0
+        if not existing:
             prev_hash = GENESIS_HASH
+        else:
+            last_data = _read_precedent_file(existing[-1])
+            if isinstance((last_data or {}).get("sealed_at"), (int, float)):
+                tail_sealed = last_data["sealed_at"]
+            if last_data and "content_hash" in last_data:
+                prev_hash = last_data["content_hash"]
+            elif last_data:
+                prev_hash = compute_content_hash(last_data)
+            else:
+                prev_hash = GENESIS_HASH
 
-    precedent_payload["prev_hash"] = prev_hash
-    precedent_payload["content_hash"] = compute_content_hash(precedent_payload)
+        # Stamp an auto seal monotonically past the tail: chain order is BY sealed_at, so a new
+        # record that precedes the tail would make chain-order and prev-linkage disagree and read
+        # as a broken link. Concurrent auto-seals sample time.time() before the lock, so their
+        # timestamps can arrive out of write order — advancing past the tail restores a valid chain.
+        # An explicit caller stamp is honored as-is (the caller then owns ordering).
+        if precedent_payload["sealed_at"] is None:
+            now = time.time()
+            precedent_payload["sealed_at"] = now if now > tail_sealed else tail_sealed + 1e-6
 
-    with open(target, "w", encoding="utf-8") as f:
-        json.dump(precedent_payload, f, indent=2)
-        f.write("\n")
+        precedent_payload["prev_hash"] = prev_hash
+        precedent_payload["content_hash"] = compute_content_hash(precedent_payload)
+
+        with open(target, "w", encoding="utf-8") as f:
+            json.dump(precedent_payload, f, indent=2)
+            f.write("\n")
     return target
 
 
