@@ -108,3 +108,19 @@ def test_modular_arithmetic_is_in_the_grammar():
     r = verify({"mode": "equality",
                 "params": {"expr_a": "Mod(16, 9)", "expr_b": "7", "variables": {}}})
     assert r.get("verdict") == "HOLDS"
+
+
+def test_runtime_complexity_abstains_on_noisy_slope_never_false_broken():
+    """Runtime is measured on a wall clock (non-deterministic). A slope that fits NO complexity class —
+    the no-man's-land between them — must ABSTAIN (inconclusive), not call a possibly-true claim BROKEN;
+    a slope that fits a DIFFERENT class IS a genuine mismatch; a slope on the claimed class confirms.
+    The decision boundary is pure, so it is proven without a clock. Guards the deterministic-engine
+    premise: a timing fluke on a loaded machine can never render a correct claim false."""
+    from concordance.verifiers.computer_science import _slope_verdict
+    slopes = [0.0, 1.0, 2.0, 3.0]                     # const/log, linear/nlogn, quadratic, cubic
+    assert _slope_verdict(1.05, 1.0, 0.40, slopes) == "confirm"      # measured ~ claimed O(n)
+    assert _slope_verdict(2.05, 1.0, 0.40, slopes) == "mismatch"     # claimed O(n), data shows O(n**2)
+    assert _slope_verdict(1.50, 1.0, 0.40, slopes) == "inconclusive"  # between O(n) and O(n**2): noise
+    assert _slope_verdict(0.50, 1.0, 0.40, slopes) == "inconclusive"  # between O(1) and O(n): noise
+    # it can NEVER manufacture a confirm from a slope off the claimed class (no false CONFIRMED)
+    assert _slope_verdict(2.50, 1.0, 0.40, slopes) != "confirm"

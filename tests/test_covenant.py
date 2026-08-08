@@ -66,3 +66,23 @@ def test_fewer_than_four_is_refused():
         cov.public_id(["John 1:1", "Romans 12:1-2", "Matthew 7:7"])
     with pytest.raises(ValueError):
         cov.public_id(["John 1:1", "John 1:1", "John 1:1", "John 1:1"])   # dupes don't count
+
+
+def test_strength_advises_without_changing_the_key():
+    """The strength advisory is purely additive: it never touches the derivation (same verses ->
+    same key), and it nudges toward diversity + a passphrase — the levers a user actually controls
+    under the frozen 4-verse design."""
+    diverse = ["Romans 12:1-2", "Matthew 7:7", "John 1:1", "Psalm 72:1"]   # four books
+    before = cov.public_id(diverse)
+    s = cov.strength(diverse)
+    assert cov.public_id(diverse) == before, "strength() must not perturb the derivation"
+    assert s["level"] == "strong" and s["distinct_books"] == 4 and s["ok"] is True
+    # all four from one book is weak — the book ordinal adds ~no entropy
+    weak = ["Psalm 1:1", "Psalm 23:1", "Psalm 72:1", "Psalm 119:11"]
+    w = cov.strength(weak)
+    assert w["level"] == "weak" and w["distinct_books"] == 1
+    # ...but a passphrase lifts even a single-book set out of "weak"
+    assert cov.strength(weak, passphrase="a word only I know")["level"] == "strong"
+    # too few, or unrecognizable, is reported — never raised
+    assert cov.strength(["John 1:1"])["ok"] is False
+    assert cov.strength(["not a verse", "also not"])["level"] == "invalid"

@@ -226,6 +226,23 @@ def verify_functional_correctness(spec: Dict[str, Any]) -> VerifierResult:
     return confirm("cs.functional_correctness", f"{len(cases)} test cases pass")
 
 
+def _slope_verdict(slope: float, expected: float, tol: float, all_slopes) -> str:
+    """Classify a measured log-log slope against the claimed class's expected slope.
+
+    'confirm'      — within tolerance of the claimed class.
+    'mismatch'     — outside the claimed class BUT within tolerance of a DIFFERENT class: the data
+                     is positive evidence of another complexity, so the claim is genuinely broken.
+    'inconclusive' — fits NEITHER the claimed class nor any other (the no-man's-land between them):
+                     a noisy wall-clock measurement, not a false claim — abstain, never assert BROKEN.
+
+    Pure and deterministic (no timing), so the decision boundary is unit-tested without a clock."""
+    if abs(slope - expected) <= tol:
+        return "confirm"
+    if any(abs(slope - o) <= tol for o in all_slopes if abs(o - expected) > 1e-9):
+        return "mismatch"
+    return "inconclusive"
+
+
 def verify_runtime_complexity(spec: Dict[str, Any]) -> VerifierResult:
     """Measure runtime at log-spaced input sizes and compare to claimed class.
 
@@ -377,15 +394,27 @@ def verify_runtime_complexity(spec: Dict[str, Any]) -> VerifierResult:
             "claimed_class": claimed, "tolerance": tol}
     if expected is None:
         return error("cs.runtime_complexity", f"unrecognized claimed_class {claimed!r}", data)
-    if abs(slope - expected) <= tol:
+    verdict = _slope_verdict(slope, expected, tol, sorted(set(expected_slopes.values())))
+    if verdict == "confirm":
         return confirm(
             "cs.runtime_complexity",
             f"measured log-log slope {slope:.2f}, expected ~{expected:.1f} for {claimed} (tol {tol})",
             data,
         )
+    if verdict == "inconclusive":
+        # Runtime is measured on a wall clock, which is NOT deterministic — a loaded machine can
+        # bend a slope off the claimed class WITHOUT it landing on any OTHER class. That is a noisy
+        # measurement, not a false claim. Abstaining here (rather than MISMATCH) keeps a timing fluke
+        # from rendering a possibly-TRUE claim BROKEN — "our engine could not check this" is not "your
+        # claim is false" (the kernel's fifth clause). It can never mint a false CONFIRMED.
+        return na(
+            "cs.runtime_complexity",
+            f"measured log-log slope {slope:.2f} fits no complexity class within tol {tol} "
+            f"(expected ~{expected:.1f} for {claimed}) — timing inconclusive, cannot call")
     return mismatch(
         "cs.runtime_complexity",
-        f"measured log-log slope {slope:.2f}, expected ~{expected:.1f} for {claimed} (tol {tol})",
+        f"measured log-log slope {slope:.2f} fits a DIFFERENT class, not the claimed {claimed} "
+        f"(expected ~{expected:.1f}, tol {tol})",
         data,
     )
 

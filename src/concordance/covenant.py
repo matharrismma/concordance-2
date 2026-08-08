@@ -149,6 +149,43 @@ def sign(verses: List[str], message: str, passphrase: str = "") -> str:
     return derive(verses, passphrase).sign((message or "").encode("utf-8")).hex()
 
 
+def strength(verses: List[str], passphrase: str = "") -> dict:
+    """A non-secret, structural assessment of a verse-set's brute-force resistance — so a surface can
+    NUDGE toward a stronger identity without touching the derivation (the key is byte-identical either
+    way; this only advises). Entropy rises with the number of DISTINCT BOOKS the verses span (the book
+    ordinal is what the derivation mixes in, so four verses from one book add little) and with an
+    optional passphrase. Never raises and never reveals the verses — only counts and a plain hint.
+
+    This is the honest, frozen-design-respecting form of "entropy hardening": four verses give ~50
+    bits (stated plainly in the module docstring), which is why the KDF is deliberately slow; a
+    memory-hard KDF remains a future, client-coordinated migration. Until then, the strongest lever a
+    user actually controls is verse DIVERSITY + a passphrase, and this makes that legible."""
+    try:
+        canon = sorted({canonical(v) for v in verses})
+    except (ValueError, TypeError):
+        return {"ok": False, "level": "invalid",
+                "note": "not four recognizable verse references in the 66 books"}
+    books = {c.split(" ", 1)[0] for c in canon}
+    has_pass = bool((passphrase or "").strip())
+    enough = len(canon) >= _MIN_VERSES
+    strong = enough and (len(books) >= 3 or has_pass)
+    tips = []
+    if len(books) < 3:
+        tips.append("choose verses from different books — the book adds entropy")
+    if not has_pass:
+        tips.append("add a personal passphrase only you know")
+    return {
+        "ok": enough,
+        "level": "strong" if strong else ("weak" if enough else "incomplete"),
+        "distinct_verses": len(canon),
+        "distinct_books": len(books),
+        "has_passphrase": has_pass,
+        "note": ("a strong, hard-to-guess verse-set" if strong
+                 else ("choose four distinct verses" if not enough
+                       else "guessable — " + "; ".join(tips))),
+    }
+
+
 def verify(public_hex: str, message: str, signature_hex: str) -> bool:
     """Server side: does this signature prove the holder of `public_hex`? No secret is held here.
     Never raises — a malformed/wrong-type field from a client body is exactly the kind of input
