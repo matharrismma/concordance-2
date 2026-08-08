@@ -66,14 +66,40 @@ def test_share_alike_and_generated_are_withheld():
     assert not corpus.is_public({**pub, "source": {"label": "PHOIBLE 2.0 + Glottolog (CC-BY-SA 3.0 / CC-BY 4.0)"}})
     assert not corpus.is_public({**pub, "extra": {"license": "CC-BY-SA 4.0"}})
     assert not corpus.is_public({**pub, "source": {"label": "something (Share-Alike)"}})
-    # attribution-only and public-domain licenses ARE served (CC-BY is not CC-BY-SA)
+    # NON-COMMERCIAL is disallowed too (CC-BY-NC* forbids the free-to-all use that is the point)
+    assert not corpus.is_public({**pub, "source": {"label": "some source (CC-BY-NC 4.0)"}})
+    assert not corpus.is_public({**pub, "extra": {"license": "CC BY-NC-SA 3.0"}})
+    assert not corpus.is_public({**pub, "source": {"label": "a dataset (non-commercial use only)"}})
+    # OEIS (CC-BY-NC-SA) carries only its SOURCE NAME in the label, never the license string — the
+    # live leak found in the pre-launch audit (6,000 cards public). Caught by source name now.
+    assert not corpus.is_public({**pub, "shelf": "oeis", "source": {
+        "label": "OEIS — On-Line Encyclopedia of Integer Sequences (oeis.org)",
+        "url": "https://oeis.org/A000001"}}), "OEIS is CC-BY-NC-SA — it must be withheld"
+    # attribution-only and public-domain licenses ARE served (CC-BY is not CC-BY-SA/NC)
     assert corpus.is_public({**pub, "source": {"label": "GeoNames (CC-BY 4.0)"}})
     assert corpus.is_public({**pub, "source": {"label": "STEPBible Strong's (CC-BY, Tyndale House)"}})
     assert corpus.is_public({**pub, "source": {"label": "NNDC nuclide data (public domain)"}})
     assert corpus.is_public({**pub, "extra": {"license": "CC0"}})
+    # the new permissive sources serve: ECB reference rates (attribution) + IANA tzdata (PD)
+    assert corpus.is_public({**pub, "source": {"label": "European Central Bank — euro foreign "
+                                               "exchange reference rates (free to use with attribution to the ECB)"}})
+    assert corpus.is_public({**pub, "source": {"label": "IANA Time Zone Database (tzdata) — public domain"}})
     # a generated card is never served publicly; the conduit's generated:false rides through
     assert not corpus.is_public({**pub, "generated": True})
     assert corpus.is_public({**pub, "generated": False})
+
+
+def test_no_generator_mints_a_disallowed_license():
+    """The mint-side mirror of is_public: scan every source_label literal in tools/card_sources.py
+    and confirm none carries a share-alike or non-commercial license. The two boundaries (mint and
+    serve) must agree — a source clean to mint must be clean to serve. Guards against a future
+    generator quietly sourcing a CC-BY-SA/NC dataset (e.g. the CC-BY-SA-3.0 elements.db)."""
+    import re
+    from pathlib import Path
+    src = (Path(__file__).resolve().parent.parent / "tools" / "card_sources.py").read_text(encoding="utf-8")
+    bad = [m.group(1) for m in re.finditer(r'source_label="([^"]*)"', src)
+           if corpus._is_share_alike({"source": {"label": m.group(1)}})]
+    assert not bad, "generator mints a disallowed-license source_label:\n" + "\n".join(bad)
 
 
 def test_a_frozen_stub_still_withholds_share_alike():

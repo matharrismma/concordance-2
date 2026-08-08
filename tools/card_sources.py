@@ -136,6 +136,14 @@ SPINES = [
            "bulletins, technical reports and surveys, public domain under 17 USC 105. Practical "
            "knowledge a family can use, from sources whose authorship makes them free.", FLOOR,
            ["federal", "government", "public domain", "manuals", "bulletins", "spine"]),
+    _spine("card_spine_currencies", "The currencies — the world's money against the euro",
+           "The world's currencies and their reference value against the euro — the European "
+           "Central Bank's daily reference rates. A spine of the measured world of exchange.", FLOOR,
+           ["currency", "money", "exchange", "forex", "economics", "ECB", "spine"]),
+    _spine("card_spine_timezones", "The time zones — how the earth keeps time",
+           "The IANA time zones: each region's name, the country it belongs to, and where on the "
+           "earth it sits. How the world keeps time — carried on the ark, public domain.", FLOOR,
+           ["timezone", "time", "IANA", "tzdata", "timekeeping", "spine"]),
     # The plumb-line: the original tongues. Rooted in the Word (special revelation), not the Floor —
     # everything runs THROUGH Hebrew and Greek. Matt: "Everything through hebrew and greek. We are
     # the tool to bring the Academics and jewish people to Christ through logic and coherence."
@@ -169,23 +177,12 @@ def gen_nuclides():
                     spine="card_spine_nuclides", domain="nuclear_physics")
 
 
-def gen_stars():
-    c = _conn("hyg")
-    for (proper, bf, con, ra, dec, dist, mag, absmag, spect, lum) in c.execute(
-            "select proper,bf,con,ra,dec,dist,mag,absmag,spect,lum from stars "
-            "where mag<=6.5 and (proper!='' or bf!='')"):
-        name = proper or (f"{bf} {con}".strip() if bf else "")
-        if not name:
-            continue
-        d_s = f" about {dist:.1f} parsecs away" if dist else ""
-        l_s = f", ~{lum:g}× the Sun's luminosity" if lum else ""
-        body = (f"{name}: a star{(' in ' + con) if con else ''}, apparent magnitude {mag:g}"
-                f"{(', spectral type ' + spect) if spect else ''}{d_s}{l_s}.")
-        yield _card(f"card_src_star_{_sk(name, con)}", name, body,
-                    shelf="astronomy", subject=name,
-                    bands=[name, str(con), "star", "astronomy", str(spect)],
-                    source_label="HYG stellar database (CC-BY-SA, D. Nash)",
-                    spine="card_spine_stars", domain="astronomy")
+# gen_stars (HYG → the `astronomy` shelf) is RETIRED and its body DELETED: HYG is CC-BY-SA
+# (share-alike), which _card refuses at the mint and is_public withholds at the serve. Keeping the
+# CC-BY-SA source_label literal here — even in dead code — is a latent hazard (a future edit could
+# re-wire it), so it is gone. The `card_spine_stars` spine stays as the home for the star cards
+# already held (withheld) on the astronomy shelf; a public-domain catalogue (Yale BSC) will refill
+# it as gen_stars_pd once that source is anchored on the drive.
 
 
 def gen_ports():
@@ -360,6 +357,81 @@ def gen_lexicon():
                     spine="card_spine_lexicon", domain="linguistics")
 
 
+_CUR_NAMES = {
+    "USD": "US dollar", "JPY": "Japanese yen", "GBP": "pound sterling", "CHF": "Swiss franc",
+    "AUD": "Australian dollar", "CAD": "Canadian dollar", "CNY": "Chinese yuan renminbi",
+    "HKD": "Hong Kong dollar", "NZD": "New Zealand dollar", "SEK": "Swedish krona",
+    "NOK": "Norwegian krone", "DKK": "Danish krone", "PLN": "Polish zloty", "CZK": "Czech koruna",
+    "HUF": "Hungarian forint", "RON": "Romanian leu", "BGN": "Bulgarian lev", "TRY": "Turkish lira",
+    "ILS": "Israeli shekel", "INR": "Indian rupee", "KRW": "South Korean won", "SGD": "Singapore dollar",
+    "ZAR": "South African rand", "BRL": "Brazilian real", "MXN": "Mexican peso", "IDR": "Indonesian rupiah",
+    "MYR": "Malaysian ringgit", "PHP": "Philippine peso", "THB": "Thai baht", "ISK": "Icelandic krona",
+    "HRK": "Croatian kuna", "RUB": "Russian rouble",
+}
+
+
+def gen_currencies():
+    """The currencies — one card per currency the ECB publishes a euro reference rate for. Each holds
+    the latest rate (units per 1 EUR) and its date. Free to use with attribution to the ECB — a clean
+    permissive license (not share-alike, not non-commercial), so it serves publicly."""
+    c = _conn("ecb_fx")
+    rows = c.execute(
+        "select r.cur, r.rate, r.date from rates r "
+        "join (select cur, max(date) md from rates group by cur) m "
+        "on m.cur=r.cur and m.md=r.date where r.rate is not null order by r.cur")
+    for (cur, rate, date) in rows:
+        if not cur:
+            continue
+        name = _CUR_NAMES.get(str(cur).upper(), str(cur))
+        body = (f"The {name} ({cur}). European Central Bank reference rate: 1 EUR = {rate:g} {cur} "
+                f"(as of {date}). Reference rates for information only — not transaction rates.")
+        yield _card(f"card_src_cur_{_sk(cur)}", f"{cur} — {name}", body,
+                    shelf="economics", subject=f"{name} ({cur})",
+                    bands=[str(cur).lower(), name.lower(), "currency", "money", "exchange", "economics"],
+                    source_label="European Central Bank — euro foreign exchange reference rates "
+                                 "(free to use with attribution to the ECB)",
+                    spine="card_spine_currencies", domain="economics")
+
+
+def gen_timezones():
+    """The time zones — one card per IANA zone from zone1970.tab (country codes, coordinates, zone
+    name). Public domain. The tzdata source is a .zip (the IANA distribution), read directly rather
+    than via a .db."""
+    import zipfile
+    zips = list(_base().glob("tzdata/*.zip"))
+    if not zips:
+        raise FileNotFoundError(f"no tzdata zip under {_base()}/tzdata")
+    with zipfile.ZipFile(zips[0]) as z:
+        names = z.namelist()
+        iso = {}
+        if "iso3166.tab" in names:
+            for line in z.read("iso3166.tab").decode("utf-8", "replace").splitlines():
+                if line and not line.startswith("#") and "\t" in line:
+                    cc, cname = line.split("\t", 1)
+                    iso[cc.strip()] = cname.strip()
+        tab = "zone1970.tab" if "zone1970.tab" in names else ("zone.tab" if "zone.tab" in names else None)
+        if not tab:
+            raise FileNotFoundError("no zone1970.tab/zone.tab in tzdata zip")
+        for line in z.read(tab).decode("utf-8", "replace").splitlines():
+            if not line or line.startswith("#") or "\t" not in line:
+                continue
+            parts = line.split("\t")
+            ccs, zone = parts[0], parts[2] if len(parts) > 2 else ""
+            if not zone:
+                continue
+            comment = parts[3].strip() if len(parts) > 3 else ""
+            countries = ", ".join(iso.get(cc.strip(), cc.strip()) for cc in ccs.split(","))
+            region = zone.split("/")[0]
+            body = (f"{zone}: the IANA time zone for {countries}"
+                    f"{(' — ' + comment) if comment else ''}. Region {region}. "
+                    "From the IANA Time Zone Database (public domain).")
+            yield _card(f"card_src_tz_{_sk(zone)}", zone, body,
+                        shelf="timekeeping", subject=zone,
+                        bands=[zone.lower(), region.lower(), "timezone", "time", "tzdata", "iana"],
+                        source_label="IANA Time Zone Database (tzdata) — public domain",
+                        spine="card_spine_timezones", domain="geography")
+
+
 def gen_federal():
     """The federal shelf of the ark (lever 3, 2026-08-05): US-government publications fetched
     by store_book.py --ia-query into D:/NarrowHighway-Sources/archive_org/texts.db — public
@@ -399,13 +471,14 @@ def gen_federal():
     c.close()
 
 
-# "stars" (gen_stars → HYG) is RETIRED: HYG is CC-BY-SA (share-alike), which _card now refuses at
-# the mint (red team 2026-08-06). A public-domain star catalog (Yale BSC) replaces it — added as
-# gen_stars_pd once the PD source is anchored on the drive. gen_stars is kept below only as a marker.
+# "stars" (gen_stars → HYG) is RETIRED and its body deleted (CC-BY-SA — see the note above where it
+# stood). A public-domain star catalogue (Yale BSC) will refill the astronomy shelf as gen_stars_pd
+# once that source is anchored on the drive. No disallowed-license generator is wired in below.
 GENERATORS = {"nuclides": gen_nuclides, "ports": gen_ports,
               "worldbank": gen_worldbank, "foods": gen_foods, "words": gen_words,
               "pronunciation": gen_cmudict,
               "places": gen_places, "drugs": gen_drugs, "lexicon": gen_lexicon,
+              "currencies": gen_currencies, "timezones": gen_timezones,
               "federal": gen_federal}
 
 

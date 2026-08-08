@@ -16,6 +16,7 @@ from __future__ import annotations
 import contextlib
 import json
 import os
+import threading
 import time
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional
@@ -153,44 +154,53 @@ def verify_chain(ledger_dir: Optional[Path] = None, *,
     return report
 
 
+# In-process serialization: sealers in THIS process queue on a plain threading.Lock, so only
+# ONE thread ever contends the OS lock at a time. That keeps the OS lock's job to what it is FOR —
+# coordination ACROSS processes (nh-org, nh-com-2 share one ledger dir) — and avoids many threads
+# spinning on a mandatory byte-range lock (pathologically slow, and prone to stall under coverage's
+# thread tracing on Windows). The OS lock is then acquired uncontended in the common case.
+_SEAL_TLOCK = threading.Lock()
+
+
 @contextlib.contextmanager
 def _chain_lock(ledger_dir: Path) -> Iterator[None]:
-    """Cross-PROCESS advisory lock over the chain's read-then-write critical section.
-
-    Two server processes (nh-org, nh-com-2) share one ledger dir, so a per-process
-    threading.Lock cannot stop them from reading the same chain tail and forking the chain
-    on the same prev_hash. An OS advisory lock does — and it releases automatically if a
-    holder dies, so a crash never wedges the ledger (no stale lock file to reap). Stdlib
-    only: fcntl.flock on POSIX (the box), msvcrt on Windows (dev/tests)."""
+    """Serialize the chain's read-then-write critical section — within this process (threading.Lock)
+    AND across processes (an OS advisory lock). Two server processes share one ledger dir, so a
+    threading.Lock alone cannot stop them from reading the same tail and forking the chain on one
+    prev_hash; the OS lock does, and it self-releases if a holder dies (no stale lock to reap).
+    Stdlib only: fcntl.flock on POSIX (the box), msvcrt on Windows (dev/tests). Because the
+    threading.Lock already serialises this process's sealers, the OS lock is acquired uncontended
+    in the common case (it only ever waits on ANOTHER process)."""
     ledger_dir.mkdir(parents=True, exist_ok=True)
-    fd = os.open(str(ledger_dir / ".chain.lock"), os.O_CREAT | os.O_RDWR)
-    try:
+    with _SEAL_TLOCK:
+        fd = os.open(str(ledger_dir / ".chain.lock"), os.O_CREAT | os.O_RDWR)
         try:
-            import fcntl
-            fcntl.flock(fd, fcntl.LOCK_EX)
-        except ImportError:  # Windows
-            import msvcrt
-            os.lseek(fd, 0, os.SEEK_SET)
-            while True:
-                try:
-                    msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
-                    break
-                except OSError:
-                    time.sleep(0.02)
-        yield
-    finally:
-        try:
-            import fcntl
-            fcntl.flock(fd, fcntl.LOCK_UN)
-        except ImportError:  # Windows
             try:
+                import fcntl
+                fcntl.flock(fd, fcntl.LOCK_EX)
+            except ImportError:  # Windows
                 import msvcrt
                 os.lseek(fd, 0, os.SEEK_SET)
-                msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
-            except OSError:
-                pass
+                while True:
+                    try:
+                        msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+                        break
+                    except OSError:
+                        time.sleep(0.02)
+            yield
         finally:
-            os.close(fd)
+            try:
+                import fcntl
+                fcntl.flock(fd, fcntl.LOCK_UN)
+            except ImportError:  # Windows
+                try:
+                    import msvcrt
+                    os.lseek(fd, 0, os.SEEK_SET)
+                    msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+                except OSError:
+                    pass
+            finally:
+                os.close(fd)
 
 
 def _slugify(value: str) -> str:

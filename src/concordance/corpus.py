@@ -52,16 +52,28 @@ def _card_text(card: dict) -> str:
 
 PUBLIC_STAGES = frozenset({"public", "featured"})
 
-# Share-alike (copyleft) license markers. CC-BY-SA's viral clause could force the WHOLE corpus
-# under SA if we redistribute it publicly — the one license class that is a legal issue to serve.
-# PD / CC0 / CC-BY (attribution-only) are fine, credited by each card's own source label.
-_SHARE_ALIKE = ("cc-by-sa", "share-alike", "sharealike")
+# Disallowed-to-REDISTRIBUTE license markers. Two classes are a legal issue to serve publicly:
+# share-alike (CC-BY-SA — its viral copyleft could pull the WHOLE corpus under SA) and
+# non-commercial (CC-BY-NC* — forbids the free-to-all use that is the point). PD / CC0 / CC-BY
+# (attribution-only) are fine, credited by each card's own source label. Mirror of the mint-side
+# guard in tools/card_sources.py (_DISALLOWED_LICENSE) — the two boundaries stay in step.
+_DISALLOWED_LICENSE = ("cc-by-sa", "cc by-sa", "share-alike", "sharealike",
+                       "cc-by-nc", "cc by-nc", "non-commercial", "noncommercial")
+# Legacy sources that ARE disallowed-license but whose cards were minted before the guard and carry
+# only the SOURCE NAME in their label, never the license string. OEIS (CC-BY-NC-SA) is the live
+# case — 6,000 cards served under a bare "OEIS — …" label, slipping the marker scan (found 2026-08-08
+# in the pre-launch shelf audit). Matched by source name (label + url) so the name alone withholds.
+_DISALLOWED_SOURCE = ("oeis", "phoible", "drugcentral")
+
+# Back-compat alias: the flag on a frozen-shelf stub and older callers is still named `share_alike`.
+_SHARE_ALIKE = _DISALLOWED_LICENSE
 
 
 def _is_share_alike(card: dict) -> bool:
-    """True iff a card declares a share-alike license. Read from the free-text source label and any
-    `extra.license` — the only license signal cards carry today (a structured `license` field would
-    be more robust; tracked as a follow-up). Only HYG + PHOIBLE match today (~5,234 cards).
+    """True iff a card declares a license we may not publicly REDISTRIBUTE — share-alike (CC-BY-SA)
+    or non-commercial (CC-BY-NC*) — OR names a known such source. Read from the free-text source
+    label, `source.url`, and any `extra.license` (a structured `license` field would be more robust;
+    tracked as a follow-up). HYG + PHOIBLE match by their CC-BY-SA label; OEIS matches by source name.
 
     A FROZEN-SHELF STUB drops `source`/`extra` to save memory, so it carries a precomputed
     `share_alike` bool (set at stub-build time while the label was still present) — honoured here
@@ -72,10 +84,13 @@ def _is_share_alike(card: dict) -> bool:
         return bool(flag)
     src = card.get("source")
     label = (src.get("label") if isinstance(src, dict) else "") or ""
+    url = (src.get("url") if isinstance(src, dict) else "") or ""
     extra = card.get("extra")
     lic = (extra.get("license") if isinstance(extra, dict) else "") or ""
-    blob = (str(label) + " " + str(lic)).lower()
-    return any(m in blob for m in _SHARE_ALIKE)
+    if any(m in (str(label) + " " + str(lic)).lower() for m in _DISALLOWED_LICENSE):
+        return True
+    # a known disallowed source recognised by name, for legacy cards whose label lacks the license
+    return any(s in (str(label) + " " + str(url)).lower() for s in _DISALLOWED_SOURCE)
 
 # Larger than any reachable TF-IDF score, so cards holding the query's rarest word form a
 # strictly higher tier than those that do not. A partition, not a weight: no amount of

@@ -47,12 +47,12 @@ _PRACTICAL_SHELVES = {
     "survival", "apothecary", "almanac", "access", "recipes", "cookery", "activities", "foods",
     "drugs", "medicine", "nutrition", "curriculum", "fieldkit", "playbook", "steward",
     "agriculture", "soil_science", "construction", "manufacturing", "real_estate", "labor",
-    "energy", "exercise_science", "sports_analytics", "document_validation",
+    "energy", "exercise_science", "sports_analytics", "document_validation", "timekeeping",
 }
 _HUMANITIES_SHELVES = {
     "gutenberg", "classics", "history", "history_chronology", "philosophy", "rhetoric",
     "linguistics", "languages", "law", "economics", "music_theory", "photography",
-    "architecture", "contributors", "narratives", "archetypes",
+    "architecture", "contributors", "narratives", "archetypes", "pronunciation",
 }
 _OPS_SHELVES = {"works", "seals", "systems", "connections", "growth", "sources", "web_cache"}
 
