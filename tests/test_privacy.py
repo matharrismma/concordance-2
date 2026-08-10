@@ -102,6 +102,28 @@ def test_no_generator_mints_a_disallowed_license():
     assert not bad, "generator mints a disallowed-license source_label:\n" + "\n".join(bad)
 
 
+def test_comms_shelf_is_clean_public_and_unorphaned(tmp_path, monkeypatch):
+    """The communications shelf (radio/field comms for the mesh + off-grid) is authored PD field
+    reference: every card must be PUBLIC, clean-licensed (no share-alike/NC), and member_of its spine
+    (no orphan). Runs the real emitter hermetically into a temp dir — proves the output, not the code."""
+    import json
+    import sys
+    from pathlib import Path
+    monkeypatch.chdir(tmp_path)
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+    import card_comms
+    assert card_comms.main() == 0
+    cards = [json.loads(ln) for ln in
+             (tmp_path / "data" / "comms_cards.jsonl").read_text(encoding="utf-8").splitlines() if ln.strip()]
+    assert len(cards) >= 20 and cards[0]["id"] == "card_spine_comms"
+    for c in cards:
+        assert corpus.is_public(c), f"{c['id']} is not public"
+        assert not corpus._is_share_alike(c), f"{c['id']} carries a disallowed license"
+        if c["id"] != "card_spine_comms":
+            assert any(e.get("to_card_id") == "card_spine_comms" for e in c["connections"]), \
+                f"{c['id']} is an orphan (not member_of the comms spine)"
+
+
 def test_a_frozen_stub_still_withholds_share_alike():
     """A frozen-shelf STUB drops `source`/`extra` to save memory, so is_public() cannot read the
     license off it — it carries a precomputed `share_alike` bool instead, honoured first. Found LIVE

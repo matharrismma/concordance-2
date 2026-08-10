@@ -643,6 +643,7 @@ def load_cards(path: Optional[Path] = None,
                       "contributors_cards.jsonl",   # the builders of the Floor (historians/scientists/mathematicians), credited with love
                       "religions_cards.jsonl",      # the pre-Christian faiths as foreshadow (Acts 17) + the test of the spirits (1 John 4)
                       "survival_cards.jsonl",       # the field library — outdoor/survival/bushcraft/homestead, PD sources (serve the off-grid + destitute)
+                      "comms_cards.jsonl",          # the communications shelf — radio & field comms (FCC/ITU/NOAA PD) for the mesh + off-grid (the whisper layer beside the field library)
                       # The plumb-line: the whole Bible in the original tongues (Greek NT + Hebrew OT),
                       # one card per verse. Academics first. Spines root in the Word.
                       "scripture_spines.jsonl", "scripture_cards.jsonl",
