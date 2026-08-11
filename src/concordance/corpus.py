@@ -644,6 +644,9 @@ def load_cards(path: Optional[Path] = None,
                       "religions_cards.jsonl",      # the pre-Christian faiths as foreshadow (Acts 17) + the test of the spirits (1 John 4)
                       "survival_cards.jsonl",       # the field library — outdoor/survival/bushcraft/homestead, PD sources (serve the off-grid + destitute)
                       "comms_cards.jsonl",          # the communications shelf — radio & field comms (FCC/ITU/NOAA PD) for the mesh + off-grid (the whisper layer beside the field library)
+                      "firstaid_cards.jsonl",       # the first-aid shelf — conservative field medicine (US Army FM 4-25.11 / CDC / WHO PD): stop bleeding, breathing, shock, rehydrate
+                      "navigation_cards.jsonl",     # the navigation shelf — map/compass/celestial land nav (US Army FM 3-25.26 PD): find the way with no battery
+                      "power_cards.jsonl",          # the off-grid power shelf — solar/battery/inverter/generator safety (DOE/NREL PD): keep the lights + the radio on
                       # The plumb-line: the whole Bible in the original tongues (Greek NT + Hebrew OT),
                       # one card per verse. Academics first. Spines root in the Word.
                       "scripture_spines.jsonl", "scripture_cards.jsonl",

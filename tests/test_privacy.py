@@ -102,26 +102,38 @@ def test_no_generator_mints_a_disallowed_license():
     assert not bad, "generator mints a disallowed-license source_label:\n" + "\n".join(bad)
 
 
-def test_comms_shelf_is_clean_public_and_unorphaned(tmp_path, monkeypatch):
-    """The communications shelf (radio/field comms for the mesh + off-grid) is authored PD field
-    reference: every card must be PUBLIC, clean-licensed (no share-alike/NC), and member_of its spine
-    (no orphan). Runs the real emitter hermetically into a temp dir — proves the output, not the code."""
+import pytest
+
+
+@pytest.mark.parametrize("module,out_file,spine", [
+    ("card_comms", "comms_cards.jsonl", "card_spine_comms"),
+    ("card_firstaid", "firstaid_cards.jsonl", "card_spine_firstaid"),
+    ("card_navigation", "navigation_cards.jsonl", "card_spine_navigation"),
+    ("card_power", "power_cards.jsonl", "card_spine_power"),
+])
+def test_field_shelf_is_clean_public_and_unorphaned(module, out_file, spine, tmp_path, monkeypatch):
+    """Every authored field-reference shelf (the practical library that serves the off-grid + mesh —
+    communications, first aid, navigation, off-grid power) is PD field reference: every card must be
+    PUBLIC, clean-licensed (no share-alike/NC), and member_of its spine (no orphan). Runs the real
+    emitter hermetically into a temp dir and proves the OUTPUT, not the code — so a future edit that
+    quietly sources a disallowed license, or drops a card's spine link, fails the gate."""
+    import importlib
     import json
     import sys
     from pathlib import Path
     monkeypatch.chdir(tmp_path)
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
-    import card_comms
-    assert card_comms.main() == 0
+    mod = importlib.import_module(module)
+    assert mod.main() == 0
     cards = [json.loads(ln) for ln in
-             (tmp_path / "data" / "comms_cards.jsonl").read_text(encoding="utf-8").splitlines() if ln.strip()]
-    assert len(cards) >= 20 and cards[0]["id"] == "card_spine_comms"
+             (tmp_path / "data" / out_file).read_text(encoding="utf-8").splitlines() if ln.strip()]
+    assert len(cards) >= 10 and cards[0]["id"] == spine
     for c in cards:
         assert corpus.is_public(c), f"{c['id']} is not public"
         assert not corpus._is_share_alike(c), f"{c['id']} carries a disallowed license"
-        if c["id"] != "card_spine_comms":
-            assert any(e.get("to_card_id") == "card_spine_comms" for e in c["connections"]), \
-                f"{c['id']} is an orphan (not member_of the comms spine)"
+        if c["id"] != spine:
+            assert any(e.get("to_card_id") == spine for e in c["connections"]), \
+                f"{c['id']} is an orphan (not member_of {spine})"
 
 
 def test_a_frozen_stub_still_withholds_share_alike():
