@@ -647,6 +647,9 @@ def load_cards(path: Optional[Path] = None,
                       "firstaid_cards.jsonl",       # the first-aid shelf — conservative field medicine (US Army FM 4-25.11 / CDC / WHO PD): stop bleeding, breathing, shock, rehydrate
                       "navigation_cards.jsonl",     # the navigation shelf — map/compass/celestial land nav (US Army FM 3-25.26 PD): find the way with no battery
                       "power_cards.jsonl",          # the off-grid power shelf — solar/battery/inverter/generator safety (DOE/NREL PD): keep the lights + the radio on
+                      "sanitation_cards.jsonl",     # the sanitation shelf — hygiene/waste/disease prevention (WHO/CDC/Army PD): the disciplines that stop post-disaster illness
+                      "water_cards.jsonl",          # the water shelf — the household water SYSTEM (EPA/CDC/FEMA PD): storage, rainwater, wells, filter types (beside survival's find/purify)
+                      "food_cards.jsonl",           # the food-growing shelf — garden/soil/seed/season (USDA PD): raising food, beside survival's preserving
                       # The plumb-line: the whole Bible in the original tongues (Greek NT + Hebrew OT),
                       # one card per verse. Academics first. Spines root in the Word.
                       "scripture_spines.jsonl", "scripture_cards.jsonl",

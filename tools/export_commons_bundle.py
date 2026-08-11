@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Export the verified field library as a Kiwix/IIAB/Prepper-Disk-droppable HTML bundle.
+"""Export the verified field library as a STANDALONE offline bundle — needs nothing but itself.
 
-Matt, 2026-08-08: the offline-knowledge and LoRa efforts (Prepper Disk, Kiwix / Internet-in-a-Box,
-Meshtastic) share our purpose — keep knowledge and connection alive for the ones the grid leaves
-behind. This is our gift INTO that commons: the clean-licensed, verified, cited field library —
-survival, communications, the field kit, the playbook, and the practical stores — rendered as
-self-contained static HTML that a family can browse offline with no server, and that drops straight
-onto any box those communities already run.
+Matt, 2026-08-08: standalone is a REQUIREMENT of this project, not a feature — "we don't accept the
+work is done unless WE do it." So the library must serve itself when everything else is gone. This
+renders the clean-licensed, verified, cited field library — survival, communications, the field kit,
+the playbook, and the practical stores — as self-contained HTML that a family reads in any browser
+(no server) or runs with our OWN reader (serve.py, standard library only). It is ALSO compatible
+with the offline-knowledge boxes others run (Kiwix / Internet-in-a-Box / Prepper Disk) — fellowship
+with that same-purpose work is welcome — but the keeping never DEPENDS on them; it does the job by
+its own hand.
 
 Unlike a raw Wikipedia dump, this is DISCERNED and CITED: every card carries its public-domain
 source, and the bundle carries its own SEAL (a MANIFEST of every file's sha256) plus a stdlib
@@ -47,7 +49,13 @@ RELEASES = Path(os.environ.get("CONCORDANCE_RELEASES", "").strip() or "D:/Narrow
 # only if present; a missing optional file is skipped, never a hole.
 SHELF_FILES = [
     ("survival_cards.jsonl", "The field library"),
+    ("firstaid_cards.jsonl", "First aid"),
+    ("water_cards.jsonl", "Water"),
+    ("food_cards.jsonl", "Food growing"),
+    ("sanitation_cards.jsonl", "Sanitation & hygiene"),
     ("comms_cards.jsonl", "Communications"),
+    ("navigation_cards.jsonl", "Navigation"),
+    ("power_cards.jsonl", "Off-grid power"),
     ("fieldkit_cards.jsonl", "The field kit"),
     ("playbook_cards.jsonl", "The playbook"),
     ("practical_cards.jsonl", "Practical stores"),
@@ -154,13 +162,17 @@ def _index_html(groups) -> str:
         f"<p>{total} verified, public-domain reference cards — survival, communications, and the "
         "practical knowledge a household needs when the grid is down. Freely given, cited to source, "
         "and clean-licensed. Browse below or search. No account, no network, no cost.</p>"
+        "<p style='margin:1.3rem 0;font-size:1.15rem'><a href='bible.html'>&#10015; The Holy Bible "
+        "&mdash; the whole Word (World English Bible)</a></p>"
         "<input id=q type=text placeholder='Search the field library…' autocomplete=off>"
         + "".join(sections) +
-        "<p class=note>This bundle carries its own seal — run <code>python verify.py</code> to "
-        "re-hash every file against MANIFEST.json and prove the copy is unaltered. It drops onto any "
-        "Kiwix / Internet-in-a-Box / Prepper Disk box (see README.txt), and ZIMREADY.txt has the one "
-        "command that turns it into a true .zim. The whole, searchable library lives at "
-        "narrowhighway.com. Psalm 119:105.</p>" + js
+        "<p class=note>This library is standalone — it needs nothing but itself: read it right here "
+        "in your browser, or run <code>python serve.py</code> to have Narrow Highway serve it for you "
+        "(no install, no internet, no other software). It carries its own seal — <code>python "
+        "verify.py</code> re-hashes every file against MANIFEST.json to prove the copy is unaltered. "
+        "(It is ALSO compatible with Kiwix / Internet-in-a-Box / Prepper Disk — see README.txt — but "
+        "never depends on them.) The whole, searchable library lives at narrowhighway.com. Psalm "
+        "119:105.</p>" + js
     )
     return _page("The field library", body)
 
@@ -192,32 +204,63 @@ sys.exit(1 if bad else 0)
 README = """THE FIELD LIBRARY — an offline keeping, freely given (Narrow Highway, narrowhighway.com)
 
 WHAT THIS IS
-  {total} verified, public-domain reference cards — survival, communications (radio + the LoRa
-  mesh), the field kit, the playbook, and practical stores — the survive-and-connect knowledge a
-  household needs when the grid is down. Every card is cited to its public-domain source. Cut on
-  {date}. No account, no network, no cost.
+  THE WHOLE BIBLE (World English Bible, public domain) — nothing in this library ever ships without
+  the Word — open bible.html — PLUS {total} verified, public-domain reference cards — survival,
+  communications (radio + the LoRa mesh), the field kit, the playbook, and practical stores — the
+  survive-and-connect knowledge a household needs when the grid is down. Every card is cited to its
+  public-domain source. Cut on {date}. No account, no network, no cost.
+
+STANDALONE — this needs NOTHING but itself
+  This library stands entirely on its own. You do NOT need Kiwix, Internet-in-a-Box, a Prepper Disk,
+  the internet, or any other software to use it. Two ways to read it, both self-contained:
+    1. Open index.html in any web browser (double-click it) — it works straight off the disk.
+    2. Or run our own reader:  python serve.py   — then open the address it prints (default
+       http://127.0.0.1:8000). Standard library only; no install, no network.
+  Search works offline in the page itself. Copy the whole folder to a USB stick or SD card and it
+  runs the same on the next machine. Sovereignty is a requirement of this project, not a feature:
+  the keeping must work when everything else is gone, by our own hand.
 
 WHY IT'S DIFFERENT FROM A RAW DUMP
   It is DISCERNED and CITED (each card names its source), it carries its own SEAL (MANIFEST.json +
   verify.py re-hash every file), and it is CLEAN-LICENSED — public domain / CC0 / CC-BY only, never
   share-alike or non-commercial — so it may be freely redistributed where a copyleft mirror cannot.
 
-HOW TO READ IT
-  Open index.html in any web browser. Everything is self-contained HTML — it works with no server,
-  no internet, on any device.
-
 HOW TO VERIFY IT
   python verify.py     (standard library only; re-hashes every file against MANIFEST.json)
 
-HOW TO SHARE IT (it rides the rails these communities already run)
-  * Kiwix / Internet-in-a-Box / Prepper Disk: copy this directory into the box's served content,
-    or serve it as a plain website — it is ordinary static HTML.
-  * Make a true ZIM: see ZIMREADY.txt for the single zimwriterfs command.
-  * Hand to hand: it fits a cheap USB stick or SD card. Copy it, verify it, pass it on.
+ALSO COMPATIBLE (a bonus, never a requirement)
+  Because it is ordinary static HTML, it ALSO drops onto boxes those in the same work already run —
+  Kiwix / Internet-in-a-Box / Prepper Disk (copy it into their served content), and ZIMREADY.txt has
+  the single zimwriterfs command to make a true .zim. Fellowship with that movement is welcome; but
+  this library never depends on it — it does the job by itself.
 
 The disk carries the library; the radio carries the whisper. The whole, searchable keeping lives at
 narrowhighway.com — this bundle is the anchor; the site is the spread. Psalm 119:105.
 """
+
+SERVE_PY = '''#!/usr/bin/env python3
+"""Serve this field library yourself — standard library only, no install, no network.
+    python serve.py           # then open the printed address (default http://127.0.0.1:8000)
+    python serve.py 9000      # choose a port
+This is Narrow Highway's OWN reader: the keeping serves itself, needing no other software.
+"""
+import http.server, socketserver, sys
+from pathlib import Path
+port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
+root = Path(__file__).resolve().parent
+class H(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *a, **k):
+        super().__init__(*a, directory=str(root), **k)
+    def log_message(self, *a):
+        pass
+print("The field library is served at  http://127.0.0.1:%d/  (Ctrl-C to stop)" % port)
+print("Open that address in any browser. Everything is offline; nothing leaves this machine.")
+with socketserver.TCPServer(("127.0.0.1", port), H) as s:
+    try:
+        s.serve_forever()
+    except KeyboardInterrupt:
+        print("\\nstopped.")
+'''
 
 ZIMREADY = """MAKE A TRUE ZIM FROM THIS BUNDLE
 
@@ -238,14 +281,69 @@ verifies itself with verify.py before you package it.)
 """
 
 
+BIBLE_FILE = "bible_en.jsonl"   # the whole World English Bible, one row per verse (public domain)
+
+
+def _load_bible():
+    """The whole Bible in canonical (file) order: [(book, [(chapter, [(verse, text)])])]. Returns []
+    if the source is absent — and main() then REFUSES to build: nothing ships without the Word."""
+    from collections import OrderedDict
+    p = DATA / BIBLE_FILE
+    if not p.exists():
+        return []
+    books = OrderedDict()
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            v = json.loads(line)
+            ch, vs = int(v["chapter"]), int(v["verse"])
+        except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+            continue
+        books.setdefault(v.get("book", "?"), OrderedDict()).setdefault(ch, []).append((vs, v.get("text", "")))
+    return [(b, [(ch, sorted(vv)) for ch, vv in sorted(chs.items())]) for b, chs in books.items()]
+
+
+def _bible_book_html(book, chapters):
+    parts = ["<a class=back href='../index.html'>&larr; Library</a>"
+             "<a class=back href='../bible.html' style='margin-left:1rem'>&larr; Books</a>",
+             f"<p class=kick>The Word &middot; World English Bible</p><h1>{_esc(book)}</h1>"]
+    for ch, verses in chapters:
+        parts.append(f"<h2>{_esc(book)} {ch}</h2><p>")
+        for vs, text in verses:
+            parts.append(f"<sup style='color:#c9a24a'>{vs}</sup>&nbsp;{_esc(text)} ")
+        parts.append("</p>")
+    parts.append("<p class=src>World English Bible (public domain). The whole Bible ships with every "
+                 "copy of this library &mdash; nothing goes without the Word. Psalm 119:105.</p>")
+    return _page(book, "".join(parts))
+
+
+def _bible_index_html(bible):
+    rows = "".join(f"<li><a href='bible/{_slug(b)}.html'>{_esc(b)}</a></li>" for b, _ in bible)
+    ch_total = sum(len(chs) for _, chs in bible)
+    body = ("<a class=back href='index.html'>&larr; The field library</a>"
+            "<p class=kick>The Word</p><h1>The Holy Bible</h1>"
+            f"<p>The whole World English Bible &mdash; public domain, freely given. {len(bible)} books, "
+            f"{ch_total} chapters. Nothing in this library ships without the Word (Psalm 119:105).</p>"
+            "<ul>" + rows + "</ul>")
+    return _page("The Holy Bible", body)
+
+
 def main() -> int:
     check = "--check" in sys.argv
     groups, total = _load_clean_cards()
+    bible = _load_bible()
+    if not bible:
+        print("REFUSING to build: the Bible (data/bible_en.jsonl) is missing. NOTHING ships without "
+              "a full copy of the Word.")
+        return 1
     if not total:
         print("REFUSING: no clean field cards found — nothing to give. (Are the data/*.jsonl present?)")
         return 1
-    print(f"bundle: {total} clean-licensed cards across {len(groups)} shelves | " +
-          " · ".join(f"{h} {len(cs)}" for h, cs in groups))
+    bible_ch = sum(len(chs) for _, chs in bible)
+    print(f"bundle: THE WHOLE BIBLE ({len(bible)} books, {bible_ch} chapters) + {total} clean-licensed "
+          f"cards across {len(groups)} shelves | " + " · ".join(f"{h} {len(cs)}" for h, cs in groups))
     if check:
         return 0
 
@@ -265,7 +363,12 @@ def main() -> int:
     for _heading, cards in groups:
         for c in cards:
             _emit(f"card/{_slug(c['id'])}.html", _card_html(c))
+    # THE WORD — the whole Bible ships with every copy; nothing goes without it.
+    _emit("bible.html", _bible_index_html(bible))
+    for book, chapters in bible:
+        _emit(f"bible/{_slug(book)}.html", _bible_book_html(book, chapters))
     _emit("verify.py", VERIFIER)
+    _emit("serve.py", SERVE_PY)
     _emit("README.txt", README.format(total=total, date=stamp[:10]))
     _emit("ZIMREADY.txt", ZIMREADY)
 

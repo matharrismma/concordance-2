@@ -48,7 +48,7 @@ _PRACTICAL_SHELVES = {
     "drugs", "medicine", "nutrition", "curriculum", "fieldkit", "playbook", "steward",
     "agriculture", "soil_science", "construction", "manufacturing", "real_estate", "labor",
     "energy", "exercise_science", "sports_analytics", "document_validation", "timekeeping",
-    "communications", "first_aid", "navigation",
+    "communications", "first_aid", "navigation", "sanitation", "water",
 }
 _HUMANITIES_SHELVES = {
     "gutenberg", "classics", "history", "history_chronology", "philosophy", "rhetoric",

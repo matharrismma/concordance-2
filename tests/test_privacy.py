@@ -110,6 +110,9 @@ import pytest
     ("card_firstaid", "firstaid_cards.jsonl", "card_spine_firstaid"),
     ("card_navigation", "navigation_cards.jsonl", "card_spine_navigation"),
     ("card_power", "power_cards.jsonl", "card_spine_power"),
+    ("card_sanitation", "sanitation_cards.jsonl", "card_spine_sanitation"),
+    ("card_water", "water_cards.jsonl", "card_spine_water"),
+    ("card_food", "food_cards.jsonl", "card_spine_food"),
 ])
 def test_field_shelf_is_clean_public_and_unorphaned(module, out_file, spine, tmp_path, monkeypatch):
     """Every authored field-reference shelf (the practical library that serves the off-grid + mesh —
