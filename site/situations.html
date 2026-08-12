@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What do you need right now? — Narrow Highway</title>
+<meta name="description" content="Start with your situation. When the power's out, the water's unsafe, someone's hurt — open the one that fits your moment and the cards are already there. Checked, cited, free, no account.">
+<meta property="og:title" content="What do you need right now? — Narrow Highway">
+<meta property="og:description" content="Open your situation; the cards are already there. Checked, cited, free, no account. The whole Word aboard.">
+<style>
+  :root{
+    --walnut:#2b1a10; --walnut-2:#170d07; --stone:#3a352d;
+    --paper:#f5f1e6; --paper-2:#e9e3d3; --parch:#ded3ba;
+    --brass:#c69a4a; --brass-hi:#eed69b; --brass-lo:#8a6a2f;
+    --ink:#241c12; --ink-soft:#6b5c45; --ink-faint:#9b8a6d;
+    --oxblood:#7d4a22; --lamp:rgba(255,231,176,.16);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:
+      radial-gradient(120% 60% at 50% -8%, var(--lamp), transparent 60%),
+      linear-gradient(#20130b, var(--walnut-2));
+    color:var(--paper); min-height:100vh;
+    font:18px/1.62 "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--brass-hi); text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:46rem; margin:0 auto; padding:1.1rem 1.15rem 4rem}
+  header.site{display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px solid rgba(198,154,74,.22); padding:.2rem 0 .9rem; margin-bottom:1.6rem}
+  .brand{font-size:1.02rem; letter-spacing:.01em; color:var(--paper)}
+  .brand b{color:var(--brass-hi); font-weight:600}
+  nav.site a{font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-faint); margin-left:1.1rem}
+  .kick{font-family:Futura,"Century Gothic","Avenir Next",Avenir,"Trebuchet MS",sans-serif;
+    text-transform:uppercase; letter-spacing:.28em; font-weight:600; font-size:.66rem; color:var(--brass)}
+  h1{font-weight:400; font-size:2.05rem; line-height:1.15; margin:.5rem 0 .6rem}
+  .lede{color:var(--paper-2); font-size:1.06rem; margin:0 0 .3rem}
+  .sub{color:var(--ink-faint); font-size:.9rem; margin:.5rem 0 1.6rem}
+  .sub b{color:var(--brass); font-weight:600}
+  h2{font-weight:400; font-size:.98rem; color:var(--brass); letter-spacing:.02em;
+    text-transform:none; margin:2.2rem 0 .5rem; padding-bottom:.35rem;
+    border-bottom:1px solid rgba(198,154,74,.18)}
+  details.sit{border:1px solid var(--parch); border-radius:5px; background:var(--paper);
+    color:var(--ink); margin:.6rem 0; overflow:hidden;
+    box-shadow:0 14px 34px -26px rgba(20,12,4,.7)}
+  details.sit>summary{list-style:none; cursor:pointer; padding:.9rem 1rem; display:block}
+  details.sit>summary::-webkit-details-marker{display:none}
+  .sit-name{font-size:1.16rem; color:var(--ink); display:flex; justify-content:space-between; align-items:baseline; gap:.6rem}
+  .sit-name .n{color:var(--ink-faint); font-size:.74rem; white-space:nowrap; font-family:Futura,"Avenir Next",sans-serif; letter-spacing:.06em}
+  .sit-desc{color:var(--ink-soft); font-size:.9rem; margin-top:.25rem}
+  details.sit[open]>summary{border-bottom:1px solid var(--parch); background:linear-gradient(var(--paper),var(--paper-2))}
+  .hand{padding:.5rem 1rem 1rem}
+  .hand .load{color:var(--ink-faint); font-size:.86rem; padding:.5rem 0}
+  .card-row{padding:.5rem 0; border-top:1px solid rgba(123,74,34,.12)}
+  .card-row:first-child{border-top:none}
+  .card-row a{color:var(--oxblood); font-size:1.02rem}
+  .card-row .shelf{color:var(--ink-faint); font-size:.7rem; text-transform:uppercase; letter-spacing:.12em; margin-left:.4rem}
+  .card-row .snip{color:var(--ink-soft); font-size:.86rem; margin-top:.15rem}
+  .more{display:inline-block; margin-top:.5rem; font-size:.82rem; color:var(--brass-lo)}
+  .domains{display:flex; flex-wrap:wrap; gap:.4rem .5rem; margin:.4rem 0}
+  .domains a{border:1px solid rgba(198,154,74,.28); border-radius:20px; padding:.28rem .7rem;
+    font-size:.86rem; color:var(--paper-2)}
+  .foot{margin-top:2.6rem; border-top:1px solid rgba(198,154,74,.18); padding-top:1.1rem;
+    color:var(--ink-faint); font-size:.84rem}
+  .foot a{color:var(--brass)}
+  .verse{color:var(--brass); font-style:italic}
+  .err{color:#e6a; font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <a class="brand" href="/">Narrow<b>Highway</b></a>
+    <nav class="site"><a href="/">The desk</a><a href="/bible.html">The Word</a></nav>
+  </header>
+
+  <p class="kick">Start here</p>
+  <h1>What do you need right now?</h1>
+  <p class="lede">Open the one that fits your moment. Each opens straight to the cards for that need — no searching.</p>
+  <p class="sub">Everything here is <b>checked and cited to its source</b>, never invented. <b>Free, no account.</b> And the whole Word is always aboard.</p>
+
+  <h2>By your situation</h2>
+  <div id="situations"><p class="load" style="color:var(--ink-faint)">Opening the shelves…</p></div>
+
+  <h2>Or by subject</h2>
+  <div class="domains" id="domains"></div>
+
+  <div class="foot">
+    <p>Narrow Highway is a conduit, not an oracle: it finds and checks what is already known, shows the
+    work, and seals it so anyone can re-check. It does not make answers up. Read the whole, searchable
+    keeping — and thousands of field manuals — on <a href="/">the desk</a>, or carry the offline field
+    library on a drive when the grid is gone.</p>
+    <p class="verse">Thy word is a lamp unto my feet, and a light unto my path. — Psalm 119:105</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var esc=function(s){var d=document.createElement('div'); d.textContent=(s==null?'':String(s)); return d.innerHTML;};
+  var SIT=document.getElementById('situations'), DOM=document.getElementById('domains');
+
+  function cardRow(c){
+    var href='/card.html?id='+encodeURIComponent(c.id||'');
+    return '<div class="card-row"><a href="'+href+'">'+esc(c.title||c.id)+'</a>'
+      +'<span class="shelf">'+esc(c.shelf||'')+'</span>'
+      +(c.snippet?'<div class="snip">'+esc(c.snippet)+'</div>':'')+'</div>';
+  }
+
+  function openDeck(det, id){
+    var hand=det.querySelector('.hand');
+    if(det.dataset.loaded){ return; }
+    det.dataset.loaded='1';
+    hand.innerHTML='<div class="load">Dealing the cards…</div>';
+    fetch('/deck/open?id='+encodeURIComponent(id)+'&limit=12').then(function(r){return r.json();})
+      .then(function(res){
+        var d=(res&&res.data)?res.data:res, cards=(d&&d.cards)||[];
+        if(!cards.length){ hand.innerHTML='<div class="load">No cards here yet — try <a href="/">the desk</a>.</div>'; return; }
+        hand.innerHTML=cards.map(cardRow).join('')
+          +'<a class="more" href="/deck/open?id='+encodeURIComponent(id)+'">the whole hand →</a>';
+      }).catch(function(){ hand.innerHTML='<div class="err">Couldn\'t reach the shelves — please try again.</div>'; });
+  }
+
+  function sit(d){
+    var det=document.createElement('details'); det.className='sit'; det.dataset.id=d.id;
+    det.innerHTML='<summary><span class="sit-name"><span>'+esc(d.name)+'</span>'
+      +'<span class="n">'+(d.cards||0)+' cards</span></span>'
+      +'<div class="sit-desc">'+esc(d.desc||'')+'</div></summary>'
+      +'<div class="hand"></div>';
+    det.addEventListener('toggle',function(){ if(det.open) openDeck(det,d.id); });
+    return det;
+  }
+
+  fetch('/decks').then(function(r){return r.json();}).then(function(res){
+    var d=(res&&res.data)?res.data:res, decks=(d&&d.decks)||[];
+    var need=decks.filter(function(x){return x.need;});
+    var dom=decks.filter(function(x){return !x.need;});
+    // situations: the fullest hands first (most cards), so the richest doors lead
+    need.sort(function(a,b){return (b.cards||0)-(a.cards||0);});
+    SIT.innerHTML='';
+    if(!need.length){ SIT.innerHTML='<p class="load" style="color:var(--ink-faint)">No situations yet.</p>'; }
+    need.forEach(function(x){ SIT.appendChild(sit(x)); });
+    DOM.innerHTML=dom.map(function(x){
+      return '<a href="/deck/open?id='+encodeURIComponent(x.id)+'">'+esc(x.name)+'</a>';
+    }).join('');
+  }).catch(function(){
+    SIT.innerHTML='<p class="err">Couldn\'t reach the shelves — please try again, or go to <a href="/">the desk</a>.</p>';
+  });
+})();
+</script>
+</body>
+</html>

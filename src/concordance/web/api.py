@@ -538,7 +538,7 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
     return 200, html
 
 
-_SITEMAP_PAGES = ("/", "/ask.html", "/bible.html", "/read.html", "/characters.html",
+_SITEMAP_PAGES = ("/", "/situations.html", "/ask.html", "/bible.html", "/read.html", "/characters.html",
                   "/prophecy.html", "/journal.html", "/map.html", "/steward.html",
                   "/community.html", "/corpus.html", "/guarantees.html", "/collapse.html",
                   "/seeds.html", "/seal.html", "/connect.html", "/corrected.html", "/audit.html",
