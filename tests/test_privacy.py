@@ -208,3 +208,69 @@ def test_graph_shares_the_same_predicate():
     assert graph._is_public({"lifecycle_stage": "public"}) is True
     _setup(_fixture())
     assert graph.neighborhood("priv1") is None
+
+
+def test_pd_decision_ships_only_verifiable_public_domain():
+    """The age-PD acquisition gate (store_book._pd_decision) is conservative and auditable: it ships
+    a book only when the Archive marks it NOT_IN_COPYRIGHT or it was published before 1929, and it
+    REFUSES an in-copyright work or one under a restrictive (CC) license. Strict PD-only, at the
+    mint — the handyman/trades shelf must never carry something the copyright has not yet released."""
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+    import store_book as sb
+
+    def d(md):
+        return sb._pd_decision({"metadata": md})
+
+    assert d({"possible-copyright-status": "NOT_IN_COPYRIGHT", "year": "1955"})[0]  # Archive's PD mark wins
+    ok, yr, _ = d({"date": "Boston, 1907"}); assert ok and yr == "1907"             # age basis, year parsed
+    assert d({"year": "1928"})[0]                                                   # ceiling year is PD
+    assert not d({"year": "1945"})[0]                                               # still in copyright
+    assert not d({"possible-copyright-status": "IN_COPYRIGHT", "year": "1900"})[0]  # explicit copyright wins
+    assert not d({"licenseurl": "https://creativecommons.org/licenses/by/4.0/", "year": "1850"})[0]  # licensed != PD
+    assert not d({})[0]                                                             # no basis -> refused
+    assert d({"licenseurl": "https://creativecommons.org/publicdomain/mark/1.0/", "year": "1900"})[0]  # PD mark ok
+
+
+def test_gen_ark_pd_cards_are_clean_public_and_carry_pd_basis(tmp_path, monkeypatch):
+    """gen_ark_pd cards the age-PD trades shelf from docs_pd: every card PUBLIC, clean-licensed,
+    member_of card_spine_arkpd, id-namespaced card_src_pd_* (never colliding with the federal
+    card_src_fed_*), carrying the PD basis so provenance stays auditable and un-blurred with the
+    17-USC-105 federal shelf. Runs the real generator against a hermetic docs_pd, proving OUTPUT."""
+    import importlib
+    import sqlite3
+    import sys
+    from pathlib import Path
+    ark = tmp_path / "ark"
+    (ark / "archive_org").mkdir(parents=True)
+    con = sqlite3.connect(str(ark / "archive_org" / "texts.db"))
+    con.execute("create table docs_pd (identifier text primary key, title text, query text, "
+                "raw_bytes integer, gz blob, stored_at text, url text, sha256 text, "
+                "pd_year text, pd_basis text)")
+    con.execute("insert into docs_pd values (?,?,?,?,?,?,?,?,?,?)",
+                ("audels01", "Audels Carpenters and Builders Guide",
+                 "subject:(carpentry) AND mediatype:(texts)", 123456, b"",
+                 "2026-08-11T00:00:00Z", "https://archive.org/download/audels01/x_djvu.txt",
+                 "abc123", "1923", "public domain by copyright expiry (published 1923, pre-1929)"))
+    con.execute("insert into docs_pd values (?,?,?,?,?,?,?,?,?,?)",
+                ("farmmanual", "The Farmer's Every-Day Book",
+                 "subject:(agriculture) AND mediatype:(texts)", 67890, b"",
+                 "2026-08-11T00:00:00Z", "https://archive.org/download/farmmanual/y_djvu.txt",
+                 "def456", "1890", "public domain by copyright expiry (published 1890, pre-1929)"))
+    con.commit(); con.close()
+    monkeypatch.setenv("CONCORDANCE_ARK_BASE", str(ark))
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+    import card_sources
+    importlib.reload(card_sources)
+    cards = list(card_sources.gen_ark_pd())
+    assert len(cards) == 2
+    assert all(c["id"].startswith("card_src_pd_") for c in cards)
+    for c in cards:
+        assert corpus.is_public(c), f"{c['id']} is not public"
+        assert not corpus._is_share_alike(c), f"{c['id']} carries a disallowed license"
+        assert any(e.get("to_card_id") == "card_spine_arkpd" for e in c["connections"]), \
+            f"{c['id']} is not member_of the trades spine"
+        assert c["extra"]["pd_basis"], f"{c['id']} lost its PD basis"
+    shelves = {c["shelf"] for c in cards}
+    assert "practical" in shelves and "agriculture" in shelves  # carpentry->practical, agri->agriculture

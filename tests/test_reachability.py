@@ -35,7 +35,7 @@ AGENT_ONLY = {
     # through the desk, the card pages, and search.
     "/apothecary/propose", "/backmatter", "/codex/artifact", "/codex/connections",
     "/codex/scripture", "/codex/themes", "/codex/verify", "/commons", "/curate",
-    "/curate/queue", "/curate/signable", "/deck", "/decks", "/drop", "/drop/signable",
+    "/curate/queue", "/curate/signable", "/deck", "/deck/open", "/decks", "/drop", "/drop/signable",
     "/formation", "/formation/help", "/formation/kinds", "/group", "/group/contribute",
     "/group/join", "/groups", "/journal/dates", "/mesh/door", "/mesh/inbox", "/mesh/invite",
     "/mesh/link", "/mesh/map", "/mesh/node", "/mesh/post", "/mesh/redeem", "/narratives",

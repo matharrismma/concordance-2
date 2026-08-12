@@ -102,6 +102,18 @@ def _secular_tools() -> List[dict]:
          "description": "Browse the keeping — paginated, optional shelf filter. Returns card briefs.",
          "inputSchema": {"type": "object", "properties": {
              "shelf": {"type": "string"}, "limit": {"type": "integer"}, "offset": {"type": "integer"}}}},
+        {"name": "decks",
+         "description": ("The decks — curated card SETS, both by-situation (need decks, frontloaded "
+                         "for a moment of need like 'when the power goes out') and by-domain. Each "
+                         "with a live card count; `need: true` marks a situation deck."),
+         "inputSchema": {"type": "object", "properties": {}}},
+        {"name": "deck_open",
+         "description": ("Open a deck to its frontloaded hand — the cards that situation calls for, "
+                         "in order, with NO query needed. Give the deck `id` (from `decks`). Ideal "
+                         "for anticipating need: open 'water-safe', 'first-aid-far', 'grow-food', "
+                         "'be-not-afraid', etc., and get the hand ready to read."),
+         "inputSchema": {"type": "object", "properties": {
+             "id": {"type": "string"}, "limit": {"type": "integer"}}, "required": ["id"]}},
         {"name": "cards_stats",
          "description": "Counts over the keeping — total, by shelf, by surface.",
          "inputSchema": {"type": "object", "properties": {}}},
@@ -767,6 +779,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "description": "Read-only retrieval over the keeping: search, cards, the grid, the "
                        "conversational door. Provenance attached; nothing here writes.",
         "tools": {"search": "read", "card_get": "read", "cards_browse": "read",
+                  "decks": "read", "deck_open": "read",
                   "cards_stats": "read", "daily_card": "read", "grid_axis": "read",
                   "grid_dimension": "read", "card_connections": "read", "locate": "read",
                   "library_health": "read", "pronounce": "derive", "study_find": "read",
@@ -1056,6 +1069,13 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     if name == "cards_browse":
         return corpus.browse(shelf=args.get("shelf"), limit=int(args.get("limit", 20)),
                              offset=int(args.get("offset", 0)))
+    if name == "decks":
+        from .. import decks as _decks
+        return {"decks": _decks.all_decks()}
+    if name == "deck_open":
+        from .. import decks as _decks
+        opened = _decks.open_deck(str(args.get("id", "")).strip(), int(args.get("limit", 15)))
+        return opened if opened is not None else {"error": "unknown deck"}
     if name == "cards_stats":
         return corpus.stats()
     if name == "daily_card":

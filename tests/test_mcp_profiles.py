@@ -96,12 +96,13 @@ def test_a_call_inside_the_mounted_plane_still_works():
 
 
 def test_the_full_catalog_on_mcp_is_unchanged_a_golden():
-    """Existing clients keep the wide door until narrowing is a deliberate cutover. 86 tools
-    (83 + the 3 Candidate Engine tools, task #135, 2026-08-05): this golden moves only when
-    the catalog does, and moving it is a conscious act — the assessment's expansion freeze,
-    countable. The Candidate Engine is the sanctioned exception: it ADDS narrowing, the point
-    of the whole system, so the count rises by exactly three, each profiled once on core."""
-    assert len(_full_catalog()) == 86
+    """Existing clients keep the wide door until narrowing is a deliberate cutover. 88 tools
+    (83 + the 3 Candidate Engine tools, task #135, 2026-08-05 + the 2 deck tools, 2026-08-12):
+    this golden moves only when the catalog does, and moving it is a conscious act — the
+    assessment's expansion freeze, countable. The deck tools (`decks`, `deck_open`) are the
+    sanctioned rise here: both read-only, both on the `library` profile, they surface the
+    need-decks (the Hare) so an agent can open the hand a situation calls for. +2, deliberate."""
+    assert len(_full_catalog()) == 88
 
 
 def test_the_witness_gate_semantics_survive_the_mount():

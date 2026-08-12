@@ -161,10 +161,11 @@ def _ia_ctx():
 def _ia_db() -> sqlite3.Connection:
     d = _base() / "archive_org"
     d.mkdir(parents=True, exist_ok=True)
-    c = sqlite3.connect(str(d / "texts.db"))
-    c.execute("create table if not exists docs (identifier text primary key, title text, "
-              "query text, raw_bytes integer, gz blob, stored_at text, url text, sha256 text)")
-    c.commit()
+    c = sqlite3.connect(str(d / "texts.db"), timeout=60)
+    c.execute("pragma busy_timeout=60000")             # docs and docs_pd share this file — a
+    c.execute("create table if not exists docs (identifier text primary key, title text, "  # concurrent
+              "query text, raw_bytes integer, gz blob, stored_at text, url text, sha256 text)")  # writer
+    c.commit()                                         # waits for the lock, it does not fail
     return c
 
 
@@ -223,11 +224,129 @@ def ia_store(query: str, limit: int = 200, delay: float = 2.0) -> int:
     return n
 
 
+# ── the age-PD side: pre-1929 COMMERCIAL books (handyman encyclopedias, trade manuals,
+# ancient technologies). These are public domain by copyright EXPIRY, not by 17 USC 105.
+# Because the basis differs, they anchor in a SEPARATE table (docs_pd) with the PD basis
+# recorded per row — never blurred with the federal shelf. PD is VERIFIED at acquisition:
+# archive.org's own NOT_IN_COPYRIGHT determination, or a conservative pre-1929 age ceiling;
+# a restrictive (CC/other) licenseurl disqualifies. Strict PD-only, and the trail says why.
+
+_PD_YEAR_CEILING = 1928       # unambiguously PD in the US as of 2026 (1928 works PD since 2024)
+
+
+def _ia_meta(ident: str) -> dict:
+    req = urllib.request.Request(f"https://archive.org/metadata/{ident}",
+                                 headers={"User-Agent": _UA})
+    with urllib.request.urlopen(req, timeout=30, context=_ia_ctx()) as r:
+        return json.load(r)
+
+
+def _one(v) -> str:
+    """archive.org metadata values are sometimes a list — take the first, as a string."""
+    if isinstance(v, list):
+        v = v[0] if v else ""
+    return str(v or "")
+
+
+def _pd_decision(meta: dict) -> tuple[bool, str, str]:
+    """Conservative, auditable public-domain gate. Returns (ok, year, basis). Default DENY."""
+    import re as _re
+    md = meta.get("metadata", {})
+    status = _one(md.get("possible-copyright-status")).upper()
+    lic = _one(md.get("licenseurl")).lower()
+    year = ""
+    for key in ("year", "date", "publicdate"):
+        m = _re.search(r"\b(1[5-9]\d\d|20\d\d)\b", _one(md.get(key)))
+        if m:
+            year = m.group(1); break
+    if "NOT_IN_COPYRIGHT" in status:
+        return True, year, "archive.org copyright status: NOT_IN_COPYRIGHT"
+    # a license URL that is not itself a public-domain mark means the item is *licensed*
+    # (e.g. CC-BY) rather than public domain — we ship PD only, so it is disqualified.
+    if lic and not any(k in lic for k in ("publicdomain", "/mark/", "cc0", "/zero/")):
+        return False, year, f"restrictive license ({lic}) — not shipped"
+    if "IN_COPYRIGHT" in status:                       # explicit copyright, no override
+        return False, year, "archive.org copyright status: IN_COPYRIGHT"
+    if year and year.isdigit() and int(year) <= _PD_YEAR_CEILING:
+        return True, year, f"public domain by copyright expiry (published {year}, pre-1929)"
+    return False, year, "no public-domain basis established"
+
+
+def _ia_pd_db() -> sqlite3.Connection:
+    d = _base() / "archive_org"
+    d.mkdir(parents=True, exist_ok=True)
+    c = sqlite3.connect(str(d / "texts.db"), timeout=60)
+    c.execute("pragma busy_timeout=60000")             # shares texts.db with docs — wait, don't fail
+    c.execute("create table if not exists docs_pd (identifier text primary key, title text, "
+              "query text, raw_bytes integer, gz blob, stored_at text, url text, sha256 text, "
+              "pd_year text, pd_basis text)")
+    c.commit()
+    return c
+
+
+def ia_store_pd(query: str, limit: int = 200, delay: float = 2.0) -> int:
+    """Store only what we can VERIFY is public domain, recording the basis per row."""
+    c = _ia_pd_db()
+    have = {r[0] for r in c.execute("select identifier from docs_pd")}
+    n = skipped = 0
+    for ident, title in ia_search(query, rows=limit):
+        if ident in have:
+            print(f"  {ident}: already held"); continue
+        try:
+            meta = _ia_meta(ident)
+        except Exception as e:  # noqa: BLE001
+            print(f"  {ident}: metadata failed ({e})"); continue
+        ok, year, basis = _pd_decision(meta)
+        if not ok:
+            skipped += 1
+            print(f"  {ident}: SKIP not-PD — {basis}"); time.sleep(delay); continue
+        name = next((f["name"] for f in meta.get("files", [])
+                     if str(f.get("name", "")).endswith("_djvu.txt")), None)
+        if not name:
+            print(f"  {ident}: no text derivative"); continue
+        url = f"https://archive.org/download/{ident}/{urllib.parse.quote(name)}"
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": _UA})
+            with urllib.request.urlopen(req, timeout=60, context=_ia_ctx()) as r:
+                data = r.read()
+        except Exception as e:  # noqa: BLE001
+            print(f"  {ident}: text fetch failed ({e})"); continue
+        if not data or len(data) <= 500:
+            print(f"  {ident}: text too small"); continue
+        gz = gzip.compress(data, 6)
+        c.execute("insert or replace into docs_pd values (?,?,?,?,?,?,?,?,?,?)",
+                  (ident, title, query, len(data), gz,
+                   time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                   url, hashlib.sha256(data).hexdigest(), year, basis))
+        c.commit()
+        n += 1
+        print(f"  {ident}: stored {len(data):>9,}B -> {len(gz):>9,}B gz  [{year or '?'}] {title[:44]}")
+        time.sleep(delay)                              # polite to the Archive
+    c.close()
+    print(f"  (PD gate: {n} stored, {skipped} skipped as not-verifiably-PD)")
+    return n
+
+
 def main() -> int:
+    # Titles carry accents/diacritics (French trade manuals, Latin, etc.). When stdout is a
+    # redirected file, Windows defaults to cp1252, which cannot encode '́' and friends — a
+    # bare print() then raises UnicodeEncodeError and kills a long acquisition mid-run, truncating
+    # every query at its first foreign title. Force UTF-8 with replacement so the log is cosmetic,
+    # never fatal. (Progress lives in the DB, not the print, but the print must not crash the run.)
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:  # noqa: BLE001 — older/odd streams without reconfigure; carry on
+            pass
     a = sys.argv[1:]
     if "--ia-query" in a:
-        n = ia_store(a[a.index("--ia-query") + 1])
+        limit = int(a[a.index("--limit") + 1]) if "--limit" in a else 200
+        n = ia_store(a[a.index("--ia-query") + 1], limit=limit)
         print(f"stored {n} archive.org documents"); return 0
+    if "--ia-pd-query" in a:
+        limit = int(a[a.index("--limit") + 1]) if "--limit" in a else 200
+        n = ia_store_pd(a[a.index("--ia-pd-query") + 1], limit=limit)
+        print(f"stored {n} age-PD archive.org documents"); return 0
     if "--stats" in a:
         stats(); return 0
     if "--ids" in a:

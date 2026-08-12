@@ -136,6 +136,13 @@ SPINES = [
            "bulletins, technical reports and surveys, public domain under 17 USC 105. Practical "
            "knowledge a family can use, from sources whose authorship makes them free.", FLOOR,
            ["federal", "government", "public domain", "manuals", "bulletins", "spine"]),
+    _spine("card_spine_arkpd", "The trades shelf — handbooks the copyright let go",
+           "Commercial books whose copyright has expired: handyman and trade encyclopedias, "
+           "mechanics' and builders' guides, farmers' manuals, the old technologies. Public "
+           "domain by the passage of time (pre-1929), each card carrying the basis on which it "
+           "is free. Practical craft a family can hold — books the law has returned to the "
+           "commons.", FLOOR,
+           ["trades", "handbook", "handyman", "public domain", "craft", "practical", "spine"]),
     _spine("card_spine_currencies", "The currencies — the world's money against the euro",
            "The world's currencies and their reference value against the euro — the European "
            "Central Bank's daily reference rates. A spine of the measured world of exchange.", FLOOR,
@@ -448,6 +455,14 @@ def gen_federal():
         ("Forest Service", "ecology", "US Forest Service publications (PD, 17 USC 105)"),
         ("Public Health", "medicine", "US Public Health Service publications (PD, 17 USC 105)"),
         ("Geological Survey", "geology", "US Geological Survey publications (PD, 17 USC 105)"),
+        # deeper federal creators (2026-08-11 SCALE): survival/field/technical manuals and
+        # farmers' bulletins the user asked for — all US-government works, PD under 17 USC 105.
+        ("War Department", "practical", "US War Department field & technical manuals (PD, 17 USC 105)"),
+        ("United States. Army", "practical", "US Army field & technical manuals (PD, 17 USC 105)"),
+        ("Navy Department", "practical", "US Navy Department publications (PD, 17 USC 105)"),
+        ("Bureau of Standards", "science", "US Bureau of Standards publications (PD, 17 USC 105)"),
+        ("Bureau of Mines", "geology", "US Bureau of Mines publications (PD, 17 USC 105)"),
+        ("Government Printing Office", "practical", "US Government Printing Office publications (PD, 17 USC 105)"),
     ]
     c = sqlite3.connect(str(db_path))
     for ident, title, query, raw, url, sha in c.execute(
@@ -471,6 +486,51 @@ def gen_federal():
     c.close()
 
 
+def gen_ark_pd():
+    """The age-PD trades shelf (2026-08-11): pre-1929 COMMERCIAL books — handyman/trade
+    encyclopedias, mechanics' and builders' guides, the old technologies — fetched by
+    store_book.py --ia-pd-query into archive_org/texts.db (docs_pd). Public domain by copyright
+    EXPIRY, not 17 USC 105; the basis on which each is free was VERIFIED at acquisition and is
+    carried on the card, so provenance is never blurred with the federal shelf. One stub card
+    per held document; the full text is on the ark with its waybill."""
+    ark = os.environ.get("CONCORDANCE_ARK_BASE", "").strip() or "D:/NarrowHighway-Sources"
+    db_path = Path(ark) / "archive_org" / "texts.db"
+    if not db_path.exists():
+        raise FileNotFoundError(f"ark store not found at {db_path} (set CONCORDANCE_ARK_BASE)")
+    c = sqlite3.connect(str(db_path))
+    if not c.execute("select name from sqlite_master where type='table' and "
+                     "name='docs_pd'").fetchone():
+        c.close(); return                              # no age-PD acquired yet — nothing to card
+    shelf_of = [  # subject fragment in the stored query -> the shelf its documents truly serve
+        ("agricultur", "agriculture"), ("farm", "agriculture"), ("garden", "agriculture"),
+        ("orchard", "agriculture"), ("poultry", "agriculture"), ("livestock", "agriculture"),
+        ("first aid", "first_aid"), ("first-aid", "first_aid"),
+        ("medic", "medicine"), ("herbal", "medicine"), ("nursing", "medicine"),
+    ]  # everything else (carpentry, masonry, blacksmithing, mechanics, ancient tech) -> practical
+    for ident, title, query, raw, url, sha, year, basis in c.execute(
+            "select identifier, title, query, raw_bytes, url, sha256, pd_year, pd_basis "
+            "from docs_pd order by identifier"):
+        shelf, ql = "practical", (query or "").lower()
+        for frag, sh in shelf_of:
+            if frag in ql:
+                shelf = sh; break
+        t = (title or ident).strip() or ident
+        yr = f" ({year})" if year else ""
+        body = (f"{t}{yr}. A book returned to the public domain — {basis}. The full text "
+                f"({(raw or 0):,} bytes) is held on the ark; waybill sha256 {(sha or '')[:16]}…; "
+                f"origin archive.org/{ident}. A held source: this card is the map, and the drive "
+                f"carries the freight.")
+        card = _card(f"card_src_pd_{_sk(ident)}", t, body,
+                     shelf=shelf, subject=t[:80],
+                     bands=[t[:60], "public domain", "trades", "handbook", shelf, "ark"],
+                     source_label="public domain (copyright expired)",
+                     spine="card_spine_arkpd", domain=shelf)
+        card["source"]["url"] = url or f"https://archive.org/details/{ident}"
+        card["extra"] = {"pd_year": year or "", "pd_basis": basis or "", "identifier": ident}
+        yield card
+    c.close()
+
+
 # "stars" (gen_stars → HYG) is RETIRED and its body deleted (CC-BY-SA — see the note above where it
 # stood). A public-domain star catalogue (Yale BSC) will refill the astronomy shelf as gen_stars_pd
 # once that source is anchored on the drive. No disallowed-license generator is wired in below.
@@ -479,7 +539,7 @@ GENERATORS = {"nuclides": gen_nuclides, "ports": gen_ports,
               "pronunciation": gen_cmudict,
               "places": gen_places, "drugs": gen_drugs, "lexicon": gen_lexicon,
               "currencies": gen_currencies, "timezones": gen_timezones,
-              "federal": gen_federal}
+              "federal": gen_federal, "ark_pd": gen_ark_pd}
 
 
 def main() -> int:

@@ -1795,6 +1795,16 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         except (TypeError, ValueError):
             lim = 12
         return _ok(_decks.search(query.get("q", ""), (query.get("id") or "").strip() or None, lim))
+    if method == "GET" and path == "/deck/open":
+        # Deal the frontloaded hand: open a deck (esp. a need-deck) to the cards it holds, in order,
+        # with NO query needed — the anticipated hand for a situation. 404 for an unknown deck id.
+        from .. import decks as _decks
+        try:
+            lim = min(60, max(1, int(query.get("limit") or 15)))
+        except (TypeError, ValueError):
+            lim = 15
+        opened = _decks.open_deck((query.get("id") or "").strip(), lim)
+        return _ok(opened) if opened is not None else _err(404, "unknown deck")
 
     if method == "GET" and path == "/archetypes":
         # The characters of the Bible + their micropositions (the pastoral decks).
@@ -2373,6 +2383,7 @@ ROUTES = [
     {"path": "/decks", "methods": ("GET",), "api": True},
     {"path": "/decks/predict", "methods": ("GET",), "api": True},
     {"path": "/deck", "methods": ("GET",), "api": True},
+    {"path": "/deck/open", "methods": ("GET",), "api": True},
     {"path": "/archetypes", "methods": ("GET",), "api": True},
     {"path": "/archetypes/match", "methods": ("GET",), "api": True},
     {"path": "/archetype", "methods": ("GET",), "api": True},

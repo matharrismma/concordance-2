@@ -205,12 +205,151 @@ _DECKS: List[Dict[str, Any]] = [
      "keywords": {"practice", "protocol", "obedience", "obey", "discipline", "habit", "walk", "doing",
                   "sermon", "mount", "beatitude", "fruit", "drift", "accountability", "fieldkit",
                   "sanctification", "discipleship", "grow", "struggle", "temptation"}},
+
+    # ── NEED DECKS ─────────────────────────────────────────────────────────────────────────────
+    # Frontloaded for the situation, not the domain. Matt: "We can anticipate need based on previous
+    # topics, so we can frontload different decks of the same cards." A card like 'boil water to make
+    # it safe' belongs to many of these at once — the deck is a hand dealt for a moment of need, cut
+    # ACROSS shelves. Each carries a `seed` (the phrase that defines its content, so it can be OPENED
+    # with no query) and distress-phrased keywords (what routes a frightened search TO it).
+    {"id": "power-out", "name": "When the power goes out", "need": True,
+     "desc": "Light, heat, keeping food, staying in touch, and caring for the sick when the grid is "
+             "down — what a household reaches for first in a blackout.",
+     "shelves": {"energy", "practical", "communications", "medicine"},
+     "seed": "power outage blackout no electricity generator battery backup solar candle lantern "
+             "light heat without power keep food cold refrigerator freezer charge phone emergency",
+     "keywords": {"power", "outage", "blackout", "electricity", "generator", "battery", "grid",
+                  "candle", "lantern", "dark", "refrigerator", "freezer", "charge", "solar", "backup"}},
+    {"id": "water-safe", "name": "When the water isn't safe to drink", "need": True,
+     "desc": "Make water safe to drink, store it, and find it — boiling, filtering, disinfecting, and "
+             "the sicknesses bad water brings, for when the tap can't be trusted.",
+     "shelves": {"water", "sanitation", "medicine", "first_aid", "survival"},
+     "seed": "purify water boil water disinfect filter contaminated well dehydration safe drinking "
+             "water storage bleach cloudy waterborne cholera diarrhea rain collection spring",
+     "keywords": {"water", "purify", "boil", "filter", "contaminated", "well", "dehydration",
+                  "thirsty", "drinking", "waterborne", "cholera", "diarrhea", "rainwater", "spring"}},
+    {"id": "first-aid-far", "name": "Someone's hurt and help is far away", "need": True,
+     "desc": "Stop the bleeding, treat the wound, splint the break, cool the burn, and know the signs "
+             "of shock and infection — first aid for when the hospital is hours off.",
+     "shelves": {"first_aid", "medicine", "survival"},
+     "seed": "stop bleeding wound dressing fracture splint burn CPR choking shock hypothermia fever "
+             "infection first aid emergency far from hospital sprain bite poisoning",
+     "keywords": {"bleeding", "wound", "cut", "fracture", "broken", "burn", "cpr", "choking", "shock",
+                  "injury", "hurt", "emergency", "bandage", "sprain", "bite", "poison", "unconscious"}},
+    {"id": "grow-food", "name": "Growing and keeping your own food", "need": True,
+     "desc": "Plant a garden, tend the soil, save seed, and put food up for the year — canning, "
+             "drying, and the root cellar, so the harvest lasts.",
+     "shelves": {"agriculture", "ecology"},
+     "seed": "vegetable garden plant crops soil seed saving planting harvest canning preserve food "
+             "root cellar compost fertilizer companion planting orchard livestock chickens",
+     "keywords": {"garden", "grow", "plant", "crop", "vegetable", "seed", "harvest", "soil", "canning",
+                  "preserve", "compost", "orchard", "farm", "livestock", "chickens", "drying"}},
+    {"id": "offgrid-comms", "name": "Reaching the world off the grid", "need": True,
+     "desc": "Two-way radio, antennas, and signaling — how to call for help and stay in touch when "
+             "the phone network is gone.",
+     "shelves": {"communications", "navigation"},
+     "seed": "two way radio ham radio CB antenna signal frequency emergency broadcast morse code "
+             "walkie talkie mesh reach help without phone repeater band",
+     "keywords": {"radio", "ham", "antenna", "signal", "frequency", "morse", "walkie", "broadcast",
+                  "communicate", "mesh", "transmit", "repeater", "band", "cb"}},
+    {"id": "sanitation", "name": "Staying clean and healthy without plumbing", "need": True,
+     "desc": "Handle human waste, wash safely, and keep sickness from spreading when there's no "
+             "running water or sewer — latrines, hygiene, and disease prevention.",
+     "shelves": {"sanitation", "water", "medicine"},
+     "seed": "human waste latrine outhouse compost toilet handwashing hygiene disease prevention "
+             "greywater sewage without plumbing keep clean garbage flies sanitation",
+     "keywords": {"sanitation", "latrine", "toilet", "waste", "hygiene", "sewage", "wash",
+                  "handwashing", "disease", "plumbing", "outhouse", "greywater", "flies"}},
+    {"id": "stay-warm", "name": "Keeping warm and fed through winter", "need": True,
+     "desc": "Heat without the grid, hold in the warmth, and stock the pantry — wood heat, "
+             "insulation, and food storage for the cold months.",
+     "shelves": {"energy", "agriculture", "survival", "practical"},
+     "seed": "stay warm wood stove heat insulation winter cold shelter blanket food storage stockpile "
+             "root cellar preserve firewood chimney frozen pipes",
+     "keywords": {"warm", "heat", "winter", "cold", "wood", "stove", "insulation", "firewood",
+                  "blanket", "freeze", "frozen", "chimney", "pantry", "stockpile"}},
+    {"id": "handyman", "name": "Fixing and building it yourself", "need": True,
+     "desc": "Repair what breaks and build what you need — carpentry, plumbing, wiring, and the old "
+             "trade handbooks, so you don't have to call anyone.",
+     "shelves": {"practical"},
+     "seed": "repair fix build carpentry woodworking joinery plumbing wiring tools maintenance "
+             "construction masonry blacksmith mechanics how to make handyman",
+     "keywords": {"repair", "fix", "build", "carpentry", "woodworking", "plumbing", "wiring", "tool",
+                  "maintenance", "construction", "handyman", "diy", "masonry", "blacksmith", "mechanic"}},
+    {"id": "navigate", "name": "Finding your way", "need": True,
+     "desc": "Read a map, hold a bearing, and find north by compass or stars — wayfinding when the "
+             "phone can't help and you can't get lost.",
+     "shelves": {"navigation", "survival"},
+     "seed": "navigate compass map bearing north dead reckoning lost direction landmark stars "
+             "find your way wayfinding latitude terrain orienteering",
+     "keywords": {"navigate", "compass", "map", "bearing", "north", "direction", "lost", "wayfinding",
+                  "landmark", "orienteering", "terrain"}},
+    {"id": "homestead", "name": "Starting a homestead from scratch", "need": True,
+     "desc": "The whole off-grid life in one hand — water, power, food, animals, and waste — for a "
+             "family setting out to provide for itself on the land.",
+     "shelves": {"agriculture", "energy", "water", "sanitation", "practical", "survival"},
+     "seed": "homestead self sufficient off grid livestock chickens goats well solar water system "
+             "garden food preservation land smallholding self reliance",
+     "keywords": {"homestead", "sufficient", "offgrid", "livestock", "goats", "well", "solar",
+                  "self-reliance", "smallholding", "land", "acreage"}},
+    {"id": "be-not-afraid", "name": "When you're afraid", "need": True,
+     "desc": "The Word for fear — 'fear not' from Genesis to Revelation, with commentary and a "
+             "practice to walk it out. The most-spoken command in Scripture.",
+     "shelves": {"codex", "commentary", "fieldkit"},
+     "seed": "fear afraid anxious worry peace courage do not be afraid fear not trust the Lord anxiety "
+             "comfort strength be strong and courageous perfect love casts out fear",
+     "keywords": {"afraid", "fear", "anxious", "anxiety", "worry", "scared", "panic", "peace",
+                  "courage", "terrified", "dread", "overwhelmed"}},
+    {"id": "grieving", "name": "When you're grieving a loss", "need": True,
+     "desc": "Comfort for mourning — the Word's promises to those who weep, with commentary, and the "
+             "hope of the resurrection.",
+     "shelves": {"codex", "commentary", "fieldkit"},
+     "seed": "grief death mourning loss comfort hope resurrection sorrow weep those who mourn blessed "
+             "eternal life valley of the shadow he will wipe away every tear",
+     "keywords": {"grief", "grieving", "death", "died", "mourning", "loss", "funeral", "comfort",
+                  "sorrow", "mourn", "bereaved", "widow", "buried"}},
+    {"id": "money-tight", "name": "When money is tight", "need": True,
+     "desc": "Provision when there's not enough — daily bread and contentment from the Word, sound "
+             "stewardship, and where to find help and resources for free.",
+     "shelves": {"economics", "codex", "access", "practical"},
+     "seed": "money poor provision budget debt work daily bread stewardship contentment worry about "
+             "money free resources food assistance make do frugal thrift save",
+     "keywords": {"money", "poor", "broke", "debt", "budget", "bills", "provision", "afford",
+                  "stewardship", "unemployed", "frugal", "assistance", "rent"}},
+    {"id": "teach-kids", "name": "Teaching your children at home", "need": True,
+     "desc": "For the homeschooling family — reading and arithmetic, the dictionary, the living "
+             "world, history, and worked math, gathered for teaching your own.",
+     "shelves": {"dictionary", "taxonomy", "history", "codex", "the-works"},
+     "seed": "teach homeschool lesson reading writing arithmetic phonics children learn curriculum "
+             "grammar math science history for kids spelling vocabulary catechism",
+     "keywords": {"teach", "homeschool", "lesson", "reading", "arithmetic", "phonics", "curriculum",
+                  "children", "kids", "learn", "school", "educate", "spelling", "catechism"}},
+    # Domain homes for the practical shelves the atlas had left uncovered.
+    {"id": "field", "name": "The Field Library — survival & self-reliance",
+     "desc": "The practical library for living without the grid: survival skills, the trade and "
+             "handyman handbooks, and the Field Kit protocols — self-reliance, gathered.",
+     "shelves": {"survival", "practical", "fieldkit"},
+     "seed": "survival self reliance preparedness field guide practical skills emergency bushcraft "
+             "off grid handbook trade",
+     "keywords": {"survival", "prepper", "preparedness", "self-reliance", "bushcraft", "field",
+                  "practical", "wilderness", "prepping"}},
+    {"id": "earth-sciences", "name": "The Earth — geology, forests & the sciences",
+     "desc": "The public-domain science of the earth: geology and minerals, forests and watersheds, "
+             "and the federal technical surveys — the ground beneath the homestead.",
+     "shelves": {"geology", "ecology", "science"},
+     "seed": "geology rock mineral soil survey forest ecology watershed scientific report earth "
+             "science terrain erosion water table strata",
+     "keywords": {"geology", "rock", "mineral", "soil", "forest", "ecology", "watershed", "science",
+                  "survey", "terrain", "erosion", "strata"}},
 ]
 
 _BY_ID = {d["id"]: d for d in _DECKS}
-# precompute the routing vocabulary for each deck (keywords + name + shelf words)
+# precompute the routing vocabulary for each deck (keywords + name + shelf words + seed words) — the
+# seed of a need-deck is exactly the language a frightened search uses, so it belongs in the router.
 for _d in _DECKS:
-    _d["_route"] = set(_d["keywords"]) | _toks(_d["name"]) | {w for s in _d["shelves"] for w in _toks(s)}
+    _d["_route"] = (set(_d["keywords"]) | _toks(_d["name"])
+                    | {w for s in _d["shelves"] for w in _toks(s)}
+                    | _toks(_d.get("seed", "")))
 
 
 def all_decks() -> List[Dict[str, Any]]:
@@ -223,6 +362,7 @@ def all_decks() -> List[Dict[str, Any]]:
             counts[c.get("shelf", "")] = counts.get(c.get("shelf", ""), 0) + 1
     return [{"id": d["id"], "name": d["name"], "desc": d["desc"],
              "shelves": sorted(d["shelves"]),
+             "need": bool(d.get("need")),      # a situation deck (frontloaded) vs a domain deck
              "cards": sum(counts.get(s, 0) for s in d["shelves"])}
             for d in _DECKS]
 
@@ -247,6 +387,38 @@ def predict(query: str, k: int = 3) -> List[Dict[str, Any]]:
 def deck_shelves(deck_id: str) -> Optional[Set[str]]:
     d = _BY_ID.get(deck_id)
     return set(d["shelves"]) if d else None
+
+
+def open_deck(deck_id: str, limit: int = 15) -> Optional[Dict[str, Any]]:
+    """Deal the frontloaded hand — the cards this situation calls for, in order, with NO query
+    needed. A need-deck carries a `seed` (the phrase that defines its content); a domain deck opens
+    on its own name. The Hare deals from the deck's own shelves; if the seed comes up thin, it
+    broadens within those same shelves by the deck's keywords, so a deck is never emptier than its
+    shelves. Returns None for an unknown deck. Conduit, not source — every card is one we hold."""
+    d = _BY_ID.get(deck_id)
+    if not d:
+        return None
+    from . import corpus
+    shelves = set(d["shelves"])
+    limit = max(1, min(int(limit), 60))
+    hits = corpus.search(d.get("seed") or d["name"], limit=limit, shelves=shelves)
+    if len(hits) < limit:                       # thin seed → broaden within the deck's own shelves
+        seen = {h.get("id") for h in hits}
+        for kw in sorted(d.get("keywords", ())):
+            for h in corpus.search(kw, limit=limit, shelves=shelves):
+                if h.get("id") not in seen:
+                    hits.append(h); seen.add(h.get("id"))
+                    if len(hits) >= limit:
+                        break
+            if len(hits) >= limit:
+                break
+
+    def _brief(c):
+        return {"id": c.get("id"), "title": c.get("title"), "shelf": c.get("shelf"),
+                "snippet": (c.get("body") or "")[:160]}
+    return {"id": d["id"], "name": d["name"], "desc": d["desc"], "need": bool(d.get("need")),
+            "shelves": sorted(shelves), "count": len(hits[:limit]),
+            "cards": [_brief(c) for c in hits[:limit]]}
 
 
 def search(query: str, deck_id: Optional[str] = None, limit: int = 12) -> Dict[str, Any]:
