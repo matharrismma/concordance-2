@@ -231,17 +231,17 @@ _DECKS: List[Dict[str, Any]] = [
     {"id": "first-aid-far", "name": "Someone's hurt and help is far away", "need": True,
      "desc": "Stop the bleeding, treat the wound, splint the break, cool the burn, and know the signs "
              "of shock and infection — first aid for when the hospital is hours off.",
-     "shelves": {"first_aid", "medicine", "survival"},
+     "shelves": {"first_aid", "medicine", "apothecary", "survival"},
      "seed": "stop bleeding wound dressing fracture splint burn CPR choking shock hypothermia fever "
-             "infection first aid emergency far from hospital sprain bite poisoning",
+             "infection first aid emergency far from hospital sprain bite poisoning herbal remedy",
      "keywords": {"bleeding", "wound", "cut", "fracture", "broken", "burn", "cpr", "choking", "shock",
                   "injury", "hurt", "emergency", "bandage", "sprain", "bite", "poison", "unconscious"}},
     {"id": "grow-food", "name": "Growing and keeping your own food", "need": True,
      "desc": "Plant a garden, tend the soil, save seed, and put food up for the year — canning, "
              "drying, and the root cellar, so the harvest lasts.",
-     "shelves": {"agriculture", "ecology"},
+     "shelves": {"agriculture", "almanac", "ecology"},
      "seed": "vegetable garden plant crops soil seed saving planting harvest canning preserve food "
-             "root cellar compost fertilizer companion planting orchard livestock chickens",
+             "root cellar compost fertilizer companion planting orchard livestock chickens almanac",
      "keywords": {"garden", "grow", "plant", "crop", "vegetable", "seed", "harvest", "soil", "canning",
                   "preserve", "compost", "orchard", "farm", "livestock", "chickens", "drying"}},
     {"id": "offgrid-comms", "name": "Reaching the world off the grid", "need": True,
@@ -263,9 +263,9 @@ _DECKS: List[Dict[str, Any]] = [
     {"id": "stay-warm", "name": "Keeping warm and fed through winter", "need": True,
      "desc": "Heat without the grid, hold in the warmth, and stock the pantry — wood heat, "
              "insulation, and food storage for the cold months.",
-     "shelves": {"energy", "agriculture", "survival", "practical"},
+     "shelves": {"energy", "agriculture", "almanac", "survival", "practical"},
      "seed": "stay warm wood stove heat insulation winter cold shelter blanket food storage stockpile "
-             "root cellar preserve firewood chimney frozen pipes",
+             "root cellar preserve firewood chimney frozen pipes season almanac",
      "keywords": {"warm", "heat", "winter", "cold", "wood", "stove", "insulation", "firewood",
                   "blanket", "freeze", "frozen", "chimney", "pantry", "stockpile"}},
     {"id": "handyman", "name": "Fixing and building it yourself", "need": True,
@@ -287,9 +287,9 @@ _DECKS: List[Dict[str, Any]] = [
     {"id": "homestead", "name": "Starting a homestead from scratch", "need": True,
      "desc": "The whole off-grid life in one hand — water, power, food, animals, and waste — for a "
              "family setting out to provide for itself on the land.",
-     "shelves": {"agriculture", "energy", "water", "sanitation", "practical", "survival"},
+     "shelves": {"agriculture", "almanac", "apothecary", "energy", "water", "sanitation", "practical", "survival"},
      "seed": "homestead self sufficient off grid livestock chickens goats well solar water system "
-             "garden food preservation land smallholding self reliance",
+             "garden food preservation land smallholding self reliance almanac herbal",
      "keywords": {"homestead", "sufficient", "offgrid", "livestock", "goats", "well", "solar",
                   "self-reliance", "smallholding", "land", "acreage"}},
     {"id": "be-not-afraid", "name": "When you're afraid", "need": True,
@@ -319,7 +319,7 @@ _DECKS: List[Dict[str, Any]] = [
     {"id": "teach-kids", "name": "Teaching your children at home", "need": True,
      "desc": "For the homeschooling family — reading and arithmetic, the dictionary, the living "
              "world, history, and worked math, gathered for teaching your own.",
-     "shelves": {"dictionary", "taxonomy", "history", "codex", "the-works"},
+     "shelves": {"dictionary", "taxonomy", "history", "codex", "curriculum", "the-works"},
      "seed": "teach homeschool lesson reading writing arithmetic phonics children learn curriculum "
              "grammar math science history for kids spelling vocabulary catechism",
      "keywords": {"teach", "homeschool", "lesson", "reading", "arithmetic", "phonics", "curriculum",

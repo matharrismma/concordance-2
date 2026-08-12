@@ -38,6 +38,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from concordance import corpus  # noqa: E402 — is_public / _is_share_alike, the one public boundary
+from concordance.decks import _DECKS  # noqa: E402 — the deck definitions (pure data; no corpus load)
 
 REPO = Path(__file__).resolve().parent.parent
 DATA = Path(os.environ.get("CONCORDANCE_DATA_DIR", "").strip() or (REPO / "data"))
@@ -162,8 +163,10 @@ def _index_html(groups) -> str:
         f"<p>{total} verified, public-domain reference cards — survival, communications, and the "
         "practical knowledge a household needs when the grid is down. Freely given, cited to source, "
         "and clean-licensed. Browse below or search. No account, no network, no cost.</p>"
-        "<p style='margin:1.3rem 0;font-size:1.15rem'><a href='bible.html'>&#10015; The Holy Bible "
+        "<p style='margin:1.3rem 0 .5rem;font-size:1.15rem'><a href='bible.html'>&#10015; The Holy Bible "
         "&mdash; the whole Word (World English Bible)</a></p>"
+        "<p style='margin:.2rem 0 1.2rem;font-size:1.1rem'><a href='situations.html'>&#9873; Start with "
+        "your situation &mdash; power's out, water's unsafe, someone's hurt&hellip;</a></p>"
         "<input id=q type=text placeholder='Search the field library…' autocomplete=off>"
         + "".join(sections) +
         "<p class=note>This library is standalone — it needs nothing but itself: read it right here "
@@ -175,6 +178,75 @@ def _index_html(groups) -> str:
         "119:105.</p>" + js
     )
     return _page("The field library", body)
+
+
+# ── THE NEED-DECKS, OFFLINE ── the situation-first door. Matt: "frontload different decks of the same
+# cards; anticipate need." A family in trouble should not have to know a shelf name — they open the
+# situation ("when the water isn't safe") and the cards are already there. Decks are grouped from the
+# SAME field cards this bundle already holds (a card serves many decks), using the deck definitions
+# from decks.py. Faith need-decks (fear, grief) also point to the Word, which ships with every copy.
+_FAITH_DECKS = {"be-not-afraid", "grieving", "money-tight"}
+
+
+def _deck_cards(groups):
+    """[(deck, [cards])] for every NEED-deck that has cards in THIS bundle. Cards are gathered from
+    the deck's own shelves out of what the field library already holds — the offline frontloaded
+    hand. A deck with nothing here (e.g. teach-kids, whose shelves aren't in the field bundle) is
+    dropped, not shown empty."""
+    by_shelf: dict = {}
+    for _heading, cards in groups:
+        for c in cards:
+            by_shelf.setdefault(c.get("shelf", ""), []).append(c)
+    out = []
+    for d in _DECKS:
+        if not d.get("need"):
+            continue
+        seen, cds = set(), []
+        for sh in d["shelves"]:
+            for c in by_shelf.get(sh, []):
+                if c["id"] not in seen:
+                    seen.add(c["id"]); cds.append(c)
+        if cds:
+            out.append((d, cds))
+    return out
+
+
+def _situations_html(deck_cards) -> str:
+    rows = []
+    for d, cards in deck_cards:
+        rows.append(
+            f"<li style='padding:.55rem 0'><a href='deck/{_slug(d['id'])}.html' style='font-size:1.12rem'>"
+            f"{_esc(d['name'])}</a> <span style='color:#8f8a7c;font-size:.8rem'>&middot; {len(cards)} cards</span>"
+            f"<br><span style='color:#8f8a7c;font-size:.86rem'>{_esc(d['desc'])}</span></li>")
+    body = (
+        "<a class=back href='index.html'>&larr; The field library</a>"
+        "<p class=kick>Start here</p><h1>What do you need right now?</h1>"
+        "<p>Open the one that fits your moment. Each opens straight to the cards for that need &mdash; "
+        "no searching, no account, no internet.</p>"
+        "<ul>" + "".join(rows) + "</ul>"
+        "<p class=note>Every card is public-domain and cited to its source. The whole, searchable "
+        "keeping &mdash; and thousands more field manuals &mdash; lives at narrowhighway.com. "
+        "Psalm 119:105.</p>")
+    return _page("What do you need right now?", body)
+
+
+def _deck_page_html(deck, cards) -> str:
+    rows = []
+    for c in sorted(cards, key=lambda x: (x.get("shelf", ""), x.get("title", ""))):
+        rows.append(
+            f"<li><a href='../card/{_slug(c['id'])}.html'>{_esc(c.get('title',''))}</a> "
+            f"<span style='color:#8f8a7c;font-size:.8rem'>&middot; {_esc(c.get('shelf',''))}</span></li>")
+    bible_cta = ("<p style='margin:1.1rem 0;font-size:1.1rem'><a href='../bible.html'>&#10015; "
+                 "Turn to the Word &mdash; the whole Bible ships with this library</a></p>"
+                 if deck["id"] in _FAITH_DECKS else "")
+    body = (
+        "<a class=back href='../situations.html'>&larr; Your situation</a>"
+        f"<p class=kick>When you need it</p><h1>{_esc(deck['name'])}</h1>"
+        f"<p>{_esc(deck['desc'])}</p>" + bible_cta +
+        "<ul>" + "".join(rows) + "</ul>"
+        "<p class=note>These are the cards this library holds for this need. More &mdash; and the "
+        "full field manuals &mdash; at narrowhighway.com.</p>")
+    return _page(deck["name"], body)
 
 
 VERIFIER = '''#!/usr/bin/env python3
@@ -363,6 +435,13 @@ def main() -> int:
     for _heading, cards in groups:
         for c in cards:
             _emit(f"card/{_slug(c['id'])}.html", _card_html(c))
+    # THE NEED-DECKS — the situation-first door: open the moment, get the cards, offline.
+    deck_cards = _deck_cards(groups)
+    _emit("situations.html", _situations_html(deck_cards))
+    for d, cards in deck_cards:
+        _emit(f"deck/{_slug(d['id'])}.html", _deck_page_html(d, cards))
+    print(f"  situations: {len(deck_cards)} need-decks (offline door) | "
+          + " · ".join(f"{d['id']} {len(cs)}" for d, cs in deck_cards))
     # THE WORD — the whole Bible ships with every copy; nothing goes without it.
     _emit("bible.html", _bible_index_html(bible))
     for book, chapters in bible:
