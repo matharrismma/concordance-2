@@ -523,7 +523,16 @@ def anticipate(text: str, r: Dict[str, Any]) -> list:
 # The genuinely practical/how-to shelves — the field library, herbs, the almanac, the free tools.
 # Deliberately NOT "reference"/"medicine"/"nutrition": those are dictionary/drug/food-row data that
 # add noise ("Judas Iscariot", "Bottle Brush") to a 'what can I do with this' answer, not help.
-_PRACTICAL_SHELVES = frozenset({"survival", "apothecary", "almanac", "access"})
+_PRACTICAL_SHELVES = frozenset({
+    "survival", "apothecary", "almanac", "access", "fieldkit", "playbook",
+    "medicine", "nutrition", "drugs", "foods", "recipes", "curriculum", "activities",
+    "agriculture", "energy", "communications", "first_aid", "navigation", "sanitation",
+    "water", "practical", "timekeeping",
+})
+# The academic Theory-Assay catalog answers "what is the law of X" well, but on a HOW-TO question it
+# only shares a word and steals the lead (measured: "start a fire" -> Hess's law thermochemistry).
+# For practical intents it is dropped from the general pool so a field card always leads.
+_ACADEMIC_DEMOTE = frozenset({"theories"})
 _RESOURCEFUL = re.compile(
     r"(what (?:can|could|should) i (?:do|make|build|use|create|cook|fix|craft)\b.*\b(?:with|from|out of)\b"
     r"|(?:make|build|create|improvise|fix|cook|craft)\b.+\b(?:with|from|out of)\b"
@@ -677,6 +686,32 @@ def _coach_refusal(base: Dict[str, Any], guard: Dict[str, Any], text: str,
                        "resources": [{"label": p, "ref": None} for p in guard.get("point_to", [])]
                        + [{"label": guard.get("do_instead", "Ask for the next lesson"), "ref": "/read.html"}]},
                       text, witness, gate_just_opened)
+
+
+def _lead_excerpt(body: str, n: int = 620) -> str:
+    """A generous, sentence-trimmed excerpt of a card's OWN body — enough to be the answer, not a
+    180-char tease. The librarian hands you the page, not the spine label."""
+    b = " ".join((body or "").split())
+    if len(b) <= n:
+        return b
+    cut = b[:n]
+    dot = cut.rfind(". ")
+    return cut[:dot + 1] if dot > n * 0.55 else cut.rstrip() + "…"
+
+
+def _lead_card(card: Dict[str, Any]) -> Dict[str, Any]:
+    """The single best hit, shaped to LEAD: title, a full excerpt of its own words, and its source
+    (the provenance IS the proof for a found card). Nothing generated — this is the card's content."""
+    src = card.get("source") or {}
+    return {"id": card.get("id"), "title": card.get("title"), "shelf": card.get("shelf"),
+            "excerpt": _lead_excerpt(card.get("body") or ""),
+            "source": {"label": src.get("label", ""), "url": src.get("url", ""),
+                       "authority_tier": src.get("authority_tier", "")}}
+
+
+# The librarian's line for a plain found answer: warm, and honest about what it is (kept + cited,
+# never composed). It sets up the ONE full card that follows — not a wall of equal snippets.
+_FOUND_LEAD = "Here's the clearest thing the keeping holds on this — in its own words, with its source:"
 
 
 def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
@@ -1173,10 +1208,49 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
 
     _vol = (_decks.predict(subj, k=1) or [None])[0]
     hits = []
-    if _vol and not practical:
-        hits = corpus.search(subj, limit=6, shelves=_decks.deck_shelves(_vol["id"]))
-    if practical or len(hits) < 3 or (hits and not _shares_a_word(subj, hits[0])):
-        hits = corpus.search(subj, limit=6)
+    if practical:
+        # A how-to question wants the DIRECTLY-USEFUL card, not an academic near-match. Measured live
+        # 2026-08-12: "how do I purify water" led with an antibiotics THEORY card, "treat a burn" with
+        # conservation of momentum — the Theory-Assay shelf matched a shared word and outranked the
+        # field library. Lead with the practical shelves (field kit, medicine, almanac, the trades),
+        # merged AHEAD of the whole keeping so the answer a family needs stands first — and the whole
+        # keeping still rides behind, so nothing is lost. Only lead with it when it actually matches.
+        q = subj
+        prac = corpus.search(q, limit=6, shelves=set(_PRACTICAL_SHELVES))
+        whole = corpus.search(q, limit=8)
+        # Subject extraction can drop the very noun ("start a fire" -> "start"): if nothing shares a
+        # word, retry on the words as typed before giving up — the answer we hold must not be lost to
+        # a parse. (Measured 2026-08-12: "start a fire" fell to a miss though the fire card exists.)
+        if q != (text or "") and not (prac and _shares_a_word(q, prac[0])) \
+                and not (whole and _shares_a_word(q, whole[0])):
+            q = text or q
+            prac = corpus.search(q, limit=6, shelves=set(_PRACTICAL_SHELVES))
+            whole = corpus.search(q, limit=8)
+        # Rank the pool so the LEAD is always the best REAL match, never an academic near-miss. Tiers:
+        # (0) a practical-shelf card that shares a word — the field answer; (1) any card that shares a
+        # word; (2) a practical card; (3) the rest of the keeping; (4) the Theory-Assay catalog LAST —
+        # present, but it never leads a how-to. Stable sort preserves search relevance within a tier.
+        seen, pool = set(), []
+        for c in prac + whole:
+            if c.get("id") and c["id"] not in seen:
+                seen.add(c["id"]); pool.append(c)
+
+        def _tier(c):
+            sh, shares = c.get("shelf"), _shares_a_word(q, c)
+            if sh in _ACADEMIC_DEMOTE:
+                return 4
+            if shares and sh in _PRACTICAL_SHELVES:
+                return 0
+            if shares:
+                return 1
+            return 2 if sh in _PRACTICAL_SHELVES else 3
+        hits = sorted(pool, key=_tier)[:6]
+        subj = q                                       # the effective query, for the weak check below
+    else:
+        if _vol:
+            hits = corpus.search(subj, limit=6, shelves=_decks.deck_shelves(_vol["id"]))
+        if len(hits) < 3 or (hits and not _shares_a_word(subj, hits[0])):
+            hits = corpus.search(subj, limit=6)
     if not hits and subj != (text or ""):         # last resort — the raw words as typed
         hits = corpus.search(text, limit=6)
     if _vol:
@@ -1243,7 +1317,13 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                "message": "Nothing on that directly — here is the nearest in the keeping:"}
         return _witnessed(out, text, witness, gate_just_opened)
 
-    out = {**base, "kind": "found", "results": [corpus._brief(c) for c in hits]}
+    # THE LIBRARIAN, not the filing cabinet (2026-08-12): lead with the ONE best card in its OWN
+    # full words, cited to its source, and a warm line to hand it over — then the rest as "more in
+    # the keeping." The old shape returned six equal 180-char snippets and no lead sentence: a person
+    # who asked got a drawer to rummage, not an answer. `results` stays whole (the page dedups the
+    # lead) so nothing downstream that counts on it changes; `lead` + `message` are additive.
+    out = {**base, "kind": "found", "message": _FOUND_LEAD, "lead": _lead_card(hits[0]),
+           "results": [corpus._brief(c) for c in hits]}
     cloud = _connected_cloud(hits[0].get("id"))
     if cloud:
         out["cloud"] = {"around": hits[0].get("title", ""), "witnesses": cloud}

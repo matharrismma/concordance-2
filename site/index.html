@@ -165,6 +165,16 @@
   .hit{ border-top:1px solid rgba(138,106,47,.22); padding:.6rem 0 }
   .hit b{ font-weight:600; color:var(--ink) }
   .hit .sn{ display:block; color:var(--ink-soft); font-size:.9rem }
+  /* THE LIBRARIAN'S ANSWER — the one best card, handed over in full, cited. */
+  .lead{ margin:.7rem 0 .4rem; padding:.85rem 1rem; border:1px solid var(--parch);
+    border-left:3px solid var(--brass); border-radius:5px; background:rgba(255,255,255,.42) }
+  .lead .leadhead{ display:flex; justify-content:space-between; align-items:baseline; gap:.6rem }
+  .lead .leadtitle{ font-weight:600; font-size:1.12rem; color:var(--ink) }
+  .lead .leadshelf{ font-size:.64rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--ink-faint); white-space:nowrap }
+  .lead .leadbody{ color:var(--ink); font-size:.98rem; line-height:1.55; margin:.4rem 0 .1rem }
+  .lead .leadsrc{ font-size:.76rem; color:var(--ink-faint); margin-top:.45rem;
+    border-top:1px solid rgba(138,106,47,.16); padding-top:.4rem }
   .note{ font-size:.76rem; color:var(--ink-faint); margin-top:.6rem }
   .word{ margin:.1rem 0 .5rem }
   .word .heb{ font-size:1.5rem; color:var(--ink) }
@@ -396,6 +406,18 @@
   function render(d,isDoc){
     var h='';
     if(d.message) h += '<div>'+esc(d.message)+'</div>';
+    // THE LIBRARIAN'S ANSWER (2026-08-12): lead with the ONE best card in its own full words, cited
+    // to its source — the page you're handed, not a drawer of six equal spines. The rest ride below
+    // as "more in the keeping." (Only the plain found path sends d.lead; every other kind is as before.)
+    if(d.lead){
+      var L=d.lead, lsrc=(L.source&&L.source.label)?L.source.label:'';
+      var lsrcHtml = lsrc ? (L.source.url ? '<a href="'+esc(L.source.url)+'" target="_blank" rel="noopener">'+esc(lsrc)+'</a>' : esc(lsrc)) : '';
+      h += '<div class="lead"><div class="leadhead"><a class="leadtitle" href="/card.html?id='+
+           encodeURIComponent(L.id||'')+'">'+esc(L.title||'')+'</a>'+
+           (L.shelf?'<span class="leadshelf">'+esc(L.shelf)+'</span>':'')+'</div>'+
+           '<div class="leadbody">'+esc(L.excerpt||'')+'</div>'+
+           (lsrcHtml?'<div class="leadsrc">Source: '+lsrcHtml+'</div>':'')+'</div>';
+    }
     // THE COMPARISON, drawn (2026-08-02). The engine composed this answer for days while the page
     // drew only the message line above it — Matt: "I asked again, and it didn't put together an
     // answer." The answer WAS put together; nothing on this surface knew how to show it. Same
@@ -540,10 +562,16 @@
     // when the claim was checked, the check IS the answer — a fuzzy keyword match is not.
     // And a DOCUMENT is not a question: sending a fence quote once dumped six "gate" keyword
     // hits under it because one row said "Gate latch". Writing is kept, not answered.
-    if(d.results && d.results.length && !checked && !isDoc)
-      h += d.results.slice(0,6).map(function(r){
-        return '<div class="hit"><b><a href="/card.html?id='+encodeURIComponent(r.id)+'">'+esc(r.title)+'</a></b>'+
-               '<span class="sn">'+esc((r.snippet||'').slice(0,180))+'</span></div>'; }).join('');
+    if(d.results && d.results.length && !checked && !isDoc){
+      // the lead card is already shown in full above — don't repeat it in the list
+      var rs = (d.lead ? d.results.filter(function(r){return r.id !== d.lead.id;}) : d.results).slice(0,6);
+      if(rs.length){
+        if(d.lead) h += '<div class="note" style="margin:.95rem 0 .1rem">More in the keeping</div>';
+        h += rs.map(function(r){
+          return '<div class="hit"><b><a href="/card.html?id='+encodeURIComponent(r.id)+'">'+esc(r.title)+'</a></b>'+
+                 '<span class="sn">'+esc((r.snippet||'').slice(0,180))+'</span></div>'; }).join('');
+      }
+    }
     // the connected cloud — the keeping's strength: who else in the tradition speaks to this
     if(d.cloud && d.cloud.witnesses && d.cloud.witnesses.length)
       h += '<div class="hit"><b>Connected in the keeping</b>'+
