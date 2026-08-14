@@ -277,12 +277,19 @@ _COMFORT_VERSE = {
 }
 _DISTRESS_WORDS = tuple(_COMFORT_VERSE.keys())
 _FIRST_PERSON = re.compile(r"\b(i|im|i'm|i\s*am|my|me|ive|i've|feel|feeling)\b", re.I)
+# A how-to / instructional question seeks INSTRUCTION, not comfort — even when it carries a word
+# that is elsewhere a cry ("how do I set a broken bone", "how do I treat a burn"). The procedural
+# "I" in "how do I …" tripped the first-person guard and routed a first-aid emergency to comfort
+# (measured 2026-08-12). Crisis still outranks everything and is checked first, always.
+_HOWTO = re.compile(r"\bhow\s+(do|to|can|should|would|could|does)\b"
+                    r"|\bwhat\s+(do|should|can)\s+i\s+do\b", re.I)
 
 
 def distress_ref(text: str) -> str:
     """If someone brings their OWN hurt (first-person + a feeling word) and it is NOT a crisis,
-    the fitting comfort verse — a canon reference to resolve. Else ''. Never fabricates."""
-    if is_crisis(text) or not _FIRST_PERSON.search(text or ""):
+    the fitting comfort verse — a canon reference to resolve. Else ''. Never fabricates. A how-to
+    question is never a cry: 'how do I set a broken bone' is first aid, not a broken heart."""
+    if is_crisis(text) or not _FIRST_PERSON.search(text or "") or _HOWTO.search(text or ""):
         return ""
     low = " " + normalize(text) + " "
     for w in _DISTRESS_WORDS:
@@ -533,6 +540,31 @@ _PRACTICAL_SHELVES = frozenset({
 # only shares a word and steals the lead (measured: "start a fire" -> Hess's law thermochemistry).
 # For practical intents it is dropped from the general pool so a field card always leads.
 _ACADEMIC_DEMOTE = frozenset({"theories"})
+# Consumer PRODUCTS the FDA registers as "drugs" (hand sanitizers, cosmetics — ~1,000 of the openFDA
+# cards): legitimately public, but noise at the top of a how-to it merely shares a word with
+# ("keep warm without power" -> "Warm Vanilla Hand Sanitizer"). Demoted, never withheld — a search
+# for the product itself still finds it.
+_PRODUCT_NOISE = re.compile(          # PREFIX match at a word start (no trailing \b — 'sanitiz'
+    r"\b(sanitiz|wipes?|shampoo|lotion|body\s*wash|sunscreen|foaming|scented|deodorant|toothpaste|"  # must
+    r"mouthwash|lip\s*balm|moisturiz|cleanser|conditioner|antiperspirant|cosmetic|fragrance|perfume)",  # catch
+    re.I)                             # 'sanitizer', 'moisturizing', …)
+
+
+def _is_product_noise(card: Dict[str, Any]) -> bool:
+    return (card.get("shelf") in ("medicine", "drugs")
+            and bool(_PRODUCT_NOISE.search(card.get("title") or "")))
+
+
+# For a HOW-TO, the answer is INSTRUCTIONAL — the field library, the trades, the recipes. The big
+# auto-generated reference databases (the drug directory, the USDA food table) are in the practical
+# set so they can be SEARCHED, but a single DB row must not LEAD a how-to it merely shares a word
+# with ("set a broken bone" -> a T-Bone Steak row; "keep warm" -> a hand sanitizer). They stay one
+# tier below a real instructional match.
+_FIELD_INSTRUCTIONAL = frozenset({
+    "survival", "first_aid", "water", "sanitation", "energy", "navigation", "communications",
+    "agriculture", "practical", "fieldkit", "playbook", "apothecary", "almanac", "access",
+    "curriculum", "recipes",
+})
 _RESOURCEFUL = re.compile(
     r"(what (?:can|could|should) i (?:do|make|build|use|create|cook|fix|craft)\b.*\b(?:with|from|out of)\b"
     r"|(?:make|build|create|improvise|fix|cook|craft)\b.+\b(?:with|from|out of)\b"
@@ -1135,7 +1167,10 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     # A practical/how-to question ("how to build a fire", "purify water") must consult the WHOLE
     # keeping, not a single predicted deck — otherwise a mis-predicted volume (maker "Build a …")
     # shortcuts past the field library before the practical boost can lift it. Skip the Hare here.
-    practical = bool(corpus._PRACTICAL & set(subj.lower().split()))
+    # A how-to question IS a practical intent even when its words aren't in the practical set
+    # ("keep warm without power" has none) — the framing itself signals it. So the how-to lane
+    # (which prefers field cards and demotes theories + product noise) covers it too.
+    practical = bool(corpus._PRACTICAL & set(subj.lower().split())) or bool(_HOWTO.search(text or ""))
     # THE GREAT QUESTIONS OUTRANK THE CARD SEARCH (Matt, 2026-07-28: "we are after sinners not
     # saints"). "Is god even real" matches thousands of cards by keyword — and a card list is the
     # WRONG answer to a person asking their biggest question. The probe caught nine of twelve
@@ -1216,30 +1251,36 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
         # merged AHEAD of the whole keeping so the answer a family needs stands first — and the whole
         # keeping still rides behind, so nothing is lost. Only lead with it when it actually matches.
         q = subj
-        prac = corpus.search(q, limit=6, shelves=set(_PRACTICAL_SHELVES))
-        whole = corpus.search(q, limit=8)
-        # Subject extraction can drop the very noun ("start a fire" -> "start"): if nothing shares a
-        # word, retry on the words as typed before giving up — the answer we hold must not be lost to
-        # a parse. (Measured 2026-08-12: "start a fire" fell to a miss though the fire card exists.)
-        if q != (text or "") and not (prac and _shares_a_word(q, prac[0])) \
-                and not (whole and _shares_a_word(q, whole[0])):
-            q = text or q
-            prac = corpus.search(q, limit=6, shelves=set(_PRACTICAL_SHELVES))
-            whole = corpus.search(q, limit=8)
-        # Rank the pool so the LEAD is always the best REAL match, never an academic near-miss. Tiers:
-        # (0) a practical-shelf card that shares a word — the field answer; (1) any card that shares a
-        # word; (2) a practical card; (3) the rest of the keeping; (4) the Theory-Assay catalog LAST —
-        # present, but it never leads a how-to. Stable sort preserves search relevance within a tier.
-        seen, pool = set(), []
-        for c in prac + whole:
-            if c.get("id") and c["id"] not in seen:
-                seen.add(c["id"]); pool.append(c)
 
+        def _pool(query):
+            # Search the INSTRUCTIONAL field shelves DIRECTLY first — so a matching field card is
+            # always in the pool even when the auto-generated DB rows (a T-Bone Steak, a hand
+            # sanitizer) outrank it globally on a shared word. Then the broader practical set, then
+            # the whole keeping. Deduped, search-order kept; the tier sort below decides the lead.
+            got = (corpus.search(query, limit=8, shelves=set(_FIELD_INSTRUCTIONAL))
+                   + corpus.search(query, limit=6, shelves=set(_PRACTICAL_SHELVES))
+                   + corpus.search(query, limit=10))
+            seen, out = set(), []
+            for c in got:
+                if c.get("id") and c["id"] not in seen:
+                    seen.add(c["id"]); out.append(c)
+            return out
+
+        pool = _pool(q)
+        # Subject extraction can drop the very noun ("start a fire" -> "start"): if nothing in the
+        # pool shares a word, retry on the words as typed before giving up.
+        if q != (text or "") and not any(_shares_a_word(q, c) for c in pool[:6]):
+            q = text or q
+            pool = _pool(q)
+        # Rank so the LEAD is always the best REAL match. Tiers: (0) an INSTRUCTIONAL field card that
+        # shares a word — the how-to answer; (1) any card that shares a word (incl. the reference
+        # databases); (2) a practical card; (3) the rest; (4) the academic catalog and product noise
+        # LAST — present, never leading. Stable sort preserves search relevance within a tier.
         def _tier(c):
             sh, shares = c.get("shelf"), _shares_a_word(q, c)
-            if sh in _ACADEMIC_DEMOTE:
+            if sh in _ACADEMIC_DEMOTE or _is_product_noise(c):
                 return 4
-            if shares and sh in _PRACTICAL_SHELVES:
+            if shares and sh in _FIELD_INSTRUCTIONAL:
                 return 0
             if shares:
                 return 1
