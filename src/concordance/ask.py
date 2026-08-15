@@ -679,6 +679,20 @@ def _scripture_from_keeping(text: str, limit: int = 2):
 def _witnessed(r: Dict[str, Any], text: str, witness: bool, just_opened: bool,
                topical: bool = True) -> Dict[str, Any]:
     """Once the door is open, bring the Word — and keep bringing it. Present, don't cross."""
+    # THE PATH (2026-08-12, the Lighthouse Model Spec: "the output is a PATH, never an answer").
+    # Above the cards, a discerned ONE next step + a fitting anchor — composed from what was found,
+    # nothing generated. Attached on BOTH surfaces (discernment is not gated), for the retrieval kinds
+    # only; the branches that are already a single answer (a proof, a sum, a comparison, crisis) keep
+    # their own shape. A failure here never costs the answer.
+    if r.get("kind") not in ("verify", "compute", "comparison", "checked", "crisis"):
+        try:
+            from . import path as _path
+            r["path"] = _path.compose(text, kind=r.get("kind", ""), subject=text,
+                                      lead=r.get("lead"), resources=r.get("resources"),
+                                      scripture=(r.get("scripture") or r.get("romans_road")),
+                                      deck=r.get("volume"))
+        except Exception:  # noqa: BLE001
+            pass
     if not witness:
         return r
     if just_opened:

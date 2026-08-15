@@ -177,3 +177,4 @@ test_xrefs.py
 test_caps_fresh.py
 test_review_fixes.py
 test_decks.py
+test_path.py
