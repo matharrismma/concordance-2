@@ -623,6 +623,21 @@ def receipt(cset: Dict[str, Any], config: Optional[EngineConfig] = None) -> Dict
                   "pre-registered policy, what survived deterministic checking, and what was "
                   "preserved anyway. The seal proves process integrity, never truth."),
     }
+    # THE GATE KERNEL — seal the nine-field record INTO the receipt (Matt, 2026-07-25). A
+    # candidate set is Zone B: proposals, born quarantined. Narrowing and SEALING are process
+    # integrity, never truth — a seal is explicitly non-upgrading (kernel.NON_UPGRADING), and
+    # there is no independent witness in the narrowing, so the kernel types the set as a
+    # generated draft and lands it QUARANTINE with authority 'quarantined'. The very invariant
+    # this module exists to enforce (§5.2: no candidate becomes verified merely by winning a
+    # ranking) is now carried as the shared audit record and content-addressed with the rest of
+    # the receipt — deterministic (the kernel reads no clock), so the seal stays reproducible and
+    # re-checkable at /s/<hash>.
+    from . import kernel as _kernel
+    grec = _kernel.gate(record, entered_as=cset["candidate_set_id"], kind_hint="generated_draft",
+                        authority_in="quarantined", in_kind_checked=True,
+                        assumptions=("a sealed candidate-set narrowing — proposals, born "
+                                     "quarantined; the seal proves process, not truth",))
+    record["gate_record"] = grec.to_dict()
     content_hash = cas.content_hash_of(record)
     out: Dict[str, Any] = {"content_hash": content_hash, "record": record}
     try:

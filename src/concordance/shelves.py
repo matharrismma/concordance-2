@@ -244,9 +244,24 @@ def drop(fields: Optional[Dict[str, Any]] = None, signature: str = "",
                   "signature": signature.strip(), "drop_kind": f["kind"],
                   "signed_at": f["at"], **link_extra},
     }
+    # THE GATE KERNEL — emit the nine-field record into the trail (Matt, 2026-07-25). A member
+    # drop is the member's OWN work: a `commons` drop is community, a `private`/`shelf` drop is a
+    # user note, and BOTH enter quarantined and stay at the member tier — never silently upgraded,
+    # whatever ring they are dropped in. No verification happened here (a member SPEAKING is not
+    # the library EVALUATING), so the kernel is given no evidence and no witness and returns
+    # QUARANTINE with authority 'quarantined' — the very law this path already keeps, now stamped
+    # as the shared audit record beside the card. ADDITIVE, and the detached signature covers
+    # _SIGNED_FIELDS only, so a record hung in `extra` changes nothing that was signed.
+    from . import kernel as _kernel
+    grec = _kernel.gate(card, entered_as=card_id, authority_in="quarantined", author="member",
+                        in_kind_checked=True,
+                        assumptions=("a member's own signed words — original speech, not a "
+                                     "retrieval",))
+    card["extra"]["gate_record"] = grec.to_dict()
     _append("drops.jsonl", card)
     return {"ok": True, "card_id": card_id, "ring": ring,
             "stage": card["lifecycle_stage"], "authority_tier": MEMBER_TIER,
+            "record": grec.to_dict(),
             "note": ("Signed by your key and stocked on your shelf. "
                      + ("Waiting for a steward before it reaches the commons — the gate is on "
                         "what the library amplifies, never on what you may say."
@@ -522,6 +537,24 @@ def curate(card_id: str, action: str, steward: str, reason: str = "", token: str
         # cannot say whose — the gap L11 named in The Way.
         rec["by_identity"] = w.get("name", "")
         rec["authority_sunsets"] = bool(w.get("sunsets"))
+    # THE GATE KERNEL — stamp the nine-field record on this curation act (Matt, 2026-07-25).
+    # Promoting or refusing AMPLIFIES or withholds a card; it never VERIFIES — member work stays
+    # community, born quarantined, at the member tier forever (the library carrying a voice is not
+    # the library agreeing with it), so the kernel returns QUARANTINE with authority 'quarantined'.
+    # A withdrawal is a RETRACTION — a floor — so the kernel REJECTS it (do not cite, serve, or
+    # seal). No content evidence is ever passed (a governance act is not a verification), so
+    # NOTHING here can reach 'verified' — the monotonic law, mechanized beside the act.
+    from . import kernel as _kernel
+    target = (held if held is not None
+              else next((d for d in _read("drops.jsonl") if d.get("id") == card_id), {}))
+    grec = _kernel.gate(target, entered_as=card_id, authority_in="quarantined",
+                        author=(target.get("extra") or {}).get("member") or target.get("author")
+                        or "member",
+                        witness=(rec.get("by_identity") or steward),
+                        retracted=(action == "withdrawn"), in_kind_checked=True,
+                        assumptions=(f"a {rec['by']} '{action}' act on an already-held card — "
+                                     f"amplification or withholding, never verification",))
+    rec["record"] = grec.to_dict()
     _append("curation.jsonl", rec)
     return {"ok": True, **rec,
             "note": ("Promoted to the commons — still the member's own words, at the member "

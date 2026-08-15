@@ -355,6 +355,20 @@ def _mint_doc(query: str, doc: Dict[str, Any], practical: bool = True,
                 "lifecycle_stage": "public_review",
                 "acquired_by_plane": plane,
                 "volatility": "durable", "surface": "secular", "generated": False, "verified": False}
+        # THE GATE KERNEL — stamp the nine-field record on the acquisition (Matt, 2026-07-25).
+        # The tortoise FOUND this (a real retrieval), but finding is not verifying: a fetched
+        # public-domain source enters `public_review`, which corpus.is_public() withholds from
+        # every public read path until a human looks. The kernel is given no verification evidence
+        # and no witness, so it types the held card as community and lands it QUARANTINE with
+        # authority 'quarantined' — exactly the held state this path already writes. The card's id
+        # is content-addressed over source|url (not the whole card), so this ADDITIVE field cannot
+        # perturb dedup; `acquired_by_plane` still records who pulled it — the plane buys no authority.
+        from . import kernel as _kernel
+        grec = _kernel.gate(card, entered_as=cid, authority_in="quarantined", author="archive",
+                            in_kind_checked=True,
+                            assumptions=("the tortoise fetched a public-domain source for a miss "
+                                         "— found, not verified; held for human review",))
+        card["gate_record"] = grec.to_dict()
         p = _store_path()
         p.parent.mkdir(parents=True, exist_ok=True)
         existing = set()
