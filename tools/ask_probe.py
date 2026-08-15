@@ -74,7 +74,7 @@ def _ask(text: str) -> dict:
     req = urllib.request.Request(BASE + "/ask", method="POST",
                                  headers={"content-type": "application/json"},
                                  data=json.dumps({"text": text}).encode("utf-8"))
-    with urllib.request.urlopen(req, timeout=30) as r:
+    with urllib.request.urlopen(req, timeout=90) as r:   # a how-to may fire the tortoise (web fetch)
         d = json.load(r)
     return d.get("data", d) if isinstance(d, dict) else d
 
@@ -88,6 +88,12 @@ def _check(d: dict, checks: dict) -> tuple[bool, str]:
     if "not_kind" in checks and kind in checks["not_kind"]:
         return False, f"kind={kind} (forbidden)"
     if checks.get("lead_practical"):
+        # A good how-to answer is EITHER a practical field-card lead, OR — when the keeping holds no
+        # card for it yet (a masked gap the ranker can't see) — an HONEST tortoise fetch of real
+        # sources (kind=web with documents). Both are wins; a theory/product lead or a bare no-lead
+        # pointer is not. This is Matt's tortoise: a miss goes out and comes back sourced.
+        if kind == "web" and (d.get("web") or {}).get("documents"):
+            return True, f"web+{len((d['web'] or {}).get('documents') or [])} sources (tortoise on a gap)"
         title = lead.get("title", "")
         if not lead:
             return False, f"no lead (kind={kind})"

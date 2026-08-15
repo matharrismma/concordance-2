@@ -630,6 +630,33 @@ def _practical_rank(query: str, pool: List[Dict[str, Any]]) -> List[Dict[str, An
     return sorted(pool, key=lambda c: (_tier(c), -_title_overlap(c)))[:6]
 
 
+def _stem(w: str) -> str:
+    """A crude, dependency-free stem — strip the common inflections so 'burn'/'burns'/'burning' and
+    'preserve'/'preserves'/'preserving' collapse to one form. Not linguistics; just enough to compare
+    a query's subject word to a card's title word without an exact-token brittleness that would treat
+    'burn' and 'burns' as different (and wrongly fire the tortoise past a perfect 'Burns and scalds')."""
+    w = (w or "").lower()
+    for suf in ("ing", "edly", "ed", "es", "s"):
+        if w.endswith(suf) and len(w) - len(suf) >= 3:
+            w = w[:-len(suf)]
+            break
+    if w.endswith("e") and len(w) >= 4:
+        w = w[:-1]
+    return w
+
+
+def _title_names_subject(query: str, card: Dict[str, Any]) -> bool:
+    """Does the card's TITLE actually name the subject asked about (stem-aware)? A card whose title
+    carries NONE of the subject words merely mentions the thing in passing ("start a fire" -> a knots
+    card) — that is a masked GAP, not the answer. True when there is no real subject word to test
+    (all generic), so we never force the tortoise on a bare/odd query."""
+    subj = {_stem(w) for w in (_content_tokens(query) - _GENERIC_Q_WORDS)}
+    if not subj:
+        return True
+    title = {_stem(w) for w in _content_tokens(card.get("title") or "")}
+    return bool(subj & title)
+
+
 def _wants_resourceful(text: str) -> bool:
     """A 'what can I do with what I have' question — material resources named, a solution sought.
     Placed AFTER crisis/comfort/ultimate in classify, so hurt and ultimate questions are met first;
@@ -1358,10 +1385,19 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     # and let the tortoise go GET the real thing and card it — Matt: "even if we respond slower. The
     # tortoise idea." The whole point: a miss goes out to primary sources and comes back a card, so the
     # NEXT asking is fast. (Crisis/comfort/verify/seeker all returned far above; this is how-tos only.)
+    gap_lead = None                                # a real nearest to restore if the tortoise finds nothing
     if practical and not weak and hits:
         _top = hits[0]
         if _is_product_noise(_top) or _top.get("shelf") not in _FIELD_INSTRUCTIONAL:
             weak = True
+        elif not _title_names_subject(subj, _top):
+            # The lead IS an instructional field card, but its TITLE names none of the subject — it
+            # only mentions the thing in passing ("start a fire" -> "The knots worth knowing"). That is
+            # a masked GAP the ranker can't see, not the answer: send the tortoise to FETCH the real
+            # source and card it (Matt: "even if we respond slower"). Keep this nearest as a fallback
+            # so a pull that comes back empty never costs the closest real card we did hold.
+            weak = True
+            gap_lead = list(hits)
     if weak:
         # THE PULL RUNS ON EVERY DOOR, not just the comparison (Matt, 2026-08-02: "Now it says it
         # doesn't have anything for southern baptists. It should find what I need, when I need
@@ -1407,6 +1443,15 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
         # irrelevant hit (the "sore throat -> Marcus Aurelius" failure). But we don't just shrug —
         # when we have no VERIFIED answer we POINT to the best places to find it (the nearest in the
         # keeping + the free, lawful libraries and references). Pointing well is courtesy, not a gap.
+        if gap_lead:
+            # A masked gap whose tortoise came back empty: show the nearest REAL field card we held,
+            # framed honestly (it is adjacent, not exact) — never worse than before, never a confident
+            # mislead. "start a fire" keeps the knots card, but says plainly it's the nearest.
+            out = {**base, "kind": "found", "lead": _lead_card(gap_lead[0]),
+                   "message": "I don't have a card exactly on that yet — here is the nearest the "
+                              "keeping holds while I go find the rest:",
+                   "results": [corpus._brief(c) for c in gap_lead]}
+            return _witnessed(out, text, witness, gate_just_opened)
         if _is_question(text):
             # No confident dump of irrelevant cards — but we POINT, politely, to where a verified
             # answer lives (the free libraries; a claim check). Sources go in `resources`, not results.

@@ -50,6 +50,23 @@ def test_theory_and_product_never_lead_even_when_all_share_a_word(monkeypatch):
     assert ask._practical_rank("treat a burn", pool)[0]["id"] == "f"
 
 
+def test_stem_collapses_common_inflections():
+    for a, b in [("burn", "burns"), ("burn", "burning"), ("fire", "fires"),
+                 ("preserve", "preserves"), ("preserve", "preserving"), ("deliver", "delivering")]:
+        assert ask._stem(a) == ask._stem(b), f"{a!r} vs {b!r}: {ask._stem(a)} != {ask._stem(b)}"
+
+
+def test_title_miss_fires_the_tortoise_but_stemming_keeps_a_real_card():
+    # "start a fire" -> a knots card names NONE of the subject -> a masked gap, fire the tortoise
+    assert not ask._title_names_subject("start a fire", {"title": "The knots worth knowing"})
+    # BUT stemming must keep a genuine card: "treat a burn" -> "Burns and scalds" is the answer, and
+    # exact-token matching ('burn' != 'burns') would wrongly fire the tortoise past it.
+    assert ask._title_names_subject("how do I treat a burn", {"title": "Burns and scalds"})
+    assert ask._title_names_subject("how do I purify water", {"title": "Making water safe to drink"})
+    # a query with no real subject word (all generic/stop) never forces the tortoise
+    assert ask._title_names_subject("how do I make it", {"title": "Anything at all"})
+
+
 def test_construction_howto_routes_to_the_full_pipeline():
     # "make X from Y" is a how-to that names its materials — it must NOT be swallowed by resourceful,
     # and must raise the practical flag so it gets the ranked pool + the tortoise.
