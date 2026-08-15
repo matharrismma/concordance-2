@@ -98,6 +98,26 @@ def expand(query: str, config, plane: str = "human",
                         "joins the shared public library.")}
 
 
+_PD_YEAR_CEILING = 1928          # unambiguously public domain in the US as of 2026
+
+
+def _pd_ok(doc: Dict[str, Any]) -> bool:
+    """A PD CHECK at the moment of the pull (Matt, 2026-08-12: "do a PD check and find an available
+    source to add to the corpus"). A confirmed primary PUBLIC-DOMAIN source may go STRAIGHT into the
+    shared library — that is why these providers were chosen — so the next asking finds it at once.
+    Project Gutenberg is curated public domain. An Internet Archive item is released only when its own
+    date puts it before 1929. Anything else waits in the human review lane, unchanged. Conservative by
+    design: uncertain -> held, never the reverse."""
+    import re as _re
+    src = str(doc.get("source") or "")
+    if "Gutenberg" in src:
+        return True
+    if "Internet Archive" in src:
+        m = _re.search(r"\b(1[5-9]\d\d|20\d\d)\b", str(doc.get("year") or ""))
+        return bool(m and int(m.group(1)) <= _PD_YEAR_CEILING)
+    return False
+
+
 def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
                   providers=None, fetch=None, craft_fn=None) -> Dict[str, Any]:
     """The WHOLE pull — find a source, open it, cut the cards, keep them. One call.
@@ -173,13 +193,22 @@ def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
         sv = _craft.verify_spans(cards)
         if sv["false"] or sv["true"] != len(cards):
             continue          # never keep a card that does not verify — try the next source
-        parent = _unchecked.mark({
+        # THE PD CHECK AT THE PULL (Matt, 2026-08-12): a confirmed primary PUBLIC-DOMAIN source is
+        # added to the shared corpus at once (lifecycle 'public'), so the NEXT asking finds it and
+        # never goes out — the tortoise's whole point, "search once per question". Anything the PD
+        # check cannot confirm keeps the earlier, conservative behaviour: marked for the human review
+        # lane at 'public_review'. (This deliberately loosens the 2026-08-06 "both planes wait" rule,
+        # but ONLY for a verified-PD primary source — uncertain still waits.)
+        pd = _pd_ok(doc)
+        parent_card = {
             "id": parent_id, "kind": "reference",
             "title": str(doc.get("title") or subj)[:140],
             "body": (f"A source fetched on the call for {subj!r}: "
                      f"{str(doc.get('title') or '')[:160]} (license as reported by the source: "
-                     f"{str(doc.get('license') or 'unstated')[:60]}; not yet verified — held for "
-                     "review). Kept whole in the ark; the passages carded beneath this one are cut "
+                     f"{str(doc.get('license') or 'unstated')[:60]}; "
+                     + ("verified public domain — released to the shared library."
+                        if pd else "not yet verified — held for review.")
+                     + " Kept whole in the ark; the passages carded beneath this one are cut "
                      "from it, and each names the exact place it came from."),
             "source": {"label": str(doc.get("title") or "")[:200],
                        "url": str(doc.get("url") or ""), "domain": "",
@@ -190,22 +219,25 @@ def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
                              "evidence": "a primary source the tortoise went and found"}],
             "author": "engine", "created_at": 0.0, "updated_at": 0.0,
             "visibility": "public",
-            # BOTH planes wait for review (Matt, 2026-08-06). The human plane is the anonymous
-            # /ask conduit, so a pull cannot enter the public library on an anonymous say-so —
-            # it is held in public_review until a copyright/PD check clears it for release.
-            "lifecycle_stage": "public_review",
+            "lifecycle_stage": "public" if pd else "public_review",
             "volatility": "permanent", "surface": "secular", "generated": False,
             "extra": {"source_sha256": sha, "crafted_from": str(doc.get("url") or ""),
-                      "license": str(doc.get("license") or "")[:120]},
-        })
+                      "license": str(doc.get("license") or "")[:120], "pd_released": pd},
+        }
+        # a released PD source needs no review queue; an uncertain one is marked for the operator.
+        parent = parent_card if pd else _unchecked.mark(parent_card)
+        for c in cards:                       # the span cards ride at the parent's stage
+            c["lifecycle_stage"] = "public" if pd else "public_review"
         kept = _keep([parent] + cards)
         return {"status": "carded", "source_card": parent, "cards": cards,
                 "kept": kept, "sha256": sha, "plane": plane,
-                "held_for_review": True,
+                "held_for_review": (not pd), "released_public": pd,
                 "message": (f"Not in the keeping, so it was fetched and cut on the call — "
                             f"{len(cards)} passage(s) from {str(doc.get('title') or '')[:80]!r}, "
-                            "kept so the next asking finds them at once. Held for a copyright "
-                            "check before it joins the shared public library.")}
+                            "kept so the next asking finds them at once."
+                            + (" A verified public-domain source — added to the shared library."
+                               if pd else " Held for a copyright check before it joins the "
+                               "shared public library."))}
 
     return {"status": "nothing_found",
             "message": "the archives were searched and no openable text spoke to this subject"}
