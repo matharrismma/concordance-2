@@ -1297,6 +1297,16 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     if _vol:
         base = {**base, "volume": {"id": _vol["id"], "name": _vol["name"]}}
     weak = (not hits) or not _shares_a_word(subj, hits[0])
+    # For a HOW-TO, "shares a word" is not "answered": a cosmetic 'Tan' foundation shares 'tan' with
+    # "tan a deer hide"; a reference-DB row shares a noun. None is the instruction asked for. When the
+    # best we hold is NOT a genuine instructional field card (or is product noise), treat it as a GAP
+    # and let the tortoise go GET the real thing and card it — Matt: "even if we respond slower. The
+    # tortoise idea." The whole point: a miss goes out to primary sources and comes back a card, so the
+    # NEXT asking is fast. (Crisis/comfort/verify/seeker all returned far above; this is how-tos only.)
+    if practical and not weak and hits:
+        _top = hits[0]
+        if _is_product_noise(_top) or _top.get("shelf") not in _FIELD_INSTRUCTIONAL:
+            weak = True
     if weak:
         # THE PULL RUNS ON EVERY DOOR, not just the comparison (Matt, 2026-08-02: "Now it says it
         # doesn't have anything for southern baptists. It should find what I need, when I need

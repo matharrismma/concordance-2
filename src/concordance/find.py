@@ -66,18 +66,21 @@ def _topic(query: str) -> str:
     return t or (query or "")
 
 
-_VERB = re.compile(
-    r"^\s*(make|making|build|building|grow|growing|preserv\w*|can|canning|ferment\w*|pickl\w*|"
-    r"repair\w*|mend|fix|sew|knit|weav\w*|tan|forge|cure|smok\w*|dry|store|raise|render|churn|"
-    r"brew\w*|distill\w*|whittl\w*|cook\w*|bak\w*|do|does|a|an|the)\s+", re.I)
+# Strip only GENERIC leading verbs ('make lye soap' -> 'lye soap') and bare articles. A SPECIFIC
+# craft verb IS the subject and must stay: 'tan a deer hide' searched as 'deer hide' returned deer
+# newspapers, not a tanning manual — the whole craft ('tan') had been thrown away (measured 2026-08-12).
+_GENERIC_VERB = re.compile(
+    r"^\s*(make|making|build|building|do|does|get|getting|use|using|create|creating|find|finding|"
+    r"start|starting|the|a|an)\s+", re.I)
+_ARTICLE = re.compile(r"\b(a|an|the)\b", re.I)
 
 
 def _search_terms(query: str) -> str:
-    """The noun subject the archives index on — 'make lye soap' -> 'lye soap' — so a leading verb
-    ('make') doesn't over-constrain and bury the real subject."""
-    t = _topic(query)
-    stripped = _VERB.sub("", t).strip()
-    return stripped or t
+    """The searchable subject the archives index on — keep the CRAFT ('tan', 'forge', 'ferment'),
+    drop only generic filler verbs and articles, so the real topic is not buried."""
+    t = _GENERIC_VERB.sub("", _topic(query)).strip()
+    t = re.sub(r"\s+", " ", _ARTICLE.sub(" ", t)).strip()
+    return t or _topic(query)
 
 
 def _relevant(query: str, *texts: str) -> bool:
