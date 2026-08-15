@@ -30,6 +30,18 @@ def test_rank_leads_with_the_instructional_field_card(monkeypatch):
     assert ranked[-1]["shelf"] in ("theories", "medicine")                # academic / product noise last
 
 
+def test_within_a_tier_the_card_that_names_the_subject_in_its_title_leads(monkeypatch):
+    # both are instructional field cards that share the word 'fire' — but one is ABOUT starting a
+    # fire (title) and the other merely mentions fire in its body. The title match must lead.
+    monkeypatch.setattr(ask, "_shares_a_word", lambda q, c: "fire" in
+                        (c.get("title", "") + " " + c.get("body", "")).lower())
+    pool = [
+        _card("k", "survival", "The knots worth knowing", body="useful near a fire pit"),  # body-only
+        _card("f", "survival", "Starting a fire without matches"),                          # title match
+    ]
+    assert ask._practical_rank("start a fire", pool)[0]["id"] == "f"
+
+
 def test_theory_and_product_never_lead_even_when_all_share_a_word(monkeypatch):
     monkeypatch.setattr(ask, "_shares_a_word", lambda q, c: True)          # everything shares a word
     pool = [_card("t", "theories", "Thermochemistry"),

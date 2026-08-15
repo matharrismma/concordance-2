@@ -578,6 +578,15 @@ _MAKE_FROM = re.compile(
     r"brew|distill|smelt|tan|render)\b.+\b(with|from|out of|using)\b", re.I)
 
 
+# Generic action verbs / filler carried by a how-to but not its SUBJECT — dropped before the
+# title-overlap tiebreak so relevance keys on the real noun ("fire", "bread", "meat"), not the verb.
+_GENERIC_Q_WORDS = frozenset({
+    "make", "made", "making", "build", "building", "start", "starting", "create", "get", "getting",
+    "use", "using", "do", "does", "find", "finding", "keep", "keeping", "put", "set", "fix", "fixing",
+    "cook", "cooking", "grow", "growing", "need", "want", "help", "way", "ways", "best", "good",
+    "without", "have", "using", "your"})
+
+
 def _practical_pool(query: str) -> List[Dict[str, Any]]:
     """Search the INSTRUCTIONAL field shelves DIRECTLY first — so a matching field card is always in
     the pool even when the auto-generated DB rows (a T-Bone Steak, a hand sanitizer) outrank it
@@ -597,7 +606,14 @@ def _practical_rank(query: str, pool: List[Dict[str, Any]]) -> List[Dict[str, An
     """Rank so the LEAD is always the best REAL match. Tiers: (0) an INSTRUCTIONAL field card that
     shares a word — the how-to answer; (1) any card that shares a word (incl. the reference
     databases); (2) a practical card; (3) the rest; (4) the academic catalog and product noise LAST —
-    present, never leading. Stable sort preserves search relevance within a tier."""
+    present, never leading. WITHIN a tier, the card whose TITLE names more of the subject leads: a
+    card ABOUT the thing beats one that merely mentions it in its body (measured 2026-08-14: "start a
+    fire" led with a knots card that says 'fire' once; "preserve meat" with 'Strawberry Preserves').
+    Stable sort preserves the corpus's search relevance to break a title-overlap tie. Generic action
+    verbs are dropped from the subject words first — else "start a fire" scores a 'Meshtastic
+    quick-START' node on the shared, meaningless 'start'."""
+    qt = _content_tokens(query) - _GENERIC_Q_WORDS
+
     def _tier(c: Dict[str, Any]) -> int:
         sh, shares = c.get("shelf"), _shares_a_word(query, c)
         if sh in _ACADEMIC_DEMOTE or _is_product_noise(c):
@@ -607,7 +623,11 @@ def _practical_rank(query: str, pool: List[Dict[str, Any]]) -> List[Dict[str, An
         if shares:
             return 1
         return 2 if sh in _PRACTICAL_SHELVES else 3
-    return sorted(pool, key=_tier)[:6]
+
+    def _title_overlap(c: Dict[str, Any]) -> int:
+        return len(qt & _content_tokens(c.get("title") or ""))
+
+    return sorted(pool, key=lambda c: (_tier(c), -_title_overlap(c)))[:6]
 
 
 def _wants_resourceful(text: str) -> bool:
