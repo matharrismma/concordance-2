@@ -2115,6 +2115,42 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import capabilities as _caps
         return _ok(_caps.statement(surface))
 
+    if method == "GET" and path == "/kernel":
+        # THE GATE KERNEL — the law, published where agents READ it. The five moves, the eight-rule
+        # agent covenant, the six KINDS, the authority lattice, and the nine-field record. UNGATED:
+        # the rules an agent must keep are not witness content, and a reader who cannot see the law
+        # cannot be held to it. Agents: check a proposed state-change at POST /kernel/gate first.
+        from .. import kernel as _kernel
+        return _ok(_kernel.doctrine())
+
+    if method == "POST" and path == "/kernel/gate":
+        # Route ONE proposed state-change through the kernel and return the verdict + the nine-field
+        # record — so an agent can discern before it writes (the covenant: stop when the evidence is
+        # incomplete). Pure: this DECIDES and records; it never persists, and it never replaces the
+        # caller's own signature / consent checks on the actual write.
+        from .. import kernel as _kernel
+        if not isinstance(body, dict):
+            return _err(400, "a JSON object is required: {artifact, authority_in, evidence, witness, author, ...}")
+        art = body.get("artifact")
+        if not isinstance(art, dict):
+            return _err(400, "artifact must be an object (the thing entering or changing state)")
+        asum = body.get("assumptions")
+        rec = _kernel.gate(
+            art,
+            entered_as=str(body.get("entered_as") or ""),
+            authority_in=str(body.get("authority_in") or "quarantined"),
+            kind_hint=str(body.get("kind_hint") or ""),
+            evidence=body.get("evidence"),
+            witness=body.get("witness"),
+            author=body.get("author"),
+            contradicts=bool(body.get("contradicts")),
+            error=body.get("error"),
+            assumptions=tuple(str(x) for x in asum) if isinstance(asum, list) else (),
+            wait_satisfied=bool(body.get("wait_satisfied", True)),
+            in_kind_checked=bool(body.get("in_kind_checked", False)),
+        )
+        return _ok({"record": rec.to_dict(), "generated": False})
+
     if method == "GET" and path == "/harmony":
         # Harmony of the Gospels — one event, every gospel that witnesses it, side by side.
         # Witness content: the same gate as /teachings, /prophecy, /commentary.
@@ -2340,6 +2376,8 @@ ROUTES = [
     {"path": "/narratives", "methods": ("GET",), "api": True},
     {"path": "/study_find", "methods": ("GET",), "api": True},
     {"path": "/capabilities", "methods": ("GET",), "api": True},
+    {"path": "/kernel", "methods": ("GET",), "api": True},
+    {"path": "/kernel/gate", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/activity.json", "methods": ("GET",), "api": True},
     {"path": "/build.json", "methods": ("GET",), "api": True},
     {"path": "/mesh/signable", "methods": ("GET",), "api": True},

@@ -70,6 +70,8 @@ GOLDEN_API_GET = {
     "/narratives",  # deliberate addition (storyboards: common narratives charted in the Bible; movements mix and match)
     "/study_find",  # deliberate addition (the quick-find index across the whole reference section)
     "/capabilities",  # deliberate addition (the live capability statement — restored from 1.0)
+    "/kernel",  # the gate kernel doctrine — the five moves + covenant, published where agents read (task #152, 2026-08-15)
+    "/kernel/gate",  # POST an api:True route (like /drop/report) — run one proposed state-change through the kernel (task #152)
     "/activity.json",  # the .org "under the hood" feed (recent public seals + counts, 2026-08-05)
     "/build.json",  # deployment provenance: protocol + profiles + tool_catalog_hash (red team R-14, 2026-08-06)
     "/mesh/signable",  # deliberate addition (the bytes to sign, so a key never crosses the wire)
@@ -107,6 +109,7 @@ GOLDEN_RATELIMITED = {
     "/chess",   # deliberate addition (the chess verifier) — game theory, applied and sealable
     "/attest",  # deliberate addition — a write, so rate-limited like every other write
     "/want",    # deliberate addition — opening a want is a write (the hive's return-point)
+    "/kernel/gate",  # run one proposed state-change through the kernel — rate-limited like every POST (task #152)
 }
 
 

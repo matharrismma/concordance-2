@@ -447,6 +447,35 @@ def _secular_tools() -> List[dict]:
                          "exactly what was counted — never a hand-maintained number. Read this "
                          "instead of trusting any count written in prose."),
          "inputSchema": {"type": "object", "properties": {}}},
+        {"name": "kernel",
+         "description": ("THE GATE KERNEL — the law you keep here, in one call. The five moves (find, "
+                         "distinguish the KIND, verify what can be verified, preserve the trail, never "
+                         "silently upgrade authority), the eight-rule agent covenant, the six object "
+                         "KINDS, the authority lattice (quarantined < cited < verified), and the "
+                         "nine-field gate record. Read it before you write; a system error is never a "
+                         "false verdict, and only a witnessed, evidenced gate reaches 'verified'."),
+         "inputSchema": {"type": "object", "properties": {}}},
+        {"name": "kernel_gate",
+         "description": ("Route ONE proposed state-change through the kernel and get back the verdict "
+                         "(REJECT / QUARANTINE / CONFIRMED) plus the nine-field record — so you can "
+                         "DISCERN before you write (covenant rule 8: stop when the evidence is "
+                         "incomplete). CONFIRMED needs a real verification that HELD, an INDEPENDENT "
+                         "witness (witness != author), and the wait; anything else quarantines. This "
+                         "decides and records only — it never persists and never replaces the "
+                         "signature / consent checks on the real write."),
+         "inputSchema": {"type": "object", "properties": {
+             "artifact": {"type": "object", "description": "the thing entering or changing state"},
+             "authority_in": {"type": "string", "enum": ["quarantined", "cited", "verified"],
+                              "description": "the authority it currently carries (default quarantined)"},
+             "kind_hint": {"type": "string",
+                           "enum": ["claim", "source", "user_note", "generated_draft", "community", "executable"]},
+             "evidence": {"description": "a verification verdict: HOLDS/PASS, BROKEN/MISMATCH, or ERROR/INCOMPLETE"},
+             "witness": {"type": "string", "description": "who corroborated it — must differ from author"},
+             "author": {"type": "string", "description": "who produced it"},
+             "contradicts": {"type": "boolean"},
+             "wait_satisfied": {"type": "boolean"},
+             "in_kind_checked": {"type": "boolean", "description": "was an in-kind lookup done first"}},
+             "required": ["artifact"]}},
         # THE GATE, for an agent. Always available — you must be able to ask BEFORE the door opens,
         # which is the whole point of asking. Same classifier, same refusals, same crisis-first
         # ordering a person meets; an agent simply asks in its own words. "Ask, and it will be given
@@ -771,6 +800,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "tools": {"verify": "derive", "audit": "derive", "seal_fetch": "read",
                   "attest_record": "preserve", "witnesses": "read",
                   "now": "read", "capabilities": "read",
+                  "kernel": "read", "kernel_gate": "derive",
                   "candidate_commit": "preserve", "candidate_narrow": "derive",
                   "candidate_get": "read"},
     },
@@ -1246,6 +1276,28 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     if name == "capabilities":
         from .. import capabilities as _caps  # both surfaces: the statement is never gated
         return _caps.statement(config.surface)
+    if name == "kernel":
+        from .. import kernel as _kernel       # the law, never gated — you must be able to read it
+        return _kernel.doctrine()
+    if name == "kernel_gate":
+        from .. import kernel as _kernel
+        art = args.get("artifact")
+        if not isinstance(art, dict):
+            return {"error": "artifact must be an object (the thing entering or changing state)"}
+        rec = _kernel.gate(
+            art,
+            entered_as=str(args.get("entered_as") or ""),
+            authority_in=str(args.get("authority_in") or "quarantined"),
+            kind_hint=str(args.get("kind_hint") or ""),
+            evidence=args.get("evidence"),
+            witness=args.get("witness"),
+            author=args.get("author"),
+            contradicts=bool(args.get("contradicts")),
+            error=args.get("error"),
+            wait_satisfied=bool(args.get("wait_satisfied", True)),
+            in_kind_checked=bool(args.get("in_kind_checked", False)),
+        )
+        return {"record": rec.to_dict(), "generated": False}
     if name == "mesh_signable":
         from .. import mesh as _mesh
         fp = str(args.get("fp") or "").strip()
