@@ -161,13 +161,31 @@ def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
 
     fetch = fetch or _sources.fetch
     craft_fn = craft_fn or _craft.craft
-    if providers is None:
-        providers = (_find.internet_archive, _find.project_gutenberg)
+    # A pull only ever answers a practical/how-to gap, so the tortoise reads the Foxfire era and the
+    # cards it keeps belong on the practical shelf. The intent lives in `q` ("how do I start a fire")
+    # even after `subj` was stripped to the bare "start fire", so read practicality from `q`.
+    practical = _find.is_practical(q)
+    default_providers = providers is None
+    if default_providers:
+        # PROJECT GUTENBERG FIRST FOR A PRACTICAL PULL. Its plain-text is curated public domain
+        # (released to the shared library at once, so the next asking is instant) and holds the
+        # Foxfire-era manuals whole — Nessmuk's "Woodcraft and Camping" and its kin. The loop keeps
+        # the FIRST source that yields enough verifying cards, so whichever provider leads decides
+        # the source: with the Internet Archive first, a tangential story book with a few 'fire'
+        # mentions won the race over the real manual (measured live 2026-08-15). For a non-practical
+        # miss the Archive's far broader catalogue still leads — it is likelier to hold an obscure
+        # subject at all.
+        providers = ((_find.project_gutenberg, _find.internet_archive) if practical
+                     else (_find.internet_archive, _find.project_gutenberg))
 
     docs: List[Dict[str, Any]] = []
     for p in providers:
         try:
-            docs.extend(p(subj if subj else q, limit=3) or [])
+            # The real archives must be searched on the PERIOD term (find._terms) — a bare "start
+            # fire" returns sermons, "woodcraft" returns the manual. An INJECTED test provider is
+            # called plainly, so its signature is never assumed to carry `practical`.
+            docs.extend((p(subj if subj else q, limit=3, practical=True) if default_providers
+                         else p(subj if subj else q, limit=3)) or [])
         except Exception:  # noqa: BLE001 — one deaf provider must not silence the others
             continue
 
@@ -200,8 +218,16 @@ def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
         # lane at 'public_review'. (This deliberately loosens the 2026-08-06 "both planes wait" rule,
         # but ONLY for a verified-PD primary source — uncertain still waits.)
         pd = _pd_ok(doc)
+        # A practical pull is Foxfire knowledge: keep it on the PRACTICAL shelf, which the how-to
+        # ranker leads with and which the next asking recognises — a generic "sources" card is
+        # demoted below a tangential field card, so the tortoise would go out all over again and
+        # "search once, keep it" would never hold. And tag every kept card `tortoise: True`, so a
+        # later ask can tell the tortoise's OWN passages (cut FOR this subject) from the millions of
+        # bulk source excerpts and short-circuit straight to them, instantly, without re-fetching.
+        shelf = "practical" if practical else "sources"
+        spine_id = "card_spine_practical" if practical else "card_spine_sources"
         parent_card = {
-            "id": parent_id, "kind": "reference",
+            "id": parent_id, "kind": "practical" if practical else "reference",
             "title": str(doc.get("title") or subj)[:140],
             "body": (f"A source fetched on the call for {subj!r}: "
                      f"{str(doc.get('title') or '')[:160]} (license as reported by the source: "
@@ -213,22 +239,31 @@ def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
             "source": {"label": str(doc.get("title") or "")[:200],
                        "url": str(doc.get("url") or ""), "domain": "",
                        "authority_tier": "primary_pd"},
-            "shelf": "sources", "box": "source", "subject": subj,
-            "bands": sorted({w for w in subj.lower().split() if len(w) > 2})[:10] + ["source"],
-            "connections": [{"to_card_id": "card_spine_sources", "relationship": "member_of",
+            "shelf": shelf, "box": "foxfire" if practical else "source", "subject": subj,
+            "bands": sorted({w for w in subj.lower().split() if len(w) > 2})[:10]
+                     + (["practical", "foxfire"] if practical else ["source"]),
+            "connections": [{"to_card_id": spine_id, "relationship": "member_of",
                              "evidence": "a primary source the tortoise went and found"}],
             "author": "engine", "created_at": 0.0, "updated_at": 0.0,
             "visibility": "public",
             "lifecycle_stage": "public" if pd else "public_review",
             "volatility": "permanent", "surface": "secular", "generated": False,
             "extra": {"source_sha256": sha, "crafted_from": str(doc.get("url") or ""),
-                      "license": str(doc.get("license") or "")[:120], "pd_released": pd},
+                      "license": str(doc.get("license") or "")[:120], "pd_released": pd,
+                      "tortoise": True},
         }
         # a released PD source needs no review queue; an uncertain one is marked for the operator.
         parent = parent_card if pd else _unchecked.mark(parent_card)
-        for c in cards:                       # the span cards ride at the parent's stage
+        for c in cards:                       # the span cards ride at the parent's stage AND shelf
             c["lifecycle_stage"] = "public" if pd else "public_review"
-        kept = _keep([parent] + cards)
+            c["shelf"] = shelf
+            ex = dict(c.get("extra") or {})
+            ex["tortoise"] = True
+            c["extra"] = ex
+        # The spine must exist before the members that hang off it, or the graft dangles (the same
+        # no-orphan rule find._mint_doc keeps). _keep is idempotent, so re-asserting it costs nothing.
+        spine = _find._spine_card(shelf)
+        kept = _keep(([spine] if spine else []) + [parent] + cards)
         return {"status": "carded", "source_card": parent, "cards": cards,
                 "kept": kept, "sha256": sha, "plane": plane,
                 "held_for_review": (not pd), "released_public": pd,

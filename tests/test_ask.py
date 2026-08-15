@@ -30,6 +30,23 @@ SEC = EngineConfig("secular")
 WIT = EngineConfig("witness")
 
 
+def test_kept_tortoise_source_is_recognised_only_when_tagged_and_on_subject():
+    """SEARCH ONCE, KEEP IT hinges on recognising the tortoise's OWN kept passages — the ones it
+    went and cut FOR this subject on an earlier ask — so a second identical how-to is answered from
+    the keeping instantly instead of re-fetching the same public-domain book. The recognition must
+    be tight: the `tortoise` tag (so the millions of bulk source excerpts, same shape, never
+    short-circuit a real gap) AND the crafted subject sharing a word with what is asked now."""
+    kept = {"id": "card_span_x", "shelf": "practical", "subject": "start fire",
+            "source": {"authority_tier": "primary_pd"}, "extra": {"tortoise": True}}
+    assert ask._is_kept_tortoise_source("how do I start a fire", kept)
+    # a BULK source excerpt about fire (no tortoise tag) must NOT short-circuit the gap
+    bulk = {**kept, "extra": {}}
+    assert not ask._is_kept_tortoise_source("how do I start a fire", bulk)
+    # a tortoise card kept for a DIFFERENT subject does not answer this one
+    other = {**kept, "subject": "tan a hide"}
+    assert not ask._is_kept_tortoise_source("how do I start a fire", other)
+
+
 def test_classify_routes():
     assert ask.classify("2+2 = 4") == "verify"
     assert ask.classify("John 3:16") == "scripture"

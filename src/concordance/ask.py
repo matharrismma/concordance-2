@@ -657,6 +657,24 @@ def _title_names_subject(query: str, card: Dict[str, Any]) -> bool:
     return bool(subj & title)
 
 
+def _is_kept_tortoise_source(query: str, card: Dict[str, Any]) -> bool:
+    """A public-domain passage THE TORTOISE ITSELF went out and cut FOR this very subject on an
+    earlier ask, and kept. The surest thing we can hand a how-to gap on the SECOND asking: instead
+    of fetching the same Foxfire manual all over again (~30–90s), lead with the passages already in
+    the keeping — "search once, keep it".
+
+    Recognised by the `tortoise` tag `expand.pull_and_card` stamps (so the millions of BULK source
+    excerpts, which share the same shape, never short-circuit a real gap), AND by the subject the
+    card was crafted for sharing a stemmed word with what is now being asked."""
+    if not (card.get("extra") or {}).get("tortoise"):
+        return False
+    q = {_stem(w) for w in (_content_tokens(query) - _GENERIC_Q_WORDS)}
+    if not q:
+        return False
+    csubj = {_stem(w) for w in _content_tokens(card.get("subject") or "")}
+    return bool(q & csubj)
+
+
 def _wants_resourceful(text: str) -> bool:
     """A 'what can I do with what I have' question — material resources named, a solution sought.
     Placed AFTER crisis/comfort/ultimate in classify, so hurt and ultimate questions are met first;
@@ -1399,6 +1417,31 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
             weak = True
             gap_lead = list(hits)
     if weak:
+        # SEARCH ONCE, KEEP IT (Matt, 2026-08-02: "so we only search once per question"). Before
+        # sending the tortoise back out, look in the keeping for passages it ALREADY went and cut
+        # for this very subject on an earlier ask. A second identical how-to must be answered from
+        # the keeping, instantly — never re-fetch the same public-domain book (a fetch re-downloads
+        # the whole body to re-hash it, ~30–90s). Only the tortoise's own tagged passages qualify
+        # (see _is_kept_tortoise_source), so a tangential bulk source never short-circuits a real gap.
+        # Look on the INSTRUCTIONAL field shelves, where the tortoise keeps its practical passages —
+        # an unscoped search for a how-to subject is drowned by dictionary/lexicon rows that merely
+        # share a common word ("start fire" pulled in 'jump-start', 'head start', a dozen network
+        # ports) and pushed the kept cards past the window (measured live 2026-08-15: the kept
+        # passages ranked 10th, 23rd, 28th). Scoped, they stand where they can be found.
+        already = [c for c in (corpus.search(subj, limit=15, shelves=set(_FIELD_INSTRUCTIONAL)) or [])
+                   if _is_kept_tortoise_source(subj, c)]
+        if already:
+            # a cut passage leads over the book-level source card — it carries the actual instruction
+            already.sort(key=lambda c: 0 if c.get("box") == "excerpt" else 1)
+            seen_ids = {c.get("id") for c in already}
+            hits = (already + [c for c in (corpus.search(subj, limit=6) or [])
+                               if c.get("id") not in seen_ids])[:6]
+            weak = False
+            gap_lead = None
+            base = {**base, "message": ("Here's what the tortoise went and found for this in the "
+                                        "public domain — kept from an earlier asking, so it's here "
+                                        "at once, no waiting:")}
+    if weak:
         # THE PULL RUNS ON EVERY DOOR, not just the comparison (Matt, 2026-08-02: "Now it says it
         # doesn't have anything for southern baptists. It should find what I need, when I need
         # it."). pull_and_card had been wired into the comparison path only, so a plain question
@@ -1421,7 +1464,13 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
             hits = (pulled_cards +
                     [c for c in (corpus.search(subj, limit=6) or [])
                      if c.get("id") not in seen_ids])[:6]
-            if hits and _shares_a_word(subj, hits[0]):
+            # The pulled cards ARE the answer: craft.rank cuts a span only where it shares the
+            # subject's own words, so a card that came back is subject-matched by construction. The
+            # earlier _shares_a_word gate here was too strict for exactly this — it sent "start a
+            # fire" to the web fallback even though 10 fire passages had just been cut and kept,
+            # because the distinctive-word test wanted the 5-letter "start" and the passage spoke of
+            # "fire". If the pull carded, lead with it.
+            if pulled_cards:
                 weak = False
                 base = {**base, "message": pulled.get("message", "")}
     if weak:
@@ -1473,8 +1522,12 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     # the keeping." The old shape returned six equal 180-char snippets and no lead sentence: a person
     # who asked got a drawer to rummage, not an answer. `results` stays whole (the page dedups the
     # lead) so nothing downstream that counts on it changes; `lead` + `message` are additive.
-    out = {**base, "kind": "found", "message": _FOUND_LEAD, "lead": _lead_card(hits[0]),
-           "results": [corpus._brief(c) for c in hits]}
+    # When the tortoise pulled these cards on the call — or found them already kept from an earlier
+    # pull — `base` already carries the honest "went and found it, kept it" line. Keep it rather than
+    # paper over it with the generic lead (this is what the spy test guards: a pull that cards must
+    # SAY it went and got it). Otherwise, the librarian's warm handoff.
+    out = {**base, "kind": "found", "message": base.get("message") or _FOUND_LEAD,
+           "lead": _lead_card(hits[0]), "results": [corpus._brief(c) for c in hits]}
     cloud = _connected_cloud(hits[0].get("id"))
     if cloud:
         out["cloud"] = {"around": hits[0].get("title", ""), "witnesses": cloud}

@@ -192,6 +192,50 @@ def test_the_envelope_is_not_the_book():
     assert "sanctification as a second work of grace" in inside
 
 
+def test_a_crlf_book_splits_into_its_real_paragraphs():
+    """PROJECT GUTENBERG STORES ITS PLAIN-TEXT BOOKS WITH CRLF (\\r\\n) LINE ENDINGS, and the
+    paragraph split must SEE the blank line through the carriage return. Before this was fixed the
+    class `[ \\t]*` did not admit the \\r sitting between the two newlines, so a CRLF book matched
+    ZERO paragraph breaks: the whole work became one paragraph, flushed at the first MAX_SPAN, and
+    the ONLY card cut was the title page. A firecraft manual full of fire passages yielded one span
+    about nothing, and every Gutenberg how-to fell silently through to the citation-only tortoise
+    (measured live 2026-08-15: 'Woodcraft and Camping' -> 1 section -> 1 card). This is the
+    regression test that would have caught it: the same book in CRLF must cut the same many cards
+    it does in LF."""
+    from concordance import craft
+    # Paragraphs are accumulated up to MAX_SPAN, so the bug only shows on a book LONGER than one
+    # span: the old regex saw the whole thing as a single paragraph, flushed once at MAX_SPAN, and
+    # discarded everything after — exactly the title-page-only collapse. So make the text well over
+    # MAX_SPAN, with the word 'fire' in a LATE paragraph that lives beyond the first span.
+    para = ("To build a fire in the open you first gather tinder, the driest and finest material "
+            "the woods afford, and lay it where the wind will not scatter it before the flame has "
+            "taken hold; over it you build a tepee of kindling, thin dead twigs from under a "
+            "standing tree, and feed it the thumb-thick wood only when the little blaze is sure. ")
+    filler = ("The woodsman learns his craft by long seasons in the open, and no printed page can "
+              "give him what the seasons give, though a plain account of the tried ways is worth "
+              "the carrying for one who has not yet had the seasons to learn them in himself. ")
+    paras = [para] + [filler] * 12 + [
+        "A fire for warmth is laid long, before a reflector of green logs, so the heat is thrown "
+        "back upon the sleeper through the night, and fed with heavy wood that holds its coals; a "
+        "fire for the cook is let die to a level bed of coals, for the leaping flame cooks nothing "
+        "evenly and only blackens the honest pot the camp depends upon each morning and each dusk."]
+    lf_doc = "\n\n".join(paras)
+    crlf_doc = lf_doc.replace("\n", "\r\n")            # exactly what Gutenberg serves
+    assert "\r\n\r\n" in crlf_doc and len(crlf_doc) > craft.MAX_SPAN
+
+    crlf_secs = craft.sections(crlf_doc, *craft.trim(crlf_doc))
+    assert len(crlf_secs) > 1, "a CRLF book collapsed to one section — the title-page-only bug"
+    # the last paragraph lives beyond the first MAX_SPAN span; it must be reachable, not discarded
+    assert crlf_secs[-1][1] > craft.MAX_SPAN, "the tail of a CRLF book was thrown away"
+
+    sha = _anchor(crlf_doc)
+    cards = craft.craft(sha, "fire warmth cook coals")["cards"]
+    assert len(cards) >= 2, f"a CRLF firecraft text yielded only {len(cards)} card(s)"
+    assert craft.verify_spans(cards)["false"] == 0    # every span still addresses the CRLF bytes
+    # the warmth/cooking passage — past the first span — was actually carded, not lost
+    assert any("reflector of green logs" in c["body"] for c in cards)
+
+
 def test_the_index_is_never_carded():
     """AN INDEX OUTSCORES EVERY REAL PASSAGE — it is the densest concentration of a book's subject
     terms anywhere in it. The tenth card of the first real run against the 1923 Manual was exactly

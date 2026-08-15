@@ -107,10 +107,12 @@ def _get(url: str) -> Optional[str]:
 
 
 # ── providers: openly-licensed, primary / high-quality only ─────────────────────────────────
-def library_of_congress(query: str, limit: int = 3) -> List[Dict[str, Any]]:
+def library_of_congress(query: str, limit: int = 3,
+                        practical: Optional[bool] = None) -> List[Dict[str, Any]]:
     """Primary documents from the Library of Congress — largely public domain. Not an 'answer';
     the original sources to go deeper, attributed and linked."""
-    q = urllib.parse.quote(_search_terms(query))
+    terms = _terms(query, practical)          # relevance is judged against what we searched (see IA note)
+    q = urllib.parse.quote(terms)
     raw = _get(f"https://www.loc.gov/search/?q={q}&fo=json&c={max(1, limit)}&at=results")
     if not raw:
         return []
@@ -122,7 +124,7 @@ def library_of_congress(query: str, limit: int = 3) -> List[Dict[str, Any]]:
     for x in results[:limit]:
         title = (x.get("title") or "").strip()
         url = x.get("id") or x.get("url") or ""
-        if not title or not url or not _relevant(query, title, " ".join(x.get("subject") or [])):
+        if not title or not url or not _relevant(terms, title, " ".join(x.get("subject") or [])):
             continue
         fmt = x.get("original_format") or x.get("type") or []
         out.append({"title": title[:140], "url": url,
@@ -148,14 +150,58 @@ def is_practical(query: str) -> bool:
     return bool(_PRACTICAL.search(query or ""))
 
 
-def internet_archive(query: str, limit: int = 3) -> List[Dict[str, Any]]:
+# THE ARCHIVES INDEX THE CRAFT UNDER ITS PERIOD NAME, not the modern phrasing. A survival how-to
+# asked in today's words does not match how the tried-and-true (1850–1964) shelved the same
+# knowledge: "start a fire" stripped to "fire" returns SERMONS and a novel titled FIRE, not a
+# firecraft manual; "keep warm without power" and "make soap from wood ash" return NOTHING at all,
+# because no 1900s book is titled that. So a practical miss was carding a novel or falling through
+# to the web tortoise while the real Foxfire-era manual sat one search term away. Map the modern
+# intent to the PERIOD vocabulary the archives actually index it under — each pairing verified
+# against the live archives (2026-08-15) to return an openable public-domain manual (Nessmuk's
+# "Woodcraft and Camping", the "Soap-Making Manual", "Camp Cookery"). Only ever consulted for a
+# PRACTICAL query, so a theology ask ("the lake of fire", "living water") is never bent to woodcraft.
+_PRACTICAL_TERMS = (
+    # fire, warmth, shelter — the woodcraft cluster. A SINGLE strong term ('woodcraft') puts Nessmuk's
+    # "Woodcraft and Camping" first; the two-word "woodcraft camping" surfaced a story anthology
+    # ("Outdoor Life and Indian Stories") ahead of the real manual (measured live 2026-08-15).
+    (re.compile(r"\b(fire|firecraft|tinder|kindl|flint|ember|spark|campfire)\b", re.I), "woodcraft"),
+    (re.compile(r"\b(warm|warmth|cold|heat|heating|hypotherm|freez|shelter|tent|lean|bivouac|cabin)\b",
+                re.I), "woodcraft"),
+    (re.compile(r"\bsoap\b", re.I), "soap making"),
+    (re.compile(r"\b(water|filter|purif|potable|drinking)\b", re.I), "water purification"),
+    (re.compile(r"\b(cook|bake|baking|ration|camp\s*food|camp\s*cook)\b", re.I), "camp cookery"),
+)
+
+
+def _terms(query: str, practical: Optional[bool] = None) -> str:
+    """The subject the archives are searched on. For a practical/how-to gap, translate the modern
+    phrasing to the period term the tried-and-true archives shelve the craft under (see
+    `_PRACTICAL_TERMS`); otherwise, and for any unmapped practical query, the plain subject stands.
+    `practical` is passed explicitly by callers that already stripped the query to a bare subject
+    (`pull_and_card` hands us 'start fire', on which `is_practical` would wrongly read False)."""
+    if practical is None:
+        practical = is_practical(query)
+    if practical:
+        for rx, term in _PRACTICAL_TERMS:
+            if rx.search(query or ""):
+                return term
+    return _search_terms(query)
+
+
+def internet_archive(query: str, limit: int = 3,
+                     practical: Optional[bool] = None) -> List[Dict[str, Any]]:
     """Public-domain texts from the Internet Archive, biased to the TRIED-AND-TRUE era — older
     first. The Foxfire well: farming, food preservation, home crafts, self-reliance."""
     # look back BEFORE the modern inputs — restrict to the tried-and-true, public-domain era
     # (through 1964; the heart is the 1920s–1950s). We don't lean on the latest; everyone else does.
     # rank by the archive's own RELEVANCE (no popularity sort — that surfaces high-traffic
     # off-topic scans); the year window already keeps it in the tried-and-true, public-domain era.
-    url = ("https://archive.org/advancedsearch.php?q=" + urllib.parse.quote(_search_terms(query))
+    # Judge relevance against the TERM WE ACTUALLY SEARCHED, not the modern phrasing: a practical
+    # how-to is searched under its period name ('start a fire' -> 'woodcraft'), and the manual that
+    # comes back — "Woodcraft and Camping" — shares no word with "start fire", so checking against
+    # the original query would reject every real result. The craft stage is the true subject gate.
+    terms = _terms(query, practical)
+    url = ("https://archive.org/advancedsearch.php?q=" + urllib.parse.quote(terms)
            + "+AND+mediatype%3A(texts)+AND+year%3A%5B1850+TO+1964%5D"
              "&fl[]=title&fl[]=year&fl[]=identifier&fl[]=creator"
              "&rows=" + str(max(1, limit) * 4) + "&output=json")
@@ -170,7 +216,7 @@ def internet_archive(query: str, limit: int = 3) -> List[Dict[str, Any]]:
     for x in docs:
         title = (x.get("title") if isinstance(x.get("title"), str) else "").strip()
         ident = x.get("identifier") or ""
-        if not title or not ident or not _relevant(query, title):
+        if not title or not ident or not _relevant(terms, title):
             continue
         yr = str(x.get("year") or "").strip()[:4]
         out.append({"title": title[:120], "url": "https://archive.org/details/" + ident,
@@ -181,9 +227,11 @@ def internet_archive(query: str, limit: int = 3) -> List[Dict[str, Any]]:
     return out
 
 
-def project_gutenberg(query: str, limit: int = 3) -> List[Dict[str, Any]]:
+def project_gutenberg(query: str, limit: int = 3,
+                      practical: Optional[bool] = None) -> List[Dict[str, Any]]:
     """Public-domain books from Project Gutenberg (PD by definition) — full text, freely carried."""
-    raw = _get("https://gutendex.com/books/?search=" + urllib.parse.quote(_search_terms(query)))
+    terms = _terms(query, practical)          # relevance is judged against what we searched (see IA note)
+    raw = _get("https://gutendex.com/books/?search=" + urllib.parse.quote(terms))
     if not raw:
         return []
     try:
@@ -193,7 +241,7 @@ def project_gutenberg(query: str, limit: int = 3) -> List[Dict[str, Any]]:
     out = []
     for x in results[:limit]:
         title = (x.get("title") or "").strip()
-        if not title or not _relevant(query, title):
+        if not title or not _relevant(terms, title):
             continue
         who = ", ".join((a.get("name") or "") for a in (x.get("authors") or []))[:70]
         out.append({"title": title[:120], "url": "https://www.gutenberg.org/ebooks/" + str(x.get("id")),
@@ -428,7 +476,9 @@ def find_and_check(query: str, config, plane: str = "human") -> Optional[Dict[st
         # slower and send you to a real source than lean on a summary. Our own science answers what
         # it can, upstream of here (the keeping + verifiers — we construct and verify); this points
         # to primary sources for what we don't yet hold.
-        docs = internet_archive(query) + project_gutenberg(query) + library_of_congress(query)
+        docs = (internet_archive(query, practical=practical)
+                + project_gutenberg(query, practical=practical)
+                + library_of_congress(query, practical=practical))
         if not docs:
             return None
         for d in docs[:3]:

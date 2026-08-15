@@ -106,7 +106,55 @@ def _check(d: dict, checks: dict) -> tuple[bool, str]:
     return True, (f"[{shelf}] {lead.get('title', '')[:44]}" if lead else f"kind={kind}")
 
 
+# SEARCH ONCE, KEEP IT (Matt: "even if we respond slower ... so we only search once per question").
+# A how-to the field library has no card for is a masked gap: the tortoise goes out, fetches a
+# public-domain Foxfire-era manual, cuts and KEEPS the passages — and the SECOND identical ask must
+# be answered from the keeping, instantly (kind=found with a practical lead), never the web tortoise
+# all over again. These five are the ones that fell to kind=web before the fix: two bare gap how-tos
+# (no field card at all) and three "make X from Y" construction how-tos.
+KEEP_ONCE = [
+    "how do I start a fire",
+    "how do I keep warm without power",
+    "make soap from wood ash",
+    "build a shelter from branches",
+    "make a water filter with sand and charcoal",
+]
+
+
+def _second_ask_is_kept(q: str) -> tuple[bool, str]:
+    """Ask twice. The first ask may go out and fetch (slow); the SECOND must come from the keeping —
+    kind=found, a practical lead, and NOT the web tortoise."""
+    _ask(q)                                   # prime: the tortoise pulls and keeps, if it must
+    d = _ask(q)                               # the real test: this one must be instant, from keeping
+    kind = d.get("kind", "")
+    lead = d.get("lead") or {}
+    shelf = lead.get("shelf") or ""
+    if kind == "web":
+        return False, "kind=web on the SECOND ask — it re-searched instead of keeping"
+    if kind != "found":
+        return False, f"kind={kind} (want found from the keeping)"
+    if not lead:
+        return False, "found, but no lead card"
+    if shelf not in _PRACTICAL:
+        return False, f"lead [{shelf}] not a practical card: {lead.get('title','')[:40]}"
+    return True, f"kept: [{shelf}] {lead.get('title','')[:44]}"
+
+
 def main() -> int:
+    twice = "--twice" in sys.argv or os.environ.get("ASK_PROBE_TWICE")
+    if twice:
+        print(f"ask probe · SEARCH ONCE, KEEP IT → {BASE}   ({len(KEEP_ONCE)} how-tos, asked twice)\n")
+        passed = 0
+        for q in KEEP_ONCE:
+            try:
+                ok, note = _second_ask_is_kept(q)
+            except Exception as e:  # noqa: BLE001
+                ok, note = False, f"ERROR {e}"
+            passed += ok
+            print(f"  {'PASS' if ok else 'FAIL'}  {q:44s}  {note}")
+        print(f"\n  {passed}/{len(KEEP_ONCE)} kept on the second ask")
+        return 0 if passed == len(KEEP_ONCE) else 1
+
     print(f"ask probe → {BASE}   ({len(PROBE)} queries)\n")
     passed = 0
     for q, checks in PROBE:

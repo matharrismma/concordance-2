@@ -38,13 +38,32 @@ def test_relevance_keeps_only_what_matches():
     assert not find._relevant("speed of light", "a novel about sailing pirates")
 
 
+def test_practical_how_tos_are_searched_on_the_period_term():
+    """THE ARCHIVES INDEX THE CRAFT UNDER ITS PERIOD NAME. 'start a fire' stripped to 'fire' returns
+    sermons and a novel titled FIRE; 'keep warm without power' and 'make soap from wood ash' return
+    NOTHING at all. So for a practical/how-to gap the tortoise searches the period vocabulary the
+    tried-and-true archives actually shelve the craft under — verified live 2026-08-15. A pull hands
+    us a bare subject ('start fire'), on which is_practical reads False, so the intent is passed in."""
+    # the how-to framing carries the intent — mapped to the woodcraft/soap/water period terms
+    assert find._terms("how do I start a fire") == "woodcraft"
+    assert find._terms("how do I keep warm without power") == "woodcraft"     # the woodcraft cluster
+    assert find._terms("how do I make soap") == "soap making"
+    assert find._terms("how do I purify water") == "water purification"
+    # a pull passes practical=True explicitly because the subject was already stripped bare
+    assert find._terms("start fire", practical=True) == "woodcraft"
+    assert find._terms("soap from wood ash", practical=True) == "soap making"
+    # a NON-practical query is never bent toward woodcraft — a theology ask keeps its own words
+    assert find._terms("the lake of fire") == find._search_terms("the lake of fire")
+    assert "woodcraft" not in find._terms("what does living water mean")
+
+
 def test_no_wikipedia_only_primary_public_domain_sources():
     """No Wikipedia, no summary — a factual question we don't hold points to PRIMARY, public-domain
     sources, kept as a primary_pd 'source' card (never masquerading as the verified keeping)."""
     _enable()
-    find.internet_archive = lambda q, limit=3: []
-    find.project_gutenberg = lambda q, limit=3: []
-    find.library_of_congress = lambda q, limit=3: [
+    find.internet_archive = lambda q, limit=3, practical=None: []
+    find.project_gutenberg = lambda q, limit=3, practical=None: []
+    find.library_of_congress = lambda q, limit=3, practical=None: [
         {"title": "The sinking of the Titanic", "url": "http://www.loc.gov/item/titanic/",
          "format": "book", "source": "Library of Congress", "license": "PD", "tier": "primary"}]
     try:
@@ -66,11 +85,11 @@ def test_practical_carries_the_torch_of_foxfire():
     assert find.is_practical("how to preserve food for winter")
     assert not find.is_practical("what year did the Titanic sink")
     _enable()
-    find.internet_archive = lambda q, limit=3: [
+    find.internet_archive = lambda q, limit=3, practical=None: [
         {"title": "Food Preservation", "url": "https://archive.org/details/foodpres",
          "year": "1922", "source": "Internet Archive",
          "license": "Public domain (verify per item)", "tier": "primary"}]
-    find.project_gutenberg = lambda q, limit=3: [
+    find.project_gutenberg = lambda q, limit=3, practical=None: [
         {"title": "Woman's Institute Library of Cookery", "url": "https://www.gutenberg.org/ebooks/1",
          "year": "", "creator": "—", "source": "Project Gutenberg", "license": "Public domain",
          "tier": "primary"}]
@@ -96,7 +115,7 @@ def test_disabled_and_empty_degrade_to_nothing():
         _restore()
     _enable()
     find.wikipedia = lambda q: None
-    find.library_of_congress = lambda q, limit=3: []
+    find.library_of_congress = lambda q, limit=3, practical=None: []
     try:
         assert find.find_and_check("xyzzy nothing here", SEC) is None
     finally:

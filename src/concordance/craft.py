@@ -212,9 +212,20 @@ def sections(text: str, lo: int = 0, hi: Optional[int] = None) -> List[Tuple[int
         return []
 
     # Paragraph boundaries first: every cut lands on one, so no span ever begins mid-sentence.
+    #
+    # THE BLANK LINE MUST BE SEEN THROUGH A CARRIAGE RETURN. Project Gutenberg's plain-text books —
+    # the tortoise's surest well of public-domain practical knowledge — are stored with CRLF
+    # (\r\n) line endings, so a blank line is "\r\n\r\n". The old class `[ \t]*` did not admit the
+    # \r sitting between the two newlines, so this regex matched ZERO paragraph breaks in a CRLF
+    # book: the whole 240k-character work became one paragraph, flushed at the first MAX_SPAN, and
+    # the ONLY card cut was the title page. A woodcraft manual full of fire-making passages yielded
+    # a single span about nothing — every Gutenberg how-to fell silently through to the citation-only
+    # web tortoise (measured 2026-08-15: "Woodcraft and Camping" -> 1 section, then 1 card). Admit
+    # the \r so CRLF and LF documents both split into their real paragraphs; offsets are unchanged
+    # (they still address the file's own bytes), so verify_spans stays true.
     paras: List[Tuple[int, int]] = []
     pos = 0
-    for m in re.finditer(r"\n[ \t]*\n+", body):
+    for m in re.finditer(r"\n[ \t\r]*\n+", body):
         if m.start() > pos:
             paras.append((pos, m.start()))
         pos = m.end()
