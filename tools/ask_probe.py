@@ -44,6 +44,12 @@ PROBE = [
     ("how do I preserve meat", {"lead_practical": True}),
     ("how do I signal for help", {"lead_practical": True}),
     ("how do I find north without a compass", {"lead_practical": True}),
+    # ── construction how-to ("make X from Y"): a how-to that names its materials must reach the
+    #    full practical pipeline and LEAD with a field card — NOT the weaker resourceful branch that
+    #    returned an empty lead (measured 2026-08-14, fixed by _MAKE_FROM + the shared ranker) ──────
+    ("make soap from wood ash", {"lead_practical": True}),
+    ("build a shelter from branches", {"lead_practical": True}),
+    ("make a water filter with sand and charcoal", {"lead_practical": True}),
     # ── first-aid: practical/health, NEVER comfort or crisis ────────────────────
     ("how do I treat a burn", {"not_kind": {"comfort", "crisis"}}),
     ("how do I set a broken bone", {"not_kind": {"comfort", "crisis"}}),

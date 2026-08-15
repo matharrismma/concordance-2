@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import re
 import time
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from . import corpus
 from .config import EngineConfig
@@ -567,8 +567,47 @@ _FIELD_INSTRUCTIONAL = frozenset({
 })
 _RESOURCEFUL = re.compile(
     r"(what (?:can|could|should) i (?:do|make|build|use|create|cook|fix|craft)\b.*\b(?:with|from|out of)\b"
-    r"|(?:make|build|create|improvise|fix|cook|craft)\b.+\b(?:with|from|out of)\b"
     r"|all i (?:have|got)\b|i only have\b|i just have\b|i've only got\b|with (?:only|just)\b)", re.I)
+# A CONSTRUCTION how-to — "make lye soap from wood ash", "build a water filter with sand" — is not the
+# constrained "what can I do with what I HAVE" question above; it is a plain how-to that names its
+# materials. It used to be swallowed by _RESOURCEFUL and met with the weaker practical-shelf search
+# (no lead, no tortoise — measured 2026-08-14: five such queries returned an empty lead). Route it
+# instead through the full FOUND pipeline (rank + tortoise) by raising the `practical` flag on it.
+_MAKE_FROM = re.compile(
+    r"\b(make|build|create|construct|assemble|improvise|fix|repair|cook|craft|forge|fashion|sew|weld|"
+    r"brew|distill|smelt|tan|render)\b.+\b(with|from|out of|using)\b", re.I)
+
+
+def _practical_pool(query: str) -> List[Dict[str, Any]]:
+    """Search the INSTRUCTIONAL field shelves DIRECTLY first — so a matching field card is always in
+    the pool even when the auto-generated DB rows (a T-Bone Steak, a hand sanitizer) outrank it
+    globally on a shared word. Then the broader practical set, then the whole keeping. Deduped,
+    search-order kept; _practical_rank decides the lead."""
+    got = (corpus.search(query, limit=8, shelves=set(_FIELD_INSTRUCTIONAL))
+           + corpus.search(query, limit=6, shelves=set(_PRACTICAL_SHELVES))
+           + corpus.search(query, limit=10))
+    seen, out = set(), []
+    for c in got:
+        if c.get("id") and c["id"] not in seen:
+            seen.add(c["id"]); out.append(c)
+    return out
+
+
+def _practical_rank(query: str, pool: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Rank so the LEAD is always the best REAL match. Tiers: (0) an INSTRUCTIONAL field card that
+    shares a word — the how-to answer; (1) any card that shares a word (incl. the reference
+    databases); (2) a practical card; (3) the rest; (4) the academic catalog and product noise LAST —
+    present, never leading. Stable sort preserves search relevance within a tier."""
+    def _tier(c: Dict[str, Any]) -> int:
+        sh, shares = c.get("shelf"), _shares_a_word(query, c)
+        if sh in _ACADEMIC_DEMOTE or _is_product_noise(c):
+            return 4
+        if shares and sh in _FIELD_INSTRUCTIONAL:
+            return 0
+        if shares:
+            return 1
+        return 2 if sh in _PRACTICAL_SHELVES else 3
+    return sorted(pool, key=_tier)[:6]
 
 
 def _wants_resourceful(text: str) -> bool:
@@ -946,16 +985,25 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     if kind == "resourceful":
         # "What can I do with what I have?" — surface the practical keeping (the field library,
         # apothecary, almanac, free tools) for the resources named. FOUND and attributed, never a
-        # plan we invented. Restrict to the practical shelves, then fall back to the whole keeping.
+        # plan we invented. Ranked like a how-to (instructional field cards lead; drug/food-DB rows and
+        # product noise last), handed over with a LEAD card + a discerned PATH via _witnessed — the old
+        # shape returned a bare results list with no lead and no path (measured empty 2026-08-14).
         res = subject(text) or (text or "").strip()
-        hits = corpus.search(res, limit=8, shelves=set(_PRACTICAL_SHELVES)) or corpus.search(res, limit=8)
+        hits = _practical_rank(res, _practical_pool(res))
+        # LEAD only with an INSTRUCTIONAL field card — never a bare reference-DB row that merely shares
+        # a word (measured 2026-08-14: "what can I do with a tarp" led with a sailboat physical-activity
+        # MET row). When the nearest is only a DB row, be honest and ask for more rather than mislead.
+        led = bool(hits) and _shares_a_word(res, hits[0]) and hits[0].get("shelf") in _FIELD_INSTRUCTIONAL
         msg = ("With what you have on hand, here is what the keeping holds — found and attributed, "
                "never invented. First things first: breathing, then shelter, then water, then food."
-               if hits else
+               if led else
                "Tell me what you have on hand — even a few things — and I'll show you what the "
                "keeping holds that you can do with them.")
-        return {**base, "kind": "resourceful", "message": msg,
-                "results": [corpus._brief(c) for c in hits], "note": _NOTE}
+        out = {**base, "kind": "resourceful", "message": msg,
+               "results": [corpus._brief(c) for c in hits], "note": _NOTE}
+        if led:
+            out["lead"] = _lead_card(hits[0])
+        return _witnessed(out, text, witness, gate_just_opened)
 
     if kind == "define":
         # Look the TERM up on the word shelves (the tongues + the dictionary), not the whole
@@ -1184,7 +1232,8 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     # A how-to question IS a practical intent even when its words aren't in the practical set
     # ("keep warm without power" has none) — the framing itself signals it. So the how-to lane
     # (which prefers field cards and demotes theories + product noise) covers it too.
-    practical = bool(corpus._PRACTICAL & set(subj.lower().split())) or bool(_HOWTO.search(text or ""))
+    practical = (bool(corpus._PRACTICAL & set(subj.lower().split()))
+                 or bool(_HOWTO.search(text or "")) or bool(_MAKE_FROM.search(text or "")))
     # THE GREAT QUESTIONS OUTRANK THE CARD SEARCH (Matt, 2026-07-28: "we are after sinners not
     # saints"). "Is god even real" matches thousands of cards by keyword — and a card list is the
     # WRONG answer to a person asking their biggest question. The probe caught nine of twelve
@@ -1265,41 +1314,13 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
         # merged AHEAD of the whole keeping so the answer a family needs stands first — and the whole
         # keeping still rides behind, so nothing is lost. Only lead with it when it actually matches.
         q = subj
-
-        def _pool(query):
-            # Search the INSTRUCTIONAL field shelves DIRECTLY first — so a matching field card is
-            # always in the pool even when the auto-generated DB rows (a T-Bone Steak, a hand
-            # sanitizer) outrank it globally on a shared word. Then the broader practical set, then
-            # the whole keeping. Deduped, search-order kept; the tier sort below decides the lead.
-            got = (corpus.search(query, limit=8, shelves=set(_FIELD_INSTRUCTIONAL))
-                   + corpus.search(query, limit=6, shelves=set(_PRACTICAL_SHELVES))
-                   + corpus.search(query, limit=10))
-            seen, out = set(), []
-            for c in got:
-                if c.get("id") and c["id"] not in seen:
-                    seen.add(c["id"]); out.append(c)
-            return out
-
-        pool = _pool(q)
+        pool = _practical_pool(q)
         # Subject extraction can drop the very noun ("start a fire" -> "start"): if nothing in the
         # pool shares a word, retry on the words as typed before giving up.
         if q != (text or "") and not any(_shares_a_word(q, c) for c in pool[:6]):
             q = text or q
-            pool = _pool(q)
-        # Rank so the LEAD is always the best REAL match. Tiers: (0) an INSTRUCTIONAL field card that
-        # shares a word — the how-to answer; (1) any card that shares a word (incl. the reference
-        # databases); (2) a practical card; (3) the rest; (4) the academic catalog and product noise
-        # LAST — present, never leading. Stable sort preserves search relevance within a tier.
-        def _tier(c):
-            sh, shares = c.get("shelf"), _shares_a_word(q, c)
-            if sh in _ACADEMIC_DEMOTE or _is_product_noise(c):
-                return 4
-            if shares and sh in _FIELD_INSTRUCTIONAL:
-                return 0
-            if shares:
-                return 1
-            return 2 if sh in _PRACTICAL_SHELVES else 3
-        hits = sorted(pool, key=_tier)[:6]
+            pool = _practical_pool(q)
+        hits = _practical_rank(q, pool)                # instructional field cards lead; DB rows + noise last
         subj = q                                       # the effective query, for the weak check below
     else:
         if _vol:

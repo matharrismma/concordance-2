@@ -178,3 +178,4 @@ test_caps_fresh.py
 test_review_fixes.py
 test_decks.py
 test_path.py
+tests/test_practical_rank.py
