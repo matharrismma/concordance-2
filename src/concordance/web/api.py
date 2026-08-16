@@ -2151,6 +2151,63 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         )
         return _ok({"record": rec.to_dict(), "generated": False})
 
+    if method == "GET" and path == "/playbook":
+        # THE PLAYBOOK — "Canon commands, Playbook remembers." The Body's testimony of faithful
+        # obedience: read-only here (list, or one entry by ?id=). Confirmed testimony is affirmed BY
+        # THE BODY — it is NOT Scripture and binds no conscience; the payload says so on every view.
+        from .. import playbook as _pb
+        eid = (query.get("id") or "").strip()
+        if eid:
+            got = _pb.get(eid)
+            return _ok(got["entry"]) if got.get("ok") else _err(404, "no such entry")
+        return _ok(_pb.list_entries(status=query.get("status") or "",
+                                    author=query.get("author") or "",
+                                    limit=int(query["limit"]) if str(query.get("limit") or "").isdigit() else 50))
+
+    if method == "POST" and path == "/playbook/signable":
+        # Step 1: the exact bytes to sign ON THE DEVICE for a create/witness/outcome/prune. The key
+        # never travels; the server mints the nonce + clock so stored and signed bytes cannot drift.
+        from .. import playbook as _pb
+        b = body if isinstance(body, dict) else {}
+        op = str(b.get("op") or "entry").strip()
+        if op == "entry":
+            r = _pb.signable_entry(str(b.get("author") or ""), str(b.get("confession") or ""),
+                                   b.get("anchors") if isinstance(b.get("anchors"), list) else [],
+                                   str(b.get("action") or ""), str(b.get("situation") or ""),
+                                   str(b.get("body") or ""),
+                                   int(b["wait_seconds"]) if str(b.get("wait_seconds") or "").isdigit() else _pb.DEFAULT_WAIT_S)
+        elif op == "witness":
+            r = _pb.signable_witness(str(b.get("witness") or ""), str(b.get("entry_id") or ""),
+                                     bool(b.get("affirms", True)), str(b.get("note") or ""))
+        elif op == "outcome":
+            r = _pb.signable_outcome(str(b.get("by") or ""), str(b.get("entry_id") or ""),
+                                     str(b.get("outcome") or ""), str(b.get("note") or ""))
+        elif op == "prune":
+            r = _pb.signable_prune(str(b.get("by") or ""), str(b.get("entry_id") or ""),
+                                   str(b.get("reason") or ""))
+        else:
+            return _err(400, "op must be entry | witness | outcome | prune")
+        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
+
+    if method == "POST" and path == "/playbook/submit":
+        # Step 2: verify the detached signature over those exact bytes and enter the testimony / event.
+        from .. import playbook as _pb
+        b = body if isinstance(body, dict) else {}
+        op = str(b.get("op") or "entry").strip()
+        fields = b.get("fields") if isinstance(b.get("fields"), dict) else None
+        sig = str(b.get("signature") or "")
+        if op == "entry":
+            r = _pb.record(fields, sig, str(b.get("display_name") or ""))
+        elif op == "witness":
+            r = _pb.add_witness(fields, sig)
+        elif op == "outcome":
+            r = _pb.add_outcome(fields, sig)
+        elif op == "prune":
+            r = _pb.prune(fields, sig)
+        else:
+            return _err(400, "op must be entry | witness | outcome | prune")
+        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
+
     if method == "GET" and path == "/harmony":
         # Harmony of the Gospels — one event, every gospel that witnesses it, side by side.
         # Witness content: the same gate as /teachings, /prophecy, /commentary.
@@ -2378,6 +2435,9 @@ ROUTES = [
     {"path": "/capabilities", "methods": ("GET",), "api": True},
     {"path": "/kernel", "methods": ("GET",), "api": True},
     {"path": "/kernel/gate", "methods": ("POST",), "api": True, "rl": True},
+    {"path": "/playbook", "methods": ("GET",), "api": True},
+    {"path": "/playbook/signable", "methods": ("POST",), "api": True, "rl": True},
+    {"path": "/playbook/submit", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/activity.json", "methods": ("GET",), "api": True},
     {"path": "/build.json", "methods": ("GET",), "api": True},
     {"path": "/mesh/signable", "methods": ("GET",), "api": True},

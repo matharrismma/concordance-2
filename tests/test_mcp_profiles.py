@@ -96,14 +96,13 @@ def test_a_call_inside_the_mounted_plane_still_works():
 
 
 def test_the_full_catalog_on_mcp_is_unchanged_a_golden():
-    """Existing clients keep the wide door until narrowing is a deliberate cutover. 90 tools
-    (83 + the 3 Candidate Engine tools, task #135, 2026-08-05 + the 2 deck tools, 2026-08-12 + the
-    2 gate-kernel tools, task #152, 2026-08-15): this golden moves only when the catalog does, and
-    moving it is a conscious act — the assessment's expansion freeze, countable. The kernel tools
-    (`kernel` reads the law, `kernel_gate` runs one proposed state-change through it) are the
-    sanctioned rise here: both read-only/derive, both on the `checks` profile — an agent must be
-    able to read the covenant and DISCERN a transition before it writes. +2, deliberate."""
-    assert len(_full_catalog()) == 90
+    """Existing clients keep the wide door until narrowing is a deliberate cutover. 93 tools
+    (83 + 3 Candidate Engine, #135 + 2 deck, 2026-08-12 + 2 gate-kernel, #152 + 3 Playbook, #153,
+    2026-08-15): this golden moves only when the catalog does, and moving it is a conscious act. The
+    Playbook tools (`playbook_read`/`playbook_signable`/`playbook_submit`) are the sanctioned rise
+    here — the Body's testimony ledger ('Canon commands, Playbook remembers'), all on the `community`
+    profile (off by default on a hosted box, same governance posture as shelf_drop). +3, deliberate."""
+    assert len(_full_catalog()) == 93
 
 
 def test_the_witness_gate_semantics_survive_the_mount():

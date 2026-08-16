@@ -329,6 +329,39 @@ def _secular_tools() -> List[dict]:
                          "the library amplified it; the library did not verify it."),
          "inputSchema": {"type": "object", "properties": {
              "limit": {"type": "integer"}}, "required": []}},
+        {"name": "playbook_read",
+         "description": ("THE PLAYBOOK — the Body's testimony of faithful obedience: 'Canon commands, "
+                         "Playbook remembers.' List entries (optionally by `status` "
+                         "quarantine/confirmed/rejected/pruned or `author`), or one by `id`. Confirmed "
+                         "testimony is affirmed BY THE BODY — it is NOT Scripture and binds no "
+                         "conscience. The Playbook remembers; it never becomes doctrine."),
+         "inputSchema": {"type": "object", "properties": {
+             "id": {"type": "string"}, "status": {"type": "string"},
+             "author": {"type": "string"}, "limit": {"type": "integer"}}, "required": []}},
+        {"name": "playbook_signable",
+         "description": ("Step 1 — the exact bytes to sign ON THE DEVICE for a Playbook write. `op` is "
+                         "entry | witness | outcome | prune. A new `entry` REQUIRES a CONFESSION ('I "
+                         "may be wrong. I acted in faith according to [anchors].') + ≥1 Scripture "
+                         "anchor + an action (OPEN/BUILD/RESERVE/PRUNE/HOLD). The key never travels."),
+         "inputSchema": {"type": "object", "properties": {
+             "op": {"type": "string", "enum": ["entry", "witness", "outcome", "prune"]},
+             "author": {"type": "string"}, "confession": {"type": "string"},
+             "anchors": {"type": "array", "items": {"type": "string"}}, "action": {"type": "string"},
+             "situation": {"type": "string"}, "body": {"type": "string"},
+             "witness": {"type": "string"}, "by": {"type": "string"},
+             "entry_id": {"type": "string"}, "affirms": {"type": "boolean"},
+             "outcome": {"type": "string"}, "reason": {"type": "string"},
+             "note": {"type": "string"}}, "required": ["op"]}},
+        {"name": "playbook_submit",
+         "description": ("Step 2 — verify your detached signature over those exact bytes and enter the "
+                         "testimony/event. A new entry is born QUARANTINE and reaches CONFIRMED only "
+                         "when TWO independent brothers affirm (never the author — Deut 19:15) and the "
+                         "wait elapses. Record the OUTCOME (fruit/mixed/failed) later, after it is "
+                         "seen; a failed fruit may be PRUNED (John 15:2). Failure is not hidden."),
+         "inputSchema": {"type": "object", "properties": {
+             "op": {"type": "string", "enum": ["entry", "witness", "outcome", "prune"]},
+             "fields": {"type": "object"}, "signature": {"type": "string"},
+             "display_name": {"type": "string"}}, "required": ["op", "fields", "signature"]}},
         {"name": "curate_queue",
          "description": ("What waits on a HUMAN steward. The counter never promotes; it only "
                          "decides when a person must look."),
@@ -858,6 +891,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "tools": {"groups_list": "read", "group_get": "read", "group_create": "publish",
                   "group_join": "publish", "group_contribute": "publish",
                   "shelf_signable": "derive", "shelf_drop": "publish", "shelf_read": "read",
+                  "playbook_read": "read", "playbook_signable": "derive", "playbook_submit": "publish",
                   "commons_read": "read", "curate_queue": "read", "curate_signable": "derive",
                   "curate": "publish", "moderation_signable": "derive", "report": "publish",
                   "mesh_map": "read", "mesh_inbox": "read", "mesh_door": "read",
@@ -1163,6 +1197,48 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     if name == "commons_read":
         from .. import shelves as _sh
         return _sh.commons(limit=int(args.get("limit", 40) or 40))
+    if name == "playbook_read":
+        from .. import playbook as _pb
+        if args.get("id"):
+            got = _pb.get(str(args["id"]))
+            return got["entry"] if got.get("ok") else {"error": "no such entry"}
+        return _pb.list_entries(status=str(args.get("status") or ""),
+                                author=str(args.get("author") or ""),
+                                limit=int(args.get("limit", 50) or 50))
+    if name == "playbook_signable":
+        from .. import playbook as _pb
+        op = str(args.get("op") or "entry").strip()
+        if op == "entry":
+            return _pb.signable_entry(str(args.get("author") or ""), str(args.get("confession") or ""),
+                                      args.get("anchors") if isinstance(args.get("anchors"), list) else [],
+                                      str(args.get("action") or ""), str(args.get("situation") or ""),
+                                      str(args.get("body") or ""))
+        if op == "witness":
+            return _pb.signable_witness(str(args.get("witness") or ""), str(args.get("entry_id") or ""),
+                                        bool(args.get("affirms", True)), str(args.get("note") or ""))
+        if op == "outcome":
+            return _pb.signable_outcome(str(args.get("by") or ""), str(args.get("entry_id") or ""),
+                                        str(args.get("outcome") or ""), str(args.get("note") or ""))
+        if op == "prune":
+            return _pb.signable_prune(str(args.get("by") or ""), str(args.get("entry_id") or ""),
+                                      str(args.get("reason") or ""))
+        return {"error": "op must be entry | witness | outcome | prune"}
+    if name == "playbook_submit":
+        from .. import playbook as _pb
+        if isinstance(args.get("fields"), dict) and args["fields"].get("private_key"):
+            return _no_private_key("playbook_submit")
+        op = str(args.get("op") or "entry").strip()
+        fields = args.get("fields") if isinstance(args.get("fields"), dict) else None
+        sig = str(args.get("signature") or "")
+        if op == "entry":
+            return _pb.record(fields, sig, str(args.get("display_name") or ""))
+        if op == "witness":
+            return _pb.add_witness(fields, sig)
+        if op == "outcome":
+            return _pb.add_outcome(fields, sig)
+        if op == "prune":
+            return _pb.prune(fields, sig)
+        return {"error": "op must be entry | witness | outcome | prune"}
     if name == "curate_queue":
         from .. import shelves as _sh
         return _sh.review_queue()
