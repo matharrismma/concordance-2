@@ -453,16 +453,30 @@ def craft(sha: str, subject: str, *, waybill: Optional[Dict[str, Any]] = None,
 
     text = decode(raw)
     lo, hi = trim(text)
-    spans = rank(text, sections(text, lo, hi), subject, limit=limit)
+    all_sections = sections(text, lo, hi)
+    spans = rank(text, all_sections, subject, limit=limit)
     cards = []
     for (s, e, h) in spans:
         c = card_from_span(sha, s, e, subject=subject, waybill=wb, parent_id=parent_id,
                            heading=h, trim_at=lo, plane=plane, text=text)
         if c:
             cards.append(c)
+    # STRUCTURE QUALITY — how INSTRUCTIONAL this source is FOR this subject, so pull_and_card can
+    # prefer the most structured of several candidates (a how-to manual over a discursive memoir).
+    #   heading_hits: kept passages sitting under a REAL section heading that names the subject —
+    #                 the strongest "this book has a chapter ON it" signal (a memoir scores ~0).
+    #   lead_hits:    distinct subject terms in the best (first) passage — how squarely it lands.
+    _want = _stems(subject) - {_stem(g) for g in _GENERIC_SUBJECT}
+    if not _want:
+        _want = _stems(subject)
+    heading_hits = sum(1 for (s, e, h) in spans
+                       if h and (_want & _stems(h)) and _looks_like_heading(h))
+    lead_hits = (len(_want & (_stems(text[spans[0][0]:spans[0][1]]) | _stems(spans[0][2])))
+                 if spans else 0)
     return {"status": "crafted" if cards else "nothing_relevant",
             "cards": cards, "sha256": sha, "subject": subject,
-            "sections_found": len(sections(text, lo, hi)), "chars": len(text),
+            "sections_found": len(all_sections), "chars": len(text),
+            "quality": {"heading_hits": heading_hits, "lead_hits": lead_hits, "cards": len(cards)},
             "held_for_review": True,
             "message": (f"{len(cards)} passage(s) cut from a source we hold, each one addressable."
                         if cards else

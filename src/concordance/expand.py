@@ -189,6 +189,13 @@ def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
         except Exception:  # noqa: BLE001 — one deaf provider must not silence the others
             continue
 
+    # Try up to three candidate sources and KEEP THE MOST STRUCTURED one — a source with a real
+    # section heading ON the subject (a how-to manual) beats a discursive memoir that merely mentions
+    # it, so the LEAD passage reads like instruction, not prose (measured 2026-08-15: Nessmuk's
+    # woodcraft MEMOIR led "start a fire" with a narrative line). Matt approved spending the extra
+    # fetch. An EARLY WIN short-circuits: the first candidate that already carries a subject heading is
+    # taken at once, so the cost is only paid when the leading sources are unstructured.
+    candidates: List[tuple] = []          # (quality_key, doc, sha, cards)
     tried = 0
     for doc in docs:
         if tried >= 3:
@@ -203,79 +210,88 @@ def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
         if wb.get("status") not in ("held", "already"):
             continue
         sha = wb["sha256"]
-        parent_id = "card_src_" + sha[:12]
-        r = craft_fn(sha, subj or q, parent_id=parent_id, plane=plane)
+        r = craft_fn(sha, subj or q, parent_id="card_src_" + sha[:12], plane=plane)
         cards = list(r.get("cards") or [])
         if len(cards) < 3:
             continue          # a book that barely speaks to the subject is the wrong book
         sv = _craft.verify_spans(cards)
         if sv["false"] or sv["true"] != len(cards):
             continue          # never keep a card that does not verify — try the next source
-        # THE PD CHECK AT THE PULL (Matt, 2026-08-12): a confirmed primary PUBLIC-DOMAIN source is
-        # added to the shared corpus at once (lifecycle 'public'), so the NEXT asking finds it and
-        # never goes out — the tortoise's whole point, "search once per question". Anything the PD
-        # check cannot confirm keeps the earlier, conservative behaviour: marked for the human review
-        # lane at 'public_review'. (This deliberately loosens the 2026-08-06 "both planes wait" rule,
-        # but ONLY for a verified-PD primary source — uncertain still waits.)
-        pd = _pd_ok(doc)
-        # A practical pull is Foxfire knowledge: keep it on the PRACTICAL shelf, which the how-to
-        # ranker leads with and which the next asking recognises — a generic "sources" card is
-        # demoted below a tangential field card, so the tortoise would go out all over again and
-        # "search once, keep it" would never hold. And tag every kept card `tortoise: True`, so a
-        # later ask can tell the tortoise's OWN passages (cut FOR this subject) from the millions of
-        # bulk source excerpts and short-circuit straight to them, instantly, without re-fetching.
-        shelf = "practical" if practical else "sources"
-        spine_id = "card_spine_practical" if practical else "card_spine_sources"
-        parent_card = {
-            "id": parent_id, "kind": "practical" if practical else "reference",
-            "title": str(doc.get("title") or subj)[:140],
-            "body": (f"A source fetched on the call for {subj!r}: "
-                     f"{str(doc.get('title') or '')[:160]} (license as reported by the source: "
-                     f"{str(doc.get('license') or 'unstated')[:60]}; "
-                     + ("verified public domain — released to the shared library."
-                        if pd else "not yet verified — held for review.")
-                     + " Kept whole in the ark; the passages carded beneath this one are cut "
-                     "from it, and each names the exact place it came from."),
-            "source": {"label": str(doc.get("title") or "")[:200],
-                       "url": str(doc.get("url") or ""), "domain": "",
-                       "authority_tier": "primary_pd"},
-            "shelf": shelf, "box": "foxfire" if practical else "source", "subject": subj,
-            "bands": sorted({w for w in subj.lower().split() if len(w) > 2})[:10]
-                     + (["practical", "foxfire"] if practical else ["source"]),
-            "connections": [{"to_card_id": spine_id, "relationship": "member_of",
-                             "evidence": "a primary source the tortoise went and found"}],
-            "author": "engine", "created_at": 0.0, "updated_at": 0.0,
-            "visibility": "public",
-            "lifecycle_stage": "public" if pd else "public_review",
-            "volatility": "permanent", "surface": "secular", "generated": False,
-            "extra": {"source_sha256": sha, "crafted_from": str(doc.get("url") or ""),
-                      "license": str(doc.get("license") or "")[:120], "pd_released": pd,
-                      "tortoise": True},
-        }
-        # a released PD source needs no review queue; an uncertain one is marked for the operator.
-        parent = parent_card if pd else _unchecked.mark(parent_card)
-        for c in cards:                       # the span cards ride at the parent's stage AND shelf
-            c["lifecycle_stage"] = "public" if pd else "public_review"
-            c["shelf"] = shelf
-            ex = dict(c.get("extra") or {})
-            ex["tortoise"] = True
-            c["extra"] = ex
-        # The spine must exist before the members that hang off it, or the graft dangles (the same
-        # no-orphan rule find._mint_doc keeps). _keep is idempotent, so re-asserting it costs nothing.
-        spine = _find._spine_card(shelf)
-        kept = _keep(([spine] if spine else []) + [parent] + cards)
-        return {"status": "carded", "source_card": parent, "cards": cards,
-                "kept": kept, "sha256": sha, "plane": plane,
-                "held_for_review": (not pd), "released_public": pd,
-                "message": (f"Not in the keeping, so it was fetched and cut on the call — "
-                            f"{len(cards)} passage(s) from {str(doc.get('title') or '')[:80]!r}, "
-                            "kept so the next asking finds them at once."
-                            + (" A verified public-domain source — added to the shared library."
-                               if pd else " Held for a copyright check before it joins the "
-                               "shared public library."))}
+        qual = r.get("quality") or {}
+        candidates.append(((qual.get("heading_hits", 0), qual.get("lead_hits", 0),
+                            qual.get("cards", 0)), doc, sha, cards))
+        if qual.get("heading_hits", 0) >= 1:
+            break             # a real chapter ON the subject — good enough; don't spend another fetch
 
-    return {"status": "nothing_found",
-            "message": "the archives were searched and no openable text spoke to this subject"}
+    if not candidates:
+        return {"status": "nothing_found",
+                "message": "the archives were searched and no openable text spoke to this subject"}
+
+    # THE MOST STRUCTURED candidate wins: heading match, then how squarely the lead lands, then coverage.
+    candidates.sort(key=lambda t: t[0], reverse=True)
+    _key, doc, sha, cards = candidates[0]
+    parent_id = "card_src_" + sha[:12]
+    # THE PD CHECK AT THE PULL (Matt, 2026-08-12): a confirmed primary PUBLIC-DOMAIN source is added to
+    # the shared corpus at once (lifecycle 'public'), so the NEXT asking finds it and never goes out —
+    # the tortoise's whole point, "search once per question". Anything the PD check cannot confirm keeps
+    # the earlier, conservative behaviour: marked for the human review lane at 'public_review'. (This
+    # deliberately loosens the 2026-08-06 "both planes wait" rule, but ONLY for a verified-PD source.)
+    pd = _pd_ok(doc)
+    # A practical pull is Foxfire knowledge: keep it on the PRACTICAL shelf, which the how-to ranker
+    # leads with and which the next asking recognises — a generic "sources" card is demoted below a
+    # tangential field card, so the tortoise would go out all over again and "search once, keep it"
+    # would never hold. And tag every kept card `tortoise: True`, so a later ask can tell the tortoise's
+    # OWN passages (cut FOR this subject) from the bulk source excerpts and short-circuit straight to
+    # them, instantly, without re-fetching.
+    shelf = "practical" if practical else "sources"
+    spine_id = "card_spine_practical" if practical else "card_spine_sources"
+    parent_card = {
+        "id": parent_id, "kind": "practical" if practical else "reference",
+        "title": str(doc.get("title") or subj)[:140],
+        "body": (f"A source fetched on the call for {subj!r}: "
+                 f"{str(doc.get('title') or '')[:160]} (license as reported by the source: "
+                 f"{str(doc.get('license') or 'unstated')[:60]}; "
+                 + ("verified public domain — released to the shared library."
+                    if pd else "not yet verified — held for review.")
+                 + " Kept whole in the ark; the passages carded beneath this one are cut "
+                 "from it, and each names the exact place it came from."),
+        "source": {"label": str(doc.get("title") or "")[:200],
+                   "url": str(doc.get("url") or ""), "domain": "",
+                   "authority_tier": "primary_pd"},
+        "shelf": shelf, "box": "foxfire" if practical else "source", "subject": subj,
+        "bands": sorted({w for w in subj.lower().split() if len(w) > 2})[:10]
+                 + (["practical", "foxfire"] if practical else ["source"]),
+        "connections": [{"to_card_id": spine_id, "relationship": "member_of",
+                         "evidence": "a primary source the tortoise went and found"}],
+        "author": "engine", "created_at": 0.0, "updated_at": 0.0,
+        "visibility": "public",
+        "lifecycle_stage": "public" if pd else "public_review",
+        "volatility": "permanent", "surface": "secular", "generated": False,
+        "extra": {"source_sha256": sha, "crafted_from": str(doc.get("url") or ""),
+                  "license": str(doc.get("license") or "")[:120], "pd_released": pd,
+                  "tortoise": True},
+    }
+    # a released PD source needs no review queue; an uncertain one is marked for the operator.
+    parent = parent_card if pd else _unchecked.mark(parent_card)
+    for c in cards:                       # the span cards ride at the parent's stage AND shelf
+        c["lifecycle_stage"] = "public" if pd else "public_review"
+        c["shelf"] = shelf
+        ex = dict(c.get("extra") or {})
+        ex["tortoise"] = True
+        c["extra"] = ex
+    # The spine must exist before the members that hang off it, or the graft dangles (the same
+    # no-orphan rule find._mint_doc keeps). _keep is idempotent, so re-asserting it costs nothing.
+    spine = _find._spine_card(shelf)
+    kept = _keep(([spine] if spine else []) + [parent] + cards)
+    return {"status": "carded", "source_card": parent, "cards": cards,
+            "kept": kept, "sha256": sha, "plane": plane,
+            "held_for_review": (not pd), "released_public": pd,
+            "message": (f"Not in the keeping, so it was fetched and cut on the call — "
+                        f"{len(cards)} passage(s) from {str(doc.get('title') or '')[:80]!r}, "
+                        "kept so the next asking finds them at once."
+                        + (" A verified public-domain source — added to the shared library."
+                           if pd else " Held for a copyright check before it joins the "
+                           "shared public library."))}
 
 
 def _keep(cards: List[Dict[str, Any]]) -> int:
