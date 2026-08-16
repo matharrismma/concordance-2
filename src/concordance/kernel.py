@@ -90,6 +90,7 @@ class GateRecord:
     safe_next: Tuple[str, ...]         # 9. what can safely happen next
     verdict: str                       # REJECT | QUARANTINE | CONFIRMED
     authority_out: str                 # the resulting authority — capped by the monotonic law
+    warnings: Tuple[str, ...] = ()      # FLOOR 'warn' concerns — named, not a veto (the advisory channel)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -98,6 +99,7 @@ class GateRecord:
             "assumptions": list(self.assumptions), "changed": self.changed,
             "preserved": self.preserved, "safe_next": list(self.safe_next),
             "verdict": self.verdict, "authority_out": self.authority_out,
+            "warnings": list(self.warnings),
         }
 
 
@@ -192,7 +194,7 @@ def gate(artifact: Optional[Dict[str, Any]] = None, *,
          evidence: Any = None, witness: Any = None, author: Any = None,
          contradicts: bool = False, retracted: Optional[bool] = None, error: Any = None,
          assumptions: Tuple[str, ...] = (), wait_satisfied: bool = True,
-         in_kind_checked: bool = False) -> GateRecord:
+         in_kind_checked: bool = False, content: str = "") -> GateRecord:
     """Route one state-change through the five moves and return the nine-field record.
 
     Exactly one verdict:
@@ -223,19 +225,37 @@ def gate(artifact: Optional[Dict[str, Any]] = None, *,
             safe_next=("retry when the system recovers", "read as UNVERIFIED — never as a 'no'"),
             verdict="QUARANTINE", authority_out="quarantined")
 
-    # RED / FLOOR — the hard floors. A retraction or a contradiction or a proven mismatch REJECTS.
+    # MORAL CONTENT — scan the decision's own words for the RED non-negotiables and FLOOR boundaries
+    # (constraints.py). Authority discipline is not the only floor: a well-TYPED proposal can still
+    # DESCRIBE a wrong (fake testimonials, preying on the vulnerable). Only scanned when `content` is
+    # given (the governance path) — never on arbitrary text. A RED hit or a FLOOR 'error' REJECTS; a
+    # FLOOR 'warn' rides along as a named concern, not a veto.
+    warn_notes: Tuple[str, ...] = ()
+    moral = None
+    if content:
+        from . import constraints as _con
+        cs = _con.scan(content)
+        warn_notes = tuple("%s %s: %s" % (h["id"], h["name"], h["cite"]) for h in cs["warnings"])
+        if cs["red"]:
+            moral = ("RED", cs["red"][0])
+        elif cs["floor_error"]:
+            moral = ("FLOOR", cs["floor_error"][0])
+
+    # RED / FLOOR — the hard floors. A retraction, a contradiction, a proven mismatch, or a moral
+    # constraint hit REJECTS.
     is_retracted = a.get("retracted") if retracted is None else retracted
     reject_reason = ("retracted" if is_retracted else
                      "contradicts what is held" if contradicts else
-                     "verification found it BROKEN" if _mismatch(evidence) else "")
+                     "verification found it BROKEN" if _mismatch(evidence) else
+                     ("%s %s — %r" % (moral[1]["id"], moral[1]["name"], moral[1]["matched"]) if moral else ""))
     if reject_reason:
-        failed.append("FLOOR" if is_retracted else "RED")
+        failed.append("RED" if (moral and moral[0] == "RED") or _mismatch(evidence) else "FLOOR")
         return GateRecord(
             entered, kind, authority_in, tuple(passed), tuple(failed), notes + (reject_reason,),
             changed="refused entry — a floor failed",
             preserved="the artifact and the reason, in the append-only trail",
             safe_next=("do NOT cite, serve, or seal", "a corrected version must re-enter and be re-gated"),
-            verdict="REJECT", authority_out="quarantined")
+            verdict="REJECT", authority_out="quarantined", warnings=warn_notes)
     passed.extend(("RED", "FLOOR"))
 
     verified = _evidence_holds(evidence)
@@ -253,7 +273,7 @@ def gate(artifact: Optional[Dict[str, Any]] = None, *,
             changed=f"authority {authority_in} -> verified (evidenced + witnessed gate)",
             preserved="the evidence, the witness, and the prior authority",
             safe_next=("may be cited AS verified", "may be sealed to the PASS-only ledger"),
-            verdict="CONFIRMED", authority_out=out)
+            verdict="CONFIRMED", authority_out=out, warnings=warn_notes)
 
     # QUARANTINE — everything else lands here, safely. Record which arm was missing.
     if verified:
@@ -285,11 +305,16 @@ def gate(artifact: Optional[Dict[str, Any]] = None, *,
         preserved="the artifact, its provenance, and every gate outcome",
         safe_next=(("may be cited AS UNVERIFIED" if out == "cited" else "may be held, not served"),
                    "reaches 'verified' only via an independent, evidenced gate"),
-        verdict="QUARANTINE", authority_out=out)
+        verdict="QUARANTINE", authority_out=out, warnings=warn_notes)
 
 
 def doctrine() -> Dict[str, Any]:
     """The law, for the read surfaces (agents read it at llms.txt / identity / the MCP instructions)."""
+    try:
+        from . import constraints as _con
+        moral = _con.catalog()
+    except Exception:  # noqa: BLE001
+        moral = {}
     return {
         "five_moves": list(FIVE_MOVES),
         "agent_covenant": list(AGENT_COVENANT),
@@ -298,6 +323,7 @@ def doctrine() -> Dict[str, Any]:
         "verdicts": list(VERDICTS),
         "born_quarantined": sorted(BORN_QUARANTINED),
         "never_upgrades": sorted(NON_UPGRADING),
+        "moral_constraints": moral,
         "gate_record_fields": ["entered", "kind", "authority_in", "passed", "failed",
                                "assumptions", "changed", "preserved", "safe_next"],
         "note": "This finds, types, verifies-what-can-be, preserves the trail, and refuses to "

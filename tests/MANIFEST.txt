@@ -183,3 +183,4 @@ tests/test_kernel.py
 tests/test_playbook.py
 tests/test_bridges.py
 tests/test_plow.py
+tests/test_constraints.py

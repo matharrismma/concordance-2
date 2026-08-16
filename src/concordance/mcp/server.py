@@ -507,7 +507,9 @@ def _secular_tools() -> List[dict]:
              "author": {"type": "string", "description": "who produced it"},
              "contradicts": {"type": "boolean"},
              "wait_satisfied": {"type": "boolean"},
-             "in_kind_checked": {"type": "boolean", "description": "was an in-kind lookup done first"}},
+             "in_kind_checked": {"type": "boolean", "description": "was an in-kind lookup done first"},
+             "content": {"type": "string", "description": "decision text to scan for the RED/FLOOR moral "
+                         "constraints — a hit on a non-negotiable (deception, exploitation, harm) REJECTS"}},
              "required": ["artifact"]}},
         # THE GATE, for an agent. Always available — you must be able to ask BEFORE the door opens,
         # which is the whole point of asking. Same classifier, same refusals, same crisis-first
@@ -1372,6 +1374,7 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
             error=args.get("error"),
             wait_satisfied=bool(args.get("wait_satisfied", True)),
             in_kind_checked=bool(args.get("in_kind_checked", False)),
+            content=str(args.get("content") or ""),
         )
         return {"record": rec.to_dict(), "generated": False}
     if name == "mesh_signable":

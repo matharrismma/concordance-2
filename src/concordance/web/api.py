@@ -2148,6 +2148,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             assumptions=tuple(str(x) for x in asum) if isinstance(asum, list) else (),
             wait_satisfied=bool(body.get("wait_satisfied", True)),
             in_kind_checked=bool(body.get("in_kind_checked", False)),
+            content=str(body.get("content") or ""),
         )
         return _ok({"record": rec.to_dict(), "generated": False})
 
