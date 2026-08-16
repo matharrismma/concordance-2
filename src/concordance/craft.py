@@ -267,15 +267,46 @@ def _tokens(s: str) -> set:
     return set(_WORD.findall((s or "").lower()))
 
 
+# Generic how-to scaffolding carried in a subject ("keep warm without power", "start a fire") that is
+# NOT what the passage should be about — keying the span score on these lets a passage that merely says
+# "warm" once (a loaf of bread) outscore a passage actually about staying warm. Dropped from the score,
+# so the rank keys on the distinctive noun ("warm", "fire"), like the corpus ranker's _GENERIC_Q_WORDS.
+_GENERIC_SUBJECT = frozenset({
+    "how", "do", "does", "to", "the", "a", "an", "of", "for", "with", "without", "make", "making",
+    "build", "building", "start", "starting", "keep", "keeping", "get", "getting", "use", "using",
+    "fix", "fixing", "doing", "your", "you", "and", "or", "in", "on", "it", "this", "that", "need",
+    "want", "way", "ways", "best", "good", "when", "power"})
+
+
+def _stem(w: str) -> str:
+    """A crude stem so a subject matches its inflections — 'fire' the section 'CAMP-FIRES', 'warm'
+    the word 'warming'. Not linguistics; enough for the span ranker (mirrors ask._stem)."""
+    w = (w or "").lower()
+    for suf in ("ing", "edly", "ed", "es", "s"):
+        if w.endswith(suf) and len(w) - len(suf) >= 3:
+            return w[:-len(suf)]
+    return w[:-1] if w.endswith("e") and len(w) >= 4 else w
+
+
+def _stems(s: str) -> set:
+    return {_stem(w) for w in _WORD.findall((s or "").lower())}
+
+
 def rank(text: str, spans: List[Tuple[int, int, str]], subject: str,
          limit: int = MAX_CARDS) -> List[Tuple[int, int, str]]:
-    """The spans that actually speak to `subject`, in DOCUMENT ORDER.
+    """The spans that actually speak to `subject`, BEST FIRST.
 
-    Score is distinct subject terms present, then density — the same shape as the corpus ranker,
-    and the same no-padding rule: a span that matches nothing about the subject is dropped, not
-    ranked last and shipped. Ties break toward the earlier passage, so a set stays readable.
-    """
-    want = _tokens(subject)
+    A span whose HEADING names the subject is the instructional passage the reader wants — a section
+    "CAMP-FIRES AND THEIR IMPORTANCE" beats a narrative "when the fire burnt low", even though both say
+    'fire'. So the score is: heading-match first, then distinct DISTINCTIVE subject terms, then density.
+    Generic scaffolding ("keep", "without") is dropped and terms are stemmed so 'fire' catches
+    'camp-fires'. No padding — a span matching nothing about the subject is dropped, never shipped.
+    Returned best-first so the LEAD card is the most relevant passage, not the earliest short mention
+    (measured 2026-08-15: "keep warm" led with a wheat-bread passage; "start fire" with a narrative
+    line, the real camp-fire section buried third)."""
+    want = _stems(subject) - {_stem(g) for g in _GENERIC_SUBJECT}
+    if not want:
+        want = _stems(subject)                  # a bare/all-generic subject — fall back to every stem
     if not want:
         return spans[:limit]
     scored = []
@@ -283,15 +314,17 @@ def rank(text: str, spans: List[Tuple[int, int, str]], subject: str,
         body = text[s:e]
         if _is_apparatus(body, h):
             continue                    # an index outscores every real passage; it is not one
-        have = _tokens(body) | _tokens(h)
-        hits = want & have
+        body_stems = _stems(body)
+        head_stems = _stems(h)
+        hits = want & (body_stems | head_stems)
         if not hits:
             continue                    # NEVER padded — silence beats a passage about nothing
-        density = sum(body.lower().count(w) for w in hits) / max(1, len(body) / 1000)
-        scored.append((len(hits), density, -i, (s, e, h)))
-    scored.sort(key=lambda x: (-x[0], -x[1], x[2]))
-    keep = [t[3] for t in scored[:max(1, int(limit))]]
-    return sorted(keep, key=lambda t: t[0])
+        head_hits = len(want & head_stems)       # a section HEADING about the subject = the answer
+        density = sum(1 for w in _WORD.findall(body.lower())
+                      if _stem(w) in hits) / max(1, len(body) / 1000)
+        scored.append((head_hits, len(hits), density, -i, (s, e, h)))
+    scored.sort(key=lambda x: (-x[0], -x[1], -x[2], x[3]))
+    return [t[4] for t in scored[:max(1, int(limit))]]   # best first — the lead is the top passage
 
 
 # ── the mint ──────────────────────────────────────────────────────────────────────────────────
@@ -343,6 +376,16 @@ def card_from_span(sha: str, start: int, end: int, *, subject: str, waybill: Dic
         opening = _strip_furniture(" ".join(body.split()))
         cut = re.search(r"[,;:.]", opening[:96])
         head = (opening[:cut.start()] if cut else opening[:72]).strip()
+    # If that title names nothing about the subject — a narrative first line like "When the fire burnt
+    # low" or "Chapter IV" — prefer the passage's FIRST sentence that DOES name the subject. Still the
+    # source's own words (never an authored claim), but a title a reader can recognise as the answer.
+    _want = _tokens(subject) - _GENERIC_SUBJECT
+    if _want and not (_want & _tokens(head)):
+        for _sent in re.split(r"(?<=[.!?])\s+", " ".join(body.split()))[:12]:
+            if _want & _tokens(_sent):
+                _cut = re.search(r"[,;:.]", _sent[:96])
+                head = _strip_furniture(_sent[:_cut.start()] if _cut else _sent[:80]).strip()
+                break
     title = (head or subject)[:110]
 
     from . import unchecked
