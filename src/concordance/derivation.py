@@ -24,6 +24,7 @@ from typing import Any, Dict, List
 
 from . import verifiers as _verifiers
 from .validate import canonical_json_bytes, sha256_bytes
+from .verifiers import bridges as _bridges
 from .verifiers import mathematics as _math
 
 _log = logging.getLogger("concordance")
@@ -211,6 +212,7 @@ def verify_derivation(steps: List[Dict[str, Any]]) -> Dict[str, Any]:
     seen_ids: set = set()
     confirmed_ids: set = set()
     outcome_by_id: Dict[str, str] = {}   # sid -> effective outcome (CONFIRMED|BROKEN|ERROR|GAP)
+    domain_by_id: Dict[str, str] = {}    # sid -> domain, so a cross-domain `uses` edge can be gated
     broken_at = None
     gap_at = None
     error_at = None
@@ -253,6 +255,7 @@ def verify_derivation(steps: List[Dict[str, Any]]) -> Dict[str, Any]:
             entry["builds_on_unconfirmed"] = unconfirmed
         trail.append(entry)
         seen_ids.add(sid)
+        domain_by_id[sid] = domain
 
         # Classify this step's EFFECTIVE outcome. A step that builds on unconfirmed ground cannot
         # stand — but WHY its ground is unconfirmed decides the honest verdict. Collapsing "our
@@ -269,6 +272,25 @@ def verify_derivation(steps: List[Dict[str, Any]]) -> Dict[str, Any]:
             outcome = "CONFIRMED" if link_ok else _worst_dep_outcome(uses)
         else:
             outcome = "ERROR"             # unknown status = our failure, never the caller's
+
+        # THE SEAM — a cross-domain BRIDGE (registry §4). A step that CONSUMES a step from another
+        # domain must not launder rigor across the boundary: a p-value asserted as PROOF, a scaling
+        # law with no dimensional analysis. The single-domain verifier above cannot see the join; this
+        # does. A category error at the seam BREAKS; a crossing whose justification is absent is a GAP
+        # (unproven, never a false HOLDS). Only checked on a genuine cross-domain `uses` edge.
+        for u in uses:
+            dep_dom = domain_by_id.get(u)
+            if not dep_dom or dep_dom == domain:
+                continue
+            bres = _bridges.check(domain, step, dep_dom)
+            bst = bres.get("status")
+            if bst == "MISMATCH":
+                entry["bridge"] = bres
+                outcome = "BROKEN"
+                break
+            if bst == "INCOMPLETE" and outcome == "CONFIRMED":
+                entry["bridge"] = bres
+                outcome = "GAP"
 
         outcome_by_id[sid] = outcome
         if outcome == "CONFIRMED":

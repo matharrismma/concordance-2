@@ -181,3 +181,4 @@ test_path.py
 tests/test_practical_rank.py
 tests/test_kernel.py
 tests/test_playbook.py
+tests/test_bridges.py
