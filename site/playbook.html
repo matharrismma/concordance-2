@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Playbook — Narrow Highway</title>
+<meta name="description" content="Canon commands, Playbook remembers. The Body's testimony of faithful obedience — what was done in faith, what came of it, what was corrected. Not Scripture; it binds no conscience.">
+<meta property="og:title" content="The Playbook — Narrow Highway">
+<meta property="og:description" content="The Body's testimony of faithful obedience. Confirmed by two witnesses and a wait — never doctrine.">
+<style>
+  :root{
+    --walnut:#2b1a10; --walnut-2:#170d07;
+    --paper:#f5f1e6; --paper-2:#e9e3d3; --parch:#ded3ba;
+    --brass:#c69a4a; --brass-hi:#eed69b; --brass-lo:#8a6a2f;
+    --ink:#241c12; --ink-soft:#6b5c45; --ink-faint:#9b8a6d;
+    --oxblood:#7d4a22; --lamp:rgba(255,231,176,.16);
+    --confirmed:#4d6b3a; --quarantine:#8a6a2f; --pruned:#7a5230; --fruit:#4d6b3a; --failed:#8a4a3a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:radial-gradient(120% 60% at 50% -8%, var(--lamp), transparent 60%),
+      linear-gradient(#20130b, var(--walnut-2));
+    color:var(--paper); min-height:100vh;
+    font:18px/1.62 "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--brass-hi); text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:46rem; margin:0 auto; padding:1.1rem 1.15rem 4rem}
+  header.site{display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px solid rgba(198,154,74,.22); padding:.2rem 0 .9rem; margin-bottom:1.6rem}
+  .brand{font-size:1.02rem; color:var(--paper)} .brand b{color:var(--brass-hi); font-weight:600}
+  nav.site a{font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-faint); margin-left:1.1rem}
+  .kick{font-family:Futura,"Century Gothic","Avenir Next",Avenir,"Trebuchet MS",sans-serif;
+    text-transform:uppercase; letter-spacing:.28em; font-weight:600; font-size:.66rem; color:var(--brass)}
+  h1{font-weight:400; font-size:2.05rem; line-height:1.15; margin:.5rem 0 .5rem}
+  .lede{color:var(--paper-2); font-size:1.06rem; margin:0 0 .3rem}
+  .sub{color:var(--ink-faint); font-size:.9rem; margin:.5rem 0 1.4rem} .sub b{color:var(--brass); font-weight:600}
+  .filters{display:flex; flex-wrap:wrap; gap:.4rem; margin:.2rem 0 1.4rem}
+  .filters button{background:transparent; border:1px solid rgba(198,154,74,.3); color:var(--paper-2);
+    border-radius:20px; padding:.28rem .8rem; font-size:.8rem; cursor:pointer; font-family:inherit}
+  .filters button.on{background:var(--brass); color:var(--walnut-2); border-color:var(--brass)}
+  .entry{border:1px solid var(--parch); border-radius:5px; background:var(--paper); color:var(--ink);
+    margin:.7rem 0; padding:.9rem 1rem; box-shadow:0 14px 34px -26px rgba(20,12,4,.7)}
+  .entry .top{display:flex; justify-content:space-between; align-items:baseline; gap:.6rem}
+  .entry .sit{font-size:1.1rem; color:var(--ink)}
+  .badge{font-size:.64rem; text-transform:uppercase; letter-spacing:.12em; padding:.16rem .5rem;
+    border-radius:12px; white-space:nowrap; font-family:Futura,"Avenir Next",sans-serif}
+  .b-action{background:var(--parch); color:var(--ink-soft)}
+  .b-confirmed{background:var(--confirmed); color:#eaf3e0} .b-quarantine{background:var(--quarantine); color:#f6ecd0}
+  .b-pruned{background:var(--pruned); color:#f0e2d3} .b-rejected{background:var(--failed); color:#f6ddd6}
+  .confession{color:var(--ink-soft); font-style:italic; margin:.45rem 0 .3rem; font-size:.96rem}
+  .meta{color:var(--ink-faint); font-size:.8rem; display:flex; flex-wrap:wrap; gap:.2rem .9rem; margin-top:.3rem}
+  .meta .anchor{color:var(--oxblood)}
+  .fruit-fruit{color:var(--fruit)} .fruit-mixed{color:var(--quarantine)} .fruit-failed{color:var(--failed)}
+  .empty{color:var(--ink-faint); font-size:.95rem; padding:1rem 0}
+  .boundary{margin-top:1.4rem; border:1px solid rgba(198,154,74,.3); border-left:3px solid var(--brass);
+    border-radius:4px; background:rgba(198,154,74,.06); padding:.8rem 1rem; color:var(--paper-2); font-size:.9rem}
+  .foot{margin-top:2.4rem; border-top:1px solid rgba(198,154,74,.18); padding-top:1.1rem; color:var(--ink-faint); font-size:.84rem}
+  .foot a{color:var(--brass)} .verse{color:var(--brass); font-style:italic}
+  .err{color:#e6a; font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <a class="brand" href="/">Narrow<b>Highway</b></a>
+    <nav class="site"><a href="/">The desk</a><a href="/bible.html">The Word</a></nav>
+  </header>
+
+  <p class="kick">Canon commands · Playbook remembers</p>
+  <h1>The Playbook</h1>
+  <p class="lede">The Body's testimony of faithful obedience — what was done in faith, what came of it, and what was corrected.</p>
+  <p class="sub">Every entry begins with a <b>confession</b> ("I may be wrong…"), stands under Scripture, and is
+    confirmed only when <b>two brothers</b> affirm it and a <b>wait</b> has passed. It is <b>not Scripture</b>
+    and binds no conscience — testimony, so wisdom compounds without becoming doctrine.</p>
+
+  <div class="filters" id="filters">
+    <button data-s="" class="on">All</button>
+    <button data-s="confirmed">Confirmed</button>
+    <button data-s="quarantine">Waiting</button>
+    <button data-s="pruned">Pruned</button>
+  </div>
+
+  <div id="entries"><p class="empty">Opening the record…</p></div>
+
+  <div class="boundary">
+    Confirmed testimony is affirmed <b>by the Body</b> — it is never the library's verified claim, and never
+    Scripture. Failure is not hidden here; a testimony that bore no fruit is <b>pruned</b> (John 15:2), and
+    the trail of a person learning stays whole.
+  </div>
+
+  <div class="foot">
+    <p>To add your own testimony you sign it with your key on your own device — the key never travels.
+    Read the Word on <a href="/bible.html">the Scripture surface</a>, or start at <a href="/">the desk</a>.</p>
+    <p class="verse">We are surrounded by so great a cloud of witnesses. — Hebrews 12:1</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var esc=function(s){var d=document.createElement('div'); d.textContent=(s==null?'':String(s)); return d.innerHTML;};
+  var BOX=document.getElementById('entries'), FIL=document.getElementById('filters'), cur='';
+
+  function statusBadge(s){
+    var label={confirmed:'Confirmed',quarantine:'Waiting',pruned:'Pruned',rejected:'Refused'}[s]||s;
+    return '<span class="badge b-'+esc(s)+'">'+esc(label)+'</span>';
+  }
+  function entry(e){
+    var anchors=(e.anchors||[]).map(function(a){return '<span class="anchor">'+esc(a)+'</span>';}).join(' · ');
+    var m=[];
+    if(e.action) m.push('<span class="badge b-action">'+esc(e.action)+'</span>');
+    if(anchors) m.push(anchors);
+    if(e.witness_count!=null) m.push(esc(e.witness_count)+' witness'+(e.witness_count===1?'':'es'));
+    if(e.outcome) m.push('<span class="fruit-'+esc(e.outcome)+'">fruit: '+esc(e.outcome)+'</span>');
+    return '<div class="entry"><div class="top"><span class="sit">'+esc(e.situation||'(a testimony)')+'</span>'
+      +statusBadge(e.status||'quarantine')+'</div>'
+      +'<div class="meta">'+m.join('')+'</div></div>';
+  }
+  function load(){
+    BOX.innerHTML='<p class="empty">Opening the record…</p>';
+    fetch('/playbook'+(cur?('?status='+encodeURIComponent(cur)):'')).then(function(r){return r.json();})
+      .then(function(res){
+        var d=(res&&res.data)?res.data:res, list=(d&&d.entries)||[];
+        if(!list.length){ BOX.innerHTML='<p class="empty">No testimony here yet — the Body writes it as it walks.</p>'; return; }
+        BOX.innerHTML=list.map(entry).join('');
+      }).catch(function(){ BOX.innerHTML='<p class="err">Couldn\'t reach the record — please try again.</p>'; });
+  }
+  FIL.addEventListener('click',function(ev){
+    var b=ev.target.closest('button'); if(!b) return;
+    cur=b.getAttribute('data-s')||'';
+    [].forEach.call(FIL.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b);});
+    load();
+  });
+  load();
+})();
+</script>
+</body>
+</html>

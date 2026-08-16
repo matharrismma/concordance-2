@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Plow — Narrow Highway</title>
+<meta name="description" content="A quiet daily companion. Name today's burdens and fruit; it sorts the chaff from the wheat and gives one small next step, with a word from Scripture. It works the field, never judges the farmer — and your walk lives on your own device.">
+<style>
+  :root{
+    --walnut:#2b1a10; --walnut-2:#170d07;
+    --paper:#f5f1e6; --paper-2:#e9e3d3; --parch:#ded3ba;
+    --brass:#c69a4a; --brass-hi:#eed69b; --brass-lo:#8a6a2f;
+    --ink:#241c12; --ink-soft:#6b5c45; --ink-faint:#9b8a6d;
+    --oxblood:#7d4a22; --lamp:rgba(255,231,176,.16);
+    --chaff:#8a6a2f; --align:#6b5c45; --fruit:#4d6b3a;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(120% 60% at 50% -8%, var(--lamp), transparent 60%),
+      linear-gradient(#20130b, var(--walnut-2));
+    color:var(--paper); min-height:100vh;
+    font:18px/1.62 "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif; -webkit-font-smoothing:antialiased;}
+  a{color:var(--brass-hi); text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:42rem; margin:0 auto; padding:1.1rem 1.15rem 4rem}
+  header.site{display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px solid rgba(198,154,74,.22); padding:.2rem 0 .9rem; margin-bottom:1.5rem}
+  .brand{font-size:1.02rem; color:var(--paper)} .brand b{color:var(--brass-hi); font-weight:600}
+  nav.site a{font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-faint); margin-left:1.1rem}
+  .kick{font-family:Futura,"Century Gothic","Avenir Next",Avenir,sans-serif; text-transform:uppercase;
+    letter-spacing:.28em; font-weight:600; font-size:.66rem; color:var(--brass)}
+  h1{font-weight:400; font-size:2.05rem; margin:.5rem 0 .5rem}
+  .lede{color:var(--paper-2); font-size:1.04rem; margin:0 0 .3rem}
+  .sub{color:var(--ink-faint); font-size:.88rem; margin:.5rem 0 1.3rem} .sub b{color:var(--brass); font-weight:600}
+  .status{display:flex; flex-wrap:wrap; gap:.5rem .9rem; margin:.2rem 0 1.2rem; color:var(--ink-faint); font-size:.82rem;
+    font-family:Futura,"Avenir Next",sans-serif; letter-spacing:.04em}
+  .status b{color:var(--brass-hi); font-weight:600}
+  .group{margin:1.2rem 0 .3rem} .group h2{font-weight:400; font-size:.82rem; color:var(--brass);
+    text-transform:uppercase; letter-spacing:.14em; margin:0 0 .5rem}
+  .sig{display:flex; align-items:center; gap:.8rem; padding:.32rem 0}
+  .sig label{flex:0 0 8.5rem; color:var(--paper-2); font-size:.96rem}
+  .sig input[type=range]{flex:1; accent-color:var(--brass)}
+  .sig .v{flex:0 0 1.2rem; text-align:right; color:var(--brass-hi); font-size:.9rem; font-family:Futura,sans-serif}
+  button.go{margin-top:1.1rem; background:var(--brass); color:var(--walnut-2); border:none; border-radius:5px;
+    padding:.7rem 1.3rem; font-size:1rem; font-family:inherit; cursor:pointer; font-weight:600}
+  button.go:hover{background:var(--brass-hi)}
+  .out{margin-top:1.5rem; border:1px solid var(--parch); border-radius:6px; background:var(--paper); color:var(--ink);
+    padding:1.1rem 1.15rem; box-shadow:0 16px 38px -26px rgba(20,12,4,.7); display:none}
+  .out.show{display:block}
+  .field{font-family:Futura,"Avenir Next",sans-serif; text-transform:uppercase; letter-spacing:.16em; font-size:.68rem; font-weight:600}
+  .field.f-chaff{color:var(--chaff)} .field.f-align{color:var(--align)} .field.f-fruit{color:var(--fruit)}
+  .invitation{font-size:1.18rem; color:var(--ink); margin:.35rem 0 .5rem; line-height:1.4}
+  .word{color:var(--oxblood); font-style:italic; font-size:.96rem}
+  .flow{color:var(--ink-soft); font-size:.86rem; margin-top:.5rem; border-top:1px solid rgba(123,74,34,.14); padding-top:.5rem}
+  .held{color:var(--ink-faint); font-size:.78rem; margin-top:.6rem}
+  .reset{margin-top:1.4rem; font-size:.78rem; color:var(--ink-faint); background:none; border:none; cursor:pointer; text-decoration:underline; font-family:inherit}
+  .foot{margin-top:2.2rem; border-top:1px solid rgba(198,154,74,.18); padding-top:1rem; color:var(--ink-faint); font-size:.82rem}
+  .verse{color:var(--brass); font-style:italic}
+  .err{color:#e6a; font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <a class="brand" href="/">Narrow<b>Highway</b></a>
+    <nav class="site"><a href="/">The desk</a><a href="/bible.html">The Word</a></nav>
+  </header>
+
+  <p class="kick">A daily companion</p>
+  <h1>The Plow</h1>
+  <p class="lede">Name today honestly. It sorts the chaff from the wheat and hands you one small next step, with a word from Scripture.</p>
+  <p class="sub">It <b>works the field, it does not judge the farmer</b> — nothing here is a score on your soul.
+    Your walk lives <b>on this device only</b>; nothing is stored on the server.</p>
+
+  <div class="status" id="status"></div>
+
+  <div class="group"><h2>What weighed on you (0 = none · 3 = heavy)</h2>
+    <div class="sig"><label>Rumination</label><input type="range" min="0" max="3" value="0" data-k="rumination"><span class="v">0</span></div>
+    <div class="sig"><label>A grudge held</label><input type="range" min="0" max="3" value="0" data-k="grudge"><span class="v">0</span></div>
+    <div class="sig"><label>Replaying a wrong</label><input type="range" min="0" max="3" value="0" data-k="replay"><span class="v">0</span></div>
+    <div class="sig"><label>Shame</label><input type="range" min="0" max="3" value="0" data-k="shame"><span class="v">0</span></div>
+  </div>
+  <div class="group"><h2>What the Spirit gave (0 = none · 3 = full)</h2>
+    <div class="sig"><label>Peace</label><input type="range" min="0" max="3" value="0" data-k="peace"><span class="v">0</span></div>
+    <div class="sig"><label>Obedience</label><input type="range" min="0" max="3" value="0" data-k="obedience"><span class="v">0</span></div>
+    <div class="sig"><label>Clarity</label><input type="range" min="0" max="3" value="0" data-k="clarity"><span class="v">0</span></div>
+  </div>
+  <div class="group"><h2>Kept whole — spirit · mind · body</h2>
+    <div class="sig"><label>Spirit</label><input type="range" min="0" max="3" value="0" data-k="spirit"><span class="v">0</span></div>
+    <div class="sig"><label>Mind</label><input type="range" min="0" max="3" value="0" data-k="mind"><span class="v">0</span></div>
+    <div class="sig"><label>Body</label><input type="range" min="0" max="3" value="0" data-k="body"><span class="v">0</span></div>
+  </div>
+
+  <button class="go" id="go">Work today's field</button>
+
+  <div class="out" id="out"></div>
+  <div><button class="reset" id="reset">Forget my walk on this device</button></div>
+
+  <div class="foot">
+    <p>The Plow is a conduit, not an oracle: it reflects your own words back and points to Christ. It keeps
+    nothing. Read the Word on <a href="/bible.html">the Scripture surface</a>.</p>
+    <p class="verse">Blessed is the one… like a tree planted by streams of water, that yields its fruit in season. — Psalm 1:1-3</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY='nh_plow_state';
+  var esc=function(s){var d=document.createElement('div'); d.textContent=(s==null?'':String(s)); return d.innerHTML;};
+  function getState(){ try{ return JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ return null; } }
+  function setState(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
+
+  function renderStatus(){
+    var s=getState(), el=document.getElementById('status');
+    if(!s){ el.innerHTML='<span>A fresh field — no walk kept on this device yet.</span>'; return; }
+    el.innerHTML='<span>day <b>'+esc(s.day||0)+'</b></span><span>tier <b>'+esc(s.tier||'milk')
+      +'</b></span><span>phase <b>'+esc(s.phase||'calibrate')+'</b></span><span>streak <b>'+esc(s.streak||0)+'</b></span>';
+  }
+  document.querySelectorAll('.sig input[type=range]').forEach(function(inp){
+    inp.addEventListener('input',function(){ inp.nextElementSibling.textContent=inp.value; });
+  });
+  function signals(){
+    var o={}; document.querySelectorAll('.sig input[type=range]').forEach(function(inp){ o[inp.getAttribute('data-k')]=+inp.value; }); return o;
+  }
+  document.getElementById('go').addEventListener('click',function(){
+    var out=document.getElementById('out');
+    out.className='out show'; out.innerHTML='<div style="color:var(--ink-faint)">Working the field…</div>';
+    fetch('/plow',{method:'POST',headers:{'content-type':'application/json'},
+        body:JSON.stringify({state:getState(),signals:signals()})})
+      .then(function(r){return r.json();}).then(function(res){
+        var d=(res&&res.data)?res.data:res;
+        if(!d||!d.step){ out.innerHTML='<div class="err">Couldn\'t work the field — please try again.</div>'; return; }
+        setState(d.next_state);
+        var st=(d.assess&&d.assess.state)||'align';
+        var wordRef=(d.step.word&&d.step.word.ref)||'';
+        var stw=(d.assess&&d.assess.word)||{};
+        out.innerHTML='<div class="field f-'+esc(st)+'">'+esc(st)+' · '+esc(d.step.phase||'')+'</div>'
+          +'<div class="invitation">'+esc(d.step.invitation||'')+'</div>'
+          +(wordRef?'<div class="word">'+esc(wordRef)+(stw.text?' — '+esc(stw.text):'')+'</div>':'')
+          +(d.step.flow_note?'<div class="flow">'+esc(d.step.flow_note)+'</div>':'')
+          +(d.advanced?'<div class="flow" style="color:var(--fruit)">You have grown — milk toward meat. Grace, not a ladder.</div>':'')
+          +'<div class="held">'+esc(d.held||'Nothing is stored on the server. Your walk lives on this device.')+'</div>';
+        renderStatus();
+      }).catch(function(){ out.innerHTML='<div class="err">Couldn\'t reach the field — please try again.</div>'; });
+  });
+  document.getElementById('reset').addEventListener('click',function(){
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    document.getElementById('out').className='out'; renderStatus();
+  });
+  renderStatus();
+})();
+</script>
+</body>
+</html>
