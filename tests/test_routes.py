@@ -74,6 +74,7 @@ GOLDEN_API_GET = {
     "/kernel/gate",  # POST an api:True route (like /drop/report) — run one proposed state-change through the kernel (task #152)
     "/playbook",  # the Playbook — the Body's testimony ledger, "Canon commands, Playbook remembers" (task #153, 2026-08-15)
     "/playbook/signable", "/playbook/submit",  # the two-step signed write (bytes-to-sign, then submit)
+    "/plow",  # The Plow — a STATELESS personal-formation engine; the walk lives on the device (task #155, 2026-08-15)
     "/activity.json",  # the .org "under the hood" feed (recent public seals + counts, 2026-08-05)
     "/build.json",  # deployment provenance: protocol + profiles + tool_catalog_hash (red team R-14, 2026-08-06)
     "/mesh/signable",  # deliberate addition (the bytes to sign, so a key never crosses the wire)
@@ -113,6 +114,7 @@ GOLDEN_RATELIMITED = {
     "/want",    # deliberate addition — opening a want is a write (the hive's return-point)
     "/kernel/gate",  # run one proposed state-change through the kernel — rate-limited like every POST (task #152)
     "/playbook/signable", "/playbook/submit",  # the Playbook two-step signed write — rate-limited like every write (task #153)
+    "/plow",  # The Plow POST computes a transition — rate-limited like every POST (task #155)
 }
 
 

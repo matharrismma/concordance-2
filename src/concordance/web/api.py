@@ -2208,6 +2208,26 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _err(400, "op must be entry | witness | outcome | prune")
         return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
 
+    if method == "GET" and path == "/plow":
+        # THE PLOW — a personal formation companion. STATELESS: the walk lives on the person's own
+        # device; this returns a fresh field + the pattern. It works the field, never judges the
+        # farmer, and keeps nothing. Ungated: the pattern is not witness content.
+        from .. import plow as _plow
+        return _ok({"blank": _plow.blank(), "phases": list(_plow.PHASES), "tiers": list(_plow.TIERS),
+                    "signals": {"burden": list(_plow.SIGNALS_BURDEN), "fruit": list(_plow.SIGNALS_FRUIT),
+                                "triad": list(_plow.TRIAD)}, "scale": _plow._SCALE, "generated": False,
+                    "note": "The Plow works the field; it does not judge the farmer. Your walk lives "
+                            "on your device — nothing here is stored on the server."})
+
+    if method == "POST" and path == "/plow":
+        # The one transition: the client sends its OWN state + today's signals; the engine returns the
+        # next state + ONE next step. Pure and stateless — it stores nothing, records no one.
+        from .. import plow as _plow
+        b = body if isinstance(body, dict) else {}
+        sig = b.get("signals") if isinstance(b.get("signals"), dict) else {}
+        st = b.get("state") if isinstance(b.get("state"), dict) else None
+        return _ok(_plow.step(st, sig))
+
     if method == "GET" and path == "/harmony":
         # Harmony of the Gospels — one event, every gospel that witnesses it, side by side.
         # Witness content: the same gate as /teachings, /prophecy, /commentary.
@@ -2438,6 +2458,7 @@ ROUTES = [
     {"path": "/playbook", "methods": ("GET",), "api": True},
     {"path": "/playbook/signable", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/playbook/submit", "methods": ("POST",), "api": True, "rl": True},
+    {"path": "/plow", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/activity.json", "methods": ("GET",), "api": True},
     {"path": "/build.json", "methods": ("GET",), "api": True},
     {"path": "/mesh/signable", "methods": ("GET",), "api": True},
