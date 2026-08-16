@@ -106,6 +106,20 @@ def _check_path_gate(packet: Dict[str, Any]) -> GateResult:
                                "substantive judgement remains the human's call."})
 
 
+def _governance_content(packet: Dict[str, Any]) -> str:
+    """The decision's OWN words to scan for moral constraints — the way path, the rationale, and the
+    execution steps (NOT the declared red_items/floor_items, which NAME a wrong in order to forbid it).
+    Empty for a non-governance packet, so only real decisions are scanned."""
+    dp = packet.get("DECISION_PACKET") if isinstance(packet.get("DECISION_PACKET"), dict) else packet
+    gov = [dp.get("way_path"), dp.get("rationale")]
+    ex = dp.get("execution_steps")
+    ex_list = [str(s) for s in ex] if isinstance(ex, list) else []
+    if not any(gov) and not ex_list:
+        return ""
+    parts = [dp.get("title")] + gov + ex_list
+    return " ".join(str(p) for p in parts if p).strip()
+
+
 def _run_validation(packet: Dict[str, Any], *, now_epoch: Optional[int],
                     config: EngineConfig) -> Tuple[List[GateResult], Tuple[VerifierResult, ...], DecisionStatus]:
     """Run RED -> FLOOR -> PATH -> WITNESS -> WAIT plus verifier dispatch."""
@@ -125,6 +139,16 @@ def _run_validation(packet: Dict[str, Any], *, now_epoch: Optional[int],
     packet = _normalize_governance_packet(packet)
     domain = (packet.get("domain") or "").lower()
     dv = load_domain_validator(domain)
+
+    # MORAL CONTENT (constraints.py) — a governance decision that DESCRIBES a wrong (fake testimonials,
+    # preying on the vulnerable) must not pass because it was well-typed. Scanned once here; a RED hit
+    # rejects the RED gate, a FLOOR 'error' the FLOOR gate, a FLOOR 'warn' rides along. Negated mentions
+    # ("we will NOT deceive") do not count, and only packets carrying a governance decision are scanned.
+    _moral = None
+    _gc = _governance_content(packet)
+    if _gc:
+        from . import constraints as _con
+        _moral = _con.scan(_gc)
 
     # RED — domain validator (artifact malformed / contradicted)
     if dv:
@@ -152,6 +176,13 @@ def _run_validation(packet: Dict[str, Any], *, now_epoch: Optional[int],
                 "verified": [f"{v.name}: {v.detail}" for v in ver_passes],
                 "not_applicable": [v.name for v in ver_na]}))
 
+    # RED — a moral non-negotiable named in the decision's own plan (never the declared red_items)
+    if _moral and _moral["red"]:
+        h = _moral["red"][0]
+        gate_results.append(reject("RED", "%s %s: %r" % (h["id"], h["name"], h["matched"]),
+                                   details={"constraint": h}))
+        return gate_results, tuple(verifier_results), "REJECT"
+
     # FLOOR — protective domain attestations
     if dv:
         gate_results.extend(dv.validate_floor(packet))
@@ -159,6 +190,16 @@ def _run_validation(packet: Dict[str, Any], *, now_epoch: Optional[int],
             return gate_results, tuple(verifier_results), "REJECT"
     else:
         gate_results.append(ok("FLOOR", {"note": "no domain validator registered"}))
+
+    # FLOOR — a protective boundary named in the decision's own plan. 'error' rejects; 'warn' rides along.
+    if _moral and _moral["floor_error"]:
+        h = _moral["floor_error"][0]
+        gate_results.append(reject("FLOOR", "%s %s: %r" % (h["id"], h["name"], h["matched"]),
+                                   details={"constraint": h}))
+        return gate_results, tuple(verifier_results), "REJECT"
+    if _moral and _moral["floor_warn"]:
+        gate_results.append(ok("FLOOR", {"warnings": ["%s %s" % (h["id"], h["name"])
+                                                      for h in _moral["floor_warn"]]}))
 
     # PATH — non-coercion
     path_result = _check_path_gate(packet)

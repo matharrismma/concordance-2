@@ -29,6 +29,14 @@ def test_a_clean_proposal_is_clean():
     assert r["worst"] is None and not r["rejects"] and not r["warnings"]
 
 
+def test_a_negated_mention_does_not_fire():
+    # a wrong NAMED in order to refuse it is not a wrong described
+    assert constraints.scan("we will not deceive anyone and will avoid any coercion")["worst"] is None
+    assert constraints.scan("no hidden fees; nothing undisclosed")["worst"] is None
+    # but a real one across a sentence boundary still fires (the negation belonged to the prior clause)
+    assert constraints.scan("we are honest. we use fake testimonials though")["worst"] == "red"
+
+
 def test_catalog_publishes_eight_red_and_six_floor():
     c = constraints.catalog()
     assert len(c["red"]) == 8 and len(c["floor"]) == 6

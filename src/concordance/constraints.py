@@ -89,6 +89,30 @@ FLOOR_CONSTRAINTS: Tuple[Dict[str, Any], ...] = (
 _RED = [(c, re.compile("|".join(c["patterns"]), re.I)) for c in RED_CONSTRAINTS]
 _FLOOR = [(c, re.compile("|".join(c["patterns"]), re.I)) for c in FLOOR_CONSTRAINTS]
 
+# A hit that is NEGATED is not a wrong described but a wrong FORBIDDEN — "we will not deceive", "avoid
+# any coercion", "no hidden fees". A plan that names a wrong in order to refuse it must not be rejected
+# for saying the word. If a negation stands within a few words before the match (no sentence break
+# between), the hit is suppressed.
+_NEG_WORDS = frozenset({
+    "not", "never", "no", "avoid", "avoiding", "prevent", "preventing", "forbid", "forbidden",
+    "prohibit", "prohibited", "against", "refuse", "refusing", "wont", "cannot", "without", "ban",
+    "banned", "reject", "rejecting", "stop", "stopping", "dont", "doesnt", "wouldnt", "neither", "nor"})
+
+
+def _negated(text: str, start: int) -> bool:
+    seg = text[:start]
+    if "." in seg[-60:] or ";" in seg[-60:] or "!" in seg[-60:] or "?" in seg[-60:]:
+        seg = re.split(r"[.;!?]", seg)[-1]          # only look within the current clause
+    pre = [w.replace("'", "") for w in re.findall(r"[a-z']+", seg.lower())[-6:]]
+    return any(w in _NEG_WORDS for w in pre)
+
+
+def _first_hit(rx: "re.Pattern", text: str):
+    for m in rx.finditer(text):
+        if not _negated(text, m.start()):
+            return m
+    return None
+
 
 def _hit(constraint: Dict[str, Any], match: "re.Match") -> Dict[str, Any]:
     return {"id": constraint["id"], "name": constraint["name"], "matched": match.group(0).strip()[:60],
@@ -98,10 +122,11 @@ def _hit(constraint: Dict[str, Any], match: "re.Match") -> Dict[str, Any]:
 def scan(text: str) -> Dict[str, Any]:
     """Scan decision CONTENT for the RED / FLOOR constraints. Returns the hits by band and the WORST
     disposition: 'red' (a RED hit) or 'error' (a FLOOR error) both REJECT; 'warn' passes with a flag;
-    None is clean. Nothing here reads the person — only the words of the proposal."""
+    None is clean. A NEGATED mention (a wrong named in order to refuse it) does not count. Nothing here
+    reads the person — only the words of the proposal."""
     t = text or ""
-    red = [_hit(c, m) for c, rx in _RED if (m := rx.search(t))]
-    floor_hits = [_hit(c, m) for c, rx in _FLOOR if (m := rx.search(t))]
+    red = [_hit(c, m) for c, rx in _RED if (m := _first_hit(rx, t))]
+    floor_hits = [_hit(c, m) for c, rx in _FLOOR if (m := _first_hit(rx, t))]
     floor_error = [h for h in floor_hits if h["severity"] == "error"]
     floor_warn = [h for h in floor_hits if h["severity"] == "warn"]
     if red:
