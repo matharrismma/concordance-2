@@ -100,6 +100,28 @@ def test_field_fails_closed_on_an_empty_field():
         d.field("what is 2 + 2", [])
 
 
+# ── extraction, folded (#4): the gate receives STRUCTURED claims, not a bare string ─────────────────
+def test_extraction_hands_the_gate_structured_claims():
+    r = d.discern("2 + 2 = 4")
+    assert r["kind"] == "claim" and r["next"] == "check"
+    assert r["claims"] and r["claims"][0]["domain"] == "mathematics"
+    assert "spec" in r["claims"][0]                  # structured (domain, spec) — not a bare string
+
+
+def test_framing_is_stripped_before_extraction():
+    r = d.discern("my mom said 2 + 2 = 4")
+    assert r["claim"] == "2 + 2 = 4" and r["held"] == "my mom said"
+    assert r["claims"] and r["claims"][0]["claim"] == "2 + 2 = 4"   # extracted from the de-framed claim
+
+
+def test_a_structured_extraction_makes_it_a_claim_even_when_routing_would_not():
+    # extraction is the claim authority: a structured claim -> check, whatever the router thought
+    fake = [{"id": "a1", "domain": "mathematics", "spec": {"mode": "x"}, "claim": "y"}]
+    r = d.discern("a phrase the router would send to search",
+                  extract_fn=lambda c: fake, search_fn=lambda q, n: [])
+    assert r["kind"] == "claim" and r["next"] == "check" and r["claims"] == fake
+
+
 def test_routing_reads_the_discerned_claim_not_the_framing():
     # framing must not sway the route — it routes on the necessary claim
     framed = d.discern("my doctor told me that 2 + 2 = 4")

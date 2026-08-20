@@ -35,7 +35,7 @@ already unifies the front, with the rest folding in one kind at a time.
 | 1 | **Front door / kind** | cry for help vs a claim vs nothing | `ask.is_crisis` + `_CRISIS_RESOURCES` | **folded** — `kind`, crisis first |
 | 2 | **Necessity** | reduce to only what could change the verdict; hold private/framing home | `context.decontextualize(minimal)` (the context loop) | **folded** — `claim` + `held` |
 | 3 | **Route** | which member / verifier should check it | `router.route` | **folded** — `route` |
-| 4 | **Claim extraction** | what in a text *is* a checkable claim, and its `(domain, spec)` | `audit.extract` | **to fold** — lives on the verify side today |
+| 4 | **Claim extraction** | what in a text *is* a checkable claim, and its `(domain, spec)` | `audit.extract` | **folded** — discern hands the gate structured `(domain, spec)` |
 | 5 | **Relevance** | a real match vs a word-collision (retrieval) | `ask._title_names_subject` | **folded** — the retrieval branch |
 | 6 | **Narrowing** | which candidate *survives* a wide field | `candidates.route` (fixed pre-registered policy, blind to `proposal_weight`) | **folded** — `discern.field`, the deep mode |
 | 7 | **Authority** | quarantined < cited < verified | `kernel` (`AUTHORITY`, born-quarantined kinds) | **stays at the gate** (correct) |
@@ -63,24 +63,25 @@ verdict** (`confirms: False`). Crisis outranks everything; empty or a genuine ro
 than guesses. Proven composing with the real gate: `discern("my mom said 2 + 2 = 4")` → claim
 `"2 + 2 = 4"` routed to the *verify* member → `check` → **HOLDS**.
 
-## Migration — fold the rest in, one kind at a time
+## The fold, complete
 
-Each step keeps the contract (proposes never confirms; crisis first; nothing generated; explains itself;
-fails safe) and stays green:
+All six facets now live behind one door — done in the order Matt called (relevance, narrowing,
+extraction), each keeping the contract (proposes never confirms; crisis first; nothing generated;
+explains itself; fails safe) and staying green:
 
-1. **Relevance (#5)** — DONE. A `search`-routed input is a retrieval, not a checkable claim: `discern`
-   returns `kind: "question"` and proposes only the cards whose title genuinely names the subject
-   (`_title_names_subject`), a gap staying an honest miss. This split — claim → verify, question →
-   retrieve — sharpened the door: a claim only exists when a verifier can actually check it.
-2. **Narrowing (#6)** — DONE. `discern.field(query, candidates)` is the deep mode: it mints the
-   candidate set, commits it, and routes each candidate under the fixed pre-registered policy — blind to
-   the generator's `proposal_weight` — then hands the committed, routed field to the gate
-   (`candidates.narrow`), which eliminates to a survivor. Proven: a true answer weighted 0.01 survives
-   while a false answer weighted 0.99 is rejected — weight buys no favor.
-3. **Extraction (#4)** — the last fold: `discern` calls `audit.extract` to propose *structured* claims
-   `(domain, spec)` rather than a skeleton string, so the gate receives exactly what it verifies. This
-   closes the boundary blur where claim-extraction still lives on the verify side.
+- **Relevance (#5)** — a `search`-routed input is a retrieval, not a claim: `discern` returns
+  `kind: "question"` and proposes only cards whose title genuinely names the subject
+  (`_title_names_subject`), a gap staying an honest miss. This sharpened the door: a claim exists only
+  when a verifier can actually check it.
+- **Narrowing (#6)** — `discern.field(query, candidates)` is the deep mode: mint, commit, and route the
+  field under a fixed pre-registered policy **blind to `proposal_weight`**, then hand it to the gate
+  (`candidates.narrow`), which eliminates to a survivor. Proven: a true answer weighted 0.01 survives
+  while a false answer weighted 0.99 is rejected — weight buys no favor.
+- **Extraction (#4)** — `discern` calls `audit.extract` to hand the gate *structured* `(domain, spec)`
+  claims rather than a bare string it re-parses. Extraction is the claim authority: a structured claim
+  routes to `check` whatever the keyword router thought. This closed the last boundary blur.
 
-Folded so far: **kind · necessity · route · relevance · narrowing.** One remains (extraction). When it
-lands, the engine is exactly two doors — `discern` and `check` — every other module hanging off one of
-them.
+**The engine is now exactly two doors — `discern` and `check` — and every other module hangs off one of
+them.** Discern proposes what matters; the gate disposes and seals. Only the **authority lattice**
+stays inside the gate, by design: quarantined < cited < verified is *earned*, never granted at the door.
+

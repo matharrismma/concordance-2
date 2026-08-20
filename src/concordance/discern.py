@@ -66,11 +66,24 @@ def _relevant(query: str, search_fn=None, relevant_fn=None) -> list:
     return out
 
 
-def discern(text: str, *, search_fn=None, relevant_fn=None) -> Dict[str, Any]:
+def _extract(claim: str, extract_fn=None) -> list:
+    """The structured claim EXTRACTOR (folded from audit): what in the discerned claim is a checkable
+    claim, and its structured (domain, spec) — exactly what the gate verifies. Pure and conservative
+    (it would rather miss a claim than structure the wrong one). Injectable so the seed stays pure."""
+    if extract_fn is None:
+        from . import audit
+        extract_fn = audit.extract
+    try:
+        return extract_fn(claim) or []
+    except Exception:  # noqa: BLE001 — a non-extractable claim is simply not structured
+        return []
+
+
+def discern(text: str, *, search_fn=None, relevant_fn=None, extract_fn=None) -> Dict[str, Any]:
     """Propose what matters. Given anything, name its KIND, reduce it to the necessary CLAIM
-    (de-identified, framing held home), and either name the MEMBER that should verify it (a checkable
-    claim) or discern the genuinely-relevant kept cards (a retrieval). Returns a proposal — never a
-    verdict. Crisis is discerned first and routed to real people."""
+    (de-identified, framing held home), and either hand the gate the STRUCTURED checkable claim(s) it
+    will verify, or discern the genuinely-relevant kept cards (a retrieval). Returns a proposal — never
+    a verdict. Crisis is discerned first and routed to real people."""
     from . import ask, context, router
 
     t = (str(text) if text else "").strip()
@@ -88,18 +101,30 @@ def discern(text: str, *, search_fn=None, relevant_fn=None) -> Dict[str, Any]:
                 "why": "discerned as a cry for help — routed to real people, not the gate",
                 "next": "real_help"}
 
-    # 2. EXTRACT — reduce to the necessary, de-identified claim; hold the framing home. (The context
+    # 2. NECESSITY — reduce to the necessary, de-identified claim; hold the framing home. (The context
     #    loop's discriminator: only what could change the verdict travels.)
     stripped = context.decontextualize(t, minimal=True)
     claim = stripped.travels()
     held = stripped.framing().strip()      # for display; reattach still uses the full holds, exact
 
-    # 3. ROUTE — name the member. router proposes; a tie asks, never guesses. Routed on the discerned
-    #    claim, not the raw text, so framing can't sway the routing.
+    # 3. EXTRACTION (folded) — the precise claim detector: the STRUCTURED (domain, spec) the gate
+    #    verifies. And ROUTE for the trail + the retrieval branch (routed on the claim, not the framing).
+    claims = _extract(claim, extract_fn)
     route = router.route(claim or t)
     member = route.get("member")
 
-    # 4. RELEVANCE (folded) — a member of "search" is a RETRIEVAL, not a checkable claim. Discern the
+    # 4. A checkable CLAIM — structured extraction found one, or the router named a specialist. Hand the
+    #    gate the structured claim(s); it verifies exactly these (no re-parsing a bare string).
+    if claims or (member not in ("search", "ask_user")):
+        return {"input": t, "kind": "claim", "claim": claim, "held": held or None,
+                "route": route, "claims": claims, "authority": "proposed",
+                "proposes": True, "confirms": False,
+                "why": ("discerned %d structured claim(s) for the gate to verify" % len(claims) if claims
+                        else "discerned the necessary claim %r; the %s should verify it (%s)" % (
+                            claim, member, route.get("why"))),
+                "next": "check"}
+
+    # 5. RELEVANCE (folded) — a member of "search" is a RETRIEVAL, not a checkable claim. Discern the
     #    genuinely-matching cards (real match vs a word-collision) and propose those; a gap stays a gap.
     if member == "search":
         candidates = _relevant(claim or t, search_fn, relevant_fn)
@@ -111,12 +136,10 @@ def discern(text: str, *, search_fn=None, relevant_fn=None) -> Dict[str, Any]:
                         "discerned a retrieval, but no kept card genuinely names the subject — a gap"),
                 "next": ("retrieve" if candidates else "miss")}
 
-    # 5. Otherwise a specialist can verify it — a checkable claim for the gate.
-    return {"input": t, "kind": "claim", "claim": claim, "held": held or None,
-            "route": route, "authority": "proposed", "proposes": True, "confirms": False,
-            "why": "discerned the necessary claim %r; the %s should verify it (%s)" % (
-                claim, member, route.get("why")),
-            "next": ("ask_user" if member == "ask_user" else "check")}
+    # 6. A genuine routing tie — ask, never guess.
+    return {"input": t, "kind": "claim", "claim": claim, "held": held or None, "route": route,
+            "claims": [], "authority": "proposed", "proposes": True, "confirms": False,
+            "why": "more than one member fits — %s" % route.get("why"), "next": "ask_user"}
 
 
 def field(query: str, candidates, *, generator: str = "human",
