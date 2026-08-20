@@ -61,6 +61,33 @@ body's verified witness returns through the gate (born quarantined, raised by wi
 gathers and the map thickens. The return loop *feeds the lens*. So the two answers are one: the lens is
 the way of seeing; circulation is how it keeps seeing further.
 
+## The Cloud of Witnesses — mentors by subject
+
+*"Since we are surrounded by so great a cloud of witnesses… let us run… looking to Jesus"* (Heb 12:1–2).
+The lens is not one man's writing alone. Matt's writing is the **near** witness — this hour, this
+mountain. Around it stands the **cloud**: wise men, a mentor for each craft, each holding a true
+fragment from his own country ([src/concordance/mentors.py](../src/concordance/mentors.py)).
+
+The courage is grounded: *"every good and perfect gift is from above"* (Jas 1:17) — so we gather wisdom
+from any voice without fear, because the **gate** makes it safe. A witness is ours if he **saw a true
+fragment** and that fragment, followed, **bends toward the Source**. Each carries a **gift** (what he saw)
+and a **discern** note (how to weigh it, and where his star stops). A witness *proposes* a way of seeing;
+the Word disposes — never confirmed past what it earned. Jung and Campbell belong in the cloud precisely
+*because* the discern note marks where they halt — they make the gate visible.
+
+Seeded across ~29 crafts: **Ellen G. White** (the body, temperance, whole-person education — and her work
+is public domain, so her actual words may be gathered), the ancients who saw the Logos from afar
+(Heraclitus, Plato, the Stoics Paul quoted), those who followed it home (Augustine, à Kempis, Pascal,
+MacDonald, Chesterton), the system-seers (Ellul, Illich, Girard), the soul-seers who most need the gate
+(Jung, Campbell, Frankl), and the local/Word (Berry, Barfield). Public-domain witnesses' text may be
+gathered as a voice, attributed, like the lens; the rest are **characterized only** — their way of
+seeing, not their copyrighted text — and the strict-PD gate holds.
+
+`mentors.for_text(q)` proposes the witnesses whose craft bears on a question; `by_subject` gathers a
+craft's mentors. Next map-as-we-go steps: gather the PD witnesses' actual words (Ellen White first) as
+attributed voices beside the lens, and wire the cloud into `discern` so a proposal carries not only how
+*your* writing sees a thing but which witness's craft it touches.
+
 ## The boundary, held
 
 I will not author his voice. Gathering means his writing, verbatim and attributed; the lens proposes his
