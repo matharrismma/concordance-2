@@ -591,6 +591,19 @@ def _secular_tools() -> List[dict]:
          "inputSchema": {"type": "object", "properties": {
              "text": {"type": "string", "description": "what you are bringing, in your own words"}},
              "required": ["text"]}},
+        {"name": "discern",
+         "description": ("Discern what to do with anything WITHOUT doing it — the proposal half of the "
+                         "engine, laid open. Bring a claim, a question, or a messy statement; get back "
+                         "what KIND it is, the necessary claim reduced to only what could change a "
+                         "verdict (private and framing context held back, not sent), the structured "
+                         "(domain, spec) the gate would verify, and where it routes. It PROPOSES, never "
+                         "confirms — no verdict, no seal: hand the returned `claims` to `verify` to "
+                         "dispose. Crisis is discerned first and routed to real people, never the gate. "
+                         "The twin of the verify door; nothing is generated."),
+         "inputSchema": {"type": "object", "properties": {
+             "text": {"type": "string",
+                      "description": "anything — a claim, a question, or what is on your mind"}},
+             "required": ["text"]}},
         # THE CANDIDATE ENGINE (task #135, docs/RED_TEAM_CANDIDATE_ENGINE_2026-08-05.md).
         # Zone C between any generator and the moat: commit the complete raw set FIRST, then
         # narrow under a pre-registered policy, then seal the whole path — winners and losers.
@@ -848,7 +861,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
                   "cards_stats": "read", "daily_card": "read", "grid_axis": "read",
                   "grid_dimension": "read", "card_connections": "read", "locate": "read",
                   "library_health": "read", "pronounce": "derive", "study_find": "read",
-                  "seeds": "read", "ask": "read"},
+                  "seeds": "read", "ask": "read", "discern": "read"},
     },
     "sovereign": {
         "version": "1.0.0",
@@ -1465,6 +1478,13 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
             result.setdefault("kind", kind)
             result["gate_open"] = bool(allow_witness or opened)
         return result
+
+    if name == "discern":
+        # The proposal half of the engine, laid open: what KIND, the necessary claim, the structured
+        # (domain, spec) the gate would verify, where it routes — and never a verdict. Crisis is
+        # discerned first and routed to real people. Twin of `verify`: discern proposes, verify disposes.
+        from .. import discern as _discern
+        return _discern.discern(str(args.get("text") or ""))
     if name == "pronounce":
         from .. import pronounce as _pron  # neutral phonetic helper, both surfaces
         return _pron.guide(args.get("text", ""))
