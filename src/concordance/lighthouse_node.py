@@ -258,6 +258,16 @@ def _simulate_over_air(reply: Dict[str, Any], node: Optional[Tuple[str, str]] = 
             "reassembled": payload is not None, "verify": verdict, "station_pubkey": node_pub}
 
 
+def context_loop(text: str, *, seal: bool = True) -> Dict[str, Any]:
+    """Run the PRIVATE context loop on this node: strip a claim to only what is necessary to check,
+    verify that de-identified skeleton in-process, and reattach the verdict with the boundary declared.
+    Nothing leaves the node — the verifier is local. This is the sovereign-node form of the loop; it is
+    also exposed over HTTP as POST /context/run when the operator sets CONCORDANCE_SOVEREIGN_NODE. Lazy
+    import keeps the loop off the minimal field-pack closure."""
+    from . import context
+    return context.run_verified(text, seal=seal)
+
+
 def simulate_answer(query: str, *, node=None, search_fn=None, is_crisis_fn=None) -> Dict[str, Any]:
     """A question -> composed -> signed -> LoRa packets -> reassembled -> verified offline. The whole
     lighthouse, minus the air."""
@@ -270,7 +280,7 @@ def simulate_daily(seed: str, *, node=None, daily_fn=None) -> Dict[str, Any]:
 
 
 __all__ = ["compose_reply", "daily_word", "new_station", "sign_reply", "frames_for_reply",
-           "serve", "simulate_answer", "simulate_daily", "ANSWER_BYTES", "DEFAULT_CALLSIGN"]
+           "serve", "simulate_answer", "simulate_daily", "context_loop", "ANSWER_BYTES", "DEFAULT_CALLSIGN"]
 
 
 # ── a field-operator CLI: run the lighthouse without writing Python ────────────────────────────────

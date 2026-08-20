@@ -896,6 +896,26 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                          claims=res.get("claims_found", 0), sealed=bool(res.get("seal")))
         return _ok(res)
 
+    if method == "POST" and path == "/context/run":
+        # THE CONTEXT LOOP — node-local ONLY. Runs the whole circuit behind the node's own walls: hold
+        # the private/framing context, verify ONLY the necessity-only, de-identified skeleton in-process,
+        # then reattach the verdict with the boundary declared. It is OFF unless the operator opts in
+        # (CONCORDANCE_SOVEREIGN_NODE), because on the SHARED hosted server this request body would carry
+        # the caller's full private text to us — the exact thing the loop exists to prevent (context
+        # stays local). On the shared server: strip locally and send only the skeleton to /verify.
+        import os as _os
+        if not str(_os.environ.get("CONCORDANCE_SOVEREIGN_NODE", "")).strip():
+            return _err(403, "the context loop runs only on a sovereign node — set "
+                             "CONCORDANCE_SOVEREIGN_NODE to enable it on your own machine; on the shared "
+                             "server, strip locally and send only the skeleton to /verify")
+        if not isinstance(body, dict) or not str(body.get("text") or "").strip():
+            return _err(400, "text required")
+        from .. import context as _context
+        seal_on = str(query.get("seal", "1")).lower() not in ("0", "false", "no", "off")
+        res = _context.run_verified(str(body["text"]), config=config, seal=seal_on)
+        telemetry.record("context_run", surface=surface, verdict=res.get("status"))
+        return _ok(res)
+
     if method == "POST" and path == "/days":
         # Your days: time + concentration, counted from the conversations THIS BROWSER holds.
         # POST, not GET, because a roster of thread ids is personal and belongs in a body rather
@@ -2363,6 +2383,7 @@ ROUTES = [
     {"path": "/verify", "methods": ("POST",), "rl": True},
     {"path": "/derivation/verify", "methods": ("POST",), "rl": True},
     {"path": "/audit", "methods": ("POST",), "rl": True},
+    {"path": "/context/run", "methods": ("POST",), "rl": True},  # the context loop — node-local (gated by CONCORDANCE_SOVEREIGN_NODE)
     {"path": "/chess", "methods": ("POST",), "rl": True},
     {"path": "/path", "methods": ("GET",), "api": True},
     {"path": "/days", "methods": ("POST",), "rl": True},

@@ -18,7 +18,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
+import os  # noqa: E402
+
 from concordance.web import api  # noqa: E402
+from concordance.config import EngineConfig  # noqa: E402
 
 # The historical hand-maintained values, verbatim — the behavior the server had before the
 # registry refactor. The derived sets must equal these exactly.
@@ -109,6 +112,7 @@ GOLDEN_RATELIMITED = {
     "/contact",  # deliberate addition — the public contact form (a JSON write, rate-limited)
     "/connect/event",  # the calendar pilot — the one on-behalf write, behind the consent lock
     "/audit",   # deliberate addition (the Auditor) — goldens update ONLY with a new route
+    "/context/run",  # the context loop — node-local, gated by CONCORDANCE_SOVEREIGN_NODE (off on the shared server)
     "/chess",   # deliberate addition (the chess verifier) — game theory, applied and sealable
     "/attest",  # deliberate addition — a write, so rate-limited like every other write
     "/want",    # deliberate addition — opening a want is a write (the hive's return-point)
@@ -180,6 +184,35 @@ def test_registered_nonserve_paths_are_dispatched():
         if r.get("serve"):
             continue  # handled in serve()'s Handler, not dispatch()
         assert r["path"] in dispatched, f"registered path not handled by dispatch(): {r['path']}"
+
+
+def test_context_run_is_off_on_the_shared_server_by_default():
+    """The context loop is node-local. On the shared server (flag unset) it MUST refuse, so a caller's
+    private text never reaches our box — invariant #2, enforced at the door. Fast: it refuses before
+    the engine is ever touched."""
+    old = os.environ.pop("CONCORDANCE_SOVEREIGN_NODE", None)
+    try:
+        status, payload = api.dispatch("POST", "/context/run", {},
+                                       {"text": "my mom said 2 + 2 = 4"}, EngineConfig(), False)
+        assert status == 403 and "sovereign node" in str(payload).lower()
+    finally:
+        if old is not None:
+            os.environ["CONCORDANCE_SOVEREIGN_NODE"] = old
+
+
+def test_context_run_opens_and_validates_when_enabled():
+    """With the flag set (a sovereign node), the door opens and validates the body — still fast: an
+    empty body is 400 before the verifier loads."""
+    old = os.environ.get("CONCORDANCE_SOVEREIGN_NODE")
+    os.environ["CONCORDANCE_SOVEREIGN_NODE"] = "1"
+    try:
+        status, _ = api.dispatch("POST", "/context/run", {}, {}, EngineConfig(), False)
+        assert status == 400                              # enabled, but text required
+    finally:
+        if old is None:
+            os.environ.pop("CONCORDANCE_SOVEREIGN_NODE", None)
+        else:
+            os.environ["CONCORDANCE_SOVEREIGN_NODE"] = old
 
 
 def _mcp_handler_names():
