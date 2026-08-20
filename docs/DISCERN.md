@@ -36,7 +36,7 @@ already unifies the front, with the rest folding in one kind at a time.
 | 2 | **Necessity** | reduce to only what could change the verdict; hold private/framing home | `context.decontextualize(minimal)` (the context loop) | **folded** — `claim` + `held` |
 | 3 | **Route** | which member / verifier should check it | `router.route` | **folded** — `route` |
 | 4 | **Claim extraction** | what in a text *is* a checkable claim, and its `(domain, spec)` | `audit.extract` | **to fold** — lives on the verify side today |
-| 5 | **Relevance** | a real match vs a word-collision (retrieval) | `ask._practical_rank`, `_title_names_subject` | **to fold** — the retrieval branch |
+| 5 | **Relevance** | a real match vs a word-collision (retrieval) | `ask._title_names_subject` | **folded** — the retrieval branch |
 | 6 | **Narrowing** | which candidate *survives* a wide field | `candidates.route` (fixed pre-registered policy, blind to `proposal_weight`) | **to fold** — the deepest form |
 | 7 | **Authority** | quarantined < cited < verified | `kernel` (`AUTHORITY`, born-quarantined kinds) | **stays at the gate** (correct) |
 
@@ -68,11 +68,13 @@ than guesses. Proven composing with the real gate: `discern("my mom said 2 + 2 =
 Each step keeps the contract (proposes never confirms; crisis first; nothing generated; explains itself;
 fails safe) and stays green:
 
-1. **Extraction (#4)** — `discern` calls `audit.extract` to propose *structured* claims `(domain, spec)`
-   rather than a skeleton string, so the gate receives exactly what it verifies. This is the biggest
-   clarifier of the two-primitive boundary.
-2. **Relevance (#5)** — when `route` lands on `search` (no checkable claim, a retrieval), `discern`
-   applies the relevance floor to propose the genuinely-matching card, not a word-collision.
+1. **Relevance (#5)** — DONE. A `search`-routed input is a retrieval, not a checkable claim: `discern`
+   returns `kind: "question"` and proposes only the cards whose title genuinely names the subject
+   (`_title_names_subject`), a gap staying an honest miss. This split — claim → verify, question →
+   retrieve — sharpened the door: a claim only exists when a verifier can actually check it.
+2. **Extraction (#4)** — `discern` calls `audit.extract` to propose *structured* claims `(domain, spec)`
+   rather than a skeleton string, so the gate receives exactly what it verifies. The biggest clarifier
+   of the two-primitive boundary.
 3. **Narrowing (#6)** — for a wide field, `discern` proposes the candidate set and the pre-registered
    routing; the gate narrows. The candidate engine becomes `discern`'s deep mode.
 

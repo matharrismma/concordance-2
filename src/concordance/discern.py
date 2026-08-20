@@ -36,15 +36,41 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-# The three things discern decides, and what to do with each.
-KINDS = ("empty", "crisis", "claim")
-NEXT = ("ask_user", "real_help", "check")
+# The kinds discern names, and what to do with each.
+KINDS = ("empty", "crisis", "claim", "question")
+NEXT = ("ask_user", "real_help", "check", "retrieve", "miss")
 
 
-def discern(text: str) -> Dict[str, Any]:
-    """Propose what matters. Given anything, name its KIND, reduce it to the necessary checkable CLAIM
-    (de-identified, framing held home), and name the MEMBER that should verify it. Returns a proposal
-    for the gate — never a verdict. Crisis is discerned first and routed to real people."""
+def _relevant(query: str, search_fn=None, relevant_fn=None) -> list:
+    """The RELEVANCE floor (folded from ask): from a search over the keeping, keep only the cards whose
+    TITLE genuinely names the subject — a real match, not a word-collision ("start a fire" must not
+    answer with a knots card that merely says 'fire' once). Returns [] on a genuine gap; a miss stays a
+    miss. Injectable so the seed stays pure in tests; defaults to the real corpus + ask's own floor."""
+    if search_fn is None:
+        from . import corpus
+        search_fn = corpus.search
+    if relevant_fn is None:
+        from . import ask
+        relevant_fn = ask._title_names_subject
+    try:
+        hits = search_fn(query, 5) or []
+    except Exception:  # noqa: BLE001 — a missing/partial corpus is a gap, never a crash
+        hits = []
+    out = []
+    for c in hits:
+        try:
+            if relevant_fn(query, c):
+                out.append({"id": c.get("id"), "title": c.get("title"), "shelf": c.get("shelf")})
+        except Exception:  # noqa: BLE001
+            continue
+    return out
+
+
+def discern(text: str, *, search_fn=None, relevant_fn=None) -> Dict[str, Any]:
+    """Propose what matters. Given anything, name its KIND, reduce it to the necessary CLAIM
+    (de-identified, framing held home), and either name the MEMBER that should verify it (a checkable
+    claim) or discern the genuinely-relevant kept cards (a retrieval). Returns a proposal — never a
+    verdict. Crisis is discerned first and routed to real people."""
     from . import ask, context, router
 
     t = (str(text) if text else "").strip()
@@ -68,11 +94,24 @@ def discern(text: str) -> Dict[str, Any]:
     claim = stripped.travels()
     held = stripped.framing().strip()      # for display; reattach still uses the full holds, exact
 
-    # 3. ROUTE — name the member/verifier that should check it. router proposes; a tie asks, never
-    #    guesses. We route on the discerned claim, not the raw text, so framing can't sway the routing.
+    # 3. ROUTE — name the member. router proposes; a tie asks, never guesses. Routed on the discerned
+    #    claim, not the raw text, so framing can't sway the routing.
     route = router.route(claim or t)
     member = route.get("member")
 
+    # 4. RELEVANCE (folded) — a member of "search" is a RETRIEVAL, not a checkable claim. Discern the
+    #    genuinely-matching cards (real match vs a word-collision) and propose those; a gap stays a gap.
+    if member == "search":
+        candidates = _relevant(claim or t, search_fn, relevant_fn)
+        return {"input": t, "kind": "question", "claim": claim, "held": held or None,
+                "route": route, "candidates": candidates, "authority": "proposed",
+                "proposes": True, "confirms": False,
+                "why": ("discerned a retrieval; %d kept card(s) genuinely name the subject" % len(candidates)
+                        if candidates else
+                        "discerned a retrieval, but no kept card genuinely names the subject — a gap"),
+                "next": ("retrieve" if candidates else "miss")}
+
+    # 5. Otherwise a specialist can verify it — a checkable claim for the gate.
     return {"input": t, "kind": "claim", "claim": claim, "held": held or None,
             "route": route, "authority": "proposed", "proposes": True, "confirms": False,
             "why": "discerned the necessary claim %r; the %s should verify it (%s)" % (
