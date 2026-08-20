@@ -133,3 +133,65 @@ def test_reveal_reattaches_a_verdict_by_putting_private_values_back():
     s = context.decontextualize("verify a@b.com for me")
     verdict = "checked [EMAIL_1]: the address is well-formed"
     assert s.reveal(verdict) == "checked a@b.com: the address is well-formed"
+
+
+# ── Step 2b — the necessity discriminator: keep only what is needed to check (Matt's rule) ──────────
+def test_attribution_is_dropped_and_the_bare_claim_travels():
+    # "the fact that it's his/her mom is irrelevant in this context"
+    s = context.decontextualize("my mom said water boils at 100C", minimal=True)
+    assert s.travels() == "water boils at 100C"
+    assert s.reattach() == "my mom said water boils at 100C"      # floor: nothing lost locally
+
+
+def test_a_truth_bearing_location_is_kept():
+    # "If she said it was 100C in Dayton, we'd need to add the location."
+    s = context.decontextualize("she said it was 100C in Dayton", minimal=True)
+    assert s.travels() == "it was 100C in Dayton"
+    assert "Dayton" in s.travels() and "she" not in s.travels()
+    assert s.reattach() == "she said it was 100C in Dayton"
+
+
+@pytest.mark.parametrize("q", [
+    "does water boil at 100C",                       # "just does water boil at 100C"
+    "is 17 a prime number",
+    "water boils at 100C at sea level",              # a condition, not framing — kept
+])
+def test_a_bare_claim_is_unchanged_by_minimal(q):
+    assert context.decontextualize(q, minimal=True).travels() == q
+
+
+def test_a_passive_or_non_frame_is_not_stripped():
+    # "is said to" has no person/pronoun subject before a speech verb — not an attribution frame.
+    q = "100C is said to be the boiling point of water"
+    assert context.decontextualize(q, minimal=True).travels() == q
+
+
+def test_pii_inside_the_kept_claim_is_still_placeheld_under_minimal():
+    s = context.decontextualize("the doctor said email me at a@b.com", minimal=True)
+    assert s.travels() == "email me at [EMAIL_1]"                 # frame dropped, PII placeheld
+    assert context.leaks(s.travels()) is False
+    assert s.reattach() == "the doctor said email me at a@b.com"
+
+
+def test_claim_convenience_matches_minimal_travels():
+    assert context.claim("she told me that water boils at 100C") == "water boils at 100C"
+
+
+def test_the_held_context_is_kept_for_the_response_not_discarded():
+    # Matt: the framing is held home, "but we would add it back in our response ideally."
+    s = context.decontextualize("my mom said water boils at 100C", minimal=True)
+    assert "mom" not in s.travels()                              # does NOT reach the verifier
+    assert "mom" in s.reattach() and "mom" in s.text            # IS still held, for the response
+    # the response side can reveal a verdict AND still has the local framing available to weave back
+    assert s.reveal("CONFIRMED: water boils at 100C") == "CONFIRMED: water boils at 100C"
+
+
+@pytest.mark.parametrize("q", [
+    "my mom said water boils at 100C",
+    "she said it was 100C in Dayton",
+    "according to Dr Smith, the dose is 500mg",
+    "does water boil at 100C",
+    "email a@b.com — she said the code is 4532015112830366",
+])
+def test_the_floor_survives_the_discriminator(q):
+    assert context.decontextualize(q, minimal=True).reattach() == q   # round-trip still exact

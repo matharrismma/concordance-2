@@ -102,31 +102,76 @@ def spans(text: str) -> List[str]:
     return _SPAN_RE.findall(text)
 
 
-# ── Step 2a — the PII discriminator, projected over the ONE floor substrate ────────────────────────
-# The plan: "teach the strip to send truth-bearing context to the verifier while holding local context
-# home… one kind per increment, checking closure after each." PII first (unambiguous). This does NOT
-# bolt the redactor on as a second reattach path — it projects redact's PII spans onto the same tiled
-# handle substrate, so the SAME (handles, holds) that reattaches the input exactly (the floor) also
-# yields the de-identified skeleton that travels. The truth-bearing/noise discriminator is a later
-# increment (a policy call), deliberately not here.
+# ── Step 2 — the discriminator: keep only what is NECESSARY to check the claim ──────────────────────
+# Matt's rule (2026-08-19): "we would need only the thing that is necessary." The verifier gets the bare
+# checkable claim plus any condition that BEARS ON ITS TRUTH — "water boils at 100C", and "in Dayton" if
+# the claim ties the boiling point to Dayton — and nothing else: who said it, whose mother, the greeting
+# are all irrelevant to whether water boils at 100C, so they stay home. Necessity is judged by the
+# verdict: a span travels iff dropping it could change the check. Framing never can; a condition can.
+#
+# The plan builds this ONE KIND AT A TIME, proving closure after each. Increment 1 (here) is the
+# highest-confidence, unambiguous drop — ATTRIBUTION FRAMING: "my mom said …", "she told me …",
+# "according to Dr X, …". Strip the leading frame, keep the claim (INCLUDING any location or number
+# inside it). Conservative by construction: it removes only a leading frame it matches with high
+# confidence and keeps EVERYTHING else, so a truth-bearing condition is never dropped — the safe error
+# direction for a verifier. More kinds (politeness, then finer classes) accrete here, each proven to
+# keep the round-trip green. The discriminator PROPOSES; the round-trip test and the verifier confirm.
+#
+# This is a projection over the Step-1 FLOOR, not a second reattach path: every span still lands in
+# `holds`, so reattach() reproduces the input exactly; the discriminator only decides, per span, whether
+# it travels (keep), travels as a typed placeholder (private/PII), or is held home (local).
+
+_PERSON = (r"(?:my|her|his|their|our|the|a)?\s*(?:mom|mother|dad|father|parents?|friends?|neighbou?rs?|"
+           r"doctors?|dr\.?|pastors?|teachers?|professors?|wife|husband|spouse|sons?|daughters?|"
+           r"sisters?|brothers?|aunts?|uncles?|cousins?|boss(?:es)?|colleagues?|co-?workers?|kids?|"
+           r"child(?:ren)?|grand(?:ma|mother|pa|father)|nurses?|coach(?:es)?|guy|lady|woman|man|"
+           r"people|someone|somebody)")
+_PRONOUN = r"(?:he|she|they|i)"
+_SPEECH = (r"(?:said|says|say|told\s+me|tells\s+me|telling\s+me|asked|asks|wondered|wonders|claimed|"
+           r"claims|claim|thinks?|thought|believes?|believed|figured|wrote|writes|mentioned|mentions|"
+           r"noted|notes|reported|reports|insists?|insisted|heard|read|reckons?|reckoned)")
+# A LEADING attribution frame only: subject (a person reference or a pronoun) + a speech verb + optional
+# "that", or "according to X,". High-confidence and bounded — a claim's own conditions can't match it.
+_ATTR = re.compile(
+    r"^\s*(?:according\s+to\s+[^,]{1,40},\s*"
+    r"|(?:%s|%s)\s+%s\s+(?:that\s+)?)" % (_PERSON, _PRONOUN, _SPEECH),
+    re.IGNORECASE)
+
+
+def _framing_end(text: str) -> int:
+    """End offset of a leading attribution frame ('my mom said (that) ', 'according to X, '), else 0.
+    Only a leading, high-confidence frame — conservative, so a claim's own conditions are never taken
+    for framing."""
+    m = _ATTR.match(text or "")
+    return m.end() if m else 0
+
 
 @dataclass(frozen=True)
 class Stripped:
     """One strip of a claim over the unified substrate. `holds` stays LOCAL (it reattaches the input
-    exactly); `travels()` is the de-identified skeleton that may go to the verifier."""
+    exactly); `travels()` is the skeleton that may go to the verifier — only the necessary spans."""
     text: str
     handles: Tuple[str, ...]        # local skeleton: one handle per span, in order
+    roles: Tuple[str, ...]          # per-span: "keep" (travels) | "private" (travels placeheld) | "local" (home)
     holds: Dict[str, str]           # handle -> original span value (LOCAL — reattaches to text exactly)
-    labels: Dict[str, str]          # handle -> typed placeholder, PRIVATE spans only (this is what travels)
+    labels: Dict[str, str]          # handle -> typed placeholder, PRIVATE spans only
 
     def reattach(self) -> str:
         """The local result: restore every handle by pure lookup — exactly the input (the floor)."""
         return "".join(self.holds[h] for h in self.handles)
 
     def travels(self) -> str:
-        """The de-identified skeleton that may reach the verifier: private spans become typed
-        placeholders, everything else travels literally. Equals redact()'s clean text, by construction."""
-        return "".join(self.labels.get(h, self.holds[h]) for h in self.handles)
+        """The skeleton that may reach the verifier: necessary spans travel literally, PII as typed
+        placeholders, and framing/local context is held home (omitted). With no discriminator active
+        (minimal=False) every span is necessary, so this equals redact()'s clean text by construction."""
+        parts: List[str] = []
+        for handle, role in zip(self.handles, self.roles):
+            if role == "keep":
+                parts.append(self.holds[handle])
+            elif role == "private":
+                parts.append(self.labels[handle])
+            # role == "local" -> held home, does not travel
+        return "".join(parts)
 
     @property
     def pii_map(self) -> Dict[str, str]:
@@ -140,33 +185,37 @@ class Stripped:
         return redact.restore(verdict, self.pii_map)
 
 
-def decontextualize(text: str) -> Stripped:
-    """Strip PII to typed placeholders over the floor substrate (Step 2a). The returned Stripped
-    reattaches the input exactly (holds) AND yields a de-identified skeleton (travels) with no PII."""
+def decontextualize(text: str, *, minimal: bool = False) -> Stripped:
+    """Strip a claim over the floor substrate. Always: PII -> typed placeholders (Step 2a). With
+    minimal=True: also hold ATTRIBUTION FRAMING home so only what is necessary to check travels
+    (Step 2b). The returned Stripped reattaches the input exactly AND yields a de-identified,
+    necessity-only skeleton."""
     if not isinstance(text, str):
         raise TypeError("context.decontextualize expects str, got %s" % type(text).__name__)
     from . import redact
     private = redact.pii_spans(text)                       # (start, end, label, value), ascending
+    frame_end = _framing_end(text) if minimal else 0
 
-    # Tile the WHOLE text into typed spans: public whitespace-runs + private PII atoms. Concatenation
-    # of the values is the input, so reattach stays exact even with PII carved out as its own spans.
-    typed: List[Tuple[str, str, "str | None"]] = []        # (value, kind, label|None)
+    # Tile the WHOLE text into typed spans: public whitespace-runs + private PII atoms, each with its
+    # start offset. Concatenation of the values is the input, so reattach stays exact.
+    typed: List[Tuple[str, int, str, "str | None"]] = []   # (value, start, kind, label|None)
     cursor = 0
     for start, end, label, value in private:
-        for seg in _SPAN_RE.findall(text[cursor:start]):
-            typed.append((seg, "public", None))
-        typed.append((value, "private", label))
+        for m in _SPAN_RE.finditer(text[cursor:start]):
+            typed.append((m.group(0), cursor + m.start(), "public", None))
+        typed.append((value, start, "private", label))
         cursor = end
-    for seg in _SPAN_RE.findall(text[cursor:]):
-        typed.append((seg, "public", None))
+    for m in _SPAN_RE.finditer(text[cursor:]):
+        typed.append((m.group(0), cursor + m.start(), "public", None))
 
     handles: List[str] = []
+    roles: List[str] = []
     holds: Dict[str, str] = {}
     labels: Dict[str, str] = {}
     value_to_handle: Dict[Tuple[str, str, "str | None"], str] = {}
     label_value_to_token: Dict[Tuple[str, str], str] = {}
     label_counters: Dict[str, int] = {}
-    for value, kind, label in typed:
+    for value, start, kind, label in typed:
         key = (value, kind, label)
         handle = value_to_handle.get(key)
         if handle is None:
@@ -181,7 +230,19 @@ def decontextualize(text: str) -> Stripped:
                     label_value_to_token[(label, value)] = token
                 labels[handle] = token
         handles.append(handle)
-    return Stripped(text=text, handles=tuple(handles), holds=holds, labels=labels)
+        if start < frame_end:
+            roles.append("local")                          # inside the attribution frame — held home
+        elif kind == "private":
+            roles.append("private")                        # PII — travels only as a typed placeholder
+        else:
+            roles.append("keep")                           # necessary to the check — travels literally
+    return Stripped(text=text, handles=tuple(handles), roles=tuple(roles), holds=holds, labels=labels)
+
+
+def claim(text: str) -> str:
+    """The necessity-only skeleton: attribution framing dropped, PII placeheld, the claim and its
+    conditions kept. Convenience for decontextualize(text, minimal=True).travels()."""
+    return decontextualize(text, minimal=True).travels()
 
 
 def leaks(travels_text: str) -> bool:
@@ -192,4 +253,4 @@ def leaks(travels_text: str) -> bool:
 
 
 __all__ = ["strip", "reattach", "round_trips", "spans",
-           "Stripped", "decontextualize", "leaks"]
+           "Stripped", "decontextualize", "claim", "leaks"]
