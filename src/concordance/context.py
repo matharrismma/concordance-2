@@ -337,5 +337,76 @@ def run(text: str, verify: "callable", *, minimal: bool = True) -> Dict[str, "ob
     }
 
 
+def verify_with_engine(skeleton: str, *, config: "object" = None, seal: bool = True) -> Dict[str, "object"]:
+    """The production `verify`: wire the loop to the REAL deterministic verifier (audit.audit) — extract
+    every checkable claim in the skeleton, verify the lot with the moat, attach one re-checkable seal.
+
+    Runs IN-PROCESS. That is the point: on a sovereign node / at the edge, the verifier is local, so
+    nothing leaves the machine — the privacy invariant holds by construction. The only thing ever passed
+    here is the necessity-only, de-identified skeleton. Never hand this raw user text; hand it run()'s
+    `travels()`."""
+    from . import audit as _audit
+    if config is None:
+        from .config import EngineConfig
+        config = EngineConfig()
+    r = _audit.audit(str(skeleton), config, seal=bool(seal))
+    verdict = str(r.get("verdict") or "UNKNOWN")
+    claims = [str(x.get("claim") or "") for x in (r.get("results") or []) if x.get("claim")]
+    n = r.get("claims_found") or 0
+    if n == 1 and claims:
+        statement = "%s — %s" % (claims[0], verdict)
+    elif n:
+        statement = "%d claims checked — %s" % (n, verdict)
+    else:
+        statement = "no checkable claim found in the skeleton"
+    seal_obj = r.get("seal") or {}
+    cite = seal_obj.get("cite_url") if isinstance(seal_obj, dict) else seal_obj
+    return {"status": verdict, "statement": statement, "seal": cite, "audit": r}
+
+
+def run_verified(text: str, *, config: "object" = None, seal: bool = True,
+                 minimal: bool = True) -> Dict[str, "object"]:
+    """Close the loop against the REAL engine: strip to the necessity-only skeleton and verify it
+    in-process. Sovereign — nothing leaves the machine. This is context.run() wired to the real gate."""
+    return run(text, lambda skeleton: verify_with_engine(skeleton, config=config, seal=seal),
+               minimal=minimal)
+
+
 __all__ = ["strip", "reattach", "round_trips", "spans",
-           "Stripped", "decontextualize", "claim", "leaks", "run"]
+           "Stripped", "decontextualize", "claim", "leaks", "run",
+           "verify_with_engine", "run_verified"]
+
+
+def main(argv=None) -> int:  # pragma: no cover - a thin edge/node entry
+    """Run the closed context loop from the command line, against the real verifier, entirely locally.
+
+        python -m concordance.context --run "my mom said 2 + 2 = 4"
+
+    Nothing leaves the machine: the claim is stripped to its necessity-only skeleton, verified
+    in-process, and the verdict is reattached in context with the boundary declared."""
+    import argparse
+    import sys
+    if sys.platform == "win32":
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+        except Exception:  # noqa: BLE001
+            pass
+    p = argparse.ArgumentParser(prog="context", description="Close the context loop locally: strip to "
+                                "what is necessary, verify it, reattach the verdict with the boundary.")
+    p.add_argument("--run", metavar="TEXT", required=True, help="the claim (with any private context)")
+    p.add_argument("--no-seal", action="store_true", help="skip minting a re-checkable seal")
+    a = p.parse_args(argv)
+    r = run_verified(a.run, seal=not a.no_seal)
+    print("status  :", r.get("status"))
+    print("checked :", repr(r.get("checked")))
+    held = (r.get("held_local") or {})
+    print("held    :", repr((r.get("boundary") or {}).get("not_checked")), "+ pii", held.get("pii"))
+    print("response:")
+    for line in str(r.get("response") or "").split("\n"):
+        print("   ", line)
+    return 0 if r.get("ok") else 1
+
+
+if __name__ == "__main__":  # pragma: no cover
+    import sys
+    sys.exit(main())
