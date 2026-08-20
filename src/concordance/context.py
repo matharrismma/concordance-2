@@ -178,6 +178,11 @@ class Stripped:
         """{placeholder: original value} — held LOCAL, for reattaching a verdict later (Step 3)."""
         return {ph: self.holds[h] for h, ph in self.labels.items()}
 
+    def framing(self) -> str:
+        """The local context held home (attribution etc.) — what did NOT travel, kept on the user's
+        machine and woven back into the response. Empty when nothing was held local."""
+        return "".join(self.holds[h] for h, role in zip(self.handles, self.roles) if role == "local")
+
     def reveal(self, verdict: str) -> str:
         """Reattach a verdict (or any returned text) by putting the private values back — pure lookup,
         via the one restore path (redact.restore). Never reconstruction."""
@@ -252,5 +257,85 @@ def leaks(travels_text: str) -> bool:
     return redact.has_pii(travels_text)
 
 
+# ── Step 3 — application: close the triad (reception → integration → expression) ────────────────────
+# The plan: "reattach the verdict to local context by handle… present with the boundary declared: what
+# was checked, what was not, the seal for re-checking. Never present a verdict as broader than what the
+# gate actually confirmed." Matt: "we would add it back in our response." run() is that circuit:
+#   integration  — decontextualize(minimal): hold local framing + PII, produce the necessity-only skeleton
+#   reception    — verify(skeleton): the content process checks ONLY the de-identified skeleton
+#   expression   — reveal the verdict locally, weave the held context back, declare the boundary
+# verify is injected (a fake in tests; the real gate/check as a follow-on) so the loop is provable with
+# no engine. Fail-safe: a skeleton that would leak is QUARANTINED (never sent); a verifier that errors
+# yields INCOMPLETE, never a false pass.
+
+def _normalize_verdict(raw: "object") -> Dict[str, "object"]:
+    """Accept a verifier's return in a few honest shapes and normalize to {status, statement, seal}.
+    A bare string has no declared status, so it is UNKNOWN — never silently a PASS."""
+    if isinstance(raw, str):
+        return {"status": "UNKNOWN", "statement": raw, "seal": None}
+    if isinstance(raw, dict):
+        status = raw.get("status") or raw.get("verdict") or "UNKNOWN"
+        statement = raw.get("statement") or raw.get("text") or raw.get("answer") or ""
+        seal = raw.get("seal") or raw.get("cite_url") or raw.get("content_hash")
+        return {"status": str(status), "statement": str(statement), "seal": seal}
+    return {"status": "UNKNOWN", "statement": str(raw), "seal": None}
+
+
+def _compose(revealed: str, checked: str, framing: str, verdict: Dict[str, "object"]) -> str:
+    """Deterministic assembly (NOT generation): the verifier's own statement (PII revealed locally),
+    then the boundary — what was checked, what stayed home, the status, and the re-check seal."""
+    lines = [revealed.strip() or "(no statement returned)"]
+    boundary = "— checked: %r" % checked
+    if framing.strip():
+        boundary += "  · kept on your machine (not sent): %r" % framing.strip()
+    lines.append(boundary)
+    tail = "[%s]" % verdict["status"]
+    if verdict.get("seal"):
+        tail += "  re-check: %s" % verdict["seal"]
+    lines.append(tail)
+    return "\n".join(lines)
+
+
+def run(text: str, verify: "callable", *, minimal: bool = True) -> Dict[str, "object"]:
+    """Close the context loop on one real input. `verify` is a callable skeleton:str -> (str | dict)
+    that checks ONLY the de-identified, necessity-only skeleton. Returns the structured result and a
+    ready-to-show `response` with the boundary declared. Private context never leaves this function."""
+    if not isinstance(text, str):
+        raise TypeError("context.run expects str, got %s" % type(text).__name__)
+    if not callable(verify):
+        raise TypeError("context.run needs a verify callable")
+
+    s = decontextualize(text, minimal=minimal)          # integration: hold local, de-identify
+    skeleton = s.travels()
+
+    if leaks(skeleton):                                  # fail-safe: never send private context
+        return {"ok": False, "status": "QUARANTINE", "checked": None,
+                "held_local": {"framing": s.framing(), "pii": list(s.pii_map.values())},
+                "verdict": None,
+                "response": "Held back: the claim could not be de-identified safely, so nothing was sent.",
+                "boundary": {"checked": None, "not_checked": s.reattach(), "reason": "would leak PII"}}
+
+    try:                                                 # reception: the content process checks the skeleton
+        raw = verify(skeleton)
+    except Exception as e:  # noqa: BLE001 — a verifier error is INCOMPLETE, never a false pass
+        return {"ok": False, "status": "INCOMPLETE", "checked": skeleton,
+                "held_local": {"framing": s.framing(), "pii": list(s.pii_map.values())},
+                "verdict": None,
+                "response": "Could not complete the check (%s). Nothing is confirmed." % type(e).__name__,
+                "boundary": {"checked": skeleton, "error": type(e).__name__}}
+
+    v = _normalize_verdict(raw)
+    revealed = s.reveal(str(v["statement"]))            # expression: put the user's PII back, locally
+    framing = s.framing()
+    return {
+        "ok": True, "status": v["status"], "checked": skeleton,
+        "held_local": {"framing": framing, "pii": list(s.pii_map.values())},
+        "verdict": v,
+        "response": _compose(revealed, skeleton, framing, v),
+        "boundary": {"checked": skeleton, "not_checked": (framing.strip() or None),
+                     "pii_masked": len(s.pii_map), "seal": v.get("seal")},
+    }
+
+
 __all__ = ["strip", "reattach", "round_trips", "spans",
-           "Stripped", "decontextualize", "claim", "leaks"]
+           "Stripped", "decontextualize", "claim", "leaks", "run"]

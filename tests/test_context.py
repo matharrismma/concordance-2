@@ -195,3 +195,63 @@ def test_the_held_context_is_kept_for_the_response_not_discarded():
 ])
 def test_the_floor_survives_the_discriminator(q):
     assert context.decontextualize(q, minimal=True).reattach() == q   # round-trip still exact
+
+
+# ── Step 3 — application: the closed triad (reception → integration → expression) ───────────────────
+def test_run_closes_the_loop_and_the_verifier_sees_only_the_skeleton():
+    seen = {}
+
+    def verify(skeleton):
+        seen["skeleton"] = skeleton                      # capture what the content process received
+        return {"status": "CONFIRMED", "statement": "%s — holds at sea level" % skeleton,
+                "seal": "/s/abc123"}
+
+    r = context.run("my mom said water boils at 100C", verify)
+    assert r["ok"] and r["status"] == "CONFIRMED"
+    assert seen["skeleton"] == "water boils at 100C"     # framing never reached the verifier
+    assert "mom" not in seen["skeleton"]
+    assert r["checked"] == "water boils at 100C"
+    assert r["boundary"]["not_checked"] == "my mom said" # held home, declared
+    assert "re-check: /s/abc123" in r["response"]        # boundary declares the seal
+
+
+def test_run_reveals_pii_only_locally_never_to_the_verifier():
+    seen = {}
+
+    def verify(skeleton):
+        seen["skeleton"] = skeleton
+        return {"status": "CONFIRMED", "statement": "%s is well-formed" % skeleton}
+
+    r = context.run("verify a@b.com please", verify)
+    assert "a@b.com" not in seen["skeleton"] and "[EMAIL_1]" in seen["skeleton"]   # verifier saw placeholder
+    assert "a@b.com" in r["response"]                    # user sees the real value, revealed locally
+    assert r["held_local"]["pii"] == ["a@b.com"]
+
+
+def test_run_declares_the_boundary_for_a_bare_claim():
+    r = context.run("does water boil at 100C", lambda s: {"status": "CONFIRMED", "statement": "yes"})
+    assert r["checked"] == "does water boil at 100C"
+    assert r["boundary"]["not_checked"] is None          # nothing held; boundary still honest
+    assert "checked:" in r["response"] and "[CONFIRMED]" in r["response"]
+
+
+def test_run_fails_safe_when_the_verifier_errors():
+    def boom(skeleton):
+        raise RuntimeError("gate down")
+
+    r = context.run("water boils at 100C", boom)
+    assert r["ok"] is False and r["status"] == "INCOMPLETE"   # never a false PASS
+    assert "could not complete" in r["response"].lower() and r["verdict"] is None
+
+
+def test_run_does_not_present_broader_than_the_verifier_said():
+    # the response leads with the verifier's OWN statement — the loop adds boundary, not claims
+    r = context.run("is 17 a prime number",
+                    lambda s: {"status": "INCOMPLETE", "statement": "could not route this claim"})
+    assert r["response"].startswith("could not route this claim")
+    assert r["status"] == "INCOMPLETE"
+
+
+def test_run_normalizes_a_bare_string_verdict_to_unknown_status():
+    r = context.run("water boils at 100C", lambda s: "looks right")
+    assert r["status"] == "UNKNOWN" and r["response"].startswith("looks right")
