@@ -37,8 +37,8 @@ from __future__ import annotations
 from typing import Any, Dict
 
 # The kinds discern names, and what to do with each.
-KINDS = ("empty", "crisis", "claim", "question")
-NEXT = ("ask_user", "real_help", "check", "retrieve", "miss")
+KINDS = ("empty", "crisis", "claim", "question", "field")
+NEXT = ("ask_user", "real_help", "check", "retrieve", "miss", "narrow")
 
 
 def _relevant(query: str, search_fn=None, relevant_fn=None) -> list:
@@ -119,4 +119,31 @@ def discern(text: str, *, search_fn=None, relevant_fn=None) -> Dict[str, Any]:
             "next": ("ask_user" if member == "ask_user" else "check")}
 
 
-__all__ = ["discern", "KINDS", "NEXT"]
+def field(query: str, candidates, *, generator: str = "human",
+          generation_method: str = "human", policy_version: str = "v0.1") -> Dict[str, Any]:
+    """Discern's DEEP MODE — the archetype (folded #6). When there is not one claim but a WIDE FIELD of
+    candidate answers, discern proposes the narrowing: it mints the candidate set, COMMITS it (no
+    verification before commitment), and routes each candidate to a verifier under a FIXED, PRE-REGISTERED
+    policy that is BLIND to the generator's proposal_weight. It hands back the committed, routed field —
+    the gate (candidates.narrow) then eliminates to a survivor. Discern proposes the field; verify
+    disposes of it. Everything is born quarantined; a lone winner exists only when exactly one passes.
+
+    `candidates`: raw strings, or {raw_text, proposal_weight?} — the weight is carried verbatim and read
+    by NOTHING in the routing, so a confident-but-wrong candidate gets no easier path to survival."""
+    from . import candidates as _cand
+    cset = _cand.create_set(query, list(candidates), generator, generation_method)
+    cset = _cand.commit(cset)
+    routing = _cand.route(cset, policy_version=policy_version)
+    routes = routing.get("routes", {})
+    routable = sum(1 for r in routes.values() if r.get("mode"))
+    n = len(cset.get("candidates", []))
+    return {"query": query, "kind": "field", "n_candidates": n, "committed": True,
+            "policy_version": policy_version, "routing": routing, "routable": routable,
+            "authority": "proposed", "proposes": True, "confirms": False,
+            "why": "proposed a field of %d candidate(s), committed and routed under policy %s "
+                   "(blind to the generator's weight); %d have a verifier — the gate narrows" % (
+                       n, policy_version, routable),
+            "next": "narrow", "cset": cset}
+
+
+__all__ = ["discern", "field", "KINDS", "NEXT"]

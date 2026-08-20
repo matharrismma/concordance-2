@@ -37,7 +37,7 @@ already unifies the front, with the rest folding in one kind at a time.
 | 3 | **Route** | which member / verifier should check it | `router.route` | **folded** — `route` |
 | 4 | **Claim extraction** | what in a text *is* a checkable claim, and its `(domain, spec)` | `audit.extract` | **to fold** — lives on the verify side today |
 | 5 | **Relevance** | a real match vs a word-collision (retrieval) | `ask._title_names_subject` | **folded** — the retrieval branch |
-| 6 | **Narrowing** | which candidate *survives* a wide field | `candidates.route` (fixed pre-registered policy, blind to `proposal_weight`) | **to fold** — the deepest form |
+| 6 | **Narrowing** | which candidate *survives* a wide field | `candidates.route` (fixed pre-registered policy, blind to `proposal_weight`) | **folded** — `discern.field`, the deep mode |
 | 7 | **Authority** | quarantined < cited < verified | `kernel` (`AUTHORITY`, born-quarantined kinds) | **stays at the gate** (correct) |
 
 Two of these are load-bearing findings:
@@ -72,11 +72,15 @@ fails safe) and stays green:
    returns `kind: "question"` and proposes only the cards whose title genuinely names the subject
    (`_title_names_subject`), a gap staying an honest miss. This split — claim → verify, question →
    retrieve — sharpened the door: a claim only exists when a verifier can actually check it.
-2. **Extraction (#4)** — `discern` calls `audit.extract` to propose *structured* claims `(domain, spec)`
-   rather than a skeleton string, so the gate receives exactly what it verifies. The biggest clarifier
-   of the two-primitive boundary.
-3. **Narrowing (#6)** — for a wide field, `discern` proposes the candidate set and the pre-registered
-   routing; the gate narrows. The candidate engine becomes `discern`'s deep mode.
+2. **Narrowing (#6)** — DONE. `discern.field(query, candidates)` is the deep mode: it mints the
+   candidate set, commits it, and routes each candidate under the fixed pre-registered policy — blind to
+   the generator's `proposal_weight` — then hands the committed, routed field to the gate
+   (`candidates.narrow`), which eliminates to a survivor. Proven: a true answer weighted 0.01 survives
+   while a false answer weighted 0.99 is rejected — weight buys no favor.
+3. **Extraction (#4)** — the last fold: `discern` calls `audit.extract` to propose *structured* claims
+   `(domain, spec)` rather than a skeleton string, so the gate receives exactly what it verifies. This
+   closes the boundary blur where claim-extraction still lives on the verify side.
 
-When these are folded, the engine is exactly two doors — `discern` and `check` — and every other module
-hangs off one of them.
+Folded so far: **kind · necessity · route · relevance · narrowing.** One remains (extraction). When it
+lands, the engine is exactly two doors — `discern` and `check` — every other module hanging off one of
+them.

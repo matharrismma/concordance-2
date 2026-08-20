@@ -4,6 +4,8 @@ The seed unifies the front of discernment: kind (crisis vs claim vs empty), the 
 (reduce to only what is needed to check, de-identified), and the route (which member verifies). Pure —
 no corpus, no model.
 """
+import pytest
+
 from concordance import discern as d
 
 
@@ -75,6 +77,27 @@ def test_a_retrieval_with_no_genuine_match_is_an_honest_miss():
 def test_a_checkable_claim_never_takes_the_retrieval_branch():
     r = d.discern("2 + 2 = 4")                       # routes to a verifier, not search -> no corpus touched
     assert r["kind"] == "claim" and r["next"] == "check" and "candidates" not in r
+
+
+# ── narrowing, folded (#6): the deep mode — propose a field, the gate eliminates ────────────────────
+def test_field_proposes_a_committed_routed_narrowing():
+    p = d.field("what is 2 + 2", ["2 + 2 = 4", "2 + 2 = 5"])
+    assert p["kind"] == "field" and p["next"] == "narrow"
+    assert p["committed"] is True and p["n_candidates"] == 2 and p["routable"] == 2
+    assert p["proposes"] is True and p["confirms"] is False and p["authority"] == "proposed"
+
+
+def test_field_routing_is_blind_to_the_generators_weight():
+    # the true answer carries a low weight, a false answer a high weight — routing must not favor weight
+    p = d.field("what is 2 + 2", [{"raw_text": "2 + 2 = 4", "proposal_weight": 0.01},
+                                  {"raw_text": "2 + 2 = 5", "proposal_weight": 0.99}])
+    routes = list(p["routing"]["routes"].values())
+    assert all(r.get("mode") for r in routes) and p["routable"] == 2   # both routed by SHAPE, not weight
+
+
+def test_field_fails_closed_on_an_empty_field():
+    with pytest.raises(Exception):
+        d.field("what is 2 + 2", [])
 
 
 def test_routing_reads_the_discerned_claim_not_the_framing():
