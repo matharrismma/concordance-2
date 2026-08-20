@@ -79,12 +79,18 @@ def _extract(claim: str, extract_fn=None) -> list:
         return []
 
 
-def discern(text: str, *, search_fn=None, relevant_fn=None, extract_fn=None) -> Dict[str, Any]:
+def discern(text: str, *, search_fn=None, relevant_fn=None, extract_fn=None, lens_fn=None) -> Dict[str, Any]:
     """Propose what matters. Given anything, name its KIND, reduce it to the necessary CLAIM
     (de-identified, framing held home), and either hand the gate the STRUCTURED checkable claim(s) it
     will verify, or discern the genuinely-relevant kept cards (a retrieval). Returns a proposal — never
-    a verdict. Crisis is discerned first and routed to real people."""
+    a verdict. Crisis is discerned first and routed to real people.
+
+    `lens_fn` (optional, e.g. lens.see) is the WAY OF SEEING — Matt's writing. When given, the proposal
+    carries `lens`: how his witness frames this. It proposes only; it never changes the verdict."""
     from . import ask, context, router
+
+    def _seen(of: str):
+        return lens_fn(of) if lens_fn else None
 
     t = (str(text) if text else "").strip()
     if not t:
@@ -117,7 +123,7 @@ def discern(text: str, *, search_fn=None, relevant_fn=None, extract_fn=None) -> 
     #    gate the structured claim(s); it verifies exactly these (no re-parsing a bare string).
     if claims or (member not in ("search", "ask_user")):
         return {"input": t, "kind": "claim", "claim": claim, "held": held or None,
-                "route": route, "claims": claims, "authority": "proposed",
+                "route": route, "claims": claims, "lens": _seen(claim), "authority": "proposed",
                 "proposes": True, "confirms": False,
                 "why": ("discerned %d structured claim(s) for the gate to verify" % len(claims) if claims
                         else "discerned the necessary claim %r; the %s should verify it (%s)" % (
@@ -129,7 +135,7 @@ def discern(text: str, *, search_fn=None, relevant_fn=None, extract_fn=None) -> 
     if member == "search":
         candidates = _relevant(claim or t, search_fn, relevant_fn)
         return {"input": t, "kind": "question", "claim": claim, "held": held or None,
-                "route": route, "candidates": candidates, "authority": "proposed",
+                "route": route, "candidates": candidates, "lens": _seen(claim or t), "authority": "proposed",
                 "proposes": True, "confirms": False,
                 "why": ("discerned a retrieval; %d kept card(s) genuinely name the subject" % len(candidates)
                         if candidates else
