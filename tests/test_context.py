@@ -73,3 +73,63 @@ def test_holds_never_carry_more_than_the_distinct_spans():
     skeleton, holds = context.strip(text)
     assert set(holds.values()) == {"a", " ", "b"}           # exactly the distinct spans
     assert context.reattach(skeleton, holds) == text
+
+
+# ── Step 2a — the PII discriminator over the floor substrate (round-trip still closes; no leak) ─────
+from concordance import redact  # noqa: E402
+
+
+@pytest.mark.parametrize("text", MESSY)
+def test_decontextualize_still_reattaches_the_input_exactly(text):
+    # The floor invariant must survive the PII layer: the local holds reattach to EXACTLY the input.
+    assert context.decontextualize(text).reattach() == text
+
+
+@pytest.mark.parametrize("text", MESSY)
+def test_nothing_private_travels(text):
+    # The de-identified skeleton that may reach the verifier carries no PII.
+    s = context.decontextualize(text)
+    assert context.leaks(s.travels()) is False
+
+
+@pytest.mark.parametrize("text", MESSY)
+def test_the_traveling_skeleton_equals_the_redactor_output(text):
+    # Proof the substrate is UNIFIED, not a second reattach path: projecting PII spans over the floor
+    # reproduces redact()'s clean text exactly, placeholder numbering and all.
+    assert context.decontextualize(text).travels() == redact.redact(text)[0]
+
+
+def test_the_email_is_held_home_and_the_checkable_claim_travels():
+    claim = "my mother in Dayton wrote matt@example.com - is 100 C the boiling point of water"
+    s = context.decontextualize(claim)
+    travels = s.travels()
+    assert "matt@example.com" not in travels and "[EMAIL_1]" in travels   # private held
+    assert "100 C the boiling point of water" in travels                  # checkable claim travels
+    assert s.reattach() == claim                                          # local round-trip exact
+
+
+def test_a_spaced_card_is_caught_as_one_atom_and_reattaches():
+    claim = "charge it to 4532 0151 1283 0366 tomorrow"
+    s = context.decontextualize(claim)
+    assert "4532 0151 1283 0366" not in s.travels() and "[CARD_1]" in s.travels()
+    assert s.reattach() == claim
+    assert context.leaks(s.travels()) is False
+
+
+def test_no_pii_text_travels_unchanged_with_no_labels():
+    claim = "is 17 a prime number"
+    s = context.decontextualize(claim)
+    assert s.travels() == claim and s.labels == {} and s.reattach() == claim
+
+
+def test_a_repeated_private_value_gets_one_stable_placeholder():
+    claim = "mail a@b.com then a@b.com again"
+    s = context.decontextualize(claim)
+    assert s.travels().count("[EMAIL_1]") == 2 and "[EMAIL_2]" not in s.travels()
+    assert s.reattach() == claim
+
+
+def test_reveal_reattaches_a_verdict_by_putting_private_values_back():
+    s = context.decontextualize("verify a@b.com for me")
+    verdict = "checked [EMAIL_1]: the address is well-formed"
+    assert s.reveal(verdict) == "checked a@b.com: the address is well-formed"

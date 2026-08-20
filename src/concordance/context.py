@@ -41,6 +41,7 @@ Stdlib only, fully offline. The holds stay with the user; nothing here reaches a
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
 # A span is a maximal run of non-space OR a maximal run of space. Every character is one or the other
@@ -101,4 +102,94 @@ def spans(text: str) -> List[str]:
     return _SPAN_RE.findall(text)
 
 
-__all__ = ["strip", "reattach", "round_trips", "spans"]
+# ── Step 2a — the PII discriminator, projected over the ONE floor substrate ────────────────────────
+# The plan: "teach the strip to send truth-bearing context to the verifier while holding local context
+# home… one kind per increment, checking closure after each." PII first (unambiguous). This does NOT
+# bolt the redactor on as a second reattach path — it projects redact's PII spans onto the same tiled
+# handle substrate, so the SAME (handles, holds) that reattaches the input exactly (the floor) also
+# yields the de-identified skeleton that travels. The truth-bearing/noise discriminator is a later
+# increment (a policy call), deliberately not here.
+
+@dataclass(frozen=True)
+class Stripped:
+    """One strip of a claim over the unified substrate. `holds` stays LOCAL (it reattaches the input
+    exactly); `travels()` is the de-identified skeleton that may go to the verifier."""
+    text: str
+    handles: Tuple[str, ...]        # local skeleton: one handle per span, in order
+    holds: Dict[str, str]           # handle -> original span value (LOCAL — reattaches to text exactly)
+    labels: Dict[str, str]          # handle -> typed placeholder, PRIVATE spans only (this is what travels)
+
+    def reattach(self) -> str:
+        """The local result: restore every handle by pure lookup — exactly the input (the floor)."""
+        return "".join(self.holds[h] for h in self.handles)
+
+    def travels(self) -> str:
+        """The de-identified skeleton that may reach the verifier: private spans become typed
+        placeholders, everything else travels literally. Equals redact()'s clean text, by construction."""
+        return "".join(self.labels.get(h, self.holds[h]) for h in self.handles)
+
+    @property
+    def pii_map(self) -> Dict[str, str]:
+        """{placeholder: original value} — held LOCAL, for reattaching a verdict later (Step 3)."""
+        return {ph: self.holds[h] for h, ph in self.labels.items()}
+
+    def reveal(self, verdict: str) -> str:
+        """Reattach a verdict (or any returned text) by putting the private values back — pure lookup,
+        via the one restore path (redact.restore). Never reconstruction."""
+        from . import redact
+        return redact.restore(verdict, self.pii_map)
+
+
+def decontextualize(text: str) -> Stripped:
+    """Strip PII to typed placeholders over the floor substrate (Step 2a). The returned Stripped
+    reattaches the input exactly (holds) AND yields a de-identified skeleton (travels) with no PII."""
+    if not isinstance(text, str):
+        raise TypeError("context.decontextualize expects str, got %s" % type(text).__name__)
+    from . import redact
+    private = redact.pii_spans(text)                       # (start, end, label, value), ascending
+
+    # Tile the WHOLE text into typed spans: public whitespace-runs + private PII atoms. Concatenation
+    # of the values is the input, so reattach stays exact even with PII carved out as its own spans.
+    typed: List[Tuple[str, str, "str | None"]] = []        # (value, kind, label|None)
+    cursor = 0
+    for start, end, label, value in private:
+        for seg in _SPAN_RE.findall(text[cursor:start]):
+            typed.append((seg, "public", None))
+        typed.append((value, "private", label))
+        cursor = end
+    for seg in _SPAN_RE.findall(text[cursor:]):
+        typed.append((seg, "public", None))
+
+    handles: List[str] = []
+    holds: Dict[str, str] = {}
+    labels: Dict[str, str] = {}
+    value_to_handle: Dict[Tuple[str, str, "str | None"], str] = {}
+    label_value_to_token: Dict[Tuple[str, str], str] = {}
+    label_counters: Dict[str, int] = {}
+    for value, kind, label in typed:
+        key = (value, kind, label)
+        handle = value_to_handle.get(key)
+        if handle is None:
+            handle = f"{_OPEN}{len(value_to_handle)}{_CLOSE}"
+            value_to_handle[key] = handle
+            holds[handle] = value
+            if kind == "private":
+                token = label_value_to_token.get((label, value))
+                if token is None:                          # first-appearance numbering, matching redact()
+                    label_counters[label] = label_counters.get(label, 0) + 1
+                    token = f"[{label}_{label_counters[label]}]"
+                    label_value_to_token[(label, value)] = token
+                labels[handle] = token
+        handles.append(handle)
+    return Stripped(text=text, handles=tuple(handles), holds=holds, labels=labels)
+
+
+def leaks(travels_text: str) -> bool:
+    """True if any PII survives in what would travel — the leak check. A skeleton that leaks must never
+    reach the verifier; the loop quarantines instead."""
+    from . import redact
+    return redact.has_pii(travels_text)
+
+
+__all__ = ["strip", "reattach", "round_trips", "spans",
+           "Stripped", "decontextualize", "leaks"]

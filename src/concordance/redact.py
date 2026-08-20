@@ -61,19 +61,21 @@ _RULES: List[Tuple[str, "re.Pattern[str]", object]] = [
 ]
 
 
-def redact(text: str) -> Tuple[str, Dict[str, str]]:
-    """Strip PII to stable placeholders. Returns (clean_text, {placeholder: original})."""
-    if not text or not isinstance(text, str):
-        return text, {}
+def pii_spans(text: str) -> List[Tuple[int, int, str, str]]:
+    """The chosen, non-overlapping PII spans as (start, end, label, value), left to right.
 
+    The SINGLE source of PII-span detection: redact() and concordance.context both build on this, so
+    the traveling skeleton and the placeholder mapping can never disagree about where the PII is.
+    """
+    if not text or not isinstance(text, str):
+        return []
     spans: List[Tuple[int, int, str, str]] = []  # (start, end, label, value)
     for label, pattern, validator in _RULES:
         for m in pattern.finditer(text):
             if validator is None or validator(m.group(0)):
                 spans.append((m.start(), m.end(), label, m.group(0)))
-
-    # Resolve overlaps: sort by start, then by earliest rule priority isn't needed since we
-    # keep the first non-overlapping span encountered in (start, -length) order.
+    # Resolve overlaps: sort by start, then longest-first; greedily keep non-overlapping spans. The
+    # result is in ascending start order (we only append when start >= last_end).
     spans.sort(key=lambda s: (s[0], -(s[1] - s[0])))
     chosen: List[Tuple[int, int, str, str]] = []
     last_end = -1
@@ -81,7 +83,15 @@ def redact(text: str) -> Tuple[str, Dict[str, str]]:
         if start >= last_end:
             chosen.append((start, end, label, value))
             last_end = end
+    return chosen
 
+
+def redact(text: str) -> Tuple[str, Dict[str, str]]:
+    """Strip PII to stable placeholders. Returns (clean_text, {placeholder: original})."""
+    if not text or not isinstance(text, str):
+        return text, {}
+
+    chosen = pii_spans(text)
     mapping: Dict[str, str] = {}
     value_to_token: Dict[Tuple[str, str], str] = {}
     counters: Dict[str, int] = {}
