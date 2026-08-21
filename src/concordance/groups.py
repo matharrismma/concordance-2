@@ -177,6 +177,23 @@ def list_groups(q: str = "") -> Dict[str, Any]:
     return {"total": len(groups), "groups": groups}
 
 
+def groups_of(member_id: str) -> List[Dict[str, Any]]:
+    """The groups this member belongs to (safe public view). Membership is by fingerprint; the raw ids
+    stay server-side — this checks them but returns only handles/counts, never the ids."""
+    mid = str(member_id or "").strip()
+    if not mid:
+        return []
+    out: List[Dict[str, Any]] = []
+    for fp in sorted(_dir().glob("grp_*.json")):
+        try:
+            g = json.loads(fp.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if any(str(m.get("id")) == mid for m in g.get("members", [])):
+            out.append(_public(g))
+    return out
+
+
 def get_group(gid: str) -> Optional[Dict[str, Any]]:
     g = _read(gid)
     return _public(g, with_cards=True) if g else None

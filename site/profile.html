@@ -105,6 +105,7 @@
     </div>
     <div class="status" id="saveStatus"></div>
     <div class="served hidden" id="served"></div>
+    <div class="served hidden" id="fellow"></div>
   </div>
 
   <div class="boundary">
@@ -179,6 +180,21 @@ async function loadServed(){
     el.innerHTML = h; el.classList.remove("hidden");
   }catch(e){ el.classList.add("hidden"); }
 }
+async function loadCommunity(){
+  const el = $("fellow");
+  try{
+    const r = await api("GET", "/profile/community?fp=" + encodeURIComponent(FP));
+    const gs = (r.body && r.body.groups) || [];
+    let h = '<div class="served-h">Your fellowship</div>';
+    if(gs.length){
+      h += gs.map(function(g){ return '<div class="served-row met"><span class="w">'+esc(g.title||g.topic)+'</span> — '+(g.member_count||0)+' walking together</div>'; }).join("");
+    }else{
+      h += '<div class="served-row seek"><i>You have not joined a fellowship yet.</i></div>';
+    }
+    h += '<div class="hint" style="margin-top:.5rem"><a href="/community.html">Find or start a group &rarr;</a></div>';
+    el.innerHTML = h; el.classList.remove("hidden");
+  }catch(e){ el.classList.add("hidden"); }
+}
 
 async function open_(){
   $("loginErr").textContent = "";
@@ -190,7 +206,7 @@ async function open_(){
     $("fp").textContent = FP;
     await loadProfile();
     $("login").classList.add("hidden"); $("profile").classList.remove("hidden");
-    loadServed();
+    loadServed(); loadCommunity();
 
     $("verses").value = "";   // clear the phrase from the page once the key is in memory
   }catch(e){
