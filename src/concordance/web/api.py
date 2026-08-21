@@ -1504,6 +1504,18 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             _p = dict(_p, unchecked=_unchecked_live(str(c.get("id") or ""), _p["unchecked"]))
         return _ok(dict(c, presentation=_p,
                         neighbors=_present.neighbors(c, resolve=corpus.get_card, limit=8)))
+    if method == "GET" and path == "/witness":
+        # THE CLOUD OF WITNESSES' VOICE — public-domain witnesses' VERBATIM words that frame a question,
+        # attributed (witness + work + ref + source). Proposes a way of seeing; the gate and the Word
+        # dispose — never a verdict. Public (the commons — PD text), honest-empty where the cloud does not
+        # reach. Optional `witness=` scopes to one voice. Nothing generated.
+        q = (query.get("q") or "").strip()
+        if not q:
+            return _err(400, "q required")
+        from .. import witness as _witness
+        who = (query.get("witness") or "").strip() or None
+        return _ok({"q": q, **_witness.see(q, witness=who, k=3)})
+
     if method == "GET" and path == "/daily":
         c = corpus.daily(query.get("seed") or None)
         return _ok(c) if c is not None else _err(404, "the keeping is empty")
@@ -2511,6 +2523,7 @@ ROUTES = [
     {"path": "/cards/stats", "methods": ("GET",), "api": True},
     {"path": "/cards", "methods": ("GET",), "api": True},
     {"path": "/card", "methods": ("GET",), "api": True},
+    {"path": "/witness", "methods": ("GET",), "api": True},   # the Cloud of Witnesses' voice — PD, attributed
     {"path": "/daily", "methods": ("GET",), "api": True},
     {"path": "/card/connections", "methods": ("GET",), "api": True},
     {"path": "/graph", "methods": ("GET",), "api": True},

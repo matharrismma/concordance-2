@@ -36,7 +36,7 @@ GOLDEN_API_GET = {
     "/now",
     "/identity", "/profile", "/profile/served", "/profile/community", "/profile/path", "/route", "/bind/challenge", "/thread/digest", "/thread/recall", "/thread/lineage", "/thread/recalled", "/land", "/cards/for-the-group",
     "/search", "/seal", "/resolve", "/word_study",
-    "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
+    "/card", "/cards", "/cards/stats", "/daily", "/witness", "/grid", "/grid/dimension",
     "/card/connections", "/graph", "/floor", "/locate", "/library/health", "/growth",
     "/thread", "/threads", "/threads/search", "/thread/verify", "/passage", "/apothecary",
     "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
@@ -233,6 +233,38 @@ def test_profile_routes_are_sovereign_signed_writes():
             os.environ.pop("CONCORDANCE_DATA_DIR", None)
         else:
             os.environ["CONCORDANCE_DATA_DIR"] = prior
+
+
+def test_witness_route_serves_attributed_pd_words_and_holds_the_gate():
+    """GET /witness returns the cloud's VERBATIM, attributed words for a query — public (the commons),
+    proposes-not-confirms — and never voices a non-public-domain passage, even if it is in the file."""
+    import json
+    import tempfile
+    prior = os.environ.get("CONCORDANCE_WITNESSES")
+    d = tempfile.mkdtemp()
+    p = Path(d) / "witnesses.jsonl"
+    p.write_text(
+        json.dumps({"text": "a lamp trimmed and burning is tended before the dark comes",
+                    "witness": "TEST-WITNESS", "work": "TEST-WORK", "ref": "ch.1", "id": "w1",
+                    "source": "test://pd", "public_domain": True}) + "\n" +
+        json.dumps({"text": "a copyrighted lamp passage that must never be voiced here",
+                    "witness": "TEST-LIVING", "work": "X", "ref": "1", "id": "c1",
+                    "source": "test://c", "public_domain": False}) + "\n",
+        encoding="utf-8")
+    os.environ["CONCORDANCE_WITNESSES"] = str(p)
+    try:
+        s, _ = api.dispatch("GET", "/witness", {}, None, EngineConfig(), False)
+        assert s == 400                                             # q required
+        s, payload = api.dispatch("GET", "/witness", {"q": "how do I tend a lamp"}, None, EngineConfig(), False)
+        assert s == 200 and payload["proposes"] is True and payload["confirms"] is False
+        seeing = payload["seeing"]
+        assert seeing and seeing[0]["witness"] == "TEST-WITNESS"    # verbatim, attributed
+        assert all(x["witness"] != "TEST-LIVING" for x in seeing)   # the PD gate holds at the route
+    finally:
+        if prior is None:
+            os.environ.pop("CONCORDANCE_WITNESSES", None)
+        else:
+            os.environ["CONCORDANCE_WITNESSES"] = prior
 
 
 def test_context_run_opens_and_validates_when_enabled():
