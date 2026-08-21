@@ -1301,6 +1301,49 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                              str(body.get("sig") or ""))
         return _ok({"ok": bool(ok)})
 
+    # PROFILE — your keeping, keyed by your fingerprint. Optional, sovereign, no account, no password.
+    # The server creates NO keys (see /identity/create) and stores no secret: a human derives their key
+    # from their verses on their own device, an agent holds one; both sign their own writes. The default
+    # is anonymous — no key, no profile.
+    if method == "GET" and path == "/profile":
+        fp = (query.get("fp") or "").strip()
+        if not fp:
+            return _err(400, "fp required (your fingerprint, from your public key)")
+        from .. import profile as _profile
+        return _ok({"id": fp, "profile": _profile.get(fp)})
+
+    if method == "POST" and path == "/profile/signable":
+        # The exact bytes to sign with your private key — computed here for correctness; a sovereign
+        # client may compute them itself. Nothing is stored, no key is seen.
+        if not isinstance(body, dict) or not str(body.get("public_key") or "").strip():
+            return _err(400, "public_key required")
+        from .. import profile as _profile
+        canon = _profile.signable(str(body["public_key"]), body.get("patch") or {},
+                                  str(body.get("nonce") or ""))
+        return _ok({"signable": canon.decode("utf-8"),
+                    "note": "sign these exact bytes with your private key, then POST /profile/save"})
+
+    if method == "POST" and path == "/profile/save":
+        # SIGNED write. The server verifies your signature against your public key, then saves — only
+        # the key's owner can write, no password, replay refused.
+        if not isinstance(body, dict):
+            return _err(400, "JSON object required")
+        from .. import profile as _profile
+        res = _profile.put(str(body.get("public_key") or ""), body.get("patch") or {},
+                           str(body.get("nonce") or ""), str(body.get("signature") or ""))
+        telemetry.record("profile", surface=surface, op="save", saved=bool(res.get("ok")))
+        return _ok(res) if res.get("ok") else _err(403, res.get("error") or "refused")
+
+    if method == "POST" and path == "/profile/erase":
+        # SIGNED erase — it is yours to take back.
+        if not isinstance(body, dict):
+            return _err(400, "JSON object required")
+        from .. import profile as _profile
+        res = _profile.delete(str(body.get("public_key") or ""), str(body.get("nonce") or ""),
+                              str(body.get("signature") or ""))
+        telemetry.record("profile", surface=surface, op="erase", saved=bool(res.get("ok")))
+        return _ok(res) if res.get("ok") else _err(403, res.get("error") or "refused")
+
     # Badges — a re-checkable receipt pointing at N seals that still stand. NEVER a competency claim.
     if method == "POST" and path == "/badges":
         if not isinstance(body, dict):
@@ -2415,6 +2458,10 @@ ROUTES = [
     {"path": "/coach/mastery", "methods": ("POST",), "rl": True},
     {"path": "/identity/create", "methods": ("POST",), "rl": True},
     {"path": "/identity/verify", "methods": ("POST",), "rl": True},
+    {"path": "/profile", "methods": ("GET",), "api": True},   # your keeping, keyed by fingerprint (opt-in)
+    {"path": "/profile/signable", "methods": ("POST",), "rl": True},
+    {"path": "/profile/save", "methods": ("POST",), "rl": True},   # signed write — no account, no password
+    {"path": "/profile/erase", "methods": ("POST",), "rl": True},  # signed delete — yours to take back
     {"path": "/badges", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/self-attest", "methods": ("POST",)},
     {"path": "/study", "methods": ("GET", "POST"), "api": True, "rl": True},

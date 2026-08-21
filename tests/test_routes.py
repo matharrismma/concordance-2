@@ -34,7 +34,7 @@ GOLDEN_API_GET = {
     # The clock, added 2026-08-04 at Matt's direction: "the actual date and time always
     # current for the time zone you are in." An agent's own 'today' is its training cutoff.
     "/now",
-    "/identity", "/route", "/bind/challenge", "/thread/digest", "/thread/recall", "/thread/lineage", "/thread/recalled", "/land", "/cards/for-the-group",
+    "/identity", "/profile", "/route", "/bind/challenge", "/thread/digest", "/thread/recall", "/thread/lineage", "/thread/recalled", "/land", "/cards/for-the-group",
     "/search", "/seal", "/resolve", "/word_study",
     "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
     "/card/connections", "/graph", "/floor", "/locate", "/library/health", "/growth",
@@ -97,6 +97,7 @@ GOLDEN_RATELIMITED = {
     "/mcp/core", "/mcp/library", "/mcp/sovereign", "/mcp/coach", "/mcp/witness", "/mcp/community", "/ask", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose", "/pins", "/pins/done",
     "/threads", "/threads/search",
     "/coach/mastery", "/identity/create", "/identity/verify", "/badges",
+    "/profile/signable", "/profile/save", "/profile/erase",  # the optional sovereign profile (signed writes)
     "/study", "/study/export", "/study/import",
     "/groups", "/group", "/group/join", "/group/contribute",
     "/mesh/node", "/mesh/link", "/mesh/post", "/mesh/tend",
@@ -198,6 +199,40 @@ def test_context_run_is_off_on_the_shared_server_by_default():
     finally:
         if old is not None:
             os.environ["CONCORDANCE_SOVEREIGN_NODE"] = old
+
+
+def test_profile_routes_are_sovereign_signed_writes():
+    """GET is a read by fingerprint; a save is a SIGNED write (only the key's owner); a forged
+    signature is refused. The server creates no keys and stores no password."""
+    import tempfile
+    from concordance import identity, signing
+    from concordance import profile as _profile
+    prior = os.environ.get("CONCORDANCE_DATA_DIR")
+    os.environ["CONCORDANCE_DATA_DIR"] = tempfile.mkdtemp()
+    try:
+        try:
+            me = identity.derive_identity("teach us to number our days that we may gain a heart of wisdom")
+        except RuntimeError:
+            return  # needs cryptography for a real key
+        s, p = api.dispatch("GET", "/profile", {"fp": me["id"]}, None, EngineConfig(), False)
+        assert s == 200 and p["profile"] == {}                      # anonymous until you save
+        patch = {"shelf": ["woodcraft-and-camping"], "display_name": "a pilgrim"}
+        sig = signing.sign_bytes(_profile.signable(me["public_key"], patch, "n1"), me["private_key"])
+        s, p = api.dispatch("POST", "/profile/save", {},
+                            {"public_key": me["public_key"], "patch": patch, "nonce": "n1", "signature": sig},
+                            EngineConfig(), False)
+        assert s == 200 and p["profile"]["display_name"] == "a pilgrim"
+        forger = identity.create_identity()
+        fsig = signing.sign_bytes(_profile.signable(me["public_key"], {"x": 1}, "n2"), forger["private_key"])
+        s, _ = api.dispatch("POST", "/profile/save", {},
+                            {"public_key": me["public_key"], "patch": {"x": 1}, "nonce": "n2", "signature": fsig},
+                            EngineConfig(), False)
+        assert s == 403                                             # forged signature refused
+    finally:
+        if prior is None:
+            os.environ.pop("CONCORDANCE_DATA_DIR", None)
+        else:
+            os.environ["CONCORDANCE_DATA_DIR"] = prior
 
 
 def test_context_run_opens_and_validates_when_enabled():
