@@ -1312,6 +1312,16 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import profile as _profile
         return _ok({"id": fp, "profile": _profile.get(fp)})
 
+    if method == "GET" and path == "/profile/served":
+        # SERVING — what has come back for you: your wants, met by the keeping, or still sought (honest).
+        fp = (query.get("fp") or "").strip()
+        if not fp:
+            return _err(400, "fp required")
+        from .. import profile as _profile
+        from .. import serve as _serve
+        wants = _profile.get(fp).get("wants") or []
+        return _ok({"id": fp, **_serve.returns(wants)})
+
     if method == "POST" and path == "/profile/signable":
         # The exact bytes to sign with your private key — computed here for correctness; a sovereign
         # client may compute them itself. Nothing is stored, no key is seen.
@@ -1331,6 +1341,10 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import profile as _profile
         res = _profile.put(str(body.get("public_key") or ""), body.get("patch") or {},
                            str(body.get("nonce") or ""), str(body.get("signature") or ""))
+        if res.get("ok") and isinstance(body.get("patch"), dict) and body["patch"].get("wants"):
+            # SERVING — a member's stated wants become the hive's work (deduped; the queue fills them).
+            from .. import serve as _serve
+            _serve.take([str(w) for w in body["patch"]["wants"] if isinstance(w, str)])
         telemetry.record("profile", surface=surface, op="save", saved=bool(res.get("ok")))
         return _ok(res) if res.get("ok") else _err(403, res.get("error") or "refused")
 
@@ -2459,6 +2473,7 @@ ROUTES = [
     {"path": "/identity/create", "methods": ("POST",), "rl": True},
     {"path": "/identity/verify", "methods": ("POST",), "rl": True},
     {"path": "/profile", "methods": ("GET",), "api": True},   # your keeping, keyed by fingerprint (opt-in)
+    {"path": "/profile/served", "methods": ("GET",), "api": True},   # serving — your wants, met or still sought
     {"path": "/profile/signable", "methods": ("POST",), "rl": True},
     {"path": "/profile/save", "methods": ("POST",), "rl": True},   # signed write — no account, no password
     {"path": "/profile/erase", "methods": ("POST",), "rl": True},  # signed delete — yours to take back

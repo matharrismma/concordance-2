@@ -50,6 +50,12 @@
   .fp{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.82rem; color:var(--oxblood); word-break:break-all}
   .status{font-size:.86rem; margin-top:.7rem; min-height:1.1rem}
   .ok{color:var(--confirmed)} .err{color:#b3402e}
+  .served{margin-top:1rem; border-top:1px dashed var(--parch); padding-top:.7rem}
+  .served-h{font-family:Futura,"Avenir Next",sans-serif; text-transform:uppercase; letter-spacing:.16em;
+    font-size:.66rem; color:var(--brass-lo); margin-bottom:.4rem}
+  .served-row{font-size:.92rem; margin:.25rem 0; color:var(--ink)}
+  .served-row .w{color:var(--ink-soft)} .served-row.met .w{color:var(--confirmed)}
+  .served-row.seek i{color:var(--ink-faint)}
   .boundary{margin-top:1.5rem; border:1px solid rgba(198,154,74,.3); border-left:3px solid var(--brass);
     border-radius:4px; background:rgba(198,154,74,.06); padding:.85rem 1rem; color:var(--paper-2); font-size:.9rem}
   .boundary b{color:var(--brass-hi); font-weight:600}
@@ -98,6 +104,7 @@
       <button class="ghost" id="forget">Forget me</button>
     </div>
     <div class="status" id="saveStatus"></div>
+    <div class="served hidden" id="served"></div>
   </div>
 
   <div class="boundary">
@@ -153,6 +160,25 @@ async function loadProfile(){
   $("name").value = p.display_name || "";
   $("wants").value = Array.isArray(p.wants) ? p.wants.join("\n") : "";
 }
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+async function loadServed(){
+  const el = $("served");
+  try{
+    const r = await api("GET", "/profile/served?fp=" + encodeURIComponent(FP));
+    const s = (r.body && r.body.served) || [];
+    if(!s.length){ el.classList.add("hidden"); return; }
+    let h = '<div class="served-h">What has come back for you</div>';
+    for(const it of s){
+      if(it.met && it.cards && it.cards.length){
+        h += '<div class="served-row met"><span class="w">'+esc(it.want)+'</span> — '+
+             it.cards.map(function(c){return esc(c.title||c.id);}).join(" · ")+'</div>';
+      }else{
+        h += '<div class="served-row seek"><span class="w">'+esc(it.want)+'</span> — <i>still seeking; the library is looking</i></div>';
+      }
+    }
+    el.innerHTML = h; el.classList.remove("hidden");
+  }catch(e){ el.classList.add("hidden"); }
+}
 
 async function open_(){
   $("loginErr").textContent = "";
@@ -164,6 +190,8 @@ async function open_(){
     $("fp").textContent = FP;
     await loadProfile();
     $("login").classList.add("hidden"); $("profile").classList.remove("hidden");
+    loadServed();
+
     $("verses").value = "";   // clear the phrase from the page once the key is in memory
   }catch(e){
     $("loginErr").textContent = (e && e.message) || String(e);
@@ -183,7 +211,7 @@ async function save(){
     if(sg.status!==200 || !sg.body.signable) throw new Error(sg.body.error||"could not prepare the write");
     const signature = await signStr(sg.body.signable);
     const r = await api("POST", "/profile/save", {public_key:PUB, patch, nonce, signature});
-    if(r.status===200 && r.body.ok){ st.className="status ok"; st.textContent="Saved. Your keeping is yours, signed by you."; }
+    if(r.status===200 && r.body.ok){ st.className="status ok"; st.textContent="Saved. Your keeping is yours, signed by you."; loadServed(); }
     else { st.className="status err"; st.textContent = r.body.error || "refused"; }
   }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||String(e); }
 }
