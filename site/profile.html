@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Keeping — Narrow Highway</title>
+<meta name="description" content="Your keeping, carried by your key. No account, no password — your verses are your key, derived on your own device and never sent. Optional and sovereign; the default is anonymous.">
+<meta property="og:title" content="Your Keeping — Narrow Highway">
+<meta property="og:description" content="No account, no password. Your verses are your key, derived on your device and never sent.">
+<style>
+  :root{
+    --walnut:#2b1a10; --walnut-2:#170d07;
+    --paper:#f5f1e6; --paper-2:#e9e3d3; --parch:#ded3ba;
+    --brass:#c69a4a; --brass-hi:#eed69b; --brass-lo:#8a6a2f;
+    --ink:#241c12; --ink-soft:#6b5c45; --ink-faint:#9b8a6d;
+    --oxblood:#7d4a22; --lamp:rgba(255,231,176,.16); --confirmed:#4d6b3a; --failed:#8a4a3a;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{
+    background:radial-gradient(120% 60% at 50% -8%, var(--lamp), transparent 60%),
+      linear-gradient(#20130b, var(--walnut-2));
+    color:var(--paper); min-height:100vh;
+    font:18px/1.62 "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--brass-hi); text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:46rem; margin:0 auto; padding:1.1rem 1.15rem 4rem}
+  header.site{display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px solid rgba(198,154,74,.22); padding:.2rem 0 .9rem; margin-bottom:1.6rem}
+  .brand{font-size:1.02rem; color:var(--paper)} .brand b{color:var(--brass-hi); font-weight:600}
+  nav.site a{font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-faint); margin-left:1.1rem}
+  .kick{font-family:Futura,"Century Gothic","Avenir Next",Avenir,"Trebuchet MS",sans-serif;
+    text-transform:uppercase; letter-spacing:.28em; font-weight:600; font-size:.66rem; color:var(--brass)}
+  h1{font-weight:400; font-size:2.05rem; line-height:1.15; margin:.5rem 0 .5rem}
+  .lede{color:var(--paper-2); font-size:1.06rem; margin:0 0 1.3rem}
+  .card{border:1px solid var(--parch); border-radius:6px; background:var(--paper); color:var(--ink);
+    margin:.9rem 0; padding:1.1rem 1.15rem; box-shadow:0 14px 34px -26px rgba(20,12,4,.7)}
+  .card h2{font-weight:500; font-size:1.15rem; margin:.1rem 0 .5rem}
+  label{display:block; font-size:.74rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); margin:.7rem 0 .25rem}
+  textarea,input[type=text]{width:100%; font-family:inherit; font-size:1rem; color:var(--ink);
+    background:#fffdf6; border:1px solid var(--parch); border-radius:4px; padding:.55rem .65rem}
+  textarea{min-height:3.4rem; resize:vertical}
+  button{font-family:Futura,"Avenir Next",sans-serif; letter-spacing:.06em; cursor:pointer;
+    background:var(--brass); color:var(--walnut-2); border:1px solid var(--brass-lo);
+    border-radius:22px; padding:.42rem 1.1rem; font-size:.86rem; font-weight:600}
+  button.ghost{background:transparent; color:var(--ink-soft); border-color:var(--parch)}
+  button:disabled{opacity:.5; cursor:default}
+  .row{display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; margin-top:.8rem}
+  .hint{color:var(--ink-faint); font-size:.82rem; margin:.5rem 0 0}
+  .fp{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.82rem; color:var(--oxblood); word-break:break-all}
+  .status{font-size:.86rem; margin-top:.7rem; min-height:1.1rem}
+  .ok{color:var(--confirmed)} .err{color:#b3402e}
+  .boundary{margin-top:1.5rem; border:1px solid rgba(198,154,74,.3); border-left:3px solid var(--brass);
+    border-radius:4px; background:rgba(198,154,74,.06); padding:.85rem 1rem; color:var(--paper-2); font-size:.9rem}
+  .boundary b{color:var(--brass-hi); font-weight:600}
+  .foot{margin-top:2.4rem; border-top:1px solid rgba(198,154,74,.18); padding-top:1.1rem; color:var(--ink-faint); font-size:.84rem}
+  .foot a{color:var(--brass)} .verse{color:var(--brass); font-style:italic}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <a class="brand" href="/">Narrow<b>Highway</b></a>
+    <nav class="site"><a href="/">The desk</a><a href="/bible.html">The Word</a></nav>
+  </header>
+
+  <div class="kick">Your keeping</div>
+  <h1>Your keeping, carried by your key</h1>
+  <p class="lede">No account. No password. Your <b>verses</b> are your key — derived on this device and
+    never sent. Type them to open your keeping on any device; leave, and nothing of yours remains here but
+    the public half of your key and what you chose to save.</p>
+
+  <!-- LOGIN -->
+  <div class="card" id="login">
+    <h2>Open your keeping</h2>
+    <label for="verses">Your verses (your passphrase)</label>
+    <textarea id="verses" placeholder="Four verses you will always remember — real words, real length. The strength of your key is the strength of your phrase."></textarea>
+    <div class="row">
+      <button id="enter">Open</button>
+      <span class="hint">Derived here, on your device. The phrase never leaves this page.</span>
+    </div>
+    <div class="status err" id="loginErr"></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="card hidden" id="profile">
+    <h2>Your keeping</h2>
+    <div class="hint">Your fingerprint (safe to share — it is not your key):</div>
+    <div class="fp" id="fp"></div>
+    <label for="name">A name to be known by (optional)</label>
+    <input type="text" id="name" placeholder="e.g. a foot washer">
+    <label for="wants">What you are seeking — one per line (your want list)</label>
+    <textarea id="wants" placeholder="a manual on digging wells&#10;how to keep bees"></textarea>
+    <div class="row">
+      <button id="save">Save</button>
+      <button class="ghost" id="signout">Sign out</button>
+      <button class="ghost" id="forget">Forget me</button>
+    </div>
+    <div class="status" id="saveStatus"></div>
+  </div>
+
+  <div class="boundary">
+    <b>How this keeps faith with you.</b> The server never makes or sees your key — you derive it here from
+    your verses, and it holds only your <i>public</i> key. Every change is <b>signed</b> by you, so no one
+    else can touch your keeping, and there is no password to steal or reset. It is all just yours: you can
+    <b>forget me</b> and it is erased. Optional, always — the door with no verses stays open and free.
+  </div>
+
+  <div class="foot">
+    <span class="verse">"Let the words of my mouth… be acceptable in your sight." — Psalm 19:14</span><br>
+    <a href="/">Narrow Highway</a> · a living sacrifice of reasoned service
+  </div>
+</div>
+
+<script>
+"use strict";
+const SALT = "narrowhighway/covenant/identity/v1", ITERS = 200000, FP_VERSION = "nhid1";
+let PRIV = null, PUB = null, FP = null;   // held in memory only — sign out clears them
+
+const enc = new TextEncoder();
+function b64u(buf){return btoa(String.fromCharCode.apply(null,new Uint8Array(buf))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
+function $(id){return document.getElementById(id);}
+
+async function deriveKey(passphrase){
+  const phrase = passphrase.trim().replace(/\s+/g," ");
+  if(phrase.length < 8) throw new Error("Use your verses — a real phrase, not a single word.");
+  const km = await crypto.subtle.importKey("raw", enc.encode(phrase), "PBKDF2", false, ["deriveBits"]);
+  const seedBits = await crypto.subtle.deriveBits({name:"PBKDF2", salt:enc.encode(SALT), iterations:ITERS, hash:"SHA-256"}, km, 256);
+  const seed = new Uint8Array(seedBits);
+  const prefix = new Uint8Array([0x30,0x2e,0x02,0x01,0x00,0x30,0x05,0x06,0x03,0x2b,0x65,0x70,0x04,0x22,0x04,0x20]);
+  const pkcs8 = new Uint8Array(prefix.length + seed.length); pkcs8.set(prefix); pkcs8.set(seed, prefix.length);
+  const priv = await crypto.subtle.importKey("pkcs8", pkcs8.buffer, {name:"Ed25519"}, true, ["sign"]);
+  const jwk = await crypto.subtle.exportKey("jwk", priv);
+  return {priv, pub: jwk.x};
+}
+async function fingerprint(pub){
+  const d = await crypto.subtle.digest("SHA-256", enc.encode(FP_VERSION + ":" + pub));
+  const hex = Array.from(new Uint8Array(d)).map(b=>b.toString(16).padStart(2,"0")).join("");
+  return "nh_" + hex.slice(0,32);
+}
+async function signStr(str){ return b64u(await crypto.subtle.sign("Ed25519", PRIV, enc.encode(str))); }
+function newNonce(){ const b=new Uint8Array(12); crypto.getRandomValues(b); return b64u(b); }
+async function api(method, path, body){
+  const r = await fetch(path, {method, headers:{"Content-Type":"application/json"}, body: body?JSON.stringify(body):undefined});
+  let j = {}; try{ j = await r.json(); }catch(e){}
+  return {status:r.status, body:j};
+}
+
+async function loadProfile(){
+  const r = await api("GET", "/profile?fp=" + encodeURIComponent(FP));
+  const p = (r.body && r.body.profile) || {};
+  $("name").value = p.display_name || "";
+  $("wants").value = Array.isArray(p.wants) ? p.wants.join("\n") : "";
+}
+
+async function open_(){
+  $("loginErr").textContent = "";
+  if(!(window.crypto && crypto.subtle)){ $("loginErr").textContent="This browser can't derive keys securely (no Web Crypto). Try a current browser."; return; }
+  $("enter").disabled = true; $("enter").textContent = "Opening…";
+  try{
+    const k = await deriveKey($("verses").value);
+    PRIV = k.priv; PUB = k.pub; FP = await fingerprint(PUB);
+    $("fp").textContent = FP;
+    await loadProfile();
+    $("login").classList.add("hidden"); $("profile").classList.remove("hidden");
+    $("verses").value = "";   // clear the phrase from the page once the key is in memory
+  }catch(e){
+    $("loginErr").textContent = (e && e.message) || String(e);
+    if(String(e).indexOf("Ed25519")>=0) $("loginErr").textContent = "This browser lacks Ed25519 in Web Crypto — try the latest Chrome, Firefox, or Safari.";
+  }finally{ $("enter").disabled=false; $("enter").textContent="Open"; }
+}
+
+async function save(){
+  const st = $("saveStatus"); st.className="status"; st.textContent="Signing…";
+  const patch = {
+    display_name: $("name").value.trim(),
+    wants: $("wants").value.split("\n").map(s=>s.trim()).filter(Boolean)
+  };
+  const nonce = newNonce();
+  try{
+    const sg = await api("POST", "/profile/signable", {public_key:PUB, patch, nonce});
+    if(sg.status!==200 || !sg.body.signable) throw new Error(sg.body.error||"could not prepare the write");
+    const signature = await signStr(sg.body.signable);
+    const r = await api("POST", "/profile/save", {public_key:PUB, patch, nonce, signature});
+    if(r.status===200 && r.body.ok){ st.className="status ok"; st.textContent="Saved. Your keeping is yours, signed by you."; }
+    else { st.className="status err"; st.textContent = r.body.error || "refused"; }
+  }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||String(e); }
+}
+
+async function forget(){
+  const st = $("saveStatus"); st.className="status"; st.textContent="Erasing…";
+  try{
+    const nonce = newNonce();
+    const sg = await api("POST", "/profile/signable", {public_key:PUB, patch:{}, nonce});
+    const signature = await signStr(sg.body.signable);
+    const r = await api("POST", "/profile/erase", {public_key:PUB, nonce, signature});
+    if(r.status===200 && r.body.ok){ st.className="status ok"; st.textContent="Erased. Nothing of yours remains here."; $("name").value=""; $("wants").value=""; }
+    else { st.className="status err"; st.textContent=r.body.error||"refused"; }
+  }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||String(e); }
+}
+function signout(){ PRIV=null; PUB=null; FP=null; $("profile").classList.add("hidden"); $("login").classList.remove("hidden"); $("saveStatus").textContent=""; }
+
+$("enter").addEventListener("click", open_);
+$("save").addEventListener("click", save);
+$("forget").addEventListener("click", forget);
+$("signout").addEventListener("click", signout);
+</script>
+</body>
+</html>
