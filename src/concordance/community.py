@@ -33,7 +33,9 @@ def _fruit(fp: str) -> int:
     n = 0
     try:
         from . import mesh
-        n += int(mesh._outgoing_counts().get(fp, 0))    # words / reflections shared on the mesh
+        # signed_only: only AUTHENTICATED posts count toward reach — an unsigned/impersonated post
+        # (anyone can attribute one to any fingerprint) must never inflate a member's promotion.
+        n += int(mesh._outgoing_counts(signed_only=True).get(fp, 0))    # words / reflections shared, signed
     except Exception:  # noqa: BLE001
         pass
     try:

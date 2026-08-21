@@ -79,9 +79,14 @@ def test_fruit_is_counted_but_alone_does_not_promote_you_must_also_be_known(tmp_
     mesh.register_node(me["public_key"], confession="Jesus Christ is Lord and Messiah")
     fp = me["id"]
     assert community._fruit(fp) == 0
-    mesh.post_message(fp, "a reflection I share with the body")
+    # an UNSIGNED post (anyone can attribute one to any fingerprint) must NEVER count as fruit —
+    # otherwise reach could be inflated by impersonation. Only authenticated service counts.
+    mesh.post_message(fp, "an unsigned word anyone could forge")
+    assert community._fruit(fp) == 0
+    # a SIGNED post — authenticated writing/reflecting — counts
+    mesh.post_message(fp, "a reflection I truly share", private_key=me["private_key"])
     w = community._walk(fp)
-    assert w["fruit"] >= 1                                # writing/reflecting counted as fruit
+    assert w["fruit"] >= 1
     assert w["stage"] == "confessor" and w["vouched"] == 0   # fruit alone does not promote — not yet known
 
 

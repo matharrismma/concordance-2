@@ -560,12 +560,15 @@ def _incoming_counts(viewer_fp: str) -> Dict[str, int]:
     return counts
 
 
-def _outgoing_counts() -> Dict[str, int]:
-    """How much each node has posted — its serving activity, which raises its estate on the map."""
+def _outgoing_counts(signed_only: bool = False) -> Dict[str, int]:
+    """How much each node has posted — its serving activity, which raises its estate on the map. With
+    `signed_only`, counts ONLY authenticated (signed) posts, so an unsigned or impersonated post cannot
+    inflate a node's standing — required wherever the count gates TRUST (promotion/reach), since anyone
+    can post an unsigned message attributed to any fingerprint (it is marked signed=False)."""
     counts: Dict[str, int] = {}
     for m in _all_messages():
         src = m.get("from")
-        if src:
+        if src and (not signed_only or m.get("signed") is True):
             counts[src] = counts.get(src, 0) + 1
     return counts
 
