@@ -20,6 +20,16 @@ from . import identity, signing
 
 _MAX_PATCH = 64 * 1024
 _MAX_NONCES = 256
+_FRESHNESS_S = 300   # a signed write is honored only within ~5 min of its timestamp — bounds replay of a
+                     # captured signature (a stolen 'erase' or a stale 'put' cannot be replayed forever)
+
+
+def _fresh(ts: Any) -> bool:
+    """Is the signer's timestamp close enough to now? Rejects a replayed (stale) or missing timestamp."""
+    try:
+        return abs(time.time() - int(ts)) <= _FRESHNESS_S
+    except (TypeError, ValueError):
+        return False
 
 
 def _dir() -> Path:
@@ -52,16 +62,22 @@ def get(fp: str) -> Dict[str, Any]:
     return _public_view(_load(str(fp or "")))
 
 
-def signable(public_key: str, patch: Dict[str, Any], nonce: str) -> bytes:
-    """The exact bytes the owner signs to authorize a write: {public_key, patch, nonce}, canonical. The
-    client signs these with its private key; nothing secret ever leaves the device."""
-    return signing.canonical_json_bytes({"public_key": public_key, "patch": patch, "nonce": nonce})
+def signable(public_key: str, patch: Dict[str, Any], nonce: str, op: str = "put", ts: int = 0) -> bytes:
+    """The exact bytes the owner signs to authorize a write: {public_key, patch, nonce, op, ts}, canonical.
+    `op` DOMAIN-SEPARATES the write kind (a 'put' signature is not a valid 'delete' signature, and vice
+    versa); `ts` is the signer's timestamp, so a captured signature goes STALE and cannot be replayed
+    forever (red-team #3,#4,#5). The client signs these with its private key; nothing secret ever leaves
+    the device."""
+    return signing.canonical_json_bytes({"public_key": str(public_key or ""), "patch": patch,
+                                         "nonce": str(nonce or ""), "op": str(op or "put"), "ts": int(ts or 0)})
 
 
-def put(public_key: str, patch: Dict[str, Any], nonce: str, signature: str) -> Dict[str, Any]:
+def put(public_key: str, patch: Dict[str, Any], nonce: str, signature: str, ts: int = 0) -> Dict[str, Any]:
     """SIGNED write: merge `patch` into the profile owned by `public_key`. Ownership is proven by the
-    signature over `signable(...)` — no password, no account. A used nonce is refused (no replay). The
-    default stays anonymous: without a key there is no write."""
+    signature over `signable(...)` — no password, no account. Replay is refused two ways: a used nonce is
+    rejected, and the signer's timestamp must be FRESH (so a captured signature cannot be replayed after
+    the window, even once the bounded nonce set has rotated). The default stays anonymous: without a key
+    there is no write."""
     if not isinstance(patch, dict):
         return {"ok": False, "error": "patch must be an object"}
     if len(json.dumps(patch)) > _MAX_PATCH:
@@ -69,8 +85,10 @@ def put(public_key: str, patch: Dict[str, Any], nonce: str, signature: str) -> D
     nonce = str(nonce or "").strip()
     if not nonce:
         return {"ok": False, "error": "nonce required"}
+    if not _fresh(ts):
+        return {"ok": False, "error": "stale or missing timestamp — sign a fresh write (within %ds)" % _FRESHNESS_S}
     try:
-        ok = signing.verify_bytes(signable(public_key, patch, nonce), signature, public_key)
+        ok = signing.verify_bytes(signable(public_key, patch, nonce, "put", ts), signature, public_key)
     except Exception:  # noqa: BLE001
         ok = False
     if not ok:
@@ -91,13 +109,17 @@ def put(public_key: str, patch: Dict[str, Any], nonce: str, signature: str) -> D
     return {"ok": True, "id": fp, "profile": _public_view(prof)}
 
 
-def delete(public_key: str, nonce: str, signature: str) -> Dict[str, Any]:
-    """SIGNED erase — remove your profile entirely. Same proof of ownership as a write; it is yours to
-    take back. (Signs over an empty patch, so the one signable path covers both.)"""
+def delete(public_key: str, nonce: str, signature: str, ts: int = 0) -> Dict[str, Any]:
+    """SIGNED erase — remove your profile entirely. Same proof of ownership as a write, with the same
+    replay defenses: the signature is over op='delete' (so a 'put' signature cannot erase you) and must be
+    FRESH (so a captured erase signature cannot be replayed after the window — erasing your profile is not
+    a forever-token). It is yours to take back."""
     if not identity.fingerprint(public_key):
         return {"ok": False, "error": "public_key required"}
+    if not _fresh(ts):
+        return {"ok": False, "error": "stale or missing timestamp — sign a fresh erase (within %ds)" % _FRESHNESS_S}
     try:
-        ok = signing.verify_bytes(signable(public_key, {}, str(nonce or "")), signature, public_key)
+        ok = signing.verify_bytes(signable(public_key, {}, str(nonce or ""), "delete", ts), signature, public_key)
     except Exception:  # noqa: BLE001
         ok = False
     if not ok:

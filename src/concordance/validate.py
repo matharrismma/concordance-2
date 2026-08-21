@@ -29,14 +29,16 @@ def canonical_json_bytes(obj: Any) -> bytes:
     surface) stays human-readable in stored seals AND hashes identically everywhere. A
     content-addressed integrity system must have exactly one canonical form; this is it.
 
-    errors="replace" on the final encode: a lone UTF-16 surrogate (invalid Unicode, but a real
+    errors="surrogatepass" on the final encode: a lone UTF-16 surrogate (invalid Unicode, but a real
     pattern from buggy upstream truncation of surrogate pairs) would otherwise raise here and
-    silently cost the caller their receipt entirely (a HOLDS/BROKEN verdict returned with no
-    seal) — the one thing this engine promises never to skip. Sealing WITH the character mapped
-    to U+FFFD beats not sealing at all; well-formed text (the overwhelming case, including every
-    Greek/Hebrew witness card) is completely unaffected."""
+    silently cost the caller their receipt entirely (a HOLDS/BROKEN verdict returned with no seal) —
+    the one thing this engine promises never to skip. `surrogatepass` never raises AND keeps the form
+    INJECTIVE: each distinct surrogate encodes to distinct bytes, so two logically different objects
+    can never collapse to the same canonical bytes / seal / signature (red-team #8 — the earlier
+    errors="replace" mapped every lone surrogate to one byte, a collision). Well-formed text (the
+    overwhelming case, including every Greek/Hebrew witness card) is completely unaffected."""
     return json.dumps(obj, sort_keys=True, separators=(",", ":"),
-                      ensure_ascii=False).encode("utf-8", errors="replace")
+                      ensure_ascii=False).encode("utf-8", errors="surrogatepass")
 
 
 def content_hash(obj: Any, *, exclude: tuple = ()) -> str:

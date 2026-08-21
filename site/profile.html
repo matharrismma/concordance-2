@@ -279,11 +279,12 @@ async function save(){
     wants: $("wants").value.split("\n").map(s=>s.trim()).filter(Boolean)
   };
   const nonce = newNonce();
+  const ts = Math.floor(Date.now()/1000);   // signer's timestamp — the server refuses a stale/replayed write
   try{
-    const sg = await api("POST", "/profile/signable", {public_key:PUB, patch, nonce});
+    const sg = await api("POST", "/profile/signable", {public_key:PUB, patch, nonce, op:"put", ts});
     if(sg.status!==200 || !sg.body.signable) throw new Error(sg.body.error||"could not prepare the write");
     const signature = await signStr(sg.body.signable);
-    const r = await api("POST", "/profile/save", {public_key:PUB, patch, nonce, signature});
+    const r = await api("POST", "/profile/save", {public_key:PUB, patch, nonce, op:"put", ts, signature});
     if(r.status===200 && r.body.ok){ st.className="status ok"; st.textContent="Saved. Your keeping is yours, signed by you."; loadServed(); }
     else { st.className="status err"; st.textContent = r.body.error || "refused"; }
   }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||String(e); }
@@ -293,9 +294,10 @@ async function forget(){
   const st = $("saveStatus"); st.className="status"; st.textContent="Erasing…";
   try{
     const nonce = newNonce();
-    const sg = await api("POST", "/profile/signable", {public_key:PUB, patch:{}, nonce});
+    const ts = Math.floor(Date.now()/1000);
+    const sg = await api("POST", "/profile/signable", {public_key:PUB, patch:{}, nonce, op:"delete", ts});
     const signature = await signStr(sg.body.signable);
-    const r = await api("POST", "/profile/erase", {public_key:PUB, nonce, signature});
+    const r = await api("POST", "/profile/erase", {public_key:PUB, nonce, ts, signature});
     if(r.status===200 && r.body.ok){ st.className="status ok"; st.textContent="Erased. Nothing of yours remains here."; $("name").value=""; $("wants").value=""; }
     else { st.className="status err"; st.textContent=r.body.error||"refused"; }
   }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||String(e); }

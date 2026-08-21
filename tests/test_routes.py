@@ -220,17 +220,19 @@ def test_profile_routes_are_sovereign_signed_writes():
             return  # needs cryptography for a real key
         s, p = api.dispatch("GET", "/profile", {"fp": me["id"]}, None, EngineConfig(), False)
         assert s == 200 and p["profile"] == {}                      # anonymous until you save
+        import time as _time
+        ts = int(_time.time())
         patch = {"shelf": ["woodcraft-and-camping"], "display_name": "a pilgrim"}
-        sig = signing.sign_bytes(_profile.signable(me["public_key"], patch, "n1"), me["private_key"])
+        sig = signing.sign_bytes(_profile.signable(me["public_key"], patch, "n1", "put", ts), me["private_key"])
         s, p = api.dispatch("POST", "/profile/save", {},
-                            {"public_key": me["public_key"], "patch": patch, "nonce": "n1", "signature": sig},
-                            EngineConfig(), False)
+                            {"public_key": me["public_key"], "patch": patch, "nonce": "n1", "op": "put",
+                             "ts": ts, "signature": sig}, EngineConfig(), False)
         assert s == 200 and p["profile"]["display_name"] == "a pilgrim"
         forger = identity.create_identity()
-        fsig = signing.sign_bytes(_profile.signable(me["public_key"], {"x": 1}, "n2"), forger["private_key"])
+        fsig = signing.sign_bytes(_profile.signable(me["public_key"], {"x": 1}, "n2", "put", ts), forger["private_key"])
         s, _ = api.dispatch("POST", "/profile/save", {},
-                            {"public_key": me["public_key"], "patch": {"x": 1}, "nonce": "n2", "signature": fsig},
-                            EngineConfig(), False)
+                            {"public_key": me["public_key"], "patch": {"x": 1}, "nonce": "n2", "op": "put",
+                             "ts": ts, "signature": fsig}, EngineConfig(), False)
         assert s == 403                                             # forged signature refused
     finally:
         if prior is None:

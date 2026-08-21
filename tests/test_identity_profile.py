@@ -4,14 +4,17 @@ A human derives their key from a passphrase (their verses); an agent holds a key
 fingerprint, and the profile follows it. Writes are signed, so only the owner can change it; the default
 is anonymous. Pure — profiles write to a temp dir.
 """
+import time
+
 import pytest
 
 from concordance import identity, profile, signing
 
 
-def _sign_put(idn, patch, nonce):
-    sig = signing.sign_bytes(profile.signable(idn["public_key"], patch, nonce), idn["private_key"])
-    return profile.put(idn["public_key"], patch, nonce, sig)
+def _sign_put(idn, patch, nonce, ts=None):
+    ts = int(time.time()) if ts is None else int(ts)
+    sig = signing.sign_bytes(profile.signable(idn["public_key"], patch, nonce, "put", ts), idn["private_key"])
+    return profile.put(idn["public_key"], patch, nonce, sig, ts=ts)
 
 
 def test_ez_login_is_deterministic_from_the_passphrase():
@@ -44,8 +47,9 @@ def test_only_the_owner_can_write(tmp_path, monkeypatch):
     monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
     me = identity.derive_identity("create in me a clean heart O God renew")
     forger = identity.create_identity()
-    sig = signing.sign_bytes(profile.signable(me["public_key"], {"x": 1}, "n1"), forger["private_key"])
-    r = profile.put(me["public_key"], {"x": 1}, "n1", sig)             # forger's signature, my key
+    ts = int(time.time())
+    sig = signing.sign_bytes(profile.signable(me["public_key"], {"x": 1}, "n1", "put", ts), forger["private_key"])
+    r = profile.put(me["public_key"], {"x": 1}, "n1", sig, ts=ts)      # forger's signature, my key
     assert r["ok"] is False and "signature" in r["error"]
 
 
@@ -72,6 +76,26 @@ def test_a_signed_delete_takes_it_back(tmp_path, monkeypatch):
     monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
     me = identity.derive_identity("the truth will set you free indeed friend")
     _sign_put(me, {"a": 1}, "n1")
-    sig = signing.sign_bytes(profile.signable(me["public_key"], {}, "del1"), me["private_key"])
-    assert profile.delete(me["public_key"], "del1", sig)["ok"]
+    ts = int(time.time())
+    sig = signing.sign_bytes(profile.signable(me["public_key"], {}, "del1", "delete", ts), me["private_key"])
+    assert profile.delete(me["public_key"], "del1", sig, ts=ts)["ok"]
     assert profile.get(me["id"]) == {}                                # erased — it was yours to take back
+
+
+def test_a_stale_signature_is_refused(tmp_path, monkeypatch):
+    monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
+    me = identity.derive_identity("teach us to number our days aright O Lord God")
+    old = int(time.time()) - 4000                                     # well outside the freshness window
+    r = _sign_put(me, {"a": 1}, "n1", ts=old)
+    assert r["ok"] is False and "stale" in r["error"]                # a captured signature cannot be replayed later
+
+
+def test_a_put_signature_cannot_erase(tmp_path, monkeypatch):
+    # op domain separation: a signature made for a 'put' must NOT be accepted as a 'delete'.
+    monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
+    me = identity.derive_identity("the Lord is my light and my salvation whom shall I fear")
+    _sign_put(me, {"a": 1}, "n1")
+    ts = int(time.time())
+    put_sig = signing.sign_bytes(profile.signable(me["public_key"], {}, "n2", "put", ts), me["private_key"])
+    assert profile.delete(me["public_key"], "n2", put_sig, ts=ts)["ok"] is False   # a put sig is not a delete
+    assert profile.get(me["id"]) != {}                               # still there — the erase was refused

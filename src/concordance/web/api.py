@@ -1377,8 +1377,12 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not isinstance(body, dict) or not str(body.get("public_key") or "").strip():
             return _err(400, "public_key required")
         from .. import profile as _profile
+        try:
+            _ts = int(body.get("ts") or 0)
+        except (TypeError, ValueError):
+            _ts = 0
         canon = _profile.signable(str(body["public_key"]), body.get("patch") or {},
-                                  str(body.get("nonce") or ""))
+                                  str(body.get("nonce") or ""), op=str(body.get("op") or "put"), ts=_ts)
         return _ok({"signable": canon.decode("utf-8"),
                     "note": "sign these exact bytes with your private key, then POST /profile/save"})
 
@@ -1388,8 +1392,12 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not isinstance(body, dict):
             return _err(400, "JSON object required")
         from .. import profile as _profile
+        try:
+            _ts = int(body.get("ts") or 0)
+        except (TypeError, ValueError):
+            _ts = 0
         res = _profile.put(str(body.get("public_key") or ""), body.get("patch") or {},
-                           str(body.get("nonce") or ""), str(body.get("signature") or ""))
+                           str(body.get("nonce") or ""), str(body.get("signature") or ""), ts=_ts)
         if res.get("ok") and isinstance(body.get("patch"), dict) and body["patch"].get("wants"):
             # SERVING — a member's stated wants become the hive's work (deduped; the queue fills them).
             from .. import serve as _serve
@@ -1402,8 +1410,12 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not isinstance(body, dict):
             return _err(400, "JSON object required")
         from .. import profile as _profile
+        try:
+            _ts = int(body.get("ts") or 0)
+        except (TypeError, ValueError):
+            _ts = 0
         res = _profile.delete(str(body.get("public_key") or ""), str(body.get("nonce") or ""),
-                              str(body.get("signature") or ""))
+                              str(body.get("signature") or ""), ts=_ts)
         telemetry.record("profile", surface=surface, op="erase", saved=bool(res.get("ok")))
         return _ok(res) if res.get("ok") else _err(403, res.get("error") or "refused")
 
