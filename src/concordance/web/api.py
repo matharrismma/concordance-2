@@ -1214,8 +1214,11 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not isinstance(body, dict) or not str(body.get("fp") or "").strip():
             return _err(400, "fp required")
         from .. import mesh
-        return _ok(mesh.make_invite(str(body["fp"]), max_uses=int(body.get("max_uses") or 0),
-                                    ttl_days=int(body.get("ttl_days") or 30)))
+        try:
+            _mu, _ttl = int(body.get("max_uses") or 0), int(body.get("ttl_days") or 30)
+        except (TypeError, ValueError):
+            return _err(400, "max_uses and ttl_days must be integers")   # not a 500 (red-team #6)
+        return _ok(mesh.make_invite(str(body["fp"]), max_uses=_mu, ttl_days=_ttl))
     if method == "POST" and path == "/mesh/redeem":
         if not isinstance(body, dict) or not str(body.get("fp") or "").strip() \
            or not str(body.get("token") or "").strip():
@@ -2124,7 +2127,11 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # What the engine has written that no one has looked at yet. A library that publishes its
         # own unchecked list is harder to fool than one that waits to be audited.
         from .. import unchecked as _unchecked
-        return _ok(_unchecked.standing(limit=int(query.get("limit") or 100)))
+        try:
+            _lim = int(query.get("limit") or 100)
+        except (TypeError, ValueError):
+            _lim = 100                               # bad limit -> the default, never a 500 (red-team #6)
+        return _ok(_unchecked.standing(limit=_lim))
 
     if method == "POST" and path == "/report":
         # The moderation floor: anyone may report; nobody's report is a verdict. One report is a
@@ -2551,17 +2558,20 @@ ROUTES = [
     {"path": "/mcp/witness", "methods": ("POST",), "rl": True},
     {"path": "/mcp/community", "methods": ("POST",), "rl": True},
     {"path": "/search", "methods": ("GET",), "api": True, "rl": "read"},
-    {"path": "/cards/stats", "methods": ("GET",), "api": True},
-    {"path": "/cards", "methods": ("GET",), "api": True},
+    # These GET routes scan/sort the whole resident corpus per request — put them on the READ bucket so an
+    # unauthenticated flood cannot pin every core and starve /verify (red-team #1). /card is a bounded
+    # single-id lookup and stays unlimited.
+    {"path": "/cards/stats", "methods": ("GET",), "api": True, "rl": "read"},
+    {"path": "/cards", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/card", "methods": ("GET",), "api": True},
     {"path": "/witness", "methods": ("GET",), "api": True, "rl": "read"},   # Cloud of Witnesses' voice — PD, attributed; scans the corpus so read-bucket limited like /search
-    {"path": "/daily", "methods": ("GET",), "api": True},
-    {"path": "/card/connections", "methods": ("GET",), "api": True},
+    {"path": "/daily", "methods": ("GET",), "api": True, "rl": "read"},
+    {"path": "/card/connections", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/graph", "methods": ("GET",), "api": True},
     {"path": "/floor", "methods": ("GET",), "api": True},
-    {"path": "/locate", "methods": ("GET",), "api": True},
-    {"path": "/library/health", "methods": ("GET",), "api": True},
-    {"path": "/growth", "methods": ("GET",), "api": True},
+    {"path": "/locate", "methods": ("GET",), "api": True, "rl": "read"},
+    {"path": "/library/health", "methods": ("GET",), "api": True, "rl": "read"},
+    {"path": "/growth", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/pronounce", "methods": ("GET",), "api": True},
     {"path": "/thread", "methods": ("DELETE", "GET"), "api": True},
     {"path": "/threads", "methods": ("GET",), "api": True, "rl": True},
@@ -2880,11 +2890,23 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             self.wfile.write(body)
 
         def _rl_key(self) -> str:
-            """Rate-limit key: the REAL client. Caddy (the single trusted proxy) APPENDS the peer
-            to X-Forwarded-For, so the real client is the LAST hop — a client-supplied XFF prefix
-            can't forge a fresh bucket. Falls back to the socket peer if XFF is absent."""
-            parts = [p.strip() for p in (self.headers.get("x-forwarded-for") or "").split(",") if p.strip()]
-            return (parts[-1] if parts else "") or (self.client_address[0] if self.client_address else "?")
+            """Rate-limit key: the REAL client. Caddy (the single trusted proxy, same host) APPENDS the
+            peer to X-Forwarded-For, so behind Caddy the real client is the LAST hop. But X-Forwarded-For
+            is trusted ONLY when the request actually arrived from the trusted proxy (the socket peer is
+            loopback / a configured proxy). A request that reaches the origin port DIRECTLY (bypassing
+            Caddy) has an untrusted peer, so its client-supplied XFF is IGNORED and we key on the real
+            socket IP — a rotating X-Forwarded-For can no longer mint a fresh bucket per request
+            (red-team #3). Configure non-loopback proxies via CONCORDANCE_TRUSTED_PROXY (comma-separated)."""
+            import os as _os
+            peer = self.client_address[0] if self.client_address else "?"
+            trusted = {"127.0.0.1", "::1", "localhost"}
+            trusted |= {p.strip() for p in (_os.environ.get("CONCORDANCE_TRUSTED_PROXY", "") or "").split(",")
+                        if p.strip()}
+            if peer in trusted:
+                parts = [p.strip() for p in (self.headers.get("x-forwarded-for") or "").split(",") if p.strip()]
+                if parts:
+                    return parts[-1]
+            return peer or "?"
 
         def _keep(self, u) -> None:
             """The operator's window. The DATA (/keep.json) is operator-gated; the sign-in SHELL
@@ -3089,7 +3111,9 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 raw = self.rfile.read(n) if n else b""
                 try:
                     body = json.loads(raw or b"{}")
-                except (ValueError, TypeError):
+                except (ValueError, TypeError, RecursionError):
+                    # RecursionError: a deeply-nested JSON payload ([[[[…]]]]) — treat as an empty/invalid
+                    # body so the handler returns a clean 400, never a 500 + traceback (red-team #5).
                     body = {}
             # The Gate carried across the conversation: a simple session flag set by the server when
             # /ask opens the door (Ask/Seek/Knock). Once open, the witness content is surfaced on

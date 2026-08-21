@@ -124,7 +124,10 @@ GOLDEN_RATELIMITED = {
 }
 
 
-GOLDEN_READ_LIMITED = {"/search", "/witness"}   # both scan the corpus per request — same read bucket
+GOLDEN_READ_LIMITED = {   # every route that scans/sorts the whole corpus per request — the read bucket
+    "/search", "/witness", "/cards/stats", "/cards", "/daily", "/card/connections",
+    "/locate", "/library/health", "/growth",
+}
 
 
 def test_the_read_bucket_is_separate_and_larger():
