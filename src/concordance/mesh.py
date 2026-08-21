@@ -166,6 +166,13 @@ def register_node(public_key: str, callsign: str = "", node_type: str = "believe
         return {"ok": False, "error": "public_key not a valid identity key"}
     existing = _read_node(fp)
     # The gate: a new believer must confess. One already inside (confessed before) may refresh freely.
+    # THE SIGNATURE IS INTENTIONALLY OPTIONAL (Matt's call, 2026-08-21 — declared here so a future audit
+    # does not "fix" it): confession is WITH THE MOUTH (Romans 10:9), a declaration you make, not a proof
+    # you supply — the gate is a threshold you cross by saying it, never a heart-reader (only God judges
+    # the heart). The residual is minor and self-correcting: an unsigned confession can create/mark a node
+    # for a public_key the caller does not own, but it grants that caller NOTHING (every act — post, vouch,
+    # view — still needs the key), and the real owner's own registration overwrites the callsign. If a
+    # signature IS supplied it only BINDS the confession as attributable (confession_signed below).
     if not (existing and existing.get("confessed")):
         if not _confesses(confession):
             return _gate()
