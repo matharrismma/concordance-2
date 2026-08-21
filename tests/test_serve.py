@@ -28,6 +28,16 @@ def test_take_opens_deduped_hive_wants(tmp_path, monkeypatch):
     assert set(again["opened"]) == set(r["opened"])             # same wants -> same ids, no spam
 
 
+def test_a_short_stem_collision_is_not_a_match():
+    # the default relevance filter: 'tan a deer hide' must NOT be answered by a place 'Tan-Tan' or 'tans'
+    tantan = {"id": "x", "title": "Tan-Tan", "shelf": "atlas"}
+    tans = {"id": "y", "title": "tans", "shelf": "dictionary"}
+    hide = {"id": "z", "title": "Tanning a hide the old way", "shelf": "survival"}
+    r = serve.returns(["tan a deer hide"], search_fn=lambda q, n: [tantan, tans, hide])
+    ids = [c["id"] for c in r["served"][0]["cards"]]
+    assert "z" in ids and "x" not in ids and "y" not in ids     # 'hide' is the real subject; 'tan' collisions rejected
+
+
 def test_returns_is_honest_when_the_keeping_is_empty():
     r = serve.returns(["anything at all"], search_fn=lambda q, n: [], relevant_fn=lambda q, c: True)
     assert r["met"] == 0 and r["served"][0]["cards"] == []

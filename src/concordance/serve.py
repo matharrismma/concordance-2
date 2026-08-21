@@ -18,9 +18,40 @@ cited. Injectable search/relevance so the seed stays pure; defaults to the real 
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+import re
+from typing import Any, Dict, List
 
 _MIN_WANT = 3
+
+# Words that do not name a subject — question and action words. A genuine answer must share a real NOUN
+# with the want, not just an action verb or a short ambiguous stem ("tan" colliding with a place "Tan-Tan").
+_GENERIC = {"how", "to", "of", "and", "or", "the", "a", "an", "do", "i", "my", "me", "for", "with", "from",
+            "on", "in", "at", "make", "making", "made", "build", "building", "start", "starting", "get",
+            "getting", "keep", "keeping", "find", "finding", "use", "using", "need", "want", "some", "any",
+            "your", "you", "without", "that", "this", "best", "way", "good"}
+
+
+def _stem(w: str) -> str:
+    for suf in ("ing", "ed", "es", "s"):
+        if w.endswith(suf) and len(w) - len(suf) >= 3:
+            return w[:-len(suf)]
+    return w
+
+
+def _subjects(text: str, minlen: int) -> set:
+    return {_stem(w) for w in re.findall(r"[a-z0-9]+", (text or "").lower())
+            if len(w) >= minlen and w not in _GENERIC}
+
+
+def _genuine(want: str, card: Dict[str, Any]) -> bool:
+    """A card genuinely answers a want only when its TITLE shares a SUBSTANTIVE subject noun (>=4 chars;
+    fall back to >=3 only if the want has no longer noun) — so 'tan a deer hide' needs 'hide'/'deer', not
+    a place named 'Tan-Tan' that merely shares the 3-letter stem 'tan'. A gap stays a gap."""
+    subj = _subjects(want, 4) or _subjects(want, 3)
+    if not subj:
+        return False
+    title = {_stem(w) for w in re.findall(r"[a-z0-9]+", (card.get("title") or "").lower())}
+    return bool(subj & title)
 
 
 def take(wants: List[str], *, plane: str = "human") -> Dict[str, Any]:
@@ -46,8 +77,7 @@ def returns(wants: List[str], *, search_fn=None, relevant_fn=None, limit_each: i
         from . import corpus
         search_fn = corpus.search
     if relevant_fn is None:
-        from . import ask
-        relevant_fn = ask._title_names_subject
+        relevant_fn = _genuine   # substantive-noun match — a short-stem collision is not an answer
     served: List[Dict[str, Any]] = []
     for w in wants or []:
         q = str(w or "").strip()
