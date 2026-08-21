@@ -23,6 +23,12 @@ def test_your_own_fellowship_is_always_yours(tmp_path, monkeypatch):
     assert r["own"] is True and r["belongs"] == 1 and len(r["groups"]) == 1 and "shelf" in r
 
 
+def test_own_view_reports_your_walk_so_the_page_can_offer_confession(tmp_path, monkeypatch):
+    monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
+    r = community.for_member("nh_me", viewer_fp="nh_me")
+    assert r["own"] is True and r["walk"]["confessed"] is False and r["walk"]["stage"] == "seeker"
+
+
 def test_an_unconfessed_viewer_sees_the_invitation_not_the_member(tmp_path, monkeypatch):
     monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
     groups.create_group("the fellowship", creator_id="nh_member", handle="a pilgrim")

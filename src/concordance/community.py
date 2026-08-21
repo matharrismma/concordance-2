@@ -21,20 +21,21 @@ from __future__ import annotations
 from typing import Any, Dict, Optional
 
 
-def _viewer_stage(viewer_fp: Optional[str]) -> Optional[str]:
-    """Where the viewer stands on the narrow path, read from their WALK on the shared mesh identity —
-    confessor / joined / community as they are vouched and serve. None if they have not confessed: the gate
-    has not opened for them, so they may not see other members. Never a verdict on a soul — a description of
-    the walk."""
-    viewer_fp = str(viewer_fp or "").strip()
-    if not viewer_fp:
-        return None
+def _walk(fp: Optional[str]) -> Dict[str, Any]:
+    """A member's WALK on the shared mesh identity: have they confessed, and where do they stand on the
+    narrow path (confessor / joined / community as they are vouched and serve). A seeker has not yet
+    confessed — the gate to the fellowship has not opened. Never a verdict on a soul; a description of the
+    walk. Reach widens with the stage — not everyone is given full reach at once (it is earned by fruit)."""
+    fp = str(fp or "").strip()
+    if not fp:
+        return {"confessed": False, "stage": "seeker"}
     from . import mesh
-    node = mesh._read_node(viewer_fp)
+    node = mesh._read_node(fp)
     if not node or not node.get("confessed"):
-        return None
+        return {"confessed": False, "stage": "seeker"}
     posts = node.get("posts")
-    return mesh._stage(node, posts=len(posts) if isinstance(posts, list) else 0)
+    stage = mesh._stage(node, posts=len(posts) if isinstance(posts, list) else 0)
+    return {"confessed": True, "stage": stage}
 
 
 def _the_gate() -> Dict[str, Any]:
@@ -56,16 +57,24 @@ def for_member(member_fp: str, viewer_fp: Optional[str] = None) -> Dict[str, Any
     if not member_fp:
         return {"groups": [], "shelf": {}, "belongs": 0}
     own = viewer_fp is not None and viewer_fp == member_fp
-    stage = "self" if own else _viewer_stage(viewer_fp)
-    if not own and not stage:
-        return _the_gate()                          # not on the path yet — shown the way in, not the members
+    if not own:
+        walk = _walk(viewer_fp)
+        if not walk["confessed"]:                   # not on the path yet — shown the way in, not the members
+            gate = _the_gate()
+            gate["your_walk"] = walk                # so the viewer sees where they stand and what opens next
+            return gate
     from . import groups, shelves
     mine = groups.groups_of(member_fp)
     try:
         shelf = shelves.shelf_of(member_fp, viewer=viewer_fp or member_fp)
     except Exception:  # noqa: BLE001
         shelf = {"ok": False}
-    return {"groups": mine, "shelf": shelf, "belongs": len(mine), "own": own, "viewer_stage": stage}
+    out: Dict[str, Any] = {"groups": mine, "shelf": shelf, "belongs": len(mine), "own": own}
+    if own:
+        out["walk"] = _walk(member_fp)              # your own walk — so the profile can show the confess step
+    else:
+        out["viewer_stage"] = _walk(viewer_fp)["stage"]
+    return out
 
 
 def signable_view(public_key: str, member_fp: str, nonce: str) -> bytes:

@@ -106,6 +106,7 @@
     <div class="status" id="saveStatus"></div>
     <div class="served hidden" id="served"></div>
     <div class="served hidden" id="path"></div>
+    <div class="served hidden" id="walk"></div>
     <div class="served hidden" id="fellow"></div>
   </div>
 
@@ -198,7 +199,7 @@ async function loadPath(){
   }catch(e){ el.classList.add("hidden"); }
 }
 async function loadCommunity(){
-  const el = $("fellow");
+  const el = $("fellow"), wk = $("walk");
   try{
     // A SIGNED self-view: seeing the fellowship is gated behind the narrow path, so we prove the key even
     // for your own (member = you, viewer derived from the same key -> served in full).
@@ -207,6 +208,21 @@ async function loadCommunity(){
     if(sg.status!==200 || !sg.body.signable) throw new Error("prep");
     const signature = await signStr(sg.body.signable);
     const r = await api("POST", "/profile/community/view", {public_key:PUB, member:FP, nonce, signature});
+
+    // YOUR WALK — the narrow path. Seeing OTHER members is a fruit of the walk; it opens with confession
+    // and widens as you are known and serve. Not everyone is given full reach at once.
+    const walk = (r.body && r.body.walk) || {confessed:false, stage:"seeker"};
+    let wh = '<div class="served-h">Your walk</div>';
+    if(walk.confessed){
+      wh += '<div class="served-row met">You have confessed — <b>'+esc(walk.stage)+'</b>. The fellowship of other members opens to you, and widens as you are vouched and serve.</div>';
+    }else{
+      wh += '<div class="served-row seek"><i>You are a seeker at the gate.</i> The believers around you are not shown at once — the way opens as you walk it. To see the fellowship of other members, confess with your mouth that Jesus Christ is Lord and Messiah (Romans 10:9).</div>';
+      wh += '<div class="row"><button id="confessBtn">I confess Jesus Christ as Lord and Messiah</button> <span id="confessStatus" class="status"></span></div>';
+    }
+    wk.innerHTML = wh; wk.classList.remove("hidden");
+    if(!walk.confessed){ const b=$("confessBtn"); if(b) b.onclick = confess; }
+
+    // YOUR FELLOWSHIP — your own groups (always yours).
     const gs = (r.body && r.body.groups) || [];
     let h = '<div class="served-h">Your fellowship</div>';
     if(gs.length){
@@ -216,7 +232,25 @@ async function loadCommunity(){
     }
     h += '<div class="hint" style="margin-top:.5rem"><a href="/community.html">Find or start a group &rarr;</a></div>';
     el.innerHTML = h; el.classList.remove("hidden");
-  }catch(e){ el.classList.add("hidden"); }
+  }catch(e){ el.classList.add("hidden"); wk.classList.add("hidden"); }
+}
+
+async function confess(){
+  // Go down the narrow path: sign the confession with your key and register your node (the same identity
+  // as your keeping). Confession is with the mouth (Romans 10:9); the gate is permissive on wording but
+  // the essence must be present. This opens the fellowship of other members.
+  const st = $("confessStatus"); if(st){ st.className="status"; st.textContent="Signing your confession…"; }
+  try{
+    const confession = "Jesus Christ is Lord and Messiah";
+    const sig = await signStr(confession);
+    const r = await api("POST", "/mesh/node", {public_key:PUB, confession:confession, confession_sig:sig});
+    if(r.status===200 && r.body.ok){
+      if(st){ st.className="status ok"; st.textContent="Welcome. You have confessed — the way opens as you walk."; }
+      loadCommunity();
+    }else{
+      if(st){ st.className="status err"; st.textContent=(r.body&&r.body.error)||"the gate did not open"; }
+    }
+  }catch(e){ if(st){ st.className="status err"; st.textContent=(e&&e.message)||String(e); } }
 }
 
 async function open_(){
