@@ -67,6 +67,24 @@ def test_the_shelf_opens_at_the_joined_stage(tmp_path, monkeypatch):
     assert r["viewer_stage"] == "joined" and "shelf" in r     # the offers and needs open at 'joined'
 
 
+def test_fruit_is_counted_but_alone_does_not_promote_you_must_also_be_known(tmp_path, monkeypatch):
+    # Promotion by fruit: writing/reflecting/serving is counted as fruit — but reach is not handed out for
+    # fruit alone; you must also be VOUCHED (known by believers). So a lone confessor who has borne fruit
+    # is still a confessor until others vouch for them. Guards against self-promotion by spamming words.
+    monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
+    try:
+        me = identity.create_identity()
+    except Exception:  # noqa: BLE001 — needs cryptography for a real key
+        return
+    mesh.register_node(me["public_key"], confession="Jesus Christ is Lord and Messiah")
+    fp = me["id"]
+    assert community._fruit(fp) == 0
+    mesh.post_message(fp, "a reflection I share with the body")
+    w = community._walk(fp)
+    assert w["fruit"] >= 1                                # writing/reflecting counted as fruit
+    assert w["stage"] == "confessor" and w["vouched"] == 0   # fruit alone does not promote — not yet known
+
+
 def test_a_member_with_no_fellowship_is_empty_not_an_error(tmp_path, monkeypatch):
     monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
     r = community.for_member("nh_nobody", viewer_fp="nh_nobody")   # own, empty

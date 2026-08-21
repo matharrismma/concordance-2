@@ -21,11 +21,36 @@ from __future__ import annotations
 from typing import Any, Dict, Optional
 
 
+def _fruit(fp: str) -> int:
+    """A member's FRUIT — their writing, reflecting, and serving: the words they have shared with the body,
+    and what they have put on their shelf for the fellowship. This is what 'pays for wisdom' — with vouching,
+    it is what promotes a member to more reach (Matt: people write and reflect and are promoted to a higher
+    level to have more reach; we do not give everyone full reach at once). Conservative and crash-safe — a
+    missing store simply counts zero, so fruit is never over-counted."""
+    fp = str(fp or "").strip()
+    if not fp:
+        return 0
+    n = 0
+    try:
+        from . import mesh
+        n += int(mesh._outgoing_counts().get(fp, 0))    # words / reflections shared on the mesh
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        from . import shelves
+        n += int(shelves.shelf_of(fp, viewer=fp).get("count", 0))   # what they have put on their shelf
+    except Exception:  # noqa: BLE001
+        pass
+    return n
+
+
 def _walk(fp: Optional[str]) -> Dict[str, Any]:
     """A member's WALK on the shared mesh identity: have they confessed, and where do they stand on the
     narrow path (confessor / joined / community as they are vouched and serve). A seeker has not yet
     confessed — the gate to the fellowship has not opened. Never a verdict on a soul; a description of the
-    walk. Reach widens with the stage — not everyone is given full reach at once (it is earned by fruit)."""
+    walk. Reach is EARNED: promotion needs both being known (vouched by believers) AND bearing fruit
+    (writing, reflecting, serving) — so it cannot be gamed by one alone. Not everyone is given full reach
+    at once."""
     fp = str(fp or "").strip()
     if not fp:
         return {"confessed": False, "stage": "seeker"}
@@ -33,9 +58,9 @@ def _walk(fp: Optional[str]) -> Dict[str, Any]:
     node = mesh._read_node(fp)
     if not node or not node.get("confessed"):
         return {"confessed": False, "stage": "seeker"}
-    posts = node.get("posts")
-    stage = mesh._stage(node, posts=len(posts) if isinstance(posts, list) else 0)
-    return {"confessed": True, "stage": stage}
+    fruit = _fruit(fp)
+    return {"confessed": True, "stage": mesh._stage(node, posts=fruit),
+            "fruit": fruit, "vouched": len(node.get("links", []))}
 
 
 def _the_gate() -> Dict[str, Any]:
