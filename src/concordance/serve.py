@@ -44,14 +44,16 @@ def _subjects(text: str, minlen: int) -> set:
 
 
 def _genuine(want: str, card: Dict[str, Any]) -> bool:
-    """A card genuinely answers a want only when its TITLE shares a SUBSTANTIVE subject noun (>=4 chars;
-    fall back to >=3 only if the want has no longer noun) — so 'tan a deer hide' needs 'hide'/'deer', not
-    a place named 'Tan-Tan' that merely shares the 3-letter stem 'tan'. A gap stays a gap."""
-    subj = _subjects(want, 4) or _subjects(want, 3)
+    """A card genuinely answers a want only when its TITLE shares the want's HEAD noun (the object the
+    want is about — the last substantive noun) OR at least TWO of its subject nouns. One weak overlap is
+    not an answer: 'tan a deer hide' (head 'hide') is not met by a place 'Tan-Tan' (shares only 'tan')
+    nor by 'The deer family' (shares only 'deer', and not the head). A gap stays a gap."""
+    toks = [w for w in re.findall(r"[a-z0-9]+", (want or "").lower()) if w not in _GENERIC]
+    subj = [_stem(w) for w in toks if len(w) >= 4] or [_stem(w) for w in toks if len(w) >= 3]
     if not subj:
         return False
     title = {_stem(w) for w in re.findall(r"[a-z0-9]+", (card.get("title") or "").lower())}
-    return bool(subj & title)
+    return (subj[-1] in title) or (len(set(subj) & title) >= 2)
 
 
 def take(wants: List[str], *, plane: str = "human") -> Dict[str, Any]:
