@@ -6,13 +6,16 @@ is the SHAPE of the lens (kind, necessity, route…); this is what it sees WITH:
 witness. A lens with no way of seeing is just a hole in the glass; his writing is the ground it is tuned
 to.
 
-THREE SENSES, ONE PRIMITIVE. His writing is the lens in three ways, and all three stand on `see()`:
-  DISCERNMENT — his writing proposes what matters and how to read a claim.
-  VOICE       — his own words frame the answer (never a generated imitation — his actual writing speaks).
-  MAP         — his writing is the structure of how things connect and point to Christ.
+THREE SENSES, ONE GROUND. His writing is the lens in three ways, and all three stand on `see()`:
+  DISCERNMENT — his writing proposes what matters and how to read a claim.        → see()
+  VOICE       — his own words frame the answer (never a generated imitation — his actual writing speaks). → voice()
+  MAP         — his writing is the structure of how things connect and point to Christ.  → edges()
 
 `see(text)` proposes a way of seeing: the passages from Matt's writing that frame the input, with their
-provenance. The laws it keeps, every one:
+provenance. `voice(text)` selects the single passage to lead an answer with — his verbatim words, never
+imitated. `edges(text)` surfaces the connections his writing DRAWS — the Scripture his relevant passages
+point to — as attributed edges, so navigation follows his map, not raw co-occurrence. The laws they keep,
+every one:
   * PROPOSES, NEVER CONFIRMS — the lens offers a way of seeing; the gate still disposes. Authority is
     never granted here.
   * NOTHING GENERATED — it retrieves his REAL words; it never writes in his voice. Gather, don't author.
@@ -101,9 +104,92 @@ def see(text: str, *, corpus: Optional[List[Dict[str, Any]]] = None, k: int = 3)
     }
 
 
+def voice(text: str, *, corpus: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+    """VOICE — frame the answer with Matt's OWN words. Selects the single passage of his writing that most
+    frames `text` and returns it verbatim, attributed, to lead the answer with. Nothing is generated: his
+    voice is his because it IS his — never a style imitated (de-AI holds). Where his writing does not yet
+    reach, the frame is honestly empty and the answer stands on its own, in no imitated voice. Proposes;
+    never confirms."""
+    seen = see(text, corpus=corpus, k=1)
+    top = seen["seeing"][0] if seen["seeing"] else None
+    return {
+        "frame": (top["text"] if top else None),          # his verbatim words to lead with — or None
+        "work": (top["work"] if top else None),
+        "ref": (top["ref"] if top else None),
+        "id": (top["id"] if top else None),
+        "his_words": bool(top), "generated": False,        # never authored in his register
+        "proposes": True, "confirms": False,
+        "gathered": seen["gathered"],
+        "note": ("Matt's own words frame this — verbatim, attributed, never imitated" if top else
+                 "his writing does not reach this yet — the answer stands on its own, in no imitated voice"),
+    }
+
+
+# The map is built from the Scripture Matt's writing points to. Chapter-anchored references only (Book N or
+# Book N:V) — a strong signal that keeps false edges out; where his writing names a book without a chapter,
+# or by an abbreviation we do not yet read, the map simply under-reaches (map as we go), never invents.
+_BOOKS = ("genesis exodus leviticus numbers deuteronomy joshua judges ruth samuel kings chronicles ezra "
+          "nehemiah esther job psalms psalm proverbs ecclesiastes song isaiah jeremiah lamentations "
+          "ezekiel daniel hosea joel amos obadiah jonah micah nahum habakkuk zephaniah haggai zechariah "
+          "malachi matthew mark luke john acts romans corinthians galatians ephesians philippians "
+          "colossians thessalonians timothy titus philemon hebrews james peter jude revelation").split()
+_SCRIPTURE_RE = re.compile(
+    r"\b(?:([1-3])\s+)?(" + "|".join(sorted(set(_BOOKS), key=len, reverse=True)) +
+    r")\.?\s+(\d+)(?::(\d+(?:[-–]\d+)?))?\b", re.IGNORECASE)
+
+
+def _scripture_refs(s: str) -> List[str]:
+    """The chapter-anchored Scripture references a passage names, normalized and de-duplicated in order."""
+    out: List[str] = []
+    for m in _SCRIPTURE_RE.finditer(s or ""):
+        num, book, ch, vs = m.group(1), m.group(2), m.group(3), m.group(4)
+        ref = ((num + " ") if num else "") + book[:1].upper() + book[1:].lower() + " " + ch
+        if vs:
+            ref += ":" + vs
+        if ref not in out:
+            out.append(ref)
+    return out
+
+
+def edges(text: str, *, corpus: Optional[List[Dict[str, Any]]] = None, k: int = 5) -> Dict[str, Any]:
+    """MAP — the connections Matt's writing DRAWS for what you brought: the Scripture his relevant passages
+    point to, as ATTRIBUTED edges (a theme → where his writing anchors it). Nothing is invented — an edge
+    exists only where his passage literally names that Scripture, so the map follows HIS way of seeing, not
+    raw co-occurrence. His writing points, in the end, to Christ; the map surfaces that pointing. Honest
+    empty where his writing draws no edge for this yet. Proposes; never confirms."""
+    q = _tokens(text)
+    body = corpus if corpus is not None else load()
+    scored = []
+    for i, p in enumerate(body):
+        shared = q & _tokens((p.get("text") or "") + " " + (p.get("work") or ""))
+        if shared:
+            scored.append((len(shared), -i, p, shared))
+    scored.sort(key=lambda x: (-x[0], x[1]))
+    out: List[Dict[str, Any]] = []
+    for _o, _i, p, shared in scored:
+        refs = _scripture_refs(p.get("text") or "")
+        if not refs:
+            continue                                        # a relevant passage that draws no edge draws none
+        theme = sorted(shared, key=lambda w: (-len(w), w))[0]   # the strongest shared subject word
+        for ref in refs:
+            out.append({"theme": theme, "points_to": ref, "text": p.get("text"),
+                        "work": p.get("work"), "ref": p.get("ref"), "id": p.get("id")})
+        if len(out) >= max(1, int(k)):
+            break
+    out = out[:max(1, int(k))]
+    return {
+        "edges": out,                               # theme → the Scripture his writing points it to, attributed
+        "proposes": True, "confirms": False,
+        "gathered": len(body),
+        "note": ("Matt's writing draws these — a theme to the Scripture it points to, his words, attributed"
+                 if out else
+                 "his writing draws no edge for this yet — the map is still being gathered (map as we go)"),
+    }
+
+
 def available() -> bool:
     """True if any of Matt's writing has been gathered into the lens yet."""
     return len(load()) > 0
 
 
-__all__ = ["see", "load", "available"]
+__all__ = ["see", "voice", "edges", "load", "available"]

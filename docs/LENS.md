@@ -45,13 +45,17 @@ gathering his writing and wiring the senses one at a time rather than one big up
 2. **Discernment** *(seed built; deepen)* — beyond attaching his framing, let his writing weight what
    *matters*: relevance and necessity read through his witness, the seeds→floor→wisdom that begins
    discernment (Prov 9:10). Still proposes; the gate still disposes.
-3. **Voice** — the answer is framed by his own words. The presentation layer leads with `see()`'s
-   passage — his writing literally speaks the frame — so the voice is his because it *is* his, not a
-   style imitated. (De-AI holds: nothing generated in his register.)
-4. **Map** — his writing is the structure. Extract the connections his writing draws — a passage that
-   binds a theme to Scripture, an idea to Christ — as *attributed edges* in the concordance, so
-   navigating from one verified truth to its neighbours follows *his* map, not raw co-occurrence. This
-   is "everything connects on planes" given a way of seeing.
+3. **Voice** *(seed built)* — the answer is framed by his own words. `lens.voice(text)` selects the single
+   passage to lead an answer with — his verbatim words, attributed, `generated: False` — and where his
+   writing does not reach, it says so and the answer stands on its own, in no imitated voice. So the voice
+   is his because it *is* his, not a style imitated. (De-AI holds: nothing generated in his register.) Next:
+   the presentation layer leads with it.
+4. **Map** *(seed built)* — his writing is the structure. `lens.edges(text)` surfaces the connections his
+   writing draws — the Scripture his relevant passages point to — as *attributed edges* (theme → where his
+   writing anchors it). An edge exists only where his passage literally names that (chapter-anchored)
+   Scripture, so navigating follows *his* map, not raw co-occurrence, and never an invented link. This is
+   "everything connects on planes" given a way of seeing. Next: wire the edges into the concordance's
+   navigation, and read his abbreviated citations as the gathered corpus shows his style.
 
 ## Circulation — the lens is living
 
