@@ -904,7 +904,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # the caller's full private text to us — the exact thing the loop exists to prevent (context
         # stays local). On the shared server: strip locally and send only the skeleton to /verify.
         import os as _os
-        if not str(_os.environ.get("CONCORDANCE_SOVEREIGN_NODE", "")).strip():
+        # EXPLICIT truthy allowlist — a bare "non-empty" check would let CONCORDANCE_SOVEREIGN_NODE=0/false
+        # (an operator's attempt to DISABLE) turn the private-context loop ON on the shared server.
+        if _os.environ.get("CONCORDANCE_SOVEREIGN_NODE", "").strip().lower() not in ("1", "true", "yes", "on"):
             return _err(403, "the context loop runs only on a sovereign node — set "
                              "CONCORDANCE_SOVEREIGN_NODE to enable it on your own machine; on the shared "
                              "server, strip locally and send only the skeleton to /verify")

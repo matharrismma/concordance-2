@@ -160,6 +160,18 @@ def test_served_serves_the_lens_only_on_a_sovereign_node(tmp_path, monkeypatch):
     assert r["proposes"] is True and r["confirms"] is False
 
 
+def test_the_sovereign_gate_only_opens_on_an_explicit_true(tmp_path, monkeypatch):
+    # Footgun closed: '0'/'false'/'off'/'no'/'' read as DISABLE and must never serve Matt's private lens;
+    # only an explicit true opens the gate. (A bare non-empty check would have served it on '0'/'false'.)
+    monkeypatch.setenv("CONCORDANCE_LENS", str(tmp_path / "empty.jsonl"))
+    for off in ("0", "false", "off", "no", ""):
+        monkeypatch.setenv("CONCORDANCE_SOVEREIGN_NODE", off)
+        assert d._lens_see("anything") is None            # disable never serves the private writing
+    for on in ("1", "true", "yes", "on"):
+        monkeypatch.setenv("CONCORDANCE_SOVEREIGN_NODE", on)
+        assert d._lens_see("anything") is not None        # explicit true opens the gate (its own honest-empty)
+
+
 def test_crisis_still_outranks_the_whole_cloud():
     r = d.served("i want to end it all")              # a cry for help is never framed by witnesses
     assert r["kind"] == "crisis" and r["next"] == "real_help"

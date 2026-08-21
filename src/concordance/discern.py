@@ -191,7 +191,9 @@ def _lens_see(text: str):
     fail-closed, not left to the file's absence (mirrors the /context/run gate). Honest-None where not
     served or not gathered; proposes, never confirms."""
     import os
-    if not str(os.environ.get("CONCORDANCE_SOVEREIGN_NODE", "")).strip():
+    # An EXPLICIT truthy allowlist — never "any non-empty string". Otherwise an operator who sets the flag
+    # to "0"/"false"/"off" intending to DISABLE sovereign mode would inadvertently serve the private lens.
+    if os.environ.get("CONCORDANCE_SOVEREIGN_NODE", "").strip().lower() not in ("1", "true", "yes", "on"):
         return None                                  # a shared node never serves his private writing
     from . import lens
     try:
