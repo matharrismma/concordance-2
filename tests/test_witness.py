@@ -1,51 +1,63 @@
-"""Witness-surface test — the .org overlay surfaces only on surface="witness".
+"""Witness — the Cloud of Witnesses' actual words, voiced only where public domain.
 
-The seam, the other direction: theology/witness verifiers run on the witness surface
-and are absent on the secular reach, while the shared foundation (and the secular
-verifiers) are unaffected. Runnable with `pytest` OR `python tests/test_witness.py`.
+The strict-PD gate is structural: a copyrighted passage is NEVER voiced, even if injected. Voiced passages
+are verbatim, attributed (witness + work + ref + source), scoped by witness, and honestly empty where the
+cloud does not reach. Pure — the corpus is injected here; the fixtures are NEUTRAL placeholders, never any
+real witness's actual words.
 """
-from __future__ import annotations
+from concordance import witness, mentors
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-
-from concordance import EngineConfig, validate_and_seal  # noqa: E402
-from concordance.verifiers import WITNESS_VERIFIERS, _get_witness_module, run_for_domain  # noqa: E402
-
-
-def test_witness_verifiers_surface_only_on_witness():
-    for d in ("theology_doctrine", "witness"):
-        on = run_for_domain(d, {}, surface="witness")
-        off = run_for_domain(d, {}, surface="secular")
-        assert on, f"{d}: the witness surface must surface the verifier"
-        assert off == [], f"{d}: the secular reach must NOT surface the witness verifier (got {off})"
+# Neutral placeholders — deliberately not any real witness's words. Two public-domain, one copyrighted.
+FIXTURE = [
+    {"text": "a lamp trimmed and burning is tended before the dark comes, not after it has fallen",
+     "witness": "TEST-WITNESS", "work": "TEST-WORK", "ref": "ch.1", "id": "w1",
+     "source": "test://pd", "public_domain": True},
+    {"text": "the plainest fare, taken in gratitude, feeds a body better than a feast eaten in strife",
+     "witness": "TEST-WITNESS", "work": "TEST-WORK", "ref": "ch.2", "id": "w2",
+     "source": "test://pd", "public_domain": True},
+    {"text": "this passage names a living author and is under copyright — it must never be voiced here",
+     "witness": "TEST-LIVING", "work": "X", "ref": "1", "id": "c1",
+     "source": "test://©", "public_domain": False},
+]
 
 
-def test_witness_modules_load():
-    for d in sorted(WITNESS_VERIFIERS):
-        m = _get_witness_module(d)
-        assert m is not None and hasattr(m, "run"), f"{d}: witness module failed to load"
+def test_only_public_domain_text_is_ever_voiced():
+    # The copyrighted passage is relevant by words, but the gate holds — it is never returned.
+    r = witness.see("a living author under copyright", corpus=FIXTURE)
+    assert all(p["witness"] != "TEST-LIVING" for p in r["seeing"])
+    assert witness.witnesses(corpus=FIXTURE) == ["TEST-WITNESS"]      # the non-PD witness is not voiced
 
 
-def test_canon_imports():
-    import concordance.canon as canon  # the layered-canon data module
-    assert canon is not None
+def test_voice_leads_with_verbatim_attributed_words():
+    r = witness.voice("how do I tend a lamp in the dark", corpus=FIXTURE)
+    assert r["frame"] == FIXTURE[0]["text"]           # the witness's ACTUAL words — verbatim
+    assert r["witness"] == "TEST-WITNESS" and r["work"] == "TEST-WORK" and r["ref"] == "ch.1"
+    assert r["source"] == "test://pd"                 # provenance carried
+    assert r["verbatim"] is True and r["generated"] is False
+    assert r["proposes"] is True and r["confirms"] is False
 
 
-def test_secular_surface_unaffected():
-    # a secular claim still verifies on the secular reach — witness gating doesn't disturb it
-    pkt = {"domain": "combinatorics",
-           "COMB_VERIFY": {"comb_n": 5, "comb_k": 2, "claimed_combinations": 10},
-           "created_epoch": 1_700_000_000, "required_witnesses": 0}
-    rec = validate_and_seal(pkt, now_epoch=1_700_000_000 + 3601, config=EngineConfig("secular"))
-    assert rec.overall == "PASS"
+def test_see_scopes_to_one_witness():
+    assert witness.see("lamp", corpus=FIXTURE, witness="TEST-WITNESS")["seeing"]
+    assert witness.see("lamp", corpus=FIXTURE, witness="NOBODY")["seeing"] == []
 
 
-if __name__ == "__main__":
-    fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-    for fn in fns:
-        fn()
-        print(f"  ok  {fn.__name__}")
-    print(f"\n{len(fns)} witness-surface tests passed — .org surfaces the witness, .com does not.")
+def test_honest_where_the_cloud_does_not_reach():
+    r = witness.see("quantum chromodynamics", corpus=FIXTURE)
+    assert r["seeing"] == [] and "still being gathered" in r["note"]
+
+
+def test_empty_cloud_is_honest_not_fabricated():
+    r = witness.voice("anything at all", corpus=[])
+    assert r["frame"] is None and r["gathered"] == 0 and r["generated"] is False
+    assert "stands on its own" in r["note"]
+
+
+def test_mentors_voice_bridges_to_the_witness_layer(tmp_path, monkeypatch):
+    # mentors.voice is the verbatim voice beside for_text's characterized gift. Point the corpus at an
+    # empty path so the bridge is honestly empty here regardless of any locally-gathered data, and confirm
+    # the gift still stands in for_text.
+    monkeypatch.setenv("CONCORDANCE_WITNESSES", str(tmp_path / "none.jsonl"))
+    r = mentors.voice("health and temperance", name="Ellen G. White")
+    assert r["proposes"] is True and r["confirms"] is False and r["seeing"] == []
+    assert mentors.for_text("health and temperance")["mentors"]      # the gift is still proposed

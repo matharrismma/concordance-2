@@ -152,4 +152,13 @@ def for_text(text: str, *, k: int = 3) -> Dict[str, Any]:
                      "no mentor yet gathered for this craft — the search continues")}
 
 
-__all__ = ["MENTORS", "subjects", "by_subject", "find", "for_text"]
+def voice(text: str, *, name: Optional[str] = None, k: int = 1) -> Dict[str, Any]:
+    """A witness's ACTUAL words that frame `text` — beside `for_text` (the characterized gift), this is the
+    verbatim VOICE, drawn only where the witness is PUBLIC DOMAIN and has been gathered (`witness.py`). Scope
+    to one witness by `name`. Where none is gathered, it says so honestly and voices nothing — the gift still
+    stands in `for_text`. Proposes; never confirms. The words are the witness's because they ARE his."""
+    from . import witness as _witness
+    return _witness.see(text, witness=name, k=k)
+
+
+__all__ = ["MENTORS", "subjects", "by_subject", "find", "for_text", "voice"]
