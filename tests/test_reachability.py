@@ -87,6 +87,13 @@ AGENT_ONLY = {
     "/wants",   # the desiderata ledger — read by the Steward's rounds and the mint; humans reach
                 # the WRITE side (/want) from the empty-search offer and the card flag
 
+    # Verification / keeping surfaces no page links, by design: /witness is the Cloud of Witnesses' voice
+    # (public-domain, attributed) reached by agents and the discern flow; /context/run is the node-local
+    # context loop, gated by CONCORDANCE_SOVEREIGN_NODE (403 on the shared box); /kernel + /kernel/gate run
+    # a proposed state-change through the invariant lattice; /playbook/signable + /playbook/submit are the
+    # Playbook's signed two-step write. All agent/API surface, not a human page.
+    "/witness", "/context/run", "/kernel", "/kernel/gate", "/playbook/signable", "/playbook/submit",
+
     # THE COMMONS: nothing here is agent-only any more. C1b declared the six shelf routes on this
     # list with a promise that `shelf.html` would land in C1c and they would come off it — C1c
     # landed, and they came off. That is what the declaration was for.
@@ -100,6 +107,9 @@ UNLISTED_PAGES = {
     "keep.html",          # the operator's own surface, noindex — a public list is not its place
     "encyclopedia.html",  # a redirect stub onto characters.html; a second door to one room
     "ask.html",           # the landing's predecessor, kept for old links
+    "profile.html",       # the opt-in sovereign keeping (ez-login) — reached by direct URL / the keeping flow, not the public nav
+    "playbook.html",      # the Playbook surface — operator/agent authoring, not the public nav
+    "plow.html",          # the Plow surface — an operator instrument, not the public nav
 }
 
 

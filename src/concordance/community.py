@@ -103,11 +103,20 @@ def for_member(member_fp: str, viewer_fp: Optional[str] = None) -> Dict[str, Any
     #   community+ → the fullest view (the woven center).
     stage = _walk(viewer_fp)["stage"]
     out["viewer_stage"] = stage
-    if mesh._STAGE.get(stage, {}).get("rank", 0) >= mesh._STAGE["joined"]["rank"]:
-        out["shelf"] = _shelf(member_fp, viewer_fp)
-    else:
+    if mesh._STAGE.get(stage, {}).get("rank", 0) < mesh._STAGE["joined"]["rank"]:
         out["reach"] = ("a confessor sees that the believers belong; their shelf — the offers and needs — "
                         "opens as you are vouched and serve (the 'joined' stage)")
+        return out
+    # The SHELF is the sensitive layer (a member's offers and needs). It opens only to a JOINED viewer who
+    # is actually CONNECTED to this member — within their consensual mutual-link neighborhood — never to a
+    # self-promoted stranger. A Sybil's circle is only its own puppets, so it can never reach a real member
+    # who has not vouched back. (The mesh model: you see the believers AROUND you, not the whole deck.)
+    max_hops = mesh._STAGE.get(stage, {}).get("max_hops", 1) or 1
+    if member_fp in mesh._bfs(viewer_fp, max_hops):
+        out["shelf"] = _shelf(member_fp, viewer_fp)
+    else:
+        out["reach"] = ("their shelf — the offers and needs — opens when you are connected to them "
+                        "(a mutual vouch within your reach); you see only the believers around you")
     return out
 
 

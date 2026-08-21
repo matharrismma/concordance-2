@@ -1155,7 +1155,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
            or not str(body.get("neighbor") or "").strip():
             return _err(400, "fp and neighbor (fingerprints) required")
         from .. import mesh
-        return _ok(mesh.link(str(body["fp"]), str(body["neighbor"]), op=str(body.get("op") or "link")))
+        return _ok(mesh.link(str(body["fp"]), str(body["neighbor"]), op=str(body.get("op") or "link"),
+                             signature=body.get("signature"), nonce=body.get("nonce")))
     if method == "GET" and path == "/mesh/map":
         from .. import mesh
         try:

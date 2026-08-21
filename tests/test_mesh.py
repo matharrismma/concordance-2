@@ -31,6 +31,15 @@ def _node(callsign="anon", node_type="believer"):
     return idn, r["fp"]
 
 
+def _vouch(a, b):
+    """A consensual MUTUAL link under the signed, directed-vouch model: BOTH parties sign a vouch for the
+    other. (A single one-sided vouch does NOT form a link — that is the whole point of consent.)"""
+    for x, y in ((a, b), (b, a)):
+        n = "n" + y["id"][-8:]
+        sig = signing.sign_bytes(mesh.link_signable(x["id"], y["id"], "link", n), x["private_key"])
+        assert mesh.link(x["id"], y["id"], signature=sig, nonce=n)["ok"]
+
+
 def test_register_is_keyed_by_fingerprint_and_idempotent(mesh_dir):
     idn = identity.create_identity()
     c = "Jesus Christ is Lord and Messiah"
@@ -43,7 +52,7 @@ def test_register_is_keyed_by_fingerprint_and_idempotent(mesh_dir):
 def test_signed_message_verifies_offline_and_tamper_is_caught(mesh_dir):
     a, afp = _node("Berean")
     b, bfp = _node("Ruth")
-    mesh.link(afp, bfp)
+    _vouch(a, b)
     r = mesh.post_message(afp, "grace and peace to you", private_key=a["private_key"])
     assert r["ok"] and r["signed"]
     got = mesh.inbox(bfp)["messages"][0]
@@ -60,7 +69,7 @@ def test_signed_message_verifies_offline_and_tamper_is_caught(mesh_dir):
 def test_unsigned_message_is_honestly_marked(mesh_dir):
     a, afp = _node("A")
     b, bfp = _node("B")
-    mesh.link(afp, bfp)
+    _vouch(a, b)
     r = mesh.post_message(afp, "no key on this device", private_key=None)
     assert r["ok"] and r["signed"] is False
     v = mesh.inbox(bfp)["messages"][0]["verify"]
@@ -78,8 +87,8 @@ def test_ttl_bounds_reach_like_a_lora_hop_limit(mesh_dir):
     a, afp = _node("A")
     b, bfp = _node("B")
     c, cfp = _node("C")
-    mesh.link(afp, bfp)
-    mesh.link(bfp, cfp)                               # chain A—B—C
+    _vouch(a, b)
+    _vouch(b, c)                                     # chain A—B—C
     mesh.post_message(afp, "one hop only", ttl=1)     # reaches B, not C
     assert mesh.inbox(bfp)["count"] == 1
     assert mesh.inbox(cfp)["count"] == 0
@@ -101,7 +110,7 @@ def test_you_see_only_the_nodes_around_you(mesh_dir):
     a, afp = _node("A")
     b, bfp = _node("B")
     far, farfp = _node("Stranger")                   # registered, but linked to no one you know
-    mesh.link(afp, bfp)
+    _vouch(a, b)
     fps = {n["fp"] for n in mesh.map_around(afp, hops=2)["nodes"]}
     assert afp in fps and bfp in fps
     assert farfp not in fps                          # no global directory of persons

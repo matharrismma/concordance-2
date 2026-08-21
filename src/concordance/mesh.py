@@ -207,10 +207,54 @@ def _public_node(node: Dict[str, Any]) -> Dict[str, Any]:
             "public_key": node.get("public_key", "")}
 
 
-def link(fp: str, neighbor_fp: str, op: str = "link") -> Dict[str, Any]:
-    """Link to a neighbor you KNOW by their exact fingerprint (op='link'), or drop one
-    (op='unlink'). Links are mutual (a radio link is bidirectional) — but you can only reach a node
-    whose id you were handed, so there is no way to attach to strangers. This is the whole graph."""
+def link_signable(fp: str, neighbor_fp: str, op: str, nonce: str) -> bytes:
+    """The exact bytes a node signs to VOUCH for (op='link') or withdraw a vouch from (op='unlink') a
+    neighbor. Signing proves you hold this node's key — so no one can forge the trust graph on your behalf.
+    A client computes these itself or asks GET /mesh/signable."""
+    return signing.canonical_json_bytes(
+        {"mesh_vouch": {"fp": str(fp or ""), "neighbor": str(neighbor_fp or ""),
+                        "op": ("unlink" if op == "unlink" else "link"), "nonce": str(nonce or "")}})
+
+
+def _remutualize(a: Dict[str, Any], b: Dict[str, Any]) -> None:
+    """Materialize the a<->b MUTUAL link from the two DIRECTED vouches: they are linked iff EACH has
+    vouched for the other. `links` stays the consensual, both-agreed graph that reach and visibility read —
+    so no one is pulled into another's circle without their own vouch."""
+    mutual = (b["fp"] in a.get("vouches", [])) and (a["fp"] in b.get("vouches", []))
+    for node, other_fp in ((a, b["fp"]), (b, a["fp"])):
+        links = node.setdefault("links", [])
+        if mutual and other_fp not in links:
+            links.append(other_fp)
+        elif not mutual and other_fp in links:
+            links.remove(other_fp)
+
+
+def _materialize_mutual(a_fp: str, b_fp: str) -> Dict[str, Any]:
+    """Form a consensual MUTUAL link between two nodes whose consent is ALREADY established out of band —
+    e.g. an INVITE token minted by one and redeemed by the other (the token WAS the consent, so no
+    signature is needed here). Records both directed vouches and materializes the link."""
+    with _LOCK:
+        a = _read_node(a_fp)
+        b = _read_node(b_fp)
+        if not a or not b:
+            return {"ok": False, "error": "both nodes must exist"}
+        for x, y in ((a, b), (b, a)):
+            vs = x.setdefault("vouches", [])
+            if y["fp"] not in vs and len(vs) < _MAX_LINKS:
+                vs.append(y["fp"])
+        _remutualize(a, b)
+        _write_json(_node_path(a["fp"]), a)
+        _write_json(_node_path(b["fp"]), b)
+    return {"ok": True, "neighbor_callsign": b.get("callsign", "anon")}
+
+
+def link(fp: str, neighbor_fp: str, op: str = "link",
+         signature: Optional[str] = None, nonce: Optional[str] = None) -> Dict[str, Any]:
+    """VOUCH for a believer you know (op='link'), or withdraw a vouch (op='unlink'). SIGNED — you may only
+    vouch FROM your own node, proven by your key (without this, anyone could forge the trust graph — link
+    strangers, or SEVER a believer's real vouches). A vouch is DIRECTED: it records fp -> neighbor. A
+    MUTUAL link (what reach and visibility count) forms ONLY when BOTH have vouched, so no one can pull
+    another into their circle without consent — the whole graph is consensual."""
     if not _valid_fp(fp) or not _valid_fp(neighbor_fp):
         return {"ok": False, "error": "both fingerprints required"}
     if fp == neighbor_fp:
@@ -222,20 +266,31 @@ def link(fp: str, neighbor_fp: str, op: str = "link") -> Dict[str, Any]:
             return {"ok": False, "error": "register your node first (POST /mesh/node)"}
         if not other:
             return {"ok": False, "error": "no node with that fingerprint — check the id you were handed"}
-        for a, b in ((me, other), (other, me)):
-            links = a.setdefault("links", [])
-            if op == "unlink":
-                if b["fp"] in links:
-                    links.remove(b["fp"])
-            else:
-                if b["fp"] not in links:
-                    if len(links) >= _MAX_LINKS:
-                        return {"ok": False, "error": f"link limit reached ({_MAX_LINKS})"}
-                    links.append(b["fp"])
-            _write_json(_node_path(a["fp"]), a)
+        try:
+            ok = bool(signature) and signing.verify_bytes(
+                link_signable(fp, neighbor_fp, op, str(nonce or "")), signature, me.get("public_key", ""))
+        except Exception:  # noqa: BLE001
+            ok = False
+        if not ok:
+            return {"ok": False, "error": ("a vouch must be signed by your node's key — get the canonical "
+                                           "bytes from GET /mesh/signable (kind=link) and send the signature")}
+        vouches = me.setdefault("vouches", [])
+        if op == "unlink":
+            if neighbor_fp in vouches:
+                vouches.remove(neighbor_fp)
+        elif neighbor_fp not in vouches:
+            if len(vouches) >= _MAX_LINKS:
+                return {"ok": False, "error": f"vouch limit reached ({_MAX_LINKS})"}
+            vouches.append(neighbor_fp)
+        _remutualize(me, other)
+        _write_json(_node_path(me["fp"]), me)
+        _write_json(_node_path(other["fp"]), other)
+    mutual = neighbor_fp in me.get("links", [])
     return {"ok": True, "op": ("unlink" if op == "unlink" else "link"),
             "you": me["fp"], "neighbor": other["fp"], "neighbor_callsign": other.get("callsign", "anon"),
-            "links": len(me.get("links", []))}
+            "mutual": mutual, "links": len(me.get("links", [])),
+            "note": ("mutual — you are linked" if mutual else
+                     "your vouch is recorded; the link forms when they vouch for you too")}
 
 
 def _any_guide_exists() -> bool:
@@ -694,7 +749,7 @@ def redeem_invite(token: str, fp: str) -> Dict[str, Any]:
             return {"ok": False, "error": "you cannot redeem your own invite"}
         rec["uses"] = int(rec.get("uses", 0)) + 1
         _write_json(_invite_path(token), rec)
-    r = link(fp, inviter)
+    r = _materialize_mutual(fp, inviter)   # the token was the consent — no signature needed on this path
     if not r.get("ok"):
         return r
     return {"ok": True, "linked_to": inviter, "neighbor_callsign": r.get("neighbor_callsign", "anon"),

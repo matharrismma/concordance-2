@@ -57,14 +57,29 @@ def test_a_confessor_sees_that_believers_belong_but_not_yet_their_shelf(tmp_path
     assert "shelf" not in r and "reach" in r                  # reach is staged — the shelf opens at 'joined'
 
 
-def test_the_shelf_opens_at_the_joined_stage(tmp_path, monkeypatch):
-    # Reach widens with the walk: a 'joined' member (vouched and serving) sees the shelf — the offers and
-    # needs, to serve and be served. (The walk is faked here to test the ladder threshold in isolation.)
+def test_the_shelf_opens_to_a_joined_viewer_connected_to_the_member(tmp_path, monkeypatch):
+    # Reach widens with the walk AND requires a real connection: a 'joined' viewer who is within the
+    # member's mutual-link neighborhood sees the shelf — the offers and needs. (Walk + neighborhood are
+    # faked here to test the ladder threshold in isolation.)
     monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
     groups.create_group("the well", creator_id="nh_member", handle="a pilgrim")
     monkeypatch.setattr(community, "_walk", lambda fp: {"confessed": True, "stage": "joined"})
-    r = community.for_member("nh_member", viewer_fp="nh_joined_viewer")
-    assert r["viewer_stage"] == "joined" and "shelf" in r     # the offers and needs open at 'joined'
+    monkeypatch.setattr(mesh, "_bfs", lambda fp, hops: {"nh_viewer": 0, "nh_member": 1})   # connected
+    r = community.for_member("nh_member", viewer_fp="nh_viewer")
+    assert r["viewer_stage"] == "joined" and "shelf" in r     # connected + joined -> the offers/needs open
+
+
+def test_a_self_promoted_stranger_cannot_reach_the_shelf(tmp_path, monkeypatch):
+    # The Sybil defense: even a JOINED viewer sees a member's shelf ONLY if actually connected to them. A
+    # self-promoted attacker's neighborhood is only its own puppets, so a real member it never linked to
+    # stays closed — belonging is visible, the sensitive offers/needs are not.
+    monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
+    groups.create_group("the well", creator_id="nh_member", handle="a pilgrim")
+    monkeypatch.setattr(community, "_walk", lambda fp: {"confessed": True, "stage": "joined"})
+    monkeypatch.setattr(mesh, "_bfs", lambda fp, hops: {"nh_sybil": 0})   # circle = only itself/puppets
+    r = community.for_member("nh_member", viewer_fp="nh_sybil")
+    assert "shelf" not in r and "reach" in r                  # not connected -> offers/needs stay closed
+    assert r["belongs"] == 1                                  # basic belonging is still visible
 
 
 def test_fruit_is_counted_but_alone_does_not_promote_you_must_also_be_known(tmp_path, monkeypatch):
