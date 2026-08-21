@@ -34,7 +34,7 @@ GOLDEN_API_GET = {
     # The clock, added 2026-08-04 at Matt's direction: "the actual date and time always
     # current for the time zone you are in." An agent's own 'today' is its training cutoff.
     "/now",
-    "/identity", "/profile", "/profile/served", "/profile/community", "/route", "/bind/challenge", "/thread/digest", "/thread/recall", "/thread/lineage", "/thread/recalled", "/land", "/cards/for-the-group",
+    "/identity", "/profile", "/profile/served", "/profile/community", "/profile/path", "/route", "/bind/challenge", "/thread/digest", "/thread/recall", "/thread/lineage", "/thread/recalled", "/land", "/cards/for-the-group",
     "/search", "/seal", "/resolve", "/word_study",
     "/card", "/cards", "/cards/stats", "/daily", "/grid", "/grid/dimension",
     "/card/connections", "/graph", "/floor", "/locate", "/library/health", "/growth",

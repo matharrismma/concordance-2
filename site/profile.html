@@ -105,6 +105,7 @@
     </div>
     <div class="status" id="saveStatus"></div>
     <div class="served hidden" id="served"></div>
+    <div class="served hidden" id="path"></div>
     <div class="served hidden" id="fellow"></div>
   </div>
 
@@ -180,6 +181,22 @@ async function loadServed(){
     el.innerHTML = h; el.classList.remove("hidden");
   }catch(e){ el.classList.add("hidden"); }
 }
+async function loadPath(){
+  const el = $("path");
+  try{
+    const r = await api("GET", "/profile/path?fp=" + encodeURIComponent(FP));
+    const d = r.body || {};
+    const n = d.done_count || 0;
+    let h = '<div class="served-h">Your path</div>';
+    h += n > 0 ? '<div class="served-row met"><span class="w">'+n+' step'+(n===1?"":"s")+' walked</span></div>'
+               : '<div class="served-row seek"><i>You are at the trailhead — the first step is waiting.</i></div>';
+    const nx = d.next || {};
+    const nt = (nx.next && nx.next.title) || nx.title || (nx.next_unit && nx.next_unit.title);
+    if(nt){ h += '<div class="served-row"><span class="w">Next:</span> '+esc(nt)+'</div>'; }
+    h += '<div class="hint" style="margin-top:.5rem"><a href="/read.html">Continue on the path &rarr;</a></div>';
+    el.innerHTML = h; el.classList.remove("hidden");
+  }catch(e){ el.classList.add("hidden"); }
+}
 async function loadCommunity(){
   const el = $("fellow");
   try{
@@ -206,7 +223,7 @@ async function open_(){
     $("fp").textContent = FP;
     await loadProfile();
     $("login").classList.add("hidden"); $("profile").classList.remove("hidden");
-    loadServed(); loadCommunity();
+    loadServed(); loadPath(); loadCommunity();
 
     $("verses").value = "";   // clear the phrase from the page once the key is in memory
   }catch(e){

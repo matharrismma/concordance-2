@@ -1330,6 +1330,14 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import community as _community
         return _ok({"id": fp, **_community.for_member(fp)})
 
+    if method == "GET" and path == "/profile/path":
+        # DISCIPLESHIP — a member's walked path with the coach, computed from their own progress (`done`).
+        fp = (query.get("fp") or "").strip()
+        if not fp:
+            return _err(400, "fp required")
+        from .. import disciple as _disciple
+        return _ok({"id": fp, **_disciple.walk(fp)})
+
     if method == "POST" and path == "/profile/signable":
         # The exact bytes to sign with your private key — computed here for correctness; a sovereign
         # client may compute them itself. Nothing is stored, no key is seen.
@@ -2483,6 +2491,7 @@ ROUTES = [
     {"path": "/profile", "methods": ("GET",), "api": True},   # your keeping, keyed by fingerprint (opt-in)
     {"path": "/profile/served", "methods": ("GET",), "api": True},   # serving — your wants, met or still sought
     {"path": "/profile/community", "methods": ("GET",), "api": True},   # community — your fellowship (groups + shelf)
+    {"path": "/profile/path", "methods": ("GET",), "api": True},   # discipleship — your walked path with the coach
     {"path": "/profile/signable", "methods": ("POST",), "rl": True},
     {"path": "/profile/save", "methods": ("POST",), "rl": True},   # signed write — no account, no password
     {"path": "/profile/erase", "methods": ("POST",), "rl": True},  # signed delete — yours to take back
