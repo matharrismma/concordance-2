@@ -151,6 +151,23 @@ def test_derived_sets_match_history():
         f"extra={set(api.RATELIMITED) - GOLDEN_RATELIMITED}")
 
 
+def test_scan_cache_serves_then_invalidates_on_a_corpus_change(monkeypatch):
+    # The whole-corpus scan routes are cached per corpus VERSION: fast on repeat, but NEVER stale — the
+    # instant the corpus changes (its version token shifts), the cache misses and recomputes.
+    api._SCAN_CACHE.clear()
+    calls = {"n": 0}
+
+    def compute():
+        calls["n"] += 1
+        return {"v": calls["n"]}
+
+    monkeypatch.setattr(api, "_corpus_token", lambda: ("tok", 1))
+    assert api._cached_scan("k", compute) == {"v": 1}
+    assert api._cached_scan("k", compute) == {"v": 1} and calls["n"] == 1   # second read served from cache
+    monkeypatch.setattr(api, "_corpus_token", lambda: ("tok", 2))           # the corpus grew
+    assert api._cached_scan("k", compute) == {"v": 2} and calls["n"] == 2   # invalidated — no stale read
+
+
 def test_no_duplicate_paths():
     paths = [r["path"] for r in api.ROUTES]
     dupes = {p for p in paths if paths.count(p) > 1}

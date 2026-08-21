@@ -575,6 +575,42 @@ def _thread_is_private(thread_id: str) -> bool:
     except Exception:
         return False
 
+# ── A per-corpus-version cache for the whole-corpus scan routes (red-team DoS #1) ────────────────────
+# These GET routes recompute an aggregate over the ENTIRE resident corpus per request (seconds each on a
+# large corpus). The corpus is an immutable singleton BETWEEN writes, so a result stays valid until the
+# corpus changes — keyed on a cheap fingerprint (the singleton's identity + its card count), which shifts
+# on a reload (a new process) or a runtime add_card. A short TTL is a backstop for any in-place edit. This
+# turns a repeatable multi-second CPU cost into a one-time-per-corpus-version cost; the read rate-limit
+# still bounds the very first (cold) hits.
+_SCAN_CACHE = {}
+_SCAN_TTL_S = 120
+_SCAN_CACHE_MAX = 512
+
+
+def _corpus_token():
+    try:
+        from .. import corpus as _c
+        cc = _c.default_corpus()
+        return (id(cc), len(cc.cards))
+    except Exception:  # noqa: BLE001
+        return (0, 0)
+
+
+def _cached_scan(key, compute):
+    """Return compute()'s result, cached until the corpus changes (or the TTL lapses). Callers must treat
+    the returned value as read-only (it is shared); copy before mutating."""
+    import time as _t
+    tok, now = _corpus_token(), _t.time()
+    hit = _SCAN_CACHE.get(key)
+    if hit is not None and hit[0] == tok and hit[1] > now:
+        return hit[2]
+    val = compute()
+    if len(_SCAN_CACHE) >= _SCAN_CACHE_MAX:
+        _SCAN_CACHE.clear()
+    _SCAN_CACHE[key] = (tok, now + _SCAN_TTL_S, val)
+    return val
+
+
 def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
              config: EngineConfig, session_gate_open: bool = False) -> Response:
     """Pure request dispatch — (method, path, query, body, config, session_gate_open) → (status, payload).
@@ -1517,7 +1553,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
 
     # Library / keeping tools (ported from 1.0, additive — over the same shared corpus).
     if method == "GET" and path == "/cards/stats":
-        return _ok(corpus.stats())
+        return _ok(_cached_scan("stats", corpus.stats))
     if method == "GET" and path == "/cards":
         try:
             limit = int(query.get("limit", "20"))
@@ -1527,7 +1563,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             offset = int(query.get("offset", "0"))
         except (TypeError, ValueError):
             offset = 0
-        return _ok(corpus.browse(shelf=(query.get("shelf") or None), limit=limit, offset=offset))
+        _sh = query.get("shelf") or None
+        return _ok(_cached_scan("browse:%s:%d:%d" % (_sh or "", limit, offset),
+                                lambda: corpus.browse(shelf=_sh, limit=limit, offset=offset)))
     if method == "GET" and path == "/card":
         cid = (query.get("id") or "").strip()
         if not cid:
@@ -1562,14 +1600,15 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok({"q": q, **_witness.see(q, witness=who, k=3)})
 
     if method == "GET" and path == "/daily":
-        c = corpus.daily(query.get("seed") or None)
+        _seed = query.get("seed") or None
+        c = _cached_scan("daily:%s" % (_seed or ""), lambda: corpus.daily(_seed))
         return _ok(c) if c is not None else _err(404, "the keeping is empty")
 
     if method == "GET" and path == "/card/connections":
         cid = (query.get("id") or "").strip()
         if not cid:
             return _err(400, "id required")
-        r = corpus.connections(cid)
+        r = _cached_scan("conn:%s" % cid, lambda: corpus.connections(cid))
         return _ok(r) if r is not None else _err(404, "card not found")
 
     # The map — the connection-graph over the keeping (found edges, each sealed). Public on
@@ -1597,23 +1636,24 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import floor as _floor
         return _ok(_floor.payload())
     if method == "GET" and path == "/locate":
-        return _ok(corpus.locate(query.get("q") or ""))
+        _q = query.get("q") or ""
+        return _ok(_cached_scan("locate:%s" % _q, lambda: corpus.locate(_q)))
     if method == "GET" and path == "/growth":
         # the standing steering report: corpus health + how much safe growth remains. Aggregate
         # only, read-only — the keeper reads it; the harvester (tools/grow.py) is operator-run.
-        from .. import corpus as _corpus, growth as _growth
-        cards = list(_corpus.default_corpus().cards.values())
-        m = _growth.measure(cards)
-        m["recent"] = _growth.ledger_read(limit=8)
+        from .. import growth as _growth
+        m = dict(_cached_scan("growth", lambda: _growth.measure(  # the heavy scan, cached per corpus version
+            list(corpus.default_corpus().cards.values()))))
+        m["recent"] = _growth.ledger_read(limit=8)                 # the light ledger tail stays fresh
         return _ok(m)
 
     if method == "GET" and path == "/library/health":
         # `gauges=1` adds the gauge panel: every invented ranking constant located on the
         # measured distribution, with vacuous/binding verdicts. Opt-in because the panel walks
         # the whole token index (~300k entries) — an operator's read, not a heartbeat's.
-        h = corpus.health()
+        h = dict(_cached_scan("health", corpus.health))
         if str(query.get("gauges") or "") in ("1", "true", "yes"):
-            h["gauges"] = corpus.gauges()
+            h["gauges"] = _cached_scan("gauges", corpus.gauges)
         return _ok(h)
 
     # Pronunciation guide (synthesized, honest floor) — a neutral phonetic helper, both surfaces.
