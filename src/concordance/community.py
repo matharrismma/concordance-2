@@ -63,18 +63,34 @@ def for_member(member_fp: str, viewer_fp: Optional[str] = None) -> Dict[str, Any
             gate = _the_gate()
             gate["your_walk"] = walk                # so the viewer sees where they stand and what opens next
             return gate
-    from . import groups, shelves
+    from . import groups, mesh
     mine = groups.groups_of(member_fp)
-    try:
-        shelf = shelves.shelf_of(member_fp, viewer=viewer_fp or member_fp)
-    except Exception:  # noqa: BLE001
-        shelf = {"ok": False}
-    out: Dict[str, Any] = {"groups": mine, "shelf": shelf, "belongs": len(mine), "own": own}
+    out: Dict[str, Any] = {"groups": mine, "belongs": len(mine), "own": own}
     if own:
-        out["walk"] = _walk(member_fp)              # your own walk — so the profile can show the confess step
+        out["shelf"] = _shelf(member_fp, member_fp)  # your own — the fullest view, always
+        out["walk"] = _walk(member_fp)               # your own walk — so the profile can show the confess step
+        return out
+    # Cross-member: reach is STAGED — not everyone sees everything at once, it is earned by the walk.
+    #   confessor  → that the believers belong (the fellowship immediately around them),
+    #   joined     → their shelf too — the offers and needs, to serve and be served,
+    #   community+ → the fullest view (the woven center).
+    stage = _walk(viewer_fp)["stage"]
+    out["viewer_stage"] = stage
+    if mesh._STAGE.get(stage, {}).get("rank", 0) >= mesh._STAGE["joined"]["rank"]:
+        out["shelf"] = _shelf(member_fp, viewer_fp)
     else:
-        out["viewer_stage"] = _walk(viewer_fp)["stage"]
+        out["reach"] = ("a confessor sees that the believers belong; their shelf — the offers and needs — "
+                        "opens as you are vouched and serve (the 'joined' stage)")
     return out
+
+
+def _shelf(member_fp: str, viewer_fp: Optional[str]) -> Dict[str, Any]:
+    """A member's shelf as the viewer is allowed to see it, never a crash on a partial corpus."""
+    from . import shelves
+    try:
+        return shelves.shelf_of(member_fp, viewer=viewer_fp or member_fp)
+    except Exception:  # noqa: BLE001
+        return {"ok": False}
 
 
 def signable_view(public_key: str, member_fp: str, nonce: str) -> bytes:

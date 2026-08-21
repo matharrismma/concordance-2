@@ -43,7 +43,7 @@ def test_a_stranger_with_no_viewer_at_all_is_also_gated(tmp_path, monkeypatch):
     assert community.for_member("nh_member")["gated"] is True  # an open read never reveals a member
 
 
-def test_a_confessor_may_see_another_member(tmp_path, monkeypatch):
+def test_a_confessor_sees_that_believers_belong_but_not_yet_their_shelf(tmp_path, monkeypatch):
     monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
     groups.create_group("the well", creator_id="nh_member", handle="a pilgrim")
     try:
@@ -53,7 +53,18 @@ def test_a_confessor_may_see_another_member(tmp_path, monkeypatch):
     mesh.register_node(me["public_key"], confession="Jesus Christ is Lord and Messiah")
     r = community.for_member("nh_member", viewer_fp=me["id"])
     assert r.get("gated") is not True and r["belongs"] == 1   # served — the gate opened for a confessor
-    assert r["viewer_stage"] in ("confessor", "joined", "community")
+    assert r["viewer_stage"] == "confessor"
+    assert "shelf" not in r and "reach" in r                  # reach is staged — the shelf opens at 'joined'
+
+
+def test_the_shelf_opens_at_the_joined_stage(tmp_path, monkeypatch):
+    # Reach widens with the walk: a 'joined' member (vouched and serving) sees the shelf — the offers and
+    # needs, to serve and be served. (The walk is faked here to test the ladder threshold in isolation.)
+    monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
+    groups.create_group("the well", creator_id="nh_member", handle="a pilgrim")
+    monkeypatch.setattr(community, "_walk", lambda fp: {"confessed": True, "stage": "joined"})
+    r = community.for_member("nh_member", viewer_fp="nh_joined_viewer")
+    assert r["viewer_stage"] == "joined" and "shelf" in r     # the offers and needs open at 'joined'
 
 
 def test_a_member_with_no_fellowship_is_empty_not_an_error(tmp_path, monkeypatch):
