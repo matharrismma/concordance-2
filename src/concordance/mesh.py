@@ -521,6 +521,7 @@ def post_message(from_fp: str, text: str, *, kind: str = "word", refs: Optional[
     ttl = max(1, min(_MAX_TTL, int(ttl or 2)))
     if kind == "broadcast":
         ttl = _MAX_TTL                     # the Emergency Broadcast reaches the farthest fold
+    from .ask import is_crisis, _CRISIS_RESOURCES   # crisis-first outranks the signature requirement below
     # DETACHED SIGNATURE — the sovereign path, and the only one offered to agents.
     #
     # The caller signs on ITS OWN machine and sends only the signature; the private key never
@@ -567,6 +568,19 @@ def post_message(from_fp: str, text: str, *, kind: str = "word", refs: Optional[
                         return {"ok": False, "error": "signature does not match this node's public key"}
             except Exception:  # noqa: BLE001 — signing is optional; a message never fails for it
                 signature, signed = None, False
+        elif not is_crisis(text):
+            # POLICY (Matt, 2026-08-21): a normal post MUST be signed — otherwise anyone could post words
+            # in any node's name (impersonation). Anyone who can post already holds a key (you must have a
+            # node), so this turns no one away. THE ONE EXCEPTION is CRISIS-FIRST: a cry for help is heard
+            # even unsigned (below), so no one in danger is refused for lack of a signature. (An unsigned
+            # message that genuinely arrives relayed off the LoRa radio is a separate ingest path, not this
+            # write endpoint.)
+            return {"ok": False, "error": ("a post must be signed — get the canonical bytes from "
+                                           "/mesh/signable, sign them with your key, and send the detached "
+                                           "signature (with its nonce and created_at); only a cry for help "
+                                           "is heard unsigned")}
+        # else: a crisis, unsigned — it falls through and is delivered (signed=False), and the real-person
+        # help is returned below. A cry for help is never blocked.
     stored = dict(core)
     stored["id"] = mid
     stored["signature"] = signature
@@ -577,8 +591,7 @@ def post_message(from_fp: str, text: str, *, kind: str = "word", refs: Optional[
            "reach": max(0, len(_bfs(from_fp, ttl)) - 1),
            "note": ("Sent to the nodes around you. Signed — verifiable offline." if signed
                     else "Sent unsigned — tamper-evident by its id, but not cryptographically authenticated.")}
-    # Crisis: real people first, always — imported from ask, never a copied list that drifts.
-    from .ask import is_crisis, _CRISIS_RESOURCES
+    # Crisis: real people first, always — imported from ask (above), never a copied list that drifts.
     if is_crisis(text):
         out["crisis"] = {"help": list(_CRISIS_RESOURCES),
                          "message": "Your fellowship will see this — and please reach a real person right now."}

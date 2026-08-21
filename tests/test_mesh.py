@@ -66,14 +66,18 @@ def test_signed_message_verifies_offline_and_tamper_is_caught(mesh_dir):
     assert v["unaltered"] is False and v["authentic"] is False
 
 
-def test_unsigned_message_is_honestly_marked(mesh_dir):
+def test_an_unsigned_post_is_refused_but_a_cry_for_help_is_heard(mesh_dir):
+    # POLICY (2026-08-21): a normal post must be signed — no one may put words in a node's name without
+    # its key. THE ONE EXCEPTION is crisis-first: a cry for help is heard even unsigned.
     a, afp = _node("A")
     b, bfp = _node("B")
     _vouch(a, b)
-    r = mesh.post_message(afp, "no key on this device", private_key=None)
-    assert r["ok"] and r["signed"] is False
-    v = mesh.inbox(bfp)["messages"][0]["verify"]
-    assert v["unaltered"] is True and v["signed"] is False and v["authentic"] is False
+    r = mesh.post_message(afp, "no key on this device", private_key=None)   # a normal post, unsigned
+    assert r["ok"] is False and "signed" in r["error"]                     # refused
+    assert mesh.inbox(bfp)["count"] == 0                                   # never delivered
+    cry = mesh.post_message(afp, "i dont want to be here anymore", private_key=None)   # a cry for help
+    assert cry["ok"] is True and cry["signed"] is False and "crisis" in cry            # heard even unsigned
+    assert mesh.inbox(bfp)["count"] == 1                                   # the fellowship hears it
 
 
 def test_a_foreign_key_cannot_speak_as_a_node(mesh_dir):
@@ -89,10 +93,10 @@ def test_ttl_bounds_reach_like_a_lora_hop_limit(mesh_dir):
     c, cfp = _node("C")
     _vouch(a, b)
     _vouch(b, c)                                     # chain A—B—C
-    mesh.post_message(afp, "one hop only", ttl=1)     # reaches B, not C
+    mesh.post_message(afp, "one hop only", ttl=1, private_key=a["private_key"])   # signed; reaches B, not C
     assert mesh.inbox(bfp)["count"] == 1
     assert mesh.inbox(cfp)["count"] == 0
-    mesh.post_message(afp, "two hops", ttl=2)         # now reaches C too
+    mesh.post_message(afp, "two hops", ttl=2, private_key=a["private_key"])       # now reaches C too
     assert mesh.inbox(cfp)["count"] == 1
 
 
