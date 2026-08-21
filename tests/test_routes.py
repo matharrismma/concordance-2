@@ -98,6 +98,7 @@ GOLDEN_RATELIMITED = {
     "/threads", "/threads/search",
     "/coach/mastery", "/identity/create", "/identity/verify", "/badges",
     "/profile/signable", "/profile/save", "/profile/erase",  # the optional sovereign profile (signed writes)
+    "/profile/community/signable", "/profile/community/view",  # the narrow-path fellowship gate (signed reads)
     "/study", "/study/export", "/study/import",
     "/groups", "/group", "/group/join", "/group/contribute",
     "/mesh/node", "/mesh/link", "/mesh/post", "/mesh/tend",

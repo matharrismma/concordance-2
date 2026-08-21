@@ -200,7 +200,13 @@ async function loadPath(){
 async function loadCommunity(){
   const el = $("fellow");
   try{
-    const r = await api("GET", "/profile/community?fp=" + encodeURIComponent(FP));
+    // A SIGNED self-view: seeing the fellowship is gated behind the narrow path, so we prove the key even
+    // for your own (member = you, viewer derived from the same key -> served in full).
+    const nonce = newNonce();
+    const sg = await api("POST", "/profile/community/signable", {public_key:PUB, member:FP, nonce});
+    if(sg.status!==200 || !sg.body.signable) throw new Error("prep");
+    const signature = await signStr(sg.body.signable);
+    const r = await api("POST", "/profile/community/view", {public_key:PUB, member:FP, nonce, signature});
     const gs = (r.body && r.body.groups) || [];
     let h = '<div class="served-h">Your fellowship</div>';
     if(gs.length){

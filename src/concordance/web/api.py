@@ -1323,12 +1323,15 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok({"id": fp, **_serve.returns(wants)})
 
     if method == "GET" and path == "/profile/community":
-        # COMMUNITY — a member's fellowship: the groups they belong to and their shelf, by fingerprint.
-        fp = (query.get("fp") or "").strip()
-        if not fp:
-            return _err(400, "fp required")
+        # COMMUNITY — the fellowship is GATED behind the narrow path (Matt: they must be a confessing
+        # Christian to see other members). An OPEN read never reveals a member, so this returns only the
+        # narrow-path invitation. To actually see a member's fellowship — your own, or another's once you
+        # have confessed — POST a SIGNED request to /profile/community/view (the signature proves your key,
+        # so the gate cannot be walked past by quoting a fingerprint).
         from .. import community as _community
-        return _ok({"id": fp, **_community.for_member(fp)})
+        return _ok({"id": (query.get("fp") or "").strip(),
+                    **_community.for_member((query.get("fp") or "").strip(), viewer_fp=None),
+                    "view": "POST /profile/community/view (signed) to see a member's fellowship"})
 
     if method == "GET" and path == "/profile/path":
         # DISCIPLESHIP — a member's walked path with the coach, computed from their own progress (`done`).
@@ -1337,6 +1340,30 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _err(400, "fp required")
         from .. import disciple as _disciple
         return _ok({"id": fp, **_disciple.walk(fp)})
+
+    if method == "POST" and path == "/profile/community/signable":
+        # The exact bytes a viewer signs to see a member's fellowship (the narrow-path gate is applied after
+        # the signature verifies). Computed here for correctness; a sovereign client may compute them itself.
+        if not isinstance(body, dict) or not str(body.get("public_key") or "").strip():
+            return _err(400, "public_key required")
+        from .. import community as _community
+        canon = _community.signable_view(str(body["public_key"]), str(body.get("member") or ""),
+                                          str(body.get("nonce") or ""))
+        return _ok({"signable": canon.decode("utf-8"),
+                    "note": "sign these exact bytes with your private key, then POST /profile/community/view"})
+
+    if method == "POST" and path == "/profile/community/view":
+        # SIGNED fellowship view. The viewer proves their key; their fingerprint is derived from it, then the
+        # narrow-path gate decides: your own in full, a confessor sees the member, anyone else is shown the
+        # invitation (200 with the gate). A bad signature is refused — the gate cannot be walked past.
+        if not isinstance(body, dict):
+            return _err(400, "body required")
+        from .. import community as _community
+        r = _community.view(str(body.get("public_key") or ""), str(body.get("member") or ""),
+                            str(body.get("nonce") or ""), str(body.get("signature") or ""))
+        if r.get("ok") or r.get("gated"):
+            return _ok(r)                            # served, or the narrow-path invitation — both 200
+        return _err(403, r.get("error") or "cannot view the fellowship")
 
     if method == "POST" and path == "/profile/signable":
         # The exact bytes to sign with your private key — computed here for correctness; a sovereign
@@ -2502,7 +2529,9 @@ ROUTES = [
     {"path": "/identity/verify", "methods": ("POST",), "rl": True},
     {"path": "/profile", "methods": ("GET",), "api": True},   # your keeping, keyed by fingerprint (opt-in)
     {"path": "/profile/served", "methods": ("GET",), "api": True},   # serving — your wants, met or still sought
-    {"path": "/profile/community", "methods": ("GET",), "api": True},   # community — your fellowship (groups + shelf)
+    {"path": "/profile/community", "methods": ("GET",), "api": True},   # community — the narrow-path invitation (no member data on an open read)
+    {"path": "/profile/community/signable", "methods": ("POST",), "rl": True},   # bytes to sign for a fellowship view
+    {"path": "/profile/community/view", "methods": ("POST",), "rl": True},   # SIGNED fellowship view — gated by confession
     {"path": "/profile/path", "methods": ("GET",), "api": True},   # discipleship — your walked path with the coach
     {"path": "/profile/signable", "methods": ("POST",), "rl": True},
     {"path": "/profile/save", "methods": ("POST",), "rl": True},   # signed write — no account, no password
