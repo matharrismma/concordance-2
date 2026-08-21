@@ -2523,7 +2523,7 @@ ROUTES = [
     {"path": "/cards/stats", "methods": ("GET",), "api": True},
     {"path": "/cards", "methods": ("GET",), "api": True},
     {"path": "/card", "methods": ("GET",), "api": True},
-    {"path": "/witness", "methods": ("GET",), "api": True},   # the Cloud of Witnesses' voice — PD, attributed
+    {"path": "/witness", "methods": ("GET",), "api": True, "rl": "read"},   # Cloud of Witnesses' voice — PD, attributed; scans the corpus so read-bucket limited like /search
     {"path": "/daily", "methods": ("GET",), "api": True},
     {"path": "/card/connections", "methods": ("GET",), "api": True},
     {"path": "/graph", "methods": ("GET",), "api": True},

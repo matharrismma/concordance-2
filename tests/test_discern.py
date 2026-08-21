@@ -139,16 +139,25 @@ def test_the_cloud_fold_is_attached_and_only_proposes():
     assert r["confirms"] is False and r["authority"] == "proposed"   # it never touches the verdict
 
 
-def test_served_extends_the_seeing_beyond_matt(tmp_path, monkeypatch):
-    # Empty BOTH text corpora (Matt's lens and the PD witness voice); the cloud's characterized wise men
-    # still surface for a claim their craft touches — the discernment is not one man's seeing.
-    monkeypatch.setenv("CONCORDANCE_LENS", str(tmp_path / "no_lens.jsonl"))
+def test_served_never_serves_matts_private_lens_on_a_shared_node(tmp_path, monkeypatch):
+    # His writing is NEVER published: on a non-sovereign (shared/public) node the lens is not served AT
+    # ALL — even if a corpus file were present — and the cloud (public-domain) still frames the claim, so
+    # the discernment is not one man's seeing.
+    monkeypatch.delenv("CONCORDANCE_SOVEREIGN_NODE", raising=False)
     monkeypatch.setenv("CONCORDANCE_WITNESSES", str(tmp_path / "no_witnesses.jsonl"))
     r = d.served("temperance and the body as the temple", search_fn=lambda q, n: [])
-    assert "lens" in r and "cloud" in r
-    assert r["lens"]["seeing"] == [] and r["cloud"]["voice"]["seeing"] == []   # no gathered text
+    assert r["lens"] is None                          # his private writing is never served on a shared node
     assert r["cloud"]["mentors"]["mentors"]           # yet the wise men's craft still frames it
     assert r["proposes"] is True and r["confirms"] is False and r["authority"] == "proposed"
+
+
+def test_served_serves_the_lens_only_on_a_sovereign_node(tmp_path, monkeypatch):
+    # On Matt's OWN machine (the flag set), his near witness is served — its own honest-empty here.
+    monkeypatch.setenv("CONCORDANCE_SOVEREIGN_NODE", "1")
+    monkeypatch.setenv("CONCORDANCE_LENS", str(tmp_path / "no_lens.jsonl"))
+    r = d.served("temperance and the body as the temple", search_fn=lambda q, n: [])
+    assert isinstance(r["lens"], dict) and r["lens"]["seeing"] == []   # served (and honestly empty), gate on
+    assert r["proposes"] is True and r["confirms"] is False
 
 
 def test_crisis_still_outranks_the_whole_cloud():

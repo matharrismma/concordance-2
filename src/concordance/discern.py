@@ -185,8 +185,14 @@ def field(query: str, candidates, *, generator: str = "human",
 
 
 def _lens_see(text: str):
-    """The NEAR witness — how Matt's own writing frames this. Honest-empty where his writing (local,
-    never published) has not gathered this. Proposes; never confirms."""
+    """The NEAR witness — Matt's OWN writing. His writing is NEVER published, so it is served only on a
+    SOVEREIGN node (CONCORDANCE_SOVEREIGN_NODE set — his own machine). On the shared/public surface it is
+    never served, even if a corpus file were somehow present: a structural guard for the frozen invariant,
+    fail-closed, not left to the file's absence (mirrors the /context/run gate). Honest-None where not
+    served or not gathered; proposes, never confirms."""
+    import os
+    if not str(os.environ.get("CONCORDANCE_SOVEREIGN_NODE", "")).strip():
+        return None                                  # a shared node never serves his private writing
     from . import lens
     try:
         return lens.see(text)

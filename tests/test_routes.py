@@ -123,7 +123,7 @@ GOLDEN_RATELIMITED = {
 }
 
 
-GOLDEN_READ_LIMITED = {"/search"}
+GOLDEN_READ_LIMITED = {"/search", "/witness"}   # both scan the corpus per request — same read bucket
 
 
 def test_the_read_bucket_is_separate_and_larger():
