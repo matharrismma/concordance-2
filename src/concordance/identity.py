@@ -106,6 +106,34 @@ def create_identity() -> Dict[str, Any]:
     }
 
 
+_COVENANT_SALT = b"narrowhighway/covenant/identity/v1"
+_COVENANT_ITERS = 200_000
+
+
+def derive_identity(passphrase: str, *, iterations: int = _COVENANT_ITERS) -> Dict[str, Any]:
+    """The EZ-LOGIN — derive a sovereign identity DETERMINISTICALLY from a passphrase (your verses).
+
+    Same passphrase -> the same Ed25519 keypair -> the same fingerprint, on any device, forever. So you
+    do not 'log in' to an account; you RE-DERIVE your own key from your own phrase, and the server only
+    ever holds your public key. There is no password to reset and no account to breach. The strength is
+    your phrase's: four verses is ample entropy; a weak phrase is a weak key. PBKDF2-HMAC-SHA256 over a
+    fixed covenant salt slows a brute-force, and the phrase never leaves your machine.
+
+    Requires cryptography. Returns {id, public_key, private_key, signing_available:True, derived:True};
+    the private key is yours to keep and is never persisted by us."""
+    if not signing_available():
+        raise RuntimeError("deriving a covenant identity needs the cryptography library")
+    phrase = " ".join((passphrase or "").split())     # collapse whitespace so re-typing derives the same key
+    if len(phrase) < 8:
+        raise ValueError("passphrase too short — use your verses (real entropy), not a single word")
+    import hashlib
+    seed = hashlib.pbkdf2_hmac("sha256", phrase.encode("utf-8"), _COVENANT_SALT, int(iterations), dklen=32)
+    priv = signing._b64u_encode(seed)
+    pub = signing.public_from_private(priv)
+    return {"id": fingerprint(pub), "public_key": pub, "private_key": priv,
+            "signing_available": True, "derived": True}
+
+
 # ── sign / verify — one interface over both paths ────────────────────────────────────
 
 # Marker prefix for the degraded (unsigned) path so a caller can always tell an authenticated
