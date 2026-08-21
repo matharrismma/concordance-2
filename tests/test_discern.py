@@ -128,3 +128,31 @@ def test_routing_reads_the_discerned_claim_not_the_framing():
     bare = d.discern("2 + 2 = 4")
     assert framed["claim"] == bare["claim"] == "2 + 2 = 4"
     assert framed["route"].get("member") == bare["route"].get("member")
+
+
+# ── the way of seeing, deepened: the proposal carries the FAR witnesses (the cloud), not just the lens ──
+def test_the_cloud_fold_is_attached_and_only_proposes():
+    seen = {"mentors": {"mentors": [{"name": "A witness"}]}, "voice": {"seeing": []},
+            "proposes": True, "confirms": False}
+    r = d.discern("the body is a temple", cloud_fn=lambda of: seen, search_fn=lambda q, n: [])
+    assert r["cloud"] == seen                         # how the cloud sees this — carried on the proposal
+    assert r["confirms"] is False and r["authority"] == "proposed"   # it never touches the verdict
+
+
+def test_served_extends_the_seeing_beyond_matt(tmp_path, monkeypatch):
+    # Empty BOTH text corpora (Matt's lens and the PD witness voice); the cloud's characterized wise men
+    # still surface for a claim their craft touches — the discernment is not one man's seeing.
+    monkeypatch.setenv("CONCORDANCE_LENS", str(tmp_path / "no_lens.jsonl"))
+    monkeypatch.setenv("CONCORDANCE_WITNESSES", str(tmp_path / "no_witnesses.jsonl"))
+    r = d.served("temperance and the body as the temple", search_fn=lambda q, n: [])
+    assert "lens" in r and "cloud" in r
+    assert r["lens"]["seeing"] == [] and r["cloud"]["voice"]["seeing"] == []   # no gathered text
+    assert r["cloud"]["mentors"]["mentors"]           # yet the wise men's craft still frames it
+    assert r["proposes"] is True and r["confirms"] is False and r["authority"] == "proposed"
+
+
+def test_crisis_still_outranks_the_whole_cloud():
+    r = d.served("i want to end it all")              # a cry for help is never framed by witnesses
+    assert r["kind"] == "crisis" and r["next"] == "real_help"
+    assert "cloud" not in r and "lens" not in r       # routed to real people, not the way of seeing
+    assert r["confirms"] is False

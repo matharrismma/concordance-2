@@ -1483,8 +1483,10 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         # The proposal half of the engine, laid open: what KIND, the necessary claim, the structured
         # (domain, spec) the gate would verify, where it routes — and never a verdict. Crisis is
         # discerned first and routed to real people. Twin of `verify`: discern proposes, verify disposes.
+        # served() wires the full WAY OF SEEING: the near witness (Matt's lens) AND the far witnesses (the
+        # cloud — the wise men's craft + their verbatim PD words). It isn't just one man's seeing.
         from .. import discern as _discern
-        return _discern.discern(str(args.get("text") or ""))
+        return _discern.served(str(args.get("text") or ""))
     if name == "pronounce":
         from .. import pronounce as _pron  # neutral phonetic helper, both surfaces
         return _pron.guide(args.get("text", ""))

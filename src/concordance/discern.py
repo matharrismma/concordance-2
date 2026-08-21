@@ -79,18 +79,26 @@ def _extract(claim: str, extract_fn=None) -> list:
         return []
 
 
-def discern(text: str, *, search_fn=None, relevant_fn=None, extract_fn=None, lens_fn=None) -> Dict[str, Any]:
+def discern(text: str, *, search_fn=None, relevant_fn=None, extract_fn=None,
+            lens_fn=None, cloud_fn=None) -> Dict[str, Any]:
     """Propose what matters. Given anything, name its KIND, reduce it to the necessary CLAIM
     (de-identified, framing held home), and either hand the gate the STRUCTURED checkable claim(s) it
     will verify, or discern the genuinely-relevant kept cards (a retrieval). Returns a proposal — never
     a verdict. Crisis is discerned first and routed to real people.
 
-    `lens_fn` (optional, e.g. lens.see) is the WAY OF SEEING — Matt's writing. When given, the proposal
-    carries `lens`: how his witness frames this. It proposes only; it never changes the verdict."""
+    The WAY OF SEEING is two witnesses, and it is not one man's:
+      `lens_fn`  (e.g. lens.see) — the NEAR witness, Matt's own writing. The proposal carries `lens`.
+      `cloud_fn` (e.g. the cloud assembler) — the FAR witnesses, the CLOUD: the wise men whose craft bears
+                 on this, and their VERBATIM public-domain words. The proposal carries `cloud`.
+    Both PROPOSE a way of seeing; neither ever changes the verdict — the gate still disposes, authority is
+    still earned. Injected here so the seed stays pure in tests; `served()` binds the real witnesses."""
     from . import ask, context, router
 
     def _seen(of: str):
         return lens_fn(of) if lens_fn else None
+
+    def _cloud(of: str):
+        return cloud_fn(of) if cloud_fn else None
 
     t = (str(text) if text else "").strip()
     if not t:
@@ -123,8 +131,8 @@ def discern(text: str, *, search_fn=None, relevant_fn=None, extract_fn=None, len
     #    gate the structured claim(s); it verifies exactly these (no re-parsing a bare string).
     if claims or (member not in ("search", "ask_user")):
         return {"input": t, "kind": "claim", "claim": claim, "held": held or None,
-                "route": route, "claims": claims, "lens": _seen(claim), "authority": "proposed",
-                "proposes": True, "confirms": False,
+                "route": route, "claims": claims, "lens": _seen(claim), "cloud": _cloud(claim),
+                "authority": "proposed", "proposes": True, "confirms": False,
                 "why": ("discerned %d structured claim(s) for the gate to verify" % len(claims) if claims
                         else "discerned the necessary claim %r; the %s should verify it (%s)" % (
                             claim, member, route.get("why"))),
@@ -135,7 +143,8 @@ def discern(text: str, *, search_fn=None, relevant_fn=None, extract_fn=None, len
     if member == "search":
         candidates = _relevant(claim or t, search_fn, relevant_fn)
         return {"input": t, "kind": "question", "claim": claim, "held": held or None,
-                "route": route, "candidates": candidates, "lens": _seen(claim or t), "authority": "proposed",
+                "route": route, "candidates": candidates, "lens": _seen(claim or t),
+                "cloud": _cloud(claim or t), "authority": "proposed",
                 "proposes": True, "confirms": False,
                 "why": ("discerned a retrieval; %d kept card(s) genuinely name the subject" % len(candidates)
                         if candidates else
@@ -175,4 +184,43 @@ def field(query: str, candidates, *, generator: str = "human",
             "next": "narrow", "cset": cset}
 
 
-__all__ = ["discern", "field", "KINDS", "NEXT"]
+def _lens_see(text: str):
+    """The NEAR witness — how Matt's own writing frames this. Honest-empty where his writing (local,
+    never published) has not gathered this. Proposes; never confirms."""
+    from . import lens
+    try:
+        return lens.see(text)
+    except Exception:  # noqa: BLE001 — an ungathered lens is a trailhead, never a crash
+        return None
+
+
+def _cloud_see(text: str):
+    """The FAR witnesses — the CLOUD. Which wise men's craft bears on this (their characterized gift and
+    the discern note that weighs it), and their VERBATIM public-domain words that frame it (Ellen G. White
+    and the rest, PD-gated). It is not one man's seeing. Proposes a way of seeing; the Word disposes —
+    never confirmed past what a witness earned. Nothing generated; honest-empty where the cloud does not
+    reach."""
+    from . import mentors, witness
+    try:
+        craft = mentors.for_text(text)
+    except Exception:  # noqa: BLE001
+        craft = None
+    try:
+        voice = witness.see(text, k=2)
+    except Exception:  # noqa: BLE001
+        voice = None
+    return {"mentors": craft, "voice": voice, "proposes": True, "confirms": False,
+            "note": "how the cloud of witnesses sees this — the wise men's craft and their verbatim "
+                    "public-domain words, weighed against the Source, never confirmed past what they earned"}
+
+
+def served(text: str, **kw) -> Dict[str, Any]:
+    """Discern with the full WAY OF SEEING wired — the NEAR witness (Matt's lens) AND the FAR witnesses
+    (the cloud). This is what the served surfaces call; the bare `discern()` stays pure for tests. Extra
+    kwargs (search_fn, extract_fn…) pass through. It isn't just one man's seeing — the cloud extends it."""
+    kw.setdefault("lens_fn", _lens_see)
+    kw.setdefault("cloud_fn", _cloud_see)
+    return discern(text, **kw)
+
+
+__all__ = ["discern", "served", "field", "KINDS", "NEXT"]
