@@ -380,6 +380,35 @@ function profileView(){
     '<div class="mono" style="font-size:10px;color:'+T.graphite+';margin-top:8px">Measured, not guessed — every line is a number you can check. As more players are measured, “focus” becomes “what actually worked for players like you.”</div>');
 }
 
+/* ---------- #4 filtered advice: the corpus, surfaced by measured FIT (not popularity) — where the two concepts meet ---------- */
+function fittedAdviceView(){
+  var p=profile(); if(p.n<3) return "";                       // no classification yet — nothing to fit against
+  var all=state.data.advice||[]; if(!all.length) return "";   // empty corpus — the Advice tab already invites; don't nag here
+  var c=classify(p), leak=tagToLeak(c.tag);                   // null for The Grinder (no single leak)
+  if(!leak) return panel("ADVICE FOR YOUR LEAK", T.graphite,
+    '<div style="font-size:14px">No single leak to match against — you’re a Grinder. Browse the whole corpus in the Advice tab and shave by inches.</div>');
+  var pool=all.filter(function(x){return x.leak===leak;});
+  // fit-first: YOUR verification reorders it — what worked for you rises, untried next, what didn't sinks. Never a vote count.
+  function rank(x){ return x.helped===true?0:(x.helped===false?2:1); }
+  pool=pool.slice().sort(function(a,b){ return rank(a)-rank(b) || b.id-a.id; });
+  var LK=esc(leakLabel(leak).toUpperCase());
+  if(!pool.length) return panel("ADVICE FOR YOUR LEAK — "+LK, c.tone,
+    '<div style="font-size:14px">Nothing gathered yet for <b>'+esc(leakLabel(leak))+'</b> — your measured leak. Add a tip for it in the Advice tab and it will surface right here.</div>');
+  var items=pool.slice(0,3).map(function(x){
+    var link=x.url?' <a href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer nofollow" class="mono" style="font-size:11px;color:'+T.rule+';font-weight:600">▶ watch/read →</a>':"";
+    var src=x.source?' <span class="mono" style="font-size:11px;color:'+T.graphite+'">— '+esc(x.source)+'</span>':"";
+    var mark=x.helped===true?'<span class="mono" style="font-size:10px;color:'+T.green+'">✓ worked for you</span>'
+            :x.helped===false?'<span class="mono" style="font-size:10px;color:'+T.red+'">✗ didn’t work</span>'
+            :'<span class="mono" style="font-size:10px;color:'+T.amber+'">untried</span>';
+    return '<div style="padding:8px 0;border-top:0.5px solid '+T.ruleSoft+'"><div style="font-size:14px">'+esc(x.text)+'</div>'+
+      '<div style="margin-top:4px">'+mark+src+link+'</div></div>';
+  }).join("");
+  var more=pool.length>3?'<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">+'+(pool.length-3)+' more for this leak in the Advice tab.</div>':"";
+  return panel("ADVICE FOR YOUR LEAK — "+LK, c.tone,
+    '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-bottom:2px">Surfaced because it’s tagged to your measured leak — <b>fit, not popularity</b>. Still quarantined; your rounds decide.</div>'+
+    items+more);
+}
+
 function render(){
   var d = state.data;
   var html = header(d.settings && d.settings.homeCourse ? d.settings.homeCourse.name : null);
@@ -541,7 +570,7 @@ function instrumentsView(){
     '<div style="color:'+T.graphite+';font-size:13px;margin-top:6px">A breach is a lost position you didn\'t concede. Review the decision, not the swing.</div></div>';
   var gateTone = (lastGate && lastGate.length) ? T.red : T.green;
 
-  var out = profileView() + panel("GATE — double bogey max", gateTone, gateBody);
+  var out = profileView() + fittedAdviceView() + panel("GATE — double bogey max", gateTone, gateBody);
 
   // LAB
   var lab = bigPair(["CURRENT 3",fmt(a.homeCur3)],["PREVIOUS 3",fmt(a.homePrev3)],par,a.homeCur3)+
