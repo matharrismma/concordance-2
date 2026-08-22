@@ -142,6 +142,20 @@ var state = { data:loadData(), tab:"card", draft:newDraft(), saveErr:false,
               setupName:"", setupPars:Array(18).fill(4), setupLL:null, setupNote:"",
               setupResults:null, setupSearching:false };
 if(!state.data.courses) state.data.courses = {};   // registry of resolved away courses: {normName:{name,lat,lon}}
+if(!state.data.shots) state.data.shots = [];       // club shots: {id, club, dist(yds), date}
+state.clubForm = {club:"7i", dist:""};
+
+var CLUBS = ["Driver","3W","5W","7W","2H","3H","4H","4i","5i","6i","7i","8i","9i","PW","GW","SW","LW"];
+function median(a){ if(!a.length) return null; var s=a.slice().sort(function(x,y){return x-y;}); var m=Math.floor(s.length/2); return s.length%2?s[m]:(s[m-1]+s[m])/2; }
+function pctile(a,p){ if(!a.length) return null; var s=a.slice().sort(function(x,y){return x-y;}); return s[Math.min(s.length-1,Math.max(0,Math.round(p*(s.length-1))))]; }
+function clubStats(){
+  var by={}; (state.data.shots||[]).forEach(function(sh){ (by[sh.club]=by[sh.club]||[]).push(sh.dist); });
+  var rows=CLUBS.filter(function(c){return by[c];}).map(function(c){
+    var d=by[c]; return {club:c, n:d.length, med:median(d), lo:pctile(d,0.1), hi:pctile(d,0.9)};
+  }).sort(function(a,b){ return b.med-a.med; });
+  rows.forEach(function(r,i){ r.gap = i<rows.length-1 ? r.med-rows[i+1].med : null; });   // to the next-shorter club
+  return rows;
+}
 
 /* ---------- maps: courses become real PLACES (client-side; coords go browser->OSM, never our engine) ---------- */
 function haversine(a,b,c,d){
@@ -239,6 +253,44 @@ function initMap(){
   }).catch(function(e){ el.innerHTML='<div class="muted" style="padding:18px">'+esc(e.message)+'. Your rounds are safe offline; open the map with a connection.</div>'; });
 }
 
+function clubsView(){
+  var f=state.clubForm, rows=clubStats();
+  var maxD=rows.length ? Math.max.apply(null, rows.map(function(r){return r.hi||r.med;})) : 260;
+  var opts=CLUBS.map(function(c){ return '<option value="'+c+'"'+(f.club===c?" selected":"")+'>'+c+'</option>'; }).join("");
+  var form='<div class="pnl"><div class="lab" style="background:'+T.rule+'">CHART YOUR CLUB — log a carry</div><div class="bd">'+
+    '<div style="display:flex;gap:8px;align-items:flex-end">'+
+      '<div><label class="mono" style="font-size:11px;color:'+T.graphite+'">CLUB</label><br><select id="clubSel" class="field soft" style="margin-top:4px;width:auto">'+opts+'</select></div>'+
+      '<div style="flex:1"><label class="mono" style="font-size:11px;color:'+T.graphite+'">CARRY (yds)</label><input id="shotDist" type="number" inputmode="numeric" class="field mono" style="margin-top:4px" value="'+esc(f.dist)+'"></div>'+
+      '<button class="findbtn" data-act="addShot" style="height:44px">Add</button></div>'+
+    '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">A handful of honest carries per club — the median is your number, the spread is your consistency.</div></div></div>';
+  var chart;
+  if(!rows.length){
+    chart='<div class="muted">No carries logged yet. Add a few per club and your bag charts itself — real distances, gaps and overlaps and all.</div>';
+  }else{
+    chart='<div class="pnl"><div class="lab" style="background:'+T.rule+'">YOUR BAG — median carry &amp; spread</div><div class="bd">'+
+      rows.map(function(r){
+        var barL=(r.lo/maxD)*100, barW=Math.max(2,((r.hi-r.lo)/maxD)*100), dotX=(r.med/maxD)*100;
+        var flag = (r.gap!==null && r.gap>=18) ? ' <span class="mono" style="color:'+T.amber+';font-size:10px">gap '+Math.round(r.gap)+'</span>'
+                 : (r.gap!==null && r.gap<=4) ? ' <span class="mono" style="color:'+T.amber+';font-size:10px">overlap</span>' : "";
+        return '<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;align-items:baseline">'+
+          '<span class="disp" style="font-size:14px;font-weight:600">'+r.club+flag+'</span>'+
+          '<span class="mono" style="font-size:13px">'+Math.round(r.med)+' <span style="color:'+T.graphite+';font-size:11px">('+Math.round(r.lo)+'–'+Math.round(r.hi)+', n'+r.n+')</span></span></div>'+
+          '<div style="position:relative;height:14px;background:#EDF3EE;border-radius:7px;margin-top:3px">'+
+            '<div style="position:absolute;left:'+barL+'%;width:'+barW+'%;top:0;bottom:0;background:'+T.ruleSoft+';border-radius:7px"></div>'+
+            '<div style="position:absolute;left:'+dotX+'%;top:-1px;bottom:-1px;width:3px;background:'+T.rule+'"></div>'+
+          '</div></div>';
+      }).join("")+
+      '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:6px">Dot = median · bar = your 10–90% spread. A wide bar is inconsistency; a “gap” or “overlap” is a bag you can tune.</div>'+
+      '</div></div>';
+  }
+  // recent carries, deletable
+  var recent=(state.data.shots||[]).slice(-8).reverse();
+  var log = recent.length ? '<div class="pnl"><div class="lab" style="background:'+T.graphite+'">RECENT CARRIES</div><div class="bd">'+
+    recent.map(function(s){ return '<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0"><span class="mono" style="font-size:13px">'+esc(s.club)+' · '+s.dist+' yds</span>'+
+      '<button class="del" data-act="delShot" data-id="'+s.id+'">delete</button></div>'; }).join("")+'</div></div>' : "";
+  return form+chart+log;
+}
+
 function render(){
   var d = state.data;
   var html = header(d.settings && d.settings.homeCourse ? d.settings.homeCourse.name : null);
@@ -250,6 +302,7 @@ function render(){
     html += '<main>';
     if(state.tab==="card") html += newRoundView();
     else if(state.tab==="inst") html += instrumentsView();
+    else if(state.tab==="clubs") html += clubsView();
     else if(state.tab==="map") html += mapView();
     else if(state.tab==="log") html += logView();
     html += '</main>';
@@ -269,7 +322,7 @@ function header(home){
 }
 
 function tabsView(){
-  var items=[["card","New round"],["inst","Instruments"],["map","Map"],["log","Log"]];
+  var items=[["card","New round"],["inst","Instruments"],["clubs","Clubs"],["map","Map"],["log","Log"]];
   return '<nav class="tabs"><div class="in">'+items.map(function(it){
     return '<button data-act="tab" data-k="'+it[0]+'" aria-selected="'+(state.tab===it[0])+'">'+it[1]+'</button>';
   }).join("")+'</div></nav>';
@@ -485,6 +538,8 @@ function wire(){
   bindInput("fairways", function(v){ state.draft.fairways=v; });
   bindInput("putts", function(v){ state.draft.putts=v; });
   var wind=document.getElementById("wind"); if(wind) wind.addEventListener("change",function(){ state.draft.wind=wind.checked; });
+  var clubSel=document.getElementById("clubSel"); if(clubSel) clubSel.addEventListener("change",function(){ state.clubForm.club=clubSel.value; });
+  bindInput("shotDist", function(v){ state.clubForm.dist=v; });
 
   app.querySelectorAll("[data-act]").forEach(function(el){
     el.addEventListener("click", function(){ act(el); });
@@ -551,6 +606,17 @@ function act(el){
     if(c){ state.draft.course=c.name; state.draft.ll={lat:c.lat,lon:c.lon}; state.draft.results=null; state.draft.note=""; }
     return render();
   }
+  if(a==="addShot"){
+    var cl=(document.getElementById("clubSel")||{}).value || state.clubForm.club;
+    var dd=Number((document.getElementById("shotDist")||{}).value);
+    if(!(dd>0)) return;
+    state.clubForm.club=cl; state.clubForm.dist="";
+    if(!state.data.shots) state.data.shots=[];
+    state.data.shots.push({id:Date.now(), club:cl, dist:Math.round(dd), date:todayISO()});
+    persist(); return render();
+  }
+  if(a==="delShot"){ var sid=+el.getAttribute("data-id");
+    state.data.shots=(state.data.shots||[]).filter(function(s){return s.id!==sid;}); persist(); return render(); }
   if(a==="save"){ return saveRound(); }
   if(a==="del"){ var id=+el.getAttribute("data-id");
     state.data.rounds=state.data.rounds.filter(function(r){return r.id!==id;}); persist(); return render(); }
