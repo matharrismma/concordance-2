@@ -139,7 +139,8 @@ function newDraft(){
            ll:null, results:null, searching:false, note:"" };   // ll = the picked course's {lat,lon}
 }
 var state = { data:loadData(), tab:"card", draft:newDraft(), saveErr:false,
-              setupName:"", setupPars:Array(18).fill(4), setupLL:null, setupNote:"" };
+              setupName:"", setupPars:Array(18).fill(4), setupLL:null, setupNote:"",
+              setupResults:null, setupSearching:false };
 if(!state.data.courses) state.data.courses = {};   // registry of resolved away courses: {normName:{name,lat,lon}}
 
 /* ---------- maps: courses become real PLACES (client-side; coords go browser->OSM, never our engine) ---------- */
@@ -184,11 +185,11 @@ function geolocate(){
 /* ============================================================ render ============================================================ */
 var app = document.getElementById("app");
 
-function courseResults(list){
+function courseResults(list, act){
   if(!list.length) return '<div class="mono" style="font-size:12px;color:'+T.graphite+';margin-top:6px">No courses found — type the name to log it anyway.</div>';
   return '<div style="margin-top:6px;border:1px solid '+T.ruleSoft+';border-radius:3px;overflow:hidden">'+
     list.slice(0,6).map(function(c,i){
-      return '<button data-act="pick" data-i="'+i+'" style="display:block;width:100%;text-align:left;border:none;border-bottom:1px solid '+T.ruleSoft+';background:'+T.card+';padding:9px 10px">'+
+      return '<button data-act="'+act+'" data-i="'+i+'" style="display:block;width:100%;text-align:left;border:none;border-bottom:1px solid '+T.ruleSoft+';background:'+T.card+';padding:9px 10px">'+
         '<div style="font-weight:600">'+esc(c.name)+(c.dist!==undefined?' <span class="mono" style="font-size:11px;color:'+T.graphite+'">'+c.dist.toFixed(1)+' km</span>':"")+'</div>'+
         (c.display?'<div class="mono" style="font-size:10px;color:'+T.graphite+'">'+esc(String(c.display).slice(0,60))+'</div>':"")+'</button>';
     }).join("")+'</div>';
@@ -293,6 +294,12 @@ function setupView(){
       '<label class="mono" style="font-size:11px;color:'+T.graphite+'">PAR BY HOLE — tap to adjust</label>'+
       '<span class="mono" style="font-size:13px">Par '+total+'</span></div>'+
     '<div class="parg">'+cells+'</div>'+
+    '<div style="display:flex;gap:8px;margin-top:16px;align-items:center">'+
+      '<button class="findbtn" data-act="setupSearch">📍 Locate on map (optional)</button>'+
+      (state.setupLL?'<span class="mono" style="font-size:11px;color:'+T.green+'">◉ located</span>':"")+'</div>'+
+    (state.setupSearching?'<div class="mono" style="font-size:12px;color:'+T.graphite+';margin-top:6px">Searching…</div>':"")+
+    (state.setupNote?'<div class="mono" style="font-size:12px;color:'+T.amber+';margin-top:6px">'+esc(state.setupNote)+'</div>':"")+
+    (state.setupResults?courseResults(state.setupResults,"setupPick"):"")+
     '<button class="cta" data-act="lock" style="margin-top:20px"'+(canLock?"":" disabled")+'>Lock the lab</button>'+
     '</main>';
 }
@@ -318,7 +325,7 @@ function newRoundView(){
         (dr.ll?'<span class="mono" style="font-size:11px;color:'+T.green+'">◉ located</span>':"")+'</div>'+
       (dr.searching?'<div class="mono" style="font-size:12px;color:'+T.graphite+';margin-top:6px">Searching…</div>':"")+
       (dr.note?'<div class="mono" style="font-size:12px;color:'+T.amber+';margin-top:6px">'+esc(dr.note)+'</div>':"")+
-      (dr.results?courseResults(dr.results):"")+
+      (dr.results?courseResults(dr.results,"pick"):"")+
       (isFirstPlay && dr.course.trim() ? '<div class="mono" style="font-size:12px;color:'+T.amber+';margin-top:6px">◈ FIRST PLAY — this round enters the cold-read series</div>':"")+'</div>';
   }
   h += '<div class="row" style="display:flex;gap:10px;align-items:center">'+
@@ -500,7 +507,23 @@ function act(el){
   if(a==="par"){ var i=+el.getAttribute("data-i"), d=+el.getAttribute("data-d");
     state.setupPars=state.setupPars.map(function(p,j){return j===i?Math.min(6,Math.max(3,p+d)):p;}); return render(); }
   if(a==="lock"){ if(!state.setupName.trim()) return;
-    state.data.settings={homeCourse:{name:state.setupName.trim(),pars:state.setupPars.slice()}}; persist(); return render(); }
+    var hc={name:state.setupName.trim(), pars:state.setupPars.slice()};
+    if(state.setupLL){ hc.lat=state.setupLL.lat; hc.lon=state.setupLL.lon; }   // home on the map, if located
+    state.data.settings={homeCourse:hc}; persist(); return render(); }
+  if(a==="setupSearch"){
+    var sq=(state.setupName||"").trim();
+    if(!sq){ state.setupNote="type the course name first"; return render(); }
+    state.setupSearching=true; state.setupNote=""; state.setupResults=null; render();
+    nominatimSearch(sq+" golf course")
+      .then(function(list){ state.setupSearching=false; state.setupResults=list; render(); })
+      .catch(function(){ state.setupSearching=false; state.setupNote="search unavailable — you can still lock without a location"; render(); });
+    return;
+  }
+  if(a==="setupPick"){
+    var sc=(state.setupResults||[])[+el.getAttribute("data-i")];
+    if(sc){ state.setupName=sc.name; state.setupLL={lat:sc.lat,lon:sc.lon}; state.setupResults=null; state.setupNote=""; }
+    return render();
+  }
   if(a==="toggle"){ var name=el.getAttribute("data-name"), v=el.getAttribute("data-v")==="true";
     state.draft[name==="home"?"isHome":"full"]=v; return render(); }
   if(a==="sel"){ state.draft.sel=+el.getAttribute("data-i"); return render(); }
