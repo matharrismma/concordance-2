@@ -291,6 +291,56 @@ function clubsView(){
   return form+chart+log;
 }
 
+/* ---------- classify: the measured profile + probable best focus (simple, transparent, auditable) ---------- */
+function profile(){
+  var d=state.data, hc=d.settings.homeCourse, par=hc.pars.reduce(function(x,y){return x+y;},0);
+  var rounds=d.rounds, full=rounds.filter(function(r){return r.holes;});
+  var breachHoles=0, fullHoles=0;
+  full.forEach(function(r){ var b=gateCheck(r,hc.pars); if(b) breachHoles+=b.length; fullHoles+=18; });
+  var fw=rounds.filter(function(r){return r.fairways!==null && r.fairways!==undefined;}).map(function(r){return r.fairways;});
+  var pu=rounds.filter(function(r){return r.putts!==null && r.putts!==undefined;}).map(function(r){return r.putts;});
+  var cs=clubStats();
+  return { n:rounds.length, nFull:full.length, par:par,
+           avgTotal: rounds.length?avg(rounds.map(function(r){return r.total;})):null,
+           breachPerRound: full.length?breachHoles/full.length:null,
+           breachPct: fullHoles?breachHoles/fullHoles*100:null,
+           avgFw: fw.length?avg(fw):null, avgPutts: pu.length?avg(pu):null,
+           avgSpread: cs.length?avg(cs.map(function(r){return r.hi-r.lo;})):null };
+}
+function classify(p){
+  if(p.n<3) return {tag:"Collecting", tone:T.graphite, why:p.n+"/3 rounds before the read — the classification is MEASURED, never guessed. Play.", focus:null};
+  var leaks=[];
+  if(p.breachPerRound!==null) leaks.push({cost:p.breachPerRound*1.0, tag:"The Volatile",
+    why:"You breach the double-bogey gate "+fmt(p.breachPerRound)+"× a round ("+fmt(p.breachPct)+"% of holes) — a few holes hold your score hostage.",
+    focus:"Course management on the blow-up hole. It's a decision, not a swing — take your medicine, and make double your worst number."});
+  if(p.avgPutts!==null) leaks.push({cost:Math.max(0,p.avgPutts-31), tag:"The Three-Putter",
+    why:"You average "+fmt(p.avgPutts)+" putts a round.",
+    focus:"Lag speed and the 3–6 footers — the cheapest strokes in golf."});
+  if(p.avgFw!==null) leaks.push({cost:Math.max(0,(7-p.avgFw))*0.6, tag:"The Wild Driver",
+    why:"You hit "+fmt(p.avgFw)+" fairways a round.",
+    focus:"A tee club you can find — the drive sets up everything after it."});
+  leaks.sort(function(a,b){ return b.cost-a.cost; });
+  var top=leaks[0];
+  if(!top || top.cost<0.5) return {tag:"The Grinder", tone:T.green, why:"No single leak — steady, no blow-ups, nothing bleeding.",
+    focus:"Shave the average: tighter club gaps, a few more greens. You improve by inches now."};
+  return {tag:top.tag, tone:top.cost>1.2?T.red:T.amber, why:top.why, focus:top.focus};
+}
+function pill(label,val){ return '<span style="background:#EDF3EE;border:1px solid '+T.ruleSoft+';border-radius:12px;padding:3px 9px;white-space:nowrap"><span class="mono" style="font-size:9px;color:'+T.graphite+'">'+label+'</span> <span class="mono" style="font-size:13px;font-weight:600">'+val+'</span></span>'; }
+function profileView(){
+  var p=profile(), c=classify(p), facts="";
+  if(p.avgTotal!==null) facts+=pill("Scoring", Math.round(p.avgTotal)+" ("+(p.avgTotal-p.par>=0?"+":"")+fmt(p.avgTotal-p.par)+")");
+  if(p.breachPerRound!==null) facts+=pill("Blow-ups", fmt(p.breachPerRound)+"/rd");
+  if(p.avgFw!==null) facts+=pill("Fairways", fmt(p.avgFw));
+  if(p.avgPutts!==null) facts+=pill("Putts", fmt(p.avgPutts));
+  if(p.avgSpread!==null) facts+=pill("Club spread", "±"+Math.round(p.avgSpread/2));
+  return panel("PROFILE — classified by your measurements ("+p.n+" round"+(p.n!==1?"s":"")+")", c.tone,
+    (facts?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">'+facts+'</div>':"")+
+    '<div class="disp" style="font-size:18px;font-weight:700;color:'+c.tone+'">'+c.tag+'</div>'+
+    (c.why?'<div style="font-size:14px;margin-top:2px">'+c.why+'</div>':"")+
+    (c.focus?'<div style="margin-top:8px;padding:8px 10px;background:#F1F4EF;border-left:3px solid '+c.tone+';border-radius:2px"><span class="mono" style="font-size:10px;color:'+T.graphite+'">PROBABLE BEST FOCUS</span><div style="font-size:14px;margin-top:2px">'+c.focus+'</div></div>':"")+
+    '<div class="mono" style="font-size:10px;color:'+T.graphite+';margin-top:8px">Measured, not guessed — every line is a number you can check. As more players are measured, “focus” becomes “what actually worked for players like you.”</div>');
+}
+
 function render(){
   var d = state.data;
   var html = header(d.settings && d.settings.homeCourse ? d.settings.homeCourse.name : null);
@@ -451,7 +501,7 @@ function instrumentsView(){
     '<div style="color:'+T.graphite+';font-size:13px;margin-top:6px">A breach is a lost position you didn\'t concede. Review the decision, not the swing.</div></div>';
   var gateTone = (lastGate && lastGate.length) ? T.red : T.green;
 
-  var out = panel("GATE — double bogey max", gateTone, gateBody);
+  var out = profileView() + panel("GATE — double bogey max", gateTone, gateBody);
 
   // LAB
   var lab = bigPair(["CURRENT 3",fmt(a.homeCur3)],["PREVIOUS 3",fmt(a.homePrev3)],par,a.homeCur3)+
