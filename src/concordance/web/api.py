@@ -1246,7 +1246,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
            or not str(body.get("target") or "").strip():
             return _err(400, "fp (a Guide) and target (the node) required")
         from .. import mesh
-        return _ok(mesh.tend(str(body["fp"]), str(body["target"]), str(body.get("role") or "member")))
+        return _ok(mesh.tend(str(body["fp"]), str(body["target"]), str(body.get("role") or "member"),
+                             signature=body.get("signature"), nonce=body.get("nonce")))
     if method == "POST" and path == "/mesh/invite":
         if not isinstance(body, dict) or not str(body.get("fp") or "").strip():
             return _err(400, "fp required")

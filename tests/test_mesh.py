@@ -40,6 +40,13 @@ def _vouch(a, b):
         assert mesh.link(x["id"], y["id"], signature=sig, nonce=n)["ok"]
 
 
+def _tend(by_idn, target_fp, role):
+    """A SIGNED conferral (the new model): the conferrer proves their OWN key, not just the fingerprint."""
+    n = "t" + target_fp[-8:] + role[:2]
+    sig = signing.sign_bytes(mesh.tend_signable(by_idn["id"], target_fp, role, n), by_idn["private_key"])
+    return mesh.tend(by_idn["id"], target_fp, role, signature=sig, nonce=n)
+
+
 def test_register_is_keyed_by_fingerprint_and_idempotent(mesh_dir):
     idn = identity.create_identity()
     c = "Jesus Christ is Lord and Messiah"
@@ -138,16 +145,28 @@ def test_gate_hides_the_network_from_the_unconfessed(mesh_dir):
     assert "path" in m                                        # a seeker is shown the way, not the flock
 
 
-def test_roles_are_conferred_not_self_claimed(mesh_dir):
+def test_roles_are_conferred_not_self_claimed(mesh_dir, monkeypatch):
+    monkeypatch.setenv("CONCORDANCE_SOVEREIGN_NODE", "1")   # founding bootstrap only on a sovereign node
     a, afp = _node("FootWasher")
     b, bfp = _node("Ruth")
-    # founding bootstrap: with no Guide yet, A may be established as the first Guide
-    assert mesh.tend(afp, afp, "guide")["ok"] is True
-    # a member cannot appoint anyone (B is still a member)
-    assert mesh.tend(bfp, bfp, "guide")["ok"] is False
+    # founding bootstrap: with no Guide yet, A SIGNS to establish itself as the first Guide
+    assert _tend(a, afp, "guide")["ok"] is True
+    # a member cannot appoint anyone (B is still a member) — even signed
+    assert _tend(b, bfp, "guide")["ok"] is False
     # but the Guide can raise up a Guardian
-    r = mesh.tend(afp, bfp, "guardian")
+    r = _tend(a, bfp, "guardian")
     assert r["ok"] is True and r["role"] == "guardian"
+    # an UNSIGNED conferral is refused — knowing a Guide's fingerprint is not holding a Guide's key
+    assert mesh.tend(afp, bfp, "guardian")["ok"] is False
+
+
+def test_founding_guide_bootstrap_is_disabled_on_a_shared_node(mesh_dir, monkeypatch):
+    # On a shared/public box the founding-Guide bootstrap is off, so the first stranger cannot seat itself
+    # as a shepherd; an operator flips CONCORDANCE_SOVEREIGN_NODE on their OWN machine to bootstrap.
+    monkeypatch.delenv("CONCORDANCE_SOVEREIGN_NODE", raising=False)
+    a, afp = _node("Racer")
+    r = _tend(a, afp, "guide")                              # signed, but this is a shared node
+    assert r["ok"] is False and "bootstrap is disabled" in r["error"]
 
 
 def test_route_forwards_the_confession(mesh_dir):

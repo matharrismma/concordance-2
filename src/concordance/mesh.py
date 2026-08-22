@@ -308,20 +308,46 @@ def _any_guide_exists() -> bool:
     return False
 
 
-def tend(by_fp: str, target_fp: str, role: str) -> Dict[str, Any]:
-    """Raise up a Guide or Guardian, or set a node back to member. Only a GUIDE may confer (a
-    shepherd appoints — you do not appoint yourself). THE ONE EXCEPTION is the founding: when no
-    Guide exists yet, a confessed node may be established as the first Guide (the foot-washer at the
-    head, lowest and first). A conferral is never a claim of authority over a soul — only a charge to
-    serve and to guard (1 Peter 5:2-3)."""
+def tend_signable(by_fp: str, target_fp: str, role: str, nonce: str) -> bytes:
+    """The exact bytes a Guide signs to confer a role — proving the conferral comes from the Guide's OWN
+    key, not merely from someone who knows their fingerprint."""
+    return signing.canonical_json_bytes(
+        {"mesh_tend": {"by": str(by_fp or ""), "target": str(target_fp or ""),
+                       "role": str(role or ""), "nonce": str(nonce or "")}})
+
+
+def tend(by_fp: str, target_fp: str, role: str,
+         signature: Optional[str] = None, nonce: Optional[str] = None) -> Dict[str, Any]:
+    """Raise up a Guide or Guardian, or set a node back to member. SIGNED — a conferral must be signed by
+    the conferrer's own key, so no one can confer roles merely by knowing a Guide's fingerprint. Only a
+    GUIDE may confer (a shepherd appoints — you do not appoint yourself). THE ONE EXCEPTION is the founding:
+    when no Guide exists yet, a confessed node may be established as the first Guide (the foot-washer at the
+    head, lowest and first) — but ONLY on a SOVEREIGN node (CONCORDANCE_SOVEREIGN_NODE), so a shared/public
+    box never hands the first stranger a shepherd's seat. A conferral is never authority over a soul — only
+    a charge to serve and to guard (1 Peter 5:2-3)."""
     role = role if role in _ROLES else "member"
     target = _read_node(target_fp)
     if not target or not target.get("confessed"):
         return {"ok": False, "error": "target is not a node in the fold"}
     by = _read_node(by_fp)
-    bootstrap = (by_fp == target_fp and role == "guide" and not _any_guide_exists())
+    if not by:
+        return {"ok": False, "error": "your node is not in the fold"}
+    try:
+        signed_ok = bool(signature) and signing.verify_bytes(
+            tend_signable(by_fp, target_fp, role, str(nonce or "")), signature, by.get("public_key", ""))
+    except Exception:  # noqa: BLE001
+        signed_ok = False
+    if not signed_ok:
+        return {"ok": False, "error": ("a conferral must be signed by your node's key — get the canonical "
+                                       "bytes from GET /mesh/signable (kind=tend) and send the signature")}
+    sovereign = os.environ.get("CONCORDANCE_SOVEREIGN_NODE", "").strip().lower() in ("1", "true", "yes", "on")
+    founding = (by_fp == target_fp and role == "guide" and not _any_guide_exists())
+    bootstrap = founding and sovereign
     if not bootstrap:
-        if not by or by.get("role") not in _SHEPHERDING:
+        if founding and not sovereign:
+            return {"ok": False, "error": ("founding-Guide bootstrap is disabled on a shared node — set "
+                                           "CONCORDANCE_SOVEREIGN_NODE on your own machine to seat the first Guide")}
+        if by.get("role") not in _SHEPHERDING:
             return {"ok": False, "error": "only a Guide may raise up a Guide or Guardian"}
     with _LOCK:
         target = _read_node(target_fp)
