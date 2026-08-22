@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1E4D3B">
+<title>Gate Golf — the card gates, the trend steers</title>
+<meta name="description" content="A scorecard-authority training instrument. The card gates, the trend steers, 3:1 loads. Offline, private, yours.">
+<link rel="manifest" href="/golf.webmanifest">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+:root{
+  --paper:#F6F7F2; --card:#FFFFFF; --rule:#1E4D3B; --ruleSoft:#CBD8CE; --ink:#17201B;
+  --graphite:#5A655E; --red:#C2402A; --green:#2E7D4F; --amber:#B07A1E;
+  --disp:'Barlow Condensed','Oswald','Arial Narrow',sans-serif;
+  --body:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--body); background:var(--paper); color:var(--ink); min-height:100vh;
+  -webkit-text-size-adjust:100%; padding-bottom:env(safe-area-inset-bottom);}
+input,button{font-family:inherit; font-size:1rem}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--rule); outline-offset:2px}
+.disp{font-family:var(--disp); text-transform:uppercase; letter-spacing:.06em}
+.mono{font-family:var(--mono)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+header.hd{background:var(--rule); color:var(--paper); padding:18px 16px 14px}
+header.hd .in{max-width:680px; margin:0 auto; display:flex; align-items:baseline; justify-content:space-between}
+nav.tabs{background:var(--card); border-bottom:2px solid var(--rule)}
+nav.tabs .in{max-width:680px; margin:0 auto; display:flex}
+nav.tabs button{flex:1; padding:12px 0; border:none; background:transparent; color:var(--ink); font-weight:600; font-size:15px}
+nav.tabs button[aria-selected="true"]{background:var(--rule); color:var(--paper)}
+main{max-width:680px; margin:0 auto; padding:12px 12px 72px}
+.row{margin-bottom:12px}
+.pnl{background:var(--card); border:1.5px solid var(--rule); border-radius:4px; margin-bottom:14px; overflow:hidden}
+.pnl>.lab{font-family:var(--disp); text-transform:uppercase; letter-spacing:.06em; font-size:14px; font-weight:700; color:var(--paper); padding:6px 12px}
+.pnl>.bd{padding:12px}
+.muted{color:var(--graphite); font-size:14px}
+.tg{display:flex; border:1.5px solid var(--rule); border-radius:3px; overflow:hidden}
+.tg button{flex:1; padding:10px 0; border:none; background:var(--card); color:var(--ink); font-weight:600; font-size:14px}
+.tg button[aria-pressed="true"]{background:var(--rule); color:var(--paper)}
+.field{width:100%; padding:10px 12px; font-size:16px; border:1.5px solid var(--rule); border-radius:3px; background:var(--card)}
+.field.soft{border:1px solid var(--ruleSoft); font-size:14px}
+.parg{display:grid; grid-template-columns:repeat(9,1fr); gap:4px}
+.parcell{background:var(--card); border:1px solid var(--ruleSoft); border-radius:3px; text-align:center; padding:4px 0}
+.parcell .step{border:none; background:none; font-size:11px; display:block; width:100%; color:var(--graphite); padding:0}
+.holes{display:grid; grid-template-columns:repeat(9,1fr); gap:3px}
+.hole{padding:5px 0 4px; text-align:center; border-radius:3px; border:1px solid var(--ruleSoft); background:var(--card)}
+.hole.filled{background:#EDF3EE}
+.hole.breach{background:#FBEAE5}
+.hole.sel{border:2px solid var(--rule)}
+.scoreopts{display:flex; gap:5px; flex-wrap:wrap}
+.scoreopts button{font-family:var(--mono); font-size:16px; font-weight:600; min-width:42px; padding:9px 0; border-radius:3px; border:1px solid var(--rule); background:var(--card); color:var(--ink)}
+.scoreopts button.over{border-color:var(--red); color:var(--red)}
+.scoreopts button.on{background:var(--rule); color:var(--paper); border-color:var(--rule)}
+.cta{font-family:var(--disp); text-transform:uppercase; letter-spacing:.06em; font-size:17px; font-weight:600; width:100%; padding:13px 0; background:var(--rule); color:var(--paper); border:none; border-radius:3px}
+.cta[disabled]{background:var(--ruleSoft); cursor:default}
+.badge{font-family:var(--mono); font-size:9px; font-weight:600; color:var(--paper); border-radius:2px; padding:2px 5px; margin-left:6px; vertical-align:middle}
+.strip{display:flex; gap:2px; margin-top:8px}
+.tick{width:12px; height:16px; border-radius:2px; background:var(--rule); opacity:.85}
+.tick.b{border-radius:50%; border:2px solid var(--red); background:transparent; opacity:1; width:12px; height:16px}
+.logitem{background:var(--card); border:1px solid var(--ruleSoft); border-radius:4px; padding:10px 12px; margin-bottom:8px}
+.del{border:none; background:none; color:var(--red); font-size:12px}
+a.foot{color:var(--graphite)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+/* ============================================================
+   GATE GOLF — scorecard-authority training instrument
+   Doctrine: the card gates, the trend steers, 3:1 loads.
+   Instruments: LAB (home 3-avg) · FIELD (away 5-avg) · COLD READ (first plays)
+   Ported verbatim from gate-golf v1; storage = localStorage, render = vanilla.
+   ============================================================ */
+var STORAGE_KEY = "gate-golf-v1";
+var T = { paper:"#F6F7F2", card:"#FFFFFF", rule:"#1E4D3B", ruleSoft:"#CBD8CE", ink:"#17201B",
+          graphite:"#5A655E", red:"#C2402A", green:"#2E7D4F", amber:"#B07A1E" };
+
+function norm(s){ return (s||"").trim().toLowerCase(); }
+function avg(a){ return a.length ? a.reduce(function(x,y){return x+y;},0)/a.length : null; }
+function fmt(n,d){ if(d===undefined)d=1; return (n===null||n===undefined||isNaN(n)) ? "—" : n.toFixed(d); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+
+/* ---------- derived series (verbatim from v1) ---------- */
+function analyze(rounds, homeName){
+  var h = norm(homeName);
+  var sorted = rounds.slice().sort(function(a,b){ return a.date<b.date?-1 : a.date>b.date?1 : a.id-b.id; });
+  var firstSeen = {};
+  for(var k=0;k<sorted.length;k++){ var c=norm(sorted[k].course); if(c!==h && !(c in firstSeen)) firstSeen[c]=sorted[k].id; }
+  var home = sorted.filter(function(r){return norm(r.course)===h;});
+  var away = sorted.filter(function(r){return norm(r.course)!==h;});
+  var firstPlays = away.filter(function(r){return firstSeen[norm(r.course)]===r.id;});
+  // LAB readings: at each home round index i (0-based) >= 5,
+  // current = avg(i-2..i), previous = avg(i-5..i-3). Lower is better.
+  var readings = [];
+  for(var i=5;i<home.length;i++){
+    var cur = avg(home.slice(i-2,i+1).map(function(r){return r.total;}));
+    var prev = avg(home.slice(i-5,i-2).map(function(r){return r.total;}));
+    readings.push({ idx:i, cur:cur, prev:prev, delta:cur-prev,
+                    windy: home.slice(i-2,i+1).filter(function(r){return r.wind;}).length });
+  }
+  var streak = 0;
+  for(var j=readings.length-1;j>=0;j--){ if(readings[j].delta>=0) streak++; else break; }
+  var homeCur3 = home.length>=3 ? avg(home.slice(-3).map(function(r){return r.total;})) : null;
+  var homePrev3 = home.length>=6 ? avg(home.slice(-6,-3).map(function(r){return r.total;})) : null;
+  var away5 = away.length>=5 ? avg(away.slice(-5).map(function(r){return r.total;})) : null;
+  var gap = (homeCur3!==null && away5!==null) ? away5-homeCur3 : null;
+  return { sorted:sorted, home:home, away:away, firstPlays:firstPlays, readings:readings, streak:streak,
+           homeCur3:homeCur3, homePrev3:homePrev3, away5:away5, gap:gap, firstSeen:firstSeen };
+}
+function gateCheck(round, pars){
+  if(!round.holes) return null;
+  var breaches = [];
+  round.holes.forEach(function(s,i){ if(s!==null && s>pars[i]+2) breaches.push(i+1); });
+  return breaches;
+}
+
+/* ---------- storage ---------- */
+function loadData(){
+  try{ var v=localStorage.getItem(STORAGE_KEY); if(v) return JSON.parse(v); }catch(e){}
+  return { settings:null, rounds:[] };
+}
+function persist(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); state.saveErr=false; }
+  catch(e){ state.saveErr=true; }
+}
+
+/* ---------- state ---------- */
+function newDraft(){
+  return { isHome:true, course:"", date:todayISO(), wind:false, full:true,
+           holes:Array(18).fill(null), sel:0, totalOnly:"", fairways:"", putts:"" };
+}
+var state = { data:loadData(), tab:"card", draft:newDraft(), saveErr:false,
+              setupName:"", setupPars:Array(18).fill(4) };
+
+/* ============================================================ render ============================================================ */
+var app = document.getElementById("app");
+
+function render(){
+  var d = state.data;
+  var html = header(d.settings && d.settings.homeCourse ? d.settings.homeCourse.name : null);
+  if(!d.settings){
+    html += setupView();
+  }else{
+    html += tabsView();
+    if(state.saveErr) html += '<div style="max-width:680px;margin:0 auto;padding:8px 16px;color:'+T.red+';font-size:13px">Storage unavailable — rounds will not survive a reload.</div>';
+    html += '<main>';
+    if(state.tab==="card") html += newRoundView();
+    else if(state.tab==="inst") html += instrumentsView();
+    else if(state.tab==="log") html += logView();
+    html += '</main>';
+  }
+  app.innerHTML = html;
+  wire();
+}
+
+function header(home){
+  return '<header class="hd"><div class="in">'+
+    '<div><div class="disp" style="font-size:30px;font-weight:700;line-height:1">Gate Golf</div>'+
+    '<div class="mono" style="font-size:11px;opacity:.75;margin-top:4px">THE CARD GATES · THE TREND STEERS</div></div>'+
+    (home ? '<div style="text-align:right"><div class="mono" style="font-size:10px;opacity:.6">HOME COURSE</div>'+
+      '<div class="disp" style="font-size:16px;font-weight:600">'+esc(home)+'</div></div>' : '')+
+    '</div></header>';
+}
+
+function tabsView(){
+  var items=[["card","New round"],["inst","Instruments"],["log","Log"]];
+  return '<nav class="tabs"><div class="in">'+items.map(function(it){
+    return '<button data-act="tab" data-k="'+it[0]+'" aria-selected="'+(state.tab===it[0])+'">'+it[1]+'</button>';
+  }).join("")+'</div></nav>';
+}
+
+/* ---------- setup ---------- */
+function setupView(){
+  var total = state.setupPars.reduce(function(a,b){return a+b;},0);
+  var cells = state.setupPars.map(function(p,i){
+    return '<div class="parcell"><div class="mono" style="font-size:9px;color:'+T.graphite+'">'+(i+1)+'</div>'+
+      '<button class="step" data-act="par" data-i="'+i+'" data-d="1">▲</button>'+
+      '<div class="mono" style="font-size:15px;font-weight:600">'+p+'</div>'+
+      '<button class="step" data-act="par" data-i="'+i+'" data-d="-1">▼</button></div>';
+  }).join("");
+  var canLock = state.setupName.trim().length>0;
+  return '<main style="padding:20px 16px 64px">'+
+    '<h2 class="disp" style="font-size:22px;margin:0 0 4px">Set the home course</h2>'+
+    '<p style="color:'+T.graphite+';font-size:14px;margin:0 0 16px">The lab. All practice decisions run off rounds played here — same tees, every time.</p>'+
+    '<label class="mono" style="font-size:11px;color:'+T.graphite+'">COURSE NAME</label>'+
+    '<input id="setupName" class="field" style="margin-top:4px" placeholder="e.g. Lafayette Golf Course" value="'+esc(state.setupName)+'">'+
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;margin:20px 0 6px">'+
+      '<label class="mono" style="font-size:11px;color:'+T.graphite+'">PAR BY HOLE — tap to adjust</label>'+
+      '<span class="mono" style="font-size:13px">Par '+total+'</span></div>'+
+    '<div class="parg">'+cells+'</div>'+
+    '<button class="cta" data-act="lock" style="margin-top:20px"'+(canLock?"":" disabled")+'>Lock the lab</button>'+
+    '</main>';
+}
+
+/* ---------- round entry ---------- */
+function newRoundView(){
+  var s = state.data.settings.homeCourse, dr = state.draft, pars = s.pars;
+  var courseName = dr.isHome ? s.name : dr.course.trim();
+  var filled = dr.holes.filter(function(h){return h!==null;}).length;
+  var runningTotal = dr.holes.reduce(function(a,b){return a+(b||0);},0);
+  var parSoFar = dr.holes.reduce(function(a,b,i){return a+(b!==null?pars[i]:0);},0);
+  var isFirstPlay = !dr.isHome && courseName && !state.data.rounds.some(function(r){return norm(r.course)===norm(courseName);});
+  var selPar = pars[dr.sel];
+  var options = [selPar-2,selPar-1,selPar,selPar+1,selPar+2,selPar+3,selPar+4].filter(function(v){return v>=1;});
+  var canSave = courseName && (dr.full ? filled===18 : Number(dr.totalOnly)>=40);
+
+  var h = '<div class="row">'+toggle("home",dr.isHome,["Home — lab","Away — field"])+'</div>';
+  if(!dr.isHome){
+    h += '<div class="row"><input id="course" class="field" placeholder="Course name" value="'+esc(dr.course)+'">'+
+      (isFirstPlay && dr.course.trim() ? '<div class="mono" style="font-size:12px;color:'+T.amber+';margin-top:6px">◈ FIRST PLAY — this round enters the cold-read series</div>':"")+'</div>';
+  }
+  h += '<div class="row" style="display:flex;gap:10px;align-items:center">'+
+    '<input id="date" type="date" class="field soft mono" style="width:auto" value="'+esc(dr.date)+'">'+
+    '<label style="display:flex;align-items:center;gap:6px;font-size:14px;color:'+T.graphite+'">'+
+    '<input id="wind" type="checkbox"'+(dr.wind?" checked":"")+'> Windy (20+ mph)</label></div>';
+  h += '<div class="row">'+toggle("full",dr.full,["Full card","Total only"])+'</div>';
+
+  if(dr.full){
+    var cells = dr.holes.map(function(hv,i){
+      var breach = hv!==null && hv>pars[i]+2;
+      var cls = "hole"+(i===dr.sel?" sel":"")+(breach?" breach":(hv!==null?" filled":""));
+      return '<button class="'+cls+'" data-act="sel" data-i="'+i+'">'+
+        '<div class="mono" style="font-size:9px;color:'+T.graphite+'">'+(i+1)+'·'+pars[i]+'</div>'+
+        '<div class="mono" style="font-size:16px;font-weight:600;color:'+(breach?T.red:T.ink)+'">'+(hv===null?"·":hv)+'</div></button>';
+    }).join("");
+    var opts = options.map(function(v){
+      var over=v>selPar+2, on=dr.holes[dr.sel]===v;
+      return '<button data-act="score" data-v="'+v+'" class="'+(over?"over":"")+(on?" on":"")+'">'+v+'</button>';
+    }).join("");
+    h += '<div style="background:'+T.card+';border:1.5px solid '+T.rule+';border-radius:4px;padding:10px;margin-bottom:12px">'+
+      '<div class="holes">'+cells+'</div>'+
+      '<div style="margin-top:12px;border-top:1px dashed '+T.ruleSoft+';padding-top:10px">'+
+        '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-bottom:6px">HOLE '+(dr.sel+1)+' — PAR '+selPar+' · gate is '+(selPar+2)+'</div>'+
+        '<div class="scoreopts">'+opts+'</div></div></div>'+
+      '<div class="mono" style="font-size:13px;color:'+T.graphite+';margin-bottom:12px">'+filled+'/18 holes · total '+(runningTotal||"—")+
+        (filled>0?' ('+((runningTotal-parSoFar)>=0?"+":"")+(runningTotal-parSoFar)+' thru '+filled+')':"")+'</div>';
+  }else{
+    h += '<div class="row"><label class="mono" style="font-size:11px;color:'+T.graphite+'">TOTAL SCORE</label>'+
+      '<input id="totalOnly" type="number" inputmode="numeric" class="field mono" style="display:block;width:120px;font-size:20px;margin-top:4px" value="'+esc(dr.totalOnly)+'">'+
+      '<div style="font-size:12px;color:'+T.graphite+';margin-top:6px">Total-only rounds can\'t run the double-max gate.</div></div>';
+  }
+  h += '<div class="row" style="display:flex;gap:12px">'+
+    '<div style="flex:1"><label class="mono" style="font-size:11px;color:'+T.graphite+'">FAIRWAYS HIT (opt.)</label>'+
+    '<input id="fairways" type="number" inputmode="numeric" class="field soft mono" style="margin-top:4px" value="'+esc(dr.fairways)+'"></div>'+
+    '<div style="flex:1"><label class="mono" style="font-size:11px;color:'+T.graphite+'">TOTAL PUTTS (opt.)</label>'+
+    '<input id="putts" type="number" inputmode="numeric" class="field soft mono" style="margin-top:4px" value="'+esc(dr.putts)+'"></div></div>';
+  h += '<button class="cta" data-act="save" style="margin-top:6px"'+(canSave?"":" disabled")+'>Post the round</button>';
+  return h;
+}
+
+function toggle(name,on,labels){
+  return '<div class="tg">'+[true,false].map(function(v,i){
+    return '<button data-act="toggle" data-name="'+name+'" data-v="'+v+'" aria-pressed="'+(on===v)+'">'+labels[i]+'</button>';
+  }).join("")+'</div>';
+}
+
+/* ---------- instruments ---------- */
+function instrumentsView(){
+  var home = state.data.settings.homeCourse;
+  var a = analyze(state.data.rounds, home.name);
+  var par = home.pars.reduce(function(x,y){return x+y;},0);
+  var lastHome = a.home[a.home.length-1] || null;
+  var lastGate = lastHome ? gateCheck(lastHome, home.pars) : null;
+  var latest = a.readings[a.readings.length-1] || null;
+
+  var verdict;
+  if(a.home.length<6) verdict={tone:T.graphite,head:"Collecting",text:a.home.length+"/6 home rounds before the first reading. Play."};
+  else if(latest.delta<0) verdict={tone:T.green,head:"Working",text:"Current 3-avg beat the previous by "+fmt(-latest.delta)+". Hold the practice plan."};
+  else if(a.streak>=2) verdict={tone:T.red,head:"Change the skill",text:"Two consecutive flat readings. Flip per the plan — practice change didn't move it."};
+  else verdict={tone:T.amber,head:"Change the practice",text:"Reading flat (+"+fmt(latest.delta)+"). Practice changes are cheap; skill flips need a second flat reading."};
+  var windyNote = (latest && latest.windy>=2) ? " Caution: this reading is built on windy cards — noise may be wearing a trend costume." : "";
+
+  // GATE
+  var gateBody;
+  if(!lastHome) gateBody='<div class="muted">No home rounds yet.</div>';
+  else if(lastGate===null) gateBody='<div class="muted">Last home round was total-only — gate unreadable.</div>';
+  else if(lastGate.length===0) gateBody='<div style="font-size:15px">Last home round held on all 18. '+strip(lastHome,home.pars)+'</div>';
+  else gateBody='<div style="font-size:15px">Breached on hole'+(lastGate.length>1?"s":"")+' '+lastGate.join(", ")+'. '+strip(lastHome,home.pars)+
+    '<div style="color:'+T.graphite+';font-size:13px;margin-top:6px">A breach is a lost position you didn\'t concede. Review the decision, not the swing.</div></div>';
+  var gateTone = (lastGate && lastGate.length) ? T.red : T.green;
+
+  var out = panel("GATE — double bogey max", gateTone, gateBody);
+
+  // LAB
+  var lab = bigPair(["CURRENT 3",fmt(a.homeCur3)],["PREVIOUS 3",fmt(a.homePrev3)],par,a.homeCur3)+
+    '<div style="margin-top:10px;padding:10px 12px;background:#F1F4EF;border-left:3px solid '+verdict.tone+';border-radius:2px">'+
+      '<div class="disp" style="font-size:15px;font-weight:700;color:'+verdict.tone+'">'+verdict.head+'</div>'+
+      '<div style="font-size:14px;margin-top:2px">'+verdict.text+windyNote+'</div></div>'+
+    (a.home.length>=3 ? spark(a.home.map(function(r){return r.total;})) : "");
+  out += panel("LAB — home 3-round average", T.rule, lab);
+
+  // FIELD
+  var field;
+  if(a.away5===null) field='<div class="muted">'+a.away.length+'/5 away rounds. Validation only — no steering authority.</div>';
+  else field=bigPair(["AWAY 5-AVG",fmt(a.away5)],["GAP vs LAB", a.gap===null?"—":("+"+fmt(a.gap))],null,null)+
+    (a.gap!==null?'<div style="font-size:13px;color:'+T.graphite+';margin-top:8px">Gap = local-knowledge inflation. Shrinking gap → transferable skill. Widening gap → you\'re learning a course, not golf.</div>':"");
+  out += panel("FIELD — away 5-round average", T.rule, field);
+
+  // COLD READ
+  var cold;
+  if(a.firstPlays.length===0) cold='<div class="muted">No first plays yet. Every new course adds one point to the slowest, truest series you own.</div>';
+  else cold=a.firstPlays.slice(-6).map(function(r){
+    return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed '+T.ruleSoft+'">'+
+      '<span>'+esc(r.course)+'</span><span class="mono" style="font-size:14px">'+r.total+'</span></div>';
+  }).join("")+'<div style="font-size:13px;color:'+T.graphite+';margin-top:8px">Never react to one cold read. The trend across a season is the evidence.</div>';
+  out += panel("COLD READ — first plays", T.rule, cold);
+  return out;
+}
+
+function panel(label,tone,body){
+  return '<section class="pnl"><div class="lab" style="background:'+tone+'">'+label+'</div><div class="bd">'+body+'</div></section>';
+}
+function bigPair(a,b,par,cur){
+  return '<div style="display:flex;gap:24px;align-items:baseline">'+
+    '<div><div class="mono" style="font-size:10px;color:'+T.graphite+'">'+a[0]+'</div>'+
+    '<div class="mono" style="font-size:34px;font-weight:600;line-height:1.1">'+a[1]+'</div>'+
+    (par && cur!==null ? '<div class="mono" style="font-size:11px;color:'+T.graphite+'">par '+par+' · +'+fmt(cur-par)+'</div>':"")+'</div>'+
+    '<div><div class="mono" style="font-size:10px;color:'+T.graphite+'">'+b[0]+'</div>'+
+    '<div class="mono" style="font-size:22px;font-weight:500;color:'+T.graphite+'">'+b[1]+'</div></div></div>';
+}
+function spark(series){
+  var w=260,h=44,pad=3, min=Math.min.apply(null,series), max=Math.max.apply(null,series), span=(max-min)||1;
+  function pt(v,i){ var x=pad+(i*(w-2*pad))/Math.max(1,series.length-1); var y=pad+((v-min)/span)*(h-2*pad); return [x,y]; }
+  var poly=series.map(function(v,i){var p=pt(v,i);return p[0]+","+p[1];}).join(" ");
+  var dots=series.map(function(v,i){var p=pt(v,i);return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.2" fill="'+T.rule+'"/>';}).join("");
+  return '<svg width="'+w+'" height="'+h+'" style="margin-top:10px;display:block" aria-label="home scores trend">'+
+    '<polyline points="'+poly+'" fill="none" stroke="'+T.rule+'" stroke-width="1.5"/>'+dots+'</svg>';
+}
+function strip(round,pars){
+  if(!round.holes) return "";
+  return '<div class="strip">'+round.holes.map(function(s,i){
+    var breach = s>pars[i]+2;
+    return '<div class="tick'+(breach?" b":"")+'" title="Hole '+(i+1)+': '+s+'"></div>';
+  }).join("")+'</div>';
+}
+
+/* ---------- log ---------- */
+function logView(){
+  var home = state.data.settings.homeCourse;
+  var a = analyze(state.data.rounds, home.name);
+  if(a.sorted.length===0) return '<div class="muted">No rounds posted. The log is an invitation.</div>';
+  return a.sorted.slice().reverse().map(function(r){
+    var isHome = norm(r.course)===norm(home.name);
+    var isFirst = !isHome && a.firstSeen[norm(r.course)]===r.id;
+    var badges = (isHome?badge("LAB",T.rule):"")+(!isHome&&!isFirst?badge("FIELD",T.graphite):"")+(isFirst?badge("COLD READ",T.amber):"")+(r.wind?badge("WIND",T.graphite):"");
+    return '<div class="logitem"><div style="display:flex;justify-content:space-between;align-items:baseline">'+
+      '<div><span class="disp" style="font-size:16px;font-weight:600">'+esc(r.course)+'</span>'+
+      '<span class="mono" style="font-size:11px;color:'+T.graphite+';margin-left:8px">'+esc(r.date)+'</span>'+badges+'</div>'+
+      '<div class="mono" style="font-size:22px;font-weight:600">'+r.total+'</div></div>'+
+      (r.holes?strip(r,home.pars):"")+
+      '<div style="display:flex;justify-content:space-between;margin-top:6px">'+
+      '<span class="mono" style="font-size:11px;color:'+T.graphite+'">'+
+        (r.fairways!==null?"FW "+r.fairways:"")+(r.fairways!==null&&r.putts!==null?" · ":"")+(r.putts!==null?"Putts "+r.putts:"")+'</span>'+
+      '<button class="del" data-act="del" data-id="'+r.id+'">Delete round</button></div></div>';
+  }).join("");
+}
+function badge(text,color){ return '<span class="badge" style="background:'+color+'">'+text+'</span>'; }
+
+/* ============================================================ actions ============================================================ */
+function wire(){
+  // text inputs update state silently (no re-render — keeps focus)
+  bindInput("setupName", function(v){ state.setupName=v; toggleDisabled("lock", v.trim().length>0); });
+  bindInput("course", function(v){ state.draft.course=v; });
+  bindInput("date", function(v){ state.draft.date=v; });
+  bindInput("totalOnly", function(v){ state.draft.totalOnly=v; refreshSaveEnabled(); });
+  bindInput("fairways", function(v){ state.draft.fairways=v; });
+  bindInput("putts", function(v){ state.draft.putts=v; });
+  var wind=document.getElementById("wind"); if(wind) wind.addEventListener("change",function(){ state.draft.wind=wind.checked; });
+
+  app.querySelectorAll("[data-act]").forEach(function(el){
+    el.addEventListener("click", function(){ act(el); });
+  });
+}
+function bindInput(id,fn){ var el=document.getElementById(id); if(el) el.addEventListener("input",function(){ fn(el.value); }); }
+function toggleDisabled(actName,enabled){ var b=app.querySelector('[data-act="'+actName+'"]'); if(b) b.disabled=!enabled; }
+
+function refreshSaveEnabled(){
+  var dr=state.draft, s=state.data.settings.homeCourse;
+  var courseName = dr.isHome ? s.name : dr.course.trim();
+  var filled = dr.holes.filter(function(h){return h!==null;}).length;
+  var canSave = courseName && (dr.full ? filled===18 : Number(dr.totalOnly)>=40);
+  toggleDisabled("save", !!canSave);
+}
+
+function act(el){
+  var a = el.getAttribute("data-act");
+  if(a==="tab"){ state.tab=el.getAttribute("data-k"); return render(); }
+  if(a==="par"){ var i=+el.getAttribute("data-i"), d=+el.getAttribute("data-d");
+    state.setupPars=state.setupPars.map(function(p,j){return j===i?Math.min(6,Math.max(3,p+d)):p;}); return render(); }
+  if(a==="lock"){ if(!state.setupName.trim()) return;
+    state.data.settings={homeCourse:{name:state.setupName.trim(),pars:state.setupPars.slice()}}; persist(); return render(); }
+  if(a==="toggle"){ var name=el.getAttribute("data-name"), v=el.getAttribute("data-v")==="true";
+    state.draft[name==="home"?"isHome":"full"]=v; return render(); }
+  if(a==="sel"){ state.draft.sel=+el.getAttribute("data-i"); return render(); }
+  if(a==="score"){ var val=+el.getAttribute("data-v"); state.draft.holes[state.draft.sel]=val;
+    if(state.draft.sel<17) state.draft.sel++; return render(); }
+  if(a==="save"){ return saveRound(); }
+  if(a==="del"){ var id=+el.getAttribute("data-id");
+    state.data.rounds=state.data.rounds.filter(function(r){return r.id!==id;}); persist(); return render(); }
+}
+
+function saveRound(){
+  var dr=state.draft, s=state.data.settings.homeCourse;
+  var courseName = dr.isHome ? s.name : dr.course.trim();
+  var filled = dr.holes.filter(function(h){return h!==null;}).length;
+  var canSave = courseName && (dr.full ? filled===18 : Number(dr.totalOnly)>=40);
+  if(!canSave) return;
+  var runningTotal = dr.holes.reduce(function(a,b){return a+(b||0);},0);
+  var r = {
+    id: Date.now(), date: dr.date, course: courseName, wind: dr.wind,
+    holes: dr.full ? dr.holes.slice() : null,
+    total: dr.full ? runningTotal : Number(dr.totalOnly),
+    fairways: dr.fairways==="" ? null : Number(dr.fairways),
+    putts: dr.putts==="" ? null : Number(dr.putts)
+  };
+  state.data.rounds = state.data.rounds.concat([r]);
+  persist();
+  state.draft = newDraft();
+  state.tab = "inst";
+  render();
+}
+
+render();
+if("serviceWorker" in navigator){ navigator.serviceWorker.getRegistrations && navigator.serviceWorker.ready.catch(function(){}); }
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "Gate Golf",
+  "short_name": "Gate Golf",
+  "description": "The card gates, the trend steers. A scorecard-authority training instrument — offline, private, yours.",
+  "start_url": "/golf.html",
+  "scope": "/golf.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6F7F2",
+  "theme_color": "#1E4D3B"
+}
