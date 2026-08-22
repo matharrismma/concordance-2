@@ -57,6 +57,8 @@ main{max-width:680px; margin:0 auto; padding:12px 12px 72px}
 .scoreopts button.on{background:var(--rule); color:var(--paper); border-color:var(--rule)}
 .cta{font-family:var(--disp); text-transform:uppercase; letter-spacing:.06em; font-size:17px; font-weight:600; width:100%; padding:13px 0; background:var(--rule); color:var(--paper); border:none; border-radius:3px}
 .cta[disabled]{background:var(--ruleSoft); cursor:default}
+.findbtn{font-family:var(--disp); text-transform:uppercase; letter-spacing:.05em; font-size:12px; font-weight:600; padding:8px 12px; border:1.5px solid var(--rule); border-radius:3px; background:var(--card); color:var(--rule)}
+.leaflet-container{font-family:var(--body)!important}
 .badge{font-family:var(--mono); font-size:9px; font-weight:600; color:var(--paper); border-radius:2px; padding:2px 5px; margin-left:6px; vertical-align:middle}
 .strip{display:flex; gap:2px; margin-top:8px}
 .tick{width:12px; height:16px; border-radius:2px; background:var(--rule); opacity:.85}
@@ -133,13 +135,108 @@ function persist(){
 /* ---------- state ---------- */
 function newDraft(){
   return { isHome:true, course:"", date:todayISO(), wind:false, full:true,
-           holes:Array(18).fill(null), sel:0, totalOnly:"", fairways:"", putts:"" };
+           holes:Array(18).fill(null), sel:0, totalOnly:"", fairways:"", putts:"",
+           ll:null, results:null, searching:false, note:"" };   // ll = the picked course's {lat,lon}
 }
 var state = { data:loadData(), tab:"card", draft:newDraft(), saveErr:false,
-              setupName:"", setupPars:Array(18).fill(4) };
+              setupName:"", setupPars:Array(18).fill(4), setupLL:null, setupNote:"" };
+if(!state.data.courses) state.data.courses = {};   // registry of resolved away courses: {normName:{name,lat,lon}}
+
+/* ---------- maps: courses become real PLACES (client-side; coords go browser->OSM, never our engine) ---------- */
+function haversine(a,b,c,d){
+  var R=6371, r=Math.PI/180, dLat=(c-a)*r, dLon=(d-b)*r,
+      x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+function nominatimSearch(q){
+  return fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&q="+encodeURIComponent(q),
+               {headers:{"Accept":"application/json"}})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      return (d||[]).map(function(x){
+        return { name:(x.name||String(x.display_name||"").split(",")[0]), display:x.display_name||"",
+                 lat:+x.lat, lon:+x.lon, type:x.type, category:x.category };
+      }).filter(function(x){ return x.lat && x.lon && x.type!=="restaurant" && x.type!=="hotel" && x.type!=="clubhouse"; })
+        .sort(function(a,b){ return (b.type==="golf_course")-(a.type==="golf_course"); });
+    });
+}
+function overpassNear(lat,lon){
+  var qy="[out:json][timeout:20];nwr[leisure=golf_course](around:8000,"+lat+","+lon+");out center 20;";
+  return fetch("https://overpass-api.de/api/interpreter",{method:"POST",body:"data="+encodeURIComponent(qy)})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      return (d.elements||[]).map(function(e){
+        var la=(e.center?e.center.lat:e.lat), lo=(e.center?e.center.lon:e.lon), nm=(e.tags||{}).name;
+        return (nm&&la&&lo)?{name:nm, lat:la, lon:lo, dist:haversine(lat,lon,la,lo), display:""}:null;
+      }).filter(Boolean).sort(function(a,b){ return a.dist-b.dist; });
+    });
+}
+function geolocate(){
+  return new Promise(function(res,rej){
+    if(!navigator.geolocation) return rej(new Error("this device has no location"));
+    navigator.geolocation.getCurrentPosition(
+      function(p){ res({lat:p.coords.latitude, lon:p.coords.longitude}); },
+      function(e){ rej(new Error(e.code===1?"location permission denied":"couldn't get your location")); },
+      {enableHighAccuracy:true, timeout:12000, maximumAge:60000});
+  });
+}
 
 /* ============================================================ render ============================================================ */
 var app = document.getElementById("app");
+
+function courseResults(list){
+  if(!list.length) return '<div class="mono" style="font-size:12px;color:'+T.graphite+';margin-top:6px">No courses found — type the name to log it anyway.</div>';
+  return '<div style="margin-top:6px;border:1px solid '+T.ruleSoft+';border-radius:3px;overflow:hidden">'+
+    list.slice(0,6).map(function(c,i){
+      return '<button data-act="pick" data-i="'+i+'" style="display:block;width:100%;text-align:left;border:none;border-bottom:1px solid '+T.ruleSoft+';background:'+T.card+';padding:9px 10px">'+
+        '<div style="font-weight:600">'+esc(c.name)+(c.dist!==undefined?' <span class="mono" style="font-size:11px;color:'+T.graphite+'">'+c.dist.toFixed(1)+' km</span>':"")+'</div>'+
+        (c.display?'<div class="mono" style="font-size:10px;color:'+T.graphite+'">'+esc(String(c.display).slice(0,60))+'</div>':"")+'</button>';
+    }).join("")+'</div>';
+}
+
+function mapView(){
+  return '<div id="map" style="height:60vh;min-height:340px;border:1.5px solid '+T.rule+';border-radius:4px;overflow:hidden;background:'+T.card+'"></div>'+
+    '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">Home course green, away courses grey — tap a pin for its rounds. Courses get pinned when you locate them (“Search course” / “📍 Near me”) as you post a round. The map needs a connection; your rounds are safe offline.</div>';
+}
+
+function allCourses(){
+  var d=state.data, hc=d.settings.homeCourse, a=analyze(d.rounds,hc.name), out=[];
+  function stat(name){ var ts=d.rounds.filter(function(r){return norm(r.course)===norm(name);}).map(function(r){return r.total;});
+    return {n:ts.length, best:ts.length?Math.min.apply(null,ts):null, avg:ts.length?avg(ts).toFixed(1):null}; }
+  if(hc.lat&&hc.lon){ var s=stat(hc.name); out.push({name:hc.name,lat:hc.lat,lon:hc.lon,role:"Home · LAB",color:T.rule,n:s.n,best:s.best,avg:s.avg}); }
+  Object.keys(d.courses||{}).forEach(function(k){ var c=d.courses[k];
+    if(c.lat&&c.lon&&norm(c.name)!==norm(hc.name)){ var s=stat(c.name);
+      out.push({name:c.name,lat:c.lat,lon:c.lon,role:"Away · FIELD",color:T.graphite,n:s.n,best:s.best,avg:s.avg}); } });
+  return out;
+}
+
+var _leaflet=null;
+function loadLeaflet(){
+  if(window.L) return Promise.resolve();
+  if(_leaflet) return _leaflet;
+  _leaflet=new Promise(function(res,rej){
+    var css=document.createElement("link"); css.rel="stylesheet"; css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; document.head.appendChild(css);
+    var s=document.createElement("script"); s.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    s.onload=function(){res();}; s.onerror=function(){rej(new Error("map library unavailable — needs a connection"));}; document.head.appendChild(s);
+  });
+  return _leaflet;
+}
+function initMap(){
+  var el=document.getElementById("map"); if(!el) return;
+  var courses=allCourses();
+  if(!courses.length){ el.innerHTML='<div class="muted" style="padding:18px">No located courses yet. When you post a round, use “Search course” or “📍 Near me” — your courses then appear here on the map.</div>'; return; }
+  loadLeaflet().then(function(){
+    el.innerHTML="";
+    var map=L.map(el), pts=[];
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap"}).addTo(map);
+    courses.forEach(function(c){
+      L.circleMarker([c.lat,c.lon],{radius:8,color:c.color,fillColor:c.color,fillOpacity:.85,weight:2}).addTo(map)
+        .bindPopup("<b>"+esc(c.name)+"</b><br>"+c.role+" · "+c.n+" round"+(c.n!==1?"s":"")+(c.best!==null?"<br>best "+c.best+" · avg "+c.avg:""));
+      pts.push([c.lat,c.lon]);
+    });
+    if(pts.length===1) map.setView(pts[0],13); else map.fitBounds(pts,{padding:[30,30]});
+  }).catch(function(e){ el.innerHTML='<div class="muted" style="padding:18px">'+esc(e.message)+'. Your rounds are safe offline; open the map with a connection.</div>'; });
+}
 
 function render(){
   var d = state.data;
@@ -152,11 +249,13 @@ function render(){
     html += '<main>';
     if(state.tab==="card") html += newRoundView();
     else if(state.tab==="inst") html += instrumentsView();
+    else if(state.tab==="map") html += mapView();
     else if(state.tab==="log") html += logView();
     html += '</main>';
   }
   app.innerHTML = html;
   wire();
+  if(state.data.settings && state.tab==="map") initMap();   // the map builds after its container is in the DOM
 }
 
 function header(home){
@@ -169,7 +268,7 @@ function header(home){
 }
 
 function tabsView(){
-  var items=[["card","New round"],["inst","Instruments"],["log","Log"]];
+  var items=[["card","New round"],["inst","Instruments"],["map","Map"],["log","Log"]];
   return '<nav class="tabs"><div class="in">'+items.map(function(it){
     return '<button data-act="tab" data-k="'+it[0]+'" aria-selected="'+(state.tab===it[0])+'">'+it[1]+'</button>';
   }).join("")+'</div></nav>';
@@ -213,6 +312,13 @@ function newRoundView(){
   var h = '<div class="row">'+toggle("home",dr.isHome,["Home — lab","Away — field"])+'</div>';
   if(!dr.isHome){
     h += '<div class="row"><input id="course" class="field" placeholder="Course name" value="'+esc(dr.course)+'">'+
+      '<div style="display:flex;gap:8px;margin-top:6px;align-items:center">'+
+        '<button class="findbtn" data-act="search">Search course</button>'+
+        '<button class="findbtn" data-act="geo">📍 Near me</button>'+
+        (dr.ll?'<span class="mono" style="font-size:11px;color:'+T.green+'">◉ located</span>':"")+'</div>'+
+      (dr.searching?'<div class="mono" style="font-size:12px;color:'+T.graphite+';margin-top:6px">Searching…</div>':"")+
+      (dr.note?'<div class="mono" style="font-size:12px;color:'+T.amber+';margin-top:6px">'+esc(dr.note)+'</div>':"")+
+      (dr.results?courseResults(dr.results):"")+
       (isFirstPlay && dr.course.trim() ? '<div class="mono" style="font-size:12px;color:'+T.amber+';margin-top:6px">◈ FIRST PLAY — this round enters the cold-read series</div>':"")+'</div>';
   }
   h += '<div class="row" style="display:flex;gap:10px;align-items:center">'+
@@ -400,6 +506,28 @@ function act(el){
   if(a==="sel"){ state.draft.sel=+el.getAttribute("data-i"); return render(); }
   if(a==="score"){ var val=+el.getAttribute("data-v"); state.draft.holes[state.draft.sel]=val;
     if(state.draft.sel<17) state.draft.sel++; return render(); }
+  if(a==="search"){
+    var q=(state.draft.course||"").trim();
+    if(!q){ state.draft.note="type a course name first"; return render(); }
+    state.draft.searching=true; state.draft.note=""; state.draft.results=null; render();
+    nominatimSearch(q+" golf course")
+      .then(function(list){ state.draft.searching=false; state.draft.results=list; render(); })
+      .catch(function(){ state.draft.searching=false; state.draft.note="search unavailable — type the name to log it"; render(); });
+    return;
+  }
+  if(a==="geo"){
+    state.draft.searching=true; state.draft.note=""; state.draft.results=null; render();
+    geolocate().then(function(p){ return overpassNear(p.lat,p.lon); })
+      .then(function(list){ state.draft.searching=false; state.draft.results=list;
+        if(!list.length) state.draft.note="no golf courses found near you — type the name"; render(); })
+      .catch(function(e){ state.draft.searching=false; state.draft.note=e.message+" — type the name to log it"; render(); });
+    return;
+  }
+  if(a==="pick"){
+    var c=(state.draft.results||[])[+el.getAttribute("data-i")];
+    if(c){ state.draft.course=c.name; state.draft.ll={lat:c.lat,lon:c.lon}; state.draft.results=null; state.draft.note=""; }
+    return render();
+  }
   if(a==="save"){ return saveRound(); }
   if(a==="del"){ var id=+el.getAttribute("data-id");
     state.data.rounds=state.data.rounds.filter(function(r){return r.id!==id;}); persist(); return render(); }
@@ -420,6 +548,10 @@ function saveRound(){
     putts: dr.putts==="" ? null : Number(dr.putts)
   };
   state.data.rounds = state.data.rounds.concat([r]);
+  if(!dr.isHome && dr.ll){                                   // remember this away course as a real place
+    if(!state.data.courses) state.data.courses = {};
+    state.data.courses[norm(courseName)] = {name:courseName, lat:dr.ll.lat, lon:dr.ll.lon};
+  }
   persist();
   state.draft = newDraft();
   state.tab = "inst";
