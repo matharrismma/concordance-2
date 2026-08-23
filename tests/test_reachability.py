@@ -109,6 +109,7 @@ UNLISTED_PAGES = {
     "ask.html",           # the landing's predecessor, kept for old links
     "profile.html",       # the opt-in sovereign keeping (ez-login) — reached by direct URL / the keeping flow, not the public nav
     "golf.html",          # Gate Golf — the founder's N=1 instrument (NarrowFairway), a self-contained offline tool; reached by direct URL / home-screen install, not the public nav
+    "tatami.html",        # Tatami — the grappling/MMA hall, the same engine as golf.html applied to fight sports; a self-contained offline tool reached by direct URL / home-screen install, not the public nav
     "playbook.html",      # the Playbook surface — operator/agent authoring, not the public nav
     "plow.html",          # the Plow surface — an operator instrument, not the public nav
 }

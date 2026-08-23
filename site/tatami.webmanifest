@@ -1,0 +1,11 @@
+{
+  "name": "Tatami",
+  "short_name": "Tatami",
+  "description": "A training instrument for grappling & MMA. The roll is the round, the mat is the lab. Measure, find your leak, filter the advice that fits — offline, private, yours.",
+  "start_url": "/tatami.html",
+  "scope": "/tatami.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F5F8",
+  "theme_color": "#2B3A57"
+}

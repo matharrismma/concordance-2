@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2B3A57">
+<title>Tatami — the roll is the round, the mat is the lab</title>
+<meta name="description" content="A training instrument for grappling and MMA. The mat gates, the trend steers. Measure your rolls, find your leak, filter the advice that fits. Offline, private, yours.">
+<link rel="manifest" href="/tatami.webmanifest">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+:root{
+  --paper:#F4F5F8; --card:#FFFFFF; --rule:#2B3A57; --ruleSoft:#CBD2E0; --ink:#161B26;
+  --graphite:#5A6070; --red:#C2402A; --green:#2E7D4F; --amber:#B07A1E;
+  --disp:'Barlow Condensed','Oswald','Arial Narrow',sans-serif;
+  --body:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--body); background:var(--paper); color:var(--ink); min-height:100vh;
+  -webkit-text-size-adjust:100%; padding-bottom:env(safe-area-inset-bottom);}
+input,button,select,textarea{font-family:inherit; font-size:1rem}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--rule); outline-offset:2px}
+.disp{font-family:var(--disp); text-transform:uppercase; letter-spacing:.06em}
+.mono{font-family:var(--mono)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+header.hd{background:var(--rule); color:var(--paper); padding:18px 16px 14px}
+header.hd .in{max-width:680px; margin:0 auto; display:flex; align-items:baseline; justify-content:space-between}
+nav.tabs{background:var(--card); border-bottom:2px solid var(--rule); overflow-x:auto}
+nav.tabs .in{max-width:680px; margin:0 auto; display:flex}
+nav.tabs button{flex:1 0 auto; padding:12px 14px; border:none; background:transparent; color:var(--ink); font-weight:600; font-size:15px; white-space:nowrap}
+nav.tabs button[aria-selected="true"]{background:var(--rule); color:var(--paper)}
+main{max-width:680px; margin:0 auto; padding:12px 12px 72px}
+.pnl{background:var(--card); border:1.5px solid var(--rule); border-radius:4px; margin-bottom:14px; overflow:hidden}
+.pnl>.lab{font-family:var(--disp); text-transform:uppercase; letter-spacing:.06em; font-size:14px; font-weight:700; color:var(--paper); padding:6px 12px}
+.pnl>.bd{padding:12px}
+.muted{color:var(--graphite); font-size:14px}
+.tg{display:flex; border:1.5px solid var(--rule); border-radius:3px; overflow:hidden}
+.tg button{flex:1; padding:10px 0; border:none; background:var(--card); color:var(--ink); font-weight:600; font-size:14px}
+.tg button[aria-pressed="true"]{background:var(--rule); color:var(--paper)}
+.field{width:100%; padding:10px 12px; font-size:16px; border:1.5px solid var(--rule); border-radius:3px; background:var(--card)}
+.field.soft{border:1px solid var(--ruleSoft); font-size:14px}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.numblk label{font-size:11px; color:var(--graphite)}
+.chip{display:inline-flex; align-items:center; gap:5px; background:#EAEEF6; border:1px solid var(--ruleSoft); border-radius:14px; padding:3px 6px 3px 10px; margin:3px 4px 0 0; font-size:13px}
+.chip button{border:none; background:none; color:var(--red); font-size:13px; padding:0 2px; line-height:1}
+.cta{font-family:var(--disp); text-transform:uppercase; letter-spacing:.06em; font-size:17px; font-weight:600; width:100%; padding:13px 0; background:var(--rule); color:var(--paper); border:none; border-radius:3px}
+.cta[disabled]{background:var(--ruleSoft); cursor:default}
+.findbtn{font-family:var(--disp); text-transform:uppercase; letter-spacing:.05em; font-size:12px; font-weight:600; padding:8px 12px; border:1.5px solid var(--rule); border-radius:3px; background:var(--card); color:var(--rule)}
+.leaflet-container{font-family:var(--body)!important}
+.badge{font-family:var(--mono); font-size:9px; font-weight:600; color:var(--paper); border-radius:2px; padding:2px 5px; margin-left:6px; vertical-align:middle}
+.logitem{background:var(--card); border:1px solid var(--ruleSoft); border-radius:4px; padding:10px 12px; margin-bottom:8px}
+.del{border:none; background:none; color:var(--red); font-size:12px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+/* ============================================================
+   TATAMI — a training instrument for grappling & MMA
+   The same engine as Gate Golf, applied to fight sports:
+     a ROLL is the round · the MAT (home gym) is the LAB · comps/open-mats are the FIELD.
+   Machines: MAP (venues as places) · CLASSIFY (your measured leak) · GATE (the recurring hole)
+             · CHART YOUR GAME (technique success) · GATHER (advice corpus) · FILTER (advice by fit).
+   One community, one kernel — this hall copies the golf machine, with grappling metrics.
+   Storage = localStorage · render = vanilla · offline, private, yours.
+   Striking (boxing / Muay Thai) is a planned discipline with its OWN metrics (rounds, knockdowns,
+   combinations, defense%) — not measured here yet; grappling never pretends to score a stand-up fight.
+   ============================================================ */
+var STORAGE_KEY = "tatami-v1";
+var T = { paper:"#F4F5F8", card:"#FFFFFF", rule:"#2B3A57", ruleSoft:"#CBD2E0", ink:"#161B26",
+          graphite:"#5A6070", red:"#C2402A", green:"#2E7D4F", amber:"#B07A1E" };
+
+function norm(s){ return (s||"").trim().toLowerCase(); }
+function avg(a){ return a.length ? a.reduce(function(x,y){return x+y;},0)/a.length : null; }
+function fmt(n,d){ if(d===undefined)d=1; return (n===null||n===undefined||isNaN(n)) ? "—" : n.toFixed(d); }
+function sgn(n,d){ if(n===null||n===undefined||isNaN(n)) return "—"; return (n>=0?"+":"")+n.toFixed(d===undefined?1:d); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+
+/* the performance number the LAB trends: sub margin, plus a third of position margin. Higher is better.
+   Simple and checkable — every session's control is (taps you got − taps you gave) + ⅓·(positions won − lost). */
+function control(s){ return (num(s.subsFor)-num(s.subsAgainst)) + 0.34*(num(s.posGained)-num(s.posLost)); }
+function num(v){ v=Number(v); return isNaN(v)?0:v; }
+
+var DISCIPLINES = [["bjj-gi","BJJ · Gi"],["bjj-nogi","BJJ · No-Gi"],["subgrap","Submission grappling"],["wrestling","Wrestling"],["mma","MMA (grappling)"]];
+function discLabel(k){ for(var i=0;i<DISCIPLINES.length;i++) if(DISCIPLINES[i][0]===k) return DISCIPLINES[i][1]; return k; }
+
+/* the leaks a tip can address — keys match classify() so a measured profile pulls the advice that fits it */
+var LEAKS = [["defense","Defense / escapes"],["position","Position / guard"],["finishing","Finishing"],["takedowns","Takedowns"],["general","General"]];
+function leakLabel(k){ for(var i=0;i<LEAKS.length;i++) if(LEAKS[i][0]===k) return LEAKS[i][1]; return k; }
+function tagToLeak(tag){ return tag==="The Submission Sieve"?"defense":tag==="Caught on Bottom"?"position":tag==="The No-Finish"?"finishing":null; }
+
+/* ---------- storage ---------- */
+function loadData(){
+  try{ var v=localStorage.getItem(STORAGE_KEY); if(v) return JSON.parse(v); }catch(e){}
+  return { settings:null, sessions:[] };
+}
+function persist(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); state.saveErr=false; }
+  catch(e){ state.saveErr=true; }
+}
+
+/* ---------- state ---------- */
+function newDraft(){
+  return { isHome:true, venue:"", date:todayISO(),
+           discipline:(typeof state!=="undefined" && state.data.settings ? state.data.settings.discipline : "bjj-nogi"),
+           rounds:"", subsFor:"", subsAgainst:"", posGained:"", posLost:"",
+           caughtBy:[], caughtInput:"", note:"",
+           ll:null, results:null, searching:false };
+}
+var state = { data:loadData(), tab:"session", draft:newDraft(), saveErr:false,
+              setupName:"", setupDisc:"bjj-nogi", setupLL:null, setupNote:"", setupResults:null, setupSearching:false };
+if(!state.data.venues) state.data.venues = {};   // registry of resolved away venues: {normName:{name,lat,lon}}
+if(!state.data.moves)  state.data.moves  = [];   // technique log: {id, name, finished, date}
+if(!state.data.advice) state.data.advice = [];   // the corpus: {id, leak, text, url, source, helped, added}
+state.moveForm   = {name:"", finished:true};
+state.adviceForm = {leak:"defense", text:"", url:"", source:""};
+
+/* ---------- analysis (mirrors Gate Golf: home 3-avg vs previous, away 5-avg, the gap) ---------- */
+function analyze(sessions, homeName){
+  var sorted = sessions.slice().sort(function(a,b){ return a.date<b.date?-1:a.date>b.date?1:a.id-b.id; });
+  var home=[], away=[], firstSeen={};
+  sorted.forEach(function(s){
+    if(norm(s.venue)===norm(homeName)) home.push(s);
+    else { away.push(s); var k=norm(s.venue); if(!(k in firstSeen)) firstSeen[k]=s.id; }
+  });
+  var hc = home.map(control), readings=[];
+  for(var i=5;i<home.length;i++){
+    var cur=(hc[i]+hc[i-1]+hc[i-2])/3, prev=(hc[i-3]+hc[i-4]+hc[i-5])/3;
+    readings.push({cur:cur, prev:prev, delta:cur-prev});   // higher control is better → delta>0 is progress
+  }
+  var streak=0;
+  for(var j=readings.length-1;j>=0;j--){ if(readings[j].delta<=0) streak++; else break; }
+  var last=readings[readings.length-1]||null;
+  var homeCur3  = home.length>=3 ? (hc[hc.length-1]+hc[hc.length-2]+hc[hc.length-3])/3 : null;
+  var homePrev3 = home.length>=6 ? (hc[hc.length-4]+hc[hc.length-5]+hc[hc.length-6])/3 : null;
+  var aw=away.map(control);
+  var away5 = away.length>=5 ? aw.slice(-5).reduce(function(x,y){return x+y;},0)/5 : null;
+  var gap = (away5!==null && homeCur3!==null) ? homeCur3-away5 : null;
+  return {sorted:sorted, home:home, away:away, readings:readings, streak:streak, last:last,
+          homeCur3:homeCur3, homePrev3:homePrev3, away5:away5, gap:gap, firstSeen:firstSeen};
+}
+
+/* recurring submissions — the gate: a tap that catches you twice is a hole, not bad luck */
+function recurringCatches(sessions){
+  var by={};
+  sessions.forEach(function(s){ (s.caughtBy||[]).forEach(function(nm){ var k=norm(nm); if(!k) return; by[k]=by[k]||{name:nm,c:0}; by[k].c++; }); });
+  return Object.keys(by).map(function(k){return by[k];}).sort(function(a,b){return b.c-a.c;});
+}
+function anyCatchesLogged(sessions){ return sessions.some(function(s){ return (s.caughtBy||[]).length; }); }
+
+/* ---------- technique chart (chart your game) ---------- */
+function moveStats(){
+  var by={}; (state.data.moves||[]).forEach(function(m){ var k=norm(m.name); (by[k]=by[k]||{name:m.name, n:0, f:0}); by[k].n++; if(m.finished) by[k].f++; });
+  return Object.keys(by).map(function(k){ var r=by[k]; r.rate=r.n?r.f/r.n:0; return r; }).sort(function(a,b){ return b.f-a.f || b.n-a.n; });
+}
+
+/* ============================================================ render ============================================================ */
+var app = document.getElementById("app");
+
+function courseResults(list, act){
+  if(!list.length) return '<div class="mono" style="font-size:12px;color:'+T.graphite+';margin-top:6px">No venues found — type the name to log it anyway.</div>';
+  return '<div style="margin-top:6px">'+list.slice(0,8).map(function(c,i){
+    return '<button class="findbtn" data-act="'+act+'" data-i="'+i+'" style="display:block;width:100%;text-align:left;margin-bottom:4px;text-transform:none;letter-spacing:0;font-family:var(--body);font-weight:500">'+
+      esc(c.name)+(c.display?'<span class="mono" style="font-size:10px;color:'+T.graphite+';display:block">'+esc(c.display)+'</span>':"")+'</button>';
+  }).join("")+'</div>';
+}
+
+/* ---------- maps: gyms & comps become real PLACES (client-side; coords go browser->OSM, never our engine) ---------- */
+function haversine(a,b,c,d){
+  var R=6371, r=Math.PI/180, dLat=(c-a)*r, dLon=(d-b)*r,
+      x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+function nominatimSearch(q){
+  return fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&q="+encodeURIComponent(q),
+               {headers:{"Accept":"application/json"}})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      return (d||[]).map(function(x){
+        return { name:(x.name||String(x.display_name||"").split(",")[0]), display:x.display_name||"",
+                 lat:+x.lat, lon:+x.lon, type:x.type };
+      }).filter(function(x){ return x.lat && x.lon; });
+    });
+}
+function overpassNear(lat,lon){
+  var qy='[out:json][timeout:20];nwr[sport~"martial_arts|brazilian_jiu_jitsu|jiu_jitsu|wrestling|judo|mma|grappling"](around:12000,'+lat+','+lon+');out center 25;';
+  return fetch("https://overpass-api.de/api/interpreter",{method:"POST",body:"data="+encodeURIComponent(qy)})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      return (d.elements||[]).map(function(e){
+        var la=(e.center?e.center.lat:e.lat), lo=(e.center?e.center.lon:e.lon), nm=(e.tags||{}).name;
+        return (nm&&la&&lo)?{name:nm, lat:la, lon:lo, dist:haversine(lat,lon,la,lo), display:""}:null;
+      }).filter(Boolean).sort(function(a,b){ return a.dist-b.dist; });
+    });
+}
+function geolocate(){
+  return new Promise(function(res,rej){
+    if(!navigator.geolocation) return rej(new Error("this device has no location"));
+    navigator.geolocation.getCurrentPosition(
+      function(p){ res({lat:p.coords.latitude, lon:p.coords.longitude}); },
+      function(e){ rej(new Error(e.code===1?"location permission denied":"couldn't get your location")); },
+      {enableHighAccuracy:true, timeout:12000, maximumAge:60000});
+  });
+}
+
+/* ---------- header / tabs ---------- */
+function header(home){
+  return '<header class="hd"><div class="in">'+
+    '<div><div class="disp" style="font-size:30px;font-weight:700;line-height:1">Tatami</div>'+
+    '<div class="mono" style="font-size:11px;opacity:.75;margin-top:4px">THE ROLL IS THE ROUND · THE MAT IS THE LAB</div></div>'+
+    (home ? '<div style="text-align:right"><div class="mono" style="font-size:10px;opacity:.6">HOME GYM</div>'+
+      '<div class="disp" style="font-size:16px;font-weight:600">'+esc(home)+'</div></div>' : '')+
+    '</div></header>';
+}
+function tabsView(){
+  var items=[["session","New roll"],["inst","Instruments"],["game","Your game"],["advice","Advice"],["map","Map"],["log","Log"]];
+  return '<nav class="tabs"><div class="in">'+items.map(function(it){
+    return '<button data-act="tab" data-k="'+it[0]+'" aria-selected="'+(state.tab===it[0])+'">'+it[1]+'</button>';
+  }).join("")+'</div></nav>';
+}
+
+/* ---------- setup ---------- */
+function setupView(){
+  var opts=DISCIPLINES.map(function(d){ return '<option value="'+d[0]+'"'+(state.setupDisc===d[0]?" selected":"")+'>'+d[1]+'</option>'; }).join("");
+  var canLock = state.setupName.trim().length>0;
+  return '<main style="padding:20px 16px 64px">'+
+    '<h2 class="disp" style="font-size:22px;margin:0 0 4px">Set your home gym</h2>'+
+    '<p style="color:'+T.graphite+';font-size:14px;margin:0 0 16px">The lab. Every read of whether you’re improving runs off rolls at your own gym — the same partners, the same mat.</p>'+
+    '<label class="mono" style="font-size:11px;color:'+T.graphite+'">GYM / ACADEMY NAME</label>'+
+    '<input id="setupName" class="field" style="margin-top:4px" placeholder="e.g. Gracie Barra Lafayette" value="'+esc(state.setupName)+'">'+
+    '<label class="mono" style="font-size:11px;color:'+T.graphite+';display:block;margin-top:16px">PRIMARY DISCIPLINE</label>'+
+    '<select id="setupDisc" class="field" style="margin-top:4px">'+opts+'</select>'+
+    '<div style="display:flex;gap:8px;margin-top:16px;align-items:center">'+
+      '<button class="findbtn" data-act="setupSearch">📍 Locate on map (optional)</button>'+
+      (state.setupLL?'<span class="mono" style="font-size:11px;color:'+T.green+'">◉ located</span>':"")+'</div>'+
+    (state.setupSearching?'<div class="mono" style="font-size:12px;color:'+T.graphite+';margin-top:6px">Searching…</div>':"")+
+    (state.setupNote?'<div class="mono" style="font-size:12px;color:'+T.amber+';margin-top:6px">'+esc(state.setupNote)+'</div>':"")+
+    (state.setupResults?courseResults(state.setupResults,"setupPick"):"")+
+    '<button class="cta" data-act="lock" style="margin-top:20px"'+(canLock?"":" disabled")+'>Lock the lab</button>'+
+    '<p class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:14px">Striking (boxing / Muay Thai) is coming as its own hall — it needs its own numbers (rounds, knockdowns, combinations, defense%). Grappling won’t pretend to score a stand-up fight.</p>'+
+    '</main>';
+}
+
+/* ---------- new roll (session entry) ---------- */
+function numField(id,label,val){
+  return '<div class="numblk"><label class="mono">'+label+'</label>'+
+    '<input id="'+id+'" type="number" inputmode="numeric" min="0" class="field mono" style="margin-top:3px" value="'+esc(val)+'"></div>';
+}
+function sessionView(){
+  var set=state.data.settings, dr=state.draft;
+  var venueName = dr.isHome ? set.homeGym : dr.venue.trim();
+  var dopts=DISCIPLINES.map(function(d){ return '<option value="'+d[0]+'"'+(dr.discipline===d[0]?" selected":"")+'>'+d[1]+'</option>'; }).join("");
+  var canSave = venueName && num(dr.rounds)>=1;
+  var away = !dr.isHome ? (
+    '<div style="margin-top:10px"><label class="mono" style="font-size:11px;color:'+T.graphite+'">VENUE — comp, open mat, another gym</label>'+
+    '<input id="venue" class="field" style="margin-top:4px" placeholder="Where did you roll?" value="'+esc(dr.venue)+'">'+
+    '<div style="display:flex;gap:8px;margin-top:8px">'+
+      '<button class="findbtn" data-act="search">Search</button>'+
+      '<button class="findbtn" data-act="geo">📍 Near me</button>'+
+      (dr.ll?'<span class="mono" style="font-size:11px;color:'+T.green+';align-self:center">◉ located</span>':"")+'</div>'+
+    (dr.searching?'<div class="mono" style="font-size:12px;color:'+T.graphite+';margin-top:6px">Searching…</div>':"")+
+    (dr.note?'<div class="mono" style="font-size:12px;color:'+T.amber+';margin-top:6px">'+esc(dr.note)+'</div>':"")+
+    (dr.results?courseResults(dr.results,"pick"):"")+'</div>') : "";
+  var caughtChips = dr.caughtBy.map(function(nm,i){ return '<span class="chip">'+esc(nm)+'<button data-act="delCaught" data-i="'+i+'">×</button></span>'; }).join("");
+  return ''+
+    '<div class="tg" style="margin-bottom:10px">'+
+      '<button data-act="toggleHome" data-v="true" aria-pressed="'+(dr.isHome)+'">Home — lab</button>'+
+      '<button data-act="toggleHome" data-v="false" aria-pressed="'+(!dr.isHome)+'">Away — field</button></div>'+
+    away+
+    '<div class="grid2" style="margin-top:10px">'+
+      '<div class="numblk"><label class="mono">DATE</label><input id="date" type="date" class="field mono" style="margin-top:3px" value="'+esc(dr.date)+'"></div>'+
+      '<div class="numblk"><label class="mono">DISCIPLINE</label><select id="disc" class="field soft" style="margin-top:3px">'+dopts+'</select></div>'+
+    '</div>'+
+    '<div class="pnl" style="margin-top:12px"><div class="lab" style="background:'+T.rule+'">THE ROLLS</div><div class="bd">'+
+      '<div class="grid2">'+numField("rounds","ROUNDS ROLLED",dr.rounds)+numField("subsFor","TAPS YOU GOT",dr.subsFor)+'</div>'+
+      '<div class="grid2" style="margin-top:8px">'+numField("subsAgainst","TAPS YOU GAVE",dr.subsAgainst)+numField("posGained","POSITIONS WON",dr.posGained)+'</div>'+
+      '<div class="grid2" style="margin-top:8px">'+numField("posLost","POSITIONS LOST",dr.posLost)+'<div></div></div>'+
+      '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">Positions = sweeps, passes, takedowns, back/mount taken. Honest counts, not exact — the trend is what matters.</div>'+
+    '</div></div>'+
+    '<div class="pnl"><div class="lab" style="background:'+T.rule+'">CAUGHT BY — what tapped you (optional, but this is where the gate lives)</div><div class="bd">'+
+      '<div style="display:flex;gap:8px"><input id="caughtInput" class="field" placeholder="e.g. armbar, rear naked choke" value="'+esc(dr.caughtInput)+'">'+
+        '<button class="findbtn" data-act="addCaught" style="white-space:nowrap">Add</button></div>'+
+      (caughtChips?'<div style="margin-top:6px">'+caughtChips+'</div>':"")+
+      '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:6px">Name what caught you. A submission that catches you twice becomes a flagged hole — the thing to drill.</div>'+
+    '</div></div>'+
+    '<input id="note" class="field" placeholder="One note (optional) — what you’re working on" value="'+esc(dr.note)+'" style="margin-bottom:12px">'+
+    '<button class="cta" data-act="save"'+(canSave?"":" disabled")+'>Log the roll</button>';
+}
+
+/* ---------- classify: the measured profile + probable best focus (simple, transparent, auditable) ---------- */
+function profile(){
+  var ss=state.data.sessions;
+  var rounds=ss.reduce(function(a,s){return a+num(s.rounds);},0)||0;
+  var sf=ss.reduce(function(a,s){return a+num(s.subsFor);},0);
+  var sa=ss.reduce(function(a,s){return a+num(s.subsAgainst);},0);
+  var pg=ss.reduce(function(a,s){return a+num(s.posGained);},0);
+  var pl=ss.reduce(function(a,s){return a+num(s.posLost);},0);
+  var rec=recurringCatches(ss).filter(function(x){return x.c>=2;});
+  return { n:ss.length, rounds:rounds,
+           avgControl: ss.length?avg(ss.map(control)):null,
+           tapForPer:   rounds?sf/rounds:null,
+           tapAgainstPer: rounds?sa/rounds:null,
+           posMarginPer: rounds?(pg-pl)/rounds:null,
+           recurring: rec };
+}
+function classify(p){
+  if(p.n<3) return {tag:"Collecting", tone:T.graphite, why:p.n+"/3 sessions before the read — the classification is MEASURED, never guessed. Roll.", focus:null};
+  var leaks=[];
+  if(p.tapAgainstPer!==null) leaks.push({cost:p.tapAgainstPer*1.0, tag:"The Submission Sieve",
+    why:"You give up "+fmt(p.tapAgainstPer)+" taps a round — the most expensive thing on the mat.",
+    focus:"Defensive posture and escapes. Survive first: you can’t attack from inside a choke. Tapping in training is fine — getting caught the SAME way isn’t."});
+  if(p.posMarginPer!==null) leaks.push({cost:Math.max(0,-p.posMarginPer)*0.8, tag:"Caught on Bottom",
+    why:"You lose "+fmt(-p.posMarginPer)+" more positions a round than you win — you’re living on bottom.",
+    focus:"Guard retention and sweeps. The match is decided by who’s on top — get there and stay there."});
+  if(p.tapForPer!==null) leaks.push({cost:Math.max(0,(p.posMarginPer||0)>0?(0.6-p.tapForPer):(0.4-p.tapForPer))*0.7, tag:"The No-Finish",
+    why:"You get "+fmt(p.tapForPer)+" taps a round"+((p.posMarginPer||0)>0?" despite winning the positions":"")+" — control isn’t turning into submissions.",
+    focus:"Submission chains from dominant positions. Turn the mount and the back into taps — attack in threes."});
+  leaks.sort(function(a,b){ return b.cost-a.cost; });
+  var top=leaks[0];
+  if(!top || top.cost<0.4) return {tag:"The All-Rounder", tone:T.green, why:"No single leak — you defend, you get on top, and you finish. Nothing bleeding.",
+    focus:"Sharpen your A-game and your pace. You improve by inches now — tighten your best positions and your conditioning."};
+  return {tag:top.tag, tone:top.cost>1.0?T.red:T.amber, why:top.why, focus:top.focus};
+}
+function pill(label,val){ return '<span style="background:#EAEEF6;border:1px solid '+T.ruleSoft+';border-radius:12px;padding:3px 9px;white-space:nowrap"><span class="mono" style="font-size:9px;color:'+T.graphite+'">'+label+'</span> <span class="mono" style="font-size:13px;font-weight:600">'+val+'</span></span>'; }
+function profileView(){
+  var p=profile(), c=classify(p), facts="";
+  if(p.avgControl!==null) facts+=pill("Control", sgn(p.avgControl));
+  if(p.tapAgainstPer!==null) facts+=pill("Taps against/rd", fmt(p.tapAgainstPer));
+  if(p.tapForPer!==null) facts+=pill("Taps for/rd", fmt(p.tapForPer));
+  if(p.posMarginPer!==null) facts+=pill("Position/rd", sgn(p.posMarginPer));
+  return panel("PROFILE — classified by your measurements ("+p.n+" session"+(p.n!==1?"s":"")+")", c.tone,
+    (facts?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">'+facts+'</div>':"")+
+    '<div class="disp" style="font-size:18px;font-weight:700;color:'+c.tone+'">'+c.tag+'</div>'+
+    (c.why?'<div style="font-size:14px;margin-top:2px">'+c.why+'</div>':"")+
+    (c.focus?'<div style="margin-top:8px;padding:8px 10px;background:#EEF1F7;border-left:3px solid '+c.tone+';border-radius:2px"><span class="mono" style="font-size:10px;color:'+T.graphite+'">PROBABLE BEST FOCUS</span><div style="font-size:14px;margin-top:2px">'+c.focus+'</div></div>':"")+
+    '<div class="mono" style="font-size:10px;color:'+T.graphite+';margin-top:8px">Measured, not guessed — every line is a number you can check. As more grapplers are measured, “focus” becomes “what actually worked for players like you.”</div>');
+}
+
+/* ---------- #4 filtered advice: the corpus, surfaced by measured FIT (not popularity) ---------- */
+function fittedAdviceView(){
+  var p=profile(); if(p.n<3) return "";
+  var all=state.data.advice||[]; if(!all.length) return "";
+  var c=classify(p), leak=tagToLeak(c.tag);
+  if(!leak) return panel("ADVICE FOR YOUR LEAK", T.graphite,
+    '<div style="font-size:14px">No single leak to match against — you’re an All-Rounder. Browse the whole corpus in the Advice tab and sharpen by inches.</div>');
+  var pool=all.filter(function(x){return x.leak===leak;});
+  function rank(x){ return x.helped===true?0:(x.helped===false?2:1); }
+  pool=pool.slice().sort(function(a,b){ return rank(a)-rank(b) || b.id-a.id; });
+  var LK=esc(leakLabel(leak).toUpperCase());
+  if(!pool.length) return panel("ADVICE FOR YOUR LEAK — "+LK, c.tone,
+    '<div style="font-size:14px">Nothing gathered yet for <b>'+esc(leakLabel(leak))+'</b> — your measured leak. Add a tip for it in the Advice tab and it will surface right here.</div>');
+  var items=pool.slice(0,3).map(function(x){
+    var link=x.url?' <a href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer nofollow" class="mono" style="font-size:11px;color:'+T.rule+';font-weight:600">▶ watch/read →</a>':"";
+    var src=x.source?' <span class="mono" style="font-size:11px;color:'+T.graphite+'">— '+esc(x.source)+'</span>':"";
+    var mark=x.helped===true?'<span class="mono" style="font-size:10px;color:'+T.green+'">✓ worked for you</span>'
+            :x.helped===false?'<span class="mono" style="font-size:10px;color:'+T.red+'">✗ didn’t work</span>'
+            :'<span class="mono" style="font-size:10px;color:'+T.amber+'">untried</span>';
+    return '<div style="padding:8px 0;border-top:0.5px solid '+T.ruleSoft+'"><div style="font-size:14px">'+esc(x.text)+'</div>'+
+      '<div style="margin-top:4px">'+mark+src+link+'</div></div>';
+  }).join("");
+  var more=pool.length>3?'<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">+'+(pool.length-3)+' more for this leak in the Advice tab.</div>':"";
+  return panel("ADVICE FOR YOUR LEAK — "+LK, c.tone,
+    '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-bottom:2px">Surfaced because it’s tagged to your measured leak — <b>fit, not popularity</b>. Still quarantined; your rolls decide.</div>'+
+    items+more);
+}
+
+/* ---------- instruments ---------- */
+function instrumentsView(){
+  var set=state.data.settings, a=analyze(state.data.sessions, set.homeGym);
+
+  var out = profileView() + fittedAdviceView();
+
+  // GATE — the recurring hole
+  var rec=recurringCatches(state.data.sessions).filter(function(x){return x.c>=2;});
+  var gateBody, gateTone;
+  if(!anyCatchesLogged(state.data.sessions)){ gateTone=T.graphite; gateBody='<div class="muted">No submissions logged yet. Add what taps you on the roll card and the recurring holes surface here.</div>'; }
+  else if(rec.length){ gateTone=T.red;
+    gateBody='<div style="font-size:15px;margin-bottom:6px">Caught more than once by:</div>'+
+      rec.map(function(x){ return '<span class="chip" style="border-color:'+T.red+'">'+esc(x.name)+' <span class="mono" style="font-size:11px;color:'+T.red+'">×'+x.c+'</span></span>'; }).join("")+
+      '<div style="color:'+T.graphite+';font-size:13px;margin-top:8px">The same tap twice is a hole in your game, not bad luck. Drill the escape until it stops being free.</div>'; }
+  else { gateTone=T.green; gateBody='<div style="font-size:15px">No submission has caught you twice. Your defense isn’t leaking the same way — hold that.</div>'; }
+  out += panel("GATE — the recurring hole", gateTone, gateBody);
+
+  // LAB — home control trend
+  var verdict;
+  if(a.home.length<6) verdict={tone:T.graphite,head:"Collecting",text:a.home.length+"/6 home sessions before the first reading. Roll."};
+  else if(a.last.delta>0) verdict={tone:T.green,head:"Working",text:"Current 3-session control beat the previous by "+fmt(a.last.delta)+". Hold the plan."};
+  else if(a.streak>=2) verdict={tone:T.red,head:"Change the game",text:"Two readings without progress. Change what you drill — the current focus isn’t moving the number."};
+  else verdict={tone:T.amber,head:"Change the drill",text:"Reading flat ("+sgn(a.last.delta)+"). Drill changes are cheap; a bigger change needs a second flat reading."};
+  var lab = bigPair(["CONTROL 3",sgn(a.homeCur3)],["PREVIOUS 3",sgn(a.homePrev3)])+
+    '<div style="margin-top:10px;padding:10px 12px;background:#EEF1F7;border-left:3px solid '+verdict.tone+';border-radius:2px">'+
+      '<div class="disp" style="font-size:15px;font-weight:700;color:'+verdict.tone+'">'+verdict.head+'</div>'+
+      '<div style="font-size:14px;margin-top:2px">'+verdict.text+'</div></div>'+
+    (a.home.length>=3 ? spark(a.home.map(control)) : "")+
+    '<div class="mono" style="font-size:10px;color:'+T.graphite+';margin-top:6px">Control = sub margin + ⅓·position margin, per session. Higher is better. You vs your own past — never a leaderboard.</div>';
+  out += panel("LAB — home 3-session average", T.rule, lab);
+
+  // FIELD — away
+  var field;
+  if(a.away5===null) field='<div class="muted">'+a.away.length+'/5 away sessions (comps, open mats). Validation only — no steering authority.</div>';
+  else field=bigPair(["AWAY 5-AVG",sgn(a.away5)],["GAP vs LAB", a.gap===null?"—":sgn(a.gap)])+
+    (a.gap!==null?'<div style="font-size:13px;color:'+T.graphite+';margin-top:8px">Gap = gym-hero inflation. Shrinking gap → your game travels. Widening gap → you’re beating your training partners, not grappling.</div>':"");
+  out += panel("FIELD — away 5-session average", T.rule, field);
+
+  return out;
+}
+function panel(label,tone,body){
+  return '<section class="pnl"><div class="lab" style="background:'+tone+'">'+label+'</div><div class="bd">'+body+'</div></section>';
+}
+function bigPair(a,b){
+  return '<div style="display:flex;gap:24px;align-items:baseline">'+
+    '<div><div class="mono" style="font-size:10px;color:'+T.graphite+'">'+a[0]+'</div>'+
+    '<div class="mono" style="font-size:34px;font-weight:600;line-height:1.1">'+a[1]+'</div></div>'+
+    '<div><div class="mono" style="font-size:10px;color:'+T.graphite+'">'+b[0]+'</div>'+
+    '<div class="mono" style="font-size:22px;font-weight:500;color:'+T.graphite+'">'+b[1]+'</div></div></div>';
+}
+function spark(series){
+  var w=260,h=44,pad=3, min=Math.min.apply(null,series), max=Math.max.apply(null,series), span=(max-min)||1;
+  function pt(v,i){ var x=pad+(i*(w-2*pad))/Math.max(1,series.length-1); var y=pad+(1-(v-min)/span)*(h-2*pad); return [x,y]; }  // higher control = higher on the chart
+  var poly=series.map(function(v,i){var p=pt(v,i);return p[0]+","+p[1];}).join(" ");
+  var dots=series.map(function(v,i){var p=pt(v,i);return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.2" fill="'+T.rule+'"/>';}).join("");
+  return '<svg width="'+w+'" height="'+h+'" style="margin-top:10px;display:block" aria-label="home control trend">'+
+    '<polyline points="'+poly+'" fill="none" stroke="'+T.rule+'" stroke-width="1.5"/>'+dots+'</svg>';
+}
+function badge(text,color){ return '<span class="badge" style="background:'+color+'">'+text+'</span>'; }
+
+/* ---------- your game (technique chart) ---------- */
+function gameView(){
+  var f=state.moveForm, rows=moveStats();
+  var form='<div class="pnl"><div class="lab" style="background:'+T.rule+'">CHART YOUR GAME — log a technique</div><div class="bd">'+
+    '<div style="display:flex;gap:8px;align-items:flex-end">'+
+      '<div style="flex:1"><label class="mono" style="font-size:11px;color:'+T.graphite+'">TECHNIQUE</label><input id="moveName" class="field" style="margin-top:4px" placeholder="e.g. triangle, knee cut, single leg" value="'+esc(f.name)+'"></div>'+
+    '</div>'+
+    '<div class="tg" style="margin-top:8px">'+
+      '<button data-act="moveFin" data-v="true" aria-pressed="'+(f.finished)+'">Finished ✓</button>'+
+      '<button data-act="moveFin" data-v="false" aria-pressed="'+(!f.finished)+'">Attempt ✗</button></div>'+
+    '<button class="findbtn" data-act="addMove" style="margin-top:10px">Add</button>'+
+    '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">Log the techniques you go for — finished or not. Your A-game is the ones that actually land; a reach is one you keep trying and missing.</div>'+
+  '</div></div>';
+  var chart;
+  if(!rows.length){ chart='<div class="muted">No techniques logged yet. Add a few and your game charts itself — what lands, what doesn’t.</div>'; }
+  else{
+    chart='<div class="pnl"><div class="lab" style="background:'+T.rule+'">YOUR A-GAME — what actually lands</div><div class="bd">'+
+      rows.map(function(r){
+        var pct=Math.round(r.rate*100), barW=Math.max(2,r.rate*100);
+        var tone=r.rate>=0.6&&r.n>=3?T.green:(r.n>=4&&r.rate<0.25?T.amber:T.rule);
+        var flag = r.rate>=0.6&&r.n>=3 ? ' <span class="mono" style="color:'+T.green+';font-size:10px">A-game</span>'
+                 : (r.n>=4&&r.rate<0.25 ? ' <span class="mono" style="color:'+T.amber+';font-size:10px">a reach — drill or shelve</span>' : "");
+        return '<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;align-items:baseline">'+
+          '<span class="disp" style="font-size:14px;font-weight:600">'+esc(r.name)+flag+'</span>'+
+          '<span class="mono" style="font-size:13px">'+pct+'% <span style="color:'+T.graphite+';font-size:11px">('+r.f+'/'+r.n+')</span></span></div>'+
+          '<div style="position:relative;height:14px;background:#EAEEF6;border-radius:7px;margin-top:3px">'+
+            '<div style="position:absolute;left:0;width:'+barW+'%;top:0;bottom:0;background:'+tone+';border-radius:7px;opacity:.85"></div>'+
+          '</div></div>';
+      }).join("")+
+      '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:6px">Bar = finish rate. Sorted by finishes — your most productive weapons on top. Percentages are yours, measured, not a highlight reel.</div>'+
+      '</div></div>';
+  }
+  var recent=(state.data.moves||[]).slice(-8).reverse();
+  var log = recent.length ? '<div class="pnl"><div class="lab" style="background:'+T.graphite+'">RECENT</div><div class="bd">'+
+    recent.map(function(m){ return '<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0"><span class="mono" style="font-size:13px">'+esc(m.name)+' · '+(m.finished?'<span style="color:'+T.green+'">finished</span>':'<span style="color:'+T.graphite+'">attempt</span>')+'</span>'+
+      '<button class="del" data-act="delMove" data-id="'+m.id+'">delete</button></div>'; }).join("")+'</div></div>' : "";
+  return form+chart+log;
+}
+
+/* ---------- the advice corpus: gathered, quarantined, tagged by leak · we link out, never rehost ---------- */
+function adviceView(){
+  var f=state.adviceForm;
+  var opts=LEAKS.map(function(l){ return '<option value="'+l[0]+'"'+(f.leak===l[0]?" selected":"")+'>'+l[1]+'</option>'; }).join("");
+  var form='<div class="pnl"><div class="lab" style="background:'+T.rule+'">GATHER ADVICE — a tip, and where it came from</div><div class="bd">'+
+    '<label class="mono" style="font-size:11px;color:'+T.graphite+'">WHICH LEAK IT ADDRESSES</label><br>'+
+    '<select id="adviceLeak" class="field soft" style="margin-top:4px;width:auto">'+opts+'</select>'+
+    '<textarea id="adviceText" class="field" style="margin-top:8px;min-height:64px;resize:vertical" placeholder="The technique or concept, in the words you heard it — what to DO.">'+esc(f.text)+'</textarea>'+
+    '<input id="adviceUrl" class="field mono" style="margin-top:8px;font-size:12px" placeholder="Instructional / video link (optional) — we link out, never rehost" value="'+esc(f.url)+'">'+
+    '<input id="adviceSource" class="field" style="margin-top:8px" placeholder="Who taught it (optional) — give them the credit" value="'+esc(f.source)+'">'+
+    '<button class="findbtn" data-act="postAdvice" style="margin-top:10px">Add to the corpus</button>'+
+    '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">Everything here is <b style="color:'+T.amber+'">quarantined</b> — gathered, never proven. A tip proposes; the mat disposes. It counts for nothing until your own rolls say it works for <i>you</i>. We link to the coach’s own video — we never re-host it.</div>'+
+    '</div></div>';
+  var items=(state.data.advice||[]).slice().reverse();
+  var list = items.length ? items.map(function(x){
+    var link = x.url ? '<a href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer nofollow" class="mono" style="font-size:12px;color:'+T.rule+';font-weight:600">▶ watch / read →</a>' : "";
+    var src  = x.source ? '<span class="mono" style="font-size:11px;color:'+T.graphite+'">— '+esc(x.source)+'</span>' : "";
+    var yes=x.helped===true, no=x.helped===false;
+    return '<div class="pnl"><div class="lab" style="background:'+T.amber+'">QUARANTINED · '+esc(leakLabel(x.leak).toUpperCase())+'</div><div class="bd">'+
+      '<div style="font-size:14px">'+esc(x.text)+'</div>'+
+      (src?'<div style="margin-top:4px">'+src+'</div>':"")+
+      (link?'<div style="margin-top:6px">'+link+'</div>':"")+
+      '<div style="display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap">'+
+        '<span class="mono" style="font-size:10px;color:'+T.graphite+'">DID IT WORK FOR YOU?</span>'+
+        '<button class="findbtn" data-act="helped" data-id="'+x.id+'" data-v="yes" style="padding:4px 10px'+(yes?';background:'+T.green+';color:#fff;border-color:'+T.green:'')+'">helped ✓</button>'+
+        '<button class="findbtn" data-act="helped" data-id="'+x.id+'" data-v="no" style="padding:4px 10px'+(no?';background:'+T.red+';color:#fff;border-color:'+T.red:'')+'">didn’t ✗</button>'+
+        '<button class="del" data-act="delAdvice" data-id="'+x.id+'" style="margin-left:auto">delete</button>'+
+      '</div></div></div>';
+  }).join("") : '<div class="muted">No advice gathered yet. When a coach, an instructional, or a training partner hands you something worth trying, put it here — tagged to the leak it fixes — and let your rolls be the judge.</div>';
+  var foot = items.length ? '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:2px;padding:0 2px">“Helped / didn’t” is <b>your</b> verification, not a vote — and never authority. When these tools federate, those honest marks become “what actually worked for grapplers measured like you.”</div>' : "";
+  return form+list+foot;
+}
+
+/* ---------- map ---------- */
+function mapView(){
+  var venues=state.data.venues||{}, set=state.data.settings, keys=Object.keys(venues);
+  var home = (set.homeLat && set.homeLon) ? {name:set.homeGym, lat:set.homeLat, lon:set.homeLon, home:true} : null;
+  var pins=[]; if(home) pins.push(home);
+  keys.forEach(function(k){ var v=venues[k]; if(v.lat&&v.lon) pins.push({name:v.name,lat:v.lat,lon:v.lon}); });
+  var head='<div class="pnl"><div class="lab" style="background:'+T.rule+'">THE MAP — your mats become places</div><div class="bd">'+
+    (home?"":'<div class="mono" style="font-size:12px;color:'+T.amber+';margin-bottom:6px">Home gym isn’t located yet. <button class="findbtn" data-act="locateHome" style="margin-left:4px">📍 Locate it</button></div>')+
+    '<div class="mono" style="font-size:12px;color:'+T.graphite+'">'+pins.length+' place'+(pins.length!==1?"s":"")+' pinned. Away venues get placed as you log &amp; locate them. Coordinates go from your browser to OpenStreetMap — never to our engine.</div>'+
+    '</div></div>';
+  if(!pins.length) return head;
+  return head+'<div id="map" style="height:340px;border:1.5px solid '+T.rule+';border-radius:4px"></div>'+
+    '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:6px">'+(home?'◉ home gym · ':"")+'○ away venues · tap a pin for the name.</div>';
+}
+var _leaflet=false, _mapObj=null;
+function initMap(){
+  var venues=state.data.venues||{}, set=state.data.settings;
+  var pins=[]; if(set.homeLat&&set.homeLon) pins.push({name:set.homeGym,lat:set.homeLat,lon:set.homeLon,home:true});
+  Object.keys(venues).forEach(function(k){ var v=venues[k]; if(v.lat&&v.lon) pins.push({name:v.name,lat:v.lat,lon:v.lon}); });
+  if(!pins.length || !document.getElementById("map")) return;
+  function build(){
+    if(_mapObj){ _mapObj.remove(); _mapObj=null; }
+    var L=window.L; _mapObj=L.map("map");
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18, attribution:"© OpenStreetMap"}).addTo(_mapObj);
+    var grp=[];
+    pins.forEach(function(p){ var m=L.circleMarker([p.lat,p.lon],{radius:8, color:T.rule, weight:2, fillColor:(p.home?T.rule:"#fff"), fillOpacity:p.home?1:0.9}).addTo(_mapObj); m.bindPopup((p.home?"◉ ":"")+esc(p.name)); grp.push([p.lat,p.lon]); });
+    if(grp.length===1) _mapObj.setView(grp[0],13); else _mapObj.fitBounds(grp,{padding:[30,30]});
+  }
+  if(_leaflet && window.L) return build();
+  var css=document.createElement("link"); css.rel="stylesheet"; css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; document.head.appendChild(css);
+  var js=document.createElement("script"); js.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+  js.onload=function(){ _leaflet=true; build(); }; document.head.appendChild(js);
+}
+
+/* ---------- log ---------- */
+function logView(){
+  var set=state.data.settings, a=analyze(state.data.sessions, set.homeGym);
+  if(a.sorted.length===0) return '<div class="muted">No rolls logged. The log is an invitation.</div>';
+  return a.sorted.slice().reverse().map(function(s){
+    var isHome=norm(s.venue)===norm(set.homeGym);
+    var isFirst=!isHome && a.firstSeen[norm(s.venue)]===s.id;
+    var badges=(isHome?badge("LAB",T.rule):"")+(!isHome&&!isFirst?badge("FIELD",T.graphite):"")+(isFirst?badge("COLD READ",T.amber):"");
+    var ctrl=control(s);
+    return '<div class="logitem"><div style="display:flex;justify-content:space-between;align-items:baseline">'+
+      '<div><span class="disp" style="font-size:16px;font-weight:600">'+esc(s.venue)+'</span>'+
+      '<span class="mono" style="font-size:11px;color:'+T.graphite+';margin-left:8px">'+esc(s.date)+'</span>'+badges+'</div>'+
+      '<div class="mono" style="font-size:20px;font-weight:600;color:'+(ctrl>=0?T.green:T.red)+'">'+sgn(ctrl)+'</div></div>'+
+      '<div class="mono" style="font-size:12px;color:'+T.graphite+';margin-top:4px">'+discLabel(s.discipline)+' · '+num(s.rounds)+' rounds · taps '+num(s.subsFor)+'–'+num(s.subsAgainst)+' · position '+sgn(num(s.posGained)-num(s.posLost),0)+
+      ((s.caughtBy||[]).length?' · caught by '+s.caughtBy.map(esc).join(", "):"")+'</div>'+
+      (s.note?'<div style="font-size:13px;margin-top:4px">'+esc(s.note)+'</div>':"")+
+      '<div style="text-align:right"><button class="del" data-act="del" data-id="'+s.id+'">delete</button></div></div>';
+  }).join("");
+}
+
+/* ---------- render ---------- */
+function render(){
+  var d=state.data;
+  var html=header(d.settings && d.settings.homeGym ? d.settings.homeGym : null);
+  if(!d.settings){ html += setupView(); }
+  else{
+    html += tabsView();
+    if(state.saveErr) html += '<div style="max-width:680px;margin:0 auto;padding:8px 16px;color:'+T.red+';font-size:13px">Storage unavailable — rolls will not survive a reload.</div>';
+    html += '<main>';
+    if(state.tab==="session") html += sessionView();
+    else if(state.tab==="inst") html += instrumentsView();
+    else if(state.tab==="game") html += gameView();
+    else if(state.tab==="advice") html += adviceView();
+    else if(state.tab==="map") html += mapView();
+    else if(state.tab==="log") html += logView();
+    html += '</main>';
+  }
+  app.innerHTML = html;
+  wire();
+  if(d.settings && state.tab==="map") initMap();
+}
+
+/* the session form re-renders on the home/away toggle, so its own <main> is emitted by sessionView (no double-main) */
+
+function wire(){
+  bindInput("setupName", function(v){ state.setupName=v; toggleDisabled("lock", v.trim().length>0); });
+  var sd=document.getElementById("setupDisc"); if(sd) sd.addEventListener("change",function(){ state.setupDisc=sd.value; });
+  bindInput("venue", function(v){ state.draft.venue=v; refreshSaveEnabled(); });
+  bindInput("date", function(v){ state.draft.date=v; });
+  var dc=document.getElementById("disc"); if(dc) dc.addEventListener("change",function(){ state.draft.discipline=dc.value; });
+  bindInput("rounds", function(v){ state.draft.rounds=v; refreshSaveEnabled(); });
+  bindInput("subsFor", function(v){ state.draft.subsFor=v; });
+  bindInput("subsAgainst", function(v){ state.draft.subsAgainst=v; });
+  bindInput("posGained", function(v){ state.draft.posGained=v; });
+  bindInput("posLost", function(v){ state.draft.posLost=v; });
+  bindInput("caughtInput", function(v){ state.draft.caughtInput=v; });
+  bindInput("note", function(v){ state.draft.note=v; });
+  bindInput("moveName", function(v){ state.moveForm.name=v; });
+  var advLeak=document.getElementById("adviceLeak"); if(advLeak) advLeak.addEventListener("change",function(){ state.adviceForm.leak=advLeak.value; });
+  bindInput("adviceText", function(v){ state.adviceForm.text=v; });
+  bindInput("adviceUrl", function(v){ state.adviceForm.url=v; });
+  bindInput("adviceSource", function(v){ state.adviceForm.source=v; });
+
+  app.querySelectorAll("[data-act]").forEach(function(el){ el.addEventListener("click", function(){ act(el); }); });
+}
+function bindInput(id,fn){ var el=document.getElementById(id); if(el) el.addEventListener("input",function(){ fn(el.value); }); }
+function toggleDisabled(actName,enabled){ var b=app.querySelector('[data-act="'+actName+'"]'); if(b) b.disabled=!enabled; }
+function refreshSaveEnabled(){
+  var dr=state.draft, set=state.data.settings;
+  var venueName = dr.isHome ? set.homeGym : dr.venue.trim();
+  toggleDisabled("save", !!(venueName && num(dr.rounds)>=1));
+}
+
+/* ---------- actions ---------- */
+function act(el){
+  var a=el.getAttribute("data-act");
+  if(a==="tab"){ state.tab=el.getAttribute("data-k"); return render(); }
+  if(a==="lock"){ if(!state.setupName.trim()) return;
+    var s={homeGym:state.setupName.trim(), discipline:state.setupDisc};
+    if(state.setupLL){ s.homeLat=state.setupLL.lat; s.homeLon=state.setupLL.lon; }
+    state.data.settings=s; state.draft=newDraft(); persist(); return render(); }
+  if(a==="setupSearch"){
+    var sq=(state.setupName||"").trim();
+    if(!sq){ state.setupNote="type the gym name first"; return render(); }
+    state.setupSearching=true; state.setupNote=""; state.setupResults=null; render();
+    nominatimSearch(sq).then(function(list){ state.setupSearching=false; state.setupResults=list; render(); })
+      .catch(function(){ state.setupSearching=false; state.setupNote="search unavailable — you can still lock without a location"; render(); });
+    return;
+  }
+  if(a==="setupPick"){ var sc=(state.setupResults||[])[+el.getAttribute("data-i")];
+    if(sc){ state.setupName=sc.name; state.setupLL={lat:sc.lat,lon:sc.lon}; state.setupResults=null; state.setupNote=""; } return render(); }
+  if(a==="toggleHome"){ state.draft.isHome=el.getAttribute("data-v")==="true"; return render(); }
+  if(a==="search"){
+    var q=(state.draft.venue||"").trim();
+    if(!q){ state.draft.note="type a venue name first"; return render(); }
+    state.draft.searching=true; state.draft.note=""; state.draft.results=null; render();
+    nominatimSearch(q).then(function(list){ state.draft.searching=false; state.draft.results=list; render(); })
+      .catch(function(){ state.draft.searching=false; state.draft.note="search unavailable — type the name to log it"; render(); });
+    return;
+  }
+  if(a==="geo"){
+    state.draft.searching=true; state.draft.note=""; state.draft.results=null; render();
+    geolocate().then(function(p){ return overpassNear(p.lat,p.lon); })
+      .then(function(list){ state.draft.searching=false; state.draft.results=list;
+        if(!list.length) state.draft.note="no gyms found near you — type the name"; render(); })
+      .catch(function(e){ state.draft.searching=false; state.draft.note=e.message+" — type the name to log it"; render(); });
+    return;
+  }
+  if(a==="pick"){ var c=(state.draft.results||[])[+el.getAttribute("data-i")];
+    if(c){ state.draft.venue=c.name; state.draft.ll={lat:c.lat,lon:c.lon}; state.draft.results=null; state.draft.note=""; } return render(); }
+  if(a==="locateHome"){
+    geolocate().then(function(p){ state.data.settings.homeLat=p.lat; state.data.settings.homeLon=p.lon; persist(); render(); })
+      .catch(function(){ /* silent — the note lives in the panel */ });
+    return;
+  }
+  if(a==="addCaught"){
+    var nm=(state.draft.caughtInput||"").trim();
+    if(nm){ state.draft.caughtBy.push(nm); state.draft.caughtInput=""; }
+    return render();
+  }
+  if(a==="delCaught"){ var ci=+el.getAttribute("data-i"); state.draft.caughtBy.splice(ci,1); return render(); }
+  if(a==="moveFin"){ state.moveForm.finished=el.getAttribute("data-v")==="true"; return render(); }
+  if(a==="addMove"){
+    var mn=((document.getElementById("moveName")||{}).value||state.moveForm.name||"").trim();
+    if(!mn) return;
+    if(!state.data.moves) state.data.moves=[];
+    state.data.moves.push({id:Date.now(), name:mn, finished:!!state.moveForm.finished, date:todayISO()});
+    state.moveForm={name:"", finished:state.moveForm.finished};
+    persist(); return render();
+  }
+  if(a==="delMove"){ var mid=+el.getAttribute("data-id"); state.data.moves=(state.data.moves||[]).filter(function(m){return m.id!==mid;}); persist(); return render(); }
+  if(a==="postAdvice"){
+    var af=state.adviceForm, at=(af.text||"").trim();
+    if(!at) return;
+    var au=(af.url||"").trim(); if(au && !/^https?:\/\//i.test(au)) au="https://"+au;
+    if(!state.data.advice) state.data.advice=[];
+    state.data.advice.push({id:Date.now(), leak:af.leak||"general", text:at, url:au, source:(af.source||"").trim(), helped:null, added:todayISO()});
+    state.adviceForm={leak:af.leak||"defense", text:"", url:"", source:""};
+    persist(); return render();
+  }
+  if(a==="helped"){ var hid=+el.getAttribute("data-id"), hv=el.getAttribute("data-v")==="yes";
+    state.data.advice=(state.data.advice||[]).map(function(x){ if(x.id===hid) x.helped=(x.helped===hv)?null:hv; return x; });
+    persist(); return render(); }
+  if(a==="delAdvice"){ var aid=+el.getAttribute("data-id"); state.data.advice=(state.data.advice||[]).filter(function(x){return x.id!==aid;}); persist(); return render(); }
+  if(a==="save"){ return saveSession(); }
+  if(a==="del"){ var id=+el.getAttribute("data-id"); state.data.sessions=state.data.sessions.filter(function(s){return s.id!==id;}); persist(); return render(); }
+}
+
+function saveSession(){
+  var dr=state.draft, set=state.data.settings;
+  var venueName = dr.isHome ? set.homeGym : dr.venue.trim();
+  if(!(venueName && num(dr.rounds)>=1)) return;
+  var s={ id:Date.now(), date:dr.date, discipline:dr.discipline, venue:venueName, isHome:dr.isHome,
+          rounds:num(dr.rounds), subsFor:num(dr.subsFor), subsAgainst:num(dr.subsAgainst),
+          posGained:num(dr.posGained), posLost:num(dr.posLost),
+          caughtBy:dr.caughtBy.slice(), note:dr.note.trim() };
+  state.data.sessions = (state.data.sessions||[]).concat([s]);
+  if(!dr.isHome && dr.ll){ if(!state.data.venues) state.data.venues={}; state.data.venues[norm(venueName)]={name:venueName, lat:dr.ll.lat, lon:dr.ll.lon}; }
+  persist();
+  state.draft=newDraft(); state.tab="inst"; render();
+}
+
+render();
+if("serviceWorker" in navigator){ navigator.serviceWorker.getRegistrations && navigator.serviceWorker.ready.catch(function(){}); }
+</script>
+</body>
+</html>
