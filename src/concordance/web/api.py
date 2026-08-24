@@ -2910,11 +2910,10 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             self.wfile.write(data)
 
         def _static(self, path: str) -> None:
-            rel = path.lstrip("/") or "index.html"
-            fp = (site / rel).resolve()
-            # traversal guard (is_relative_to, NOT startswith — a sibling dir whose name merely
-            # begins with the site path must not pass) + existence
-            if not fp.is_relative_to(site) or not fp.is_file():
+            # Resolution (clean-URL + traversal guard) lives in resolve_site_file() so it is unit-
+            # tested without warming the server; None means no such file (or an escape attempt).
+            fp = resolve_site_file(site, path)
+            if fp is None:
                 return self._json(404, {"error": "not found"})
             body = fp.read_bytes()
             ctype = mimetypes.guess_type(str(fp))[0] or "application/octet-stream"
@@ -3226,6 +3225,27 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             pass
 
     return _QuietServer((host, port), Handler)
+
+
+def resolve_site_file(site, path: str):
+    """Map a request path to a file under `site`, or None if there is none.
+
+    Clean URLs (Matt, 2026-08-22 — "2 paths on everything"): `/golf` resolves to `golf.html`
+    when the bare path names no file and carries no extension, so every page answers to BOTH its
+    clean address and its old `/page.html` one — no forced redirect, whichever they type is served.
+    Traversal-guarded: a resolved path that escapes `site` (`../`) returns None. Extensioned paths
+    that miss (a stray `.css`) are NOT retried as `.html`. Pure and importable so the behaviour is
+    unit-tested without warming the whole server (tests/test_clean_urls.py).
+    """
+    rel = path.lstrip("/") or "index.html"
+    fp = (site / rel).resolve()
+    if (not fp.is_file()) and "." not in rel.rsplit("/", 1)[-1]:
+        alt = (site / (rel + ".html")).resolve()
+        if alt.is_relative_to(site) and alt.is_file():
+            fp = alt
+    if not fp.is_relative_to(site) or not fp.is_file():
+        return None
+    return fp
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",

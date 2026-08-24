@@ -1,0 +1,56 @@
+"""Clean URLs — "2 paths on everything" (Matt, 2026-08-22).
+
+Every page must answer to BOTH its clean address (`/golf`) and its old `.html` address
+(`/golf.html`), with no forced redirect — whichever a visitor types is served. And the clean-URL
+fallback must never become a traversal or content-type hole: an escaping path returns nothing, and
+a missing *extensioned* asset (a stray `.css`) is not retried as `.html`.
+
+Tests resolve_site_file() directly — the pure resolver the static handler delegates to — so the
+behaviour is proven in milliseconds without warming the whole corpus-backed server.
+"""
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "src"))
+
+from concordance.web.api import resolve_site_file  # noqa: E402
+
+SITE = (ROOT / "site").resolve()
+
+
+def test_clean_path_serves_the_html_twin():
+    for name in ("golf", "tatami", "halls"):
+        assert resolve_site_file(SITE, "/" + name) == (SITE / (name + ".html")).resolve(), name
+
+
+def test_explicit_html_still_resolves():
+    # the old address must keep working — two paths, both served, no redirect
+    for name in ("golf", "tatami", "halls"):
+        assert resolve_site_file(SITE, "/" + name + ".html") == (SITE / (name + ".html")).resolve()
+
+
+def test_root_is_index():
+    assert resolve_site_file(SITE, "/") == (SITE / "index.html").resolve()
+
+
+def test_missing_returns_none():
+    assert resolve_site_file(SITE, "/no-such-hall") is None
+    assert resolve_site_file(SITE, "/no-such-hall.html") is None
+
+
+def test_extensioned_miss_is_not_retried_as_html():
+    # a stray /x.css must 404, never resolve to x.css.html (content-type safety)
+    assert resolve_site_file(SITE, "/definitely-missing.css") is None
+
+
+def test_traversal_is_blocked():
+    for attack in ("/../secret", "/golf/../../api.py", "/../../etc/passwd", "/..%2f..%2fapi.py"):
+        assert resolve_site_file(SITE, attack) is None, attack
+
+
+if __name__ == "__main__":
+    import pytest
+    sys.exit(int(pytest.main([__file__, "-q"])))
