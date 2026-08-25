@@ -33,3 +33,32 @@ edits), and the fast pure set (conductor + clean-urls + reachability, 29 tests) 
 **Next step (singular).** M1 — the classifier: rule-based, confidence-scored, CLARIFY below 0.7,
 nine-type shop taxonomy, CRISIS routes to RED and halts autonomous action, 100% on Matt's 50
 hand-labeled orders (SOP-02) before it ships.
+
+---
+
+## 2026-08-24 — M1: the classifier — built, suite green (SHIP GATE pending Matt's labels)
+
+**Built.** `conductor/classify.py` — the nine-type shop taxonomy (QUOTE, TOOLING, SCHEDULE, QUALITY,
+MATERIAL, MAINTENANCE, PROCESS, HISTORICAL, + CRISIS), rule-based and confidence-scored. Strong
+keyword hit -> 0.9; weak-only -> 0.62 which collapses to CLARIFY (the disposition is 'ask, don't
+guess', the weak guess kept in the note). CRISIS is first and halts autonomous action. `is_crisis`
+ORs a local shop PHYSICAL-injury list with the kernel's PASTORAL matcher (concordance.ask.is_crisis)
+— never defers to one, because they are different notions of crisis. `run_benchmark(cases)` is the
+harness; 100% is the ship gate. Locked by tests/test_conductor_classify.py (7): seed benchmark 100%,
+every type covered, CRISIS-first even disguised ('someone got hurt bad on the saw'), CLARIFY on vague
+work, confident types are not CLARIFY.
+
+**What failed / harvested.** First run caught two real bugs: (1) `is_crisis` deferred to the kernel
+matcher, which is the PASTORAL crisis (suicide/despair) and does NOT flag a physical-injury shop cry
+('someone is hurt, call 911') — fixed to OR a local injury list; (2) below-threshold weak matches
+returned the weak type instead of CLARIFY — fixed to collapse to CLARIFY as the disposition. The
+tests are what surfaced both.
+
+**The ship gate is NOT met and cannot be by me.** SOP-02: the classifier ships at 100% on 50 of
+MATT'S real work orders, in the shop's own words, disguised cases marked — Matt only, not delegated.
+The SEED in the test is SYNTHETIC placeholder that exercises the rules and the harness; it is not the
+gate. When Matt provides the 50, load them and iterate the rules to 100% on THAT set.
+
+**Next step (singular).** Matt gathers the 50 real orders (SOP-02) -> tune classify.py to 100% on
+them; THEN M2 (the shop domain: domains/machine_shop.py + verifiers/manufacturing.py, the real
+engineering).
