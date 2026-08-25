@@ -65,6 +65,22 @@ def _x_product(text: str):
     return out
 
 
+def _x_each(text: str):
+    """"N units at $X each = $Y" — quantity times unit price. Unambiguous: the words name the
+    relationship (a count, a per-item price, a claimed total). A descriptor of up to a few words may
+    sit between the count and "at"; the price MUST carry a per-item marker (each / apiece / per
+    unit), so "50 brackets at $12.40 = $620" without "each" is left to the reader, not guessed."""
+    out = []
+    for m in re.finditer(
+            r"(\d[\d,]*(?:\.\d+)?)\s+[a-z][a-z\- ]{0,24}?\s+at\s+\$?\s*(\d[\d,]*(?:\.\d+)?)"
+            r"\s*(?:each|apiece|a piece|/ea\b|per (?:unit|piece|part|item|ea))\b"
+            r"[^.\n]{0,20}?" + _EQ + r"\s*" + _NUM, text, re.I):
+        qty, unit, total = _f(m.group(1)), _f(m.group(2)), _f(m.group(3))
+        out.append((_q(text, m), "mathematics",
+                    {"mode": "equality", "params": {"expr_a": f"{qty}*{unit}", "expr_b": str(total)}}))
+    return out
+
+
 def _x_percent(text: str):
     out = []
     for m in re.finditer(r"(\d+(?:\.\d+)?)\s*%\s*(?:of|tip on|tax on|discount on|off(?: of)?|on)\s*"
@@ -78,7 +94,10 @@ def _x_percent(text: str):
 
 def _x_gross_pay(text: str):
     out = []
-    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*hours?\s*(?:at|@)\s*\$\s*(\d+(?:\.\d+)?)"
+    # A single descriptor word may sit between the count and "hours" — a real quote says
+    # "22 machine hours at $95/hr = $2,090", not "22 hours ...". One optional word only, to stay
+    # unambiguous (it cannot swallow another number or cross a claim).
+    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:[a-z]+\s+)?hours?\s*(?:at|@)\s*\$\s*(\d+(?:\.\d+)?)"
                          r"\s*(?:/hr|/hour|per hour|an hour|hourly)?\s*" + _EQ + r"\s*" + _NUM,
                          text, re.I):
         out.append((_q(text, m), "labor",
@@ -188,7 +207,7 @@ def _x_nutrition(text: str):
 
 
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
-    ("sum", _x_sum), ("product", _x_product), ("percent", _x_percent),
+    ("sum", _x_sum), ("product", _x_product), ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),
     ("compound_interest", _x_compound), ("rule_of_72", _x_rule72),
     ("elapsed_years", _x_elapsed_years), ("day_of_week", _x_day_of_week),
