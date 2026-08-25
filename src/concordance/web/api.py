@@ -3265,16 +3265,18 @@ def home_for(surface: str, site, path: str) -> str:
     return path
 
 
-# Domain Sort Part 2 (Matt, 2026-08-24): the family / teaching / scripture pages whose HOME is the
-# .org witness. On the .com (secular) surface they 301 to their .org twin; the .org surface serves
-# them normally. Only HUMAN PAGES move — agent/MCP endpoints never do (redirect_for is wired for GET
-# page paths only, and only after the API routes are consulted). Every name here was verified to
-# return 200 on narrowhighway.org before it was added; a redirect must never land on a 404. Ambiguous
-# pages (situations = crisis-first, stays everywhere; almanac; profile) are deliberately NOT moved yet.
-MOVED_TO_ORG = frozenset({
-    "bible", "read", "characters", "encyclopedia", "prophecy", "harmony", "timeline",
-    "backmatter", "places", "narratives", "teachings", "seeds", "journal", "steward",
-})
+# Domain Sort Part 2 (Matt, 2026-08-24): the family / teaching / scripture HUMAN PAGES whose home is
+# the .org witness. On the .com (secular) surface they 301 to their .org twin; .org serves them.
+#
+# ONLY HUMAN PAGES MOVE — agent endpoints never do, which the live surface bore out and pruned this
+# set: characters, prophecy, harmony, timeline, backmatter, places, narratives, teachings, seeds,
+# journal, steward all answer their clean URL with application/json — they are AGENT ENDPOINTS, not
+# pages, so redirecting them would move the machine plane (forbidden). They correctly stay on .com;
+# their family CONTENT is already surface-gated in the engine and rendered through the desk. What
+# remains as a genuine static human page moving to .org is this short, verified list (each 200 on
+# .org, each a real HTML page that 301s cleanly). Expand it only for pages that are actually served
+# HTML, never a JSON route. (situations = crisis-first, stays everywhere; almanac/profile: later.)
+MOVED_TO_ORG = frozenset({"bible", "read", "encyclopedia"})
 
 
 def redirect_for(surface: str, path: str):

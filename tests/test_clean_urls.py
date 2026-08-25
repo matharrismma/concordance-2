@@ -27,6 +27,7 @@ def test_family_pages_redirect_to_org_on_secular():
     assert redirect_for("secular", "/bible") == "https://narrowhighway.org/bible"
     assert redirect_for("secular", "/bible.html") == "https://narrowhighway.org/bible.html"
     assert redirect_for("secular", "/read") == "https://narrowhighway.org/read"
+    assert redirect_for("secular", "/encyclopedia") == "https://narrowhighway.org/encyclopedia"
 
 
 def test_verification_pages_stay_on_com():
@@ -35,13 +36,16 @@ def test_verification_pages_stay_on_com():
 
 
 def test_witness_surface_never_redirects():
-    for p in ("/bible", "/read", "/characters", "/"):
+    for p in ("/bible", "/read", "/encyclopedia", "/"):
         assert redirect_for("witness", p) is None, p
 
 
-def test_moved_set_excludes_ambiguous_and_missing():
-    # crisis-first stays everywhere; 404-on-org pages were never added
-    for p in ("situations", "voices", "corpus", "community", "map", "profile", "almanac"):
+def test_agent_endpoints_and_ambiguous_pages_do_not_move():
+    # JSON agent endpoints (characters/prophecy/... answer application/json) must NOT move; nor the
+    # crisis-first page, nor 404-on-org names.
+    for p in ("characters", "prophecy", "harmony", "timeline", "backmatter", "places", "narratives",
+              "teachings", "seeds", "journal", "steward", "situations", "voices", "corpus",
+              "community", "map", "profile", "almanac"):
         assert p not in MOVED_TO_ORG, p
 
 
