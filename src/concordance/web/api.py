@@ -2910,6 +2910,8 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             self.wfile.write(data)
 
         def _static(self, path: str) -> None:
+            # The Domain Sort flip: on .com the homepage IS the tool (see home_for). Witness untouched.
+            path = home_for(surface, site, path)
             # Resolution (clean-URL + traversal guard) lives in resolve_site_file() so it is unit-
             # tested without warming the server; None means no such file (or an escape attempt).
             fp = resolve_site_file(site, path)
@@ -3246,6 +3248,16 @@ def resolve_site_file(site, path: str):
     if not fp.is_relative_to(site) or not fp.is_file():
         return None
     return fp
+
+
+def home_for(surface: str, site, path: str) -> str:
+    """The Domain Sort flip (Matt, 2026-08-24): on the .com (secular) surface the BARE homepage is
+    the working auditor — efficiency is the front door. Only "/" flips, and only when /checkit
+    exists; /index.html still serves the desk, and the witness surface (.org) is untouched. Pure and
+    reversible: return this to `return path` and / serves index.html again."""
+    if surface == "secular" and path == "/" and resolve_site_file(site, "/checkit") is not None:
+        return "/checkit"
+    return path
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",

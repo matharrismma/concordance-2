@@ -16,9 +16,27 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from concordance.web.api import resolve_site_file  # noqa: E402
+from concordance.web.api import resolve_site_file, home_for  # noqa: E402
 
 SITE = (ROOT / "site").resolve()
+
+
+# ---- the Domain Sort flip: .com homepage IS the auditor; .org and /index.html unchanged ----
+
+def test_secular_bare_home_flips_to_checkit():
+    assert home_for("secular", SITE, "/") == "/checkit"
+
+
+def test_flip_is_only_the_bare_root():
+    # /index.html still serves the desk; deep paths and clean URLs are untouched
+    assert home_for("secular", SITE, "/index.html") == "/index.html"
+    assert home_for("secular", SITE, "/golf") == "/golf"
+    assert home_for("secular", SITE, "/about") == "/about"
+
+
+def test_witness_home_is_untouched():
+    assert home_for("witness", SITE, "/") == "/"
+    assert home_for("witness", SITE, "/index.html") == "/index.html"
 
 
 def test_clean_path_serves_the_html_twin():
