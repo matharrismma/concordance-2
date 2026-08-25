@@ -16,9 +16,33 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from concordance.web.api import resolve_site_file, home_for  # noqa: E402
+from concordance.web.api import resolve_site_file, home_for, redirect_for, MOVED_TO_ORG  # noqa: E402
 
 SITE = (ROOT / "site").resolve()
+
+
+# ---- Domain Sort Part 2: family/teaching pages 301 to .org on the .com surface ----
+
+def test_family_pages_redirect_to_org_on_secular():
+    assert redirect_for("secular", "/bible") == "https://narrowhighway.org/bible"
+    assert redirect_for("secular", "/bible.html") == "https://narrowhighway.org/bible.html"
+    assert redirect_for("secular", "/read") == "https://narrowhighway.org/read"
+
+
+def test_verification_pages_stay_on_com():
+    for p in ("/checkit", "/", "/proof", "/about", "/connect", "/identity"):
+        assert redirect_for("secular", p) is None, p
+
+
+def test_witness_surface_never_redirects():
+    for p in ("/bible", "/read", "/characters", "/"):
+        assert redirect_for("witness", p) is None, p
+
+
+def test_moved_set_excludes_ambiguous_and_missing():
+    # crisis-first stays everywhere; 404-on-org pages were never added
+    for p in ("situations", "voices", "corpus", "community", "map", "profile", "almanac"):
+        assert p not in MOVED_TO_ORG, p
 
 
 # ---- the Domain Sort flip: .com homepage IS the auditor; .org and /index.html unchanged ----

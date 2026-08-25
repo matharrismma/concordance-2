@@ -3158,6 +3158,11 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 return self._redirect(301, _retire_to(u.path, u.query))
             # static site (GET only) for non-API paths, when a site dir is configured
             if method == "GET" and site is not None and u.path not in _API_GET_PATHS:
+                # Domain Sort Part 2: family/teaching pages have moved to .org — 301 there (secular
+                # only; the API routes above already ran, so agent endpoints never redirect).
+                org = redirect_for(surface, u.path)
+                if org is not None:
+                    return self._redirect(301, org + (("?" + u.query) if u.query else ""))
                 return self._static(u.path)
             q = {k: v[0] for k, v in parse_qs(u.query).items()}
             body = None
@@ -3258,6 +3263,31 @@ def home_for(surface: str, site, path: str) -> str:
     if surface == "secular" and path == "/" and resolve_site_file(site, "/checkit") is not None:
         return "/checkit"
     return path
+
+
+# Domain Sort Part 2 (Matt, 2026-08-24): the family / teaching / scripture pages whose HOME is the
+# .org witness. On the .com (secular) surface they 301 to their .org twin; the .org surface serves
+# them normally. Only HUMAN PAGES move — agent/MCP endpoints never do (redirect_for is wired for GET
+# page paths only, and only after the API routes are consulted). Every name here was verified to
+# return 200 on narrowhighway.org before it was added; a redirect must never land on a 404. Ambiguous
+# pages (situations = crisis-first, stays everywhere; almanac; profile) are deliberately NOT moved yet.
+MOVED_TO_ORG = frozenset({
+    "bible", "read", "characters", "encyclopedia", "prophecy", "harmony", "timeline",
+    "backmatter", "places", "narratives", "teachings", "seeds", "journal", "steward",
+})
+
+
+def redirect_for(surface: str, path: str):
+    """The .org home for a moved family/teaching page, or None. Pure and testable; the set is the
+    sort. Reversible — remove a name and .com serves the page again."""
+    if surface != "secular":
+        return None
+    base = path.strip("/").rsplit("/", 1)[-1]
+    if base.endswith(".html"):
+        base = base[:-5]
+    if base in MOVED_TO_ORG:
+        return "https://narrowhighway.org" + path
+    return None
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
