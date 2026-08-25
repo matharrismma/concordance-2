@@ -81,7 +81,7 @@ footer .lead{color:var(--ink); font-weight:500}
     <p class="lede">Paste a quote, an invoice, a spec, or any document with numbers in it. Deterministic
       verification checks every quantitative claim. No AI guessing. No account. No sales call.</p>
     <div class="tool">
-      <textarea id="src" placeholder="Paste your quote or invoice here — e.g.&#10;50 brackets at $12.40 each = $620.&#10;22 machine hours at $95/hr = $2,090.&#10;Subtotal $2,710, 24% margin, total $3,360.40."></textarea>
+      <textarea id="src" placeholder="Paste your quote or invoice here. Write the arithmetic out — e.g.&#10;50 × $12.40 = $620&#10;22 hours at $95/hr = $2,090&#10;$620 + $2,090 = $2,710&#10;10% of $2,710 = $271"></textarea>
       <div class="toolbar">
         <button class="btn" id="go">Check it</button>
         <label class="uplabel">upload a file<input type="file" id="file" accept=".txt,.csv,.md,.tsv,text/plain"></label>
@@ -158,9 +158,10 @@ function render(res){
       '<span class="tag '+cls+'">'+statusWord(a.status)+'</span></div>'+
       (a.detail?'<div class="d">'+esc(a.detail)+'</div>':'')+'</div>';
   }).join("");
-  if(res.seal){
+  var sealUrl = res.seal && (typeof res.seal === "string" ? res.seal : res.seal.cite_url);
+  if(sealUrl){
     h += '<div class="sealbox">Sealed report. Every claim listed, every check shown, one link that proves it: '+
-         '<a href="'+esc(res.seal)+'" target="_blank" rel="noopener">the receipt →</a>'+
+         '<a href="'+esc(sealUrl)+'" target="_blank" rel="noopener">the receipt →</a>'+
          '<div class="note" style="margin-top:4px">Send the link with your quote. Your customer sees every number was verified.</div></div>';
   }
   h += '<div class="note">'+esc(res.note || "")+'</div>';
