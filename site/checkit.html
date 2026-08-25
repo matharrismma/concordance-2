@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14322A">
+<title>Check every number in your quote — Narrow Highway</title>
+<meta name="description" content="Paste a quote, invoice, or spec. Deterministic verification checks every number and hands you a sealed report you can send. No AI guessing. No account. Free.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+:root{ --paper:#F7F8F6; --card:#FFFFFF; --ink:#141C18; --graphite:#586158; --rule:#14322A; --line:#E2E6E0;
+  --green:#2E7D4F; --red:#C2402A; --amber:#B07A1E;
+  --body:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif; --mono:'IBM Plex Mono',ui-monospace,Consolas,monospace; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--body); background:var(--paper); color:var(--ink); line-height:1.55; -webkit-text-size-adjust:100%}
+a{color:var(--rule)}
+.wrap{max-width:760px; margin:0 auto; padding:0 18px}
+header.top{border-bottom:1px solid var(--line); background:var(--card)}
+header.top .in{max-width:760px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between}
+.mark{font-weight:700; letter-spacing:.02em; font-size:15px}
+.mark span{color:var(--graphite); font-weight:500}
+header.top nav a{font-size:13px; color:var(--graphite); text-decoration:none; margin-left:16px}
+header.top nav a:hover{color:var(--ink)}
+.hero{padding:44px 0 8px}
+h1{font-size:33px; line-height:1.12; font-weight:700; margin:0 0 12px; letter-spacing:-0.01em}
+h1 .free{color:var(--green)}
+.lede{font-size:16px; color:var(--graphite); margin:0 0 20px; max-width:60ch}
+.tool{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; box-shadow:0 1px 2px rgba(20,50,42,.04)}
+textarea{width:100%; min-height:132px; resize:vertical; border:1px solid var(--line); border-radius:8px; padding:12px 14px;
+  font-family:var(--mono); font-size:14px; color:var(--ink); background:#FCFDFC}
+textarea:focus{outline:2px solid var(--rule); outline-offset:1px}
+.toolbar{display:flex; gap:10px; align-items:center; margin-top:12px; flex-wrap:wrap}
+.btn{font-weight:600; font-size:16px; padding:12px 22px; border:none; border-radius:8px; background:var(--rule); color:#fff; cursor:pointer}
+.btn:disabled{opacity:.5; cursor:default}
+.uplabel{font-size:13px; color:var(--graphite); cursor:pointer; text-decoration:underline}
+.uplabel input{display:none}
+.hint{font-size:12px; color:var(--graphite); margin-left:auto}
+.result{margin-top:16px}
+.verdict{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:6px}
+.verdict .big{font-size:20px; font-weight:700}
+.count{font-family:var(--mono); font-size:13px; color:var(--graphite)}
+.claim{border:1px solid var(--line); border-left-width:4px; border-radius:8px; padding:11px 13px; margin:8px 0; background:var(--card)}
+.claim.holds{border-left-color:var(--green)}
+.claim.broken{border-left-color:var(--red)}
+.claim.unchecked{border-left-color:var(--graphite)}
+.claim .q{font-family:var(--mono); font-size:13.5px; font-weight:500}
+.claim .d{font-size:13px; color:var(--graphite); margin-top:4px}
+.tag{font-family:var(--mono); font-size:10px; font-weight:600; padding:2px 7px; border-radius:10px; margin-left:8px; vertical-align:1px}
+.tag.holds{background:#E7F1EA; color:var(--green)}
+.tag.broken{background:#F7E7E2; color:var(--red)}
+.tag.unchecked{background:#EDEFEB; color:var(--graphite)}
+.sealbox{margin-top:12px; padding:12px 14px; background:#EAF1EC; border:1px solid #CFE0D5; border-radius:8px; font-size:14px}
+.sealbox a{font-weight:600}
+.note{font-size:12.5px; color:var(--graphite); margin-top:8px}
+.err{color:var(--red); font-size:14px; margin-top:10px}
+section.band{border-top:1px solid var(--line); margin-top:40px; padding:34px 0}
+h2{font-size:22px; font-weight:700; margin:0 0 8px}
+.sub{color:var(--graphite); margin:0 0 18px; max-width:62ch}
+.three{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px}
+.three .c{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:15px}
+.three .c h3{font-size:16px; margin:0 0 6px}
+.three .c p{font-size:13.5px; color:var(--graphite); margin:0}
+.price{display:flex; gap:26px; flex-wrap:wrap; font-size:15px}
+.price div span{display:block; font-size:12px; color:var(--graphite); text-transform:uppercase; letter-spacing:.05em}
+footer{border-top:1px solid var(--line); padding:26px 0 44px; font-size:13.5px; color:var(--graphite)}
+footer a{text-decoration:none}
+footer .lead{color:var(--ink); font-weight:500}
+@media (max-width:620px){ h1{font-size:27px} .three{grid-template-columns:1fr} .hint{margin-left:0; width:100%} }
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <div class="mark">Narrow Highway <span>· verification</span></div>
+  <nav><a href="/about">About</a><a href="https://narrowhighway.org">Teaching tools ↗</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <h1>Every number in your quote. Checked. In thirty seconds. <span class="free">Free.</span></h1>
+    <p class="lede">Paste a quote, an invoice, a spec, or any document with numbers in it. Deterministic
+      verification checks every quantitative claim. No AI guessing. No account. No sales call.</p>
+    <div class="tool">
+      <textarea id="src" placeholder="Paste your quote or invoice here — e.g.&#10;50 brackets at $12.40 each = $620.&#10;22 machine hours at $95/hr = $2,090.&#10;Subtotal $2,710, 24% margin, total $3,360.40."></textarea>
+      <div class="toolbar">
+        <button class="btn" id="go">Check it</button>
+        <label class="uplabel">upload a file<input type="file" id="file" accept=".txt,.csv,.md,.tsv,text/plain"></label>
+        <span class="hint">Nothing is stored. Only the numbers you paste are checked.</span>
+      </div>
+      <div class="result" id="result" aria-live="polite"></div>
+    </div>
+  </div>
+</main>
+
+<section class="band"><div class="wrap">
+  <h2>Checking is free. Keeping is paid.</h2>
+  <p class="sub">Anyone can verify anything here, forever, free. Shops that want their evidence to
+    accumulate pay for the keeping: every job sealed, every signature witnessed, every step walked,
+    your audit package regenerated on demand from work you already did.</p>
+  <div class="three">
+    <div class="c"><h3>The traveler</h3><p>Your job's paper trail, digital, signed at every step,
+      impossible to skip a step, sealed when it ships.</p></div>
+    <div class="c"><h3>The audit package</h3><p>AS9100 evidence prep collapses from weeks to one
+      command. Generated from your sealed records, not assembled by hand.</p></div>
+    <div class="c"><h3>The record</h3><p>Append-only, cryptographically chained, yours. When a
+      customer, an auditor, or a prime asks how you know, the answer is a link.</p></div>
+  </div>
+</div></section>
+
+<section class="band"><div class="wrap">
+  <h2>Plain pricing</h2>
+  <div class="price">
+    <div><span>Setup</span>One visit — your floors, your keys, your baseline.</div>
+    <div><span>Monthly</span>Less than one hour of shop time.</div>
+    <div><span>First shop in a region</span>Proves it live before anyone pays. Ask us how.</div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="lead">Narrow Highway builds tools for the people who make things.</div>
+  <div style="margin-top:8px">
+    Teaching and family tools: <a href="https://narrowhighway.org">narrowhighway.org</a><br>
+    Stories from the mountains: <a href="https://narrowhighway.tv">narrowhighway.tv</a><br>
+    Who we are and what we serve: <a href="/about">/about</a>
+  </div>
+</div></footer>
+
+<script>
+"use strict";
+var srcEl = document.getElementById("src"), goEl = document.getElementById("go"),
+    outEl = document.getElementById("result"), fileEl = document.getElementById("file");
+
+fileEl.addEventListener("change", function(){
+  var f = fileEl.files && fileEl.files[0]; if(!f) return;
+  var r = new FileReader();
+  r.onload = function(){ srcEl.value = String(r.result || "").slice(0, 100000); };
+  r.readAsText(f);
+});
+
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+
+function statusClass(st){ return st==="CONFIRMED" ? "holds" : st==="MISMATCH" ? "broken" : "unchecked"; }
+function statusWord(st){ return st==="CONFIRMED" ? "holds" : st==="MISMATCH" ? "does not hold" : "not checked"; }
+
+function render(res){
+  if(res.verdict === "NOTHING_TO_CHECK" || !res.claims_found){
+    outEl.innerHTML = '<div class="note">'+esc(res.note || "No checkable number was found. The auditor checks sums, percentages, pay, interest, dates, and labels — it would rather miss a claim than check the wrong one.")+'</div>';
+    return;
+  }
+  var held = res.held||0, broken = res.broken||0, unchecked = res.unchecked||0;
+  var big = broken>0 ? "A number does not hold." : "Every number checked out.";
+  var bigColor = broken>0 ? "var(--red)" : "var(--green)";
+  var h = '<div class="verdict"><span class="big" style="color:'+bigColor+'">'+big+'</span>'+
+          '<span class="count">'+held+' hold · '+broken+' broken · '+unchecked+' not checked · '+res.claims_found+' found</span></div>';
+  h += res.results.map(function(a){
+    var cls = statusClass(a.status);
+    return '<div class="claim '+cls+'"><div class="q">'+esc(a.claim)+
+      '<span class="tag '+cls+'">'+statusWord(a.status)+'</span></div>'+
+      (a.detail?'<div class="d">'+esc(a.detail)+'</div>':'')+'</div>';
+  }).join("");
+  if(res.seal){
+    h += '<div class="sealbox">Sealed report. Every claim listed, every check shown, one link that proves it: '+
+         '<a href="'+esc(res.seal)+'" target="_blank" rel="noopener">the receipt →</a>'+
+         '<div class="note" style="margin-top:4px">Send the link with your quote. Your customer sees every number was verified.</div></div>';
+  }
+  h += '<div class="note">'+esc(res.note || "")+'</div>';
+  outEl.innerHTML = h;
+}
+
+function check(){
+  var text = (srcEl.value||"").trim();
+  if(!text){ outEl.innerHTML = '<div class="note">Paste a quote or invoice above, then press Check it.</div>'; return; }
+  goEl.disabled = true; var prev = goEl.textContent; goEl.textContent = "Checking…";
+  outEl.innerHTML = '<div class="note">Checking every number…</div>';
+  fetch("/audit", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({text:text})})
+    .then(function(r){ if(!r.ok) throw new Error("check unavailable ("+r.status+")"); return r.json(); })
+    .then(function(res){ render(res); })
+    .catch(function(e){ outEl.innerHTML = '<div class="err">'+esc(e.message || "Something went wrong. Try again.")+'</div>'; })
+    .then(function(){ goEl.disabled = false; goEl.textContent = prev; });
+}
+goEl.addEventListener("click", check);
+srcEl.addEventListener("keydown", function(e){ if((e.metaKey||e.ctrlKey) && e.key==="Enter") check(); });
+</script>
+</body>
+</html>

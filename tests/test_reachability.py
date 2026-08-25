@@ -111,6 +111,8 @@ UNLISTED_PAGES = {
     "golf.html",          # Gate Golf — the founder's N=1 instrument (NarrowFairway), a self-contained offline tool; reached by direct URL / home-screen install, not the public nav
     "tatami.html",        # Tatami — the grappling/MMA hall, the same engine as golf.html applied to fight sports; a self-contained offline tool reached by direct URL / home-screen install, not the public nav
     "halls.html",         # The Halls — the lobby that lists the halls (golf, tatami, and what's coming); reached by direct URL, a front door for the instruments line, not the main witness-site nav
+    "checkit.html",       # the .com efficiency front door (the working auditor) — the pending homepage per the Domain Sort; reached at /checkit during review, and served at / on the secular surface once the flip lands
+    "about.html",         # the confession, whole (Domain Sort: the declaration lives at /about + /identity). Linked from checkit.html's footer as the CLEAN url /about, which the static link-checker (html hrefs only) cannot see — hence declared, same limit as /unchecked/answer
     "playbook.html",      # the Playbook surface — operator/agent authoring, not the public nav
     "plow.html",          # the Plow surface — an operator instrument, not the public nav
 }
