@@ -153,6 +153,7 @@ test_strongs.py
 test_study_index.py
 test_survival.py
 test_system_error_distinct.py
+test_teachings.py
 test_the_gate_refuses_abuse_not_use.py
 test_theory_map_interactive.py
 test_threads.py
