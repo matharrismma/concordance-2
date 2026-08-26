@@ -3,6 +3,7 @@
 # on disk' is not a suite. Add a line when you add a test file; the gate refuses unlisted ones.
 test_address.py
 test_airlock.py
+test_almanac.py
 test_api.py
 test_apothecary.py
 test_ask.py
