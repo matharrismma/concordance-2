@@ -72,3 +72,39 @@ def test_simulate_proves_the_round_trip_with_no_radio():
     msg, pub, _ = _signed_msg()
     r = mb.simulate(msg, public_key=pub)
     assert r["reassembled"] and r["verify"]["authentic"] and r["max_packet_bytes"] <= mb.MTU
+
+
+# ── frames/radio, the hardware guard, malformed inputs, and the field-operator CLI ────────────────
+def test_frames_for_and_radio_available():
+    msg, pub, _ = _signed_msg()
+    frames = mb.frames_for(msg, public_key=pub)
+    assert frames and all(f.startswith(mb.CHUNK_TAG + ":") for f in frames)
+    assert all(len(f) <= mb.MTU for f in frames)
+    assert isinstance(mb.radio_available(), bool)     # library present-or-not, never crashes
+
+
+def test_serve_without_a_radio_degrades_honestly():
+    r = mb.serve()
+    assert r["ok"] is False and "meshtastic" in r["error"].lower()   # the software mesh still works
+
+
+def test_dechunk_ignores_foreign_and_malformed_packets():
+    assert mb.dechunk(["not a chunk", "NHMc:onlytwo", "OTHER:1:0:1:x"]) is None
+    assert mb.dechunk(["NHMc:g:9:2:x"]) is None        # i >= n is rejected
+    assert mb.dechunk([]) is None
+
+
+def test_from_wire_and_verify_wire_reject_garbage():
+    assert mb.from_wire("not a wire payload") is None
+    assert mb.from_wire("") is None
+    v = mb.verify_wire("garbage")                      # a nonsense payload is neither unaltered nor authentic
+    assert not (v.get("unaltered") and v.get("authentic"))
+
+
+def test_cli_self_test_and_serve(capsys):
+    assert mb.main([]) == 0                            # default self-test: sign -> frame -> reassemble -> verify
+    out = capsys.readouterr().out
+    assert "authentic" in out and "packets" in out
+    assert mb.main(["--serve"]) == 1                   # no radio on the test box -> not started
+    out2 = capsys.readouterr().out
+    assert "not started" in out2.lower() or "meshtastic" in out2.lower()

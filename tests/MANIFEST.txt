@@ -93,6 +93,7 @@ test_mcp_profiles.py
 test_mention_web.py
 test_mesh.py
 test_mesh_signed_speech.py
+test_meshtastic_bridge.py
 test_mission_string.py
 test_moderation.py
 test_narratives.py
