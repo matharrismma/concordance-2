@@ -28,6 +28,7 @@ test_cas.py
 test_characters.py
 test_chess.py
 test_coach.py
+test_codex.py
 test_commentary.py
 test_commentary_cards.py
 test_compare.py
