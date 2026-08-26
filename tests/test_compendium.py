@@ -120,6 +120,73 @@ def test_tampered_manifest_fails_the_hash():
     assert r["manifest_hash_ok"] is False and r["ok"] is False
 
 
+# ── build → publish/drop → sign → emit → serve (engine + receipts mocked) ──
+_DEMOS = [
+    {"id": "d_hold", "discipline": "mathematics", "field": "algebra", "title": "Two and two",
+     "narrative": "2 + 2 = 4.", "steps": [{"id": "s1", "domain": "mathematics",
+                                           "spec": {"mode": "equality", "params": {}}, "claim": "2+2=4"}]},
+    {"id": "d_broken", "discipline": "physical", "field": "physics", "title": "A false claim",
+     "narrative": "does not hold", "steps": [{"id": "s1", "domain": "mathematics",
+                                              "spec": {"_break": True}, "claim": "wrong"}]},
+]
+
+
+def _fake_verify(runsteps):
+    if any((s.get("spec") or {}).get("_break") for s in runsteps):
+        return {"verdict": "BROKEN", "broken_at": "s1", "gap_at": None,
+                "steps": [], "confirmed_steps": 0, "trail": []}
+    return {"verdict": "HOLDS", "steps": [{"id": "s1", "verdict": "CONFIRMED"}], "confirmed_steps": 1,
+            "trail": [{"domain": "mathematics", "step": "s1", "note": "2+2 = 4"}]}
+
+
+def test_build_publishes_holds_drops_broken_signs_emits_and_serves():
+    """The build side (the original tests only exercise the serve side). Only what HOLDS is
+    published; a BROKEN demonstration is dropped; the volume is signed and every demonstration
+    becomes a seed in the keeping; then the serve surfaces read the sealed file back."""
+    prior = os.environ.get("CONCORDANCE_DATA_DIR")
+    saved = (compendium.DEMONSTRATIONS, compendium.verify_derivation, compendium.receipts.attach)
+    try:
+        with tempfile.TemporaryDirectory() as t:
+            os.environ["CONCORDANCE_DATA_DIR"] = t
+            compendium._CACHE = None
+            compendium.DEMONSTRATIONS = _DEMOS
+            compendium.verify_derivation = _fake_verify
+            compendium.receipts.attach = (lambda result, config=None, domain=None, enabled=True: {
+                **result, "seal": {"content_hash": "h_" + result["verdict"],
+                                   "cite_url": "/s/h_" + result["verdict"], "ledgered": True}})
+            payload = compendium.build_all()
+            man = payload["manifest"]
+            assert man["published"] == 1 and man["dropped"] == ["d_broken"]
+            assert man["by_discipline"] == {"mathematics": 1}
+            assert payload["demonstrations"][0]["seal"]["cite_url"] == "/s/h_HOLDS"
+            assert "signed" in payload and payload["manifest_sha256"]
+            assert (Path(t) / "works_cards.jsonl").exists(), "demonstrations become seeds in the keeping"
+
+            compendium._CACHE = None                      # serve must re-read the sealed file
+            assert compendium.overview()["published"] == 1
+            assert [d["id"] for d in compendium.demonstrations()] == ["d_hold"]
+            assert compendium.demonstration("d_hold")["title"] == "Two and two"
+            assert compendium.demonstration("missing") is None
+            assert compendium.artifact()["manifest"]["published"] == 1
+            v = compendium.verify_artifact()
+            assert v["manifest_hash_ok"] is True and v["ok"] is True
+    finally:
+        compendium.DEMONSTRATIONS, compendium.verify_derivation, compendium.receipts.attach = saved
+        compendium._CACHE = None
+        if prior is None:
+            os.environ.pop("CONCORDANCE_DATA_DIR", None)
+        else:
+            os.environ["CONCORDANCE_DATA_DIR"] = prior
+
+
+def test_packet_for_wraps_domain_specs_but_passes_math():
+    assert compendium._packet_for("mathematics", {"mode": "equality"}) == {"mode": "equality"}
+    assert compendium._packet_for("physics", {"v": 1}) == {"PHYS_VERIFY": {"v": 1}}
+    already = {"PHYS_VERIFY": {"v": 1}}
+    assert compendium._packet_for("physics", already) == already   # not double-wrapped
+    assert compendium._packet_for("unknown_domain", {"v": 1}) == {"v": 1}
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:
