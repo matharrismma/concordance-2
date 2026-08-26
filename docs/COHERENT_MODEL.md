@@ -37,15 +37,37 @@ from the verified keeping, it is sovereign and sourced: unlike scraped embedding
 what the keeping does not contain. This is also the instrument the OT chiasm sweep called for —
 *semantic* echo where *lexical* echo fails (synonymous parallelism, small cohesive books).
 
-## Where this goes
+## Steps (a)–(c), measured (all deterministic, `eval/coherent_model/`)
 
-- **Rescue the semantic cases** the lexical measure missed (Jonah's synonymous panels, Ruth) with these
-  vectors — semantic echo, not lexical.
-- **Widen the context** beyond the single verse (windowed co-occurrence), and build the model over the
-  whole keeping, not just the Bible.
-- **Compose the layers** into the answer path: keeping (retrieve) → semantic vectors (understand the
-  ask despite different words) → verifiers (prove) → structure (connect) → a template/tiny translator
-  (say it). Measure, at each step, how much is deterministic and how small any neural surface must be.
+- **(a) Semantic echo** (`semantic_echo.py`). Soft alignment (each word's best cross-match) rescues
+  synonymous parallelism partially — parallel couplets score 1.5× a random baseline (the model catches
+  heavens↔expanse), but the hardest zero-word cases are only RESONANCE. Honest: the Bible-only model is
+  small and noisy — which motivates (b).
+- **(b) The whole-keeping model** (`widen_probe.py`). Built over the Bible + 11 card files (window=5),
+  vocab **10,332** (from 3,394). **General-domain semantics CONFIRMED at 6.7×** (war~battle 0.55,
+  fire~burn 0.52, sun~moon, money~gold; *money* → silver, talent, shekel; *iron* → bronze, metal,
+  gold). The model knows the world, not just Scripture — still deterministic and sovereign. (It did not
+  sharpen the *narrow* parallelism-rescue — a richer space raises the baseline; that fine task is the
+  structure layer's job, not the semantic model's.)
+- **(c) The answer path** (`answer_path.py`). The load-bearing, LLM-shaped step is understanding a
+  question phrased in DIFFERENT WORDS than the answer. Benchmark: paraphrase retrieval from
+  synonymous-parallelism pairs that share ZERO words (query = colon A, target = colon B, +20
+  distractors). **Lexical retrieval is at chance (MRR 0.149); the deterministic model is 2.4× that
+  (MRR 0.355, recall@5 0.544 vs chance 0.238).** When no words match — where a keyword search fails and
+  an LLM is usually reached for — the coherent model still finds the answer, from counting the keeping.
+
+## The wall, named — how small the neural surface must be
+
+The path decomposes, and only the last, thinnest step is neural-shaped:
+**understand** (bridge the words — deterministic, (c)) · **retrieve** (deterministic) · **prove** (the
+~71 verifiers) · **connect** (the fascia) · **say** (compose the already-chosen, already-proven
+material into a sentence). Only *say* benefits from fluent generation, and it operates on content
+fixed upstream, so it can invent no fact — a template or a tiny, authority-less translator suffices.
+That is the whole remaining neural surface: small, replaceable, fact-bounded.
+
+A coherent model that needs no LLM is therefore not a slogan but a shape: **four deterministic layers —
+keeping (knowledge) · counting (meaning) · verifiers (truth) · fascia (form) — and one thin, sovereign,
+fact-bounded mouth.**
 
 The north star: a model that is transparent, sovereign, non-hallucinating, and needs no LLM — because
 its knowledge is the verified keeping, its meaning is counted from that keeping, its truth is proven by
