@@ -52,6 +52,7 @@ test_distill.py
 test_domain_goldens.py
 test_encyclopedia_and_voices.py
 test_engine.py
+test_expand.py
 test_expand_on_call.py
 test_find.py
 test_floor.py
