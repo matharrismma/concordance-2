@@ -33,9 +33,15 @@ _STOP = set(("the a an of to and but in on for is are was were be his her my you
 
 def stem(w):
     w = re.sub(r"[^a-z]", "", w.lower())
-    for s in ("ing", "eth", "est", "ed", "es", "s"):
+    for s in ("ing", "eth", "est", "ed"):
         if w.endswith(s) and len(w) - len(s) >= 3:
             return w[: -len(s)]
+    # English plural rule for -es: strip 'es' only after a sibilant (boxes→box, churches→church);
+    # otherwise strip just 's' (cares→care, trees→tree) — never 'cares'→'car' (a stemmer collision).
+    if w.endswith("es") and len(w) - 2 >= 3:
+        return w[:-2] if (w[-3] in "sxzo" or w.endswith(("ches", "shes"))) else w[:-1]
+    if w.endswith("s") and len(w) - 1 >= 3:
+        return w[:-1]
     return w
 
 

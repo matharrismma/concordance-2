@@ -33,10 +33,16 @@ _CRISIS = ("kill myself", "end my life", "end it all", "want to die", "suicide",
            "hurt myself", "no reason to live", "can't go on")
 
 
+PRACTICAL_SHELVES = {"practical", "survival", "apothecary", "foxfire", "medical", "homestead",
+                     "field", "sources"}
+_PRACTICAL_Q = ("how do i", "how do you", "how to", "how can i", "what do i do", "treat ", "cure ",
+                "stop ", "fix ", "repair ", "build ", "make ", "grow ", "start a fire", "first aid")
+
+
 def _docs(cap):
     for line in open(M.DATA / "bible_en.jsonl", encoding="utf-8"):
         c = json.loads(line)
-        yield (f"{c['book']} {c['chapter']}:{c['verse']}", c.get("text", ""), "WEB Bible")
+        yield (f"{c['book']} {c['chapter']}:{c['verse']}", c.get("text", ""), "WEB Bible", "scripture")
     for name in FILES:
         p = M.DATA / name
         if not p.exists():
@@ -52,17 +58,19 @@ def _docs(cap):
             body = c.get("body") or c.get("text") or ""
             if body:
                 n += 1
-                yield (c.get("title") or "(untitled)", body, (c.get("source") or {}).get("label") or name)
+                yield (c.get("title") or "(untitled)", body,
+                       (c.get("source") or {}).get("label") or name, c.get("shelf") or name)
 
 
 class Answerer:
     def __init__(self, cap=12000):
-        titles, texts, srcs, stems = [], [], [], []
-        for title, text, src in _docs(cap):
+        titles, texts, srcs, stems, shelves = [], [], [], [], []
+        for title, text, src, shelf in _docs(cap):
             st = set(M.content(text))
             if st:
-                titles.append(title); texts.append(text[:200]); srcs.append(src); stems.append(st)
-        self.titles, self.snips, self.srcs, self.stems = titles, texts, srcs, stems
+                titles.append(title); texts.append(text[:200]); srcs.append(src)
+                stems.append(st); shelves.append(shelf)
+        self.titles, self.snips, self.srcs, self.stems, self.shelves = titles, texts, srcs, stems, shelves
         # stems are per-doc SETS (unordered) → window=0 whole-doc co-occurrence for the semantic model
         self.mdl = M.build((s for s in stems), window=0, min_count=20)
         N = len(stems)
@@ -93,6 +101,7 @@ class Answerer:
         weights = self.understand(q)
         if not any(v == 1.0 for v in weights.values()):
             return {"status": "miss", "text": "There is no question I can act on here."}
+        practical = any(m in q.lower() for m in _PRACTICAL_Q)   # a how-to query wants the practical shelf
         cand = set()
         for t in weights:
             cand |= self.inv.get(t, set())
@@ -101,14 +110,20 @@ class Answerer:
         def score(i):
             st = self.stems[i]
             ln = 1 - b + b * len(st) / self.avgdl           # BM25 length normalization: long docs pay
-            return sum(weights[t] * self.idf.get(t, 0.0) for t in (qterms & st)) / ln
+            s = sum(weights[t] * self.idf.get(t, 0.0) for t in (qterms & st)) / ln
+            if practical and self.shelves[i] in PRACTICAL_SHELVES:
+                s *= 2.5                                     # shelf-awareness: boost the how-to shelves
+            return s
         scored = sorted(((score(i), i) for i in cand), reverse=True)[:k]
-        # honest-miss: the top hit must match a DISTINCTIVE original query word (high idf), not just
-        # common/tangential terms. A question whose real words aren't in the keeping (carburetor) misses.
+        # honest-miss (coverage): a coherent answer covers ≥2 of the query's real words, OR one rare/
+        # distinctive one. A single INCIDENTAL moderately-rare match (Apple 'stock' → RFC 'Current') is
+        # not an answer — it misses. This is what stops the load from making it lie.
         orig = {t for t, w in weights.items() if w == 1.0}
-        top_distinct = (max((self.idf.get(t, 0.0) for t in (orig & self.stems[scored[0][1]])), default=0.0)
-                        if scored else 0.0)
-        if not scored or scored[0][0] < floor or top_distinct < 3.0:
+        best_orig = (orig & self.stems[scored[0][1]]) if scored else set()
+        distinct = sum(1 for t in best_orig if self.idf.get(t, 0.0) >= 3.0)
+        rare = max((self.idf.get(t, 0.0) for t in best_orig), default=0.0)
+        coherent = distinct >= 2 or rare >= 5.5
+        if not scored or scored[0][0] < floor or not coherent:
             return {"status": "miss", "text": ("Not in the keeping — I won't invent an answer. "
                     "This can be fetched on the call and carded for next time."), "top": scored[:1]}
         hits = [{"title": self.titles[i], "snippet": self.snips[i], "source": self.srcs[i],
@@ -187,13 +202,29 @@ def main():
               "Matthew 7:24, bread from heaven → John 6:50. Crisis-first held throughout — the tendon that",
               "matters most never slipped.",
               "",
-              "**Remaining slips — the next loads (named, not hidden):** (1) out-of-corpus honest-miss",
-              "still leaks when the query shares an INCIDENTAL moderately-rare word ('Apple *stock*' →",
-              "RFC 'Best *Current* Practice'); distinguishing a distinctive match from an incidental one is",
-              "the next heal. (2) The practical shelf under-surfaces in a scripture-heavy index (a first-aid",
-              "query gets a verse); shelf-aware retrieval or fuller practical indexing is the fix. Both are",
-              "PATH heals. This is the Yijin Jing for the answer path: load, reveal, heal the path, re-load.",
-              "Bench — not deployed; the tendon carries public weight only after it carries far more of this."]
+              "Heal cycles: first load **16%** (long-doc bias, no honest-miss, expansion noise) → healed",
+              "with BM25 length-norm + weighted expansion + a distinctive-term gate → **75%**; second cycle",
+              "added a COVERAGE honest-miss and SHELF-AWARENESS (how-to boosts the practical shelves) →",
+              "**83%**; then a real LEMMATIZER (English plural rule: 'cares'→'care', not 'car') — more",
+              "correct, but the harness score swung to 75%, then 66% under a threshold nudge.",
+              "",
+              "**That swing is the real finding: the 12-question harness is far too small to tune on.** A",
+              "noise-level change moves 1–3 questions, so any single score in 66–83% is meaningless. The",
+              "disciplined heal is to STOP turning knobs (over-fitting) and keep the PRINCIPLED config — the",
+              "correct lemmatizer, BM25, coverage honest-miss, shelf-awareness — not the score-maximizing",
+              "one. A measurement must report its coverage, and this one's coverage is 12 questions.",
+              "",
+              "**What actually held across every configuration** — the tendon's real strength: scriptural",
+              "and paraphrase questions retrieve the RIGHT passage (good shepherd → John 10:11, bread →",
+              "John 6:50), out-of-corpus fabrication is stopped or reduced, and CRISIS-FIRST never once",
+              "slipped. What's unstable is exactly the precision/recall edge (a single incidental word vs a",
+              "sparse legitimate match).",
+              "",
+              "**The next heal is therefore NOT another heuristic — it is INFRASTRUCTURE:** a benchmark of",
+              "hundreds of questions (so tuning is stable, not over-fit), a real relevance/ranking model",
+              "over the keeping, and a richer practical corpus. Recognizing when to stop tuning and name the",
+              "structural work IS part of healing the path. Bench — not deployed; the tendon carries public",
+              "weight only after a real benchmark, not a 12-question one."]
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"\n   wrote {out}")
 
