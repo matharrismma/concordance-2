@@ -239,3 +239,33 @@ neighbours; bridge test confirmed). The frontier is now clearly the *representat
 larger-span reductions (passages for chiasm; and eventually genuinely different modalities like music
 as pitch sequences) so more forms become visible to bridge. The thesis earned its name; the work is
 feeding it more computable structure.
+
+## 12. Chiasm at the passage level (`eval/recurring_form/chiasm_attack.py`)
+
+The §11 caveat, resolved. A passage (a 7-verse window) becomes a sequence of per-verse stem-sets; its
+**mirror-echo** is how much mirror-paired verses (i ↔ N-1-i) share, averaged. The honest null is a
+**verse-order shuffle** — a real chiasm loses its echo when reordered, mere cohesion does not — so the
+chiasm score is `mirror_echo(actual) − mirror_echo(shuffled)`: symmetry that lives in the *order*.
+
+**Result (1200 poetic + 1200 narrative windows).**
+
+- **Chiasm is a sparse *family*, not an average property.** The aggregate is a null (poetic mean
+  −0.004): most arbitrary windows are not chiasms, and sliding windows straddle real literary units.
+  Correct and honest. The signal is in the **tail** the shuffle-null surfaces.
+- **The mirror form is now visible in text.** The strongest candidates — Psalm 116:13-19 (echo 0.397
+  vs shuffled ~0.17), Psalm 62:1-7, Psalm 147, Psalm 107 — are known **refrain/inclusio** psalms; the
+  deriver surfaces real structure by inspection. The verse-level blindness of §11 is lifted for this
+  family.
+- **A real finding, not expected: the mirror form leans NARRATIVE.** Order-borne symmetry > 0.05 is
+  heavier in narrative (5.0%) than poetry (2.5%). That matches the literary fact — **chiasm structures
+  prose narrative** (the flood account, many OT narratives), while **parallelism structures poetry**
+  (§10). The deriver separates the two forms by their genre homes: parallelism → poetry (§10, p=0),
+  chiasm → narrative (here). Two different recurring forms with two different homes, each measured.
+
+**Honest limits.** A candidate list is where to *look*, not a claim each is a deliberate chiasm; the
+shuffle null keeps the looking honest. Arbitrary windows dilute real pericopes — a stronger version
+cuts on natural unit boundaries. High mirror-echo also catches inclusio/refrain (an envelope A…A),
+the same mirror family. But the point Matt asked for is done: **text now carries measurable mirror-form
+members**, so the §11 cross-domain bridge is no longer starved on the text side — a chiastic passage
+and a palindromic number sequence are, at last, two instances of one form the measure can hold
+together.
