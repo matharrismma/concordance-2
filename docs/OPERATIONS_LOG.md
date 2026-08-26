@@ -774,3 +774,15 @@ expectation from before the signed-posts policy (9ea6d93); updated to the shippe
 refused, crisis-exempt) — file green (5/5). Metric: that honesty debt closes; a directive/addendum
 misdiagnosis corrected. Held open: the contract §5 DONE line is frozen — its strike is the operator's,
 flagged in PUNCHLIST §4.
+
+**2026-08-26 — Phase 0, corpus-dependent tests skip on a clean clone: DONE.** Measured against a real
+clean clone (a local shallow clone = committed state only, no generated keeping): 48 failed / 1675
+passed / 27 skipped — matching Fable's count. The honesty check (running the 19 failing files WITH the
+corpus present) split them: 16 files pass with data → genuinely corpus-only → guarded; 3 tests fail
+even with data → real reds, fixed not skipped (`test_site.py` ×2 = self-contained pages added this
+session undeclared in its way-home/palette checks; `test_present.py` ×1 = stale allow-set missing the
+`gate_record` provenance field). `tests/conftest.py` gained `_CORPUS_DEPENDENT` + a collection hook that
+skips those 17 files with a stated reason when their data is absent. Result — clean clone: 1554 pass /
+196 skip / **0 fail**; box (data present): they run and pass. Metric moved: a stranger's clean clone now
+reports 0 reds, and 3 genuine reds (that would have failed the box gate too) are fixed. Held open: the
+whole-file granularity over-skips the non-corpus tests in those files on a clean clone (acceptable, noted).

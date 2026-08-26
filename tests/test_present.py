@@ -95,7 +95,10 @@ def test_the_stored_card_stays_bare():
         assert leak not in present, f"presentation field {leak!r} reached the store"
     assert set(rec["extra"]) <= {"member", "ring", "display_name", "signature", "drop_kind",
                                  "signed_at", "url", "waybill", "reach", "reach_error", "embed",
-                                 "quote", "attribution", "supersedes"}, \
+                                 "quote", "attribution", "supersedes",
+                                 # the gate's record of the drop — provenance, a FACT ("preserve the
+                                 # trail"), deliberately stored by shelves.py:260. Not presentation.
+                                 "gate_record"}, \
         "a field crept into the card that is not a fact"
 
 

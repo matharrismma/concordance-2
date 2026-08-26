@@ -53,6 +53,19 @@ v3 places 99.97% but stores nothing. **Done when** the address renders on the ca
 - **Three dead files on production** (`web/ask.py`, `branding.py`, `config.py`). **Done when**
   Matt says the word and they are archived (not deleted) with the act recorded.
 - **Coverage 52% → 90%**, worst user-facing modules first (almanac 20%).
+- **Corpus-dependent tests skip on a clean clone — DONE (2026-08-26)**: a clean clone lacks the
+  gitignored keeping (`cards.jsonl`, `bible_en.jsonl`, `strongs/`, `characters/`, …), so 48 tests
+  across 17 files failed for a stranger. `tests/conftest.py` now skips those files WITH A STATED
+  REASON when their data is absent (`_CORPUS_DEPENDENT` + a `pytest_collection_modifyitems` hook);
+  on the box (data present) they run. **Clean clone: 1554 passed / 196 skipped / 0 FAILED** (was
+  48 failed); box: they run and pass. Whole-file granularity — robust across renames, at the cost
+  of also skipping the non-corpus tests in those files on a clean clone. The honesty check surfaced
+  **3 reds that were NOT corpus** (they failed WITH the data too) and were FIXED, never skipped:
+  `test_site.py` ×2 (the self-contained pages added this session — checkit/about/halls/golf/tatami —
+  were undeclared in its way-home + palette checks; declared as exceptions alongside mesh/live) and
+  `test_present.py` ×1 (a stale allow-set — the `gate_record` provenance field, deliberately stored
+  by `shelves.py:260`, added to the allowed facts). So Fable's "48 all corpus" was slightly off: 45
+  corpus, 3 real.
 
 ## 5 · THE SEEDING, continued
 Torrey's 96% unresolved-reference rate · Smith's + AmTract definitional cores · Matthew Henry
