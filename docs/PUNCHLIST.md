@@ -50,8 +50,15 @@ v3 places 99.97% but stores nothing. **Done when** the address renders on the ca
   signed-posts policy (9ea6d93) and asserted "unsigned still allowed." Updated to the shipped policy
   (unsigned refused, crisis-exempt); the file is green. **The contract §5 DONE line can now be
   truthfully struck — operator's call, since `COMPLETION_CONTRACT.md` is frozen.**
-- **Three dead files on production** (`web/ask.py`, `branding.py`, `config.py`). **Done when**
-  Matt says the word and they are archived (not deleted) with the act recorded.
+- **The "three dead files" were a STALE PREMISE — verified 2026-08-26, nothing archived.** The
+  named files are not dead: `config.py` has 11 src importers, `branding.py` 3, and `web/ask.py`
+  does not exist (the module is `ask.py`, with 14 importers). A wider sweep for a real archival
+  target found only `grid_atlas.py` unwired from any production code path (0 src refs) — but it is
+  tested (`test_grid_atlas.py` exercises its full surface) and named a strong aspect in
+  `docs/HARVEST.md`; it renders the axis atlas over the live `grid` scaffold. That is **latent, not
+  dead** — archiving it would remove a working, tested capability, so it stays. `inlet.py`, briefly
+  eyed as a candidate, is live too (serves `POST /inlet` + returns). **Conclusion: no file here is
+  safe to archive. This debt is closed as a documentation error, not a removal.**
 - **Coverage 52% → 90%**, worst user-facing modules first (almanac 20%).
 - **Corpus-dependent tests skip on a clean clone — DONE (2026-08-26)**: a clean clone lacks the
   gitignored keeping (`cards.jsonl`, `bible_en.jsonl`, `strongs/`, `characters/`, …), so 48 tests
