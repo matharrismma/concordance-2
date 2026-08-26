@@ -142,3 +142,40 @@ call a form when everything trivially connects (Matt's "short-risk"). (3) The si
 hand-built; deriving them automatically is the representation problem (§6) and the real frontier.
 This is the bench proof that the instrument reads true — the null-test-of-the-null — before we trust
 any verdict it gives.
+
+## 9. The many-instance attack — computed signatures (`eval/recurring_form/oeis_attack.py`)
+
+The first probe's honest limits pointed the way: gather **many** instances and **derive** signatures
+instead of hand-building. Both are done here on the one modality our corpus lets us compute exactly —
+integer sequences in `data/oeis_cards.jsonl`, which carry their actual first terms. A **linear
+recurrence is eigenstructure in integers** (its characteristic polynomial's dominant root is the
+growth ratio, Fibonacci → φ), so each sequence's signature is **computed** — exact rational
+linear-recurrence detection over the terms, plus growth/parity structure — never keyword-matched.
+
+**Result (1500-sequence sample; recurrence family = 127; rarity-weighted spine; permutation null):**
+
+| M (bodies) | family w-spine | null w-spine | ratio | p(null ≥ fam) |
+|---|---|---|---|---|
+| 3 | 10.7 | 2.0 | 5.2× | 0.005 |
+| 5 | 16.9 | 4.1 | 4.1× | 0.000 |
+| **10** | **25.1** | **8.4** | **3.0×** | **0.0025 → CONFIRMED** |
+| 20 | 31.2 | 15.6 | 2.0× | 0.000 |
+| 40 | 36.0 | 25.1 | 1.4× | 0.015 |
+
+The family is defined by its **rare** shared spine — `linrec` (family 1.00 vs base 0.12), `order_2`
+(idf 3.62), `irrational_ratio` — while generic features (`strict_inc`, idf 0.61) are correctly
+down-weighted.
+
+**Two findings carry into the measure itself.**
+1. **Connections must be weighted by rarity.** Naive shared-primitive counting is swamped by generic
+   features nearly every sequence has (`all_positive`, `monotonic_inc`) — the dense-universe /
+   "short-risk" regime where a too-rich fabric connects everything. Weighting each shared connection
+   by IDF *is* the apophenia dial made precise: a shared generic feature is not a recurring form; a
+   shared rare structure is. This should fold back into the engine's live connection surfaces.
+2. **The jumper axis needs bodies.** The n=3 saturation is resolved by many instances; the recurring
+   form is beyond chance (p ≈ 0.003) at a practical family size — Matt's fabric runs 12–20 nets, not 3.
+
+**Standing frontier.** The deriver here is exact but modality-bound (integer sequences). Generalizing
+computed structural signatures to other modalities is the representation problem (§6) — the real work
+of the new domain. `grid_atlas.predict_dimensions` is too coarse to stand in (it gave John 3:16 and
+PCA the same tags), which is itself a measured finding, not a guess.
