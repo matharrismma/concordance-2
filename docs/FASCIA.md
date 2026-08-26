@@ -179,3 +179,31 @@ down-weighted.
 computed structural signatures to other modalities is the representation problem (§6) — the real work
 of the new domain. `grid_atlas.predict_dimensions` is too coarse to stand in (it gave John 3:16 and
 PCA the same tags), which is itself a measured finding, not a guess.
+
+## 10. Generalizing the deriver — SCRIPTURE (`eval/recurring_form/scripture_attack.py`)
+
+Matt's next call (2026-08-26, "A"): generalize the computed deriver past integer sequences to a
+non-numeric modality — the Word. The form is **Hebrew parallelism**, the defining structure of the
+poetic books. "The heavens declare the glory of God / the expanse shows his handiwork" (Ps 19:1) is
+two balanced cola saying one thing twice (*synonymous* — so lexical overlap is low; the signal is
+structural balance); "A wise son makes a glad father; but a foolish son brings grief to his mother"
+(Prov 10:1) is *antithetic*, hinged on "but"; narrative prose is one unbalanced clause. The deriver
+**computes** structure from the verse text — colon balance, terse lines, the antithetic hinge,
+anaphora, lexical echo — never keyword-matching.
+
+**Result (1837 poetry verses vs 2290 narrative, from `bible_en.jsonl`).** The computed primitives
+discriminate: terse (poetry 0.72 vs narrative 0.38), short-lines (0.61 vs 0.31), balanced (0.59 vs
+0.39), antithetic (0.13 vs 0.06, idf 2.40). Scored properly — each primitive's poetry-vs-narrative
+**lift learned on a train split**, summed per verse, evaluated on a **held-out test split** — the
+poetry population scores 0.599 vs narrative 0.342 (gap +0.257), permutation **p = 0.0000 →
+CONFIRMED**; 82% of held-out poetry verses beat the narrative median. The deriver recovers parallelism
+from raw text without being told which book is which.
+
+**The finding that carries forward — a modality difference.** A per-*verse* recurring-form assay reads
+COINCIDENCE here: a terse narrative verse looks like a terse poetry verse. Unlike a linear recurrence
+(a per-instance binary), **Scripture structure is a *population* fact** — the recurring form is
+statistical, measured on groups, not single verses. So the fascia measure has two regimes now:
+discrete/per-instance (integer sequences) and distributional/per-population (text). Next along this
+frontier: chiasm (mirror symmetry about a centre), and the cross-domain reach — the *same* balance
+form in music (ABA) and math (palindrome/fixed point), which is where "one form across domains"
+finally earns its name.
