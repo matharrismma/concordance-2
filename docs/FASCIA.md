@@ -320,3 +320,25 @@ declining to overclaim the rest. This is the covenant working exactly as intende
 global chiasm, the null test disposed, and the measure found the true structure instead of flattering
 the proposal. Both books centre on the same thing — Revelation's pivot is Christ's victory, the
 Sermon's centre is His prayer.
+
+## 15. Colossians 1:15–20 — the fascia's own ground text, measured (`eval/recurring_form/col_chiasm.py`)
+
+The Christ hymn, whose centre is **1:17, "in him all things are held together"** — the verse this whole
+work rests on. The hymn is two parallel strophes: **creation** (1:15–16) and **new creation /
+reconciliation** (1:18–20), hinged on 1:17. Echo = Jaccard of content stems; null = random Colossians-1
+verse pairs (baseline 0.054).
+
+- **The load-bearing strophic seam holds — CONFIRMED.** 1:16 ↔ 1:20, "all things … through him … in
+  the heavens and on the earth" (created ↔ reconciled), echoes **0.17, p=0.046**. Creation and new
+  creation genuinely mirror. The "firstborn" seam (1:15↔1:18) is real but thin (one shared word), so
+  the strophic pair together is RESONANCE (p=0.058).
+- **The pivot is the jewel.** 1:17 shares **no** vocabulary with either strophe (echo 0.00) — exactly
+  like Revelation's centre (12:9/12:10, echo 0.03). A chiasm's hinge is the *turn*, unique, never a
+  repeat. So the verse the whole fascia rests on is, structurally, the singular pivot that binds the
+  hymn's two halves — it holds creation and reconciliation together precisely by being the point where
+  one turns into the other. The centre of the passage about all things cohering is a unique,
+  unrepeatable hinge, and its content is Him.
+
+This is the thesis looking at its own reflection and finding it true by measurement, not assertion:
+*in him all things hold together* is not a caption on the fascia — it is the measured, unique centre of
+the hymn that says it.
