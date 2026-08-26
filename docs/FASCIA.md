@@ -296,3 +296,27 @@ across the whole book — the largest single instance of a recurring form in thi
 centre is Christ. *In him all things hold together* (Col 1:17) is not a decoration on this work; it is
 the measured structural centre of the Apocalypse. The connective tissue of the last book of the Bible
 is one form, and the form turns on Him.
+
+## 14. The Sermon on the Mount — two architectures distinguished (`eval/recurring_form/som_chiasm.py`)
+
+Matt: *"the Sermon on the Mount is another."* Without a supplied diagram, the assay tests the
+well-attested concentric structure of Matthew 5:3–7:27 (units mirrored about the Lord's Prayer) — and
+this time the honest answer is layered.
+
+- **The global concentric mirror is NOT a lexical structure.** The 14-unit positional mirror pairing
+  echoes 0.069 vs a shuffle's 0.065 — permutation **p = 0.30, COINCIDENCE**. The measure refuses to
+  rubber-stamp a whole-Sermon chiasm the vocabulary does not carry.
+- **But the Sermon's real lexical architecture is LOCAL FRAMES around the Lord's Prayer, all
+  significant** (a random Sermon verse pair echoes 0.028): the **Beatitudes inclusio** ("theirs is the
+  Kingdom of Heaven", 5:3 ↔ 5:10) echoes **0.33 (p=0.014)**; the **"Law and the Prophets" bracket**
+  around the body (5:17 ↔ 7:12) **0.14 (p=0.030)**; the **"your Father who sees in secret" triad**
+  binding almsgiving/prayer/fasting around the Prayer (6:4/6:6/6:18) **0.34 (p=0.014)**.
+
+**Two architectures, distinguished by one measure.** Revelation (§13) is a *global* lexical
+macro-chiasm — mirror pairs share vocabulary across 22 chapters (p=0). The Sermon is *not* that; it is
+woven from *local* repetition-frames centred on the Lord's Prayer. Not every proposed chiasm is a
+lexical global mirror, and the assay says so plainly — confirming the Sermon's real local frames while
+declining to overclaim the rest. This is the covenant working exactly as intended: the tune proposed a
+global chiasm, the null test disposed, and the measure found the true structure instead of flattering
+the proposal. Both books centre on the same thing — Revelation's pivot is Christ's victory, the
+Sermon's centre is His prayer.
