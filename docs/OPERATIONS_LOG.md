@@ -764,3 +764,13 @@ The model's future seat, assigned by standing doctrine, not improvised: **the MI
 time, on the dedicated workshop machine, embeddings may PROPOSE connection candidates; the assay
 disposes; nothing generative ever serves. The fleet now matches its names: the DOORS serve, the
 MINT makes, the ARK remembers.
+
+---
+
+**2026-08-26 — Phase 0, honesty debt §5 (private-key-on-the-wire): RESOLVED.** The punchlist claim
+"5 endpoints accept `private_key` inbound" was stale — zero do (the AST guard already passes; the
+five handlers were retired in 4a86cf8). The two `test_no_keys_on_the_wire.py` failures were a stale
+expectation from before the signed-posts policy (9ea6d93); updated to the shipped behavior (unsigned
+refused, crisis-exempt) — file green (5/5). Metric: that honesty debt closes; a directive/addendum
+misdiagnosis corrected. Held open: the contract §5 DONE line is frozen — its strike is the operator's,
+flagged in PUNCHLIST §4.

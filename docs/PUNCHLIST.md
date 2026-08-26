@@ -43,8 +43,13 @@ v3 places 99.97% but stores nothing. **Done when** the address renders on the ca
 `/search`, and on the MCP surface, and a prefix query route answers — *then* the shard column.
 
 ## 4 · THE HONESTY DEBTS
-- **§5 private-key-on-the-wire**: 5 endpoints still accept `private_key` inbound. **Done when**
-  zero do and the contract line can be truthfully struck.
+- **§5 private-key-on-the-wire — RESOLVED (2026-08-26)**: zero endpoints read `private_key` inbound.
+  The five handlers were retired once the browser could sign (commit 4a86cf8); the AST guard
+  `test_no_http_handler_reads_a_private_key_out_of_a_request` proves no handler sources one, and the
+  two remaining failures in `test_no_keys_on_the_wire.py` were a STALE expectation — they predated the
+  signed-posts policy (9ea6d93) and asserted "unsigned still allowed." Updated to the shipped policy
+  (unsigned refused, crisis-exempt); the file is green. **The contract §5 DONE line can now be
+  truthfully struck — operator's call, since `COMPLETION_CONTRACT.md` is frozen.**
 - **Three dead files on production** (`web/ask.py`, `branding.py`, `config.py`). **Done when**
   Matt says the word and they are archived (not deleted) with the act recorded.
 - **Coverage 52% → 90%**, worst user-facing modules first (almanac 20%).

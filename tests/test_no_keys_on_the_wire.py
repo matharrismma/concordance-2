@@ -69,10 +69,11 @@ def test_no_http_handler_reads_a_private_key_out_of_a_request():
 
 
 def test_a_private_key_sent_anyway_simply_does_nothing():
-    """Not an error — just inert. The message still posts, unsigned, because the key is ignored
-    rather than used. Silently honouring it would be the failure."""
-    import base64
-    from concordance import identity, mesh, signing
+    """The private key is inert: the HTTP layer ignores it (the AST guard above proves no handler
+    reads it), so it is never used to sign. Under the signed-posts policy (2026-08-21) the resulting
+    unsigned normal post is then refused — so a leaked key buys nothing, not even an unsigned post.
+    Silently signing on the sender's behalf would be the failure; it does not happen."""
+    from concordance import identity, mesh
     from concordance.config import EngineConfig
     from concordance.web.api import dispatch
 
@@ -84,11 +85,13 @@ def test_a_private_key_sent_anyway_simply_does_nothing():
     st, r = dispatch("POST", "/mesh/post", {},
                      {"fp": fp, "text": "sneaking a key", "kind": "word",
                       "private_key": me["private_key"]}, cfg)
-    assert st == 200 and r["ok"] is True
-    assert r["signed"] is False, "a private key in the body was USED — it must be inert"
+    assert st == 200
+    assert r.get("signed") is not True, "a private key in the body was used to sign — it must be inert"
+    assert r["ok"] is False and "signed" in r.get("error", ""), \
+        "the leaked key is ignored and the unsigned post refused — it must buy nothing"
 
 
-def test_the_sovereign_path_still_works_and_unsigned_is_still_allowed():
+def test_the_sovereign_path_still_works_and_unsigned_is_refused_except_a_cry_for_help():
     import base64
     from concordance import identity, mesh, signing
     from concordance.config import EngineConfig
@@ -109,10 +112,16 @@ def test_the_sovereign_path_still_works_and_unsigned_is_still_allowed():
     assert st == 200 and r["ok"] is True and r["signed"] is True
     assert r["id"] == s["would_be_id"]
 
-    # unsigned remains allowed: tamper-evident by content hash, honestly labelled
+    # a NORMAL unsigned post is refused (policy 2026-08-21): otherwise anyone could post in any node's
+    # name (impersonation), and everyone who can post already holds a key — so no one is turned away.
     st2, r2 = dispatch("POST", "/mesh/post", {},
                        {"fp": fp, "text": "no key, no signature", "kind": "word"}, cfg)
-    assert st2 == 200 and r2["ok"] is True and r2["signed"] is False
+    assert st2 == 200 and r2["ok"] is False and "signed" in r2.get("error", "")
+
+    # THE ONE EXCEPTION — crisis-first: a cry for help is heard even unsigned, delivered signed=False.
+    st3, r3 = dispatch("POST", "/mesh/post", {},
+                       {"fp": fp, "text": "I want to kill myself", "kind": "word"}, cfg)
+    assert st3 == 200 and r3["ok"] is True and r3["signed"] is False and "crisis" in r3
 
 
 def test_modules_may_still_take_a_key_locally():
