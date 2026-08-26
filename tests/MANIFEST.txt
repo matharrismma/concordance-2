@@ -105,6 +105,7 @@ test_pins.py
 test_precedent.py
 test_present.py
 test_privacy.py
+test_profile.py
 test_pronounce.py
 test_prophecy.py
 test_push.py
