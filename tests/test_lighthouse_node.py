@@ -78,3 +78,45 @@ def test_packets_fit_the_lora_budget():
     card = _card("c", "A card", "with a reasonable amount of body text to answer the question well")
     r = ln.simulate_answer("a card question", search_fn=lambda q, n: [card], is_crisis_fn=lambda t: False)
     assert r["packets"] >= 1 and r["max_packet_bytes"] <= ln._wire.MTU
+
+
+# ── the station, the hardware guard, the local loop, and the field-operator CLI ───────────────────
+def test_new_station_is_a_working_keypair():
+    priv, pub = ln.new_station()
+    assert priv and pub and priv != pub
+    r = ln.simulate_answer("hi", node=(priv, pub), search_fn=lambda q, n: [], is_crisis_fn=lambda t: False)
+    assert r["station_pubkey"] == pub and r["verify"]["authentic"] is True
+
+
+def test_serve_without_a_radio_degrades_honestly():
+    # No meshtastic library / no radio on a test box: serve must say so, never crash — the composer
+    # still works offline regardless.
+    priv, pub = ln.new_station()
+    r = ln.serve(priv, pub)
+    assert r["ok"] is False and "meshtastic" in r["error"].lower()
+
+
+def test_context_loop_delegates_to_the_local_verifier(monkeypatch):
+    from concordance import context
+    monkeypatch.setattr(context, "run_verified",
+                        lambda text, seal=True: {"ok": True, "text": text, "seal": seal})
+    assert ln.context_loop("a claim", seal=False) == {"ok": True, "text": "a claim", "seal": False}
+
+
+def test_cli_self_test_proves_the_whole_chain(capsys):
+    assert ln.main([]) == 0                     # default: crisis + verified card + daily, all over "air"
+    out = capsys.readouterr().out
+    assert "authentic=True" in out and "station pubkey" in out
+
+
+def test_cli_ask_daily_and_serve(capsys, monkeypatch):
+    # --ask/--daily go through the REAL corpus in production; here we stub the composers so the CLI
+    # plumbing (arg routing, printing, exit codes) is what's under test — not a 346MB corpus load.
+    monkeypatch.setattr(ln, "compose_reply",
+                        lambda q, **k: {"kind": "answer", "verified": True, "text": "press hard", "ref": "/c/x"})
+    monkeypatch.setattr(ln, "daily_word", lambda seed, **k: {"ok": True, "text": "verse of the day"})
+    assert ln.main(["--ask", "how do i stop bad bleeding"]) == 0
+    assert ln.main(["--daily", "2026-01-01"]) == 0
+    assert ln.main(["--serve"]) == 1           # no radio on the test box -> not started, exit 1
+    out = capsys.readouterr().out
+    assert "not started" in out.lower() or "meshtastic" in out.lower()

@@ -82,6 +82,7 @@ test_keystones.py
 test_last_mile.py
 test_ledger.py
 test_library.py
+test_lighthouse_node.py
 test_linkdrop.py
 test_mcp.py
 test_mcp_contracts.py
