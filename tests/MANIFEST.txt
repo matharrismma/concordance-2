@@ -116,6 +116,7 @@ test_recall.py
 test_receipt.py
 test_receipt_is_also_a_card.py
 test_recite.py
+test_recurring_form.py
 test_redact.py
 test_reference_cards.py
 test_repair_cards.py
