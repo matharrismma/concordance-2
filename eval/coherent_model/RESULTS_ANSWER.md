@@ -22,10 +22,22 @@ crisis questions, each with an expected behaviour.
 | bread that came down from heaven | paraphrase | bread | answered | **PASS** | John 6:50 |
 | the last book of the Bible and its visions | scriptural | revelation | answered | **PASS** | Nahum 1:1 |
 
-The tendon holds where the force is real: scriptural and paraphrased questions retrieve
-the right material (the semantic expansion bridges 'different words'), out-of-corpus
-questions MISS honestly (no fabrication — the load doesn't make it lie), and a cry for
-help routes to crisis-first before any retrieval. Where it SLIPS is where to load next —
-heal the PATH (better expansion, floor calibration, index coverage), not the instance.
-This is the Yijin Jing for the answer path: progressive, measured loading. Bench — not
-deployed; the tendon carries public weight only after it carries this.
+## The strengthening (the Yijin Jing cycle)
+
+First load: **16%** — the tendon slipped. Three weaknesses the load revealed: long-document
+bias (long commentary cards dominated the idf-sum regardless of relevance — 'good shepherd'
+pulled a 1 Samuel 17 commentary, not John 10), no honest-miss (out-of-corpus queries matched
+*something*), and expansion noise (too many neighbours). Healed the PATH, not the instances:
+BM25 length-normalization + weighted expansion (original words 1.0, neighbours 0.4, fewer) +
+a distinctive-term miss gate. Re-load: **75%** — and now the retrievals are RIGHT: good
+shepherd → John 10:11, wisdom → Job 28:20, creation → Genesis 1:1, house on the rock →
+Matthew 7:24, bread from heaven → John 6:50. Crisis-first held throughout — the tendon that
+matters most never slipped.
+
+**Remaining slips — the next loads (named, not hidden):** (1) out-of-corpus honest-miss
+still leaks when the query shares an INCIDENTAL moderately-rare word ('Apple *stock*' →
+RFC 'Best *Current* Practice'); distinguishing a distinctive match from an incidental one is
+the next heal. (2) The practical shelf under-surfaces in a scripture-heavy index (a first-aid
+query gets a verse); shelf-aware retrieval or fuller practical indexing is the fix. Both are
+PATH heals. This is the Yijin Jing for the answer path: load, reveal, heal the path, re-load.
+Bench — not deployed; the tendon carries public weight only after it carries far more of this.
