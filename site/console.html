@@ -28,6 +28,11 @@
   #page .thread{ margin-top:.7rem; padding-top:.6rem; border-top:1px solid var(--rule); font-size:.96rem; color:var(--faint) }
   #page .thread b{ color:var(--ink) }
   #page .source{ margin-top:.5rem; font-family:ui-sans-serif,system-ui,sans-serif; font-size:.78rem; color:var(--faint) }
+  /* Where next — the choice, always offered, never forced. Simple book choices. */
+  #page .next{ margin-top:.8rem; padding-top:.7rem; border-top:1px solid var(--rule); display:flex; flex-wrap:wrap; align-items:center; gap:.5rem }
+  #page .next .nxlabel{ font-family:ui-sans-serif,system-ui,sans-serif; font-size:.72rem; text-transform:uppercase; letter-spacing:.12em; color:var(--faint) }
+  #page .next .nxopt{ font-family:Georgia,serif; font-size:.98rem; padding:.4rem .7rem; border:1px solid var(--ink); background:var(--paper); color:var(--ink); cursor:pointer }
+  #page .next .nxopt:focus-visible{ outline:3px solid var(--ink); outline-offset:2px }
 
   /* Controls — one big voice key; a written line always beside it (curb-cut: both, never one). */
   .controls{ display:flex; flex-direction:column; gap:.7rem; margin-bottom:1.2rem }
@@ -113,6 +118,9 @@
     if(r.resources && r.resources.length){ var ul=el('ul','resources'); r.resources.forEach(function(x){ var li=el('li'); if(x.ref){ var a=el('a',null,x.label); a.href=x.ref; li.appendChild(a);} else li.textContent=x.label; ul.appendChild(li);}); page.appendChild(ul); }
     if(r.connections && r.connections.length){ var t=el('p','thread'); t.appendChild(el('b',null,'A thread worth following: ')); t.appendChild(document.createTextNode(r.connections[0].title)); page.appendChild(t); }
     if(r.source && r.source.ref){ var s=el('p','source'); s.appendChild(document.createTextNode('Source arriving: ')); var a=el('a',null,r.source.title||r.source.ref); a.href=r.source.ref; s.appendChild(a); page.appendChild(s); }
+    // Where next — always offered, always a way to a new path; never forced (your choice).
+    if(r.next && r.next.length){ var nx=el('nav','next'); nx.setAttribute('aria-label','Where next'); nx.appendChild(el('span','nxlabel','Where next —'));
+      r.next.forEach(function(n){ var b=el('button','nxopt',n.label); b.type='button'; b.onclick=function(){ if(n.ref){ location.href=n.ref; } else { line.focus(); } }; nx.appendChild(b); }); page.appendChild(nx); }
     try{ if(window.NHSpeak) NHSpeak.play(r.spoken||r.caption||''); }catch(e){}
   }
 

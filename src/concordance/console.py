@@ -76,22 +76,52 @@ def _trim(s: str, n: int = 320) -> str:
     return s if len(s) <= n else s[: n - 1].rsplit(" ", 1)[0] + "…"
 
 
-def _one_connection(card_id: str) -> Optional[Dict[str, str]]:
-    """A single related thread to weave back in — 'reinforce the connection'. Found, never invented."""
+# Meet them in THEIR frame (Matt: "use their frame to focus what we say — their vocabulary"). The
+# person's own words carry their frame; we use it to SELECT which found threads resonate and to phrase
+# in their terms — NEVER to bend the truth. Frame shapes delivery and selection; the room is unchanged.
+_STOP = frozenset((
+    "the a an of to and but in on for is are was were be his her my your their our its he she it they we "
+    "you i do does did how what when where why who which that this these those can could would should "
+    "will with from about into over under out up down want need get got make made new old very just some "
+    "any not no know tell show find give me us them him there here have has had a").split())
+
+
+def _frame(text: str) -> List[str]:
+    """The person's own vocabulary, in their order — the frame we meet them in. Their words, not ours."""
+    out: List[str] = []
+    for w in re.findall(r"[a-zA-Z]{3,}", (text or "").lower()):
+        if w not in _STOP and w not in out:
+            out.append(w)
+    return out
+
+
+def _connection_list(card_id: str) -> List[Dict[str, str]]:
+    """All found related threads (id + title). Found, never invented."""
     try:
-        r = _corpus.connections(card_id, limit=6) or {}
+        r = _corpus.connections(card_id, limit=8) or {}
     except Exception:  # noqa: BLE001 — a missing connection must never break a spoken answer
-        return None
+        return []
     for key in ("connections", "related", "neighbors", "cards", "edges"):
         items = r.get(key) if isinstance(r, dict) else None
         if isinstance(items, list) and items:
-            c = items[0]
-            if isinstance(c, dict):
-                cid = c.get("id") or c.get("card_id") or ""
-                title = (c.get("title") or c.get("subject") or "").strip()
-                if title:
-                    return {"id": cid, "title": title}
-    return None
+            out = []
+            for c in items:
+                if isinstance(c, dict):
+                    cid = c.get("id") or c.get("card_id") or ""
+                    title = (c.get("title") or c.get("subject") or "").strip()
+                    if title:
+                        out.append({"id": cid, "title": title})
+            return out
+    return []
+
+
+def _by_frame(items: List[Dict[str, str]], frame: List[str]) -> List[Dict[str, str]]:
+    """Rank found threads by how much they share the PERSON'S vocabulary — their frame surfaces first.
+    A stable sort, so with no overlap the found order is kept (we never invent a resonance)."""
+    fset = set(frame)
+    def overlap(c):
+        return len(set(re.findall(r"[a-z]{3,}", c["title"].lower())) & fset)
+    return sorted(items, key=overlap, reverse=True)
 
 
 def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
@@ -107,21 +137,25 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
     msg = (r.get("message") or "").strip()
     scripture = r.get("scripture") or r.get("romans_road")
     results = r.get("results") or []
+    frame = _frame(text)                                # their vocabulary — the frame we meet them in
     connections: List[Dict[str, str]] = []
+    nexts: List[Dict[str, Any]] = []
     source: Optional[Dict[str, str]] = None
     headline = ""
 
     if results:
         top = results[0]
         title = (top.get("title") or "").strip()
-        snippet = _trim(top.get("snippet") or top.get("surface") or "")
+        snippet = _trim(top.get("snippet") or top.get("surface") or "", 260)
         headline = title
-        spoken = f"On {text.strip().rstrip('?')}, the keeping holds this. {snippet}"
+        spoken = f"On {_trim(text.strip().rstrip('?'), 80)}, the keeping holds this. {snippet}"
         source = {"title": title, "ref": f"/card/{top.get('id','')}"}
-        conn = _one_connection(top.get("id", ""))
-        if conn:
-            connections = [conn]
-            spoken += f" A thread worth following: {conn['title']}."
+        # frame-focus: surface the threads that resonate with THEIR words first (found, never invented)
+        threads = _by_frame(_connection_list(top.get("id", "")), frame)
+        if threads:
+            connections = threads[:1]
+            spoken += f" A thread worth following: {threads[0]['title']}."
+            nexts = [{"label": t["title"], "ref": f"/card/{t['id']}"} for t in threads[:2]]
         caption = f"{title}\n\n{top.get('snippet') or ''}"
     elif scripture:
         v = scripture[0] if isinstance(scripture, list) and scripture else {}
@@ -141,10 +175,17 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
         caption = spoken
         kind = "miss"
 
+    # ALWAYS offer the next step — and ALWAYS a way to a new path. Paced (at most two threads, never a
+    # wall) and never forced: the final choice is theirs (the Gate — we present, we do not cross).
+    nexts.append({"label": "Or ask about anything else — your choice", "ref": None})
+    if len(nexts) > 1:
+        opts = "; ".join(n["label"] for n in nexts[:-1])
+        spoken += f" Where next — {opts}; or somewhere else entirely? Your choice."
+
     return {
         "intent": "ask", "kind": kind, "headline": headline, "spoken": spoken, "caption": caption,
-        "source": source, "connections": connections, "resources": r.get("resources"),
-        "note": r.get("note"), "generated": False,
+        "source": source, "connections": connections, "next": nexts, "frame": frame[:8],
+        "resources": r.get("resources"), "note": r.get("note"), "generated": False,
     }
 
 

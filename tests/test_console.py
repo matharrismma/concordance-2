@@ -44,19 +44,27 @@ def test_schedule_and_copies_route_and_never_act_without_confirmation():
     assert c["intent"] == "copies" and c["count"] == 3
 
 
-def test_the_coach_speaks_a_short_answer_with_a_connection_and_a_deferred_source(monkeypatch):
+def test_the_coach_answers_in_their_frame_and_offers_a_choice_of_whats_next(monkeypatch):
     # monkeypatch the corpus-backed pieces so this is fast and hermetic
     monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
         "kind": "search", "results": [{"id": "card_water", "title": "Purifying water",
         "snippet": "Boil for one minute at a rolling boil; at altitude, three."}],
         "generated": False, "note": "conduit"})
-    monkeypatch.setattr(console, "_one_connection", lambda cid: {"id": "card_exodus", "title": "Exodus 15 — the waters made sweet"})
-    r = console.dispatch("how do I purify water", SEC)
+    # two found threads; the one sharing the person's OWN word ("well") must surface first — their frame
+    monkeypatch.setattr(console, "_connection_list", lambda cid: [
+        {"id": "card_exodus", "title": "Exodus 15 the waters made sweet"},
+        {"id": "card_well", "title": "Digging and keeping a well"}])
+    r = console.dispatch("how do I keep my well water safe", SEC)
     assert r["intent"] == "ask" and r["generated"] is False
     assert "Boil for one minute" in r["spoken"]
-    assert r["connections"][0]["title"].startswith("Exodus 15")     # a thread woven back in
+    assert "well" in r["frame"]                                       # their vocabulary is read
+    assert r["connections"][0]["id"] == "card_well"                  # frame-focus: their word ranks first
     assert r["source"]["ref"] == "/card/card_water"                 # the full source, deferred
-    assert len(r["spoken"]) < 600                                    # short — speakable, LoRa-small
+    # ALWAYS offers what's next, and ALWAYS a door to a new path (freedom; we present, we do not cross)
+    labels = [n["label"] for n in r["next"]]
+    assert any("well" in l.lower() for l in labels)                 # a next step in their frame
+    assert labels[-1].lower().startswith("or ask about anything else")
+    assert "Your choice" in r["spoken"] and len(r["spoken"]) < 700   # short — speakable, LoRa-small
 
 
 def test_an_honest_miss_stays_a_miss():
