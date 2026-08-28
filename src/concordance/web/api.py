@@ -1005,6 +1005,30 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         res = _pins.done(str(body["thread_id"]), str(body["id"]))
         return _ok(res) if res.get("ok") else _err(404, res.get("error", "not found"))
 
+    if method == "POST" and path == "/console":
+        # THE CONSOLE — audio-native coach & scribe. Crisis-first, then route (ask · dictate · schedule
+        # · copies), or form a LOCATED artifact from anything dropped in (the location, never the blob).
+        # Returns the small, speakable, LoRa-ready payload. See docs/CONSOLE.md.
+        if not isinstance(body, dict):
+            return _err(400, "text or intake required")
+        from .. import console as _console
+        intake = body.get("intake")
+        if isinstance(intake, dict):
+            r = _console.intake_artifact(
+                source_location=str(intake.get("source_location") or ""),
+                kind=str(intake.get("kind") or "file"), title=str(intake.get("title") or ""),
+                extracted_text=str(intake.get("extracted_text") or ""),
+                sha256=str(intake.get("sha256") or ""))
+            return _ok(r) if r.get("ok") else _err(400, r.get("error") or "a source location is required")
+        text = str(body.get("text") or "").strip()
+        if not text:
+            return _err(400, "text or intake required")
+        from .. import ask as _ask
+        gate_open = (surface == "witness") or session_gate_open or _ask.gate_signal(text)
+        # v1: dictation is kept edge-side (store-nothing, no account); the signed-write owner arrives
+        # with the covenant flow. A proven owner may be threaded here later.
+        return _ok(_console.dispatch(text, config, owner=None, gate_open=gate_open))
+
     if method == "POST" and path == "/ask":
         # The conduit front door: find + verify + cite, never generate. Deterministic router.
         if not isinstance(body, dict) or not str(body.get("text") or "").strip():
@@ -2563,6 +2587,7 @@ ROUTES = [
     {"path": "/path", "methods": ("GET",), "api": True},
     {"path": "/days", "methods": ("POST",), "rl": True},
     {"path": "/ask", "methods": ("POST",), "rl": True},
+    {"path": "/console", "methods": ("POST",), "rl": True},
     {"path": "/journal", "methods": ("GET", "POST"), "api": True},
     {"path": "/steward/budget", "methods": ("POST",)},
     {"path": "/steward/cost-destroyed", "methods": ("POST",)},

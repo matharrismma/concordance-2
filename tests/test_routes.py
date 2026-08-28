@@ -94,7 +94,7 @@ GOLDEN_RATELIMITED = {
     "/unchecked/answer",   # deliberate addition 2026-08-01 — anyone may answer, so it is rate-limited
     "/verify", "/derivation/verify", "/mcp",
     # the six profile mounts (task #123) — same engine, narrow doors; goldens updated as a decision
-    "/mcp/core", "/mcp/library", "/mcp/sovereign", "/mcp/coach", "/mcp/witness", "/mcp/community", "/ask", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose", "/pins", "/pins/done",
+    "/mcp/core", "/mcp/library", "/mcp/sovereign", "/mcp/coach", "/mcp/witness", "/mcp/community", "/ask", "/console", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose", "/pins", "/pins/done",
     "/threads", "/threads/search",
     "/coach/mastery", "/identity/create", "/identity/verify", "/badges",
     "/profile/signable", "/profile/save", "/profile/erase",  # the optional sovereign profile (signed writes)

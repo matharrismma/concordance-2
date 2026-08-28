@@ -1,0 +1,168 @@
+<!doctype html><html lang=en><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>The Console — Narrow Highway</title>
+<meta name="description" content="A book you speak to and write in — a coach and a scribe. Ask and hear a verified answer; dictate a note; drop anything in. Audio-native, ADA, E-Ink first, works offline on the sovereign voice.">
+<link rel="stylesheet" href="/styles.css">
+<style>
+  /* E-INK FIRST: high-contrast ink on paper, a serif book column, NO animation, page not app.
+     A book on its face; the whole library within. */
+  :root{ --paper:#f7f6f1; --ink:#141310; --faint:#5c584f; --hair:#cdc8ba; --rule:#e5e0d3; --accent:#141310; }
+  @media (prefers-color-scheme: dark){ :root{ --paper:#0c0c0b; --ink:#efece2; --faint:#9a968b; --hair:#2b2a27; --rule:#232220; } }
+  *{ box-sizing:border-box }
+  html,body{ margin:0; background:var(--paper); color:var(--ink) }
+  body{ font-family:Georgia,"Times New Roman",serif; font-size:1.12rem; line-height:1.6; -webkit-text-size-adjust:100% }
+  a{ color:var(--ink) }
+  .skip{ position:absolute; left:-999px; top:0 } .skip:focus{ left:.5rem; top:.5rem; background:var(--ink); color:var(--paper); padding:.5rem .8rem; z-index:9 }
+  .book{ max-width:40rem; margin:0 auto; padding:1.4rem 1.15rem 4rem }
+  header.masthead{ display:flex; align-items:baseline; justify-content:space-between; border-bottom:2px solid var(--ink); padding-bottom:.5rem; margin-bottom:1.2rem }
+  .masthead .name{ font-weight:700; letter-spacing:.02em; font-size:1.02rem }
+  .masthead .tag{ font-family:ui-sans-serif,system-ui,sans-serif; font-size:.7rem; text-transform:uppercase; letter-spacing:.14em; color:var(--faint) }
+
+  /* The current page — the spoken answer, shown as text (ADA: nothing is audio-only). */
+  #page{ min-height:8.5rem; border:1px solid var(--hair); background:var(--paper); padding:1.1rem 1.15rem; margin-bottom:1.1rem }
+  #page .kind{ font-family:ui-sans-serif,system-ui,sans-serif; font-size:.66rem; text-transform:uppercase; letter-spacing:.14em; color:var(--faint); margin:0 0 .4rem }
+  #page h2{ font-size:1.24rem; font-weight:700; margin:0 0 .5rem; line-height:1.3 }
+  #page .body{ margin:0 } #page .body p{ margin:0 0 .6rem }
+  #page .resources{ list-style:none; margin:.7rem 0 0; padding:.7rem 0 0; border-top:1px solid var(--rule) }
+  #page .resources li{ margin:.25rem 0 } #page .resources a{ font-weight:700 }
+  #page .thread{ margin-top:.7rem; padding-top:.6rem; border-top:1px solid var(--rule); font-size:.96rem; color:var(--faint) }
+  #page .thread b{ color:var(--ink) }
+  #page .source{ margin-top:.5rem; font-family:ui-sans-serif,system-ui,sans-serif; font-size:.78rem; color:var(--faint) }
+
+  /* Controls — one big voice key; a written line always beside it (curb-cut: both, never one). */
+  .controls{ display:flex; flex-direction:column; gap:.7rem; margin-bottom:1.2rem }
+  #talk{ font-family:ui-sans-serif,system-ui,sans-serif; font-size:1.05rem; font-weight:700; padding:1.1rem; border:2px solid var(--ink); background:var(--paper); color:var(--ink); cursor:pointer; width:100%; letter-spacing:.02em }
+  #talk[aria-pressed=true]{ background:var(--ink); color:var(--paper) }
+  #talk:focus-visible{ outline:3px solid var(--ink); outline-offset:2px }
+  .written{ display:flex; gap:.5rem }
+  .written label{ position:absolute; left:-999px }
+  #line{ flex:1 1 auto; font-family:Georgia,serif; font-size:1rem; padding:.7rem .8rem; border:1px solid var(--ink); background:var(--paper); color:var(--ink) }
+  #send{ font-family:ui-sans-serif,system-ui,sans-serif; font-weight:700; padding:.7rem 1rem; border:1px solid var(--ink); background:var(--ink); color:var(--paper); cursor:pointer }
+  #send:focus-visible,#line:focus-visible{ outline:3px solid var(--ink); outline-offset:2px }
+  .hint{ font-family:ui-sans-serif,system-ui,sans-serif; font-size:.76rem; color:var(--faint); margin:.1rem 0 0 }
+
+  /* Drop anything — keep the LOCATION and the usable form, never the blob. */
+  #intake{ border:1px dashed var(--hair); padding:.9rem 1rem; margin-bottom:1.3rem; font-family:ui-sans-serif,system-ui,sans-serif; font-size:.86rem; color:var(--faint) }
+  #intake.over{ border-color:var(--ink); color:var(--ink) }
+  #intake input[type=file]{ font:inherit } #intake .loc{ margin-top:.5rem; display:none } #intake.has .loc{ display:block }
+  #intake .loc input{ width:100%; font-family:Georgia,serif; font-size:.95rem; padding:.45rem .6rem; border:1px solid var(--ink); background:var(--paper); color:var(--ink); margin-top:.25rem }
+
+  /* The book — the pages you have turned (transcript + your notes). Vast inside. */
+  h3.turned{ font-family:ui-sans-serif,system-ui,sans-serif; font-size:.72rem; text-transform:uppercase; letter-spacing:.14em; color:var(--faint); border-bottom:1px solid var(--rule); padding-bottom:.35rem; margin:0 0 .6rem }
+  #book{ list-style:none; margin:0; padding:0 }
+  #book li{ padding:.6rem 0; border-bottom:1px solid var(--rule) }
+  #book .you{ font-family:ui-sans-serif,system-ui,sans-serif; font-size:.8rem; color:var(--faint); margin:0 0 .15rem }
+  #book .said{ margin:0 }
+  #book .note{ margin:.35rem 0 0; padding-left:.8rem; border-left:2px solid var(--hair); color:var(--faint); font-size:.95rem }
+  .foot{ margin-top:1.6rem; font-family:ui-sans-serif,system-ui,sans-serif; font-size:.78rem; color:var(--faint); line-height:1.5 }
+  @media (prefers-reduced-motion: no-preference){ } /* deliberately empty — no motion, ever (E-Ink) */
+</style></head>
+<body>
+<a class="skip" href="#talk">Skip to the voice key</a>
+<div class="book">
+  <header class="masthead">
+    <span class="name">The Console</span>
+    <span class="tag">a coach &amp; a scribe</span>
+  </header>
+
+  <!-- The current page: the answer, spoken AND shown. aria-live so a screen reader announces it. -->
+  <section id="page" aria-live="polite" aria-atomic="true" role="region" aria-label="The page">
+    <p class="kind">Speak, or write a line</p>
+    <div class="body"><p>Ask and hear a verified answer. Say “note that…” to keep a record. Drop anything in and it becomes a located note. In a crisis, real help comes first.</p></div>
+  </section>
+
+  <div class="controls">
+    <button id="talk" type="button" aria-pressed="false" aria-describedby="talkhint">🎙 Hold the voice key — speak</button>
+    <p id="talkhint" class="hint">Tap to start and stop listening. No microphone? Write your line below — everything works either way.</p>
+    <form class="written" id="wform">
+      <label for="line">Write a line</label>
+      <input id="line" name="line" type="text" autocomplete="off" placeholder="…or write it here" enterkeyhint="send">
+      <button id="send" type="submit">Say</button>
+    </form>
+  </div>
+
+  <section id="intake" aria-label="Drop anything in">
+    <strong>Drop anything in</strong> — a photo, a screenshot, a PDF, a link. We keep the <em>location</em> and what’s usable, never the file itself.
+    <div><input id="file" type="file" aria-label="Choose a file to bring in"></div>
+    <div class="loc"><label for="locpath">Where does the source live? (a drive path or a link)</label>
+      <input id="locpath" type="text" placeholder="e.g. /sd/photos/well.jpg  or  https://…"></div>
+  </section>
+
+  <h3 class="turned">The pages you’ve turned</h3>
+  <ul id="book" aria-label="Transcript and your notes"></ul>
+
+  <p class="foot">Conduit, not source — it speaks found and verified words and keeps yours verbatim; it never makes up the facts it answers with. Works offline on your device’s own voice; richer in the operator’s voice when wired. <a href="/">Narrow Highway</a>.</p>
+</div>
+
+<script src="/speak.js"></script>
+<script>
+(function(){
+  var API = (window.API != null ? window.API : '');
+  var page = document.getElementById('page'), book = document.getElementById('book');
+  var line = document.getElementById('line'), talk = document.getElementById('talk');
+
+  function el(tag, cls, txt){ var e=document.createElement(tag); if(cls)e.className=cls; if(txt!=null)e.textContent=txt; return e; }
+
+  // Render a reply onto the current page (shown), and speak it (heard). ADA: always both.
+  function render(r){
+    page.innerHTML='';
+    page.appendChild(el('p','kind', (r.kind||'answer').toUpperCase()));
+    if(r.headline) page.appendChild(el('h2',null,r.headline));
+    var b=el('div','body'); (String(r.caption||r.spoken||'').split('\n\n')).forEach(function(par){ if(par.trim()) b.appendChild(el('p',null,par)); });
+    page.appendChild(b);
+    if(r.resources && r.resources.length){ var ul=el('ul','resources'); r.resources.forEach(function(x){ var li=el('li'); if(x.ref){ var a=el('a',null,x.label); a.href=x.ref; li.appendChild(a);} else li.textContent=x.label; ul.appendChild(li);}); page.appendChild(ul); }
+    if(r.connections && r.connections.length){ var t=el('p','thread'); t.appendChild(el('b',null,'A thread worth following: ')); t.appendChild(document.createTextNode(r.connections[0].title)); page.appendChild(t); }
+    if(r.source && r.source.ref){ var s=el('p','source'); s.appendChild(document.createTextNode('Source arriving: ')); var a=el('a',null,r.source.title||r.source.ref); a.href=r.source.ref; s.appendChild(a); page.appendChild(s); }
+    try{ if(window.NHSpeak) NHSpeak.play(r.spoken||r.caption||''); }catch(e){}
+  }
+
+  function remember(you, r){ // add the turned page to the book, with room for a margin note
+    var li=el('li'); li.appendChild(el('p','you','You said')); li.appendChild(el('p','said', you));
+    var add=el('button',null,'+ add a note'); add.type='button'; add.style.cssText='font-family:ui-sans-serif,system-ui,sans-serif;font-size:.76rem;background:none;border:0;color:var(--faint);cursor:pointer;padding:.2rem 0';
+    add.onclick=function(){ var n=el('input'); n.type='text'; n.setAttribute('aria-label','Add a margin note'); n.style.cssText='width:100%;font-family:Georgia,serif;padding:.4rem;border:1px solid var(--ink);background:var(--paper);color:var(--ink);margin-top:.3rem';
+      n.onkeydown=function(ev){ if(ev.key==='Enter'&&n.value.trim()){ var m=el('p','note',n.value.trim()); li.replaceChild(m,n); ask('note that '+m.textContent, true);} };
+      li.replaceChild(n,add); n.focus(); };
+    li.appendChild(add); book.insertBefore(li, book.firstChild);
+  }
+
+  function ask(text, quiet){
+    text=String(text||'').trim(); if(!text) return;
+    if(!quiet) remember(text, null);
+    fetch(API+'/console',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:text})})
+      .then(function(r){ return r.json(); })
+      .then(function(r){ render(r); })
+      .catch(function(){ render({kind:'offline', headline:'Off the wire', spoken:'I could not reach the station. Your words are kept here; the answer will follow.', caption:'I could not reach the station. Your words are kept here; the answer will follow.'}); });
+  }
+
+  document.getElementById('wform').addEventListener('submit', function(e){ e.preventDefault(); var t=line.value; line.value=''; ask(t); });
+
+  // ── Voice input — Web Speech API, sovereign (no key). Falls back silently to the written line. ──
+  var Rec = window.SpeechRecognition || window.webkitSpeechRecognition, rec=null, listening=false;
+  if(Rec){
+    rec=new Rec(); rec.lang='en-US'; rec.interimResults=false; rec.maxAlternatives=1;
+    rec.onresult=function(ev){ var t=ev.results[0][0].transcript; ask(t); };
+    rec.onend=function(){ listening=false; talk.setAttribute('aria-pressed','false'); talk.textContent='🎙 Hold the voice key — speak'; };
+    rec.onerror=function(){ listening=false; talk.setAttribute('aria-pressed','false'); talk.textContent='🎙 Hold the voice key — speak'; };
+    talk.addEventListener('click', function(){ if(listening){ try{rec.stop();}catch(e){} } else { try{ rec.start(); listening=true; talk.setAttribute('aria-pressed','true'); talk.textContent='■ Listening… tap to stop'; }catch(e){} } });
+  } else {
+    talk.textContent='Voice key unavailable — write your line';
+    talk.addEventListener('click', function(){ line.focus(); });
+  }
+
+  // ── Intake — keep the LOCATION and the usable form, never the blob. ──
+  var intake=document.getElementById('intake'), fileI=document.getElementById('file'), locI=document.getElementById('locpath');
+  function bringIn(name, kind){ intake.classList.add('has'); locI.value = locI.value || name; locI.focus();
+    var say='Bring it in: '+name+'. Where does the source live? Confirm the location, then say a note to describe it.';
+    render({kind:'intake', headline:'Bring it in', spoken:say, caption:say}); }
+  fileI.addEventListener('change', function(){ if(fileI.files[0]) bringIn(fileI.files[0].name, (fileI.files[0].type||'file')); });
+  ['dragover','dragenter'].forEach(function(ev){ intake.addEventListener(ev,function(e){ e.preventDefault(); intake.classList.add('over'); }); });
+  ['dragleave','drop'].forEach(function(ev){ intake.addEventListener(ev,function(e){ e.preventDefault(); intake.classList.remove('over'); }); });
+  intake.addEventListener('drop', function(e){ var f=e.dataTransfer && e.dataTransfer.files[0]; if(f) bringIn(f.name, (f.type||'file')); });
+  window.addEventListener('paste', function(e){ var it=e.clipboardData && e.clipboardData.items; if(!it) return; for(var i=0;i<it.length;i++){ if(it[i].kind==='file'){ var f=it[i].getAsFile(); if(f) bringIn(f.name||'pasted-image', (f.type||'image')); } } });
+  locI && locI.addEventListener('keydown', function(e){ if(e.key==='Enter' && locI.value.trim()){
+    fetch(API+'/console',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({intake:{source_location:locI.value.trim(), kind:'file'}})})
+      .then(function(r){return r.json();}).then(function(r){ if(r.artifact){ var say='Kept the location: '+r.artifact.title+'. Say a note to describe what it is.'; render({kind:'artifact', headline:'Located', spoken:say, caption:say}); } }).catch(function(){});
+  }});
+})();
+</script>
+</body></html>

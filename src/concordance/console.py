@@ -1,0 +1,235 @@
+"""THE CONSOLE — the deterministic router of an audio-native coach & scribe.
+
+You speak (or type, or drop a file); the console hears, decides WHAT KIND of thing it is, does it, and
+hands back a SMALL payload the edge can speak immediately and a LoRa link could carry:
+
+    { intent, kind, headline, spoken, caption, source, connections, record }
+
+  spoken   — the few words to say aloud NOW (a host's line; short by design)
+  caption  — the full text, for the deaf and for the transcript (ADA: nothing is audio-only)
+  source   — a WAYBILL to the full document (delivered later — the tortoise), never the blob
+  record   — for dictation, the verbatim note that was kept
+
+Crisis-first, always: the one hardened matcher (ask.is_crisis) runs before any routing — a cry is met
+with real help spoken plainly (988, a real person) before dictation, before a schedule, before anything.
+
+Conduit, not source: the console SPEAKS found and verified words and keeps yours verbatim; it never
+generates the facts it answers with. Deterministic — no LLM in the router. See docs/CONSOLE.md.
+"""
+from __future__ import annotations
+
+import re
+from typing import Any, Dict, List, Optional
+
+from . import ask as _ask
+from . import bookofdays as _book
+from . import corpus as _corpus
+
+# ── intent cues (deterministic; leading-anchored where a bare word would over-match) ─────────────
+# Dictation: "keep these words, verbatim." Anchored to the start so "make a note of the meeting" is a
+# note but "the note he played" (mid-sentence) is not swept.
+_DICTATE = (
+    "note that", "note to self", "note down", "take a note", "make a note", "jot down", "jot this",
+    "write down", "write this down", "write that down", "for the record", "dictate", "dictation",
+    "remember that", "record that", "log that", "note this",
+)
+# Schedule: a calendar act. "remind me" lives here (a reminder is a scheduled thing), distinct from
+# "remember that" (a kept note above).
+_SCHEDULE = (
+    "schedule", "put on my calendar", "add to my calendar", "on my calendar", "remind me",
+    "set a reminder", "make an appointment", "book an appointment", "book a", "add an event",
+)
+# Copies / distribution.
+_COPIES = ("make copies", "make a copy", "copy this", "duplicate this", "send copies", "distribute this")
+
+
+def _strip_prefix(text: str, cues) -> str:
+    """Remove a leading dictation/command cue so the KEPT words are the content, not the command.
+    'note that the well is dry' -> 'the well is dry'. Only strips at the very start."""
+    t = text.strip()
+    low = t.lower()
+    for c in sorted(cues, key=len, reverse=True):
+        if low.startswith(c):
+            rest = t[len(c):]
+            rest = re.sub(r"^[\s:,\-]+", "", rest)                # drop the joiner after the cue
+            rest = re.sub(r"^(that|to|the following|this)\b[\s:,\-]*", "", rest, flags=re.I)
+            return rest.strip() or t
+    return t
+
+
+def classify_intent(text: str) -> str:
+    """crisis | dictate | schedule | copies | ask. Crisis outranks everything (Mt 25)."""
+    t = (text or "").strip().lower()
+    if _ask.is_crisis(text):
+        return "crisis"
+    if any(t.startswith(c) for c in _DICTATE):
+        return "dictate"
+    if re.search(r"\bmake\s+\d+\s+cop(y|ies)\b", t) or "copies of" in t or any(c in t for c in _COPIES):
+        return "copies"
+    if any(t.startswith(c) or c in t for c in _SCHEDULE):
+        return "schedule"
+    return "ask"
+
+
+def _trim(s: str, n: int = 320) -> str:
+    s = re.sub(r"\s+", " ", (s or "").strip())
+    return s if len(s) <= n else s[: n - 1].rsplit(" ", 1)[0] + "…"
+
+
+def _one_connection(card_id: str) -> Optional[Dict[str, str]]:
+    """A single related thread to weave back in — 'reinforce the connection'. Found, never invented."""
+    try:
+        r = _corpus.connections(card_id, limit=6) or {}
+    except Exception:  # noqa: BLE001 — a missing connection must never break a spoken answer
+        return None
+    for key in ("connections", "related", "neighbors", "cards", "edges"):
+        items = r.get(key) if isinstance(r, dict) else None
+        if isinstance(items, list) and items:
+            c = items[0]
+            if isinstance(c, dict):
+                cid = c.get("id") or c.get("card_id") or ""
+                title = (c.get("title") or c.get("subject") or "").strip()
+                if title:
+                    return {"id": cid, "title": title}
+    return None
+
+
+def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
+    """The coach faculty: a verified answer, spoken short, a connection woven in, the source deferred."""
+    r = _ask.respond(text, config, gate_open=gate_open)
+    kind = r.get("kind", "search")
+
+    # crisis is handled upstream, but respond() is the one source of truth — honor it if it fires here.
+    if kind == "crisis":
+        return _spoken_crisis(r)
+
+    # a spoken message the router already has (comfort/ultimate/define/date/compute) — say it, plainly.
+    msg = (r.get("message") or "").strip()
+    scripture = r.get("scripture") or r.get("romans_road")
+    results = r.get("results") or []
+    connections: List[Dict[str, str]] = []
+    source: Optional[Dict[str, str]] = None
+    headline = ""
+
+    if results:
+        top = results[0]
+        title = (top.get("title") or "").strip()
+        snippet = _trim(top.get("snippet") or top.get("surface") or "")
+        headline = title
+        spoken = f"On {text.strip().rstrip('?')}, the keeping holds this. {snippet}"
+        source = {"title": title, "ref": f"/card/{top.get('id','')}"}
+        conn = _one_connection(top.get("id", ""))
+        if conn:
+            connections = [conn]
+            spoken += f" A thread worth following: {conn['title']}."
+        caption = f"{title}\n\n{top.get('snippet') or ''}"
+    elif scripture:
+        v = scripture[0] if isinstance(scripture, list) and scripture else {}
+        ref = (v.get("ref") or "").strip()
+        body = _trim(v.get("web") or v.get("text") or msg)
+        headline = ref
+        spoken = f"{body}" + (f" — {ref}." if ref else "")
+        source = {"title": ref, "ref": f"/read.html?ref={ref}"} if ref else None
+        caption = f"{ref}\n\n{v.get('web') or body}"
+    elif msg:
+        spoken = _trim(msg, 480)
+        caption = msg
+    else:
+        # an honest miss: say so, and let the want-loop carry it (the tortoise brings it later)
+        spoken = ("That is not in the keeping yet. I have written down the want, and the answer will "
+                  "follow when it is found.")
+        caption = spoken
+        kind = "miss"
+
+    return {
+        "intent": "ask", "kind": kind, "headline": headline, "spoken": spoken, "caption": caption,
+        "source": source, "connections": connections, "resources": r.get("resources"),
+        "note": r.get("note"), "generated": False,
+    }
+
+
+def _spoken_crisis(r: Dict[str, Any]) -> Dict[str, Any]:
+    msg = (r.get("message") or
+           "You matter, and you don't have to carry this alone. Please reach a real person right now.")
+    res = r.get("resources") or []
+    aloud = msg + " " + " ".join(x.get("label", "") for x in res if x.get("label"))
+    return {
+        "intent": "crisis", "kind": "crisis", "headline": "You are not alone.",
+        "spoken": aloud.strip(), "caption": aloud.strip(), "source": None,
+        "connections": [], "resources": res, "note": r.get("note"), "generated": False,
+    }
+
+
+def _dictate(text: str, owner: Optional[str]) -> Dict[str, Any]:
+    """The scribe: keep the words VERBATIM. To your book of days when a covenant key is proven; else the
+    console hands the record back for the edge to keep (store-nothing on the server, no account)."""
+    note = _strip_prefix(text, _DICTATE)
+    record: Dict[str, Any] = {"text": note, "kept": "edge"}
+    if owner:
+        w = _book.write(owner, note)
+        if w.get("ok"):
+            record = {"text": note, "kept": "book_of_days", "entry_id": w["entry"]["id"],
+                      "at": w["entry"]["at"]}
+    spoken = "Written down: " + _trim(note, 160)
+    return {"intent": "dictate", "kind": "note", "headline": "Kept.", "spoken": spoken,
+            "caption": note, "record": record, "source": None, "connections": [], "generated": False}
+
+
+def _schedule(text: str) -> Dict[str, Any]:
+    """Parse the calendar intent and hand it back for confirmation. The actual write is the consent-
+    gated /connect/event pilot — the console never writes a calendar without an explicit grant."""
+    spoken = ("I can put that on the calendar you named. Confirm the event and I will write it — "
+              "nothing is scheduled without your say.")
+    return {"intent": "schedule", "kind": "schedule", "headline": "Ready to schedule.",
+            "spoken": spoken, "caption": text.strip(), "proposed": {"summary": _trim(text, 120)},
+            "source": None, "connections": [], "generated": False}
+
+
+def _copies(text: str) -> Dict[str, Any]:
+    m = re.search(r"\b(\d+)\b", text)
+    n = max(1, min(int(m.group(1)), 50)) if m else 1
+    spoken = f"Ready to make {n} cop{'y' if n == 1 else 'ies'}. Tell me what to copy and where it goes."
+    return {"intent": "copies", "kind": "copies", "headline": "Copies.", "spoken": spoken,
+            "caption": text.strip(), "count": n, "source": None, "connections": [], "generated": False}
+
+
+def dispatch(text: str, config: Any, *, owner: Optional[str] = None,
+             gate_open: bool = False) -> Dict[str, Any]:
+    """The one entry. Crisis-first, then route. Returns the small, speakable, LoRa-ready payload."""
+    text = (text or "").strip()
+    if not text:
+        return {"intent": "empty", "kind": "empty", "spoken": "", "caption": "",
+                "source": None, "connections": [], "generated": False}
+    intent = classify_intent(text)
+    if intent == "crisis":
+        return _spoken_crisis(_ask.respond(text, config))
+    if intent == "dictate":
+        return _dictate(text, owner)
+    if intent == "schedule":
+        return _schedule(text)
+    if intent == "copies":
+        return _copies(text)
+    return _coach(text, config, gate_open)
+
+
+# ── INTAKE — accept anything; keep the LOCATION and the usable form, never the blob ──────────────
+def intake_artifact(*, source_location: str, kind: str = "file", title: str = "",
+                    extracted_text: str = "", sha256: str = "",
+                    at: Optional[str] = None) -> Dict[str, Any]:
+    """Form a light, LOCATED artifact card from anything dropped in. The heavy source stays where it is
+    (the location); we keep only what is usable and searchable. 'We don't need the image, we need the
+    image location.' Extraction (OCR / PDF text) happens at the caller/edge; this shapes the card."""
+    loc = (source_location or "").strip()
+    if not loc:
+        return {"ok": False, "error": "a source location is required (we keep the location, not the blob)"}
+    title = (title or "").strip() or (loc.rsplit("/", 1)[-1] or loc)[:120]
+    card = {
+        "kind": "artifact",
+        "artifact_kind": kind,                          # image | pdf | screenshot | text | link | …
+        "title": title,
+        "extracted_text": _trim(extracted_text, 4000),  # the usable form (may be empty until OCR'd)
+        "source_location": loc,                          # the waybill — where the source actually lives
+        "sha256": (sha256 or "").strip(),
+        "at": at,
+    }
+    return {"ok": True, "artifact": card}

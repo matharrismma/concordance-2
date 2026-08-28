@@ -45,6 +45,7 @@ test_conductor_reference.py
 test_connect.py
 test_connect_write.py
 test_consent.py
+test_console.py
 test_constraints.py
 test_contact.py
 test_context.py
