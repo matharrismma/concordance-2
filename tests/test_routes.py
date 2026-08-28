@@ -27,6 +27,9 @@ from concordance.config import EngineConfig  # noqa: E402
 # registry refactor. The derived sets must equal these exactly.
 GOLDEN_API_GET = {
     "/health",
+    # A glance-check for the operator's voice, added 2026-08-28: synthesizes one content-addressed
+    # line (API once, cache forever) to prove the ElevenLabs key actually WORKS, not just that it's set.
+    "/speak/health",
     # An operator door, added 2026-08-01 to settle whether the freeze design rests on a
     # true belief: it reports where the resident corpus actually spends its memory
     # (cards vs token index), from the live process, sampled and labelled as an estimate.

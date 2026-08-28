@@ -644,6 +644,20 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         c = corpus.default_corpus()
         return _ok({"resident": c.footprint(),
                     "note": "an estimate from samples, labelled as one — see `measured_over`"})
+    if method == "GET" and path == "/speak/health":
+        # Is the operator's voice wired, or are we on the sovereign floor? Self-check without guessing:
+        # actually synthesize one fixed line — content-addressed, so it hits the API once and the cache
+        # forever after (near-free to poll). configured() only proves the env is set; this proves the
+        # KEY WORKS. Matt, 2026-08-28: a glance-check after any rotation, no engineer needed.
+        from .. import voice as _voice
+        if not _voice.configured():
+            return _ok({"voice": "floor", "wired": False,
+                        "reason": "ELEVENLABS_API_KEY / ELEVENLABS_VOICE_ID not set — sovereign floor"})
+        s = _voice.speak("Narrow Highway voice check.")
+        if s:
+            return _ok({"voice": "ceiling", "wired": True, "cache": s[1], "bytes": len(s[0])})
+        return _ok({"voice": "floor", "wired": False,
+                    "reason": "key present but the upstream voice call failed (bad/rotated key?) — floor"})
     if method == "GET" and path == "/identity":
         # identity = what the engine IS (the dry, efficient truth); persona = WHO it is to talk to
         # (the separate voice / movie-style experience). The card system stays pure efficiency.
@@ -2562,6 +2576,7 @@ def resolve_mcp_profile(path: str):
 ROUTES = [
     {"path": "/", "methods": ("GET",)},
     {"path": "/health", "methods": ("GET",), "api": True},
+    {"path": "/speak/health", "methods": ("GET",), "api": True},
     {"path": "/health/memory", "methods": ("GET",), "api": True},
     {"path": "/now", "methods": ("GET",), "api": True},
     {"path": "/identity", "methods": ("GET",), "api": True},
