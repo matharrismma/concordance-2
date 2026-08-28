@@ -96,32 +96,35 @@ def _frame(text: str) -> List[str]:
 
 
 def _connection_list(card_id: str) -> List[Dict[str, str]]:
-    """All found related threads (id + title). Found, never invented."""
+    """Found neighbor cards (id + title) from the keeping's connections. corpus.connections returns
+    'same_shelf' (real neighbor cards with titles) and 'links' (structural: member_of a spine — no
+    user-facing title). We take the titled neighbors; found, never invented."""
     try:
         r = _corpus.connections(card_id, limit=8) or {}
     except Exception:  # noqa: BLE001 — a missing connection must never break a spoken answer
         return []
-    for key in ("connections", "related", "neighbors", "cards", "edges"):
-        items = r.get(key) if isinstance(r, dict) else None
-        if isinstance(items, list) and items:
-            out = []
-            for c in items:
-                if isinstance(c, dict):
-                    cid = c.get("id") or c.get("card_id") or ""
-                    title = (c.get("title") or c.get("subject") or "").strip()
-                    if title:
-                        out.append({"id": cid, "title": title})
-            return out
-    return []
+    out = []
+    for c in (r.get("same_shelf") or []) if isinstance(r, dict) else []:
+        if isinstance(c, dict):
+            cid = (c.get("id") or "").strip()
+            title = (c.get("title") or c.get("subject") or "").strip()
+            if cid and title:
+                out.append({"id": cid, "title": title})
+    return out
 
 
 def _by_frame(items: List[Dict[str, str]], frame: List[str]) -> List[Dict[str, str]]:
-    """Rank found threads by how much they share the PERSON'S vocabulary — their frame surfaces first.
-    A stable sort, so with no overlap the found order is kept (we never invent a resonance)."""
+    """Keep ONLY the neighbors that genuinely share the person's own vocabulary (their frame), best
+    first. A same-shelf neighbor that shares nothing of their words is NOT a thread worth following —
+    surfacing it would invent a resonance. So no frame overlap => no suggestion (just the open door)."""
     fset = set(frame)
-    def overlap(c):
-        return len(set(re.findall(r"[a-z]{3,}", c["title"].lower())) & fset)
-    return sorted(items, key=overlap, reverse=True)
+    scored = []
+    for c in items:
+        ov = len(set(re.findall(r"[a-z]{3,}", c["title"].lower())) & fset)
+        if ov > 0:
+            scored.append((ov, c))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [c for _, c in scored]
 
 
 def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
