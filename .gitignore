@@ -34,6 +34,7 @@ data/*.db-shm
 *.log
 .env
 .env.*
+scratchpad/
 
 # vendored ML assets for the opt-in Rampart layer (~90 MB binaries; reproduce with
 # tools/vendor_rampart.sh — kept out of source like the runtime data)
