@@ -95,36 +95,23 @@ def _frame(text: str) -> List[str]:
     return out
 
 
-def _connection_list(card_id: str) -> List[Dict[str, str]]:
-    """Found neighbor cards (id + title) from the keeping's connections. corpus.connections returns
-    'same_shelf' (real neighbor cards with titles) and 'links' (structural: member_of a spine — no
-    user-facing title). We take the titled neighbors; found, never invented."""
-    try:
-        r = _corpus.connections(card_id, limit=8) or {}
-    except Exception:  # noqa: BLE001 — a missing connection must never break a spoken answer
-        return []
-    out = []
-    for c in (r.get("same_shelf") or []) if isinstance(r, dict) else []:
-        if isinstance(c, dict):
-            cid = (c.get("id") or "").strip()
-            title = (c.get("title") or c.get("subject") or "").strip()
-            if cid and title:
-                out.append({"id": cid, "title": title})
-    return out
-
-
-def _by_frame(items: List[Dict[str, str]], frame: List[str]) -> List[Dict[str, str]]:
-    """Keep ONLY the neighbors that genuinely share the person's own vocabulary (their frame), best
-    first. A same-shelf neighbor that shares nothing of their words is NOT a thread worth following —
-    surfacing it would invent a resonance. So no frame overlap => no suggestion (just the open door)."""
+def _threads_from_results(results: Any, frame: List[str]) -> List[Dict[str, str]]:
+    """The 'what's next' threads are the OTHER cards the keeping surfaced for THEIR query — relevant by
+    construction (they matched their own words) and already in their frame. We rank them by how much
+    each title shares the person's vocabulary, so the most resonant is offered first; a stable sort
+    keeps the keeping's relevance order for ties. Found, never invented — corpus.connections gives only
+    alphabetical shelf-mates and structural spine links, which are not threads worth following."""
     fset = set(frame)
     scored = []
-    for c in items:
-        ov = len(set(re.findall(r"[a-z]{3,}", c["title"].lower())) & fset)
-        if ov > 0:
-            scored.append((ov, c))
+    for h in (results[1:] if isinstance(results, list) else []):
+        if isinstance(h, dict):
+            cid = (h.get("id") or "").strip()
+            title = (h.get("title") or "").strip()
+            if cid and title:
+                ov = len(set(re.findall(r"[a-z]{3,}", title.lower())) & fset)
+                scored.append((ov, cid, title))
     scored.sort(key=lambda x: x[0], reverse=True)
-    return [c for _, c in scored]
+    return [{"id": c, "title": t} for _, c, t in scored]
 
 
 def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
@@ -153,8 +140,8 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
         headline = title
         spoken = f"On {_trim(text.strip().rstrip('?'), 80)}, the keeping holds this. {snippet}"
         source = {"title": title, "ref": f"/card/{top.get('id','')}"}
-        # frame-focus: surface the threads that resonate with THEIR words first (found, never invented)
-        threads = _by_frame(_connection_list(top.get("id", "")), frame)
+        # frame-focus: the other cards the keeping found for their query, most in-their-frame first
+        threads = _threads_from_results(results, frame)
         if threads:
             connections = threads[:1]
             spoken += f" A thread worth following: {threads[0]['title']}."

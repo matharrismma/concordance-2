@@ -46,14 +46,14 @@ def test_schedule_and_copies_route_and_never_act_without_confirmation():
 
 def test_the_coach_answers_in_their_frame_and_offers_a_choice_of_whats_next(monkeypatch):
     # monkeypatch the corpus-backed pieces so this is fast and hermetic
+    # the answer plus two more found hits; the one sharing the person's OWN word ("well") must surface
+    # first — their frame focuses which thread is offered next
     monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
-        "kind": "search", "results": [{"id": "card_water", "title": "Purifying water",
-        "snippet": "Boil for one minute at a rolling boil; at altitude, three."}],
-        "generated": False, "note": "conduit"})
-    # two found threads; the one sharing the person's OWN word ("well") must surface first — their frame
-    monkeypatch.setattr(console, "_connection_list", lambda cid: [
-        {"id": "card_exodus", "title": "Exodus 15 the waters made sweet"},
-        {"id": "card_well", "title": "Digging and keeping a well"}])
+        "kind": "search", "generated": False, "note": "conduit", "results": [
+            {"id": "card_water", "title": "Purifying water",
+             "snippet": "Boil for one minute at a rolling boil; at altitude, three."},
+            {"id": "card_exodus", "title": "Exodus 15 the waters made sweet"},
+            {"id": "card_well", "title": "Digging and keeping a well"}]})
     r = console.dispatch("how do I keep my well water safe", SEC)
     assert r["intent"] == "ask" and r["generated"] is False
     assert "Boil for one minute" in r["spoken"]
