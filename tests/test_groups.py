@@ -12,11 +12,40 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-_TMP = tempfile.mkdtemp(prefix="nh-groups-")
-os.environ["CONCORDANCE_DATA_DIR"] = _TMP
-os.environ["CONCORDANCE_GROUPS_DIR"] = _TMP + "/groups"
+
+import pytest  # noqa: E402
 
 from concordance import groups  # noqa: E402
+
+
+def _point_group_store_at_tmp():
+    """Point the groups store (and its data dir) at a fresh tmp dir; return a restore callable.
+
+    This module once set these at import (collection) time and never restored them — a PROCESS-WIDE
+    leak. Because groups._dir() prefers CONCORDANCE_GROUPS_DIR, that leak SHADOWED every other test's
+    CONCORDANCE_DATA_DIR isolation, so test_community accumulated groups across tests (belongs 1->3->5)
+    and failed only in a full-suite run. Setting the env inside a fixture / the __main__ guard keeps
+    this file hermetic without poisoning the rest of the suite.
+    """
+    tmp = tempfile.mkdtemp(prefix="nh-groups-")
+    prior = {k: os.environ.get(k) for k in ("CONCORDANCE_DATA_DIR", "CONCORDANCE_GROUPS_DIR")}
+    os.environ["CONCORDANCE_DATA_DIR"] = tmp
+    os.environ["CONCORDANCE_GROUPS_DIR"] = tmp + "/groups"
+
+    def restore():
+        for k, v in prior.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+    return restore
+
+
+@pytest.fixture(autouse=True, scope="module")
+def _isolated_groups_store():
+    restore = _point_group_store_at_tmp()
+    yield
+    restore()
 
 
 def test_create_and_discover_by_topic():
@@ -78,6 +107,7 @@ def test_suggest_finds_relevant_groups_by_keyword():
 
 
 if __name__ == "__main__":
+    _point_group_store_at_tmp()   # direct run has no pytest fixtures — set the env here
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:
         fn(); print(f"  ok  {fn.__name__}")

@@ -78,7 +78,81 @@ _CRISIS_WORDS = ("suicide", "suicidal", "kill myself", "killing myself", "end my
                  "quiero morir", "me quiero morir", "ya no quiero vivir", "quiero matarme",
                  "me quiero matar", "quiero acabar con mi vida", "acabar con mi vida",
                  "no quiero vivir", "no quiero seguir viviendo", "quitarme la vida",
-                 "quiero desaparecer")
+                 "quiero desaparecer",
+                 # Answer-path benchmark, 2026-08-26: a 25-cry graded set routed only 18/25 to help.
+                 # These seven softer idioms of ideation missed — give-up-on-life, no-hope-left, the
+                 # pain, ending things, want-it-all-to-stop, should-be-over. Same asymmetry as above
+                 # (an unnecessary helpline is a small cost, a missed person is not); these are near-
+                 # synonyms and conjugations of phrases already treated as crisis, and add no exclusion.
+                 "give up on life", "giving up on life", "gave up on life", "given up on life",
+                 "want it all to stop", "want everything to stop", "want the pain to stop",
+                 "make the pain stop", "make it all stop", "just want it all to stop",
+                 "cant take the pain", "cant take the pain anymore", "cant take this pain anymore",
+                 "cant handle the pain anymore",
+                 "cutting myself", "hurting myself", "harming myself",
+                 "no hope left", "theres no hope left", "no hope left for me",
+                 "life should be over", "my life should be over", "want my life to be over",
+                 "wish my life was over", "wish my life were over",
+                 "thinking about ending things", "thinking of ending things", "about ending things",
+                 "want to end things", "ready to end things", "planning to end things",
+                 # Adversarial load, 2026-08-27: a 90+ phrasing sweep across registers found the
+                 # quieter idioms of hopelessness the blunt list missed — cant-do-life, no-way-out,
+                 # never-get-better, tired-of-being-here, the-point-anymore, would-anyone-notice. Same
+                 # asymmetry; these are near-synonyms of ideation already treated as crisis. These are
+                 # QUERIES to the engine, where such phrasings are overwhelmingly a cry, not idiom.
+                 "cant do life anymore", "do life anymore", "cant keep going", "cant keep doing this",
+                 "need the pain to stop", "make my pain stop", "end my suffering", "end the suffering",
+                 "hope i dont wake up", "hope i never wake up", "hope i dont wake up tomorrow",
+                 "hope i dont wake up in the morning", "wish i didnt have to wake up",
+                 "notice if i was gone", "notice if i were gone", "even notice if i was gone",
+                 "world would be better without me", "world would be better off without me",
+                 "everyone would be better without me",
+                 "tired of being here", "so tired of being here",
+                 "point of anything anymore", "whats the point anymore", "whats the point of living",
+                 "dont see the point anymore", "dont see a point anymore", "dont see the point in living",
+                 "never going to get better", "never gonna get better", "nothing will ever get better",
+                 "things will never get better", "it will never get better", "itll never get better",
+                 "thinking about ending it", "thinking of ending it", "way to end it",
+                 "way to end my life", "see no way out", "no way out of this", "no way out but",
+                 "why am i still here", "why am i even still here",
+                 # bound to "still here" (still alive) — bare "why am i here" is a faith question the
+                 # engine should meet with purpose, not a helpline; "still here" is the ideation tell.
+                 "why im still here", "why im even still here", "why am i still alive",
+                 "no future for me", "cant see a future for myself",
+                 # Independent red-team, 2026-08-27: two blind adversarial passes (adult/veiled +
+                 # youth/multilingual) beat the net 94/98 — proof a substring list catches what its
+                 # author imagined, not what a real, diverse population types. These close the SAFELY-
+                 # boundable holes (clear ideation, current online euphemism, non-English cries). The
+                 # veiled/behavioral cluster with no reliable token (goodbye + giving-away, grief-
+                 # longing, faith-"called home") is NOT force-fit here — it is the documented target of
+                 # the semantic/intent backstop (docs/CRISIS_BACKSTOP.md), because forcing it into
+                 # substrings would either miss or sweep ordinary estate-planning and grief.
+                 "disappointed that i woke up", "disappointed i woke up", "disappointed i wake up",
+                 "if i wasnt around", "if i wasnt here anymore", "everyone would breathe easier if i wasnt",
+                 "feel like a burden", "i feel like a burden", "im just dead weight to",
+                 "cant do another day", "cant face another day", "another day in this body",
+                 "pain is never going to stop", "pain will never stop", "im done fighting",
+                 "dont want to continue being alive", "want to stop existing", "i want to stop existing",
+                 "dont want to be a person anymore", "being alive is too painful", "dont want to be here anymore",
+                 "dont wanna be here", "dont wanna be here anymore", "id rather not wake up",
+                 "sleep and never wake up", "nap and never wake up", "go to sleep and never wake up",
+                 "would anyone even notice if i was gone", "would anyone notice if i was gone",
+                 "would anyone care if i was gone", "if i wasnt here would anyone",
+                 "ive lived long enough", "lived long enough", "no reason to keep going",
+                 "wont be around much longer", "wont be here much longer", "not be around much longer",
+                 "praying not to wake up", "pray i dont wake up", "been praying not to wake up",
+                 "whats even the point", "whats the point of it all",
+                 # online / gaming euphemism (current, evolving; the unambiguous ones):
+                 "log off for good", "delete my existence", "uninstall myself", "uninstall my life",
+                 "alt f4 my life", "un-exist", "unexist",
+                 # non-English cries (highest-signal per language; English-primary engine, low collision):
+                 "acabar con mi vida", "mejor muerto", "estaria mejor muerto", "no le veo sentido a la vida",
+                 "no despertar nunca", "todos estarian mejor sin mi", "mejor sin mi", "quitar la vida",
+                 "para que seguir viviendo", "cansado de vivir", "terminar con mi vida", "no quiero seguir aqui",
+                 "ya no puedo mas", "ya no aguanto", "je veux en finir", "en finir", "ne veux plus me reveiller",
+                 "nao quero mais viver", "queria sumir pra sempre", "sumir pra sempre",
+                 "ayoko na mabuhay", "gusto ko nang mawala", "khong muon song nua", "muon bien mat",
+                 "biddi amout", "bidi amout")
 
 # Short self-harm abbreviations ("kms" = kill myself, "kys"). As substrings they collide with real,
 # common queries ("5 kms to the store", the unit_convert domain, "whiskys"), so they count only as
