@@ -18,6 +18,8 @@ generates the facts it answers with. Deterministic — no LLM in the router. See
 """
 from __future__ import annotations
 
+import datetime as _dt
+import os
 import re
 from typing import Any, Dict, List, Optional
 
@@ -247,22 +249,124 @@ def _dictate(text: str, owner: Optional[str]) -> Dict[str, Any]:
             "caption": note, "record": record, "source": None, "connections": [], "generated": False}
 
 
+# ── deterministic schedule parsing (no LLM): a summary + a time from plain speech ────────────────
+_WEEKDAYS = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4,
+             "saturday": 5, "sunday": 6}
+
+
+def _parse_clock(t: str):
+    """(hour, minute) in 24h from a time phrase, or None."""
+    if "noon" in t:
+        return (12, 0)
+    if "midnight" in t:
+        return (0, 0)
+    m = re.search(r"\b(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)", t)
+    if m:
+        h = int(m.group(1)) % 12
+        return (h + 12 if m.group(3).startswith("p") else h, int(m.group(2) or 0))
+    m = re.search(r"\bat (\d{1,2})(?::(\d{2}))?\b", t)
+    if m and 0 <= int(m.group(1)) <= 23:
+        return (int(m.group(1)), int(m.group(2) or 0))
+    return None
+
+
+def _parse_day(t: str, base):
+    if "today" in t or "tonight" in t:
+        return base.date()
+    if "tomorrow" in t:
+        return base.date() + _dt.timedelta(days=1)
+    for name, idx in _WEEKDAYS.items():
+        if re.search(r"\b" + name + r"\b", t):
+            return base.date() + _dt.timedelta(days=((idx - base.weekday()) % 7 or 7))
+    return None
+
+
+def _human_when(w) -> str:
+    hh = w.hour % 12 or 12
+    ap = "AM" if w.hour < 12 else "PM"
+    return w.strftime("%A %b ") + str(w.day) + f", {hh}:{w.minute:02d} {ap}"
+
+
+def _parse_event(text: str, now) -> Dict[str, Any]:
+    """Best-effort {summary, start_iso, when_human}. start_iso is None when there is no clear time — the
+    console then ASKS rather than guessing (a wrong time is worse than a question)."""
+    t = text.lower()
+    when = None
+    rel = re.search(r"\bin (\d+)\s*(hour|hr|minute|min|day|week)s?\b", t)
+    if rel:
+        n = int(rel.group(1))
+        when = now + {"hour": _dt.timedelta(hours=n), "hr": _dt.timedelta(hours=n),
+                      "minute": _dt.timedelta(minutes=n), "min": _dt.timedelta(minutes=n),
+                      "day": _dt.timedelta(days=n), "week": _dt.timedelta(weeks=n)}[rel.group(2)]
+    else:
+        day, clk = _parse_day(t, now), _parse_clock(t)
+        day_explicit = day is not None
+        if clk and not day:
+            day = now.date()                                  # a time with no day => today
+        if day and clk:
+            when = _dt.datetime(day.year, day.month, day.day, clk[0], clk[1])
+            if not day_explicit and when < now:
+                when += _dt.timedelta(days=1)                 # today's time already passed => tomorrow
+        elif day and "tonight" in t:
+            when = _dt.datetime(day.year, day.month, day.day, 19, 0)
+    summ = _strip_prefix(text, _SCHEDULE)
+    summ = re.sub(r"\s*(?:\b(?:on|at|by|in|this|next|tonight|today|tomorrow)\b.*|"
+                  r"\b(?:mon|tues|wednes|thurs|fri|satur|sun)day\b.*)$", "", summ, flags=re.I).strip()
+    summ = re.sub(r"^(?:to|that|for|the)\b\s*", "", summ, flags=re.I).strip()
+    return {"summary": _trim(summ, 120) or "reminder",
+            "start_iso": when.strftime("%Y%m%dT%H%M%S") if when else None,
+            "when_human": _human_when(when) if when else None}
+
+
 def _schedule(text: str) -> Dict[str, Any]:
-    """Parse the calendar intent and hand it back for confirmation. The actual write is the consent-
-    gated /connect/event pilot — the console never writes a calendar without an explicit grant."""
-    spoken = ("I can put that on the calendar you named. Confirm the event and I will write it — "
-              "nothing is scheduled without your say.")
-    return {"intent": "schedule", "kind": "schedule", "headline": "Ready to schedule.",
-            "spoken": spoken, "caption": text.strip(), "proposed": {"summary": _trim(text, 120)},
-            "source": None, "connections": [], "generated": False}
+    """Parse the event, then WRITE it to the calendar the operator named — but only with a live consent
+    grant (create_event calls consent.guard FIRST). Unconfigured, it hands back the parsed proposal and
+    the one-time setup. It NEVER writes without the grant (the Gate: we present, we do not cross)."""
+    ev = _parse_event(text, _dt.datetime.now())
+    base = {"intent": "schedule", "kind": "schedule", "caption": text.strip(),
+            "proposed": ev, "connections": [], "generated": False}
+    if not ev["start_iso"]:
+        return {**base, "headline": "When?",
+                "spoken": f"I can schedule '{ev['summary']}', but I didn't catch a clear time. "
+                          f"When should it be — a day and a time?"}
+    agent = os.environ.get("CONSOLE_SCHEDULE_AGENT", "").strip()
+    grantor = os.environ.get("CONSOLE_SCHEDULE_GRANTOR", "").strip()
+    if agent and grantor and os.environ.get("NH_CALENDAR_WRITE", "").strip():
+        try:
+            from . import connect_write
+            r = connect_write.create_event(grantor, agent, ev["summary"], ev["start_iso"])
+        except Exception:  # noqa: BLE001 — a calendar hiccup must not crash the console
+            r = {"ok": False, "error": "the calendar is unreachable right now"}
+        if r.get("ok"):
+            return {**base, "kind": "scheduled", "headline": "Scheduled.",
+                    "spoken": f"Scheduled: {ev['summary']}, {ev['when_human']}. It's on your calendar.",
+                    "receipt": {"uid": r.get("uid"), "target": r.get("target")}}
+        return {**base, "headline": "Your say-so first", "needs": "consent",
+                "why": r.get("refusal") or r.get("error"),
+                "spoken": f"I have it ready — {ev['summary']}, {ev['when_human']} — but I need your "
+                          f"authorization before I write to your calendar."}
+    return {**base, "headline": "Ready to schedule",
+            "spoken": f"I have it as: {ev['summary']}, {ev['when_human']}. To let me write it, name your "
+                      f"calendar and authorize the console once — nothing is scheduled without your grant."}
 
 
 def _copies(text: str) -> Dict[str, Any]:
-    m = re.search(r"\b(\d+)\b", text)
+    """Make N copies of a note. 'make 3 copies of the water plan' -> three edge copies to distribute.
+    What to copy is the words after 'copies of'; with none, it asks. Store-nothing: the copies are handed
+    back for the edge to keep and send, never kept on the server."""
+    m = re.search(r"\bmake\s+(\d+)\s+cop", text.lower()) or re.search(r"\b(\d+)\b", text)
     n = max(1, min(int(m.group(1)), 50)) if m else 1
-    spoken = f"Ready to make {n} cop{'y' if n == 1 else 'ies'}. Tell me what to copy and where it goes."
-    return {"intent": "copies", "kind": "copies", "headline": "Copies.", "spoken": spoken,
-            "caption": text.strip(), "count": n, "source": None, "connections": [], "generated": False}
+    plural = "y" if n == 1 else "ies"
+    what = re.sub(r"^.*?\bcop(?:y|ies)\b\s*(?:of\s+)?", "", text, flags=re.I).strip()
+    what = re.sub(r"^(?:this|that|the following)\b[\s:,\-]*", "", what, flags=re.I).strip()
+    if not what:
+        return {"intent": "copies", "kind": "copies", "headline": "Copy what?", "count": n,
+                "spoken": f"Ready to make {n} cop{plural} — say what to copy.",
+                "caption": text.strip(), "connections": [], "generated": False}
+    return {"intent": "copies", "kind": "copies", "headline": f"{n} cop{plural}.", "count": n,
+            "copies": [{"n": i + 1, "text": what} for i in range(n)],
+            "spoken": f"Made {n} cop{plural} of: {_trim(what, 90)}. Yours to send.",
+            "caption": what, "connections": [], "generated": False}
 
 
 def dispatch(text: str, config: Any, *, owner: Optional[str] = None,

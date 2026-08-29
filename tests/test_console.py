@@ -37,11 +37,43 @@ def test_dictation_writes_to_the_book_of_days_when_an_owner_is_proven(tmp_path, 
     assert any(e["text"] == "the goats got out" for e in entries)   # kept verbatim, command word stripped
 
 
-def test_schedule_and_copies_route_and_never_act_without_confirmation():
-    s = console.dispatch("put on my calendar a meeting tuesday", SEC)
-    assert s["intent"] == "schedule" and s.get("proposed")     # proposed, not written
-    c = console.dispatch("make 3 copies of this", SEC)
-    assert c["intent"] == "copies" and c["count"] == 3
+def test_schedule_parses_summary_and_time_and_never_writes_without_a_grant():
+    r = console.dispatch("remind me to check the goats at 6pm", SEC)
+    assert r["intent"] == "schedule"
+    assert r["proposed"]["summary"] == "check the goats"
+    assert r["proposed"]["start_iso"] and r["proposed"]["start_iso"].endswith("T180000")   # 6pm parsed
+    assert r["kind"] != "scheduled"                            # not written — no grant configured here
+    # no clear time -> ask, never guess (a wrong time is worse than a question)
+    q = console.dispatch("remind me to pray", SEC)
+    assert q["kind"] == "schedule" and q["proposed"]["start_iso"] is None and "when" in q["spoken"].lower()
+
+
+def test_schedule_writes_to_the_calendar_when_configured_and_granted(monkeypatch):
+    """When the operator has named a calendar and authorized the console, a parsed event is WRITTEN via
+    the consent-gated create_event, and the console speaks the receipt."""
+    monkeypatch.setenv("CONSOLE_SCHEDULE_AGENT", "nh_console")
+    monkeypatch.setenv("CONSOLE_SCHEDULE_GRANTOR", "pubkey_hex")
+    monkeypatch.setenv("NH_CALENDAR_WRITE", "/tmp/cal.ics")
+    from concordance import connect_write
+    seen = {}
+
+    def fake_create(grantor, agent, summary, start_iso, **k):
+        seen.update(grantor=grantor, agent=agent, summary=summary, start_iso=start_iso)
+        return {"ok": True, "uid": "evt-123", "target": "/tmp/cal.ics"}
+
+    monkeypatch.setattr(connect_write, "create_event", fake_create)
+    r = console.dispatch("remind me to check the goats at 6pm", SEC)
+    assert r["kind"] == "scheduled" and r["receipt"]["uid"] == "evt-123"
+    assert seen["agent"] == "nh_console" and seen["summary"] == "check the goats"
+    assert seen["start_iso"].endswith("T180000")
+
+
+def test_copies_makes_n_copies_of_the_named_content():
+    r = console.dispatch("make 3 copies of the water plan", SEC)
+    assert r["intent"] == "copies" and r["count"] == 3
+    assert len(r["copies"]) == 3 and all(c["text"] == "the water plan" for c in r["copies"])
+    a = console.dispatch("make 2 copies", SEC)                 # nothing named -> asks, no copies made
+    assert a["kind"] == "copies" and a["count"] == 2 and "copies" not in a
 
 
 def test_the_coach_answers_in_their_frame_and_offers_a_choice_of_whats_next(monkeypatch):
