@@ -139,3 +139,7 @@ data/**/*.json
 data/**/*.db
 data/**/*.zip
 data/**/*.gz
+
+# The crisis semantic backstop is a committed CODE asset (a sealed, reproducible model), not
+# runtime corpus data — it must ship and be gate-tested everywhere.
+!data/crisis_semantic.json

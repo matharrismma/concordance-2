@@ -33,23 +33,40 @@ false-positives on clearly-benign queries, and **ratchets** the blind-adversaria
 Both red-team passes reached the same conclusion independently: these need an **intent/meaning** matcher,
 not more keywords.
 
-## The plan: a deterministic semantic/intent backstop (not an LLM)
+## BUILT: a deterministic semantic backstop (not an LLM) — 2026-08-28
 
-A second net **layered under** the substring list, built from the coherent model's counting layer
-(`eval/coherent_model/model.py`, PPMI over the keeping — deterministic, sovereign, auditable, no LLM):
+A second net **layered under** the substring list, counted from the keeping alone. How it works:
 
-1. Build a **hopelessness/ideation centroid** from the confirmed crisis corpus (the curated + red-team
-   sets here) using the same PPMI vectors.
-2. Score an incoming message's content centroid against it. Above a **conservative** threshold, treat as
-   crisis — a *soft* catch that surfaces the same help resources.
-3. **It may only ADD catches, never remove one the substring list makes** — the asymmetry is preserved
-   (an unnecessary helpline is a small cost; a missed person is not), and a deterministic score keeps it
-   auditable, unlike a neural classifier.
-4. Evaluate against `RED_TEAM_BLIND` in the floor test; the ratchet records progress as the backstop
-   closes the residual. Tier note (both red teams flagged it): the softest catches may warrant a *gentle
-   check-in* rather than a hard interrupt, to keep false-positive fatigue from eroding trust.
+1. A **hopelessness/ideation centroid** is built from the confirmed crisis corpus (`CRISIS_FLOOR`) using
+   PPMI co-occurrence vectors over the keeping (Bible + cards) — deterministic, sovereign, no LLM.
+2. Each word vector is **projected to a small dense space** by a fixed seeded ±1 matrix
+   (Johnson–Lindenstrauss — preserves dot-products and norms, so the cosine survives), then quantized to
+   **int8**. The whole thing seals to a **2.1 MB committed JSON** (`data/crisis_semantic.json`) by
+   `tools/build_crisis_semantic.py`. The runtime (`src/concordance/crisis_semantic.py`) only loads it and
+   scores: the cosine of a message's mean word-vector against the crisis centroid.
+3. Above a **conservative** threshold (top benign score + a 0.02 margin), it flags. **It only ever ADDS a
+   catch** — `ask.is_crisis` unions it after the substring test — so the net can widen but never shrink,
+   and an absent/malformed artifact returns False (substring-only, never a crash: no single point of
+   failure). The asymmetry stands (an unnecessary helpline is a small cost; a missed person is not).
+
+**Measured (the assay that authorized it, `eval/coherent_model/crisis_backstop.py`):** the full centroid-
+cosine caught 49% of the substring-missed cries; a per-word scalar table fails (3–6% — the message-norm
+in the cosine measures *alignment*, which no per-word table reproduces); the shipped dense-projection
+form catches **21 of 61** missed cries. Net effect on the blind red-team set: **is_crisis recall 37/98 →
+58/98 (38% → 59%)**, curated recall still **100%**, clearly-benign false-positives still **0%**. It
+reaches the veiled/grief cluster substrings never could — *"nothing keeping me here since he passed"*,
+*"wherever my wife is now"*, *"how peaceful it would be to just stop"*. Pinned in
+`tests/test_crisis_coverage.py` (the ratchet floor rose 37 → 58; the backstop-fires-on-benign and graceful-
+degradation invariants are tested). Residual + tier note below.
 
 This is the bridge between the crisis work and the coherent-language-model work: the same deterministic
 meaning layer that answers a question in different words than the answer is the layer that hears a cry in
-different words than the list. **Status: not built.** What ships today is the hardened substring net, this
-named gap, and the ratchet that keeps us honest about it.
+different words than the list. **Status: BUILT, wired into `ask.is_crisis`, and deployed** (2026-08-28).
+
+**Residual + next.** ~40 of the blind cries still evade both nets — the most oblique behavioral/financial
+lines with no despair vocabulary at all ("the debt only ends when i do", "i lost it all and they'd come
+out ahead collecting on me") and the giving-away cluster ("found good homes for the dog"). Recall could
+rise further with: a larger benign set (a better-estimated threshold, so a higher K helps rather than
+adds noise); a centroid built from the full keeping; and the tier idea both red teams flagged — the
+softest catches warranting a *gentle check-in* rather than a hard interrupt, to keep false-positive
+fatigue from eroding trust. The ratchet in `tests/test_crisis_coverage.py` records every gain.

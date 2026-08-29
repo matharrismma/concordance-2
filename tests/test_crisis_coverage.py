@@ -253,7 +253,10 @@ RED_TEAM_BLIND = (
 
 # The blind red-team floor RATCHETS: this many of the 98 independent adversarial phrasings are
 # caught today. It may only rise — a change that drops below it has shrunk the net and fails the gate.
-_RED_TEAM_FLOOR = 37
+# 37 by the substring net alone; 58 once the deterministic SEMANTIC BACKSTOP is unioned in (it reaches
+# the veiled/grief cries that share no keyword — data/crisis_semantic.json, docs/CRISIS_BACKSTOP.md).
+_RED_TEAM_FLOOR = 58
+_SUBSTRING_ONLY_FLOOR = 37   # what the substring net catches with the backstop artifact absent
 
 
 def test_every_curated_cry_reaches_help():
@@ -273,3 +276,41 @@ def test_blind_red_team_recall_only_ratchets_up():
     caught = sum(1 for q in RED_TEAM_BLIND if ask.is_crisis(q))
     assert caught >= _RED_TEAM_FLOOR, (
         f"blind red-team recall regressed: {caught} < {_RED_TEAM_FLOOR}. The net shrank.")
+
+
+def _boom(_text):
+    raise RuntimeError("backstop artifact broke")
+
+
+def test_the_semantic_backstop_reaches_veiled_cries_substrings_cannot():
+    """The deterministic backstop (PPMI over the keeping, JL-projected) catches the veiled/grief cries
+    that share NO keyword with the list — what substrings alone can never reach."""
+    from concordance import crisis_semantic
+    if not crisis_semantic.available():
+        import pytest; pytest.skip("crisis_semantic.json artifact not present")
+    for q in ("there's nothing keeping me here since he passed",
+              "i just want to be wherever my wife is now",
+              "i keep thinking about how peaceful it would be to just stop"):
+        assert crisis_semantic.flags(q), f"backstop missed a veiled cry: {q!r}"
+        assert ask.is_crisis(q), f"the one matcher did not union the backstop for: {q!r}"
+
+
+def test_the_backstop_never_fires_on_clearly_benign():
+    """The semantic net keeps the precision floor: it must not judge an ordinary query a cry."""
+    from concordance import crisis_semantic
+    if not crisis_semantic.available():
+        import pytest; pytest.skip("crisis_semantic.json artifact not present")
+    fired = [q for q in CLEARLY_BENIGN if crisis_semantic.flags(q)]
+    assert not fired, f"the semantic backstop fired on benign queries: {fired}"
+
+
+def test_is_crisis_degrades_to_substrings_if_the_backstop_breaks(monkeypatch):
+    """The backstop only ADDS. If its artifact is absent or malformed it must never crash the safety
+    check nor lose a substring catch — is_crisis falls back to the substring net (no single point of
+    failure). Simulated by making the backstop raise."""
+    from concordance import crisis_semantic
+    monkeypatch.setattr(crisis_semantic, "flags", _boom)
+    assert ask.is_crisis("I want to kill myself")                 # a plain cry still reaches help
+    assert not ask.is_crisis("convert 5 km to miles")             # and benign stays benign
+    caught = sum(1 for q in RED_TEAM_BLIND if ask.is_crisis(q))   # the substring floor still holds
+    assert caught >= _SUBSTRING_ONLY_FLOOR

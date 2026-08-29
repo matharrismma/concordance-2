@@ -185,10 +185,25 @@ def normalize(text: str) -> str:
     return re.sub(r"\s+", " ", t).strip()
 
 
+def _semantic_backstop(text: str) -> bool:
+    """The deterministic semantic net UNDER the substring list — catches the veiled cries that share no
+    keyword ("nothing keeping me here since he passed"). An absent or malformed artifact returns False
+    (substring-only), never a crash: the backstop can widen the net but is never a single point of
+    failure. It only ever ADDS a catch — is_crisis unions it in, so the net can grow but never shrink."""
+    try:
+        from . import crisis_semantic
+        return crisis_semantic.flags(text)
+    except Exception:  # noqa: BLE001 — the safety check must never crash instead of answering
+        return False
+
+
 def is_crisis(text: str) -> bool:
-    """The one crisis test. Every surface calls this — a copied list is a list that drifts."""
+    """The one crisis test. Every surface calls this — a copied list is a list that drifts. Substring
+    net first (fast, exact); then the semantic backstop for the veiled cries (only adds, never removes)."""
     t = normalize(text)
-    return t in _CRISIS_EXACT or any(w in t for w in _CRISIS_WORDS)
+    if t in _CRISIS_EXACT or any(w in t for w in _CRISIS_WORDS):
+        return True
+    return _semantic_backstop(text)
 
 
 # The Fellowship Mesh ("The Way") is hidden — never advertised. The agent opens the door ONLY when
