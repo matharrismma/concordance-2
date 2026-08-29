@@ -101,18 +101,14 @@ def build_vevent(summary: str, start_iso: str, end_iso: Optional[str] = None,
     return {"uid": uid, "vevent": "\r\n".join(lines)}
 
 
-def create_event(grantor_pubkey: str, agent_fp: str, summary: str, start_iso: str,
-                 end_iso: Optional[str] = None, description: str = "",
-                 target: Optional[str] = None) -> Dict[str, Any]:
-    """The pilot write. The lock is checked before ANYTHING else happens — an unauthorized call
-    does not even build the event."""
-    g = consent.guard(agent_fp, "calendar_write", grantor_pubkey)
-    if not g.get("authorized"):
-        return {"ok": False, "refused": True, "error": g.get("detail"),
-                "refusal": g.get("refusal"), "tampered_entries": g.get("tampered_entries", 0)}
+def _write(summary: str, start_iso: str, end_iso: Optional[str], description: str,
+           target: Optional[str]) -> Dict[str, Any]:
+    """Build the VEVENT and place it in the named calendar — a local .ics (sovereign mode) or a
+    CalDAV collection. Shared by both write paths below. It does NOT decide WHO may write: the
+    caller settles authorization first (a signed grant on-behalf, or the operator's own node).
+    Stores nothing; the event lives only where the user keeps their days."""
     if not (summary or "").strip() or not (start_iso or "").strip():
         return {"ok": False, "error": "summary and start_iso are required"}
-
     dest = (target or os.environ.get(ENV_TARGET, "")).strip()
     if not dest:
         return {"ok": False, "error": f"{ENV_TARGET} is not configured — the user names WHERE "
@@ -156,12 +152,42 @@ def create_event(grantor_pubkey: str, agent_fp: str, summary: str, start_iso: st
         except OSError as e:
             return {"ok": False, "error": f"could not write the calendar file: {e}"}
         kind = "file"
+    return {"ok": True, "uid": ev["uid"], "target_kind": kind}
 
+
+def create_event(grantor_pubkey: str, agent_fp: str, summary: str, start_iso: str,
+                 end_iso: Optional[str] = None, description: str = "",
+                 target: Optional[str] = None) -> Dict[str, Any]:
+    """The ON-BEHALF write — an agent acting for a HUMAN, with that human's data. The consent lock
+    is checked before ANYTHING else happens; an unauthorized call does not even build the event.
+    An operator writing to their OWN calendar is not this path — see create_event_direct."""
+    g = consent.guard(agent_fp, "calendar_write", grantor_pubkey)
+    if not g.get("authorized"):
+        return {"ok": False, "refused": True, "error": g.get("detail"),
+                "refusal": g.get("refusal"), "tampered_entries": g.get("tampered_entries", 0)}
+    r = _write(summary, start_iso, end_iso, description, target)
+    if not r.get("ok"):
+        return r
     # The receipt — covenant rule 5. We keep no copy of the event itself; it lives in THEIR days.
-    return {"ok": True, "uid": ev["uid"], "target_kind": kind,
+    return {"ok": True, "uid": r["uid"], "target_kind": r["target_kind"],
             "grant_id": g.get("grant_id"), "scope_used": "calendar_write",
             "note": ("Written into the calendar the user named, under a grant the user signed. "
                      "Nothing was stored here; delete the event there and it is gone everywhere.")}
 
 
-__all__ = ["create_event", "build_vevent", "ENV_TARGET"]
+def create_event_direct(summary: str, start_iso: str, end_iso: Optional[str] = None,
+                        description: str = "", target: Optional[str] = None) -> Dict[str, Any]:
+    """The OPERATOR'S OWN calendar, on the operator's OWN node — their own act, not a proxy, so no
+    consent grant. The consent lock governs exactly one thing (an agent acting on a HUMAN'S behalf);
+    a member speaking as themselves needs no one's approval — consent.guard's own closing words.
+    Naming the calendar (NH_CALENDAR_WRITE) IS the operator's authorization for their own writes; a
+    node that names no calendar writes nothing. Same RFC 5545 event, same store-nothing receipt."""
+    r = _write(summary, start_iso, end_iso, description, target)
+    if not r.get("ok"):
+        return r
+    return {"ok": True, "uid": r["uid"], "target_kind": r["target_kind"], "scope_used": "operator_self",
+            "note": ("Written into the calendar you named, as your own act on your own node. "
+                     "Nothing was stored here; delete the event there and it is gone everywhere.")}
+
+
+__all__ = ["create_event", "create_event_direct", "build_vevent", "ENV_TARGET"]

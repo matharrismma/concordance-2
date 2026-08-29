@@ -37,15 +37,42 @@ def test_dictation_writes_to_the_book_of_days_when_an_owner_is_proven(tmp_path, 
     assert any(e["text"] == "the goats got out" for e in entries)   # kept verbatim, command word stripped
 
 
-def test_schedule_parses_summary_and_time_and_never_writes_without_a_grant():
+def test_schedule_parses_summary_and_time_and_never_writes_without_a_calendar(monkeypatch):
+    for k in ("NH_CALENDAR_WRITE", "CONSOLE_SCHEDULE_AGENT", "CONSOLE_SCHEDULE_GRANTOR"):
+        monkeypatch.delenv(k, raising=False)                   # hermetic: no calendar named anywhere
     r = console.dispatch("remind me to check the goats at 6pm", SEC)
     assert r["intent"] == "schedule"
     assert r["proposed"]["summary"] == "check the goats"
     assert r["proposed"]["start_iso"] and r["proposed"]["start_iso"].endswith("T180000")   # 6pm parsed
-    assert r["kind"] != "scheduled"                            # not written — no grant configured here
+    assert r["kind"] != "scheduled"                            # not written — no calendar configured
     # no clear time -> ask, never guess (a wrong time is worse than a question)
     q = console.dispatch("remind me to pray", SEC)
     assert q["kind"] == "schedule" and q["proposed"]["start_iso"] is None and "when" in q["spoken"].lower()
+
+
+def test_schedule_writes_to_the_operators_own_calendar_with_no_grant(monkeypatch):
+    """The common case: the operator names their OWN calendar (one value) and the console writes to it
+    directly — no consent ceremony, because writing to your own calendar on your own node is your own
+    act, not a proxy. The guarded on-behalf create_event is NOT touched here."""
+    monkeypatch.delenv("CONSOLE_SCHEDULE_AGENT", raising=False)
+    monkeypatch.delenv("CONSOLE_SCHEDULE_GRANTOR", raising=False)
+    monkeypatch.setenv("NH_CALENDAR_WRITE", "/tmp/mine.ics")
+    from concordance import connect_write
+    seen = {}
+
+    def fake_direct(summary, start_iso, **k):
+        seen.update(summary=summary, start_iso=start_iso)
+        return {"ok": True, "uid": "evt-self", "target_kind": "file", "scope_used": "operator_self"}
+
+    def forbidden(*a, **k):
+        raise AssertionError("the operator's own calendar must NOT go through the consent gate")
+
+    monkeypatch.setattr(connect_write, "create_event_direct", fake_direct)
+    monkeypatch.setattr(connect_write, "create_event", forbidden)
+    r = console.dispatch("remind me to check the goats at 6pm", SEC)
+    assert r["kind"] == "scheduled" and r["receipt"]["uid"] == "evt-self"
+    assert "needs" not in r                                    # no consent asked of the operator
+    assert seen["summary"] == "check the goats" and seen["start_iso"].endswith("T180000")
 
 
 def test_schedule_writes_to_the_calendar_when_configured_and_granted(monkeypatch):

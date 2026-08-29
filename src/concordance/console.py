@@ -319,9 +319,17 @@ def _parse_event(text: str, now) -> Dict[str, Any]:
 
 
 def _schedule(text: str) -> Dict[str, Any]:
-    """Parse the event, then WRITE it to the calendar the operator named — but only with a live consent
-    grant (create_event calls consent.guard FIRST). Unconfigured, it hands back the parsed proposal and
-    the one-time setup. It NEVER writes without the grant (the Gate: we present, we do not cross)."""
+    """Parse the event, then WRITE it into the calendar the operator named. Two honest paths:
+
+      * The OPERATOR'S OWN node (NH_CALENDAR_WRITE set) — the common case. The operator writing to
+        their own calendar is their own act, not a proxy, so it needs no consent grant (consent.guard's
+        own words: a member speaking as themselves needs no one's approval). One value turns it on.
+      * An on-behalf PROXY (CONSOLE_SCHEDULE_AGENT + _GRANTOR named) — a node scheduling for ANOTHER
+        human. That is the one case the consent lock governs: create_event calls consent.guard FIRST
+        and refuses without a live signed grant.
+
+    With no calendar named at all, it hands back the parsed proposal (an event the person can add
+    themselves — sovereign, no account) and the one-line setup. No clear time -> it asks, never guesses."""
     ev = _parse_event(text, _dt.datetime.now())
     base = {"intent": "schedule", "kind": "schedule", "caption": text.strip(),
             "proposed": ev, "connections": [], "generated": False}
@@ -331,7 +339,9 @@ def _schedule(text: str) -> Dict[str, Any]:
                           f"When should it be — a day and a time?"}
     agent = os.environ.get("CONSOLE_SCHEDULE_AGENT", "").strip()
     grantor = os.environ.get("CONSOLE_SCHEDULE_GRANTOR", "").strip()
-    if agent and grantor and os.environ.get("NH_CALENDAR_WRITE", "").strip():
+    dest = os.environ.get("NH_CALENDAR_WRITE", "").strip()
+    if agent and grantor and dest:
+        # On-behalf proxy: a node scheduling for another human -> the consent lock applies.
         try:
             from . import connect_write
             r = connect_write.create_event(grantor, agent, ev["summary"], ev["start_iso"])
@@ -340,14 +350,28 @@ def _schedule(text: str) -> Dict[str, Any]:
         if r.get("ok"):
             return {**base, "kind": "scheduled", "headline": "Scheduled.",
                     "spoken": f"Scheduled: {ev['summary']}, {ev['when_human']}. It's on your calendar.",
-                    "receipt": {"uid": r.get("uid"), "target": r.get("target")}}
+                    "receipt": {"uid": r.get("uid"), "target": r.get("target_kind")}}
         return {**base, "headline": "Your say-so first", "needs": "consent",
                 "why": r.get("refusal") or r.get("error"),
-                "spoken": f"I have it ready — {ev['summary']}, {ev['when_human']} — but I need your "
-                          f"authorization before I write to your calendar."}
+                "spoken": f"I have it ready — {ev['summary']}, {ev['when_human']} — but I need that "
+                          f"person's authorization before I write to their calendar."}
+    if dest:
+        # The operator's own calendar on their own node — their own act, no grant needed.
+        try:
+            from . import connect_write
+            r = connect_write.create_event_direct(ev["summary"], ev["start_iso"])
+        except Exception:  # noqa: BLE001 — a calendar hiccup must not crash the console
+            r = {"ok": False, "error": "the calendar is unreachable right now"}
+        if r.get("ok"):
+            return {**base, "kind": "scheduled", "headline": "Scheduled.",
+                    "spoken": f"Scheduled: {ev['summary']}, {ev['when_human']}. It's on your calendar.",
+                    "receipt": {"uid": r.get("uid"), "target": r.get("target_kind")}}
+        return {**base, "headline": "Couldn't write it", "why": r.get("error"),
+                "spoken": f"I have it as: {ev['summary']}, {ev['when_human']}, but I couldn't write to "
+                          f"your calendar just now. Take it as an event to add yourself for now."}
     return {**base, "headline": "Ready to schedule",
-            "spoken": f"I have it as: {ev['summary']}, {ev['when_human']}. To let me write it, name your "
-                      f"calendar and authorize the console once — nothing is scheduled without your grant."}
+            "spoken": f"I have it as: {ev['summary']}, {ev['when_human']}. Take it as an event to add, "
+                      f"or point the console at your calendar once and I'll keep your days for you."}
 
 
 def _copies(text: str) -> Dict[str, Any]:

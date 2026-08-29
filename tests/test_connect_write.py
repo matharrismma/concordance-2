@@ -118,6 +118,29 @@ def test_no_destination_is_ever_guessed():
     assert r["ok"] is False and "never guess" in r["error"]
 
 
+def test_the_operator_writes_their_own_calendar_with_no_grant():
+    """The operator writing to their OWN calendar on their OWN node is their own act, not a proxy —
+    consent.guard's own words. create_event_direct needs no signed grant: naming the calendar IS the
+    authorization. The event still lands well-formed inside the VCALENDAR envelope, with a receipt."""
+    from concordance import connect_write
+    ics = os.path.join(tempfile.mkdtemp(), "mine.ics")
+    r = connect_write.create_event_direct("Feed the goats", "2026-08-08T06:30:00", target=ics)
+    assert r["ok"] is True and r["target_kind"] == "file"
+    assert r["scope_used"] == "operator_self" and "grant_id" not in r, "no grant is involved"
+    text = Path(ics).read_text(encoding="utf-8")
+    assert text.startswith("BEGIN:VCALENDAR") and text.rstrip().endswith("END:VCALENDAR")
+    assert f"UID:{r['uid']}" in text and "SUMMARY:Feed the goats" in text
+    assert "DTSTART:20260808T063000" in text
+
+
+def test_the_operator_path_still_never_guesses_a_destination():
+    """Sovereign, not sloppy: even the operator's own path refuses to invent a calendar location."""
+    from concordance import connect_write
+    os.environ.pop("NH_CALENDAR_WRITE", None)
+    r = connect_write.create_event_direct("Nowhere", "2026-08-09")
+    assert r["ok"] is False and "never guess" in r["error"]
+
+
 def test_the_read_module_stays_byte_for_byte_read_only():
     """The pilot must not have leaked a single write into connect.py — the separation IS the
     design, and test_connect's source scan must keep something real to scan."""
