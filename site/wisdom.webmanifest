@@ -1,0 +1,11 @@
+{
+  "name": "Wisdom",
+  "short_name": "Wisdom",
+  "description": "Treasure the Word, understand it, live it. Hide Scripture in your heart, go deep into it, and carry it into the life you're living — a mirror of the Word dwelling in you, never a meter on your soul.",
+  "start_url": "/wisdom.html",
+  "scope": "/wisdom.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F4F9",
+  "theme_color": "#3E3A6E"
+}

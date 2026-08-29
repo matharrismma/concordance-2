@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3E3A6E">
+<title>Wisdom — treasure the Word, understand it, live it</title>
+<meta name="description" content="The fear of the LORD is the beginning of wisdom (Proverbs 9:10). Hide the Word in your heart, go deep into it — cross-references, the original words — and bring it to the life you're actually living. Not a meter on your soul; a mirror of the Word dwelling in you. Christ is the wisdom of God.">
+<link rel="manifest" href="/wisdom.webmanifest">
+<style>
+:root{
+  --paper:#F5F4F9; --card:#FFFFFF; --rule:#3E3A6E; --ruleSoft:#CFCADF; --ink:#1B1836;
+  --graphite:#5B5776; --gold:#9C7C22; --green:#2E7D4F; --amber:#A9781A; --red:#B23A2A;
+  --disp:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --body:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--body); background:var(--paper); color:var(--ink); min-height:100vh;
+  -webkit-text-size-adjust:100%; padding-bottom:env(safe-area-inset-bottom);}
+input,button,select,textarea{font-family:inherit; font-size:1rem}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--rule); outline-offset:2px}
+.disp{font-family:var(--disp); letter-spacing:.01em}
+.mono{font-family:var(--mono)}
+.serif{font-family:var(--disp)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+header.hd{background:var(--rule); color:var(--paper); padding:18px 16px 14px}
+header.hd .in{max-width:680px; margin:0 auto}
+header.hd .verse{font-family:var(--disp); font-style:italic; font-size:13px; opacity:.85; margin-top:5px}
+nav.tabs{background:var(--card); border-bottom:2px solid var(--rule); overflow-x:auto}
+nav.tabs .in{max-width:680px; margin:0 auto; display:flex}
+nav.tabs button{flex:1 0 auto; padding:12px 16px; border:none; background:transparent; color:var(--ink); font-weight:600; font-size:15px; white-space:nowrap}
+nav.tabs button[aria-selected="true"]{background:var(--rule); color:var(--paper)}
+main{max-width:680px; margin:0 auto; padding:14px 12px 72px}
+.pnl{background:var(--card); border:1.5px solid var(--rule); border-radius:6px; margin-bottom:14px; overflow:hidden}
+.pnl>.lab{font-family:var(--mono); text-transform:uppercase; letter-spacing:.06em; font-size:12px; font-weight:700; color:var(--paper); padding:6px 12px; background:var(--rule)}
+.pnl>.bd{padding:12px}
+.muted{color:var(--graphite); font-size:14px}
+.field{width:100%; padding:10px 12px; font-size:16px; border:1.5px solid var(--rule); border-radius:5px; background:var(--card); color:var(--ink)}
+.cta{font-family:var(--disp); font-size:18px; font-weight:700; width:100%; padding:12px 0; background:var(--rule); color:var(--paper); border:none; border-radius:5px}
+.btn{font-family:var(--mono); text-transform:uppercase; letter-spacing:.05em; font-size:12px; font-weight:600; padding:8px 12px; border:1.5px solid var(--rule); border-radius:5px; background:var(--card); color:var(--rule)}
+.btn[aria-pressed="true"]{background:var(--rule); color:var(--paper)}
+.vtext{font-family:var(--disp); font-size:17px; line-height:1.55}
+.small{font-size:13px} .del{border:none;background:none;color:var(--red);font-size:12px}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.04em;padding:2px 7px;border-radius:10px;border:1px solid var(--ruleSoft);color:var(--graphite)}
+a{color:var(--rule)}
+label.k{font-family:var(--mono);font-size:11px;color:var(--graphite);display:block;margin-top:10px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+/* ============================================================
+   WISDOM — the crown guild. Scripture, toward wisdom, not a scorecard.
+   "The fear of the LORD is the beginning of wisdom" (Prov 9:10); Christ IS the wisdom of God (1 Cor 1:30).
+   Three movements, only the first is memory:
+     TREASURE  — hide the Word in the heart (Ps 119:11); keep what fades.
+     UNDERSTAND— go deep: the passage, its cross-references, the original words (the engine's own gift).
+     LIVE      — be a doer, not a hearer only (James 1:22); bring the Word to a real situation.
+   WALK is a gentle mirror — never a meter on your soul. It reflects the Word dwelling in you (Col 3:16),
+   never scores your righteousness. Wisdom is God's gift to ask for (James 1:5), grows in humility
+   (Prov 11:2), and points past this tool to Christ.
+   Treasure + Live are kept in localStorage (private, offline). Understand fetches the engine's Scripture
+   depth (same-origin: /passage · /cross_refs · /original · /commentary · /word_study).
+   ============================================================ */
+var STORAGE_KEY = "wisdom-v1";
+var T = { rule:"#3E3A6E", graphite:"#5B5776", gold:"#9C7C22", green:"#2E7D4F", amber:"#A9781A", red:"#B23A2A", soft:"#CFCADF" };
+var API = location.origin;
+
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function daysBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+
+function loadData(){ try{ var v=localStorage.getItem(STORAGE_KEY); if(v) return JSON.parse(v); }catch(e){} return { treasures:[], livings:[] }; }
+function persist(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); state.saveErr=false; }catch(e){ state.saveErr=true; } }
+
+var state = { data:loadData(), tab:"walk", saveErr:false,
+              tAdd:{ref:"", note:"", loading:false},
+              u:{ref:"", passage:null, cross:null, orig:null, comm:null, loading:"", err:""},
+              live:{ref:"", facing:"", doing:""} };
+if(!state.data.treasures) state.data.treasures=[];
+if(!state.data.livings) state.data.livings=[];
+
+/* ---------- fetch (same-origin scripture depth) ---------- */
+function getJSON(pathq){
+  return fetch(API+pathq, {headers:{"Accept":"application/json"}}).then(function(r){
+    if(!r.ok) throw new Error("HTTP "+r.status); return r.json();
+  });
+}
+
+/* ---------- app ---------- */
+var app = document.getElementById("app");
+
+function header(){
+  return '<header class="hd"><div class="in">'+
+    '<div class="disp" style="font-size:30px;font-weight:700;line-height:1">Wisdom</div>'+
+    '<div class="verse">“The fear of the LORD is the beginning of wisdom.” — Proverbs 9:10</div>'+
+    '</div></header>';
+}
+function tabsView(){
+  var items=[["walk","The Walk"],["treasure","Treasure"],["understand","Understand"],["live","Live"]];
+  return '<nav class="tabs"><div class="in">'+items.map(function(it){
+    return '<button data-act="tab" data-k="'+it[0]+'" aria-selected="'+(state.tab===it[0])+'">'+it[1]+'</button>';
+  }).join("")+'</div></nav>';
+}
+
+/* ---------- Treasure: hide the Word; keep what fades ---------- */
+function fading(tr){
+  // gentle: not reviewed in 7+ days, or the last review said it slipped. Never a judgment — only "revisit".
+  if(!tr.review || !tr.review.length) return daysBetween(tr.added, todayISO())>=3;
+  var last=tr.review[tr.review.length-1];
+  if(!last.held) return true;
+  return daysBetween(last.date, todayISO())>=7;
+}
+function treasureView(){
+  var a=state.tAdd, ts=state.data.treasures;
+  var add='<div class="pnl"><div class="lab">HIDE A PASSAGE IN YOUR HEART</div><div class="bd">'+
+    '<div style="display:flex;gap:8px"><input id="tref" class="field" placeholder="a reference — e.g. Psalm 119:11, John 15:1-5" value="'+esc(a.ref)+'">'+
+      '<button class="btn" data-act="treasureAdd" style="white-space:nowrap"'+(a.loading?" disabled":"")+'>'+(a.loading?"…":"Add")+'</button></div>'+
+    (a.err?'<div class="small" style="color:'+T.amber+';margin-top:6px">'+esc(a.err)+'</div>':"")+
+    '<div class="mono small" style="color:'+T.graphite+';margin-top:8px">“Thy word have I hid in mine heart, that I might not sin against thee.” (Ps 119:11). We fetch the verse so you keep the true text; after that it lives on your device, offline. This is treasure, not a test — what fades just comes back for review.</div>'+
+    '</div></div>';
+  if(!ts.length) return add+'<div class="muted">Nothing treasured yet. Start with one verse that’s speaking to you — hide it in your heart, and it’s yours when there’s no book in reach.</div>';
+  var due=ts.filter(fading), held=ts.filter(function(t){return !fading(t);});
+  function card(t){
+    var f=fading(t);
+    return '<div class="pnl"><div class="lab" style="background:'+(f?T.amber:T.rule)+'">'+esc(t.ref)+(f?' · REVIEW':' · HELD')+'</div><div class="bd">'+
+      '<div class="vtext">'+esc(t.text||"")+'</div>'+
+      '<div style="display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap">'+
+        '<span class="mono small" style="color:'+T.graphite+'">CAN YOU RECALL IT?</span>'+
+        '<button class="btn" data-act="review" data-id="'+t.id+'" data-v="held" style="padding:5px 10px">held ✓</button>'+
+        '<button class="btn" data-act="review" data-id="'+t.id+'" data-v="fade" style="padding:5px 10px">still learning</button>'+
+        '<button class="btn" data-act="understandFrom" data-ref="'+esc(t.ref)+'" style="padding:5px 10px;border-color:'+T.gold+';color:'+T.gold+'">go deeper →</button>'+
+        '<button class="del" data-act="delTreasure" data-id="'+t.id+'" style="margin-left:auto">remove</button>'+
+      '</div></div></div>';
+  }
+  var out=add;
+  if(due.length) out+='<div class="mono small" style="color:'+T.graphite+';margin:4px 2px">FOR REVIEW — revisit these, gently</div>'+due.map(card).join("");
+  if(held.length) out+='<div class="mono small" style="color:'+T.graphite+';margin:12px 2px 4px">HELD</div>'+held.map(card).join("");
+  return out;
+}
+
+/* ---------- Understand: go deep ---------- */
+function understandView(){
+  var u=state.u;
+  var form='<div class="pnl"><div class="lab">GO DEEP INTO A PASSAGE</div><div class="bd">'+
+    '<div style="display:flex;gap:8px"><input id="uref" class="field" placeholder="a reference — e.g. John 3:16" value="'+esc(u.ref)+'">'+
+      '<button class="btn" data-act="uLoad" style="white-space:nowrap"'+(u.loading==="passage"?" disabled":"")+'>'+(u.loading==="passage"?"…":"Open")+'</button></div>'+
+    (u.err?'<div class="small" style="color:'+T.amber+';margin-top:6px">'+esc(u.err)+'</div>':"")+
+    '<div class="mono small" style="color:'+T.graphite+';margin-top:8px">The fear of the LORD is the beginning of wisdom. Let the Word interpret the Word — its cross-references, its original tongue. Every line here is found and verified, never invented.</div>'+
+    '</div></div>';
+  if(!u.passage) return form;
+  var p=u.passage;
+  var verses=(p.verses||[]).map(function(v){ return '<div class="vtext" style="margin-bottom:4px"><span class="mono small" style="color:'+T.graphite+'">'+v.verse+'</span> '+esc(v.text)+'</div>'; }).join("");
+  var body='<div class="pnl"><div class="lab">'+esc(p.ref||u.ref)+'</div><div class="bd">'+verses+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+
+      '<button class="btn" data-act="uCross"'+(u.loading==="cross"?" disabled":"")+'>'+(u.loading==="cross"?"…":"Cross-references")+'</button>'+
+      '<button class="btn" data-act="uOrig"'+(u.loading==="orig"?" disabled":"")+'>'+(u.loading==="orig"?"…":"Original words")+'</button>'+
+      '<button class="btn" data-act="uComm"'+(u.loading==="comm"?" disabled":"")+'>'+(u.loading==="comm"?"…":"Commentary")+'</button>'+
+      '<button class="btn" data-act="treasureThis" data-ref="'+esc(p.ref||u.ref)+'" style="border-color:'+T.gold+';color:'+T.gold+'">treasure this</button>'+
+    '</div></div></div>';
+  if(u.cross){
+    var cr=(u.cross.cross_references||[]).slice(0,10).map(function(c){
+      return '<div style="padding:7px 0;border-top:0.5px solid '+T.soft+'"><a href="#" data-act="uJump" data-ref="'+esc(c.ref)+'" class="mono small" style="font-weight:600">'+esc(c.ref)+'</a> <span class="vtext" style="font-size:15px">'+esc(c.web_text||"")+'</span></div>';
+    }).join("");
+    body+='<div class="pnl"><div class="lab">CROSS-REFERENCES — the Word interprets the Word</div><div class="bd">'+(cr||'<div class="muted">None found for this reference.</div>')+'</div></div>';
+  }
+  if(u.orig){
+    var ws=(u.orig.words||[]).map(function(w){
+      return '<button class="btn" data-act="uWord" data-s="'+esc(w.strongs)+'" style="margin:3px 4px 0 0;text-transform:none;letter-spacing:0"><span class="serif" style="font-size:16px">'+esc(w.word)+'</span> <span class="mono" style="font-size:10px;color:'+T.graphite+'">'+esc(w.strongs)+'</span></button>';
+    }).join("");
+    body+='<div class="pnl"><div class="lab">THE ORIGINAL WORDS — tap one to study it</div><div class="bd">'+(ws||'<div class="muted">No original-language data for this reference.</div>')+
+      (u.word?'<div style="margin-top:10px;padding:10px;background:#EEEDF5;border-left:3px solid '+T.gold+';border-radius:3px"><div class="mono small" style="color:'+T.graphite+'">'+esc(u.word.strongs||"")+'</div><div class="vtext" style="font-size:15px;margin-top:2px">'+esc((u.word.definition||u.word.gloss||u.word.meaning||JSON.stringify(u.word)).toString().slice(0,400))+'</div></div>':"")+
+      '</div></div>';
+  }
+  if(u.comm){
+    var ct=(u.comm.commentary||u.comm.text||u.comm.body||"").toString();
+    body+='<div class="pnl"><div class="lab">COMMENTARY — a father’s own words (public domain)</div><div class="bd"><div class="vtext" style="font-size:15px">'+esc(ct.slice(0,1400))+(ct.length>1400?"…":"")+'</div>'+(u.comm.source?'<div class="mono small" style="color:'+T.graphite+';margin-top:6px">— '+esc(u.comm.source)+'</div>':"")+'</div></div>';
+  }
+  return form+body;
+}
+
+/* ---------- Live: be a doer ---------- */
+function liveView(){
+  var l=state.live, ls=state.data.livings;
+  var form='<div class="pnl"><div class="lab">BRING THE WORD TO YOUR LIFE</div><div class="bd">'+
+    '<label class="k">THE PASSAGE</label><input id="lref" class="field" style="margin-top:3px" placeholder="e.g. Philippians 4:6-7" value="'+esc(l.ref)+'">'+
+    '<label class="k">WHAT YOU’RE FACING</label><textarea id="lfac" class="field" style="margin-top:3px;min-height:56px;resize:vertical" placeholder="the real situation in front of you">'+esc(l.facing)+'</textarea>'+
+    '<label class="k">WHAT YOU’LL DO</label><textarea id="ldo" class="field" style="margin-top:3px;min-height:56px;resize:vertical" placeholder="the one step of obedience — small and real">'+esc(l.doing)+'</textarea>'+
+    '<button class="btn" data-act="addLiving" style="margin-top:10px">Write it down</button>'+
+    '<div class="mono small" style="color:'+T.graphite+';margin-top:8px">“Be doers of the word, and not hearers only” (James 1:22). Wisdom is skill for living — the Word carried into the day you’re actually in. This is your record of walking it, kept only on your device.</div>'+
+    '</div></div>';
+  if(!ls.length) return form+'<div class="muted">Nothing written yet. When a passage meets a real thing you’re facing, name the step — and come back to see how the Lord met you in it.</div>';
+  var list=ls.slice().reverse().map(function(x){
+    return '<div class="pnl"><div class="lab">'+esc(x.ref||"the Word")+' · '+esc(x.date)+'</div><div class="bd">'+
+      (x.facing?'<div class="mono small" style="color:'+T.graphite+'">FACING</div><div class="vtext" style="font-size:15px;margin-bottom:8px">'+esc(x.facing)+'</div>':"")+
+      (x.doing?'<div class="mono small" style="color:'+T.graphite+'">THE STEP</div><div class="vtext" style="font-size:15px">'+esc(x.doing)+'</div>':"")+
+      '<div style="text-align:right;margin-top:6px"><button class="del" data-act="delLiving" data-id="'+x.id+'">remove</button></div>'+
+      '</div></div>';
+  }).join("");
+  return form+list;
+}
+
+/* ---------- The Walk: a mirror, never a meter ---------- */
+function walkView(){
+  var ts=state.data.treasures, ls=state.data.livings;
+  var due=ts.filter(fading).length;
+  var intro='<div class="pnl"><div class="lab">THE WALK</div><div class="bd">'+
+    '<div class="vtext" style="font-size:16px">“Let the word of Christ dwell in you richly, in all wisdom.” — Colossians 3:16</div>'+
+    '<div class="mono small" style="color:'+T.graphite+';margin-top:10px">This is a mirror, not a measure. It never scores your standing before God — that is settled in Christ, not earned in an app. It only reflects the Word you’re treasuring, so you can revisit what fades and carry more of it into your days.</div>'+
+    '</div></div>';
+  var stat='<div class="pnl"><div class="bd" style="display:flex;gap:22px;flex-wrap:wrap">'+
+    '<div><div class="mono small" style="color:'+T.graphite+'">TREASURED</div><div class="disp" style="font-size:32px;font-weight:700">'+ts.length+'</div></div>'+
+    '<div><div class="mono small" style="color:'+T.graphite+'">FOR REVIEW</div><div class="disp" style="font-size:32px;font-weight:700;color:'+(due?T.amber:T.green)+'">'+due+'</div></div>'+
+    '<div><div class="mono small" style="color:'+T.graphite+'">BROUGHT TO LIFE</div><div class="disp" style="font-size:32px;font-weight:700">'+ls.length+'</div></div>'+
+    '</div></div>';
+  var next='';
+  if(!ts.length) next='<div class="muted">Begin in <b>Treasure</b> — hide one verse in your heart. Wisdom starts there, and in the fear of the Lord.</div>';
+  else if(due) next='<div class="muted"><b>'+due+'</b> to revisit — go to <b>Treasure</b> and let them come back to you. Nothing here is a failing; the Word is worth returning to.</div>';
+  else next='<div class="muted">All held for now. Go <b>deeper</b> into one you’ve treasured, or carry one into what you’re <b>facing</b> today.</div>';
+  var foot='<div class="mono small" style="color:'+T.graphite+';margin-top:14px;text-align:center">Wisdom is God’s to give — ask Him (James 1:5). This tool is a servant, and points past itself to Christ, the wisdom of God.</div>';
+  return intro+stat+'<div style="padding:2px 4px">'+next+'</div>'+foot;
+}
+
+/* ---------- render ---------- */
+function render(){
+  var html=header()+tabsView();
+  if(state.saveErr) html+='<div style="max-width:680px;margin:0 auto;padding:8px 16px;color:'+T.red+';font-size:13px">Storage unavailable — treasures will not survive a reload.</div>';
+  html+='<main>';
+  if(state.tab==="walk") html+=walkView();
+  else if(state.tab==="treasure") html+=treasureView();
+  else if(state.tab==="understand") html+=understandView();
+  else if(state.tab==="live") html+=liveView();
+  html+='</main>';
+  app.innerHTML=html;
+  wire();
+}
+function wire(){
+  bindInput("tref", function(v){ state.tAdd.ref=v; });
+  bindInput("uref", function(v){ state.u.ref=v; });
+  bindInput("lref", function(v){ state.live.ref=v; });
+  bindInput("lfac", function(v){ state.live.facing=v; });
+  bindInput("ldo", function(v){ state.live.doing=v; });
+  app.querySelectorAll("[data-act]").forEach(function(el){ el.addEventListener("click", function(e){ act(el,e); }); });
+}
+function bindInput(id,fn){ var el=document.getElementById(id); if(el) el.addEventListener("input",function(){ fn(el.value); }); }
+
+/* ---------- actions ---------- */
+function act(el,e){
+  var a=el.getAttribute("data-act");
+  if(a==="tab"){ state.tab=el.getAttribute("data-k"); return render(); }
+
+  if(a==="treasureAdd" || a==="treasureThis"){
+    var ref=(a==="treasureThis"?el.getAttribute("data-ref"):state.tAdd.ref)||"";
+    ref=ref.trim(); if(!ref) return;
+    if(a==="treasureThis"){ // already have the passage open — store directly
+      var p=state.u.passage, text=p?(p.verses||[]).map(function(v){return v.text;}).join(" "):"";
+      state.data.treasures.push({id:Date.now(), ref:(p&&p.ref)||ref, text:text, added:todayISO(), review:[]});
+      persist(); state.tab="treasure"; return render();
+    }
+    state.tAdd.loading=true; state.tAdd.err=""; render();
+    getJSON("/passage?ref="+encodeURIComponent(ref)).then(function(p){
+      state.tAdd.loading=false;
+      if(!p || p.status!=="ok" || !(p.verses||[]).length){ state.tAdd.err="Couldn’t find that reference — check the book, chapter and verse."; return render(); }
+      var text=(p.verses||[]).map(function(v){return v.text;}).join(" ");
+      state.data.treasures.push({id:Date.now(), ref:p.ref||ref, text:text, added:todayISO(), review:[]});
+      state.tAdd.ref=""; persist(); render();
+    }).catch(function(){ state.tAdd.loading=false; state.tAdd.err="Couldn’t reach the Word right now — you need a connection to add a new passage. What you’ve already treasured is here offline."; render(); });
+    return;
+  }
+  if(a==="review"){ var id=+el.getAttribute("data-id"), held=el.getAttribute("data-v")==="held";
+    state.data.treasures=state.data.treasures.map(function(t){ if(t.id===id){ t.review=t.review||[]; t.review.push({date:todayISO(), held:held}); } return t; });
+    persist(); return render(); }
+  if(a==="delTreasure"){ var did=+el.getAttribute("data-id"); state.data.treasures=state.data.treasures.filter(function(t){return t.id!==did;}); persist(); return render(); }
+
+  if(a==="understandFrom"){ state.u={ref:el.getAttribute("data-ref"), passage:null, cross:null, orig:null, comm:null, word:null, loading:"", err:""}; state.tab="understand"; render(); return loadPassage(); }
+  if(a==="uLoad"){ return loadPassage(); }
+  if(a==="uJump"){ if(e) e.preventDefault(); state.u={ref:el.getAttribute("data-ref"), passage:null, cross:null, orig:null, comm:null, word:null, loading:"", err:""}; render(); return loadPassage(); }
+  if(a==="uCross"){ state.u.loading="cross"; render(); getJSON("/cross_refs?ref="+encodeURIComponent(state.u.passage.ref||state.u.ref)).then(function(d){ state.u.loading=""; state.u.cross=d; render(); }).catch(function(){ state.u.loading=""; state.u.err="Couldn’t reach the cross-references."; render(); }); return; }
+  if(a==="uOrig"){ state.u.loading="orig"; render(); getJSON("/original?ref="+encodeURIComponent(state.u.passage.ref||state.u.ref)).then(function(d){ state.u.loading=""; state.u.orig=d; render(); }).catch(function(){ state.u.loading=""; state.u.err="Couldn’t reach the original words."; render(); }); return; }
+  if(a==="uComm"){ state.u.loading="comm"; render(); getJSON("/commentary?ref="+encodeURIComponent(state.u.passage.ref||state.u.ref)).then(function(d){ state.u.loading=""; state.u.comm=d; render(); }).catch(function(){ state.u.loading=""; state.u.err="Couldn’t reach the commentary."; render(); }); return; }
+  if(a==="uWord"){ var s=el.getAttribute("data-s"); if(!s) return; state.u.word={strongs:s}; render();
+    getJSON("/word_study?strongs="+encodeURIComponent(s)).then(function(d){ state.u.word=Object.assign({strongs:s}, d||{}); render(); }).catch(function(){ render(); }); return; }
+
+  if(a==="addLiving"){ var l=state.live; if(!(l.facing||"").trim() && !(l.doing||"").trim()) return;
+    state.data.livings.push({id:Date.now(), ref:(l.ref||"").trim(), facing:(l.facing||"").trim(), doing:(l.doing||"").trim(), date:todayISO()});
+    state.live={ref:"", facing:"", doing:""}; persist(); return render(); }
+  if(a==="delLiving"){ var lid=+el.getAttribute("data-id"); state.data.livings=state.data.livings.filter(function(x){return x.id!==lid;}); persist(); return render(); }
+}
+
+function loadPassage(){
+  var ref=(state.u.ref||"").trim(); if(!ref) return;
+  state.u.loading="passage"; state.u.err=""; state.u.passage=null; state.u.cross=null; state.u.orig=null; state.u.comm=null; state.u.word=null; render();
+  getJSON("/passage?ref="+encodeURIComponent(ref)).then(function(p){
+    state.u.loading="";
+    if(!p || p.status!=="ok" || !(p.verses||[]).length){ state.u.err="Couldn’t find that reference — check the book, chapter and verse."; return render(); }
+    state.u.passage=p; render();
+  }).catch(function(){ state.u.loading=""; state.u.err="Couldn’t reach the Word right now — Understand needs a connection. Treasure and Live work offline."; render(); });
+}
+
+render();
+if("serviceWorker" in navigator){ navigator.serviceWorker.getRegistrations && navigator.serviceWorker.ready.catch(function(){}); }
+</script>
+</body>
+</html>
