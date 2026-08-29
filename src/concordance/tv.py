@@ -26,7 +26,7 @@ from . import corpus
 # (the naming method: "to you, this is your ___"). Start small; let usefulness pull the rest in.
 CHANNELS: List[Dict[str, Any]] = [
     {"id": "witnesses", "name": "Witnesses", "line": "Voices who walked it before you",
-     "seed": "faith trial perseverance testimony endurance", "witness": True},
+     "seed": "martyr persecution faithful witness testimony of Christ", "witness": True},
     {"id": "scripture", "name": "Scripture", "line": "The Word, read through",
      "seed": "gospel psalm the word of God covenant", "witness": True},
     {"id": "field", "name": "The Field", "line": "Getting it done, off-grid and at home",
@@ -49,21 +49,37 @@ def _trim(s: str, n: int = 180) -> str:
     return s if len(s) <= n else s[: n - 1].rsplit(" ", 1)[0] + "…"
 
 
+# Bodiless stub shelves — dictionary/pronunciation/lexicon entries are word-cards with no body to air.
+# The audit found raw search aired these (off-topic keyword collisions like "endurance riding" on the
+# Witnesses channel) with the license label as the "blurb". A program needs a real body to describe.
+_STUB_SHELVES = {"dictionary", "pronunciation", "lexicon"}
+
+
 def _items(seed: str, limit: int, witness: bool) -> List[Dict[str, str]]:
-    """One channel's lineup, pulled from the keeping — real cards, already gated, shown as programs."""
+    """One channel's lineup — REAL, described cards only. We over-fetch, then keep cards that have a
+    body to describe and a clean title, and use the card's own snippet as the program blurb (never the
+    license label). A bodiless stub or a mojibake title is skipped; a channel with nothing real goes dark."""
     out: List[Dict[str, str]] = []
     try:
-        hits = corpus.search(seed, limit=limit, include_witness=witness)
+        hits = corpus.search(seed, limit=max(limit * 4, 12), include_witness=witness)
     except Exception:  # noqa: BLE001 — a channel that can't load is simply dark, never a crash
         return out
     for h in hits or []:
-        if isinstance(h, dict) and h.get("id") and (h.get("title") or "").strip():
-            out.append({
-                "id": h["id"],
-                "title": _trim(h.get("title") or "", 90),
-                "blurb": _trim(h.get("snippet") or h.get("surface") or ""),
-                "ref": f"/card/{h['id']}",
-            })
+        if not isinstance(h, dict):
+            continue
+        cid = h.get("id")
+        title = (h.get("title") or "").strip()
+        if not cid or not title or "�" in title:          # no id, no title, or mojibake title
+            continue
+        if (h.get("shelf") or "").lower() in _STUB_SHELVES:      # a bodiless dictionary/lexicon stub
+            continue
+        # a program blurb is a REAL description only — never the `surface` license label ("secular"),
+        # and the internal snippet is often empty, so we simply omit the blurb rather than air a label.
+        snippet = (h.get("snippet") or "").strip()
+        blurb = _trim(snippet, 170) if (len(snippet) >= 30 and " " in snippet) else ""
+        out.append({"id": cid, "title": _trim(title, 90), "blurb": blurb, "ref": f"/card/{cid}"})
+        if len(out) >= limit:
+            break
     return out
 
 
