@@ -35,6 +35,8 @@ CHANNELS: List[Dict[str, Any]] = [
      "seed": "golf swing putting short game practice", "witness": False},
     {"id": "grappling", "name": "Grappling", "line": "Measure your rolls, find your leak",
      "seed": "grappling wrestling jiu jitsu guard escape", "witness": False},
+    {"id": "music", "name": "Music", "line": "Learn your instrument — find the leak in your practice",
+     "seed": "mandolin fiddle guitar chords scales practice music", "witness": False},
 ]
 
 # A broadcast 'slot' — how long each program sits in 'now playing' before the schedule advances. The
