@@ -68,13 +68,13 @@ def test_witness_home_is_untouched():
 
 
 def test_clean_path_serves_the_html_twin():
-    for name in ("golf", "tatami", "halls"):
+    for name in ("golf", "grappling", "halls"):
         assert resolve_site_file(SITE, "/" + name) == (SITE / (name + ".html")).resolve(), name
 
 
 def test_explicit_html_still_resolves():
     # the old address must keep working — two paths, both served, no redirect
-    for name in ("golf", "tatami", "halls"):
+    for name in ("golf", "grappling", "halls"):
         assert resolve_site_file(SITE, "/" + name + ".html") == (SITE / (name + ".html")).resolve()
 
 

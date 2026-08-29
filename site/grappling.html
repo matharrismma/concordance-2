@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2B3A57">
-<title>Tatami — the roll is the round, the mat is the lab</title>
-<meta name="description" content="A training instrument for grappling and MMA. The mat gates, the trend steers. Measure your rolls, find your leak, filter the advice that fits. Offline, private, yours.">
-<link rel="manifest" href="/tatami.webmanifest">
+<title>Grappling — measure your rolls, find your leak</title>
+<meta name="description" content="A training tool for grappling and MMA. Measure your rolls, find your leak, filter the advice that fits. Offline, private, yours.">
+<link rel="manifest" href="/grappling.webmanifest">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 :root{
@@ -60,8 +60,8 @@ main{max-width:680px; margin:0 auto; padding:12px 12px 72px}
 <script>
 "use strict";
 /* ============================================================
-   TATAMI — a training instrument for grappling & MMA
-   The same engine as Gate Golf, applied to fight sports:
+   GRAPPLING — a training instrument for grappling & MMA (internal codename: tatami)
+   The same engine as Golf, applied to fight sports:
      a ROLL is the round · the MAT (home gym) is the LAB · comps/open-mats are the FIELD.
    Machines: MAP (venues as places) · CLASSIFY (your measured leak) · GATE (the recurring hole)
              · CHART YOUR GAME (technique success) · GATHER (advice corpus) · FILTER (advice by fit).
@@ -70,7 +70,7 @@ main{max-width:680px; margin:0 auto; padding:12px 12px 72px}
    Striking (boxing / Muay Thai) is a planned discipline with its OWN metrics (rounds, knockdowns,
    combinations, defense%) — not measured here yet; grappling never pretends to score a stand-up fight.
    ============================================================ */
-var STORAGE_KEY = "tatami-v1";
+var STORAGE_KEY = "grappling-v1";
 var T = { paper:"#F4F5F8", card:"#FFFFFF", rule:"#2B3A57", ruleSoft:"#CBD2E0", ink:"#161B26",
           graphite:"#5A6070", red:"#C2402A", green:"#2E7D4F", amber:"#B07A1E" };
 
@@ -211,8 +211,8 @@ function geolocate(){
 /* ---------- header / tabs ---------- */
 function header(home){
   return '<header class="hd"><div class="in">'+
-    '<div><div class="disp" style="font-size:30px;font-weight:700;line-height:1">Tatami</div>'+
-    '<div class="mono" style="font-size:11px;opacity:.75;margin-top:4px">THE ROLL IS THE ROUND · THE MAT IS THE LAB</div></div>'+
+    '<div><div class="disp" style="font-size:30px;font-weight:700;line-height:1">Grappling</div>'+
+    '<div class="mono" style="font-size:11px;opacity:.75;margin-top:4px">MEASURE YOUR ROLLS · FIND YOUR LEAK</div></div>'+
     (home ? '<div style="text-align:right"><div class="mono" style="font-size:10px;opacity:.6">HOME GYM</div>'+
       '<div class="disp" style="font-size:16px;font-weight:600">'+esc(home)+'</div></div>' : '')+
     '</div></header>';

@@ -69,11 +69,12 @@ def test_every_page_offers_a_way_home():
     # minimal home link, not the shared nav/palette control (which would clutter the calm feed).
     # Self-contained surfaces that carry their OWN nav, not the shared home control: the efficiency
     # front door and its confession/lobby (checkit/about/halls — the .com door leads with the working
-    # tool, no shared nav by design, per the Domain Sort), the offline instrument apps (golf/tatami),
+    # tool, no shared nav by design, per the Domain Sort), the offline instrument apps (golf/grappling),
     # and the operator/sovereign/pastoral surfaces (playbook/plow/profile/situations). Declared here
     # rather than each carrying nh-home.js — the same treatment mesh.html/live.html already get.
     hidden = {"mesh.html", "live.html", "checkit.html", "about.html", "halls.html", "golf.html",
-              "tatami.html", "playbook.html", "plow.html", "profile.html", "situations.html"}
+              "grappling.html", "console.html", "playbook.html", "plow.html", "profile.html",
+              "situations.html"}
     missing = [f.name for f in SITE.glob("*.html")
                if f.name != "index.html" and f.name not in hidden
                and "nh-home.js" not in f.read_text(encoding="utf-8")]
@@ -122,8 +123,8 @@ def test_the_palette_reaches_every_public_page():
     excused = {"index.html", "keep.html", "ask.html", "encyclopedia.html", "mesh.html", "live.html",
                # self-contained surfaces, reached by direct URL / their own nav, not the palette: the
                # efficiency front door + confession + lobby, the offline instruments, the operator pages
-               "checkit.html", "about.html", "halls.html", "golf.html", "tatami.html",
-               "playbook.html", "plow.html", "profile.html", "situations.html"}
+               "checkit.html", "about.html", "halls.html", "golf.html", "grappling.html",
+               "console.html", "playbook.html", "plow.html", "profile.html", "situations.html"}
     unreachable = sorted(
         p.name for p in SITE.glob("*.html") if p.name not in listed and p.name not in excused)
     assert not unreachable, f"no way to reach: {unreachable} (list them or excuse them by name)"

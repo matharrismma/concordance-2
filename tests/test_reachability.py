@@ -43,6 +43,9 @@ AGENT_ONLY = {
     "/steward/cost-destroyed", "/study", "/study_find", "/teachings", "/thread/verify",
     "/want", "/works/artifact", "/works/verify",
     "/health",
+    # A readiness probe for the voice faculty (ceiling ElevenLabs vs. sovereign floor) — read by the
+    # console's own script and by operators checking the voice is up, not a page a reader visits.
+    "/speak/health",
     # The six MCP profile mounts (task #123): an agent's client mounts one plane by URL;
     # a human page linking them would be a door drawn for someone who cannot walk through it.
     # The full /mcp is documented on the connect page; the profiles are documented beside it.
@@ -104,13 +107,14 @@ AGENT_ONLY = {
 UNLISTED_PAGES = {
     "offline.html",       # served by the service worker when the network is gone
     "404.html",
+    "console.html",       # the Console (the audio-native desk) — reached by voice / direct URL / home-screen install, an E-Ink-first tool, not a page on the public witness nav
     "keep.html",          # the operator's own surface, noindex — a public list is not its place
     "encyclopedia.html",  # a redirect stub onto characters.html; a second door to one room
     "ask.html",           # the landing's predecessor, kept for old links
     "profile.html",       # the opt-in sovereign keeping (ez-login) — reached by direct URL / the keeping flow, not the public nav
     "golf.html",          # Gate Golf — the founder's N=1 instrument (NarrowFairway), a self-contained offline tool; reached by direct URL / home-screen install, not the public nav
-    "tatami.html",        # Tatami — the grappling/MMA hall, the same engine as golf.html applied to fight sports; a self-contained offline tool reached by direct URL / home-screen install, not the public nav
-    "halls.html",         # The Halls — the lobby that lists the halls (golf, tatami, and what's coming); reached by direct URL, a front door for the instruments line, not the main witness-site nav
+    "grappling.html",     # Grappling — the grappling/MMA hall (internal codename tatami), the same engine as golf.html applied to fight sports; a self-contained offline tool reached by direct URL / home-screen install, not the public nav
+    "halls.html",         # The Halls — the lobby that lists the halls (golf, grappling, and what's coming); reached by direct URL, a front door for the instruments line, not the main witness-site nav
     "checkit.html",       # the .com efficiency front door (the working auditor) — the pending homepage per the Domain Sort; reached at /checkit during review, and served at / on the secular surface once the flip lands
     "about.html",         # the confession, whole (Domain Sort: the declaration lives at /about + /identity). Linked from checkit.html's footer as the CLEAN url /about, which the static link-checker (html hrefs only) cannot see — hence declared, same limit as /unchecked/answer
     "playbook.html",      # the Playbook surface — operator/agent authoring, not the public nav

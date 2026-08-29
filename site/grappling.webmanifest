@@ -1,0 +1,11 @@
+{
+  "name": "Grappling",
+  "short_name": "Grappling",
+  "description": "A training tool for grappling & MMA. Measure your rolls, find your leak, filter the advice that fits — offline, private, yours.",
+  "start_url": "/grappling.html",
+  "scope": "/grappling.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F5F8",
+  "theme_color": "#2B3A57"
+}
