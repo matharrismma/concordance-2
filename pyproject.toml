@@ -19,6 +19,8 @@ dependencies = []
 [project.optional-dependencies]
 math = ["sympy", "scipy", "numpy"]
 signing = ["cryptography"]      # Ed25519 seal attestations (optional, lazy)
+pdf = ["pypdf"]                 # robust PDF text extraction for Console intake (optional, lazy — the
+                                # stdlib floor handles simple text PDFs; pypdf covers embedded/CID fonts)
 schema = ["jsonschema"]         # full packet validation; without it, the sovereign structural fallback runs
 web = ["fastapi", "uvicorn"]
 dev = ["pytest>=8", "coverage>=7"]

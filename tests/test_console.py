@@ -111,3 +111,35 @@ def test_intake_keeps_the_location_not_the_blob():
 def test_intake_requires_a_location():
     a = console.intake_artifact(source_location="   ")
     assert not a["ok"] and "location" in a["error"].lower()
+
+
+_MINI_PDF = (b"%PDF-1.4\n"
+             b"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
+             b"2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n"
+             b"3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 300 200]/Contents 4 0 R>>endobj\n"
+             b"4 0 obj<</Length 60>>\nstream\n"
+             b"BT /F1 18 Tf 20 120 Td (Sovereign PDF text extraction works) Tj ET\n"
+             b"endstream endobj\ntrailer<</Root 1 0 R>>\n%%EOF")
+
+
+def test_pdf_intake_extracts_text_and_keeps_the_location_not_the_blob():
+    """A dropped PDF's TEXT is extracted (sovereign stdlib floor, or pypdf if present) and the bytes are
+    discarded — the card keeps the LOCATION and the usable text, never the blob."""
+    from concordance import pdf_extract
+    assert "Sovereign PDF text extraction works" in pdf_extract.text(_MINI_PDF)
+    a = console.intake_artifact(source_location="/sd/docs/note.pdf", pdf_bytes=_MINI_PDF)
+    assert a["ok"]
+    art = a["artifact"]
+    assert art["artifact_kind"] == "pdf"
+    assert "Sovereign PDF text extraction works" in art["extracted_text"]
+    assert art["source_location"] == "/sd/docs/note.pdf"       # the location is kept
+    assert len(art["sha256"]) == 64                            # the source is hashed for identity
+    assert "pdf_bytes" not in art and "blob" not in art        # the blob is never kept
+
+
+def test_pdf_extract_returns_empty_not_garbage_on_a_non_pdf():
+    """Honest emptiness, never noise: a non-PDF or an unreadable/scanned PDF yields "" — the location
+    is still kept, and the person can dictate a description."""
+    from concordance import pdf_extract
+    assert pdf_extract.text(b"this is plainly not a pdf") == ""
+    assert pdf_extract.text(b"") == ""

@@ -1028,11 +1028,23 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import console as _console
         intake = body.get("intake")
         if isinstance(intake, dict):
+            # A PDF may be sent as base64 for TEXT extraction only — we extract, then discard the bytes
+            # (we keep the location + the usable text, never the blob). Capped so intake stays light.
+            pdf_bytes = None
+            b64 = intake.get("pdf_b64")
+            if isinstance(b64, str) and b64:
+                import base64 as _b64
+                try:
+                    pdf_bytes = _b64.b64decode(b64)
+                except Exception:  # noqa: BLE001
+                    pdf_bytes = None
+                if pdf_bytes and len(pdf_bytes) > 12_000_000:
+                    return _err(413, "file too large to extract here — keep it on a drive and give the location")
             r = _console.intake_artifact(
                 source_location=str(intake.get("source_location") or ""),
                 kind=str(intake.get("kind") or "file"), title=str(intake.get("title") or ""),
                 extracted_text=str(intake.get("extracted_text") or ""),
-                sha256=str(intake.get("sha256") or ""))
+                sha256=str(intake.get("sha256") or ""), pdf_bytes=pdf_bytes)
             return _ok(r) if r.get("ok") else _err(400, r.get("error") or "a source location is required")
         text = str(body.get("text") or "").strip()
         if not text:

@@ -287,13 +287,28 @@ def dispatch(text: str, config: Any, *, owner: Optional[str] = None,
 # ── INTAKE — accept anything; keep the LOCATION and the usable form, never the blob ──────────────
 def intake_artifact(*, source_location: str, kind: str = "file", title: str = "",
                     extracted_text: str = "", sha256: str = "",
+                    pdf_bytes: Optional[bytes] = None,
                     at: Optional[str] = None) -> Dict[str, Any]:
     """Form a light, LOCATED artifact card from anything dropped in. The heavy source stays where it is
     (the location); we keep only what is usable and searchable. 'We don't need the image, we need the
-    image location.' Extraction (OCR / PDF text) happens at the caller/edge; this shapes the card."""
+    image location.' For a PDF we extract its TEXT here and then DISCARD the bytes — we keep the location
+    and the usable text, never the blob. Extraction is best-effort and honest: a scanned/image PDF (or an
+    encoding the floor can't read) yields no text, and the card still points to where the source lives."""
     loc = (source_location or "").strip()
     if not loc:
         return {"ok": False, "error": "a source location is required (we keep the location, not the blob)"}
+    if pdf_bytes:
+        try:
+            import hashlib
+            from . import pdf_extract
+            sha256 = sha256 or hashlib.sha256(pdf_bytes).hexdigest()
+            if not (extracted_text or "").strip():
+                extracted_text = pdf_extract.text(pdf_bytes)
+            kind = "pdf"
+        except Exception:  # noqa: BLE001 — intake must never crash on a bad or huge file
+            pass
+        finally:
+            pdf_bytes = None  # the blob is never kept
     title = (title or "").strip() or (loc.rsplit("/", 1)[-1] or loc)[:120]
     card = {
         "kind": "artifact",

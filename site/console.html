@@ -157,20 +157,30 @@
     talk.addEventListener('click', function(){ line.focus(); });
   }
 
-  // ── Intake — keep the LOCATION and the usable form, never the blob. ──
+  // ── Intake — keep the LOCATION and the usable form, never the blob. A PDF's TEXT is extracted
+  // server-side (its bytes sent once for reading, never stored); everything else keeps the location. ──
   var intake=document.getElementById('intake'), fileI=document.getElementById('file'), locI=document.getElementById('locpath');
-  function bringIn(name, kind){ intake.classList.add('has'); locI.value = locI.value || name; locI.focus();
-    var say='Bring it in: '+name+'. Where does the source live? Confirm the location, then say a note to describe it.';
+  var _file=null;                 // the pending File, so a PDF's bytes can be read for text extraction
+  function isPdf(f, name){ name=(name||(f&&f.name)||''); return name.toLowerCase().slice(-4)==='.pdf' || (f&&f.type==='application/pdf'); }
+  function bringIn(file, name, kind){ _file=file||null; intake.classList.add('has'); locI.value = locI.value || name; locI.focus();
+    var say='Bring it in: '+name+(isPdf(file,name)?'. I will read its text once you confirm.':'')+' Where does the source live? Confirm, then say a note.';
     render({kind:'intake', headline:'Bring it in', spoken:say, caption:say}); }
-  fileI.addEventListener('change', function(){ if(fileI.files[0]) bringIn(fileI.files[0].name, (fileI.files[0].type||'file')); });
+  fileI.addEventListener('change', function(){ var f=fileI.files[0]; if(f) bringIn(f, f.name, (f.type||'file')); });
   ['dragover','dragenter'].forEach(function(ev){ intake.addEventListener(ev,function(e){ e.preventDefault(); intake.classList.add('over'); }); });
   ['dragleave','drop'].forEach(function(ev){ intake.addEventListener(ev,function(e){ e.preventDefault(); intake.classList.remove('over'); }); });
-  intake.addEventListener('drop', function(e){ var f=e.dataTransfer && e.dataTransfer.files[0]; if(f) bringIn(f.name, (f.type||'file')); });
-  window.addEventListener('paste', function(e){ var it=e.clipboardData && e.clipboardData.items; if(!it) return; for(var i=0;i<it.length;i++){ if(it[i].kind==='file'){ var f=it[i].getAsFile(); if(f) bringIn(f.name||'pasted-image', (f.type||'image')); } } });
-  locI && locI.addEventListener('keydown', function(e){ if(e.key==='Enter' && locI.value.trim()){
-    fetch(API+'/console',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({intake:{source_location:locI.value.trim(), kind:'file'}})})
-      .then(function(r){return r.json();}).then(function(r){ if(r.artifact){ var say='Kept the location: '+r.artifact.title+'. Say a note to describe what it is.'; render({kind:'artifact', headline:'Located', spoken:say, caption:say}); } }).catch(function(){});
-  }});
+  intake.addEventListener('drop', function(e){ var f=e.dataTransfer && e.dataTransfer.files[0]; if(f) bringIn(f, f.name, (f.type||'file')); });
+  window.addEventListener('paste', function(e){ var it=e.clipboardData && e.clipboardData.items; if(!it) return; for(var i=0;i<it.length;i++){ if(it[i].kind==='file'){ var f=it[i].getAsFile(); if(f) bringIn(f, f.name||'pasted-image', (f.type||'image')); } } });
+  function sendIntake(loc, b64){ var payload={source_location:loc, kind:(b64?'pdf':'file')}; if(b64) payload.pdf_b64=b64;
+    fetch(API+'/console',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({intake:payload})})
+      .then(function(r){return r.json();}).then(function(r){ if(!r.artifact) return; var a=r.artifact, n=(a.extracted_text||'').length;
+        var say = n>16 ? ('Kept '+a.title+' — read '+n+' characters of its text. Ask me about it, or add a note.')
+                       : ('Kept the location: '+a.title+'. No readable text found; say a note to describe it.');
+        render({kind:'artifact', headline:'Located', spoken:say, caption:(a.extracted_text ? (a.title+'\n\n'+a.extracted_text.slice(0,600)) : say)}); }).catch(function(){}); }
+  locI && locI.addEventListener('keydown', function(e){ if(e.key!=='Enter' || !locI.value.trim()) return; var loc=locI.value.trim();
+    if(_file && isPdf(_file)){ var rd=new FileReader();
+      rd.onload=function(){ var s=String(rd.result||''); var i=s.indexOf(','); sendIntake(loc, i>=0? s.slice(i+1):''); };
+      rd.onerror=function(){ sendIntake(loc, null); }; rd.readAsDataURL(_file); }
+    else { sendIntake(loc, null); } });
 })();
 </script>
 </body></html>
