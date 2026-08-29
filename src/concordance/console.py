@@ -95,23 +95,55 @@ def _frame(text: str) -> List[str]:
     return out
 
 
+# Title hygiene for the "what's next" threads. The keeping is a large, partly-OCR'd public-domain
+# corpus, so a few card titles are rough (mojibake, mid-sentence fragments, OCR garble). We do NOT
+# repair the stored titles — that would risk damaging the many LEGITIMATE unusual ones (acronyms like
+# FRS/CVSS, accents like Schrödinger, Hebrew prefixes like "Ben-", long descriptive shelf titles).
+# Instead we (a) hard-drop only the UNAMBIGUOUSLY broken from being offered, and (b) softly prefer
+# cleaner titles so a rough one only surfaces when nothing cleaner is as relevant. Selection, not repair.
+_FRAG_START = ("for ", "the ", "a ", "an ", "and ", "of ", "in ", "with ", "to ", "by ", "as ",
+               "that ", "this ", "from ", "but ", "or ")
+
+
+def _title_offerable(t: str) -> bool:
+    """Reject only the unambiguously broken: real mojibake, or a true lowercase sentence fragment."""
+    if "�" in t:
+        return False
+    low = t.lower()
+    return not (t[:1].islower() and any(low.startswith(f) for f in _FRAG_START))
+
+
+def _title_penalty(t: str) -> float:
+    """A soft roughness score so cleaner titles surface first — a preference, never a repair."""
+    p = 0.0
+    if len(t.split()) > 10:
+        p += 1.0                                        # a sentence, not a title
+    if t.rstrip().endswith((",", ";")):
+        p += 0.5
+    for tok in re.findall(r"[A-Za-z']{4,}", t):         # a mid-title no-vowel garble word (not an acronym)
+        s = re.sub(r"[^A-Za-z]", "", tok)
+        if len(s) >= 4 and not re.search(r"[aeiou]", s.lower()) and not s.isupper():
+            p += 0.5
+            break
+    return p
+
+
 def _threads_from_results(results: Any, frame: List[str]) -> List[Dict[str, str]]:
     """The 'what's next' threads are the OTHER cards the keeping surfaced for THEIR query — relevant by
-    construction (they matched their own words) and already in their frame. We rank them by how much
-    each title shares the person's vocabulary, so the most resonant is offered first; a stable sort
-    keeps the keeping's relevance order for ties. Found, never invented — corpus.connections gives only
-    alphabetical shelf-mates and structural spine links, which are not threads worth following."""
+    construction (they matched their own words) and already in their frame. Rank them by how much each
+    title shares the person's vocabulary (frame first), then prefer the cleaner title for ties. Found,
+    never invented; corpus.connections gives only alphabetical shelf-mates, which are not real threads."""
     fset = set(frame)
     scored = []
     for h in (results[1:] if isinstance(results, list) else []):
         if isinstance(h, dict):
             cid = (h.get("id") or "").strip()
             title = (h.get("title") or "").strip()
-            if cid and title:
+            if cid and title and _title_offerable(title):
                 ov = len(set(re.findall(r"[a-z]{3,}", title.lower())) & fset)
-                scored.append((ov, cid, title))
-    scored.sort(key=lambda x: x[0], reverse=True)
-    return [{"id": c, "title": t} for _, c, t in scored]
+                scored.append((ov, -_title_penalty(title), cid, title))
+    scored.sort(key=lambda x: (x[0], x[1]), reverse=True)   # frame overlap first, then cleaner title
+    return [{"id": c, "title": t} for _, _, c, t in scored]
 
 
 def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:

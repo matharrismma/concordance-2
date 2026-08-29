@@ -67,6 +67,24 @@ def test_the_coach_answers_in_their_frame_and_offers_a_choice_of_whats_next(monk
     assert "Your choice" in r["spoken"] and len(r["spoken"]) < 700   # short — speakable, LoRa-small
 
 
+def test_whats_next_prefers_clean_titles_and_drops_the_unambiguously_broken(monkeypatch):
+    """Title hygiene for 'what's next' in a partly-OCR'd corpus: mojibake and lowercase sentence-
+    fragments are dropped from the offers; among equally-relevant threads the cleaner title surfaces
+    first. We SELECT, never repair the stored title (legitimate acronyms/accents/prefixes are untouched)."""
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "search", "generated": False, "results": [
+            {"id": "card_ans", "title": "Making water safe", "snippet": "Boil one minute."},
+            {"id": "card_frag", "title": "for the use of unfiltered water a connec"},   # fragment -> dropped
+            {"id": "card_moji", "title": "Taste of the � water"},                   # mojibake -> dropped
+            {"id": "card_ocr", "title": "Taste of the Rh'cr Water"},                     # OCR garble -> penalized
+            {"id": "card_clean", "title": "Storing Water Safely"}]})                     # clean -> preferred
+    r = console.dispatch("how do I keep water safe", SEC)
+    threads = [n["label"] for n in r["next"] if n.get("ref")]
+    assert threads and threads[0] == "Storing Water Safely"        # cleaner title preferred over garble
+    assert "for the use of unfiltered water a connec" not in threads
+    assert not any("�" in l for l in threads)                 # mojibake never offered
+
+
 def test_an_honest_miss_stays_a_miss():
     monkeypatch = None
     from concordance import console as C
