@@ -1,0 +1,11 @@
+{
+  "name": "Music",
+  "short_name": "Music",
+  "description": "A practice tool for learning an instrument. Measure your sessions, find your leak, drill the fault that keeps tripping you, and filter the advice that fits — offline, private, yours.",
+  "start_url": "/music.html",
+  "scope": "/music.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6F3EC",
+  "theme_color": "#6B4423"
+}

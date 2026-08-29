@@ -115,6 +115,7 @@ UNLISTED_PAGES = {
     "profile.html",       # the opt-in sovereign keeping (ez-login) — reached by direct URL / the keeping flow, not the public nav
     "golf.html",          # Gate Golf — the founder's N=1 instrument (NarrowFairway), a self-contained offline tool; reached by direct URL / home-screen install, not the public nav
     "grappling.html",     # Grappling — the grappling/MMA hall (internal codename tatami), the same engine as golf.html applied to fight sports; a self-contained offline tool reached by direct URL / home-screen install, not the public nav
+    "music.html",         # Music — the instrument-practice hall (mandolin/guitar/fiddle…), the same engine as golf.html applied to practice; a self-contained offline tool reached by direct URL / home-screen install and from the Halls, not the public nav
     "halls.html",         # The Halls — the lobby that lists the halls (golf, grappling, and what's coming); reached by direct URL, a front door for the instruments line, not the main witness-site nav
     "checkit.html",       # the .com efficiency front door (the working auditor) — the pending homepage per the Domain Sort; reached at /checkit during review, and served at / on the secular surface once the flip lands
     "about.html",         # the confession, whole (Domain Sort: the declaration lives at /about + /identity). Linked from checkit.html's footer as the CLEAN url /about, which the static link-checker (html hrefs only) cannot see — hence declared, same limit as /unchecked/answer

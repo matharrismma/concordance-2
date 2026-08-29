@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6B4423">
+<title>Music — measure your practice, find your leak</title>
+<meta name="description" content="A practice tool for learning an instrument. Log your sessions, find the leak, drill the fault that keeps tripping you, and filter the advice that fits. Mandolin, guitar, fiddle, and more. Offline, private, yours.">
+<link rel="manifest" href="/music.webmanifest">
+<style>
+:root{
+  --paper:#F6F3EC; --card:#FFFFFF; --rule:#6B4423; --ruleSoft:#D8CBB8; --ink:#22190F;
+  --graphite:#6A5A46; --red:#B23A2A; --green:#2E7D4F; --amber:#A9781A;
+  --disp:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --body:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--body); background:var(--paper); color:var(--ink); min-height:100vh;
+  -webkit-text-size-adjust:100%; padding-bottom:env(safe-area-inset-bottom);}
+input,button,select,textarea{font-family:inherit; font-size:1rem}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--rule); outline-offset:2px}
+.disp{font-family:var(--disp); letter-spacing:.01em}
+.mono{font-family:var(--mono)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+header.hd{background:var(--rule); color:var(--paper); padding:18px 16px 14px}
+header.hd .in{max-width:680px; margin:0 auto; display:flex; align-items:baseline; justify-content:space-between}
+nav.tabs{background:var(--card); border-bottom:2px solid var(--rule); overflow-x:auto}
+nav.tabs .in{max-width:680px; margin:0 auto; display:flex}
+nav.tabs button{flex:1 0 auto; padding:12px 14px; border:none; background:transparent; color:var(--ink); font-weight:600; font-size:15px; white-space:nowrap}
+nav.tabs button[aria-selected="true"]{background:var(--rule); color:var(--paper)}
+main{max-width:680px; margin:0 auto; padding:12px 12px 72px}
+.pnl{background:var(--card); border:1.5px solid var(--rule); border-radius:6px; margin-bottom:14px; overflow:hidden}
+.pnl>.lab{font-family:var(--mono); text-transform:uppercase; letter-spacing:.06em; font-size:12px; font-weight:700; color:var(--paper); padding:6px 12px}
+.pnl>.bd{padding:12px}
+.muted{color:var(--graphite); font-size:14px}
+.tg{display:flex; border:1.5px solid var(--rule); border-radius:5px; overflow:hidden}
+.tg button{flex:1; padding:10px 0; border:none; background:var(--card); color:var(--ink); font-weight:600; font-size:14px}
+.tg button[aria-pressed="true"]{background:var(--rule); color:var(--paper)}
+.field{width:100%; padding:10px 12px; font-size:16px; border:1.5px solid var(--rule); border-radius:5px; background:var(--card); color:var(--ink)}
+.field.soft{border:1px solid var(--ruleSoft); font-size:14px}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.numblk label{font-size:11px; color:var(--graphite)}
+.chip{display:inline-flex; align-items:center; gap:5px; background:#EFE7D8; border:1px solid var(--ruleSoft); border-radius:14px; padding:3px 6px 3px 10px; margin:3px 4px 0 0; font-size:13px}
+.chip button{border:none; background:none; color:var(--red); font-size:13px; padding:0 2px; line-height:1}
+.cta{font-family:var(--disp); font-size:18px; font-weight:700; width:100%; padding:13px 0; background:var(--rule); color:var(--paper); border:none; border-radius:5px}
+.cta[disabled]{background:var(--ruleSoft); cursor:default}
+.findbtn{font-family:var(--mono); text-transform:uppercase; letter-spacing:.05em; font-size:12px; font-weight:600; padding:8px 12px; border:1.5px solid var(--rule); border-radius:5px; background:var(--card); color:var(--rule)}
+.badge{font-family:var(--mono); font-size:9px; font-weight:600; color:var(--paper); border-radius:2px; padding:2px 5px; margin-left:6px; vertical-align:middle}
+.logitem{background:var(--card); border:1px solid var(--ruleSoft); border-radius:6px; padding:10px 12px; margin-bottom:8px}
+.del{border:none; background:none; color:var(--red); font-size:12px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+/* ============================================================
+   MUSIC — a practice instrument for learning an instrument.
+   The same engine as Golf / Grappling, applied to music practice:
+     a PRACTICE SESSION is the round · your PRACTICE SPACE is the LAB · playing OUT (jams, stage) is the FIELD.
+   Machines: CLASSIFY (your measured leak) · GATE (the fault that trips you twice) · LAB (control trend)
+             · REPERTOIRE (what you can actually play clean) · GATHER (advice) · FILTER (advice by fit).
+   One community, one kernel — this hall copies the golf machine, with practice metrics.
+   Storage = localStorage · render = vanilla · offline, private, yours.
+   Playing OUT venues are a plain text field here; a map of jams/open-mics is a planned add (like golf's).
+   ============================================================ */
+var STORAGE_KEY = "music-v1";
+var T = { paper:"#F6F3EC", card:"#FFFFFF", rule:"#6B4423", ruleSoft:"#D8CBB8", ink:"#22190F",
+          graphite:"#6A5A46", red:"#B23A2A", green:"#2E7D4F", amber:"#A9781A" };
+
+function norm(s){ return (s||"").trim().toLowerCase(); }
+function avg(a){ return a.length ? a.reduce(function(x,y){return x+y;},0)/a.length : null; }
+function fmt(n,d){ if(d===undefined)d=1; return (n===null||n===undefined||isNaN(n)) ? "—" : n.toFixed(d); }
+function sgn(n,d){ if(n===null||n===undefined||isNaN(n)) return "—"; return (n>=0?"+":"")+n.toFixed(d===undefined?1:d); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function num(v){ v=Number(v); return isNaN(v)?0:v; }
+
+/* the performance number the LAB trends: clean run-throughs minus flubbed ones. Higher is better.
+   Simple and checkable — flubbed = run-throughs that broke down = max(0, runs − clean). */
+function flubbed(s){ return Math.max(0, num(s.runs)-num(s.clean)); }
+function control(s){ return num(s.clean) - flubbed(s); }
+
+var INSTRUMENTS = [["mandolin","Mandolin"],["guitar","Guitar"],["fiddle","Fiddle / Violin"],["banjo","Banjo"],["piano","Piano"],["voice","Voice"],["other","Other"]];
+function instLabel(k){ for(var i=0;i<INSTRUMENTS.length;i++) if(INSTRUMENTS[i][0]===k) return INSTRUMENTS[i][1]; return k; }
+
+/* the leaks a tip can address — keys match classify() so a measured profile pulls the advice that fits it */
+var LEAKS = [["technique","Technique / fingering"],["timing","Timing / rhythm"],["speed","Speed / tempo"],["tone","Tone / dynamics"],["memory","Memory / repertoire"],["general","General"]];
+function leakLabel(k){ for(var i=0;i<LEAKS.length;i++) if(LEAKS[i][0]===k) return LEAKS[i][1]; return k; }
+function tagToLeak(tag){ return tag==="The Breakdown"?"technique":tag==="Stuck Slow"?"speed":tag==="Ragged Time"?"timing":null; }
+
+/* ---------- storage ---------- */
+function loadData(){
+  try{ var v=localStorage.getItem(STORAGE_KEY); if(v) return JSON.parse(v); }catch(e){}
+  return { settings:null, sessions:[] };
+}
+function persist(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); state.saveErr=false; }
+  catch(e){ state.saveErr=true; }
+}
+
+/* ---------- state ---------- */
+function newDraft(){
+  return { isHome:true, venue:"", date:todayISO(),
+           instrument:(typeof state!=="undefined" && state.data.settings ? state.data.settings.instrument : "mandolin"),
+           minutes:"", runs:"", clean:"", tempo:"", steady:true,
+           stumbles:[], stumbleInput:"", note:"" };
+}
+var state = { data:loadData(), tab:"session", draft:newDraft(), saveErr:false,
+              setupName:"", setupInst:"mandolin" };
+if(!state.data.tunes)  state.data.tunes  = [];   // repertoire log: {id, name, clean, date}
+if(!state.data.advice) state.data.advice = [];   // the corpus: {id, leak, text, url, source, helped, added}
+state.tuneForm   = {name:"", clean:true};
+state.adviceForm = {leak:"technique", text:"", url:"", source:""};
+
+/* ---------- analysis (mirrors the golf/grappling machine: home 3-avg vs previous, out 5-avg, the gap) ---------- */
+function analyze(sessions, homeName){
+  var sorted = sessions.slice().sort(function(a,b){ return a.date<b.date?-1:a.date>b.date?1:a.id-b.id; });
+  var home=[], away=[], firstSeen={};
+  sorted.forEach(function(s){
+    if(s.isHome) home.push(s);
+    else { away.push(s); var k=norm(s.venue); if(k && !(k in firstSeen)) firstSeen[k]=s.id; }
+  });
+  var hc = home.map(control), readings=[];
+  for(var i=5;i<home.length;i++){
+    var cur=(hc[i]+hc[i-1]+hc[i-2])/3, prev=(hc[i-3]+hc[i-4]+hc[i-5])/3;
+    readings.push({cur:cur, prev:prev, delta:cur-prev});   // higher control is better → delta>0 is progress
+  }
+  var streak=0;
+  for(var j=readings.length-1;j>=0;j--){ if(readings[j].delta<=0) streak++; else break; }
+  var last=readings[readings.length-1]||null;
+  var homeCur3  = home.length>=3 ? (hc[hc.length-1]+hc[hc.length-2]+hc[hc.length-3])/3 : null;
+  var homePrev3 = home.length>=6 ? (hc[hc.length-4]+hc[hc.length-5]+hc[hc.length-6])/3 : null;
+  var aw=away.map(control);
+  var away5 = away.length>=5 ? aw.slice(-5).reduce(function(x,y){return x+y;},0)/5 : null;
+  var gap = (away5!==null && homeCur3!==null) ? homeCur3-away5 : null;
+  return {sorted:sorted, home:home, away:away, readings:readings, streak:streak, last:last,
+          homeCur3:homeCur3, homePrev3:homePrev3, away5:away5, gap:gap, firstSeen:firstSeen};
+}
+
+/* recurring stumbles — the gate: a passage that breaks you down twice is a hole, not bad luck */
+function recurringStumbles(sessions){
+  var by={};
+  sessions.forEach(function(s){ (s.stumbles||[]).forEach(function(nm){ var k=norm(nm); if(!k) return; by[k]=by[k]||{name:nm,c:0}; by[k].c++; }); });
+  return Object.keys(by).map(function(k){return by[k];}).sort(function(a,b){return b.c-a.c;});
+}
+function anyStumblesLogged(sessions){ return sessions.some(function(s){ return (s.stumbles||[]).length; }); }
+
+/* tempo trend — later sessions vs earlier (BPM you actually reached, honestly) */
+function tempoTrend(sessions){
+  var t=sessions.map(function(s){return num(s.tempo);}).filter(function(x){return x>0;});
+  if(t.length<4) return null;
+  var half=Math.floor(t.length/2);
+  return avg(t.slice(half)) - avg(t.slice(0,half));
+}
+
+/* ---------- repertoire (chart your game) ---------- */
+function tuneStats(){
+  var by={}; (state.data.tunes||[]).forEach(function(m){ var k=norm(m.name); (by[k]=by[k]||{name:m.name, n:0, f:0}); by[k].n++; if(m.clean) by[k].f++; });
+  return Object.keys(by).map(function(k){ var r=by[k]; r.rate=r.n?r.f/r.n:0; return r; }).sort(function(a,b){ return b.f-a.f || b.n-a.n; });
+}
+
+/* ============================================================ render ============================================================ */
+var app = document.getElementById("app");
+
+/* ---------- header / tabs ---------- */
+function header(home){
+  return '<header class="hd"><div class="in">'+
+    '<div><div class="disp" style="font-size:30px;font-weight:700;line-height:1">Music</div>'+
+    '<div class="mono" style="font-size:11px;opacity:.8;margin-top:4px">MEASURE YOUR PRACTICE · FIND YOUR LEAK</div></div>'+
+    (home ? '<div style="text-align:right"><div class="mono" style="font-size:10px;opacity:.7">INSTRUMENT</div>'+
+      '<div class="disp" style="font-size:16px;font-weight:600">'+esc(home)+'</div></div>' : '')+
+    '</div></header>';
+}
+function tabsView(){
+  var items=[["session","New session"],["inst","Read"],["game","Repertoire"],["advice","Advice"],["log","Log"]];
+  return '<nav class="tabs"><div class="in">'+items.map(function(it){
+    return '<button data-act="tab" data-k="'+it[0]+'" aria-selected="'+(state.tab===it[0])+'">'+it[1]+'</button>';
+  }).join("")+'</div></nav>';
+}
+
+/* ---------- setup ---------- */
+function setupView(){
+  var opts=INSTRUMENTS.map(function(d){ return '<option value="'+d[0]+'"'+(state.setupInst===d[0]?" selected":"")+'>'+d[1]+'</option>'; }).join("");
+  var canLock = state.setupInst && state.setupInst.length>0;
+  return '<main style="padding:20px 16px 64px">'+
+    '<h2 class="disp" style="font-size:24px;margin:0 0 4px">Pick up your instrument</h2>'+
+    '<p style="color:'+T.graphite+';font-size:14px;margin:0 0 16px">Your practice space is the lab. Every read of whether you’re improving runs off your own honest sessions — you against your own past, never a leaderboard.</p>'+
+    '<label class="mono" style="font-size:11px;color:'+T.graphite+'">YOUR INSTRUMENT</label>'+
+    '<select id="setupInst" class="field" style="margin-top:4px">'+opts+'</select>'+
+    '<label class="mono" style="font-size:11px;color:'+T.graphite+';display:block;margin-top:16px">A NAME FOR YOUR PRACTICE SPACE (optional)</label>'+
+    '<input id="setupName" class="field" style="margin-top:4px" placeholder="e.g. the back porch" value="'+esc(state.setupName)+'">'+
+    '<button class="cta" data-act="lock" style="margin-top:20px"'+(canLock?"":" disabled")+'>Start the lab</button>'+
+    '<p class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:14px">Nothing leaves this device. Add a session after each practice and the read builds itself — three sessions before the first honest classification.</p>'+
+    '</main>';
+}
+
+/* ---------- new session ---------- */
+function numField(id,label,val,ph){
+  return '<div class="numblk"><label class="mono">'+label+'</label>'+
+    '<input id="'+id+'" type="number" inputmode="numeric" min="0" class="field mono" style="margin-top:3px" placeholder="'+(ph||"")+'" value="'+esc(val)+'"></div>';
+}
+function sessionView(){
+  var set=state.data.settings, dr=state.draft;
+  var iopts=INSTRUMENTS.map(function(d){ return '<option value="'+d[0]+'"'+(dr.instrument===d[0]?" selected":"")+'>'+d[1]+'</option>'; }).join("");
+  var canSave = num(dr.runs)>=1;
+  var out = !dr.isHome ? (
+    '<div style="margin-top:10px"><label class="mono" style="font-size:11px;color:'+T.graphite+'">WHERE — jam, open mic, lesson, stage</label>'+
+    '<input id="venue" class="field" style="margin-top:4px" placeholder="Where did you play?" value="'+esc(dr.venue)+'"></div>') : "";
+  var stumbleChips = dr.stumbles.map(function(nm,i){ return '<span class="chip">'+esc(nm)+'<button data-act="delStumble" data-i="'+i+'">×</button></span>'; }).join("");
+  return ''+
+    '<div class="tg" style="margin-bottom:10px">'+
+      '<button data-act="toggleHome" data-v="true" aria-pressed="'+(dr.isHome)+'">Practice — lab</button>'+
+      '<button data-act="toggleHome" data-v="false" aria-pressed="'+(!dr.isHome)+'">Played out — field</button></div>'+
+    out+
+    '<div class="grid2" style="margin-top:10px">'+
+      '<div class="numblk"><label class="mono">DATE</label><input id="date" type="date" class="field mono" style="margin-top:3px" value="'+esc(dr.date)+'"></div>'+
+      '<div class="numblk"><label class="mono">INSTRUMENT</label><select id="inst" class="field soft" style="margin-top:3px">'+iopts+'</select></div>'+
+    '</div>'+
+    '<div class="pnl" style="margin-top:12px"><div class="lab" style="background:'+T.rule+'">THE SESSION</div><div class="bd">'+
+      '<div class="grid2">'+numField("runs","RUN-THROUGHS","",dr.runs)+numField("clean","CLEAN OF THEM","",dr.clean)+'</div>'+
+      '<div class="grid2" style="margin-top:8px">'+numField("tempo","TEMPO REACHED (BPM)","",dr.tempo)+numField("minutes","MINUTES (optional)","",dr.minutes)+'</div>'+
+      '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">A run-through is playing a piece start to finish. Clean = you got through without a breakdown. Honest counts, not exact — the trend is what matters.</div>'+
+    '</div></div>'+
+    '<div class="pnl"><div class="lab" style="background:'+T.rule+'">WHAT TRIPPED YOU — the passages that broke down (optional, but this is where the gate lives)</div><div class="bd">'+
+      '<div style="display:flex;gap:8px"><input id="stumbleInput" class="field" placeholder="e.g. the B-part, bar 12, the fast triplet run" value="'+esc(dr.stumbleInput)+'">'+
+        '<button class="findbtn" data-act="addStumble" style="white-space:nowrap">Add</button></div>'+
+      (stumbleChips?'<div style="margin-top:6px">'+stumbleChips+'</div>':"")+
+      '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:6px">Name the spot that fell apart. A passage that trips you twice becomes a flagged hole — the thing to slow down and drill.</div>'+
+    '</div></div>'+
+    '<input id="note" class="field" placeholder="One note (optional) — what you’re working on" value="'+esc(dr.note)+'" style="margin-bottom:12px">'+
+    '<button class="cta" data-act="save"'+(canSave?"":" disabled")+'>Log the session</button>';
+}
+
+/* ---------- classify: the measured profile + probable best focus (simple, transparent, auditable) ---------- */
+function profile(){
+  var ss=state.data.sessions;
+  var runs=ss.reduce(function(a,s){return a+num(s.runs);},0)||0;
+  var clean=ss.reduce(function(a,s){return a+num(s.clean);},0);
+  var flub=ss.reduce(function(a,s){return a+flubbed(s);},0);
+  var rec=recurringStumbles(ss).filter(function(x){return x.c>=2;});
+  return { n:ss.length, runs:runs, clean:clean, flub:flub,
+           avgControl: ss.length?avg(ss.map(control)):null,
+           cleanRate: runs?clean/runs:null,
+           flubPer: ss.length?flub/ss.length:null,
+           tempoTrend: tempoTrend(ss),
+           recurring: rec };
+}
+function classify(p){
+  if(p.n<3) return {tag:"Collecting", tone:T.graphite, why:p.n+"/3 sessions before the read — the classification is MEASURED, never guessed. Play.", focus:null};
+  var leaks=[];
+  if(p.cleanRate!==null) leaks.push({cost:(1-p.cleanRate)*1.0, tag:"The Breakdown",
+    why:"You break down on "+Math.round((1-p.cleanRate)*100)+"% of your run-throughs — the piece isn’t solid yet.",
+    focus:"Slow it down until it’s clean, then inch the tempo up. Speed hides mistakes; slow reveals and fixes them. A clean slow pass beats a fast wreck every time."});
+  if(p.tempoTrend!==null) leaks.push({cost:Math.max(0,-p.tempoTrend)*0.05, tag:"Stuck Slow",
+    why:"Your reached tempo isn’t rising ("+sgn(p.tempoTrend,0)+" BPM across your log) — you’re holding, not climbing.",
+    focus:"A metronome ladder: set the speed you can play clean, then +3 BPM only when a pass is spotless. Small, honest steps beat lunging for speed."});
+  if(p.flubPer!==null) leaks.push({cost:Math.max(0,(p.flubPer-1))*0.4, tag:"Ragged Time",
+    why:"You’re logging "+fmt(p.flubPer)+" breakdowns a session — the time is wobbling under you.",
+    focus:"Practice with a metronome or a drone, even slow. Count out loud. Rhythm is the floor everything else stands on; steady time carries a wrong note, ragged time drops a right one."});
+  leaks.sort(function(a,b){ return b.cost-a.cost; });
+  var top=leaks[0];
+  if(!top || top.cost<0.35) return {tag:"Playing Clean", tone:T.green, why:"No single leak — you get through clean and your tempo is climbing. Nothing bleeding.",
+    focus:"Add repertoire and polish tone. You improve by inches now — learn a new tune, and make the ones you own sing, not just survive."};
+  return {tag:top.tag, tone:top.cost>0.6?T.red:T.amber, why:top.why, focus:top.focus};
+}
+function pill(label,val){ return '<span style="background:#EFE7D8;border:1px solid '+T.ruleSoft+';border-radius:12px;padding:3px 9px;white-space:nowrap"><span class="mono" style="font-size:9px;color:'+T.graphite+'">'+label+'</span> <span class="mono" style="font-size:13px;font-weight:600">'+val+'</span></span>'; }
+function profileView(){
+  var p=profile(), c=classify(p), facts="";
+  if(p.avgControl!==null) facts+=pill("Control/session", sgn(p.avgControl));
+  if(p.cleanRate!==null) facts+=pill("Clean rate", Math.round(p.cleanRate*100)+"%");
+  if(p.flubPer!==null) facts+=pill("Breakdowns/session", fmt(p.flubPer));
+  if(p.tempoTrend!==null) facts+=pill("Tempo trend", sgn(p.tempoTrend,0)+" BPM");
+  return panel("READ — classified by your measurements ("+p.n+" session"+(p.n!==1?"s":"")+")", c.tone,
+    (facts?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">'+facts+'</div>':"")+
+    '<div class="disp" style="font-size:20px;font-weight:700;color:'+c.tone+'">'+c.tag+'</div>'+
+    (c.why?'<div style="font-size:14px;margin-top:2px">'+c.why+'</div>':"")+
+    (c.focus?'<div style="margin-top:8px;padding:8px 10px;background:#F1EADB;border-left:3px solid '+c.tone+';border-radius:2px"><span class="mono" style="font-size:10px;color:'+T.graphite+'">PROBABLE BEST FOCUS</span><div style="font-size:14px;margin-top:2px">'+c.focus+'</div></div>':"")+
+    '<div class="mono" style="font-size:10px;color:'+T.graphite+';margin-top:8px">Measured, not guessed — every line is a number you can check. As more players are measured, “focus” becomes “what actually worked for players like you.”</div>');
+}
+
+/* ---------- filtered advice: the corpus, surfaced by measured FIT (not popularity) ---------- */
+function fittedAdviceView(){
+  var p=profile(); if(p.n<3) return "";
+  var all=state.data.advice||[]; if(!all.length) return "";
+  var c=classify(p), leak=tagToLeak(c.tag);
+  if(!leak) return panel("ADVICE FOR YOUR LEAK", T.graphite,
+    '<div style="font-size:14px">No single leak to match against — you’re Playing Clean. Browse the whole corpus in the Advice tab and polish by inches.</div>');
+  var pool=all.filter(function(x){return x.leak===leak;});
+  function rank(x){ return x.helped===true?0:(x.helped===false?2:1); }
+  pool=pool.slice().sort(function(a,b){ return rank(a)-rank(b) || b.id-a.id; });
+  var LK=esc(leakLabel(leak).toUpperCase());
+  if(!pool.length) return panel("ADVICE FOR YOUR LEAK — "+LK, c.tone,
+    '<div style="font-size:14px">Nothing gathered yet for <b>'+esc(leakLabel(leak))+'</b> — your measured leak. Add a tip for it in the Advice tab and it will surface right here.</div>');
+  var items=pool.slice(0,3).map(function(x){
+    var link=x.url?' <a href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer nofollow" class="mono" style="font-size:11px;color:'+T.rule+';font-weight:600">▶ watch/read →</a>':"";
+    var src=x.source?' <span class="mono" style="font-size:11px;color:'+T.graphite+'">— '+esc(x.source)+'</span>':"";
+    var mark=x.helped===true?'<span class="mono" style="font-size:10px;color:'+T.green+'">✓ worked for you</span>'
+            :x.helped===false?'<span class="mono" style="font-size:10px;color:'+T.red+'">✗ didn’t work</span>'
+            :'<span class="mono" style="font-size:10px;color:'+T.amber+'">untried</span>';
+    return '<div style="padding:8px 0;border-top:0.5px solid '+T.ruleSoft+'"><div style="font-size:14px">'+esc(x.text)+'</div>'+
+      '<div style="margin-top:4px">'+mark+src+link+'</div></div>';
+  }).join("");
+  var more=pool.length>3?'<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">+'+(pool.length-3)+' more for this leak in the Advice tab.</div>':"";
+  return panel("ADVICE FOR YOUR LEAK — "+LK, c.tone,
+    '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-bottom:2px">Surfaced because it’s tagged to your measured leak — <b>fit, not popularity</b>. Still quarantined; your practice decides.</div>'+
+    items+more);
+}
+
+/* ---------- read (the instruments panel) ---------- */
+function instrumentsView(){
+  var set=state.data.settings, a=analyze(state.data.sessions, set.homeGym);
+  var out = profileView() + fittedAdviceView();
+
+  // GATE — the recurring stumble
+  var rec=recurringStumbles(state.data.sessions).filter(function(x){return x.c>=2;});
+  var gateBody, gateTone;
+  if(!anyStumblesLogged(state.data.sessions)){ gateTone=T.graphite; gateBody='<div class="muted">No stumbles logged yet. Name what trips you on the session card and the recurring holes surface here.</div>'; }
+  else if(rec.length){ gateTone=T.red;
+    gateBody='<div style="font-size:15px;margin-bottom:6px">Tripped more than once by:</div>'+
+      rec.map(function(x){ return '<span class="chip" style="border-color:'+T.red+'">'+esc(x.name)+' <span class="mono" style="font-size:11px;color:'+T.red+'">×'+x.c+'</span></span>'; }).join("")+
+      '<div style="color:'+T.graphite+';font-size:13px;margin-top:8px">The same spot twice is a hole, not bad luck. Loop it slow, hands-alone if you must, until it stops being free.</div>'; }
+  else { gateTone=T.green; gateBody='<div style="font-size:15px">Nothing has tripped you twice. You’re not leaking the same way — hold that.</div>'; }
+  out += panel("GATE — the fault that keeps tripping you", gateTone, gateBody);
+
+  // LAB — home control trend
+  var verdict;
+  if(a.home.length<6) verdict={tone:T.graphite,head:"Collecting",text:a.home.length+"/6 practice sessions before the first reading. Play."};
+  else if(a.last.delta>0) verdict={tone:T.green,head:"Working",text:"Current 3-session control beat the previous by "+fmt(a.last.delta)+". Hold the plan."};
+  else if(a.streak>=2) verdict={tone:T.red,head:"Change the practice",text:"Two readings without progress. Change what you drill — the current focus isn’t moving the number."};
+  else verdict={tone:T.amber,head:"Change the drill",text:"Reading flat ("+sgn(a.last.delta)+"). Drill changes are cheap; a bigger change needs a second flat reading."};
+  var lab = bigPair(["CONTROL 3",sgn(a.homeCur3)],["PREVIOUS 3",sgn(a.homePrev3)])+
+    '<div style="margin-top:10px;padding:10px 12px;background:#F1EADB;border-left:3px solid '+verdict.tone+';border-radius:2px">'+
+      '<div class="disp" style="font-size:16px;font-weight:700;color:'+verdict.tone+'">'+verdict.head+'</div>'+
+      '<div style="font-size:14px;margin-top:2px">'+verdict.text+'</div></div>'+
+    (a.home.length>=3 ? spark(a.home.map(control)) : "")+
+    '<div class="mono" style="font-size:10px;color:'+T.graphite+';margin-top:6px">Control = clean run-throughs − flubbed, per session. Higher is better. You vs your own past — never a leaderboard.</div>';
+  out += panel("LAB — home 3-session average", T.rule, lab);
+
+  // FIELD — played out
+  var field;
+  if(a.away5===null) field='<div class="muted">'+a.away.length+'/5 played-out sessions (jams, open mics, stage). Validation only — no steering authority. The nerves of playing for people are the real test.</div>';
+  else field=bigPair(["OUT 5-AVG",sgn(a.away5)],["GAP vs LAB", a.gap===null?"—":sgn(a.gap)])+
+    (a.gap!==null?'<div style="font-size:13px;color:'+T.graphite+';margin-top:8px">Gap = practice-room inflation. Shrinking gap → your playing travels to the stage. Widening gap → you’re clean alone but it falls apart in front of people.</div>':"");
+  out += panel("FIELD — played-out 5-session average", T.rule, field);
+
+  return out;
+}
+function panel(label,tone,body){
+  return '<section class="pnl"><div class="lab" style="background:'+tone+'">'+label+'</div><div class="bd">'+body+'</div></section>';
+}
+function bigPair(a,b){
+  return '<div style="display:flex;gap:24px;align-items:baseline">'+
+    '<div><div class="mono" style="font-size:10px;color:'+T.graphite+'">'+a[0]+'</div>'+
+    '<div class="mono" style="font-size:34px;font-weight:600;line-height:1.1">'+a[1]+'</div></div>'+
+    '<div><div class="mono" style="font-size:10px;color:'+T.graphite+'">'+b[0]+'</div>'+
+    '<div class="mono" style="font-size:22px;font-weight:500;color:'+T.graphite+'">'+b[1]+'</div></div></div>';
+}
+function spark(series){
+  var w=260,h=44,pad=3, min=Math.min.apply(null,series), max=Math.max.apply(null,series), span=(max-min)||1;
+  function pt(v,i){ var x=pad+(i*(w-2*pad))/Math.max(1,series.length-1); var y=pad+(1-(v-min)/span)*(h-2*pad); return [x,y]; }
+  var poly=series.map(function(v,i){var p=pt(v,i);return p[0]+","+p[1];}).join(" ");
+  var dots=series.map(function(v,i){var p=pt(v,i);return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.2" fill="'+T.rule+'"/>';}).join("");
+  return '<svg width="'+w+'" height="'+h+'" style="margin-top:10px;display:block" aria-label="home control trend">'+
+    '<polyline points="'+poly+'" fill="none" stroke="'+T.rule+'" stroke-width="1.5"/>'+dots+'</svg>';
+}
+function badge(text,color){ return '<span class="badge" style="background:'+color+'">'+text+'</span>'; }
+
+/* ---------- repertoire (chart your game) ---------- */
+function gameView(){
+  var f=state.tuneForm, rows=tuneStats();
+  var form='<div class="pnl"><div class="lab" style="background:'+T.rule+'">REPERTOIRE — log a tune or a piece</div><div class="bd">'+
+    '<div style="display:flex;gap:8px;align-items:flex-end">'+
+      '<div style="flex:1"><label class="mono" style="font-size:11px;color:'+T.graphite+'">TUNE / PIECE / TECHNIQUE</label><input id="tuneName" class="field" style="margin-top:4px" placeholder="e.g. Blackberry Blossom, tremolo, G-run" value="'+esc(f.name)+'"></div>'+
+    '</div>'+
+    '<div class="tg" style="margin-top:8px">'+
+      '<button data-act="tuneFin" data-v="true" aria-pressed="'+(f.clean)+'">Clean ✓</button>'+
+      '<button data-act="tuneFin" data-v="false" aria-pressed="'+(!f.clean)+'">Broke down ✗</button></div>'+
+    '<button class="findbtn" data-act="addTune" style="margin-top:10px">Add</button>'+
+    '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">Log the tunes you run — clean or not. Your set list is the ones that actually land; a work-in-progress is one you keep attempting and dropping.</div>'+
+  '</div></div>';
+  var chart;
+  if(!rows.length){ chart='<div class="muted">No tunes logged yet. Add a few and your repertoire charts itself — what you own, what’s still coming.</div>'; }
+  else{
+    chart='<div class="pnl"><div class="lab" style="background:'+T.rule+'">YOUR SET LIST — what you can actually play clean</div><div class="bd">'+
+      rows.map(function(r){
+        var pct=Math.round(r.rate*100), barW=Math.max(2,r.rate*100);
+        var tone=r.rate>=0.6&&r.n>=3?T.green:(r.n>=4&&r.rate<0.25?T.amber:T.rule);
+        var flag = r.rate>=0.6&&r.n>=3 ? ' <span class="mono" style="color:'+T.green+';font-size:10px">set-ready</span>'
+                 : (r.n>=4&&r.rate<0.25 ? ' <span class="mono" style="color:'+T.amber+';font-size:10px">work in progress — slow it down</span>' : "");
+        return '<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;align-items:baseline">'+
+          '<span class="disp" style="font-size:15px;font-weight:600">'+esc(r.name)+flag+'</span>'+
+          '<span class="mono" style="font-size:13px">'+pct+'% <span style="color:'+T.graphite+';font-size:11px">('+r.f+'/'+r.n+')</span></span></div>'+
+          '<div style="position:relative;height:14px;background:#EFE7D8;border-radius:7px;margin-top:3px">'+
+            '<div style="position:absolute;left:0;width:'+barW+'%;top:0;bottom:0;background:'+tone+';border-radius:7px;opacity:.85"></div>'+
+          '</div></div>';
+      }).join("")+
+      '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:6px">Bar = clean rate. Sorted by clean runs — your most reliable tunes on top. Percentages are yours, measured, not a highlight reel.</div>'+
+      '</div></div>';
+  }
+  var recent=(state.data.tunes||[]).slice(-8).reverse();
+  var log = recent.length ? '<div class="pnl"><div class="lab" style="background:'+T.graphite+'">RECENT</div><div class="bd">'+
+    recent.map(function(m){ return '<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0"><span class="mono" style="font-size:13px">'+esc(m.name)+' · '+(m.clean?'<span style="color:'+T.green+'">clean</span>':'<span style="color:'+T.graphite+'">broke down</span>')+'</span>'+
+      '<button class="del" data-act="delTune" data-id="'+m.id+'">delete</button></div>'; }).join("")+'</div></div>' : "";
+  return form+chart+log;
+}
+
+/* ---------- the advice corpus: gathered, quarantined, tagged by leak · we link out, never rehost ---------- */
+function adviceView(){
+  var f=state.adviceForm;
+  var opts=LEAKS.map(function(l){ return '<option value="'+l[0]+'"'+(f.leak===l[0]?" selected":"")+'>'+l[1]+'</option>'; }).join("");
+  var form='<div class="pnl"><div class="lab" style="background:'+T.rule+'">GATHER ADVICE — a tip, and where it came from</div><div class="bd">'+
+    '<label class="mono" style="font-size:11px;color:'+T.graphite+'">WHICH LEAK IT ADDRESSES</label><br>'+
+    '<select id="adviceLeak" class="field soft" style="margin-top:4px;width:auto">'+opts+'</select>'+
+    '<textarea id="adviceText" class="field" style="margin-top:8px;min-height:64px;resize:vertical" placeholder="The technique or practice method, in the words you heard it — what to DO.">'+esc(f.text)+'</textarea>'+
+    '<input id="adviceUrl" class="field mono" style="margin-top:8px;font-size:12px" placeholder="Lesson / video link (optional) — we link out, never rehost" value="'+esc(f.url)+'">'+
+    '<input id="adviceSource" class="field" style="margin-top:8px" placeholder="Who taught it (optional) — give them the credit" value="'+esc(f.source)+'">'+
+    '<button class="findbtn" data-act="postAdvice" style="margin-top:10px">Add to the corpus</button>'+
+    '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">Everything here is <b style="color:'+T.amber+'">quarantined</b> — gathered, never proven. A tip proposes; your practice disposes. It counts for nothing until your own sessions say it works for <i>you</i>. We link to the teacher’s own video — we never re-host it.</div>'+
+    '</div></div>';
+  var items=(state.data.advice||[]).slice().reverse();
+  var list = items.length ? items.map(function(x){
+    var link = x.url ? '<a href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer nofollow" class="mono" style="font-size:12px;color:'+T.rule+';font-weight:600">▶ watch / read →</a>' : "";
+    var src  = x.source ? '<span class="mono" style="font-size:11px;color:'+T.graphite+'">— '+esc(x.source)+'</span>' : "";
+    var yes=x.helped===true, no=x.helped===false;
+    return '<div class="pnl"><div class="lab" style="background:'+T.amber+'">QUARANTINED · '+esc(leakLabel(x.leak).toUpperCase())+'</div><div class="bd">'+
+      '<div style="font-size:14px">'+esc(x.text)+'</div>'+
+      (src?'<div style="margin-top:4px">'+src+'</div>':"")+
+      (link?'<div style="margin-top:6px">'+link+'</div>':"")+
+      '<div style="display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap">'+
+        '<span class="mono" style="font-size:10px;color:'+T.graphite+'">DID IT WORK FOR YOU?</span>'+
+        '<button class="findbtn" data-act="helped" data-id="'+x.id+'" data-v="yes" style="padding:4px 10px'+(yes?';background:'+T.green+';color:#fff;border-color:'+T.green:'')+'">helped ✓</button>'+
+        '<button class="findbtn" data-act="helped" data-id="'+x.id+'" data-v="no" style="padding:4px 10px'+(no?';background:'+T.red+';color:#fff;border-color:'+T.red:'')+'">didn’t ✗</button>'+
+        '<button class="del" data-act="delAdvice" data-id="'+x.id+'" style="margin-left:auto">delete</button>'+
+      '</div></div></div>';
+  }).join("") : '<div class="muted">No advice gathered yet. When a teacher, a lesson, or a jam buddy hands you something worth trying, put it here — tagged to the leak it fixes — and let your practice be the judge.</div>';
+  var foot = items.length ? '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:2px;padding:0 2px">“Helped / didn’t” is <b>your</b> verification, not a vote — and never authority. When these tools federate, those honest marks become “what actually worked for players measured like you.”</div>' : "";
+  return form+list+foot;
+}
+
+/* ---------- log ---------- */
+function logView(){
+  var set=state.data.settings, a=analyze(state.data.sessions, set.homeGym);
+  if(a.sorted.length===0) return '<div class="muted">No sessions logged. The log is an invitation.</div>';
+  return a.sorted.slice().reverse().map(function(s){
+    var isFirst=!s.isHome && s.venue && a.firstSeen[norm(s.venue)]===s.id;
+    var badges=(s.isHome?badge("LAB",T.rule):"")+(!s.isHome&&!isFirst?badge("FIELD",T.graphite):"")+(isFirst?badge("FIRST TIME OUT",T.amber):"");
+    var ctrl=control(s);
+    var where=s.isHome?"Practice":(s.venue||"Played out");
+    return '<div class="logitem"><div style="display:flex;justify-content:space-between;align-items:baseline">'+
+      '<div><span class="disp" style="font-size:16px;font-weight:600">'+esc(where)+'</span>'+
+      '<span class="mono" style="font-size:11px;color:'+T.graphite+';margin-left:8px">'+esc(s.date)+'</span>'+badges+'</div>'+
+      '<div class="mono" style="font-size:20px;font-weight:600;color:'+(ctrl>=0?T.green:T.red)+'">'+sgn(ctrl)+'</div></div>'+
+      '<div class="mono" style="font-size:12px;color:'+T.graphite+';margin-top:4px">'+instLabel(s.instrument)+' · '+num(s.runs)+' run-throughs · '+num(s.clean)+' clean'+
+      (num(s.tempo)?' · '+num(s.tempo)+' BPM':"")+
+      ((s.stumbles||[]).length?' · tripped on '+s.stumbles.map(esc).join(", "):"")+'</div>'+
+      (s.note?'<div style="font-size:13px;margin-top:4px">'+esc(s.note)+'</div>':"")+
+      '<div style="text-align:right"><button class="del" data-act="del" data-id="'+s.id+'">delete</button></div></div>';
+  }).join("");
+}
+
+/* ---------- render ---------- */
+function render(){
+  var d=state.data;
+  var html=header(d.settings && d.settings.instrument ? instLabel(d.settings.instrument) : null);
+  if(!d.settings){ html += setupView(); }
+  else{
+    html += tabsView();
+    if(state.saveErr) html += '<div style="max-width:680px;margin:0 auto;padding:8px 16px;color:'+T.red+';font-size:13px">Storage unavailable — sessions will not survive a reload.</div>';
+    html += '<main>';
+    if(state.tab==="session") html += sessionView();
+    else if(state.tab==="inst") html += instrumentsView();
+    else if(state.tab==="game") html += gameView();
+    else if(state.tab==="advice") html += adviceView();
+    else if(state.tab==="log") html += logView();
+    html += '</main>';
+  }
+  app.innerHTML = html;
+  wire();
+}
+
+function wire(){
+  var si=document.getElementById("setupInst"); if(si) si.addEventListener("change",function(){ state.setupInst=si.value; });
+  bindInput("setupName", function(v){ state.setupName=v; });
+  bindInput("venue", function(v){ state.draft.venue=v; });
+  bindInput("date", function(v){ state.draft.date=v; });
+  var ic=document.getElementById("inst"); if(ic) ic.addEventListener("change",function(){ state.draft.instrument=ic.value; });
+  bindInput("runs", function(v){ state.draft.runs=v; refreshSaveEnabled(); });
+  bindInput("clean", function(v){ state.draft.clean=v; });
+  bindInput("tempo", function(v){ state.draft.tempo=v; });
+  bindInput("minutes", function(v){ state.draft.minutes=v; });
+  bindInput("stumbleInput", function(v){ state.draft.stumbleInput=v; });
+  bindInput("note", function(v){ state.draft.note=v; });
+  bindInput("tuneName", function(v){ state.tuneForm.name=v; });
+  var advLeak=document.getElementById("adviceLeak"); if(advLeak) advLeak.addEventListener("change",function(){ state.adviceForm.leak=advLeak.value; });
+  bindInput("adviceText", function(v){ state.adviceForm.text=v; });
+  bindInput("adviceUrl", function(v){ state.adviceForm.url=v; });
+  bindInput("adviceSource", function(v){ state.adviceForm.source=v; });
+  app.querySelectorAll("[data-act]").forEach(function(el){ el.addEventListener("click", function(){ act(el); }); });
+}
+function bindInput(id,fn){ var el=document.getElementById(id); if(el) el.addEventListener("input",function(){ fn(el.value); }); }
+function toggleDisabled(actName,enabled){ var b=app.querySelector('[data-act="'+actName+'"]'); if(b) b.disabled=!enabled; }
+function refreshSaveEnabled(){ toggleDisabled("save", num(state.draft.runs)>=1); }
+
+/* ---------- actions ---------- */
+function act(el){
+  var a=el.getAttribute("data-act");
+  if(a==="tab"){ state.tab=el.getAttribute("data-k"); return render(); }
+  if(a==="lock"){
+    var s={instrument:state.setupInst||"mandolin", homeGym:(state.setupName||"").trim()||"Practice"};
+    state.data.settings=s; state.draft=newDraft(); persist(); return render(); }
+  if(a==="toggleHome"){ state.draft.isHome=el.getAttribute("data-v")==="true"; return render(); }
+  if(a==="addStumble"){
+    var nm=(state.draft.stumbleInput||"").trim();
+    if(nm){ state.draft.stumbles.push(nm); state.draft.stumbleInput=""; }
+    return render();
+  }
+  if(a==="delStumble"){ var ci=+el.getAttribute("data-i"); state.draft.stumbles.splice(ci,1); return render(); }
+  if(a==="tuneFin"){ state.tuneForm.clean=el.getAttribute("data-v")==="true"; return render(); }
+  if(a==="addTune"){
+    var mn=((document.getElementById("tuneName")||{}).value||state.tuneForm.name||"").trim();
+    if(!mn) return;
+    if(!state.data.tunes) state.data.tunes=[];
+    state.data.tunes.push({id:Date.now(), name:mn, clean:!!state.tuneForm.clean, date:todayISO()});
+    state.tuneForm={name:"", clean:state.tuneForm.clean};
+    persist(); return render();
+  }
+  if(a==="delTune"){ var mid=+el.getAttribute("data-id"); state.data.tunes=(state.data.tunes||[]).filter(function(m){return m.id!==mid;}); persist(); return render(); }
+  if(a==="postAdvice"){
+    var af=state.adviceForm, at=(af.text||"").trim();
+    if(!at) return;
+    var au=(af.url||"").trim(); if(au && !/^https?:\/\//i.test(au)) au="https://"+au;
+    if(!state.data.advice) state.data.advice=[];
+    state.data.advice.push({id:Date.now(), leak:af.leak||"general", text:at, url:au, source:(af.source||"").trim(), helped:null, added:todayISO()});
+    state.adviceForm={leak:af.leak||"technique", text:"", url:"", source:""};
+    persist(); return render();
+  }
+  if(a==="helped"){ var hid=+el.getAttribute("data-id"), hv=el.getAttribute("data-v")==="yes";
+    state.data.advice=(state.data.advice||[]).map(function(x){ if(x.id===hid) x.helped=(x.helped===hv)?null:hv; return x; });
+    persist(); return render(); }
+  if(a==="delAdvice"){ var aid=+el.getAttribute("data-id"); state.data.advice=(state.data.advice||[]).filter(function(x){return x.id!==aid;}); persist(); return render(); }
+  if(a==="save"){ return saveSession(); }
+  if(a==="del"){ var id=+el.getAttribute("data-id"); state.data.sessions=state.data.sessions.filter(function(s){return s.id!==id;}); persist(); return render(); }
+}
+
+function saveSession(){
+  var dr=state.draft;
+  if(!(num(dr.runs)>=1)) return;
+  var s={ id:Date.now(), date:dr.date, instrument:dr.instrument, isHome:dr.isHome, venue:dr.isHome?"":dr.venue.trim(),
+          runs:num(dr.runs), clean:Math.min(num(dr.clean),num(dr.runs)), tempo:num(dr.tempo), minutes:num(dr.minutes),
+          stumbles:dr.stumbles.slice(), note:dr.note.trim() };
+  state.data.sessions = (state.data.sessions||[]).concat([s]);
+  persist();
+  state.draft=newDraft(); state.tab="inst"; render();
+}
+
+render();
+if("serviceWorker" in navigator){ navigator.serviceWorker.getRegistrations && navigator.serviceWorker.ready.catch(function(){}); }
+</script>
+</body>
+</html>

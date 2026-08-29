@@ -73,7 +73,7 @@ def test_every_page_offers_a_way_home():
     # and the operator/sovereign/pastoral surfaces (playbook/plow/profile/situations). Declared here
     # rather than each carrying nh-home.js — the same treatment mesh.html/live.html already get.
     hidden = {"mesh.html", "live.html", "checkit.html", "about.html", "halls.html", "golf.html",
-              "grappling.html", "coach.html", "tv.html", "playbook.html", "plow.html",
+              "grappling.html", "music.html", "coach.html", "tv.html", "playbook.html", "plow.html",
               "profile.html", "situations.html"}
     missing = [f.name for f in SITE.glob("*.html")
                if f.name != "index.html" and f.name not in hidden
@@ -124,7 +124,7 @@ def test_the_palette_reaches_every_public_page():
                # self-contained surfaces, reached by direct URL / their own nav, not the palette: the
                # efficiency front door + confession + lobby, the offline instruments, the operator pages
                "checkit.html", "about.html", "halls.html", "golf.html", "grappling.html",
-               "coach.html", "tv.html", "playbook.html", "plow.html", "profile.html", "situations.html"}
+               "coach.html", "tv.html", "music.html", "playbook.html", "plow.html", "profile.html", "situations.html"}
     unreachable = sorted(
         p.name for p in SITE.glob("*.html") if p.name not in listed and p.name not in excused)
     assert not unreachable, f"no way to reach: {unreachable} (list them or excuse them by name)"
