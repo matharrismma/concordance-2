@@ -1,0 +1,11 @@
+{
+  "name": "Workshop",
+  "short_name": "Workshop",
+  "description": "Help build Narrow Highway. See what the library needs, name what's missing, add to the keeping, or improve the engine — easy for you and safe for everyone, because everything enters quarantined and has to pass the gate.",
+  "start_url": "/workshop.html",
+  "scope": "/workshop.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EFF1F3",
+  "theme_color": "#3D4B57"
+}

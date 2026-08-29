@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3D4B57">
+<title>Workshop — help build it</title>
+<meta name="description" content="Help build Narrow Highway. The library is honest about its gaps — see what it needs, name what's missing, add to the keeping, or improve the engine. Easy for you because nothing bypasses the gate; safe for everyone for the same reason. Everything enters quarantined and has to pass.">
+<link rel="manifest" href="/workshop.webmanifest">
+<style>
+:root{
+  --paper:#EFF1F3; --card:#FFFFFF; --rule:#3D4B57; --ruleSoft:#C6CED6; --ink:#161C22;
+  --graphite:#54606B; --green:#2E7D4F; --amber:#A9781A; --red:#B23A2A; --gold:#8A6D1F;
+  --disp:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --body:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box} html,body{margin:0}
+body{font-family:var(--body); background:var(--paper); color:var(--ink); min-height:100vh;
+  -webkit-text-size-adjust:100%; padding-bottom:env(safe-area-inset-bottom); line-height:1.5;}
+input,button,textarea,select{font-family:inherit; font-size:1rem}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--rule); outline-offset:2px}
+.disp{font-family:var(--disp)} .mono{font-family:var(--mono)}
+header.hd{background:var(--rule); color:var(--paper); padding:20px 16px 16px}
+header.hd .in{max-width:720px; margin:0 auto}
+header.hd h1{font-family:var(--disp); font-size:30px; margin:0}
+header.hd p{margin:6px 0 0; font-size:14.5px; opacity:.9}
+main{max-width:720px; margin:0 auto; padding:16px 14px 80px}
+.pnl{background:var(--card); border:1.5px solid var(--rule); border-radius:8px; margin-bottom:16px; overflow:hidden}
+.pnl>.lab{font-family:var(--mono); text-transform:uppercase; letter-spacing:.06em; font-size:12px; font-weight:700; color:var(--paper); background:var(--rule); padding:7px 13px}
+.pnl>.bd{padding:14px}
+.muted{color:var(--graphite); font-size:14px}
+.field{width:100%; padding:11px 13px; font-size:16px; border:1.5px solid var(--rule); border-radius:6px; background:var(--card); color:var(--ink)}
+.btn{font-family:var(--mono); text-transform:uppercase; letter-spacing:.05em; font-size:12px; font-weight:600; padding:9px 14px; border:1.5px solid var(--rule); border-radius:6px; background:var(--rule); color:var(--paper)}
+.btn.ghost{background:var(--card); color:var(--rule)}
+.btn[disabled]{opacity:.5; cursor:default}
+.want{border:1px solid var(--ruleSoft); border-radius:7px; padding:10px 12px; margin-bottom:8px}
+.want .q{font-size:16px; font-weight:600}
+.want .m{font-family:var(--mono); font-size:11px; color:var(--graphite); margin-top:3px}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+@media(max-width:560px){.two{grid-template-columns:1fr}}
+.how{border:1px solid var(--ruleSoft); border-radius:8px; padding:12px}
+.how h3{font-family:var(--disp); font-size:18px; margin:0 0 4px}
+.how .easy{color:var(--green); font-weight:600} .how .safe{color:var(--rule); font-weight:600}
+.step{font-size:14px; margin:6px 0}
+a{color:var(--rule)}
+.note{font-family:var(--mono); font-size:11px; color:var(--graphite); margin-top:8px}
+.ok{color:var(--green); font-family:var(--mono); font-size:12px; margin-top:6px}
+.err{color:var(--amber); font-family:var(--mono); font-size:12px; margin-top:6px}
+</style>
+</head>
+<body>
+<header class="hd"><div class="in">
+  <h1>Workshop</h1>
+  <p>Help build it. The library is honest about its gaps — and it grows by them. Everything you add
+     enters <b>quarantined</b> and has to pass the gate, which is exactly what makes it easy for you and
+     safe for everyone: nothing you contribute can do harm before it’s proven, so the doors can be open.</p>
+</div></header>
+<main id="app">
+  <div class="pnl"><div class="lab">What the project needs</div><div class="bd" id="board">
+    <div class="muted">Loading the board…</div>
+  </div></div>
+
+  <div class="pnl"><div class="lab">Name a gap</div><div class="bd">
+    <p class="muted" style="margin-top:0">Couldn’t find something? Hit a thing the library is missing? Name
+       it. It goes on the board for anyone — or the tortoise — to fill. This is the easiest way in, and
+       it’s the demand signal that tells us what to build next.</p>
+    <div style="display:flex;gap:8px">
+      <input id="gap" class="field" placeholder="what’s missing — e.g. how to render lard, a psalm on grief">
+      <button class="btn" id="namebtn" style="white-space:nowrap">Post it</button>
+    </div>
+    <div id="gapmsg"></div>
+    <div class="note">A want is a request, not a claim — powerless until it’s filled and passes. So no
+       account is needed to post one. Held on the human side until a second person seconds it.</div>
+  </div></div>
+
+  <div class="pnl"><div class="lab">Two ways to build</div><div class="bd">
+    <div class="two">
+      <div class="how">
+        <h3>Add to the keeping</h3>
+        <div class="step"><span class="easy">Easy:</span> bring a public‑domain source, a card, or a
+          correction — or drop your own material (BYOS) and let us craft the card.</div>
+        <div class="step"><span class="safe">Safe:</span> it enters as a <b>candidate</b>, born
+          quarantined, license‑checked, and promoted only by fruit and witnesses — never by your say‑so.</div>
+        <div class="note">Signed with a covenant key: no account (easy), yet accountable and revocable
+          (safe). Public‑domain only for others’ words; we link out, we don’t re‑host.</div>
+      </div>
+      <div class="how">
+        <h3>Improve the engine</h3>
+        <div class="step"><span class="easy">Easy:</span> the code is open and <b>the tests are the
+          spec</b> — make them pass and you’ve said something true. Pick a gap above, or a fault you’ve
+          found.</div>
+        <div class="step"><span class="safe">Safe:</span> the gate <i>is</i> those tests, the goldens,
+          and review; nothing ships that fails, and a staggered canary stops a bad change at half the
+          fleet.</div>
+        <div class="note">Deterministic, stdlib‑first, sovereign. A change proposes; the suite disposes.</div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="pnl"><div class="lab">Why it’s open</div><div class="bd">
+    <p class="muted" style="margin-top:0">Safety here isn’t a wall in front of you — it’s <b>the gate
+      everything flows through.</b> Because nothing bypasses it, the doors can be thrown wide. Open and
+      safe stop fighting. It’s the Acts‑2 shape: the whole body builds, and nothing false gets in.</p>
+    <p class="note">The engine tells you what it needs; you help; the gate keeps it holy.</p>
+  </div></div>
+  <p class="mono" style="text-align:center;color:var(--graphite);font-size:12px"><a href="/">↩ Narrow Highway</a></p>
+</main>
+<script>
+"use strict";
+var API=location.origin;
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+
+function loadBoard(){
+  var el=document.getElementById("board");
+  fetch(API+"/wants?state=open",{headers:{"Accept":"application/json"}})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var w=(d.wants||[]).filter(function(x){return x.state==="open" && (x.query||"").trim();});
+      if(!w.length){ el.innerHTML='<div class="muted">Nothing open on the board right now — the library’s gaps are filled for the moment. Name one below if you’ve found a new one.</div>'; return; }
+      el.innerHTML='<p class="muted" style="margin-top:0">'+w.length+' open — real things the library is missing. Fill one by adding a source, or improve how it’s answered.</p>'+
+        w.slice(0,40).map(function(x){
+          return '<div class="want"><div class="q">'+esc(x.query||"(untitled)")+'</div>'+
+            '<div class="m">'+esc(x.kind||"missing")+(x.asks?' · asked '+x.asks+'×':"")+(x.note?' · '+esc(x.note):"")+'</div></div>';
+        }).join("");
+    })
+    .catch(function(){ el.innerHTML='<div class="muted">Couldn’t reach the board right now. Try again in a moment.</div>'; });
+}
+function nameGap(){
+  var inp=document.getElementById("gap"), btn=document.getElementById("namebtn"), msg=document.getElementById("gapmsg");
+  var q=(inp.value||"").trim();
+  if(!q){ msg.innerHTML='<div class="err">Type what’s missing first.</div>'; return; }
+  btn.disabled=true; msg.innerHTML='';
+  fetch(API+"/want",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({query:q,kind:"missing"})})
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+    .then(function(res){
+      btn.disabled=false;
+      if(res.ok && res.d && res.d.ok!==false){ inp.value=""; msg.innerHTML='<div class="ok">On the board. Thank you — that’s a real gift; it tells us where to dig.</div>'; loadBoard(); }
+      else { msg.innerHTML='<div class="err">'+esc((res.d&&(res.d.error||res.d.detail))||"Couldn’t post that — try rephrasing.")+'</div>'; }
+    })
+    .catch(function(){ btn.disabled=false; msg.innerHTML='<div class="err">Couldn’t reach the board — you need a connection to post.</div>'; });
+}
+document.getElementById("namebtn").addEventListener("click", nameGap);
+document.getElementById("gap").addEventListener("keydown", function(e){ if(e.key==="Enter") nameGap(); });
+loadBoard();
+</script>
+</body>
+</html>
