@@ -100,6 +100,8 @@
 </div>
 
 <script src="/speak.js"></script>
+<script>/* register the offline worker so the Coach (and its crisis floor) survive with no network */
+if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); }); }</script>
 <script>
 (function(){
   var API = (window.API != null ? window.API : '');
@@ -139,7 +141,11 @@
     fetch(API+'/console',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:text})})
       .then(function(r){ return r.json(); })
       .then(function(r){ render(r); })
-      .catch(function(){ render({kind:'offline', headline:'Off the wire', spoken:'I could not reach the station. Your words are kept here; the answer will follow.', caption:'I could not reach the station. Your words are kept here; the answer will follow.'}); });
+      .catch(function(){ render({kind:'offline', headline:'Off the wire',
+        spoken:'I could not reach the station. Your words are kept here; the answer will follow. If you need help right now, reach a real person.',
+        caption:'I could not reach the station. Your words are kept here; the answer will follow. If you need help right now, reach a real person.',
+        resources:[{label:'Call or text 988 — US Suicide & Crisis Lifeline, 24/7', ref:'tel:988'},
+                   {label:'findahelpline.com — a free, confidential helpline in your country', ref:'https://findahelpline.com'}]}); });
   }
 
   document.getElementById('wform').addEventListener('submit', function(e){ e.preventDefault(); var t=line.value; line.value=''; ask(t); });

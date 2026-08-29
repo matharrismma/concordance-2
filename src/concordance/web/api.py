@@ -1693,7 +1693,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # the floor, made visible — the rooted design (both halves) + the two-tree grafts, so a
         # visitor SEES the coherence and is turned upward (Proverbs 9:10).
         from .. import floor as _floor
-        return _ok(_floor.payload())
+        # cached per corpus version like its sibling scan routes — payload() is a full-corpus scan
+        # (public-card list + grafts), ~2s uncached and repeatable, so it rode the DoS-#1 caution.
+        return _ok(_cached_scan("floor", _floor.payload))
     if method == "GET" and path == "/locate":
         _q = query.get("q") or ""
         return _ok(_cached_scan("locate:%s" % _q, lambda: corpus.locate(_q)))

@@ -11,7 +11,7 @@
  *   - GET + same-origin only. Never caches errors, opaque responses, or the seal/verify path.
  * Bump CACHE to purge every old cache on activate.
  */
-const CACHE = 'nh-offline-v5';  // v5: precache harmony.html + timeline.html
+const CACHE = 'nh-offline-v6';  // v6: precache coach.html + situations.html (the audio front door + urgent-need triage, offline-ready)
 
 /* The floor: what must be there with no network at all — precached on install so the whole flagship
    experience (the door, the Floor of Discovery, the Coach, the Apothecary, Scripture, the journal)
@@ -24,6 +24,7 @@ const CORE = [
   // so `?section=` would precache the same bytes three times under three cache keys
   '/kinds.js', '/nh-tools.js', '/nh-home.js', '/speak.js', '/gate.js', '/redact.js', '/nh-search.js',
   '/manifest.webmanifest', '/icon.svg',
+  '/coach.html', '/situations.html', // the audio-native front door + the urgent-need triage — offline-ready, with the static crisis floor
   '/floor', '/coach/journey', '/coach/subjects', '/apothecary', '/almanac'
 ];
 
