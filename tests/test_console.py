@@ -156,6 +156,42 @@ def test_an_honest_miss_stays_a_miss():
         C._ask.respond = orig
 
 
+def test_a_topicless_ask_is_met_with_the_hare_question_not_a_blind_answer(monkeypatch):
+    # the FORM GATE in front of the keeping: an ask with no topic asks the one blank and looks nothing
+    # up (Prov 18:13 — never answer before hearing). The keeping is not even touched.
+    called = {"n": 0}
+    def spy(*a, **k):
+        called["n"] += 1
+        return {"kind": "search", "results": [], "generated": False}
+    monkeypatch.setattr(console._ask, "respond", spy)
+    r = console.dispatch("look up", SEC)
+    assert r["intent"] == "ask" and r["kind"] == "clarify"
+    assert r["spoken"] == "What would you like me to find?"
+    assert r["cost"] == "free" and called["n"] == 0            # nothing fetched before we heard
+
+
+def test_a_real_ask_is_the_free_hare_from_the_keeping_with_the_tortoise_offered(monkeypatch):
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "search", "generated": False, "results": [
+            {"id": "card_water", "title": "Purifying water",
+             "snippet": "Boil for one minute at a rolling boil."}]})
+    r = console.dispatch("how do I purify water", SEC)
+    assert r["kind"] != "clarify" and r["cost"] == "free"      # the keeping answer is the free hare
+    assert r["tortoise"]["offered"] is True and r["tortoise"]["cost"] == "cheap"
+    assert r["source"] and r["source"]["ref"].startswith("/card/")   # the waybill to the full source
+
+
+def test_a_miss_offers_the_tortoise_and_makes_no_false_promise(monkeypatch):
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "search", "results": [], "generated": False})
+    r = console.dispatch("what is the torque spec for a Lister CS head", SEC)
+    assert r["kind"] == "miss" and "not in the keeping" in r["spoken"].lower()
+    assert r["tortoise"]["offered"] is True                    # offered, the user's to choose
+    low = r["spoken"].lower()
+    assert "written down the want" not in low                  # no claim of a want we didn't open
+    assert "24" not in low and "48" not in low and "hour" not in low   # no clock promised
+
+
 def test_intake_keeps_the_location_not_the_blob():
     a = console.intake_artifact(source_location="/sd/photos/well_pump.jpg", kind="image",
                                 extracted_text="Shurflo 9300, 24V")

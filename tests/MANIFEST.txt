@@ -30,6 +30,7 @@ test_caps_fresh.py
 test_cas.py
 test_characters.py
 test_chess.py
+test_clarify.py
 test_clean_urls.py
 test_coach.py
 test_codex.py

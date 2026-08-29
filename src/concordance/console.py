@@ -25,6 +25,7 @@ from typing import Any, Dict, List, Optional
 
 from . import ask as _ask
 from . import bookofdays as _book
+from . import clarify as _clarify
 from . import corpus as _corpus
 
 # ── intent cues (deterministic; leading-anchored where a bare word would over-match) ─────────────
@@ -202,9 +203,9 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
         spoken = _trim(msg, 480)
         caption = msg
     else:
-        # an honest miss: say so, and let the want-loop carry it (the tortoise brings it later)
-        spoken = ("That is not in the keeping yet. I have written down the want, and the answer will "
-                  "follow when it is found.")
+        # an honest miss: the keeping does not hold it. We OFFER the tortoise (the user chooses it on
+        # their need and access) rather than claiming to have written a want they did not ask for.
+        spoken = "That is not in the keeping yet. " + _clarify.TORTOISE_OFFER
         caption = spoken
         kind = "miss"
 
@@ -409,7 +410,35 @@ def dispatch(text: str, config: Any, *, owner: Optional[str] = None,
         return _schedule(text)
     if intent == "copies":
         return _copies(text)
-    return _coach(text, config, gate_open)
+    return _ask_path(text, config, owner, gate_open)
+
+
+def _ask_path(text: str, config: Any, owner: Optional[str], gate_open: bool) -> Dict[str, Any]:
+    """The ask path, through the FORM GATE (Prov 18:13 — never answer before hearing). Route to the
+    ask-form (look-up / verify / learn); if the request carries no topic, the HARE is the clarifying
+    question and we look nothing up. Otherwise the keeping answers — that verified answer IS the hare,
+    fast and free — and the TORTOISE is OFFERED alongside it: the cheap, chosen trip to the full source,
+    which the user takes on their own need and access. Nothing is fetched or written without their say."""
+    gate = _clarify.run(_clarify.FORMS[_clarify.route_ask(text)], text)
+    if not gate.get("complete"):
+        return _hare_question(gate)
+    r = _coach(text, config, gate_open)
+    # the tortoise is OFFERED, never auto-fired — the user chooses the source (send is a separate step)
+    r["tortoise"] = {"offered": True, "spoken": _clarify.TORTOISE_OFFER, "cost": "cheap",
+                     "form": gate.get("form"), "subject": gate.get("filled")}
+    r["cost"] = "free"                       # the hare — the keeping's answer — costs the family nothing
+    return r
+
+
+def _hare_question(gate: Dict[str, Any]) -> Dict[str, Any]:
+    """The hare when the form is not yet complete: ask the one blank, in plain speech, and fetch
+    nothing. A question is a valid instant answer — the one thing an engine that 'just runs' never says."""
+    return {
+        "intent": "ask", "kind": "clarify", "headline": "One thing first —",
+        "spoken": gate.get("ask", ""), "caption": gate.get("ask", ""),
+        "source": None, "connections": [], "next": [], "frame": [],
+        "form": gate.get("form"), "cost": "free", "generated": False,
+    }
 
 
 # ── INTAKE — accept anything; keep the LOCATION and the usable form, never the blob ──────────────
