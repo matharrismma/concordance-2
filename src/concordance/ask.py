@@ -397,8 +397,9 @@ _STOP = frozenset((
     "am", "as", "from", "into", "than", "then", "there", "here", "some", "any", "old", "new"))
 _WORD3 = re.compile(r"[a-z]{3,}")
 _QUESTION = re.compile(
-    r"^\s*(is|are|was|were|do|does|did|can|could|how|why|when|where|which|will|should|has|have)\b",
-    re.I)
+    r"^\s*(is|are|was|were|do|does|did|can|could|how|why|when|where|which|will|should|has|have"
+    r"|what|who|whom|whose)\b",   # "what"/"who" were missing — the two commonest question words, so a
+    re.I)                          # true miss on "what is X" / "who was X" got the weaker non-question path
 
 
 def _content_tokens(s: str) -> set:

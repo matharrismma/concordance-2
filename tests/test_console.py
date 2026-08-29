@@ -192,6 +192,20 @@ def test_a_miss_offers_the_tortoise_and_makes_no_false_promise(monkeypatch):
     assert "24" not in low and "48" not in low and "hour" not in low   # no clock promised
 
 
+def test_a_checkable_claim_gets_the_verdict_not_a_false_miss(monkeypatch):
+    """THE CORE PROMISE on the console door: a verify payload must be spoken as its verdict + worked
+    reasoning, never fall through to 'not in the keeping'. ("is 91 prime" was returning a false miss.)"""
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "verify", "generated": False,
+        "verify": {"verdict": "BROKEN", "detail": "91 is NOT prime (7 x 13); it was claimed prime.",
+                   "trail": [], "cite_url": "/s/abc123"}})
+    r = console.dispatch("is 91 prime", SEC)
+    assert r["kind"] == "verify"                                # not "miss"
+    assert "does not hold" in r["spoken"].lower() and "91" in r["spoken"]
+    assert r["source"] and r["source"]["ref"] == "/s/abc123"   # the re-checkable receipt is offered
+    assert "tortoise" not in r                                  # a computed verdict has no source to fetch
+
+
 def test_intake_keeps_the_location_not_the_blob():
     a = console.intake_artifact(source_location="/sd/photos/well_pump.jpg", kind="image",
                                 extracted_text="Shurflo 9300, 24V")

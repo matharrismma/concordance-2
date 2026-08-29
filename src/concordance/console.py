@@ -202,6 +202,31 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
     elif msg:
         spoken = _trim(msg, 480)
         caption = msg
+    elif r.get("verify"):
+        # THE CORE PROMISE on the console door: a checkable claim ("is 17 prime", "12*7 = 84") gets the
+        # VERIFIED VERDICT + the worked reasoning — never a false "not in the keeping". Found/computed,
+        # not generated (the verify payload carries verdict/detail/trail + a re-checkable seal). Without
+        # this branch the payload fell through to the miss below, and the engine's one job read as a gap.
+        v = r["verify"]
+        verdict = (v.get("verdict") or "").upper()
+        detail = _trim(v.get("detail") or "", 420)
+        if verdict == "HOLDS":
+            headline = "It checks out."
+            spoken = ("Verified — it holds. " + detail).strip()
+        elif verdict == "BROKEN":
+            headline = "That does not hold."
+            spoken = ("I checked it, and it does not hold. " + detail).strip()
+        elif verdict == "INCOMPLETE":
+            headline = "I can only go so far on that."
+            spoken = ("I could not fully verify that. " + detail).strip()
+        else:  # SYSTEM_ERROR — our failure, never a false verdict on their claim
+            headline = "I could not run the check."
+            spoken = ("I hit an error checking that — that is my failure, not a false claim. " + detail).strip()
+        caption = spoken
+        kind = "verify"
+        cu = v.get("cite_url") or v.get("seal_url") or (v.get("seal") if isinstance(v.get("seal"), str) else "")
+        if cu:
+            source = {"title": "the worked check — re-verify it yourself", "ref": cu}
     else:
         # an honest miss: the keeping does not hold it. We OFFER the tortoise (the user chooses it on
         # their need and access) rather than claiming to have written a want they did not ask for.
@@ -423,10 +448,12 @@ def _ask_path(text: str, config: Any, owner: Optional[str], gate_open: bool) -> 
     if not gate.get("complete"):
         return _hare_question(gate)
     r = _coach(text, config, gate_open)
-    # the tortoise is OFFERED, never auto-fired — the user chooses the source (send is a separate step)
-    r["tortoise"] = {"offered": True, "spoken": _clarify.TORTOISE_OFFER, "cost": "cheap",
-                     "form": gate.get("form"), "subject": gate.get("filled")}
     r["cost"] = "free"                       # the hare — the keeping's answer — costs the family nothing
+    # the tortoise is OFFERED (never auto-fired) alongside a keeping answer or a miss — but NOT a verify
+    # verdict, which is a computed result with no external source to go and fetch.
+    if r.get("kind") != "verify":
+        r["tortoise"] = {"offered": True, "spoken": _clarify.TORTOISE_OFFER, "cost": "cheap",
+                         "form": gate.get("form"), "subject": gate.get("filled")}
     return r
 
 
