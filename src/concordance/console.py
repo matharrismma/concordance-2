@@ -101,16 +101,25 @@ def _frame(text: str) -> List[str]:
 # FRS/CVSS, accents like Schrödinger, Hebrew prefixes like "Ben-", long descriptive shelf titles).
 # Instead we (a) hard-drop only the UNAMBIGUOUSLY broken from being offered, and (b) softly prefer
 # cleaner titles so a rough one only surfaces when nothing cleaner is as relevant. Selection, not repair.
-_FRAG_START = ("for ", "the ", "a ", "an ", "and ", "of ", "in ", "with ", "to ", "by ", "as ",
-               "that ", "this ", "from ", "but ", "or ")
+_FRAG_WORDS = {"for", "the", "a", "an", "and", "of", "in", "with", "to", "by", "as", "that",
+               "this", "from", "but", "or", "if", "when", "while", "because"}
+
+
+def _tidy_title(t: str) -> str:
+    """Cosmetic only: collapse OCR double-spacing and trim. Never changes the words."""
+    return re.sub(r"\s+", " ", t).strip()
 
 
 def _title_offerable(t: str) -> bool:
-    """Reject only the unambiguously broken: real mojibake, or a true lowercase sentence fragment."""
+    """Reject only the unambiguously broken: mojibake, or a long prose FRAGMENT — one that starts with
+    a function word, runs several words, and lacks the 'title — subtitle' or 'Prefix: entry' structure
+    that real titles use (so Matt's long descriptive titles and 'ISBE: Ben-' style entries are kept)."""
     if "�" in t:
         return False
-    low = t.lower()
-    return not (t[:1].islower() and any(low.startswith(f) for f in _FRAG_START))
+    w = _tidy_title(t).split()
+    if w and w[0].lower() in _FRAG_WORDS and len(w) > 6 and " — " not in t and ": " not in t:
+        return False
+    return True
 
 
 def _title_penalty(t: str) -> float:
@@ -141,7 +150,7 @@ def _threads_from_results(results: Any, frame: List[str]) -> List[Dict[str, str]
             title = (h.get("title") or "").strip()
             if cid and title and _title_offerable(title):
                 ov = len(set(re.findall(r"[a-z]{3,}", title.lower())) & fset)
-                scored.append((ov, -_title_penalty(title), cid, title))
+                scored.append((ov, -_title_penalty(title), cid, _tidy_title(title)))
     scored.sort(key=lambda x: (x[0], x[1]), reverse=True)   # frame overlap first, then cleaner title
     return [{"id": c, "title": t} for _, _, c, t in scored]
 
