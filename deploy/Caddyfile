@@ -4,7 +4,7 @@
 #   narrowhighway.com      -> :8002  (2.0 secular; front door, app, engine, seals, card permalinks)
 #   api.narrowhighway.com  -> :8002  (2.0 secular; verify/derivation.verify/search/seal/mcp/identity)
 #   narrowhighway.org      -> :8001  (2.0 witness)
-#   narrowhighway.tv       -> :8001  (2.0 witness; tv.html landing — watch/listen/learn)
+#   narrowhighway.tv       -> :8002  (2.0 secular; the TV GUIDE at /tv — watch/listen/learn)
 # 1.0 files remain at /home/nh/Lighthouse (+ archive ~/backups/lighthouse-1.0-full-*.tar.gz);
 # re-enable with `sudo systemctl enable --now nh-engine` and restore this file from a backup.
 # Rollback points: .pre2cut (.com cutover), .pretv (.tv), .pre1retire (this 1.0 retirement).
@@ -44,7 +44,7 @@ narrowhighway.com {
 	redir /today.html /journal.html 301
 	redir /curriculum.html /read.html 301
 	redir /submit-curriculum.html /read.html 301
-	redir /workshop.html /read.html 301
+	# (removed 2026-08-29: /workshop.html is now a REAL 2.0 page — the contributor door — not a 1.0 stub)
 	redir /guidance.html /ask.html 301
 	redir /canon.html /bible.html 301
 	redir /bibles.html /bible.html 301
@@ -82,10 +82,13 @@ narrowhighway.tv {
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
 
-	# The watch/listen/learn face on the 2.0 WITNESS engine (:8001); its landing is tv.html.
+	# The watch/listen/learn face — the TV GUIDE. Served by the 2.0 SECULAR engine (:8002), which
+	# serves the guide correctly (the witness :8001 was serving the .org clone + a 301 redirect loop).
+	# Rewrite the bare domain to the CLEAN /tv, NOT /tv.html — the app 301s /tv.html -> /tv, which fed
+	# the rewrite back into itself and looped. narrowhighway.tv/ now serves the guide directly, 200.
 	@root path /
-	rewrite @root /tv.html
-	reverse_proxy 127.0.0.1:8001 {
+	rewrite @root /tv
+	reverse_proxy 127.0.0.1:8002 {
 		lb_try_duration 10s
 		lb_try_interval 250ms
 	}
