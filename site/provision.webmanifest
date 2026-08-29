@@ -1,0 +1,11 @@
+{
+  "name": "Provision",
+  "short_name": "Provision",
+  "description": "A tool for a man's work and livelihood. Measure what you actually ship, find the leak that stalls you, and gather the masters who built what you're building — offline, private, yours.",
+  "start_url": "/provision.html",
+  "scope": "/provision.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EEF3F2",
+  "theme_color": "#0E5A5A"
+}

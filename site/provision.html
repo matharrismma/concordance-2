@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E5A5A">
+<title>Provision — ship your work, grow your craft</title>
+<meta name="description" content="A tool for a man's work and livelihood. Log your work blocks, measure what you actually ship, find the leak that stalls you — and gather the masters who built what you're building, toward learning from them directly. Offline, private, yours.">
+<link rel="manifest" href="/provision.webmanifest">
+<style>
+:root{
+  --paper:#EEF3F2; --card:#FFFFFF; --rule:#0E5A5A; --ruleSoft:#B8D2CF; --ink:#0E2320;
+  --graphite:#4C635F; --red:#B23A2A; --green:#2E7D4F; --amber:#A9781A;
+  --disp:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --body:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--body); background:var(--paper); color:var(--ink); min-height:100vh;
+  -webkit-text-size-adjust:100%; padding-bottom:env(safe-area-inset-bottom);}
+input,button,select,textarea{font-family:inherit; font-size:1rem}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--rule); outline-offset:2px}
+.disp{font-family:var(--disp); letter-spacing:.01em}
+.mono{font-family:var(--mono)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+header.hd{background:var(--rule); color:var(--paper); padding:18px 16px 14px}
+header.hd .in{max-width:680px; margin:0 auto; display:flex; align-items:baseline; justify-content:space-between}
+nav.tabs{background:var(--card); border-bottom:2px solid var(--rule); overflow-x:auto}
+nav.tabs .in{max-width:680px; margin:0 auto; display:flex}
+nav.tabs button{flex:1 0 auto; padding:12px 12px; border:none; background:transparent; color:var(--ink); font-weight:600; font-size:15px; white-space:nowrap}
+nav.tabs button[aria-selected="true"]{background:var(--rule); color:var(--paper)}
+main{max-width:680px; margin:0 auto; padding:12px 12px 72px}
+.pnl{background:var(--card); border:1.5px solid var(--rule); border-radius:6px; margin-bottom:14px; overflow:hidden}
+.pnl>.lab{font-family:var(--mono); text-transform:uppercase; letter-spacing:.06em; font-size:12px; font-weight:700; color:var(--paper); padding:6px 12px}
+.pnl>.bd{padding:12px}
+.muted{color:var(--graphite); font-size:14px}
+.tg{display:flex; border:1.5px solid var(--rule); border-radius:5px; overflow:hidden}
+.tg button{flex:1; padding:10px 0; border:none; background:var(--card); color:var(--ink); font-weight:600; font-size:14px}
+.tg button[aria-pressed="true"]{background:var(--rule); color:var(--paper)}
+.field{width:100%; padding:10px 12px; font-size:16px; border:1.5px solid var(--rule); border-radius:5px; background:var(--card); color:var(--ink)}
+.field.soft{border:1px solid var(--ruleSoft); font-size:14px}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.numblk label{font-size:11px; color:var(--graphite)}
+.chip{display:inline-flex; align-items:center; gap:5px; background:#DCEAE8; border:1px solid var(--ruleSoft); border-radius:14px; padding:3px 6px 3px 10px; margin:3px 4px 0 0; font-size:13px}
+.chip button{border:none; background:none; color:var(--red); font-size:13px; padding:0 2px; line-height:1}
+.cta{font-family:var(--disp); font-size:18px; font-weight:700; width:100%; padding:13px 0; background:var(--rule); color:var(--paper); border:none; border-radius:5px}
+.cta[disabled]{background:var(--ruleSoft); cursor:default}
+.findbtn{font-family:var(--mono); text-transform:uppercase; letter-spacing:.05em; font-size:12px; font-weight:600; padding:8px 12px; border:1.5px solid var(--rule); border-radius:5px; background:var(--card); color:var(--rule)}
+.badge{font-family:var(--mono); font-size:9px; font-weight:600; color:var(--paper); border-radius:2px; padding:2px 5px; margin-left:6px; vertical-align:middle}
+.logitem{background:var(--card); border:1px solid var(--ruleSoft); border-radius:6px; padding:10px 12px; margin-bottom:8px}
+.del{border:none; background:none; color:var(--red); font-size:12px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+/* ============================================================
+   PROVISION — a man's work & livelihood, on the guild engine.
+   The tracker (his own work) opening into the MASTERS (who built what he's building):
+     a WORK BLOCK (a week / a sprint) is the round · building alone is the LAB · the market is the FIELD.
+   Machines: CLASSIFY (your measured leak) · GATE (the stall that keeps recurring) · LAB (ship trend)
+             · SHIPPED (what you actually delivered) · ADVICE (tips by leak) · MASTERS (the pro-vision flywheel).
+   MASTERS: choose the ones who most connect to the vision, learn from their work (we link out, credit,
+   never re-host), and grow toward learning from them directly — the initial mentor hands you to a real one.
+   Storage = localStorage · render = vanilla · offline, private, yours.
+   ============================================================ */
+var STORAGE_KEY = "provision-v1";
+var T = { paper:"#EEF3F2", card:"#FFFFFF", rule:"#0E5A5A", ruleSoft:"#B8D2CF", ink:"#0E2320",
+          graphite:"#4C635F", red:"#B23A2A", green:"#2E7D4F", amber:"#A9781A" };
+
+function norm(s){ return (s||"").trim().toLowerCase(); }
+function avg(a){ return a.length ? a.reduce(function(x,y){return x+y;},0)/a.length : null; }
+function fmt(n,d){ if(d===undefined)d=1; return (n===null||n===undefined||isNaN(n)) ? "—" : n.toFixed(d); }
+function sgn(n,d){ if(n===null||n===undefined||isNaN(n)) return "—"; return (n>=0?"+":"")+n.toFixed(d===undefined?1:d); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function num(v){ v=Number(v); return isNaN(v)?0:v; }
+
+/* the performance number the LAB trends: shipped minus dropped. Higher is better.
+   dropped = things committed to that did not ship = max(0, committed − shipped). */
+function dropped(s){ return Math.max(0, num(s.committed)-num(s.shipped)); }
+function control(s){ return num(s.shipped) - dropped(s); }
+
+var WORKTYPES = [["trade","A trade / craft"],["service","A service business"],["product","A product / making"],["creative","Creative / content"],["homestead","Farm / homestead"],["job","A job / role"],["other","Other"]];
+function workLabel(k){ for(var i=0;i<WORKTYPES.length;i++) if(WORKTYPES[i][0]===k) return WORKTYPES[i][1]; return k; }
+
+var LEAKS = [["finishing","Finishing / shipping"],["margin","Margin / getting paid"],["focus","Focus / too many fronts"],["selling","Selling / the ask"],["general","General"]];
+function leakLabel(k){ for(var i=0;i<LEAKS.length;i++) if(LEAKS[i][0]===k) return LEAKS[i][1]; return k; }
+function tagToLeak(tag){ return tag==="The Unfinisher"?"finishing":tag==="No Margin"?"margin":tag==="Scattered"?"focus":null; }
+
+/* ---------- storage ---------- */
+function loadData(){
+  try{ var v=localStorage.getItem(STORAGE_KEY); if(v) return JSON.parse(v); }catch(e){}
+  return { settings:null, sessions:[] };
+}
+function persist(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); state.saveErr=false; }
+  catch(e){ state.saveErr=true; }
+}
+
+/* ---------- state ---------- */
+function newDraft(){
+  return { isHome:true, venue:"", date:todayISO(),
+           worktype:(typeof state!=="undefined" && state.data.settings ? state.data.settings.worktype : "trade"),
+           committed:"", shipped:"", value:"", hours:"",
+           stalls:[], stallInput:"", note:"" };
+}
+var state = { data:loadData(), tab:"session", draft:newDraft(), saveErr:false,
+              setupName:"", setupWork:"trade" };
+if(!state.data.ships)   state.data.ships   = [];   // shipped log: {id, name, clean, date}
+if(!state.data.advice)  state.data.advice  = [];   // advice corpus: {id, leak, text, url, source, helped, added}
+if(!state.data.masters) state.data.masters = [];   // the pro-vision flywheel: {id, name, built, url, reached, added}
+state.shipForm   = {name:"", clean:true};
+state.adviceForm = {leak:"finishing", text:"", url:"", source:""};
+state.masterForm = {name:"", built:"", url:""};
+
+/* ---------- analysis (the golf/grappling/music machine) ---------- */
+function analyze(sessions){
+  var sorted = sessions.slice().sort(function(a,b){ return a.date<b.date?-1:a.date>b.date?1:a.id-b.id; });
+  var home=[], away=[], firstSeen={};
+  sorted.forEach(function(s){
+    if(s.isHome) home.push(s);
+    else { away.push(s); var k=norm(s.venue); if(k && !(k in firstSeen)) firstSeen[k]=s.id; }
+  });
+  var hc = home.map(control), readings=[];
+  for(var i=5;i<home.length;i++){
+    var cur=(hc[i]+hc[i-1]+hc[i-2])/3, prev=(hc[i-3]+hc[i-4]+hc[i-5])/3;
+    readings.push({cur:cur, prev:prev, delta:cur-prev});
+  }
+  var streak=0;
+  for(var j=readings.length-1;j>=0;j--){ if(readings[j].delta<=0) streak++; else break; }
+  var last=readings[readings.length-1]||null;
+  var homeCur3  = home.length>=3 ? (hc[hc.length-1]+hc[hc.length-2]+hc[hc.length-3])/3 : null;
+  var homePrev3 = home.length>=6 ? (hc[hc.length-4]+hc[hc.length-5]+hc[hc.length-6])/3 : null;
+  var aw=away.map(control);
+  var away5 = away.length>=5 ? aw.slice(-5).reduce(function(x,y){return x+y;},0)/5 : null;
+  var gap = (away5!==null && homeCur3!==null) ? homeCur3-away5 : null;
+  return {sorted:sorted, home:home, away:away, readings:readings, streak:streak, last:last,
+          homeCur3:homeCur3, homePrev3:homePrev3, away5:away5, gap:gap, firstSeen:firstSeen};
+}
+
+/* recurring stalls — the gate: a stall that hits twice is a hole, not bad luck */
+function recurringStalls(sessions){
+  var by={};
+  sessions.forEach(function(s){ (s.stalls||[]).forEach(function(nm){ var k=norm(nm); if(!k) return; by[k]=by[k]||{name:nm,c:0}; by[k].c++; }); });
+  return Object.keys(by).map(function(k){return by[k];}).sort(function(a,b){return b.c-a.c;});
+}
+function anyStallsLogged(sessions){ return sessions.some(function(s){ return (s.stalls||[]).length; }); }
+
+function valueTrend(sessions){
+  var t=sessions.map(function(s){return num(s.value);}).filter(function(x){return x>0;});
+  if(t.length<4) return null;
+  var half=Math.floor(t.length/2);
+  return avg(t.slice(half)) - avg(t.slice(0,half));
+}
+
+/* ---------- shipped (chart your game) ---------- */
+function shipStats(){
+  var by={}; (state.data.ships||[]).forEach(function(m){ var k=norm(m.name); (by[k]=by[k]||{name:m.name, n:0, f:0}); by[k].n++; if(m.clean) by[k].f++; });
+  return Object.keys(by).map(function(k){ var r=by[k]; r.rate=r.n?r.f/r.n:0; return r; }).sort(function(a,b){ return b.f-a.f || b.n-a.n; });
+}
+
+/* ============================================================ render ============================================================ */
+var app = document.getElementById("app");
+
+function header(home){
+  return '<header class="hd"><div class="in">'+
+    '<div><div class="disp" style="font-size:30px;font-weight:700;line-height:1">Provision</div>'+
+    '<div class="mono" style="font-size:11px;opacity:.8;margin-top:4px">SHIP YOUR WORK · GROW YOUR CRAFT</div></div>'+
+    (home ? '<div style="text-align:right"><div class="mono" style="font-size:10px;opacity:.7">YOUR WORK</div>'+
+      '<div class="disp" style="font-size:16px;font-weight:600">'+esc(home)+'</div></div>' : '')+
+    '</div></header>';
+}
+function tabsView(){
+  var items=[["session","New block"],["inst","Read"],["game","Shipped"],["advice","Advice"],["masters","Masters"],["log","Log"]];
+  return '<nav class="tabs"><div class="in">'+items.map(function(it){
+    return '<button data-act="tab" data-k="'+it[0]+'" aria-selected="'+(state.tab===it[0])+'">'+it[1]+'</button>';
+  }).join("")+'</div></nav>';
+}
+
+/* ---------- setup ---------- */
+function setupView(){
+  var opts=WORKTYPES.map(function(d){ return '<option value="'+d[0]+'"'+(state.setupWork===d[0]?" selected":"")+'>'+d[1]+'</option>'; }).join("");
+  return '<main style="padding:20px 16px 64px">'+
+    '<h2 class="disp" style="font-size:24px;margin:0 0 4px">Name your work</h2>'+
+    '<p style="color:'+T.graphite+';font-size:14px;margin:0 0 16px">A man provides by shipping — turning effort into something delivered. This measures whether you actually ship, and what keeps stalling you. You against your own past, never a leaderboard.</p>'+
+    '<label class="mono" style="font-size:11px;color:'+T.graphite+'">THE KIND OF WORK</label>'+
+    '<select id="setupWork" class="field" style="margin-top:4px">'+opts+'</select>'+
+    '<label class="mono" style="font-size:11px;color:'+T.graphite+';display:block;margin-top:16px">A NAME FOR IT (optional)</label>'+
+    '<input id="setupName" class="field" style="margin-top:4px" placeholder="e.g. the woodshop, the freelance line" value="'+esc(state.setupName)+'">'+
+    '<button class="cta" data-act="lock" style="margin-top:20px">Start the ledger</button>'+
+    '<p class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:14px">Nothing leaves this device. Log a work block (a week, a sprint) as you finish it — three blocks before the first honest read. The Masters tab is where you gather the ones who built what you’re building.</p>'+
+    '</main>';
+}
+
+/* ---------- new block ---------- */
+function numField(id,label,ph){
+  return '<div class="numblk"><label class="mono">'+label+'</label>'+
+    '<input id="'+id+'" type="number" inputmode="decimal" min="0" class="field mono" style="margin-top:3px" placeholder="'+(ph||"")+'" value="'+esc(state.draft[id]!==undefined?state.draft[id]:"")+'"></div>';
+}
+function sessionView(){
+  var dr=state.draft;
+  var wopts=WORKTYPES.map(function(d){ return '<option value="'+d[0]+'"'+(dr.worktype===d[0]?" selected":"")+'>'+d[1]+'</option>'; }).join("");
+  var canSave = num(dr.committed)>=1 || num(dr.shipped)>=1;
+  var out = !dr.isHome ? (
+    '<div style="margin-top:10px"><label class="mono" style="font-size:11px;color:'+T.graphite+'">FOR WHOM — client, customer, market</label>'+
+    '<input id="venue" class="field" style="margin-top:4px" placeholder="Who did you ship it to?" value="'+esc(dr.venue)+'"></div>') : "";
+  var stallChips = dr.stalls.map(function(nm,i){ return '<span class="chip">'+esc(nm)+'<button data-act="delStall" data-i="'+i+'">×</button></span>'; }).join("");
+  return ''+
+    '<div class="tg" style="margin-bottom:10px">'+
+      '<button data-act="toggleHome" data-v="true" aria-pressed="'+(dr.isHome)+'">Building — lab</button>'+
+      '<button data-act="toggleHome" data-v="false" aria-pressed="'+(!dr.isHome)+'">In the market — field</button></div>'+
+    out+
+    '<div class="grid2" style="margin-top:10px">'+
+      '<div class="numblk"><label class="mono">DATE (block end)</label><input id="date" type="date" class="field mono" style="margin-top:3px" value="'+esc(dr.date)+'"></div>'+
+      '<div class="numblk"><label class="mono">WORK</label><select id="work" class="field soft" style="margin-top:3px">'+wopts+'</select></div>'+
+    '</div>'+
+    '<div class="pnl" style="margin-top:12px"><div class="lab" style="background:'+T.rule+'">THE BLOCK</div><div class="bd">'+
+      '<div class="grid2">'+numField("committed","COMMITTED TO","things you set out to finish")+numField("shipped","ACTUALLY SHIPPED","delivered / done")+'</div>'+
+      '<div class="grid2" style="margin-top:8px">'+numField("value","VALUE PRODUCED ($, optional)","income / value")+numField("hours","HOURS (optional)","")+'</div>'+
+      '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">Shipped = delivered, out the door, done — not "worked on." Honest counts. Value is whatever a block produced (money, or a thing that stands). The trend is what matters.</div>'+
+    '</div></div>'+
+    '<div class="pnl"><div class="lab" style="background:'+T.rule+'">WHAT STALLED YOU — where the work stuck (optional, but this is where the gate lives)</div><div class="bd">'+
+      '<div style="display:flex;gap:8px"><input id="stallInput" class="field" placeholder="e.g. pricing, the last 10%, follow-up, waiting on a decision" value="'+esc(dr.stallInput)+'">'+
+        '<button class="findbtn" data-act="addStall" style="white-space:nowrap">Add</button></div>'+
+      (stallChips?'<div style="margin-top:6px">'+stallChips+'</div>':"")+
+      '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:6px">Name what stalled the work. The same stall twice becomes a flagged hole — the one bottleneck to attack.</div>'+
+    '</div></div>'+
+    '<input id="note" class="field" placeholder="One note (optional) — what you’re building toward" value="'+esc(dr.note)+'" style="margin-bottom:12px">'+
+    '<button class="cta" data-act="save"'+(canSave?"":" disabled")+'>Log the block</button>';
+}
+
+/* ---------- classify ---------- */
+function profile(){
+  var ss=state.data.sessions;
+  var committed=ss.reduce(function(a,s){return a+num(s.committed);},0)||0;
+  var shipped=ss.reduce(function(a,s){return a+num(s.shipped);},0);
+  var drop=ss.reduce(function(a,s){return a+dropped(s);},0);
+  var rec=recurringStalls(ss).filter(function(x){return x.c>=2;});
+  var vals=ss.map(function(s){return num(s.value);}).filter(function(x){return x>0;});
+  return { n:ss.length, committed:committed, shipped:shipped, drop:drop,
+           avgControl: ss.length?avg(ss.map(control)):null,
+           shipRate: committed?shipped/committed:null,
+           avgValue: vals.length?avg(vals):null,
+           valueTrend: valueTrend(ss),
+           recurring: rec };
+}
+function classify(p){
+  if(p.n<3) return {tag:"Collecting", tone:T.graphite, why:p.n+"/3 blocks before the read — the classification is MEASURED, never guessed. Ship.", focus:null};
+  var leaks=[];
+  if(p.shipRate!==null) leaks.push({cost:(1-Math.min(1,p.shipRate))*1.0, tag:"The Unfinisher",
+    why:"You ship "+Math.round(Math.min(1,p.shipRate)*100)+"% of what you commit to — the ideas outrun the finishing.",
+    focus:"Commit to less and finish it. One thing shipped beats three at 80%. Define 'done' before you start, and don't start the next until this one is out the door."});
+  if(p.valueTrend!==null) leaks.push({cost:Math.max(0,-p.valueTrend)*0.002 + (p.avgValue!==null&&p.avgValue<1?0.3:0), tag:"No Margin",
+    why:"The value a block produces isn’t climbing ("+sgn(p.valueTrend,0)+" a block) — you’re busy, but it isn’t compounding.",
+    focus:"Charge for the value, not the hours — and raise it. Cut the work that doesn’t pay or build. Provision means the effort turns into something that lasts, not just motion."});
+  var stallCount = recurringStalls(state.data.sessions).filter(function(x){return x.c>=2;}).length;
+  if(stallCount>=2) leaks.push({cost:0.5, tag:"Scattered",
+    why:"You’re stalling on several different fronts — the work is spread too thin to gather momentum.",
+    focus:"Narrow to one front until it ships. Momentum is a stack of finished things; you can’t stack while you’re juggling."});
+  leaks.sort(function(a,b){ return b.cost-a.cost; });
+  var top=leaks[0];
+  if(!top || top.cost<0.35) return {tag:"Shipping", tone:T.green, why:"No single leak — you finish what you start and the value is holding or climbing. Nothing bleeding.",
+    focus:"Raise the ceiling. You’re shipping reliably now — take on the harder thing, or charge what it’s worth, and put a master in front of you (the Masters tab)."};
+  return {tag:top.tag, tone:top.cost>0.6?T.red:T.amber, why:top.why, focus:top.focus};
+}
+function pill(label,val){ return '<span style="background:#DCEAE8;border:1px solid '+T.ruleSoft+';border-radius:12px;padding:3px 9px;white-space:nowrap"><span class="mono" style="font-size:9px;color:'+T.graphite+'">'+label+'</span> <span class="mono" style="font-size:13px;font-weight:600">'+val+'</span></span>'; }
+function profileView(){
+  var p=profile(), c=classify(p), facts="";
+  if(p.avgControl!==null) facts+=pill("Net shipped/block", sgn(p.avgControl));
+  if(p.shipRate!==null) facts+=pill("Ship rate", Math.round(Math.min(1,p.shipRate)*100)+"%");
+  if(p.avgValue!==null) facts+=pill("Value/block", "$"+fmt(p.avgValue,0));
+  if(p.valueTrend!==null) facts+=pill("Value trend", sgn(p.valueTrend,0));
+  return panel("READ — classified by your measurements ("+p.n+" block"+(p.n!==1?"s":"")+")", c.tone,
+    (facts?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">'+facts+'</div>':"")+
+    '<div class="disp" style="font-size:20px;font-weight:700;color:'+c.tone+'">'+c.tag+'</div>'+
+    (c.why?'<div style="font-size:14px;margin-top:2px">'+c.why+'</div>':"")+
+    (c.focus?'<div style="margin-top:8px;padding:8px 10px;background:#E1EDEB;border-left:3px solid '+c.tone+';border-radius:2px"><span class="mono" style="font-size:10px;color:'+T.graphite+'">PROBABLE BEST FOCUS</span><div style="font-size:14px;margin-top:2px">'+c.focus+'</div></div>':"")+
+    '<div class="mono" style="font-size:10px;color:'+T.graphite+';margin-top:8px">Measured, not guessed — every line is a number you can check. As more builders are measured, “focus” becomes “what actually worked for men building like you.”</div>');
+}
+
+function fittedAdviceView(){
+  var p=profile(); if(p.n<3) return "";
+  var all=state.data.advice||[]; if(!all.length) return "";
+  var c=classify(p), leak=tagToLeak(c.tag);
+  if(!leak) return "";
+  var pool=all.filter(function(x){return x.leak===leak;});
+  function rank(x){ return x.helped===true?0:(x.helped===false?2:1); }
+  pool=pool.slice().sort(function(a,b){ return rank(a)-rank(b) || b.id-a.id; });
+  var LK=esc(leakLabel(leak).toUpperCase());
+  if(!pool.length) return panel("ADVICE FOR YOUR LEAK — "+LK, c.tone,
+    '<div style="font-size:14px">Nothing gathered yet for <b>'+esc(leakLabel(leak))+'</b> — your measured leak. Add a tip for it in the Advice tab and it will surface right here.</div>');
+  var items=pool.slice(0,3).map(function(x){
+    var link=x.url?' <a href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer nofollow" class="mono" style="font-size:11px;color:'+T.rule+';font-weight:600">▶ read →</a>':"";
+    var src=x.source?' <span class="mono" style="font-size:11px;color:'+T.graphite+'">— '+esc(x.source)+'</span>':"";
+    var mark=x.helped===true?'<span class="mono" style="font-size:10px;color:'+T.green+'">✓ worked for you</span>'
+            :x.helped===false?'<span class="mono" style="font-size:10px;color:'+T.red+'">✗ didn’t work</span>'
+            :'<span class="mono" style="font-size:10px;color:'+T.amber+'">untried</span>';
+    return '<div style="padding:8px 0;border-top:0.5px solid '+T.ruleSoft+'"><div style="font-size:14px">'+esc(x.text)+'</div><div style="margin-top:4px">'+mark+src+link+'</div></div>';
+  }).join("");
+  return panel("ADVICE FOR YOUR LEAK — "+LK, c.tone,
+    '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-bottom:2px">Surfaced because it’s tagged to your measured leak — <b>fit, not popularity</b>. Still quarantined; your work decides.</div>'+items);
+}
+
+function instrumentsView(){
+  var out = profileView() + fittedAdviceView();
+  var a=analyze(state.data.sessions);
+  // GATE
+  var rec=recurringStalls(state.data.sessions).filter(function(x){return x.c>=2;});
+  var gateBody, gateTone;
+  if(!anyStallsLogged(state.data.sessions)){ gateTone=T.graphite; gateBody='<div class="muted">No stalls logged yet. Name what stalls the work on the block card and the recurring bottlenecks surface here.</div>'; }
+  else if(rec.length){ gateTone=T.red;
+    gateBody='<div style="font-size:15px;margin-bottom:6px">Stalled more than once by:</div>'+
+      rec.map(function(x){ return '<span class="chip" style="border-color:'+T.red+'">'+esc(x.name)+' <span class="mono" style="font-size:11px;color:'+T.red+'">×'+x.c+'</span></span>'; }).join("")+
+      '<div style="color:'+T.graphite+';font-size:13px;margin-top:8px">The same stall twice is a bottleneck, not bad luck. Fix the system around it — a template, a price, a default — so it stops costing you the same week twice.</div>'; }
+  else { gateTone=T.green; gateBody='<div style="font-size:15px">Nothing has stalled you twice. Your pipeline isn’t leaking the same way — hold that.</div>'; }
+  out += panel("GATE — the stall that keeps recurring", gateTone, gateBody);
+  // LAB
+  var verdict;
+  if(a.home.length<6) verdict={tone:T.graphite,head:"Collecting",text:a.home.length+"/6 building blocks before the first reading. Ship."};
+  else if(a.last.delta>0) verdict={tone:T.green,head:"Working",text:"Current 3-block net-shipped beat the previous by "+fmt(a.last.delta)+". Hold the plan."};
+  else if(a.streak>=2) verdict={tone:T.red,head:"Change the system",text:"Two readings without progress. Change how you work — the current approach isn’t moving the number."};
+  else verdict={tone:T.amber,head:"Adjust",text:"Reading flat ("+sgn(a.last.delta)+"). Small changes are cheap; a bigger change needs a second flat reading."};
+  var lab = bigPair(["NET-SHIPPED 3",sgn(a.homeCur3)],["PREVIOUS 3",sgn(a.homePrev3)])+
+    '<div style="margin-top:10px;padding:10px 12px;background:#E1EDEB;border-left:3px solid '+verdict.tone+';border-radius:2px">'+
+      '<div class="disp" style="font-size:16px;font-weight:700;color:'+verdict.tone+'">'+verdict.head+'</div>'+
+      '<div style="font-size:14px;margin-top:2px">'+verdict.text+'</div></div>'+
+    (a.home.length>=3 ? spark(a.home.map(control)) : "")+
+    '<div class="mono" style="font-size:10px;color:'+T.graphite+';margin-top:6px">Net-shipped = delivered − dropped, per block. Higher is better. You vs your own past — never a leaderboard.</div>';
+  out += panel("LAB — building 3-block average", T.rule, lab);
+  // FIELD
+  var field;
+  if(a.away5===null) field='<div class="muted">'+a.away.length+'/5 blocks shipped to a real client or market. Validation only — no steering authority. Building is proven when someone else pays for it or depends on it.</div>';
+  else field=bigPair(["MARKET 5-AVG",sgn(a.away5)],["GAP vs LAB", a.gap===null?"—":sgn(a.gap)])+
+    (a.gap!==null?'<div style="font-size:13px;color:'+T.graphite+';margin-top:8px">Gap = workshop inflation. Shrinking gap → your work survives contact with the market. Widening gap → you finish for yourself but it stalls when real stakes arrive.</div>':"");
+  out += panel("FIELD — market 5-block average", T.rule, field);
+  return out;
+}
+function panel(label,tone,body){ return '<section class="pnl"><div class="lab" style="background:'+tone+'">'+label+'</div><div class="bd">'+body+'</div></section>'; }
+function bigPair(a,b){
+  return '<div style="display:flex;gap:24px;align-items:baseline">'+
+    '<div><div class="mono" style="font-size:10px;color:'+T.graphite+'">'+a[0]+'</div>'+
+    '<div class="mono" style="font-size:34px;font-weight:600;line-height:1.1">'+a[1]+'</div></div>'+
+    '<div><div class="mono" style="font-size:10px;color:'+T.graphite+'">'+b[0]+'</div>'+
+    '<div class="mono" style="font-size:22px;font-weight:500;color:'+T.graphite+'">'+b[1]+'</div></div></div>';
+}
+function spark(series){
+  var w=260,h=44,pad=3, min=Math.min.apply(null,series), max=Math.max.apply(null,series), span=(max-min)||1;
+  function pt(v,i){ var x=pad+(i*(w-2*pad))/Math.max(1,series.length-1); var y=pad+(1-(v-min)/span)*(h-2*pad); return [x,y]; }
+  var poly=series.map(function(v,i){var p=pt(v,i);return p[0]+","+p[1];}).join(" ");
+  var dots=series.map(function(v,i){var p=pt(v,i);return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.2" fill="'+T.rule+'"/>';}).join("");
+  return '<svg width="'+w+'" height="'+h+'" style="margin-top:10px;display:block" aria-label="building net-shipped trend"><polyline points="'+poly+'" fill="none" stroke="'+T.rule+'" stroke-width="1.5"/>'+dots+'</svg>';
+}
+function badge(text,color){ return '<span class="badge" style="background:'+color+'">'+text+'</span>'; }
+
+/* ---------- shipped (chart your game) ---------- */
+function gameView(){
+  var f=state.shipForm, rows=shipStats();
+  var form='<div class="pnl"><div class="lab" style="background:'+T.rule+'">SHIPPED — log something delivered</div><div class="bd">'+
+    '<div style="flex:1"><label class="mono" style="font-size:11px;color:'+T.graphite+'">WHAT — a project, product, job, deliverable</label><input id="shipName" class="field" style="margin-top:4px" placeholder="e.g. the deck build, the logo package, the harvest" value="'+esc(f.name)+'"></div>'+
+    '<div class="tg" style="margin-top:8px">'+
+      '<button data-act="shipFin" data-v="true" aria-pressed="'+(f.clean)+'">Shipped clean ✓</button>'+
+      '<button data-act="shipFin" data-v="false" aria-pressed="'+(!f.clean)+'">Fell through ✗</button></div>'+
+    '<button class="findbtn" data-act="addShip" style="margin-top:10px">Add</button>'+
+    '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">Log what you set out to deliver — shipped or fell through. Your track record is the ones that landed; a "fell through" is one you started and didn’t finish.</div>'+
+  '</div></div>';
+  var chart;
+  if(!rows.length){ chart='<div class="muted">Nothing logged yet. Add a few and your track record charts itself — what you finish, what slips.</div>'; }
+  else{
+    chart='<div class="pnl"><div class="lab" style="background:'+T.rule+'">YOUR TRACK RECORD — what you actually deliver</div><div class="bd">'+
+      rows.map(function(r){
+        var pct=Math.round(r.rate*100), barW=Math.max(2,r.rate*100);
+        var tone=r.rate>=0.6&&r.n>=3?T.green:(r.n>=4&&r.rate<0.25?T.amber:T.rule);
+        var flag = r.rate>=0.6&&r.n>=3 ? ' <span class="mono" style="color:'+T.green+';font-size:10px">reliable</span>'
+                 : (r.n>=4&&r.rate<0.25 ? ' <span class="mono" style="color:'+T.amber+';font-size:10px">keeps slipping — narrow it</span>' : "");
+        return '<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;align-items:baseline">'+
+          '<span class="disp" style="font-size:15px;font-weight:600">'+esc(r.name)+flag+'</span>'+
+          '<span class="mono" style="font-size:13px">'+pct+'% <span style="color:'+T.graphite+';font-size:11px">('+r.f+'/'+r.n+')</span></span></div>'+
+          '<div style="position:relative;height:14px;background:#DCEAE8;border-radius:7px;margin-top:3px">'+
+            '<div style="position:absolute;left:0;width:'+barW+'%;top:0;bottom:0;background:'+tone+';border-radius:7px;opacity:.85"></div></div></div>';
+      }).join("")+
+      '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:6px">Bar = ship rate. Sorted by things delivered — your most reliable work on top. Measured, not a portfolio reel.</div>'+
+      '</div></div>';
+  }
+  return form+chart;
+}
+
+/* ---------- advice ---------- */
+function adviceView(){
+  var f=state.adviceForm;
+  var opts=LEAKS.map(function(l){ return '<option value="'+l[0]+'"'+(f.leak===l[0]?" selected":"")+'>'+l[1]+'</option>'; }).join("");
+  var form='<div class="pnl"><div class="lab" style="background:'+T.rule+'">GATHER ADVICE — a tip, and where it came from</div><div class="bd">'+
+    '<label class="mono" style="font-size:11px;color:'+T.graphite+'">WHICH LEAK IT ADDRESSES</label><br>'+
+    '<select id="adviceLeak" class="field soft" style="margin-top:4px;width:auto">'+opts+'</select>'+
+    '<textarea id="adviceText" class="field" style="margin-top:8px;min-height:64px;resize:vertical" placeholder="The principle or method, in the words you heard it — what to DO.">'+esc(f.text)+'</textarea>'+
+    '<input id="adviceUrl" class="field mono" style="margin-top:8px;font-size:12px" placeholder="Link (optional) — we link out, never rehost" value="'+esc(f.url)+'">'+
+    '<input id="adviceSource" class="field" style="margin-top:8px" placeholder="Who said it (optional) — give them the credit" value="'+esc(f.source)+'">'+
+    '<button class="findbtn" data-act="postAdvice" style="margin-top:10px">Add to the corpus</button>'+
+    '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">Everything here is <b style="color:'+T.amber+'">quarantined</b> — gathered, never proven. A tip proposes; your work disposes. It counts for nothing until your own blocks say it works for <i>you</i>.</div>'+
+    '</div></div>';
+  var items=(state.data.advice||[]).slice().reverse();
+  var list = items.length ? items.map(function(x){
+    var link = x.url ? '<a href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer nofollow" class="mono" style="font-size:12px;color:'+T.rule+';font-weight:600">▶ read →</a>' : "";
+    var src  = x.source ? '<span class="mono" style="font-size:11px;color:'+T.graphite+'">— '+esc(x.source)+'</span>' : "";
+    var yes=x.helped===true, no=x.helped===false;
+    return '<div class="pnl"><div class="lab" style="background:'+T.amber+'">QUARANTINED · '+esc(leakLabel(x.leak).toUpperCase())+'</div><div class="bd">'+
+      '<div style="font-size:14px">'+esc(x.text)+'</div>'+(src?'<div style="margin-top:4px">'+src+'</div>':"")+(link?'<div style="margin-top:6px">'+link+'</div>':"")+
+      '<div style="display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap">'+
+        '<span class="mono" style="font-size:10px;color:'+T.graphite+'">DID IT WORK FOR YOU?</span>'+
+        '<button class="findbtn" data-act="helped" data-id="'+x.id+'" data-v="yes" style="padding:4px 10px'+(yes?';background:'+T.green+';color:#fff;border-color:'+T.green:'')+'">helped ✓</button>'+
+        '<button class="findbtn" data-act="helped" data-id="'+x.id+'" data-v="no" style="padding:4px 10px'+(no?';background:'+T.red+';color:#fff;border-color:'+T.red:'')+'">didn’t ✗</button>'+
+        '<button class="del" data-act="delAdvice" data-id="'+x.id+'" style="margin-left:auto">delete</button>'+
+      '</div></div></div>';
+  }).join("") : '<div class="muted">No advice gathered yet. When something worth trying comes your way — a principle, a method — put it here, tagged to the leak it fixes, and let your own work be the judge.</div>';
+  return form+list;
+}
+
+/* ---------- MASTERS — the pro-vision flywheel ---------- */
+function mastersView(){
+  var f=state.masterForm;
+  var form='<div class="pnl"><div class="lab" style="background:'+T.rule+'">A MASTER — someone who built what you’re building</div><div class="bd">'+
+    '<input id="masterName" class="field" placeholder="Their name" value="'+esc(f.name)+'">'+
+    '<input id="masterBuilt" class="field" style="margin-top:8px" placeholder="What they built (in a line)" value="'+esc(f.built)+'">'+
+    '<input id="masterUrl" class="field mono" style="margin-top:8px;font-size:12px" placeholder="Where to learn from them (their site / channel) — we link out, never rehost" value="'+esc(f.url)+'">'+
+    '<button class="findbtn" data-act="addMaster" style="margin-top:10px">Add</button>'+
+    '<div class="mono" style="font-size:11px;color:'+T.graphite+';margin-top:8px">Choose the ones who most connect to what you want to become — not the loudest, the truest. Learn from their work first. As you ship, the path opens toward learning from them <i>directly</i>.</div>'+
+    '</div></div>';
+  var items=(state.data.masters||[]).slice().reverse();
+  var list = items.length ? items.map(function(x){
+    var link=x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer nofollow" class="mono" style="font-size:12px;color:'+T.rule+';font-weight:600">▶ learn from them →</a>':"";
+    var reached=x.reached?'<span class="mono" style="font-size:10px;color:'+T.green+'">◉ reached out</span>':'<span class="mono" style="font-size:10px;color:'+T.graphite+'">not yet</span>';
+    return '<div class="pnl"><div class="lab" style="background:'+T.rule+'">MASTER</div><div class="bd">'+
+      '<div class="disp" style="font-size:18px;font-weight:700">'+esc(x.name)+'</div>'+
+      (x.built?'<div style="font-size:14px;color:'+T.graphite+';margin-top:2px">'+esc(x.built)+'</div>':"")+
+      (link?'<div style="margin-top:8px">'+link+'</div>':"")+
+      '<div style="display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap">'+
+        '<span class="mono" style="font-size:10px;color:'+T.graphite+'">HAVE YOU REACHED OUT?</span>'+
+        '<button class="findbtn" data-act="reached" data-id="'+x.id+'" style="padding:4px 10px'+(x.reached?';background:'+T.green+';color:#fff;border-color:'+T.green:'')+'">'+(x.reached?"yes ✓":"mark reached")+'</button>'+
+        '<button class="del" data-act="delMaster" data-id="'+x.id+'" style="margin-left:auto">delete</button>'+
+      '</div></div></div>';
+  }).join("") : '<div class="muted">No masters gathered yet. The first mentor is this tool; the real ones are people. Name the ones who built what you’re building, learn from their work, and grow toward them.</div>';
+  return form+list;
+}
+
+/* ---------- log ---------- */
+function logView(){
+  var a=analyze(state.data.sessions);
+  if(a.sorted.length===0) return '<div class="muted">No blocks logged. The ledger is an invitation.</div>';
+  return a.sorted.slice().reverse().map(function(s){
+    var isFirst=!s.isHome && s.venue && a.firstSeen[norm(s.venue)]===s.id;
+    var badges=(s.isHome?badge("LAB",T.rule):"")+(!s.isHome&&!isFirst?badge("MARKET",T.graphite):"")+(isFirst?badge("FIRST TO MARKET",T.amber):"");
+    var ctrl=control(s);
+    var where=s.isHome?"Building":(s.venue||"Market");
+    return '<div class="logitem"><div style="display:flex;justify-content:space-between;align-items:baseline">'+
+      '<div><span class="disp" style="font-size:16px;font-weight:600">'+esc(where)+'</span>'+
+      '<span class="mono" style="font-size:11px;color:'+T.graphite+';margin-left:8px">'+esc(s.date)+'</span>'+badges+'</div>'+
+      '<div class="mono" style="font-size:20px;font-weight:600;color:'+(ctrl>=0?T.green:T.red)+'">'+sgn(ctrl)+'</div></div>'+
+      '<div class="mono" style="font-size:12px;color:'+T.graphite+';margin-top:4px">'+workLabel(s.worktype)+' · shipped '+num(s.shipped)+'/'+num(s.committed)+
+      (num(s.value)?' · $'+num(s.value):"")+((s.stalls||[]).length?' · stalled on '+s.stalls.map(esc).join(", "):"")+'</div>'+
+      (s.note?'<div style="font-size:13px;margin-top:4px">'+esc(s.note)+'</div>':"")+
+      '<div style="text-align:right"><button class="del" data-act="del" data-id="'+s.id+'">delete</button></div></div>';
+  }).join("");
+}
+
+/* ---------- render ---------- */
+function render(){
+  var d=state.data;
+  var html=header(d.settings && d.settings.worktype ? workLabel(d.settings.worktype) : null);
+  if(!d.settings){ html += setupView(); }
+  else{
+    html += tabsView();
+    if(state.saveErr) html += '<div style="max-width:680px;margin:0 auto;padding:8px 16px;color:'+T.red+';font-size:13px">Storage unavailable — blocks will not survive a reload.</div>';
+    html += '<main>';
+    if(state.tab==="session") html += sessionView();
+    else if(state.tab==="inst") html += instrumentsView();
+    else if(state.tab==="game") html += gameView();
+    else if(state.tab==="advice") html += adviceView();
+    else if(state.tab==="masters") html += mastersView();
+    else if(state.tab==="log") html += logView();
+    html += '</main>';
+  }
+  app.innerHTML = html;
+  wire();
+}
+
+function wire(){
+  var sw=document.getElementById("setupWork"); if(sw) sw.addEventListener("change",function(){ state.setupWork=sw.value; });
+  bindInput("setupName", function(v){ state.setupName=v; });
+  bindInput("venue", function(v){ state.draft.venue=v; });
+  bindInput("date", function(v){ state.draft.date=v; });
+  var wc=document.getElementById("work"); if(wc) wc.addEventListener("change",function(){ state.draft.worktype=wc.value; });
+  ["committed","shipped","value","hours"].forEach(function(id){ bindInput(id, function(v){ state.draft[id]=v; if(id==="committed"||id==="shipped") refreshSaveEnabled(); }); });
+  bindInput("stallInput", function(v){ state.draft.stallInput=v; });
+  bindInput("note", function(v){ state.draft.note=v; });
+  bindInput("shipName", function(v){ state.shipForm.name=v; });
+  var advLeak=document.getElementById("adviceLeak"); if(advLeak) advLeak.addEventListener("change",function(){ state.adviceForm.leak=advLeak.value; });
+  bindInput("adviceText", function(v){ state.adviceForm.text=v; });
+  bindInput("adviceUrl", function(v){ state.adviceForm.url=v; });
+  bindInput("adviceSource", function(v){ state.adviceForm.source=v; });
+  bindInput("masterName", function(v){ state.masterForm.name=v; });
+  bindInput("masterBuilt", function(v){ state.masterForm.built=v; });
+  bindInput("masterUrl", function(v){ state.masterForm.url=v; });
+  app.querySelectorAll("[data-act]").forEach(function(el){ el.addEventListener("click", function(){ act(el); }); });
+}
+function bindInput(id,fn){ var el=document.getElementById(id); if(el) el.addEventListener("input",function(){ fn(el.value); }); }
+function toggleDisabled(actName,enabled){ var b=app.querySelector('[data-act="'+actName+'"]'); if(b) b.disabled=!enabled; }
+function refreshSaveEnabled(){ toggleDisabled("save", num(state.draft.committed)>=1 || num(state.draft.shipped)>=1); }
+
+/* ---------- actions ---------- */
+function act(el){
+  var a=el.getAttribute("data-act");
+  if(a==="tab"){ state.tab=el.getAttribute("data-k"); return render(); }
+  if(a==="lock"){ state.data.settings={worktype:state.setupWork||"trade", name:(state.setupName||"").trim()}; state.draft=newDraft(); persist(); return render(); }
+  if(a==="toggleHome"){ state.draft.isHome=el.getAttribute("data-v")==="true"; return render(); }
+  if(a==="addStall"){ var nm=(state.draft.stallInput||"").trim(); if(nm){ state.draft.stalls.push(nm); state.draft.stallInput=""; } return render(); }
+  if(a==="delStall"){ state.draft.stalls.splice(+el.getAttribute("data-i"),1); return render(); }
+  if(a==="shipFin"){ state.shipForm.clean=el.getAttribute("data-v")==="true"; return render(); }
+  if(a==="addShip"){ var mn=((document.getElementById("shipName")||{}).value||state.shipForm.name||"").trim(); if(!mn) return;
+    state.data.ships.push({id:Date.now(), name:mn, clean:!!state.shipForm.clean, date:todayISO()}); state.shipForm={name:"", clean:state.shipForm.clean}; persist(); return render(); }
+  if(a==="delShip"){ var mid=+el.getAttribute("data-id"); state.data.ships=(state.data.ships||[]).filter(function(m){return m.id!==mid;}); persist(); return render(); }
+  if(a==="postAdvice"){ var af=state.adviceForm, at=(af.text||"").trim(); if(!at) return;
+    var au=(af.url||"").trim(); if(au && !/^https?:\/\//i.test(au)) au="https://"+au;
+    state.data.advice.push({id:Date.now(), leak:af.leak||"general", text:at, url:au, source:(af.source||"").trim(), helped:null, added:todayISO()});
+    state.adviceForm={leak:af.leak||"finishing", text:"", url:"", source:""}; persist(); return render(); }
+  if(a==="helped"){ var hid=+el.getAttribute("data-id"), hv=el.getAttribute("data-v")==="yes";
+    state.data.advice=(state.data.advice||[]).map(function(x){ if(x.id===hid) x.helped=(x.helped===hv)?null:hv; return x; }); persist(); return render(); }
+  if(a==="delAdvice"){ var aid=+el.getAttribute("data-id"); state.data.advice=(state.data.advice||[]).filter(function(x){return x.id!==aid;}); persist(); return render(); }
+  if(a==="addMaster"){ var mnm=((document.getElementById("masterName")||{}).value||state.masterForm.name||"").trim(); if(!mnm) return;
+    var mu=(state.masterForm.url||"").trim(); if(mu && !/^https?:\/\//i.test(mu)) mu="https://"+mu;
+    state.data.masters.push({id:Date.now(), name:mnm, built:(state.masterForm.built||"").trim(), url:mu, reached:false, added:todayISO()});
+    state.masterForm={name:"", built:"", url:""}; persist(); return render(); }
+  if(a==="reached"){ var rid=+el.getAttribute("data-id"); state.data.masters=(state.data.masters||[]).map(function(x){ if(x.id===rid) x.reached=!x.reached; return x; }); persist(); return render(); }
+  if(a==="delMaster"){ var did=+el.getAttribute("data-id"); state.data.masters=(state.data.masters||[]).filter(function(x){return x.id!==did;}); persist(); return render(); }
+  if(a==="save"){ return saveSession(); }
+  if(a==="del"){ var id=+el.getAttribute("data-id"); state.data.sessions=state.data.sessions.filter(function(s){return s.id!==id;}); persist(); return render(); }
+}
+
+function saveSession(){
+  var dr=state.draft;
+  if(!(num(dr.committed)>=1 || num(dr.shipped)>=1)) return;
+  var s={ id:Date.now(), date:dr.date, worktype:dr.worktype, isHome:dr.isHome, venue:dr.isHome?"":dr.venue.trim(),
+          committed:num(dr.committed), shipped:num(dr.shipped), value:num(dr.value), hours:num(dr.hours),
+          stalls:dr.stalls.slice(), note:dr.note.trim() };
+  state.data.sessions = (state.data.sessions||[]).concat([s]);
+  persist();
+  state.draft=newDraft(); state.tab="inst"; render();
+}
+
+render();
+if("serviceWorker" in navigator){ navigator.serviceWorker.getRegistrations && navigator.serviceWorker.ready.catch(function(){}); }
+</script>
+</body>
+</html>
