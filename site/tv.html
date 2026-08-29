@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Narrow Highway TV — watch live, or from the start</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The museum as an old-school cable network. Channels over the halls — watch what's on now, or wind back to the start. Tell it what you're seeking and it curates a channel for you. Every program is a verified card from the keeping; nothing is generated.">
+<meta name="theme-color" content="#111">
+<style>
+  :root { --bg:#F7F6F2; --ink:#14140F; --soft:#54524A; --rule:#D8D5CC; --card:#FFFFFF; --acc:#7A1F1F; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#12120F; --ink:#ECEAE2; --soft:#A6A296; --rule:#2C2B25; --card:#1A1A15; --acc:#D98A5B; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif; line-height:1.5; }
+  .wrap { max-width:820px; margin:0 auto; padding:28px 20px 80px; }
+  header.top { border-bottom:2px solid var(--ink); padding-bottom:14px; margin-bottom:20px; }
+  .kick { font:600 12px/1 ui-monospace,"SFMono-Regular",Menlo,monospace; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--soft); }
+  h1 { font-size:30px; margin:8px 0 4px; letter-spacing:-.01em; }
+  .sub { color:var(--soft); font-size:15px; margin:0; }
+  form.seek { display:flex; gap:8px; margin:18px 0 4px; }
+  form.seek input { flex:1; min-width:0; font:inherit; font-size:16px; padding:11px 13px;
+    border:1.5px solid var(--rule); border-radius:9px; background:var(--card); color:var(--ink); }
+  form.seek button { font:600 15px/1 inherit; padding:0 16px; border:1.5px solid var(--ink);
+    border-radius:9px; background:var(--ink); color:var(--bg); cursor:pointer; }
+  .hint { color:var(--soft); font-size:13px; margin:6px 2px 0; }
+  section.ch { border:1.5px solid var(--rule); border-radius:12px; background:var(--card);
+    padding:16px 18px; margin:16px 0; }
+  section.ch.you { border-color:var(--acc); }
+  .chh { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .chname { font-size:20px; font-weight:700; }
+  .chline { color:var(--soft); font-size:13.5px; }
+  .live { font:600 11px/1 ui-monospace,monospace; letter-spacing:.1em; color:var(--acc);
+    border:1.4px solid var(--acc); border-radius:6px; padding:4px 7px; text-transform:uppercase; }
+  .now { margin:12px 0 6px; }
+  .now a, .up a, .rest a { color:inherit; text-decoration:none; }
+  .now a:hover, .up a:hover, .rest a:hover { text-decoration:underline; }
+  .nowt { font-size:18px; font-weight:600; }
+  .nowb { color:var(--soft); font-size:14.5px; margin-top:3px; }
+  .up { color:var(--soft); font-size:13.5px; margin-top:8px; }
+  details.rest { margin-top:10px; }
+  details.rest summary { cursor:pointer; font:600 13px/1 ui-monospace,monospace; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--soft); }
+  .rest ol { margin:10px 0 0; padding-left:22px; }
+  .rest li { margin:5px 0; font-size:15px; }
+  footer { margin-top:34px; padding-top:14px; border-top:1px solid var(--rule);
+    color:var(--soft); font-size:13px; }
+  .empty { color:var(--soft); font-style:italic; padding:20px 2px; }
+  a.home { color:var(--acc); text-decoration:none; font-weight:600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="kick">Narrow Highway · TV</div>
+    <h1>Watch live, or from the start.</h1>
+    <p class="sub">The museum as a cable network. Each channel is a hall; every program is a verified
+      card from the keeping — nothing here is made up. Say what you're seeking and a channel is yours.</p>
+    <form class="seek" onsubmit="return go(event)">
+      <input id="seek" type="search" placeholder="What are you seeking? (e.g. keeping water safe, a founder who failed first)"
+             aria-label="What are you seeking?">
+      <button type="submit">Curate</button>
+    </form>
+    <p class="hint" id="hint">Showing the standing channels. Tell it what you seek to lead with a “For You” channel.</p>
+  </header>
+  <main id="guide" aria-live="polite"><p class="empty">Tuning the channels…</p></main>
+  <footer>
+    Conduit, not source — every program is a card that already passed the gate, shown in a broadcast
+    frame. <a class="home" href="/">↩ Narrow Highway</a>
+  </footer>
+</div>
+<script>
+  var API = location.origin;
+  function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function prog(p, tag){ if(!p) return "";
+    return '<div class="'+tag+'"><a href="'+esc(p.ref)+'"><span class="nowt">'+esc(p.title)+'</span>'+
+      (p.blurb?'<div class="nowb">'+esc(p.blurb)+'</div>':'')+'</a></div>'; }
+  function channel(c){
+    var rest = (c.from_start||[]).map(function(it,i){
+      return '<li><a href="'+esc(it.ref)+'">'+esc(it.title)+'</a></li>'; }).join("");
+    return '<section class="ch'+(c.id==="foryou"?" you":"")+'">'+
+      '<div class="chh"><div><div class="chname">'+esc(c.name)+'</div>'+
+      '<div class="chline">'+esc(c.line)+'</div></div><span class="live">On now</span></div>'+
+      prog(c.now,"now")+
+      (c.up_next?'<div class="up">Up next — <a href="'+esc(c.up_next.ref)+'">'+esc(c.up_next.title)+'</a></div>':'')+
+      (rest?'<details class="rest"><summary>From the start · '+(c.from_start.length)+' programs</summary><ol>'+rest+'</ol></details>':'')+
+      '</section>'; }
+  function render(data){
+    var g = document.getElementById("guide");
+    var chs = (data && data.channels) || [];
+    if(!chs.length){ g.innerHTML = '<p class="empty">No channels have anything to show yet.</p>'; return; }
+    g.innerHTML = chs.map(channel).join("");
+    var h = document.getElementById("hint");
+    h.textContent = data.seeking ? ('Curated for: “'+data.seeking+'”. Standing channels follow.')
+                                 : 'Showing the standing channels. Tell it what you seek to lead with a “For You” channel.';
+  }
+  function load(seeking){
+    fetch(API+'/tv/lineup'+(seeking?('?seeking='+encodeURIComponent(seeking)):''))
+      .then(function(r){ return r.json(); }).then(render)
+      .catch(function(){ document.getElementById("guide").innerHTML =
+        '<p class="empty">Couldn’t reach the network. Try again.</p>'; });
+  }
+  function go(e){ e.preventDefault(); load(document.getElementById("seek").value.trim()); return false; }
+  var pre = new URLSearchParams(location.search).get("seeking");
+  if(pre){ document.getElementById("seek").value = pre; }
+  load(pre||"");
+</script>
+</body>
+</html>

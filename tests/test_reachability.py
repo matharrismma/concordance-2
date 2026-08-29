@@ -107,7 +107,8 @@ AGENT_ONLY = {
 UNLISTED_PAGES = {
     "offline.html",       # served by the service worker when the network is gone
     "404.html",
-    "console.html",       # the Console (the audio-native desk) — reached by voice / direct URL / home-screen install, an E-Ink-first tool, not a page on the public witness nav
+    "coach.html",         # Coach (the audio-native desk; internal codename console) — reached by voice / direct URL / home-screen install, an E-Ink-first tool, not a page on the public witness nav
+    "tv.html",            # narrowhighway.tv (the museum/broadcast shell) — reached by direct URL / the .tv domain, curated to what the viewer seeks, not a page on the witness nav
     "keep.html",          # the operator's own surface, noindex — a public list is not its place
     "encyclopedia.html",  # a redirect stub onto characters.html; a second door to one room
     "ask.html",           # the landing's predecessor, kept for old links

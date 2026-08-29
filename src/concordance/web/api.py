@@ -658,6 +658,14 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _ok({"voice": "ceiling", "wired": True, "cache": s[1], "bytes": len(s[0])})
         return _ok({"voice": "floor", "wired": False,
                     "reason": "key present but the upstream voice call failed (bad/rotated key?) — floor"})
+    if method == "GET" and path == "/tv/lineup":
+        # narrowhighway.tv — the museum as an old-school cable network (the SHELL). Channels over the
+        # halls we already hold; 'now playing' rotates by the clock, 'from the start' winds to the top,
+        # and a 'For You' lane leads when the viewer says what they seek. Conduit — every item is a card
+        # that already passed the gate, shown in a broadcast frame; nothing here is generated.
+        import time as _time
+        from .. import tv as _tv
+        return _ok(_tv.lineup(seeking=(query.get("seeking") or "").strip(), now_epoch=_time.time()))
     if method == "GET" and path == "/identity":
         # identity = what the engine IS (the dry, efficient truth); persona = WHO it is to talk to
         # (the separate voice / movie-style experience). The card system stays pure efficiency.
@@ -2589,6 +2597,7 @@ ROUTES = [
     {"path": "/", "methods": ("GET",)},
     {"path": "/health", "methods": ("GET",), "api": True},
     {"path": "/speak/health", "methods": ("GET",), "api": True},
+    {"path": "/tv/lineup", "methods": ("GET",), "api": True},
     {"path": "/health/memory", "methods": ("GET",), "api": True},
     {"path": "/now", "methods": ("GET",), "api": True},
     {"path": "/identity", "methods": ("GET",), "api": True},
