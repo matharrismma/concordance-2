@@ -52,8 +52,12 @@ BIBLE_FILE = "bible_en.jsonl"
 
 # ── selecting the slice ────────────────────────────────────────────────────────────────────────────
 def _is_public(card: Dict[str, Any]) -> bool:
-    return (card.get("visibility") or "public") == "public" and \
-           (card.get("lifecycle_stage") or "public") in ("public", "featured")
+    # FAIL-CLOSED. A card that a stranger will redistribute must EXPLICITLY declare itself public and
+    # released; a MISSING visibility/lifecycle must never default to shippable. (Every in-repo field
+    # card already carries visibility:"public" + lifecycle_stage:"public", so this excludes nothing
+    # legitimate — only an accidental quarantined/public_review/unset card, which must never ride out.)
+    return card.get("visibility") == "public" and \
+           card.get("lifecycle_stage") in ("public", "featured")
 
 
 def _norm_field(card: Dict[str, Any]) -> Dict[str, Any]:
@@ -237,6 +241,26 @@ def _reply(q):
     return ln.compose_reply(q, search_fn=field_search.search, is_crisis_fn=crisis.is_crisis)
 
 
+def _station_key():
+    """The node\\'s identity, kept on disk (0600) so the mesh PINS YOU ONCE and verifies your
+    broadcasts forever. Created on the first --serve; never leaves this device. Do NOT share
+    station_key.json — it is your private key. Delete it only to become a new station."""
+    import json
+    import stat
+    path = os.path.join(_HERE, "station_key.json")
+    if os.path.exists(path):
+        d = json.load(open(path, encoding="utf-8"))
+        return d["priv"], d["pub"]
+    priv, pub = ln.new_station()
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump({"priv": priv, "pub": pub}, fh)
+    try:
+        os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+    except Exception:
+        pass
+    return priv, pub
+
+
 def main():
     p = argparse.ArgumentParser(prog="run.py", description="Narrow Highway Field Pack — the Lighthouse "
                                 "Node on its slice, sovereign and offline.")
@@ -247,7 +271,7 @@ def main():
     a = p.parse_args()
 
     if a.serve:
-        priv, pub = ln.new_station()
+        priv, pub = _station_key()          # persisted on disk: the mesh pins you ONCE, not per launch
         print("station public key (pin this on the mesh):", pub)
         ctl = ln.serve(priv, pub, dev_path=a.dev, search_fn=field_search.search,
                        is_crisis_fn=crisis.is_crisis,
@@ -324,6 +348,56 @@ print("VERIFIED: every file matches its seal" if not bad else "FAILED: %d file(s
 sys.exit(1 if bad else 0)
 '''
 
+_RUN_SH = '''#!/bin/sh
+# Narrow Highway Field Pack — ONE COMMAND. Creates a private virtual environment, installs the single
+# dependency (OFFLINE from ./wheelhouse if present, else from the internet), and runs the node on this
+# pack\\'s slice. Nothing here depends on our servers.
+#
+#   ./run.sh                                  prove the pack works (a no-radio self-test)
+#   ./run.sh --ask "how do i stop bad bleeding"
+#   ./run.sh --daily
+#   ./run.sh --serve --dev /dev/ttyUSB0       answer a Meshtastic mesh (needs a radio)
+#
+# Verify the pack is unaltered any time:  python3 verify_pack.py
+set -eu
+cd "$(dirname "$0")"
+PY="$(command -v python3 || command -v python || true)"
+[ -n "$PY" ] || { echo "Python 3 is required. Install python3 and run ./run.sh again."; exit 1; }
+if [ ! -d .venv ]; then
+  echo "First run: setting up (once)…"
+  "$PY" -m venv .venv || { echo "could not create a virtual environment"; exit 1; }
+  if [ -d wheelhouse ]; then
+    .venv/bin/pip install --quiet --no-index --find-links wheelhouse -r requirements.txt \\
+      || { echo "offline install failed — see wheelhouse/README"; exit 1; }
+  else
+    .venv/bin/pip install --quiet -r requirements.txt \\
+      || { echo "install needs the internet once (no ./wheelhouse present)"; exit 1; }
+  fi
+fi
+exec .venv/bin/python run.py "$@"
+'''
+
+_RUN_CMD = '''@echo off
+REM Narrow Highway Field Pack — ONE COMMAND (Windows). Creates a private virtual environment, installs
+REM the single dependency (offline from wheelhouse\\ if present, else from the internet), runs the node.
+REM   run.cmd                                  self-test
+REM   run.cmd --ask "how do i stop bad bleeding"
+REM   run.cmd --serve --dev COM3               answer a Meshtastic mesh
+setlocal
+cd /d "%~dp0"
+where python >nul 2>nul || (echo Python 3 is required. Install it from python.org and run run.cmd again. & exit /b 1)
+if not exist .venv (
+  echo First run: setting up ^(once^)...
+  python -m venv .venv || (echo could not create a virtual environment & exit /b 1)
+  if exist wheelhouse (
+    .venv\\Scripts\\pip install --quiet --no-index --find-links wheelhouse -r requirements.txt || (echo offline install failed & exit /b 1)
+  ) else (
+    .venv\\Scripts\\pip install --quiet -r requirements.txt || (echo install needs the internet once & exit /b 1)
+  )
+)
+.venv\\Scripts\\python run.py %*
+'''
+
 _README = """# Narrow Highway — Field Pack
 
 **The engine, behind a radio.** Drop this on an offline computer (a Raspberry Pi, an old phone, a solar
@@ -334,34 +408,30 @@ offline, with no account:
 - **Answers** — a question typed into the mesh comes back as a *verified* card: crisis-first, budgeted
   to the ~200-byte LoRa payload, carrying a `/c/<id>` pull-ref to open later when there is signal.
 
-## Requirements
+## Run it — one command
 
-Python 3.8+ and one library:
+You need **Python 3.8+**. Nothing else to figure out.
 
-```
-pip install -r requirements.txt      # cryptography (for signing/verifying)
-```
+- Linux / Mac / Raspberry Pi:  `./run.sh`
+- Windows:  `run.cmd`
 
-`meshtastic` is only needed for `--serve` (answering a real radio) — install it when you add hardware.
-
-## Run it
-
-No radio needed to see it work:
+The first run sets up a private environment and installs the one dependency (`cryptography`, for
+signing) — offline from the bundled `wheelhouse/` if this pack includes it, otherwise from the internet
+once — then proves itself with a no-radio self-test. After that:
 
 ```
-python run.py                                  # self-test
-python run.py --ask "how do i stop bad bleeding"
-python run.py --daily
+./run.sh --ask "how do i stop bad bleeding"
+./run.sh --daily
+./run.sh --serve --dev /dev/ttyUSB0      # answer a Meshtastic mesh (plug in a radio first)
 ```
 
-Then add the radio (`pip install meshtastic`, plug in your board):
+The first `--serve` creates and saves `station_key.json` — your node's identity, kept `0600` on this
+device only. Publish the **station public key** it prints **once**, so the mesh can *pin* your
+lighthouse and verify its broadcasts offline forever — the same key on every restart. Do not share
+`station_key.json`; it is your private key.
 
-```
-python run.py --serve --dev /dev/ttyUSB0
-```
-
-It prints the **station public key** — publish it once so the mesh can *pin* your lighthouse and verify
-its broadcasts offline forever.
+(Prefer to drive it yourself? `pip install -r requirements.txt` then `python run.py …` works too.
+`meshtastic` is only needed for `--serve`.)
 
 ## What's inside
 
@@ -404,6 +474,47 @@ def _sha(p: Path) -> str:
     return h.hexdigest()
 
 
+# The dependency (`cryptography`) wheels bundled for a truly OFFLINE install, across the arches a field
+# node actually runs on — x86 Linux, Raspberry Pi (aarch64/armv7), Windows, Apple silicon.
+_WHEEL_TARGETS = [("manylinux2014_x86_64", "39"), ("manylinux2014_aarch64", "39"),
+                  ("manylinux2014_armv7l", "39"), ("win_amd64", "39"), ("macosx_11_0_arm64", "39")]
+
+
+def _populate_wheelhouse(dest: Path) -> int:
+    """Download `cryptography`'s wheels for the common field arches into dest/wheelhouse, so ./run.sh
+    can install with NO internet. Needs network at CUT time only; best-effort per platform (a platform
+    with no matching wheel is skipped, not fatal). Sealed with the rest of the pack."""
+    import subprocess
+    wh = dest / "wheelhouse"
+    wh.mkdir(exist_ok=True)
+    got = 0
+    for plat, pyver in _WHEEL_TARGETS:
+        try:
+            subprocess.run([sys.executable, "-m", "pip", "download", "cryptography",
+                            "--only-binary", ":all:", "--platform", plat, "--python-version", pyver,
+                            "--implementation", "cp", "-d", str(wh)],
+                           check=True, capture_output=True)
+            got += 1
+        except Exception:  # noqa: BLE001
+            continue
+    (wh / "README.txt").write_text(
+        "Offline-install wheels for `cryptography`, one set per field arch. ./run.sh (and run.cmd) use\n"
+        "these with pip --no-index when no internet is present. To add an arch, drop its wheel here.\n",
+        encoding="utf-8")
+    return got
+
+
+def _archive(dest: Path) -> Path:
+    """Bundle the whole pack into ONE .tar.gz + a .sha256 sidecar — one file to carry on a USB/SD stick,
+    with a published hash so a stranger can prove the copy is unaltered before trusting it."""
+    import tarfile
+    tgz = dest.parent / (dest.name + ".tar.gz")
+    with tarfile.open(tgz, "w:gz") as tar:
+        tar.add(dest, arcname=dest.name)
+    (tgz.parent / (tgz.name + ".sha256")).write_text(_sha(tgz) + "  " + tgz.name + "\n", encoding="utf-8")
+    return tgz
+
+
 def _crisis_module() -> str:
     """Freeze the engine's crisis test into a standalone module — the canonical word list + normalizer
     captured at cut time, so it can never drift from a hand copy."""
@@ -423,8 +534,10 @@ def _crisis_module() -> str:
     return header + body + _CRISIS_FUNCS
 
 
-def cut(dest: Path, data_dir: Path) -> Dict[str, Any]:
-    """Assemble a full field pack at `dest` from the card files in `data_dir`. Returns a summary."""
+def cut(dest: Path, data_dir: Path, offline: bool = False) -> Dict[str, Any]:
+    """Assemble a full field pack at `dest` from the card files in `data_dir`. Returns a summary.
+    `offline=True` bundles the dependency wheels (needs network at cut time) so the pack installs with
+    no internet on the field arches."""
     cards = select_cards(data_dir)
     counts = _counts(cards)
     if counts["field_cards"] == 0:
@@ -449,6 +562,12 @@ def cut(dest: Path, data_dir: Path) -> Dict[str, Any]:
     (dest / "field_search.py").write_text(_FIELD_SEARCH, encoding="utf-8")
     (dest / "crisis.py").write_text(_crisis_module(), encoding="utf-8")
     (dest / "run.py").write_text(_RUN, encoding="utf-8")
+    (dest / "run.sh").write_text(_RUN_SH, encoding="utf-8", newline="\n")   # LF: it is a shell script
+    try:
+        os.chmod(dest / "run.sh", 0o755)
+    except Exception:  # noqa: BLE001 — a filesystem without exec bits (e.g. some Windows mounts) is fine
+        pass
+    (dest / "run.cmd").write_text(_RUN_CMD, encoding="utf-8", newline="\r\n")  # CRLF for cmd.exe
     (dest / "verify_pack.py").write_text(_VERIFY, encoding="utf-8")
     (dest / "requirements.txt").write_text(_REQUIREMENTS, encoding="utf-8")
     date = time.strftime("%Y-%m-%d", time.gmtime())
@@ -458,6 +577,9 @@ def cut(dest: Path, data_dir: Path) -> Dict[str, Any]:
     lh = REPO / "docs" / "LIGHTHOUSE_NODE.md"
     if lh.is_file():
         shutil.copy2(lh, dest / "LIGHTHOUSE_NODE.md")
+
+    if offline:
+        _populate_wheelhouse(dest)          # bundle the dependency wheels so ./run.sh needs no internet
 
     # the seal: every file's bytes + sha256 (MANIFEST last, over everything else)
     files = []
@@ -492,16 +614,20 @@ def main() -> int:
         print("field pack would carry: %(field_cards)s field cards + %(bible_verses)s Bible verses "
               "(%(total)s total)" % c)
         return 0
+    offline = "--offline" in args           # bundle dependency wheels for a no-internet install
     if "--out" in args:
         dest = Path(args[args.index("--out") + 1])
     else:
         stamp = time.strftime("%Y-%m-%dT%H%M%SZ", time.gmtime())
         dest = RELEASES / "field-pack" / f"field-pack-v1-{stamp}"
-    summary = cut(dest, data_dir)
+    summary = cut(dest, data_dir, offline=offline)
     print("CUT + VERIFIED: %s" % summary["dest"])
     print("  %(field_cards)s field cards + %(bible_verses)s Bible verses" % summary["counts"])
     print("  %s files, sealed in MANIFEST.json" % summary["files"])
-    print("  run it:  cd %s && python run.py" % summary["dest"])
+    print("  run it:  cd %s && ./run.sh        (Windows: run.cmd)" % summary["dest"])
+    if "--out" not in args:                  # ship one sealed tarball a stranger can carry + verify
+        tgz = _archive(dest)
+        print("  bundle:  %s  (+ .sha256)" % tgz)
     return 0
 
 

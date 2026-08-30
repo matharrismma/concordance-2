@@ -29,6 +29,7 @@ def _write_fixture(d: Path):
          "visibility": "public", "lifecycle_stage": "public", "source": {"label": "field"}},
         {"id": "fa-priv", "title": "Private draft", "body": "not for release",
          "visibility": "private", "lifecycle_stage": "draft"},
+        {"id": "fa-unmarked", "title": "Unmarked card", "body": "no visibility field at all"},
     ]
     (d / "firstaid_cards.jsonl").write_text("\n".join(json.dumps(c) for c in firstaid), encoding="utf-8")
     water = [{"id": "wa-purify", "title": "Purify water", "shelf": "water",
@@ -50,7 +51,8 @@ def test_select_cards_filters_to_public_and_normalizes(tmp_path):
     cards = cfp.select_cards(data)
     ids = {c["id"] for c in cards}
     assert "fa-bleed" in ids and "wa-purify" in ids
-    assert "fa-priv" not in ids                          # non-public is withheld
+    assert "fa-priv" not in ids                          # explicitly non-public is withheld
+    assert "fa-unmarked" not in ids                      # FAIL-CLOSED: a card with no visibility never ships
     assert "web-JOH-14-27" in ids                        # a verse, normalized
     john = next(c for c in cards if c["id"] == "web-JOH-14-27")
     assert john["title"] == "John 14:27" and john["shelf"] == "bible"
@@ -63,10 +65,14 @@ def test_cut_produces_a_sealed_self_contained_pack(tmp_path):
     _write_fixture(data)
     dest = tmp_path / "pack"
     cfp.cut(dest, data)
-    for rel in ["run.py", "field_search.py", "crisis.py", "verify_pack.py", "requirements.txt",
-                "README.md", "MANIFEST.json", "data/cards.jsonl", "code/concordance/__init__.py",
-                "code/concordance/lighthouse_node.py", "code/concordance/meshtastic_bridge.py"]:
+    for rel in ["run.py", "run.sh", "run.cmd", "field_search.py", "crisis.py", "verify_pack.py",
+                "requirements.txt", "README.md", "MANIFEST.json", "data/cards.jsonl",
+                "code/concordance/__init__.py", "code/concordance/lighthouse_node.py",
+                "code/concordance/meshtastic_bridge.py"]:
         assert (dest / rel).is_file(), rel
+    # the one-command launcher + a PERSISTED station key (pin once), not a fresh key per launch
+    assert "run.py" in (dest / "run.sh").read_text(encoding="utf-8")
+    assert "_station_key" in (dest / "run.py").read_text(encoding="utf-8")
     man = json.loads((dest / "MANIFEST.json").read_text(encoding="utf-8"))
     assert man["counts"]["field_cards"] == 2 and man["counts"]["bible_verses"] == 2
     for f in man["files"]:                               # the seal holds
