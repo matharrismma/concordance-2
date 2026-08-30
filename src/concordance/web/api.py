@@ -3319,12 +3319,14 @@ def resolve_site_file(site, path: str):
 
 
 def home_for(surface: str, site, path: str) -> str:
-    """The Domain Sort flip (Matt, 2026-08-24): on the .com (secular) surface the BARE homepage is
-    the working auditor — efficiency is the front door. Only "/" flips, and only when /checkit
-    exists; /index.html still serves the desk, and the witness surface (.org) is untouched. Pure and
-    reversible: return this to `return path` and / serves index.html again."""
-    if surface == "secular" and path == "/" and resolve_site_file(site, "/checkit") is not None:
-        return "/checkit"
+    """The bare homepage. The Domain Sort flip (Matt, 2026-08-24) had put the working auditor
+    (/checkit) at "/" on the .com surface. REVERTED 2026-08-30 (Matt: "the homepage still doesn't
+    really show what it does. What are we? Provide a clear value add.") — the auditor is a narrow
+    commercial wedge that never says what Narrow Highway IS or that a family is served. "/" now serves
+    the DESK (index.html), whose hero states the value plainly and whose doors show the whole offering;
+    the auditor stays reachable at /checkit and on the 'Check a claim' door. Reversible: restore the
+    branch `if surface == "secular" and path == "/" and resolve_site_file(site, "/checkit"): return
+    "/checkit"` to put the wedge back at "/"."""
     return path
 
 

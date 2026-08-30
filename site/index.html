@@ -306,9 +306,9 @@
     <button id="newbtn" type="button">New</button>
     <a href="/bible.html">Scripture</a>
     <a href="/read.html">Study</a>
-    <a href="/steward.html">Steward</a>
-    <a href="/journal.html">Journal</a>
-    <a href="/days.html">Days</a>
+    <a href="/wisdom.html">Wisdom</a>
+    <a href="/halls">Halls</a>
+    <a href="/plow">Daily</a>
     <button id="flip" type="button" aria-pressed="false" title="Flip to the page" aria-label="Flip to the Concordance page"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6C10 4.5 7 4 4 4.5v14C7 18 10 18.5 12 20c2-1.5 5-2 8-1.5v-14C17 4 14 4.5 12 6z"/><path d="M12 6v14"/></svg></button>
     <button id="doors" type="button" title="Everything (Ctrl-K)" aria-label="Everything">&#8943;</button>
   </nav>
@@ -320,9 +320,12 @@
 
     <div id="page" aria-label="The Concordance page"></div>
 
-    <p class="ident"><b>A deterministic verification engine.</b>
-      <span>Bring a claim — get a verdict, the worked trail, and a receipt you can re-check.
-      No model in the loop.</span></p>
+    <p class="ident"><b>A library for your family that never makes things up.</b>
+      <span>Ask anything — Scripture, the land and your health, teaching your children, a claim you
+      need checked. Every answer shows its work and names its source, so you never take our word for
+      it. Free, no account, and it works when the power and the internet don't. And when we don't
+      hold something yet, we go find the tried‑and‑true source, prove it, and keep it — so the next
+      asking is here at once.</span></p>
 
     <div class="card">
       <div id="q" contenteditable="true" role="textbox" aria-multiline="true"
@@ -340,17 +343,16 @@
       <p class="desk-line">Free. No account. Works offline. Write anything above — or start at a door.</p>
       <div class="doors">
         <a href="/situations.html"><b>What do you need right now?</b><span>Power out, water unsafe, someone hurt, teaching your kids — open your situation and the cards are already there.</span></a>
-        <a href="/read.html"><b>Learn to read</b><span>Lessons for you or your children, from the first letter up.</span></a>
+        <a href="/coach"><b>Ask out loud</b><span>Say it, hear a checked answer, keep your day. If we don't hold it, we go and find the tried‑and‑true source, and keep it — so the next asking is here at once.</span></a>
+        <a href="/checkit.html"><b>Check a claim</b><span>Bring a number, a dose, a quote — the engine checks every figure and shows its work, with a receipt you can re‑check.</span></a>
         <a href="/bible.html"><b>Study the Bible</b><span>The whole reference desk: original words, maps, timelines, commentaries.</span></a>
-        <a href="/apothecary.html"><b>Health &amp; the land</b><span>Herbs, planting, preparations — the old knowledge, kept with its sources.</span></a>
-        <a href="/steward.html"><b>Handle money</b><span>A budget you own. It never touches your money — it helps you see it.</span></a>
-        <a href="/connect.html"><b>Check a claim</b><span>Bring a number, a dose, a deal — the engine shows its work.</span></a>
-        <a href="/coach"><b>Ask out loud</b><span>A coach and a scribe — say it, hear a checked answer, keep your day. Built for E‑Ink and for hands that can’t type.</span></a>
-        <a href="/halls"><b>Grow your craft</b><span>Golf, grappling, music, your work, the Word — measured against your own past, never a leaderboard.</span></a>
-        <a href="/tv"><b>Watch, curated to you</b><span>Feeds tuned to what you’re seeking — live or from the start. Every program a verified card.</span></a>
-        <a href="/community.html"><b>Study together</b><span>Find others in the same book. A handle, no personal information.</span></a>
-        <a href="/corpus.html"><b>The whole library</b><span>Over half a million kept cards, every one carrying its source.</span></a>
-        <a href="/companion.html"><b>Take it with you</b><span>Carry the library on your device for when the internet is not there.</span></a>
+        <a href="/wisdom.html"><b>Treasure the Word</b><span>Hide it in your heart, understand it, live it — the fear of the LORD is the beginning of wisdom.</span></a>
+        <a href="/read.html"><b>Learn to read</b><span>Lessons for you or your children, from the first letter up.</span></a>
+        <a href="/halls"><b>Grow your craft</b><span>Golf, grappling, music, your work — measured against your own past, never a leaderboard.</span></a>
+        <a href="/tv"><b>Watch, curated to you</b><span>Old‑school channels tuned to what you're seeking — public‑domain films and the kept library, live or from the start.</span></a>
+        <a href="/profile.html"><b>Your keeping</b><span>Everything you keep, carried by your key. No account, no password — kept for you.</span></a>
+        <a href="/plow"><b>A quiet daily walk</b><span>Name today's burdens and fruit; a companion that sorts the chaff from the wheat.</span></a>
+        <a href="/workshop.html"><b>Help build it</b><span>The library is honest about its gaps. See what it needs, and help fill them.</span></a>
       </div>
     </nav>
       <div class="tools" role="toolbar" aria-label="Tools" data-intable="0" data-fmt="0">
@@ -383,6 +385,7 @@
     <div class="foot">
       <span id="found">A conduit, not a source · nothing is generated</span>
       <a href="https://narrowhighway.org">the witness</a>
+      <a href="/connect.html">for your agent</a>
       <a href="/live.html">under the hood →</a>
       <span hidden>narrowing the possibilities</span>
     </div>
@@ -687,9 +690,8 @@
             encodeURIComponent(r.id)+'">'+esc(r.title)+'</a></b>'+
             (r.snippet?'<span class="sn">'+esc(r.snippet)+'</span>':'')+'</div>'; }).join('');
       } else {
-        body.innerHTML='<span class="note">You’re offline. Connect once and open '+
-          '<a href="/companion.html">Carry it with you</a> to download the keeping — then search '+
-          'works on this device even with no internet.</span>';
+        body.innerHTML='<span class="note">You’re offline, and nothing from the keeping is stored on '+
+          'this device yet. Reconnect to search — what you open is kept here for next time.</span>';
       }
       settle(); scroll();
     }

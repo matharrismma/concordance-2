@@ -49,15 +49,19 @@ def test_agent_endpoints_and_ambiguous_pages_do_not_move():
         assert p not in MOVED_TO_ORG, p
 
 
-# ---- the Domain Sort flip: .com homepage IS the auditor; .org and /index.html unchanged ----
+# ---- the bare homepage: the DESK, not the auditor wedge (flip REVERTED 2026-08-30) ----
 
-def test_secular_bare_home_flips_to_checkit():
-    assert home_for("secular", SITE, "/") == "/checkit"
+def test_secular_bare_home_serves_the_desk():
+    # Matt, 2026-08-30: "the homepage still doesn't really show what it does. What are we? Provide a
+    # clear value add." The narrow /checkit auditor wedge is no longer the front door; "/" serves the
+    # desk (index.html), whose hero states the value and whose doors show the whole offering. The
+    # wedge stays reachable at /checkit and on the "Check a claim" door.
+    assert home_for("secular", SITE, "/") == "/"
 
 
-def test_flip_is_only_the_bare_root():
-    # /index.html still serves the desk; deep paths and clean URLs are untouched
+def test_home_leaves_every_other_path_untouched():
     assert home_for("secular", SITE, "/index.html") == "/index.html"
+    assert home_for("secular", SITE, "/checkit") == "/checkit"     # the wedge is still reachable
     assert home_for("secular", SITE, "/golf") == "/golf"
     assert home_for("secular", SITE, "/about") == "/about"
 
