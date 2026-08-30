@@ -106,6 +106,14 @@ def _ia(ident: str, title: str, year: str) -> Dict[str, Any]:
             "source": "Internet Archive", "license": "Public domain (verify per item)", "year": year}
 
 
+def _prelinger(ident: str, title: str, year: str) -> Dict[str, Any]:
+    """A Prelinger Archives film — the VIDEO plane's source. Public-domain / public-access; the .tv
+    frame airs it (a watch URL), it is never crafted into text. Each id was verified live to PLAY (a
+    real .mp4) and to sit in the Prelinger collection, which is the family-safety scope."""
+    return {"title": title, "url": "https://archive.org/details/" + ident,
+            "source": "Prelinger Archives", "license": "Public domain / public access", "year": year}
+
+
 _SEED: List[Dict[str, Any]] = [
     # Ten verified anchors for the subjects families reach for first — each cleared THREE bars live on
     # 2026-08-30: on-topic, OPENABLE (a real _djvu.txt), and it actually crafts 10 cards; and each is
@@ -143,6 +151,23 @@ _SEED: List[Dict[str, Any]] = [
     {"subject": "first aid", "plane": "text", "kind": "practical",
      "terms": "first aid injury injuries wound wounds bleeding emergency bandage bandaging rescue",
      "source": _ia("americannational00lync", "American National Red Cross text-book on First Aid", "1908")},
+
+    # ── VIDEO plane: the Curator's Field channel airs these (Matt: "this is also how we build feeds
+    # from youtube for .tv"). Prelinger public-domain educational films, each verified live to PLAY.
+    # The .tv frame links out to the archive.org player (which also honours the credit / drive-traffic
+    # covenant). YouTube-CC is the next provider on this plane, when a key is present.
+    {"subject": "victory gardening (film)", "plane": "video", "kind": "program",
+     "terms": "garden gardening vegetable vegetables victory grow food home plot preserve field",
+     "source": _prelinger("200638_Garden_For_Victory", "Garden For Victory", "1942")},
+    {"subject": "keeping poultry (film)", "plane": "video", "kind": "program",
+     "terms": "poultry chicken chickens hen hens flock egg eggs farm home field",
+     "source": _prelinger("Protecti1952_2", "Protecting Poultry Profits", "1952")},
+    {"subject": "soil and land care (film)", "plane": "video", "kind": "program",
+     "terms": "land soil farm farming conservation erosion crops garden field home",
+     "source": _prelinger("Looktoth1953", "Look to the Land", "1953")},
+    {"subject": "farm life (film)", "plane": "video", "kind": "program",
+     "terms": "farm farming valley agriculture country rural land home field harvest",
+     "source": _prelinger("Lifeinth1949", "Life in the Central Valley of California", "1949")},
 ]
 
 

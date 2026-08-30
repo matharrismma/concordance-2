@@ -59,6 +59,19 @@ def test_a_dark_channel_is_dropped_not_faked(monkeypatch):
     assert "golf" not in ids and "witnesses" in ids        # nothing to show -> dark, never invented
 
 
+def test_field_channel_airs_public_domain_films_from_the_video_canon(monkeypatch):
+    """The video plane — the SAME find/canon mechanism, on film. The Field channel leads with Prelinger
+    public-domain films from the kept VIDEO canon; each links OUT to the archive.org player (crediting
+    the source and driving traffic to it), and a film is what's on now."""
+    monkeypatch.setattr(tv.corpus, "search", _fake_search)
+    fld = next(c for c in tv.lineup(now_epoch=0.0)["channels"] if c["id"] == "field")
+    films = [it for it in fld["from_start"] if it.get("video")]
+    assert films, "the Field channel airs at least one film from the video canon"
+    assert films[0]["ref"].startswith("https://archive.org/")   # links out to the player, credits the source
+    assert films[0]["id"].startswith("vid_")
+    assert fld["now"].get("video") == "1"                        # a film leads the channel
+
+
 if __name__ == "__main__":
     import types
     tv.corpus.search = _fake_search  # type: ignore

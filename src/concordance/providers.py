@@ -48,6 +48,11 @@ PROVIDERS: List[Dict[str, Any]] = [
      "blurb": "The research library of the United States Congress — primary documents, film, maps "
               "and recordings, largely public domain.",
      "planes": ("text", "video"), "paused": False},
+    {"id": "internet_archive_video", "name": "Prelinger Archives",
+     "home": "https://archive.org/details/prelinger",
+     "blurb": "A public-domain / public-access library of educational, documentary and how-to films, "
+              "preserved at the Internet Archive.",
+     "planes": ("video",), "paused": False},
     {"id": "project_gutenberg", "name": "Project Gutenberg", "home": "https://www.gutenberg.org",
      "blurb": "The oldest library of free public-domain ebooks, transcribed and proofread by "
               "volunteers.",

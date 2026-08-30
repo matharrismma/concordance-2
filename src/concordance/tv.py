@@ -21,16 +21,20 @@ import re
 from typing import Any, Dict, List, Optional
 
 from . import corpus
+from . import field_canon as _canon
 
 # The channels ARE the museum's halls. Plainly named by the relationship each holds with the viewer
 # (the naming method: "to you, this is your ___"). Start small; let usefulness pull the rest in.
+# `vseed` (optional) is the theme the channel's FILM programs are matched on in the video canon — a
+# little broader than the text `seed`, so a channel airs the openly-licensed films that fit it.
 CHANNELS: List[Dict[str, Any]] = [
     {"id": "witnesses", "name": "Witnesses", "line": "Voices who walked it before you",
      "seed": "martyr persecution faithful witness testimony of Christ", "witness": True},
     {"id": "scripture", "name": "Scripture", "line": "The Word, read through",
      "seed": "gospel psalm the word of God covenant", "witness": True},
     {"id": "field", "name": "The Field", "line": "Getting it done, off-grid and at home",
-     "seed": "water shelter garden repair fire preserve", "witness": False},
+     "seed": "water shelter garden repair fire preserve", "witness": False,
+     "vseed": "garden gardening farm farming poultry soil land food home homestead conservation harvest"},
     {"id": "golf", "name": "Golf", "line": "Find the leak in your game",
      "seed": "golf swing putting short game practice", "witness": False},
     {"id": "grappling", "name": "Grappling", "line": "Measure your rolls, find your leak",
@@ -55,11 +59,36 @@ def _trim(s: str, n: int = 180) -> str:
 _STUB_SHELVES = {"dictionary", "pronunciation", "lexicon"}
 
 
-def _items(seed: str, limit: int, witness: bool) -> List[Dict[str, str]]:
-    """One channel's lineup — REAL, described cards only. We over-fetch, then keep cards that have a
-    body to describe and a clean title, and use the card's own snippet as the program blurb (never the
-    license label). A bodiless stub or a mojibake title is skipped; a channel with nothing real goes dark."""
+def _video_items(vseed: str, limit: int) -> List[Dict[str, str]]:
+    """A channel's FILM programs — from the kept VIDEO canon (Prelinger public-domain films), matched
+    to the channel's theme. A program links out to the archive.org player, which also credits the
+    source and drives traffic to it. Kept, so the guide stays fast; the video reach grows the canon
+    out of band, never on a page load. The same find/canon mechanism as the text plane, on film."""
     out: List[Dict[str, str]] = []
+    if not vseed:
+        return out
+    try:
+        for d in _canon.lookup(vseed, plane="video", limit=limit):
+            url = (d.get("url") or "").strip()
+            title = (d.get("title") or "").strip()
+            if not url or not title:
+                continue
+            ident = url.rstrip("/").split("/")[-1]
+            blurb = " · ".join(x for x in [(d.get("source") or ""), str(d.get("year") or "")] if x)
+            out.append({"id": "vid_" + ident, "title": _trim(title, 90), "blurb": blurb,
+                        "ref": url, "video": "1"})
+    except Exception:  # noqa: BLE001 — a channel that can't load its films is simply text-only
+        return []
+    return out
+
+
+def _items(seed: str, limit: int, witness: bool, vseed: str = "") -> List[Dict[str, str]]:
+    """One channel's lineup — its FILM programs (from the video canon) lead, then REAL, described
+    cards from the keeping. We over-fetch the cards, then keep those that have a body to describe and a
+    clean title, and use the card's own snippet as the program blurb (never the license label). A
+    bodiless stub or a mojibake title is skipped; a channel with nothing real goes dark."""
+    out: List[Dict[str, str]] = _video_items(vseed, max(2, limit // 2))
+    seen_ids = {it["id"] for it in out}
     try:
         hits = corpus.search(seed, limit=max(limit * 4, 12), include_witness=witness)
     except Exception:  # noqa: BLE001 — a channel that can't load is simply dark, never a crash
@@ -69,7 +98,7 @@ def _items(seed: str, limit: int, witness: bool) -> List[Dict[str, str]]:
             continue
         cid = h.get("id")
         title = (h.get("title") or "").strip()
-        if not cid or not title or "�" in title:          # no id, no title, or mojibake title
+        if not cid or not title or "�" in title or cid in seen_ids:   # no id/title, mojibake, or dupe
             continue
         if (h.get("shelf") or "").lower() in _STUB_SHELVES:      # a bodiless dictionary/lexicon stub
             continue
@@ -98,11 +127,11 @@ def lineup(seeking: str = "", now_epoch: float = 0.0, per: int = 6) -> Dict[str,
     defs: List[Dict[str, Any]] = list(CHANNELS)
     if seeking:
         defs = [{"id": "foryou", "name": "For You", "line": f"Because you're seeking: {seeking}",
-                 "seed": seeking, "witness": True}] + defs
+                 "seed": seeking, "witness": True, "vseed": seeking}] + defs
 
     channels: List[Dict[str, Any]] = []
     for c in defs:
-        items = _items(c["seed"], per, bool(c.get("witness")))
+        items = _items(c["seed"], per, bool(c.get("witness")), vseed=c.get("vseed", ""))
         if not items:
             continue                                    # a hall with nothing to show stays dark
         i = _now_index(len(items), now_epoch)

@@ -298,6 +298,45 @@ def usda_bulletins(query: str, limit: int = 3,
     return out
 
 
+def internet_archive_video(query: str, limit: int = 3,
+                           practical: Optional[bool] = None) -> List[Dict[str, Any]]:
+    """The VIDEO plane — the SAME find, on film (Matt, 2026-08-30: "This is also how we build feeds
+    from youtube for .tv"). SCOPED to the Prelinger Archives: an explicitly public-domain / public-
+    access library of educational, documentary and how-to films. The scope is the safeguard — the
+    OPEN movies pool carries copyrighted uploads ("The Witch", "Escape From Sobibor") and content
+    unfit for a family channel, and a downloads sort surfaces exactly those; Prelinger, relevance-
+    ranked and relevance-filtered, cannot. Returns PROGRAM docs (a watch URL), never text to craft;
+    the .tv frame airs them. YouTube under a Creative-Commons filter is the next provider on this
+    plane, when a key is present."""
+    terms = _terms(query, practical)
+    url = ("https://archive.org/advancedsearch.php?q="
+           + urllib.parse.quote(terms + " AND collection:(prelinger)")
+           + "+AND+mediatype%3A(movies)"
+             "&fl[]=title&fl[]=year&fl[]=identifier"
+             "&rows=" + str(max(1, limit) * 4) + "&output=json")
+    raw = _get(url, "internet_archive_video")
+    if not raw:
+        return []
+    try:
+        docs = (json.loads(raw).get("response") or {}).get("docs") or []
+    except ValueError:
+        return []
+    out = []
+    for x in docs:
+        title = (x.get("title") if isinstance(x.get("title"), str) else "").strip()
+        ident = x.get("identifier") or ""
+        if not title or not ident or not _relevant(terms, title):
+            continue
+        yr = str(x.get("year") or "").strip()[:4]
+        out.append({"title": title[:120], "url": "https://archive.org/details/" + ident,
+                    "year": yr, "source": "Prelinger Archives",
+                    "license": "Public domain / public access", "tier": "primary",
+                    "plane": "video", "provider_id": "internet_archive_video"})
+        if len(out) >= limit:
+            break
+    return out
+
+
 # The provider id -> the name of the function on THIS module that reaches it. Resolved by name at
 # call time (not bound here), so a test that monkeypatches find.internet_archive is honoured and the
 # real network is never touched behind its back. find owns the functions; providers.py owns only
@@ -307,6 +346,7 @@ _PROVIDER_FNS = {
     "usda_bulletins": "usda_bulletins",
     "library_of_congress": "library_of_congress",
     "project_gutenberg": "project_gutenberg",
+    "internet_archive_video": "internet_archive_video",
 }
 
 
