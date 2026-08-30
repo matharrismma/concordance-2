@@ -747,6 +747,48 @@ def _title_names_subject(query: str, card: Dict[str, Any]) -> bool:
     return bool(subj & title)
 
 
+# THE OFF-DOMAIN SHIFT. A distributional topic model was proven unable to tell a how-to from a book
+# merely ABOUT the subject — it conflates topic with intent ("hog cholera" sits in the same hog-cluster
+# as "raise hogs") and penalizes synonyms ("chickens" vs "poultry"); so a threshold gate on it both
+# false-gaps real matches and misses the mismatch. The intent shift is caught DETERMINISTICALLY here
+# instead. A practical ask ("raise hogs", "keep bees") is answered wrongly when the best card names the
+# subject yet its TITLE has shifted to a DIFFERENT frame the asker never entered — disease ("hog
+# cholera"), the study of the thing ("the anatomy of the honey bee"), a reference work. Each domain
+# lists the TITLE markers that signal the shift AND the ASK words that mean the asker is ALREADY in that
+# domain, so a health question answered by a disease book is NOT a shift. Unambiguous + conservative by
+# design: it only ever turns a served answer into a GAP (a slower, surer pull that grows the keeping),
+# never a wrong answer, and — unlike a tighter noun match — it never rejects a related FORM.
+_OFF_DOMAINS = {
+    "health": (
+        frozenset({"cholera", "disease", "diseases", "sickness", "pathology", "veterinary", "epidemic",
+                   "infection", "plague", "ailment", "ailments", "parasite", "parasites"}),
+        frozenset({"disease", "diseases", "sick", "sickness", "ill", "illness", "treat", "treating",
+                   "cure", "curing", "remedy", "remedies", "symptom", "symptoms", "heal", "ailment",
+                   "health", "medicine", "medical", "veterinary", "pathology", "parasite"})),
+    "science": (
+        frozenset({"anatomy", "physiology", "microbiology", "embryology", "taxonomy", "morphology"}),
+        frozenset({"anatomy", "physiology", "biology", "science", "scientific", "microbiology",
+                   "structure"})),
+    "reference": (
+        frozenset({"biography", "dictionary", "encyclopedia", "catalogue", "catalog"}),
+        frozenset({"history", "biography", "dictionary", "who", "when", "catalogue", "catalog"})),
+}
+
+
+def _off_domain_shift(query: str, card: Dict[str, Any]) -> Optional[str]:
+    """The card's TITLE has shifted to a frame the ask never entered — the domain, or None. Deterministic,
+    no model; only a genuine cross-domain shift trips it (see `_OFF_DOMAINS`). "natural history" is
+    matched as a phrase because neither word alone is a reference marker."""
+    q = _content_tokens(query)
+    tw = _content_tokens(card.get("title") or "")
+    for dom, (markers, ask_words) in _OFF_DOMAINS.items():
+        if (markers & tw) and not (ask_words & q):
+            return dom
+    if "natural history" in (card.get("title") or "").lower() and not ({"history", "natural"} & q):
+        return "reference"
+    return None
+
+
 def _is_kept_tortoise_source(query: str, card: Dict[str, Any]) -> bool:
     """A public-domain passage THE TORTOISE ITSELF went out and cut FOR this very subject on an
     earlier ask, and kept. The surest thing we can hand a how-to gap on the SECOND asking: instead
@@ -1504,6 +1546,16 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
             # a masked GAP the ranker can't see, not the answer: send the tortoise to FETCH the real
             # source and card it (Matt: "even if we respond slower"). Keep this nearest as a fallback
             # so a pull that comes back empty never costs the closest real card we did hold.
+            weak = True
+            gap_lead = list(hits)
+        elif _off_domain_shift(text, _top):
+            # The lead names the subject and sits on a field shelf, but its TITLE has shifted to a
+            # DIFFERENT frame the asker never entered — "raise hogs" answered by "hog cholera" (a
+            # disease book), "keep bees" by "the anatomy of the honey bee". Deterministic and domain-
+            # aware (`_off_domain_shift`): it fires only on a genuine cross-domain shift, so it never
+            # rejects a related FORM ("honeybees" ~ "beekeeping") and never shifts a health question met
+            # by a health book. A masked gap all the same — go FETCH the how-to and keep it; hold this
+            # nearest as the fallback if the pull comes back empty.
             weak = True
             gap_lead = list(hits)
     if weak:

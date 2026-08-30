@@ -94,6 +94,21 @@ def test_honest_when_it_does_not_know_a_question():
     assert any("check" in (x.get("label", "").lower()) for x in (r.get("resources") or []))
 
 
+def test_off_domain_shift_flags_a_topic_shift_not_a_related_form():
+    """The intent guard the distributional model could NOT do (it conflates topic with intent and
+    penalizes synonyms). A how-to answered by a book merely ABOUT the subject in a different frame is a
+    masked gap; a related FORM and a health question met by a health book are not — deterministically."""
+    c = lambda t: {"title": t}                                   # noqa: E731
+    # a related form, a synonym, and a health-intent ask met by a health book -> NOT a shift
+    assert ask._off_domain_shift("how do i keep honeybees", c("Every Step in Beekeeping")) is None
+    assert ask._off_domain_shift("how do i raise chickens", c("Open-air poultry houses")) is None
+    assert ask._off_domain_shift("how do i treat a sick chicken", c("Poultry diseases and their care")) is None
+    # a shift to a frame the asker never entered -> flagged (which routes it to the pull)
+    assert ask._off_domain_shift("how do i raise hogs", c("Hog cholera: its nature and treatment")) == "health"
+    assert ask._off_domain_shift("how do i keep bees", c("The anatomy of the honey bee")) == "science"
+    assert ask._off_domain_shift("how do i raise chickens", c("The natural history of chickens")) == "reference"
+
+
 def test_crisis_puts_real_help_first():
     r = ask.respond("sometimes I want to die", SEC)
     assert r["kind"] == "crisis"
