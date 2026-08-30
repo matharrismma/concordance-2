@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prophecy &amp; Fulfillment — Narrow Highway</title>
+<meta name="description" content="The Old Testament spoke of the Messiah; the New Testament names where it was met. Every pairing here is one the New Testament itself declares fulfilled — Scripture's own witness, not ours. A signpost to Jesus Christ, never a proof. Read the verses and discern.">
+<style>
+  :root{ --bg:#f7f4ec; --panel:#fffdf7; --ink:#241f18; --soft:#5c5344; --dim:#857a68;
+         --line:#e4ddcd; --gold:#9a6b2f; --ot:#5a4a2a; --nt:#3d5a6c; --accent:#7d4a22; }
+  :root[data-theme="dark"], :root:not([data-theme="light"]){ }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --bg:#141210; --panel:#1c1915; --ink:#ece7dc; --soft:#c4bba9; --dim:#8f8674;
+    --line:#2c2822; --gold:#d0a05a; --ot:#cbb68a; --nt:#9db8c9; --accent:#e0a06a; } }
+  :root[data-theme="dark"]{ --bg:#141210; --panel:#1c1915; --ink:#ece7dc; --soft:#c4bba9;
+    --dim:#8f8674; --line:#2c2822; --gold:#d0a05a; --ot:#cbb68a; --nt:#9db8c9; --accent:#e0a06a; }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--ink);
+       font:16px/1.6 -apple-system,"Segoe UI",Roboto,sans-serif}
+  a{color:inherit}
+  .bar{display:flex; align-items:center; gap:1rem; padding:1rem 1.3rem; border-bottom:1px solid var(--line)}
+  .brand{font-weight:700; letter-spacing:.02em; text-decoration:none}
+  .brand .r{color:var(--gold)}
+  .bar nav{margin-left:auto; display:flex; gap:1.1rem; font-size:.92rem}
+  .bar nav a{color:var(--soft); text-decoration:none}
+  .wrap{max-width:52rem; margin:0 auto; padding:2rem 1.3rem 4rem}
+  h1{font:600 2rem/1.15 Georgia,"Times New Roman",serif; margin:.2rem 0 .6rem}
+  .lede{color:var(--soft); font-size:1.05rem; max-width:44rem}
+  .lede b{color:var(--ink)}
+  .find{display:flex; gap:.5rem; margin:1.6rem 0 .4rem}
+  .find input{flex:1; padding:.7rem .9rem; font-size:1rem; color:var(--ink); background:var(--panel);
+              border:1px solid var(--line); border-radius:8px}
+  .find button{padding:.7rem 1.1rem; font-size:1rem; border:1px solid var(--gold); border-radius:8px;
+               background:transparent; color:var(--gold); cursor:pointer}
+  .hint{color:var(--dim); font-size:.86rem; margin:.1rem 0 1.2rem}
+  .theme{margin-top:2.2rem}
+  .theme > h2{font:600 .82rem/1 ui-monospace,monospace; letter-spacing:.14em; text-transform:uppercase;
+              color:var(--gold); border-bottom:1px solid var(--line); padding-bottom:.5rem; margin:0 0 1rem}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:1rem 1.1rem;
+        margin:.8rem 0}
+  .card .t{font-weight:600; font-size:1.05rem; margin-bottom:.5rem}
+  .pair{display:grid; grid-template-columns:1fr 1fr; gap:.9rem}
+  @media (max-width:620px){ .pair{grid-template-columns:1fr} }
+  .v .tag{font:600 10px/1 ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase}
+  .v.ot .tag{color:var(--ot)} .v.nt .tag{color:var(--nt)}
+  .v .ref{font-weight:600; margin:.15rem 0 .2rem; font-size:.94rem}
+  .v .txt{color:var(--soft); font-size:.95rem}
+  .src{color:var(--dim); font-size:.84rem; margin-top:.7rem; border-top:1px dashed var(--line); padding-top:.5rem}
+  .src .verdict{color:var(--gold); font-weight:600}
+  .note{background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--gold);
+        border-radius:8px; padding:1rem 1.1rem; margin:1.6rem 0; color:var(--soft); font-size:.95rem}
+  footer{border-top:1px solid var(--line); margin-top:3rem; padding-top:1.3rem; color:var(--dim);
+         font-size:.86rem}
+  .msg{color:var(--dim); padding:1rem 0}
+</style>
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="/">Narrow<span class="r">Highway</span></a>
+  <nav><a href="/bible.html">Scripture</a><a href="/prophecy.html">Prophecy</a><a href="https://narrowhighway.org">Witness</a></nav>
+</header>
+<main class="wrap">
+  <h1>Prophecy &amp; Fulfillment</h1>
+  <p class="lede">The Old Testament spoke of the Messiah; the New Testament names where it was met.
+  Every pairing below is one <b>the New Testament itself declares fulfilled</b> — Scripture's own
+  witness, not ours. The verses are here so you never take the pairing on our word. A signpost to
+  Jesus Christ, never a proof. Read them, and discern.</p>
+
+  <div class="find">
+    <input id="q" type="text" placeholder="Stand on a verse — e.g. Isaiah 53, Psalm 22, Micah 5:2"
+           aria-label="Find fulfillments touching a verse">
+    <button id="go" type="button">Find</button>
+  </div>
+  <div class="hint">Enter a book and chapter to see which of its lines the New Testament takes up — or leave it blank for the whole map.</div>
+
+  <div id="out"><p class="msg">Loading the map…</p></div>
+
+  <div class="note" id="foot-note"></div>
+
+  <footer>A conduit, not a source — nothing here is generated; every pairing is Scripture citing
+  Scripture, in the public-domain World English Bible. Verdict CONCORDANT, never HOLDS.
+  <a href="/">↩ Narrow Highway</a></footer>
+</main>
+<script>
+(function(){
+  var out=document.getElementById('out'), qi=document.getElementById('q');
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function verseBlock(cls,tag,v){ if(!v||!v.ref) return '';
+    return '<div class="v '+cls+'"><div class="tag">'+tag+'</div><div class="ref">'+esc(v.ref)+
+      '</div><div class="txt">'+esc(v.txt||v.text||'')+'</div></div>'; }
+  function card(m){
+    var nts=(m.nt_fulfillments||[]).map(function(f){return verseBlock('nt','New Testament',f);}).join('');
+    return '<div class="card"><div class="t">'+esc(m.title)+'</div>'+
+      '<div class="pair">'+verseBlock('ot','Old Testament',m.ot)+
+      '<div>'+nts+'</div></div>'+
+      '<div class="src">'+esc(m.source||'')+' · <span class="verdict">'+esc(m.verdict||'')+'</span></div></div>';
+  }
+  function renderThemes(d){
+    if(!d||!d.themes){ out.innerHTML='<p class="msg">Nothing to show.</p>'; return; }
+    var order=['birth','ministry','passion','resurrection','apostles','epistles'];
+    var names={birth:'Birth',ministry:'Ministry',passion:'The Passion',resurrection:'Resurrection',apostles:'The Apostles’ Witness',epistles:'In the Epistles'};
+    var keys=order.filter(function(k){return d.themes[k];}).concat(Object.keys(d.themes).filter(function(k){return order.indexOf(k)<0;}));
+    out.innerHTML=keys.map(function(k){
+      return '<section class="theme"><h2>'+esc(names[k]||k)+'</h2>'+d.themes[k].map(card).join('')+'</section>';
+    }).join('');
+  }
+  function renderMatches(d){
+    if(!d||!d.count){ out.innerHTML='<p class="msg">No fulfillment in the map touches '+esc(d&&d.ref||'')+' yet. Try a book and chapter, e.g. Isaiah 53.</p>'; return; }
+    out.innerHTML='<section class="theme"><h2>Touching '+esc(d.ref)+'</h2>'+d.matches.map(card).join('')+'</section>';
+  }
+  function load(url,render){
+    out.innerHTML='<p class="msg">Reading Scripture…</p>';
+    fetch(url).then(function(r){return r.json();}).then(function(d){
+      render(d);
+      if(d&&d.note) document.getElementById('foot-note').textContent=d.note;
+    }).catch(function(){ out.innerHTML='<p class="msg">Could not load right now. Please try again.</p>'; });
+  }
+  function search(){ var q=qi.value.trim();
+    if(q) load('/prophecy?ref='+encodeURIComponent(q), renderMatches);
+    else  load('/prophecy?fulfillments=1', renderThemes);
+  }
+  document.getElementById('go').addEventListener('click',search);
+  qi.addEventListener('keydown',function(e){ if(e.key==='Enter') search(); });
+  // deep-link ?ref=
+  var m=location.search.match(/[?&]ref=([^&]+)/);
+  if(m){ qi.value=decodeURIComponent(m[1].replace(/\+/g,' ')); search(); }
+  else load('/prophecy?fulfillments=1', renderThemes);
+})();
+</script>
+</body>
+</html>

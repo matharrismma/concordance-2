@@ -144,6 +144,7 @@ test_privacy.py
 test_profile.py
 test_pronounce.py
 test_prophecy.py
+test_prophecy_fulfillments.py
 test_push.py
 test_reachability.py
 test_reachable_from_the_floor.py

@@ -1946,12 +1946,23 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                                      category=(query.get("category") or None)))
 
     if method == "GET" and path == "/prophecy":
-        # Christ-signpost traces — attributed, verdict CONCORDANT/MIXED, NEVER HOLDS (a signpost, not a proof).
+        # Two maps under one door, both attributed and NEVER "HOLDS" (a signpost to Christ, not a proof):
+        # the cross-cultural SIGNPOSTS (prophecy.py) and the OT->NT FULFILLMENTS the New Testament itself
+        # names (prophecy_fulfillments.py — verdict CONCORDANT, Scripture's own witness carried, not ours).
         from .. import prophecy
+        from .. import prophecy_fulfillments as pf
+        ref = (query.get("ref") or "").strip()
+        if ref:                                      # stand on a verse/chapter, see what the NT takes up
+            return _ok(pf.for_ref(ref))
         tid = (query.get("id") or "").strip()
-        if tid:
+        if tid.startswith("mp_"):                    # one OT->NT fulfillment, whole (both verses' text)
+            rec = pf.get(tid)
+            return _ok(rec) if rec is not None else _err(404, "fulfillment not found")
+        if tid:                                      # one cross-cultural signpost trace
             rec = prophecy.get(tid)
             return _ok(rec) if rec is not None else _err(404, "trace not found")
+        if (query.get("fulfillments") or "").strip():   # the whole OT->NT map, grouped by theme
+            return _ok(pf.list_all())
         q = (query.get("q") or "").strip()
         return _ok(prophecy.search(q) if q else prophecy.list_traces())
 
@@ -2839,7 +2850,6 @@ _RETIRED = {
     "/mesh.html": "/",
     "/narratives.html": "/bible.html",
     "/places.html": "/encyclopedia.html",
-    "/prophecy.html": "/bible.html",
     "/reason.html": "/proof.html",
     "/seal.html": "/proof.html",
     "/seeds.html": "/proof.html",
