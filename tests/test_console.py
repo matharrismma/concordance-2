@@ -198,7 +198,7 @@ def test_a_checkable_claim_gets_the_verdict_not_a_false_miss(monkeypatch):
     monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
         "kind": "verify", "generated": False,
         "verify": {"verdict": "BROKEN", "detail": "91 is NOT prime (7 x 13); it was claimed prime.",
-                   "trail": [], "cite_url": "/s/abc123"}})
+                   "trail": [], "seal": {"cite_url": "/s/abc123", "content_hash": "abc123"}}})
     r = console.dispatch("is 91 prime", SEC)
     assert r["kind"] == "verify"                                # not "miss"
     assert "does not hold" in r["spoken"].lower() and "91" in r["spoken"]

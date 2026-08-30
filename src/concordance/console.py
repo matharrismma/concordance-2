@@ -224,7 +224,11 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
             spoken = ("I hit an error checking that — that is my failure, not a false claim. " + detail).strip()
         caption = spoken
         kind = "verify"
-        cu = v.get("cite_url") or v.get("seal_url") or (v.get("seal") if isinstance(v.get("seal"), str) else "")
+        # the re-checkable receipt — attach() stores it as verify["seal"]["cite_url"] (a permanent,
+        # content-addressed /s/<hash>). Surface it so the family can VERIFY WITHOUT TRUSTING US — the
+        # whole wedge. (This was reading the wrong key, so the seal never reached the console user.)
+        seal = v.get("seal") if isinstance(v.get("seal"), dict) else {}
+        cu = seal.get("cite_url") or v.get("cite_url") or ""
         if cu:
             source = {"title": "the worked check — re-verify it yourself", "ref": cu}
     else:
