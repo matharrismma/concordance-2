@@ -107,9 +107,12 @@ def _ia(ident: str, title: str, year: str) -> Dict[str, Any]:
 
 
 _SEED: List[Dict[str, Any]] = [
-    # Ten verified public-domain anchors for the subjects families reach for first — each id returned
-    # live by archive.org on 2026-08-30. The floor, not the ceiling: soap, canning, bread, sewing,
-    # tanning and the rest are left DARK on purpose, for the reach + promotion to fill from real asks.
+    # Ten verified anchors for the subjects families reach for first — each cleared THREE bars live on
+    # 2026-08-30: on-topic, OPENABLE (a real _djvu.txt), and it actually crafts 10 cards; and each is
+    # PRE-1929, so it is unambiguously public domain in the US ([[strict PD-only]], the _pd_ok ceiling)
+    # and releases to the shared library at once rather than waiting in review. The floor, not the
+    # ceiling: soap, canning, bread, sewing, tanning and the rest are left DARK on purpose, for the
+    # reach + promotion to fill from real asks.
     {"subject": "beekeeping", "plane": "text", "kind": "practical",
      "terms": "bee bees beekeeping honeybee honeybees beehive hive honey apiary apiculture langstroth",
      "source": _ia("everystepinbeek00douggoog", "Every Step in Beekeeping: A Book for Amateurs", "1921")},
@@ -129,11 +132,11 @@ _SEED: List[Dict[str, Any]] = [
      "terms": "meat curing cure sausage smoking smoke butcher butchering pork ham bacon salting",
      "source": _ia("secretsofmeatcur00bhelrich", "Secrets of meat curing and sausage making", "1922")},
     {"subject": "vegetable gardening", "plane": "text", "kind": "practical",
-     "terms": "garden gardening vegetable vegetables planting soil crops victory horticulture",
-     "source": _ia("VictoryGardenLeadersHandbook", "Victory Garden Leader's Handbook", "1943")},
+     "terms": "garden gardening vegetable vegetables planting soil crops horticulture",
+     "source": _ia("principlesofveg00bail", "The Principles of Vegetable-Gardening", "1912")},
     {"subject": "herbal remedies", "plane": "text", "kind": "practical",
      "terms": "herb herbs herbal remedy remedies medicinal medicine plants simples",
-     "source": _ia("meyer-1934-natures-remedies", "Nature's Remedies", "1934")},
+     "source": _ia("64210320R.nlm.nih.gov", "The Complete Herbalist", "1867")},
     {"subject": "drying and preserving food", "plane": "text", "kind": "practical",
      "terms": "dry drying dehydrate dehydrating preserve preserving food fruit fruits vegetables",
      "source": _ia("dehydratingfoods00andr", "Dehydrating foods: fruits, vegetables", "1920")},

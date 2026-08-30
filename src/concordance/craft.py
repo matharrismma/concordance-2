@@ -160,6 +160,26 @@ _LEAD_MARK = re.compile(r"(?:[^\s\d]{1,3}\s+)?\d{1,4}(?:\s+\d{1,4})?\s*[.\]\)]\s
 # A running head OCR dropped into the middle of the text stream at a page break:
 # "Y 34] DOCTRINE 29 of their association…". Only ever stripped from a DERIVED title, never a body.
 _RUN_HEAD = re.compile(r"[A-Z][A-Z ]{2,}\s+\d{1,4}\s+")
+# The SAME running head when the page NUMBER leads it: "24 BEEKEEPING the bees…", "50 GOVERNMENT of".
+# _RUN_HEAD misses these because the digit comes first, so the scanner's page furniture rode into the
+# card title on a Google-scanned manual (measured live 2026-08-30: a beekeeping card titled
+# ") by Google 24 BEEKEEPING the bees and it was seldom…").
+_DIGIT_RUNHEAD = re.compile(r"\d{1,4}\s+[A-Z][A-Z]{2,}(?:\s+[A-Z&'’]+)*\s+")
+# A bare leading PAGE NUMBER before ordinary text: "244 The Principles of…", "6 The Principles…".
+# Only meaningful on a DERIVED title (an OCR body-opening), where a number in first position is the
+# folio, never the author's words — a real title/sentence that opens on a number does so as "In 1900,"
+# not "1900". Requires a LETTER (not another digit) next, so "6 390] RITUAL" is left to _LEAD_MARK.
+_LEAD_PAGENUM = re.compile(r"\d{1,4}\s+(?=[A-Za-z])")
+# Mass-digitisation boilerplate dropped into the text stream: "Digitized by Google", "Original from
+# THE UNIVERSITY OF…", "Generated on …". No 1850–1964 book titles itself this way, so a DERIVED title
+# is cut up to and including it. Bounded to the head of the string so it can never eat a real title.
+# Case-sensitive on purpose: this boilerplate is always capitalised as shown, and matching the WHOLE
+# phrase ("Digitized by Google", "Original from THE UNIVERSITY OF …") swallows the library name too,
+# where a case-insensitive [A-Z] run would greedily eat the real text that follows.
+_SCAN_BOILER = re.compile(
+    r"^.{0,50}?(?:(?:Digiti[sz]ed )?by Google"
+    r"|Original from(?:\s+[A-Z][A-Z.&'’ ]{2,})?"
+    r"|Generated (?:on|for))[\s.,:;)\]]*")
 
 
 def _strip_furniture(s: str) -> str:
@@ -172,11 +192,11 @@ def _strip_furniture(s: str) -> str:
     prev = None
     while s != prev and s:
         prev = s
-        for pat in (_LEAD_MARK, _RUN_HEAD):
+        for pat in (_SCAN_BOILER, _LEAD_MARK, _RUN_HEAD, _DIGIT_RUNHEAD, _LEAD_PAGENUM):
             m = pat.match(s)
             if m and m.end() < len(s):
                 s = s[m.end():]
-        s = s.lstrip(" \t[(")
+        s = s.lstrip(" \t[()»«|¶§*")
     return s
 
 

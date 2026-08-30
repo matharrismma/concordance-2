@@ -320,9 +320,18 @@ def test_furniture_is_stripped_from_labels_and_never_from_bodies():
     assert craft._strip_furniture("6 390] RITUAL 133 The Minister may") == "The Minister may"
     assert craft._strip_furniture("II. The Churches Severally").startswith("The Churches") or \
         craft._strip_furniture("II. The Churches Severally") == "II. The Churches Severally"
-    # and a real sentence is left entirely alone
+    # mass-digitisation boilerplate + a PAGE-NUMBER-led running head (measured live 2026-08-30 on a
+    # Google-scanned beekeeping manual: a card titled ") by Google 24 BEEKEEPING the bees…")
+    assert craft._strip_furniture(") by Google 24 BEEKEEPING the bees and it was seldom") == \
+        "the bees and it was seldom"
+    assert craft._strip_furniture("Digitized by Google 50 GOVERNMENT of the several States") == \
+        "of the several States"
+    assert craft._strip_furniture("Original from THE UNIVERSITY OF MICHIGAN honey is stored") == \
+        "honey is stored"
+    # and a real sentence — and a real title — are left entirely alone
     assert craft._strip_furniture("In 1900, the first Church was organized") == \
         "In 1900, the first Church was organized"
+    assert craft._strip_furniture("Every Step in Beekeeping") == "Every Step in Beekeeping"
 
 
 # ── THE PLANES ────────────────────────────────────────────────────────────────────────────────
