@@ -53,6 +53,12 @@ PROVIDERS: List[Dict[str, Any]] = [
      "blurb": "A public-domain / public-access library of educational, documentary and how-to films, "
               "preserved at the Internet Archive.",
      "planes": ("video",), "paused": False},
+    {"id": "youtube_cc", "name": "YouTube (Creative Commons)", "home": "https://www.youtube.com",
+     "blurb": "Creative-Commons-licensed video. A candidate source only — its finds enter quarantine "
+              "for human curation before any family channel airs them.",
+     # PAUSED: inert without a YOUTUBE_API_KEY, and a wild pool even with one — unpause only together
+     # with the curation/quarantine step, never as a live airer.
+     "planes": ("video",), "paused": True},
     {"id": "project_gutenberg", "name": "Project Gutenberg", "home": "https://www.gutenberg.org",
      "blurb": "The oldest library of free public-domain ebooks, transcribed and proofread by "
               "volunteers.",

@@ -337,6 +337,49 @@ def internet_archive_video(query: str, limit: int = 3,
     return out
 
 
+def youtube_cc(query: str, limit: int = 3,
+               practical: Optional[bool] = None) -> List[Dict[str, Any]]:
+    """YouTube under a Creative-Commons filter — the video plane's second provider (Matt, 2026-08-30:
+    "this is also how we build feeds from youtube for .tv"). Reads YOUTUBE_API_KEY from the
+    environment; with NO key it is INERT (returns nothing), so this ships dark and lights up only when
+    a key is placed in .env on the box — the key never travels through chat ([[secret hygiene]]).
+
+    Unlike Prelinger (a curated public-domain collection), YouTube-CC is a WILD pool: uploaders
+    mislabel licences and nothing is vetted for a Christian family channel. So this is a CANDIDATE
+    finder, not an airer — its results are meant to enter QUARANTINE for human curation before any
+    channel airs them, exactly the gate's born-quarantined rule. The provider is registered PAUSED for
+    that reason; unpausing it is a deliberate act taken together with the curation step. Even so it
+    asks the API for safeSearch=strict and videoLicense=creativeCommon as a first floor."""
+    key = os.environ.get("YOUTUBE_API_KEY", "").strip()
+    if not key:
+        return []
+    terms = _terms(query, practical)
+    url = ("https://www.googleapis.com/youtube/v3/search?part=snippet&type=video"
+           "&videoLicense=creativeCommon&safeSearch=strict&maxResults=" + str(max(1, limit) * 2)
+           + "&q=" + urllib.parse.quote(terms) + "&key=" + urllib.parse.quote(key))
+    raw = _get(url, "youtube_cc")
+    if not raw:
+        return []
+    try:
+        items = json.loads(raw).get("items") or []
+    except ValueError:
+        return []
+    out = []
+    for it in items:
+        vid = ((it.get("id") or {}).get("videoId") or "").strip()
+        sn = it.get("snippet") or {}
+        title = (sn.get("title") or "").strip()
+        if not vid or not title or not _relevant(terms, title, sn.get("description") or ""):
+            continue
+        out.append({"title": title[:120], "url": "https://www.youtube.com/watch?v=" + vid,
+                    "year": (sn.get("publishedAt") or "")[:4],
+                    "source": "YouTube (Creative Commons)", "license": "Creative Commons — BY",
+                    "tier": "community", "plane": "video", "provider_id": "youtube_cc"})
+        if len(out) >= limit:
+            break
+    return out
+
+
 # The provider id -> the name of the function on THIS module that reaches it. Resolved by name at
 # call time (not bound here), so a test that monkeypatches find.internet_archive is honoured and the
 # real network is never touched behind its back. find owns the functions; providers.py owns only
@@ -347,6 +390,7 @@ _PROVIDER_FNS = {
     "library_of_congress": "library_of_congress",
     "project_gutenberg": "project_gutenberg",
     "internet_archive_video": "internet_archive_video",
+    "youtube_cc": "youtube_cc",
 }
 
 
