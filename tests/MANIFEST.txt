@@ -73,6 +73,7 @@ test_encyclopedia_and_voices.py
 test_engine.py
 test_expand.py
 test_expand_on_call.py
+test_field_canon.py
 test_find.py
 test_floor.py
 test_floor_connected.py

@@ -35,6 +35,9 @@ import urllib.parse
 import urllib.request
 from typing import Any, Dict, List, Optional
 
+from . import field_canon as _canon
+from . import providers as _providers
+
 _UA = "NarrowHighway/1.0 (+https://narrowhighway.com; sovereign verification)"
 _TIMEOUT = 7          # per source; the practical path calls several, so keep each bounded
 _WORD = re.compile(r"[a-z]{3,}")
@@ -96,13 +99,20 @@ def _relevant(query: str, *texts: str) -> bool:
     return bool(q & hay)
 
 
-def _get(url: str) -> Optional[str]:
-    """Defensive GET — text or None. Never raises into the caller."""
+def _get(url: str, pid: Optional[str] = None) -> Optional[str]:
+    """Defensive GET — text or None. Never raises into the caller. Records provider health at this
+    one network chokepoint, so a source that fails us more than once is benched and rotated out
+    (providers.record); a source that answers clears its slate."""
     try:
         req = urllib.request.Request(url, headers={"User-Agent": _UA, "Accept": "application/json"})
         with urllib.request.urlopen(req, timeout=_TIMEOUT) as r:   # noqa: S310 (trusted hosts only)
-            return r.read().decode("utf-8", "replace")
+            body = r.read().decode("utf-8", "replace")
+        if pid:
+            _providers.record(pid, True)
+        return body
     except Exception:  # noqa: BLE001
+        if pid:
+            _providers.record(pid, False)
         return None
 
 
@@ -113,7 +123,8 @@ def library_of_congress(query: str, limit: int = 3,
     the original sources to go deeper, attributed and linked."""
     terms = _terms(query, practical)          # relevance is judged against what we searched (see IA note)
     q = urllib.parse.quote(terms)
-    raw = _get(f"https://www.loc.gov/search/?q={q}&fo=json&c={max(1, limit)}&at=results")
+    raw = _get(f"https://www.loc.gov/search/?q={q}&fo=json&c={max(1, limit)}&at=results",
+               "library_of_congress")
     if not raw:
         return []
     try:
@@ -130,7 +141,7 @@ def library_of_congress(query: str, limit: int = 3,
         out.append({"title": title[:140], "url": url,
                     "format": (fmt[0] if isinstance(fmt, list) and fmt else str(fmt)),
                     "source": "Library of Congress", "license": "Public domain (mostly) — verify per item",
-                    "tier": "primary"})
+                    "tier": "primary", "provider_id": "library_of_congress"})
     return out
 
 
@@ -205,7 +216,7 @@ def internet_archive(query: str, limit: int = 3,
            + "+AND+mediatype%3A(texts)+AND+year%3A%5B1850+TO+1964%5D"
              "&fl[]=title&fl[]=year&fl[]=identifier&fl[]=creator"
              "&rows=" + str(max(1, limit) * 4) + "&output=json")
-    raw = _get(url)
+    raw = _get(url, "internet_archive")
     if not raw:
         return []
     try:
@@ -221,7 +232,8 @@ def internet_archive(query: str, limit: int = 3,
         yr = str(x.get("year") or "").strip()[:4]
         out.append({"title": title[:120], "url": "https://archive.org/details/" + ident,
                     "year": yr, "source": "Internet Archive",
-                    "license": "Public domain (verify per item)", "tier": "primary"})
+                    "license": "Public domain (verify per item)", "tier": "primary",
+                    "provider_id": "internet_archive"})
         if len(out) >= limit:
             break
     return out
@@ -231,7 +243,7 @@ def project_gutenberg(query: str, limit: int = 3,
                       practical: Optional[bool] = None) -> List[Dict[str, Any]]:
     """Public-domain books from Project Gutenberg (PD by definition) — full text, freely carried."""
     terms = _terms(query, practical)          # relevance is judged against what we searched (see IA note)
-    raw = _get("https://gutendex.com/books/?search=" + urllib.parse.quote(terms))
+    raw = _get("https://gutendex.com/books/?search=" + urllib.parse.quote(terms), "project_gutenberg")
     if not raw:
         return []
     try:
@@ -246,7 +258,38 @@ def project_gutenberg(query: str, limit: int = 3,
         who = ", ".join((a.get("name") or "") for a in (x.get("authors") or []))[:70]
         out.append({"title": title[:120], "url": "https://www.gutenberg.org/ebooks/" + str(x.get("id")),
                     "year": "", "creator": who, "source": "Project Gutenberg",
-                    "license": "Public domain", "tier": "primary"})
+                    "license": "Public domain", "tier": "primary", "provider_id": "project_gutenberg"})
+    return out
+
+
+# The provider id -> the name of the function on THIS module that reaches it. Resolved by name at
+# call time (not bound here), so a test that monkeypatches find.internet_archive is honoured and the
+# real network is never touched behind its back. find owns the functions; providers.py owns only
+# their health and credit, so there is no import cycle.
+_PROVIDER_FNS = {
+    "internet_archive": "internet_archive",
+    "library_of_congress": "library_of_congress",
+    "project_gutenberg": "project_gutenberg",
+}
+
+
+def reach(query: str, plane: str = "text", practical: Optional[bool] = None,
+          limit: int = 3) -> List[Dict[str, Any]]:
+    """Reach the ACTIVE sources on this plane, in registry order (canon-first is the caller's job).
+    Paused and benched sources are skipped, so one throttled catalogue can't drag the answer to its
+    timeout; each doc carries its provider_id for credit. Never raises into the caller."""
+    if practical is None:
+        practical = is_practical(query)
+    out: List[Dict[str, Any]] = []
+    for p in _providers.active(plane):
+        name = _PROVIDER_FNS.get(p["id"])
+        fn = globals().get(name) if name else None
+        if not callable(fn):
+            continue
+        try:
+            out.extend(fn(query, limit=limit, practical=practical) or [])
+        except Exception:  # noqa: BLE001 — one deaf provider must not silence the others
+            continue
     return out
 
 
@@ -380,9 +423,11 @@ def _mint_doc(query: str, doc: Dict[str, Any], practical: bool = True,
         who = (" — " + doc["creator"]) if doc.get("creator") else ""
         tag = ("Carry the torch of Foxfire — practical knowledge that has stood the test of time."
                if practical else "A primary source — go to the original, not a summary.")
+        credit = _providers.line(doc)           # who they are + an easy way back; we drive traffic to them
         body = (doc.get("title", "") + yr + who + "\n\nA public-domain source: " + doc.get("source", "")
                 + " — " + url + ". " + tag + " Public domain (" + doc.get("license", "")
-                + "), so it can be kept and used offline.")
+                + "), so it can be kept and used offline."
+                + (("\n\n" + credit) if credit else ""))
         card = {"id": cid, "kind": "practical" if practical else "source",
                 "title": doc.get("title", "")[:100], "body": body,
                 "source": {"label": doc.get("source", "") + (yr or ""), "url": url,
@@ -472,17 +517,22 @@ def find_and_check(query: str, config, plane: str = "human") -> Optional[Dict[st
         return None
     try:
         practical = is_practical(query)
-        # PRIMARY, public-domain sources only — never Wikipedia, never the latest. We'd rather be
-        # slower and send you to a real source than lean on a summary. Our own science answers what
-        # it can, upstream of here (the keeping + verifiers — we construct and verify); this points
-        # to primary sources for what we don't yet hold.
-        docs = (internet_archive(query, practical=practical)
-                + project_gutenberg(query, practical=practical)
-                + library_of_congress(query, practical=practical))
+        # CANON FIRST — the kept map of the tried-and-true source for this subject (Langstroth for
+        # bees, and its kin). A hit is deterministic and needs no network. Only a subject the canon
+        # does not yet hold falls through to the reach — PRIMARY, public-domain sources only, never
+        # Wikipedia, never the latest — and the reach's active set excludes any source we benched for
+        # failing us more than once. Every reach that wins is promoted back into the canon, so the
+        # subject is never gambled again (search once, keep forever).
+        canon_docs = _canon.lookup(query, plane="text", limit=3)
+        reached = reach(query, plane="text", practical=practical)
+        docs = canon_docs + reached
         if not docs:
             return None
         for d in docs[:3]:
             _mint_doc(query, d, practical=practical, plane=plane)
+        for d in reached:                       # keep the first reached win; the subject is now mapped
+            if _canon.promote(query, d, plane="text"):
+                break
         if practical:
             note = ("The keeping doesn't hold this yet. For practical knowledge we carry the torch of "
                     "Foxfire — we look back before the modern inputs, to the tried-and-true (the "
@@ -493,6 +543,8 @@ def find_and_check(query: str, config, plane: str = "human") -> Optional[Dict[st
                     "from our own science where we can; the rest we won't fetch from a summary — we'd "
                     "rather be slower and send you to primary, public-domain sources. We are the "
                     "tortoise.")
+        for d in docs:                          # credit reaches the reader, with the way back
+            d["credit"] = _providers.line(d)
         return {"source_note": note, "answer": None, "framed": "", "checks_verdict": None,
                 "documents": docs}
     except Exception:  # noqa: BLE001

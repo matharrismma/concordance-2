@@ -160,7 +160,12 @@ def resolve_text_url(url: str, _meta=None) -> Optional[str]:
         for f in (meta or {}).get("files") or []:
             name = str(f.get("name") or "")
             if name.endswith("_djvu.txt"):
-                return f"https://archive.org/download/{ident}/{name}"
+                # A scan's filename can carry spaces or stray control characters (e.g. an
+                # 'in.gov.ignca…' item), which urllib rejects outright ("URL can't contain control
+                # characters") — so the openable book was lost to a fetch that never left. Percent-
+                # encode the path segments; the bytes behind the name are unchanged.
+                return ("https://archive.org/download/" + urllib.parse.quote(ident)
+                        + "/" + urllib.parse.quote(name))
     return None
 
 

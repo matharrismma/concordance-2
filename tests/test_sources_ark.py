@@ -220,6 +220,16 @@ def test_a_catalogue_page_resolves_to_the_text_behind_it(ark):
         "https://archive.org/download/abc/abc_djvu.txt"
 
 
+def test_a_scan_filename_with_a_space_is_percent_encoded(ark):
+    """Some scans (e.g. an 'in.gov.ignca…' item) name their text file with a space or stray control
+    character. Built raw, that URL made urllib refuse ("URL can't contain control characters") and the
+    openable book was lost. The path segments are percent-encoded now, so no literal space survives."""
+    spacey = {"metadata": {}, "files": [{"name": "in.gov 2047_djvu.txt"}]}
+    url = sources.resolve_text_url("https://archive.org/details/in.gov.2047", _meta=spacey)
+    assert url == "https://archive.org/download/in.gov.2047/in.gov%202047_djvu.txt"
+    assert " " not in url          # the exact thing that made urllib refuse
+
+
 def test_a_restricted_or_textless_item_resolves_to_nothing(ark):
     """None is an honest answer; a guessed URL that 404s would waste the fetch and log a lie."""
     restricted = {"metadata": {"access-restricted-item": "true"},

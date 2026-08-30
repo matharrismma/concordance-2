@@ -164,30 +164,35 @@ def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
     # A pull only ever answers a practical/how-to gap, so the tortoise reads the Foxfire era and the
     # cards it keeps belong on the practical shelf. The intent lives in `q` ("how do I start a fire")
     # even after `subj` was stripped to the bare "start fire", so read practicality from `q`.
+    from . import field_canon as _canon
     practical = _find.is_practical(q)
     default_providers = providers is None
-    if default_providers:
-        # PROJECT GUTENBERG FIRST FOR A PRACTICAL PULL. Its plain-text is curated public domain
-        # (released to the shared library at once, so the next asking is instant) and holds the
-        # Foxfire-era manuals whole — Nessmuk's "Woodcraft and Camping" and its kin. The loop keeps
-        # the FIRST source that yields enough verifying cards, so whichever provider leads decides
-        # the source: with the Internet Archive first, a tangential story book with a few 'fire'
-        # mentions won the race over the real manual (measured live 2026-08-15). For a non-practical
-        # miss the Archive's far broader catalogue still leads — it is likelier to hold an obscure
-        # subject at all.
-        providers = ((_find.project_gutenberg, _find.internet_archive) if practical
-                     else (_find.internet_archive, _find.project_gutenberg))
 
-    docs: List[Dict[str, Any]] = []
-    for p in providers:
-        try:
-            # The real archives must be searched on the PERIOD term (find._terms) — a bare "start
-            # fire" returns sermons, "woodcraft" returns the manual. An INJECTED test provider is
-            # called plainly, so its signature is never assumed to carry `practical`.
-            docs.extend((p(subj if subj else q, limit=3, practical=True) if default_providers
-                         else p(subj if subj else q, limit=3)) or [])
-        except Exception:  # noqa: BLE001 — one deaf provider must not silence the others
-            continue
+    # CANON FIRST — the kept map of the tried-and-true source for this subject (Langstroth for bees,
+    # the Red Cross book for first aid). A canon hit is a KNOWN openable source: it is cut FIRST, so
+    # the pull no longer gambles on whether a title happens to share a word. Only a subject the canon
+    # does not yet hold falls to the reach, and a reach that yields real cards is promoted back into
+    # the canon so the subject is never gambled again ("search once per question", made to hold).
+    # The pull wants THE anchor for this subject, not a mix: a query that grazes a second subject
+    # ("keeping honeybees" also touches "keeping poultry") must not let the other subject's book into
+    # the candidate race and win it on structure. Take the single best-matched canon source; the reach
+    # fills in if it fails to open or craft.
+    canon_docs = _canon.lookup(subj or q, plane="text", limit=1) if default_providers else []
+
+    docs: List[Dict[str, Any]] = list(canon_docs)
+    if default_providers:
+        # THE REACH: active sources only. Project Gutenberg is paused by policy and a source that
+        # failed us more than once is benched, so neither is called — one throttled catalogue cannot
+        # drag the pull down to its timeout. A practical pull is always searched on the period term.
+        docs.extend(_find.reach(subj if subj else q, plane="text", practical=True))
+    else:
+        for p in providers:
+            try:
+                # An INJECTED test provider is called plainly — its signature is never assumed to
+                # carry `practical`.
+                docs.extend(p(subj if subj else q, limit=3) or [])
+            except Exception:  # noqa: BLE001 — one deaf provider must not silence the others
+                continue
 
     # Try up to three candidate sources and KEEP THE MOST STRUCTURED one — a source with a real
     # section heading ON the subject (a how-to manual) beats a discursive memoir that merely mentions
@@ -210,7 +215,13 @@ def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
         if wb.get("status") not in ("held", "already"):
             continue
         sha = wb["sha256"]
-        r = craft_fn(sha, subj or q, parent_id="card_src_" + sha[:12], plane=plane)
+        # Craft a CANON source on its OWN canonical subject, not the user's phrasing: the same
+        # openable bee journal cut 10 passages for "beekeeping" but zero for "keeping honeybees",
+        # because the craft ranker cuts a span only where it shares the subject's words. The canon
+        # knows the clean subject the source is shelved under (`_subject`), so we cut on that; a
+        # reached (non-canon) source keeps the asked subject.
+        craft_subj = (doc.get("_subject") or subj or q)
+        r = craft_fn(sha, craft_subj, parent_id="card_src_" + sha[:12], plane=plane)
         cards = list(r.get("cards") or [])
         if len(cards) < 3:
             continue          # a book that barely speaks to the subject is the wrong book
@@ -230,6 +241,11 @@ def pull_and_card(query: str, subject: str, config=None, plane: str = "human",
     # THE MOST STRUCTURED candidate wins: heading match, then how squarely the lead lands, then coverage.
     candidates.sort(key=lambda t: t[0], reverse=True)
     _key, doc, sha, cards = candidates[0]
+    # SEARCH ONCE, KEEP FOREVER: a source the reach won (not one the canon already held) is promoted
+    # into the canon, so the next asking for this subject reaches it straight away. `promote` self-
+    # guards — a canon hit and a duplicate url are no-ops.
+    if default_providers:
+        _canon.promote(subj or q, doc, plane="text", terms=q)
     parent_id = "card_src_" + sha[:12]
     # THE PD CHECK AT THE PULL (Matt, 2026-08-12): a confirmed primary PUBLIC-DOMAIN source is added to
     # the shared corpus at once (lifecycle 'public'), so the NEXT asking finds it and never goes out —
