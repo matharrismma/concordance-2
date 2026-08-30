@@ -1,25 +1,23 @@
 {
-  "name": "narrow-highway",
-  "title": "Narrow Highway — deterministic verification with receipts",
-  "description": "Hand any AI agent a claim; get a verdict, the worked trail, and a permanent, independently re-checkable seal. Deterministic math and rules across 62 domains — no model in the loop. 0 false positives on the published benchmark. Free, no key.",
-  "endpoints": {
-    "mcp": "https://narrowhighway.com/mcp",
-    "profiles": {
-      "core": "https://narrowhighway.com/mcp/core",
-      "library": "https://narrowhighway.com/mcp/library",
-      "sovereign": "https://narrowhighway.com/mcp/sovereign",
-      "coach": "https://narrowhighway.com/mcp/coach",
-      "witness": "https://narrowhighway.com/mcp/witness"
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.matharrismma/narrow-highway",
+  "title": "Narrow Highway — verification engine",
+  "description": "A deterministic verification engine for AI agents. Hand it a claim and it returns a verdict, the worked trail, and a permanent, re-checkable receipt (content-addressed seal) — deterministic math and rules, no model in the loop. Stops an agent's answers from being taken on faith: every one can carry proof. Free, one URL, no key.",
+  "version": "1.0.0",
+  "websiteUrl": "https://narrowhighway.com/connect.html",
+  "repository": {
+    "url": "https://github.com/matharrismma/concordance-2",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://narrowhighway.com/mcp"
     }
-  },
-  "transport": ["streamable-http"],
-  "authentication": "none",
-  "documentation": {
-    "agents_start_here": "https://narrowhighway.com/llms.txt",
-    "connect": "https://narrowhighway.com/connect.html",
-    "benchmark": "https://github.com/matharrismma/concordance-2/blob/master/docs/BENCHMARK.md",
-    "seal_spec": "https://github.com/matharrismma/concordance-2/blob/master/docs/SEAL_SPEC.md",
-    "independent_verifier": "https://github.com/matharrismma/concordance-2/blob/master/tools/verify_seal.py"
-  },
-  "guarantee": "Every claim is bounded to the published benchmark; every seal is verifiable with ~60 lines of standard-library Python and no Narrow Highway code."
+  ],
+  "_notes": {
+    "witness_surface": "https://narrowhighway.org/mcp adds Scripture tools (passage reading, original-language word studies, cross-references).",
+    "provable": "Every verdict returns {content_hash, cite_url}; the seal is re-fetchable at https://narrowhighway.com/s/<content_hash> and re-checkable with a ~60-line stdlib verifier (docs/SEAL_SPEC.md, tools/verify_seal.py). Re-check without trusting us.",
+    "key_tools": ["check", "verify", "audit", "search", "seal_fetch", "redact", "capabilities"]
+  }
 }
