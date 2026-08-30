@@ -76,6 +76,33 @@ MENTORS: List[Dict[str, Any]] = [
        "living education — the child as a person, fed on living books and real things, not twaddle",
        "a sturdy, God-honoring pedagogy; a companion to Ellen White on the whole-person child", True),
 
+    # — the fathers, reformers, and founders since Acts 2 (the cloud whose OWN words are gathered in
+    #   witness.py; each held a true fragment, all pointing to the one Christ) —
+    _M("Athanasius", ["the incarnation", "doctrine"], "c.296–373", "Greek church",
+       "the Word became flesh that we might be remade — 'he became what we are that he might make us "
+       "what he is'; the full deity of Christ held against the age",
+       "the great defender of the Son; receive the doctrine, read under Scripture", True),
+    _M("John Chrysostom", ["preaching", "Christian living"], "c.347–407", "Greek church",
+       "the golden mouth — Scripture preached plainly and pastorally, and mercy pressed on the rich "
+       "toward the poor",
+       "a father of the pulpit; his moral urgency and care for the poor are his surest fruit", True),
+    _M("Thomas Aquinas", ["doctrine", "reason and faith"], "1225–1274", "Catholic",
+       "faith and reason as one light; the whole of Christian teaching set in order",
+       "the scholastic summit — vast and careful; read under Scripture, never over it", True),
+    _M("Martin Luther", ["the gospel", "grace"], "1483–1546", "Lutheran / Reformation",
+       "justification by faith alone; the bondage of the will and the freedom grace gives; Scripture "
+       "over tradition",
+       "the hammer of the Reformation; weigh his sharpness against the whole counsel of Scripture", True),
+    _M("John Calvin", ["doctrine", "the sovereignty of God"], "1509–1564", "Reformed",
+       "the majesty and sovereignty of God; all doctrine ordered to God's glory",
+       "rigorous and God-exalting; hold his harder conclusions against the Word's full breadth", True),
+    _M("John Wesley", ["Christian living", "holiness"], "1703–1791", "Methodist",
+       "scriptural holiness and the warmed heart; grace offered to all, and grace that transforms",
+       "a founder of the awakening; his practical holiness and mercy to the poor are his surest fruit", True),
+    _M("John Bunyan", ["the Christian walk", "allegory"], "1628–1688", "Puritan / Baptist",
+       "the pilgrim's road from the City of Destruction to the Celestial City — the whole walk in a story",
+       "the plain tinker's masterpiece; a companion for the road, read beside Scripture", True),
+
     # — sharp on the system that grinds (the Ledger) —
     _M("Jacques Ellul", ["systems", "technique"], "1912–1994", "Reformed",
        "la technique: the autonomous system that subordinates the person; Christian freedom against it",

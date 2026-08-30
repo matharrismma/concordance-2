@@ -63,12 +63,30 @@ def _trim(text: str, start_after: str, stop_before: str) -> str:
     return text
 
 
+# A source's own FRONT MATTER / APPARATUS is not the witness's words: CCEL cache metadata ("Title:",
+# "Creator(s):", "Rights:", a "Reformed or Calvinistic Churches ______" divider), a producer credit, an
+# index line. Voicing it as the witness would misattribute the commons to him, so it is dropped — the
+# witness's own prose is what rides into the cloud.
+_META = re.compile(
+    r"^\s*(title|creator\(s\)|creator|rights|source\(s\)|source|subject|print basis|lc call|"
+    r"contributor|description|language|publisher|date|produced by|this ebook|\[illustration|"
+    r"early christian literature|classic christian ebooks)\b", re.I)
+
+
+def _is_apparatus(para: str) -> bool:
+    if _META.search(para) or "______" in para:          # source metadata, or a divider rule
+        return True
+    letters = sum(1 for c in para if c.isalpha() or c.isspace())
+    return letters / max(1, len(para)) < 0.72            # a table/index/apparatus line, not prose
+
+
 def _paragraphs(text: str):
-    """The work's real paragraphs — blank-line separated, whitespace-normalized, within length bounds."""
+    """The work's real paragraphs — blank-line separated, whitespace-normalized, within length bounds,
+    with source front matter / apparatus dropped so only the witness's own prose is gathered."""
     text = text.replace("\r\n", "\n").replace("\r", "\n")
     for chunk in re.split(r"\n\s*\n", text):
         para = re.sub(r"\s+", " ", chunk).strip()
-        if _MIN <= len(para) <= _MAX and re.search(r"[a-zA-Z]", para):
+        if _MIN <= len(para) <= _MAX and re.search(r"[a-zA-Z]", para) and not _is_apparatus(para):
             yield para
 
 

@@ -46,25 +46,38 @@ def _is_pd(row: Dict[str, Any]) -> bool:
     return row.get("public_domain") is True
 
 
+# Load-once cache, keyed by (path, mtime). The cloud grows from a seed (279 passages) toward whole works
+# (the fathers, reformers, founders — tens of thousands of paragraphs); re-reading and re-parsing the
+# whole file on EVERY /witness call was fine at the seed and a real cost at scale. The file changes only
+# when the gatherer appends, so cache the parsed rows and re-read only when the mtime moves.
+_CACHE: Dict[str, Any] = {"path": None, "mtime": None, "rows": None}
+
+
 def load(path: Optional[str] = None) -> List[Dict[str, Any]]:
     """Load the witness corpus, admitting ONLY public-domain passages with real text. A non-PD or textless
     row is dropped at the door — the gate holds before anything can be voiced. Returns [] if not yet
-    gathered: an honest empty cloud, never a fabricated one."""
+    gathered: an honest empty cloud, never a fabricated one. Cached by (path, mtime)."""
     p = path or _corpus_path()
+    try:
+        mtime = os.path.getmtime(p) if os.path.exists(p) else None
+    except OSError:
+        mtime = None
+    if _CACHE["path"] == p and _CACHE["mtime"] == mtime and _CACHE["rows"] is not None:
+        return _CACHE["rows"]
     out: List[Dict[str, Any]] = []
-    if not os.path.exists(p):
-        return out
-    with open(p, encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                row = json.loads(line)
-            except Exception:  # noqa: BLE001
-                continue
-            if _is_pd(row) and str(row.get("text") or "").strip():
-                out.append(row)
+    if mtime is not None:
+        with open(p, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    row = json.loads(line)
+                except Exception:  # noqa: BLE001
+                    continue
+                if _is_pd(row) and str(row.get("text") or "").strip():
+                    out.append(row)
+    _CACHE.update(path=p, mtime=mtime, rows=out)
     return out
 
 
