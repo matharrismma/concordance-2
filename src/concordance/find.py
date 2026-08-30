@@ -262,12 +262,49 @@ def project_gutenberg(query: str, limit: int = 3,
     return out
 
 
+def usda_bulletins(query: str, limit: int = 3,
+                   practical: Optional[bool] = None) -> List[Dict[str, Any]]:
+    """USDA Farmers' Bulletins — the U.S. government's own tried-and-true how-to pamphlets on exactly
+    the practical subjects families reach for (poultry, bees, canning, gardening, dairy, hogs). Federal
+    works, public domain by 17 USC 105; scoped pre-1929 so the year gate releases them at once. Short
+    and focused, they often craft cleaner than a rambling book. Fetched via the Internet Archive (where
+    they are scanned), so the same resolve -> fetch -> craft chain opens them unchanged."""
+    terms = _terms(query, practical)
+    url = ("https://archive.org/advancedsearch.php?q="
+           + urllib.parse.quote('"farmers bulletin" AND (' + terms + ')')
+           + "+AND+mediatype%3A(texts)+AND+year%3A%5B1850+TO+1928%5D"
+             "&fl[]=title&fl[]=year&fl[]=identifier"
+             "&rows=" + str(max(1, limit) * 4) + "&output=json")
+    raw = _get(url, "usda_bulletins")
+    if not raw:
+        return []
+    try:
+        docs = (json.loads(raw).get("response") or {}).get("docs") or []
+    except ValueError:
+        return []
+    out = []
+    for x in docs:
+        title = (x.get("title") if isinstance(x.get("title"), str) else "").strip()
+        ident = x.get("identifier") or ""
+        if not title or not ident or not _relevant(terms, title):
+            continue
+        yr = str(x.get("year") or "").strip()[:4]
+        out.append({"title": title[:120], "url": "https://archive.org/details/" + ident,
+                    "year": yr, "source": "USDA Farmers' Bulletin",
+                    "license": "Public domain (U.S. government work, 17 USC 105)", "tier": "primary",
+                    "provider_id": "usda_bulletins"})
+        if len(out) >= limit:
+            break
+    return out
+
+
 # The provider id -> the name of the function on THIS module that reaches it. Resolved by name at
 # call time (not bound here), so a test that monkeypatches find.internet_archive is honoured and the
 # real network is never touched behind its back. find owns the functions; providers.py owns only
 # their health and credit, so there is no import cycle.
 _PROVIDER_FNS = {
     "internet_archive": "internet_archive",
+    "usda_bulletins": "usda_bulletins",
     "library_of_congress": "library_of_congress",
     "project_gutenberg": "project_gutenberg",
 }

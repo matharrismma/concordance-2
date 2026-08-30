@@ -39,6 +39,11 @@ PROVIDERS: List[Dict[str, Any]] = [
      "blurb": "A non-profit digital library of millions of free public-domain books, films and "
               "recordings, kept for everyone.",
      "planes": ("text", "video"), "paused": False},
+    {"id": "usda_bulletins", "name": "USDA Farmers' Bulletins",
+     "home": "https://www.nal.usda.gov/collections/farmers-bulletins",
+     "blurb": "The U.S. Department of Agriculture's own tried-and-true how-to bulletins — public-"
+              "domain government works (17 USC 105), scanned and hosted by the Internet Archive.",
+     "planes": ("text",), "paused": False},
     {"id": "library_of_congress", "name": "Library of Congress", "home": "https://www.loc.gov",
      "blurb": "The research library of the United States Congress — primary documents, film, maps "
               "and recordings, largely public domain.",

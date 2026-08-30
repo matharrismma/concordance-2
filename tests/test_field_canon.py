@@ -28,6 +28,7 @@ from concordance.config import EngineConfig  # noqa: E402
 
 SEC = EngineConfig("secular")
 _LOC, _IA, _GUT = find.library_of_congress, find.internet_archive, find.project_gutenberg
+_USDA = find.usda_bulletins
 
 
 def _fresh() -> str:
@@ -43,6 +44,7 @@ def _enable() -> None:
 
 def _restore() -> None:
     find.library_of_congress, find.internet_archive, find.project_gutenberg = _LOC, _IA, _GUT
+    find.usda_bulletins = _USDA
     os.environ["WEB_FIND_DISABLED"] = "1"
 
 
@@ -125,11 +127,12 @@ def test_reach_skips_paused_and_honours_monkeypatch():
     _enable()
     seen = []
     find.internet_archive = lambda q, limit=3, practical=None: (seen.append("ia") or [])
+    find.usda_bulletins = lambda q, limit=3, practical=None: (seen.append("usda") or [])
     find.project_gutenberg = lambda q, limit=3, practical=None: (seen.append("gut") or [])
     find.library_of_congress = lambda q, limit=3, practical=None: (seen.append("loc") or [])
     try:
         find.reach("beekeeping", plane="text")
-        assert "ia" in seen and "loc" in seen        # active sources reached (monkeypatch honoured)
+        assert "ia" in seen and "usda" in seen and "loc" in seen   # active sources reached (monkeypatch honoured)
         assert "gut" not in seen                      # gutenberg is paused -> never called
     finally:
         _restore()

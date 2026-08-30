@@ -21,15 +21,19 @@ from concordance import find  # noqa: E402
 from concordance.config import EngineConfig  # noqa: E402
 
 SEC = EngineConfig("secular")
-_LOC, _IA, _GUT = find.library_of_congress, find.internet_archive, find.project_gutenberg
+_LOC, _IA, _GUT, _USDA = (find.library_of_congress, find.internet_archive,
+                          find.project_gutenberg, find.usda_bulletins)
+_EMPTY = lambda q, limit=3, practical=None: []        # noqa: E731 — a stubbed-silent provider
 
 
 def _enable():
     os.environ.pop("WEB_FIND_DISABLED", None)         # on for this test (providers are stubbed)
+    find.usda_bulletins = _EMPTY                       # keep the reach hermetic — no live USDA call
 
 
 def _restore():
     find.library_of_congress, find.internet_archive, find.project_gutenberg = _LOC, _IA, _GUT
+    find.usda_bulletins = _USDA
     os.environ["WEB_FIND_DISABLED"] = "1"             # back to the test-wide default (off)
 
 
