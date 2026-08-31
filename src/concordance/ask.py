@@ -593,7 +593,12 @@ _STOP = {"how", "what", "when", "where", "who", "whom", "whose", "why", "which",
          "the", "a", "an", "of", "to", "in", "on", "at", "for", "and", "or", "but", "about",
          "as", "by", "with", "from", "into", "please", "tell", "me", "us", "give", "show",
          "there", "that", "this", "these", "those", "it", "its", "i", "you", "we", "they",
-         "far", "away", "many", "much", "really", "actually", "exactly", "some", "any"}
+         "far", "away", "many", "much", "really", "actually", "exactly", "some", "any",
+         # authorship / attribution scaffolding — "who WROTE Pilgrims Progress" is about the BOOK, not
+         # the verb. Left in, the verb became the subject and led with a pronunciation stub for "wrote"
+         # (measured live 2026-08-31). The subject of "who <verb> X" is X.
+         "wrote", "write", "writes", "written", "said", "painted", "invented", "discovered",
+         "composed", "founded", "authored", "coined", "directed", "produced", "sculpted", "built"}
 
 
 def subject(text: str) -> str:
