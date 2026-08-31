@@ -27,8 +27,13 @@ _KIND_TYPE = {
     "scripture": "doctrine", "word_study": "doctrine",
 }
 _HOWTO = re.compile(r"\bhow\s+(?:do|to|can|would|could|does)\b|\bhow\s+do\s+i\b", re.I)
+# The "do i <verb>" branch catches a life-decision ("do I keep the house", "do I take the job"). But
+# a HOW-TO reuses those same verbs about a craft, not a choice — "how do i KEEP chickens", "how do i
+# TAKE honey", "how do i MOVE a hive" — and was misread as a decision, drawing the four-gates / "wait
+# and pray" framing onto a homestead question (measured live 2026-08-31). Guard the branch against a
+# leading "how" exactly as the "should i" branch already is, so a how-to falls through to `resource`.
 _DECISION = re.compile(r"\b(?:(?<!how )should i|shall i|ought i|is it worth|which (?:should|do) i|"
-                       r"do i (?:take|buy|sell|quit|accept|sign|move|marry|leave|keep))\b", re.I)
+                       r"(?<!how )do i (?:take|buy|sell|quit|accept|sign|move|marry|leave|keep))\b", re.I)
 _DOCTRINE = re.compile(r"\b(what does the bible say|is it a sin|is .* a sin|doctrine|theolog|"
                        r"gospel|salvation|trinity|baptism|covenant|scripture say|god's word)\b", re.I)
 _HISTORICAL = re.compile(r"\b(when did|what year|what happened|history of|who (?:was|were)|"

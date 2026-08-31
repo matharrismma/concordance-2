@@ -9,6 +9,9 @@ from concordance import path
 def test_question_type_classifies_the_nine():
     cases = [
         ("how do I purify water", "found", "resource"),
+        ("how do I keep chickens", "found", "resource"),   # "do i keep" is husbandry, not a decision
+        ("how do I take honey from a hive", "found", "resource"),
+        ("should I keep the house", "", "decision"),        # the real decision still routes as one
         ("what does the Bible say about baptism", "", "doctrine"),
         ("when did World War 2 end", "", "historical"),
         ("should I take this job", "decision", "decision"),
