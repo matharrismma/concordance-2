@@ -655,6 +655,24 @@ _FIELD_INSTRUCTIONAL = frozenset({
     "agriculture", "practical", "fieldkit", "playbook", "apothecary", "almanac", "access",
     "curriculum", "recipes",
 })
+
+# Reference-LOOKUP shelves that are never a how-to answer, plus obvious fiction. A dictionary
+# definition ("chicken cacciatore"), a drug-database row ("Chicken Powder — HUMAN OTC DRUG"), a
+# pronunciation key, a novel ("Love Among the Chickens") merely share a word with a practical
+# question — measured live 2026-08-30: "how do i keep chickens" returned a children's story, a
+# Wodehouse comedy, and three pill powders. Dropped from a PRACTICAL answer so a homestead question
+# can never be answered with a recipe, a novel, or a pill. (Named explicitly, not _FIELD_INSTRUCTIONAL's
+# inverse, so legitimate off-shelf cards are not swept out with the junk.)
+_PRACTICAL_JUNK_SHELVES = frozenset({"dictionary", "lexicon", "pronunciation", "drug", "drugs",
+                                     "thesaurus", "definition", "definitions", "glossary"})
+
+
+def _is_practical_junk(card: Dict[str, Any]) -> bool:
+    if (card.get("shelf") or "").lower() in _PRACTICAL_JUNK_SHELVES:
+        return True
+    meta = (" ".join(card.get("bands") or []) + " " + str(card.get("subject") or "")
+            + " " + str(card.get("kind") or "")).lower()
+    return "fiction" in meta                 # a novel is not a how-to
 _RESOURCEFUL = re.compile(
     r"(what (?:can|could|should) i (?:do|make|build|use|create|cook|fix|craft)\b.*\b(?:with|from|out of)\b"
     r"|all i (?:have|got)\b|i only have\b|i just have\b|i've only got\b|with (?:only|just)\b)", re.I)
@@ -1634,6 +1652,8 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
         # irrelevant hit (the "sore throat -> Marcus Aurelius" failure). But we don't just shrug —
         # when we have no VERIFIED answer we POINT to the best places to find it (the nearest in the
         # keeping + the free, lawful libraries and references). Pointing well is courtesy, not a gap.
+        if practical and gap_lead:
+            gap_lead = [c for c in gap_lead if not _is_practical_junk(c)]   # never a novel/pill as "nearest"
         if gap_lead:
             # A masked gap whose tortoise came back empty: show the nearest REAL field card we held,
             # framed honestly (it is adjacent, not exact) — never worse than before, never a confident
@@ -1658,6 +1678,23 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
         out = {**base, "kind": "found", "results": [corpus._brief(c) for c in hits],
                "message": "Nothing on that directly — here is the nearest in the keeping:"}
         return _witnessed(out, text, witness, gate_just_opened)
+
+    # NEVER A RECIPE OR A NOVEL FOR A HOW-TO (2026-08-30). For a practical question, drop the
+    # lookup/fiction word-matches from what is served; if that empties the answer, say so honestly and
+    # point to real sources rather than hand a family a pill powder for "how do i keep chickens".
+    if practical:
+        clean = [c for c in hits if not _is_practical_junk(c)]
+        if clean:
+            hits = clean
+        else:
+            return _witnessed({**base, "kind": "found", "results": [],
+                               "message": "I don't have a real how-to on that yet, and I won't hand "
+                                          "you a word-match. Here's where to look while I go find and "
+                                          "keep the tried-and-true source:",
+                               "resources": [{"label": "What do you need right now?", "ref": "/situations.html"},
+                                             {"label": "Ask out loud", "ref": "/coach"},
+                                             {"label": "Search the whole library", "ref": "/read.html"}]},
+                              text, witness, gate_just_opened)
 
     # THE LIBRARIAN, not the filing cabinet (2026-08-12): lead with the ONE best card in its OWN
     # full words, cited to its source, and a warm line to hand it over — then the rest as "more in
