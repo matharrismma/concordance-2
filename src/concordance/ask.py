@@ -670,9 +670,19 @@ _PRACTICAL_JUNK_SHELVES = frozenset({"dictionary", "lexicon", "pronunciation", "
 def _is_practical_junk(card: Dict[str, Any]) -> bool:
     if (card.get("shelf") or "").lower() in _PRACTICAL_JUNK_SHELVES:
         return True
+    if _is_product_noise(card):              # cosmetic/sanitizer DB rows on the medicine/drugs shelf
+        return True
+    # openFDA drug/supplement REGISTRATION rows (card_sources.py mints them `card_src_drug_*`) sit on
+    # the medicine shelf but are product listings, not instruction — "Chicken Powder, Tongkat Ali: a
+    # HUMAN OTC DRUG" for "how do i keep chickens". The shelf itself is legitimate (real first-aid /
+    # apothecary cards live there), so key off the id prefix, not the shelf.
+    if str(card.get("id") or "").startswith("card_src_drug_"):
+        return True
     meta = (" ".join(card.get("bands") or []) + " " + str(card.get("subject") or "")
             + " " + str(card.get("kind") or "")).lower()
     return "fiction" in meta                 # a novel is not a how-to
+
+
 _RESOURCEFUL = re.compile(
     r"(what (?:can|could|should) i (?:do|make|build|use|create|cook|fix|craft)\b.*\b(?:with|from|out of)\b"
     r"|all i (?:have|got)\b|i only have\b|i just have\b|i've only got\b|with (?:only|just)\b)", re.I)
