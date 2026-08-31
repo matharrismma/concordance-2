@@ -99,6 +99,13 @@
      nags a person who already knows where they are going. */
   #desk{ margin:1.4rem .2rem 0 }
   .col:not(.empty) #desk{ display:none }
+  /* SUBMIT/FLOW (2026-08-31): on first load the send button lived in .tools AFTER the whole doors grid,
+     so a person who typed saw no way to send but the (undiscoverable) Enter key. Lift the composer's
+     tools to sit directly under it, doors then footer below — flex `order`, no DOM move. Empty state
+     only; once answering, the desk is hidden and tools already follow the composer. */
+  .col.empty .tools{ order:1 }
+  .col.empty #desk{ order:2 }
+  .col.empty .foot{ order:3 }
   .desk-line{ text-align:center; font-size:.8rem; color:var(--ink-soft);
     letter-spacing:.04em; margin:0 0 .95rem; font-style:italic }
   /* THE IDENTITY (Matt, 2026-08-06: "Deterministic verification engine.") — what this IS, said
@@ -266,7 +273,7 @@
                border-color:var(--oxblood); animation:micpulse 1.15s ease-in-out infinite }
   .tools #send.act{ color:#fff; background:var(--brass-lo); box-shadow:0 1px 3px rgba(0,0,0,.24) }
   .tools #send.act:hover{ background:var(--brass); color:#fff }
-  .tools #send.act[data-idle="1"]{ opacity:.32 }
+  .tools #send.act[data-idle="1"]{ opacity:.5 }   /* idle: visible-but-muted so the send affordance is discoverable */
   @keyframes micpulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(125,42,34,.45) }
                        50%{ box-shadow:0 0 0 9px rgba(125,42,34,0) } }
 
