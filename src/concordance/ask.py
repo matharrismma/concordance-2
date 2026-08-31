@@ -1215,6 +1215,7 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
         # shape returned a bare results list with no lead and no path (measured empty 2026-08-14).
         res = subject(text) or (text or "").strip()
         hits = _practical_rank(res, _practical_pool(res))
+        hits = [c for c in hits if not _is_practical_junk(c)]   # no drug/dictionary/fiction for "what can I do with X"
         # LEAD only with an INSTRUCTIONAL field card — never a bare reference-DB row that merely shares
         # a word (measured 2026-08-14: "what can I do with a tarp" led with a sailboat physical-activity
         # MET row). When the nearest is only a DB row, be honest and ask for more rather than mislead.
