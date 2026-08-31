@@ -471,6 +471,28 @@ def _prefer_full_coverage(hits: List[Dict[str, Any]], text: str) -> List[Dict[st
     return hits
 
 
+def _shape_found_hits(hits: List[Dict[str, Any]], text: str, practical: bool) -> List[Dict[str, Any]]:
+    """The ONE place a found answer's hits are shaped before the lead is chosen — the discernment the
+    found path used to scatter across the served block (this is the P2 consolidation: one function, so
+    both the found path AND discern can share it). In order:
+      1. PRACTICAL JUNK — for a how-to, drop lookup/fiction word-matches (a pill powder, a novel); an
+         empty result here is the honest "I don't have a real how-to yet" signal, returned as [].
+      2. PRONUNCIATION KEY — never leads a substantive ask ("who composed the Messiah" → a phonetic
+         key for "messiah"); demoted behind any real hit unless the ask is about how a word is SAID.
+      3. WHOLE NAME — the hit carrying the most of a multi-word subject leads over a partial fragment.
+    Behavior-preserving: the same three steps, same order, that lived inline before."""
+    if practical:
+        clean = [c for c in hits if not _is_practical_junk(c)]
+        if not clean:
+            return []                     # a how-to with only word-matches — the caller answers honestly
+        hits = clean
+    if not re.search(r"pronounc|how (?:do you|to|do i) say\b", text or "", re.I):
+        pron = [c for c in hits if str(c.get("id") or "").startswith("card_src_pron_")]
+        if pron and len(pron) < len(hits):
+            hits = [c for c in hits if not str(c.get("id") or "").startswith("card_src_pron_")] + pron
+    return _prefer_full_coverage(hits, text)
+
+
 def find_ref(text: str):
     """The one place a scripture reference is discerned from prose. Strict form first, then
     the church passage names, then phone-typed loose forms validated against the canon."""
@@ -1720,35 +1742,20 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                "message": "Nothing on that directly — here is the nearest in the keeping:"}
         return _witnessed(out, text, witness, gate_just_opened)
 
-    # NEVER A RECIPE OR A NOVEL FOR A HOW-TO (2026-08-30). For a practical question, drop the
-    # lookup/fiction word-matches from what is served; if that empties the answer, say so honestly and
-    # point to real sources rather than hand a family a pill powder for "how do i keep chickens".
-    if practical:
-        clean = [c for c in hits if not _is_practical_junk(c)]
-        if clean:
-            hits = clean
-        else:
-            return _witnessed({**base, "kind": "found", "results": [],
-                               "message": "I don't have a real how-to on that yet, and I won't hand "
-                                          "you a word-match. Here's where to look while I go find and "
-                                          "keep the tried-and-true source:",
-                               "resources": [{"label": "What do you need right now?", "ref": "/situations.html"},
-                                             {"label": "Ask out loud", "ref": "/coach"},
-                                             {"label": "Search the whole library", "ref": "/read.html"}]},
-                              text, witness, gate_just_opened)
-
-    # A PRONUNCIATION stub (card_src_pron_*) is a phonetic key, not an answer — "who composed the
-    # Messiah" led with the PRONUNCIATION of "messiah" (measured live 2026-08-31). Demote pronunciation
-    # stubs behind any real hit unless the asking is actually about how a word is SAID; they stay in the
-    # results, just never lead a substantive question.
-    if not re.search(r"pronounc|how (?:do you|to|do i) say\b", text or "", re.I):
-        _pron = [c for c in hits if str(c.get("id") or "").startswith("card_src_pron_")]
-        if _pron and len(_pron) < len(hits):
-            hits = [c for c in hits if not str(c.get("id") or "").startswith("card_src_pron_")] + _pron
-
-    # THE WHOLE NAME LEADS, not its rarest fragment: if a hit carries more of a multi-word subject
-    # than the current lead, it leads (fixes "Charles Haddon Spurgeon" → a Chambers comedy).
-    hits = _prefer_full_coverage(hits, text)
+    # SHAPE THE FOUND HITS — one consolidated discernment step (practical-junk drop · pronunciation-key
+    # demotion · whole-name coverage). A how-to left with only word-matches returns [] — answer honestly
+    # rather than hand a family a pill powder for "how do i keep chickens".
+    _shaped = _shape_found_hits(hits, text, practical)
+    if not _shaped:
+        return _witnessed({**base, "kind": "found", "results": [],
+                           "message": "I don't have a real how-to on that yet, and I won't hand "
+                                      "you a word-match. Here's where to look while I go find and "
+                                      "keep the tried-and-true source:",
+                           "resources": [{"label": "What do you need right now?", "ref": "/situations.html"},
+                                         {"label": "Ask out loud", "ref": "/coach"},
+                                         {"label": "Search the whole library", "ref": "/read.html"}]},
+                          text, witness, gate_just_opened)
+    hits = _shaped
 
     # THE LIBRARIAN, not the filing cabinet (2026-08-12): lead with the ONE best card in its OWN
     # full words, cited to its source, and a warm line to hand it over — then the rest as "more in
