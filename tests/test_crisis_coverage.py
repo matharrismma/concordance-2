@@ -16,7 +16,44 @@ Three guarantees:
     + giving-away, grief-longing, faith-"called home") is the documented target of the semantic/intent
     backstop (docs/CRISIS_BACKSTOP.md). A gap named is a gap kept honest, not hidden.
 """
-from concordance import ask
+import os
+from pathlib import Path
+
+import pytest
+
+from concordance import ask, crisis_semantic
+
+_REAL_DATA = str(Path(__file__).resolve().parent.parent / "data")
+
+
+@pytest.fixture(autouse=True)
+def _backstop_from_real_data():
+    """Measure the crisis floor against the REAL net — the substring list UNION the deterministic
+    semantic backstop — exactly as production runs it.
+
+    The trap this closes: a sibling module (test_ask) sets CONCORDANCE_DATA_DIR to an EMPTY tempdir at
+    import, and crisis_semantic loads its artifact ONCE (a module-global cache). Whichever data dir
+    wins that first `_load()` is settled by collection order — the same global-cache race conftest
+    guards for the corpus singleton. Co-collected with test_ask, the cache is poisoned with "artifact
+    absent" and blind-red-team recall silently drops to the substring-only floor (37 vs 58) — a crisis
+    safety gate reporting false-red on nothing but test order. Run this file alone, and it passes.
+
+    Pin the honest state for every crisis check: point at the real data dir, drop the cache, reload —
+    so `is_crisis` sees the backstop no matter what else was collected. Restore both globals and the
+    env var on the way out (same private-global-restore pattern conftest uses for corpus._DEFAULT)."""
+    prior_dir = os.environ.get("CONCORDANCE_DATA_DIR")
+    prior_art, prior_loaded = crisis_semantic._ART, crisis_semantic._LOADED
+    os.environ["CONCORDANCE_DATA_DIR"] = _REAL_DATA
+    crisis_semantic._ART, crisis_semantic._LOADED = None, False
+    crisis_semantic._load()
+    try:
+        yield
+    finally:
+        crisis_semantic._ART, crisis_semantic._LOADED = prior_art, prior_loaded
+        if prior_dir is None:
+            os.environ.pop("CONCORDANCE_DATA_DIR", None)
+        else:
+            os.environ["CONCORDANCE_DATA_DIR"] = prior_dir
 
 
 CRISIS_FLOOR = (
