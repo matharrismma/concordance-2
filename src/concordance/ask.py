@@ -1737,6 +1737,15 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                                              {"label": "Search the whole library", "ref": "/read.html"}]},
                               text, witness, gate_just_opened)
 
+    # A PRONUNCIATION stub (card_src_pron_*) is a phonetic key, not an answer — "who composed the
+    # Messiah" led with the PRONUNCIATION of "messiah" (measured live 2026-08-31). Demote pronunciation
+    # stubs behind any real hit unless the asking is actually about how a word is SAID; they stay in the
+    # results, just never lead a substantive question.
+    if not re.search(r"pronounc|how (?:do you|to|do i) say\b", text or "", re.I):
+        _pron = [c for c in hits if str(c.get("id") or "").startswith("card_src_pron_")]
+        if _pron and len(_pron) < len(hits):
+            hits = [c for c in hits if not str(c.get("id") or "").startswith("card_src_pron_")] + _pron
+
     # THE WHOLE NAME LEADS, not its rarest fragment: if a hit carries more of a multi-word subject
     # than the current lead, it leads (fixes "Charles Haddon Spurgeon" → a Chambers comedy).
     hits = _prefer_full_coverage(hits, text)
