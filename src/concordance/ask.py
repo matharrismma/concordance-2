@@ -446,6 +446,31 @@ def _shares_a_word(text: str, card: Dict[str, Any]) -> bool:
     return bool(distinctive & hay) if distinctive else bool(q & hay)
 
 
+def _prefer_full_coverage(hits: List[Dict[str, Any]], text: str) -> List[Dict[str, Any]]:
+    """Lead with the hit that carries the WHOLE multi-word subject, not a partial match.
+
+    A person's name is a UNIT, but the ranker reduces the asking to its single rarest token — and for
+    a famous name the identifying surname is COMMON in the keeping (many of his own books), so the
+    rarest token is some other part of the name. "Charles Haddon Spurgeon" reduced to the middle name
+    "haddon" and led with a Charles Haddon CHAMBERS comedy over Spurgeon's own works; "Athanasius of
+    Alexandria" dropped to "athanasius" (measured live 2026-08-31 — Matt: "if you ask for a name it
+    breaks it down to just the last name or a single word"). When the asking carries 2+ distinctive
+    words and some hit covers strictly MORE of them than the current lead, move that fuller hit to the
+    front — a stable promotion (nothing else reorders), and it only ever fires to fix a partial lead.
+    """
+    want = {w for w in _content_tokens(text) if len(w) >= 5}
+    if len(want) < 2 or len(hits) < 2:
+        return hits
+
+    def _cov(c: Dict[str, Any]) -> int:
+        return len(want & _content_tokens((c.get("title") or "") + " " + (c.get("body") or "")))
+
+    best = max(range(len(hits)), key=lambda i: _cov(hits[i]))
+    if best and _cov(hits[best]) > _cov(hits[0]):
+        hits = [hits[best]] + hits[:best] + hits[best + 1:]
+    return hits
+
+
 def find_ref(text: str):
     """The one place a scripture reference is discerned from prose. Strict form first, then
     the church passage names, then phone-typed loose forms validated against the canon."""
@@ -1706,6 +1731,10 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                                              {"label": "Ask out loud", "ref": "/coach"},
                                              {"label": "Search the whole library", "ref": "/read.html"}]},
                               text, witness, gate_just_opened)
+
+    # THE WHOLE NAME LEADS, not its rarest fragment: if a hit carries more of a multi-word subject
+    # than the current lead, it leads (fixes "Charles Haddon Spurgeon" → a Chambers comedy).
+    hits = _prefer_full_coverage(hits, text)
 
     # THE LIBRARIAN, not the filing cabinet (2026-08-12): lead with the ONE best card in its OWN
     # full words, cited to its source, and a warm line to hand it over — then the rest as "more in

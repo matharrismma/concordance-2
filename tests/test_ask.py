@@ -168,6 +168,29 @@ def test_search_is_the_default():
     assert r["kind"] == "found" and "results" in r
 
 
+def test_the_whole_name_leads_over_a_partial_name_match():
+    """A person's name is a UNIT. The ranker reduces the asking to its single rarest token, and for a
+    famous name the surname is common (his own many books) so the rarest token is some other fragment —
+    "Charles Haddon Spurgeon" led with a Charles Haddon CHAMBERS comedy. _prefer_full_coverage lifts the
+    hit that carries the WHOLE name (Matt: "if you ask for a name it breaks it down to just the last
+    name or a single word")."""
+    hits = [
+        {"id": "chambers", "title": "The Tyranny of Tears — C. Haddon (Charles Haddon) Chambers",
+         "body": "a comedy in four acts"},
+        {"id": "spurgeon", "title": "Gleanings among the Sheaves — C. H. (Charles Haddon) Spurgeon",
+         "body": "sermons of the preacher"},
+        {"id": "other", "title": "bonhoeffer", "body": ""},
+    ]
+    out = ask._prefer_full_coverage(list(hits), "Charles Haddon Spurgeon")
+    assert out[0]["id"] == "spurgeon"          # all three name words > the two Chambers shares
+
+
+def test_full_coverage_leaves_a_thin_subject_alone():
+    """Fewer than two distinctive (>=5) words → nothing to disambiguate; the order is left untouched."""
+    hits = [{"id": "a", "title": "first"}, {"id": "b", "title": "second"}]
+    assert ask._prefer_full_coverage(list(hits), "who was Jesus")[0]["id"] == "a"
+
+
 def test_scripture_routes_on_witness_but_falls_back_on_secular():
     assert "scripture" in ask.respond("John 3:16", WIT)          # witness resolves (text may be empty w/o data)
     assert ask.respond("John 3:16", SEC)["kind"] == "found"       # secular has no resolve -> search
