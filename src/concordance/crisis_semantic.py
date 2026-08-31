@@ -130,9 +130,27 @@ def score(text: str) -> float:
     return dot / (na * cn) if na else 0.0
 
 
+# A physical MEASUREMENT / conversion question is never a cry, but the distributional score reads one as
+# close to crisis: "how much does a gallon of water weigh" scored 0.694 (> 0.657) — the model conflates
+# physical "how much does X WEIGH" with emotional "how much more can I bear / the weight I carry"
+# (measured live 2026-08-31, query 96 of a 100-pass run: a benign lookup met with a helpline). This is
+# the documented topic≈intent limit of a distributional model; correct it deterministically. The guard
+# is TIGHT — verified to match 0 of the curated CRISIS_FLOOR and 0 of the blind RED_TEAM set, so the
+# recall floor cannot shrink; a veiled cry the backstop exists to catch carries no unit, no measure verb.
+_BENIGN_MEASUREMENT = re.compile(
+    r"\bhow (?:much|many|long|far|tall|wide|deep|heavy|hot|cold)\b.{0,60}\b"
+    r"(?:weigh|weighs|weight|cost|costs|measure|measures|gallon|ounce|pound|teaspoon|tablespoon|cup|"
+    r"quart|liter|litre|mile|kilomet|kilogram|gram|meter|metre|inch|foot|feet|celsius|fahrenheit|"
+    r"degree|calorie|acre|volt|watt|amp|psi|horsepower|bushel)\b"
+    r"|\bconvert\b.{0,40}\b(?:to|into)\b"
+    r"|\bhow many\b.{0,40}\bin (?:a|an|one)\b", re.I)
+
+
 def flags(text: str) -> bool:
     """True when the semantic backstop judges this a cry. Only ever ADDS to the substring net."""
     art = _load()
     if not art:
         return False
+    if _BENIGN_MEASUREMENT.search(text or ""):
+        return False                      # a physical measurement/conversion is never a cry (see note)
     return score(text) > art["threshold"]
