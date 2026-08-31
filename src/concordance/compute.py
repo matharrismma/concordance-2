@@ -39,6 +39,10 @@ _UNITS = {
     "quart": ("V", 0.946353), "quarts": ("V", 0.946353),
     "pint": ("V", 0.473176), "pints": ("V", 0.473176),
     "cup": ("V", 0.236588), "cups": ("V", 0.236588),
+    # culinary / canning volume (US) — the kitchen conversions a homestead family actually asks for
+    # (live 2026-08-31: "how many teaspoons in a tablespoon" fell through to a dictionary card). tsp x3 = tbsp.
+    "tablespoon": ("V", 0.01478676), "tablespoons": ("V", 0.01478676), "tbsp": ("V", 0.01478676),
+    "teaspoon": ("V", 0.00492892), "teaspoons": ("V", 0.00492892), "tsp": ("V", 0.00492892),
     "second": ("T", 1.0), "seconds": ("T", 1.0), "sec": ("T", 1.0),
     "minute": ("T", 60.0), "minutes": ("T", 60.0), "min": ("T", 60.0),
     "hour": ("T", 3600.0), "hours": ("T", 3600.0), "hr": ("T", 3600.0),

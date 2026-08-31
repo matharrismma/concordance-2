@@ -43,6 +43,9 @@ def test_unit_conversion():
     assert compute.answer("convert 10 miles to kilometers") == "10 miles = 16.0934 kilometers"
     assert compute.answer("how many ounces in a pound") == "1 pound = 16 ounces"
     assert compute.answer("how many minutes in an hour") == "1 hour = 60 minutes"
+    # culinary / canning volume — the kitchen conversions a homestead family asks (added 2026-08-31)
+    assert compute.answer("how many teaspoons in a tablespoon") == "1 tablespoon = 3 teaspoons"
+    assert compute.answer("how many tablespoons in a cup") == "1 cup = 16 tablespoons"
 
 
 def test_temperature():
