@@ -145,12 +145,27 @@ _BENIGN_MEASUREMENT = re.compile(
     r"|\bconvert\b.{0,40}\b(?:to|into)\b"
     r"|\bhow many\b.{0,40}\bin (?:a|an|one)\b", re.I)
 
+# A THEODICY question — the problem of evil, "why does God allow suffering" — is the seeker's oldest
+# question, not a cry. The distributional score read one as crisis (0.691 > 0.657; measured live
+# 2026-08-31: a seeker's deepest question met with a helpline). It is the SAME topic≈intent limit:
+# "suffering / allow" sits near the crisis cluster. The frame is unmistakably ABOUT God permitting evil
+# in the world, never first-person distress — "i am suffering and want it to end" (0.757) and "why does
+# god hate me" carry no such frame and still fire. Verified: 0 hits on CRISIS_FLOOR, 0 on RED_TEAM. The
+# ultimate/seeker/comfort paths answer this with Scripture and point to Christ and to real people.
+_THEODICY = re.compile(
+    r"\bwhy (?:does|would|did|do|is|are) .*\bgod\b.*\b(?:allow|permit|let|cause)\b"
+    r"|\bproblem of (?:evil|suffering|pain)\b"
+    r"|\bwhy (?:is there|does).{0,20}(?:evil|suffering) (?:in|exist)", re.I)
+
 
 def flags(text: str) -> bool:
     """True when the semantic backstop judges this a cry. Only ever ADDS to the substring net."""
     art = _load()
     if not art:
         return False
-    if _BENIGN_MEASUREMENT.search(text or ""):
+    t = text or ""
+    if _BENIGN_MEASUREMENT.search(t):
         return False                      # a physical measurement/conversion is never a cry (see note)
+    if _THEODICY.search(t):
+        return False                      # a theodicy question is the seeker's, not a cry (see note)
     return score(text) > art["threshold"]
