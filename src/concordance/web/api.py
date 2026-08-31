@@ -2382,6 +2382,14 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import capabilities as _caps
         return _ok(_caps.statement(surface))
 
+    if method == "GET" and path == "/systems":
+        # THE SYSTEMS HANDICAP — operational health of every subsystem as one number each (a golf
+        # handicap: low is strong) and one for the course. Computed live from real signals (tests on
+        # disk, SOP presence, module resolution, the issue register) so it recomputes itself as the
+        # foundation is laid. UNGATED: knowing what is out is not witness content. Feeds site/systems.html.
+        from .. import systems as _systems
+        return _ok(_systems.report())
+
     if method == "GET" and path == "/kernel":
         # THE GATE KERNEL — the law, published where agents READ it. The five moves, the eight-rule
         # agent covenant, the six KINDS, the authority lattice, and the nine-field record. UNGATED:
@@ -2738,6 +2746,7 @@ ROUTES = [
     {"path": "/narratives", "methods": ("GET",), "api": True},
     {"path": "/study_find", "methods": ("GET",), "api": True},
     {"path": "/capabilities", "methods": ("GET",), "api": True},
+    {"path": "/systems", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/kernel", "methods": ("GET",), "api": True},
     {"path": "/kernel/gate", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/playbook", "methods": ("GET",), "api": True},

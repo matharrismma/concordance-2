@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Systems Handicap — Narrow Highway</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#eef0f3; --panel:#fff; --panel-2:#f7f8fa; --ink:#1a1d23; --ink-2:#565d6a;
+    --line:#dfe2e8; --line-2:#eaecf1; --brass:#9c7431;
+    --good:#2f9e6b; --good-bg:#e6f4ec; --warn:#c07d1f; --warn-bg:#f8efdc; --crit:#c8433f; --crit-bg:#f7e3e2;
+    --good-ink:#1f6b48; --warn-ink:#8a5910; --crit-ink:#932e2b;
+    --shadow:0 1px 2px rgba(20,25,40,.05),0 8px 24px -12px rgba(20,25,40,.12);
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#0f1217; --panel:#171b21; --panel-2:#1c212a; --ink:#e7ebf1; --ink-2:#9aa3b1;
+    --line:#262c36; --line-2:#20262f; --brass:#c39a52;
+    --good:#43b483; --good-bg:#132a20; --warn:#d79a3c; --warn-bg:#2c2311; --crit:#e0605b; --crit-bg:#2e1918;
+    --good-ink:#7fd3ab; --warn-ink:#e6b968; --crit-ink:#ef8f8b;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.6);
+  }}
+  :root[data-theme="dark"]{
+    --bg:#0f1217; --panel:#171b21; --panel-2:#1c212a; --ink:#e7ebf1; --ink-2:#9aa3b1;
+    --line:#262c36; --line-2:#20262f; --brass:#c39a52;
+    --good:#43b483; --good-bg:#132a20; --warn:#d79a3c; --warn-bg:#2c2311; --crit:#e0605b; --crit-bg:#2e1918;
+    --good-ink:#7fd3ab; --warn-ink:#e6b968; --crit-ink:#ef8f8b;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;
+    font-variant-numeric:tabular-nums}
+  .wrap{max-width:1000px;margin:0 auto;padding:2.4rem 1.4rem 4rem}
+  a{color:var(--brass)}
+  .top{display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--brass);font-weight:500}
+  h1{font-family:"Spectral",Georgia,serif;font-weight:700;font-size:2.4rem;line-height:1.05;
+    margin:.35rem 0 .2rem;letter-spacing:-.01em}
+  .lede{color:var(--ink-2);max-width:60ch;margin:.2rem 0 0}
+  .summary{display:grid;grid-template-columns:auto 1fr;gap:1.6rem;align-items:center;background:var(--panel);
+    border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:1.5rem 1.7rem;margin:1.8rem 0 1.4rem}
+  .score{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-right:1.6rem;
+    border-right:1px solid var(--line-2);min-width:150px}
+  .score .num{font-family:"Spectral",serif;font-weight:700;font-size:4.2rem;line-height:.9;letter-spacing:-.02em}
+  .score .cap{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-2);margin-top:.5rem}
+  .read p{margin:0 0 .7rem;color:var(--ink-2);font-size:.95rem}
+  .read p b{color:var(--ink);font-weight:600}
+  .tallies{display:flex;gap:.5rem;flex-wrap:wrap}
+  .tally{display:inline-flex;align-items:center;gap:.45rem;font-size:.82rem;font-weight:500;padding:.32rem .7rem;border-radius:999px}
+  .tally .dot{width:.6rem;height:.6rem;border-radius:50%}
+  .tally.g{background:var(--good-bg);color:var(--good-ink)} .tally.a{background:var(--warn-bg);color:var(--warn-ink)}
+  .tally.c{background:var(--crit-bg);color:var(--crit-ink)}
+  .g .dot{background:var(--good)} .a .dot{background:var(--warn)} .c .dot{background:var(--crit)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+  .cardhead{display:flex;justify-content:space-between;align-items:baseline;padding:1.1rem 1.4rem .6rem;border-bottom:1px solid var(--line-2)}
+  .cardhead h2{font-family:"Spectral",serif;font-weight:600;font-size:1.15rem;margin:0}
+  .cardhead .hint{font-size:.78rem;color:var(--ink-2)}
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:720px}
+  thead th{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-2);font-weight:500;text-align:center;padding:.7rem .5rem;border-bottom:1px solid var(--line)}
+  thead th.l{text-align:left;padding-left:1.4rem} thead th.r{text-align:right;padding-right:1.4rem}
+  tbody td{padding:.6rem .5rem;border-bottom:1px solid var(--line-2);text-align:center;vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none} tbody tr:hover{background:var(--panel-2)}
+  .sys{text-align:left;padding-left:1.4rem}
+  .sys .name{font-weight:600;font-size:.95rem} .sys .mods{font-family:"IBM Plex Mono",monospace;font-size:.7rem;color:var(--ink-2);margin-top:.1rem}
+  .pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:600;padding:.24rem .6rem;border-radius:999px;white-space:nowrap}
+  .pill.g{background:var(--good-bg);color:var(--good-ink)} .pill.a{background:var(--warn-bg);color:var(--warn-ink)} .pill.c{background:var(--crit-bg);color:var(--crit-ink)}
+  .pill .dot{width:.5rem;height:.5rem;border-radius:50%}
+  .cell{display:inline-flex;flex-direction:column;align-items:center;gap:.2rem;min-width:44px}
+  .cell .v{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:.9rem}
+  .cell .bar{width:30px;height:4px;border-radius:2px;background:var(--line)}
+  .cell.s0 .v{color:var(--good-ink)} .cell.s0 .bar{background:var(--good)}
+  .cell.s1 .v{color:var(--warn-ink)} .cell.s1 .bar{background:var(--warn)}
+  .cell.s2 .v{color:var(--crit-ink)} .cell.s2 .bar{background:var(--crit)}
+  td.hcp{text-align:right;padding-right:1.4rem}
+  .hcp .h{font-family:"Spectral",serif;font-weight:700;font-size:1.5rem;letter-spacing:-.01em}
+  .hcp.low .h{color:var(--good-ink)} .hcp.mid .h{color:var(--warn-ink)} .hcp.high .h{color:var(--crit-ink)}
+  .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin:1.6rem 0 0}
+  .leg{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:.95rem 1.1rem}
+  .leg h3{font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--brass);margin:0 0 .35rem;font-weight:500}
+  .leg p{margin:0;font-size:.85rem;color:var(--ink-2)}
+  .foot{margin-top:1.8rem;padding-top:1.1rem;border-top:1px solid var(--line);font-size:.8rem;color:var(--ink-2)}
+  .foot code{font-family:"IBM Plex Mono",monospace;color:var(--brass)}
+  .state{color:var(--ink-2);font-size:.9rem;padding:1.4rem}
+  @media (max-width:640px){h1{font-size:2rem} .summary{grid-template-columns:1fr}
+    .score{border-right:none;border-bottom:1px solid var(--line-2);padding:0 0 1.2rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><div class="eyebrow">Narrow Highway · operational health</div>
+    <h1>Systems Handicap</h1></div>
+    <a href="/">← home</a>
+  </div>
+  <p class="lede">Every subsystem, at a glance — connected, degraded, or out — and one number, low is
+  strong, that says how much foundation is still to lay and how fast we can move. It recomputes itself
+  as tests and SOPs land.</p>
+
+  <div class="summary">
+    <div class="score"><div class="num" id="course">·</div><div class="cap">course handicap</div></div>
+    <div class="read" id="read"><p class="state">Reading the systems…</p></div>
+  </div>
+
+  <div class="card">
+    <div class="cardhead"><h2>The course card</h2><span class="hint">sorted by handicap — what needs attention reads first</span></div>
+    <div class="scroll"><table>
+      <thead><tr><th class="l">Subsystem</th><th>Status</th><th>Live</th><th>Tested</th><th>SOP</th><th>Supported</th><th class="r">Handicap</th></tr></thead>
+      <tbody id="rows"><tr><td colspan="7" class="state">Loading…</td></tr></tbody>
+    </table></div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+  <div class="foot">Grounded, live: <code>GET /systems</code> computes each stroke from the test files on disk,
+    SOP presence, module resolution, and the issue register — no hand-set numbers.</div>
+</div>
+
+<script>
+  const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const sev = n => n>=2?"s2":n===1?"s1":"s0";
+  const pillClass = st => st==="out"?"c":st==="degraded"?"a":"g";
+  const band = h => h>=6?"high":h>=4?"mid":"low";
+  function cell(o){ return `<td><div class="cell ${sev(o.strokes)}" title="${esc(o.detail)}"><span class="v">+${o.strokes}</span><span class="bar"></span></div></td>`; }
+  function render(d){
+    document.getElementById("course").textContent = d.course_handicap;
+    const c = d.counts;
+    document.getElementById("read").innerHTML =
+      `<p><b>${c.total} subsystems.</b> ${c.connected} connected, ${c.degraded} degraded, ${c.out} out.</p>`
+      + `<div class="tallies"><span class="tally g"><span class="dot"></span>${c.connected} connected</span>`
+      + `<span class="tally a"><span class="dot"></span>${c.degraded} degraded</span>`
+      + `<span class="tally c"><span class="dot"></span>${c.out} out</span></div>`;
+    document.getElementById("rows").innerHTML = d.subsystems.map(s=>`
+      <tr>
+        <td class="sys"><div class="name">${esc(s.name)}</div><div class="mods">${esc((s.modules||[]).join(" · "))}</div></td>
+        <td><span class="pill ${pillClass(s.live.status)}"><span class="dot"></span>${esc(s.live.status)}</span></td>
+        ${cell(s.live)}${cell(s.tested)}${cell(s.sop)}${cell(s.supported)}
+        <td class="hcp ${band(s.handicap)}"><span class="h">${s.handicap}</span></td>
+      </tr>`).join("");
+    const m = d.model||{};
+    document.getElementById("legend").innerHTML = [
+      ["Live", m.live],["Tested", m.tested],["SOP", m.sop],["Supported", m.supported]
+    ].map(([k,v])=>`<div class="leg"><h3>${k}</h3><p>${esc(v)}</p></div>`).join("");
+  }
+  fetch("/systems").then(r=>r.json()).then(render).catch(e=>{
+    document.getElementById("rows").innerHTML = `<tr><td colspan="7" class="state">Could not reach /systems — ${esc(e.message||e)}</td></tr>`;
+  });
+</script>
+</body>
+</html>
