@@ -191,6 +191,74 @@ def test_full_coverage_leaves_a_thin_subject_alone():
     assert ask._prefer_full_coverage(list(hits), "who was Jesus")[0]["id"] == "a"
 
 
+def test_a_connected_hub_leads_over_an_island_stub():
+    """Two things true at once: the words AND the connection map (Matt). All three cards hold the subject
+    word, but 'grace_stub' is an ISLAND — its only edge is a generic shelf-membership — while 'grace_hub'
+    is embedded in the neighbourhood, linked by a substantive edge to another on-topic hit. The map lifts
+    the hub over the island lead; it composes with the words (all were already matches) and deletes none."""
+    hits = [
+        {"id": "grace_stub", "title": "grace",
+         "connections": [{"to_card_id": "card_spine_words", "relationship": "member_of"}]},
+        {"id": "grace_hub", "title": "On grace — a treatise",
+         "connections": [{"to_card_id": "grace_neighbor", "relationship": "shared_scripture"}]},
+        {"id": "grace_neighbor", "title": "grace and works",
+         "connections": [{"to_card_id": "grace_hub", "relationship": "shared_scripture"}]},
+    ]
+    out = ask._prefer_connected(list(hits))
+    assert out[0]["id"] == "grace_hub"          # linked into the on-topic pool > the island stub
+    assert {c["id"] for c in out} == {c["id"] for c in hits}   # nothing deleted
+
+
+def test_connection_signal_is_inert_where_the_graph_is_thin():
+    """A practical query's cards carry no real edges yet — only generic shelf-membership. The signal
+    scores every card 0 and leaves the lexical order EXACTLY as it was (helps where dense, never harms
+    where sparse). This is why the practical frontier needs the substance/region signals, not this one."""
+    hits = [
+        {"id": "chickens_a", "title": "keeping poultry",
+         "connections": [{"to_card_id": "card_spine_agriculture", "relationship": "member_of"}]},
+        {"id": "chickens_b", "title": "the henhouse",
+         "connections": [{"to_card_id": "card_spine_agriculture", "relationship": "member_of"}]},
+        {"id": "chickens_c", "title": "eggs", "connections": []},
+    ]
+    out = ask._prefer_connected(list(hits))
+    assert [c["id"] for c in out] == ["chickens_a", "chickens_b", "chickens_c"]   # untouched
+
+
+def test_connection_leaves_an_already_connected_lead_alone():
+    """The lift only fires to rescue an ISLAND lead. When the lexical lead is already embedded in the
+    neighbourhood, the words and the map agree — nothing to compose, order untouched."""
+    hits = [
+        {"id": "lead", "title": "on the subject",
+         "connections": [{"to_card_id": "other", "relationship": "cites"}]},
+        {"id": "other", "title": "also the subject",
+         "connections": [{"to_card_id": "lead", "relationship": "cites"}]},
+        {"id": "third", "title": "subject too", "connections": []},
+    ]
+    assert ask._prefer_connected(list(hits))[0]["id"] == "lead"    # lead already connected → no change
+
+
+def test_a_connector_card_never_leads_over_content():
+    """The parasitic-connector guard (live regression: '/ask what is grace' buried the Amazing Grace
+    hymn under a 'card_c_' bridge). A connector links to content BY NATURE, so it is the most-linked card
+    in any pool — a naive rule would promote the map's EDGE over its destinations. The connector here has
+    the MOST raw links, yet must never be promoted and must not count as a destination; the CONTENT hub
+    is lifted over the island lead instead."""
+    hits = [
+        {"id": "card_n_island", "title": "grace",
+         "connections": [{"to_card_id": "card_spine_words", "relationship": "member_of"}]},      # island lead
+        {"id": "card_c_bridge", "shelf": "connections", "title": "grace ↔ ephesians",
+         "connections": [{"to_card_id": "card_n_island", "relationship": "see_also"},
+                         {"to_card_id": "card_n_content", "relationship": "see_also"}]},          # connector, most links
+        {"id": "card_n_content", "title": "on grace — a treatise",
+         "connections": [{"to_card_id": "card_n_content2", "relationship": "cites"}]},
+        {"id": "card_n_content2", "title": "grace and works",
+         "connections": [{"to_card_id": "card_n_content", "relationship": "cites"}]},
+    ]
+    out = ask._prefer_connected(list(hits))
+    assert out[0]["id"] == "card_n_content"                 # the CONTENT hub leads, not the connector
+    assert not str(out[0]["id"]).startswith("card_c_")      # the map's edge is never the lead
+
+
 def test_scripture_routes_on_witness_but_falls_back_on_secular():
     assert "scripture" in ask.respond("John 3:16", WIT)          # witness resolves (text may be empty w/o data)
     assert ask.respond("John 3:16", SEC)["kind"] == "found"       # secular has no resolve -> search
@@ -667,6 +735,104 @@ def test_a_true_miss_tries_the_pull_before_the_citation_fallback():
     assert any(h.get("id") == "card_span_pulltest" for h in hits), \
         "the pull carded an answer and the response did not carry it"
     assert "kept for next time" in (r.get("message") or "")
+
+
+def test_a_mis_selected_pull_does_not_lead_a_gap_stays_a_gap():
+    """The pull cards only subject-matched spans BY CONSTRUCTION — except craft.rank cuts a span
+    wherever it shares ONE distinctive stem, so a tangential source still cards. Live 2026-08-31:
+    "raise goats for milk" led with a waste-water treatise, "lye soap from wood ash" with a carpentry
+    manual (cut on the wrong sense of 'wood'). The post-pull guard leads only when the lead's TITLE
+    names the subject — TITLE not body, because the wrong source's body is exactly what shares the one
+    common word. A mis-selected pull must fall to the honest gap, never lead a confident wrong source.
+    A gap must stay a gap."""
+    from concordance import expand, find
+    orig_pull, orig_find = expand.pull_and_card, find.find_and_check
+    find.find_and_check = lambda *a, **k: None                 # web fallback offline, deterministic
+
+    def spy(card):
+        calls = []
+        def fake(text, subj, config, plane="human"):
+            calls.append(subj)
+            return {"status": "carded", "cards": [card],
+                    "message": "fetched and cut on the call — kept for next time"}
+        return calls, fake
+
+    try:
+        # (1) the waste-water mis-selection for a goat-milk how-to — title names none of the subject
+        ww = {"id": "card_span_ww", "title": "Unfiltered Waste-water. The total quantity",
+              "body": "the total quantity of unfiltered waste-water ... milk of lime ...",
+              "shelf": "practical", "subject": "raise goats milk",
+              "source": {"authority_tier": "primary_pd"}, "extra": {"tortoise": True}}
+        # (2) the carpentry mis-selection for lye soap — 'wood' IS in the body (the trap a body test falls
+        #     for), but the TITLE names none of lye/soap/ash, so the guard must still reject it
+        carp = {"id": "card_span_carp", "title": "CARPENTRY AND JOINERY",
+                "body": "in carpentry and joinery the wood is planed ... the grain of the wood ...",
+                "shelf": "practical", "subject": "make lye soap wood ash",
+                "source": {"authority_tier": "primary_pd"}, "extra": {"tortoise": True}}
+        for q, bad in (("how do i raise goats for milk", ww),
+                       ("how do i make lye soap from wood ash", carp)):
+            calls, fake = spy(bad)
+            expand.pull_and_card = fake
+            r = ask.respond(q, SEC)
+            assert calls, f"the pull was never attempted for {q!r}"
+            ids = {(r.get("lead") or {}).get("id")} | {h.get("id") for h in (r.get("results") or [])}
+            assert bad["id"] not in ids, f"{q!r} led with the mis-selected source {bad['title']!r}"
+            assert "kept for next time" not in (r.get("message") or ""), \
+                f"{q!r} carried the pull's confident 'found it' message over a wrong source"
+
+        # a GOOD reach pull (title names the subject) still leads — the guard never over-rejects
+        good = {"id": "card_span_goat", "title": "The Milk Goat and Her Management",
+                "body": "a milch goat in good condition ... how to raise goats for milk ...",
+                "shelf": "practical", "subject": "raise goats milk",
+                "source": {"authority_tier": "primary_pd"}, "extra": {"tortoise": True}}
+        _, fake = spy(good)
+        expand.pull_and_card = fake
+        r = ask.respond("how do i raise goats for milk", SEC)
+        assert good["id"] in {h.get("id") for h in (r.get("results") or [])}, \
+            "a good pull whose title names the subject was wrongly dropped"
+
+        # a pull whose TITLE carries the user's own word leads normally — the guard is strict, not
+        # blind: it rejects only when the title names none of what was asked
+        canon = {"id": "card_span_soap", "title": "The Soap-Maker's Handbook",
+                 "body": "lye is leached from hardwood ashes and boiled with tallow ...",
+                 "shelf": "practical", "subject": "soap making",
+                 "source": {"authority_tier": "primary_pd"}, "extra": {"tortoise": True}}
+        _, fake = spy(canon)
+        expand.pull_and_card = fake
+        r = ask.respond("how do i make lye soap from wood ash", SEC)
+        assert canon["id"] in {h.get("id") for h in (r.get("results") or [])}, \
+            "a pull whose title names the subject was wrongly dropped"
+    finally:
+        expand.pull_and_card, find.find_and_check = orig_pull, orig_find
+
+
+def test_pulled_lead_names_subject_gates_both_the_pull_and_the_kept_replay():
+    """The one predicate that guards BOTH the fresh-pull lead and the already-kept short-circuit: a
+    pulled span leads only if its TITLE names the subject the USER asked. Title, not body — the wrong
+    source's body is exactly what carries the shared common word. And the USER's subject, NEVER the
+    card's own `subject`: a mis-selection's span is CRAFTED for the wrong subject and titled to name
+    it, so trusting `card['subject']` is circular and rubber-stamps the mis-selection (live 2026-09-01:
+    'lye soap from wood ash' matched the canon 'carpentry' entry via 'wood', so the spans carried
+    subject='carpentry' and title 'CARPENTRY AND JOINERY')."""
+    # the live mis-selections. THE CARPENTRY SPAN'S OWN subject IS 'carpentry' (it was cut for the
+    # canon subject reached through the 'wood' bridge) — the exact case a subject-vs-title check waved
+    # through; the guard must reject it on the USER's words all the same.
+    ww = {"title": "Unfiltered Waste-water. The total quantity", "subject": "keep well water goats",
+          "body": "the total quantity of unfiltered waste-water ... milk of lime ..."}
+    carp = {"title": "CARPENTRY AND JOINERY", "subject": "carpentry",
+            "body": "the wood is planed ... the grain of the wood ..."}   # 'wood' in the BODY is the trap
+    assert not ask._pulled_lead_names_subject("raise goats milk", ww)
+    assert not ask._pulled_lead_names_subject("make lye soap wood ash", carp)
+    # a good reach pull — the span is cut for the user's own words, so its title names the subject
+    good = {"title": "The Milk Goat and Her Management", "subject": "raise goats milk", "body": "..."}
+    assert ask._pulled_lead_names_subject("raise goats milk", good)
+    # a canon source whose title carries the user's own word still leads
+    soap = {"title": "The Soap-Maker's Handbook", "subject": "soap making", "body": "lye and tallow ..."}
+    assert ask._pulled_lead_names_subject("make lye soap wood ash", soap)
+    # a canon synonym the crude stemmer cannot bridge ('beekeeping' for the asked 'honeybees') becomes
+    # an honest GAP rather than a confident lead — the safe direction, by design
+    bee = {"title": "Every Step in Beekeeping", "subject": "beekeeping", "body": "the hive ..."}
+    assert not ask._pulled_lead_names_subject("keep honeybees", bee)
 
 
 def test_the_candidate_pool_is_deterministic_and_never_starves_the_rare_word():

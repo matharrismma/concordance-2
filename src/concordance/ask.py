@@ -471,6 +471,51 @@ def _prefer_full_coverage(hits: List[Dict[str, Any]], text: str) -> List[Dict[st
     return hits
 
 
+def _prefer_connected(hits: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Compose the LEXICAL rank with the CONNECTION map — two signals, both true (Matt: "2 things can
+    be true at once"). Among the word-matches, lift the neighbourhood HUB — a card linked by a
+    SUBSTANTIVE edge (a shared scripture, a citation) to OTHER on-topic hits — over an ISLAND that holds
+    the word but connects to nothing about it (a `card_src_pron_messiah`-shaped stub). It NEVER replaces
+    the words and never deletes a hit; it only lifts a hub over an island lead.
+
+    Honest by construction where the graph is THIN: a card whose only edge is a generic shelf-membership
+    (`member_of` a `card_spine_*`) scores 0, so a practical query — whose cards carry no real edges yet —
+    is left exactly as the words ranked it. The signal helps where the map is dense (Scripture's
+    cross-references) and is inert, never harmful, where it is sparse. Clearing the practical frontier
+    needs the substance/region signals, not this one — both are true, and both are needed.
+
+    Connector cards are the map's EDGES, never its destinations. A `card_c_*` / shelf-"connections" card
+    (e.g. "Amazing Grace ↔ Ephesians") exists only to link two content cards, so it is BY NATURE the most
+    linked card in any pool — count it and it would always win, burying the very content it points to (the
+    parasitic-connector failure). So a connector never counts as a destination and is never promoted; it
+    stays where the words put it, to DECORATE, not to lead."""
+    if len(hits) < 3:
+        return hits
+
+    def _connector(c: Dict[str, Any]) -> bool:
+        return str(c.get("id") or "").startswith("card_c_") or c.get("shelf") == "connections"
+
+    # Evidence = substantive links into the pool of CONTENT cards (connectors and shelf spines excluded,
+    # so the map's edges neither score nor get scored toward).
+    content_ids = {c.get("id") for c in hits if not _connector(c)}
+
+    def _evidence(c: Dict[str, Any]) -> int:
+        n = 0
+        for e in (c.get("connections") or []):
+            tid = e.get("to_card_id")
+            if tid and tid != c.get("id") and tid in content_ids and not str(tid).startswith("card_spine_"):
+                n += 1
+        return n
+
+    cand = [i for i in range(len(hits)) if not _connector(hits[i])]   # a connector may never be promoted
+    if not cand:
+        return hits
+    best = max(cand, key=lambda i: _evidence(hits[i]))
+    if best and _evidence(hits[best]) > 0 and _evidence(hits[0]) == 0 and not _connector(hits[0]):
+        hits = [hits[best]] + hits[:best] + hits[best + 1:]
+    return hits
+
+
 def _shape_found_hits(hits: List[Dict[str, Any]], text: str, practical: bool) -> List[Dict[str, Any]]:
     """The ONE place a found answer's hits are shaped before the lead is chosen — the discernment the
     found path used to scatter across the served block (this is the P2 consolidation: one function, so
@@ -480,7 +525,11 @@ def _shape_found_hits(hits: List[Dict[str, Any]], text: str, practical: bool) ->
       2. PRONUNCIATION KEY — never leads a substantive ask ("who composed the Messiah" → a phonetic
          key for "messiah"); demoted behind any real hit unless the ask is about how a word is SAID.
       3. WHOLE NAME — the hit carrying the most of a multi-word subject leads over a partial fragment.
-    Behavior-preserving: the same three steps, same order, that lived inline before."""
+      4. CONNECTION — among the word-matches, a card the CONNECTION MAP embeds in the subject's
+         neighbourhood (a substantive link to another on-topic hit) leads over an island stub that
+         merely holds the word. Composes with the lexical rank, never replaces it; inert where the
+         graph is thin (so a practical query is left exactly as the words ranked it).
+    Behavior-preserving through step 3; step 4 only lifts a connected hub over an island lead."""
     if practical:
         clean = [c for c in hits if not _is_practical_junk(c)]
         if not clean:
@@ -490,7 +539,8 @@ def _shape_found_hits(hits: List[Dict[str, Any]], text: str, practical: bool) ->
         pron = [c for c in hits if str(c.get("id") or "").startswith("card_src_pron_")]
         if pron and len(pron) < len(hits):
             hits = [c for c in hits if not str(c.get("id") or "").startswith("card_src_pron_")] + pron
-    return _prefer_full_coverage(hits, text)
+    hits = _prefer_full_coverage(hits, text)
+    return _prefer_connected(hits)
 
 
 def find_ref(text: str):
@@ -825,6 +875,25 @@ def _title_names_subject(query: str, card: Dict[str, Any]) -> bool:
         return True
     title = {_stem(w) for w in _content_tokens(card.get("title") or "")}
     return bool(subj & title)
+
+
+def _pulled_lead_names_subject(query: str, card: Dict[str, Any]) -> bool:
+    """A span the tortoise pulled (or kept from an earlier pull) may LEAD only if its TITLE names the
+    subject the USER asked. craft.rank cuts a span wherever it shares ONE distinctive stem, so a
+    tangential source can card (a waste-water treatise on 'milk', a carpentry manual on the wrong sense
+    of 'wood'); the TITLE — not the body, which is exactly what carries the shared word — is the honest
+    signal the span is ABOUT what was asked. Reused by BOTH the fresh-pull lead and the already-kept
+    short-circuit, so a mis-selection can neither lead on the call nor be replayed as "already found it".
+
+    Checked against the USER's query, NEVER the card's own `subject`. That field is what RETRIEVAL
+    decided the source was about, and the span's title is minted to name that very subject — so trusting
+    it is circular and rubber-stamps the mis-selection we are catching. Live 2026-09-01: 'lye soap from
+    wood ash' matched the canon's 'carpentry' entry through the shared word 'wood', so the spans were cut
+    FOR 'carpentry' and titled "CARPENTRY AND JOINERY"; a subject-vs-title check passed them, confident
+    and wrong. A canon source whose spans name a synonym the crude stemmer can't bridge ('beekeeping' for
+    the asked 'honeybees') is turned into an honest GAP instead — the safe direction this whole path is
+    built on (Matt: an honest "I don't have that" beats a confident irrelevant hit). A gap stays a gap."""
+    return _title_names_subject(query, card)
 
 
 # THE OFF-DOMAIN SHIFT. A distributional topic model was proven unable to tell a how-to from a book
@@ -1651,8 +1720,14 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
         # share a common word ("start fire" pulled in 'jump-start', 'head start', a dozen network
         # ports) and pushed the kept cards past the window (measured live 2026-08-15: the kept
         # passages ranked 10th, 23rd, 28th). Scoped, they stand where they can be found.
+        # AND the kept card's TITLE must name the subject (_pulled_lead_names_subject): a pull that
+        # MIS-SELECTED on an earlier ask kept its spans too, and _is_kept_tortoise_source recognises them
+        # by the shared crafted-subject word — so without this, a kept waste-water span ("raise goats for
+        # milk") or carpentry span ("lye soap from wood ash") would be replayed here, instantly and
+        # confidently wrong, never even reaching the fresh-pull guard. Same guard, both doors. Live
+        # 2026-09-01: these three were being served from exactly this short-circuit.
         already = [c for c in (corpus.search(subj, limit=15, shelves=set(_FIELD_INSTRUCTIONAL)) or [])
-                   if _is_kept_tortoise_source(subj, c)]
+                   if _is_kept_tortoise_source(subj, c) and _pulled_lead_names_subject(subj, c)]
         if already:
             # a cut passage leads over the book-level source card — it carries the actual instruction
             already.sort(key=lambda c: 0 if c.get("box") == "excerpt" else 1)
@@ -1677,27 +1752,30 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
         except Exception:  # noqa: BLE001 — the pull failing must never cost the citation fallback
             pulled = {"status": "error"}
         if pulled.get("status") == "carded":
-            # THE PULLED CARDS LEAD. The first wiring re-searched and let whatever the corpus
-            # already ranked displace the passages just cut for THIS question — caught by the
-            # spy test, where "fellowship" hits buried the pulled zorblatt cards entirely. The
-            # spans carry the subject by construction (craft's rank requires it), so they stand
-            # first and the re-search fills the remaining seats.
+            # THE PULLED CARDS LEAD — but only when the lead's TITLE names the subject. The re-search
+            # fills the seats behind the pulled spans (the spy test guards that "fellowship" hits don't
+            # bury them). "The spans carry the subject by construction" was too strong a trust: craft.rank
+            # cuts a span wherever it shares ONE distinctive stem, so a tangential source still cards —
+            # live 2026-08-31, "raise goats for milk" led with a waste-water treatise ("Unfiltered Waste-
+            # water..."), "lye soap from wood ash" with a carpentry manual ("CARPENTRY AND JOINERY", cut
+            # on the wrong sense of 'wood'), each confident and wrong. Guard the lead with the same masked-
+            # gap test the pre-pull path already trusts (_title_names_subject, at the `not
+            # _title_names_subject(subj, _top)` branch above): the lead leads only if its TITLE names the
+            # subject. Title, NOT body — the wrong source's body is exactly what shares the one common word
+            # ('wood', 'milk'); that overlap IS the mis-selection, so a body test would wave carpentry
+            # through. Checked against the user's subject OR the subject the card was crafted for, so a
+            # canon source cut on its own clean subject ("beekeeping" for "keep honeybees") still leads
+            # while a reach mis-selection — whose crafted subject is the user's own words — cannot. Names
+            # neither -> weak stays True: the honest gap / web fallback answers, never a confident wrong
+            # source. A gap must stay a gap. (hits is reassigned only when the lead passes, so a rejected
+            # pull never leaks the wrong card into the fallback display either.)
             pulled_cards = list(pulled.get("cards") or [])[:6]
-            seen_ids = {c.get("id") for c in pulled_cards}
-            hits = (pulled_cards +
-                    [c for c in (corpus.search(subj, limit=6) or [])
-                     if c.get("id") not in seen_ids])[:6]
-            # The pull is SUPPOSED to card only subject-matched spans (craft.rank cuts a span only where
-            # it shares the subject's words), but a shared-word MIS-SELECTION slips through — live
-            # 2026-08-31, "how do i raise goats for milk" pulled a waste-water document and led with it.
-            # Guard the lead: it leads only if it carries a DISTINCTIVE subject word (title or body, the
-            # generic verbs dropped so "start a fire" still matches on "fire", not the missing "start").
-            # If the pull mis-selected, leave weak=True so the honest gap/web fallback answers rather
-            # than a confident wrong source.
-            _subj_words = {_stem(w) for w in (_content_tokens(subj) - _GENERIC_Q_WORDS)}
-            _lead_hay = {_stem(w) for w in _content_tokens(
-                (pulled_cards[0].get("title") or "") + " " + (pulled_cards[0].get("body") or ""))}
-            if pulled_cards and (not _subj_words or (_subj_words & _lead_hay)):
+            _lead = pulled_cards[0] if pulled_cards else None
+            if _lead and _pulled_lead_names_subject(subj, _lead):
+                seen_ids = {c.get("id") for c in pulled_cards}
+                hits = (pulled_cards +
+                        [c for c in (corpus.search(subj, limit=6) or [])
+                         if c.get("id") not in seen_ids])[:6]
                 weak = False
                 base = {**base, "message": pulled.get("message", "")}
     if weak:
