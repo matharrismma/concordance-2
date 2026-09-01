@@ -1687,13 +1687,17 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
             hits = (pulled_cards +
                     [c for c in (corpus.search(subj, limit=6) or [])
                      if c.get("id") not in seen_ids])[:6]
-            # The pulled cards ARE the answer: craft.rank cuts a span only where it shares the
-            # subject's own words, so a card that came back is subject-matched by construction. The
-            # earlier _shares_a_word gate here was too strict for exactly this — it sent "start a
-            # fire" to the web fallback even though 10 fire passages had just been cut and kept,
-            # because the distinctive-word test wanted the 5-letter "start" and the passage spoke of
-            # "fire". If the pull carded, lead with it.
-            if pulled_cards:
+            # The pull is SUPPOSED to card only subject-matched spans (craft.rank cuts a span only where
+            # it shares the subject's words), but a shared-word MIS-SELECTION slips through — live
+            # 2026-08-31, "how do i raise goats for milk" pulled a waste-water document and led with it.
+            # Guard the lead: it leads only if it carries a DISTINCTIVE subject word (title or body, the
+            # generic verbs dropped so "start a fire" still matches on "fire", not the missing "start").
+            # If the pull mis-selected, leave weak=True so the honest gap/web fallback answers rather
+            # than a confident wrong source.
+            _subj_words = {_stem(w) for w in (_content_tokens(subj) - _GENERIC_Q_WORDS)}
+            _lead_hay = {_stem(w) for w in _content_tokens(
+                (pulled_cards[0].get("title") or "") + " " + (pulled_cards[0].get("body") or ""))}
+            if pulled_cards and (not _subj_words or (_subj_words & _lead_hay)):
                 weak = False
                 base = {**base, "message": pulled.get("message", "")}
     if weak:

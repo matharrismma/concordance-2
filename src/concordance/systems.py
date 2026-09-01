@@ -47,18 +47,24 @@ SUBSYSTEMS: List[Dict[str, Any]] = [
      "issues": [{"what": "founders gather pending (per-work start-after)", "supported": False}]},
     {"name": "Find / the Tortoise", "slug": "find", "degraded": True,
      "modules": ["find", "providers", "expand", "craft", "field_canon", "sources"],
-     "issues": [{"what": "pull mis-selects tangential sources", "supported": False}]},
+     # supported now: a relevance guard on the pulled lead prevents a shared-word mis-selection from
+     # leading confidently (it falls to an honest gap instead). Still degraded until selection improves.
+     "issues": [{"what": "pull can mis-select a tangential source", "supported": True}]},
     {"name": "The Keeping / Corpus", "slug": "keeping", "degraded": True,
      "modules": ["corpus", "corpus_db", "graph", "decks", "wayfind", "growth"],
-     "issues": [{"what": "~67% word-match stubs", "supported": False},
+     # the stub flood has interim support (the junk filters + relevance floor keep the worst off a lead);
+     # the ranker being blind to substance-vs-headword is the real open work (P3 of the wiring).
+     "issues": [{"what": "~67% word-match stubs", "supported": True},
                 {"what": "ranker blind to substance vs headword", "supported": False}]},
     {"name": "Crisis / Safety", "slug": "crisis",
      "modules": ["crisis_semantic", "floor", "seeds"]},
     {"name": "Coach / Shepherd", "slug": "coach",
      "modules": ["coach", "disciple", "formation", "serve"]},
-    {"name": "Field Library", "slug": "field", "degraded": True,
+    {"name": "Field Library", "slug": "field",
+     # not degraded: it answers correctly for what it holds (compute is exact, the survival/apothecary
+     # cards are real) — it is thinly STOCKED, a growth process the tortoise handles, not a defect.
      "modules": ["apothecary", "almanac", "playbook", "compute", "science_cards", "chess"],
-     "issues": [{"what": "shelves thinly stocked", "supported": False}]},
+     "issues": [{"what": "shelves thinly stocked (the tortoise grows them on demand)", "supported": True}]},
     {"name": "Museum / TV", "slug": "tv", "modules": ["tv"],
      "issues": [{"what": "curated feeds thin", "supported": False}]},
     {"name": "Identity / Profile / Community", "slug": "identity",
