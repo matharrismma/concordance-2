@@ -49,24 +49,25 @@ def test_agent_endpoints_and_ambiguous_pages_do_not_move():
         assert p not in MOVED_TO_ORG, p
 
 
-# ---- the bare homepage: the DESK, not the auditor wedge (flip REVERTED 2026-08-30) ----
+# ---- the bare homepage: SORTED BY SURFACE (Matt, 2026-09-01) ----
 
-def test_secular_bare_home_serves_the_desk():
-    # Matt, 2026-08-30: "the homepage still doesn't really show what it does. What are we? Provide a
-    # clear value add." The narrow /checkit auditor wedge is no longer the front door; "/" serves the
-    # desk (index.html), whose hero states the value and whose doors show the whole offering. The
-    # wedge stays reachable at /checkit and on the "Check a claim" door.
-    assert home_for("secular", SITE, "/") == "/"
+def test_secular_bare_home_serves_the_engine():
+    # Matt, 2026-09-01: "the .com should be more secular and obviously geared to computing and
+    # business — the current .com page is better suited for .org." "/" on the secular surface now
+    # serves com.html, the deterministic-verification-engine face (branding.SECULAR_IDENTITY), instead
+    # of the family desk. The working checker stays reachable at /checkit and on the 'Check a claim' CTA.
+    assert home_for("secular", SITE, "/") == "/com.html"
+    assert home_for("secular", SITE, "/index.html") == "/com.html"
 
 
 def test_home_leaves_every_other_path_untouched():
-    assert home_for("secular", SITE, "/index.html") == "/index.html"
-    assert home_for("secular", SITE, "/checkit") == "/checkit"     # the wedge is still reachable
+    assert home_for("secular", SITE, "/checkit") == "/checkit"     # the checker is still reachable
     assert home_for("secular", SITE, "/golf") == "/golf"
     assert home_for("secular", SITE, "/about") == "/about"
 
 
-def test_witness_home_is_untouched():
+def test_witness_home_is_the_desk():
+    # .org (witness) keeps the desk — Scripture, wisdom, the family — the foundation named plain.
     assert home_for("witness", SITE, "/") == "/"
     assert home_for("witness", SITE, "/index.html") == "/index.html"
 

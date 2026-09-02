@@ -3291,6 +3291,31 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             self.send_response(501)
             self.end_headers()
 
+        def end_headers(self) -> None:
+            # THE OPEN DOOR (CORS), added once for every response so the widest door is also the
+            # DRY-est. This is a read/verify API with NO ambient credential: the one cookie, nh_gate,
+            # is never sent cross-origin because we allow no credentials — so answering every origin
+            # is safe. A third-party web app or browser-agent gets the secular, UNGATED reads (the
+            # correct default — the witness surfaces only on the reader's OWN seeking, which needs the
+            # same-origin cookie), and a WRITE still requires an Ed25519 signature, not a session.
+            # `*` without credentials leaks nothing and unblocks every browser integrator.
+            self.send_header("access-control-allow-origin", "*")
+            self.send_header("access-control-expose-headers", "*")
+            super().end_headers()
+
+        def do_OPTIONS(self) -> None:
+            # CORS preflight — the browser's question before it will let a page READ our JSON. Answer
+            # 204 with the methods and request-headers we accept (content-type for JSON bodies; the
+            # Mcp-* headers so a browser can also mount the remote MCP). end_headers() adds
+            # Allow-Origin. Max-Age caches the answer so the preflight is paid once a day, not per call.
+            self.send_response(204)
+            self.send_header("access-control-allow-methods", "GET, POST, DELETE, OPTIONS")
+            self.send_header("access-control-allow-headers",
+                             "content-type, mcp-session-id, mcp-protocol-version, last-event-id")
+            self.send_header("access-control-max-age", "86400")
+            self.send_header("content-length", "0")
+            self.end_headers()
+
         def log_message(self, *args) -> None:  # quiet
             pass
 
@@ -3338,14 +3363,18 @@ def resolve_site_file(site, path: str):
 
 
 def home_for(surface: str, site, path: str) -> str:
-    """The bare homepage. The Domain Sort flip (Matt, 2026-08-24) had put the working auditor
-    (/checkit) at "/" on the .com surface. REVERTED 2026-08-30 (Matt: "the homepage still doesn't
-    really show what it does. What are we? Provide a clear value add.") — the auditor is a narrow
-    commercial wedge that never says what Narrow Highway IS or that a family is served. "/" now serves
-    the DESK (index.html), whose hero states the value plainly and whose doors show the whole offering;
-    the auditor stays reachable at /checkit and on the 'Check a claim' door. Reversible: restore the
-    branch `if surface == "secular" and path == "/" and resolve_site_file(site, "/checkit"): return
-    "/checkit"` to put the wedge back at "/"."""
+    """The bare homepage, SORTED BY SURFACE (Matt, 2026-09-01: ".org should be up front religious; the
+    .com should be more secular and obviously geared to computing and business — the current .com page
+    is better suited for .org"). Two faces of one engine, each in its own language:
+    - .com (secular): "/" serves com.html — what Narrow Highway IS in the world's own language: a
+      deterministic verification engine, its 66-domain breadth, the receipt you can re-verify, and the
+      API/agent door. It surfaces branding.SECULAR_IDENTITY, which the old family desk never wore.
+    - .org (witness): "/" keeps index.html — the desk whose doors open on Scripture, wisdom, and the
+      family, the foundation named plain. (A religious-forward .org pass is the next step.)
+    Guarded on the file existing so a missing com.html falls back to the desk, never a 500. Reversible:
+    drop the branch and both surfaces serve index.html again."""
+    if surface == "secular" and path in ("/", "/index.html") and resolve_site_file(site, "/com.html"):
+        return "/com.html"
     return path
 
 

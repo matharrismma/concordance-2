@@ -60,7 +60,12 @@ disagreement itself is the alarm.
 abstract: https://github.com/matharrismma/concordance-2/blob/master/docs/BENCHMARK.md
 (package: `python tools/benchmark.py --json`, versioned, per-case rows, FP and FN separate).
 
-## API (JSON over HTTP, same-origin)
+## API (JSON over HTTP — CORS-open, no login)
+Call any read/verify route cross-origin — from a browser app, a server, or an agent. Every response
+carries `Access-Control-Allow-Origin: *` and the `OPTIONS` preflight is answered, so a web page's
+`fetch()` works with no key and no account. (Writes still require an Ed25519 signature, not a session,
+so an open origin grants no authority.) Straight from a browser:
+`fetch("https://narrowhighway.com/audit",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text:"the moon is 384400 km away"})}).then(r=>r.json())`
 **Start here — no schema needed:** `POST /audit` with `{"text":"<any prose with numbers>"}`.
 The engine extracts every unambiguously checkable claim from plain text, verifies the lot, and
 returns ONE sealed report (per-claim quote + verdict + worked trail + re-checkable seal). The

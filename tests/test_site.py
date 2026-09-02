@@ -46,8 +46,10 @@ def test_identity_line_is_one_source():
     assert anchor == "A deterministic verification engine.", anchor
     # the long-form identity is BUILT from the line — the single source is internally consistent
     assert branding.SECULAR_IDENTITY.startswith(anchor), "SECULAR_IDENTITY must open with the line"
-    # every human-read surface carries the exact line — one source, no drift
-    for rel in ("site/index.html", "site/live.html", "site/llms.txt"):
+    # every human-read SECULAR surface carries the exact line — one source, no drift. The .com face
+    # is com.html (the surface sort, 2026-09-01): the deterministic-engine identity lives on the secular
+    # landing, not the witness desk (index.html), which names the Rock in its own language instead.
+    for rel in ("site/com.html", "site/live.html", "site/llms.txt"):
         t = (_ROOT / rel).read_text(encoding="utf-8")
         assert anchor in t, f"{rel} does not surface the identity line verbatim"
     # the agent descriptors say the same thing in machine-register: still a verification engine,
@@ -74,7 +76,11 @@ def test_every_page_offers_a_way_home():
     # rather than each carrying nh-home.js — the same treatment mesh.html/live.html already get.
     hidden = {"mesh.html", "live.html", "checkit.html", "about.html", "halls.html", "golf.html",
               "grappling.html", "music.html", "provision.html", "wisdom.html", "workshop.html",
-              "coach.html", "tv.html", "playbook.html", "plow.html", "profile.html", "situations.html"}
+              "coach.html", "tv.html", "playbook.html", "plow.html", "profile.html", "situations.html",
+              # com.html is the .com secular LANDING (surface sort, 2026-09-01): it IS home and carries
+              # its own nav, not the shared desk control. systems.html/prophecy.html are self-contained
+              # surfaces reached by direct URL.
+              "com.html", "systems.html", "prophecy.html"}
     missing = [f.name for f in SITE.glob("*.html")
                if f.name != "index.html" and f.name not in hidden
                and "nh-home.js" not in f.read_text(encoding="utf-8")]
@@ -124,7 +130,10 @@ def test_the_palette_reaches_every_public_page():
                # self-contained surfaces, reached by direct URL / their own nav, not the palette: the
                # efficiency front door + confession + lobby, the offline instruments, the operator pages
                "checkit.html", "about.html", "halls.html", "golf.html", "grappling.html",
-               "coach.html", "tv.html", "music.html", "provision.html", "wisdom.html", "workshop.html", "playbook.html", "plow.html", "profile.html", "situations.html"}
+               "coach.html", "tv.html", "music.html", "provision.html", "wisdom.html", "workshop.html", "playbook.html", "plow.html", "profile.html", "situations.html",
+               # com.html is the .com bare homepage (served at "/"), like index.html; systems.html is the
+               # operator dashboard and prophecy.html a direct-URL surface — reached by URL, not the palette.
+               "com.html", "systems.html", "prophecy.html"}
     unreachable = sorted(
         p.name for p in SITE.glob("*.html") if p.name not in listed and p.name not in excused)
     assert not unreachable, f"no way to reach: {unreachable} (list them or excuse them by name)"

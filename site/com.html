@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Narrow Highway</title>
+<meta name="description" content="A deterministic verification engine. Bring a claim, get a verdict, the worked reasoning, and a permanent receipt you can re-verify &mdash; across 66 domains, no model in the loop.">
+<style>
+  :root{
+    --paper:#eef1f4; --surface:#f7f9fb; --surface-2:#e9edf1;
+    --ink:#12161c; --ink-soft:#48545f; --ink-faint:#7c8894;
+    --line:#d3dbe2; --line-soft:#e2e8ee;
+    --seal:#0c6b5f; --seal-bright:#0e8577; --seal-wash:rgba(12,107,95,.09);
+    --broken:#b0472b; --broken-wash:rgba(176,71,43,.10);
+    --slate:#5f6b78; --slate-wash:rgba(95,107,120,.10);
+    --grid:rgba(18,22,28,.045);
+    --shadow:24px 30px 60px -34px rgba(16,26,34,.55);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#0c1116; --surface:#121a20; --surface-2:#0f171d;
+      --ink:#e7edf2; --ink-soft:#a4b3bf; --ink-faint:#6f7d89;
+      --line:#222e37; --line-soft:#1a252d;
+      --seal:#3bb6a3; --seal-bright:#54cbb8; --seal-wash:rgba(59,182,163,.12);
+      --broken:#e28a6b; --broken-wash:rgba(226,138,107,.13);
+      --slate:#93a2b0; --slate-wash:rgba(147,162,176,.12);
+      --grid:rgba(231,237,242,.05);
+      --shadow:24px 30px 70px -34px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0c1116; --surface:#121a20; --surface-2:#0f171d;
+    --ink:#e7edf2; --ink-soft:#a4b3bf; --ink-faint:#6f7d89;
+    --line:#222e37; --line-soft:#1a252d;
+    --seal:#3bb6a3; --seal-bright:#54cbb8; --seal-wash:rgba(59,182,163,.12);
+    --broken:#e28a6b; --broken-wash:rgba(226,138,107,.13);
+    --slate:#93a2b0; --slate-wash:rgba(147,162,176,.12);
+    --grid:rgba(231,237,242,.05);
+    --shadow:24px 30px 70px -34px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:16.5px; line-height:1.6; letter-spacing:.005em;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:28px 28px;
+  }
+  .wrap{max-width:1120px; margin:0 auto; padding:0 clamp(1.1rem,4vw,3rem)}
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif; font-weight:500; text-wrap:balance; letter-spacing:-.01em}
+  a{color:inherit}
+  .mono{font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace}
+  .tnum{font-variant-numeric:tabular-nums}
+  .eyebrow{font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace; font-size:.72rem; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--seal); font-weight:500}
+
+  /* -- top bar ----------------------------------------------- */
+  header.bar{position:sticky; top:0; z-index:20; backdrop-filter:blur(9px);
+    background:color-mix(in srgb, var(--paper) 82%, transparent);
+    border-bottom:1px solid var(--line-soft)}
+  .bar .wrap{display:flex; align-items:center; gap:1.3rem; height:60px}
+  .brand{font-family:Georgia,serif; font-weight:600; font-size:1.06rem; letter-spacing:-.01em;
+    display:flex; align-items:center; gap:.55rem}
+  .brand .mk{width:15px; height:15px; border:2px solid var(--seal); border-radius:50%;
+    position:relative; flex:none}
+  .brand .mk::after{content:""; position:absolute; inset:2px; border-radius:50%;
+    background:var(--seal); transform:scale(.0); transform-origin:center;
+    animation:seal .9s .2s cubic-bezier(.2,.9,.2,1) forwards}
+  @keyframes seal{to{transform:scale(1)}}
+  .bar nav{margin-left:auto; display:flex; align-items:center; gap:1.4rem; font-size:.9rem}
+  .bar nav a{color:var(--ink-soft); text-decoration:none; transition:color .15s}
+  .bar nav a:hover{color:var(--ink)}
+  .bar .witness{color:var(--seal); text-decoration:none; font-weight:500}
+  @media (max-width:720px){ .bar nav a.hidesm{display:none} }
+
+  /* -- hero -------------------------------------------------- */
+  .hero{padding:clamp(3rem,7vw,5.5rem) 0 clamp(2rem,4vw,3rem)}
+  .hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(2rem,5vw,4rem); align-items:start}
+  @media (max-width:900px){ .hero-grid{grid-template-columns:1fr; gap:2.2rem} }
+  h1.title{font-size:clamp(2.5rem,5.6vw,4rem); line-height:1.02; margin:.9rem 0 0; font-weight:500}
+  .title .em{font-style:italic; color:var(--seal)}
+  .lede{font-size:clamp(1.06rem,1.5vw,1.22rem); color:var(--ink-soft); margin:1.4rem 0 0;
+    max-width:34ch}
+  .lede b{color:var(--ink); font-weight:600}
+  .cta{display:flex; gap:.7rem; margin-top:1.9rem; flex-wrap:wrap}
+  .btn{font:inherit; font-size:.94rem; font-weight:500; cursor:pointer; border-radius:7px;
+    padding:.66rem 1.15rem; text-decoration:none; display:inline-flex; align-items:center; gap:.5rem;
+    border:1px solid transparent; transition:transform .12s, background .15s, border-color .15s}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--seal); color:#fff; border-color:var(--seal)}
+  .btn-primary:hover{background:var(--seal-bright)}
+  .btn-ghost{background:transparent; color:var(--ink); border-color:var(--line)}
+  .btn-ghost:hover{border-color:var(--seal); color:var(--seal)}
+  :root[data-theme="dark"] .btn-primary, :root:not([data-theme="light"]) .btn-primary{color:#08201c}
+
+  /* -- the instrument (demo) --------------------------------- */
+  .inst{background:var(--surface); border:1px solid var(--line); border-radius:13px;
+    box-shadow:var(--shadow); overflow:hidden}
+  .inst-head{display:flex; align-items:center; gap:.5rem; padding:.7rem .95rem;
+    border-bottom:1px solid var(--line-soft); background:var(--surface-2)}
+  .inst-head .dot{width:9px; height:9px; border-radius:50%; background:var(--line); flex:none}
+  .inst-head .lbl{font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace; font-size:.7rem; letter-spacing:.15em;
+    text-transform:uppercase; color:var(--ink-faint); margin-left:.3rem}
+  .inst-head .verdict-chip{margin-left:auto; font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace; font-size:.72rem;
+    letter-spacing:.1em; padding:.2rem .55rem; border-radius:999px; opacity:0; transition:opacity .3s}
+  .inst-head .verdict-chip.show{opacity:1}
+  .v-holds{color:var(--seal); background:var(--seal-wash)}
+  .v-broken{color:var(--broken); background:var(--broken-wash)}
+  .v-slate{color:var(--slate); background:var(--slate-wash)}
+  .inst-body{padding:1.05rem 1.1rem 1.15rem; min-height:288px; display:flex; flex-direction:column}
+  .claim{font-family:Georgia,serif; font-size:1.18rem; line-height:1.4; color:var(--ink);
+    border-left:2px solid var(--seal); padding-left:.85rem; margin:.1rem 0 .55rem}
+  .elim{font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace; font-size:.82rem; color:var(--ink-faint);
+    min-height:1.3em; margin-bottom:.7rem}
+  .elim s{color:var(--ink-faint); opacity:.5; margin-right:.55rem; text-decoration-thickness:1px}
+  .elim .keep{color:var(--seal); text-decoration:none; font-weight:500}
+  .trail{list-style:none; margin:.1rem 0 0; padding:0; display:flex; flex-direction:column; gap:.5rem}
+  .trail li{display:grid; grid-template-columns:auto 1fr; gap:.65rem; align-items:baseline;
+    font-size:.9rem; color:var(--ink-soft); opacity:0; transform:translateY(4px);
+    transition:opacity .35s, transform .35s}
+  .trail li.in{opacity:1; transform:none}
+  .trail .dom{font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace; font-size:.72rem; color:var(--seal);
+    background:var(--seal-wash); padding:.12rem .45rem; border-radius:4px; white-space:nowrap}
+  .trail .step b{color:var(--ink); font-weight:600}
+  .seal{margin-top:auto; padding-top:.9rem; border-top:1px dashed var(--line);
+    display:flex; align-items:center; gap:.6rem; font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+    font-size:.74rem; color:var(--ink-faint); opacity:0; transition:opacity .4s}
+  .seal.in{opacity:1}
+  .seal .stamp{width:16px; height:16px; border:1.5px solid var(--seal); border-radius:50%; flex:none;
+    display:grid; place-items:center; color:var(--seal); font-size:.6rem}
+  .seal .hash{color:var(--ink-soft); word-break:break-all}
+  .picker{display:flex; flex-wrap:wrap; gap:.4rem; margin-top:1.1rem}
+  .chip{font:inherit; font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace; font-size:.74rem; cursor:pointer;
+    border:1px solid var(--line); background:transparent; color:var(--ink-soft);
+    padding:.32rem .6rem; border-radius:999px; transition:.15s}
+  .chip:hover{border-color:var(--seal); color:var(--seal)}
+  .chip[aria-pressed="true"]{background:var(--seal); color:#fff; border-color:var(--seal)}
+  :root[data-theme="dark"] .chip[aria-pressed="true"], :root:not([data-theme="light"]) .chip[aria-pressed="true"]{color:#08201c}
+  .demo-note{font-size:.74rem; color:var(--ink-faint); margin:.7rem .1rem 0}
+
+  /* -- stat strip -------------------------------------------- */
+  .stats{border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft);
+    background:var(--surface)}
+  .stats .wrap{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line-soft)}
+  .stat{background:var(--surface); padding:1.5rem clamp(.8rem,2vw,1.4rem)}
+  .stat .n{font-family:Georgia,serif; font-size:clamp(1.7rem,3vw,2.3rem); font-weight:500;
+    color:var(--ink); line-height:1}
+  .stat .k{font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace; font-size:.72rem; letter-spacing:.13em;
+    text-transform:uppercase; color:var(--ink-faint); margin-top:.5rem}
+  @media (max-width:680px){ .stats .wrap{grid-template-columns:1fr 1fr} }
+
+  /* -- generic section --------------------------------------- */
+  section.blk{padding:clamp(3rem,6vw,5rem) 0}
+  .sec-head{max-width:56ch; margin-bottom:2.2rem}
+  .sec-head h2{font-size:clamp(1.7rem,3.2vw,2.4rem); margin:.6rem 0 0; line-height:1.1}
+  .sec-head p{color:var(--ink-soft); margin:.9rem 0 0; font-size:1.05rem}
+
+  /* domains grid */
+  .domains{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:1px;
+    background:var(--line-soft); border:1px solid var(--line-soft); border-radius:10px; overflow:hidden}
+  .domains span{background:var(--surface); font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace; font-size:.78rem;
+    color:var(--ink-soft); padding:.6rem .7rem; transition:.15s}
+  .domains span:hover{background:var(--seal-wash); color:var(--seal)}
+
+  /* difference cards */
+  .diff{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1.1rem}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:11px; padding:1.3rem 1.35rem}
+  .card .k{font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace; font-size:.7rem; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--seal); margin-bottom:.55rem}
+  .card h3{font-size:1.16rem; margin:0 0 .5rem; font-weight:600}
+  .card p{margin:0; color:var(--ink-soft); font-size:.94rem}
+
+  /* for agents / api */
+  .api-grid{display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start}
+  @media (max-width:820px){ .api-grid{grid-template-columns:1fr} }
+  .code{background:var(--surface); border:1px solid var(--line); border-radius:11px; overflow:hidden}
+  .code .top{display:flex; gap:.5rem; padding:.55rem .9rem; border-bottom:1px solid var(--line-soft);
+    background:var(--surface-2); font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace; font-size:.7rem;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint)}
+  .code pre{margin:0; padding:1rem 1.1rem; overflow-x:auto; font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+    font-size:.82rem; line-height:1.65; color:var(--ink)}
+  .code .cm{color:var(--ink-faint)} .code .st{color:var(--seal)} .code .kw{color:var(--broken)}
+  .api-points{display:flex; flex-direction:column; gap:1.1rem}
+  .api-points .pt{display:grid; grid-template-columns:auto 1fr; gap:.8rem; align-items:start}
+  .api-points .pt .b{width:8px; height:8px; border-radius:50%; background:var(--seal); margin-top:.5rem; flex:none}
+  .api-points .pt b{color:var(--ink)} .api-points .pt span{color:var(--ink-soft); font-size:.95rem}
+
+  /* foundation / footer */
+  .found{background:var(--surface); border:1px solid var(--line); border-radius:13px;
+    padding:clamp(1.6rem,3vw,2.4rem); display:flex; gap:1.4rem; align-items:center; flex-wrap:wrap}
+  .found .txt{flex:1 1 320px}
+  .found h3{font-size:1.35rem; margin:0 0 .4rem}
+  .found p{margin:0; color:var(--ink-soft)}
+  footer{border-top:1px solid var(--line-soft); margin-top:3rem; padding:2.2rem 0 3rem}
+  footer .wrap{display:flex; gap:1.4rem 2rem; flex-wrap:wrap; align-items:center;
+    font-size:.86rem; color:var(--ink-faint)}
+  footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(--seal)}
+  footer .sep{flex:1}
+  .toggle{font:inherit; cursor:pointer; background:transparent; border:1px solid var(--line);
+    color:var(--ink-soft); border-radius:6px; padding:.3rem .6rem; font-size:.78rem}
+  .toggle:hover{border-color:var(--seal); color:var(--seal)}
+
+  :focus-visible{outline:2px solid var(--seal); outline-offset:2px; border-radius:3px}
+  @media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important} }
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <span class="brand"><span class="mk"></span>Narrow Highway</span>
+    <nav>
+      <a href="#verify" class="hidesm">Verify</a>
+      <a href="#domains" class="hidesm">Domains</a>
+      <a href="#api">API</a>
+      <a href="https://narrowhighway.org" class="witness">the witness &rsaquo;</a>
+      <button class="toggle" id="theme" type="button" aria-label="Toggle light or dark">&#9680;</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- HERO: the thesis is the receipt -->
+  <section class="hero"><div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Deterministic &middot; no model in the loop</span>
+      <h1 class="title">A deterministic<br>verification <span class="em">engine</span>.</h1>
+      <p class="lede">Bring a claim. Get a <b>verdict</b>, the <b>worked reasoning</b>, and a
+        <b>permanent receipt you can re-verify</b> &mdash; across 66 domains. It eliminates what is not the
+        answer so what survives stands on its own.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="/checkit.html">Check a claim</a>
+        <a class="btn btn-ghost" href="#api">Build on the API</a>
+      </div>
+      <p class="demo-note">Free, no account, sovereign &mdash; runs offline on your own box, stdlib-only,
+        no per-call cost.</p>
+    </div>
+
+    <div id="verify">
+      <div class="inst" aria-live="polite">
+        <div class="inst-head">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="lbl">verify</span>
+          <span class="verdict-chip mono" id="vchip"></span>
+        </div>
+        <div class="inst-body">
+          <div class="claim" id="claim">The Moon&rsquo;s mean distance from Earth is 384,400&nbsp;km.</div>
+          <div class="elim mono" id="elim"></div>
+          <ul class="trail" id="trail"></ul>
+          <div class="seal" id="seal">
+            <span class="stamp">&#10003;</span>
+            <span>sealed &middot; <span class="hash" id="hash"></span></span>
+          </div>
+        </div>
+      </div>
+      <div class="picker" id="picker" role="group" aria-label="Example claims"></div>
+      <p class="demo-note">Illustrative examples across domains. On the live engine every result is
+        computed fresh and its seal is real &mdash; re-fetch the hash and the bytes must match.</p>
+    </div>
+  </div></section>
+
+  <!-- STAT STRIP: the breadth, grounded -->
+  <div class="stats"><div class="wrap">
+    <div class="stat"><div class="n tnum">66</div><div class="k">verifier domains</div></div>
+    <div class="stat"><div class="n tnum">133</div><div class="k">domains accepted</div></div>
+    <div class="stat"><div class="n tnum">94</div><div class="k">callable tools</div></div>
+    <div class="stat"><div class="n tnum">673,243</div><div class="k">public-domain sources</div></div>
+  </div></div>
+
+  <!-- THE RECEIPT: the differentiator -->
+  <section class="blk"><div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">The receipt, not &ldquo;trust me&rdquo;</span>
+      <h2>Every answer is a permanent, re-checkable seal.</h2>
+      <p>A verdict, the worked trail, and a content-addressed hash. Re-fetch the record and the bytes
+        must match, or it is not that record. Personal context is stripped before anything is stored &mdash;
+        private in, verified out.</p>
+    </div>
+    <div class="diff">
+      <div class="card"><div class="k">Addressable</div><h3>Cite it forever</h3>
+        <p>Each result lives at <span class="mono">/s/&lt;hash&gt;</span> &mdash; a crawlable receipt page and
+          raw JSON. Hand it to your users; the proof travels with the claim.</p></div>
+      <div class="card"><div class="k">Independent</div><h3>Verify without trusting us</h3>
+        <p>The seal spec is public and the checker is ~60 lines of standard-library Python &mdash; no Narrow
+          Highway code, no network. If the script and the engine ever disagree, that is the alarm.</p></div>
+      <div class="card"><div class="k">Honest</div><h3>Three states, never a bluff</h3>
+        <p><span class="mono" style="color:var(--seal)">holds</span> &middot;
+          <span class="mono" style="color:var(--broken)">broken</span> &middot;
+          <span class="mono" style="color:var(--slate)">cannot check</span>. It declines when it cannot
+          verify, rather than inventing an answer to fill the silence.</p></div>
+    </div>
+  </div></section>
+
+  <!-- DOMAINS: the academic integration -->
+  <section class="blk" id="domains" style="background:var(--surface); border-block:1px solid var(--line-soft)">
+    <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">One engine &middot; one kernel</span>
+      <h2>Verification integrated across 66 domains.</h2>
+      <p>Each domain carries its own worked method &mdash; from a molar mass to a bond yield to a boiling
+        point to a scripture reference. All of them resolve through a single kernel:
+        <b>find, distinguish, verify, preserve the trail, never silently upgrade authority.</b>
+        Integrating them under one deterministic roof is the work.</p>
+    </div>
+    <div class="domains" id="domainGrid"></div>
+    </div>
+  </section>
+
+  <!-- FOR YOUR APP / AGENT: the contractor value -->
+  <section class="blk" id="api"><div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">For your app, your agent, your business</span>
+      <h2>The deterministic work your model is bad at &mdash; done cheaply, with a receipt.</h2>
+      <p>An LLM burns tokens to unreliably check arithmetic, resolve a fact, or cite a source. Hand
+        those to Narrow Highway instead: one call, a deterministic answer, a receipt you can show your
+        own users. No key, no account, open CORS from any origin.</p>
+    </div>
+    <div class="api-grid">
+      <div class="code">
+        <div class="top">POST /audit &middot; from a browser or a server</div>
+<pre><span class="cm"># the fastest path from a sentence to a receipt</span>
+fetch(<span class="st">"https://narrowhighway.com/audit"</span>, {
+  method: <span class="st">"POST"</span>,
+  headers: { <span class="st">"content-type"</span>: <span class="st">"application/json"</span> },
+  body: JSON.stringify({
+    text: <span class="st">"aspirin C9H8O4 is 180.16 g/mol"</span>
+  })
+}).then(r =&gt; r.json())
+<span class="cm">// &rarr; { verdict, trail, seal: "/s/&lt;hash&gt;" }</span></pre>
+      </div>
+      <div class="api-points">
+        <div class="pt"><span class="b"></span><span><b>One line for an agent.</b>
+          <span class="mono" style="font-size:.86em">claude mcp add --transport http narrow-highway
+          https://narrowhighway.com/mcp</span> &mdash; 94 tools, six profiles, no SDK, no auth.</span></div>
+        <div class="pt"><span class="b"></span><span><b>Requisite variety, as a service.</b> You supply
+          possibility; the engine returns the checked survivors. It is the deterministic instrument your
+          probabilistic model lacks.</span></div>
+        <div class="pt"><span class="b"></span><span><b>Writes stay yours.</b> Reads are open to every
+          origin; a write still needs an Ed25519 signature you hold, not a session &mdash; so the open door
+          grants no authority.</span></div>
+        <div class="pt"><span class="b"></span><span><b>Nothing is generated.</b> A conduit, not a
+          source: it finds and verifies, and it will tell you plainly when it cannot.</span></div>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- FOUNDATION: link to .org -->
+  <section class="blk" style="padding-top:0"><div class="wrap">
+    <div class="found">
+      <div class="txt">
+        <h3>The same engine, its foundation made plain.</h3>
+        <p>Narrow Highway reaches the world in its own language here. The witness surface names the Rock
+          it is built on &mdash; Scripture in the original languages, Christ at the center.</p>
+      </div>
+      <a class="btn btn-ghost" href="https://narrowhighway.org">Visit the witness &rsaquo;</a>
+    </div>
+  </div></section>
+</main>
+
+<footer><div class="wrap">
+  <span class="brand" style="font-size:.95rem"><span class="mk" style="animation:none;border-color:var(--ink-faint)"></span>Narrow Highway</span>
+  <a href="/capabilities">capabilities</a>
+  <a href="/llms.txt">for agents</a>
+  <a href="/systems.html">systems</a>
+  <a href="/live.html">under the hood</a>
+  <span class="sep"></span>
+  <span>A conduit, not a source &middot; nothing is generated</span>
+</div></footer>
+
+<script>
+(function(){
+  // -- theme toggle (respects system default; only stamps on explicit choice) --
+  var root=document.documentElement, tk="nh_theme";
+  try{ var s=localStorage.getItem(tk); if(s) root.setAttribute("data-theme",s); }catch(e){}
+  document.getElementById("theme").addEventListener("click",function(){
+    var cur=root.getAttribute("data-theme");
+    var next = cur==="dark" ? "light" : cur==="light" ? "dark"
+      : (matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark");
+    root.setAttribute("data-theme",next);
+    try{ localStorage.setItem(tk,next); }catch(e){}
+  });
+
+  // -- the domains grid (the real verifier set, grounded) --
+  var DOMAINS=["acoustics","agriculture","architecture","astronomy","atomic","biology","bridges",
+   "calendar_time","chemistry","combinatorics","computer_science","construction","cryptography",
+   "cybersecurity","ecology","economics","electrical","energy","ephemeris","exercise_science",
+   "finance","formal_logic","genetics","geography","geology","geometry","governance",
+   "history_chronology","hydrology","information_theory","labor","law","linear_algebra","linguistics",
+   "manufacturing","materials_science","mathematics","medicine","meteorology","molecular_geometry",
+   "music_theory","networking","nuclear_physics","number_theory","nutrition","oceanography",
+   "operations_research","optics","periodic_table","philosophy","photography","physical_constants",
+   "physics","probability","quantum_computing","real_estate","rhetoric","scripture","soil_science",
+   "sports_analytics","statistics","theology_doctrine","thermodynamics"];
+  document.getElementById("domainGrid").innerHTML =
+    DOMAINS.map(function(d){ return '<span>'+d+'</span>'; }).join("");
+
+  // -- the instrument: canned, grounded examples across domains --
+  var EX=[
+    {q:'The Moon&rsquo;s mean distance from Earth is 384,400&nbsp;km.', v:'holds', chip:'astronomy',
+     cands:['405,500 km (apogee)','363,300 km (perigee)','384,400 km (mean)'], keep:2,
+     trail:[['astronomy','Mean orbital distance resolves to <b>384,400 km</b> &mdash; the claim matches.']],
+     hash:'a91f4c..7de2'},
+    {q:'Aspirin (C&#8329;H&#8328;O&#8324;) has a molar mass of 180.16&nbsp;g/mol.', v:'holds', chip:'chemistry',
+     cands:['138.12 g/mol','194.19 g/mol','180.16 g/mol'], keep:2,
+     trail:[['periodic_table','&Sigma; atomic mass of C&#8329;H&#8328;O&#8324; = <b>180.158 g/mol</b>.'],
+            ['chemistry','Rounded to 2 dp = <b>180.16</b> &mdash; holds.']],
+     hash:'3b7e02..c4a1'},
+    {q:'A 10&nbsp;kg mass at 9.8&nbsp;m/s&sup2; exerts 98&nbsp;N of force.', v:'holds', chip:'physics',
+     cands:['9.8 N','980 N','98 N'], keep:2,
+     trail:[['physics','F = m&middot;a = 10 &times; 9.8 = <b>98 N</b> &mdash; holds.']],
+     hash:'0f5aa9..91bd'},
+    {q:'$1,000 at 5% annual, compounded yearly for 3 years, is $1,157.63.', v:'holds', chip:'finance',
+     cands:['$1,150.00','$1,161.05','$1,157.63'], keep:2,
+     trail:[['finance','1000 &times; 1.05&sup3; = <b>1157.625</b> &rarr; $1,157.63 &mdash; holds.']],
+     hash:'d24c81..6a07'},
+    {q:'Water boils at 90&nbsp;&deg;C at sea level.', v:'broken', chip:'thermodynamics',
+     cands:['90 &deg;C','98 &deg;C','100 &deg;C'], keep:2,
+     trail:[['thermodynamics','Boiling point of water at 101.325 kPa = <b>100 &deg;C</b>, not 90 &deg;C &mdash; broken.']],
+     hash:'7c1be4..30f9'},
+    {q:'This painting is the most beautiful ever made.', v:'slate', chip:'&mdash; no domain',
+     cands:['aesthetics?','preference?','&mdash;'], keep:-1,
+     trail:[['cannot_check','No domain verifies aesthetic preference. It declines rather than bluff.']],
+     hash:'&mdash;'}
+  ];
+  var claim=document.getElementById("claim"), elim=document.getElementById("elim"),
+      trail=document.getElementById("trail"), sealEl=document.getElementById("seal"),
+      hashEl=document.getElementById("hash"), vchip=document.getElementById("vchip"),
+      picker=document.getElementById("picker");
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var VCLS={holds:"v-holds",broken:"v-broken",slate:"v-slate"},
+      VTXT={holds:"HOLDS",broken:"BROKEN",slate:"CANNOT CHECK"};
+  var timers=[], active=0;
+  function clearT(){ timers.forEach(clearTimeout); timers=[]; }
+  function at(fn,ms){ timers.push(setTimeout(fn,ms)); }
+
+  function run(i){
+    active=i; clearT();
+    var e=EX[i];
+    [].forEach.call(picker.children,function(c,k){ c.setAttribute("aria-pressed", k===i?"true":"false"); });
+    claim.innerHTML=e.q;
+    vchip.className="verdict-chip mono "+VCLS[e.v]; vchip.textContent="";
+    trail.innerHTML=""; sealEl.classList.remove("in"); hashEl.textContent="";
+    // 1. elimination line
+    if(reduce){ elim.innerHTML=''; showTrail(e); return; }
+    var shown=[];
+    e.cands.forEach(function(c,k){
+      at(function(){
+        shown.push(k===e.keep ? '<span class="keep">'+c+' &#10003;</span>'
+                              : '<s>'+c+'</s>');
+        elim.innerHTML = e.keep<0 && k===e.cands.length-1
+          ? '<span style="color:var(--slate)">no candidate survives &mdash; declined</span>'
+          : shown.join(' ');
+      }, 220*(k+1));
+    });
+    at(function(){ showTrail(e); }, 220*(e.cands.length+1)+120);
+  }
+  function showTrail(e){
+    trail.innerHTML = e.trail.map(function(t){
+      return '<li><span class="dom">'+t[0]+'</span><span class="step">'+t[1]+'</span></li>';
+    }).join("");
+    var lis=trail.querySelectorAll("li");
+    [].forEach.call(lis,function(li,k){ at(function(){ li.classList.add("in"); }, reduce?0:180*k); });
+    at(function(){
+      vchip.textContent=VTXT[e.v]; vchip.classList.add("show");
+      hashEl.textContent=e.hash; sealEl.classList.add("in");
+    }, reduce?0:180*lis.length+120);
+  }
+  picker.innerHTML = EX.map(function(e,i){
+    return '<button class="chip" type="button" aria-pressed="false">'+e.chip+'</button>';
+  }).join("");
+  [].forEach.call(picker.children,function(c,i){ c.addEventListener("click",function(){ run(i); }); });
+  run(0);
+})();
+</script>
+</body>
+</html>
