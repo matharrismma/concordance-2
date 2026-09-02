@@ -24,6 +24,7 @@
     { h: '/contact.html',    n: 'Contact',           k: 'contact reach message write keeper support help feedback' },
     { h: '/proof.html',      n: 'What it proves',   k: 'refusals limits catalog guarantees honest' },
     { h: '/map.html',        n: 'The Map',          k: 'map atlas graph constellation keeping shelves overview everything visual health systems flow' },
+    { h: '/theories.html',   n: 'The Floor',        k: 'theories theory science math physics gaps floor lattice comb domains thin coverage' },
   ];
 
   var css = document.createElement('style');

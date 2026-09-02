@@ -543,7 +543,7 @@ _SITEMAP_PAGES = ("/", "/situations.html", "/ask.html", "/bible.html", "/read.ht
                   "/community.html", "/corpus.html", "/guarantees.html", "/collapse.html",
                   "/seeds.html", "/seal.html", "/connect.html", "/profile.html", "/corrected.html", "/audit.html",
                   "/proof.html", "/reason.html", "/boundary.html", "/almanac.html", 
-                  "/teachings.html", "/brain.html", "/floor.html", 
+                  "/teachings.html", "/brain.html", "/floor.html", "/theories.html",
                   "/harmony.html", "/timeline.html", "/backmatter.html", "/places.html",
                   "/narratives.html",  "/voices.html", "/contact.html",
                   "/playbook.html", "/plow.html")
@@ -2863,7 +2863,6 @@ _RETIRED = {
     "/seeds.html": "/proof.html",
     "/shelf.html": "/",
     "/teachings.html": "/bible.html",
-    "/theories.html": "/graph",                           # the theory map lives in the constellation
     "/timeline.html": "/bible.html",
     "/tv.html": "https://narrowhighway.tv/",
     "/voices.html": "/bible.html",
