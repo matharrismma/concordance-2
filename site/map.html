@@ -90,6 +90,10 @@ section.blk{padding:1.6rem 0}
 .sub.out{border-color:rgba(217,105,74,.5); background:var(--out-dim)}
 .legend-status{display:flex; gap:1.1rem; margin-top:.8rem; font-size:.76rem; color:var(--ink-faint); flex-wrap:wrap}
 .legend-status i{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:.35rem}
+/* the body constellation */
+.body-wrap{margin:0 0 1.1rem}
+#bodyCanvas{display:block; width:100%; height:min(48vh,440px); background:var(--panel-2); border:1px solid var(--line); border-radius:12px}
+.body-cap{font-size:.78rem; color:var(--ink-faint); margin:.55rem .2rem 0; max-width:70ch}
 
 /* the constellation */
 .constel{background:var(--panel-2); border:1px solid var(--line); border-radius:12px; overflow:hidden}
@@ -170,6 +174,8 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
   <section class="blk">
     <div class="sec-h"><h2>Every part, and its health</h2><span class="n">live from /systems</span>
       <span class="course" style="margin-left:auto"><b id="courseHc">&mdash;</b><span>course handicap &middot; low is strong</span></span></div>
+    <div class="body-wrap"><canvas id="bodyCanvas" aria-label="the subsystems wired together"></canvas>
+      <p class="body-cap">The body, wired by its real import edges &mdash; the same connective pattern as the cards, one scale up. Size is how many other parts it wires to; colour is its health; a <span style="color:var(--out)">dashed red ring</span> marks a part wired to nothing &mdash; a portion out of order.</p></div>
     <div class="subs" id="subs"><div class="sub"><span class="nm" style="color:var(--ink-faint)">reading the engine&hellip;</span></div></div>
     <div class="legend-status">
       <span><i style="background:var(--seal)"></i>connected</span>
@@ -226,9 +232,47 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
       return '<div class="sub '+st+'"><span class="dot"></span><span class="nm">'+
         (s.name||s.slug)+'</span><span class="hc">'+h+'</span></div>';
     }).join("");
+    drawBody(d);
   }).catch(function(){
     document.getElementById("subs").innerHTML='<div class="sub"><span class="nm" style="color:var(--ink-faint)">systems reading unavailable</span></div>';
   });
+
+  // THE BODY as a constellation — the polymathic connection, fractal: subsystems drawn the way the
+  // cards are (a force graph). Nodes = parts (colour=health, size=how wired), edges = real import links.
+  function drawBody(d){
+    var cv=document.getElementById("bodyCanvas"); if(!cv) return;
+    var dpr=window.devicePixelRatio||1, W=cv.clientWidth||600, H=cv.clientHeight||360;
+    cv.width=W*dpr; cv.height=H*dpr; var ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0);
+    var subs=d.subsystems||[], edges=(d.graph&&d.graph.edges)||[];
+    var COL={connected:"#3bb6a3",degraded:"#d99a3c",out:"#d9694a"};
+    var idx={}, nodes=subs.map(function(s,i){ idx[s.slug]=i;
+      var it=s.integration||{}; return {slug:s.slug, name:(s.name||s.slug).split(" / ")[0],
+        st:(s.live&&s.live.status)||"connected", deg:it.degree||0, iso:it.status==="isolated",
+        x:W/2+(Math.random()-0.5)*W*0.55, y:H/2+(Math.random()-0.5)*H*0.55, vx:0, vy:0}; });
+    var links=edges.filter(function(e){ return idx[e.from]!=null&&idx[e.to]!=null; })
+      .map(function(e){ return {s:idx[e.from], t:idx[e.to]}; });
+    for(var it2=0; it2<260; it2++){
+      for(var i=0;i<nodes.length;i++) for(var j=i+1;j<nodes.length;j++){
+        var a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy||1,dd=Math.sqrt(d2),f=2400/d2;
+        var fx=dx/dd*f, fy=dy/dd*f; a.vx+=fx;a.vy+=fy;b.vx-=fx;b.vy-=fy;
+      }
+      links.forEach(function(l){ var a=nodes[l.s],b=nodes[l.t],dx=b.x-a.x,dy=b.y-a.y,dd=Math.sqrt(dx*dx+dy*dy)||1,f=(dd-95)*0.02;
+        var fx=dx/dd*f, fy=dy/dd*f; a.vx+=fx;a.vy+=fy;b.vx-=fx;b.vy-=fy; });
+      nodes.forEach(function(n){ n.vx+=(W/2-n.x)*0.006; n.vy+=(H/2-n.y)*0.006;
+        n.x+=n.vx*0.5; n.y+=n.vy*0.5; n.vx*=0.86; n.vy*=0.86;
+        n.x=Math.max(48,Math.min(W-48,n.x)); n.y=Math.max(26,Math.min(H-26,n.y)); });
+    }
+    ctx.clearRect(0,0,W,H);
+    links.forEach(function(l){ var a=nodes[l.s],b=nodes[l.t];
+      ctx.strokeStyle="rgba(150,172,192,.16)"; ctx.lineWidth=1; ctx.beginPath();
+      ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); });
+    ctx.font='600 11px "IBM Plex Sans",sans-serif'; ctx.textAlign="center"; ctx.textBaseline="alphabetic";
+    nodes.forEach(function(n){ var r=6+Math.min(11,n.deg), c=COL[n.st]||"#3bb6a3";
+      ctx.beginPath(); ctx.arc(n.x,n.y,r,0,6.2832); ctx.fillStyle=c; ctx.fill();
+      if(n.iso){ ctx.strokeStyle="#d9694a"; ctx.lineWidth=2; ctx.setLineDash([3,3]);
+        ctx.beginPath(); ctx.arc(n.x,n.y,r+5,0,6.2832); ctx.stroke(); ctx.setLineDash([]); }
+      ctx.fillStyle="#d3dee8"; ctx.fillText(n.name, n.x, n.y-r-4); });
+  }
 
   // the constellation — the renderer that was written for this page
   function mountMap(){
