@@ -398,6 +398,8 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
     # end. These are now real <a href> in the markup, so the graph is walkable by anything that can
     # read HTML. The canvas stays as enhancement for those who get it.
     from .. import present as _present
+    from .. import address as _address
+    _addr, _addr_unplaced = _address.derive(card)
     _over = _present.derive(card)
     _nb = _present.neighbors(card, resolve=corpus.get_card, limit=8)
     overlay = ""
@@ -499,7 +501,10 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             f"<h1>{title}</h1>{overlay}{unchecked_block}{body_html}"
             f"<section class=card>{source_html}"
             f"<div class=muted style=\"font-size:.8rem;margin-top:.5rem\">card id</div>"
-            f"<div class=mono style=\"word-break:break-all\">{_esc(card_id)}</div>{related}</section>"
+            f"<div class=mono style=\"word-break:break-all\">{_esc(card_id)}</div>"
+            f"<div class=muted style=\"font-size:.8rem;margin-top:.5rem\">address</div>"
+            f"<div class=mono style=\"word-break:break-all\" title=\"{_esc(_addr_unplaced or 'a pure function of the fields this card carries — derived, never assigned')}\">{_esc(_addr)}</div>"
+            f"{related}</section>"
             f"{adjoining}"
             # Local connection-graph — progressive enhancement (hidden until JS finds a real
             # neighborhood, so the crawlable page stands alone). Each edge links to its seal.
