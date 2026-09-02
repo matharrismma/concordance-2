@@ -1363,8 +1363,24 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
 
     if kind == "word_study" and witness:
         from .verifiers import scripture
-        return _witnessed({**base, "word_study": scripture.word_study(_STRONGS.search(text).group(1).upper())},
-                          text, witness, gate_just_opened, topical=False)
+        ws = scripture.word_study(_STRONGS.search(text).group(1).upper())
+        # INTEGRATE WHERE LOGICAL (the Word cluster): the Greek entries carry no pronunciation — the
+        # lexicon just echoes the transliteration back — so derive a deterministic guide from
+        # `pronounce` (the sovereign tongues tool) and the reader can actually SAY the original word.
+        # This is the isolated tongues part wired to the Word through real use, not a decorative import.
+        if isinstance(ws, dict):
+            _tl = (ws.get("transliteration") or "").strip()
+            _pr = (ws.get("pronunciation") or "").strip()
+            if _tl and (not _pr or _pr == _tl):
+                try:
+                    from . import pronounce as _pron
+                    _g = _pron.guide(_tl)
+                    if _g.get("respelling"):
+                        ws = {**ws, "pronunciation": _g["respelling"], "pronunciation_ipa": _g.get("ipa"),
+                              "pronunciation_note": _g.get("note")}
+                except Exception:  # noqa: BLE001
+                    pass
+        return _witnessed({**base, "word_study": ws}, text, witness, gate_just_opened, topical=False)
 
     if kind == "scripture" and witness:
         from .verifiers import scripture

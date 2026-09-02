@@ -264,6 +264,20 @@ def test_scripture_routes_on_witness_but_falls_back_on_secular():
     assert ask.respond("John 3:16", SEC)["kind"] == "found"       # secular has no resolve -> search
 
 
+def test_a_greek_word_study_can_be_said_tongues_woven_into_the_word():
+    """Integrate where logical (the Word cluster): the Greek lexicon entries carry no pronunciation —
+    they echo the transliteration back — so the word-study answer weaves the sovereign `pronounce`
+    guide. The once-isolated tongues tool is wired to the Word through real use, and a Greek word comes
+    back sayable rather than silent."""
+    r = ask.respond("the original tongue word study G26", WIT, gate_open=True)
+    if r.get("kind") != "word_study":
+        return                                                   # no witness data in this env — nothing to pin
+    ws = r.get("word_study") or {}
+    assert ws.get("word")                                        # ἀγάπη resolved
+    pr, tl = (ws.get("pronunciation") or ""), (ws.get("transliteration") or "")
+    assert pr and pr != tl                                       # a real guide, not the echoed transliteration
+
+
 def test_every_response_carries_the_conduit_note():
     for q in ("2+2 = 4", "grace", "the meaning of life", "I want to die"):
         assert "not generate the answer" in ask.respond(q, SEC)["note"]
