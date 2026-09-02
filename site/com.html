@@ -239,7 +239,7 @@
       <span class="eyebrow">Deterministic &middot; no model in the loop</span>
       <h1 class="title">A deterministic<br>verification <span class="em">engine</span>.</h1>
       <p class="lede">Bring a claim. Get a <b>verdict</b>, the <b>worked reasoning</b>, and a
-        <b>permanent receipt you can re-verify</b> &mdash; across 65 domains. It eliminates what is not the
+        <b>permanent receipt you can re-verify</b> &mdash; across <span data-domains-count>65</span> domains. It eliminates what is not the
         answer so what survives stands on its own.</p>
       <div class="cta">
         <a class="btn btn-primary" href="/checkit.html">Check a claim</a>
@@ -274,10 +274,10 @@
 
   <!-- STAT STRIP: the breadth, grounded -->
   <div class="stats"><div class="wrap">
-    <div class="stat"><div class="n tnum">65</div><div class="k">verifier domains</div></div>
-    <div class="stat"><div class="n tnum">133</div><div class="k">domains accepted</div></div>
-    <div class="stat"><div class="n tnum">94</div><div class="k">callable tools</div></div>
-    <div class="stat"><div class="n tnum">673,243</div><div class="k">public-domain sources</div></div>
+    <div class="stat"><div class="n tnum" data-stat="domains">65</div><div class="k">verifier domains</div></div>
+    <div class="stat"><div class="n tnum" data-stat="accepted">133</div><div class="k">domains accepted</div></div>
+    <div class="stat"><div class="n tnum" data-stat="tools">94</div><div class="k">callable tools</div></div>
+    <div class="stat"><div class="n tnum" data-stat="sources">673,243</div><div class="k">public-domain sources</div></div>
   </div></div>
 
   <!-- THE RECEIPT: the differentiator -->
@@ -309,7 +309,7 @@
     <div class="wrap">
     <div class="sec-head">
       <span class="eyebrow">One engine &middot; one kernel</span>
-      <h2>Verification integrated across 65 domains.</h2>
+      <h2>Verification integrated across <span data-domains-count>65</span> domains.</h2>
       <p>Each domain carries its own worked method &mdash; from a molar mass to a bond yield to a boiling
         point to a scripture reference. All of them resolve through a single kernel:
         <b>find, distinguish, verify, preserve the trail, never silently upgrade authority.</b>
@@ -344,7 +344,7 @@ fetch(<span class="st">"https://narrowhighway.com/audit"</span>, {
       <div class="api-points">
         <div class="pt"><span class="b"></span><span><b>One line for an agent.</b>
           <span class="mono" style="font-size:.86em">claude mcp add --transport http narrow-highway
-          https://narrowhighway.com/mcp</span> &mdash; 94 tools, six profiles, no SDK, no auth.</span></div>
+          https://narrowhighway.com/mcp</span> &mdash; <span data-stat="tools">94</span> tools, six profiles, no SDK, no auth.</span></div>
         <div class="pt"><span class="b"></span><span><b>Requisite variety, as a service.</b> You supply
           possibility; the engine returns the checked survivors. It is the deterministic instrument your
           probabilistic model lacks.</span></div>
@@ -474,6 +474,21 @@ fetch(<span class="st">"https://narrowhighway.com/audit"</span>, {
   }).join("");
   [].forEach.call(picker.children,function(c,i){ c.addEventListener("click",function(){ run(i); }); });
   run(0);
+
+  // Live numbers - the rule is public numbers are LIVE-WIRED, not hardcoded (systems.html does this).
+  // The literals above are the no-JS / offline fallback; this refreshes them from the engine so they
+  // can never silently drift as the corpus grows or a tool/domain is added.
+  fetch("/capabilities").then(function(r){return r.json();}).then(function(c){
+    var v=c.verifiers||{}, s=c.substrate||{};
+    function put(k,val){ if(val==null) return;
+      document.querySelectorAll('[data-stat="'+k+'"]').forEach(function(e){ e.textContent=Number(val).toLocaleString(); }); }
+    put("domains", v.distinct_modules_total && v.distinct_modules_total.count);
+    put("accepted", v.domain_names_accepted && v.domain_names_accepted.count);
+    put("tools", (c.tools||{}).count);
+    put("sources", s.cards && s.cards.count);
+    var n=(v.distinct_modules_total && v.distinct_modules_total.count) || document.querySelectorAll("#domainGrid span").length;
+    document.querySelectorAll("[data-domains-count]").forEach(function(e){ e.textContent=n; });
+  }).catch(function(){});   // offline: the static fallback numbers stand
 })();
 </script>
 </body>
