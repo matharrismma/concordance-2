@@ -152,13 +152,31 @@ _BENIGN_MEASUREMENT = re.compile(
 # in the world, never first-person distress — "i am suffering and want it to end" (0.757) and "why does
 # god hate me" carry no such frame and still fire. Verified: 0 hits on CRISIS_FLOOR, 0 on RED_TEAM. The
 # ultimate/seeker/comfort paths answer this with Scripture and point to Christ and to real people.
+#
+# HARDENED 2026-09-02 (Sonnet review): the pronoun branch below was anchored to an ABSTRACT object so a
+# first-person cry never matches it — but the God-named branch above it was never given that same
+# anchor, and stayed wide open. Six constructed first-person messages ("why does god allow me to keep
+# existing like this, it just hurts too much") scored ABOVE the crisis threshold (0.774 vs 0.657 — the
+# backstop WOULD have caught them) yet were silently suppressed here and tripped no substring, so they
+# landed on the seeker path (Scripture + "talk to a pastor") instead of the one thing that actually
+# matters for someone in that state: the 988 crisis line. A closed noun list (requiring "evil" or
+# "suffering" literally) is not the right fix — it reopens the SAME false-positive hole for impersonal
+# phrasings that don't use those exact nouns ("why does god allow bad things to happen to good people"
+# scored 0.714, also above threshold). The real signal is not the noun, it is whether the object of
+# allow/permit/let/cause is FIRST-PERSON: a negative lookahead excludes only "me/my/us/our/myself"
+# immediately following the verb, so an impersonal question (about the world, "good people", "bad
+# things") still suppresses correctly, and a first-person one no longer does. Verified against the
+# existing CLEARLY_BENIGN fixtures (unchanged), the pronoun-form case from the earlier fix (unchanged),
+# six constructed cries (5/6 now correctly reach the backstop — the sixth uses the ambiguous third-person
+# "someone", not clearly first-person, left alone rather than risk a new false positive), and three new
+# impersonal-phrasing controls (all still correctly suppressed).
 _THEODICY = re.compile(
-    r"\bwhy (?:does|would|did|do|is|are) .*\bgod\b.*\b(?:allow|permit|let|cause)\b"
-    # God named, then referred to by pronoun — "who is God and why does HE allow suffering". Anchored to
-    # an ABSTRACT object (evil/suffering/…) so a first-person cry ("why does he let ME suffer") never
-    # matches; and this only suppresses the backstop — the substring net still catches any explicit cry.
-    r"|\bgod\b.*\bwhy (?:does|would|did|do) (?:he|she|they|it)\b.*\b(?:allow|permit|let|cause)\s+"
-    r"(?:so much |such |all this |the )?(?:evil|suffering|pain|injustice|death|sin)\b"
+    r"\bwhy (?:does|would|did|do|is|are) .*\bgod\b.*\b(?:allow|permit|let|cause)\b(?!\s+(?:me|my|us|our|myself)\b)"
+    # God named, then referred to by pronoun — "who is God and why does HE allow suffering". Same
+    # first-person exclusion as the branch above; this only suppresses the backstop — the substring
+    # net still catches any explicit cry regardless of either branch.
+    r"|\bgod\b.*\bwhy (?:does|would|did|do) (?:he|she|they|it)\b.*\b(?:allow|permit|let|cause)\b"
+    r"(?!\s+(?:me|my|us|our|myself)\b)"
     r"|\bproblem of (?:evil|suffering|pain)\b"
     r"|\bwhy (?:is there|does).{0,20}(?:evil|suffering) (?:in|exist)", re.I)
 

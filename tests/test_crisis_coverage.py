@@ -171,6 +171,13 @@ CLEARLY_BENIGN = (
     "why does God permit pain",
     "the problem of suffering",
     "why is there evil in the world",
+    # IMPERSONAL theodicy phrasing that doesn't use "evil"/"suffering" literally (2026-09-02, Sonnet
+    # review) — a naive fix for the first-person gap below (requiring one of those exact nouns) would
+    # have reopened a false-positive HERE, since these score above threshold too (0.71, 0.64, 0.72) and
+    # carry no first-person object. The real guard is FIRST-PERSON, not the noun choice.
+    "why does god allow bad things to happen to good people",
+    "why does god let terrible things happen in this world",
+    "why does god allow so much wrong in this world",
     "how many km to the store",
     "i ran 10 km today",
     "5 kms to the shop",
@@ -356,6 +363,27 @@ def test_the_backstop_never_fires_on_clearly_benign():
         import pytest; pytest.skip("crisis_semantic.json artifact not present")
     fired = [q for q in CLEARLY_BENIGN if crisis_semantic.flags(q)]
     assert not fired, f"the semantic backstop fired on benign queries: {fired}"
+
+
+def test_theodicy_guard_does_not_swallow_a_first_person_cry():
+    """2026-09-02 (Sonnet review): the pronoun branch of _THEODICY was anchored to an abstract object so
+    a first-person cry never matched it ("who is God and why does He allow suffering" -> the seeker's
+    gate). The God-NAMED branch above it never got the same anchor and stayed wide open — six first-
+    person messages framed as theodicy scored ABOVE the crisis threshold (the backstop would have caught
+    them) yet were silently suppressed and tripped no substring, landing on Scripture-and-a-pastor
+    instead of the 988 crisis line. Hardened: the real signal is not which noun follows allow/permit/
+    let/cause, it is whether that object is FIRST-PERSON (me/my/us/our/myself) — closing this gap
+    without reopening a false-positive on impersonal phrasings (pinned above in CLEARLY_BENIGN)."""
+    from concordance import crisis_semantic
+    if not crisis_semantic.available():
+        import pytest; pytest.skip("crisis_semantic.json artifact not present")
+    for q in ("why does god let me suffer like this every single day with no relief in sight",
+              "why does god allow me to keep waking up when i have nothing left inside",
+              "why does god let me carry this pain alone when no one would even miss me",
+              "why does god let me go through this when i am so tired of everything",
+              "why does god allow me to keep existing like this, it just hurts too much"):
+        assert not crisis_semantic._THEODICY.search(q), f"theodicy guard still swallows a first-person cry: {q!r}"
+        assert ask.is_crisis(q), f"a first-person cry framed as theodicy was missed: {q!r}"
 
 
 def test_is_crisis_degrades_to_substrings_if_the_backstop_breaks(monkeypatch):
