@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Steward</title>
+<meta name="description" content="Steward helps you manage your money — it never moves it. Build a budget, see your savings rate, and find cost destroyed, with a sealed receipt for the arithmetic.">
+<style>
+:root{
+  --bg:#f7f6f2; --surface:#ffffff; --surface-2:#f1efe8;
+  --ink:#20241f; --ink-soft:#565f52; --ink-faint:#8a9282;
+  --line:#dcdcd0; --line-soft:#ebebe1;
+  --keep:#3a6b4a; --keep-wash:rgba(58,107,74,.09);
+  --spend:#8a4a2a; --spend-wash:rgba(138,74,42,.08);
+  --accent:#3a6b4a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12140f; --surface:#191c15; --surface-2:#15170f;
+    --ink:#e8ece2; --ink-soft:#aab19f; --ink-faint:#727a67;
+    --line:#2b2f22; --line-soft:#1f2318;
+    --keep:#6fbd85; --keep-wash:rgba(111,189,133,.12);
+    --spend:#d99568; --spend-wash:rgba(217,149,104,.1);
+    --accent:#6fbd85;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12140f; --surface:#191c15; --surface-2:#15170f;
+  --ink:#e8ece2; --ink-soft:#aab19f; --ink-faint:#727a67;
+  --line:#2b2f22; --line-soft:#1f2318;
+  --keep:#6fbd85; --keep-wash:rgba(111,189,133,.12);
+  --spend:#d99568; --spend-wash:rgba(217,149,104,.1);
+  --accent:#6fbd85;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,"Segoe UI",Roboto,sans-serif; font-size:16px; line-height:1.55}
+.wrap{max-width:760px; margin:0 auto; padding:0 1.3rem 4rem}
+h1,h2{font-weight:600; letter-spacing:-.01em}
+a{color:var(--accent)}
+.tnum{font-variant-numeric:tabular-nums}
+
+header.bar{display:flex; align-items:center; gap:.9rem; padding:1.1rem 0; border-bottom:1px solid var(--line-soft)}
+.brand{font-weight:700; text-decoration:none; color:var(--ink)}
+.bar .gap{flex:1}
+.bar a.home{font-size:.88rem; color:var(--ink-soft); text-decoration:none}
+.bar a.home:hover{color:var(--accent)}
+
+.hero{padding:2rem 0 1rem}
+.hero h1{font-size:1.9rem; margin:0 0 .5rem}
+.hero p{color:var(--ink-soft); max-width:56ch; margin:0}
+.boundary{margin-top:1rem; padding:.7rem .9rem; border:1px solid var(--line); border-radius:9px;
+  background:var(--surface-2); font-size:.88rem; color:var(--ink-soft)}
+.boundary b{color:var(--ink)}
+
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:12px;
+  padding:1.3rem 1.4rem; margin:1.4rem 0}
+.panel h2{font-size:1.15rem; margin:0 0 .3rem}
+.panel > p.sub{color:var(--ink-soft); font-size:.9rem; margin:0 0 1rem}
+
+label{display:block; font-size:.8rem; color:var(--ink-soft); margin:0 0 .25rem}
+input[type=text],input[type=number]{width:100%; font:inherit; font-size:.95rem; color:var(--ink);
+  background:var(--bg); border:1px solid var(--line); border-radius:7px; padding:.5rem .6rem}
+input:focus{outline:none; border-color:var(--accent)}
+.field{margin-bottom:.9rem}
+.row{display:grid; grid-template-columns:1fr 6rem 7rem auto; gap:.5rem; align-items:end; margin-bottom:.5rem}
+.row2{display:grid; grid-template-columns:1fr 7rem 7rem auto; gap:.5rem; align-items:end; margin-bottom:.5rem}
+@media (max-width:560px){ .row,.row2{grid-template-columns:1fr 1fr} .row label,.row2 label{display:none} }
+button{font:inherit; cursor:pointer; border-radius:8px; border:1px solid transparent; padding:.55rem 1rem}
+.btn-add{background:none; border:1px solid var(--line); color:var(--ink-soft); font-size:.85rem}
+.btn-add:hover{border-color:var(--accent); color:var(--accent)}
+.btn-rm{background:none; border:0; color:var(--ink-faint); font-size:1.1rem; padding:.4rem .5rem}
+.btn-rm:hover{color:var(--spend)}
+.btn-go{background:var(--accent); color:var(--bg); font-weight:600; margin-top:.6rem}
+.btn-go:hover{opacity:.9}
+
+.result{margin-top:1.1rem; padding-top:1rem; border-top:1px dashed var(--line)}
+.stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:.7rem; margin-bottom:.8rem}
+.stat{background:var(--surface-2); border-radius:8px; padding:.6rem .7rem}
+.stat .v{font-size:1.3rem; font-weight:600}
+.stat .k{font-size:.72rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em}
+.stat.keep .v{color:var(--keep)} .stat.spend .v{color:var(--spend)}
+.cat-row{display:flex; justify-content:space-between; font-size:.9rem; padding:.3rem 0;
+  border-bottom:1px solid var(--line-soft)}
+.cat-row:last-child{border-bottom:0}
+.receipt{margin-top:.8rem; font-size:.82rem; color:var(--ink-faint)}
+.receipt a{color:var(--accent)}
+.err{color:var(--spend); font-size:.88rem; margin-top:.6rem}
+
+.will-not{font-size:.85rem; color:var(--ink-soft)}
+.will-not li{margin:.2rem 0}
+footer{text-align:center; color:var(--ink-faint); font-size:.78rem; margin-top:2rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <a class="brand" href="/">Narrow Highway</a>
+    <span class="gap"></span>
+    <a class="home" href="/">&larr; home</a>
+  </header>
+
+  <div class="hero">
+    <h1>Steward</h1>
+    <p>The honest arithmetic of a household: a budget, a savings rate, and cost destroyed — money you
+      did not spend, kept in your own currency. Every number below is sealed and re-checkable.</p>
+    <div class="boundary"><b>What Steward will not do:</b> move money — buy, sell, transfer, pay,
+      deposit, withdraw, or invest (that stays your own action) — and it gives no personalized
+      investment advice. It shows and plans; it never moves anything.</div>
+  </div>
+
+  <div class="panel">
+    <h2>Build a budget</h2>
+    <p class="sub">Your monthly income, and what you spend it on. Nothing here is stored or sent
+      anywhere except this one calculation.</p>
+    <div class="field">
+      <label for="income">Monthly income</label>
+      <input type="number" id="income" placeholder="0.00" step="0.01">
+    </div>
+    <div id="expenseRows"></div>
+    <button class="btn-add" id="addExpense" type="button">+ Add an expense</button><br>
+    <button class="btn-go" id="calcBudget" type="button">Calculate my budget</button>
+    <div id="budgetResult"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Cost destroyed</h2>
+    <p class="sub">Money you did not spend — a bill you lowered, a subscription you cut, a rate you
+      renegotiated. "Was" vs. "now"; the difference is kept in your currency, not metered by us.</p>
+    <div id="destroyRows"></div>
+    <button class="btn-add" id="addDestroy" type="button">+ Add an item</button><br>
+    <button class="btn-go" id="calcDestroy" type="button">Calculate cost destroyed</button>
+    <div id="destroyResult"></div>
+  </div>
+
+  <footer>A conduit, not a source · nothing is generated · <a href="/proof.html">what it proves</a></footer>
+</div>
+
+<script>
+(function(){
+  var API = '';
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function money(n){ return (n<0?'-':'') + '$' + Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+  // ---- budget rows ----
+  var expenseRows = document.getElementById('expenseRows');
+  function addExpenseRow(label, amount, category){
+    var row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML =
+      '<div><label>Label</label><input type="text" class="e-label" placeholder="Rent" value="'+esc(label||'')+'"></div>' +
+      '<div><label>Amount</label><input type="number" class="e-amount" placeholder="0.00" step="0.01" value="'+esc(amount||'')+'"></div>' +
+      '<div><label>Category</label><input type="text" class="e-cat" placeholder="housing" value="'+esc(category||'')+'"></div>' +
+      '<button class="btn-rm" type="button" aria-label="Remove">&times;</button>';
+    row.querySelector('.btn-rm').addEventListener('click', function(){ row.remove(); });
+    expenseRows.appendChild(row);
+  }
+  document.getElementById('addExpense').addEventListener('click', function(){ addExpenseRow(); });
+  addExpenseRow('Rent', '', 'housing');
+  addExpenseRow('Groceries', '', 'food');
+
+  document.getElementById('calcBudget').addEventListener('click', function(){
+    var income = parseFloat(document.getElementById('income').value) || 0;
+    var expenses = [].map.call(expenseRows.querySelectorAll('.row'), function(r){
+      return { label: r.querySelector('.e-label').value,
+               amount: parseFloat(r.querySelector('.e-amount').value) || 0,
+               category: r.querySelector('.e-cat').value || 'other' };
+    }).filter(function(e){ return e.amount; });
+    var out = document.getElementById('budgetResult');
+    out.innerHTML = '<div class="result">Calculating&hellip;</div>';
+    fetch(API + '/steward/budget', {method:'POST', headers:{'content-type':'application/json'},
+      body: JSON.stringify({income: income, expenses: expenses})})
+      .then(function(r){ return r.json(); })
+      .then(function(b){
+        if(b.error){ out.innerHTML = '<div class="err">'+esc(b.error)+'</div>'; return; }
+        var cats = Object.keys(b.by_category||{}).map(function(k){
+          return '<div class="cat-row"><span>'+esc(k)+'</span><span class="tnum">'+money(b.by_category[k])+'</span></div>';
+        }).join('');
+        var seal = b.seal && (b.seal.cite_url || b.seal.permanent_ref);
+        out.innerHTML =
+          '<div class="result">' +
+          '<div class="stat-grid">' +
+            '<div class="stat"><div class="v tnum">'+money(b.income)+'</div><div class="k">Income</div></div>' +
+            '<div class="stat spend"><div class="v tnum">'+money(b.total_expenses)+'</div><div class="k">Spent</div></div>' +
+            '<div class="stat keep"><div class="v tnum">'+money(b.net)+'</div><div class="k">Net</div></div>' +
+            '<div class="stat"><div class="v tnum">'+b.savings_rate_pct+'%</div><div class="k">Savings rate</div></div>' +
+          '</div>' + cats +
+          (seal ? '<div class="receipt">Sealed &mdash; <a href="'+esc(seal)+'" target="_blank" rel="noopener">the permanent receipt &rarr;</a></div>' : '') +
+          '</div>';
+      })
+      .catch(function(){ out.innerHTML = '<div class="err">Could not reach the engine — try again in a moment.</div>'; });
+  });
+
+  // ---- cost destroyed rows ----
+  var destroyRows = document.getElementById('destroyRows');
+  function addDestroyRow(label, was, now){
+    var row = document.createElement('div');
+    row.className = 'row2';
+    row.innerHTML =
+      '<div><label>Label</label><input type="text" class="d-label" placeholder="Cable bill" value="'+esc(label||'')+'"></div>' +
+      '<div><label>Was</label><input type="number" class="d-was" placeholder="0.00" step="0.01" value="'+esc(was||'')+'"></div>' +
+      '<div><label>Now</label><input type="number" class="d-now" placeholder="0.00" step="0.01" value="'+esc(now||'')+'"></div>' +
+      '<button class="btn-rm" type="button" aria-label="Remove">&times;</button>';
+    row.querySelector('.btn-rm').addEventListener('click', function(){ row.remove(); });
+    destroyRows.appendChild(row);
+  }
+  document.getElementById('addDestroy').addEventListener('click', function(){ addDestroyRow(); });
+  addDestroyRow();
+
+  document.getElementById('calcDestroy').addEventListener('click', function(){
+    var items = [].map.call(destroyRows.querySelectorAll('.row2'), function(r){
+      return { label: r.querySelector('.d-label').value,
+               was: parseFloat(r.querySelector('.d-was').value) || 0,
+               now: parseFloat(r.querySelector('.d-now').value) || 0 };
+    }).filter(function(i){ return i.was || i.now; });
+    var out = document.getElementById('destroyResult');
+    out.innerHTML = '<div class="result">Calculating&hellip;</div>';
+    fetch(API + '/steward/cost-destroyed', {method:'POST', headers:{'content-type':'application/json'},
+      body: JSON.stringify({items: items})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var rows = (d.items||[]).map(function(i){
+          return '<div class="cat-row"><span>'+esc(i.label)+'</span><span class="tnum">'+money(i.saved)+'</span></div>';
+        }).join('');
+        out.innerHTML =
+          '<div class="result"><div class="stat-grid"><div class="stat keep"><div class="v tnum">'+
+          money(d.total_saved)+'</div><div class="k">Total cost destroyed</div></div></div>' + rows + '</div>';
+      })
+      .catch(function(){ out.innerHTML = '<div class="err">Could not reach the engine — try again in a moment.</div>'; });
+  });
+})();
+</script>
+</body>
+</html>

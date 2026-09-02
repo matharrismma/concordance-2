@@ -2862,7 +2862,6 @@ _RETIRED = {
     "/seal.html": "/proof.html",
     "/seeds.html": "/proof.html",
     "/shelf.html": "/",
-    "/steward.html": "/",
     "/teachings.html": "/bible.html",
     "/theories.html": "/graph",                           # the theory map lives in the constellation
     "/timeline.html": "/bible.html",

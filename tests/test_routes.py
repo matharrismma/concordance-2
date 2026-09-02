@@ -40,6 +40,11 @@ GOLDEN_API_GET = {
     # The clock, added 2026-08-04 at Matt's direction: "the actual date and time always
     # current for the time zone you are in." An agent's own 'today' is its training cutoff.
     "/now",
+    # The Systems Handicap, added 2026-08-31: a golf-handicap per subsystem (low is strong) computed
+    # live from real signals (tests on disk, SOP presence, module resolution, the issue register) —
+    # cheap enough per request to sit in the generous READ bucket alongside /search. This golden set
+    # was never updated when the route shipped (found 2026-09-02, Sonnet review of the route registry).
+    "/systems",
     "/identity", "/profile", "/profile/served", "/profile/community", "/profile/path", "/route", "/bind/challenge", "/thread/digest", "/thread/recall", "/thread/lineage", "/thread/recalled", "/land", "/cards/for-the-group",
     "/search", "/seal", "/resolve", "/word_study",
     "/card", "/cards", "/cards/stats", "/daily", "/witness", "/grid", "/grid/dimension",
@@ -133,6 +138,7 @@ GOLDEN_RATELIMITED = {
 GOLDEN_READ_LIMITED = {   # every route that scans/sorts the whole corpus per request — the read bucket
     "/search", "/witness", "/cards/stats", "/cards", "/daily", "/card/connections",
     "/locate", "/library/health", "/growth",
+    "/systems",  # cheap (disk + import resolution, no corpus) but placed in the generous bucket anyway
 }
 
 
