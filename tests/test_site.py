@@ -78,9 +78,9 @@ def test_every_page_offers_a_way_home():
               "grappling.html", "music.html", "provision.html", "wisdom.html", "workshop.html",
               "coach.html", "tv.html", "playbook.html", "plow.html", "profile.html", "situations.html",
               # com.html is the .com secular LANDING (surface sort, 2026-09-01): it IS home and carries
-              # its own nav, not the shared desk control. systems.html/prophecy.html are self-contained
-              # surfaces reached by direct URL.
-              "com.html", "systems.html", "prophecy.html"}
+              # its own nav, not the shared desk control. systems.html/prophecy.html/map.html are
+              # self-contained surfaces with their own nav (map.html is in the Ctrl-K palette).
+              "com.html", "systems.html", "prophecy.html", "map.html"}
     missing = [f.name for f in SITE.glob("*.html")
                if f.name != "index.html" and f.name not in hidden
                and "nh-home.js" not in f.read_text(encoding="utf-8")]

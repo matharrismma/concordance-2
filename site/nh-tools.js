@@ -23,6 +23,7 @@
     { h: '/connect.html',    n: 'Connect an agent',  k: 'api mcp developer integrate build llm tool' },
     { h: '/contact.html',    n: 'Contact',           k: 'contact reach message write keeper support help feedback' },
     { h: '/proof.html',      n: 'What it proves',   k: 'refusals limits catalog guarantees honest' },
+    { h: '/map.html',        n: 'The Map',          k: 'map atlas graph constellation keeping shelves overview everything visual health systems flow' },
   ];
 
   var css = document.createElement('style');

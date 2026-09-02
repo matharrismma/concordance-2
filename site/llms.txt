@@ -134,12 +134,13 @@ equality/inequality; other claim types quarantine rather than pretend to judge.)
   `/timeline` · `/backmatter` · `/places` · `/prophecy` · `/seeds` · `/narratives` · `/teachings`.
 
 ## The Corpus — the whole body, browsable
-`/corpus.html` holds the keeping in four sections over one body: **the shelves** (over half a
-million cards across its shelves and decks — call `capabilities` for live counts), **the drawers** (the reference section walked A–Z), **the
-manuscript** (the compiled, cross-indexed body with its authority spine), and **the worked volume**
-(sealed demonstrations you can re-check). It replaced four pages that were doing one job — the old
-addresses `/library.html`, `/catalog.html`, `/codex.html` and `/works.html` all 301 onto it and
-**carry their query with them**, so a link that named something still names it on arrival.
+The keeping (call `capabilities` for live counts). Reach it through the API — no page needed:
+- `GET /graph?scope=overview` — the whole keeping as a connection graph: shelves as super-nodes,
+  three planes (nesting · found · crossings). `?scope=shelf&shelf=<name>` opens one shelf;
+  `?scope=card&id=<id>` opens one card and its neighbours.
+- `GET /cards` and `GET /card?id=<id>` — browse, then open a card with its source and links.
+- `GET /search?q=<...>` and `GET /locate?q=<...>` — find a card by word, name, or verse.
+Humans see it drawn live at `/map.html` — the constellation of the keeping, with every subsystem's health.
 
 ## Privacy gateway (embeddable, runs at your edge)
 Strip personal context before any AI call, reapply locally — the data never has to reach us.
