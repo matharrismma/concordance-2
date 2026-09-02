@@ -149,6 +149,23 @@ Strip personal context before any AI call, reapply locally — the data never ha
 - Python: `from concordance.gateway import scrub, restore, guard`.
 - Drop-in examples (browser / Python / MCP): docs/GATEWAY.md in the source repo.
 
+## Verify your own claims, embeddable (one script tag, no key, no account)
+If your app writes text a reader has to trust — an AI draft, a generated report, a summary — hand it
+to `POST /audit` before you ship it, and show your reader the receipt instead of asking them to trust
+you. A small badge widget wraps the one call:
+
+    <script src="https://narrowhighway.com/widget.js"></script>
+    <div id="mount"></div>
+    <script>NarrowHighway.embed(theGeneratedText, document.getElementById('mount'));</script>
+
+It extracts every unambiguously checkable claim (sums, percentages, hourly/annual pay, compound
+interest, dates), verifies each one, and renders "N claims checked — M held", linked to the permanent
+receipt (`/s/<hash>`) anyone can re-verify without trusting this widget or this site. Be honest with
+yourself about what it catches: the extractor is conservative BY DESIGN (it would rather miss a claim
+than check the wrong one), so ordinary prose with no exact pattern match returns `NOTHING_TO_CHECK`
+— that is a report about the engine's coverage, never a silent pass. `NarrowHighway.check(text)`
+returns the raw report if you want to render it yourself; nothing here is generated, only checked.
+
 ## Connect your own tools (edge capability — your credential never touches our server)
 Narrow Highway can read the tools you already use — your calendar, email, and storage — to serve
 you in the moment, and it **keeps nothing**. This runs on YOUR box (sovereign mode), over standard
