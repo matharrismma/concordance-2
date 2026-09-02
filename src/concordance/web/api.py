@@ -2930,6 +2930,7 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
     mimetypes.add_type("text/javascript", ".js")
     mimetypes.add_type("application/wasm", ".wasm")
     mimetypes.add_type("application/json", ".json")
+    mimetypes.add_type("font/woff2", ".woff2")   # self-hosted fonts (sovereign) served with a real type
 
     from .. import ratelimit
 
