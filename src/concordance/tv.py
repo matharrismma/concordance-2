@@ -41,6 +41,9 @@ CHANNELS: List[Dict[str, Any]] = [
      "seed": "grappling wrestling jiu jitsu guard escape", "witness": False},
     {"id": "music", "name": "Music", "line": "Learn your instrument — find the leak in your practice",
      "seed": "mandolin fiddle guitar chords scales practice music", "witness": False},
+    {"id": "provision", "name": "Provision", "line": "Ship your work, grow your craft",
+     "seed": "trade craft workshop apprentice tools carpentry blacksmith livelihood work", "witness": False,
+     "vseed": "trade craft apprentice tools carpentry blacksmith workshop industrial handiwork"},
 ]
 
 # A broadcast 'slot' — how long each program sits in 'now playing' before the schedule advances. The
