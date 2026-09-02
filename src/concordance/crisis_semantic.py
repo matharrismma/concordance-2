@@ -154,6 +154,11 @@ _BENIGN_MEASUREMENT = re.compile(
 # ultimate/seeker/comfort paths answer this with Scripture and point to Christ and to real people.
 _THEODICY = re.compile(
     r"\bwhy (?:does|would|did|do|is|are) .*\bgod\b.*\b(?:allow|permit|let|cause)\b"
+    # God named, then referred to by pronoun — "who is God and why does HE allow suffering". Anchored to
+    # an ABSTRACT object (evil/suffering/…) so a first-person cry ("why does he let ME suffer") never
+    # matches; and this only suppresses the backstop — the substring net still catches any explicit cry.
+    r"|\bgod\b.*\bwhy (?:does|would|did|do) (?:he|she|they|it)\b.*\b(?:allow|permit|let|cause)\s+"
+    r"(?:so much |such |all this |the )?(?:evil|suffering|pain|injustice|death|sin)\b"
     r"|\bproblem of (?:evil|suffering|pain)\b"
     r"|\bwhy (?:is there|does).{0,20}(?:evil|suffering) (?:in|exist)", re.I)
 
