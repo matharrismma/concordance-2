@@ -147,4 +147,46 @@ def test_VI_a_theory_outranks_an_incidental_mention():
     # and the boost cannot reach a card the partition refused
     assert all(h["id"] != "x" for h in fix.search("cell", limit=5)), \
         "an off-subject card was admitted"
+
+
+def test_VII_substance_outranks_a_bare_pointer_that_holds_the_same_subject():
+    """docs/SOP/subsystems/keeping.md's own 'Refine': within the subject tier, a card that
+    ANSWERS the question must outrank one that merely NAMES it. ~67% of the keeping are stubs
+    (a pronunciation guide, a bare title+link); the subject partition alone can tell "about this"
+    from "not about this," never a thin gloss from a real excerpt. Padded with 20 unrelated decoy
+    cards so the subject token's idf is meaningfully positive — with too small a fixture (as in
+    test_VI's 3 cards) two subject-holders can both score a base of 0 and tie in the tier for a
+    reason that has nothing to do with this fix; the ranker's own comment on `_score` explains why."""
+    stub_body = "zorlaxian"                                       # < STUB_BODY_CHARS: a bare pointer
+    substance_body = (
+        "Zorlaxian is a fictional demonym invented for this test; it names a people and a place, "
+        "and this sentence exists only to push the body length past the substance threshold so "
+        "the ranker can tell a real answer from a pointer that merely repeats the headword.")
+    assert len(stub_body) < corpus.STUB_BODY_CHARS
+    assert len(substance_body) >= corpus.STUB_BODY_CHARS
+    cards = {
+        # neither title is an exact match to the query "zorlaxian" alone — search()'s own
+        # exact-title boost (9.0x, deliberately larger than SUBSTANCE_WEIGHT) is a different,
+        # already-tested signal; a title of bare "Zorlaxian" would collide with it here and
+        # test the wrong thing.
+        "p": {"id": "p", "title": "Zorlaxian pronunciation guide", "shelf": "words",
+              "body": stub_body, "lifecycle_stage": "public"},
+        "a": {"id": "a", "title": "On the Zorlaxian people", "shelf": "gutenberg",
+              "body": substance_body, "lifecycle_stage": "public"},
+        "x": {"id": "x", "title": "Unrelated", "shelf": "gutenberg",
+              "body": "harvesting barley", "lifecycle_stage": "public"},
+    }
+    for i in range(20):                                            # decoys: no "zorlaxian" at all
+        cards[f"d{i}"] = {"id": f"d{i}", "title": f"Decoy volume {i}", "shelf": "gutenberg",
+                          "body": f"an unrelated passage about decoy subject {i}",
+                          "lifecycle_stage": "public"}
+    fix = corpus.Corpus(cards, min_idf=0.0)
+    hits = fix.search("zorlaxian", limit=5)
+    assert hits and hits[0]["id"] == "a", (
+        "a bare pointer outranked the card that actually answers the question: "
+        + ", ".join(h["id"] for h in hits))
+    assert "p" in [h["id"] for h in hits], "the pointer should still be admitted, just ranked lower"
+    # and the boost cannot reach a card the partition refused
+    assert all(h["id"] != "x" for h in hits), "an off-subject card was admitted"
+    assert corpus.SUBSTANCE_WEIGHT > 1.0
     assert corpus.THEORY_WEIGHT > 1.0

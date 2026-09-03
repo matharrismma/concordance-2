@@ -19,6 +19,8 @@ import threading
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from .ops import STUB_BODY_CHARS  # the one definition of "stub" — never redefined here
+
 # A query token must be at least this distinctive (high IDF) to count as a real hit.
 # Tuned for a large corpus; lower it for small fixtures.
 MIN_DISTINCTIVE_IDF = 1.5
@@ -102,6 +104,15 @@ SUBJECT_TIER = 1000.0
 # already are. Set at 4.0 — above the survival field library's 3.0 (a how-to should still win a
 # how-to question) and well under the exact-title 9.0, so naming a card by its title still wins.
 THEORY_WEIGHT = 4.0
+
+# THE RANKER WAS BLIND TO SUBSTANCE VS HEADWORD (docs/SOP/subsystems/keeping.md's own "Refine" —
+# the highest-leverage open item, 2026-09-02). ~67% of the keeping are stubs (a pronunciation
+# guide, a bare title+link — ops.STUB_BODY_CHARS defines the line), and the subject partition
+# above is lexical presence only: it can tell "about this" from "not about this," never a thin
+# gloss from a real excerpt that answers the question. A weight, not a tier, like THEORY_WEIGHT —
+# it only ever reorders cards the partition already admitted. Set modestly (well under
+# THEORY_WEIGHT) because it distinguishes within EVERY tier a query reaches, not one narrow shelf.
+SUBSTANCE_WEIGHT = 2.0
 
 
 def is_public(card: dict) -> bool:
@@ -447,6 +458,16 @@ class Corpus:
         score = sum(counts[t] * idf.get(t, 0.0) for t in common) / math.log(doc_len + 10)
         if len(common) == len(query_tokens):
             score *= 1.5
+        # SUBSTANCE VS HEADWORD. Applied to the BASE score, before the tier addition below, so it
+        # only ever reorders cards WITHIN whichever tier they already earned: a boosted stub still
+        # cannot cross into the subject tier alone (base scores never approach SUBJECT_TIER's
+        # scale — see its own comment), and among cards that already hold the subject, a real
+        # answer now pulls ahead of a bare pointer that merely names it. A frozen card scored here
+        # BEFORE rehydration still carries its true (stripped) stub body, so this correctly treats
+        # it as a stub on that first pass; `search()` rehydrates and re-scores any frozen card that
+        # clears zero, so the score actually used for ranking always reflects the real body.
+        if len(str(card.get("body") or "")) >= STUB_BODY_CHARS:
+            score *= SUBSTANCE_WEIGHT
         # THE PARTITION. Holding the subject word puts a card in the upper tier outright —
         # in EITHER number: a card that says "Methodist" is about "methodists" (the singular-only
         # voice card was partitioned out of a plural search, live, 2026-08-02). The seat is
