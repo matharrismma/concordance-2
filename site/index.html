@@ -594,6 +594,17 @@
            d.cross_refs.map(function(c){
              return '<span class="sn"><b>'+esc(c.ref)+'</b> — '+esc(c.text)+'</span>'; }).join('')+
            '</div>';
+    // the OT speaks of Christ — when the NT itself takes this passage up as fulfilled, the
+    // connection the whole project exists to preserve: Scripture's own witness, attributed.
+    if(d.fulfillments && d.fulfillments.items && d.fulfillments.items.length)
+      h += '<div class="hit"><b>Taken up in the New Testament</b>'+
+           d.fulfillments.items.map(function(f){
+             var nt = (f.nt_refs||[]).join(', ');
+             return '<span class="sn"><b>'+esc(f.ot_ref||'')+'</b> → <b>'+esc(nt)+'</b>'+
+                    (f.title?' — '+esc(f.title):'')+
+                    (f.source?'<br><span style="opacity:.7">'+esc(f.source)+'</span>':'')+'</span>'; }).join('')+
+           (d.fulfillments.note?'<span class="sn" style="opacity:.6">'+esc(d.fulfillments.note)+'</span>':'')+
+           '</div>';
     // when the claim was checked, the check IS the answer — a fuzzy keyword match is not.
     // And a DOCUMENT is not a question: sending a fence quote once dumped six "gate" keyword
     // hits under it because one row said "Gate latch". Writing is kept, not answered.

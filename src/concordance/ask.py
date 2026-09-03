@@ -1408,6 +1408,29 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                 out["cloud"] = {"around": rows[0]["ref"], "witnesses": cloud}
         except Exception:  # noqa: BLE001
             pass
+        # THE OT SPEAKS OF CHRIST — when THIS passage is one the New Testament itself takes up as
+        # fulfilled (prophecy_fulfillments, verdict CONCORDANT), carry that: stand on Isaiah 53 and
+        # see what the gospel writers name from it. Scripture's own witness, attributed, never our
+        # assertion. Real composition, not a decorative import: self-gating — for a non-messianic
+        # passage `for_ref` returns nothing and this adds nothing, so it shows exactly where the
+        # cross-reference from Testament to Testament actually exists. The verse-lookup people seek
+        # most, answered on the .org face with the connection the whole project exists to preserve.
+        try:
+            if rows:
+                from . import prophecy_fulfillments as _pf
+                _pr = _pf.for_ref(rows[0]["ref"])
+                _ms = _pr.get("matches") or []
+                if _ms:
+                    out["fulfillments"] = {
+                        "around": rows[0]["ref"],
+                        "note": _pr.get("note"),
+                        "items": [{"title": m.get("title"), "theme": m.get("theme"),
+                                   "ot_ref": m.get("ot_ref"), "nt_refs": m.get("nt_refs") or [],
+                                   "source": m.get("source"), "verdict": m.get("verdict")}
+                                  for m in _ms[:6]],
+                    }
+        except Exception:  # noqa: BLE001 — the witness is a gift on top; never break the passage
+            pass
         # asking for meaning earns the study: what Scripture itself says elsewhere (TSK), and
         # a public-domain commentator in his own words — found and attributed, never generated
         if study and rows:

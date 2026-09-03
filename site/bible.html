@@ -184,11 +184,12 @@ async function openStudy(ref, rowEl, studyEl){
   rowEl.classList.add('open'); studyEl.classList.add('open');
   if(studyEl.dataset.loaded){ return; }
   studyEl.innerHTML = '<p class="dim">gathering the original words, the commentary, and the connections…</p>';
-  const [orig, cmt, xref, tsk] = await Promise.all([
+  const [orig, cmt, xref, tsk, proph] = await Promise.all([
     getJSON('/original?ref=' + encodeURIComponent(ref)),
     getJSON('/commentary?ref=' + encodeURIComponent(ref)),
     getJSON('/cross_refs?ref=' + encodeURIComponent(ref)),
     getJSON('/tsk?ref=' + encodeURIComponent(ref)),
+    getJSON('/prophecy?ref=' + encodeURIComponent(ref)),
   ]);
   let html = '';
   if(orig && orig.words && orig.words.length){
@@ -204,6 +205,19 @@ async function openStudy(ref, rowEl, studyEl){
     html += '<div class="slabel" style="margin-top:1rem">commentary</div>' +
       '<div class="cmt">' + body + '</div>' +
       '<div class="cmt-attr">' + esc(cmt.attribution || '') + (cmt.license ? ' · ' + esc(cmt.license) : '') + '</div>';
+  }
+  // the OT speaks of Christ — where the NT itself takes this passage up as fulfilled (CONCORDANT),
+  // Scripture's own witness, attributed. Self-gating: shows only where a fulfillment exists.
+  if(proph && proph.matches && proph.matches.length){
+    html += '<div class="slabel" style="margin-top:1rem">taken up in the New Testament</div>' +
+      proph.matches.slice(0,8).map(m => {
+        const nt = (m.nt_refs || []).map(r =>
+          '<button class="xref" data-ref="' + esc(r) + '">' + esc(r) + '</button>').join('');
+        return '<div class="cmt" style="margin:.2rem 0">' +
+          (m.title ? '<b>' + esc(m.title) + '</b> · ' : '') + esc(m.ot_ref || '') + ' → ' + nt +
+          (m.source ? '<div class="cmt-attr">' + esc(m.source) + '</div>' : '') + '</div>';
+      }).join('') +
+      (proph.note ? '<div class="cmt-attr">' + esc(proph.note) + '</div>' : '');
   }
   if(xref && xref.cross_references && xref.cross_references.length){
     html += '<div class="slabel" style="margin-top:1rem">cross-references — shared original words</div>' +

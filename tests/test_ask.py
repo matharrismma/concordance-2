@@ -633,6 +633,29 @@ def test_the_search_answer_carries_its_connected_cloud():
         assert all(w.get("id") and w.get("title") for w in cloud["witnesses"])
 
 
+def test_a_messianic_passage_study_carries_its_new_testament_fulfillments():
+    """The connection the whole project exists to preserve, woven into a scripture study on the .org
+    face: standing on an OT passage the New Testament itself takes up (Isaiah 53, verdict CONCORDANT)
+    surfaces what the gospel writers name from it — Scripture's own witness, attributed, never
+    asserted. Self-gating: a passage the NT does not take up adds nothing. Guarded on data presence,
+    like the word-study weave, so a corpus-less env skips rather than flaps."""
+    from concordance import prophecy_fulfillments as pf
+    if not pf.available():
+        return                                               # no prophecy data in this env — nothing to pin
+    r = ask.respond("explain Isaiah 53", WIT)
+    if r.get("kind") != "scripture" or not (r.get("scripture") or []):
+        return                                               # no WEB bible data in this env
+    ff = r.get("fulfillments")
+    assert ff and ff.get("items"), "a messianic passage study shipped no NT fulfillments"
+    first = ff["items"][0]
+    assert first.get("ot_ref") and first.get("nt_refs"), \
+        "a fulfillment must carry both the OT ref and the NT ref(s) — the pairing IS the witness"
+    # self-gating: a passage the NT does not take up as fulfilled adds no block
+    r2 = ask.respond("explain Philemon 1", WIT)
+    if r2.get("kind") == "scripture" and (r2.get("scripture") or []):
+        assert not r2.get("fulfillments"), "fulfillments appeared on a passage that has none"
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:
