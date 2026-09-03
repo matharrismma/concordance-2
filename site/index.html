@@ -535,8 +535,15 @@
                '<span class="sn">'+esc(a.detail||'')+'</span></div>'; }).join('');
       // the boundary still has to be visible — but as one short line, not a paragraph
       h += '<div class="note">only the claim'+(d.audit.results.length>1?'s':'')+' above '+
-           (d.audit.results.length>1?'were':'was')+' checked'+
-           (d.audit.seal?' · <a href="'+esc(d.audit.seal)+'">receipt</a>':'')+'</div>';
+           (d.audit.results.length>1?'were':'was')+' checked</div>';
+      // THE RECEIPT, NOT "TRUST ME" (2026-09-03): our one thing is that you never have to take our
+      // word for it. The .com face makes the receipt the hero; the witness face buried it in a grey
+      // footnote ("· receipt"). Where a seal exists, it leads its own line — a permanent, re-runnable
+      // proof. Only rendered when there IS one, so the affordance never promises a receipt we can't show.
+      if(d.audit.seal)
+        h += '<div style="margin:.55rem 0;padding:.6rem .85rem;border:1px solid rgba(201,162,74,.35);border-radius:8px;background:rgba(201,162,74,.05)">'+
+             '<a href="'+esc(d.audit.seal)+'" style="color:#c9a24a;font-weight:600;text-decoration:none">Re-check this yourself →</a>'+
+             '<span class="note" style="display:block;margin-top:.15rem">A permanent receipt — don’t trust us, re-run it.</span></div>';
     }
     // A word study: the word itself, how it sounds, what it means, and how often it is used.
     // This had no renderer at all — it only ever showed the standing note, so removing that
