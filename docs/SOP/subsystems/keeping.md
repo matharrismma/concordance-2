@@ -34,27 +34,35 @@ pointer not an answer.
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | A distinctive query ("what is Mahavira") returns unrelated cards | We hold nothing for the subject word, so only stopwords contributed | Working as intended — a gap must report itself and feed the want list; do not paper over it with a weak match |
-| A thin "title-only" card leads the results | It's a stub (body < 120 chars) that matched on its title | The `~67% word-match stubs` issue below; substance-aware ranking is the fix, not a per-card patch |
-| A card that only *mentions* the subject outranks one that *answers* it | The subject tier is pure lexical presence — it can't tell a headword from an answer | The `ranker blind to substance vs headword` issue below |
+| A thin "title-only" card leads the results | It's a stub (body < 120 chars) that matched on its title | The `~67% word-match stubs` issue below is the remaining cause — substance-aware ranking (below) now demotes it relative to a real answer, but cannot manufacture substance a stub doesn't have |
+| A card that only *mentions* the subject outranks one that *answers* it | Was: the subject tier is pure lexical presence, no substance signal | Fixed 2026-09-02 (`corpus.SUBSTANCE_WEIGHT`) — if it recurs, check the card's real (post-rehydration) body length against `STUB_BODY_CHARS` |
 | A frozen card scores wrong / results reorder after a freeze | Rehydrate didn't fire, or the shard is missing | `rehydrate(card)` pulls the real body from the shard; confirm `CONCORDANCE_DATA_DIR` shards are present |
 
 ## Tests
-`tests/test_corpus.py`, `tests/test_graph.py`, `tests/test_decks.py`, `tests/test_wayfind.py` —
-`PYTHONPATH=src python -m pytest tests/test_corpus.py tests/test_graph.py tests/test_decks.py tests/test_wayfind.py -q`.
+`tests/test_corpus.py`, `tests/test_retrieval_invariants.py`, `tests/test_graph.py`,
+`tests/test_decks.py`, `tests/test_wayfind.py` —
+`PYTHONPATH=src python -m pytest tests/test_corpus.py tests/test_retrieval_invariants.py tests/test_graph.py tests/test_decks.py tests/test_wayfind.py -q`.
 They guard the subject partition (a card without the subject word cannot outrank one with it),
-stopword-only queries returning nothing, the deck fast-path falling back to the full keeping, and the
-floorplan routing.
+stopword-only queries returning nothing, the deck fast-path falling back to the full keeping, the
+floorplan routing, and (test_VII, 2026-09-02) that a real answer outranks a bare pointer holding the
+same subject.
 
 ## Known issues & support
 - **~67% word-match stubs** — unsupported. Two thirds of measured cards are pointers (body < 120
   chars), not answers. Interim support: `ops.substance` reports the honest two-number split (total vs
-  substance) so the keeping's reach is never overstated, and Find grows real substance on a miss.
-- **Ranker blind to substance vs headword** — unsupported. The subject tier is lexical presence only,
-  so a card that names the subject can win over one that actually answers it. Interim support: the
-  hard partition still keeps the *wrong tradition* off the lead; the real fix is substance-aware
-  scoring (Part 3).
+  substance) so the keeping's reach is never overstated, Find grows real substance on a miss, and
+  (2026-09-02) the ranker no longer lets a stub lead ahead of a real answer that holds the same
+  subject — but this does not shrink the stub count itself, only how it's ranked against substance.
+- **Ranker blind to substance vs headword** — FIXED 2026-09-02 (commit `32ed21a`, `corpus.py`
+  `SUBSTANCE_WEIGHT`). Within whatever tier the subject partition already admits a card to, a real
+  answer (body >= `STUB_BODY_CHARS`) now outranks a bare pointer that merely names the subject.
+  Deployed and unit-pinned (test_VII below), but not yet measured against real query quality at
+  scale (no `live_passes.py` re-run) — `/systems` still marks the Keeping "degraded" pending that
+  measurement; see the "Refine" note below for what that would take.
 
 ## Refine
-Add a substance signal to `_score` so, *within* the subject tier, a card that answers the question
-(real body, dense subject terms) ranks above one that merely mentions it — closing the headword-vs-
-answer gap without disturbing the partition that keeps the wrong subject out entirely.
+~~Add a substance signal to `_score`...~~ DONE 2026-09-02. What's left: measure it. Re-run
+`scratchpad/live_passes.py` (or its successor) against production with the fix live, and compare
+against the pre-fix 100-pass baseline in memory (*100-pass live-user refinement*) — if it moves the
+needle on real queries, `systems.py`'s `"degraded": True` for `keeping` should flip, not just the one
+issue's `"supported"` flag.

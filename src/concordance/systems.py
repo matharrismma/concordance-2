@@ -54,10 +54,14 @@ SUBSYSTEMS: List[Dict[str, Any]] = [
      "issues": [{"what": "pull can mis-select a tangential source", "supported": True}]},
     {"name": "The Keeping / Corpus", "slug": "keeping", "degraded": True,
      "modules": ["corpus", "corpus_db", "graph", "decks", "wayfind", "growth"],
-     # the stub flood has interim support (the junk filters + relevance floor keep the worst off a lead);
-     # the ranker being blind to substance-vs-headword is the real open work (P3 of the wiring).
+     # 2026-09-02: corpus.SUBSTANCE_WEIGHT landed (32ed21a) — within whatever tier the subject
+     # partition already admits a card to, a real answer (body >= ops.STUB_BODY_CHARS) now
+     # outranks a bare pointer that merely names the same subject. Deployed and unit-pinned
+     # (test_retrieval_invariants.py test_VII), but NOT yet measured against real query quality
+     # (no live_passes.py re-run) — so still marked degraded rather than upgraded to connected;
+     # the stub flood itself is a corpus-growth question this does not touch.
      "issues": [{"what": "~67% word-match stubs", "supported": True},
-                {"what": "ranker blind to substance vs headword", "supported": False}]},
+                {"what": "ranker was blind to substance vs headword", "supported": True}]},
     {"name": "Crisis / Safety", "slug": "crisis",
      "modules": ["crisis_semantic", "floor", "seeds"]},
     {"name": "Coach / Shepherd", "slug": "coach",
