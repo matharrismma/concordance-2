@@ -615,6 +615,19 @@
                     esc(w.title)+'</a>'+(w.shares?' — '+esc(w.shares):'')+'</span>'; }).join('')+
            '</div>';
 
+    // THE COMPANION REMEMBERS (2026-09-02): recall.land()/remember() have run on every /ask since
+    // this session began, silently — the engine already "searches once" and promotes what is worth
+    // recalling, but nothing on this page ever SHOWED that to the person it was happening for. A
+    // memory nobody can see is not yet a memory that was kept faithfully. Two quiet notes, never
+    // louder than the answer itself, never on crisis/grief (those kinds carry neither field).
+    if(d.landed && d.landed.length)
+      h += '<div class="note" style="border-left:2px solid rgba(201,162,74,.4); padding-left:.8rem; margin:.5rem 0">'+
+           'Landed on what you already asked before — no search was run: '+
+           d.landed.map(function(c){ return esc(c.text||c.id); }).join(' · ')+'</div>';
+    if(d.recalled && d.recalled.length)
+      h += '<div class="note" style="border-left:2px solid rgba(201,162,74,.4); padding-left:.8rem; margin:.5rem 0">'+
+           'Kept for next time: '+d.recalled.map(function(c){ return esc(c.text||c.id); }).join(' · ')+'</div>';
+
     // anticipation — a step ahead: the likely next question, as clickable chips (a concierge, not
     // a salesman; the engine never attaches these to crisis or grief)
     if(d.next && d.next.length)
