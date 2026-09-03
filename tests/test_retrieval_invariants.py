@@ -190,3 +190,41 @@ def test_VII_substance_outranks_a_bare_pointer_that_holds_the_same_subject():
     assert all(h["id"] != "x" for h in hits), "an off-subject card was admitted"
     assert corpus.SUBSTANCE_WEIGHT > 1.0
     assert corpus.THEORY_WEIGHT > 1.0
+
+
+def test_VIII_a_pronunciation_card_never_leads_a_bare_subject_lookup():
+    """Measured live 2026-09-03: EVERY single-word subject lookup led with a phonetic string, because
+    a pronunciation card's title IS its headword (all ~125k of them), so it won the exact-title boost
+    (9.0x) for any bare word — "gravity" returned "G R AE1 V AH0 T IY0" ahead of the definition and
+    every substantive card. The pronunciation genre is enrichment (the tongues->Word weave), never the
+    lead answer to "what is X". This pins that the exact-title boost is withheld from that one genre,
+    so the substantive card leads — while pronunciation is still ADMITTED (a reader who wants it, or a
+    subject we hold nothing else for, still finds it)."""
+    # the phonetic body clears STUB_BODY_CHARS on CMU boilerplate alone — proof the substance signal
+    # cannot catch this, so the genre rule must (exactly the live case).
+    pron_body = ("gravity: pronounced (ARPABET) G R AE1 V AH0 T IY0. From the CMU Pronouncing "
+                 "Dictionary, the standard machine-readable pronunciations of North American English.")
+    assert len(pron_body) >= corpus.STUB_BODY_CHARS          # NOT a stub — clears the bar on boilerplate
+    defn_body = ("gravity: (noun) (physics) the force of attraction between all masses in the "
+                 "universe; also a manner that is serious and solemn.")
+    cards = {
+        "pron": {"id": "pron", "title": "gravity", "shelf": "pronunciation",
+                 "body": pron_body, "lifecycle_stage": "public"},
+        "defn": {"id": "defn", "title": "gravity", "shelf": "dictionary",
+                 "body": defn_body, "lifecycle_stage": "public"},
+    }
+    for i in range(20):                                       # decoys so "gravity" idf is positive
+        cards[f"d{i}"] = {"id": f"d{i}", "title": f"Decoy volume {i}", "shelf": "gutenberg",
+                          "body": f"an unrelated passage about decoy subject {i}",
+                          "lifecycle_stage": "public"}
+    fix = corpus.Corpus(cards, min_idf=0.0)
+    hits = fix.search("gravity", limit=5)
+    assert hits and hits[0]["id"] == "defn", (
+        "a phonetic guide led a bare subject lookup over the definition: "
+        + ", ".join(f"{h['id']}[{h.get('shelf')}]" for h in hits))
+    assert "pron" in [h["id"] for h in hits], "pronunciation should still be admitted, just not the lead"
+    # and when pronunciation is ALL we hold for the subject, it must still answer (nothing to
+    # demote it below) — drop only the definition, keep pronunciation + the decoys.
+    only_pron = corpus.Corpus({k: v for k, v in cards.items() if k != "defn"}, min_idf=0.0)
+    solo = only_pron.search("gravity", limit=3)
+    assert solo and solo[0]["id"] == "pron", "with nothing else held, the pronunciation card must still lead"

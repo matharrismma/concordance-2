@@ -553,10 +553,24 @@ class Corpus:
             if s > 0:
                 title_n = " ".join(str(c.get("title", "")).lower().split())
                 ref_n = " ".join(str((c.get("source") or {}).get("ref", "")).lower().split())
-                if title_n in q_exact or (ref_n and ref_n in q_exact and title_n in q_exact):
-                    s *= 9.0                              # THE card for this exact reference/title
-                elif q_exact and (title_n in q_exact or ref_n in q_exact):
-                    s *= 4.0
+                # THE EXACT-TITLE BOOST IS FOR A DEFINITIVE CARD — a verse titled "Philippians 4:13",
+                # a named work — where the title matching the query is real evidence this is THE one.
+                # A PRONUNCIATION card's title IS its headword for all ~125k of them, so an exact match
+                # on one is an INDEX COLLISION, not evidence of definitiveness. Without this guard,
+                # EVERY single-word subject lookup led with an ARPABET phonetic string — "gravity" ->
+                # "G R AE1 V AH0 T IY0", ahead of the definition, Newton's law, and general relativity
+                # (measured live 2026-09-03). Pronunciation is an enrichment genre (the tongues->Word
+                # weave), never the lead answer to "what is X"; it still surfaces for a pronunciation-
+                # intent query, which matches its body ("...CMU Pronouncing Dictionary...") on the
+                # normal TF-IDF path, and via the word-study door. The card's phonetic body also clears
+                # ops.STUB_BODY_CHARS on CMU boilerplate alone, so the substance signal cannot catch it
+                # — the genre must. Dictionary/encyclopedia exact-title cards ARE answers and keep the
+                # boost; only this one pure-index genre loses it.
+                if c.get("shelf") != "pronunciation":
+                    if title_n in q_exact or (ref_n and ref_n in q_exact and title_n in q_exact):
+                        s *= 9.0                          # THE card for this exact reference/title
+                    elif q_exact and (title_n in q_exact or ref_n in q_exact):
+                        s *= 4.0
                 # a practical/how-to question prefers the practical field library over an
                 # incidentally-titled book or species (so "build a fire" gets the how-to, not fire ants)
                 if c.get("shelf") == "survival" and (_PRACTICAL & query_tokens):
