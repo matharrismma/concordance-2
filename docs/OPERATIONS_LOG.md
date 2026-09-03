@@ -786,3 +786,49 @@ skips those 17 files with a stated reason when their data is absent. Result — 
 196 skip / **0 fail**; box (data present): they run and pass. Metric moved: a stranger's clean clone now
 reports 0 reds, and 3 genuine reds (that would have failed the box gate too) are fixed. Held open: the
 whole-file granularity over-skips the non-corpus tests in those files on a clean clone (acceptable, noted).
+
+---
+
+**2026-09-02/03 — "All 3": the Console joins the Deck, and the ranker learns substance from headword.**
+Two of the three items from Matt's mandate ("an agent that never forgets a conversation... focus on
+Console and Ranker... anything started needs to be completed and connected"), the memory-continuity
+work being the third and standing.
+
+*The Console (`9fbb605`).* `/console` spoke every utterance and forgot it instantly — no `thread_id`
+in or out, so `threads.py`'s own keystone never reached the voice door, only `/ask`'s typed-chat door.
+`web/api.py`'s `/console` handler now mirrors `/ask` exactly: creates/resumes a thread, appends the
+exchange, runs `recall.land`/`remember`, off to the side so a deck-write failure never breaks the
+spoken answer. `site/coach.html` carries the same `nh_tid` localStorage key `index.html` already used,
+so a member who types on `/ask` and later speaks to the Console is in ONE conversation, not two silos.
+Live-verified: two `/console` POSTs of "John 3:16" returned the identical `thread_id`, second call
+`landed` on the card the first one promoted. A first draft duplicated `coach.html`'s functionality in
+a new `console.html` before this was caught (`rm`'d, never shipped) — look-before-you-build held.
+
+*The ranker (`32ed21a`).* docs/HANDOFF.md's own #1 open item: the subject-tier partition in
+`corpus.Corpus._score` could tell "about this" from "not about this," never a thin gloss from a real
+excerpt — and ~67% of the keeping are stubs (`ops.STUB_BODY_CHARS`). Added `SUBSTANCE_WEIGHT = 2.0`
+next to `SUBJECT_TIER`/`THEORY_WEIGHT`, applied to the BASE score before the tier addition so it only
+ever reorders cards WITHIN a tier they already earned — a boosted stub cannot cross into the tier
+alone. New `tests/test_retrieval_invariants.py::test_VII`; all six prior invariants plus 100 other
+tests across `test_corpus`, `test_graph`, `test_decks`, `test_wayfind`, `test_ask`, `test_growth` pass
+unchanged (every existing fixture uses sub-threshold bodies, so the new signal is a true no-op there).
+Deployed, live-verified against production search. `systems.py`'s self-report for `keeping` was then
+stale by construction — it still called the fix "unsupported" — corrected in the same sitting
+(`32e5a36`) rather than left to drift; `"degraded"` itself was deliberately left standing since the fix
+is unit-pinned but not yet measured against real query quality at scale (no `live_passes.py` re-run).
+
+**Found in passing, not fixed here:** running the entire 219-file suite in one `pytest` invocation
+(not per-file) fails `tests/test_ask.py::test_a_greek_word_study_can_be_said_tongues_woven_into_the_word`
+— confirmed identical on a clean baseline via `git stash`, so pre-existing and unrelated to either
+change above. Root cause found and a fix begun independently (a second, concurrent local session, per
+Matt's own click on the flagged task) in `tests/test_bible.py`: `CONCORDANCE_STRONGS_DIR`'s target
+module reads that env var into a MODULE-LEVEL constant once, at import time, and pytest imports every
+test file during collection before any test runs — so whichever file's import happened to trigger the
+`strongs` module first "won" the env var for the whole process. Uncommitted as of this entry; the next
+session should check `git status` on `tests/test_bible.py` before assuming it needs (re)work.
+
+Metric moved: Keeping's `/systems` self-report `supported.unsupported` went 1 -> 0; its `handicap`
+4 -> 2 (uncommitted numbers reflect the box, re-verify via `GET /systems` rather than trusting this
+line). Held open: the ranker's real-world lift is unmeasured; Find's pull-selection quality; the
+subsystem-mesh thinning (scripture/prophecy/witnesses); the surfacing decision (Gateway/grid/Floor/
+atlas); the test-order-dependency fix (in flight, see above).
