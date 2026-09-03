@@ -107,6 +107,10 @@ if('serviceWorker' in navigator){ window.addEventListener('load', function(){ na
   var API = (window.API != null ? window.API : '');
   var page = document.getElementById('page'), book = document.getElementById('book');
   var line = document.getElementById('line'), talk = document.getElementById('talk');
+  // THE SAME DECK the typed chat (index.html) keeps — one localStorage key, so a person who speaks
+  // to the Coach and types to the chat on this device gets ONE continuous conversation, never two
+  // silos of the same relationship ("we pick up whatever thread you pull" — threads.py's keystone).
+  var TID='nh_tid', threadId=null; try{ threadId=localStorage.getItem(TID)||null; }catch(e){}
 
   function el(tag, cls, txt){ var e=document.createElement(tag); if(cls)e.className=cls; if(txt!=null)e.textContent=txt; return e; }
 
@@ -120,6 +124,10 @@ if('serviceWorker' in navigator){ window.addEventListener('load', function(){ na
     if(r.resources && r.resources.length){ var ul=el('ul','resources'); r.resources.forEach(function(x){ var li=el('li'); if(x.ref){ var a=el('a',null,x.label); a.href=x.ref; li.appendChild(a);} else li.textContent=x.label; ul.appendChild(li);}); page.appendChild(ul); }
     if(r.connections && r.connections.length){ var t=el('p','thread'); t.appendChild(el('b',null,'A thread worth following: ')); t.appendChild(document.createTextNode(r.connections[0].title)); page.appendChild(t); }
     if(r.source && r.source.ref){ var s=el('p','source'); s.appendChild(document.createTextNode('Source arriving: ')); var a=el('a',null,r.source.title||r.source.ref); a.href=r.source.ref; s.appendChild(a); page.appendChild(s); }
+    // The companion remembers — the same recall.land()/remember() the typed chat now shows, spoken
+    // here instead (ADA: shown too, in the margin note style already used for the transcript).
+    if(r.landed && r.landed.length){ var ld=el('p','thread'); ld.appendChild(el('b',null,'Landed on what you already asked before: ')); ld.appendChild(document.createTextNode(r.landed.map(function(c){return c.text||c.id;}).join(' · '))); page.appendChild(ld); }
+    if(r.recalled && r.recalled.length){ var kp=el('p','thread'); kp.appendChild(el('b',null,'Kept for next time: ')); kp.appendChild(document.createTextNode(r.recalled.map(function(c){return c.text||c.id;}).join(' · '))); page.appendChild(kp); }
     // Where next — always offered, always a way to a new path; never forced (your choice).
     if(r.next && r.next.length){ var nx=el('nav','next'); nx.setAttribute('aria-label','Where next'); nx.appendChild(el('span','nxlabel','Where next —'));
       r.next.forEach(function(n){ var b=el('button','nxopt',n.label); b.type='button'; b.onclick=function(){ if(n.ref){ location.href=n.ref; } else { line.focus(); } }; nx.appendChild(b); }); page.appendChild(nx); }
@@ -138,9 +146,10 @@ if('serviceWorker' in navigator){ window.addEventListener('load', function(){ na
   function ask(text, quiet){
     text=String(text||'').trim(); if(!text) return;
     if(!quiet) remember(text, null);
-    fetch(API+'/console',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:text})})
+    var payload={text:text}; if(threadId) payload.thread_id=threadId;
+    fetch(API+'/console',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
       .then(function(r){ return r.json(); })
-      .then(function(r){ render(r); })
+      .then(function(r){ if(r.thread_id){ threadId=r.thread_id; try{ localStorage.setItem(TID,threadId); }catch(e){} } render(r); })
       .catch(function(){ render({kind:'offline', headline:'Off the wire',
         spoken:'I could not reach the station. Your words are kept here; the answer will follow. If you need help right now, reach a real person.',
         caption:'I could not reach the station. Your words are kept here; the answer will follow. If you need help right now, reach a real person.',

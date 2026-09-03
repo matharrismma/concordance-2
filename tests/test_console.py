@@ -11,6 +11,35 @@ from concordance.config import EngineConfig
 SEC = EngineConfig("secular")
 
 
+def test_the_console_keeps_the_same_deck_the_typed_chat_keeps(tmp_path, monkeypatch):
+    """2026-09-02: the Console spoke every utterance and forgot it instantly - no thread_id in or
+    out, so 'one conversation, pick up whatever thread you pull' (threads.py's keystone) never
+    reached the voice door. web/api.py's /console handler now mirrors /ask exactly: creates/resumes
+    a thread, appends the exchange, and runs recall.land()/remember() - the SAME mechanism, a second
+    surface. Proven at the HTTP-dispatch layer (not console.dispatch() directly), since the wiring
+    lives there."""
+    monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
+    from concordance.web import api
+    from concordance import threads as _threads
+
+    st1, r1 = api.dispatch("POST", "/console", {}, {"text": "John 3:16"}, SEC)
+    assert st1 == 200
+    tid = r1.get("thread_id")
+    assert tid, "the console must hand back a thread_id, like /ask does"
+    rec = _threads.get(tid)
+    assert rec and len(rec.get("exchanges") or []) == 1          # the Deck kept it
+
+    # A second utterance, same thread_id (as a client carrying nh_tid across chat and console would):
+    # the deck grows, and recall.land() should find the card remember() just promoted.
+    st2, r2 = api.dispatch("POST", "/console", {},
+                           {"text": "John 3:16", "thread_id": tid}, SEC)
+    assert st2 == 200
+    assert r2.get("thread_id") == tid                            # continuity: same thread, not a new one
+    rec2 = _threads.get(tid)
+    assert len(rec2.get("exchanges") or []) == 2                 # the second utterance landed in the SAME deck
+    assert r2.get("landed"), "recall.land() should have found the card the first exchange promoted"
+
+
 def test_crisis_outranks_every_other_intent():
     """A cry is met first (Mt 25) — even when it wears the shape of a note or a schedule."""
     for text in ("I want to end my life", "note that there is no hope left for me",

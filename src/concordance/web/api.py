@@ -1066,7 +1066,34 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         gate_open = (surface == "witness") or session_gate_open or _ask.gate_signal(text)
         # v1: dictation is kept edge-side (store-nothing, no account); the signed-write owner arrives
         # with the covenant flow. A proven owner may be threaded here later.
-        return _ok(_console.dispatch(text, config, owner=None, gate_open=gate_open))
+        r = _console.dispatch(text, config, owner=None, gate_open=gate_open)
+        # THE SAME DECK the typed chat keeps (2026-09-02): the Console spoke every utterance and
+        # forgot it the instant the response was sent — no thread_id in or out, so "It's one
+        # conversation, we pick up whatever thread you pull" (threads.py's own keystone) never
+        # reached the voice door at all. Mirrors /ask exactly, off to the side: never alters or
+        # breaks the spoken answer. A client that sends the SAME thread_id it uses for the typed
+        # chat gets ONE continuous relationship whether they type or speak.
+        try:
+            from .. import threads as _threads
+            tid = body.get("thread_id") if isinstance(body.get("thread_id"), str) else None
+            if not tid:
+                tid = _threads.new_thread(surface)["thread_id"]
+            try:
+                _threads.append(tid, text, r, surface=surface, gate_open=gate_open)
+            except ValueError:  # a malformed client-held id — start a fresh deck instead of failing
+                tid = _threads.new_thread(surface)["thread_id"]
+                _threads.append(tid, text, r, surface=surface, gate_open=gate_open)
+            r["thread_id"] = tid
+            from .. import recall as _recall
+            landed = _recall.land(text, thread_id=tid)
+            if landed.get("landed"):
+                r["landed"] = landed["cards"]
+            kept = _recall.remember(tid)
+            if kept.get("ok") and kept.get("count"):
+                r["recalled"] = kept["kept"]
+        except Exception:  # noqa: BLE001 — the spoken answer stands even if the deck write fails
+            pass
+        return _ok(r)
 
     if method == "POST" and path == "/ask":
         # The conduit front door: find + verify + cite, never generate. Deterministic router.
