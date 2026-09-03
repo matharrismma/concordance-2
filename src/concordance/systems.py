@@ -56,12 +56,18 @@ SUBSYSTEMS: List[Dict[str, Any]] = [
      "modules": ["corpus", "corpus_db", "graph", "decks", "wayfind", "growth"],
      # 2026-09-02: corpus.SUBSTANCE_WEIGHT landed (32ed21a) — within whatever tier the subject
      # partition already admits a card to, a real answer (body >= ops.STUB_BODY_CHARS) now
-     # outranks a bare pointer that merely names the same subject. Deployed and unit-pinned
-     # (test_retrieval_invariants.py test_VII), but NOT yet measured against real query quality
-     # (no live_passes.py re-run) — so still marked degraded rather than upgraded to connected;
-     # the stub flood itself is a corpus-growth question this does not touch.
-     "issues": [{"what": "~67% word-match stubs", "supported": True},
-                {"what": "ranker was blind to substance vs headword", "supported": True}]},
+     # outranks a bare pointer that merely names the same subject. 2026-09-03: measuring that live
+     # exposed a second facet — EVERY single-word subject lookup led with a phonetic string
+     # ("gravity" -> "G R AE1 V AH0 T IY0"), because a pronunciation card's title is its headword
+     # and won the exact-title boost, and its CMU-boilerplate body clears the stub bar so substance
+     # couldn't catch it. Fixed (a525611): the pronunciation genre loses the exact-title boost; the
+     # six live subject lookups that led with phonemes now lead with the definition, ask_probe holds
+     # 25/25. Both ranker facets are now closed AND deployed. Still marked degraded, deliberately:
+     # the remaining reason is STOCKING, not the ranker — ~67% of the keeping is a thin pointer, so
+     # for a niche subject the honest answer is still a gap. Flipping to connected wants a scale
+     # re-measure (a live_passes-style 100-probe run), not a unit test — held until that evidence.
+     "issues": [{"what": "~67% word-match stubs (a stocking gap, not a ranker defect)", "supported": True},
+                {"what": "ranker blind to substance vs headword — FIXED (32ed21a + a525611)", "supported": True}]},
     {"name": "Crisis / Safety", "slug": "crisis",
      "modules": ["crisis_semantic", "floor", "seeds"]},
     {"name": "Coach / Shepherd", "slug": "coach",

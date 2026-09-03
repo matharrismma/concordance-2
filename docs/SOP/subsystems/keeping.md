@@ -36,6 +36,7 @@ pointer not an answer.
 | A distinctive query ("what is Mahavira") returns unrelated cards | We hold nothing for the subject word, so only stopwords contributed | Working as intended — a gap must report itself and feed the want list; do not paper over it with a weak match |
 | A thin "title-only" card leads the results | It's a stub (body < 120 chars) that matched on its title | The `~67% word-match stubs` issue below is the remaining cause — substance-aware ranking (below) now demotes it relative to a real answer, but cannot manufacture substance a stub doesn't have |
 | A card that only *mentions* the subject outranks one that *answers* it | Was: the subject tier is pure lexical presence, no substance signal | Fixed 2026-09-02 (`corpus.SUBSTANCE_WEIGHT`) — if it recurs, check the card's real (post-rehydration) body length against `STUB_BODY_CHARS` |
+| A single-word lookup ("gravity") leads with a phonetic string / ARPABET | The pronunciation card's title is its headword, so it won the exact-title 9x boost; its CMU-boilerplate body clears the stub bar so substance can't catch it | Fixed 2026-09-03 (`a525611`) — the pronunciation shelf is withheld from the exact-title boost in `search()`. If it recurs, confirm the shelf name is exactly `"pronunciation"`; other pure-index genres, if any surface the same way, need the same treatment |
 | A frozen card scores wrong / results reorder after a freeze | Rehydrate didn't fire, or the shard is missing | `rehydrate(card)` pulls the real body from the shard; confirm `CONCORDANCE_DATA_DIR` shards are present |
 
 ## Tests
@@ -53,16 +54,24 @@ same subject.
   substance) so the keeping's reach is never overstated, Find grows real substance on a miss, and
   (2026-09-02) the ranker no longer lets a stub lead ahead of a real answer that holds the same
   subject — but this does not shrink the stub count itself, only how it's ranked against substance.
-- **Ranker blind to substance vs headword** — FIXED 2026-09-02 (commit `32ed21a`, `corpus.py`
-  `SUBSTANCE_WEIGHT`). Within whatever tier the subject partition already admits a card to, a real
-  answer (body >= `STUB_BODY_CHARS`) now outranks a bare pointer that merely names the subject.
-  Deployed and unit-pinned (test_VII below), but not yet measured against real query quality at
-  scale (no `live_passes.py` re-run) — `/systems` still marks the Keeping "degraded" pending that
-  measurement; see the "Refine" note below for what that would take.
+- **Ranker blind to substance vs headword** — FIXED, both facets, deployed.
+  - *Facet 1 (substance signal), 2026-09-02, `32ed21a`, `corpus.SUBSTANCE_WEIGHT`.* Within a subject
+    tier, a real answer (body >= `STUB_BODY_CHARS`) now outranks a bare pointer that only names the
+    subject.
+  - *Facet 2 (the phonetic-index collision), 2026-09-03, `a525611`.* Measuring facet 1 live exposed
+    that every single-word lookup still led with a pronunciation card — its title is its headword, so
+    it won the exact-title 9x boost, and its CMU-boilerplate body clears the stub bar so the substance
+    signal couldn't touch it. The pronunciation shelf is now withheld from the exact-title boost;
+    "gravity" leads with the definition, `tools/ask_probe.py` holds 25/25, `test_VIII` pins it.
+  - `/systems` still marks the Keeping "degraded" — the remaining reason is STOCKING (the ~67% stub
+    count above), not the ranker. See "Refine".
 
 ## Refine
-~~Add a substance signal to `_score`...~~ DONE 2026-09-02. What's left: measure it. Re-run
-`scratchpad/live_passes.py` (or its successor) against production with the fix live, and compare
-against the pre-fix 100-pass baseline in memory (*100-pass live-user refinement*) — if it moves the
-needle on real queries, `systems.py`'s `"degraded": True` for `keeping` should flip, not just the one
-issue's `"supported"` flag.
+The ranker work is done (both facets, above). What's left before `systems.py`'s `"degraded": True`
+for `keeping` can honestly flip to connected is a **scale measurement**, not another code change:
+re-run `tools/ask_probe.py` plus a broader diverse-query set (a `live_passes`-style 100-probe run —
+the harness in memory *100-pass live-user refinement*; the old `scratchpad/live_passes.py` was cleaned,
+rebuild from that note if needed) against production, and confirm the keeping answers *well*, not just
+*without regression*, across niche subjects — where the stub-stocking gap, not ranking, is the limit.
+If it holds, flip the flag; if niche subjects still return thin pointers, the honest state is that the
+keeping needs stocking (a growth process), and "degraded" stays until the corpus is deeper.
