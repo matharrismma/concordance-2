@@ -1,5 +1,11 @@
 # THE MAP
 
+> **SUPERSEDED (2026-09-03).** This map's prose still holds, but its **numbers are from 2026-08-01**
+> and have drifted. The current, live-verified reference is **[`docs/WORLD.md`](WORLD.md)**; for where
+> the work stands and what's next, **[`docs/HANDOFF.md`](HANDOFF.md)**. Trust the running system
+> (`GET /capabilities`, `GET /systems`) over any count here. Kept for its architecture narrative, not
+> its figures.
+
 *One map of the whole project, written 2026-08-01 to be handed to another model.*
 
 Every number here was **measured** on the day it was written, not remembered. Where something is

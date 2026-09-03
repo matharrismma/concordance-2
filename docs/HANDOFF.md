@@ -42,6 +42,9 @@ you trust it further; a stale read is a lie to the reader.
 
 | Commit | What |
 |---|---|
+| `25d0932` | **Prophecy woven into a Scripture study** — Isaiah 53 → its NT fulfillments (CONCORDANT) on both reader surfaces; self-gating; live-verified visually on `.org` |
+| `5727c7d` | Keeping self-report records the phonetic-index fix; `"degraded"` now = stocking, not the ranker |
+| `a525611` | **Ranker facet 2: a phonetic guide never leads a bare subject lookup** — "gravity" led with ARPABET; pronunciation genre loses the exact-title boost; ask_probe 25/25 |
 | `32e5a36` | **Keeping's self-report catches up** — `systems.py` + the keeping SOP no longer call the fixed ranker issue "unsupported"; `"degraded"` deliberately left standing (unmeasured at scale) |
 | `32ed21a` | **The ranker: substance vs headword** — `corpus.SUBSTANCE_WEIGHT`, docs/HANDOFF's own #1 open item from the prior snapshot. Full detail + design rationale in `docs/OPERATIONS_LOG.md`'s newest entry and memory `ranker-substance-vs-headword`. |
 | `9fbb605` | **The Console joins the Deck** — `/console` now shares `/ask`'s thread + recall pipeline. Full detail in the operations log and memory `console-joins-the-deck`. |
@@ -76,19 +79,26 @@ something else, don't discard the changes — that's someone else's in-progress 
 
 ## The open frontier — pick up here (highest leverage first)
 
-1. **Measure the ranker's real impact** *(the natural next step, not yet done)*. `SUBSTANCE_WEIGHT` is
-   deployed and unit-pinned but has never been run against real query quality at scale. Re-run
-   `scratchpad/live_passes.py` (or whatever succeeded it — check first) against production with the
-   fix live, and compare to the pre-fix 100-pass baseline (memory: *live-user-100-pass-refinement*). If
-   it moves the needle, flip `systems.py`'s `"degraded": True` for `keeping` to `False` — that flag is a
-   public claim and should follow the evidence, not the commit.
+1. **The Keeping — the ranker is DONE, what's left is STOCKING** *(2026-09-03, Opus)*. Measuring
+   `SUBSTANCE_WEIGHT` live (`tools/ask_probe.py` → 25/25) exposed and fixed a second facet: every
+   single-word subject lookup led with a phonetic string ("gravity" → `G R AE1 V AH0 T IY0`) because a
+   pronunciation card's title is its headword and won the exact-title boost. Fixed (`a525611`): the
+   pronunciation genre is withheld from that boost; those lookups now lead with the definition. **Both
+   ranker facets are now closed.** Keeping stays `"degraded"` for one honest reason only — **~67% of the
+   keeping is a thin pointer** (a *stocking* gap, not a ranker defect). To move it off degraded: a
+   growth process that deepens niche subjects, not another ranker change; the SOP's "Refine" note says
+   what a scale re-measure would take before flipping the flag. Remaining Keeping leverage is **corpus
+   growth**, not scoring.
 2. **Find's pull selection** *(degraded, guarded)*. The post-pull relevance guard stops a confident
    wrong lead (it falls to an honest gap), but selection quality is the open work. Files: `find.py`,
    `field_canon.py`, `expand.py`.
-3. **Continue the subsystem mesh** *(the star → a peer-mesh)*. The scripture/prophecy/witnesses cluster
-   is "thin" — functionally integrated in the flow but not peer-meshed. The next genuine weave: add
-   `prophecy.for_ref(ref)` and surface a passage's fulfillments + original words in a Scripture study
-   answer (`ask.py` scripture handler ~line 1369). Do it as real composition, never decorative imports.
+3. **Subsystem mesh — one weave DONE, more to do** *(2026-09-03, Opus)*. The prophecy weave shipped
+   (`25d0932`): studying an OT passage the NT itself takes up (Isaiah 53 → Matthew 8:17, Luke 22:37…)
+   now surfaces those fulfillments (verdict CONCORDANT) on BOTH reader surfaces — the `/ask` study
+   answer (`index.html`) and the `bible.html` study desk — self-gating to nothing on a non-messianic
+   passage. Live-verified visually on `.org`. **Still thin:** the *original words* half of that weave
+   (Strong's beside a studied passage in the `/ask` answer — `bible.html` already has it via
+   `/original`), and peer-meshing the witnesses cluster further. Real composition, never decorative.
 4. **`.tv` — entertainment, its season now open.** Matt: *"You need to complete all 3. .org is family.
    .com is business .tv will be entertainment."* New resources disclosed but not yet used: a YouTube
    channel already set up, PD episodes on an external hard drive, and Matt's pro ElevenLabs account

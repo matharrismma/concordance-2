@@ -832,3 +832,58 @@ Metric moved: Keeping's `/systems` self-report `supported.unsupported` went 1 ->
 line). Held open: the ranker's real-world lift is unmeasured; Find's pull-selection quality; the
 subsystem-mesh thinning (scripture/prophecy/witnesses); the surfacing decision (Gateway/grid/Floor/
 atlas); the test-order-dependency fix (in flight, see above).
+
+---
+
+**2026-09-03 (Opus) — the ranker's real impact, MEASURED; a live defect found and fixed; and the
+OT→NT witness woven into a passage study.** "Review everything; anything open is yours."
+
+*Measured the ranker (the prior handoff's #1).* `tools/ask_probe.py` against production: **25/25** — the
+front-door voice routes every probe correctly (practical how-tos lead with a field card not a theory,
+crisis stays crisis, compute computes), and `SUBSTANCE_WEIGHT` caused no regression. But the probe
+tests *routing*, not the substance-vs-headword facet, so I measured that directly — and it exposed a
+real, still-live defect: **every single-word subject lookup led with a phonetic string.** "gravity"
+returned `G R AE1 V AH0 T IY0` (a 186-char pronunciation card) ahead of the definition, Newton's law
+(1032 ch), and general relativity (1417 ch); "baptism" led with ARPABET over a 3,801-char article.
+Cause: a pronunciation card's title IS its headword for all ~125k of them, so it won the exact-title
+9x boost on any bare word, and its CMU boilerplate clears `STUB_BODY_CHARS` so `SUBSTANCE_WEIGHT`
+couldn't catch it — a genre problem, not a length one. Measured, not believed: I pulled the real card
+bodies over the wire before judging.
+
+*Fixed (`a525611`).* The pronunciation shelf is withheld from the exact-title boost — an index
+collision is not evidence of definitiveness, the way a verse card titled "Philippians 4:13" is. The
+six live lookups that led with phonemes now lead with the definition (or a substantive theory card);
+ask_probe holds 25/25; pronunciation stays admitted (leads when it's all we hold, and surfaces via the
+pronounce/word-study door). `test_VIII` pins both directions. `systems.py` + the keeping SOP updated
+(`5727c7d`): BOTH ranker facets are now closed and deployed; `"degraded"` stays for one honest reason —
+the ~67% stub STOCKING gap, a growth question, not a scoring one. Flipping it wants a scale re-measure,
+not a commit.
+
+*Wove the OT→NT witness into a Scripture study (`25d0932`) — the prior handoff's #3, done as real
+composition.* `prophecy_fulfillments.for_ref()` and `GET /prophecy?ref=` already held the data
+(messianic.jsonl) but were reachable only by asking about prophecy as a topic — never woven into a
+passage study beside the cross-refs, commentary, and cloud that already were. Now studying an OT
+passage the New Testament itself takes up surfaces those fulfillments (verdict CONCORDANT, Scripture's
+own witness, attributed): Isaiah 53 → Matthew 8:17 / Luke 22:37 / Acts 8:32 / John 12:38; Micah 5:2 →
+Matthew 2:6; Psalm 22 → the passion. **Self-gating** — John 3:16 and Philemon add nothing, so it shows
+exactly where the cross-Testament connection actually exists. Wired on BOTH reader surfaces (the `/ask`
+answer on `index.html`, the `bible.html` study desk) and **live-verified visually on `.org`** — the
+"Taken up in the New Testament" block renders for the reader, each pairing with its citation beneath.
+`test_a_messianic_passage_study_carries_its_new_testament_fulfillments` pins Isaiah 53 carries it and
+Philemon does not.
+
+*Docs kept honest:* `docs/THE_MAP.md` gained a SUPERSEDED banner (its Aug-1 numbers have drifted; WORLD
+/ HANDOFF / the live endpoints are the truth). `find_verifier` checked: it appears only in a `check`
+tool description string in `mcp/server.py` with no handler there, yet `mcp__concordance__find_verifier`
+is in the runtime tool list — an unresolved ambiguity, left alone rather than guess-implemented or
+guess-removed; flagged for verification.
+
+Metric moved: Keeping's ranker is fully closed (2 facets); a single-word lookup now answers with
+substance, not phonemes (6/6 live); the scripture/prophecy/witnesses cluster gained a real weave that
+reaches the reader on both surfaces. Held open (needs Matt or is corpus growth): flipping Keeping off
+degraded (a stocking/growth process + scale re-measure); Find's pull-selection quality; the *original
+words* half of the scripture weave; `.tv` (resources); the surfacing decision (Gateway/grid/Floor/
+atlas — which door first); founders gather; OT→NT full sweep; verifier coverage ~52%; off-site backup;
+`find_verifier` verification; the test-order-dependency fix (a separate session — `tests/test_bible.py`
+is still modified-but-uncommitted in the working tree as of this entry, origin unchanged; left
+untouched, re-check `git status`/`git log` before touching it).
