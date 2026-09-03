@@ -887,3 +887,23 @@ atlas — which door first); founders gather; OT→NT full sweep; verifier cover
 `find_verifier` verification; the test-order-dependency fix (a separate session — `tests/test_bible.py`
 is still modified-but-uncommitted in the working tree as of this entry, origin unchanged; left
 untouched, re-check `git status`/`git log` before touching it).
+
+---
+
+**2026-09-03 (Opus) — THE AUTOMATON: a witness who faced your situation testifies in his own words
+(`37d2e49`).** Matt: "Automaton. give me that." The hall of the .tv museum, and the purest live demo
+of strength #1 (real sourced words, never generated, points past itself) — a museum of TRUE testimony,
+never a hall of talking deepfakes. `src/concordance/automaton.py` composes `witness.py`'s strict,
+fail-closed public-domain cloud: bring a situation, ONE figure emerges who faced it and testifies with
+his real, cited PD passages. `GET /tv/automaton?seeking=&witness=` (read-bucket rate-limited),
+surfaced as "The Hall of Witnesses" on `site/tv.html` (blockquote + citation per passage; "also in the
+hall" re-consults a named witness). The load-bearing law made STRUCTURAL — it TESTIFIES, never
+IMPERSONATES; `test_automaton.py`'s key test proves a non-PD witness is voiced by nobody even when his
+words match best. Honest-empty on a miss; the frame names the figure so it reads as testimony you are
+reading, not a voice speaking TO you; points past itself (Heb 12:1-2). Live-verified visually on `.tv`:
+"I am weary…" → Spurgeon (Around the Wicket Gate); "I am afraid and doubting" → Ellen G. White (Steps
+to Christ, cited to p251/p7) — both gathered witnesses surface by situation; a nonsense query returns
+the honest empty. Cloud today: 385 PD passages, 2 witnesses; it fills as the gather runs. Box == repo
+at 212 modules. Held open: gather more witnesses (demand-driven, never generation); the two PRE-EXISTING
+reachability reds (`/days /journal /harmony /timeline` unreachable; `com.html`/`steward.html` orphan
+pages) confirmed by stash-baseline to predate this and unrelated — part of the ~52-orphan triage.
