@@ -47,6 +47,20 @@
   footer a{color:var(--acc)}
   .empty{color:var(--soft); font-style:italic; padding:22px 6px}
   a.home{color:var(--acc); text-decoration:none; font-weight:600}
+  /* The Hall of Witnesses — the automaton: a witness who faced your situation, testifying in his own
+     recorded words. Never impersonation; his real, cited, public-domain text. */
+  .hall{border:1px solid var(--rule); border-radius:10px; background:var(--card); margin:12px 0; overflow:hidden}
+  .hall .who{background:var(--bar); color:var(--barink); padding:11px 14px; font-size:18px; font-weight:700}
+  .hall .who .role{display:block; font:600 10.5px/1.4 ui-monospace,Menlo,monospace; letter-spacing:.13em;
+    text-transform:uppercase; color:var(--acc); margin-bottom:3px}
+  .hall .body{padding:4px 14px 13px}
+  .hall blockquote{margin:13px 0 3px; padding-left:13px; border-left:3px solid var(--nowrule); font-size:16.5px; line-height:1.56}
+  .hall cite{display:block; font-style:normal; font-size:12px; color:var(--soft); margin:2px 0 8px 13px}
+  .hall .disc{font-size:12.5px; color:var(--soft); border-top:1px solid var(--rule); padding-top:10px; margin-top:10px}
+  .hall .also{font-size:13px; margin-top:9px; color:var(--soft)}
+  .hall .also button{font:inherit; font-size:13px; background:none; border:1px solid var(--rule); border-radius:6px;
+    padding:3px 10px; margin:0 5px 5px 0; color:var(--acc); cursor:pointer}
+  .hall .miss{padding:16px 14px; color:var(--soft); font-style:italic}
 </style>
 </head>
 <body>
@@ -56,10 +70,11 @@
     <input id="seek" type="search" placeholder="Search what you're seeking — a skill, a struggle, a book…" aria-label="Search what you're seeking">
     <button type="submit">Tune</button>
   </form>
-  <div class="subline"><b>Your curator.</b> Tell it what you want — it also lines up what you'd want anyway. Watch what's on now, or wind any program to the start.</div>
+  <div class="subline"><b>Your curator.</b> Tell it what you want — a witness who faced it testifies in his own recorded words, and the channels re-curate to you. Watch what's on now, or wind any program to the start.</div>
 </div></div>
 <div class="wrap">
   <p class="hint" id="hint">Loading the guide…</p>
+  <div id="hall" aria-live="polite"></div>
   <main id="guide" aria-live="polite"></main>
 </div>
 <footer>
@@ -88,8 +103,36 @@
     h.textContent = d.seeking ? ('Curated for “'+d.seeking+'.” Your channel leads; the standing channels follow.')
                               : 'The standing channels. Search above and the guide re-curates to you.';
   }
+  // THE AUTOMATON — a witness who FACED your situation, testifying in his own recorded words.
+  // His real, cited, public-domain text (never a fabricated "what he would say"); the frame names
+  // him so it reads as testimony you are reading, not a voice speaking TO you. Honest-empty when no
+  // gathered witness has faced it. Composes the same words the /witness door voices; nothing generated.
+  function hallBlock(a){
+    if(!a || !a.witness)
+      return (a && a.note) ? '<section class="hall"><div class="miss">'+esc(a.note)+'</div></section>' : '';
+    var quotes = (a.testimony||[]).map(function(p){
+      var src = [p.work, p.ref].filter(Boolean).join(' · ');
+      return '<blockquote>'+esc(p.text)+'</blockquote>'+(src?'<cite>'+esc(src)+'</cite>':''); }).join('');
+    var also = (a.also_in_the_hall && a.also_in_the_hall.length) ?
+      '<div class="also">Also in the hall: '+a.also_in_the_hall.map(function(w){
+        return '<button data-witness="'+esc(w)+'">'+esc(w)+'</button>'; }).join('')+'</div>' : '';
+    return '<section class="hall"><div class="who"><span class="role">A witness who faced this</span>'+
+      esc(a.witness)+'</div><div class="body">'+quotes+
+      (a.discipline?'<p class="disc">'+esc(a.discipline)+'</p>':'')+also+'</div></section>';
+  }
+  function loadHall(seeking, witness){
+    var el=document.getElementById("hall");
+    if(!seeking){ el.innerHTML=''; return; }              // no situation, no one to consult
+    fetch(API+'/tv/automaton?seeking='+encodeURIComponent(seeking)+(witness?('&witness='+encodeURIComponent(witness)):''))
+      .then(function(r){ return r.json(); })
+      .then(function(raw){ var a=(raw&&raw.data)?raw.data:raw; el.innerHTML=hallBlock(a);
+        Array.prototype.forEach.call(el.querySelectorAll('.also button'), function(b){
+          b.onclick=function(){ loadHall(seeking, b.getAttribute('data-witness')); }; }); })
+      .catch(function(){ el.innerHTML=''; });               // the guide still stands if the hall can't load
+  }
   function load(seeking){
     document.getElementById("hint").textContent='Tuning…';
+    loadHall(seeking);
     fetch(API+'/tv/lineup'+(seeking?('?seeking='+encodeURIComponent(seeking)):''))
       .then(function(r){ return r.json(); }).then(render)
       .catch(function(){ document.getElementById("hint").textContent='Couldn’t reach the network. Try again.'; });

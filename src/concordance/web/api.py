@@ -671,6 +671,19 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         import time as _time
         from .. import tv as _tv
         return _ok(_tv.lineup(seeking=(query.get("seeking") or "").strip(), now_epoch=_time.time()))
+
+    if method == "GET" and path == "/tv/automaton":
+        # THE AUTOMATON — the hall of the museum: bring a situation, and the witness who FACED it
+        # testifies in his OWN recorded words (public-domain, cited), never a fabricated "what he would
+        # say." It TESTIFIES; it never IMPERSONATES — the no-generation law made structural, since this
+        # is where the impersonation temptation is strongest. Composes the strict-PD cloud (witness.py);
+        # honest-empty where no gathered witness has faced this yet (a miss stays a miss). Public — the
+        # text is the commons — and read-bucket limited like /witness, since it scans the same corpus.
+        from .. import automaton as _automaton
+        seeking = (query.get("seeking") or query.get("q") or "").strip()
+        who = (query.get("witness") or "").strip() or None
+        return _ok(_automaton.consult(seeking, witness=who))
+
     if method == "GET" and path == "/identity":
         # identity = what the engine IS (the dry, efficient truth); persona = WHO it is to talk to
         # (the separate voice / movie-style experience). The card system stays pure efficiency.
@@ -2651,6 +2664,7 @@ ROUTES = [
     {"path": "/health", "methods": ("GET",), "api": True},
     {"path": "/speak/health", "methods": ("GET",), "api": True},
     {"path": "/tv/lineup", "methods": ("GET",), "api": True},
+    {"path": "/tv/automaton", "methods": ("GET",), "api": True, "rl": "read"},   # a witness testifies in his own PD words — scans the witness cloud, so read-bucket limited like /witness
     {"path": "/health/memory", "methods": ("GET",), "api": True},
     {"path": "/now", "methods": ("GET",), "api": True},
     {"path": "/identity", "methods": ("GET",), "api": True},
