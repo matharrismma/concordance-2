@@ -52,6 +52,12 @@ SOP before trusting it; this sheet is a map, the running engine is the territory
   process (ISBE-style full text, Gutenberg chapters, per-domain reference cores), not another scoring
   change. Flip `keeping` off `degraded` only after a scale re-measure. → SOP `keeping.md`;
   `corpus.py`, `growth.py`. Legacy: `GAPS G1`, `HANDOFF #1`. Ties to `seed-1`, `field-1`, `tv-1`.
+- **`keeping-2` · The resident token index is the real RAM hog, not card bodies.** *Open (2026-09-05).*
+  Enabling shard freezing on the box sheds card BODIES to the mmap'd shards but barely moved RAM,
+  because `corpus._by_token` (postings for 687k cards) + the resident stubs dominate. Materially
+  cutting the box's ~2 GB/process floor needs frozen-shelf search to use the shard FTS index instead
+  of the resident `_by_token`. → `corpus.py` (`_by_token`, `_candidates`), `corpus_db.py`. Legacy: box
+  RAM cleanup, ops log 2026-09-05.
 
 ## crisis — Safety · handicap 2 · connected
 - *No open defect.* The handicap is coverage/SOP strokes on a deliberately hardened net, not a gap.
@@ -125,10 +131,12 @@ SOP before trusting it; this sheet is a map, the running engine is the territory
 - **`commons-2` · Opportunities to serve** (Romans 12:1): a member posts a need or an offer, matched
   by proximity + capability (never profiling), attested by the one served, unseen by default (Mt 6:3),
   no leaderboard. Legacy: `PUNCHLIST C1f`.
-- **`seed-1` · Seeding continued toward 400k substance cards** — Torrey's unresolved references,
-  Smith's + AmTract cores, Matthew Henry complete, the other PD CrossWire modules, the probed-live
-  open sources (NIST, openFDA, DailyMed, NOAA, GBIF, OpenAlex). The single biggest lever on
-  `keeping-1`/`field-1`. Legacy: `PUNCHLIST #5`, `GAPS G1/G2`.
+- **`seed-1` · Seeding continued toward 400k substance cards** — ~~Matthew Henry complete~~ **DONE
+  2026-09-05** (1,347→4,124 cards, avg 1,882 chars, live). Remaining: Torrey's unresolved references,
+  Smith's + AmTract cores, the other PD CrossWire modules, the probed-live open sources (NIST, openFDA,
+  DailyMed, NOAA, GBIF, OpenAlex). The single biggest lever on `keeping-1`/`field-1`. **Landing path
+  proven:** mint locally → scp the `*_cards.jsonl` → rebuild shards on the box (safe live) → staggered
+  restart. Legacy: `PUNCHLIST #5`, `GAPS G1/G2`.
 - **`record-1` · THE_RECORD — this sheet, GAPS, and the ops log rendered from cards**, so hand-editing
   is impossible without the renderer disagreeing. This file is a step toward it, not the end. Legacy:
   `PUNCHLIST #2`.
