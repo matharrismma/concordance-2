@@ -53,6 +53,28 @@ def shards(monkeypatch):
     _reset()
 
 
+def test_shards_dir_defaults_to_data_dir_so_freezing_cannot_be_silently_disarmed(monkeypatch):
+    """2026-09-05: on the live box `CONCORDANCE_FREEZE_SHELVES` was set but `CONCORDANCE_CORPUS_SHARDS`
+    was NOT, so `available()` was False and the whole corpus loaded resident — freezing silently off,
+    one env var disarming the other. The shards live beside the data at `<DATA_DIR>/shards`, so
+    `available()` must find them from `CONCORDANCE_DATA_DIR` alone. Explicit override still wins; and
+    where no built shards exist, it stays False (no behaviour change)."""
+    import os
+    data = tempfile.mkdtemp(prefix="datadir_")
+    monkeypatch.delenv("CONCORDANCE_CORPUS_SHARDS", raising=False)
+    monkeypatch.delenv("CONCORDANCE_CORPUS_DB", raising=False)
+    monkeypatch.setenv("CONCORDANCE_DATA_DIR", data)
+    _reset()
+    assert corpus_db.available() is False           # DATA_DIR set, but no shards built yet
+    os.mkdir(f"{data}/shards")
+    _mkshard(f"{data}/shards/core.db", [("card_a", "spine", "secular", "The Floor", "floor", {"id": "card_a"})])
+    open(f"{data}/shards/manifest.json", "w").write(json.dumps({"mode": "shards", "shards": {
+        "core": {"file": "core.db", "cards": 1, "core": True}}}))
+    _reset()
+    assert corpus_db.available() is True            # found beside the data, no second env var needed
+    _reset()
+
+
 def test_core_thaws_automatically_and_searches(shards):
     r = corpus_db.search("floor design")
     assert r and r[0]["id"] == "card_a"

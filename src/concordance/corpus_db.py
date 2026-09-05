@@ -232,8 +232,22 @@ def shard_of(shelf: Optional[str]) -> str:
 
 
 def _shards_dir() -> Optional[Path]:
+    """Where the FTS shards live. An explicit `CONCORDANCE_CORPUS_SHARDS` wins; otherwise the shards
+    sit beside the data at `<CONCORDANCE_DATA_DIR>/shards` (or `data/shards`), so the memory-efficient
+    freeze design is DISCOVERABLE by default wherever the shards were built — not gated behind a second
+    env var that has to be remembered separately.
+
+    2026-09-05: on the live box `CONCORDANCE_FREEZE_SHELVES` was set but `CONCORDANCE_CORPUS_SHARDS`
+    was not, so `available()` was False, `frozen_shelves()` returned empty, and the WHOLE corpus loaded
+    resident (~3.5 GB/process) with freezing silently off — one env var quietly disarming the other.
+    The fallback closes that trap: `CONCORDANCE_DATA_DIR` (already set for the data) now suffices.
+    Still returns None when no built shards are present, so nothing changes where they don't exist."""
     d = os.environ.get("CONCORDANCE_CORPUS_SHARDS", "").strip()
-    return Path(d) if d else None
+    if d:
+        return Path(d)
+    data = os.environ.get("CONCORDANCE_DATA_DIR", "").strip()
+    cand = (Path(data) if data else Path("data")) / "shards"
+    return cand if (cand / "manifest.json").exists() else None
 
 
 def _single_db() -> Optional[str]:
