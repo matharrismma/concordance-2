@@ -1,5 +1,10 @@
 # THE GAPS — measured 2026-07-29, not guessed
 
+> **The live routed sheet is now [`REMAINING.md`](REMAINING.md)** — every open item there carries a
+> `<subsystem>-<n>` ID that routes to `/systems`, its SOP, and its code. This file is kept as the
+> **measured snapshot** the `G#` IDs came from (grounded gap analysis, a moment in time); REMAINING
+> maps each surviving `G#` onto its subsystem. Trust `/systems` and the SOPs over any count here.
+
 Matt: "Identify the gaps." Grounded gap analysis is the steering instrument: **query the live
 state, then name what is missing.** Every number below came from a command run against the
 live corpus, the deployed box, or the last gate — none of it is estimated.

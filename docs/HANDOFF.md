@@ -79,6 +79,10 @@ something else, don't discard the changes — that's someone else's in-progress 
 
 ## The open frontier — pick up here (highest leverage first)
 
+*The full, ID'd, routed list of everything remaining is [`REMAINING.md`](REMAINING.md) — each item a
+`<subsystem>-<n>` that routes to `/systems`, its SOP, and its code. This section is the curated top of
+it; the IDs below in brackets are the routing IDs.*
+
 1. **The Keeping — the ranker is DONE, what's left is STOCKING** *(2026-09-03, Opus)*. Measuring
    `SUBSTANCE_WEIGHT` live (`tools/ask_probe.py` → 25/25) exposed and fixed a second facet: every
    single-word subject lookup led with a phonetic string ("gravity" → `G R AE1 V AH0 T IY0`) because a

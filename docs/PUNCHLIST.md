@@ -1,5 +1,10 @@
 # THE PUNCH LIST — one item at a time, finished before the next is started
 
+> **The live routed sheet is now [`REMAINING.md`](REMAINING.md)** — every open item there carries a
+> `<subsystem>-<n>` ID (or a cross-cutting `commons-`/`seed-`/`record-` slug) that routes to
+> `/systems`, its SOP, and its code. This file is kept for its **unit definitions and completion
+> tests** (the `C#`/`H#` breakdowns REMAINING points back to); the surviving units are mapped there.
+
 Matt, 2026-07-29: *"Build the priority punch list and work on one until complete. Then move to
 the next. Start with the commons."*
 
