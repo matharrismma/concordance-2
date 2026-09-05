@@ -97,6 +97,14 @@ AGENT_ONLY = {
     # Playbook's signed two-step write. All agent/API surface, not a human page.
     "/witness", "/context/run", "/kernel", "/kernel/gate", "/playbook/signable", "/playbook/submit",
 
+    # THE PERSONAL KEEPING FLOW, write side: /journal keeps the day's ideas/writings, and /days counts
+    # your time + concentration from the conversations THIS BROWSER holds — both POSTed with data the
+    # client already carries (a note; a roster of thread ids that must stay out of a query string), so
+    # they are driven by the coach/keeping flow acting for the person, never a public <a href>. Their
+    # human dashboards (a "your days" glance, a journal surface) are future standalone projects; the
+    # endpoints stand ready for them. Sibling /journal/dates is already declared above.
+    "/days", "/journal",
+
     # THE COMMONS: nothing here is agent-only any more. C1b declared the six shelf routes on this
     # list with a promise that `shelf.html` would land in C1c and they would come off it — C1c
     # landed, and they came off. That is what the declaration was for.
@@ -121,6 +129,7 @@ UNLISTED_PAGES = {
     "workshop.html",      # Workshop — the contributor front (help build it): fetches the want-list (GET /wants) as the board, POST /want to name a gap, explains the content/build fronts and the gate; reached by direct URL and from the Halls, not the public nav
     "halls.html",         # The Halls — the lobby that lists the halls (golf, grappling, and what's coming); reached by direct URL, a front door for the instruments line, not the main witness-site nav
     "checkit.html",       # the .com efficiency front door (the working auditor) — the pending homepage per the Domain Sort; reached at /checkit during review, and served at / on the secular surface once the flip lands
+    "com.html",           # the LIVE .com homepage — served at / on the secular surface by home_for() (the Domain Sort flip landed), so a human reaches it as the domain root, never a /com.html <a href>. The static link-checker reads html hrefs only and cannot see surface routing — the same limit as checkit.html/about.html. Its own footer now links the steward.
     "about.html",         # the confession, whole (Domain Sort: the declaration lives at /about + /identity). Linked from checkit.html's footer as the CLEAN url /about, which the static link-checker (html hrefs only) cannot see — hence declared, same limit as /unchecked/answer
     "playbook.html",      # the Playbook surface — operator/agent authoring, not the public nav
     "plow.html",          # the Plow surface — an operator instrument, not the public nav

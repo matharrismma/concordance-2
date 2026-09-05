@@ -81,7 +81,11 @@ def test_every_page_offers_a_way_home():
               # com.html is the .com secular LANDING (surface sort, 2026-09-01): it IS home and carries
               # its own nav, not the shared desk control. systems.html/prophecy.html/map.html are
               # self-contained surfaces with their own nav (map.html is in the Ctrl-K palette).
-              "com.html", "systems.html", "prophecy.html", "map.html"}
+              "com.html", "systems.html", "prophecy.html", "map.html",
+              # harmony.html + timeline.html are self-contained scripture study surfaces with their
+              # own nav (modeled on prophecy.html), reached from the Bible study-desk nav (bible.html),
+              # not the shared witness home control.
+              "harmony.html", "timeline.html"}
     missing = [f.name for f in SITE.glob("*.html")
                if f.name != "index.html" and f.name not in hidden
                and "nh-home.js" not in f.read_text(encoding="utf-8")]
@@ -137,7 +141,10 @@ def test_the_palette_reaches_every_public_page():
                "steward.html",
                # com.html is the .com bare homepage (served at "/"), like index.html; systems.html is the
                # operator dashboard and prophecy.html a direct-URL surface — reached by URL, not the palette.
-               "com.html", "systems.html", "prophecy.html"}
+               "com.html", "systems.html", "prophecy.html",
+               # harmony.html + timeline.html — study aids reached from the Bible study-desk nav
+               # (bible.html), a direct nav like prophecy.html, deliberately off the Ctrl-K palette.
+               "harmony.html", "timeline.html"}
     unreachable = sorted(
         p.name for p in SITE.glob("*.html") if p.name not in listed and p.name not in excused)
     assert not unreachable, f"no way to reach: {unreachable} (list them or excuse them by name)"

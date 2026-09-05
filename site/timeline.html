@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bible Timeline — Narrow Highway</title>
+<meta name="description" content="One spine, creation to today: the Old Testament, the New Testament from Acts onward, and Church history. Every event is found in the Word or the record, never generated. Where careful scholarship genuinely disagrees on a date, both positions stand side by side — we live in the nuance, and no position here is declared the winner.">
+<style>
+  :root{ --bg:#f7f4ec; --panel:#fffdf7; --ink:#241f18; --soft:#5c5344; --dim:#857a68;
+         --line:#e4ddcd; --gold:#9a6b2f; --accent:#7d4a22; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --bg:#141210; --panel:#1c1915; --ink:#ece7dc; --soft:#c4bba9; --dim:#8f8674;
+    --line:#2c2822; --gold:#d0a05a; --accent:#e0a06a; } }
+  :root[data-theme="dark"]{ --bg:#141210; --panel:#1c1915; --ink:#ece7dc; --soft:#c4bba9;
+    --dim:#8f8674; --line:#2c2822; --gold:#d0a05a; --accent:#e0a06a; }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 -apple-system,"Segoe UI",Roboto,sans-serif}
+  a{color:inherit}
+  .bar{display:flex; align-items:center; gap:1rem; padding:1rem 1.3rem; border-bottom:1px solid var(--line)}
+  .brand{font-weight:700; letter-spacing:.02em; text-decoration:none}
+  .brand .r{color:var(--gold)}
+  .bar nav{margin-left:auto; display:flex; gap:1.1rem; font-size:.92rem}
+  .bar nav a{color:var(--soft); text-decoration:none}
+  .wrap{max-width:52rem; margin:0 auto; padding:2rem 1.3rem 4rem}
+  h1{font:600 2rem/1.15 Georgia,"Times New Roman",serif; margin:.2rem 0 .6rem}
+  .lede{color:var(--soft); font-size:1.05rem; max-width:44rem}
+  .lede b{color:var(--ink)}
+  .era{margin-top:2.4rem}
+  .era > h2{font:600 1.35rem/1.2 Georgia,serif; color:var(--accent); border-bottom:2px solid var(--line);
+            padding-bottom:.45rem; margin:0 0 .3rem}
+  .period{font:600 .8rem/1 ui-monospace,monospace; letter-spacing:.12em; text-transform:uppercase;
+          color:var(--gold); margin:1.4rem 0 .5rem}
+  .ev{display:flex; gap:.9rem; padding:.55rem 0; border-bottom:1px dashed var(--line); align-items:baseline}
+  .ev:last-child{border-bottom:0}
+  .ev .name{flex:1; font-weight:600; font-size:1rem}
+  .ev .date{color:var(--soft); font-size:.9rem; white-space:normal; text-align:right; max-width:16rem}
+  .ev .disp{font:600 9px/1.4 ui-monospace,monospace; letter-spacing:.08em; text-transform:uppercase;
+            color:var(--dim); border:1px solid var(--line); border-radius:4px; padding:.1rem .35rem; margin-left:.4rem}
+  .note{background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--gold);
+        border-radius:8px; padding:1rem 1.1rem; margin:1.8rem 0 0; color:var(--soft); font-size:.95rem}
+  footer{border-top:1px solid var(--line); margin-top:3rem; padding-top:1.3rem; color:var(--dim); font-size:.86rem}
+  .msg{color:var(--dim); padding:1rem 0}
+</style>
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="/">Narrow<span class="r">Highway</span></a>
+  <nav><a href="/bible.html">Scripture</a><a href="/prophecy.html">Prophecy</a><a href="/harmony.html">Harmony</a><a href="/">Witness</a></nav>
+</header>
+<main class="wrap">
+  <h1>Bible Timeline</h1>
+  <p class="lede">One spine, creation to today — the Old Testament, the New Testament from Acts
+  onward, and the Church since. Every event is <b>found in the Word or the record, never generated</b>.
+  Where careful scholarship genuinely disagrees on a date, both positions stand side by side: we live
+  in the nuance, and no position here is declared the winner.</p>
+
+  <div id="out"><p class="msg">Reading the record…</p></div>
+  <div class="note" id="foot-note" hidden></div>
+
+  <footer>A conduit, not a source — nothing here is generated. Dates marked <b>disputed</b> carry
+  their competing reckonings in the open. <a href="/">↩ Narrow Highway</a></footer>
+</main>
+<script>
+(function(){
+  var out=document.getElementById('out');
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function ev(e){
+    return '<div class="ev"><span class="name">'+esc(e.event||'')+
+      (e.disputed?'<span class="disp">disputed</span>':'')+'</span>'+
+      (e.date?'<span class="date">'+esc(e.date)+'</span>':'')+'</div>';
+  }
+  function period(p){
+    return '<div class="period">'+esc(p.period||'')+'</div>'+(p.events||[]).map(ev).join('');
+  }
+  function era(e){
+    return '<section class="era"><h2>'+esc(e.era||'')+'</h2>'+(e.periods||[]).map(period).join('')+'</section>';
+  }
+  function render(d){
+    d=(d&&d.data)?d.data:d;
+    var eras=(d&&d.eras)||[];
+    if(!eras.length){ out.innerHTML='<p class="msg">Nothing to show right now.</p>'; return; }
+    out.innerHTML=eras.map(era).join('');
+    var fn=document.getElementById('foot-note');
+    if(d.note){ fn.textContent=d.note; fn.hidden=false; }
+  }
+  fetch('/timeline').then(function(r){return r.json();}).then(render)
+    .catch(function(){ out.innerHTML='<p class="msg">Could not load the timeline right now. Please try again.</p>'; });
+})();
+</script>
+</body>
+</html>

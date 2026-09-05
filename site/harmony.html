@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harmony of the Gospels — Narrow Highway</title>
+<meta name="description" content="One event, and every gospel that witnesses it, side by side — Matthew, Mark, Luke, John. Found in the Word itself, never generated. Where the sequence is genuinely disputed among harmonies, the period names the phase of the ministry, not a settled day-by-day order.">
+<style>
+  :root{ --bg:#f7f4ec; --panel:#fffdf7; --ink:#241f18; --soft:#5c5344; --dim:#857a68;
+         --line:#e4ddcd; --gold:#9a6b2f; --accent:#7d4a22; --has:#3d5a6c; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --bg:#141210; --panel:#1c1915; --ink:#ece7dc; --soft:#c4bba9; --dim:#8f8674;
+    --line:#2c2822; --gold:#d0a05a; --accent:#e0a06a; --has:#9db8c9; } }
+  :root[data-theme="dark"]{ --bg:#141210; --panel:#1c1915; --ink:#ece7dc; --soft:#c4bba9;
+    --dim:#8f8674; --line:#2c2822; --gold:#d0a05a; --accent:#e0a06a; --has:#9db8c9; }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 -apple-system,"Segoe UI",Roboto,sans-serif}
+  a{color:inherit}
+  .bar{display:flex; align-items:center; gap:1rem; padding:1rem 1.3rem; border-bottom:1px solid var(--line)}
+  .brand{font-weight:700; letter-spacing:.02em; text-decoration:none}
+  .brand .r{color:var(--gold)}
+  .bar nav{margin-left:auto; display:flex; gap:1.1rem; font-size:.92rem}
+  .bar nav a{color:var(--soft); text-decoration:none}
+  .wrap{max-width:54rem; margin:0 auto; padding:2rem 1.3rem 4rem}
+  h1{font:600 2rem/1.15 Georgia,"Times New Roman",serif; margin:.2rem 0 .6rem}
+  .lede{color:var(--soft); font-size:1.05rem; max-width:44rem}
+  .lede b{color:var(--ink)}
+  .period{margin-top:2.2rem}
+  .period > h2{font:600 .82rem/1 ui-monospace,monospace; letter-spacing:.14em; text-transform:uppercase;
+               color:var(--gold); border-bottom:1px solid var(--line); padding-bottom:.5rem; margin:0 0 1rem}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:.9rem 1.1rem; margin:.7rem 0}
+  .card .t{font-weight:600; font-size:1.02rem; margin-bottom:.55rem}
+  .cols{display:grid; grid-template-columns:repeat(4,1fr); gap:.5rem}
+  @media (max-width:620px){ .cols{grid-template-columns:1fr 1fr} }
+  .g{border:1px solid var(--line); border-radius:7px; padding:.4rem .55rem}
+  .g .gn{font:600 9.5px/1.4 ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--dim)}
+  .g .gr{font-size:.9rem; margin-top:.1rem}
+  .g.has{border-color:color-mix(in srgb, var(--has) 45%, var(--line))}
+  .g.has .gn{color:var(--has)} .g.has .gr{font-weight:600}
+  .g.no .gr{color:var(--dim)}
+  .note{background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--gold);
+        border-radius:8px; padding:1rem 1.1rem; margin:1.8rem 0 0; color:var(--soft); font-size:.95rem}
+  footer{border-top:1px solid var(--line); margin-top:3rem; padding-top:1.3rem; color:var(--dim); font-size:.86rem}
+  .msg{color:var(--dim); padding:1rem 0}
+</style>
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="/">Narrow<span class="r">Highway</span></a>
+  <nav><a href="/bible.html">Scripture</a><a href="/prophecy.html">Prophecy</a><a href="/timeline.html">Timeline</a><a href="/">Witness</a></nav>
+</header>
+<main class="wrap">
+  <h1>Harmony of the Gospels</h1>
+  <p class="lede">One event, and <b>every gospel that witnesses it</b>, side by side — Matthew, Mark,
+  Luke, John. Found in the Word itself, never generated. Where the sequence is genuinely disputed
+  among harmonies, the period names the phase of the ministry, not a settled day-by-day order. Read
+  the passages themselves and see how the four accounts meet.</p>
+
+  <div id="out"><p class="msg">Gathering the witnesses…</p></div>
+  <div class="note" id="foot-note" hidden></div>
+
+  <footer>A conduit, not a source — nothing here is generated; the pairing is Scripture beside
+  Scripture. Open your Bible to each reference. <a href="/">↩ Narrow Highway</a></footer>
+</main>
+<script>
+(function(){
+  var out=document.getElementById('out');
+  var GOS=[['matthew','Matthew'],['mark','Mark'],['luke','Luke'],['john','John']];
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function card(e){
+    var cols=GOS.map(function(g){
+      var ref=(e[g[0]]||'').trim();
+      return '<div class="g '+(ref?'has':'no')+'"><div class="gn">'+g[1]+'</div>'+
+        '<div class="gr">'+(ref?esc(ref):'—')+'</div></div>';
+    }).join('');
+    return '<div class="card"><div class="t">'+esc(e.event||'')+'</div><div class="cols">'+cols+'</div></div>';
+  }
+  function period(p){
+    return '<section class="period"><h2>'+esc(p.period||'')+'</h2>'+(p.events||[]).map(card).join('')+'</section>';
+  }
+  function render(d){
+    d=(d&&d.data)?d.data:d;
+    var ps=(d&&d.periods)||[];
+    if(!ps.length){ out.innerHTML='<p class="msg">Nothing to show right now.</p>'; return; }
+    out.innerHTML=ps.map(period).join('');
+    var fn=document.getElementById('foot-note');
+    if(d.note){ fn.textContent=d.note; fn.hidden=false; }
+  }
+  fetch('/harmony').then(function(r){return r.json();}).then(render)
+    .catch(function(){ out.innerHTML='<p class="msg">Could not load the harmony right now. Please try again.</p>'; });
+})();
+</script>
+</body>
+</html>
