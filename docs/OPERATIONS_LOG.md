@@ -907,3 +907,32 @@ the honest empty. Cloud today: 385 PD passages, 2 witnesses; it fills as the gat
 at 212 modules. Held open: gather more witnesses (demand-driven, never generation); the two PRE-EXISTING
 reachability reds (`/days /journal /harmony /timeline` unreachable; `com.html`/`steward.html` orphan
 pages) confirmed by stash-baseline to predate this and unrelated — part of the ~52-orphan triage.
+
+---
+
+**2026-09-05 (Opus) — WIRE IN EVERY ASPECT: reachability green, both interfaces (`03a9322`).** Matt:
+"make sure all aspects are wired in for the agent and human interface; if obviously a future standalone
+project, hide it from navigation but leave it on the nearest page." Used `tests/test_reachability.py`
+as the grounded instrument (every route reachable-or-declared, every page linked-or-declared) and drove
+its two reds to zero, honestly:
+- **A broken promise found and fulfilled.** `_SITEMAP_PAGES` listed `/harmony.html` and `/timeline.html`
+  and the index copy promises "timelines," but the pages did not exist — the clean URLs 301'd to
+  `/bible.html` (stale dead-link redirects). Built both as self-contained scripture viewers (modeled on
+  `prophecy.html`) over the live `/harmony` (97 events, gospel columns) and `/timeline` (100 events, one
+  spine; disputed dates carry both reckonings, marked). Linked from the Bible study-desk nav (bible.html),
+  OFF the main witness nav — exactly "leave it on the nearest page." Removed the two shadowing redirects
+  so the pages serve (`/harmony.html` → the page, `/harmony` → the JSON route, coexisting like prophecy).
+  Live-verified: both 200 with their own content; the timeline renders events + dates + DISPUTED tags on
+  `.org`.
+- **The orphan Steward wired.** `steward.html` (household money — shows, never moves money) was built but
+  linked from nowhere; now on the `.com` footer (money on the business face) → reachable.
+- **Declared, with reasons, what is genuinely agent-flow or a homepage** (not hidden to dodge the check):
+  `/days` + `/journal` — personal keeping-flow POSTs carrying client data (a note; thread ids that must
+  stay out of query strings), reached by the coach/keeping flow, human dashboards a FUTURE standalone
+  project (sibling `/journal/dates` already declared) → AGENT_ONLY. `com.html` — the LIVE `.com` homepage,
+  served at `/` by `home_for()`, invisible to the static href-checker (same limit as checkit/about) →
+  UNLISTED_PAGES. Dropped the dead `/journal.html` sitemap entry.
+Reachability + site + clean-url suites green; box == repo at 212 modules. Held open (genuinely future,
+now honestly reachable-or-declared, not hidden): the human dashboards for `/days` + `/journal`; richer
+interactive Harmony/Timeline; the broader ~52-orphan surfacing triage; `tests/test_bible.py` still the
+other session's in-flight work, untouched.
