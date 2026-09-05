@@ -52,12 +52,16 @@ SOP before trusting it; this sheet is a map, the running engine is the territory
   process (ISBE-style full text, Gutenberg chapters, per-domain reference cores), not another scoring
   change. Flip `keeping` off `degraded` only after a scale re-measure. → SOP `keeping.md`;
   `corpus.py`, `growth.py`. Legacy: `GAPS G1`, `HANDOFF #1`. Ties to `seed-1`, `field-1`, `tv-1`.
-- **`keeping-2` · The resident token index is the real RAM hog, not card bodies.** *Open (2026-09-05).*
-  Enabling shard freezing on the box sheds card BODIES to the mmap'd shards but barely moved RAM,
-  because `corpus._by_token` (postings for 687k cards) + the resident stubs dominate. Materially
-  cutting the box's ~2 GB/process floor needs frozen-shelf search to use the shard FTS index instead
-  of the resident `_by_token`. → `corpus.py` (`_by_token`, `_candidates`), `corpus_db.py`. Legacy: box
-  RAM cleanup, ops log 2026-09-05.
+- **`keeping-2` · Compact the resident floor (~1.9 GB/process).** *Open (2026-09-05).* Freezing is now
+  correctly ACTIVE (the silent-off env-var bug is fixed, `b3e3d56` — it sheds card bodies to the mmap'd
+  shards). Measured floor: card **stubs ~1.9 GB** (connections alone ~449 MB) + **token index ~375 MB**;
+  bodies are already on the shards. To go leaner (Matt: "make it efficient and compact as reasonable"):
+  (a) move frozen-shelf candidate generation to the **shard FTS** so the resident `_by_token` only
+  indexes non-frozen shelves (~-375 MB); (b) **compact the stubs** — intern repeated field values
+  (shelf/surface/kind/lifecycle), lazy-load `connections` from the graph store instead of holding them
+  on every stub (~-449 MB). Both are careful retrieval-/graph-path changes, well-tested before deploy.
+  → `corpus.py` (`_by_token`, `_candidates`, `_STUB_KEEPS`), `corpus_db.py`, `graph.py`. Legacy: box
+  RAM cleanup + freeze-config fix, ops log 2026-09-05.
 
 ## crisis — Safety · handicap 2 · connected
 - *No open defect.* The handicap is coverage/SOP strokes on a deliberately hardened net, not a gap.

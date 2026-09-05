@@ -957,11 +957,22 @@ a previously-missing chapter, so **MH is complete and live**), all three surface
 Safe hygiene alongside: swap 2 GB → **6 GB** (rebuild can't OOM); journald capped 150M; deploy-rollback
 pruned to 3; multipathd disabled (single-disk VPS). Result: **available RAM 2.4 → 3.3 GB**, **swap
 un-swapped** (2.7 GB churn during the rebuild → 129 MB, 5.9 GB free), fresh complete shards, MH landed.
-HONEST metric: the RAM win is MODEST (+0.9 GB available), not the ~3 GB hoped — freezing sheds card
-BODIES to the mmap'd shards, but the dominant resident cost is the TOKEN INDEX (`_by_token`, 687k cards'
-postings) + the stubs (identity/connections kept resident), which freezing does not shed. Shrinking that
-(search frozen shelves via the shard FTS instead of the resident index) is a deeper architecture change,
-noted for later. Box config note: the freeze env lives in the box's `.env` (gitignored, persists across
-restarts) — NOT in the repo, so a fresh box needs it re-set; the completed MH + rebuilt shards are box
-data (gitignored), not in git. seed-1 progress: Matthew Henry `complete` — one PUNCHLIST #5 module done;
-`keeping-1` stub ratio unchanged (commentary was already substance), the broader substance climb continues.
+HONEST metric: +0.9 GB available. seed-1: Matthew Henry `complete` — one PUNCHLIST #5 module done.
+
+**SAME DAY, follow-up — the freezing was SILENTLY OFF; found by measuring, fixed in code (`b3e3d56`).**
+Matt: "I can always upgrade the server, but I want to purposefully make it as efficient and compact as
+reasonable." Pursued `keeping-2` and measured the resident cost directly (the `/health/memory` estimate
+is broken — it reports 15 GB for a 2 GB process): the hog is **card stubs ~1.9 GB (connections ~449 MB)
++ token index ~375 MB**, NOT the bodies. Then the root cause surfaced: even with `CONCORDANCE_FREEZE_SHELVES`
+set and shards present, `corpus.frozen_shelves()` returned EMPTY — because `corpus_db.available()` reads a
+SEPARATE env var, `CONCORDANCE_CORPUS_SHARDS`, which was never set → `available()` False → the whole
+corpus loaded resident (~3.5 GB/proc) with freezing silently off. One env var quietly disarming the other.
+FIX: `corpus_db._shards_dir()` now falls back to `<CONCORDANCE_DATA_DIR>/shards` (where `build_corpus_db`
+writes them), so the lean design is discoverable from the data-dir alone; explicit override still wins;
+still None where no shards exist. `test_corpus_db.py` pins it. Removed the redundant box env var and
+PROVED the fallback live: `available()` True, both procs frozen (`frozen_shelves`=16), PSS ~1.9 GB, full
+bodies rehydrate (MH Psalm 23:1 = 15,607 chars), both surfaces 200. A fresh box now runs lean by default
+(sovereignty: the whole ark, carried in the pocket). Deeper compaction is `keeping-2` (frozen-shelf FTS
+search to drop the ~375 MB resident index; compact/lazy stubs+connections ~449 MB) — real, not yet done.
+Box config note: the completed MH store + rebuilt shards + the `FREEZE_SHELVES` env are box-side
+(gitignored); the code fallback + tests are in git.
