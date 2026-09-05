@@ -936,3 +936,32 @@ Reachability + site + clean-url suites green; box == repo at 212 modules. Held o
 now honestly reachable-or-declared, not hidden): the human dashboards for `/days` + `/journal`; richer
 interactive Harmony/Timeline; the broader ~52-orphan surfacing triage; `tests/test_bible.py` still the
 other session's in-flight work, untouched.
+
+---
+
+**2026-09-05 (Opus) — BOX RAM CLEANUP + seed-1 lands Matthew Henry.** Matt: "do a clean up to ensure we
+have maximum ram" (confirmed target: the production box, its only purpose is the site). Grounded review
+found the RAM was almost entirely the two serving processes (~4.8 GB), and TWO real issues:
+(1) `CONCORDANCE_FREEZE_SHELVES` was EMPTY — the whole corpus loaded fully resident in both processes,
+the memory-efficient shard design switched off; and (2) the shards were month-STALE (551k cards, built
+2026-07-29) vs the live 673k — so freezing couldn't be switched on safely (121k cards would serve as
+empty stubs). The fix converged with seed-1: complete Matthew Henry (`migrate_commentary` re-fetched the
+~892 missing chapters from the PD helloao source → store 269→1166 chapters; `card_commentary_verses.py`
+re-carded → 47,152 commentary cards, **MH 1,347→4,124, avg body 1,882 chars — substance**), upload the
+new `commentary_verse_cards.jsonl`, then **rebuild the shards** (`build_corpus_db.py`, safe while serving
+since freezing was off so the live procs don't read shards; 6 GB swap as insurance) → fresh 687,344-card
+shards including MH, and **enable freezing** + staggered restart (witness first, per discipline).
+Verified live: rehydration serves FULL bodies (MH Genesis 1:1 = 10,383 chars, Genesis 50:20 = 5,944 —
+a previously-missing chapter, so **MH is complete and live**), all three surfaces 200, both frozen.
+
+Safe hygiene alongside: swap 2 GB → **6 GB** (rebuild can't OOM); journald capped 150M; deploy-rollback
+pruned to 3; multipathd disabled (single-disk VPS). Result: **available RAM 2.4 → 3.3 GB**, **swap
+un-swapped** (2.7 GB churn during the rebuild → 129 MB, 5.9 GB free), fresh complete shards, MH landed.
+HONEST metric: the RAM win is MODEST (+0.9 GB available), not the ~3 GB hoped — freezing sheds card
+BODIES to the mmap'd shards, but the dominant resident cost is the TOKEN INDEX (`_by_token`, 687k cards'
+postings) + the stubs (identity/connections kept resident), which freezing does not shed. Shrinking that
+(search frozen shelves via the shard FTS instead of the resident index) is a deeper architecture change,
+noted for later. Box config note: the freeze env lives in the box's `.env` (gitignored, persists across
+restarts) — NOT in the repo, so a fresh box needs it re-set; the completed MH + rebuilt shards are box
+data (gitignored), not in git. seed-1 progress: Matthew Henry `complete` — one PUNCHLIST #5 module done;
+`keeping-1` stub ratio unchanged (commentary was already substance), the broader substance climb continues.
