@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Fellowship — Narrow Highway</title>
+<meta name="description" content="Find others walking the same road: join a study group, share what you keep in the commons, and enter the fellowship of believers. No account — your verses are your key, derived on your own device and never sent.">
+<meta property="og:title" content="The Fellowship — Narrow Highway">
+<meta property="og:description" content="Two or three, gathered. Study groups, a shared commons, and the fellowship of believers — sovereign, no account, no directory of persons.">
+<style>
+  :root{
+    --walnut:#2b1a10; --walnut-2:#170d07;
+    --paper:#f5f1e6; --paper-2:#e9e3d3; --parch:#ded3ba;
+    --brass:#c69a4a; --brass-hi:#eed69b; --brass-lo:#8a6a2f;
+    --ink:#241c12; --ink-soft:#6b5c45; --ink-faint:#9b8a6d;
+    --oxblood:#7d4a22; --lamp:rgba(255,231,176,.16); --confirmed:#4d6b3a; --failed:#8a4a3a;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{
+    background:radial-gradient(120% 60% at 50% -8%, var(--lamp), transparent 60%),
+      linear-gradient(#20130b, var(--walnut-2));
+    color:var(--paper); min-height:100vh;
+    font:18px/1.62 "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--brass-hi); text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:46rem; margin:0 auto; padding:1.1rem 1.15rem 4rem}
+  header.site{display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px solid rgba(198,154,74,.22); padding:.2rem 0 .9rem; margin-bottom:1.6rem}
+  .brand{font-size:1.02rem; color:var(--paper)} .brand b{color:var(--brass-hi); font-weight:600}
+  nav.site a{font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-faint); margin-left:1.1rem}
+  .kick{font-family:Futura,"Century Gothic","Avenir Next",Avenir,"Trebuchet MS",sans-serif;
+    text-transform:uppercase; letter-spacing:.28em; font-weight:600; font-size:.66rem; color:var(--brass)}
+  h1{font-weight:400; font-size:2.05rem; line-height:1.15; margin:.5rem 0 .5rem}
+  .lede{color:var(--paper-2); font-size:1.06rem; margin:0 0 1.3rem}
+  .card{border:1px solid var(--parch); border-radius:6px; background:var(--paper); color:var(--ink);
+    margin:.9rem 0; padding:1.1rem 1.15rem; box-shadow:0 14px 34px -26px rgba(20,12,4,.7)}
+  .card h2{font-weight:500; font-size:1.15rem; margin:.1rem 0 .35rem}
+  .card .sub{color:var(--ink-soft); font-size:.92rem; margin:0 0 .6rem}
+  label{display:block; font-size:.74rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); margin:.7rem 0 .25rem}
+  textarea,input[type=text]{width:100%; font-family:inherit; font-size:1rem; color:var(--ink);
+    background:#fffdf6; border:1px solid var(--parch); border-radius:4px; padding:.55rem .65rem}
+  textarea{min-height:3.4rem; resize:vertical}
+  button{font-family:Futura,"Avenir Next",sans-serif; letter-spacing:.06em; cursor:pointer;
+    background:var(--brass); color:var(--walnut-2); border:1px solid var(--brass-lo);
+    border-radius:22px; padding:.42rem 1.1rem; font-size:.86rem; font-weight:600}
+  button.ghost{background:transparent; color:var(--ink-soft); border-color:var(--parch)}
+  button.sm{padding:.28rem .8rem; font-size:.78rem}
+  button:disabled{opacity:.5; cursor:default}
+  .row{display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; margin-top:.8rem}
+  .hint{color:var(--ink-faint); font-size:.82rem; margin:.5rem 0 0}
+  .fp{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.82rem; color:var(--oxblood); word-break:break-all}
+  .status{font-size:.86rem; margin-top:.7rem; min-height:1.1rem}
+  .ok{color:var(--confirmed)} .err{color:#b3402e}
+  /* a group / commons row */
+  .item{border-top:1px dashed var(--parch); padding:.7rem 0 .2rem; margin-top:.2rem}
+  .item:first-of-type{border-top:0}
+  .item .t{font-size:1.02rem; color:var(--ink)}
+  .item .t b{font-weight:600}
+  .item .d{color:var(--ink-soft); font-size:.9rem; margin:.15rem 0 .35rem}
+  .item .m{font-family:Futura,"Avenir Next",sans-serif; text-transform:uppercase; letter-spacing:.12em;
+    font-size:.6rem; color:var(--brass-lo)}
+  .item .foot-row{display:flex; justify-content:space-between; align-items:center; gap:.6rem; margin-top:.3rem}
+  .grouplist,.commonslist{margin-top:.6rem}
+  .empty{color:var(--ink-faint); font-size:.9rem; font-style:italic; margin:.5rem 0}
+  details.start{margin-top:1rem; border-top:1px dashed var(--parch); padding-top:.7rem}
+  details.start summary{cursor:pointer; font-family:Futura,"Avenir Next",sans-serif; text-transform:uppercase;
+    letter-spacing:.14em; font-size:.66rem; color:var(--brass-lo)}
+  .gate{margin-top:1.5rem; border:1px solid rgba(198,154,74,.3); border-left:3px solid var(--brass);
+    border-radius:4px; background:rgba(198,154,74,.06); padding:.85rem 1rem; color:var(--paper-2); font-size:.95rem}
+  .gate b{color:var(--brass-hi); font-weight:600}
+  .gate .verse{color:var(--brass); font-style:italic; font-size:.9rem}
+  .boundary{margin-top:1.5rem; border:1px solid rgba(198,154,74,.3); border-left:3px solid var(--brass);
+    border-radius:4px; background:rgba(198,154,74,.06); padding:.85rem 1rem; color:var(--paper-2); font-size:.9rem}
+  .boundary b{color:var(--brass-hi); font-weight:600}
+  .foot{margin-top:2.4rem; border-top:1px solid rgba(198,154,74,.18); padding-top:1.1rem; color:var(--ink-faint); font-size:.84rem}
+  .foot a{color:var(--brass)} .verse{color:var(--brass); font-style:italic}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <a class="brand" href="/">Narrow<b>Highway</b></a>
+    <nav class="site"><a href="/">The desk</a><a href="/profile.html">Your keeping</a><a href="/bible.html">The Word</a></nav>
+  </header>
+
+  <div class="kick">Fellowship</div>
+  <h1>Two or three, gathered</h1>
+  <p class="lede">You were not made to walk alone. Find others on the same road — <b>study together</b>,
+    <b>share what you keep</b>, and enter <b>the fellowship of believers</b>. No account and no directory of
+    persons: your <b>verses</b> are your key, and a handle is the only name you give. Browse freely; open
+    your key only to join, start, or confess.</p>
+
+  <!-- YOUR KEY (optional; needed only to act) -->
+  <div class="card" id="idcard">
+    <h2>Your name here</h2>
+    <p class="sub">Optional. Derive your key from your verses — on this device, never sent — so what you
+      join is carried by <i>you</i>, not an account.</p>
+    <div id="idout">
+      <label for="verses">Your verses (your passphrase)</label>
+      <textarea id="verses" placeholder="Four verses you will always remember — real words, real length."></textarea>
+      <label for="handle">A handle to be known by</label>
+      <input type="text" id="handle" placeholder="e.g. a foot washer">
+      <div class="row">
+        <button id="open">Open my key</button>
+        <span class="hint">Derived here. The phrase never leaves this page.</span>
+      </div>
+      <div class="status err" id="idErr"></div>
+    </div>
+    <div id="idin" class="hidden">
+      <div class="hint">Your fingerprint (safe to share — it is not your key):</div>
+      <div class="fp" id="fp"></div>
+      <div class="row"><button class="ghost sm" id="close">Forget on this page</button></div>
+    </div>
+  </div>
+
+  <!-- GROUPS (open, attributed) -->
+  <div class="card">
+    <h2>Study groups</h2>
+    <p class="sub">Gather around what you study — pseudonymous, by topic, never by person. Open to all;
+      what a member shares is <i>attributed to their handle, not verified</i> by the engine.</p>
+    <label for="gsearch">Find a group</label>
+    <div class="row" style="margin-top:.25rem">
+      <input type="text" id="gsearch" placeholder="a topic — bread, Romans, wells, homeschooling…" style="flex:1; min-width:12rem">
+      <button class="ghost sm" id="gsearchbtn">Search</button>
+    </div>
+    <div class="grouplist" id="grouplist"><p class="empty">Loading groups…</p></div>
+    <details class="start">
+      <summary>Start a group</summary>
+      <label for="ntopic">Topic (required)</label>
+      <input type="text" id="ntopic" placeholder="sourdough &amp; provision">
+      <label for="ntitle">Title</label>
+      <input type="text" id="ntitle" placeholder="Daily Bread">
+      <label for="ndesc">A line about it</label>
+      <input type="text" id="ndesc" placeholder="learning to bake and to keep what we grow">
+      <div class="row"><button id="startbtn">Start it</button></div>
+      <div class="status" id="startStatus"></div>
+    </details>
+  </div>
+
+  <!-- THE FELLOWSHIP MESH (confession-gated) -->
+  <div class="card">
+    <h2>The fellowship of believers</h2>
+    <p class="sub">A network of believers who serve one another — offer, need, collaborate, create. Not a
+      church and not a tithe (the churches are welcome here as nodes); sovereign, with no account and no
+      directory of persons. Your key is your node.</p>
+    <div class="gate" id="meshgate">
+      <b>This door opens with confession.</b> The believers around you are not shown at once — the way opens
+      as you walk it. To enter the fellowship, confess with your mouth that Jesus Christ is Lord and Messiah
+      <span class="verse">(Romans 10:9)</span>. Your key signs it; the confession, not your name, opens the door.
+      <div class="row">
+        <button id="confessbtn">Confess &amp; enter</button>
+        <span class="hint">Needs your key opened above.</span>
+      </div>
+      <div class="status" id="confessStatus"></div>
+    </div>
+    <div id="meshin" class="hidden"></div>
+  </div>
+
+  <!-- THE COMMONS (open browse) -->
+  <div class="card">
+    <h2>The commons</h2>
+    <p class="sub">What members have set out to share — the outer ring of each keeping, offered to all.
+      Read freely; every card names its source.</p>
+    <div class="commonslist" id="commonslist"><p class="empty">Loading the commons…</p></div>
+  </div>
+
+  <div class="boundary">
+    <b>How this keeps faith with you.</b> The server never makes or sees your key — you derive it here from
+    your verses, and it holds only your <i>public</i> key. There is no account, no email, and no list of who
+    is who; a handle is the only name you give. What you join is carried by you, and you can walk away and
+    leave nothing behind but the public half of your key.
+  </div>
+
+  <div class="foot">
+    <span class="verse">"And let us consider one another to provoke unto love and to good works… not
+      forsaking the assembling of ourselves together." — Hebrews 10:24-25</span><br>
+    <a href="/">Narrow Highway</a> · a living sacrifice of reasoned service
+  </div>
+</div>
+
+<script>
+"use strict";
+const SALT = "narrowhighway/covenant/identity/v1", ITERS = 200000, FP_VERSION = "nhid1";
+let PRIV = null, PUB = null, FP = null;   // held in memory only
+
+const enc = new TextEncoder();
+function b64u(buf){return btoa(String.fromCharCode.apply(null,new Uint8Array(buf))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+
+async function deriveKey(passphrase){
+  const phrase = passphrase.trim().replace(/\s+/g," ");
+  if(phrase.length < 8) throw new Error("Use your verses — a real phrase, not a single word.");
+  const km = await crypto.subtle.importKey("raw", enc.encode(phrase), "PBKDF2", false, ["deriveBits"]);
+  const seedBits = await crypto.subtle.deriveBits({name:"PBKDF2", salt:enc.encode(SALT), iterations:ITERS, hash:"SHA-256"}, km, 256);
+  const seed = new Uint8Array(seedBits);
+  const prefix = new Uint8Array([0x30,0x2e,0x02,0x01,0x00,0x30,0x05,0x06,0x03,0x2b,0x65,0x70,0x04,0x22,0x04,0x20]);
+  const pkcs8 = new Uint8Array(prefix.length + seed.length); pkcs8.set(prefix); pkcs8.set(seed, prefix.length);
+  const priv = await crypto.subtle.importKey("pkcs8", pkcs8.buffer, {name:"Ed25519"}, true, ["sign"]);
+  const jwk = await crypto.subtle.exportKey("jwk", priv);
+  return {priv, pub: jwk.x};
+}
+async function fingerprint(pub){
+  const d = await crypto.subtle.digest("SHA-256", enc.encode(FP_VERSION + ":" + pub));
+  const hex = Array.from(new Uint8Array(d)).map(b=>b.toString(16).padStart(2,"0")).join("");
+  return "nh_" + hex.slice(0,32);
+}
+async function signStr(str){ return b64u(await crypto.subtle.sign("Ed25519", PRIV, enc.encode(str))); }
+async function api(method, path, body){
+  const r = await fetch(path, {method, headers:{"Content-Type":"application/json"}, body: body?JSON.stringify(body):undefined});
+  let j = {}; try{ j = await r.json(); }catch(e){}
+  return {status:r.status, body:(j&&j.data)?j.data:j};
+}
+function handle(){ return ($("handle").value||"").trim(); }
+function needKey(where){
+  if(FP) return true;
+  where.className="status err"; where.textContent="Open your key above first (your verses).";
+  $("idcard").scrollIntoView({behavior:"smooth", block:"center"});
+  return false;
+}
+
+// ── your key ──
+async function openKey(){
+  $("idErr").textContent = "";
+  if(!(window.crypto && crypto.subtle)){ $("idErr").textContent="This browser can't derive keys securely (no Web Crypto). Try a current browser."; return; }
+  $("open").disabled = true; $("open").textContent = "Opening…";
+  try{
+    const k = await deriveKey($("verses").value);
+    PRIV = k.priv; PUB = k.pub; FP = await fingerprint(PUB);
+    $("fp").textContent = FP;
+    $("verses").value = "";                 // clear the phrase once the key is in memory
+    $("idout").classList.add("hidden"); $("idin").classList.remove("hidden");
+  }catch(e){ $("idErr").textContent = (e && e.message) || String(e); }
+  $("open").disabled = false; $("open").textContent = "Open my key";
+}
+function closeKey(){
+  PRIV = PUB = FP = null;
+  $("idin").classList.add("hidden"); $("idout").classList.remove("hidden");
+}
+
+// ── groups ──
+function groupItem(g){
+  const title = esc(g.title || g.topic || "a group");
+  const topic = g.topic ? '<span class="m">'+esc(g.topic)+'</span>' : "";
+  const n = (g.member_count||0), cards = (g.card_count||0);
+  return '<div class="item"><div class="t"><b>'+title+'</b></div>'+
+    (g.description?'<div class="d">'+esc(g.description)+'</div>':'')+
+    '<div class="foot-row"><span class="m">'+n+' member'+(n===1?'':'s')+
+    (cards?' · '+cards+' kept':'')+(g.topic?' · '+esc(g.topic):'')+'</span>'+
+    '<button class="ghost sm" data-join="'+esc(g.id)+'">Join</button></div></div>';
+}
+async function loadGroups(q){
+  const el = $("grouplist");
+  const r = await api("GET", "/groups" + (q?("?q="+encodeURIComponent(q)):""));
+  const list = (r.body && r.body.groups) || [];
+  if(!list.length){ el.innerHTML = '<p class="empty">No groups yet'+(q?" for that":"")+'. Be the first — start one below.</p>'; return; }
+  el.innerHTML = list.map(groupItem).join("");
+  Array.prototype.forEach.call(el.querySelectorAll("[data-join]"), function(b){
+    b.addEventListener("click", function(){ joinGroup(b.getAttribute("data-join"), b); });
+  });
+}
+async function joinGroup(id, btn){
+  if(!needKey($("startStatus"))) return;
+  btn.disabled = true; btn.textContent = "Joining…";
+  const r = await api("POST", "/group/join", {id:id, subject_id:FP, handle:handle()});
+  if(r.status===200){ btn.textContent = "Joined ✓"; loadGroups($("gsearch").value.trim()); }
+  else { btn.disabled = false; btn.textContent = "Join"; }
+}
+async function startGroup(){
+  const topic = ($("ntopic").value||"").trim();
+  const st = $("startStatus");
+  if(!topic){ st.className="status err"; st.textContent="A topic is required."; return; }
+  if(!needKey(st)) return;
+  st.className="status"; st.textContent="Starting…";
+  const r = await api("POST", "/groups", {topic:topic, title:($("ntitle").value||"").trim(),
+    description:($("ndesc").value||"").trim(), subject_id:FP, handle:handle()});
+  if(r.status===200 && r.body && r.body.ok){
+    st.className="status ok"; st.textContent="Started — you are the founder.";
+    $("ntopic").value=$("ntitle").value=$("ndesc").value="";
+    loadGroups("");
+  } else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not start the group."; }
+}
+
+// ── the fellowship mesh ──
+async function confess(){
+  const st = $("confessStatus");
+  if(!needKey(st)) return;
+  st.className="status"; st.textContent="Signing your confession…";
+  try{
+    const confession = "Jesus Christ is Lord and Messiah";
+    const sig = await signStr(confession);
+    const r = await api("POST", "/mesh/node", {public_key:PUB, confession:confession, confession_sig:sig});
+    if(r.status===200){
+      $("meshgate").classList.add("hidden");
+      const inn = $("meshin"); inn.classList.remove("hidden");
+      inn.innerHTML = '<div class="gate"><b>You are in the fellowship.</b> The way widens as you are '+
+        'vouched and as you serve. Your node is your key — carry it, and you are known here by your walk, '+
+        'not your name. <span class="verse">"Behold, how good and how pleasant it is for brethren to '+
+        'dwell together in unity." — Psalm 133:1</span></div>';
+      try{
+        const m = await api("GET", "/mesh/map?fp="+encodeURIComponent(FP)+"&hops=2");
+        const nodes = (m.body && (m.body.nodes||m.body.reachable)) || [];
+        const cnt = Array.isArray(nodes) ? nodes.length : (m.body && m.body.count) || 0;
+        if(cnt) inn.innerHTML += '<p class="hint">'+cnt+' believer'+(cnt===1?'':'s')+' within reach of your node.</p>';
+      }catch(e){}
+    } else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not register your node."; }
+  }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||String(e); }
+}
+
+// ── the commons ──
+function commonsItem(c){
+  const title = esc(c.title || c.id || "a card");
+  const who = c.handle || c.member || "";
+  return '<div class="item"><div class="t"><b>'+title+'</b></div>'+
+    (c.snippet||c.body?'<div class="d">'+esc((c.snippet||c.body)).slice(0,240)+'</div>':'')+
+    '<div class="m">'+(c.source?esc(c.source):'shared')+(who?' · '+esc(who):'')+'</div></div>';
+}
+async function loadCommons(){
+  const el = $("commonslist");
+  const r = await api("GET", "/commons");
+  const list = (r.body && r.body.cards) || [];
+  if(!list.length){ el.innerHTML = '<p class="empty">The commons is quiet so far — nothing shared yet.</p>'; return; }
+  el.innerHTML = list.slice(0,12).map(commonsItem).join("");
+}
+
+// ── wire it ──
+$("open").addEventListener("click", openKey);
+$("close").addEventListener("click", closeKey);
+$("gsearchbtn").addEventListener("click", function(){ loadGroups($("gsearch").value.trim()); });
+$("gsearch").addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); loadGroups($("gsearch").value.trim()); } });
+$("startbtn").addEventListener("click", startGroup);
+$("confessbtn").addEventListener("click", confess);
+loadGroups("");
+loadCommons();
+</script>
+</body>
+</html>

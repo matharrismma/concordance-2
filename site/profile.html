@@ -230,7 +230,7 @@ async function loadCommunity(){
     }else{
       h += '<div class="served-row seek"><i>You have not joined a fellowship yet.</i></div>';
     }
-    h += '<div class="hint" style="margin-top:.5rem"><a href="/community.html">Find or start a group &rarr;</a></div>';
+    h += '<div class="hint" style="margin-top:.5rem"><a href="/fellowship.html">Find or start a group, and gather &rarr;</a></div>';
     el.innerHTML = h; el.classList.remove("hidden");
   }catch(e){ el.classList.add("hidden"); wk.classList.add("hidden"); }
 }
