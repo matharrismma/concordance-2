@@ -1,9 +1,24 @@
-# Narrow Highway — Handoff (2026-09-03, prepared for Opus)
+# Narrow Highway — Handoff (2026-09-06)
 
 *Where the work stands and how to pick it up. For the whole picture of what the project **is**, read
 [`docs/WORLD.md`](WORLD.md) first — this handoff is **where we are and what's next**, not a
 re-explainer. For the full dated history behind every line below, read
-[`docs/OPERATIONS_LOG.md`](OPERATIONS_LOG.md) (newest entries at the bottom).*
+[`docs/OPERATIONS_LOG.md`](OPERATIONS_LOG.md) (newest entries at the bottom). Full open work, ID'd and
+routed: [`REMAINING.md`](REMAINING.md). A red team from Fable is being prepared for —
+[`RED_TEAM_BRIEF_2026-09-06.md`](RED_TEAM_BRIEF_2026-09-06.md).*
+
+---
+
+## THE PIVOT — read this first (2026-09-05)
+
+A strategic call Matt made and agreed to, and it changes what "next" means: **keep the lane, narrow the
+mode.** The lane (verifiable, sourced, re-checkable provenance — the one thing generative AI can't do)
+is right and appreciating. The risk was *breadth* — one builder spreading across 15 subsystems, three
+domains, and ever more surfaces, doing maintenance-and-polish instead of *validating the thesis with a
+real user*. So the mode changed: **focus on the single sharpest wedge — the Gateway ("private in,
+verified out") — and get one real design partner to try it.** The Gateway is now shipped and demo-able
+(see below). **Freeze the breadth** — no more "found another orphan to wire" sessions — until the wedge
+pulls. The next move is not more building; it's Matt finding one real user/customer. Honor this.
 
 ---
 
@@ -12,36 +27,38 @@ re-explainer. For the full dated history behind every line below, read
 The engine is live and healthy on all three surfaces (**narrowhighway.com** secular, **.org** witness,
 **.tv** museum), running on the box `nh@5.78.186.55` (two processes: `nh-org` :8001, `nh-com-2` :8002).
 Deploy is `sh tools/deploy.sh <repo-relative files>` — staggered canary, auto-verified **box == repo**.
-Course handicap **1.1**; 15 subsystems, **0 out, 0 isolated, 2 degraded** (Find, Keeping — Keeping's
-"blind ranker" issue is now fixed, see below; the remaining degradation is the ~67% stub count, a
-corpus-growth question, and that the fix is unmeasured at scale). Every number here was re-verified
-live against the running engine on 2026-09-03, minutes before writing this — re-verify again before
-you trust it further; a stale read is a lie to the reader.
+15 subsystems, 0 out, 0 isolated, 2 degraded (Find, Keeping — both ranker facets fixed; the remaining
+degradation is the ~67% stub count, a *stocking*/corpus-growth question, not a scoring one). Re-verify
+every number against `/capabilities` + `/systems` before trusting it; a stale read is a lie to the reader.
 
 ---
 
-## Current live state (re-verified 2026-09-03)
+## Current live state (2026-09-06)
 
-- **`.com` / `.org` / `.tv`** all return 200. `/capabilities`, `/systems`, `/search`, `/cards/stats`,
-  `/console`, `/ask` all live-smoke-tested this session — working.
-- **Numbers (live, just pulled):** 65 verifier domains (62 secular + 3 witness-only) · 133 accepted
-  domain names · 94 MCP tools · 673,253 cards. (The `map.html` card/shelf breakdown and route count
-  from the prior snapshot were not re-pulled this pass — re-check `/map.html` and `/systems` rather
-  than trusting the old figures.)
-- **Thread continuity is now real across BOTH doors.** A member typing on `/ask` (`site/index.html`)
-  and one speaking to `/console` (`site/coach.html`) share the same `nh_tid` — verified live: two
-  `/console` POSTs with a carried `thread_id` returned the same id and the second call's `landed`
-  found the card the first one promoted.
-- **The ranker now separates a real answer from a bare pointer**, within whatever tier the subject
-  partition already put a card in — verified live against `/search`, and unit-pinned
-  (`tests/test_retrieval_invariants.py::test_VII`).
+- **`.com` / `.org` / `.tv`** all return 200; `/gateway.html` live on both faces. Re-verify against the
+  running engine — a stale read is a lie to the reader.
+- **The Gateway is live and demo-able** (`gateway.html`): PII stripped in the browser (redact.js),
+  a claim verified into a re-checkable receipt. The `/verify` door takes a plain `claim` now.
+- **The box runs lean and healthy.** Freezing was silently OFF (a missing `CONCORDANCE_CORPUS_SHARDS`
+  env; fixed in code `b3e3d56` — shards default to `DATA_DIR/shards`). RAM available 2.4 → 3.3 GB, swap
+  2 → 6 GB. The deeper resident floor (~1.9 GB/proc) is the token index + stubs (`keeping-2`), not bodies.
+- **Matthew Henry is complete** (seed-1, `1565a6f`): commentary +2,777 substance cards, live.
+- Thread continuity across `/ask` + `/console` (same `nh_tid`); both ranker facets fixed
+  (`tests/test_retrieval_invariants.py::test_VII`, `test_VIII`).
 
 ---
 
-## What shipped this session (2026-09-02/03, newest first)
+## What shipped recently (newest first)
 
 | Commit | What |
 |---|---|
+| `69499e6` | **Red-team brief for Fable** + honest Gateway privacy wording (the hero no longer overclaims "both run at your edge") |
+| `c454d5a`, `5293770` | **The Gateway, demo-able** — `gateway.html` + the free-text `/verify` "verified out" door (the pivot's wedge) |
+| `b3e3d56`, `1565a6f` | **Box freeze fix + seed-1 Matthew Henry** — freezing was silently off (shards default to DATA_DIR/shards); MH completed + shards rebuilt |
+| `03a9322` | Wired in every aspect: Harmony + Timeline viewers, Steward link, reachability green |
+| `25d0932` | **Prophecy woven into a Scripture study** — Isaiah 53 → its NT fulfillments (CONCORDANT) on both reader surfaces; self-gating; live-verified visually on `.org` |
+| `5727c7d` | Keeping self-report records the phonetic-index fix; `"degraded"` now = stocking, not the ranker |
+| `a525611` | **Ranker facet 2: a phonetic guide never leads a bare subject lookup** — "gravity" led with ARPABET; pronunciation genre loses the exact-title boost; ask_probe 25/25 |
 | `25d0932` | **Prophecy woven into a Scripture study** — Isaiah 53 → its NT fulfillments (CONCORDANT) on both reader surfaces; self-gating; live-verified visually on `.org` |
 | `5727c7d` | Keeping self-report records the phonetic-index fix; `"degraded"` now = stocking, not the ranker |
 | `a525611` | **Ranker facet 2: a phonetic guide never leads a bare subject lookup** — "gravity" led with ARPABET; pronunciation genre loses the exact-title boost; ask_probe 25/25 |
@@ -77,11 +94,16 @@ something else, don't discard the changes — that's someone else's in-progress 
 
 ---
 
-## The open frontier — pick up here (highest leverage first)
+## The open frontier — but read THE PIVOT first
+
+**The #1 move is not on this list: it's validation.** The Gateway wedge is shipped and demo-able
+(`surface-1`, below) — the next step is Matt finding **one real design partner / user** to try it, and
+learning from that. Everything else here is **frozen behind the wedge, deliberately**, until it pulls.
+So this is the "when the wedge is validated, or Matt redirects" list — not a build queue to grind now.
 
 *The full, ID'd, routed list of everything remaining is [`REMAINING.md`](REMAINING.md) — each item a
-`<subsystem>-<n>` that routes to `/systems`, its SOP, and its code. This section is the curated top of
-it; the IDs below in brackets are the routing IDs.*
+`<subsystem>-<n>` that routes to `/systems`, its SOP, and its code. The IDs below in brackets are the
+routing IDs.*
 
 1. **The Keeping — the ranker is DONE, what's left is STOCKING** *(2026-09-03, Opus)*. Measuring
    `SUBSTANCE_WEIGHT` live (`tools/ask_probe.py` → 25/25) exposed and fixed a second facet: every
@@ -108,9 +130,11 @@ it; the IDs below in brackets are the routing IDs.*
    channel already set up, PD episodes on an external hard drive, and Matt's pro ElevenLabs account
    (voice cloning already wired for Coach/Console TTS — see `NHSpeak`/`site/speak.js`). Ask what's on
    the drive and what the channel needs before building; this is unscoped, not a bug to close.
-5. **The surfacing decision** *(a project, not a bug)*. Built-but-unhosted features — the **Gateway**
-   page (the "private in, verified out" product, only a code snippet today), the theory **grid**, the
-   **Floor**, the **Bible atlas** — have endpoints/renderers but no door. Which gets one first?
+5. **The Gateway wedge — SHIPPED (`c454d5a`+`5293770`), now validate it** `[surface-1]`. `site/gateway.html`
+   is live: strip PII in the browser (redact.js, nothing sent) and verify a claim → a re-checkable
+   receipt (the `/verify` door was extended to take a plain-language `claim`). **This is THE thing** —
+   the next move is one real user, not more surfaces. Still unhosted, behind the wedge: the theory
+   **grid**, the **Floor**, the **Bible atlas**.
 6. **Tracked gaps:** verifier domain coverage ~52%; OT→NT prophecy sweep not run; founders (Ellen G.
    White) gather pending (needs per-work `--start-after`); off-site backup durability; `find_verifier`
    is referenced in the MCP tool description but unimplemented here; `docs/THE_MAP.md` has stale counts

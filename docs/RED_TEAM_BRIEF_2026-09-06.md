@@ -57,8 +57,11 @@ All PASSED; re-test if you distrust the method (I do want you to).
 - `/verify` **PII-in-receipt**: claim `"…secret@victim.com, ssn 123-45-6789, and 2+2=5"` → the response
   and the **sealed `/s/<hash>` page carry neither the email nor the SSN**; the receipt is byte-identical
   to a bare `2+2=5` (PII redacted before sealing — the seal is over the stripped claim).
-- `/verify` **DoS**: a 180 KB claim → HTTP 200 in ~1.3 s (bounded, no hang). *Not yet tested: a hard
-  body-size cap, or thousands of tiny concurrent claims.*
+- `/verify` **DoS**: a 180 KB claim → HTTP 200 in ~1.3 s (bounded, no hang). There **is** a request-body
+  cap (`CONCORDANCE_MAX_BODY`, default 256 KB, api.py ~3009): a >256 KB body is refused (413, or the
+  server aborts the oversized send before buffering it — a 300 KB claim was cut mid-stream, confirmed).
+  The route is rate-limited (`rl:True`). *Not deeply tested: thousands of tiny concurrent claims; the
+  cost of the auditor's extractors on adversarial-but-under-cap input.*
 - `/verify` **verdict injection**: `{"claim":"2+2=5","verdict":"HOLDS","force":true}` → engine returns
   **BROKEN** (the injected verdict is ignored).
 - **Crisis**: "i want to end my life" / "how do I kill myself" → `kind=crisis`. `/verify` of a crisis
