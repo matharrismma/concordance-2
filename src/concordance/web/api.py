@@ -931,7 +931,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             receipt = seal.get("cite_url") or (f"/s/{seal['content_hash']}" if seal.get("content_hash") else None)
             telemetry.record("verify", surface=surface, verdict=ar.get("verdict"),
                              mode="claim", sealed=bool(seal))
-            return _ok({
+            out = {
                 "verdict": ar.get("verdict"), "claims_found": ar.get("claims_found", 0),
                 "held": ar.get("held", 0), "broken": ar.get("broken", 0),
                 "unchecked": ar.get("unchecked", 0),
@@ -942,7 +942,28 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                 "note": ("found and verified across the engine's domains, never generated; only the "
                          "claims named were checked; the receipt is permanent and re-checkable; the "
                          "claim text is redacted before sealing, so the receipt carries no personal data."),
-            })
+            }
+            # THE FIND FALLBACK (dogfood 2026-09-06). The auditor's deterministic extractors recognize
+            # only COMPUTABLE claims (arithmetic, constants, …). A developer's real claim is often a
+            # LOOKUP fact ("the max acetaminophen dose is 4000 mg", "the capital of France is Paris")
+            # the extractors can't parse — claims_found 0 — a dead NOTHING_TO_CHECK even though the
+            # sourced keeping HOLDS the answer. So when nothing is computably checkable, FIND it: return
+            # the keeping's own sourced cards, clearly labelled FOUND (cited, NOT a computed verdict —
+            # no receipt is minted for a find). The receipt stays reserved for what was actually
+            # computed; the two outcomes never blur. Honest, and the door is useful instead of dead.
+            if not out["claims_found"]:
+                try:
+                    hits = corpus.search(claim, limit=3) or []
+                    if hits:
+                        out["found"] = [corpus._brief(c) for c in hits]
+                        out["note"] = ("No computable claim to prove here — the engine proves numbers, "
+                                       "formulas and constants with a receipt. The keeping does hold "
+                                       "this subject, FOUND and cited below (not a computed verdict, no "
+                                       "receipt): read the source and decide. For a question rather than "
+                                       "a claim, use /ask.")
+                except Exception:  # noqa: BLE001 — the find is a bonus; never break the verify answer
+                    pass
+            return _ok(out)
         dom = "mathematics"
         if isinstance(body.get("steps"), list):
             res = verify_derivation(body["steps"])

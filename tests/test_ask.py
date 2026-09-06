@@ -183,6 +183,24 @@ def test_the_gateway_verify_door_takes_a_free_text_claim_and_seals():
     assert st2 == 200 and "verdict" in r2
 
 
+def test_the_gateway_verify_door_finds_a_sourced_answer_when_nothing_is_computable():
+    """The find-fallback (dogfood 2026-09-06). A free-text claim the auditor can't COMPUTE — a lookup
+    fact with no number/formula/constant to check — must not dead-end at a bare NOTHING_TO_CHECK when
+    the keeping actually HOLDS the subject. So when nothing is computably checkable, the door FINDS it:
+    it returns the keeping's own sourced cards in `found`, cited, NOT a computed verdict. The two
+    outcomes never blur — this is the *nothing-generated* discipline: verdict stays NOTHING_TO_CHECK
+    (nothing was VERIFIED) and receipt stays None (a seal is reserved for what was actually computed);
+    only `found` is added, so the door is useful instead of dead."""
+    from concordance.web import api
+    st, r = api.dispatch("POST", "/verify", {}, {"claim": "justice and mercy are the theme"}, SEC)
+    assert st == 200
+    assert r.get("claims_found") == 0                 # nothing computable was extracted
+    assert r.get("verdict") == "NOTHING_TO_CHECK"     # honest: nothing was VERIFIED
+    assert r.get("receipt") is None                   # no seal for a find — the receipt proves computation
+    assert r.get("found") and isinstance(r["found"], list)   # but the keeping's sourced answer is offered
+    assert r["found"][0].get("title")                 # a real, citeable card (id/title/shelf/surface/snippet)
+
+
 def test_search_is_the_default():
     r = ask.respond("justice and mercy", SEC)
     assert r["kind"] == "found" and "results" in r

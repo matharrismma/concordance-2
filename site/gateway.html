@@ -211,8 +211,18 @@ safe_llm = guard(my_llm)                          <span class="c"># …or wrap i
             return '<div class="check"><div class="c"><span class="verdict '+vclass(c.verdict)+'" style="font-size:11px;padding:.15rem .4rem">'+
               esc(c.verdict)+'</span> '+esc(c.claim)+(c.domain?' <span class="kept">· '+esc(c.domain)+'</span>':'')+'</div>'+
               (c.detail?'<div class="d">'+esc(c.detail)+'</div>':'')+'</div>'; }).join("");
+        } else if((d.found || []).length){
+          // No computable claim — but the keeping holds the subject. Show the sourced cards, FOUND and
+          // cited, clearly NOT a computed verdict (no receipt): the two outcomes never blur.
+          h += '<div class="note">No computable claim to prove here — but the keeping holds this subject. '+
+               'Found and cited below (a sourced answer, not a computed verdict — no receipt):</div>';
+          h += d.found.map(function(c){
+            return '<div class="check"><div class="c"><span class="kept" style="font-size:11px">FOUND</span> '+
+              esc(c.title||c.id||"a card")+(c.shelf?' <span class="kept">· '+esc(c.shelf)+'</span>':'')+'</div>'+
+              (c.snippet?'<div class="d">'+esc(c.snippet)+'</div>':'')+'</div>'; }).join("");
         } else {
-          h += '<div class="note">No checkable claim was extracted — the engine would rather miss a claim than check the wrong one.</div>';
+          h += '<div class="note">No checkable claim was extracted, and the keeping holds nothing on it — '+
+               'the engine would rather find nothing than check the wrong thing. For a question rather than a claim, use /ask.</div>';
         }
         if(d.receipt){
           var url = d.receipt.charAt(0)==="/" ? "https://narrowhighway.org"+d.receipt : d.receipt;
