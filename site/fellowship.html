@@ -63,6 +63,10 @@
   .item .foot-row{display:flex; justify-content:space-between; align-items:center; gap:.6rem; margin-top:.3rem}
   .grouplist,.commonslist{margin-top:.6rem}
   .empty{color:var(--ink-faint); font-size:.9rem; font-style:italic; margin:.5rem 0}
+  select{font-family:inherit; font-size:.9rem; color:var(--ink); background:#fffdf6; border:1px solid var(--parch); border-radius:4px; padding:.38rem .5rem}
+  .served{margin-top:1.2rem; border-top:1px dashed var(--parch); padding-top:.7rem}
+  .served-h{font-family:Futura,"Avenir Next",sans-serif; text-transform:uppercase; letter-spacing:.16em;
+    font-size:.66rem; color:var(--brass-lo); margin-bottom:.4rem}
   details.start{margin-top:1rem; border-top:1px dashed var(--parch); padding-top:.7rem}
   details.start summary{cursor:pointer; font-family:Futura,"Avenir Next",sans-serif; text-transform:uppercase;
     letter-spacing:.14em; font-size:.66rem; color:var(--brass-lo)}
@@ -208,6 +212,11 @@ async function fingerprint(pub){
   return "nh_" + hex.slice(0,32);
 }
 async function signStr(str){ return b64u(await crypto.subtle.sign("Ed25519", PRIV, enc.encode(str))); }
+function unb64u(s){ var t=String(s||"").replace(/-/g,"+").replace(/_/g,"/"); while(t.length%4)t+="="; var raw=atob(t),o=new Uint8Array(raw.length); for(var i=0;i<raw.length;i++)o[i]=raw.charCodeAt(i); return o; }
+// A mesh post is a DETACHED signature over the exact canonical BYTES the engine handed back (GET
+// /mesh/signable -> canonical_b64u), not a string — decode, then sign the bytes with the key that
+// never leaves this page. The engine re-checks it against the public key pinned at your confession.
+async function signBytesB64u(canonB64u){ return b64u(await crypto.subtle.sign("Ed25519", PRIV, unb64u(canonB64u))); }
 async function api(method, path, body){
   const r = await fetch(path, {method, headers:{"Content-Type":"application/json"}, body: body?JSON.stringify(body):undefined});
   let j = {}; try{ j = await r.json(); }catch(e){}
@@ -232,6 +241,7 @@ async function openKey(){
     $("fp").textContent = FP;
     $("verses").value = "";                 // clear the phrase once the key is in memory
     $("idout").classList.add("hidden"); $("idin").classList.remove("hidden");
+    checkMesh();                              // already confessed? go straight into the fellowship
   }catch(e){ $("idErr").textContent = (e && e.message) || String(e); }
   $("open").disabled = false; $("open").textContent = "Open my key";
 }
@@ -284,6 +294,7 @@ async function startGroup(){
 }
 
 // ── the fellowship mesh ──
+const KINDS = [["word","a word"],["offer","an offer"],["need","a need"]];
 async function confess(){
   const st = $("confessStatus");
   if(!needKey(st)) return;
@@ -292,21 +303,96 @@ async function confess(){
     const confession = "Jesus Christ is Lord and Messiah";
     const sig = await signStr(confession);
     const r = await api("POST", "/mesh/node", {public_key:PUB, confession:confession, confession_sig:sig});
-    if(r.status===200){
-      $("meshgate").classList.add("hidden");
-      const inn = $("meshin"); inn.classList.remove("hidden");
-      inn.innerHTML = '<div class="gate"><b>You are in the fellowship.</b> The way widens as you are '+
-        'vouched and as you serve. Your node is your key — carry it, and you are known here by your walk, '+
-        'not your name. <span class="verse">"Behold, how good and how pleasant it is for brethren to '+
-        'dwell together in unity." — Psalm 133:1</span></div>';
-      try{
-        const m = await api("GET", "/mesh/map?fp="+encodeURIComponent(FP)+"&hops=2");
-        const nodes = (m.body && (m.body.nodes||m.body.reachable)) || [];
-        const cnt = Array.isArray(nodes) ? nodes.length : (m.body && m.body.count) || 0;
-        if(cnt) inn.innerHTML += '<p class="hint">'+cnt+' believer'+(cnt===1?'':'s')+' within reach of your node.</p>';
-      }catch(e){}
-    } else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not register your node."; }
+    if(r.status===200){ enterMesh(); }
+    else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not register your node."; }
   }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||String(e); }
+}
+function enterMesh(){
+  $("meshgate").classList.add("hidden");
+  const inn = $("meshin"); inn.classList.remove("hidden");
+  inn.innerHTML =
+    '<div class="gate"><b>You are in the fellowship.</b> Known here by your walk, not your name. '+
+      '<span class="hint" id="meshreach" style="display:block;margin-top:.25rem"></span>'+
+      '<span class="verse">"Behold, how good and how pleasant it is for brethren to dwell together in '+
+      'unity." — Psalm 133:1</span></div>'+
+    '<label for="mtext">Speak to those around you</label>'+
+    '<textarea id="mtext" placeholder="a word, an offer, a need — it reaches your neighbors, and theirs"></textarea>'+
+    '<div class="row"><select id="mkind">'+KINDS.map(function(k){return '<option value="'+k[0]+'">'+k[1]+'</option>';}).join("")+'</select>'+
+      '<button id="mpost" class="sm">Send</button>'+
+      '<span class="hint">Signed by your key; re-checkable offline.</span></div>'+
+    '<div class="status" id="mpostStatus"></div>'+
+    '<div class="served"><div class="served-h">What has reached you</div><div id="inbox"><p class="empty">Loading…</p></div></div>'+
+    '<div class="served"><div class="served-h">Your door</div><div id="door"><p class="empty">Loading…</p></div>'+
+      '<details class="start"><summary>Leave a word on a door</summary>'+
+        '<label for="dtarget">Their node id (their fingerprint)</label>'+
+        '<input type="text" id="dtarget" placeholder="nh_…">'+
+        '<label for="dtext">Your word</label>'+
+        '<input type="text" id="dtext" placeholder="the Lord bless you and keep you">'+
+        '<div class="row"><button id="dsend" class="sm">Leave it</button></div>'+
+        '<div class="status" id="dStatus"></div></details></div>';
+  $("mpost").addEventListener("click", postWord);
+  $("dsend").addEventListener("click", leaveNote);
+  loadInbox(); loadDoor();
+  api("GET", "/mesh/map?fp="+encodeURIComponent(FP)+"&hops=2").then(function(m){
+    const nodes=(m.body&&(m.body.nodes||m.body.reachable))||[]; const c=Array.isArray(nodes)?nodes.length:(m.body&&m.body.count)||0;
+    const el=$("meshreach"); if(c&&el) el.textContent=c+" believer"+(c===1?"":"s")+" within reach of your node.";
+  }).catch(function(){});
+}
+async function postWord(){
+  const text=($("mtext").value||"").trim(), kind=$("mkind").value, st=$("mpostStatus");
+  if(!text){ st.className="status err"; st.textContent="Say something first."; return; }
+  st.className="status"; st.textContent="Signing…";
+  try{
+    const sg = await api("GET","/mesh/signable?fp="+encodeURIComponent(FP)+"&text="+encodeURIComponent(text)+"&kind="+encodeURIComponent(kind)+"&ttl=2");
+    if(sg.status!==200 || !sg.body.canonical_b64u) throw new Error((sg.body&&sg.body.error)||"could not prepare");
+    const signature = await signBytesB64u(sg.body.canonical_b64u);
+    const r = await api("POST","/mesh/post",{fp:FP, text:text, kind:sg.body.kind, refs:[], ttl:sg.body.ttl, signature:signature, nonce:sg.body.nonce, created_at:sg.body.created_at});
+    if(r.status===200 && r.body && r.body.ok!==false){ st.className="status ok"; st.textContent="Sent — it is on the mesh."; $("mtext").value=""; loadInbox(); }
+    else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not send."; }
+  }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||String(e); }
+}
+function verifyBadge(v){ v=v||{}; if(v.authentic) return "✓ signed"; if(v.unaltered) return "unaltered"; return ""; }
+function msgItem(m){
+  const b=verifyBadge(m.verify);
+  return '<div class="item"><div class="t"><b>'+esc(m.from_callsign_current||m.callsign||"a believer")+'</b> '+
+    '<span class="m">'+esc(m.kind||"word")+(m.hops_away!=null?" · "+m.hops_away+" hop"+(m.hops_away===1?"":"s")+" away":"")+(b?" · "+b:"")+'</span></div>'+
+    '<div class="d">'+esc(m.text)+'</div></div>';
+}
+async function loadInbox(){
+  const el=$("inbox"); if(!el) return;
+  const r = await api("GET","/mesh/inbox?fp="+encodeURIComponent(FP)+"&limit=50");
+  const list=(r.body&&r.body.messages)||[];
+  el.innerHTML = list.length ? list.map(msgItem).join("") : '<p class="empty">Nothing has reached you yet. Speak, or be vouched closer in.</p>';
+}
+function noteItem(n){
+  const b=verifyBadge(n.verify);
+  return '<div class="item"><div class="t"><b>'+esc(n.from_callsign_current||n.callsign||"a believer")+'</b> '+
+    '<span class="m">'+esc(n.kind||"blessing")+(b?" · "+b:"")+'</span></div><div class="d">'+esc(n.text)+'</div></div>';
+}
+async function loadDoor(){
+  const el=$("door"); if(!el) return;
+  const r = await api("GET","/mesh/door?fp="+encodeURIComponent(FP)+"&limit=50");
+  const list=(r.body&&r.body.notes)||[];
+  el.innerHTML = list.length ? list.map(noteItem).join("") : '<p class="empty">No words on your door yet.</p>';
+}
+async function leaveNote(){
+  const target=($("dtarget").value||"").trim(), text=($("dtext").value||"").trim(), st=$("dStatus");
+  if(!target||!text){ st.className="status err"; st.textContent="A node id and a word are both needed."; return; }
+  st.className="status"; st.textContent="Signing…";
+  try{
+    const sg = await api("GET","/mesh/signable?fp="+encodeURIComponent(FP)+"&text="+encodeURIComponent(text)+"&target="+encodeURIComponent(target)+"&kind=blessing");
+    if(sg.status!==200 || !sg.body.canonical_b64u) throw new Error((sg.body&&sg.body.error)||"could not prepare");
+    const signature = await signBytesB64u(sg.body.canonical_b64u);
+    const r = await api("POST","/mesh/door",{fp:FP, target:target, text:text, kind:sg.body.kind, signature:signature, nonce:sg.body.nonce, created_at:sg.body.created_at});
+    if(r.status===200 && r.body && r.body.ok!==false){ st.className="status ok"; st.textContent="Left on their door."; $("dtext").value=""; }
+    else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not leave it — check the node id."; }
+  }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||String(e); }
+}
+async function checkMesh(){   // a returning member who already confessed goes straight in
+  try{
+    const r = await api("GET","/mesh/inbox?fp="+encodeURIComponent(FP)+"&limit=1");
+    if(r.status===200 && r.body && r.body.ok===true){ enterMesh(); }
+  }catch(e){}
 }
 
 // ── the commons ──
