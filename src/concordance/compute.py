@@ -29,6 +29,8 @@ _UNITS = {
     "centimeter": ("L", 0.01), "centimeters": ("L", 0.01), "cm": ("L", 0.01),
     "millimeter": ("L", 0.001), "millimeters": ("L", 0.001), "mm": ("L", 0.001),
     "gram": ("M", 1.0), "grams": ("M", 1.0), "g": ("M", 1.0),
+    "milligram": ("M", 0.001), "milligrams": ("M", 0.001), "mg": ("M", 0.001),
+    "microgram": ("M", 1e-6), "micrograms": ("M", 1e-6), "mcg": ("M", 1e-6),
     "kilogram": ("M", 1000.0), "kilograms": ("M", 1000.0), "kg": ("M", 1000.0),
     "pound": ("M", 453.59237), "pounds": ("M", 453.59237), "lb": ("M", 453.59237), "lbs": ("M", 453.59237),
     "ounce": ("M", 28.349523), "ounces": ("M", 28.349523), "oz": ("M", 28.349523),

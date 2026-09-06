@@ -263,13 +263,53 @@ def _x_physical_constant(text: str):
     return out
 
 
+# A claimed unit conversion — "1 mile is 1.609 kilometers", "500 mg is 0.5 grams", "100 degrees
+# fahrenheit is 37.78 celsius". A COMPUTABLE claim (conversions are the most common computable claim
+# in AI output), so it earns a verdict + receipt. The unit vocabulary is the verifier's own table
+# (compute._UNITS + _TEMP), so the extractor and verifier can never drift. Conservative: BOTH sides
+# must carry a known unit AND share a dimension (or both be temperatures) — a cross-dimension pair is
+# NOT extracted (units like "ounce" are ambiguous mass-vs-fluid; we decline rather than risk a false
+# BROKEN), and a bare "5 apples = 5 fruit" never matches (not units). The second value must be present,
+# so "convert 1 mile to km" (a question, no claimed answer) is left to the compute door.
+_UC_PAT: Optional[re.Pattern] = None
+
+
+def _uc_pattern() -> re.Pattern:
+    global _UC_PAT
+    if _UC_PAT is None:
+        from .compute import _UNITS, _TEMP
+        units = sorted(set(_UNITS) | set(_TEMP), key=len, reverse=True)
+        alt = "|".join(re.escape(u) for u in units)
+        n = r"(-?\d[\d,]*(?:\.\d+)?)"
+        _UC_PAT = re.compile(
+            n + r"\s*(?:degrees?\s+)?(" + alt + r")\b\s+" + _EQ +
+            r"\s*(?:about|approximately|roughly|around|~|≈)?\s*" +
+            n + r"\s*(?:degrees?\s+)?(" + alt + r")\b", re.I)
+    return _UC_PAT
+
+
+def _x_unit_conversion(text: str):
+    from .compute import _UNITS, _TEMP
+    out = []
+    for m in _uc_pattern().finditer(text):
+        u1, u2 = m.group(2).lower(), m.group(4).lower()
+        both_temp = u1 in _TEMP and u2 in _TEMP
+        same_dim = (u1 in _UNITS and u2 in _UNITS and _UNITS[u1][0] == _UNITS[u2][0])
+        if not (both_temp or same_dim):        # cross-dimension / mixed / unknown — not extracted
+            continue
+        out.append((_q(text, m), "unit_conversion",
+                    {"CONV_VERIFY": {"from_value": _f(m.group(1)), "from_unit": u1,
+                                     "to_value": _f(m.group(3)), "to_unit": u2}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),
     ("compound_interest", _x_compound), ("rule_of_72", _x_rule72),
     ("elapsed_years", _x_elapsed_years), ("day_of_week", _x_day_of_week),
     ("leap_year", _x_leap_year), ("nutrition_label", _x_nutrition),
-    ("physical_constant", _x_physical_constant),
+    ("physical_constant", _x_physical_constant), ("unit_conversion", _x_unit_conversion),
 )
 
 

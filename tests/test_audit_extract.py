@@ -116,6 +116,36 @@ def test_a_bare_symbol_or_common_word_is_not_a_constant_claim():
         assert "physical_constant" not in _extractors(t), t
 
 
+# ---- unit conversions (dogfood 2026-09-06): the most common computable claim in AI output ----
+
+def test_a_conversion_confirms_against_the_factor_table():
+    text = "1 mile is 1.609 kilometers"
+    assert _extractors(text) == ["unit_conversion"]
+    res = audit(text, CFG, seal=False)
+    assert res["held"] == 1 and res["broken"] == 0
+    assert res["results"][0]["domain"] == "unit_conversion"
+
+
+def test_a_wrong_conversion_is_broken():
+    res = audit("1 mile is 2 kilometers", CFG, seal=False)
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_milligrams_and_temperature_convert():
+    assert audit("500 mg is 0.5 grams", CFG, seal=False)["held"] == 1
+    assert audit("100 degrees fahrenheit is 37.78 celsius", CFG, seal=False)["held"] == 1
+    # 100 F is 37.78 C, not 50 — a false temperature claim must break
+    assert audit("100 degrees fahrenheit is 50 degrees celsius", CFG, seal=False)["broken"] == 1
+
+
+def test_cross_dimension_and_non_unit_pairs_are_not_extracted():
+    """Conservative: a cross-dimension pair (the table's 'ounce' is mass; a cup is volume) is NOT
+    extracted — 'ounce' is ambiguous mass-vs-fluid, so we decline rather than risk a false BROKEN on a
+    true fluid-ounce claim. A non-unit pair ('5 apples is 5 fruit') never matches at all."""
+    for t in ["2 cups is 16 ounces", "5 apples is 5 fruit", "the team is 5 people"]:
+        assert "unit_conversion" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))
