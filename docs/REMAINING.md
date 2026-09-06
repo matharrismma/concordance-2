@@ -125,11 +125,13 @@ SOP before trusting it; this sheet is a map, the running engine is the territory
 
 ## Cross-cutting — no single subsystem
 
-- **`surface-1` · The surfacing decision.** *Open — needs Matt.* Built-but-unhosted features have
-  endpoints/renderers but no front door: the **Gateway** ("private in, verified out", a code snippet
-  today), the theory **grid**, the **Floor**, the **Bible atlas**. Which gets a door first is a
-  product call. Legacy: `HANDOFF #5`, map audit. (The generic orphan-route triage is otherwise
-  CLOSED — reachability is green as of `03a9322`.)
+- **`surface-1` · The surfacing decision.** *In progress — the Gateway shipped.* The **Gateway**
+  ("private in, verified out") is now a live, demo-able product surface (`c454d5a`): `site/gateway.html`
+  strips PII in the browser (redact.js, nothing sent) and verifies a claim into a re-checkable receipt;
+  the `/verify` door was extended to take a plain-language `claim`. **This is THE wedge** (the 2026-09-05
+  pivot: narrow the mode, validate with one real user — get a design partner to try it). Still unhosted:
+  the theory **grid**, the **Floor**, the **Bible atlas** — but those wait behind the wedge, deliberately.
+  Legacy: `HANDOFF #5`, the pivot. (Generic orphan-route triage CLOSED — reachability green `03a9322`.)
 - **`commons-1` · First wings stocked** (recipes · music · art, PD seed cards) — a wing never
   announced before it is stocked. Legacy: `PUNCHLIST C1e`, `GAPS G3`.
 - **`commons-2` · Opportunities to serve** (Romans 12:1): a member posts a need or an offer, matched

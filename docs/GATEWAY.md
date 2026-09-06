@@ -1,5 +1,11 @@
 # The Gateway — private in, verified out
 
+> **Try it live: [narrowhighway.com/gateway.html](https://narrowhighway.com/gateway.html)** — strip PII
+> in your own browser (nothing is sent) and verify a claim into a re-checkable receipt, with the
+> copy-paste snippets. The verified door also takes a **plain-language claim** now, not only a
+> structured spec: `POST /verify {"claim":"the speed of light is 299792458 m/s"}` → `{verdict, checks,
+> receipt}` (the engine finds + checks it; the receipt is a permanent `/s/<hash>` seal).
+
 Put Narrow Highway's two distinctives in front of *any* AI you already use:
 
 - **Private** — strip personal context to stable placeholders before text is sent, reapply it
