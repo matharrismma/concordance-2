@@ -79,9 +79,11 @@
   <div class="kick">The Gateway</div>
   <h1>Private in, <span class="em">verified out</span>.</h1>
   <p class="lede">Put Narrow Highway's two distinctives in front of <b>any AI you already use</b>.
-  <b>Strip</b> personal context to stable placeholders before the model sees it — on your device, so
-  the data never reaches us. <b>Verify</b> any claim into a permanent, re-checkable receipt — a verdict
-  and the worked reasoning, not "trust me." Both run at your edge. Try them right here.</p>
+  <b>Strip</b> personal context to stable placeholders before the model sees it — this runs on your
+  device, so that data never reaches us. <b>Verify</b> any claim into a permanent, re-checkable
+  receipt — a verdict and the worked reasoning, not "trust me." Verifying sends only the claim, checked
+  transiently and stored nowhere (and redacted before it is sealed) — or run the whole engine locally
+  and nothing leaves at all. Try them right here.</p>
 
   <div class="cols">
     <!-- PRIVATE — runs in the browser -->
@@ -102,9 +104,11 @@
 
     <!-- VERIFIED — calls the engine -->
     <div class="card">
-      <span class="where">Checked by the engine · sealed</span>
+      <span class="where">Sent to the engine · store-nothing · sealed</span>
       <h2>Verified</h2>
-      <div class="sub">A claim in — a verdict, the worked reasoning, and a receipt you can re-check.</div>
+      <div class="sub">A claim in — a verdict, the worked reasoning, and a receipt you can re-check.
+      Unlike the strip on the left, this <b>sends your claim to the engine</b>: checked transiently,
+      stored nowhere, redacted before it is sealed.</div>
       <textarea id="vin">The speed of light is 299792458 m/s and 2 + 2 = 5.</textarea>
       <button class="btn" id="vbtn" type="button">Verify it →</button>
       <div class="out" id="vout" hidden></div>
