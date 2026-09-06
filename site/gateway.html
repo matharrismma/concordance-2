@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Gateway — private in, verified out</title>
+<meta name="description" content="Put Narrow Highway's two distinctives in front of any AI you already use: strip personal context to placeholders before the model sees it (on your device — the data never reaches us), and turn any claim into a re-checkable receipt (verdict + worked trail + sealed hash). Try both live; copy the snippet.">
+<meta name="theme-color" content="#0c6b5f">
+<style>
+  :root{ --bg:#f6f5f1; --panel:#ffffff; --ink:#16150f; --ink-soft:#5a574d; --ink-faint:#8a877c;
+         --line:#e3e0d6; --line-soft:#eeece4; --seal:#0c6b5f; --seal-bright:#0e8577; --seal-wash:rgba(12,107,95,.08);
+         --warn:#9a5b1b; --mono:"IBM Plex Mono",ui-monospace,"Cascadia Code",Menlo,monospace; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --bg:#111310; --panel:#191b17; --ink:#eceadf; --ink-soft:#b3afa1; --ink-faint:#7f7c70;
+    --line:#2a2c26; --line-soft:#222420; --seal:#3bb6a3; --seal-bright:#54cbb8; --seal-wash:rgba(59,182,163,.12); --warn:#d69a56; } }
+  :root[data-theme="dark"]{ --bg:#111310; --panel:#191b17; --ink:#eceadf; --ink-soft:#b3afa1; --ink-faint:#7f7c70;
+    --line:#2a2c26; --line-soft:#222420; --seal:#3bb6a3; --seal-bright:#54cbb8; --seal-wash:rgba(59,182,163,.12); --warn:#d69a56; }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--bg); color:var(--ink); font:16px/1.6 -apple-system,"Segoe UI",Roboto,sans-serif}
+  a{color:var(--seal)}
+  .wrap{max-width:60rem; margin:0 auto; padding:1.4rem 1.3rem 5rem}
+  header.bar{display:flex; align-items:center; gap:1rem; max-width:60rem; margin:0 auto; padding:1.1rem 1.3rem}
+  .brand{font-weight:700; letter-spacing:.01em; text-decoration:none; color:var(--ink); display:flex; align-items:center; gap:.5rem}
+  .brand .mk{width:14px; height:14px; border:2px solid var(--seal); border-radius:50%}
+  header .sp{flex:1}
+  header nav a{color:var(--ink-soft); text-decoration:none; font-size:.92rem; margin-left:1.1rem}
+  .kick{font:600 11px/1 var(--mono); letter-spacing:.18em; text-transform:uppercase; color:var(--seal)}
+  h1{font:600 2.5rem/1.1 Georgia,"Times New Roman",serif; margin:.5rem 0 .5rem; letter-spacing:-.01em}
+  h1 .em{color:var(--seal); font-style:italic}
+  .lede{font-size:1.12rem; color:var(--ink-soft); max-width:44rem}
+  .lede b{color:var(--ink)}
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:1.3rem; margin-top:2.2rem}
+  @media (max-width:780px){ .cols{grid-template-columns:1fr} h1{font-size:2rem} }
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:1.2rem 1.25rem}
+  .card h2{font-size:1.18rem; margin:.1rem 0 .2rem}
+  .card .sub{color:var(--ink-soft); font-size:.93rem; margin-bottom:.9rem}
+  .card .where{font:600 10px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--seal);
+    background:var(--seal-wash); padding:.28rem .5rem; border-radius:6px; display:inline-block; margin-bottom:.7rem}
+  textarea{width:100%; min-height:5rem; resize:vertical; font:inherit; font-size:.95rem; color:var(--ink);
+    background:var(--bg); border:1px solid var(--line); border-radius:9px; padding:.65rem .75rem}
+  .btn{margin-top:.7rem; font:600 15px/1 inherit; padding:.62rem 1.1rem; border:1px solid var(--seal);
+    border-radius:9px; background:var(--seal); color:#fff; cursor:pointer}
+  .btn:hover{background:var(--seal-bright); border-color:var(--seal-bright)}
+  .out{margin-top:.9rem; font-size:.92rem}
+  .out .lbl{font:600 10px/1 var(--mono); letter-spacing:.09em; text-transform:uppercase; color:var(--ink-faint); margin:.7rem 0 .25rem}
+  .clean{font-family:var(--mono); font-size:.86rem; background:var(--bg); border:1px solid var(--line-soft);
+    border-radius:8px; padding:.6rem .7rem; white-space:pre-wrap; word-break:break-word}
+  .tok{color:var(--seal); font-weight:600}
+  .kept{color:var(--ink-faint); font-size:.85rem}
+  .verdict{font:700 13px/1 var(--mono); letter-spacing:.06em; padding:.3rem .55rem; border-radius:6px; display:inline-block}
+  .v-holds{color:var(--seal); background:var(--seal-wash)}
+  .v-broken{color:#b23b3b; background:rgba(178,59,59,.1)}
+  .v-other{color:var(--warn); background:rgba(154,91,27,.1)}
+  .check{border-top:1px solid var(--line-soft); padding:.55rem 0}
+  .check .c{font-weight:600; font-size:.93rem} .check .d{color:var(--ink-soft); font-size:.88rem; margin-top:.15rem}
+  .receipt{margin-top:.8rem; padding:.6rem .7rem; border:1px solid var(--seal); border-radius:8px; background:var(--seal-wash); font-size:.9rem}
+  .receipt a{font-family:var(--mono); font-size:.82rem; word-break:break-all}
+  .note{color:var(--ink-faint); font-size:.85rem; margin-top:.6rem}
+  section.snips{margin-top:2.6rem}
+  section.snips h2{font-size:1.3rem; margin-bottom:.3rem}
+  .snip{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:0; margin-top:1rem; overflow:hidden}
+  .snip .h{display:flex; align-items:center; gap:.6rem; padding:.7rem .95rem; border-bottom:1px solid var(--line-soft)}
+  .snip .h b{font-size:.95rem} .snip .h span{color:var(--ink-faint); font-size:.85rem}
+  pre{margin:0; padding:.85rem .95rem; overflow-x:auto; font-family:var(--mono); font-size:.82rem; line-height:1.5; color:var(--ink)}
+  pre .c{color:var(--ink-faint)} pre .k{color:var(--seal)}
+  footer{max-width:60rem; margin:3rem auto 0; padding:1.4rem 1.3rem 0; border-top:1px solid var(--line);
+    color:var(--ink-faint); font-size:.88rem; display:flex; gap:1.3rem; flex-wrap:wrap}
+  footer a{color:var(--ink-soft); text-decoration:none} footer .sp{flex:1}
+</style>
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="/"><span class="mk"></span>Narrow Highway</a>
+  <span class="sp"></span>
+  <nav><a href="/#api">API</a><a href="/capabilities">Capabilities</a><a href="https://narrowhighway.org">The witness ›</a></nav>
+</header>
+
+<div class="wrap">
+  <div class="kick">The Gateway</div>
+  <h1>Private in, <span class="em">verified out</span>.</h1>
+  <p class="lede">Put Narrow Highway's two distinctives in front of <b>any AI you already use</b>.
+  <b>Strip</b> personal context to stable placeholders before the model sees it — on your device, so
+  the data never reaches us. <b>Verify</b> any claim into a permanent, re-checkable receipt — a verdict
+  and the worked reasoning, not "trust me." Both run at your edge. Try them right here.</p>
+
+  <div class="cols">
+    <!-- PRIVATE — runs in the browser -->
+    <div class="card">
+      <span class="where">Runs on your device</span>
+      <h2>Private</h2>
+      <div class="sub">Email, SSN, card, IP, URL → stable placeholders. Nothing is sent anywhere.</div>
+      <textarea id="pin">Email me at jane@acme.com — my card is 4111 1111 1111 1111 and I'm at 10.0.0.42.</textarea>
+      <button class="btn" id="pbtn" type="button">Strip it →</button>
+      <div class="out" id="pout" hidden>
+        <div class="lbl">What an LLM would see</div>
+        <div class="clean" id="pclean"></div>
+        <div class="lbl">Kept on your side (never sent)</div>
+        <div class="clean kept" id="pmap"></div>
+        <div class="note" id="pnote"></div>
+      </div>
+    </div>
+
+    <!-- VERIFIED — calls the engine -->
+    <div class="card">
+      <span class="where">Checked by the engine · sealed</span>
+      <h2>Verified</h2>
+      <div class="sub">A claim in — a verdict, the worked reasoning, and a receipt you can re-check.</div>
+      <textarea id="vin">The speed of light is 299792458 m/s and 2 + 2 = 5.</textarea>
+      <button class="btn" id="vbtn" type="button">Verify it →</button>
+      <div class="out" id="vout" hidden></div>
+    </div>
+  </div>
+
+  <section class="snips">
+    <h2>Build it in five minutes</h2>
+    <p class="lede" style="font-size:1rem">The engine finds and verifies; it never generates. Point an
+    agent at a local engine (<span style="font-family:var(--mono);font-size:.85rem">python -m concordance mcp</span>)
+    and the text never leaves your machine at all.</p>
+
+    <div class="snip">
+      <div class="h"><b>Browser</b> <span>vanilla JS, zero build — the model never sees the personal details</span></div>
+<pre><span class="c">&lt;!-- one script, then wrap any LLM/API call --&gt;</span>
+&lt;script src="https://narrowhighway.org/redact.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  <span class="k">const</span> ask = Rampart.guard(<span class="k">async</span> (clean) =&gt; {
+    <span class="c">// `clean` has [EMAIL_1], [CARD_1]… — the originals stay on this device</span>
+    <span class="k">const</span> r = <span class="k">await</span> fetch("https://some-llm.example/v1/chat", {
+      method: "POST", body: JSON.stringify({ prompt: clean })
+    });
+    <span class="k">return</span> (<span class="k">await</span> r.json()).text;
+  });
+  <span class="k">const</span> answer = <span class="k">await</span> ask(userText);  <span class="c">// scrub in, reveal out — automatically</span>
+&lt;/script&gt;</pre>
+    </div>
+
+    <div class="snip">
+      <div class="h"><b>Verify a claim → a receipt</b> <span>curl · the receipt URL is permanent and re-checkable</span></div>
+<pre>curl -s -X POST https://narrowhighway.org/verify \
+  -H content-type:application/json \
+  -d '{"claim":"the speed of light is 299792458 m/s"}'
+<span class="c"># → { "verdict":"HOLDS",
+#     "checks":[{"claim":"…","verdict":"CONFIRMED","domain":"physics","detail":"…"}],
+#     "receipt":"https://narrowhighway.org/s/&lt;hash&gt;",   ← proof, not "trust me"
+#     "generated": false }</span></pre>
+    </div>
+
+    <div class="snip">
+      <div class="h"><b>Server</b> <span>Python, stdlib — strip at your edge, we never see the data</span></div>
+<pre><span class="k">from</span> concordance.gateway <span class="k">import</span> scrub, restore, guard
+
+clean, mapping = scrub("email me at a@b.com")   <span class="c"># ("email me at [EMAIL_1]", {…})</span>
+reply = my_llm(clean)                            <span class="c"># the model never sees the email</span>
+final = restore(reply, mapping)                  <span class="c"># reapply locally</span>
+
+safe_llm = guard(my_llm)                          <span class="c"># …or wrap it once</span></pre>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <span>A conduit, not a source · the engine finds and verifies · nothing is generated · nothing is stored</span>
+  <span class="sp"></span>
+  <a href="/capabilities">capabilities</a><a href="/llms.txt">for agents</a><a href="https://narrowhighway.org">the witness ›</a>
+</footer>
+
+<script src="/redact.js"></script>
+<script>
+(function(){
+  var API = location.origin;
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+
+  // PRIVATE — entirely in the browser, via Rampart.protect (redact.js). Nothing leaves the page.
+  function strip(){
+    var t = document.getElementById("pin").value;
+    var r = (window.Rampart ? Rampart.protect(t) : {clean:t, map:{}});
+    var shown = esc(r.clean).replace(/\[[A-Z]+_\d+\]/g, function(m){ return '<span class="tok">'+m+'</span>'; });
+    document.getElementById("pclean").innerHTML = shown || "<span class='kept'>(nothing to strip)</span>";
+    var keys = Object.keys(r.map||{});
+    document.getElementById("pmap").innerHTML = keys.length
+      ? keys.map(function(k){ return '<span class="tok">'+esc(k)+'</span> = '+esc(r.map[k]); }).join("<br>")
+      : "(no personal details found)";
+    document.getElementById("pnote").textContent = keys.length
+      ? "↑ This ran in your browser. The " + keys.length + " item(s) above were never sent to us."
+      : "Add an email, card, SSN, IP or URL above and strip again.";
+    document.getElementById("pout").hidden = false;
+  }
+  document.getElementById("pbtn").addEventListener("click", strip);
+
+  // VERIFIED — POST the claim to /verify; show verdict, each check, and the clickable receipt.
+  function vclass(v){ v=String(v||"").toUpperCase();
+    if(v==="HOLDS"||v==="CONFIRMED") return "v-holds";
+    if(v==="BROKEN"||v==="MISMATCH") return "v-broken"; return "v-other"; }
+  function verify(){
+    var t = document.getElementById("vin").value.trim();
+    var out = document.getElementById("vout");
+    out.hidden = false; out.innerHTML = '<div class="note">Checking across the engine’s domains…</div>';
+    fetch(API + "/verify", { method:"POST", headers:{"content-type":"application/json"},
+      body: JSON.stringify({ claim: t }) })
+      .then(function(r){ return r.json(); })
+      .then(function(raw){
+        var d = (raw && raw.data) ? raw.data : raw;
+        if(!d || d.error){ out.innerHTML = '<div class="note">'+esc((d&&d.error)||"could not verify")+'</div>'; return; }
+        var h = '<span class="verdict '+vclass(d.verdict)+'">'+esc(d.verdict||"—")+'</span>';
+        var checks = d.checks || [];
+        if(checks.length){
+          h += checks.map(function(c){
+            return '<div class="check"><div class="c"><span class="verdict '+vclass(c.verdict)+'" style="font-size:11px;padding:.15rem .4rem">'+
+              esc(c.verdict)+'</span> '+esc(c.claim)+(c.domain?' <span class="kept">· '+esc(c.domain)+'</span>':'')+'</div>'+
+              (c.detail?'<div class="d">'+esc(c.detail)+'</div>':'')+'</div>'; }).join("");
+        } else {
+          h += '<div class="note">No checkable claim was extracted — the engine would rather miss a claim than check the wrong one.</div>';
+        }
+        if(d.receipt){
+          var url = d.receipt.charAt(0)==="/" ? "https://narrowhighway.org"+d.receipt : d.receipt;
+          h += '<div class="receipt">Receipt — permanent &amp; re-checkable:<br><a href="'+esc(url)+'" target="_blank" rel="noopener">'+esc(url)+'</a></div>';
+        }
+        if(d.note) h += '<div class="note">'+esc(d.note)+'</div>';
+        out.innerHTML = h;
+      })
+      .catch(function(){ out.innerHTML = '<div class="note">Couldn’t reach the engine. Try again.</div>'; });
+  }
+  document.getElementById("vbtn").addEventListener("click", verify);
+})();
+</script>
+</body>
+</html>

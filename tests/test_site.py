@@ -85,7 +85,10 @@ def test_every_page_offers_a_way_home():
               # harmony.html + timeline.html are self-contained scripture study surfaces with their
               # own nav (modeled on prophecy.html), reached from the Bible study-desk nav (bible.html),
               # not the shared witness home control.
-              "harmony.html", "timeline.html"}
+              "harmony.html", "timeline.html",
+              # gateway.html — the .com Gateway product surface ("private in, verified out"), its own
+              # nav, reached from com.html's receipt section, not the shared witness home control.
+              "gateway.html"}
     missing = [f.name for f in SITE.glob("*.html")
                if f.name != "index.html" and f.name not in hidden
                and "nh-home.js" not in f.read_text(encoding="utf-8")]
@@ -144,7 +147,9 @@ def test_the_palette_reaches_every_public_page():
                "com.html", "systems.html", "prophecy.html",
                # harmony.html + timeline.html — study aids reached from the Bible study-desk nav
                # (bible.html), a direct nav like prophecy.html, deliberately off the Ctrl-K palette.
-               "harmony.html", "timeline.html"}
+               "harmony.html", "timeline.html",
+               # gateway.html — the .com Gateway, reached from com.html's receipt section, not the palette.
+               "gateway.html"}
     unreachable = sorted(
         p.name for p in SITE.glob("*.html") if p.name not in listed and p.name not in excused)
     assert not unreachable, f"no way to reach: {unreachable} (list them or excuse them by name)"

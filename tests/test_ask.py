@@ -163,6 +163,26 @@ def test_verify_hands_a_receipt_and_catches_falsehood():
     assert bad["verify"]["verdict"] == "BROKEN"
 
 
+def test_the_gateway_verify_door_takes_a_free_text_claim_and_seals():
+    """The Gateway's 'verified out' door (the wedge, 2026-09-05): POST /verify with a plain-language
+    `claim` (not a structured spec) → the auditor finds + checks it and returns a verdict, the checks,
+    and a permanent re-checkable receipt. Proof, not 'trust me'; nothing generated. The structured
+    {mode,params}/{steps} moat path shares the handler and must stay intact."""
+    from concordance.web import api
+    st, r = api.dispatch("POST", "/verify", {}, {"claim": "2+2=4"}, SEC)
+    assert st == 200
+    assert r.get("verdict") == "HOLDS"
+    assert r.get("checks") and r["checks"][0]["verdict"] == "CONFIRMED"
+    assert r.get("receipt") and "/s/" in r["receipt"]      # a re-checkable seal, not "trust me"
+    assert r.get("generated") is False
+    # the structured moat path still answers on the same door (regression guard on the shared handler)
+    st2, r2 = api.dispatch("POST", "/verify", {},
+                           {"steps": [{"id": "a", "domain": "mathematics",
+                                       "spec": {"mode": "equality", "expr_a": "2+2",
+                                                "expr_b": "4", "variables": {}}}]}, SEC)
+    assert st2 == 200 and "verdict" in r2
+
+
 def test_search_is_the_default():
     r = ask.respond("justice and mercy", SEC)
     assert r["kind"] == "found" and "results" in r

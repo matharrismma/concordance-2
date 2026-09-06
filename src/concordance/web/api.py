@@ -916,6 +916,33 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # /derivation/verify is the 1.0-compatible alias (preserves the public moat contract).
         if not isinstance(body, dict):
             return _err(400, "JSON object body required")
+        # THE GATEWAY'S "VERIFIED OUT" DOOR, free-text case (the wedge, 2026-09-05): an agent hands us
+        # a plain-language `claim` — we FIND the checkable claim(s), verify across the engine's domains,
+        # and hand back a verdict + a permanent, re-checkable receipt. Proof, not "trust me." Nothing
+        # generated; nothing stored (store-nothing, no account); the claim is redacted before it is
+        # sealed, so the receipt carries no PII. The precise moat path (structured {steps}/{mode,params})
+        # stays below unchanged — this only adds the plain-claim door GATEWAY.md points agents to.
+        claim = str(body.get("claim") or body.get("text") or "").strip()
+        if claim and not body.get("steps") and not body.get("mode"):
+            from .. import audit as _audit
+            seal_on = str(query.get("seal", "1")).lower() not in ("0", "false", "no", "off")
+            ar = _audit.audit(claim, config, seal=seal_on)
+            seal = ar.get("seal") or {}
+            receipt = seal.get("cite_url") or (f"/s/{seal['content_hash']}" if seal.get("content_hash") else None)
+            telemetry.record("verify", surface=surface, verdict=ar.get("verdict"),
+                             mode="claim", sealed=bool(seal))
+            return _ok({
+                "verdict": ar.get("verdict"), "claims_found": ar.get("claims_found", 0),
+                "held": ar.get("held", 0), "broken": ar.get("broken", 0),
+                "unchecked": ar.get("unchecked", 0),
+                "checks": [{"claim": c.get("claim"), "verdict": c.get("status"),
+                            "domain": c.get("domain"), "detail": c.get("detail")}
+                           for c in (ar.get("results") or [])],
+                "receipt": receipt, "generated": False,
+                "note": ("found and verified across the engine's domains, never generated; only the "
+                         "claims named were checked; the receipt is permanent and re-checkable; the "
+                         "claim text is redacted before sealing, so the receipt carries no personal data."),
+            })
         dom = "mathematics"
         if isinstance(body.get("steps"), list):
             res = verify_derivation(body["steps"])
