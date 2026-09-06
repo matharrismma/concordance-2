@@ -79,6 +79,43 @@ def test_ambiguous_text_extracts_nothing():
         assert extract(t) == [], t
 
 
+# ---- named physical constants (dogfood 2026-09-06): a COMPUTABLE claim, so a verdict + receipt ----
+
+def test_a_named_constant_confirms_against_codata():
+    text = "the speed of light is 299792458 m/s"
+    assert _extractors(text) == ["physical_constant"]
+    res = audit(text, CFG, seal=False)
+    assert res["held"] == 1 and res["broken"] == 0
+    assert res["results"][0]["domain"] == "physical_constants"
+
+
+def test_a_wrong_constant_value_is_broken():
+    res = audit("the speed of light is 300000000 m/s", CFG, seal=False)  # rounded, outside 1e-4
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_a_true_constant_is_never_broken_by_unit_formatting():
+    """The gas constant IS 8.314 J/(mol·K); written "J/K/mol" the stored form differs, but the value
+    is right. The unit is passed to the verifier ONLY when it will confirm, so a true claim is checked
+    on its value and never falsely BROKEN over unit spelling — the auditor's asymmetry, applied here."""
+    res = audit("the ideal gas constant is 8.314 J/K/mol", CFG, seal=False)
+    assert res["held"] == 1 and res["broken"] == 0
+
+
+def test_scientific_notation_and_apostrophe_names_extract():
+    assert _extractors("avogadro's number is 6.022e23") == ["physical_constant"]
+    res = audit("the boltzmann constant is 1.380649e-23 J/K", CFG, seal=False)
+    assert res["held"] == 1
+
+
+def test_a_bare_symbol_or_common_word_is_not_a_constant_claim():
+    """Conservative: a lone symbol/greek letter or a common word is far too ambiguous in prose, so it
+    is NOT matched as a constant. The required numeric value guards the rest — better to miss than to
+    tell someone their unrelated number is a wrong physical constant."""
+    for t in ["alpha is 0.5", "c is 4", "the total is 36", "e is 2.718", "our margin is 0.1"]:
+        assert "physical_constant" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))

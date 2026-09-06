@@ -206,12 +206,70 @@ def _x_nutrition(text: str):
     return out
 
 
+# A named fundamental physical constant asserted to a value — "the speed of light is 299792458 m/s".
+# This is a COMPUTABLE claim (the wedge's differentiator: AI models emit constants often), so it earns
+# a verdict + receipt, not just a find. The name alternation is built ONCE from the verifier's own
+# CODATA table + its curated aliases — so the extractor can only name a constant the verifier actually
+# knows, and stays in lock-step with it. Conservative, per the auditor's asymmetry:
+#   * a bare symbol ("c", "e", "g", "alpha") is NOT matched — far too ambiguous in prose; only the
+#     full constant names, multi-word alias phrases, and a few unmistakable proper names (planck,
+#     boltzmann, avogadro, faraday) are candidates. The required numeric value guards the rest.
+#   * the unit is passed to the verifier ONLY when it normalize-MATCHES the constant's own unit — i.e.
+#     only when it will CONFIRM. A true claim can then never be falsely BROKEN over unit formatting
+#     ("8.314 J/K/mol" for the gas constant is correct, but its stored form differs, so we check the
+#     value alone rather than break it); any other unit is dropped and only the value is checked. The
+#     residual — the exact numeric value stated under a wrong unit label — is left to the structured
+#     door, which checks units deliberately. Scientific "e" notation is read; "x 10^n" is left to miss.
+_PC_SAFE_SINGLE = frozenset({"planck", "boltzmann", "avogadro", "faraday"})
+_PC_PAT: Optional[re.Pattern] = None
+
+
+def _pc_pattern() -> re.Pattern:
+    global _PC_PAT
+    if _PC_PAT is None:
+        from .verifiers import physical_constants as _pc
+        names = {k.replace("_", " ") for k in _pc._CONSTANTS}
+        for k in _pc._ALIASES:
+            phrase = k.replace("_", " ")
+            if " " in phrase or phrase in _PC_SAFE_SINGLE:
+                names.add(phrase)
+        alt = "|".join(re.escape(n) for n in sorted(names, key=len, reverse=True))
+        _PC_PAT = re.compile(
+            r"\b(?:the\s+)?(" + alt + r")\s+" + _EQ +
+            r"\s*(?:about|approximately|roughly|around|~|≈)?\s*"
+            r"(\d[\d,]*(?:\.\d+)?(?:\s*[eE]\s*[-+]?\d+)?)"
+            r"\s*([^\s.,;:!?]{1,14})?", re.I)
+    return _PC_PAT
+
+
+def _x_physical_constant(text: str):
+    from .verifiers import physical_constants as _pc
+    out = []
+    for m in _pc_pattern().finditer(text):
+        canon = _pc._canonical(m.group(1))
+        if canon not in _pc._CONSTANTS:            # the name must resolve to a constant it truly knows
+            continue
+        try:
+            value = float(m.group(2).replace(",", "").replace(" ", ""))
+        except ValueError:
+            continue
+        cv: Dict[str, Any] = {"constant": canon, "claimed_value": value}
+        unit = (m.group(3) or "").strip()
+        if unit:                                    # pass the unit ONLY when it will confirm (see above)
+            stored = _pc._CONSTANTS[canon]["unit"]
+            if unit.lower() == stored.lower() or _pc._normalize_unit(unit) == _pc._normalize_unit(stored):
+                cv["claimed_unit"] = unit
+        out.append((_q(text, m), "physical_constants", {"CONST_VERIFY": cv}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),
     ("compound_interest", _x_compound), ("rule_of_72", _x_rule72),
     ("elapsed_years", _x_elapsed_years), ("day_of_week", _x_day_of_week),
     ("leap_year", _x_leap_year), ("nutrition_label", _x_nutrition),
+    ("physical_constant", _x_physical_constant),
 )
 
 
