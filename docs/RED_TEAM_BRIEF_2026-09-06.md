@@ -38,6 +38,17 @@ Changed in the last few sessions (commit → what):
   → verdict + checks + sealed receipt; also structured `{mode,params}`/`{steps}`) and **`site/gateway.html`**
   (in-browser PII strip via `redact.js` + a live verify demo). This is the newest, most-exposed code.
   Attack: injection into the claim; the redact-before-seal guarantee; DoS; the "private in" messaging.
+- **The `/verify` dogfood fixes** (`f7561f7` find-fallback, `6a34431` physical-constants extractor) —
+  freshest of all. (a) When the auditor extracts NO computable claim, the door now runs a corpus
+  **find-fallback** and returns sourced cards in `found` (verdict stays `NOTHING_TO_CHECK`, receipt
+  stays `None`). Attack: get a **withheld/non-PD** card body into `found` (it must obey the same
+  `is_public` gate as `/search`); make a `found` result read as a computed verdict (the two must never
+  blur — no receipt on a find); reach witness-gated content on `.com` through it. (b) A new
+  **physical-constants extractor** in `audit.py` mints a real receipt for "the speed of light is
+  299792458 m/s". Attack: a **false HOLDS** (a bare symbol matched as a constant; a wrong value inside
+  1e-4; the exact value under a wrong unit label — the free-text door checks the unit only when it
+  normalize-matches, so a wrong compact unit may slip a value-correct claim to HOLDS); a false BROKEN
+  on a true claim over unit formatting.
 - **Box RAM / freeze fix** (`b3e3d56`, `1565a6f`) — `corpus_db._shards_dir()` now defaults to
   `DATA_DIR/shards`; freezing was enabled; the box `.env` changed; shards rebuilt (687k). Attack: a
   frozen shelf that serves a stub where a body belongs (a stale-read); a shard that leaks a withheld
@@ -86,13 +97,18 @@ All PASSED; re-test if you distrust the method (I do want you to).
   `gateway.html`'s "Verify it" box is human-facing — a distressed person *could* type a cry there and
   get `NOTHING_TO_CHECK`. Judge whether that's an acceptable seam. (I chose not to hack crisis into the
   claim door.)
-- **`/verify` coverage is bounded by the extractors, by design.** The auditor extracts only claims it can
-  deterministically check (math, physical constants, the 65 domains) and is deliberately conservative —
-  "would rather miss a claim than check the wrong one." So many plain-language claims (e.g. "water boils
-  at 100 °C") return `NOTHING_TO_CHECK`, not a verdict. This is the *nothing-generated* discipline: it
-  never guesses at a claim it can't compute or find. A red-teamer will notice the door "does nothing" for
-  most free text — that is honest, not a bug; the failure mode to hunt is the opposite: a claim it checks
-  and gets *wrong*, or a false HOLDS. `gateway.html` states the miss ("no checkable claim was extracted").
+- **`/verify` coverage is bounded by the extractors, by design — with a find-fallback beneath it.** The
+  auditor extracts only claims it can deterministically COMPUTE (arithmetic, physical constants, the
+  domains) and is deliberately conservative — "rather miss a claim than check the wrong one." When it
+  computes nothing, the door no longer dead-ends: it runs a corpus **find** and returns sourced cards in
+  `found` — cited, explicitly NOT a computed verdict (verdict stays `NOTHING_TO_CHECK`, no receipt). So a
+  lookup fact ("water boils at 100 °C", a drug dose) now yields a sourced answer, and only a subject with
+  nothing kept is a true gap. Dogfood (2026-09-06): a 15-claim developer battery went from 2/15 useful to
+  15/15 (4 proved-with-receipt, 11 found-and-cited, 0 gaps). Two honesty seams for a red-teamer: (i) a
+  `found` result is NOT an adjudication of the claim — "8000 mg of acetaminophen is safe" returns
+  acetaminophen cards, it does NOT flag the claim false; the note says so, but judge whether a reader
+  could mistake found-on-subject for verified-true. (ii) The failure mode to hunt is still a computed
+  claim it gets WRONG — a false HOLDS or a false BROKEN — now including the constants extractor (see §2).
 - **The redact layer is deterministic only** (email/SSN/card-Luhn/IP/URL). Names and phone numbers need
   the opt-in Rampart ML model (`rampart-ml.js`), which is NOT loaded on `gateway.html` by default. The
   page/`GATEWAY.md` should be honest that unaided, those two classes pass through. Attack the gap and
