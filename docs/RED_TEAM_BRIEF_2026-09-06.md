@@ -86,6 +86,13 @@ All PASSED; re-test if you distrust the method (I do want you to).
   `gateway.html`'s "Verify it" box is human-facing — a distressed person *could* type a cry there and
   get `NOTHING_TO_CHECK`. Judge whether that's an acceptable seam. (I chose not to hack crisis into the
   claim door.)
+- **`/verify` coverage is bounded by the extractors, by design.** The auditor extracts only claims it can
+  deterministically check (math, physical constants, the 65 domains) and is deliberately conservative —
+  "would rather miss a claim than check the wrong one." So many plain-language claims (e.g. "water boils
+  at 100 °C") return `NOTHING_TO_CHECK`, not a verdict. This is the *nothing-generated* discipline: it
+  never guesses at a claim it can't compute or find. A red-teamer will notice the door "does nothing" for
+  most free text — that is honest, not a bug; the failure mode to hunt is the opposite: a claim it checks
+  and gets *wrong*, or a false HOLDS. `gateway.html` states the miss ("no checkable claim was extracted").
 - **The redact layer is deterministic only** (email/SSN/card-Luhn/IP/URL). Names and phone numbers need
   the opt-in Rampart ML model (`rampart-ml.js`), which is NOT loaded on `gateway.html` by default. The
   page/`GATEWAY.md` should be honest that unaided, those two classes pass through. Attack the gap and
