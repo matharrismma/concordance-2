@@ -130,6 +130,7 @@
       <button class="ghost sm" id="gsearchbtn">Search</button>
     </div>
     <div class="grouplist" id="grouplist"><p class="empty">Loading groups…</p></div>
+    <div id="groupdetail" class="hidden"></div>
     <details class="start">
       <summary>Start a group</summary>
       <label for="ntopic">Topic (required)</label>
@@ -168,6 +169,16 @@
     <p class="sub">What members have set out to share — the outer ring of each keeping, offered to all.
       Read freely; every card names its source.</p>
     <div class="commonslist" id="commonslist"><p class="empty">Loading the commons…</p></div>
+    <details class="start">
+      <summary>Share something to the commons</summary>
+      <label for="cdsubject">Subject</label>
+      <input type="text" id="cdsubject" placeholder="what this is about">
+      <label for="cdbody">Why it is worth another's time — in your own words</label>
+      <textarea id="cdbody" placeholder="a note, a passage, a hard-won lesson — a bare link is not curation"></textarea>
+      <div class="row"><button id="cdrop" class="sm">Offer it</button>
+        <span class="hint">Signed by your key. A steward reviews before it reaches the commons — the gate is on what the library amplifies, never on what you may say.</span></div>
+      <div class="status" id="cdStatus"></div>
+    </details>
   </div>
 
   <div class="boundary">
@@ -259,7 +270,8 @@ function groupItem(g){
     (g.description?'<div class="d">'+esc(g.description)+'</div>':'')+
     '<div class="foot-row"><span class="m">'+n+' member'+(n===1?'':'s')+
     (cards?' · '+cards+' kept':'')+(g.topic?' · '+esc(g.topic):'')+'</span>'+
-    '<button class="ghost sm" data-join="'+esc(g.id)+'">Join</button></div></div>';
+    '<span><button class="ghost sm" data-open="'+esc(g.id)+'">Open</button> '+
+    '<button class="ghost sm" data-join="'+esc(g.id)+'">Join</button></span></div></div>';
 }
 async function loadGroups(q){
   const el = $("grouplist");
@@ -270,6 +282,41 @@ async function loadGroups(q){
   Array.prototype.forEach.call(el.querySelectorAll("[data-join]"), function(b){
     b.addEventListener("click", function(){ joinGroup(b.getAttribute("data-join"), b); });
   });
+  Array.prototype.forEach.call(el.querySelectorAll("[data-open]"), function(b){
+    b.addEventListener("click", function(){ openGroup(b.getAttribute("data-open")); });
+  });
+}
+async function openGroup(id){
+  const el = $("groupdetail"); el.classList.remove("hidden");
+  el.innerHTML = '<p class="empty">Opening…</p>';
+  const r = await api("GET", "/group?id=" + encodeURIComponent(id));
+  if(r.status!==200 || !r.body){ el.innerHTML = '<p class="empty">Could not open that group.</p>'; return; }
+  const g = r.body, cards = g.cards || [];
+  let h = '<div class="served"><div class="served-h">'+esc(g.title||g.topic||"group")+
+    ' · '+(g.member_count||0)+' member'+((g.member_count||0)===1?'':'s')+'</div>';
+  h += (g.description ? '<p class="hint" style="margin-top:0">'+esc(g.description)+'</p>' : '');
+  h += cards.length ? cards.map(function(c){
+      return '<div class="item"><div class="t"><b>'+esc((c.source||"").replace(/^member:/,"")||"a member")+'</b> '+
+        '<span class="m">'+esc(c.kind||"note")+(c.signed?" · ✓ signed":"")+'</span></div>'+
+        '<div class="d">'+esc(c.text||"")+'</div></div>'; }).join("")
+    : '<p class="empty">No notes yet. Be the first to add one.</p>';
+  h += '<label for="gcontrib">Add a note to this group</label>'+
+    '<textarea id="gcontrib" placeholder="a verse, a question, a note — attributed to your handle"></textarea>'+
+    '<div class="row"><button id="gcbtn" class="sm">Post to the group</button>'+
+    '<button id="gclose" class="ghost sm">Close</button></div>'+
+    '<div class="status" id="gcStatus"></div></div>';
+  el.innerHTML = h;
+  $("gcbtn").addEventListener("click", function(){ contributeToGroup(id); });
+  $("gclose").addEventListener("click", function(){ el.classList.add("hidden"); el.innerHTML=""; });
+}
+async function contributeToGroup(id){
+  const text=($("gcontrib").value||"").trim(), st=$("gcStatus");
+  if(!text){ st.className="status err"; st.textContent="Write something first."; return; }
+  if(!needKey(st)) return;
+  st.className="status"; st.textContent="Posting…";
+  const r = await api("POST","/group/contribute",{id:id, subject_id:FP, handle:handle(), text:text, kind:"note"});
+  if(r.status===200 && r.body && r.body.ok!==false){ openGroup(id); }
+  else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not post."; }
 }
 async function joinGroup(id, btn){
   if(!needKey($("startStatus"))) return;
@@ -329,9 +376,21 @@ function enterMesh(){
         '<label for="dtext">Your word</label>'+
         '<input type="text" id="dtext" placeholder="the Lord bless you and keep you">'+
         '<div class="row"><button id="dsend" class="sm">Leave it</button></div>'+
-        '<div class="status" id="dStatus"></div></details></div>';
+        '<div class="status" id="dStatus"></div></details></div>'+
+    '<div class="served"><div class="served-h">Invite &amp; vouch</div>'+
+      '<div class="row"><button id="mkinvite" class="sm">Make an invite</button>'+
+        '<span class="hint">Hand the link to a believer you know; when they enter, they are linked to you.</span></div>'+
+      '<div class="status" id="inviteStatus"></div>'+
+      '<label for="rtoken">Redeem an invite you were given</label>'+
+      '<div class="row"><input type="text" id="rtoken" placeholder="nhi_…" style="flex:1;min-width:10rem">'+
+        '<button id="mredeem" class="sm">Redeem</button></div>'+
+      '<div class="status" id="redeemStatus"></div></div>';
   $("mpost").addEventListener("click", postWord);
   $("dsend").addEventListener("click", leaveNote);
+  $("mkinvite").addEventListener("click", makeInvite);
+  $("mredeem").addEventListener("click", function(){ redeemInvite(); });
+  const inv = new URLSearchParams(location.search).get("invite");
+  if(inv){ const rt=$("rtoken"); if(rt) rt.value=inv; redeemInvite(inv); }
   loadInbox(); loadDoor();
   api("GET", "/mesh/map?fp="+encodeURIComponent(FP)+"&hops=2").then(function(m){
     const nodes=(m.body&&(m.body.nodes||m.body.reachable))||[]; const c=Array.isArray(nodes)?nodes.length:(m.body&&m.body.count)||0;
@@ -394,6 +453,23 @@ async function checkMesh(){   // a returning member who already confessed goes s
     if(r.status===200 && r.body && r.body.ok===true){ enterMesh(); }
   }catch(e){}
 }
+async function makeInvite(){
+  const st=$("inviteStatus"); st.className="status"; st.textContent="Minting…";
+  const r=await api("POST","/mesh/invite",{fp:FP, max_uses:0, ttl_days:30});
+  if(r.status===200 && r.body && r.body.token){
+    const link=location.origin+"/fellowship.html?invite="+r.body.token;
+    st.className="status ok"; st.innerHTML="Share this link with a believer you know:<br><span class=\"fp\">"+esc(link)+"</span>";
+  } else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not mint an invite."; }
+}
+async function redeemInvite(tok){
+  const token=String(tok||($("rtoken")&&$("rtoken").value)||"").trim(), st=$("redeemStatus");
+  if(!st) return;
+  if(!token){ st.className="status err"; st.textContent="Paste the invite token you were given."; return; }
+  st.className="status"; st.textContent="Redeeming…";
+  const r=await api("POST","/mesh/redeem",{fp:FP, token:token});
+  if(r.status===200 && r.body && r.body.ok){ st.className="status ok"; st.textContent=r.body.note||("Linked to "+(r.body.neighbor_callsign||"a believer")+"."); }
+  else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not redeem that invite."; }
+}
 
 // ── the commons ──
 function commonsItem(c){
@@ -410,6 +486,24 @@ async function loadCommons(){
   if(!list.length){ el.innerHTML = '<p class="empty">The commons is quiet so far — nothing shared yet.</p>'; return; }
   el.innerHTML = list.slice(0,12).map(commonsItem).join("");
 }
+async function dropToCommons(){
+  const subject=($("cdsubject").value||"").trim(), body=($("cdbody").value||"").trim(), st=$("cdStatus");
+  if(!body){ st.className="status err"; st.textContent="Say why it is worth another's time — a bare link is not curation."; return; }
+  if(!needKey(st)) return;
+  st.className="status"; st.textContent="Signing…";
+  try{
+    // The shelf `signable` is base64url of the canonical bytes; sign the DECODED bytes on-device.
+    // NB a shelf belongs to a KEY: the member id here is the PUBLIC KEY, not the fingerprint.
+    const q="/drop/signable?member="+encodeURIComponent(PUB)+"&kind=note&ring=commons"+
+      "&subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+    const sg=await api("GET",q);
+    if(sg.status!==200 || !sg.body.ok) throw new Error((sg.body&&sg.body.error)||"could not prepare");
+    const signature=await signBytesB64u(sg.body.signable);
+    const r=await api("POST","/drop",{fields:sg.body.fields, signature:signature, display_name:handle()});
+    if(r.status===200 && r.body && r.body.ok){ st.className="status ok"; st.textContent=r.body.note||"Offered — a steward reviews it before it reaches the commons."; $("cdsubject").value=$("cdbody").value=""; }
+    else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not offer it."; }
+  }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||String(e); }
+}
 
 // ── wire it ──
 $("open").addEventListener("click", openKey);
@@ -418,6 +512,7 @@ $("gsearchbtn").addEventListener("click", function(){ loadGroups($("gsearch").va
 $("gsearch").addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); loadGroups($("gsearch").value.trim()); } });
 $("startbtn").addEventListener("click", startGroup);
 $("confessbtn").addEventListener("click", confess);
+$("cdrop").addEventListener("click", dropToCommons);
 loadGroups("");
 loadCommons();
 </script>
