@@ -353,7 +353,7 @@ async function contributeToGroup(id){
   if(!needKey(st)) return;
   st.className="status"; st.textContent="Posting…";
   const r = await api("POST","/group/contribute",{id:id, subject_id:FP, handle:handle(), text:text, kind:"note"});
-  if(r.status===200 && r.body && r.body.ok!==false){ openGroup(id); }
+  if(r.status===200 && r.body && r.body.ok!==false){ st.className="status ok"; st.textContent="Posted."; setTimeout(function(){ openGroup(id); }, 800); }
   else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not post."; }
 }
 async function joinGroup(id, btn){
@@ -570,7 +570,7 @@ async function dropToShelf(){
     if(sg.status!==200 || !sg.body.ok) throw new Error((sg.body&&sg.body.error)||"could not prepare");
     const signature=await signBytesB64u(sg.body.signable);
     const r=await api("POST","/drop",{fields:sg.body.fields, signature:signature, display_name:handle()});
-    if(r.status===200 && r.body && r.body.ok){ st.className="status ok"; st.textContent="Kept on your shelf."; $("ssubject").value=$("sbody").value=""; loadShelf(); }
+    if(r.status===200 && r.body && r.body.ok){ st.className="status ok"; st.textContent="Kept on your shelf."; $("ssubject").value=$("sbody").value=""; setTimeout(loadShelf, 800); }
     else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not keep it."; }
   }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||String(e); }
 }
