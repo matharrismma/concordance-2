@@ -1,9 +1,27 @@
 # Narrow Highway — a public verification engine; agents and crawlers welcome.
+# AI agents especially: read /llms.txt, then use /search and /card. Nothing here is behind a
+# login and nothing records who read what. Measured 2026-07-30, 35% of our traffic is ClaudeBot
+# and the card permalink is the most-used thing we serve — that is the intended use, not a leak.
 User-agent: *
 Allow: /
 # The operator console is not a public surface:
 Disallow: /keep
 Disallow: /keep.html
+
+# SEO backlink crawlers: no. Measured 2026-07-30, SemrushBot alone was 26,894 requests — 21% of
+# ALL traffic — indexing us for a marketing product nobody here uses. This is a free library run
+# on one small box; that capacity belongs to readers and to agents that actually cite us. Named
+# individually rather than by a blanket rule, so a genuine reader is never caught by it.
+User-agent: SemrushBot
+Disallow: /
+User-agent: AhrefsBot
+Disallow: /
+User-agent: MJ12bot
+Disallow: /
+User-agent: DotBot
+Disallow: /
+User-agent: BLEXBot
+Disallow: /
 
 # What this is, for machines: /llms.txt
 Sitemap: https://narrowhighway.org/sitemap.xml

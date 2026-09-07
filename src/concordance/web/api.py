@@ -534,7 +534,7 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             f"<a href=/search>Search the keeping →</a></p>"
             f"<p class=muted style=\"font-size:.82rem\">"
             f"Every claim here can be checked: <a href=\"/#verify\">verify one yourself ↗</a>"
-            f" · members keep their own shelves in <a href=\"/shelf.html\">the Commons ↗</a>"
+            f" · members keep and share their own in <a href=\"/fellowship.html\">the fellowship ↗</a>"
             f" · <a href=\"/llms.txt\">if you are an agent, start here ↗</a></p></footer></main>"
             f"<script src=/graph.js defer></script>"
             f"<script>addEventListener('load',function(){{var s=document.getElementById('nhconn');"
@@ -3457,7 +3457,7 @@ def home_for(surface: str, site, path: str) -> str:
     .com should be more secular and obviously geared to computing and business — the current .com page
     is better suited for .org"). Two faces of one engine, each in its own language:
     - .com (secular): "/" serves com.html — what Narrow Highway IS in the world's own language: a
-      deterministic verification engine, its 66-domain breadth, the receipt you can re-verify, and the
+      deterministic verification engine, its full domain breadth, the receipt you can re-verify, and the
       API/agent door. It surfaces branding.SECULAR_IDENTITY, which the old family desk never wore.
     - .org (witness): "/" keeps index.html — the desk whose doors open on Scripture, wisdom, and the
       family, the foundation named plain. (A religious-forward .org pass is the next step.)

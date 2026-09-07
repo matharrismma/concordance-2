@@ -10,7 +10,7 @@ TLS and reverse-proxies each host to a backend.
 | `narrowhighway.com`      | `:8002` (2.0)      | **2.0 secular face** — front door, app, engine, seals, and the card permalinks (`render_card_html` at `/card.html?id=` and `/card/<id>`) |
 | `api.narrowhighway.com`  | `:8002` (2.0)      | **2.0 secular** — verify / derivation.verify / search / seal / mcp / identity |
 | `narrowhighway.org`      | `:8001` (2.0)      | **2.0 witness face** — the full Word (scripture, dictionary, signposts, the Gate) |
-| `narrowhighway.tv`       | `:8001` (2.0)      | **2.0 watch/listen/learn face** — `tv.html` landing (the Word read aloud in Matt's voice, reading tutor, literacy) |
+| `narrowhighway.tv`       | `:8001` (2.0)      | **2.0 museum face** — `tv.html` cable-guide landing (curated channels — on now / up next / from the start — of public-domain film and the kept library, plus the Hall of Witnesses automaton). Same `nh-org` backend as `.org`; the `tv.html` landing is a Caddy rewrite on the droplet. |
 
 Retired 1.0 lifestyle pages (`almanac.html`, `apothecary.html`, `walk.html`, `kept.html`,
 `enter.html`, `packets.html`, `breath.html`, `missions.html`, `search.html`, `voices`) `301`
