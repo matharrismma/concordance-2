@@ -333,11 +333,11 @@ async function openGroup(id){
   let h = '<div class="served"><div class="served-h">'+esc(g.title||g.topic||"group")+
     ' · '+(g.member_count||0)+' member'+((g.member_count||0)===1?'':'s')+'</div>';
   h += (g.description ? '<p class="hint" style="margin-top:0">'+esc(g.description)+'</p>' : '');
-  h += cards.length ? cards.map(function(c){
+  h += '<div id="gcards">' + (cards.length ? cards.map(function(c){
       return '<div class="item"><div class="t"><b>'+esc((c.source||"").replace(/^member:/,"")||"a member")+'</b> '+
         '<span class="m">'+esc(c.kind||"note")+(c.signed?" · ✓ signed":"")+'</span></div>'+
         '<div class="d">'+esc(c.text||"")+'</div></div>'; }).join("")
-    : '<p class="empty">No notes yet. Be the first to add one.</p>';
+    : '<p class="empty">No notes yet. Be the first to add one.</p>') + '</div>';
   h += '<label for="gcontrib">Add a note to this group</label>'+
     '<textarea id="gcontrib" placeholder="a verse, a question, a note — attributed to your handle"></textarea>'+
     '<div class="row"><button id="gcbtn" class="sm">Post to the group</button>'+
@@ -353,8 +353,14 @@ async function contributeToGroup(id){
   if(!needKey(st)) return;
   st.className="status"; st.textContent="Posting…";
   const r = await api("POST","/group/contribute",{id:id, subject_id:FP, handle:handle(), text:text, kind:"note"});
-  if(r.status===200 && r.body && r.body.ok!==false){ st.className="status ok"; st.textContent="Posted."; setTimeout(function(){ openGroup(id); }, 800); }
-  else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not post."; }
+  if(r.status===200 && r.body && r.body.ok!==false){
+    st.className="status ok"; st.textContent="Posted.";
+    // optimistic echo — same cache cadence as the shelf; show it now, the list reconciles on re-open
+    const gc=$("gcards"), opt='<div class="item"><div class="t"><b>'+esc(handle()||"a member")+'</b> '+
+      '<span class="m">note</span></div><div class="d">'+esc(text)+'</div></div>';
+    if(gc){ const empty=gc.querySelector(".empty"); if(empty){ gc.innerHTML=opt; } else { gc.insertAdjacentHTML("afterbegin", opt); } }
+    $("gcontrib").value="";
+  } else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not post."; }
 }
 async function joinGroup(id, btn){
   if(!needKey($("startStatus"))) return;
@@ -570,8 +576,15 @@ async function dropToShelf(){
     if(sg.status!==200 || !sg.body.ok) throw new Error((sg.body&&sg.body.error)||"could not prepare");
     const signature=await signBytesB64u(sg.body.signable);
     const r=await api("POST","/drop",{fields:sg.body.fields, signature:signature, display_name:handle()});
-    if(r.status===200 && r.body && r.body.ok){ st.className="status ok"; st.textContent="Kept on your shelf."; $("ssubject").value=$("sbody").value=""; setTimeout(loadShelf, 800); }
-    else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not keep it."; }
+    if(r.status===200 && r.body && r.body.ok){
+      st.className="status ok"; st.textContent="Kept on your shelf.";
+      // Optimistic echo: the shelf is served from a cache that refreshes on its own cadence, so an
+      // immediate re-read can miss a just-signed card. We know exactly what was kept, so show it now;
+      // the authoritative list catches up on the next open. (The card is saved either way.)
+      const el=$("shelflist"), opt=shelfItem({title:subject||body.slice(0,60), body:body, box:"note", extra:{ring:"shelf"}});
+      const empty=el.querySelector(".empty"); if(empty){ el.innerHTML=opt; } else { el.insertAdjacentHTML("afterbegin", opt); }
+      $("ssubject").value=$("sbody").value="";
+    } else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not keep it."; }
   }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||String(e); }
 }
 
