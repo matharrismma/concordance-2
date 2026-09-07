@@ -119,6 +119,23 @@
     </div>
   </div>
 
+  <!-- YOUR SHELF (revealed when your key is open) -->
+  <div class="card hidden" id="shelfcard">
+    <h2>Your shelf</h2>
+    <p class="sub">Your own ring of the keeping — kept by your key, private to you. A shelf note is live the
+      moment you sign it; only a steward's hand ever moves a thing to the public commons.</p>
+    <div class="shelflist" id="shelflist"><p class="empty">Loading your shelf…</p></div>
+    <details class="start">
+      <summary>Keep a note to your shelf</summary>
+      <label for="ssubject">Subject</label>
+      <input type="text" id="ssubject" placeholder="what this is about">
+      <label for="sbody">Your note</label>
+      <textarea id="sbody" placeholder="a private note, kept by your key — yours to hold or to offer later"></textarea>
+      <div class="row"><button id="skeep" class="sm">Keep it</button></div>
+      <div class="status" id="sStatus"></div>
+    </details>
+  </div>
+
   <!-- GROUPS (open, attributed) -->
   <div class="card">
     <h2>Study groups</h2>
@@ -178,6 +195,25 @@
       <div class="row"><button id="cdrop" class="sm">Offer it</button>
         <span class="hint">Signed by your key. A steward reviews before it reaches the commons — the gate is on what the library amplifies, never on what you may say.</span></div>
       <div class="status" id="cdStatus"></div>
+    </details>
+  </div>
+
+  <!-- THE DESIDERATA (open) -->
+  <div class="card">
+    <h2>What the library is missing</h2>
+    <p class="sub">A library is honest about its gaps. This is the want list — the misses the keeping grows
+      by. Name what you sought and could not find; the hive works the queue, and agents offer what they can
+      find, so the next one who asks is answered.</p>
+    <div class="wantslist" id="wantslist"><p class="empty">Loading the want list…</p></div>
+    <details class="start">
+      <summary>Name something you are seeking</summary>
+      <label for="wquery">What you are looking for</label>
+      <input type="text" id="wquery" placeholder="a manual on digging wells; a pre-1929 edition of…">
+      <label for="wnote">Why, or where it might be found (optional)</label>
+      <input type="text" id="wnote" placeholder="context that helps the hive find it">
+      <div class="row"><button id="wname" class="sm">Add it to the list</button>
+        <span class="hint">No key needed — a want is an open ask.</span></div>
+      <div class="status" id="wStatus"></div>
     </details>
   </div>
 
@@ -252,6 +288,7 @@ async function openKey(){
     $("fp").textContent = FP;
     $("verses").value = "";                 // clear the phrase once the key is in memory
     $("idout").classList.add("hidden"); $("idin").classList.remove("hidden");
+    $("shelfcard").classList.remove("hidden"); loadShelf();   // your own ring of the keeping
     checkMesh();                              // already confessed? go straight into the fellowship
   }catch(e){ $("idErr").textContent = (e && e.message) || String(e); }
   $("open").disabled = false; $("open").textContent = "Open my key";
@@ -259,6 +296,7 @@ async function openKey(){
 function closeKey(){
   PRIV = PUB = FP = null;
   $("idin").classList.add("hidden"); $("idout").classList.remove("hidden");
+  $("shelfcard").classList.add("hidden");
 }
 
 // ── groups ──
@@ -505,6 +543,61 @@ async function dropToCommons(){
   }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||String(e); }
 }
 
+// ── your shelf ──
+function shelfItem(c){
+  const ring = (c.extra && c.extra.ring) ? c.extra.ring : "";
+  return '<div class="item"><div class="t"><b>'+esc(c.title||c.subject||"a note")+'</b> '+
+    '<span class="m">'+esc(c.box||c.kind||"note")+(ring?" · "+esc(ring):"")+'</span></div>'+
+    (c.body?'<div class="d">'+esc(String(c.body).slice(0,240))+'</div>':'')+'</div>';
+}
+async function loadShelf(){
+  const el=$("shelflist"); if(!el || !PUB) return;
+  const r=await api("GET","/shelf?member="+encodeURIComponent(PUB)+"&viewer="+encodeURIComponent(PUB));
+  if(r.status!==200 || !r.body || !r.body.ok){ el.innerHTML='<p class="empty">Your shelf is empty. Keep your first note below.</p>'; return; }
+  const cards=r.body.cards||[];
+  const awaiting = r.body.awaiting_review ? '<p class="hint">'+r.body.awaiting_review+' of your cards await a steward before the commons.</p>' : '';
+  el.innerHTML = (cards.length ? cards.map(shelfItem).join("") : '<p class="empty">Your shelf is empty. Keep your first note below.</p>') + awaiting;
+}
+async function dropToShelf(){
+  const subject=($("ssubject").value||"").trim(), body=($("sbody").value||"").trim(), st=$("sStatus");
+  if(!body){ st.className="status err"; st.textContent="Write your note first."; return; }
+  if(!needKey(st)) return;
+  st.className="status"; st.textContent="Signing…";
+  try{
+    const q="/drop/signable?member="+encodeURIComponent(PUB)+"&kind=note&ring=shelf"+
+      "&subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+    const sg=await api("GET",q);
+    if(sg.status!==200 || !sg.body.ok) throw new Error((sg.body&&sg.body.error)||"could not prepare");
+    const signature=await signBytesB64u(sg.body.signable);
+    const r=await api("POST","/drop",{fields:sg.body.fields, signature:signature, display_name:handle()});
+    if(r.status===200 && r.body && r.body.ok){ st.className="status ok"; st.textContent="Kept on your shelf."; $("ssubject").value=$("sbody").value=""; loadShelf(); }
+    else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not keep it."; }
+  }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||String(e); }
+}
+
+// ── the want list (the library grows by its misses) ──
+function wantItem(w){
+  const asks = w.asks || 1;
+  return '<div class="item"><div class="t"><b>'+esc(w.query||"(a want)")+'</b> '+
+    '<span class="m">'+esc(w.kind||"missing")+(asks>1?" · "+asks+" asking":"")+
+    (w.state&&w.state!=="open"?" · "+esc(w.state):"")+'</span></div>'+
+    (w.note?'<div class="d">'+esc(w.note)+'</div>':'')+'</div>';
+}
+async function loadWants(){
+  const el=$("wantslist"); if(!el) return;
+  const r=await api("GET","/wants?state=open");
+  const list=(r.body&&r.body.wants)||[];
+  el.innerHTML = list.length ? list.slice(0,15).map(wantItem).join("") : '<p class="empty">No open wants right now — the shelves are keeping up.</p>';
+}
+async function nameWant(){
+  const query=($("wquery").value||"").trim(), note=($("wnote").value||"").trim(), st=$("wStatus");
+  if(!query){ st.className="status err"; st.textContent="Say what you are looking for."; return; }
+  st.className="status"; st.textContent="Adding…";
+  const r=await api("POST","/want",{query:query, kind:"missing", note:note});
+  if(r.status===200 && r.body && r.body.ok){ st.className="status ok"; st.textContent="Added — the library grows by its misses."; $("wquery").value=$("wnote").value=""; loadWants(); }
+  else { st.className="status err"; st.textContent=(r.body&&r.body.error)||"Could not add it."; }
+}
+
 // ── wire it ──
 $("open").addEventListener("click", openKey);
 $("close").addEventListener("click", closeKey);
@@ -513,8 +606,11 @@ $("gsearch").addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.pre
 $("startbtn").addEventListener("click", startGroup);
 $("confessbtn").addEventListener("click", confess);
 $("cdrop").addEventListener("click", dropToCommons);
+$("skeep").addEventListener("click", dropToShelf);
+$("wname").addEventListener("click", nameWant);
 loadGroups("");
 loadCommons();
+loadWants();
 </script>
 </body>
 </html>
