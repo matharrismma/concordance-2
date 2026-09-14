@@ -296,6 +296,22 @@ CALCS: list[tuple] = [
     ("surprisal", "Surprisal (self-information)", "I = -log2(p)", "computer_science", "logarithmic", "the information in an event is the log of its improbability"),
     ("poiseuille", "Hagen-Poiseuille flow", "Q = pi r^4 dP / (8 mu L)", "physics", "linear_flux", "laminar flow driven by a pressure gradient — the fluid Ohm's law"),
     ("hill_equation", "Hill equation (cooperativity)", "theta = L^n / (K + L^n)", "biology", "logistic", "cooperative binding gives a sigmoid saturation — enzymes, hemoglobin, receptors"),
+    # --- Atlas sweep: plotting the 11-gap frontier ---
+    ("kimura_diffusion", "Kimura allele diffusion", "dp/dt = drift + (1/2)V d2p/dp^2", "biology", "diffusion", "allele frequencies drift and diffuse in a finite population — the diffusion equation in gene space"),
+    ("weber_fechner", "Weber-Fechner law", "S = k ln(I / I0)", "neuroscience", "logarithmic", "perceived intensity is the log of the stimulus — loudness, brightness, weight"),
+    ("quantum_oscillator", "Quantum harmonic oscillator", "E_n = hbar omega (n + 1/2)", "physics", "periodic", "the oscillator quantized — evenly-spaced energy levels above a zero-point"),
+    ("optimal_control", "Optimal control (Euler eqn)", "d/dt(dH/dp) = -dH/dx", "economics", "variational", "the best path over time extremizes an integral — Pontryagin's principle, dynamic optimization"),
+    ("mri_reconstruction", "MRI reconstruction", "image = IFT(k-space)", "medicine", "fourier_spectral", "an MR image is the inverse Fourier transform of the measured k-space"),
+    ("lexical_diffusion", "Lexical diffusion (S-curve)", "F(t) = 1/(1 + e^(-k(t-t0)))", "linguistics", "logistic", "a sound or word change spreads through a language as an S-curve"),
+    ("radiocarbon_dating", "Radiocarbon dating", "t = (1/lambda) ln(N0 / N)", "archaeology", "decay", "exponential decay read backwards as a clock — the same law as the decay itself"),
+    ("carbon_budget", "Carbon / nutrient budget", "d(store)/dt = inflow - outflow", "ecology", "conservation", "an ecosystem's carbon balance — the same ledger as mass and charge"),
+    ("polygenic_trait", "Polygenic trait distribution", "trait ~ Normal(mu, sigma^2)", "biology", "gaussian", "many small allele effects sum to a bell curve — quantitative genetics"),
+    ("starling_flow", "Starling filtration", "Jv = Lp (dP - sigma d_pi)", "medicine", "linear_flux", "fluid across a capillary wall driven by pressure and osmotic gradients"),
+    ("income_mobility", "Income-mobility Markov", "pi = pi P", "economics", "linear_system", "the long-run class distribution is the stationary distribution of a mobility matrix"),
+    # --- the Boltzmann distribution / softmax: physics <-> ML <-> economic choice ---
+    ("boltzmann_distribution", "Boltzmann distribution", "p_i = e^(-E_i/kT) / Z", "thermodynamics", "decay", "the probability of a state falls exponentially with its energy, normalized by the partition function Z"),
+    ("softmax", "Softmax", "p_i = e^(z_i) / sum_j e^(z_j)", "computer_science", "decay", "a network's class probabilities ARE a Boltzmann distribution over scores (temperature = 1)"),
+    ("logit_choice", "Logit choice model", "P_i = e^(V_i) / sum_j e^(V_j)", "economics", "decay", "the probability of a choice is the softmax of its utility — discrete-choice / random-utility theory"),
 ]
 
 # calc slug -> the parent THEORY card on THE FLOOR it rests on (joins the two maps into one body).
@@ -454,7 +470,19 @@ CALC_THEORY: dict[str, str] = {
     "surprisal": "card_theory_shannon_information_theory",
     "poiseuille": "card_theory_fluid_mechanics",
     "hill_equation": "card_theory_biochemistry_enzymes",
-    # neutron_diffusion, gamma_dose: no reactor/dosimetry theory carded yet — honest gaps
+    "kimura_diffusion": "card_theory_hardy_weinberg_equilibrium",
+    "weber_fechner": "card_theory_neuroscience",
+    "quantum_oscillator": "card_theory_quantization",
+    "optimal_control": "card_theory_control_theory___cybernetics__feedback__stability",
+    "mri_reconstruction": "card_theory_fourier_analysis___signal_processing",
+    "radiocarbon_dating": "card_theory_radiometric_dating_uniformitarianism",
+    "carbon_budget": "card_theory_nutrient_cycling_agronomy",
+    "polygenic_trait": "card_theory_hardy_weinberg_equilibrium",
+    "starling_flow": "card_theory_circulation_harvey",
+    "boltzmann_distribution": "card_theory_statistical_mechanics",
+    "softmax": "card_theory_statistical_learning_theory__bias_variance__generali",
+    "logit_choice": "card_theory_public_choice_decision_theory",
+    # lexical_diffusion, income_mobility, neutron_diffusion, gamma_dose: honest theory-gaps
 }
 
 
