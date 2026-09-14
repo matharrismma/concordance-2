@@ -106,6 +106,12 @@ VERIFIERS: Dict[str, str] = {
     # gentler a verifier than a stranger's chemistry.
     "retrieval": _P + "retrieval", "search_quality": _P + "retrieval",
     "information_retrieval": _P + "retrieval",
+    # domains Atlas mapped before the engine could check them — now built from the map's own formulas
+    "neuroscience": _P + "neuroscience", "neuro": _P + "neuroscience", "neurophysiology": _P + "neuroscience",
+    "electrochemistry": _P + "electrochemistry", "echem": _P + "electrochemistry",
+    "condensed_matter": _P + "condensed_matter", "solid_state": _P + "condensed_matter",
+    "game_theory": _P + "game_theory", "games": _P + "game_theory", "strategy": _P + "game_theory",
+    "archaeology": _P + "archaeology", "radiocarbon": _P + "archaeology", "radiometric_dating": _P + "archaeology",
 }
 
 # Witness-surface verifiers — surfaced ONLY when surface == "witness" (the .org overlay).
