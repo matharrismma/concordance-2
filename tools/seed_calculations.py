@@ -262,6 +262,10 @@ CALCS: list[tuple] = [
     ("psf_blur", "Point-spread blur", "I' = I * PSF", "optics", "convolution", "every lens convolves the scene with its point-spread function"),
     ("moving_average", "Moving-average filter", "y = x * kernel", "statistics", "convolution", "smoothing is convolution with a window"),
     ("cnn_layer", "Convolutional neural network layer", "feature = input * filter", "computer_science", "convolution", "vision models learn the filters they convolve with"),
+    # --- added to complete real bridges (each is a genuine calculation, not a placeholder) ---
+    ("arrhenius", "Arrhenius equation", "k = A e^(-Ea/RT)", "chemistry", "decay", "reaction rate set by the Boltzmann factor e^(-Ea/RT) — the fraction of collisions over the barrier"),
+    ("nernst", "Nernst equation", "E = E0 - (RT/nF) ln(Q)", "electrochemistry", "logarithmic", "a cell's voltage from the log of a concentration ratio"),
+    ("membrane_potential", "Nernst membrane potential", "V = (RT/zF) ln(C_out/C_in)", "neuroscience", "logarithmic", "a neuron's resting voltage IS the Nernst equation across the membrane"),
 ]
 
 # calc slug -> the parent THEORY card on THE FLOOR it rests on (joins the two maps into one body).
@@ -393,6 +397,9 @@ CALC_THEORY: dict[str, str] = {
     "psf_blur": "card_theory_wave_optics",
     "moving_average": "card_theory_fourier_analysis___signal_processing",
     "cnn_layer": "card_theory_statistical_learning_theory__bias_variance__generali",
+    "arrhenius": "card_theory_chemical_kinetics_equilibrium",
+    "nernst": "card_theory_electrochemistry",
+    "membrane_potential": "card_theory_neuroscience",
 }
 
 

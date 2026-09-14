@@ -174,6 +174,48 @@ MASTER_EQUATIONS: list[dict] = [
          ("atomic", "spectral_lines", "an atom's discrete emission spectrum — its fingerprint"),
          ("computer_science", "fft_signal", "the algorithm that computes the spectrum"),
      ]},
+    {"id": "logarithmic_scale", "eq": "L = k * log10(x / x_ref)",
+     "gist": "put a ratio on a log scale — the same operation, wherever a range spans many orders of magnitude",
+     "rows": [
+         ("acoustics", "v_acoustics_decibel_ratio", "k = 10, x = intensity, x_ref = 1e-12 W/m^2 (decibels)"),
+         ("geology", "v_geology_richter_amplitude", "k = 1, x = seismic amplitude (Richter magnitude)"),
+         ("astronomy", "v_astronomy_apparent_magnitude_distance", "k = -2.5, x = flux (stellar magnitude)"),
+         ("cybersecurity", "v_cybersecurity_password_entropy", "k = 1, base 2, x = charset^length (bits of entropy)"),
+     ]},
+    {"id": "gaussian_bell", "eq": "p(x) ~ e^(-(x-mu)^2 / (2 sigma^2))",
+     "gist": "the sum of many small independent effects — the bell curve, wherever noise adds up",
+     "rows": [
+         ("physics", "measurement_error", "x = a measurement, sigma = its standard error"),
+         ("thermodynamics", "maxwell_boltzmann", "each velocity component is Gaussian, sigma^2 = kT/m"),
+         ("statistics", "central_limit", "the theorem behind it: a mean tends to Normal(mu, sigma^2/n)"),
+         ("manufacturing", "v_manufacturing_spc_control_limits", "control limits at mu +- 3 sigma"),
+     ]},
+    {"id": "laplace_potential", "eq": "laplacian(phi) = -rho / k",
+     "gist": "a potential set by its sources — Poisson's equation, wherever a field has no curl",
+     "rows": [
+         ("electrical", "electrostatic_potential", "phi = electric potential, rho = charge density, k = eps0"),
+         ("physics", "gravitational_potential", "phi = gravitational potential, rho = mass density, k = 1/(4 pi G)"),
+     ]},
+    {"id": "boltzmann_factor", "eq": "n ~ e^(-E / kT)",
+     "gist": "the fraction of a system with energy E falls off exponentially against thermal energy kT",
+     "rows": [
+         ("meteorology", "barometric", "E = m g h — the barometric formula is the Boltzmann factor of height"),
+         ("thermodynamics", "maxwell_boltzmann", "E = 1/2 m v^2 — the speed distribution carries the same factor"),
+         ("chemistry", "arrhenius", "E = Ea, the activation barrier — the Arrhenius rate"),
+     ]},
+    {"id": "proportional_growth", "eq": "dy/dt = k y  ->  y = y0 e^(kt)",
+     "gist": "change proportional to the amount present — unchecked growth, one rate k",
+     "rows": [
+         ("finance", "compound_interest", "k = interest rate r"),
+         ("ecology", "malthus_growth", "k = net birth rate r"),
+         ("biology", "bacterial_growth", "k = ln2 / doubling time"),
+     ]},
+    {"id": "nernst_potential", "eq": "V = (RT / zF) * ln(C_out / C_in)",
+     "gist": "a voltage from the log of a concentration ratio — the same equation in a battery and a neuron",
+     "rows": [
+         ("electrochemistry", "nernst", "the electrode potential of a half-cell"),
+         ("neuroscience", "membrane_potential", "the resting potential a neuron holds across its membrane"),
+     ]},
 ]
 
 
