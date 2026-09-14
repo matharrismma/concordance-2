@@ -127,6 +127,41 @@ PATTERNS: list[dict] = [
         ("business", "Scale and network moats", "modern", "grow until size or network effects deter every challenger", "the moat, not the product, keeps the profit"),
         ("ministry", "Guard the deposit", "1st c. AD-", "a fixed creed as a moat against doctrinal drift", "2 Timothy 1:14 — 'guard the good deposit'"),
         ("business", "Standard Oil's scale", "1880s-", "undercut and absorb until the scale itself was the barrier", "the moat was the size no rival could match")]},
+    {"id": "intelligence", "title": "See first — reconnaissance and information",
+     "gist": "Know the ground and the enemy before you commit; surprise is a failure of the other side's seeing.",
+     "cases": [
+        ("war", "Sun Tzu's spies", "5th c. BC", "'know the enemy and know yourself' — win before the battle by knowing", "The Art of War: foreknowledge is the general's first weapon"),
+        ("business", "Bloomberg's terminal", "1981-", "sell the information advantage itself as the product", "own what the market must see, and it must come to you"),
+        ("politics", "Walsingham's network", "1570s-80s", "a spy service to see plots before they mature", "Elizabeth I's intelligence pre-empted the threats to the throne"),
+        ("science", "Measurement first", "17th c.-", "instrument and observe before theorizing", "the telescope and microscope: seeing further decided the arguments")]},
+    {"id": "cut_losses", "title": "Cut losses — retreat to fight again",
+     "gist": "A position is only worth what it costs to keep; abandon the sunk cost to preserve the force.",
+     "cases": [
+        ("war", "Washington's retreats", "1776", "trade ground and avoid the decisive battle to keep the army alive", "the Continental Army survived by refusing to be destroyed"),
+        ("business", "Intel exits memory", "1985", "abandon the founding business (DRAM) for microprocessors", "Grove: 'if we got kicked out, what would a new CEO do?' — then did it"),
+        ("politics", "Diocletian's abdication", "305 AD", "step down at strength rather than cling to power to the end", "a rare voluntary exit that stabilized the succession"),
+        ("ministry", "Paul leaves a city", "1st c. AD", "shake the dust and move on where the door is closed (Acts 13:51)", "the mission preserved by not dying on ground that would not receive it")]},
+    {"id": "standardize", "title": "Standardize — the interchangeable part",
+     "gist": "Make the units uniform and the whole becomes repeatable, scalable, and teachable.",
+     "cases": [
+        ("business", "Ford's interchangeable parts", "1913", "identical components on a moving line", "the assembly line made the car reproducible at scale"),
+        ("war", "The Roman legion", "3rd c. BC-", "a standard unit, drill, camp and kit anywhere in the empire", "one interchangeable system fought from Britain to Syria"),
+        ("ministry", "The canon and creed", "2nd-4th c. AD", "a fixed rule of faith teachable in every congregation", "a standard the whole church could carry and reproduce"),
+        ("business", "The shipping container", "1956", "one box, one standard, every port and ship", "standardization collapsed the cost of global trade")]},
+    {"id": "decentralize", "title": "Push decisions to the edge",
+     "gist": "Let those nearest the problem decide; a body that must ask the center for everything cannot move.",
+     "cases": [
+        ("war", "Auftragstaktik (mission command)", "19th-20th c.", "give the intent, let the officer on the spot choose the means", "Prussian/German doctrine: initiative at the edge beat rigid central control"),
+        ("business", "Amazon's two-pizza teams", "2000s", "small autonomous teams owning their own service end to end", "decentralized ownership kept a giant moving fast"),
+        ("ministry", "The house-church network", "1st c. AD", "many self-governing local congregations, loosely bound", "no single point of failure; it spread faster than any center could direct"),
+        ("nature", "The colony without a center", "always", "ants and slime molds solve without a controller", "distributed local rules produce coherent global behavior")]},
+    {"id": "reinvest_the_core", "title": "Reinvest the flywheel",
+     "gist": "Plow the returns back into the engine that produced them; let the loop feed itself.",
+     "cases": [
+        ("business", "Amazon's flywheel", "1997-", "lower prices -> more customers -> more sellers -> lower costs -> lower prices", "reinvest every gain into the loop instead of taking profit"),
+        ("politics", "Rome's settled veterans", "republic-empire", "reinvest conquest into colonies that secured and extended the frontier", "each win funded the base for the next"),
+        ("ministry", "Disciples who make disciples", "1st c. AD-", "the fruit is trained to reproduce, not merely counted", "2 Timothy 2:2 — entrust it to faithful men who will teach others"),
+        ("nature", "Seed and forest", "always", "the tree spends its surplus on seed, not only on itself", "the flywheel of life is reinvested growth")]},
 ]
 
 

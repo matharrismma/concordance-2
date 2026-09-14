@@ -23,6 +23,11 @@ except Exception:  # noqa: BLE001
     pass
 from seed_bridges import MASTER_EQUATIONS, FORM_DUALITIES, _load_theory  # noqa: E402
 from seed_calculations import CALCS, CALC_THEORY, FORMS, FORM_PARENT, leaf_forms_ordered  # noqa: E402
+from seed_strategy import PATTERNS as STRAT_PATTERNS, ARENAS as STRAT_ARENAS  # noqa: E402
+
+_STRAT_ATINT = {"war": "#c67f6f", "politics": "#c69a4a", "business": "#6f9ec6",
+                "ministry": "#7fb069", "science": "#9b7fc6", "nature": "#5fa8a0"}
+_STRAT_ORDER = ["war", "politics", "business", "ministry", "science", "nature"]
 
 DPAL = ["#c69a4a", "#6f9ec6", "#9b7fc6", "#7fb069", "#5fa8a0", "#c67f6f", "#c6a86f",
         "#d1728f", "#7aa5d2", "#b0894a", "#68b0a0", "#a98bd0", "#8fb26a", "#cf8a5c",
@@ -53,6 +58,19 @@ FAMTINT = {"ratio": "#c69a4a", "exponential": "#c67f6f", "modular": "#6f9ec6", "
 
 def esc(s):
     return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def _strategy_data():
+    pats = []
+    for pi, p in enumerate(STRAT_PATTERNS):
+        arenas = [a for a in _STRAT_ORDER if a in {x[0] for x in p["cases"]}]
+        pats.append({"i": pi, "id": p["id"], "title": p["title"], "gist": p["gist"], "arenas": arenas,
+                     "cases": [{"arena": a, "who": who, "when": when, "move": move, "ev": ev}
+                               for a, who, when, move, ev in p["cases"]],
+                     "col": MPAL[pi % len(MPAL)]})
+    used = [a for a in _STRAT_ORDER if any(a in p["arenas"] for p in pats)]
+    return {"patterns": pats, "arenas": used,
+            "arenaSub": {a: STRAT_ARENAS.get(a, "") for a in used}, "atint": _STRAT_ATINT}
 
 
 def build():
@@ -120,6 +138,7 @@ def build():
         "theoryTitles": {t: theory_titles.get(t, t) for t in show_theories},
         "dualities": [[a, b, k, e] for a, b, k, e in FORM_DUALITIES],
         "theoryIso": theory_iso, "mpal": MPAL,
+        "strategy": _strategy_data(),
         "counts": {"calcs": len(calcs), "forms": len(FORMS), "masters": len(masters),
                    "domains": len(all_domains), "theories": len(theory_titles),
                    "dualities": len(FORM_DUALITIES), "iso": len(theory_iso)},
@@ -177,6 +196,10 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,'Iowan O
   padding:.18rem .4rem;font:inherit;font-size:.7rem;cursor:pointer}
 .chip code{font-family:'DejaVu Sans Mono',monospace}.chip .sw{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
 .chip:hover,.chip.on{background:#241a0b}
+.detail .strat .case{display:grid;grid-template-columns:4.6rem 1fr;gap:.04rem .5rem;padding:.3rem 0;border-top:1px solid #1c1710;font-size:.82rem}
+.detail .strat .case .ar{grid-row:span 2;font-size:.77rem;padding-top:.05rem}
+.detail .strat .case .who{color:var(--ink)}.detail .strat .case .when{color:var(--faint);font-size:.77rem}
+.detail .strat .case .ev{color:var(--dim);font-size:.79rem}.detail .strat .case .ev i{color:var(--faint)}
 /* selection states, applied to any layout */
 .node,.thread{transition:opacity .1s}
 .dim{opacity:.06 !important}
@@ -198,6 +221,7 @@ text.lbl{font-family:Georgia,serif;pointer-events:none}
       <button class=tab data-l=spiral>spiral</button>
       <button class=tab data-l=domains>domains</button>
       <button class=tab data-l=bridges>bridges</button>
+      <button class=tab data-l=strategy style="margin-left:.4rem;border-color:#5a4a28;color:#c69a4a">strategy</button>
     </div>
   </div>
   <div class=hint id=hint>Hover to preview, click to select. Selection is kept when you switch layout.</div>
@@ -233,7 +257,7 @@ function formRoot(f){while(D.formParent[f])f=D.formParent[f];return f;}
 let reg;
 function tt(node,text){const t=E('title',{});t.textContent=text;node.appendChild(t);return node;}
 
-function clearFig(){fig.innerHTML='';reg={calc:{},dom:{},master:{},form:{},theory:{},thread:{},du:{}};
+function clearFig(){fig.innerHTML='';reg={calc:{},dom:{},master:{},form:{},theory:{},thread:{},du:{},pat:{},arena:{}};
   fig.appendChild(E('rect',{id:'bg',x:0,y:0,width:1200,height:1200,fill:'#0f0d09'}));}
 
 function calcDot(slug,x,y,r){const c=D.calcs[slug];const dot=E('circle',{cx:x,cy:y,r:r||4.4,
@@ -424,13 +448,35 @@ function renderBridges(){clearFig();
     lbl(lx,ly+2,f,9,'#cbbfa4',c>=0?'start':'end',(ang[f]*180/Math.PI)+(c<0?180:0));});
   hub(46,'bridges',D.counts.dualities+' dualities');
 }
-const RENDER={kernel:renderKernel,wheel:renderWheel,onebody:renderOneBody,spiral:renderSpiral,domains:renderDomains,bridges:renderBridges};
+function renderStrategy(){clearFig();
+  const S=D.strategy, ar=S.arenas, n=ar.length, Rn=460;
+  const ang={}; ar.forEach((a,i)=>ang[a]=-Math.PI/2+2*Math.PI*i/n);
+  const deg={}; S.patterns.forEach(p=>p.arenas.forEach(a=>deg[a]=(deg[a]||0)+1)); const maxd=Math.max(1,...Object.values(deg));
+  fig.appendChild(E('circle',{cx:CX,cy:CY,r:Rn,fill:'none',stroke:'#221d15'}));
+  S.patterns.forEach(p=>{if(p.arenas.length<2)return;const pts=p.arenas.filter(a=>ang[a]!==undefined).map(a=>pol(Rn,ang[a]));
+    const g=E('g',{class:'thread node','data-pat':p.i,stroke:p.col});
+    for(let k=0;k<pts.length-1;k++){const [x0,y0]=pts[k],[x1,y1]=pts[k+1];const mx=(x0+x1)/2,my=(y0+y1)/2,cxp=CX+(mx-CX)*.28,cyp=CY+(my-CY)*.28;
+      g.appendChild(E('path',{d:`M${x0} ${y0} Q${cxp} ${cyp} ${x1} ${y1}`,fill:'none','stroke-width':1.6,opacity:.5,'stroke-linecap':'round'}));}
+    tt(g,p.title);g.addEventListener('mouseenter',()=>{if(!pinned)showPattern(p.i);});
+    g.addEventListener('click',e=>{e.stopPropagation();pinned=true;showPattern(p.i);});
+    (reg.pat[p.i]=reg.pat[p.i]||[]).push(g);fig.appendChild(g);});
+  ar.forEach(a=>{const [x,y]=pol(Rn,ang[a]);const r=5+(deg[a]/maxd)*9;const col=S.atint[a]||'#c69a4a';
+    const node=E('circle',{cx:x,cy:y,r:r,fill:col,stroke:'#0f0d09','stroke-width':1,class:'node','data-arena':a});
+    tt(node,a+' — '+(S.arenaSub[a]||'')+': '+deg[a]+' patterns');node.style.cursor='pointer';
+    node.addEventListener('mouseenter',()=>{if(!pinned)showArena(a);});
+    node.addEventListener('click',e=>{e.stopPropagation();pinned=true;showArena(a);});
+    (reg.arena[a]=reg.arena[a]||[]).push(node);fig.appendChild(node);
+    const c=Math.cos(ang[a]),[lx,ly]=pol(Rn+16,ang[a]);
+    lbl(lx,ly,a,14,col,c>=0?'start':'end',(ang[a]*180/Math.PI)+(c<0?180:0));
+    lbl(lx,ly+15,S.arenaSub[a]||'',9,'#7d745f',c>=0?'start':'end',(ang[a]*180/Math.PI)+(c<0?180:0));});
+  hub(52,'STRATEGY',S.patterns.length+' patterns');}
+const RENDER={kernel:renderKernel,wheel:renderWheel,onebody:renderOneBody,spiral:renderSpiral,domains:renderDomains,bridges:renderBridges,strategy:renderStrategy};
 function render(){RENDER[layout]();applyHi();}
 
 // ---------------------------------------------------------------- selection
 function hiSets(){
   if(!sel)return null;
-  const calcs=new Set(),doms=new Set(),mis=new Set(),forms=new Set(),ths=new Set(),dualf=new Set(),dus=new Set();
+  const calcs=new Set(),doms=new Set(),mis=new Set(),forms=new Set(),ths=new Set(),dualf=new Set(),dus=new Set(),pats=new Set(),arenas=new Set();
   const addCalc=s=>{const c=D.calcs[s];if(!c)return;calcs.add(s);doms.add(c.dom);forms.add(c.form);if(c.thid)ths.add(c.thid);c.m.forEach(m=>mis.add(m));};
   if(sel.type==='master'){const m=D.masters[sel.id];mis.add(sel.id);m.doms.forEach(d=>doms.add(d));m.members.forEach(s=>{calcs.add(s);forms.add(D.calcs[s].form);});}
   else if(sel.type==='domain'){doms.add(sel.id);D.masters.forEach(m=>{if(m.doms.includes(sel.id))mis.add(m.i);});for(const s in D.calcs)if(D.calcs[s].dom===sel.id)calcs.add(s);}
@@ -442,7 +488,9 @@ function hiSets(){
   else if(sel.type==='theory'){ths.add(sel.id);for(const s in D.calcs)if(D.calcs[s].thid===sel.id)calcs.add(s);}
   else if(sel.type==='duality'){const d=D.dualities[sel.id];dus.add(sel.id);forms.add(d[0]);forms.add(d[1]);
     (D.calcsByForm[d[0]]||[]).forEach(s=>calcs.add(s));(D.calcsByForm[d[1]]||[]).forEach(s=>calcs.add(s));}
-  return {calcs,doms,mis,forms,ths,dualf,dus};
+  else if(sel.type==='pattern'){const p=D.strategy.patterns[sel.id];pats.add(sel.id);p.arenas.forEach(a=>arenas.add(a));}
+  else if(sel.type==='arena'){arenas.add(sel.id);D.strategy.patterns.forEach(p=>{if(p.arenas.includes(sel.id))pats.add(p.i);});}
+  return {calcs,doms,mis,forms,ths,dualf,dus,pats,arenas};
 }
 function applyHi(){
   const H=hiSets();
@@ -458,6 +506,8 @@ function applyHi(){
     else if(n.dataset.form!==undefined)on=H.forms.has(n.dataset.form)||H.dualf.has(n.dataset.form);
     else if(n.dataset.th!==undefined)on=H.ths.has(n.dataset.th);
     else if(n.dataset.du!==undefined)on=H.dus.has(+n.dataset.du);
+    else if(n.dataset.pat!==undefined)on=H.pats.has(+n.dataset.pat);
+    else if(n.dataset.arena!==undefined)on=H.arenas.has(n.dataset.arena);
     else return; // structural, leave as is
     n.classList.add(on?'hi':'dim');
   });
@@ -520,6 +570,15 @@ function showCalc(slug){sel={type:'calc',id:slug};const c=D.calcs[slug];
     (c.thid?`<div class=lead>rests on <span class=thlink data-th="${esc(c.thid)}">${esc(c.th)}</span></div>`:'<div class=lead>an honest theory-gap</div>')+
     (c.m.length?`<h2>Master equation${c.m.length>1?'s':''}</h2><div class=mlist>${mchips}</div>`:'<div class=lead style="margin-top:.4rem">a domain-specific calculation</div>');
   wireLinks();applyHi();setCount(c.t);}
+function showPattern(pi){sel={type:'pattern',id:pi};const p=D.strategy.patterns[pi];
+  const rows=p.cases.map(c=>`<div class=case><span class=ar style="color:${D.strategy.atint[c.arena]||'#c69a4a'}">${esc(c.arena)}</span><span class=who>${esc(c.who)} <span class=when>${esc(c.when)}</span></span><span class=ev>${esc(c.move)}. <i>${esc(c.ev)}</i></span></div>`).join('');
+  detail.innerHTML=`<div class=eq style="font-family:Georgia,serif;color:var(--gold)">${esc(p.title)}</div><div class=gist>${esc(p.gist)}</div><div class=strat>${rows}</div>`;
+  applyHi();setCount('pattern — '+p.arenas.length+' arenas');}
+function showArena(a){sel={type:'arena',id:a};const S=D.strategy;const ps=S.patterns.filter(p=>p.arenas.includes(a));
+  const rows=ps.map(p=>`<div class=row data-pat="${p.i}"><span class=sw style="background:${p.col}"></span>${esc(p.title)}</div>`).join('');
+  detail.innerHTML=`<div class=eq style="font-family:Georgia,serif;color:var(--gold)">${esc(a)}</div><div class=gist>${esc(S.arenaSub[a]||'')} — ${ps.length} pattern${ps.length==1?'':'s'} run through this arena.</div><div class=mlist>${rows}</div>`;
+  detail.querySelectorAll('.row[data-pat]').forEach(r=>r.onclick=()=>{pinned=true;showPattern(+r.dataset.pat);});
+  applyHi();setCount(a);}
 
 function reset(){sel=null;pinned=false;detail.innerHTML='<div class=lead>Atlas — '+D.counts.masters+' master equations, '+D.counts.calcs+' calculations, '+D.counts.theories+' theories. Pick a layout above; select a master, a field, a form, a theory, or any calculation. Your selection is kept across layouts.</div>';applyHi();setCount('Hover to preview, click to select. Selection is kept across layouts.');}
 
