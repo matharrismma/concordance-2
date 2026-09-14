@@ -31,12 +31,13 @@ try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:  # noqa: BLE001
     pass
-from seed_calculations import CALCS, CALC_THEORY, FORMS  # noqa: E402
+from seed_calculations import CALCS, CALC_THEORY, FORMS, FORM_PARENT  # noqa: E402
 
 PALETTE = ["#c69a4a", "#6f9ec6", "#9b7fc6", "#7fb069", "#5fa8a0", "#c67f6f", "#c6a86f",
            "#d1728f", "#7aa5d2", "#b0894a", "#68b0a0", "#a98bd0", "#8fb26a", "#cf8a5c",
            "#7f9cc8", "#c0708f", "#5aa89a", "#b59a52", "#8b7fc4", "#9cae5f", "#d0a15a",
            "#6fb0c6", "#b98fc0", "#86b57f"]
+FAMILY_TINT = {"ratio": "#c69a4a", "exponential": "#c67f6f", "modular": "#6f9ec6"}
 
 
 def esc(s):
@@ -69,8 +70,23 @@ def circ_mean(angles: list[float]) -> float:
     return math.atan2(s, c)
 
 
+def _leaf_order():
+    """Leaf forms ordered so a parent's children are contiguous (the fractal grouping)."""
+    parents = set(FORM_PARENT.values())
+    order, seen = [], set()
+    for f in FORMS:
+        if f in parents:
+            continue
+        key = FORM_PARENT.get(f, f)
+        if key in seen:
+            continue
+        seen.add(key)
+        order.extend([g for g in FORMS if g not in parents and FORM_PARENT.get(g, g) == key])
+    return order
+
+
 def build() -> str:
-    forms = list(FORMS)
+    forms = _leaf_order()
     n = len(forms)
     # group calcs by form, collect domains
     by = defaultdict(list)
@@ -144,6 +160,30 @@ def build() -> str:
         p.append(f'<circle cx="{cx}" cy="{cy}" r="{Rout*q:.0f}" fill="none" stroke="#241f18" stroke-width="1"/>')
     p.append(f'<circle cx="{cx}" cy="{cy}" r="{Rout:.0f}" fill="none" stroke="#2f2a20" stroke-width="1.5"/>')
     p.append(f'<circle cx="{cx}" cy="{cy}" r="{Rtheory:.0f}" fill="none" stroke="#3a3120" stroke-width="1" stroke-dasharray="2 6"/>')
+
+    # --- faint tinted super-sectors behind the three split families (the fractal nesting) ---
+    fam_span = {}
+    for i, f in enumerate(forms):
+        par = FORM_PARENT.get(f)
+        if par:
+            lo, hi = fam_span.get(par, (i, i))
+            fam_span[par] = (min(lo, i), max(hi, i))
+    for fam, (lo, hi) in fam_span.items():
+        a0 = -math.pi / 2 + 2 * math.pi * lo / n
+        a1 = -math.pi / 2 + 2 * math.pi * (hi + 1) / n
+        col = FAMILY_TINT.get(fam, "#c69a4a")
+        x0o, y0o = cx + Rout * math.cos(a0), cy + Rout * math.sin(a0)
+        x1o, y1o = cx + Rout * math.cos(a1), cy + Rout * math.sin(a1)
+        large = 1 if (a1 - a0) > math.pi else 0
+        p.append(f'<path d="M{cx:.1f},{cy:.1f} L{x0o:.1f},{y0o:.1f} '
+                 f'A{Rout},{Rout} 0 {large} 1 {x1o:.1f},{y1o:.1f} Z" fill="{col}" opacity="0.05"/>')
+        amid = (a0 + a1) / 2
+        lx, ly = cx + (Rout + 24) * math.cos(amid), cy + (Rout + 24) * math.sin(amid)
+        deg = math.degrees(amid) + (180 if math.cos(amid) < 0 else 0)
+        anchor = "start" if math.cos(amid) >= 0 else "end"
+        p.append(f'<text x="{lx:.0f}" y="{ly:.0f}" fill="{col}" font-size="11" opacity="0.75" '
+                 f'font-family="Georgia,serif" text-anchor="{anchor}" '
+                 f'transform="rotate({deg:.0f} {lx:.0f} {ly:.0f})">{esc(fam)}</text>')
 
     # --- chords: calc -> theory (rests_on) — drawn first, under the nodes ---
     for slug, (x, y, domain) in calc_xy.items():

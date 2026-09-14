@@ -50,6 +50,29 @@ FORMS: dict[str, tuple[str, str]] = {
     "variational":     ("delta integral L = 0",       "find the FUNCTION that extremizes an integral — calculus of variations (Euler-Lagrange)"),
     "green_function":  ("u = integral G(x,x') f(x') dx'", "the response to a point source, superposed — solving an inhomogeneous linear operator"),
     "convolution":     ("(f*g)(t) = integral f(tau) g(t-tau) dtau", "blend one signal by another — the operation of every linear time-invariant system"),
+    # --- finer forms: the model is fractal, so a coarse form is a form-of-forms ---
+    # children of ratio
+    "proportion":      ("a/b = c/d",                  "direct proportion — scale by a ratio equal to one"),
+    "rate":            ("q = extensive / extensive",  "an intensive quantity — a 'per' (density, efficiency, yield)"),
+    "linear_map":      ("y = a + b x",                "an affine response — output linear in the input(s)"),
+    "product_law":     ("q = f1 * f2 * ...",          "a quantity is the product of its factors"),
+    "probability_ratio": ("P(A|B) = P(A,B)/P(B)",     "conditional and joint probability — Bayes"),
+    # children of exponential
+    "growth":          ("y = y0 e^(+kt)",             "continuous or geometric increase"),
+    "decay":           ("y = y0 e^(-kt)",             "relaxation toward a floor — decay and cooling"),
+    "discounting":     ("PV = FV/(1+r)^t",            "discrete present value — discounting and inflation"),
+    # children of modular
+    "cyclic":          ("x mod n (a cycle)",          "wrap-around cycles — clocks, calendars, pitch classes"),
+    "check_digit":     ("weighted sum mod n = 0",     "error-detecting checksums — ISBN, Luhn, EAN"),
+    "number_theoretic": ("a^x = 1 (mod m)",           "primes, gcd, modular inverse and exponentiation"),
+}
+
+# a form can be a finer case of a coarser one — the fractal nesting (child -> parent).
+FORM_PARENT: dict[str, str] = {
+    "proportion": "ratio", "rate": "ratio", "linear_map": "ratio",
+    "product_law": "ratio", "probability_ratio": "ratio",
+    "growth": "exponential", "decay": "exponential", "discounting": "exponential",
+    "cyclic": "modular", "check_digit": "modular", "number_theoretic": "modular",
 }
 
 # (slug, title, formula, domain, form, note)
@@ -358,6 +381,64 @@ except Exception:  # noqa: BLE001 — verifiers are optional; the curated core s
     pass
 
 
+# --- REFINE: split the coarse forms into their finer children (the model is fractal) ---
+# One slug -> child-form map, applied to the merged CALCS, so both curated and verifier
+# calculations move to the finer form without touching 100+ tuples. Every slug that was
+# on ratio / exponential / modular appears here exactly once.
+_REFINE_GROUPS: dict[str, list[str]] = {
+    # ratio -> proportion / rate / linear_map / product_law / probability_ratio
+    "proportion": ["stoichiometry", "similar_triangles", "unit_conversion", "map_scale", "gear_ratio",
+                   "v_units_conversion", "v_music_frequency_ratio", "v_acoustics_doppler_shift",
+                   "v_periodic_table_atomic_mass_weighted_average", "v_optics_photon_energy",
+                   "v_optics_de_broglie", "v_optics_magnification", "v_optics_thin_lens"],
+    "rate": ["v_agriculture_stocking_density", "v_architecture_floor_area_ratio",
+             "v_architecture_window_wall_ratio", "v_architecture_occupant_load",
+             "v_economics_gdp_per_capita", "v_economics_price_elasticity", "v_energy_efficiency",
+             "v_energy_runtime", "v_labor_annual_to_hourly", "v_materials_science_density",
+             "v_medicine_bmi", "v_nuclear_physics_binding_energy_per_nucleon", "v_real_estate_cap_rate",
+             "v_real_estate_gross_rent_mult", "v_real_estate_loan_to_value", "v_real_estate_debt_service_cov",
+             "v_real_estate_rental_yield", "v_retrieval_precision", "v_retrieval_recall_of_known",
+             "v_sports_analytics_games_behind", "v_thermodynamics_carnot_efficiency",
+             "v_thermodynamics_entropy_change", "v_verify_molarity", "v_construction_beam_load",
+             "v_construction_paint_coverage"],
+    "linear_map": ["v_exercise_science_max_heart_rate", "v_exercise_science_target_heart_rate_zone",
+                   "v_medicine_a1c_to_eag", "v_medicine_egfr_cockcroft", "v_medicine_map",
+                   "v_photography_hyperfocal_distance", "v_soil_science_lime_requirement",
+                   "v_labor_take_home_pay", "v_labor_overtime_pay", "v_nutrition_macronutrient_calories",
+                   "v_oceanography_pressure_at_depth"],
+    "product_law": ["v_electrical_power", "v_thermodynamics_ideal_gas_law", "v_thermodynamics_specific_heat",
+                    "v_physics_newtons_second_law", "v_hydrology_rational_runoff",
+                    "v_exercise_science_energy_expenditure", "v_medicine_drug_dosage", "v_labor_gross_pay",
+                    "v_construction_rebar_weight", "v_soil_science_npk_requirement", "v_soil_science_irrigation_req",
+                    "v_ecology_carbon_footprint_transport", "v_economics_simple_interest",
+                    "v_materials_science_thermal_expansion", "v_energy_battery_sizing",
+                    "v_energy_solar_daily_yield", "v_construction_floor_tiles", "v_law_flsa_overtime",
+                    "v_probability_binomial_mean"],
+    "probability_ratio": ["v_probability_bayes", "v_probability_conditional", "v_probability_independence",
+                          "v_quantum_computing_quantum_fidelity"],
+    # exponential -> growth / decay / discounting
+    "growth": ["compound_interest", "malthus_growth", "bacterial_growth", "v_economics_compound_interest",
+               "v_economics_future_value", "v_finance_compound_interest", "v_music_equal_temperament_freq",
+               "v_real_estate_monthly_mortgage", "v_meteorology_saturation_vapor_pressure",
+               "v_thermodynamics_clausius_clapeyron"],
+    "decay": ["radioactive_decay", "newton_cooling", "rc_discharge", "beer_lambert", "barometric",
+              "capacitor_charge", "v_geology_radiometric_decay", "v_nuclear_physics_radioactive_decay",
+              "v_electrical_rc_time_constant", "v_ecology_trophic_efficiency"],
+    "discounting": ["v_economics_present_value", "v_economics_inflation_adjusted", "v_finance_present_value"],
+    # modular -> cyclic / check_digit / number_theoretic
+    "cyclic": ["clock_arithmetic", "octave_equivalence", "v_calendar_time_leap_year",
+               "v_calendar_time_day_of_week", "v_calendar_time_utc_offset", "v_music_interval_semitones",
+               "v_music_scale_membership"],
+    "check_digit": ["checksum_mod", "v_doc_validation_isbn10", "v_doc_validation_isbn13",
+                    "v_doc_validation_luhn", "v_doc_validation_ean_upc"],
+    "number_theoretic": ["cyclic_group", "rsa_modexp", "diffie_hellman", "v_number_theory_primality",
+                         "v_number_theory_gcd", "v_number_theory_modular_inverse",
+                         "v_number_theory_perfect_number", "v_quantum_computing_shor_period"],
+}
+REFINE: dict[str, str] = {slug: child for child, slugs in _REFINE_GROUPS.items() for slug in slugs}
+CALCS = [(s, t, f, d, REFINE.get(s, form), n) for (s, t, f, d, form, n) in CALCS]
+
+
 def _theory_ids() -> set[str]:
     ids = set()
     p = Path("data/theory_cards.jsonl")
@@ -385,15 +466,22 @@ def _existing_ids() -> set[str]:
 
 def _form_spine(form: str) -> dict:
     eq, desc = FORMS[form]
+    conns = []
+    parent = FORM_PARENT.get(form)
+    if parent:  # the fractal nesting, made explicit in the card graph
+        conns.append({"to_card_id": f"card_form_{parent}", "relationship": "specializes",
+                      "evidence": f"a finer case of the {parent} form ({FORMS[parent][0]})"})
     return {
         "id": f"card_form_{form}", "kind": "reference",
         "title": f"Canonical form: {form}  ({eq})",
-        "body": f"A canonical mathematical FORM: {eq} — {desc}. Every calculation joined here is this same computation under a change of variable; the domains differ, the form does not.",
+        "body": f"A canonical mathematical FORM: {eq} — {desc}. Every calculation joined here is this same computation under a change of variable; the domains differ, the form does not."
+                + (f" It is a finer case of the {parent} form." if parent else ""),
         "source": {"label": "The Calculation Map — canonical forms", "url": "", "domain": "mathematics", "authority_tier": "reference"},
         "shelf": "forms", "box": "form", "bands": ["form", form, "calculation-map"],
-        "subject": form, "connections": [], "author": "engine", "created_at": 0.0, "updated_at": 0.0,
+        "subject": form, "connections": conns, "author": "engine", "created_at": 0.0, "updated_at": 0.0,
         "visibility": "public", "lifecycle_stage": "public", "volatility": "permanent",
-        "surface": "secular", "generated": False, "extra": {"equation": eq, "form": form},
+        "surface": "secular", "generated": False,
+        "extra": {"equation": eq, "form": form, "parent_form": parent or ""},
     }
 
 
@@ -421,7 +509,13 @@ def cmd_check() -> int:
     bad = [c[0] for c in CALCS if c[4] not in FORMS]
     if bad:
         print("calcs with unknown form:", bad); return 3
-    print(f"OK: {len(FORMS)} forms, {len(CALCS)} calculations, all forms known.")
+    parents = set(FORM_PARENT.values())
+    stranded = [c[0] for c in CALCS if c[4] in parents]
+    if stranded:
+        print(f"calcs stranded on a bare parent form (add to REFINE): {stranded}"); return 3
+    leaves = [f for f in FORMS if f not in parents]
+    print(f"OK: {len(FORMS)} forms ({len(leaves)} leaf, {len(parents)} parent), "
+          f"{len(CALCS)} calculations, all on leaf forms.")
     return 0
 
 
