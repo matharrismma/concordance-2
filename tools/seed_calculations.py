@@ -287,6 +287,15 @@ CALCS: list[tuple] = [
     # --- walking the edge: the next two predictions, plotted ---
     ("cable_equation", "The cable equation", "dV/dt = lambda^2 d2V/dx2 - V/tau", "neuroscience", "diffusion", "voltage spreading down an axon/dendrite — the diffusion equation with a leak"),
     ("molecular_vibration", "Molecular bond vibration", "omega = sqrt(k/mu)", "chemistry", "periodic", "a chemical bond is a spring — the harmonic oscillator with the reduced mass mu (IR spectroscopy)"),
+    # --- a larger sweep of the predictive edge ---
+    ("fokker_planck", "Fokker-Planck equation", "dp/dt = -d(mu p)/dx + D d2p/dx2", "statistics", "diffusion", "the density of a drifting, diffusing particle — the diffusion equation with a drift term"),
+    ("lattice_vibration", "Lattice phonons", "omega(k) = 2 sqrt(K/m) |sin(ka/2)|", "condensed_matter", "periodic", "a crystal's vibrations are a chain of coupled harmonic oscillators (the phonon dispersion)"),
+    ("markov_succession", "Markov ecological succession", "pi = pi P", "ecology", "linear_system", "a climax community is the stationary distribution of a succession Markov chain"),
+    ("portfolio_returns", "Portfolio returns (Normal)", "r ~ Normal(mu, sigma^2)", "finance", "gaussian", "the random-walk hypothesis: aggregate returns tend to a bell curve"),
+    ("drug_elimination", "First-order drug elimination", "C = C0 e^(-ke t)", "medicine", "decay", "a drug clears exponentially — the same relaxation as radioactive decay"),
+    ("surprisal", "Surprisal (self-information)", "I = -log2(p)", "computer_science", "logarithmic", "the information in an event is the log of its improbability"),
+    ("poiseuille", "Hagen-Poiseuille flow", "Q = pi r^4 dP / (8 mu L)", "physics", "linear_flux", "laminar flow driven by a pressure gradient — the fluid Ohm's law"),
+    ("hill_equation", "Hill equation (cooperativity)", "theta = L^n / (K + L^n)", "biology", "logistic", "cooperative binding gives a sigmoid saturation — enzymes, hemoglobin, receptors"),
 ]
 
 # calc slug -> the parent THEORY card on THE FLOOR it rests on (joins the two maps into one body).
@@ -437,6 +446,14 @@ CALC_THEORY: dict[str, str] = {
     "firing_rate_curve": "card_theory_neuroscience",
     "cable_equation": "card_theory_neuroscience",
     "molecular_vibration": "card_theory_chemical_bonding",
+    "fokker_planck": "card_theory_statistical_mechanics",
+    "lattice_vibration": "card_theory_condensed_matter",
+    "markov_succession": "card_theory_population_ecology",
+    "portfolio_returns": "card_theory_modern_portfolio_theory",
+    "drug_elimination": "card_theory_pharmacokinetics",
+    "surprisal": "card_theory_shannon_information_theory",
+    "poiseuille": "card_theory_fluid_mechanics",
+    "hill_equation": "card_theory_biochemistry_enzymes",
     # neutron_diffusion, gamma_dose: no reactor/dosimetry theory carded yet — honest gaps
 }
 

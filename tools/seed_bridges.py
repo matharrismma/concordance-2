@@ -96,8 +96,10 @@ MASTER_EQUATIONS: list[dict] = [
          ("chemistry", "ficks_law", "J = particle flux, k = diffusivity D, phi = concentration"),
          ("hydrology", "darcy_flow", "J = flow, k = permeability, phi = hydraulic head"),
          ("physics", "newton_viscosity", "J = momentum flux, k = viscosity mu, phi = velocity (the transport analogy's 4th member)"),
+         ("physics", "poiseuille", "the integrated form: Q = dP / R, laminar pipe flow (fluid Ohm's law)"),
          ("materials_science", "hookes_law", "F = k x — the elastic analog: force from a displacement gradient"),
-     ]},
+     ],
+     "predict": [("medicine", "osmotic / Starling flow across a capillary wall")]},
     {"id": "inverse_square", "eq": "F = k * Q1 * Q2 / r^2",
      "gist": "a source's influence spread over the growing sphere it crosses",
      "rows": [
@@ -105,6 +107,7 @@ MASTER_EQUATIONS: list[dict] = [
          ("electrical", "coulomb", "k = 1/(4 pi eps0), Q = charge"),
          ("optics", "light_intensity", "one source's power over 4 pi r^2 — the same falloff for radiance"),
          ("acoustics", "sound_intensity", "acoustic power over 4 pi r^2"),
+         ("physics", "gravitational_field", "the field g = GM/r^2 (not the force) — same sphere-thinning"),
          ("nuclear_physics", "gamma_dose", "gamma dose = S/(4 pi r^2) from a point source"),
      ]},
     {"id": "harmonic_oscillator", "eq": "d2x/dt2 = -omega^2 x",
@@ -114,8 +117,9 @@ MASTER_EQUATIONS: list[dict] = [
          ("electrical", "lc_resonance", "omega^2 = 1/(LC) — the electrical pendulum"),
          ("physics", "pendulum", "omega^2 = g/L"),
          ("chemistry", "molecular_vibration", "omega^2 = k/mu — a chemical bond as a spring (IR spectroscopy)"),
+         ("condensed_matter", "lattice_vibration", "a chain of coupled oscillators — the phonon dispersion omega(k)"),
      ],
-     "predict": [("condensed_matter", "lattice phonons — a chain of coupled oscillators")]},
+     "predict": [("physics", "the quantum harmonic oscillator, E_n = hbar omega (n + 1/2)")]},
     {"id": "exponential_relaxation", "eq": "dQ/dt = -Q/tau  ->  Q = Q0 e^(-t/tau)",
      "gist": "change proportional to the amount left — decay toward a floor, one time constant tau",
      "rows": [
@@ -123,7 +127,9 @@ MASTER_EQUATIONS: list[dict] = [
          ("electrical", "rc_discharge", "tau = RC"),
          ("thermodynamics", "newton_cooling", "tau = 1/k (thermal), Q = T - T_env"),
          ("optics", "beer_lambert", "the spatial version: x for t, tau = 1/absorptivity"),
-     ]},
+         ("medicine", "drug_elimination", "tau = 1/ke — a drug clears exponentially"),
+     ],
+     "predict": [("archaeology", "radiocarbon dating — the same decay read as a clock")]},
     {"id": "wave_equation", "eq": "d2u/dt2 = c^2 * laplacian(u)",
      "gist": "a disturbance propagating at a fixed speed — the parent of every wave",
      "rows": [
@@ -145,8 +151,9 @@ MASTER_EQUATIONS: list[dict] = [
          ("biology", "reaction_diffusion", "du/dt = D lap(u) + f(u) — diffusion plus reaction (Turing patterns)"),
          ("nuclear_physics", "neutron_diffusion", "u = neutron flux; diffusion with absorption and a source"),
          ("neuroscience", "cable_equation", "u = membrane voltage; diffusion with a leak (-V/tau)"),
+         ("statistics", "fokker_planck", "u = probability density; diffusion with a drift term"),
      ],
-     "predict": [("statistics", "the Fokker-Planck equation — diffusion with a drift term")]},
+     "predict": [("biology", "Kimura's diffusion of allele frequencies in a finite population")]},
     {"id": "logistic_saturation", "eq": "dP/dt = r P (1 - P/K)",
      "gist": "self-limited growth toward a ceiling K",
      "rows": [
@@ -162,7 +169,9 @@ MASTER_EQUATIONS: list[dict] = [
          ("electrical", "kirchhoff_current", "current into a node = current out"),
          ("finance", "accounting_identity", "assets = liabilities + equity (the store side)"),
          ("thermodynamics", "energy_balance", "dU = Q - W — the same ledger for energy"),
-     ]},
+         ("physics", "momentum_conservation", "total momentum in = out, absent an external force"),
+     ],
+     "predict": [("ecology", "a carbon / nutrient budget — inflow = outflow + storage")]},
     {"id": "entropy_log", "eq": "S = -k * sum(p_i log p_i)",
      "gist": "disorder and information are one quantity — Boltzmann's S and Shannon's H are the same sum",
      "rows": [
@@ -178,7 +187,10 @@ MASTER_EQUATIONS: list[dict] = [
          ("optics", "fermat_time", "extremize travel time — Snell's law falls out"),
          ("mathematics", "brachistochrone", "extremize descent time — the founding variational problem"),
          ("physics", "geodesic", "extremize path length on a curved space"),
-     ]},
+         ("architecture", "catenary", "the hanging chain / ideal arch — minimize potential energy"),
+         ("mathematics", "minimal_surface", "soap films — minimize area for a boundary"),
+     ],
+     "predict": [("economics", "optimal control — the Euler equation of dynamic optimization")]},
     {"id": "fourier_superposition", "eq": "f(t) = sum c_n e^(i n omega t)",
      "gist": "any signal is a sum of pure frequencies",
      "rows": [
@@ -186,7 +198,10 @@ MASTER_EQUATIONS: list[dict] = [
          ("music_theory", "harmonics_timbre", "a note's timbre is its spectrum of overtones"),
          ("atomic", "spectral_lines", "an atom's discrete emission spectrum — its fingerprint"),
          ("computer_science", "fft_signal", "the algorithm that computes the spectrum"),
-     ]},
+         ("materials_science", "xrd_diffraction", "X-ray diffraction reads a crystal as a Fourier transform of its lattice"),
+         ("chemistry", "nmr_spectrum", "an NMR spectrum is the Fourier transform of the free-induction decay"),
+     ],
+     "predict": [("medicine", "MRI reconstruction — the image is the inverse Fourier transform of k-space")]},
     {"id": "logarithmic_scale", "eq": "L = k * log10(x / x_ref)",
      "gist": "put a ratio on a log scale — the same operation, wherever a range spans many orders of magnitude",
      "rows": [
@@ -195,7 +210,9 @@ MASTER_EQUATIONS: list[dict] = [
          ("astronomy", "v_astronomy_apparent_magnitude_distance", "k = -2.5, x = flux (stellar magnitude)"),
          ("cybersecurity", "v_cybersecurity_password_entropy", "k = 1, base 2, x = charset^length (bits of entropy)"),
          ("chemistry", "ph_scale", "k = -1, x = [H+] (pH)"),
-     ]},
+         ("computer_science", "surprisal", "k = -1, base 2, x = probability (self-information / surprisal)"),
+     ],
+     "predict": [("neuroscience", "the Weber-Fechner law — perceived intensity ~ log(stimulus)")]},
     {"id": "gaussian_bell", "eq": "p(x) ~ e^(-(x-mu)^2 / (2 sigma^2))",
      "gist": "the sum of many small independent effects — the bell curve, wherever noise adds up",
      "rows": [
@@ -203,7 +220,9 @@ MASTER_EQUATIONS: list[dict] = [
          ("thermodynamics", "maxwell_boltzmann", "each velocity component is Gaussian, sigma^2 = kT/m"),
          ("statistics", "central_limit", "the theorem behind it: a mean tends to Normal(mu, sigma^2/n)"),
          ("manufacturing", "v_manufacturing_spc_control_limits", "control limits at mu +- 3 sigma"),
-     ]},
+         ("finance", "portfolio_returns", "aggregate returns ~ Normal (the random-walk hypothesis)"),
+     ],
+     "predict": [("biology", "a polygenic quantitative trait — many small alleles sum to a Normal")]},
     {"id": "laplace_potential", "eq": "laplacian(phi) = -rho / k",
      "gist": "a potential set by its sources — Poisson's equation, wherever a field has no curl",
      "rows": [
@@ -242,8 +261,9 @@ MASTER_EQUATIONS: list[dict] = [
      "rows": [
          ("probability", "markov_chain", "pi = the stationary distribution of a Markov chain"),
          ("computer_science", "pagerank", "PageRank is the stationary distribution of the web's random surfer"),
+         ("ecology", "markov_succession", "the climax community is the stationary distribution of succession"),
      ],
-     "predict": [("ecology", "a Markov model of ecological succession — the climax community as pi")]},
+     "predict": [("economics", "a Markov model of income / social mobility — the long-run class distribution")]},
     {"id": "geometric_series", "eq": "S = a / (1 - r),  |r| < 1",
      "gist": "an infinite sum with a constant ratio collapses to a simple fraction",
      "rows": [
@@ -266,7 +286,9 @@ MASTER_EQUATIONS: list[dict] = [
          ("computer_science", "logistic_activation", "x = w.x + b: a neuron's activation and logistic regression"),
          ("chemistry", "titration_curve", "x = ln10 (pH - pKa): the fraction deprotonated (Henderson-Hasselbalch)"),
          ("neuroscience", "firing_rate_curve", "x = (I - theta)/k: a neuron's firing-rate response"),
-     ]},
+         ("biology", "hill_equation", "cooperative binding: theta = L^n/(K+L^n) — a steeper sigmoid"),
+     ],
+     "predict": [("linguistics", "the S-curve of language change / lexical diffusion")]},
 ]
 
 
