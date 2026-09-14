@@ -93,6 +93,7 @@ MASTER_EQUATIONS: list[dict] = [
          ("thermodynamics", "fourier_conduction", "J = heat flux, k = thermal conductivity, phi = temperature"),
          ("chemistry", "ficks_law", "J = particle flux, k = diffusivity D, phi = concentration"),
          ("hydrology", "darcy_flow", "J = flow, k = permeability, phi = hydraulic head"),
+         ("physics", "newton_viscosity", "J = momentum flux, k = viscosity mu, phi = velocity (the transport analogy's 4th member)"),
          ("materials_science", "hookes_law", "F = k x — the elastic analog: force from a displacement gradient"),
      ]},
     {"id": "inverse_square", "eq": "F = k * Q1 * Q2 / r^2",
@@ -102,7 +103,8 @@ MASTER_EQUATIONS: list[dict] = [
          ("electrical", "coulomb", "k = 1/(4 pi eps0), Q = charge"),
          ("optics", "light_intensity", "one source's power over 4 pi r^2 — the same falloff for radiance"),
          ("acoustics", "sound_intensity", "acoustic power over 4 pi r^2"),
-     ]},
+     ],
+     "predict": [("nuclear_physics", "gamma-ray dose from a point source, 1/r^2")]},
     {"id": "harmonic_oscillator", "eq": "d2x/dt2 = -omega^2 x",
      "gist": "a restoring force proportional to displacement — every oscillation is this, with omega^2 = restoring/inertia",
      "rows": [
@@ -125,7 +127,10 @@ MASTER_EQUATIONS: list[dict] = [
          ("acoustics", "acoustic_wave", "u = pressure, c = speed of sound"),
          ("music_theory", "string_wave", "u = string displacement, c = sqrt(T/mu)"),
          ("geology", "seismic_wave", "u = ground motion, c = sqrt(modulus/rho)"),
-     ]},
+         ("physics", "schrodinger", "u = wavefunction Psi — matter is a (complex) wave"),
+         ("oceanography", "v_oceanography_deep_water_wave_speed", "u = surface height, c = sqrt(g lambda / 2 pi)"),
+     ],
+     "predict": [("physics", "gravitational waves — ripples in spacetime propagating at c (LIGO)")]},
     {"id": "diffusion_equation", "eq": "du/dt = D * laplacian(u)",
      "gist": "spreading by random walk — first in time, second in space",
      "rows": [
@@ -133,7 +138,9 @@ MASTER_EQUATIONS: list[dict] = [
          ("chemistry", "ficks_second", "u = concentration, D = diffusivity"),
          ("finance", "black_scholes", "u = option value, D from volatility^2 (after a change of variable)"),
          ("physics", "brownian_diffusion", "<x^2> = 2 D t — the same D, seen from one particle"),
-     ]},
+         ("biology", "reaction_diffusion", "du/dt = D lap(u) + f(u) — diffusion plus reaction (Turing patterns)"),
+     ],
+     "predict": [("nuclear_physics", "neutron diffusion in a reactor core")]},
     {"id": "logistic_saturation", "eq": "dP/dt = r P (1 - P/K)",
      "gist": "self-limited growth toward a ceiling K",
      "rows": [
@@ -181,6 +188,7 @@ MASTER_EQUATIONS: list[dict] = [
          ("geology", "v_geology_richter_amplitude", "k = 1, x = seismic amplitude (Richter magnitude)"),
          ("astronomy", "v_astronomy_apparent_magnitude_distance", "k = -2.5, x = flux (stellar magnitude)"),
          ("cybersecurity", "v_cybersecurity_password_entropy", "k = 1, base 2, x = charset^length (bits of entropy)"),
+         ("chemistry", "ph_scale", "k = -1, x = [H+] (pH)"),
      ]},
     {"id": "gaussian_bell", "eq": "p(x) ~ e^(-(x-mu)^2 / (2 sigma^2))",
      "gist": "the sum of many small independent effects — the bell curve, wherever noise adds up",
@@ -215,7 +223,8 @@ MASTER_EQUATIONS: list[dict] = [
      "rows": [
          ("electrochemistry", "nernst", "the electrode potential of a half-cell"),
          ("neuroscience", "membrane_potential", "the resting potential a neuron holds across its membrane"),
-     ]},
+     ],
+     "predict": [("neuroscience", "the Goldman-Hodgkin-Katz equation — Nernst extended to several ions")]},
     {"id": "replicator", "eq": "dx_i/dt = x_i (f_i - <f>)",
      "gist": "a type grows exactly when it beats the average — natural selection and game dynamics are one equation",
      "rows": [
@@ -240,7 +249,17 @@ MASTER_EQUATIONS: list[dict] = [
          ("electrical", "smith_reflection", "Z = electrical impedance (the Smith chart's own map)"),
          ("optics", "fresnel_reflection", "Z ~ refractive index n (Fresnel reflection at an interface)"),
          ("acoustics", "acoustic_reflection", "Z = acoustic impedance (reflection at a boundary)"),
-     ]},
+     ],
+     "predict": [("physics", "quantum reflection at a potential step — Z ~ wavenumber k")]},
+    {"id": "sigmoid", "eq": "y = 1 / (1 + e^(-x))",
+     "gist": "the S-curve — a soft switch between two states; a near-miss with logistic growth that IS a calculation",
+     "rows": [
+         ("economics", "adoption_curve", "x = k(t - t0): the logistic / Bass adoption curve"),
+         ("thermodynamics", "fermi_dirac", "x = -(E - mu)/kT: the Fermi-Dirac occupation of a quantum state"),
+         ("computer_science", "logistic_activation", "x = w.x + b: a neuron's activation and logistic regression"),
+     ],
+     "predict": [("chemistry", "a titration / two-state Boltzmann fraction curve"),
+                 ("neuroscience", "a neuron's firing-rate response curve")]},
 ]
 
 
@@ -311,7 +330,8 @@ def build_bridges():
             f"{me['gist']}. ONE equation, {len(doms)} domains, connected by a change of variable: {subs}.",
             "master", members, len(doms),
             {"equation": me["eq"], "gist": me["gist"], "domains": doms,
-             "substitutions": [[d, sub] for d, _s, sub in rows]}))
+             "substitutions": [[d, sub] for d, _s, sub in rows],
+             "predictions": [[d, what] for d, what in me.get("predict", [])]}))
         report.append(("master", len(doms), f"{me['eq']}  ({len(doms)} domains)"))
 
     # 1) FORM bridges — a form realized in >= 2 domains

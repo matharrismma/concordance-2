@@ -36,10 +36,17 @@ def build():
     # --- master equations: one connecting formula + a substitution table (the crown) ---
     masters = sorted(by_kind["master"], key=lambda c: -c["extra"]["span"])
     master_blocks = []
+    npred = 0
     for c in masters:
         rows = "".join(
             f'<tr><td class=dom>{esc(d)}</td><td class=sub>{esc(sub)}</td></tr>'
             for d, sub in c["extra"]["substitutions"])
+        preds = c["extra"].get("predictions", [])
+        npred += len(preds)
+        rows += "".join(
+            f'<tr class=pred><td class=dom>{esc(d)}</td>'
+            f'<td class=sub>○ predicted, not yet plotted — {esc(what)}</td></tr>'
+            for d, what in preds)
         master_blocks.append(
             f'<div class=master><div class=eq>{esc(c["extra"]["equation"])}</div>'
             f'<div class=gist>{esc(c["extra"]["gist"])}</div>'
@@ -122,6 +129,8 @@ table.subtab{{border-collapse:collapse;width:100%;font-size:.82rem}}
 table.subtab td{{padding:.2rem .5rem;border-top:1px solid #201c15;vertical-align:top}}
 table.subtab td.dom{{color:var(--gold);white-space:nowrap;width:9rem;font-size:.8rem}}
 table.subtab td.sub{{color:var(--dim)}}
+table.subtab tr.pred td{{color:var(--faint)}}
+table.subtab tr.pred td.sub{{font-style:italic;color:#8a7f63}}
 </style></head>
 <body><div class=wrap>
 <h1>The Bridges</h1>
@@ -134,7 +143,9 @@ its evidence.</p>
 
 <h2>Master equations <span class=sub>&mdash; one formula, a substitution dictionary across domains</span></h2>
 <p class=sub>The strongest bridge: the SAME equation in every domain, connected by naming what each
-symbol becomes. This is a formula that connects.</p>
+symbol becomes. This is a formula that connects. A <b>&#9675; open row</b> is a gap the structure
+predicts &mdash; a domain where this formula must apply but no calculation is plotted yet
+({npred} such predictions).</p>
 {''.join(master_blocks)}
 
 <h2>Universal computations <span class=sub>&mdash; one canonical form, many domains</span></h2>

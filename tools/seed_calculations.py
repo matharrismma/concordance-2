@@ -272,6 +272,10 @@ CALCS: list[tuple] = [
     ("keynesian_multiplier", "Spending multiplier", "1 / (1 - MPC)", "economics", "accumulation", "each dollar re-spent a fraction MPC — the geometric series of a feedback loop"),
     ("fresnel_reflection", "Fresnel reflection", "r = (n1 - n2)/(n1 + n2)", "optics", "mobius_conformal", "light reflected at an interface — the impedance-mismatch reflection, for refractive index"),
     ("acoustic_reflection", "Acoustic reflection", "R = (Z2 - Z1)/(Z2 + Z1)", "acoustics", "mobius_conformal", "sound reflected at a boundary — the same reflection map, for acoustic impedance"),
+    # --- filling predicted gaps: the sigmoid near-miss, and a log-axis gap (pH) ---
+    ("fermi_dirac", "Fermi-Dirac occupation", "n = 1/(1 + e^((E-mu)/kT))", "thermodynamics", "logistic", "the fraction of quantum states filled — the sigmoid, from Pauli exclusion"),
+    ("logistic_activation", "Logistic activation / regression", "sigma(x) = 1/(1 + e^(-x))", "computer_science", "logistic", "a neuron's soft switch and logistic regression's link — the same S-curve"),
+    ("ph_scale", "pH scale", "pH = -log10[H+]", "chemistry", "logarithmic", "acidity on a log scale — a hydrogen-ion ratio compressed, like decibels and magnitude"),
 ]
 
 # calc slug -> the parent THEORY card on THE FLOOR it rests on (joins the two maps into one body).
@@ -412,6 +416,9 @@ CALC_THEORY: dict[str, str] = {
     # keynesian_multiplier: no macroeconomics theory carded yet — an honest gap
     "fresnel_reflection": "card_theory_wave_optics",
     "acoustic_reflection": "card_theory_acoustic_wave_theory",
+    "fermi_dirac": "card_theory_pauli_exclusion_principle",
+    "logistic_activation": "card_theory_statistical_learning_theory__bias_variance__generali",
+    "ph_scale": "card_theory_br_nsted_lowry_acid_base_theory_ph",
 }
 
 
