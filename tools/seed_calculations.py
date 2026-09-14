@@ -320,7 +320,7 @@ CALC_THEORY: dict[str, str] = {
     "geometric_brownian": "card_theory_modern_portfolio_theory",
     "langevin": "card_theory_statistical_mechanics",
     "genetic_drift": "card_theory_hardy_weinberg_equilibrium",
-    # ornstein_uhlenbeck stays a gap — no clean stochastic-process theory carded yet.
+    "ornstein_uhlenbeck": "card_theory_stochastic_processes",
     "fibonacci": "card_theory_golden_ratio_phyllotaxis",
     "newton_method": "card_theory_numerical_analysis",
     "logistic_map": "card_theory_dynamical_systems___deterministic_chaos",

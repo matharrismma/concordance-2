@@ -170,6 +170,12 @@ DOMAINS: dict[str, list[dict]] = {
          "body": "Probability distributions form a curved manifold whose metric is the Fisher information; estimation, testing and learning become GEOMETRY — distances, geodesics and curvature on the space of models. PARTIAL: the Fisher metric computes; the program is broad.",
          "conns": [("rests_on", "card_theory_kolmogorov_probability_axioms", "the manifold is the space of probability measures the axioms define"),
                    ("same_form", "card_theory_general_relativity", "inference on a curved manifold with a metric — statistics wearing GR's geometry")]},
+        {"id": "card_theory_stochastic_processes", "title": "Stochastic processes & Ito calculus",
+         "subject": "Stochastic processes", "calib": "seals", "section": "Mathematics & formal reasoning",
+         "body": "The mathematics of random evolution in continuous time. Its canonical object is the WIENER PROCESS (Brownian motion) — a path that is continuous everywhere yet differentiable nowhere, with independent Gaussian increments. Ito's calculus integrates against it and supplies a chain rule (Ito's lemma) that corrects ordinary calculus for the path's quadratic variation, turning 'drift plus noise' into stochastic differential equations dX = mu dt + sigma dW. It is the frame under a whole form on the calculation map — Black-Scholes, the Langevin equation, genetic drift, and mean-reverting (Ornstein-Uhlenbeck) processes are all SDEs. SEALS: a rigorous theory; Ito's lemma and the Wiener measure are proven.",
+         "conns": [("rests_on", "card_theory_kolmogorov_probability_axioms", "a stochastic process is a probability measure on the space of paths — built directly on the measure-theoretic axioms of probability"),
+                   ("rests_on", "card_theory_central_limit_theorem", "Donsker's theorem: the Wiener process is the scaling limit of a random walk — the functional CLT — so its increments are Gaussian"),
+                   ("same_form", "card_theory_fundamental_theorem_of_calculus", "Ito calculus is the fundamental theorem of calculus adapted to a nowhere-differentiable path — an integral and a chain rule corrected for quadratic variation")]},
     ],
     "physics": [
         {
