@@ -216,6 +216,12 @@
 
   :focus-visible{outline:2px solid var(--seal); outline-offset:2px; border-radius:3px}
   @media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important} }
+
+  /* ATLAS centerpiece */
+  .atlas-frame{margin-top:1.4rem; border:1px solid var(--line); border-radius:14px; overflow:hidden;
+    background:#0f0d09; box-shadow:var(--shadow); height:min(80vh,880px)}
+  .atlas-frame iframe{width:100%; height:100%; border:0; display:block}
+  @media (max-width:640px){ .atlas-frame{height:78vh; border-radius:10px} }
 </style>
 </head>
 <body>
@@ -280,6 +286,24 @@
     <div class="stat"><div class="n tnum" data-stat="tools">94</div><div class="k">callable tools</div></div>
     <div class="stat"><div class="n tnum" data-stat="sources">673,243</div><div class="k">public-domain sources</div></div>
   </div></div>
+
+  <!-- ATLAS: the concordance the engine reasons over -->
+  <section class="blk" id="atlas" style="background:var(--surface-2); border-block:1px solid var(--line-soft)"><div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">The concordance it reasons over</span>
+      <h2>One kernel. Every calculation, joined.</h2>
+      <p>The engine does not guess &mdash; it verifies against a map. Every calculation the sciences run,
+        placed by its <b>form</b>, joined to the <b>theory</b> it rests on, and bridged to the same computation
+        in other fields. At the centre are the <b>22 master equations</b> &mdash; the finite set of formulas
+        that genuinely connect across domains. This is the body the verifier walks; the box above draws on it.</p>
+    </div>
+    <div class="atlas-frame">
+      <iframe src="/explore.html" title="Atlas &mdash; the interactive concordance of reality" loading="lazy"></iframe>
+    </div>
+    <p class="demo-note" style="margin-top:.9rem">Six live views &mdash; kernel, form wheel, one body, spiral,
+      domains, bridges. Select any master equation, field, form, theory, or calculation; the selection is kept
+      as you move between views. <a href="/explore.html">Open the full Atlas &rsaquo;</a></p>
+  </div></section>
 
   <!-- THE RECEIPT: the differentiator -->
   <section class="blk"><div class="wrap">
