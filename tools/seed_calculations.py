@@ -65,15 +65,43 @@ FORMS: dict[str, tuple[str, str]] = {
     "cyclic":          ("x mod n (a cycle)",          "wrap-around cycles — clocks, calendars, pitch classes"),
     "check_digit":     ("weighted sum mod n = 0",     "error-detecting checksums — ISBN, Luhn, EAN"),
     "number_theoretic": ("a^x = 1 (mod m)",           "primes, gcd, modular inverse and exponentiation"),
+    # children of rate (a third level — the fractal goes as deep as the structure does)
+    "density":         ("q / (space or mass or count)", "an amount per unit of space, mass, or count"),
+    "fraction":        ("part / whole (dimensionless)", "a dimensionless part-over-whole or yield"),
+    "specific_rate":   ("q / (another quantity)",     "a quantity per unit of another physical quantity — per time, per temperature"),
 }
 
-# a form can be a finer case of a coarser one — the fractal nesting (child -> parent).
+# a form can be a finer case of a coarser one — the fractal nesting (child -> parent), any depth.
 FORM_PARENT: dict[str, str] = {
     "proportion": "ratio", "rate": "ratio", "linear_map": "ratio",
     "product_law": "ratio", "probability_ratio": "ratio",
     "growth": "exponential", "decay": "exponential", "discounting": "exponential",
     "cyclic": "modular", "check_digit": "modular", "number_theoretic": "modular",
+    "density": "rate", "fraction": "rate", "specific_rate": "rate",
 }
+
+
+def form_root(f: str) -> str:
+    while f in FORM_PARENT:
+        f = FORM_PARENT[f]
+    return f
+
+
+def form_ancestors(f: str) -> list[str]:
+    out = []
+    while f in FORM_PARENT:
+        f = FORM_PARENT[f]
+        out.append(f)
+    return out
+
+
+def leaf_forms_ordered() -> list[str]:
+    """Leaf forms ordered so each family (at every level) is contiguous — a preorder walk."""
+    parents = set(FORM_PARENT.values())
+    leaves = [f for f in FORMS if f not in parents]
+    idx = {f: i for i, f in enumerate(FORMS)}
+    fi = lambda n: idx.get(n, 10 ** 9)  # noqa: E731
+    return sorted(leaves, key=lambda f: (fi(form_root(f)), fi(FORM_PARENT.get(f, f)), idx[f]))
 
 # (slug, title, formula, domain, form, note)
 CALCS: list[tuple] = [
@@ -391,16 +419,18 @@ _REFINE_GROUPS: dict[str, list[str]] = {
                    "v_units_conversion", "v_music_frequency_ratio", "v_acoustics_doppler_shift",
                    "v_periodic_table_atomic_mass_weighted_average", "v_optics_photon_energy",
                    "v_optics_de_broglie", "v_optics_magnification", "v_optics_thin_lens"],
-    "rate": ["v_agriculture_stocking_density", "v_architecture_floor_area_ratio",
-             "v_architecture_window_wall_ratio", "v_architecture_occupant_load",
-             "v_economics_gdp_per_capita", "v_economics_price_elasticity", "v_energy_efficiency",
-             "v_energy_runtime", "v_labor_annual_to_hourly", "v_materials_science_density",
-             "v_medicine_bmi", "v_nuclear_physics_binding_energy_per_nucleon", "v_real_estate_cap_rate",
-             "v_real_estate_gross_rent_mult", "v_real_estate_loan_to_value", "v_real_estate_debt_service_cov",
-             "v_real_estate_rental_yield", "v_retrieval_precision", "v_retrieval_recall_of_known",
-             "v_sports_analytics_games_behind", "v_thermodynamics_carnot_efficiency",
-             "v_thermodynamics_entropy_change", "v_verify_molarity", "v_construction_beam_load",
-             "v_construction_paint_coverage"],
+    # rate is itself split one level deeper (ratio -> rate -> density/fraction/specific_rate)
+    "density": ["v_agriculture_stocking_density", "v_materials_science_density", "v_medicine_bmi",
+                "v_nuclear_physics_binding_energy_per_nucleon", "v_construction_beam_load",
+                "v_verify_molarity", "v_economics_gdp_per_capita", "v_architecture_occupant_load",
+                "v_construction_paint_coverage"],
+    "fraction": ["v_energy_efficiency", "v_thermodynamics_carnot_efficiency", "v_retrieval_precision",
+                 "v_retrieval_recall_of_known", "v_real_estate_loan_to_value", "v_real_estate_rental_yield",
+                 "v_real_estate_cap_rate", "v_real_estate_gross_rent_mult", "v_real_estate_debt_service_cov",
+                 "v_architecture_floor_area_ratio", "v_architecture_window_wall_ratio",
+                 "v_economics_price_elasticity"],
+    "specific_rate": ["v_energy_runtime", "v_labor_annual_to_hourly", "v_thermodynamics_entropy_change",
+                      "v_sports_analytics_games_behind"],
     "linear_map": ["v_exercise_science_max_heart_rate", "v_exercise_science_target_heart_rate_zone",
                    "v_medicine_a1c_to_eag", "v_medicine_egfr_cockcroft", "v_medicine_map",
                    "v_photography_hyperfocal_distance", "v_soil_science_lime_requirement",
