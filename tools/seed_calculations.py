@@ -345,6 +345,19 @@ CALC_THEORY: dict[str, str] = {
 }
 
 
+# --- merge in the engine's own verifier computations (found from src/concordance/verifiers) ---
+# The curated calculations above are the core; the verifiers are the deterministic checks the
+# concordance actually runs. seed_verifiers places only the COMPUTATIONAL ones, by form, with the
+# formula as evidence; its --check proves every placed name is a real verifier in the engine source.
+try:
+    from seed_verifiers import NEW_FORMS as _VFORMS, verifier_calcs as _vcalcs, verifier_theory as _vtheory
+    FORMS.update(_VFORMS)
+    CALCS = CALCS + _vcalcs()
+    CALC_THEORY = {**CALC_THEORY, **_vtheory()}
+except Exception:  # noqa: BLE001 — verifiers are optional; the curated core stands alone without them
+    pass
+
+
 def _theory_ids() -> set[str]:
     ids = set()
     p = Path("data/theory_cards.jsonl")
