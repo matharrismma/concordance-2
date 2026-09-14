@@ -216,6 +216,31 @@ MASTER_EQUATIONS: list[dict] = [
          ("electrochemistry", "nernst", "the electrode potential of a half-cell"),
          ("neuroscience", "membrane_potential", "the resting potential a neuron holds across its membrane"),
      ]},
+    {"id": "replicator", "eq": "dx_i/dt = x_i (f_i - <f>)",
+     "gist": "a type grows exactly when it beats the average — natural selection and game dynamics are one equation",
+     "rows": [
+         ("biology", "replicator_selection", "f = Darwinian fitness; the mean is population fitness"),
+         ("game_theory", "replicator_payoff", "f = strategy payoff; the mean is the population payoff"),
+     ]},
+    {"id": "stationary_distribution", "eq": "pi = pi P  (pi P = pi)",
+     "gist": "the long-run distribution of a random process — the fixed point of its transition matrix",
+     "rows": [
+         ("probability", "markov_chain", "pi = the stationary distribution of a Markov chain"),
+         ("computer_science", "pagerank", "PageRank is the stationary distribution of the web's random surfer"),
+     ]},
+    {"id": "geometric_series", "eq": "S = a / (1 - r),  |r| < 1",
+     "gist": "an infinite sum with a constant ratio collapses to a simple fraction",
+     "rows": [
+         ("finance", "perpetuity", "a = C, r = 1/(1+i): PV of an endless stream = C/i"),
+         ("economics", "keynesian_multiplier", "r = MPC: total spending = 1/(1 - MPC)"),
+     ]},
+    {"id": "reflection_coefficient", "eq": "Gamma = (Z2 - Z1) / (Z2 + Z1)",
+     "gist": "what bounces back at an impedance mismatch — the same reflection map for currents, light, and sound",
+     "rows": [
+         ("electrical", "smith_reflection", "Z = electrical impedance (the Smith chart's own map)"),
+         ("optics", "fresnel_reflection", "Z ~ refractive index n (Fresnel reflection at an interface)"),
+         ("acoustics", "acoustic_reflection", "Z = acoustic impedance (reflection at a boundary)"),
+     ]},
 ]
 
 

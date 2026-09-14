@@ -266,6 +266,12 @@ CALCS: list[tuple] = [
     ("arrhenius", "Arrhenius equation", "k = A e^(-Ea/RT)", "chemistry", "decay", "reaction rate set by the Boltzmann factor e^(-Ea/RT) — the fraction of collisions over the barrier"),
     ("nernst", "Nernst equation", "E = E0 - (RT/nF) ln(Q)", "electrochemistry", "logarithmic", "a cell's voltage from the log of a concentration ratio"),
     ("membrane_potential", "Nernst membrane potential", "V = (RT/zF) ln(C_out/C_in)", "neuroscience", "logarithmic", "a neuron's resting voltage IS the Nernst equation across the membrane"),
+    ("replicator_selection", "Replicator dynamics (selection)", "dx/dt = x (f - f_avg)", "biology", "logistic", "a type grows when its fitness beats the population average — natural selection as an equation"),
+    ("replicator_payoff", "Replicator dynamics (game)", "dx/dt = x (payoff - avg)", "game_theory", "logistic", "a strategy spreads when its payoff beats the average — the same equation, fitness replaced by payoff"),
+    ("perpetuity", "Perpetuity (geometric series)", "PV = C / r", "finance", "accumulation", "an infinite stream of payments collapses to a simple ratio — the geometric series summed"),
+    ("keynesian_multiplier", "Spending multiplier", "1 / (1 - MPC)", "economics", "accumulation", "each dollar re-spent a fraction MPC — the geometric series of a feedback loop"),
+    ("fresnel_reflection", "Fresnel reflection", "r = (n1 - n2)/(n1 + n2)", "optics", "mobius_conformal", "light reflected at an interface — the impedance-mismatch reflection, for refractive index"),
+    ("acoustic_reflection", "Acoustic reflection", "R = (Z2 - Z1)/(Z2 + Z1)", "acoustics", "mobius_conformal", "sound reflected at a boundary — the same reflection map, for acoustic impedance"),
 ]
 
 # calc slug -> the parent THEORY card on THE FLOOR it rests on (joins the two maps into one body).
@@ -400,6 +406,12 @@ CALC_THEORY: dict[str, str] = {
     "arrhenius": "card_theory_chemical_kinetics_equilibrium",
     "nernst": "card_theory_electrochemistry",
     "membrane_potential": "card_theory_neuroscience",
+    "replicator_selection": "card_theory_darwinian_evolution_by_natural_selection",
+    "replicator_payoff": "card_theory_evolutionary_game_theory__evolutionarily_stable_stra",
+    "perpetuity": "card_theory_time_value_of_money_discounting",
+    # keynesian_multiplier: no macroeconomics theory carded yet — an honest gap
+    "fresnel_reflection": "card_theory_wave_optics",
+    "acoustic_reflection": "card_theory_acoustic_wave_theory",
 }
 
 
