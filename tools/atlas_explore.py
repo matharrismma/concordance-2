@@ -129,7 +129,8 @@ def build():
         f'<span class="sw" style="background:{m["col"]}"></span>'
         f'<code>{esc(m["eq"].split("->")[0].strip())}</code></button>' for m in masters)
 
-    return _SHELL.replace("__DATA__", json.dumps(data, ensure_ascii=False)).replace("__CHIPS__", chips)
+    payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")  # never break out of <script>
+    return _SHELL.replace("__DATA__", payload).replace("__CHIPS__", chips)
 
 
 # ---------------------------------------------------------------------------- the page
