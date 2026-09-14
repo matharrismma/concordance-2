@@ -80,6 +80,102 @@ FORM_DUALITIES: list[tuple[str, str, str, str]] = [
      "Fourier analysis is trigonometry taken to a basis — any signal as a sum of sines and cosines"),
 ]
 
+# --- MASTER EQUATIONS: the strongest bridge — ONE connecting formula, a substitution ----
+# dictionary across domains. Matt, 2026-09-14: "It must have a formula that connects."
+# A bridge is admitted here only when the SAME equation is realized in each domain under a
+# named change of variable. rows = (domain, calc_slug, substitution). The calc_slug must be a
+# real calculation on the map (proved by --check).
+MASTER_EQUATIONS: list[dict] = [
+    {"id": "flux_gradient", "eq": "J = -k * grad(phi)",
+     "gist": "a flow driven linearly by a difference — the same law wherever something runs down a gradient",
+     "rows": [
+         ("electrical", "ohms_law", "J = current density, k = conductivity, phi = voltage"),
+         ("thermodynamics", "fourier_conduction", "J = heat flux, k = thermal conductivity, phi = temperature"),
+         ("chemistry", "ficks_law", "J = particle flux, k = diffusivity D, phi = concentration"),
+         ("hydrology", "darcy_flow", "J = flow, k = permeability, phi = hydraulic head"),
+         ("materials_science", "hookes_law", "F = k x — the elastic analog: force from a displacement gradient"),
+     ]},
+    {"id": "inverse_square", "eq": "F = k * Q1 * Q2 / r^2",
+     "gist": "a source's influence spread over the growing sphere it crosses",
+     "rows": [
+         ("physics", "newton_gravity", "k = G, Q = mass"),
+         ("electrical", "coulomb", "k = 1/(4 pi eps0), Q = charge"),
+         ("optics", "light_intensity", "one source's power over 4 pi r^2 — the same falloff for radiance"),
+         ("acoustics", "sound_intensity", "acoustic power over 4 pi r^2"),
+     ]},
+    {"id": "harmonic_oscillator", "eq": "d2x/dt2 = -omega^2 x",
+     "gist": "a restoring force proportional to displacement — every oscillation is this, with omega^2 = restoring/inertia",
+     "rows": [
+         ("physics", "shm", "omega^2 = k/m (spring stiffness over mass)"),
+         ("electrical", "lc_resonance", "omega^2 = 1/(LC) — the electrical pendulum"),
+         ("physics", "pendulum", "omega^2 = g/L"),
+     ]},
+    {"id": "exponential_relaxation", "eq": "dQ/dt = -Q/tau  ->  Q = Q0 e^(-t/tau)",
+     "gist": "change proportional to the amount left — decay toward a floor, one time constant tau",
+     "rows": [
+         ("nuclear_physics", "radioactive_decay", "tau = 1/lambda (mean lifetime)"),
+         ("electrical", "rc_discharge", "tau = RC"),
+         ("thermodynamics", "newton_cooling", "tau = 1/k (thermal), Q = T - T_env"),
+         ("optics", "beer_lambert", "the spatial version: x for t, tau = 1/absorptivity"),
+     ]},
+    {"id": "wave_equation", "eq": "d2u/dt2 = c^2 * laplacian(u)",
+     "gist": "a disturbance propagating at a fixed speed — the parent of every wave",
+     "rows": [
+         ("electrical", "em_wave", "u = E field, c = speed of light (from Maxwell)"),
+         ("acoustics", "acoustic_wave", "u = pressure, c = speed of sound"),
+         ("music_theory", "string_wave", "u = string displacement, c = sqrt(T/mu)"),
+         ("geology", "seismic_wave", "u = ground motion, c = sqrt(modulus/rho)"),
+     ]},
+    {"id": "diffusion_equation", "eq": "du/dt = D * laplacian(u)",
+     "gist": "spreading by random walk — first in time, second in space",
+     "rows": [
+         ("thermodynamics", "heat_equation", "u = temperature, D = thermal diffusivity"),
+         ("chemistry", "ficks_second", "u = concentration, D = diffusivity"),
+         ("finance", "black_scholes", "u = option value, D from volatility^2 (after a change of variable)"),
+         ("physics", "brownian_diffusion", "<x^2> = 2 D t — the same D, seen from one particle"),
+     ]},
+    {"id": "logistic_saturation", "eq": "dP/dt = r P (1 - P/K)",
+     "gist": "self-limited growth toward a ceiling K",
+     "rows": [
+         ("ecology", "carrying_capacity", "P = population, K = carrying capacity"),
+         ("medicine", "epidemic_saturation", "P = infected, K set by the susceptible pool (SIR)"),
+         ("economics", "adoption_curve", "P = adopters, K = market size (Bass/S-curve)"),
+     ]},
+    {"id": "conservation_balance", "eq": "sum(in) = sum(out) + d(store)/dt",
+     "gist": "nothing is created or lost — a balance, whatever the substance",
+     "rows": [
+         ("physics", "continuity", "the general law: mass/charge density and its flux"),
+         ("chemistry", "mass_balance", "atoms in = atoms out + accumulation"),
+         ("electrical", "kirchhoff_current", "current into a node = current out"),
+         ("finance", "accounting_identity", "assets = liabilities + equity (the store side)"),
+         ("thermodynamics", "energy_balance", "dU = Q - W — the same ledger for energy"),
+     ]},
+    {"id": "entropy_log", "eq": "S = -k * sum(p_i log p_i)",
+     "gist": "disorder and information are one quantity — Boltzmann's S and Shannon's H are the same sum",
+     "rows": [
+         ("information_theory", "v_info_theory_shannon_entropy", "k = 1/ln2 (bits), p = symbol probability"),
+         ("ecology", "v_ecology_shannon_diversity", "p = species fraction — diversity is entropy"),
+         ("cybersecurity", "v_cybersecurity_password_entropy", "H = L log2 N — entropy of a uniform charset"),
+         ("quantum_computing", "v_quantum_computing_von_neumann_entropy", "p = density-matrix eigenvalues"),
+     ]},
+    {"id": "stationary_action", "eq": "delta(integral L) = 0",
+     "gist": "nature takes the extremal path — physics as optimization over functions",
+     "rows": [
+         ("physics", "least_action", "L = kinetic - potential; the path extremizes the action"),
+         ("optics", "fermat_time", "extremize travel time — Snell's law falls out"),
+         ("mathematics", "brachistochrone", "extremize descent time — the founding variational problem"),
+         ("physics", "geodesic", "extremize path length on a curved space"),
+     ]},
+    {"id": "fourier_superposition", "eq": "f(t) = sum c_n e^(i n omega t)",
+     "gist": "any signal is a sum of pure frequencies",
+     "rows": [
+         ("mathematics", "fourier_series", "the general decomposition into pure tones"),
+         ("music_theory", "harmonics_timbre", "a note's timbre is its spectrum of overtones"),
+         ("atomic", "spectral_lines", "an atom's discrete emission spectrum — its fingerprint"),
+         ("computer_science", "fft_signal", "the algorithm that computes the spectrum"),
+     ]},
+]
+
 
 def _load_theory() -> tuple[dict[str, str], list[tuple[str, str, str]]]:
     """(id -> title) and the same_form edges between theory cards."""
@@ -134,6 +230,22 @@ def build_bridges():
     """Return (cards, report) — report is a list of (kind, span, title) for --list."""
     titles, edges = _load_theory()
     cards, report = [], []
+
+    # 0) MASTER EQUATIONS — one connecting formula, a substitution dictionary across domains.
+    #    "It must have a formula that connects." The strongest bridge there is.
+    for me in MASTER_EQUATIONS:
+        rows = me["rows"]
+        members = [(f"card_calc_{slug}", f"{domain}: {sub}") for domain, slug, sub in rows]
+        doms = sorted({d for d, _s, _sub in rows})
+        subs = "; ".join(f"{d} [{sub}]" for d, _s, sub in rows)
+        cards.append(_card(
+            f"card_bridge_master_{me['id']}",
+            f"Master equation: {me['eq']}",
+            f"{me['gist']}. ONE equation, {len(doms)} domains, connected by a change of variable: {subs}.",
+            "master", members, len(doms),
+            {"equation": me["eq"], "gist": me["gist"], "domains": doms,
+             "substitutions": [[d, sub] for d, _s, sub in rows]}))
+        report.append(("master", len(doms), f"{me['eq']}  ({len(doms)} domains)"))
 
     # 1) FORM bridges — a form realized in >= 2 domains
     form_dom = defaultdict(dict)  # form -> {domain: representative calc_slug}
@@ -230,7 +342,7 @@ def cmd_check() -> int:
 
 def cmd_list() -> int:
     _, report = build_bridges()
-    for kind in ("form", "hub", "theory", "duality"):
+    for kind in ("master", "form", "hub", "theory", "duality"):
         rows = sorted([r for r in report if r[0] == kind], key=lambda r: -r[1])
         print(f"\n== {kind.upper()} bridges ({len(rows)}) ==")
         for _k, span, label in rows:

@@ -33,6 +33,18 @@ def build():
     for c in cards:
         by_kind[c["extra"]["bridge_kind"]].append(c)
 
+    # --- master equations: one connecting formula + a substitution table (the crown) ---
+    masters = sorted(by_kind["master"], key=lambda c: -c["extra"]["span"])
+    master_blocks = []
+    for c in masters:
+        rows = "".join(
+            f'<tr><td class=dom>{esc(d)}</td><td class=sub>{esc(sub)}</td></tr>'
+            for d, sub in c["extra"]["substitutions"])
+        master_blocks.append(
+            f'<div class=master><div class=eq>{esc(c["extra"]["equation"])}</div>'
+            f'<div class=gist>{esc(c["extra"]["gist"])}</div>'
+            f'<table class=subtab><tbody>{rows}</tbody></table></div>')
+
     # --- universal computations: form bridges as ranked bars ---
     forms = sorted(by_kind["form"], key=lambda c: -c["extra"]["span"])
     maxspan = forms[0]["extra"]["span"] if forms else 1
@@ -78,7 +90,7 @@ def build():
             f'<span class=kind>{c["extra"]["span"]} domains</span>'
             f'<span class=ev>{esc(", ".join(c["extra"]["domains"]))}</span></li>')
 
-    nf, nd, nt, nh = len(forms), len(duals), len(theos), len(hubs)
+    nm, nf, nd, nt, nh = len(masters), len(forms), len(duals), len(theos), len(hubs)
     return f"""<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>The Bridges</title>
@@ -103,13 +115,27 @@ ul.bridges li{{padding:.55rem 0;border-bottom:1px solid #201c15}}
 .kind{{display:inline-block;color:var(--gold2);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;margin:.1rem .5rem .1rem 0}}
 .ev{{display:block;color:var(--dim);font-size:.86rem;margin-top:.15rem}}
 .count{{color:var(--gold);font-weight:bold}}
+.master{{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:5px;padding:.7rem .9rem;margin:.7rem 0}}
+.master .eq{{font-family:'DejaVu Sans Mono',ui-monospace,monospace;font-size:1.05rem;color:var(--gold2);letter-spacing:.02em}}
+.master .gist{{color:var(--dim);font-size:.86rem;margin:.25rem 0 .5rem}}
+table.subtab{{border-collapse:collapse;width:100%;font-size:.82rem}}
+table.subtab td{{padding:.2rem .5rem;border-top:1px solid #201c15;vertical-align:top}}
+table.subtab td.dom{{color:var(--gold);white-space:nowrap;width:9rem;font-size:.8rem}}
+table.subtab td.sub{{color:var(--dim)}}
 </style></head>
 <body><div class=wrap>
 <h1>The Bridges</h1>
 <p class=lede>A bridge is one structure that appears in more than one domain — the universality of the
-one kernel, seen as a connection. When the same computation runs a circuit and a chemical reaction
-and an economy, the connection is the finding, not the coincidence. <span class=count>{nf+nd+nt+nh}</span>
-bridges, in four kinds, each carrying its evidence.</p>
+one kernel, seen as a connection. And a real bridge <b>must have a formula that connects</b>: not
+just a shared category, but one equation instantiated in each domain under a change of variable.
+When the same computation runs a circuit and a chemical reaction and an economy, the connection is
+the finding, not the coincidence. <span class=count>{nm+nf+nd+nt+nh}</span> bridges, each carrying
+its evidence.</p>
+
+<h2>Master equations <span class=sub>&mdash; one formula, a substitution dictionary across domains</span></h2>
+<p class=sub>The strongest bridge: the SAME equation in every domain, connected by naming what each
+symbol becomes. This is a formula that connects.</p>
+{''.join(master_blocks)}
 
 <h2>Universal computations <span class=sub>&mdash; one canonical form, many domains</span></h2>
 <p class=sub>The forms that run the widest. Bar length is the number of domains the same computation appears in.</p>
