@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
-"""ATLAS, INTERACTIVE — drive the connections between domains.
+"""ATLAS, INTERACTIVE & UNIFIED — every view live, one selection.
 
-Matt, 2026-09-14: "It all needs to be interactive." A single page you operate:
-domains on a ring, each master equation a thread through the fields it joins. Click a
-master to light up only its thread and read its substitution table; click a field to
-see every master equation that runs through it and every calculation it holds; hover
-to preview. Data is embedded (so it stays in sync with the seeders); interaction is
-vanilla JS, no dependencies, CSP-safe.
+Matt, 2026-09-14: "It all needs to be interactive and selectable. We need to interact
+with granularity." One page, five layouts of the same body (kernel / form wheel / one
+body / spiral / domains), a shared selection, and a shared detail panel. Select a
+master equation, a domain, a form, a theory, or a single calculation, and every layout
+and the panel respond; switch layout and the selection is kept. Data is embedded from
+the seeders; interaction is vanilla JS, no dependencies, CSP-safe.
 
     python tools/atlas_explore.py   # writes site/explore.html
 """
 import json
-import math
 import os
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
@@ -22,9 +21,13 @@ try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:  # noqa: BLE001
     pass
-from seed_bridges import MASTER_EQUATIONS, _load_theory  # noqa: E402
-from seed_calculations import CALCS, CALC_THEORY  # noqa: E402
+from seed_bridges import MASTER_EQUATIONS, FORM_DUALITIES, _load_theory  # noqa: E402
+from seed_calculations import CALCS, CALC_THEORY, FORMS, FORM_PARENT, leaf_forms_ordered  # noqa: E402
 
+DPAL = ["#c69a4a", "#6f9ec6", "#9b7fc6", "#7fb069", "#5fa8a0", "#c67f6f", "#c6a86f",
+        "#d1728f", "#7aa5d2", "#b0894a", "#68b0a0", "#a98bd0", "#8fb26a", "#cf8a5c",
+        "#7f9cc8", "#c0708f", "#5aa89a", "#b59a52", "#8b7fc4", "#9cae5f", "#d0a15a",
+        "#6fb0c6", "#b98fc0", "#86b57f", "#b6844f", "#7c96c2", "#a37ec0", "#7aa86a"]
 MPAL = ["#c69a4a", "#6f9ec6", "#c67f6f", "#7fb069", "#9b7fc6", "#5fa8a0", "#d1728f",
         "#c6a86f", "#7aa5d2", "#68b0a0", "#a98bd0", "#8fb26a", "#cf8a5c", "#7f9cc8",
         "#c0708f", "#5aa89a", "#b59a52", "#8b7fc4", "#9cae5f", "#d0a15a", "#6fb0c6", "#b98fc0"]
@@ -45,293 +48,448 @@ FAMILY = [
 ]
 FTINT = {"physical": "#c69a4a", "chemical": "#6fb0a0", "life": "#7fb069",
          "earth & sky": "#6f9ec6", "formal": "#9b7fc6", "human": "#c67f6f"}
+FAMTINT = {"ratio": "#c69a4a", "exponential": "#c67f6f", "modular": "#6f9ec6", "rate": "#d0a15a"}
 
 
 def esc(s):
     return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def sid(s):
-    return "".join(ch if ch.isalnum() else "_" for ch in s)
-
-
 def build():
-    masters = []
-    for mi, me in enumerate(MASTER_EQUATIONS):
-        doms = sorted({d for d, _s, _sub in me["rows"]})
-        masters.append({"i": mi, "eq": me["eq"], "gist": me["gist"], "doms": doms,
-                        "subs": [[d, sub] for d, _s, sub in me["rows"]]})
-    dom_deg = defaultdict(int)
-    for m in masters:
-        for d in m["doms"]:
-            dom_deg[d] += 1
-    present = set(dom_deg)
-
-    fam_of, ordered = {}, []
-    for fam, doms in FAMILY:
-        for d in doms:
-            fam_of[d] = fam
-            if d in present:
-                ordered.append(d)
-    for d in sorted(present):
-        if d not in ordered:
-            ordered.append(d); fam_of.setdefault(d, "human")
-    n = len(ordered)
-    ang = {d: -math.pi / 2 + 2 * math.pi * i / n for i, d in enumerate(ordered)}
-    maxdeg = max(dom_deg.values())
-
-    # calc slug -> which master equations include it, and its parent theory (for granular drill-down)
     theory_titles = _load_theory()[0]
+    all_domains = sorted({c[3] for c in CALCS})
+    dcol = {d: DPAL[i % len(DPAL)] for i, d in enumerate(all_domains)}
+
+    fam_of = {}
+    for fam, ds in FAMILY:
+        for d in ds:
+            fam_of[d] = fam
+    # domain ring order (family-grouped), all domains present
+    dom_order = []
+    for fam, ds in FAMILY:
+        for d in ds:
+            if d in all_domains:
+                dom_order.append(d)
+    for d in all_domains:
+        if d not in dom_order:
+            dom_order.append(d); fam_of.setdefault(d, "human")
+
     slug_masters = defaultdict(list)
     for mi, me in enumerate(MASTER_EQUATIONS):
         for _d, s, _sub in me["rows"]:
             slug_masters[s].append(mi)
-    all_calcs = {}
-    dom_calcs = defaultdict(list)
+
+    calcs = {}
+    calcs_by_form = defaultdict(list)
     for slug, title, formula, domain, form, note in CALCS:
         tid = CALC_THEORY.get(slug)
-        all_calcs[slug] = {"t": title, "f": formula, "form": form, "dom": domain,
-                           "th": theory_titles.get(tid, "") if tid else "",
-                           "m": slug_masters.get(slug, [])}
-        dom_calcs[domain].append(slug)
+        calcs[slug] = {"t": title, "f": formula, "form": form, "dom": domain,
+                       "th": theory_titles.get(tid, "") if tid else "", "thid": tid or "",
+                       "m": slug_masters.get(slug, [])}
+        calcs_by_form[form].append(slug)
 
-    W = Hh = 1360
-    cx = cy = Hh / 2
-    Rn = 500
+    masters = []
+    for mi, me in enumerate(MASTER_EQUATIONS):
+        mem = [s for _d, s, _sub in me["rows"]]
+        forms = [calcs[s]["form"] for s in mem if s in calcs]
+        domf = Counter(forms).most_common(1)
+        masters.append({"i": mi, "eq": me["eq"], "gist": me["gist"],
+                        "doms": sorted({d for d, _s, _sub in me["rows"]}),
+                        "subs": [[d, sub] for d, _s, sub in me["rows"]],
+                        "members": mem, "domform": domf[0][0] if domf else "",
+                        "col": MPAL[mi % len(MPAL)]})
 
-    def node(d):
-        return cx + Rn * math.cos(ang[d]), cy + Rn * math.sin(ang[d])
-
-    p = [f'<svg id="fig" viewBox="0 0 {W} {Hh}" xmlns="http://www.w3.org/2000/svg">']
-    p.append(f'<rect id="bg" width="100%" height="100%" fill="#0f0d09"/>')
-
-    # family arcs
-    fam_idx = defaultdict(list)
-    for i, d in enumerate(ordered):
-        fam_idx[fam_of[d]].append(i)
-    for fam, idxs in fam_idx.items():
-        a0 = -math.pi / 2 + 2 * math.pi * (min(idxs) - 0.42) / n
-        a1 = -math.pi / 2 + 2 * math.pi * (max(idxs) + 0.42) / n
-        col = FTINT.get(fam, "#c69a4a")
-        large = 1 if (a1 - a0) > math.pi else 0
-        x0, y0 = cx + (Rn + 58) * math.cos(a0), cy + (Rn + 58) * math.sin(a0)
-        x1, y1 = cx + (Rn + 58) * math.cos(a1), cy + (Rn + 58) * math.sin(a1)
-        p.append(f'<path d="M{x0:.0f} {y0:.0f} A{Rn+58:.0f} {Rn+58:.0f} 0 {large} 1 {x1:.0f} {y1:.0f}" '
-                 f'fill="none" stroke="{col}" stroke-width="2.5" opacity="0.5"/>')
-        amid = (a0 + a1) / 2
-        lx, ly = cx + (Rn + 74) * math.cos(amid), cy + (Rn + 74) * math.sin(amid)
-        deg = math.degrees(amid) + (180 if math.cos(amid) < 0 else 0)
-        anc = "start" if math.cos(amid) >= 0 else "end"
-        p.append(f'<text x="{lx:.0f}" y="{ly:.0f}" fill="{col}" font-size="12" opacity="0.85" '
-                 f'font-family="Georgia,serif" text-anchor="{anc}" '
-                 f'transform="rotate({deg:.0f} {lx:.0f} {ly:.0f})">{esc(fam)}</text>')
-
-    # threads: one <g> per master (all its segments), so JS toggles the whole thread
-    p.append('<g id="threads">')
-    for m in masters:
-        ds = m["doms"]
-        if len(ds) < 2:
-            continue
-        col = MPAL[m["i"] % len(MPAL)]
-        p.append(f'<g class="thread" data-mi="{m["i"]}" stroke="{col}">')
-        pts = [node(d) for d in ds]
-        for a in range(len(pts) - 1):
-            (x0, y0), (x1, y1) = pts[a], pts[a + 1]
-            mx, my = (x0 + x1) / 2, (y0 + y1) / 2
-            ctrlx, ctrly = cx + (mx - cx) * 0.30, cy + (my - cy) * 0.30
-            p.append(f'<path d="M{x0:.0f} {y0:.0f} Q{ctrlx:.0f} {ctrly:.0f} {x1:.0f} {y1:.0f}" '
-                     f'fill="none" stroke-width="1.5" stroke-linecap="round"/>')
-        p.append('</g>')
-    p.append('</g>')
-
-    # nodes
-    p.append('<g id="nodes">')
-    for d in ordered:
-        x, y = node(d)
-        r = 3.5 + (dom_deg[d] / maxdeg) * 8.5
-        col = FTINT.get(fam_of[d], "#c69a4a")
-        a = ang[d]
-        lx, ly = cx + (Rn + 14) * math.cos(a), cy + (Rn + 14) * math.sin(a)
-        rot = math.degrees(a) + (180 if math.cos(a) < 0 else 0)
-        anc = "start" if math.cos(a) >= 0 else "end"
-        p.append(f'<g class="dnode" data-dom="{esc(d)}" data-fam="{esc(fam_of[d])}">'
-                 f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{r:.1f}" fill="{col}" stroke="#0f0d09" stroke-width="1"/>'
-                 f'<text x="{lx:.0f}" y="{ly+2:.0f}" fill="#cbbfa4" font-size="10.5" '
-                 f'font-family="Georgia,serif" text-anchor="{anc}" '
-                 f'transform="rotate({rot:.0f} {lx:.0f} {ly:.0f})">{esc(d)}</text></g>')
-    p.append('</g>')
-
-    p.append(f'<circle cx="{cx}" cy="{cy}" r="46" fill="#0f0d09" stroke="#3a3427"/>')
-    p.append(f'<text x="{cx}" y="{cy-2:.0f}" fill="#c69a4a" font-size="12" font-family="Georgia,serif" text-anchor="middle">ATLAS</text>')
-    p.append(f'<text x="{cx}" y="{cy+14:.0f}" fill="#8a8378" font-size="9" font-family="Georgia,serif" text-anchor="middle">{n} domains</text>')
-    p.append('</svg>')
-    svg = "\n".join(p)
-
+    leaf = leaf_forms_ordered()
     data = {
-        "masters": [{"i": m["i"], "eq": m["eq"], "gist": m["gist"], "doms": m["doms"],
-                     "subs": m["subs"], "col": MPAL[m["i"] % len(MPAL)]} for m in masters],
-        "domDeg": dict(dom_deg),
-        "domFam": {d: fam_of[d] for d in ordered},
-        "domCalcs": {d: dom_calcs[d] for d in ordered},
-        "calcs": all_calcs,
+        "domOrder": dom_order, "domFam": fam_of, "dcol": dcol, "ftint": FTINT,
+        "calcs": calcs, "calcsByForm": {f: calcs_by_form[f] for f in calcs_by_form},
+        "leaf": leaf, "formEq": {f: FORMS[f][0] for f in FORMS}, "formParent": FORM_PARENT,
+        "famTint": FAMTINT, "masters": masters,
+        "theoryTitles": {t: theory_titles.get(t, t) for t in {c["thid"] for c in calcs.values() if c["thid"]}},
+        "dualities": [[a, b] for a, b, _k, _e in FORM_DUALITIES],
+        "mpal": MPAL,
+        "counts": {"calcs": len(calcs), "forms": len(FORMS), "masters": len(masters),
+                   "domains": len(all_domains), "theories": len(theory_titles)},
     }
-    master_chips = "".join(
-        f'<button class="chip" data-mi="{m["i"]}" style="border-color:{MPAL[m["i"]%len(MPAL)]}">'
-        f'<span class="sw" style="background:{MPAL[m["i"]%len(MPAL)]}"></span>'
-        f'<code>{esc(m["eq"].split("->")[0].strip())}</code></button>'
-        for m in masters)
+    chips = "".join(
+        f'<button class="chip" data-mi="{m["i"]}" style="border-left-color:{m["col"]}">'
+        f'<span class="sw" style="background:{m["col"]}"></span>'
+        f'<code>{esc(m["eq"].split("->")[0].strip())}</code></button>' for m in masters)
 
-    return """<!doctype html><html lang=en><head><meta charset=utf-8>
+    return _SHELL.replace("__DATA__", json.dumps(data, ensure_ascii=False)).replace("__CHIPS__", chips)
+
+
+# ---------------------------------------------------------------------------- the page
+_SHELL = r"""<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
-<title>Atlas — Explore</title>
+<title>Atlas</title>
 <style>
 :root{--bg:#0f0d09;--ink:#e8dfc9;--dim:#a99c82;--faint:#7d745f;--gold:#c69a4a;--gold2:#e6c374;--line:#241f18;--panel:#15120d}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,'Iowan Old Style',serif}
-.wrap{display:flex;gap:0;min-height:100vh;align-items:stretch}
-.figwrap{flex:1 1 62%;min-width:0;padding:1rem;display:flex;flex-direction:column}
-.figwrap h1{color:var(--gold);font-weight:400;font-size:1.3rem;margin:.2rem .2rem .1rem;letter-spacing:.5px}
-.hint{color:var(--faint);font-size:.8rem;margin:0 .2rem .5rem}
+.wrap{display:flex;min-height:100vh}
+.figwrap{flex:1 1 63%;min-width:0;padding:.8rem 1rem;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin:.1rem 0 .3rem}
+.top h1{color:var(--gold);font-weight:400;font-size:1.2rem;margin:0;letter-spacing:.5px}
+.tabs{display:flex;gap:.25rem;flex-wrap:wrap}
+.tab{background:#161209;border:1px solid var(--line);color:var(--dim);border-radius:5px;padding:.22rem .6rem;
+  cursor:pointer;font:inherit;font-size:.8rem}
+.tab:hover{color:var(--ink)}.tab.on{background:#241a0b;color:var(--gold2);border-color:#5a4a28}
+.hint{color:var(--faint);font-size:.76rem;margin:0}
 #fig{width:100%;height:auto;display:block;flex:1;min-height:0}
-.side{flex:0 0 33%;max-width:33%;background:var(--panel);border-left:1px solid var(--line);
-  padding:1rem 1rem 2rem;overflow-y:auto;max-height:100vh}
-.side h2{color:var(--gold2);font-weight:400;font-size:1rem;margin:.2rem 0 .5rem;border-bottom:1px solid var(--line);padding-bottom:.3rem}
-.detail .eq{font-family:'DejaVu Sans Mono',monospace;color:var(--gold2);font-size:1.05rem;margin:.3rem 0}
-.detail .gist{color:var(--dim);font-size:.85rem;margin:.1rem 0 .6rem}
+.side{flex:0 0 34%;max-width:34%;background:var(--panel);border-left:1px solid var(--line);
+  padding:.9rem 1rem 2rem;overflow-y:auto;max-height:100vh}
+.side h2{color:var(--gold2);font-weight:400;font-size:.98rem;margin:.6rem 0 .4rem;border-bottom:1px solid var(--line);padding-bottom:.25rem}
+.bar{display:flex;gap:.5rem;align-items:center;margin:0 0 .5rem}
+.reset{background:#1a1610;border:1px solid var(--line);color:var(--gold);border-radius:4px;padding:.25rem .6rem;cursor:pointer;font:inherit;font-size:.8rem}
+.reset:hover{background:#221a0c}
+.search{flex:1;background:#120f0a;border:1px solid var(--line);color:var(--ink);border-radius:4px;padding:.28rem .5rem;font:inherit;font-size:.82rem}
+.detail .eq{font-family:'DejaVu Sans Mono',monospace;color:var(--gold2);font-size:1.02rem;margin:.2rem 0;word-break:break-word}
+.detail .gist{color:var(--dim);font-size:.85rem;margin:.1rem 0 .5rem}
 .detail table{border-collapse:collapse;width:100%;font-size:.8rem}
 .detail td{padding:.2rem .4rem;border-top:1px solid #201c15;vertical-align:top}
-.detail td.d{color:var(--gold);white-space:nowrap;cursor:pointer}
-.detail td.d:hover{color:var(--gold2);text-decoration:underline}
+.detail td.d{color:var(--gold);white-space:nowrap;cursor:pointer}.detail td.d:hover{color:var(--gold2);text-decoration:underline}
 .detail td.s{color:var(--dim)}
 .detail .lead{color:var(--dim);font-size:.86rem}
-.mlist{font-size:.82rem}
-.mlist .row{padding:.32rem 0;border-top:1px solid #201c15;cursor:pointer;display:flex;gap:.5rem;align-items:center}
-.mlist .row:hover{color:var(--gold2)}
-.mlist .sw{flex:0 0 auto;width:14px;height:3px;border-radius:2px}
-.calc{color:var(--faint);font-size:.78rem;padding:.16rem .2rem;cursor:pointer;border-radius:3px}
+.mlist .row{padding:.3rem 0;border-top:1px solid #201c15;cursor:pointer;display:flex;gap:.5rem;align-items:center;font-size:.82rem}
+.mlist .row:hover{color:var(--gold2)}.mlist .sw{flex:0 0 auto;width:14px;height:3px;border-radius:2px}
+.calc{color:var(--faint);font-size:.78rem;padding:.16rem .25rem;cursor:pointer;border-radius:3px}
 .calc code{color:#8a7f63;font-family:'DejaVu Sans Mono',monospace}
 .calc:hover{background:#1c1710}.calc:hover b{color:var(--gold2)}.calc:hover code{color:var(--gold)}
-.domlink{color:var(--gold);cursor:pointer}.domlink:hover{color:var(--gold2);text-decoration:underline}
-.detail .hint{font-size:.72rem}
-.chips{display:flex;flex-wrap:wrap;gap:.3rem;margin:.4rem 0}
+.calc b{color:#bcae8a;font-weight:400}
+.domlink,.formlink,.thlink{color:var(--gold);cursor:pointer}.domlink:hover,.formlink:hover,.thlink:hover{color:var(--gold2);text-decoration:underline}
+.chips{display:flex;flex-wrap:wrap;gap:.3rem;margin:.3rem 0}
 .chip{background:#161209;border:1px solid var(--line);border-left-width:3px;border-radius:4px;color:var(--ink);
-  padding:.18rem .4rem;font:inherit;font-size:.72rem;cursor:pointer}
-.chip code{font-family:'DejaVu Sans Mono',monospace}
-.chip .sw{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
-.chip:hover,.chip.on{background:#221a0c}
-.bar{display:flex;gap:.5rem;align-items:center;margin:.2rem 0 .5rem}
-button.reset{background:#1a1610;border:1px solid var(--line);color:var(--gold);border-radius:4px;padding:.25rem .6rem;cursor:pointer;font:inherit;font-size:.8rem}
-button.reset:hover{background:#221a0c}
-/* interaction states */
-.thread{opacity:.42;transition:opacity .12s}
-.thread.dim{opacity:.05}
-.thread.hi{opacity:.98}
-.thread.hi path{stroke-width:2.6}
-.dnode{cursor:pointer}
-.dnode circle{transition:opacity .12s}
-.dnode.dim{opacity:.28}
-.dnode.hi circle{stroke:#fff;stroke-width:1.6}
-.dnode.hi text{fill:#fff}
+  padding:.18rem .4rem;font:inherit;font-size:.7rem;cursor:pointer}
+.chip code{font-family:'DejaVu Sans Mono',monospace}.chip .sw{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.chip:hover,.chip.on{background:#241a0b}
+/* selection states, applied to any layout */
+.node,.thread{transition:opacity .1s}
+.dim{opacity:.06 !important}
+.calcdot{cursor:pointer}
+.hi{opacity:1 !important}
+.hi.calcdot{stroke:#fff !important;stroke-width:1.6px !important}
+.hi.mnode{stroke:#fff !important;stroke-width:2px !important}
+text.lbl{font-family:Georgia,serif;pointer-events:none}
 @media(max-width:900px){.wrap{flex-direction:column}.side{max-width:100%;flex-basis:auto;border-left:none;border-top:1px solid var(--line)}}
 </style></head>
 <body><div class=wrap>
 <div class=figwrap>
-  <h1>Atlas — the connections between domains</h1>
-  <div class=hint>Click a field, or a master equation on the right, to light up its connections. Hover to preview. Click the centre to reset.</div>
-  """ + svg + """
+  <div class=top>
+    <h1>Atlas</h1>
+    <div class=tabs id=tabs>
+      <button class=tab data-l=kernel>kernel</button>
+      <button class=tab data-l=wheel>form wheel</button>
+      <button class=tab data-l=onebody>one body</button>
+      <button class=tab data-l=spiral>spiral</button>
+      <button class=tab data-l=domains>domains</button>
+    </div>
+  </div>
+  <div class=hint id=hint>Hover to preview, click to select. Selection is kept when you switch layout.</div>
+  <svg id=fig viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg"></svg>
 </div>
 <div class=side>
-  <div class=bar><button class=reset id=reset>↺ Reset</button><span id=count class=hint></span></div>
+  <div class=bar><button class=reset id=reset>&#8635;</button>
+    <input class=search id=search placeholder="search a calculation, field, theory…" autocomplete=off></div>
   <div class=detail id=detail></div>
   <h2>The 22 master equations</h2>
-  <div class=chips id=chips>""" + master_chips + """</div>
+  <div class=chips id=chips>__CHIPS__</div>
 </div>
 </div>
 <script>
-const DATA = """ + json.dumps(data, ensure_ascii=False) + """;
-const fig = document.getElementById('fig');
-const detail = document.getElementById('detail');
-const threads = [...fig.querySelectorAll('.thread')];
-const nodes = [...fig.querySelectorAll('.dnode')];
-const chips = [...document.querySelectorAll('.chip')];
-const nodeByDom = {}; nodes.forEach(g=>nodeByDom[g.dataset.dom]=g);
-let pinned = null;
+const D = __DATA__;
+const NS="http://www.w3.org/2000/svg";
+const fig=document.getElementById('fig'), detail=document.getElementById('detail');
+const CX=600, CY=600;
+let layout='kernel';
+let sel=null;              // {type:'master'|'domain'|'calc'|'form'|'theory', id}
+let pinned=false;
 
-function clearHi(){ threads.forEach(t=>t.classList.remove('hi','dim')); nodes.forEach(nn=>nn.classList.remove('hi','dim')); chips.forEach(c=>c.classList.remove('on')); }
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function E(tag,at,kids){const e=document.createElementNS(NS,tag);for(const k in at)e.setAttribute(k,at[k]);
+  if(kids)kids.forEach(c=>e.appendChild(c));return e;}
+function pol(r,a){return [CX+r*Math.cos(a),CY+r*Math.sin(a)];}
+const dcol=d=>D.dcol[d]||'#8a8378';
+const domIdx={}; D.domOrder.forEach((d,i)=>domIdx[d]=i);
+const leafIdx={}; D.leaf.forEach((f,i)=>leafIdx[f]=i);
+function formRoot(f){while(D.formParent[f])f=D.formParent[f];return f;}
 
-function showMaster(mi){
-  const m = DATA.masters.find(x=>x.i==mi);
-  clearHi();
-  threads.forEach(t=>t.classList.add((t.dataset.mi==mi)?'hi':'dim'));
-  const dset = new Set(m.doms);
-  nodes.forEach(nn=>nn.classList.add(dset.has(nn.dataset.dom)?'hi':'dim'));
-  chips.forEach(c=>{ if(c.dataset.mi==mi) c.classList.add('on'); });
-  let rows = m.subs.map(([d,s])=>`<tr><td class=d data-dom="${esc(d)}">${esc(d)}</td><td class=s>${esc(s)}</td></tr>`).join('');
-  detail.innerHTML = `<div class=eq>${esc(m.eq)}</div><div class=gist>${esc(m.gist)}</div>`+
-    `<table>${rows}</table>`;
-  wireDomLinks();
-  document.getElementById('count').textContent = m.doms.length+' domains connected';
+// ---- registries so applyHi can find drawn elements ----
+let reg;
+function tt(node,text){const t=E('title',{});t.textContent=text;node.appendChild(t);return node;}
+
+function clearFig(){fig.innerHTML='';reg={calc:{},dom:{},master:{},form:{},theory:{},thread:{}};
+  fig.appendChild(E('rect',{id:'bg',x:0,y:0,width:1200,height:1200,fill:'#0f0d09'}));}
+
+function calcDot(slug,x,y,r){const c=D.calcs[slug];const dot=E('circle',{cx:x,cy:y,r:r||4.4,
+  fill:dcol(c.dom),stroke:'#0f0d09','stroke-width':.7,class:'node calcdot','data-id':slug});
+  tt(dot,c.t+' — '+c.dom+' · '+c.form);
+  dot.addEventListener('mouseenter',()=>{if(!pinned)showCalc(slug);});
+  dot.addEventListener('click',e=>{e.stopPropagation();pinned=true;showCalc(slug);});
+  (reg.calc[slug]=reg.calc[slug]||[]).push(dot);fig.appendChild(dot);return dot;}
+
+function lbl(x,y,text,size,fill,anchor,rot){const t=E('text',{x:x,y:y,'font-size':size||10,
+  fill:fill||'#cbbfa4','text-anchor':anchor||'middle',class:'lbl'});
+  if(rot!==undefined)t.setAttribute('transform','rotate('+rot+' '+x+' '+y+')');
+  t.textContent=text;fig.appendChild(t);return t;}
+
+// theory placement helper (mean angle of its calcs given an angle map)
+function theoryRim(angleOf, Rt){
+  const byT={};
+  for(const slug in D.calcs){const c=D.calcs[slug];if(c.thid&&angleOf[slug]!==undefined)(byT[c.thid]=byT[c.thid]||[]).push(angleOf[slug]);}
+  const mean=a=>Math.atan2(a.reduce((s,x)=>s+Math.sin(x),0),a.reduce((s,x)=>s+Math.cos(x),0));
+  const ids=Object.keys(byT).sort((p,q)=>mean(byT[p])-mean(byT[q]));
+  const gap=2*Math.PI/Math.max(1,ids.length)*0.9; let prev=null; const place={};
+  ids.forEach(t=>{let a=mean(byT[t]); if(prev!==null&&a-prev<gap)a=prev+gap; place[t]=a; prev=a;});
+  ids.forEach(t=>{const [x,y]=pol(Rt,place[t]);
+    const n=E('circle',{cx:x,cy:y,r:3.3,fill:'#e6c374',stroke:'#7a5f28','stroke-width':.8,class:'node','data-th':t});
+    tt(n,D.theoryTitles[t]||t);
+    n.addEventListener('mouseenter',()=>{if(!pinned)showTheory(t);});
+    n.addEventListener('click',e=>{e.stopPropagation();pinned=true;showTheory(t);});
+    (reg.theory[t]=reg.theory[t]||[]).push(n);fig.appendChild(n);
+    const c=Math.cos(place[t]); const [lx,ly]=pol(Rt+12,place[t]);
+    lbl(lx,ly+2,(D.theoryTitles[t]||t).split('(')[0].trim().slice(0,22),8,'#a08a5a',c>=0?'start':'end',
+        (place[t]*180/Math.PI)+(c<0?180:0));});
+  return place;
 }
 
-function showDomain(dom){
-  clearHi();
-  const ms = DATA.masters.filter(m=>m.doms.includes(dom));
-  const miset = new Set(ms.map(m=>m.i));
-  const domset = new Set([dom]); ms.forEach(m=>m.doms.forEach(d=>domset.add(d)));
-  threads.forEach(t=>t.classList.add(miset.has(+t.dataset.mi)?'hi':'dim'));
-  nodes.forEach(nn=>{ if(nn.dataset.dom===dom) nn.classList.add('hi'); else if(!domset.has(nn.dataset.dom)) nn.classList.add('dim'); });
-  const calcs = (DATA.domCalcs[dom]||[]);
-  let mrows = ms.map(m=>`<div class=row data-mi="${m.i}"><span class=sw style="background:${m.col}"></span><code style="color:${m.col}">${esc(m.eq.split('->')[0].trim())}</code></div>`).join('');
-  let crows = calcs.map(id=>{const c=DATA.calcs[id]; return `<div class=calc data-id="${id}"><b style="color:#bcae8a">${esc(c.t)}</b> <code>${esc(c.f)}</code></div>`;}).join('');
-  detail.innerHTML = `<div class=eq style="font-family:Georgia,serif;color:var(--gold)">${esc(dom)}</div>`+
+// ------------------------------------------------------------------ layouts
+function renderWheel(){clearFig();
+  const forms=D.leaf, n=forms.length, Rin=110, Rout=560;
+  const parents=new Set(Object.values(D.formParent));
+  // family tint wedges
+  const span={}; forms.forEach((f,i)=>{const p=D.formParent[f]; if(p){span[p]=span[p]||[i,i]; span[p][0]=Math.min(span[p][0],i);span[p][1]=Math.max(span[p][1],i);}});
+  for(const p in span){const [lo,hi]=span[p];const a0=-Math.PI/2+2*Math.PI*lo/n,a1=-Math.PI/2+2*Math.PI*(hi+1)/n;
+    const large=(a1-a0)>Math.PI?1:0;const [x0,y0]=pol(Rout,a0),[x1,y1]=pol(Rout,a1),[xi,yi]=pol(Rin,a1),[x0i,y0i]=pol(Rin,a0);
+    fig.appendChild(E('path',{d:`M${x0} ${y0} A${Rout} ${Rout} 0 ${large} 1 ${x1} ${y1} L${xi} ${yi} A${Rin} ${Rin} 0 ${large} 0 ${x0i} ${y0i} Z`,fill:D.famTint[p]||'#c69a4a',opacity:.05}));}
+  for(const q of [.3,.55,.8,1])fig.appendChild(E('circle',{cx:CX,cy:CY,r:Rout*q,fill:'none',stroke:'#241f18'}));
+  forms.forEach((f,i)=>{const a0=-Math.PI/2+2*Math.PI*i/n, amid=-Math.PI/2+2*Math.PI*(i+.5)/n;
+    const [sx,sy]=pol(Rin,a0),[ex,ey]=pol(Rout,a0);
+    fig.appendChild(E('line',{x1:sx,y1:sy,x2:ex,y2:ey,stroke:'#241f18'}));
+    const rows=D.calcsByForm[f]||[], m=Math.max(1,rows.length);
+    rows.forEach((slug,j)=>{const r=Rin+30+(Rout-Rin-70)*((j+.5)/m);const frac=((j%3)-1)*.34;
+      const [x,y]=pol(r,amid+(2*Math.PI/n)*.28*frac);calcDot(slug,x,y);});
+    const [lx,ly]=pol(Rout-8,amid);const c=Math.cos(amid);
+    const tl=lbl(lx,ly,f,10,'#cbbfa4',c>=0?'end':'start',(amid*180/Math.PI)+(c<0?180:0));
+    tl.setAttribute('data-form',f);tl.style.pointerEvents='auto';tl.style.cursor='pointer';
+    tl.addEventListener('mouseenter',()=>{if(!pinned)showForm(f);});
+    tl.addEventListener('click',e=>{e.stopPropagation();pinned=true;showForm(f);});
+    (reg.form[f]=reg.form[f]||[]).push(tl);});
+  hub(Rin-2,'form wheel',n+' forms');
+}
+
+function renderOneBody(){clearFig();
+  const forms=D.leaf, n=forms.length, Rin=120, Rout=470, Rt=560;
+  for(const q of [.28,.55,.82,1])fig.appendChild(E('circle',{cx:CX,cy:CY,r:Rout*q,fill:'none',stroke:'#221d15'}));
+  const angleOf={};
+  forms.forEach((f,i)=>{const a0=-Math.PI/2+2*Math.PI*i/n,a1=-Math.PI/2+2*Math.PI*(i+1)/n,amid=(a0+a1)/2;
+    const [sx,sy]=pol(Rin,a0),[ex,ey]=pol(Rout,a0);fig.appendChild(E('line',{x1:sx,y1:sy,x2:ex,y2:ey,stroke:'#221d15'}));
+    const rows=D.calcsByForm[f]||[],m=Math.max(1,rows.length);
+    rows.forEach((slug,j)=>{const r=Rin+(Rout-Rin-30)*((j+.5)/m);const frac=((j%3)-1)*.34;const ang=amid+(a1-a0)*.3*frac;
+      angleOf[slug]=ang;});});
+  const place=theoryRim(angleOf,Rt);
+  // rests_on chords under dots
+  for(const slug in angleOf){const c=D.calcs[slug];if(c.thid&&place[c.thid]!==undefined){
+    const [x,y]=pol(fromR(slug,forms,Rin,Rout),angleOf[slug]);const [tx,ty]=pol(Rt,place[c.thid]);
+    const mx=(x+tx)/2,my=(y+ty)/2,ctx=CX+(mx-CX)*.5,cty=CY+(my-CY)*.5;
+    fig.appendChild(E('path',{d:`M${x} ${y} Q${ctx} ${cty} ${tx} ${ty}`,fill:'none',stroke:dcol(c.dom),'stroke-width':.6,opacity:.12}));}}
+  // dots
+  for(const slug in angleOf){const [x,y]=pol(fromR(slug,forms,Rin,Rout),angleOf[slug]);calcDot(slug,x,y,4.2);}
+  hub(Rin-4,'one body',D.counts.calcs+' calcs');
+}
+function fromR(slug,forms,Rin,Rout){const f=D.calcs[slug].form;const rows=D.calcsByForm[f]||[];const j=rows.indexOf(slug),m=Math.max(1,rows.length);
+  return Rin+(Rout-Rin-30)*((j+.5)/m);}
+
+function renderSpiral(){clearFig();
+  const rows=Object.keys(D.calcs).sort((p,q)=>{const a=D.calcs[p],b=D.calcs[q];
+    return a.dom<b.dom?-1:a.dom>b.dom?1:(leafIdx[a.form]||0)-(leafIdx[b.form]||0);});
+  const N=rows.length, R0=42,Rmax=560,turns=5.2,th0=-Math.PI/2,thspan=turns*2*Math.PI,b=Math.log(Rmax/R0)/thspan;
+  const pos={},ang={};
+  rows.forEach((slug,i)=>{const t=i/Math.max(1,N-1),th=th0+t*thspan,r=R0*Math.exp(b*(th-th0));
+    pos[slug]=pol(r,th);ang[slug]=th;});
+  // spine
+  let sp='';for(let k=0;k<=600;k++){const th=th0+(k/600)*thspan,r=R0*Math.exp(b*(th-th0));const [x,y]=pol(r,th);sp+=(k?' ':'')+x.toFixed(1)+','+y.toFixed(1);}
+  fig.appendChild(E('polyline',{points:sp,fill:'none',stroke:'#241f18'}));
+  // form threads
+  const byForm={};rows.forEach(s=>{(byForm[D.calcs[s].form]=byForm[D.calcs[s].form]||[]).push(s);});
+  for(const f in byForm){if(byForm[f].length<2)continue;let pts=byForm[f].map(s=>pos[s].map(v=>v.toFixed(0)).join(',')).join(' ');
+    fig.appendChild(E('polyline',{points:pts,fill:'none',stroke:'#c69a4a','stroke-width':.7,opacity:.12,class:'node','data-form':f}));}
+  rows.forEach(slug=>{const [x,y]=pos[slug];calcDot(slug,x,y,3.6);});
+  hub(30,'spiral',N+' calcs');
+}
+
+function renderKernel(){clearFig();
+  const ms=D.masters.slice().sort((a,b)=>(leafIdx[a.domform]||99)-(leafIdx[b.domform]||99));
+  const nM=ms.length, Rm=250;
+  const mang={}; ms.forEach((m,i)=>mang[m.i]=-Math.PI/2+2*Math.PI*i/nM);
+  // member dots + angle map for theory rim
+  const angleOf={}; const memberpos={};
+  ms.forEach((m,i)=>{const a=mang[m.i],k=m.members.length;
+    m.members.forEach((slug,j)=>{const frac=(j-(k-1)/2)/Math.max(1,k);const ang=a+frac*(2*Math.PI/nM)*.8;
+      const r=360+206*(.15+.7*(j+.5)/Math.max(1,k));memberpos[m.i+'|'+slug]=[pol(r,ang),m.i];angleOf[slug]=angleOf[slug]===undefined?ang:angleOf[slug];});});
+  const place=theoryRim(angleOf,680);
+  // duality arcs between master forms
+  const formMasters={}; ms.forEach(m=>{(formMasters[m.domform]=formMasters[m.domform]||[]).push(m.i);});
+  D.dualities.forEach(([fa,fb])=>{(formMasters[fa]||[]).forEach(ia=>(formMasters[fb]||[]).forEach(ib=>{
+    const [x0,y0]=pol(Rm,mang[ia]),[x1,y1]=pol(Rm,mang[ib]);
+    fig.appendChild(E('path',{d:`M${x0} ${y0} Q${CX} ${CY} ${x1} ${y1}`,fill:'none',stroke:'#c69a4a','stroke-width':.8,opacity:.26}));}));});
+  // reach rays + member dots
+  for(const key in memberpos){const [[x,y],mi]=memberpos[key];const slug=key.split('|')[1];const [mx,my]=pol(Rm,mang[mi]);
+    const ray=E('line',{x1:mx,y1:my,x2:x,y2:y,stroke:dcol(D.calcs[slug].dom),'stroke-width':.7,opacity:.32,class:'node','data-id':slug});
+    fig.appendChild(ray);calcDot(slug,x,y,4.4);}
+  // master nodes
+  ms.forEach(m=>{const [mx,my]=pol(Rm,mang[m.i]);
+    const node=E('circle',{cx:mx,cy:my,r:7.5,fill:'#f0d68a',stroke:'#7a5f28','stroke-width':1.3,class:'node mnode','data-mi':m.i});
+    tt(node,m.eq);node.style.cursor='pointer';
+    node.addEventListener('mouseenter',()=>{if(!pinned)showMaster(m.i);});
+    node.addEventListener('click',e=>{e.stopPropagation();pinned=true;showMaster(m.i);});
+    (reg.master[m.i]=reg.master[m.i]||[]).push(node);fig.appendChild(node);
+    const c=Math.cos(mang[m.i]);const [lx,ly]=pol(Rm-16,mang[m.i]);
+    lbl(lx,ly,m.eq.split('->')[0].trim(),9,'#e8dfc9',c>=0?'end':'start',(mang[m.i]*180/Math.PI)+(c<0?180:0));});
+  hub(46,'ATLAS','the one kernel');
+}
+
+function renderDomains(){clearFig();
+  const present=new Set(); D.masters.forEach(m=>m.doms.forEach(d=>present.add(d)));
+  const ord=D.domOrder.filter(d=>present.has(d)); const n=ord.length, Rn=520;
+  const ang={}; ord.forEach((d,i)=>ang[d]=-Math.PI/2+2*Math.PI*i/n);
+  const deg={}; D.masters.forEach(m=>m.doms.forEach(d=>deg[d]=(deg[d]||0)+1)); const maxd=Math.max(...Object.values(deg));
+  // family arcs
+  const fi={}; ord.forEach((d,i)=>{(fi[D.domFam[d]]=fi[D.domFam[d]]||[]).push(i);});
+  for(const fam in fi){const idx=fi[fam];const a0=-Math.PI/2+2*Math.PI*(Math.min(...idx)-.42)/n,a1=-Math.PI/2+2*Math.PI*(Math.max(...idx)+.42)/n;
+    const large=(a1-a0)>Math.PI?1:0;const [x0,y0]=pol(Rn+52,a0),[x1,y1]=pol(Rn+52,a1);
+    fig.appendChild(E('path',{d:`M${x0} ${y0} A${Rn+52} ${Rn+52} 0 ${large} 1 ${x1} ${y1}`,fill:'none',stroke:D.ftint[fam]||'#c69a4a','stroke-width':2.5,opacity:.5}));
+    const amid=(a0+a1)/2,cc=Math.cos(amid),[lx,ly]=pol(Rn+68,amid);
+    lbl(lx,ly,fam,12,D.ftint[fam]||'#c69a4a',cc>=0?'start':'end',(amid*180/Math.PI)+(cc<0?180:0));}
+  // threads
+  D.masters.forEach(m=>{if(m.doms.length<2)return;const g=E('g',{class:'thread node','data-mi':m.i,stroke:m.col});
+    for(let a=0;a<m.doms.length-1;a++){const [x0,y0]=pol(Rn,ang[m.doms[a]]),[x1,y1]=pol(Rn,ang[m.doms[a+1]]);
+      const mx=(x0+x1)/2,my=(y0+y1)/2,ctx=CX+(mx-CX)*.3,cty=CY+(my-CY)*.3;
+      const p=E('path',{d:`M${x0} ${y0} Q${ctx} ${cty} ${x1} ${y1}`,fill:'none','stroke-width':1.5,opacity:.42,'stroke-linecap':'round'});
+      g.appendChild(p);}
+    g.addEventListener('mouseenter',()=>{if(!pinned)showMaster(m.i);});
+    g.addEventListener('click',e=>{e.stopPropagation();pinned=true;showMaster(m.i);});
+    (reg.thread[m.i]=reg.thread[m.i]||[]).push(g);fig.appendChild(g);});
+  // domain nodes
+  ord.forEach(d=>{const [x,y]=pol(Rn,ang[d]);const r=3.5+(deg[d]/maxd)*8.5;
+    const node=E('circle',{cx:x,cy:y,r:r,fill:D.ftint[D.domFam[d]]||'#c69a4a',stroke:'#0f0d09','stroke-width':1,class:'node','data-dom':d});
+    tt(node,d+' — '+deg[d]+' master equations');node.style.cursor='pointer';
+    node.addEventListener('mouseenter',()=>{if(!pinned)showDomain(d);});
+    node.addEventListener('click',e=>{e.stopPropagation();pinned=true;showDomain(d);});
+    (reg.dom[d]=reg.dom[d]||[]).push(node);fig.appendChild(node);
+    const c=Math.cos(ang[d]),[lx,ly]=pol(Rn+14,ang[d]);
+    lbl(lx,ly+2,d,10,'#cbbfa4',c>=0?'start':'end',(ang[d]*180/Math.PI)+(c<0?180:0));});
+  hub(46,'ATLAS',n+' domains');
+}
+
+function hub(r,a,b){fig.appendChild(E('circle',{cx:CX,cy:CY,r:r<40?46:r,fill:'#0f0d09',stroke:'#3a3427','stroke-width':1.4}));
+  const t1=E('text',{x:CX,y:CY-2,'font-size':a==='ATLAS'?15:12,fill:'#c69a4a','text-anchor':'middle',class:'lbl'});t1.textContent=a;fig.appendChild(t1);
+  const t2=E('text',{x:CX,y:CY+14,'font-size':9,fill:'#8a8378','text-anchor':'middle',class:'lbl'});t2.textContent=b;fig.appendChild(t2);}
+
+const RENDER={kernel:renderKernel,wheel:renderWheel,onebody:renderOneBody,spiral:renderSpiral,domains:renderDomains};
+function render(){RENDER[layout]();applyHi();}
+
+// ---------------------------------------------------------------- selection
+function hiSets(){
+  if(!sel)return null;
+  const calcs=new Set(),doms=new Set(),mis=new Set(),forms=new Set(),ths=new Set();
+  const addCalc=s=>{const c=D.calcs[s];if(!c)return;calcs.add(s);doms.add(c.dom);forms.add(c.form);if(c.thid)ths.add(c.thid);c.m.forEach(m=>mis.add(m));};
+  if(sel.type==='master'){const m=D.masters[sel.id];mis.add(sel.id);m.doms.forEach(d=>doms.add(d));m.members.forEach(s=>{calcs.add(s);forms.add(D.calcs[s].form);});}
+  else if(sel.type==='domain'){doms.add(sel.id);D.masters.forEach(m=>{if(m.doms.includes(sel.id))mis.add(m.i);});for(const s in D.calcs)if(D.calcs[s].dom===sel.id)calcs.add(s);}
+  else if(sel.type==='calc'){addCalc(sel.id);}
+  else if(sel.type==='form'){forms.add(sel.id);(D.calcsByForm[sel.id]||[]).forEach(s=>calcs.add(s));}
+  else if(sel.type==='theory'){ths.add(sel.id);for(const s in D.calcs)if(D.calcs[s].thid===sel.id)calcs.add(s);}
+  return {calcs,doms,mis,forms,ths};
+}
+function applyHi(){
+  const H=hiSets();
+  const all=fig.querySelectorAll('.node');
+  all.forEach(n=>{n.classList.remove('hi','dim');});
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',!!H&&sel.type==='master'&&+c.dataset.mi===sel.id));
+  if(!H)return;
+  all.forEach(n=>{
+    let on=false;
+    if(n.dataset.id!==undefined)on=H.calcs.has(n.dataset.id);
+    else if(n.dataset.dom!==undefined)on=H.doms.has(n.dataset.dom);
+    else if(n.dataset.mi!==undefined)on=H.mis.has(+n.dataset.mi);
+    else if(n.dataset.form!==undefined)on=H.forms.has(n.dataset.form);
+    else if(n.dataset.th!==undefined)on=H.ths.has(n.dataset.th);
+    else return; // structural, leave as is
+    n.classList.add(on?'hi':'dim');
+  });
+}
+
+// ---------------------------------------------------------------- panels
+function wireMasterRows(){detail.querySelectorAll('.mlist .row[data-mi]').forEach(r=>r.onclick=()=>{pinned=true;showMaster(+r.dataset.mi);});}
+function wireLinks(){
+  detail.querySelectorAll('.domlink[data-dom]').forEach(el=>el.onclick=()=>{pinned=true;showDomain(el.dataset.dom);});
+  detail.querySelectorAll('.formlink[data-form]').forEach(el=>el.onclick=()=>{pinned=true;showForm(el.dataset.form);});
+  detail.querySelectorAll('.thlink[data-th]').forEach(el=>el.onclick=()=>{pinned=true;showTheory(el.dataset.th);});
+  detail.querySelectorAll('td.d[data-dom]').forEach(el=>el.onclick=()=>{pinned=true;showDomain(el.dataset.dom);});
+  detail.querySelectorAll('.calc[data-id]').forEach(el=>el.onclick=()=>{pinned=true;showCalc(el.dataset.id);});
+}
+function setCount(t){document.getElementById('hint').textContent=t;}
+
+function showMaster(mi){sel={type:'master',id:mi};const m=D.masters[mi];
+  const rows=m.subs.map(([d,s])=>`<tr><td class=d data-dom="${esc(d)}">${esc(d)}</td><td class=s>${esc(s)}</td></tr>`).join('');
+  detail.innerHTML=`<div class=eq>${esc(m.eq)}</div><div class=gist>${esc(m.gist)}</div><table>${rows}</table>`;
+  wireLinks();applyHi();setCount('master equation — '+m.doms.length+' domains');}
+function showDomain(dom){sel={type:'domain',id:dom};
+  const ms=D.masters.filter(m=>m.doms.includes(dom));
+  const calcs=Object.keys(D.calcs).filter(s=>D.calcs[s].dom===dom);
+  const mrows=ms.map(m=>`<div class=row data-mi="${m.i}"><span class=sw style="background:${m.col}"></span><code style="color:${m.col}">${esc(m.eq.split('->')[0].trim())}</code></div>`).join('');
+  const crows=calcs.map(s=>`<div class=calc data-id="${s}"><b>${esc(D.calcs[s].t)}</b> <code>${esc(D.calcs[s].f)}</code></div>`).join('');
+  detail.innerHTML=`<div class=eq style="font-family:Georgia,serif;color:var(--gold)">${esc(dom)}</div>`+
     `<div class=gist>${ms.length} master equation${ms.length==1?'':'s'} run through this field; ${calcs.length} calculation${calcs.length==1?'':'s'} live here.</div>`+
-    `<div class=mlist>${mrows||'<div class=lead>No master equation runs through this field yet.</div>'}</div>`+
-    `<h2 style="margin-top:.8rem">Calculations here <span class=hint>(click one)</span></h2>${crows||'<div class=lead>none plotted</div>'}`;
-  wireMasterRows(); wireDomLinks(); wireCalcRows();
-  document.getElementById('count').textContent = dom+' — '+ms.length+' formulas, '+calcs.length+' calcs';
-}
+    `<div class=mlist>${mrows||'<div class=lead>no master equation through this field</div>'}</div>`+
+    `<h2>Calculations here</h2>${crows||'<div class=lead>none</div>'}`;
+  wireLinks();applyHi();setCount(dom);}
+function showForm(f){sel={type:'form',id:f};const calcs=D.calcsByForm[f]||[];const par=D.formParent[f];
+  const crows=calcs.map(s=>`<div class=calc data-id="${s}"><b>${esc(D.calcs[s].t)}</b> <code>${esc(D.calcs[s].f)}</code> <span style="color:#5f584a">${esc(D.calcs[s].dom)}</span></div>`).join('');
+  detail.innerHTML=`<div class=eq style="color:var(--gold)">${esc(f)}</div><div class=gist>${esc(D.formEq[f]||'')}`+
+    (par?` · a finer case of <span class=formlink data-form="${esc(par)}">${esc(par)}</span>`:'')+`</div>`+
+    `<h2>Calculations of this form <span style="color:#5f584a">(${calcs.length})</span></h2>${crows}`;
+  wireLinks();applyHi();setCount('form: '+f);}
+function showTheory(th){sel={type:'theory',id:th};const calcs=Object.keys(D.calcs).filter(s=>D.calcs[s].thid===th);
+  const crows=calcs.map(s=>`<div class=calc data-id="${s}"><b>${esc(D.calcs[s].t)}</b> <code>${esc(D.calcs[s].f)}</code> <span style="color:#5f584a">${esc(D.calcs[s].dom)}</span></div>`).join('');
+  detail.innerHTML=`<div class=eq style="font-family:Georgia,serif;color:var(--gold2)">${esc(D.theoryTitles[th]||th)}</div>`+
+    `<div class=gist>A theory on THE FLOOR. ${calcs.length} calculation${calcs.length==1?'':'s'} rest on it.</div>`+
+    `<h2>Calculations that rest here</h2>${crows}`;
+  wireLinks();applyHi();setCount('theory');}
+function showCalc(slug){sel={type:'calc',id:slug};const c=D.calcs[slug];
+  const mchips=c.m.map(mi=>{const m=D.masters[mi];return `<div class=row data-mi="${mi}"><span class=sw style="background:${m.col}"></span><code style="color:${m.col}">${esc(m.eq.split('->')[0].trim())}</code></div>`;}).join('');
+  detail.innerHTML=`<div class=eq>${esc(c.f)}</div>`+
+    `<div class=gist>${esc(c.t)} — <span class=domlink data-dom="${esc(c.dom)}">${esc(c.dom)}</span> · form <span class=formlink data-form="${esc(c.form)}">${esc(c.form)}</span></div>`+
+    (c.thid?`<div class=lead>rests on <span class=thlink data-th="${esc(c.thid)}">${esc(c.th)}</span></div>`:'<div class=lead>an honest theory-gap</div>')+
+    (c.m.length?`<h2>Master equation${c.m.length>1?'s':''}</h2><div class=mlist>${mchips}</div>`:'<div class=lead style="margin-top:.4rem">a domain-specific calculation</div>');
+  wireLinks();applyHi();setCount(c.t);}
 
-function showCalc(slug){
-  const c = DATA.calcs[slug]; if(!c) return;
-  clearHi();
-  const miset = new Set(c.m);
-  threads.forEach(t=>t.classList.add(miset.has(+t.dataset.mi)?'hi':'dim'));
-  nodes.forEach(nn=>{ if(nn.dataset.dom===c.dom) nn.classList.add('hi'); else nn.classList.add('dim'); });
-  const mchips = c.m.map(mi=>{const m=DATA.masters.find(x=>x.i==mi); return `<div class=row data-mi="${mi}"><span class=sw style="background:${m.col}"></span><code style="color:${m.col}">${esc(m.eq.split('->')[0].trim())}</code></div>`;}).join('');
-  detail.innerHTML = `<div class=eq>${esc(c.f)}</div>`+
-    `<div class=gist>${esc(c.t)} — <span class=domlink data-dom="${esc(c.dom)}">${esc(c.dom)}</span> · form: <b>${esc(c.form)}</b></div>`+
-    (c.th?`<div class=lead>rests on the theory: <b style="color:#cbbfa4">${esc(c.th)}</b></div>`:'<div class=lead>an honest theory-gap — no parent theory carded yet</div>')+
-    (c.m.length?`<h2 style="margin-top:.6rem">Master equation${c.m.length>1?'s':''} it is part of</h2><div class=mlist>${mchips}</div>`
-               :'<div class=lead style="margin-top:.5rem">a domain-specific calculation, not on a master equation</div>');
-  wireMasterRows();
-  detail.querySelectorAll('.domlink[data-dom]').forEach(el=>el.onclick=()=>{pinned='d'+el.dataset.dom; showDomain(el.dataset.dom);});
-  document.getElementById('count').textContent = c.t;
-}
-function wireCalcRows(){ detail.querySelectorAll('.calc[data-id]').forEach(el=>el.onclick=()=>{pinned='c'+el.dataset.id; showCalc(el.dataset.id);}); }
+function reset(){sel=null;pinned=false;detail.innerHTML='<div class=lead>Atlas — '+D.counts.masters+' master equations, '+D.counts.calcs+' calculations, '+D.counts.theories+' theories. Pick a layout above; select a master, a field, a form, a theory, or any calculation. Your selection is kept across layouts.</div>';applyHi();setCount('Hover to preview, click to select. Selection is kept across layouts.');}
 
-function wireMasterRows(){ detail.querySelectorAll('.mlist .row').forEach(r=>r.onclick=()=>{pinned='m'+r.dataset.mi; showMaster(r.dataset.mi);}); }
-function wireDomLinks(){ detail.querySelectorAll('td.d[data-dom]').forEach(td=>td.onclick=()=>{pinned='d'+td.dataset.dom; showDomain(td.dataset.dom);}); }
+// search
+document.getElementById('search').addEventListener('input',e=>{const q=e.target.value.toLowerCase().trim();
+  if(!q){if(!sel)reset();return;}
+  const hits=[];
+  for(const s in D.calcs){if(D.calcs[s].t.toLowerCase().includes(q)||s.includes(q))hits.push(['calc',s,D.calcs[s].t]);}
+  D.domOrder.forEach(d=>{if(d.includes(q))hits.push(['dom',d,d]);});
+  for(const t in D.theoryTitles){if((D.theoryTitles[t]||'').toLowerCase().includes(q))hits.push(['th',t,D.theoryTitles[t]]);}
+  const rows=hits.slice(0,40).map(([k,id,label])=>`<div class=calc data-k="${k}" data-v="${esc(id)}">${esc(label)} <span style="color:#5f584a">${k}</span></div>`).join('');
+  detail.innerHTML=`<div class=lead>${hits.length} match${hits.length==1?'':'es'}</div>`+rows;
+  detail.querySelectorAll('.calc[data-k]').forEach(el=>el.onclick=()=>{pinned=true;const k=el.dataset.k,v=el.dataset.v;
+    if(k==='calc')showCalc(v);else if(k==='dom')showDomain(v);else showTheory(v);});});
 
-function reset(){ pinned=null; clearHi(); detail.innerHTML='<div class=lead>Atlas holds '+DATA.masters.length+' master equations — the formulas that connect across domains. Pick one, or a field, to trace its reach.</div>'; document.getElementById('count').textContent=''; }
-
-threads.forEach(t=>{
-  t.addEventListener('mouseenter',()=>{ if(!pinned) showMaster(t.dataset.mi); });
-  t.addEventListener('click',(e)=>{ e.stopPropagation(); pinned='m'+t.dataset.mi; showMaster(t.dataset.mi); });
-});
-nodes.forEach(g=>{
-  g.addEventListener('mouseenter',()=>{ if(!pinned) showDomain(g.dataset.dom); });
-  g.addEventListener('click',(e)=>{ e.stopPropagation(); pinned='d'+g.dataset.dom; showDomain(g.dataset.dom); });
-});
-chips.forEach(c=>{
-  c.addEventListener('mouseenter',()=>{ if(!pinned) showMaster(c.dataset.mi); });
-  c.addEventListener('click',()=>{ pinned='m'+c.dataset.mi; showMaster(c.dataset.mi); });
-});
-fig.addEventListener('mouseleave',()=>{ if(!pinned) reset(); });
-document.getElementById('bg').addEventListener('click',reset);
-document.querySelector('#fig circle:last-of-type');
+// tabs
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  layout=t.dataset.l;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));render();}));
+document.querySelectorAll('.chip').forEach(c=>{
+  c.addEventListener('mouseenter',()=>{if(!pinned)showMaster(+c.dataset.mi);});
+  c.addEventListener('click',()=>{pinned=true;showMaster(+c.dataset.mi);});});
 document.getElementById('reset').addEventListener('click',reset);
-reset();
+fig.addEventListener('click',e=>{if(e.target.id==='bg')reset();});
+
+// init
+document.querySelector('.tab[data-l=kernel]').classList.add('on');
+render();reset();
 </script>
 </body></html>"""
 
