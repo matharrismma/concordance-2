@@ -284,6 +284,9 @@ CALCS: list[tuple] = [
     ("goldman_equation", "Goldman-Hodgkin-Katz", "V = (RT/F) ln( sum P[out] / sum P[in] )", "neuroscience", "logarithmic", "the membrane potential from several ions weighted by permeability — Nernst generalized"),
     ("titration_curve", "Titration curve (Henderson-Hasselbalch)", "f = 1/(1 + 10^(pKa - pH))", "chemistry", "logistic", "the fraction deprotonated is a sigmoid in pH — a two-state occupation"),
     ("firing_rate_curve", "Neuronal firing-rate curve", "r = r_max / (1 + e^(-(I - theta)/k))", "neuroscience", "logistic", "a neuron's f-I response is a sigmoid in input current"),
+    # --- walking the edge: the next two predictions, plotted ---
+    ("cable_equation", "The cable equation", "dV/dt = lambda^2 d2V/dx2 - V/tau", "neuroscience", "diffusion", "voltage spreading down an axon/dendrite — the diffusion equation with a leak"),
+    ("molecular_vibration", "Molecular bond vibration", "omega = sqrt(k/mu)", "chemistry", "periodic", "a chemical bond is a spring — the harmonic oscillator with the reduced mass mu (IR spectroscopy)"),
 ]
 
 # calc slug -> the parent THEORY card on THE FLOOR it rests on (joins the two maps into one body).
@@ -432,6 +435,8 @@ CALC_THEORY: dict[str, str] = {
     "goldman_equation": "card_theory_neuroscience",
     "titration_curve": "card_theory_br_nsted_lowry_acid_base_theory_ph",
     "firing_rate_curve": "card_theory_neuroscience",
+    "cable_equation": "card_theory_neuroscience",
+    "molecular_vibration": "card_theory_chemical_bonding",
     # neutron_diffusion, gamma_dose: no reactor/dosimetry theory carded yet — honest gaps
 }
 

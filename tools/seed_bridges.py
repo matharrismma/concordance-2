@@ -113,8 +113,9 @@ MASTER_EQUATIONS: list[dict] = [
          ("physics", "shm", "omega^2 = k/m (spring stiffness over mass)"),
          ("electrical", "lc_resonance", "omega^2 = 1/(LC) — the electrical pendulum"),
          ("physics", "pendulum", "omega^2 = g/L"),
+         ("chemistry", "molecular_vibration", "omega^2 = k/mu — a chemical bond as a spring (IR spectroscopy)"),
      ],
-     "predict": [("chemistry", "a molecular bond vibration — the bond as a spring, omega^2 = k/mu")]},
+     "predict": [("condensed_matter", "lattice phonons — a chain of coupled oscillators")]},
     {"id": "exponential_relaxation", "eq": "dQ/dt = -Q/tau  ->  Q = Q0 e^(-t/tau)",
      "gist": "change proportional to the amount left — decay toward a floor, one time constant tau",
      "rows": [
@@ -143,8 +144,9 @@ MASTER_EQUATIONS: list[dict] = [
          ("physics", "brownian_diffusion", "<x^2> = 2 D t — the same D, seen from one particle"),
          ("biology", "reaction_diffusion", "du/dt = D lap(u) + f(u) — diffusion plus reaction (Turing patterns)"),
          ("nuclear_physics", "neutron_diffusion", "u = neutron flux; diffusion with absorption and a source"),
+         ("neuroscience", "cable_equation", "u = membrane voltage; diffusion with a leak (-V/tau)"),
      ],
-     "predict": [("neuroscience", "the cable equation — voltage spreading down an axon or dendrite")]},
+     "predict": [("statistics", "the Fokker-Planck equation — diffusion with a drift term")]},
     {"id": "logistic_saturation", "eq": "dP/dt = r P (1 - P/K)",
      "gist": "self-limited growth toward a ceiling K",
      "rows": [
@@ -240,7 +242,8 @@ MASTER_EQUATIONS: list[dict] = [
      "rows": [
          ("probability", "markov_chain", "pi = the stationary distribution of a Markov chain"),
          ("computer_science", "pagerank", "PageRank is the stationary distribution of the web's random surfer"),
-     ]},
+     ],
+     "predict": [("ecology", "a Markov model of ecological succession — the climax community as pi")]},
     {"id": "geometric_series", "eq": "S = a / (1 - r),  |r| < 1",
      "gist": "an infinite sum with a constant ratio collapses to a simple fraction",
      "rows": [
