@@ -100,16 +100,29 @@ def build():
                         "col": MPAL[mi % len(MPAL)]})
 
     leaf = leaf_forms_ordered()
+    form_dom = {f: len({calcs[s]["dom"] for s in calcs_by_form.get(f, [])}) for f in FORMS}
+    # theory same_form isomorphisms (deduped, both endpoints resolvable)
+    iso_seen, theory_iso = set(), []
+    for a, b, ev in _load_theory()[1]:
+        key = frozenset((a, b))
+        if key in iso_seen or a not in theory_titles or b not in theory_titles:
+            continue
+        iso_seen.add(key)
+        theory_iso.append([a, b, ev])
+    iso_theories = {t for e in theory_iso for t in e[:2]}
+    calc_theories = {c["thid"] for c in calcs.values() if c["thid"]}
+    show_theories = calc_theories | iso_theories
     data = {
         "domOrder": dom_order, "domFam": fam_of, "dcol": dcol, "ftint": FTINT,
         "calcs": calcs, "calcsByForm": {f: calcs_by_form[f] for f in calcs_by_form},
-        "leaf": leaf, "formEq": {f: FORMS[f][0] for f in FORMS}, "formParent": FORM_PARENT,
-        "famTint": FAMTINT, "masters": masters,
-        "theoryTitles": {t: theory_titles.get(t, t) for t in {c["thid"] for c in calcs.values() if c["thid"]}},
-        "dualities": [[a, b] for a, b, _k, _e in FORM_DUALITIES],
-        "mpal": MPAL,
+        "leaf": leaf, "formList": list(FORMS), "formEq": {f: FORMS[f][0] for f in FORMS},
+        "formParent": FORM_PARENT, "formDom": form_dom, "famTint": FAMTINT, "masters": masters,
+        "theoryTitles": {t: theory_titles.get(t, t) for t in show_theories},
+        "dualities": [[a, b, k, e] for a, b, k, e in FORM_DUALITIES],
+        "theoryIso": theory_iso, "mpal": MPAL,
         "counts": {"calcs": len(calcs), "forms": len(FORMS), "masters": len(masters),
-                   "domains": len(all_domains), "theories": len(theory_titles)},
+                   "domains": len(all_domains), "theories": len(theory_titles),
+                   "dualities": len(FORM_DUALITIES), "iso": len(theory_iso)},
     }
     chips = "".join(
         f'<button class="chip" data-mi="{m["i"]}" style="border-left-color:{m["col"]}">'
@@ -183,6 +196,7 @@ text.lbl{font-family:Georgia,serif;pointer-events:none}
       <button class=tab data-l=onebody>one body</button>
       <button class=tab data-l=spiral>spiral</button>
       <button class=tab data-l=domains>domains</button>
+      <button class=tab data-l=bridges>bridges</button>
     </div>
   </div>
   <div class=hint id=hint>Hover to preview, click to select. Selection is kept when you switch layout.</div>
@@ -218,7 +232,7 @@ function formRoot(f){while(D.formParent[f])f=D.formParent[f];return f;}
 let reg;
 function tt(node,text){const t=E('title',{});t.textContent=text;node.appendChild(t);return node;}
 
-function clearFig(){fig.innerHTML='';reg={calc:{},dom:{},master:{},form:{},theory:{},thread:{}};
+function clearFig(){fig.innerHTML='';reg={calc:{},dom:{},master:{},form:{},theory:{},thread:{},du:{}};
   fig.appendChild(E('rect',{id:'bg',x:0,y:0,width:1200,height:1200,fill:'#0f0d09'}));}
 
 function calcDot(slug,x,y,r){const c=D.calcs[slug];const dot=E('circle',{cx:x,cy:y,r:r||4.4,
@@ -386,20 +400,48 @@ function hub(r,a,b){fig.appendChild(E('circle',{cx:CX,cy:CY,r:r<40?46:r,fill:'#0
   const t1=E('text',{x:CX,y:CY-2,'font-size':a==='ATLAS'?15:12,fill:'#c69a4a','text-anchor':'middle',class:'lbl'});t1.textContent=a;fig.appendChild(t1);
   const t2=E('text',{x:CX,y:CY+14,'font-size':9,fill:'#8a8378','text-anchor':'middle',class:'lbl'});t2.textContent=b;fig.appendChild(t2);}
 
-const RENDER={kernel:renderKernel,wheel:renderWheel,onebody:renderOneBody,spiral:renderSpiral,domains:renderDomains};
+function renderBridges(){clearFig();
+  const forms=D.formList, n=forms.length, Rn=460;
+  const ang={}; forms.forEach((f,i)=>ang[f]=-Math.PI/2+2*Math.PI*i/n);
+  const maxdom=Math.max(1,...Object.values(D.formDom));
+  fig.appendChild(E('circle',{cx:CX,cy:CY,r:Rn,fill:'none',stroke:'#221d15'}));
+  D.dualities.forEach((du,i)=>{const a=du[0],b=du[1];if(ang[a]===undefined||ang[b]===undefined)return;
+    const [x0,y0]=pol(Rn,ang[a]),[x1,y1]=pol(Rn,ang[b]);const mx=(x0+x1)/2,my=(y0+y1)/2,ctx=CX+(mx-CX)*.25,cty=CY+(my-CY)*.25;
+    const p=E('path',{d:`M${x0} ${y0} Q${ctx} ${cty} ${x1} ${y1}`,fill:'none',stroke:'#c69a4a','stroke-width':1.6,opacity:.5,class:'node','data-du':i});
+    tt(p,a+' ↔ '+b+' : '+du[2]);p.style.cursor='pointer';
+    p.addEventListener('mouseenter',()=>{if(!pinned)showDuality(i);});
+    p.addEventListener('click',e=>{e.stopPropagation();pinned=true;showDuality(i);});
+    (reg.du[i]=reg.du[i]||[]).push(p);fig.appendChild(p);});
+  forms.forEach(f=>{const [x,y]=pol(Rn,ang[f]);const r=3.2+(D.formDom[f]/maxdom)*7.5;
+    const root=formRoot(f);const col=D.famTint[root]||(D.formParent[f]?'#9a8f76':'#c6a86f');
+    const node=E('circle',{cx:x,cy:y,r:r,fill:col,stroke:'#0f0d09','stroke-width':1,class:'node','data-form':f});
+    tt(node,f+' — spans '+D.formDom[f]+' domains');node.style.cursor='pointer';
+    node.addEventListener('mouseenter',()=>{if(!pinned)showForm(f);});
+    node.addEventListener('click',e=>{e.stopPropagation();pinned=true;showForm(f);});
+    (reg.form[f]=reg.form[f]||[]).push(node);fig.appendChild(node);
+    const c=Math.cos(ang[f]),[lx,ly]=pol(Rn+12,ang[f]);
+    lbl(lx,ly+2,f,9,'#cbbfa4',c>=0?'start':'end',(ang[f]*180/Math.PI)+(c<0?180:0));});
+  hub(46,'bridges',D.counts.dualities+' dualities');
+}
+const RENDER={kernel:renderKernel,wheel:renderWheel,onebody:renderOneBody,spiral:renderSpiral,domains:renderDomains,bridges:renderBridges};
 function render(){RENDER[layout]();applyHi();}
 
 // ---------------------------------------------------------------- selection
 function hiSets(){
   if(!sel)return null;
-  const calcs=new Set(),doms=new Set(),mis=new Set(),forms=new Set(),ths=new Set();
+  const calcs=new Set(),doms=new Set(),mis=new Set(),forms=new Set(),ths=new Set(),dualf=new Set(),dus=new Set();
   const addCalc=s=>{const c=D.calcs[s];if(!c)return;calcs.add(s);doms.add(c.dom);forms.add(c.form);if(c.thid)ths.add(c.thid);c.m.forEach(m=>mis.add(m));};
   if(sel.type==='master'){const m=D.masters[sel.id];mis.add(sel.id);m.doms.forEach(d=>doms.add(d));m.members.forEach(s=>{calcs.add(s);forms.add(D.calcs[s].form);});}
   else if(sel.type==='domain'){doms.add(sel.id);D.masters.forEach(m=>{if(m.doms.includes(sel.id))mis.add(m.i);});for(const s in D.calcs)if(D.calcs[s].dom===sel.id)calcs.add(s);}
   else if(sel.type==='calc'){addCalc(sel.id);}
-  else if(sel.type==='form'){forms.add(sel.id);(D.calcsByForm[sel.id]||[]).forEach(s=>calcs.add(s));}
+  else if(sel.type==='form'){
+    for(const g in D.calcsByForm){let x=g;while(x!==undefined){if(x===sel.id){forms.add(g);D.calcsByForm[g].forEach(s=>calcs.add(s));break;}x=D.formParent[x];}}
+    forms.add(sel.id);
+    D.dualities.forEach((d,i)=>{if(d[0]===sel.id){dualf.add(d[1]);dus.add(i);}else if(d[1]===sel.id){dualf.add(d[0]);dus.add(i);}});}
   else if(sel.type==='theory'){ths.add(sel.id);for(const s in D.calcs)if(D.calcs[s].thid===sel.id)calcs.add(s);}
-  return {calcs,doms,mis,forms,ths};
+  else if(sel.type==='duality'){const d=D.dualities[sel.id];dus.add(sel.id);forms.add(d[0]);forms.add(d[1]);
+    (D.calcsByForm[d[0]]||[]).forEach(s=>calcs.add(s));(D.calcsByForm[d[1]]||[]).forEach(s=>calcs.add(s));}
+  return {calcs,doms,mis,forms,ths,dualf,dus};
 }
 function applyHi(){
   const H=hiSets();
@@ -412,8 +454,9 @@ function applyHi(){
     if(n.dataset.id!==undefined)on=H.calcs.has(n.dataset.id);
     else if(n.dataset.dom!==undefined)on=H.doms.has(n.dataset.dom);
     else if(n.dataset.mi!==undefined)on=H.mis.has(+n.dataset.mi);
-    else if(n.dataset.form!==undefined)on=H.forms.has(n.dataset.form);
+    else if(n.dataset.form!==undefined)on=H.forms.has(n.dataset.form)||H.dualf.has(n.dataset.form);
     else if(n.dataset.th!==undefined)on=H.ths.has(n.dataset.th);
+    else if(n.dataset.du!==undefined)on=H.dus.has(+n.dataset.du);
     else return; // structural, leave as is
     n.classList.add(on?'hi':'dim');
   });
@@ -444,18 +487,31 @@ function showDomain(dom){sel={type:'domain',id:dom};
     `<div class=mlist>${mrows||'<div class=lead>no master equation through this field</div>'}</div>`+
     `<h2>Calculations here</h2>${crows||'<div class=lead>none</div>'}`;
   wireLinks();applyHi();setCount(dom);}
-function showForm(f){sel={type:'form',id:f};const calcs=D.calcsByForm[f]||[];const par=D.formParent[f];
+function showForm(f){sel={type:'form',id:f};const par=D.formParent[f];
+  let calcs=[];for(const g in D.calcsByForm){let x=g;while(x!==undefined){if(x===f){calcs=calcs.concat(D.calcsByForm[g]);break;}x=D.formParent[x];}}
+  const duals=[];D.dualities.forEach((d,i)=>{if(d[0]===f||d[1]===f)duals.push([d[0]===f?d[1]:d[0],d[2],i]);});
+  const durows=duals.map(([o,k,i])=>`<div class=row data-du="${i}"><code style="color:var(--gold)">↔ ${esc(o)}</code> <span style="color:#5f584a">${esc(k)}</span></div>`).join('');
   const crows=calcs.map(s=>`<div class=calc data-id="${s}"><b>${esc(D.calcs[s].t)}</b> <code>${esc(D.calcs[s].f)}</code> <span style="color:#5f584a">${esc(D.calcs[s].dom)}</span></div>`).join('');
   detail.innerHTML=`<div class=eq style="color:var(--gold)">${esc(f)}</div><div class=gist>${esc(D.formEq[f]||'')}`+
     (par?` · a finer case of <span class=formlink data-form="${esc(par)}">${esc(par)}</span>`:'')+`</div>`+
+    (duals.length?`<h2>Dualities <span style="color:#5f584a">(${duals.length})</span></h2><div class=mlist>${durows}</div>`:'')+
     `<h2>Calculations of this form <span style="color:#5f584a">(${calcs.length})</span></h2>${crows}`;
-  wireLinks();applyHi();setCount('form: '+f);}
+  wireLinks();detail.querySelectorAll('.row[data-du]').forEach(r=>r.onclick=()=>{pinned=true;showDuality(+r.dataset.du);});
+  applyHi();setCount('form: '+f);}
+function showDuality(idx){sel={type:'duality',id:idx};const d=D.dualities[idx];
+  detail.innerHTML=`<div class=eq><span class=formlink data-form="${esc(d[0])}">${esc(d[0])}</span> ↔ <span class=formlink data-form="${esc(d[1])}">${esc(d[1])}</span></div>`+
+    `<div class=gist>${esc(d[2])}</div><div class=lead>${esc(d[3])}</div>`;
+  wireLinks();applyHi();setCount('duality');}
 function showTheory(th){sel={type:'theory',id:th};const calcs=Object.keys(D.calcs).filter(s=>D.calcs[s].thid===th);
+  const isos=[];D.theoryIso.forEach(e=>{if(e[0]===th||e[1]===th)isos.push([e[0]===th?e[1]:e[0],e[2]]);});
+  const isorows=isos.map(([o,ev])=>`<div class=row data-th="${esc(o)}"><span class=thlink data-th="${esc(o)}">↔ ${esc(D.theoryTitles[o]||o)}</span><div style="color:#6f6555;font-size:.76rem;margin-left:.2rem">${esc(ev)}</div></div>`).join('');
   const crows=calcs.map(s=>`<div class=calc data-id="${s}"><b>${esc(D.calcs[s].t)}</b> <code>${esc(D.calcs[s].f)}</code> <span style="color:#5f584a">${esc(D.calcs[s].dom)}</span></div>`).join('');
   detail.innerHTML=`<div class=eq style="font-family:Georgia,serif;color:var(--gold2)">${esc(D.theoryTitles[th]||th)}</div>`+
-    `<div class=gist>A theory on THE FLOOR. ${calcs.length} calculation${calcs.length==1?'':'s'} rest on it.</div>`+
-    `<h2>Calculations that rest here</h2>${crows}`;
-  wireLinks();applyHi();setCount('theory');}
+    `<div class=gist>A theory on THE FLOOR.</div>`+
+    (isos.length?`<h2>Same form as <span style="color:#5f584a">(${isos.length})</span></h2><div class=mlist>${isorows}</div>`:'')+
+    `<h2>Calculations that rest here <span style="color:#5f584a">(${calcs.length})</span></h2>${crows||'<div class=lead>none</div>'}`;
+  wireLinks();detail.querySelectorAll('.row[data-th]').forEach(r=>r.onclick=()=>{pinned=true;showTheory(r.dataset.th);});
+  applyHi();setCount('theory');}
 function showCalc(slug){sel={type:'calc',id:slug};const c=D.calcs[slug];
   const mchips=c.m.map(mi=>{const m=D.masters[mi];return `<div class=row data-mi="${mi}"><span class=sw style="background:${m.col}"></span><code style="color:${m.col}">${esc(m.eq.split('->')[0].trim())}</code></div>`;}).join('');
   detail.innerHTML=`<div class=eq>${esc(c.f)}</div>`+
