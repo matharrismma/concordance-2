@@ -426,6 +426,12 @@ DOMAINS: dict[str, list[dict]] = {
          "body": "There are EXACTLY five convex regular polyhedra — tetrahedron, cube, octahedron, dodecahedron, icosahedron — provable from Euler's formula V - E + F = 2 and the geometry of regular faces meeting at a vertex. Kepler once tried to nest them as the planetary orbits. SEALS: the enumeration is a proof — exactly five.",
          "conns": [("rests_on", "card_theory_euclidean_geometry_the_parallel_postulate", "the regular solids are Euclidean; that there are five is a theorem of that geometry"),
                    ("same_form", "card_theory_graph_theory", "the proof runs through Euler's polyhedron formula — the solids are planar graphs")]},
+        {"id": "card_theory_projective_geometry", "title": "Projective geometry (perspective & the cross-ratio)",
+         "subject": "Projective geometry", "calib": "seals", "section": "Mathematics & formal reasoning",
+         "body": "The geometry of projection and perspective. Add a 'line at infinity' so that ANY two lines meet — parallels included — and drop distance and angle, keeping only incidence (which points lie on which lines). What survives is the CROSS-RATIO of four collinear points, the one number every projection preserves. Points and lines become interchangeable (duality), and Klein's Erlangen program recasts the whole subject as the invariant theory of the projective group. It is the frame behind perspective drawing, the pinhole camera, and homogeneous coordinates in graphics. SEALS: a rigorous classical geometry; the cross-ratio's invariance is a theorem.",
+         "conns": [("same_form", "card_theory_group_theory", "Erlangen program: projective geometry IS the invariant theory of the projective group PGL — the cross-ratio is exactly what that group of transformations preserves"),
+                   ("limits", "card_theory_euclidean_geometry_the_parallel_postulate", "Euclidean geometry is the restricted case: single out a line at infinity and restore a metric, and parallels and distance reappear — projective geometry is the wider frame where the parallel postulate's exception dissolves"),
+                   ("same_form", "card_theory_map_projections", "central (perspective) projection from a single point — the draftsman's and the camera's map — is itself a projective transformation")]},
     ],
     "medicine": [
         {"id": "card_theory_free_energy_principle", "title": "The free-energy principle (Friston)",

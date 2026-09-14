@@ -286,7 +286,7 @@ CALC_THEORY: dict[str, str] = {
     "least_squares": "card_theory_optimization",
     "unit_conversion": "card_theory_dimensional_analysis",
     "map_scale": "card_theory_map_projections",
-    # cross_ratio stays a gap on purpose — projective geometry is not yet carded.
+    "cross_ratio": "card_theory_projective_geometry",
     # --- new calculations ---
     "rsa_modexp": "card_theory_cryptographic_security",
     "diffie_hellman": "card_theory_diffie_hellman_key_exchange",

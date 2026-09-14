@@ -1,6 +1,6 @@
 # THE FLOOR — the theories the sciences and mathematics actually run on
 
-> **215 theories · 348 relations · one connected body · 167 cross-domain pairs**
+> **216 theories · 351 relations · one connected body · 168 cross-domain pairs**
 > (measured 2026-08-02; `PYTHONPATH=src python tools/theory_map.py` re-measures and redraws)
 >
 > This file began as "The 100" and said so for months after the shelf had grown past it. A
