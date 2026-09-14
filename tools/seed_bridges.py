@@ -78,6 +78,8 @@ FORM_DUALITIES: list[tuple[str, str, str, str]] = [
      "sine and cosine are the projection of uniform circular motion; the trigonometric relations and periodic oscillation are the circle seen two ways"),
     ("trigonometric", "fourier_spectral", "harmonic basis",
      "Fourier analysis is trigonometry taken to a basis — any signal as a sum of sines and cosines"),
+    ("wave", "diffusion", "telegrapher's equation",
+     "the telegrapher's equation d2u/dt2 + a du/dt = c2 d2u/dx2 sits between them: no damping (a=0) is a pure wave, heavy damping is pure diffusion — one equation interpolating the two masters"),
 ]
 
 # --- MASTER EQUATIONS: the strongest bridge — ONE connecting formula, a substitution ----
@@ -103,15 +105,16 @@ MASTER_EQUATIONS: list[dict] = [
          ("electrical", "coulomb", "k = 1/(4 pi eps0), Q = charge"),
          ("optics", "light_intensity", "one source's power over 4 pi r^2 — the same falloff for radiance"),
          ("acoustics", "sound_intensity", "acoustic power over 4 pi r^2"),
-     ],
-     "predict": [("nuclear_physics", "gamma-ray dose from a point source, 1/r^2")]},
+         ("nuclear_physics", "gamma_dose", "gamma dose = S/(4 pi r^2) from a point source"),
+     ]},
     {"id": "harmonic_oscillator", "eq": "d2x/dt2 = -omega^2 x",
      "gist": "a restoring force proportional to displacement — every oscillation is this, with omega^2 = restoring/inertia",
      "rows": [
          ("physics", "shm", "omega^2 = k/m (spring stiffness over mass)"),
          ("electrical", "lc_resonance", "omega^2 = 1/(LC) — the electrical pendulum"),
          ("physics", "pendulum", "omega^2 = g/L"),
-     ]},
+     ],
+     "predict": [("chemistry", "a molecular bond vibration — the bond as a spring, omega^2 = k/mu")]},
     {"id": "exponential_relaxation", "eq": "dQ/dt = -Q/tau  ->  Q = Q0 e^(-t/tau)",
      "gist": "change proportional to the amount left — decay toward a floor, one time constant tau",
      "rows": [
@@ -129,8 +132,8 @@ MASTER_EQUATIONS: list[dict] = [
          ("geology", "seismic_wave", "u = ground motion, c = sqrt(modulus/rho)"),
          ("physics", "schrodinger", "u = wavefunction Psi — matter is a (complex) wave"),
          ("oceanography", "v_oceanography_deep_water_wave_speed", "u = surface height, c = sqrt(g lambda / 2 pi)"),
-     ],
-     "predict": [("physics", "gravitational waves — ripples in spacetime propagating at c (LIGO)")]},
+         ("physics", "gravitational_wave", "u = spacetime strain h, c = speed of light (LIGO)"),
+     ]},
     {"id": "diffusion_equation", "eq": "du/dt = D * laplacian(u)",
      "gist": "spreading by random walk — first in time, second in space",
      "rows": [
@@ -139,8 +142,9 @@ MASTER_EQUATIONS: list[dict] = [
          ("finance", "black_scholes", "u = option value, D from volatility^2 (after a change of variable)"),
          ("physics", "brownian_diffusion", "<x^2> = 2 D t — the same D, seen from one particle"),
          ("biology", "reaction_diffusion", "du/dt = D lap(u) + f(u) — diffusion plus reaction (Turing patterns)"),
+         ("nuclear_physics", "neutron_diffusion", "u = neutron flux; diffusion with absorption and a source"),
      ],
-     "predict": [("nuclear_physics", "neutron diffusion in a reactor core")]},
+     "predict": [("neuroscience", "the cable equation — voltage spreading down an axon or dendrite")]},
     {"id": "logistic_saturation", "eq": "dP/dt = r P (1 - P/K)",
      "gist": "self-limited growth toward a ceiling K",
      "rows": [
@@ -223,8 +227,8 @@ MASTER_EQUATIONS: list[dict] = [
      "rows": [
          ("electrochemistry", "nernst", "the electrode potential of a half-cell"),
          ("neuroscience", "membrane_potential", "the resting potential a neuron holds across its membrane"),
-     ],
-     "predict": [("neuroscience", "the Goldman-Hodgkin-Katz equation — Nernst extended to several ions")]},
+         ("neuroscience", "goldman_equation", "Goldman-Hodgkin-Katz: Nernst weighted over several ions"),
+     ]},
     {"id": "replicator", "eq": "dx_i/dt = x_i (f_i - <f>)",
      "gist": "a type grows exactly when it beats the average — natural selection and game dynamics are one equation",
      "rows": [
@@ -249,17 +253,17 @@ MASTER_EQUATIONS: list[dict] = [
          ("electrical", "smith_reflection", "Z = electrical impedance (the Smith chart's own map)"),
          ("optics", "fresnel_reflection", "Z ~ refractive index n (Fresnel reflection at an interface)"),
          ("acoustics", "acoustic_reflection", "Z = acoustic impedance (reflection at a boundary)"),
-     ],
-     "predict": [("physics", "quantum reflection at a potential step — Z ~ wavenumber k")]},
+         ("physics", "quantum_reflection", "Z ~ wavenumber k: a matter wave at a potential step"),
+     ]},
     {"id": "sigmoid", "eq": "y = 1 / (1 + e^(-x))",
      "gist": "the S-curve — a soft switch between two states; a near-miss with logistic growth that IS a calculation",
      "rows": [
          ("economics", "adoption_curve", "x = k(t - t0): the logistic / Bass adoption curve"),
          ("thermodynamics", "fermi_dirac", "x = -(E - mu)/kT: the Fermi-Dirac occupation of a quantum state"),
          ("computer_science", "logistic_activation", "x = w.x + b: a neuron's activation and logistic regression"),
-     ],
-     "predict": [("chemistry", "a titration / two-state Boltzmann fraction curve"),
-                 ("neuroscience", "a neuron's firing-rate response curve")]},
+         ("chemistry", "titration_curve", "x = ln10 (pH - pKa): the fraction deprotonated (Henderson-Hasselbalch)"),
+         ("neuroscience", "firing_rate_curve", "x = (I - theta)/k: a neuron's firing-rate response"),
+     ]},
 ]
 
 

@@ -276,6 +276,14 @@ CALCS: list[tuple] = [
     ("fermi_dirac", "Fermi-Dirac occupation", "n = 1/(1 + e^((E-mu)/kT))", "thermodynamics", "logistic", "the fraction of quantum states filled — the sigmoid, from Pauli exclusion"),
     ("logistic_activation", "Logistic activation / regression", "sigma(x) = 1/(1 + e^(-x))", "computer_science", "logistic", "a neuron's soft switch and logistic regression's link — the same S-curve"),
     ("ph_scale", "pH scale", "pH = -log10[H+]", "chemistry", "logarithmic", "acidity on a log scale — a hydrogen-ion ratio compressed, like decibels and magnitude"),
+    # --- plotting the predicted gaps: each was an open position the structure required ---
+    ("gravitational_wave", "Gravitational waves", "box h = 0", "physics", "wave", "ripples in spacetime — the metric strain h obeys the wave equation at c (LIGO)"),
+    ("neutron_diffusion", "Neutron diffusion", "dphi/dt = D lap(phi) - Sigma_a phi + S", "nuclear_physics", "diffusion", "reactor neutron flux — the diffusion equation with absorption and a source"),
+    ("gamma_dose", "Point-source radiation dose", "dose = S / (4 pi r^2)", "nuclear_physics", "inverse_square", "gamma dose falls as 1/r^2 from a point source — the same sphere-thinning geometry"),
+    ("quantum_reflection", "Quantum reflection (potential step)", "R = ((k1 - k2)/(k1 + k2))^2", "physics", "mobius_conformal", "a matter wave partly reflects at a potential step — the reflection map with impedance ~ wavenumber k"),
+    ("goldman_equation", "Goldman-Hodgkin-Katz", "V = (RT/F) ln( sum P[out] / sum P[in] )", "neuroscience", "logarithmic", "the membrane potential from several ions weighted by permeability — Nernst generalized"),
+    ("titration_curve", "Titration curve (Henderson-Hasselbalch)", "f = 1/(1 + 10^(pKa - pH))", "chemistry", "logistic", "the fraction deprotonated is a sigmoid in pH — a two-state occupation"),
+    ("firing_rate_curve", "Neuronal firing-rate curve", "r = r_max / (1 + e^(-(I - theta)/k))", "neuroscience", "logistic", "a neuron's f-I response is a sigmoid in input current"),
 ]
 
 # calc slug -> the parent THEORY card on THE FLOOR it rests on (joins the two maps into one body).
@@ -419,6 +427,12 @@ CALC_THEORY: dict[str, str] = {
     "fermi_dirac": "card_theory_pauli_exclusion_principle",
     "logistic_activation": "card_theory_statistical_learning_theory__bias_variance__generali",
     "ph_scale": "card_theory_br_nsted_lowry_acid_base_theory_ph",
+    "gravitational_wave": "card_theory_general_relativity",
+    "quantum_reflection": "card_theory_quantum_mechanics",
+    "goldman_equation": "card_theory_neuroscience",
+    "titration_curve": "card_theory_br_nsted_lowry_acid_base_theory_ph",
+    "firing_rate_curve": "card_theory_neuroscience",
+    # neutron_diffusion, gamma_dose: no reactor/dosimetry theory carded yet — honest gaps
 }
 
 
