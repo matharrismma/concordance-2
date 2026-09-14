@@ -13,7 +13,7 @@ b{color:#cbbfa4;font-weight:400}code{font-family:'DejaVu Sans Mono',monospace;fo
 connection, and its colour is the formula that makes it. Where many threads pass through one node,
 that field is a <b>hub</b> of reality's computation (its node grows). 35 connected domains, joined
 by the 22 master equations.</p>
-<div class=leg>The widest bridges &mdash; one formula, this many fields:<div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #5fa8a0;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">du/dt = D * laplacian(u)</code> <span style="color:#8a8378">&mdash; 8 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #c69a4a;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">J = -k * grad(phi)</code> <span style="color:#8a8378">&mdash; 7 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #a98bd0;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">f(t) = sum c_n e^(i n omega t)</code> <span style="color:#8a8378">&mdash; 7 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #8fb26a;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">L = k * log10(x / x_ref)</code> <span style="color:#8a8378">&mdash; 7 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #b98fc0;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">y = 1 / (1 + e^(-x))</code> <span style="color:#8a8378">&mdash; 7 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #7fb069;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">dQ/dt = -Q/tau</code> <span style="color:#8a8378">&mdash; 6 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #9b7fc6;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">d2u/dt2 = c^2 * laplacian(u)</code> <span style="color:#8a8378">&mdash; 6 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #c6a86f;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">sum(in) = sum(out) + d(store)/dt</code> <span style="color:#8a8378">&mdash; 6 domains</span></div></div>
+<div class=leg>The widest bridges &mdash; one formula, this many fields:<div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #5fa8a0;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">du/dt = D * laplacian(u)</code> <span style="color:#8a8378">&mdash; 8 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #8fb26a;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">L = k * log10(x / x_ref)</code> <span style="color:#8a8378">&mdash; 8 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #c69a4a;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">J = -k * grad(phi)</code> <span style="color:#8a8378">&mdash; 7 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #a98bd0;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">f(t) = sum c_n e^(i n omega t)</code> <span style="color:#8a8378">&mdash; 7 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #b98fc0;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">y = 1 / (1 + e^(-x))</code> <span style="color:#8a8378">&mdash; 7 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #7fb069;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">dQ/dt = -Q/tau</code> <span style="color:#8a8378">&mdash; 6 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #9b7fc6;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">d2u/dt2 = c^2 * laplacian(u)</code> <span style="color:#8a8378">&mdash; 6 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #c6a86f;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">sum(in) = sum(out) + d(store)/dt</code> <span style="color:#8a8378">&mdash; 6 domains</span></div></div>
 <svg viewBox="0 0 1500 1500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Connections between domains: each master equation is a thread through the domains it joins">
 <rect width="100%" height="100%" fill="#0f0d09"/>
 <path d="M703 132 A620 620 0 0 1 1366 824" fill="none" stroke="#c69a4a" stroke-width="2.5" opacity="0.5"/>
@@ -78,12 +78,13 @@ by the 22 master equations.</p>
 <path d="M1305 675 Q774 800 345 1137" fill="none" stroke="#a98bd0" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>f(t) = sum c_n e^(i n omega t) — connects atomic, chemistry, computer_science, materials_science, mathematics, medicine, music_theory</title></path>
 <path d="M345 1137 Q738 884 1079 1203" fill="none" stroke="#a98bd0" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>f(t) = sum c_n e^(i n omega t) — connects atomic, chemistry, computer_science, materials_science, mathematics, medicine, music_theory</title></path>
 <path d="M1079 1203 Q744 755 382 328" fill="none" stroke="#a98bd0" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>f(t) = sum c_n e^(i n omega t) — connects atomic, chemistry, computer_science, materials_science, mathematics, medicine, music_theory</title></path>
-<path d="M1118 328 Q770 763 507 1255" fill="none" stroke="#8fb26a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>L = k * log10(x / x_ref) — connects acoustics, astronomy, chemistry, computer_science, cybersecurity, geology, neuroscience</title></path>
-<path d="M507 1255 Q798 851 1296 875" fill="none" stroke="#8fb26a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>L = k * log10(x / x_ref) — connects acoustics, astronomy, chemistry, computer_science, cybersecurity, geology, neuroscience</title></path>
-<path d="M1296 875 Q750 790 204 875" fill="none" stroke="#8fb26a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>L = k * log10(x / x_ref) — connects acoustics, astronomy, chemistry, computer_science, cybersecurity, geology, neuroscience</title></path>
-<path d="M204 875 Q647 682 650 199" fill="none" stroke="#8fb26a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>L = k * log10(x / x_ref) — connects acoustics, astronomy, chemistry, computer_science, cybersecurity, geology, neuroscience</title></path>
-<path d="M650 199 Q758 748 899 1290" fill="none" stroke="#8fb26a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>L = k * log10(x / x_ref) — connects acoustics, astronomy, chemistry, computer_science, cybersecurity, geology, neuroscience</title></path>
-<path d="M899 1290 Q839 898 1155 1137" fill="none" stroke="#8fb26a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>L = k * log10(x / x_ref) — connects acoustics, astronomy, chemistry, computer_science, cybersecurity, geology, neuroscience</title></path>
+<path d="M1118 328 Q770 763 507 1255" fill="none" stroke="#8fb26a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>L = k * log10(x / x_ref) — connects acoustics, astronomy, chemistry, computer_science, cybersecurity, geology, neuroscience, physics</title></path>
+<path d="M507 1255 Q798 851 1296 875" fill="none" stroke="#8fb26a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>L = k * log10(x / x_ref) — connects acoustics, astronomy, chemistry, computer_science, cybersecurity, geology, neuroscience, physics</title></path>
+<path d="M1296 875 Q750 790 204 875" fill="none" stroke="#8fb26a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>L = k * log10(x / x_ref) — connects acoustics, astronomy, chemistry, computer_science, cybersecurity, geology, neuroscience, physics</title></path>
+<path d="M204 875 Q647 682 650 199" fill="none" stroke="#8fb26a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>L = k * log10(x / x_ref) — connects acoustics, astronomy, chemistry, computer_science, cybersecurity, geology, neuroscience, physics</title></path>
+<path d="M650 199 Q758 748 899 1290" fill="none" stroke="#8fb26a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>L = k * log10(x / x_ref) — connects acoustics, astronomy, chemistry, computer_science, cybersecurity, geology, neuroscience, physics</title></path>
+<path d="M899 1290 Q839 898 1155 1137" fill="none" stroke="#8fb26a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>L = k * log10(x / x_ref) — connects acoustics, astronomy, chemistry, computer_science, cybersecurity, geology, neuroscience, physics</title></path>
+<path d="M1155 1137 Q815 722 750 190" fill="none" stroke="#8fb26a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>L = k * log10(x / x_ref) — connects acoustics, astronomy, chemistry, computer_science, cybersecurity, geology, neuroscience, physics</title></path>
 <path d="M1217 1059 Q740 772 217 577" fill="none" stroke="#cf8a5c" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>p(x) ~ e^(-(x-mu)^2 / (2 sigma^2)) — connects biology, finance, manufacturing, physics, statistics, thermodynamics</title></path>
 <path d="M217 577 Q633 638 553 226" fill="none" stroke="#cf8a5c" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>p(x) ~ e^(-(x-mu)^2 / (2 sigma^2)) — connects biology, finance, manufacturing, physics, statistics, thermodynamics</title></path>
 <path d="M553 226 Q719 577 750 190" fill="none" stroke="#cf8a5c" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>p(x) ~ e^(-(x-mu)^2 / (2 sigma^2)) — connects biology, finance, manufacturing, physics, statistics, thermodynamics</title></path>
@@ -111,39 +112,39 @@ by the 22 master equations.</p>
 <path d="M195 675 Q591 682 312 401" fill="none" stroke="#b98fc0" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>y = 1 / (1 + e^(-x)) — connects biology, chemistry, computer_science, economics, linguistics, neuroscience, thermodynamics</title></path>
 <path d="M312 401 Q745 756 1155 1137" fill="none" stroke="#b98fc0" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>y = 1 / (1 + e^(-x)) — connects biology, chemistry, computer_science, economics, linguistics, neuroscience, thermodynamics</title></path>
 <path d="M1155 1137 Q846 728 947 226" fill="none" stroke="#b98fc0" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>y = 1 / (1 + e^(-x)) — connects biology, chemistry, computer_science, economics, linguistics, neuroscience, thermodynamics</title></path>
-<circle cx="750" cy="190" r="12.0" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>physics — on 10 master equations</title></circle>
+<circle cx="750" cy="190" r="12.0" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>physics — on 11 master equations</title></circle>
 <text x="750" y="176" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-90 750 174)">physics</text>
-<circle cx="850" cy="199" r="10.3" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>electrical — on 8 master equations</title></circle>
+<circle cx="850" cy="199" r="9.7" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>electrical — on 8 master equations</title></circle>
 <text x="853" y="185" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-80 853 183)">electrical</text>
-<circle cx="947" cy="226" r="9.4" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>thermodynamics — on 7 master equations</title></circle>
+<circle cx="947" cy="226" r="8.9" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>thermodynamics — on 7 master equations</title></circle>
 <text x="952" y="213" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-69 952 211)">thermodynamics</text>
-<circle cx="1037" cy="269" r="6.9" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>optics — on 4 master equations</title></circle>
+<circle cx="1037" cy="269" r="6.6" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>optics — on 4 master equations</title></circle>
 <text x="1045" y="258" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-59 1045 256)">optics</text>
-<circle cx="1118" cy="328" r="6.9" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>acoustics — on 4 master equations</title></circle>
+<circle cx="1118" cy="328" r="6.6" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>acoustics — on 4 master equations</title></circle>
 <text x="1129" y="318" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-49 1129 316)">acoustics</text>
-<circle cx="1188" cy="401" r="6.0" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>nuclear_physics — on 3 master equations</title></circle>
+<circle cx="1188" cy="401" r="5.8" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>nuclear_physics — on 3 master equations</title></circle>
 <text x="1200" y="393" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-39 1200 391)">nuclear_physics</text>
 <circle cx="1243" cy="485" r="4.3" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>condensed_matter — on 1 master equations</title></circle>
 <text x="1257" y="479" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-28 1257 477)">condensed_matter</text>
 <circle cx="1283" cy="577" r="4.3" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>atomic — on 1 master equations</title></circle>
 <text x="1298" y="574" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-18 1298 572)">atomic</text>
-<circle cx="1305" cy="675" r="5.2" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>materials_science — on 2 master equations</title></circle>
+<circle cx="1305" cy="675" r="5.0" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>materials_science — on 2 master equations</title></circle>
 <text x="1321" y="675" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-8 1321 673)">materials_science</text>
 <circle cx="1309" cy="775" r="4.3" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>quantum_computing — on 1 master equations</title></circle>
 <text x="1325" y="778" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(3 1325 776)">quantum_computing</text>
-<circle cx="1296" cy="875" r="10.3" fill="#6fb0a0" stroke="#0f0d09" stroke-width="1"><title>chemistry — on 8 master equations</title></circle>
+<circle cx="1296" cy="875" r="9.7" fill="#6fb0a0" stroke="#0f0d09" stroke-width="1"><title>chemistry — on 8 master equations</title></circle>
 <text x="1312" y="880" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(13 1312 878)">chemistry</text>
 <circle cx="1265" cy="970" r="4.3" fill="#6fb0a0" stroke="#0f0d09" stroke-width="1"><title>electrochemistry — on 1 master equations</title></circle>
 <text x="1280" y="978" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(23 1280 976)">electrochemistry</text>
-<circle cx="1217" cy="1059" r="7.8" fill="#7fb069" stroke="#0f0d09" stroke-width="1"><title>biology — on 5 master equations</title></circle>
+<circle cx="1217" cy="1059" r="7.4" fill="#7fb069" stroke="#0f0d09" stroke-width="1"><title>biology — on 5 master equations</title></circle>
 <text x="1231" y="1069" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(33 1231 1067)">biology</text>
-<circle cx="1155" cy="1137" r="6.9" fill="#7fb069" stroke="#0f0d09" stroke-width="1"><title>neuroscience — on 4 master equations</title></circle>
+<circle cx="1155" cy="1137" r="6.6" fill="#7fb069" stroke="#0f0d09" stroke-width="1"><title>neuroscience — on 4 master equations</title></circle>
 <text x="1166" y="1150" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(44 1166 1148)">neuroscience</text>
-<circle cx="1079" cy="1203" r="6.9" fill="#7fb069" stroke="#0f0d09" stroke-width="1"><title>medicine — on 4 master equations</title></circle>
+<circle cx="1079" cy="1203" r="6.6" fill="#7fb069" stroke="#0f0d09" stroke-width="1"><title>medicine — on 4 master equations</title></circle>
 <text x="1089" y="1218" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(54 1089 1216)">medicine</text>
-<circle cx="993" cy="1255" r="7.8" fill="#7fb069" stroke="#0f0d09" stroke-width="1"><title>ecology — on 5 master equations</title></circle>
+<circle cx="993" cy="1255" r="7.4" fill="#7fb069" stroke="#0f0d09" stroke-width="1"><title>ecology — on 5 master equations</title></circle>
 <text x="1000" y="1271" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(64 1000 1269)">ecology</text>
-<circle cx="899" cy="1290" r="5.2" fill="#6f9ec6" stroke="#0f0d09" stroke-width="1"><title>geology — on 2 master equations</title></circle>
+<circle cx="899" cy="1290" r="5.0" fill="#6f9ec6" stroke="#0f0d09" stroke-width="1"><title>geology — on 2 master equations</title></circle>
 <text x="903" y="1307" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(75 903 1305)">geology</text>
 <circle cx="800" cy="1308" r="4.3" fill="#6f9ec6" stroke="#0f0d09" stroke-width="1"><title>oceanography — on 1 master equations</title></circle>
 <text x="802" y="1326" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(85 802 1324)">oceanography</text>
@@ -155,31 +156,31 @@ by the 22 master equations.</p>
 <text x="500" y="1271" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(296 500 1269)">astronomy</text>
 <circle cx="421" cy="1203" r="4.3" fill="#6f9ec6" stroke="#0f0d09" stroke-width="1"><title>archaeology — on 1 master equations</title></circle>
 <text x="411" y="1218" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(306 411 1216)">archaeology</text>
-<circle cx="345" cy="1137" r="5.2" fill="#9b7fc6" stroke="#0f0d09" stroke-width="1"><title>mathematics — on 2 master equations</title></circle>
+<circle cx="345" cy="1137" r="5.0" fill="#9b7fc6" stroke="#0f0d09" stroke-width="1"><title>mathematics — on 2 master equations</title></circle>
 <text x="334" y="1150" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(316 334 1148)">mathematics</text>
-<circle cx="283" cy="1059" r="5.2" fill="#9b7fc6" stroke="#0f0d09" stroke-width="1"><title>statistics — on 2 master equations</title></circle>
+<circle cx="283" cy="1059" r="5.0" fill="#9b7fc6" stroke="#0f0d09" stroke-width="1"><title>statistics — on 2 master equations</title></circle>
 <text x="269" y="1069" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(327 269 1067)">statistics</text>
 <circle cx="235" cy="970" r="4.3" fill="#9b7fc6" stroke="#0f0d09" stroke-width="1"><title>probability — on 1 master equations</title></circle>
 <text x="220" y="978" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(337 220 976)">probability</text>
-<circle cx="204" cy="875" r="7.8" fill="#9b7fc6" stroke="#0f0d09" stroke-width="1"><title>computer_science — on 5 master equations</title></circle>
+<circle cx="204" cy="875" r="7.4" fill="#9b7fc6" stroke="#0f0d09" stroke-width="1"><title>computer_science — on 5 master equations</title></circle>
 <text x="188" y="880" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(347 188 878)">computer_science</text>
 <circle cx="191" cy="775" r="4.3" fill="#9b7fc6" stroke="#0f0d09" stroke-width="1"><title>information_theory — on 1 master equations</title></circle>
 <text x="175" y="778" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(357 175 776)">information_theory</text>
-<circle cx="195" cy="675" r="8.6" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>economics — on 6 master equations</title></circle>
+<circle cx="195" cy="675" r="8.1" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>economics — on 6 master equations</title></circle>
 <text x="179" y="675" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(368 179 673)">economics</text>
-<circle cx="217" cy="577" r="7.8" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>finance — on 5 master equations</title></circle>
+<circle cx="217" cy="577" r="7.4" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>finance — on 5 master equations</title></circle>
 <text x="202" y="574" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(378 202 572)">finance</text>
 <circle cx="257" cy="485" r="4.3" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>game_theory — on 1 master equations</title></circle>
 <text x="243" y="479" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(388 243 477)">game_theory</text>
 <circle cx="312" cy="401" r="4.3" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>linguistics — on 1 master equations</title></circle>
 <text x="300" y="393" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(399 300 391)">linguistics</text>
-<circle cx="382" cy="328" r="5.2" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>music_theory — on 2 master equations</title></circle>
+<circle cx="382" cy="328" r="5.0" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>music_theory — on 2 master equations</title></circle>
 <text x="371" y="318" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(409 371 316)">music_theory</text>
 <circle cx="463" cy="269" r="4.3" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>architecture — on 1 master equations</title></circle>
 <text x="455" y="258" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(419 455 256)">architecture</text>
 <circle cx="553" cy="226" r="4.3" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>manufacturing — on 1 master equations</title></circle>
 <text x="548" y="213" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(429 548 211)">manufacturing</text>
-<circle cx="650" cy="199" r="5.2" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>cybersecurity — on 2 master equations</title></circle>
+<circle cx="650" cy="199" r="5.0" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>cybersecurity — on 2 master equations</title></circle>
 <text x="647" y="185" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(440 647 183)">cybersecurity</text>
 <circle cx="750.0" cy="750.0" r="48" fill="#0f0d09" stroke="#3a3427"/>
 <text x="750.0" y="747" fill="#c69a4a" font-size="12" font-family="Georgia,serif" text-anchor="middle">DOMAINS</text>
