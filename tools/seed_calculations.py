@@ -322,6 +322,9 @@ CALCS: list[tuple] = [
     ("boltzmann_distribution", "Boltzmann distribution", "p_i = e^(-E_i/kT) / Z", "thermodynamics", "decay", "the probability of a state falls exponentially with its energy, normalized by the partition function Z"),
     ("softmax", "Softmax", "p_i = e^(z_i) / sum_j e^(z_j)", "computer_science", "decay", "a network's class probabilities ARE a Boltzmann distribution over scores (temperature = 1)"),
     ("logit_choice", "Logit choice model", "P_i = e^(V_i) / sum_j e^(V_j)", "economics", "decay", "the probability of a choice is the softmax of its utility — discrete-choice / random-utility theory"),
+    # --- the Bellman equation: the master form of acting well across time (dynamic programming / RL) ---
+    ("bellman_equation", "Bellman optimality equation", "V*(s) = max_a [ R(s,a) + gamma sum_s' P(s'|s,a) V*(s') ]", "operations_research", "recursion", "the worth of a state is the best you can do now plus the discounted worth of where it lands you — dynamic programming, the recursive optimum over time (Bellman, 1957)"),
+    ("td_learning", "Temporal-difference learning", "V(s) <- V(s) + alpha [ r + gamma V(s') - V(s) ]", "computer_science", "recursion", "learn the value function from experience by bootstrapping; the bracket is the TD error. Reinforcement learning — deep RL when V is a neural network"),
 ]
 
 # calc slug -> the parent THEORY card on THE FLOOR it rests on (joins the two maps into one body).
@@ -501,6 +504,8 @@ CALC_THEORY: dict[str, str] = {
     "boltzmann_distribution": "card_theory_statistical_mechanics",
     "softmax": "card_theory_statistical_learning_theory__bias_variance__generali",
     "logit_choice": "card_theory_public_choice_decision_theory",
+    "bellman_equation": "card_theory_control_theory___cybernetics__feedback__stability",
+    "td_learning": "card_theory_control_theory___cybernetics__feedback__stability",
     # lexical_diffusion, income_mobility, neutron_diffusion, gamma_dose: honest theory-gaps
 }
 

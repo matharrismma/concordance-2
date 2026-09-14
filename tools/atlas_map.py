@@ -2,7 +2,7 @@
 """ATLAS — the whole body in one frame.
 
 Matt, 2026-09-14: "What has Atlas become? Draw it." The four layers as one image:
-the KERNEL (the 22 master equations, swept to dry) at the heart; each master
+the KERNEL (the master equations) at the heart; each master
 reaches OUTWARD through its CALCULATIONS (the same formula in many domains, colored
 by domain) to the THEORIES on the rim (THE FLOOR); and the master forms are woven to
 each other by the DUALITIES. One equation, many domains, bounded whole.
@@ -105,7 +105,7 @@ def build():
             prev = ang
 
     p = [f'<svg viewBox="0 0 {W} {Hh}" xmlns="http://www.w3.org/2000/svg" role="img" '
-         f'aria-label="Atlas: the 22 master equations at the kernel, reaching through their '
+         f'aria-label="Atlas: the {len(MASTER_EQUATIONS)} master equations at the kernel, reaching through their '
          f'calculations to the theories on the floor">']
     p.append('<rect width="100%" height="100%" fill="#0f0d09"/>')
     for q in (Rm, Rd1, Rt):
@@ -177,7 +177,7 @@ def build():
     p.append(f'<circle cx="{cx}" cy="{cy}" r="{Rcore}" fill="#0f0d09" stroke="#3a3427" stroke-width="1.5"/>')
     p.append(f'<text x="{cx}" y="{cy-8:.0f}" fill="#c69a4a" font-size="26" font-family="Georgia,serif" text-anchor="middle" letter-spacing="3">ATLAS</text>')
     p.append(f'<text x="{cx}" y="{cy+14:.0f}" fill="#8a8378" font-size="10.5" font-family="Georgia,serif" text-anchor="middle">the one kernel</text>')
-    p.append(f'<text x="{cx}" y="{cy+30:.0f}" fill="#7d745f" font-size="9" font-family="Georgia,serif" text-anchor="middle">22 master equations</text>')
+    p.append(f'<text x="{cx}" y="{cy+30:.0f}" fill="#7d745f" font-size="9" font-family="Georgia,serif" text-anchor="middle">{len(MASTER_EQUATIONS)} master equations</text>')
     p.append('</svg>')
     svg = "\n".join(p)
 
@@ -200,8 +200,8 @@ b{{color:#cbbfa4;font-weight:400}}
 .key i.dot{{display:inline-block;width:10px;height:10px;border-radius:50%;background:#f0d68a;vertical-align:middle;margin:0 4px}}
 .key i.line{{display:inline-block;width:22px;height:0;border-top:1px solid #c69a4a;opacity:.5;vertical-align:middle;margin:0 4px}}</style></head>
 <body><div class=wrap><h1>ATLAS</h1>
-<p>The whole body in one frame. At the heart is the <b>kernel</b> &mdash; the 22 <b>master equations</b>,
-the finite set of formulas that genuinely connect across domains, swept until no more remained. Each
+<p>The whole body in one frame. At the heart is the <b>kernel</b> &mdash; the {len(MASTER_EQUATIONS)} <b>master equations</b>,
+the finite set of formulas that genuinely connect across domains. Each
 master reaches outward through its <b>calculations</b> (the same equation in many fields, colored by
 domain) to the <b>theories</b> it rests on, on the rim &mdash; <b>THE FLOOR</b>, {total_theory} theories.
 The gold arcs across the centre are the <b>dualities</b>, where two master forms are themselves one thing

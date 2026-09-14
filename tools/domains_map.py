@@ -177,7 +177,7 @@ b{{color:#cbbfa4;font-weight:400}}code{{font-family:'DejaVu Sans Mono',monospace
 <b>master equation</b>, drawn through every domain it connects &mdash; the thread <b>is</b> the
 connection, and its colour is the formula that makes it. Where many threads pass through one node,
 that field is a <b>hub</b> of reality's computation (its node grows). {n} connected domains, joined
-by the 22 master equations.</p>
+by the {len(MASTER_EQUATIONS)} master equations.</p>
 <div class=leg>The widest bridges &mdash; one formula, this many fields:{leg}</div>
 {svg}
 <p style="color:#7d745f;font-size:.8rem">Found and mapped, never generated. A thread between two

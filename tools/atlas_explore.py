@@ -149,7 +149,8 @@ def build():
         f'<code>{esc(m["eq"].split("->")[0].strip())}</code></button>' for m in masters)
 
     payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")  # never break out of <script>
-    return _SHELL.replace("__DATA__", payload).replace("__CHIPS__", chips)
+    return (_SHELL.replace("__DATA__", payload).replace("__CHIPS__", chips)
+            .replace("__NMASTERS__", str(len(masters))))
 
 
 # ---------------------------------------------------------------------------- the page
@@ -231,7 +232,7 @@ text.lbl{font-family:Georgia,serif;pointer-events:none}
   <div class=bar><button class=reset id=reset>&#8635;</button>
     <input class=search id=search placeholder="search a calculation, field, theory…" autocomplete=off></div>
   <div class=detail id=detail></div>
-  <h2>The 22 master equations</h2>
+  <h2>The __NMASTERS__ master equations</h2>
   <div class=chips id=chips>__CHIPS__</div>
 </div>
 </div>

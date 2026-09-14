@@ -296,6 +296,21 @@ MASTER_EQUATIONS: list[dict] = [
          ("biology", "hill_equation", "cooperative binding: theta = L^n/(K+L^n) — a steeper sigmoid"),
          ("linguistics", "lexical_diffusion", "a sound/word change spreads through a language as an S-curve"),
      ]},
+    {"id": "bellman_value", "eq": "V*(s) = max_a [ R(s,a) + gamma * sum_s' P(s'|s,a) V*(s') ]",
+     "gist": "how to act well across time: the worth of where you stand is the best you can do now plus the "
+             "discounted worth of where that lands you. Reinforcement learning learns it from experience; optimal "
+             "control extremizes it; a Markov chain is its choiceless limit; a present value is its transition-free "
+             "limit. The brain appears to run it too — dopamine tracks the temporal-difference error (Schultz; "
+             "Montague-Dayan). This is the master form under the strategy patterns: compounding is the discount "
+             "gamma, concentrate-force is the max over actions, intelligence is estimating the transition P.",
+     "rows": [
+         ("operations_research", "bellman_equation", "V = value of a state, gamma = discount, P = transition, R = reward — dynamic programming (Bellman, 1957)"),
+         ("computer_science", "td_learning", "the sample-based form: bootstrap V from experience; deep reinforcement learning when V is a neural network"),
+         ("economics", "optimal_control", "the continuous-time sibling — HJB / Pontryagin extremize the same value integral"),
+         ("probability", "markov_chain", "drop reward and choice: the max is gone, what remains is the bare Markov transition pi P = pi"),
+         ("finance", "present_value_integral", "drop choice and transition: V = the discounted sum of a fixed reward stream — a present value"),
+         ("economics", "income_mobility", "the transition read alone as class mobility — the world-model a policy plans against"),
+     ]},
 ]
 
 
