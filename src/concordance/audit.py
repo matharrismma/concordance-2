@@ -354,8 +354,48 @@ def _x_unit_fact(text: str):
     return out
 
 
+def _x_power(text: str):
+    """"A to the power of B is C" and "A^B = C" — exponentiation with an INTEGER exponent, so the
+    result is exact (the equality verifier is exact-symbolic). A DECIMAL exponent (a root) is skipped
+    because its result is usually an approximation that would break honestly-but-harshly. The exponent
+    is capped at 1000 so a claim can never become an expression bomb."""
+    out = []
+
+    def add(a, b, c, m):
+        try:
+            e = int(b.replace(",", ""))
+        except ValueError:
+            return
+        if e > 1000:            # a miss stays a miss — don't emit an astronomically large expression
+            return
+        out.append((_q(text, m), "mathematics",
+                    {"mode": "equality", "params": {"expr_a": f"{_f(a)}**{e}", "expr_b": str(_f(c))}}))
+    for m in re.finditer(_NUM + r"\s*to\s+the\s+power\s+of\s+(\d[\d,]*)\s*" + _EQ + r"\s*" + _NUM, text, re.I):
+        add(m.group(1), m.group(2), m.group(3), m)
+    for m in re.finditer(_NUM + r"\s*\^\s*(\d[\d,]*)\s*" + _EQ + r"\s*" + _NUM, text, re.I):
+        add(m.group(1), m.group(2), m.group(3), m)
+    return out
+
+
+def _x_factorial(text: str):
+    """"N factorial is M" / "N! is M" — factorial, exact. Capped at 200 so it cannot become an
+    expression bomb; a bare "5!" without the claim verb and a number extracts nothing."""
+    out = []
+    for m in re.finditer(r"(\d[\d,]*)\s*(?:!|\bfactorial\b)\s*" + _EQ + r"\s*" + _NUM, text, re.I):
+        try:
+            n = int(m.group(1).replace(",", ""))
+        except ValueError:
+            continue
+        if n > 200:
+            continue
+        out.append((_q(text, m), "mathematics",
+                    {"mode": "equality", "params": {"expr_a": f"factorial({n})", "expr_b": str(_f(m.group(2)))}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
+    ("power", _x_power), ("factorial", _x_factorial),
     ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),
     ("compound_interest", _x_compound), ("rule_of_72", _x_rule72),

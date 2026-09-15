@@ -214,6 +214,40 @@ def test_unit_fact_zero_false_positives():
         assert "unit_fact" not in _extractors(t), t
 
 
+# ---- powers / exponents (2026-09-15): "2 to the power of 10 is 1024", "2^10 = 1024" ----
+
+def test_power_extracts_and_confirms():
+    for t in ["2 to the power of 10 is 1024", "2^10 = 1024", "10 to the power of 3 is 1000"]:
+        assert "power" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_power_catches_a_wrong_claim():
+    res = audit("10 to the power of 3 is 999", CFG, seal=False)   # 1000, not 999
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_power_zero_false_positives():
+    for t in [
+        "2 to the power of 0.5 is 1.414",   # decimal exponent -> approximation, skipped
+        "I scored 5! It was great",         # bare ! with no claim verb + number
+    ]:
+        assert "power" not in _extractors(t) and "factorial" not in _extractors(t), t
+
+
+# ---- factorial (2026-09-15): "5 factorial is 120", "5! is 120" ----
+
+def test_factorial_extracts_and_confirms():
+    for t in ["5 factorial is 120", "5! is 120", "6 factorial is 720"]:
+        assert "factorial" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_factorial_catches_a_wrong_claim():
+    res = audit("4 factorial is 30", CFG, seal=False)   # 24, not 30
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))
