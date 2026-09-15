@@ -411,9 +411,43 @@ def _x_sqrt(text: str):
     return out
 
 
+def _x_circle(text: str):
+    """"a circle of radius R has area A" / "... has circumference C" — routes to the geometry verifier
+    (area = pi r^2, circumference = 2 pi r; tolerance 1e-3, so a user-rounded value like 28.27 for
+    pi*3^2 holds). Radius phrasing only (diameter is left to the reader). A wrong value breaks honestly
+    with the true one shown."""
+    out = []
+    rad = r"circle\s+(?:of|with)\s+(?:an?\s+)?radius\s+(?:of\s+)?" + _NUM + r"\s+has\s+(?:an?\s+)?"
+    approx = r"(?:about|approximately|roughly|around|~|≈)?\s*"
+    for m in re.finditer(rad + r"area\s+(?:of\s+)?" + approx + _NUM, text, re.I):
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"circle_radius": _f(m.group(1)), "claimed_circle_area": _f(m.group(2))}}))
+    for m in re.finditer(rad + r"circumference\s+(?:of\s+)?" + approx + _NUM, text, re.I):
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"circle_radius": _f(m.group(1)), "claimed_circle_circumference": _f(m.group(2))}}))
+    return out
+
+
+def _x_physics_force(text: str):
+    """"M kg at A m/s^2 exerts F N" — Newton's second law, F = m*a, routed to the physics verifier.
+    The three units (kg, m/s^2, N) anchor it, so it is unambiguous; a wrong force breaks honestly."""
+    n = r"(\d[\d,]*(?:\.\d+)?)"
+    pat = (n + r"\s*kg\b[^.\n]{0,25}?\bat\s+" + n +
+           r"\s*(?:m/s\^?2|m/s²|m/s/s|meters?\s+per\s+second\s+squared)\b[^.\n]{0,25}?"
+           r"(?:exerts?|is|=|equals|produces?|gives?|has)\s*(?:a\s+)?(?:force\s+of\s+)?" + n +
+           r"\s*(?:N|newtons?)\b")
+    out = []
+    for m in re.finditer(pat, text, re.I):
+        out.append((_q(text, m), "physics",
+                    {"PHYS_VERIFY": {"mass_kg": _f(m.group(1)), "acceleration_m_per_s2": _f(m.group(2)),
+                                     "claimed_force_N": _f(m.group(3))}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
+    ("circle", _x_circle), ("physics_force", _x_physics_force),
     ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),
     ("compound_interest", _x_compound), ("rule_of_72", _x_rule72),

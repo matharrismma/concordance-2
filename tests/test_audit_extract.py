@@ -268,6 +268,43 @@ def test_sqrt_of_non_perfect_square_extracts_nothing():
         assert "sqrt" not in _extractors(t), t
 
 
+# ---- circle geometry (2026-09-15): verifier tolerance loosened to 1e-3 so user rounding holds ----
+
+def test_circle_area_extracts_and_confirms():
+    for t in ["a circle of radius 3 has area 28.27", "a circle with radius 5 has circumference 31.42"]:
+        assert "circle" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_circle_catches_a_wrong_area():
+    res = audit("a circle of radius 3 has area 50", CFG, seal=False)   # ~28.27, not 50
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_circle_zero_false_positives():
+    for t in ["a circle of radius 3 has area to spare", "the circle of life has no radius"]:
+        assert "circle" not in _extractors(t), t
+
+
+# ---- Newton's second law F = m*a (2026-09-15): "10 kg at 9.8 m/s^2 exerts 98 N" ----
+
+def test_force_extracts_and_confirms():
+    for t in ["a 10 kg mass at 9.8 m/s^2 exerts 98 N of force", "10 kg at 9.8 m/s² exerts 98 N"]:
+        assert "physics_force" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_force_catches_a_wrong_claim():
+    res = audit("10 kg at 9.8 m/s^2 is 50 N", CFG, seal=False)   # 98, not 50
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_force_zero_false_positives():
+    """The three units (kg, m/s^2, N) anchor it; a bare mass with no acceleration/force is skipped."""
+    for t in ["the 10 kg box sat at the dock", "she ran 10 km at 9 minutes per mile"]:
+        assert "physics_force" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))

@@ -132,7 +132,7 @@ def verify_circle_properties(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "radius must be numeric")
     if rf < 0:
         return error(name, "radius must be non-negative")
-    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-4)
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)  # free-text circle claims are user-rounded (e.g. area 28.27 for pi*3^2=28.2743); 1e-3 matches the auditor's conversion tolerance. A caller may still TIGHTEN via the spec.
     actual_area = math.pi * rf * rf
     actual_circ = 2.0 * math.pi * rf
     data: Dict[str, Any] = {
