@@ -214,6 +214,7 @@ text.lbl{font-family:Georgia,serif;pointer-events:none}
 <body><div class=wrap>
 <div class=figwrap>
   <div class=top>
+    <a href="/" target="_top" title="Narrow Highway" style="color:#8a8172;font:400 .8rem system-ui,sans-serif;text-decoration:none">&#8592; narrowhighway.com</a>
     <h1>Atlas</h1>
     <div class=tabs id=tabs>
       <button class=tab data-l=kernel>kernel</button>

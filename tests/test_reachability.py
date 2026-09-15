@@ -133,6 +133,10 @@ UNLISTED_PAGES = {
     "about.html",         # the confession, whole (Domain Sort: the declaration lives at /about + /identity). Linked from checkit.html's footer as the CLEAN url /about, which the static link-checker (html hrefs only) cannot see — hence declared, same limit as /unchecked/answer
     "playbook.html",      # the Playbook surface — operator/agent authoring, not the public nav
     "plow.html",          # the Plow surface — an operator instrument, not the public nav
+    # the Atlas static views — single-view SVG renderings, one per layout of the unified interactive
+    # explore.html (which IS linked, from com.html + the Ctrl-K palette). Kept as lightweight direct-URL
+    # and share/print targets, each with its own "← narrowhighway.com" home link; not linked into the nav.
+    "atlas.html", "bridges.html", "calculations.html", "domains.html", "one_body.html", "spiral.html",
 }
 
 

@@ -150,6 +150,14 @@
   .chip:hover{border-color:var(--seal); color:var(--seal)}
   .chip[aria-pressed="true"]{background:var(--seal); color:#fff; border-color:var(--seal)}
   :root[data-theme="dark"] .chip[aria-pressed="true"], :root:not([data-theme="light"]) .chip[aria-pressed="true"]{color:#08201c}
+  .ask{display:flex; gap:.5rem; margin-bottom:.9rem}
+  .ask input{flex:1; min-width:0; font:inherit; font-family:"Spectral",Georgia,serif; font-size:1rem; color:var(--ink);
+    padding:.6rem .75rem; border:1px solid var(--line); border-radius:9px; background:var(--surface)}
+  .ask input:focus{outline:none; border-color:var(--seal); box-shadow:0 0 0 3px var(--seal-wash)}
+  .ask button{font:inherit; font-weight:600; white-space:nowrap; padding:.6rem 1.15rem; border:1px solid var(--seal);
+    border-radius:9px; background:var(--seal); color:#fff; cursor:pointer}
+  .ask button:disabled{opacity:.55; cursor:default}
+  .seal a.hash{color:var(--seal); text-decoration:underline}
   .demo-note{font-size:.74rem; color:var(--ink-faint); margin:.7rem .1rem 0}
 
   /* -- stat strip -------------------------------------------- */
@@ -257,6 +265,11 @@
     </div>
 
     <div id="verify">
+      <form class="ask" id="askform" autocomplete="off">
+        <input id="claimin" type="text" aria-label="Type a claim to verify"
+          placeholder="Type a claim with a number — a conversion, a constant, an amount…">
+        <button type="submit" id="askgo">Verify</button>
+      </form>
       <div class="inst" aria-live="polite">
         <div class="inst-head">
           <span class="dot"></span><span class="dot"></span><span class="dot"></span>
@@ -264,18 +277,20 @@
           <span class="verdict-chip mono" id="vchip"></span>
         </div>
         <div class="inst-body">
-          <div class="claim" id="claim">The Moon&rsquo;s mean distance from Earth is 384,400&nbsp;km.</div>
+          <div class="claim" id="claim"></div>
           <div class="elim mono" id="elim"></div>
           <ul class="trail" id="trail"></ul>
           <div class="seal" id="seal">
             <span class="stamp">&#10003;</span>
-            <span>sealed &middot; <span class="hash" id="hash"></span></span>
+            <span>sealed &middot; <a class="hash" id="hash" target="_blank" rel="noopener"></a></span>
           </div>
         </div>
       </div>
       <div class="picker" id="picker" role="group" aria-label="Example claims"></div>
-      <p class="demo-note">Illustrative examples across domains. On the live engine every result is
-        computed fresh and its seal is real &mdash; re-fetch the hash and the bytes must match.</p>
+      <p class="demo-note">Live &mdash; every result here is computed by the engine and the seal is real:
+        click the hash to re-check it. It proves numbers, constants and conversions; hand it a claim it
+        cannot compute and it declines, pointing to the cited source, rather than bluff.
+        <noscript>&nbsp;Requires JavaScript &mdash; or use <a href="/checkit.html">the auditor</a>.</noscript></p>
     </div>
   </div></section>
 
@@ -430,82 +445,66 @@ fetch(<span class="st">"https://narrowhighway.com/audit"</span>, {
   document.getElementById("domainGrid").innerHTML =
     DOMAINS.map(function(d){ return '<span>'+d+'</span>'; }).join("");
 
-  // -- the instrument: canned, grounded examples across domains --
-  var EX=[
-    {q:'The Moon&rsquo;s mean distance from Earth is 384,400&nbsp;km.', v:'holds', chip:'astronomy',
-     cands:['405,500 km (apogee)','363,300 km (perigee)','384,400 km (mean)'], keep:2,
-     trail:[['astronomy','Mean orbital distance resolves to <b>384,400 km</b> &mdash; the claim matches.']],
-     hash:'a91f4c..7de2'},
-    {q:'Aspirin (C&#8329;H&#8328;O&#8324;) has a molar mass of 180.16&nbsp;g/mol.', v:'holds', chip:'chemistry',
-     cands:['138.12 g/mol','194.19 g/mol','180.16 g/mol'], keep:2,
-     trail:[['periodic_table','&Sigma; atomic mass of C&#8329;H&#8328;O&#8324; = <b>180.158 g/mol</b>.'],
-            ['chemistry','Rounded to 2 dp = <b>180.16</b> &mdash; holds.']],
-     hash:'3b7e02..c4a1'},
-    {q:'A 10&nbsp;kg mass at 9.8&nbsp;m/s&sup2; exerts 98&nbsp;N of force.', v:'holds', chip:'physics',
-     cands:['9.8 N','980 N','98 N'], keep:2,
-     trail:[['physics','F = m&middot;a = 10 &times; 9.8 = <b>98 N</b> &mdash; holds.']],
-     hash:'0f5aa9..91bd'},
-    {q:'$1,000 at 5% annual, compounded yearly for 3 years, is $1,157.63.', v:'holds', chip:'finance',
-     cands:['$1,150.00','$1,161.05','$1,157.63'], keep:2,
-     trail:[['finance','1000 &times; 1.05&sup3; = <b>1157.625</b> &rarr; $1,157.63 &mdash; holds.']],
-     hash:'d24c81..6a07'},
-    {q:'Water boils at 90&nbsp;&deg;C at sea level.', v:'broken', chip:'thermodynamics',
-     cands:['90 &deg;C','98 &deg;C','100 &deg;C'], keep:2,
-     trail:[['thermodynamics','Boiling point of water at 101.325 kPa = <b>100 &deg;C</b>, not 90 &deg;C &mdash; broken.']],
-     hash:'7c1be4..30f9'},
-    {q:'This painting is the most beautiful ever made.', v:'slate', chip:'&mdash; no domain',
-     cands:['aesthetics?','preference?','&mdash;'], keep:-1,
-     trail:[['cannot_check','No domain verifies aesthetic preference. It declines rather than bluff.']],
-     hash:'&mdash;'}
+  // -- the instrument: LIVE. Every result is computed by the engine (/verify); the seal is real. --
+  // The chips are claims the engine verifies with a receipt — click to watch one run, or type your own.
+  // It proves numbers, constants and conversions; a claim it cannot compute is declined (with the cited
+  // source found instead), never bluffed. The working set is narrow BY DESIGN — honest over impressive.
+  var CLAIMS=[
+    {q:"100 kilometers is 62.14 miles",              chip:"a conversion"},
+    {q:"The speed of light is 299792458 m/s",         chip:"a constant"},
+    {q:"32 degrees Fahrenheit is 0 degrees Celsius",  chip:"temperature"},
+    {q:"100 kilometers is 50 miles",                  chip:"a wrong claim"},
+    {q:"The capital of France is Paris",              chip:"a lookup"}
   ];
-  var claim=document.getElementById("claim"), elim=document.getElementById("elim"),
+  var claimin=document.getElementById("claimin"), askgo=document.getElementById("askgo"),
+      askform=document.getElementById("askform"),
+      claim=document.getElementById("claim"), elim=document.getElementById("elim"),
       trail=document.getElementById("trail"), sealEl=document.getElementById("seal"),
       hashEl=document.getElementById("hash"), vchip=document.getElementById("vchip"),
       picker=document.getElementById("picker");
-  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   var VCLS={holds:"v-holds",broken:"v-broken",slate:"v-slate"},
       VTXT={holds:"HOLDS",broken:"BROKEN",slate:"CANNOT CHECK"};
-  var timers=[], active=0;
-  function clearT(){ timers.forEach(clearTimeout); timers=[]; }
-  function at(fn,ms){ timers.push(setTimeout(fn,ms)); }
-
-  function run(i){
-    active=i; clearT();
-    var e=EX[i];
-    [].forEach.call(picker.children,function(c,k){ c.setAttribute("aria-pressed", k===i?"true":"false"); });
-    claim.innerHTML=e.q;
-    vchip.className="verdict-chip mono "+VCLS[e.v]; vchip.textContent="";
-    trail.innerHTML=""; sealEl.classList.remove("in"); hashEl.textContent="";
-    // 1. elimination line
-    if(reduce){ elim.innerHTML=''; showTrail(e); return; }
-    var shown=[];
-    e.cands.forEach(function(c,k){
-      at(function(){
-        shown.push(k===e.keep ? '<span class="keep">'+c+' &#10003;</span>'
-                              : '<s>'+c+'</s>');
-        elim.innerHTML = e.keep<0 && k===e.cands.length-1
-          ? '<span style="color:var(--slate)">no candidate survives &mdash; declined</span>'
-          : shown.join(' ');
-      }, 220*(k+1));
-    });
-    at(function(){ showTrail(e); }, 220*(e.cands.length+1)+120);
+  function vesc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function setVerdict(v){ vchip.className="verdict-chip mono "+VCLS[v]; vchip.textContent=VTXT[v]; vchip.classList.add("show"); }
+  function reset(){ vchip.className="verdict-chip mono"; vchip.textContent=""; trail.innerHTML=""; elim.textContent="";
+    sealEl.classList.remove("in"); hashEl.textContent=""; hashEl.removeAttribute("href"); }
+  function render(res, text){
+    reset(); claim.textContent=text;
+    var found=res.claims_found||0, broken=res.broken||0;
+    if(found>0){
+      trail.innerHTML=(res.checks||[]).map(function(c){
+        return '<li class="in"><span class="dom">'+vesc(c.domain||"")+'</span><span class="step">'+vesc(c.detail||c.claim||"")+'</span></li>'; }).join("");
+      setVerdict(broken>0?"broken":"holds");
+      if(res.receipt){ var h=String(res.receipt).replace(/^.*\//,"");
+        hashEl.textContent=(h.length>14?h.slice(0,6)+"…"+h.slice(-4):h);
+        hashEl.setAttribute("href",res.receipt); sealEl.classList.add("in"); }
+    } else {
+      setVerdict("slate");
+      var fc=res.found||[];
+      if(fc.length){
+        elim.innerHTML='<span style="color:var(--slate)">no computable claim &mdash; found in the keeping, cited (not a verdict):</span>';
+        trail.innerHTML=fc.map(function(f){ return '<li class="in"><span class="dom">found</span><span class="step">'+vesc(f.title||f.id||"")+'</span></li>'; }).join("");
+      } else {
+        elim.innerHTML='<span style="color:var(--slate)">no domain verifies this &mdash; it declines rather than bluff.</span>';
+      }
+    }
   }
-  function showTrail(e){
-    trail.innerHTML = e.trail.map(function(t){
-      return '<li><span class="dom">'+t[0]+'</span><span class="step">'+t[1]+'</span></li>';
-    }).join("");
-    var lis=trail.querySelectorAll("li");
-    [].forEach.call(lis,function(li,k){ at(function(){ li.classList.add("in"); }, reduce?0:180*k); });
-    at(function(){
-      vchip.textContent=VTXT[e.v]; vchip.classList.add("show");
-      hashEl.textContent=e.hash; sealEl.classList.add("in");
-    }, reduce?0:180*lis.length+120);
+  function verify(text){
+    text=(text||"").trim(); if(!text) return;
+    claimin.value=text; reset(); claim.textContent=text; elim.textContent="checking…";
+    [].forEach.call(picker.children,function(c){ c.setAttribute("aria-pressed", c.getAttribute("data-q")===text?"true":"false"); });
+    askgo.disabled=true; var prev=askgo.textContent; askgo.textContent="…";
+    fetch("/verify",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({claim:text})})
+      .then(function(r){ if(!r.ok) throw new Error("engine unavailable ("+r.status+")"); return r.json(); })
+      .then(function(res){ render(res,text); })
+      .catch(function(){ reset(); claim.textContent=text;
+        elim.innerHTML='<span style="color:var(--broken)">the live engine is offline &mdash; try <a href="/checkit.html">the auditor</a>.</span>'; })
+      .then(function(){ askgo.disabled=false; askgo.textContent=prev; });
   }
-  picker.innerHTML = EX.map(function(e,i){
-    return '<button class="chip" type="button" aria-pressed="false">'+e.chip+'</button>';
-  }).join("");
-  [].forEach.call(picker.children,function(c,i){ c.addEventListener("click",function(){ run(i); }); });
-  run(0);
+  picker.innerHTML=CLAIMS.map(function(e){ return '<button class="chip" type="button" aria-pressed="false" data-q="'+vesc(e.q)+'">'+vesc(e.chip)+'</button>'; }).join("");
+  [].forEach.call(picker.children,function(c,i){ c.addEventListener("click",function(){ verify(CLAIMS[i].q); }); });
+  if(askform){ askform.addEventListener("submit",function(e){ e.preventDefault(); verify(claimin.value); }); }
+  verify(CLAIMS[0].q);   // run the first example live on load — a real verdict + real seal on first paint
 
   // Live numbers - the rule is public numbers are LIVE-WIRED, not hardcoded (systems.html does this).
   // The literals above are the no-JS / offline fallback; this refreshes them from the engine so they

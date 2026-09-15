@@ -301,8 +301,8 @@ DOMAINS: dict[str, list[dict]] = {
     ],
     "governance": [
         {"id": "card_theory_arrow_impossibility_theorem", "title": "Arrow's impossibility theorem",
-         "subject": "Arrow's theorem", "calib": "seals", "section": "Applied & human systems",
-         "body": "No ranked voting rule can satisfy a short list of fairness conditions at once (unrestricted domain, Pareto, independence of irrelevant alternatives, non-dictatorship) — Arrow (1951). Collective preference cannot always be rational the way individual preference is. SEALS: a proven theorem.",
+         "subject": "Arrow's theorem", "calib": "map-only", "section": "Applied & human systems",
+         "body": "No ranked voting rule can satisfy a short list of fairness conditions at once (unrestricted domain, Pareto, independence of irrelevant alternatives, non-dictatorship) — Arrow (1951). Collective preference cannot always be rational the way individual preference is. MAP-ONLY: a proven impossibility result the engine maps as a hard limit; it seals no computational run of its own (the governance verifier returns NOT_APPLICABLE), so it claims no seal.",
          "conns": [("limits", "card_theory_public_choice_decision_theory", "Arrow is a hard LIMIT on what any social-choice procedure can achieve")]},
     ],
     "law": [

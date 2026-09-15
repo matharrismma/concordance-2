@@ -167,7 +167,7 @@ h1{{color:#c69a4a;font-weight:400;font-size:1.7rem;margin:.2rem 0}}
 p{{color:#a99c82;max-width:62rem;line-height:1.6}}svg{{width:100%;height:auto;display:block}}
 b{{color:#cbbfa4;font-weight:400}}
 .legend{{font-size:.8rem;color:#a99c82;margin:1rem 0;line-height:1.9}}</style></head>
-<body><div class=wrap><h1>The Calculation Map</h1>
+<body><div class=wrap><a href="/" target="_top" style="color:#8a8172;font:400 .8rem system-ui,sans-serif;text-decoration:none">&#8592; narrowhighway.com</a><h1>The Calculation Map</h1>
 <p>Every calculation placed by its <b>canonical form</b> — the way a Smith chart places every
 impedance on one disk. A sector is one form; each dot is a calculation, colored by domain. And the
 model is <b>fractal</b>: a coarse form is a form-of-forms, so the three families that ran too wide —

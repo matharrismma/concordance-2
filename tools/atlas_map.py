@@ -199,7 +199,7 @@ b{{color:#cbbfa4;font-weight:400}}
 .key{{color:#a99c82;font-size:.82rem;margin:.5rem 0 0}}
 .key i.dot{{display:inline-block;width:10px;height:10px;border-radius:50%;background:#f0d68a;vertical-align:middle;margin:0 4px}}
 .key i.line{{display:inline-block;width:22px;height:0;border-top:1px solid #c69a4a;opacity:.5;vertical-align:middle;margin:0 4px}}</style></head>
-<body><div class=wrap><h1>ATLAS</h1>
+<body><div class=wrap><a href="/" target="_top" style="color:#8a8172;font:400 .8rem system-ui,sans-serif;text-decoration:none">&#8592; narrowhighway.com</a><h1>ATLAS</h1>
 <p>The whole body in one frame. At the heart is the <b>kernel</b> &mdash; the {len(MASTER_EQUATIONS)} <b>master equations</b>,
 the finite set of formulas that genuinely connect across domains. Each
 master reaches outward through its <b>calculations</b> (the same equation in many fields, colored by

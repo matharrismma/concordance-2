@@ -172,7 +172,7 @@ h1{{color:#c69a4a;font-weight:400;font-size:1.8rem;margin:.2rem 0}}
 p{{color:#a99c82;max-width:60rem;line-height:1.62}}svg{{width:100%;height:auto;display:block}}
 b{{color:#cbbfa4;font-weight:400}}code{{font-family:'DejaVu Sans Mono',monospace;font-size:.85em}}
 .leg{{font-size:.82rem;color:#9a8f76;margin:1rem 0 0}}</style></head>
-<body><div class=wrap><h1>Connections Between Domains</h1>
+<body><div class=wrap><a href="/" target="_top" style="color:#8a8172;font:400 .8rem system-ui,sans-serif;text-decoration:none">&#8592; narrowhighway.com</a><h1>Connections Between Domains</h1>
 <p>Every domain is a node on the ring, grouped into families. Each <b>thread</b> is a
 <b>master equation</b>, drawn through every domain it connects &mdash; the thread <b>is</b> the
 connection, and its colour is the formula that makes it. Where many threads pass through one node,

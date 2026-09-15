@@ -91,7 +91,13 @@ def test_every_page_offers_a_way_home():
               "gateway.html",
               # fellowship.html — the .org social hall (study groups + the commons + the confession-gated
               # mesh), its own nav, reached from the witness desk door and profile.html, not the shared control.
-              "fellowship.html"}
+              "fellowship.html",
+              # the Atlas visualization family (tools/atlas_explore.py + the map generators) — full-viewport
+              # generated SVG surfaces that carry their OWN minimal home link (a target=_top "← narrowhighway.com"),
+              # not the shared witness desk control which would fight the canvas; explore.html is the unified
+              # interactive Atlas (also in the Ctrl-K palette), the other six are single-view static renderings.
+              "explore.html", "atlas.html", "bridges.html", "calculations.html", "domains.html",
+              "one_body.html", "spiral.html", "strategy.html"}
     missing = [f.name for f in SITE.glob("*.html")
                if f.name != "index.html" and f.name not in hidden
                and "nh-home.js" not in f.read_text(encoding="utf-8")]
@@ -154,7 +160,12 @@ def test_the_palette_reaches_every_public_page():
                # gateway.html — the .com Gateway, reached from com.html's receipt section, not the palette.
                "gateway.html",
                # fellowship.html — the .org social hall, reached from the witness desk door + profile.html.
-               "fellowship.html"}
+               "fellowship.html",
+               # the Atlas visualization family: explore.html (the unified interactive Atlas) IS in the palette;
+               # these are its single-view static renderings (one per explore.html layout) + the strategy view,
+               # reached from com.html / explore.html and as direct-URL share targets, not separate palette entries.
+               "atlas.html", "bridges.html", "calculations.html", "domains.html",
+               "one_body.html", "spiral.html", "strategy.html"}
     unreachable = sorted(
         p.name for p in SITE.glob("*.html") if p.name not in listed and p.name not in excused)
     assert not unreachable, f"no way to reach: {unreachable} (list them or excuse them by name)"

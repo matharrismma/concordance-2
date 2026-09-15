@@ -98,6 +98,7 @@ GOLDEN_API_GET = {
     # and the first reader to recall it is asked to close it. `/unchecked` publishes the standing
     # list; `/unchecked/answer` is the door the ask on every such card points at.
     "/unchecked", "/unchecked/answer",
+    "/tv/automaton",  # the .tv automaton — a witness testifies in his own PD words (built 2026-09-03, 37d2e49); a GET, read-bucket limited like /witness
 }
 # /search moved OUT of this set on 2026-07-31 and into GOLDEN_READ_LIMITED — a read and a write
 # are not the same risk, and the one client the shared cap refused most was ClaudeBot.
@@ -139,6 +140,7 @@ GOLDEN_READ_LIMITED = {   # every route that scans/sorts the whole corpus per re
     "/search", "/witness", "/cards/stats", "/cards", "/daily", "/card/connections",
     "/locate", "/library/health", "/growth",
     "/systems",  # cheap (disk + import resolution, no corpus) but placed in the generous bucket anyway
+    "/tv/automaton",  # scans the witness cloud to let a witness testify in his own PD words — read-bucket limited like /witness
 }
 
 
