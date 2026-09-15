@@ -248,6 +248,26 @@ def test_factorial_catches_a_wrong_claim():
     assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
 
 
+# ---- square roots of PERFECT SQUARES only (2026-09-15): exact so equality is right ----
+
+def test_sqrt_of_perfect_square_extracts_and_confirms():
+    for t in ["the square root of 144 is 12", "square root of 64 is 8", "the square root of 400 is 20"]:
+        assert "sqrt" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_sqrt_catches_a_wrong_perfect_square_claim():
+    res = audit("the square root of 16 is 5", CFG, seal=False)   # 4, not 5
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_sqrt_of_non_perfect_square_extracts_nothing():
+    """sqrt(2) = 1.41421... is irrational; the exact-symbolic verifier would break a correct
+    approximation harshly, so a non-perfect-square root is skipped (a miss stays a miss)."""
+    for t in ["the square root of 2 is 1.414", "square root of 10 is 3.16", "square root of 2.5 is 1.58"]:
+        assert "sqrt" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))

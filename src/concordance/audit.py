@@ -393,9 +393,27 @@ def _x_factorial(text: str):
     return out
 
 
+def _x_sqrt(text: str):
+    """"the square root of N is M" — ONLY when N is a PERFECT SQUARE, so the result is exact and the
+    exact-symbolic equality verifier is the right tool. sqrt of a non-perfect-square is an irrational
+    approximation that would break harshly, so it is skipped (a miss stays a miss)."""
+    import math
+    out = []
+    for m in re.finditer(r"(?:the\s+)?square\s+root\s+of\s+" + _NUM + r"\s*" + _EQ + r"\s*" + _NUM, text, re.I):
+        n = _f(m.group(1))
+        if n < 0 or n != int(n):
+            continue
+        root = math.isqrt(int(n))
+        if root * root != int(n):            # not a perfect square -> skip
+            continue
+        out.append((_q(text, m), "mathematics",
+                    {"mode": "equality", "params": {"expr_a": f"sqrt({int(n)})", "expr_b": str(_f(m.group(2)))}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
-    ("power", _x_power), ("factorial", _x_factorial),
+    ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
     ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),
     ("compound_interest", _x_compound), ("rule_of_72", _x_rule72),
