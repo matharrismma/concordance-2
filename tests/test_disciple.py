@@ -4,8 +4,12 @@ The coach is stateless about the learner; a disciple's progress (`done` units) l
 profile, and walk() reads it back. Empty is the trailhead, not failure. Pure — profiles in a temp dir.
 """
 import json
+import sys
+from pathlib import Path
 
-from concordance import disciple
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
+from concordance import disciple  # noqa: E402
 
 
 def test_the_trailhead_is_honest_not_an_error(tmp_path, monkeypatch):
