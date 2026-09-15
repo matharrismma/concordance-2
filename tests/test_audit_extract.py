@@ -146,6 +146,49 @@ def test_cross_dimension_and_non_unit_pairs_are_not_extracted():
         assert "unit_conversion" not in _extractors(t), t
 
 
+# ---- percent stated in WORDS (2026-09-15): the box is live; people type "percent", not "%" ----
+
+def test_percent_in_words_extracts_and_confirms():
+    text = "12 percent of 500 is 60"
+    assert _extractors(text) == ["percent"]
+    res = audit(text, CFG, seal=False)
+    assert res["held"] == 1 and res["broken"] == 0
+
+
+def test_percent_in_words_catches_a_wrong_claim():
+    res = audit("15 percent of 200 is 45", CFG, seal=False)   # 30, not 45
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_percent_symbol_still_extracts():   # regression — the original % phrasing must not break
+    assert "percent" in _extractors("10% of $2,710 = $271")
+
+
+# ---- arithmetic stated in WORDS (2026-09-15): "2 plus 2 equals 4", not just "2 + 2 = 4" ----
+
+def test_word_arithmetic_extracts_and_confirms():
+    for t in ["2 plus 2 equals 4", "3 times 4 is 12", "10 divided by 2 is 5",
+              "9 minus 4 is 5", "6 multiplied by 7 is 42"]:
+        assert "arith_words" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_word_arithmetic_catches_a_wrong_claim():
+    res = audit("2 plus 2 equals 5", CFG, seal=False)
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_word_arithmetic_zero_false_positives():
+    """The named operator must sit between two numbers with the verb directly on the result;
+    ambiguous prose extracts NOTHING — better to miss than check the wrong thing."""
+    for t in [
+        "2 plus a few more, is 4 enough?",           # no second number adjacent to 'plus'
+        "I called 3 times and 4 people answered",    # 'times' but no claim verb on a result
+        "5 minus the discount, roughly 2 left",      # no number after 'minus'
+    ]:
+        assert "arith_words" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))

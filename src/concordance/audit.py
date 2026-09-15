@@ -65,6 +65,25 @@ def _x_product(text: str):
     return out
 
 
+_ARITH_WORDS = {"plus": "+", "minus": "-", "times": "*", "multiplied by": "*", "divided by": "/"}
+
+
+def _x_arith_words(text: str):
+    """"A plus/minus/times/divided by B is C" — arithmetic stated in WORDS (the symbol forms are
+    _x_sum / _x_product). Unambiguous: two numbers joined by a NAMED operator, with the claim verb
+    directly on the result. Because the operator must sit between two numbers and the verb must follow
+    the second number immediately, prose like "2 plus a few more, is 4 enough?" cannot match — the
+    same zero-false-positive discipline as every other extractor."""
+    out = []
+    for m in re.finditer(_NUM + r"\s*(plus|minus|times|multiplied by|divided by)\s*" + _NUM +
+                         r"\s*" + _EQ + r"\s*" + _NUM, text, re.I):
+        op = _ARITH_WORDS[m.group(2).lower()]
+        out.append((_q(text, m), "mathematics",
+                    {"mode": "equality", "params": {"expr_a": f"{_f(m.group(1))}{op}{_f(m.group(3))}",
+                                                    "expr_b": str(_f(m.group(4)))}}))
+    return out
+
+
 def _x_each(text: str):
     """"N units at $X each = $Y" — quantity times unit price. Unambiguous: the words name the
     relationship (a count, a per-item price, a claimed total). A descriptor of up to a few words may
@@ -83,7 +102,7 @@ def _x_each(text: str):
 
 def _x_percent(text: str):
     out = []
-    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*%\s*(?:of|tip on|tax on|discount on|off(?: of)?|on)\s*"
+    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:%|percent|pct)\s*(?:of|tip on|tax on|discount on|off(?: of)?|on)\s*"
                          + _NUM + r"\s*" + _EQ + r"\s*" + _NUM, text, re.I):
         pct, base, claimed = _f(m.group(1)), _f(m.group(2)), _f(m.group(3))
         out.append((_q(text, m), "mathematics",
@@ -304,7 +323,8 @@ def _x_unit_conversion(text: str):
 
 
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
-    ("sum", _x_sum), ("product", _x_product), ("units_each", _x_each), ("percent", _x_percent),
+    ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
+    ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),
     ("compound_interest", _x_compound), ("rule_of_72", _x_rule72),
     ("elapsed_years", _x_elapsed_years), ("day_of_week", _x_day_of_week),
