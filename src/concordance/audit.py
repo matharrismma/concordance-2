@@ -322,6 +322,38 @@ def _x_unit_conversion(text: str):
     return out
 
 
+_UF_PAT: Optional[re.Pattern] = None
+
+
+def _uf_pattern() -> re.Pattern:
+    """there are N unit1 in a unit2 — cached like _uc_pattern."""
+    global _UF_PAT
+    if _UF_PAT is None:
+        from .compute import _UNITS, _TEMP
+        alt = "|".join(re.escape(u) for u in sorted(set(_UNITS) | set(_TEMP), key=len, reverse=True))
+        _UF_PAT = re.compile(r"there\s+(?:are|is)\s+(-?\d[\d,]*(?:\.\d+)?)\s*(" + alt +
+                             r")\b\s+in\s+(?:a|an|one|1)\s+(" + alt + r")\b", re.I)
+    return _UF_PAT
+
+
+def _x_unit_fact(text: str):
+    """"there are N unit1 in a unit2" — a unit-equivalence FACT ("there are 5280 feet in a mile",
+    "there are 12 inches in a foot"). The "there are/is" marker makes it unambiguously a count claim
+    (unlike "5 minutes in an hour" = within), so it verifies as N unit1 == 1 unit2 against the same
+    factor table (with tolerance). Same-dimension only; cross-dimension / unknown units extract
+    nothing. A FALSE fact ("there are 5000 feet in a mile") breaks honestly."""
+    from .compute import _UNITS
+    out = []
+    for m in _uf_pattern().finditer(text):
+        u1, u2 = m.group(2).lower(), m.group(3).lower()
+        if not (u1 in _UNITS and u2 in _UNITS and _UNITS[u1][0] == _UNITS[u2][0]):
+            continue
+        out.append((_q(text, m), "unit_conversion",
+                    {"CONV_VERIFY": {"from_value": _f(m.group(1)), "from_unit": u1,
+                                     "to_value": 1.0, "to_unit": u2}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
     ("units_each", _x_each), ("percent", _x_percent),
@@ -330,6 +362,7 @@ _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("elapsed_years", _x_elapsed_years), ("day_of_week", _x_day_of_week),
     ("leap_year", _x_leap_year), ("nutrition_label", _x_nutrition),
     ("physical_constant", _x_physical_constant), ("unit_conversion", _x_unit_conversion),
+    ("unit_fact", _x_unit_fact),
 )
 
 

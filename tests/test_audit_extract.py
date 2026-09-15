@@ -189,6 +189,31 @@ def test_word_arithmetic_zero_false_positives():
         assert "arith_words" not in _extractors(t), t
 
 
+# ---- unit-equivalence FACTS (2026-09-15): "there are 5280 feet in a mile" ----
+
+def test_unit_fact_extracts_and_confirms():
+    for t in ["there are 5280 feet in a mile", "there are 12 inches in a foot",
+              "there are 100 centimeters in a meter"]:
+        assert _extractors(t) == ["unit_fact"], t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_unit_fact_catches_a_wrong_fact():
+    res = audit("there are 5000 feet in a mile", CFG, seal=False)   # 5280, not 5000
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_unit_fact_zero_false_positives():
+    """The 'there are' marker is required so a count-claim ("there are N X in a Y") is not confused
+    with mere containment ("5 minutes in an hour" = within); and unknown/non-unit words never match."""
+    for t in [
+        "I spent 5 minutes in an hour-long call",   # 'in an hour' but no 'there are' -> within, not a fact
+        "there are 5 apples in a basket",           # apples/basket are not units
+        "there are 3 people in a room",             # not units
+    ]:
+        assert "unit_fact" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))
