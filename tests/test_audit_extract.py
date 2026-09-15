@@ -305,6 +305,30 @@ def test_force_zero_false_positives():
         assert "physics_force" not in _extractors(t), t
 
 
+# ---- molar mass from a chemical formula (2026-09-15): new periodic_table.molar_mass verifier ----
+
+def test_molar_mass_extracts_and_confirms():
+    for t in ["the molar mass of H2O is 18.015 g/mol", "the molar mass of CO2 is 44.01 g/mol",
+              "the molar mass of C6H12O6 is 180.16 g/mol"]:
+        assert "molar_mass" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_molar_mass_catches_a_wrong_claim():
+    res = audit("the molar mass of H2O is 20 g/mol", CFG, seal=False)   # 18.015, not 20
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_molar_mass_zero_false_positives():
+    """Formula notation only, case-significant; a plain word or a parenthesised/complex formula is
+    skipped rather than mis-parsed (a miss stays a miss)."""
+    for t in [
+        "the molar mass of water is 18",       # lowercase word, not a formula token
+        "the molar mass of Ca(OH)2 is 74.09",  # parentheses unsupported -> not extracted
+    ]:
+        assert "molar_mass" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))

@@ -444,10 +444,24 @@ def _x_physics_force(text: str):
     return out
 
 
+def _x_molar_mass(text: str):
+    """"the molar mass of H2O is 18.015 g/mol" — FORMULA notation only (a simple element+count formula
+    sitting immediately before the claim verb), routed to the periodic_table molar-mass verifier. A
+    plain word ("water"), a parenthesised formula (Ca(OH)2), or a lowercase token is NOT extracted —
+    case is significant (Co vs CO) and a miss stays a miss. The formula group is case-sensitive
+    (?-i:) even though the surrounding words are not."""
+    out = []
+    for m in re.finditer(r"molar\s+mass\s+of\s+(?-i:([A-Z][a-z]?\d*(?:[A-Z][a-z]?\d*)*))\s+"
+                         + _EQ + r"\s*" + _NUM + r"\s*(?:g\s*/\s*mol|grams?\s+per\s+mole?)?", text, re.I):
+        out.append((_q(text, m), "periodic_table",
+                    {"PT_VERIFY": {"formula": m.group(1), "claimed_molar_mass": _f(m.group(2))}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
-    ("circle", _x_circle), ("physics_force", _x_physics_force),
+    ("circle", _x_circle), ("physics_force", _x_physics_force), ("molar_mass", _x_molar_mass),
     ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),
     ("compound_interest", _x_compound), ("rule_of_72", _x_rule72),

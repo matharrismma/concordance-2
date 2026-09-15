@@ -28,6 +28,7 @@ PT_VERIFY shape (any subset):
 """
 from __future__ import annotations
 
+import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
@@ -317,6 +318,46 @@ def verify_atomic_mass_weighted_average(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"weighted average = {actual:.5f} u, claimed {c}", data)
 
 
+_MOLAR_FORMULA = re.compile(r"(?:[A-Z][a-z]?\d*)+$")
+_MOLAR_TOKEN = re.compile(r"([A-Z][a-z]?)(\d*)")
+
+
+def verify_molar_mass(spec: Dict[str, Any]) -> VerifierResult:
+    """Molar mass of a chemical formula, computed from the periodic table: M = Σ(count × atomic_mass).
+    SIMPLE formulas only — element symbols with optional counts (H2O, CO2, C6H12O6). Parentheses,
+    charges and hydrates are unsupported and return na (a miss stays a miss). Case is significant:
+    'Co' is cobalt, 'CO' is carbon monoxide. The atomic masses are the standard periodic-table values
+    the engine already holds; this confirms only the arithmetic of the sum, never the measurements."""
+    name = "periodic_table.molar_mass"
+    formula = str(spec.get("formula") or "").strip()
+    claimed = spec.get("claimed_molar_mass")
+    if not formula or claimed is None:
+        return na(name, "formula and claimed_molar_mass required")
+    if not _MOLAR_FORMULA.match(formula):
+        return na(name, f"{formula!r} is not a simple element-and-count formula (parentheses/charges unsupported)")
+    try:
+        cl = float(claimed)
+    except (TypeError, ValueError):
+        return error(name, "claimed_molar_mass must be numeric")
+    total = 0.0
+    comp: Dict[str, int] = {}
+    for sym, cnt in _MOLAR_TOKEN.findall(formula):
+        el = _BY_SYMBOL.get(sym)
+        if el is None:
+            return na(name, f"unknown element symbol {sym!r} in {formula}")
+        c = int(cnt) if cnt else 1
+        comp[sym] = comp.get(sym, 0) + c
+        total += c * el["atomic_mass"]
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    threshold = max(1e-4, rel_tol * total)
+    data = {"formula": formula, "composition": comp,
+            "actual_molar_mass_g_per_mol": round(total, 4), "claimed_molar_mass": cl,
+            "rule": "M = Σ(count × atomic_mass)"}
+    if abs(total - cl) <= threshold:
+        return confirm(name, f"{formula} molar mass = {total:.4f} g/mol (claim {cl} within {rel_tol:g})", data)
+    return mismatch(name, f"{formula} molar mass = {total:.4f} g/mol, not {cl}", data)
+
+
 def list_elements() -> List[Dict[str, Any]]:
     """Public listing — atomic_mass deliberately omitted because the
     verifier does not confirm mass claims (measured quantity)."""
@@ -331,9 +372,12 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     results: List[VerifierResult] = []
     pv = packet.get("PT_VERIFY") or {}
     if pv:
-        results.append(verify_element(pv))
+        if any(k in pv for k in ("symbol", "name", "atomic_number")):
+            results.append(verify_element(pv))
         if "isotopes" in pv and "claimed_atomic_mass" in pv:
             results.append(verify_atomic_mass_weighted_average(pv))
+        if "formula" in pv and "claimed_molar_mass" in pv:
+            results.append(verify_molar_mass(pv))
     if not results:
         results.append(na("periodic_table"))
     return results
