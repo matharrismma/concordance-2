@@ -15,7 +15,7 @@ Repo root: `concordance-2/` · Live: **narrowhighway.com** (secular / reach) · 
 
 The engine is **one body**, not a bundle of features. A request flows through it and the parts compose
 into one answer. The canonical identity, defined once in [`src/concordance/branding.py`](../src/concordance/branding.py)
-(`IDENTITY_LINE`), is: **"A deterministic verification engine."** It *finds and verifies*; it does not
+(`IDENTITY_LINE`), is: **"A deterministic model of reality."** It *finds and verifies*; it does not
 generate. It is a **conduit, not the source.**
 
 The single most authoritative, always-live source of "what this is and how much of it exists" is

@@ -43,21 +43,24 @@ def test_identity_line_is_one_source():
     _sys.path.insert(0, str(_ROOT / "src"))
     from concordance import branding
     anchor = branding.IDENTITY_LINE
-    assert anchor == "A deterministic verification engine.", anchor
+    # RECALIBRATED 2026-09-19: the identity leads with what the thing IS — a deterministic MODEL OF
+    # REALITY — not one faculty ("verification engine"). Verification is the entry, not the whole name.
+    assert anchor == "A deterministic model of reality.", anchor
     # the long-form identity is BUILT from the line — the single source is internally consistent
     assert branding.SECULAR_IDENTITY.startswith(anchor), "SECULAR_IDENTITY must open with the line"
     # every human-read SECULAR surface carries the exact line — one source, no drift. The .com face
-    # is com.html (the surface sort, 2026-09-01): the deterministic-engine identity lives on the secular
+    # is com.html (the surface sort, 2026-09-01): the model-of-reality identity lives on the secular
     # landing, not the witness desk (index.html), which names the Rock in its own language instead.
     for rel in ("site/com.html", "site/live.html", "site/llms.txt"):
         t = (_ROOT / rel).read_text(encoding="utf-8")
         assert anchor in t, f"{rel} does not surface the identity line verbatim"
-    # the agent descriptors say the same thing in machine-register: still a verification engine,
-    # still no model in the loop (these two claims are load-bearing; the exact human wording is not)
+    # the agent descriptors say the same thing in machine-register — two load-bearing claims (the exact
+    # human wording is not): it does deterministic verification, and there is NO LLM in the loop. "model"
+    # is reserved for "model of reality" now, so the anti-generation guarantee says "no LLM" to disambiguate.
     for rel in ("docs/registry/server.json", "site/.well-known/mcp.json", "site/connect.html"):
         t = (_ROOT / rel).read_text(encoding="utf-8").lower()
         assert "deterministic verification" in t, f"{rel} lost the engine framing"
-        assert "no model in the loop" in t, f"{rel} lost the 'no model in the loop' guarantee"
+        assert "no llm in the loop" in t, f"{rel} lost the 'no LLM in the loop' guarantee"
 
 
 def test_every_page_offers_a_way_home():

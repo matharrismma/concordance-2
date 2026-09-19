@@ -8,26 +8,30 @@ the witness.
 """
 from __future__ import annotations
 
-# The one line — what this IS, in six words, defined ONCE here and surfaced verbatim everywhere a
-# person reads the identity (.com landing, the .org ledger, llms.txt). Matt, 2026-08-06:
-# "Deterministic verification engine. We need to reframe and reorganize." The reframe is not a new
-# claim — it is surfacing the claim that was already true and buried, and pinning every face to this
-# single string so it cannot drift (test_site.test_identity_line_is_one_source enforces it).
-IDENTITY_LINE = "A deterministic verification engine."
+# The one line — what this IS, defined ONCE here and surfaced verbatim everywhere a person reads the
+# identity (.com landing, the .org ledger, llms.txt). Matt, 2026-08-06: "Deterministic verification
+# engine. We need to reframe and reorganize." RECALIBRATED 2026-09-19 (Matt: "recalibrate to be most
+# accurate based on task and the world we are pursuing"): the engine does not only VERIFY — it maps
+# the structure of reality (the Atlas), checks claims against it, and predicts from that structure.
+# "Verification engine" named one faculty; "a deterministic MODEL OF REALITY" names the whole. It models
+# reality, not text — the true contrast with an LLM. Verification is the ENTRY, not the whole name.
+# Pinned to this single string so it cannot drift (test_site.test_identity_line_is_one_source enforces it).
+IDENTITY_LINE = "A deterministic model of reality."
 
-# The reach (.com): the world's own language — truth, verification, a receipt.
+# The reach (.com): the world's own language — a model of reality you can check, and a receipt.
 SECULAR_IDENTITY = (
-    IDENTITY_LINE + " It checks what is true and hands you a receipt "
-    "you can re-verify — a verdict, the worked reasoning, and a permanent content-addressed "
-    "seal. It eliminates what is not the answer so that what survives stands on its own."
+    IDENTITY_LINE + " It maps the structure of reality and checks every claim against it — a "
+    "verdict, the worked reasoning, and a permanent, content-addressed receipt you can re-verify. "
+    "It models reality, not text: nothing is generated, and it eliminates what is not the answer "
+    "so that what survives stands on its own."
 )
 
-# The witness (.org): the same engine, foundation made plain.
+# The witness (.org): the same model, foundation made plain.
 WITNESS_IDENTITY = (
-    "Concordance / Narrow Highway serves Jesus Christ. The same engine, with its foundation "
-    "made plain: it verifies, keeps, and points — a conduit, not the source. It eliminates "
-    "what is not the answer so the narrow path is illuminated by what survives. Good fruit is "
-    "the measure. Christ is at the center; the foundation is the Word."
+    "Concordance / Narrow Highway serves Jesus Christ. The same model, its foundation made plain: "
+    "it maps, verifies, keeps, and points — a conduit, not the source. It eliminates what is not "
+    "the answer so the narrow path is illuminated by what survives. Good fruit is the measure. "
+    "Christ is at the center; the foundation is the Word."
 )
 
 

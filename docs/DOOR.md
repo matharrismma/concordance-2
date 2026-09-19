@@ -17,7 +17,7 @@ ready to paste.
   (math, physics, medicine, finance, law, ...) and get a verdict, the worked trail, and a
   permanent content-addressed seal anyone can re-check. 0 false positives, benchmarked.
 - **Longer description:** Language models generate; Concordance verifies. The `verify`
-  tool checks a claim deterministically (no model in the loop) and returns
+  tool checks a claim deterministically (no LLM in the loop) and returns
   HOLDS / BROKEN / INCOMPLETE with the worked reasoning and a sealed receipt
   (`content_hash` + `cite_url`) that re-fetches byte-identical or not at all. Also:
   ranked `search` over a library of over half a million records, `seal_fetch` to re-verify any
