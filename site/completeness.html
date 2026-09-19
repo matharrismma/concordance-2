@@ -1,0 +1,109 @@
+<!doctype html><html lang=en><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Completeness &mdash; the Memristor</title>
+<style>
+:root{--bg:#0f0d09;--ink:#e8dfc9;--dim:#a99c82;--faint:#7d745f;--gold:#c69a4a;--gold2:#e6c374;--line:#241f18}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,'Iowan Old Style',serif;line-height:1.6}
+.wrap{max-width:60rem;margin:0 auto;padding:1.8rem 1.1rem 4rem}
+h1{color:var(--gold);font-weight:400;font-size:2rem;margin:.2rem 0}
+.lede{color:var(--dim);max-width:48rem}
+svg{width:100%;height:auto;display:block;max-width:560px;margin:1rem auto}
+.edge{cursor:default;transition:opacity .12s}
+.edge.pred line{animation:pulse 2.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.75}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.edge.pred line{animation:none}}
+h2{color:var(--gold2);font-weight:400;font-size:1.2rem;margin:2.2rem 0 .4rem;border-bottom:1px solid var(--line);padding-bottom:.3rem}
+.rel{display:grid;grid-template-columns:3.2rem 1fr;gap:.1rem .8rem;padding:.5rem .3rem;border-bottom:1px solid #1c1710;align-items:baseline}
+.rel.predicted{background:#15120d;border-radius:7px;border:1px solid #3a3118}
+.pair{font-style:italic;font-size:1.15rem;grid-row:span 2}
+.main b{color:var(--ink)}.main code{color:var(--gold2);font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.85rem;margin:0 .3rem}
+.tag{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em}
+.note{color:var(--dim);font-size:.85rem;margin-top:.15rem}
+.prov{color:var(--faint);font-size:.8rem;grid-column:2}
+.pred{display:grid;grid-template-columns:8rem 1fr;gap:.7rem;padding:.5rem .2rem;border-bottom:1px solid #1c1710;font-size:.9rem}
+.pred .by{color:var(--gold);font-weight:600}.pred .yr{color:var(--faint);font-weight:400;font-size:.82rem}
+.pred .field{color:var(--gold2);text-transform:uppercase;font-size:.72rem;letter-spacing:.05em}
+.pred .body{color:var(--dim)}.pred .body b{color:var(--ink)}.pred .conf{color:var(--faint);font-size:.82rem}
+.foot{color:#7d745f;font-size:.82rem;margin-top:2rem}
+</style></head>
+<body><div class=wrap>
+<a href="/" target="_top" style="color:#8a8172;font:400 .8rem system-ui,sans-serif;text-decoration:none">&#8592; narrowhighway.com</a>
+<h1>Completeness &mdash; the hole in the table is the prediction</h1>
+<p class=lede>Some fields have a <b>closed structure</b>: a few fundamental quantities whose pairwise
+relations form a complete table. When one cell is empty, symmetry does not merely suggest &mdash; it
+<b>demands</b> that something fill it. This is the Atlas as a <b>predictor</b>, not only a map: the same
+move that placed every calculation, at the grade of a fundamental element.</p>
+<h2>The four circuit variables &mdash; Chua's square</h2>
+<p class=lede>Four circuit variables — voltage v, current i, charge q, and magnetic flux φ — admit six pairwise relations. Two are definitions (q is the integral of i; φ is the integral of v), three are the classic passive elements (resistor, capacitor, inductor), and the sixth — linking flux to charge — was EMPTY. Chua argued in 1971 that an element must fill it. HP built the memristor in 2008. The hole in the table was the prediction.</p>
+<svg id="fig" viewBox="0 0 620 620" xmlns="http://www.w3.org/2000/svg">
+<rect width="100%" height="100%" fill="#0f0d09"/>
+<g class="edge" data-rel="charge from current">
+<line x1="515" y1="310" x2="310" y2="515" stroke="#5a5344" stroke-width="1.4" opacity="0.8" stroke-dasharray="7 5" stroke-linecap="round"/>
+<circle cx="412" cy="412" r="11" fill="#0f0d09" stroke="#5a5344" stroke-width="1"/>
+<text x="412" y="416" fill="#5a5344" font-size="13" font-family="Georgia,serif" font-style="italic" text-anchor="middle">∫</text>
+</g>
+<g class="edge" data-rel="flux from voltage">
+<line x1="105" y1="310" x2="310" y2="105" stroke="#5a5344" stroke-width="1.4" opacity="0.8" stroke-dasharray="7 5" stroke-linecap="round"/>
+<circle cx="208" cy="208" r="11" fill="#0f0d09" stroke="#5a5344" stroke-width="1"/>
+<text x="208" y="212" fill="#5a5344" font-size="13" font-family="Georgia,serif" font-style="italic" text-anchor="middle">∫</text>
+</g>
+<g class="edge" data-rel="resistor">
+<line x1="310" y1="105" x2="310" y2="515" stroke="#c69a4a" stroke-width="2.2" opacity="0.8" stroke-linecap="round"/>
+<circle cx="310" cy="246" r="11" fill="#0f0d09" stroke="#c69a4a" stroke-width="1"/>
+<text x="310" y="250" fill="#c69a4a" font-size="13" font-family="Georgia,serif" font-style="italic" text-anchor="middle">R</text>
+</g>
+<g class="edge" data-rel="capacitor">
+<line x1="515" y1="310" x2="310" y2="105" stroke="#c69a4a" stroke-width="2.2" opacity="0.8" stroke-linecap="round"/>
+<circle cx="412" cy="208" r="11" fill="#0f0d09" stroke="#c69a4a" stroke-width="1"/>
+<text x="412" y="212" fill="#c69a4a" font-size="13" font-family="Georgia,serif" font-style="italic" text-anchor="middle">C</text>
+</g>
+<g class="edge" data-rel="inductor">
+<line x1="105" y1="310" x2="310" y2="515" stroke="#c69a4a" stroke-width="2.2" opacity="0.8" stroke-linecap="round"/>
+<circle cx="208" cy="412" r="11" fill="#0f0d09" stroke="#c69a4a" stroke-width="1"/>
+<text x="208" y="416" fill="#c69a4a" font-size="13" font-family="Georgia,serif" font-style="italic" text-anchor="middle">L</text>
+</g>
+<g class="edge pred" data-rel="memristor">
+<line x1="105" y1="310" x2="515" y2="310" stroke="#e6c374" stroke-width="10" opacity="0.20" stroke-linecap="round"/>
+<line x1="105" y1="310" x2="515" y2="310" stroke="#e6c374" stroke-width="3.4" opacity="0.95" stroke-linecap="round"/>
+<circle cx="370" cy="310" r="13" fill="#0f0d09" stroke="#e6c374" stroke-width="1.6"/>
+<text x="370" y="314" fill="#e6c374" font-size="15" font-family="Georgia,serif" font-style="italic" text-anchor="middle">M</text>
+</g>
+<circle cx="310" cy="105" r="26" fill="#161209" stroke="#c69a4a" stroke-width="1.5"/>
+<text x="310" y="112" fill="#e6c374" font-size="22" font-family="Georgia,serif" font-style="italic" text-anchor="middle">v</text>
+<text x="310" y="67" fill="#a99c82" font-size="12.5" font-family="Georgia,serif" text-anchor="middle">voltage</text>
+<circle cx="515" cy="310" r="26" fill="#161209" stroke="#c69a4a" stroke-width="1.5"/>
+<text x="515" y="317" fill="#e6c374" font-size="22" font-family="Georgia,serif" font-style="italic" text-anchor="middle">q</text>
+<text x="515" y="354" fill="#a99c82" font-size="12.5" font-family="Georgia,serif" text-anchor="middle">charge</text>
+<circle cx="310" cy="515" r="26" fill="#161209" stroke="#c69a4a" stroke-width="1.5"/>
+<text x="310" y="522" fill="#e6c374" font-size="22" font-family="Georgia,serif" font-style="italic" text-anchor="middle">i</text>
+<text x="310" y="559" fill="#a99c82" font-size="12.5" font-family="Georgia,serif" text-anchor="middle">current</text>
+<circle cx="105" cy="310" r="26" fill="#161209" stroke="#c69a4a" stroke-width="1.5"/>
+<text x="105" y="317" fill="#e6c374" font-size="22" font-family="Georgia,serif" font-style="italic" text-anchor="middle">φ</text>
+<text x="105" y="354" fill="#a99c82" font-size="12.5" font-family="Georgia,serif" text-anchor="middle">flux linkage</text>
+</svg>
+<p class=lede style="text-align:center;color:var(--faint);font-size:.85rem;max-width:38rem;margin:.2rem auto 0">
+The two <span style="color:#5a5344">definitions</span> and the three <span style="color:#c69a4a">known elements</span>
+filled five edges. The sixth &mdash; the flux&ndash;charge diagonal, <span style="color:#e6c374">M</span> &mdash;
+was empty. That emptiness was the prediction.</p>
+<h2>The complete relation table</h2>
+<div class="rel definition" data-rel="charge from current"><span class=pair style="color:#5a5344">q–i</span><span class=main><b>Charge From Current</b> <code>q = ∫ i dt</code> <span class=tag style="color:#5a5344">definition</span></span><span class=prov>charge is the time-integral of current</span></div><div class="rel definition" data-rel="flux from voltage"><span class=pair style="color:#5a5344">φ–v</span><span class=main><b>Flux From Voltage</b> <code>φ = ∫ v dt</code> <span class=tag style="color:#5a5344">definition</span></span><span class=prov>flux linkage is the time-integral of voltage</span></div><div class="rel element" data-rel="resistor"><span class=pair style="color:#c69a4a">v–i</span><span class=main><b>Resistor (R)</b> <code>dv = R·di</code> <span class=tag style="color:#c69a4a">known element</span></span><span class=prov>Ohm&#x27;s law, 1827</span></div><div class="rel element" data-rel="capacitor"><span class=pair style="color:#c69a4a">q–v</span><span class=main><b>Capacitor (C)</b> <code>dq = C·dv</code> <span class=tag style="color:#c69a4a">known element</span></span><span class=prov>the Leyden jar, 1745</span></div><div class="rel element" data-rel="inductor"><span class=pair style="color:#c69a4a">φ–i</span><span class=main><b>Inductor (L)</b> <code>dφ = L·di</code> <span class=tag style="color:#c69a4a">known element</span></span><span class=prov>Faraday&#x27;s induction, 1831</span></div><div class="rel predicted" data-rel="memristor"><span class=pair style="color:#e6c374">φ–q</span><span class=main><b>Memristor (M)</b> <code>dφ = M·dq</code> <span class=tag style="color:#e6c374">PREDICTED</span><div class=note>memristance M = dφ/dq — a resistance that REMEMBERS the charge that has flowed through it</div></span><span class=prov><b style="color:#e6c374">Predicted:</b> Chua, 1971 — from the symmetry of this very table<br><b style="color:#e6c374">Confirmed:</b> HP (Strukov, Snider, Stewart &amp; Williams), 2008</span></div>
+<h2>The class it belongs to &mdash; predictions from a complete structure</h2>
+<p class=lede>The memristor is not a curiosity; it is one of the great predictions made not from an
+experiment but from the <b>completeness of a structure</b>. Every one below: a complete table, an empty
+cell, a real thing found later.</p>
+<div class=pred><span class=by>Mendeleev <span class=yr>1869</span></span><span class=body><span class=field>chemistry</span> — in <i>the periodic table</i>, gaps between known elements in atomic weight and valence → <b>gallium, scandium &amp; germanium — each with its properties</b>. <span class=conf>Confirmed 1875–1886.</span></span></div><div class=pred><span class=by>Chua <span class=yr>1971</span></span><span class=body><span class=field>electrical</span> — in <i>the four circuit variables (this table)</i>, the flux–charge relation → <b>the memristor, the fourth fundamental element</b>. <span class=conf>Confirmed 2008 (HP).</span></span></div><div class=pred><span class=by>Gell-Mann <span class=yr>1962</span></span><span class=body><span class=field>particle physics</span> — in <i>the SU(3) &#x27;eightfold way&#x27; baryon decuplet</i>, the tenth, empty slot → <b>the Ω⁻ baryon, mass and all</b>. <span class=conf>Confirmed 1964.</span></span></div><div class=pred><span class=by>Dirac <span class=yr>1928</span></span><span class=body><span class=field>quantum physics</span> — in <i>the Dirac equation</i>, the negative-energy solutions its symmetry required → <b>the positron — antimatter</b>. <span class=conf>Confirmed 1932 (Anderson).</span></span></div><div class=pred><span class=by>Pauli <span class=yr>1930</span></span><span class=body><span class=field>nuclear physics</span> — in <i>the energy–momentum–spin ledger of beta decay</i>, energy and angular momentum that did not balance → <b>the neutrino</b>. <span class=conf>Confirmed 1956 (Cowan–Reines).</span></span></div><div class=pred><span class=by>Maxwell <span class=yr>1865</span></span><span class=body><span class=field>electromagnetism</span> — in <i>Maxwell&#x27;s equations and charge conservation</i>, an inconsistency in Ampère&#x27;s law → <b>the displacement current — and with it, electromagnetic waves</b>. <span class=conf>Confirmed 1887 (Hertz).</span></span></div>
+<p class=foot>Conduit, not source. Every entry is a <b>confirmed historical</b> prediction, cited by date
+and discoverer &mdash; grounded, never invented. Having the Atlas emit a <i>new</i> prediction &mdash; an
+unfilled cell we claim must exist &mdash; is the next step, and it must clear the same rigor bar (the
+master equations' <code>--check</code>) or it is only apophenia wearing confidence. 1 predicted-then-
+confirmed cell here; 6 in the class.</p>
+</div>
+<script>
+const edges=[...document.querySelectorAll('#fig .edge')];
+const rels=[...document.querySelectorAll('.rel')];
+function lite(name){ edges.forEach(e=>e.style.opacity=(!name||e.dataset.rel===name)?'1':'0.18');
+  rels.forEach(r=>r.style.background=(r.dataset.rel===name)?'#1c1810':''); }
+edges.forEach(e=>{ e.addEventListener('mouseenter',()=>lite(e.dataset.rel)); e.addEventListener('mouseleave',()=>lite(null)); });
+rels.forEach(r=>{ r.addEventListener('mouseenter',()=>lite(r.dataset.rel)); r.addEventListener('mouseleave',()=>lite(null)); });
+</script>
+</body></html>
