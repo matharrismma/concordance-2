@@ -433,8 +433,9 @@ def verify_set_algebra(spec: Dict[str, Any]) -> VerifierResult:
     Under the correspondence union -> |, intersection -> &, complement -> ~, an identity between
     set expressions holds for ALL sets exactly when the matching propositional formula is a
     tautology (Stone's representation theorem: every Boolean algebra embeds in a field of sets).
-    So De Morgan, distributivity and absorption for sets are decided by the SAME SAT engine the
-    formal-logic verifier runs — the third face of one Boolean algebra (logic / circuits / sets).
+    De Morgan, distributivity and absorption for sets are decided here by exact truth-table
+    enumeration over element membership (pure standard library) — the third face of one Boolean
+    algebra (logic / circuits / sets), and runnable on the sovereign stdlib-only box.
 
     Spec:
       variables: set names, e.g. ["A", "B", "C"] (membership of an arbitrary element)
@@ -448,17 +449,11 @@ def verify_set_algebra(spec: Dict[str, Any]) -> VerifierResult:
     if a is None or b is None or claimed is None:
         return na(name)
     var_names = spec.get("variables") or []
+    from ._boolean import boolean_equivalent, BooleanParseError
     try:
-        from .formal_logic import _parse as _lparse, _satisfiable, _parse_errors
-        from sympy.logic.boolalg import Equivalent, Not
-    except Exception as e:  # noqa: BLE001
-        return error(name, f"logic engine unavailable: {type(e).__name__}: {e}")
-    try:
-        ea = _lparse(a, var_names)
-        eb = _lparse(b, var_names)
         # sets equal for all elements iff no membership pattern separates them
-        equal = not _satisfiable(Not(Equivalent(ea, eb)))
-    except _parse_errors() as e:
+        equal = boolean_equivalent(a, b, var_names)
+    except BooleanParseError as e:
         return na(name, f"cannot parse set expression: {e}")
     except Exception as e:  # noqa: BLE001
         return error(name, f"computation failure: {e}")

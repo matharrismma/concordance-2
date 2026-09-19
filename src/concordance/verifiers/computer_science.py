@@ -424,10 +424,10 @@ def verify_logic_gate(spec: Dict[str, Any]) -> VerifierResult:
 
     A combinational gate network is a Boolean function of its inputs; two networks are
     interchangeable exactly when they compute the same function — the core correctness check
-    in logic synthesis and circuit optimization. It is decided by the SAME propositional-SAT
-    engine the formal-logic verifier runs: gate_a is equivalent to gate_b iff
-    ~(gate_a <-> gate_b) is unsatisfiable. This is Claude Shannon's 1937 result — the algebra
-    of switching circuits IS propositional logic — realized as a deterministic check.
+    in logic synthesis and circuit optimization. Decided here by exact truth-table enumeration
+    over the inputs (pure standard library, so it runs on the sovereign stdlib-only box, unlike
+    the sympy SAT path). This is Claude Shannon's 1937 result — the algebra of switching circuits
+    IS propositional logic — realized as a deterministic check.
 
     Spec:
       variables: input names, e.g. ["a", "b", "c"]
@@ -441,17 +441,11 @@ def verify_logic_gate(spec: Dict[str, Any]) -> VerifierResult:
     if a is None or b is None or claimed is None:
         return na(name)
     var_names = spec.get("variables") or []
+    from ._boolean import boolean_equivalent, BooleanParseError
     try:
-        from .formal_logic import _parse, _satisfiable, _parse_errors
-        from sympy.logic.boolalg import Equivalent, Not
-    except Exception as e:  # noqa: BLE001 — sympy is optional in stripped envs
-        return error(name, f"logic engine unavailable: {type(e).__name__}: {e}")
-    try:
-        ea = _parse(a, var_names)
-        eb = _parse(b, var_names)
         # two gate networks are the same circuit iff no input assignment tells them apart
-        is_equiv = not _satisfiable(Not(Equivalent(ea, eb)))
-    except _parse_errors() as e:
+        is_equiv = boolean_equivalent(a, b, var_names)
+    except BooleanParseError as e:
         return na(name, f"cannot parse gate network: {e}")
     except Exception as e:  # noqa: BLE001
         return error(name, f"computation failure: {type(e).__name__}: {e}")
