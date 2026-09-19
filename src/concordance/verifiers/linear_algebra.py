@@ -41,9 +41,24 @@ LIN_VERIFY shape (any subset; each check fires when its keys are present):
 from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple
 
-import numpy as np
-
 from .base import VerifierResult, na, confirm, mismatch, error
+
+# numpy is the optional `math` extra. Load it lazily so THIS MODULE IMPORTS on a stdlib-only box
+# (a top-level `import numpy` would crash the import and take the whole verifier registry with it).
+# run() guards on _ensure_numpy() and returns NOT_APPLICABLE when it is absent, never a crash.
+np = None
+
+
+def _ensure_numpy() -> bool:
+    global np
+    if np is not None:
+        return True
+    try:
+        import numpy as _np
+        np = _np
+        return True
+    except ModuleNotFoundError:
+        return False
 
 
 # ── helpers ─────────────────────────────────────────────────────────────
@@ -333,6 +348,8 @@ def verify_linear_system(spec: Dict[str, Any]) -> VerifierResult:
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     results: List[VerifierResult] = []
     lv = packet.get("LIN_VERIFY") or {}
+    if lv and not _ensure_numpy():
+        return [na("linear_algebra", "requires the optional math extra (numpy); not installed on this box")]
     # Vectors
     if lv.get("vec_a") is not None and lv.get("vec_b") is not None:
         if lv.get("claimed_dot_product") is not None:

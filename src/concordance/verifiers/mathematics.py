@@ -22,24 +22,33 @@ sympify = simplify = diff = integrate = limit = solve = None
 Symbol = oo = S = expand = _SympifyError = None
 _PARSE_ERRORS = (SyntaxError, TypeError, ValueError, NotImplementedError)
 _sympy_loaded = False
+_sympy_ok = None  # None = untried; True/False after first attempt
 
 
-def _ensure_sympy() -> None:
-    """Import sympy on first use. Idempotent — every entrypoint calls it."""
+def _ensure_sympy() -> bool:
+    """Import sympy on first use. Idempotent. Returns True if sympy is available, False on a
+    stdlib-only box (the optional `math` extra is not installed). Callers degrade to a clean
+    NOT_APPLICABLE — the symbolic checks genuinely need sympy — rather than crash, so the engine
+    keeps running offline. (set_algebra does not need sympy; it uses the pure-stdlib engine.)"""
     global sympify, simplify, diff, integrate, limit, solve
-    global Symbol, oo, S, expand, _SympifyError, _PARSE_ERRORS, _sympy_loaded
+    global Symbol, oo, S, expand, _SympifyError, _PARSE_ERRORS, _sympy_loaded, _sympy_ok
     if _sympy_loaded:
-        return
-    from sympy import (
-        sympify as _f, simplify as _s, diff as _d, integrate as _i,
-        limit as _l, solve as _so, Symbol as _Sy, oo as _oo, S as _S, expand as _e,
-    )
-    from sympy.core.sympify import SympifyError as _SE
-    sympify, simplify, diff, integrate = _f, _s, _d, _i
-    limit, solve, Symbol, oo, S, expand = _l, _so, _Sy, _oo, _S, _e
-    _SympifyError = _SE
-    _PARSE_ERRORS = (_SE, SyntaxError, TypeError, ValueError, NotImplementedError)
+        return _sympy_ok
+    try:
+        from sympy import (
+            sympify as _f, simplify as _s, diff as _d, integrate as _i,
+            limit as _l, solve as _so, Symbol as _Sy, oo as _oo, S as _S, expand as _e,
+        )
+        from sympy.core.sympify import SympifyError as _SE
+        sympify, simplify, diff, integrate = _f, _s, _d, _i
+        limit, solve, Symbol, oo, S, expand = _l, _so, _Sy, _oo, _S, _e
+        _SympifyError = _SE
+        _PARSE_ERRORS = (_SE, SyntaxError, TypeError, ValueError, NotImplementedError)
+        _sympy_ok = True
+    except ModuleNotFoundError:
+        _sympy_ok = False
     _sympy_loaded = True
+    return _sympy_ok
 
 
 # Characters that are NOT part of any valid math expression string. sympify treats
@@ -159,7 +168,10 @@ def _ast_compute_guard(expr: str):
 
 
 def _parse(expr: str, var_names: List[str] = None):
-    _ensure_sympy()
+    if not _ensure_sympy():
+        # stdlib-only box: the symbolic-math checks need sympy. Raise a _PARSE_ERRORS member so
+        # every verify_* wrapper degrades to NOT_APPLICABLE with this reason, never a crash.
+        raise ValueError("requires the optional math extra (sympy); not installed on this box")
     expr = _MOD_WORD_RE.sub("%", str(expr))
     if _INVALID_EXPR_RE.search(str(expr)):
         raise _SympifyError(f"invalid characters in expression: {expr!r}")

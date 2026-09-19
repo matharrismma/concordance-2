@@ -61,18 +61,36 @@ def _tree(formula: str) -> ast.Expression:
         raise BooleanParseError(f"cannot parse {formula!r}: {e}") from e
 
 
+def _assignments(variables: List[str]):
+    vars_ = list(variables or [])
+    if len(vars_) > MAX_VARS:
+        raise BooleanParseError(f"{len(vars_)} variables exceeds the {MAX_VARS}-variable enumeration cap")
+    for combo in itertools.product((False, True), repeat=len(vars_)):
+        yield dict(zip(vars_, combo))
+
+
+def truth_rows(exprs: List[str], variables: List[str]):
+    """Yield, for every assignment of `variables`, the tuple of the exprs' truth values.
+
+    One engine for every Boolean check — equivalence, satisfiability, tautology, entailment all
+    read these rows. Raises BooleanParseError on a malformed expr, an undeclared symbol, or a
+    variable count over MAX_VARS. Pure standard library.
+    """
+    trees = [_tree(e) for e in exprs]
+    for env in _assignments(variables):
+        yield tuple(_eval(t, env) for t in trees)
+
+
+def satisfiable(expr: str, variables: List[str]) -> bool:
+    """True iff some assignment of `variables` makes `expr` true (exact enumeration)."""
+    tree = _tree(expr)
+    return any(_eval(tree, env) for env in _assignments(variables))
+
+
 def boolean_equivalent(expr_a: str, expr_b: str, variables: List[str]) -> bool:
     """True iff expr_a and expr_b have identical truth tables over `variables`.
 
     Raises BooleanParseError if either string is malformed, references an undeclared symbol, or the
     variable count exceeds MAX_VARS. Exact — enumerates every assignment; pure standard library.
     """
-    vars_ = list(variables or [])
-    if len(vars_) > MAX_VARS:
-        raise BooleanParseError(f"{len(vars_)} variables exceeds the {MAX_VARS}-variable enumeration cap")
-    ta, tb = _tree(expr_a), _tree(expr_b)
-    for combo in itertools.product((False, True), repeat=len(vars_)):
-        env = dict(zip(vars_, combo))
-        if _eval(ta, env) != _eval(tb, env):
-            return False
-    return True
+    return all(a == b for a, b in truth_rows([expr_a, expr_b], variables))

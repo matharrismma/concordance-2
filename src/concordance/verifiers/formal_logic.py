@@ -1,35 +1,38 @@
 """Formal Logic verifier.
 
-Deterministic checks of propositional-logic claims against SymPy's
-satisfiability solver. The five canonical predicate-logic questions
-are decidable mechanically; this verifier wraps that decision into
-the engine's CONFIRMED / MISMATCH / NA / ERROR shape.
+Deterministic checks of propositional-logic claims by exact truth-table enumeration
+(pure standard library — no sympy), so the verifier runs on the sovereign stdlib-only
+box, not only where the optional `math` extra is installed. The five canonical
+propositional questions are decidable mechanically; this verifier wraps that decision
+into the engine's CONFIRMED / MISMATCH / NA / ERROR shape.
 
-Why SymPy and not Z3: SymPy is already a hard dependency of the
-mathematics verifier, and propositional satisfiability is well within
-its `sympy.logic.boolalg` capabilities. SMT-grade (first-order with
-theories) is a future addition; for V1 the propositional fragment
-covers the Z3/SymPy slot in the BIBLE P1 punch list.
+Why truth tables and not a SAT solver: the V1 spec is purely propositional (declared
+Boolean symbols, no quantifiers), and enumerating the 2^n assignments over the few
+variables a claim carries is exact and complete — it gives the identical answer sympy's
+SAT would, with nothing to install. (sympy would only add first-order / SMT, which the
+spec does not expose.) The shared engine lives in `_boolean.py` and also backs the
+computer_science.logic_gate and mathematics.set_algebra bridge verifiers — one Boolean
+core, three faces (logic / circuits / sets).
 
 Checks performed:
 
   * formal_logic.satisfiability
       formula has a satisfying assignment (or doesn't), matches claim.
   * formal_logic.tautology
-      formula is true under every assignment (¬formula is unsat).
+      formula is true under every assignment.
   * formal_logic.contradiction
-      formula is false under every assignment (formula itself is unsat).
+      formula is false under every assignment.
   * formal_logic.entailment
-      premises ⊨ conclusion ⟺ premises ∧ ¬conclusion is unsat.
+      premises |= conclusion  <=>  no assignment makes every premise true and the conclusion false.
   * formal_logic.equivalence
-      formula_a ≡ formula_b ⟺ ¬(formula_a ↔ formula_b) is unsat.
+      formula_a === formula_b  <=>  identical truth tables.
 
-Formula syntax (Python-flavored Boolean operators, parsed by SymPy):
-  &   = AND
-  |   = OR
-  ~   = NOT
-  >>  = implies (p >> q)
-  Equivalent(p, q) for biconditional, or use ~(p ^ q)
+Formula syntax (Python-flavored Boolean operators):
+  &   = AND        |   = OR         ~   = NOT
+  ^   = XOR        >>  = implies (p >> q)
+The `and`/`or`/`not` keywords and the constants True/False are also accepted. The parser is a
+strict AST allowlist (see _boolean.py): a call, attribute, number, or undeclared name is refused
+(-> NOT_APPLICABLE), so a formula can never carry code — structural safety, no sympify.
 
 LOGIC_VERIFY packet shape (any subset of fields):
     {
@@ -47,45 +50,10 @@ LOGIC_VERIFY packet shape (any subset of fields):
     }
 """
 from __future__ import annotations
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error
-
-
-# Lazy-import sympy at call time so the module loads even in stripped envs.
-def _parse(formula: str, var_names: List[str]):
-    """Parse a Boolean formula string into a SymPy expression."""
-    import sympy
-    from sympy.logic.boolalg import (
-        And, Or, Not, Implies, Equivalent, Xor, true as Sym_True, false as Sym_False
-    )
-    locals_ = {n: sympy.symbols(n) for n in (var_names or [])}
-    locals_.update({
-        "Implies": Implies, "Equivalent": Equivalent,
-        "And": And, "Or": Or, "Not": Not, "Xor": Xor,
-        "true": Sym_True, "false": Sym_False,
-        "True": Sym_True, "False": Sym_False,
-    })
-    # SECURITY (red team 2026-08-06, CRITICAL): sympify evaluates arbitrary Python — this call had
-    # no guard at all. Reuse the math verifier's pure-mathematics AST allowlist (attribute access,
-    # string literals, underscore/dunder names, and non-mathematical calls are refused) so a Boolean
-    # formula can never carry code. Logic constructors (And/Or/Not/Implies/Equivalent/Xor) are on it.
-    from .mathematics import _ast_compute_guard as _guard
-    _guard(formula)
-    return sympy.sympify(formula, locals=locals_)
-
-
-def _satisfiable(expr) -> bool:
-    """True iff there's a model. Wraps sympy.logic.inference.satisfiable."""
-    from sympy.logic.inference import satisfiable
-    result = satisfiable(expr)
-    return result is not False
-
-
-# Same kind of parse-error tuple as the math verifier uses.
-def _parse_errors():
-    from sympy.core.sympify import SympifyError
-    return (SympifyError, SyntaxError, TypeError, ValueError, NotImplementedError)
+from ._boolean import boolean_equivalent, satisfiable, truth_rows, BooleanParseError
 
 
 def verify_satisfiability(spec: Dict[str, Any]) -> VerifierResult:
@@ -96,11 +64,10 @@ def verify_satisfiability(spec: Dict[str, Any]) -> VerifierResult:
         return na(name)
     var_names = spec.get("variables") or []
     try:
-        expr = _parse(formula, var_names)
-        actual = _satisfiable(expr)
-    except _parse_errors() as e:
+        actual = satisfiable(formula, var_names)
+    except BooleanParseError as e:
         return na(name, f"cannot parse formula: {e}")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return error(name, f"computation failure: {type(e).__name__}: {e}")
     claimed_b = bool(claimed)
     if actual == claimed_b:
@@ -120,13 +87,11 @@ def verify_tautology(spec: Dict[str, Any]) -> VerifierResult:
         return na(name)
     var_names = spec.get("variables") or []
     try:
-        from sympy.logic.boolalg import Not
-        expr = _parse(formula, var_names)
-        # tautology iff Not(expr) is unsatisfiable.
-        is_taut = not _satisfiable(Not(expr))
-    except _parse_errors() as e:
+        # tautology iff every assignment makes the formula true
+        is_taut = all(row[0] for row in truth_rows([formula], var_names))
+    except BooleanParseError as e:
         return na(name, f"cannot parse formula: {e}")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return error(name, f"computation failure: {type(e).__name__}: {e}")
     claimed_b = bool(claimed)
     if is_taut == claimed_b:
@@ -146,11 +111,11 @@ def verify_contradiction(spec: Dict[str, Any]) -> VerifierResult:
         return na(name)
     var_names = spec.get("variables") or []
     try:
-        expr = _parse(formula, var_names)
-        is_contradiction = not _satisfiable(expr)
-    except _parse_errors() as e:
+        # contradiction iff no assignment satisfies it
+        is_contradiction = not satisfiable(formula, var_names)
+    except BooleanParseError as e:
         return na(name, f"cannot parse formula: {e}")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return error(name, f"computation failure: {type(e).__name__}: {e}")
     claimed_b = bool(claimed)
     if is_contradiction == claimed_b:
@@ -171,24 +136,21 @@ def verify_entailment(spec: Dict[str, Any]) -> VerifierResult:
         return na(name)
     var_names = spec.get("variables") or []
     try:
-        from sympy.logic.boolalg import And, Not
-        prem_exprs = [_parse(str(p), var_names) for p in premises]
-        conc_expr = _parse(str(conclusion), var_names)
-        # premises ⊨ conclusion iff (And(premises) ∧ ¬conclusion) is unsat.
-        check = And(And(*prem_exprs), Not(conc_expr))
-        entails = not _satisfiable(check)
-    except _parse_errors() as e:
+        # premises |= conclusion iff no row has every premise true but the conclusion false
+        exprs = [str(p) for p in premises] + [str(conclusion)]
+        entails = all(row[-1] or not all(row[:-1]) for row in truth_rows(exprs, var_names))
+    except BooleanParseError as e:
         return na(name, f"cannot parse formula: {e}")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return error(name, f"computation failure: {type(e).__name__}: {e}")
     claimed_b = bool(claimed)
     if entails == claimed_b:
         return confirm(name,
-                       f"premises ⊨ conclusion = {entails}, matches claim",
+                       f"premises |= conclusion = {entails}, matches claim",
                        {"premises": list(premises), "conclusion": conclusion,
                         "actual": entails, "claimed": claimed_b})
     return mismatch(name,
-                    f"premises ⊨ conclusion = {entails}, claimed {claimed_b}",
+                    f"premises |= conclusion = {entails}, claimed {claimed_b}",
                     {"premises": list(premises), "conclusion": conclusion,
                      "actual": entails, "claimed": claimed_b})
 
@@ -202,22 +164,18 @@ def verify_equivalence(spec: Dict[str, Any]) -> VerifierResult:
         return na(name)
     var_names = spec.get("variables") or []
     try:
-        from sympy.logic.boolalg import Equivalent, Not
-        ea = _parse(a, var_names)
-        eb = _parse(b, var_names)
-        # ea ≡ eb iff ¬(ea ↔ eb) is unsat.
-        is_equiv = not _satisfiable(Not(Equivalent(ea, eb)))
-    except _parse_errors() as e:
+        is_equiv = boolean_equivalent(a, b, var_names)
+    except BooleanParseError as e:
         return na(name, f"cannot parse formula: {e}")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return error(name, f"computation failure: {type(e).__name__}: {e}")
     claimed_b = bool(claimed)
     if is_equiv == claimed_b:
         return confirm(name,
-                       f"{a!r} ≡ {b!r} = {is_equiv}, matches claim",
+                       f"{a!r} === {b!r} = {is_equiv}, matches claim",
                        {"a": a, "b": b, "actual": is_equiv, "claimed": claimed_b})
     return mismatch(name,
-                    f"{a!r} ≡ {b!r} = {is_equiv}, claimed {claimed_b}",
+                    f"{a!r} === {b!r} = {is_equiv}, claimed {claimed_b}",
                     {"a": a, "b": b, "actual": is_equiv, "claimed": claimed_b})
 
 
