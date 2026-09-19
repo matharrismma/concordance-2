@@ -79,6 +79,9 @@ PLACE: list[tuple[str, str, str, str, str]] = [
     # computer_science
     ("computer_science", "verify_runtime_complexity", "power_law", "card_theory_computational_complexity__p__np__reductions", "T(n) ~ n^k (log-log fit)"),
     ("computer_science", "verify_space_complexity", "power_law", "card_theory_computational_complexity__p__np__reductions", "S(n) ~ n^k"),
+    # digital logic — Shannon 1937: a switching circuit IS a Boolean function. Same SAT engine as
+    # formal_logic, realized in circuits — the bridge that ties the reasoning domains to the map.
+    ("computer_science", "computer_science.logic_gate", "boolean_logic", "card_theory_boolean_algebra_propositional_logic", "gate_a == gate_b iff ~(a <-> b) unsat"),
     # construction (mensuration + ratios)
     ("construction", "construction.concrete_volume", "mensuration", "", "V = l * w * d"),
     ("construction", "construction.rectangular_area", "mensuration", "", "A = l * w"),
@@ -197,6 +200,9 @@ PLACE: list[tuple[str, str, str, str, str]] = [
     ("materials_science", "materials_science.stress_strain", "linear_flux", "card_theory_elasticity", "sigma = E epsilon (Hooke)"),
     ("materials_science", "materials_science.thermal_expansion", "ratio", "", "dL = alpha L0 dT"),
     ("materials_science", "materials_science.density", "ratio", "", "rho = m / V"),
+    # mathematics — the algebra of sets IS a Boolean algebra (Boole; Stone's representation theorem).
+    # Third face of the same kernel: a set identity holds iff the matching propositional formula is valid.
+    ("mathematics", "mathematics.set_algebra", "boolean_logic", "card_theory_boolean_algebra_propositional_logic", "set identity iff Boolean formula is a tautology"),
     # medicine
     ("medicine", "medicine.bmi", "ratio", "", "BMI = kg / m^2"),
     ("medicine", "medicine.drug_dosage", "ratio", "card_theory_pharmacokinetics", "dose = weight * mg_per_kg"),

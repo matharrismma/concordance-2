@@ -419,9 +419,59 @@ def verify_runtime_complexity(spec: Dict[str, Any]) -> VerifierResult:
     )
 
 
+def verify_logic_gate(spec: Dict[str, Any]) -> VerifierResult:
+    """Digital logic gate-network equivalence — Shannon's bridge (circuits ARE Boolean algebra).
+
+    A combinational gate network is a Boolean function of its inputs; two networks are
+    interchangeable exactly when they compute the same function — the core correctness check
+    in logic synthesis and circuit optimization. It is decided by the SAME propositional-SAT
+    engine the formal-logic verifier runs: gate_a is equivalent to gate_b iff
+    ~(gate_a <-> gate_b) is unsatisfiable. This is Claude Shannon's 1937 result — the algebra
+    of switching circuits IS propositional logic — realized as a deterministic check.
+
+    Spec:
+      variables: input names, e.g. ["a", "b", "c"]
+      gate_a, gate_b: Boolean expressions over the inputs (& AND, | OR, ~ NOT, ^ XOR, >> IMPLIES)
+      claimed_equivalent: bool — do the two gate networks realize the same circuit?
+    """
+    name = "computer_science.logic_gate"
+    a = spec.get("gate_a")
+    b = spec.get("gate_b")
+    claimed = spec.get("claimed_equivalent")
+    if a is None or b is None or claimed is None:
+        return na(name)
+    var_names = spec.get("variables") or []
+    try:
+        from .formal_logic import _parse, _satisfiable, _parse_errors
+        from sympy.logic.boolalg import Equivalent, Not
+    except Exception as e:  # noqa: BLE001 — sympy is optional in stripped envs
+        return error(name, f"logic engine unavailable: {type(e).__name__}: {e}")
+    try:
+        ea = _parse(a, var_names)
+        eb = _parse(b, var_names)
+        # two gate networks are the same circuit iff no input assignment tells them apart
+        is_equiv = not _satisfiable(Not(Equivalent(ea, eb)))
+    except _parse_errors() as e:
+        return na(name, f"cannot parse gate network: {e}")
+    except Exception as e:  # noqa: BLE001
+        return error(name, f"computation failure: {type(e).__name__}: {e}")
+    claimed_b = bool(claimed)
+    if is_equiv == claimed_b:
+        return confirm(name,
+                       f"gate networks {a!r} and {b!r} equivalent={is_equiv}, matches claim",
+                       {"gate_a": a, "gate_b": b, "actual": is_equiv, "claimed": claimed_b})
+    return mismatch(name,
+                    f"gate networks {a!r} and {b!r} equivalent={is_equiv}, claimed {claimed_b}",
+                    {"gate_a": a, "gate_b": b, "actual": is_equiv, "claimed": claimed_b})
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     results: List[VerifierResult] = []
     cv = packet.get("CS_VERIFY") or {}
+
+    # digital logic (Boolean gate networks) — independent of the code-execution checks below
+    if cv.get("gate_a") is not None and cv.get("gate_b") is not None:
+        results.append(verify_logic_gate(cv))
 
     if cv.get("code"):
         results.append(verify_static_termination(cv["code"]))
