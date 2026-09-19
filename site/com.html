@@ -230,6 +230,23 @@
     background:#0f0d09; box-shadow:var(--shadow); height:min(80vh,880px)}
   .atlas-frame iframe{width:100%; height:100%; border:0; display:block}
   @media (max-width:640px){ .atlas-frame{height:78vh; border-radius:10px} }
+
+  /* THE MECHANISM: immutable core -> validation boundary -> configurable surface */
+  .mech{display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:1rem; align-items:stretch; margin:2rem 0 0}
+  .mech .step{border:1px solid var(--line); border-radius:13px; padding:1.3rem 1.35rem; background:var(--surface);
+    display:flex; flex-direction:column}
+  .mech .step.mid{border-color:var(--seal); box-shadow:inset 0 0 0 1px var(--seal-wash);
+    background:linear-gradient(180deg,var(--seal-wash),transparent 70%)}
+  .mech .k{font-family:"IBM Plex Mono",ui-monospace,"Cascadia Code",Menlo,monospace; font-size:.66rem;
+    letter-spacing:.18em; text-transform:uppercase; color:var(--seal); margin-bottom:.55rem}
+  .mech .step b{font-family:"Spectral",Georgia,serif; font-weight:500; font-size:1.12rem; color:var(--ink);
+    line-height:1.25; margin-bottom:.5rem; letter-spacing:-.01em}
+  .mech .step p{margin:0; font-size:.9rem; color:var(--ink-soft); line-height:1.55}
+  .mech .arrow{align-self:center; color:var(--seal); font-size:1.4rem; line-height:1}
+  .mech-thesis{max-width:66ch; margin:1.5rem 0 0; padding:1.15rem 1.35rem; border-left:2px solid var(--seal);
+    background:var(--seal-wash); border-radius:0 10px 10px 0; font-size:.98rem; color:var(--ink-soft); line-height:1.6}
+  .mech-thesis b{color:var(--ink)}
+  @media (max-width:760px){ .mech{grid-template-columns:1fr} .mech .arrow{transform:rotate(90deg); justify-self:center; margin:.15rem 0} }
 </style>
 </head>
 <body>
@@ -238,6 +255,7 @@
     <span class="brand"><span class="mk"></span>Narrow Highway</span>
     <nav>
       <a href="#verify" class="hidesm">Verify</a>
+      <a href="#mechanism" class="hidesm">Mechanism</a>
       <a href="#domains" class="hidesm">Domains</a>
       <a href="#api">API</a>
       <a href="/map.html">Map</a>
@@ -302,6 +320,47 @@
     <div class="stat"><div class="n tnum" data-stat="tools">94</div><div class="k">callable tools</div></div>
     <div class="stat"><div class="n tnum" data-stat="sources">673,243</div><div class="k">public-domain sources</div></div>
   </div></div>
+
+  <!-- THE MECHANISM: what it actually is, and why it doesn't drift -->
+  <section class="blk" id="mechanism"><div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">The mechanism</span>
+      <h2>It anchors, then checks &mdash; so it cannot drift.</h2>
+      <p>One pattern runs under everything here: a fixed reference that does not bend to the question, a
+        boundary that checks every claim before it crosses, and a surface that speaks in your words but
+        hands you only what passed. Old as the escapement of a watch and the assay of a mint &mdash; here
+        it is made explicit, and every crossing leaves a receipt.</p>
+    </div>
+    <div class="mech">
+      <div class="step">
+        <div class="k">Immutable core</div>
+        <b>The model of reality, and the keeping.</b>
+        <p>What is true, and what is kept, do not change to please you &mdash; the floor of theories, the
+          master equations, the public-domain record. It is the reference a claim is measured against, not
+          a target the engine is trained to satisfy.</p>
+      </div>
+      <div class="arrow" aria-hidden="true">&rarr;</div>
+      <div class="step mid">
+        <div class="k">Validation boundary</div>
+        <b>Deterministic verification.</b>
+        <p>Every claim is checked at the boundary before it reaches you: a verdict, the worked reasoning,
+          and a permanent receipt you can re-verify. Nothing crosses unchecked. This is the escapement
+          &mdash; the one place work is measured.</p>
+      </div>
+      <div class="arrow" aria-hidden="true">&rarr;</div>
+      <div class="step">
+        <div class="k">Configurable surface</div>
+        <b>The answer, in your words.</b>
+        <p>The reply meets you where you are &mdash; your framing, your need, your device. Everything on the
+          surface can change to serve you; only what passed the boundary is ever here.</p>
+      </div>
+    </div>
+    <p class="mech-thesis">A language model is trained to satisfy the rater, so it drifts as the ratings
+      drift &mdash; and it cannot show you why. This is <b>anchored to a reference that does not change</b>
+      and <b>checks at the boundary</b>, so it cannot be slowly captured, and it cannot hand you what it
+      could not verify. That is why it does not hallucinate, and why it needs <i>less</i>, not more: it
+      taps the structure of reality instead of fighting it with data.</p>
+  </div></section>
 
   <!-- ATLAS: the concordance the engine reasons over -->
   <section class="blk" id="atlas" style="background:var(--surface-2); border-block:1px solid var(--line-soft)"><div class="wrap">
