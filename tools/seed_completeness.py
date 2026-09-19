@@ -40,6 +40,9 @@ SETS: list[dict] = [
         "id": "circuit_variables",
         "title": "The four fundamental circuit elements",
         "domain": "electrical",
+        "kind": "gap",
+        "finding": ("Two definitions and three known elements filled five edges; the sixth — the "
+                    "flux–charge diagonal — was empty. That emptiness was the prediction."),
         "gist": ("Four circuit variables — voltage v, current i, charge q, and magnetic flux φ — "
                  "admit six pairwise relations. Two are definitions (q is the integral of i; φ is the "
                  "integral of v), three are the classic passive elements (resistor, capacitor, inductor), "
@@ -71,6 +74,66 @@ SETS: list[dict] = [
              "note": "memristance M = dφ/dq — a resistance that REMEMBERS the charge that has flowed through it"},
         ],
     },
+    {
+        "id": "thermodynamic_square",
+        "title": "The thermodynamic square — the four potentials",
+        "domain": "thermodynamics",
+        "kind": "generative",
+        "finding": ("The four potentials are the COMPLETE Legendre family of two conjugate pairs — there "
+                    "is no fifth. The square's symmetry then FORCES the four Maxwell relations: predicted "
+                    "from the structure, confirmed by every measurement ever made."),
+        "gist": ("Four state variables in two conjugate pairs — temperature T with entropy S, pressure P "
+                 "with volume V — and the four thermodynamic potentials (internal energy U, enthalpy H, "
+                 "Helmholtz F, Gibbs G), each a Legendre transform that trades one variable of a pair for its "
+                 "partner. Arrange them on a square (Born, 1929): the variables at the corners, the potentials "
+                 "on the sides, the conjugate pairs on the diagonals. The equality of each potential's mixed "
+                 "second derivatives then yields a Maxwell relation — four in all, and no more."),
+        "quantities": [
+            {"sym": "S", "name": "entropy", "pos": "top"},
+            {"sym": "V", "name": "volume", "pos": "right"},
+            {"sym": "T", "name": "temperature", "pos": "bottom"},
+            {"sym": "P", "name": "pressure", "pos": "left"},
+        ],
+        "relations": [
+            {"pair": ["S", "V"], "name": "internal energy", "formula": "dU = T dS − P dV",
+             "status": "potential", "label": "U", "of": "U(S,V)",
+             "maxwell": "(∂T/∂V)ₛ = −(∂P/∂S)ᵥ"},
+            {"pair": ["V", "T"], "name": "Helmholtz free energy", "formula": "dF = −S dT − P dV",
+             "status": "potential", "label": "F", "of": "F(T,V)",
+             "maxwell": "(∂S/∂V)ₜ = (∂P/∂T)ᵥ"},
+            {"pair": ["T", "P"], "name": "Gibbs free energy", "formula": "dG = −S dT + V dP",
+             "status": "potential", "label": "G", "of": "G(T,P)",
+             "maxwell": "(∂S/∂P)ₜ = −(∂V/∂T)ₚ"},
+            {"pair": ["P", "S"], "name": "enthalpy", "formula": "dH = T dS + V dP",
+             "status": "potential", "label": "H", "of": "H(S,P)",
+             "maxwell": "(∂T/∂P)ₛ = (∂V/∂S)ₚ"},
+            {"pair": ["S", "T"], "name": "thermal conjugates", "formula": "T·S → heat",
+             "status": "conjugate", "label": "◇",
+             "note": "temperature and entropy are conjugate — their product carries energy as heat"},
+            {"pair": ["V", "P"], "name": "mechanical conjugates", "formula": "P·V → work",
+             "status": "conjugate", "label": "◇",
+             "note": "pressure and volume are conjugate — their product carries energy as work"},
+        ],
+    },
+]
+
+# THE WATCH: complete subsystems are whole on their own, but the PERFORMANCE is in how they mesh.
+# A connection is given the same weight as a set, and the same rigor: it carries its EVIDENCE (the
+# shared form or method), or it is a forced analogy, which is a broken gear. Between = the two set ids.
+CONNECTIONS: list[dict] = [
+    {"between": ["circuit_variables", "thermodynamic_square"], "kind": "same method",
+     "shared": "prediction from structural completeness — read two ways",
+     "evidence": ("Both close a table by symmetry. The circuit square shows the GAP face: an empty cell "
+                  "(flux–charge) that demanded the memristor. The thermodynamic square shows the "
+                  "GENERATIVE face: a full table whose symmetry FORCES the four Maxwell relations. One "
+                  "method, two faces — a hole predicts a thing; a full structure predicts a law.")},
+    {"between": ["circuit_variables", "thermodynamic_square"], "kind": "same form",
+     "shared": "a complete K₄ on four quantities, drawn as a square with two distinguished diagonals",
+     "evidence": ("They are the SAME graph: four fundamental quantities, all six pairwise relations, on a "
+                  "square whose two diagonals are the special ones — resistor and memristor for circuits, "
+                  "the two conjugate pairs (T–S, P–V) for thermodynamics. The completeness FORM is "
+                  "identical though the fields are not; the semantics of the diagonals differ, and that "
+                  "difference is itself the finding.")},
 ]
 
 # The class the memristor belongs to: great predictions made from the completeness of a structure.
@@ -102,7 +165,7 @@ PREDICTIONS: list[dict] = [
      "by": "Maxwell", "year": 1865, "confirmed": "1887 (Hertz)"},
 ]
 
-_VALID_STATUS = {"definition", "element", "predicted"}
+_VALID_STATUS = {"definition", "element", "predicted", "potential", "conjugate"}
 
 
 def _pairs_of(quantities: list[dict]) -> set:
@@ -135,14 +198,26 @@ def check() -> int:
         for k in ("field", "structure", "hole", "predicted", "by", "year", "confirmed"):
             if not p.get(k):
                 errs.append(f"prediction by {p.get('by','?')} missing {k!r}")
+    # the watch: a connection is held to the same bar as a set — real endpoints and its own evidence,
+    # or it is a forced analogy, which is a broken gear.
+    ids = {s["id"] for s in SETS}
+    for c in CONNECTIONS:
+        for sid in c.get("between", []):
+            if sid not in ids:
+                errs.append(f"connection references unknown set {sid!r}")
+        if len(c.get("between", [])) != 2:
+            errs.append(f"connection {c.get('between')} must join exactly two sets")
+        if not (c.get("shared") and c.get("evidence")):
+            errs.append(f"connection {c.get('between')} lacks a shared form AND evidence (a forced analogy is a broken gear)")
     if errs:
         print("FAIL:")
         for e in errs:
             print("   ", e)
         return 1
     npred = sum(1 for s in SETS for r in s["relations"] if r["status"] == "predicted")
-    print(f"OK: {len(SETS)} completeness set(s), every relation table complete; "
-          f"{npred} predicted-then-confirmed cell(s); {len(PREDICTIONS)} historical predictions, all confirmed.")
+    print(f"OK: {len(SETS)} completeness set(s), every relation table complete; {npred} predicted-then-"
+          f"confirmed cell(s); {len(CONNECTIONS)} evidenced connection(s); {len(PREDICTIONS)} historical "
+          f"predictions, all confirmed.")
     return 0
 
 
