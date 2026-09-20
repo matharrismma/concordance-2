@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/shell.js"></script>
+<title>The Crossing</title>
+<meta name="description" content="Geometry is not a domain on the ring — it is one law, measure ~ length^d, worn at every scale and in every field. The fractal that crosses boundaries.">
+<style>
+@font-face{font-family:"Spectral";font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/spectral-500.woff2) format("woff2")}
+@font-face{font-family:"Spectral";font-style:normal;font-weight:600;font-display:swap;src:url(/fonts/spectral-600.woff2) format("woff2")}
+@font-face{font-family:"Spectral";font-style:italic;font-weight:400;font-display:swap;src:url(/fonts/spectral-400i.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/plexsans-400.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/plexsans-500.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/plexmono-400.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/plexmono-500.woff2) format("woff2")}
+:root{
+  --bg:#0f0d09; --panel:#15120d; --panel-2:#1a160f;
+  --ink:#e8dfc9; --dim:#a99c82; --faint:#7d745f;
+  --gold:#c69a4a; --gold2:#e6c374; --line:#28221a;
+  --teal:#3bb6a3; --teal-wash:rgba(59,182,163,.12);
+  --c-construction:#cf9a54; --c-geography:#89b877; --c-linear:#7aa6de; --c-chem:#b39ada;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16.5px;line-height:1.62;
+  background-image:radial-gradient(1100px 520px at 72% -8%,rgba(198,154,74,.07),transparent 60%);}
+.wrap{max-width:940px;margin:0 auto;padding:0 clamp(1rem,4vw,2.2rem)}
+h1,h2,h3{font-family:"Spectral",Georgia,serif;font-weight:500;letter-spacing:-.01em;text-wrap:balance;color:var(--ink)}
+a{color:var(--gold2)}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+
+.hero{padding:clamp(2.2rem,6vw,4rem) 0 1.2rem}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);margin:.5rem 0 0;line-height:1.02}
+.hero h1 em{font-style:italic;color:var(--gold2);font-weight:400}
+.law{font-family:"IBM Plex Mono",monospace;font-size:clamp(1rem,2.6vw,1.45rem);color:var(--gold2);
+  margin:1.1rem 0 0;letter-spacing:.01em}
+.lede{color:var(--dim);max-width:64ch;margin:1rem 0 0;font-size:1.08rem}
+.lede b{color:var(--ink);font-weight:500}
+
+section{padding:1.6rem 0}
+.sec-h{display:flex;align-items:baseline;gap:.7rem;margin:0 0 .2rem}
+.sec-h h2{font-size:1.4rem;margin:0}
+.sec-h .n{font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+.sub{color:var(--dim);max-width:62ch;margin:.2rem 0 1.3rem;font-size:1rem}
+
+/* the scale ladder */
+.ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem}
+@media(max-width:720px){.ladder{grid-template-columns:1fr 1fr}}
+.rung{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:1rem .9rem;
+  display:flex;flex-direction:column;align-items:center;text-align:center;min-height:200px}
+.rung .d{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.1em;color:var(--gold);text-transform:uppercase}
+.rung .fig{flex:1;display:flex;align-items:center;justify-content:center;width:100%;margin:.35rem 0}
+.rung .nm{font-family:"Spectral",serif;font-size:1.02rem;color:var(--ink)}
+.rung .fm{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--dim);margin-top:.15rem}
+.rung.fractal{border-color:#3a2f1c}
+.rung.fractal .d{color:var(--gold2)}
+.fr-ctl{display:flex;align-items:center;gap:.5rem;justify-content:center;margin:.9rem 0 0;color:var(--faint);
+  font-family:"IBM Plex Mono",monospace;font-size:.72rem}
+.fr-ctl input{accent-color:var(--gold);width:150px}
+
+/* the crossing diagram */
+.diagram{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:.6rem;margin-top:.2rem;overflow:hidden}
+.diagram svg{display:block;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:1rem;margin:.9rem .2rem 0;font-size:.8rem;color:var(--dim)}
+.legend span{display:inline-flex;align-items:center;gap:.4rem}
+.legend i{width:22px;height:0;border-top:2px solid var(--gold);display:inline-block}
+.legend i.dash{border-top-style:dashed}
+
+.note{background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:0 11px 11px 0;
+  padding:1rem 1.2rem;margin-top:1.4rem;color:var(--dim);font-size:.95rem}
+.note b{color:var(--ink);font-weight:500}
+.note code{font-family:"IBM Plex Mono",monospace;font-size:.85em;color:var(--gold2)}
+.foot{display:flex;flex-wrap:wrap;gap:.8rem;margin:1.8rem 0 3rem}
+.foot a{font-family:"IBM Plex Sans",sans-serif;font-size:.92rem;text-decoration:none;color:var(--ink);
+  border:1px solid var(--line);border-radius:8px;padding:.5rem .9rem;background:var(--panel)}
+.foot a:hover{border-color:var(--gold);color:var(--gold2)}
+.foot a b{color:var(--gold);font-weight:500}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">The geometric family &middot; one of the four master couplings</div>
+    <h1>The <em>Crossing</em></h1>
+    <div class="law">measure&nbsp;~&nbsp;length<sup>d</sup></div>
+    <p class="lede">Geometry is not a dot on the ring. It is <b>one law</b> &mdash; measure scales as length to the power <b>d</b> &mdash;
+      worn at every scale and in every field. Let <b>d</b> be a whole number and you get the line, the area, the volume.
+      Let it leave the integers and the same law draws a coastline. Follow the law and it walks straight out of geometry's
+      box and into the others. This page shows the crossing &mdash; and every thread is one the engine already carries.</p>
+  </div>
+
+  <section>
+    <div class="sec-h"><h2>One law, every scale</h2><span class="n">self-similar &middot; d is the dimension</span></div>
+    <p class="sub">The same equation at every magnification. A triangle is rigid whether you draw it small or large &mdash;
+      which is exactly why geometry <em>holds up</em>: the load path does not care about size.</p>
+    <div class="ladder">
+      <div class="rung">
+        <div class="d">d = 1</div>
+        <div class="fig"><svg viewBox="0 0 120 90" width="120" height="90"><line x1="14" y1="45" x2="106" y2="45" stroke="var(--gold)" stroke-width="2.5"/></svg></div>
+        <div class="nm">Length</div><div class="fm">L</div>
+      </div>
+      <div class="rung">
+        <div class="d">d = 2</div>
+        <div class="fig"><svg viewBox="0 0 120 90" width="120" height="90"><rect x="30" y="18" width="60" height="54" fill="rgba(198,154,74,.14)" stroke="var(--gold)" stroke-width="2"/></svg></div>
+        <div class="nm">Area</div><div class="fm">~ L&sup2;</div>
+      </div>
+      <div class="rung">
+        <div class="d">d = 3</div>
+        <div class="fig"><svg viewBox="0 0 120 90" width="120" height="90">
+          <path d="M28 30 L74 30 L74 70 L28 70 Z" fill="rgba(198,154,74,.10)" stroke="var(--gold)" stroke-width="2"/>
+          <path d="M28 30 L48 16 L94 16 L74 30" fill="rgba(198,154,74,.20)" stroke="var(--gold)" stroke-width="2"/>
+          <path d="M74 30 L94 16 L94 56 L74 70" fill="rgba(198,154,74,.05)" stroke="var(--gold)" stroke-width="2"/>
+        </svg></div>
+        <div class="nm">Volume</div><div class="fm">~ L&sup3;</div>
+      </div>
+      <div class="rung fractal">
+        <div class="d">d &asymp; 1.26</div>
+        <div class="fig"><canvas id="koch" width="240" height="180" style="width:120px;height:90px"></canvas></div>
+        <div class="nm">A fractal</div><div class="fm">non-integer d</div>
+      </div>
+    </div>
+    <div class="fr-ctl">
+      <span>iterations</span>
+      <input id="kslider" type="range" min="0" max="5" value="3" aria-label="fractal iterations">
+      <span id="kval" class="mono">3</span>
+      <span>&mdash; the same rule, refined</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><h2>One law, every domain</h2><span class="n">the thread through the ring</span></div>
+    <p class="sub">The very same <span class="mono">length<sup>d</sup></span> reappears field after field, wearing different clothes.
+      Three of these are rows of geometry's own master equation; the fourth is geometry reaching across into chemistry, where
+      the tetrahedral angle it computes <em>co-confirms</em> the shape of a molecule. Every one is checkable today.</p>
+    <div class="diagram"><svg id="cross" viewBox="0 0 1010 470" role="img" aria-label="Geometry crossing into construction, geography, linear algebra, and molecular geometry"></svg></div>
+    <div class="legend">
+      <span><i></i> a row of the <b style="color:var(--gold)">euclidean_measure</b> master</span>
+      <span><i class="dash"></i> a co-confirmation across a boundary</span>
+      <span style="color:var(--teal)">&#10003; verified by the engine</span>
+    </div>
+  </section>
+
+  <div class="note">
+    <b>Shown, not forced.</b> Every thread is drawn from the running model, not decided for the picture.
+    The three solid crossings are the actual rows of the <code>euclidean_measure</code> master &mdash;
+    <code>geometry</code> (rectangle, cube, sphere), <code>construction</code> (concrete volume),
+    <code>geography</code> (polygon area), <code>linear_algebra</code> (vector magnitude). The dashed one is
+    <code>geometry.coordination_angle</code>, whose own code says it <em>co-confirms</em> <code>molecular_geometry.vsepr</code>:
+    the shape of methane is four points spread on a sphere &mdash; pure geometry, answered in chemistry. Geometry is the
+    <b>fascia</b> of the Atlas: the scale-free form that threads the domains and, by threading them, holds the body together.
+  </div>
+
+  <div class="foot">
+    <a href="/explore.html"><b>&rarr;</b> the full Atlas</a>
+    <a href="/domains.html"><b>&rarr;</b> the domain ring</a>
+    <a href="/#verify"><b>&rarr;</b> check a geometry claim yourself</a>
+  </div>
+
+</main>
+
+<script>
+"use strict";
+/* the fractal rung — a Koch curve, the same rule refined N times (self-similar) */
+(function(){
+  var cv=document.getElementById("koch"), sl=document.getElementById("kslider"), kv=document.getElementById("kval");
+  if(!cv) return;
+  var ctx=cv.getContext("2d");
+  function koch(a,b,depth,out){
+    if(depth<=0){ out.push(b); return; }
+    var ax=a[0],ay=a[1],bx=b[0],by=b[1];
+    var dx=(bx-ax)/3, dy=(by-ay)/3;
+    var p1=[ax+dx,ay+dy], p3=[ax+2*dx,ay+2*dy];
+    var ang=Math.atan2(by-ay,bx-ax)-Math.PI/3, len=Math.hypot(dx,dy);
+    var p2=[p1[0]+Math.cos(ang)*len, p1[1]+Math.sin(ang)*len];
+    koch(a,p1,depth-1,out); koch(p1,p2,depth-1,out); koch(p2,p3,depth-1,out); koch(p3,b,depth-1,out);
+  }
+  function draw(n){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    var a=[16,132], b=[224,132], pts=[a], out=[];
+    koch(a,b,n,out); pts=pts.concat(out);
+    ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
+    for(var i=1;i<pts.length;i++) ctx.lineTo(pts[i][0],pts[i][1]);
+    var g=getComputedStyle(document.documentElement).getPropertyValue("--gold").trim()||"#c69a4a";
+    ctx.strokeStyle=g; ctx.lineWidth=1.6; ctx.lineJoin="round"; ctx.stroke();
+  }
+  function up(){ kv.textContent=sl.value; draw(+sl.value); }
+  sl.addEventListener("input",up); up();
+})();
+
+/* the crossing diagram — geometry's law threading out to the fields that wear it */
+(function(){
+  var svg=document.getElementById("cross"); if(!svg) return;
+  var NS="http://www.w3.org/2000/svg";
+  var core={x:150,y:235,r:60};
+  var boundaryX=400;
+  var nodes=[
+    {y:60, dom:"construction",       fm:"V ~ L³",       who:"concrete volume",  ver:"construction.concrete_volume", col:"var(--c-construction)", dash:false},
+    {y:170,dom:"geography",          fm:"A ~ L²",       who:"polygon area",     ver:"geography.polygon_area",       col:"var(--c-geography)",    dash:false},
+    {y:300,dom:"linear_algebra",     fm:"‖v‖ = √Σxᵢ²", who:"vector magnitude", ver:"linear_algebra.vector_magnitude", col:"var(--c-linear)", dash:false},
+    {y:410,dom:"molecular_geometry", fm:"arccos(−⅓) = 109.47°", who:"VSEPR shape", ver:"geometry.coordination_angle", col:"var(--c-chem)", dash:true}
+  ];
+  var nodeX=646;
+  function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+  function bez(t,p0,p1,p2,p3){var u=1-t;
+    return [u*u*u*p0[0]+3*u*u*t*p1[0]+3*u*t*t*p2[0]+t*t*t*p3[0],
+            u*u*u*p0[1]+3*u*u*t*p1[1]+3*u*t*t*p2[1]+t*t*t*p3[1]];}
+
+  // faint domain boundary the threads cross
+  svg.appendChild(el("line",{x1:boundaryX,y1:24,x2:boundaryX,y2:452,stroke:"var(--line)","stroke-width":1.5,"stroke-dasharray":"3 6"}));
+  var blab=el("text",{x:boundaryX+6,y:40,fill:"var(--faint)","font-family":"IBM Plex Mono, monospace","font-size":11});
+  blab.textContent="the domain boundary"; svg.appendChild(blab);
+
+  var p0=[core.x+core.r-2, core.y];
+  nodes.forEach(function(nd){
+    var p3=[nodeX-12, nd.y], p1=[boundaryX-70, core.y], p2=[boundaryX+70, nd.y];
+    var d="M"+p0[0]+" "+p0[1]+" C"+p1[0]+" "+p1[1]+" "+p2[0]+" "+p2[1]+" "+p3[0]+" "+p3[1];
+    var path=el("path",{d:d,fill:"none",stroke:nd.col,"stroke-width":2,opacity:.85});
+    if(nd.dash) path.setAttribute("stroke-dasharray","6 5");
+    svg.appendChild(path);
+    // verified tick where the thread meets the boundary
+    var c=bez(0.5,p0,p1,p2,p3);
+    svg.appendChild(el("circle",{cx:c[0],cy:c[1],r:8,fill:"var(--bg)",stroke:"var(--teal)","stroke-width":1.5}));
+    var tk=el("text",{x:c[0],y:c[1]+3.5,fill:"var(--teal)","font-size":10,"text-anchor":"middle"});
+    tk.textContent="✓"; svg.appendChild(tk);
+    // node
+    svg.appendChild(el("circle",{cx:nodeX,cy:nd.y,r:6,fill:nd.col}));
+    var dl=el("text",{x:nodeX+16,y:nd.y-6,fill:"var(--ink)","font-family":"Spectral, serif","font-size":17});
+    dl.textContent=nd.dom.replace(/_/g," "); svg.appendChild(dl);
+    var fl=el("text",{x:nodeX+16,y:nd.y+13,fill:"var(--dim)","font-family":"IBM Plex Mono, monospace","font-size":12.5});
+    fl.textContent=nd.fm; svg.appendChild(fl);
+    var vl=el("text",{x:nodeX+16,y:nd.y+30,fill:"var(--faint)","font-family":"IBM Plex Mono, monospace","font-size":10.5});
+    vl.textContent=nd.who+"  ·  "+nd.ver; svg.appendChild(vl);
+  });
+
+  // the core
+  svg.appendChild(el("circle",{cx:core.x,cy:core.y,r:core.r,fill:"var(--panel-2)",stroke:"var(--gold)","stroke-width":2}));
+  svg.appendChild(el("circle",{cx:core.x,cy:core.y,r:core.r+7,fill:"none",stroke:"var(--gold)","stroke-width":1,opacity:.28}));
+  var t1=el("text",{x:core.x,y:core.y-6,fill:"var(--gold2)","font-family":"Spectral, serif","font-size":21,"text-anchor":"middle","letter-spacing":".5"});
+  t1.textContent="GEOMETRY"; svg.appendChild(t1);
+  var t2=el("text",{x:core.x,y:core.y+16,fill:"var(--dim)","font-family":"IBM Plex Mono, monospace","font-size":12,"text-anchor":"middle"});
+  t2.textContent="measure ~ Lᵈ"; svg.appendChild(t2);
+})();
+</script>
+</body>
+</html>

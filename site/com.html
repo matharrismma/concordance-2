@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/shell.js"></script>
 <title>Narrow Highway</title>
-<meta name="description" content="A deterministic model of reality. Bring a claim, get a verdict, the worked reasoning, and a permanent receipt you can re-verify &mdash; across 65 domains, no LLM in the loop.">
+<meta name="description" content="A deterministic model of reality. Bring a claim, get a verdict, the worked reasoning, and a permanent receipt you can re-verify &mdash; across 70+ domains, no LLM in the loop.">
 <style>
 /* Self-hosted Spectral + IBM Plex (latin subset) - sovereign, no external font call */
 @font-face{font-family:"Spectral";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/spectral-400.woff2) format("woff2")}
@@ -250,20 +251,7 @@
 </style>
 </head>
 <body>
-<header class="bar">
-  <div class="wrap">
-    <span class="brand"><span class="mk"></span>Narrow Highway</span>
-    <nav>
-      <a href="#verify" class="hidesm">Verify</a>
-      <a href="#mechanism" class="hidesm">Mechanism</a>
-      <a href="#domains" class="hidesm">Domains</a>
-      <a href="#api">API</a>
-      <a href="/map.html">Map</a>
-      <a href="https://narrowhighway.org" class="witness">the witness &rsaquo;</a>
-      <button class="toggle" id="theme" type="button" aria-label="Toggle light or dark">&#9680;</button>
-    </nav>
-  </div>
-</header>
+<!-- header is injected by /shell.js (the one spine, shared across all surfaces) -->
 
 <main>
   <!-- HERO: the thesis is the receipt -->
@@ -369,7 +357,7 @@
       <h2>One kernel. Every calculation, joined.</h2>
       <p>The engine does not guess &mdash; it verifies against a map. Every calculation the sciences run,
         placed by its <b>form</b>, joined to the <b>theory</b> it rests on, and bridged to the same computation
-        in other fields. At the centre are the <b>23 master equations</b> &mdash; the finite set of formulas
+        in other fields. At the centre are the <b>30 master equations</b> &mdash; the finite set of formulas
         that genuinely connect across domains, down to the <b>Bellman equation</b>, the recursive form of acting
         well across time that is also the floor under the strategy patterns. This is the body the verifier
         walks; the box above draws on it.</p>
@@ -381,7 +369,7 @@
       domains, bridges, and <b>strategy</b>: the same method turned on history &mdash; the recurring patterns of
       what endures, across war, politics, business and ministry. Select any master equation, field, form,
       theory, calculation, or historical pattern; the selection is kept as you move between views.
-      <a href="/explore.html">Open the full Atlas &rsaquo;</a> &middot; <a href="/torus.html">its true shape &mdash; the torus &rsaquo;</a>
+      <a href="/explore.html">Open the full Atlas &rsaquo;</a> &middot; <a href="/torus.html">its true shape &mdash; the torus &rsaquo;</a> &middot; <a href="/crossing.html">geometry, the crossing &rsaquo;</a>
       &middot; <a href="/strategy.html">the strategy concordance &rsaquo;</a>
       &middot; <a href="/completeness.html">completeness &mdash; the memristor &rsaquo;</a></p>
   </div></section>
@@ -491,16 +479,7 @@ fetch(<span class="st">"https://narrowhighway.com/audit"</span>, {
 
 <script>
 (function(){
-  // -- theme toggle (respects system default; only stamps on explicit choice) --
-  var root=document.documentElement, tk="nh_theme";
-  try{ var s=localStorage.getItem(tk); if(s) root.setAttribute("data-theme",s); }catch(e){}
-  document.getElementById("theme").addEventListener("click",function(){
-    var cur=root.getAttribute("data-theme");
-    var next = cur==="dark" ? "light" : cur==="light" ? "dark"
-      : (matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark");
-    root.setAttribute("data-theme",next);
-    try{ localStorage.setItem(tk,next); }catch(e){}
-  });
+  // -- theme toggle now lives in /shell.js (the shared spine) --
 
   // -- the domains grid (the real verifier set, grounded) --
   var DOMAINS=["acoustics", "agriculture", "architecture", "astronomy", "atomic", "biology", "bridges", "calendar_time", "chemistry", "combinatorics", "computer_science", "construction", "cryptography", "cybersecurity", "document_validation", "ecology", "economics", "electrical", "energy", "ephemeris", "exercise_science", "finance", "formal_logic", "genetics", "geography", "geology", "geometry", "governance", "history_chronology", "hydrology", "information_theory", "labor", "law", "linear_algebra", "linguistics", "manufacturing", "materials_science", "mathematics", "medicine", "meteorology", "molecular_geometry", "music_theory", "networking", "nuclear_physics", "number_theory", "nutrition", "oceanography", "operations_research", "optics", "periodic_table", "philosophy", "photography", "physical_constants", "physics", "probability", "quantum_computing", "real_estate", "rhetoric", "scripture", "soil_science", "sports_analytics", "statistics", "theology_doctrine", "thermodynamics", "witness"];
