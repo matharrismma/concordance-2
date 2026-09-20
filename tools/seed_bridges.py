@@ -343,6 +343,21 @@ MASTER_EQUATIONS: list[dict] = [
          ("probability", "v_probability_binomial", "C(n,k) p^k (1-p)^(n-k) — the coefficient weighting k successes in n trials"),
          ("probability", "v_probability_poisson", "lambda^k e^(-lambda)/k! — the rare-event limit, same factorial in the denominator"),
      ]},
+    # THE THIRD DISCRETE MASTER (2026-09-20) — the wrap-around. Reduction modulo m is the residue-class
+    # coupling of Z/mZ: timekeeping, music, and error-detection are the SAME cyclic arithmetic. Shown, not forced.
+    {"id": "modular_reduction", "eq": "x mod m",
+     "gist": "the wrap-around: reduce to a residue class in Z/mZ and the line becomes a circle. A clock is Z/12, "
+             "a week is Z/7, an octave is Z/12, a check digit is the residue chosen to make a weighted sum vanish. "
+             "Time, music, and error-detection are one cyclic arithmetic — the periodic form's discrete twin (a wave "
+             "closes smoothly; a residue closes exactly).",
+     "rows": [
+         ("calendar_time", "clock_arithmetic", "(h + t) mod 12 — the clock wraps; the hour is a residue"),
+         ("calendar_time", "v_calendar_time_day_of_week", "weekday = date mod 7 — the week is Z/7Z"),
+         ("music_theory", "octave_equivalence", "pitch class = note mod 12 — the octave is Z/12Z; music lives on a circle"),
+         ("music_theory", "v_music_interval_semitones", "interval = note difference mod 12 — the same wrap"),
+         ("document_validation", "v_doc_validation_isbn10", "sum(i*d_i) mod 11 = 0 — a check digit is the residue that makes the total vanish"),
+         ("document_validation", "v_doc_validation_luhn", "Luhn mod 10 = 0 — the same residue guard on a card number"),
+     ]},
 ]
 
 
