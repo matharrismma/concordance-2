@@ -119,6 +119,24 @@
   '.nhs-btn:hover{color:var(--b-accent);border-color:var(--b-accent)}' +
   '.nhs-menu{display:none}' +
   '.nhs-panel{display:none}' +
+  /* the reciprocal road — fills <div data-nh-road>; closes the reach/witness/museum loop from any face */
+  '.nhs-road{padding:2.4rem clamp(1rem,4vw,2.2rem);border-top:1px solid var(--r-line);background:var(--r-bg)}' +
+  '.nhs-road[data-mode="dark"]{--r-bg:#0d1218;--r-line:rgba(255,255,255,.09);--r-card:rgba(255,255,255,.03);--r-ink:#aeb9c4;--r-brand:#eef2f6;--r-mut:#8493a1}' +
+  '.nhs-road[data-mode="light"]{--r-bg:#f4f6f9;--r-line:rgba(16,22,28,.1);--r-card:#ffffff;--r-ink:#4c5763;--r-brand:#12161c;--r-mut:#7c8894}' +
+  '.nhs-road-in{max-width:1000px;margin:0 auto;font-family:"NHPlex",system-ui,sans-serif}' +
+  '.nhr-head{font-family:"NHSpectral",Georgia,serif;font-size:clamp(1.3rem,3vw,1.7rem);color:var(--r-brand);margin:0 0 1.2rem;max-width:34ch;line-height:1.22}' +
+  '.nhr-faces{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}' +
+  '@media(max-width:680px){.nhr-faces{grid-template-columns:1fr}}' +
+  '.nhr-face{background:var(--r-card);border:1px solid var(--r-line);border-left:3px solid var(--r-line);border-radius:10px;padding:1rem 1.1rem;display:flex;flex-direction:column;text-decoration:none;color:inherit}' +
+  'a.nhr-face{transition:transform .14s,border-color .14s,box-shadow .14s}a.nhr-face:hover{transform:translateY(-2px);box-shadow:0 16px 26px -20px rgba(0,0,0,.5)}' +
+  '.nhr-step{font-family:"NHMono",ui-monospace,monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--r-mut);min-height:1em}' +
+  '.nhr-name{font-family:"NHSpectral",Georgia,serif;font-size:1.12rem;color:var(--r-brand);margin:.28rem 0 .25rem}' +
+  '.nhr-line{font-size:.86rem;color:var(--r-ink);margin:0 0 .7rem;flex:1}' +
+  '.nhr-go{font-family:"NHMono",ui-monospace,monospace;font-size:.8rem;font-weight:500}' +
+  '.nhr-face[data-f="reach"]{border-left-color:#3bb6a3}.nhr-face[data-f="reach"] .nhr-go{color:#3bb6a3}' +
+  '.nhr-face[data-f="witness"]{border-left-color:#c9a24a}.nhr-face[data-f="witness"] .nhr-go{color:#c9a24a}' +
+  '.nhr-face[data-f="museum"]{border-left-color:#8a7fd6}.nhr-face[data-f="museum"] .nhr-go{color:#8a7fd6}' +
+  '.nhr-face.here .nhr-step{color:var(--r-brand)}' +
   /* collapse well before the full bar (~800px of content) can overflow a narrow viewport */
   '@media(max-width:900px){' +
     '.nhs-nav,.nhs-faces{display:none}' +
@@ -222,6 +240,7 @@
       try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncMode); } catch (e) {}
     }
     fillCounts();
+    renderRoad();
   }
 
   /* live counts from /capabilities — only fires if a page actually asks for one */
@@ -236,6 +255,42 @@
         if (v != null) n.textContent = (typeof v === "number") ? v.toLocaleString("en-US") : String(v);
       });
     }).catch(function () {});
+  }
+
+  /* the reciprocal road — fills every [data-nh-road] with the reach/witness/museum loop,
+     framed from the face you are on, so the journey circles instead of ending. */
+  function renderRoad() {
+    var slots = document.querySelectorAll("[data-nh-road]");
+    if (!slots.length) return;
+    var active = activeFace(), order = ["reach", "witness", "museum"];
+    var HEAD = {
+      reach:   "You’ve seen it hold. Here is what it holds to.",
+      witness: "You’ve found the foundation. Here is what stands on it — and what it keeps.",
+      museum:  "You’re in the kept library. Here is the engine that finds it — and the foundation it rests on."
+    };
+    var INFO = {
+      reach:   { name: "The reach",   href: "https://narrowhighway.com", line: "A deterministic model of reality — the engine, the open API, the agent door." },
+      witness: { name: "The witness", href: "https://narrowhighway.org", line: "The foundation made plain — Scripture in the original languages, Christ at the center." },
+      museum:  { name: "The museum",  href: "https://narrowhighway.tv",  line: "Curated public-domain channels — the kept library of what endures." }
+    };
+    slots.forEach(function (slot) {
+      var road = el("section", "nhs-road", { "data-mode": effectiveDark() ? "dark" : "light", "aria-label": "Three faces, one road" });
+      var inner = el("div", "nhs-road-in");
+      var h = el("div", "nhr-head"); h.textContent = HEAD[active] || HEAD.reach; inner.appendChild(h);
+      var faces = el("div", "nhr-faces");
+      order.forEach(function (f) {
+        var here = (f === active), info = INFO[f];
+        var card = el(here ? "div" : "a", "nhr-face" + (here ? " here" : ""),
+                      here ? { "data-f": f } : { "data-f": f, href: info.href });
+        var step = el("div", "nhr-step"); step.textContent = here ? "you are here" : ""; card.appendChild(step);
+        var nm = el("div", "nhr-name"); nm.textContent = info.name; card.appendChild(nm);
+        var ln = el("div", "nhr-line"); ln.textContent = info.line; card.appendChild(ln);
+        if (!here) { var go = el("div", "nhr-go"); go.textContent = "Enter ›"; card.appendChild(go); }
+        faces.appendChild(card);
+      });
+      inner.appendChild(faces); road.appendChild(inner);
+      slot.innerHTML = ""; slot.appendChild(road);
+    });
   }
 
   if (document.readyState === "loading") {
