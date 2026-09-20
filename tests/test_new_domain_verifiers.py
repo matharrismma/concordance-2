@@ -18,6 +18,29 @@ def test_all_five_domains_are_registered():
         assert d in VERIFIERS, f"{d} not registered"
 
 
+def test_photonics_is_registered_and_computes():
+    """Photonics — added 2026-09-19 because the Atlas's own topology asked for it (it closes two of
+    the eight voids where random additions add holes). A connective domain: guided/resonant/active/
+    nonlinear light, each check a real closed-form relation, pure stdlib (runs on the offline box)."""
+    assert "photonics" in VERIFIERS
+    # V = 2*pi*a*NA/lambda = 2.686 for a=4um, NA=0.14, lambda=1.31um
+    ok = run_for_domain("photonics", {"PHOT_VERIFY": {
+        "core_radius_m": 4e-6, "numerical_aperture": 0.14, "wavelength_m": 1.31e-6, "claimed_v_number": 2.686}})
+    assert _find(ok, "photonics.waveguide_v_number").status == "CONFIRMED"
+    bad = run_for_domain("photonics", {"PHOT_VERIFY": {
+        "core_radius_m": 4e-6, "numerical_aperture": 0.14, "wavelength_m": 1.31e-6, "claimed_v_number": 9.9}})
+    assert _find(bad, "photonics.waveguide_v_number").status == "MISMATCH"
+    # FSR = c/(n_g*L); ring resonator
+    fsr = run_for_domain("photonics", {"PHOT_VERIFY": {
+        "group_index": 4.2, "ring_length_m": 6.28e-5, "claimed_fsr_hz": 1.137e12}})
+    assert _find(fsr, "photonics.ring_resonator_fsr").status == "CONFIRMED"
+    # d*sin(theta) = m*lambda -> 30 deg for d=1.5um, lambda=0.75um, m=1
+    g = run_for_domain("photonics", {"PHOT_VERIFY": {
+        "grating_period_m": 1.5e-6, "order": 1, "wavelength_m": 0.75e-6, "claimed_angle_deg": 30.0}})
+    assert _find(g, "photonics.grating_angle").status == "CONFIRMED"
+    assert run_for_domain("photonics", {})[0].status == "NOT_APPLICABLE"
+
+
 def test_neuroscience_nernst_and_weber():
     # E = (RT/zF) ln(145/12) at 310K = 66.56 mV
     ok = run_for_domain("neuroscience", {"NEURO_VERIFY": {

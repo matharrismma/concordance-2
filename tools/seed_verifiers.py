@@ -262,6 +262,18 @@ PLACE: list[tuple[str, str, str, str, str]] = [
     ("photography", "photography.reciprocity_equivalent", "logarithmic", "card_theory_photographic_exposure_theory", "equal EV settings equivalent"),
     ("photography", "photography.angle_of_view", "trigonometric", "card_theory_photographic_exposure_theory", "AOV = 2 atan(d / 2f)"),
     ("photography", "photography.hyperfocal_distance", "ratio", "card_theory_depth_of_field", "H = f^2/(N c) + f"),
+    # photonics — light engineered as a signal/computing medium (guided, resonant, active, nonlinear).
+    # A connective domain: each check instantiates a form already carried across many fields, so it
+    # BRIDGES optics <-> electrical <-> quantum <-> materials. (Measured to heal the structure: closing
+    # two of the topology's eight voids where noise adds holes — 2026-09-19.)
+    ("photonics", "photonics.waveguide_v_number", "wave", "card_theory_wave_optics", "V = 2*pi*a*NA/lambda (single-mode iff V<=2.405)"),
+    ("photonics", "photonics.ring_resonator_fsr", "periodic", "card_theory_wave_optics", "FSR = c/(n_g*L)"),
+    ("photonics", "photonics.fiber_loss", "logarithmic", "card_theory_wave_optics", "P_out(dBm) = P_in - alpha*L"),
+    ("photonics", "photonics.electro_optic_vpi", "linear_flux", "card_theory_maxwell_s_equations_classical_electromagnetism", "V_pi = lambda*d/(n^3*r*L)"),
+    ("photonics", "photonics.second_harmonic", "power_law", "card_theory_quantization", "P_2w ~ P_w^2"),
+    ("photonics", "photonics.laser_slope", "proportion", "card_theory_quantization", "P_out = eta*(I - I_th)"),
+    ("photonics", "photonics.grating_angle", "trigonometric", "card_theory_wave_optics", "d*sin(theta) = m*lambda"),
+    ("photonics", "photonics.beer_lambert", "decay", "card_theory_wave_optics", "I(z) = I0*exp(-alpha*z)"),
     # physics
     ("physics", "verify_conservation", "conservation", "card_theory_conservation_of_energy", "each named quantity conserved"),
     ("physics", "verify_named_conservation", "conservation", "card_theory_conservation_of_energy", "conservation + named-law profile"),

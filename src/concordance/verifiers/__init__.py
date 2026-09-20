@@ -56,6 +56,8 @@ VERIFIERS: Dict[str, str] = {
     "energy": _P + "energy", "power": _P + "energy", "off_grid": _P + "energy",
     "acoustics": _P + "acoustics",
     "optics": _P + "optics",
+    "photonics": _P + "photonics", "integrated_photonics": _P + "photonics",
+    "optical_engineering": _P + "photonics", "silicon_photonics": _P + "photonics",
     "materials_science": _P + "materials_science", "materials": _P + "materials_science",
     "metallurgy": _P + "materials_science",
     # earth & space
