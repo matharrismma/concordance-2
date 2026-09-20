@@ -163,7 +163,7 @@ section{padding:1.5rem 0}
         <svg viewBox="0 0 200 150" role="img" aria-label="a power law is a rising curve on linear axes">
           <line x1="26" y1="14" x2="26" y2="126" stroke="var(--line)" stroke-width="1.5"/>
           <line x1="26" y1="126" x2="184" y2="126" stroke="var(--line)" stroke-width="1.5"/>
-          <path d="M26 126 Q120 124 150 40 T176 18" fill="none" stroke="var(--gold)" stroke-width="2.4"/>
+          <polyline id="curveLin" points="" fill="none" stroke="var(--gold)" stroke-width="2.4" stroke-linejoin="round"/>
           <text x="105" y="146" fill="var(--faint)" font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle">length</text>
           <text x="12" y="70" fill="var(--faint)" font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle" transform="rotate(-90 12 70)">measure</text>
         </svg>
@@ -174,9 +174,9 @@ section{padding:1.5rem 0}
         <svg viewBox="0 0 200 150" role="img" aria-label="on log-log axes the power law is a straight line of slope d">
           <line x1="26" y1="14" x2="26" y2="126" stroke="var(--line)" stroke-width="1.5"/>
           <line x1="26" y1="126" x2="184" y2="126" stroke="var(--line)" stroke-width="1.5"/>
-          <line x1="30" y1="120" x2="180" y2="30" stroke="var(--teal)" stroke-width="2.4"/>
-          <circle cx="60" cy="102" r="3" fill="var(--teal)"/><circle cx="105" cy="75" r="3" fill="var(--teal)"/><circle cx="150" cy="48" r="3" fill="var(--teal)"/>
-          <text x="120" y="70" fill="var(--gold2)" font-family="IBM Plex Mono, monospace" font-size="11">slope = d</text>
+          <polyline id="curveLog" points="" fill="none" stroke="var(--teal)" stroke-width="2.4"/>
+          <g id="dotsLog"></g>
+          <text x="118" y="66" fill="var(--gold2)" font-family="IBM Plex Mono, monospace" font-size="11">slope = d</text>
           <text x="105" y="146" fill="var(--faint)" font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle">log length</text>
           <text x="12" y="72" fill="var(--faint)" font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle" transform="rotate(-90 12 72)">log measure</text>
         </svg>
@@ -284,6 +284,30 @@ section{padding:1.5rem 0}
   }
   function up(){ kv.textContent=sl.value; draw(+sl.value); }
   sl.addEventListener("input",up); up();
+})();
+
+/* the pivot plots are the ACTUAL function y = x^d (d=2), computed — not drawn by hand.
+   Left: y vs x on linear axes (a real power curve). Right: log y vs log x — a straight
+   line whose slope IS d. If the numbers are right, the picture is right. */
+(function(){
+  var NS="http://www.w3.org/2000/svg", d=2, N=48, xmin=0.5, xmax=9;
+  var AX0=26, AX1=184, AY0=126, AYt=16;  // plot box in the 200x150 viewBox
+  function map(v,a,b,pa,pb){return (pa+(v-a)/(b-a)*(pb-pa)).toFixed(1);}
+  // linear: y = x^d
+  var ymax=Math.pow(xmax,d), lin=[];
+  for(var i=0;i<=N;i++){var x=xmin+(xmax-xmin)*i/N, y=Math.pow(x,d);
+    lin.push(map(x,xmin,xmax,AX0,AX1)+','+map(y,0,ymax,AY0,AYt));}
+  var cl=document.getElementById('curveLin'); if(cl) cl.setAttribute('points',lin.join(' '));
+  // log-log: X=log10 x, Y=log10 y = d*X  ->  straight line, slope d
+  var Xmin=Math.log10(xmin), Xmax=Math.log10(xmax), Ymin=d*Xmin, Ymax=d*Xmax, lg=[];
+  for(var j=0;j<=N;j++){var X=Xmin+(Xmax-Xmin)*j/N;
+    lg.push(map(X,Xmin,Xmax,AX0,AX1)+','+map(d*X,Ymin,Ymax,AY0,AYt));}
+  var cg=document.getElementById('curveLog'); if(cg) cg.setAttribute('points',lg.join(' '));
+  var dots=document.getElementById('dotsLog');
+  if(dots){[0.22,0.5,0.78].forEach(function(t){var X=Xmin+(Xmax-Xmin)*t;
+    var c=document.createElementNS(NS,'circle');
+    c.setAttribute('cx',map(X,Xmin,Xmax,AX0,AX1)); c.setAttribute('cy',map(d*X,Ymin,Ymax,AY0,AYt));
+    c.setAttribute('r','3'); c.setAttribute('fill','var(--teal)'); dots.appendChild(c);});}
 })();
 </script>
 </body>
