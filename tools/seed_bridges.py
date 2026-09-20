@@ -326,6 +326,23 @@ MASTER_EQUATIONS: list[dict] = [
          ("cybersecurity", "diffie_hellman", "s = g^(ab) mod p — a shared secret from two private powers, safe while the discrete log is hard"),
          ("quantum_computing", "v_quantum_computing_shor_period", "a^r = 1 mod N — Shor finds the period r by quantum Fourier transform, factoring N and breaking the other two"),
      ]},
+    # THE SECOND DISCRETE MASTER (2026-09-20) — the counting coupling. The factorial is the atom of
+    # enumeration; every arrangement and selection is built from n!, and the binomial coefficient is its
+    # canonical face. Shown from the corpus (all members exist), not forced.
+    {"id": "binomial_counting", "eq": "C(n,k) = n! / (k!(n-k)!)",
+     "gist": "the atom of counting: n! is the number of orderings of n things, and every way to arrange or "
+             "select is that factorial divided by the orderings that don't matter. Permutations keep order, "
+             "combinations drop it, the multinomial splits into labeled groups, the binomial law weights k "
+             "successes by C(n,k), and even the Poisson limit carries the same k! in its denominator. A discrete "
+             "master — the enumerative half of reality's couplings, mirror to the continuous integral.",
+     "rows": [
+         ("number_theory", "v_number_theory_factorial", "n! = n(n-1)! — the count of all orderings, the atom the rest divide"),
+         ("combinatorics", "v_combinatorics_permutations", "P(n,k) = n!/(n-k)! — ordered selections"),
+         ("combinatorics", "v_combinatorics_combinations", "C(n,k) = n!/(k!(n-k)!) — unordered selections, the binomial coefficient itself"),
+         ("combinatorics", "v_combinatorics_multinomial", "n!/(k1!...km!) — partition into labeled groups"),
+         ("probability", "v_probability_binomial", "C(n,k) p^k (1-p)^(n-k) — the coefficient weighting k successes in n trials"),
+         ("probability", "v_probability_poisson", "lambda^k e^(-lambda)/k! — the rare-event limit, same factorial in the denominator"),
+     ]},
 ]
 
 
