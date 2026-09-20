@@ -41,6 +41,18 @@ def test_photonics_is_registered_and_computes():
     assert run_for_domain("photonics", {})[0].status == "NOT_APPLICABLE"
 
 
+def test_prime_counting_closes_the_last_void():
+    """The Prime Number Theorem — added 2026-09-19 because the Atlas's own homology said its one
+    irreducible void was the primes<->logarithm seam, and pi(x) ~ x/ln(x) is exactly what closes it.
+    Exact pi(x) by sieve; the log asymptotic is the worked bridge."""
+    ok = run_for_domain("number_theory", {"NUM_VERIFY": {"limit": 100, "claimed_prime_count": 25}})
+    assert _find(ok, "number_theory.prime_counting").status == "CONFIRMED"
+    ok2 = run_for_domain("number_theory", {"NUM_VERIFY": {"limit": 1000000, "claimed_prime_count": 78498}})
+    assert _find(ok2, "number_theory.prime_counting").status == "CONFIRMED"
+    bad = run_for_domain("number_theory", {"NUM_VERIFY": {"limit": 100, "claimed_prime_count": 30}})
+    assert _find(bad, "number_theory.prime_counting").status == "MISMATCH"
+
+
 def test_neuroscience_nernst_and_weber():
     # E = (RT/zF) ln(145/12) at 310K = 66.56 mV
     ok = run_for_domain("neuroscience", {"NEURO_VERIFY": {

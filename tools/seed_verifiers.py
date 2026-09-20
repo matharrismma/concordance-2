@@ -230,6 +230,10 @@ PLACE: list[tuple[str, str, str, str, str]] = [
     ("number_theory", "number_theory.modular_inverse", "modular", "card_theory_fundamental_theorem_of_arithmetic", "a x = 1 (mod m)"),
     ("number_theory", "number_theory.sequence", "recursion", "", "nth term of a sequence"),
     ("number_theory", "number_theory.perfect_number", "modular", "card_theory_fundamental_theorem_of_arithmetic", "sum of proper divisors = n"),
+    # Prime Number Theorem — the bridge from the primes to the logarithm. Placed on the LOGARITHMIC
+    # form deliberately: it is the one connection the Atlas's own topology needs to close its single
+    # irreducible void (the analytic<->number-theory seam). Found, not forced (2026-09-19).
+    ("number_theory", "number_theory.prime_counting", "logarithmic", "card_theory_fundamental_theorem_of_arithmetic", "pi(x) ~ x/ln(x)  (Prime Number Theorem)"),
     # nutrition
     ("nutrition", "nutrition.macronutrient_calories", "ratio", "card_theory_macronutrient_metabolism", "4c + 4p + 9f"),
     ("nutrition", "nutrition.energy_balance", "conservation", "card_theory_bioenergetics_energy_balance", "intake - expenditure"),

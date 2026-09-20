@@ -245,8 +245,48 @@ def verify_perfect_number(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"is_perfect({nf}) = {actual}, claimed {cl}", data)
 
 
+def verify_prime_counting(spec: Dict[str, Any]) -> VerifierResult:
+    """The Prime Number Theorem — the bridge from the primes to the logarithm.
+
+    pi(x), the count of primes <= x, is computed EXACTLY by sieve, and the claim is checked against
+    it. The worked trail shows the PNT asymptotic pi(x) ~ x/ln(x): the discrete count of the primes
+    is governed, in the large, by a continuous logarithm. This is the one calculation that joins
+    number theory to the analytic (log) world — the seam analytic number theory lives on, and (by
+    the Atlas's own topology) the single connection that closes its one irreducible void.
+    """
+    import math
+    name = "number_theory.prime_counting"
+    x = spec.get("limit")
+    claimed = spec.get("claimed_prime_count")
+    if x is None or claimed is None:
+        return na(name)
+    try:
+        x = int(x)
+        claimed = int(claimed)
+    except (TypeError, ValueError):
+        return error(name, "limit and claimed_prime_count must be integers")
+    if x < 2:
+        actual = 0
+    elif x > 20_000_000:
+        return na(name, "limit exceeds the exact-sieve cap (2e7); the PNT is an asymptotic law")
+    else:
+        sieve = bytearray([1]) * (x + 1)
+        sieve[0] = sieve[1] = 0
+        for i in range(2, int(x ** 0.5) + 1):
+            if sieve[i]:
+                sieve[i * i::i] = bytearray(len(range(i * i, x + 1, i)))
+        actual = sum(sieve)
+    est = x / math.log(x) if x > 1 else 0.0  # PNT asymptotic pi(x) ~ x/ln(x)
+    data = {"pi": actual, "pnt_estimate_x_over_lnx": est, "claimed": claimed,
+            "law": "pi(x) ~ x / ln(x)  (Prime Number Theorem)"}
+    if actual == claimed:
+        return confirm(name, f"pi({x}) = {actual}; PNT estimate x/ln(x) = {est:.1f} (matches claim)", data)
+    return mismatch(name, f"pi({x}) = {actual}, claimed {claimed}; PNT estimate x/ln(x) = {est:.1f}", data)
+
+
 _RULES = [
     (lambda nv: ("n_prime" in nv and "claimed_prime" in nv), verify_primality),
+    (lambda nv: ("limit" in nv and "claimed_prime_count" in nv), verify_prime_counting),
     (lambda nv: (all(k in nv for k in ("gcd_a", "gcd_b", "claimed_gcd"))), verify_gcd),
     (lambda nv: ("factorial_n" in nv and "claimed_factorial" in nv), verify_factorial),
     (lambda nv: (all(k in nv for k in ("mod_a", "mod_m", "claimed_inverse"))), verify_modular_inverse),
