@@ -12,7 +12,7 @@ b{color:#cbbfa4;font-weight:400}code{font-family:'DejaVu Sans Mono',monospace;fo
 <b>master equation</b>, drawn through every domain it connects &mdash; the thread <b>is</b> the
 connection, and its colour is the formula that makes it. Where many threads pass through one node,
 that field is a <b>hub</b> of reality's computation (its node grows). 36 connected domains, joined
-by the 23 master equations.</p>
+by the 24 master equations.</p>
 <div class=leg>The widest bridges &mdash; one formula, this many fields:<div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #5fa8a0;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">du/dt = D * laplacian(u)</code> <span style="color:#8a8378">&mdash; 8 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #8fb26a;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">L = k * log10(x / x_ref)</code> <span style="color:#8a8378">&mdash; 8 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #c69a4a;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">J = -k * grad(phi)</code> <span style="color:#8a8378">&mdash; 7 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #a98bd0;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">f(t) = sum c_n e^(i n omega t)</code> <span style="color:#8a8378">&mdash; 7 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #b98fc0;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">y = 1 / (1 + e^(-x))</code> <span style="color:#8a8378">&mdash; 7 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #7fb069;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">dQ/dt = -Q/tau</code> <span style="color:#8a8378">&mdash; 6 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #9b7fc6;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">d2u/dt2 = c^2 * laplacian(u)</code> <span style="color:#8a8378">&mdash; 6 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #c6a86f;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">sum(in) = sum(out) + d(store)/dt</code> <span style="color:#8a8378">&mdash; 6 domains</span></div></div>
 <svg viewBox="0 0 1500 1500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Connections between domains: each master equation is a thread through the domains it joins">
 <rect width="100%" height="100%" fill="#0f0d09"/>
@@ -116,6 +116,7 @@ by the 23 master equations.</p>
 <path d="M199 653 Q578 704 224 558" fill="none" stroke="#c69a4a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>V*(s) = max_a [ R(s,a) + gamma * sum_s' P(s'|s,a) V*(s') ] — connects computer_science, economics, finance, operations_research, probability</title></path>
 <path d="M224 558 Q576 719 190 750" fill="none" stroke="#c69a4a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>V*(s) = max_a [ R(s,a) + gamma * sum_s' P(s'|s,a) V*(s') ] — connects computer_science, economics, finance, operations_research, probability</title></path>
 <path d="M190 750 Q583 795 265 1030" fill="none" stroke="#c69a4a" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>V*(s) = max_a [ R(s,a) + gamma * sum_s' P(s'|s,a) V*(s') ] — connects computer_science, economics, finance, operations_research, probability</title></path>
+<path d="M653 199 Q824 662 1310 750" fill="none" stroke="#6f9ec6" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>c = a^k mod n — connects cybersecurity, quantum_computing</title></path>
 <circle cx="750" cy="190" r="12.0" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>physics — on 11 master equations</title></circle>
 <text x="750" y="176" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-90 750 174)">physics</text>
 <circle cx="847" cy="199" r="9.7" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>electrical — on 8 master equations</title></circle>
@@ -134,7 +135,7 @@ by the 23 master equations.</p>
 <text x="1291" y="555" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-20 1291 553)">atomic</text>
 <circle cx="1301" cy="653" r="5.0" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>materials_science — on 2 master equations</title></circle>
 <text x="1317" y="652" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-10 1317 650)">materials_science</text>
-<circle cx="1310" cy="750" r="4.3" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>quantum_computing — on 1 master equations</title></circle>
+<circle cx="1310" cy="750" r="5.0" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>quantum_computing — on 2 master equations</title></circle>
 <text x="1326" y="752" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(0 1326 750)">quantum_computing</text>
 <circle cx="1301" cy="847" r="9.7" fill="#6fb0a0" stroke="#0f0d09" stroke-width="1"><title>chemistry — on 8 master equations</title></circle>
 <text x="1317" y="852" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(10 1317 850)">chemistry</text>
@@ -186,7 +187,7 @@ by the 23 master equations.</p>
 <text x="462" y="253" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(420 462 251)">architecture</text>
 <circle cx="558" cy="224" r="4.3" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>manufacturing — on 1 master equations</title></circle>
 <text x="553" y="211" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(430 553 209)">manufacturing</text>
-<circle cx="653" cy="199" r="5.0" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>cybersecurity — on 2 master equations</title></circle>
+<circle cx="653" cy="199" r="5.8" fill="#c67f6f" stroke="#0f0d09" stroke-width="1"><title>cybersecurity — on 3 master equations</title></circle>
 <text x="650" y="185" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(440 650 183)">cybersecurity</text>
 <circle cx="750.0" cy="750.0" r="48" fill="#0f0d09" stroke="#3a3427"/>
 <text x="750.0" y="747" fill="#c69a4a" font-size="12" font-family="Georgia,serif" text-anchor="middle">DOMAINS</text>

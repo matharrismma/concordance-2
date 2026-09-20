@@ -311,6 +311,21 @@ MASTER_EQUATIONS: list[dict] = [
          ("finance", "present_value_integral", "drop choice and transition: V = the discounted sum of a fixed reward stream — a present value"),
          ("economics", "income_mobility", "the transition read alone as class mobility — the world-model a policy plans against"),
      ]},
+    # THE FIRST DISCRETE MASTER (2026-09-20) — the continuous master program (23 above) named only the
+    # differential couplings; the discrete/algebraic half has its own. Modular exponentiation is the clearest:
+    # one identity across classical cryptography and quantum factoring, shown from the corpus, not forced.
+    {"id": "modular_exponentiation", "eq": "c = a^k mod n",
+     "gist": "the one-way power at the root of the discrete world: raising to a power modulo n is cheap, but "
+             "inverting it — recovering the exponent, or factoring n — is hard on a classical machine and easy on a "
+             "quantum one. The trust of modern cryptography and the threat that ends it are the SAME identity, read "
+             "forward and backward. A discrete master: an algorithm, not a differential equation — the counting half "
+             "of reality's couplings the continuous program never named. Its continuous mirror is the wave equation "
+             "(one form across acoustics/EM/quantum); this is one form across RSA/Diffie-Hellman/Shor.",
+     "rows": [
+         ("cybersecurity", "rsa_modexp", "c = m^e mod n — encryption is a power; only the holder of n's factorization inverts it"),
+         ("cybersecurity", "diffie_hellman", "s = g^(ab) mod p — a shared secret from two private powers, safe while the discrete log is hard"),
+         ("quantum_computing", "v_quantum_computing_shor_period", "a^r = 1 mod N — Shor finds the period r by quantum Fourier transform, factoring N and breaking the other two"),
+     ]},
 ]
 
 
