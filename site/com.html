@@ -192,6 +192,12 @@
     text-transform:uppercase; color:var(--seal); margin-bottom:.55rem}
   .card h3{font-size:1.16rem; margin:0 0 .5rem; font-weight:600}
   .card p{margin:0; color:var(--ink-soft); font-size:.94rem}
+  /* the human doors, as links (Phase 4: now it serves you) */
+  a.card{text-decoration:none; color:inherit; display:flex; flex-direction:column;
+    transition:border-color .14s, transform .14s, box-shadow .14s}
+  a.card:hover{border-color:var(--seal); transform:translateY(-2px); box-shadow:var(--shadow)}
+  a.card p{flex:1}
+  a.card .go{color:var(--seal); font-weight:500; font-size:.9rem; margin-top:.85rem}
 
   /* for agents / api */
   .api-grid{display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start}
@@ -475,6 +481,28 @@ fetch(<span class="st">"https://narrowhighway.com/audit"</span>, {
   </div></section>
 
   <!-- FOUNDATION: link to .org -->
+  <!-- FOR YOU / FAMILY: now it serves a person -->
+  <section class="blk"><div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">For you and your family</span>
+      <h2>The same engine, now serving a person.</h2>
+      <p>Not only the deterministic work a model is bad at &mdash; the engine meets a household where it lives:
+        ask and hear a checked answer, open the card that fits a crisis, grow a craft measured against your own
+        past. Free, no account, and it works when the power and the internet don&rsquo;t.</p>
+    </div>
+    <div class="diff">
+      <a class="card" href="/coach.html"><div class="k">Ask &amp; keep</div><h3>A book you speak to</h3>
+        <p>Ask and hear a verified answer, dictate a note, drop anything in and keep it &mdash; audio-native, ADA, and it works offline on your own voice.</p>
+        <span class="go">Open the coach &rsaquo;</span></a>
+      <a class="card" href="/situations.html"><div class="k">In a crisis</div><h3>What you need right now</h3>
+        <p>Power out, water unsafe, someone hurt &mdash; open the one that fits your moment, and the real help comes first.</p>
+        <span class="go">Start with your situation &rsaquo;</span></a>
+      <a class="card" href="/halls.html"><div class="k">Grow a craft</div><h3>The halls</h3>
+        <p>Small communities on one path. Each hall measures you against your own past and raises the floor &mdash; offline, private, free.</p>
+        <span class="go">Enter the halls &rsaquo;</span></a>
+    </div>
+  </div></section>
+
   <section class="blk" style="padding-top:0"><div class="wrap">
     <div class="sec-head">
       <span class="eyebrow">Three faces &middot; one road</span>
