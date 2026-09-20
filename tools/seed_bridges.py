@@ -390,6 +390,21 @@ MASTER_EQUATIONS: list[dict] = [
          ("finance", "compound_discrete", "A_{n+1} = A_n (1 + r) — roll a balance forward one period"),
          ("sports_analytics", "v_sports_analytics_elo_rating_update", "R' = R + K(S - E) — update a rating from the surprise"),
      ]},
+    # THE MEASURE MASTER (2026-09-20) — a THIRD kind alongside the dynamical (continuous) and the algebraic
+    # (discrete): the geometric. Length, area, volume are one rule read in 1/2/3 dimensions. Shown, not forced.
+    {"id": "euclidean_measure", "eq": "measure ~ length^d   (A ~ L^2,  V ~ L^3)",
+     "gist": "the measure of extent: length, area, and volume are one rule read in one, two, and three dimensions "
+             "— a product of extents that scales as length to the dimension. A rectangle's l*w, a cube's s^3, a "
+             "sphere's (4/3) pi r^3, a vector's sqrt(sum of squares) — all the Euclidean measure of size. Neither a "
+             "flow in time nor a discrete identity but a geometric one: how much space a thing takes.",
+     "rows": [
+         ("geometry", "v_geometry_rectangle", "A = l*w — area as a product of two extents"),
+         ("geometry", "v_geometry_cube", "V = s^3 — volume scales as length cubed"),
+         ("geometry", "v_geometry_sphere", "V = (4/3) pi r^3 ; A = 4 pi r^2 — the curved case, same length^d scaling"),
+         ("construction", "v_construction_concrete_volume", "V = l*w*d — the same product of extents, poured in the field"),
+         ("geography", "v_geography_polygon_area", "spherical-excess area — measure carried onto a curved surface"),
+         ("linear_algebra", "v_vector_magnitude", "|a| = sqrt(sum a_i^2) — the Euclidean length, measure in n dimensions"),
+     ]},
 ]
 
 
