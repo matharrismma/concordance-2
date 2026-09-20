@@ -155,6 +155,7 @@ def build():
     bridges = ", ".join(f"{esc(f)} ({len(form_domains[f])})" for f in top_forms)
     return f"""<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
+<script src="/shell.js"></script>
 <title>The Spiral</title>
 <style>body{{margin:0;background:#12100c;color:#e8dfc9;font-family:Georgia,'Iowan Old Style',serif}}
 .wrap{{max-width:1520px;margin:0 auto;padding:1.6rem 1rem 3rem}}
@@ -162,7 +163,7 @@ h1{{color:#c69a4a;font-weight:400;font-size:1.7rem;margin:.2rem 0}}
 p{{color:#a99c82;max-width:62rem;line-height:1.62}}svg{{width:100%;height:auto;display:block}}
 b{{color:#cbbfa4;font-weight:400}}
 .legend{{font-size:.78rem;color:#a99c82;margin:1rem 0 0;line-height:1.85}}</style></head>
-<body><div class=wrap><a href="/" target="_top" style="color:#8a8172;font:400 .8rem system-ui,sans-serif;text-decoration:none">&#8592; narrowhighway.com</a><h1>The Spiral</h1>
+<body><div class=wrap><h1>The Spiral</h1>
 <p>The calculations laid on a <b>logarithmic spiral</b> — the scale-free, self-similar curve, the
 same golden-angle geometry the theory map already grows on. Every bead is a calculation; the coil is
 ordered so each <b>domain</b> is one continuous arc of color. Woven on top is the connective tissue:

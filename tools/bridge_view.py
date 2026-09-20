@@ -100,6 +100,7 @@ def build():
     nm, nf, nd, nt, nh = len(masters), len(forms), len(duals), len(theos), len(hubs)
     return f"""<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
+<script src="/shell.js"></script>
 <title>The Bridges</title>
 <style>
 :root{{--bg:#12100c;--ink:#e8dfc9;--dim:#a99c82;--faint:#7d745f;--gold:#c69a4a;--gold2:#e6c374;--line:#2a2620;--panel:#171410}}
@@ -133,7 +134,7 @@ table.subtab tr.pred td{{color:var(--faint)}}
 table.subtab tr.pred td.sub{{font-style:italic;color:#8a7f63}}
 </style></head>
 <body><div class=wrap>
-<a href="/" target="_top" style="color:#8a8172;font:400 .8rem system-ui,sans-serif;text-decoration:none">&#8592; narrowhighway.com</a>
+
 <h1>The Bridges</h1>
 <p class=lede>A bridge is one structure that appears in more than one domain — the universality of the
 one kernel, seen as a connection. And a real bridge <b>must have a formula that connects</b>: not

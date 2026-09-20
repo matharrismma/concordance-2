@@ -164,6 +164,7 @@ def build():
 
 _PAGE = r"""<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
+<script src="/shell.js"></script>
 <title>The Torus</title>
 <style>
   :root{color-scheme:dark}
@@ -198,7 +199,7 @@ _PAGE = r"""<!doctype html><html lang=en><head><meta charset=utf-8>
   noscript .ns{display:block;margin:1rem 0;padding:1rem;border:1px solid #3a3427;border-radius:10px;color:#cbbfa4}
 </style></head>
 <body><div class=wrap>
-<a class=home href="/" target="_top">&#8592; narrowhighway.com</a>
+
 <h1>The Torus</h1>
 <p class=lede>The Atlas is a <b>(domain &times; form) matrix</b> &mdash; two cyclic axes, so its true shape is a
 <b>torus</b>. Around the hole runs the <b>form</b> axis: one form is a ring around the tube, the same

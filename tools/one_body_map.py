@@ -255,6 +255,7 @@ def build() -> str:
     linked = sum(1 for s in calc_xy if CALC_THEORY.get(s) in placed)
     return f"""<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
+<script src="/shell.js"></script>
 <title>The One Body</title>
 <style>body{{margin:0;background:#12100c;color:#e8dfc9;font-family:Georgia,'Iowan Old Style',serif}}
 .wrap{{max-width:1500px;margin:0 auto;padding:1.6rem 1rem 3rem}}
@@ -265,7 +266,7 @@ b{{color:#cbbfa4;font-weight:400}}
 .key i.line{{display:inline-block;width:26px;height:0;border-top:1px solid #c69a4a;vertical-align:middle;margin-right:5px;opacity:.6}}
 .key i.dot{{display:inline-block;width:9px;height:9px;border-radius:50%;background:#e6c374;vertical-align:middle;margin-right:5px}}
 .legend{{font-size:.8rem;color:#a99c82;margin:1.1rem 0 0;line-height:1.9}}</style></head>
-<body><div class=wrap><a href="/" target="_top" style="color:#8a8172;font:400 .8rem system-ui,sans-serif;text-decoration:none">&#8592; narrowhighway.com</a><h1>The One Body</h1>
+<body><div class=wrap><h1>The One Body</h1>
 <p>The calculation map and the theory <b>FLOOR</b>, drawn as one figure. The inner disk is
 every calculation, placed in the <b>sector of its canonical form</b> &mdash; sharing a sector is
 sharing a computation (<b>same&#95;form</b>). Each calculation then throws a <b>chord</b> outward to

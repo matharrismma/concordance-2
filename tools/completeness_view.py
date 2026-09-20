@@ -148,6 +148,7 @@ def build() -> str:
     npred = sum(1 for s in SETS for r in s["relations"] if r["status"] == "predicted")
     return f"""<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
+<script src="/shell.js"></script>
 <title>Completeness &mdash; Subsystems of a Watch</title>
 <style>
 :root{{--bg:{BG};--ink:#e8dfc9;--dim:#a99c82;--faint:#7d745f;--gold:{GOLD};--gold2:{GOLD2};--blue:{BLUE};--line:#241f18}}
@@ -183,7 +184,7 @@ h2{{color:var(--gold2);font-weight:400;font-size:1.32rem;margin:2.4rem 0 .4rem;b
 .foot{{color:#7d745f;font-size:.82rem;margin-top:2rem}}
 </style></head>
 <body><div class=wrap>
-<a href="/" target="_top" style="color:#8a8172;font:400 .8rem system-ui,sans-serif;text-decoration:none">&#8592; narrowhighway.com</a>
+
 <h1>Completeness &mdash; subsystems of a watch</h1>
 <p class=lede>Some fields have a <b>closed structure</b>: a few fundamental quantities whose pairwise
 relations complete a table. When a cell is empty, symmetry <b>demands</b> what fills it; when the table
