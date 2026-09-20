@@ -214,6 +214,24 @@
   .found .txt{flex:1 1 320px}
   .found h3{font-size:1.35rem; margin:0 0 .4rem}
   .found p{margin:0; color:var(--ink-soft)}
+  /* the reach -> witness -> museum road (Phase 3: the journey that points past itself) */
+  .road{display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1.6rem}
+  @media (max-width:760px){ .road{grid-template-columns:1fr} }
+  .road .face{background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--line);
+    border-radius:12px; padding:1.15rem 1.25rem; display:flex; flex-direction:column;
+    text-decoration:none; color:inherit; transition:border-color .14s, transform .14s, box-shadow .14s}
+  a.face:hover{transform:translateY(-2px); box-shadow:var(--shadow)}
+  .road .step{font-family:"IBM Plex Mono",monospace; font-size:.64rem; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--ink-faint)}
+  .road .d{font-family:"IBM Plex Mono",monospace; font-size:.78rem; font-weight:600; margin-top:.45rem}
+  .road .face h3{font-size:1.12rem; margin:.35rem 0 .3rem}
+  .road .face p{margin:0 0 .85rem; color:var(--ink-soft); font-size:.92rem; flex:1}
+  .road .go{font-size:.9rem; font-weight:500}
+  .road .reach{border-left-color:#3bb6a3} .road .reach .d,.road .reach .go{color:var(--seal)}
+  .road .witness{border-left-color:#c9a24a} .road .witness .d,.road .witness .go{color:#a07d2c}
+  .road .museum{border-left-color:#8a7fd6} .road .museum .d,.road .museum .go{color:#6f62c2}
+  :root[data-theme="dark"] .road .witness .d,:root[data-theme="dark"] .road .witness .go,:root:not([data-theme="light"]) .road .witness .d,:root:not([data-theme="light"]) .road .witness .go{color:#d9b95e}
+  :root[data-theme="dark"] .road .museum .d,:root[data-theme="dark"] .road .museum .go,:root:not([data-theme="light"]) .road .museum .d,:root:not([data-theme="light"]) .road .museum .go{color:#a99cf0}
   footer{border-top:1px solid var(--line-soft); margin-top:3rem; padding:2.2rem 0 3rem}
   footer .wrap{display:flex; gap:1.4rem 2rem; flex-wrap:wrap; align-items:center;
     font-size:.86rem; color:var(--ink-faint)}
@@ -458,13 +476,34 @@ fetch(<span class="st">"https://narrowhighway.com/audit"</span>, {
 
   <!-- FOUNDATION: link to .org -->
   <section class="blk" style="padding-top:0"><div class="wrap">
-    <div class="found">
-      <div class="txt">
-        <h3>The same engine, its foundation made plain.</h3>
-        <p>Narrow Highway reaches the world in its own language here. The witness surface names the Rock
-          it is built on &mdash; Scripture in the original languages, Christ at the center.</p>
+    <div class="sec-head">
+      <span class="eyebrow">Three faces &middot; one road</span>
+      <h2>You&rsquo;ve seen it hold. Here is what it holds to.</h2>
+      <p>The proof is only the doorway. One engine wears three faces &mdash; the reach that speaks the world&rsquo;s
+        language, the witness that names the Rock beneath it, and the museum that keeps the inheritance. Walk the road.</p>
+    </div>
+    <div class="road">
+      <div class="face reach">
+        <span class="step">you are here</span>
+        <span class="d">narrowhighway.com</span>
+        <h3>The reach</h3>
+        <p>The world&rsquo;s own language: a deterministic model of reality, an open API, the agent door. Bring a claim; leave with a receipt.</p>
+        <span class="go">the proof that holds</span>
       </div>
-      <a class="btn btn-ghost" href="https://narrowhighway.org">Visit the witness &rsaquo;</a>
+      <a class="face witness" href="https://narrowhighway.org">
+        <span class="step">then &mdash; what holds it</span>
+        <span class="d">narrowhighway.org</span>
+        <h3>The witness</h3>
+        <p>The foundation made plain: Scripture in the original languages, Christ at the center &mdash; the Rock the number stands on.</p>
+        <span class="go">Enter the witness &rsaquo;</span>
+      </a>
+      <a class="face museum" href="https://narrowhighway.tv">
+        <span class="step">and &mdash; what it keeps</span>
+        <span class="d">narrowhighway.tv</span>
+        <h3>The museum</h3>
+        <p>Curated public-domain channels &mdash; the kept library of what endures, tuned to what you seek.</p>
+        <span class="go">Open the museum &rsaquo;</span>
+      </a>
     </div>
   </div></section>
 </main>
