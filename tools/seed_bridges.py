@@ -358,6 +358,21 @@ MASTER_EQUATIONS: list[dict] = [
          ("document_validation", "v_doc_validation_isbn10", "sum(i*d_i) mod 11 = 0 — a check digit is the residue that makes the total vanish"),
          ("document_validation", "v_doc_validation_luhn", "Luhn mod 10 = 0 — the same residue guard on a card number"),
      ]},
+    # THE FOURTH DISCRETE MASTER (2026-09-20) — the reasoning coupling. The two-valued algebra of AND/OR/NOT;
+    # propositional logic, switching circuits, and the algebra of sets are ONE Boolean algebra. Bridged earlier
+    # this session (logic_gate, set_algebra); named here as the master. Shown, not forced.
+    {"id": "boolean_algebra", "eq": "(a AND b), (a OR b), NOT a  —  the two-valued algebra",
+     "gist": "the law of thought made algebra: the same AND/OR/NOT structure is propositional logic, a network "
+             "of switches, and the algebra of sets. Boole titled it The Laws of Thought; Shannon showed a circuit "
+             "IS a Boolean function; Stone showed every Boolean algebra is a field of sets. Logic = circuits = sets. "
+             "A discrete master — the reasoning half of the couplings, decided by truth table rather than integral.",
+     "rows": [
+         ("formal_logic", "v_formal_logic_equivalence", "A <=> B iff identical truth tables — the propositional face"),
+         ("computer_science", "v_computer_science_logic_gate", "two gate networks are one circuit iff same truth table — the switching face (Shannon 1937)"),
+         ("mathematics", "v_mathematics_set_algebra", "a set identity holds iff the matching propositional formula is a tautology — the set face (Boole; Stone)"),
+         ("rhetoric", "v_rhetoric_syllogism_validity", "a valid syllogism is a Boolean entailment — the discourse face"),
+         ("philosophy", "v_philosophy_modal_logic_validity", "propositional validity underlies the modal K axiom — the deductive face"),
+     ]},
 ]
 
 
