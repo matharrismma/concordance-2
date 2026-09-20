@@ -373,6 +373,23 @@ MASTER_EQUATIONS: list[dict] = [
          ("rhetoric", "v_rhetoric_syllogism_validity", "a valid syllogism is a Boolean entailment — the discourse face"),
          ("philosophy", "v_philosophy_modal_logic_validity", "propositional validity underlies the modal K axiom — the deductive face"),
      ]},
+    # THE FIFTH DISCRETE MASTER (2026-09-20) — the iterated map. Apply a rule to the current state to get
+    # the next: the discrete-time dynamical system, twin of the continuous flow dx/dt = f(x). Shown, not forced.
+    {"id": "iterated_map", "eq": "x_{n+1} = f(x_n)",
+     "gist": "time made of steps: the next state is a fixed rule applied to this one. Euler steps an ODE forward, "
+             "Newton hunts a root, gradient descent hunts a minimum, compound interest rolls a balance, Fibonacci "
+             "sums the last two, the logistic map breeds chaos, Elo updates a rating from the surprise. One "
+             "recurrence, many fields — the discrete twin of the continuous flow, and where deterministic rules "
+             "still generate chaos.",
+     "rows": [
+         ("mathematics", "fibonacci", "F_n = F_{n-1} + F_{n-2} — the next from the last two"),
+         ("mathematics", "newton_method", "x_{n+1} = x_n - f/f' — iterate toward a root"),
+         ("mathematics", "logistic_map", "x_{n+1} = r x_n (1 - x_n) — the same recurrence breeds chaos"),
+         ("computer_science", "euler_integration", "y_{n+1} = y_n + h f(y_n) — an ODE stepped forward in time"),
+         ("computer_science", "gradient_descent", "x_{n+1} = x_n - eta grad f — iterate downhill toward a minimum"),
+         ("finance", "compound_discrete", "A_{n+1} = A_n (1 + r) — roll a balance forward one period"),
+         ("sports_analytics", "v_sports_analytics_elo_rating_update", "R' = R + K(S - E) — update a rating from the surprise"),
+     ]},
 ]
 
 
