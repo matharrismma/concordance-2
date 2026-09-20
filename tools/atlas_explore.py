@@ -22,6 +22,7 @@ try:
 except Exception:  # noqa: BLE001
     pass
 from seed_bridges import MASTER_EQUATIONS, FORM_DUALITIES, _load_theory  # noqa: E402
+from seed_bridges import MASTER_FAMILY, MASTER_FAMILY_META  # noqa: E402  (the four families)
 from seed_calculations import CALCS, CALC_THEORY, FORMS, FORM_PARENT, leaf_forms_ordered  # noqa: E402
 from seed_strategy import PATTERNS as STRAT_PATTERNS, ARENAS as STRAT_ARENAS  # noqa: E402
 
@@ -106,16 +107,18 @@ def build():
                        "m": slug_masters.get(slug, [])}
         calcs_by_form[form].append(slug)
 
+    fam_col = {fid: col for fid, _lab, _g, col in MASTER_FAMILY_META}
     masters = []
     for mi, me in enumerate(MASTER_EQUATIONS):
         mem = [s for _d, s, _sub in me["rows"]]
         forms = [calcs[s]["form"] for s in mem if s in calcs]
         domf = Counter(forms).most_common(1)
+        fam = MASTER_FAMILY[me["id"]]
         masters.append({"i": mi, "eq": me["eq"], "gist": me["gist"],
                         "doms": sorted({d for d, _s, _sub in me["rows"]}),
                         "subs": [[d, sub] for d, _s, sub in me["rows"]],
                         "members": mem, "domform": domf[0][0] if domf else "",
-                        "col": MPAL[mi % len(MPAL)]})
+                        "fam": fam, "col": fam_col[fam]})
 
     leaf = leaf_forms_ordered()
     form_dom = {f: len({calcs[s]["dom"] for s in calcs_by_form.get(f, [])}) for f in FORMS}
@@ -138,15 +141,28 @@ def build():
         "theoryTitles": {t: theory_titles.get(t, t) for t in show_theories},
         "dualities": [[a, b, k, e] for a, b, k, e in FORM_DUALITIES],
         "theoryIso": theory_iso, "mpal": MPAL,
+        "families": [{"id": f, "label": l, "gist": g, "col": c} for f, l, g, c in MASTER_FAMILY_META],
         "strategy": _strategy_data(),
         "counts": {"calcs": len(calcs), "forms": len(FORMS), "masters": len(masters),
                    "domains": len(all_domains), "theories": len(theory_titles),
                    "dualities": len(FORM_DUALITIES), "iso": len(theory_iso)},
     }
-    chips = "".join(
-        f'<button class="chip" data-mi="{m["i"]}" style="border-left-color:{m["col"]}">'
-        f'<span class="sw" style="background:{m["col"]}"></span>'
-        f'<code>{esc(m["eq"].split("->")[0].strip())}</code></button>' for m in masters)
+    # master chips, GROUPED by family — the four families made visible in the list
+    chip_parts = []
+    for fid, flab, fgist, fcol in MASTER_FAMILY_META:
+        fmasters = [m for m in masters if m["fam"] == fid]
+        if not fmasters:
+            continue
+        chip_parts.append(
+            f'<div class="famhead" style="border-left-color:{fcol}">'
+            f'<span class="fdot" style="background:{fcol}"></span>'
+            f'<b>{esc(flab)}</b><span class="fn">{len(fmasters)}</span>'
+            f'<span class="fg">{esc(fgist)}</span></div>')
+        chip_parts.append("".join(
+            f'<button class="chip" data-mi="{m["i"]}" style="border-left-color:{m["col"]}">'
+            f'<span class="sw" style="background:{m["col"]}"></span>'
+            f'<code>{esc(m["eq"].split("->")[0].strip())}</code></button>' for m in fmasters))
+    chips = "".join(chip_parts)
 
     payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")  # never break out of <script>
     return (_SHELL.replace("__DATA__", payload).replace("__CHIPS__", chips)
@@ -156,6 +172,7 @@ def build():
 # ---------------------------------------------------------------------------- the page
 _SHELL = r"""<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
+<script src="/shell.js"></script>
 <title>Atlas</title>
 <style>
 :root{--bg:#0f0d09;--ink:#e8dfc9;--dim:#a99c82;--faint:#7d745f;--gold:#c69a4a;--gold2:#e6c374;--line:#241f18;--panel:#15120d}
@@ -180,6 +197,12 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,'Iowan O
 .search{flex:1;background:#120f0a;border:1px solid var(--line);color:var(--ink);border-radius:4px;padding:.28rem .5rem;font:inherit;font-size:.82rem}
 .detail .eq{font-family:'DejaVu Sans Mono',monospace;color:var(--gold2);font-size:1.02rem;margin:.2rem 0;word-break:break-word}
 .detail .gist{color:var(--dim);font-size:.85rem;margin:.1rem 0 .5rem}
+.detail .fam{font-size:.78rem;margin:0 0 .5rem}.detail .fam .fdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.famhead{display:flex;align-items:baseline;gap:.42rem;margin:.75rem 0 .3rem;padding-left:.5rem;border-left:3px solid var(--line)}
+.famhead .fdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;align-self:center}
+.famhead b{color:var(--ink);font-weight:600;font-family:Georgia,serif;font-size:.94rem}
+.famhead .fn{color:var(--gold);font-family:'DejaVu Sans Mono',monospace;font-size:.72rem}
+.famhead .fg{color:var(--faint);font-size:.75rem}
 .detail table{border-collapse:collapse;width:100%;font-size:.8rem}
 .detail td{padding:.2rem .4rem;border-top:1px solid #201c15;vertical-align:top}
 .detail td.d{color:var(--gold);white-space:nowrap;cursor:pointer}.detail td.d:hover{color:var(--gold2);text-decoration:underline}
@@ -214,7 +237,6 @@ text.lbl{font-family:Georgia,serif;pointer-events:none}
 <body><div class=wrap>
 <div class=figwrap>
   <div class=top>
-    <a href="/" target="_top" title="Narrow Highway" style="color:#8a8172;font:400 .8rem system-ui,sans-serif;text-decoration:none">&#8592; narrowhighway.com</a>
     <h1>Atlas</h1>
     <div class=tabs id=tabs>
       <button class=tab data-l=kernel>kernel</button>
@@ -233,7 +255,7 @@ text.lbl{font-family:Georgia,serif;pointer-events:none}
   <div class=bar><button class=reset id=reset>&#8635;</button>
     <input class=search id=search placeholder="search a calculation, field, theory…" autocomplete=off></div>
   <div class=detail id=detail></div>
-  <h2>The __NMASTERS__ master equations</h2>
+  <h2>The __NMASTERS__ masters, in four families</h2>
   <div class=chips id=chips>__CHIPS__</div>
 </div>
 </div>
@@ -528,7 +550,9 @@ function setCount(t){document.getElementById('hint').textContent=t;}
 
 function showMaster(mi){sel={type:'master',id:mi};const m=D.masters[mi];
   const rows=m.subs.map(([d,s])=>`<tr><td class=d data-dom="${esc(d)}">${esc(d)}</td><td class=s>${esc(s)}</td></tr>`).join('');
-  detail.innerHTML=`<div class=eq>${esc(m.eq)}</div><div class=gist>${esc(m.gist)}</div><table>${rows}</table>`;
+  const fam=(D.families||[]).find(f=>f.id===m.fam)||{};
+  const famline=fam.label?`<div class=fam><span class=fdot style="background:${fam.col}"></span><b style="color:${fam.col}">${esc(fam.label)}</b> &mdash; ${esc(fam.gist)}</div>`:'';
+  detail.innerHTML=`<div class=eq>${esc(m.eq)}</div><div class=gist>${esc(m.gist)}</div>${famline}<table>${rows}</table>`;
   wireLinks();applyHi();setCount('master equation — '+m.doms.length+' domains');}
 function showDomain(dom){sel={type:'domain',id:dom};
   const ms=D.masters.filter(m=>m.doms.includes(dom));

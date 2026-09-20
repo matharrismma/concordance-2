@@ -423,6 +423,29 @@ MASTER_EQUATIONS: list[dict] = [
 ]
 
 
+# ── The four families of master coupling ──────────────────────────────────────────
+# The 30 masters are not a bag — they fall into four kinds, by what a coupling DOES.
+# Made visible 2026-09-20 (the refinement loop's convergence, surfaced). Shown, not
+# forced: the split IS the build history — the 23 original continuous couplings
+# (dynamical), the 5 discrete ones added later (algebraic), the one measure (geometric),
+# the one inference (evidential). Every master resolves to exactly one family; the map
+# is exhaustive by construction (dynamical is the default), so it can never fall stale.
+MASTER_FAMILY_META: list[tuple[str, str, str, str]] = [
+    ("dynamical",  "Continuous", "how things change across space and time", "#5fb3c9"),
+    ("algebraic",  "Discrete",   "combine exactly, step by step",           "#d9a441"),
+    ("geometric",  "Measure",    "take up space",                           "#7fae6b"),
+    ("evidential", "Inference",  "weigh a belief against chance",           "#b58fd6"),
+]
+_MASTER_FAM_EXCEPT: dict[str, str] = {
+    "modular_exponentiation": "algebraic", "binomial_counting": "algebraic",
+    "modular_reduction": "algebraic", "boolean_algebra": "algebraic", "iterated_map": "algebraic",
+    "euclidean_measure": "geometric",
+    "null_hypothesis_test": "evidential",
+}
+MASTER_FAMILY: dict[str, str] = {me["id"]: _MASTER_FAM_EXCEPT.get(me["id"], "dynamical")
+                                 for me in MASTER_EQUATIONS}
+
+
 def _load_theory() -> tuple[dict[str, str], list[tuple[str, str, str]]]:
     """(id -> title) and the same_form edges between theory cards."""
     titles, edges = {}, []
