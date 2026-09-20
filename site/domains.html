@@ -12,7 +12,7 @@ b{color:#cbbfa4;font-weight:400}code{font-family:'DejaVu Sans Mono',monospace;fo
 <b>master equation</b>, drawn through every domain it connects &mdash; the thread <b>is</b> the
 connection, and its colour is the formula that makes it. Where many threads pass through one node,
 that field is a <b>hub</b> of reality's computation (its node grows). 48 connected domains, joined
-by the 29 master equations.</p>
+by the 30 master equations.</p>
 <div class=leg>The widest bridges &mdash; one formula, this many fields:<div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #5fa8a0;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">du/dt = D * laplacian(u)</code> <span style="color:#8a8378">&mdash; 8 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #8fb26a;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">L = k * log10(x / x_ref)</code> <span style="color:#8a8378">&mdash; 8 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #c69a4a;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">J = -k * grad(phi)</code> <span style="color:#8a8378">&mdash; 7 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #a98bd0;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">f(t) = sum c_n e^(i n omega t)</code> <span style="color:#8a8378">&mdash; 7 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #b98fc0;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">y = 1 / (1 + e^(-x))</code> <span style="color:#8a8378">&mdash; 7 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #7fb069;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">dQ/dt = -Q/tau</code> <span style="color:#8a8378">&mdash; 6 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #9b7fc6;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">d2u/dt2 = c^2 * laplacian(u)</code> <span style="color:#8a8378">&mdash; 6 domains</span></div><div style="margin:.2rem 0"><i style="display:inline-block;width:16px;height:0;border-top:2px solid #c6a86f;vertical-align:middle;margin-right:7px"></i><code style="color:#e6c374">sum(in) = sum(out) + d(store)/dt</code> <span style="color:#8a8378">&mdash; 6 domains</span></div></div>
 <svg viewBox="0 0 1500 1500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Connections between domains: each master equation is a thread through the domains it joins">
 <rect width="100%" height="100%" fill="#0f0d09"/>
@@ -131,6 +131,7 @@ by the 29 master equations.</p>
 <path d="M265 470 Q707 788 964 1267" fill="none" stroke="#d1728f" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>measure ~ length^d   (A ~ L^2,  V ~ L^3) — connects construction, geography, geometry, linear_algebra</title></path>
 <path d="M964 1267 Q761 746 605 209" fill="none" stroke="#d1728f" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>measure ~ length^d   (A ~ L^2,  V ~ L^3) — connects construction, geography, geometry, linear_algebra</title></path>
 <path d="M605 209 Q663 727 354 1146" fill="none" stroke="#d1728f" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>measure ~ length^d   (A ~ L^2,  V ~ L^3) — connects construction, geography, geometry, linear_algebra</title></path>
+<path d="M1310 750 Q840 840 750 1310" fill="none" stroke="#c6a86f" stroke-width="1.5" opacity="0.5" stroke-linecap="round"><title>reject H0 if p &lt;= alpha — connects biology, statistics</title></path>
 <circle cx="750" cy="190" r="12.0" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>physics — on 11 master equations</title></circle>
 <text x="750" y="176" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-90 750 174)">physics</text>
 <circle cx="823" cy="195" r="9.7" fill="#c69a4a" stroke="#0f0d09" stroke-width="1"><title>electrical — on 8 master equations</title></circle>
@@ -155,7 +156,7 @@ by the 29 master equations.</p>
 <text x="1306" y="603" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-15 1306 601)">chemistry</text>
 <circle cx="1305" cy="677" r="4.3" fill="#6fb0a0" stroke="#0f0d09" stroke-width="1"><title>electrochemistry — on 1 master equations</title></circle>
 <text x="1321" y="677" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(-8 1321 675)">electrochemistry</text>
-<circle cx="1310" cy="750" r="7.4" fill="#7fb069" stroke="#0f0d09" stroke-width="1"><title>biology — on 5 master equations</title></circle>
+<circle cx="1310" cy="750" r="8.1" fill="#7fb069" stroke="#0f0d09" stroke-width="1"><title>biology — on 6 master equations</title></circle>
 <text x="1326" y="752" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(0 1326 750)">biology</text>
 <circle cx="1305" cy="823" r="6.6" fill="#7fb069" stroke="#0f0d09" stroke-width="1"><title>neuroscience — on 4 master equations</title></circle>
 <text x="1321" y="827" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(8 1321 825)">neuroscience</text>
@@ -179,7 +180,7 @@ by the 29 master equations.</p>
 <text x="899" y="1308" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(75 899 1306)">archaeology</text>
 <circle cx="823" cy="1305" r="6.6" fill="#9b7fc6" stroke="#0f0d09" stroke-width="1"><title>mathematics — on 4 master equations</title></circle>
 <text x="825" y="1323" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(82 825 1321)">mathematics</text>
-<circle cx="750" cy="1310" r="5.0" fill="#9b7fc6" stroke="#0f0d09" stroke-width="1"><title>statistics — on 2 master equations</title></circle>
+<circle cx="750" cy="1310" r="5.8" fill="#9b7fc6" stroke="#0f0d09" stroke-width="1"><title>statistics — on 3 master equations</title></circle>
 <text x="750" y="1328" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="start" transform="rotate(90 750 1326)">statistics</text>
 <circle cx="677" cy="1305" r="5.8" fill="#9b7fc6" stroke="#0f0d09" stroke-width="1"><title>probability — on 3 master equations</title></circle>
 <text x="675" y="1323" fill="#cbbfa4" font-size="10.5" font-family="Georgia,serif" text-anchor="end" transform="rotate(278 675 1321)">probability</text>

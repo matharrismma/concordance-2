@@ -405,6 +405,21 @@ MASTER_EQUATIONS: list[dict] = [
          ("geography", "v_geography_polygon_area", "spherical-excess area — measure carried onto a curved surface"),
          ("linear_algebra", "v_vector_magnitude", "|a| = sqrt(sum a_i^2) — the Euclidean length, measure in n dimensions"),
      ]},
+    # THE INFERENCE MASTER (2026-09-20) — a FOURTH kind: not a flow, an identity, or a measure, but a JUDGMENT
+    # under uncertainty. Place a statistic in its null distribution and reject when the tail is small. Shown, not forced.
+    {"id": "null_hypothesis_test", "eq": "reject H0 if p <= alpha",
+     "gist": "inference against chance: measure a statistic, place it in the distribution it would have if nothing "
+             "were going on, and reject that null when the tail probability falls below alpha. A chi-squared "
+             "goodness-of-fit asks whether inheritance fits a ratio; the p-value and the confidence interval are the "
+             "same decision read two ways. The fourth kind of master — neither dynamical nor algebraic nor geometric "
+             "but evidential: how much a result should move a belief.",
+     "rows": [
+         ("statistics", "v_verify_significance_consistency", "significant iff p <= alpha — the decision rule itself"),
+         ("statistics", "v_verify_pvalue_calibration", "p recomputed from the statistic and its null distribution"),
+         ("statistics", "v_verify_confidence_interval", "CI = estimate +- z*SE — the interval the same test would not reject"),
+         ("biology", "v_verify_hardy_weinberg", "chi^2 vs p^2:2pq:q^2 — is the population in Hardy-Weinberg equilibrium?"),
+         ("biology", "v_verify_mendelian", "chi^2 vs the Mendelian ratio — do the offspring counts fit the cross?"),
+     ]},
 ]
 
 
