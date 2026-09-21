@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Narrow Highway — the Concordance</title>
+<meta name="description" content="A guide to what is true. Bring anything — a word, a question, a verse, a claim — and it sorts itself, then hands you what is kept, checked, and sealed. Found, never generated.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+Hebrew:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ea; --panel:#fbfaf4; --grid:#e8e4d6; --ink:#1b241f; --ink-soft:#5a6b62; --ink-faint:#93a096;
+  --line:#e3ddce; --green:#1a6b52; --green-deep:#0f4a39; --green-wash:#e7efe9;
+  --gold:#9a7638; --gold-wash:#f2ebd9; --star:#1a6b52; --bad:#a2482f;
+  --shadow:0 1px 2px rgba(27,36,31,.05),0 18px 46px rgba(27,36,31,.09);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1512; --panel:#141d19; --grid:#1a2620; --ink:#eaf1ec; --ink-soft:#9db3a8; --ink-faint:#5f746a;
+  --line:#212e27; --green:#5fbf9a; --green-deep:#8ad4b4; --green-wash:#15251d;
+  --gold:#cba95f; --gold-wash:#221d12; --star:#3f7d67; --bad:#e08b6f;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 20px 50px rgba(0,0,0,.5);
+}}
+:root[data-theme="dark"]{
+  --bg:#0d1512; --panel:#141d19; --grid:#1a2620; --ink:#eaf1ec; --ink-soft:#9db3a8; --ink-faint:#5f746a;
+  --line:#212e27; --green:#5fbf9a; --green-deep:#8ad4b4; --green-wash:#15251d;
+  --gold:#cba95f; --gold-wash:#221d12; --star:#3f7d67; --bad:#e08b6f;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 20px 50px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter",system-ui,sans-serif;line-height:1.55;overflow-x:hidden}
+#sky{position:fixed;inset:0;z-index:0;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:0 22px;min-height:100%;display:flex;flex-direction:column}
+header.bar{display:flex;align-items:center;justify-content:space-between;padding:22px 0 0}
+.brand{display:flex;align-items:center;gap:9px;font-family:"Spectral",serif;font-weight:500;font-size:1rem;color:var(--ink);text-decoration:none;letter-spacing:.01em}
+.brand .ring{width:13px;height:13px;border-radius:50%;border:2px solid var(--green)}
+.rightbar{display:flex;align-items:center;gap:12px}
+.faces{display:flex;gap:2px;font-family:"IBM Plex Mono",monospace;font-size:.64rem}
+.faces a{padding:4px 9px;border-radius:20px;text-decoration:none;color:var(--ink-soft);letter-spacing:.04em}
+.faces a.on{background:var(--green);color:#fff}
+:root[data-theme="dark"] .faces a.on,:root:not([data-theme="light"]) .faces a.on{color:#08130e}
+.tog{background:none;border:1px solid var(--line);border-radius:50%;width:30px;height:30px;cursor:pointer;color:var(--ink-soft);font-size:.85rem}
+
+.stage{flex:1;display:flex;flex-direction:column}
+.home{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 0 70px}
+.home .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.34em;text-transform:uppercase;color:var(--green);margin-bottom:22px}
+.home h1{font-family:"Spectral",serif;font-weight:400;font-size:clamp(2.3rem,6vw,3.5rem);line-height:1.04;letter-spacing:-.015em;margin:0 0 8px;text-wrap:balance}
+.home h1 em{font-style:italic;color:var(--green-deep)}
+.home .said{font-family:"Spectral",serif;font-style:italic;font-size:1.08rem;color:var(--ink-soft);margin:0 0 34px;max-width:34ch}
+@keyframes rise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+body.intro .home .eyebrow{opacity:0;animation:rise .9s .1s ease forwards}
+body.intro .home h1{opacity:0;animation:rise .9s .22s ease forwards}
+body.intro .home .said{opacity:0;animation:rise .9s .34s ease forwards}
+body.intro .box{opacity:0;animation:rise .9s .46s ease forwards}
+body.intro .whisper{opacity:0;animation:rise .9s .6s ease forwards}
+.box{width:100%;max-width:560px;position:relative}
+.box .field{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:5px 5px 5px 20px;transition:border-color .2s}
+.box .field:focus-within{border-color:var(--green)}
+.box .glyph{color:var(--green);font-size:1.05rem;flex:none}
+.box input{flex:1;border:none;background:none;outline:none;font-family:"Spectral",serif;font-size:1.22rem;color:var(--ink);padding:12px 0}
+.box input::placeholder{color:var(--ink-faint)}
+.box button{flex:none;border:none;background:var(--green);color:#fff;font-family:"Inter";font-weight:600;font-size:.95rem;padding:12px 20px;border-radius:12px;cursor:pointer}
+:root[data-theme="dark"] .box button,:root:not([data-theme="light"]) .box button{color:#08130e}
+.whisper{margin-top:20px;font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.08em;color:var(--ink-faint)}
+.whisper b{color:var(--ink-soft);font-weight:500}
+
+.opened .home{display:none}
+.topsearch{display:none;padding:16px 0 6px;gap:12px;align-items:center}
+.opened .topsearch{display:flex;animation:rise .5s ease}
+.topsearch .field{flex:1;display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:4px 4px 4px 16px;box-shadow:var(--shadow)}
+.topsearch input{flex:1;border:none;background:none;outline:none;font-family:"Spectral",serif;font-size:1.05rem;color:var(--ink);padding:9px 0}
+.topsearch button{border:none;background:var(--green);color:#fff;font-weight:600;font-family:Inter;font-size:.85rem;padding:9px 15px;border-radius:10px;cursor:pointer}
+:root[data-theme="dark"] .topsearch button,:root:not([data-theme="light"]) .topsearch button{color:#08130e}
+
+.entry{padding:8px 0 60px;display:none}
+.opened .entry{display:block}
+.entry.show{animation:open .5s ease}
+@keyframes open{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.readas{font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);margin:14px 0 12px;display:flex;align-items:center;gap:10px}
+.readas .k{color:var(--green-deep);border:1px solid var(--green);border-radius:20px;padding:3px 11px}
+.loading{font-family:"Spectral",serif;font-style:italic;color:var(--ink-soft);padding:24px 6px;font-size:1.05rem}
+.loading .dot{display:inline-block;animation:blink 1.2s infinite}
+.loading .dot:nth-child(2){animation-delay:.2s}.loading .dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
+.card .top{padding:24px 30px 18px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.card .top .subj{font-family:"Spectral",serif;font-weight:500;font-size:clamp(1.7rem,5vw,2.6rem);line-height:.98;letter-spacing:-.02em}
+.card .top .ess{font-family:"Spectral",serif;font-style:italic;color:var(--ink-soft);font-size:1rem;flex:1;min-width:170px}
+.reg{display:grid;grid-template-columns:132px 1fr;gap:20px;padding:22px 30px;border-bottom:1px solid var(--line)}
+.reg:last-child{border-bottom:none}
+.reg .lab{font-family:"IBM Plex Mono",monospace;font-size:.63rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);padding-top:2px}
+.reg .c{min-width:0}
+.src{font-family:"IBM Plex Mono",monospace;font-size:.62rem;color:var(--ink-faint);letter-spacing:.03em;margin-top:9px}
+.src a{color:var(--green-deep);text-decoration:none;border-bottom:1px solid var(--green-wash)}
+.def{font-size:1.06rem;line-height:1.55}
+.hit{display:block;text-decoration:none;color:inherit;padding:9px 0;border-bottom:1px dashed var(--line)}
+.hit:last-child{border-bottom:none}
+.hit .t{font-weight:600;color:var(--ink)}
+.hit .sn{color:var(--ink-soft);font-size:.92rem;line-height:1.5}
+.hit .sh{font-family:"IBM Plex Mono",monospace;font-size:.6rem;color:var(--green-deep);letter-spacing:.04em;text-transform:uppercase;margin-right:7px}
+.domlist{display:flex;flex-wrap:wrap;gap:7px}
+.dom{font-size:.8rem;padding:6px 11px;border-radius:8px;background:var(--green-wash);color:var(--green-deep);line-height:1.25;text-decoration:none}
+
+.verdict-hero{display:flex;align-items:center;gap:16px;padding:24px 30px;flex-wrap:wrap}
+.vbadge{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:.72rem;letter-spacing:.12em;padding:7px 14px;border-radius:8px;background:var(--green);color:#fff;white-space:nowrap}
+.vbadge.no{background:var(--gold-wash);color:var(--gold)}
+:root[data-theme="dark"] .vbadge,:root:not([data-theme="light"]) .vbadge{color:#08130e}
+:root[data-theme="dark"] .vbadge.no,:root:not([data-theme="light"]) .vbadge.no{color:var(--gold)}
+.vclaim{font-family:"Spectral",serif;font-size:1.28rem;flex:1;min-width:190px;line-height:1.3}
+.vdetail{padding:0 30px 22px;color:var(--ink-soft);font-size:.96rem}
+.vdetail .mono{font-family:"IBM Plex Mono",monospace;font-size:.82rem;color:var(--green-deep);background:var(--green-wash);padding:2px 7px;border-radius:5px}
+.window{margin:16px 30px;padding:12px 16px;border-left:3px solid var(--gold);background:var(--gold-wash);font-family:"Spectral",serif;font-style:italic;font-size:.98rem;color:var(--ink-soft);border-radius:0 8px 8px 0}
+.hebrow{display:flex;flex-wrap:wrap;gap:6px;direction:rtl}
+.hw{border:1px solid var(--line);border-radius:8px;padding:6px 9px 5px;text-align:center;background:var(--bg);min-width:44px}
+.hw .h{font-family:"Noto Serif Hebrew",serif;font-size:1.35rem;color:var(--gold)}
+.hw .s{font-family:"IBM Plex Mono",monospace;font-size:.56rem;color:var(--ink-faint);margin-top:2px;direction:ltr}
+.err{padding:22px 30px;color:var(--bad);font-family:"Spectral",serif;font-style:italic}
+
+.creed{text-align:center;padding:8px 20px 40px;color:var(--ink-faint)}
+.creed .b{font-family:"Spectral",serif;font-style:italic;font-size:1.02rem;color:var(--ink-soft);max-width:42ch;margin:0 auto 7px;text-wrap:balance}
+.creed .s{font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.14em}
+.creed a{color:var(--ink-soft);text-decoration:none;border-bottom:1px solid var(--line)}
+@media(max-width:600px){
+  .reg{grid-template-columns:1fr;gap:7px;padding:18px 18px}
+  .card .top,.verdict-hero,.vdetail{padding-left:18px;padding-right:18px}
+  .window{margin-left:18px;margin-right:18px}
+  .box input{font-size:1.08rem}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+<div class="wrap">
+  <header class="bar">
+    <a class="brand" href="#" onclick="reset();return false"><span class="ring"></span>Narrow Highway</a>
+    <div class="rightbar">
+      <div class="faces"><a class="on" href="/concordance.html">reach</a><a href="https://narrowhighway.org">witness</a><a href="https://narrowhighway.tv">museum</a></div>
+      <button class="tog" id="tog" title="Light or dark">◑</button>
+    </div>
+  </header>
+
+  <div class="stage" id="stage">
+    <section class="home" id="home">
+      <p class="eyebrow">A guide to what is true</p>
+      <h1>Bring <em>anything.</em></h1>
+      <p class="said">It has already been kept. Ask it a word, a question, a verse, a claim — it will know what you mean.</p>
+      <div class="box">
+        <div class="field">
+          <span class="glyph">✳</span>
+          <input id="q" type="text" autocomplete="off" spellcheck="false" aria-label="Bring anything">
+          <button id="go">Open</button>
+        </div>
+      </div>
+      <p class="whisper"><b>676,354</b>&nbsp; kept · found, checked &amp; sealed · <b>never generated</b></p>
+    </section>
+
+    <div class="topsearch">
+      <div class="field"><span style="color:var(--green)">✳</span><input id="q2" type="text" autocomplete="off" spellcheck="false"></div>
+      <button id="go2">Open</button>
+    </div>
+    <main class="entry" id="entry" aria-live="polite"></main>
+  </div>
+
+  <p class="creed">
+    <span class="b">What is not the answer is eliminated, so the narrow path is illuminated by what survives.</span><br>
+    <span class="s">FOUND · CHECKED · SEALED &nbsp;·&nbsp; <a href="/explore.html">the Atlas →</a></span>
+  </p>
+</div>
+
+<script>
+const CHIPS=["water","the speed of light is 299,792,458 m/s","how do I purify creek water","Genesis 1:2","light","100 kilometers is 62.14 miles"];
+function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+const E=document.getElementById("entry");
+
+// ── discern what was brought — the sort ──
+function discern(raw){
+  const s=raw.trim(), l=s.toLowerCase();
+  if(/^([1-3]\s?)?[a-z][a-z. ]{1,20}\s+\d{1,3}:\d{1,3}/i.test(s)) return "verse";
+  if(/[?]$/.test(s)||/^(how|what|why|who|where|when|which|can|should|do|does|is there|tell me)\b/i.test(l)) return "question";
+  if(/\d/.test(s)&&/\b(is|are|=|equals|per|to|in|of|has|weigh|equal)\b/.test(l)) return "claim";
+  return "word";
+}
+async function api(path, opts){
+  const r=await fetch(path, opts);
+  const j=await r.json().catch(()=>({}));
+  return (j && j.data!==undefined) ? j.data : j;
+}
+function reg(lab,inner){return `<div class="reg"><div class="lab">${lab}</div><div class="c">${inner}</div></div>`}
+function hit(c){
+  return `<a class="hit" href="/card.html?id=${encodeURIComponent(c.id||"")}"><span class="t"><span class="sh">${esc(c.shelf)}</span>${esc(c.title)}</span>`
+       + (c.snippet?`<span class="sn">${esc(String(c.snippet).slice(0,160))}</span>`:"")+`</a>`;
+}
+
+// ── the four sorts, each a live call to the engine ──
+async function doQuestion(raw){
+  const d=await api("/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:raw})});
+  const res=(d&&d.results)||[];
+  if(!res.length) return `<div class="card"><div class="err">Nothing kept answers that yet — the window is honest when it is empty. Try a word or a claim.</div></div>`;
+  const lead=res[0];
+  let h=`<div class="card"><div class="top"><span class="subj" style="font-size:1.5rem">${esc(lead.title)}</span></div>`;
+  h+=reg("Found &amp; kept",`<div class="def">${esc(String(lead.snippet||"").slice(0,600))}</div><div class="src">shelf ${esc(lead.shelf)} · found and cited, verbatim — not generated</div>`);
+  if(res.length>1) h+=reg("Also kept", res.slice(1,5).map(hit).join(""));
+  if(d.note) h+=`<div class="window">${esc(d.note)}</div>`;
+  return h+`</div>`;
+}
+async function doClaim(raw){
+  const d=await api("/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({claim:raw})});
+  const verd=d.verdict||"—", checks=(d.checks||[]);
+  if(verd==="NOTHING_TO_CHECK"||!checks.length){
+    return `<div class="card"><div class="verdict-hero"><span class="vbadge no">NO COMPUTABLE CLAIM</span><span class="vclaim">${esc(raw)}</span></div>`
+      +`<div class="vdetail">${esc(d.note||"The engine proves numbers, formulas and constants with a receipt; it will not bluff the rest. Try it as a word or a question.")}</div></div>`;
+  }
+  const seal=d.receipt||d.cite_url;
+  let rows=checks.slice(0,4).map(c=>`<div style="margin:8px 0"><span class="mono">${esc(c.detail||c.claim)}</span> — <b>${esc(c.verdict)}</b> · ${esc(c.domain||"")}</div>`).join("");
+  return `<div class="card"><div class="verdict-hero"><span class="vbadge">✓ ${esc(verd)}</span><span class="vclaim">${esc(raw)}</span></div>`
+    +`<div class="vdetail">${rows}<div class="src">proven at the boundary, not generated${seal?` · <a href="${esc(seal)}" target="_blank" rel="noopener">re-verify ↗</a>`:""}</div></div></div>`;
+}
+async function doVerse(raw){
+  const d=await api("/original?ref="+encodeURIComponent(raw));
+  const words=(d&&d.words)||[];
+  if(!words.length) return `<div class="card"><div class="err">No verse found at “${esc(raw)}”. Try like “Genesis 1:2” or “John 3:16”.</div></div>`;
+  const cells=words.map(w=>`<span class="hw"><span class="h">${esc(w.word)}</span><span class="s">${esc(w.strongs||"")}</span></span>`).join("");
+  let h=`<div class="card"><div class="top"><span class="subj" style="font-size:1.5rem">${esc(d.ref||raw)}</span><span class="ess">read in the tongue it was given</span></div>`;
+  h+=reg("The original", `<div class="hebrow">${cells}</div><div class="src">${words.length} words — each to its Strong’s · the plumb-line</div>`);
+  return h+`</div>`;
+}
+async function doWord(raw){
+  const d=await api("/search?q="+encodeURIComponent(raw)+"&limit=14");
+  const res=(d&&d.results)||[];
+  if(!res.length) return `<div class="card"><div class="err">Nothing kept under “${esc(raw)}” yet. The keeping always grows.</div></div>`;
+  const byShelf={}; res.forEach(r=>{(byShelf[r.shelf]=byShelf[r.shelf]||[]).push(r)});
+  const def=res.find(r=>r.shelf==="dictionary")||res.find(r=>/dictionary|encyclopedia|lexicon/.test(r.shelf||""))||res[0];
+  const theories=(byShelf["theories"]||[]);
+  let h=`<div class="card"><div class="top"><span class="subj">${esc(raw)}</span><span class="ess">its life across all that is kept</span></div>`;
+  if(def) h+=reg("What it is", `<div class="def">${esc(String(def.snippet||def.title).slice(0,400))}</div><div class="src">shelf ${esc(def.shelf)} · <a href="/card.html?id=${encodeURIComponent(def.id)}">the card →</a></div>`);
+  if(theories.length) h+=reg('Across reality<br><span style="color:var(--green-deep)">the Atlas</span>',
+     `<div class="domlist">${theories.slice(0,10).map(t=>`<a class="dom" href="/card.html?id=${encodeURIComponent(t.id)}">${esc(t.title)}</a>`).join("")}</div><div class="src">the kept domains this thread touches — joined to the master equations</div>`);
+  const others=res.filter(r=>r!==def && r.shelf!=="theories").slice(0,6);
+  if(others.length) h+=reg("Also kept", others.map(hit).join(""));
+  return h+`</div>`;
+}
+
+const LABELS={word:"a word",question:"a question",claim:"a claim",verse:"a verse"};
+async function open(raw){
+  const kind=discern(raw);
+  document.body.classList.add("opened");
+  document.getElementById("q2").value=raw;
+  window.scrollTo({top:0,behavior:"smooth"});
+  E.className="entry show";
+  E.innerHTML=`<div class="readas"><span>brought this — reading as</span><span class="k">${LABELS[kind]}</span></div>`
+    +`<div class="loading">consulting the keeping<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>`;
+  let body;
+  try{
+    body = kind==="question"?await doQuestion(raw)
+         : kind==="claim"?await doClaim(raw)
+         : kind==="verse"?await doVerse(raw)
+         : await doWord(raw);
+  }catch(err){
+    body=`<div class="card"><div class="err">The keeping did not answer — the engine may be reloading. Try again in a moment.</div></div>`;
+  }
+  E.innerHTML=`<div class="readas"><span>brought this — reading as</span><span class="k">${LABELS[kind]}</span></div>`+body;
+}
+function reset(){document.body.classList.remove("opened");document.getElementById("q").value="";document.getElementById("q").focus();return false}
+
+function runFrom(id){const v=document.getElementById(id).value.trim();if(v)open(v)}
+document.getElementById("go").onclick=()=>runFrom("q");
+document.getElementById("go2").onclick=()=>runFrom("q2");
+document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter")runFrom("q")});
+document.getElementById("q2").addEventListener("keydown",e=>{if(e.key==="Enter")runFrom("q2")});
+document.getElementById("tog").onclick=()=>{const r=document.documentElement;r.setAttribute("data-theme",r.getAttribute("data-theme")==="dark"?"light":"dark")};
+
+// cycling placeholder — the Guide's entries drifting past
+const qi=document.getElementById("q");let ci=0,typing=false;
+qi.addEventListener("focus",()=>typing=true);qi.addEventListener("blur",()=>{if(!qi.value)typing=false});
+(function cyclePH(){if(!typing&&!qi.value){qi.setAttribute("placeholder",CHIPS[ci%CHIPS.length]);ci++}setTimeout(cyclePH,2600)})();
+qi.setAttribute("placeholder",CHIPS[0]);
+document.body.classList.add("intro");setTimeout(()=>document.body.classList.remove("intro"),1700);
+
+// deep-link: ?q=... opens straight to an entry
+const urlq=new URLSearchParams(location.search).get("q");
+if(urlq){document.getElementById("q").value=urlq;open(urlq)}
+
+// the dormant map of reality — a faint breathing constellation
+const cv=document.getElementById("sky"),cx=cv.getContext("2d");let W,H,pts;
+const reduce=window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+function starCol(){return getComputedStyle(document.documentElement).getPropertyValue("--star").trim()||"#1a6b52"}
+function initSky(){W=cv.width=innerWidth;H=cv.height=innerHeight;const n=Math.min(70,Math.floor(W*H/16000));
+  pts=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.08,vy:(Math.random()-.5)*.08,r:Math.random()*1.4+.5,tw:Math.random()*6.28}))}
+function draw(t){cx.clearRect(0,0,W,H);const col=starCol();
+  for(const p of pts){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
+    cx.globalAlpha=(.10+.10*Math.sin(t/1600+p.tw));cx.fillStyle=col;cx.beginPath();cx.arc(p.x,p.y,p.r,0,6.28);cx.fill()}
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const a=pts[i],b=pts[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy;
+    if(d<9000){cx.globalAlpha=(1-d/9000)*.06;cx.strokeStyle=col;cx.lineWidth=.5;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}}
+  cx.globalAlpha=1;requestAnimationFrame(draw)}
+addEventListener("resize",initSky);initSky();
+if(reduce){draw(0)}else{requestAnimationFrame(draw)}
+</script>
+</body>
+</html>
