@@ -157,6 +157,21 @@ _STUB_KEEPS = frozenset({"id", "title", "shelf", "surface", "kind", "box", "visi
                          "call", "facets"})  # the Dewey call number + controlled facets, kept for browse
 
 
+def call_number(card: dict) -> str:
+    """The Dewey-style call number `shelf.class.item`, DERIVED from shelf + box — both of which are
+    resident in RAM even for a frozen stub, so every card (the 637k on the shards included) connects
+    to the same tree with no shard read. Must match tools/classify_keeping.call_number exactly."""
+    shelf = (card.get("shelf") or "misc").strip().lower()
+    box = (card.get("box") or "").strip().lower()
+    if not box:
+        return shelf
+    if "_" in box:
+        cls, item = box.split("_", 1)
+    else:
+        cls, item = box, ""
+    return ".".join(p for p in (shelf, cls, item) if p)
+
+
 def frozen_shelves() -> frozenset:
     """The shelves currently riding the shards — empty unless BOTH the env names them AND the
     shards exist (bodies are never shed without a place to rehydrate from)."""
@@ -211,6 +226,67 @@ class Corpus:
         for v in self._by_token.values():
             v.sort()
         self._n = max(1, len(self._index_card_ids()))
+
+        # THE CALL-NUMBER INDEX — built once here so a walk is an instant lookup, never a scan of
+        # the whole keeping. We look faster than we are because the shelves are already sorted and
+        # counted before anyone asks. Connects every PUBLIC card (frozen shards included, since the
+        # number derives from shelf+box which are resident). `_call_tree` is nested
+        # {seg: {"n": count, "kids": {...}}}; `_cids_by_call` groups cards by their full call for the
+        # card list; `_public_sorted` is the whole keeping pre-sorted so top-level paging is O(page).
+        self._call_tree: Dict[str, dict] = {}
+        self._cids_by_call: Dict[str, List[str]] = {}
+        for cid, c in cards.items():
+            if not is_public(c):
+                continue
+            call = c.get("call") or call_number(c)
+            c["call"] = call
+            self._cids_by_call.setdefault(call, []).append(cid)
+            node = self._call_tree
+            for seg in call.split("."):
+                entry = node.setdefault(seg, {"n": 0, "kids": {}})
+                entry["n"] += 1
+                node = entry["kids"]
+        for v in self._cids_by_call.values():
+            v.sort()
+        self._public_sorted: List[str] = sorted(
+            (cid for cids in self._cids_by_call.values() for cid in cids),
+            key=lambda cid: ((cards[cid].get("call") or ""), (cards[cid].get("title") or cid)))
+
+    def _call_node(self, prefix: str) -> Optional[dict]:
+        node = self._call_tree
+        entry = None
+        for seg in (prefix.split(".") if prefix else []):
+            entry = node.get(seg)
+            if entry is None:
+                return None
+            node = entry["kids"]
+        return entry
+
+    def call_children(self, prefix: str = "") -> List[tuple]:
+        """The next level of the call tree under `prefix` — [(full_call, count)], most first. Instant."""
+        if not prefix:
+            return sorted(((seg, e["n"]) for seg, e in self._call_tree.items()), key=lambda x: -x[1])
+        entry = self._call_node(prefix)
+        if entry is None:
+            return []
+        return sorted(((prefix + "." + seg, e["n"]) for seg, e in entry["kids"].items()), key=lambda x: -x[1])
+
+    def call_total(self, prefix: str = "") -> int:
+        if not prefix:
+            return sum(e["n"] for e in self._call_tree.values())
+        entry = self._call_node(prefix)
+        return entry["n"] if entry else 0
+
+    def cids_for_call(self, prefix: str) -> List[str]:
+        """Card ids at or under a call prefix, in stable order — gathered from the grouped index
+        (bounded by the number of distinct call numbers, not the size of the keeping)."""
+        p = (prefix or "").strip().lower().rstrip(".")
+        out: List[str] = []
+        for call, cids in self._cids_by_call.items():
+            if call == p or call.startswith(p + "."):
+                out.extend(cids)
+        out.sort(key=lambda cid: ((self.cards[cid].get("call") or ""), (self.cards[cid].get("title") or cid)))
+        return out
 
     def footprint(self, sample: int = 400) -> Dict[str, Any]:
         """What this corpus costs in memory, BY STRUCTURE — measured, not believed.
@@ -911,39 +987,35 @@ def browse(shelf: Optional[str] = None, limit: int = 20, offset: int = 0,
     tree, e.g. call='classics.augustine'), or by controlled FACET ('verse', or 'person:david').
     Returns briefs PLUS the call-tree children under the current prefix, so a reader can walk a
     shelf down one level at a time."""
-    from collections import Counter
-    cards = [c for c in default_corpus().cards.values() if is_public(c)]
-    if shelf:
-        cards = [c for c in cards if (c.get("shelf") or "").lower() == shelf.lower()]
+    cp = default_corpus()
     pref = (call or "").strip().lower().rstrip(".")
+    children = [{"call": c, "count": n} for c, n in cp.call_children(pref)[:60]]  # precomputed
     if pref:
-        cards = [c for c in cards
-                 if (c.get("call") or "").lower() == pref
-                 or (c.get("call") or "").lower().startswith(pref + ".")]
+        cids = cp.cids_for_call(pref)                 # walk — bounded by distinct call numbers
+    elif not shelf and not facet:
+        cids = cp._public_sorted                      # whole keeping, pre-sorted at load
+    else:
+        cids = [cid for cid, c in cp.cards.items() if is_public(c)]
+    if shelf:
+        cids = [cid for cid in cids if (cp.cards.get(cid, {}).get("shelf") or "").lower() == shelf.lower()]
     if facet:
         fkey, _, fval = facet.strip().lower().partition(":")
-        def _has(c: dict) -> bool:
-            fs = c.get("facets") or {}
+        def _has(cid: str) -> bool:
+            fs = cp.cards.get(cid, {}).get("facets") or {}
             if not isinstance(fs, dict) or fkey not in fs:
                 return False
             return (not fval) or any(fval == str(v).lower() for v in (fs.get(fkey) or []))
-        cards = [c for c in cards if _has(c)]
-    cards.sort(key=lambda c: ((c.get("call") or c.get("shelf") or ""), (c.get("title") or c.get("id") or "")))
-    total = len(cards)
+        cids = [cid for cid in cids if _has(cid)]
+    if (shelf or facet) and not pref:
+        cids = sorted(cids, key=lambda cid: ((cp.cards.get(cid, {}).get("call") or cp.cards.get(cid, {}).get("shelf") or ""),
+                                             (cp.cards.get(cid, {}).get("title") or cid)))
+    total = len(cids)
     offset = max(0, offset)
     limit = max(1, min(limit, 100))
-    # the next level of the call tree under the current prefix — the sub-shelves to walk into
-    depth = len(pref.split(".")) if pref else 0
-    kids: Counter = Counter()
-    for c in cards:
-        cl = c.get("call") or ""
-        parts = cl.split(".") if cl else []
-        if len(parts) > depth:
-            kids[".".join(parts[:depth + 1])] += 1
-    children = [{"call": k, "count": v} for k, v in kids.most_common(60)]
+    page = cids[offset:offset + limit]
     return {"total": total, "offset": offset, "limit": limit, "shelf": shelf,
             "call": call, "facet": facet, "children": children,
-            "cards": [_brief(rehydrate(c)) for c in cards[offset:offset + limit]]}
+            "cards": [_brief(rehydrate(cp.cards[cid])) for cid in page if cid in cp.cards]}
 
 
 def stats() -> Dict[str, Any]:
