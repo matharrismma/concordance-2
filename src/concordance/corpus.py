@@ -297,6 +297,85 @@ def deep_call(card: dict) -> str:
     return base
 
 
+# ── Facets — the controlled subjects beside the call number ──────────────────────────────────
+# deep_call gives a card its PLACE (the shelf spine); facets give it its controlled SUBJECTS.
+# Every structural band maps to exactly one facet TYPE; every other band folds UNDER a facet as a
+# VALUE (a verse, a person, a place, a taxon), never a free top-level tag — so a filling library
+# stays navigable instead of drowning in a folksonomy. Must match tools/classify_keeping's schedule.
+FACET_SCHEDULE: Dict[str, List[str]] = {
+    "verse":      ["chapter_verse", "cites", "citation", "cross_reference", "xref"],
+    "person":     ["person", "mention_person", "father", "prophet", "apostle"],
+    "place":      ["place", "mention_place", "region", "city", "geography"],
+    "mention":    ["mention"],
+    "sequence":   ["sequence", "prev", "next", "chapter", "section", "part"],
+    "reference":  ["references", "reference", "proof_text", "proof", "citation_of"],
+    "dictionary": ["dictionary", "bible_dictionary", "easton", "isbe", "smith", "vine", "thesaurus"],
+    "concept":    ["concept", "scripture", "doctrine", "theme", "stoic", "virtue"],
+    "taxon":      ["organism", "taxonomy", "binomial", "species", "genus"],
+    "language":   ["arpabet", "phonetics", "aramaic", "transliteration", "original language"],
+    "provenance": ["auto_detected", "manual", "curated", "imported"],
+}
+FACET_OF_BAND: Dict[str, str] = {b: f for f, _bands in FACET_SCHEDULE.items() for b in _bands}
+_VERSE_FACET_RE = re.compile(
+    r"^(?:[1-3]\s?)?(?:[A-Z][a-z]{1,11}\.?|Ps|Jas|Rom|Phil|Matt|Gen|Exod|Deut|Rev)"
+    r"\s?\d{1,3}(?:[:.]\d{1,3})?(?:-\d{1,3})?$")
+_PSALM_FACET_RE = re.compile(r"^psalm_\d+$", re.I)
+
+
+def facets_for(card: dict) -> Dict[str, List[str]]:
+    """The card's controlled facets — {facet_type: [values]} folded from its flat `bands` by the
+    schedule. A bare value folds under a facet instead of floating: a verse ref → `verse`; a name
+    co-occurring with a person/place/concept type → that facet; a token already carried by the call
+    number's source (the box) → dropped as redundant; anything else → `subject` (kept, never lost).
+    Must match tools/classify_keeping."""
+    out: Dict[str, List[str]] = {}
+    bands = card.get("bands") or []
+    if not isinstance(bands, list):
+        bands = [bands]
+    box = (card.get("box") or "").strip().lower()
+    redundant = set(box.split("_")) | ({box} if box else set())
+    types: set = set()
+    values: List[str] = []
+    for b in bands:
+        if not isinstance(b, str) or not b:
+            continue
+        if b in FACET_OF_BAND:
+            types.add(FACET_OF_BAND[b])
+        else:
+            values.append(b)
+    for t in types:
+        out.setdefault(t, [])
+    for v in values:
+        if _VERSE_FACET_RE.match(v) or _PSALM_FACET_RE.match(v):
+            out.setdefault("verse", []).append(v)
+        elif v.lower() in redundant:
+            continue
+        elif "person" in types:
+            out.setdefault("person", []).append(v)
+        elif "place" in types:
+            out.setdefault("place", []).append(v)
+        elif "concept" in types:
+            out.setdefault("concept", []).append(v)
+        else:
+            out.setdefault("subject", []).append(v)  # a named value with no clearer facet — kept
+    return {k: sorted(set(v)) for k, v in out.items()}
+
+
+def shelve(card: dict) -> dict:
+    """Give a card its PLACE and its SUBJECTS — the Dewey call number + controlled facets — from
+    what it already carries (shelf, box, title, bands). IDEMPOTENT: a card that already carries a
+    call/facets is left untouched, so a pre-classified keeping pays nothing on reload. This is the
+    one gate every card crosses at load (load_cards._keep) and at runtime mint (Corpus.add_card),
+    so a card is shelved the moment it enters the keeping — no separate pass, no seeder to forget.
+    (tools/classify_keeping is the BULK tool that re-derives and PERSISTS these into the JSONL when
+    the rules change; shelve only fills what is missing.)"""
+    if not card.get("call"):
+        card["call"] = deep_call(card)
+    if card.get("facets") is None:
+        card["facets"] = facets_for(card)
+    return card
+
+
 def frozen_shelves() -> frozenset:
     """The shelves currently riding the shards — empty unless BOTH the env names them AND the
     shards exist (bodies are never shed without a place to rehydrate from)."""
@@ -495,6 +574,7 @@ class Corpus:
         cid = card.get("id")
         if not cid:
             return
+        shelve(card)  # a live-minted card is shelved like any other (walkable on next reload)
         self.cards[cid] = card
         if is_public(card):
             for t in set(_tokens(_card_text(card))):
@@ -845,6 +925,11 @@ def load_cards(path: Optional[Path] = None,
     frozen = frozen_shelves()
 
     def _keep(c: dict) -> None:
+        # SHELVE at the gate: every card gets its call + facets here, computed from the FULL card
+        # (bands present) before any frozen strip — so a newly-carded shelf is walkable and
+        # facet-reachable the instant it loads, with no separate classify pass. Idempotent: a
+        # pre-classified card keeps its stored call/facets and pays nothing.
+        shelve(c)
         # a frozen-shelf card loads as a stub — the graph resident, the weight on the shard
         if c.get("shelf") in frozen:
             full_toks = set(_tokens(_card_text(c)))
