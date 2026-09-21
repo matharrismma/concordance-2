@@ -14,7 +14,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 os.environ["CONCORDANCE_DATA_DIR"] = tempfile.mkdtemp(prefix="nh-bible-")
-os.environ["CONCORDANCE_STRONGS_DIR"] = tempfile.mkdtemp(prefix="nh-strongs-")  # isolate: no real DB
+# No CONCORDANCE_STRONGS_DIR override: this file's one Concordance() test monkeypatches
+# _lex_entry/strongs_verses directly (below) and never touches STRONGS_G/STRONGS_H/WEB_DB, so it
+# needs no isolation there. Setting it anyway used to permanently poison the process: ROOT in
+# concordance/strongs/{concordance,lookup}.py is a module-level constant read once from this env
+# var, pytest imports every test file during collection (before any test runs), and whichever
+# file's import first triggers loading concordance.strongs.concordance wins for the whole run.
+# That made test_ask.py's live Greek word-study test fail with "not_in_lexicon" whenever this file
+# was collected first — a real bug, not a flake (feedback_a_global_cache_race_can_make_a_safety_gate_lie).
 
 from concordance.verifiers import scripture  # noqa: E402
 from concordance.strongs import Concordance  # noqa: E402
