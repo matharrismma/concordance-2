@@ -29,12 +29,11 @@
 
   /* --- the canonical spine. Links are absolute so they work from any surface. --- */
   var NAV = [
-    { k: "verify",    label: "Verify",    href: "/#verify" },
-    { k: "atlas",     label: "Atlas",     href: "/explore.html" },
-    { k: "domains",   label: "Domains",   href: "/domains.html" },
-    { k: "mechanism", label: "Mechanism", href: "/#mechanism" },
-    { k: "api",       label: "API",       href: "/#api" },
-    { k: "map",       label: "Map",       href: "/map.html" }
+    { k: "concordance", label: "Concordance", href: "/" },
+    { k: "atlas",       label: "Atlas",       href: "/explore.html" },
+    { k: "domains",     label: "Domains",     href: "/domains.html" },
+    { k: "verify",      label: "Verify",      href: "/com.html#verify" },
+    { k: "map",         label: "Map",         href: "/map.html" }
   ];
   var FACES = [
     { k: "reach",   label: "reach",   href: "https://narrowhighway.com" },
@@ -46,8 +45,10 @@
     var override = document.documentElement.getAttribute("data-nh-section");
     if (override) return override;
     var p = location.pathname.replace(/\/+$/, "") || "/";
-    if (p === "/" || p === "/index.html" || p === "/com.html") return "home";
+    if (p === "/" || p === "/index.html") return "concordance";
+    if (p === "/com.html") return "verify";
     var map = {
+      "/concordance.html": "concordance",
       "/explore.html": "atlas", "/atlas.html": "atlas",
       "/domains.html": "domains", "/map.html": "map"
     };
