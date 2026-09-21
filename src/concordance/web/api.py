@@ -3458,15 +3458,21 @@ def home_for(surface: str, site, path: str) -> str:
     """The bare homepage, SORTED BY SURFACE (Matt, 2026-09-01: ".org should be up front religious; the
     .com should be more secular and obviously geared to computing and business — the current .com page
     is better suited for .org"). Two faces of one engine, each in its own language:
-    - .com (secular): "/" serves com.html — what Narrow Highway IS in the world's own language: a
-      deterministic verification engine, its full domain breadth, the receipt you can re-verify, and the
-      API/agent door. It surfaces branding.SECULAR_IDENTITY, which the old family desk never wore.
+    - .com (secular): "/" serves concordance.html — the redesigned front door (Matt, 2026-09-21: "make
+      it the front door"). A near-empty, centered page — "a guide to what is true" — with one box that
+      takes ANYTHING and discerns what you brought (word · question · claim · verse), then answers from
+      the live engine: found, checked, sealed, never generated. The manifesto that used to sit here
+      (com.html — "a deterministic model of reality", the mechanism, the Atlas, the API door) moves
+      BEHIND the door, reachable at /com.html and linked from the concordance footer ("the engine →").
     - .org (witness): "/" keeps index.html — the desk whose doors open on Scripture, wisdom, and the
       family, the foundation named plain. (A religious-forward .org pass is the next step.)
-    Guarded on the file existing so a missing com.html falls back to the desk, never a 500. Reversible:
-    drop the branch and both surfaces serve index.html again."""
-    if surface == "secular" and path in ("/", "/index.html") and resolve_site_file(site, "/com.html"):
-        return "/com.html"
+    Guarded on the file existing so a missing concordance.html falls back to the manifesto, then the
+    desk, never a 500. Reversible: point this back at /com.html (or drop the branch) to restore."""
+    if surface == "secular" and path in ("/", "/index.html"):
+        if resolve_site_file(site, "/concordance.html"):
+            return "/concordance.html"
+        if resolve_site_file(site, "/com.html"):
+            return "/com.html"
     return path
 
 
