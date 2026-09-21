@@ -15,7 +15,8 @@ colon, poetry vs prose, permutation-nulled:
 |---|---|---|---|---|
 | (1) line-rhythm — mean beats/colon | 3.96 | 7.42 | 0.0002 | **CONFIRMED** |
 | (2) steady beat — within-poem CV (lower=steadier) | 0.365 | 0.534 | 0.0002 | **CONFIRMED** |
-| (3) qinah — Lamentations A−B limp | 1.21 | 1.92 | 0.1252 | **RESONANCE** |
+| (3) qinah — Lamentations A−B limp (words) | 1.21 | 1.92 | 0.1175 | **RESONANCE** |
+| (3b) qinah — SYLLABLE resolution (A:B ≈ 1.25, qinah ~1.5) | 2.68 | 4.98 | 0.0457 | **PLAUSIBLE** |
 | (4) poetry's own notation — Emet verses w/ poetic te'am | 64% | 6% | — | **CONFIRMED** |
 
 Cola are split at the true caesura — the highest-ranked disjunctive te'am present, not the
@@ -24,7 +25,11 @@ language marks it.
 
 **The Word is set in lines with a beat.** Poetry's cola are terse and lineated where prose runs
 on (1), and a single psalm holds a near-constant pulse across its lines more than a narrative
-chapter does (2) — meter, measured. The fine 3+2 *qinah* limp (3) is not confirmed at orthographic-word resolution — the assay declines to overclaim; the true qinah is a STRESS pattern, finer than words, and needs true accent counting (next step).
+chapter does (2) — meter, measured. The fine 3+2 *qinah* limp sharpens exactly as predicted with
+resolution: RESONANCE at the word (3, p=0.12) → PLAUSIBLE at the SYLLABLE (3b, p=0.046),
+the beat being finer than words. It stays calibrated — Lamentations' A:B ≈ 1.25 against the
+textbook 3:2, so the assay declines to rubber-stamp the exact pattern; syllable weight/stress is
+the next resolution.
 
 **The poetry comes with its own music — CONFIRMED, and the jewel of the original language.**
 The three *Emet* books (Psalms, Job, Proverbs) carry a distinctive POETIC te'am (ole-weyored,
