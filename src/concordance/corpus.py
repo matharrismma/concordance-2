@@ -16,6 +16,7 @@ import math
 import os
 import re
 import threading
+import unicodedata
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -172,6 +173,115 @@ def call_number(card: dict) -> str:
     return ".".join(p for p in (shelf, cls, item) if p)
 
 
+# ── The additional sublayers (deepening the flat frozen shelves) ─────────────────────────────
+# `call_number` alone leaves the big acquired shelves flat: their box is the generic "source",
+# so dictionary/pronunciation/gutenberg/geography/taxonomy/… all collapse to one `<shelf>.source`
+# bucket of 70–150k cards. But each shelf carries its REAL order in its resident title + bands —
+# a wordlist walks A→Z, books shelve by author, places by country, verse cards by book, numbered
+# series by range. `deep_call` reads only what is already there (no imposed scheme) and returns a
+# finer call; a shelf with no known sublayer, or a card missing the field, degrades to
+# `call_number()`/alphabetical, never worse. It uses `bands` when present (the classifier writes
+# over full cards, where bands live) and degrades to title-only when they are gone (a frozen stub
+# in RAM), so the same card lands on the same shelf both ways. Must match tools/classify_keeping.
+_RANKS = frozenset({"domain", "kingdom", "phylum", "class", "order", "family", "genus", "species",
+                    "subphylum", "subclass", "suborder", "subfamily", "tribe", "superfamily",
+                    "infraclass", "superorder", "infraorder", "subgenus", "subspecies", "clade"})
+_BOOK_REF_RE = re.compile(r"^\s*(.+?)\s+(\d+):(\d+)")   # "Genesis 1:1 (Hebrew)" -> book, ch, vs
+_YEAR_TAIL_RE = re.compile(r"\((-?\d{1,4})\)\s*$")      # "... (1815)" / "(-0479)"
+_STRONG_RE = re.compile(r"^\s*([hg])0*(\d+)", re.I)     # "H1", "G976"
+_RFC_RE = re.compile(r"^\s*rfc\s*0*(\d+)", re.I)        # "RFC1 — Host Software"
+_OEIS_RE = re.compile(r"^\s*a0*(\d+)", re.I)            # "A000001 — ..."
+_TITLE_DASH_RE = re.compile(r"\s+[—–]\s+")             # em/en dash with spaces (author/name split)
+
+
+def _slug(s: str, maxlen: int = 48) -> str:
+    """A lowercase ascii slug — the shelf-safe form of a title or name."""
+    s = unicodedata.normalize("NFKD", (s or "")).encode("ascii", "ignore").decode("ascii").lower()
+    s = re.sub(r"[^a-z0-9]+", "_", s).strip("_")
+    return s[:maxlen].strip("_") or "_"
+
+
+def _alpha_bucket(s: str) -> str:
+    """The A→Z drawer a title falls in — a letter, `0-9`, or `misc`."""
+    sl = _slug(s)
+    ch = sl[0] if sl and sl != "_" else ""
+    if ch.isalpha():
+        return ch
+    if ch.isdigit():
+        return "0-9"
+    return "misc"
+
+
+def _country_code(card: dict) -> str:
+    """The 2-letter ISO country code a geography card carries in its bands (else empty)."""
+    for b in (card.get("bands") or []):
+        if isinstance(b, str) and len(b) == 2 and b.isalpha() and b.isupper():
+            return b.lower()
+    return ""
+
+
+def deep_call(card: dict) -> str:
+    shelf = (card.get("shelf") or "misc").strip().lower()
+    title = (card.get("title") or "").strip()
+    base = call_number(card)
+
+    if shelf in ("hebrew_ot", "greek_nt"):
+        m = _BOOK_REF_RE.match(title)
+        if m:
+            return f"{shelf}.{_slug(m.group(1), 24)}.{m.group(2)}.{m.group(3)}"
+    elif shelf == "commentary":
+        # box is the commentator; the title "Author on Book ch:vs" gives book (+ chapter)
+        cls = (card.get("box") or "").strip().lower() or "source"
+        rest = re.split(r"\s+on\s+", title, maxsplit=1)
+        if len(rest) == 2:
+            m = _BOOK_REF_RE.match(rest[1])
+            if m:
+                return f"{shelf}.{_slug(cls, 24)}.{_slug(m.group(1), 24)}.{m.group(2)}"
+            return f"{shelf}.{_slug(cls, 24)}.{_slug(rest[1], 24)}"
+        return f"{shelf}.{_slug(cls, 24)}"
+    elif shelf == "gutenberg":
+        parts = _TITLE_DASH_RE.split(title)  # "Work — Author"; author is the last segment
+        if len(parts) >= 2:
+            work = " ".join(parts[:-1])
+            return f"{shelf}.{_slug(parts[-1], 40)}.{_slug(work, 48)}"
+        return f"{shelf}.{_alpha_bucket(title)}.{_slug(title)}"
+    elif shelf == "geography":
+        cc = _country_code(card)
+        if cc:
+            return f"{shelf}.{cc}.{_slug(title)}"
+        return f"{shelf}.{_alpha_bucket(title)}.{_slug(title)}"
+    elif shelf == "taxonomy":
+        name = _TITLE_DASH_RE.split(title)[0]  # scientific name, before " — common name"
+        return f"{shelf}.{_alpha_bucket(name)}.{_slug(name)}"
+    elif shelf == "lexicon":
+        m = _STRONG_RE.match(title)
+        if m:
+            lang, num = m.group(1).lower(), int(m.group(2))
+            return f"{shelf}.{lang}{num // 1000}.{lang}{num:04d}"
+    elif shelf == "history":
+        m = _YEAR_TAIL_RE.search(title)
+        if m:
+            y = int(m.group(1))
+            era = f"{(y // 100) * 100}s" if y >= 0 else f"bc_{((abs(y) + 99) // 100) * 100}s"
+            return f"{shelf}.{era}.{_slug(_YEAR_TAIL_RE.sub('', title))}"
+    elif shelf == "rfcs":
+        m = _RFC_RE.match(title)
+        if m:
+            num = int(m.group(1))
+            return f"{shelf}.{num // 1000}xxx.rfc{num:04d}"
+    elif shelf == "oeis":
+        m = _OEIS_RE.match(title)
+        if m:
+            num = int(m.group(1))
+            return f"{shelf}.a{num // 1000:03d}xxx.a{num:06d}"
+
+    # generic: a card stuck in the flat `<shelf>.source` (or bare `<shelf>`) bucket earns an
+    # A→Z sublayer from its title — a dictionary/drug/food list shelved like a library.
+    if base == f"{shelf}.source" or base == shelf:
+        return f"{shelf}.{_alpha_bucket(title)}.{_slug(title)}"
+    return base
+
+
 def frozen_shelves() -> frozenset:
     """The shelves currently riding the shards — empty unless BOTH the env names them AND the
     shards exist (bodies are never shed without a place to rehydrate from)."""
@@ -199,6 +309,13 @@ def rehydrate(card: Optional[dict]) -> Optional[dict]:
     if not isinstance(full, dict):
         return card
     full["connections"] = card.get("connections", full.get("connections") or [])
+    # The call number and facets are LIVE too — classified onto the resident stub AFTER the shard
+    # was frozen, so the stub is authoritative and the shard's copy (if any) is stale. Carry them
+    # over like the graph, so a rehydrated card (a browse brief, the /card page) shows where it sits.
+    if card.get("call"):
+        full["call"] = card["call"]
+    if card.get("facets"):
+        full["facets"] = card["facets"]
     return full
 
 
@@ -238,7 +355,7 @@ class Corpus:
         for cid, c in cards.items():
             if not is_public(c):
                 continue
-            call = c.get("call") or call_number(c)
+            call = c.get("call") or deep_call(c)
             c["call"] = call
             self._cids_by_call.setdefault(call, []).append(cid)
             node = self._call_tree

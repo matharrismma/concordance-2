@@ -11,17 +11,26 @@ prefix, and `bands` is a 2,370-tag FOLKSONOMY (58% used once) that explodes as w
 library. Dewey's two disciplines we're missing at that level: one COMPACT HIERARCHICAL CODE, and
 one CONTROLLED vocabulary.
 
-  CALL NUMBER   shelf . class . item      e.g.  classics.augustine.confessions
-                                                 codex.catechism.heidelberg
-                                                 connections.mention  (edges)
-  FACETS        a fixed schedule of ~9 facet-TYPES; every other band is a VALUE under one of them
-                (a verse, a person, a place, a source), never a free top-level tag.
+  CALL NUMBER   shelf . class . item …    e.g.  classics.augustine.confessions
+                                                 gutenberg.thomas_jefferson.the_declaration…
+                                                 geography.ad.ordino   hebrew_ot.genesis.1.1
+  FACETS        a fixed schedule of facet-TYPES; every other band is a VALUE under one of them
+                (a verse, a person, a place, a taxon), never a free top-level tag.
 
-    PYTHONPATH=src python tools/classify_keeping.py            # --check: derive + print the SCHEDULE, change nothing
-    PYTHONPATH=src python tools/classify_keeping.py --apply    # add card['call'] + card['facets'], backed up + atomic
+The call number itself comes from `concordance.corpus.deep_call` (imported — one source of truth,
+so the tool and the runtime that walks the tree can never drift). `deep_call` reads each shelf's
+REAL order out of its resident title/bands: the flat acquired shelves — whose box is the generic
+"source" — get their true sublayer (a wordlist A→Z, books by author, places by country, verse
+cards by book, numbered series by range) instead of one 150k bucket.
 
-`--apply` is idempotent (re-run skips cards already carrying the same call), atomic (temp+rename),
-and backs the file up first. It keeps the content-hash id (identity) and adds the call number (shelf).
+    PYTHONPATH=src python tools/classify_keeping.py                 # --check: print the SCHEDULE, change nothing
+    PYTHONPATH=src python tools/classify_keeping.py --apply         # add card['call'] + card['facets']
+    PYTHONPATH=src python tools/classify_keeping.py --apply --frozen-only   # skip cards.jsonl (acquired shelves only)
+
+It classifies cards.jsonl AND every `*_cards.jsonl` (the frozen acquired shelves — the 637k stub
+cards live on disk there as full cards; call + facets ride into the RAM stub via corpus._STUB_KEEPS).
+`--apply` is idempotent, streamed card-by-card (the acquired shelves reach 330 MB), atomic
+(temp+rename), and backs each file up first. It keeps the content-hash id and adds the call + facets.
 """
 from __future__ import annotations
 
@@ -38,6 +47,15 @@ try:
 except Exception:  # noqa: BLE001
     pass
 
+# The call number derives from the LIBRARY — one source of truth, imported so the tool and the
+# runtime can never drift (corpus.deep_call is what browse walks). Works with `PYTHONPATH=src`;
+# fall back to inserting src/ so the tool also runs from a bare checkout.
+try:
+    from concordance.corpus import call_number, deep_call
+except ModuleNotFoundError:  # pragma: no cover - convenience for a bare invocation
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+    from concordance.corpus import call_number, deep_call
+
 # ── The CONTROLLED FACET SCHEDULE ─────────────────────────────────────────────────────────────
 # Each structural band maps to exactly one facet TYPE. Everything else is a VALUE (a name, a ref),
 # which folds UNDER a facet instead of floating as its own top-level tag.
@@ -45,12 +63,16 @@ FACET_OF_BAND: dict[str, str] = {}
 FACET_SCHEDULE = {
     "verse":      ["chapter_verse", "cites", "citation", "cross_reference", "xref"],
     "person":     ["person", "mention_person", "father", "prophet", "apostle"],
-    "place":      ["place", "mention_place", "region", "city"],
+    "place":      ["place", "mention_place", "region", "city", "geography"],
     "mention":    ["mention"],
     "sequence":   ["sequence", "prev", "next", "chapter", "section", "part"],
     "reference":  ["references", "reference", "proof_text", "proof", "citation_of"],
-    "dictionary": ["dictionary", "bible_dictionary", "easton", "isbe", "smith", "vine"],
+    "dictionary": ["dictionary", "bible_dictionary", "easton", "isbe", "smith", "vine", "thesaurus"],
     "concept":    ["concept", "scripture", "doctrine", "theme", "stoic", "virtue"],
+    # the frozen acquired shelves carry their kind in their bands — fold it into a controlled facet
+    # instead of leaving it as top-level noise (unambiguous tokens only, so it never misfires):
+    "taxon":      ["organism", "taxonomy", "binomial", "species", "genus"],
+    "language":   ["arpabet", "phonetics", "aramaic", "transliteration", "original language"],
     "provenance": ["auto_detected", "manual", "curated", "imported"],
 }
 for _facet, _bands in FACET_SCHEDULE.items():
@@ -70,19 +92,6 @@ def _facet_for_value(band: str) -> str:
     if _VERSE_RE.match(band) or _PSALM_RE.match(band):
         return "verse"
     return "value"  # a name/source token; the source work already lives in the call number's item
-
-
-def call_number(card: dict) -> str:
-    """shelf . class . item — the Dewey-style spine, derived from shelf + box."""
-    shelf = (card.get("shelf") or "misc").strip().lower()
-    box = (card.get("box") or "").strip().lower()
-    if not box:
-        return shelf
-    if "_" in box:
-        cls, item = box.split("_", 1)
-    else:
-        cls, item = box, ""
-    return ".".join(p for p in (shelf, cls, item) if p)
 
 
 def facets_for(card: dict) -> dict[str, list[str]]:
@@ -125,54 +134,112 @@ def facets_for(card: dict) -> dict[str, list[str]]:
     return {k: sorted(set(v)) for k, v in out.items()}
 
 
-def _cards_path() -> Path:
-    base = os.environ.get("CONCORDANCE_DATA_DIR", "").strip() or "data"
-    return Path(base) / "cards.jsonl"
+def _data_dir() -> Path:
+    return Path(os.environ.get("CONCORDANCE_DATA_DIR", "").strip() or "data")
+
+
+def card_files() -> list[Path]:
+    """The keeping files to classify. With explicit positional paths, exactly those (so a caller
+    can point at just the gitignored frozen shelves and leave git-tracked seeder output alone —
+    that output is regenerated from its seeder, never hand-edited here, and the runtime re-derives
+    its call at load anyway). With none, auto-discover: the resident substance (cards.jsonl) AND
+    the frozen acquired shelves (`*_cards.jsonl` — gutenberg, source, commentary, taxonomy, …),
+    which hold the 637k stub cards on disk as full cards, so the finer call + facets ride into the
+    stub at load (both are in corpus._STUB_KEEPS). `--frozen-only` skips cards.jsonl."""
+    explicit = [Path(a) for a in sys.argv[1:] if not a.startswith("-")]
+    if explicit:
+        return [p for p in explicit if p.exists()]
+    d = _data_dir()
+    files: list[Path] = []
+    if "--frozen-only" not in sys.argv:
+        main_cards = d / "cards.jsonl"
+        if main_cards.exists():
+            files.append(main_cards)
+    files += sorted(p for p in d.glob("*_cards.jsonl") if p.name != "cards.jsonl")
+    return files
+
+
+def _classify_stats(card: dict, call_tree, class_items, facet_type_hits, band_total, tail) -> None:
+    """Accumulate one card into the --check schedule counters (no card is held in memory)."""
+    call = deep_call(card)
+    parts = call.split(".")
+    sh = parts[0]
+    cls = parts[1] if len(parts) > 1 else "_"
+    item = parts[2] if len(parts) > 2 else ""
+    call_tree[sh][cls] += 1
+    if item:
+        class_items[(sh, cls)][item] += 1
+    for b in (card.get("bands") or []):
+        if isinstance(b, str) and b:
+            band_total[b] += 1
+            if b in FACET_OF_BAND:
+                facet_type_hits[FACET_OF_BAND[b]] += 1
+            elif _VERSE_RE.match(b) or _PSALM_RE.match(b):
+                tail[0] += 1  # verse value
+            else:
+                tail[1] += 1  # bare value
+
+
+def _apply_file(p: Path) -> tuple[int, int]:
+    """Stream a file card-by-card, add call + facets, write atomically after backing up.
+    Returns (cards, changed). Never holds the whole file in memory — the acquired shelves reach
+    330 MB. Idempotent: re-running only rewrites the same values."""
+    bak = p.with_suffix(p.suffix + f".bak-{time.strftime('%Y%m%d%H%M%S')}")
+    tmp = p.with_suffix(p.suffix + ".tmp")
+    n = changed = 0
+    with p.open(encoding="utf-8") as src, tmp.open("w", encoding="utf-8") as out:
+        for line in src:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                card = json.loads(line)
+            except json.JSONDecodeError:
+                out.write(line + "\n")  # never drop a line we cannot parse
+                continue
+            n += 1
+            call = deep_call(card)
+            if card.get("call") != call:
+                changed += 1
+            card["call"] = call
+            card["facets"] = facets_for(card)
+            out.write(json.dumps(card, ensure_ascii=False) + "\n")
+    bak.write_bytes(p.read_bytes())  # back up the original only once we have a complete tmp
+    os.replace(tmp, p)
+    return n, changed
 
 
 def main() -> int:
     apply = "--apply" in sys.argv
-    p = _cards_path()
-    if not p.exists():
-        print(f"no cards at {p}", file=sys.stderr)
+    files = card_files()
+    if not files:
+        print(f"no card files in {_data_dir()}", file=sys.stderr)
         return 2
 
-    call_tree: dict[str, Counter] = defaultdict(Counter)  # shelf -> class -> count
+    call_tree: dict[str, Counter] = defaultdict(Counter)   # shelf -> class -> count
     class_items: dict[tuple, Counter] = defaultdict(Counter)  # (shelf,class) -> item -> count
     facet_type_hits = Counter()
     band_total = Counter()
-    verse_values = 0
-    value_tail = 0
+    tail = [0, 0]  # [verse values, bare-value tail]
     n = 0
-    rows = []
-    for line in p.open(encoding="utf-8"):
-        card = json.loads(line)
-        n += 1
-        rows.append(card)
-        call = call_number(card)
-        parts = call.split(".")
-        sh = parts[0]
-        cls = parts[1] if len(parts) > 1 else "_"
-        item = parts[2] if len(parts) > 2 else ""
-        call_tree[sh][cls] += 1
-        if item:
-            class_items[(sh, cls)][item] += 1
-        for b in (card.get("bands") or []):
-            if isinstance(b, str) and b:
-                band_total[b] += 1
-                if b in FACET_OF_BAND:
-                    facet_type_hits[FACET_OF_BAND[b]] += 1
-                elif _VERSE_RE.match(b) or _PSALM_RE.match(b):
-                    verse_values += 1
-                else:
-                    value_tail += 1
+    for p in files:
+        for line in p.open(encoding="utf-8"):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                card = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            n += 1
+            _classify_stats(card, call_tree, class_items, facet_type_hits, band_total, tail)
 
     # ── the SCHEDULE ─────────────────────────────────────────────────────────────────────────
     print("=" * 74)
-    print("  THE CALL-NUMBER SCHEDULE   (shelf . class . item)")
+    print(f"  THE CALL-NUMBER SCHEDULE   (shelf . class . item)   [{len(files)} files, {n} cards]")
     print("=" * 74)
     for sh, classes in sorted(call_tree.items(), key=lambda kv: -sum(kv[1].values())):
-        print(f"\n  {sh}.  [{sum(classes.values())} cards]")
+        print(f"\n  {sh}.  [{sum(classes.values())} cards, {len(classes)} classes]")
         for cls, cc in classes.most_common(9):
             items = class_items.get((sh, cls))
             sample = ""
@@ -187,7 +254,7 @@ def main() -> int:
         hits = facet_type_hits.get(facet, 0)
         members = ", ".join(FACET_SCHEDULE[facet])
         print(f"    {facet:11} {hits:>7} cards   ← {members}")
-    print(f"    {'verse(val)':11} {verse_values:>7} refs    ← scripture references folded under `verse`")
+    print(f"    {'verse(val)':11} {tail[0]:>7} refs    ← scripture references folded under `verse`")
 
     distinct = len(band_total)
     singles = sum(1 for _, c in band_total.items() if c == 1)
@@ -197,7 +264,7 @@ def main() -> int:
     print("-" * 74)
     print(f"    band vocabulary : {distinct:>6} free tags ({singles} used once)  →  {controlled} controlled facet-types + values")
     print(f"    identity/place  : opaque hash id only            →  hash id (identity) + call number (place)")
-    print(f"    value tail      : {value_tail} bare tokens floating top-level →  folded under a facet or dropped as noise")
+    print(f"    value tail      : {tail[1]} bare tokens floating top-level →  folded under a facet or dropped as noise")
     print(f"    cards classified: {n}")
     print("-" * 74)
 
@@ -205,21 +272,14 @@ def main() -> int:
         print("\n  --check: nothing written. Review the schedule above; run --apply to write call + facets.")
         return 0
 
-    # ── APPLY: additive, backed up, atomic ───────────────────────────────────────────────────
-    bak = p.with_suffix(p.suffix + f".bak-{time.strftime('%Y%m%d%H%M%S')}")
-    bak.write_bytes(p.read_bytes())
-    tmp = p.with_suffix(p.suffix + ".tmp")
-    changed = 0
-    with tmp.open("w", encoding="utf-8") as out:
-        for card in rows:
-            call = call_number(card)
-            if card.get("call") != call:
-                changed += 1
-            card["call"] = call
-            card["facets"] = facets_for(card)
-            out.write(json.dumps(card, ensure_ascii=False) + "\n")
-    os.replace(tmp, p)
-    print(f"\n  --apply: wrote call + facets to {changed}/{n} cards. Backup: {bak.name}")
+    # ── APPLY: additive, backed up, atomic, streamed per file ─────────────────────────────────
+    total = total_changed = 0
+    for p in files:
+        cards, changed = _apply_file(p)
+        total += cards
+        total_changed += changed
+        print(f"    {p.name:32} {cards:>7} cards, {changed:>7} call-changed")
+    print(f"\n  --apply: wrote call + facets across {len(files)} files — {total_changed}/{total} cards' call deepened.")
     return 0
 
 
