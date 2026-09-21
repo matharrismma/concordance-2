@@ -153,7 +153,8 @@ def is_public(card: dict) -> bool:
 # stub exactly as it judges the full card — the license lives in `source` (dropped on a stub), so
 # it is precomputed at stub-build time (search runs on stubs; without this it leaked CC-BY-SA).
 _STUB_KEEPS = frozenset({"id", "title", "shelf", "surface", "kind", "box", "visibility",
-                         "lifecycle_stage", "retracted", "generated", "share_alike", "connections"})
+                         "lifecycle_stage", "retracted", "generated", "share_alike", "connections",
+                         "call", "facets"})  # the Dewey call number + controlled facets, kept for browse
 
 
 def frozen_shelves() -> frozenset:
@@ -887,8 +888,13 @@ def search(query: str, limit: int = 25, include_witness: bool = True,
 # ── Library primitives (ported from 1.0's card tools, over the same corpus) ──────────────
 
 def _brief(c: dict) -> Dict[str, Any]:
-    return {"id": c.get("id"), "title": c.get("title"), "shelf": c.get("shelf"),
-            "surface": c.get("surface"), "snippet": (c.get("body", "") or "")[:200]}
+    b = {"id": c.get("id"), "title": c.get("title"), "shelf": c.get("shelf"),
+         "surface": c.get("surface"), "snippet": (c.get("body", "") or "")[:200]}
+    if c.get("call"):
+        b["call"] = c.get("call")          # the Dewey call number, so a browser sees where it sits
+    if c.get("facets"):
+        b["facets"] = c.get("facets")
+    return b
 
 
 def get_card(card_id: str) -> Optional[dict]:
@@ -899,17 +905,45 @@ def get_card(card_id: str) -> Optional[dict]:
     return rehydrate(c) if (c is not None and is_public(c)) else None
 
 
-def browse(shelf: Optional[str] = None, limit: int = 20, offset: int = 0) -> Dict[str, Any]:
-    """Paginated browse over the keeping, optionally filtered to a shelf. Returns briefs."""
+def browse(shelf: Optional[str] = None, limit: int = 20, offset: int = 0,
+           call: Optional[str] = None, facet: Optional[str] = None) -> Dict[str, Any]:
+    """Paginated browse over the keeping. Filter by shelf, by CALL-NUMBER prefix (walk the Dewey
+    tree, e.g. call='classics.augustine'), or by controlled FACET ('verse', or 'person:david').
+    Returns briefs PLUS the call-tree children under the current prefix, so a reader can walk a
+    shelf down one level at a time."""
+    from collections import Counter
     cards = [c for c in default_corpus().cards.values() if is_public(c)]
     if shelf:
         cards = [c for c in cards if (c.get("shelf") or "").lower() == shelf.lower()]
-    cards.sort(key=lambda c: ((c.get("shelf") or ""), (c.get("title") or c.get("id") or "")))
+    pref = (call or "").strip().lower().rstrip(".")
+    if pref:
+        cards = [c for c in cards
+                 if (c.get("call") or "").lower() == pref
+                 or (c.get("call") or "").lower().startswith(pref + ".")]
+    if facet:
+        fkey, _, fval = facet.strip().lower().partition(":")
+        def _has(c: dict) -> bool:
+            fs = c.get("facets") or {}
+            if not isinstance(fs, dict) or fkey not in fs:
+                return False
+            return (not fval) or any(fval == str(v).lower() for v in (fs.get(fkey) or []))
+        cards = [c for c in cards if _has(c)]
+    cards.sort(key=lambda c: ((c.get("call") or c.get("shelf") or ""), (c.get("title") or c.get("id") or "")))
     total = len(cards)
     offset = max(0, offset)
     limit = max(1, min(limit, 100))
-    return {"total": total, "offset": offset, "limit": limit,
-            "shelf": shelf, "cards": [_brief(rehydrate(c)) for c in cards[offset:offset + limit]]}
+    # the next level of the call tree under the current prefix — the sub-shelves to walk into
+    depth = len(pref.split(".")) if pref else 0
+    kids: Counter = Counter()
+    for c in cards:
+        cl = c.get("call") or ""
+        parts = cl.split(".") if cl else []
+        if len(parts) > depth:
+            kids[".".join(parts[:depth + 1])] += 1
+    children = [{"call": k, "count": v} for k, v in kids.most_common(60)]
+    return {"total": total, "offset": offset, "limit": limit, "shelf": shelf,
+            "call": call, "facet": facet, "children": children,
+            "cards": [_brief(rehydrate(c)) for c in cards[offset:offset + limit]]}
 
 
 def stats() -> Dict[str, Any]:

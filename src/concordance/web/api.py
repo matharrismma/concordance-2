@@ -1716,8 +1716,10 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         except (TypeError, ValueError):
             offset = 0
         _sh = query.get("shelf") or None
-        return _ok(_cached_scan("browse:%s:%d:%d" % (_sh or "", limit, offset),
-                                lambda: corpus.browse(shelf=_sh, limit=limit, offset=offset)))
+        _call = query.get("call") or None       # walk the Dewey call-number tree
+        _facet = query.get("facet") or None      # filter by controlled facet (verse / person:david)
+        return _ok(_cached_scan("browse:%s:%s:%s:%d:%d" % (_sh or "", _call or "", _facet or "", limit, offset),
+                                lambda: corpus.browse(shelf=_sh, call=_call, facet=_facet, limit=limit, offset=offset)))
     if method == "GET" and path == "/card":
         cid = (query.get("id") or "").strip()
         if not cid:
