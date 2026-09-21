@@ -191,6 +191,7 @@ _YEAR_TAIL_RE = re.compile(r"\((-?\d{1,4})\)\s*$")      # "... (1815)" / "(-0479
 _STRONG_RE = re.compile(r"^\s*([hg])0*(\d+)", re.I)     # "H1", "G976"
 _RFC_RE = re.compile(r"^\s*rfc\s*0*(\d+)", re.I)        # "RFC1 — Host Software"
 _OEIS_RE = re.compile(r"^\s*a0*(\d+)", re.I)            # "A000001 — ..."
+_PORT_RE = re.compile(r"^\s*port\s+(\d+)\s*/\s*(\w+)", re.I)  # "Port 80/tcp — http"
 _TITLE_DASH_RE = re.compile(r"\s+[—–]\s+")             # em/en dash with spaces (author/name split)
 
 
@@ -201,15 +202,24 @@ def _slug(s: str, maxlen: int = 48) -> str:
     return s[:maxlen].strip("_") or "_"
 
 
-def _alpha_bucket(s: str) -> str:
-    """The A→Z drawer a title falls in — a letter, `0-9`, or `misc`."""
-    sl = _slug(s)
-    ch = sl[0] if sl and sl != "_" else ""
-    if ch.isalpha():
-        return ch
-    if ch.isdigit():
-        return "0-9"
-    return "misc"
+def _letter(s: str) -> str:
+    """The single A→Z drawer a key falls in — a letter, `0-9`, or `misc`."""
+    key = re.sub(r"[^a-z0-9]", "", _slug(s))
+    if not key:
+        return "misc"
+    return "0-9" if key[0].isdigit() else key[0]
+
+
+def _alpha_path(s: str) -> str:
+    """A two-level A→Z shelf location `letter.pair` — the drawer, then the thumb-index tab within
+    it — so one crowded letter (dictionary.s ~ 15k words) breaks into ~600-word pair-drawers. A
+    single-character key repeats the letter; a digit key files under `0-9`; an empty one, `misc`."""
+    key = re.sub(r"[^a-z0-9]", "", _slug(s))
+    if not key:
+        return "misc.misc"
+    if key[0].isdigit():
+        return f"0-9.{key[:2]}"
+    return f"{key[0]}.{key[:2] if len(key) >= 2 else key}"
 
 
 def _country_code(card: dict) -> str:
@@ -244,15 +254,15 @@ def deep_call(card: dict) -> str:
         if len(parts) >= 2:
             work = " ".join(parts[:-1])
             return f"{shelf}.{_slug(parts[-1], 40)}.{_slug(work, 48)}"
-        return f"{shelf}.{_alpha_bucket(title)}.{_slug(title)}"
+        return f"{shelf}.{_alpha_path(title)}.{_slug(title)}"
     elif shelf == "geography":
         cc = _country_code(card)
-        if cc:
-            return f"{shelf}.{cc}.{_slug(title)}"
-        return f"{shelf}.{_alpha_bucket(title)}.{_slug(title)}"
+        if cc:  # country, then a place-name drawer so a big country (us ~ 7.5k) still walks
+            return f"{shelf}.{cc}.{_letter(title)}.{_slug(title)}"
+        return f"{shelf}.{_alpha_path(title)}.{_slug(title)}"
     elif shelf == "taxonomy":
         name = _TITLE_DASH_RE.split(title)[0]  # scientific name, before " — common name"
-        return f"{shelf}.{_alpha_bucket(name)}.{_slug(name)}"
+        return f"{shelf}.{_alpha_path(name)}.{_slug(name)}"
     elif shelf == "lexicon":
         m = _STRONG_RE.match(title)
         if m:
@@ -274,11 +284,16 @@ def deep_call(card: dict) -> str:
         if m:
             num = int(m.group(1))
             return f"{shelf}.a{num // 1000:03d}xxx.a{num:06d}"
+    elif shelf == "networking":
+        m = _PORT_RE.match(title)  # a port list is walked by NUMBER, not by "Port…" — thousand.hundred
+        if m:
+            num, proto = int(m.group(1)), m.group(2).lower()
+            return f"{shelf}.{num // 1000}k.{(num % 1000) // 100}c.{num:05d}_{proto}"
 
     # generic: a card stuck in the flat `<shelf>.source` (or bare `<shelf>`) bucket earns an
     # A→Z sublayer from its title — a dictionary/drug/food list shelved like a library.
     if base == f"{shelf}.source" or base == shelf:
-        return f"{shelf}.{_alpha_bucket(title)}.{_slug(title)}"
+        return f"{shelf}.{_alpha_path(title)}.{_slug(title)}"
     return base
 
 
