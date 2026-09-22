@@ -225,9 +225,10 @@ async function doClaim(raw){
     +`<div class="vdetail">${rows}<div class="src">proven at the boundary, not generated${seal?` · <a href="${esc(seal)}" target="_blank" rel="noopener">re-verify ↗</a>`:""}</div></div></div>`;
 }
 async function doVerse(raw){
-  const [d, ps] = await Promise.all([
+  const [d, ps, xr] = await Promise.all([
     api("/original?ref="+encodeURIComponent(raw)),
-    api("/passage?ref="+encodeURIComponent(raw)).catch(()=>null)
+    api("/passage?ref="+encodeURIComponent(raw)).catch(()=>null),
+    api("/cross_refs?ref="+encodeURIComponent(raw)).catch(()=>null)
   ]);
   const words=(d&&d.words)||[];
   const eng=(ps&&ps.verses&&ps.verses.length)?ps.verses.map(v=>v.text).join(" "):"";
@@ -237,6 +238,11 @@ async function doVerse(raw){
   let h=`<div class="card"><div class="top"><span class="subj" style="font-size:1.6rem">${esc(ref)}</span></div>`;
   if(eng) h+=reg("The passage", `<div class="def" style="font-family:Spectral,serif;font-size:1.12rem;line-height:1.5">“${esc(eng)}”</div><div class="src">World English Bible</div>`);
   if(cells) h+=reg("In the original", `<div class="hebrow">${cells}</div><div class="src">${words.length} words — the tongue it was given, each to its Strong’s · the plumb-line</div>`);
+  const xrs=(xr&&xr.cross_references)||[];
+  if(xrs.length){
+    const links=xrs.slice(0,12).map(x=>`<a class="dom" href="/concordance.html?q=${encodeURIComponent(x.ref)}">${esc(x.ref)}</a>`).join("");
+    h+=reg("It connects to", `<div class="domlist">${links}</div><div class="src">verses sharing this one’s original-language roots — the plumb-line, followed</div>`);
+  }
   return h+`</div>`;
 }
 async function doWord(raw){
