@@ -36,6 +36,8 @@
     letter-spacing:.08em; text-transform:uppercase; font-size:.68rem; padding:.5rem 1rem; cursor:pointer; border-radius:3px}
   .btn:hover:not(:disabled){color:var(--ink); border-color:var(--gold)}
   .btn:disabled{opacity:.32; cursor:default}
+  .hearbtn{margin-left:auto}
+  .hearbtn[aria-pressed="true"]{border-color:var(--gold); color:var(--gold); background:rgba(201,162,74,.08)}
   .leafno{color:var(--dim); font-size:.74rem; letter-spacing:.14em; text-transform:uppercase}
   .leafno b{color:var(--gold); font-weight:600}
   .jump{width:4.5rem; background:rgba(255,255,255,.03); border:1px solid var(--line); color:var(--ink);
@@ -266,6 +268,7 @@
       +   '<span class="leafno">leaf <b id="cur">1</b> of ' + n + '</span>'
       +   '<input class="jump" id="jump" inputmode="numeric" aria-label="jump to leaf" value="1">'
       +   '<button class="btn" id="next">Next ›</button>'
+      +   '<button class="btn hearbtn" id="hear" aria-pressed="false">🔊 Read aloud</button>'
       + '</div>'
       + '<div class="leaf" id="leaf"></div>'
       + '<div class="prog"><i id="pi"></i></div>'
@@ -300,14 +303,35 @@
         show(best);
       }
     }
-    prevB.onclick = function(){ show(at - 1); };
-    nextB.onclick = function(){ show(at + 1); };
-    jumpEl.onchange = function(){ var v = parseInt(jumpEl.value, 10); if (!isNaN(v)) show(v - 1); else jumpEl.value = at + 1; };
+    // READ ALOUD — the book SPEAKS. Faith comes by hearing (Rom 10:17), and we understand more of what
+    // we hear than what we read. The browser's own voice reads the whole work — free, offline, unlimited
+    // — leaf by leaf, turning the page itself; the operator's ElevenLabs voice is kept for the coach's
+    // own words, not a whole book. Reading follows along, so eye and ear move together.
+    var hearB = document.getElementById("hear"), reading = false;
+    var canSpeak = ("speechSynthesis" in window);
+    function speakLeaf(){
+      if (!reading) return;
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+      var u = new SpeechSynthesisUtterance(pages[at] || "");
+      u.rate = 0.96;
+      u.onend = function(){ if (reading && at < n - 1){ show(at + 1); speakLeaf(); } else { stopRead(); } };
+      u.onerror = function(){ stopRead(); };
+      try { window.speechSynthesis.speak(u); } catch (e) { stopRead(); }
+    }
+    function startRead(){ reading = true; hearB.setAttribute("aria-pressed", "true"); hearB.textContent = "⏸ Pause"; speakLeaf(); }
+    function stopRead(){ reading = false; hearB.setAttribute("aria-pressed", "false"); hearB.textContent = "🔊 Read aloud"; try { window.speechSynthesis.cancel(); } catch (e) {} }
+    if (!canSpeak) { hearB.style.display = "none"; }
+    else hearB.onclick = function(){ reading ? stopRead() : startRead(); };
+
+    prevB.onclick = function(){ show(at - 1); if (reading) speakLeaf(); };
+    nextB.onclick = function(){ show(at + 1); if (reading) speakLeaf(); };
+    jumpEl.onchange = function(){ var v = parseInt(jumpEl.value, 10); if (!isNaN(v)) show(v - 1); else jumpEl.value = at + 1; if (reading) speakLeaf(); };
     document.addEventListener("keydown", function(e){
       if (e.target && /input|textarea|select/i.test(e.target.tagName)) return;
-      if (e.key === "ArrowLeft") show(at - 1);
-      else if (e.key === "ArrowRight") show(at + 1);
+      if (e.key === "ArrowLeft"){ show(at - 1); if (reading) speakLeaf(); }
+      else if (e.key === "ArrowRight"){ show(at + 1); if (reading) speakLeaf(); }
     });
+    window.addEventListener("pagehide", stopRead);   // never keep speaking after the reader is left
     show(0);
     jumpToFound();               // ?find= from the coach — open on the located passage, highlighted
 
