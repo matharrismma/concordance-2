@@ -210,16 +210,28 @@ def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[s
         try:
             from .verifiers import scripture as _sc
             best = None
-            # 1) THE CURATED ANCHOR — the verse the ANSWER itself already points to (a card's own
-            #    cross-reference is aligned by the operator's keeping, far better than a bare keyword).
-            m = _SCRIPTURE_REF.search(answer_text or "")
-            if m:
-                ps = _sc.read_passage(m.group(1))
-                verses = ps.get("verses") or []
-                if verses:
-                    best = {"ref": str(ps.get("ref") or m.group(1)).strip(),
-                            "text": _trim(" ".join(v.get("text", "") for v in verses), 240)}
-            # 2) ELSE the concordance — most specific term first (the subject noun, not the common verb).
+            # TIER 1 — THE WORDS IN RED. Christ's OWN teaching on the matter, from the operator-curated
+            # theme index (teachings.for_topic). The title carries the discernment of which teaching a
+            # matter belongs to, so it connects to Red where a bare keyword cannot — "treat my enemy" ->
+            # "Love your enemies" (Matthew 5:43-48), not a verse that merely contains the word "enemy".
+            try:
+                from . import teachings
+                red = teachings.for_topic(text)
+                if red and str(red.get("text") or "").strip():
+                    best = {"ref": red["ref"], "text": _trim(red["text"], 320),
+                            "red": True, "title": red.get("title")}
+            except Exception:  # noqa: BLE001
+                pass
+            # TIER 2 — the verse the ANSWER itself points to (its own curated cross-reference, aligned).
+            if not best:
+                m = _SCRIPTURE_REF.search(answer_text or "")
+                if m:
+                    ps = _sc.read_passage(m.group(1))
+                    verses = ps.get("verses") or []
+                    if verses:
+                        best = {"ref": str(ps.get("ref") or m.group(1)).strip(),
+                                "text": _trim(" ".join(v.get("text", "") for v in verses), 240)}
+            # TIER 3 — the concordance, most specific term first (the subject noun, not the common verb).
             if not best:
                 topic = set(_frame(text))
                 score_best = 0
@@ -233,8 +245,12 @@ def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[s
                             best = {"ref": str(r.get("ref") or "").strip(), "text": _trim(r["english"], 240)}
             if best:
                 out["word"] = best
-                out["lead"] = (f"The Word speaks — {best['ref']}: “{best['text']}” "
-                               if best["ref"] else f"The Word: “{best['text']}” ")
+                if best.get("red"):
+                    out["lead"] = (f"Christ Himself — {best['ref']} ({best['title']}): “{best['text']}” "
+                                   if best.get("title") else f"Christ Himself — {best['ref']}: “{best['text']}” ")
+                else:
+                    out["lead"] = (f"The Word speaks — {best['ref']}: “{best['text']}” "
+                                   if best["ref"] else f"The Word: “{best['text']}” ")
         except Exception:  # noqa: BLE001 — the Word not reached here is a quiet trailhead, never a crash
             pass
 

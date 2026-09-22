@@ -505,10 +505,27 @@ def test_an_unreachable_cloud_is_a_quiet_trailhead(monkeypatch):
     assert r["spoken"] and r.get("cloud") is None
 
 
+def test_christ_leads_when_a_teaching_aligns(monkeypatch):
+    """Rooted in RED — when a curated teaching of Christ aligns to the matter, HIS words open the thought
+    ('Christ Himself — …'), before the answer and the witnesses. Matt: 'all of that should connect to
+    Red.' The teachings.py Words-in-Red index is the operator's alignment."""
+    import concordance.teachings as T
+    import concordance.witness as W
+    monkeypatch.setattr(T, "for_topic", lambda text: {
+        "id": "som_09", "title": "Love your enemies", "ref": "Matthew 5:43-48", "group": "Sermon on the Mount",
+        "text": "Love your enemies, and pray for those who persecute you.", "score": 10.0, "red": True})
+    monkeypatch.setattr(W, "see", lambda *a, **k: {"seeing": []})
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "search", "results": [{"id": "c1", "title": "Enemies", "snippet": "kept"}], "generated": False})
+    r = console._coach("how should I treat my enemy", SEC, True)
+    assert r["spoken"].startswith("Christ Himself — Matthew 5:43-48 (Love your enemies)")
+    assert r.get("word") and r["word"].get("red") is True
+
+
 def test_the_word_leads_the_thought_when_the_door_is_open(monkeypatch):
-    """Bible first, rooted in Red — when the door is open (seeking), the WORD opens the coach's thought,
-    before the answer and before the witnesses. Matt: 'we want the thoughts to contain scripture ...
-    all of that should connect to Red.'"""
+    """Where no teaching-title aligns, the concordance still brings the Word to lead (Bible first)."""
+    import concordance.teachings as T
+    monkeypatch.setattr(T, "for_topic", lambda text: None)     # no curated teaching -> concordance leads
     from concordance.verifiers import scripture as S
     monkeypatch.setattr(S, "for_word", lambda w: (
         {"status": "ok", "ref": "John 14:6", "english": "I am the way, the truth, and the life."}

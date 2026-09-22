@@ -220,4 +220,91 @@ def get(teaching_id: str) -> Optional[Dict[str, Any]]:
     return gather(teaching_id)
 
 
-__all__ = ["queue", "get", "gather", "NOTE"]
+# ── THE WORDS IN RED, INDEXED BY THEME — Christ's own teaching on a matter, to LEAD a thought ──────
+# The queue's TITLES are the operator's curated themes (the discernment of which teaching a matter
+# belongs to); the passages are the Red itself. for_topic() matches a question to the teaching that
+# aligns and hands back Christ's words to speak FIRST. Found, never generated; the title carries the
+# operator's alignment, so this "connects to Red" in the way a bare concordance keyword never can.
+_TOPIC_STOP = frozenset((
+    "the a an of to and but in on for is are was were be am his her my your their our its he she it "
+    "they we you i do does did how what when where why who which that this these those can could would "
+    "should will with from about into over under out up down not no as at by or if his let your").split())
+
+
+_SUFFIXES = ("ness", "ment", "ings", "ies", "ied", "ing", "ers", "ed", "es", "er", "ly", "s", "y")
+
+
+def _stem(w: str) -> str:
+    """A light suffix strip so enemy/enemies, forgive/forgiveness, worry/worries concord — WITHOUT the
+    4-char-prefix trap that conflated treat/treasure and someone/some."""
+    for suf in _SUFFIXES:
+        if w.endswith(suf) and len(w) - len(suf) >= 3:
+            return w[: -len(suf)]
+    return w
+
+
+def _topic_stems(s: str) -> List[str]:
+    """Content-word stems, WITH repeats (frequency is signal — a teaching ABOUT a thing repeats it)."""
+    return [_stem(w) for w in re.findall(r"[a-z]{3,}", (s or "").lower()) if w not in _TOPIC_STOP]
+
+
+_TOPIC_INDEX: Optional[List[Any]] = None
+
+
+def _topic_index():
+    """(raw, idf) built once and cached. raw = (teaching, title-stem-set, passage-stem-COUNTER); idf =
+    inverse document frequency across the teachings, so a word COMMON to many (life, love, man) weighs
+    little and a DISCRIMINATING one (enemy, neighbour, divorce, rock) weighs much — a teaching is found
+    by what it is DISTINCTLY about, not by the words every teaching shares."""
+    global _TOPIC_INDEX
+    if _TOPIC_INDEX is not None:
+        return _TOPIC_INDEX
+    import math
+    from collections import Counter
+    raw, df = [], Counter()
+    for t in _QUEUE:
+        title_st = set(_topic_stems(t["title"]))
+        try:
+            body_ct = Counter(_topic_stems(_passage_text(t["ref"])))
+        except Exception:  # noqa: BLE001 — a passage the engine can't resolve just matches on its title
+            body_ct = Counter()
+        raw.append((t, title_st, body_ct))
+        for s in set(body_ct):
+            df[s] += 1
+    n = len(raw) or 1
+    idf = {s: math.log((n + 1) / (c + 1)) + 1.0 for s, c in df.items()}
+    _TOPIC_INDEX = (raw, idf)
+    return _TOPIC_INDEX
+
+
+def for_topic(text: str) -> Optional[Dict[str, Any]]:
+    """Christ's own teaching whose theme aligns to `text` — matched on the curated TITLE (weighted 3×,
+    the operator's alignment) and the passage's own words by IDF-WEIGHTED frequency (a teaching that is
+    DISTINCTLY about a thing repeats its discriminating word; a common word every teaching shares counts
+    for little). Returns {id,title,ref,group,text,score,red} with the Red verbatim, or None where no
+    teaching aligns (a caller may then fall to the concordance)."""
+    q = set(_topic_stems(text))
+    if not q:
+        return None
+    raw, idf = _topic_index()
+    best, best_score = None, 0.0
+    for t, title_st, body_ct in raw:
+        # BOTH title and body are IDF-weighted, so a DISTINCTIVE word (enemy, divorce, neighbour, rock,
+        # prodigal) carries the match and a common one (life, love, man) does not — the curated title
+        # weighed heaviest (4×), where the operator's alignment lives.
+        score = (4.0 * sum(idf.get(s, 1.0) for s in q & title_st)
+                 + sum(body_ct.get(s, 0) * idf.get(s, 1.0) for s in q))
+        if score > best_score:
+            best_score, best = score, t
+    if not best or best_score < 4.0:          # a distinctive title hit, or a word the teaching is ABOUT
+        return None
+    text_out = ""
+    try:
+        text_out = _passage_text(best["ref"])
+    except Exception:  # noqa: BLE001
+        pass
+    return {"id": best["id"], "title": best["title"], "ref": best["ref"], "group": best["group"],
+            "text": text_out, "score": best_score, "red": True}
+
+
+__all__ = ["queue", "get", "gather", "for_topic", "NOTE"]
