@@ -63,6 +63,8 @@ body.intro .whisper{opacity:0;animation:rise .9s .6s ease forwards}
 .box button{flex:none;border:none;background:var(--green);color:#fff;font-family:"Inter";font-weight:600;font-size:.95rem;padding:12px 20px;border-radius:12px;cursor:pointer}
 :root[data-theme="dark"] .box button,:root:not([data-theme="light"]) .box button{color:#08130e}
 .whisper{margin-top:20px;font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.08em;color:var(--ink-faint)}
+.learn-cta{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.05em;color:var(--green-deep);text-decoration:none;border:1px solid var(--line);border-radius:22px;padding:9px 18px;transition:.16s}
+.learn-cta:hover{border-color:var(--green);background:var(--green-wash)}
 .whisper b{color:var(--ink-soft);font-weight:500}
 
 .opened .home{display:none}
@@ -161,6 +163,7 @@ body.intro .whisper{opacity:0;animation:rise .9s .6s ease forwards}
         </div>
       </div>
       <p class="whisper"><b>676,354</b>&nbsp; kept · found, checked &amp; sealed · <b>never generated</b></p>
+      <p style="margin-top:16px"><a class="learn-cta" href="/coach.html">✦ &nbsp;Learn a language — the Coach &nbsp;→</a></p>
     </section>
 
     <div class="topsearch">
@@ -172,7 +175,7 @@ body.intro .whisper{opacity:0;animation:rise .9s .6s ease forwards}
 
   <p class="creed">
     <span class="b">What is not the answer is eliminated, so the narrow path is illuminated by what survives.</span><br>
-    <span class="s">FOUND · CHECKED · SEALED &nbsp;·&nbsp; <a href="/explore.html">the Atlas →</a> &nbsp;·&nbsp; <a href="/com.html">the engine →</a></span>
+    <span class="s">FOUND · CHECKED · SEALED &nbsp;·&nbsp; <a href="/explore.html">the Atlas →</a> &nbsp;·&nbsp; <a href="/coach.html">the Coach →</a> &nbsp;·&nbsp; <a href="/com.html">the engine →</a></span>
   </p>
 </div>
 
@@ -184,6 +187,7 @@ const E=document.getElementById("entry");
 // ── discern what was brought — the sort ──
 function discern(raw){
   const s=raw.trim(), l=s.toLowerCase();
+  if(/^(teach me|learn|study|practice)\b/i.test(l) || /\b(the cube|the coach)\b/i.test(l)) return "learn";
   if(/^([1-3]\s?)?[a-z][a-z. ]{1,20}\s+\d{1,3}:\d{1,3}/i.test(s)) return "verse";
   if(/[?]$/.test(s)||/^(how|what|why|who|where|when|which|can|should|do|does|is there|tell me)\b/i.test(l)) return "question";
   if(/\d/.test(s)&&/\b(is|are|=|equals|per|to|in|of|has|weigh|equal)\b/.test(l)) return "claim";
@@ -271,7 +275,20 @@ async function doWord(raw){
   return h+`</div>`;
 }
 
-const LABELS={word:"a word",question:"a question",claim:"a claim",verse:"a verse"};
+async function doLearn(raw){
+  const d=await api("/coach/subjects").catch(()=>null);
+  const subs=(d&&d.subjects)||[];
+  let h=`<div class="card"><div class="top"><span class="subj" style="font-size:1.7rem">The Coach</span><span class="ess">learn it by the cube — you learn the tongue; we don’t do it for you</span></div>`;
+  if(subs.length){
+    const links=subs.map(s=>`<a class="dom" href="/coach.html?subject=${encodeURIComponent(s.id)}">${esc(s.title)} · ${esc(s.count)}</a>`).join("");
+    h+=reg("Pick a track", `<div class="domlist">${links}</div><div class="src">five embodied anchors × three times · found, checked, no grades, no model · <a href="/coach.html">open the coach →</a></div>`);
+  } else {
+    h+=reg("Begin", `<div class="def"><a href="/coach.html">open the coach →</a> and pick a track.</div>`);
+  }
+  return h+`</div>`;
+}
+
+const LABELS={word:"a word",question:"a question",claim:"a claim",verse:"a verse",learn:"a lesson"};
 async function open(raw){
   const kind=discern(raw);
   document.body.classList.add("opened");
@@ -282,7 +299,8 @@ async function open(raw){
     +`<div class="loading">consulting the keeping<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>`;
   let body;
   try{
-    body = kind==="question"?await doQuestion(raw)
+    body = kind==="learn"?await doLearn(raw)
+         : kind==="question"?await doQuestion(raw)
          : kind==="claim"?await doClaim(raw)
          : kind==="verse"?await doVerse(raw)
          : await doWord(raw);

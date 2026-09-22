@@ -37,6 +37,7 @@ DEFAULT_SUBJECT = "read"
 _LABELS = {
     "read": "Learn to Read (phonics)", "mcguffey": "McGuffey Readers", "aesop": "Aesop's Fables",
     "founding": "Founding Documents", "pilgrims": "Pilgrim's Progress", "es": "Español (Spanish)",
+    "en": "English", "ja": "日本語 (Japanese)", "pt": "Português (Portuguese)",
     "bible": "Bible Study",
 }
 _CACHE: Dict[str, List[Dict[str, Any]]] = {}
