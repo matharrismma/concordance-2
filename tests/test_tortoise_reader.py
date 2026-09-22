@@ -187,5 +187,18 @@ def test_open_work_on_a_card_pointing_nowhere_fetchable(monkeypatch):
     assert "no fetchable public-domain source" in r["reason"]
 
 
+# ── the finding path: a work is one click from the results ───────────────────────────────────────
+
+def test_a_search_brief_marks_a_readable_work():
+    """A search hit carries `readable` so a listing can put a direct 'Read the full work' link on the
+    hit itself — the whole PD source one click from the results, not two (hit -> card -> read)."""
+    from concordance.web.api import _card_brief
+    work = {"id": "card_arch_x", "title": "A PD work", "shelf": "trades",
+            "source": {"url": "https://archive.org/details/x"}}
+    plain = {"id": "card_y", "title": "A theory", "shelf": "floor", "source": {"url": ""}}
+    assert _card_brief(work)["readable"] is True
+    assert _card_brief(plain)["readable"] is False
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))

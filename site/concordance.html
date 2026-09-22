@@ -97,11 +97,14 @@ body.intro .whisper{opacity:0;animation:rise .9s .6s ease forwards}
 .src{font-family:"IBM Plex Mono",monospace;font-size:.62rem;color:var(--ink-faint);letter-spacing:.03em;margin-top:9px}
 .src a{color:var(--green-deep);text-decoration:none;border-bottom:1px solid var(--green-wash)}
 .def{font-size:1.06rem;line-height:1.55}
-.hit{display:block;text-decoration:none;color:inherit;padding:9px 0;border-bottom:1px dashed var(--line)}
+.hit{display:block;padding:9px 0;border-bottom:1px dashed var(--line)}
 .hit:last-child{border-bottom:none}
+.hitmain{display:block;text-decoration:none;color:inherit}
 .hit .t{font-weight:600;color:var(--ink)}
 .hit .sn{color:var(--ink-soft);font-size:.92rem;line-height:1.5}
 .hit .sh{font-family:"IBM Plex Mono",monospace;font-size:.6rem;color:var(--green-deep);letter-spacing:.04em;text-transform:uppercase;margin-right:7px}
+.hitread{display:inline-block;margin-top:6px;font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.04em;color:var(--green-deep);text-decoration:none;border:1px solid var(--line);border-radius:20px;padding:3px 11px;transition:.16s}
+.hitread:hover{border-color:var(--green);background:var(--green-wash)}
 .domlist{display:flex;flex-wrap:wrap;gap:7px}
 .dom{font-size:.8rem;padding:6px 11px;border-radius:8px;background:var(--green-wash);color:var(--green-deep);line-height:1.25;text-decoration:none}
 
@@ -200,8 +203,12 @@ async function api(path, opts){
 }
 function reg(lab,inner){return `<div class="reg"><div class="lab">${lab}</div><div class="c">${inner}</div></div>`}
 function hit(c){
-  return `<a class="hit" href="/card.html?id=${encodeURIComponent(c.id||"")}"><span class="t"><span class="sh">${esc(c.shelf)}</span>${esc(c.title)}</span>`
+  const id=encodeURIComponent(c.id||"");
+  const main=`<a class="hitmain" href="/card.html?id=${id}"><span class="t"><span class="sh">${esc(c.shelf)}</span>${esc(c.title)}</span>`
        + (c.snippet?`<span class="sn">${esc(String(c.snippet).slice(0,160))}</span>`:"")+`</a>`;
+  // A public-domain work stands one click behind its hit — the whole source, on demand (the tortoise).
+  const read=c.readable?`<a class="hitread" href="/reader.html?card=${id}">Read the full work →</a>`:"";
+  return `<div class="hit">${main}${read}</div>`;
 }
 
 // ── the four sorts, each a live call to the engine ──

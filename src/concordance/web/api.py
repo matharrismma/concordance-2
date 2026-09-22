@@ -89,10 +89,16 @@ def _card_brief(c: dict) -> Dict[str, Any]:
     nothing is asserted that the card does not already carry.
     """
     src = c.get("source") or {}
+    from .. import tortoise as _tortoise
     return {"id": c.get("id"), "title": c.get("title"), "shelf": c.get("shelf"),
             "surface": c.get("surface"), "snippet": (c.get("body", "") or "")[:200],
             "authority_tier": src.get("authority_tier") or "",
             "source": src.get("label") or "",
+            # Whether the WHOLE public-domain work stands one click behind this hit (the tortoise):
+            # a pure host check, no I/O. Governs what a reader may DO with the hit — open the book —
+            # the way authority_tier governs what they may CLAIM from it. A listing reads it to put a
+            # "Read the full work" link on the hit itself, so a work is one click from the results.
+            "readable": _tortoise.readable(c),
             "generated": bool(c.get("generated", False))}
 
 
