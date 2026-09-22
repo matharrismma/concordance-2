@@ -63,6 +63,24 @@ def test_identity_line_is_one_source():
         assert "no llm in the loop" in t, f"{rel} lost the 'no LLM in the loop' guarantee"
 
 
+def test_the_name_is_one_source_and_reaches_both_faces():
+    """THE NAME (Matt, 2026-09-22: "That's the name. Witness."). Like the identity line and the
+    foundation, the coach's name is defined ONCE — branding.COACH_NAME — and is the SAME under both
+    faces (only its depth of meaning differs). The name is true because the guard makes it a *faithful*
+    witness by construction: it testifies to what it found, verbatim and cited, and never bluffs. This
+    pins it so the name cannot silently fork per surface, and proves the voice actually says it."""
+    import sys as _sys
+    _sys.path.insert(0, str(_ROOT / "src"))
+    from concordance import branding
+    assert branding.COACH_NAME == "Witness", branding.COACH_NAME
+    # ONE name — the surface never changes it (the foundation is the same under both faces).
+    assert branding.name_for("witness") == "Witness"
+    assert branding.name_for("secular") == "Witness"
+    # the VOICE names itself — both personas open by giving the name, so a person hears who is speaking.
+    assert branding.SECULAR_PERSONA.startswith("I'm Witness"), "the secular voice must name itself"
+    assert branding.WITNESS_PERSONA.startswith("I'm Witness"), "the witness voice must name itself"
+
+
 def test_every_page_offers_a_way_home():
     """One identical home control, injected everywhere, so it cannot drift per page."""
     # mesh.html is THE HIDDEN discovery surface (the Fellowship Mesh / "The Way"). It must NOT carry

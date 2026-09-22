@@ -25,6 +25,7 @@ from typing import Any, Dict, List, Optional
 
 from . import ask as _ask
 from . import bookofdays as _book
+from . import branding as _branding
 from . import clarify as _clarify
 from . import corpus as _corpus
 
@@ -687,7 +688,7 @@ def _learn(text: str) -> Dict[str, Any]:
             "spoken": ("I can be your coach in many tongues and skills — " + names +
                        ", and more. Which shall we learn? We learn it by the cube — you speak it; "
                        "I don't do it for you."),
-            "caption": names, "source": {"title": "the coach", "ref": "/read.html"},
+            "caption": names, "source": {"title": _branding.COACH_NAME, "ref": "/read.html"},
             "next": nexts, "generated": False}
 
 

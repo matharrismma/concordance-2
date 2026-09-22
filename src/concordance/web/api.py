@@ -709,7 +709,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # The FROZEN mission + kernel + agent covenant (Matt, 2026-07-25) are served here so any
         # agent that reads /identity reads the law it is bound by.
         from .. import branding as _branding
-        return _ok({"surface": surface, "identity": config.identity, "persona": config.persona,
+        return _ok({"surface": surface, "name": _branding.name_for(surface),
+                    "identity": config.identity, "persona": config.persona,
                     "motto": _branding.MOTTO,
                     "mission": ("Narrow Highway gives humans and agents a governed way to find, check, "
                                 "use, and preserve information without losing its source, authority, "
