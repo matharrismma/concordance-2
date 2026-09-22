@@ -35,8 +35,8 @@ def _load_tool():
 
 
 TOOL = _load_tool()
-CUBES = [TOOL.FR, TOOL.DE, TOOL.LA, TOOL.HE, TOOL.ZH]
-EXPECTED_SUBJECTS = {"fr", "de", "la", "he", "zh"}
+CUBES = [TOOL.FR, TOOL.DE, TOOL.LA, TOOL.HE, TOOL.ZH, TOOL.GR]
+EXPECTED_SUBJECTS = {"fr", "de", "la", "he", "zh", "grc"}
 # The five anchors the cube is built on — every language teaches these, in this order, then a review.
 ANCHOR_SUFFIXES = ["iam", "thereis", "thisis", "igo", "path", "review"]
 

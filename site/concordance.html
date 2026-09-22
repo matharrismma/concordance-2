@@ -298,6 +298,7 @@ async function doVerse(raw){
   const ramps=[{label:"Read "+ref+" in context",href:"/bible.html?ref="+encodeURIComponent(ref),g:"✧"}];
   const strong=(words[0]&&String(words[0].strongs||""))||"";
   if(strong.charAt(0)==="H") ramps.push({label:"Learn Biblical Hebrew",href:"/read.html?subject=he",g:"✦"});
+  else if(strong.charAt(0)==="G") ramps.push({label:"Learn Biblical Greek",href:"/read.html?subject=grc",g:"✦"});
   return {body:h+`</div>`, ramps};
 }
 async function doWord(raw){

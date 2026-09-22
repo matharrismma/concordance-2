@@ -39,7 +39,7 @@ _LABELS = {
     "founding": "Founding Documents", "pilgrims": "Pilgrim's Progress", "es": "Español (Spanish)",
     "en": "English", "ja": "日本語 (Japanese)", "pt": "Português (Portuguese)",
     "fr": "Français (French)", "de": "Deutsch (German)", "la": "Latina (Latin)",
-    "he": "עברית (Hebrew)", "zh": "中文 (Mandarin)",
+    "he": "עברית (Hebrew)", "zh": "中文 (Mandarin)", "grc": "Ἑλληνικά (Biblical Greek)",
     "bible": "Bible Study",
 }
 _CACHE: Dict[str, List[Dict[str, Any]]] = {}

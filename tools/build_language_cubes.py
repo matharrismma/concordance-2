@@ -563,13 +563,127 @@ ZH = cube("zh", "cubo_zh",
     ])
 
 
+# ─────────────────────────────────────────── BIBLICAL GREEK ───────────────────────────────────────
+GR = cube("grc", "cubo_grc",
+    "Speech track for learning BIBLICAL (Koine) GREEK by the cube — five embodied anchors in the "
+    "learner's own room, in the tongue of the New Testament. English is the instruction; each Greek "
+    "phrase is given as  Greek — romanization — English. Greek marks a word's job by its ENDING, so "
+    "the same noun changes shape as it moves through the path; the article (the word for \"the\") "
+    "changes with it. The verb often carries \"I\" already, so the pronoun can be dropped. The words "
+    "are the everyday nouns of the room, chosen where the New Testament itself uses them. Status: "
+    "DRAFT, pending author review.",
+    [
+     U("cubo_grc", 1, "cubo_grc_iam", "εἰμί — where I stand",
+       "Eimi (εἰμί) means \"I am\" — the verb already says \"I\", so no separate word for \"I\" is "
+       "needed. Stand in the middle of your room and say: ὧδέ εἰμι (hōde eimi) — I am here. Hōde means "
+       "\"here\".",
+       ["ὧδέ εἰμι — hōde eimi — I am here.",
+        "ἐν τῷ οἴκῳ εἰμί — en tō oikō eimi — I am in the house.",
+        "ἐν τῷ ταμείῳ εἰμί — en tō tameiō eimi — I am in the room."],
+       "ὧδέ εἰμι — hōde eimi",
+       "Stand in the center, point to yourself, say hōde eimi. Walk to the door and say it again — the verb carries the \"I\".",
+       "Hōde eimi. Now I walk to the door. Hōde eimi. Same words, new spot.",
+       "Name a place. The learner walks there and says en tō plus the place plus eimi.",
+       "You say: oikos (house). The learner walks there and says: en tō oikō eimi.",
+       "You are standing in the room. Which is true?",
+       "ἐν τῷ ταμείῳ εἰμί — en tō tameiō eimi",
+       "Only one answer matches where the body actually is. Eimi already means \"I am\" — no separate \"I\" is needed.",
+       ["ἐν τῷ ταμείῳ εἰμί — en tō tameiō eimi", "ἐν τῇ ὁδῷ εἰμί — en tē hodō eimi (on the road)",
+        "ὑπάγω εἰς τὸ ταμεῖον — hypagō eis to tameion (I go into the room)"]),
+     U("cubo_grc", 2, "cubo_grc_thereis", "ἔστιν / εἰσίν — what exists in the space",
+       "Estin (ἔστιν) means \"there is\" for one thing; eisin (εἰσίν) means \"there are\" for many. Look "
+       "around the room and name what is there.",
+       ["ἔστι τράπεζα — esti trapeza — There is a table.",
+        "εἰσὶ δύο καθέδραι — eisi dyo kathedrai — There are two seats.",
+        "ἔστιν ὕδωρ — estin hydōr — There is water."],
+       "ἔστι τράπεζα καὶ εἰσὶ δύο καθέδραι — esti trapeza kai eisi dyo kathedrai",
+       "Sweep your hand across the room. Use estin for one thing, eisin for many.",
+       "Esti trapeza. Eisi dyo kathedrai. Esti thyra (there is a door).",
+       "The learner finds one thing (estin) or several (eisin) and names them. Keep going to five.",
+       "The learner sees the water and says: estin hydōr.",
+       "There are two seats in the room. Which is true?",
+       "εἰσὶ δύο καθέδραι — eisi dyo kathedrai",
+       "One thing takes estin; many take eisin. Eimi is only for where I stand.",
+       ["εἰσὶ δύο καθέδραι — eisi dyo kathedrai", "δύο καθέδραι εἰμί — dyo kathedrai eimi (I am two seats)",
+        "ὑπάγω δύο καθέδραι — hypagō dyo kathedrai (I go two seats)"]),
+     U("cubo_grc", 3, "cubo_grc_thisis", "οὗτος / αὕτη / τοῦτο — pointing at one thing",
+       "\"This is\" points at one thing and names it. Greek fits the word for \"this\" to the thing: "
+       "houtos (οὗτος) for a masculine thing, hautē (αὕτη) for a feminine one, touto (τοῦτο) for a "
+       "neuter one. Point, then name.",
+       ["αὕτη ἐστὶ τράπεζα — hautē esti trapeza — This is a table. (table is feminine)",
+        "τοῦτό ἐστι τὸ βιβλίον μου — touto esti to biblion mou — This is my book. (book is neuter)",
+        "οὗτός ἐστιν ὁ ἄρτος — houtos estin ho artos — This is the bread. (bread is masculine)"],
+       "αὕτη ἐστὶ καθέδρα — hautē esti kathedra",
+       "Point at one object and name it, fitting houtos / hautē / touto to the thing. Then point at another.",
+       "Hautē esti trapeza. Hautē esti kathedra. Touto esti to biblion mou.",
+       "Point at an object; the learner names it with houtos, hautē, or touto plus esti. Then switch.",
+       "You point at the bread (artos, masculine). The learner says: houtos estin ho artos.",
+       "You point at the bread (ὁ ἄρτος, masculine). Which is true?",
+       "οὗτός ἐστιν ὁ ἄρτος — houtos estin ho artos",
+       "The word for \"this\" fits the thing: houtos (masc.), hautē (fem.), touto (neut.). The pointing finger tells you it is a \"this is\".",
+       ["οὗτός ἐστιν ὁ ἄρτος — houtos estin ho artos", "ἔστιν ὧδε — estin hōde (there is here)",
+        "ἄρτος εἰμί — artos eimi (I am bread)"]),
+     U("cubo_grc", 4, "cubo_grc_igo", "ὑπάγω — the arrow of movement",
+       "Hypagō (ὑπάγω) means \"I go\". It is the arrow from where you stand to where you will be: "
+       "ὑπάγω πρὸς τὴν θύραν — I go to the door. When the arrow finishes, it becomes eimi again: νῦν "
+       "ὧδέ εἰμι — now I am here. Notice that after pros, ἡ θύρα becomes τὴν θύραν.",
+       ["ὑπάγω εἰς τὸν οἶκον — hypagō eis ton oikon — I go into the house.",
+        "ὑπάγω πρὸς τὴν θύραν — hypagō pros tēn thyran — I go to the door.",
+        "νῦν ὧδέ εἰμι — nyn hōde eimi — Now I am here."],
+       "ὑπάγω πρὸς τὴν θύραν — hypagō pros tēn thyran",
+       "Say hypagō pros plus a place, then walk there. On arrival, stop and say nyn hōde eimi. Show the flip.",
+       "Hypagō pros tēn thyran. I walk. I arrive. Nyn hōde eimi.",
+       "Call a destination. The learner says hypagō pros plus the place, walks there, and on arrival says nyn hōde eimi.",
+       "You say: thyra (door). The learner says hypagō pros tēn thyran, walks, and says nyn hōde eimi.",
+       "You are walking to the door right now. Which is true?",
+       "ὑπάγω πρὸς τὴν θύραν — hypagō pros tēn thyran",
+       "While the feet move, the word is hypagō. When the feet stop, you are there: eimi. After pros, thyra changes to thyran.",
+       ["ὑπάγω πρὸς τὴν θύραν — hypagō pros tēn thyran", "θύρα εἰμί — thyra eimi (I am a door)",
+        "ἔστι θύρα — esti thyra (there is a door)"]),
+     U("cubo_grc", 5, "cubo_grc_path", "ἀπό, διά, πρός — the three parts of the path",
+       "Every arrow has three parts. Apo (ἀπό) is where it starts, dia (διά) is the space it passes "
+       "through, pros (πρός) is where it ends. Each one changes the noun's ending: ἀπὸ τοῦ οἴκου, διὰ "
+       "τῆς θύρας, πρὸς τὴν τράπεζαν.",
+       ["ἀπὸ τοῦ οἴκου πρὸς τὴν θύραν — apo tou oikou pros tēn thyran — from the house to the door.",
+        "διὰ τῆς θύρας — dia tēs thyras — through the door.",
+        "ἀπὸ τῆς καθέδρας πρὸς τὴν τράπεζαν — apo tēs kathedras pros tēn trapezan — from the seat to the table."],
+       "ἀπὸ τοῦ οἴκου, διὰ τῆς θύρας, πρὸς τὴν τράπεζαν — apo tou oikou, dia tēs thyras, pros tēn trapezan",
+       "Announce your start with apo, the middle with dia, the arrival with pros — narrate each as your body reaches it.",
+       "Apo tou oikou... dia tēs thyras... pros tēn trapezan. Nyn hōde eimi.",
+       "Give the learner a start and an end. The learner walks it, saying all three parts in order.",
+       "From the seat to the door. The learner says: apo tēs kathedras, dia tēs thyras, pros tēn thyran.",
+       "Put the path words in order from start to finish.",
+       "ἀπό, διά, πρός — apo, dia, pros",
+       "Apo starts, dia carries, pros lands. Each changes the noun after it — walk the path slowly and say each word in its part.",
+       ["ἀπό, διά, πρός — apo, dia, pros", "πρός, διά, ἀπό — pros, dia, apo",
+        "διά, ἀπό, πρός — dia, apo, pros"]),
+     U("cubo_grc", 6, "cubo_grc_review", "ἀνακεφαλαίωσις — the whole cube in one breath",
+       "Now run the whole cube in Greek. Stand: eimi. Look around: estin / eisin. Point: houtos, "
+       "hautē, touto esti. Move: hypagō, with apo, dia, pros marking the path. Five anchors, one room, "
+       "one breath.",
+       ["ὧδέ εἰμι — hōde eimi — I am here.",
+        "ἔστι τράπεζα — esti trapeza — There is a table.",
+        "αὕτη ἐστὶ ἡ καθέδρα μου — hautē esti hē kathedra mou — This is my seat.",
+        "ὑπάγω ἀπὸ τῆς καθέδρας πρὸς τὴν θύραν — hypagō apo tēs kathedras pros tēn thyran — from the seat to the door."],
+       "ὧδέ εἰμι. ἔστι τράπεζα. αὕτη ἐστὶ ἡ καθέδρα μου. ὑπάγω ἀπὸ τῆς καθέδρας, διὰ τῆς θύρας, πρὸς τὴν τράπεζαν.",
+       "Perform the full sequence with your body: stand and say eimi, sweep and say estin / eisin, point and say houtos/hautē/touto esti, then walk saying hypagō with apo, dia, pros.",
+       "Hōde eimi. Esti trapeza kai eisi dyo kathedrai. Touto esti to biblion mou. Hypagō apo tēs trapezēs, dia tēs thyras, pros ton oikon. Nyn hōde eimi.",
+       "The learner performs the full run in their own room. Then you perform it and make one deliberate mistake to catch.",
+       "The learner stands, sweeps, points, and walks, saying all five anchors in order.",
+       "You point at one seat (καθέδρα, feminine) and name it. Which anchor do you use?",
+       "αὕτη ἐστί — hautē esti",
+       "Pointing at one named thing is always houtos / hautē / touto esti, fitted to the thing. A feminine kathedra takes hautē.",
+       ["εἰμί — eimi", "ἔστιν — estin", "αὕτη ἐστί — hautē esti", "ὑπάγω — hypagō"]),
+    ])
+
+
 def main():
     try:
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     except Exception:  # noqa: BLE001 — already utf-8, or no buffer (imported): harmless
         pass
     OUT.mkdir(parents=True, exist_ok=True)
-    for c in (FR, DE, LA, HE, ZH):
+    for c in (FR, DE, LA, HE, ZH, GR):
         path = OUT / (c["subject"] + "_en.json")
         path.write_text(json.dumps(c["units"], ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         print(f"  {c['subject']}: wrote {len(c['units'])} units → {path}")
