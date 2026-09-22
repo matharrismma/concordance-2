@@ -61,6 +61,9 @@ body.intro .whisper{opacity:0;animation:rise .9s .6s ease forwards}
 .box input{flex:1;border:none;background:none;outline:none;font-family:"Spectral",serif;font-size:1.22rem;color:var(--ink);padding:12px 0}
 .box input::placeholder{color:var(--ink-faint)}
 .box button{flex:none;border:none;background:var(--green);color:#fff;font-family:"Inter";font-weight:600;font-size:.95rem;padding:12px 20px;border-radius:12px;cursor:pointer}
+.box button.micbtn{background:none;color:var(--ink-faint);font-size:1.15rem;padding:8px 10px;border-radius:12px;-webkit-user-select:none;user-select:none;touch-action:none}
+.box button.micbtn:hover{color:var(--green)}
+.box button.micbtn[aria-pressed="true"]{color:#fff;background:var(--green)}
 :root[data-theme="dark"] .box button,:root:not([data-theme="light"]) .box button{color:#08130e}
 .whisper{margin-top:20px;font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.08em;color:var(--ink-faint)}
 .learn-cta{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.05em;color:var(--green-deep);text-decoration:none;border:1px solid var(--line);border-radius:22px;padding:9px 18px;transition:.16s}
@@ -169,6 +172,7 @@ body.intro .whisper{opacity:0;animation:rise .9s .6s ease forwards}
         <div class="field">
           <span class="glyph">✳</span>
           <input id="q" type="text" autocomplete="off" spellcheck="false" aria-label="Bring anything">
+          <button id="mic" class="micbtn" type="button" aria-pressed="false" aria-label="Hold to speak" title="Hold to speak — release to send" hidden>🎙</button>
           <button id="go">Open</button>
         </div>
       </div>
@@ -189,6 +193,7 @@ body.intro .whisper{opacity:0;animation:rise .9s .6s ease forwards}
   </p>
 </div>
 
+<script src="/nh-listen.js"></script>
 <script>
 const CHIPS=["water","the speed of light is 299,792,458 m/s","how do I purify creek water","Genesis 1:2","light","100 kilometers is 62.14 miles"];
 function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
@@ -373,6 +378,11 @@ function reset(){document.body.classList.remove("opened");document.getElementByI
 function runFrom(id){const v=document.getElementById(id).value.trim();if(v)open(v)}
 document.getElementById("go").onclick=()=>runFrom("q");
 document.getElementById("go2").onclick=()=>runFrom("q2");
+// PUSH-TO-TALK — the shared standard (nh-listen.js). Hold the mic: the words appear in the box as you
+// speak, and open on release. Bring anything, by voice — the mic is on only while held.
+(function(){var mic=document.getElementById("mic");if(mic&&window.NHListen&&NHListen.supported){mic.hidden=false;
+  NHListen.attach(mic,{onInterim:function(t){document.getElementById("q").value=t;},
+                       onFinal:function(t){document.getElementById("q").value=t;open(t);}});}})();
 document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter")runFrom("q")});
 document.getElementById("q2").addEventListener("keydown",e=>{if(e.key==="Enter")runFrom("q2")});
 document.getElementById("tog").onclick=()=>{const r=document.documentElement;r.setAttribute("data-theme",r.getAttribute("data-theme")==="dark"?"light":"dark")};
