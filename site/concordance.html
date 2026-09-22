@@ -219,8 +219,10 @@ function hit(c){
 }
 
 // THE OFF-RAMP RAIL — every answer opens onto every surface, so the finding path holds everything.
-// The door that matches what was brought is led (primary); the rest stand ready. On-ramps back onto
-// the finding path live on the surfaces themselves (the spine's "Concordance", and ?q= from anywhere).
+// It is RESULTS-AWARE: each handler hands back the specific next steps for what it actually found
+// (read THIS work, read THIS verse in context, learn the tongue it is written in, more on THIS
+// domain), and those lead the rail. The universal doors follow, so you can always go anywhere. On-
+// ramps back onto the finding path live on the surfaces themselves (the spine's "Concordance", ?q=).
 const RAMPS=[
   {k:"learn", label:"the Coach",  href:"/read.html",       g:"✦"},   // learn a tongue / to read
   {k:"verse", label:"the Word",   href:"/bible.html",      g:"✧"},   // Scripture, original tongues
@@ -228,34 +230,49 @@ const RAMPS=[
   {k:"claim", label:"verify",     href:"/com.html#verify", g:"✓"},   // prove one yourself, sealed
   {k:"_",     label:"the map",    href:"/map.html",        g:"❉"},   // the connection graph
 ];
-function ramps(kind){
-  const items=RAMPS.map(r=>`<a class="ramp${r.k===kind?" primary":""}" href="${r.href}"><span class="g">${r.g}</span>${r.label}</a>`).join("");
-  return `<div class="ramps"><span class="rlab">go on →</span>${items}</div>`;
+function ramps(kind, ctx){
+  ctx = ctx || [];
+  const seen = new Set(ctx.map(c=>c.href));
+  // the specific off-ramps this result earned, led first
+  const lead = ctx.map(r=>`<a class="ramp primary" href="${r.href}"><span class="g">${r.g||"→"}</span>${esc(r.label)}</a>`).join("");
+  // the universal doors — the kind's door is only self-highlighted when nothing more specific leads
+  const doors = RAMPS.filter(r=>!seen.has(r.href))
+    .map(r=>`<a class="ramp${(!ctx.length && r.k===kind)?" primary":""}" href="${r.href}"><span class="g">${r.g}</span>${r.label}</a>`).join("");
+  return `<div class="ramps"><span class="rlab">go on →</span>${lead}${doors}</div>`;
 }
 
 // ── the four sorts, each a live call to the engine ──
 async function doQuestion(raw){
   const d=await api("/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:raw})});
   const res=(d&&d.results)||[];
-  if(!res.length) return `<div class="card"><div class="err">Nothing kept answers that yet — the window is honest when it is empty. Try a word or a claim.</div></div>`;
+  if(!res.length) return {body:`<div class="card"><div class="err">Nothing kept answers that yet — the window is honest when it is empty. Try a word or a claim.</div></div>`, ramps:[]};
   const lead=res[0];
   let h=`<div class="card"><div class="top"><span class="subj" style="font-size:1.5rem">${esc(lead.title)}</span></div>`;
   h+=reg("Found &amp; kept",`<div class="def">${esc(String(lead.snippet||"").slice(0,600))}</div><div class="src">shelf ${esc(lead.shelf)} · found and cited, verbatim — not generated</div>`);
   if(res.length>1) h+=reg("Also kept", res.slice(1,5).map(hit).join(""));
   if(d.note) h+=`<div class="window">${esc(d.note)}</div>`;
-  return h+`</div>`;
+  // results-aware off-ramp: if a whole public-domain work answers this, open it
+  const work=res.find(r=>r.readable);
+  const ramps=work?[{label:"Read the full work",href:"/reader.html?card="+encodeURIComponent(work.id),g:"▤"}]:[];
+  return {body:h+`</div>`, ramps};
 }
 async function doClaim(raw){
   const d=await api("/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({claim:raw})});
   const verd=d.verdict||"—", checks=(d.checks||[]);
   if(verd==="NOTHING_TO_CHECK"||!checks.length){
-    return `<div class="card"><div class="verdict-hero"><span class="vbadge no">NO COMPUTABLE CLAIM</span><span class="vclaim">${esc(raw)}</span></div>`
-      +`<div class="vdetail">${esc(d.note||"The engine proves numbers, formulas and constants with a receipt; it will not bluff the rest. Try it as a word or a question.")}</div></div>`;
+    return {body:`<div class="card"><div class="verdict-hero"><span class="vbadge no">NO COMPUTABLE CLAIM</span><span class="vclaim">${esc(raw)}</span></div>`
+      +`<div class="vdetail">${esc(d.note||"The engine proves numbers, formulas and constants with a receipt; it will not bluff the rest. Try it as a word or a question.")}</div></div>`, ramps:[]};
   }
   const seal=d.receipt||d.cite_url;
   let rows=checks.slice(0,4).map(c=>`<div style="margin:8px 0"><span class="mono">${esc(c.detail||c.claim)}</span> — <b>${esc(c.verdict)}</b> · ${esc(c.domain||"")}</div>`).join("");
-  return `<div class="card"><div class="verdict-hero"><span class="vbadge">✓ ${esc(verd)}</span><span class="vclaim">${esc(raw)}</span></div>`
+  const body=`<div class="card"><div class="verdict-hero"><span class="vbadge">✓ ${esc(verd)}</span><span class="vclaim">${esc(raw)}</span></div>`
     +`<div class="vdetail">${rows}<div class="src">proven at the boundary, not generated${seal?` · <a href="${esc(seal)}" target="_blank" rel="noopener">re-verify ↗</a>`:""}</div></div></div>`;
+  // results-aware off-ramps: the sealed receipt to keep, and the domain it was proven in
+  const dom=(checks.find(c=>c.domain)||{}).domain||"";
+  const ramps=[];
+  if(seal) ramps.push({label:"Keep the sealed receipt",href:seal,g:"✓"});
+  if(dom)  ramps.push({label:"More on "+dom,href:"/?q="+encodeURIComponent(dom),g:"◆"});
+  return {body, ramps};
 }
 async function doVerse(raw){
   const [d, ps, xr] = await Promise.all([
@@ -265,7 +282,7 @@ async function doVerse(raw){
   ]);
   const words=(d&&d.words)||[];
   const eng=(ps&&ps.verses&&ps.verses.length)?ps.verses.map(v=>v.text).join(" "):"";
-  if(!words.length && !eng) return `<div class="card"><div class="err">No verse found at “${esc(raw)}”. Try like “Genesis 1:2” or “John 3:16”.</div></div>`;
+  if(!words.length && !eng) return {body:`<div class="card"><div class="err">No verse found at “${esc(raw)}”. Try like “Genesis 1:2” or “John 3:16”.</div></div>`, ramps:[]};
   const ref=(ps&&ps.ref)||(d&&d.ref)||raw;
   const cells=words.map(w=>`<span class="hw"><span class="h">${esc(w.word)}</span><span class="s">${esc(w.strongs||"")}</span></span>`).join("");
   let h=`<div class="card"><div class="top"><span class="subj" style="font-size:1.6rem">${esc(ref)}</span></div>`;
@@ -276,7 +293,12 @@ async function doVerse(raw){
     const links=xrs.slice(0,12).map(x=>`<a class="dom" href="/concordance.html?q=${encodeURIComponent(x.ref)}">${esc(x.ref)}</a>`).join("");
     h+=reg("It connects to", `<div class="domlist">${links}</div><div class="src">verses sharing this one’s original-language roots — the plumb-line, followed</div>`);
   }
-  return h+`</div>`;
+  // results-aware off-ramps: read the whole passage in context, and learn the very tongue it is in
+  // (Strong's marks it: H#### = Hebrew, G#### = Greek — offer the cube only where one exists).
+  const ramps=[{label:"Read "+ref+" in context",href:"/bible.html?ref="+encodeURIComponent(ref),g:"✧"}];
+  const strong=(words[0]&&String(words[0].strongs||""))||"";
+  if(strong.charAt(0)==="H") ramps.push({label:"Learn Biblical Hebrew",href:"/read.html?subject=he",g:"✦"});
+  return {body:h+`</div>`, ramps};
 }
 async function doWord(raw){
   const [d, sc] = await Promise.all([
@@ -284,7 +306,7 @@ async function doWord(raw){
     api("/scripture_for?word="+encodeURIComponent(raw)).catch(()=>null)
   ]);
   const res=(d&&d.results)||[];
-  if(!res.length) return `<div class="card"><div class="err">Nothing kept under “${esc(raw)}” yet. The keeping always grows.</div></div>`;
+  if(!res.length) return {body:`<div class="card"><div class="err">Nothing kept under “${esc(raw)}” yet. The keeping always grows.</div></div>`, ramps:[]};
   const byShelf={}; res.forEach(r=>{(byShelf[r.shelf]=byShelf[r.shelf]||[]).push(r)});
   const def=res.find(r=>r.shelf==="dictionary")||res.find(r=>/dictionary|encyclopedia|lexicon/.test(r.shelf||""))||res[0];
   const theories=(byShelf["theories"]||[]);
@@ -301,7 +323,13 @@ async function doWord(raw){
      `<div class="domlist">${theories.slice(0,10).map(t=>`<a class="dom" href="/card.html?id=${encodeURIComponent(t.id)}">${esc(t.title)}</a>`).join("")}</div><div class="src">the kept domains this thread touches — joined to the master equations</div>`);
   const others=res.filter(r=>r!==def && r.shelf!=="theories").slice(0,6);
   if(others.length) h+=reg("Also kept", others.map(hit).join(""));
-  return h+`</div>`;
+  // results-aware off-ramps, most specific first
+  const ramps=[];
+  const work=res.find(r=>r.readable);
+  if(work) ramps.push({label:"Read a full work",href:"/reader.html?card="+encodeURIComponent(work.id),g:"▤"});
+  if(sc && sc.ref) ramps.push({label:"Read "+sc.ref+" in context",href:"/bible.html?ref="+encodeURIComponent(sc.ref),g:"✧"});
+  if(theories.length) ramps.push({label:"See it in the Atlas",href:"/explore.html",g:"◆"});
+  return {body:h+`</div>`, ramps};
 }
 
 async function doLearn(raw){
@@ -314,7 +342,8 @@ async function doLearn(raw){
   } else {
     h+=reg("Begin", `<div class="def"><a href="/read.html">open the coach →</a> and pick a track.</div>`);
   }
-  return h+`</div>`;
+  // the tracks are the off-ramps here (each a live link into a cube); the universal rail follows
+  return {body:h+`</div>`, ramps:[]};
 }
 
 const LABELS={word:"a word",question:"a question",claim:"a claim",verse:"a verse",learn:"a lesson"};
@@ -326,17 +355,17 @@ async function open(raw){
   E.className="entry show";
   E.innerHTML=`<div class="readas"><span>brought this — reading as</span><span class="k">${LABELS[kind]}</span></div>`
     +`<div class="loading">consulting the keeping<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>`;
-  let body;
+  let result;
   try{
-    body = kind==="learn"?await doLearn(raw)
+    result = kind==="learn"?await doLearn(raw)
          : kind==="question"?await doQuestion(raw)
          : kind==="claim"?await doClaim(raw)
          : kind==="verse"?await doVerse(raw)
          : await doWord(raw);
   }catch(err){
-    body=`<div class="card"><div class="err">The keeping did not answer — the engine may be reloading. Try again in a moment.</div></div>`;
+    result={body:`<div class="card"><div class="err">The keeping did not answer — the engine may be reloading. Try again in a moment.</div></div>`, ramps:[]};
   }
-  E.innerHTML=`<div class="readas"><span>brought this — reading as</span><span class="k">${LABELS[kind]}</span></div>`+body+ramps(kind);
+  E.innerHTML=`<div class="readas"><span>brought this — reading as</span><span class="k">${LABELS[kind]}</span></div>`+result.body+ramps(kind, result.ramps);
 }
 function reset(){document.body.classList.remove("opened");document.getElementById("q").value="";document.getElementById("q").focus();return false}
 
