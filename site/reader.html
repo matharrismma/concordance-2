@@ -23,6 +23,10 @@
   .meta{color:var(--dim); font-size:.92rem; font-family:var(--sans); line-height:1.7}
   .meta .pd{color:var(--goldsoft)}
   .carry{margin-top:.5rem; font-family:var(--sans); font-size:.82rem}
+  .rramps{display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.9rem; font-family:var(--sans)}
+  .rramp{font-size:.72rem; letter-spacing:.03em; color:var(--goldsoft); text-decoration:none;
+    border:1px solid var(--line); border-radius:20px; padding:4px 12px; transition:.16s}
+  .rramp:hover{border-color:var(--gold); color:var(--gold)}
   .rule{height:1px; background:var(--line); margin:1.5rem 0}
 
   .bar{display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; font-family:var(--sans);
@@ -109,10 +113,16 @@
     var carry = d.detail_url
       ? '<div class="carry">Carry the whole source ↗ <a href="'+esc(d.detail_url)+'" target="_blank" rel="noopener">'
         + esc(d.identifier || "Internet Archive") + '</a></div>' : '';
+    // The loop back onto the finding path: an on-ramp to find anything, and an off-ramp to more
+    // works of this kind — reading a work leads back into finding, never to a dead end.
+    var disc = d.discipline ? String(d.discipline).replace(/[_-]+/g, " ").trim() : "";
+    var ramps = '<div class="rramps"><a class="rramp" href="/">⌕ Find anything</a>'
+      + (disc ? '<a class="rramp" href="/?q='+encodeURIComponent(disc)+'">more on '+esc(disc)+' →</a>' : "")
+      + '</div>';
     return '<h1>'+esc(d.title || "Untitled")+'</h1>'
       + (line ? '<div class="meta">'+line+'</div>' : '')
       + (pd ? '<div class="meta">'+pd+'</div>' : '')
-      + carry + '<div class="rule"></div>';
+      + carry + ramps + '<div class="rule"></div>';
   }
 
   function render(d){

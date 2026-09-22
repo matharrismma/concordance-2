@@ -107,6 +107,13 @@ body.intro .whisper{opacity:0;animation:rise .9s .6s ease forwards}
 .hitread:hover{border-color:var(--green);background:var(--green-wash)}
 .domlist{display:flex;flex-wrap:wrap;gap:7px}
 .dom{font-size:.8rem;padding:6px 11px;border-radius:8px;background:var(--green-wash);color:var(--green-deep);line-height:1.25;text-decoration:none}
+/* the off-ramp rail — from any answer, every surface is one click on. The finding path holds everything. */
+.ramps{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:20px 2px 0;padding-top:15px;border-top:1px dashed var(--line)}
+.rlab{font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);margin-right:3px}
+.ramp{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--green-deep);text-decoration:none;border:1px solid var(--line);border-radius:20px;padding:5px 13px;transition:.16s;white-space:nowrap}
+.ramp:hover{border-color:var(--green);background:var(--green-wash);color:var(--ink)}
+.ramp.primary{border-color:var(--green);background:var(--green-wash);color:var(--ink);font-weight:600}
+.ramp .g{opacity:.6;margin-right:5px}
 
 .verdict-hero{display:flex;align-items:center;gap:16px;padding:24px 30px;flex-wrap:wrap}
 .vbadge{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:.72rem;letter-spacing:.12em;padding:7px 14px;border-radius:8px;background:var(--green);color:#fff;white-space:nowrap}
@@ -209,6 +216,21 @@ function hit(c){
   // A public-domain work stands one click behind its hit — the whole source, on demand (the tortoise).
   const read=c.readable?`<a class="hitread" href="/reader.html?card=${id}">Read the full work →</a>`:"";
   return `<div class="hit">${main}${read}</div>`;
+}
+
+// THE OFF-RAMP RAIL — every answer opens onto every surface, so the finding path holds everything.
+// The door that matches what was brought is led (primary); the rest stand ready. On-ramps back onto
+// the finding path live on the surfaces themselves (the spine's "Concordance", and ?q= from anywhere).
+const RAMPS=[
+  {k:"learn", label:"the Coach",  href:"/read.html",       g:"✦"},   // learn a tongue / to read
+  {k:"verse", label:"the Word",   href:"/bible.html",      g:"✧"},   // Scripture, original tongues
+  {k:"word",  label:"the Atlas",  href:"/explore.html",    g:"◆"},   // the math of reality
+  {k:"claim", label:"verify",     href:"/com.html#verify", g:"✓"},   // prove one yourself, sealed
+  {k:"_",     label:"the map",    href:"/map.html",        g:"❉"},   // the connection graph
+];
+function ramps(kind){
+  const items=RAMPS.map(r=>`<a class="ramp${r.k===kind?" primary":""}" href="${r.href}"><span class="g">${r.g}</span>${r.label}</a>`).join("");
+  return `<div class="ramps"><span class="rlab">go on →</span>${items}</div>`;
 }
 
 // ── the four sorts, each a live call to the engine ──
@@ -314,7 +336,7 @@ async function open(raw){
   }catch(err){
     body=`<div class="card"><div class="err">The keeping did not answer — the engine may be reloading. Try again in a moment.</div></div>`;
   }
-  E.innerHTML=`<div class="readas"><span>brought this — reading as</span><span class="k">${LABELS[kind]}</span></div>`+body;
+  E.innerHTML=`<div class="readas"><span>brought this — reading as</span><span class="k">${LABELS[kind]}</span></div>`+body+ramps(kind);
 }
 function reset(){document.body.classList.remove("opened");document.getElementById("q").value="";document.getElementById("q").focus();return false}
 

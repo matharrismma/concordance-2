@@ -140,6 +140,7 @@ def _trades_card(url="https://archive.org/details/cassellscarpentr00hasl"):
     return {
         "id": "card_arch_test", "title": "Cassells' carpentry and joinery",
         "author": "the trades catalogue (public domain, held in the ark)", "language": "english",
+        "box": "carpentry", "extra": {"discipline": "carpentry"},
         "source": {"url": url, "identifier": "cassellscarpentr00hasl",
                    "pd_basis": "public domain by copyright expiry (published 1907, pre-1929)",
                    "pd_year": 1907, "license": "public-domain",
@@ -169,6 +170,7 @@ def test_open_work_reads_a_catalogue_card(monkeypatch):
     assert r["text"].startswith("CARPENTRY")
     assert r["pd_basis"].startswith("public domain")
     assert r["detail_url"].endswith("cassellscarpentr00hasl"), "the whole source stays carriable"
+    assert r["discipline"] == "carpentry", "the discipline rides along so the reader can off-ramp to 'more like this'"
 
 
 def test_open_work_with_no_plaintext_edition_is_honest(monkeypatch):

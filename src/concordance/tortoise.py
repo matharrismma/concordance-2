@@ -46,11 +46,15 @@ def open_work(card: Dict[str, Any], *, meta=None) -> Dict[str, Any]:
     """
     src = card.get("source") or {}
     detail_url = _source_url(card)
+    extra = card.get("extra") or {}
     head = {
         "card": card.get("id"),
         "title": card.get("title"),
         "author": card.get("author"),
-        "language": card.get("language") or (card.get("extra") or {}).get("language"),
+        "language": card.get("language") or extra.get("language"),
+        # The shelf/discipline this work sits under — the reader offers it as an off-ramp back onto
+        # the finding path ("more like this"), so read leads back into find, not to a dead end.
+        "discipline": extra.get("discipline") or card.get("box") or card.get("shelf"),
         "detail_url": detail_url,          # the catalogue page — the whole source, to carry (the tortoise)
         "identifier": src.get("identifier"),
         "pd_basis": src.get("pd_basis"),
