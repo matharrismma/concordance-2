@@ -116,6 +116,12 @@ body.intro .whisper{opacity:0;animation:rise .9s .6s ease forwards}
 .hw{border:1px solid var(--line);border-radius:8px;padding:6px 9px 5px;text-align:center;background:var(--bg);min-width:44px}
 .hw .h{font-family:"Noto Serif Hebrew",serif;font-size:1.35rem;color:var(--gold)}
 .hw .s{font-family:"IBM Plex Mono",monospace;font-size:.56rem;color:var(--ink-faint);margin-top:2px;direction:ltr}
+.orig{margin-top:12px}
+.orig summary{cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.06em;color:var(--gold);list-style:none;outline:none}
+.orig summary::-webkit-details-marker{display:none}
+.orig summary::before{content:"▸ ";color:var(--ink-faint)}
+.orig[open] summary::before{content:"▾ "}
+.orig .hebrow{margin-top:11px}
 .err{padding:22px 30px;color:var(--bad);font-family:"Spectral",serif;font-style:italic}
 
 .creed{text-align:center;padding:8px 20px 40px;color:var(--ink-faint)}
@@ -219,12 +225,18 @@ async function doClaim(raw){
     +`<div class="vdetail">${rows}<div class="src">proven at the boundary, not generated${seal?` · <a href="${esc(seal)}" target="_blank" rel="noopener">re-verify ↗</a>`:""}</div></div></div>`;
 }
 async function doVerse(raw){
-  const d=await api("/original?ref="+encodeURIComponent(raw));
+  const [d, ps] = await Promise.all([
+    api("/original?ref="+encodeURIComponent(raw)),
+    api("/passage?ref="+encodeURIComponent(raw)).catch(()=>null)
+  ]);
   const words=(d&&d.words)||[];
-  if(!words.length) return `<div class="card"><div class="err">No verse found at “${esc(raw)}”. Try like “Genesis 1:2” or “John 3:16”.</div></div>`;
+  const eng=(ps&&ps.verses&&ps.verses.length)?ps.verses.map(v=>v.text).join(" "):"";
+  if(!words.length && !eng) return `<div class="card"><div class="err">No verse found at “${esc(raw)}”. Try like “Genesis 1:2” or “John 3:16”.</div></div>`;
+  const ref=(ps&&ps.ref)||(d&&d.ref)||raw;
   const cells=words.map(w=>`<span class="hw"><span class="h">${esc(w.word)}</span><span class="s">${esc(w.strongs||"")}</span></span>`).join("");
-  let h=`<div class="card"><div class="top"><span class="subj" style="font-size:1.5rem">${esc(d.ref||raw)}</span><span class="ess">read in the tongue it was given</span></div>`;
-  h+=reg("The original", `<div class="hebrow">${cells}</div><div class="src">${words.length} words — each to its Strong’s · the plumb-line</div>`);
+  let h=`<div class="card"><div class="top"><span class="subj" style="font-size:1.6rem">${esc(ref)}</span></div>`;
+  if(eng) h+=reg("The passage", `<div class="def" style="font-family:Spectral,serif;font-size:1.12rem;line-height:1.5">“${esc(eng)}”</div><div class="src">World English Bible</div>`);
+  if(cells) h+=reg("In the original", `<div class="hebrow">${cells}</div><div class="src">${words.length} words — the tongue it was given, each to its Strong’s · the plumb-line</div>`);
   return h+`</div>`;
 }
 async function doWord(raw){
@@ -239,12 +251,12 @@ async function doWord(raw){
   const theories=(byShelf["theories"]||[]);
   let h=`<div class="card"><div class="top"><span class="subj">${esc(raw)}</span><span class="ess">its life across all that is kept</span></div>`;
   if(def) h+=reg("What it is", `<div class="def">${esc(String(def.snippet||def.title).slice(0,400))}</div><div class="src">shelf ${esc(def.shelf)} · <a href="/card.html?id=${encodeURIComponent(def.id)}">the card →</a></div>`);
-  if(sc && sc.status==="ok" && sc.words && sc.words.length){
-    const cells=sc.words.map(w=>`<span class="hw"><span class="h">${esc(w.word)}</span><span class="s">${esc(w.strongs||"")}</span></span>`).join("");
+  if(sc && sc.status==="ok" && (sc.english || (sc.words&&sc.words.length))){
+    const cells=(sc.words||[]).map(w=>`<span class="hw"><span class="h">${esc(w.word)}</span><span class="s">${esc(w.strongs||"")}</span></span>`).join("");
     h+=reg("In the Word",
-      `<div class="src" style="margin:0 0 9px">“${esc(raw)}” in Scripture — at <b style="color:var(--gold)">${esc(sc.ref)}</b>, in the tongue it was given:</div>`
-      +`<div class="hebrow">${cells}</div>`
-      +`<div class="src">the original words to their Strong’s · the plumb-line</div>`);
+      (sc.english?`<div class="def" style="font-family:Spectral,serif;font-style:italic">“${esc(sc.english)}”</div>`:"")
+      +`<div class="src" style="margin:8px 0 0">“${esc(raw)}” — <b style="color:var(--gold)">${esc(sc.ref)}</b> · World English Bible</div>`
+      +(cells?`<details class="orig"><summary>in the original tongue</summary><div class="hebrow">${cells}</div><div class="src">each word to its Strong’s · the plumb-line</div></details>`:""));
   }
   if(theories.length) h+=reg('Across reality<br><span style="color:var(--green-deep)">the Atlas</span>',
      `<div class="domlist">${theories.slice(0,10).map(t=>`<a class="dom" href="/card.html?id=${encodeURIComponent(t.id)}">${esc(t.title)}</a>`).join("")}</div><div class="src">the kept domains this thread touches — joined to the master equations</div>`);
