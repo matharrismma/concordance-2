@@ -1150,10 +1150,12 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         src_text = body.get("source_text")
         src_text = str(src_text)[:2_000_000] if isinstance(src_text, str) and src_text.strip() else None
         src_title = str(body.get("source_title") or "")[:200] or None
+        # a pending Socratic check the learner is answering: {unit, subject}, held client-side
+        answering = body.get("answering") if isinstance(body.get("answering"), dict) else None
         # v1: dictation is kept edge-side (store-nothing, no account); the signed-write owner arrives
         # with the covenant flow. A proven owner may be threaded here later.
         r = _console.dispatch(text, config, owner=None, gate_open=gate_open,
-                              source_text=src_text, source_title=src_title)
+                              source_text=src_text, source_title=src_title, answering=answering)
         # THE SAME DECK the typed chat keeps (2026-09-02): the Console spoke every utterance and
         # forgot it the instant the response was sent — no thread_id in or out, so "It's one
         # conversation, we pick up whatever thread you pull" (threads.py's own keystone) never

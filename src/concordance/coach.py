@@ -262,6 +262,45 @@ def unit(unit_id: str, subject: str = DEFAULT_SUBJECT) -> Dict[str, Any]:
             "note": _NOTE, "generated": False}
 
 
+def _norm_answer(s: str) -> str:
+    """Fold an answer for comparison: lowercase, drop punctuation and the extra whitespace an OCR or a
+    speaker adds — keep the letters of ANY script (so Greek/Hebrew/Latin answers compare too)."""
+    s = re.sub(r"[.,;:!?\"'’“”()\[\]\-–—]+", " ", (s or "").lower())
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def check_answer(unit_id: str, answer: str, subject: str = DEFAULT_SUBJECT) -> Dict[str, Any]:
+    """SOCRATIC — evaluate a learner's spoken/written answer against the unit's OWN authored check
+    (found, never generated). Returns the verdict and the authored teaching_note (the hint), so the
+    coach leads by question and the answer is judged only against what the operator wrote.
+
+    correct   the answer matches the unit's check.answer
+    incorrect it matches one of the offered distractor choices (a known wrong turn -> teach it)
+    unclear   neither -> invite them to say it in the words of the cube
+    """
+    u = unit(unit_id, subject)
+    if u.get("kind") != "coach_unit":
+        return {"kind": "coach_check_unknown", "unit": unit_id, "message": u.get("message", "No such unit."),
+                "note": _NOTE, "generated": False}
+    chk = u.get("check") or {}
+    correct = str(chk.get("answer") or "").strip()
+    given_n = _norm_answer(answer)
+    correct_n = _norm_answer(correct)
+    verdict = "unclear"
+    if given_n and correct_n and (given_n == correct_n or given_n in correct_n or correct_n in given_n):
+        verdict = "correct"
+    else:
+        for ch in (chk.get("choices") or []):
+            cn = _norm_answer(ch)
+            if cn and cn != correct_n and given_n and (given_n == cn or given_n in cn or cn in given_n):
+                verdict = "incorrect"
+                break
+    return {"kind": "coach_check", "unit": unit_id, "subject": u.get("subject", subject),
+            "verdict": verdict, "prompt": chk.get("prompt", ""), "correct_answer": correct,
+            "teaching_note": chk.get("teaching_note", ""), "title": u.get("title", ""),
+            "note": _NOTE, "generated": False}
+
+
 def next_unit(after: Optional[str] = None, subject: str = DEFAULT_SUBJECT) -> Dict[str, Any]:
     """The next lesson to teach, deterministically, within a subject. after=None -> the first unit;
     after=<id> -> the unit that follows it in the stable teaching order. Past the end -> coach_complete.

@@ -422,3 +422,48 @@ def test_a_section_the_shelf_cannot_pin_asks_which_or_to_drop_the_source(monkeyp
     assert "drop" in r["spoken"].lower() and ("which" in r["spoken"].lower())
     assert any(n["ref"] is None for n in r["next"])          # the "drop your own copy" option
     assert any(n["ref"] and "card_arch_a" in n["ref"] for n in r["next"])   # the works to pick among
+
+
+# ── Socratic — the coach leads by question, judges only the authored answer ───────────────────────
+def test_the_coach_poses_a_check_when_it_teaches(monkeypatch):
+    import concordance.coach as C
+    monkeypatch.setattr(C, "_discover", lambda: ["grc"])
+    monkeypatch.setattr(C, "_LABELS", {"grc": "Ἑλληνικά (Biblical Greek)"})
+    monkeypatch.setattr(C, "next_unit", lambda a, s: {"unit": {
+        "id": "u1", "title": "εἰμί", "rule": "Eimi means I am.",
+        "check": {"prompt": "Which is true?", "answer": "hōde eimi", "choices": ["hōde eimi", "x"]}}})
+    monkeypatch.setattr(C, "subjects", lambda: {"subjects": [{"id": "grc", "title": "Greek"}]})
+    r = console._learn("teach me Greek")
+    assert r.get("ask") == {"unit": "u1", "subject": "grc"}       # a check is pending
+    assert "Which is true?" in r["spoken"] and "your answer" in r["spoken"].lower()
+
+
+def test_answering_a_check_is_judged_against_the_authored_answer(monkeypatch):
+    import concordance.coach as C
+    monkeypatch.setattr(C, "check_answer", lambda unit, ans, subj: {
+        "verdict": "correct" if "hode" in ans.lower() else "incorrect",
+        "prompt": "Which is true?", "teaching_note": "Eimi is I am.", "correct_answer": "hōde eimi"})
+    right = console.dispatch("hode eimi", SEC, answering={"unit": "u1", "subject": "grc"})
+    assert right["kind"] == "coach_check" and right["verdict"] == "correct"
+    assert not right.get("ask")                                   # correct -> the check closes
+    wrong = console.dispatch("something else", SEC, answering={"unit": "u1", "subject": "grc"})
+    assert wrong["verdict"] == "incorrect" and wrong.get("ask")   # wrong -> stays open to try again
+
+
+def test_a_crisis_while_answering_still_outranks_the_lesson(monkeypatch):
+    """Even mid-check, a cry is met first (Mt 25)."""
+    r = console.dispatch("I want to end my life", SEC, answering={"unit": "u1", "subject": "grc"})
+    assert r["kind"] == "crisis"
+
+
+def test_check_answer_matches_found_answer_and_flags_a_distractor():
+    """coach.check_answer judges only against the operator's authored check — never generated."""
+    from concordance import coach
+    import os
+    os.environ.setdefault("CONCORDANCE_DATA_DIR", os.path.join(os.getcwd(), "data"))
+    u = coach.next_unit(None, "grc").get("unit")
+    if not u:                                                     # curriculum not present in this env
+        return
+    ans = u["check"]["answer"]
+    assert coach.check_answer(u["id"], ans, "grc")["verdict"] == "correct"
+    assert coach.check_answer(u["id"], "utterly unrelated words", "grc")["verdict"] == "unclear"

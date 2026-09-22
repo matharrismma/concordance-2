@@ -557,13 +557,23 @@ def _learn(text: str) -> Dict[str, Any]:
         label = _coachmod._LABELS.get(subj, subj)
         title = (u.get("title") or "").strip()
         rule = _trim((u.get("rule") or "").split(". ")[0], 180)
-        spoken = (f"Let's learn {label}, by the cube. We begin here — {title}. {rule} "
-                  f"Open the cube and we'll walk it together, one step at a time.")
-        return {"intent": "learn", "kind": "lesson", "headline": f"{label} — the cube",
-                "spoken": spoken, "caption": (u.get("rule") or title),
-                "source": {"title": "the cube", "ref": f"/read.html?subject={subj}"},
-                "next": [{"label": f"Begin {label}", "ref": f"/read.html?subject={subj}"}],
-                "unit": {"id": u.get("id"), "subject": subj, "title": title}, "generated": False}
+        # SOCRATIC — give the rule, then ASK (the unit's own check), and hold the answer. The learner
+        # speaks or writes it back; we judge only against what the operator authored (coach.check_answer).
+        chk = u.get("check") or {}
+        prompt = str(chk.get("prompt") or "").strip()
+        rule = (rule.rstrip(" .") + ". ") if rule else ""
+        spoken = (f"Let's learn {label}, by the cube. We begin here — {title}. {rule}")
+        out = {"intent": "learn", "kind": "lesson", "headline": f"{label} — the cube",
+               "caption": (u.get("rule") or title),
+               "source": {"title": "the cube", "ref": f"/read.html?subject={subj}"},
+               "next": [{"label": f"Open {label} in the cube", "ref": f"/read.html?subject={subj}"}],
+               "unit": {"id": u.get("id"), "subject": subj, "title": title}, "generated": False}
+        if prompt:
+            out["spoken"] = spoken + "Now — before I say more — " + prompt + " Tell me your answer."
+            out["ask"] = {"unit": u.get("id"), "subject": subj}     # a check is pending; the next line answers it
+        else:
+            out["spoken"] = spoken + "Open the cube and we'll walk it together, one step at a time."
+        return out
     subs = [s for s in _coachmod.subjects().get("subjects", []) if s.get("id") in present]
     nexts = [{"label": s["title"], "ref": f"/read.html?subject={s['id']}"} for s in subs[:8]]
     names = ", ".join(s["title"] for s in subs[:8])
@@ -729,17 +739,47 @@ def _acquire(text: str) -> Dict[str, Any]:
             "caption": q, "source": None, "next": [], "generated": False}
 
 
+def _check(answer: str, answering: Dict[str, Any], config: Any = None) -> Dict[str, Any]:
+    """The learner's answer to a pending Socratic check — judged against the unit's OWN authored answer
+    (coach.check_answer), with the authored teaching_note as the hint. Correct -> move on; not yet ->
+    the hint, and the check stays open (`ask`) so they can try again. Crisis still outranks everything."""
+    if _ask.is_crisis(answer):
+        return _spoken_crisis(_ask.respond(answer, config))
+    from . import coach as _coachmod
+    unit_id = str((answering or {}).get("unit") or "")
+    subject = str((answering or {}).get("subject") or _coachmod.DEFAULT_SUBJECT)
+    r = _coachmod.check_answer(unit_id, answer, subject)
+    v = r.get("verdict")
+    note = _trim(r.get("teaching_note") or "", 240)
+    if v == "correct":
+        return {"intent": "learn", "kind": "coach_check", "verdict": "correct", "headline": "Yes — that's it.",
+                "spoken": ("Yes — that's it. " + note).strip(), "caption": r.get("prompt") or "",
+                "source": {"title": "the cube", "ref": f"/read.html?subject={subject}"},
+                "next": [{"label": "The next step", "ref": f"/read.html?subject={subject}"}],
+                "generated": False}
+    lead = "Not quite. " if v == "incorrect" else "Say it in the words of the cube. "
+    return {"intent": "learn", "kind": "coach_check", "verdict": v, "headline": "Think it through —",
+            "spoken": (lead + note + " Try once more.").strip(), "caption": r.get("prompt") or "",
+            "source": {"title": "the cube", "ref": f"/read.html?subject={subject}"},
+            "ask": {"unit": unit_id, "subject": subject},        # the check stays open — answer again
+            "next": [{"label": "Show me in the cube", "ref": f"/read.html?subject={subject}"}],
+            "generated": False}
+
+
 def dispatch(text: str, config: Any, *, owner: Optional[str] = None, gate_open: bool = False,
-             source_text: Optional[str] = None, source_title: Optional[str] = None) -> Dict[str, Any]:
+             source_text: Optional[str] = None, source_title: Optional[str] = None,
+             answering: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """The one entry. Crisis-first, then route. Returns the small, speakable, LoRa-ready payload.
 
     `source_text` is the extracted text of a work the reader DROPPED IN — their OWN copy of a book.
-    When present, a read/section request is answered from THEIR copy first (store-nothing: the text is
-    passed through, never held), so the coach can teach from a book they own, not only the PD shelf."""
+    `answering` = {unit, subject} means this text is the learner's answer to a pending Socratic check.
+    Both keep the coach one conversation: teach by asking, read from their own copy — store-nothing."""
     text = (text or "").strip()
     if not text:
         return {"intent": "empty", "kind": "empty", "spoken": "", "caption": "",
                 "source": None, "connections": [], "generated": False}
+    if isinstance(answering, dict) and answering.get("unit"):
+        return _check(text, answering, config)
     intent = classify_intent(text)
     if intent == "crisis":
         return _spoken_crisis(_ask.respond(text, config))

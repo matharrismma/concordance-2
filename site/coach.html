@@ -88,8 +88,8 @@
   </div>
 
   <section id="intake" aria-label="Drop anything in">
-    <strong>Drop anything in</strong> — a photo, a screenshot, a PDF, a link. We keep the <em>location</em> and what’s usable, never the file itself.
-    <div><input id="file" type="file" aria-label="Choose a file to bring in"></div>
+    <strong>Drop anything in</strong> — a photo of a page, a screenshot, a PDF, a link. A photo is read <em>on your device</em> (the picture stays with you); a PDF’s text is read too. We keep what’s usable, never the file itself.
+    <div><input id="file" type="file" accept="image/*,application/pdf,text/*" aria-label="Photograph or choose a page to bring in"></div>
     <div class="loc"><label for="locpath">Where does the source live? (a drive path or a link)</label>
       <input id="locpath" type="text" placeholder="e.g. /sd/photos/well.jpg  or  https://…"></div>
   </section>
@@ -147,18 +147,22 @@ if('serviceWorker' in navigator){ window.addEventListener('load', function(){ na
   var _ownCopy=null;   // a book the reader dropped in — their OWN copy, held here (edge-side), so the
                        // coach can read a section from it. Store-nothing: it never leaves this device
                        // except as the text of the one request that reads it.
+  var _pending=null;   // a Socratic check the coach posed {unit, subject}; the next line answers it
+  var _CMD=/^(read|teach|learn|study|practice|note that|note to|make a note|jot|write down|remember that|record that|log that|remind|schedule|book a|make \d|go find|find me|acquire|get me|copy this|make cop|the cube|the coach)\b/i;
   function ask(text, quiet){
     text=String(text||'').trim(); if(!text) return;
     if(_ownCopy && /^(done with (the|this) book|forget the book|clear the book|new book|done with the book)\.?$/i.test(text)){
       _ownCopy=null; render({kind:'ok', headline:'Cleared', spoken:'Done — I have let go of that copy.', caption:'Done — I have let go of that copy.'}); return; }
     if(!quiet) remember(text, null);
     var payload={text:text}; if(threadId) payload.thread_id=threadId;
+    // a check is open and this isn't a fresh command -> it's the learner's ANSWER to the question
+    if(_pending && !_CMD.test(text)){ payload.answering=_pending; }
     // send their copy ONLY on a read/section request — never on every utterance (LoRa-thrifty)
     if(_ownCopy && _ownCopy.text && /^read\b|\b(section|chapter|passage|the part)\b/i.test(text)){
       payload.source_text=_ownCopy.text; payload.source_title=_ownCopy.title||''; }
     fetch(API+'/console',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
       .then(function(r){ return r.json(); })
-      .then(function(r){ if(r.thread_id){ threadId=r.thread_id; try{ localStorage.setItem(TID,threadId); }catch(e){} } render(r); })
+      .then(function(r){ r=(r&&r.data!==undefined)?r.data:r; if(r.thread_id){ threadId=r.thread_id; try{ localStorage.setItem(TID,threadId); }catch(e){} } _pending=(r&&r.ask)||null; render(r); })
       .catch(function(){ render({kind:'offline', headline:'Off the wire',
         spoken:'I could not reach the station. Your words are kept here; the answer will follow. If you need help right now, reach a real person.',
         caption:'I could not reach the station. Your words are kept here; the answer will follow. If you need help right now, reach a real person.',
@@ -186,14 +190,33 @@ if('serviceWorker' in navigator){ window.addEventListener('load', function(){ na
   var intake=document.getElementById('intake'), fileI=document.getElementById('file'), locI=document.getElementById('locpath');
   var _file=null;                 // the pending File, so a PDF's bytes can be read for text extraction
   function isPdf(f, name){ name=(name||(f&&f.name)||''); return name.toLowerCase().slice(-4)==='.pdf' || (f&&f.type==='application/pdf'); }
+  function isImage(f, name){ name=(name||(f&&f.name)||''); return /^image\//.test((f&&f.type)||'') || /\.(png|jpe?g|gif|bmp|webp|tiff?)$/i.test(name); }
+
+  // ── THE EYE — read the words on a photographed page, ON THIS DEVICE. The picture never leaves your
+  //    machine; only its text is kept (edge-side, as your own copy). Tesseract runs client-side. ──
+  function loadScript(src){ return new Promise(function(res,rej){ var s=document.createElement('script'); s.src=src; s.async=true; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+  var _ocrBusy=false;
+  function ocrImage(file, name){
+    if(_ocrBusy) return; _ocrBusy=true;
+    render({kind:'ocr', headline:'Reading the page…', spoken:'Reading the words on the page. This runs on your device — the picture stays with you.', caption:'Reading the page on your device…'});
+    var go = window.Tesseract ? Promise.resolve() : loadScript('https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.1/tesseract.min.js');
+    go.then(function(){ return window.Tesseract.recognize(file, 'eng'); })
+      .then(function(res){ var text=(((res&&res.data&&res.data.text)||'').replace(/[ \t]+\n/g,'\n')).trim(); _ocrBusy=false;
+        if(text.length>40){ _ownCopy={text:text, title:(name||'the page')};
+          render({kind:'ocr_done', headline:'I read the page', spoken:'I read '+text.length+' characters from the page. Now say, for instance, “read me the section on …”, or ask me about it.', caption:(name||'the page')+'\n\n'+text.slice(0,600)}); }
+        else { render({kind:'ocr_none', headline:'Couldn’t read it', spoken:'I couldn’t make out clear text on that image. Try a sharper, straighter photo of the page.', caption:'No clear text found on the image.'}); } })
+      .catch(function(){ _ocrBusy=false; render({kind:'ocr_err', headline:'Reading unavailable', spoken:'I couldn’t start the page-reader just now. Bring the text as a PDF, or type a note.', caption:'The on-device page-reader could not load.'}); });
+  }
+  function take(f, name){ if(isImage(f,name)) ocrImage(f, name); else bringIn(f, name, (f&&f.type)||'file'); }
+
   function bringIn(file, name, kind){ _file=file||null; intake.classList.add('has'); locI.value = locI.value || name; locI.focus();
     var say='Bring it in: '+name+(isPdf(file,name)?'. I will read its text once you confirm.':'')+' Where does the source live? Confirm, then say a note.';
     render({kind:'intake', headline:'Bring it in', spoken:say, caption:say}); }
-  fileI.addEventListener('change', function(){ var f=fileI.files[0]; if(f) bringIn(f, f.name, (f.type||'file')); });
+  fileI.addEventListener('change', function(){ var f=fileI.files[0]; if(f) take(f, f.name); });
   ['dragover','dragenter'].forEach(function(ev){ intake.addEventListener(ev,function(e){ e.preventDefault(); intake.classList.add('over'); }); });
   ['dragleave','drop'].forEach(function(ev){ intake.addEventListener(ev,function(e){ e.preventDefault(); intake.classList.remove('over'); }); });
-  intake.addEventListener('drop', function(e){ var f=e.dataTransfer && e.dataTransfer.files[0]; if(f) bringIn(f, f.name, (f.type||'file')); });
-  window.addEventListener('paste', function(e){ var it=e.clipboardData && e.clipboardData.items; if(!it) return; for(var i=0;i<it.length;i++){ if(it[i].kind==='file'){ var f=it[i].getAsFile(); if(f) bringIn(f, f.name||'pasted-image', (f.type||'image')); } } });
+  intake.addEventListener('drop', function(e){ var f=e.dataTransfer && e.dataTransfer.files[0]; if(f) take(f, f.name); });
+  window.addEventListener('paste', function(e){ var it=e.clipboardData && e.clipboardData.items; if(!it) return; for(var i=0;i<it.length;i++){ if(it[i].kind==='file'){ var f=it[i].getAsFile(); if(f) take(f, f.name||'pasted-image'); } } });
   function sendIntake(loc, b64){ var payload={source_location:loc, kind:(b64?'pdf':'file')}; if(b64) payload.pdf_b64=b64;
     fetch(API+'/console',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({intake:payload})})
       .then(function(r){return r.json();}).then(function(r){ r=(r&&r.data!==undefined)?r.data:r; if(!r.artifact) return; var a=r.artifact, full=r.full_text||'', n=r.chars||(a.extracted_text||'').length;
