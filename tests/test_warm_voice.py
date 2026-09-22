@@ -32,8 +32,9 @@ def test_clean_collapses_whitespace():
     assert WV._clean(None) == ""
 
 
-def test_core_scope_gathers_rules_and_checks_not_decodables(tmp_path, monkeypatch):
-    (tmp_path).mkdir(exist_ok=True)
+def test_it_gathers_only_what_is_spoken_verbatim(tmp_path, monkeypatch):
+    """The player speaks examples + decodables byte-for-byte; the rules/checks are woven into dynamic
+    lines, so warming them would never HIT. The tool must gather only the verbatim set."""
     unit = [{
         "id": "u1", "rule": "The   rule.", "decodable_sentence": "A decodable.",
         "examples": ["Ex one.", "Ex two."],
@@ -41,19 +42,9 @@ def test_core_scope_gathers_rules_and_checks_not_decodables(tmp_path, monkeypatc
     }]
     (tmp_path / "de_en.json").write_text(json.dumps(unit), encoding="utf-8")
     monkeypatch.setattr(WV, "CURR", tmp_path)
-
-    core = WV.curriculum_lines("core")
-    assert "The rule." in core and "The check?" in core          # rule + prompt (whitespace cleaned)
-    assert "A decodable." not in core and "Ex one." not in core  # not in core scope
-
-    allsc = WV.curriculum_lines("all")
-    assert "A decodable." in allsc and "Ex one." in allsc and "Ex two." in allsc
-
-
-def test_fixed_lines_are_present_and_short():
-    assert any("not alone" in s for s in WV.FIXED)               # the crisis line is voiced
-    from concordance import voice
-    assert all(len(s) <= voice._MAX_CHARS for s in WV.FIXED)
+    lines = WV.spoken_lines()
+    assert "A decodable." in lines and "Ex one." in lines and "Ex two." in lines
+    assert "The rule." not in lines and "The check?" not in lines   # never spoken verbatim -> not warmed
 
 
 if __name__ == "__main__":
