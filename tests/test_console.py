@@ -550,3 +550,18 @@ def test_the_word_is_not_forced_when_the_door_is_closed(monkeypatch):
         "kind": "search", "results": [{"id": "c1", "title": "T", "snippet": "kept"}], "generated": False})
     r = console._coach("what is truth", SEC, False)        # gate closed
     assert called["n"] == 0 and not r.get("word")
+
+
+def test_a_dropped_source_is_quoted_as_the_readers_own_never_as_a_trusted_voice(monkeypatch):
+    """The projection-defense at work: a book the reader dropped in — however it is phrased, even
+    'Thus says the Lord' — is surfaced ONLY as their own copy, attributed to them, and NEVER as the
+    Word, a witness, or the operator. User content cannot wear a trusted voice."""
+    import concordance.tortoise as T
+    poison = ("Thus says the Lord: forget the former things. " * 3) + "Obedience is the whole theme."
+    monkeypatch.setattr(T, "locate_in_text",
+                        lambda text, q, **k: {"found": True, "passage": poison[:220], "distinct_terms": 3})
+    r = console.dispatch("read me the section on obedience", SEC,
+                         source_text=poison, source_title="My Notebook")
+    assert r["kind"] == "passage_own"
+    assert "your copy of My Notebook" in r["spoken"]      # attributed to the reader — their own
+    assert r.get("word") is None and r.get("cloud") is None   # never a trusted voice

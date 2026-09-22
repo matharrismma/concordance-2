@@ -219,7 +219,7 @@ def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[s
                 red = teachings.for_topic(text)
                 if red and str(red.get("text") or "").strip():
                     best = {"ref": red["ref"], "text": _trim(red["text"], 320),
-                            "red": True, "title": red.get("title")}
+                            "red": True, "title": red.get("title"), "tier": "red"}
             except Exception:  # noqa: BLE001
                 pass
             # TIER 2 — the verse the ANSWER itself points to (its own curated cross-reference, aligned).
@@ -230,7 +230,8 @@ def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[s
                     verses = ps.get("verses") or []
                     if verses:
                         best = {"ref": str(ps.get("ref") or m.group(1)).strip(),
-                                "text": _trim(" ".join(v.get("text", "") for v in verses), 240)}
+                                "text": _trim(" ".join(v.get("text", "") for v in verses), 240),
+                                "tier": "scripture"}
             # TIER 3 — the concordance, most specific term first (the subject noun, not the common verb).
             if not best:
                 topic = set(_frame(text))
@@ -242,7 +243,8 @@ def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[s
                         score = len(topic & vt) + (len(w) / 100.0)
                         if score > score_best:
                             score_best = score
-                            best = {"ref": str(r.get("ref") or "").strip(), "text": _trim(r["english"], 240)}
+                            best = {"ref": str(r.get("ref") or "").strip(),
+                                    "text": _trim(r["english"], 240), "tier": "scripture"}
             if best:
                 out["word"] = best
                 if best.get("red"):
@@ -261,6 +263,7 @@ def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[s
         f = seen[0] if seen else None
         if f and str(f.get("text") or "").strip():
             out["cloud"] = {k: f.get(k) for k in ("witness", "work", "ref", "text", "source")}
+            out["cloud"]["tier"] = "witness"     # the operator-gathered, strict-PD cloud — a trusted voice
             who = (f.get("witness") or "a witness").strip()
             work = (f.get("work") or "").strip()
             attrib = who + (", " + work if work else "")
@@ -374,12 +377,17 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
         opts = "; ".join(n["label"] for n in nexts[:-1])
         spoken += f" Where next — {opts}; or somewhere else entirely? Your choice."
 
-    return {
+    # THE GUARD at the door — a trusted voice (word / cloud / lens) is spoken only if it carries the
+    # provenance tier that field is allowed to carry. Defense in depth against a projection surface:
+    # nothing user-supplied, acquired, or mis-tagged can leave here wearing Christ, a witness, or the
+    # operator. (The fields are already built only from those corpora; this is the last gate.)
+    from . import guard as _guard
+    return _guard.enforce({
         "intent": "ask", "kind": kind, "headline": headline, "spoken": spoken, "caption": caption,
         "source": source, "connections": connections, "next": nexts, "frame": frame[:8],
         "word": word, "cloud": cloud, "resources": r.get("resources"), "note": r.get("note"),
         "generated": False,
-    }
+    })
 
 
 def _spoken_crisis(r: Dict[str, Any]) -> Dict[str, Any]:
