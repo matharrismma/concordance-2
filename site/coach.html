@@ -78,8 +78,8 @@
   </section>
 
   <div class="controls">
-    <button id="talk" type="button" aria-pressed="false" aria-describedby="talkhint">🎙 Hold the voice key — speak</button>
-    <p id="talkhint" class="hint">Tap to start and stop listening. No microphone? Write your line below — everything works either way.</p>
+    <button id="talk" type="button" aria-pressed="false" aria-describedby="talkhint">🎙 Hold to speak</button>
+    <p id="talkhint" class="hint">Hold the key while you speak, release to send — the microphone is on only while you hold it. No microphone? Write your line below — everything works either way.</p>
     <form class="written" id="wform">
       <label for="line">Write a line</label>
       <input id="line" name="line" type="text" autocomplete="off" placeholder="…or write it here" enterkeyhint="send">
@@ -173,13 +173,26 @@ if('serviceWorker' in navigator){ window.addEventListener('load', function(){ na
   document.getElementById('wform').addEventListener('submit', function(e){ e.preventDefault(); var t=line.value; line.value=''; ask(t); });
 
   // ── Voice input — Web Speech API, sovereign (no key). Falls back silently to the written line. ──
+  // PUSH-TO-TALK — a button, not an always-on ear. The mic opens only WHILE the key is held (press to
+  // speak, release to send), so nothing is heard unless the person chooses it — sovereign, low-power,
+  // and the same press/release a physical button on a pair of glasses gives. No continuous listening.
   var Rec = window.SpeechRecognition || window.webkitSpeechRecognition, rec=null, listening=false;
   if(Rec){
     rec=new Rec(); rec.lang='en-US'; rec.interimResults=false; rec.maxAlternatives=1;
+    var IDLE='🎙 Hold to speak', LIVE='● Listening — release to send';
+    function startListen(){ if(listening) return; try{ rec.start(); listening=true; talk.setAttribute('aria-pressed','true'); talk.textContent=LIVE; }catch(e){} }
+    function stopListen(){ if(!listening) return; try{ rec.stop(); }catch(e){} }   // onend resets the label
     rec.onresult=function(ev){ var t=ev.results[0][0].transcript; ask(t); };
-    rec.onend=function(){ listening=false; talk.setAttribute('aria-pressed','false'); talk.textContent='🎙 Hold the voice key — speak'; };
-    rec.onerror=function(){ listening=false; talk.setAttribute('aria-pressed','false'); talk.textContent='🎙 Hold the voice key — speak'; };
-    talk.addEventListener('click', function(){ if(listening){ try{rec.stop();}catch(e){} } else { try{ rec.start(); listening=true; talk.setAttribute('aria-pressed','true'); talk.textContent='■ Listening… tap to stop'; }catch(e){} } });
+    rec.onend=function(){ listening=false; talk.setAttribute('aria-pressed','false'); talk.textContent=IDLE; };
+    rec.onerror=function(){ listening=false; talk.setAttribute('aria-pressed','false'); talk.textContent=IDLE; };
+    talk.textContent=IDLE;
+    talk.addEventListener('pointerdown', function(e){ e.preventDefault(); startListen(); });
+    talk.addEventListener('pointerup', function(e){ e.preventDefault(); stopListen(); });
+    talk.addEventListener('pointerleave', function(){ stopListen(); });
+    talk.addEventListener('pointercancel', function(){ stopListen(); });
+    // keyboard parity: hold Space or Enter to talk, release to send (a real hardware key does the same)
+    talk.addEventListener('keydown', function(e){ if((e.key===' '||e.key==='Enter')&&!e.repeat){ e.preventDefault(); startListen(); } });
+    talk.addEventListener('keyup', function(e){ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); stopListen(); } });
   } else {
     talk.textContent='Voice key unavailable — write your line';
     talk.addEventListener('click', function(){ line.focus(); });
