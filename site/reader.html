@@ -41,6 +41,23 @@
   .jump{width:4.5rem; background:rgba(255,255,255,.03); border:1px solid var(--line); color:var(--ink);
     font:inherit; font-size:.8rem; padding:.35rem .5rem; border-radius:3px; text-align:center}
 
+  /* Read with the Coach — the chosen text as the cube's decodable surface */
+  .coachbox{margin:0 0 1.7rem; border:1px solid var(--line); border-radius:6px; background:rgba(201,162,74,.045); font-family:var(--sans)}
+  .cbhead{display:flex; flex-wrap:wrap; align-items:center; gap:.55rem; padding:.75rem .95rem}
+  .cbtitle{color:var(--gold); font-size:.9rem; letter-spacing:.01em}
+  .cbsub{color:var(--dim); font-size:.76rem; flex:1; min-width:11rem}
+  .cbpick{background:rgba(255,255,255,.04); border:1px solid var(--line); color:var(--ink); font:inherit; font-size:.8rem; padding:.35rem .5rem; border-radius:4px}
+  .cbgo{background:transparent; border:1px solid var(--line); color:var(--gold); font:inherit; font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; padding:.42rem .9rem; border-radius:3px; cursor:pointer}
+  .cbgo:hover{border-color:var(--gold); color:var(--ink)}
+  .cbody{padding:0 .95rem}
+  .cbody.on{padding:.1rem .95rem 1rem}
+  .cline{font-family:var(--serif); font-size:1.06rem; line-height:1.65; padding:.5rem 0; border-top:1px solid var(--line)}
+  .cline:first-child{border-top:none}
+  .cline b{color:var(--gold); font-weight:600}
+  .cline .wc{color:var(--dim); font-family:var(--sans); font-size:.64rem; margin-left:.5rem; letter-spacing:.06em}
+  .cbnote{color:var(--dim); font-size:.78rem; line-height:1.6; margin:.5rem 0 .2rem}
+  .cblearn{display:inline-block; margin-top:.55rem; font-size:.74rem; color:var(--goldsoft); text-decoration:none; border-bottom:1px solid var(--line)}
+  .cblearn:hover{color:var(--gold)}
   .leaf{white-space:pre-wrap; word-break:break-word; font-size:1.06rem; line-height:1.85;
     min-height:14rem; letter-spacing:.005em}
   .prog{height:3px; background:var(--line); border-radius:2px; margin:1.6rem 0 0; overflow:hidden}
@@ -168,11 +185,66 @@
     return out.length ? out : [text];
   }
 
+  // "Read with the Coach" — the CHOSEN work becomes the cube's decodable surface. The learner picks
+  // the tongue; we fetch the real sentences in THIS book they can read by the cube's anchors (found,
+  // verbatim). The reader (the tortoise) and the coach (the cube) meet here.
+  var CUBES = [["en","English"],["es","Español"],["fr","Français"],["de","Deutsch"],["la","Latina"],
+               ["pt","Português"],["grc","Biblical Greek"],["he","עברית"],["zh","中文"]];
+  var LANGMAP = {english:"en",french:"fr",german:"de",latin:"la",spanish:"es",portuguese:"pt",
+                 greek:"grc",hebrew:"he",chinese:"zh",mandarin:"zh"};
+
+  function coachPanel(d, defSubj){
+    var opts = CUBES.map(function(c){
+      return '<option value="'+c[0]+'"'+(c[0]===defSubj?" selected":"")+'>'+esc(c[1])+'</option>';
+    }).join("");
+    return '<div class="coachbox">'
+      + '<div class="cbhead">'
+      +   '<span class="cbtitle">✦ Read with the Coach</span>'
+      +   '<span class="cbsub">real sentences from this book you can read by the cube — found, not written</span>'
+      +   '<select class="cbpick" id="cbpick" aria-label="tongue">'+opts+'</select>'
+      +   '<button class="cbgo" id="cbgo">Show</button>'
+      + '</div>'
+      + '<div class="cbody" id="cbody"></div>'
+      + '</div>';
+  }
+
+  function boldAnchor(text, anchor){
+    if (!anchor) return esc(text);
+    var i = text.toLowerCase().indexOf(String(anchor).toLowerCase());
+    if (i < 0) return esc(text);
+    return esc(text.slice(0,i)) + "<b>" + esc(text.slice(i, i+anchor.length)) + "</b>" + esc(text.slice(i+anchor.length));
+  }
+
+  function loadCoach(cardId){
+    var pick = document.getElementById("cbpick"), body = document.getElementById("cbody");
+    if (!pick || !body) return;
+    var subj = pick.value;
+    body.className = "cbody on";
+    body.innerHTML = '<div class="cbnote">reading this book with the coach<span class="dot">…</span></div>';
+    fetch("/coach/text?card=" + encodeURIComponent(cardId) + "&subject=" + encodeURIComponent(subj),
+          {headers:{accept:"application/json"}})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ j = (j && j.data!==undefined) ? j.data : j; renderCoach(body, j, subj); })
+      .catch(function(){ body.innerHTML = '<div class="cbnote">The book could not be read just now — try again in a moment.</div>'; });
+  }
+
+  function renderCoach(body, j, subj){
+    var found = (j && j.found) || [];
+    var lines = found.map(function(f){
+      return '<div class="cline">' + boldAnchor(f.text, f.anchor) + '<span class="wc">'+esc(f.anchor)+'</span></div>';
+    }).join("");
+    var learn = '<a class="cblearn" href="/read.html?subject=' + encodeURIComponent(subj) + '">Learn the anchors — the cube →</a>';
+    body.innerHTML = (lines || "") + '<div class="cbnote">' + esc((j && j.note) || "") + '</div>' + learn;
+  }
+
   function renderBook(d){
     var pages = leaves(d.text || "");
     var n = pages.length, at = 0;
+    var urlSubj = (qs.get("subject") || "").trim();
+    var defSubj = urlSubj || LANGMAP[String(d.language||"").toLowerCase()] || "en";
 
     doc.innerHTML = head(d)
+      + coachPanel(d, defSubj)
       + '<div class="bar">'
       +   '<button class="btn" id="prev">‹ Prev</button>'
       +   '<span class="leafno">leaf <b id="cur">1</b> of ' + n + '</span>'
@@ -199,11 +271,17 @@
     nextB.onclick = function(){ show(at + 1); };
     jumpEl.onchange = function(){ var v = parseInt(jumpEl.value, 10); if (!isNaN(v)) show(v - 1); else jumpEl.value = at + 1; };
     document.addEventListener("keydown", function(e){
-      if (e.target && /input|textarea/i.test(e.target.tagName)) return;
+      if (e.target && /input|textarea|select/i.test(e.target.tagName)) return;
       if (e.key === "ArrowLeft") show(at - 1);
       else if (e.key === "ArrowRight") show(at + 1);
     });
     show(0);
+
+    // wire the coach panel; if the reader was opened WITH a tongue (?subject=), read with it at once
+    var cbgo = document.getElementById("cbgo"), cbpick = document.getElementById("cbpick");
+    if (cbgo) cbgo.onclick = function(){ loadCoach(d.card); };
+    if (cbpick) cbpick.onchange = function(){ loadCoach(d.card); };
+    if (urlSubj) loadCoach(d.card);
   }
 
   function noteText(d){

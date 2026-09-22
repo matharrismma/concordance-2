@@ -1924,6 +1924,22 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import coach
         return _ok(coach.guidance())
 
+    if method == "GET" and path == "/coach/text":
+        # READ WITH THE COACH — the learner's CHOSEN work becomes the cube's decodable surface. Given
+        # a card (a public-domain work) and a subject (a cube), find the real sentences in that work
+        # the learner can read by the anchors — verbatim, found, cited. Fetches the text (the tortoise),
+        # so read-bucket limited. The chosen text supplies the words; the cube is the frame.
+        cid = (query.get("card") or query.get("id") or "").strip()
+        if not cid:
+            return _err(400, "card required")
+        c = corpus.get_card(cid)
+        if c is None:
+            return _err(404, "card not found")
+        from .. import readwith as _readwith
+        subj = (query.get("subject") or "").strip() or _readwith.subjects_for_language(
+            c.get("language") or (c.get("extra") or {}).get("language") or "")
+        return _ok(_readwith.decodable(c, subj))
+
     # Identity GETs — capabilities + fingerprint derivation (public key only; no secret involved).
     if method == "GET" and path == "/identity/fingerprint":
         from .. import identity
@@ -2858,6 +2874,7 @@ ROUTES = [
     {"path": "/coach/next", "methods": ("GET",), "api": True},
     {"path": "/coach/recommend", "methods": ("GET",), "api": True},
     {"path": "/coach/guidance", "methods": ("GET",), "api": True},
+    {"path": "/coach/text", "methods": ("GET",), "api": True, "rl": "read"},  # read with the coach — fetches the chosen work (the tortoise)
     {"path": "/identity/fingerprint", "methods": ("GET",), "api": True},
     {"path": "/identity/describe", "methods": ("GET",), "api": True},
     {"path": "/grid", "methods": ("GET",), "api": True},
