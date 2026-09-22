@@ -188,13 +188,57 @@ def _threads_from_results(results: Any, frame: List[str]) -> List[Dict[str, str]
     return [{"id": c, "title": t} for _, _, c, t in scored]
 
 
-def _seeing(text: str) -> Dict[str, Any]:
-    """THE CLOUD OF WITNESSES, ATTACHED TO THE VOICE. The far witnesses' VERBATIM public-domain words
-    that frame a question — attributed (witness + work), spoken, so the coach carries not one man's
-    seeing but the cloud's. Proposes, never confirms; the Word disposes. Nothing generated; honest-empty
-    where the cloud does not yet reach. The way of seeing was built throughout the project (witness.see /
-    discern.served); this is the piece never wired — the voice now carries it."""
-    out: Dict[str, Any] = {"cloud": None, "say": ""}
+_SCRIPTURE_REF = re.compile(r"\b((?:[1-3]\s)?[A-Z][a-zA-Z]+\.?\s+\d{1,3}:\d{1,3}(?:[-–]\d{1,3})?)")
+
+
+def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[str, Any]:
+    """THE WAY OF SEEING, ATTACHED TO THE VOICE — and rooted in RED. Every thought the coach carries is
+    grounded in the WORD FIRST (Tier 1 = the Words in Red / Scripture, brought by the concordance), then
+    the selected WITNESSES beneath it (Tier 3), weighed against the Word. Matt: "all of that should
+    connect to Red; if my words don't align with the words of Christ or Scripture we don't use them"
+    (teachings.py's doctrine: Tier 1 always wins; keep what aligns, refuse the idol; nothing generated).
+
+    Returns `lead` (the Word, to open the thought — brought when the door is open, the Ask/Seek/Knock
+    Gate), `tail` (a selected witness's verbatim words beneath it), and the structured `word`/`cloud`.
+    Honest-empty where neither reaches — a silent trailhead, never a crash, never a generation.
+    """
+    out: Dict[str, Any] = {"word": None, "cloud": None, "lead": "", "tail": ""}
+
+    # TIER 1/2 — THE WORD FIRST. The concordance brings the verse that speaks to this; the coach's
+    # thought opens on it. Brought when the door is open (seeking) — the Gate, Matt's own design.
+    if gate_open:
+        try:
+            from .verifiers import scripture as _sc
+            best = None
+            # 1) THE CURATED ANCHOR — the verse the ANSWER itself already points to (a card's own
+            #    cross-reference is aligned by the operator's keeping, far better than a bare keyword).
+            m = _SCRIPTURE_REF.search(answer_text or "")
+            if m:
+                ps = _sc.read_passage(m.group(1))
+                verses = ps.get("verses") or []
+                if verses:
+                    best = {"ref": str(ps.get("ref") or m.group(1)).strip(),
+                            "text": _trim(" ".join(v.get("text", "") for v in verses), 240)}
+            # 2) ELSE the concordance — most specific term first (the subject noun, not the common verb).
+            if not best:
+                topic = set(_frame(text))
+                score_best = 0
+                for w in sorted(topic, key=len, reverse=True)[:6]:
+                    r = _sc.for_word(w)
+                    if r.get("status") == "ok" and str(r.get("english") or "").strip():
+                        vt = set(re.findall(r"[a-z]{3,}", r["english"].lower()))
+                        score = len(topic & vt) + (len(w) / 100.0)
+                        if score > score_best:
+                            score_best = score
+                            best = {"ref": str(r.get("ref") or "").strip(), "text": _trim(r["english"], 240)}
+            if best:
+                out["word"] = best
+                out["lead"] = (f"The Word speaks — {best['ref']}: “{best['text']}” "
+                               if best["ref"] else f"The Word: “{best['text']}” ")
+        except Exception:  # noqa: BLE001 — the Word not reached here is a quiet trailhead, never a crash
+            pass
+
+    # TIER 3 — the selected cloud of witnesses (already curated to align; PD-gated). One voice, verbatim.
     try:
         from . import witness
         seen = (witness.see(text, k=1) or {}).get("seeing") or []
@@ -204,8 +248,8 @@ def _seeing(text: str) -> Dict[str, Any]:
             who = (f.get("witness") or "a witness").strip()
             work = (f.get("work") or "").strip()
             attrib = who + (", " + work if work else "")
-            out["say"] = f" And a witness sees it — {attrib}: “{_trim(f['text'], 240)}”."
-    except Exception:  # noqa: BLE001 — an unreachable cloud is a quiet trailhead, never a crash
+            out["tail"] = f" And a witness sees it — {attrib}: “{_trim(f['text'], 240)}”."
+    except Exception:  # noqa: BLE001
         pass
     return out
 
@@ -293,17 +337,19 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
         caption = spoken
         kind = "miss"
 
-    # THE CLOUD OF WITNESSES, WOVEN IN AND SPOKEN — the answer (the found fact, the Word where it
-    # resonates) stands FIRST; then a witness's verbatim words are voiced beneath it, weighed against
-    # the Word. Not on a bare computed claim (verify has no source to see through) nor a crisis (handled
-    # above). One voice, short — the cloud proposes, never a wall, never a verdict.
-    cloud = None
+    # ROOTED IN RED, WOVEN AND SPOKEN — the WORD opens the thought (Tier 1, brought when the door is
+    # open), the found answer stands within it, and a selected witness is voiced beneath, weighed against
+    # the Word. Not on a bare computed claim (verify has no source to see through) nor a crisis (above).
+    cloud = word = None
     if kind not in ("verify",):
-        _s = _seeing(text)
-        if _s.get("say"):
-            cloud = _s["cloud"]
-            spoken += _s["say"]
-            caption = (caption + "\n\n" + _s["say"].strip()) if caption else _s["say"].strip()
+        _s = _seeing(text, gate_open, caption)     # the answer's own scripture anchor leads where it has one
+        word, cloud = _s.get("word"), _s.get("cloud")
+        if _s.get("lead"):                       # the Word first — Bible before the answer
+            spoken = _s["lead"] + spoken
+            caption = (_s["lead"].strip() + "\n\n" + caption) if caption else _s["lead"].strip()
+        if _s.get("tail"):                       # the witness beneath, weighed against the Word
+            spoken += _s["tail"]
+            caption = (caption + "\n\n" + _s["tail"].strip()) if caption else _s["tail"].strip()
 
     # ALWAYS offer the next step — and ALWAYS a way to a new path. Paced (at most two threads, never a
     # wall) and never forced: the final choice is theirs (the Gate — we present, we do not cross).
@@ -315,7 +361,8 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
     return {
         "intent": "ask", "kind": kind, "headline": headline, "spoken": spoken, "caption": caption,
         "source": source, "connections": connections, "next": nexts, "frame": frame[:8],
-        "cloud": cloud, "resources": r.get("resources"), "note": r.get("note"), "generated": False,
+        "word": word, "cloud": cloud, "resources": r.get("resources"), "note": r.get("note"),
+        "generated": False,
     }
 
 

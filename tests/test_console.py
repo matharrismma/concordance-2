@@ -503,3 +503,33 @@ def test_an_unreachable_cloud_is_a_quiet_trailhead(monkeypatch):
         "kind": "search", "results": [{"id": "c1", "title": "Faith", "snippet": "kept"}], "generated": False})
     r = console._coach("what is faith", SEC, False)
     assert r["spoken"] and r.get("cloud") is None
+
+
+def test_the_word_leads_the_thought_when_the_door_is_open(monkeypatch):
+    """Bible first, rooted in Red — when the door is open (seeking), the WORD opens the coach's thought,
+    before the answer and before the witnesses. Matt: 'we want the thoughts to contain scripture ...
+    all of that should connect to Red.'"""
+    from concordance.verifiers import scripture as S
+    monkeypatch.setattr(S, "for_word", lambda w: (
+        {"status": "ok", "ref": "John 14:6", "english": "I am the way, the truth, and the life."}
+        if w == "truth" else {"status": "none"}))
+    import concordance.witness as W
+    monkeypatch.setattr(W, "see", lambda *a, **k: {"seeing": []})
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "search", "results": [{"id": "c1", "title": "Truth", "snippet": "kept"}], "generated": False})
+    r = console._coach("what is truth", SEC, True)         # gate_open True = the door is open
+    assert r["spoken"].startswith("The Word speaks — John 14:6")
+    assert r.get("word") and r["word"]["ref"] == "John 14:6"
+
+
+def test_the_word_is_not_forced_when_the_door_is_closed(monkeypatch):
+    """Facts by default until the door opens (the Ask/Seek/Knock Gate, Matt's own design)."""
+    from concordance.verifiers import scripture as S
+    called = {"n": 0}
+    monkeypatch.setattr(S, "for_word", lambda w: called.__setitem__("n", called["n"] + 1) or {"status": "none"})
+    import concordance.witness as W
+    monkeypatch.setattr(W, "see", lambda *a, **k: {"seeing": []})
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "search", "results": [{"id": "c1", "title": "T", "snippet": "kept"}], "generated": False})
+    r = console._coach("what is truth", SEC, False)        # gate closed
+    assert called["n"] == 0 and not r.get("word")
