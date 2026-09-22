@@ -1988,6 +1988,13 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from ..verifiers import scripture  # lazy: witness-only
         return _ok(scripture.original_words(ref))
 
+    if method == "GET" and path == "/scripture_for":
+        # A plain English WORD → its scripture home in the ORIGINAL tongue (the concordance's
+        # "In the Word" register). Finds the word in the WEB text, returns a representative verse's
+        # Hebrew/Greek words with Strong's. Conduit — it surfaces what is kept, never generates.
+        from ..verifiers import scripture
+        return _ok(scripture.for_word((query.get("word") or "").strip()))
+
     if method == "GET" and path == "/now":
         # The actual date and time, current at this call. An agent's own clock is months stale
         # (its training cutoff); a layer that stamps receipts with time must be able to TELL time.
@@ -2829,6 +2836,7 @@ ROUTES = [
     {"path": "/cross_refs", "methods": ("GET",), "api": True},
     {"path": "/word_occurrences", "methods": ("GET",), "api": True},
     {"path": "/original", "methods": ("GET",), "api": True},
+    {"path": "/scripture_for", "methods": ("GET",), "api": True},
     {"path": "/canon", "methods": ("GET",), "api": True},
     {"path": "/commentary", "methods": ("GET",), "api": True},
     {"path": "/tsk", "methods": ("GET",), "api": True},

@@ -228,7 +228,10 @@ async function doVerse(raw){
   return h+`</div>`;
 }
 async function doWord(raw){
-  const d=await api("/search?q="+encodeURIComponent(raw)+"&limit=14");
+  const [d, sc] = await Promise.all([
+    api("/search?q="+encodeURIComponent(raw)+"&limit=14"),
+    api("/scripture_for?word="+encodeURIComponent(raw)).catch(()=>null)
+  ]);
   const res=(d&&d.results)||[];
   if(!res.length) return `<div class="card"><div class="err">Nothing kept under “${esc(raw)}” yet. The keeping always grows.</div></div>`;
   const byShelf={}; res.forEach(r=>{(byShelf[r.shelf]=byShelf[r.shelf]||[]).push(r)});
@@ -236,6 +239,13 @@ async function doWord(raw){
   const theories=(byShelf["theories"]||[]);
   let h=`<div class="card"><div class="top"><span class="subj">${esc(raw)}</span><span class="ess">its life across all that is kept</span></div>`;
   if(def) h+=reg("What it is", `<div class="def">${esc(String(def.snippet||def.title).slice(0,400))}</div><div class="src">shelf ${esc(def.shelf)} · <a href="/card.html?id=${encodeURIComponent(def.id)}">the card →</a></div>`);
+  if(sc && sc.status==="ok" && sc.words && sc.words.length){
+    const cells=sc.words.map(w=>`<span class="hw"><span class="h">${esc(w.word)}</span><span class="s">${esc(w.strongs||"")}</span></span>`).join("");
+    h+=reg("In the Word",
+      `<div class="src" style="margin:0 0 9px">“${esc(raw)}” in Scripture — at <b style="color:var(--gold)">${esc(sc.ref)}</b>, in the tongue it was given:</div>`
+      +`<div class="hebrow">${cells}</div>`
+      +`<div class="src">the original words to their Strong’s · the plumb-line</div>`);
+  }
   if(theories.length) h+=reg('Across reality<br><span style="color:var(--green-deep)">the Atlas</span>',
      `<div class="domlist">${theories.slice(0,10).map(t=>`<a class="dom" href="/card.html?id=${encodeURIComponent(t.id)}">${esc(t.title)}</a>`).join("")}</div><div class="src">the kept domains this thread touches — joined to the master equations</div>`);
   const others=res.filter(r=>r!==def && r.shelf!=="theories").slice(0,6);

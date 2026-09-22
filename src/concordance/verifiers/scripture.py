@@ -355,6 +355,34 @@ def word_study(strongs_num: str) -> Dict[str, Any]:
     return result
 
 
+def for_word(word: str) -> Dict[str, Any]:
+    """Where an English word lives in Scripture, IN THE ORIGINAL TONGUE. Finds the word in the WEB
+    text (whole-word), then hands back a representative verse's Hebrew/Greek words with Strong's — so
+    the concordance can show a plain word's scripture home in the language it was given, not the gloss.
+    {word, count, ref, english, words:[{word,strongs}], status}."""
+    word = (word or "").strip()
+    if not word:
+        return {"status": "not_found", "words": []}
+    try:
+        from ..strongs import Concordance
+    except Exception as e:  # noqa: BLE001
+        return {"status": "unavailable", "detail": f"strongs backend not importable: {e}"}
+    try:
+        c = Concordance()
+        es = c.english_search(word, whole_word=True, limit=6)
+        results = (es or {}).get("results") or []
+        if not results:
+            return {"word": word, "status": "not_found", "count": 0, "words": []}
+        first = results[0]
+        b, ch, v = first.get("book_num"), first.get("chapter"), first.get("verse")
+        words = c.verse_words(b, ch, v) if b else []
+        return {"word": word, "status": "ok" if words else "no_words",
+                "count": (es or {}).get("count", len(results)), "ref": first.get("ref"),
+                "english": first.get("text"), "words": words}
+    except Exception as e:  # noqa: BLE001
+        return {"status": "unavailable", "detail": str(e)[:200]}
+
+
 def cross_references(ref: str) -> Dict[str, Any]:
     """Verses connected to a reference by shared original words (Strong's) — via the backend."""
     try:
