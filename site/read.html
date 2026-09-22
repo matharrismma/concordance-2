@@ -273,7 +273,12 @@ async function renderJourney(){
     el.hidden=false;
   }catch(e){}
 }
-(function init(){ if(done().length){ document.getElementById('continuebtn').hidden=false; } renderRibbon(); renderJourney(); loadSubjects(); })();
+(function init(){
+  // A deep link — /read.html?subject=fr — opens straight onto that track (the landing's
+  // "learn a language" cards link in this way). Server-side subject codes are lowercase alnum;
+  // an unknown one simply shows an empty path, never an error.
+  try{ var qs=new URLSearchParams(location.search).get('subject'); if(qs && /^[a-z0-9_]+$/.test(qs)) SUBJECT=qs; }catch(e){}
+  if(done().length){ document.getElementById('continuebtn').hidden=false; } renderRibbon(); renderJourney(); loadSubjects(); })();
 </script>
 <script src="/nh-home.js"></script>
 <script src="/nh-tools.js"></script>
