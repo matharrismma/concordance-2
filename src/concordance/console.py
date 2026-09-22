@@ -456,6 +456,86 @@ def _copies(text: str) -> Dict[str, Any]:
 
 
 # ── the coach reaches the lessons, the works, and the steward — behind the scenes ────────────────
+def _work_rank(c: Dict[str, Any]) -> int:
+    """Prefer a genuine readable WORK (an archive/gutenberg detail page) over a catalogue spine card
+    that merely carries an allowlisted url — the one has a book behind it, the other does not."""
+    src = c.get("source") or {}
+    url = str(src.get("url") or "")
+    title = (c.get("title") or "").lower()
+    r = 0
+    if src.get("identifier"):
+        r += 3
+    if "/details/" in url or "/ebooks/" in url:
+        r += 2
+    if (c.get("shelf") or "") == "trades":
+        r += 2                                 # a catalogued craft BOOK, classified by discipline
+    elif (c.get("shelf") or "") in ("practical", "library", "field"):
+        r += 1
+    # a section is TAUGHT by a treatise, not sold by a catalogue — push mail-order catalogues,
+    # price lists and directories down so a real book on the craft is chosen to read from.
+    if re.search(r"\bcatalog|catalogue|price list|mail order|directory|almanac|advertis", title):
+        r -= 5
+    return r
+
+
+# band/box words that name a shelf or provenance, not a DISCIPLINE — never a discipline hint
+_NAV_STOP = frozenset((
+    "and the for with public domain english french german latin spanish greek hebrew trades "
+    "dictionary thesaurus word noun verb adjective excerpt source spine reference pre-1929 book "
+    "manual work volume field library practical").split())
+
+
+def _disciplines(results) -> list:
+    """The discipline(s) the concordance already assigns to a topic — a work's `box`, and the bands of
+    the practical/trades/spine cards that name the craft. This is the reliable bridge from a narrow
+    section ('mortise and tenon') to the shelf that teaches it ('carpentry, joinery')."""
+    hints: List[str] = []
+    for c in (results or [])[:8]:
+        box = str(c.get("box") or "").strip().lower().replace("_", " ")
+        if box and box not in _NAV_STOP and box not in hints:
+            hints.append(box)
+        if c.get("shelf") in ("practical", "trades", "spine"):
+            for b in (c.get("bands") or []):
+                b = str(b).strip().lower()
+                if len(b) >= 4 and b not in _NAV_STOP and b not in hints:
+                    hints.append(b)
+    return hints[:3]
+
+
+def _find_works(topic: str):
+    """A ranked list of genuine readable WORKS for a topic, the craft books first. A narrow section
+    query ('mortise and tenon') surfaces spine/dictionary cards, not the archive books — those answer
+    to the DISCIPLINE the concordance assigns it ('carpentry, joinery'). So we search the DISCIPLINE
+    first (the trades books), then the topic itself. `card_span_*` are navigational nodes with no book
+    behind them — excluded; only real detail-page works (rank>=5) are kept."""
+    from . import tortoise as _t
+
+    def works_from(res):
+        # readable + not a navigational span node are the HARD filters; rank only SORTS (trades books
+        # and real detail-pages first, catalogues last). The relevance gate in _read is what keeps a
+        # located passage honest, so a rank-0 Gutenberg book can still be the right one.
+        return [c for c in (res or []) if isinstance(c, dict) and _t.readable(c)
+                and not str(c.get("id", "")).startswith("card_span")]
+
+    results = _corpus.search(topic, limit=12) or []
+    queries: List[str] = []
+    disc = _disciplines(results)
+    if disc:
+        queries.append(" ".join(disc[:2]))          # the craft — trades books answer to this
+    queries.append(topic)                            # the topic itself, as a fallback
+
+    works: List[Dict[str, Any]] = []
+    seen = set()
+    for q in queries:
+        res = results if q == topic else (_corpus.search(q, limit=12) or [])
+        for c in sorted(works_from(res), key=_work_rank, reverse=True):
+            cid = str(c.get("id") or "")
+            if cid and cid not in seen:
+                seen.add(cid)
+                works.append(c)
+    return works
+
+
 def _subject_from_text(text: str) -> Optional[str]:
     """The cube a request names ('teach me Biblical Greek' -> grc), or None. Longest phrase first so
     'to read' beats 'read'."""
@@ -495,10 +575,11 @@ def _learn(text: str) -> Dict[str, Any]:
             "next": nexts, "generated": False}
 
 
-def _read(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
+def _read(text: str, config: Any, gate_open: bool, *, source_text: Optional[str] = None,
+          source_title: Optional[str] = None) -> Dict[str, Any]:
     """The coach as reader: read a passage of Scripture — and, when asked, in the ORIGINAL tongue,
-    each word to its Strong's (decoding it by the cube) — or find a whole public-domain WORK and open
-    the reading room. Found and verbatim; the book is the tortoise, fetched on the person's say."""
+    each word to its Strong's (decoding it by the cube) — or locate and read a section of a WORK: the
+    reader's OWN dropped copy first, else a public-domain book from the shelf. Found and verbatim."""
     ref_m = _REF_RE.search(text)
     if ref_m:
         from .verifiers import scripture as _sc
@@ -530,32 +611,102 @@ def _read(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
                              {"label": "Hear it in the original", "ref": f"/bible.html?ref={shown}"}],
                     "generated": False}
 
-    # a whole WORK — strip the read cue, find a readable public-domain book, open the reading room
+    # a WORK — strip the read cue (and any "section on / part about / chapter on"), find a readable
+    # public-domain book. If they named a SPECIFIC AREA, LOCATE that passage and read it; if they asked
+    # for a whole book ("read me a book on X"), open the reading room at the start.
+    from urllib.parse import quote as _q
     from . import tortoise as _tortoise
+    low = text.lower()
+    wants_whole = bool(re.search(r"\b(?:a|the|another|some|this)\s+(?:whole\s+)?"
+                                 r"(?:book|work|volume|treatise|manual|text)\b", low))
     topic = _strip_prefix(text, _READ)
-    topic = re.sub(r"^(?:me|us|to me|aloud|a book (?:about|on)|the book (?:about|on)|about|on|from|the|a)\b[\s:,\-]*",
+    topic = re.sub(r"^(?:me|us|to me|aloud|let's|"
+                   r"(?:the |a )?(?:section|part|chapter|passage)s?\s+(?:on|about|regarding|covering|of)|"
+                   r"a book (?:about|on)|the book (?:about|on)|about|on|from|the|a)\b[\s:,\-]*",
                    "", topic, flags=re.I).strip() or text
-    results = _corpus.search(topic, limit=10) or []
-    work = next((c for c in results if isinstance(c, dict) and _tortoise.readable(c)), None)
-    if work:
+    # drop a trailing work-context clause ("... in the carpentry manual") from the SECTION topic
+    section = re.sub(r"\s+in (?:the |a )?[\w\s]+?\b(?:book|manual|work|volume|treatise|text)\s*$", "",
+                     topic, flags=re.I).strip() or topic
+    sect_terms = [t for t in re.findall(r"[a-zà-ÿ0-9]{3,}", section.lower())
+                  if t not in ("and", "the", "for", "with", "of", "to", "on", "about")]
+    need = min(2, len(sect_terms)) if sect_terms else 1     # enough of the area's terms must cluster
+
+    # THEIR OWN COPY FIRST — a book they dropped in. Store-nothing: their text, located and read, never
+    # held. Reading from a copy they own is theirs to do; our PD shelf is the free default beside it.
+    if source_text and section:
+        loc = _tortoise.locate_in_text(source_text, section)
+        if loc.get("found") and loc.get("passage") and loc.get("distinct_terms", 0) >= need:
+            who = _trim(source_title or "your book", 70)
+            return {"intent": "read", "kind": "passage_own", "headline": f"{who} — on {_trim(section, 44)}",
+                    "spoken": f"In your copy of {who}, here is where it treats {_trim(section, 60)}. " +
+                              _trim(loc["passage"], 520),
+                    "caption": loc["passage"], "source": None,
+                    "next": [{"label": "Ask about another part", "ref": None}],
+                    "located": {"in": "your_copy", "terms": loc.get("terms"), "query": section},
+                    "generated": False}
+
+    _DROP = {"label": "Or drop your own copy of the book", "ref": None}    # read from a book they own
+    works = _find_works(topic)
+    if works:
+        # A SPECIFIC AREA: try the best works in turn until one actually holds that passage (a card can
+        # look like a book and have no readable text behind it). Bounded, because each is a live fetch.
+        if not wants_whole:
+            for work in works[:3]:
+                loc = _tortoise.locate(work, section)
+                if (loc.get("found") and loc.get("passage")
+                        and loc.get("distinct_terms", 0) >= need):   # a real match, not one metaphor
+                    title = (work.get("title") or "").strip()
+                    at = f"/reader.html?card={work.get('id')}&find={_q(section)}"
+                    # NARROW BY CHOICE: the other works that may treat this too — "which do you mean?"
+                    others = [{"label": "Or in " + _trim((w.get("title") or "").strip(), 44),
+                               "ref": f"/reader.html?card={w.get('id')}&find={_q(section)}"}
+                              for w in works[1:3] if w.get("id") != work.get("id")]
+                    return {"intent": "read", "kind": "passage",
+                            "headline": f"{title} — on {_trim(section, 48)}",
+                            "spoken": (f"In {title}, here is where it treats {_trim(section, 60)}. " +
+                                       _trim(loc["passage"], 520)),
+                            "caption": loc["passage"],
+                            "source": {"title": f"{title} — the passage", "ref": at},
+                            "next": [{"label": "Open it here in the reader", "ref": at},
+                                     {"label": "Read the whole work",
+                                      "ref": f"/reader.html?card={work.get('id')}"}] + others + [_DROP],
+                            "located": {"card": work.get("id"), "offset": loc.get("offset"),
+                                        "terms": loc.get("terms"), "query": section}, "generated": False}
+
+            # works on the shelf, but none held THAT area — ASK: which did you mean, or drop the source?
+            picks = [{"label": _trim((w.get("title") or "").strip(), 46),
+                      "ref": f"/reader.html?card={w.get('id')}&find={_q(section)}"} for w in works[:3]]
+            return {"intent": "read", "kind": "narrow", "headline": f"Which, for {_trim(section, 40)}?",
+                    "spoken": (f"I couldn't pin {_trim(section, 60)} to one book. I hold "
+                               + ", ".join(p["label"] for p in picks) +
+                               ". Which did you mean — or drop a link to the source you want, or drop "
+                               "your own copy of the book and I'll read that part from it."),
+                    "caption": section, "source": None, "next": picks + [_DROP], "generated": False}
+
+        # a WHOLE book was asked for — open the best readable work at the start, others offered to narrow
+        work = works[0]
         title = (work.get("title") or "").strip()
         lang = (work.get("language") or (work.get("extra") or {}).get("language") or "").lower()
         withcube = _LANG_WORDS.get(lang if lang in _LANG_WORDS else "english", "en")
         rurl = f"/reader.html?card={work.get('id')}"
-        spoken = (f"I found {title} — a public-domain work, held in the ark. Open it and I'll read it "
-                  f"with you, sentence by sentence, by the cube.")
-        return {"intent": "read", "kind": "work", "headline": title, "spoken": spoken,
+        others = [{"label": "Or " + _trim((w.get("title") or "").strip(), 44),
+                   "ref": f"/reader.html?card={w.get('id')}"} for w in works[1:3]]
+        return {"intent": "read", "kind": "work", "headline": title,
+                "spoken": (f"I found {title} — a public-domain work, held in the ark. Open it and I'll "
+                           f"read it with you, sentence by sentence, by the cube."),
                 "caption": _trim(work.get("body") or title, 300),
                 "source": {"title": title, "ref": rurl},
                 "next": [{"label": "Open the reading room", "ref": rurl},
-                         {"label": "Read it with the coach", "ref": rurl + "&subject=" + withcube}],
+                         {"label": "Read it with the coach", "ref": rurl + "&subject=" + withcube}] + others,
                 "work": {"id": work.get("id"), "readable": True}, "generated": False}
-    # nothing readable held — the coach turns to the steward (offered; the write waits on their say)
+
+    # nothing readable held — turn to the steward, OR let them point us at it (a link / their own copy)
     return {"intent": "read", "kind": "miss", "headline": "Not on the shelf yet",
             "spoken": (f"I don't hold a readable work on {_trim(topic, 60)} yet. Say \"go find it\" and "
-                       f"I'll set the steward to acquire it for the shelf."),
+                       f"I'll set the steward to acquire it — or drop a link to the source, or drop your "
+                       f"own copy of the book, and I'll read it with you."),
             "caption": topic, "source": None,
-            "next": [{"label": "Ask the steward to find it", "ref": None}], "generated": False}
+            "next": [{"label": "Ask the steward to find it", "ref": None}, _DROP], "generated": False}
 
 
 def _acquire(text: str) -> Dict[str, Any]:
@@ -578,9 +729,13 @@ def _acquire(text: str) -> Dict[str, Any]:
             "caption": q, "source": None, "next": [], "generated": False}
 
 
-def dispatch(text: str, config: Any, *, owner: Optional[str] = None,
-             gate_open: bool = False) -> Dict[str, Any]:
-    """The one entry. Crisis-first, then route. Returns the small, speakable, LoRa-ready payload."""
+def dispatch(text: str, config: Any, *, owner: Optional[str] = None, gate_open: bool = False,
+             source_text: Optional[str] = None, source_title: Optional[str] = None) -> Dict[str, Any]:
+    """The one entry. Crisis-first, then route. Returns the small, speakable, LoRa-ready payload.
+
+    `source_text` is the extracted text of a work the reader DROPPED IN — their OWN copy of a book.
+    When present, a read/section request is answered from THEIR copy first (store-nothing: the text is
+    passed through, never held), so the coach can teach from a book they own, not only the PD shelf."""
     text = (text or "").strip()
     if not text:
         return {"intent": "empty", "kind": "empty", "spoken": "", "caption": "",
@@ -599,7 +754,7 @@ def dispatch(text: str, config: Any, *, owner: Optional[str] = None,
     if intent == "learn":
         return _learn(text)
     if intent == "read":
-        return _read(text, config, gate_open)
+        return _read(text, config, gate_open, source_text=source_text, source_title=source_title)
     return _ask_path(text, config, owner, gate_open)
 
 
@@ -668,4 +823,8 @@ def intake_artifact(*, source_location: str, kind: str = "file", title: str = ""
         "sha256": (sha256 or "").strip(),
         "at": at,
     }
-    return {"ok": True, "artifact": card}
+    # THE FULL TEXT goes back to the CLIENT (store-nothing on the server), so the reader can hold their
+    # OWN COPY edge-side and later ask the coach to read a section from it. Capped to keep the request
+    # light; the card keeps only a 4k preview.
+    full = (extracted_text or "")[:2_000_000]
+    return {"ok": True, "artifact": card, "full_text": full, "chars": len(extracted_text or "")}

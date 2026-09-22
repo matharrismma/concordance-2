@@ -1144,9 +1144,16 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _err(400, "text or intake required")
         from .. import ask as _ask
         gate_open = (surface == "witness") or session_gate_open or _ask.gate_signal(text)
+        # THEIR OWN COPY — a book the reader dropped in (its extracted text, held EDGE-SIDE by the
+        # client, sent along here). Store-nothing: we locate and read within it, keep nothing. Capped so
+        # one request stays light; a whole library belongs on their drive, not in a request body.
+        src_text = body.get("source_text")
+        src_text = str(src_text)[:2_000_000] if isinstance(src_text, str) and src_text.strip() else None
+        src_title = str(body.get("source_title") or "")[:200] or None
         # v1: dictation is kept edge-side (store-nothing, no account); the signed-write owner arrives
         # with the covenant flow. A proven owner may be threaded here later.
-        r = _console.dispatch(text, config, owner=None, gate_open=gate_open)
+        r = _console.dispatch(text, config, owner=None, gate_open=gate_open,
+                              source_text=src_text, source_title=src_title)
         # THE SAME DECK the typed chat keeps (2026-09-02): the Console spoke every utterance and
         # forgot it the instant the response was sent — no thread_id in or out, so "It's one
         # conversation, we pick up whatever thread you pull" (threads.py's own keystone) never

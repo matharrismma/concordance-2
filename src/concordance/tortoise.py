@@ -24,9 +24,18 @@ through, never generated and never ours.
 """
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+import re
+from typing import Any, Dict, List, Optional
 
 from . import sources
+
+# words too common to locate on — a passage is found by its DISTINCTIVE terms, not "the" and "with"
+_LOCATE_STOP = frozenset((
+    "the a an of to and but in on for is are was were be his her its their our my your this that these "
+    "those with from about into over under out up down how what when where why who which can could "
+    "would should will not no as at by or if it he she they we you i do does did section part chapter "
+    "passage page read me us about on regarding book manual work volume treatise").split())
+_LOC_SENT = re.compile(r"(?<=[.!?])\s")
 
 
 def _source_url(card: Dict[str, Any]) -> str:
@@ -86,4 +95,99 @@ def open_work(card: Dict[str, Any], *, meta=None) -> Dict[str, Any]:
     return {**head, "status": "not_available", "reason": res.get("reason", "the source could not be reached")}
 
 
-__all__ = ["open_work", "readable"]
+_HEAD_KEYS = ("card", "title", "author", "language", "discipline", "detail_url", "identifier",
+              "pd_basis", "pd_year", "license", "held")
+
+
+def _snap(text: str, start: int, length: int) -> str:
+    """A window of the text, snapped OUT to whole-sentence bounds so a passage never begins or ends
+    mid-word. Verbatim (only inter-word whitespace is collapsed for reading)."""
+    end = min(len(text), start + length)
+    lo = max(0, start)
+    pre = text[max(0, start - 220):start]
+    ms = list(re.finditer(r"[.!?]\s|\n\n", pre))
+    if ms:
+        lo = max(0, start - 220) + ms[-1].end()
+    hi = end
+    post = text[end:end + 220]
+    mp = re.search(r"[.!?]\s|\n\n", post)
+    if mp:
+        hi = end + mp.start() + 1
+    return re.sub(r"\s+", " ", text[lo:hi]).strip()
+
+
+def locate_in_text(text: str, query: str, *, window_chars: int = 1500,
+                   scan_chars: int = 1_800_000) -> Dict[str, Any]:
+    """The passage-finder over a plain string — used both for a KEPT work (the tortoise reads it) and
+    for a reader's OWN copy they dropped in (store-nothing: their text, passed through, never held).
+
+    Returns {found, passage, offset, terms, distinct_terms, hits, note}. The passage is verbatim,
+    snapped to sentence bounds. Honest when the area is not in the text.
+    """
+    text = (text or "")[:scan_chars]
+    terms = [t for t in dict.fromkeys(re.findall(r"[a-zà-ÿ0-9]{3,}", (query or "").lower()))
+             if t not in _LOCATE_STOP]
+    if not text.strip():
+        return {"found": False, "passage": "", "query": query, "terms": terms,
+                "note": "There is no readable text to search."}
+    if not terms:
+        return {"found": False, "query": query, "terms": [], "offset": 0,
+                "passage": _snap(text, 0, window_chars),
+                "note": "No distinctive term to locate on — the opening is shown."}
+
+    hits: List[tuple] = []
+    low = text.lower()
+    for t in terms:
+        for m in re.finditer(r"\b" + re.escape(t) + r"\b", low):
+            hits.append((m.start(), t))
+    if not hits:
+        return {"found": False, "query": query, "terms": terms, "offset": None, "passage": "",
+                "note": "That area is not discussed here — try another wording, or another source."}
+    hits.sort()
+    pos = [h[0] for h in hits]
+
+    # densest window by (distinct terms, then total hits) — two pointers over sorted positions
+    from collections import defaultdict
+    cnt: Dict[str, int] = defaultdict(int)
+    distinct = 0
+    j = 0
+    best = (-1, -1)
+    best_center = pos[0]
+    for i in range(len(hits)):
+        if j < i:
+            j = i
+        while j < len(hits) and pos[j] - pos[i] <= window_chars:
+            if cnt[hits[j][1]] == 0:
+                distinct += 1
+            cnt[hits[j][1]] += 1
+            j += 1
+        score = (distinct, j - i)
+        if score > best:
+            best = score
+            best_center = pos[i]
+        cnt[hits[i][1]] -= 1
+        if cnt[hits[i][1]] == 0:
+            distinct -= 1
+
+    start = max(0, best_center - window_chars // 3)
+    return {"found": True, "query": query, "terms": terms, "offset": start,
+            "distinct_terms": best[0], "hits": best[1],
+            "passage": _snap(text, start, window_chars),
+            "note": "Found — the passage where these terms cluster densest."}
+
+
+def locate(card: Dict[str, Any], query: str, *, window_chars: int = 1500,
+           scan_chars: int = 1_800_000, meta=None) -> Dict[str, Any]:
+    """Find WHERE in a KEPT work a topic is discussed and return THAT passage, verbatim. Fetches the
+    work (the tortoise), then locates within it. Honest when the work cannot be read or the area is
+    absent."""
+    op = open_work(card, meta=meta)
+    head = {k: op.get(k) for k in _HEAD_KEYS}
+    if op.get("status") != "read":
+        return {**head, "status": op.get("status", "not_available"), "reason": op.get("reason"),
+                "found": False, "passage": "", "query": query}
+    return {**head, "status": "read",
+            **locate_in_text(op.get("text") or "", query, window_chars=window_chars, scan_chars=scan_chars)}
+
+
+__all__ = ["open_work", "readable", "locate", "locate_in_text"]

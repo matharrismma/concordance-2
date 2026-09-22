@@ -191,6 +191,27 @@ def test_open_work_on_a_card_pointing_nowhere_fetchable(monkeypatch):
 
 # ── the finding path: a work is one click from the results ───────────────────────────────────────
 
+def test_locate_finds_the_passage_where_a_topic_clusters(monkeypatch):
+    """'the section on dovetail joints' -> the place those terms cluster densest, verbatim, snapped to
+    sentence bounds. Found in the author's text, honest when the area is absent."""
+    body = ("The workshop must be kept clean and the tools in order. " * 6 +
+            "The dovetail joint is the strongest of all. To cut a dovetail joint, mark the pins first, "
+            "then saw down to the line and pare away the waste with a sharp chisel. A well-made "
+            "dovetail joint needs no glue. " +
+            "The lathe turns the wood while the gouge shapes it. " * 8)
+    monkeypatch.setattr(tortoise, "open_work",
+                        lambda card, **k: {"status": "read", "text": body, "title": "A Manual",
+                                           "detail_url": "https://archive.org/details/x", "discipline": "carpentry"})
+    r = tortoise.locate(_trades_card(), "the section on dovetail joints")
+    assert r["found"] is True
+    assert "dovetail joint" in r["passage"].lower()
+    assert "pare away the waste" in r["passage"]         # the real passage, verbatim
+    assert isinstance(r["offset"], int)
+
+    absent = tortoise.locate(_trades_card(), "submarine navigation sonar")
+    assert absent["found"] is False and absent["passage"] == ""
+
+
 def test_a_search_brief_marks_a_readable_work():
     """A search hit carries `readable` so a listing can put a direct 'Read the full work' link on the
     hit itself — the whole PD source one click from the results, not two (hit -> card -> read)."""

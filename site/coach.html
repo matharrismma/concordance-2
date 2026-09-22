@@ -144,10 +144,18 @@ if('serviceWorker' in navigator){ window.addEventListener('load', function(){ na
     li.appendChild(add); book.insertBefore(li, book.firstChild);
   }
 
+  var _ownCopy=null;   // a book the reader dropped in — their OWN copy, held here (edge-side), so the
+                       // coach can read a section from it. Store-nothing: it never leaves this device
+                       // except as the text of the one request that reads it.
   function ask(text, quiet){
     text=String(text||'').trim(); if(!text) return;
+    if(_ownCopy && /^(done with (the|this) book|forget the book|clear the book|new book|done with the book)\.?$/i.test(text)){
+      _ownCopy=null; render({kind:'ok', headline:'Cleared', spoken:'Done — I have let go of that copy.', caption:'Done — I have let go of that copy.'}); return; }
     if(!quiet) remember(text, null);
     var payload={text:text}; if(threadId) payload.thread_id=threadId;
+    // send their copy ONLY on a read/section request — never on every utterance (LoRa-thrifty)
+    if(_ownCopy && _ownCopy.text && /^read\b|\b(section|chapter|passage|the part)\b/i.test(text)){
+      payload.source_text=_ownCopy.text; payload.source_title=_ownCopy.title||''; }
     fetch(API+'/console',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
       .then(function(r){ return r.json(); })
       .then(function(r){ if(r.thread_id){ threadId=r.thread_id; try{ localStorage.setItem(TID,threadId); }catch(e){} } render(r); })
@@ -188,10 +196,14 @@ if('serviceWorker' in navigator){ window.addEventListener('load', function(){ na
   window.addEventListener('paste', function(e){ var it=e.clipboardData && e.clipboardData.items; if(!it) return; for(var i=0;i<it.length;i++){ if(it[i].kind==='file'){ var f=it[i].getAsFile(); if(f) bringIn(f, f.name||'pasted-image', (f.type||'image')); } } });
   function sendIntake(loc, b64){ var payload={source_location:loc, kind:(b64?'pdf':'file')}; if(b64) payload.pdf_b64=b64;
     fetch(API+'/console',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({intake:payload})})
-      .then(function(r){return r.json();}).then(function(r){ if(!r.artifact) return; var a=r.artifact, n=(a.extracted_text||'').length;
-        var say = n>16 ? ('Kept '+a.title+' — read '+n+' characters of its text. Ask me about it, or add a note.')
-                       : ('Kept the location: '+a.title+'. No readable text found; say a note to describe it.');
-        render({kind:'artifact', headline:'Located', spoken:say, caption:(a.extracted_text ? (a.title+'\n\n'+a.extracted_text.slice(0,600)) : say)}); }).catch(function(){}); }
+      .then(function(r){return r.json();}).then(function(r){ r=(r&&r.data!==undefined)?r.data:r; if(!r.artifact) return; var a=r.artifact, full=r.full_text||'', n=r.chars||(a.extracted_text||'').length;
+        if(full && full.length>400){ _ownCopy={text:full, title:a.title}; }   // hold their copy to read from
+        var say = full && full.length>400
+              ? ('Kept your copy of '+a.title+' — '+n+' characters. Now say, for instance, “read me the section on …” and I’ll read that part from your book.')
+              : (n>16 ? ('Kept '+a.title+' — read '+n+' characters of its text. Ask me about it, or add a note.')
+                      : ('Kept the location: '+a.title+'. No readable text found; say a note to describe it.'));
+        render({kind:'artifact', headline:(_ownCopy?'Your copy is ready':'Located'), spoken:say,
+                caption:(a.extracted_text ? (a.title+'\n\n'+a.extracted_text.slice(0,600)) : say)}); }).catch(function(){}); }
   locI && locI.addEventListener('keydown', function(e){ if(e.key!=='Enter' || !locI.value.trim()) return; var loc=locI.value.trim();
     if(_file && isPdf(_file)){ var rd=new FileReader();
       rd.onload=function(){ var s=String(rd.result||''); var i=s.indexOf(','); sendIntake(loc, i>=0? s.slice(i+1):''); };

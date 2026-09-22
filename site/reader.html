@@ -60,6 +60,8 @@
   .cblearn:hover{color:var(--gold)}
   .leaf{white-space:pre-wrap; word-break:break-word; font-size:1.06rem; line-height:1.85;
     min-height:14rem; letter-spacing:.005em}
+  .leaf mark{background:rgba(201,162,74,.30); color:var(--ink); border-radius:2px; padding:0 1px}
+  .foundhint{font-family:var(--sans); font-size:.76rem; color:var(--goldsoft); margin:.2rem 0 1rem}
   .prog{height:3px; background:var(--line); border-radius:2px; margin:1.6rem 0 0; overflow:hidden}
   .prog > i{display:block; height:100%; background:var(--gold); width:0; transition:width .25s}
 
@@ -237,11 +239,25 @@
     body.innerHTML = (lines || "") + '<div class="cbnote">' + esc((j && j.note) || "") + '</div>' + learn;
   }
 
+  var STOPW = {the:1,a:1,an:1,of:1,to:1,and:1,on:1,in:1,for:1,section:1,part:1,chapter:1,passage:1,about:1};
+  function findTerms(q){
+    return (q||"").toLowerCase().split(/[^a-zà-ÿ0-9]+/).filter(function(t){ return t.length>=3 && !STOPW[t]; });
+  }
+  function renderLeaf(el, txt, terms){
+    if (!terms || !terms.length){ el.textContent = txt; return; }
+    var html = esc(txt);
+    terms.forEach(function(t){
+      try{ html = html.replace(new RegExp("("+t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"), "<mark>$1</mark>"); }catch(e){}
+    });
+    el.innerHTML = html;
+  }
+
   function renderBook(d){
     var pages = leaves(d.text || "");
     var n = pages.length, at = 0;
     var urlSubj = (qs.get("subject") || "").trim();
     var defSubj = urlSubj || LANGMAP[String(d.language||"").toLowerCase()] || "en";
+    var HL = findTerms(qs.get("find") || "");   // ?find=<area> — the coach located this passage
 
     doc.innerHTML = head(d)
       + coachPanel(d, defSubj)
@@ -261,11 +277,28 @@
 
     function show(i){
       at = Math.max(0, Math.min(n - 1, i));
-      leafEl.textContent = pages[at] || "";
+      renderLeaf(leafEl, pages[at] || "", HL);
       curEl.textContent = jumpEl.value = (at + 1);
       piEl.style.width = ((at + 1) / n * 100) + "%";
       prevB.disabled = at === 0; nextB.disabled = at === n - 1;
       window.scrollTo({top:0, behavior:"smooth"});
+    }
+    // if the coach sent us to a located passage (?find=), open on the leaf where those terms cluster
+    function jumpToFound(){
+      if (!HL.length) return;
+      var best = -1, bestScore = 0;
+      for (var k = 0; k < pages.length; k++){
+        var pl = pages[k].toLowerCase(), score = 0;
+        HL.forEach(function(t){ if (pl.indexOf(t) >= 0) score++; });
+        if (score > bestScore){ bestScore = score; best = k; }
+      }
+      if (best >= 0){
+        var hint = document.createElement("div");
+        hint.className = "foundhint";
+        hint.textContent = "▸ opened where this work treats “" + (qs.get("find")||"") + "”";
+        doc.querySelector(".bar").insertAdjacentElement("afterend", hint);
+        show(best);
+      }
     }
     prevB.onclick = function(){ show(at - 1); };
     nextB.onclick = function(){ show(at + 1); };
@@ -276,6 +309,7 @@
       else if (e.key === "ArrowRight") show(at + 1);
     });
     show(0);
+    jumpToFound();               // ?find= from the coach — open on the located passage, highlighted
 
     // wire the coach panel; if the reader was opened WITH a tongue (?subject=), read with it at once
     var cbgo = document.getElementById("cbgo"), cbpick = document.getElementById("cbpick");

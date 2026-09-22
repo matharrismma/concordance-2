@@ -326,8 +326,9 @@ def test_the_coach_finds_a_whole_work_and_opens_the_reading_room(monkeypatch):
     import concordance.tortoise as T
     monkeypatch.setattr(console._corpus, "search", lambda q, **k: [
         {"id": "card_x", "title": "A theory", "source": {"url": ""}},
-        {"id": "card_arch_y", "title": "Cassell's Carpentry", "language": "english",
-         "source": {"url": "https://archive.org/details/y"}}])
+        {"id": "card_arch_y", "title": "Cassell's Carpentry", "language": "english", "shelf": "trades",
+         "box": "carpentry", "bands": ["carpentry", "joinery"],
+         "source": {"url": "https://archive.org/details/y", "identifier": "y"}}])
     monkeypatch.setattr(T, "readable", lambda c: bool((c.get("source") or {}).get("url")))
     r = console._read("read me a book about carpentry", None, True)
     assert r["kind"] == "work"
@@ -354,3 +355,70 @@ def test_an_ask_miss_offers_the_steward_but_writes_no_want(monkeypatch):
     assert r["kind"] == "miss"
     assert "go find it" in r["spoken"]                          # the steward is OFFERED
     assert called["n"] == 0, "a miss must not write a want on its own"
+
+
+def test_the_coach_locates_and_reads_a_named_section(monkeypatch):
+    """Matt: 'if they ask for a section on a specific area, we locate and read the passage.'"""
+    import concordance.tortoise as T
+    monkeypatch.setattr(console._corpus, "search", lambda q, **k: [
+        {"id": "card_arch_y", "title": "Cassell's Carpentry", "language": "english", "shelf": "trades",
+         "box": "carpentry", "bands": ["carpentry", "joinery"],
+         "source": {"url": "https://archive.org/details/y", "identifier": "y"}}])
+    monkeypatch.setattr(T, "readable", lambda c: True)
+    monkeypatch.setattr(T, "locate", lambda card, q, **k: {
+        "status": "read", "found": True, "offset": 158868, "distinct_terms": 2, "terms": ["dovetail", "joints"],
+        "passage": "To cut a dovetail joint, mark the pins first, then saw to the line."})
+    r = console._read("read me the section on dovetail joints", None, True)
+    assert r["kind"] == "passage"
+    assert "dovetail joint" in r["caption"].lower()          # the located passage IS read back
+    assert "find=" in r["source"]["ref"]                     # points the reader to the spot
+    assert any(n["ref"] and n["ref"].endswith("card=card_arch_y") for n in r["next"])  # + whole work
+
+
+def test_read_a_whole_book_opens_at_the_start_not_a_located_passage(monkeypatch):
+    """'read me a book about X' wants the WORK — it must not be short-circuited to one passage."""
+    import concordance.tortoise as T
+    monkeypatch.setattr(console._corpus, "search", lambda q, **k: [
+        {"id": "card_arch_y", "title": "Cassell's Carpentry", "language": "english", "shelf": "trades",
+         "box": "carpentry", "bands": ["carpentry", "joinery"],
+         "source": {"url": "https://archive.org/details/y", "identifier": "y"}}])
+    monkeypatch.setattr(T, "readable", lambda c: True)
+    called = {"locate": 0}
+    monkeypatch.setattr(T, "locate", lambda *a, **k: called.__setitem__("locate", called["locate"] + 1) or {})
+    r = console._read("read me a book about carpentry", None, True)
+    assert r["kind"] == "work"
+    assert called["locate"] == 0, "a whole-book read must not run the passage locator"
+
+
+def test_the_coach_reads_a_section_from_their_own_dropped_copy(monkeypatch):
+    """Matt: 'ideally we just read it from their copy of the book they own.' A dropped source's text is
+    located and read, store-nothing — and the library is NOT searched when their copy answers."""
+    import concordance.tortoise as T
+    searched = {"n": 0}
+    monkeypatch.setattr(console._corpus, "search", lambda q, **k: searched.__setitem__("n", searched["n"] + 1) or [])
+    own = ("Chapter 7. The camshaft. " * 3 +
+           "To set the valve timing, rotate the camshaft until the timing marks align, then torque the "
+           "cap bolts in sequence. The valve timing determines when each valve opens.")
+    r = console.dispatch("read me the section on valve timing", SEC,
+                         source_text=own, source_title="Haynes Manual")
+    assert r["kind"] == "passage_own"
+    assert "valve timing" in r["caption"].lower()
+    assert "your copy of Haynes Manual" in r["spoken"]
+    assert searched["n"] == 0, "their own copy answered — the shelf must not be searched"
+
+
+def test_a_section_the_shelf_cannot_pin_asks_which_or_to_drop_the_source(monkeypatch):
+    """When works are held but none pin the area, the coach ASKS — which do you mean, or drop the source."""
+    import concordance.tortoise as T
+    monkeypatch.setattr(console._corpus, "search", lambda q, **k: [
+        {"id": "card_arch_a", "title": "Carpentry A", "shelf": "trades", "box": "carpentry",
+         "source": {"url": "https://archive.org/details/a", "identifier": "a"}},
+        {"id": "card_arch_b", "title": "Carpentry B", "shelf": "trades", "box": "carpentry",
+         "source": {"url": "https://archive.org/details/b", "identifier": "b"}}])
+    monkeypatch.setattr(T, "readable", lambda c: True)
+    monkeypatch.setattr(T, "locate", lambda card, q, **k: {"status": "read", "found": False, "passage": ""})
+    r = console._read("read the section on quantum chromodynamics", None, True)
+    assert r["kind"] == "narrow"
+    assert "drop" in r["spoken"].lower() and ("which" in r["spoken"].lower())
+    assert any(n["ref"] is None for n in r["next"])          # the "drop your own copy" option
+    assert any(n["ref"] and "card_arch_a" in n["ref"] for n in r["next"])   # the works to pick among
