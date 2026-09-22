@@ -28,8 +28,10 @@ const CORE = [
   '/floor', '/coach/journey', '/coach/subjects', '/apothecary', '/almanac'
 ];
 
-/* Never cache: anything that must be live-verified or is per-request. */
-const NEVER = [/^\/verify/, /^\/seal/, /^\/s\//, /^\/audit/, /^\/speak/];
+/* Never cache: anything that must be live-verified or is per-request. (/speak is the exception —
+   handled cache-first below, because the operator's voice for a line is content-addressed and never
+   changes, so caching it is memory, not staleness.) */
+const NEVER = [/^\/verify/, /^\/seal/, /^\/s\//, /^\/audit/];
 
 /* THE SHELL — the scripts that decide what a page DOES, network-first like the pages themselves.
  *
@@ -75,6 +77,21 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;          // never touch third parties
   if (NEVER.some((re) => re.test(url.pathname))) return;    // always live
+
+  // THE OPERATOR'S VOICE — cache-first. /speak?text=… is content-addressed and immutable (the same
+  // words in the same voice are the same audio, forever), so once a line has been heard it is served
+  // from the cache: instant, and it works with no network. Memory carried to the edge. Only a real
+  // 200 audio response is kept — a 503 "floor" signal is never cached, so the sovereign browser voice
+  // still takes over offline for a line never heard online.
+  if (url.pathname === '/speak') {
+    e.respondWith(
+      caches.match(req).then((hit) => hit || fetch(req).then((res) => {
+        if (cacheable(req, res)) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
+        return res;
+      }))
+    );
+    return;
+  }
 
   const isDoc = req.mode === 'navigate' ||
                 (req.headers.get('accept') || '').includes('text/html');

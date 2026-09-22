@@ -28,11 +28,10 @@
     text = String(text == null ? '' : text).trim();
     if (!text) return Promise.resolve(false);
     var api = (window.API != null ? window.API : (opts.api || ''));
-    return fetch(api + '/speak', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ text: text })
-    }).then(function (r) {
+    // GET, not POST: the operator's voice for a given line is content-addressed and immutable, so a
+    // GET response is cached by the browser (max-age immutable) AND the service worker — heard once,
+    // then instant and offline forever. The server caps the text, so the URL stays short.
+    return fetch(api + '/speak?text=' + encodeURIComponent(text)).then(function (r) {
       if (!r.ok) throw new Error('no ceiling');   // 503 when the voice isn't wired
       var ct = r.headers.get('content-type') || '';
       if (ct.indexOf('audio') === -1) throw new Error('not audio');
