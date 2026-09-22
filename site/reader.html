@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en" data-nh-section="concordance">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/shell.js"></script>
+<title>The Reading Room — Narrow Highway</title>
+<meta name="description" content="The whole public-domain source, delivered on demand — the tortoise. The catalogue card is light and everywhere; the full book is fetched live from the Internet Archive the moment you open it, and nothing is stored on this device.">
+<style>
+  :root{
+    --void:#0a0b10; --ink:#e9e3d4; --dim:#8f8a7c; --gold:#c9a24a; --goldsoft:#a98a3f;
+    --line:rgba(201,162,74,.16); --pass:#8bbf8f; --warn:#d89a6a;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --sans:"NHPlex",system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(62% 44% at 50% -10%, rgba(201,162,74,.11), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:18px/1.78 var(--serif); -webkit-font-smoothing:antialiased}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:720px; margin:0 auto; padding:2rem 1.3rem 5rem}
+  .kicker{color:var(--gold); letter-spacing:.32em; text-transform:uppercase; font-size:.64rem; font-family:var(--sans)}
+  h1{font-weight:400; letter-spacing:.01em; font-size:2rem; line-height:1.2; margin:.55rem 0 .5rem}
+  .meta{color:var(--dim); font-size:.92rem; font-family:var(--sans); line-height:1.7}
+  .meta .pd{color:var(--goldsoft)}
+  .carry{margin-top:.5rem; font-family:var(--sans); font-size:.82rem}
+  .rule{height:1px; background:var(--line); margin:1.5rem 0}
+
+  .bar{display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; font-family:var(--sans);
+    position:sticky; top:54px; z-index:20; padding:.7rem 0; margin:0 0 .4rem;
+    background:linear-gradient(var(--void) 70%, rgba(10,11,16,0)); backdrop-filter:blur(3px)}
+  .btn{background:transparent; border:1px solid var(--line); color:var(--gold); font:inherit;
+    letter-spacing:.08em; text-transform:uppercase; font-size:.68rem; padding:.5rem 1rem; cursor:pointer; border-radius:3px}
+  .btn:hover:not(:disabled){color:var(--ink); border-color:var(--gold)}
+  .btn:disabled{opacity:.32; cursor:default}
+  .leafno{color:var(--dim); font-size:.74rem; letter-spacing:.14em; text-transform:uppercase}
+  .leafno b{color:var(--gold); font-weight:600}
+  .jump{width:4.5rem; background:rgba(255,255,255,.03); border:1px solid var(--line); color:var(--ink);
+    font:inherit; font-size:.8rem; padding:.35rem .5rem; border-radius:3px; text-align:center}
+
+  .leaf{white-space:pre-wrap; word-break:break-word; font-size:1.06rem; line-height:1.85;
+    min-height:14rem; letter-spacing:.005em}
+  .prog{height:3px; background:var(--line); border-radius:2px; margin:1.6rem 0 0; overflow:hidden}
+  .prog > i{display:block; height:100%; background:var(--gold); width:0; transition:width .25s}
+
+  .note{color:var(--dim); font-size:.82rem; font-family:var(--sans); margin-top:2.4rem; line-height:1.7;
+    border-left:2px solid var(--line); padding:.2rem 0 .2rem 1rem}
+  .state{margin-top:2rem; border:1px solid var(--line); border-radius:5px; padding:1.4rem 1.5rem;
+    font-family:var(--sans)}
+  .state h2{font-family:var(--serif); font-weight:400; font-size:1.2rem; margin:0 0 .5rem; color:var(--ink)}
+  .state p{color:var(--dim); font-size:.92rem; margin:.3rem 0}
+  .state.warn{border-color:rgba(216,154,106,.4)}
+  .loading{color:var(--dim); font-family:var(--sans); margin-top:2.5rem}
+  .loading .dot{animation:pulse 1.3s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+  @media (max-width:640px){
+    body{font-size:16px} .wrap{padding:1.4rem 1.1rem 4rem} h1{font-size:1.55rem}
+    .bar{top:48px} .leaf{font-size:1rem}
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="kicker">The Reading Room · the whole source, on demand</div>
+  <div id="doc"></div>
+  <div id="loading" class="loading">Fetching the source from the ark<span class="dot">…</span></div>
+</main>
+
+<div data-nh-road></div>
+
+<script>
+(function(){
+  "use strict";
+  var qs = new URLSearchParams(location.search);
+  var cid = (qs.get("card") || qs.get("id") || "").trim();
+  var doc = document.getElementById("doc");
+  var loading = document.getElementById("loading");
+  var esc = function(s){ var d=document.createElement("div"); d.textContent=s==null?"":String(s); return d.innerHTML; };
+
+  if (!cid){
+    loading.remove();
+    doc.innerHTML = state("Nothing to read yet",
+      "Open a work from the catalogue and it arrives here. Every reading is one public-domain source, "
+      + "fetched the moment you ask. <a href='/'>Back to the desk →</a>", false);
+    return;
+  }
+
+  fetch("/tortoise?id=" + encodeURIComponent(cid), {headers:{accept:"application/json"}})
+    .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+    .then(function(res){ render(res.j); })
+    .catch(function(){
+      loading.remove();
+      doc.innerHTML = state("The source could not be reached",
+        "The tortoise walks over the network, and the network did not answer. Try again in a moment.", true);
+    });
+
+  function state(h, body, warn){
+    return '<div class="state'+(warn?' warn':'')+'"><h2>'+esc(h)+'</h2><p>'+body+'</p></div>';
+  }
+
+  // Header block shared by every outcome — the card is always identified and its whole source
+  // always carriable, even when we cannot inline the text.
+  function head(d){
+    var bits = [];
+    if (d.author) bits.push(esc(d.author));
+    if (d.language) bits.push(esc(String(d.language).replace(/^\w/, function(c){return c.toUpperCase();})));
+    var line = bits.join(" · ");
+    var pd = d.pd_basis ? '<span class="pd">'+esc(d.pd_basis)+'</span>'
+                        : (d.license ? '<span class="pd">'+esc(d.license)+'</span>' : '');
+    var carry = d.detail_url
+      ? '<div class="carry">Carry the whole source ↗ <a href="'+esc(d.detail_url)+'" target="_blank" rel="noopener">'
+        + esc(d.identifier || "Internet Archive") + '</a></div>' : '';
+    return '<h1>'+esc(d.title || "Untitled")+'</h1>'
+      + (line ? '<div class="meta">'+line+'</div>' : '')
+      + (pd ? '<div class="meta">'+pd+'</div>' : '')
+      + carry + '<div class="rule"></div>';
+  }
+
+  function render(d){
+    loading.remove();
+    document.title = (d.title ? d.title + " — " : "") + "The Reading Room · Narrow Highway";
+
+    if (d.status === "read"){
+      renderBook(d);
+      return;
+    }
+    if (d.status === "binary"){
+      doc.innerHTML = head(d) + state("Held as a document, not as inline text",
+        esc(d.reason || "This edition is not plain text.") + " "
+        + (d.download_url ? "<a href='"+esc(d.download_url)+"' target='_blank' rel='noopener'>Download the whole source →</a>" : ""),
+        true);
+      return;
+    }
+    // not_available
+    doc.innerHTML = head(d) + state("No readable text behind this entry",
+      esc(d.reason || "The plain text of this work is not available to read inline.")
+      + (d.detail_url ? " <a href='"+esc(d.detail_url)+"' target='_blank' rel='noopener'>Open it at the source ↗</a>" : ""),
+      false);
+  }
+
+  // Split the raw source into LEAVES to turn. A scan's _djvu.txt marks page breaks with a form feed;
+  // where it doesn't, we cut on blank lines near a comfortable length so a leaf never splits a line.
+  function leaves(text){
+    text = text.replace(/\r\n/g, "\n");
+    if (text.indexOf("\f") >= 0){
+      return text.split("\f").map(function(s){return s.replace(/^\n+|\n+$/g,"");}).filter(function(s){return s.trim().length;});
+    }
+    var TARGET = 3600, out = [], i = 0, n = text.length;
+    while (i < n){
+      var end = Math.min(i + TARGET, n);
+      if (end < n){
+        var br = text.indexOf("\n\n", end);
+        var nl = text.indexOf("\n", end);
+        end = (br >= 0 && br < end + 1200) ? br : (nl >= 0 && nl < end + 400 ? nl : end);
+      }
+      out.push(text.slice(i, end).replace(/^\n+|\n+$/g,""));
+      i = end;
+    }
+    return out.length ? out : [text];
+  }
+
+  function renderBook(d){
+    var pages = leaves(d.text || "");
+    var n = pages.length, at = 0;
+
+    doc.innerHTML = head(d)
+      + '<div class="bar">'
+      +   '<button class="btn" id="prev">‹ Prev</button>'
+      +   '<span class="leafno">leaf <b id="cur">1</b> of ' + n + '</span>'
+      +   '<input class="jump" id="jump" inputmode="numeric" aria-label="jump to leaf" value="1">'
+      +   '<button class="btn" id="next">Next ›</button>'
+      + '</div>'
+      + '<div class="leaf" id="leaf"></div>'
+      + '<div class="prog"><i id="pi"></i></div>'
+      + '<div class="note">' + noteText(d) + '</div>';
+
+    var leafEl = document.getElementById("leaf"), curEl = document.getElementById("cur"),
+        jumpEl = document.getElementById("jump"), piEl = document.getElementById("pi"),
+        prevB = document.getElementById("prev"), nextB = document.getElementById("next");
+
+    function show(i){
+      at = Math.max(0, Math.min(n - 1, i));
+      leafEl.textContent = pages[at] || "";
+      curEl.textContent = jumpEl.value = (at + 1);
+      piEl.style.width = ((at + 1) / n * 100) + "%";
+      prevB.disabled = at === 0; nextB.disabled = at === n - 1;
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+    prevB.onclick = function(){ show(at - 1); };
+    nextB.onclick = function(){ show(at + 1); };
+    jumpEl.onchange = function(){ var v = parseInt(jumpEl.value, 10); if (!isNaN(v)) show(v - 1); else jumpEl.value = at + 1; };
+    document.addEventListener("keydown", function(e){
+      if (e.target && /input|textarea/i.test(e.target.tagName)) return;
+      if (e.key === "ArrowLeft") show(at - 1);
+      else if (e.key === "ArrowRight") show(at + 1);
+    });
+    show(0);
+  }
+
+  function noteText(d){
+    var t = "Fetched live from the public-domain source the moment you opened it — the <em>tortoise</em>. "
+      + "Nothing is stored on this device; the catalogue card is what we keep, the book is what we point to. ";
+    if (d.truncated) t += "This work is long enough that the reading was capped; the whole source is at the link above. ";
+    if (d.chars) t += "· " + Number(d.chars).toLocaleString() + " characters, as scanned.";
+    return t;
+  }
+})();
+</script>
+</body>
+</html>

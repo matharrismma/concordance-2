@@ -377,6 +377,19 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
                        f"<div>{cite_text}</div>")
     else:
         source_html = ""
+    # THE TORTOISE DOOR — a catalogue card (the hare) that points at a fetchable public-domain source
+    # opens into the WHOLE WORK, read on demand. Shown only when the source is on the allowlist
+    # (Internet Archive / Gutenberg / LoC), so a card that points nowhere fetchable makes no false
+    # promise. The book is never carried in the card; the reader fetches it live.
+    from .. import tortoise as _tortoise
+    read_block = ""
+    if _tortoise.readable(card):
+        read_block = (
+            "<p style=\"margin:.5rem 0 1.1rem\">"
+            f"<a href=\"/reader.html?card={_esc(card_id)}\" "
+            "style=\"display:inline-block;border:1px solid #b8973a;background:#fbf8ee;color:#7a5f18;"
+            "padding:.6rem 1.15rem;border-radius:4px;text-decoration:none;font-size:.92rem\">"
+            "Read the full work &mdash; the whole source, on demand &rarr;</a></p>")
     # Related seal cross-link, if this card carries one (found only).
     # A SEAL, AND ONLY A SEAL. This used to fall back to `source_hash`, and the fallback was a
     # false claim: a `source_hash` fingerprints the SOURCE TEXT, while a seal is a sealed
@@ -498,7 +511,7 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             "<p class=muted style=\"font-size:.74rem;margin:0 0 .55rem\">"
             "A card from <a href=\"/\">a free library</a> — ask anything, no account, works "
             "offline. Every card carries its source.</p>"
-            f"<h1>{title}</h1>{overlay}{unchecked_block}{body_html}"
+            f"<h1>{title}</h1>{overlay}{unchecked_block}{body_html}{read_block}"
             f"<section class=card>{source_html}"
             f"<div class=muted style=\"font-size:.8rem;margin-top:.5rem\">card id</div>"
             f"<div class=mono style=\"word-break:break-all\">{_esc(card_id)}</div>"
@@ -543,7 +556,7 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
     return 200, html
 
 
-_SITEMAP_PAGES = ("/", "/situations.html", "/ask.html", "/bible.html", "/read.html", "/characters.html",
+_SITEMAP_PAGES = ("/", "/situations.html", "/ask.html", "/bible.html", "/read.html", "/reader.html", "/characters.html",
                   "/prophecy.html", "/steward.html",
                   "/community.html", "/corpus.html", "/guarantees.html", "/collapse.html",
                   "/seeds.html", "/seal.html", "/connect.html", "/profile.html", "/corrected.html", "/audit.html",
@@ -1741,6 +1754,19 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             _p = dict(_p, unchecked=_unchecked_live(str(c.get("id") or ""), _p["unchecked"]))
         return _ok(dict(c, presentation=_p,
                         neighbors=_present.neighbors(c, resolve=corpus.get_card, limit=8)))
+    if method == "GET" and path == "/tortoise":
+        # THE TORTOISE — the whole public-domain source behind a catalogue card, fetched on demand and
+        # read through (never stored on the box; the box carries the catalogue, not the library). Same
+        # allowlist as the ark's fetch: you can only read what is catalogued, into PD hosts only.
+        cid = (query.get("id") or "").strip()
+        if not cid:
+            return _err(400, "id required")
+        c = corpus.get_card(cid)
+        if c is None:
+            return _err(404, "card not found")
+        from .. import tortoise as _tortoise
+        return _ok(_tortoise.open_work(c))
+
     if method == "GET" and path == "/witness":
         # THE CLOUD OF WITNESSES' VOICE — public-domain witnesses' VERBATIM words that frame a question,
         # attributed (witness + work + ref + source). Proposes a way of seeing; the gate and the Word
@@ -2804,6 +2830,7 @@ ROUTES = [
     {"path": "/cards", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/card", "methods": ("GET",), "api": True},
     {"path": "/witness", "methods": ("GET",), "api": True, "rl": "read"},   # Cloud of Witnesses' voice — PD, attributed; scans the corpus so read-bucket limited like /search
+    {"path": "/tortoise", "methods": ("GET",), "api": True, "rl": "read"},  # the whole PD source on demand — outbound fetch to the allowlist, read-bucket limited
     {"path": "/daily", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/card/connections", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/graph", "methods": ("GET",), "api": True},

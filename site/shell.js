@@ -48,7 +48,7 @@
     if (p === "/" || p === "/index.html") return "concordance";
     if (p === "/com.html") return "verify";
     var map = {
-      "/concordance.html": "concordance",
+      "/concordance.html": "concordance", "/reader.html": "concordance",
       "/explore.html": "atlas", "/atlas.html": "atlas",
       "/domains.html": "domains", "/map.html": "map"
     };

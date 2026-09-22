@@ -169,6 +169,86 @@ def resolve_text_url(url: str, _meta=None) -> Optional[str]:
     return None
 
 
+# THE READER'S CEILINGS. fetch() anchors a body up to MAX_BYTES (64 MB — it may be a PDF or epub a
+# drive keeps forever). The reader only needs the PLAIN TEXT of one book on a screen now, so it reads
+# through a tighter ceiling and holds nothing.
+READ_BYTES = 12 * 1024 * 1024        # 12 MB of raw text — a very long book; beyond this we truncate, and say so
+INLINE_CHARS = 1_800_000             # returned inline; a whole book of prose fits, larger truncates with a notice
+_TEXT_CTYPES = ("text/plain", "text/html", "text/xml", "application/xml")
+
+
+def _strip_html(s: str) -> str:
+    """A light, dependency-free HTML→text — enough to read a Gutenberg HTML edition. Not a parser."""
+    import html as _html
+    s = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", s)
+    s = re.sub(r"(?is)<(br|/p|/div|/h[1-6]|/li)\s*/?>", "\n", s)
+    s = re.sub(r"(?s)<[^>]+>", "", s)
+    s = _html.unescape(s)
+    s = re.sub(r"[ \t]+", " ", s)
+    return re.sub(r"\n{3,}", "\n\n", s).strip()
+
+
+def read_through(url: str, *, read_bytes: int = READ_BYTES,
+                 inline_chars: int = INLINE_CHARS) -> Dict[str, Any]:
+    """THE TORTOISE'S READ PATH — stream a public-domain body from an allowlisted host to a reader who
+    asked, WITHOUT storing it. `fetch()` anchors a body to a drive and hashes it so a copied drive is
+    verifiable; this holds nothing, persists nothing, and returns the decoded text for one reading.
+    Same allowlist gate, same redirect check, same bounded stream — a Content-Length header cannot lie
+    the ceiling away, because the ceiling is enforced on the stream.
+
+    Returns exactly one of, never raising for an expected failure:
+      {"status":"read",   "text":..., "chars":n, "truncated":bool, "media_type":..., "final_url":...}
+      {"status":"binary", "reason":..., "download_url":..., "media_type":...}   # a PDF/epub — carry it, don't inline it
+      {"status":"not_available", "reason":...}
+    """
+    if not url:
+        return {"status": "not_available", "reason": "no source url"}
+    if not _host_ok(url):
+        host = (urllib.parse.urlparse(url).hostname or "?")
+        return {"status": "not_available", "reason": f"{host} is not an allowed public-domain source"}
+
+    req = urllib.request.Request(url, headers={"User-Agent": _UA})
+    try:
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+            final = r.geturl()
+            if not _host_ok(final):
+                return {"status": "not_available",
+                        "reason": f"redirected off the allowlist to {urllib.parse.urlparse(final).hostname}"}
+            ctype = (r.headers.get("content-type") or "").split(";")[0].strip().lower()
+            if ctype and not any(ctype.startswith(k) for k in _TEXT_CTYPES):
+                # A book we can hold but not put on a screen as text — hand back the direct link so the
+                # reader can carry the whole source (the tortoise), instead of pretending to render it.
+                return {"status": "binary", "media_type": ctype, "download_url": final,
+                        "reason": f"this edition is {ctype}, not inline text — download the whole source"}
+            raw = bytearray()
+            truncated = False
+            while True:
+                chunk = r.read(_CHUNK)
+                if not chunk:
+                    break
+                raw.extend(chunk)
+                if len(raw) > read_bytes:      # a header can lie; the stream cannot — cap on bytes read
+                    del raw[read_bytes:]        # trim the overshoot so the ceiling holds exactly
+                    truncated = True
+                    break
+    except urllib.error.HTTPError as e:
+        return {"status": "not_available", "reason": f"the source refused us: HTTP {e.code} {e.reason}"}
+    except (urllib.error.URLError, OSError, ValueError) as e:
+        reason = getattr(e, "reason", None)
+        return {"status": "not_available",
+                "reason": f"could not reach the source: {type(e).__name__}"
+                          + (f" ({reason})" if reason else "")}
+
+    text = bytes(raw).decode("utf-8", "replace")
+    if ctype.startswith("text/html") or ctype.endswith("xml"):
+        text = _strip_html(text)
+    if len(text) > inline_chars:
+        text = text[:inline_chars]
+        truncated = True
+    return {"status": "read", "text": text, "chars": len(text), "truncated": truncated,
+            "media_type": ctype or "text/plain", "final_url": final}
+
+
 def held(sha: str) -> Optional[Dict[str, Any]]:
     """The waybill for a body we hold, or None. Reads the drive — no index to fall out of date."""
     base = sources_dir()
@@ -324,5 +404,6 @@ def stats() -> Dict[str, Any]:
     return {"anchoring": True, "root": str(base), "bodies": n, "bytes": total}
 
 
-__all__ = ["fetch", "verify", "held", "stats", "sources_dir", "path_for",
-           "ALLOWED_HOSTS", "MAX_BYTES", "HELD", "NOT_HELD", "ALREADY"]
+__all__ = ["fetch", "verify", "held", "stats", "sources_dir", "path_for", "resolve_text_url",
+           "read_through", "ALLOWED_HOSTS", "MAX_BYTES", "READ_BYTES", "INLINE_CHARS",
+           "HELD", "NOT_HELD", "ALREADY"]
