@@ -467,3 +467,39 @@ def test_check_answer_matches_found_answer_and_flags_a_distractor():
     ans = u["check"]["answer"]
     assert coach.check_answer(u["id"], ans, "grc")["verdict"] == "correct"
     assert coach.check_answer(u["id"], "utterly unrelated words", "grc")["verdict"] == "unclear"
+
+
+# ── the Cloud of Witnesses, attached to the voice ────────────────────────────────────────────────
+def test_the_coach_voices_the_cloud_of_witnesses(monkeypatch):
+    """A witness's VERBATIM words are spoken beneath the answer, attributed — the cloud, attached to the
+    voice. Matt: 'the whole cloud of witnesses concept was built on it ... just attaching it to voice.'"""
+    import concordance.witness as W
+    monkeypatch.setattr(W, "see", lambda text, **k: {"seeing": [
+        {"witness": "Ellen G. White", "work": "Steps to Christ", "ref": "p.12",
+         "text": "The Lord Jesus is our helper.", "source": "PD"}]})
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "search", "results": [{"id": "c1", "title": "Faith", "snippet": "kept"}], "generated": False})
+    r = console._coach("what is faith", SEC, False)
+    assert "Ellen G. White" in r["spoken"] and "our helper" in r["spoken"]   # SPOKEN -> voiced
+    assert r.get("cloud") and r["cloud"]["witness"] == "Ellen G. White"       # attributed in the payload
+
+
+def test_a_computed_verdict_is_not_framed_by_a_witness(monkeypatch):
+    """A bare verify verdict has no source to see through — the cloud is not consulted or appended."""
+    import concordance.witness as W
+    called = {"n": 0}
+    monkeypatch.setattr(W, "see", lambda *a, **k: called.__setitem__("n", called["n"] + 1) or {"seeing": []})
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "verify", "verify": {"verdict": "HOLDS", "detail": "17 is prime."}, "generated": False})
+    r = console._coach("is 17 prime", SEC, False)
+    assert r["kind"] == "verify" and called["n"] == 0 and not r.get("cloud")
+
+
+def test_an_unreachable_cloud_is_a_quiet_trailhead(monkeypatch):
+    """No witness corpus (honest-empty) must not break the answer — the cloud is silent, not a crash."""
+    import concordance.witness as W
+    monkeypatch.setattr(W, "see", lambda *a, **k: {"seeing": []})
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "search", "results": [{"id": "c1", "title": "Faith", "snippet": "kept"}], "generated": False})
+    r = console._coach("what is faith", SEC, False)
+    assert r["spoken"] and r.get("cloud") is None

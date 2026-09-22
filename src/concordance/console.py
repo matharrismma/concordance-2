@@ -188,8 +188,31 @@ def _threads_from_results(results: Any, frame: List[str]) -> List[Dict[str, str]
     return [{"id": c, "title": t} for _, _, c, t in scored]
 
 
+def _seeing(text: str) -> Dict[str, Any]:
+    """THE CLOUD OF WITNESSES, ATTACHED TO THE VOICE. The far witnesses' VERBATIM public-domain words
+    that frame a question — attributed (witness + work), spoken, so the coach carries not one man's
+    seeing but the cloud's. Proposes, never confirms; the Word disposes. Nothing generated; honest-empty
+    where the cloud does not yet reach. The way of seeing was built throughout the project (witness.see /
+    discern.served); this is the piece never wired — the voice now carries it."""
+    out: Dict[str, Any] = {"cloud": None, "say": ""}
+    try:
+        from . import witness
+        seen = (witness.see(text, k=1) or {}).get("seeing") or []
+        f = seen[0] if seen else None
+        if f and str(f.get("text") or "").strip():
+            out["cloud"] = {k: f.get(k) for k in ("witness", "work", "ref", "text", "source")}
+            who = (f.get("witness") or "a witness").strip()
+            work = (f.get("work") or "").strip()
+            attrib = who + (", " + work if work else "")
+            out["say"] = f" And a witness sees it — {attrib}: “{_trim(f['text'], 240)}”."
+    except Exception:  # noqa: BLE001 — an unreachable cloud is a quiet trailhead, never a crash
+        pass
+    return out
+
+
 def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
-    """The coach faculty: a verified answer, spoken short, a connection woven in, the source deferred."""
+    """The coach faculty: a verified answer, spoken short, a connection woven in, the source deferred —
+    and the CLOUD OF WITNESSES woven in beneath it, the Word first and the cloud weighed against it."""
     r = _ask.respond(text, config, gate_open=gate_open)
     kind = r.get("kind", "search")
 
@@ -270,6 +293,18 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
         caption = spoken
         kind = "miss"
 
+    # THE CLOUD OF WITNESSES, WOVEN IN AND SPOKEN — the answer (the found fact, the Word where it
+    # resonates) stands FIRST; then a witness's verbatim words are voiced beneath it, weighed against
+    # the Word. Not on a bare computed claim (verify has no source to see through) nor a crisis (handled
+    # above). One voice, short — the cloud proposes, never a wall, never a verdict.
+    cloud = None
+    if kind not in ("verify",):
+        _s = _seeing(text)
+        if _s.get("say"):
+            cloud = _s["cloud"]
+            spoken += _s["say"]
+            caption = (caption + "\n\n" + _s["say"].strip()) if caption else _s["say"].strip()
+
     # ALWAYS offer the next step — and ALWAYS a way to a new path. Paced (at most two threads, never a
     # wall) and never forced: the final choice is theirs (the Gate — we present, we do not cross).
     nexts.append({"label": "Or ask about anything else — your choice", "ref": None})
@@ -280,7 +315,7 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
     return {
         "intent": "ask", "kind": kind, "headline": headline, "spoken": spoken, "caption": caption,
         "source": source, "connections": connections, "next": nexts, "frame": frame[:8],
-        "resources": r.get("resources"), "note": r.get("note"), "generated": False,
+        "cloud": cloud, "resources": r.get("resources"), "note": r.get("note"), "generated": False,
     }
 
 
