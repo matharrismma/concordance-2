@@ -44,6 +44,25 @@ _SCHEDULE = (
 )
 # Copies / distribution.
 _COPIES = ("make copies", "make a copy", "copy this", "duplicate this", "send copies", "distribute this")
+# Learn: start a cube (the coach IS the shepherd — one conversation reaches the lessons too).
+_LEARN = ("teach me", "teach us", "teach ", "learn ", "study ", "practice ", "help me learn",
+          "i want to learn", "i'd like to learn", "let's learn", "the cube", "the coach")
+# Read: read a work aloud, or read Scripture (and, on ask, in the original tongue by the cube).
+_READ = ("read me", "read to me", "read us", "read the ", "read a ", "read from ", "read aloud",
+         "let's read", "read ")
+# Acquire: dictate a want to the STEWARD — an explicit ask to go find what the keeping does not hold.
+_ACQUIRE = ("go find", "find me", "acquire ", "get me the", "have the library find", "send the steward",
+            "ask the library to find", "go get", "have the steward")
+
+# a language/skill word -> its cube subject (only ones the coach actually teaches are honored later)
+_LANG_WORDS = {
+    "greek": "grc", "koine": "grc", "hebrew": "he", "latin": "la", "french": "fr", "german": "de",
+    "spanish": "es", "español": "es", "espanol": "es", "portuguese": "pt", "mandarin": "zh",
+    "chinese": "zh", "japanese": "ja", "english": "en", "phonics": "read", "reading": "read",
+    "to read": "read",
+}
+_REF_RE = re.compile(r"\b((?:[1-3]\s+)?[A-Za-z][A-Za-z.]{1,18}\s+\d{1,3}(?::\d{1,3})?)")
+_IN_ORIGINAL = re.compile(r"\bin (?:the )?(original|greek|hebrew|koine|tongue)\b", re.I)
 
 
 def _strip_prefix(text: str, cues) -> str:
@@ -61,12 +80,23 @@ def _strip_prefix(text: str, cues) -> str:
 
 
 def classify_intent(text: str) -> str:
-    """crisis | dictate | schedule | copies | ask. Crisis outranks everything (Mt 25)."""
+    """crisis | dictate | schedule | copies | acquire | learn | read | ask. Crisis outranks
+    everything (Mt 25). The coach is the shepherd: one conversation reaches find/verify (ask), the
+    lessons (learn), the whole works (read), the record (dictate/schedule/copies) and the steward
+    (acquire) — it calls each behind the scenes."""
     t = (text or "").strip().lower()
     if _ask.is_crisis(text):
         return "crisis"
     if any(t.startswith(c) for c in _DICTATE):
         return "dictate"
+    # the leading-anchored verbs win over the broad contains-cues below — otherwise "read me a BOOK A-bout
+    # carpentry" is swept into schedule by its "book a" cue. A clear opening verb is the strongest signal.
+    if any(t.startswith(c) for c in _ACQUIRE):
+        return "acquire"
+    if any(t.startswith(c) for c in _LEARN) or "the cube" in t or "the coach" in t:
+        return "learn"
+    if any(t.startswith(c) for c in _READ):
+        return "read"
     if re.search(r"\bmake\s+\d+\s+cop(y|ies)\b", t) or "copies of" in t or any(c in t for c in _COPIES):
         return "copies"
     if any(t.startswith(c) or c in t for c in _SCHEDULE):
@@ -232,9 +262,11 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
         if cu:
             source = {"title": "the worked check — re-verify it yourself", "ref": cu}
     else:
-        # an honest miss: the keeping does not hold it. We OFFER the tortoise (the user chooses it on
-        # their need and access) rather than claiming to have written a want they did not ask for.
-        spoken = "That is not in the keeping yet. " + _clarify.TORTOISE_OFFER
+        # an honest miss: the keeping does not hold it. We OFFER the tortoise, and OFFER the steward
+        # (say "go find it") — but never write a want they did not ask for (bot noise must not fill the
+        # queue; the write waits on their clear word — see wants.open_want).
+        spoken = ("That is not in the keeping yet. " + _clarify.TORTOISE_OFFER +
+                  " Or say \"go find it\" and I'll set the steward to acquire it for the shelf.")
         caption = spoken
         kind = "miss"
 
@@ -423,6 +455,129 @@ def _copies(text: str) -> Dict[str, Any]:
             "caption": what, "connections": [], "generated": False}
 
 
+# ── the coach reaches the lessons, the works, and the steward — behind the scenes ────────────────
+def _subject_from_text(text: str) -> Optional[str]:
+    """The cube a request names ('teach me Biblical Greek' -> grc), or None. Longest phrase first so
+    'to read' beats 'read'."""
+    t = " " + (text or "").lower() + " "
+    for word in sorted(_LANG_WORDS, key=len, reverse=True):
+        if re.search(r"\b" + re.escape(word) + r"\b", t):
+            return _LANG_WORDS[word]
+    return None
+
+
+def _learn(text: str) -> Dict[str, Any]:
+    """The coach as teacher: start the cube the person named, spoken — or, when no tongue is named,
+    offer the tongues it teaches. Found curriculum, never generated (see coach.py)."""
+    from . import coach as _coachmod
+    present = set(_coachmod._discover())
+    subj = _subject_from_text(text)
+    if subj and subj in present:
+        u = (_coachmod.next_unit(None, subj) or {}).get("unit") or {}    # next_unit nests the unit
+        label = _coachmod._LABELS.get(subj, subj)
+        title = (u.get("title") or "").strip()
+        rule = _trim((u.get("rule") or "").split(". ")[0], 180)
+        spoken = (f"Let's learn {label}, by the cube. We begin here — {title}. {rule} "
+                  f"Open the cube and we'll walk it together, one step at a time.")
+        return {"intent": "learn", "kind": "lesson", "headline": f"{label} — the cube",
+                "spoken": spoken, "caption": (u.get("rule") or title),
+                "source": {"title": "the cube", "ref": f"/read.html?subject={subj}"},
+                "next": [{"label": f"Begin {label}", "ref": f"/read.html?subject={subj}"}],
+                "unit": {"id": u.get("id"), "subject": subj, "title": title}, "generated": False}
+    subs = [s for s in _coachmod.subjects().get("subjects", []) if s.get("id") in present]
+    nexts = [{"label": s["title"], "ref": f"/read.html?subject={s['id']}"} for s in subs[:8]]
+    names = ", ".join(s["title"] for s in subs[:8])
+    return {"intent": "learn", "kind": "lesson_pick", "headline": "What shall we learn?",
+            "spoken": ("I can be your coach in many tongues and skills — " + names +
+                       ", and more. Which shall we learn? We learn it by the cube — you speak it; "
+                       "I don't do it for you."),
+            "caption": names, "source": {"title": "the coach", "ref": "/read.html"},
+            "next": nexts, "generated": False}
+
+
+def _read(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
+    """The coach as reader: read a passage of Scripture — and, when asked, in the ORIGINAL tongue,
+    each word to its Strong's (decoding it by the cube) — or find a whole public-domain WORK and open
+    the reading room. Found and verbatim; the book is the tortoise, fetched on the person's say."""
+    ref_m = _REF_RE.search(text)
+    if ref_m:
+        from .verifiers import scripture as _sc
+        ref = ref_m.group(1).strip()
+        ps = _sc.read_passage(ref)
+        verses = ps.get("verses") or []
+        eng = _trim(" ".join(v.get("text", "") for v in verses), 420) if verses else ""
+        shown = (ps.get("ref") or ref)
+        if _IN_ORIGINAL.search(text):
+            ow = _sc.original_words(ref)
+            words = ow.get("words") or []
+            tongue = "Greek" if (words and str(words[0].get("strongs", "")).startswith("G")) else "Hebrew"
+            orig = " ".join(w.get("word", "") for w in words)
+            spoken = ((f"{eng} — {shown}. " if eng else "") +
+                      (f"In the {tongue} it was given, {len(words)} words. Open it to read each one to "
+                       f"its Strong's — the very tongue, by the cube." if words else
+                       "I could not reach the original words just now."))
+            return {"intent": "read", "kind": "scripture_original", "headline": f"{shown} — in the {tongue}",
+                    "spoken": spoken, "caption": (orig or eng or shown),
+                    "source": {"title": f"{shown} — the original", "ref": f"/bible.html?ref={shown}"},
+                    "next": [{"label": "Read it in the original", "ref": f"/bible.html?ref={shown}"},
+                             {"label": f"Learn {tongue} by the cube",
+                              "ref": "/read.html?subject=" + ("grc" if tongue == "Greek" else "he")}],
+                    "original": {"tongue": tongue, "count": len(words)}, "generated": False}
+        if eng:
+            return {"intent": "read", "kind": "scripture", "headline": shown, "spoken": f"{eng} — {shown}.",
+                    "caption": eng, "source": {"title": shown, "ref": f"/bible.html?ref={shown}"},
+                    "next": [{"label": "Read the chapter", "ref": f"/bible.html?ref={shown}"},
+                             {"label": "Hear it in the original", "ref": f"/bible.html?ref={shown}"}],
+                    "generated": False}
+
+    # a whole WORK — strip the read cue, find a readable public-domain book, open the reading room
+    from . import tortoise as _tortoise
+    topic = _strip_prefix(text, _READ)
+    topic = re.sub(r"^(?:me|us|to me|aloud|a book (?:about|on)|the book (?:about|on)|about|on|from|the|a)\b[\s:,\-]*",
+                   "", topic, flags=re.I).strip() or text
+    results = _corpus.search(topic, limit=10) or []
+    work = next((c for c in results if isinstance(c, dict) and _tortoise.readable(c)), None)
+    if work:
+        title = (work.get("title") or "").strip()
+        lang = (work.get("language") or (work.get("extra") or {}).get("language") or "").lower()
+        withcube = _LANG_WORDS.get(lang if lang in _LANG_WORDS else "english", "en")
+        rurl = f"/reader.html?card={work.get('id')}"
+        spoken = (f"I found {title} — a public-domain work, held in the ark. Open it and I'll read it "
+                  f"with you, sentence by sentence, by the cube.")
+        return {"intent": "read", "kind": "work", "headline": title, "spoken": spoken,
+                "caption": _trim(work.get("body") or title, 300),
+                "source": {"title": title, "ref": rurl},
+                "next": [{"label": "Open the reading room", "ref": rurl},
+                         {"label": "Read it with the coach", "ref": rurl + "&subject=" + withcube}],
+                "work": {"id": work.get("id"), "readable": True}, "generated": False}
+    # nothing readable held — the coach turns to the steward (offered; the write waits on their say)
+    return {"intent": "read", "kind": "miss", "headline": "Not on the shelf yet",
+            "spoken": (f"I don't hold a readable work on {_trim(topic, 60)} yet. Say \"go find it\" and "
+                       f"I'll set the steward to acquire it for the shelf."),
+            "caption": topic, "source": None,
+            "next": [{"label": "Ask the steward to find it", "ref": None}], "generated": False}
+
+
+def _acquire(text: str) -> Dict[str, Any]:
+    """The coach dictates to the STEWARD: an EXPLICIT ask to acquire what the keeping does not hold.
+    Opening a want is queuing, not executing — the steward's own gated rounds do the fetching. Only on
+    the person's clear word (this intent), never on its own; nothing bot-driven writes the queue."""
+    from . import wants as _wants
+    q = _strip_prefix(text, _ACQUIRE)
+    q = re.sub(r"^(?:me|us|the|a|an|some|about|on|for)\b[\s:,\-]*", "", q, flags=re.I).strip() or text
+    r = _wants.open_want(query=q, kind="missing", plane="human")
+    if r.get("ok"):
+        return {"intent": "acquire", "kind": "want", "headline": "Sent to the steward.",
+                "spoken": (f"I've asked the library's steward to go find \"{_trim(q, 80)}\". It will "
+                           f"forage the public-domain sources and, when it holds something true, keep "
+                           f"it on the shelf for you and everyone."),
+                "caption": q, "source": None, "want": {"id": r.get("id") or r.get("want_id"), "query": q},
+                "next": [], "generated": False}
+    return {"intent": "acquire", "kind": "want_refused", "headline": "Couldn't open that request",
+            "spoken": "I couldn't send that to the steward — " + _trim(r.get("error") or "", 120),
+            "caption": q, "source": None, "next": [], "generated": False}
+
+
 def dispatch(text: str, config: Any, *, owner: Optional[str] = None,
              gate_open: bool = False) -> Dict[str, Any]:
     """The one entry. Crisis-first, then route. Returns the small, speakable, LoRa-ready payload."""
@@ -439,6 +594,12 @@ def dispatch(text: str, config: Any, *, owner: Optional[str] = None,
         return _schedule(text)
     if intent == "copies":
         return _copies(text)
+    if intent == "acquire":
+        return _acquire(text)
+    if intent == "learn":
+        return _learn(text)
+    if intent == "read":
+        return _read(text, config, gate_open)
     return _ask_path(text, config, owner, gate_open)
 
 

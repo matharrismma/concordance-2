@@ -281,3 +281,76 @@ def test_pdf_extract_returns_empty_not_garbage_on_a_non_pdf():
     from concordance import pdf_extract
     assert pdf_extract.text(b"this is plainly not a pdf") == ""
     assert pdf_extract.text(b"") == ""
+
+
+# ── the coach reaches the lessons, the works, and the steward — everything through the console ────
+# Matt, 2026-09-22: "coach is shepherd ... it all should be possible with a conversation ... everything
+# connects through the console." Deterministic routing, deps stubbed so the suite stays light.
+
+def test_the_leading_verbs_win_over_the_broad_schedule_cue():
+    """'read me a BOOK Above carpentry' must be a READ, not a schedule swept in by the 'book a' cue."""
+    assert console.classify_intent("read me a book about carpentry") == "read"
+    assert console.classify_intent("teach me Greek") == "learn"
+    assert console.classify_intent("go find a treatise on beekeeping") == "acquire"
+    # the schedule cues still route when they lead
+    assert console.classify_intent("book an appointment tuesday at 3") == "schedule"
+    assert console.classify_intent("remind me to pray at noon") == "schedule"
+
+
+def test_the_coach_starts_the_cube_a_conversation_names(monkeypatch):
+    import concordance.coach as C
+    monkeypatch.setattr(C, "_discover", lambda: ["grc", "en"])
+    monkeypatch.setattr(C, "_LABELS", {"grc": "Ἑλληνικά (Biblical Greek)", "en": "English"})
+    monkeypatch.setattr(C, "next_unit", lambda after, subj: {
+        "unit": {"id": "cubo_grc_iam", "title": "εἰμί — where I stand", "rule": "Eimi means I am. Stand."}})
+    monkeypatch.setattr(C, "subjects", lambda: {"subjects": [{"id": "grc", "title": "Ἑλληνικά (Biblical Greek)"}]})
+    r = console._learn("teach me Biblical Greek")
+    assert r["intent"] == "learn" and r["kind"] == "lesson"
+    assert r["source"]["ref"] == "/read.html?subject=grc"
+    assert "εἰμί" in r["spoken"] or "εἰμί" in r["caption"]
+
+
+def test_the_coach_reads_scripture_in_the_original_tongue(monkeypatch):
+    import concordance.verifiers.scripture as S
+    monkeypatch.setattr(S, "read_passage", lambda ref: {"ref": "John 3:16", "verses": [{"text": "For God so loved the world."}]})
+    monkeypatch.setattr(S, "original_words", lambda ref: {"ref": "John 3:16", "status": "ok", "count": 3,
+                        "words": [{"word": "θεὸς", "strongs": "G2316"}, {"word": "κόσμον", "strongs": "G2889"}]})
+    r = console._read("read John 3:16 in the original", None, True)
+    assert r["kind"] == "scripture_original"
+    assert "Greek" in r["headline"]                             # G#### -> Greek, not Hebrew
+    assert any(n["ref"] == "/read.html?subject=grc" for n in r["next"])
+    assert r["source"]["ref"] == "/bible.html?ref=John 3:16"
+
+
+def test_the_coach_finds_a_whole_work_and_opens_the_reading_room(monkeypatch):
+    import concordance.tortoise as T
+    monkeypatch.setattr(console._corpus, "search", lambda q, **k: [
+        {"id": "card_x", "title": "A theory", "source": {"url": ""}},
+        {"id": "card_arch_y", "title": "Cassell's Carpentry", "language": "english",
+         "source": {"url": "https://archive.org/details/y"}}])
+    monkeypatch.setattr(T, "readable", lambda c: bool((c.get("source") or {}).get("url")))
+    r = console._read("read me a book about carpentry", None, True)
+    assert r["kind"] == "work"
+    assert r["source"]["ref"] == "/reader.html?card=card_arch_y"     # the FIRST readable, not the theory
+    assert any("subject=" in n["ref"] for n in r["next"])            # read-with-the-coach off-ramp
+
+
+def test_the_coach_dictates_a_want_to_the_steward_only_on_an_explicit_ask(monkeypatch):
+    import concordance.wants as W
+    seen = {}
+    monkeypatch.setattr(W, "open_want", lambda **kw: (seen.update(kw) or {"ok": True, "id": "want_1"}))
+    r = console._acquire("go find a treatise on beekeeping")
+    assert r["intent"] == "acquire" and r["kind"] == "want"
+    assert seen.get("kind") == "missing" and "beekeeping" in seen.get("query", "")
+
+
+def test_an_ask_miss_offers_the_steward_but_writes_no_want(monkeypatch):
+    """The write waits on the person's clear word — a miss must never fill the acquisition queue."""
+    import concordance.wants as W
+    called = {"n": 0}
+    monkeypatch.setattr(W, "open_want", lambda **kw: called.__setitem__("n", called["n"] + 1))
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {"kind": "search", "results": [], "generated": False})
+    r = console.dispatch("what is the airspeed of an unladen swallow", SEC)
+    assert r["kind"] == "miss"
+    assert "go find it" in r["spoken"]                          # the steward is OFFERED
+    assert called["n"] == 0, "a miss must not write a want on its own"
