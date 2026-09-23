@@ -362,3 +362,54 @@ def calltree(prefix: str = "", c=None, cap: int = _CALLTREE_CAP) -> Dict[str, An
                       "folder": "a drawer below, sized by the cards under it — click to go deeper",
                       "card": "a leaf — opens its sealed record",
                       "found": "the call-tree is built at load from real call numbers; nothing generated"}}
+
+
+# ── the media plane — the keeping grouped by artifact FORMAT ───────────────────────────────────
+# A library holds more than books: maps, data registries, sound, film, microfilm. Format is largely
+# a property of the SHELF, so a single-source, correctable shelf->format mapping gives it for the
+# whole keeping without touching the frozen corpus. It is a HEURISTIC and says so; the default is
+# text/print (the stacks proper). This is another transparency over the one keeping — the media plane.
+_SHELF_FORMAT = {
+    # cartographic — the map room (places of the earth; the heavens as celestial charts)
+    "geography": "map", "geology": "map", "ecology": "map", "astronomy": "map",
+    # sound recordings — the listening room
+    "pronunciation": "audio", "hymns": "audio", "music": "audio",
+    # moving image — the film & AV room (.tv is off-repo; mapped for when it lands)
+    "animation": "film", "tv": "film",
+    # tabular registries & datasets — the data drawers (the nearest thing we hold to microfiche)
+    "economics": "data", "oeis": "data", "sequences": "data", "networking": "data",
+    "networks": "data", "rfcs": "data", "nuclear_physics": "data", "taxonomy": "data",
+}
+FORMATS = ("text", "data", "map", "audio", "film", "microfilm", "link")
+_FORMAT_LABEL = {
+    "text": "Text & print", "data": "Data & registries", "map": "Maps & atlases",
+    "audio": "Audio", "film": "Film & video", "microfilm": "Microfilm & scans", "link": "Web links"}
+
+
+def format_of_shelf(shelf: str) -> str:
+    """The media/format a shelf holds — a heuristic, single-source mapping; default text/print."""
+    return _SHELF_FORMAT.get((shelf or "").strip().lower(), "text")
+
+
+def formats(c=None) -> Dict[str, Any]:
+    """The library's MEDIA — the keeping grouped by artifact format, so the stacks can be browsed by
+    medium the way a library separates books from maps from microfilm. Counts are REAL (call-tree
+    section totals); the shelf->format mapping is a heuristic and says so; nothing generated. Each
+    format lists the sections under it, and each section links into the stacks walk. `c` injectable."""
+    if c is None:
+        c = corpus.default_corpus()
+    fmt_count: Counter = Counter()
+    fmt_sections: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    for shelf, n in c.call_children(""):   # top-level sections + counts — instant
+        f = format_of_shelf(shelf)
+        fmt_count[f] += n
+        fmt_sections[f].append({"shelf": shelf, "count": n})
+    out = []
+    for f in FORMATS:
+        secs = sorted(fmt_sections.get(f, []), key=lambda s: -s["count"])
+        out.append({"format": f, "label": _FORMAT_LABEL[f], "count": fmt_count.get(f, 0),
+                    "sections": secs, "section_count": len(secs)})
+    return {"scope": "formats", "total": sum(fmt_count.values()), "formats": out,
+            "note": "the keeping grouped by media/format — a heuristic shelf→format mapping "
+                    "(single-source in graph._SHELF_FORMAT, correctable); section counts are real "
+                    "call-tree totals; nothing generated"}

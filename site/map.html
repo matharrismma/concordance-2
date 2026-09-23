@@ -135,6 +135,17 @@ section.blk{padding:1.6rem 0}
 #mine .empty{color:var(--ink-faint); font-size:.85rem}
 #verses{resize:vertical}
 
+/* the library's media (the format transparency) */
+#media .fmt{margin-bottom:1.1rem}
+#media .fmt-h{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.3rem}
+#media .fmt-label{font-family:"Spectral",serif; font-size:1.05rem}
+#media .fmt-n{font-family:"IBM Plex Mono",monospace; font-size:.8rem; color:var(--ink-faint)}
+#media .fmt-bar{height:8px; background:var(--panel); border-radius:4px; overflow:hidden; margin-bottom:.45rem}
+#media .fmt-bar i{display:block; height:100%; background:var(--seal)}
+#media .fmt-secs{display:flex; flex-wrap:wrap; gap:.35rem}
+#media .fmt-secs button{background:var(--panel); border:1px solid var(--line); color:var(--ink-soft); font:inherit; font-size:.76rem; border-radius:999px; padding:.2rem .55rem; cursor:pointer}
+#media .fmt-secs button:hover{border-color:var(--seal); color:var(--seal)}
+
 footer{border-top:1px solid var(--line-soft); margin-top:2.5rem; padding:1.6rem 0 2.4rem; font-size:.82rem; color:var(--ink-faint)}
 footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(--seal)}
 :focus-visible{outline:2px solid var(--seal); outline-offset:2px}
@@ -202,8 +213,15 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
     </div>
   </section>
 
-  <!-- THE STACKS (walk the library's call-tree) -->
+  <!-- THE LIBRARY'S MEDIA — the format transparency -->
   <section class="blk">
+    <div class="sec-h"><h2>The library's media</h2><span class="n">live from /graph?scope=formats</span></div>
+    <p style="color:var(--ink-soft); margin:.2rem 0 1rem; max-width:66ch; font-size:.95rem">A library holds more than books &mdash; maps, data registries, sound, film, microfilm. The keeping grouped by the media it holds (a heuristic by section, correctable). Pick a section to walk it in the stacks below.</p>
+    <div class="constel" style="padding:1.1rem" id="media"><p class="empty">Sorting the media&hellip;</p></div>
+  </section>
+
+  <!-- THE STACKS (walk the library's call-tree) -->
+  <section class="blk" id="stacks">
     <div class="sec-h"><h2>Walk the stacks</h2><span class="n">live from /graph?scope=calltree</span></div>
     <p style="color:var(--ink-soft); margin:.2rem 0 1rem; max-width:64ch; font-size:.95rem">The keeping shelved like a library &mdash; <em>section &rarr; shelf &rarr; drawer &rarr; folder &rarr; card</em>. Every card is placed at the gate by its call number; walk down a drawer, or click a card to open its record.</p>
     <div class="constel">
@@ -362,6 +380,7 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
       }).catch(function(){ status.textContent="The stacks are resting."; });
     }
     up.addEventListener("click",function(e){ e.preventDefault(); load(cur.parent!=null?cur.parent:""); });
+    window.NHWalk = load;   // let the media view jump the walk to a section
     load("");
   }
   mountStacks();
@@ -437,6 +456,29 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
   function closeKey(){ PUB=null; FP=null; $("keyIn").classList.add("hidden"); $("keyOut").classList.remove("hidden"); }
   function wire(){ var o=$("openKey"), c=$("closeKey"); if(o) o.addEventListener("click",openKey); if(c) c.addEventListener("click",closeKey); }
   if(document.readyState!=="loading") wire(); else document.addEventListener("DOMContentLoaded",wire);
+})();
+</script>
+<script>
+// The library's media — group the stacks by artifact format (the media plane / a transparency).
+(function(){
+  "use strict";
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+  function jumpTo(shelf){ if(window.NHWalk){ window.NHWalk(shelf); } var s=document.getElementById("stacks"); if(s) s.scrollIntoView({behavior:"smooth", block:"start"}); }
+  fetch("/graph?scope=formats",{headers:{accept:"application/json"}}).then(function(r){return r.json();}).then(function(res){
+    var d=(res&&res.data)?res.data:res, el=document.getElementById("media"); if(!el) return;
+    var fmts=(d.formats||[]).filter(function(f){return f.count>0;});
+    var max=fmts.reduce(function(m,f){return Math.max(m,f.count||0);},1);
+    el.innerHTML=fmts.map(function(f){
+      var secs=(f.sections||[]).slice(0,12).map(function(s){
+        return '<button type="button" data-shelf="'+esc(s.shelf)+'">'+esc(s.shelf)+' · '+Number(s.count).toLocaleString()+'</button>';
+      }).join("");
+      return '<div class="fmt"><div class="fmt-h"><span class="fmt-label">'+esc(f.label)+'</span>'+
+        '<span class="fmt-n">'+Number(f.count).toLocaleString()+' card'+(f.count===1?"":"s")+'</span></div>'+
+        '<div class="fmt-bar"><i style="width:'+Math.max(2,Math.round((f.count/max)*100))+'%"></i></div>'+
+        '<div class="fmt-secs">'+secs+'</div></div>';
+    }).join("") || '<p class="empty">No media sorted yet.</p>';
+    el.addEventListener("click",function(e){ var b=e.target.closest("[data-shelf]"); if(b) jumpTo(b.getAttribute("data-shelf")); });
+  }).catch(function(){ var el=document.getElementById("media"); if(el) el.innerHTML='<p class="empty">The media view is resting.</p>'; });
 })();
 </script>
 </body>

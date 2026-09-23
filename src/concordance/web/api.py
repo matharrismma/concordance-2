@@ -1828,6 +1828,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if scope == "calltree":
             # walk the library's call-tree: section -> shelf -> drawer -> folder -> card
             return _ok(_graph.calltree(query.get("prefix") or ""))
+        if scope == "formats":
+            # the media plane — the keeping grouped by artifact format (maps, data, audio, film...)
+            return _ok(_graph.formats())
         return _err(400, "unknown scope")
     if method == "GET" and path == "/floor":
         # the floor, made visible — the rooted design (both halves) + the two-tree grafts, so a
