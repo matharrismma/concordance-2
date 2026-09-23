@@ -3036,7 +3036,8 @@ _RETIRED = {
     "/game.html": "/",
     "/guarantees.html": "/proof.html",
     "/journal.html": "/",
-    "/mesh.html": "/",
+    "/mesh.html": "/fellowship.html",   # the mesh surface consolidated INTO fellowship.html — send the
+                                        # door/invite/notification journeys there, not home (a lost link)
     "/narratives.html": "/bible.html",
     "/places.html": "/encyclopedia.html",
     "/reason.html": "/proof.html",

@@ -817,7 +817,7 @@ def make_invite(fp: str, max_uses: int = 0, ttl_days: int = 30) -> Dict[str, Any
            "max_uses": max(0, int(max_uses or 0)), "uses": 0}
     _write_json(_invite_path(token), rec)
     return {"ok": True, "token": token, "inviter": fp,
-            "link": "/mesh.html#way&invite=" + token,
+            "link": "/fellowship.html?invite=" + token,
             "note": "Hand this link to a believer you know. When they confess and enter, they are linked to you."}
 
 

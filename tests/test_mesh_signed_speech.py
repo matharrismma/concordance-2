@@ -169,8 +169,11 @@ def test_a_door_note_is_signed_the_same_sovereign_way():
                            nonce=s["nonce"], created_at=s["created_at"])
     assert r["ok"] is True and r["signed"] is True
     assert r["id"] == s["would_be_id"]
-    # the recipient actually has it
-    assert (mesh.read_door(target) or {}).get("count", 0) >= 1
+    # the recipient actually has it — a door read is proof-gated, so the recipient proves its own key
+    import time as _t
+    _at = int(_t.time())
+    _rsig = signing.sign_bytes(("nh-mesh-read:v1:%s:%d" % (target, _at)).encode("utf-8"), other["private_key"])
+    assert (mesh.read_door(target, at=_at, signature=_rsig) or {}).get("count", 0) >= 1
 
     # and the target's own key cannot sign as the sender
     forged = signing.sign_bytes(canon, other["private_key"])

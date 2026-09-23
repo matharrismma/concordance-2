@@ -31,6 +31,15 @@ def _node(callsign="anon", node_type="believer"):
     return idn, r["fp"]
 
 
+def _rp(idn, fp):
+    """Signed-read PROOF for reading your own door/inbox — the door and inbox are yours alone now, so
+    a read is served only to a caller who signs nh-mesh-read:v1:<fp>:<at> with the node's own key."""
+    import time as _t
+    at = int(_t.time())
+    sig = signing.sign_bytes(("nh-mesh-read:v1:%s:%d" % (fp, at)).encode("utf-8"), idn["private_key"])
+    return {"at": at, "signature": sig}
+
+
 def _vouch(a, b):
     """A consensual MUTUAL link under the signed, directed-vouch model: BOTH parties sign a vouch for the
     other. (A single one-sided vouch does NOT form a link — that is the whole point of consent.)"""
@@ -62,7 +71,7 @@ def test_signed_message_verifies_offline_and_tamper_is_caught(mesh_dir):
     _vouch(a, b)
     r = mesh.post_message(afp, "grace and peace to you", private_key=a["private_key"])
     assert r["ok"] and r["signed"]
-    got = mesh.inbox(bfp)["messages"][0]
+    got = mesh.inbox(bfp, **_rp(b, bfp))["messages"][0]
     assert got["verify"] == {"unaltered": True, "authentic": True, "signed": True}
     # tamper the stored message body; both honest layers must now fail
     p = next((mesh._dir() / "msgs").glob("*.json"))
@@ -81,10 +90,10 @@ def test_an_unsigned_post_is_refused_but_a_cry_for_help_is_heard(mesh_dir):
     _vouch(a, b)
     r = mesh.post_message(afp, "no key on this device", private_key=None)   # a normal post, unsigned
     assert r["ok"] is False and "signed" in r["error"]                     # refused
-    assert mesh.inbox(bfp)["count"] == 0                                   # never delivered
+    assert mesh.inbox(bfp, **_rp(b, bfp))["count"] == 0                                   # never delivered
     cry = mesh.post_message(afp, "i dont want to be here anymore", private_key=None)   # a cry for help
     assert cry["ok"] is True and cry["signed"] is False and "crisis" in cry            # heard even unsigned
-    assert mesh.inbox(bfp)["count"] == 1                                   # the fellowship hears it
+    assert mesh.inbox(bfp, **_rp(b, bfp))["count"] == 1                                   # the fellowship hears it
 
 
 def test_a_foreign_key_cannot_speak_as_a_node(mesh_dir):
@@ -101,10 +110,10 @@ def test_ttl_bounds_reach_like_a_lora_hop_limit(mesh_dir):
     _vouch(a, b)
     _vouch(b, c)                                     # chain A—B—C
     mesh.post_message(afp, "one hop only", ttl=1, private_key=a["private_key"])   # signed; reaches B, not C
-    assert mesh.inbox(bfp)["count"] == 1
-    assert mesh.inbox(cfp)["count"] == 0
+    assert mesh.inbox(bfp, **_rp(b, bfp))["count"] == 1
+    assert mesh.inbox(cfp, **_rp(c, cfp))["count"] == 0
     mesh.post_message(afp, "two hops", ttl=2, private_key=a["private_key"])       # now reaches C too
-    assert mesh.inbox(cfp)["count"] == 1
+    assert mesh.inbox(cfp, **_rp(c, cfp))["count"] == 1
 
 
 def test_no_pii_or_private_key_ever_written(mesh_dir):
@@ -238,15 +247,17 @@ def test_door_whiteboard_directed_and_verifiable(mesh_dir):
     b, bfp = _node("Homeowner")
     r = mesh.leave_on_door(afp, bfp, "Grace and peace on your house.", private_key=a["private_key"])
     assert r["ok"] and r["signed"] and r["on_door_of"] == "Homeowner"
-    door = mesh.read_door(bfp)
+    door = mesh.read_door(bfp, **_rp(b, bfp))
     assert door["count"] == 1
     note = door["notes"][0]
     assert note["callsign"] == "Neighbor"
     assert note["verify"] == {"unaltered": True, "authentic": True, "signed": True}
     # the note is on B's door, not A's; the unconfessed see nothing
-    assert mesh.read_door(afp)["count"] == 0
+    assert mesh.read_door(afp, **_rp(a, afp))["count"] == 0
     other = identity.create_identity()
-    assert mesh.read_door(identity.fingerprint(other["public_key"])).get("gated") is True
+    # an outsider's fingerprint (never a registered node) can't be read — and the refusal is "unproven",
+    # revealing nothing about whether that node exists or has confessed.
+    assert mesh.read_door(identity.fingerprint(other["public_key"])).get("unproven") is True
 
 
 def test_church_node_and_estate_ladder(mesh_dir):

@@ -317,11 +317,15 @@ def _secular_tools() -> List[dict]:
              "display_name": {"type": "string"}},
              "required": ["fields", "signature"]}},
         {"name": "shelf_read",
-         "description": ("Read one member's shelf. Pass `viewer` (your own key) to see your own "
-                         "private drops; anyone else sees the shelf ring and promoted commons "
-                         "cards only. Nothing anywhere records who read what."),
+         "description": ("Read one member's shelf. Access is by PROOF, not by naming a key: an "
+                         "unproven caller sees only the promoted commons. To see your own rings "
+                         "(private + shelf) or a friend's shelf ring, pass `viewer` (a key), `at` "
+                         "(unix seconds) and `sig` — a signature over nh-shelf-read:v1:<member>:"
+                         "<viewer>:<at> made with the viewer key on your own machine (never send the "
+                         "key). Nothing anywhere records who read what."),
          "inputSchema": {"type": "object", "properties": {
-             "member": {"type": "string"}, "viewer": {"type": "string"}},
+             "member": {"type": "string"}, "viewer": {"type": "string"},
+             "at": {"type": "integer"}, "sig": {"type": "string"}},
              "required": ["member"]}},
         {"name": "commons_read",
          "description": ("What the fellowship has put on the commons — promoted member work, "
@@ -531,15 +535,19 @@ def _secular_tools() -> List[dict]:
              "fp": {"type": "string"}, "hops": {"type": "integer"}}, "required": ["fp"]}},
         {"name": "mesh_inbox",
          "description": ("The messages that reached you, each carrying its own offline verification "
-                         "so you trust it by proof rather than by this server's word. Requires fp + "
-                         "confession."),
+                         "so you trust it by proof rather than by this server's word. Yours alone: "
+                         "prove your key — pass `at` (unix seconds) and `sig`, a signature over "
+                         "nh-mesh-read:v1:<fp>:<at> made with your key (never send the key)."),
          "inputSchema": {"type": "object", "properties": {
-             "fp": {"type": "string"}, "limit": {"type": "integer"}}, "required": ["fp"]}},
+             "fp": {"type": "string"}, "limit": {"type": "integer"},
+             "at": {"type": "integer"}, "sig": {"type": "string"}}, "required": ["fp"]}},
         {"name": "mesh_door",
          "description": ("Read the words left on YOUR door — the whiteboard others wrote to you, each "
-                         "with its verification. Requires fp + confession."),
+                         "with its verification. Yours alone: prove your key — pass `at` (unix "
+                         "seconds) and `sig` over nh-mesh-read:v1:<fp>:<at>, signed with your key."),
          "inputSchema": {"type": "object", "properties": {
-             "fp": {"type": "string"}, "limit": {"type": "integer"}}, "required": ["fp"]}},
+             "fp": {"type": "string"}, "limit": {"type": "integer"},
+             "at": {"type": "integer"}, "sig": {"type": "string"}}, "required": ["fp"]}},
         # SPEECH INTO THE MESH — proof-of-possession, never a transmitted secret. Two steps, because
         # the second one must be signed: mesh_signable hands you the exact canonical bytes; you sign
         # them with YOUR key on YOUR machine; mesh_post carries only the signature. This tool will
@@ -1206,9 +1214,19 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
                         str(args.get("signature") or ""),
                         display_name=str(args.get("display_name") or ""))
     if name == "shelf_read":
-        from .. import shelves as _sh
-        return _sh.shelf_of(str(args.get("member") or ""),
-                            viewer=(str(args["viewer"]) if args.get("viewer") else None))
+        from .. import shelves as _sh, identity as _id, mesh as _mesh
+        member = str(args.get("member") or "")
+        viewer = str(args["viewer"]) if args.get("viewer") else ""
+
+        def _friend(m: str, v: str) -> bool:
+            try:
+                return _mesh.are_linked(_id.fingerprint(m), _id.fingerprint(v))
+            except Exception:  # noqa: BLE001
+                return False
+        # Access by PROOF, never a bare `viewer`: to see private/shelf rings, sign the read challenge
+        # (nh-shelf-read:v1:member:viewer:at) with the viewer key and pass at+sig. No proof -> commons.
+        access = _sh.access_for(member, viewer, args.get("at"), args.get("sig"), friend_fn=_friend)
+        return _sh.shelf_of(member, viewer=(viewer or None), access=access)
     if name == "commons_read":
         from .. import shelves as _sh
         return _sh.commons(limit=int(args.get("limit", 40) or 40))
@@ -1462,7 +1480,9 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
             except (TypeError, ValueError):
                 hops = 2
             return _mesh.map_around(fp, hops=hops)
-        return _mesh.inbox(fp, limit=limit) if name == "mesh_inbox" else _mesh.read_door(fp, limit=limit)
+        _at, _sig = args.get("at"), args.get("sig")   # prove your key (nh-mesh-read:v1:fp:at) to read
+        return (_mesh.inbox(fp, limit=limit, at=_at, signature=_sig) if name == "mesh_inbox"
+                else _mesh.read_door(fp, limit=limit, at=_at, signature=_sig))
     if name == "ask":
         # The same front door a human walks through: ask.respond() classifies, answers in kind,
         # keeps crisis absolute, and reports whether this turn opened the Gate. handle() reads

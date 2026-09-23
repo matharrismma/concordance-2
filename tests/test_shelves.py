@@ -72,7 +72,7 @@ def test_a_member_stocks_their_own_shelf_and_it_carries_their_name():
     from concordance import shelves
     r, pub, _ = _drop()
     assert r["ok"] and r["ring"] == "shelf"
-    view = shelves.shelf_of(pub, viewer=pub)
+    view = shelves.shelf_of(pub, access="owner")
     assert view["count"] == 1
     card = view["cards"][0]
     assert card["author"] == "member"
@@ -90,7 +90,7 @@ def test_nobody_can_put_words_on_another_members_shelf():
     forged = signing.sign_bytes(base64.urlsafe_b64decode(sg["signable"]), priv_a)  # A signs B's
     r = shelves.drop(sg["fields"], forged)
     assert r["ok"] is False and "does not verify" in r["error"]
-    assert shelves.shelf_of(pub_b, viewer=pub_b)["count"] == 0
+    assert shelves.shelf_of(pub_b, access="owner")["count"] == 0
     # and an unsigned drop is refused with the way in
     assert shelves.drop(sg["fields"], "")["ok"] is False
     # and a private key is never an acceptable substitute for a signature
@@ -104,14 +104,14 @@ def test_the_gate_is_on_amplification_not_speech():
     commons_r, pub2, _ = _drop(ring="commons", body="A drop the member wants the whole "
                                                     "fellowship to see, in their own words.")
     # the shelf drop is LIVE immediately — no steward, no wait
-    assert shelf_r["stage"] == "private" and shelves.shelf_of(pub)["count"] == 1
+    assert shelf_r["stage"] == "private" and shelves.shelf_of(pub, access="owner")["count"] == 1
     # the commons drop waits, and it waits for a HUMAN
     assert commons_r["stage"] == "public_review"
     assert shelves.commons()["count"] == 0, "nothing reaches the commons uncurated"
     q = shelves.review_queue()
     assert q["count"] == 1 and q["items"][0]["card_id"] == commons_r["card_id"]
     # meanwhile the author still sees their own drop, and a stranger sees it is held
-    assert shelves.shelf_of(pub2, viewer=pub2)["count"] == 1
+    assert shelves.shelf_of(pub2, access="owner")["count"] == 1
     assert shelves.shelf_of(pub2)["awaiting_review"] == 1
 
 
@@ -142,9 +142,9 @@ def test_no_anonymous_and_no_reasonless_judgement():
 def test_private_stays_private_and_the_public_boundary_agrees():
     from concordance import corpus, shelves
     r, pub, _ = _drop(ring="private", body="Something written only for myself, kept and not shown.")
-    assert shelves.shelf_of(pub, viewer=pub)["count"] == 1, "the member sees their own"
+    assert shelves.shelf_of(pub, access="owner")["count"] == 1, "the member sees their own"
     assert shelves.shelf_of(pub)["count"] == 0, "a stranger never sees a private drop"
-    card = shelves.shelf_of(pub, viewer=pub)["cards"][0]
+    card = shelves.shelf_of(pub, access="owner")["cards"][0]
     assert corpus.is_public(card) is False, \
         "the ONE public boundary must withhold it too — not just this reader"
 
@@ -156,7 +156,7 @@ def test_a_refusal_withholds_amplification_and_keeps_the_shelf():
                            token=STEWARD_TOKEN)
     assert act["ok"]
     assert shelves.commons()["count"] == 0
-    assert shelves.shelf_of(pub, viewer=pub)["count"] == 1, \
+    assert shelves.shelf_of(pub, access="owner")["count"] == 1, \
         "refusing to amplify never removes a member's own words from their own shelf"
     h = shelves.history(r["card_id"])
     assert h["count"] == 1 and h["acts"][0]["reason"]
@@ -167,7 +167,7 @@ def test_append_only_withdrawal_keeps_the_record():
     r, pub, _ = _drop()
     shelves.curate(r["card_id"], "withdrawn", "matt", "the member asked for it to come down",
                    token=STEWARD_TOKEN)
-    assert shelves.shelf_of(pub, viewer=pub)["count"] == 0, "gone from the view"
+    assert shelves.shelf_of(pub, access="owner")["count"] == 0, "gone from the view"
     assert shelves.history(r["card_id"])["count"] == 1, "and still in the record, with its reason"
 
 
@@ -210,7 +210,7 @@ def test_a_member_withdraws_their_own_card_with_their_own_key():
     act = shelves.curate(r["card_id"], "withdrawn", "Matt Harris", "changed my mind",
                          fields=sg["fields"], signature=sig)
     assert act["ok"] and act["by"] == "member", act
-    assert shelves.shelf_of(pub, viewer=pub)["count"] == 0
+    assert shelves.shelf_of(pub, access="owner")["count"] == 0
     assert shelves.history(r["card_id"])["count"] == 1, "and the act is in the record, with its why"
 
 
@@ -230,7 +230,7 @@ def test_one_member_cannot_pull_down_anothers_card():
     sig2 = signing.sign_bytes(base64.urlsafe_b64decode(sg2["signable"]), priv_b)
     assert shelves.curate(r_a["card_id"], "withdrawn", "someone else", "still not mine",
                           fields=sg2["fields"], signature=sig2)["ok"] is False
-    assert shelves.shelf_of(pub_a, viewer=pub_a)["count"] == 1, "A's card is untouched"
+    assert shelves.shelf_of(pub_a, access="owner")["count"] == 1, "A's card is untouched"
     # a member's signature does NOT buy a promotion — that is a different authority
     r_c, pub_c, key_c = _drop(ring="commons")
     sg3 = shelves.signable_curate(r_c["card_id"], pub_c)
@@ -248,7 +248,7 @@ def test_a_stale_withdrawal_signature_is_refused():
     stale = dict(sg["fields"], at=sg["fields"]["at"] - (shelves.SIGNATURE_TTL_S + 60))
     assert shelves.curate(r["card_id"], "withdrawn", "me", "too late",
                           fields=stale, signature=sig)["ok"] is False
-    assert shelves.shelf_of(pub, viewer=pub)["count"] == 1
+    assert shelves.shelf_of(pub, access="owner")["count"] == 1
 
 
 def test_stale_signatures_and_bad_shapes_are_refused():

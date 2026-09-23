@@ -371,7 +371,10 @@ def shelf_of(member: str, viewer: Optional[str] = None, access: str = "public") 
     # one byte of it reaches the store.
     from . import present as _present
     return {"ok": True, "member": member, "own_view": own, "access": access, "count": len(cards),
-            "awaiting_review": (held if access in ("owner", "friend") else None),
+            # the count of the member's own commons drops still awaiting a steward. It is a COUNT,
+            # not content (and the drops are bound for the commons anyway), so it is shown to any
+            # reader — the friend-gate withholds the private/shelf CARDS, not this number.
+            "awaiting_review": held,
             "cards": _present.attach(cards),
             "note": "A shelf is a key with cards on it. Nothing here records who read them."}
 

@@ -178,7 +178,7 @@ def test_a_link_drop_lands_with_its_waybill(monkeypatch, loopback):
     monkeypatch.setattr(linkdrop, "_public_ip", lambda host: (True, ""))
     r, pub, _ = _drop_link(loopback + "/good")
     assert r.get("ok"), r
-    card = shelves.shelf_of(pub, viewer=pub)["cards"][0]
+    card = shelves.shelf_of(pub, access="owner")["cards"][0]
     x = card["extra"]
     assert x["reach"] == "FETCHED"
     assert x["waybill"]["sha256"] and x["waybill"]["fetched_at"]
@@ -216,7 +216,7 @@ def test_our_outage_never_silences_the_member(monkeypatch):
                         lambda t: (None, {}, "could not reach it: [simulated outage]"))
     r, pub, _ = _drop_link("https://a-real-site.example/page")
     assert r.get("ok"), "the drop was refused because WE could not fetch — never do that"
-    card = shelves.shelf_of(pub, viewer=pub)["cards"][0]
+    card = shelves.shelf_of(pub, access="owner")["cards"][0]
     assert card["extra"]["reach"] == "SYSTEM_ERROR"
     assert card["extra"]["waybill"] == {}
     line = card["presentation"]["link"]["waybill_line"]

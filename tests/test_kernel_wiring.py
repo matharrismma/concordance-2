@@ -91,7 +91,7 @@ def test_a_member_drop_emits_a_quarantine_record_on_the_card_and_the_wire(_shelf
     assert r["record"]["verdict"] == "QUARANTINE" and r["record"]["authority_out"] == "quarantined"
     assert r["record"]["kind"] == "community", "a commons drop is shared -> community"
     # and persisted on the card itself
-    card = shelves.shelf_of(pub, viewer=pub)["cards"][0]
+    card = shelves.shelf_of(pub, access="owner")["cards"][0]
     persisted = card["extra"]["gate_record"]
     _assert_record(persisted)
     assert persisted == r["record"], "the card's record and the wire's record are one and the same"

@@ -105,7 +105,7 @@ def test_the_stored_card_stays_bare():
 def test_the_read_path_hands_back_the_magic():
     from concordance import shelves
     _r, pub, _ = _drop()
-    card = shelves.shelf_of(pub, viewer=pub)["cards"][0]
+    card = shelves.shelf_of(pub, access="owner")["cards"][0]
     p = card["presentation"]
     assert p["kind_label"] == "A recipe" and p["glyph"]
     assert "Matt Harris" in p["by"]

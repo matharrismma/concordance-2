@@ -67,7 +67,19 @@ def _sign(signable, priv):
     return signing.sign_bytes(base64.urlsafe_b64decode(signable), priv)
 
 
-def test_a_member_stocks_a_shelf_over_http_and_anyone_can_read_it():
+def _read_q(pub, priv, viewer=None):
+    """A SIGNED shelf-read query. Access is by proof now: to see your own rings (private + shelf) you
+    prove the viewer key over nh-shelf-read:v1:<member>:<viewer>:<at>. A read never writes; this only
+    decides what is served. An unproven `{"member": pub}` query sees the promoted commons alone."""
+    import time as _t
+    from concordance import signing
+    v = viewer or pub
+    at = int(_t.time())
+    sig = signing.sign_bytes(("nh-shelf-read:v1:%s:%s:%d" % (pub, v, at)).encode("utf-8"), priv)
+    return {"member": pub, "viewer": v, "at": at, "sig": sig}
+
+
+def test_a_member_stocks_a_shelf_over_http_and_reads_it_with_proof():
     priv, pub = _key()
     st, sg = _http("/drop/signable", query={"member": pub, "kind": "recipe",
                                             "subject": "Sourdough, cold-proofed",
@@ -79,7 +91,7 @@ def test_a_member_stocks_a_shelf_over_http_and_anyone_can_read_it():
                                     "display_name": "Matt Harris"})
     assert st == 200 and r.get("ok"), (st, r)
 
-    st, view = _http("/shelf", query={"member": pub})
+    st, view = _http("/shelf", query=_read_q(pub, priv))
     assert st == 200 and view["count"] == 1
     card = view["cards"][0]
     assert "Sourdough" in card["title"]
@@ -135,8 +147,8 @@ def test_reading_a_shelf_is_not_a_write_and_a_stranger_never_sees_private():
                                              "body": "Something written only for myself, kept and "
                                                      "not shown to anyone.", "ring": "private"})
     _http("/drop", "POST", {"fields": sg["fields"], "signature": _sign(sg["signable"], priv)})
-    assert _http("/shelf", query={"member": pub, "viewer": pub})[1]["count"] == 1
-    assert _http("/shelf", query={"member": pub})[1]["count"] == 0
+    assert _http("/shelf", query=_read_q(pub, priv))[1]["count"] == 1        # the owner, key proven
+    assert _http("/shelf", query={"member": pub})[1]["count"] == 0           # a stranger: never private
     # `viewer` decides what is SERVED and is not kept: nothing anywhere records who looked.
     store = Path(os.environ["CONCORDANCE_DATA_DIR"]) / "shelves"
     written = "\n".join(p.read_text(encoding="utf-8") for p in store.glob("*.jsonl"))
@@ -165,7 +177,7 @@ def test_an_agent_walks_the_same_flow():
     r = _mcp("shelf_drop", {"fields": sg["fields"], "signature": _sign(sg["signable"], priv),
                             "display_name": "Matt Harris"})
     assert r.get("ok"), r
-    view = _mcp("shelf_read", {"member": pub})
+    view = _mcp("shelf_read", _read_q(pub, priv))
     assert view["count"] == 1 and "creek" in view["cards"][0]["title"].lower()
     assert _mcp("commons_read", {})["count"] == 0
     assert _mcp("curate_queue", {})["count"] == 0, "a shelf drop needs no steward"
@@ -191,7 +203,7 @@ def test_one_store_two_doors():
                                  "body": "Rip the board in three, laminate the legs, and the whole "
                                          "bench comes out of eight feet of pine."})
     _mcp("shelf_drop", {"fields": sg["fields"], "signature": _sign(sg["signable"], priv)})
-    assert _http("/shelf", query={"member": pub})[1]["count"] == 1, "agent wrote, HTTP cannot see it"
+    assert _http("/shelf", query=_read_q(pub, priv))[1]["count"] == 1, "agent wrote, HTTP cannot see it"
 
     _st, sg2 = _http("/drop/signable", query={"member": pub, "kind": "question",
                                               "subject": "How do you keep pine from denting?",
