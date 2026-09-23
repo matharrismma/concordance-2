@@ -124,6 +124,17 @@ section.blk{padding:1.6rem 0}
 #stackUp{display:none; background:none; border:1px solid var(--line); color:var(--ink-soft); font:inherit; font-size:.8rem; cursor:pointer; border-radius:6px; padding:.3rem .6rem}
 #stackUp:hover{border-color:var(--seal); color:var(--seal)}
 
+/* your deck & your door (the personal transparency) */
+.hidden{display:none}
+.mine-cols{display:grid; grid-template-columns:1fr 1fr; gap:1rem}
+@media(max-width:640px){.mine-cols{grid-template-columns:1fr}}
+#deck .item,#board .item{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:.6rem .7rem; margin-bottom:.5rem}
+#deck .t,#board .t{font-size:.9rem}
+#deck .m,#board .m{font-family:"IBM Plex Mono",monospace; font-size:.72rem; color:var(--ink-faint)}
+#deck .d,#board .d{font-size:.85rem; color:var(--ink-soft); margin-top:.25rem}
+#mine .empty{color:var(--ink-faint); font-size:.85rem}
+#verses{resize:vertical}
+
 footer{border-top:1px solid var(--line-soft); margin-top:2.5rem; padding:1.6rem 0 2.4rem; font-size:.82rem; color:var(--ink-faint)}
 footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(--seal)}
 :focus-visible{outline:2px solid var(--seal); outline-offset:2px}
@@ -217,6 +228,29 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
       <canvas id="mapCanvas"></canvas>
       <div id="mapStatus">Charting the keeping&hellip;</div>
       <div id="mapLegend"></div>
+    </div>
+  </section>
+
+  <!-- YOUR DECK & YOUR DOOR — the personal transparency, on your covenant key -->
+  <section class="blk" id="mine">
+    <div class="sec-h"><h2>Your deck &amp; your door</h2><span class="n">your covenant key &mdash; no account</span></div>
+    <p style="color:var(--ink-soft); margin:.2rem 0 1rem; max-width:66ch; font-size:.95rem">Your own transparency over the library &mdash; the shelf you keep, and the words left on your door. Your key is your <em>verses</em>: it is derived here on your device and <strong>never stored, never sent</strong>. This view is read-only; keep to your shelf or leave a word on a door in the <a href="/fellowship.html" style="color:var(--seal)">fellowship hall</a>.</p>
+    <div class="constel" style="padding:1.1rem">
+      <div id="keyOut">
+        <label for="verses" style="display:block; color:var(--ink-soft); font-size:.85rem; margin-bottom:.4rem">Your verses &mdash; a phrase only you know. Your key, derived on this device alone.</label>
+        <textarea id="verses" rows="2" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="the verses that are your covenant key&hellip;" style="width:100%; background:var(--bg); border:1px solid var(--line); color:var(--ink); font:inherit; border-radius:7px; padding:.5rem .7rem"></textarea>
+        <div style="margin-top:.6rem; display:flex; align-items:center; gap:.7rem"><button id="openKey" type="button" class="layer on" style="cursor:pointer">Open my key</button><span id="keyErr" class="mono" style="color:var(--out); font-size:.8rem"></span></div>
+      </div>
+      <div id="keyIn" class="hidden">
+        <div style="display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; margin-bottom:.9rem">
+          <span class="mono" style="color:var(--ink-soft); font-size:.8rem">your node: <span id="myfp" style="color:var(--seal)"></span></span>
+          <button id="closeKey" type="button" class="layer" style="cursor:pointer; margin-left:auto">Close key</button>
+        </div>
+        <div class="mine-cols">
+          <div><h3 style="font-size:1.02rem; margin:.1rem 0 .6rem">Your deck</h3><div id="deck"><p class="empty">Opening&hellip;</p></div></div>
+          <div><h3 style="font-size:1.02rem; margin:.1rem 0 .6rem">Your door</h3><div id="board"><p class="empty">Opening&hellip;</p></div></div>
+        </div>
+      </div>
     </div>
   </section>
 </main>
@@ -331,6 +365,78 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
     load("");
   }
   mountStacks();
+})();
+</script>
+<script>
+// Your deck & your door — a read-only personal transparency over the library, on your covenant key.
+// The key is DERIVED on-device from your verses (identity.py's scheme, matching fellowship.html) and
+// NEVER sent — only the PUBLIC key (for the shelf) and the fingerprint (for the door) go on the wire.
+// Reads need no signature at all; keeping to a shelf or leaving a word on a door happens in fellowship.
+(function(){
+  "use strict";
+  var SALT="narrowhighway/covenant/identity/v1", ITERS=200000, FP_VERSION="nhid1";
+  var PUB=null, FP=null, enc=new TextEncoder();
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+  async function deriveKey(passphrase){
+    var phrase=String(passphrase||"").trim().replace(/\s+/g," ");
+    if(phrase.length<8) throw new Error("Use your verses — a real phrase, not a single word.");
+    var km=await crypto.subtle.importKey("raw",enc.encode(phrase),"PBKDF2",false,["deriveBits"]);
+    var seedBits=await crypto.subtle.deriveBits({name:"PBKDF2",salt:enc.encode(SALT),iterations:ITERS,hash:"SHA-256"},km,256);
+    var seed=new Uint8Array(seedBits);
+    var prefix=new Uint8Array([0x30,0x2e,0x02,0x01,0x00,0x30,0x05,0x06,0x03,0x2b,0x65,0x70,0x04,0x22,0x04,0x20]);
+    var pkcs8=new Uint8Array(prefix.length+seed.length); pkcs8.set(prefix); pkcs8.set(seed,prefix.length);
+    var priv=await crypto.subtle.importKey("pkcs8",pkcs8.buffer,{name:"Ed25519"},true,["sign"]);
+    var jwk=await crypto.subtle.exportKey("jwk",priv);   // reads need only the PUBLIC key (jwk.x)
+    return jwk.x;
+  }
+  async function fingerprint(pub){
+    var d=await crypto.subtle.digest("SHA-256",enc.encode(FP_VERSION+":"+pub));
+    var hex=Array.from(new Uint8Array(d)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");
+    return "nh_"+hex.slice(0,32);
+  }
+  function getj(path){ return fetch(path,{headers:{accept:"application/json"}}).then(function(r){ return r.json().then(function(j){ return {status:r.status, body:(j&&j.data)?j.data:j}; }).catch(function(){ return {status:r.status, body:{}}; }); }); }
+  function deckItem(c){
+    var ring=(c.extra&&c.extra.ring)?c.extra.ring:"";
+    return '<div class="item"><div class="t"><b>'+esc(c.title||c.subject||"a note")+'</b> <span class="m">'+esc(c.box||c.kind||"note")+(ring?" · "+esc(ring):"")+'</span></div>'+(c.body?'<div class="d">'+esc(String(c.body).slice(0,240))+'</div>':'')+'</div>';
+  }
+  function noteItem(n){
+    var v=n.verify||{}, b=v.authentic?"✓ signed":(v.unaltered?"unaltered":"");
+    return '<div class="item"><div class="t"><b>'+esc(n.from_callsign_current||n.callsign||"a believer")+'</b> <span class="m">'+esc(n.kind||"blessing")+(b?" · "+b:"")+'</span></div><div class="d">'+esc(n.text)+'</div></div>';
+  }
+  function loadDeck(){
+    var el=$("deck"); if(!el||!PUB) return;
+    getj("/shelf?member="+encodeURIComponent(PUB)+"&viewer="+encodeURIComponent(PUB)).then(function(r){
+      var cards=(r.body&&r.body.cards)||[];
+      var awaiting=(r.body&&r.body.awaiting_review)?'<p class="empty">'+Number(r.body.awaiting_review)+' of your cards await a steward before the commons.</p>':'';
+      el.innerHTML=(cards.length?cards.map(deckItem).join(""):'<p class="empty">Your shelf is empty — keep your first note in the <a href="/fellowship.html" style="color:var(--seal)">fellowship hall</a>.</p>')+awaiting;
+    }).catch(function(){ el.innerHTML='<p class="empty">Your shelf is resting.</p>'; });
+  }
+  function loadBoard(){
+    var el=$("board"); if(!el||!FP) return;
+    getj("/mesh/door?fp="+encodeURIComponent(FP)+"&limit=50").then(function(r){
+      if(!r.body||r.body.ok===false||r.body.gated){
+        el.innerHTML='<p class="empty">Your door opens once you’ve joined the fellowship (a confession binds your key). <a href="/fellowship.html" style="color:var(--seal)">Enter the fellowship hall →</a></p>';
+        return;
+      }
+      var notes=(r.body&&r.body.notes)||[];
+      el.innerHTML=notes.length?notes.map(noteItem).join(""):'<p class="empty">No words on your door yet.</p>';
+    }).catch(function(){ el.innerHTML='<p class="empty">Your door is resting.</p>'; });
+  }
+  function openKey(){
+    var errEl=$("keyErr"); if(errEl) errEl.textContent="";
+    if(!(window.crypto&&crypto.subtle)){ if(errEl) errEl.textContent="This browser can't derive keys (no Web Crypto)."; return; }
+    var btn=$("openKey"); if(btn){ btn.disabled=true; btn.textContent="Opening…"; }
+    deriveKey($("verses").value).then(function(pub){ PUB=pub; return fingerprint(pub); }).then(function(fp){
+      FP=fp; $("myfp").textContent=fp;
+      $("verses").value="";                                   // clear the phrase once the key is derived
+      $("keyOut").classList.add("hidden"); $("keyIn").classList.remove("hidden");
+      loadDeck(); loadBoard();
+    }).catch(function(e){ if(errEl) errEl.textContent=(e&&e.message)||String(e); }).then(function(){ if(btn){ btn.disabled=false; btn.textContent="Open my key"; } });
+  }
+  function closeKey(){ PUB=null; FP=null; $("keyIn").classList.add("hidden"); $("keyOut").classList.remove("hidden"); }
+  function wire(){ var o=$("openKey"), c=$("closeKey"); if(o) o.addEventListener("click",openKey); if(c) c.addEventListener("click",closeKey); }
+  if(document.readyState!=="loading") wire(); else document.addEventListener("DOMContentLoaded",wire);
 })();
 </script>
 </body>
