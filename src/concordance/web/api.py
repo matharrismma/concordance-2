@@ -3031,6 +3031,7 @@ _RETIRED = {
     "/community.html": "/",
     "/companion.html": "/",
     "/corrected.html": "/proof.html",
+    "/concordance.html": "/",   # the retired ".com reach" face — com.html is the live .com; send it home
     "/days.html": "/",
     "/floor.html": "/graph",
     "/game.html": "/",

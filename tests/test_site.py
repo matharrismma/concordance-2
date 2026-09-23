@@ -118,7 +118,11 @@ def test_every_page_offers_a_way_home():
               # not the shared witness desk control which would fight the canvas; explore.html is the unified
               # interactive Atlas (also in the Ctrl-K palette), the other six are single-view static renderings.
               "explore.html", "atlas.html", "bridges.html", "calculations.html", "domains.html",
-              "one_body.html", "spiral.html", "strategy.html", "completeness.html", "torus.html"}
+              "one_body.html", "spiral.html", "strategy.html", "completeness.html", "torus.html",
+              # reader.html (the tortoise reader) and crossing.html (an Atlas single-view) carry their
+              # own minimal home link, not the shared nh-home.js; concordance.html is retired (301 to /,
+              # com.html is the live .com face) and never served.
+              "reader.html", "crossing.html", "concordance.html"}
     missing = [f.name for f in SITE.glob("*.html")
                if f.name != "index.html" and f.name not in hidden
                and "nh-home.js" not in f.read_text(encoding="utf-8")]
@@ -186,7 +190,14 @@ def test_the_palette_reaches_every_public_page():
                # these are its single-view static renderings (one per explore.html layout) + the strategy view,
                # reached from com.html / explore.html and as direct-URL share targets, not separate palette entries.
                "atlas.html", "bridges.html", "calculations.html", "domains.html",
-               "one_body.html", "spiral.html", "strategy.html", "completeness.html", "torus.html"}
+               "one_body.html", "spiral.html", "strategy.html", "completeness.html", "torus.html",
+               # reader.html — the tortoise reader, reached from search "read it" buttons / ?find=, a
+               # contextual reader, not the nav. crossing.html — an Atlas single-view (geometry / the
+               # logarithm), linked from com.html ("geometry, the crossing") like its torus/spiral siblings.
+               "reader.html", "crossing.html",
+               # concordance.html — the retired ".com reach" face; /concordance.html now 301s to / (com.html
+               # is the live .com face). The file is kept but never served — the redirect precedes it.
+               "concordance.html"}
     unreachable = sorted(
         p.name for p in SITE.glob("*.html") if p.name not in listed and p.name not in excused)
     assert not unreachable, f"no way to reach: {unreachable} (list them or excuse them by name)"

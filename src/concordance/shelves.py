@@ -185,6 +185,33 @@ def _stage_for(ring: str) -> str:
     return {"private": "private", "shelf": "private", "commons": "public_review"}[ring]
 
 
+def _spine_id(member: str) -> str:
+    return "card_spine_shelf_" + _slug(member, 24)
+
+
+def _ensure_spine(member: str, display_name: str = "") -> None:
+    """Mint the member's shelf-SPINE once (idempotent) — the root that every drop nests onto
+    (`member_of card_spine_shelf_<member>`), so a member's shelf is a real sub-tree (their personal
+    deck) instead of a dangling edge. The spine is not itself a drop, so shelf_of never lists it and
+    the public boundary withholds it (a private root). ADDITIVE — it changes nothing that was signed."""
+    sid = _spine_id(member)
+    for d in _read("drops.jsonl"):
+        if d.get("id") == sid:
+            return
+    name = display_name.strip()
+    now = time.time()
+    _append("drops.jsonl", {
+        "id": sid, "kind": "note", "spine": True, "generated": False,
+        "title": (f"{name}'s shelf" if name else "A member's shelf"), "body": "",
+        "shelf": "commons", "box": "shelf", "author": "member",
+        "created_at": now, "updated_at": now,
+        "visibility": "private", "lifecycle_stage": "private",
+        "source": {"label": (f"{name} — a member of the Commons" if name else "A member of the Commons"),
+                   "ref": member[:16], "authority_tier": MEMBER_TIER},
+        "extra": {"member": member},   # `spine` is the top-level flag; extra stays a bare fact set
+    })
+
+
 def drop(fields: Optional[Dict[str, Any]] = None, signature: str = "",
          display_name: str = "") -> Dict[str, Any]:
     """Step 2: verify the member's signature over those exact bytes, and stock the shelf.
@@ -260,6 +287,7 @@ def drop(fields: Optional[Dict[str, Any]] = None, signature: str = "",
                                      "retrieval",))
     card["extra"]["gate_record"] = grec.to_dict()
     _append("drops.jsonl", card)
+    _ensure_spine(member, display_name)   # the root the drop nests onto — minted once, idempotent
     return {"ok": True, "card_id": card_id, "ring": ring,
             "stage": card["lifecycle_stage"], "authority_tier": MEMBER_TIER,
             "record": grec.to_dict(),
@@ -339,6 +367,8 @@ def shelf_of(member: str, viewer: Optional[str] = None, access: str = "public") 
     cards, held = [], 0
     for d in _read("drops.jsonl"):
         extra = d.get("extra") or {}
+        if d.get("spine") or extra.get("spine"):
+            continue                                   # the shelf's own root card is not a drop on it
         if extra.get("member") != member or d["id"] in superseded:
             continue
         act = curation.get(d["id"], {})

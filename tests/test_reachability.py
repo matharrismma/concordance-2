@@ -121,6 +121,7 @@ UNLISTED_PAGES = {
     "encyclopedia.html",  # a redirect stub onto characters.html; a second door to one room
     "ask.html",           # the landing's predecessor, kept for old links
     "profile.html",       # the opt-in sovereign keeping (ez-login) — reached by direct URL / the keeping flow, not the public nav
+    "reader.html",        # the tortoise reader (the whole PD source on demand) — reached from search-result "read it" buttons and ?find= deep links, a contextual reader, not a page on the nav
     "golf.html",          # Gate Golf — the founder's N=1 instrument (NarrowFairway), a self-contained offline tool; reached by direct URL / home-screen install, not the public nav
     "grappling.html",     # Grappling — the grappling/MMA hall (internal codename tatami), the same engine as golf.html applied to fight sports; a self-contained offline tool reached by direct URL / home-screen install, not the public nav
     "music.html",         # Music — the instrument-practice hall (mandolin/guitar/fiddle…), the same engine as golf.html applied to practice; a self-contained offline tool reached by direct URL / home-screen install and from the Halls, not the public nav
