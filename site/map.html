@@ -116,6 +116,14 @@ section.blk{padding:1.6rem 0}
 #mapLegend .leg{font-size:.72rem; color:var(--ink-faint); display:inline-flex; align-items:center; gap:.35rem}
 #mapLegend .leg i{width:8px; height:8px; border-radius:50%; display:inline-block}
 
+/* the stacks walk */
+#stackCanvas{display:block; width:100%; height:min(60vh,520px); cursor:grab}
+#stackStatus{padding:.6rem .95rem .8rem; font-size:.85rem; color:var(--ink-soft); min-height:1.2em}
+#stackStatus strong{color:var(--ink)}
+#stackCrumb{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+#stackUp{display:none; background:none; border:1px solid var(--line); color:var(--ink-soft); font:inherit; font-size:.8rem; cursor:pointer; border-radius:6px; padding:.3rem .6rem}
+#stackUp:hover{border-color:var(--seal); color:var(--seal)}
+
 footer{border-top:1px solid var(--line-soft); margin-top:2.5rem; padding:1.6rem 0 2.4rem; font-size:.82rem; color:var(--ink-faint)}
 footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(--seal)}
 :focus-visible{outline:2px solid var(--seal); outline-offset:2px}
@@ -180,6 +188,20 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
       <span><i style="background:var(--degraded)"></i>degraded &mdash; still works, has a known gap</span>
       <span><i style="background:var(--out)"></i>out</span>
       <span style="color:var(--ink-faint)">the number is that part's handicap &mdash; how much work stands between it and scratch.</span>
+    </div>
+  </section>
+
+  <!-- THE STACKS (walk the library's call-tree) -->
+  <section class="blk">
+    <div class="sec-h"><h2>Walk the stacks</h2><span class="n">live from /graph?scope=calltree</span></div>
+    <p style="color:var(--ink-soft); margin:.2rem 0 1rem; max-width:64ch; font-size:.95rem">The keeping shelved like a library &mdash; <em>section &rarr; shelf &rarr; drawer &rarr; folder &rarr; card</em>. Every card is placed at the gate by its call number; walk down a drawer, or click a card to open its record.</p>
+    <div class="constel">
+      <div class="top">
+        <button id="stackUp" type="button">&larr; up</button>
+        <span id="stackCrumb" class="mono">the library</span>
+      </div>
+      <canvas id="stackCanvas"></canvas>
+      <div id="stackStatus">Opening the stacks&hellip;</div>
     </div>
   </section>
 
@@ -279,6 +301,36 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
       search:"mapSearch", legend:"mapLegend", layers:"mapLayers"});
   }
   mountMap();
+
+  // Walk the stacks — the library's call-tree, one level at a time (section -> ... -> card).
+  function mountStacks(){
+    if(!window.NHGraph||!window.NHGraph.View){ setTimeout(mountStacks,120); return; }
+    var cv=document.getElementById("stackCanvas"); if(!cv) return;
+    var crumb=document.getElementById("stackCrumb"), status=document.getElementById("stackStatus"), up=document.getElementById("stackUp");
+    var v=new NHGraph.View(cv,"dark"); var cur={prefix:"",parent:null};
+    function esc(s){var d=document.createElement("div"); d.textContent=s==null?"":String(s); return d.innerHTML;}
+    v.onpick=function(n){ if(n&&n.kind==="folder"&&n.call){ load(n.call); } else if(n&&n.kind==="card"){ location.href="/card/"+encodeURIComponent(n.id); } };
+    function load(prefix){
+      fetch("/graph?scope=calltree&prefix="+encodeURIComponent(prefix||""),{headers:{accept:"application/json"}})
+        .then(function(r){ return r.json(); }).then(function(d){
+        cur={prefix:d.prefix, parent:d.parent};
+        up.style.display=d.prefix?"inline-block":"none";
+        crumb.textContent=d.prefix?("the library › "+d.prefix.split(".").join(" › ")):"the library";
+        v.setData(d.nodes, d.links, "call:"+d.prefix);
+        if(d.shows==="folders"){
+          status.innerHTML="<strong>"+esc(d.level)+"</strong> &mdash; "+Number(d.children).toLocaleString()+
+            " drawer"+(d.children===1?"":"s")+" below, holding <strong>"+Number(d.total_here).toLocaleString()+
+            "</strong> card"+(d.total_here===1?"":"s")+" in all. Click a drawer to go deeper.";
+        } else {
+          status.innerHTML="<strong>"+Number(d.total_here).toLocaleString()+"</strong> card"+(d.total_here===1?"":"s")+
+            " here"+(d.shown<d.total_here?(" &mdash; showing "+d.shown):"")+". Click one to open its record.";
+        }
+      }).catch(function(){ status.textContent="The stacks are resting."; });
+    }
+    up.addEventListener("click",function(e){ e.preventDefault(); load(cur.parent!=null?cur.parent:""); });
+    load("");
+  }
+  mountStacks();
 })();
 </script>
 </body>

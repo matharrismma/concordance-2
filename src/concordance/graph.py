@@ -301,3 +301,64 @@ def neighborhood(card_id: str, limit: int = _NEIGHBOR_CAP) -> Optional[Dict[str,
     nodes = [_node_payload(n) for n in keep.values()]
     return {"scope": "card", "center": cid, "nodes": nodes, "links": links,
             "shown": len(shown), "total": total}
+
+
+# ── the library, walked — the call-tree as section → shelf → drawer → folder → card ────────────
+# The keeping is a library: every card is shelved at the gate with a Dewey-style call number
+# (corpus.deep_call / shelve), so the whole thing already nests into descending drawers. This walks
+# ONE level at a time — instant (the call-tree is indexed at load, corpus.call_children/call_total),
+# deterministic, FOUND (nothing generated). It is the human browse UI the call-tree never had.
+_LEVEL_NAMES = ("the library", "section", "shelf", "drawer", "folder", "sub-folder", "sub-folder")
+_CALLTREE_CAP = 240  # children/cards shown at one level — a room you can take in, honestly reported
+
+
+def _level_name(depth: int) -> str:
+    return _LEVEL_NAMES[depth] if 0 <= depth < len(_LEVEL_NAMES) else "folder"
+
+
+def calltree(prefix: str = "", c=None, cap: int = _CALLTREE_CAP) -> Dict[str, Any]:
+    """One level of the library under `prefix`: the drawers/folders directly below (each a node
+    sized by how many cards sit under it), or — when we have reached a leaf — the cards themselves.
+    Reuses the load-time call-tree index, so a walk is a lookup, not a scan. `c` is injectable for
+    tests; it defaults to the live corpus. Public-visibility is already enforced when the corpus
+    builds its call-tree, so nothing private can appear here."""
+    if c is None:
+        c = corpus.default_corpus()
+    prefix = (prefix or "").strip().strip(".")
+    depth = len(prefix.split(".")) if prefix else 0
+    top = prefix.split(".")[0] if prefix else "atlas"
+    here_id = "call:" + prefix
+    nodes: List[Dict[str, Any]] = [
+        {"id": here_id, "title": (prefix.split(".")[-1] if prefix else "the library"),
+         "shelf": top, "degree": 0, "kind": "here", "call": prefix, "level": _level_name(depth)}]
+    links: List[Dict[str, str]] = []
+    children = c.call_children(prefix)  # [(full_call, count)], most first — instant
+    shows = "folders"
+    if children:
+        for full, n in children[:cap]:
+            nid = "call:" + full
+            seg = full.split(".")[-1]
+            nodes.append({"id": nid, "title": "%s · %s" % (seg, format(n, ",")),
+                          "shelf": full.split(".")[0], "degree": n, "count": n,
+                          "call": full, "kind": "folder", "level": _level_name(depth + 1)})
+            links.append({"source": here_id, "target": nid, "kind": "nested"})
+        nodes[0]["degree"] = len(children)
+    else:
+        shows = "cards"
+        cids = c.cids_for_call(prefix)
+        for cid in cids[:cap]:
+            card = c.cards.get(cid) or {}
+            nodes.append({"id": cid, "title": card.get("title") or cid,
+                          "shelf": card.get("shelf") or top, "degree": 1, "kind": "card"})
+            links.append({"source": here_id, "target": cid, "kind": "nested"})
+        nodes[0]["degree"] = len(cids)
+    return {"scope": "calltree", "prefix": prefix, "depth": depth, "level": _level_name(depth),
+            "shows": shows, "children": len(children),
+            "total_here": c.call_total(prefix) if prefix else c.call_total(),
+            "shown": len(nodes) - 1,
+            "parent": (".".join(prefix.split(".")[:-1]) if prefix else None),
+            "nodes": nodes, "links": links,
+            "means": {"here": "the level you are standing in (section → shelf → drawer → folder → card)",
+                      "folder": "a drawer below, sized by the cards under it — click to go deeper",
+                      "card": "a leaf — opens its sealed record",
+                      "found": "the call-tree is built at load from real call numbers; nothing generated"}}

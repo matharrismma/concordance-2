@@ -1808,7 +1808,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok(r) if r is not None else _err(404, "card not found")
 
     # The map — the connection-graph over the keeping (found edges, each sealed). Public on
-    # both surfaces (one shared library). scope=overview (default) | shelf | card.
+    # both surfaces (one shared library). scope=overview (default) | shelf | card | calltree.
     if method == "GET" and path == "/graph":
         from .. import graph as _graph
         scope = (query.get("scope") or "overview").strip()
@@ -1825,6 +1825,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                 return _err(400, "id required")
             r = _graph.neighborhood(cid)
             return _ok(r) if r is not None else _err(404, "card not found")
+        if scope == "calltree":
+            # walk the library's call-tree: section -> shelf -> drawer -> folder -> card
+            return _ok(_graph.calltree(query.get("prefix") or ""))
         return _err(400, "unknown scope")
     if method == "GET" and path == "/floor":
         # the floor, made visible — the rooted design (both halves) + the two-tree grafts, so a
