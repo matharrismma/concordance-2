@@ -54,6 +54,7 @@ _MAX_TTL = 4                                      # hop limit, like a LoRa mesh
 _KINDS = ("word", "offer", "need", "blessing", "content", "broadcast")
 _MSG_TTL_SECONDS = 30 * 24 * 3600                 # a message ages off the relay after 30 days
 _MAX_MAP_NODES = 400                              # the map around you is bounded — no global crawl
+MESH_READ_TTL_S = 300                             # a proof to read YOUR door/inbox is good for 5 minutes
 
 
 def _dir() -> Path:
@@ -732,11 +733,52 @@ def verify_message(m: Dict[str, Any]) -> Dict[str, Any]:
     return {"unaltered": unaltered, "authentic": authentic, "signed": bool(sig)}
 
 
-def inbox(fp: str, limit: int = 100) -> Dict[str, Any]:
+def _mesh_read_challenge(fp: str, at: int) -> bytes:
+    """The exact bytes a node signs to prove it holds its OWN key for a personal read (door/inbox).
+    A fixed, unambiguous string — the client builds it with no round-trip, the server reproduces it."""
+    return ("nh-mesh-read:v1:%s:%d" % ((fp or "").strip(), int(at))).encode("utf-8")
+
+
+def _prove_reader(fp: str, node: Optional[Dict[str, Any]], at: Any, signature: Optional[str]) -> bool:
+    """True iff the caller PROVED it holds this node's key — a detached signature over the read
+    challenge, verified against the node's PINNED public key, within the replay window. This is what
+    makes the door and inbox the recipient's ALONE: knowing a fingerprint is not holding its key."""
+    if not node or not signature:
+        return False
+    pub = node.get("public_key") or ""
+    if not pub:
+        return False
+    try:
+        at_i = int(at)
+    except (TypeError, ValueError):
+        return False
+    if not (_now() - MESH_READ_TTL_S <= at_i <= _now() + 120):
+        return False
+    try:
+        return signing.verify_bytes(_mesh_read_challenge(fp, at_i), str(signature).strip(), pub)
+    except Exception:  # noqa: BLE001 — any verification error is simply "unproven"
+        return False
+
+
+def _unproven() -> Dict[str, Any]:
+    """Refuse a personal read that did not prove the caller's key — WITHOUT revealing whether the
+    node even exists or has confessed, so a fingerprint cannot be probed for who is inside."""
+    return {"ok": False, "unproven": True,
+            "error": ("prove you hold this node's key — your door and inbox are yours alone. Sign "
+                      "nh-mesh-read:v1:<fp>:<unix_seconds> with your key and send fp, at and the "
+                      "signature; your key never leaves your device."),
+            "how": "GET /mesh/door?fp=<fp>&at=<unix>&sig=<b64u over nh-mesh-read:v1:fp:at>"}
+
+
+def inbox(fp: str, limit: int = 100, at: Any = None, signature: Optional[str] = None) -> Dict[str, Any]:
     """The messages that reached you — from a neighbor, or a neighbor's neighbor within their TTL.
-    Each carries its verification so you can trust it by proof, not by the server's word."""
+    Each carries its verification so you can trust it by proof, not by the server's word. PROOF-GATED:
+    the inbox is yours alone, so the caller must prove it holds this node's key — a fingerprint is
+    public, and knowing one is not holding its key."""
     me = _read_node(fp)
-    if not me or not me.get("confessed"):
+    if not _prove_reader(fp, me, at, signature):
+        return _unproven()
+    if not me.get("confessed"):
         return _gate()                    # hidden until you reach the gate — protect those inside
     msgs = []
     for m in _all_messages():
@@ -934,10 +976,13 @@ def _verify_door(m: Dict[str, Any]) -> Dict[str, Any]:
     return {"unaltered": unaltered, "authentic": authentic, "signed": bool(sig)}
 
 
-def read_door(fp: str, limit: int = 100) -> Dict[str, Any]:
-    """Read the words left on YOUR door — each with its offline verification."""
+def read_door(fp: str, limit: int = 100, at: Any = None, signature: Optional[str] = None) -> Dict[str, Any]:
+    """Read the words left on YOUR door — each with its offline verification. PROOF-GATED (yours
+    alone): the caller must prove it holds this node's key; knowing the fingerprint is not enough."""
     me = _read_node(fp)
-    if not me or not me.get("confessed"):
+    if not _prove_reader(fp, me, at, signature):
+        return _unproven()
+    if not me.get("confessed"):
         return _gate()
     notes = []
     p = _door_path(fp)

@@ -463,8 +463,10 @@ function msgItem(m){
     '<div class="d">'+esc(m.text)+'</div></div>';
 }
 async function loadInbox(){
-  const el=$("inbox"); if(!el) return;
-  const r = await api("GET","/mesh/inbox?fp="+encodeURIComponent(FP)+"&limit=50");
+  const el=$("inbox"); if(!el || !FP) return;
+  const at=Math.floor(Date.now()/1000);
+  const sig=await signStr("nh-mesh-read:v1:"+FP+":"+at);   // prove your key — the inbox is yours alone
+  const r = await api("GET","/mesh/inbox?fp="+encodeURIComponent(FP)+"&at="+at+"&sig="+encodeURIComponent(sig)+"&limit=50");
   const list=(r.body&&r.body.messages)||[];
   el.innerHTML = list.length ? list.map(msgItem).join("") : '<p class="empty">Nothing has reached you yet. Speak, or be vouched closer in.</p>';
 }
@@ -474,8 +476,10 @@ function noteItem(n){
     '<span class="m">'+esc(n.kind||"blessing")+(b?" · "+b:"")+'</span></div><div class="d">'+esc(n.text)+'</div></div>';
 }
 async function loadDoor(){
-  const el=$("door"); if(!el) return;
-  const r = await api("GET","/mesh/door?fp="+encodeURIComponent(FP)+"&limit=50");
+  const el=$("door"); if(!el || !FP) return;
+  const at=Math.floor(Date.now()/1000);
+  const sig=await signStr("nh-mesh-read:v1:"+FP+":"+at);   // prove your key — your door is yours alone
+  const r = await api("GET","/mesh/door?fp="+encodeURIComponent(FP)+"&at="+at+"&sig="+encodeURIComponent(sig)+"&limit=50");
   const list=(r.body&&r.body.notes)||[];
   el.innerHTML = list.length ? list.map(noteItem).join("") : '<p class="empty">No words on your door yet.</p>';
 }
@@ -494,7 +498,9 @@ async function leaveNote(){
 }
 async function checkMesh(){   // a returning member who already confessed goes straight in
   try{
-    const r = await api("GET","/mesh/inbox?fp="+encodeURIComponent(FP)+"&limit=1");
+    const at=Math.floor(Date.now()/1000);
+    const sig=await signStr("nh-mesh-read:v1:"+FP+":"+at);
+    const r = await api("GET","/mesh/inbox?fp="+encodeURIComponent(FP)+"&at="+at+"&sig="+encodeURIComponent(sig)+"&limit=1");
     if(r.status===200 && r.body && r.body.ok===true){ enterMesh(); }
   }catch(e){}
 }

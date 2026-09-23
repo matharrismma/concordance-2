@@ -437,8 +437,11 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
     }).catch(function(){ el.innerHTML='<p class="empty">Your shelf is resting.</p>'; });
   }
   function loadBoard(){
-    var el=$("board"); if(!el||!FP) return;
-    getj("/mesh/door?fp="+encodeURIComponent(FP)+"&limit=50").then(function(r){
+    var el=$("board"); if(!el||!FP||!PRIV) return;
+    var at=Math.floor(Date.now()/1000);   // prove your key — the door is yours alone
+    signStr("nh-mesh-read:v1:"+FP+":"+at).then(function(sig){
+      return getj("/mesh/door?fp="+encodeURIComponent(FP)+"&at="+at+"&sig="+encodeURIComponent(sig)+"&limit=50");
+    }).then(function(r){
       if(!r.body||r.body.ok===false||r.body.gated){
         el.innerHTML='<p class="empty">Your door opens once you’ve joined the fellowship (a confession binds your key). <a href="/fellowship.html" style="color:var(--seal)">Enter the fellowship hall →</a></p>';
         return;

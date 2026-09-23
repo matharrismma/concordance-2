@@ -1420,7 +1420,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             limit = int(query.get("limit") or 100)
         except (TypeError, ValueError):
             limit = 100
-        return _ok(mesh.inbox((query.get("fp") or "").strip(), limit=limit))
+        return _ok(mesh.inbox((query.get("fp") or "").strip(), limit=limit,
+                              at=query.get("at"), signature=query.get("sig")))
     if method == "POST" and path == "/mesh/tend":
         if not isinstance(body, dict) or not str(body.get("fp") or "").strip() \
            or not str(body.get("target") or "").strip():
@@ -1459,7 +1460,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             limit = int(query.get("limit") or 100)
         except (TypeError, ValueError):
             limit = 100
-        return _ok(mesh.read_door((query.get("fp") or "").strip(), limit=limit))
+        return _ok(mesh.read_door((query.get("fp") or "").strip(), limit=limit,
+                                  at=query.get("at"), signature=query.get("sig")))
 
     # Formation — "make a wish for life"; the tool FINDS the fitting practice, then points off the
     # screen. Stateless (stores nothing about a person's life); found/attributed, never generated.
