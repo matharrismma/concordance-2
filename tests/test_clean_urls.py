@@ -52,12 +52,12 @@ def test_agent_endpoints_and_ambiguous_pages_do_not_move():
 # ---- the bare homepage: SORTED BY SURFACE (Matt, 2026-09-01) ----
 
 def test_secular_bare_home_serves_the_engine():
-    # Matt, 2026-09-01: "the .com should be more secular and obviously geared to computing and
-    # business — the current .com page is better suited for .org." "/" on the secular surface now
-    # serves com.html, the deterministic-verification-engine face (branding.SECULAR_IDENTITY), instead
-    # of the family desk. The working checker stays reachable at /checkit and on the 'Check a claim' CTA.
-    assert home_for("secular", SITE, "/") == "/com.html"
-    assert home_for("secular", SITE, "/index.html") == "/com.html"
+    # Matt, 2026-09-01: "the .com should be more secular and obviously geared to computing." "/" on the
+    # secular surface serves the engine face, not the .org family desk. Updated 2026-09-21 ("make it the
+    # front door", home_for): the bare home now serves concordance.html — "a guide to what is true", the
+    # discern-anything box over the live engine — and the manifesto (com.html) moved behind it, at /com.html.
+    assert home_for("secular", SITE, "/") == "/concordance.html"
+    assert home_for("secular", SITE, "/index.html") == "/concordance.html"
 
 
 def test_home_leaves_every_other_path_untouched():

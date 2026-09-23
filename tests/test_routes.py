@@ -27,6 +27,10 @@ from concordance.config import EngineConfig  # noqa: E402
 # registry refactor. The derived sets must equal these exactly.
 GOLDEN_API_GET = {
     "/health",
+    # coach lesson text, the scripture-for lookup, and the tortoise reader — GET surfaces added with the
+    # lesson/reader work in prior passes; registered here after this manifest audit (the code had them,
+    # the golden set did not — the drift this test exists to catch, now reconciled).
+    "/coach/text", "/scripture_for", "/tortoise",
     # A glance-check for the operator's voice, added 2026-08-28: synthesizes one content-addressed
     # line (API once, cache forever) to prove the ElevenLabs key actually WORKS, not just that it's set.
     "/speak/health",
@@ -139,6 +143,7 @@ GOLDEN_RATELIMITED = {
 GOLDEN_READ_LIMITED = {   # every route that scans/sorts the whole corpus per request — the read bucket
     "/search", "/witness", "/cards/stats", "/cards", "/daily", "/card/connections",
     "/locate", "/library/health", "/growth",
+    "/coach/text", "/tortoise",  # coach lesson text + the tortoise reader — each streams/scans a PD source per request
     "/systems",  # cheap (disk + import resolution, no corpus) but placed in the generous bucket anyway
     "/tv/automaton",  # scans the witness cloud to let a witness testify in his own PD words — read-bucket limited like /witness
 }

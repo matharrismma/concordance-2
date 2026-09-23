@@ -120,8 +120,8 @@ def test_every_page_offers_a_way_home():
               "explore.html", "atlas.html", "bridges.html", "calculations.html", "domains.html",
               "one_body.html", "spiral.html", "strategy.html", "completeness.html", "torus.html",
               # reader.html (the tortoise reader) and crossing.html (an Atlas single-view) carry their
-              # own minimal home link, not the shared nh-home.js; concordance.html is retired (301 to /,
-              # com.html is the live .com face) and never served.
+              # own minimal home link, not the shared nh-home.js; concordance.html is the LIVE .com front
+              # door served at / by home_for() (2026-09-21), reached as the domain root, not via nh-home.js.
               "reader.html", "crossing.html", "concordance.html"}
     missing = [f.name for f in SITE.glob("*.html")
                if f.name != "index.html" and f.name not in hidden
@@ -195,8 +195,9 @@ def test_the_palette_reaches_every_public_page():
                # contextual reader, not the nav. crossing.html — an Atlas single-view (geometry / the
                # logarithm), linked from com.html ("geometry, the crossing") like its torus/spiral siblings.
                "reader.html", "crossing.html",
-               # concordance.html — the retired ".com reach" face; /concordance.html now 301s to / (com.html
-               # is the live .com face). The file is kept but never served — the redirect precedes it.
+               # concordance.html — the LIVE .com front door, served at / on the secular surface by
+               # home_for() (Matt, 2026-09-21: "make it the front door"). A human reaches it as the domain
+               # root, never a /concordance.html <a href> — the same surface-routing excuse as com.html.
                "concordance.html"}
     unreachable = sorted(
         p.name for p in SITE.glob("*.html") if p.name not in listed and p.name not in excused)
