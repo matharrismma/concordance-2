@@ -394,9 +394,11 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
 (function(){
   "use strict";
   var SALT="narrowhighway/covenant/identity/v1", ITERS=200000, FP_VERSION="nhid1";
-  var PUB=null, FP=null, enc=new TextEncoder();
+  var PRIV=null, PUB=null, FP=null, enc=new TextEncoder();
   function $(id){return document.getElementById(id);}
   function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+  function b64u(buf){return btoa(String.fromCharCode.apply(null,new Uint8Array(buf))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
+  async function signStr(str){ return b64u(await crypto.subtle.sign("Ed25519", PRIV, enc.encode(str))); }
   async function deriveKey(passphrase){
     var phrase=String(passphrase||"").trim().replace(/\s+/g," ");
     if(phrase.length<8) throw new Error("Use your verses — a real phrase, not a single word.");
@@ -406,8 +408,8 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
     var prefix=new Uint8Array([0x30,0x2e,0x02,0x01,0x00,0x30,0x05,0x06,0x03,0x2b,0x65,0x70,0x04,0x22,0x04,0x20]);
     var pkcs8=new Uint8Array(prefix.length+seed.length); pkcs8.set(prefix); pkcs8.set(seed,prefix.length);
     var priv=await crypto.subtle.importKey("pkcs8",pkcs8.buffer,{name:"Ed25519"},true,["sign"]);
-    var jwk=await crypto.subtle.exportKey("jwk",priv);   // reads need only the PUBLIC key (jwk.x)
-    return jwk.x;
+    var jwk=await crypto.subtle.exportKey("jwk",priv);   // pub = jwk.x; priv is kept to SIGN the read proof
+    return {priv:priv, pub:jwk.x};
   }
   async function fingerprint(pub){
     var d=await crypto.subtle.digest("SHA-256",enc.encode(FP_VERSION+":"+pub));
@@ -424,8 +426,11 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
     return '<div class="item"><div class="t"><b>'+esc(n.from_callsign_current||n.callsign||"a believer")+'</b> <span class="m">'+esc(n.kind||"blessing")+(b?" · "+b:"")+'</span></div><div class="d">'+esc(n.text)+'</div></div>';
   }
   function loadDeck(){
-    var el=$("deck"); if(!el||!PUB) return;
-    getj("/shelf?member="+encodeURIComponent(PUB)+"&viewer="+encodeURIComponent(PUB)).then(function(r){
+    var el=$("deck"); if(!el||!PUB||!PRIV) return;
+    var at=Math.floor(Date.now()/1000);   // prove your key to read your own rings (the shelf is proof-gated)
+    signStr("nh-shelf-read:v1:"+PUB+":"+PUB+":"+at).then(function(sig){
+      return getj("/shelf?member="+encodeURIComponent(PUB)+"&viewer="+encodeURIComponent(PUB)+"&at="+at+"&sig="+encodeURIComponent(sig));
+    }).then(function(r){
       var cards=(r.body&&r.body.cards)||[];
       var awaiting=(r.body&&r.body.awaiting_review)?'<p class="empty">'+Number(r.body.awaiting_review)+' of your cards await a steward before the commons.</p>':'';
       el.innerHTML=(cards.length?cards.map(deckItem).join(""):'<p class="empty">Your shelf is empty — keep your first note in the <a href="/fellowship.html" style="color:var(--seal)">fellowship hall</a>.</p>')+awaiting;
@@ -446,14 +451,14 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
     var errEl=$("keyErr"); if(errEl) errEl.textContent="";
     if(!(window.crypto&&crypto.subtle)){ if(errEl) errEl.textContent="This browser can't derive keys (no Web Crypto)."; return; }
     var btn=$("openKey"); if(btn){ btn.disabled=true; btn.textContent="Opening…"; }
-    deriveKey($("verses").value).then(function(pub){ PUB=pub; return fingerprint(pub); }).then(function(fp){
+    deriveKey($("verses").value).then(function(k){ PRIV=k.priv; PUB=k.pub; return fingerprint(PUB); }).then(function(fp){
       FP=fp; $("myfp").textContent=fp;
       $("verses").value="";                                   // clear the phrase once the key is derived
       $("keyOut").classList.add("hidden"); $("keyIn").classList.remove("hidden");
       loadDeck(); loadBoard();
     }).catch(function(e){ if(errEl) errEl.textContent=(e&&e.message)||String(e); }).then(function(){ if(btn){ btn.disabled=false; btn.textContent="Open my key"; } });
   }
-  function closeKey(){ PUB=null; FP=null; $("keyIn").classList.add("hidden"); $("keyOut").classList.remove("hidden"); }
+  function closeKey(){ PRIV=null; PUB=null; FP=null; $("keyIn").classList.add("hidden"); $("keyOut").classList.remove("hidden"); }
   function wire(){ var o=$("openKey"), c=$("closeKey"); if(o) o.addEventListener("click",openKey); if(c) c.addEventListener("click",closeKey); }
   if(document.readyState!=="loading") wire(); else document.addEventListener("DOMContentLoaded",wire);
 })();

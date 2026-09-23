@@ -559,7 +559,11 @@ function shelfItem(c){
 }
 async function loadShelf(){
   const el=$("shelflist"); if(!el || !PUB) return;
-  const r=await api("GET","/shelf?member="+encodeURIComponent(PUB)+"&viewer="+encodeURIComponent(PUB));
+  // The shelf is served by PROOF now, not by a bare param — sign the read challenge so you see your
+  // own rings (private + shelf). Only the signature + public key travel; the key never leaves the page.
+  const at=Math.floor(Date.now()/1000);
+  const sig=await signStr("nh-shelf-read:v1:"+PUB+":"+PUB+":"+at);
+  const r=await api("GET","/shelf?member="+encodeURIComponent(PUB)+"&viewer="+encodeURIComponent(PUB)+"&at="+at+"&sig="+encodeURIComponent(sig));
   if(r.status!==200 || !r.body || !r.body.ok){ el.innerHTML='<p class="empty">Your shelf is empty. Keep your first note below.</p>'; return; }
   const cards=r.body.cards||[];
   const awaiting = r.body.awaiting_review ? '<p class="hint">'+r.body.awaiting_review+' of your cards await a steward before the commons.</p>' : '';

@@ -300,6 +300,16 @@ def link(fp: str, neighbor_fp: str, op: str = "link",
                      "your vouch is recorded; the link forms when they vouch for you too")}
 
 
+def are_linked(a_fp: str, b_fp: str) -> bool:
+    """True iff a and b hold a consensual MUTUAL link — each vouched for the other, so b is in a's
+    `links` (the both-agreed graph, never a one-sided vouch). This is the friendship the shelf's
+    `shelf` ring is scoped to. Read-only, no side effects; a missing node is simply not a friend."""
+    if not a_fp or not b_fp or a_fp == b_fp:
+        return False
+    a = _read_node(a_fp)
+    return bool(a and b_fp in (a.get("links") or []))
+
+
 def _any_guide_exists() -> bool:
     for p in (_dir() / "nodes").glob("*.json"):
         n = _read_json(p)

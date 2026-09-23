@@ -2330,10 +2330,20 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                      display_name=str(body.get("display_name") or ""))
         return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
     if method == "GET" and path == "/shelf":
-        # `viewer` is supplied by the reader and used ONLY to decide what is served. Nothing
-        # records that they looked — known when you speak, unseen when you read.
+        # Access is decided by PROOF, never by a bare `viewer` param (which is public): an unproven
+        # reader sees only the promoted commons; the member (a signature over the read challenge from
+        # their own key) sees every ring; a proven MUTUAL mesh friend sees the `shelf` ring too.
+        # Nothing records that they looked — known when you speak, unseen when you read.
         from .. import shelves as _sh
-        r = _sh.shelf_of(query.get("member") or "", viewer=(query.get("viewer") or None))
+        member = query.get("member") or ""
+        viewer = query.get("viewer") or ""
+
+        def _friend(m: str, v: str) -> bool:
+            from .. import identity as _id, mesh as _mesh
+            return _mesh.are_linked(_id.fingerprint(m), _id.fingerprint(v))
+
+        access = _sh.access_for(member, viewer, query.get("at"), query.get("sig"), friend_fn=_friend)
+        r = _sh.shelf_of(member, viewer=(viewer or None), access=access)
         return _ok(r) if r.get("ok") else _err(404, r.get("error") or "no such shelf")
     if method == "GET" and path == "/commons":
         from .. import shelves as _sh

@@ -47,6 +47,7 @@ from typing import Any, Dict, List, Optional
 RINGS = ("private", "shelf", "commons")
 KINDS = ("note", "writing", "recipe", "build", "field_note", "question", "link", "suggestion")
 SIGNATURE_TTL_S = 900          # signed bytes are good for 15 minutes — a replay window, not a life
+READ_TTL_S = 300               # a shelf-read PROOF is good for 5 minutes — a smaller replay window
 MAX_BODY = 20000
 # `url`, `quote`, and `attribution` join the signed bytes for C1d link drops, and are the empty
 # string on every other kind. They MUST be signed: a link swapped after signing would put a
@@ -271,17 +272,67 @@ def drop(fields: Optional[Dict[str, Any]] = None, signature: str = "",
                      "commons does not make them the library's claim."}
 
 
-def shelf_of(member: str, viewer: Optional[str] = None) -> Dict[str, Any]:
-    """One member's shelf. `viewer` decides what is served, and nothing records that they looked.
+def _read_challenge(member: str, viewer: str, at: int) -> bytes:
+    """The exact bytes a VIEWER signs to prove they hold the key they claim, for a shelf read. A
+    fixed, unambiguous string so the client can build it with no round-trip and the server
+    reproduces it exactly — the same discipline as a drop's canonical bytes, for a read."""
+    return ("nh-shelf-read:v1:%s:%s:%d" % ((member or "").strip(), (viewer or "").strip(),
+                                           int(at))).encode("utf-8")
 
-    * the member themselves sees every ring;
-    * anyone else sees `shelf` and promoted `commons` cards — never `private`;
-    * withdrawn and superseded drops are excluded from the shelf view but never deleted.
+
+def access_for(member: str, viewer: Optional[str], at: Any, signature: Optional[str],
+               friend_fn=None) -> str:
+    """Decide a reader's access to a shelf from PROOF, never from a bare `viewer` param — this is
+    what closes the leak that let anyone read another member's `private`/`shelf` cards just by naming
+    their (public) key. No signature, a stale one, or one that does not verify against the viewer's
+    OWN key -> 'public'. A valid signature from the member -> 'owner'. A valid signature from a proven
+    MUTUAL friend (friend_fn(member, viewer)) -> 'friend'. friend_fn is injected so this stays pure."""
+    member, viewer = (member or "").strip(), (viewer or "").strip()
+    if not viewer or not signature:
+        return "public"
+    try:
+        at_i = int(at)
+    except (TypeError, ValueError):
+        return "public"
+    now = int(time.time())
+    if not (now - READ_TTL_S <= at_i <= now + 120):
+        return "public"
+    from . import signing
+    try:
+        if not signing.verify_bytes(_read_challenge(member, viewer, at_i), str(signature).strip(), viewer):
+            return "public"
+    except Exception:  # noqa: BLE001 — any verification error is simply "unproven"
+        return "public"
+    if viewer == member:
+        return "owner"
+    if friend_fn:
+        try:
+            if friend_fn(member, viewer):
+                return "friend"
+        except Exception:  # noqa: BLE001 — a mesh read that fails is "not a friend", never a crash
+            return "public"
+    return "public"
+
+
+def shelf_of(member: str, viewer: Optional[str] = None, access: str = "public") -> Dict[str, Any]:
+    """One member's shelf, served by ACCESS LEVEL, and nothing records that a reader looked.
+
+    Access is decided by PROOF (see access_for), never by a bare `viewer` param:
+      * ``owner``  — the member, key proven: every ring (private, shelf, commons);
+      * ``friend`` — a proven MUTUAL mesh friend: the ``shelf`` ring + promoted commons, never private;
+      * ``public`` — the safe default for an UNPROVEN reader: promoted commons only. This is the
+        friend-gate: a ``shelf`` drop is shared with the friends who chose you, not with anyone who
+        merely knows your public key, and ``private`` is served to no one but you.
+
+    `viewer` is carried only for `own_view` display. Withdrawn and superseded drops are excluded from
+    the shelf view but never deleted.
     """
     member = (member or "").strip()
     if not member:
         return {"ok": False, "error": "which shelf?"}
-    own = bool(viewer and viewer.strip() == member)
+    if access not in ("owner", "friend", "public"):
+        access = "public"
+    own = access == "owner"
     curation = {c["card_id"]: c for c in _read("curation.jsonl")}
     superseded = {str((d.get("extra") or {}).get("supersedes"))
                   for d in _read("drops.jsonl") if (d.get("extra") or {}).get("supersedes")}
@@ -294,14 +345,21 @@ def shelf_of(member: str, viewer: Optional[str] = None) -> Dict[str, Any]:
         if act.get("action") == "withdrawn":
             continue
         ring = extra.get("ring")
-        if not own:
-            if ring == "private":
+        promoted = act.get("action") == "promoted"
+        if ring == "commons" and not promoted:
+            held += 1                                  # the member's own commons drops awaiting a steward
+        # Ring visibility by access. `private` is served to the owner alone; the `shelf` ring to the
+        # owner and proven friends; the `commons` ring only once promoted (to anyone), else held.
+        if access == "owner":
+            pass                                       # every ring
+        elif access == "friend":
+            if ring == "private" or (ring == "commons" and not promoted):
                 continue
-            if ring == "commons" and act.get("action") != "promoted":
-                held += 1
+        else:  # public
+            if ring != "commons" or not promoted:
                 continue
         card = dict(d)
-        if act.get("action") == "promoted":
+        if promoted:
             card["lifecycle_stage"] = "public"
             card["extra"] = dict(extra, promoted_by=act.get("steward"),
                                  promoted_reason=act.get("reason"), promoted_at=act.get("at"))
@@ -312,8 +370,8 @@ def shelf_of(member: str, viewer: Optional[str] = None) -> Dict[str, Any]:
     # card and hangs a derived `presentation` block on the copy — pure string work, no I/O, and not
     # one byte of it reaches the store.
     from . import present as _present
-    return {"ok": True, "member": member, "own_view": own, "count": len(cards),
-            "awaiting_review": held if not own else None,
+    return {"ok": True, "member": member, "own_view": own, "access": access, "count": len(cards),
+            "awaiting_review": (held if access in ("owner", "friend") else None),
             "cards": _present.attach(cards),
             "note": "A shelf is a key with cards on it. Nothing here records who read them."}
 
