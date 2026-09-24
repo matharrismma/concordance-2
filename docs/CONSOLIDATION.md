@@ -74,12 +74,13 @@ The package is the **shared engine + these essential doors**:
 
 ## 3. CARD-LAYER consolidation (`decks.py`, shelves, kinds, facets)
 
-- **`deck-1` · 6 dead deck shelves (routes to nothing).** `decks.py` claims `patristics`, `hymns`
-  (`scripture` L47), `recipes`, `maker` (`land` L92), `classics` (`books` L105), and **`"nuclear
-  physics"` with a space** (`matter` L66) — but no seeder produces any of them (`nuclear_physics` is
-  produced with an underscore; `call_number` `corpus.py:165` never bridges space↔underscore). *Action:*
-  fix the `nuclear physics`→`nuclear_physics` token; drop or re-point the other 5 to their real shelves
-  (`gutenberg` for `classics`; drop `recipes`/`maker`/`patristics`/`hymns` or seed them).
+- **`deck-1` · ✅ DONE 2026-09-24 — and the audit was HALF WRONG.** The only real defect was the
+  `"nuclear physics"` (space) token in the `matter` deck (fixed, + the `SHARD_ASSIGN` twin). The audit
+  also called `patristics`/`hymns`/`recipes`/`maker`/`classics` "dead — no seeder produces them" and
+  told us to drop them. **The LIVE `GET /cards/stats` proves all five are alive** (classics 1,420 ·
+  patristics 216 · hymns 21 · maker 12 · recipes 11 — ~1,680 real cards). A static `shelf="..."` grep
+  under-counted because seeders mint many shelves dynamically. Removing those deck routes would have
+  ORPHANED live content — do NOT. Lesson: verify shelf existence against the live corpus, never a grep.
 - **`deck-2` · Collapse the 7-deck "systems" family.** `systems`/`control` claim `{systems}`;
   `electronics`/`fluids`/`thermal`/`mechanical`/`waves` all claim the identical `{systems, physics}`
   (`decks.py:171-200`) — five decks over the same 1–2 shelves, differing only by keywords. *Action:*
@@ -89,12 +90,13 @@ The package is the **shared engine + these essential doors**:
   `seed` + keywords → a different hand dealt from the same shelves), and `test_decks.py` pins both as
   separate routes. Merging them contradicts this doc's own `deck-4` principle ("need-deck shelf overlap
   is by design"). Do NOT merge — the audit mistook intentional overlap for duplication.
-- **`deck-4` · ~60+ produced shelves are in NO deck (the real loss).** Real content unreachable via the
-  Hare: **`theories` (the Floor, 217 theories!)**, `encyclopedia` (the ISBE/Easton/Smith/Vine bible
-  dictionaries), `trades` (PD trade handbooks), `pronunciation` (CMU dict), and **~60 domain-core
-  shelves** minted per verifier domain (`card_domain_cores.py:65,82`). *Action:* add decks (or route
-  keywords) for the high-value ones — the Floor, the dictionaries, the trades — so a query can reach
-  them. (Need-deck shelf overlap is **by design** — cards cut across shelves — not a defect.)
+- **`deck-4` · ✅ DONE 2026-09-24 — the high-value unrouted shelves are now routed.** Confirmed against
+  the live `GET /cards/stats`: **`theories` (the Floor, 217)** → new `floor` deck; **`encyclopedia`
+  (13,341 Bible dictionaries)** + **`topical` (7,301)** → the `scripture` deck; **`pronunciation`
+  (125,167)** → the `word` deck; **`trades` (1,157)** → the `handyman` + `field` decks; `mathematics`
+  (88) + `geometry` (9) → the `works` deck; `finance` (34) → the `nations` deck. Left unrouted on
+  purpose: ops/edge shelves (`seals`, `sources`, `spine`, `connections`, `reference`, `domains`).
+  (Need-deck shelf overlap is **by design** — cards cut across shelves — not a defect.)
 - **`card-1` · Dead `kind`: `walk`.** `codex._CONTENT_KINDS = {"note","walk"}` (`codex.py:46`)
   recognizes `walk`, but nothing anywhere mints `kind="walk"`. *Action:* prune it. (Note: `spine` is
   NOT a kind — it's a top-level flag; spine cards are `kind="note"`.)

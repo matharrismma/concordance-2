@@ -97,5 +97,20 @@ def test_open_deck_deals_a_frontloaded_hand_from_its_own_shelves(monkeypatch):
     assert san is not None and "w1" in {c["id"] for c in san["cards"]}
 
 
+def test_floor_deck_routes_and_deck4_shelves_are_covered():
+    """deck-4 (consolidation, 2026-09-24): shelves that carry real cards on the live box but had NO
+    deck are now routed. The audit's deck-1 'dead shelves' claim was FALSE (patristics/hymns/recipes/
+    maker/classics are all alive per GET /cards/stats), so nothing was removed — but the Floor, the
+    Bible dictionaries, pronunciation and the trades WERE unrouted, and now are."""
+    top = decks.predict("a proven theorem and the foundational law it rests on", k=3)
+    assert any(t["id"] == "floor" for t in top), [t["id"] for t in top]
+    covered = set()
+    for d in decks._DECKS:
+        covered |= set(d["shelves"])
+    for shelf in ("theories", "encyclopedia", "topical", "pronunciation", "trades",
+                  "finance", "mathematics", "geometry"):
+        assert shelf in covered, f"{shelf} is produced (live) but routed by no deck"
+
+
 def test_open_unknown_deck_is_none():
     assert decks.open_deck("no-such-deck") is None
