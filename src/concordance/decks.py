@@ -132,12 +132,14 @@ _DECKS: List[Dict[str, Any]] = [
      "keywords": {"animal", "plant", "species", "organism", "creature", "genus", "mammal", "bird",
                   "fish", "insect", "tree", "flower", "taxonomy", "scientific", "kingdom", "life",
                   "reptile", "amphibian", "fungus", "bacteria"}},
-    {"id": "sequences", "name": "Integer Sequences — the OEIS core",
-     "desc": "The foundational integer sequences: the primes, Fibonacci, Catalan, the partitions, and "
-             "thousands more the whole of number theory keeps returning to.",
-     "shelves": {"oeis"},
-     "keywords": {"sequence", "integer", "oeis", "fibonacci", "catalan", "prime", "primes", "partition",
-                  "series", "recurrence", "combinatorics", "number", "triangular", "factorial", "terms"}},
+    {"id": "sequences", "name": "Integer Sequences — the foundational forms",
+     "desc": "The foundational integer sequences the whole of number theory keeps returning to — the "
+             "primes, Fibonacci, Catalan, the partitions and more — each COMPUTED from its classical "
+             "definition (public domain), not copied from any database.",
+     "shelves": {"sequences"},
+     "keywords": {"sequence", "integer", "oeis", "fibonacci", "lucas", "catalan", "bell", "motzkin",
+                  "prime", "primes", "partition", "pell", "perfect", "series", "recurrence",
+                  "combinatorics", "number", "triangular", "pentagonal", "factorial", "terms"}},
     {"id": "churches", "name": "The Churches — one Lord, many traditions (calibrated)",
      "desc": "Every major tradition of the Church, gathered from its own confession and measured against "
              "the one plumb-line — calibrated, not judged; each tradition's gift, and the creeds held in common.",
