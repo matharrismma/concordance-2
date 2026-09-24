@@ -26,13 +26,13 @@ def test_coverage_classifies_every_case():
         "newshelf": 7,        # produced, NOT routed, not ops -> UNROUTED (drift)
         "seals": 862,         # produced but OPS   -> excluded, not drift
         "spine": 65,          # produced but OPS   -> excluded
-        "languages": 0,       # routed, not produced, PENDING -> pending (not dead)
+        "oeis": 0,            # routed, not produced, PENDING (CC-BY-NC-SA, refused) -> pending (not dead)
     }
-    deck_shelves = {"physics", "theories", "languages", "deadtoken"}
+    deck_shelves = {"physics", "theories", "oeis", "deadtoken"}
     rep = cov.coverage(by_shelf, deck_shelves)
     assert rep["unrouted_content_shelves"] == ["newshelf"]          # the one real gap
     assert rep["dead_deck_shelves"] == ["deadtoken"]                # routed but no card carries it
-    assert rep["pending_deck_shelves"] == ["languages"]             # kept, awaiting data — not drift
+    assert rep["pending_deck_shelves"] == ["oeis"]                  # kept, license-refused — not drift
     assert "seals" not in rep["unrouted_content_shelves"]           # ops shelves are excluded
     assert "spine" not in rep["unrouted_content_shelves"]
 

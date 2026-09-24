@@ -37,9 +37,11 @@ OPS_SHELVES: Set[str] = frozenset({
     "concepts", "atlas", "document_validation",   # internal/meta scaffolds, not query-facing content
 })
 
-# Deck shelves whose data is PLANNED but not yet seeded — the deck is kept (removing it would cut a
-# planned capability), and it will light up when the data lands. Reported as pending, not as drift.
-PENDING_SHELVES: Set[str] = frozenset({"languages", "oeis"})
+# Deck shelves whose data is refused by the license gate (not seedable public) — the deck is kept
+# (removing it would cut a planned capability). Reported as pending, not as drift. `oeis` is
+# CC-BY-NC-SA (non-commercial + share-alike), refused. (`languages` was here until 2026-09-24, when
+# it was seeded license-clean from Glottolog CC-BY 4.0 — PHOIBLE's CC-BY-SA phonology stays out.)
+PENDING_SHELVES: Set[str] = frozenset({"oeis"})
 
 
 def coverage(by_shelf: Dict[str, int], deck_shelves: Set[str]) -> Dict[str, object]:
