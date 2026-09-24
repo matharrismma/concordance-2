@@ -99,6 +99,9 @@ def test_every_page_offers_a_way_home():
               "grappling.html", "music.html", "provision.html", "wisdom.html", "workshop.html",
               "coach.html", "tv.html", "playbook.html", "plow.html", "profile.html", "situations.html",
               "steward.html",
+              # improve.html — The Workshop, the operator's improvement-filing desk; carries its own
+              # header/home link, not the shared nh-home.js control. An operator surface, direct-URL only.
+              "improve.html",
               # com.html is the .com secular LANDING (surface sort, 2026-09-01): it IS home and carries
               # its own nav, not the shared desk control. systems.html/prophecy.html/map.html are
               # self-contained surfaces with their own nav (map.html is in the Ctrl-K palette).
@@ -176,6 +179,8 @@ def test_the_palette_reaches_every_public_page():
                # steward.html is reached the same way — a direct link from the chat's steward branch
                # (ask.py's "Open the Steward" resource), not the palette.
                "steward.html",
+               # improve.html — The Workshop, the operator's filing desk; reached by direct URL, not the palette.
+               "improve.html",
                # com.html is the .com bare homepage (served at "/"), like index.html; systems.html is the
                # operator dashboard and prophecy.html a direct-URL surface — reached by URL, not the palette.
                "com.html", "systems.html", "prophecy.html",

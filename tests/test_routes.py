@@ -103,6 +103,10 @@ GOLDEN_API_GET = {
     # list; `/unchecked/answer` is the door the ask on every such card points at.
     "/unchecked", "/unchecked/answer",
     "/tv/automaton",  # the .tv automaton — a witness testifies in his own PD words (built 2026-09-03, 37d2e49); a GET, read-bucket limited like /witness
+    # THE WORKSHOP (2026-09-23) — the operator's improvement queue, filed through the site and drained
+    # by the agent. All three are api:True so GET /workshop is dispatched as JSON; filing is signed,
+    # the drain (GET /workshop, POST /workshop/status) is keep-operator-gated.
+    "/workshop/signable", "/workshop", "/workshop/status",
 }
 # /search moved OUT of this set on 2026-07-31 and into GOLDEN_READ_LIMITED — a read and a write
 # are not the same risk, and the one client the shared cap refused most was ClaudeBot.
@@ -134,6 +138,9 @@ GOLDEN_RATELIMITED = {
     "/chess",   # deliberate addition (the chess verifier) — game theory, applied and sealable
     "/attest",  # deliberate addition — a write, so rate-limited like every other write
     "/want",    # deliberate addition — opening a want is a write (the hive's return-point)
+    # THE WORKSHOP (2026-09-23) — filing is a signed write; the drain read/status is operator-gated.
+    # All three sit in the write bucket (the operator's volume is low; the tighter cap is ample).
+    "/workshop/signable", "/workshop", "/workshop/status",
     "/kernel/gate",  # run one proposed state-change through the kernel — rate-limited like every POST (task #152)
     "/playbook/signable", "/playbook/submit",  # the Playbook two-step signed write — rate-limited like every write (task #153)
     "/plow",  # The Plow POST computes a transition — rate-limited like every POST (task #155)

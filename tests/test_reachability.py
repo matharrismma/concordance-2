@@ -96,6 +96,10 @@ AGENT_ONLY = {
     # a proposed state-change through the invariant lattice; /playbook/signable + /playbook/submit are the
     # Playbook's signed two-step write. All agent/API surface, not a human page.
     "/witness", "/context/run", "/kernel", "/kernel/gate", "/playbook/signable", "/playbook/submit",
+    # THE WORKSHOP drain (2026-09-23) — /workshop/status marks progress (in_progress/done/declined),
+    # reached only by the agent draining the queue. The filing side (/workshop, /workshop/signable) IS
+    # referenced by improve.html, so only the drain-status endpoint is declared agent-only here.
+    "/workshop/status",
 
     # THE PERSONAL KEEPING FLOW, write side: /journal keeps the day's ideas/writings, and /days counts
     # your time + concentration from the conversations THIS BROWSER holds — both POSTed with data the
@@ -134,6 +138,7 @@ UNLISTED_PAGES = {
     "about.html",         # the confession, whole (Domain Sort: the declaration lives at /about + /identity). Linked from checkit.html's footer as the CLEAN url /about, which the static link-checker (html hrefs only) cannot see — hence declared, same limit as /unchecked/answer
     "playbook.html",      # the Playbook surface — operator/agent authoring, not the public nav
     "plow.html",          # the Plow surface — an operator instrument, not the public nav
+    "improve.html",       # The Workshop — the operator's improvement-filing desk (covenant-signed); files land in a queue the agent drains. Reached by direct URL, an operator surface, not the public nav.
     # the Atlas static views — single-view SVG renderings, one per layout of the unified interactive
     # explore.html (which IS linked, from com.html + the Ctrl-K palette). Kept as lightweight direct-URL
     # and share/print targets, each with its own "← narrowhighway.com" home link; not linked into the nav.

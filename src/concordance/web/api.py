@@ -562,15 +562,14 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
     return 200, html
 
 
-_SITEMAP_PAGES = ("/", "/situations.html", "/ask.html", "/bible.html", "/read.html", "/reader.html", "/characters.html",
-                  "/prophecy.html", "/steward.html",
-                  "/community.html", "/corpus.html", "/guarantees.html", "/collapse.html",
-                  "/seeds.html", "/seal.html", "/connect.html", "/profile.html", "/corrected.html", "/audit.html",
-                  "/proof.html", "/reason.html", "/boundary.html", "/almanac.html", 
-                  "/teachings.html", "/brain.html", "/floor.html", "/theories.html",
-                  "/harmony.html", "/timeline.html", "/backmatter.html", "/places.html",
-                  "/narratives.html",  "/voices.html", "/contact.html",
-                  "/playbook.html", "/plow.html")
+# Live, canonical pages only. Retired paths (see _RETIRED) 301 to a tombstone-successor, so a
+# sitemap listing them is the very drift the ROUTES comment warns of — a live surface pointing a
+# crawler at a redirect instead of the content. Pruned 2026-09-23 (consolidation surface-5): the
+# 19 _RETIRED entries removed; each is still caught by the 301 for inbound bookmarks/crawlers.
+_SITEMAP_PAGES = ("/", "/situations.html", "/bible.html", "/read.html", "/reader.html", "/characters.html",
+                  "/prophecy.html", "/steward.html", "/connect.html", "/profile.html",
+                  "/proof.html", "/theories.html", "/harmony.html", "/timeline.html",
+                  "/contact.html", "/playbook.html", "/plow.html")
 
 
 def build_sitemap(base_url: str) -> str:
@@ -636,12 +635,17 @@ def _cached_scan(key, compute):
 
 
 def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
-             config: EngineConfig, session_gate_open: bool = False) -> Response:
-    """Pure request dispatch — (method, path, query, body, config, session_gate_open) → (status, payload).
+             config: EngineConfig, session_gate_open: bool = False,
+             operator: bool = False) -> Response:
+    """Pure request dispatch — (method, path, query, body, config, flags) → (status, payload).
 
     session_gate_open carries the Gate across a conversation: once the person's own seeking has
     opened the door (Ask/Seek/Knock — see /ask), the witness content is surfaced on the secular
-    reach too, not just the witness face."""
+    reach too, not just the witness face.
+
+    operator is the keep operator decision, computed by the handler from the REAL socket peer +
+    the keep token (never X-Forwarded-For) and threaded in for the operator-only routes (the
+    workshop drain). Pure and defaulted, so every existing caller and test is unaffected."""
     method = (method or "GET").upper()
     path = path.rstrip("/") or "/"
     surface = config.surface
@@ -1737,6 +1741,41 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     # Library / keeping tools (ported from 1.0, additive — over the same shared corpus).
     if method == "GET" and path == "/cards/stats":
         return _ok(_cached_scan("stats", corpus.stats))
+    # ── THE WORKSHOP — the operator's improvement queue (Matt, 2026-09-23: "an interface … to
+    # begin working to improve it through the site … structure you as a call back"). Filing is
+    # covenant-SIGNED and operator-authorized (workshop._verify); the drain (queue + status) is
+    # gated by the keep operator decision, threaded in as `operator`. The steward records; it
+    # never executes — see workshop.py.
+    if path in ("/workshop", "/workshop/signable", "/workshop/status"):
+        from .. import workshop as _wk
+        if method == "POST" and path == "/workshop/signable":
+            b = body if isinstance(body, dict) else {}
+            return _ok(_wk.signable(b.get("author", ""), b.get("kind", ""), b.get("title", ""),
+                                    b.get("body", ""), b.get("target", "")))
+        if method == "POST" and path == "/workshop":
+            b = body if isinstance(body, dict) else {}
+            r = _wk.file(b.get("fields"), b.get("signature", ""))
+            if r.get("ok"):
+                return _ok(r)
+            return _err(403 if "authorized operator" in r.get("error", "") else 400,
+                        r.get("error", "could not file"))
+        if method == "GET" and path == "/workshop":
+            if not operator:
+                return _err(403, "the workshop queue is the operator's — sign in at the keep")
+            state = (query.get("state") or "").strip() or None
+            try:
+                limit = int(query.get("limit", "200"))
+            except (TypeError, ValueError):
+                limit = 200
+            return _ok(_wk.queue(state=state, limit=limit))
+        if method == "POST" and path == "/workshop/status":
+            if not operator:
+                return _err(403, "only the operator drains the workshop")
+            b = body if isinstance(body, dict) else {}
+            r = _wk.update(b.get("id", ""), state=(b.get("state") or None),
+                           note=b.get("note", ""), by=(b.get("by") or "operator"))
+            return _ok(r) if r.get("ok") else _err(400, r.get("error", "could not update"))
+        return _err(405, "method not allowed")
     if method == "GET" and path == "/cards":
         try:
             limit = int(query.get("limit", "20"))
@@ -2954,6 +2993,11 @@ ROUTES = [
     {"path": "/moderation/signable", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/want", "methods": ("POST",), "rl": True},
     {"path": "/wants", "methods": ("GET",), "api": True},
+    # THE WORKSHOP — operator improvement queue. `api:True` so GET /workshop is dispatched as JSON
+    # (not static/redirected). Filing is signature-gated; the drain is keep-operator-gated.
+    {"path": "/workshop/signable", "methods": ("POST",), "api": True, "rl": True},
+    {"path": "/workshop", "methods": ("GET", "POST"), "api": True, "rl": True},
+    {"path": "/workshop/status", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/unchecked", "methods": ("GET",), "api": True},
     {"path": "/unchecked/answer", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/report", "methods": ("POST",), "api": True, "rl": True},
@@ -3440,7 +3484,18 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             # /ask opens the door (Ask/Seek/Knock). Once open, the witness content is surfaced on
             # this reach too. Not an access secret — the gate opens on seeking; this only remembers it.
             session_gate_open = "nh_gate=open" in (self.headers.get("cookie") or "")
-            status, payload = dispatch(method, u.path, q, body, config, session_gate_open=session_gate_open)
+            # The keep operator decision — computed ONLY for the operator-gated workshop-drain routes,
+            # from the REAL socket peer + keep token (never X-Forwarded-For; see keep.request_is_operator).
+            operator = False
+            if u.path in ("/workshop", "/workshop/status"):
+                try:
+                    from .keep import request_is_operator
+                    peer_ip = self.client_address[0] if self.client_address else ""
+                    operator = request_is_operator(peer_ip, self.headers, q)
+                except Exception:  # noqa: BLE001 — a gate that errors is CLOSED, never open
+                    operator = False
+            status, payload = dispatch(method, u.path, q, body, config,
+                                       session_gate_open=session_gate_open, operator=operator)
             extra = None
             if (u.path == "/ask" and isinstance(payload, dict) and payload.get("gate_open")
                     and not session_gate_open):

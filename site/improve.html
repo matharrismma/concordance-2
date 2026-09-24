@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/shell.js"></script>
+<meta name="robots" content="noindex, nofollow">
+<title>The Workshop — Narrow Highway</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem; margin: 1rem 0; }
+  label { display:block; font-size:.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin:.7rem 0 .25rem; }
+  input, textarea, select { width:100%; padding:.6rem .75rem; font:inherit; background:var(--bg);
+    border:1px solid var(--line); border-radius:8px; color:var(--ink); box-sizing:border-box; }
+  textarea { min-height:7rem; resize:vertical; }
+  .row { display:flex; gap:.7rem; flex-wrap:wrap; }
+  .row > * { flex:1 1 12rem; min-width:0; }
+  .status { min-height:1.2rem; font-size:.85rem; margin:.6rem 0 0; }
+  .status.ok { color: var(--pass); } .status.err { color: var(--fail); }
+  .fp { font-family: ui-monospace, Consolas, monospace; font-size:.82rem; color:var(--accent); word-break:break-all; }
+  .backup { font-family: ui-monospace, Consolas, monospace; font-size:.72rem; background:var(--bg);
+    border:1px dashed var(--line); border-radius:8px; padding:.6rem; word-break:break-all; color:var(--muted); }
+  .muted { color: var(--muted); }
+  .item { border-bottom:1px solid var(--line); padding:.6rem 0; }
+  .item .t { font-weight:600; }
+  .item .m { font-size:.75rem; color:var(--muted); }
+  .pill { display:inline-block; font-size:.7rem; padding:.05rem .5rem; border-radius:20px; border:1px solid var(--line); color:var(--muted); }
+  .pill.open { color:var(--accent); border-color:var(--accent); }
+  .pill.in_progress { color:var(--pass); border-color:var(--pass); }
+  .pill.done { color:var(--muted); }
+  .pill.declined { color:var(--fail); border-color:var(--fail); }
+  button { cursor:pointer; }
+  .btn-sm { font-size:.8rem; padding:.4rem .7rem; }
+  details { margin-top:.6rem; } summary { cursor:pointer; font-size:.82rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap" style="padding:.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center">
+  <a class="brand" href="/">Narrow<span class="road">Highway</span></a>
+  <nav class="site"><span class="muted">the workshop</span></nav>
+</div></header>
+
+<main class="wrap">
+  <h1 style="font-size:1.7rem">The Workshop</h1>
+  <p class="lede">File an improvement to Narrow Highway from here. Each filing is signed by your
+  covenant key — provably you — and lands in a queue the agent drains: it does the work in the repo,
+  through the tests and an explicit deploy. <strong>Nothing here executes.</strong> The workshop
+  records intent; it never touches the live system on its own.</p>
+
+  <!-- ── your operator key ────────────────────────────────────────────────── -->
+  <div class="card" id="keycard">
+    <strong>Your operator key</strong>
+    <div id="keystate" class="muted" style="font-size:.85rem;margin:.4rem 0"></div>
+    <div id="fpline" hidden>Fingerprint to authorize: <span class="fp" id="fp"></span>
+      <div class="muted" style="font-size:.75rem;margin:.3rem 0 0">This must be in
+        <code>CONCORDANCE_OPERATOR_FPS</code> on the box before filing is accepted.</div>
+    </div>
+    <div id="keyactions" class="row" style="margin-top:.7rem">
+      <button id="btn-create" type="button" class="btn-sm">Create an operator key</button>
+      <button id="btn-restore" type="button" class="btn-sm">Restore from backup</button>
+      <button id="btn-forget" type="button" class="btn-sm" hidden>Forget key on this device</button>
+    </div>
+    <div id="backupbox" hidden style="margin-top:.7rem">
+      <div class="muted" style="font-size:.8rem;color:var(--fail)">Back this up now — it is your key,
+      shown once. Anyone with it can file as you; we never store it.</div>
+      <div class="backup" id="backup"></div>
+    </div>
+    <div id="restorebox" hidden style="margin-top:.7rem">
+      <label for="restorefield">Paste your backup string</label>
+      <input id="restorefield" placeholder="private.public" autocomplete="off">
+      <button id="btn-restore-go" type="button" class="btn-sm" style="margin-top:.5rem">Restore</button>
+    </div>
+  </div>
+
+  <!-- ── file an improvement ──────────────────────────────────────────────── -->
+  <form class="card" id="fileform">
+    <strong>File an improvement</strong>
+    <div class="row">
+      <div style="flex:0 0 10rem">
+        <label for="kind">Kind</label>
+        <select id="kind">
+          <option value="improve">improve</option>
+          <option value="fix">fix</option>
+          <option value="feature">feature</option>
+          <option value="observe">observe</option>
+          <option value="question">question</option>
+        </select>
+      </div>
+      <div>
+        <label for="target">Target <span class="muted" style="text-transform:none">(optional — a page, card id, or subsystem)</span></label>
+        <input id="target" placeholder="e.g. decks.py, /explore, the stacks walk">
+      </div>
+    </div>
+    <label for="title">Title</label>
+    <input id="title" placeholder="One line: what to improve" maxlength="200">
+    <label for="body">What you want</label>
+    <textarea id="body" placeholder="Say it plainly — what is wrong or missing, and what good would look like. The agent reads this as its brief."></textarea>
+    <div style="margin-top:.8rem"><button id="btn-file" type="submit">Sign &amp; file</button></div>
+    <p class="status" id="fileStatus"></p>
+  </form>
+
+  <!-- ── the queue (operator-token gated, like the keep) ──────────────────── -->
+  <section class="card" id="queuesec">
+    <strong>The queue</strong>
+    <p class="muted" style="font-size:.82rem;margin:.4rem 0 .6rem">What is filed and where it stands.
+    Served only to the operator — your token is kept in this browser and sent as a header, never in the URL.</p>
+    <div class="row" id="tokrow">
+      <input id="tokfield" type="password" placeholder="operator token (the keep token)" autocomplete="current-password" style="flex:2 1 14rem">
+      <button id="btn-load" type="button" class="btn-sm" style="flex:0 0 auto">Load queue</button>
+    </div>
+    <p class="status" id="qStatus"></p>
+    <div id="queue"></div>
+  </section>
+</main>
+
+<script src="/nh-keys.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  var LS_PRIV = "nh_wk_priv", LS_PUB = "nh_wk_pub", LS_TOK = "nh_wk_tok";
+  var PRIV = null, PUB = null;
+
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+  async function api(method, path, body, headers){
+    var opt = { method: method, headers: Object.assign({}, headers||{}) };
+    if (body != null){ opt.headers["content-type"] = "application/json"; opt.body = JSON.stringify(body); }
+    var r = await fetch(path, opt);
+    var b = null; try { b = await r.json(); } catch(e){}
+    return { status: r.status, body: b };
+  }
+
+  async function fingerprint(pubB64u){
+    var bytes = new TextEncoder().encode("nhid1:" + pubB64u);
+    var digest = await crypto.subtle.digest("SHA-256", bytes);
+    var hex = Array.prototype.map.call(new Uint8Array(digest), function(b){ return ("0"+b.toString(16)).slice(-2); }).join("");
+    return "nh_" + hex.slice(0, 32);
+  }
+
+  function loadKey(){
+    try { PRIV = localStorage.getItem(LS_PRIV); PUB = localStorage.getItem(LS_PUB); } catch(e){ PRIV = PUB = null; }
+  }
+  function saveKey(priv, pub){
+    PRIV = priv; PUB = pub;
+    try { localStorage.setItem(LS_PRIV, priv); localStorage.setItem(LS_PUB, pub); } catch(e){}
+  }
+
+  async function renderKey(){
+    var st = $("keystate");
+    if (PUB && PRIV){
+      st.textContent = "A key is loaded on this device.";
+      $("fpline").hidden = false;
+      $("fp").textContent = await fingerprint(PUB);
+      $("btn-create").hidden = true; $("btn-restore").hidden = true; $("btn-forget").hidden = false;
+    } else {
+      st.textContent = "No key on this device yet. Create one (first time) or restore your backup.";
+      $("fpline").hidden = true;
+      $("btn-create").hidden = false; $("btn-restore").hidden = false; $("btn-forget").hidden = true;
+    }
+  }
+
+  async function createKey(){
+    if (!window.NHKeys || !NHKeys.available()){
+      $("keystate").textContent = "This browser has no Ed25519 (WebCrypto) — use a current Firefox, Safari or Chrome.";
+      return;
+    }
+    var kp = await NHKeys.create();
+    if (!kp){ $("keystate").textContent = "Could not create a key here."; return; }
+    saveKey(kp.private_key, kp.public_key);
+    $("backupbox").hidden = false;
+    $("backup").textContent = kp.private_key + "." + kp.public_key;
+    await renderKey();
+  }
+
+  function forgetKey(){
+    try { localStorage.removeItem(LS_PRIV); localStorage.removeItem(LS_PUB); } catch(e){}
+    PRIV = PUB = null; $("backupbox").hidden = true; renderKey();
+  }
+
+  function restoreKey(){
+    var v = ($("restorefield").value || "").trim();
+    var parts = v.split(".");
+    if (parts.length !== 2 || !parts[0] || !parts[1]){
+      $("keystate").textContent = "That backup should be private.public — two parts."; return;
+    }
+    saveKey(parts[0], parts[1]);
+    $("restorebox").hidden = true; $("restorefield").value = "";
+    renderKey();
+  }
+
+  async function fileImprovement(ev){
+    ev.preventDefault();
+    var st = $("fileStatus");
+    if (!PRIV || !PUB){ st.className = "status err"; st.textContent = "Load your operator key first."; return; }
+    var title = ($("title").value||"").trim(), body = ($("body").value||"").trim();
+    if (!title){ st.className="status err"; st.textContent="A one-line title, please."; return; }
+    if (!body){ st.className="status err"; st.textContent="Say what you want — the agent reads this as its brief."; return; }
+    st.className = "status"; st.textContent = "Signing…";
+    try {
+      var s = await api("POST", "/workshop/signable", {
+        author: PUB, kind: $("kind").value, title: title, body: body, target: ($("target").value||"").trim() });
+      if (s.status !== 200 || !s.body || !s.body.ok) throw new Error((s.body && s.body.error) || "could not prepare the filing");
+      var sig = await NHKeys.signB64uBytes(PRIV, s.body.signable);
+      if (!sig) throw new Error("could not sign — no Ed25519 in this browser");
+      var r = await api("POST", "/workshop", { fields: s.body.fields, signature: sig });
+      if (r.status === 200 && r.body && r.body.ok){
+        st.className = "status ok";
+        st.textContent = r.body.duplicate ? "Already filed (same signed request)." : ("Filed — " + r.body.id + ". The agent will pick it up.");
+        $("title").value = ""; $("body").value = ""; $("target").value = "";
+        if (getTok()) loadQueue();
+      } else if (r.status === 403){
+        st.className = "status err";
+        st.textContent = (r.body && r.body.error) || "Not authorized — is your fingerprint in CONCORDANCE_OPERATOR_FPS?";
+      } else {
+        st.className = "status err";
+        st.textContent = (r.body && r.body.error) || "Could not file.";
+      }
+    } catch(e){ st.className = "status err"; st.textContent = (e && e.message) || String(e); }
+  }
+
+  function getTok(){ try { return localStorage.getItem(LS_TOK) || ""; } catch(e){ return ""; } }
+
+  function qitem(it){
+    var notes = (it.notes||[]).map(function(n){
+      return '<div class="m">· '+esc(n.text)+(n.by?' <span class="muted">('+esc(n.by)+')</span>':'')+'</div>'; }).join("");
+    return '<div class="item"><div class="t">'+esc(it.title)+
+      ' <span class="pill '+esc(it.state)+'">'+esc(it.state)+'</span></div>'+
+      '<div class="m">'+esc(it.kind)+(it.target?' · '+esc(it.target):'')+' · '+esc(it.id)+'</div>'+
+      (it.body?'<div class="m" style="margin-top:.25rem">'+esc(String(it.body).slice(0,240))+'</div>':'')+
+      notes+'</div>';
+  }
+
+  async function loadQueue(){
+    var st = $("qStatus"), tok = ($("tokfield").value||"").trim() || getTok();
+    if (!tok){ st.className="status err"; st.textContent="Enter the operator (keep) token to see the queue."; return; }
+    try { localStorage.setItem(LS_TOK, tok); } catch(e){}
+    st.className = "status"; st.textContent = "Loading…";
+    var r = await api("GET", "/workshop", null, { "X-Keep-Token": tok });
+    if (r.status === 403){ st.className="status err"; st.textContent="That token was not accepted."; return; }
+    if (r.status !== 200 || !r.body){ st.className="status err"; st.textContent="Could not load the queue."; return; }
+    st.textContent = "";
+    var items = r.body.items || [];
+    $("queue").innerHTML = items.length ? items.map(qitem).join("") :
+      '<p class="muted" style="font-size:.9rem">The queue is empty — nothing open right now.</p>';
+  }
+
+  // wire up
+  loadKey(); renderKey();
+  $("btn-create").addEventListener("click", createKey);
+  $("btn-forget").addEventListener("click", forgetKey);
+  $("btn-restore").addEventListener("click", function(){ $("restorebox").hidden = !$("restorebox").hidden; });
+  $("btn-restore-go").addEventListener("click", restoreKey);
+  $("fileform").addEventListener("submit", fileImprovement);
+  $("btn-load").addEventListener("click", loadQueue);
+  try { if (getTok()) $("tokfield").value = getTok(); } catch(e){}
+})();
+</script>
+</body>
+</html>
