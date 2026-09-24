@@ -987,8 +987,11 @@ def load_cards(path: Optional[Path] = None,
                       # The plumb-line: the whole Bible in the original tongues (Greek NT + Hebrew OT),
                       # one card per verse. Academics first. Spines root in the Word.
                       "scripture_spines.jsonl", "scripture_cards.jsonl",
-                      # The OEIS core — the foundational integer sequences (academics: mathematics).
+                      # The foundational integer sequences (academics: mathematics). `oeis_*` is the
+                      # LEGACY slot (OEIS is CC-BY-NC-SA, refused by the license gate); `sequence_*` is
+                      # the license-clean COMPUTED set that supersedes it (tools/card_sequences.py).
                       "oeis_spine.jsonl", "oeis_cards.jsonl",
+                      "sequence_spine.jsonl", "sequence_cards.jsonl",
                       # The tree of life — the recognizable organisms (academics: biology).
                       "taxonomy_spine.jsonl", "taxonomy_cards.jsonl",
                       # The languages of the earth — PHOIBLE/Glottolog (academics: linguistics).
