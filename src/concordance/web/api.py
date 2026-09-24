@@ -33,8 +33,19 @@ def _ok(payload: Dict[str, Any]) -> Response:
     return 200, payload
 
 
-def _err(status: int, msg: str) -> Response:
-    return status, {"error": msg}
+# Stable, machine-readable error codes so an agent branches on a CODE, not on prose (agent/bot audit
+# F4, 2026-09-24). Every _err carries one — defaulted from the HTTP status, or a more specific code
+# passed at the call site (e.g. OPERATOR_ONLY, SIGNATURE_REQUIRED). This brings the transport-error
+# envelope up to the standard verify's verdict schema already sets. Additive: the `error` prose stays.
+_ERR_CODE_BY_STATUS = {
+    400: "BAD_REQUEST", 401: "UNAUTHORIZED", 403: "FORBIDDEN", 404: "NOT_FOUND",
+    405: "METHOD_NOT_ALLOWED", 409: "CONFLICT", 413: "TOO_LARGE", 422: "UNPROCESSABLE",
+    429: "RATE_LIMITED", 500: "SERVER_ERROR", 501: "NOT_IMPLEMENTED", 503: "UNAVAILABLE",
+}
+
+
+def _err(status: int, msg: str, code: str = "") -> Response:
+    return status, {"error": msg, "code": code or _ERR_CODE_BY_STATUS.get(status, "ERROR")}
 
 
 # WHAT THE GATE IS FOR — AND WHAT IT NEVER WAS.
@@ -1757,11 +1768,13 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             r = _wk.file(b.get("fields"), b.get("signature", ""))
             if r.get("ok"):
                 return _ok(r)
-            return _err(403 if "authorized operator" in r.get("error", "") else 400,
-                        r.get("error", "could not file"))
+            authz = "authorized operator" in r.get("error", "")
+            return _err(403 if authz else 400, r.get("error", "could not file"),
+                        "OPERATOR_ONLY" if authz else "BAD_REQUEST")
         if method == "GET" and path == "/workshop":
             if not operator:
-                return _err(403, "the workshop queue is the operator's — sign in at the keep")
+                return _err(403, "the workshop queue is the operator's — sign in at the keep",
+                            "OPERATOR_ONLY")
             state = (query.get("state") or "").strip() or None
             try:
                 limit = int(query.get("limit", "200"))
@@ -1770,7 +1783,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _ok(_wk.queue(state=state, limit=limit))
         if method == "POST" and path == "/workshop/status":
             if not operator:
-                return _err(403, "only the operator drains the workshop")
+                return _err(403, "only the operator drains the workshop", "OPERATOR_ONLY")
             b = body if isinstance(body, dict) else {}
             r = _wk.update(b.get("id", ""), state=(b.get("state") or None),
                            note=b.get("note", ""), by=(b.get("by") or "operator"))
@@ -1834,7 +1847,10 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _err(400, "q required")
         from .. import witness as _witness
         who = (query.get("witness") or "").strip() or None
-        return _ok({"q": q, **_witness.see(q, witness=who, k=3)})
+        # F6 (agent/bot audit): this scans the witness cloud per call — cache per (q, witness) by the
+        # same per-corpus-version key the sibling scans use, so a repeat is free and cannot be hammered.
+        return _ok({"q": q, **_cached_scan("witness:%s:%s" % (q, who or ""),
+                                           lambda: _witness.see(q, witness=who, k=3))})
 
     if method == "GET" and path == "/daily":
         _seed = query.get("seed") or None
@@ -3393,7 +3409,7 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 lim = read_limiter if read else limiter
                 key = self._rl_key()
                 if not lim.allow(key):
-                    return self._json(429, {"error": "rate limit exceeded"},
+                    return self._json(429, {"error": "rate limit exceeded", "code": "RATE_LIMITED"},
                                       {"retry-after": str(lim.retry_after(key))})
             if u.path == "/mcp" or u.path.startswith("/mcp/"):
                 # Full catalog on /mcp (existing clients keep working); PROFILE MOUNTS on

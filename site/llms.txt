@@ -107,6 +107,9 @@ can shape a structured claim.
   tool-catalog hash) so you can pin exactly what you are talking to.
 - `GET /capabilities` carries `routes.registry` — **every** route with its methods and flags (the
   POSTs too), machine-readable, so an agent discovers the whole surface without parsing this file.
+- **Every error carries a stable `code`** beside its human `error` prose — `RATE_LIMITED`,
+  `NOT_FOUND`, `BAD_REQUEST`, `FORBIDDEN`, `OPERATOR_ONLY`, … — so branch on the code, not the
+  sentence. A `429` also carries a `retry-after` header (seconds).
 
 ## The Candidate Engine — narrow your OWN candidates without laundering confidence
 When you have generated several plausible answers (sampling, multi-model, tail exploration) and

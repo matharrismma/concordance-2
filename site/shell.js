@@ -31,7 +31,8 @@
   var NAV = [
     { k: "concordance", label: "Concordance", href: "/" },
     { k: "atlas",       label: "Atlas",       href: "/explore.html" },
-    { k: "domains",     label: "Domains",     href: "/domains.html" },
+    // domains.html demoted from the spine (consolidation surface-3, 2026-09-24): it is one of
+    // explore.html's own views, not a sibling of its parent — reachable inside the Atlas.
     { k: "verify",      label: "Verify",      href: "/com.html#verify" },
     { k: "map",         label: "Map",         href: "/map.html" }
   ];
@@ -50,7 +51,7 @@
     var map = {
       "/concordance.html": "concordance", "/reader.html": "concordance",
       "/explore.html": "atlas", "/atlas.html": "atlas",
-      "/domains.html": "domains", "/map.html": "map"
+      "/domains.html": "atlas", "/map.html": "map"
     };
     return map[p] || "";
   }

@@ -177,6 +177,18 @@ def test_derived_sets_match_history():
         f"extra={set(api.RATELIMITED) - GOLDEN_RATELIMITED}")
 
 
+def test_error_responses_carry_a_stable_machine_readable_code():
+    """F4 (agent/bot audit, 2026-09-24): every error carries a `code` beside its prose, so an agent
+    branches on a code not a sentence — defaulted from the HTTP status, or specific at the call site."""
+    from concordance.web.api import _err
+    assert _err(404, "nope")[1]["code"] == "NOT_FOUND"
+    assert _err(400, "bad")[1]["code"] == "BAD_REQUEST"
+    assert _err(403, "no", "OPERATOR_ONLY")[1]["code"] == "OPERATOR_ONLY"    # specific overrides default
+    # a live route proves the envelope on the wire
+    s, p = api.dispatch("GET", "/search", {"q": ""}, None, EngineConfig())
+    assert s == 400 and p["code"] == "BAD_REQUEST" and p["error"] == "q required"
+
+
 def test_capabilities_exposes_a_machine_readable_route_registry():
     """F1 (agent/bot audit, 2026-09-24): an agent can discover every route + its methods
     programmatically — including the POST routes that api_get_paths omits — via the routes.registry
