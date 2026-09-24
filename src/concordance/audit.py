@@ -458,10 +458,61 @@ def _x_molar_mass(text: str):
     return out
 
 
+def _x_pythagorean(text: str):
+    """"a right triangle with legs A and B has hypotenuse C" — routes to geometry.pythagorean
+    (a² + b² = c²). Legs-and-hypotenuse phrasing only, so it is unambiguous; a false hypotenuse
+    breaks honestly with the true right-triangle relation shown."""
+    n = r"(\d[\d,]*(?:\.\d+)?)"
+    pat = (r"right\s+triangle\s+with\s+legs?\s+(?:of\s+)?" + n + r"\s+and\s+" + n +
+           r"\s+(?:has|is|=|with)\s+(?:an?\s+)?hypotenuse\s+(?:of\s+)?" + n)
+    out = []
+    for m in re.finditer(pat, text, re.I):
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"pyth_a": _f(m.group(1)), "pyth_b": _f(m.group(2)),
+                                     "pyth_c": _f(m.group(3)), "claimed_right_triangle": True}}))
+    return out
+
+
+_POLY = {"triangle": 3, "quadrilateral": 4, "pentagon": 5, "hexagon": 6, "heptagon": 7,
+         "octagon": 8, "nonagon": 9, "decagon": 10, "hendecagon": 11, "dodecagon": 12}
+
+
+def _x_polygon_angles(text: str):
+    """"a hexagon's interior angles sum to 720 degrees" — routes to geometry (interior-angle sum
+    (n-2)·180). Named polygons only; a false total breaks honestly."""
+    names = "|".join(_POLY)
+    pat = (r"\b(" + names + r")\b[^.\n]{0,40}?interior\s+angles?\b[^.\n]{0,20}?"
+           r"(?:sum[a-z]*(?:\s+to)?|add\s+up\s+to|is|are|=|equals?|total[a-z]*)\s*" +
+           r"(\d[\d,]*(?:\.\d+)?)\s*(?:°|degrees?|deg)\b")
+    out = []
+    for m in re.finditer(pat, text, re.I):
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"polygon_n": _POLY[m.group(1).lower()],
+                                     "claimed_interior_angle_sum_deg": _f(m.group(2))}}))
+    return out
+
+
+def _x_kinetic_energy(text: str):
+    """"a M kg object at V m/s has kinetic energy E J" — routes to physics.kinetic_energy (½mv²).
+    Anchored by kg, m/s and joules, so it is unambiguous; a wrong value breaks honestly."""
+    n = r"(\d[\d,]*(?:\.\d+)?)"
+    pat = (n + r"\s*kg\b[^.\n]{0,30}?\bat\s+" + n + r"\s*(?:m/s|meters?\s+per\s+second)\b[^.\n]{0,30}?"
+           r"kinetic\s+energy\s+(?:of\s+|is\s+|=\s*|equals?\s+)?(?:about\s+|approximately\s+|~|≈)?" + n +
+           r"\s*(?:J\b|joules?\b)")
+    out = []
+    for m in re.finditer(pat, text, re.I):
+        out.append((_q(text, m), "physics",
+                    {"PHYS_VERIFY": {"mass_kg": _f(m.group(1)), "velocity_m_per_s": _f(m.group(2)),
+                                     "claimed_kinetic_energy_J": _f(m.group(3))}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
-    ("circle", _x_circle), ("physics_force", _x_physics_force), ("molar_mass", _x_molar_mass),
+    ("circle", _x_circle), ("pythagorean", _x_pythagorean), ("polygon_angles", _x_polygon_angles),
+    ("physics_force", _x_physics_force), ("kinetic_energy", _x_kinetic_energy),
+    ("molar_mass", _x_molar_mass),
     ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),
     ("compound_interest", _x_compound), ("rule_of_72", _x_rule72),

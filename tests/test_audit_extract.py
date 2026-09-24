@@ -329,6 +329,63 @@ def test_molar_mass_zero_false_positives():
         assert "molar_mass" not in _extractors(t), t
 
 
+# ---- Pythagorean theorem (2026-09-24): "a right triangle with legs 3 and 4 has hypotenuse 5" ----
+
+def test_pythagorean_extracts_and_confirms():
+    for t in ["a right triangle with legs 3 and 4 has hypotenuse 5",
+              "a right triangle with legs of 5 and 12 has a hypotenuse of 13"]:
+        assert "pythagorean" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_pythagorean_catches_a_wrong_claim():
+    res = audit("a right triangle with legs 3 and 4 has hypotenuse 6", CFG, seal=False)  # 5, not 6
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_pythagorean_zero_false_positives():
+    for t in ["the triangle restaurant has great legs of lamb", "legs 3 and 4 of the trip were long"]:
+        assert "pythagorean" not in _extractors(t), t
+
+
+# ---- polygon interior-angle sum (2026-09-24): "a hexagon interior angles sum to 720 degrees" ----
+
+def test_polygon_angles_extracts_and_confirms():
+    for t in ["a hexagon interior angles sum to 720 degrees",
+              "a pentagon interior angles add up to 540 degrees"]:
+        assert "polygon_angles" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_polygon_angles_catches_a_wrong_claim():
+    res = audit("a hexagon interior angles sum to 700 degrees", CFG, seal=False)  # 720, not 700
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_polygon_angles_zero_false_positives():
+    for t in ["the octagon table seats eight", "a hexagon has real interior beauty"]:
+        assert "polygon_angles" not in _extractors(t), t
+
+
+# ---- kinetic energy (2026-09-24): "a 2 kg object at 3 m/s has kinetic energy 9 J" ----
+
+def test_kinetic_energy_extracts_and_confirms():
+    for t in ["a 2 kg object at 3 m/s has kinetic energy 9 J",
+              "a 10 kg mass at 2 m/s has kinetic energy of 20 joules"]:
+        assert "kinetic_energy" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_kinetic_energy_catches_a_wrong_claim():
+    res = audit("a 2 kg object at 3 m/s has kinetic energy 10 J", CFG, seal=False)  # 9, not 10
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_kinetic_energy_zero_false_positives():
+    for t in ["a 2 kg bag of flour on the shelf", "I ran at 3 m/s and felt full of energy"]:
+        assert "kinetic_energy" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))
