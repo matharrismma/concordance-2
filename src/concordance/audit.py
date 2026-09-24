@@ -507,11 +507,58 @@ def _x_kinetic_energy(text: str):
     return out
 
 
+def _x_rectangle(text: str):
+    """"a rectangle 4 by 6 has area 24" / "... has perimeter 20" — routes to geometry.rectangle
+    (A = l·w, P = 2·(l+w); a square is the l=w case). Two dimensions right after the word "rectangle",
+    joined by by/×/x, so it is unambiguous; a wrong area or perimeter breaks honestly with the true
+    value shown. No dimensions, or no area/perimeter claim, means nothing is extracted (a miss stays
+    a miss)."""
+    n = r"(\d[\d,]*(?:\.\d+)?)"
+    approx = r"(?:about|approximately|roughly|around|~|≈)?\s*"
+    dims = (r"rectangle\s+(?:(?:that\s+is|measuring|of|with\s+(?:sides?|dimensions?)\s+of?)\s*)?" +
+            n + r"\s*(?:by|×|x)\s*" + n + r"[^.\n]{0,25}?\b(?:has|is|=|with)\s+(?:an?\s+)?")
+    out = []
+    for m in re.finditer(dims + r"area\s+(?:of\s+)?" + approx + n, text, re.I):
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"rect_length": _f(m.group(1)), "rect_width": _f(m.group(2)),
+                                     "claimed_rect_area": _f(m.group(3))}}))
+    for m in re.finditer(dims + r"perimeter\s+(?:of\s+)?" + approx + n, text, re.I):
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"rect_length": _f(m.group(1)), "rect_width": _f(m.group(2)),
+                                     "claimed_rect_perimeter": _f(m.group(3))}}))
+    return out
+
+
+def _x_kinematics(text: str):
+    """"starting at 5 m/s, accelerating at 2 m/s² for 3 s, it travels 24 m" — routes to
+    physics.kinematic_motion (d = v0·t + ½·a·t²). Anchored by four SI units (m/s, m/s², s, m) in
+    order, so it is unambiguous; a wrong displacement breaks honestly with the true value shown. A
+    bare velocity or acceleration with no full v0-a-t-distance chain extracts nothing."""
+    n = r"(\d[\d,]*(?:\.\d+)?)"
+    approx = r"(?:about|approximately|roughly|around|~|≈)?\s*"
+    mps = r"(?:m/s|meters?\s+per\s+second|metres?\s+per\s+second)"
+    mps2 = (r"(?:m/s\^?2|m/s²|m/s/s|meters?\s+per\s+second\s+squared|"
+            r"metres?\s+per\s+second\s+squared)")
+    pat = (r"start(?:ing|s|ed)?\s+(?:from|at)\s+" + n + r"\s*" + mps +
+           r"[^.\n]{0,30}?accelerat\w*\s+(?:at\s+)?" + n + r"\s*" + mps2 +
+           r"[^.\n]{0,30}?\bfor\s+" + n + r"\s*(?:s\b|sec\b|seconds?\b)" +
+           r"[^.\n]{0,35}?(?:travels?|covers?|moves?|displac\w*|goes?)\s+"
+           r"(?:a\s+distance\s+of\s+|through\s+|of\s+)?" + approx + n + r"\s*(?:m\b|meters?\b|metres?\b)")
+    out = []
+    for m in re.finditer(pat, text, re.I):
+        out.append((_q(text, m), "physics",
+                    {"PHYS_VERIFY": {"v0": _f(m.group(1)), "a": _f(m.group(2)), "t": _f(m.group(3)),
+                                     "claimed_displacement": _f(m.group(4))}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
     ("circle", _x_circle), ("pythagorean", _x_pythagorean), ("polygon_angles", _x_polygon_angles),
+    ("rectangle", _x_rectangle),
     ("physics_force", _x_physics_force), ("kinetic_energy", _x_kinetic_energy),
+    ("kinematics", _x_kinematics),
     ("molar_mass", _x_molar_mass),
     ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),

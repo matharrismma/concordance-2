@@ -386,6 +386,51 @@ def test_kinetic_energy_zero_false_positives():
         assert "kinetic_energy" not in _extractors(t), t
 
 
+# ---- rectangle area / perimeter (2026-09-24): "a rectangle 4 by 6 has area 24" ----
+
+def test_rectangle_extracts_and_confirms():
+    for t in ["a rectangle 4 by 6 has area 24", "a rectangle 4 by 6 has perimeter 20",
+              "a rectangle measuring 5 by 5 has an area of 25"]:
+        assert "rectangle" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_rectangle_catches_a_wrong_claim():
+    res = audit("a rectangle 4 by 6 has area 30", CFG, seal=False)   # 24, not 30
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_rectangle_zero_false_positives():
+    """Two dimensions AND an area/perimeter claim are required; dimensions alone, or none, extract
+    nothing (a miss stays a miss)."""
+    for t in ["a rectangle 4 by 6 is in the corner of the room",   # dims but no area/perimeter claim
+              "the golden rectangle has a pleasing shape"]:        # no numbers at all
+        assert "rectangle" not in _extractors(t), t
+
+
+# ---- 1D kinematics (2026-09-24): "starting at 5 m/s, accelerating at 2 m/s^2 for 3 s, travels 24 m" ----
+
+def test_kinematics_extracts_and_confirms():
+    for t in ["starting at 5 m/s and accelerating at 2 m/s^2 for 3 s covers 24 m",
+              "starting at 10 m/s and accelerating at 4 m/s^2 for 2 s travels 28 m"]:
+        assert "kinematics" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_kinematics_catches_a_wrong_claim():
+    res = audit("starting at 5 m/s and accelerating at 2 m/s^2 for 3 s covers 25 m",
+                CFG, seal=False)   # d = 5*3 + 0.5*2*9 = 24, not 25
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_kinematics_zero_false_positives():
+    """The full v0-a-t-distance chain (four SI units in order) is required; a bare velocity or
+    acceleration mention extracts nothing."""
+    for t in ["starting at 5 m/s we talked for a while",         # v0 only, no accel/time/distance
+              "accelerating at 2 m/s^2 down the hill was fun"]:  # no start velocity or distance
+        assert "kinematics" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))
