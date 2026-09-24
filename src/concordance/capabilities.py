@@ -94,6 +94,16 @@ def _tools(surface: str) -> Dict[str, Any]:
 def _routes() -> Dict[str, Any]:
     from .web import api
     api_gets = sorted(api._API_GET_PATHS)
+    # The machine-readable route map: every HTTP route with its methods and flags, straight from the
+    # one registry (api.ROUTES). So an agent can discover endpoints — INCLUDING the POST routes that
+    # api_get_paths omits (verify/audit/ask/drop/workshop…) — without parsing llms.txt prose. Pure
+    # exposure of what already answers; nothing gated is revealed (authority still checks per request).
+    registry = sorted(
+        ({"path": r["path"], "methods": sorted(r.get("methods", ("GET",))),
+          "api": bool(r.get("api")), "rate_limited": bool(r.get("rl")),
+          "retired": bool(r.get("retired"))}
+         for r in api.ROUTES),
+        key=lambda e: e["path"])
     return {
         "api_get_paths": {"count": len(api_gets), "paths": api_gets,
                           "means": "JSON GET endpoints served by the engine (not static files)"},
@@ -101,6 +111,9 @@ def _routes() -> Dict[str, Any]:
                          "means": "endpoints behind the rate limiter"},
         "registered_routes": {"count": len(api.ROUTES),
                               "means": "entries in the single route registry ROUTES"},
+        "registry": {"count": len(registry), "routes": registry,
+                     "means": "every HTTP route with its methods + flags — the machine-readable map "
+                              "so an agent discovers endpoints (POSTs included) without parsing prose"},
     }
 
 

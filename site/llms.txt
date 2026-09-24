@@ -101,6 +101,12 @@ can shape a structured claim.
 - `GET /search?q=&limit=` — ranked retrieval over the keeping (the kept library).
 - `GET /graph?scope=overview|shelf|card` — the public connection map (every edge carries its seal).
 - `GET /identity` — what this surface is. `GET /health` — status + `schema_active`.
+- `GET /kernel` — the agent-covenant LAW as JSON: the five moves, the authority lattice, the content
+  kinds, and the nine-field gate record. `POST /kernel/gate` pre-checks ONE proposed write against that
+  lattice before you make it. `GET /build.json` — deployment provenance (protocol, active profiles,
+  tool-catalog hash) so you can pin exactly what you are talking to.
+- `GET /capabilities` carries `routes.registry` — **every** route with its methods and flags (the
+  POSTs too), machine-readable, so an agent discovers the whole surface without parsing this file.
 
 ## The Candidate Engine — narrow your OWN candidates without laundering confidence
 When you have generated several plausible answers (sampling, multi-model, tail exploration) and

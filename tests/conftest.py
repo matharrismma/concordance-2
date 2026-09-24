@@ -209,6 +209,20 @@ def real_corpus():
         graph._GRAPH = prior_graph
 
 
+@pytest.fixture(autouse=True)
+def _reset_expand_state():
+    """expand() keeps a process-wide result cache + a global outbound-acquire budget (the F2
+    protection against a /search-miss spray driving uncached archive fetches). Both are module-level,
+    so clear them before EACH test — otherwise one test's cached 'Rigveda' outcome, or its budget
+    increments, leak into the next: exactly the global-cache-race trap this suite guards against."""
+    try:
+        from concordance import expand
+        expand._reset_state()
+    except Exception:  # noqa: BLE001 — the reset is a convenience, never a reason a test cannot run
+        pass
+    yield
+
+
 @pytest.fixture
 def corpus_left_as_found():
     """For tests that REPLACE the corpus singleton with a small fixture of their own.

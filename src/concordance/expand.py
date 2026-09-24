@@ -41,9 +41,36 @@ chore for a person, which is exactly backwards.
 """
 from __future__ import annotations
 
+import threading
+import time
 from typing import Any, Dict, List, Optional
 
 PLANES = ("human", "agent")
+
+# ── PROTECT THE OUTBOUND LANE (agent/bot audit F2, 2026-09-24) ───────────────────────────────
+# A /search (or MCP search) MISS calls expand(), which reaches OUT to the public-domain archives
+# (find.find_and_check) synchronously. Guarded only by offline() and the 600/min read bucket, a
+# client spraying novel queries could amplify each cheap inbound GET into an outbound multi-archive
+# search. Two bounds live here, so the fast (hit) lane is untouched:
+#   * a short-TTL RESULT CACHE keyed on the query — a repeated identical miss is not re-fetched;
+#   * a global ACQUIRE BUDGET — at most _ACQUIRE_MAX outbound attempts per _ACQUIRE_WINDOW_S across
+#     ALL callers; beyond it a miss returns a plain "busy" nothing_found (never a want flood), so a
+#     spray cannot drive unbounded outbound load. Degrades honestly; the first real miss still runs.
+_EXPAND_LOCK = threading.Lock()
+_RESULT_CACHE: Dict[str, Any] = {}     # q_norm -> (ts, outcome)
+_RESULT_TTL_S = 300
+_RESULT_CACHE_MAX = 512
+_ACQUIRE_TIMES: List[float] = []       # timestamps of recent outbound acquisitions (global)
+_ACQUIRE_WINDOW_S = 60
+_ACQUIRE_MAX = 40
+
+
+def _reset_state() -> None:
+    """Clear the outbound-lane cache and budget. The test suite's autouse fixture calls this before
+    every test, so this process-wide state never leaks between tests (the global-cache-race trap)."""
+    with _EXPAND_LOCK:
+        _RESULT_CACHE.clear()
+        _ACQUIRE_TIMES.clear()
 
 
 def offline() -> bool:
@@ -75,6 +102,23 @@ def expand(query: str, config, plane: str = "human",
                 "message": "There is no connection right now, so this is written down and will be "
                            "fetched when there is one."}
 
+    # PROTECT THE OUTBOUND LANE (F2): serve a recent identical miss from cache, and bound the total
+    # outbound acquisition rate so a spray of novel queries cannot amplify into unbounded fetches.
+    q_norm = q.lower()
+    now = time.time()
+    with _EXPAND_LOCK:
+        hit = _RESULT_CACHE.get(q_norm)
+        if hit and now - hit[0] < _RESULT_TTL_S:
+            return dict(hit[1])                       # a recent identical miss — do not re-fetch
+        while _ACQUIRE_TIMES and now - _ACQUIRE_TIMES[0] > _ACQUIRE_WINDOW_S:
+            _ACQUIRE_TIMES.pop(0)
+        if len(_ACQUIRE_TIMES) >= _ACQUIRE_MAX:
+            # the outbound lane is saturated — refuse to amplify, honestly and without a want flood
+            return {"status": "nothing_found", "busy": True,
+                    "message": "The acquire lane is busy right now — this search was not sent out to "
+                               "the archives. Try again shortly."}
+        _ACQUIRE_TIMES.append(now)
+
     from . import find
     try:
         found = find.find_and_check(q, config, plane=plane)
@@ -85,17 +129,22 @@ def expand(query: str, config, plane: str = "human",
     if not found or not (found.get("answer") or docs):
         # WE LOOKED AND THE ARCHIVES HAD NOTHING. That is not a want either: queueing it would ask
         # a person to do what the miners just failed to do. Say so plainly instead.
-        return {"status": "nothing_found",
-                "message": "I went to the public-domain archives for this and they had nothing I "
-                           "could stand behind. I won't invent one."}
-
-    return {"status": "acquired", "plane": plane, "documents": docs,
-            "answer": found.get("answer"), "framed": found.get("framed", ""),
-            "checks": found.get("checks_verdict"), "source_note": found.get("source_note") or "",
-            "held_for_review": True,
-            "message": ("Not in the keeping, so I went and found it — public-domain sources, "
-                        "kept for next time. Carded and waiting for a copyright check before it "
-                        "joins the shared public library.")}
+        outcome = {"status": "nothing_found",
+                   "message": "I went to the public-domain archives for this and they had nothing I "
+                              "could stand behind. I won't invent one."}
+    else:
+        outcome = {"status": "acquired", "plane": plane, "documents": docs,
+                   "answer": found.get("answer"), "framed": found.get("framed", ""),
+                   "checks": found.get("checks_verdict"), "source_note": found.get("source_note") or "",
+                   "held_for_review": True,
+                   "message": ("Not in the keeping, so I went and found it — public-domain sources, "
+                               "kept for next time. Carded and waiting for a copyright check before it "
+                               "joins the shared public library.")}
+    with _EXPAND_LOCK:
+        if len(_RESULT_CACHE) >= _RESULT_CACHE_MAX:
+            _RESULT_CACHE.clear()
+        _RESULT_CACHE[q_norm] = (now, dict(outcome))
+    return outcome
 
 
 _PD_YEAR_CEILING = 1928          # unambiguously public domain in the US as of 2026

@@ -177,6 +177,18 @@ def test_derived_sets_match_history():
         f"extra={set(api.RATELIMITED) - GOLDEN_RATELIMITED}")
 
 
+def test_capabilities_exposes_a_machine_readable_route_registry():
+    """F1 (agent/bot audit, 2026-09-24): an agent can discover every route + its methods
+    programmatically — including the POST routes that api_get_paths omits — via the routes.registry
+    block of /capabilities, rather than parsing llms.txt prose."""
+    from concordance import capabilities
+    reg = capabilities._routes()["registry"]
+    assert reg["count"] == len(api.ROUTES)
+    by_path = {e["path"]: e for e in reg["routes"]}
+    assert "/verify" in by_path and "POST" in by_path["/verify"]["methods"]      # a POST route, now visible
+    assert "/workshop" in by_path and set(by_path["/workshop"]["methods"]) >= {"GET", "POST"}
+
+
 def test_scan_cache_serves_then_invalidates_on_a_corpus_change(monkeypatch):
     # The whole-corpus scan routes are cached per corpus VERSION: fast on repeat, but NEVER stale — the
     # instant the corpus changes (its version token shifts), the cache misses and recomputes.

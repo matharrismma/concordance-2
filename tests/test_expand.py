@@ -43,6 +43,49 @@ def test_expand_offline_opens_a_want(monkeypatch):
     assert r["status"] == "queued" and r["want_id"] == "w7" and r["ok"] is True
 
 
+# ---- F2: protect the outbound lane (agent/bot audit, 2026-09-24) ----
+
+def test_a_repeated_miss_is_served_from_cache_not_refetched(monkeypatch):
+    """A /search miss reaches out to the archives; the IDENTICAL repeat must not re-fetch — otherwise
+    a bot re-asking the same missing query amplifies each ask into an outbound search."""
+    expand._reset_state()
+    calls = {"n": 0}
+
+    def fake(q, cfg, plane="human"):
+        calls["n"] += 1
+        return {"documents": [], "answer": None}      # it reached out; the archives had nothing
+
+    monkeypatch.setattr(expand, "offline", lambda: False)
+    monkeypatch.setattr(find, "find_and_check", fake)
+    assert expand.expand("Rigveda", config=None)["status"] == "nothing_found"
+    assert expand.expand("Rigveda", config=None)["status"] == "nothing_found"
+    assert calls["n"] == 1, "the identical repeat should be served from cache, not re-fetched"
+
+
+def test_the_outbound_budget_caps_a_spray_of_novel_queries(monkeypatch):
+    """A spray of DISTINCT queries cannot drive unbounded outbound acquisitions: beyond the global
+    budget, expand refuses to send out (busy) rather than amplify — and never floods the want list."""
+    expand._reset_state()
+    calls = {"n": 0}
+
+    def fake(q, cfg, plane="human"):
+        calls["n"] += 1
+        return {"documents": [], "answer": None}
+
+    monkeypatch.setattr(expand, "offline", lambda: False)
+    monkeypatch.setattr(find, "find_and_check", fake)
+    sent = busy = 0
+    for i in range(expand._ACQUIRE_MAX + 10):
+        r = expand.expand(f"novel-query-{i}", config=None)
+        if r.get("busy"):
+            busy += 1
+        else:
+            sent += 1
+    assert sent == expand._ACQUIRE_MAX, f"budget should cap outbound at {expand._ACQUIRE_MAX}, sent {sent}"
+    assert calls["n"] == expand._ACQUIRE_MAX, "no outbound call past the budget"
+    assert busy == 10, "the overflow was refused (busy), not sent out"
+
+
 def test_expand_online_acquires_when_the_slow_lane_finds(monkeypatch):
     monkeypatch.setattr(expand, "offline", lambda: False)
     monkeypatch.setattr(find, "find_and_check",

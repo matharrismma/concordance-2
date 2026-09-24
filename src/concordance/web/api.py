@@ -3349,7 +3349,8 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                     b = ("# Narrow Highway — a public verification engine.\n"
                          "# Agents: read /llms.txt, then use /search and /card. No login, and\n"
                          "# nothing here records who read what.\n"
-                         "User-agent: *\nAllow: /\nDisallow: /keep\nDisallow: /keep.html\n\n"
+                         "User-agent: *\nAllow: /\nDisallow: /keep\nDisallow: /keep.html\n"
+                         "Disallow: /improve\nDisallow: /improve.html\n\n"
                          "# SEO backlink crawlers — this capacity belongs to readers.\n"
                          + "".join(f"User-agent: {n}\nDisallow: /\n" for n in seo)
                          + f"\nSitemap: {base}/sitemap.xml\n").encode("utf-8")
