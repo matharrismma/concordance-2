@@ -63,7 +63,7 @@ _DECKS: List[Dict[str, Any]] = [
                   "night", "nebula", "orbit", "celestial", "astronomy", "cosmos"}},
     {"id": "matter", "name": "Matter & the Atom",
      "desc": "The nuclides, the elements and the physical laws.",
-     "shelves": {"nuclear physics", "chemistry", "physics"},
+     "shelves": {"nuclear_physics", "chemistry", "physics"},
      "keywords": {"nuclide", "isotope", "half", "life", "element", "atom", "atomic", "decay",
                   "radioactive", "proton", "neutron", "physics", "chemistry", "reaction", "energy"}},
     {"id": "earth", "name": "The Earth & its Places",

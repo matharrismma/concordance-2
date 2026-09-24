@@ -43,7 +43,7 @@ _ENUM_RE = re.compile(r"^(chapter|verse|book|q|section|part|episode)[ _]?\d+$")
 _VERSEREF_RE = re.compile(r"\b\d?\s?[a-z]+ \d+:\d+\b")
 _SEAL_RE = re.compile(r"/s/([0-9a-f]{8,})")
 _THEME_MIN_SITES = 3          # Deut 19:15 + one — a theme binds only if it reaches 3+ sites
-_CONTENT_KINDS = {"note", "walk"}
+_CONTENT_KINDS = {"note"}
 
 
 def _data_dir() -> Path:

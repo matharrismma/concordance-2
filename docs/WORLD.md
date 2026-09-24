@@ -128,8 +128,10 @@ pattern), not only through the hub.
 One engine; the surface is chosen by host and carried as `EngineConfig(surface)`. `home_for()` in
 [`web/api.py`](../src/concordance/web/api.py) serves a different landing per surface.
 
-- **`.com` — the reach (secular).** `/` = [`com.html`](../site/com.html): the live "check a claim"
-  instrument, the domain breadth, the receipt, the API/agent door — numbers **live-wired** from
+- **`.com` — the reach (secular).** `/` = [`concordance.html`](../site/concordance.html): "a guide to what
+  is true" — the discern-anything box over the live engine (the flip landed 2026-09-21, `home_for`). The
+  manifesto/breadth page [`com.html`](../site/com.html) — the live "check a claim" instrument, the domain
+  breadth, the receipt, the API/agent door — sits behind it at `/com.html`; numbers **live-wired** from
   `/capabilities`. The **Atlas** (§5) is embedded as the centerpiece.
 - **`.org` — the witness.** `/` = [`index.html`](../site/index.html) (the cream "book"): *"Christ is the
   center. The Word is the foundation."* — Scripture in the original Hebrew/Greek, pointing past itself to

@@ -217,7 +217,7 @@ _WORD = re.compile(r"[A-Za-z0-9']{2,}")
 # Which shard a shelf belongs to. Anything unlisted falls to `core` (the small, always-thawed map).
 SHARD_ASSIGN = {
     "hebrew_ot": "word", "greek_nt": "word", "lexicon": "word", "commentary": "word", "sermons": "word",
-    "taxonomy": "science", "oeis": "science", "languages": "science", "nuclear physics": "science",
+    "taxonomy": "science", "oeis": "science", "languages": "science", "nuclear_physics": "science",
     "astronomy": "science", "chemistry": "science", "physics": "science",
     "geography": "world", "economics": "world", "networking": "world", "rfcs": "world",
     "medicine": "world", "nutrition": "world", "activities": "world", "drugs": "world", "foods": "world",
