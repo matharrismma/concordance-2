@@ -1,41 +1,47 @@
 #!/usr/bin/env python3
-"""Card the languages of the earth — PHOIBLE. Academics (linguistics) first.
+"""RETIRED 2026-09-24 — do not run. Kept for the record only.
 
-Matt: "Keep expanding the corpus. Academics first." PHOIBLE 2.0 (with Glottolog classification) holds
-the phonological inventory of 2,177 of the world's languages — each with its family, region, and the
-actual consonants, vowels and tones it uses. This mints one card per language: the tongues of the
-earth catalogued (Genesis 11 scattered them; Acts 2 gathered them again).
+PHOIBLE 2.0 is CC-BY-SA 3.0 (viral copyleft), which the license gate refuses: it is on
+`corpus._DISALLOWED_SOURCE`, so its cards were minted but NEVER publicly served. The languages deck is
+now seeded LICENSE-CLEAN from Glottolog CC-BY 4.0 via `tools/card_glottolog.py` (family & region; the
+phoneme inventories stay out). This seeder will NOT run: re-running it would overwrite
+`data/language_cards.jsonl` with the withheld PHOIBLE cards and dark the languages deck on the next
+shard rebuild. It is preserved as the documentary record of the PHOIBLE attempt and why it was refused.
 
-Conduit, not source: each card is a real PHOIBLE/Glottolog entry, attributed, generated=False. Nested
-under a languages spine → the Floor of Discovery. Card file gitignored; spine git-tracked. Re-runnable.
-
-    CONCORDANCE_LW_BASE=D:/nh-backup/mirror/repo/lw/00_source python tools/card_phoible.py
+(Original intent: PHOIBLE 2.0 + Glottolog — the phonological inventory of 2,177 languages, one card
+each. The scattering of Babel, catalogued. Blocked on license, not on merit.)
 """
 from __future__ import annotations
 
-import json
-import os
-import re
 import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-
-FLOOR = "card_k_floor_of_discovery"
-SPINE = "card_spine_languages"
-_slug = re.compile(r"[^a-z0-9]+")
-
-
-def _sk(*p):
-    return _slug.sub("_", "-".join(str(x) for x in p).lower()).strip("_")
-
-
-def _base() -> Path:
-    b = os.environ.get("CONCORDANCE_LW_BASE", "").strip()
-    return Path(b) if b else Path("D:/nh-backup/mirror/repo/lw/00_source")
 
 
 def main() -> int:
+    print("RETIRED: card_phoible.py does not run. PHOIBLE is CC-BY-SA 3.0 — refused by the license "
+          "gate (corpus._DISALLOWED_SOURCE) and never publicly served. The languages deck is seeded "
+          "license-clean from Glottolog CC-BY 4.0 via tools/card_glottolog.py. Re-running this would "
+          "overwrite data/language_cards.jsonl with withheld cards and dark the deck.")
+    return 2
+
+
+def _retired_original() -> int:
+    """The original PHOIBLE seeder, kept unreachable for the record. Never called."""
+    import json
+    import os
+    import re
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+    FLOOR = "card_k_floor_of_discovery"
+    SPINE = "card_spine_languages"
+    _slug = re.compile(r"[^a-z0-9]+")
+
+    def _sk(*p):
+        return _slug.sub("_", "-".join(str(x) for x in p).lower()).strip("_")
+
+    def _base() -> Path:
+        b = os.environ.get("CONCORDANCE_LW_BASE", "").strip()
+        return Path(b) if b else Path("D:/nh-backup/mirror/repo/lw/00_source")
+
     src = _base() / "phoible" / "phoible_index.json"
     if not src.exists():
         print(f"phoible index not found: {src}"); return 1
