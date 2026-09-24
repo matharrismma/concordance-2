@@ -163,6 +163,39 @@ the work above is trimming the overgrowth around them, not rebuilding.
 
 ---
 
+## 7. `corpus_db.py` shard rebuild — ✅ DONE 2026-09-24 (runbook kept for next time)
+
+**Executed in a ~48s full maintenance window** (both services stopped → 7.1 GB free → build 688,857
+cards in 13s → verify `moved True` → swap → restart). Result: `science` 49,312→52,698 (+nuclides),
+`nuclear_physics` gone from `core`; live nuclide queries (uranium-238, carbon-14) return results;
+both faces 200; `data/shards.old` kept as rollback. `corpus_db.py` is now deployed + box==repo.
+The runbook below stands for the next SHARD_ASSIGN change:
+
+`corpus_db.SHARD_ASSIGN` now reads `nuclear_physics` (underscore), moving ~3,385 nuclide cards from
+the always-thawed `core` shard to `science`. The pre-built `data/shards/*.db` on the box were built
+under the OLD assignment (nuclides in `core`), so **deploying `corpus_db.py` alone would make
+`shard_of("nuclear_physics")` point at `science.db`, which does not yet contain them** — a silent
+nuclide-retrieval gap. `tools/build_corpus_db.py` places each card via `corpus_db.shard_of()`, so the
+fix and the shards must land together, new-file-first:
+
+1. Stage the NEW `corpus_db.py` on the box **without a restart** (plain `scp`/`tar`, not `deploy.sh`).
+2. Free RAM for the heavy load — the builder loads the full ~2.7 GB corpus resident (it disarms
+   `CONCORDANCE_FREEZE_SHELVES` for itself). On the RAM-tight box, `sudo systemctl stop nh-org` first
+   (the witness), so only one service holds a corpus during the build.
+3. Build to a SIDE dir so live shards are untouched mid-build:
+   `cd /home/nh/concordance-2 && PYTHONPATH=src python tools/build_corpus_db.py --out data/shards.new`
+4. Sanity-check `data/shards.new/manifest.json`: the `science` shard's `shelves` now include
+   `nuclear_physics` and its card count rose by ~3,385; `core` fell by the same.
+5. Swap + restart: `mv data/shards data/shards.old && mv data/shards.new data/shards`, then
+   `sudo systemctl restart nh-org nh-com-2`.
+6. Verify live: a nuclide query (e.g. `/search?q=uranium-238`) returns results. Keep `data/shards.old`
+   as the rollback until confirmed.
+
+Heavy + RAM-risky on the live box — run at low traffic, with a person watching. Until then the fix
+stays committed-but-undeployed and the box keeps the (working) old behaviour: nuclides resident in `core`.
+
+---
+
 *Current state (2026-09-23): **Step 1 executed and committed** — the sitemap pruned of its 19 retired
 entries, the `nuclear physics`→`nuclear_physics` typo fixed in `decks.py` AND `corpus_db.SHARD_ASSIGN`,
 the dead `walk` kind removed, and the `WORLD.md` §4 front-door line corrected (§6). The deck-layer
