@@ -431,6 +431,63 @@ def test_kinematics_zero_false_positives():
         assert "kinematics" not in _extractors(t), t
 
 
+# ---- sphere volume / surface area (2026-09-25): "a sphere of radius 3 has volume 113.1" ----
+
+def test_sphere_extracts_and_confirms():
+    for t in ["a sphere of radius 3 has volume 113.1",
+              "a sphere of radius 5 has surface area 314.16"]:
+        assert "sphere" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_sphere_catches_a_wrong_claim():
+    res = audit("a sphere of radius 3 has volume 120", CFG, seal=False)   # ~113.1, not 120
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_sphere_zero_false_positives():
+    for t in ["the sphere of influence had no radius", "a sphere of radius 3 has real beauty"]:
+        assert "sphere" not in _extractors(t), t
+
+
+# ---- cube volume / surface area (2026-09-25): "a cube with side 3 has volume 27" ----
+
+def test_cube_extracts_and_confirms():
+    for t in ["a cube with side 3 has volume 27", "a cube of edge 4 has surface area 96"]:
+        assert "cube" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_cube_catches_a_wrong_claim():
+    res = audit("a cube with side 3 has volume 30", CFG, seal=False)   # 27, not 30
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_cube_zero_false_positives():
+    """Side/edge phrasing only, so the cube ROOT of a number is never mistaken for a cube solid."""
+    for t in ["the cube root of 27 is 3", "a cube of sugar sweetened the coffee"]:
+        assert "cube" not in _extractors(t), t
+
+
+# ---- cylinder volume (2026-09-25): "a cylinder of radius 3 and height 5 has volume 141.37" ----
+
+def test_cylinder_extracts_and_confirms():
+    for t in ["a cylinder of radius 3 and height 5 has volume 141.37",
+              "a cylinder with radius 2 and height 10 has volume 125.66"]:
+        assert "cylinder" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_cylinder_catches_a_wrong_claim():
+    res = audit("a cylinder of radius 3 and height 5 has volume 150", CFG, seal=False)  # ~141.37
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_cylinder_zero_false_positives():
+    for t in ["the engine has six cylinders", "a cylinder of compressed air stood in the corner"]:
+        assert "cylinder" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))

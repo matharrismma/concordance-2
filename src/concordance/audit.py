@@ -552,11 +552,67 @@ def _x_kinematics(text: str):
     return out
 
 
+def _x_sphere(text: str):
+    """"a sphere of radius 3 has volume 113.1" / "... has surface area 314.16" — routes to
+    geometry.sphere (V = 4/3·πr³, A = 4πr²; rel tol 1e-4, so ordinary rounding holds). Radius phrasing
+    only; a wrong value breaks honestly with the true one shown."""
+    n = r"(\d[\d,]*(?:\.\d+)?)"
+    approx = r"(?:about|approximately|roughly|around|~|≈)?\s*"
+    rad = r"sphere\s+(?:of|with)\s+(?:an?\s+)?radius\s+(?:of\s+)?" + n + r"\s+has\s+(?:an?\s+)?"
+    out = []
+    for m in re.finditer(rad + r"volume\s+(?:of\s+)?" + approx + n, text, re.I):
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"sphere_radius": _f(m.group(1)),
+                                     "claimed_sphere_volume": _f(m.group(2))}}))
+    for m in re.finditer(rad + r"surface\s+area\s+(?:of\s+)?" + approx + n, text, re.I):
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"sphere_radius": _f(m.group(1)),
+                                     "claimed_sphere_surface_area": _f(m.group(2))}}))
+    return out
+
+
+def _x_cube(text: str):
+    """"a cube with side 3 has volume 27" / "... has surface area 54" — routes to geometry.cube
+    (V = s³, A = 6s²). Side/edge phrasing only, so the cube ROOT of a number ("the cube root of 27 is
+    3") is never mistaken for it; a wrong value breaks honestly."""
+    n = r"(\d[\d,]*(?:\.\d+)?)"
+    approx = r"(?:about|approximately|roughly|around|~|≈)?\s*"
+    side = (r"cube\s+(?:of|with)\s+(?:an?\s+)?(?:side|edge)\s+(?:lengths?\s+)?(?:of\s+)?" + n +
+            r"\s+has\s+(?:an?\s+)?")
+    out = []
+    for m in re.finditer(side + r"volume\s+(?:of\s+)?" + approx + n, text, re.I):
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"cube_side": _f(m.group(1)),
+                                     "claimed_cube_volume": _f(m.group(2))}}))
+    for m in re.finditer(side + r"surface\s+area\s+(?:of\s+)?" + approx + n, text, re.I):
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"cube_side": _f(m.group(1)),
+                                     "claimed_cube_surface_area": _f(m.group(2))}}))
+    return out
+
+
+def _x_cylinder(text: str):
+    """"a cylinder of radius 3 and height 5 has volume 141.37" — routes to geometry.cylinder
+    (V = πr²h; rel tol 1e-4). Radius-and-height phrasing only, so it is unambiguous; a wrong volume
+    breaks honestly."""
+    n = r"(\d[\d,]*(?:\.\d+)?)"
+    approx = r"(?:about|approximately|roughly|around|~|≈)?\s*"
+    dims = (r"cylinder\s+(?:of|with)\s+(?:an?\s+)?radius\s+(?:of\s+)?" + n +
+            r"\s+and\s+(?:an?\s+)?height\s+(?:of\s+)?" + n + r"\s+has\s+(?:an?\s+)?"
+            r"volume\s+(?:of\s+)?" + approx + n)
+    out = []
+    for m in re.finditer(dims, text, re.I):
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"cyl_radius": _f(m.group(1)), "cyl_height": _f(m.group(2)),
+                                     "claimed_cyl_volume": _f(m.group(3))}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
     ("circle", _x_circle), ("pythagorean", _x_pythagorean), ("polygon_angles", _x_polygon_angles),
-    ("rectangle", _x_rectangle),
+    ("rectangle", _x_rectangle), ("sphere", _x_sphere), ("cube", _x_cube), ("cylinder", _x_cylinder),
     ("physics_force", _x_physics_force), ("kinetic_energy", _x_kinetic_energy),
     ("kinematics", _x_kinematics),
     ("molar_mass", _x_molar_mass),
