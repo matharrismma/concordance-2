@@ -48,7 +48,7 @@ def _relevant(query: str, search_fn=None, relevant_fn=None) -> list:
     miss. Injectable so the seed stays pure in tests; defaults to the real corpus + ask's own floor."""
     if search_fn is None:
         from . import corpus
-        search_fn = corpus.search
+        search_fn = corpus.search_question   # strip the question frame to the subject before matching
     if relevant_fn is None:
         from . import ask
         relevant_fn = ask._title_names_subject
