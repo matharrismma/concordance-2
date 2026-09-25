@@ -16,6 +16,7 @@ the 2.0 verifiers (no agent_manifest indirection).
 from __future__ import annotations
 
 import concurrent.futures as _futures
+import copy
 import json
 import logging
 import os
@@ -41,6 +42,23 @@ def _spec_hash(spec: Any) -> str:
         return sha256_bytes(canonical_json_bytes(spec if isinstance(spec, dict) else {"_": spec}))
     except Exception:  # noqa: BLE001 — a fingerprint must never break a verdict
         return sha256_bytes(repr(spec).encode("utf-8"))
+
+
+def _set_spec_path(spec: Dict[str, Any], path: str, value: Any) -> None:
+    """Set spec[...path...] = value for value-binding (3b). `path` is a dotted key into the spec —
+    "field", "WRAPPER.field", or "params.field" (depth-bounded). Intermediate non-dicts are replaced
+    with dicts. Mutates `spec` (always a caller-owned deep copy)."""
+    parts = [p for p in str(path).split(".") if p]
+    if not parts:
+        return
+    d = spec
+    for p in parts[:-1]:
+        nxt = d.get(p)
+        if not isinstance(nxt, dict):
+            nxt = {}
+            d[p] = nxt
+        d = nxt
+    d[parts[-1]] = value
 
 # DoS guards: reject oversized expressions before sympy sees them, and bound compute time
 # so a pathological-but-small expression cannot pin a request thread forever.
@@ -127,7 +145,7 @@ def verify_math(spec: Dict[str, Any]) -> Dict[str, str]:
     except _Saturated:
         _log.warning("verify pool saturated mode=%s — shed to ERROR (errs safe)", mode)
         return {"status": "ERROR", "detail": "verifier busy (too many concurrent verifications) — retry shortly"}
-    return {"status": res.status, "detail": (res.detail or "")[:300]}
+    return {"status": res.status, "detail": (res.detail or "")[:300], "data": dict(res.data or {})}
 
 
 def _reduce_domain_results(results: List[Any]) -> Dict[str, str]:
@@ -139,14 +157,23 @@ def _reduce_domain_results(results: List[Any]) -> Dict[str, str]:
     if not applicable:
         return {"status": "NOT_APPLICABLE",
                 "detail": "no applicable secular verifier for this domain/artifact"}
+    # merged verifier outputs, so a later step can BIND to a confirmed prior result (3b). Only ever read
+    # for a CONFIRMED source (verify_derivation gates that), so merging all applicable data is harmless.
+    merged: Dict[str, Any] = {}
+    for r in applicable:
+        if getattr(r, "data", None):
+            merged.update(r.data)
     mism = [r for r in applicable if r.status == "MISMATCH"]
     if mism:
-        return {"status": "MISMATCH", "detail": "; ".join(f"{r.name}: {r.detail}" for r in mism)[:300]}
+        return {"status": "MISMATCH", "detail": "; ".join(f"{r.name}: {r.detail}" for r in mism)[:300],
+                "data": merged}
     errs = [r for r in applicable if r.status == "ERROR"]
     if errs:
-        return {"status": "ERROR", "detail": "; ".join(f"{r.name}: {r.detail}" for r in errs)[:300]}
+        return {"status": "ERROR", "detail": "; ".join(f"{r.name}: {r.detail}" for r in errs)[:300],
+                "data": merged}
     return {"status": "CONFIRMED",
-            "detail": "; ".join(f"{r.name}: {r.detail}" for r in applicable if r.passed)[:300]}
+            "detail": "; ".join(f"{r.name}: {r.detail}" for r in applicable if r.passed)[:300],
+            "data": merged}
 
 
 def verify_domain(domain: str, spec: Dict[str, Any]) -> Dict[str, str]:
@@ -213,6 +240,7 @@ def verify_derivation(steps: List[Dict[str, Any]]) -> Dict[str, Any]:
     confirmed_ids: set = set()
     outcome_by_id: Dict[str, str] = {}   # sid -> effective outcome (CONFIRMED|BROKEN|ERROR|GAP)
     domain_by_id: Dict[str, str] = {}    # sid -> domain, so a cross-domain `uses` edge can be gated
+    data_by_id: Dict[str, Dict[str, Any]] = {}  # sid -> a CONFIRMED step's verifier outputs, for value-binding
     broken_at = None
     gap_at = None
     error_at = None
@@ -235,24 +263,55 @@ def verify_derivation(steps: List[Dict[str, Any]]) -> Dict[str, Any]:
         spec = step.get("spec") or {}
         uses = [str(u) for u in (step.get("uses") or [])]
 
+        # VALUE-BINDING (3b): a step may BUILD an input from a CONFIRMED prior step's output —
+        # bind = {"<spec path>": "<srcId>.<outputKey>"} (outputKey defaults to "actual"). A bind IS a
+        # dependency, so its source joins `uses`. Fail-closed: if the source is not confirmed or the
+        # output key is absent, the binding is UNRESOLVED and the step is NOT verified with a fabricated
+        # value — it becomes a GAP, never a guessed HOLDS and never a MISMATCH manufactured from our own
+        # inability to resolve a ref. Substitution is into a deep copy, so the caller's spec is never
+        # mutated and the spec_hash below binds the seal to exactly what was checked.
+        bind = step.get("bind")
+        unresolved: List[str] = []
+        if isinstance(bind, dict) and bind:
+            spec = copy.deepcopy(spec)
+            for path, ref in bind.items():
+                src_id, _, key = str(ref).partition(".")
+                key = key or "actual"
+                if src_id not in uses:
+                    uses.append(src_id)
+                src_data = data_by_id.get(src_id)
+                if src_id not in confirmed_ids or not isinstance(src_data, dict) or key not in src_data:
+                    unresolved.append("%s<-%s" % (path, ref))
+                    continue
+                _set_spec_path(spec, str(path), src_data[key])
+
         missing = [u for u in uses if u not in seen_ids]
         unconfirmed = [u for u in uses if u in seen_ids and u not in confirmed_ids]
-        link_ok = not missing and not unconfirmed
+        link_ok = not missing and not unconfirmed and not unresolved
 
-        sr = verify_step(domain, spec)
+        if unresolved:
+            # the step could not be BUILT — we cannot check what we could not assemble. A gap, never a
+            # false verdict; the dependency gating below still records what it stood on.
+            sr: Dict[str, Any] = {"status": "NOT_APPLICABLE",
+                                  "detail": "unresolved binding(s): " + ", ".join(unresolved), "data": {}}
+        else:
+            sr = verify_step(domain, spec)
         st = sr["status"]
 
         entry: Dict[str, Any] = {
             "id": sid, "domain": domain, "claim": str(step.get("claim", "")),
             "uses": uses, "status": st, "detail": sr.get("detail", ""), "link_ok": link_ok,
-            # the fingerprint of exactly what was checked — travels into the seal so the verdict
-            # is bound to its artifact, not to the free-text claim label a caller supplied.
+            # the fingerprint of exactly what was checked — travels into the seal so the verdict is bound
+            # to its artifact, not the free-text label. For a bound step this is the SUBSTITUTED spec, so
+            # the seal binds to what was actually verified.
             "spec_hash": _spec_hash(spec),
         }
         if missing:
             entry["missing_refs"] = missing
         if unconfirmed:
             entry["builds_on_unconfirmed"] = unconfirmed
+        if unresolved:
+            entry["unresolved_binding"] = unresolved
         trail.append(entry)
         seen_ids.add(sid)
         domain_by_id[sid] = domain
@@ -295,6 +354,7 @@ def verify_derivation(steps: List[Dict[str, Any]]) -> Dict[str, Any]:
         outcome_by_id[sid] = outcome
         if outcome == "CONFIRMED":
             confirmed_ids.add(sid)
+            data_by_id[sid] = sr.get("data") or {}   # this step's outputs, available to bind downstream
         elif outcome == "BROKEN":
             if broken_at is None:
                 broken_at = sid

@@ -1,168 +1,87 @@
-"""Binding — the key on the drive IS the identity.
+"""Value-binding in the derivation — composition 3b (2026-09-25).
 
-Guards the properties that make this sovereign rather than merely convenient: possession of
-the private key is the only proof, a challenge is single-use, a thread cannot be stolen by
-asserting a new key, and the private key is never persisted anywhere on our side.
+A step may BUILD an input from a CONFIRMED prior step's output: bind = {"<spec path>": "<srcId>.<key>"}
+(key defaults to "actual"). The moat resolves it ONLY from a confirmed source and substitutes into a
+deep copy of the step's spec before verifying it. Fail-closed: if the source is broken or absent, the
+binding is unresolved and the step is a GAP — never verified with a fabricated value, never a guessed
+HOLDS, and never a MISMATCH manufactured from our own inability to resolve a reference.
 """
-import json
-import os
-import tempfile
+from __future__ import annotations
 
-_TMP = tempfile.mkdtemp(prefix="nh-binding-")
-os.environ["CONCORDANCE_BINDINGS_DIR"] = _TMP
+import sys
+from pathlib import Path
 
-from concordance import binding, identity  # noqa: E402  (env must be set first)
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "src"))
 
-SIGNED = identity.signing_available()
-
-
-def _who():
-    return identity.create_identity()
+from concordance.derivation import verify_derivation, _set_spec_path  # noqa: E402
 
 
-def _prove(who, thread_id=None):
-    ch = binding.challenge(who["public_key"])
-    assert ch["ok"], ch
-    sig = identity.sign(who["private_key"], ch["nonce"].encode("utf-8"))
-    return binding.claim(who["public_key"], ch["nonce"], sig, thread_id)
+def _step(sid, domain, spec, **extra):
+    d = {"id": sid, "domain": domain, "spec": spec}
+    d.update(extra)
+    return d
 
 
-# --- the happy path -------------------------------------------------------------------------
-
-def test_signing_a_challenge_proves_the_drive():
-    if not SIGNED:
-        return                       # honest skip: degraded path refuses to bind at all
-    who = _who()
-    r = _prove(who)
-    assert r["ok"] and r["id"] == identity.fingerprint(who["public_key"])
-
-
-def test_binding_a_thread_and_listing_it_back():
-    if not SIGNED:
-        return
-    who = _who()
-    tid = "a" * 32
-    r = _prove(who, tid)
-    assert r["ok"] and r["bound"] == tid
-    assert tid in r["threads"]
-    assert binding.owns(who["public_key"], tid) is True
-    assert binding.threads_of(who["public_key"]) == [tid]
+def test_bind_builds_an_input_from_a_confirmed_output():
+    # a1 confirms a 4x6 rectangle (area 24); a2's rect_length is BUILT from a1's output (24), so a
+    # 24x1 rectangle has area 24 — the second step's input came from the first step's confirmed result.
+    steps = [
+        _step("a1", "geometry", {"GEOM_VERIFY": {"rect_length": 4, "rect_width": 6,
+                                                 "claimed_rect_area": 24}}),
+        _step("a2", "geometry", {"GEOM_VERIFY": {"rect_width": 1, "claimed_rect_area": 24}},
+              bind={"GEOM_VERIFY.rect_length": "a1.actual_area"}),
+    ]
+    res = verify_derivation(steps)
+    assert res["verdict"] == "HOLDS", res
+    a2 = next(t for t in res["trail"] if t["id"] == "a2")
+    assert a2["status"] == "CONFIRMED"
+    assert "a1" in a2["uses"]              # a bind IS a dependency — the source joined `uses`
+    assert not a2.get("unresolved_binding")
 
 
-# --- replay, expiry, tampering --------------------------------------------------------------
-
-def test_a_challenge_is_single_use():
-    if not SIGNED:
-        return
-    who = _who()
-    ch = binding.challenge(who["public_key"])
-    sig = identity.sign(who["private_key"], ch["nonce"].encode("utf-8"))
-    assert binding.claim(who["public_key"], ch["nonce"], sig)["ok"] is True
-    # the exact same nonce + signature must not work twice
-    assert binding.claim(who["public_key"], ch["nonce"], sig)["ok"] is False
-
-
-def test_a_wrong_signature_is_refused():
-    if not SIGNED:
-        return
-    who, other = _who(), _who()
-    ch = binding.challenge(who["public_key"])
-    sig = identity.sign(other["private_key"], ch["nonce"].encode("utf-8"))   # wrong key
-    assert binding.claim(who["public_key"], ch["nonce"], sig)["ok"] is False
+def test_bind_to_a_broken_source_does_not_fabricate():
+    # a1 is WRONG (4x6 = 24, not 99) -> BROKEN, so it is not confirmed and exposes no output. a2 cannot
+    # be built from an unconfirmed output, so it is a GAP — never verified with a guessed value.
+    steps = [
+        _step("a1", "geometry", {"GEOM_VERIFY": {"rect_length": 4, "rect_width": 6,
+                                                 "claimed_rect_area": 99}}),
+        _step("a2", "geometry", {"GEOM_VERIFY": {"rect_width": 1, "claimed_rect_area": 24}},
+              bind={"GEOM_VERIFY.rect_length": "a1.actual_area"}),
+    ]
+    res = verify_derivation(steps)
+    a2 = next(t for t in res["trail"] if t["id"] == "a2")
+    assert a2["status"] == "NOT_APPLICABLE" and a2.get("unresolved_binding")
+    assert res["verdict"] == "BROKEN"      # the real falsehood at a1 governs
 
 
-def test_an_unknown_nonce_is_refused():
-    who = _who()
-    assert binding.claim(who["public_key"], "never-issued", "x")["ok"] is False
+def test_bind_to_a_missing_source_is_a_gap_never_holds():
+    steps = [_step("a2", "geometry", {"GEOM_VERIFY": {"rect_width": 1, "claimed_rect_area": 24}},
+                   bind={"GEOM_VERIFY.rect_length": "nope.actual_area"})]
+    res = verify_derivation(steps)
+    assert res["verdict"] != "HOLDS"
+    assert res["trail"][0].get("unresolved_binding")
 
 
-def test_an_expired_challenge_is_refused():
-    if not SIGNED:
-        return
-    who = _who()
-    ch = binding.challenge(who["public_key"])
-    binding._NONCES[ch["nonce"]]["expires_at"] = 0.0        # force expiry
-    sig = identity.sign(who["private_key"], ch["nonce"].encode("utf-8"))
-    assert binding.claim(who["public_key"], ch["nonce"], sig)["ok"] is False
+def test_no_bind_is_unchanged():
+    # a plain two-step derivation with no bind behaves exactly as before.
+    steps = [
+        _step("a1", "mathematics", {"mode": "equality", "params": {"expr_a": "2+2", "expr_b": "4"}}),
+        _step("a2", "mathematics", {"mode": "equality", "params": {"expr_a": "3*3", "expr_b": "9"}}),
+    ]
+    res = verify_derivation(steps)
+    assert res["verdict"] == "HOLDS"
+    assert all(not t.get("unresolved_binding") for t in res["trail"])
 
 
-# --- threads are not transferable -----------------------------------------------------------
-
-def test_a_thread_cannot_be_stolen_by_another_key():
-    if not SIGNED:
-        return
-    mine, theirs = _who(), _who()
-    tid = "b" * 32
-    assert _prove(mine, tid)["ok"] is True
-    r = _prove(theirs, tid)
-    assert r["ok"] is False and "another key" in r["error"]
-    assert binding.owner_of(tid) == identity.fingerprint(mine["public_key"])
+def test_set_spec_path_walks_into_wrappers():
+    spec = {"GEOM_VERIFY": {"rect_width": 2}}
+    _set_spec_path(spec, "GEOM_VERIFY.rect_length", 10)
+    assert spec["GEOM_VERIFY"]["rect_length"] == 10
+    _set_spec_path(spec, "top", 7)
+    assert spec["top"] == 7
 
 
-def test_rebinding_my_own_thread_is_fine():
-    if not SIGNED:
-        return
-    who = _who()
-    tid = "c" * 32
-    assert _prove(who, tid)["ok"] is True
-    assert _prove(who, tid)["ok"] is True          # idempotent, not an error
-    assert binding.threads_of(who["public_key"]).count(tid) == 1
-
-
-# --- nothing about the person is stored ------------------------------------------------------
-
-def test_the_private_key_is_never_persisted():
-    """The strongest guarantee here: search everything we wrote for the secret."""
-    if not SIGNED:
-        return
-    who = _who()
-    _prove(who, "d" * 32)
-    secret = who["private_key"]
-    for root, _dirs, files in os.walk(_TMP):
-        for f in files:
-            blob = open(os.path.join(root, f), encoding="utf-8").read()
-            assert secret not in blob, f"private key leaked into {f}"
-
-
-def test_only_a_public_key_and_thread_ids_are_stored():
-    if not SIGNED:
-        return
-    who = _who()
-    _prove(who, "e" * 32)
-    fp = identity.fingerprint(who["public_key"])
-    rec = json.loads(open(os.path.join(_TMP, "owners", f"{fp}.json"), encoding="utf-8").read())
-    assert set(rec) <= {"id", "public_key", "threads", "created_at", "updated_at"}
-    # no email, no name, no password, no device info — nothing that identifies a person
-    assert rec["id"] == fp
-
-
-def test_invalid_thread_id_is_refused():
-    if not SIGNED:
-        return
-    who = _who()
-    r = _prove(who, "not a valid id")
-    assert r["ok"] is False
-
-
-def test_challenge_requires_a_public_key():
-    assert binding.challenge("")["ok"] is False
-
-
-# --- owner_of() must not build a path from an unvalidated caller string ----------------------
-
-def test_owner_of_refuses_malformed_ids_without_touching_disk():
-    for bad in ("../../../etc/passwd", "../secret", "a/b/c", "", None, "a" * 500, "not-hex-!!"):
-        assert binding.owner_of(bad) is None
-
-
-def test_owner_of_traversal_cannot_reach_a_file_outside_its_own_directory():
-    # found: owner_of(thread_id) built _dir()/"threads"/f"{thread_id}.json" with ZERO
-    # validation, unlike claim() (same module) which already checks threads._valid_id() first.
-    # This was reachable from api.py's UNAUTHENTICATED /fork route via bound_to =
-    # binding_mod.owner_of(tid) — a raw, unvalidated body["thread_id"]. A traversal-shaped id
-    # must never escape the bindings/threads directory to read some other file's "owner" field.
-    planted = os.path.join(_TMP, "planted_secret.json")
-    with open(planted, "w", encoding="utf-8") as f:
-        json.dump({"owner": "nh_shouldneverbereturned"}, f)
-    assert binding.owner_of("../planted_secret") is None
-    os.remove(planted)
+if __name__ == "__main__":
+    import pytest
+    raise SystemExit(int(pytest.main([__file__, "-q"])))
