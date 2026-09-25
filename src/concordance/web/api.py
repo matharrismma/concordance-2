@@ -1743,7 +1743,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not q:
             return _err(400, "q required")
         limit, capped = bounded_limit(query.get("limit"), 20)
-        res = corpus.search(q, limit=limit)  # shared keeping (both surfaces)
+        # search_question strips a leading question FRAME to the subject before matching (the airlock,
+        # applied to the query), merged with the raw so recall never drops — see corpus.query_subject.
+        res = corpus.search_question(q, limit=limit)  # shared keeping (both surfaces)
         expansion = None
         if not res:
             # THE SAME SLOW LANE /ask HAS ALWAYS HAD. Proven live 2026-08-01: /search?q=Rigveda
@@ -1753,7 +1755,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             from .. import expand as _expand
             expansion = _expand.expand(q, config, plane="human")
             if expansion.get("status") == "acquired":
-                res = corpus.search(q, limit=limit)      # it is in the keeping now
+                res = corpus.search_question(q, limit=limit)      # it is in the keeping now
         telemetry.record("search", surface=surface, query=q, count=len(res))
         out = {"query": q, "count": len(res), "results": [_card_brief(c) for c in res]}
         if capped:

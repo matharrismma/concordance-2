@@ -1186,6 +1186,70 @@ def search(query: str, limit: int = 25, include_witness: bool = True,
     return [rehydrate(c) for c in out]
 
 
+# ── Question retrieval: strip the frame, keep the subject (2026-09-25) ──────────────────────────────
+# Matt: "when you remove the context of a name and place you have a much more limited set of responses."
+# A free-text question carries a FRAME (a name, a request, a politeness) around its SUBJECT; the full-text
+# engine matches the frame's words too. Proven live: "Can you tell me what the Bible says about being
+# anxious and worried?" ranked "The Great Schism (1054)" #1 (it matched 'says'/'Bible') and the real
+# "Do Not Worry" teaching never appeared — while the subject "anxious and worried" ranks the teaching #1.
+# The airlock, applied to the query: strip the leading frame to the necessity-only subject before search.
+_Q_FRAME = re.compile(
+    r"^\s*(?:"
+    r"please\s+|"
+    r"(?:can|could|would|will|do)\s+(?:you|u|ya)\s+(?:please\s+)?(?:tell|explain|teach|show|help|give|find)\s+(?:me|us)?\s*|"
+    r"(?:tell|explain|teach|show)\s+(?:me|us)\s+(?:about\s+)?|"
+    r"i\s+(?:want|need|would\s+like|'?d\s+like)\s+to\s+(?:know|understand|learn)\s+(?:about\s+)?|"
+    # "what does the Bible say about" AND the relative-clause "what the Bible says about" / "the Bible says about"
+    r"(?:what|which)?\s*(?:does|do|did|is|are|was|were)?\s*(?:the\s+)?(?:bible|scripture|scriptures|word|god|jesus|lord|christ|gospel)\s+(?:say|says|said|teach|teaches|tell|tells|state|states)\s+(?:me\s+|us\s+)?(?:about\s+)?|"
+    r"what\s+(?:does|do|did)\s+[a-z]+(?:\s+[a-z]+){0,3}\s+say\s+about\s+|"
+    r"(?:what|how|why|where|when|who|whether)\s+(?:is|are|was|were|do|does|did|can|should|would|to)\s+(?:the\s+|a\s+|an\s+)?|"
+    r"(?:what|how|why|where|when|who)\s+(?:the\s+|a\s+|an\s+)?"
+    r")", re.I)
+
+
+def query_subject(text: str) -> str:
+    """Strip a leading question/request FRAME so search matches the subject, not the scaffold.
+    Deterministic and conservative: only a recognized leading frame is removed, and the raw text is kept
+    whenever the strip would leave nothing real — never over-strip a bare or odd query (a miss stays a
+    miss). No model; the airlock's principle applied to a query."""
+    s = re.sub(r"\s+", " ", (text or "").strip())
+    if not s:
+        return s
+    for _ in range(3):                                  # stacked frames: "can you tell me" + "what X says about"
+        nxt = _Q_FRAME.sub("", s, count=1).strip(" ?.!,")
+        if nxt == s:
+            break
+        if len(nxt) < 2 or not any(ch.isalpha() for ch in nxt):
+            break                                       # would over-strip — keep the last real subject
+        s = nxt
+    return s
+
+
+def search_question(query: str, limit: int = 25, include_witness: bool = True,
+                    shelves: Optional[set] = None) -> List[dict]:
+    """Search a free-text QUESTION: the necessity-only subject first (frame stripped), then the raw text,
+    merged subject-first and deduped. Recall-safe by construction — the raw results are always included,
+    so this can only LIFT the on-subject cards ahead of frame-matched noise, never drop a hit. For a bare
+    query with no frame it is exactly search()."""
+    raw = str(query or "")
+    subj = query_subject(raw)
+    if subj == raw:
+        return search(raw, limit=limit, include_witness=include_witness, shelves=shelves)
+    seen: set = set()
+    out: List[dict] = []
+    for c in (list(search(subj, limit=limit, include_witness=include_witness, shelves=shelves))
+              + list(search(raw, limit=limit, include_witness=include_witness, shelves=shelves))):
+        cid = c.get("id")
+        if cid and cid in seen:
+            continue
+        if cid:
+            seen.add(cid)
+        out.append(c)
+        if len(out) >= limit:
+            break
+    return out
+
+
 # ── Library primitives (ported from 1.0's card tools, over the same corpus) ──────────────
 
 def _brief(c: dict) -> Dict[str, Any]:

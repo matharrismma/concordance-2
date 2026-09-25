@@ -1112,7 +1112,9 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         # served 1.67 MB / 5.1 s for a 200-byte request asking limit=10^9.)
         from ..web.api import bounded_limit
         _limit, _capped = bounded_limit(args.get("limit"), 10)
-        res = corpus.search(args.get("query", ""), limit=_limit)
+        # search_question strips a leading question FRAME to the subject before matching (recall-safe;
+        # the raw results are still merged in) — the airlock applied to the agent's query.
+        res = corpus.search_question(args.get("query", ""), limit=_limit)
         out = {"count": len(res), "results": [
             {"id": c.get("id"), "title": c.get("title"), "shelf": c.get("shelf"),
              "snippet": (c.get("body", "") or "")[:200]} for c in res]}
@@ -1129,7 +1131,7 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
             from .. import expand as _expand
             ex = _expand.expand(args.get("query", ""), config, plane="agent")
             if ex.get("status") == "acquired":
-                res = corpus.search(args.get("query", ""), limit=_limit)
+                res = corpus.search_question(args.get("query", ""), limit=_limit)
                 out["count"] = len(res)
                 out["results"] = [{"id": c.get("id"), "title": c.get("title"),
                                    "shelf": c.get("shelf"),
