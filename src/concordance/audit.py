@@ -641,9 +641,53 @@ def _x_cylinder(text: str):
     return out
 
 
+def _x_combinations(text: str):
+    """"5 choose 2 is 10" / "C(5,2) = 10" / "combinations of 5 things taken 2 at a time is 10" — routes
+    to combinatorics.combinations (C(n,k) = n!/(k!·(n-k)!)). Strongly anchored (the word "choose", the
+    C(n,k) notation, or the full "combinations of … taken … at a time" phrase); a wrong count breaks
+    honestly. Whole numbers only, so "choose between 2 and 5" is never mistaken for it."""
+    d = r"(\d+)"
+    eq = r"\s*(?:is|=|equals?)\s*"
+    pats = (
+        d + r"\s+choose\s+" + d + eq + d,
+        r"\bC\s*\(\s*" + d + r"\s*,\s*" + d + r"\s*\)" + eq + d,
+        r"(?:number\s+of\s+)?combinations?\s+of\s+" + d +
+        r"\s+(?:things?|items?|objects?|elements?)\s+taken\s+" + d + r"\s+at\s+a\s+time" + eq + d,
+    )
+    out = []
+    for pat in pats:
+        for m in re.finditer(pat, text, re.I):
+            out.append((_q(text, m), "combinatorics",
+                        {"COMB_VERIFY": {"comb_n": int(m.group(1)), "comb_k": int(m.group(2)),
+                                         "claimed_combinations": int(m.group(3))}}))
+    return out
+
+
+def _x_permutations(text: str):
+    """"P(5,2) = 20" / "5 permute 2 is 20" / "permutations of 5 things taken 2 at a time is 20" — routes
+    to combinatorics.permutations (P(n,k) = n!/(n-k)!). Notation/verb anchored; a wrong count breaks
+    honestly. Whole numbers only."""
+    d = r"(\d+)"
+    eq = r"\s*(?:is|=|equals?)\s*"
+    pats = (
+        r"\bP\s*\(\s*" + d + r"\s*,\s*" + d + r"\s*\)" + eq + d,
+        d + r"\s+permute\s+" + d + eq + d,
+        r"(?:number\s+of\s+)?permutations?\s+of\s+" + d +
+        r"\s+(?:things?|items?|objects?|elements?)\s+taken\s+" + d + r"\s+at\s+a\s+time" + eq + d,
+    )
+    out = []
+    for pat in pats:
+        for m in re.finditer(pat, text, re.I):
+            out.append((_q(text, m), "combinatorics",
+                        {"COMB_VERIFY": {"perm_n": int(m.group(1)), "perm_k": int(m.group(2)),
+                                         "claimed_permutations": int(m.group(3))}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
+    ("combinations", _x_combinations), ("permutations", _x_permutations),
     ("circle", _x_circle), ("pythagorean", _x_pythagorean), ("polygon_angles", _x_polygon_angles),
     ("rectangle", _x_rectangle), ("triangle_inequality", _x_triangle_inequality),
     ("sphere", _x_sphere), ("cube", _x_cube), ("cylinder", _x_cylinder),

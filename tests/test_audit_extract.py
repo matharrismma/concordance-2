@@ -517,6 +517,42 @@ def test_triangle_inequality_zero_false_positives():
         assert "triangle_inequality" not in _extractors(t), t
 
 
+# ---- combinations / permutations (2026-09-25): "5 choose 2 is 10", "P(5,2) = 20" ----
+
+def test_combinations_extracts_and_confirms():
+    for t in ["5 choose 2 is 10", "C(6,2) = 15",
+              "the number of combinations of 5 things taken 2 at a time is 10"]:
+        assert "combinations" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_combinations_catches_a_wrong_claim():
+    res = audit("5 choose 2 is 12", CFG, seal=False)   # C(5,2)=10, not 12
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_combinations_zero_false_positives():
+    for t in ["choose 2 of the 5 boxes on the shelf", "I had to choose between 2 and 5 options"]:
+        assert "combinations" not in _extractors(t), t
+
+
+def test_permutations_extracts_and_confirms():
+    for t in ["P(5,2) = 20", "5 permute 2 is 20",
+              "the number of permutations of 5 things taken 2 at a time is 20"]:
+        assert "permutations" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_permutations_catches_a_wrong_claim():
+    res = audit("P(5,2) = 25", CFG, seal=False)   # P(5,2)=20, not 25
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_permutations_zero_false_positives():
+    for t in ["the permutations of the schedule were endless", "P was 5, 2 short of the goal"]:
+        assert "permutations" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))
