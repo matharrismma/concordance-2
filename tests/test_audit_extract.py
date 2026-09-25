@@ -582,6 +582,34 @@ def test_propositional_logic_zero_false_positives():
         assert "propositional_logic" not in _extractors(t), t
 
 
+# ---- element FACTS (2026-09-25, fact-verifier): a lookup claim becomes a verdict ----
+
+def test_element_fact_extracts_and_confirms():
+    for t in ["the atomic number of carbon is 6",
+              "oxygen has an atomic number of 8",
+              "the chemical symbol for gold is Au"]:
+        assert "element_fact" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_element_fact_catches_a_wrong_atomic_number():
+    res = audit("the atomic number of carbon is 7", CFG, seal=False)   # carbon is 6
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_element_fact_catches_a_wrong_symbol():
+    res = audit("the symbol for gold is Ag", CFG, seal=False)          # Ag is silver, Au is gold
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_element_fact_zero_false_positives():
+    """The name must be a real element; ordinary prose in the same shape extracts nothing."""
+    for t in ["the atomic number of the meeting is 5",
+              "the symbol for freedom is a flag",
+              "the atomic number of attendees is 12"]:
+        assert "element_fact" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))

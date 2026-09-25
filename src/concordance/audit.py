@@ -821,6 +821,40 @@ def _x_propositional_logic(text: str):
     return out
 
 
+# ── element FACTS (fact-verifier, 2026-09-25): a lookup claim becomes a VERDICT ──────────────────────
+# The gap Matt named: a lookup like "the atomic number of carbon is 6" returned NOTHING_TO_CHECK + FOUND,
+# never a verdict. The periodic_table verifier + IUPAC data already exist (definitional identity, zero
+# ambiguity); this extractor routes the prose to it, so a chemistry lookup HOLDS or BREAKS honestly. The
+# element name is validated against the real table, so a non-element ("the atomic number of the meeting")
+# is never extracted — and a miss stays a miss.
+def _x_element_fact(text: str):
+    """"the atomic number of carbon is 6" / "oxygen has atomic number 8" / "the symbol for gold is Au" —
+    routes to periodic_table.element (IUPAC identity). The element must be a real element name; a wrong
+    atomic number or symbol breaks honestly with the true one shown."""
+    from .verifiers import periodic_table as _pt
+    names = _pt._BY_NAME
+    out = []
+    for m in re.finditer(r"(?:the\s+)?atomic\s+number\s+of\s+([A-Za-z]+)\s+(?:is|=|equals?)\s+(\d{1,3})\b",
+                         text, re.I):
+        el = m.group(1).lower()
+        if el in names:
+            out.append((_q(text, m), "periodic_table",
+                        {"PT_VERIFY": {"name": el, "claimed_atomic_number": int(m.group(2))}}))
+    for m in re.finditer(r"\b([A-Za-z]+)\s+has\s+(?:an?\s+)?atomic\s+number\s+(?:of\s+)?(\d{1,3})\b",
+                         text, re.I):
+        el = m.group(1).lower()
+        if el in names:
+            out.append((_q(text, m), "periodic_table",
+                        {"PT_VERIFY": {"name": el, "claimed_atomic_number": int(m.group(2))}}))
+    for m in re.finditer(r"(?:the\s+)?(?:chemical\s+)?symbol\s+for\s+([A-Za-z]+)\s+(?:is|=)\s+"
+                         r"([A-Za-z][a-z]{0,2})\b", text, re.I):
+        el = m.group(1).lower()
+        if el in names:
+            out.append((_q(text, m), "periodic_table",
+                        {"PT_VERIFY": {"name": el, "claimed_symbol": m.group(2)}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
@@ -831,7 +865,7 @@ _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sphere", _x_sphere), ("cube", _x_cube), ("cylinder", _x_cylinder),
     ("physics_force", _x_physics_force), ("kinetic_energy", _x_kinetic_energy),
     ("kinematics", _x_kinematics),
-    ("molar_mass", _x_molar_mass),
+    ("molar_mass", _x_molar_mass), ("element_fact", _x_element_fact),
     ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),
     ("compound_interest", _x_compound), ("rule_of_72", _x_rule72),
