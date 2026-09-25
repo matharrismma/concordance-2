@@ -1005,7 +1005,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             # computed; the two outcomes never blur. Honest, and the door is useful instead of dead.
             if not out["claims_found"]:
                 try:
-                    hits = corpus.search(passage.checked or claim, limit=3) or []
+                    # search_question strips the claim's frame to the subject (the airlock, lever #1),
+                    # so an agent's lookup claim FINDs on-subject cards, not frame-matched noise.
+                    hits = corpus.search_question(passage.checked or claim, limit=3) or []
                     if hits:
                         out["found"] = [corpus._brief(c) for c in hits]
                         out["note"] = ("No computable claim to prove here — the engine proves numbers, "
