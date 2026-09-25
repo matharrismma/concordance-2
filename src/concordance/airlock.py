@@ -1,25 +1,36 @@
-"""The airlock — the input side. A user drags in a file; we mint cards + a map from it, in the
-chamber, and kick the FILE back out. It never enters our core.
+"""The airlock — the chamber that works something without ever absorbing it. Two sides, one principle
+(leverage, never absorb): whatever enters is worked in the chamber and sent back out; the core keeps
+only what is safe to keep, and private material never crosses the boundary.
 
-Matt, 2026-07-25: "Same on the other end. User drags a file. We create cards and deposit the cards.
-We will work using that file while in airlock, but it never enters our core. It is kicked back out,
-but we do create valuable maps and cards while it is in airlock."
+  * ingest()  — the INPUT/FILE side. A user drags in a file; we mint cards + a map from it, in the
+                chamber, and kick the FILE back out. It never enters our core.
+  * through() — the CONTEXT side. Remove context, run an operation (discern, verify, anything) on ONLY
+                the de-identified claim, reapply context. Private context never enters the clean zone.
 
-So ingest() takes the file's TEXT (transient — held only for this call), chunks it into lightweight
-cards that MAP BACK to the user's own file (their path/link is the waybill; they keep the file), and
-builds a small MAP (the outline, the salient terms, and — if the corpus is at hand — the cards in the
-keeping it connects to). It returns {cards, map}. It stores NOTHING: the file is not persisted, and
-the minted cards belong to the USER (a personal deck), never merged into the shared core. Privacy and
-sovereignty on the input side — carry-your-own-data + the parasitic connector (leverage, never absorb).
+Matt, 2026-07-25 (the file side): "User drags a file. We create cards and deposit the cards. We will
+work using that file while in airlock, but it never enters our core. It is kicked back out, but we do
+create valuable maps and cards while it is in airlock."
+Matt, 2026-09-25 (the context side): "a clean airlock method of removing context, discerning and then
+reapplying context."
 
-Sovereign: stdlib only; the optional connection-map uses the corpus if it is already loaded, else is
-skipped. Conduit: cards are the user's own words, chunked and attributed to their file; generated=False.
+ingest() takes the file's TEXT (transient — held only for this call), chunks it into lightweight cards
+that MAP BACK to the user's own file (their path/link is the waybill; they keep the file), and builds a
+small MAP (the outline, the salient terms, and — if the corpus is at hand — the cards in the keeping it
+connects to). It stores NOTHING; the minted cards belong to the USER, never merged into the shared core.
+
+through() delegates to the context loop's floor (context.decontextualize / Stripped / leaks): the strip
+is byte-exactly reversible, and the operation is handed ONLY the necessity-only skeleton, so it cannot
+leak what it never sees. context.run() is the same passage specialized to verify.
+
+Sovereign: stdlib only (ingest); through() adds only the deterministic context/redact layer. Conduit:
+cards are the user's own words, attributed to their file, generated=False; nothing is authored here.
 """
 from __future__ import annotations
 
 import hashlib
 import re
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 _HEADING = re.compile(r"^(#{1,6}\s+.+|[A-Z][A-Z0-9 \-]{6,}|\d+[.)]\s+.+)$")
 _WORD = re.compile(r"[A-Za-z][A-Za-z'\-]{2,}")
@@ -121,4 +132,53 @@ def _connect(text: str, limit: int = 6) -> List[Dict[str, str]]:
         return []
 
 
-__all__ = ["ingest"]
+@dataclass(frozen=True)
+class Airlock:
+    """One passage through the CONTEXT airlock. `checked` is the clean, de-identified claim that entered
+    the clean zone (None if quarantined); `result` is what `operate` returned (PII reapplied when it was
+    text); `framing` and `held_pii` are what stayed home and never crossed the boundary."""
+    ok: bool
+    checked: Optional[str]
+    result: Any
+    framing: str
+    held_pii: Tuple[str, ...]
+    leaked: bool
+    stripped: Any                       # context.Stripped — the reversible strip (reattach/reveal)
+
+    def reveal(self, text: str) -> str:
+        """Out-door for any further text (a verdict, an answer): put this passage's PII back — pure
+        lookup via the one restore path, never reconstruction."""
+        return self.stripped.reveal(text)
+
+
+def through(text: str, operate: Callable[[str], Any], *, minimal: bool = True) -> Airlock:
+    """The CONTEXT airlock: remove context at the in-door, run `operate` on ONLY the de-identified
+    necessity-only skeleton in the clean zone, reapply context at the out-door.
+
+    `operate`: skeleton:str -> object (a discern proposal, a verdict, a plain answer). It is handed one
+    string — the skeleton — and NEVER the holds, the PII map, or the framing, so it cannot leak what it
+    never sees: the boundary is structural, not a promise. Fail-closed: a skeleton that would still carry
+    PII is QUARANTINED and operate does not run. A string result has PII reapplied on the way out; the
+    framing is held local and returned for the caller to weave into the human-facing answer. What gets
+    sealed or stored must bind to `checked`, never the revealed text. Delegates to the context loop's
+    reversible floor; context.run() is this same passage specialized to verify."""
+    from . import context as _context
+    if not isinstance(text, str):
+        raise TypeError("airlock.through expects str, got %s" % type(text).__name__)
+    if not callable(operate):
+        raise TypeError("airlock.through needs an operate callable")
+    s = _context.decontextualize(text, minimal=minimal)     # in-door: hold local, de-identify
+    skeleton = s.travels()
+    framing = s.framing()
+    held_pii = tuple(s.pii_map.values())
+    if _context.leaks(skeleton):                            # fail-closed: PII never enters the clean zone
+        return Airlock(ok=False, checked=None, result=None, framing=framing,
+                       held_pii=held_pii, leaked=True, stripped=s)
+    result = operate(skeleton)                              # clean zone — operate sees ONLY the skeleton
+    if isinstance(result, str):
+        result = s.reveal(result)                           # out-door: reapply PII for the caller
+    return Airlock(ok=True, checked=skeleton, result=result, framing=framing,
+                   held_pii=held_pii, leaked=False, stripped=s)
+
+
+__all__ = ["ingest", "through", "Airlock"]

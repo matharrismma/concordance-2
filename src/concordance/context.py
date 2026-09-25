@@ -364,61 +364,6 @@ def verify_with_engine(skeleton: str, *, config: "object" = None, seal: bool = T
     return {"status": verdict, "statement": statement, "seal": cite, "audit": r}
 
 
-# ── The AIRLOCK — the clean method: remove context → operate → reapply context ──────────────────────
-# Matt (2026-09-25): "a clean airlock method of removing context, discerning and then reapplying
-# context." The triad above (integration → reception → expression), made ONE first-class primitive and
-# operation-AGNOSTIC: `run()` is its verify-shaped presentation; this serves discern — or anything that
-# takes a clean claim — just as well. The guarantee is STRUCTURAL, not a promise: `operate` is handed a
-# single string, the de-identified necessity-only skeleton, and NEVER the holds, the PII map, or the
-# framing — so it cannot leak what it never sees. A skeleton that would still carry PII is QUARANTINED
-# (operate does not run — fail-closed). A string result has PII reapplied on the way out; the framing is
-# held local and handed back for the caller to weave into the human-facing answer. What gets sealed or
-# stored must bind to `checked` (the clean skeleton), never the revealed text — reveal is only for the
-# answer returning to this caller.
-
-@dataclass(frozen=True)
-class Airlock:
-    """One passage through the airlock. `checked` is the clean claim that entered the clean zone (None if
-    quarantined); `result` is what `operate` returned (PII reapplied when it was text); `framing` and
-    `held_pii` are what stayed home and never crossed the boundary."""
-    ok: bool
-    checked: "str | None"
-    result: "object"
-    framing: str
-    held_pii: Tuple[str, ...]
-    leaked: bool
-    stripped: Stripped
-
-    def reveal(self, text: str) -> str:
-        """Out-door for any further text (a verdict, an answer): put this passage's PII back — pure
-        lookup via the one restore path, never reconstruction."""
-        return self.stripped.reveal(text)
-
-
-def airlock(text: str, operate: "callable", *, minimal: bool = True) -> Airlock:
-    """Remove context at the in-door, run `operate` on ONLY the de-identified skeleton in the clean zone,
-    reapply context at the out-door. `operate`: skeleton:str -> object (a discern proposal, a verdict, a
-    plain answer). It never receives the framing or the PII map, so private context cannot leak through
-    it. A skeleton that would leak is quarantined (operate not run); a string result has PII reapplied;
-    the framing is held local. `run()` is the verify-shaped specialization of this same passage."""
-    if not isinstance(text, str):
-        raise TypeError("context.airlock expects str, got %s" % type(text).__name__)
-    if not callable(operate):
-        raise TypeError("context.airlock needs an operate callable")
-    s = decontextualize(text, minimal=minimal)     # in-door: hold local, de-identify
-    skeleton = s.travels()
-    framing = s.framing()
-    held_pii = tuple(s.pii_map.values())
-    if leaks(skeleton):                            # fail-closed: private context never enters the clean zone
-        return Airlock(ok=False, checked=None, result=None, framing=framing,
-                       held_pii=held_pii, leaked=True, stripped=s)
-    result = operate(skeleton)                     # clean zone — operate sees ONLY the skeleton
-    if isinstance(result, str):
-        result = s.reveal(result)                  # out-door: reapply PII for the caller
-    return Airlock(ok=True, checked=skeleton, result=result, framing=framing,
-                   held_pii=held_pii, leaked=False, stripped=s)
-
-
 def run_verified(text: str, *, config: "object" = None, seal: bool = True,
                  minimal: bool = True) -> Dict[str, "object"]:
     """Close the loop against the REAL engine: strip to the necessity-only skeleton and verify it
