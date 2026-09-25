@@ -124,6 +124,16 @@ def discern(text: str, *, search_fn=None, relevant_fn=None, extract_fn=None,
     # 3. EXTRACTION (folded) — the precise claim detector: the STRUCTURED (domain, spec) the gate
     #    verifies. And ROUTE for the trail + the retrieval branch (routed on the claim, not the framing).
     claims = _extract(claim, extract_fn)
+    if claims:
+        # Composition (2026-09-25): the same chaining the auditor does, on the discern path — set `uses`
+        # edges where the discerned claim states a chain ("A, so B" reusing A's number), so the gate
+        # checks the LINK, not just the isolated steps (a conclusion on a false premise no longer stands).
+        # Nothing is invented; both claims are the author's. A bonus — never allowed to break the proposal.
+        try:
+            from . import audit as _audit
+            _audit.compose_uses(claims, claim or t)
+        except Exception:  # noqa: BLE001 — an unexpected claim shape must not sink the proposal
+            pass
     route = router.route(claim or t)
     member = route.get("member")
 
@@ -133,7 +143,11 @@ def discern(text: str, *, search_fn=None, relevant_fn=None, extract_fn=None,
         return {"input": t, "kind": "claim", "claim": claim, "held": held or None,
                 "route": route, "claims": claims, "lens": _seen(claim), "cloud": _cloud(claim),
                 "authority": "proposed", "proposes": True, "confirms": False,
-                "why": ("discerned %d structured claim(s) for the gate to verify" % len(claims) if claims
+                "why": (("discerned %d structured claim(s) for the gate to verify%s" % (
+                            len(claims),
+                            (" (%d chained — the gate checks the link too)"
+                             % sum(1 for c in claims if c.get("uses"))
+                             if any(c.get("uses") for c in claims) else ""))) if claims
                         else "discerned the necessary claim %r; the %s should verify it (%s)" % (
                             claim, member, route.get("why"))),
                 "next": "check"}

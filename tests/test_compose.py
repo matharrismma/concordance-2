@@ -83,6 +83,16 @@ def test_single_claim_never_self_links():
     assert all(not s.get("uses") for s in steps)
 
 
+def test_discern_surfaces_the_chain():
+    """Increment 2 — the discern proposer chains too, not just /audit: the discerned claims carry the
+    `uses` edge, so whoever hands them to the gate gets the reasoning checked, not just the facts."""
+    from concordance import discern as D
+    prop = D.discern("A rectangle 4 by 6 has area 24, so 24 x 2 = 48.")
+    assert prop["kind"] == "claim"
+    claims = prop.get("claims") or []
+    assert any(c.get("uses") for c in claims), claims
+
+
 if __name__ == "__main__":
     import pytest
     raise SystemExit(int(pytest.main([__file__, "-q"])))
