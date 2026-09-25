@@ -960,8 +960,24 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         claim = str(body.get("claim") or body.get("text") or "").strip()
         if claim and not body.get("steps") and not body.get("mode"):
             from .. import audit as _audit
+            from .. import airlock as _airlock
             seal_on = str(query.get("seal", "1")).lower() not in ("0", "false", "no", "off")
-            ar = _audit.audit(claim, config, seal=seal_on)
+            # THE AIRLOCK (2026-09-25): remove context before the verifier sees it, reapply after. audit
+            # only ever sees the de-identified, necessity-only skeleton (framing held on the caller's
+            # side, PII placeheld); a claim that cannot be de-identified safely is QUARANTINED, never
+            # sent. The seal already redacts (receipts.py) — this makes the whole path, extraction
+            # included, structurally clean rather than clean only at the seal.
+            passage = _airlock.through(claim, lambda skel: _audit.audit(skel, config, seal=seal_on),
+                                       minimal=True)
+            if passage.leaked:
+                telemetry.record("verify", surface=surface, verdict="QUARANTINE", mode="claim",
+                                 sealed=False)
+                return _ok({"verdict": "QUARANTINE", "claims_found": 0, "held": 0, "broken": 0,
+                            "unchecked": 0, "checks": [], "receipt": None, "generated": False,
+                            "note": ("The claim could not be de-identified safely, so nothing was sent "
+                                     "to the verifier and nothing was sealed — strip the personal "
+                                     "details and try again.")})
+            ar = passage.result
             seal = ar.get("seal") or {}
             receipt = seal.get("cite_url") or (f"/s/{seal['content_hash']}" if seal.get("content_hash") else None)
             telemetry.record("verify", surface=surface, verdict=ar.get("verdict"),
@@ -976,7 +992,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                 "receipt": receipt, "generated": False,
                 "note": ("found and verified across the engine's domains, never generated; only the "
                          "claims named were checked; the receipt is permanent and re-checkable; the "
-                         "claim text is redacted before sealing, so the receipt carries no personal data."),
+                         "claim is de-identified in an airlock before the verifier sees it — framing and "
+                         "personal details stay on your side, and the receipt carries no personal data."),
             }
             # THE FIND FALLBACK (dogfood 2026-09-06). The auditor's deterministic extractors recognize
             # only COMPUTABLE claims (arithmetic, constants, …). A developer's real claim is often a
@@ -988,7 +1005,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             # computed; the two outcomes never blur. Honest, and the door is useful instead of dead.
             if not out["claims_found"]:
                 try:
-                    hits = corpus.search(claim, limit=3) or []
+                    hits = corpus.search(passage.checked or claim, limit=3) or []
                     if hits:
                         out["found"] = [corpus._brief(c) for c in hits]
                         out["note"] = ("No computable claim to prove here — the engine proves numbers, "

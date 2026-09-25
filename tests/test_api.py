@@ -91,6 +91,23 @@ def test_derivation_verify_alias():
     assert s == 200 and p["verdict"] == "HOLDS"
 
 
+def test_free_text_verify_airlocks_context():
+    # The free-text door now runs through the airlock (2026-09-25): framing and PII are stripped before
+    # the verifier sees the claim, and never come back in the response. The arithmetic still verifies.
+    _, r = dispatch("POST", "/verify", {},
+                    {"claim": "my friend said email me at a@b.com and 2 plus 2 is 4"}, SEC)
+    assert r["verdict"] == "HOLDS" and r["held"] >= 1
+    blob = json.dumps(r)
+    assert "a@b.com" not in blob        # PII de-identified in the airlock, never echoed back
+    assert "friend said" not in blob    # attribution framing held on the caller's side, not returned
+
+
+def test_free_text_verify_still_works_plainly():
+    # a claim with no context to strip passes straight through — same verdict + receipt as before.
+    _, r = dispatch("POST", "/verify", {}, {"claim": "2 plus 2 is 4"}, SEC)
+    assert r["verdict"] == "HOLDS" and r["held"] == 1 and r["receipt"]
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:
