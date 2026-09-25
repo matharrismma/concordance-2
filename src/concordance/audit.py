@@ -723,19 +723,126 @@ def extract(text: str) -> List[Dict[str, Any]]:
     return steps
 
 
+_CHAIN_CONNECTIVE = re.compile(
+    r"\b(?:so|therefore|thus|hence|consequently|meaning|which\s+means|so\s+that|"
+    r"and\s+so|as\s+a\s+result|it\s+follows(?:\s+that)?)\b", re.I)
+
+
+def _spec_numbers(spec: Any) -> set:
+    """Every number anywhere in a step's spec — works for the {mode, params} math shape (numbers live
+    inside the expr strings) and the {WRAPPER: {...}} shape (numbers are values). Booleans excluded."""
+    nums: set = set()
+
+    def add(v: Any) -> None:
+        if isinstance(v, bool):
+            return
+        try:
+            nums.add(round(float(v), 9))
+        except (TypeError, ValueError):
+            return
+
+    def walk(o: Any) -> None:
+        if isinstance(o, dict):
+            for k, val in o.items():
+                if k == "mode":            # a routing label, not a quantity
+                    continue
+                walk(val)
+        elif isinstance(o, (list, tuple)):
+            for x in o:
+                walk(x)
+        elif isinstance(o, (int, float)):
+            add(o)
+        elif isinstance(o, str):
+            for tok in re.findall(r"-?\d+(?:\.\d+)?", o):
+                add(tok)
+
+    walk(spec)
+    return nums
+
+
+def _norm_pos(text: str):
+    """Whitespace-normalized text plus a locator — quotes are stored whitespace-normalized (see _q),
+    so a chain has to be read in that same space or the connective search misses."""
+    norm = re.sub(r"\s+", " ", text or "")
+
+    def locate(claim: str) -> int:
+        q = re.sub(r"\s+", " ", claim or "").strip()
+        return norm.find(q) if q else -1
+
+    return norm, locate
+
+
+def compose_uses(steps: List[Dict[str, Any]], text: str) -> List[Dict[str, Any]]:
+    """Set `uses` edges between claims the author explicitly CHAINED: a later claim that reuses an
+    earlier claim's number AND sits just after a chaining connective ("so", "therefore", …) depends on
+    it. Nothing is invented — both claims are the author's own; the edge only records the dependency the
+    prose asserts, so the gate can check the LINK as well as each step (a conclusion resting on a false
+    premise no longer stands). Conservative by design: no connective between them, no shared number, or
+    too far apart → no edge, and a miss stays a miss."""
+    norm, locate = _norm_pos(text)
+    pos = {s["id"]: locate(s.get("claim") or "") for s in steps}
+    length = {s["id"]: len(re.sub(r"\s+", " ", s.get("claim") or "").strip()) for s in steps}
+    nums = {s["id"]: _spec_numbers(s.get("spec") or {}) for s in steps}
+    for b in steps:
+        pb = pos[b["id"]]
+        if pb < 0:
+            continue
+        for a in steps:
+            if a["id"] == b["id"]:
+                continue
+            pa = pos[a["id"]]
+            if pa < 0 or pa >= pb:                       # a must strictly precede b in the text
+                continue
+            a_end = pa + length[a["id"]]
+            if a_end > pb:                               # overlapping quotes — not a chain
+                continue
+            gap = norm[a_end:pb]
+            if len(gap) > 140 or not _CHAIN_CONNECTIVE.search(gap):
+                continue
+            if not (nums[a["id"]] & nums[b["id"]]):       # b must reuse one of a's numbers
+                continue
+            b.setdefault("uses", [])
+            if a["id"] not in b["uses"]:
+                b["uses"].append(a["id"])
+    return steps
+
+
 def audit(text: str, config, seal: bool = True) -> Dict[str, Any]:
-    """Extract -> verify the lot as one derivation -> attach one seal. The coverage report."""
+    """Extract -> compose the stated chain -> verify the lot as one derivation -> attach one seal.
+
+    Composition (2026-09-25): after extraction, `compose_uses` sets a `uses` edge wherever the author
+    chained two claims ("A, so B" reusing A's number). The moat then checks the LINK as well as each
+    step, so a conclusion that rests on a false premise no longer stands on its own — the reasoning is
+    verified, not just the isolated facts. The derivation runs in TEXT order so a `uses` ref (always an
+    earlier claim) is processed first; the report keeps extraction order."""
     steps = extract(text)
     if not steps:
         return {"claims_found": 0, "results": [], "verdict": "NOTHING_TO_CHECK",
                 "note": ("No unambiguously checkable claim was found. The auditor extracts only "
                          "certain patterns (sums, percentages, pay, interest, dates, labels) — "
                          "it would rather miss a claim than check the wrong one.")}
+    compose_uses(steps, text)
     from .derivation import verify_derivation
-    dres = verify_derivation([{k: s[k] for k in ("id", "domain", "spec", "claim")} for s in steps])
+    _, locate = _norm_pos(text)
+    # The derivation must process a used step before the step that uses it. `uses` edges always point
+    # from a later claim back to an earlier one, so text order satisfies that; an unlocatable claim
+    # sorts to the end (stable). The report below still comes back in extraction order.
+    order = sorted(range(len(steps)),
+                   key=lambda i: (locate(steps[i].get("claim") or "") if locate(steps[i].get("claim") or "") >= 0
+                                  else 10 ** 9, i))
+    dsteps = []
+    for i in order:
+        s = steps[i]
+        d = {"id": s["id"], "domain": s["domain"], "spec": s["spec"], "claim": s["claim"]}
+        if s.get("uses"):
+            d["uses"] = s["uses"]
+        dsteps.append(d)
+    dres = verify_derivation(dsteps)
+    trail_by_id = {t["id"]: t for t in dres["trail"]}
     results = []
     held = broken = unchecked = 0
-    for s, t in zip(steps, dres["trail"]):
+    for s in steps:
+        t = trail_by_id.get(s["id"], {"status": "ERROR", "detail": ""})
         st = t["status"]
         if st == "CONFIRMED":
             held += 1
@@ -743,8 +850,15 @@ def audit(text: str, config, seal: bool = True) -> Dict[str, Any]:
             broken += 1
         else:  # NOT_APPLICABLE / ERROR — we did not get a result, which is not a finding
             unchecked += 1
-        results.append({"claim": s["claim"], "extractor": s["extractor"], "domain": s["domain"],
-                        "status": st, "detail": t["detail"]})
+        r = {"claim": s["claim"], "extractor": s["extractor"], "domain": s["domain"],
+             "status": st, "detail": t.get("detail", "")}
+        if t.get("uses"):
+            # this claim was read as building on the named earlier claim(s) — the prose said "so"/"therefore"
+            r["uses"] = t["uses"]
+        if t.get("builds_on_unconfirmed"):
+            # raw-checked here, but it rests on a premise that did NOT hold — so it does not stand alone
+            r["builds_on_unconfirmed"] = t["builds_on_unconfirmed"]
+        results.append(r)
     out: Dict[str, Any] = {
         "claims_found": len(steps), "held": held,
         # `broken` is a finding about the CLAIM; `unchecked` is a fact about US. The old single
