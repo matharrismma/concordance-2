@@ -552,6 +552,39 @@ def _x_kinematics(text: str):
     return out
 
 
+_TRI_D = r"(\d+(?:\.\d+)?)"
+_TRI_L = _TRI_D + r"\s*,\s*" + _TRI_D + r"\s*,?\s+and\s+" + _TRI_D
+
+
+def _x_triangle_inequality(text: str):
+    """"sides 3, 4, and 5 form a valid triangle" (True) / "sides 1, 2, and 10 cannot form a triangle"
+    (False) — routes to geometry.triangle_inequality (a triangle iff each pair of sides sums to more
+    than the third). A BOOLEAN claim, so both polarities are read explicitly: only valid/forms phrasing
+    is True, only cannot/do-not/invalid phrasing is False. A bare "sides 3, 4, and 5" or a "triangle"
+    with no verdict extracts nothing — a miss stays a miss. A stated validity that is wrong for those
+    side lengths breaks honestly. The three sides must be a clean comma list ending in "and"."""
+    L = _TRI_L
+    out = []
+    true_pats = (
+        r"triangle\s+with\s+sides?\s+(?:of\s+)?" + L + r"\s+(?:is|are)\s+valid\b",
+        r"sides?\s+(?:of\s+)?" + L + r"\s+(?:forms?|makes?)\s+(?:a\s+)?(?:valid\s+)?triangle\b",
+    )
+    false_pats = (
+        r"triangle\s+with\s+sides?\s+(?:of\s+)?" + L + r"\s+is\s+(?:not\s+valid|invalid)\b",
+        r"sides?\s+(?:of\s+)?" + L +
+        r"\s+(?:cannot|can\s?not|can't|could\s+not|couldn't|do\s+not|don't|does\s+not|doesn't|"
+        r"will\s+not|won't)\s+(?:form|make)\s+(?:a\s+)?(?:valid\s+)?triangle\b",
+    )
+    for claimed, pats in ((True, true_pats), (False, false_pats)):
+        for pat in pats:
+            for m in re.finditer(pat, text, re.I):
+                out.append((_q(text, m), "geometry",
+                            {"GEOM_VERIFY": {"tri_a": _f(m.group(1)), "tri_b": _f(m.group(2)),
+                                             "tri_c": _f(m.group(3)),
+                                             "claimed_valid_triangle": claimed}}))
+    return out
+
+
 def _x_sphere(text: str):
     """"a sphere of radius 3 has volume 113.1" / "... has surface area 314.16" — routes to
     geometry.sphere (V = 4/3·πr³, A = 4πr²; rel tol 1e-4, so ordinary rounding holds). Radius phrasing
@@ -612,7 +645,8 @@ _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
     ("circle", _x_circle), ("pythagorean", _x_pythagorean), ("polygon_angles", _x_polygon_angles),
-    ("rectangle", _x_rectangle), ("sphere", _x_sphere), ("cube", _x_cube), ("cylinder", _x_cylinder),
+    ("rectangle", _x_rectangle), ("triangle_inequality", _x_triangle_inequality),
+    ("sphere", _x_sphere), ("cube", _x_cube), ("cylinder", _x_cylinder),
     ("physics_force", _x_physics_force), ("kinetic_energy", _x_kinetic_energy),
     ("kinematics", _x_kinematics),
     ("molar_mass", _x_molar_mass),

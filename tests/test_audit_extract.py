@@ -488,6 +488,35 @@ def test_cylinder_zero_false_positives():
         assert "cylinder" not in _extractors(t), t
 
 
+# ---- triangle inequality (2026-09-25): a BOOLEAN claim, both polarities read explicitly ----
+
+def test_triangle_inequality_extracts_and_confirms():
+    for t in ["sides 3, 4, and 5 form a valid triangle",       # valid, claimed valid
+              "sides 1, 2, and 10 cannot form a triangle",      # invalid, claimed invalid
+              "a triangle with sides 6, 8, and 10 is valid"]:   # valid, claimed valid
+        assert "triangle_inequality" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_triangle_inequality_catches_a_wrong_claim():
+    res = audit("sides 1, 2, and 10 form a valid triangle", CFG, seal=False)  # 1+2 < 10, not valid
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_triangle_inequality_catches_a_wrong_negative():
+    res = audit("sides 3, 4, and 5 cannot form a triangle", CFG, seal=False)  # 3,4,5 IS valid
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_triangle_inequality_zero_false_positives():
+    """A boolean claim needs an explicit validity verdict; sides with no verdict, or 'triangle' used
+    figuratively, extract nothing (a miss stays a miss)."""
+    for t in ["a triangle with sides 3, 4, and 5",              # no verdict
+              "the love triangle had three sides to it",         # figurative, no number list
+              "sides 3, 4, and 5 of the argument were weak"]:    # no triangle/valid/form verdict
+        assert "triangle_inequality" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))
