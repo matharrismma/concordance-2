@@ -684,10 +684,148 @@ def _x_permutations(text: str):
     return out
 
 
+# ── propositional logic (3a, 2026-09-25): a bounded parser over prose → formal_logic ────────────────
+# The structured "next layer": a claim like "P or not P is a tautology" is a determinate structure once
+# the prose around it is stripped. A small recursive-descent parser turns the clause into a formula in
+# the verifier's syntax; if it does not parse WHOLLY and cleanly, nothing is extracted (a miss stays a
+# miss). Variables are single uppercase letters EXCEPT A (article) and I (pronoun), so English prose is
+# never mistaken for a proposition.
+_LOGIC_TOK = re.compile(r"\(|\)|(?i:\b(?:and|or|not|implies|then)\b)|\b[B-HJ-Z]\b")
+_LOGIC_TRAIL = re.compile(r"(?:(?:(?i:\b(?:and|or|not|implies|then)\b)|[B-HJ-Z]|[()])\s*)+$")
+_LOGIC_VERDICT = re.compile(
+    r"\bis\s+(?P<neg>not\s+)?(?:an?\s+)?"
+    r"(?P<kind>tautolog(?:y|ical)|contradiction|contradictory|(?P<un>un)?satisfiable)\b", re.I)
+
+
+def _prop_tokens(clause: str):
+    """Tokenize a propositional clause; None if any non-propositional text sits between tokens."""
+    toks: List[str] = []
+    last = 0
+    for m in _LOGIC_TOK.finditer(clause):
+        if clause[last:m.start()].strip():
+            return None
+        toks.append(m.group(0))
+        last = m.end()
+    if clause[last:].strip() or not toks:
+        return None
+    return toks
+
+
+def _parse_prop(clause: str):
+    """Bounded recursive-descent parse → (formula, sorted vars) in the verifier's syntax (& | ~ >>), or
+    None if it does not parse wholly and cleanly. Precedence: not > and > or > implies; parens group."""
+    toks = _prop_tokens(clause)
+    if not toks:
+        return None
+    variables = set()
+    pos = 0
+
+    def peek():
+        return toks[pos] if pos < len(toks) else None
+
+    def eat():
+        nonlocal pos
+        t = toks[pos]
+        pos += 1
+        return t
+
+    def atom():
+        t = peek()
+        if t == "(":
+            eat()
+            e = imp()
+            if e is None or peek() != ")":
+                return None
+            eat()
+            return e
+        if t is not None and re.fullmatch(r"[B-HJ-Z]", t):
+            eat()
+            variables.add(t.lower())
+            return t.lower()
+        return None
+
+    def neg():
+        if peek() is not None and peek().lower() == "not":
+            eat()
+            e = neg()
+            return None if e is None else "~" + e
+        return atom()
+
+    def conj():
+        left = neg()
+        if left is None:
+            return None
+        while peek() is not None and peek().lower() == "and":
+            eat()
+            right = neg()
+            if right is None:
+                return None
+            left = "(%s & %s)" % (left, right)
+        return left
+
+    def disj():
+        left = conj()
+        if left is None:
+            return None
+        while peek() is not None and peek().lower() == "or":
+            eat()
+            right = conj()
+            if right is None:
+                return None
+            left = "(%s | %s)" % (left, right)
+        return left
+
+    def imp():
+        left = disj()
+        if left is None:
+            return None
+        while peek() is not None and peek().lower() in ("implies", "then"):
+            eat()
+            right = disj()
+            if right is None:
+                return None
+            left = "(%s >> %s)" % (left, right)
+        return left
+
+    formula = imp()
+    if formula is None or pos != len(toks) or not variables:
+        return None
+    return formula, sorted(variables)
+
+
+def _x_propositional_logic(text: str):
+    """"P or not P is a tautology" / "P and not P is a contradiction" / "P and Q is satisfiable" — the
+    clause is parsed (single-letter vars excl. A/I, joined by and/or/not/implies/then, with parens) and
+    routed to formal_logic's truth-table decision. No clean parse -> nothing extracted. Both polarities:
+    "is not a tautology" / "is unsatisfiable" break honestly."""
+    out = []
+    for vm in _LOGIC_VERDICT.finditer(text):
+        tm = _LOGIC_TRAIL.search(text[:vm.start()])
+        if not tm:
+            continue
+        parsed = _parse_prop(tm.group(0).strip())
+        if not parsed:
+            continue
+        formula, variables = parsed
+        negated = bool(vm.group("neg"))
+        kind = vm.group("kind").lower()
+        spec: Dict[str, Any] = {"variables": variables, "formula": formula}
+        if kind.startswith("tautolog"):
+            spec["claimed_tautology"] = not negated
+        elif kind.startswith("contradict"):
+            spec["claimed_contradiction"] = not negated
+        else:  # (un)satisfiable
+            spec["claimed_satisfiable"] = not (negated or bool(vm.group("un")))
+        quote = re.sub(r"\s+", " ", tm.group(0).strip() + " " + text[vm.start():vm.end()]).strip()[:160]
+        out.append((quote, "formal_logic", {"LOGIC_VERIFY": spec}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
     ("combinations", _x_combinations), ("permutations", _x_permutations),
+    ("propositional_logic", _x_propositional_logic),
     ("circle", _x_circle), ("pythagorean", _x_pythagorean), ("polygon_angles", _x_polygon_angles),
     ("rectangle", _x_rectangle), ("triangle_inequality", _x_triangle_inequality),
     ("sphere", _x_sphere), ("cube", _x_cube), ("cylinder", _x_cylinder),

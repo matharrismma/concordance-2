@@ -553,6 +553,35 @@ def test_permutations_zero_false_positives():
         assert "permutations" not in _extractors(t), t
 
 
+# ---- propositional logic (2026-09-25, 3a): a bounded parser → formal_logic (structured layer) ----
+
+def test_propositional_logic_extracts_and_confirms():
+    for t in ["P or not P is a tautology",           # excluded middle
+              "P and not P is a contradiction",        # non-contradiction
+              "P and Q is satisfiable"]:               # a model exists
+        assert "propositional_logic" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_propositional_logic_catches_a_wrong_claim():
+    res = audit("P and not P is a tautology", CFG, seal=False)   # it is a contradiction, not a tautology
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_propositional_logic_catches_a_wrong_negative():
+    res = audit("P or not P is not a tautology", CFG, seal=False)  # it IS a tautology
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_propositional_logic_zero_false_positives():
+    """The clause must parse wholly as a proposition; ordinary prose (and the English words A/I) never
+    becomes a formula — a miss stays a miss."""
+    for t in ["the plan is a contradiction of everything we stand for",   # 'plan' is not a variable
+              "the requirement is satisfiable by any vendor",              # 'requirement' is not a var
+              "I is a tautology of the self"]:                             # 'I' is excluded (pronoun)
+        assert "propositional_logic" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))
