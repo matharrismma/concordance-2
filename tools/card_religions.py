@@ -209,6 +209,35 @@ AFTER = [
            "love of God was proven (Romans 5:8)."),
           "under_the_test", ["islam", "test of the spirits", "denial of the crucifixion", "in love", "1 john"],
           {"anchor": "1 John 4:2-3; 1 John 2:22; John 3:16; Romans 5:8", "framing": "Matt's, anchored"}),
+    _card("the_gateway_process_under_the_test",
+          "The Gateway Process & New Age consciousness — under the test of the spirits (in love)",
+          ("Credited where it names something true: the hunger for transcendence and the sense that "
+           "reality is deeper than matter — 'He has put eternity into man's heart' (Ecclesiastes 3:11), "
+           "and God set us to 'seek Him, and perhaps feel their way toward Him and find Him' (Acts "
+           "17:27). Even its concrete core is real in a limited way: the Monroe Institute's Hemi-Sync is "
+           "an actual binaural-beat audio method, and the declassified 1983 U.S. Army report 'Analysis "
+           "and Assessment of the Gateway Process' (Lt. Col. W. McDonnell; released through the CIA "
+           "reading room; kin to Project STARGATE remote viewing) is a genuine government document — a "
+           "real assessment, not proof of its metaphysical claims and not an endorsement of them. And "
+           "then, held to the one test in love: arising in the 20th century, after Christ, its metaphysic "
+           "is monist — consciousness itself is 'the Absolute,' and the self is, or merges into, God. "
+           "That is precisely the first lie, 'you will be like God' (Genesis 3:5), and it dispenses with "
+           "the one mediator between God and men (1 Timothy 2:5); its practices — out-of-body 'travel,' "
+           "remote viewing, seeking the unseen through altered states — are the divination and consulting "
+           "of spirits and the dead that Scripture names and forbids (Deuteronomy 18:10-12; Isaiah 8:19). "
+           "A post-Christ teaching that makes the self divine and bypasses the Son falls under 1 John "
+           "4:2-3. This is said of the TEACHING, never of any seeker — every one of whom is loved, and "
+           "for whom the door stands wide open. The ache is real, and it is answered — not in the self, "
+           "but in the One in whom 'the whole fullness of deity dwells bodily, and you have been filled "
+           "in Him' (Colossians 2:9-10; John 14:6). 'We don't lie, but we love you.'"),
+          "under_the_test",
+          ["gateway process", "monroe institute", "hemi-sync", "stargate", "remote viewing", "new age",
+           "consciousness", "out of body", "astral projection", "test of the spirits", "in love", "1 john"],
+          {"anchor": "1 John 4:2-3; Genesis 3:5; Deuteronomy 18:10-12; Isaiah 8:19; 1 Timothy 2:5; "
+                     "Colossians 2:9-10; John 14:6",
+           "framing": "Matt's, anchored",
+           "declassified_source": "Analysis and Assessment of the Gateway Process (US Army, 1983; CIA "
+                                  "CREST record family RDP96-00788); Monroe Institute (MIAS); Project STARGATE"}),
     _card("post_christ_pattern",
           "The pattern for movements arising after Christ (the test, in love)",
           ("Beyond any single case, the calibration is a pattern, applied gently: a religion or movement that "
