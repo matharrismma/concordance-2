@@ -223,6 +223,17 @@ SHARD_ASSIGN = {
     "medicine": "world", "nutrition": "world", "activities": "world", "drugs": "world", "foods": "world",
     "dictionary": "dictionary",
     "gutenberg": "books", "classics": "books",
+    # 2026-09-26 coherence audit — route the growing/heavy shelves OFF the always-resident `core`
+    # onto freezable shards (the load-balancing hole the audit found). Takes effect only at the next
+    # shard rebuild + when each is ADDED to CONCORDANCE_FREEZE_SHELVES (they stay in step); inert for
+    # a resident shelf until then. `pronunciation` (~125k, the biggest resident load) gets its OWN
+    # shard so a small device can leave it frozen. The rest catch the OpenStax textbook load.
+    "pronunciation": "pronunciation",
+    "mathematics": "science", "biology": "science",
+    "history": "world", "psychology": "world", "sociology": "world", "timekeeping": "world",
+    "philosophy": "word", "reference": "world",
+    # frozen on the box but were routed to core.db (always-thawed) — give them real shards too
+    "encyclopedia": "world", "topical": "world",
 }
 CORE = "core"                                  # always thawed
 

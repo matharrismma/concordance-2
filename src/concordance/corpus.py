@@ -1039,6 +1039,10 @@ def load_cards(path: Optional[Path] = None,
                       # into /characters, boxed by category (the card-catalog drawers). Minted by
                       # tools/card_encyclopedia.py.
                       "encyclopedia_cards.jsonl",
+                      # The SWORD Bible dictionaries (distinct from Easton's above) — minted by
+                      # tools/card_sword_dicts.py but was an ORPHAN SEEDER (never loaded); registered
+                      # 2026-09-26 by the coherence audit. Inert until the file is minted + deployed.
+                      "sword_dict_cards.jsonl",
                       # The domain reference cores (GAPS G1/G2): a spine per domain the engine
                       # can actually check, plus one WORKED-CHECK card per claim — the inputs,
                       # the engine's verdict, and the falsehood it refuses. Substance minted from
