@@ -82,14 +82,19 @@ def grafts(limit: int = 24) -> List[Dict[str, str]]:
 
 def payload() -> Dict[str, Any]:
     """Everything /floor.html needs: the rooted design, the grafts, and the plain measure."""
-    cards = [c for c in corpus.default_corpus().cards.values() if corpus.is_public(c)]
+    cp = corpus.default_corpus()
+    cards = [c for c in cp.cards.values() if corpus.is_public(c)]
+    frozen_counts = cp.frozen_shelf_counts()          # the frozen bulk (dictionary, taxonomy, …) counts too
+    shelves = {c.get("shelf") for c in cards} | set(frozen_counts)
     return {
         "root": tree(),
         "grafts": grafts(),
         "verse": {"ref": "Proverbs 9:10",
                   "text": "The fear of the LORD is the beginning of wisdom."},
-        "stats": {"seeds": len(cards),
-                  "shelves": len({c.get("shelf") for c in cards})},
+        # the whole public keeping — resident cards plus the frozen index — so the measure does not
+        # shrink when a shelf is frozen off resident RAM.
+        "stats": {"seeds": cp._n,
+                  "shelves": len(shelves)},
         "note": ("This finds and maps; it does not generate. By seeing the design — Scripture and "
                  "the created order, one floor — the eye is turned upward, to the Maker."),
     }

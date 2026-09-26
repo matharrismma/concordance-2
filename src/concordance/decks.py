@@ -377,6 +377,8 @@ def all_decks() -> List[Dict[str, Any]]:
     for c in cor.cards.values():
         if corpus.is_public(c):
             counts[c.get("shelf", "")] = counts.get(c.get("shelf", ""), 0) + 1
+    for shelf, n in cor.frozen_shelf_counts().items():   # frozen bulk (words, life-on-earth, places…) counts too
+        counts[shelf] = counts.get(shelf, 0) + n
     return [{"id": d["id"], "name": d["name"], "desc": d["desc"],
              "shelves": sorted(d["shelves"]),
              "need": bool(d.get("need")),      # a situation deck (frontloaded) vs a domain deck

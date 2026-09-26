@@ -348,8 +348,11 @@ def calltree(prefix: str = "", c=None, cap: int = _CALLTREE_CAP) -> Dict[str, An
         cids = c.cids_for_call(prefix)
         for cid in cids[:cap]:
             card = c.cards.get(cid) or {}
-            nodes.append({"id": cid, "title": card.get("title") or cid,
-                          "shelf": card.get("shelf") or top, "degree": 1, "kind": "card"})
+            # a frozen leaf is not resident — its title/shelf come from the compact index, so the
+            # walk shows a real name, never a raw id.
+            title = card.get("title") or c._title_of(cid)
+            shelf = card.get("shelf") or c._shelf_of(cid) or top
+            nodes.append({"id": cid, "title": title, "shelf": shelf, "degree": 1, "kind": "card"})
             links.append({"source": here_id, "target": cid, "kind": "nested"})
         nodes[0]["degree"] = len(cids)
     return {"scope": "calltree", "prefix": prefix, "depth": depth, "level": _level_name(depth),

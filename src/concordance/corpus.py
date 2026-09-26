@@ -417,63 +417,120 @@ class Corpus:
     """An indexed, searchable set of cards (id -> card dict)."""
 
     def __init__(self, cards: Dict[str, dict], min_idf: float = MIN_DISTINCTIVE_IDF,
-                 df_extra: Optional[Dict[str, int]] = None):
+                 df_extra: Optional[Dict[str, int]] = None,
+                 frozen_idx: Optional[Dict[str, tuple]] = None):
         self.cards = cards
         self.min_idf = min_idf
+        # LAZY STUBS (increment 2): frozen cards are NOT held resident. `_frozen` maps each PUBLIC
+        # frozen id -> (call, title) — a compact entry for browse and the call-tree; the full card
+        # (body, connections, facets, provenance) rehydrates from the shard on read. This makes
+        # resident RAM scale with `cards` (core + resident shelves), not the whole keeping (measured
+        # 2026-09-26: the frozen stub dicts were ~96% of resident memory). Their document frequencies
+        # ride in `_df_extra` so the corpus-wide IDF is unchanged.
+        self._frozen: Dict[str, tuple] = dict(frozen_idx) if frozen_idx else {}
         self._by_token: Dict[str, List[str]] = {}
-        # extra document frequency from frozen stubs' full text (streamed out of load_cards) —
-        # the tokens themselves live on the shard, but their COUNTS stay here so the corpus-wide
-        # IDF statistics are identical whether a shelf is frozen or resident
         self._df_extra: Dict[str, int] = dict(df_extra) if df_extra else {}
         for cid, c in cards.items():
             if not is_public(c):
                 continue
-            # FROZEN FREIGHT IS NOT INDEXED RESIDENT. A frozen stub's only text is its title, and
-            # indexing ~500k of them is what makes `_by_token` the dominant resident cost (measured
-            # 2026-09-26: the token index was ~69% of resident RAM). The shard FTS already indexes
-            # the frozen card's FULL text, and `search()` scores those hits through the SAME ranker,
-            # so dropping them here is rank-neutral and makes RAM scale with the CORE shelf, not the
-            # whole keeping. Their document frequencies still ride in `_df_extra` (below), so the
-            # corpus-wide IDF is unchanged — pinned by test_freezing_never_shifts_the_corpus_idf.
-            if c.get("frozen"):
-                continue
             for t in set(_tokens(_card_text(c))):
                 self._by_token.setdefault(t, []).append(cid)
-        # CANONICAL POSTINGS. Two corpora over the same cards must rank identically whatever
-        # order the cards arrived in — invariant I of tests/test_retrieval_invariants.py. Without
-        # this, cap admission and tie order both follow insertion order, and "same corpus, same
-        # query" can rank differently across builds. Sorted once at load; never at query time.
+        # CANONICAL POSTINGS — sorted once at load so ranking is a function of the cards + query, not
+        # insertion order (invariant I of tests/test_retrieval_invariants.py).
         for v in self._by_token.values():
             v.sort()
-        # N is the whole public keeping (resident cards + frozen stubs, which stay in self.cards),
-        # NOT just the indexed set — frozen cards leave `_by_token` now but must still count toward
-        # the corpus size, or IDF would shift the instant a shelf froze.
-        self._n = max(1, sum(1 for c in cards.values() if is_public(c)))
+        # N = the whole public keeping: resident public cards + the frozen index (all public), so IDF
+        # is unchanged by freezing.
+        self._n = max(1, sum(1 for c in cards.values() if is_public(c)) + len(self._frozen))
 
-        # THE CALL-NUMBER INDEX — built once here so a walk is an instant lookup, never a scan of
-        # the whole keeping. We look faster than we are because the shelves are already sorted and
-        # counted before anyone asks. Connects every PUBLIC card (frozen shards included, since the
-        # number derives from shelf+box which are resident). `_call_tree` is nested
-        # {seg: {"n": count, "kids": {...}}}; `_cids_by_call` groups cards by their full call for the
-        # card list; `_public_sorted` is the whole keeping pre-sorted so top-level paging is O(page).
+        # THE CALL-NUMBER INDEX — an instant walk over the whole keeping, built from resident public
+        # cards AND the frozen index (each frozen id carries its (call, title)). `_call_tree` is nested
+        # {seg: {"n", "kids"}}; `_cids_by_call` groups ids by full call; `_public_sorted` is every
+        # public id pre-sorted for O(page) top-level paging. Frozen ids resolve their call/title via
+        # `_call_of`/`_title_of` (resident dict OR the compact index).
         self._call_tree: Dict[str, dict] = {}
         self._cids_by_call: Dict[str, List[str]] = {}
-        for cid, c in cards.items():
-            if not is_public(c):
-                continue
-            call = c.get("call") or deep_call(c)
-            c["call"] = call
+
+        def _add(cid: str, call: str) -> None:
             self._cids_by_call.setdefault(call, []).append(cid)
             node = self._call_tree
             for seg in call.split("."):
                 entry = node.setdefault(seg, {"n": 0, "kids": {}})
                 entry["n"] += 1
                 node = entry["kids"]
+
+        for cid, c in cards.items():
+            if not is_public(c):
+                continue
+            call = c.get("call") or deep_call(c)
+            c["call"] = call
+            _add(cid, call)
+        # Frozen ids join the call-tree, and their per-shelf tally is banked in the SAME pass so
+        # reader-facing counts (deck sizes, the Floor measure) can include the frozen bulk without a
+        # scan — the whole keeping shows, not just what stayed resident.
+        self._frozen_shelf_counts: Dict[str, int] = {}
+        for cid, fz in self._frozen.items():
+            call = (fz[0] if fz else "") or "misc"
+            _add(cid, call)
+            sh = call.split(".")[0]
+            self._frozen_shelf_counts[sh] = self._frozen_shelf_counts.get(sh, 0) + 1
         for v in self._cids_by_call.values():
             v.sort()
         self._public_sorted: List[str] = sorted(
             (cid for cids in self._cids_by_call.values() for cid in cids),
-            key=lambda cid: ((cards[cid].get("call") or ""), (cards[cid].get("title") or cid)))
+            key=lambda cid: (self._call_of(cid), self._title_of(cid)))
+
+    def _call_of(self, cid: str) -> str:
+        c = self.cards.get(cid)
+        if c is not None:
+            return c.get("call") or ""
+        fz = self._frozen.get(cid)
+        return (fz[0] if fz else "") or ""
+
+    def _title_of(self, cid: str) -> str:
+        c = self.cards.get(cid)
+        if c is not None:
+            return c.get("title") or cid
+        fz = self._frozen.get(cid)
+        return (fz[1] if fz else cid) or cid
+
+    def has(self, cid: str) -> bool:
+        """Is this a card the corpus knows — resident OR a frozen index entry?"""
+        return cid in self.cards or cid in self._frozen
+
+    def frozen_shelf_counts(self) -> Dict[str, int]:
+        """Public cards on frozen shelves, counted per shelf (from the compact index, precomputed at
+        load). Reader-facing measures add this to the resident tally so the whole keeping is shown."""
+        return dict(self._frozen_shelf_counts)
+
+    def _shelf_of(self, cid: str) -> str:
+        c = self.cards.get(cid)
+        if c is not None:
+            return (c.get("shelf") or "").lower()
+        # a frozen card's shelf is the head of its Dewey call ("shelf.class.item")
+        call = self._call_of(cid)
+        return call.split(".")[0] if call else ""
+
+    def _surface_of(self, cid: str) -> str:
+        c = self.cards.get(cid)
+        if c is not None:
+            return c.get("surface") or "?"
+        fz = self._frozen.get(cid)
+        return (fz[2] if fz and len(fz) > 2 else "?") or "?"
+
+    def full(self, cid: str) -> Optional[dict]:
+        """The FULL card by id — resident, or rehydrated from the shard for a frozen id (lazy stubs).
+        None if unknown. is_public is NOT applied here (callers decide); the frozen index holds only
+        public cards, and resident cards keep their own flags."""
+        c = self.cards.get(cid)
+        if c is not None:
+            return rehydrate(c)
+        if cid in self._frozen:
+            # rehydrate thaws the frozen card's shard, reads the full card, and falls back to this
+            # minimal stub if the shard cannot answer (never a silent hole).
+            return rehydrate({"id": cid, "shelf": self._shelf_of(cid), "frozen": True,
+                              "title": self._title_of(cid)})
+        return None
 
     def _call_node(self, prefix: str) -> Optional[dict]:
         node = self._call_tree
@@ -508,7 +565,7 @@ class Corpus:
         for call, cids in self._cids_by_call.items():
             if call == p or call.startswith(p + "."):
                 out.extend(cids)
-        out.sort(key=lambda cid: ((self.cards[cid].get("call") or ""), (self.cards[cid].get("title") or cid)))
+        out.sort(key=lambda cid: (self._call_of(cid), self._title_of(cid)))
         return out
 
     def footprint(self, sample: int = 400) -> Dict[str, Any]:
@@ -593,7 +650,14 @@ class Corpus:
                 self._by_token.setdefault(t, [])
                 if cid not in self._by_token[t]:
                     self._by_token[t].append(cid)
-            self._n = max(1, sum(1 for c in self.cards.values() if is_public(c)))
+            self._n = max(1, sum(1 for c in self.cards.values() if is_public(c)) + len(self._frozen))
+            # a live-minted card is also walkable: place it in the call-tree now (frozen ids already
+            # entered it at load). Idempotent-ish — a re-mint of the same id re-adds; acceptable for
+            # the rare live mint, and a reload rebuilds the tree cleanly.
+            call = card.get("call") or deep_call(card)
+            card["call"] = call
+            if cid not in self._cids_by_call.get(call, ()):
+                self._cids_by_call.setdefault(call, []).append(cid)
 
     def _index_card_ids(self) -> set:
         ids: set = set()
@@ -929,14 +993,21 @@ def _cards_path() -> Path:
 
 
 def load_cards(path: Optional[Path] = None,
-               _df_out: Optional[Dict[str, int]] = None) -> Dict[str, dict]:
+               _df_out: Optional[Dict[str, int]] = None,
+               _frozen_out: Optional[Dict[str, tuple]] = None) -> Dict[str, dict]:
     """Load cards from a JSONL file into an id -> card dict. Empty if absent.
 
     `_df_out` (internal — default_corpus passes it): a dict that receives the document
-    frequency of each frozen card's full-text-only tokens, streamed during the load so no
-    per-card token list ever materializes. Corpus takes it as `df_extra`, keeping the
-    corpus-wide IDF statistics identical whether a shelf is frozen or resident (the probe
-    battery caught title-only indexing re-ranking two RESIDENT cards on an unrelated query)."""
+    frequency of each frozen card's full-text tokens, streamed during the load so no per-card
+    token list ever materializes. Corpus takes it as `df_extra`, keeping the corpus-wide IDF
+    statistics identical whether a shelf is frozen or resident.
+
+    `_frozen_out` (internal — LAZY STUBS, increment 2): a dict that receives, for each PUBLIC
+    frozen card, a COMPACT entry `id -> (call, title)` instead of a resident stub dict. The full
+    card (body, connections, facets, provenance) is served from the shard on demand (get_card /
+    rehydrate). This is what makes resident RAM scale with the CORE shelf, not the whole keeping
+    (measured 2026-09-26: the stub dicts were ~96% of resident memory). Withheld frozen cards are
+    dropped entirely (never browsable/served), but still stream their DF so IDF is unchanged."""
     p = path or _cards_path()
     out: Dict[str, dict] = {}
     if not p.exists():
@@ -945,23 +1016,20 @@ def load_cards(path: Optional[Path] = None,
 
     def _keep(c: dict) -> None:
         # SHELVE at the gate: every card gets its call + facets here, computed from the FULL card
-        # (bands present) before any frozen strip — so a newly-carded shelf is walkable and
-        # facet-reachable the instant it loads, with no separate classify pass. Idempotent: a
-        # pre-classified card keeps its stored call/facets and pays nothing.
+        # (bands present) before any frozen handling — so a newly-carded shelf is walkable and
+        # facet-reachable the instant it loads, with no separate classify pass.
         shelve(c)
-        # a frozen-shelf card loads as a stub — the graph resident, the weight on the shard
+        # A frozen-shelf card is NOT held resident (increment 2): its full text streams to _df_extra
+        # (IDF unchanged), a PUBLIC card leaves only a compact (call, title) index entry for browse /
+        # the call-tree, and the full card rehydrates from the shard on read. Withheld frozen: DF only.
         if c.get("shelf") in frozen:
-            full_toks = set(_tokens(_card_text(c)))
-            _sa = _is_share_alike(c)   # compute on the FULL card, before the source label is dropped
-            c = {k: v for k, v in c.items() if k in _STUB_KEEPS}
-            c["frozen"] = True
-            c["share_alike"] = _sa     # so is_public() withholds a share-alike stub too (search runs on stubs)
             if _df_out is not None:
-                # The FULL token set (title + body) goes to _df_extra now — frozen cards no longer
-                # sit in `_by_token` at all (title included), so their whole DF must ride here or the
-                # corpus-wide IDF would drop for every frozen title word. (Was full_toks - title.)
-                for t in full_toks:
+                for t in set(_tokens(_card_text(c))):
                     _df_out[t] = _df_out.get(t, 0) + 1
+            if _frozen_out is not None and is_public(c):
+                _frozen_out[c["id"]] = (c.get("call") or "", c.get("title") or c["id"],
+                                        c.get("surface") or "?")
+            return                       # no resident stub — the shard holds the body + the graph
         out[c["id"]] = c
 
     with open(p, encoding="utf-8") as f:
@@ -1155,7 +1223,9 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
         with _DEFAULT_LOCK:
             if _DEFAULT is None:
                 df: Dict[str, int] = {}
-                _DEFAULT = Corpus(load_cards(path, _df_out=df), df_extra=df)
+                fz: Dict[str, tuple] = {}
+                _DEFAULT = Corpus(load_cards(path, _df_out=df, _frozen_out=fz),
+                                  df_extra=df, frozen_idx=fz)
     return _DEFAULT
 
 
@@ -1328,8 +1398,8 @@ def get_card(card_id: str) -> Optional[dict]:
     """Fetch one PUBLIC card (the full record) by id, or None. Non-public cards
     (private / public_review / archived / quarantine / retracted) are never returned —
     this is the boundary render_card_html and /card rely on."""
-    c = default_corpus().cards.get((card_id or "").strip())
-    return rehydrate(c) if (c is not None and is_public(c)) else None
+    c = default_corpus().full((card_id or "").strip())   # resident, or rehydrated from the shard
+    return c if (c is not None and is_public(c)) else None
 
 
 def browse(shelf: Optional[str] = None, limit: int = 20, offset: int = 0,
@@ -1343,13 +1413,13 @@ def browse(shelf: Optional[str] = None, limit: int = 20, offset: int = 0,
     children = [{"call": c, "count": n} for c, n in cp.call_children(pref)[:60]]  # precomputed
     if pref:
         cids = cp.cids_for_call(pref)                 # walk — bounded by distinct call numbers
-    elif not shelf and not facet:
-        cids = cp._public_sorted                      # whole keeping, pre-sorted at load
     else:
-        cids = [cid for cid, c in cp.cards.items() if is_public(c)]
+        cids = list(cp._public_sorted)                # whole keeping (resident + frozen index), pre-sorted
     if shelf:
-        cids = [cid for cid in cids if (cp.cards.get(cid, {}).get("shelf") or "").lower() == shelf.lower()]
+        cids = [cid for cid in cids if cp._shelf_of(cid) == shelf.lower()]   # shelf from call for frozen
     if facet:
+        # facets are resident-only (a frozen card's facets live on the shard, not the compact index),
+        # so facet-browse covers the resident shelves; the call-walk reaches the frozen ones.
         fkey, _, fval = facet.strip().lower().partition(":")
         def _has(cid: str) -> bool:
             fs = cp.cards.get(cid, {}).get("facets") or {}
@@ -1358,59 +1428,72 @@ def browse(shelf: Optional[str] = None, limit: int = 20, offset: int = 0,
             return (not fval) or any(fval == str(v).lower() for v in (fs.get(fkey) or []))
         cids = [cid for cid in cids if _has(cid)]
     if (shelf or facet) and not pref:
-        cids = sorted(cids, key=lambda cid: ((cp.cards.get(cid, {}).get("call") or cp.cards.get(cid, {}).get("shelf") or ""),
-                                             (cp.cards.get(cid, {}).get("title") or cid)))
+        cids = sorted(cids, key=lambda cid: (cp._call_of(cid) or cp._shelf_of(cid), cp._title_of(cid)))
     total = len(cids)
     offset = max(0, offset)
     limit = max(1, min(limit, 100))
     page = cids[offset:offset + limit]
+    briefs = []
+    for cid in page:                                  # full(): resident, or rehydrated from the shard
+        fc = cp.full(cid)
+        if fc is not None:
+            briefs.append(_brief(fc))
     return {"total": total, "offset": offset, "limit": limit, "shelf": shelf,
-            "call": call, "facet": facet, "children": children,
-            "cards": [_brief(rehydrate(cp.cards[cid])) for cid in page if cid in cp.cards]}
+            "call": call, "facet": facet, "children": children, "cards": briefs}
 
 
 def stats() -> Dict[str, Any]:
-    """Counts over the keeping — total, by shelf, by surface."""
+    """Counts over the WHOLE keeping — total, by shelf, by surface — resident cards AND the frozen
+    index (lazy stubs), so the numbers reflect the full keeping, not just what's held in RAM."""
     from collections import Counter
-    cards = [c for c in default_corpus().cards.values() if is_public(c)]
-    out = {"total": len(cards),
-           # EVERY shelf, not the largest 40. This was `most_common(40)`, and the library's browse
-           # dropdown is built from it — so 63 of 103 shelves could not be reached by browsing at
-           # all, while /cards?shelf=X served them perfectly well. A cap that hides two-thirds of
-           # the keeping from the one control meant for reaching it is a silent truncation, and it
-           # reads to a visitor as "this is all there is".
-           "by_shelf": dict(Counter((c.get("shelf") or "?") for c in cards).most_common()),
-           "by_surface": dict(Counter((c.get("surface") or "?") for c in cards))}
+    cp = default_corpus()
+    ids = cp._public_sorted                          # every public id (resident + frozen index)
+    by_shelf: Counter = Counter(cp._shelf_of(cid) or "?" for cid in ids)
+    by_surface: Counter = Counter(cp._surface_of(cid) for cid in ids)
+    out = {"total": len(ids),
+           # EVERY shelf, never the largest 40 — the browse dropdown is built from this; a cap hides
+           # shelves the one control meant to reach them.
+           "by_shelf": dict(by_shelf.most_common()),
+           "by_surface": dict(by_surface)}
     fz = frozen_shelves()
     if fz:
-        # named, never silent: these shelves are resident as stubs (graph + titles), full
-        # bodies riding the SQLite shards and rehydrated on read
+        # named, never silent: these shelves ride the SQLite shards (bodies + graph rehydrated on
+        # read); resident holds only a compact (call, title, surface) index for them.
         out["frozen_shelves"] = sorted(fz)
     return out
 
 
 def daily(seed: Optional[str] = None) -> Optional[dict]:
     """A deterministic 'card of the day' — same card all day, different each day. Stable: the
-    seed (default today's UTC date) hashes to an index, so it needs no stored state."""
+    seed (default today's UTC date) hashes to an index over the WHOLE keeping (resident + frozen)."""
     import hashlib
     import time as _time
-    ids = sorted(cid for cid, c in default_corpus().cards.items() if is_public(c))
+    cp = default_corpus()
+    ids = cp._public_sorted
     if not ids:
         return None
     if seed is None:
         seed = _time.strftime("%Y-%m-%d", _time.gmtime())
     idx = int(hashlib.sha256(seed.encode("utf-8")).hexdigest(), 16) % len(ids)
-    return rehydrate(default_corpus().cards[ids[idx]])
+    return cp.full(ids[idx])                          # resident, or rehydrated from the shard
 
 
 def connections(card_id: str, limit: int = 10) -> Optional[Dict[str, Any]]:
-    """Cards related to one card — its explicit links plus same-shelf siblings. None if absent."""
+    """Cards related to one card — its explicit links plus same-shelf siblings. None if absent.
+    Same-shelf siblings come from the call-tree (the shelf is the call's head), so they include
+    frozen cards, rehydrated from the shard for their brief."""
+    cp = default_corpus()
     c = get_card(card_id)
     if c is None:
         return None
-    shelf = c.get("shelf")
-    sibs = [_brief(x) for x in default_corpus().cards.values()
-            if x.get("id") != card_id and x.get("shelf") == shelf and is_public(x)][:max(1, min(limit, 50))]
+    shelf = (c.get("shelf") or "")
+    lim = max(1, min(limit, 50))
+    sib_ids = [cid for cid in cp.cids_for_call(shelf.lower()) if cid != card_id][:lim]
+    sibs = []
+    for cid in sib_ids:
+        fc = cp.full(cid)
+        if fc is not None and is_public(fc):
+            sibs.append(_brief(fc))
     links = c.get("links") or c.get("connections") or c.get("refs") or []
     return {"id": card_id, "shelf": shelf, "links": links, "same_shelf": sibs}
 
@@ -1423,24 +1506,39 @@ def locate(q: str, limit: int = 5) -> Dict[str, Any]:
     q = (str(q) if q else "").strip()
     if not q:
         return {"query": q, "by": "none", "matches": []}
-    cards = default_corpus().cards
-    if q in cards and is_public(cards[q]):
-        return {"query": q, "by": "id", "matches": [_brief(cards[q])]}
+    cp = default_corpus()
+    idc = cp.full(q)                                  # exact id — resident or frozen (rehydrated)
+    if idc is not None and is_public(idc):
+        return {"query": q, "by": "id", "matches": [_brief(idc)]}
     ql = q.lower()
-    title_hits = [_brief(c) for c in cards.values() if is_public(c) and ql in (c.get("title") or "").lower()]
-    if title_hits:
-        return {"query": q, "by": "title", "matches": title_hits[:limit]}
+    hits: List[str] = []
+    for cid, c in cp.cards.items():                   # resident titles
+        if is_public(c) and ql in (c.get("title") or "").lower():
+            hits.append(cid)
+            if len(hits) >= limit:
+                break
+    if len(hits) < limit:                             # then frozen titles (from the compact index)
+        for cid, fz in cp._frozen.items():
+            if ql in (fz[1] or "").lower():
+                hits.append(cid)
+                if len(hits) >= limit:
+                    break
+    if hits:
+        matches = [_brief(fc) for cid in hits[:limit] for fc in [cp.full(cid)] if fc]
+        return {"query": q, "by": "title", "matches": matches}
     return {"query": q, "by": "search", "matches": [_brief(c) for c in search(q, limit=limit)]}
 
 
 def health() -> Dict[str, Any]:
-    """Corpus health — is the keeping loaded and sound."""
-    cards = [c for c in default_corpus().cards.values() if is_public(c)]
-    n = len(cards)
+    """Corpus health — is the keeping loaded and sound (whole keeping: resident + frozen index)."""
+    cp = default_corpus()
+    ids = cp._public_sorted
+    n = len(ids)
+    resident_body = sum(1 for c in cp.cards.values() if is_public(c) and (c.get("body") or "").strip())
     return {"ok": n > 0, "total": n,
-            "with_body": sum(1 for c in cards if (c.get("body") or "").strip()),
-            "shelves": len({c.get("shelf") for c in cards}),
-            "surfaces": sorted({(c.get("surface") or "?") for c in cards})}
+            "with_body": resident_body + len(cp._frozen),   # frozen bodies ride the shard
+            "shelves": len({cp._shelf_of(cid) for cid in ids}),
+            "surfaces": sorted({cp._surface_of(cid) for cid in ids})}
 
 
 def gauges() -> Dict[str, Any]:

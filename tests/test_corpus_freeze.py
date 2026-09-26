@@ -66,8 +66,9 @@ def _build_world(tmp: Path, with_shards: bool = True) -> None:
         sh.mkdir()
         db = sqlite3.connect(str(sh / "dictionary.db"))
         db.executescript(_DDL)
-        # the STORED copy carries no connections — the live resident graph must win on rehydrate
-        stored = dict(FULL_DICT_CARD, connections=[])
+        # the shard holds the FULL card — body, connections, provenance (with lazy stubs, the graph
+        # of a frozen card rides the shard, not a resident stub).
+        stored = dict(FULL_DICT_CARD)
         db.execute("insert into cards values (?,?,?,?,?)",
                    (stored["id"], stored["shelf"], stored["surface"], stored["title"],
                     json.dumps(stored, ensure_ascii=False)))
@@ -118,25 +119,27 @@ def _reset_corpus_db(corpus_db):
     corpus_db._USE.clear()
 
 
-def test_frozen_shelf_loads_as_stub_and_the_graph_stays_whole(frozen_world):
+def test_frozen_shelf_is_lazy_not_resident(frozen_world):
+    """LAZY STUBS (increment 2): a frozen card is NOT held resident — it leaves only a compact
+    index entry (call, title, surface) for browse / the call-tree, and the full card rehydrates
+    from the shard on read. Resident RAM scales with the core, not the whole keeping."""
     from concordance import corpus
-    cards = corpus.default_corpus().cards
-    stub = cards["card_dict_zymurgy"]
-    assert stub.get("frozen") is True and "body" not in stub and "bands" not in stub, \
-        "the weight is shed"
-    assert stub["title"] == "Zymurgy" and stub["shelf"] == "dictionary"
-    assert stub["connections"] and stub["connections"][0]["to_card_id"] == "card_core_home", \
-        "the nesting stays whole — a stub is never an orphan"
-    assert corpus.is_public(stub), "the public boundary judges a stub exactly as the full card"
-    core = cards["card_core_home"]
-    assert core.get("frozen") is None and core.get("body"), "resident shelves load untouched"
+    cp = corpus.default_corpus()
+    assert "card_dict_zymurgy" not in cp.cards, "a frozen card is no longer a resident dict"
+    assert "card_dict_zymurgy" in cp._frozen, "it lives in the compact frozen index"
+    call, title, surface = cp._frozen["card_dict_zymurgy"]
+    assert title == "Zymurgy" and surface == "secular" and call.startswith("dictionary")
+    assert cp.has("card_dict_zymurgy"), "the corpus still knows it"
+    assert cp.cards["card_core_home"].get("body"), "resident shelves load full, untouched"
+    # browse / the call-tree still reach it (walkable via its Dewey call, which heads with its shelf)
+    assert "card_dict_zymurgy" in cp.cids_for_call("dictionary"), \
+        "the frozen card is walkable via the call-tree, without a resident stub"
 
 
-def test_a_share_alike_card_on_a_frozen_shelf_is_withheld(frozen_world):
-    """The license lives in `source`, which a stub drops — so `share_alike` is precomputed at
-    stub-build time. A CC-BY-SA card on a frozen shelf must load as a stub that is_public()
-    withholds; otherwise /search (which runs over stubs) leaks it while card_get withholds it —
-    exactly the divergence found LIVE 2026-08-06 for HYG star cards."""
+def test_a_share_alike_card_on_a_frozen_shelf_is_never_served(frozen_world):
+    """A CC-BY-SA card on a frozen shelf is withheld. With lazy stubs it is DROPPED entirely — not
+    resident, not in the browse index — so neither browse, get_card, nor search can leak it (its DF
+    still counts so IDF is unshifted). Guards the divergence found LIVE 2026-08-06 for HYG cards."""
     from concordance import corpus
     sa = {"id": "card_dict_sa", "kind": "reference", "title": "ShareAlikeWord",
           "body": "a term drawn from a CC-BY-SA source", "shelf": "dictionary", "surface": "secular",
@@ -146,21 +149,20 @@ def test_a_share_alike_card_on_a_frozen_shelf_is_withheld(frozen_world):
                            "evidence": "member"}]}
     with open(frozen_world / "cards.jsonl", "a", encoding="utf-8") as f:
         f.write(json.dumps(sa) + "\n")
-    stub = corpus.default_corpus().cards["card_dict_sa"]
-    assert stub.get("frozen") is True and "source" not in stub, "the source label is shed on a stub"
-    assert stub.get("share_alike") is True, "the share-alike bit is precomputed before the label drops"
-    assert corpus.is_public(stub) is False, "a share-alike stub is withheld — search must not leak it"
+    cp = corpus.default_corpus()
+    assert "card_dict_sa" not in cp.cards and "card_dict_sa" not in cp._frozen, \
+        "a withheld frozen card is dropped — not resident, not in the browse index"
+    assert corpus.get_card("card_dict_sa") is None, "get_card never serves it"
 
 
-def test_get_card_rehydrates_full_and_the_live_graph_wins(frozen_world):
+def test_get_card_rehydrates_full_from_the_shard(frozen_world):
     from concordance import corpus
     c = corpus.get_card("card_dict_zymurgy")
     assert c and c.get("body", "").startswith("Zymurgy:"), "the reader gets the FULL card back"
     assert c.get("source", {}).get("label") == "Webster 1913 (PD)", "provenance rides home too"
     assert c["connections"] and c["connections"][0]["to_card_id"] == "card_core_home", \
-        "the LIVE resident graph wins over the stored copy (which had none)"
-    # and the resident stub was never mutated by the read
-    assert "body" not in corpus.default_corpus().cards["card_dict_zymurgy"]
+        "connections come from the shard's stored copy — the graph rides the shard now"
+    assert "card_dict_zymurgy" not in corpus.default_corpus().cards, "still not resident after the read"
 
 
 def test_search_on_body_text_still_finds_the_frozen_card_full(frozen_world):
