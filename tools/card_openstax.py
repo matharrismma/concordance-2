@@ -186,6 +186,8 @@ def main() -> int:
     ap.add_argument("--slug", help="one book slug (prototype)")
     ap.add_argument("--all", action="store_true", help="every book (long, network-heavy)")
     ap.add_argument("--list", action="store_true", help="list books, write nothing")
+    ap.add_argument("--resume", action="store_true",
+                    help="keep books already in openstax_cards.jsonl and fetch only the rest")
     args = ap.parse_args()
 
     books = _books()
@@ -232,16 +234,38 @@ def main() -> int:
                                               encoding="utf-8")
     total = 0
     tmp = out / "openstax_cards.jsonl.tmp"
+    final = out / "openstax_cards.jsonl"
+    done: set = set()
     with tmp.open("w", encoding="utf-8") as f:
+        # RESUME: carry forward the books already carded (a crash mid-run must not lose them) and
+        # skip re-fetching them — so a full run is incremental and network-frugal.
+        if args.resume and final.exists():
+            for line in final.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                f.write(line + "\n")
+                total += 1
+                try:
+                    done.add((json.loads(line).get("extra") or {}).get("openstax_slug"))
+                except Exception:  # noqa: BLE001
+                    pass
+            done.discard(None)
+            print(f"  [resume] kept {total:,} sections from {len(done)} books already done")
         for slug, (title, uuid) in targets.items():
+            if slug in done:
+                continue
             ver = (versions.get(uuid) or {}).get("defaultVersion")
             if not ver:
                 print(f"  {slug}: no version in release; skipped", file=sys.stderr)
                 continue
-            for card in card_book(slug, title, uuid, arch, ver):
-                f.write(json.dumps(card, ensure_ascii=False) + "\n")
-                total += 1
-    (out / "openstax_cards.jsonl").write_bytes(tmp.read_bytes())
+            try:
+                for card in card_book(slug, title, uuid, arch, ver):
+                    f.write(json.dumps(card, ensure_ascii=False) + "\n")
+                    total += 1
+            except Exception as e:  # noqa: BLE001 — one bad book (404 tree, timeout) must not sink the run
+                print(f"  {slug}: SKIPPED ({type(e).__name__}: {e})", file=sys.stderr)
+                continue
+    final.write_bytes(tmp.read_bytes())
     tmp.unlink()
     print(f"[openstax] {total:,} section cards -> data/openstax_cards.jsonl  (+1 spine)")
     return 0
