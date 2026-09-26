@@ -428,6 +428,15 @@ class Corpus:
         for cid, c in cards.items():
             if not is_public(c):
                 continue
+            # FROZEN FREIGHT IS NOT INDEXED RESIDENT. A frozen stub's only text is its title, and
+            # indexing ~500k of them is what makes `_by_token` the dominant resident cost (measured
+            # 2026-09-26: the token index was ~69% of resident RAM). The shard FTS already indexes
+            # the frozen card's FULL text, and `search()` scores those hits through the SAME ranker,
+            # so dropping them here is rank-neutral and makes RAM scale with the CORE shelf, not the
+            # whole keeping. Their document frequencies still ride in `_df_extra` (below), so the
+            # corpus-wide IDF is unchanged — pinned by test_freezing_never_shifts_the_corpus_idf.
+            if c.get("frozen"):
+                continue
             for t in set(_tokens(_card_text(c))):
                 self._by_token.setdefault(t, []).append(cid)
         # CANONICAL POSTINGS. Two corpora over the same cards must rank identically whatever
@@ -436,7 +445,10 @@ class Corpus:
         # query" can rank differently across builds. Sorted once at load; never at query time.
         for v in self._by_token.values():
             v.sort()
-        self._n = max(1, len(self._index_card_ids()))
+        # N is the whole public keeping (resident cards + frozen stubs, which stay in self.cards),
+        # NOT just the indexed set — frozen cards leave `_by_token` now but must still count toward
+        # the corpus size, or IDF would shift the instant a shelf froze.
+        self._n = max(1, sum(1 for c in cards.values() if is_public(c)))
 
         # THE CALL-NUMBER INDEX — built once here so a walk is an instant lookup, never a scan of
         # the whole keeping. We look faster than we are because the shelves are already sorted and
@@ -581,7 +593,7 @@ class Corpus:
                 self._by_token.setdefault(t, [])
                 if cid not in self._by_token[t]:
                     self._by_token[t].append(cid)
-            self._n = max(1, len(self._index_card_ids()))
+            self._n = max(1, sum(1 for c in self.cards.values() if is_public(c)))
 
     def _index_card_ids(self) -> set:
         ids: set = set()
@@ -821,6 +833,30 @@ class Corpus:
         qn = " ".join((query or "").lower().split())
         q_exact = {qn} | {r.lower() for r in _growth.refs_in_text(query or "")}
         scored = []
+
+        def _finalize(c: dict, s: float) -> float:
+            """The exact-title / survival / theory boosts — applied IDENTICALLY to a resident
+            candidate and to a frozen hit pulled from the shard, so the two sources rank on one
+            scale. Boosts multiply the base score, so they only reorder WITHIN the tier a card
+            already earned; they can never smuggle an off-subject hit into the subject tier.
+
+            The pronunciation guard: a pron card's title IS its headword for all ~125k of them, so
+            an exact-title match is an INDEX COLLISION, not evidence of definitiveness (without it
+            every one-word lookup led with an ARPABET string, live 2026-09-03). Verse/named-work
+            exact-title cards ARE the answer and keep the boost."""
+            title_n = " ".join(str(c.get("title", "")).lower().split())
+            ref_n = " ".join(str((c.get("source") or {}).get("ref", "")).lower().split())
+            if c.get("shelf") != "pronunciation":
+                if title_n in q_exact or (ref_n and ref_n in q_exact and title_n in q_exact):
+                    s *= 9.0                          # THE card for this exact reference/title
+                elif q_exact and (title_n in q_exact or ref_n in q_exact):
+                    s *= 4.0
+            if c.get("shelf") == "survival" and (_PRACTICAL & query_tokens):
+                s *= 3.0                              # a how-to question prefers the field library
+            elif c.get("shelf") == "theories":
+                s *= THEORY_WEIGHT                     # a theory is load-bearing (Matt 2026-08-02)
+            return s
+
         for cid in self._candidates(
                 query_tokens, seat_family=(self.subject_family(seat) if seat else None)):
             c = self.cards.get(cid)
@@ -831,50 +867,33 @@ class Corpus:
             if shelves is not None and c.get("shelf") not in shelves:
                 continue
             s = self._score(c, query_tokens, idf, subject=seat)
-            if s > 0 and c.get("frozen"):
-                # rank-neutral freezing: a stub that matched on TITLE is re-scored on its real
-                # text from the shard, so freezing a shelf never reorders results. Only stubs
-                # passing the distinctiveness floor pay the point lookup (a handful per query).
-                full = rehydrate(c)
-                if full is not c:
-                    c = full
-                    s = self._score(c, query_tokens, idf, subject=seat)
             if s > 0:
-                title_n = " ".join(str(c.get("title", "")).lower().split())
-                ref_n = " ".join(str((c.get("source") or {}).get("ref", "")).lower().split())
-                # THE EXACT-TITLE BOOST IS FOR A DEFINITIVE CARD — a verse titled "Philippians 4:13",
-                # a named work — where the title matching the query is real evidence this is THE one.
-                # A PRONUNCIATION card's title IS its headword for all ~125k of them, so an exact match
-                # on one is an INDEX COLLISION, not evidence of definitiveness. Without this guard,
-                # EVERY single-word subject lookup led with an ARPABET phonetic string — "gravity" ->
-                # "G R AE1 V AH0 T IY0", ahead of the definition, Newton's law, and general relativity
-                # (measured live 2026-09-03). Pronunciation is an enrichment genre (the tongues->Word
-                # weave), never the lead answer to "what is X"; it still surfaces for a pronunciation-
-                # intent query, which matches its body ("...CMU Pronouncing Dictionary...") on the
-                # normal TF-IDF path, and via the word-study door. The card's phonetic body also clears
-                # ops.STUB_BODY_CHARS on CMU boilerplate alone, so the substance signal cannot catch it
-                # — the genre must. Dictionary/encyclopedia exact-title cards ARE answers and keep the
-                # boost; only this one pure-index genre loses it.
-                if c.get("shelf") != "pronunciation":
-                    if title_n in q_exact or (ref_n and ref_n in q_exact and title_n in q_exact):
-                        s *= 9.0                          # THE card for this exact reference/title
-                    elif q_exact and (title_n in q_exact or ref_n in q_exact):
-                        s *= 4.0
-                # a practical/how-to question prefers the practical field library over an
-                # incidentally-titled book or species (so "build a fire" gets the how-to, not fire ants)
-                if c.get("shelf") == "survival" and (_PRACTICAL & query_tokens):
-                    s *= 3.0
-                # A THEORY IS LOAD-BEARING (Matt, 2026-08-02: "Theories should be weighted heavier
-                # than a standard card."). The theories shelf is 99 cards out of 550,000, each one
-                # a thing the sciences actually run on, each now carrying its own place in the
-                # assembled floor — what it rests on, what limits it, what shares its form. When a
-                # reader's question touches one, the theory is the card that orients everything
-                # else, so it outranks an incidental mention in a book that happens to use the
-                # same word. Applied INSIDE the s > 0 branch, so it can only lift a card the
-                # partition already admitted — a boost can never smuggle in an off-subject hit.
-                elif c.get("shelf") == "theories":
-                    s *= THEORY_WEIGHT
-                scored.append((s, c))
+                scored.append((_finalize(c, s), c))
+
+        # FROZEN FREIGHT RIDES THE SHARD, SCORED ON ONE SCALE. Frozen shelves are no longer in the
+        # resident index, so their hits come from the shard FTS (which indexes the full text) and are
+        # scored through the SAME `_score` + `_finalize` as resident cards — interleaved by score, not
+        # appended as a fallback. This is what lets `_by_token` shed ~500k title stubs (the measured
+        # 69% of resident RAM) with no ranking change: a frozen card is scored on its real body here,
+        # exactly as the old title-match→rehydrate→re-score path did. Skipped entirely when nothing is
+        # frozen (frozen_shelves() is empty), so an unfrozen corpus is byte-for-byte unchanged.
+        frozen = frozen_shelves()
+        if frozen and (shelves is None or (set(shelves) & frozen)):
+            from . import corpus_db
+            corpus_db.thaw_for(*frozen)
+            have = {c.get("id") for _s, c in scored}
+            for hit in corpus_db.search(query, limit=max(int(limit) * 3, 60),
+                                        include_witness=include_witness):
+                sh = hit.get("shelf")
+                if sh not in frozen or hit.get("id") in have or not is_public(hit):
+                    continue                          # resident shelves are already fully scored
+                if shelves is not None and sh not in shelves:
+                    continue
+                s = self._score(hit, query_tokens, idf, subject=seat)
+                if s <= 0:
+                    continue
+                scored.append((_finalize(hit, s), hit))
+                have.add(hit.get("id"))
         # a TOTAL order: equal scores tie-break on id, so the ranking is a function of the
         # cards and the query alone — never of construction order (invariant I)
         scored.sort(key=lambda x: (-x[0], str(x[1].get("id") or "")))
@@ -938,7 +957,10 @@ def load_cards(path: Optional[Path] = None,
             c["frozen"] = True
             c["share_alike"] = _sa     # so is_public() withholds a share-alike stub too (search runs on stubs)
             if _df_out is not None:
-                for t in full_toks - set(_tokens(_card_text(c))):
+                # The FULL token set (title + body) goes to _df_extra now — frozen cards no longer
+                # sit in `_by_token` at all (title included), so their whole DF must ride here or the
+                # corpus-wide IDF would drop for every frozen title word. (Was full_toks - title.)
+                for t in full_toks:
                     _df_out[t] = _df_out.get(t, 0) + 1
         out[c["id"]] = c
 
