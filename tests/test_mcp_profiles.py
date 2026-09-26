@@ -101,8 +101,10 @@ def test_the_full_catalog_on_mcp_is_unchanged_a_golden():
     2026-08-15 + 1 discern, 2026-08-20): this golden moves only when the catalog does, and moving it is
     a conscious act. `discern` is the sanctioned rise here — the proposal half of the two-door core
     ('discern proposes, verify disposes'), a read-class tool on the `library` profile next to `ask`. +1,
-    deliberate."""
-    assert len(_full_catalog()) == 94
+    deliberate. + 1 thesaurus (2026-09-26): the agent twin of GET /thesaurus — WordNet synonyms/broader,
+    a read/derive tool on the `library` profile beside `pronounce`, closing the human-page/agent-tool
+    parity gap the coherence audit found. +1, deliberate."""
+    assert len(_full_catalog()) == 95
 
 
 def test_the_witness_gate_semantics_survive_the_mount():

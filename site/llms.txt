@@ -149,6 +149,9 @@ The keeping (call `capabilities` for live counts). Reach it through the API — 
   `?scope=card&id=<id>` opens one card and its neighbours.
 - `GET /cards` and `GET /card?id=<id>` — browse, then open a card with its source and links.
 - `GET /search?q=<...>` and `GET /locate?q=<...>` — find a card by word, name, or verse.
+- `GET /thesaurus?q=<word>` — WordNet synonyms + broader (IS-A) terms, "the words that stand with it"
+  (empty if unknown); the same relation quietly sharpens `/search` recall. `GET /pronounce?text=<word>` —
+  a synthesized pronunciation guide (honestly labeled). Both have MCP twins (`thesaurus`, `pronounce`).
 Humans see it drawn live at `/map.html` — the constellation of the keeping, with every subsystem's health.
 
 ## Privacy gateway (embeddable, runs at your edge)

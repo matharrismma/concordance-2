@@ -140,6 +140,11 @@ def _secular_tools() -> List[dict]:
          "description": ("A synthesized pronunciation guide (respelling + approximate IPA) for a "
                          "transliteration or word — honestly labeled, not a native speaker."),
          "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]}},
+        {"name": "thesaurus",
+         "description": ("The thesaurus — WordNet synonyms and broader (IS-A) terms for a word; the words "
+                         "that stand with it. Empty when the word is unknown or no thesaurus is loaded. "
+                         "The agent twin of the GET /thesaurus page."),
+         "inputSchema": {"type": "object", "properties": {"word": {"type": "string"}}, "required": ["word"]}},
         {"name": "steward_budget",
          "description": ("Steward — a household budget (income, expenses -> net, savings rate, by "
                          "category). Shows and plans; NEVER moves money."),
@@ -868,7 +873,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
                   "decks": "read", "deck_open": "read",
                   "cards_stats": "read", "daily_card": "read", "grid_axis": "read",
                   "grid_dimension": "read", "card_connections": "read", "locate": "read",
-                  "library_health": "read", "pronounce": "derive", "study_find": "read",
+                  "library_health": "read", "pronounce": "derive", "thesaurus": "derive", "study_find": "read",
                   "seeds": "read", "ask": "read", "discern": "read"},
     },
     "sovereign": {
@@ -1512,6 +1517,12 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     if name == "pronounce":
         from .. import pronounce as _pron  # neutral phonetic helper, both surfaces
         return _pron.guide(args.get("text", ""))
+    if name == "thesaurus":
+        from .. import thesaurus as _th   # offline WordNet synonyms/broader — the agent twin of /thesaurus
+        w = str(args.get("word") or "")
+        syn, broader = _th.synonyms(w), _th.broader(w)
+        return {"word": w, "synonyms": syn, "broader": broader, "count": len(syn) + len(broader),
+                "note": "WordNet synonyms + broader (IS-A) terms; empty if unknown or no thesaurus loaded"}
     if name == "steward_budget":
         from .. import steward  # shows + plans; never moves money
         return steward.budget(args.get("income"), args.get("expenses") or [])

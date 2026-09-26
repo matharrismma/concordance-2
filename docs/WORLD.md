@@ -211,8 +211,18 @@ honest signature is a **ring** — nothing central, nothing peripheral, one conn
 - **Size (live `/capabilities` → `substrate`):** **676,343 cards** — **26,147 substance** (body ≥ 120
   chars), **637,372 frozen** (body on a shard, not judged), **4,231 stubs** (stub_ratio 0.139). The base is
   the Bible; every kept card is a gradient step (*the keeping is the model*).
-- **Store:** [`corpus.py`](../src/concordance/corpus.py) (in-RAM, TF-IDF + subject-tier partition),
-  `corpus_db.py`. Production keep is **appended** to the box's `data/`.
+- **Store:** [`corpus.py`](../src/concordance/corpus.py) (resident cards, TF-IDF + subject-tier partition)
+  + [`corpus_db.py`](../src/concordance/corpus_db.py) (SQLite FTS shards). **Lazy RAM (2026-09-26):** frozen
+  shelves ride the shards and their full text is **no longer indexed resident** (the token index was
+  measured ~69% of resident RAM); search pulls frozen hits from the shard FTS and re-scores them through the
+  *same* ranker (rank-neutral), and their document frequencies ride in `_df_extra` so corpus-wide IDF is
+  unchanged. `SHARD_ASSIGN` routes each shelf to a shard — the logistics / load-balancing layer (freeze /
+  unfreeze / rebalance). Production keep is **appended** to the box's `data/`.
+- **Reference section (the wisdom engine's substance):** the dictionary **+ thesaurus** (WordNet; `GET
+  /thesaurus` and the offline `thesaurus.py`, which also sharpens `/search` recall), the **OpenStax** open
+  textbooks (CC-BY — mathematics/physics/chemistry/biology/…; `tools/card_openstax.py`), the **tree-of-life
+  backbone** (recognizable taxa; `tools/card_taxonomy.py`), plus the field library. **License gate: PD +
+  CC0 + CC-BY** (attribution kept on each card); **CC-BY-SA + NC withheld** (`corpus._DISALLOWED_LICENSE`).
 - **The connection graph:** [`graph.py`](../src/concordance/graph.py) → `GET /graph` — everything connects,
   0 isolated. Rendered by `site/graph.js` on `site/map.html`.
 - **Scripture substrate:** **97 harmony events**, **100 timeline events** (11 disputed, carrying both
