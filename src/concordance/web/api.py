@@ -1770,6 +1770,22 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                                "found": len(expansion.get("documents") or [])}
         return _ok(out)
 
+    # THE THESAURUS door of the reference section — "the words that stand with it" (WordNet synonyms)
+    # plus the broader IS-A terms. Offline lookup (data/thesaurus.db, built once by
+    # tools/build_thesaurus.py); the same relation quietly sharpens /search recall (corpus.search_question
+    # broadens a subject by its synonyms when the literal query under-fills). Empty, never an error, for
+    # an unknown word or a node with no thesaurus loaded — a miss stays an honest miss.
+    if method == "GET" and path == "/thesaurus":
+        w = (query.get("q") or query.get("word") or "").strip()
+        if not w:
+            return _err(400, "q required")
+        from .. import thesaurus as _th
+        syn, broader_terms = _th.synonyms(w), _th.broader(w)
+        return _ok({"word": w, "synonyms": syn, "broader": broader_terms,
+                    "count": len(syn) + len(broader_terms),
+                    "note": "WordNet synonyms + broader (IS-A) terms; empty if the word is unknown or "
+                            "no thesaurus is loaded on this node"})
+
     # Library / keeping tools (ported from 1.0, additive — over the same shared corpus).
     if method == "GET" and path == "/cards/stats":
         return _ok(_cached_scan("stats", corpus.stats))

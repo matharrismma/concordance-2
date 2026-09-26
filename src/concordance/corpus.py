@@ -1255,20 +1255,45 @@ def search_question(query: str, limit: int = 25, include_witness: bool = True,
     query with no frame it is exactly search()."""
     raw = str(query or "")
     subj = query_subject(raw)
-    if subj == raw:
-        return search(raw, limit=limit, include_witness=include_witness, shelves=shelves)
     seen: set = set()
     out: List[dict] = []
-    for c in (list(search(subj, limit=limit, include_witness=include_witness, shelves=shelves))
-              + list(search(raw, limit=limit, include_witness=include_witness, shelves=shelves))):
-        cid = c.get("id")
-        if cid and cid in seen:
-            continue
-        if cid:
-            seen.add(cid)
-        out.append(c)
+
+    def _take(src: str) -> None:
+        for c in search(src, limit=limit, include_witness=include_witness, shelves=shelves):
+            cid = c.get("id")
+            if cid and cid in seen:
+                continue
+            if cid:
+                seen.add(cid)
+            out.append(c)
+            if len(out) >= limit:
+                break
+
+    # The literal question first — subject (frame stripped) then raw — always kept ahead.
+    for src in ([raw] if subj == raw else [subj, raw]):
         if len(out) >= limit:
             break
+        _take(src)
+
+    # RECALL, SHARPENED BY THE THESAURUS. Only when the literal query UNDER-FILLS: broaden the
+    # subject word by a few WordNet synonyms so "automobile" reaches material that only says "car".
+    # Recall-safe by construction — literal hits already hold the front slots; synonyms merely fill
+    # what remains, deduped. Zero cost when results are plentiful, and a no-op when no thesaurus is
+    # present (offline-optional, like the shards). Synonyms WIDEN what can be found; they never
+    # redefine the question — so the subject is chosen among the ASKED words, never a synonym.
+    if len(out) < limit:
+        from . import thesaurus
+        if thesaurus.available():
+            from .corpus_db import _STOP
+            corpus = default_corpus()
+            asked = {t for t in _tokens(subj) if t not in _STOP} \
+                or {t for t in _tokens(raw) if t not in _STOP}
+            subject = corpus._subject_of(asked, corpus._idf(asked)) if asked else None
+            if subject:
+                for syn in thesaurus.expand_subject(subject, limit=4):
+                    if len(out) >= limit:
+                        break
+                    _take(syn)
     return out
 
 
