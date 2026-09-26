@@ -551,28 +551,36 @@ def _discernment_watch(cp) -> List[tuple]:
     return watch
 
 
-def _pair_discernment(hits: List[Dict[str, Any]], cp=None) -> List[Dict[str, Any]]:
-    """Front door must discern (step 5): when a result set carries a PRIMARY SOURCE on a subject a
-    discernment chart covers — an occult text the PD ingest holds (Leadbeater's 'The Astral Plane', a
-    spiritualist memoir) — lift that chart to the LEAD, so the source is never met without the
-    discernment beside it. Unlike steps 1-4 this DOES lead, on purpose: it is the discernment posture,
-    the same as crisis-first. Curated + inert — it fires only on a chart's distinctive `discerns_terms`
-    and is untouched for every unrelated query (nothing trips 'astral projection' by accident).
-    `cp` is injectable for tests; it defaults to the live corpus."""
-    if not hits:
-        return hits
+def _pair_discernment(hits: List[Dict[str, Any]], text: str = "", cp=None) -> List[Dict[str, Any]]:
+    """Front door must discern (step 5): when the INTERACTION is about a subject a discernment chart
+    covers — the person asks about the occult practice, OR a result carries a PRIMARY SOURCE on it (an
+    occult text the PD ingest holds: Leadbeater's 'The Astral Plane', a spiritualist memoir) — lift that
+    chart to the LEAD, so the practice is never met without the discernment beside it. The subject is
+    read from BOTH the query and the results, because a how-to query ('how do I have an out-of-body
+    experience') returns junk that carries none of the terms while the QUESTION plainly names the
+    practice. Unlike steps 1-4 this DOES lead, on purpose: the discernment posture, like crisis-first.
+    Curated + inert — fires only on a chart's distinctive `discerns_terms`, untouched otherwise. `cp` is
+    injectable for tests; it defaults to the live corpus."""
     cp = cp or corpus.default_corpus()
-    for chart, terms in _discernment_watch(cp):
+    watch = _discernment_watch(cp)
+    if not watch:
+        return hits
+    q = " " + str(text or "").lower() + " "
+    for chart, terms in watch:
         cid = chart.get("id")
-        for h in hits:
-            if h.get("id") == cid:
-                continue
-            hay = (str(h.get("title") or "") + " " + " ".join(str(b) for b in (h.get("bands") or []))
-                   + " " + str(h.get("subject") or "")).lower()
-            if any(t in hay for t in terms):
-                lead = next((x for x in hits if x.get("id") == cid), None) or corpus._brief(chart)
-                hits = [lead] + [x for x in hits if x.get("id") != cid]
-                break
+        tripped = any(t in q for t in terms)          # the QUESTION names the charted practice
+        if not tripped:
+            for h in hits:                              # or a RESULT is a source on it
+                if h.get("id") == cid:
+                    continue
+                hay = (str(h.get("title") or "") + " " + " ".join(str(b) for b in (h.get("bands") or []))
+                       + " " + str(h.get("subject") or "")).lower()
+                if any(t in hay for t in terms):
+                    tripped = True
+                    break
+        if tripped:
+            lead = next((x for x in hits if x.get("id") == cid), None) or corpus._brief(chart)
+            hits = [lead] + [x for x in hits if x.get("id") != cid]
     return hits
 
 
@@ -597,7 +605,10 @@ def _shape_found_hits(hits: List[Dict[str, Any]], text: str, practical: bool) ->
     if practical:
         clean = [c for c in hits if not _is_practical_junk(c)]
         if not clean:
-            return []                     # a how-to with only word-matches — the caller answers honestly
+            # a how-to with only word-matches — the caller answers honestly. But if the QUESTION names a
+            # charted occult practice ("how do I have an out-of-body experience"), the discernment still
+            # leads rather than an empty answer (front door must discern).
+            return _pair_discernment([], text)
         hits = clean
     if not re.search(r"pronounc|how (?:do you|to|do i) say\b", text or "", re.I):
         pron = [c for c in hits if str(c.get("id") or "").startswith("card_src_pron_")]
@@ -605,7 +616,7 @@ def _shape_found_hits(hits: List[Dict[str, Any]], text: str, practical: bool) ->
             hits = [c for c in hits if not str(c.get("id") or "").startswith("card_src_pron_")] + pron
     hits = _prefer_full_coverage(hits, text)
     hits = _prefer_connected(hits)
-    return _pair_discernment(hits)
+    return _pair_discernment(hits, text)
 
 
 def find_ref(text: str):

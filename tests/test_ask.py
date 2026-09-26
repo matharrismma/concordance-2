@@ -110,9 +110,16 @@ def test_discernment_pairing_lifts_the_chart_over_an_occult_source():
     out = ask._pair_discernment([source, other], cp=cp)
     assert out[0]["id"] == chart["id"], "the discernment chart must lead when an occult source is present"
     assert {h["id"] for h in out} >= {"card_src_book_astral", "card_bio_photo"}, "no hit is dropped"
-    # nothing trips the watch terms -> INERT, order untouched
-    out2 = ask._pair_discernment([other], cp=cp)
-    assert [h["id"] for h in out2] == ["card_bio_photo"], "inert when no source trips the watch terms"
+    # the QUESTION names the practice but the results are junk (a how-to) -> the chart still leads
+    out_q = ask._pair_discernment([other], "how do I have an out of body experience", cp=cp)
+    assert out_q[0]["id"] == chart["id"], "a query naming the charted practice must lead with discernment"
+    # an occult how-to with NO real results -> the chart is the answer, not an empty reply
+    out_empty = ask._pair_discernment([], "how do I astral projection", cp=cp)
+    assert [h["id"] for h in out_empty] == [chart["id"]], "front door discerns even with no how-to hits"
+    # nothing trips the watch terms (query or results) -> INERT, order untouched
+    out2 = ask._pair_discernment([other], "what is photosynthesis", cp=cp)
+    assert [h["id"] for h in out2] == ["card_bio_photo"], "inert when nothing trips the watch terms"
+    assert ask._pair_discernment([], "what is photosynthesis", cp=cp) == [], "inert on an unrelated empty result"
 
 
 def test_a_remedy_question_reaches_the_apothecary():
