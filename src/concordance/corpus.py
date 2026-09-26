@@ -1095,6 +1095,11 @@ def load_cards(path: Optional[Path] = None,
                       # reference section. Free to reuse WITH attribution (kept on each card).
                       # Minted by tools/card_openstax.py (--slug one book / --all the shelf).
                       "openstax_spine.jsonl", "openstax_cards.jsonl",
+                      # The Country Studies — the LoC Federal Research Division / US Army Area Handbook
+                      # series, public domain (17 U.S.C. §105), one overview card per nation linked to the
+                      # full PD text. The PD original via loc.gov (not a mirror / restricted scan).
+                      # Minted by tools/card_country_studies.py.
+                      "country_studies_spine.jsonl", "country_studies_cards.jsonl",
                       # The languages of the earth — PHOIBLE/Glottolog (academics: linguistics).
                       "language_spine.jsonl", "language_cards.jsonl",
                       # More stored sources — RFCs (internet standards), Matthew Henry commentary,

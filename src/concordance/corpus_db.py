@@ -234,6 +234,9 @@ SHARD_ASSIGN = {
     "philosophy": "word", "reference": "world",
     # frozen on the box but were routed to core.db (always-thawed) — give them real shards too
     "encyclopedia": "world", "topical": "world",
+    # The Country Studies (LoC FRD / Army Area Handbook, PD) — reference bulk, routed to the world
+    # shard for a future freeze; resident until the next shard rebuild.
+    "countries": "world",
 }
 CORE = "core"                                  # always thawed
 
