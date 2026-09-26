@@ -2981,6 +2981,7 @@ ROUTES = [
     {"path": "/library/health", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/growth", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/pronounce", "methods": ("GET",), "api": True},
+    {"path": "/thesaurus", "methods": ("GET",), "api": True},   # bounded single-word lookup (data/thesaurus.db), like /pronounce
     {"path": "/thread", "methods": ("DELETE", "GET"), "api": True},
     {"path": "/threads", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/threads/search", "methods": ("GET",), "api": True, "rl": True},

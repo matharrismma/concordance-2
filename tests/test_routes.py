@@ -27,6 +27,9 @@ from concordance.config import EngineConfig  # noqa: E402
 # registry refactor. The derived sets must equal these exactly.
 GOLDEN_API_GET = {
     "/health",
+    # The thesaurus reference door (2026-09-26): synonyms + broader terms from data/thesaurus.db, a
+    # bounded word lookup like /pronounce; the same WordNet relation sharpens /search recall.
+    "/thesaurus",
     # coach lesson text, the scripture-for lookup, and the tortoise reader — GET surfaces added with the
     # lesson/reader work in prior passes; registered here after this manifest audit (the code had them,
     # the golden set did not — the drift this test exists to catch, now reconciled).
