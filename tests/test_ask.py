@@ -74,6 +74,22 @@ def test_distress_never_overrides_crisis():
     assert ask.distress_ref("I want to end my life") == ""    # crisis short-circuits before comfort
 
 
+def test_the_fear_of_the_lord_reaches_the_teaching_not_an_emotional_lane():
+    """"The fear of the LORD" is REVERENCE (Proverbs 9:10; Psalm 34), a study question — not a cry, and
+    not personal distress. A first-person word buried in the framing ("tell ME") must not divert it to the
+    comfort lane's 'fear not' verse; it reaches the same teaching the bare form does (verified live
+    2026-09-25 — the crisis path was fixed in test_crisis_coverage; this pins the distress lane so the
+    family gets the answer, not a deflection). The emotion word 'fear' standing alone is untouched."""
+    for q in ("Can you tell me what the Bible says about the fear of the Lord?",
+              "fear of the Lord", "what does the Bible say about the fear of the Lord",
+              "teach me about the fear of God"):
+        assert ask.distress_ref(q) == "", f"a reverence question was met with a comfort verse: {q!r}"
+        assert ask.classify(q) == "search", f"a reverence question left the search path: {q!r}"
+    # genuine distress is still met with comfort — the guard neutralizes ONLY the reverent span
+    assert ask.classify("I feel anxious and afraid") == "comfort"
+    assert ask.distress_ref("I'm scared and I fear the Lord") == ask._COMFORT_VERSE["scared"]
+
+
 def test_a_remedy_question_reaches_the_apothecary():
     """An ailment or remedy is discerned to the Apothecary, not dumped into a classics search."""
     from concordance import router

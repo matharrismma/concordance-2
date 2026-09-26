@@ -377,10 +377,23 @@ _HOWTO = re.compile(r"\bhow\s+(do|to|can|should|would|could|does)\b"
 def distress_ref(text: str) -> str:
     """If someone brings their OWN hurt (first-person + a feeling word) and it is NOT a crisis,
     the fitting comfort verse — a canon reference to resolve. Else ''. Never fabricates. A how-to
-    question is never a cry: 'how do I set a broken bone' is first aid, not a broken heart."""
+    question is never a cry: 'how do I set a broken bone' is first aid, not a broken heart.
+
+    "The fear of the LORD" is REVERENCE, not the distress sense of 'fear' — so a study question that
+    happens to carry a first-person word ("can you tell ME what the Bible says about the fear of the
+    Lord") is not a cry for comfort. The reverent span is neutralized before the feeling-word scan
+    (SAME shared pattern the crisis backstop uses, so the two lanes cannot drift) — and only that span:
+    a genuine feeling word alongside it still fires ("im scared and i fear the Lord" -> the 'scared'
+    verse). Without this, the crisis fix would merely swap a helpline for a 'fear not' verse (Isaiah
+    41:10) on a reverence question — still not the teaching the family asked for (verified 2026-09-25)."""
     if is_crisis(text) or not _FIRST_PERSON.search(text or "") or _HOWTO.search(text or ""):
         return ""
     low = " " + normalize(text) + " "
+    try:
+        from . import crisis_semantic
+        low = crisis_semantic._REVERENT_FEAR.sub(" ", low)   # reverence toward God is not personal distress
+    except Exception:  # noqa: BLE001 — if unavailable, fall back to the plain scan (never crash the router)
+        pass
     for w in _DISTRESS_WORDS:
         if (" " + w) in low:
             return _COMFORT_VERSE[w]

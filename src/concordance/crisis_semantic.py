@@ -180,6 +180,25 @@ _THEODICY = re.compile(
     r"|\bproblem of (?:evil|suffering|pain)\b"
     r"|\bwhy (?:is there|does).{0,20}(?:evil|suffering) (?:in|exist)", re.I)
 
+# THE FEAR OF THE LORD — the biblical word "fear" bound to God is REVERENCE/awe ("the fear of the LORD is
+# the beginning of wisdom", Proverbs 9:10; Psalm 34; Deuteronomy 6), the seeker's core question, never a
+# cry. The distributional score reads it near crisis because the bare stem "fear" sits by the emotional-
+# distress cluster — the SAME topic≈intent limit already corrected for measurement and theodicy above.
+# Measured live 2026-09-25 on narrowhighway.com/ask: "Can you tell me what the Bible says about the fear
+# of the Lord?" scored 0.6579 (> 0.6568) and a homeschool family's core-doctrine question was met with a
+# suicide-hotline response, while the bare "fear of the Lord" (0.4098) answered correctly — proof the trip
+# is the surrounding framing pushing an already-adjacent phrase a hair over threshold, not any real signal.
+# TIGHT by design: keyed to "fear" bound to a DIVINE object (Lord/God/Yahweh/…) or a fixed reverence idiom,
+# NEVER to the bare emotion word — "im afraid i cant go on" carries no divine object and still fires. It
+# only SUPPRESSES the backstop; the substring net still catches any explicit cry regardless (a real cry
+# that also named the fear of the Lord would carry "want to die"/"end it"/… and route to help unchanged).
+# Verified: 0 hits on the curated CRISIS_FLOOR and 0 on the blind RED_TEAM set, so the recall floor cannot
+# shrink. Shared with ask.distress_ref so the SAME reverent phrase is not mistaken for personal distress
+# either — one source, so the two lanes cannot drift.
+_REVERENT_FEAR = re.compile(
+    r"\bfear(?:ing|s|ed)?\s+(?:of\s+)?(?:the\s+)?(?:lord|god|yahweh|jehovah|almighty|most\s+high)\b"
+    r"|\b(?:reverent(?:ial)?\s+fear|godly\s+fear|god-?fearing|fear\s+and\s+trembling)\b", re.I)
+
 
 def flags(text: str) -> bool:
     """True when the semantic backstop judges this a cry. Only ever ADDS to the substring net."""
@@ -191,4 +210,6 @@ def flags(text: str) -> bool:
         return False                      # a physical measurement/conversion is never a cry (see note)
     if _THEODICY.search(t):
         return False                      # a theodicy question is the seeker's, not a cry (see note)
+    if _REVERENT_FEAR.search(t):
+        return False                      # "the fear of the LORD" is reverence, not a cry (see note)
     return score(text) > art["threshold"]
