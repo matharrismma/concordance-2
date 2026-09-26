@@ -988,6 +988,12 @@ def load_cards(path: Optional[Path] = None,
                                                  # (tools/shepherd_rounds.py --choose; source-to-source)
                       "verified_cards.jsonl", "reference_cards.jsonl", "keystone_seeds.jsonl",
                       "nesting_seeds.jsonl", "ncs_seeds.jsonl", "works_cards.jsonl", "theory_cards.jsonl",
+                      # Orphan seeders wired in 2026-09-26 ("let them fill the gaps") — each a distinct
+                      # shelf the coherence audit found minted-but-never-loaded, no duplicate of the above:
+                      # the tools reference, the strategy concordance (patterns×arenas), the canonical
+                      # forms + worked calculations, and the cross-domain bridge cards (browsable, distinct
+                      # from the *_bridges edge overlays). Small; resident on core.
+                      "tool_cards.jsonl", "strategy_cards.jsonl", "calculation_cards.jsonl", "bridge_cards.jsonl",
                       "fieldkit_cards.jsonl", "playbook_cards.jsonl", "systems_cards.jsonl",
                       "access_tools_cards.jsonl",   # the connection to lawful free tools (logistics: tag onto paid carriers)
                       "church_cards.jsonl",         # the churches, calibrated from their own confessions (not judged)
