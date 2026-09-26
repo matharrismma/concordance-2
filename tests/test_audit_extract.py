@@ -610,6 +610,27 @@ def test_element_fact_zero_false_positives():
         assert "element_fact" not in _extractors(t), t
 
 
+# ---- sequence FACTS (2026-09-25, fact-verifier): "the Nth prime/Fibonacci/triangular is X" ----
+
+def test_sequence_fact_extracts_and_confirms():
+    for t in ["the 5th prime is 11",
+              "the 7th Fibonacci number is 13",
+              "the 4th triangular number is 10"]:
+        assert "sequence_fact" in _extractors(t), t
+        assert audit(t, CFG, seal=False)["held"] == 1, t
+
+
+def test_sequence_fact_catches_a_wrong_term():
+    res = audit("the 5th prime is 13", CFG, seal=False)   # 5th prime is 11, not 13
+    assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
+
+
+def test_sequence_fact_zero_false_positives():
+    """The ordinal must name one of the supported sequences; ordinary "Nth X" prose extracts nothing."""
+    for t in ["the 5th person is 11", "the 3rd time is the charm", "the 2nd item is 10"]:
+        assert "sequence_fact" not in _extractors(t), t
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))

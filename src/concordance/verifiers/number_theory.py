@@ -146,6 +146,18 @@ def _fibonacci(n: int) -> int:
     return a
 
 
+def _nth_prime(n: int) -> int:
+    """The n-th prime, 1-indexed: nth(1)=2, nth(5)=11. Bounded by the sequence cap in the caller."""
+    if n < 1:
+        raise ValueError("the n-th prime is 1-indexed (n >= 1)")
+    count, cand = 0, 1
+    while count < n:
+        cand += 1
+        if _is_prime(cand):
+            count += 1
+    return cand
+
+
 def _catalan(n: int) -> int:
     if n < 0:
         raise ValueError("Catalan undefined for negative index")
@@ -175,6 +187,7 @@ def _is_perfect_number(n: int) -> bool:
 
 
 _SEQUENCES: Dict[str, Dict[str, Any]] = {
+    "prime":       {"oeis": "A000040", "fn": _nth_prime, "name": "prime"},        # 1-indexed: 2,3,5,7,11,…
     "fibonacci":   {"oeis": "A000045", "fn": _fibonacci, "name": "Fibonacci"},
     "catalan":     {"oeis": "A000108", "fn": _catalan,   "name": "Catalan"},
     "triangular":  {"oeis": "A000217", "fn": _triangular,"name": "triangular"},

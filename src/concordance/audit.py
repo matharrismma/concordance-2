@@ -855,6 +855,27 @@ def _x_element_fact(text: str):
     return out
 
 
+# ── sequence FACTS (fact-verifier, 2026-09-25): "the Nth prime/Fibonacci/triangular number is X" ─────
+# Reuses the number_theory verifier's computed sequences (deterministic, OEIS-keyed) — a lookup like
+# "the 5th prime is 11" becomes a VERDICT, not a FOUND card. Ordinal-anchored ("Nth <sequence>"), so
+# ordinary prose is never mistaken for it; a wrong term breaks honestly with the true one shown.
+_SEQ_ORD = r"(?:the\s+)?(\d+)\s*(?:st|nd|rd|th)\s+"
+_SEQ_EQ = r"\s+(?:is|=|equals?)\s+(\d+)\b"
+
+
+def _x_sequence_fact(text: str):
+    """"the 5th prime is 11" / "the 7th Fibonacci number is 13" / "the 4th triangular number is 10" —
+    routes to number_theory.sequence (1-indexed for these three). A wrong term breaks honestly."""
+    out = []
+    for seq, word in (("prime", "primes?"), ("fibonacci", "fibonacci"), ("triangular", "triangular")):
+        pat = _SEQ_ORD + word + r"(?:\s+number)?" + _SEQ_EQ
+        for m in re.finditer(pat, text, re.I):
+            out.append((_q(text, m), "number_theory",
+                        {"NUM_VERIFY": {"sequence": seq, "sequence_index": int(m.group(1)),
+                                        "claimed_term": int(m.group(2))}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
@@ -866,6 +887,7 @@ _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("physics_force", _x_physics_force), ("kinetic_energy", _x_kinetic_energy),
     ("kinematics", _x_kinematics),
     ("molar_mass", _x_molar_mass), ("element_fact", _x_element_fact),
+    ("sequence_fact", _x_sequence_fact),
     ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),
     ("compound_interest", _x_compound), ("rule_of_72", _x_rule72),
