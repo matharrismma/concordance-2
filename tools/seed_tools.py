@@ -30,6 +30,7 @@ from pathlib import Path
 STORE = Path("data/tool_cards.jsonl")
 THEORY_STORE = Path("data/theory_cards.jsonl")
 
+FLOOR = "card_k_floor_of_discovery"
 SPINE_ID = "card_spine_tools"
 SPINE_CONN = {"to_card_id": SPINE_ID, "relationship": "member_of",
               "evidence": "a tool the work reaches for, discerned and connected — not rebuilt"}
@@ -131,7 +132,10 @@ def _spine_card() -> dict:
                  "discern which to reach for, connect to it, and keep incorporating the best."),
         "source": {"label": "The Tool Concordance", "url": "", "domain": "", "authority_tier": "reference"},
         "shelf": "spine", "box": "spine", "bands": ["tools", "concordance", "discernment", "spine"],
-        "subject": "the tools", "connections": [],
+        # the spine roots to the Floor — every tool then reaches the Floor through it (§5.3 reachability)
+        "subject": "the tools", "connections": [
+            {"to_card_id": FLOOR, "relationship": "part_of",
+             "evidence": "the tools, a shelf of the Floor of Discovery"}],
         "author": "engine", "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
         "lifecycle_stage": "public", "volatility": "permanent", "surface": "secular", "generated": False,
     }

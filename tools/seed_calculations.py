@@ -25,6 +25,9 @@ from pathlib import Path
 
 STORE = Path("data/calculation_cards.jsonl")
 
+FLOOR = "card_k_floor_of_discovery"
+SPINE_ID = "card_spine_calculation"        # The Calculation Map — the spine that roots the forms to the Floor
+
 # canonical form id -> (equation, what the form IS)
 FORMS: dict[str, tuple[str, str]] = {
     "exponential":     ("y = y0 * e^(kt)",            "change proportional to the present amount"),
@@ -608,6 +611,26 @@ def _existing_ids() -> set[str]:
     return ids
 
 
+def _calc_spine_card() -> dict:
+    """The Calculation Map spine, rooted in the Floor. The canonical forms hang from it, so every
+    form — and thus every calculation that wears it — reaches the Floor (§5.3 reachability)."""
+    return {
+        "id": SPINE_ID, "kind": "reference", "title": "The Calculation Map",
+        "body": ("Every calculation, mapped by its canonical mathematical FORM: the domains differ, "
+                 "the form does not. One computation under a change of variable, seen across "
+                 "physics, finance, biology and more — gathered here, each resting on the theory it "
+                 "is the computational edge of."),
+        "source": {"label": "The Calculation Map", "url": "", "domain": "mathematics",
+                   "authority_tier": "reference"},
+        "shelf": "spine", "box": "spine", "bands": ["calculation", "forms", "mathematics", "spine"],
+        "subject": "the calculation map", "connections": [
+            {"to_card_id": FLOOR, "relationship": "part_of",
+             "evidence": "the calculation map, a shelf of the Floor of Discovery"}],
+        "author": "engine", "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
+        "lifecycle_stage": "public", "volatility": "permanent", "surface": "secular", "generated": False,
+    }
+
+
 def _form_spine(form: str) -> dict:
     eq, desc = FORMS[form]
     conns = []
@@ -615,6 +638,9 @@ def _form_spine(form: str) -> dict:
     if parent:  # the fractal nesting, made explicit in the card graph
         conns.append({"to_card_id": f"card_form_{parent}", "relationship": "specializes",
                       "evidence": f"a finer case of the {parent} form ({FORMS[parent][0]})"})
+    else:  # a top-level form roots to the Calculation Map spine, which roots to the Floor
+        conns.append({"to_card_id": SPINE_ID, "relationship": "member_of",
+                      "evidence": "a canonical form of the Calculation Map"})
     return {
         "id": f"card_form_{form}", "kind": "reference",
         "title": f"Canonical form: {form}  ({eq})",
@@ -685,6 +711,8 @@ def cmd_seed() -> int:
     existing = _existing_ids()
     tids = _theory_ids()
     cards = []
+    if SPINE_ID not in existing:
+        cards.append(_calc_spine_card())          # the Floor-rooted spine the forms hang from
     for form in FORMS:
         sid = f"card_form_{form}"
         if sid not in existing:
@@ -719,7 +747,7 @@ def cmd_rebuild() -> int:
         print("WARN unresolved theory targets (link skipped for these):")
         for t in unresolved:
             print("   ", t)
-    cards = [_form_spine(f) for f in FORMS]
+    cards = [_calc_spine_card()] + [_form_spine(f) for f in FORMS]   # spine first, then the forms it roots
     linked = 0
     for c in CALCS:
         card = _calc_card(*c, theory_ids=tids)

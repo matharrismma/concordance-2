@@ -22,6 +22,8 @@ from collections import defaultdict
 from pathlib import Path
 
 STORE = Path("data/strategy_cards.jsonl")
+FLOOR = "card_k_floor_of_discovery"
+SPINE_ID = "card_spine_strategy"        # The Strategy Concordance — roots the patterns to the Floor
 ARENAS = {
     "war": "the field", "politics": "the state", "business": "the enterprise",
     "ministry": "the church", "science": "the discipline", "nature": "the living world",
@@ -180,11 +182,27 @@ def _case_id(pid, arena, who):
     return f"card_case_{pid}__{arena}__{slug}"
 
 
+def _spine_card() -> dict:
+    """The Strategy Concordance spine, rooted in the Floor. Every pattern is a member of it, so the
+    whole strategy island (patterns and their cases) reaches the Floor (§5.3 reachability)."""
+    return _card(
+        SPINE_ID, "reference", "The Strategy Concordance",
+        ("Patterns of what endures — the same strategic move winning across war, politics, business, "
+         "ministry, science and nature, and across time. The method turned on history: not who was "
+         "clever once, but the form that recurs because it is true to how the world is made."),
+        "spine", "spine", ["strategy", "patterns", "concordance", "spine"], "the strategy concordance",
+        [{"to_card_id": FLOOR, "relationship": "part_of",
+          "evidence": "the strategy concordance, a shelf of the Floor of Discovery"}],
+        {"span": "history"})
+
+
 def build_cards():
-    cards = []
+    cards = [_spine_card()]        # the Floor-rooted spine the patterns hang from
     for p in PATTERNS:
         arenas = sorted({a for a, *_ in p["cases"]})
-        conns = []
+        # the pattern is a member of the spine (roots it to the Floor), then names its cases
+        conns = [{"to_card_id": SPINE_ID, "relationship": "member_of",
+                  "evidence": "a recurring strategic pattern of the Strategy Concordance"}]
         for arena, who, when, move, ev in p["cases"]:
             cid = _case_id(p["id"], arena, who)
             conns.append({"to_card_id": cid, "relationship": "instance_of",
