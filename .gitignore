@@ -91,6 +91,8 @@ data/verified_cards.jsonl
 !data/oeis_spine.jsonl
 # The tree of life — the spine is CONTENT (git-tracked); the 38k organism cards are generated (gitignored).
 !data/taxonomy_spine.jsonl
+# OpenStax open textbooks — the spine is CONTENT (git-tracked); the CC-BY section cards are fetched (gitignored).
+!data/openstax_spine.jsonl
 # The languages of the earth (PHOIBLE) — spine is CONTENT (git-tracked); the 2.2k language cards generated (gitignored).
 !data/language_spine.jsonl
 # More stored sources (RFCs, Matthew Henry, Spurgeon, activities) — spines CONTENT (git-tracked); cards generated (gitignored).

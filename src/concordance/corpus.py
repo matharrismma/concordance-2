@@ -1016,6 +1016,11 @@ def load_cards(path: Optional[Path] = None,
                       "sequence_spine.jsonl", "sequence_cards.jsonl",
                       # The tree of life — the recognizable organisms (academics: biology).
                       "taxonomy_spine.jsonl", "taxonomy_cards.jsonl",
+                      # OpenStax — the open textbooks (calculus, physics, chemistry, biology, …),
+                      # CC-BY 4.0, gathered section by section: modern mathematics and theory for the
+                      # reference section. Free to reuse WITH attribution (kept on each card).
+                      # Minted by tools/card_openstax.py (--slug one book / --all the shelf).
+                      "openstax_spine.jsonl", "openstax_cards.jsonl",
                       # The languages of the earth — PHOIBLE/Glottolog (academics: linguistics).
                       "language_spine.jsonl", "language_cards.jsonl",
                       # More stored sources — RFCs (internet standards), Matthew Henry commentary,
