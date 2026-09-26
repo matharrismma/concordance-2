@@ -529,6 +529,53 @@ def _prefer_connected(hits: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return hits
 
 
+def _discernment_watch(cp) -> List[tuple]:
+    """The charts that DISCERN a subject with PRIMARY SOURCES in the keeping — each declares the
+    distinctive terms it watches (`card.extra.discerns_terms`, e.g. the Gateway/New-Age chart watching
+    'astral projection', 'hemi-sync'). Built once per corpus and cached on it (a reload builds a new
+    corpus, so the cache invalidates itself). The form: a chart owns the scope it discerns, and the
+    watch is a property of the keeping, not a hand-list kept in the router."""
+    cached = getattr(cp, "_discern_watch", None)
+    if cached is not None:
+        return cached
+    watch: List[tuple] = []
+    for c in cp.cards.values():
+        extra = c.get("extra")
+        terms = extra.get("discerns_terms") if isinstance(extra, dict) else None
+        if terms and corpus.is_public(c):
+            watch.append((c, frozenset(str(t).lower() for t in terms)))
+    try:
+        cp._discern_watch = watch
+    except Exception:  # noqa: BLE001 — caching is an optimization, never a requirement
+        pass
+    return watch
+
+
+def _pair_discernment(hits: List[Dict[str, Any]], cp=None) -> List[Dict[str, Any]]:
+    """Front door must discern (step 5): when a result set carries a PRIMARY SOURCE on a subject a
+    discernment chart covers — an occult text the PD ingest holds (Leadbeater's 'The Astral Plane', a
+    spiritualist memoir) — lift that chart to the LEAD, so the source is never met without the
+    discernment beside it. Unlike steps 1-4 this DOES lead, on purpose: it is the discernment posture,
+    the same as crisis-first. Curated + inert — it fires only on a chart's distinctive `discerns_terms`
+    and is untouched for every unrelated query (nothing trips 'astral projection' by accident).
+    `cp` is injectable for tests; it defaults to the live corpus."""
+    if not hits:
+        return hits
+    cp = cp or corpus.default_corpus()
+    for chart, terms in _discernment_watch(cp):
+        cid = chart.get("id")
+        for h in hits:
+            if h.get("id") == cid:
+                continue
+            hay = (str(h.get("title") or "") + " " + " ".join(str(b) for b in (h.get("bands") or []))
+                   + " " + str(h.get("subject") or "")).lower()
+            if any(t in hay for t in terms):
+                lead = next((x for x in hits if x.get("id") == cid), None) or corpus._brief(chart)
+                hits = [lead] + [x for x in hits if x.get("id") != cid]
+                break
+    return hits
+
+
 def _shape_found_hits(hits: List[Dict[str, Any]], text: str, practical: bool) -> List[Dict[str, Any]]:
     """The ONE place a found answer's hits are shaped before the lead is chosen — the discernment the
     found path used to scatter across the served block (this is the P2 consolidation: one function, so
@@ -542,7 +589,11 @@ def _shape_found_hits(hits: List[Dict[str, Any]], text: str, practical: bool) ->
          neighbourhood (a substantive link to another on-topic hit) leads over an island stub that
          merely holds the word. Composes with the lexical rank, never replaces it; inert where the
          graph is thin (so a practical query is left exactly as the words ranked it).
-    Behavior-preserving through step 3; step 4 only lifts a connected hub over an island lead."""
+      5. DISCERNMENT — when a result is a PRIMARY SOURCE on a subject a discernment chart covers (an
+         occult text the PD ingest carries), the chart is lifted to the LEAD so the source is never met
+         without the discernment beside it. Curated + inert (fires only on a chart's distinctive terms).
+    Behavior-preserving through step 3; step 4 only lifts a connected hub over an island lead; step 5
+    only fires when a discernment chart's own watch-terms are tripped (front door must discern)."""
     if practical:
         clean = [c for c in hits if not _is_practical_junk(c)]
         if not clean:
@@ -553,7 +604,8 @@ def _shape_found_hits(hits: List[Dict[str, Any]], text: str, practical: bool) ->
         if pron and len(pron) < len(hits):
             hits = [c for c in hits if not str(c.get("id") or "").startswith("card_src_pron_")] + pron
     hits = _prefer_full_coverage(hits, text)
-    return _prefer_connected(hits)
+    hits = _prefer_connected(hits)
+    return _pair_discernment(hits)
 
 
 def find_ref(text: str):

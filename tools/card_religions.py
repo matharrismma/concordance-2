@@ -238,7 +238,14 @@ AFTER = [
                      "Colossians 2:9-10; John 14:6",
            "framing": "Matt's, anchored",
            "declassified_source": "Analysis and Assessment of the Gateway Process (US Army, 1983; CIA "
-                                  "CREST record family RDP96-00788); Monroe Institute (MIAS); Project STARGATE"}),
+                                  "CREST record family RDP96-00788); Monroe Institute (MIAS); Project STARGATE",
+           # DISCERNMENT PAIRING (ask._pair_discernment): distinctive occult-practice phrases that, when
+           # they appear in a search result (a Theosophy/spiritualism PRIMARY SOURCE the PD ingest carries),
+           # lift THIS chart to the lead so the source never stands alone. Tight by design — distinctive
+           # phrases only, never generic words ("consciousness", "energy") that would trip legitimate hits.
+           "discerns_terms": ["astral projection", "astral plane", "astral body", "out of body",
+                              "out-of-body", "hemi-sync", "hemi sync", "gateway process",
+                              "gateway experience", "remote viewing", "monroe institute", "etheric"]}),
     _card("post_christ_pattern",
           "The pattern for movements arising after Christ (the test, in love)",
           ("Beyond any single case, the calibration is a pattern, applied gently: a religion or movement that "

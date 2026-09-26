@@ -90,6 +90,31 @@ def test_the_fear_of_the_lord_reaches_the_teaching_not_an_emotional_lane():
     assert ask.distress_ref("I'm scared and I fear the Lord") == ask._COMFORT_VERSE["scared"]
 
 
+def test_discernment_pairing_lifts_the_chart_over_an_occult_source():
+    """Front door must discern (ask._shape_found_hits step 5): when a result set carries an occult
+    PRIMARY SOURCE on a subject a discernment chart watches, the chart is lifted to the LEAD so the
+    source is never met without the discernment beside it. Curated + inert (fires only on a chart's
+    own discerns_terms). Verified live 2026-09-26: 'The Astral Plane' out-ranked the Gateway chart."""
+    from concordance import ask, corpus
+    chart = {"id": "card_foreshadow_new_age_test", "kind": "reference",
+             "title": "New Age consciousness under the test", "shelf": "foreshadows", "surface": "secular",
+             "lifecycle_stage": "public", "generated": False, "body": "the test of the spirits",
+             "extra": {"discerns_terms": ["astral projection", "out of body", "hemi-sync"]},
+             "connections": [{"to_card_id": "card_k_floor_of_discovery", "relationship": "member_of",
+                              "evidence": "under the test"}]}
+    cp = corpus.Corpus({chart["id"]: chart})
+    source = {"id": "card_src_book_astral", "title": "The Astral Plane, Its Scenery and Inhabitants",
+              "bands": ["astral projection", "theosophy"]}
+    other = {"id": "card_bio_photo", "title": "Photosynthesis", "bands": ["biology", "plants"]}
+    # an occult source is present -> the chart LEADS (injected even though it was not among the hits)
+    out = ask._pair_discernment([source, other], cp=cp)
+    assert out[0]["id"] == chart["id"], "the discernment chart must lead when an occult source is present"
+    assert {h["id"] for h in out} >= {"card_src_book_astral", "card_bio_photo"}, "no hit is dropped"
+    # nothing trips the watch terms -> INERT, order untouched
+    out2 = ask._pair_discernment([other], cp=cp)
+    assert [h["id"] for h in out2] == ["card_bio_photo"], "inert when no source trips the watch terms"
+
+
 def test_a_remedy_question_reaches_the_apothecary():
     """An ailment or remedy is discerned to the Apothecary, not dumped into a classics search."""
     from concordance import router
