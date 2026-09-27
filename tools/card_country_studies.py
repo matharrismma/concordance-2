@@ -104,7 +104,12 @@ def _items():
     sp = 1
     seen = 0
     while True:
-        d = _get(_COLL % sp)
+        try:
+            d = _get(_COLL % sp)
+        except urllib.error.HTTPError as e:
+            if e.code == 404:            # loc.gov 404s a page past the last — clean end of pagination
+                break
+            raise
         results = d.get("results") or []
         if not results:
             break
