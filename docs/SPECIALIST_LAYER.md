@@ -50,7 +50,14 @@ scripture/word subsystem). The checkable pool (69 modules) is complete; "~52%" i
 - Phase 1 queue (for sign-off): the occult primary-source cluster (Theosophy/spiritualism — Leadbeater's
   "The Astral Plane", etc., already in the corpus and out-ranking discernment); then the broader atlas.
 
-## Phase 3 — Expert faces — SCAFFOLD BUILT (local, awaiting review) · 2026-09-26
+## Phase 3 — Expert faces — DEPLOYED + LIVE · 2026-09-27
+Wired into the front door (additive; `ask.respond` untouched): **GET `/faces`** lists the 4 servants,
+**POST `/face` {text[, face]}** routes + composes. Live-verified: `/face "why does the inverse square
+law hold"` → the Theorist gathered Coulomb, light-intensity, Newton-gravity, sound-intensity (the one
+inverse-square form across domains), honest GAP on verify (no structured claim in a "why" question).
+Route registry + golden contract sets updated; box==repo. Phase 3 CLOSED.
+
+## Phase 3 (build notes) — SCAFFOLD · 2026-09-26
 `src/concordance/faces.py` + `tests/test_faces.py` (5 pass): the deterministic composer + a 4-face
 registry (Steward, Tutor, Social Worker, Theorist). `route()` picks the servant; `compose()` runs
 crisis-gate → scoped search → discern (proposes the claim; worldview calibration shown only where the
