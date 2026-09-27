@@ -2480,6 +2480,25 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                      str(body.get("signature") or ""),
                      display_name=str(body.get("display_name") or ""))
         return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused")
+    # C1b-place — a member POINTS the catalogue at content THEY host (Drive/Dropbox/a shared folder or
+    # server). We keep the small high-value card; the heavy file stays on their storage, user to user.
+    # Storage and tokens on their dime; we connect and dress. The commons ring is license-gated.
+    if method == "GET" and path == "/place/signable":
+        from .. import shelves as _sh
+        r = _sh.signable_place(query.get("member") or "", query.get("title") or "",
+                               query.get("curation") or "", query.get("url") or "",
+                               storage=query.get("storage") or "url",
+                               license=query.get("license") or "", ring=query.get("ring") or "commons")
+        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "bad request")
+    if method == "POST" and path == "/place":
+        from .. import shelves as _sh
+        if not isinstance(body, dict):
+            return _err(400, "signed fields and signature required")
+        r = _sh.place(body.get("fields") if isinstance(body.get("fields"), dict) else None,
+                      str(body.get("signature") or ""),
+                      display_name=str(body.get("display_name") or ""),
+                      abstract=str(body.get("abstract") or ""))
+        return _ok(r) if r.get("ok") else _err(400, r.get("error") or "refused", r.get("code") or "BAD_REQUEST")
     if method == "GET" and path == "/shelf":
         # Access is decided by PROOF, never by a bare `viewer` param (which is public): an unproven
         # reader sees only the promoted commons; the member (a signature over the read challenge from
@@ -3099,6 +3118,8 @@ ROUTES = [
     # THE COMMONS (C1b): the shelf, the drops, the curation desk.
     {"path": "/drop/signable", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/drop", "methods": ("POST",), "api": True, "rl": True},
+    {"path": "/place/signable", "methods": ("GET",), "api": True, "rl": True},   # point the catalogue at content you host
+    {"path": "/place", "methods": ("POST",), "api": True, "rl": True},           # keep the card, not the file
     {"path": "/shelf", "methods": ("GET",), "api": True},
     {"path": "/commons", "methods": ("GET",), "api": True},
     {"path": "/curate/queue", "methods": ("GET",), "api": True},

@@ -300,6 +300,147 @@ def drop(fields: Optional[Dict[str, Any]] = None, signature: str = "",
                      "commons does not make them the library's claim."}
 
 
+# ── PLACE — a member points the catalogue at content THEY host (Drive/Dropbox/a shared folder or
+# server), signing an ownership + license attestation. We keep the small high-value CARD (the Hare);
+# the heavy file stays on THEIR storage, user to user (the Tortoise). "A giant card catalogue of reality
+# and information" — storage and tokens on their dime; we connect and dress. A place-specific
+# canonicalisation SIGNS the license/ownership/pointer without touching what note/link drops sign.
+_PLACE_SIGNED_FIELDS = ("at", "body", "kind", "license", "member", "nonce", "owns",
+                        "ring", "storage", "subject", "url")
+_STORAGE = ("drive", "dropbox", "folder", "server", "url")
+
+
+def _canon_place(fields: Dict[str, Any]) -> bytes:
+    return json.dumps({k: fields.get(k) for k in _PLACE_SIGNED_FIELDS}, sort_keys=True,
+                      separators=(",", ":")).encode("utf-8")
+
+
+def signable_place(member: str, title: str, curation: str, url: str, storage: str = "url",
+                   license: str = "", owns: bool = True, ring: str = "commons") -> Dict[str, Any]:
+    """Step 1: the canonical bytes of a PLACEMENT, ready to sign ON THE DEVICE — the attestation that
+    the member owns (or may share) the content, under this license, hosted at this pointer."""
+    member, ring = (member or "").strip(), (ring or "").strip()
+    if not member:
+        return {"ok": False, "error": "a placement needs the member's public key"}
+    if ring not in RINGS:
+        return {"ok": False, "error": f"ring must be one of {list(RINGS)}"}
+    storage = (storage or "url").strip().lower()
+    if storage not in _STORAGE:
+        return {"ok": False, "error": f"storage must be one of {list(_STORAGE)}"}
+    curation = (curation or "").strip()
+    if not curation:
+        return {"ok": False, "error": "say WHY it is worth borrowing — a bare pointer is not curation"}
+    if len(curation) > MAX_BODY:
+        return {"ok": False, "error": f"curation over {MAX_BODY} chars"}
+    url = (url or "").strip()
+    if not url:
+        return {"ok": False, "error": "a placement needs the POINTER to where you host the file"}
+    from . import linkdrop as _ld
+    target, why = _ld._safe_target(url)
+    if not target:
+        return {"ok": False, "error": why}
+    lic = (license or "").strip()
+    if not lic:
+        return {"ok": False, "error": "state the LICENSE you share it under — you host it, you set the terms"}
+    if not owns:
+        return {"ok": False, "error": "place only what you OWN or have the right to share"}
+    fields = {"member": member, "kind": "place", "subject": (title or "").strip()[:180],
+              "body": curation, "ring": ring, "nonce": secrets.token_urlsafe(12),
+              "at": int(time.time()), "url": target, "storage": storage, "license": lic[:80], "owns": True}
+    return {"ok": True, "fields": fields,
+            "signable": base64.urlsafe_b64encode(_canon_place(fields)).decode("ascii"),
+            "note": "sign these exact bytes with your own key ON YOUR DEVICE — your attestation that you "
+                    "own or may share this, under this license, at this pointer. Then send fields + signature."}
+
+
+def _verify_place(fields: Optional[Dict[str, Any]], signature: str) -> Dict[str, Any]:
+    if not isinstance(fields, dict) or not isinstance(signature, str) or not signature.strip():
+        return {"ok": False, "error": "signed fields and a signature are required — call signable_place() first"}
+    if "private_key" in fields:
+        return {"ok": False, "error": "a detached signature is required — never a private key"}
+    missing = [k for k in _PLACE_SIGNED_FIELDS if k not in fields]
+    if missing:
+        return {"ok": False, "error": f"the signed fields must carry {list(_PLACE_SIGNED_FIELDS)}; missing {missing}"}
+    if fields.get("kind") != "place":
+        return {"ok": False, "error": "not a place attestation (kind must be 'place')"}
+    member = str(fields.get("member") or "").strip()
+    try:
+        at = int(fields.get("at") or 0)
+    except (TypeError, ValueError):
+        return {"ok": False, "error": "the signed bytes carry no readable timestamp"}
+    now = int(time.time())
+    if not (now - SIGNATURE_TTL_S <= at <= now + 300):
+        return {"ok": False, "error": "these signed bytes are stale — sign a fresh set"}
+    from . import signing
+    if not signing.verify_bytes(_canon_place(fields), signature.strip(), member):
+        return {"ok": False, "error": "that signature does not verify against the named key"}
+    return {"ok": True, "member": member}
+
+
+def place(fields: Optional[Dict[str, Any]] = None, signature: str = "",
+          display_name: str = "", abstract: str = "", waybill_fn=None) -> Dict[str, Any]:
+    """Step 2: verify the member's attestation and CATALOGUE their placement. We keep the small
+    high-value card pointing at where THEY host the file; we never hold the file. The commons ring is
+    license-gated (the library amplifies only PD/CC0/CC-BY); a member's own restrictive-licensed content
+    may still sit on their private/shelf ring. `abstract` is an optional high-value excerpt THE MEMBER
+    provides — we do not fetch or store the file itself."""
+    v = _verify_place(fields, signature)
+    if not v.get("ok"):
+        return {"ok": False, "error": v["error"]}
+    member, f = v["member"], dict(fields or {})
+    ring, lic = f["ring"], str(f.get("license") or "")
+    from . import corpus as _corpus
+    if ring == "commons" and any(m in lic.lower() for m in _corpus._DISALLOWED_LICENSE):
+        return {"ok": False, "code": "LICENSE_RING",
+                "error": f"the commons amplifies only PD/CC0/CC-BY; place {lic!r} on your private or "
+                         "shelf ring instead — your friends can still borrow it"}
+    card_id = f"card_shelf_place_{_slug(member, 24)}_{f['nonce']}"
+    body = f["body"]
+    if abstract.strip():
+        body = (body + "\n\n— from the source (placed by the member): "
+                + " ".join(abstract.split())[:1200]).strip()
+    if waybill_fn is None:
+        from . import linkdrop as _ld
+        waybill_fn = _ld.waybill
+    wb = waybill_fn(str(f["url"]))           # a reach probe; a private file is a miss, and the card STILL lands
+    reach = "FETCHED" if wb.get("ok") else (wb.get("state") or "SYSTEM_ERROR")
+    card = {
+        "id": card_id, "kind": "reference",
+        "title": (f.get("subject") or body[:60]).strip()[:180], "body": body,
+        "source": {"label": (f"{display_name.strip()} — a member of the Commons" if display_name.strip()
+                             else "A member of the Commons"),
+                   "url": str(f["url"]), "ref": member[:16], "authority_tier": MEMBER_TIER},
+        "shelf": "commons", "box": "placed",
+        "bands": ["commons", "member", "placed", f.get("storage") or "url"]
+                 + _slug(f.get("subject")).split("-")[:3],
+        "subject": f.get("subject") or body[:60],
+        "connections": [{"to_card_id": f"card_spine_shelf_{_slug(member, 24)}",
+                         "relationship": "member_of", "evidence": "content this member hosts and shares"}],
+        "author": "member", "created_at": float(f["at"]), "updated_at": float(f["at"]),
+        "visibility": "public" if ring == "commons" else "private",
+        "lifecycle_stage": _stage_for(ring),
+        "volatility": "durable", "surface": "secular", "generated": False,
+        "extra": {"member": member, "ring": ring, "display_name": display_name.strip()[:80],
+                  "signature": signature.strip(), "placed": True, "storage": f.get("storage") or "url",
+                  "license": lic[:80], "owns": True, "pointer": str(f["url"]), "reach": reach,
+                  "signed_at": f["at"]},
+    }
+    from . import kernel as _kernel
+    grec = _kernel.gate(card, entered_as=card_id, authority_in="quarantined", author="member",
+                        in_kind_checked=True,
+                        assumptions=("a member's own signed attestation that they host and may share this",))
+    card["extra"]["gate_record"] = grec.to_dict()
+    _append("drops.jsonl", card)
+    _ensure_spine(member, display_name)
+    return {"ok": True, "card_id": card_id, "ring": ring, "stage": card["lifecycle_stage"],
+            "storage": f.get("storage") or "url", "reach": reach, "license": lic[:80],
+            "note": ("Catalogued on your shelf, pointing at where YOU host the file — the small "
+                     "high-value card is kept; the heavy file stays on your storage, shared user to user. "
+                     + ("Waiting for a steward before the commons amplifies it."
+                        if ring == "commons" else "Visible to you and the friends who chose you.")),
+            "never": "We never hold your file. Storage and tokens stay on your dime; we connect and dress."}
+
+
 def _read_challenge(member: str, viewer: str, at: int) -> bytes:
     """The exact bytes a VIEWER signs to prove they hold the key they claim, for a shelf read. A
     fixed, unambiguous string so the client can build it with no round-trip and the server

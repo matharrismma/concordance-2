@@ -80,6 +80,8 @@ GOLDEN_API_GET = {
     "/consent", "/consent/signable", "/consent/revoke",  # the human-authorized write path (worklist item 2)
     "/drop/signable",
     "/drop",
+    "/place/signable",
+    "/place",
     "/shelf",
     "/commons",
     "/curate/queue",
@@ -131,6 +133,8 @@ GOLDEN_RATELIMITED = {
     "/consent/signable", "/consent", "/consent/revoke",  # the human-authorized write path (worklist item 2)
     "/drop/signable",
     "/drop",
+    "/place/signable",
+    "/place",
     "/curate/signable",
     "/curate",
     "/moderation/signable",
