@@ -6,7 +6,7 @@
 #   crontab: 0 9 * * * /home/nh/concordance-2/tools/ingest_country_studies_cron.sh
 cd /home/nh/concordance-2 || exit 0
 DATA=data/country_studies_cards.jsonl
-if [ -f "$DATA" ] && [ "$(wc -l < "$DATA" 2>/dev/null)" -ge 76 ]; then exit 0; fi   # already complete
+if [ -f "$DATA" ] && [ "$(wc -l < "$DATA" 2>/dev/null)" -ge 72 ]; then exit 0; fi   # complete (73 land; ~5 skip thin OCR)
 if pgrep -f card_country_studies.py >/dev/null 2>&1; then exit 0; fi                # already running
 before=0; [ -f "$DATA" ] && before=$(wc -l < "$DATA" 2>/dev/null)
 python3 tools/card_country_studies.py --all --resume >> data/cs_ingest_cron.log 2>&1
