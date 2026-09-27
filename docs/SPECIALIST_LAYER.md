@@ -74,7 +74,16 @@ never generates. Build: a `faces` registry + a thin composer over the existing v
 core (a face = {domain scope, which verifiers, which shelves, which discernment, the servant's manner}).
 Scaffold locally, commit, review, then deploy.
 
-## Phase 4 — BYOM external-worker tier — SCAFFOLD BUILT (local, awaiting review) · 2026-09-26
+## Phase 4 — BYOM external-worker tier — WIRED + DEPLOYED (gated OFF) · 2026-09-27
+`byom.openai_adapter` builds a `model_call` for any OpenAI-compatible endpoint from the user's own
+{base_url, api_key, model}, SSRF-guarded (public host only). **POST `/byom`** runs the gated flow
+(airlock.strip → the user's model → verify/discern → capture) but is **DISABLED unless
+`CONCORDANCE_BYOM_ENABLED=1`** — verified live: on the public core it returns 501 BYOM_DISABLED (zero
+model calls; the free core stays no-LLM). Enable on a sovereign node; the user brings + pays for the
+model, and the checked outcome trains the keeping. Phase 4 CLOSED (public = off by design).
+_Remaining (optional): the capture→public_review filing pipeline; a `/face` opt-in BYOM-polish flag._
+
+## Phase 4 (build notes) — SCAFFOLD · 2026-09-26
 `src/concordance/byom.py` + `tests/test_byom.py` (5 pass): `run_byom(request, model_call, ...)` routes a
 user's model through airlock.strip → the model (clean zone, skeleton only) → discern → verify → capture.
 Fail-closed at the airlock (PII leak → the model never runs); the output is TRUSTED only if our verifier
@@ -115,8 +124,10 @@ The autonomous loop took every phase as far as it can **without your review or s
   then wiring into the front door (ask/router) + deploy.
 - **Phase 4 (BYOM)** — SCAFFOLD BUILT + tested locally (`byom.py`, 5 tests). **Awaits review**, then a
   concrete model adapter + wiring + the capture→public_review pipeline + deploy.
-- **Phase 1 (discerners)** — GATED on your Spirit-led sign-off (no autonomous authoring of new spiritual
-  content). Queue: the occult primary-source cluster (Theosophy/spiritualism), then the broader atlas.
+- **Phase 1 (discerners)** — occult cluster SIGNED OFF + LIVE (2026-09-27): Gateway/New-Age +
+  Theosophy/spiritualism charted (`under_the_test`, in love, Scripture-anchored) with `discerns_terms`;
+  the pairing lifts them on astral/theosophy/séance queries — the occult-source out-ranking finding is
+  closed. Remaining (your call): the broader "chart every religion" atlas.
 
 **Nothing built by the loop is deployed** — all committed, all tested, all local. Everything remaining
 needs you: review the two scaffolds (faces, BYOM) before they wire in and ship, and sign off Phase 1.
