@@ -38,7 +38,7 @@ from collections import deque
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from . import identity, signing
+from . import flock, identity, signing
 
 _LOCK = threading.Lock()
 _HANDLE_RE = re.compile(r"[^A-Za-z0-9 _.\-]")     # a callsign is a pseudonym, never PII
@@ -507,18 +507,29 @@ def map_around(fp: str, hops: int = 2) -> Dict[str, Any]:
     inset = set(dist)
     edges: List[List[str]] = []
     seen = set()
+    nlinks: Dict[str, List[str]] = {}
     for nfp in inset:
         node = _read_node(nfp)
-        for nb in (node or {}).get("links", []):
+        nlinks[nfp] = list((node or {}).get("links", []))
+        for nb in nlinks[nfp]:
             if nb in inset:
                 key = tuple(sorted((nfp, nb)))
                 if key not in seen:
                     seen.add(key)
                     edges.append(list(key))
-    return {"ok": True, "you": fp, "callsign": me.get("callsign", "anon"),
-            "stage": stage, "horizon": max_hops, "hops": hops, "count": len(nodes),
-            "nodes": nodes, "edges": edges, "next_gate": _next_gate(stage),
-            "note": "The nodes around you. Message a neighbor, or hand your id to one more believer."}
+    out = {"ok": True, "you": fp, "callsign": me.get("callsign", "anon"),
+           "stage": stage, "horizon": max_hops, "hops": hops, "count": len(nodes),
+           "nodes": nodes, "edges": edges, "next_gate": _next_gate(stage),
+           "note": "The nodes around you. Message a neighbor, or hand your id to one more believer."}
+    if flock.enabled():
+        # The starling's rule (BOIDS): the handful you actually move with — your topological
+        # neighborhood — foregrounded so the map stays coherent no matter how the mesh grows.
+        flk = flock.neighborhood(me.get("links", []), nlinks)
+        fset = set(flk)
+        for v in nodes:
+            v["in_flock"] = v.get("fp") in fset
+        out["flock"] = flk
+    return out
 
 
 # ── Messages — signed, content-addressed, hop-limited (LoRa TTL) ──────────

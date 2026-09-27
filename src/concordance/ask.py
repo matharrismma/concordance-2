@@ -1975,6 +1975,13 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     _q = _quorum.assess(hits)
     if _q:
         out["quorum"] = _q
+    # Eldership (the orca matriarch): of those witnesses, how many are enduring sources? Two witnesses
+    # that have stood a century are held more firmly than two that surfaced last week. Standing, not
+    # count — additive, and gated off by default so the response is unchanged until a node opts in.
+    from . import eldership as _eldership
+    _e = _eldership.assess(hits)
+    if _e:
+        out["eldership"] = _e
     # The concierge: a search result is RELATED material, not a VERIFIED answer. For a question,
     # point — politely — to where a verified answer can be found (the free libraries; a claim check).
     if _is_question(text):
