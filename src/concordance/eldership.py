@@ -77,10 +77,12 @@ def assess(hits: List[Dict[str, Any]], lead: Optional[Dict[str, Any]] = None) ->
         by_source[key] = standing(h)["elder"]
     total = len(by_source)
     elders = sum(1 for v in by_source.values() if v)
-    return {
-        "elders": elders, "witnesses": total,
-        "means": (f"{elders} of {total} witnesses are enduring sources — the elders concur; hold this the "
-                  "more firmly (a matriarch's memory, tested by more seasons)"
-                  if elders else
-                  "no enduring witness yet — this rests on recent testimony; weigh it as such"),
-    }
+    if elders >= 2:
+        means = (f"{elders} of {total} witnesses are enduring sources — the elders concur; hold this the "
+                 "more firmly (a matriarch's memory, tested by more seasons)")
+    elif elders == 1:
+        means = ("one witness is an enduring source — a matriarch's memory, tested by more seasons; hold "
+                 "this the more firmly than recent testimony alone")
+    else:
+        means = "no enduring witness yet — this rests on recent testimony; weigh it as such"
+    return {"elders": elders, "witnesses": total, "means": means}
