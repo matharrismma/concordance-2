@@ -438,8 +438,13 @@ function enterMesh(){
   if(inv){ const rt=$("rtoken"); if(rt) rt.value=inv; redeemInvite(inv); }
   loadInbox(); loadDoor();
   api("GET", "/mesh/map?fp="+encodeURIComponent(FP)+"&hops=2").then(function(m){
-    const nodes=(m.body&&(m.body.nodes||m.body.reachable))||[]; const c=Array.isArray(nodes)?nodes.length:(m.body&&m.body.count)||0;
-    const el=$("meshreach"); if(c&&el) el.textContent=c+" believer"+(c===1?"":"s")+" within reach of your node.";
+    const body=m.body||{};
+    const nodes=(body.nodes||body.reachable)||[]; const c=Array.isArray(nodes)?nodes.length:(body.count)||0;
+    const el=$("meshreach"); if(!el) return;
+    let msg = c ? (c+" believer"+(c===1?"":"s")+" within reach of your node.") : "";
+    const flock = Array.isArray(body.flock) ? body.flock : [];   // the near circle — the few you move most closely with (a starling's handful)
+    if(flock.length){ msg += (msg?" ":"") + flock.length+" "+(flock.length===1?"is":"are")+" your near circle."; }
+    if(msg) el.textContent = msg;
   }).catch(function(){});
 }
 async function postWord(){
