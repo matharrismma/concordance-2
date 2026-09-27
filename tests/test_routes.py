@@ -30,6 +30,7 @@ GOLDEN_API_GET = {
     # The thesaurus reference door (2026-09-26): synonyms + broader terms from data/thesaurus.db, a
     # bounded word lookup like /pronounce; the same WordNet relation sharpens /search recall.
     "/thesaurus",
+    "/faces",
     # coach lesson text, the scripture-for lookup, and the tortoise reader — GET surfaces added with the
     # lesson/reader work in prior passes; registered here after this manifest audit (the code had them,
     # the golden set did not — the drift this test exists to catch, now reconciled).
@@ -115,7 +116,7 @@ GOLDEN_API_GET = {
 # are not the same risk, and the one client the shared cap refused most was ClaudeBot.
 GOLDEN_RATELIMITED = {
     "/unchecked/answer",   # deliberate addition 2026-08-01 — anyone may answer, so it is rate-limited
-    "/verify", "/derivation/verify", "/mcp",
+    "/verify", "/derivation/verify", "/face", "/mcp",
     # the six profile mounts (task #123) — same engine, narrow doors; goldens updated as a decision
     "/mcp/core", "/mcp/library", "/mcp/sovereign", "/mcp/coach", "/mcp/witness", "/mcp/community", "/ask", "/console", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose", "/pins", "/pins/done",
     "/threads", "/threads/search",

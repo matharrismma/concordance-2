@@ -1786,6 +1786,30 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                     "note": "WordNet synonyms + broader (IS-A) terms; empty if the word is unknown or "
                             "no thesaurus is loaded on this node"})
 
+    # ── THE EXPERT FACES — callable life-domain servants (the Steward, Tutor, Social Worker, Theorist).
+    # A face is a deterministic COMPOSER: it ARRANGES existing verifiers + shelves + discernment for a
+    # life-domain and never generates. Additive — the ordinary front door (/ask) is untouched; a caller
+    # consults a face explicitly. See docs/EXPERT_FACES.md.
+    if method == "GET" and path == "/faces":
+        from .. import faces as _faces
+        reg = _faces.faces()
+        return _ok({"faces": [{"id": fid, "name": f["name"], "scope": f["scope"],
+                               "shelves": sorted(f["shelves"]), "verifiers": f["verifiers"],
+                               "manner": f["manner"]} for fid, f in reg.items()],
+                    "count": len(reg),
+                    "note": "callable life-domain servants; each arranges existing verifiers + shelves + "
+                            "discernment and never generates. POST /face {text[, face]} to consult one."})
+    if method == "POST" and path == "/face":
+        from .. import faces as _faces
+        b = body if isinstance(body, dict) else {}
+        text = str(b.get("text") or "").strip()
+        if not text:
+            return _err(400, "text required")
+        fid = (b.get("face") or "").strip() or _faces.route(text)
+        if not fid:
+            return _err(404, "no face fits this request — use the ordinary front door (POST /ask)", "NO_FACE")
+        return _ok(_faces.compose(fid, text, config))
+
     # Library / keeping tools (ported from 1.0, additive — over the same shared corpus).
     if method == "GET" and path == "/cards/stats":
         return _ok(_cached_scan("stats", corpus.stats))
@@ -2982,6 +3006,8 @@ ROUTES = [
     {"path": "/growth", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/pronounce", "methods": ("GET",), "api": True},
     {"path": "/thesaurus", "methods": ("GET",), "api": True},   # bounded single-word lookup (data/thesaurus.db), like /pronounce
+    {"path": "/faces", "methods": ("GET",), "api": True},       # list the callable life-domain servants
+    {"path": "/face", "methods": ("POST",), "rl": True},        # consult one — composes verifiers+shelves+discernment
     {"path": "/thread", "methods": ("DELETE", "GET"), "api": True},
     {"path": "/threads", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/threads/search", "methods": ("GET",), "api": True, "rl": True},
