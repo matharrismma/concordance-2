@@ -1072,6 +1072,10 @@ def load_cards(path: Optional[Path] = None,
                       # from the *_bridges edge overlays). Small; resident on core.
                       "tool_cards.jsonl", "strategy_cards.jsonl", "calculation_cards.jsonl", "bridge_cards.jsonl",
                       "fieldkit_cards.jsonl", "playbook_cards.jsonl", "systems_cards.jsonl",
+                      # Collective intelligence — the measured natural systems (ants/bees/birds/orcas)
+                      # mapped to the engine's mechanisms (keeping/conductor/mesh/witness-wire). The
+                      # "systems of the world" made first-class. Minted by card_collective_intelligence.py.
+                      "collective_intelligence_cards.jsonl",
                       "access_tools_cards.jsonl",   # the connection to lawful free tools (logistics: tag onto paid carriers)
                       "church_cards.jsonl",         # the churches, calibrated from their own confessions (not judged)
                       "contributors_cards.jsonl",   # the builders of the Floor (historians/scientists/mathematicians), credited with love
