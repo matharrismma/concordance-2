@@ -350,6 +350,66 @@ AFTER = [
            "framing": "Matt's, anchored — the Areopagus move for the audience whose idol is logic",
            "discerns_terms": ["atheism", "atheist", "materialism", "naturalism", "physicalism",
                               "scientism", "secular humanism", "new atheism", "there is no god", "nihilism"]}),
+    _card("gnosticism_under_the_test",
+          "Gnosticism under the test of the spirits (the test was written for it, in love)",
+          ("Credited where it names a real ache: the hunger to KNOW, and the true sense that something is "
+           "wrong with the world (the creation was indeed subjected to futility, Romans 8:20-22). And "
+           "then, held to the one test — the test John wrote WITH THIS IN VIEW: it teaches salvation by "
+           "secret knowledge (gnosis) for an elite, a lesser creator-god (the demiurge) who made matter "
+           "evil (against 'God saw everything that he had made, and behold, it was very good', Genesis "
+           "1:31), and — docetism — that Christ only SEEMED to have a body. 'Every spirit that confesses "
+           "that Jesus Christ has come in the FLESH is from God, and every spirit that does not confess "
+           "Jesus is not from God' (1 John 4:2-3) — the incarnation is the exact hinge; 'the Word became "
+           "flesh and dwelt among us' (John 1:14). Guard, too, against 'what is falsely called knowledge' "
+           "(1 Timothy 6:20). This is said of the TEACHING, never of any seeker — whose longing to know is "
+           "honored, for the true knowledge is a Person: 'this is eternal life, that they know You' (John "
+           "17:3), good news for all, not a secret for the few. 'We don't lie, but we love you.'"),
+          "under_the_test",
+          ["gnosticism", "gnosis", "docetism", "demiurge", "come in the flesh", "test of the spirits", "in love"],
+          {"anchor": "1 John 4:2-3; John 1:14; Genesis 1:31; John 17:3; 1 Timothy 6:20; Colossians 2:8-9; "
+                     "Romans 8:20-22",
+           "framing": "Matt's, anchored — 1 John 4:2-3 was written against this very denial",
+           "discerns_terms": ["gnosticism", "gnostic", "gnosis", "demiurge", "docetism", "docetic",
+                              "sophia", "archons", "nag hammadi", "secret knowledge", "pleroma"]}),
+    _card("urantia_under_the_test",
+          "The Urantia Book under the test of the spirits (in love)",
+          ("Credited where it names a real longing: for a grand cosmic order and humanity's place in a "
+           "vast universe. And then, held to the one test in love: the Urantia Book (20th c., claimed "
+           "dictated by celestial beings) is a NEW revelation after Christ that adds a sprawling cosmology "
+           "and re-narrates a different 'Jesus' (Michael of Nebadon). 'Even if we or an angel from heaven "
+           "should preach a gospel contrary to the one we preached, let him be accursed' (Galatians 1:8); "
+           "'false christs and false prophets will arise' (Matthew 24:24); and Satan 'disguises himself as "
+           "an angel of light' (2 Corinthians 11:14). A re-defined Son fails the confession of 1 John "
+           "4:2-3, and nothing may be added to the finished word (Revelation 22:18-19). This is said of "
+           "the BOOK and its teaching, never of any reader — whose hunger for cosmic meaning is real, and "
+           "is answered in the Christ the apostles saw and touched (1 John 1:1-3), not a channeled text. "
+           "'We don't lie, but we love you.'"),
+          "under_the_test",
+          ["urantia", "channeled revelation", "false christs", "test of the spirits", "in love", "1 john"],
+          {"anchor": "1 John 4:2-3; Galatians 1:8; Matthew 24:24; 2 Corinthians 11:14; "
+                     "Revelation 22:18-19; John 1:1; 1 John 1:1-3",
+           "framing": "Matt's, anchored — the archetype the witness-guard defends against",
+           "discerns_terms": ["urantia", "urantia book", "nebadon", "michael of nebadon",
+                              "thought adjusters", "mansonia", "the fifth epochal revelation"]}),
+    _card("bahai_under_the_test",
+          "The Bahá'í Faith under the test of the spirits (in love)",
+          ("Credited generously: a beautiful longing for the unity of humanity, for peace, and for the "
+           "one human family made in God's image — real goods. And then, held to the one test in love: "
+           "arising in the 19th century (Bahá'u'lláh), after Christ, it teaches 'progressive revelation' "
+           "— that all religions are one and each founder a prophet for his age, with a new prophet AFTER "
+           "Christ. That demotes the Son from the unique and final Word to one messenger among many, which "
+           "the confession of 1 John 4:2-3 makes the dividing line: 'I am the way, and the truth, and the "
+           "life; no one comes to the Father except through me' (John 14:6); 'there is salvation in no one "
+           "else' (Acts 4:12); 'Jesus Christ is the same yesterday and today and forever' (Hebrews 13:8); "
+           "no other gospel (Galatians 1:8). This is said of the TEACHING, never of any Bahá'í — whose "
+           "ache for unity is honored, for the true and lasting unity is a Person: 'he himself is our "
+           "peace, who has made us both one' (Ephesians 2:14). 'We don't lie, but we love you.'"),
+          "under_the_test",
+          ["bahai", "progressive revelation", "unity of religions", "test of the spirits", "in love", "1 john"],
+          {"anchor": "1 John 4:2-3; John 14:6; Acts 4:12; Hebrews 13:8; Galatians 1:8; Ephesians 2:14",
+           "framing": "Matt's, anchored",
+           "discerns_terms": ["bahai", "baha'i", "bahaullah", "baha'u'llah", "abdul-baha",
+                              "progressive revelation", "all religions are one", "all paths are one"]}),
     _card("post_christ_pattern",
           "The pattern for movements arising after Christ (the test, in love)",
           ("Beyond any single case, the calibration is a pattern, applied gently: a religion or movement that "
