@@ -15,8 +15,11 @@ from concordance import stigmergy  # noqa: E402
 
 def _reset():
     stigmergy._TRAILS.clear()
+    stigmergy._PENDING.clear()
     stigmergy._LOADED[0] = False
+    stigmergy._LOADED_MTIME[0] = 0.0
     stigmergy._LAST_EVAP[0] = 0.0
+    stigmergy._LAST_SYNC[0] = 0.0
     stigmergy._DIRTY[0] = 0
 
 
@@ -72,6 +75,48 @@ def test_the_trail_is_aggregate_and_carries_no_identity(on):
     # only {trails: {card_id: strength}} + a decay clock — no who, no query, no per-read log
     assert set(d.keys()) <= {"trails", "last_evap"}
     assert list(d["trails"].keys()) == ["card_x"] and isinstance(d["trails"]["card_x"], (int, float))
+
+
+def test_flush_merges_and_does_not_clobber_a_concurrent_write(on, tmp_path):
+    import json
+    stigmergy.deposit(["x"])                       # our worker deposits x, unflushed
+    # meanwhile ANOTHER worker writes the shared store with its own trail y
+    (tmp_path / "stigmergy.json").write_text(json.dumps({"trails": {"y": 10.0}, "last_evap": time.time()}))
+    stigmergy.flush()                              # must MERGE onto the shared state, not overwrite it
+    d = json.loads((tmp_path / "stigmergy.json").read_text())
+    assert set(d["trails"]) == {"x", "y"}          # neither worker's deposit was lost
+    assert d["trails"]["y"] == pytest.approx(10.0, rel=0.02)
+    assert d["trails"]["x"] == pytest.approx(1.0, rel=0.02)
+
+
+def test_read_resyncs_from_the_shared_store(on, tmp_path):
+    import json
+    stigmergy.deposit(["x"])                       # loads (empty), local cache holds x
+    (tmp_path / "stigmergy.json").write_text(json.dumps({"trails": {"z": 7.0}, "last_evap": time.time()}))
+    stigmergy._LAST_SYNC[0] = 0.0                  # open the throttled resync window
+    assert stigmergy.strength("z") == pytest.approx(7.0, rel=0.05)   # we now feel another worker's trail
+    assert stigmergy.strength("x") == pytest.approx(1.0, rel=0.05)   # and still our own unflushed deposit
+
+
+def test_concurrent_workers_lose_no_deposits(tmp_path):
+    """The real proof: four independent processes hammer one shared card; every deposit must survive."""
+    import json
+    import subprocess
+    src = str(Path(__file__).resolve().parent.parent / "src")
+    worker = (
+        "import os, sys\n"
+        f"sys.path.insert(0, {src!r})\n"
+        f"os.environ['CONCORDANCE_DATA_DIR'] = {str(tmp_path)!r}\n"
+        "os.environ['CONCORDANCE_STIGMERGY'] = '1'\n"
+        "from concordance import stigmergy\n"
+        "for _ in range(30): stigmergy.deposit(['z'])\n"
+        "stigmergy.flush()\n"
+    )
+    procs = [subprocess.Popen([sys.executable, "-c", worker]) for _ in range(4)]
+    for p in procs:
+        assert p.wait(timeout=60) == 0
+    d = json.loads((tmp_path / "stigmergy.json").read_text())
+    assert d["trails"]["z"] == pytest.approx(4 * 30, rel=0.02)      # 120 — not one deposit clobbered
 
 
 if __name__ == "__main__":
