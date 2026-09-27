@@ -87,11 +87,33 @@ Their compute pays; the sealed outcomes train our keeping (public-review-gated).
 dispatches the 69 verifiers — BYOM is one more (external, gated, paid-by-them) pool entry. Design +
 scaffold locally; review before deploy (touches the no-LLM conviction).
 
-## Phase 5 — Workshop intake / witness wire — PARTIAL
-The continuous-growth pipe: people (reader→contributor→writer, signed/verified/discerned witness) and
-agents (`/improve` operator filings + the agent-door) PROPOSE new specialists (verifiers/cards/charts),
-a human signs off, they drop into the pool. `/improve` exists; confirm the intake accepts specialist
-proposals and routes them to review.
+## Phase 5 — Workshop intake / witness wire — VERIFIED (the pipe exists) · 2026-09-26
+The continuous-growth pipe already carries specialist proposals — no code change needed. `workshop.file`
+(POST `/workshop`, covenant-SIGNED, operator-authorized) accepts kinds `improve/fix/observe/feature/
+question`; a **specialist proposal** files as a signed `feature` with `target` = the specialist it adds
+(the verifier domain / face id / chart subject) and `body` = the proposal + a pointer to its design doc.
+It folds into the operator's queue (GET `/workshop`), the operator drains it (POST `/workshop/status`),
+and nothing auto-incorporates — a human signs off, then it drops into the pool (drop-in, per Phase 0).
+Convention documented here; no new `kind` added (`feature` covers it). Filing needs `OPERATOR_FPS` set
+on the box (known: `project_workshop_operator_improvement_queue`).
+
+---
+
+## Loop outcome / handoff (2026-09-26 → 2026-09-27)
+The autonomous loop took every phase as far as it can **without your review or sign-off**:
+- **Phase 0 (verifiers)** — COMPLETE (69 modules, 100% of checkable domains; "52%" was stale).
+- **Phase 2 (verifier gaps)** — CLOSED (no true gaps; the "35" were modes/cue-words/umbrella hints).
+- **Phase 5 (intake)** — VERIFIED + documented (the workshop already routes specialist proposals).
+- **Phase 3 (expert faces)** — SCAFFOLD BUILT + tested locally (`faces.py`, 5 tests). **Awaits review**,
+  then wiring into the front door (ask/router) + deploy.
+- **Phase 4 (BYOM)** — SCAFFOLD BUILT + tested locally (`byom.py`, 5 tests). **Awaits review**, then a
+  concrete model adapter + wiring + the capture→public_review pipeline + deploy.
+- **Phase 1 (discerners)** — GATED on your Spirit-led sign-off (no autonomous authoring of new spiritual
+  content). Queue: the occult primary-source cluster (Theosophy/spiritualism), then the broader atlas.
+
+**Nothing built by the loop is deployed** — all committed, all tested, all local. Everything remaining
+needs you: review the two scaffolds (faces, BYOM) before they wire in and ship, and sign off Phase 1.
+The loop stops here because further progress is yours to unblock; restart it anytime with `/loop`.
 
 ---
 
