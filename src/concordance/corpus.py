@@ -896,6 +896,7 @@ class Corpus:
         from . import growth as _growth
         qn = " ".join((query or "").lower().split())
         q_exact = {qn} | {r.lower() for r in _growth.refs_in_text(query or "")}
+        from . import stigmergy as _stig     # the pheromone layer (gated OFF by default → boost is 1.0)
         scored = []
 
         def _finalize(c: dict, s: float) -> float:
@@ -919,6 +920,9 @@ class Corpus:
                 s *= 3.0                              # a how-to question prefers the field library
             elif c.get("shelf") == "theories":
                 s *= THEORY_WEIGHT                     # a theory is load-bearing (Matt 2026-08-02)
+            # STIGMERGY (ants): a well-travelled trail leads WITHIN its tier — multiplies the base
+            # score like the boosts above, capped, so it never crosses tiers. 1.0 when gated off.
+            s *= _stig.boost_factor(c.get("id"))
             return s
 
         for cid in self._candidates(
@@ -975,7 +979,12 @@ class Corpus:
         # they did not, and that inconsistency is what reached the reader.)
         if scored and scored[0][0] >= SUBJECT_TIER:
             scored = [(s, c) for s, c in scored if s >= SUBJECT_TIER]
-        return [c for _s, c in scored[:max(1, int(limit))]]
+        out = [c for _s, c in scored[:max(1, int(limit))]]
+        # STIGMERGY DEPOSIT (gated OFF → no-op): the cards this search returned proved retrieval-worthy,
+        # so lay a little pheromone on them — aggregate, no identity, no query. Trails that serve
+        # strengthen; the evaporation in the module fades the rest.
+        _stig.deposit(c.get("id") for c in out)
+        return out
 
 
 # ── module-level default corpus (lazy, from cards.jsonl) ─────────────────
