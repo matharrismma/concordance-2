@@ -107,6 +107,24 @@ def test_a_placed_card_presents_a_borrow_block(member_env):
     assert "https://drive.google.com/file/d/xyz/view" in blob   # the borrower can open it at the source
 
 
+def test_public_shelf_shows_how_to_connect_and_borrow(member_env):
+    """Connect/mesh: a public reader who finds a shelf learns how much waits behind a link, and how to
+    connect — the mesh is the connector; the file stays the member's."""
+    from concordance import shelves, mesh
+    priv, pub, _ = member_env
+    s = shelves.signable_place(pub, "Homestead logs", "my whole homestead archive",
+                               "https://drive.google.com/d/hs", "drive", "CC0", ring="shelf")
+    shelves.place(s["fields"], _sign(s["signable"], priv), display_name="Sam", waybill_fn=_OFFLINE)
+    r0 = shelves.shelf_of(pub, viewer=None, access="public")
+    assert r0["connect"] is not None
+    assert r0["connect"]["borrowable_on_connect"] == 1        # one shelf-ring card waits behind a link
+    assert r0["connect"]["on_mesh"] is False and "not on the mesh" in r0["connect"]["how"].lower()
+    reg = mesh.register_node(pub, callsign="SAM")
+    if reg.get("ok"):
+        r1 = shelves.shelf_of(pub, viewer=None, access="public")
+        assert r1["connect"]["on_mesh"] is True and "linked" in r1["connect"]["how"].lower()
+
+
 def test_a_forged_signature_is_refused(member_env):
     from concordance import shelves
     priv, pub, _ = member_env

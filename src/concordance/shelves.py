@@ -505,7 +505,7 @@ def shelf_of(member: str, viewer: Optional[str] = None, access: str = "public") 
     curation = {c["card_id"]: c for c in _read("curation.jsonl")}
     superseded = {str((d.get("extra") or {}).get("supersedes"))
                   for d in _read("drops.jsonl") if (d.get("extra") or {}).get("supersedes")}
-    cards, held = [], 0
+    cards, held, shelf_borrowable = [], 0, 0
     for d in _read("drops.jsonl"):
         extra = d.get("extra") or {}
         if d.get("spine") or extra.get("spine"):
@@ -528,6 +528,8 @@ def shelf_of(member: str, viewer: Optional[str] = None, access: str = "public") 
                 continue
         else:  # public
             if ring != "commons" or not promoted:
+                if ring == "shelf":
+                    shelf_borrowable += 1          # withheld from the public, but borrowable once linked
                 continue
         card = dict(d)
         if promoted:
@@ -541,11 +543,29 @@ def shelf_of(member: str, viewer: Optional[str] = None, access: str = "public") 
     # card and hangs a derived `presentation` block on the copy — pure string work, no I/O, and not
     # one byte of it reaches the store.
     from . import present as _present
+    # CONNECT — "we just connect two people." A public reader who found this shelf sees only the promoted
+    # commons; the friend-gated `shelf` ring (where a member's borrowable placements sit) opens once they
+    # are LINKED. So tell them how to connect, and how much waits behind it — the mesh is the connector.
+    connect = None
+    if access == "public":
+        from . import identity as _id, mesh as _mesh
+        mfp = _id.fingerprint(member)
+        node = _mesh._read_node(mfp)
+        connect = {
+            "member_fp": mfp, "on_mesh": bool(node),
+            "callsign": str((node or {}).get("callsign") or "") if node else "",
+            "borrowable_on_connect": shelf_borrowable,
+            "how": ("Leave a note on their door; when they invite you and you redeem it, you're linked "
+                    "and their shelf ring opens — you borrow from their storage, we just connect the two "
+                    "of you." if node else
+                    "This member is not on the mesh yet, so only their commons is public here."),
+        }
     return {"ok": True, "member": member, "own_view": own, "access": access, "count": len(cards),
             # the count of the member's own commons drops still awaiting a steward. It is a COUNT,
             # not content (and the drops are bound for the commons anyway), so it is shown to any
             # reader — the friend-gate withholds the private/shelf CARDS, not this number.
             "awaiting_review": held,
+            "connect": connect,
             "cards": _present.attach(cards),
             "note": "A shelf is a key with cards on it. Nothing here records who read them."}
 
