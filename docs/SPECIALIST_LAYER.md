@@ -67,7 +67,19 @@ never generates. Build: a `faces` registry + a thin composer over the existing v
 core (a face = {domain scope, which verifiers, which shelves, which discernment, the servant's manner}).
 Scaffold locally, commit, review, then deploy.
 
-## Phase 4 — BYOM external-worker tier — NOT BUILT · design-first, review before deploy
+## Phase 4 — BYOM external-worker tier — SCAFFOLD BUILT (local, awaiting review) · 2026-09-26
+`src/concordance/byom.py` + `tests/test_byom.py` (5 pass): `run_byom(request, model_call, ...)` routes a
+user's model through airlock.strip → the model (clean zone, skeleton only) → discern → verify → capture.
+Fail-closed at the airlock (PII leak → the model never runs); the output is TRUSTED only if our verifier
+holds, REJECTED if it contradicts one, an honest GAP when nothing is checkable (SYSTEM_ERROR never
+rejects the model — our failure ≠ their falsehood); non-rejected outcomes are captured as candidates for
+public_review (the user paid; the checked outcome trains the keeping), never auto-published, bound to the
+clean skeleton. Deterministic wrapper; deps injectable → tested without model/corpus. NOT deployed — not
+wired to a real model adapter or the front door; review before deploy (touches the no-LLM conviction).
+_Remaining to close Phase 4: a concrete model adapter (user key/local), wire into faces/conductor as an
+opt-in worker, and the capture→public_review pipeline; then deploy._
+
+## Phase 4 (orig) — BYOM external-worker tier — design at project_byom_bring_your_own_model_pays_to_train_us
 `project_byom_bring_your_own_model_pays_to_train_us`: a user's model registers as an EXTERNAL worker the
 conductor may route to, gated: **airlock.strip → user model → verify/discern → seal → capture**. Never
 in the core loop, never trusted raw, never a core dependency (the engine runs fully without any model).
