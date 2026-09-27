@@ -1968,6 +1968,13 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     cloud = _connected_cloud(hits[0].get("id"))
     if cloud:
         out["cloud"] = {"around": hits[0].get("title", ""), "witnesses": cloud}
+    # QUORUM (bees / Deut 19:15): how many INDEPENDENT sources corroborate this answer's subject — a
+    # confidence signal (established vs a single testimony), never a change to which card leads. Gated
+    # off by default → absent, so the response is unchanged until a node opts in.
+    from . import quorum as _quorum
+    _q = _quorum.assess(hits)
+    if _q:
+        out["quorum"] = _q
     # The concierge: a search result is RELATED material, not a VERIFIED answer. For a question,
     # point — politely — to where a verified answer can be found (the free libraries; a claim check).
     if _is_question(text):
