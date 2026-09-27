@@ -50,7 +50,16 @@ scripture/word subsystem). The checkable pool (69 modules) is complete; "~52%" i
 - Phase 1 queue (for sign-off): the occult primary-source cluster (Theosophy/spiritualism — Leadbeater's
   "The Astral Plane", etc., already in the corpus and out-ranking discernment); then the broader atlas.
 
-## Phase 3 — Expert faces — NOT BUILT · design-first, review before deploy
+## Phase 3 — Expert faces — SCAFFOLD BUILT (local, awaiting review) · 2026-09-26
+`src/concordance/faces.py` + `tests/test_faces.py` (5 pass): the deterministic composer + a 4-face
+registry (Steward, Tutor, Social Worker, Theorist). `route()` picks the servant; `compose()` runs
+crisis-gate → scoped search → discern (proposes the claim; worldview calibration shown only where the
+face carries it) → verify (the face's verifiers, on a checkable claim in-domain; honest GAP otherwise)
+→ a render-FRAME (data, never generated prose). Injectable deps → tested without corpus/model. NOT
+deployed — not yet wired to the router/front door; review the design + wiring before any deploy.
+_Remaining to close Phase 3: wire `faces.route`/`compose` into the front door (ask/router), then deploy._
+
+## Phase 3 (orig) — Expert faces — design at docs/EXPERT_FACES.md
 The callable life-domain composites from the living-community vision: the social worker, the tutor, the
 steward, the theorist, … A face is a *role* that assembles the right keeping + verifiers + discernment
 for a life-domain and answers as that servant would — deterministic, points to Christ not to an idol,
