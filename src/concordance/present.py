@@ -215,6 +215,19 @@ def derive(card: Dict[str, Any], now: Optional[int] = None) -> Dict[str, Any]:
     if x.get("promoted_by"):
         out["vouched"] = {"by": str(x["promoted_by"]), "reason": str(x.get("promoted_reason") or "")}
 
+    # BORROW — a member PLACED this: they host the file, we keep the card. The borrower needs the
+    # terms (license) and where to open it, and to know we do not hold the bytes. Pure (card alone),
+    # so _view stays free + cacheable. The `link` block above already carries the pointer + reach.
+    if x.get("placed"):
+        out["borrow"] = {
+            "license": str(x.get("license") or "unstated"),
+            "storage": str(x.get("storage") or ""),
+            "hosted_by": str((card.get("source") or {}).get("label") or ""),
+            "at": url,
+            "reach": str(x.get("reach") or ""),
+            "means": "borrow it from the member's own storage — we keep the card, they keep the file",
+        }
+
     # THE OPEN QUESTION AN ENGINE-WRITTEN CARD WEARS (Matt, 2026-08-01: "We put them in, when you
     # write, but you ask the first person that recalls the cards to verify them."). It rides here
     # rather than on a route because this block is what BOTH surfaces render from — the card page a

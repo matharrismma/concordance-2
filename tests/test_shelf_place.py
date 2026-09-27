@@ -89,6 +89,24 @@ def test_signable_place_requires_pointer_license_and_curation(member_env):
     assert shelves.signable_place(pub, "t", "", "https://x.org/f", "url", "CC0")["ok"] is False   # no curation
 
 
+def test_a_placed_card_presents_a_borrow_block(member_env):
+    """The borrow side (polish): a placed card tells a borrower the terms (license), where it's hosted,
+    and that we keep the card, not the file."""
+    import json
+    from concordance import shelves, present
+    priv, pub, _ = member_env
+    s = shelves.signable_place(pub, "My grafting notes", "worth borrowing",
+                               "https://drive.google.com/file/d/xyz/view", "drive", "CC-BY 4.0", ring="shelf")
+    out = shelves.place(s["fields"], _sign(s["signable"], priv), display_name="Sam", waybill_fn=_OFFLINE)
+    card = next(json.loads(l) for l in
+                (Path(os.environ["CONCORDANCE_DATA_DIR"]) / "shelves" / "drops.jsonl").read_text().splitlines()
+                if l.strip() and json.loads(l).get("id") == out["card_id"])
+    presented = present.attach([card])
+    blob = json.dumps(presented)
+    assert "borrow" in blob and "CC-BY 4.0" in blob and "drive" in blob
+    assert "https://drive.google.com/file/d/xyz/view" in blob   # the borrower can open it at the source
+
+
 def test_a_forged_signature_is_refused(member_env):
     from concordance import shelves
     priv, pub, _ = member_env
