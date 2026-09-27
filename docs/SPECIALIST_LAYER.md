@@ -32,12 +32,23 @@ in `project_chart_every_religion_discernment_atlas`). Each iteration: chart 1–
 `tools/card_religions.py` (AFTER list, `under_the_test`) or the atlas seeder; held in love; Scripture-
 anchored; add `discerns_terms` where occult primary sources exist so the pairing lifts it.
 
-## Phase 2 — True verifier gaps — TODO · loop executes
-**First loop task:** enumerate the routable-AND-deterministically-checkable domains (router.py rules +
-clarify slots + any domain named on cards) MINUS the `VERIFIERS` keys. Then add a real deterministic
-verifier for each genuine gap (never a stub — a bluffing specialist is worse than an honest GAP; fails
-closed; "our failure ≠ their falsehood"). Non-checkable domains (history/sociology/…) are NOT verifier
-gaps — they are served by discerners (Phase 1), faces (Phase 3), or the keeping.
+## Phase 2 — True verifier gaps — CLOSED (2026-09-26)
+Enumerated the full routable-domain universe (router rules + clarify slots + card-named domains, 104
+strings) minus the `VERIFIERS` keys: **no true deterministic-verifier gaps.** The 35 apparent misses are
+all router *modes* (apothecary/coach/prophecy/steward/…), clarify *cue words* (is/was/does/prove/…), and
+umbrella *hints* (science/health/doctrine — already served by their concrete verifiers or by the
+scripture/word subsystem). The checkable pool (69 modules) is complete; "~52%" in `systems.py` is stale.
+
+## Autonomy calibration (the loop's rails)
+- **Phase 1 (discerners) is GATED on Matt's Spirit-led sign-off** — authoring new spiritual/doctrinal
+  discernment (kept·hinge·Red·Scripture) is his call, not mine to write in an unattended loop
+  (`feedback_matt_listens_to_spirit_assay_confirms`; the atlas already awaits sign-off). The loop QUEUES
+  subjects for him (below), and may do MECHANICAL discern work (e.g. add `discerns_terms`/pairing for
+  sources tied to an ALREADY-charted subject), but does not author new charts autonomously.
+- **Phases 3, 4, 5 advance autonomously as reviewable SCAFFOLDS/DESIGNS — committed locally, NOT
+  deployed** until Matt reviews. No live/hot-path change without review.
+- Phase 1 queue (for sign-off): the occult primary-source cluster (Theosophy/spiritualism — Leadbeater's
+  "The Astral Plane", etc., already in the corpus and out-ranking discernment); then the broader atlas.
 
 ## Phase 3 — Expert faces — NOT BUILT · design-first, review before deploy
 The callable life-domain composites from the living-community vision: the social worker, the tutor, the
