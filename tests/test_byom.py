@@ -101,6 +101,46 @@ def test_openai_adapter_builds_a_callable_and_validates():
             pass
 
 
+def _airlock_pii(text, operate, minimal=True):
+    """A fake airlock where the query carried PII (held_pii non-empty) — a personal, not shared, query."""
+    return SimpleNamespace(ok=True, leaked=False, checked="SKELETON", result=operate("SKELETON"),
+                           held_pii=("123-45-6789",))
+
+
+def test_ingest_keeps_a_checked_answer_as_public_review():
+    """A gap-fill answer that holds is KEPT as a public_review card — model-derived, source+quality tagged."""
+    kept = {}
+    out = byom.ingest("what is the boiling point of water", lambda skel: "About 100 C at sea level.",
+                      airlock_fn=_airlock_ok, discern_fn=lambda t: {"claim": None},
+                      keep_fn=lambda cards: (kept.setdefault("cards", cards), len(cards))[1])
+    assert out["status"] == "ingested"
+    c = kept["cards"][0]
+    assert c["lifecycle_stage"] == "public_review", "model-derived is never auto-public"
+    assert c["generated"] is True and c["extra"]["byom"] is True
+    assert c["source"]["authority_tier"] == "byom_unverified"    # no checkable claim → unverified tier
+    assert c["body"].startswith("About 100 C")
+
+
+def test_ingest_does_not_keep_a_rejected_answer():
+    called = {"kept": False}
+    out = byom.ingest("is 2+2 five", lambda skel: "2+2=5", verifiers=["mathematics"],
+                      airlock_fn=_airlock_ok,
+                      discern_fn=lambda t: {"claim": {"domain": "mathematics",
+                                                      "spec": {"mode": "arithmetic", "params": {}}}},
+                      verify_fn=lambda s: {"verdict": "BROKEN"},
+                      keep_fn=lambda cards: called.__setitem__("kept", True))
+    assert out["status"] == "rejected" and called["kept"] is False
+
+
+def test_ingest_does_not_keep_a_pii_bearing_query():
+    """A personal question is answered for the caller but NEVER written to the shared corpus."""
+    called = {"kept": False}
+    out = byom.ingest("my SSN is 123-45-6789, what should I budget", lambda skel: "an answer",
+                      airlock_fn=_airlock_pii, discern_fn=lambda t: {"claim": None},
+                      keep_fn=lambda cards: called.__setitem__("kept", True))
+    assert out["status"] == "not_ingested" and called["kept"] is False
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))

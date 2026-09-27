@@ -1831,7 +1831,17 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         except ValueError as e:
             return _err(400, str(e), "BAD_MODEL")
         verifiers = b.get("verifiers") if isinstance(b.get("verifiers"), list) else []
-        return _ok(_byom.run_byom(text, adapter, verifiers=verifiers, config=config))
+        # You may already HAVE it — search the keeping first; reach for the model only on a MISS, then
+        # KEEP the checked answer (public_review, source+quality-gated). "Wikipedia for AI, through our
+        # structure": the model fills the gap ONCE; recall serves it after. `force` overrides the search.
+        if not b.get("force"):
+            hits = corpus.search(text, limit=3)
+            if hits:
+                return _ok({"status": "already_kept", "from": "the keeping",
+                            "results": [{"id": c.get("id"), "title": c.get("title"),
+                                         "snippet": (c.get("body", "") or "")[:200]} for c in hits[:3]],
+                            "means": "the keeping already holds this — no model was called"})
+        return _ok(_byom.ingest(text, adapter, verifiers=verifiers, config=config))
 
     # Library / keeping tools (ported from 1.0, additive — over the same shared corpus).
     if method == "GET" and path == "/cards/stats":

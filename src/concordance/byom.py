@@ -146,7 +146,70 @@ def run_byom(request: str, model_call: Callable[[str], Any], *,
         capture = (capture_fn(record) if capture_fn else record)
 
     return {"ok": True, "trust": trust, "model_output": raw, "checked": clean,
+            "had_pii": bool(getattr(passage, "held_pii", ())),
             "discern": proposal, "verify": verify, "capture": capture,
             "means": ("the model ran only on the de-identified skeleton; its output was checked by our "
                       "verifiers and is trusted only if it holds. What holds is filed for review, not "
                       "published — the sovereign core never depended on the model.")}
+
+
+def ingest(query: str, model_call: Callable[[str], Any], *, config: Any = None,
+           verifiers: Sequence[str] = (), keep_fn: Optional[Callable[[list], int]] = None,
+           **run_kw) -> Dict[str, Any]:
+    """Fill a GAP the keeping does not hold with a user's model, then KEEP the checked answer as a card —
+    "you have it in your own once ingested". Model-derived, so it enters `public_review` (withheld from
+    public reads until a human reviews SOURCE + QUALITY), generated=True, tagged with the model as source
+    and the verifier verdict as its quality tier. NOT kept when the answer was REJECTED (our verifier
+    broke it) or when the query carried PII (personal — answered for the caller, never written to the
+    shared corpus). The same acquire→public_review path as `expand` (one mechanism); `keep_fn` injectable."""
+    r = run_byom(query, model_call, verifiers=verifiers, config=config, **run_kw)
+    if not r.get("ok"):
+        return {**r, "status": "refused"}
+    if r.get("trust") == "rejected":
+        return {**r, "status": "rejected",
+                "message": "the model's answer contradicted our verifier — not ingested"}
+    if r.get("had_pii"):
+        return {**r, "status": "not_ingested",
+                "message": "the question carried personal context — answered for you, never written to "
+                           "the shared corpus (a gap-fill is general knowledge, not a private matter)"}
+    card = _ingest_card(query, r)
+    if keep_fn is None:
+        from .expand import _keep as keep_fn
+    try:
+        kept = keep_fn([card])
+    except Exception as e:  # noqa: BLE001 — a keep failure must not lose the answer for the caller
+        return {**r, "status": "answered_keep_failed", "card_id": card["id"], "error": str(e)}
+    return {"status": "ingested", "card_id": card["id"], "trust": r["trust"],
+            "lifecycle_stage": "public_review", "quality_tier": card["source"]["authority_tier"],
+            "kept": kept, "model_output": r["model_output"], "verify": r["verify"],
+            "means": ("filled a gap and KEPT the checked answer as a review candidate — model-derived, so "
+                      "held in public_review (source + quality reviewed before it is shared); once cleared, "
+                      "recall serves it and no model is called for it again")}
+
+
+def _ingest_card(query: str, r: Dict[str, Any]) -> Dict[str, Any]:
+    """A public_review card from a checked BYOM answer, BOUND TO THE CLEAN SKELETON (never revealed PII).
+    generated=True (a model produced it); quality tier = the verifier verdict on the model's own claim."""
+    import hashlib
+    clean = str(r.get("checked") or query)
+    answer = str(r.get("model_output") or "")
+    sha = hashlib.sha256((clean + "\n" + answer).encode("utf-8")).hexdigest()
+    tier = {"verified": "byom_verified"}.get(r.get("trust"), "byom_unverified")
+    subj = " ".join(clean.split())[:120]
+    return {
+        "id": "card_byom_" + sha[:16], "kind": "reference",
+        "title": subj or "a gap the keeping did not hold",
+        "body": answer[:2400],
+        "source": {"label": "BYOM — a user-attached model; the engine checked this answer",
+                   "url": "", "domain": "", "authority_tier": tier},
+        "shelf": "sources", "box": "byom", "subject": subj,
+        "bands": sorted({w for w in subj.lower().split() if len(w) > 2})[:10] + ["byom", "public-review"],
+        "connections": [{"to_card_id": "card_spine_sources", "relationship": "member_of",
+                         "evidence": "an answer a user's model gave to fill a gap the keeping did not hold"}],
+        "author": "engine", "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
+        "lifecycle_stage": "public_review",   # model-derived: never auto-public; a human reviews source+quality
+        "volatility": "permanent", "surface": "secular", "generated": True,
+        "extra": {"byom": True, "trust": r.get("trust"),
+                  "verify": (r.get("verify") or {}).get("verdict") if r.get("verify") else None,
+                  "skeleton_sha256": sha},
+    }
