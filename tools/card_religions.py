@@ -246,6 +246,40 @@ AFTER = [
            "discerns_terms": ["astral projection", "astral plane", "astral body", "out of body",
                               "out-of-body", "hemi-sync", "hemi sync", "gateway process",
                               "gateway experience", "remote viewing", "monroe institute", "etheric"]}),
+    _card("theosophy_spiritualism_under_the_test",
+          "Theosophy & spiritualism — under the test of the spirits (in love)",
+          ("Credited where it names something true: the reality of the unseen and the ache toward what "
+           "lies beyond death — 'He has put eternity into man's heart' (Ecclesiastes 3:11), and the grief "
+           "of the bereaved is real. The primary sources this discerns are in the keeping as public-domain "
+           "texts — Blavatsky's 'The Secret Doctrine', Leadbeater's 'The Astral Plane', the spiritualist "
+           "memoirs — gathered as history, not endorsed. And then, held to the one test in love: arising in "
+           "the 19th-20th centuries, after Christ, its metaphysic is monist/pantheist (all is one divine "
+           "consciousness; the self is divine — the first lie, 'you will be like God', Genesis 3:5); it "
+           "teaches reincarnation and karma against the appointed judgment ('it is appointed for man to die "
+           "once, and after that comes judgment', Hebrews 9:27); and its core practice — séance, mediumship, "
+           "contacting the dead, channeling 'ascended masters' and spirit guides — is precisely the "
+           "necromancy and consulting of spirits that Scripture names and forbids (Deuteronomy 18:10-12; "
+           "Leviticus 19:31; Isaiah 8:19; and the medium of Endor, 1 Samuel 28). Such 'guides' are the "
+           "deceiving spirits and doctrines of demons the apostles warned of (1 Timothy 4:1), for even "
+           "Satan disguises himself as an angel of light (2 Corinthians 11:14); and by making Christ one "
+           "'master' among many it denies the Son come in the flesh (1 John 4:2-3). This is said of the "
+           "TEACHING and the practice, never of any grieving or seeking soul — every one of whom is loved. "
+           "The ache is real, and it is answered: not in the dead, whom we do not summon but await, but in "
+           "the One who is 'the resurrection and the life' (John 11:25), the firstfruits of those who sleep "
+           "(1 Corinthians 15:20-22). 'We don't lie, but we love you.'"),
+          "under_the_test",
+          ["theosophy", "spiritualism", "seance", "mediumship", "necromancy", "astral plane", "reincarnation",
+           "ascended masters", "test of the spirits", "in love", "1 john"],
+          {"anchor": "1 John 4:2-3; Genesis 3:5; Hebrews 9:27; Deuteronomy 18:10-12; Leviticus 19:31; "
+                     "Isaiah 8:19; 1 Samuel 28; 1 Timothy 4:1; 2 Corinthians 11:14; John 11:25; "
+                     "1 Corinthians 15:20-22",
+           "framing": "Matt's, anchored",
+           "primary_sources": "Blavatsky (The Secret Doctrine); Leadbeater (The Astral Plane); spiritualist memoirs — PD, in the keeping as history",
+           # pairing: lift THIS chart to the lead when an occult PRIMARY SOURCE tied to it is returned
+           "discerns_terms": ["theosophy", "theosophical", "blavatsky", "leadbeater", "secret doctrine",
+                              "astral plane", "seance", "séance", "medium", "mediumship", "spiritualism",
+                              "ascended master", "spirit guide", "ectoplasm", "necromancy", "channeling",
+                              "clairvoyance", "contact the dead"]}),
     _card("post_christ_pattern",
           "The pattern for movements arising after Christ (the test, in love)",
           ("Beyond any single case, the calibration is a pattern, applied gently: a religion or movement that "
