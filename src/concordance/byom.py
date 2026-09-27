@@ -19,7 +19,54 @@ Deterministic wrapper: the only non-deterministic part is the user's `model_call
 """
 from __future__ import annotations
 
+import ipaddress
+import json
+import socket
+import urllib.request
+from urllib.parse import urlparse
 from typing import Any, Callable, Dict, List, Optional, Sequence
+
+
+def _guard_url(url: str) -> str:
+    """SSRF guard: only http(s) to a PUBLIC host — never localhost/private/link-local/reserved. Defense
+    in depth behind the CONCORDANCE_BYOM_ENABLED flag: a user's model lives on a public endpoint (their
+    cloud API or server), so nothing internal is ever a legitimate BYOM target."""
+    u = urlparse(url or "")
+    if u.scheme not in ("http", "https") or not u.hostname:
+        raise ValueError("model base_url must be an http(s) URL with a host")
+    try:
+        infos = socket.getaddrinfo(u.hostname, u.port or (443 if u.scheme == "https" else 80))
+    except OSError as e:  # noqa: BLE001
+        raise ValueError(f"model host does not resolve: {u.hostname}") from e
+    for info in infos:
+        ip = ipaddress.ip_address(info[4][0])
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
+            raise ValueError("model base_url must be a PUBLIC host (no localhost/private/internal targets)")
+    return url
+
+
+def openai_adapter(model_cfg: Dict[str, Any]) -> Callable[[str], str]:
+    """Build a `model_call(skeleton)->str` for any OpenAI-compatible endpoint (OpenAI, Anthropic-compat,
+    a local server exposed publicly, Sakana Fugu, …) from the user's own {base_url, api_key, model}. The
+    caller pays; the airlock has already stripped PII from the skeleton before it reaches this. SSRF-
+    guarded. This is the ONE place BYOM touches an external model; run_byom gates it on both sides."""
+    base = _guard_url(str(model_cfg.get("base_url") or ""))
+    key = str(model_cfg.get("api_key") or "")
+    model = str(model_cfg.get("model") or "")
+    if not model:
+        raise ValueError("model name required")
+
+    def model_call(skeleton: str) -> str:
+        payload = json.dumps({"model": model, "temperature": 0,
+                              "messages": [{"role": "user", "content": skeleton}]}).encode("utf-8")
+        req = urllib.request.Request(base.rstrip("/") + "/chat/completions", data=payload,
+                                     headers={"Authorization": f"Bearer {key}",
+                                              "Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=60) as r:
+            d = json.loads(r.read().decode("utf-8", "replace"))
+        return str(((d.get("choices") or [{}])[0].get("message") or {}).get("content") or "")
+
+    return model_call
 
 # verdicts that mean the model's claim CONTRADICTED our deterministic verifier → do not trust, do not
 # capture. Everything else (holds, or an engine gap/error) does not reject the model — our failure is

@@ -116,7 +116,7 @@ GOLDEN_API_GET = {
 # are not the same risk, and the one client the shared cap refused most was ClaudeBot.
 GOLDEN_RATELIMITED = {
     "/unchecked/answer",   # deliberate addition 2026-08-01 — anyone may answer, so it is rate-limited
-    "/verify", "/derivation/verify", "/face", "/mcp",
+    "/verify", "/derivation/verify", "/face", "/byom", "/mcp",
     # the six profile mounts (task #123) — same engine, narrow doors; goldens updated as a decision
     "/mcp/core", "/mcp/library", "/mcp/sovereign", "/mcp/coach", "/mcp/witness", "/mcp/community", "/ask", "/console", "/speak", "/bind", "/book", "/fork", "/defer", "/inlet", "/returns", "/days", "/apothecary/propose", "/pins", "/pins/done",
     "/threads", "/threads/search",

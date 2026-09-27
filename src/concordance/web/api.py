@@ -1810,6 +1810,29 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _err(404, "no face fits this request — use the ordinary front door (POST /ask)", "NO_FACE")
         return _ok(_faces.compose(fid, text, config))
 
+    # ── BYOM — bring your own model. An OPTIONAL, gated EXTERNAL worker: the user's OpenAI-compatible
+    # model is called ONLY on the airlock-stripped skeleton, its output is verified (never trusted raw),
+    # and the checked outcome is captured for review. DEFAULT OFF: the free public core is no-LLM
+    # (project_cut_the_llm_already_free); enable on a sovereign node with CONCORDANCE_BYOM_ENABLED=1.
+    if method == "POST" and path == "/byom":
+        import os as _os
+        if _os.environ.get("CONCORDANCE_BYOM_ENABLED", "").strip().lower() not in ("1", "true", "yes", "on"):
+            return _err(501, "BYOM is off on this node — the free core is no-LLM. Enable on a sovereign "
+                             "node with CONCORDANCE_BYOM_ENABLED=1; the model is yours, and you pay for it.",
+                        "BYOM_DISABLED")
+        from .. import byom as _byom
+        b = body if isinstance(body, dict) else {}
+        text = str(b.get("text") or "").strip()
+        mc = b.get("model") if isinstance(b.get("model"), dict) else None
+        if not text or not mc:
+            return _err(400, "text and model {base_url, api_key, model} required")
+        try:
+            adapter = _byom.openai_adapter(mc)
+        except ValueError as e:
+            return _err(400, str(e), "BAD_MODEL")
+        verifiers = b.get("verifiers") if isinstance(b.get("verifiers"), list) else []
+        return _ok(_byom.run_byom(text, adapter, verifiers=verifiers, config=config))
+
     # Library / keeping tools (ported from 1.0, additive — over the same shared corpus).
     if method == "GET" and path == "/cards/stats":
         return _ok(_cached_scan("stats", corpus.stats))
@@ -3008,6 +3031,7 @@ ROUTES = [
     {"path": "/thesaurus", "methods": ("GET",), "api": True},   # bounded single-word lookup (data/thesaurus.db), like /pronounce
     {"path": "/faces", "methods": ("GET",), "api": True},       # list the callable life-domain servants
     {"path": "/face", "methods": ("POST",), "rl": True},        # consult one — composes verifiers+shelves+discernment
+    {"path": "/byom", "methods": ("POST",), "rl": True},        # bring your own model — gated external worker (default OFF)
     {"path": "/thread", "methods": ("DELETE", "GET"), "api": True},
     {"path": "/threads", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/threads/search", "methods": ("GET",), "api": True, "rl": True},

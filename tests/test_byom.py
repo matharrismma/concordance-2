@@ -77,6 +77,30 @@ def test_our_engine_error_does_not_reject_the_model():
     assert byom._trust(None) == "unverified"
 
 
+def test_byom_ssrf_guard_blocks_internal_targets():
+    """A user's model lives on a PUBLIC endpoint — never localhost/private/link-local/reserved."""
+    for bad in ["http://127.0.0.1/v1", "http://10.0.0.1/v1", "http://192.168.1.5/v1",
+                "http://169.254.169.254/latest", "http://[::1]/v1", "ftp://example.com/v1", "not a url"]:
+        try:
+            byom._guard_url(bad)
+            assert False, f"SSRF guard should have blocked {bad!r}"
+        except ValueError:
+            pass
+    assert byom._guard_url("https://8.8.8.8/v1") == "https://8.8.8.8/v1"   # a public IP literal is fine
+
+
+def test_openai_adapter_builds_a_callable_and_validates():
+    mc = byom.openai_adapter({"base_url": "https://8.8.8.8/v1", "api_key": "k", "model": "gpt"})
+    assert callable(mc)
+    for bad in [{"base_url": "http://127.0.0.1", "api_key": "k", "model": "m"},   # SSRF
+                {"base_url": "https://8.8.8.8", "api_key": "k", "model": ""}]:    # missing model
+        try:
+            byom.openai_adapter(bad)
+            assert False, f"should reject {bad}"
+        except ValueError:
+            pass
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))
