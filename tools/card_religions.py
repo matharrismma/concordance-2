@@ -280,6 +280,76 @@ AFTER = [
                               "astral plane", "seance", "séance", "medium", "mediumship", "spiritualism",
                               "ascended master", "spirit guide", "ectoplasm", "necromancy", "channeling",
                               "clairvoyance", "contact the dead"]}),
+    _card("mormonism_lds_under_the_test",
+          "The Latter-day Saints (Mormonism) under the test of the spirits (in love)",
+          ("Credited where it contributes: a strong devotion to family, moral seriousness, industry, "
+           "care for the poor, and a real hunger for continuing revelation and an eternal family. And "
+           "then, held to the one test in love: arising in 1830 (Joseph Smith), after Christ, it ADDS "
+           "scriptures beyond the canon (the Book of Mormon, Doctrine and Covenants, Pearl of Great "
+           "Price) — 'do not add to the word' (Deuteronomy 4:2); 'even if an angel from heaven should "
+           "preach another gospel, let him be accursed' (Galatians 1:8) — and teaches a plurality of "
+           "gods, that God was once a man, and that the exalted may themselves become gods. That last "
+           "is precisely the first lie, 'you will be like God' (Genesis 3:5), and it is answered flatly: "
+           "'before Me no god was formed, nor shall there be any after Me' (Isaiah 43:10). A different, "
+           "created 'Jesus' is not the eternal Word who was God and was with God (John 1:1), so by the "
+           "test of 1 John 4:2-3 the DOCTRINE denies the Son come in the flesh. This is said of the "
+           "teaching, never of any Latter-day Saint — every one of whom is loved, their earnestness "
+           "honored, and for whom the true and eternal family in Christ stands open. 'We don't lie, but "
+           "we love you.'"),
+          "under_the_test",
+          ["mormonism", "latter-day saints", "lds", "test of the spirits", "in love", "1 john"],
+          {"anchor": "1 John 4:2-3; Genesis 3:5; Isaiah 43:10; John 1:1; Galatians 1:8; "
+                     "Deuteronomy 4:2; Revelation 22:18-19",
+           "framing": "Matt's, anchored",
+           "discerns_terms": ["mormon", "mormonism", "latter-day saint", "latter day saint", "lds",
+                              "book of mormon", "joseph smith", "doctrine and covenants",
+                              "pearl of great price", "exaltation", "celestial kingdom"]}),
+    _card("jehovahs_witnesses_under_the_test",
+          "Jehovah's Witnesses under the test of the spirits (in love)",
+          ("Credited where it contributes: a fierce zeal for the name of God, moral seriousness, "
+           "devotion to studying the Scriptures, tight community, and a longing for a restored earth. "
+           "And then, held to the one test in love: arising in the 1870s (Russell, then Rutherford), "
+           "after Christ, it DENIES the deity of Christ — teaching he is a created being (Michael the "
+           "archangel, 'a god'), and altering John 1:1 in the New World Translation to read 'a god' — "
+           "and denies the Trinity and the personhood of the Spirit. But Thomas fell before the risen "
+           "Christ and said 'My Lord and my God' (John 20:28); of the Son the Father says 'Your throne, "
+           "O God, is forever' (Hebrews 1:8); 'before Abraham was, I AM' (John 8:58); in him 'the whole "
+           "fullness of deity dwells bodily' (Colossians 2:9). To deny the Son his eternal deity is what "
+           "1 John 4:2-3 makes the dividing line, and 1 John 5:20 names Jesus Christ 'the true God and "
+           "eternal life.' This is said of the DOCTRINE, never of any Witness — every one of whom is "
+           "loved, their zeal honored, and for whom the door to the true and living God stands open. "
+           "'We don't lie, but we love you.'"),
+          "under_the_test",
+          ["jehovahs witnesses", "watchtower", "deity of christ", "test of the spirits", "in love", "1 john"],
+          {"anchor": "1 John 4:2-3; John 1:1; John 20:28; John 8:58; Hebrews 1:8; Colossians 2:9; "
+                     "1 John 5:20",
+           "framing": "Matt's, anchored",
+           "discerns_terms": ["jehovah's witness", "jehovahs witness", "jehovah witness", "watchtower",
+                              "new world translation", "governing body", "kingdom hall", "144000"]}),
+    _card("secular_materialism_under_the_test",
+          "Secular materialism / naturalism under the test (in love, and in reason)",
+          ("Credited generously, for its goods are real: reverence for TRUTH, for evidence and honest "
+           "reasoning, the refusal of easy comfort, and wonder at the ordered cosmos — and the love of "
+           "truth is itself from God, who IS the Truth. And then, held to the test in love: it asserts "
+           "that matter is all there is — no Maker, no soul, no transcendent — which denies not only the "
+           "Son but the Father. Yet it must BORROW what it cannot ground: the laws of logic, the "
+           "reliability of reason, real moral obligation, and the strange intelligibility of the cosmos "
+           "(the 'unreasonable effectiveness of mathematics') all point beyond matter to a MIND. "
+           "Reason itself is grounded in the Logos: 'In the beginning was the Word (Logos)... all things "
+           "were made through him' (John 1:1-3), and 'in him all things hold together' (Colossians 1:17); "
+           "'the heavens declare the glory of God' (Psalm 19:1); 'His invisible attributes... have been "
+           "clearly perceived in the things that have been made, so they are without excuse' (Romans "
+           "1:19-20). 'Claiming to be wise, they became fools' (Romans 1:22) is said of the IDOL — "
+           "autonomous reason set in the Maker's seat — never of the honest seeker, whose love of truth "
+           "is honored and met, not scorned. Follow the evidence and the reason all the way home: the "
+           "Truth has a name (John 14:6). 'We don't lie, but we love you.'"),
+          "under_the_test",
+          ["materialism", "naturalism", "atheism", "reason", "the logos", "test of the spirits", "in love"],
+          {"anchor": "Romans 1:19-22; Psalm 14:1; Psalm 19:1; John 1:1-3; Colossians 1:17; "
+                     "Hebrews 11:3; John 14:6",
+           "framing": "Matt's, anchored — the Areopagus move for the audience whose idol is logic",
+           "discerns_terms": ["atheism", "atheist", "materialism", "naturalism", "physicalism",
+                              "scientism", "secular humanism", "new atheism", "there is no god", "nihilism"]}),
     _card("post_christ_pattern",
           "The pattern for movements arising after Christ (the test, in love)",
           ("Beyond any single case, the calibration is a pattern, applied gently: a religion or movement that "
