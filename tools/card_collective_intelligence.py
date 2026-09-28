@@ -130,21 +130,24 @@ SYSTEMS = [
       "emergence", "one body no swarm", "ordered to christ"],
      {"surface": "witness"}),
     ("gradient_manifold", "The gradient manifold — one form across the planes",
-     "The same form appears in energy. Every engine harvests a GRADIENT (thermal, pressure, electrical, "
-     "chemical); the enduring value is not the fuel or the engine but the RESERVOIR that stores the "
-     "gradient and the MANIFOLD that routes it to work — Source, Gradient, Reservoir, Manifold, "
-     "Converter, Work (the Universal Gradient Manifold). Biology already runs this: ATP is the universal "
-     "energy currency, and the key insight is 'not the molecule but the COMMON INTERFACE' — one unit that "
-     "decouples every source from every use.",
-     "THE MANIFOLD — our deepest structure, made explicit. The CARD is our ATP: every source (a "
-     "public-domain text, a contributor's writing, a measurement, a model's output through the airlock) "
-     "is transduced into ONE unit, stored in ONE reservoir (the keeping), routed by ONE manifold (the "
-     "kernel / gate / fascia), converted to work by the faces and verifiers. The models are FUEL; the "
-     "manifold is the enduring platform while the fuels evolve — 'a model of reality, not an LLM.' Recall, "
-     "shards and stigmergy are the honeycomb: the charge/discharge RATE, not the store. The superorganism "
-     "(ATP + metabolism) and the energy OS are one form on two planes — the concordance of reality.",
+     "This form is already kept here as doctrine (see 'the reservoir and the manifold', from Matt Harris's "
+     "Universal Gradient Manifold): the enduring value in an energy system is the RESERVOIR that stores a "
+     "gradient and the MANIFOLD that routes it, with ATP as biology's COMMON INTERFACE — one unit that "
+     "decouples every source from every use. Collective intelligence is the BIOLOGICAL instance of that "
+     "same manifold: a superorganism runs on a shared currency (ATP within a body; pheromone and "
+     "trophallaxis across a colony) routed through a common medium.",
+     "THE MANIFOLD, ON THREE PLANES. Energy: the UGM — fuels are interchangeable, the manifold endures. "
+     "Biology: the superorganism — ATP / pheromone is the common interface, the colony the routed body. "
+     "Software: OUR engine — the CARD is the common interface (every source, even a model's output through "
+     "the airlock, transduced to one unit), the KEEPING is the reservoir, the KERNEL / gate is the "
+     "manifold, the faces and verifiers are the converters, and recall / shards / stigmergy are the "
+     "honeycomb (the charge-discharge RATE, not the store). The models are FUEL; the manifold is the "
+     "enduring platform — 'a model of reality, not an LLM.' One form; three planes; the concordance of reality.",
      ["gradient manifold", "ugm", "atp", "common interface", "reservoir", "manifold",
-      "energy operating system", "source-agnostic", "card as currency", "concordance of reality"]),
+      "energy operating system", "source-agnostic", "card as currency", "concordance of reality"],
+     {"extra_connections": [{"to_card_id": "card_doctrine_reservoir_manifold", "relationship": "relates_to",
+                             "evidence": "the collective-intelligence reading of the Universal Gradient "
+                                         "Manifold doctrine — the same routing form on the biological plane"}]}),
 ]
 
 
@@ -160,7 +163,8 @@ def _card(cid, title, mechanism, mapping, bands, opts=None):
         "bands": list(bands) + ["collective intelligence", "systems of the world", "swarm intelligence"],
         "subject": title,
         "connections": [{"to_card_id": SPINE, "relationship": "member_of",
-                         "evidence": "a measured collective-intelligence system, mapped to the engine"}],
+                         "evidence": "a measured collective-intelligence system, mapped to the engine"}]
+        + list(opts.get("extra_connections", [])),
         "author": "engine", "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
         "lifecycle_stage": "public", "volatility": "permanent",
         "surface": opts.get("surface", "secular"), "generated": False,
