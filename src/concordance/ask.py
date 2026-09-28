@@ -566,22 +566,28 @@ def _pair_discernment(hits: List[Dict[str, Any]], text: str = "", cp=None) -> Li
     if not watch:
         return hits
     q = " " + str(text or "").lower() + " "
+    chart_ids = {c.get("id") for c, _ in watch}         # the discernment charts themselves — NEVER repelled
     for chart, terms in watch:
         cid = chart.get("id")
         tripped = any(t in q for t in terms)          # the QUESTION names the charted practice
         if not tripped:
+            source_to_repel = None
             for h in hits:                              # or a RESULT is a source on it
-                if h.get("id") == cid:
+                hid = h.get("id")
+                if hid == cid:
                     continue
                 hay = (str(h.get("title") or "") + " " + " ".join(str(b) for b in (h.get("bands") or []))
                        + " " + str(h.get("subject") or "")).lower()
                 if any(t in hay for t in terms):
                     tripped = True
-                    # REPELLENT (no-entry pheromone): this result IS primary material under the test —
-                    # mark it so it stops crowding queries it does not answer. No-op when gated off.
-                    from . import repellent as _rep
-                    _rep.repel([h.get("id")])
-                    break
+                    # REPELLENT (no-entry pheromone): mark the PRIMARY SOURCE under the test so it stops
+                    # crowding queries it does not answer — but NEVER a discernment chart (they share the
+                    # occult vocabulary and would repel each other; the charts are the good content).
+                    if source_to_repel is None and hid not in chart_ids:
+                        source_to_repel = hid
+            if source_to_repel:
+                from . import repellent as _rep
+                _rep.repel([source_to_repel])          # no-op when gated off
         if tripped:
             lead = next((x for x in hits if x.get("id") == cid), None) or corpus._brief(chart)
             hits = [lead] + [x for x in hits if x.get("id") != cid]
