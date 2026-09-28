@@ -1790,6 +1790,15 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     # A face is a deterministic COMPOSER: it ARRANGES existing verifiers + shelves + discernment for a
     # life-domain and never generates. Additive — the ordinary front door (/ask) is untouched; a caller
     # consults a face explicitly. See docs/EXPERT_FACES.md.
+    if method == "GET" and path == "/recombine":
+        # The expressive half of the Cubo model: SPEAK from the live keeping by recombining found,
+        # verbatim clauses over the frame — nothing generated; references resolved found-for-found.
+        q = (query.get("q") or "").strip()
+        if not q:
+            return _err(400, "q required")
+        subject = (query.get("lang") or "en").strip() or "en"
+        from .. import recombine as _recombine
+        return _ok(_recombine.answer(q, subject=subject))
     if method == "GET" and path == "/faces":
         from .. import faces as _faces
         reg = _faces.faces()
@@ -3059,6 +3068,7 @@ ROUTES = [
     {"path": "/pronounce", "methods": ("GET",), "api": True},
     {"path": "/thesaurus", "methods": ("GET",), "api": True},   # bounded single-word lookup (data/thesaurus.db), like /pronounce
     {"path": "/faces", "methods": ("GET",), "api": True},       # list the callable life-domain servants
+    {"path": "/recombine", "methods": ("GET",), "api": True, "rl": "read"},  # speak from the keeping by recombining found clauses (scans the corpus like /search)
     {"path": "/face", "methods": ("POST",), "rl": True},        # consult one — composes verifiers+shelves+discernment
     {"path": "/byom", "methods": ("POST",), "rl": True},        # bring your own model — gated external worker (default OFF)
     {"path": "/thread", "methods": ("DELETE", "GET"), "api": True},

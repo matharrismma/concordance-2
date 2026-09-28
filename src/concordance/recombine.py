@@ -159,3 +159,106 @@ def weave(query: str, instances: List[Dict[str, Any]], *, limit: int = 4) -> Dic
             "means": (f"woven from {len(chosen)} found clause(s) across {n_src} source(s), ordered by the "
                       "frame; the joints assert nothing and clauses from different sources are held apart — "
                       "no claim is made that a source did not make; nothing is generated or altered")}
+
+
+# ── reference resolution — found-for-found only ─────────────────────────────────────────────────────
+
+_PRONOUN = {"it", "they", "this", "these", "that", "those"}
+# words that END a noun phrase introduced by an anchor (prepositions, conjunctions, copulas)
+_STOP_NP = {"in", "on", "at", "of", "to", "for", "with", "by", "from", "and", "but", "or", "nor",
+            "that", "which", "who", "is", "are", "was", "were", "be", "been", "will", "would"}
+# anchors that INTRODUCE a subject noun phrase, so its referent is unambiguous (frame-driven antecedent).
+# "it is" is deliberately excluded — it is anaphoric itself, not a clean noun-introducer.
+_INTRODUCERS = ("there is ", "there are ", "here is ", "this is ")
+
+
+def _lead_pronoun(clause: str) -> Optional[str]:
+    m = re.match(r"\s*([A-Za-z]+)", str(clause or ""))
+    return m.group(1) if (m and m.group(1).lower() in _PRONOUN) else None
+
+
+def _antecedent(clause: str) -> Optional[str]:
+    """The noun phrase a clause INTRODUCES via a frame anchor (e.g. 'there is [clean water] in …'). Only a
+    frame-introduced subject counts, so the referent is unambiguous; everything else yields None (we would
+    rather leave a pronoun than guess its antecedent)."""
+    low = str(clause or "").lower()
+    for a in _INTRODUCERS:
+        i = low.find(a)
+        if i == -1:
+            continue
+        rest = str(clause)[i + len(a):]
+        np: List[str] = []
+        for w in rest.split():
+            wl = w.strip(_TRIM).lower()
+            if not wl or wl in _STOP_NP:
+                break
+            np.append(w.strip(_TRIM))
+            if len(np) >= 3:
+                break
+        phrase = " ".join(np).strip()
+        if phrase and _WORD.findall(phrase):
+            return phrase
+    return None
+
+
+def resolve_refs(pieces: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Resolve a leading pronoun to a FOUND antecedent — the reference-resolution rung, held to one rule:
+    substitute a found token for a found token. Only when the antecedent was INTRODUCED by a frame anchor
+    in an immediately preceding clause of the SAME source (so it is unambiguous and already asserted). The
+    verbatim `text` is never overwritten; a `resolved` variant + a `resolution` mark are offered beside it,
+    and `resolved_passage` renders the reading. No found antecedent → the pronoun stands."""
+    out: List[Dict[str, Any]] = []
+    last_ante: Optional[str] = None
+    last_src: Any = None
+    for p in pieces:
+        p = dict(p)
+        if p.get("kind") == "found":
+            clause = str(p.get("text") or "")
+            pron = _lead_pronoun(clause)
+            if pron and last_ante and last_src == p.get("source"):
+                p["resolved"] = re.sub(r"^\s*" + re.escape(pron), "The " + last_ante, clause, count=1)
+                p["resolution"] = {"pronoun": pron, "antecedent": last_ante,
+                                   "kind": "found-for-found (frame-introduced antecedent, same source)"}
+            ante = _antecedent(clause)
+            if ante:
+                last_ante, last_src = ante, p.get("source")
+        out.append(p)
+    parts = [(p.get("resolved") or p.get("text") or "") if p.get("kind") == "found" else p.get("text", "")
+             for p in out]
+    return {"pieces": out, "resolved_passage": "".join(parts).strip()}
+
+
+# ── live wiring — speak from the keeping ────────────────────────────────────────────────────────────
+
+def answer(query: str, *, subject: str = "en", limit: int = 4, top_cards: int = 6,
+           search_fn: Optional[Callable[[str], List[Dict[str, Any]]]] = None,
+           decodable_fn: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None) -> Dict[str, Any]:
+    """Speak from the LIVE keeping: search for relevant cards, read the verbatim anchor-carrying sentences
+    out of each (`readwith.decodable`), weave them by the frame, and resolve references found-for-found.
+    Dependencies are injected for tests; production defaults are the live corpus + reader."""
+    if search_fn is None:
+        from . import corpus
+        search_fn = lambda q: corpus.search(q, limit=top_cards)          # noqa: E731
+    if decodable_fn is None:
+        from . import readwith
+        decodable_fn = lambda card: readwith.decodable(card, subject)    # noqa: E731
+    cards = search_fn(query) or []
+    instances: List[Dict[str, Any]] = []
+    for c in cards[:max(1, int(top_cards))]:
+        try:
+            d = decodable_fn(c) or {}
+        except Exception:  # noqa: BLE001 — a card the reader can't open is skipped, not fatal
+            continue
+        src = str(c.get("title") or c.get("id") or "a source")
+        for f in (d.get("found") or []):
+            if f.get("text"):
+                instances.append({"text": f.get("text"), "anchor": f.get("anchor"), "source": src})
+    w = weave(query, instances, limit=limit)
+    if not w.get("found"):
+        return {**w, "instances": len(instances)}
+    rr = resolve_refs(w["pieces"])
+    return {"passage": w["passage"], "resolved_passage": rr.get("resolved_passage"),
+            "pieces": rr.get("pieces", w["pieces"]), "found": True, "instances": len(instances),
+            "sources": sorted({p.get("source") for p in w["pieces"]
+                               if p.get("kind") == "found" and p.get("source")}),
+            "means": w["means"] + " — spoken from the live keeping; references resolved found-for-found."}

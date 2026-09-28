@@ -31,6 +31,7 @@ GOLDEN_API_GET = {
     # bounded word lookup like /pronounce; the same WordNet relation sharpens /search recall.
     "/thesaurus",
     "/faces",
+    "/recombine",   # speak from the keeping by recombining found clauses (read bucket, scans like /search)
     # coach lesson text, the scripture-for lookup, and the tortoise reader — GET surfaces added with the
     # lesson/reader work in prior passes; registered here after this manifest audit (the code had them,
     # the golden set did not — the drift this test exists to catch, now reconciled).
@@ -159,6 +160,7 @@ GOLDEN_READ_LIMITED = {   # every route that scans/sorts the whole corpus per re
     "/search", "/witness", "/cards/stats", "/cards", "/daily", "/card/connections",
     "/locate", "/library/health", "/growth",
     "/coach/text", "/tortoise",  # coach lesson text + the tortoise reader — each streams/scans a PD source per request
+    "/recombine",  # recombines found clauses from a corpus search per request — read bucket, like /search
     "/systems",  # cheap (disk + import resolution, no corpus) but placed in the generous bucket anyway
     "/tv/automaton",  # scans the witness cloud to let a witness testify in his own PD words — read-bucket limited like /witness
 }

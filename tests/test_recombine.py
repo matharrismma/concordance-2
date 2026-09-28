@@ -93,5 +93,48 @@ def test_weave_honest_empty():
     assert r["found"] is False and r["passage"] == ""
 
 
+def test_resolve_refs_found_for_found_same_source():
+    pieces = [{"kind": "found", "text": "There is clean water in the spring", "source": "A", "anchor": "there is"},
+              {"kind": "frame", "text": ", "},
+              {"kind": "found", "text": "It is cold and pure", "source": "A", "anchor": "it is"}]
+    rr = recombine.resolve_refs(pieces)
+    second = [p for p in rr["pieces"] if p["kind"] == "found"][1]
+    assert second["resolution"]["antecedent"] == "clean water" and second["resolution"]["pronoun"] == "It"
+    assert second["resolved"] == "The clean water is cold and pure"       # found-for-found substitution
+    assert second["text"] == "It is cold and pure"                        # the verbatim is never overwritten
+    assert "The clean water is cold and pure" in rr["resolved_passage"]
+
+
+def test_resolve_refs_will_not_cross_sources():
+    pieces = [{"kind": "found", "text": "There is a well here", "source": "A", "anchor": "there is"},
+              {"kind": "frame", "text": "; "},
+              {"kind": "found", "text": "It is deep", "source": "B", "anchor": "it is"}]
+    rr = recombine.resolve_refs(pieces)
+    second = [p for p in rr["pieces"] if p["kind"] == "found"][1]
+    assert "resolved" not in second                                        # a pronoun is never resolved across sources
+
+
+def test_resolve_refs_leaves_the_pronoun_when_no_found_antecedent():
+    pieces = [{"kind": "found", "text": "The path goes uphill", "source": "A", "anchor": ""},
+              {"kind": "frame", "text": ", "},
+              {"kind": "found", "text": "It is steep", "source": "A", "anchor": "it is"}]
+    rr = recombine.resolve_refs(pieces)
+    second = [p for p in rr["pieces"] if p["kind"] == "found"][1]
+    assert "resolved" not in second                                        # no frame-introduced antecedent → stands
+
+
+def test_answer_speaks_from_the_keeping():
+    cards = [{"title": "Foxfire", "id": "c1"}, {"title": "Manual", "id": "c2"}]
+    def decodable_fn(card):
+        if card["id"] == "c1":
+            return {"found": [{"text": "There is clean water in the spring", "anchor": "there is"},
+                              {"text": "It is safe to drink", "anchor": "it is"}]}
+        return {"found": [{"text": "This is how you purify it", "anchor": "this is"}]}
+    r = recombine.answer("purify water spring drink", search_fn=lambda q: cards, decodable_fn=decodable_fn)
+    assert r["found"] is True and r["instances"] == 3
+    assert "Foxfire" in r["sources"]
+    assert isinstance(r["resolved_passage"], str) and r["resolved_passage"]  # spoken from the (injected) keeping
+
+
 if __name__ == "__main__":
     sys.exit(int(pytest.main([__file__, "-q"])))
