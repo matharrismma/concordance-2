@@ -290,7 +290,9 @@ def answer(query: str, *, subject: str = "en", limit: int = 4, top_cards: int = 
         # `lambda c: readwith.decodable(c, subject)` to also read whole works.
         def decodable_fn(card: Dict[str, Any]) -> Dict[str, Any]:       # noqa: E306
             body = str(card.get("body") or "")
-            return {"found": readwith.sentences_in(body, subject) if body else []}
+            # SPEAKING draws from ALL clean sentences (anchor tags the frame role but is not required),
+            # so the engine reaches far more of the keeping than the teaching (anchor-only) side does.
+            return {"found": readwith.sentences_in(body, subject, require_anchor=False) if body else []}
     cards = search_fn(query) or []
     instances: List[Dict[str, Any]] = []
     for c in cards[:max(1, int(top_cards))]:

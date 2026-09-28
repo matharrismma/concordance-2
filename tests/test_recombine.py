@@ -172,6 +172,15 @@ def test_inflection_leaves_agreement_alone_when_singular():
     assert second["resolved"] == "The water is cold" and "inflection" not in second   # already agrees
 
 
+def test_reach_speaking_mode_includes_non_anchor_sentences():
+    from concordance import readwith
+    text = "The mountain rose above the plain. There is a road below."
+    teaching = readwith.sentences_in(text, require_anchor=True)         # only the anchor-carrying one
+    speaking = readwith.sentences_in(text, require_anchor=False)        # every clean sentence
+    assert len(teaching) == 1 and len(speaking) == 2
+    assert any(s["anchor"] is None for s in speaking)                   # a non-anchor sentence, kept for reach
+
+
 def test_answer_reads_from_resident_body_no_ark():
     # rung 2 (reach): with no decodable_fn injected, answer reads anchor sentences from the card BODY
     card = {"title": "A Field Manual", "id": "c1",

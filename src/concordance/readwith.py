@@ -84,10 +84,14 @@ def _fold(s: str) -> str:
 
 
 def sentences_in(text: str, subject: str = "en", *, limit: int = 12, min_words: int = 3,
-                 max_words: int = 16, scan_chars: int = 500_000) -> List[Dict[str, Any]]:
-    """The cube's scanner over ANY text: verbatim sentences that carry one of the five anchors — a card's
-    resident BODY (no ark needed) or an opened work. Each `{text, anchor, words}`, shortest first (most
-    decodable). This is what lets a serving node speak by the cube without opening the source."""
+                 max_words: int = 16, scan_chars: int = 500_000,
+                 require_anchor: bool = True) -> List[Dict[str, Any]]:
+    """The cube's scanner over ANY text: verbatim sentences, each `{text, anchor, words}`, shortest first.
+
+    `require_anchor=True` (the TEACHING side) keeps only sentences that carry one of the five embodied
+    anchors — the ones a learner can decode by the cube. `require_anchor=False` (the SPEAKING side —
+    recombination) keeps every clean sentence, tagging the anchor when present (so the frame can still
+    ORDER them) but not requiring one — which lets the engine speak from far more of the keeping."""
     subject = (subject or "en").strip().lower()
     markers = ANCHORS.get(subject) or ANCHORS["en"]
     roman = subject in _ROMAN
@@ -114,7 +118,7 @@ def sentences_in(text: str, subject: str = "en", *, limit: int = 12, min_words: 
             if (pat.search(fs) if roman else (pat in fs)):
                 anchor = m
                 break
-        if not anchor:
+        if require_anchor and not anchor:
             continue
         seen.add(key)
         found.append({"text": s, "anchor": anchor, "words": n})
