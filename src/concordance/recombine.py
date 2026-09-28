@@ -270,6 +270,7 @@ def answer(query: str, *, subject: str = "en", limit: int = 4, top_cards: int = 
     rr = resolve_refs(w["pieces"])
     return {"passage": w["passage"], "resolved_passage": rr.get("resolved_passage"),
             "pieces": rr.get("pieces", w["pieces"]), "found": True, "instances": len(instances),
+            "covered": w.get("covered"),
             "sources": sorted({p.get("source") for p in w["pieces"]
                                if p.get("kind") == "found" and p.get("source")}),
             "means": w["means"] + " — spoken from the live keeping; references resolved found-for-found."}
