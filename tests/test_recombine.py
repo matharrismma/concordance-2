@@ -151,5 +151,14 @@ def test_answer_speaks_from_the_keeping():
     assert isinstance(r["resolved_passage"], str) and r["resolved_passage"]  # spoken from the (injected) keeping
 
 
+def test_answer_reads_from_resident_body_no_ark():
+    # rung 2 (reach): with no decodable_fn injected, answer reads anchor sentences from the card BODY
+    card = {"title": "A Field Manual", "id": "c1",
+            "body": "There is clean water in the spring. It flows all year. This is how you find it."}
+    r = recombine.answer("water spring", search_fn=lambda q: [card])
+    assert r["found"] is True and r["instances"] >= 1
+    assert "A Field Manual" in r["sources"]                             # spoke from the resident body, no ark
+
+
 if __name__ == "__main__":
     sys.exit(int(pytest.main([__file__, "-q"])))

@@ -83,32 +83,19 @@ def _fold(s: str) -> str:
     return "".join(ch for ch in s if not unicodedata.combining(ch)).lower()
 
 
-def decodable(card: Dict[str, Any], subject: str = "en", *, limit: int = 12,
-              min_words: int = 3, max_words: int = 16, scan_chars: int = 500_000) -> Dict[str, Any]:
-    """Find the sentences in `card`'s work that a learner of `subject` can read by the cube.
-
-    Returns the head (title, subject, detail_url) plus `found`: verbatim sentences, shortest first
-    (short = most decodable), each with the anchor it carries. Honest empty when the book holds few.
-    """
+def sentences_in(text: str, subject: str = "en", *, limit: int = 12, min_words: int = 3,
+                 max_words: int = 16, scan_chars: int = 500_000) -> List[Dict[str, Any]]:
+    """The cube's scanner over ANY text: verbatim sentences that carry one of the five anchors — a card's
+    resident BODY (no ark needed) or an opened work. Each `{text, anchor, words}`, shortest first (most
+    decodable). This is what lets a serving node speak by the cube without opening the source."""
     subject = (subject or "en").strip().lower()
     markers = ANCHORS.get(subject) or ANCHORS["en"]
     roman = subject in _ROMAN
-
-    op = tortoise.open_work(card)
-    head = {"card": card.get("id"), "title": op.get("title"), "subject": subject,
-            "detail_url": op.get("detail_url"), "language": op.get("language"),
-            "discipline": op.get("discipline")}
-    if op.get("status") != "read":
-        return {**head, "status": op.get("status", "not_available"), "reason": op.get("reason"),
-                "found": [], "count": 0}
-
-    text = (op.get("text") or "")[:scan_chars]
-    # Match against a diacritic-folded form; keep the display marker for the UI to bold.
+    text = str(text or "")[:scan_chars]
     if roman:
         pats = [(m, re.compile(r"\b" + re.escape(_fold(m)) + r"\b")) for m in markers]
     else:
         pats = [(m, _fold(m)) for m in markers]
-
     found: List[Dict[str, Any]] = []
     seen = set()
     for raw in _SENT.findall(text):
@@ -131,9 +118,28 @@ def decodable(card: Dict[str, Any], subject: str = "en", *, limit: int = 12,
             continue
         seen.add(key)
         found.append({"text": s, "anchor": anchor, "words": n})
+    found.sort(key=lambda x: x["words"])       # shortest first — the most decodable
+    return found[:limit]
 
-    found.sort(key=lambda x: x["words"])   # shortest first — the most decodable
-    found = found[:limit]
+
+def decodable(card: Dict[str, Any], subject: str = "en", *, limit: int = 12,
+              min_words: int = 3, max_words: int = 16, scan_chars: int = 500_000) -> Dict[str, Any]:
+    """Find the sentences in `card`'s work that a learner of `subject` can read by the cube.
+
+    Returns the head (title, subject, detail_url) plus `found`: verbatim sentences, shortest first
+    (short = most decodable), each with the anchor it carries. Honest empty when the book holds few.
+    """
+    subject = (subject or "en").strip().lower()
+    op = tortoise.open_work(card)
+    head = {"card": card.get("id"), "title": op.get("title"), "subject": subject,
+            "detail_url": op.get("detail_url"), "language": op.get("language"),
+            "discipline": op.get("discipline")}
+    if op.get("status") != "read":
+        return {**head, "status": op.get("status", "not_available"), "reason": op.get("reason"),
+                "found": [], "count": 0}
+
+    found = sentences_in(op.get("text") or "", subject, limit=limit, min_words=min_words,
+                         max_words=max_words, scan_chars=scan_chars)
     return {**head, "status": "read", "found": found, "count": len(found),
             "note": ("Real sentences from this work you can read by the cube — found in the book, "
                      "not written for you." if found else
@@ -141,4 +147,4 @@ def decodable(card: Dict[str, Any], subject: str = "en", *, limit: int = 12,
                      "or choose another text.")}
 
 
-__all__ = ["decodable", "subjects_for_language", "ANCHORS", "LANG_TO_SUBJECT"]
+__all__ = ["decodable", "sentences_in", "subjects_for_language", "ANCHORS", "LANG_TO_SUBJECT"]

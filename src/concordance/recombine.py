@@ -247,7 +247,12 @@ def answer(query: str, *, subject: str = "en", limit: int = 4, top_cards: int = 
         search_fn = lambda q: corpus.search(q, limit=top_cards)          # noqa: E731
     if decodable_fn is None:
         from . import readwith
-        decodable_fn = lambda card: readwith.decodable(card, subject)    # noqa: E731
+        # REACH (rung 2): read anchor-carrying sentences from the card's RESIDENT BODY — no ark needed, so
+        # a serving node speaks by the cube over the ~substance cards. An ark-equipped node can inject
+        # `lambda c: readwith.decodable(c, subject)` to also read whole works.
+        def decodable_fn(card: Dict[str, Any]) -> Dict[str, Any]:       # noqa: E306
+            body = str(card.get("body") or "")
+            return {"found": readwith.sentences_in(body, subject) if body else []}
     cards = search_fn(query) or []
     instances: List[Dict[str, Any]] = []
     for c in cards[:max(1, int(top_cards))]:
