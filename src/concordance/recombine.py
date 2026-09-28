@@ -32,6 +32,12 @@ import re
 from typing import Any, Dict, List, Optional
 
 _WORD = re.compile(r"[a-z0-9]+")
+# function words that carry no intent — kept out of the QUERY so aptness matches on content, not "the"
+_STOP = {"the", "and", "for", "are", "was", "were", "this", "that", "with", "from", "have", "has", "had",
+         "not", "but", "all", "any", "one", "who", "whom", "what", "when", "where", "how", "why", "its",
+         "his", "her", "our", "your", "you", "they", "them", "their", "she", "him", "been", "being",
+         "which", "into", "than", "then", "there", "here", "will", "would", "shall", "should", "can",
+         "could", "may", "might", "must", "does", "did", "about", "over", "under", "upon", "unto", "out"}
 
 # The frame's narrative order: set the scene (what exists) → say what it is → what one does. An anchor the
 # instance carries places it; an unknown/other-tongue anchor takes the middle (identity) role.
@@ -56,7 +62,7 @@ def compose(query: str, instances: List[Dict[str, Any]], *, limit: int = 5) -> D
     """Assemble an answer from found, verbatim `instances` (each `{text, source, anchor}`), ordered along
     the frame and by relevance to `query`. Returns the composed passage + every fragment with its source.
     Honest empty when nothing fits — never invents to fill the gap."""
-    qt = _toks(query)
+    qt = _toks(query) - _STOP
     ranked = []
     for ins in instances:
         text = str((ins.get("text") if isinstance(ins, dict) else ins) or "").strip()
@@ -122,7 +128,7 @@ def weave(query: str, instances: List[Dict[str, Any]], *, limit: int = 4) -> Dic
     """Weave an answer from found CLAUSES over the frame. Sharper than `compose` (clause, not sentence),
     with frame joints that assert nothing and a cross-source boundary so no two clauses fuse into a claim
     a source did not make. `pieces` carries per-clause provenance; `passage` is the rendered convenience."""
-    qt = _toks(query)
+    qt = _toks(query) - _STOP
     spans: List[Dict[str, Any]] = []
     for ins in instances:
         text = str((ins.get("text") if isinstance(ins, dict) else ins) or "")
