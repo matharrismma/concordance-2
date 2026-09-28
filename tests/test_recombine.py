@@ -58,5 +58,40 @@ def test_limit_and_dedup():
     assert texts == ["There is water.", "This is good."]           # dedup + frame order, capped
 
 
+def test_weave_splits_into_verbatim_clauses():
+    src = "There is water in the spring; there is fire on the hill."
+    r = recombine.weave("water spring fire hill", [_ins(src, "there is", "Foxfire")])
+    found = [p for p in r["pieces"] if p["kind"] == "found"]
+    assert r["found"] is True and len(found) == 2                      # split into two clauses
+    for p in found:
+        assert p["text"] in src                                        # each clause is verbatim from the source
+    joints = [p for p in r["pieces"] if p["kind"] == "frame"]
+    assert joints and all(j["text"] == ", " for j in joints)           # same source → smooth joint
+
+
+def test_weave_holds_different_sources_apart():
+    # the guard: a poison clause and a "safe" clause from DIFFERENT sources must not fuse into one claim
+    inst = [_ins("There is poison in the water.", "there is", "A"),
+            _ins("This is safe to drink.", "this is", "B")]
+    r = recombine.weave("water safe drink poison", inst)
+    found = [p for p in r["pieces"] if p["kind"] == "found"]
+    frame = [p for p in r["pieces"] if p["kind"] == "frame"]
+    assert {p["source"] for p in found} == {"A", "B"}                  # both, each attributed
+    assert frame and all(j["text"] == "; " for j in frame)            # BOUNDARY across sources, never ", "
+
+
+def test_weave_frame_joints_are_non_assertive():
+    inst = [_ins("There is a well here.", "there is", "A"), _ins("This is the path.", "this is", "B")]
+    r = recombine.weave("well path", inst)
+    for p in r["pieces"]:
+        if p["kind"] == "frame":
+            assert p["text"].strip() in {",", ";"}                     # only structure — asserts nothing
+
+
+def test_weave_honest_empty():
+    r = recombine.weave("anything", [])
+    assert r["found"] is False and r["passage"] == ""
+
+
 if __name__ == "__main__":
     sys.exit(int(pytest.main([__file__, "-q"])))
