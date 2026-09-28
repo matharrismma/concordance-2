@@ -46,6 +46,10 @@ def main() -> int:
         return 0
     res = training.run(acquire_fn=acquire, steps=steps)
     print(json.dumps(res, indent=2, ensure_ascii=False)[:6000])
+    # a machine-readable line for the cadence: how many NEW cards were actually kept (a citation-only
+    # close keeps 0 — real fruit to serve is kept > 0).
+    kept_total = sum(int(r.get("kept") or 0) for r in res.get("results", []) if isinstance(r, dict))
+    print(f"KEPT_TOTAL: {kept_total}")
     return 0
 
 

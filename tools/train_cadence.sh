@@ -17,8 +17,8 @@ echo "== training tick: $STEPS step(s) =="
 OUT="$(PYTHONPATH=src timeout 300 python3 tools/train_run.py "$STEPS" 2>&1 || true)"
 echo "$OUT"
 
-if echo "$OUT" | grep -q '"status": "learned"'; then
-  echo "-- learned new cards -> SERVING (staggered restart), so no fruit is left hanging --"
+if echo "$OUT" | grep -qE 'KEPT_TOTAL: [1-9]'; then
+  echo "-- kept new content this tick -> SERVING (staggered restart), so no fruit is left hanging --"
   sudo systemctl restart nh-org; sleep 8
   sudo systemctl restart nh-com-2; sleep 8
   for i in $(seq 1 24); do
