@@ -208,7 +208,10 @@ AFTER = [
            "'We don't lie, but we love you': the cross the Qur'an calls an appearance is the very place the "
            "love of God was proven (Romans 5:8)."),
           "under_the_test", ["islam", "test of the spirits", "denial of the crucifixion", "in love", "1 john"],
-          {"anchor": "1 John 4:2-3; 1 John 2:22; John 3:16; Romans 5:8", "framing": "Matt's, anchored"}),
+          {"anchor": "1 John 4:2-3; 1 John 2:22; John 3:16; Romans 5:8", "framing": "Matt's, anchored",
+           # distinctive to Islam-as-subject (never "Allah" — Arabic-speaking Christians use it for God)
+           "discerns_terms": ["islam", "islamic", "muslim", "qur'an", "quran", "koran", "muhammad",
+                              "mohammed", "hadith", "sharia", "sunni islam", "shia islam", "caliphate"]}),
     _card("the_gateway_process_under_the_test",
           "The Gateway Process & New Age consciousness — under the test of the spirits (in love)",
           ("Credited where it names something true: the hunger for transcendence and the sense that "
@@ -447,6 +450,18 @@ def main() -> int:
         "lifecycle_stage": "public", "volatility": "permanent", "surface": "secular", "generated": False,
     }
     cards = [spine] + PRINCIPLES + FORESHADOWS + AFTER
+    # ALIGNMENT TIERS (gate the keeping by agreement — Matt 2026-09-28). A card that carries
+    # discerns_terms names a subject we do not hold in agreement; its PRIMARY SOURCES are tiered so they
+    # do not sit as the aligned material. The OCCULT charts are 'sectioned' (their sources surface only on
+    # an explicit call); the other tested worldviews are 'reference' (referenceable, down-weighted when not
+    # sought). The charts themselves are always aligned — they are the discernment, never gated. Stamped
+    # here by id so it is one rule; foreshadow philosophy/religions inherit 'reference' once they gain terms.
+    _SECTIONED = {"card_foreshadow_the_gateway_process_under_the_test",
+                  "card_foreshadow_theosophy_spiritualism_under_the_test"}
+    for c in cards:
+        ex = c.get("extra")
+        if isinstance(ex, dict) and ex.get("discerns_terms"):
+            ex["alignment"] = "sectioned" if c["id"] in _SECTIONED else "reference"
     out = Path("data") / "religions_cards.jsonl"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(json.dumps(c, ensure_ascii=False) for c in cards) + "\n", encoding="utf-8")

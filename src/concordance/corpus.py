@@ -898,6 +898,8 @@ class Corpus:
         q_exact = {qn} | {r.lower() for r in _growth.refs_in_text(query or "")}
         from . import stigmergy as _stig     # the pheromone layer (gated OFF by default → boost is 1.0)
         from . import repellent as _rep       # the no-entry pheromone (gated OFF → damp is 1.0)
+        from . import alignment as _align     # gate the keeping by agreement (gated OFF → keep, damp = True, 1.0)
+        align_ctx = _align.context(query)     # the subjects the query explicitly names (empty when off)
         scored = []
 
         def _finalize(c: dict, s: float) -> float:
@@ -941,7 +943,9 @@ class Corpus:
                 continue
             s = self._score(c, query_tokens, idf, subject=seat)
             if s > 0:
-                scored.append((_finalize(c, s), c))
+                keep, damp = _align.verdict(c, align_ctx)   # gate by agreement (no-op when off)
+                if keep:
+                    scored.append((_finalize(c, s) * damp, c))
 
         # FROZEN FREIGHT RIDES THE SHARD, SCORED ON ONE SCALE. Frozen shelves are no longer in the
         # resident index, so their hits come from the shard FTS (which indexes the full text) and are
@@ -965,7 +969,10 @@ class Corpus:
                 s = self._score(hit, query_tokens, idf, subject=seat)
                 if s <= 0:
                     continue
-                scored.append((_finalize(hit, s), hit))
+                keep, damp = _align.verdict(hit, align_ctx)   # gate by agreement (no-op when off)
+                if not keep:
+                    continue
+                scored.append((_finalize(hit, s) * damp, hit))
                 have.add(hit.get("id"))
         # a TOTAL order: equal scores tie-break on id, so the ranking is a function of the
         # cards and the query alone — never of construction order (invariant I)
