@@ -48,13 +48,19 @@ def _card(sid, title, body, box, bands, extra, subject=None):
     }
 
 
-def _fore(sid, name, era, seed, shortfall, fulfillment, bands):
+def _fore(sid, name, era, seed, shortfall, fulfillment, bands, terms=None):
     body = (f"{name} ({era}). The seed it kept: {seed}. Where the shadow fell short: {shortfall}. The "
             f"fulfillment (named, not hidden — we do not fear the light): {fulfillment}. (Credited in "
             f"love as a foreshadow — praeparatio evangelica, Acts 17:23; the shadow whose substance is "
             f"Christ, Colossians 2:17.)")
-    return _card(sid, name, body, "foreshadow", ["pre-christian"] + list(bands),
-                 {"era": era, "seed": seed, "shortfall": shortfall, "fulfillment": fulfillment}, subject=name)
+    extra = {"era": era, "seed": seed, "shortfall": shortfall, "fulfillment": fulfillment}
+    # `terms` are DISTINCTIVE worldview markers (never a word shared with the faith — no "logos",
+    # "resurrection", "conscience", "the way") so a primary source of THIS tradition is tiered to
+    # `reference` (down-weighted unless sought) while foundational classics that carry no such marker
+    # stay aligned. The chart itself is never gated. Stamped `reference` by main().
+    if terms:
+        extra["discerns_terms"] = list(terms)
+    return _card(sid, name, body, "foreshadow", ["pre-christian"] + list(bands), extra, subject=name)
 
 
 PRINCIPLES = [
@@ -109,7 +115,8 @@ FORESHADOWS = [
           "but could not be reconciled to it",
           "'In the beginning was the Logos, and the Logos was with God, and the Logos was God... and the "
           "Logos became flesh' (John 1:1,14) — the principle the philosophers glimpsed is a Person who came",
-          ["plato", "logos", "forms", "unknown god"]),
+          ["plato", "logos", "forms", "unknown god"],
+          terms=["platonism", "neoplatonism", "neoplatonic", "theory of forms", "the unmoved mover", "plotinus"]),
     _fore("stoicism", "Stoicism", "c. 3rd c. BC onward",
           "conscience and natural law, a providence governing all, the divine logos indwelling the world, "
           "and the brotherhood of all humanity — Paul quotes their poets: 'in him we live and move and have "
@@ -118,7 +125,8 @@ FORESHADOWS = [
           "detachment rather than in grace and love",
           "the law written on the heart (Romans 2:15) is fulfilled by the Spirit given, not the will "
           "steeled; the offspring the Stoics named can become sons by adoption (Galatians 4:5)",
-          ["stoic", "natural law", "conscience", "providence"]),
+          ["stoic", "natural law", "conscience", "providence"],
+          terms=["stoicism", "stoic philosophy", "the stoics"]),
     _fore("zoroastrianism", "Zoroastrianism", "c. 1200–600 BC",
           "one wise Lord (Ahura Mazda), a real moral struggle of good against evil, a coming Savior "
           "(Saoshyant), the resurrection of the body and a final judgment — and the Magi who read the "
@@ -127,7 +135,8 @@ FORESHADOWS = [
           "God over a defeated evil",
           "the awaited Savior came, the resurrection it hoped for was accomplished first-fruits in Christ "
           "(1 Corinthians 15:20-23), and its own wise men were led to the manger",
-          ["zoroaster", "magi", "resurrection", "saoshyant", "judgment"]),
+          ["zoroaster", "magi", "resurrection", "saoshyant", "judgment"],
+          terms=["zoroastrianism", "zoroastrian", "zoroaster", "zarathustra", "ahura mazda", "avesta"]),
     _fore("egyptian", "Ancient Egyptian religion (Ma'at)", "c. 3000–30 BC",
           "Ma'at — truth, justice and cosmic order as the will of heaven — and a vivid expectation of "
           "judgment after death, the heart weighed against the feather of truth",
@@ -135,7 +144,8 @@ FORESHADOWS = [
           "there is a judgment, and a heart no spell can make light — but 'there is now no condemnation for "
           "those who are in Christ Jesus' (Romans 8:1), whose righteousness is credited, not weighed and "
           "found wanting",
-          ["egypt", "maat", "judgment", "order"]),
+          ["egypt", "maat", "judgment", "order"],
+          terms=["egyptian religion", "book of the dead", "ma'at", "maat", "ancient egyptian mythology"]),
     _fore("mesopotamian", "Mesopotamian religion (Sumer, Babylon)", "c. 3000–500 BC",
           "the earliest written law codes binding a people to justice, a keen sense of cosmic order, and a "
           "preserved memory of the great Flood carried in its epics",
@@ -144,7 +154,8 @@ FORESHADOWS = [
           "the Law finds its ground not in a king's stele but in the God who gives it (Exodus 20), and the "
           "Flood it half-remembered is told true in Genesis 6-9 — with a covenant and a bow of mercy in the "
           "cloud",
-          ["sumer", "babylon", "law code", "flood", "gilgamesh"]),
+          ["sumer", "babylon", "law code", "flood", "gilgamesh"],
+          terms=["enuma elish", "mesopotamian religion", "babylonian religion", "marduk", "sumerian mythology"]),
     _fore("vedic_hindu", "Vedic religion and early Hinduism", "c. 1500 BC onward",
           "rita, the cosmic moral order; sacrifice placed at the very center of worship; and a deep, "
           "unquenched hunger for union with the divine and the unseen",
@@ -153,7 +164,8 @@ FORESHADOWS = [
           "the sacrifice the altars reached toward is offered once for all in Christ (Hebrews 10:10), and the "
           "hunger for the divine is met not by absorption but by adoption — 'that they may be one, as we are "
           "one' (John 17:22)",
-          ["hinduism", "vedic", "rita", "sacrifice"]),
+          ["hinduism", "vedic", "rita", "sacrifice"],
+          terms=["hinduism", "vedic religion", "vedanta", "upanishads", "the vedas", "brahman", "atman", "moksha"]),
     _fore("buddhism", "Buddhism", "c. 5th c. BC",
           "an unflinching diagnosis of the human condition — that life as we grasp it is shot through with "
           "suffering (dukkha) — profound compassion, and a refusal to rest in the emptiness of created idols",
@@ -162,7 +174,9 @@ FORESHADOWS = [
           "the suffering it named so honestly is real (Romans 8:20-22), but the answer is not to be blown out "
           "like a candle — it is a Man of Sorrows who bore it (Isaiah 53:3-4) and a self not annihilated but "
           "raised",
-          ["buddhism", "dukkha", "suffering", "compassion", "nirvana"]),
+          ["buddhism", "dukkha", "suffering", "compassion", "nirvana"],
+          terms=["buddhism", "buddhist", "the buddha", "nirvana", "dukkha", "four noble truths",
+                 "eightfold path", "bodhisattva", "theravada", "mahayana"]),
     _fore("chinese", "Chinese traditions — Confucianism & Daoism", "c. 6th–5th c. BC",
           "the moral order and the cultivation of virtue, filial reverence, the rectification of names — and, "
           "in Daoism, 'the Way' (the Dao): an ineffable Source from which all things flow, and the wisdom of "
@@ -171,7 +185,8 @@ FORESHADOWS = [
           "and impersonal, never a Someone who could be known or followed home",
           "'I am the Way' (John 14:6) — the Dao the sages reached toward has a face and a name; the order "
           "written on the heart is kept by the One who wrote it and now indwells",
-          ["confucius", "daoism", "the way", "dao", "virtue"]),
+          ["confucius", "daoism", "the way", "dao", "virtue"],
+          terms=["confucianism", "confucius", "daoism", "taoism", "tao te ching", "laozi", "lao tzu", "the analects"]),
     _fore("mystery_dying_rising", "The dying-and-rising motif in the mysteries", "antiquity",
           "the deep, near-universal human intuition — carried in Osiris, Dionysus, Tammuz and others — that "
           "life is somehow won through death, and that a god might die and live again",
@@ -180,7 +195,8 @@ FORESHADOWS = [
           "the pattern every culture dreamed became FACT in one place at one hour — 'the true myth' (C.S. "
           "Lewis): crucified under Pontius Pilate, raised the third day, seen by five hundred at once (1 "
           "Corinthians 15:4-6). The shadows dreamed it; Christ did it",
-          ["mystery religions", "osiris", "dionysus", "true myth", "dying and rising"]),
+          ["mystery religions", "osiris", "dionysus", "true myth", "dying and rising"],
+          terms=["mystery religions", "eleusinian mysteries", "mithraism", "mithras", "dionysian mysteries", "orphism"]),
     _fore("primal_witness", "Primal religion and the 'unknown god'", "all ages",
           "the near-universal witness of conscience, the awe before creation, and the reaching-after of every "
           "people 'in the hope that they might feel their way toward him and find him' (Acts 17:27) — the "
@@ -189,7 +205,8 @@ FORESHADOWS = [
           "1:23), feeling after a God it could not name",
           "'What therefore you worship as unknown, this I proclaim to you' (Acts 17:23) — the God felt-after "
           "in the dark has drawn near and made himself known in his Son",
-          ["primal", "unknown god", "conscience", "areopagus"]),
+          ["primal", "unknown god", "conscience", "areopagus"],
+          terms=["animism", "shamanism", "ancestor worship", "totemism", "primal religion"]),
 ]
 
 

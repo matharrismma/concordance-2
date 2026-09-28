@@ -96,9 +96,15 @@ def _tier_of(card: Dict[str, Any], terms: List[Tuple[str, str, str]],
         return "aligned", None                     # a discernment chart is the discernment — never gated
     hay = (str(card.get("title") or "") + " " + " ".join(str(b) for b in (card.get("bands") or []))
            + " " + str(card.get("subject") or "")).lower()
+    found_ref: Optional[Tuple[str, Optional[str]]] = None
     for phrase, tier, cid in terms:
         if phrase in hay:
-            return tier, cid
+            if tier == "sectioned":
+                return "sectioned", cid            # the stricter wall wins immediately
+            if found_ref is None:
+                found_ref = (tier, cid)
+    if found_ref is not None:
+        return found_ref
     return "aligned", None
 
 

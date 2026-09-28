@@ -60,6 +60,14 @@ def test_reference_is_downweighted_unless_sought(monkeypatch, atlas):
     assert keep2 is True and damp2 == 1.0                          # normal weight when the subject is sought
 
 
+def test_sectioned_beats_reference_when_both_match(monkeypatch, atlas):
+    monkeypatch.setenv("CONCORDANCE_ALIGNMENT", "1")
+    both = {"id": "src_mixed", "title": "Islam and astral projection", "bands": ["islam", "astral projection"],
+            "subject": "islam"}
+    # matches a reference term (islam) AND a sectioned term (astral projection) -> the stricter wall wins
+    assert alignment.verdict(both, alignment.context("what is grace")) == (False, 1.0)
+
+
 def test_aligned_and_charts_are_untouched(monkeypatch, atlas):
     monkeypatch.setenv("CONCORDANCE_ALIGNMENT", "1")
     assert alignment.verdict(_ALIGNED, set()) == (True, 1.0)       # aligned material unaffected
