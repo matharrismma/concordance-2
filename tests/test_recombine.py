@@ -151,6 +151,27 @@ def test_answer_speaks_from_the_keeping():
     assert isinstance(r["resolved_passage"], str) and r["resolved_passage"]  # spoken from the (injected) keeping
 
 
+def test_inflection_agrees_verb_with_plural_antecedent():
+    pieces = [{"kind": "found", "text": "There are rivers in the valley", "source": "A", "anchor": "there are"},
+              {"kind": "frame", "text": ", "},
+              {"kind": "found", "text": "It is cold", "source": "A", "anchor": "it is"}]
+    rr = recombine.resolve_refs(pieces)
+    second = [p for p in rr["pieces"] if p["kind"] == "found"][1]
+    assert second["resolution"]["antecedent"] == "rivers"
+    assert second["resolved"] == "The rivers are cold"                 # is → are: agreement on the resolved variant
+    assert second["inflection"] == {"from": "is", "to": "are"}
+    assert second["text"] == "It is cold"                              # the verbatim is never touched
+
+
+def test_inflection_leaves_agreement_alone_when_singular():
+    pieces = [{"kind": "found", "text": "There is water in the spring", "source": "A", "anchor": "there is"},
+              {"kind": "frame", "text": ", "},
+              {"kind": "found", "text": "It is cold", "source": "A", "anchor": "it is"}]
+    rr = recombine.resolve_refs(pieces)
+    second = [p for p in rr["pieces"] if p["kind"] == "found"][1]
+    assert second["resolved"] == "The water is cold" and "inflection" not in second   # already agrees
+
+
 def test_answer_reads_from_resident_body_no_ark():
     # rung 2 (reach): with no decodable_fn injected, answer reads anchor sentences from the card BODY
     card = {"title": "A Field Manual", "id": "c1",

@@ -201,10 +201,42 @@ def _antecedent(clause: str) -> Optional[str]:
             np.append(w.strip(_TRIM))
             if len(np) >= 3:
                 break
+        if np and np[0].lower() in ("a", "an", "the"):
+            np = np[1:]                                   # 'The ' + 'a rock' → 'The rock'
         phrase = " ".join(np).strip()
         if phrase and _WORD.findall(phrase):
             return phrase
     return None
+
+
+# ── inflection (rung 3) — number/tense AGREEMENT on the derived resolved variant only ───────────────
+_VERB_PL = {"is": "are", "was": "were", "has": "have"}       # singular → plural
+_VERB_SG = {v: k for k, v in _VERB_PL.items()}              # plural → singular (are→is, were→was, have→has)
+
+
+def _is_plural(phrase: str) -> bool:
+    """Heuristic number of an antecedent: plural if any content word is an -s plural (waters, rivers) —
+    conservative (skips -ss like 'grass'); irregulars (men) read singular, acceptable for a marked variant."""
+    for w in str(phrase or "").split():
+        wl = w.strip(_TRIM).lower()
+        if len(wl) > 3 and wl.endswith("s") and not wl.endswith("ss"):
+            return True
+    return False
+
+
+def _inflect(clause: str, antecedent: str) -> tuple:
+    """Correct the FIRST copula/aux in a RESOLVED clause to agree with the substituted antecedent's number.
+    Returns (clause, mark|None). Only is/are, was/were, has/have — forms we can determine; nothing else is
+    touched, and this only ever runs on the already-derived resolved variant, never on the verbatim."""
+    plural = _is_plural(antecedent)
+    toks = str(clause or "").split()
+    for i, t in enumerate(toks):
+        low = t.strip(_TRIM).lower()
+        repl = _VERB_PL.get(low) if plural else _VERB_SG.get(low)
+        if repl and repl != low:
+            toks[i] = t.lower().replace(low, repl, 1) if low in t.lower() else repl
+            return " ".join(toks), {"from": low, "to": repl}
+    return clause, None
 
 
 def resolve_refs(pieces: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -225,6 +257,12 @@ def resolve_refs(pieces: List[Dict[str, Any]]) -> Dict[str, Any]:
                 p["resolved"] = re.sub(r"^\s*" + re.escape(pron), "The " + last_ante, clause, count=1)
                 p["resolution"] = {"pronoun": pron, "antecedent": last_ante,
                                    "kind": "found-for-found (frame-introduced antecedent, same source)"}
+                # INFLECTION (rung 3): make the verb agree with the substituted antecedent's number — on
+                # the resolved variant ONLY, marked; the verbatim `text` is never touched.
+                inflected, mark = _inflect(p["resolved"], last_ante)
+                if mark:
+                    p["resolved"] = inflected
+                    p["inflection"] = mark
             ante = _antecedent(clause)
             if ante:
                 last_ante, last_src = ante, p.get("source")
