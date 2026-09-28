@@ -36,10 +36,11 @@ def _wants():
     return wants
 
 
-def next_want(fold_fn: Optional[Callable[[], Dict[str, Dict[str, Any]]]] = None
-              ) -> Optional[Tuple[str, Dict[str, Any]]]:
+def next_want(fold_fn: Optional[Callable[[], Dict[str, Dict[str, Any]]]] = None,
+              exclude: Any = frozenset()) -> Optional[Tuple[str, Dict[str, Any]]]:
     """The strongest demand: the most-asked OPEN 'missing' want (what people keep seeking and do not
-    find). The demand signal IS the teaching pressure — the loop learns what it is most asked to teach."""
+    find). The demand signal IS the teaching pressure — the loop learns what it is most asked to teach.
+    `exclude` skips wants already attempted this run, so an unfillable one never wedges the loop."""
     fold = fold_fn or _wants().fold
     try:
         folded = fold() or {}
@@ -47,7 +48,7 @@ def next_want(fold_fn: Optional[Callable[[], Dict[str, Dict[str, Any]]]] = None
         return None
     cand = [(wid, w) for wid, w in folded.items()
             if isinstance(w, dict) and w.get("state") == "open" and w.get("kind") == "missing"
-            and str(w.get("query") or "").strip()]
+            and str(w.get("query") or "").strip() and wid not in exclude]
     if not cand:
         return None
     cand.sort(key=lambda kv: (-int(kv[1].get("asks") or 0), str(kv[0])))   # most-asked first, stable
@@ -66,7 +67,7 @@ def step(*, acquire_fn: Acquire, want_id: Optional[str] = None,
          fold_fn: Optional[Callable[[], Dict[str, Dict[str, Any]]]] = None,
          close_fn: Optional[Callable[[str, str, str], Dict[str, Any]]] = None,
          deposit_fn: Optional[Callable[[List[str]], None]] = None,
-         by: str = "training") -> Dict[str, Any]:
+         exclude: Any = frozenset(), by: str = "training") -> Dict[str, Any]:
     """One turn of the loop. `acquire_fn(query)` runs the proven read→find→verify→BIND path (wire it to
     `expand.pull_and_card` for a PD source, or `byom.ingest` for a user's model) and returns at least
     `{card_id, kept}`. No-op when gated off. Nothing is minted here — acquire_fn owns the write and its
@@ -78,7 +79,7 @@ def step(*, acquire_fn: Acquire, want_id: Optional[str] = None,
         w = (fold() or {}).get(want_id)
         picked: Optional[Tuple[str, Dict[str, Any]]] = (want_id, w) if isinstance(w, dict) else None
     else:
-        picked = next_want(fold_fn)
+        picked = next_want(fold_fn, exclude=exclude)
     if not picked:
         return {"status": "no_open_wants"}
     wid, w = picked
@@ -101,11 +102,15 @@ def run(*, acquire_fn: Acquire, steps: int = 1, **kw: Any) -> Dict[str, Any]:
     """Drive the loop up to `steps` bounded turns, stopping early when no open want remains. Continuous
     training is just this, run on a cadence: the corpus grows by being used (the keeping is the model)."""
     out: List[Dict[str, Any]] = []
+    attempted: set = set()
     for _ in range(max(1, int(steps))):
-        r = step(acquire_fn=acquire_fn, **kw)
+        r = step(acquire_fn=acquire_fn, exclude=attempted, **kw)
         out.append(r)
         if r.get("status") in ("gated_off", "no_open_wants"):
             break
+        wid = r.get("want_id")
+        if wid:
+            attempted.add(wid)                     # never retry the same want in one run (fillable or not)
         kw.pop("want_id", None)                    # after the first, always take the next by demand
     return {"steps": len(out), "learned": sum(1 for r in out if r.get("status") == "learned"),
             "results": out}

@@ -58,6 +58,18 @@ def test_nothing_kept_leaves_the_want_open(monkeypatch):
     assert r["status"] == "nothing_kept" and closed == []       # the gap stays open — honest
 
 
+def test_run_advances_past_an_unfillable_want(monkeypatch):
+    monkeypatch.setenv("CONCORDANCE_TRAINING", "1")
+    tried = []
+    def acquire(q):
+        tried.append(q)
+        return {"status": "no_source"}             # nothing kept — the want stays open
+    r = training.run(acquire_fn=acquire, steps=3, fold_fn=_fold_two)
+    # must try BOTH open wants (strongest first), never wedge on the first — then run dry
+    assert tried == ["how to purify water", "how to ford a river"]
+    assert r["learned"] == 0 and r["results"][-1]["status"] == "no_open_wants"
+
+
 def test_run_stops_when_no_open_wants(monkeypatch):
     monkeypatch.setenv("CONCORDANCE_TRAINING", "1")
     r = training.run(acquire_fn=lambda q: {"card_id": "x", "kept": 1}, steps=5, fold_fn=lambda: {})
