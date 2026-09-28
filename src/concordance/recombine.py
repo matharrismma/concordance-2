@@ -64,6 +64,8 @@ def compose(query: str, instances: List[Dict[str, Any]], *, limit: int = 5) -> D
         anchor = str((ins.get("anchor") if isinstance(ins, dict) else "") or "").strip().lower()
         role = _ROLE.get(anchor, _DEFAULT_ROLE)
         rel = len(_toks(text) & qt)                       # overlap with the intent
+        if qt and rel == 0:                               # APTNESS: skip a fragment that misses the intent
+            continue
         ranked.append((role, -rel, len(text), text, ins))
     ranked.sort(key=lambda x: (x[0], x[1], x[2], x[3]))    # frame order → relevance → shortest → stable
     chosen: List[Dict[str, Any]] = []
@@ -129,13 +131,15 @@ def weave(query: str, instances: List[Dict[str, Any]], *, limit: int = 4) -> Dic
             sp["source"] = src
             sp["rel"] = len(sp["toks"] & qt)
             spans.append(sp)
-    spans.sort(key=lambda s: (s["role"], -s["rel"], len(s["span"]), s["span"]))   # frame → relevance → tight
+    # APTNESS (rung 1): never speak a grounded-but-irrelevant clause. Keep only clauses that actually
+    # touch the intent, SELECT the most relevant, then ORDER the survivors by the frame for a coherent
+    # reading. Selection is by aptness; the frame is only for how the chosen clauses are read.
+    pool = [s for s in spans if (not qt) or s["rel"] > 0]
+    pool.sort(key=lambda s: (-s["rel"], len(s["span"]), s["span"]))    # most apt first
     chosen: List[Dict[str, Any]] = []
     seen = set()
-    for s in spans:
+    for s in pool:
         if s["span"] in seen:
-            continue
-        if qt and s["rel"] == 0 and chosen:               # after the first, require a tie to the intent
             continue
         seen.add(s["span"])
         chosen.append(s)
@@ -143,7 +147,8 @@ def weave(query: str, instances: List[Dict[str, Any]], *, limit: int = 4) -> Dic
             break
     if not chosen:
         return {"passage": "", "pieces": [], "found": False,
-                "means": "the keeping holds no clause that answers this by the frame — an honest gap, not a guess"}
+                "means": "the keeping holds no clause that ANSWERS this by the frame — an honest gap, not a guess"}
+    chosen.sort(key=lambda s: (s["role"], -s["rel"], len(s["span"]), s["span"]))   # frame order for reading
     pieces: List[Dict[str, Any]] = []
     for i, s in enumerate(chosen):
         if i > 0:
@@ -155,7 +160,8 @@ def weave(query: str, instances: List[Dict[str, Any]], *, limit: int = 4) -> Dic
         pieces.append({"text": s["span"], "kind": "found", "source": s.get("source"), "anchor": s.get("anchor")})
     passage = "".join(p["text"] for p in pieces).strip()
     n_src = len({s.get("source") for s in chosen})
-    return {"passage": passage, "pieces": pieces, "found": True,
+    covered = round(len(_toks(passage) & qt) / len(qt), 2) if qt else None
+    return {"passage": passage, "pieces": pieces, "found": True, "covered": covered,
             "means": (f"woven from {len(chosen)} found clause(s) across {n_src} source(s), ordered by the "
                       "frame; the joints assert nothing and clauses from different sources are held apart — "
                       "no claim is made that a source did not make; nothing is generated or altered")}

@@ -29,7 +29,7 @@ def test_orders_by_the_frame_then_relevance():
         _ins("There is clean water in the spring.", "there is"),   # existence (role 0)
         _ins("This is the way to purify it.", "this is"),          # identity (role 1)
     ]
-    r = recombine.compose("purify water spring", inst)
+    r = recombine.compose("river water purify morning", inst)   # all three touch the intent
     assert r["found"] is True and len(r["fragments"]) == 3
     order = [f["anchor"] for f in r["fragments"]]
     assert order == ["there is", "this is", "I go"]               # existence → identity → motion
@@ -52,7 +52,7 @@ def test_honest_empty_when_nothing_fits():
 def test_limit_and_dedup():
     inst = [_ins("There is water.", "there is"), _ins("There is water.", "there is"),  # dup
             _ins("This is good.", "this is"), _ins("I go.", "I go")]
-    r = recombine.compose("water", inst, limit=2)
+    r = recombine.compose("water good", inst, limit=2)             # both touch the intent
     assert len(r["fragments"]) == 2
     texts = [f["text"] for f in r["fragments"]]
     assert texts == ["There is water.", "This is good."]           # dedup + frame order, capped
@@ -91,6 +91,21 @@ def test_weave_frame_joints_are_non_assertive():
 def test_weave_honest_empty():
     r = recombine.weave("anything", [])
     assert r["found"] is False and r["passage"] == ""
+
+
+def test_aptness_drops_the_irrelevant_and_reports_coverage():
+    inst = [_ins("There is a city on a hill.", "there is", "A"),          # touches the intent
+            _ins("Here is the bathroom.", "here is", "A")]                # grounded but irrelevant
+    r = recombine.weave("city on a hill", inst)
+    kept = [p["text"] for p in r["pieces"] if p["kind"] == "found"]
+    assert kept == ["There is a city on a hill"]                          # the bathroom clause is dropped
+    assert r["covered"] == 1.0                                            # every intent word is answered
+
+
+def test_aptness_honest_empty_when_nothing_touches_the_intent():
+    inst = [_ins("Here is the bathroom.", "here is", "A"), _ins("I go home.", "I go", "A")]
+    r = recombine.weave("quantum chromodynamics", inst)
+    assert r["found"] is False                                            # speaks nothing rather than something off
 
 
 def test_resolve_refs_found_for_found_same_source():
