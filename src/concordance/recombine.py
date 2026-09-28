@@ -147,19 +147,31 @@ def weave(query: str, instances: List[Dict[str, Any]], *, limit: int = 4) -> Dic
     # Never speak a grounded-but-irrelevant clause: keep only clauses that touch the intent, SELECT the
     # most apt (IDF-weighted), then ORDER the survivors by the frame for a coherent reading.
     pool = [s for s in spans if (not qt) or s["rel"] > 0]
-    pool.sort(key=lambda s: (-s["rel"], len(s["span"]), s["span"]))    # most apt first
+    if not pool:
+        return {"passage": "", "pieces": [], "found": False,
+                "means": "the keeping holds no clause that ANSWERS this by the frame — an honest gap, not a guess"}
+    # SYNTHESIS (rung 3): greedy COVERAGE-DIVERSE selection. The lead is the most apt clause; each next
+    # clause is the one that adds the MOST NEW (uncovered) query-term weight, so the answer spans different
+    # FACETS of the query (water AND life) instead of near-duplicates. Ties prefer the lead's source
+    # (coherence), then shorter/stable. Frame ordering is applied after, only for how it reads.
     chosen: List[Dict[str, Any]] = []
-    seen = set()
-    for s in pool:
+    seen: set = set()
+    covered: set = set()
+    lead_src: Any = None
+    while pool and len(chosen) < max(1, int(limit)):
+        pool.sort(key=lambda s: (
+            -round(sum(_idf[t] for t in qt if t in s["toks"] and t not in covered), 4),   # new facets first
+            -s["rel"],                                                                     # then aptness
+            0 if (lead_src is not None and s.get("source") == lead_src) else 1,            # then coherence
+            len(s["span"]), s["span"]))
+        s = pool.pop(0)
         if s["span"] in seen:
             continue
         seen.add(s["span"])
         chosen.append(s)
-        if len(chosen) >= max(1, int(limit)):
-            break
-    if not chosen:
-        return {"passage": "", "pieces": [], "found": False,
-                "means": "the keeping holds no clause that ANSWERS this by the frame — an honest gap, not a guess"}
+        covered |= (s["toks"] & qt)
+        if lead_src is None:
+            lead_src = s.get("source")
     chosen.sort(key=lambda s: (s["role"], -s["rel"], len(s["span"]), s["span"]))   # frame order for reading
     pieces: List[Dict[str, Any]] = []
     for i, s in enumerate(chosen):

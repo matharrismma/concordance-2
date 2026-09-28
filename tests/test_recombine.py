@@ -69,6 +69,17 @@ def test_weave_splits_into_verbatim_clauses():
     assert joints and all(j["text"] == ", " for j in joints)           # same source → smooth joint
 
 
+def test_synthesis_covers_diverse_facets_not_near_duplicates():
+    # naive top-N by relevance would take both 'water' clauses; synthesis spans facets: water AND life
+    inst = [_ins("There is water here.", "there is", "A"),
+            _ins("There is water there.", "there is", "A"),      # a near-duplicate facet (water)
+            _ins("This is the tree of life.", "this is", "B")]    # the life facet
+    r = recombine.weave("water and life", inst, limit=2)
+    kept = " ".join(p["text"] for p in r["pieces"] if p["kind"] == "found").lower()
+    assert "water" in kept and "life" in kept                    # both facets covered
+    assert kept.count("water") == 1                              # not two near-duplicate water clauses
+
+
 def test_weave_holds_different_sources_apart():
     # the guard: a poison clause and a "safe" clause from DIFFERENT sources must not fuse into one claim
     inst = [_ins("There is poison in the water.", "there is", "A"),
