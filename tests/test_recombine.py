@@ -102,6 +102,18 @@ def test_aptness_drops_the_irrelevant_and_reports_coverage():
     assert r["covered"] == 1.0                                            # every intent word is answered
 
 
+def test_aptness_prefers_the_rarer_query_term():
+    # "water" is common across the pool, "life" rare — a clause covering the RARE term must outrank
+    # clauses covering only the common one (the live 'water of life' → chemistry bug).
+    inst = [_ins("There is water in the flask.", "there is", "Chem"),
+            _ins("There is water in the tube.", "there is", "Chem"),
+            _ins("There is water in the beaker.", "there is", "Chem"),
+            _ins("This is the water of life.", "this is", "Scripture")]
+    r = recombine.weave("water of life", inst, limit=1)
+    top = [p for p in r["pieces"] if p["kind"] == "found"][0]["text"]
+    assert "life" in top.lower()                                       # IDF: the rare-term clause wins
+
+
 def test_aptness_honest_empty_when_nothing_touches_the_intent():
     inst = [_ins("Here is the bathroom.", "here is", "A"), _ins("I go home.", "I go", "A")]
     r = recombine.weave("quantum chromodynamics", inst)

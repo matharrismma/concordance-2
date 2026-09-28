@@ -26,6 +26,7 @@ GATED for wiring by CONCORDANCE_RECOMBINE; the pure core always runs.
 """
 from __future__ import annotations
 
+import math
 import os
 import re
 from typing import Any, Dict, List, Optional
@@ -129,11 +130,16 @@ def weave(query: str, instances: List[Dict[str, Any]], *, limit: int = 4) -> Dic
         anch = str((ins.get("anchor") if isinstance(ins, dict) else "") or "")
         for sp in _spans(text, anch):
             sp["source"] = src
-            sp["rel"] = len(sp["toks"] & qt)
             spans.append(sp)
-    # APTNESS (rung 1): never speak a grounded-but-irrelevant clause. Keep only clauses that actually
-    # touch the intent, SELECT the most relevant, then ORDER the survivors by the frame for a coherent
-    # reading. Selection is by aptness; the frame is only for how the chosen clauses are read.
+    # APTNESS (rung 2): weight each query term by RARITY across the candidate pool (a local IDF), so a
+    # clause covering a RARE query word ("life") outranks one that merely repeats a common one ("water")
+    # — plain token count let a chemistry clause answer "water of life". rel = IDF-weighted coverage.
+    _n = len(spans) or 1
+    _idf = {t: math.log((_n + 1) / (sum(1 for s in spans if t in s["toks"]) + 1)) + 1.0 for t in qt}
+    for s in spans:
+        s["rel"] = round(sum(_idf[t] for t in qt if t in s["toks"]), 4)
+    # Never speak a grounded-but-irrelevant clause: keep only clauses that touch the intent, SELECT the
+    # most apt (IDF-weighted), then ORDER the survivors by the frame for a coherent reading.
     pool = [s for s in spans if (not qt) or s["rel"] > 0]
     pool.sort(key=lambda s: (-s["rel"], len(s["span"]), s["span"]))    # most apt first
     chosen: List[Dict[str, Any]] = []
