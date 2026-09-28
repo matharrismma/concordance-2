@@ -897,6 +897,7 @@ class Corpus:
         qn = " ".join((query or "").lower().split())
         q_exact = {qn} | {r.lower() for r in _growth.refs_in_text(query or "")}
         from . import stigmergy as _stig     # the pheromone layer (gated OFF by default → boost is 1.0)
+        from . import repellent as _rep       # the no-entry pheromone (gated OFF → damp is 1.0)
         scored = []
 
         def _finalize(c: dict, s: float) -> float:
@@ -923,6 +924,10 @@ class Corpus:
             # STIGMERGY (ants): a well-travelled trail leads WITHIN its tier — multiplies the base
             # score like the boosts above, capped, so it never crosses tiers. 1.0 when gated off.
             s *= _stig.boost_factor(c.get("id"))
+            # REPELLENT (no-entry pheromone): a source discernment judged leads-astray is down-weighted
+            # WITHIN its tier, so it stops crowding queries it does not answer. 1.0 when gated off, and
+            # floored (never zeroed) — a repelled card stays retrievable for discernment.
+            s *= _rep.damp_factor(c.get("id"))
             return s
 
         for cid in self._candidates(

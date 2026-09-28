@@ -577,6 +577,10 @@ def _pair_discernment(hits: List[Dict[str, Any]], text: str = "", cp=None) -> Li
                        + " " + str(h.get("subject") or "")).lower()
                 if any(t in hay for t in terms):
                     tripped = True
+                    # REPELLENT (no-entry pheromone): this result IS primary material under the test —
+                    # mark it so it stops crowding queries it does not answer. No-op when gated off.
+                    from . import repellent as _rep
+                    _rep.repel([h.get("id")])
                     break
         if tripped:
             lead = next((x for x in hits if x.get("id") == cid), None) or corpus._brief(chart)
@@ -1982,6 +1986,12 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
     _e = _eldership.assess(hits)
     if _e:
         out["eldership"] = _e
+    # Inhibition (the bee stop signal): the strongest competing answer on a different subject the lead
+    # was committed over — the elimination made visible. Additive, gated off by default -> absent.
+    from . import inhibition as _inhibition
+    _inh = _inhibition.assess(hits)
+    if _inh:
+        out["inhibition"] = _inh
     # The concierge: a search result is RELATED material, not a VERIFIED answer. For a question,
     # point — politely — to where a verified answer can be found (the free libraries; a claim check).
     if _is_question(text):

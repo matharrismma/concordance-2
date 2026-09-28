@@ -108,12 +108,15 @@ SYSTEMS = [
      "signal — a head-butt that cross-inhibits scouts for a rival site, breaking deadlock so the swarm "
      "can commit (Seeley et al., Science 2012); colonies practice SOCIAL IMMUNITY, grooming out and "
      "removing the infected (Cremer). The inhibitory signals are as measured as the recruiting ones.",
-     "DIFFERENTIATED SIGNALS + IMMUNITY. GAP: our stigmergy only DEPOSITS positive and our quorum only "
-     "COUNTS. We lack (1) a REPELLENT trail — a card that fails the fruit test should mark the path 'no "
-     "entry', not merely fade; (2) CROSS-INHIBITION — a strong witness suppressing a near-tie rival to "
-     "force a clean decision (candidate elimination made decisive); (3) active QUARANTINE — a "
-     "discerned-false source removed, a collective response raised. Our discernment is static; the immune "
-     "RESPONSE is missing.",
+     "DIFFERENTIATED SIGNALS + IMMUNITY — now built. (1) REPELLENT (repellent.py): a source the front-door "
+     "discernment judges primary material under the test is marked 'no entry' — a bounded, decaying "
+     "down-weight learned from the discernment layer, so it stops crowding queries it does not answer "
+     "(never deleted — still retrievable for discernment). (2) CROSS-INHIBITION (inhibition.py): the bee "
+     "stop signal — the strongest competing answer on a different subject is named and the elimination "
+     "made visible (the inhibitory twin of the quorum's corroboration). (3) QUARANTINE / social immunity "
+     "already stands: distinct members' signed reports HOLD an item, a human steward restores or removes "
+     "it, and is_public withholds the quarantined/retracted (moderation.py). Repellent and cross-inhibition "
+     "are gated off, held for review.",
      ["repellent pheromone", "no-entry trail", "stop signal", "cross-inhibition", "social immunity",
       "quarantine", "negative signal", "deadlock"]),
     ("the_head", "The Head — why we are a body, not a colony",
