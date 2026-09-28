@@ -74,6 +74,16 @@ pays for them.
 
 Realized where built (stigmergy on recall; the Cubo reader's binding; the BYOM ingest path; this loop) and
 now the **law** the rest of the surface is being brought under — not yet a claim that every endpoint grows
-the keeping on every call. The remaining craft is the *expressive* half: comprehension by the cube works;
-producing novel fluent language by **recombining** bound instances over the frame (not sampling) is the
-frontier. The loop above closes the *acquisition* half; recombination is the next build.
+the keeping on every call.
+
+**Acquisition half — the loop above.** Enabled and proven to run end-to-end (`tools/train_run.py`,
+supervised); it binds only on an **ark-equipped acquisition node** (`_sources.sources_dir()` set), and on a
+serving node with no ark it degrades honestly (`no_ark`, the want left open). Continuous training runs
+where the ark is, then deploys — a generator picking its own path must never run unwatched.
+
+**Expressive half — `recombine.py` (v0 started).** The other direction of the Cubo model: *say it by
+recombining found instances over the frame, never generating.* `compose(query, instances)` selects and
+orders verbatim fragments by the frame (existence → identity → motion) with full provenance; honest-empty
+when the keeping holds too little. v0 is EXTRACTIVE (whole fragments); weaving novel sentences (splicing
+clauses, resolving reference, inflection) is the frontier it grows toward. Gated `CONCORDANCE_RECOMBINE`;
+`test_recombine.py` (5).
