@@ -251,6 +251,14 @@ learned repellent is retired.**
 Quarantine / social immunity was already built: `moderation.py` (signed report → 3-reporter HOLD →
 human-steward restore/remove) + `is_public` withholds `quarantine`/`retracted`.
 
+**Teaching ≡ training — the training loop** ([`docs/TRAINING_LOOP.md`](TRAINING_LOOP.md); `training.py`,
+`CONCORDANCE_TRAINING`, off): there is no train/infer wall — one OPERATE cycle (SELECT a gap by demand →
+READ → FIND → VERIFY/GATE → BIND → REINFORCE → CLOSE) both serves and grows the keeping, the same act by
+which the engine teaches (the Cubo way). Pure orchestration over the proven acquire paths
+(`expand.pull_and_card` for PD, `byom.ingest` for a user's model); mints nothing itself, so every write
+guard holds. `run(steps=N)` on a cadence = continuous training driven by demand — the corpus grows by
+being used.
+
 ### 7.2 The alignment gate — tier the keeping by agreement (`alignment.py`, `ALIGNMENT`, on — 2026-09-28)
 
 Matt's directive: *"section off occult for only call on explicit … much of the philosophy and other
