@@ -46,11 +46,13 @@ just with less to retrieve.)
 
 ## Status
 
-The 2.0 engine is built end to end — floor 7/7, the derivation moat (0 false-positives), the
-tamper-evident ledger + precedent overlay, 62 verifiers, the witness overlay (theology / witness /
-scripture / canon), the shared corpus + ranker, scripture ref-resolution + original-language word
-study, the axes grid, a sovereign HTTP API, and the site. 13 test suites green. Sovereign,
-stdlib-first; heavy deps (`sympy`/`scipy`/`numpy`) are optional, lazy-loaded. Port progress:
-[`PORT_PLAN.md`](PORT_PLAN.md).
+The 2.0 engine is built end to end and live (narrowhighway.com/.org/.tv) — floor 7/7, the derivation
+moat (0 false-positives), the tamper-evident ledger + precedent overlay, **72 verifiers**, the witness
+overlay (theology / witness / scripture / canon), the shared corpus + ranker (**872k cards**), scripture
+ref-resolution + original-language word study, the axes grid, a sovereign HTTP API, and the site.
+**252 test files green.** A gated **collective-intelligence layer** (stigmergy, quorum, flock, eldership,
+physiology, inhibition) and an **alignment gate** (the keeping tiered by agreement — occult explicit-only,
+other religions/philosophy referenceable) run over it; see [`docs/WORLD.md`](docs/WORLD.md). Sovereign,
+stdlib-first; heavy deps (`sympy`/`scipy`/`numpy`) are optional, lazy-loaded.
 
 1.0 is frozen (`v1.0-frozen` in the Lighthouse repo) — the shape that taught us the floor.

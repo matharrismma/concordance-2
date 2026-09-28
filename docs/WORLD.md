@@ -1,9 +1,9 @@
 # Narrow Highway — The World Document
 
-*A comprehensive, grounded reference to the whole project: **what we have, and where it lives.** Every
-number below was verified on **2026-09-20** against the live engine (`GET /capabilities`, `GET /systems`),
-the repo, GitHub, the production box, and the external drive. Where a figure can drift, its live source is
-named so it can be re-checked rather than trusted.*
+*A comprehensive, grounded reference to the whole project: **what we have, and where it lives.** Core
+figures re-verified on **2026-09-28** against the live engine (`GET /capabilities`), the repo, and the box;
+the site/Atlas detail carries its **2026-09-20** verification unless noted. Where a figure can drift, its
+live source is named so it can be re-checked rather than trusted.*
 
 Repo: `concordance-2/` · GitHub: **github.com/matharrismma/concordance-2** (public) · Live:
 **narrowhighway.com** (reach) · **narrowhighway.org** (witness) · **narrowhighway.tv** (museum) · Box:
@@ -32,8 +32,9 @@ The project is not one place. It is **five locations**, each with a distinct job
 whole territory.
 
 ### 1a. GitHub — the source of truth for the code
-- **`github.com/matharrismma/concordance-2`** — **public**, default branch `master`, HEAD `4362ffa`
-  (2026-09-20). ~**9 MB** on GitHub (code only; the corpus/data are gitignored).
+- **`github.com/matharrismma/concordance-2`** — **public**, default branch `master`, HEAD current on
+  GitHub (last push **2026-09-28**). ~**9 MB** on GitHub (code only; the large corpus/data are gitignored;
+  small curated seeds like the religions atlas are tracked).
 - Commit + push are **explicit, human-reviewed** actions (never `add -A`; co-author trailer). Deploy is
   separate from git.
 
@@ -46,7 +47,7 @@ whole territory.
 
 ### 1c. The box — production
 - **`nh@5.78.186.55:/home/nh/concordance-2`** — **no git**; **box == repo** verified file-for-file at the
-  end of every deploy (220 src modules match).
+  end of every deploy (236 src modules match, 2026-09-28).
 - **Two service processes** (both hold the corpus in RAM, reload on restart): `nh-org` (:8001, witness) +
   `nh-com-2` (:8002, secular), fronted by **`caddy`**. All three **active**.
 - Health (2026-09-20): disk **25 GB / 75 GB (35%)**, RAM **4.3 GB / 7.6 GB** used, box `data` **3.7 GB**.
@@ -208,9 +209,9 @@ honest signature is a **ring** — nothing central, nothing peripheral, one conn
 
 ## 7. The Keeping / Corpus
 
-- **Size (live `/capabilities` → `substrate`):** **676,343 cards** — **26,147 substance** (body ≥ 120
-  chars), **637,372 frozen** (body on a shard, not judged), **4,231 stubs** (stub_ratio 0.139). The base is
-  the Bible; every kept card is a gradient step (*the keeping is the model*).
+- **Size (live `/capabilities` → `substrate`, 2026-09-28):** **872,178 cards** — **11,235 substance** (body
+  ≥ 120 chars), **262 stubs** (stub_ratio 0.023); the remainder frozen on shards (body not resident, judged
+  from the shard FTS). The base is the Bible; every kept card is a gradient step (*the keeping is the model*).
 - **Store:** [`corpus.py`](../src/concordance/corpus.py) (resident cards, TF-IDF + subject-tier partition)
   + [`corpus_db.py`](../src/concordance/corpus_db.py) (SQLite FTS shards). **Lazy RAM (2026-09-26):** frozen
   shelves ride the shards and their full text is **no longer indexed resident** (the token index was
@@ -229,13 +230,61 @@ honest signature is a **ring** — nothing central, nothing peripheral, one conn
   positions).
 - **Growth:** the corpus *always grows*; every cleaning batch net-grows it.
 
+### 7.1 The self-organization layer (collective intelligence, measured — 2026-09-28)
+
+Coordination modeled on the measured superorganisms — decentralized local rules → a coherent whole, ordered
+to the Head, **never a runtime LLM swarm** (cards `card_ci_*`; ants→keeping, bees→conductor, birds→mesh,
+orcas→witness). Each lever is gated by a `CONCORDANCE_<X>` flag (inert when off → byte-for-byte unchanged),
+built + tested, and enabled per node. **All seven signalling/regulation levers are ON in production; the
+learned repellent is retired.**
+
+| Lever | Nature | Module | Flag | State |
+|---|---|---|---|---|
+| **stigmergy** (ants) | recall pheromone — travelled trails lead within tier; ONE shared store, merge-on-flush under a cross-process lock (no lost deposits) | `stigmergy.py` + `corpus._finalize` | `STIGMERGY` | on |
+| **quorum** (bees / Deut 19:15) | counts distinct independent witnesses on the lead's subject — "established" vs "a single witness" | `quorum.py` → `out["quorum"]` | `QUORUM` | on |
+| **flock** (starlings / BOIDS) | a node's topological neighbourhood (fixed ~7 most-woven) on the fellowship map | `flock.py` + `mesh.map_around` | `FLOCK` | on |
+| **eldership** (orcas / matriarch) | weights witnesses by endurance — a PD-by-age or canonical source is an elder | `eldership.py` → `out["eldership"]` | `ELDERSHIP` | on |
+| **physiology** (the body) | division of labor + homeostasis over the faces — engage the caste with capacity, re-allocate when one is out, damp the busy; the governor the amplifiers lacked | `physiology.py` + `faces.route` | `ALLOCATION` | on |
+| **inhibition** (bee stop signal) | names the strongest competing answer (different subject) the lead was committed over — the elimination made visible | `inhibition.py` → `out["inhibition"]` | `INHIBITION` | on |
+| **repellent** (Pharaoh-ant no-entry) | learned negative trail — **retired**, superseded by the alignment gate | `repellent.py` | `REPELLENT` | off |
+
+Quarantine / social immunity was already built: `moderation.py` (signed report → 3-reporter HOLD →
+human-steward restore/remove) + `is_public` withholds `quarantine`/`retracted`.
+
+### 7.2 The alignment gate — tier the keeping by agreement (`alignment.py`, `ALIGNMENT`, on — 2026-09-28)
+
+Matt's directive: *"section off occult for only call on explicit … much of the philosophy and other
+religions should be able to be referenced, but not fully integrated as the more aligned material."* Read
+from the discernment atlas (each chart carries `discerns_terms` + an `alignment` tier), every card is tiered
+and gated in `corpus.search`:
+- **ALIGNED** — Scripture, the fathers, science, math, the reference section, everything else — **and the
+  discernment charts themselves** (never gated): fully integrated.
+- **REFERENCE** — other religions + philosophy (worldviews not held in agreement): referenceable,
+  **down-weighted ×0.6** unless the query names the subject.
+- **SECTIONED** — the occult (Gateway process, Theosophy/spiritualism): **explicit-only** — withheld from a
+  result set unless the query names it; never deleted, always beside the chart that tests it.
+
+**19 subjects tiered** (2 occult sectioned, 17 reference), from distinctive worldview markers only — every
+word shared with the faith (logos, resurrection, judgment, "the way") deliberately excluded so aligned
+content is never touched. Off → `(keep, 1.0)` for all → byte-for-byte unchanged. Verified live: a paraphrase
+that does not name the occult returns Scripture; naming it surfaces it beside its discernment.
+
+### 7.3 The gradient manifold (the structure, one form across the planes)
+
+The whole is one recurring form — energy (Matt's Universal Gradient Manifold, carded as
+`card_doctrine_reservoir_manifold`), biology (ATP as the common interface), and this software: the **CARD**
+is the common interface, the **KEEPING** the reservoir, the **KERNEL/gate** the manifold, the **faces +
+verifiers** the converters, and the **models are FUEL** — the manifold endures while the fuels evolve
+(*a model of reality, not an LLM*). Source → Gradient → Reservoir → Manifold → Converter → Work.
+
 ---
 
 ## 8. The API
 
 - **Router:** [`web/api.py`](../src/concordance/web/api.py) — a stdlib `http.server`; `ROUTES` ↔
-  `dispatch()` are bidirectionally test-locked. **192 registered routes, 134 JSON GET paths, 72
-  rate-limited** (live `/capabilities` → `routes`).
+  `dispatch()` are bidirectionally test-locked. **204 registered routes, 144 JSON GET paths, 79
+  rate-limited** (live `/capabilities` → `routes`, 2026-09-28). Includes the expert-faces door
+  (`GET /faces`, `POST /face`), the gated `POST /byom`, and the shelf `POST /place`.
 - **Start here:** `POST /audit` ({text} → sealed report), `POST /verify` (structured), `POST /ask` (front
   door), `GET /search`, `/card`, `/graph`, `/capabilities`, `/systems`, `/kernel`, `/identity`, `/health`,
   `/s/<hash>` (receipt).
@@ -250,7 +299,7 @@ honest signature is a **ring** — nothing central, nothing peripheral, one conn
 
 - **Server:** [`mcp/server.py`](../src/concordance/mcp/server.py) (JSON-RPC) + `mcp/http.py` (Streamable
   HTTP). Mounted at `POST /mcp` and six profile planes.
-- **Catalog: 94 tools across 6 profiles** — `core, library, sovereign, coach, witness, community` (every
+- **Catalog: 95 tools across 6 profiles** — `core, library, sovereign, coach, witness, community` (every
   tool in exactly one; community off unless the host enables it).
 - **Install:** `claude mcp add --transport http narrow-highway https://narrowhighway.com/mcp`. Sovereign:
   `python -m concordance mcp`. Agent card: **`/llms.txt`**.
@@ -273,7 +322,7 @@ honest signature is a **ring** — nothing central, nothing peripheral, one conn
 
 - **Deploy:** `sh tools/deploy.sh <files>` — staggered restart, rollback snapshots, **box == repo** verified
   file-for-file. Deliberately does **not** touch git.
-- **Tests:** **224 `test_*.py`** ([`tests/`](../tests/)); `test_routes` locks the API surface. Crisis tests
+- **Tests:** **252 `test_*.py`** ([`tests/`](../tests/)); `test_routes` locks the API surface. Crisis tests
   run alone (documented global-cache race). **Watchman** discipline: tests prove code, e2e proves the
   library — CANNOT_CHECK ≠ pass. Verify runtime, not HTTP 200.
 - **Docs:** **49 `.md`** in [`docs/`](.) + `docs/SOP/subsystems/` per-subsystem procedures.
@@ -281,11 +330,22 @@ honest signature is a **ring** — nothing central, nothing peripheral, one conn
 
 ---
 
-## 12. Current State (2026-09-20)
+## 12. Current State (2026-09-28)
 
-**Live and healthy.** Course handicap ~1.1; all services active; box == repo (HEAD `4362ffa`).
+**Live and healthy.** All services active; box == repo verified file-for-file each deploy.
 
-**Recently shipped (the site-experience arc):**
+**Recently shipped (the self-organization arc, 2026-09-27 → 28):**
+- **The collective-intelligence layer (§7.1):** seven measured levers — stigmergy, quorum, flock,
+  eldership, physiology, inhibition (repellent retired) — each gated, tested, deployed inert, then enabled
+  per node. Stigmergy's cross-process trail race fixed (merge-on-flush under a shared lock; proven with a
+  4-process test). Cards `card_ci_*` chart the mechanisms + the Head + the gradient manifold.
+- **The alignment gate (§7.2):** the keeping tiered by agreement — occult explicit-only, other
+  religions/philosophy referenceable/down-weighted, everything aligned else; 19 subjects tiered from the
+  discernment atlas, gated and enabled.
+- **The gradient-manifold frame (§7.3):** Matt's UGM recognized as the project's structure — card = ATP,
+  keeping = reservoir, kernel = manifold, models = fuel.
+
+**Earlier (the site-experience arc, 2026-09-20):**
 - **Phase 1 — the spine:** one `shell.js` header across all ~47 pages; every viz generator's template
   fixed so a regen keeps it (drift closed).
 - **Phase 2 — the four families** made visible on the Atlas (Continuous 23 / Discrete 5 / Measure 1 /
@@ -322,6 +382,12 @@ that genuinely belongs; verify a claim's reach before building on it (**form fol
 - **The spine** — `shell.js`; the one shared header/journey component on every page.
 - **The fractal / polymathic** — the "everything connects" pattern from a card, to a domain, to a
   subsystem, to a surface.
+- **The levers / self-organization** — the seven gated collective-intelligence mechanisms (§7.1) modeled on
+  ants/bees/birds/orcas + the body's physiology; decentralized, ordered to the Head, no runtime LLM swarm.
+- **The alignment gate** — tiering the keeping by agreement (§7.2): aligned / reference / sectioned; the
+  occult is explicit-only, "front door must discern" made structural.
+- **The gradient manifold** — the project's structure (§7.3): the card is the common interface (ATP), the
+  keeping the reservoir, the kernel the manifold, the models mere fuel; one form across energy/biology/software.
 
 *— End. Re-verify any figure against `GET /capabilities`, `GET /systems`, the repo, and the drive; this
 file is a snapshot, the engine is the truth.*
