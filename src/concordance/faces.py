@@ -15,6 +15,8 @@ from __future__ import annotations
 import re
 from typing import Any, Callable, Dict, List, Optional
 
+from . import physiology
+
 # A face is DATA (see docs/EXPERT_FACES.md): a servant role over existing components.
 #   scope       — words that route a request to this face
 #   shelves      — the keeping it draws on first (search is scoped here, then falls back)
@@ -73,22 +75,35 @@ def faces() -> Dict[str, Dict[str, Any]]:
     return {fid: {k: v for k, v in f.items()} for fid, f in _FACES.items()}
 
 
+def _scores(text: str) -> Dict[str, int]:
+    """Each face's fitness for the request: how many of its scope phrases the request trips."""
+    toks = set(_WORD.findall((text or "").lower()))
+    low = " " + (text or "").lower() + " "
+    scores: Dict[str, int] = {}
+    for fid, f in _FACES.items():
+        score = 0
+        for s in f["scope"]:
+            # multi-word phrases matched as substrings, single words as tokens
+            score += (1 if s in low else 0) if " " in s else (1 if s in toks else 0)
+        scores[fid] = score
+    return scores
+
+
 def route(text: str) -> Optional[str]:
     """Which face does this request call for? The face whose scope the request overlaps most; None if
-    nothing overlaps (the caller then uses the ordinary front door — a face is never forced)."""
-    toks = set(_WORD.findall((text or "").lower()))
-    if not toks:
+    nothing overlaps (the caller then uses the ordinary front door — a face is never forced).
+
+    When the allocation lever (physiology) is on, a TIE in fitness is broken toward the caste with
+    capacity — division of labor + the homeostatic brake — and re-allocates to an available caste if the
+    fittest is out. It only ever reorders WITHIN the top fitness tier; it never routes to a face the
+    request does not fit, so the plain routing is unchanged whenever there is a single clear best."""
+    if not _WORD.findall((text or "").lower()):
         return None
+    scores = _scores(text)
+    if physiology.enabled():
+        return physiology.allocate(scores)
     best, best_score = None, 0
-    for fid, f in _FACES.items():
-        # count scope phrases present (multi-word phrases matched as substrings, single words as tokens)
-        score = 0
-        low = " " + (text or "").lower() + " "
-        for s in f["scope"]:
-            if " " in s:
-                score += 1 if s in low else 0
-            else:
-                score += 1 if s in toks else 0
+    for fid, score in scores.items():
         if score > best_score:
             best, best_score = fid, score
     return best if best_score > 0 else None
@@ -116,6 +131,11 @@ def compose(face_id: str, text: str, config: Any = None, *,
                 "handoff": "crisis", "gathered": [], "verify": None, "discern": None,
                 "manner": face["manner"],
                 "means": "a cry outranks the servant — this is handed to the crisis response, real people first"}
+
+    # This servant is now doing the work — record a unit of recent load (aggregate, content-free) so the
+    # allocation lever can balance the castes and regulate the rate. No-op unless the lever is on.
+    if physiology.enabled():
+        physiology.note(face_id)
 
     # 2. GATHER — scoped to the face's shelves first (the servant's own substance), then the keeping.
     if search_fn is None:
