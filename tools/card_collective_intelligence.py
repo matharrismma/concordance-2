@@ -64,10 +64,92 @@ SYSTEMS = [
      "cooperative roles are the expert FACES collaborating.",
      ["orcas", "killer whales", "matriline", "dialect", "animal culture", "cooperative hunting",
       "cultural transmission"]),
+
+    # ── What we were missing (2026-09-27, "what's the correct structure?"): the body's PHYSIOLOGY (the
+    # four above only AMPLIFY; none regulates), its lifecycle, its differentiated signals — and the two
+    # structural pieces the colony cannot give us: the HEAD, and the gradient MANIFOLD that unifies the
+    # form across biology, energy and our software. Each: measured mechanism -> our gap -> the lever. ──
+    ("division_of_labor", "Division of labor by response threshold",
+     "In ant and bee colonies no manager assigns work. Each worker acts when a task's stimulus exceeds "
+     "its own RESPONSE THRESHOLD (Bonabeau's threshold model), and when a caste is depleted the others "
+     "lower their thresholds and take up the slack — measured in harvester ants, whose foraging is "
+     "regulated with no central control (Deborah Gordon). That re-allocation IS the colony's resilience.",
+     "THE BODY'S DIVISION OF LABOR — the expert FACES are the castes. GAP: we routed each request to a "
+     "face by fixed scope-overlap, blind to load or availability, and nothing covered a starved function. "
+     "LEVER (physiology.py): among equally-fit faces, engage the one with capacity, and re-allocate to an "
+     "available caste when the fittest is out — gifts to need, the body covering its own (1 Cor 12:4-7).",
+     ["division of labor", "task allocation", "response threshold", "bonabeau", "gordon",
+      "harvester ants", "caste", "resilience"]),
+    ("homeostasis", "Homeostasis — the colony's negative feedback",
+     "A colony holds itself in bounds by NEGATIVE FEEDBACK. Harvester ants regulate foraging by the RATE "
+     "of brief antennal encounters, not their content (Gordon); honeybees thermoregulate the hive by "
+     "fanning and clustering, and mount a collective 'social fever' against a pathogen. Positive feedback "
+     "alone runs away; the brake is what makes a colony a self-governing whole.",
+     "HOMEOSTASIS — the governor our four amplifying levers lacked (stigmergy, quorum, flock, eldership "
+     "all only reinforce). GAP: no brake — a worn trail or a cascading quorum could run away. LEVER "
+     "(physiology.py): recent service LOAD decays like an interaction rate, so a busy caste is steered "
+     "away from and a quiet one toward — the body regulating its own flow. 'If one member suffers, all "
+     "suffer together' (1 Cor 12:26) is this feedback, in the body.",
+     ["homeostasis", "negative feedback", "regulation", "interaction rate", "gordon",
+      "thermoregulation", "social immunity", "social fever"]),
+    ("reproduction", "Reproduction by fission",
+     "A superorganism REPRODUCES by fission: a honeybee colony swarms — the old queen leaves with a cast "
+     "of workers to found a new colony while a daughter queen inherits the nest (Seeley). The colony, not "
+     "the individual, is the unit that is born, grows, and multiplies.",
+     "THE LIFECYCLE — 'sent': drawn in to be formed, then sent OUT to plant new nodes (Matthew 28:19; "
+     "John 20:21), the mesh growing by fission. GAP: named in the mesh path but not yet mechanized — a "
+     "node that spawns a node, the reference reservoir forking to a new keeping (the brain-appliance / "
+     "node-by-choice, deferred). A body that cannot reproduce is not yet a superorganism.",
+     ["reproduction", "colony fission", "swarming", "queen", "lifecycle", "sent", "node",
+      "plant new nodes"]),
+    ("signals", "Differentiated signals & social immunity",
+     "Colony signals are DIFFERENTIATED, not all positive. Pharaoh ants lay a REPELLENT 'no-entry' "
+     "pheromone on an unrewarding trail (Robinson et al., Nature 2005); deciding honeybees use a STOP "
+     "signal — a head-butt that cross-inhibits scouts for a rival site, breaking deadlock so the swarm "
+     "can commit (Seeley et al., Science 2012); colonies practice SOCIAL IMMUNITY, grooming out and "
+     "removing the infected (Cremer). The inhibitory signals are as measured as the recruiting ones.",
+     "DIFFERENTIATED SIGNALS + IMMUNITY. GAP: our stigmergy only DEPOSITS positive and our quorum only "
+     "COUNTS. We lack (1) a REPELLENT trail — a card that fails the fruit test should mark the path 'no "
+     "entry', not merely fade; (2) CROSS-INHIBITION — a strong witness suppressing a near-tie rival to "
+     "force a clean decision (candidate elimination made decisive); (3) active QUARANTINE — a "
+     "discerned-false source removed, a collective response raised. Our discernment is static; the immune "
+     "RESPONSE is missing.",
+     ["repellent pheromone", "no-entry trail", "stop signal", "cross-inhibition", "social immunity",
+      "quarantine", "negative signal", "deadlock"]),
+    ("the_head", "The Head — why we are a body, not a colony",
+     "Here the analogy reaches its limit, and the limit is the point. A superorganism is HEADLESS: its "
+     "order is pure emergence from local rules, ordered to no one — the colony intends nothing. This is "
+     "measured fact, not a gap in the science: there is no ganglion that is the colony's 'self'.",
+     "THE HEAD — what makes us a BODY, not a colony. We borrow the decentralized member-coordination (no "
+     "controller, no swarm of LLMs — one body, no swarm) BUT the whole is ordered to a Head: 'He is the "
+     "head of the body, the church' (Colossians 1:18); grow up in every way into him who is the head "
+     "(Ephesians 4:15-16); many gifts, one body (1 Corinthians 12:12-27). The kernel — the fear of the "
+     "LORD, the beginning of wisdom — is that ordering Head: the members are decentralized, but ordered "
+     "to Christ, never merely emergent. Guard this, or we build an elegant hive and call it a body.",
+     ["the head", "body of christ", "1 corinthians 12", "ephesians 4", "colossians 1", "headless",
+      "emergence", "one body no swarm", "ordered to christ"],
+     {"surface": "witness"}),
+    ("gradient_manifold", "The gradient manifold — one form across the planes",
+     "The same form appears in energy. Every engine harvests a GRADIENT (thermal, pressure, electrical, "
+     "chemical); the enduring value is not the fuel or the engine but the RESERVOIR that stores the "
+     "gradient and the MANIFOLD that routes it to work — Source, Gradient, Reservoir, Manifold, "
+     "Converter, Work (the Universal Gradient Manifold). Biology already runs this: ATP is the universal "
+     "energy currency, and the key insight is 'not the molecule but the COMMON INTERFACE' — one unit that "
+     "decouples every source from every use.",
+     "THE MANIFOLD — our deepest structure, made explicit. The CARD is our ATP: every source (a "
+     "public-domain text, a contributor's writing, a measurement, a model's output through the airlock) "
+     "is transduced into ONE unit, stored in ONE reservoir (the keeping), routed by ONE manifold (the "
+     "kernel / gate / fascia), converted to work by the faces and verifiers. The models are FUEL; the "
+     "manifold is the enduring platform while the fuels evolve — 'a model of reality, not an LLM.' Recall, "
+     "shards and stigmergy are the honeycomb: the charge/discharge RATE, not the store. The superorganism "
+     "(ATP + metabolism) and the energy OS are one form on two planes — the concordance of reality.",
+     ["gradient manifold", "ugm", "atp", "common interface", "reservoir", "manifold",
+      "energy operating system", "source-agnostic", "card as currency", "concordance of reality"]),
 ]
 
 
-def _card(cid, title, mechanism, mapping, bands):
+def _card(cid, title, mechanism, mapping, bands, opts=None):
+    opts = opts or {}
     return {
         "id": f"card_ci_{cid}", "kind": "reference", "title": title,
         "body": (f"{mechanism} — HOW IT FITS OUR SYSTEM: {mapping} We did not invent this form; we "
@@ -80,7 +162,8 @@ def _card(cid, title, mechanism, mapping, bands):
         "connections": [{"to_card_id": SPINE, "relationship": "member_of",
                          "evidence": "a measured collective-intelligence system, mapped to the engine"}],
         "author": "engine", "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
-        "lifecycle_stage": "public", "volatility": "permanent", "surface": "secular", "generated": False,
+        "lifecycle_stage": "public", "volatility": "permanent",
+        "surface": opts.get("surface", "secular"), "generated": False,
         "extra": {"measured": True, "systems_of_the_world": True},
     }
 
@@ -92,7 +175,11 @@ def _spine_card():
                  "global behavior, with no central controller and the group doing what no member can "
                  "alone. Ants (stigmergy), bees (quorum), birds (scale-free flocking), orcas (matriline "
                  "culture) — each measured, and each the natural form of one of the engine's mechanisms: "
-                 "the keeping, the conductor, the mesh, the witness wire. Uncovered, not invented."),
+                 "the keeping, the conductor, the mesh, the witness wire. Then the body's PHYSIOLOGY that "
+                 "holds it in bounds — division of labor and homeostasis — its lifecycle (reproduction), "
+                 "and its differentiated signals and immunity. And the two the colony lacks: the HEAD "
+                 "(it is a body ordered to Christ, not a headless swarm), and the gradient MANIFOLD that "
+                 "shows this is one form across biology, energy, and our software. Uncovered, not invented."),
         "source": {"label": "Collective intelligence — the measured architecture", "url": "",
                    "domain": "systems", "authority_tier": "reference"},
         "shelf": "spine", "box": "spine",
@@ -110,7 +197,7 @@ def main() -> int:
     out = Path("data") / "collective_intelligence_cards.jsonl"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(json.dumps(c, ensure_ascii=False) for c in cards) + "\n", encoding="utf-8")
-    print(f"carded {len(SYSTEMS)} collective-intelligence systems (+1 spine) -> {out}")
+    print(f"carded {len(SYSTEMS)} collective-intelligence systems/structures (+1 spine) -> {out}")
     return 0
 
 
