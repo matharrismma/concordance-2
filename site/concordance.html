@@ -176,7 +176,7 @@ body.intro .whisper{opacity:0;animation:rise .9s .6s ease forwards}
           <button id="go">Open</button>
         </div>
       </div>
-      <p class="whisper"><b>676,354</b>&nbsp; kept · found, checked &amp; sealed · <b>never generated</b></p>
+      <p class="whisper"><b id="keptn">676,354</b>&nbsp; kept · found, checked &amp; sealed · <b>never generated</b></p>
       <p style="margin-top:16px"><a class="learn-cta" href="/read.html">✦ &nbsp;Learn a language — the Coach &nbsp;→</a></p>
     </section>
 
@@ -397,6 +397,10 @@ document.body.classList.add("intro");setTimeout(()=>document.body.classList.remo
 // deep-link: ?q=... opens straight to an entry
 const urlq=new URLSearchParams(location.search).get("q");
 if(urlq){document.getElementById("q").value=urlq;open(urlq)}
+
+// the kept count, LIVE-WIRED from /capabilities — never a hardcoded number that drifts
+api("/capabilities").then(function(d){var n=d&&d.substrate&&d.substrate.cards&&d.substrate.cards.count;
+  if(n){var el=document.getElementById("keptn");if(el)el.textContent=Number(n).toLocaleString();}}).catch(function(){});
 
 // the dormant map of reality — a faint breathing constellation
 const cv=document.getElementById("sky"),cx=cv.getContext("2d");let W,H,pts;
