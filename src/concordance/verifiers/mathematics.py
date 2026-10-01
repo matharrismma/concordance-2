@@ -15,7 +15,7 @@ import ast as _ast
 import re as _re
 from typing import Any, Dict, List
 
-from .base import VerifierResult, confirm, error, mismatch, na
+from .base import VerifierResult, clamp_tol, confirm, error, mismatch, na
 from .base import dispatch  # declarative run() driver
 
 sympify = simplify = diff = integrate = limit = solve = None
@@ -572,10 +572,9 @@ def verify_calc_chain(spec: Dict[str, Any]) -> VerifierResult:
     if not _ensure_sympy():
         return na(name, "requires the optional math extra (sympy)")
     var_names = spec.get("variables") or []
-    try:
-        tol = min(abs(float(spec.get("step_rel_tol", 0.0) or 0.0)), 1e-2)
-    except (TypeError, ValueError):
-        tol = 0.0
+    # Exact by default (preserving the zero-false-positive guarantee); a caller may opt into a display
+    # tolerance, but clamp_tol caps it at 1e-2 and lets it only TIGHTEN — never widen the FP window.
+    tol = clamp_tol(spec, "step_rel_tol", 1e-2) if spec.get("step_rel_tol") is not None else 0.0
     claimed_answer = spec.get("claimed_answer")
     pairs: List = []
     raw = spec.get("calc_steps")
@@ -705,10 +704,9 @@ def verify_numeric(spec: Dict[str, Any]) -> VerifierResult:
     claimed = spec.get("claimed_value")
     if expr is None or claimed is None:
         return na(name)
-    try:
-        rel_tol = min(abs(float(spec.get("rel_tol", 1e-6))), 1e-2)
-    except (TypeError, ValueError):
-        rel_tol = 1e-6
+    # clamp_tol: default 1e-6 and a caller may only TIGHTEN below it, never loosen — the earlier
+    # min(..., 1e-2) let a caller widen the match window to 1e-2 (the FP-widening hole clamp_tol closes).
+    rel_tol = clamp_tol(spec, "rel_tol", 1e-6)
     try:
         val = _parse(str(expr), spec.get("variables") or [])
         fv = float(val.evalf() if hasattr(val, "evalf") else val)
