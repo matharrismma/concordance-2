@@ -310,6 +310,13 @@ def verify_derivation(steps: List[Dict[str, Any]]) -> Dict[str, Any]:
             # the seal binds to what was actually verified.
             "spec_hash": _spec_hash(spec),
         }
+        # Kind B — surface a verifier's framing (explanation + the question that would let us
+        # calculate) so a decline is actionable, not a dead end. Only the curated framing fields
+        # travel out, never the verifier's whole internal data dict.
+        _g = sr.get("data") or {}
+        _framing = {k: _g[k] for k in ("framing_question", "need", "example", "route") if k in _g}
+        if _framing:
+            entry["guidance"] = _framing
         if missing:
             entry["missing_refs"] = missing
         if unconfirmed:
