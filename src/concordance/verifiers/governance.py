@@ -17,6 +17,14 @@ from typing import Any, Dict, List
 
 from .base import VerifierResult, confirm, error, mismatch, na
 
+# Golden: a complete, valid decision packet confirms; perturbing the scope to an invalid value is
+# the falsehood the shape check must refuse.
+GOLDEN_PACKET_KEY = "DECISION_PACKET"
+GOLDEN_FALSIFY_KEYS = ["scope"]
+GOLDEN_EXAMPLE = {"title": "T", "scope": "local", "red_items": ["r1"], "floor_items": ["f1"],
+                  "way_path": "the chosen path through the options", "execution_steps": ["s1"],
+                  "witnesses": ["w1"]}
+
 _REQUIRED_FIELDS = ["title", "scope", "red_items", "floor_items",
                     "way_path", "execution_steps", "witnesses"]
 _VALID_SCOPES = ("local", "mesh", "archived")

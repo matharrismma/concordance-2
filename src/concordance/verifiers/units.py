@@ -71,6 +71,11 @@ _RULES = [
 ]
 
 
+GOLDEN_PACKET_KEY = "CONV_VERIFY"
+GOLDEN_FALSIFY_KEYS = ["to_value"]  # the claim here is to_value, not a 'claimed_'-prefixed field
+GOLDEN_EXAMPLE = {"from_unit": "km", "to_unit": "m", "from_value": 1.0, "to_value": 1000.0}
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     return dispatch(packet, "CONV_VERIFY", _RULES, domain="unit_conversion",
                     none_reason="no artifact provided")

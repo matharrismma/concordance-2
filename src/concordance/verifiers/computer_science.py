@@ -459,6 +459,13 @@ def verify_logic_gate(spec: Dict[str, Any]) -> VerifierResult:
                     {"gate_a": a, "gate_b": b, "actual": is_equiv, "claimed": claimed_b})
 
 
+GOLDEN_PACKET_KEY = "CS_VERIFY"
+# Boolean-algebra equivalence (Shannon) — pure truth-table, no code execution (which the engine
+# disables). a&b == b&a, so the two gate networks are equivalent.
+GOLDEN_EXAMPLE = {"variables": ["a", "b"], "gate_a": "a & b", "gate_b": "b & a",
+                  "claimed_equivalent": True}
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     results: List[VerifierResult] = []
     cv = packet.get("CS_VERIFY") or {}

@@ -620,6 +620,11 @@ def verify_measurement_consistency(spec: Dict[str, Any]) -> VerifierResult:
     return error(name, f"unknown claim {claim!r}; use consistent | discordant | agree_to_relative")
 
 
+# Verified golden for the domain-golden benchmark: a z-test whose two-sided p at z=1.96 is 0.05.
+GOLDEN_PACKET_KEY = "STAT_VERIFY"
+GOLDEN_EXAMPLE = {"test": "z", "z": 1.96, "tail": "two-sided", "claimed_p": 0.05}
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     results: List[VerifierResult] = []
     sv = packet.get("STAT_VERIFY") or {}

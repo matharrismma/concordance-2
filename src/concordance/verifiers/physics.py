@@ -370,6 +370,10 @@ def verify_gravitation(spec: Dict[str, Any]) -> VerifierResult:
                          spec["claimed_gravitational_force_N"], 1e-3, {"formula": "F = G m1 m2 / r^2"})
 
 
+GOLDEN_PACKET_KEY = "PHYS_VERIFY"
+GOLDEN_EXAMPLE = {"mass_kg": 2.0, "acceleration_m_per_s2": 3.0, "claimed_force_N": 6.0}  # F = ma
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     results: List[VerifierResult] = []
     pv = packet.get("PHYS_VERIFY") or {}

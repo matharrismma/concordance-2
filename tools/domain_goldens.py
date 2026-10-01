@@ -67,23 +67,37 @@ def _packet_key(mod, src: str) -> str | None:
     return m.group(1) if m else None
 
 
-def _falsify(spec: dict) -> dict | None:
+def _falsify(spec: dict, extra_keys=()) -> dict | None:
     """Perturb the CLAIMS, never the inputs — the falsehood must be a wrong ANSWER to the same
-    question, which is exactly what a false positive would have to swallow."""
-    out, changed = {}, False
-    for k, v in spec.items():
-        if k.startswith("claimed_") or k.startswith("claim_"):
-            if isinstance(v, bool):
-                out[k], changed = (not v), True
-                continue
-            if isinstance(v, (int, float)):
-                out[k], changed = (v * 2 + 7.5 if v else 42.0), True
-                continue
-            if isinstance(v, str):
-                out[k], changed = (v + "_NOT"), True
-                continue
-        out[k] = v
-    return out if changed else None
+    question, which is exactly what a false positive would have to swallow. Recurses into nested
+    dicts/lists (some packets nest their claim, e.g. BIO_VERIFY['molarity']['claimed_molarity']).
+    `extra_keys` lets a verifier whose claim field is not 'claimed_'-prefixed (e.g. a unit
+    conversion's to_value) name the field to perturb, so it too can be falsified."""
+    extra = set(extra_keys or ())
+    changed = [False]
+
+    def _perturb(obj):
+        if isinstance(obj, dict):
+            out = {}
+            for k, v in obj.items():
+                if k.startswith("claimed_") or k.startswith("claim_") or k in extra:
+                    if isinstance(v, bool):
+                        out[k], changed[0] = (not v), True
+                        continue
+                    if isinstance(v, (int, float)):
+                        out[k], changed[0] = (v * 2 + 7.5 if v else 42.0), True
+                        continue
+                    if isinstance(v, str):
+                        out[k], changed[0] = (v + "_NOT"), True
+                        continue
+                out[k] = _perturb(v)
+            return out
+        if isinstance(obj, list):
+            return [_perturb(x) for x in obj]
+        return obj
+
+    out = _perturb(spec)
+    return out if changed[0] else None
 
 
 def _confirmed(results) -> bool:
@@ -105,7 +119,7 @@ def derive():
         base = path.rsplit(".", 1)[-1]
         if dom == base or path not in canonical:
             canonical[path] = dom if dom == base else canonical.get(path, dom)
-    seen, goldens, no_example, unproven, false_positives = set(), {}, [], [], []
+    seen, goldens, no_example, unproven, false_positives, exempt = set(), {}, [], [], [], []
     for path, domain in sorted(canonical.items()):
         if path in seen:
             continue
@@ -116,9 +130,17 @@ def derive():
         mod = verifiers._get_module(domain)
         if mod is None:
             continue
+        exempt_reason = getattr(mod, "GOLDEN_EXEMPT", None)
+        if isinstance(exempt_reason, str) and exempt_reason:
+            exempt.append((domain, exempt_reason))     # intentionally outside the claim-golden model
+            continue
         src = f.read_text(encoding="utf-8")
-        spec = _example_from_docstring(mod)
-        pkt = _packet_key(mod, src)
+        # A verifier may declare an explicit, verified golden as module constants (real Python, so
+        # expressions like 1/250 work and there is no docstring-parsing fragility). Preferred; the
+        # docstring remains the fallback spec so nothing regresses.
+        explicit = getattr(mod, "GOLDEN_EXAMPLE", None)
+        spec = explicit if isinstance(explicit, dict) and explicit else _example_from_docstring(mod)
+        pkt = getattr(mod, "GOLDEN_PACKET_KEY", None) or _packet_key(mod, src)
         if not spec or not pkt:
             no_example.append(domain)
             continue
@@ -144,7 +166,7 @@ def derive():
             unproven.append(domain)
             continue
         spec = chosen
-        false_spec = _falsify(spec)
+        false_spec = _falsify(spec, getattr(mod, "GOLDEN_FALSIFY_KEYS", ()) or ())
         if false_spec is None:
             unproven.append(f"{domain} (no claimed_* value to falsify)")
             continue
@@ -157,11 +179,11 @@ def derive():
             unproven.append(f"{domain} (falsehood raised {type(exc).__name__})")
             continue
         goldens[domain] = {"packet_key": pkt, "true": spec, "false": false_spec}
-    return goldens, no_example, unproven, false_positives
+    return goldens, no_example, unproven, false_positives, exempt
 
 
 def main() -> int:
-    goldens, no_example, unproven, fps = derive()
+    goldens, no_example, unproven, fps, exempt = derive()
     print(f"PROVEN golden pairs: {len(goldens)} domains")
     print(f"  no documented example found: {len(no_example)}")
     if no_example:
@@ -169,6 +191,9 @@ def main() -> int:
     print(f"  example did not hold (documentation gap): {len(unproven)}")
     if unproven:
         print("    " + ", ".join(sorted(unproven)))
+    print(f"  exempt (outside the claim-golden model, covered elsewhere): {len(exempt)}")
+    for d, why in sorted(exempt):
+        print(f"    {d}: {why}")
     print(f"  FALSE POSITIVES (sealed a falsehood — CRITICAL): {len(fps)}")
     for d in fps:
         print(f"    !! {d}")

@@ -331,5 +331,11 @@ _RULES = [
 ]
 
 
+GOLDEN_PACKET_KEY = "OR_VERIFY"
+GOLDEN_EXAMPLE = {"variable_values": {"x": 1.0},
+                  "constraints": [{"lhs_coeffs": {"x": 1.0}, "operator": "<=", "rhs": 5.0}],
+                  "claimed_feasible": True}  # x=1 satisfies x<=5
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     return dispatch(packet, 'OR_VERIFY', _RULES, domain='operations_research', none_reason='no OR_VERIFY artifacts present')

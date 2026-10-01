@@ -396,5 +396,10 @@ _RULES = [
 ]
 
 
+GOLDEN_PACKET_KEY = "EPH_VERIFY"
+GOLDEN_EXAMPLE = {"orbit_semi_major_m": 1.496e11, "orbit_central_mass_kg": 1.989e30,
+                  "claimed_orbital_period_s": 3.156e7}  # Earth's orbit, ~1 year
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     return dispatch(packet, 'EPH_VERIFY', _RULES, domain='ephemeris', none_reason='no artifact provided')

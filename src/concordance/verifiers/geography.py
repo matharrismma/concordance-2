@@ -549,5 +549,9 @@ _RULES = [
 ]
 
 
+GOLDEN_PACKET_KEY = "GEO_LOC_VERIFY"
+GOLDEN_EXAMPLE = {"lat": 35.0, "lon": -85.0, "claimed_coords_valid": True}  # valid lat/lon
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     return dispatch(packet, 'GEO_LOC_VERIFY', _RULES, domain='geography', none_reason='no GEO_LOC_VERIFY artifacts present')

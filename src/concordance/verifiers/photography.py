@@ -164,5 +164,10 @@ _RULES = [
 ]
 
 
+GOLDEN_PACKET_KEY = "PHOTO_VERIFY"
+GOLDEN_EXAMPLE = {"f_number": 8.0, "shutter_seconds": 1.0 / 250.0,
+                  "claimed_exposure_value": 13.97}  # EV = log2(N^2/t) at ISO 100
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     return dispatch(packet, 'PHOTO_VERIFY', _RULES, domain='photography', none_reason='no PHOTO_VERIFY artifacts present')

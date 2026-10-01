@@ -394,6 +394,10 @@ def verify_sensor_failure_plan(spec: Dict[str, Any]) -> VerifierResult:
                     {"sensor_recalibration_plan": spec.get("sensor_recalibration_plan")})
 
 
+GOLDEN_PACKET_KEY = "BIO_VERIFY"
+GOLDEN_EXAMPLE = {"molarity": {"moles": 2.0, "volume_L": 1.0, "claimed_molarity": 2.0}}  # M = moles/L
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     results: List[VerifierResult] = []
     bv = packet.get("BIO_VERIFY") or {}

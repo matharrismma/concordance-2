@@ -172,7 +172,9 @@ def _parse(expr: str, var_names: List[str] = None):
         # stdlib-only box: the symbolic-math checks need sympy. Raise a _PARSE_ERRORS member so
         # every verify_* wrapper degrades to NOT_APPLICABLE with this reason, never a crash.
         raise ValueError("requires the optional math extra (sympy); not installed on this box")
-    expr = _MOD_WORD_RE.sub("%", str(expr))
+    # Strip surrounding whitespace: ast.parse(..., mode="eval") rejects leading/trailing space as an
+    # IndentationError, so a split like "x + y = 3" -> " 3" would otherwise fail to parse.
+    expr = _MOD_WORD_RE.sub("%", str(expr)).strip()
     if _INVALID_EXPR_RE.search(str(expr)):
         raise _SympifyError(f"invalid characters in expression: {expr!r}")
     _ast_compute_guard(expr)
@@ -477,7 +479,188 @@ def verify_set_algebra(spec: Dict[str, Any]) -> VerifierResult:
                     {"set_a": a, "set_b": b, "actual": equal, "claimed": claimed_b})
 
 
+# <<lhs=rhs>> calculator annotations and the final '#### N', for grading GSM8K-style worked solutions.
+_CALC_ANNOTATION = _re.compile(r"<<\s*(.+?)\s*=\s*(.+?)\s*>>")
+_FINAL_ANSWER = _re.compile(r"####\s*([\-\d.,/]+)")
+
+
+def verify_calc_chain(spec: Dict[str, Any]) -> VerifierResult:
+    """Grade a worked arithmetic/algebra SOLUTION: a chain of 'lhs = rhs' steps reaching a final
+    answer. Each step is checked with the SAME equality engine (simplify(lhs - rhs) == 0), so a
+    single wrong step is caught; the final answer, if given, must equal the last step. Accepts
+    explicit steps (calc_steps = ['16-3-4=9', '9*2=18'] or [{'lhs':.., 'rhs':..}]) OR a GSM8K-style
+    solution_text with <<lhs=rhs>> calculator annotations and a '#### N' final answer. Deterministic,
+    no NL understanding — it grades a worked chain, it does not solve the word problem. An opt-in
+    step_rel_tol (clamped to <= 1e-2) accepts numeric steps rounded to display precision; the default
+    is 0 (exact), preserving the zero-false-positive guarantee."""
+    name = "mathematics.calc_chain"
+    if not _ensure_sympy():
+        return na(name, "requires the optional math extra (sympy)")
+    var_names = spec.get("variables") or []
+    try:
+        tol = min(abs(float(spec.get("step_rel_tol", 0.0) or 0.0)), 1e-2)
+    except (TypeError, ValueError):
+        tol = 0.0
+    claimed_answer = spec.get("claimed_answer")
+    pairs: List = []
+    raw = spec.get("calc_steps")
+    text = spec.get("solution_text")
+    if raw:
+        for s in raw:
+            if isinstance(s, dict) and (s.get("lhs") is not None or s.get("expr") is not None):
+                pairs.append((str(s.get("lhs", s.get("expr"))), str(s.get("rhs", s.get("result")))))
+            elif isinstance(s, str) and "=" in s:
+                lhs, rhs = s.split("=", 1)
+                pairs.append((lhs, rhs))
+    elif isinstance(text, str):
+        for m in _CALC_ANNOTATION.finditer(text):
+            pairs.append((m.group(1), m.group(2)))
+        if claimed_answer is None:
+            fm = _FINAL_ANSWER.search(text)
+            if fm:
+                claimed_answer = fm.group(1).replace(",", "")
+    else:
+        return na(name)
+    if not pairs:
+        return na(name, "no calc steps found")
+
+    def _ok(lhs: str, rhs: str) -> bool:
+        L, R = _parse(lhs, var_names), _parse(rhs, var_names)
+        if simplify(L - R) == 0:
+            return True
+        if tol > 0:
+            try:
+                lf, rf = float(L), float(R)
+                return abs(lf - rf) <= tol * max(1.0, abs(lf))
+            except (TypeError, ValueError):
+                return False
+        return False
+
+    failures: List[str] = []
+    for i, (lhs, rhs) in enumerate(pairs):
+        try:
+            if not _ok(lhs, rhs):
+                failures.append(f"step {i + 1}: {lhs.strip()} != {rhs.strip()}")
+        except _PARSE_ERRORS:
+            failures.append(f"step {i + 1}: unparseable ({lhs.strip()}={rhs.strip()})")
+    if claimed_answer is not None:
+        try:
+            if not _ok(str(claimed_answer), pairs[-1][1]):
+                failures.append(f"final answer {claimed_answer} != last step {pairs[-1][1].strip()}")
+        except _PARSE_ERRORS:
+            failures.append(f"final answer {claimed_answer} not comparable")
+    data = {"steps": len(pairs), "final_answer": claimed_answer, "step_rel_tol": tol,
+            "chain": [f"{l.strip()}={r.strip()}" for l, r in pairs][:50]}
+    if failures:
+        return mismatch(name, "; ".join(failures)[:300], data)
+    tail = f"; final answer {claimed_answer}" if claimed_answer is not None else ""
+    return confirm(name, f"all {len(pairs)} steps verified{tail}", data)
+
+
+def verify_numeric(spec: Dict[str, Any]) -> VerifierResult:
+    """Evaluate an arithmetic/numeric expression and check a claimed value — the engine as the
+    verifier behind any solver (the solver proposes a number, the engine disposes). Exact via sympy,
+    compared to the claim within rel_tol (default 1e-6 to accept display rounding, clamped <= 1e-2).
+    Spec: {"numeric_expr": "sqrt(2) + 1", "claimed_value": 2.414214, "rel_tol": 1e-6}."""
+    name = "mathematics.numeric"
+    if not _ensure_sympy():
+        return na(name, "requires the optional math extra (sympy)")
+    expr = spec.get("numeric_expr")
+    claimed = spec.get("claimed_value")
+    if expr is None or claimed is None:
+        return na(name)
+    try:
+        rel_tol = min(abs(float(spec.get("rel_tol", 1e-6))), 1e-2)
+    except (TypeError, ValueError):
+        rel_tol = 1e-6
+    try:
+        val = _parse(str(expr), spec.get("variables") or [])
+        fv = float(val.evalf() if hasattr(val, "evalf") else val)
+        cv = float(claimed)
+    except _PARSE_ERRORS as e:
+        return error(name, f"could not evaluate {expr!r}: {type(e).__name__}")
+    except (TypeError, ValueError):
+        return mismatch(name, f"{expr} is not a pure number (has free symbols?)", {"expr": str(expr)})
+    data = {"expr": str(expr), "computed": fv, "claimed": cv, "rel_tol": rel_tol,
+            "abs_diff": abs(fv - cv)}
+    if abs(fv - cv) <= rel_tol * max(1.0, abs(fv)):
+        return confirm(name, f"{expr} = {fv:.10g} (claim {cv}, within {rel_tol:.0e})", data)
+    return mismatch(name, f"{expr} = {fv:.10g}, claimed {cv}", data)
+
+
+def verify_number_theory(spec: Dict[str, Any]) -> VerifierResult:
+    """Number-theory claims — gcd, lcm, primality, factorial, binomial, modulo — checked exactly.
+    Spec (any one): {"gcd": [12, 18], "claimed_gcd": 6} · {"lcm": [4, 6], "claimed_lcm": 12} ·
+    {"is_prime": 17, "claimed_prime": true} · {"factorial": 5, "claimed_factorial": 120} ·
+    {"binomial": [5, 2], "claimed_binomial": 10} · {"modulo": [17, 5], "claimed_modulo": 2}."""
+    name = "mathematics.number_theory"
+    if not _ensure_sympy():
+        return na(name, "requires the optional math extra (sympy)")
+    from sympy import igcd, ilcm, isprime, factorial as _fact, binomial as _binom
+    try:
+        if "gcd" in spec and "claimed_gcd" in spec:
+            a = [int(x) for x in spec["gcd"]]
+            actual, claimed, label = igcd(*a), int(spec["claimed_gcd"]), f"gcd{tuple(a)}"
+        elif "lcm" in spec and "claimed_lcm" in spec:
+            a = [int(x) for x in spec["lcm"]]
+            actual, claimed, label = ilcm(*a), int(spec["claimed_lcm"]), f"lcm{tuple(a)}"
+        elif "is_prime" in spec and "claimed_prime" in spec:
+            actual, claimed, label = bool(isprime(int(spec["is_prime"]))), bool(spec["claimed_prime"]), f"isprime({spec['is_prime']})"
+        elif "factorial" in spec and "claimed_factorial" in spec:
+            actual, claimed, label = int(_fact(int(spec["factorial"]))), int(spec["claimed_factorial"]), f"{spec['factorial']}!"
+        elif "binomial" in spec and "claimed_binomial" in spec:
+            n, k = int(spec["binomial"][0]), int(spec["binomial"][1])
+            actual, claimed, label = int(_binom(n, k)), int(spec["claimed_binomial"]), f"C({n},{k})"
+        elif "modulo" in spec and "claimed_modulo" in spec:
+            a, m = int(spec["modulo"][0]), int(spec["modulo"][1])
+            actual, claimed, label = a % m, int(spec["claimed_modulo"]), f"{a} mod {m}"
+        else:
+            return na(name)
+    except (TypeError, ValueError, IndexError) as e:
+        return error(name, f"malformed number-theory input: {e}")
+    data = {"claim": label, "actual": actual, "claimed": claimed}
+    if actual == claimed:
+        return confirm(name, f"{label} = {actual}", data)
+    return mismatch(name, f"{label} = {actual}, claimed {claimed}", data)
+
+
+def verify_system(spec: Dict[str, Any]) -> VerifierResult:
+    """A claimed solution to a SYSTEM of equations — verified by substitution (each equation must
+    hold), so no solver ambiguity and no false positive. Spec: {"equations": ["x + y = 3",
+    "x - y = 1"], "variables": ["x", "y"], "claimed_solution": {"x": 2, "y": 1}}."""
+    name = "mathematics.system"
+    if not _ensure_sympy():
+        return na(name, "requires the optional math extra (sympy)")
+    eqs = spec.get("equations")
+    claimed = spec.get("claimed_solution")
+    var_names = spec.get("variables") or (list(claimed.keys()) if isinstance(claimed, dict) else [])
+    if not eqs or not isinstance(claimed, dict):
+        return na(name)
+    try:
+        subs = {Symbol(k): _parse(str(v), var_names) for k, v in claimed.items()}
+    except _PARSE_ERRORS as e:
+        return error(name, f"unparseable claimed value: {type(e).__name__}")
+    failures = []
+    for eq in eqs:
+        if "=" not in str(eq):
+            return error(name, f"equation has no '=': {eq!r}")
+        lhs, rhs = str(eq).split("=", 1)
+        try:
+            if simplify((_parse(lhs, var_names) - _parse(rhs, var_names)).subs(subs)) != 0:
+                failures.append(str(eq).strip())
+        except _PARSE_ERRORS:
+            return error(name, f"unparseable equation: {eq!r}")
+    data = {"equations": [str(e).strip() for e in eqs], "claimed_solution": claimed}
+    if failures:
+        return mismatch(name, "solution fails: " + "; ".join(failures)[:200], data)
+    return confirm(name, f"claimed solution satisfies all {len(eqs)} equations", data)
+
+
 _RULES = [
+    (lambda mv: ("calc_steps" in mv or "solution_text" in mv), verify_calc_chain),
+    (lambda mv: ("numeric_expr" in mv and "claimed_value" in mv), verify_numeric),
+    (lambda mv: any(k in mv for k in ("gcd", "lcm", "is_prime", "factorial", "binomial", "modulo")), verify_number_theory),
+    (lambda mv: ("equations" in mv and "claimed_solution" in mv), verify_system),
     (lambda mv: ("expr_a" in mv and "expr_b" in mv), verify_equality),
     (lambda mv: ("set_a" in mv and "set_b" in mv and "claimed_equal" in mv), verify_set_algebra),
     (lambda mv: ("function" in mv and "claimed_derivative" in mv), verify_derivative),
@@ -486,6 +669,10 @@ _RULES = [
     (lambda mv: ("equation" in mv and "claimed_solutions" in mv), verify_solve),
     (lambda mv: ("lhs" in mv and "rhs" in mv and "op" in mv), verify_inequality),
 ]
+
+
+GOLDEN_PACKET_KEY = "MATH_VERIFY"  # dispatch()-routed, so the auto-detector needs this named
+GOLDEN_EXAMPLE = {"function": "x**2", "variable": "x", "claimed_derivative": "2*x"}  # d/dx x^2 = 2x
 
 
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:

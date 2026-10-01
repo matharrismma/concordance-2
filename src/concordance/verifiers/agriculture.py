@@ -305,5 +305,9 @@ _RULES = [
 ]
 
 
+GOLDEN_PACKET_KEY = "AG_VERIFY"
+GOLDEN_EXAMPLE = {"crop": "tomato", "claimed_zone": "7b"}  # hardiness zone within tolerance
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     return dispatch(packet, 'AG_VERIFY', _RULES, domain='agriculture', none_reason='no AG_VERIFY artifacts present')

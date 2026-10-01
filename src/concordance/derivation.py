@@ -124,6 +124,10 @@ _MATH_MODES = {
     "integral": _math.verify_integral,
     "limit": _math.verify_limit,
     "solve": _math.verify_solve,
+    "calc_chain": _math.verify_calc_chain,        # grade a worked solution (incl. GSM8K <<expr=result>>)
+    "numeric": _math.verify_numeric,              # evaluate an expression, check a claimed value
+    "number_theory": _math.verify_number_theory,  # gcd / lcm / primality / factorial / binomial / modulo
+    "system": _math.verify_system,                # a claimed solution to a system, by substitution
 }
 
 

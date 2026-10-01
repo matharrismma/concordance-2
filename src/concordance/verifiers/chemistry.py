@@ -406,6 +406,10 @@ def verify_ph_classification(spec: Dict[str, Any]) -> VerifierResult:
                     {"pH": pH_f, "actual": actual, "claimed": claim_norm})
 
 
+GOLDEN_PACKET_KEY = "CHEM_VERIFY"
+GOLDEN_EXAMPLE = {"amount_mol": 1.0, "claimed_particle_count": 6.02214076e23}  # N = n * N_A
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     """Run all chemistry verifiers that have an artifact in the packet."""
     results: List[VerifierResult] = []

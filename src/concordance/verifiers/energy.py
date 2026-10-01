@@ -451,6 +451,11 @@ def verify_peak_load_vs_inverter(spec: Dict[str, Any]) -> VerifierResult:
 # ── Entry point ────────────────────────────────────────────────────
 
 
+GOLDEN_PACKET_KEY = "ENERGY_VERIFY"
+GOLDEN_EXAMPLE = {"generation_kwh_day": 10.0, "consumption_kwh_day": 6.0,
+                  "losses_kwh_day": 0.0, "claimed_balance_kwh_day": 4.0}
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     results: List[VerifierResult] = []
     ev = packet.get("ENERGY_VERIFY") or {}
