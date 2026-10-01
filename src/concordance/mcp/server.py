@@ -145,6 +145,13 @@ def _secular_tools() -> List[dict]:
                          "that stand with it. Empty when the word is unknown or no thesaurus is loaded. "
                          "The agent twin of the GET /thesaurus page."),
          "inputSchema": {"type": "object", "properties": {"word": {"type": "string"}}, "required": ["word"]}},
+        {"name": "define",
+         "description": ("The dictionary — what an English word MEANS. Webster's 1913 (public domain) plus "
+                         "our gathered supplement for terms it predates; each sense labeled with its source. "
+                         "Empty when the word is unknown or no dictionary is loaded. The peer of thesaurus "
+                         "(synonyms) and word_study (original languages) — it points to them, never duplicates. "
+                         "The agent twin of GET /dictionary."),
+         "inputSchema": {"type": "object", "properties": {"word": {"type": "string"}}, "required": ["word"]}},
         {"name": "steward_budget",
          "description": ("Steward — a household budget (income, expenses -> net, savings rate, by "
                          "category). Shows and plans; NEVER moves money."),
@@ -873,7 +880,8 @@ PROFILES: Dict[str, Dict[str, Any]] = {
                   "decks": "read", "deck_open": "read",
                   "cards_stats": "read", "daily_card": "read", "grid_axis": "read",
                   "grid_dimension": "read", "card_connections": "read", "locate": "read",
-                  "library_health": "read", "pronounce": "derive", "thesaurus": "derive", "study_find": "read",
+                  "library_health": "read", "pronounce": "derive", "thesaurus": "derive",
+                  "define": "derive", "study_find": "read",
                   "seeds": "read", "ask": "read", "discern": "read"},
     },
     "sovereign": {
@@ -1523,6 +1531,9 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         syn, broader = _th.synonyms(w), _th.broader(w)
         return {"word": w, "synonyms": syn, "broader": broader, "count": len(syn) + len(broader),
                 "note": "WordNet synonyms + broader (IS-A) terms; empty if unknown or no thesaurus loaded"}
+    if name == "define":
+        from .. import dictionary as _dict   # offline Webster's 1913 + supplement — the agent twin of /dictionary
+        return _dict.define(str(args.get("word") or ""))
     if name == "steward_budget":
         from .. import steward  # shows + plans; never moves money
         return steward.budget(args.get("income"), args.get("expenses") or [])

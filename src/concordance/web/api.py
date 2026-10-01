@@ -1786,6 +1786,18 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                     "note": "WordNet synonyms + broader (IS-A) terms; empty if the word is unknown or "
                             "no thesaurus is loaded on this node"})
 
+    # THE DICTIONARY door of the reference section — "what this English word MEANS": Webster's 1913
+    # (public domain) plus our gathered supplement for terms it predates, each sense labeled with its
+    # source. Offline lookup (data/dictionary_en.db, built once by tools/build_dictionary.py). The peer
+    # of the thesaurus (synonyms) and word_study (original languages); it points to them rather than
+    # duplicating. Empty, never an error, for an unknown word or a node with no dictionary loaded.
+    if method == "GET" and path == "/dictionary":
+        w = (query.get("q") or query.get("word") or "").strip()
+        if not w:
+            return _err(400, "q required")
+        from .. import dictionary as _dict
+        return _ok(_dict.define(w))
+
     # ── THE EXPERT FACES — callable life-domain servants (the Steward, Tutor, Social Worker, Theorist).
     # A face is a deterministic COMPOSER: it ARRANGES existing verifiers + shelves + discernment for a
     # life-domain and never generates. Additive — the ordinary front door (/ask) is untouched; a caller
@@ -3067,6 +3079,7 @@ ROUTES = [
     {"path": "/growth", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/pronounce", "methods": ("GET",), "api": True},
     {"path": "/thesaurus", "methods": ("GET",), "api": True},   # bounded single-word lookup (data/thesaurus.db), like /pronounce
+    {"path": "/dictionary", "methods": ("GET",), "api": True},  # Webster's 1913 + supplement definitions (data/dictionary_en.db)
     {"path": "/faces", "methods": ("GET",), "api": True},       # list the callable life-domain servants
     {"path": "/recombine", "methods": ("GET",), "api": True, "rl": "read"},  # speak from the keeping by recombining found clauses (scans the corpus like /search)
     {"path": "/face", "methods": ("POST",), "rl": True},        # consult one — composes verifiers+shelves+discernment

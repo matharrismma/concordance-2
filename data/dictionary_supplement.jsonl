@@ -1,0 +1,12 @@
+# Our dictionary supplement — Webster's 1913 is the base; these are terms it predates, added as
+# additional senses and marked source="supplement" so the reader sees which is which. Gathered
+# factual definitions of modern things, never opinion. One JSON object per line: {word, definition,
+# source?}. Grows through the keeping; start small and honest.
+{"word": "computer", "definition": "A programmable electronic device that stores and processes data according to instructions, performing calculations and operations at high speed. (Webster's 1913 records only the older sense: one who computes.)", "source": "supplement"}
+{"word": "internet", "definition": "The global system of interconnected computer networks that exchange data using standard protocols, linking devices worldwide.", "source": "supplement"}
+{"word": "software", "definition": "The programs and instructions that direct a computer's operation, as distinct from the physical hardware.", "source": "supplement"}
+{"word": "smartphone", "definition": "A handheld mobile telephone that also runs software applications, connects to the internet, and combines the functions of a computer and a camera.", "source": "supplement"}
+{"word": "email", "definition": "Messages sent and received electronically over a computer network; electronic mail.", "source": "supplement"}
+{"word": "antibiotic", "definition": "A medicine that inhibits the growth of or destroys bacteria, used to treat bacterial infections.", "source": "supplement"}
+{"word": "vaccine", "definition": "A preparation that stimulates the immune system to recognize and resist a specific disease, usually given by injection or by mouth.", "source": "supplement"}
+{"word": "solar panel", "definition": "A panel of photovoltaic cells that converts sunlight directly into electricity.", "source": "supplement"}

@@ -75,6 +75,11 @@ AGENT_ONLY = {
     "/push/unsubscribe", "/study/export", "/study/import", "/card/connections",
     "/cards/for-the-group", "/decks/predict", "/thread/digest", "/thread/lineage",
     "/thread/recall", "/thread/recalled", "/threads/search", "/word_occurrences",
+    # /dictionary and /pronounce are reference-section lookup APIs (single word -> definitions /
+    # phonetics), the data twins of the `define` and `pronounce` agent tools — data endpoints, not
+    # pages a human navigates TO. (/thesaurus is the same shape and is NOT yet declared — a
+    # pre-existing gap, tracked separately, not this change's to fix.)
+    "/dictionary",
     "/works/item", "/library/health", "/growth", "/daily", "/pronounce", "/book",
     "/badges", "/archetype", "/archetypes", "/archetypes/match", "/coach/guidance",
     "/chess", "/report", "/block",

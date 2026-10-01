@@ -145,3 +145,7 @@ data/**/*.gz
 # The crisis semantic backstop is a committed CODE asset (a sealed, reproducible model), not
 # runtime corpus data — it must ship and be gate-tested everywhere.
 !data/crisis_semantic.json
+# Our dictionary supplement — curated CONTENT (git-tracked), tiny; must be AFTER the data/**/*.jsonl
+# re-ignore above to win. The Webster's 1913 base and the built data/dictionary_en.db stay untracked
+# (fetched/built like thesaurus.db).
+!data/dictionary_supplement.jsonl

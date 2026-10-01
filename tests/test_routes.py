@@ -30,6 +30,9 @@ GOLDEN_API_GET = {
     # The thesaurus reference door (2026-09-26): synonyms + broader terms from data/thesaurus.db, a
     # bounded word lookup like /pronounce; the same WordNet relation sharpens /search recall.
     "/thesaurus",
+    # The dictionary reference door (2026-10-01): Webster's 1913 + our supplement from
+    # data/dictionary_en.db, a bounded word lookup like /thesaurus; the peer that gives DEFINITIONS.
+    "/dictionary",
     "/faces",
     "/recombine",   # speak from the keeping by recombining found clauses (read bucket, scans like /search)
     # coach lesson text, the scripture-for lookup, and the tortoise reader — GET surfaces added with the
