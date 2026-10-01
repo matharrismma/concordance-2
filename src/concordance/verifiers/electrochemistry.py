@@ -22,6 +22,7 @@ from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 from .base import dispatch
+from . import alpha_scale as _ascale  # alpha-anchored Faraday / Nernst scale
 
 _R = 8.314462618   # J/(mol·K)
 _F = 96485.33212   # C/mol
@@ -93,10 +94,34 @@ def verify_faraday(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"m = {actual:.4f} g, claimed {cl} (diff {abs(actual-cl):.4f})", data)
 
 
+def verify_faraday_constant(spec: Dict[str, Any]) -> VerifierResult:
+    """The Faraday constant and the Nernst thermal voltage — electrochemistry THROUGH the charge
+    quantum: F = N_A e, and RT/F (the thermal voltage that scales the Nernst equation, ~25.69 mV
+    at 298.15 K). The elementary charge e is part of alpha's constant web."""
+    name = "electrochemistry.faraday_constant"
+    if "claimed_faraday_c_per_mol" in spec:
+        return _ascale.compare(name, _ascale.faraday_C_per_mol(),
+                               spec["claimed_faraday_c_per_mol"], 1e-3, {"formula": "F = N_A e"})
+    if "nernst_temperature_k" in spec and "claimed_thermal_voltage_v" in spec:
+        try:
+            T = float(spec["nernst_temperature_k"])
+        except (TypeError, ValueError):
+            return error(name, "nernst_temperature_k must be numeric")
+        if T <= 0:
+            return error(name, "temperature must be > 0 K")
+        return _ascale.compare(name, _ascale.nernst_thermal_V(T),
+                               spec["claimed_thermal_voltage_v"], 1e-3,
+                               {"formula": "RT/F (Nernst thermal voltage)", "T_K": T})
+    return na(name)
+
+
 _RULES = [
     (("e0_V", "n_electrons", "reaction_quotient", "claimed_E_V"), verify_nernst),
     (("e_cathode_V", "e_anode_V", "claimed_cell_V"), verify_cell_potential),
     (("charge_C", "molar_mass_g", "n_faraday", "claimed_mass_g"), verify_faraday),
+    (lambda ec: ("claimed_faraday_c_per_mol" in ec
+                 or ("nernst_temperature_k" in ec and "claimed_thermal_voltage_v" in ec)),
+     verify_faraday_constant),
 ]
 
 

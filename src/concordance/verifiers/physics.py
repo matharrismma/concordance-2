@@ -21,6 +21,8 @@ Conservation format:
 from __future__ import annotations
 from typing import Any, Dict, List, Optional
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from . import rela_scale as _rela  # c-anchored mass-energy / Lorentz factor
+from . import grav_scale as _grav  # G-anchored Newtonian gravitation
 
 # sympy (with sympy.physics.units) is a ~4s import. Only the dimensional-
 # consistency check needs it, so it loads on first use rather than at module
@@ -331,9 +333,54 @@ def verify_kinetic_energy_basic(spec: Dict[str, Any]) -> VerifierResult:
     )
 
 
+def verify_mass_energy(spec: Dict[str, Any]) -> VerifierResult:
+    """Mass-energy and time dilation — physics THROUGH the speed of light c: the rest energy
+    E = m c^2, and the Lorentz factor gamma = 1 / sqrt(1 - (v/c)^2)."""
+    name = "physics.mass_energy"
+    if "rest_mass_kg" in spec and "claimed_rest_energy_J" in spec:
+        try:
+            m = float(spec["rest_mass_kg"])
+        except (TypeError, ValueError):
+            return error(name, "rest_mass_kg must be numeric")
+        if m <= 0:
+            return error(name, "rest mass must be positive")
+        return _rela.compare(name, _rela.rest_energy_J(m), spec["claimed_rest_energy_J"], 1e-3,
+                             {"formula": "E = m c^2"})
+    if "lorentz_velocity_m_per_s" in spec and "claimed_lorentz_factor" in spec:
+        try:
+            g = _rela.lorentz_factor(float(spec["lorentz_velocity_m_per_s"]))
+        except (TypeError, ValueError):
+            return error(name, "lorentz_velocity_m_per_s must be numeric and below c")
+        return _rela.compare(name, g, spec["claimed_lorentz_factor"], 1e-3,
+                             {"formula": "gamma = 1/sqrt(1-(v/c)^2)"})
+    return na(name)
+
+
+def verify_gravitation(spec: Dict[str, Any]) -> VerifierResult:
+    """Newton's law of universal gravitation F = G m1 m2 / r^2 — physics THROUGH the gravitational
+    constant G."""
+    name = "physics.gravitation"
+    try:
+        m1 = float(spec["grav_mass_1_kg"]); m2 = float(spec["grav_mass_2_kg"]); r = float(spec["grav_separation_m"])
+    except (KeyError, TypeError, ValueError):
+        return error(name, "grav_mass_1_kg / grav_mass_2_kg / grav_separation_m must be numeric")
+    if m1 <= 0 or m2 <= 0 or r <= 0:
+        return error(name, "masses and separation must be positive")
+    return _grav.compare(name, _grav.gravitational_force_N(m1, m2, r),
+                         spec["claimed_gravitational_force_N"], 1e-3, {"formula": "F = G m1 m2 / r^2"})
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     results: List[VerifierResult] = []
     pv = packet.get("PHYS_VERIFY") or {}
+
+    if ("rest_mass_kg" in pv and "claimed_rest_energy_J" in pv) or \
+       ("lorentz_velocity_m_per_s" in pv and "claimed_lorentz_factor" in pv):
+        results.append(verify_mass_energy(pv))
+
+    if all(k in pv for k in ("grav_mass_1_kg", "grav_mass_2_kg", "grav_separation_m",
+                             "claimed_gravitational_force_N")):
+        results.append(verify_gravitation(pv))
 
     if "equation" in pv and "symbols" in pv:
         results.append(verify_dimensional_consistency(pv["equation"], pv["symbols"]))

@@ -45,6 +45,8 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from . import grav_scale as _gscale  # G-anchored escape velocity / Schwarzschild radius
+from . import rela_scale as _rela  # c-anchored light-travel time
 
 
 # Newtonian gravitational constant (SI: m³ kg⁻¹ s⁻²). CODATA 2018.
@@ -196,14 +198,73 @@ def verify_distance_modulus(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+def verify_gravitational_scale(spec: Dict[str, Any]) -> VerifierResult:
+    """Gravitational quantities set THROUGH the Newtonian constant G: the escape velocity
+    v = sqrt(2 G M / r), and the Schwarzschild radius r_s = 2 G M / c^2."""
+    name = "astronomy.gravitational_scale"
+    if all(k in spec for k in ("escape_mass_kg", "escape_radius_m", "claimed_escape_velocity_m_s")):
+        try:
+            M = float(spec["escape_mass_kg"]); r = float(spec["escape_radius_m"])
+        except (TypeError, ValueError):
+            return error(name, "escape_mass_kg / escape_radius_m must be numeric")
+        if M <= 0 or r <= 0:
+            return error(name, "mass and radius must be positive")
+        return _gscale.compare(name, _gscale.escape_velocity_m_s(M, r),
+                               spec["claimed_escape_velocity_m_s"], 1e-3,
+                               {"formula": "v = sqrt(2 G M / r)"})
+    if "schwarzschild_mass_kg" in spec and "claimed_schwarzschild_radius_m" in spec:
+        try:
+            M = float(spec["schwarzschild_mass_kg"])
+        except (TypeError, ValueError):
+            return error(name, "schwarzschild_mass_kg must be numeric")
+        if M <= 0:
+            return error(name, "mass must be positive")
+        return _gscale.compare(name, _gscale.schwarzschild_radius_m(M),
+                               spec["claimed_schwarzschild_radius_m"], 1e-3,
+                               {"formula": "r_s = 2 G M / c^2"})
+    return na(name)
+
+
+def verify_light_travel(spec: Dict[str, Any]) -> VerifierResult:
+    """Light-travel time and distance — astronomy THROUGH the speed of light c: t = d / c and
+    d = c t (e.g. 1 AU is ~499 light-seconds away)."""
+    name = "astronomy.light_travel"
+    if "light_distance_m" in spec and "claimed_light_time_s" in spec:
+        try:
+            d = float(spec["light_distance_m"])
+        except (TypeError, ValueError):
+            return error(name, "light_distance_m must be numeric")
+        if d <= 0:
+            return error(name, "distance must be positive")
+        return _rela.compare(name, _rela.light_travel_time_s(d), spec["claimed_light_time_s"], 1e-3,
+                             {"formula": "t = d / c"})
+    if "light_time_s" in spec and "claimed_light_distance_m" in spec:
+        try:
+            t = float(spec["light_time_s"])
+        except (TypeError, ValueError):
+            return error(name, "light_time_s must be numeric")
+        if t <= 0:
+            return error(name, "time must be positive")
+        return _rela.compare(name, _rela.light_travel_distance_m(t), spec["claimed_light_distance_m"], 1e-3,
+                             {"formula": "d = c t"})
+    return na(name)
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     results: List[VerifierResult] = []
     av = packet.get("ASTRO_VERIFY") or {}
+
+    if ("light_distance_m" in av and "claimed_light_time_s" in av) or \
+       ("light_time_s" in av and "claimed_light_distance_m" in av):
+        results.append(verify_light_travel(av))
 
     if all(k in av for k in ("orbital_period_years", "semi_major_axis_au", "claimed_kepler_consistent")):
         results.append(verify_kepler_third_law(av))
     if all(k in av for k in ("mass_1_kg", "mass_2_kg", "separation_m", "claimed_gravitational_force_N")):
         results.append(verify_gravitational_force(av))
+    if (all(k in av for k in ("escape_mass_kg", "escape_radius_m", "claimed_escape_velocity_m_s"))
+            or ("schwarzschild_mass_kg" in av and "claimed_schwarzschild_radius_m" in av)):
+        results.append(verify_gravitational_scale(av))
     if "parallax_arcsec" in av and "claimed_distance_parsec" in av:
         # Disambiguate: if magnitudes are also present, the claimed_distance
         # is for the magnitude path. parallax check only runs when

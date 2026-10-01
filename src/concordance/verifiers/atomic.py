@@ -34,6 +34,7 @@ from typing import Any, Dict, List, Optional
 
 from .base import VerifierResult, na, confirm, mismatch, error
 from .base import dispatch  # declarative run() driver
+from . import alpha_scale as _ascale  # alpha-anchored energy levels / spectral lines
 
 # Madelung (n+l, then n) fill order, covering Z = 1..118.
 _MADELUNG = [
@@ -212,7 +213,56 @@ def verify_electron_configuration(spec: Dict[str, Any]) -> VerifierResult:
                     {"ground_state": _fmt(truth), "claimed": _fmt(parsed)})
 
 
+def verify_energy_level(spec: Dict[str, Any]) -> VerifierResult:
+    """Hydrogenic energy levels and spectral lines — atomic structure THROUGH alpha (via the
+    Rydberg energy Ry = alpha^2 m_e c^2 / 2). Verifies a bound-state energy E_n = -Z^2 Ry/n^2,
+    or a Rydberg spectral line 1/lambda = R_inf Z^2 (1/n_lower^2 - 1/n_upper^2). Infinite nuclear
+    mass (a few x 10^-4 from the reduced-mass value; the tolerance absorbs it)."""
+    name = "atomic.energy_level"
+    if "level_n" in spec and "claimed_energy_level_eV" in spec:
+        try:
+            n = int(spec["level_n"]); Z = float(spec.get("level_Z", 1))
+        except (TypeError, ValueError):
+            return error(name, "level_n / level_Z must be numeric")
+        if n < 1 or Z <= 0:
+            return error(name, "need n >= 1 and Z > 0")
+        return _ascale.compare(name, _ascale.hydrogen_energy_eV(Z, n),
+                               spec["claimed_energy_level_eV"], 2e-3,
+                               {"formula": f"E_{n} = -Z^2 Ry / n^2 (Z={Z:g})"})
+    if all(k in spec for k in ("line_lower", "line_upper", "claimed_line_nm")):
+        try:
+            n1 = int(spec["line_lower"]); n2 = int(spec["line_upper"]); Z = float(spec.get("line_Z", 1))
+        except (TypeError, ValueError):
+            return error(name, "line quantum numbers must be integers")
+        if not (1 <= n1 < n2) or Z <= 0:
+            return error(name, "need 1 <= n_lower < n_upper and Z > 0")
+        return _ascale.compare(name, _ascale.rydberg_line_m(Z, n1, n2) * 1e9,
+                               spec["claimed_line_nm"], 2e-3,
+                               {"formula": f"1/lambda = R_inf Z^2 (1/{n1}^2 - 1/{n2}^2) (Z={Z:g})"})
+    return na(name)
+
+
+def verify_fine_structure(spec: Dict[str, Any]) -> VerifierResult:
+    """The QED / fine-structure layer — the deeper alpha. Verifies the electron magnetic-moment
+    anomaly a_e = (g-2)/2 against the leading QED term alpha/(2 pi) (the measured value adds
+    higher-order alpha terms, so the tolerance allows ~0.2%), or the characteristic fine-structure
+    energy scale alpha^2 Ry."""
+    name = "atomic.fine_structure"
+    if "claimed_g2_anomaly" in spec:
+        return _ascale.compare(name, _ascale.electron_g2_anomaly(),
+                               spec["claimed_g2_anomaly"], 5e-3,
+                               {"formula": "a_e = (g-2)/2 ~ alpha/(2 pi) (leading QED)"})
+    if "claimed_fine_structure_scale_ev" in spec:
+        return _ascale.compare(name, _ascale.fine_structure_scale_eV(),
+                               spec["claimed_fine_structure_scale_ev"], 1e-3,
+                               {"formula": "alpha^2 Ry -- the fine-structure energy scale"})
+    return na(name)
+
+
 _RULES = [
+    (lambda av: ("claimed_g2_anomaly" in av or "claimed_fine_structure_scale_ev" in av), verify_fine_structure),
+    (lambda av: (("level_n" in av and "claimed_energy_level_eV" in av)
+                 or all(k in av for k in ("line_lower", "line_upper", "claimed_line_nm"))), verify_energy_level),
     (lambda av: ("n" in av and "l" in av), verify_quantum_numbers),
     (lambda av: (("shell_n" in av and "claimed_shell_capacity" in av) or \
        ("subshell_l" in av and "claimed_subshell_capacity" in av)), verify_shell_capacity),

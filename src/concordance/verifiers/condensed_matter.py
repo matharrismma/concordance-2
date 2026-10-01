@@ -8,12 +8,19 @@ Deterministic checks against canonical solid-state relations (all public-domain)
         E_F = (hbar^2 / 2m_e)·(3·pi^2·n)^(2/3)        [joules]
   * condensed_matter.bragg — constructive diffraction from lattice planes
         n·lambda = 2·d·sin(theta)
+  * condensed_matter.quantum_hall — the resistance quantum and Josephson constant, condensed
+        matter THROUGH the fine structure constant:
+        R_K = h/e^2 = mu_0 c / (2 alpha)   (von Klitzing, ~25812.807 ohm)
+        K_J = 2e/h                          (Josephson, ~483597.8 GHz/V)
+        R_H = R_K / nu                      (a quantized Hall plateau)
 
 CONDMAT_VERIFY packet (any subset):
     {
       "spring_const": 10.0, "atom_mass": 1e-26, "wavevector": 1e10, "lattice_a": 3e-10, "claimed_omega": 1.0e13,
       "number_density": 8.5e28, "claimed_fermi_J": 1.12e-18,
       "diff_order": 1, "wavelength_m": 1.54e-10, "plane_spacing_m": 3.13e-10, "claimed_theta_deg": 14.3,
+      "claimed_von_klitzing_ohm": 25812.807, "claimed_josephson_ghz_per_v": 483597.8,
+      "filling_factor": 2, "claimed_hall_resistance_ohm": 12906.4,
     }
 """
 from __future__ import annotations
@@ -22,9 +29,12 @@ from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 from .base import dispatch
+from . import physical_constants as _pc
 
 _HBAR = 1.054571817e-34   # J·s
 _ME = 9.1093837015e-31    # kg
+# alpha-anchored checks read from the ONE constant source, so h, e, alpha match the rest of the engine
+_C = {c["constant"]: c["value"] for c in _pc.list_constants()}
 
 
 def _close(actual: float, claimed: float, rel_tol: float = 1e-2, abs_tol: float = 0.0) -> bool:
@@ -97,10 +107,69 @@ def verify_bragg(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"theta = {actual:.3f} deg, claimed {cl}", data)
 
 
+def verify_quantum_hall(spec: Dict[str, Any]) -> VerifierResult:
+    """The quantum Hall / Josephson constants — condensed matter through the fine structure
+    constant. The von Klitzing constant R_K = h/e^2 is the resistance quantum, and it equals
+    mu_0 c / (2 alpha) — so a quantized Hall plateau IS a measurement of alpha (the route the
+    2019 SI turned into a definition). The Josephson constant is K_J = 2e/h. Verifies whichever
+    claim is present."""
+    name = "condensed_matter.quantum_hall"
+    h = _C["planck_constant"]
+    e = _C["elementary_charge"]
+    alpha = _C["fine_structure_constant"]
+    R_K = h / (e * e)                                                   # von Klitzing, ohm
+    K_J = 2.0 * e / h                                                   # Josephson, Hz/V
+    R_K_from_alpha = _C["vacuum_permeability"] * _C["speed_of_light"] / (2.0 * alpha)
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-4)
+    base = {"von_klitzing_ohm": R_K, "josephson_hz_per_v": K_J,
+            "R_K_from_alpha_ohm": R_K_from_alpha, "alpha": alpha,
+            "identity": "R_K = h/e^2 = mu_0 c / (2 alpha);  K_J = 2e/h"}
+
+    if "claimed_von_klitzing_ohm" in spec:
+        try:
+            cl = float(spec["claimed_von_klitzing_ohm"])
+        except (TypeError, ValueError):
+            return error(name, "claimed_von_klitzing_ohm must be numeric")
+        data = {**base, "claimed_ohm": cl}
+        if _close(R_K, cl, rel_tol=rel_tol):
+            return confirm(name, f"R_K = h/e^2 = {R_K:.6f} ohm (= mu0 c/2alpha = "
+                                 f"{R_K_from_alpha:.6f}); matches {cl}", data)
+        return mismatch(name, f"R_K = h/e^2 = {R_K:.6f} ohm, claimed {cl}", data)
+
+    if "claimed_josephson_ghz_per_v" in spec:
+        try:
+            cl = float(spec["claimed_josephson_ghz_per_v"])
+        except (TypeError, ValueError):
+            return error(name, "claimed_josephson_ghz_per_v must be numeric")
+        kj_ghz = K_J / 1e9
+        data = {**base, "josephson_ghz_per_v": kj_ghz, "claimed_ghz_per_v": cl}
+        if _close(kj_ghz, cl, rel_tol=rel_tol):
+            return confirm(name, f"K_J = 2e/h = {kj_ghz:.4f} GHz/V; matches {cl}", data)
+        return mismatch(name, f"K_J = 2e/h = {kj_ghz:.4f} GHz/V, claimed {cl}", data)
+
+    if "filling_factor" in spec and "claimed_hall_resistance_ohm" in spec:
+        try:
+            nu = float(spec["filling_factor"])
+            cl = float(spec["claimed_hall_resistance_ohm"])
+        except (TypeError, ValueError):
+            return error(name, "filling_factor and claimed_hall_resistance_ohm must be numeric")
+        if nu <= 0:
+            return error(name, f"filling factor must be positive (nu={nu})")
+        R_H = R_K / nu
+        data = {**base, "filling_factor": nu, "hall_resistance_ohm": R_H, "claimed_ohm": cl}
+        if _close(R_H, cl, rel_tol=rel_tol):
+            return confirm(name, f"R_H = R_K/{nu:g} = {R_H:.4f} ohm; matches {cl}", data)
+        return mismatch(name, f"R_H = R_K/{nu:g} = {R_H:.4f} ohm, claimed {cl}", data)
+
+    return na(name)
+
+
 _RULES = [
     (("spring_const", "atom_mass", "wavevector", "lattice_a", "claimed_omega"), verify_phonon_dispersion),
     (("number_density", "claimed_fermi_J"), verify_fermi_energy),
     (("diff_order", "wavelength_m", "plane_spacing_m", "claimed_theta_deg"), verify_bragg),
+    (lambda cm: ("claimed_von_klitzing_ohm" in cm or "claimed_josephson_ghz_per_v" in cm
+                 or ("filling_factor" in cm and "claimed_hall_resistance_ohm" in cm)), verify_quantum_hall),
 ]
 
 

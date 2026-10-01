@@ -12,6 +12,10 @@ Checks performed:
   * confidence_interval_coverage: given (estimate, ci_low, ci_high, alpha),
     verify the interval is symmetric (or shape-correct) and contains the
     estimate
+  * measurement_consistency: given several INDEPENDENT determinations of one
+    quantity (value +/- sigma), recompute the inverse-variance weighted mean,
+    the Birge ratio, and the worst pairwise sigma-tension, and verify a stated
+    claim about the set (consistent / discordant / agree_to_relative)
 
 Recomputed test statistics for two_sample_t are derived from the supplied
 (n1, n2, mean1, mean2, sd1, sd2) using Welch's formula.
@@ -418,10 +422,209 @@ def verify_confidence_interval(spec: Dict[str, Any]) -> VerifierResult:
                    f"estimate {est} in [{lo}, {hi}]")
 
 
+def verify_measurement_consistency(spec: Dict[str, Any]) -> VerifierResult:
+    """Do several INDEPENDENT determinations of one quantity agree?
+
+    The metrologist's consistency check, in pure arithmetic. Given measurements of the SAME
+    quantity, each a value with a one-sigma uncertainty, it computes the inverse-variance
+    weighted mean, the reduced chi-square / Birge ratio, and the largest pairwise
+    sigma-tension, then verifies a stated CLAIM about the set:
+
+      claim="consistent" (default): the determinations agree within their stated
+          uncertainties -> CONFIRMED iff the worst pairwise tension <= max_tension_sigma
+          AND (with more than one degree of freedom) the Birge ratio <= birge_max.
+      claim="discordant": the set carries a real disagreement -> CONFIRMED iff the worst
+          pairwise tension > max_tension_sigma.
+      claim="agree_to_relative" (requires rel_level): the values agree to a stated relative
+          level -> CONFIRMED iff (max - min) / |weighted_mean| <= rel_level.
+
+    It does NOT and CANNOT judge whether any measured value is correct -- that is what the
+    experiment is for, and a claim about a measured constant is out of a verifier's scope.
+    It judges only the internal agreement of the reported numbers, which is pure computation.
+
+    Method: inverse-variance weighted mean + Birge ratio (R. T. Birge, Phys. Rev. 40, 207
+    (1932)) -- the consistency statistic used in the CODATA and PDG constant adjustments.
+    Public-domain method: it grounds the tool, never the verdict.
+
+    Spec (artifact key CONCORDANCE_VERIFY):
+        {
+          "quantity": "inverse fine structure constant",   # label only, optional
+          "measurements": [
+             {"label": "Rb-87 recoil", "value": 137.035999206, "sigma": 0.000000011},
+             ...   # >= 2 entries, each sigma > 0
+          ],
+          "claim": "consistent" | "discordant" | "agree_to_relative",   # default consistent
+          "max_tension_sigma": 3.0,   # optional; clamped so a caller may only TIGHTEN it
+          "birge_max": 1.5,           # optional; clamped (tighten-only)
+          "rel_level": 1e-8,          # required for claim="agree_to_relative"
+        }
+    """
+    name = "statistics.measurement_consistency"
+    ms = spec.get("measurements")
+    if not ms:
+        return na(name)
+    pts = []
+    for i, m in enumerate(ms):
+        try:
+            v = float(m["value"]); s = float(m["sigma"])
+        except (KeyError, TypeError, ValueError):
+            return error(name, f"measurement {i} is missing a numeric value/sigma")
+        if not (math.isfinite(v) and math.isfinite(s)) or s <= 0:
+            return error(name, f"measurement {i} has a non-finite value or sigma <= 0")
+        pts.append((str(m.get("label", f"m{i}")), v, s))
+    n = len(pts)
+    if n < 2:
+        return error(name, "need at least two measurements to check agreement")
+
+    def _st(subset):
+        """Consistency statistics for a subset of (label, value, sigma) points. Pure arithmetic."""
+        w = sum(1.0 / (s * s) for _, _, s in subset)
+        xb = sum(v / (s * s) for _, v, s in subset) / w
+        sig = math.sqrt(1.0 / w)
+        contr = {lab: ((v - xb) / s) ** 2 for lab, v, s in subset}
+        c2 = sum(contr.values())
+        d = len(subset) - 1
+        bg = math.sqrt(c2 / d) if d > 0 else 0.0
+        wt, wp = 0.0, None
+        for a in range(len(subset)):
+            for b in range(a + 1, len(subset)):
+                (_, va, sa), (_, vb, sb) = subset[a], subset[b]
+                tt = abs(va - vb) / math.sqrt(sa * sa + sb * sb)
+                if tt > wt:
+                    wt, wp = tt, (subset[a][0], subset[b][0])
+        return xb, sig, c2, d, bg, wt, wp, contr
+
+    xbar, sigma_mean, chi2, dof, birge, worst_t, worst_pair, contribs = _st(pts)
+    vals = [v for _, v, _ in pts]
+    spread = max(vals) - min(vals)
+    rel_spread = spread / abs(xbar) if xbar != 0 else float("inf")
+
+    claim = (spec.get("claim") or "consistent").strip().lower()
+    tension_thr = clamp_tol(spec, "max_tension_sigma", 3.0)
+    birge_thr = clamp_tol(spec, "birge_max", 1.5)
+
+    # LOCATE the fault. Over-dispersion (Birge > 1) means the reported uncertainties are too small
+    # for a single common value -- a METHOD is wrong, not the quantity. The scale factor is what
+    # CODATA/PDG inflate the consensus uncertainty by; the prime suspect is the largest contributor
+    # to chi-square; the leave-one-out shows which single removal (if any) reconciles the set to the
+    # tension threshold -- the method to re-examine.
+    scale_factor = birge if (dof > 0 and birge > 1.0) else 1.0
+    prime_suspect = max(contribs, key=contribs.get) if contribs else None
+    leave_one_out = []
+    located = None
+    best_resid = None
+    if n >= 3:
+        for k in range(n):
+            sub = [p for idx, p in enumerate(pts) if idx != k]
+            _, _, _, _, bg_w, wt_w, _, _ = _st(sub)
+            leave_one_out.append({"removed": pts[k][0], "birge_without": bg_w,
+                                  "worst_tension_without": wt_w})
+            if wt_w <= tension_thr and (best_resid is None or wt_w < best_resid):
+                best_resid, located = wt_w, pts[k][0]
+    # How big is the suspect's departure from the consensus of the OTHERS -- the size of the
+    # systematic error to find and correct.
+    systematic = None
+    if prime_suspect and n >= 2:
+        others = [p for p in pts if p[0] != prime_suspect]
+        ps = [p for p in pts if p[0] == prime_suspect][0]
+        ox, osig, _, _, _, _, _, _ = _st(others)
+        dev = ps[1] - ox
+        dev_sig = abs(dev) / math.sqrt(ps[2] ** 2 + osig ** 2)
+        systematic = {"label": prime_suspect, "deviation_abs": dev, "deviation_sigma": dev_sig,
+                      "consensus_of_others": ox, "reconciles_if_removed": (located == prime_suspect)}
+
+    data = {
+        "quantity": spec.get("quantity"),
+        "n": n,
+        "weighted_mean": xbar,
+        "sigma_weighted_mean": sigma_mean,
+        "chi_square": chi2,
+        "dof": dof,
+        "birge_ratio": birge,
+        "scale_factor": scale_factor,
+        "max_tension_sigma": worst_t,
+        "worst_pair": list(worst_pair) if worst_pair else None,
+        "chi2_contributions": contribs,
+        "prime_suspect": prime_suspect,
+        "leave_one_out": leave_one_out,
+        "located": located,
+        "systematic_estimate": systematic,
+        "adjusted_consensus": {"value": xbar, "sigma": sigma_mean * scale_factor,
+                               "note": "weighted mean; sigma inflated by the PDG scale factor"},
+        "spread": spread,
+        "relative_spread": rel_spread,
+        "method": "inverse-variance weighted mean + Birge ratio + leave-one-out (Birge 1932); "
+                  "the CODATA/PDG consistency + scale-factor procedure",
+    }
+    data["tension_threshold"] = tension_thr
+    data["birge_threshold"] = birge_thr
+
+    # a compact locator note, appended to the discordant / over-dispersed details
+    loc = ""
+    if prime_suspect and (worst_t > tension_thr or (dof > 0 and birge > birge_thr)):
+        loc = f" scale x{scale_factor:.2f}; prime suspect {prime_suspect}"
+        if systematic:
+            loc += f" ({systematic['deviation_sigma']:.1f}sigma from the others)"
+        if located:
+            loc += f"; removing {located} reconciles the set to {tension_thr:g}sigma"
+
+    if claim in ("consistent", "consistency", "agree", "concordant"):
+        if worst_t <= tension_thr and (dof == 0 or birge <= birge_thr):
+            return confirm(
+                name,
+                f"{n} determinations consistent: worst tension {worst_t:.2f}sigma <= "
+                f"{tension_thr:g}, Birge {birge:.2f} <= {birge_thr:g}; weighted mean "
+                f"{xbar:.12g} +/- {sigma_mean:.2g}",
+                data,
+            )
+        why = []
+        if worst_t > tension_thr and worst_pair:
+            why.append(f"{worst_pair[0]} vs {worst_pair[1]} at {worst_t:.2f}sigma > {tension_thr:g}")
+        if dof > 0 and birge > birge_thr:
+            why.append(f"Birge {birge:.2f} > {birge_thr:g} (over-dispersed)")
+        return mismatch(name, "not consistent: " + "; ".join(why) + "." + loc, data)
+
+    if claim in ("discordant", "disagree", "tension", "inconsistent"):
+        if worst_t > tension_thr and worst_pair:
+            return confirm(
+                name,
+                f"real tension confirmed: {worst_pair[0]} vs {worst_pair[1]} at "
+                f"{worst_t:.2f}sigma > {tension_thr:g} (Birge {birge:.2f}).{loc}",
+                data,
+            )
+        return mismatch(
+            name,
+            f"claimed discordant but the set is consistent: worst tension {worst_t:.2f}sigma "
+            f"<= {tension_thr:g}",
+            data,
+        )
+
+    if claim in ("agree_to_relative", "relative", "agree_to"):
+        rl = spec.get("rel_level")
+        if rl is None:
+            return error(name, "claim=agree_to_relative requires rel_level")
+        try:
+            rel_level = abs(float(rl))
+        except (TypeError, ValueError):
+            return error(name, "rel_level is not a number")
+        data["rel_level"] = rel_level
+        if rel_spread <= rel_level:
+            return confirm(
+                name,
+                f"{n} determinations agree to relative {rel_spread:.2e} <= {rel_level:g} "
+                f"(weighted mean {xbar:.12g})",
+                data,
+            )
+        return mismatch(name, f"relative spread {rel_spread:.2e} > {rel_level:g}", data)
+
+    return error(name, f"unknown claim {claim!r}; use consistent | discordant | agree_to_relative")
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     results: List[VerifierResult] = []
     sv = packet.get("STAT_VERIFY") or {}
     inf = packet.get("STAT_INFERENCE") or {}
+    cc = packet.get("CONCORDANCE_VERIFY") or {}
 
     if sv.get("test"):
         results.append(verify_pvalue_calibration(sv))
@@ -438,6 +641,9 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
 
     if all(k in sv for k in ("estimate", "ci_low", "ci_high")):
         results.append(verify_confidence_interval(sv))
+
+    if cc.get("measurements"):
+        results.append(verify_measurement_consistency(cc))
 
     if not results:
         results.append(na("statistics", "no STAT_VERIFY artifacts present"))

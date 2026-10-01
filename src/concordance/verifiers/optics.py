@@ -31,6 +31,7 @@ from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 from .base import dispatch  # declarative run() driver
+from . import alpha_scale as _ascale  # alpha-anchored light-matter scale
 
 
 def _close(a, b, rel_tol=1e-3, abs_tol=1e-9):
@@ -378,6 +379,28 @@ _RULES = [
         (ov.get("attenuation_db_per_km") is not None and ov.get("length_km") is not None) or
         (ov.get("power_in_mw") is not None and ov.get("power_out_mw") is not None))), verify_fiber_attenuation),
     (lambda ov: (all(ov.get(k) is not None for k in ("num_channels", "bitrate_per_channel_gbps", "claimed_total_gbps"))), verify_wdm_capacity),
+]
+
+
+def verify_light_matter_scale(spec: Dict[str, Any]) -> VerifierResult:
+    """The classical electron radius and Thomson cross section — the scale at which light scatters
+    off a free electron, set THROUGH alpha: r_e = e^2/(4 pi eps0 m_e c^2) = alpha^2 a_0, and
+    sigma_T = (8 pi/3) r_e^2."""
+    name = "optics.light_matter_scale"
+    if "claimed_classical_electron_radius_m" in spec:
+        return _ascale.compare(name, _ascale.classical_electron_radius_m(),
+                               spec["claimed_classical_electron_radius_m"], 1e-3,
+                               {"formula": "r_e = e^2/(4 pi eps0 m_e c^2) = alpha^2 a_0"})
+    if "claimed_thomson_cross_section_m2" in spec:
+        return _ascale.compare(name, _ascale.thomson_cross_section_m2(),
+                               spec["claimed_thomson_cross_section_m2"], 1e-3,
+                               {"formula": "sigma_T = (8 pi/3) r_e^2"})
+    return na(name)
+
+
+_RULES = _RULES + [
+    (lambda ov: ("claimed_classical_electron_radius_m" in ov
+                 or "claimed_thomson_cross_section_m2" in ov), verify_light_matter_scale),
 ]
 
 

@@ -44,6 +44,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 from .base import dispatch  # declarative run() driver
+from . import grav_scale as _grav  # G-anchored orbital period (Kepler's third law)
 
 
 # ── Julian Day ─────────────────────────────────────────────────────────
@@ -371,7 +372,23 @@ def verify_sunrise_sunset(spec: Dict[str, Any]) -> VerifierResult:
     )
 
 
+def verify_orbital_period(spec: Dict[str, Any]) -> VerifierResult:
+    """Orbital period T = 2 pi sqrt(a^3 / G M) — ephemeris THROUGH the gravitational constant G:
+    Kepler's third law in its gravitational form (Earth's orbit ~3.156e7 s = 1 year)."""
+    name = "ephemeris.orbital_period"
+    try:
+        a = float(spec["orbit_semi_major_m"]); M = float(spec["orbit_central_mass_kg"])
+    except (KeyError, TypeError, ValueError):
+        return error(name, "orbit_semi_major_m / orbit_central_mass_kg must be numeric")
+    if a <= 0 or M <= 0:
+        return error(name, "semi-major axis and central mass must be positive")
+    return _grav.compare(name, _grav.orbital_period_s(a, M),
+                         spec["claimed_orbital_period_s"], 1e-3, {"formula": "T = 2 pi sqrt(a^3 / G M)"})
+
+
 _RULES = [
+    (lambda ev: (all(k in ev for k in ("orbit_semi_major_m", "orbit_central_mass_kg",
+                                       "claimed_orbital_period_s"))), verify_orbital_period),
     (lambda ev: (ev.get("iso_date") and ev.get("claimed_julian_day") is not None), verify_julian_day),
     (lambda ev: (ev.get("iso_date") and ev.get("claimed_moon_phase")), verify_moon_phase),
     (lambda ev: (ev.get("year") is not None and ev.get("event") and ev.get("claimed_event_iso")), verify_equinox_solstice),

@@ -34,6 +34,7 @@ from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 from .base import dispatch  # declarative run() driver
+from . import rela_scale as _rela  # c-anchored rest energy (E = m c^2)
 
 _LN2 = math.log(2)
 _AMU_TO_MEV = 931.5  # MeV per amu (unified atomic mass unit)
@@ -211,7 +212,23 @@ def verify_decay_constant(spec: Dict[str, Any]) -> VerifierResult:
     )
 
 
+def verify_rest_energy(spec: Dict[str, Any]) -> VerifierResult:
+    """Rest energy E = m c^2 for a mass given in atomic mass units, in MeV (~931.494 MeV per amu)
+    — the mass-energy equivalence that underlies every nuclear binding energy, made explicit."""
+    name = "nuclear_physics.rest_energy"
+    try:
+        m = float(spec["rest_mass_amu"])
+    except (KeyError, TypeError, ValueError):
+        return error(name, "rest_mass_amu must be numeric")
+    if m <= 0:
+        return error(name, "mass must be positive")
+    return _rela.compare(name, _rela.rest_energy_MeV_from_amu(m),
+                         spec["claimed_rest_energy_MeV"], 1e-3, {"formula": "E = m c^2 (amu -> MeV)"})
+
+
 _RULES = [
+    (lambda nv: (nv.get("rest_mass_amu") is not None
+                 and nv.get("claimed_rest_energy_MeV") is not None), verify_rest_energy),
     (lambda nv: (all(nv.get(k) is not None for k in ("half_life_seconds", "elapsed_seconds",
                                              "initial_count", "claimed_remaining_count"))), verify_radioactive_decay),
     (lambda nv: (all(nv.get(k) is not None for k in ("mass_defect_amu", "nucleon_count",

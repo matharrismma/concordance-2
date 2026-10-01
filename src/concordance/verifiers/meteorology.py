@@ -31,6 +31,7 @@ from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 from .base import dispatch  # declarative run() driver
+from . import thermal_scale as _thermal  # k_B-anchored barometric scale height
 
 
 _MAGNUS_A = 17.625
@@ -231,7 +232,23 @@ def verify_saturation_vapor_pressure(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+def verify_scale_height(spec: Dict[str, Any]) -> VerifierResult:
+    """Barometric scale height H = k_B T / (m g) — meteorology THROUGH k_B, the height over which
+    an isothermal atmosphere's pressure falls by a factor of e."""
+    name = "meteorology.scale_height"
+    try:
+        T = float(spec["scale_height_temp_K"]); m = float(spec["molecular_mass_kg"]); g = float(spec["gravity_m_s2"])
+    except (KeyError, TypeError, ValueError):
+        return error(name, "scale_height_temp_K / molecular_mass_kg / gravity_m_s2 must be numeric")
+    if T <= 0 or m <= 0 or g <= 0:
+        return error(name, "temperature, mass and gravity must be positive")
+    return _thermal.compare(name, _thermal.scale_height_m(T, m, g),
+                            spec["claimed_scale_height_m"], 1e-3, {"formula": "H = k_B T / (m g)"})
+
+
 _RULES = [
+    (lambda mv: (all(k in mv for k in ("scale_height_temp_K", "molecular_mass_kg",
+                                       "gravity_m_s2", "claimed_scale_height_m"))), verify_scale_height),
     (lambda mv: (all(k in mv for k in ("temperature_c", "relative_humidity_pct", "claimed_dew_point_c"))), verify_dew_point),
     (lambda mv: (all(k in mv for k in ("temperature_f", "relative_humidity_pct_for_hi", "claimed_heat_index_f"))), verify_heat_index),
     (lambda mv: (all(k in mv for k in ("temperature_f_for_wc", "wind_speed_mph", "claimed_wind_chill_f"))), verify_wind_chill),

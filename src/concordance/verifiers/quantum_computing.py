@@ -47,6 +47,7 @@ from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 from .base import dispatch  # declarative run() driver
+from . import planck_scale as _planck  # h-anchored qubit energy E = h f
 
 
 # ── qubit state normalization ────────────────────────────────────────────────
@@ -260,7 +261,23 @@ def verify_quantum_fidelity(spec: Dict[str, Any]) -> VerifierResult:
 
 # ── runner ────────────────────────────────────────────────────────────────────
 
+def verify_qubit_energy(spec: Dict[str, Any]) -> VerifierResult:
+    """Qubit transition energy E = h f — quantum computing THROUGH the Planck constant: the energy
+    splitting of a two-level system at transition frequency f (e.g. a ~5 GHz superconducting qubit)."""
+    name = "quantum_computing.qubit_energy"
+    try:
+        f = float(spec["qubit_frequency_hz"])
+    except (KeyError, TypeError, ValueError):
+        return error(name, "qubit_frequency_hz must be numeric")
+    if f <= 0:
+        return error(name, "frequency must be positive")
+    return _planck.compare(name, _planck.photon_energy_J(f),
+                           spec["claimed_qubit_energy_j"], 1e-3, {"formula": "E = h f"})
+
+
 _RULES = [
+    (lambda qv: (qv.get("qubit_frequency_hz") is not None
+                 and qv.get("claimed_qubit_energy_j") is not None), verify_qubit_energy),
     (lambda qv: ("amplitudes" in qv and "claimed_normalized" in qv), verify_qubit_normalization),
     (lambda qv: ("n_items" in qv and "claimed_grover_iterations" in qv), verify_grover_iterations),
     (lambda qv: (all(k in qv for k in ("shor_a", "shor_N", "shor_r", "claimed_period_valid"))), verify_shor_period),

@@ -31,6 +31,10 @@ VERIFIERS: Dict[str, str] = {
     "formal_logic": _P + "formal_logic", "logic": _P + "formal_logic",
     "probability": _P + "probability",
     "statistics": _P + "statistics",
+    # "do these independent measurements agree?" — the concordance check lives in statistics
+    "measurement_consistency": _P + "statistics",
+    "measurement_agreement": _P + "statistics",
+    "measurement_concordance": _P + "statistics",
     "linear_algebra": _P + "linear_algebra",
     "information_theory": _P + "information_theory", "info_theory": _P + "information_theory",
     "computer_science": _P + "computer_science", "cs": _P + "computer_science",

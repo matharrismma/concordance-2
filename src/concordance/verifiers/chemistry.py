@@ -21,6 +21,9 @@ import re
 from fractions import Fraction
 from typing import Dict, List, Tuple, Any
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from . import alpha_scale as _ascale  # alpha-anchored atomic energy scale
+from . import thermal_scale as _thermal  # k_B-anchored Boltzmann factor
+from . import molar_scale as _molar  # N_A-anchored particle count
 
 # regex pieces ---------------------------------------------------------------
 
@@ -426,6 +429,61 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     if "pH" in chem_verify and "claimed_classification" in chem_verify:
         results.append(verify_ph_classification(chem_verify))
 
+    # Atomic energy scale (Rydberg / Hartree) — the alpha-set scale of bond and ionization energies.
+    if "claimed_hartree_ev" in chem_verify or "claimed_rydberg_ev" in chem_verify:
+        results.append(verify_atomic_energy_scale(chem_verify))
+
+    # Boltzmann factor exp(-E/k_B T) — the k_B-set population/rate ratio (Arrhenius).
+    if all(k in chem_verify for k in ("boltzmann_energy_J", "boltzmann_temperature_K",
+                                      "claimed_boltzmann_factor")):
+        results.append(verify_boltzmann_factor(chem_verify))
+
+    # Particle count N = n * N_A — the N_A-set bridge from moles to molecules.
+    if "amount_mol" in chem_verify and "claimed_particle_count" in chem_verify:
+        results.append(verify_avogadro_count(chem_verify))
+
     if not results:
         results.append(na("chemistry", "no CHEM_VERIFY artifacts present"))
     return results
+
+
+def verify_avogadro_count(spec: Dict[str, Any]) -> VerifierResult:
+    """Particle count N = n * N_A — chemistry THROUGH the Avogadro constant: the number of entities
+    in n moles (1 mol = 6.02214076e23)."""
+    name = "chemistry.avogadro_count"
+    try:
+        n = float(spec["amount_mol"])
+    except (KeyError, TypeError, ValueError):
+        return error(name, "amount_mol must be numeric")
+    if n <= 0:
+        return error(name, "amount must be positive")
+    return _molar.compare(name, _molar.particles_from_moles(n),
+                          spec["claimed_particle_count"], 1e-3, {"formula": "N = n * N_A"})
+
+
+def verify_boltzmann_factor(spec: Dict[str, Any]) -> VerifierResult:
+    """The Boltzmann factor exp(-E / k_B T) — chemistry THROUGH k_B: the relative population of a
+    state at energy E, and the temperature dependence of reaction rates (Arrhenius)."""
+    name = "chemistry.boltzmann_factor"
+    try:
+        E = float(spec["boltzmann_energy_J"]); T = float(spec["boltzmann_temperature_K"])
+    except (KeyError, TypeError, ValueError):
+        return error(name, "boltzmann_energy_J / boltzmann_temperature_K must be numeric")
+    if T <= 0:
+        return error(name, "temperature must be > 0 K")
+    return _thermal.compare(name, _thermal.boltzmann_factor(E, T),
+                            spec["claimed_boltzmann_factor"], 1e-3, {"formula": "exp(-E / k_B T)"})
+
+
+def verify_atomic_energy_scale(spec: Dict[str, Any]) -> VerifierResult:
+    """The Rydberg and Hartree energies — chemistry's energy scale, set THROUGH alpha. Bond and
+    ionization energies live on this scale: Ry = alpha^2 m_e c^2 / 2 (~13.606 eV) and the Hartree
+    E_h = 2 Ry = alpha^2 m_e c^2 (~27.211 eV)."""
+    name = "chemistry.atomic_energy_scale"
+    if "claimed_hartree_ev" in spec:
+        return _ascale.compare(name, _ascale.hartree_eV(), spec["claimed_hartree_ev"], 1e-3,
+                               {"formula": "E_h = 2 Ry = alpha^2 m_e c^2 (the Hartree)"})
+    if "claimed_rydberg_ev" in spec:
+        return _ascale.compare(name, _ascale.rydberg_energy_eV(), spec["claimed_rydberg_ev"], 1e-3,
+                               {"formula": "Ry = R_inf h c = alpha^2 m_e c^2 / 2"})
+    return na(name)

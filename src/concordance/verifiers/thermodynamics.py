@@ -47,6 +47,8 @@ from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 from .base import dispatch  # declarative run() driver
+from . import thermal_scale as _thermal  # k_B-anchored Boltzmann entropy
+from . import molar_scale as _molar  # N_A-anchored gas constant R = N_A k_B
 
 _R = 8.314  # J / (mol · K)
 
@@ -305,7 +307,32 @@ def verify_clausius_clapeyron(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"predicted {T2_pred:.2f} K, claimed {cT2} K (Δ {diff:.2f} K)", data)
 
 
+def verify_boltzmann_entropy(spec: Dict[str, Any]) -> VerifierResult:
+    """Boltzmann entropy S = k_B ln W — thermodynamics THROUGH k_B, the microscopic bridge from
+    the count of microstates to entropy."""
+    name = "thermodynamics.boltzmann_entropy"
+    try:
+        W = float(spec["microstates_W"])
+    except (KeyError, TypeError, ValueError):
+        return error(name, "microstates_W must be numeric")
+    if W < 1:
+        return error(name, "number of microstates must be >= 1")
+    return _thermal.compare(name, _thermal.boltzmann_entropy_J_per_K(W),
+                            spec["claimed_entropy_J_per_K"], 1e-3, {"formula": "S = k_B ln W"})
+
+
+def verify_gas_constant(spec: Dict[str, Any]) -> VerifierResult:
+    """The molar gas constant R = N_A k_B — thermodynamics THROUGH the Avogadro constant: the
+    per-mole form of the Boltzmann constant (~8.314462618 J/(mol K))."""
+    name = "thermodynamics.gas_constant"
+    return _molar.compare(name, _molar.gas_constant(),
+                          spec["claimed_gas_constant_j_per_mol_k"], 1e-3, {"formula": "R = N_A k_B"})
+
+
 _RULES = [
+    (lambda tv: (tv.get("claimed_gas_constant_j_per_mol_k") is not None), verify_gas_constant),
+    (lambda tv: (tv.get("microstates_W") is not None
+                 and tv.get("claimed_entropy_J_per_K") is not None), verify_boltzmann_entropy),
     (lambda tv: (all(tv.get(k) is not None for k in ("T_hot_K", "T_cold_K", "claimed_efficiency"))), verify_carnot_efficiency),
     (lambda tv: (tv.get("claimed_pressure_Pa") is not None
             or tv.get("claimed_volume_m3") is not None

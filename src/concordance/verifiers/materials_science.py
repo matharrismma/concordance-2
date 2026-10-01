@@ -46,6 +46,7 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from . import thermal_scale as _thermal  # k_B-anchored thermal energy scale
 
 
 def verify_stress_strain(spec: Dict[str, Any]) -> VerifierResult:
@@ -237,9 +238,26 @@ def verify_hardness_comparison(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+def verify_thermal_energy(spec: Dict[str, Any]) -> VerifierResult:
+    """Thermal energy k_B T in eV — the materials thermal scale (carriers, phonons), THROUGH k_B
+    (~0.02585 eV at 300 K)."""
+    name = "materials_science.thermal_energy"
+    try:
+        T = float(spec["thermal_temp_K"])
+    except (KeyError, TypeError, ValueError):
+        return error(name, "thermal_temp_K must be numeric")
+    if T <= 0:
+        return error(name, "temperature must be > 0 K")
+    return _thermal.compare(name, _thermal.thermal_energy_eV(T),
+                            spec["claimed_thermal_energy_ev"], 1e-3, {"formula": "k_B T (eV)"})
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     results: List[VerifierResult] = []
     mv = packet.get("MAT_VERIFY") or {}
+
+    if all(mv.get(k) is not None for k in ("thermal_temp_K", "claimed_thermal_energy_ev")):
+        results.append(verify_thermal_energy(mv))
 
     # stress_strain: triggered by any of the three sub-cases
     _stress_keys = (

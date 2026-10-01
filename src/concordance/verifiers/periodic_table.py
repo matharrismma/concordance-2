@@ -32,6 +32,7 @@ import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from . import alpha_scale as _ascale  # alpha-anchored Moseley K-alpha
 
 
 # (atomic_number, symbol, name, standard_atomic_weight)
@@ -368,6 +369,22 @@ def list_elements() -> List[Dict[str, Any]]:
     ]
 
 
+def verify_moseley(spec: Dict[str, Any]) -> VerifierResult:
+    """Moseley's law for the K-alpha X-ray — the periodic table THROUGH alpha. The characteristic
+    line energy scales as E(K-alpha) ~ (3/4) Ry (Z-1)^2, rooted in the Rydberg energy. Approximate
+    (single-electron screening), so the tolerance is looser than the exact alpha-anchored checks."""
+    name = "periodic_table.moseley"
+    try:
+        Z = float(spec["moseley_Z"])
+    except (KeyError, TypeError, ValueError):
+        return error(name, "moseley_Z must be numeric")
+    if Z < 2:
+        return error(name, "Moseley's law needs Z >= 2")
+    return _ascale.compare(name, _ascale.moseley_k_alpha_eV(Z),
+                           spec["claimed_k_alpha_ev"], 3e-2,
+                           {"formula": f"E(K-alpha) ~ (3/4) Ry (Z-1)^2 (Z={Z:g})"})
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     results: List[VerifierResult] = []
     pv = packet.get("PT_VERIFY") or {}
@@ -378,6 +395,8 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
             results.append(verify_atomic_mass_weighted_average(pv))
         if "formula" in pv and "claimed_molar_mass" in pv:
             results.append(verify_molar_mass(pv))
+        if "moseley_Z" in pv and "claimed_k_alpha_ev" in pv:
+            results.append(verify_moseley(pv))
     if not results:
         results.append(na("periodic_table"))
     return results

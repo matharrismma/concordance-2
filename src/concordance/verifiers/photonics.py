@@ -52,6 +52,8 @@ from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 from .base import dispatch  # declarative run() driver
+from . import alpha_scale as _ascale  # alpha-anchored Compton scale
+from . import planck_scale as _planck  # h-anchored photon energy E = h nu
 
 _C = 299792458.0  # speed of light in vacuum, m/s
 
@@ -216,6 +218,59 @@ _RULES = [
     (lambda pv: "slope_efficiency_w_per_a" in pv and "claimed_output_w" in pv, verify_laser_slope),
     (lambda pv: "grating_period_m" in pv and "claimed_angle_deg" in pv, verify_grating_angle),
     (lambda pv: "coefficient_per_m" in pv and "claimed_output_intensity" in pv, verify_beer_lambert),
+]
+
+
+def verify_compton(spec: Dict[str, Any]) -> VerifierResult:
+    """The Compton wavelength and scattering shift — photon-electron interaction THROUGH alpha:
+    lambda_C = h/(m_e c) = 2 pi alpha a_0, and the shift d_lambda = lambda_C (1 - cos theta)."""
+    name = "photonics.compton"
+    if "claimed_compton_wavelength_m" in spec:
+        return _ascale.compare(name, _ascale.compton_wavelength_m(),
+                               spec["claimed_compton_wavelength_m"], 1e-3,
+                               {"formula": "lambda_C = h/(m_e c) = 2 pi alpha a_0"})
+    if "compton_angle_deg" in spec and "claimed_compton_shift_m" in spec:
+        try:
+            th = math.radians(float(spec["compton_angle_deg"]))
+        except (TypeError, ValueError):
+            return error(name, "compton_angle_deg must be numeric")
+        shift = _ascale.compton_wavelength_m() * (1.0 - math.cos(th))
+        return _ascale.compare(name, shift, spec["claimed_compton_shift_m"], 1e-3,
+                               {"formula": "d_lambda = lambda_C (1 - cos theta)",
+                                "angle_deg": spec["compton_angle_deg"]})
+    return na(name)
+
+
+def verify_photon_energy(spec: Dict[str, Any]) -> VerifierResult:
+    """Photon energy E = h nu = h c / lambda — photonics THROUGH the Planck constant (~2.48 eV at
+    500 nm)."""
+    name = "photonics.photon_energy"
+    if "photon_frequency_hz" in spec and "claimed_photon_energy_ev" in spec:
+        try:
+            nu = float(spec["photon_frequency_hz"])
+        except (TypeError, ValueError):
+            return error(name, "photon_frequency_hz must be numeric")
+        if nu <= 0:
+            return error(name, "frequency must be positive")
+        return _planck.compare(name, _planck.photon_energy_eV_from_freq(nu),
+                               spec["claimed_photon_energy_ev"], 1e-3, {"formula": "E = h nu"})
+    if "photon_wavelength_m" in spec and "claimed_photon_energy_ev" in spec:
+        try:
+            lam = float(spec["photon_wavelength_m"])
+        except (TypeError, ValueError):
+            return error(name, "photon_wavelength_m must be numeric")
+        if lam <= 0:
+            return error(name, "wavelength must be positive")
+        return _planck.compare(name, _planck.photon_energy_eV_from_wavelength(lam),
+                               spec["claimed_photon_energy_ev"], 1e-3, {"formula": "E = h c / lambda"})
+    return na(name)
+
+
+_RULES = _RULES + [
+    (lambda pv: ("claimed_compton_wavelength_m" in pv
+                 or ("compton_angle_deg" in pv and "claimed_compton_shift_m" in pv)), verify_compton),
+    (lambda pv: (("photon_frequency_hz" in pv or "photon_wavelength_m" in pv)
+                 and "claimed_photon_energy_ev" in pv), verify_photon_energy),
 ]
 
 

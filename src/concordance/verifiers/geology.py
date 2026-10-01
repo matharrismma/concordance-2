@@ -30,6 +30,7 @@ from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 from .base import dispatch  # declarative run() driver
+from . import grav_scale as _grav  # G-anchored surface gravity
 
 
 def verify_radiometric_decay(spec: Dict[str, Any]) -> VerifierResult:
@@ -123,7 +124,23 @@ def verify_richter_amplitude(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+def verify_surface_gravity(spec: Dict[str, Any]) -> VerifierResult:
+    """Surface gravity g = G M / r^2 — geology THROUGH the gravitational constant G (Earth ~9.82
+    m/s^2). The acceleration a body's own mass produces at its surface."""
+    name = "geology.surface_gravity"
+    try:
+        M = float(spec["surface_gravity_mass_kg"]); r = float(spec["surface_gravity_radius_m"])
+    except (KeyError, TypeError, ValueError):
+        return error(name, "surface_gravity_mass_kg / surface_gravity_radius_m must be numeric")
+    if M <= 0 or r <= 0:
+        return error(name, "mass and radius must be positive")
+    return _grav.compare(name, _grav.surface_gravity_m_s2(M, r),
+                         spec["claimed_surface_gravity_m_s2"], 1e-3, {"formula": "g = G M / r^2"})
+
+
 _RULES = [
+    (lambda gv: (all(k in gv for k in ("surface_gravity_mass_kg", "surface_gravity_radius_m",
+                                       "claimed_surface_gravity_m_s2"))), verify_surface_gravity),
     (lambda gv: (all(gv.get(k) is not None for k in ("isotope_half_life_years", "elapsed_years",
                                             "initial_amount", "claimed_remaining_amount"))), verify_radiometric_decay),
     (lambda gv: (all(gv.get(k) is not None for k in ("harder_mineral_mohs", "softer_mineral_mohs", "claimed_can_scratch"))), verify_mohs_scratch),
