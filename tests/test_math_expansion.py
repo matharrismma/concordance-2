@@ -70,6 +70,23 @@ def test_system_of_equations():
     assert M.verify_system({**sys_spec, "claimed_solution": {"x": 1, "y": 2}}).status == "MISMATCH"
 
 
+def test_kind_b_framing_on_declines():
+    # pure prose, nothing written to grade -> NA that EXPLAINS and asks for the steps
+    r = M.verify_calc_chain({"solution_text": "She had ten apples and ate three, leaving seven."})
+    assert r.status == "NOT_APPLICABLE"
+    assert r.data and r.data.get("framing_question")
+    assert "calc_chain" in r.data.get("route", "")
+    # algebra -> routes to the system-solve framing (verify by substitution)
+    r2 = M.verify_calc_chain({"solution_text": "Let x be the age. 2x + 3 = 11, so x = 4."})
+    assert r2.status == "NOT_APPLICABLE" and r2.data and "system" in r2.data.get("route", "")
+    # nothing at all -> still a framing question, not a dead decline
+    r3 = M.verify_calc_chain({})
+    assert r3.status == "NOT_APPLICABLE" and r3.data and r3.data.get("framing_question")
+    # framing NEVER interferes with real grading
+    assert M.verify_calc_chain({"calc_steps": ["2+2=4"], "claimed_answer": 4}).status == "CONFIRMED"
+    assert M.verify_calc_chain({"calc_steps": ["2+2=5"], "claimed_answer": 5}).status == "MISMATCH"
+
+
 def test_all_four_route_through_run():
     assert any(x.status == "CONFIRMED" for x in _run({"calc_steps": ["2+2=4"], "claimed_answer": 4}))
     assert any(x.status == "CONFIRMED" for x in _run({"numeric_expr": "7*6", "claimed_value": 42}))

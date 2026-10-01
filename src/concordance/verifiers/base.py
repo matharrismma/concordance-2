@@ -39,8 +39,9 @@ class VerifierResult:
         return self.status != "NOT_APPLICABLE"
 
 
-def na(name: str, reason: str = "no artifact provided") -> VerifierResult:
-    return VerifierResult(name=name, status="NOT_APPLICABLE", detail=reason)
+def na(name: str, reason: str = "no artifact provided",
+       data: Optional[Dict[str, Any]] = None) -> VerifierResult:
+    return VerifierResult(name=name, status="NOT_APPLICABLE", detail=reason, data=data)
 
 
 def confirm(name: str, detail: str = "", data: Optional[Dict[str, Any]] = None) -> VerifierResult:

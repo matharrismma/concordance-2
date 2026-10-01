@@ -520,6 +520,40 @@ def _norm_inline(tok: str) -> str:
     return t.strip()
 
 
+def _calc_chain_framing(spec: Dict[str, Any]) -> VerifierResult:
+    """Kind B: when there is nothing gradeable, do not just decline — EXPLAIN why and ASK for the
+    structure needed to calculate, so the caller (a person, or a proposer model) can supply the work
+    and we verify it. This NEVER guesses the answer; it asks for the computation. The framing lives in
+    data so a surface can render the question; the status stays NOT_APPLICABLE (nothing was verified).
+    Deterministic routing by what the input looks like."""
+    name = "mathematics.calc_chain"
+    text = spec.get("solution_text")
+    if isinstance(text, str) and _ALGEBRA.search(text):
+        return na(name, "reads as an equation to SOLVE, not a worked chain to CHECK — I verify "
+                  "provided work, I do not solve the problem",
+                  data={"need": "equation(s), the unknown(s), and a claimed solution",
+                        "framing_question": "What is the equation, and the claimed value for each "
+                        "unknown? Give me equations + variables + a claimed solution and I will "
+                        "verify it by substitution.",
+                        "example": {"equations": ["2*x = 10"], "variables": ["x"],
+                                    "claimed_solution": {"x": 5}},
+                        "route": "mathematics mode=system"})
+    if isinstance(text, str) and text.strip():
+        return na(name, "the answer is stated in prose, not as checkable arithmetic — I grade written "
+                  "steps, I do not infer the computation",
+                  data={"need": "the arithmetic written as steps",
+                        "framing_question": "Which quantities combine to reach the answer? Write the "
+                        "arithmetic as steps (e.g. '16-3-4=9', '9*2=18') and I will check every one.",
+                        "example": {"calc_steps": ["16-3-4=9", "9*2=18"], "claimed_answer": 18},
+                        "route": "mathematics mode=calc_chain"})
+    return na(name, "no worked solution provided to grade",
+              data={"need": "calc_steps or a solution_text with the arithmetic written out",
+                    "framing_question": "Give me the worked steps and I will verify each one. What "
+                    "calculation reaches the answer?",
+                    "example": {"calc_steps": ["16-3-4=9", "9*2=18"], "claimed_answer": 18},
+                    "route": "mathematics mode=calc_chain"})
+
+
 def verify_calc_chain(spec: Dict[str, Any]) -> VerifierResult:
     """Grade a worked arithmetic/algebra SOLUTION: a chain of 'lhs = rhs' steps reaching a final
     answer. Each step is checked with the SAME equality engine (simplify(lhs - rhs) == 0), so a
@@ -611,9 +645,9 @@ def verify_calc_chain(spec: Dict[str, Any]) -> VerifierResult:
             if fm:
                 claimed_answer = fm.group(1).replace(",", "")
     else:
-        return na(name)
+        return _calc_chain_framing(spec)
     if not pairs:
-        return na(name, "no calc steps found")
+        return _calc_chain_framing(spec)
 
     def _ok(lhs: str, rhs: str) -> bool:
         L, R = _parse(lhs, var_names, rational=True), _parse(rhs, var_names, rational=True)
@@ -627,21 +661,32 @@ def verify_calc_chain(spec: Dict[str, Any]) -> VerifierResult:
                 return False
         return False
 
-    failures: List[str] = []
+    step_failures: List[str] = []
     for i, (lhs, rhs) in enumerate(pairs):
         try:
             if not _ok(lhs, rhs):
-                failures.append(f"step {i + 1}: {lhs.strip()} != {rhs.strip()}")
+                step_failures.append(f"step {i + 1}: {lhs.strip()} != {rhs.strip()}")
         except _PARSE_ERRORS:
-            failures.append(f"step {i + 1}: unparseable ({lhs.strip()}={rhs.strip()})")
+            step_failures.append(f"step {i + 1}: unparseable ({lhs.strip()}={rhs.strip()})")
+    final_failure = None
     if claimed_answer is not None:
         try:
             if not _ok(str(claimed_answer), pairs[-1][1]):
-                failures.append(f"final answer {claimed_answer} != last step {pairs[-1][1].strip()}")
+                final_failure = f"final answer {claimed_answer} != last step {pairs[-1][1].strip()}"
         except _PARSE_ERRORS:
-            failures.append(f"final answer {claimed_answer} not comparable")
+            final_failure = f"final answer {claimed_answer} not comparable"
+    failures = step_failures + ([final_failure] if final_failure else [])
     data = {"steps": len(pairs), "final_answer": claimed_answer, "step_rel_tol": tol,
             "chain": [f"{l.strip()}={r.strip()}" for l, r in pairs][:50]}
+    # Kind B: every written step checked out, but the stated answer isn't linked to the last verified
+    # value — the final step was left in prose. Don't imply the math is wrong; explain and ask for the
+    # missing step so we can finish the check. (Status stays MISMATCH: nothing was certified.)
+    if final_failure and not step_failures:
+        data["framing_question"] = (
+            f"All {len(pairs)} written steps check out, but I can't connect your answer "
+            f"{claimed_answer} to the last verified value ({pairs[-1][1].strip()}) — the final step "
+            f"isn't written out. Show it as 'a op b = {claimed_answer}' and I'll verify it.")
+        data["need"] = "the final computation, written as a step"
     if failures:
         return mismatch(name, "; ".join(failures)[:300], data)
     tail = f"; final answer {claimed_answer}" if claimed_answer is not None else ""
