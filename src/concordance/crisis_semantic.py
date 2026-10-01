@@ -199,6 +199,27 @@ _REVERENT_FEAR = re.compile(
     r"\bfear(?:ing|s|ed)?\s+(?:of\s+)?(?:the\s+)?(?:lord|god|yahweh|jehovah|almighty|most\s+high)\b"
     r"|\b(?:reverent(?:ial)?\s+fear|godly\s+fear|god-?fearing|fear\s+and\s+trembling)\b", re.I)
 
+# Three more benign CALCULATION/LOOKUP frames that the distributional score reads near crisis — the SAME
+# topic≈intent limit already corrected for measurement/theodicy/reverence (2026-10-01, measured on the
+# live resolver's benign set: 5 of 80 ordinary domain questions tripped the backstop just over threshold
+# — 6.2%, the target was ~3%). Each guard is TIGHT: the financial and calendar guards require the factual
+# "how much/many/long" question frame, and the technical guard keys to scientific nouns a cry never
+# carries. VERIFIED to match 0 of CRISIS_FLOOR and 0 of RED_TEAM_BLIND (recall floor cannot shrink) —
+# critically, the money guard does NOT key to bare money nouns, because RED_TEAM carries real financial-
+# despair cries ("the debt only ends when i do", "my life insurance is worth more than i am to them")
+# that must still reach help; the question frame is what a cry never uses. They only SUPPRESS the
+# backstop; the substring net still catches any explicit cry regardless.
+_BENIGN_FINANCIAL = re.compile(
+    r"\bhow (?:much|many|long)\b.{0,70}\b(?:mortgage|loan|interest|apr|principal|payment|installment|"
+    r"amortiz\w*|refinanc\w*|invest\w*|savings|dividend|premium|deductible|escrow|appreciat\w*|"
+    r"percent|per cent|down ?payment)\b", re.I)
+_BENIGN_TECHNICAL = re.compile(
+    r"\b(?:radioactiv\w*|isotope|half[- ]?li(?:fe|ves)|nuclide|becquerel|voltage|ampere?s?|ohms?|"
+    r"capacitor|resistor|molarity|wavelength|nanomet\w*|angstrom)\b", re.I)
+_BENIGN_CALENDAR = re.compile(
+    r"\bhow (?:many|long)\b.{0,50}\b(?:days?|weeks?|months?)\b.{0,50}\b(?:easter|passover|pentecost|"
+    r"good friday|christmas|advent|ascension|epiphany|hanukkah|lent|palm sunday|ash wednesday)\b", re.I)
+
 
 def flags(text: str) -> bool:
     """True when the semantic backstop judges this a cry. Only ever ADDS to the substring net."""
@@ -212,4 +233,10 @@ def flags(text: str) -> bool:
         return False                      # a theodicy question is the seeker's, not a cry (see note)
     if _REVERENT_FEAR.search(t):
         return False                      # "the fear of the LORD" is reverence, not a cry (see note)
+    if _BENIGN_FINANCIAL.search(t):
+        return False                      # a money CALCULATION ("how much ... mortgage") is never a cry
+    if _BENIGN_TECHNICAL.search(t):
+        return False                      # a scientific lookup (isotope/voltage/wavelength) is never a cry
+    if _BENIGN_CALENDAR.search(t):
+        return False                      # a date calculation ("how many days to Easter") is never a cry
     return score(text) > art["threshold"]
