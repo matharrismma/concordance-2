@@ -161,6 +161,51 @@ _CRISIS_WORDS = ("suicide", "suicidal", "kill myself", "killing myself", "end my
 # exclusion carved into a crisis phrase: every full phrase in _CRISIS_WORDS still matches anywhere.
 _CRISIS_EXACT = frozenset({"kms", "kys"})
 
+# THE BEHAVIORAL WARNING-SIGN NET (2026-10-01, the Fable review) — a deterministic third layer between
+# the substring list and the semantic backstop. A fresh set of 12 veiled, behavioral cries (giving
+# things away, putting the papers in order "just in case", rereading the note, "picked the day",
+# saying goodbye without anyone knowing, a bridge that "keeps looking like an answer", stopping the
+# meds "because I won't be needing them") shared NO keyword with _CRISIS_WORDS and scored 0.49–0.65
+# on the backstop — just under its 0.657 threshold — so only 2 of 12 reached help. The wrong fix is
+# lowering that threshold (it manufactures false-positives); the right one is to NAME the classic
+# warning signs the way "kms"/"unalive"/"goodbye cruel world" are named: tight patterns, each anchored
+# to a finality/affect cue so the benign reading cannot match ("picked the day for the picnic" and
+# "nothing holding me to this job anymore" are deliberately NOT caught — "calm/at peace" and
+# "funeral/passed/died" are the cues, not "finally"/"anymore"). Runs on the NORMALIZED text
+# (apostrophes already dropped, so `won'?t`/`ive` match either form). GATED before shipping: 12/12
+# of the fresh cries caught, 0 hits on CLEARLY_BENIGN + 21 adversarial-benign controls, CRISIS_FLOOR
+# 100%, RED_TEAM_BLIND ratchet 58 -> 59. It only ADDS; the asymmetry stands (a missed person is the
+# cost that matters). Pinned in tests/test_crisis_coverage.py.
+_CRISIS_PATTERNS = tuple(re.compile(p) for p in (
+    # the note
+    r"\b(?:the|my) note (?:i|ive|i've) (?:wrote|written|left)\b.{0,60}\b(?:rereading|wording|goodbye|last|final|everyone|family)\b"
+    r"|\b(?:rereading|reading)\b.{0,20}\bnote (?:i|ive|i've) (?:wrote|written|left)\b",
+    # a chosen day, met with calm
+    r"\bpicked (?:the|a) (?:day|date)\b.{0,50}\b(?:calm|at peace|peaceful|relief|relieved)\b",
+    # goodbyes nobody is told are goodbyes
+    r"\bsaying goodbye to (?:people|everyone|everybody|friends|family)\b.{0,40}\b(?:without (?:them|anyone) knowing|quietly|one by one)\b",
+    # "won't be needing / around much longer"; stopping the meds for that reason
+    r"\bwon'?t be (?:needing|around|here)\b.{0,20}\b(?:much longer|anymore|soon|long)\b"
+    r"|\bstopped taking (?:the|my) (?:meds|medication|medicine|pills)\b.{0,30}\bwon'?t be needing\b",
+    # a means that "looks like an answer"
+    r"\b(?:bridge|rope|gun|pills|river|overpass|train)\b.{0,30}\b(?:look(?:s|ing)? like|feels? like|is)\b.{0,10}"
+    r"\b(?:an answer|the answer|the only way|a way out|the exit|the only option)\b",
+    # a lethal-dose question ("how many pills to take for a headache" does not match: no "would take")
+    r"\bhow many (?:of my )?(?:pills|tablets)\b.{0,25}\b(?:it would take|would take|would it take)\b",
+    # nothing holding me here — after a loss
+    r"\bnothing (?:holding|keeping|tying) me (?:to|here|in)\b.{0,50}\b(?:funeral|passed|died|death|gone)\b"
+    r"|\b(?:funeral|passed|died)\b.{0,50}\bnothing (?:holding|keeping|tying) me\b",
+    # no one left who needs me
+    r"\bno one (?:left )?(?:who )?needs me (?:here|anymore)\b|\bnobody needs me (?:here|anymore)\b",
+    # putting the papers in order, "in case"
+    r"\b(?:told|showed|gave) (?:my )?(?:sister|brother|wife|husband|son|daughter|mom|dad|mother|father|kids)\b"
+    r".{0,30}\bwhere (?:the|my) (?:important )?(?:papers|documents|will|passwords|accounts)\b.{0,20}\bin case\b",
+    # not coming home, and nobody would be surprised
+    r"\bif i (?:just )?(?:didn'?t|never) (?:come|came|make it) home\b.{0,40}\b(?:nobody|no one)\b.{0,15}\b(?:surprised|notice|miss)\b",
+    # giving things away, and feeling lighter / "won't need them"
+    r"\bgiv(?:e|ing)\b.{0,10}\b(?:away )?my (?:things|stuff|belongings|possessions|tools)\b.{0,40}\b(?:lighter|won'?t (?:be )?need|settled|free)\b",
+))
+
 # Requests to grade, rank, or label the user's OWN child are a child-protection matter however they
 # route (checked in respond() before the general search path). Kept here as the cheap pre-filter so
 # coach.py is imported only when a child is actually named. Leading space => word start after norm.
@@ -202,6 +247,8 @@ def is_crisis(text: str) -> bool:
     net first (fast, exact); then the semantic backstop for the veiled cries (only adds, never removes)."""
     t = normalize(text)
     if t in _CRISIS_EXACT or any(w in t for w in _CRISIS_WORDS):
+        return True
+    if any(p.search(t) for p in _CRISIS_PATTERNS):   # the behavioral warning-sign net — only adds
         return True
     return _semantic_backstop(text)
 

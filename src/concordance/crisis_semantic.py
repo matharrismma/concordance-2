@@ -139,9 +139,12 @@ def score(text: str) -> float:
 # recall floor cannot shrink; a veiled cry the backstop exists to catch carries no unit, no measure verb.
 _BENIGN_MEASUREMENT = re.compile(
     r"\bhow (?:much|many|long|far|tall|wide|deep|heavy|hot|cold)\b.{0,60}\b"
-    r"(?:weigh|weighs|weight|cost|costs|measure|measures|gallon|ounce|pound|teaspoon|tablespoon|cup|"
-    r"quart|liter|litre|mile|kilomet|kilogram|gram|meter|metre|inch|foot|feet|celsius|fahrenheit|"
-    r"degree|calorie|acre|volt|watt|amp|psi|horsepower|bushel)\b"
+    # plurals accepted (2026-10-01, Fable review): "how long does sourdough rise at 65 degrees" scored
+    # 0.721 and was swept because `degree\b` cannot match "degrees" — the same gap for every countable
+    # unit here. Still frame-anchored to "how much/many/long…", which no cry uses (0 floor hits).
+    r"(?:weigh|weighs|weight|cost|costs|measure|measures|gallons?|ounces?|pounds?|teaspoons?|tablespoons?|cups?|"
+    r"quarts?|liters?|litres?|miles?|kilomet|kilograms?|grams?|meters?|metres?|inch(?:es)?|foot|feet|celsius|fahrenheit|"
+    r"degrees?|calories?|acres?|volts?|watts?|amps?|psi|horsepower|bushels?)\b"
     r"|\bconvert\b.{0,40}\b(?:to|into)\b"
     r"|\bhow many\b.{0,40}\bin (?:a|an|one)\b", re.I)
 
