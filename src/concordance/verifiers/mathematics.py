@@ -167,7 +167,7 @@ def _ast_compute_guard(expr: str):
         raise _SympifyError("expression too deeply nested")
 
 
-def _parse(expr: str, var_names: List[str] = None):
+def _parse(expr: str, var_names: List[str] = None, rational: bool = False):
     if not _ensure_sympy():
         # stdlib-only box: the symbolic-math checks need sympy. Raise a _PARSE_ERRORS member so
         # every verify_* wrapper degrades to NOT_APPLICABLE with this reason, never a crash.
@@ -181,7 +181,11 @@ def _parse(expr: str, var_names: List[str] = None):
     locals_ = {n: Symbol(n) for n in (var_names or [])}
     locals_.setdefault("oo", oo)
     locals_.setdefault("inf", oo)
-    return sympify(expr, locals=locals_)
+    # rational=True parses decimals as EXACT rationals (0.1 -> 1/10), so a chain like 520/1.04 = 500
+    # or 6*0.1 = 0.60 is TRUE by exact arithmetic rather than tripping on the last IEEE-754 bit. This
+    # TIGHTENS exactness (no float wobble); it never loosens it. Default off to leave every symbolic
+    # caller (equality/derivative/limit/series) unchanged.
+    return sympify(expr, locals=locals_, rational=rational)
 
 
 def _pole_bases(expr):
@@ -483,15 +487,52 @@ def verify_set_algebra(spec: Dict[str, Any]) -> VerifierResult:
 _CALC_ANNOTATION = _re.compile(r"<<\s*(.+?)\s*=\s*(.+?)\s*>>")
 _FINAL_ANSWER = _re.compile(r"####\s*([\-\d.,/]+)")
 
+# Inline arithmetic written in prose, e.g. the final step GSM8K leaves un-bracketed:
+# "99 + 5 = $104", "12/20 x 100% = 60%". The LHS must carry >=1 operator so a plain "x = 5"
+# variable definition is not mistaken for a computation. Currency, percent, thousands commas and
+# an 'x'/'×' multiplication sign are normalized away before parsing.
+_INLINE_EQ = _re.compile(
+    r"(?<![\w.)])(\$?\d[\d.,]*(?:\s*[-+*/x×]\s*\$?\d[\d.,]*)+)\s*=\s*\$?(\d[\d.,]*)")
+_INLINE_X = _re.compile(r"(?<=[\d)])\s*[x×]\s*(?=[\d(])")
+_THOUSANDS = _re.compile(r"(?<=\d),(?=\d\d\d(?:\D|$))")
+# A matched result followed by '/n' (a fraction) or ' n/n' (a mixed number) means the true value is
+# longer than the integer captured — prose arithmetic is ambiguous there, so the step is SKIPPED
+# rather than graded on a truncated number. Declining beats guessing.
+_FRACTION_TAIL = _re.compile(r"\s*/\s*\d|\s+\d+\s*/\s*\d")
+# A matched result immediately followed by an operator is not a result but the next expression in a
+# chained equality "A = B = C" (GSM8K: "4 * 60 / 5 = 4 * 12 = <<4*60/5=48>>48", where our regex
+# grabs "4 * 60 / 5 = 4"). Skip it — the bracketed step still carries the real check. A result
+# followed by prose ("= $300 left") is a genuine final step and stays graded.
+_CHAINED_TAIL = _re.compile(r"\s*[-+*/x×]")
+# Prose algebra — a coefficient-variable ("2x"), a variable in an operation ("X + 3", "X*4") or a
+# parenthesized variable ("(X+80)"). A segment carrying any of these is NOT graded inline: the
+# equations are symbolic and the numeric fragments ("4x - 4" -> "4 - 4") would be mis-read. Single
+# trailing-letter only, so ordinals/units ("7th", "5km") do not trip it into over-matching symbols.
+_ALGEBRA = _re.compile(r"\d[a-zA-Z](?![a-zA-Z])|\b[a-zA-Z]\s*[-+*/=]\s*\d|\b[a-zA-Z]\s*\*|\([a-zA-Z]")
+
+
+def _norm_inline(tok: str) -> str:
+    """Normalize a prose arithmetic token to something _parse accepts: drop $, 'x'->*, drop
+    thousands commas. Percent signs are stripped by the caller (both sides, symmetrically)."""
+    t = tok.replace("$", "").replace("×", "*")
+    t = _INLINE_X.sub("*", t)
+    t = _THOUSANDS.sub("", t)
+    return t.strip()
+
 
 def verify_calc_chain(spec: Dict[str, Any]) -> VerifierResult:
     """Grade a worked arithmetic/algebra SOLUTION: a chain of 'lhs = rhs' steps reaching a final
     answer. Each step is checked with the SAME equality engine (simplify(lhs - rhs) == 0), so a
     single wrong step is caught; the final answer, if given, must equal the last step. Accepts
     explicit steps (calc_steps = ['16-3-4=9', '9*2=18'] or [{'lhs':.., 'rhs':..}]) OR a GSM8K-style
-    solution_text with <<lhs=rhs>> calculator annotations and a '#### N' final answer. Deterministic,
-    no NL understanding — it grades a worked chain, it does not solve the word problem. An opt-in
-    step_rel_tol (clamped to <= 1e-2) accepts numeric steps rounded to display precision; the default
+    solution_text with <<lhs=rhs>> calculator annotations and a '#### N' final answer. In
+    solution_text, inline prose equations ("99 + 5 = $104", "12/20 x 100% = 60%") are graded too —
+    not just the bracketed ones — so a solution whose final step is written in prose is still
+    certified; a prose fragment that is not a pure numeric computation is skipped, never silently
+    confirmed. Decimals are parsed as exact rationals, so 520/1.04 = 500 and 6*0.1 = 0.60 hold by
+    exact arithmetic instead of tripping on a float's last bit. Deterministic, no NL understanding —
+    it grades a worked chain, it does not solve the word problem. An opt-in step_rel_tol (clamped to
+    <= 1e-2) additionally accepts steps rounded to display precision (e.g. 2/3 -> 0.67); the default
     is 0 (exact), preserving the zero-false-positive guarantee."""
     name = "mathematics.calc_chain"
     if not _ensure_sympy():
@@ -513,8 +554,58 @@ def verify_calc_chain(spec: Dict[str, Any]) -> VerifierResult:
                 lhs, rhs = s.split("=", 1)
                 pairs.append((lhs, rhs))
     elif isinstance(text, str):
+        # Collect <<lhs=rhs>> annotations (authoritative) in text order, then add any inline
+        # prose equations that are NOT just an echo of a bracketed step (deduped by value), so the
+        # final un-bracketed step GSM8K-style solutions end on is graded too. Each entry carries its
+        # text position so the merged chain stays in reading order (the final-answer check compares
+        # against the LAST step).
+        positioned: List = []
+        seen = set()
+
+        def _key(a: str, b: str) -> str:
+            return _re.sub(r"\s+", "", a) + "=" + _re.sub(r"\s+", "", b)
+
+        # Bracketed <<lhs=rhs>> steps are authoritative. Record them AND the text segments BETWEEN
+        # them: an inline scan runs per segment, never across a bracket, so an echo
+        # ("a op b = <<a op b=c>>c") splits at the boundary and matches neither side — no cross-
+        # binding of an LHS before a bracket to the result after it.
+        segments: List = []
+        last = 0
         for m in _CALC_ANNOTATION.finditer(text):
-            pairs.append((m.group(1), m.group(2)))
+            positioned.append((m.start(), m.group(1), m.group(2)))
+            seen.add(_key(m.group(1), m.group(2)))
+            segments.append((last, text[last:m.start()]))
+            last = m.end()
+        segments.append((last, text[last:]))
+        for off, seg in segments:
+            if _ALGEBRA.search(seg):
+                continue  # prose algebra: variables/coefficients get mis-read -> decline the segment
+            for m in _INLINE_EQ.finditer(seg):
+                if "%" in seg[m.start():m.end() + 1]:
+                    continue  # percent is an ambiguous operand/label ("100 * 20%", "= 50%") -> decline
+                if _FRACTION_TAIL.match(seg, m.end()):
+                    continue  # result is a fraction/mixed number ("= 2/5", "= 3 1/2") -> decline
+                if _CHAINED_TAIL.match(seg, m.end()):
+                    continue  # "A = B = C": the RHS is the next expression, not a result -> decline
+                pre = seg[:m.start()].rstrip()
+                if pre and (pre[-1].isdigit() or pre[-1] == ")"):
+                    continue  # LHS is a fragment of a mixed number ("1 1/2") or a coefficient ("(1/2) 278")
+                lhs, rhs = _norm_inline(m.group(1)), _norm_inline(m.group(2))
+                if _key(lhs, rhs) in seen:
+                    continue  # already counted as a bracketed step
+                try:
+                    L = _parse(lhs, var_names, rational=True)
+                    R = _parse(rhs, var_names, rational=True)
+                except _PARSE_ERRORS:
+                    continue  # not a parseable computation -> prose, skip (never a silent confirm)
+                if getattr(L, "free_symbols", None) or getattr(R, "free_symbols", None):
+                    continue  # contains variables -> not a pure numeric step, skip
+                if not (getattr(L, "is_number", False) and getattr(R, "is_number", False)):
+                    continue
+                seen.add(_key(lhs, rhs))
+                positioned.append((off + m.start(), lhs, rhs))
+        positioned.sort(key=lambda t: t[0])
+        pairs = [(a, b) for _p, a, b in positioned]
         if claimed_answer is None:
             fm = _FINAL_ANSWER.search(text)
             if fm:
@@ -525,7 +616,7 @@ def verify_calc_chain(spec: Dict[str, Any]) -> VerifierResult:
         return na(name, "no calc steps found")
 
     def _ok(lhs: str, rhs: str) -> bool:
-        L, R = _parse(lhs, var_names), _parse(rhs, var_names)
+        L, R = _parse(lhs, var_names, rational=True), _parse(rhs, var_names, rational=True)
         if simplify(L - R) == 0:
             return True
         if tol > 0:
