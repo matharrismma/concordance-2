@@ -90,6 +90,20 @@ def test_route_ask_sorts_verify_learn_and_lookup():
     assert r["form"] == "learn" and r["complete"] is True
 
 
+def test_domain_candidates_are_offered_additively_and_explain_themselves():
+    """The resolver rides the form gate as a CONFIRM-menu of fine verify-domains — additive, never a
+    silent pick, and each option carries the words that matched. When nothing in the verifiers'
+    vocabulary matches, the key is simply absent (no empty noise, nothing else changes)."""
+    r = clarify.clarify_ask("is it true that 17 is a prime number")
+    cands = r.get("domain_candidates", [])
+    assert isinstance(cands, list) and cands, "a domain-vocabulary request should offer a menu"
+    assert "number_theory" in [c["domain"] for c in cands]
+    assert all(c.get("why") for c in cands), "every suggestion must show its matched evidence"
+    # strictly additive: either the key is absent, or it is a non-empty list — never an empty list
+    r2 = clarify.clarify_ask("tell me a story about a quiet morning")
+    assert "domain_candidates" not in r2 or r2["domain_candidates"]
+
+
 def test_envelope_incomplete_gate_speaks_the_question_and_offers_no_tortoise():
     # nothing is sourced until we have heard — the hare IS the question, free, no tortoise yet
     gate = clarify.run(clarify.LOOKUP, "look up")

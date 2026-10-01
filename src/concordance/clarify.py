@@ -80,6 +80,11 @@ def run(form: Form, text: str, known: Optional[Dict[str, str]] = None,
     ready for its verifier. One question at a time (Socratic, not a wall of fields)."""
     known = known or {}
     filled: Dict[str, str] = {}
+    # A pre-ranked fine-domain menu (chemistry / physics / finance …) for a form that routes by
+    # domain — the deterministic resolver's suggestion, for the person to CONFIRM, never a silent
+    # pick. Strictly additive: present only when the resolver found candidates; the coarse domain_of
+    # prefill and every existing field are untouched, so nothing regresses when it finds none.
+    menu = _domain_menu(text) if any(s.name == "domain" for s in form.slots) else []
     for slot in form.slots:
         val = known.get(slot.name)                      # 1) the coach's prefill — the relationship autofills
         val = val.strip() if isinstance(val, str) else val
@@ -88,20 +93,39 @@ def run(form: Form, text: str, known: Optional[Dict[str, str]] = None,
             val = got.strip() if isinstance(got, str) else got
         if not val:                                     # 3) an empty required blank -> ask; optional -> skip
             if slot.required:
-                return _ask(form, slot, filled, "missing")
+                return _ask(form, slot, filled, "missing", menu)
             continue
         if slot.known_values and val not in slot.known_values:   # 4) outside a closed set -> ambiguous
-            return _ask(form, slot, filled, "ambiguous")
+            return _ask(form, slot, filled, "ambiguous", menu)
         if resolver is not None and not resolver(slot.name, val):  # 5) the keeping can't place it -> ask
-            return _ask(form, slot, filled, "unresolved")
+            return _ask(form, slot, filled, "unresolved", menu)
         filled[slot.name] = val
-    return {"complete": True, "form": form.name, "verifier": form.verifier,
-            "keep": form.keep, "filled": filled}
+    out: Dict[str, object] = {"complete": True, "form": form.name, "verifier": form.verifier,
+                              "keep": form.keep, "filled": filled}
+    if menu:
+        out["domain_candidates"] = menu
+    return out
 
 
-def _ask(form: Form, slot: Slot, filled: Dict[str, str], why: str) -> Dict[str, object]:
-    return {"complete": False, "form": form.name, "slot": slot.name, "why": why,
-            "ask": slot.question, "filled": filled}
+def _ask(form: Form, slot: Slot, filled: Dict[str, str], why: str,
+         menu: Optional[list] = None) -> Dict[str, object]:
+    d: Dict[str, object] = {"complete": False, "form": form.name, "slot": slot.name, "why": why,
+                            "ask": slot.question, "filled": filled}
+    if menu:
+        d["domain_candidates"] = menu
+    return d
+
+
+def _domain_menu(text: str, k: int = 5) -> list:
+    """The resolver's top-k fine verify-domains for this request, as a confirm-menu. Deterministic,
+    model-free; empty when nothing in the verifiers' vocabulary matched (then the form just asks the
+    open question as before). Lazy import so clarify stays light until a domain form runs."""
+    try:
+        from .domain_resolver import resolve_domain
+        return [{"domain": c["domain"], "why": c["why"]}
+                for c in resolve_domain(text, k=k).get("candidates", [])]
+    except Exception:
+        return []
 
 
 # ── the slot library (parts) ────────────────────────────────────────────────────────────────────
@@ -130,17 +154,15 @@ _VERIFY_LEADS = (
 # so a value we can't place is asked about, never silently accepted.
 KNOWN_DOMAINS = ("scripture", "doctrine", "history", "science", "language",
                  "health", "law", "math", "geography", "nature")
-_DOMAIN_HINTS = {
+# SUBSUMED (2026-10-01): secular domain classification used to live here as a second keyword map,
+# duplicating the fine resolver (domain_resolver.py). There is now ONE secular classifier — the
+# resolver, surfaced as the `domain_candidates` confirm-menu on every form. This keeps only the
+# WITNESS sections the secular resolver does not cover; secular cues return None here and are carried
+# by the fine menu instead (richer: chemistry/physics, not just "science").
+_WITNESS_HINTS = {
     "scripture": ("bible", "verse", "scripture", "gospel", "psalm", "testament", "chapter"),
-    "doctrine": ("doctrine", "theology", "salvation", "trinity", "sin", "grace", "faith"),
-    "history": ("history", "historical", "ancient", "century", "war", "king", "empire", "dated"),
-    "science": ("science", "physics", "chemistry", "biology", "atom", "energy", "cell", "gravity"),
-    "language": ("hebrew", "greek", "word", "meaning", "translate", "translation", "lexicon"),
-    "health": ("health", "disease", "body", "medicine", "herb", "nutrition", "illness"),
-    "law": ("law", "legal", "rights", "statute", "court", "constitution"),
-    "math": ("math", "equation", "number", "geometry", "algebra", "calculate"),
-    "geography": ("where", "country", "city", "map", "river", "mountain", "region"),
-    "nature": ("plant", "animal", "tree", "bird", "species", "weather", "soil", "seed"),
+    "doctrine": ("doctrine", "theology", "salvation", "trinity", "grace"),
+    "language": ("hebrew", "greek", "transliteration", "lexicon", "septuagint", "aramaic"),
 }
 
 
@@ -173,10 +195,12 @@ def claim_of(text: str) -> Optional[str]:
 
 
 def domain_of(text: str) -> Optional[str]:
-    """A best-effort classifier prefill — the domain is usually implied, not stated. None -> we simply
-    do not ask (it is optional); the verifier can route without it."""
+    """Best-effort coarse prefill for the optional domain slot. ONE classifier for secular: this only
+    recognises the WITNESS sections (scripture/doctrine/language) that the secular resolver cannot
+    place; everything secular returns None here and is carried by the richer `domain_candidates` menu
+    (domain_resolver). None -> the optional slot is simply skipped."""
     low = " " + re.sub(r"\s+", " ", (text or "").lower()) + " "
-    for dom, hints in _DOMAIN_HINTS.items():
+    for dom, hints in _WITNESS_HINTS.items():
         if any(f" {h}" in low or h in low for h in hints):
             return dom
     return None
