@@ -82,7 +82,10 @@ def test_mcp_lists_and_calls_new_tools():
         r = mcp.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, cfg)
         return {t["name"] for t in r["result"]["tools"]}
     wit = names(WIT)
-    assert {"read_passage", "cross_references", "word_occurrences", "pronounce"} <= wit
+    # word_occurrences was FOLDED into word_study (2026-10-01): word_study already returns every
+    # occurrence, so there is one word tool, not two. The paginated /word_occurrences WEB route stays.
+    assert {"read_passage", "cross_references", "word_study", "pronounce"} <= wit
+    assert "word_occurrences" not in wit, "folded into word_study; should not be a separate tool"
     sec = names(SEC)
     # 2026-07-31: knowledge is open on BOTH doors — "we don't hide knowledge, we aren't a
     # secret society". This asserted the tool was hidden from the secular surface; it now

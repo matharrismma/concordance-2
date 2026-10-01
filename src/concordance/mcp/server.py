@@ -723,10 +723,10 @@ def _witness_tools() -> List[dict]:
          "description": ("Verses connected to a reference by SHARED original words (Strong's) — the "
                          "dots, connected; deterministic and found, ranked by shared-word count."),
          "inputSchema": {"type": "object", "properties": {"ref": {"type": "string"}}, "required": ["ref"]}},
-        {"name": "word_occurrences",
-         "description": "Every verse where a Strong's word occurs (the concordance).",
-         "inputSchema": {"type": "object", "properties": {
-             "strongs": {"type": "string", "description": "e.g. G26, H2617"}}, "required": ["strongs"]}},
+        # word_occurrences FOLDED INTO word_study (2026-10-01): word_study already returns definition +
+        # pronunciation + EVERY occurrence, so a separate occurrences tool was a redundant agent door.
+        # One excellent tool for the situation. The paginated /word_occurrences WEB route stays as the
+        # full concordance-listing view (which word_study's inline occurrences do not paginate).
         {"name": "commentary",
          "description": ("Public-domain, attributed commentary (Matthew Henry) on a reference — the "
                          "commentator's own words, found and cited, never generated."),
@@ -911,7 +911,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
                        "cross-references, the charts — found and cited, never generated. "
                        "Gate semantics unchanged from the main door.",
         "tools": {"resolve": "read", "read_passage": "read", "word_study": "read",
-                  "cross_references": "read", "word_occurrences": "read", "commentary": "read",
+                  "cross_references": "read", "commentary": "read",
                   "tsk_cross_references": "read", "character_get": "read",
                   "characters_browse": "read", "prophecy_traces": "read", "harmony": "read",
                   "timeline": "read", "backmatter": "read", "bible_places": "read",
@@ -1648,9 +1648,8 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     if name == "cross_references" and knowledge:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.cross_references(args.get("ref", ""))
-    if name == "word_occurrences" and knowledge:
-        from ..verifiers import scripture  # lazy: witness-only
-        return scripture.word_occurrences(args.get("strongs", ""))
+    # word_occurrences folded into word_study (which already returns every occurrence); the web
+    # route /word_occurrences keeps the paginated concordance-listing view.
     if name == "commentary" and knowledge:
         from .. import commentary  # lazy: witness-only
         return commentary.for_ref(args.get("ref", ""), source=args.get("source") or commentary.DEFAULT_SOURCE)
