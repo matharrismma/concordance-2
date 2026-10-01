@@ -1798,6 +1798,26 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import dictionary as _dict
         return _ok(_dict.define(w))
 
+    # THE LOOKUP door — the found-value twin of /verify: return a value deterministically from the
+    # engine's offline PD data (molar_mass {formula}, element {symbol|name|atomic_number},
+    # convert {value,from,to}). Consolidated like verify; new kinds don't grow the surface.
+    if method == "GET" and path == "/lookup":
+        kind = (query.get("kind") or "").strip()
+        if not kind:
+            return _err(400, "kind required")
+        params = {k: v for k, v in query.items() if k != "kind"}
+        from .. import lookup as _lk
+        return _ok(_lk.lookup(kind, params))
+
+    # FIND_VERIFIER — the deterministic claim->domain resolver (no model): ranked domain candidates
+    # to confirm then pass to /verify. The data twin of the find_verifier tool and the /ask resolver.
+    if method == "GET" and path == "/find_verifier":
+        q = (query.get("q") or query.get("query") or "").strip()
+        if not q:
+            return _err(400, "q required")
+        from .. import domain_resolver as _dr
+        return _ok(_dr.resolve_domain(q))
+
     # ── THE EXPERT FACES — callable life-domain servants (the Steward, Tutor, Social Worker, Theorist).
     # A face is a deterministic COMPOSER: it ARRANGES existing verifiers + shelves + discernment for a
     # life-domain and never generates. Additive — the ordinary front door (/ask) is untouched; a caller
@@ -3080,6 +3100,8 @@ ROUTES = [
     {"path": "/pronounce", "methods": ("GET",), "api": True},
     {"path": "/thesaurus", "methods": ("GET",), "api": True},   # bounded single-word lookup (data/thesaurus.db), like /pronounce
     {"path": "/dictionary", "methods": ("GET",), "api": True},  # Webster's 1913 + supplement definitions (data/dictionary_en.db)
+    {"path": "/lookup", "methods": ("GET",), "api": True},      # deterministic value lookup (molar_mass/element/convert) — twin of /verify
+    {"path": "/find_verifier", "methods": ("GET",), "api": True},  # claim->domain resolver (no model)
     {"path": "/faces", "methods": ("GET",), "api": True},       # list the callable life-domain servants
     {"path": "/recombine", "methods": ("GET",), "api": True, "rl": "read"},  # speak from the keeping by recombining found clauses (scans the corpus like /search)
     {"path": "/face", "methods": ("POST",), "rl": True},        # consult one — composes verifiers+shelves+discernment

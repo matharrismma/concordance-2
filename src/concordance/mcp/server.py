@@ -152,6 +152,21 @@ def _secular_tools() -> List[dict]:
                          "(synonyms) and word_study (original languages) — it points to them, never duplicates. "
                          "The agent twin of GET /dictionary."),
          "inputSchema": {"type": "object", "properties": {"word": {"type": "string"}}, "required": ["word"]}},
+        {"name": "lookup",
+         "description": ("Look up a VALUE deterministically from the engine's offline, public-domain data — "
+                         "the found-value twin of `verify` (look it up, then verify it), consolidated like "
+                         "verify into one tool. kind is one of: molar_mass {formula}, element "
+                         "{symbol|name|atomic_number}, convert {value, from, to}. Returns the value + its "
+                         "source; found=false (never a guess) when unknown. Call with an unknown kind to "
+                         "list the current kinds. The agent twin of GET /lookup."),
+         "inputSchema": {"type": "object", "properties": {
+             "kind": {"type": "string"}, "params": {"type": "object"}}, "required": ["kind"]}},
+        {"name": "find_verifier",
+         "description": ("Which verify DOMAIN handles a plain-language claim — the deterministic resolver "
+                         "(no model). Returns ranked domain candidates with the literal words that matched, "
+                         "to confirm and pass to `verify`. Crisis defers to real help; genuine ambiguity "
+                         "returns the candidates, never a single guess. The agent twin of GET /find_verifier."),
+         "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}},
         {"name": "steward_budget",
          "description": ("Steward — a household budget (income, expenses -> net, savings rate, by "
                          "category). Shows and plans; NEVER moves money."),
@@ -881,7 +896,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
                   "cards_stats": "read", "daily_card": "read", "grid_axis": "read",
                   "grid_dimension": "read", "card_connections": "read", "locate": "read",
                   "library_health": "read", "pronounce": "derive", "thesaurus": "derive",
-                  "define": "derive", "study_find": "read",
+                  "define": "derive", "lookup": "derive", "find_verifier": "read", "study_find": "read",
                   "seeds": "read", "ask": "read", "discern": "read"},
     },
     "sovereign": {
@@ -1534,6 +1549,12 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     if name == "define":
         from .. import dictionary as _dict   # offline Webster's 1913 + supplement — the agent twin of /dictionary
         return _dict.define(str(args.get("word") or ""))
+    if name == "lookup":
+        from .. import lookup as _lk         # offline deterministic value lookup — the found-value twin of verify
+        return _lk.lookup(str(args.get("kind") or ""), args.get("params") or {})
+    if name == "find_verifier":
+        from .. import domain_resolver as _dr  # deterministic claim->domain resolver (no model)
+        return _dr.resolve_domain(str(args.get("query") or ""))
     if name == "steward_budget":
         from .. import steward  # shows + plans; never moves money
         return steward.budget(args.get("income"), args.get("expenses") or [])

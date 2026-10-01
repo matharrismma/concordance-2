@@ -211,6 +211,12 @@ def _lookup(spec: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     return None
 
 
+def element(symbol=None, name=None, atomic_number=None) -> Optional[Dict[str, Any]]:
+    """Look up an element by symbol / name / atomic number — the reusable lookup behind both
+    verify_element and the `lookup` tool (one source, so the two doors cannot drift)."""
+    return _lookup({"symbol": symbol, "name": name, "atomic_number": atomic_number})
+
+
 def verify_element(spec: Dict[str, Any]) -> VerifierResult:
     """Verify a claim about an element's identity.
 
@@ -323,6 +329,26 @@ _MOLAR_FORMULA = re.compile(r"(?:[A-Z][a-z]?\d*)+$")
 _MOLAR_TOKEN = re.compile(r"([A-Z][a-z]?)(\d*)")
 
 
+def molar_mass(formula: str):
+    """Molar mass (g/mol) of a SIMPLE formula (H2O, C6H12O6): M = Σ(count × atomic_mass), from the
+    periodic table the engine already holds. Returns (mass, composition_dict) on success, or
+    (None, reason) on a bad/unsupported formula. The reusable compute behind verify_molar_mass AND
+    the `lookup` tool — one computation, both doors (look up the value, or verify a claimed one)."""
+    f = str(formula or "").strip()
+    if not f or not _MOLAR_FORMULA.match(f):
+        return None, f"{formula!r} is not a simple element-and-count formula (parentheses/charges unsupported)"
+    total = 0.0
+    comp: Dict[str, int] = {}
+    for sym, cnt in _MOLAR_TOKEN.findall(f):
+        el = _BY_SYMBOL.get(sym)
+        if el is None:
+            return None, f"unknown element symbol {sym!r} in {f}"
+        c = int(cnt) if cnt else 1
+        comp[sym] = comp.get(sym, 0) + c
+        total += c * el["atomic_mass"]
+    return round(total, 6), comp
+
+
 def verify_molar_mass(spec: Dict[str, Any]) -> VerifierResult:
     """Molar mass of a chemical formula, computed from the periodic table: M = Σ(count × atomic_mass).
     SIMPLE formulas only — element symbols with optional counts (H2O, CO2, C6H12O6). Parentheses,
@@ -334,21 +360,13 @@ def verify_molar_mass(spec: Dict[str, Any]) -> VerifierResult:
     claimed = spec.get("claimed_molar_mass")
     if not formula or claimed is None:
         return na(name, "formula and claimed_molar_mass required")
-    if not _MOLAR_FORMULA.match(formula):
-        return na(name, f"{formula!r} is not a simple element-and-count formula (parentheses/charges unsupported)")
     try:
         cl = float(claimed)
     except (TypeError, ValueError):
         return error(name, "claimed_molar_mass must be numeric")
-    total = 0.0
-    comp: Dict[str, int] = {}
-    for sym, cnt in _MOLAR_TOKEN.findall(formula):
-        el = _BY_SYMBOL.get(sym)
-        if el is None:
-            return na(name, f"unknown element symbol {sym!r} in {formula}")
-        c = int(cnt) if cnt else 1
-        comp[sym] = comp.get(sym, 0) + c
-        total += c * el["atomic_mass"]
+    total, comp = molar_mass(formula)
+    if total is None:
+        return na(name, comp)          # comp carries the reason string on failure
     rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     threshold = max(1e-4, rel_tol * total)
     data = {"formula": formula, "composition": comp,

@@ -79,7 +79,7 @@ AGENT_ONLY = {
     # phonetics), the data twins of the `define` and `pronounce` agent tools — data endpoints, not
     # pages a human navigates TO. (/thesaurus is the same shape and is NOT yet declared — a
     # pre-existing gap, tracked separately, not this change's to fix.)
-    "/dictionary",
+    "/dictionary", "/lookup", "/find_verifier",
     "/works/item", "/library/health", "/growth", "/daily", "/pronounce", "/book",
     "/badges", "/archetype", "/archetypes", "/archetypes/match", "/coach/guidance",
     "/chess", "/report", "/block",

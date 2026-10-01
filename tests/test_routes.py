@@ -33,6 +33,11 @@ GOLDEN_API_GET = {
     # The dictionary reference door (2026-10-01): Webster's 1913 + our supplement from
     # data/dictionary_en.db, a bounded word lookup like /thesaurus; the peer that gives DEFINITIONS.
     "/dictionary",
+    # The lookup + find_verifier doors (2026-10-01): /lookup returns a VALUE deterministically from
+    # offline PD data (the found-value twin of /verify, consolidated like it); /find_verifier is the
+    # claim->domain resolver (no model). Both replace the retired 1.0 server's per-domain lookup tools.
+    "/lookup",
+    "/find_verifier",
     "/faces",
     "/recombine",   # speak from the keeping by recombining found clauses (read bucket, scans like /search)
     # coach lesson text, the scripture-for lookup, and the tortoise reader — GET surfaces added with the
