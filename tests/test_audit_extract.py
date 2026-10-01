@@ -94,12 +94,16 @@ def test_a_wrong_constant_value_is_broken():
     assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
 
 
-def test_a_true_constant_is_never_broken_by_unit_formatting():
+def test_a_true_constant_with_a_variant_unit_is_declined_never_broken():
     """The gas constant IS 8.314 J/(mol·K); written "J/K/mol" the stored form differs, but the value
-    is right. The unit is passed to the verifier ONLY when it will confirm, so a true claim is checked
-    on its value and never falsely BROKEN over unit spelling — the auditor's asymmetry, applied here."""
+    is right. It must never be falsely BROKEN over unit spelling (the auditor's asymmetry) — and, since
+    2026-10-01, it must NOT be confirmed on the bare value either: that value-only path minted a false
+    HOLDS for "the speed of light is 299792458 km/s" (the Fable review's cardinal finding). A stated
+    unit that does not normalize-match is DECLINED — unchecked, neither held nor broken — until a real
+    unit normalizer can tell a formatting variant from a wrong unit."""
     res = audit("the ideal gas constant is 8.314 J/K/mol", CFG, seal=False)
-    assert res["held"] == 1 and res["broken"] == 0
+    assert res.get("broken", 0) == 0                                 # never falsely broken
+    assert res.get("held", 0) == 0 and res["verdict"] != "HOLDS"      # and never confirmed on the bare value
 
 
 def test_scientific_notation_and_apostrophe_names_extract():

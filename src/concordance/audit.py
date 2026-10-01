@@ -233,12 +233,16 @@ def _x_nutrition(text: str):
 #   * a bare symbol ("c", "e", "g", "alpha") is NOT matched — far too ambiguous in prose; only the
 #     full constant names, multi-word alias phrases, and a few unmistakable proper names (planck,
 #     boltzmann, avogadro, faraday) are candidates. The required numeric value guards the rest.
-#   * the unit is passed to the verifier ONLY when it normalize-MATCHES the constant's own unit — i.e.
-#     only when it will CONFIRM. A true claim can then never be falsely BROKEN over unit formatting
-#     ("8.314 J/K/mol" for the gas constant is correct, but its stored form differs, so we check the
-#     value alone rather than break it); any other unit is dropped and only the value is checked. The
-#     residual — the exact numeric value stated under a wrong unit label — is left to the structured
-#     door, which checks units deliberately. Scientific "e" notation is read; "x 10^n" is left to miss.
+#   * a STATED unit must normalize-MATCH the constant's own unit, or the claim is DECLINED — left
+#     unchecked, never silently confirmed on the value alone. Until 2026-10-01 a non-matching unit was
+#     DROPPED and the bare value checked, so "the speed of light is 299792458 km/s" (false — 1000x c)
+#     and "... 299792458 mph" each earned a sealed HOLDS: the cardinal failure, found by the Fable
+#     review. The old rationale — avoid a false BROKEN on an equivalent-but-oddly-formatted unit such
+#     as "8.314 J/K/mol" — is served just as well by declining: neither a false HOLDS nor a false
+#     BROKEN, because _normalize_unit cannot yet tell "wrong unit" from "same unit, other format"
+#     (refinement: a real unit normalizer would let formatting variants confirm and wrong units
+#     MISMATCH honestly). A claim with NO unit stated still checks the value; the structured door
+#     checks units deliberately. Scientific "e" notation is read; "x 10^n" is left to miss.
 _PC_SAFE_SINGLE = frozenset({"planck", "boltzmann", "avogadro", "faraday"})
 _PC_PAT: Optional[re.Pattern] = None
 
@@ -274,10 +278,14 @@ def _x_physical_constant(text: str):
             continue
         cv: Dict[str, Any] = {"constant": canon, "claimed_value": value}
         unit = (m.group(3) or "").strip()
-        if unit:                                    # pass the unit ONLY when it will confirm (see above)
+        if unit:
             stored = _pc._CONSTANTS[canon]["unit"]
             if unit.lower() == stored.lower() or _pc._normalize_unit(unit) == _pc._normalize_unit(stored):
                 cv["claimed_unit"] = unit
+            else:
+                # A stated unit that does not match -> DECLINE (unchecked), never confirm on the bare
+                # value: that path minted a false HOLDS for "299792458 km/s" (see the note above).
+                continue
         out.append((_q(text, m), "physical_constants", {"CONST_VERIFY": cv}))
     return out
 
