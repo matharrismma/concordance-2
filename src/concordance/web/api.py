@@ -2767,7 +2767,8 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # attached. UNGATED on both surfaces by design: what this engine can and cannot do is not
         # witness content, and a reader who cannot check our claims cannot trust them.
         from .. import capabilities as _caps
-        return _ok(_caps.statement(surface))
+        from .. import doors as _doors
+        return _ok(dict(_caps.statement(surface), doors=_doors.doors()))
 
     if method == "GET" and path == "/systems":
         # THE SYSTEMS HANDICAP — operational health of every subsystem as one number each (a golf
@@ -3237,6 +3238,11 @@ _RETIRED = {
     # /card, /encyclopedia, /graph, /characters, /bible and the desk carried the site.
     # 43 files -> 8 (+ routes). Every entry names the FINAL home of its content, no chains.
     "/hymns.html": "/?q=hymns",                           # the desk searches the keeping
+    # THE FIVE DOORS (2026-10-02, docs/FIVE_DOORS_MAP.md): four pages folded into their doors
+    "/atlas.html": "/explore.html",                       # an unlisted duplicate of the Atlas
+    "/improve.html": "/workshop.html",                    # the second Workshop page, same title
+    "/crossing.html": "/concordance.html",                # an interstitial with no door of its own
+    "/encyclopedia.html": "/characters.html",             # the redirect stub, made a real 301
     "/library.html": "/",
     "/catalog.html": "/",
     "/codex.html": "/",
@@ -3263,7 +3269,7 @@ _RETIRED = {
     "/mesh.html": "/fellowship.html",   # the mesh surface consolidated INTO fellowship.html — send the
                                         # door/invite/notification journeys there, not home (a lost link)
     "/narratives.html": "/bible.html",
-    "/places.html": "/encyclopedia.html",
+    "/places.html": "/characters.html",                   # FINAL home (encyclopedia.html itself retired 2026-10-02 — no chains)
     "/reason.html": "/proof.html",
     "/seal.html": "/proof.html",
     "/seeds.html": "/proof.html",

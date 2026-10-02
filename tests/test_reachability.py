@@ -114,6 +114,10 @@ AGENT_ONLY = {
     # reached only by the agent draining the queue. The filing side (/workshop, /workshop/signable) IS
     # referenced by improve.html, so only the drain-status endpoint is declared agent-only here.
     "/workshop/status",
+    # THE FIVE DOORS (2026-10-02): improve.html (the operator's filing desk, the only page that linked the
+    # signed filing step) is retired into workshop.html; the signable is the agent/script half of the
+    # write — a contributor's tool signs and submits it — never a public <a href>.
+    "/workshop/signable",
 
     # THE PERSONAL KEEPING FLOW, write side: /journal keeps the day's ideas/writings, and /days counts
     # your time + concentration from the conversations THIS BROWSER holds — both POSTed with data the
@@ -136,6 +140,7 @@ UNLISTED_PAGES = {
     "coach.html",         # Coach (the audio-native desk; internal codename console) — reached by voice / direct URL / home-screen install, an E-Ink-first tool, not a page on the public witness nav
     "tv.html",            # narrowhighway.tv (the museum/broadcast shell) — reached by direct URL / the .tv domain, curated to what the viewer seeks, not a page on the witness nav
     "keep.html",          # the operator's own surface, noindex — a public list is not its place
+    "steward.html",       # the Steward's instrument (budget, rounds, cost-destroyed) — plumbing in the five-doors map (2026-10-02); documented on connect.html, never a reader's door
     "encyclopedia.html",  # a redirect stub onto characters.html; a second door to one room
     "ask.html",           # the landing's predecessor, kept for old links
     "profile.html",       # the opt-in sovereign keeping (ez-login) — reached by direct URL / the keeping flow, not the public nav

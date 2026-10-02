@@ -28,13 +28,16 @@
   } catch (e) {}
 
   /* --- the canonical spine. Links are absolute so they work from any surface. --- */
+  /* THE FIVE DOORS (Matt, 2026-10-02: "I don't want 15 things. I want 1-5 amazing things.") —
+     the spine shows the same five verbs on every page: Check · Find · Walk · Keep · Word.
+     Everything else is a view inside one of them (docs/FIVE_DOORS_MAP.md, src/concordance/doors.py).
+     domains/map/torus/… are the Atlas's own views, reachable inside Find, never siblings here. */
   var NAV = [
-    { k: "concordance", label: "Concordance", href: "/" },
-    { k: "atlas",       label: "Atlas",       href: "/explore.html" },
-    // domains.html demoted from the spine (consolidation surface-3, 2026-09-24): it is one of
-    // explore.html's own views, not a sibling of its parent — reachable inside the Atlas.
-    { k: "verify",      label: "Verify",      href: "/com.html#verify" },
-    { k: "map",         label: "Map",         href: "/map.html" }
+    { k: "check", label: "Check", href: "/" },
+    { k: "find",  label: "Find",  href: "/explore.html" },
+    { k: "walk",  label: "Walk",  href: "/situations.html" },
+    { k: "keep",  label: "Keep",  href: "/profile.html" },
+    { k: "word",  label: "Word",  href: "https://narrowhighway.org/bible.html" }
   ];
   var FACES = [
     { k: "reach",   label: "reach",   href: "https://narrowhighway.com" },
@@ -46,12 +49,19 @@
     var override = document.documentElement.getAttribute("data-nh-section");
     if (override) return override;
     var p = location.pathname.replace(/\/+$/, "") || "/";
-    if (p === "/" || p === "/index.html") return "concordance";
-    if (p === "/com.html") return "verify";
+    if (p === "/" || p === "/index.html") return "check";
     var map = {
-      "/concordance.html": "concordance", "/reader.html": "concordance",
-      "/explore.html": "atlas", "/atlas.html": "atlas",
-      "/domains.html": "atlas", "/map.html": "map"
+      "/concordance.html": "check", "/checkit.html": "check", "/proof.html": "check", "/com.html": "check",
+      "/connect.html": "check", "/gateway.html": "check", "/live.html": "check", "/completeness.html": "check",
+      "/explore.html": "find", "/reader.html": "find", "/map.html": "find", "/theories.html": "find",
+      "/bridges.html": "find", "/calculations.html": "find", "/domains.html": "find", "/one_body.html": "find",
+      "/spiral.html": "find", "/torus.html": "find", "/tv.html": "find",
+      "/situations.html": "walk", "/coach.html": "walk", "/halls.html": "walk", "/golf.html": "walk",
+      "/grappling.html": "walk", "/music.html": "walk", "/provision.html": "walk", "/systems.html": "walk",
+      "/strategy.html": "walk", "/playbook.html": "walk",
+      "/profile.html": "keep", "/fellowship.html": "keep", "/workshop.html": "keep", "/plow.html": "keep",
+      "/bible.html": "word", "/characters.html": "word", "/harmony.html": "word", "/timeline.html": "word",
+      "/prophecy.html": "word", "/read.html": "word", "/wisdom.html": "word"
     };
     return map[p] || "";
   }

@@ -1105,7 +1105,21 @@ def _tools_for(config: EngineConfig, gate_open: bool = False) -> List[dict]:
     #
     # `gate_open` survives as the invitation it always was: it still tells ask.py how to meet
     # someone. It no longer decides what exists.
-    return _secular_tools() + _witness_tools()
+    #
+    # THE FIVE DOORS (Matt, 2026-10-02: "I don't want 15 things. I want 1-5 amazing things."): the
+    # catalog is the SAME 97 tools (the golden holds; the profile partition holds), but a new agent
+    # meets them sorted CHECK · FIND · WALK · KEEP · WORD, doors before internals, and every
+    # description leads with its verb and kind — "[CHECK · door]" / "[KEEP · internal]" — so the
+    # first screen of tools/list reads as five doors, not ninety-seven things.
+    from .. import doors as _doors
+    out = []
+    for t in sorted(_secular_tools() + _witness_tools(), key=lambda t: _doors.door_rank(t.get("name", ""))):
+        t = dict(t)
+        tag = _doors.tag(t.get("name", ""))
+        if tag and not str(t.get("description", "")).startswith("["):
+            t["description"] = f"[{tag}] " + str(t.get("description", ""))
+        out.append(t)
+    return out
 
 
 def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = False) -> Any:
@@ -1414,7 +1428,8 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         return _ops.now(str(args.get("tz") or "").strip() or None)
     if name == "capabilities":
         from .. import capabilities as _caps  # both surfaces: the statement is never gated
-        return _caps.statement(config.surface)
+        from .. import doors as _doors
+        return dict(_caps.statement(config.surface), doors=_doors.doors())
     if name == "kernel":
         from .. import kernel as _kernel       # the law, never gated — you must be able to read it
         return _kernel.doctrine()
