@@ -6,6 +6,9 @@ Checks performed:
     (mass, length, time, current, temperature, amount, luminous_intensity)
   * conservation: given before/after dictionaries of conserved quantities
     (mass, energy, momentum, charge, ...), verify within tolerance
+  * planck_units: the Planck length/time/mass/energy/temperature from h, G, c, k_B
+    (claimed_planck_length_m, claimed_planck_time_s, claimed_planck_mass_kg,
+     claimed_planck_energy_J, claimed_planck_energy_gev, claimed_planck_temperature_k)
 
 Equation format for dimensional check:
     "F = m * a"           # symbolic — uses sympy.physics.units
@@ -23,6 +26,7 @@ from typing import Any, Dict, List, Optional
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 from . import rela_scale as _rela  # c-anchored mass-energy / Lorentz factor
 from . import grav_scale as _grav  # G-anchored Newtonian gravitation
+from . import planck_scale as _planck  # h-anchored; the Planck units join h, G, c, k_B
 
 # sympy (with sympy.physics.units) is a ~4s import. Only the dimensional-
 # consistency check needs it, so it loads on first use rather than at module
@@ -370,6 +374,48 @@ def verify_gravitation(spec: Dict[str, Any]) -> VerifierResult:
                          spec["claimed_gravitational_force_N"], 1e-3, {"formula": "F = G m1 m2 / r^2"})
 
 
+_PLANCK_CHECKS = (
+    ("claimed_planck_length_m", _planck.planck_length_m, "l_P = sqrt(hbar G / c^3)", "m"),
+    ("claimed_planck_time_s", _planck.planck_time_s, "t_P = sqrt(hbar G / c^5)", "s"),
+    ("claimed_planck_mass_kg", _planck.planck_mass_kg, "m_P = sqrt(hbar c / G)", "kg"),
+    ("claimed_planck_energy_J", _planck.planck_energy_J, "E_P = sqrt(hbar c^5 / G)", "J"),
+    ("claimed_planck_energy_gev", _planck.planck_energy_GeV, "E_P = sqrt(hbar c^5 / G) / e", "GeV"),
+    ("claimed_planck_temperature_k", _planck.planck_temperature_K, "T_P = E_P / k_B", "K"),
+)
+
+
+def verify_planck_units(spec: Dict[str, Any]) -> VerifierResult:
+    """The Planck units — the Planck length l_P = sqrt(hbar G / c^3) (1.616255e-35 m, the smallest
+    length with measured meaning: quantum, gravity and light in ONE number), Planck time t_P = l_P/c,
+    Planck mass m_P = sqrt(hbar c / G), Planck energy E_P = m_P c^2 (1.2209e19 GeV) and Planck
+    temperature T_P = E_P / k_B. physics THROUGH three anchors at once (h, G, c; k_B for T_P) — every
+    value an exact function of the constant table. Any subset of the claimed_planck_* keys."""
+    name = "physics.planck_units"
+    asked = [chk for chk in _PLANCK_CHECKS if chk[0] in spec]
+    if not asked:
+        return na(name)
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)   # G is known to 2.2e-5; 1e-3 absorbs a 4-digit claim
+    data: Dict[str, Any] = {"h": _planck._h, "G": _planck._G, "c": _planck._c, "k_B": _planck._kB,
+                            "rel_tol": rel_tol}
+    bad, good = [], []
+    for key, fn, formula, unit in asked:
+        try:
+            cl = float(spec[key])
+        except (TypeError, ValueError):
+            return error(name, f"{key} must be numeric")
+        actual = fn()
+        rel = abs(actual - cl) / abs(actual)
+        data[key.replace("claimed_", "")] = actual
+        data[key] = cl
+        if rel > rel_tol:
+            bad.append(f"{formula} = {actual:.6g} {unit}, claimed {cl:.6g} (rel {rel:.1e} > {rel_tol:.0e})")
+        else:
+            good.append(f"{formula} = {actual:.6g} {unit}")
+    if bad:
+        return mismatch(name, "; ".join(bad), data)
+    return confirm(name, "; ".join(good) + " (matches claims)", data)
+
+
 GOLDEN_PACKET_KEY = "PHYS_VERIFY"
 GOLDEN_EXAMPLE = {"mass_kg": 2.0, "acceleration_m_per_s2": 3.0, "claimed_force_N": 6.0}  # F = ma
 
@@ -385,6 +431,9 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     if all(k in pv for k in ("grav_mass_1_kg", "grav_mass_2_kg", "grav_separation_m",
                              "claimed_gravitational_force_N")):
         results.append(verify_gravitation(pv))
+
+    if any(k in pv for k, _fn, _f, _u in _PLANCK_CHECKS):
+        results.append(verify_planck_units(pv))
 
     if "equation" in pv and "symbols" in pv:
         results.append(verify_dimensional_consistency(pv["equation"], pv["symbols"]))
