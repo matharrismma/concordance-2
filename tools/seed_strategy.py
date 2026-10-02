@@ -33,6 +33,10 @@ ARENAS = {
 PATTERNS: list[dict] = [
     {"id": "concentrate_force", "title": "Concentrate force at the decisive point",
      "gist": "Mass what you have where it decides. Dispersion loses to concentration.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('war', "Lee at Gettysburg — Pickett's Charge", '3 July 1863', 'massed ~12,500 men on the Union centre at Cemetery Ridge after a bombardment', 'concentration against a PREPARED decisive point: ~50% of the assaulting force lost in under an hour; the mass was the target, not the lever'),
+        ('business', 'Quibi', '2020', '$1.75 billion concentrated on one product — mobile-only short-form video', 'the single point was the wrong one: shut down six months after launch; concentration cannot rescue a bet the market did not want'),
+     ],
      "cases": [
         ("war", "Hannibal at Cannae", "216 BC", "a deliberately yielding centre and concentrated flanks — double envelopment", "annihilated a Roman army roughly twice his size; the textbook of concentration"),
         ("business", "Peter Thiel & PayPal", "1999-2002", "own one small market first (eBay's power-sellers) before widening", "'competition is for losers' — take a monopoly of a niche, then expand (Zero to One)"),
@@ -40,6 +44,10 @@ PATTERNS: list[dict] = [
         ("politics", "Napoleon's central position", "1796-1809", "place the army between divided enemies and beat each in turn", "local superiority against larger coalitions, repeatedly")]},
     {"id": "tempo", "title": "Tempo — speed as a weapon",
      "gist": "Act faster than the other side can react; decide before they can.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('war', 'Napoleon in Russia', '1812', 'a lightning advance to Moscow to force a decision before winter', 'tempo outran supply: ~600,000 crossed the Niemen, under 100,000 returned; speed without the line of supply is a march into the void'),
+        ('business', 'Webvan', '1999–2001', 'built warehouses and fleets in 26 cities at once, ahead of demand', '$800M+ spent before the market existed; bankrupt July 2001 — speed is a weapon only when it outruns the ENEMY, not the customer'),
+     ],
      "cases": [
         ("war", "Caesar and the Rubicon", "49 BC", "cross before the Senate can organise; march on Rome at once", "'the die is cast' — decisive speed took the initiative and the war"),
         ("business", "Musk / SpaceX iteration", "2010s", "build, fly, fail, fix — a fast test cadence instead of a slow perfect design", "reusable rockets by out-iterating slower, risk-averse incumbents"),
@@ -47,6 +55,10 @@ PATTERNS: list[dict] = [
         ("business", "Amazon 'Day 1'", "1997-", "bias to action, reversible decisions made fast", "'Day 2 is stasis, then death' — speed as culture")]},
     {"id": "own_the_bottleneck", "title": "Own the bottleneck",
      "gist": "Control the one chokepoint everything must pass through.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('business', 'Standard Oil', '1870–1911', 'owned refining, pipelines and rail rebates — the bottleneck of the whole trade', 'the choke invited the state: Standard Oil v. United States (1911) broke it into 34 companies — a bottleneck too total provokes its own breaking'),
+        ('politics', 'Britain and France at Suez', '1956', 'seized the Canal Zone to keep the bottleneck in their hands', 'the United States and the USSR forced withdrawal within weeks; a bottleneck held without the strength of the greater powers is a hostage, not an asset'),
+     ],
      "cases": [
         ("business", "Rockefeller / Standard Oil", "1870-1911", "control refining, then the pipelines and rail rebates", "owned the chokepoint of the oil economy, not just the wells"),
         ("business", "Ford's River Rouge", "1928", "raw ore and rubber in one gate, finished cars out the other — vertical integration", "own the whole chain so no supplier can hold you up"),
@@ -54,6 +66,10 @@ PATTERNS: list[dict] = [
         ("war", "Themistocles at Salamis", "480 BC", "fight in the narrows where numbers cannot be brought to bear", "the strait was the bottleneck; owning it beat a larger fleet")]},
     {"id": "asymmetric_leverage", "title": "Asymmetric leverage",
      "gist": "Fight where you are strong and they are weak; do what they can't or won't.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('war', 'Operation Market Garden', 'September 1944', 'a narrow airborne thrust to seize the Rhine bridges and shorten the war', "the surprise was lost (German armour at Arnhem was reported and discounted); 1st Airborne destroyed — 'a bridge too far'"),
+        ('politics', 'The Bay of Pigs', 'April 1961', '1,400 exiles to spark an uprising with deniable backing', 'no surprise (the plan was known), no uprising, no air cover: crushed in three days — leverage assumes a reaction that never came'),
+     ],
      "cases": [
         ("war", "Hannibal over the Alps", "218 BC", "attack on the axis the enemy believed impossible", "arrived in Italy from the direction Rome never defended"),
         ("ministry", "David and Goliath", "c. 1010 BC", "refuse the enemy's game (armour, sword); win with the sling at range", "1 Samuel 17 — strength met on your own terms, not his"),
@@ -61,6 +77,10 @@ PATTERNS: list[dict] = [
         ("business", "The disruptive entrant", "ongoing", "enter at the low end the incumbent is glad to cede, then move up", "the innovator's dilemma — attack where the leader will not defend")]},
     {"id": "compounding", "title": "Compounding — the long game",
      "gist": "Hold the position and reinvest; time in the compound beats the brilliant stroke.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('business', 'Long-Term Capital Management', '1994–1998', 'compounded small spreads with 25:1+ leverage', 'the Russian default (1998) reversed the spreads; a $3.6B rescue — compounding on leverage compounds the loss as fast as the gain'),
+        ('business', 'Sears', '1886–2018', 'a century of compounded retail dominance (catalogue, stores, credit)', 'the core eroded under discount and online rivals; bankruptcy 2018 — compounding stops the day the thing being compounded stops being wanted'),
+     ],
      "cases": [
         ("politics", "Rome's slow consolidation", "509 BC-", "absorb, settle, extend citizenship, repeat over centuries", "the republic grew by patient accretion, not one conquest"),
         ("business", "Warren Buffett", "1965-", "reinvest and let returns compound for decades", "the eighth wonder is patience applied to capital"),
@@ -68,6 +88,10 @@ PATTERNS: list[dict] = [
         ("nature", "Old-growth forest", "millennia", "small annual increments, unbroken, become a canopy", "compounding is how the largest living things are built")]},
     {"id": "founder_conviction", "title": "Founder conviction",
      "gist": "A clear telos, bigger than the self, held with will through the hard middle.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('business', 'Theranos', '2003–2018', 'unshakable conviction in a device that could run hundreds of tests on a finger-prick', 'the device never worked; investors and patients deceived; the founder convicted of fraud (2022) — conviction without a working thing is a lie with a long fuse'),
+        ('war', 'Custer at the Little Bighorn', '25 June 1876', 'attacked at once, dividing his regiment, certain the village would scatter', 'the village was the largest ever gathered on the plains; five companies annihilated — conviction overrode reconnaissance'),
+     ],
      "cases": [
         ("business", "Ford's 'car for the multitude'", "1908", "a single obsessive aim: a car ordinary people can own", "the Model T followed from an unbending purpose"),
         ("business", "Musk's mission", "2000s-", "sustainable energy; make humanity multi-planetary", "capital and talent recruited by a cause, not a return"),
@@ -75,6 +99,10 @@ PATTERNS: list[dict] = [
         ("war", "Alexander", "336-323 BC", "a vision of one world, carried past every reasonable stopping point", "conviction that outran his generals' caution")]},
     {"id": "antifragility", "title": "Antifragility — grow from the blow",
      "gist": "Build so that shocks strengthen you rather than break you.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('business', 'Nokia', '2007–2013', 'met the iPhone blow with the existing platform and process', 'the blow did not strengthen: from ~50% smartphone share to the sale of the handset business to Microsoft (2013) — a shock only builds what was already able to change'),
+        ('war', 'Carthage after Zama', '202–146 BC', 'absorbed defeat and rebuilt trade and wealth', 'the recovery provoked the third war; Carthage was razed (146 BC) — a rival that cannot be allowed to grow back is not antifragile, it is marked'),
+     ],
      "cases": [
         ("war", "Rome after Cannae", "216 BC", "refuse to negotiate; rebuild; wear Hannibal down and win the war", "the worst defeat became the turning point — it did not quit"),
         ("ministry", "The persecuted church", "1st-3rd c. AD", "spread further under persecution, not less", "Tertullian: 'the blood of the martyrs is the seed of the church'"),
@@ -82,6 +110,10 @@ PATTERNS: list[dict] = [
         ("business", "Surviving the bust", "2000-01", "the firms that live through the crash inherit the field", "downturns clear competitors for the durable")]},
     {"id": "distribution_over_product", "title": "Distribution beats product",
      "gist": "Owning the channel of reach beats a better thing no one can receive.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('business', 'Blockbuster', '2000–2010', 'the largest rental distribution network in the world; declined to buy Netflix for $50M (2000)', 'distribution of the wrong form: the stores became the cost; bankrupt 2010 while the mail-and-stream rival it refused grew'),
+        ('business', 'Kodak', '1975–2012', 'unmatched film distribution and retail; shelved its own digital camera (1975)', 'distribution bound to a product that was ending; Chapter 11 in 2012 — a channel cannot save what it is built to carry'),
+     ],
      "cases": [
         ("ministry", "The printing press", "1517-", "cheap print carried the Reformation faster than any preacher could walk", "the 95 Theses were across Europe in weeks"),
         ("ministry", "The apostolic letters", "c. 50-65 AD", "a network of congregations bound by circulated epistles", "Paul's letters were the distribution layer of the early church"),
@@ -89,6 +121,10 @@ PATTERNS: list[dict] = [
         ("politics", "Roman roads", "312 BC-", "the same network moved troops, trade, mail and law", "reach was the empire's true product")]},
     {"id": "win_the_narrative", "title": "Win the story",
      "gist": "Control the meaning of events; legitimacy is a weapon.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('war', 'The United States in Vietnam', '1965–1973', 'won nearly every set-piece battle and reported progress', 'lost the story: the Tet Offensive (1968) was a military defeat for the North and a narrative defeat for Washington; the war was lost at home'),
+        ('business', 'New Coke', '1985', "re-told the brand as 'new' on the strength of blind taste tests", "the public's story of the old Coke beat the test data; reversed in 79 days — a narrative cannot be won against the one people already hold"),
+     ],
      "cases": [
         ("politics", "Augustus and the Pax Romana", "27 BC-14 AD", "frame autocracy as restored republic and peace", "the Res Gestae and the coinage told the story that held the order"),
         ("war", "Caesar's Commentaries", "58-49 BC", "narrate your own campaigns to Rome, in the third person", "shaped his legend while the events were still warm"),
@@ -96,6 +132,10 @@ PATTERNS: list[dict] = [
         ("business", "Brand mythos", "modern", "a product wrapped in a story people want to belong to", "the story compounds loyalty the specs cannot")]},
     {"id": "outlive_the_founder", "title": "Outlive the founder",
      "gist": "Institutionalize past the one whose will built it, or it dies with them.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('war', "Alexander's empire", '323 BC', "no named heir — 'to the strongest'", 'the Diadochi tore the empire into warring kingdoms within a generation — the greatest conquest in history outlived its founder by nothing'),
+        ('politics', 'Yugoslavia after Tito', '1980–1991', "a federation held together by one man's authority", 'the institution was the man; a decade after his death the state dissolved in war'),
+     ],
      "cases": [
         ("politics", "Rome's adoptive succession", "96-180 AD", "adopt the ablest heir rather than trust blood", "the Five Good Emperors — until Marcus chose his son Commodus, and it broke"),
         ("ministry", "Canon, creed, and office", "1st-4th c. AD", "fix the deposit in Scripture, rule of faith, and succession", "the church carried past the apostles because it institutionalized the deposit (2 Tim 1:14)"),
@@ -103,6 +143,10 @@ PATTERNS: list[dict] = [
         ("politics", "Genghis Khan's succession", "1227-", "a division on death that fractured within generations", "the empire outgrew the man but not the succession problem")]},
     {"id": "first_principles", "title": "Reason from first principles",
      "gist": "Strip the inherited assumptions; reason up from what is actually true.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('science', 'Lysenkoism', '1930s–1960s', "'reasoned' agriculture from ideology, rejecting Mendelian genetics", 'crop failures, the ruin of Soviet biology, geneticists imprisoned — first principles that are false reason straight to disaster'),
+        ('business', 'Juicero', '2016–2017', 'engineered a $400 press from first principles for proprietary juice bags', 'the bags could be squeezed by hand (Bloomberg, 2017); shut down within the year — reasoning from the wrong first question'),
+     ],
      "cases": [
         ("science", "The Scientific Revolution", "16-17th c.", "observe and measure rather than defer to Aristotle and authority", "Galileo, Newton — the ground, not the analogy"),
         ("business", "Musk's cost teardown", "2000s-", "price a rocket by the raw materials, not by what rockets 'cost'", "first-principles cost analysis broke the industry's assumptions"),
@@ -110,6 +154,10 @@ PATTERNS: list[dict] = [
         ("ministry", "The Reformers", "1517-", "go back to the text itself — sola scriptura", "authority re-grounded on the source, not accretion")]},
     {"id": "coalition", "title": "Coalition — borrow strength",
      "gist": "Multiply your force through allies, marriages, and networks.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('war', 'The Third Coalition at Austerlitz', '2 December 1805', 'Austria and Russia united their armies against Napoleon', 'divided command and a plan each ally read differently; routed in a day — a coalition without one will is two armies'),
+        ('politics', 'The Delian League', '478–404 BC', "Athens' alliance of Aegean cities against Persia", "became an empire; the allies' revolts and the Peloponnesian War ended Athenian power (404 BC) — borrowed strength taken rather than kept is lost"),
+     ],
      "cases": [
         ("politics", "Rome's client kingdoms", "2nd c. BC-", "rule through allies and clients, not only direct conquest", "borrowed strength held a frontier a legion could not"),
         ("politics", "Habsburg marriages", "15-16th c.", "'let others wage war; you, fortunate Austria, marry'", "a dynasty assembled by alliance more than by battle"),
@@ -117,6 +165,10 @@ PATTERNS: list[dict] = [
         ("business", "Platform ecosystems", "modern", "let others build on you; their strength becomes yours", "the ecosystem out-competes the standalone product")]},
     {"id": "requisite_variety", "title": "Requisite variety — adapt to the terrain",
      "gist": "Match the complexity of the environment, or it will overwhelm you.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('war', 'Singapore', 'February 1942', 'fortress guns and plans pointed to the sea', 'the Japanese came down the Malay peninsula through the jungle; 80,000 surrendered — a defence with one answer meets the question it did not ask'),
+        ('business', 'BlackBerry', '2007–2013', 'held to the physical keyboard and the enterprise niche as touchscreens took the market', 'from ~50% US share to under 1%; variety the market demanded was refused'),
+     ],
      "cases": [
         ("politics", "Rome extends citizenship", "1st c. BC-3rd c. AD", "absorb and adapt conquered peoples rather than only subjugate", "variety inside the system matched the variety it ruled"),
         ("ministry", "The Jerusalem Council", "c. 49 AD", "adapt the terms of belonging to reach a new people", "Acts 15 — contextualize without losing the core"),
@@ -124,6 +176,10 @@ PATTERNS: list[dict] = [
         ("nature", "Evolution by variation", "deep time", "generate variety; let selection keep what fits", "Ashby's law in the living world — variety answers variety")]},
     {"id": "build_a_moat", "title": "Build a moat",
      "gist": "Make the position you have won expensive to take.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('war', 'The Maginot Line', 'May 1940', 'the strongest fortified line ever built, along the German border', 'walked around through the Ardennes; France fell in six weeks — a moat defends only the ground it covers'),
+        ('business', 'Encyclopædia Britannica', '1768–2012', 'two centuries of authority and a door-to-door sales moat', 'Encarta then Wikipedia made the moat irrelevant; print edition ended 2012 — a moat around a form the world stops using is a monument'),
+     ],
      "cases": [
         ("war", "Rome's fortified frontier", "1st-4th c. AD", "walls, forts and the limes to make ground costly to cross", "defensibility turned conquest into a settled border"),
         ("business", "Scale and network moats", "modern", "grow until size or network effects deter every challenger", "the moat, not the product, keeps the profit"),
@@ -131,6 +187,10 @@ PATTERNS: list[dict] = [
         ("business", "Standard Oil's scale", "1880s-", "undercut and absorb until the scale itself was the barrier", "the moat was the size no rival could match")]},
     {"id": "intelligence", "title": "See first — reconnaissance and information",
      "gist": "Know the ground and the enemy before you commit; surprise is a failure of the other side's seeing.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('war', 'Stalin before Barbarossa', 'June 1941', 'held multiple warnings of the invasion date (Sorge, British intelligence, deserters)', 'disbelieved them all; the Red Army was caught deployed forward and unready — intelligence held but not believed is none'),
+        ('business', 'Decca rejects the Beatles', '1 January 1962', 'an audition heard and judged', "'guitar groups are on the way out' — the information was in the room and misread; the group signed with EMI within months"),
+     ],
      "cases": [
         ("war", "Sun Tzu's spies", "5th c. BC", "'know the enemy and know yourself' — win before the battle by knowing", "The Art of War: foreknowledge is the general's first weapon"),
         ("business", "Bloomberg's terminal", "1981-", "sell the information advantage itself as the product", "own what the market must see, and it must come to you"),
@@ -138,6 +198,10 @@ PATTERNS: list[dict] = [
         ("science", "Measurement first", "17th c.-", "instrument and observe before theorizing", "the telescope and microscope: seeing further decided the arguments")]},
     {"id": "cut_losses", "title": "Cut losses — retreat to fight again",
      "gist": "A position is only worth what it costs to keep; abandon the sunk cost to preserve the force.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('business', 'Concorde', '1962–2003', 'kept funding a programme whose economics were known to be broken', "never recovered its cost; the 'Concorde fallacy' is named for it — sunk cost kept the losses running for forty years"),
+        ('war', 'Verdun', '1916', 'neither side would yield the ground once blood was spent on it', '~700,000 casualties for a front that barely moved — the refusal to cut losses became the loss'),
+     ],
      "cases": [
         ("war", "Washington's retreats", "1776", "trade ground and avoid the decisive battle to keep the army alive", "the Continental Army survived by refusing to be destroyed"),
         ("business", "Intel exits memory", "1985", "abandon the founding business (DRAM) for microprocessors", "Grove: 'if we got kicked out, what would a new CEO do?' — then did it"),
@@ -145,6 +209,10 @@ PATTERNS: list[dict] = [
         ("ministry", "Paul leaves a city", "1st c. AD", "shake the dust and move on where the door is closed (Acts 13:51)", "the mission preserved by not dying on ground that would not receive it")]},
     {"id": "standardize", "title": "Standardize — the interchangeable part",
      "gist": "Make the units uniform and the whole becomes repeatable, scalable, and teachable.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('business', "Ford's Model T", '1908–1927', "'any colour so long as it is black' — one standard car, held for nineteen years", "GM's annual models and choice took the market; Ford shut the line for six months in 1927 to retool — a standard held past its day is a cage"),
+        ('war', 'Braddock on the Monongahela', '9 July 1755', 'European linear drill and standard formation in the American forest', 'ambushed by French and Native irregulars; ~900 of 1,300 casualties — the standard answered a battlefield that was not there'),
+     ],
      "cases": [
         ("business", "Ford's interchangeable parts", "1913", "identical components on a moving line", "the assembly line made the car reproducible at scale"),
         ("war", "The Roman legion", "3rd c. BC-", "a standard unit, drill, camp and kit anywhere in the empire", "one interchangeable system fought from Britain to Syria"),
@@ -152,6 +220,10 @@ PATTERNS: list[dict] = [
         ("business", "The shipping container", "1956", "one box, one standard, every port and ship", "standardization collapsed the cost of global trade")]},
     {"id": "decentralize", "title": "Push decisions to the edge",
      "gist": "Let those nearest the problem decide; a body that must ask the center for everything cannot move.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('business', 'Enron', '1990s–2001', 'autonomous units, mark-to-market freedom, incentives at the edge', 'no centre to check the books; collapse and prosecutions (2001) — decisions at the edge with no intent from the centre is abandonment, not delegation'),
+        ('war', 'Ewell at Gettysburg', '1 July 1863', "Lee's discretionary order to take Cemetery Hill 'if practicable'", 'the hill was not taken; the Union held the high ground for two more days — delegation without clear intent delegates the defeat'),
+     ],
      "cases": [
         ("war", "Auftragstaktik (mission command)", "19th-20th c.", "give the intent, let the officer on the spot choose the means", "Prussian/German doctrine: initiative at the edge beat rigid central control"),
         ("business", "Amazon's two-pizza teams", "2000s", "small autonomous teams owning their own service end to end", "decentralized ownership kept a giant moving fast"),
@@ -159,6 +231,10 @@ PATTERNS: list[dict] = [
         ("nature", "The colony without a center", "always", "ants and slime molds solve without a controller", "distributed local rules produce coherent global behavior")]},
     {"id": "reinvest_the_core", "title": "Reinvest the flywheel",
      "gist": "Plow the returns back into the engine that produced them; let the loop feed itself.",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ('business', 'Xerox PARC', '1970s', 'reinvested heavily in research — the GUI, Ethernet, the laser printer, the mouse', "Apple and Microsoft harvested the inventions; Xerox did not — reinvestment that never returns to the flywheel feeds someone else's"),
+        ('politics', 'Soviet heavy-industry reinvestment', '1950s–1980s', 'poured surplus into steel, arms and heavy plant year after year', 'consumer goods and agriculture starved; stagnation and collapse (1991) — reinvesting in a core the people did not want'),
+     ],
      "cases": [
         ("business", "Amazon's flywheel", "1997-", "lower prices -> more customers -> more sellers -> lower costs -> lower prices", "reinvest every gain into the loop instead of taking profit"),
         ("politics", "Rome's settled veterans", "republic-empire", "reinvest conquest into colonies that secured and extended the frontier", "each win funded the base for the next"),
@@ -175,6 +251,11 @@ def _card(cid, kind, title, body, shelf, box, bands, subject, conns, extra):
             "author": "engine", "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
             "lifecycle_stage": "public", "volatility": "permanent", "surface": "secular",
             "generated": False, "extra": extra}
+
+
+def _counter_id(pid, arena, who):
+    slug = "".join(ch if ch.isalnum() else "_" for ch in who.lower())[:40]
+    return f"card_counter_{pid}__{arena}__{slug}"
 
 
 def _case_id(pid, arena, who):
@@ -207,12 +288,27 @@ def build_cards():
             cid = _case_id(p["id"], arena, who)
             conns.append({"to_card_id": cid, "relationship": "instance_of",
                           "evidence": f"{arena}: {who} ({when}) — {ev}"})
+        for arena, who, when, move, ev in p.get("counters", []):
+            cid = _counter_id(p["id"], arena, who)
+            conns.append({"to_card_id": cid, "relationship": "counterexample_of",
+                          "evidence": f"{arena}: {who} ({when}) — FAILED: {ev}"})
         cards.append(_card(
             f"card_pattern_{p['id']}", "strategy_pattern", p["title"],
             f"{p['gist']} A recurring strategic form seen across {len(arenas)} arenas "
             f"({', '.join(arenas)}) and across time — the same move winning in each.",
             "strategy", "pattern", ["strategy", "pattern"] + arenas, p["title"], conns,
-            {"gist": p["gist"], "arenas": arenas, "span": len(arenas)}))
+            {"gist": p["gist"], "arenas": arenas, "span": len(arenas),
+             "record": {"won": len(p["cases"]), "failed": len(p.get("counters", []))}}))
+        for arena, who, when, move, ev in p.get("counters", []):
+            cid = _counter_id(p["id"], arena, who)
+            cards.append(_card(
+                cid, "strategy_counter", f"{who} ({when}) — where it failed",
+                f"{who}, {when} — {move}. What failed, and why: {ev}. A counterexample to '{p['title']}' "
+                f"in the arena of {arena}: the boundary of the pattern, kept beside its wins.",
+                "strategy", "counter", ["strategy", "counter", "failure", arena, p["id"]], who,
+                [{"to_card_id": f"card_pattern_{p['id']}", "relationship": "counterexample_of",
+                  "evidence": f"where the move '{p['title']}' failed"}],
+                {"arena": arena, "when": when, "move": move, "pattern": p["id"], "who": who, "failed": ev}))
         for arena, who, when, move, ev in p["cases"]:
             cid = _case_id(p["id"], arena, who)
             cards.append(_card(
@@ -234,10 +330,15 @@ def cmd_check() -> int:
     bad = [(p["id"], a) for p in PATTERNS for a, *_ in p["cases"] if a not in ARENAS]
     if bad:
         rc = 3; print("cases in unknown arenas:", bad)
+    unbounded = [p["id"] for p in PATTERNS if not p.get("counters")]
+    if unbounded:
+        rc = 3; print("patterns with no counter-case (a pattern with no known failure is a slogan):", unbounded)
     thin = [p["id"] for p in PATTERNS if len({a for a, *_ in p["cases"]}) < 2]
     if thin:
         rc = 3; print("patterns spanning <2 arenas (not a bridge):", thin)
     ncases = sum(len(p["cases"]) for p in PATTERNS)
+    ncounter = sum(len(p.get("counters", [])) for p in PATTERNS)
+    print(f"      {ncounter} counter-cases (where the move failed) — every pattern bounded")
     print(f"OK: {len(PATTERNS)} patterns, {ncases} cases across {len({a for p in PATTERNS for a,*_ in p['cases']})} arenas; "
           f"every pattern bridges >=2 arenas; no dup ids.")
     return rc
@@ -250,6 +351,8 @@ def cmd_list() -> int:
         print(f"   {p['gist']}")
         for arena, who, when, move, ev in p["cases"]:
             print(f"     {arena:9} {who} ({when})")
+        for arena, who, when, move, ev in p.get("counters", []):
+            print(f"     {arena:9} FAILED: {who} ({when})")
     return 0
 
 

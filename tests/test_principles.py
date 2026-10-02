@@ -46,7 +46,10 @@ def _fixture(tmp_path: Path):
             {"id": "card_case_1", "kind": "strategy_case", "extra": {"pattern": "tempo", "arena": "war",
                                                                     "who": "Caesar", "when": "49 BC", "move": "crossed"}},
             {"id": "card_case_2", "kind": "strategy_case", "extra": {"pattern": "tempo", "arena": "business",
-                                                                    "who": "SpaceX", "when": "2010s", "move": "iterated"}}]
+                                                                    "who": "SpaceX", "when": "2010s", "move": "iterated"}},
+            {"id": "card_counter_1", "kind": "strategy_counter",
+             "extra": {"pattern": "tempo", "arena": "war", "who": "Napoleon in Russia", "when": "1812",
+                       "move": "a lightning advance to Moscow", "failed": "tempo outran supply"}}]
     prs = [{"id": "p1", "kind": "principle", "body": "Lose no time.", "source": {"url": "u1"},
             "extra": {"figure": "Napoleon Bonaparte", "arena": "war", "patterns": ["tempo"]}},
            {"id": "p2", "kind": "principle", "body": "Speed is the essence of war.", "source": {"url": "u2"},
@@ -62,9 +65,10 @@ def test_proof_is_a_count_of_distinct_figures_arenas_and_cases(tmp_path):
     d = _fixture(tmp_path)
     prs = P.load_principles(d)
     _pats, cases = P.load_patterns(d)
-    pr = P.proof("tempo", prs, cases)
+    pr = P.proof("tempo", prs, cases, P.load_counters(d))
     assert pr["figures"] == 2 and set(pr["arenas"]) == {"war", "business"} and pr["cases"] == 2
     assert pr["proven"] is True
+    assert pr["counter_cases"] == 1 and pr["record"] == "2-1" and pr["bounded"] is True   # the losses count too
     one = P.proof("distribution_over_product", prs, cases)
     assert one["figures"] == 1 and one["proven"] is False      # one witness, one arena: not yet proven
 
@@ -79,6 +83,9 @@ def test_apply_resolves_a_situation_and_hands_back_the_figures_words(tmp_path):
     assert figs[:2] == ["Napoleon Bonaparte", "Sun Tzu"]       # one per figure first — breadth of witness
     assert all(p["quote"] and p["url"] for p in top["principles"])
     assert {c["who"] for c in top["cases"]} == {"Caesar", "SpaceX"}
+    # the boundary rides with the pattern: where the same move failed, and why
+    assert top["where_it_failed"] and top["where_it_failed"][0]["who"] == "Napoleon in Russia"
+    assert top["where_it_failed"][0]["why"] == "tempo outran supply"
 
 
 def test_apply_never_guesses(tmp_path):
@@ -103,3 +110,6 @@ def test_every_pattern_in_the_lexicon_exists_in_the_strategy_concordance():
     mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
     ids = {p["id"] for p in mod.PATTERNS}
     assert set(P.PATTERN_LEXICON) == ids, set(P.PATTERN_LEXICON) ^ ids
+    # every pattern is BOUNDED: it names at least one dated case where the same move failed
+    unbounded = [p["id"] for p in mod.PATTERNS if not p.get("counters")]
+    assert not unbounded, unbounded

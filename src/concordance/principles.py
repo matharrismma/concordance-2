@@ -214,17 +214,33 @@ def load_patterns(data_dir: Optional[Path] = None) -> Tuple[Dict[str, dict], Dic
     return pats, cases
 
 
-def proof(pid: str, principles: List[dict], cases: Dict[str, List[dict]]) -> Dict[str, Any]:
+def load_counters(data_dir: Optional[Path] = None) -> Dict[str, List[dict]]:
+    """pattern id -> the cases where the SAME move FAILED (strategy_counter cards)."""
+    out: Dict[str, List[dict]] = defaultdict(list)
+    for c in _load_jsonl((data_dir or _data_dir()) / "strategy_cards.jsonl"):
+        if c.get("kind") == "strategy_counter":
+            pid = (c.get("extra") or {}).get("pattern")
+            if pid:
+                out[pid].append(c)
+    return out
+
+
+def proof(pid: str, principles: List[dict], cases: Dict[str, List[dict]],
+          counters: Optional[Dict[str, List[dict]]] = None) -> Dict[str, Any]:
     """The count that makes 'repeatedly proven' a measurement: distinct figures stating the pattern in
-    their own words, distinct arenas (figures' + cases'), dated cases with evidence."""
+    their own words, distinct arenas (figures' + cases'), dated cases with evidence — AND the dated
+    cases where the same move FAILED (the record is won–failed, never wins alone)."""
     mine = [p for p in principles if pid in ((p.get("extra") or {}).get("patterns") or [])]
     figures = sorted({(p.get("extra") or {}).get("figure", "?") for p in mine})
     arenas = {(p.get("extra") or {}).get("arena", "?") for p in mine}
     cs = cases.get(pid, [])
     arenas |= {(c.get("extra") or {}).get("arena", "?") for c in cs}
     arenas.discard("?")
+    failed = (counters or {}).get(pid, [])
     return {"figures": len(figures), "who": figures, "arenas": sorted(arenas), "cases": len(cs),
-            "principles": len(mine), "proven": len(figures) >= 2 and len(arenas) >= 2}
+            "counter_cases": len(failed), "record": f"{len(cs)}-{len(failed)}",
+            "principles": len(mine), "proven": len(figures) >= 2 and len(arenas) >= 2,
+            "bounded": len(failed) >= 1}
 
 
 def apply(situation: str, *, limit: int = 3, per_pattern: int = 4,
@@ -234,13 +250,14 @@ def apply(situation: str, *, limit: int = 3, per_pattern: int = 4,
     lexical hits then proof. found=False when the situation names no pattern — never a guess."""
     hits = tag(situation or "", situation=True)
     pats, cases = load_patterns(data_dir)
+    counters = load_counters(data_dir)
     principles = load_principles(data_dir)
     if not hits:
         return {"found": False, "situation": situation, "patterns": [],
                 "detail": "the situation names no pattern of the Strategy Concordance (no stem matched)"}
     ranked = []
     for pid, stems in hits.items():
-        pr = proof(pid, principles, cases)
+        pr = proof(pid, principles, cases, counters)
         ranked.append((len(stems), pr["figures"] + pr["cases"], pid, stems, pr))
     ranked.sort(key=lambda t: (-t[0], -t[1], t[2]))
     out = []
@@ -268,6 +285,11 @@ def apply(situation: str, *, limit: int = 3, per_pattern: int = 4,
             "cases": [{"who": (c.get("extra") or {}).get("who"), "when": (c.get("extra") or {}).get("when"),
                        "arena": (c.get("extra") or {}).get("arena"), "move": (c.get("extra") or {}).get("move"),
                        "card": c.get("id")} for c in cases.get(pid, [])[:per_pattern]],
+            # the boundary: where the SAME move failed, and why — read these before applying the pattern
+            "where_it_failed": [{"who": (c.get("extra") or {}).get("who"), "when": (c.get("extra") or {}).get("when"),
+                                 "arena": (c.get("extra") or {}).get("arena"), "move": (c.get("extra") or {}).get("move"),
+                                 "why": (c.get("extra") or {}).get("failed"), "card": c.get("id")}
+                                for c in counters.get(pid, [])[:per_pattern]],
         })
     return {"found": True, "situation": situation, "patterns": out,
             "detail": f"{len(out)} pattern(s) named by the situation; proof = distinct figures × arenas × dated cases",
