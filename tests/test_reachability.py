@@ -75,11 +75,20 @@ AGENT_ONLY = {
     "/push/unsubscribe", "/study/export", "/study/import", "/card/connections",
     "/cards/for-the-group", "/decks/predict", "/thread/digest", "/thread/lineage",
     "/thread/recall", "/thread/recalled", "/threads/search", "/word_occurrences",
-    # /dictionary and /pronounce are reference-section lookup APIs (single word -> definitions /
-    # phonetics), the data twins of the `define` and `pronounce` agent tools — data endpoints, not
-    # pages a human navigates TO. (/thesaurus is the same shape and is NOT yet declared — a
-    # pre-existing gap, tracked separately, not this change's to fix.)
-    "/dictionary", "/lookup", "/find_verifier",
+    # /dictionary, /thesaurus and /pronounce are reference-section lookup APIs (single word ->
+    # definitions / synonyms / phonetics), the data twins of the `define`, `thesaurus` and `pronounce`
+    # agent tools — data endpoints, not pages a human navigates TO. All three are documented in
+    # site/llms.txt; the human doors are the reference shelf and search.
+    "/dictionary", "/thesaurus", "/lookup", "/find_verifier",
+    # THE LIVING COMMUNITY's callable faces (2026-09-26): /faces lists the life-domain servants and
+    # /face consults one (composes verifiers + shelves + discernment) — an agent's door, reached
+    # through the MCP tools; a human reaches the same servants through the desk and the halls.
+    # /recombine speaks from the keeping by recombining found clauses — the discern/ask flow's
+    # instrument, not a page. /byom is the gated external-worker door (default OFF; 403 until an
+    # operator enables it) — a page linking it would be a door drawn shut. /place + /place/signable
+    # are the catalogue's signed two-step write (keep the card, not the file) — driven by a
+    # contributor's agent or script with content it already hosts, never a public <a href>.
+    "/faces", "/face", "/recombine", "/byom", "/place", "/place/signable",
     "/works/item", "/library/health", "/growth", "/daily", "/pronounce", "/book",
     "/badges", "/archetype", "/archetypes", "/archetypes/match", "/coach/guidance",
     "/chess", "/report", "/block",

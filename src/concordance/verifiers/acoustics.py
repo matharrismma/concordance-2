@@ -128,7 +128,7 @@ def verify_doppler_shift(spec: Dict[str, Any]) -> VerifierResult:
             "formula": "f_obs = f_src · (c + v_obs) / (c − v_src)  (v > 0 = closing)"}
     if _close(actual, fo_c, rel_tol=rel_tol):
         return confirm(name,
-                       f"f_obs = {fs}·({c}+{vo})/({c}+{vs}) = {actual:.3f} Hz (matches claim {fo_c})",
+                       f"f_obs = {fs}·({c}+{vo})/({c}−{vs}) = {actual:.3f} Hz (matches claim {fo_c})",
                        data)
     return mismatch(name,
                     f"f_obs = {actual:.3f} Hz, claimed {fo_c} (diff {diff:.3f})",
