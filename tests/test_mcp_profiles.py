@@ -103,8 +103,12 @@ def test_the_full_catalog_on_mcp_is_unchanged_a_golden():
     ('discern proposes, verify disposes'), a read-class tool on the `library` profile next to `ask`. +1,
     deliberate. + 1 thesaurus (2026-09-26): the agent twin of GET /thesaurus — WordNet synonyms/broader,
     a read/derive tool on the `library` profile beside `pronounce`, closing the human-page/agent-tool
-    parity gap the coherence audit found. +1, deliberate."""
-    assert len(_full_catalog()) == 95
+    parity gap the coherence audit found. +1, deliberate. 2026-10-01 (dictionary + word-tool dedup):
+    + `define` (Webster's 1913 + our supplement, the twin of GET /dictionary), + `lookup` (the ONE
+    consolidated reference lookup: molar_mass / element / convert…), + `find_verifier` (claim -> domain
+    without scanning the list); − `word_occurrences` (folded into `word_study`, one excellent tool per
+    situation). Net +2 = 97, deliberate."""
+    assert len(_full_catalog()) == 97
 
 
 def test_the_witness_gate_semantics_survive_the_mount():

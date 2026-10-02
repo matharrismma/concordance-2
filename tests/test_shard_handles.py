@@ -196,7 +196,8 @@ def test_a_thread_that_reads_again_after_closing_is_still_watched(server):
         corpus_db._conn(SHARD)
         corpus_db.close_this_thread()
         corpus_db._conn(SHARD)                       # read again on the same thread
-        seen["registered"] = threading.get_ident() in corpus_db._CACHES
+        me = threading.current_thread()              # registered = THIS thread has a row (keyed by token, not ident)
+        seen["registered"] = any(t is me for t, _c in corpus_db._CACHES.values())
         seen["counted"] = corpus_db.open_connections()["open"]
         corpus_db.close_this_thread()
 

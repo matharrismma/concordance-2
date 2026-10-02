@@ -18,6 +18,7 @@ generates.
 """
 from __future__ import annotations
 
+import itertools
 import json
 import os
 import re
@@ -83,7 +84,15 @@ _TL = threading.local()                       # per-thread: {shard name: connect
 # merely forgotten. `close_this_thread()` is the fast path for the HTTP handler; this is the
 # backstop for every other thread that ever touches a shard, which is what the original leak was.
 _LIVE_LOCK = threading.Lock()
-_CACHES: Dict[int, tuple] = {}                # thread ident -> (thread, {shard: connection})
+# KEYED BY A REGISTRATION TOKEN, NOT THE THREAD IDENT. The ident is recycled the moment a thread
+# exits — the next thread the OS starts can get the same number — so keying on it let a new thread
+# OVERWRITE a dead thread's entry: the dead thread's handles fell out of the registry uncounted and
+# unreaped (the leak this registry exists to close, wearing a third hat). Caught by
+# test_dead_threads_have_their_handles_reaped on the CI runner (8 short-lived threads, 4 reclaimed:
+# the other four had reused idents). The thread object is held in the tuple, so liveness is still
+# asked of the runtime; the token only makes every registration its own row.
+_CACHES: Dict[int, tuple] = {}                # registration token -> (thread, {shard: connection})
+_NEXT_TOKEN = itertools.count(1)
 _PEAK = 0                                     # the high-water mark since boot — what nearly happened
 _OPENED = 0                                   # LIFETIME opens; monotonic, never decremented
 # `_OPENED` answers a different question from `open`/`peak`, and conflating them cost a gate run.
@@ -139,7 +148,8 @@ def _conn(name: str) -> Optional[sqlite3.Connection]:
         cache = _TL.conns = {}
         with _LIVE_LOCK:
             t = threading.current_thread()
-            _CACHES[t.ident] = (t, cache)
+            _TL.token = next(_NEXT_TOKEN)
+            _CACHES[_TL.token] = (t, cache)
     # KEYED BY NAME **AND PATH**. Keying on the name alone means a shard re-registered at a new
     # file — refrozen and rethawed elsewhere, or rebuilt and shipped to a different directory —
     # keeps being served from the OLD file by every thread that already had it open, silently and
@@ -197,7 +207,8 @@ def close_this_thread() -> int:
     _TL.conns = None
     _TL.paths = None
     with _LIVE_LOCK:
-        _CACHES.pop(threading.get_ident(), None)   # this thread holds nothing now
+        _CACHES.pop(getattr(_TL, "token", None), None)   # this thread holds nothing now
+    _TL.token = None
     return n
 
 
