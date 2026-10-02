@@ -240,6 +240,25 @@ PATTERNS: list[dict] = [
         ("politics", "Rome's settled veterans", "republic-empire", "reinvest conquest into colonies that secured and extended the frontier", "each win funded the base for the next"),
         ("ministry", "Disciples who make disciples", "1st c. AD-", "the fruit is trained to reproduce, not merely counted", "2 Timothy 2:2 — entrust it to faithful men who will teach others"),
         ("nature", "Seed and forest", "always", "the tree spends its surplus on seed, not only on itself", "the flywheel of life is reinvested growth")]},
+    # Matt, 2026-10-02: "The Prisoner's dilemma." The game is sealed on the engine (defect dominates;
+    # mutual defection is the only equilibrium; yet cooperation pays 3 against the equilibrium's 1; and
+    # with a shadow of the future w > max((T-R)/(R-S), (T-R)/(T-P)) = 2/3 a reciprocator cannot be invaded —
+    # Axelrod 1984). The PATTERN is what wins the iterated game: nice, retaliatory, forgiving, clear.
+    {"id": "reciprocity", "title": "Reciprocity — cooperate first, answer in kind, forgive, be clear",
+     "gist": "In a repeated game the winning move is tit-for-tat: open with cooperation, return what you receive, forgive a single defection, and be predictable — so the other side's best reply is to cooperate too. The Gospel asks more than reciprocity (Matt 5:44), never less (Matt 7:12).",
+     "counters": [  # where the SAME move FAILED — the boundary of the pattern, with evidence
+        ("politics", "The July Crisis", "1914", "each power answered the last mobilisation in kind — Austria, Russia, Germany, France — with no forgiveness and no clear signal of limits", "tit-for-tat without forgiveness or clarity is an escalation ladder: five weeks from a murder to a continental war"),
+        ("war", "The Hatfield–McCoy feud", "1863–1891", "every killing answered by a killing, for a generation", "reciprocity with no end in sight and no forgiveness consumed both families — a dozen dead for a hog and a grudge; the pattern needs the shadow of a SHARED future, not merely a next move"),
+        ("business", "The last round — Enron's counterparties", "2001", "trading partners who had cooperated for years defected the week the future vanished", "when the game is known to end, backward induction unravels cooperation from the last round to the first; reciprocity holds only while tomorrow is worth something"),
+     ],
+     "cases": [
+        ("war", "Live-and-let-live in the trenches", "1914–1917", "front-line units on both sides tacitly refrained from lethal fire at mealtimes and routines, answering restraint with restraint and a breach with a sharp but bounded reply", "documented by Ashworth (1980) and analysed by Axelrod (1984) — the iterated dilemma played with real lives, and cooperation emerged without any treaty"),
+        ("science", "Axelrod's tournaments", "1979–1980", "the simplest entry, TIT FOR TAT (cooperate, then copy the other's last move), won both open computer tournaments against more cunning strategies", "Axelrod, The Evolution of Cooperation (1984): the winners were nice, retaliatory, forgiving and clear — the properties, not the cleverness, won"),
+        ("politics", "'Trust, but verify' — the INF Treaty", "1987", "reciprocal elimination of a whole missile class with on-site verification, each side's step answered by the other's", "2,692 missiles destroyed by 1991 — cooperation sustained between adversaries by reciprocity made verifiable"),
+        ("business", "Reputation among strangers — eBay feedback", "1996–", "a public running score turned one-shot trades between strangers into a repeated game", "sellers with a record of cooperation commanded a price premium (Resnick et al., 2006 — ~8% for a strong reputation); the shadow of the future, engineered"),
+        ("nature", "Vampire bats", "always", "a bat that fed shares blood with a roost-mate that did not — preferentially with those that shared with it before", "Wilkinson (1984): reciprocal altruism in the field; cheats are remembered and refused"),
+        ("ministry", "The collection for Jerusalem", "c. 55 AD", "the Gentile churches gave to the famine-struck Judean church that had first given them the gospel", "2 Corinthians 8:14 — 'that your abundance may be a supply for their want, that their abundance also may be a supply for your want: that there may be equality'"),
+     ]},
 ]
 
 

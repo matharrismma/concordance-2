@@ -55,6 +55,7 @@ PATTERN_LEXICON: Dict[str, List[str]] = {
     'win_the_narrative': ['opinion', 'morale', 'moral force', 'confidence of', 'reputation', 'spirit of the', 'enthusiasm', 'persuad', 'proclamation', 'hearts', 'inspire'],
     'outlive_the_founder': ['successor', 'succession', 'institution', 'after my death', 'posterity', 'endure', 'lasting', 'outlast'],
     'first_principles': ['first principle', 'fundamental', 'nature of things', 'think for', 'the truth is', 'underlying', 'root of', 'go to the root', 'cause and effect', 'from the ground up'],
+    'reciprocity': ['reciproc', 'in kind', 'tit for tat', 'good faith', 'mutual', 'retaliat', 'forgive', 'forgiv', 'repeated dealings', 'do not do to others', 'do unto others', 'as you would', 'return good', 'requite', 'benefits'],
     'coalition': ['alliance', 'allies', 'ally', 'coalition', 'confederat', 'in union with', 'act in union', 'co-operat', 'cooperat', 'together with', 'partner'],
     'requisite_variety': ['adapt', 'circumstances', 'terrain', 'nature of the ground', 'flexib', 'vary', 'varies', 'modif', 'suit the', 'lie of the land'],
     'build_a_moat': ['fortif', 'entrench', 'defensive position', 'defend', 'barrier', 'stronghold', 'impregnable', 'rampart'],
@@ -88,6 +89,7 @@ SITUATION_STEMS: Dict[str, List[str]] = {
     'own_the_bottleneck': ['chokepoint', 'single supplier', 'depend on one', 'gatekeeper', 'platform'],
     'reinvest_the_core': ['flywheel', 'what to do with the profit', 'cash flow', 'dividend'],
     'first_principles': ['from scratch', 'why does', 'assumption', 'conventional wisdom', 'everyone assumes'],
+    'reciprocity': ['cooperate', 'defect', 'cheated us', 'they cheated', 'trust them', 'trust us', 'repeated', 'long-term relationship', 'one-shot', 'prisoner', 'tit-for-tat', 'retaliate', 'get even', 'burned once'],
 }
 
 # ── the normative cues that make a sentence a candidate PRINCIPLE (the maxim shape) ────────────────
