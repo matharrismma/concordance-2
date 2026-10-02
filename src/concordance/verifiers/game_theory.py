@@ -42,6 +42,7 @@ GAME_VERIFY packet (any subset):
     }
 """
 from __future__ import annotations
+import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error
@@ -49,7 +50,51 @@ from .base import dispatch
 
 
 def _num_matrix(M):
-    return [[float(x) for x in row] for row in M]
+    """A finite, rectangular, non-empty numeric matrix — or ValueError. (Handoff review 2026-10-02:
+    a ragged matrix, a NaN, or an empty list must be MALFORMED INPUT, never a false MISMATCH.)"""
+    rows = [[float(x) for x in row] for row in M]
+    if not rows or not rows[0]:
+        raise ValueError("empty matrix")
+    if any(len(r) != len(rows[0]) for r in rows):
+        raise ValueError("ragged matrix")
+    if any(not math.isfinite(x) for r in rows for x in r):
+        raise ValueError("non-finite entry")
+    return rows
+
+
+def _as_bool(v):
+    """A STRICT boolean claim: True/False, 0/1, or the words true/false/yes/no. Anything else is
+    malformed — never bool(\"false\") == True (a claim of 'false' was CONFIRMED as 'true' before)."""
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, (int, float)) and v in (0, 1):
+        return bool(v)
+    if isinstance(v, str):
+        t = v.strip().lower()
+        if t in ("true", "yes", "1"):
+            return True
+        if t in ("false", "no", "0"):
+            return False
+    raise ValueError(f"claim must be a boolean (true/false), got {v!r}")
+
+
+def _index(v):
+    """An integral index — 1.7 is not row 1 (it was silently truncated before)."""
+    f = float(v)
+    if not f.is_integer():
+        raise ValueError(f"index must be integral, got {v!r}")
+    return int(f)
+
+
+def _distribution(p):
+    """A probability vector: finite, nonnegative, summing to one. [-1, 2] sums to one and was
+    accepted — a negative probability 'verified' a payoff of nonsense."""
+    pf = [float(x) for x in p]
+    if not pf or any(not math.isfinite(x) or x < 0 for x in pf):
+        raise ValueError("strategy entries must be finite and nonnegative")
+    if abs(sum(pf) - 1.0) > 1e-6:
+        raise ValueError("strategy must sum to one")
+    return pf
 
 
 def verify_expected_payoff(spec: Dict[str, Any]) -> VerifierResult:
@@ -59,12 +104,14 @@ def verify_expected_payoff(spec: Dict[str, Any]) -> VerifierResult:
     if any(v is None for v in (A, p, q, claimed)):
         return na(name)
     try:
-        Af = _num_matrix(A); pf = [float(x) for x in p]; qf = [float(x) for x in q]; cl = float(claimed)
-    except (TypeError, ValueError):
-        return error(name, "payoff matrix and strategies must be numeric")
+        Af = _num_matrix(A); pf = _distribution(p); qf = _distribution(q); cl = float(claimed)
+    except (TypeError, ValueError) as e:
+        return error(name, f"payoff matrix must be finite and rectangular, strategies finite nonnegative distributions, claim numeric ({e})")
+    if not math.isfinite(cl):
+        return error(name, "claimed payoff must be finite")
     if len(Af) != len(pf) or any(len(r) != len(qf) for r in Af):
         return error(name, "strategy lengths must match the payoff-matrix dimensions")
-    if abs(sum(pf) - 1.0) > 1e-6 or abs(sum(qf) - 1.0) > 1e-6:
+    if False:
         return error(name, "mixed strategies must each sum to 1")
     actual = sum(pf[i] * Af[i][j] * qf[j] for i in range(len(pf)) for j in range(len(qf)))
     data = {"expected_payoff": actual, "claimed": cl, "formula": "u = p^T A q"}
@@ -81,9 +128,12 @@ def verify_nash_pure(spec: Dict[str, Any]) -> VerifierResult:
         return na(name)
     try:
         Af, Bf = _num_matrix(A), _num_matrix(B)
-        i, j = int(prof[0]), int(prof[1])
-    except (TypeError, ValueError, IndexError):
-        return error(name, "payoff matrices must be numeric and profile a pair of indices")
+        i, j = _index(prof[0]), _index(prof[1])
+        claimed = _as_bool(claimed)
+    except (TypeError, ValueError, IndexError) as e:
+        return error(name, f"payoff matrices must be finite and rectangular, profile a pair of integral indices, claim boolean ({e})")
+    if len(Af) != len(Bf) or len(Af[0]) != len(Bf[0]):
+        return error(name, "row and column payoff matrices must have identical shape (one game, two players)")
     if not (0 <= i < len(Af)) or not (0 <= j < len(Af[0])):
         return error(name, "profile indices are out of range")
     row_best = all(Af[i][j] >= Af[k][j] for k in range(len(Af)))          # row can't gain by deviating
@@ -103,9 +153,9 @@ def verify_dominant_strategy(spec: Dict[str, Any]) -> VerifierResult:
     if any(v is None for v in (M, i, k, claimed)):
         return na(name)
     try:
-        Mf = _num_matrix(M); ii, kk = int(i), int(k)
-    except (TypeError, ValueError):
-        return error(name, "matrix must be numeric and rows must be indices")
+        Mf = _num_matrix(M); ii, kk = _index(i), _index(k); claimed = _as_bool(claimed)
+    except (TypeError, ValueError) as e:
+        return error(name, f"matrix must be finite and rectangular, rows integral indices, claim boolean ({e})")
     if not (0 <= ii < len(Mf)) or not (0 <= kk < len(Mf)):
         return error(name, "row indices out of range")
     dominates = all(Mf[ii][j] > Mf[kk][j] for j in range(len(Mf[ii])))
@@ -136,8 +186,13 @@ def verify_iterated(spec: Dict[str, Any]) -> VerifierResult:
     try:
         T, R, P, S = _pd(spec)
         w = float(spec.get("shadow_w", 0.0))
-    except (TypeError, ValueError, KeyError):
-        return error(name, "pd_T, pd_R, pd_P, pd_S and shadow_w must be numeric")
+        for k in ("claimed_is_dilemma", "claimed_tft_stable"):
+            if k in spec:
+                spec = dict(spec, **{k: _as_bool(spec[k])})
+    except (TypeError, ValueError, KeyError) as e:
+        return error(name, f"pd_T, pd_R, pd_P, pd_S and shadow_w must be finite numbers, boolean claims true/false ({e})")
+    if not all(math.isfinite(v) for v in (T, R, P, S, w)):
+        return error(name, "payoffs and shadow_w must be finite")
     if not (0.0 <= w < 1.0):
         return error(name, "shadow_w must satisfy 0 <= w < 1 (a discount on the next round)")
     dilemma = _is_dilemma(T, R, P, S)
@@ -148,6 +203,10 @@ def verify_iterated(spec: Dict[str, Any]) -> VerifierResult:
     data = {"T": T, "R": R, "P": P, "S": S, "w": w, "is_dilemma": dilemma,
             "tft_stability_threshold_w": thr, "tft_stable": tft_stable,
             "cooperate_forever_payoff": coop, "defect_then_punished_payoff": defect_once,
+            "model": "two players, pairwise, discount w per round; TFT = cooperate first then copy the other's "
+                     "last move. 'cooperate forever' = TFT vs TFT (R every round). 'defect then punished' = "
+                     "ALL-D vs TFT: T once, then P every round (the defector keeps defecting; TFT answers in kind). "
+                     "A single defection followed by repair is a DIFFERENT sequence, not this number.",
             "formula": "TFT stable iff w >= max((T-R)/(R-S), (T-R)/(T-P)); R/(1-w) vs T + wP/(1-w)"}
     bad = []
     if "claimed_is_dilemma" in spec and bool(spec["claimed_is_dilemma"]) != dilemma:
@@ -183,6 +242,8 @@ def verify_population(spec: Dict[str, Any]) -> VerifierResult:
         x = float(spec["cooperator_share"])
     except (TypeError, ValueError, KeyError):
         return error(name, "pd_T, pd_R, pd_P, pd_S, shadow_w and cooperator_share must be numeric")
+    if not all(math.isfinite(v) for v in (T, R, P, S, w, x)):
+        return error(name, "payoffs, shadow_w and cooperator_share must be finite")
     if not (0.0 <= w < 1.0) or not (0.0 <= x <= 1.0):
         return error(name, "shadow_w must satisfy 0 <= w < 1 and cooperator_share 0 <= x <= 1")
     f_tft = x * R / (1 - w) + (1 - x) * (S + w * P / (1 - w))
@@ -198,6 +259,9 @@ def verify_population(spec: Dict[str, Any]) -> VerifierResult:
     direction = "stationary" if (x in (0.0, 1.0) or abs(diff) < 1e-12) else ("expands" if diff > 0 else "contracts")
     data = {"T": T, "R": R, "P": P, "S": S, "w": w, "cooperator_share": x,
             "fitness_tft": f_tft, "fitness_defect": f_d, "direction": direction, "threshold_share": thr,
+            "model": "exactly two strategies (TIT FOR TAT, ALL-D), random pairwise matching, infinite well-mixed "
+                     "population, replicator dynamics, discount w per round — a statement about THIS model, not "
+                     "about every community or strategy set",
             "formula": "dx/dt ∝ x(1-x)(f_TFT - f_D); x* = (P-S)/((R-T+w(T-P))/(1-w) + P-S)"}
     bad = []
     if "claimed_direction" in spec and str(spec["claimed_direction"]).strip().lower() != direction:

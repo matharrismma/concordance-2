@@ -18,6 +18,11 @@ Checks performed:
   * electrical.rc_time_constant
       τ = R·C (seconds). Capacitor voltage v(t) = V·(1 - e^(-t/τ)).
       Given R, C, and t, the claimed fraction-of-final must match.
+  * electrical.reflection_coefficient — THE SMITH CHART'S OWN MAP, in its literal domain
+      z = Z/Z0 (complex), Γ = (z − 1)/(z + 1), z = (1 + Γ)/(1 − Γ); |Γ| ≤ 1 for a passive load,
+      VSWR = (1 + |Γ|)/(1 − |Γ|), return loss = −20·log10|Γ|. Given Z (re, im) and Z0, the claimed
+      Γ (re, im), |Γ|, VSWR or return loss must match; the inverse is checked too (Γ → Z). A single
+      frequency, lossless reference, no component model — the idealized chart, nothing more.
 
 ELEC_VERIFY packet shape (any subset of fields):
     {
@@ -27,6 +32,10 @@ ELEC_VERIFY packet shape (any subset of fields):
 
       "voltages_in_loop": [9, -4.5, -4.5],
       "claimed_loop_sum_V": 0.0,
+
+      "z_real_ohm": 50, "z_imag_ohm": 50, "z0_ohm": 50,
+      "claimed_gamma_real": 0.2, "claimed_gamma_imag": 0.4, "claimed_gamma_mag": 0.4472,
+      "claimed_vswr": 2.618, "claimed_return_loss_db": 6.99,
 
       "resistance_ohm_rc": 1000, "capacitance_F": 1e-6,
       "elapsed_s": 1e-3,
@@ -194,12 +203,72 @@ def verify_rc_time_constant(spec: Dict[str, Any]) -> VerifierResult:
                     data)
 
 
+
+def verify_reflection_coefficient(spec: Dict[str, Any]) -> VerifierResult:
+    """The Smith chart's own mapping, literal: a load Z = R + jX against a real reference Z0 reflects
+    Γ = (Z − Z0)/(Z + Z0) = (z − 1)/(z + 1) with z = Z/Z0; the inverse z = (1 + Γ)/(1 − Γ) is checked
+    back; |Γ| ≤ 1 for a passive load (R ≥ 0), VSWR = (1+|Γ|)/(1−|Γ|), return loss = −20 log10|Γ|.
+    One frequency, a lossless real Z0, no component model — the idealized chart (the handoff's
+    fixture: Z0 = 50 Ω, Z = 50 + j50 Ω → Γ = 0.2 + 0.4j; a series −j50 Ω reaches the centre)."""
+    name = "electrical.reflection_coefficient"
+    claims = ("claimed_gamma_real", "claimed_gamma_imag", "claimed_gamma_mag", "claimed_vswr", "claimed_return_loss_db")
+    if "z0_ohm" not in spec or "z_real_ohm" not in spec or not any(k in spec for k in claims):
+        return na(name)
+    try:
+        R = float(spec["z_real_ohm"]); X = float(spec.get("z_imag_ohm", 0.0)); Z0 = float(spec["z0_ohm"])
+    except (TypeError, ValueError):
+        return error(name, "z_real_ohm, z_imag_ohm and z0_ohm must be numeric")
+    if not all(math.isfinite(v) for v in (R, X, Z0)):
+        return error(name, "impedances must be finite")
+    if Z0 <= 0:
+        return error(name, "the reference impedance Z0 must be a positive real number")
+    if R < 0:
+        return error(name, "a passive load has nonnegative resistance (R >= 0); an active load lies outside the unit disk")
+    z = complex(R, X) / Z0
+    if z == -1:
+        return error(name, "z = -1 (Z = -Z0): the map has no finite image here")
+    gamma = (z - 1) / (z + 1)
+    back = (1 + gamma) / (1 - gamma) if gamma != 1 else None       # the inverse, checked
+    mag = abs(gamma)
+    vswr = (1 + mag) / (1 - mag) if mag < 1 else float("inf")
+    rl = (-20.0 * math.log10(mag)) if mag > 0 else float("inf")
+    data = {"Z_ohm": [R, X], "Z0_ohm": Z0, "z_normalized": [z.real, z.imag],
+            "gamma": [gamma.real, gamma.imag], "gamma_mag": mag, "vswr": vswr, "return_loss_db": rl,
+            "inverse_z": [back.real, back.imag] if back is not None else None,
+            "inverse_holds": (back is not None and abs(back - z) < 1e-9),
+            "to_centre_series_reactance_ohm": -X if abs(R - Z0) < 1e-9 else None,
+            "formula": "Γ = (z−1)/(z+1), z = Z/Z0; z = (1+Γ)/(1−Γ); VSWR = (1+|Γ|)/(1−|Γ|); RL = −20·log10|Γ|",
+            "model": "single frequency, lossless real Z0, no component/tolerance model — the idealized Smith chart"}
+    tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    bad = []
+    for key, val in (("claimed_gamma_real", gamma.real), ("claimed_gamma_imag", gamma.imag), ("claimed_gamma_mag", mag),
+                     ("claimed_vswr", vswr), ("claimed_return_loss_db", rl)):
+        if key in spec:
+            try:
+                cl = float(spec[key])
+            except (TypeError, ValueError):
+                return error(name, f"{key} must be numeric")
+            if not math.isfinite(val):
+                if not (isinstance(cl, float) and math.isinf(cl)):
+                    bad.append(f"{key.replace('claimed_', '')} is unbounded (|Γ| = 1), claimed {cl:g}")
+                continue
+            if abs(val - cl) > max(1e-4, tol * abs(val)):
+                bad.append(f"{key.replace('claimed_', '')} = {val:.6g}, claimed {cl:.6g}")
+    if not data["inverse_holds"]:
+        bad.append("the inverse map did not return the load (numerical failure)")
+    if bad:
+        return mismatch(name, "; ".join(bad), data)
+    return confirm(name, f"z = {z.real:.4g}{z.imag:+.4g}j → Γ = {gamma.real:.4g}{gamma.imag:+.4g}j (|Γ| = {mag:.4g}, "
+                         f"VSWR {vswr:.4g}, RL {rl:.4g} dB); inverse returns z (matches claims)", data)
+
+
 _RULES = [
     (lambda ev: (all(ev.get(k) is not None for k in ("voltage_V", "current_A", "resistance_ohm"))), verify_ohms_law),
     (lambda ev: ("power_W_claim" in ev), verify_power),
     (lambda ev: ("voltages_in_loop" in ev and "claimed_loop_sum_V" in ev), verify_kirchhoff_voltage_loop),
     (lambda ev: (all(k in ev for k in ("resistance_ohm_rc", "capacitance_F", "elapsed_s",
                              "supply_V", "claimed_capacitor_voltage_V"))), verify_rc_time_constant),
+    (lambda ev: "z0_ohm" in ev and "z_real_ohm" in ev and any(k in ev for k in ("claimed_gamma_real", "claimed_gamma_imag", "claimed_gamma_mag", "claimed_vswr", "claimed_return_loss_db")), verify_reflection_coefficient),
 ]
 
 

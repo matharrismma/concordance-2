@@ -44,6 +44,29 @@ def test_without_a_shadow_of_the_future_cooperation_only_contracts():
     assert r.status == "CONFIRMED", r
 
 
+def test_adversarial_inputs_are_malformed_never_a_false_verdict():
+    """The handoff review's cases (2026-10-02), each reproduced before the fix: a negative 'probability'
+    that sums to one CONFIRMED a payoff of 7; the string "false" was bool()-true and a claim of false
+    was CONFIRMED as true; 1.7 was silently row 1; mismatched player matrices and NaN were MISMATCH
+    (a false claim) instead of ERROR (malformed input)."""
+    assert G.verify_expected_payoff({"row_payoff": [[3, 0], [5, 1]], "p": [-1, 2], "q": [1, 0], "claimed_payoff": 7}).status == "ERROR"
+    assert G.verify_expected_payoff({"row_payoff": [[float("nan"), 0], [5, 1]], "p": [1, 0], "q": [1, 0], "claimed_payoff": 5}).status == "ERROR"
+    assert G.verify_expected_payoff({"row_payoff": [[3, 0], [5]], "p": [0.5, 0.5], "q": [0.5, 0.5], "claimed_payoff": 2}).status == "ERROR"
+    pd2 = {"row_payoff_A": [[3, 0], [5, 1]], "col_payoff_B": [[3, 5], [0, 1]]}
+    assert G.verify_nash_pure({**pd2, "profile": [1, 1], "claimed_is_nash": "false"}).status == "MISMATCH"   # the claim said false; it IS Nash
+    assert G.verify_nash_pure({**pd2, "profile": [1, 1], "claimed_is_nash": "true"}).status == "CONFIRMED"
+    assert G.verify_nash_pure({**pd2, "profile": [1, 1], "claimed_is_nash": "maybe"}).status == "ERROR"
+    assert G.verify_nash_pure({**pd2, "profile": [1.7, 1], "claimed_is_nash": True}).status == "ERROR"
+    assert G.verify_nash_pure({"row_payoff_A": [[3, 0], [5, 1]], "col_payoff_B": [[3, 5, 1], [0, 1, 2]],
+                               "profile": [1, 1], "claimed_is_nash": True}).status == "ERROR"
+    assert G.verify_dominant_strategy({"dom_matrix": [[3, 0], [5, 1]], "dom_row": 1, "dominated_row": 0, "claimed_dominates": "no"}).status == "MISMATCH"
+    assert G.verify_dominant_strategy({"dom_matrix": [], "dom_row": 0, "dominated_row": 0, "claimed_dominates": True}).status == "ERROR"
+    assert G.verify_iterated({**PD, "shadow_w": 0.9, "claimed_tft_stable": "no"}).status == "MISMATCH"
+    assert G.verify_iterated({**PD, "shadow_w": float("nan"), "claimed_tft_stable": True}).status == "ERROR"
+    r = G.verify_iterated({**PD, "shadow_w": 0.9, "claimed_defect_then_punished_payoff": 14})
+    assert r.status == "CONFIRMED" and "ALL-D vs TFT" in r.data["model"]      # the sequence behind the number is named
+
+
 def test_edges_and_dispatch():
     assert G.verify_iterated({}).status == "NOT_APPLICABLE"
     assert G.verify_iterated({**PD, "shadow_w": 1.0, "claimed_tft_stable": True}).status == "ERROR"     # w must be < 1

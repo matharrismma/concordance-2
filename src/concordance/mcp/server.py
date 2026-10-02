@@ -884,7 +884,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
                   "attest_record": "preserve", "witnesses": "read",
                   "now": "read", "capabilities": "read",
                   "kernel": "read", "kernel_gate": "derive",
-                  "candidate_commit": "preserve", "candidate_narrow": "derive",
+                  "candidate_commit": "preserve", "candidate_narrow": "preserve",   # narrow() is pure, but the handler mints a best-effort receipt (candidates.receipt) — a write, labelled honestly (handoff review 2026-10-02)
                   "candidate_get": "read"},
     },
     "library": {
