@@ -70,6 +70,24 @@ SOURCES = [
 
 # Author-LABELLED maxims: a source whose author numbered his rules — accepted by construction.
 # gutenberg id -> (heading regex, block terminator regex or None)
+# The lines a reader knows the figure by — found by phrase search in the PD text, never typed in.
+ANCHORS = {
+    3253: ["house divided against itself cannot stand", "with malice toward none", "government of the people, by the people, for the people",
+           "the better angels of our nature", "public sentiment is everything", "let us have faith that right makes might"],
+    12029: ["labour to keep alive in your breast that little spark", "undertake not what you cannot perform", "be careful to keep your promise"],
+    7213: ["business must be run at a profit", "the man who will use his skill and constructive imagination", "a business that makes nothing but money is a poor"],
+    148: ["lose no time", "early to bed", "well done is better than well said", "an investment in knowledge"],
+    132: ["supreme excellence consists in breaking the enemy's resistance without fighting", "know the enemy and know yourself", "all warfare is based on deception"],
+    1946: ["war is merely the continuation of policy by other means", "the best form of defence is attack", "everything in war is very simple, but the simplest thing is difficult"],
+    1232: ["it is much safer to be feared than loved", "the first method for estimating the intelligence of a ruler", "there is nothing more difficult to take in hand"],
+    4367: ["the art of war is simple enough", "find out where your enemy is", "get at him as soon as you can"],
+    2680: ["the happiness of your life depends upon the quality of your thoughts", "waste no more time arguing", "it is not death that a man should fear"],
+    45109: ["some things are in our control and others not", "men are disturbed not by things, but by the principles and notions"],
+    13529: ["communications dominate war"],
+    17976: ["put all your eggs in one basket", "the man who dies thus rich dies disgraced"],
+    3335: ["do what you can, with what you have, where you are", "speak softly and carry a big stick"],
+}
+
 LABELLED = {
     50750: (r"^MAXIM [IVXLC]+\.?\s*$", r"\nNOTE"),                 # Napoleon: MAXIM I. … NOTE.
     12029: (r"^\d{1,3}(?:st|nd|rd|d|th)\.\s+", None),               # Washington: "1st. Every Action…" … "110th." (column 0, with the period — the editor's genealogy says "1st, Ester" and must not split)
@@ -151,8 +169,19 @@ def build_cards(texts_dir: Path = TEXTS) -> list:
             print(f"  missing text for {fig} (#{gid}) — run --fetch", file=sys.stderr)
             continue
         text = _body_of(p.read_text(encoding="utf-8", errors="replace"))
-        blocks = _labelled_blocks(text, gid) or None
-        found = P.identify(text, labelled_blocks=blocks, limit=cap)
+        blocks = _labelled_blocks(text, gid)
+        # ANCHORS: the lines a reader knows this figure by, pinned by a verbatim phrase SEARCH of the text
+        # (never typed in — if the phrase is not in the PD text, nothing is added). They rank first.
+        low_sents = None
+        for phrase in ANCHORS.get(gid, []):
+            if low_sents is None:
+                low_sents = [(sn.lower(), sn) for sn in P.sentences(text)]
+            hit = next((sn for lo, sn in low_sents if phrase.lower() in lo), None)
+            if hit:
+                blocks.append(hit)
+            else:
+                print(f"  anchor not found in #{gid}: {phrase!r}", file=sys.stderr)
+        found = P.identify(text, labelled_blocks=blocks or None, limit=cap)
         url = f"https://www.gutenberg.org/ebooks/{gid}"
         for i, f in enumerate(found, 1):
             h = hashlib.sha1(f["quote"].encode("utf-8")).hexdigest()[:10]
