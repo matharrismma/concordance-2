@@ -55,7 +55,7 @@ PATTERN_LEXICON: Dict[str, List[str]] = {
     'win_the_narrative': ['opinion', 'morale', 'moral force', 'confidence of', 'reputation', 'spirit of the', 'enthusiasm', 'persuad', 'proclamation', 'hearts', 'inspire'],
     'outlive_the_founder': ['successor', 'succession', 'institution', 'after my death', 'posterity', 'endure', 'lasting', 'outlast'],
     'first_principles': ['first principle', 'fundamental', 'nature of things', 'think for', 'the truth is', 'underlying', 'root of', 'go to the root', 'cause and effect', 'from the ground up'],
-    'coalition': ['alliance', 'allies', 'ally', 'coalition', 'confederat', 'union with', 'co-operat', 'cooperat', 'together with', 'partner'],
+    'coalition': ['alliance', 'allies', 'ally', 'coalition', 'confederat', 'in union with', 'act in union', 'co-operat', 'cooperat', 'together with', 'partner'],
     'requisite_variety': ['adapt', 'circumstances', 'terrain', 'nature of the ground', 'flexib', 'vary', 'varies', 'modif', 'suit the', 'lie of the land'],
     'build_a_moat': ['fortif', 'entrench', 'defensive position', 'defend', 'barrier', 'stronghold', 'impregnable', 'rampart'],
     'intelligence': ['information', 'reconnai', 'reconnoit', 'spies', 'spy', 'scout', 'intelligence', 'know the enemy', 'know your', 'observe', 'observation', 'foresee', 'foresight'],
@@ -194,7 +194,7 @@ def identify(text: str, *, labelled_blocks: Optional[Iterable[str]] = None,
             continue                                   # a story being told, not a rule being stated
         seen.add(s)
         found.append({"quote": s, "cues": c, "patterns": tag(s), "labelled": False})
-    found.sort(key=lambda d: (-int(d["labelled"]), -len(d["cues"]), -len(d["patterns"]), d["quote"]))
+    found.sort(key=lambda d: (-int(d["labelled"]), -len(d["cues"]), len(_WORD.findall(d["quote"].lower())), d["quote"]))
     return found[:limit]
 
 

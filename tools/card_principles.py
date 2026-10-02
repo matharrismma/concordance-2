@@ -52,7 +52,7 @@ SOURCES = [
     ("Winston Churchill", "Liberalism and the Social Problem", 1909, 18419, "politics", "published 1909 — public domain", 25),
     ("Theodore Roosevelt", "Theodore Roosevelt: An Autobiography", 1913, 3335, "politics", "published 1913 — public domain", 30),
     # 2026-10-02, Matt: "add Lincoln, Washington, and the other similar greats. Gather wisdom."
-    ("Abraham Lincoln", "The Papers and Writings of Abraham Lincoln (complete)", 1865, 3253, "politics", "author d. 1865 — public domain", 40),
+    ("Abraham Lincoln", "The Papers and Writings of Abraham Lincoln (complete)", 1865, 3253, "politics", "author d. 1865 — public domain", 120),
     ("George Washington", "Rules of Civility & Decent Behaviour in Company and Conversation (the 110 rules)", 1747, 12029, "politics", "author d. 1799 — public domain", 40),
     ("Thomas Jefferson", "The Writings of Thomas Jefferson", 1826, 21002, "politics", "author d. 1826 — public domain", 30),
     ("Ulysses S. Grant", "Personal Memoirs of U. S. Grant", 1885, 4367, "war", "published 1885 — public domain", 30),
@@ -63,7 +63,7 @@ SOURCES = [
     ("Epictetus", "The Enchiridion (tr. Elizabeth Carter)", 1758, 45109, "wisdom", "translation 1758 — public domain", 25),
     ("Seneca", "Seneca's Morals of a Happy Life, Benefits, Anger and Clemency (tr. L'Estrange)", 1678, 56075, "wisdom", "translation 1678 — public domain", 30),
     ("Confucius", "The Analects (tr. James Legge)", 1861, 3330, "wisdom", "translation 1861 — public domain", 30),
-    ("Plutarch", "Lives of the Noble Grecians and Romans (tr. Dryden, rev. Clough)", 1864, 674, "wisdom", "translation 1864 — public domain", 30),
+    ("Plutarch", "Lives of the Noble Grecians and Romans (tr. Dryden, rev. Clough)", 1864, 674, "wisdom", "translation 1864 — public domain", 50),
     ("Antoine-Henri Jomini", "The Art of War (tr. Mendell & Craighill)", 1862, 13549, "war", "translation 1862 — public domain", 30),
     ("Alfred Thayer Mahan", "The Influence of Sea Power Upon History, 1660-1783", 1890, 13529, "war", "published 1890 — public domain", 25),
 ]
