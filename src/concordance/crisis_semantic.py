@@ -222,6 +222,26 @@ _BENIGN_TECHNICAL = re.compile(
 _BENIGN_CALENDAR = re.compile(
     r"\bhow (?:many|long)\b.{0,50}\b(?:days?|weeks?|months?)\b.{0,50}\b(?:easter|passover|pentecost|"
     r"good friday|christmas|advent|ascension|epiphany|hanukkah|lent|palm sunday|ash wednesday)\b", re.I)
+# The WORK-REQUEST frame (2026-10-02, found by the Conductor's own seed benchmark running on the box,
+# where the artifact exists — CI has no artifact and never saw it): "Need a bid on this bracket, how much?"
+# scored 0.698, "hey can you take a look at this thing when you get a chance" 0.671, "what would it take
+# to get this done by friday" 0.716 — a shop's ordinary asks, read as crisis because need/take/get/done
+# sit near the centroid. Same topic≈intent limit, same discipline: each alternative needs BOTH a trade
+# noun or delegation idiom AND its question/deadline frame, never a bare verb. "what would it take" alone
+# does NOT suppress (a cry can carry it); only with a work verb and a calendar deadline. Verified 0 hits
+# across CRISIS_FLOOR + RED_TEAM + the veiled set before wiring. Only suppresses the backstop.
+_BENIGN_WORK_REQUEST = re.compile(
+    r"\b(?:bid|quote|quotation|estimate|rfq|invoice|purchase order|lead ?time|turnaround)\b.{0,60}"
+    r"\bhow (?:much|many|long|soon)\b"
+    r"|\bhow (?:much|many|long|soon)\b.{0,60}\b(?:bid|quote|quotation|estimate|rfq|invoice|purchase order|"
+    r"lead ?time|turnaround)\b"
+    r"|\b(?:need|needs|want|wants|get|send|give) (?:me |us )?(?:a|an|the) (?:bid|quote|quotation|estimate|"
+    r"rfq|invoice|purchase order)\b"
+    r"|\b(?:take|have) a (?:quick )?look at (?:this|that|the|these|those|my|our) \w+ when you (?:get|have) a "
+    r"(?:chance|sec|second|minute|moment)\b"
+    r"|\bwhat would it take to (?:get|have|finish|ship|make|build|machine|deliver)\b.{0,40}\bby "
+    r"(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|tomorrow|end of (?:day|week|month)|eod|eow)\b",
+    re.I)
 
 
 def flags(text: str) -> bool:
@@ -242,4 +262,6 @@ def flags(text: str) -> bool:
         return False                      # a scientific lookup (isotope/voltage/wavelength) is never a cry
     if _BENIGN_CALENDAR.search(t):
         return False                      # a date calculation ("how many days to Easter") is never a cry
+    if _BENIGN_WORK_REQUEST.search(t):
+        return False                      # a shop's ask (bid/quote frame, "take a look … when you get a chance") is never a cry
     return score(text) > art["threshold"]
