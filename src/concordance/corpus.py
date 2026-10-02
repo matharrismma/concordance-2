@@ -428,6 +428,11 @@ class Corpus:
         # 2026-09-26: the frozen stub dicts were ~96% of resident memory). Their document frequencies
         # ride in `_df_extra` so the corpus-wide IDF is unchanged.
         self._frozen: Dict[str, tuple] = dict(frozen_idx) if frozen_idx else {}
+        # Built WITH freeze awareness (default_corpus / load_cards pass an index, empty or not) vs a
+        # fixture `Corpus({...})` that never shed anything: only the former may merge shard freight.
+        # The distinction is the ARGUMENT's presence, not the index's size — a shard-only node whose
+        # resident keeping is empty still freezes, and must still read its shards.
+        self._froze: bool = frozen_idx is not None
         self._by_token: Dict[str, List[str]] = {}
         self._df_extra: Dict[str, int] = dict(df_extra) if df_extra else {}
         for cid, c in cards.items():
@@ -959,7 +964,7 @@ class Corpus:
         # corpus (`Corpus({...})` in a test) under the servers' env was receiving the live keeping's
         # shard hits — real dictionary cards outranking the fixture's own — which is not a ranking
         # bug, it is freight from a shard this corpus never loaded.
-        frozen = frozen_shelves() if self._frozen else frozenset()
+        frozen = frozen_shelves() if self._froze else frozenset()
         if frozen and (shelves is None or (set(shelves) & frozen)):
             from . import corpus_db
             corpus_db.thaw_for(*frozen)
@@ -1295,7 +1300,7 @@ def search(query: str, limit: int = 25, include_witness: bool = True,
     shelf rode the shard."""
     corpus = default_corpus()
     out = corpus.search(query, limit, include_witness, shelves)
-    frozen = frozen_shelves() if corpus._frozen else frozenset()   # only a corpus that froze shelves merges shard freight
+    frozen = frozen_shelves() if corpus._froze else frozenset()   # only a corpus built with freeze awareness merges shard freight
     if frozen and (shelves is None or (set(shelves) & frozen)) and len(out) < limit:
         from . import corpus_db
         corpus_db.thaw_for(*frozen)

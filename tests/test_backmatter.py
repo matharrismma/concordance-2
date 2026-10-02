@@ -78,9 +78,11 @@ def test_the_disputes_are_carried_not_flattened():
 
 def test_names_of_god_resolve_in_the_actual_lexicon():
     from concordance import corpus
-    cards = corpus.default_corpus().cards
+    cp = corpus.default_corpus()
+    # `has` — resident OR in the frozen index. Under the servers' CONCORDANCE_FREEZE_SHELVES the
+    # lexicon rides the shard and is not in `.cards`; the keeping still knows every id (2026-10-02).
     missing = [e["name"] for e in backmatter.NAMES_OF_GOD
-               if e.get("strongs") and f"card_src_lex_{e['strongs'].lower()}" not in cards]
+               if e.get("strongs") and not cp.has(f"card_src_lex_{e['strongs'].lower()}")]
     assert not missing, f"names whose Strong's number has no lexicon entry: {missing}"
 
 
