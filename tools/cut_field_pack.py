@@ -31,6 +31,7 @@ your slice, your key.
 from __future__ import annotations
 
 import hashlib
+import ast
 import json
 import os
 import shutil
@@ -44,7 +45,41 @@ SRC = REPO / "src" / "concordance"
 RELEASES = Path(os.environ.get("CONCORDANCE_RELEASES", "").strip() or "D:/NarrowHighway-Releases")
 
 # The Lighthouse Node's minimal top-level import closure — exactly the modules it needs, no engine.
-CLOSURE = ["lighthouse_node", "meshtastic_bridge", "mesh", "signing", "identity", "validate"]
+CLOSURE = ["lighthouse_node", "meshtastic_bridge", "mesh", "flock", "signing", "identity", "validate"]
+
+
+def _module_level_relative_imports(path: Path) -> set:
+    """The sibling modules a file imports AT MODULE LEVEL (`from . import a, b` / `from .x import`),
+    including inside a module-level try/except. Function-local imports are lazy and do not count:
+    the pack must IMPORT clean on a Pi; what a code path later reaches is that path's concern."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    out: set = set()
+    nodes = []
+    for n in tree.body:
+        nodes.append(n)
+        if isinstance(n, ast.Try):
+            nodes.extend(n.body)
+            for h in n.handlers:
+                nodes.extend(h.body)
+    for n in nodes:
+        if isinstance(n, ast.ImportFrom) and n.level == 1:
+            out |= {n.module.split(".")[0]} if n.module else {a.name for a in n.names}
+    return out
+
+
+def check_closure(modules: List[str] = None) -> List[str]:
+    """Every module-level sibling import of every module in the closure must itself be in the
+    closure, or the cut pack fails on `import concordance.lighthouse_node` in the field. Returns the
+    missing names (empty = closed). mesh grew `from . import flock` after CLOSURE was written and the
+    pack shipped broken until test_cut_field_pack caught it (Fable review 2026-10-01) — so the cut
+    now refuses, naming the module, instead of a Pi discovering it."""
+    mods = list(modules or CLOSURE)
+    missing: List[str] = []
+    for m in mods:
+        for dep in sorted(_module_level_relative_imports(SRC / f"{m}.py")):
+            if dep not in mods and (SRC / f"{dep}.py").is_file():
+                missing.append(f"{m} -> {dep}")
+    return missing
 # The practical field shelves that ride in every pack (each an in-repo per-shelf jsonl).
 FIELD_FILES = ["firstaid", "water", "power", "navigation", "food", "survival", "comms", "fieldkit"]
 BIBLE_FILE = "bible_en.jsonl"
@@ -551,7 +586,10 @@ def cut(dest: Path, data_dir: Path, offline: bool = False) -> Dict[str, Any]:
         for c in cards:
             f.write(json.dumps(c, ensure_ascii=False) + "\n")
 
-    # the minimal code closure + a stub package init
+    # the minimal code closure + a stub package init — refused if the closure is not closed
+    gaps = check_closure()
+    if gaps:
+        raise SystemExit("REFUSING: CLOSURE is not import-closed — add to CLOSURE: " + ", ".join(gaps))
     code_pkg = dest / "code" / "concordance"
     code_pkg.mkdir(parents=True)
     (code_pkg / "__init__.py").write_text(_STUB_INIT, encoding="utf-8")
