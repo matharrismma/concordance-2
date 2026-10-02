@@ -40,6 +40,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # a cp1252 console must not garble the report
+except Exception:  # noqa: BLE001
+    pass
+
 ROOT = Path(__file__).resolve().parent.parent
 HOST = "nh@5.78.186.55"
 KEY = str(Path.home() / ".ssh" / "id_ed25519_nh")
