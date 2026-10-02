@@ -68,6 +68,9 @@ def _strategy_data():
         pats.append({"i": pi, "id": p["id"], "title": p["title"], "gist": p["gist"], "arenas": arenas,
                      "cases": [{"arena": a, "who": who, "when": when, "move": move, "ev": ev}
                                for a, who, when, move, ev in p["cases"]],
+                     # where the SAME move failed — the boundary of the pattern, shown beside its wins
+                     "failed": [{"arena": a, "who": who, "when": when, "move": move, "ev": ev}
+                                for a, who, when, move, ev in p.get("counters", [])],
                      "col": MPAL[pi % len(MPAL)]})
     used = [a for a in _STRAT_ORDER if any(a in p["arenas"] for p in pats)]
     return {"patterns": pats, "arenas": used,
@@ -221,6 +224,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,'Iowan O
 .chip code{font-family:'DejaVu Sans Mono',monospace}.chip .sw{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
 .chip:hover,.chip.on{background:#241a0b}
 .detail .strat .case{display:grid;grid-template-columns:4.6rem 1fr;gap:.04rem .5rem;padding:.3rem 0;border-top:1px solid #1c1710;font-size:.82rem}
+.detail .strat .failhead{margin:.5rem 0 .1rem;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:#b86a4a}
+.detail .strat .case.fail{border-left:2px solid #b86a4a;background:rgba(184,106,74,.06);padding-left:.4rem}
 .detail .strat .case .ar{grid-row:span 2;font-size:.77rem;padding-top:.05rem}
 .detail .strat .case .who{color:var(--ink)}.detail .strat .case .when{color:var(--faint);font-size:.77rem}
 .detail .strat .case .ev{color:var(--dim);font-size:.79rem}.detail .strat .case .ev i{color:var(--faint)}
@@ -598,7 +603,8 @@ function showCalc(slug){sel={type:'calc',id:slug};const c=D.calcs[slug];
   wireLinks();applyHi();setCount(c.t);}
 function showPattern(pi){sel={type:'pattern',id:pi};const p=D.strategy.patterns[pi];
   const rows=p.cases.map(c=>`<div class=case><span class=ar style="color:${D.strategy.atint[c.arena]||'#c69a4a'}">${esc(c.arena)}</span><span class=who>${esc(c.who)} <span class=when>${esc(c.when)}</span></span><span class=ev>${esc(c.move)}. <i>${esc(c.ev)}</i></span></div>`).join('');
-  detail.innerHTML=`<div class=eq style="font-family:Georgia,serif;color:var(--gold)">${esc(p.title)}</div><div class=gist>${esc(p.gist)}</div><div class=strat>${rows}</div>`;
+  const fails=(p.failed||[]).map(c=>`<div class="case fail"><span class=ar style="color:${D.strategy.atint[c.arena]||'#c69a4a'}">${esc(c.arena)}</span><span class=who>${esc(c.who)} <span class=when>${esc(c.when)}</span></span><span class=ev>${esc(c.move)}. <i>${esc(c.ev)}</i></span></div>`).join('');
+  detail.innerHTML=`<div class=eq style="font-family:Georgia,serif;color:var(--gold)">${esc(p.title)}</div><div class=gist>${esc(p.gist)}</div><div class=strat>${rows}${fails?`<div class=failhead>where it failed (${p.failed.length})</div>${fails}`:''}</div>`;
   applyHi();setCount('pattern — '+p.arenas.length+' arenas');}
 function showArena(a){sel={type:'arena',id:a};const S=D.strategy;const ps=S.patterns.filter(p=>p.arenas.includes(a));
   const rows=ps.map(p=>`<div class=row data-pat="${p.i}"><span class=sw style="background:${p.col}"></span>${esc(p.title)}</div>`).join('');

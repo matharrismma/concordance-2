@@ -100,13 +100,22 @@ def build():
             f'<span class=who>{esc(who)} <span class=when>{esc(when)}</span></span>'
             f'<span class=ev>{esc(move)}. <i>{esc(ev)}</i></span></div>'
             for a, who, when, move, ev in pat["cases"])
+        # the boundary of the pattern: the SAME move failing, with what failed and why (kept beside the wins)
+        failed = "".join(
+            f'<div class="case fail"><span class=ar style="color:{ATINT.get(a,"#c69a4a")}">{esc(a)}</span>'
+            f'<span class=who>{esc(who)} <span class=when>{esc(when)}</span></span>'
+            f'<span class=ev>{esc(move)}. <i>{esc(ev)}</i></span></div>'
+            for a, who, when, move, ev in pat.get("counters", []))
+        if failed:
+            failed = f'<div class=failhead>where it failed ({len(pat.get("counters", []))})</div>' + failed
         blocks.append(
             f'<div class=pat data-pi="{real_pi}" id="pat{real_pi}">'
             f'<h3 style="border-color:{col}"><span class=dot style="background:{col}"></span>{esc(pat["title"])}'
             f'<span class=span>{len(arenas)} arenas</span></h3>'
-            f'<p class=gist>{esc(pat["gist"])}</p>{rows}</div>')
+            f'<p class=gist>{esc(pat["gist"])}</p>{rows}{failed}</div>')
 
     ncases = sum(len(p["cases"]) for p in PATTERNS)
+    nfailed = sum(len(p.get("counters", [])) for p in PATTERNS)
     return f"""<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <script src="/shell.js"></script>
@@ -128,6 +137,8 @@ h2{{color:var(--gold2);font-weight:400;font-size:1.2rem;margin:2rem 0 .3rem;bord
 .case{{display:grid;grid-template-columns:5.5rem 1fr;gap:.15rem .7rem;padding:.28rem 0 .28rem .55rem;border-top:1px solid #1c1710;font-size:.86rem}}
 .case .ar{{grid-row:span 2;font-size:.8rem;padding-top:.1rem}}
 .case .who{{color:var(--ink)}}.case .when{{color:var(--faint);font-size:.8rem}}
+.failhead{{margin:.5rem 0 .1rem .55rem;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:#b86a4a}}
+.case.fail{{border-left:2px solid #b86a4a;background:rgba(184,106,74,.06)}}.case.fail .who{{color:#d9a48a}}
 .case .ev{{color:var(--dim);font-size:.82rem}}.case .ev i{{color:var(--faint)}}
 </style></head>
 <body><div class=wrap>
@@ -138,7 +149,7 @@ recurring <b>patterns</b> of building things that win and endure. Each arena on 
 the state, the enterprise, the church &mdash; is a domain; each <b>thread</b> is one pattern, drawn through
 every arena it recurs in. A thread that ties war to ministry is the finding: the same move wins for a
 general and an apostle. Found across time, not invented; every case carries its evidence.
-{len(PATTERNS)} patterns &middot; {ncases} cases &middot; {n} arenas.</p>
+{len(PATTERNS)} patterns &middot; {ncases} cases &middot; {nfailed} counter-cases (where the same move failed) &middot; {n} arenas.</p>
 {svg}
 <h2>The patterns, and their cases across time</h2>
 {''.join(blocks)}
