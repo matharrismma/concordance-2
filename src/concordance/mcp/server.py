@@ -1831,6 +1831,11 @@ def handle(request: dict, config: EngineConfig, session: Optional[Dict[str, Any]
             return {"jsonrpc": "2.0", "id": rid, "result": {
                 "content": [{"type": "text", "text": json.dumps(typed, ensure_ascii=False)}],
                 "isError": True}}
+        # THE HOUSE ENDING (2026-10-02): a door's answer ends the same way on every door — a verdict
+        # or a card, the trail, a seal, ONE next step — so an agent is never handed a lobby.
+        from .. import doors as _doors
+        if name in _doors.ALL_DOORS and isinstance(result, dict):
+            result = dict(result, house=_doors.house(name, result, args))
         return {"jsonrpc": "2.0", "id": rid, "result": {
             "content": [{"type": "text", "text": json.dumps(result, ensure_ascii=False)}], "isError": False}}
     if method and method.startswith("notifications/"):

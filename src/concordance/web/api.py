@@ -3839,3 +3839,20 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
     where = f" + site {site_dir}" if site_dir else ""
     print(f"Narrow Highway API ({surface}) on http://{host}:{port}{where}")
     httpd.serve_forever()
+
+
+# ── THE HOUSE ENDING on the web twins (2026-10-02, Matt: "keep going API") ─────────────────────
+# A door's answer ends the same way on every door — a verdict or a card, the trail, a seal, ONE next
+# step — whether it arrives through the agent catalog or its web twin. One wrapper around dispatch,
+# so the handler, the tests and any other caller all see the same ending; nothing inside changes.
+_dispatch_core = dispatch
+
+
+def dispatch(method, path, query, body, config, **kw):  # noqa: F811 — the wrapped door
+    status, payload = _dispatch_core(method, path, query, body, config, **kw)
+    if status == 200 and isinstance(payload, dict) and "error" not in payload:
+        from .. import doors as _doors
+        tool = _doors.DOOR_ROUTES.get(path)
+        if tool:
+            payload = dict(payload, house=_doors.house(tool, payload, query if isinstance(query, dict) else None))
+    return status, payload

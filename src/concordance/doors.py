@@ -45,3 +45,184 @@ def tag(tool: str) -> str:
 def doors() -> Dict[str, dict]:
     """The five doors as /capabilities reports them."""
     return {v: {"page": DOOR_PAGE[v], "lead": LEAD[v], "tools": TOOL_DOORS[v]} for v in VERBS}
+
+
+# ── THE HOUSE ENDING — every door's answer ends the same way ────────────────────────────────────
+# Matt, 2026-10-02 ("keep going API"): a verdict or a card · the trail · a seal · ONE next step.
+# The next step is a RULE per door, filled with this answer's own ids — never generated, never a
+# menu. `house()` is defensive: it reads what the answer holds and never raises.
+
+# web route -> the door tool it is the data twin of (the handler attaches the same ending)
+DOOR_ROUTES: Dict[str, str] = {
+    "/verify": "verify", "/audit": "audit", "/seal": "seal_fetch", "/find_verifier": "find_verifier",
+    "/search": "search", "/card": "card_get", "/lookup": "lookup", "/dictionary": "define",
+    "/ask": "ask", "/coach/next": "coach_next",
+    "/identity/create": "identity_create", "/study": "study_create", "/decks": "decks",
+    "/passage": "read_passage", "/word_study": "word_study", "/cross_refs": "cross_references",
+}
+
+ALL_DOORS = frozenset(t for ts in TOOL_DOORS.values() for t in ts)
+ENDS = "a verdict or a card · the trail · a seal · one next step"
+
+
+def _first(seq, *keys):
+    """The first dict in a list (or among a dict's values) that carries one of `keys`."""
+    if isinstance(seq, dict):
+        seq = list(seq.values())
+    if not isinstance(seq, list):
+        return None
+    for item in seq:
+        if isinstance(item, dict) and any(k in item for k in keys):
+            return item
+    return None
+
+
+def _step(do: str, door: str, tool: str = None, params: dict = None, web: str = None) -> dict:
+    s = {"do": do, "door": door}
+    if tool:
+        s["tool"] = tool
+    if params:
+        s["params"] = params
+    if web:
+        s["web"] = web
+    return s
+
+
+def _status_is(step, *statuses) -> bool:
+    return isinstance(step, dict) and str(step.get("status") or "").upper() in statuses
+
+
+def _arg(args, *keys) -> str:
+    """What the caller asked (the request's own words), for a next step that carries them forward."""
+    if not isinstance(args, dict):
+        return ""
+    for k in keys:
+        v = args.get(k)
+        if v:
+            return str(v)
+    return ""
+
+
+def house(tool: str, r: dict, args: dict = None) -> dict:
+    """The house ending for a door tool's answer `r` (a dict without "error"); `args` = the request."""
+    verb = TOOL_VERB.get(tool, "")
+    kind, trail, seal, nxt = "answer", None, None, None
+    asked = _arg(args, "query", "q", "claim", "text", "ref", "word", "id")
+    try:
+        trail_steps = r.get("trail") if isinstance(r.get("trail"), list) else []
+        if tool == "verify":
+            kind, trail = "verdict", "trail"
+            sl = r.get("seal") if isinstance(r.get("seal"), dict) else {}
+            seal = sl.get("cite_url")
+            v = str(r.get("verdict") or "").upper()
+            if v == "HOLDS" and sl.get("content_hash"):
+                nxt = _step("cite the seal; anyone can re-check it", "CHECK", "seal_fetch", {"hash": sl["content_hash"]})
+            elif v == "BROKEN":
+                bad = next((s for s in trail_steps if _status_is(s, "MISMATCH")), None)
+                nxt = _step(f"open the step that broke ({(bad or {}).get('id', '?')}), correct that claim, verify again",
+                            "CHECK", "verify")
+            else:
+                gap = next((s for s in trail_steps if _status_is(s, "NOT_APPLICABLE", "ERROR")), None)
+                nxt = _step("find the door for what could not be checked, then verify with that domain",
+                            "CHECK", "find_verifier", {"q": str((gap or {}).get("id") or r.get("claim") or "")})
+        elif tool == "audit":
+            kind, trail = "checks", "checks"
+            sl = r.get("seal") if isinstance(r.get("seal"), dict) else {}
+            seal = sl.get("cite_url")
+            c = _first(r.get("checks"), "claim")
+            nxt = (_step("verify the first checkable claim on its own", "CHECK", "verify", {"claim": c["claim"]})
+                   if c else _step("bring one claim, stated as a number with its unit", "CHECK", "verify"))
+        elif tool == "seal_fetch":
+            kind, trail, seal = "record", "verifier_results", r.get("content_hash")
+            nxt = _step("re-run the sealed derivation yourself; a seal is only a claim until re-checked", "CHECK", "verify")
+        elif tool == "find_verifier":
+            kind, trail = "route", "candidates"
+            c = _first(r.get("candidates"), "domain")
+            nxt = (_step(f"verify it through {c['domain']}", "CHECK", "verify",
+                         {"claim": str(r.get("query") or asked), "domain": c["domain"]})
+                   if c else _step("ask it as a question instead", "WALK", "ask", {"q": str(r.get("query") or asked)}))
+        elif tool == "search":
+            kind, trail = "cards", "results"
+            top = _first(r.get("results"), "id")
+            nxt = (_step("open the top card", "FIND", "card_get", {"id": top["id"]})
+                   if top else _step("ask it as a question; a situation in, one step out", "WALK", "ask",
+                                     {"q": str(r.get("query") or asked)}))
+        elif tool == "card_get":
+            kind, trail = "card", "connections"
+            if r.get("id"):
+                seal = f"/card/{r['id']}"
+            src = r.get("source") if isinstance(r.get("source"), dict) else {}
+            if r.get("readable") or r.get("source_url") or src.get("url"):
+                nxt = _step("read the source itself", "FIND", web=f"/reader.html?card={r.get('id', '')}")
+            else:
+                nxt = _step("follow a connection: what this card rests on, and what rests on it", "FIND",
+                            "card_connections", {"id": str(r.get("id") or "")})
+        elif tool == "lookup":
+            kind, trail = "value", "source"
+            k = r.get("kind")
+            if not r.get("found"):
+                nxt = _step("ask it as a question", "WALK", "ask", {"q": str(r.get("detail") or "")[:120]})
+            elif k == "principles":
+                p = _first(r.get("value"), "pattern")
+                q = _first((p or {}).get("principles"), "card")
+                nxt = (_step("open the figure's own words, and the cases where the move failed", "WALK", "card_get",
+                             {"id": q["card"]})
+                       if q else _step("bring the situation to the Walk", "WALK", "ask"))
+            else:
+                nxt = _step("state it as a claim and seal it", "CHECK", "verify",
+                            {"claim": f"{k}: {r.get('detail', '')}"[:200]})
+        elif tool == "define":
+            kind, trail = "senses", "senses"
+            nxt = _step("the words that stand with it", "FIND", "thesaurus", {"word": str(r.get("word") or asked)})
+        elif tool == "ask":
+            kind = "path"
+            trail = "path" if "path" in r else ("trail" if "trail" in r else None)
+            own = r.get("next")
+            if not isinstance(own, dict) and isinstance(r.get("path"), dict):
+                own = r["path"].get("next_step") or r["path"].get("next")
+            nxt = own if isinstance(own, dict) else _step(
+                "name what you brought: a word, a question, a claim, a verse", "WALK", "discern",
+                {"text": str(r.get("q") or r.get("query") or asked)})
+        elif tool == "discern":
+            kind, trail = "discernment", "why"
+            own = r.get("next")
+            nxt = own if isinstance(own, dict) else _step("ask it", "WALK", "ask", {"q": str(r.get("input") or asked)})
+        elif tool == "coach_next":
+            kind, trail = "unit", "position"
+            u = r.get("unit")
+            uid = u.get("id") if isinstance(u, dict) else u
+            nxt = _step("open the unit and do the one thing it asks", "WALK", "coach_unit",
+                        {"subject": str(r.get("subject") or ""), "unit": uid})
+        elif tool == "identity_create":
+            kind, trail = "record", "message"
+            nxt = _step("prove you hold it", "KEEP", "identity_verify")
+        elif tool == "study_create":
+            kind, trail = "record", "card_ids"
+            s = r.get("study")
+            nxt = _step("export it, so it travels with you", "KEEP", "study_export",
+                        {"study": s.get("id") if isinstance(s, dict) else s})
+        elif tool == "decks":
+            kind, trail = "cards", "decks"
+            d = _first(r.get("decks"), "id")
+            nxt = (_step("open a deck", "KEEP", "deck_open", {"id": d["id"]})
+                   if d else _step("keep your first card; a study starts a deck", "KEEP", "study_create"))
+        elif tool == "read_passage":
+            kind, trail, seal = "passage", "verses", r.get("ref")
+            nxt = _step("what Scripture says beside it", "WORD", "cross_references", {"ref": str(r.get("ref") or asked)})
+        elif tool == "word_study":
+            kind, trail = "word", "verses"
+            v = _first(r.get("verses"), "ref")
+            nxt = (_step("read the first place the word is used", "WORD", "read_passage", {"ref": v["ref"]})
+                   if v else _step("read a passage", "WORD", "read_passage"))
+        elif tool == "cross_references":
+            kind, trail = "references", "cross_references"
+            v = _first(r.get("cross_references"), "ref")
+            nxt = (_step("read the first", "WORD", "read_passage", {"ref": v["ref"]})
+                   if v else _step("read the passage itself", "WORD", "read_passage", {"ref": str(r.get("ref") or "")}))
+    except Exception:  # noqa: BLE001 — the ending must never break the answer
+        pass
+    if nxt is None:
+        nxt = _step("bring the next thing", verb or "CHECK")
+    if trail is not None and trail not in r:
+        trail = None                                            # the pointer names a key this answer holds, or nothing
+    return {"door": verb, "kind": kind, "trail": trail, "seal": seal, "next_step": nxt, "ends": ENDS}
