@@ -8,6 +8,21 @@ Public-domain checks:
         each player's chosen action is a best response to the other's
   * game_theory.dominant_strategy — does one of a player's rows dominate another?
         strictly:  A[i][j] > A[k][j] for every column j
+  * game_theory.iterated — the Prisoner's Dilemma with a shadow of the future w (Axelrod 1984):
+        a dilemma iff T > R > P > S and 2R > T + S; TIT FOR TAT cannot be invaded iff
+        w >= max((T-R)/(R-S), (T-R)/(T-P)); cooperating forever earns R/(1-w), defecting once and
+        being punished earns T + wP/(1-w)
+  * game_theory.population — MANY players, no true opponent (Matt, 2026-10-02: "there are many and
+        no true opponents … it can expand and contract"): a share x of reciprocators (TIT FOR TAT)
+        among defectors, pairwise random matching, replicator direction dx/dt ∝ x(1-x)(f_TFT - f_D).
+        Cooperation EXPANDS above the threshold share x* = (P-S) / ((R-T+w(T-P))/(1-w) + P-S) and
+        CONTRACTS below it; with no shadow of the future (w below (T-R)/(T-P)) it only contracts.
+        The opponent is the population's current mix, and the mix moves.
+
+  Matt's frame for the game (2026-10-02): OPENING = the optimal path (wayfind.path — one next step);
+  MIDGAME = reciprocity (tit for tat) until the finish position is reached; CLOSING = run the final
+  play to the seal. Two gates on every move: GREEN = the FLOOR holds (attest_floor), RED = aligned
+  (attest_red) — kernel.gate: a RED hit or a FLOOR error rejects.
 
 GAME_VERIFY packet (any subset):
     {
@@ -17,6 +32,13 @@ GAME_VERIFY packet (any subset):
       "profile": [1,1], "claimed_is_nash": true,
 
       "dom_matrix": [[5,1],[3,0]], "dom_row": 0, "dominated_row": 1, "claimed_dominates": true,
+
+      "pd_T": 5, "pd_R": 3, "pd_P": 1, "pd_S": 0, "shadow_w": 0.9,
+      "claimed_is_dilemma": true, "claimed_tft_stable": true,
+      "claimed_cooperate_forever_payoff": 30, "claimed_defect_then_punished_payoff": 14,
+
+      "pd_T": 5, "pd_R": 3, "pd_P": 1, "pd_S": 0, "shadow_w": 0.9, "cooperator_share": 0.5,
+      "claimed_direction": "expands", "claimed_threshold_share": 0.0588,
     }
 """
 from __future__ import annotations
@@ -93,10 +115,115 @@ def verify_dominant_strategy(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"row {ii} {'dominates' if dominates else 'does not dominate'} row {kk}; claim said {bool(claimed)}", data)
 
 
+def _pd(spec):
+    T, R, P, S = (float(spec["pd_T"]), float(spec["pd_R"]), float(spec["pd_P"]), float(spec["pd_S"]))
+    return T, R, P, S
+
+
+def _is_dilemma(T, R, P, S) -> bool:
+    return T > R > P > S and 2 * R > T + S
+
+
+def verify_iterated(spec: Dict[str, Any]) -> VerifierResult:
+    """The iterated Prisoner's Dilemma under a shadow of the future w (Axelrod, The Evolution of
+    Cooperation, 1984, Propositions 1-2): is it a dilemma; can TIT FOR TAT be invaded; what does
+    cooperating forever earn against defecting once and being punished ever after."""
+    name = "game_theory.iterated"
+    claims = ("claimed_is_dilemma", "claimed_tft_stable", "claimed_cooperate_forever_payoff",
+              "claimed_defect_then_punished_payoff")
+    if not all(k in spec for k in ("pd_T", "pd_R", "pd_P", "pd_S")) or not any(k in spec for k in claims):
+        return na(name)
+    try:
+        T, R, P, S = _pd(spec)
+        w = float(spec.get("shadow_w", 0.0))
+    except (TypeError, ValueError, KeyError):
+        return error(name, "pd_T, pd_R, pd_P, pd_S and shadow_w must be numeric")
+    if not (0.0 <= w < 1.0):
+        return error(name, "shadow_w must satisfy 0 <= w < 1 (a discount on the next round)")
+    dilemma = _is_dilemma(T, R, P, S)
+    thr = max((T - R) / (R - S), (T - R) / (T - P)) if (R > S and T > P) else float("inf")
+    tft_stable = w >= thr
+    coop = R / (1 - w)
+    defect_once = T + w * P / (1 - w)
+    data = {"T": T, "R": R, "P": P, "S": S, "w": w, "is_dilemma": dilemma,
+            "tft_stability_threshold_w": thr, "tft_stable": tft_stable,
+            "cooperate_forever_payoff": coop, "defect_then_punished_payoff": defect_once,
+            "formula": "TFT stable iff w >= max((T-R)/(R-S), (T-R)/(T-P)); R/(1-w) vs T + wP/(1-w)"}
+    bad = []
+    if "claimed_is_dilemma" in spec and bool(spec["claimed_is_dilemma"]) != dilemma:
+        bad.append(f"is_dilemma is {dilemma}, claim said {bool(spec['claimed_is_dilemma'])}")
+    if "claimed_tft_stable" in spec and bool(spec["claimed_tft_stable"]) != tft_stable:
+        bad.append(f"TIT FOR TAT {'is' if tft_stable else 'is NOT'} stable at w={w:g} (threshold {thr:.4g}); claim said {bool(spec['claimed_tft_stable'])}")
+    for key, val in (("claimed_cooperate_forever_payoff", coop), ("claimed_defect_then_punished_payoff", defect_once)):
+        if key in spec:
+            try:
+                cl = float(spec[key])
+            except (TypeError, ValueError):
+                return error(name, f"{key} must be numeric")
+            if abs(val - cl) > max(1e-6, 1e-3 * abs(val)):
+                bad.append(f"{key.replace('claimed_', '')} = {val:.6g}, claimed {cl:.6g}")
+    if bad:
+        return mismatch(name, "; ".join(bad), data)
+    return confirm(name, f"dilemma={dilemma}; TFT {'stable' if tft_stable else 'invadable'} at w={w:g} (threshold {thr:.4g}); "
+                         f"cooperate forever {coop:.6g} vs defect-then-punished {defect_once:.6g} (matches claims)", data)
+
+
+def verify_population(spec: Dict[str, Any]) -> VerifierResult:
+    """MANY players, no true opponent: a share x of reciprocators (TIT FOR TAT) among defectors, pairwise
+    random matching, repeated with shadow w. Replicator direction dx/dt ∝ x(1-x)(f_TFT - f_D):
+    f_TFT = x·R/(1-w) + (1-x)(S + wP/(1-w)), f_D = x(T + wP/(1-w)) + (1-x)P/(1-w). Cooperation EXPANDS
+    above x* = (P-S)/((R-T+w(T-P))/(1-w) + P-S) and CONTRACTS below; the mix itself is the opponent."""
+    name = "game_theory.population"
+    if not all(k in spec for k in ("pd_T", "pd_R", "pd_P", "pd_S", "cooperator_share")) \
+            or not any(k in spec for k in ("claimed_direction", "claimed_threshold_share")):
+        return na(name)
+    try:
+        T, R, P, S = _pd(spec)
+        w = float(spec.get("shadow_w", 0.0))
+        x = float(spec["cooperator_share"])
+    except (TypeError, ValueError, KeyError):
+        return error(name, "pd_T, pd_R, pd_P, pd_S, shadow_w and cooperator_share must be numeric")
+    if not (0.0 <= w < 1.0) or not (0.0 <= x <= 1.0):
+        return error(name, "shadow_w must satisfy 0 <= w < 1 and cooperator_share 0 <= x <= 1")
+    f_tft = x * R / (1 - w) + (1 - x) * (S + w * P / (1 - w))
+    f_d = x * (T + w * P / (1 - w)) + (1 - x) * P / (1 - w)
+    diff = f_tft - f_d
+    A = (R - T + w * (T - P)) / (1 - w)          # the per-share gain of meeting a reciprocator
+    denom = A + (P - S)
+    if denom > 0 and A > 0:
+        thr = (P - S) / denom                     # the critical mass of cooperators
+    else:
+        thr = 1.0                                 # no shadow of the future large enough: never expands
+    thr = max(0.0, min(1.0, thr))
+    direction = "stationary" if (x in (0.0, 1.0) or abs(diff) < 1e-12) else ("expands" if diff > 0 else "contracts")
+    data = {"T": T, "R": R, "P": P, "S": S, "w": w, "cooperator_share": x,
+            "fitness_tft": f_tft, "fitness_defect": f_d, "direction": direction, "threshold_share": thr,
+            "formula": "dx/dt ∝ x(1-x)(f_TFT - f_D); x* = (P-S)/((R-T+w(T-P))/(1-w) + P-S)"}
+    bad = []
+    if "claimed_direction" in spec and str(spec["claimed_direction"]).strip().lower() != direction:
+        bad.append(f"at x={x:g}, w={w:g} cooperation {direction} (f_TFT {f_tft:.4g} vs f_D {f_d:.4g}); claim said {spec['claimed_direction']!r}")
+    if "claimed_threshold_share" in spec:
+        try:
+            cl = float(spec["claimed_threshold_share"])
+        except (TypeError, ValueError):
+            return error(name, "claimed_threshold_share must be numeric")
+        if abs(thr - cl) > max(1e-4, 1e-3 * thr):
+            bad.append(f"threshold share x* = {thr:.4g}, claimed {cl:.4g}")
+    if bad:
+        return mismatch(name, "; ".join(bad), data)
+    return confirm(name, f"at x={x:g}, w={w:g} cooperation {direction} (f_TFT {f_tft:.4g} vs f_D {f_d:.4g}); "
+                         f"critical mass x* = {thr:.4g} (matches claims)", data)
+
+
 _RULES = [
     (("row_payoff", "p", "q", "claimed_payoff"), verify_expected_payoff),
     (("row_payoff_A", "col_payoff_B", "profile", "claimed_is_nash"), verify_nash_pure),
     (("dom_matrix", "dom_row", "dominated_row", "claimed_dominates"), verify_dominant_strategy),
+    (("pd_T", "pd_R", "pd_P", "pd_S", "claimed_tft_stable"), verify_iterated),
+    (("pd_T", "pd_R", "pd_P", "pd_S", "claimed_is_dilemma"), verify_iterated),
+    (("pd_T", "pd_R", "pd_P", "pd_S", "claimed_cooperate_forever_payoff"), verify_iterated),
+    (("pd_T", "pd_R", "pd_P", "pd_S", "cooperator_share", "claimed_direction"), verify_population),
+    (("pd_T", "pd_R", "pd_P", "pd_S", "cooperator_share", "claimed_threshold_share"), verify_population),
 ]
 
 
