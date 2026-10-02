@@ -64,13 +64,15 @@ def test_capabilities_carries_the_doors_on_both_doors():
 
 def test_the_spine_shows_the_same_five_verbs_on_every_face():
     shell = (SITE / "shell.js").read_text(encoding="utf-8")
-    for label, href in (("Check", "/"), ("Find", "/explore.html"), ("Walk", "/situations.html"),
-                        ("Keep", "/profile.html"), ("Word", "https://narrowhighway.org/bible.html")):
-        assert re.search(r'label:\s*"%s",\s*href:\s*"%s"' % (label, re.escape(href)), shell), label
+    reach = shell.split("var NAV_REACH", 1)[1].split("];", 1)[0]
+    witness = shell.split("var NAV_WITNESS", 1)[1].split("];", 1)[0]
+    assert re.findall(r'label:\s*"(\w+)"', reach) == ["Check", "Find", "Walk", "Keep", "Word"]      # .com: Check first
+    assert re.findall(r'label:\s*"(\w+)"', witness) == ["Word", "Walk", "Check", "Find", "Keep"]    # .org: Word first
+    assert 'href: "/checkit.html"' in witness and 'href: "https://narrowhighway.org/bible.html"' in reach
     desk = (SITE / "index.html").read_text(encoding="utf-8")
     nav = desk.split('aria-label="Navigate"', 1)[1].split("</nav>", 1)[0]
-    assert [m for m in re.findall(r'href="([^"]+)"', nav)] == \
-        ["/bible.html", "/situations.html", "/checkit.html", "/explore.html", "/profile.html"]
+    assert not re.findall(r'<a href="/(?:bible|situations|checkit|explore|profile)\.html"', nav), \
+        "the desk must not carry a second copy of the five verbs — the spine is the one nav"
     grid = desk.split('<div class="doors">', 1)[1].split("</div>", 1)[0]
     assert len(re.findall(r"<a href=", grid)) == 6                  # five doors + about
 

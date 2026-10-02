@@ -32,13 +32,23 @@
      the spine shows the same five verbs on every page: Check · Find · Walk · Keep · Word.
      Everything else is a view inside one of them (docs/FIVE_DOORS_MAP.md, src/concordance/doors.py).
      domains/map/torus/… are the Atlas's own views, reachable inside Find, never siblings here. */
-  var NAV = [
+  var NAV_REACH = [
     { k: "check", label: "Check", href: "/" },
     { k: "find",  label: "Find",  href: "/explore.html" },
     { k: "walk",  label: "Walk",  href: "/situations.html" },
     { k: "keep",  label: "Keep",  href: "/profile.html" },
     { k: "word",  label: "Word",  href: "https://narrowhighway.org/bible.html" }
   ];
+  /* the witness face leads with the Word, and "Check" there is the auditor (the desk at / is Walk's
+     front, not the .com box). ONE spine, one order per face — a page carries no nav of its own. */
+  var NAV_WITNESS = [
+    { k: "word",  label: "Word",  href: "/bible.html" },
+    { k: "walk",  label: "Walk",  href: "/situations.html" },
+    { k: "check", label: "Check", href: "/checkit.html" },
+    { k: "find",  label: "Find",  href: "/explore.html" },
+    { k: "keep",  label: "Keep",  href: "/profile.html" }
+  ];
+  var NAV = activeFace() === "witness" ? NAV_WITNESS : NAV_REACH;
   var FACES = [
     { k: "reach",   label: "reach",   href: "https://narrowhighway.com" },
     { k: "witness", label: "witness", href: "https://narrowhighway.org" },
