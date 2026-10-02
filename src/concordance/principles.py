@@ -116,7 +116,7 @@ _RULE_FRAMES = {"first rule", "the secret of", "nothing is more"}
 _NARRATIVE = re.compile(r"\b(?:was|were|had|did|went|came|said|told|made|took|got|gave|saw|sent|wrote|arrived|replied)\b", re.I)
 _NARRATIVE_MAX = 1
 _SENT_SPLIT = re.compile(r"(?<=[.!?])\s+(?=[A-Z\"'(])")
-_MIN_WORDS, _MAX_WORDS = 8, 60
+_MIN_WORDS, _MAX_WORDS = 5, 60   # 5: "A house divided against itself cannot stand" is seven words
 
 
 _CAPS_PREFIX = re.compile(r"^(?:[A-Z][A-Z'’\-]+[\s,:;.\-—]+){4,}(?=[A-Z][a-z])")   # a chapter heading glued to the first sentence
