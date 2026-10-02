@@ -30,7 +30,7 @@ ASTRO_VERIFY packet shape (any subset of fields):
       "mass_1_kg": 5.972e24,
       "mass_2_kg": 7.342e22,
       "separation_m": 3.84e8,
-      "claimed_gravitational_force_N": 1.98e20,
+      "claimed_gravitational_force_N": 1.985e20,
 
       "parallax_arcsec": 0.769,
       "claimed_distance_parsec": 1.30,
@@ -184,7 +184,8 @@ def verify_distance_modulus(spec: Dict[str, Any]) -> VerifierResult:
     actual = 10.0 ** ((mf - Mf + 5.0) / 5.0)
     rel_tol = clamp_tol(spec, "tolerance_relative", 5e-2)
     diff = abs(actual - cf)
-    threshold = max(0.5, rel_tol * abs(actual))
+    # absolute floor 0.01 pc (was 0.5 pc, which at Proxima's 1.3 pc was a 38 % window)
+    threshold = max(0.01, rel_tol * abs(actual))
     data = {"apparent_magnitude": mf, "absolute_magnitude": Mf,
             "actual_distance_parsec": actual, "claimed_distance_parsec": cf,
             "diff_pc": diff,

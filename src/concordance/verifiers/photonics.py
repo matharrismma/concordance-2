@@ -32,7 +32,7 @@ PHOT_VERIFY shape (any subset; each check fires when its keys are present):
       "claimed_output_dbm": -5.0,
 
       "wavelength_m": 1.55e-6, "gap_m": 1e-5, "index": 2.2,
-      "eo_coefficient_m_per_v": 3.1e-11, "length_m": 0.02, "claimed_vpi_v": 5.09,
+      "eo_coefficient_m_per_v": 3.1e-11, "length_m": 0.02, "claimed_vpi_v": 2.35,
 
       "reference_fundamental_w": 1.0, "reference_shg_w": 0.01,
       "test_fundamental_w": 2.0, "claimed_shg_w": 0.04,
@@ -40,9 +40,9 @@ PHOT_VERIFY shape (any subset; each check fires when its keys are present):
       "threshold_current_a": 0.015, "slope_efficiency_w_per_a": 0.9,
       "drive_current_a": 0.05, "claimed_output_w": 0.0315,
 
-      "grating_period_m": 1.5e-6, "order": 1, "claimed_angle_deg": 31.06,
+      "grating_period_m": 3.0e-6, "order": 1, "claimed_angle_deg": 31.1,   # at 1.55e-6 m
 
-      "input_intensity": 1.0, "coefficient_per_m": 200.0, "length_m2": 0.001,
+      "input_intensity": 1.0, "coefficient_per_m": 200.0, "path_length_m": 0.001,
       "claimed_output_intensity": 0.8187,
     }
 """
@@ -114,7 +114,9 @@ def verify_fiber_loss(spec: Dict[str, Any]) -> VerifierResult:
     except (TypeError, ValueError):
         return error(name, "input_power_dbm, attenuation_db_per_km, length_km, claimed_output_dbm must be numeric")
     out = pin - alpha * Lkm
-    if _close(out, c, clamp_tol(spec, "tolerance", 1e-2), abs_=1e-3):
+    # dBm is logarithmic: an ABSOLUTE dB window (as acoustics.decibel_ratio uses), never a
+    # window relative to the dBm figure, which widened with distance from 0 dBm.
+    if abs(out - c) <= clamp_tol(spec, "tolerance_db", 0.1):
         return confirm(name, f"P_out = P_in - alpha*L = {out:.4g} dBm, matches claim", {"output_dbm": out, "claimed": c})
     return mismatch(name, f"P_out = {out:.4g} dBm, claimed {c:.4g} dBm", {"output_dbm": out, "claimed": c})
 
@@ -195,14 +197,17 @@ def verify_grating_angle(spec: Dict[str, Any]) -> VerifierResult:
 
 def verify_beer_lambert(spec: Dict[str, Any]) -> VerifierResult:
     name = "photonics.beer_lambert"
-    I0, alpha, z, claimed = (spec.get("input_intensity"), spec.get("coefficient_per_m"),
-                             spec.get("length_m2"), spec.get("claimed_output_intensity"))
+    # path_length_m is the length (metres); the legacy key length_m2 (chosen to avoid colliding
+    # with electro_optic_vpi's length_m) is still honoured but reads as an area — prefer the new one.
+    z = spec.get("path_length_m", spec.get("length_m2"))
+    I0, alpha, claimed = (spec.get("input_intensity"), spec.get("coefficient_per_m"),
+                          spec.get("claimed_output_intensity"))
     if I0 is None or alpha is None or z is None or claimed is None:
         return na(name)
     try:
         I0, alpha, z, c = _nums(I0, alpha, z, claimed)
     except (TypeError, ValueError):
-        return error(name, "input_intensity, coefficient_per_m, length_m2, claimed_output_intensity must be numeric")
+        return error(name, "input_intensity, coefficient_per_m, path_length_m, claimed_output_intensity must be numeric")
     I = I0 * math.exp(-alpha * z)  # absorption (alpha>0) or gain (alpha<0)
     if _close(I, c, clamp_tol(spec, "tolerance", 1e-2)):
         return confirm(name, f"I(z) = I0*exp(-alpha*z) = {I:.4g}, matches claim", {"output_intensity": I, "claimed": c})
@@ -235,6 +240,16 @@ def verify_compton(spec: Dict[str, Any]) -> VerifierResult:
         except (TypeError, ValueError):
             return error(name, "compton_angle_deg must be numeric")
         shift = _ascale.compton_wavelength_m() * (1.0 - math.cos(th))
+        if shift == 0.0:  # theta = 0: no scattering, no shift — compare() cannot take a zero actual
+            try:
+                cl = float(spec["claimed_compton_shift_m"])
+            except (TypeError, ValueError):
+                return error(name, "claimed_compton_shift_m must be numeric")
+            dat = {"formula": "d_lambda = lambda_C (1 - cos theta)", "angle_deg": spec["compton_angle_deg"],
+                   "actual": 0.0, "claimed": cl}
+            if abs(cl) <= 1e-15:
+                return confirm(name, "theta = 0: d_lambda = 0 (no shift), matches claim", dat)
+            return mismatch(name, f"theta = 0 gives d_lambda = 0, claimed {cl:.4g} m", dat)
         return _ascale.compare(name, shift, spec["claimed_compton_shift_m"], 1e-3,
                                {"formula": "d_lambda = lambda_C (1 - cos theta)",
                                 "angle_deg": spec["compton_angle_deg"]})

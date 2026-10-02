@@ -349,7 +349,7 @@ def verify_mass_energy(spec: Dict[str, Any]) -> VerifierResult:
     if "lorentz_velocity_m_per_s" in spec and "claimed_lorentz_factor" in spec:
         try:
             g = _rela.lorentz_factor(float(spec["lorentz_velocity_m_per_s"]))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, ZeroDivisionError):  # v = c divides by zero; v > c is a ValueError
             return error(name, "lorentz_velocity_m_per_s must be numeric and below c")
         return _rela.compare(name, g, spec["claimed_lorentz_factor"], 1e-3,
                              {"formula": "gamma = 1/sqrt(1-(v/c)^2)"})

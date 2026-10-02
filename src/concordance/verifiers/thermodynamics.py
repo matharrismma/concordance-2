@@ -50,7 +50,7 @@ from .base import dispatch  # declarative run() driver
 from . import thermal_scale as _thermal  # k_B-anchored Boltzmann entropy
 from . import molar_scale as _molar  # N_A-anchored gas constant R = N_A k_B
 
-_R = 8.314  # J / (mol · K)
+_R = _molar.gas_constant()  # J / (mol · K) — the exact N_A·k_B (8.314462618), the same R verify_gas_constant confirms
 
 
 def verify_carnot_efficiency(spec: Dict[str, Any]) -> VerifierResult:
@@ -317,6 +317,15 @@ def verify_boltzmann_entropy(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "microstates_W must be numeric")
     if W < 1:
         return error(name, "number of microstates must be >= 1")
+    if W == 1:  # third-law case: one microstate, S = k_B ln 1 = 0 — compare() cannot take a zero actual
+        try:
+            cl = float(spec["claimed_entropy_J_per_K"])
+        except (KeyError, TypeError, ValueError):
+            return error(name, "claimed_entropy_J_per_K must be numeric")
+        dat = {"formula": "S = k_B ln W", "actual": 0.0, "claimed": cl}
+        if abs(cl) <= 1e-30:
+            return confirm(name, "W = 1: S = k_B ln 1 = 0, matches claim", dat)
+        return mismatch(name, f"W = 1 gives S = 0, claimed {cl:.4g} J/K", dat)
     return _thermal.compare(name, _thermal.boltzmann_entropy_J_per_K(W),
                             spec["claimed_entropy_J_per_K"], 1e-3, {"formula": "S = k_B ln W"})
 

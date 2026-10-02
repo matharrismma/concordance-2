@@ -16,7 +16,7 @@ NUCLEAR_VERIFY shape (any subset):
       "initial_count": 1e12,
       "claimed_remaining_count": 5e11,
 
-      "mass_defect_amu": 0.0988,
+      "mass_defect_amu": 0.5284,
       "nucleon_count": 56,
       "claimed_binding_energy_MeV_per_nucleon": 8.79,
 
@@ -37,7 +37,7 @@ from .base import dispatch  # declarative run() driver
 from . import rela_scale as _rela  # c-anchored rest energy (E = m c^2)
 
 _LN2 = math.log(2)
-_AMU_TO_MEV = 931.5  # MeV per amu (unified atomic mass unit)
+_AMU_TO_MEV = 931.49410242  # MeV per u (CODATA 2018: u·c²/e) — the same value verify_rest_energy derives
 
 
 def verify_radioactive_decay(spec: Dict[str, Any]) -> VerifierResult:

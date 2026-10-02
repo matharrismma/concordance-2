@@ -276,6 +276,10 @@ def verify_wire_voltage_drop(spec: Dict[str, Any]) -> VerifierResult:
     claimed_pct = _num(spec.get("claimed_drop_pct"))
     if claimed_drop is None and claimed_pct is None:
         return na(name, "need claimed_drop_V or claimed_drop_pct")
+    if claimed_pct is not None and actual_pct is None:
+        # A % claim with no system voltage has nothing to be checked against — it must NOT fall
+        # through to the confirm below (a pct-only packet was sealed unchecked; Fable review 2026-10-01).
+        return na(name, "claimed_drop_pct needs system_V_for_drop to compute the percentage")
     rel_tol = clamp_tol(spec, "tolerance_relative", 1e-2)
     data = {
         "wire_resistance_ohm_per_m": r_per_m,

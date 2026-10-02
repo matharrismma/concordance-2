@@ -48,7 +48,7 @@ PLACE: list[tuple[str, str, str, str, str]] = [
     # acoustics
     ("acoustics", "acoustics.wave_relation", "wave", "card_theory_acoustic_wave_theory", "c = f * lambda"),
     ("acoustics", "acoustics.decibel_ratio", "logarithmic", "card_theory_acoustic_wave_theory", "dB = 10 log10(I/I_ref)"),
-    ("acoustics", "acoustics.doppler_shift", "ratio", "card_theory_acoustic_wave_theory", "f_obs = f (c+v_o)/(c+v_s)"),
+    ("acoustics", "acoustics.doppler_shift", "ratio", "card_theory_acoustic_wave_theory", "f_obs = f (c+v_o)/(c-v_s)"),
     ("acoustics", "acoustics.harmonic_frequency", "fourier_spectral", "card_theory_music_theory", "f_n = n f_1"),
     # agriculture
     ("agriculture", "agriculture.stocking_density", "ratio", "card_theory_agricultural_science", "animals / area"),

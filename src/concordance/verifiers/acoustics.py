@@ -6,7 +6,7 @@ formulas public-domain.
 Checks:
   * acoustics.wave_relation       — c = f·λ
   * acoustics.decibel_ratio       — dB = 10·log10(I/I_ref) (intensity) or 20·log10(P/P_ref) (pressure)
-  * acoustics.doppler_shift       — f_obs = f_src · (c + v_obs) / (c + v_src)
+  * acoustics.doppler_shift       — f_obs = f_src · (c + v_obs) / (c − v_src)   (v > 0 = closing)
   * acoustics.harmonic_frequency  — f_n = n · f_fundamental
 
 ACOUS_VERIFY shape (any subset):
@@ -92,8 +92,14 @@ def verify_decibel_ratio(spec: Dict[str, Any]) -> VerifierResult:
 
 
 def verify_doppler_shift(spec: Dict[str, Any]) -> VerifierResult:
-    """f_obs = f_src · (c + v_obs) / (c + v_src). Sign convention:
-    positive velocities are toward the other party (closing).
+    """f_obs = f_src · (c + v_obs) / (c − v_src). Sign convention:
+    positive velocities are toward the other party (closing), for BOTH
+    parties — an observer closing at +v hears higher (numerator grows), a
+    source closing at +v is heard higher (denominator shrinks). The textbook
+    (c + v_obs)/(c + v_src) form is the SAME law under the opposite source
+    sign (v_src > 0 = receding); it was shipped here with the closing
+    docstring, which rejected the true pitch of every approaching source and
+    confirmed the receding one (Fable review 2026-10-01).
     """
     name = "acoustics.doppler_shift"
     f_src = spec.get("f_source_hz")
@@ -110,16 +116,16 @@ def verify_doppler_shift(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "all inputs must be numeric")
     if fs <= 0 or c <= 0:
         return error(name, "source frequency and medium speed must be positive")
-    denom = c + vs
-    if denom == 0:
-        return error(name, "source moving at -c is unphysical (denominator zero)")
+    denom = c - vs
+    if denom <= 0:
+        return error(name, "source closing at or above the wave speed is unphysical (denominator zero or negative)")
     actual = fs * (c + vo) / denom
     rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
     diff = abs(actual - fo_c)
     data = {"f_source": fs, "v_observer": vo, "v_source": vs,
             "speed_medium": c, "actual_f_observed": actual,
             "claimed_f_observed": fo_c, "diff_hz": diff,
-            "formula": "f_obs = f_src · (c + v_obs) / (c + v_src)"}
+            "formula": "f_obs = f_src · (c + v_obs) / (c − v_src)  (v > 0 = closing)"}
     if _close(actual, fo_c, rel_tol=rel_tol):
         return confirm(name,
                        f"f_obs = {fs}·({c}+{vo})/({c}+{vs}) = {actual:.3f} Hz (matches claim {fo_c})",

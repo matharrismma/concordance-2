@@ -16,7 +16,7 @@ Deterministic checks against canonical solid-state relations (all public-domain)
 
 CONDMAT_VERIFY packet (any subset):
     {
-      "spring_const": 10.0, "atom_mass": 1e-26, "wavevector": 1e10, "lattice_a": 3e-10, "claimed_omega": 1.0e13,
+      "spring_const": 10.0, "atom_mass": 1e-26, "wavevector": 1e10, "lattice_a": 3e-10, "claimed_omega": 6.3e13,
       "number_density": 8.5e28, "claimed_fermi_J": 1.12e-18,
       "diff_order": 1, "wavelength_m": 1.54e-10, "plane_spacing_m": 3.13e-10, "claimed_theta_deg": 14.3,
       "claimed_von_klitzing_ohm": 25812.807, "claimed_josephson_ghz_per_v": 483597.8,
