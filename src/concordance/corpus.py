@@ -1092,7 +1092,7 @@ def load_cards(path: Optional[Path] = None,
                       # the tools reference, the strategy concordance (patterns×arenas), the canonical
                       # forms + worked calculations, and the cross-domain bridge cards (browsable, distinct
                       # from the *_bridges edge overlays). Small; resident on core.
-                      "tool_cards.jsonl", "strategy_cards.jsonl", "calculation_cards.jsonl", "bridge_cards.jsonl",
+                      "tool_cards.jsonl", "strategy_cards.jsonl", "principle_cards.jsonl", "calculation_cards.jsonl", "bridge_cards.jsonl",
                       "fieldkit_cards.jsonl", "playbook_cards.jsonl", "systems_cards.jsonl",
                       # Collective intelligence — the measured natural systems (ants/bees/birds/orcas)
                       # mapped to the engine's mechanisms (keeping/conductor/mesh/witness-wire). The

@@ -149,3 +149,7 @@ data/**/*.gz
 # re-ignore above to win. The Webster's 1913 base and the built data/dictionary_en.db stay untracked
 # (fetched/built like thesaurus.db).
 !data/dictionary_supplement.jsonl
+data/pd_texts/
+# The principles of those who won — curated CONTENT (git-tracked), verbatim public-domain words; AFTER the
+# data/**/*.jsonl re-ignore so it wins (like the dictionary supplement). The PD texts stay untracked.
+!data/principle_cards.jsonl

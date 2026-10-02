@@ -69,7 +69,21 @@ def _convert(params: Dict[str, Any]) -> Dict[str, Any]:
 
 # kind -> handler. One excellent tool for the "look it up" situation; a new kind is one line here,
 # the agent-facing tool surface never grows (the consolidated lesson from `verify`).
-_KINDS = {"molar_mass": _molar_mass, "element": _element, "convert": _convert}
+def _principles(params: Dict[str, Any]) -> Dict[str, Any]:
+    """The principles of those who repeatedly won, applied to a present situation: the Strategy
+    Concordance patterns the situation names, each with its proof count (distinct figures x arenas x
+    dated cases) and the figures' own public-domain words, attributed. found=False when no pattern
+    is named (never a guess)."""
+    from . import principles as pr
+    situation = str(params.get("situation") or params.get("text") or "").strip()
+    if not situation:
+        return _result("principles", False, None, "situation (text) required", "principles")
+    r = pr.apply(situation, limit=int(params.get("limit") or 3), per_pattern=int(params.get("per_pattern") or 4))
+    return _result("principles", r["found"], r["patterns"], r["detail"],
+                   "principles (public-domain works, verbatim) + the Strategy Concordance", {"note": r.get("note")})
+
+
+_KINDS = {"molar_mass": _molar_mass, "element": _element, "convert": _convert, "principles": _principles}
 
 
 def kinds() -> list:
