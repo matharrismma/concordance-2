@@ -87,7 +87,44 @@ def main() -> int:
                "discipleship, family governance, church operations, economic development, engineering "
                "decisions. One pattern. Repeated faithfully."),
               ["universality", "fractal", "scale", "portable"], "universality"),
+        # Matt, 2026-10-02 (spoken for the Playbook; "mint"): the game, in his words.
+        _card("card_playbook_the_game", "The Game — opening, midgame, closing; two gates, green and red",
+              ("The Prisoner's Dilemma: there are many and no true opponents. It isn't two-sided. Multifaceted, "
+               "but also it can expand and contract. Opening, midgame and closing. Opening is the optimal path. "
+               "Midgame is tit for tat until the finish position is achieved, and then run the final play until "
+               "closing. Two gates: green and red. — Matt Harris, 2026-10-02.\n\n"
+               "Where it lives in the engine: GREEN is the FLOOR gate (attest_floor — does it break stability or "
+               "moral floors?), RED is the RED gate (attest_red — is it aligned with Christ?); kernel.gate rejects a "
+               "move on a RED hit or a FLOOR error. The opening is the PATH (wayfind.path — one next step). The "
+               "midgame is the reciprocity pattern of the Strategy Concordance (cooperate first, answer in kind, "
+               "forgive, be clear) until the finish position. The closing is the final play run to the seal. "
+               "'Many and no true opponent' is measured: the opponent is the population's current mix, and the mix "
+               "moves — cooperation expands above a critical mass of reciprocators and contracts below it "
+               "(game_theory.population; at w = 0.9 six in a hundred are enough), sealed at "
+               "https://narrowhighway.org/s/584a4cf4dc91444db1681cc175d53231ca3c332638acb799f01b52389e6d169b. "
+               "The Gospel asks more than reciprocity (Matthew 5:44), never less (Matthew 7:12)."),
+              ["the-game", "prisoners-dilemma", "opening", "midgame", "closing", "green", "red", "reciprocity"],
+              "the game",
+              {"phases": ["opening = optimal path", "midgame = tit for tat until the finish position",
+                          "closing = the final play"],
+               "gates": {"green": "FLOOR", "red": "RED"}, "spoken": "2026-10-02",
+               "seal": "https://narrowhighway.org/s/584a4cf4dc91444db1681cc175d53231ca3c332638acb799f01b52389e6d169b"}),
     ]
+    # the game's card names the two hard gates and the midgame pattern it runs on
+    cards[-1]["connections"] += [
+        {"to_card_id": "card_playbook_gate_floor", "relationship": "uses", "evidence": "GREEN = the FLOOR gate"},
+        {"to_card_id": "card_playbook_gate_red", "relationship": "uses", "evidence": "RED = the RED gate"},
+        {"to_card_id": "card_pattern_reciprocity", "relationship": "uses",
+         "evidence": "the midgame is tit for tat — the reciprocity pattern of the Strategy Concordance"},
+    ]
+    # the keeping's call number + facets on every card, as classify_keeping persists them (the box's copies
+    # carry them; a regenerated file must not strip them — the parity check would show the drift)
+    try:
+        from concordance.corpus import shelve
+        for c in cards:
+            shelve(c)
+    except Exception as e:  # noqa: BLE001 — a bare checkout without the corpus module still mints
+        print(f"  (call numbers not applied: {e})", file=sys.stderr)
     out = Path("data") / "playbook_cards.jsonl"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(json.dumps(c, ensure_ascii=False) for c in cards) + "\n", encoding="utf-8")
