@@ -53,7 +53,11 @@ def test_a_new_agent_meets_the_doors_first_and_every_tool_leads_with_its_verb():
         assert t["description"].startswith(f"[{doors.tag(t['name'])}]"), t["name"]
 
 
-def test_capabilities_carries_the_doors_on_both_doors():
+def test_capabilities_carries_the_doors_on_both_doors(monkeypatch):
+    # the live statement computes every public number (a corpus load — minutes on a laptop); this
+    # pins only the WIRING: both doors attach `doors` beside whatever the statement says
+    from concordance import capabilities as _caps
+    monkeypatch.setattr(_caps, "statement", lambda surface: {"stub": True, "surface": surface})
     r = handle({"jsonrpc": "2.0", "id": 2, "method": "tools/call",
                 "params": {"name": "capabilities", "arguments": {}}}, EngineConfig())
     body = r["result"]["content"][0]["text"] if "content" in r["result"] else str(r["result"])
