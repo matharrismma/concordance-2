@@ -111,6 +111,7 @@ _WORD = re.compile(r"[a-z]+")
 # block a maxim or the cue is itself a rule-frame ("the first rule of…", "the secret of…").
 _FIRST_PERSON = re.compile(r"\b(?:I|I'd|I'll|I've|me|my|mine|myself|we|we'd|we're|we've|us|our|ours|ourselves)\b")
 _RULE_FRAMES = {"first rule", "the secret of", "nothing is more"}
+_FRAGMENT = re.compile(r"^(?:But|And|Or|Nor|Yet|So|For|Because|Though|Although|Whereas|Then)\b", re.I)
 # A memoir also narrates in the third person ("Scott at once had notices posted"): two or more
 # past-tense narrative verbs mark a story being told, not a rule being stated.
 _NARRATIVE = re.compile(r"\b(?:was|were|had|did|went|came|said|told|made|took|got|gave|saw|sent|wrote|arrived|replied)\b", re.I)
@@ -194,7 +195,15 @@ def identify(text: str, *, labelled_blocks: Optional[Iterable[str]] = None,
             continue                                   # a story being told, not a rule being stated
         seen.add(s)
         found.append({"quote": s, "cues": c, "patterns": tag(s), "labelled": False})
-    found.sort(key=lambda d: (-int(d["labelled"]), -len(d["cues"]), len(_WORD.findall(d["quote"].lower())), d["quote"]))
+    # Rank: the author's own labelled maxims; then a rule-frame cue or two cues; then a sentence that names
+    # a pattern; then the BRIEFER sentence (an aphorism over a paragraph). A sentence that opens with a
+    # conjunction ("But money should always be money.") is a fragment of an argument, not a rule — dropped
+    # unless labelled.
+    found = [d for d in found if d["labelled"] or not _FRAGMENT.match(d["quote"])]
+    found.sort(key=lambda d: (-int(d["labelled"]),
+                              -int(bool(set(d["cues"]) & _RULE_FRAMES) or len(d["cues"]) >= 2),
+                              -int(bool(d["patterns"])),
+                              len(_WORD.findall(d["quote"].lower())), d["quote"]))
     return found[:limit]
 
 
