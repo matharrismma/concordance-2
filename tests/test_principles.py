@@ -104,6 +104,18 @@ def test_precision_pins_from_the_first_mint():
     assert kept and kept[0]["quote"].startswith("The first rule")
 
 
+def test_edition_furniture_is_stripped_and_headings_dropped():
+    # a chapter heading glued to the first sentence (Marriott's Machiavelli) is cut; the sentence stays verbatim
+    glued = "CONCERNING THE WAY IN WHICH THE STRENGTH OF ALL PRINCIPALITIES OUGHT TO BE MEASURED It is necessary to consider whether a prince has such power that he can support himself."
+    assert P._clean(glued).startswith("It is necessary to consider")
+    # Legge's trailing section number and an editor's sidenote go; the words are the author's
+    assert P._clean("Men of principle are sure to be bold. CHAP.") == "Men of principle are sure to be bold."
+    assert P._clean("Never express anything unbecoming [Sidenote: Walker: 'A man should not'] before your inferiours.") == \
+        "Never express anything unbecoming before your inferiours."
+    # a table-of-contents line is not a principle
+    assert P.identify("CORPUS CHRISTI--MEXICAN SMUGGLING--SPANISH RULE IN MEXICO--SUPPLYING TRANSPORTATION--THE MARCH MUST GO ON.") == []
+
+
 def test_every_pattern_in_the_lexicon_exists_in_the_strategy_concordance():
     import importlib.util
     spec = importlib.util.spec_from_file_location("seed_strategy", Path(__file__).resolve().parent.parent / "tools" / "seed_strategy.py")

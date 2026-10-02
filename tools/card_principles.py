@@ -45,13 +45,35 @@ SOURCES = [
      "author d. 1821; translation 1831 — public domain", 78),
     ("Henry Ford", "My Life and Work", 1922, 7213, "business", "published 1922 — public domain in the US", 40),
     ("Benjamin Franklin", "The Autobiography of Benjamin Franklin", 1791, 148, "politics", "author d. 1790 — public domain", 30),
-    ("Marcus Aurelius", "Meditations (tr. George Long)", 1862, 2680, "politics", "author d. 180; translation 1862 — public domain", 30),
+    ("Marcus Aurelius", "Meditations (tr. George Long)", 1862, 2680, "wisdom", "author d. 180; translation 1862 — public domain", 30),
     ("Sun Tzu", "The Art of War (tr. Lionel Giles)", 1910, 132, "war", "translation 1910 — public domain", 30),
     ("Carl von Clausewitz", "On War (tr. J. J. Graham)", 1873, 1946, "war", "translation 1873 — public domain", 30),
     ("Andrew Carnegie", "Autobiography of Andrew Carnegie", 1920, 17976, "business", "published 1920 — public domain in the US", 30),
     ("Winston Churchill", "Liberalism and the Social Problem", 1909, 18419, "politics", "published 1909 — public domain", 25),
     ("Theodore Roosevelt", "Theodore Roosevelt: An Autobiography", 1913, 3335, "politics", "published 1913 — public domain", 30),
+    # 2026-10-02, Matt: "add Lincoln, Washington, and the other similar greats. Gather wisdom."
+    ("Abraham Lincoln", "The Papers and Writings of Abraham Lincoln (complete)", 1865, 3253, "politics", "author d. 1865 — public domain", 40),
+    ("George Washington", "Rules of Civility & Decent Behaviour in Company and Conversation (the 110 rules)", 1747, 12029, "politics", "author d. 1799 — public domain", 40),
+    ("Thomas Jefferson", "The Writings of Thomas Jefferson", 1826, 21002, "politics", "author d. 1826 — public domain", 30),
+    ("Ulysses S. Grant", "Personal Memoirs of U. S. Grant", 1885, 4367, "war", "published 1885 — public domain", 30),
+    ("William T. Sherman", "Memoirs of General William T. Sherman", 1875, 4361, "war", "published 1875 — public domain", 30),
+    ("Niccolò Machiavelli", "The Prince (tr. W. K. Marriott)", 1908, 1232, "politics", "translation 1908 — public domain", 30),
+    ("Julius Caesar", "Commentaries on the Gallic War (tr. McDevitte & Bohn)", 1869, 10657, "war", "translation 1869 — public domain", 25),
+    ("Thucydides", "The History of the Peloponnesian War (tr. Richard Crawley)", 1874, 7142, "war", "translation 1874 — public domain", 30),
+    ("Epictetus", "The Enchiridion (tr. Elizabeth Carter)", 1758, 45109, "wisdom", "translation 1758 — public domain", 25),
+    ("Seneca", "Seneca's Morals of a Happy Life, Benefits, Anger and Clemency (tr. L'Estrange)", 1678, 56075, "wisdom", "translation 1678 — public domain", 30),
+    ("Confucius", "The Analects (tr. James Legge)", 1861, 3330, "wisdom", "translation 1861 — public domain", 30),
+    ("Plutarch", "Lives of the Noble Grecians and Romans (tr. Dryden, rev. Clough)", 1864, 674, "wisdom", "translation 1864 — public domain", 30),
+    ("Antoine-Henri Jomini", "The Art of War (tr. Mendell & Craighill)", 1862, 13549, "war", "translation 1862 — public domain", 30),
+    ("Alfred Thayer Mahan", "The Influence of Sea Power Upon History, 1660-1783", 1890, 13529, "war", "published 1890 — public domain", 25),
 ]
+
+# Author-LABELLED maxims: a source whose author numbered his rules — accepted by construction.
+# gutenberg id -> (heading regex, block terminator regex or None)
+LABELLED = {
+    50750: (r"^MAXIM [IVXLC]+\.?\s*$", r"\nNOTE"),                 # Napoleon: MAXIM I. … NOTE.
+    12029: (r"^\d{1,3}(?:st|nd|rd|d|th)\.\s+", None),               # Washington: "1st. Every Action…" … "110th." (column 0, with the period — the editor's genealogy says "1st, Ester" and must not split)
+}
 
 _MAXIM = re.compile(r"^MAXIM [IVXLC]+\.?\s*$", re.M)
 _GUT_START = re.compile(r"\*\*\* START OF (?:THE|THIS) PROJECT GUTENBERG EBOOK[^\n]*\n")
@@ -69,13 +91,21 @@ def _body_of(raw: str) -> str:
     return s[: e.start()] if e else s
 
 
-def _labelled_blocks(text: str) -> list:
-    """Napoleon's numbered MAXIMs: the block after each heading up to the NOTE / next heading."""
-    parts = _MAXIM.split(text)
+def _labelled_blocks(text: str, gid: int) -> list:
+    """The author's own numbered maxims/rules: the block after each heading, up to the terminator (if
+    any) or the next heading. Napoleon's MAXIM I. … NOTE.; Washington's 1st … 110th."""
+    spec = LABELLED.get(gid)
+    if not spec:
+        return []
+    head_re, term = spec
+    parts = re.split(head_re, text, flags=re.M)
     out = []
     for blk in parts[1:]:
-        blk = blk.split("\nNOTE", 1)[0]
-        out.append(blk.strip())
+        if term:
+            blk = re.split(term, blk, maxsplit=1)[0]
+        blk = blk.strip()
+        if blk:
+            out.append(blk)
     return out
 
 
@@ -102,8 +132,10 @@ def _card(cid, kind, title, body, box, bands, subject, conns, extra, source):
 
 def build_cards(texts_dir: Path = TEXTS) -> list:
     cards = [_card(SPINE_ID, "reference", "The principles of those who won — in their own words",
-                   "The stated rules of figures who repeatedly succeeded — Napoleon, Ford, Franklin, Marcus "
-                   "Aurelius, Sun Tzu, Clausewitz, Carnegie, Churchill, Roosevelt — gathered verbatim from their "
+                   "The stated rules of figures who repeatedly succeeded — Napoleon, Lincoln, Washington, Ford, "
+                   "Franklin, Jefferson, Grant, Sherman, Caesar, Thucydides, Machiavelli, Jomini, Mahan, Sun Tzu, "
+                   "Clausewitz, Carnegie, Churchill, Roosevelt, and the wisdom of Marcus Aurelius, Epictetus, Seneca, "
+                   "Confucius and Plutarch — gathered verbatim from their "
                    "public-domain works, each tagged to the patterns of the Strategy Concordance so that 'repeatedly "
                    "proven' is a count (distinct figures, arenas, dated cases), and applied to a present situation "
                    "by the same resolution. Who said it, where it won, where to read it — the discernment stays yours.",
@@ -119,7 +151,7 @@ def build_cards(texts_dir: Path = TEXTS) -> list:
             print(f"  missing text for {fig} (#{gid}) — run --fetch", file=sys.stderr)
             continue
         text = _body_of(p.read_text(encoding="utf-8", errors="replace"))
-        blocks = _labelled_blocks(text) if gid == 50750 else None
+        blocks = _labelled_blocks(text, gid) or None
         found = P.identify(text, labelled_blocks=blocks, limit=cap)
         url = f"https://www.gutenberg.org/ebooks/{gid}"
         for i, f in enumerate(found, 1):

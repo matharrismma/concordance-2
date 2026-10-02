@@ -51,7 +51,7 @@ PATTERN_LEXICON: Dict[str, List[str]] = {
     'compounding': ['little by little', 'accumulat', 'compound', 'year after year', 'steady', 'perseverance', 'persever', 'patience', 'patient', 'long run', 'small beginnings'],
     'founder_conviction': ['resolution', 'resolve', 'determination', 'determined', 'firmness', 'courage', 'boldness', 'bold', 'will to', 'faith in', 'conviction', 'never give'],
     'antifragility': ['adversity', 'misfortune', 'defeat', 'failure', 'mistakes', 'learn from', 'setback', 'hardship', 'obstacle'],
-    'distribution_over_product': ['customer', 'market', 'price', 'cheap', 'sell', 'selling', 'sales', 'consumer', 'buyer', 'reach the'],
+    'distribution_over_product': ['customer', 'market', 'price', 'cheap', 'sell', 'selling', 'sales', 'consumer', 'buyer', 'reach the customer', 'reach the market'],
     'win_the_narrative': ['opinion', 'morale', 'moral force', 'confidence of', 'reputation', 'spirit of the', 'enthusiasm', 'persuad', 'proclamation', 'hearts', 'inspire'],
     'outlive_the_founder': ['successor', 'succession', 'institution', 'after my death', 'posterity', 'endure', 'lasting', 'outlast'],
     'first_principles': ['first principle', 'fundamental', 'nature of things', 'think for', 'the truth is', 'underlying', 'root of', 'go to the root', 'cause and effect', 'from the ground up'],
@@ -77,13 +77,13 @@ SITUATION_STEMS: Dict[str, List[str]] = {
     'cut_losses': ['sunk cost', 'walk away', 'pull out', 'shut it down', 'kill the'],
     'intelligence': ["don't know", 'do not know', 'find out', 'research', 'data on', 'what the customer'],
     'decentralize': ['micromanag', 'bottleneck on me', 'empower', 'autonomy', 'decisions at the edge'],
-    'coalition': ['team up', 'join forces', 'joint venture'],
+    'coalition': ['team up', 'join forces', 'joint venture', 'divided', 'hold together', 'quarrel', 'faction', 'united front', 'our side', 'infighting'],
     'compounding': ['long game', 'slow and steady', 'consistent', 'every day', 'daily'],
     'antifragility': ['failed', 'we lost', 'went wrong', 'crisis', 'downturn', 'recession'],
     'standardize': ['checklist', 'process', 'repeatable', 'procedure', 'template'],
     'outlive_the_founder': ['depends on me', "when i'm gone", 'handoff', 'second generation'],
     'founder_conviction': ['everyone says', "told it can't", 'nobody believes', 'doubt', 'keep going'],
-    'win_the_narrative': ['story', 'brand', 'messag', 'press', 'perception', 'trust us'],
+    'win_the_narrative': ['story', 'brand', 'messag', 'press', 'perception', 'trust us', 'reach the people', 'the people', 'hearts and minds', 'win over'],
     'requisite_variety': ['changed', 'changing', 'new market', 'pivot', 'different rules', 'local'],
     'own_the_bottleneck': ['chokepoint', 'single supplier', 'depend on one', 'gatekeeper', 'platform'],
     'reinvest_the_core': ['flywheel', 'what to do with the profit', 'cash flow', 'dividend'],
@@ -101,6 +101,8 @@ _CUES: List[Tuple[str, re.Pattern]] = [
     ("it is essential", re.compile(r"\bit is (?:essential|necessary|better|wiser|important|a mistake|an error|fatal|dangerous)\b", re.I)),
     ("a maxim", re.compile(r"\b(?:maxim|precept|rule|principle)\b", re.I)),
     ("he who", re.compile(r"\b(?:he|a man|a general|a leader|a commander|a business|whoever) (?:who|that|which)\b", re.I)),
+    ("cannot", re.compile(r"\bcannot\b", re.I)),                      # "a house divided against itself cannot stand"
+    ("let us", re.compile(r"\blet us\b", re.I)),                      # "let us strive on to finish the work we are in"
     ("is to", re.compile(r"\b(?:the|a) (?:way|means|key|only way) (?:to|of)\b", re.I)),
 ]
 _WORD = re.compile(r"[a-z]+")
@@ -115,6 +117,26 @@ _NARRATIVE = re.compile(r"\b(?:was|were|had|did|went|came|said|told|made|took|go
 _NARRATIVE_MAX = 1
 _SENT_SPLIT = re.compile(r"(?<=[.!?])\s+(?=[A-Z\"'(])")
 _MIN_WORDS, _MAX_WORDS = 8, 60
+
+
+_CAPS_PREFIX = re.compile(r"^(?:[A-Z][A-Z'’\-]+[\s,:;.\-—]+){4,}(?=[A-Z][a-z])")   # a chapter heading glued to the first sentence
+_TRAIL_NUM = re.compile(r"\s+(?:CHAP\.|\d{1,3}\.|[IVXLC]+\.)\s*$")                 # "… CHAP." / "… 2." (Legge's numbering)
+_SIDENOTE = re.compile(r"\s*\[Sidenote:[^\]]*\]")
+
+
+def _clean(s: str) -> str:
+    """Strip edition furniture that is not the author's sentence: a run-on chapter heading, a trailing
+    section number, an editor's [Sidenote]. The words that remain are still the author's, verbatim."""
+    s = _SIDENOTE.sub("", s)
+    s = _CAPS_PREFIX.sub("", s)
+    s = _TRAIL_NUM.sub("", s)
+    return s.strip()
+
+
+def _is_heading(s: str) -> bool:
+    """A table-of-contents line or chapter title: mostly capitals among its letters."""
+    letters = [ch for ch in s if ch.isalpha()]
+    return bool(letters) and sum(1 for ch in letters if ch.isupper()) / len(letters) > 0.4
 
 
 def sentences(text: str) -> List[str]:
@@ -153,14 +175,15 @@ def identify(text: str, *, labelled_blocks: Optional[Iterable[str]] = None,
         first = sentences(blk)
         if not first:
             continue
-        s = first[0]
-        if s in seen:
+        s = _clean(first[0])
+        if not s or s in seen:
             continue
         seen.add(s)
         found.append({"quote": s, "cues": ["labelled maxim"] + cues_of(s), "patterns": tag(s), "labelled": True})
     for s in sentences(text):
+        s = _clean(s)
         n = len(_WORD.findall(s.lower()))
-        if n < _MIN_WORDS or n > _MAX_WORDS or s in seen:
+        if n < _MIN_WORDS or n > _MAX_WORDS or s in seen or _is_heading(s):
             continue
         c = cues_of(s)
         if not c:
