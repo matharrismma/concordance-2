@@ -954,7 +954,12 @@ class Corpus:
         # 69% of resident RAM) with no ranking change: a frozen card is scored on its real body here,
         # exactly as the old title-match→rehydrate→re-score path did. Skipped entirely when nothing is
         # frozen (frozen_shelves() is empty), so an unfrozen corpus is byte-for-byte unchanged.
-        frozen = frozen_shelves()
+        # AND skipped for a corpus that holds no frozen index of its own (2026-10-02): the env names
+        # the shelves, but only a corpus BUILT with `frozen_idx` shed them to the shard. A fixture
+        # corpus (`Corpus({...})` in a test) under the servers' env was receiving the live keeping's
+        # shard hits — real dictionary cards outranking the fixture's own — which is not a ranking
+        # bug, it is freight from a shard this corpus never loaded.
+        frozen = frozen_shelves() if self._frozen else frozenset()
         if frozen and (shelves is None or (set(shelves) & frozen)):
             from . import corpus_db
             corpus_db.thaw_for(*frozen)
@@ -1290,7 +1295,7 @@ def search(query: str, limit: int = 25, include_witness: bool = True,
     shelf rode the shard."""
     corpus = default_corpus()
     out = corpus.search(query, limit, include_witness, shelves)
-    frozen = frozen_shelves()
+    frozen = frozen_shelves() if corpus._frozen else frozenset()   # only a corpus that froze shelves merges shard freight
     if frozen and (shelves is None or (set(shelves) & frozen)) and len(out) < limit:
         from . import corpus_db
         corpus_db.thaw_for(*frozen)

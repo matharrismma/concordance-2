@@ -162,8 +162,13 @@ def real_corpus_object():
         os.environ["CONCORDANCE_DATA_DIR"] = str(ROOT / "data")
         try:
             df: dict = {}
-            cards = corpus.load_cards(_df_out=df)
-            _REAL_CORPUS = corpus.Corpus(cards, df_extra=df)
+            fz: dict = {}
+            # EXACTLY as default_corpus builds it — including the frozen index. Under the servers'
+            # CONCORDANCE_FREEZE_SHELVES (the box, 2026-10-02) a corpus built without `frozen_idx`
+            # holds no frozen index, and search() merges shard hits only for a corpus that froze
+            # shelves — so this helper would have silently lost every frozen-shelf answer.
+            cards = corpus.load_cards(_df_out=df, _frozen_out=fz)
+            _REAL_CORPUS = corpus.Corpus(cards, df_extra=df, frozen_idx=fz)
             if not _REAL_CARDS:
                 _REAL_CARDS = cards            # one read serves both helpers
         finally:
