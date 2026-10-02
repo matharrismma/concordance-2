@@ -79,6 +79,10 @@ def test_the_spine_shows_the_same_five_verbs_on_every_face():
         "the desk must not carry a second copy of the five verbs — the spine is the one nav"
     grid = desk.split('<div class="doors">', 1)[1].split("</div>", 1)[0]
     assert len(re.findall(r"<a href=", grid)) == 6                  # five doors + about
+    # the .com front door carries no spine (it IS Check): its creed line names the other four verbs
+    front = (SITE / "concordance.html").read_text(encoding="utf-8")
+    for href in ("/explore.html", "/situations.html", "/profile.html", "https://narrowhighway.org/bible.html"):
+        assert f'href="{href}"' in front, href
 
 
 def test_the_manifesto_keeps_its_prose_and_loses_its_lobby():
