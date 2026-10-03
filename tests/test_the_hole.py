@@ -65,6 +65,10 @@ def test_signposts_load_as_cards_from_the_one_file(monkeypatch):
     ]) + "\n", encoding="utf-8")
     monkeypatch.setenv("CONCORDANCE_PROPHECY_DIR", str(tmp / "prophecy"))
     monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp))
+    # other test modules set these at import for the whole process (CI runs one process): a cards
+    # path that is not this keeping, or a freeze list — neither may reach this test
+    monkeypatch.delenv("CONCORDANCE_CARDS_JSONL", raising=False)
+    monkeypatch.delenv("CONCORDANCE_FREEZE_SHELVES", raising=False)
     out = corpus.load_cards()                 # the default keeping: the extras (and the signposts) load only there
     sp = out["signpost_tao_logos_derek_the_way"]
     assert sp["shelf"] == "signposts" and corpus.is_public(sp) and sp["generated"] is False
