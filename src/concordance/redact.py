@@ -56,7 +56,12 @@ _RULES: List[Tuple[str, "re.Pattern[str]", object]] = [
     # trail the match. The naive "(?:\d[ -]?){13,19}" is greedy and a trailing space is ALSO a
     # valid \b boundary (space-then-word-char), so it would swallow the space after the card
     # number in ordinary prose ("card 4532...66 ssn" -> "[CARD_1]ssn", jamming the words together).
-    ("CARD", re.compile(r"\b\d(?:[ -]?\d){12,18}\b"), _luhn_ok),
+    # (?<![.\d]) / (?!\.\d): the digits of a DECIMAL are never a card. "the fine structure constant is
+    # 0.0072973525693" lost its value to this rule — the 13 digits after the point passed Luhn, became
+    # [CARD_1], and the CHECK door judged "… is 0" BROKEN: a true claim turned false by the airlock
+    # (caught 2026-10-03 on the 137 slide). A run preceded by a digit-and-point, or followed by a
+    # point-and-digit, is part of a number, not an account.
+    ("CARD", re.compile(r"(?<![.\d])\b\d(?:[ -]?\d){12,18}\b(?!\.\d)"), _luhn_ok),
     ("IP", re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b"), _ipv4_ok),
 ]
 

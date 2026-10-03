@@ -877,6 +877,23 @@ def _x_element_fact(text: str):
     return out
 
 
+# ── primality (2026-10-03): "137 is a prime number" / "138 is not prime" — the same declarative shape the
+# front door already verifies (ask._PRIME_D); the CHECK door answered NOTHING_TO_CHECK for it. A QUESTION
+# ("is 137 prime?") is not a claim and is left to /ask.
+_PRIME_DECL = re.compile(r"\b(\d{1,12})\s+is\s+(not\s+)?(?:an?\s+)?(prime|composite)(?:\s+number)?\b", re.I)
+
+
+def _x_primality(text: str):
+    out = []
+    for m in _PRIME_DECL.finditer(text or ""):
+        n = int(m.group(1))
+        claimed = (m.group(3).lower() == "prime")
+        if m.group(2):
+            claimed = not claimed
+        out.append((_q(text, m), "number_theory", {"NUM_VERIFY": {"n_prime": n, "claimed_prime": claimed}}))
+    return out
+
+
 # ── sequence FACTS (fact-verifier, 2026-09-25): "the Nth prime/Fibonacci/triangular number is X" ─────
 # Reuses the number_theory verifier's computed sequences (deterministic, OEIS-keyed) — a lookup like
 # "the 5th prime is 11" becomes a VERDICT, not a FOUND card. Ordinal-anchored ("Nth <sequence>"), so
@@ -909,7 +926,7 @@ _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("physics_force", _x_physics_force), ("kinetic_energy", _x_kinetic_energy),
     ("kinematics", _x_kinematics),
     ("molar_mass", _x_molar_mass), ("element_fact", _x_element_fact),
-    ("sequence_fact", _x_sequence_fact),
+    ("sequence_fact", _x_sequence_fact), ("primality", _x_primality),
     ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),
     ("compound_interest", _x_compound), ("rule_of_72", _x_rule72),

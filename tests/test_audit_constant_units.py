@@ -62,6 +62,26 @@ def test_a_wrong_dimension_is_broken_and_an_unknown_unit_is_declined():
     assert r.get("held", 0) == 0 and r.get("broken", 0) == 0
 
 
+def test_the_exact_codata_value_is_never_eaten_by_the_airlock():
+    """2026-10-03, the 137 slide: "the fine structure constant is 0.0072973525693" came back BROKEN through
+    POST /verify — the airlock's card rule took the 13 digits after the point (they pass Luhn) for an
+    account number and the claim became "… is 0". The decimal is a number, not an account."""
+    from concordance import redact
+    clean, held = redact.redact("the fine structure constant is 0.0072973525693")
+    assert clean == "the fine structure constant is 0.0072973525693" and held == {}
+    clean, held = redact.redact("card 4532015112830366 on file")               # a real card still goes
+    assert "[CARD_1]" in clean and held
+    assert _verdict("The fine structure constant is 0.0072973525693.") == "HOLDS"
+    assert _verdict("The fine structure constant is 0.00729927.") == "BROKEN"   # 1/137 is a rounding, not the value
+
+
+def test_a_declarative_primality_claim_is_checkable():
+    assert _verdict("137 is a prime number.") == "HOLDS"
+    assert _verdict("138 is prime.") == "BROKEN"
+    assert _verdict("137 is not prime.") == "BROKEN"
+    assert _verdict("91 is composite.") == "HOLDS"
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]:
         fn()
