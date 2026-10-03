@@ -638,7 +638,10 @@ def _pair_discernment(hits: List[Dict[str, Any]], text: str = "", cp=None) -> Li
             source_to_repel = None
             for h in hits:                              # or a RESULT is a source on it
                 hid = h.get("id")
-                if hid == cid:
+                if hid == cid or h.get("shelf") in _SHADOW_SHELVES:
+                    # a foreshadow or a signpost is DISCERNMENT, never a source of the tradition — the
+                    # Tao signpost's bands ("lao tzu") tripped the Chinese chart on "what did the stoics
+                    # believe" and lifted it over the Stoicism chart the question named (live 2026-10-03)
                     continue
                 hay = (str(h.get("title") or "") + " " + " ".join(str(b) for b in (h.get("bands") or []))
                        + " " + str(h.get("subject") or "")).lower()
@@ -1028,6 +1031,14 @@ def _title_names_subject(query: str, card: Dict[str, Any]) -> bool:
     if not subj:
         return True
     title = {_stem(w) for w in _content_tokens(card.get("title") or "")}
+    if card.get("shelf") in _SHADOW_SHELVES:
+        # A chart NAMES its subject by the terms it discerns and the bands it carries: the title is
+        # "Zoroastrianism", the terms are "zoroaster", "magi", "saoshyant" — and "what did the magi of
+        # zoroaster expect" was routed past the chart that answers it to the web fallback, kind "web",
+        # no results (live 2026-10-03). Only the discernment shelves; the gap guard is unchanged elsewhere.
+        ex = card.get("extra") if isinstance(card.get("extra"), dict) else {}
+        for t in list(ex.get("discerns_terms") or []) + list(card.get("bands") or []):
+            title |= {_stem(w) for w in _content_tokens(str(t))}
     return bool(subj & title)
 
 

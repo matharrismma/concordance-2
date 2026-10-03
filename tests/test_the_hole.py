@@ -172,3 +172,40 @@ def test_every_foreshadow_card_carries_the_frame():
     for c in after:
         assert "AFTER CHRIST: it arose after him" in c["body"] and "stands in opposition (1 John 4:2-3)" in c["body"], c["id"]
         assert "never of persons" in c["body"] and c["extra"]["frame"]["after_christ"].startswith("opposition")
+
+
+def test_a_signpost_in_the_results_never_trips_another_chart():
+    """"what did the stoics believe": the Tao signpost (bands: "lao tzu") sat in the results, tripped the
+    Chinese chart as if it were a Taoist source, and the Chinese card led over the Stoicism chart the
+    question named. Discernment never trips discernment."""
+    from types import SimpleNamespace
+    from concordance import ask
+    pub = {"lifecycle_stage": "public", "visibility": "public", "surface": "secular"}
+    stoic = {"id": "card_foreshadow_stoicism", "title": "Stoicism", "shelf": "foreshadows", "body": "s",
+             "extra": {"discerns_terms": ["stoicism", "the stoics"]}, **pub}
+    chinese = {"id": "card_foreshadow_chinese", "title": "Chinese traditions", "shelf": "foreshadows", "body": "c",
+               "extra": {"discerns_terms": ["taoism", "lao tzu"]}, **pub}
+    cp = SimpleNamespace(cards={stoic["id"]: stoic, chinese["id"]: chinese})
+    signpost = {"id": "signpost_tao_logos_derek_the_way", "title": "The nations reached for the Way",
+                "shelf": "signposts", "bands": ["signpost", "lao tzu"], "body": "x"}
+    hits = ask._pair_discernment([signpost], "what did the stoics believe", cp=cp)
+    assert hits[0]["id"] == "card_foreshadow_stoicism" and all(h["id"] != "card_foreshadow_chinese" for h in hits)
+    # a real primary source still trips its chart
+    legge = {"id": "card_src_book_216", "title": "The Tao Teh King — Laozi", "shelf": "gutenberg", "bands": ["lao tzu"], "body": "y"}
+    hits = ask._pair_discernment([legge], "what does this book say", cp=cp)
+    assert hits[0]["id"] == "card_foreshadow_chinese"
+
+
+def test_a_chart_names_its_subject_by_its_terms_and_bands():
+    """"what did the magi of zoroaster expect" routed to the web fallback (kind "web", no results) because the
+    gap guard reads only the TITLE ("Zoroastrianism") and the question says "zoroaster"/"magi". A chart names
+    its subject by the terms it discerns and the bands it carries; other shelves keep the strict guard."""
+    from concordance import ask
+    zoro = {"id": "card_foreshadow_zoroastrianism", "title": "Zoroastrianism", "shelf": "foreshadows",
+            "bands": ["foreshadow", "zoroaster", "magi", "saoshyant"],
+            "extra": {"discerns_terms": ["zoroastrianism", "zoroaster", "ahura mazda"]}}
+    assert ask._title_names_subject("what did the magi of zoroaster expect", zoro)
+    assert ask._title_names_subject("who was zoroaster", zoro)
+    assert not ask._title_names_subject("how do I purify water", zoro)
+    other = dict(zoro, id="card_src_book_x", shelf="gutenberg")
+    assert not ask._title_names_subject("what did the magi of zoroaster expect", other)   # unchanged elsewhere
