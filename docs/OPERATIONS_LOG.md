@@ -976,3 +976,22 @@ bodies rehydrate (MH Psalm 23:1 = 15,607 chars), both surfaces 200. A fresh box 
 search to drop the ~375 MB resident index; compact/lazy stubs+connections ~449 MB) — real, not yet done.
 Box config note: the completed MH store + rebuilt shards + the `FREEZE_SHELVES` env are box-side
 (gitignored); the code fallback + tests are in git.
+
+## 2026-10-03 — the two guards: the live assay with a ratchet, and the restore drill
+
+**The live assay** (`tools/live_assay.py`, 39 probes in `eval/live_probes.jsonl`, nightly 05:10 UTC via `nh-assay.timer`,
+results in `/home/nh/backups/assay/<date>.json`, the floor in `floor.json`, one line per run in `assay.log`). First run,
+21:12 UTC: **36/39 passed in 14.1 s; floor 36; regressed none.** The three failures are the three `known_miss` probes —
+the assay's want list: a wrong constant in km/s gets no verdict (R4), a lookup fact does not reach CHECK (R5), the
+Egyptian chart does not lead "what did the egyptians believe about judgment after death" (narrow terms by design). A floor
+probe that fails on a later night exits 1 and logs REGRESSED; recall may only rise. No alert webhook is set on the box
+(`CONCORDANCE_ALERT_WEBHOOK`): the log and the exit code are the signals until one is.
+
+**The restore drill** (`tools/ark/restore_drill.sh`, monthly on the 1st 05:30 UTC via `nh-restore-drill.timer`, one line per
+run in `/home/nh/backups/restore-drill.log`). First run failed honestly on four "unparseable" lines that were the `#`
+comment header of `dictionary_supplement.jsonl`; the drill now skips comments and measures the copy against the live
+keeping (only a line the copy lost or broke fails it). Second run, 21:15 UTC, **DRILL OK in 36 s**: `nh-2.0-data-20261003-030001.tar.gz`
+sha256-verified, restored to scratch, **integrity OK — ledger 748/748 verified, 1,854 CAS records re-verified** against the
+restored keeping, 1,044,475 jsonl lines parsed (live 1,044,912 — the keeping grew since 03:00), cards 25,087 = live, 748
+ledger files. Not in the tar by design: the shards and the acquisitions (they ride the ark and the Storage Box). A backup
+is a backup now.

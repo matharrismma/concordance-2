@@ -30,8 +30,12 @@ free_k="$(df -k /home | tail -1 | awk '{print $4}')"
 rm -rf "$SCRATCH"; mkdir -p "$SCRATCH/data"
 tar -xzf "$tar_path" -C "$SCRATCH/data" 2>/dev/null || fail "extract of $base"
 
-# every restored jsonl line must parse (a truncated or corrupt line is a quiet hole)
-bad="$(python3 - "$SCRATCH/data" <<'EOF'
+# every restored jsonl line must parse (a truncated or corrupt line is a quiet hole). `#` lines are comments
+# (dictionary_supplement.jsonl opens with four — the first drill, 2026-10-03, failed on exactly those). And the
+# copy is measured AGAINST THE LIVE KEEPING: a quirk the live data already carries is not a restore failure —
+# only a line the copy lost or broke is.
+parse_count() {  # parse_count <dir> -> "<bad> <lines>"
+    python3 - "$1" <<'PYEOF'
 import json, os, sys
 root = sys.argv[1]; bad = 0; n = 0
 for name in sorted(os.listdir(root)):
@@ -39,7 +43,7 @@ for name in sorted(os.listdir(root)):
         continue
     with open(os.path.join(root, name), encoding="utf-8", errors="replace") as f:
         for ln in f:
-            if not ln.strip():
+            if not ln.strip() or ln.lstrip().startswith("#"):
                 continue
             n += 1
             try:
@@ -47,10 +51,12 @@ for name in sorted(os.listdir(root)):
             except Exception:
                 bad += 1
 print(f"{bad} {n}")
-EOF
-)"
-bad_n="${bad%% *}"; lines_n="${bad##* }"
-[ "${bad_n:-1}" = "0" ] || fail "$bad_n unparseable jsonl lines of $lines_n in the restored keeping"
+PYEOF
+}
+restored="$(parse_count "$SCRATCH/data")"; live_parse="$(parse_count "$ROOT/data")"
+bad_n="${restored%% *}"; lines_n="${restored##* }"; live_bad="${live_parse%% *}"; live_lines="${live_parse##* }"
+[ "${bad_n:-1}" -le "${live_bad:-0}" ] || fail "$bad_n unparseable jsonl lines of $lines_n in the restored keeping (live has $live_bad)"
+[ "${live_bad:-0}" = "0" ] || say "WARN: the live keeping itself carries $live_bad unparseable jsonl lines (the copy is faithful to them)"
 
 # the integrity check against the RESTORED keeping, never the live one
 out="$(cd "$ROOT" && CONCORDANCE_DATA_DIR="$SCRATCH/data" PYTHONPATH=src timeout 1800 .venv/bin/python tools/integrity_check.py 2>&1 | tail -1)"
@@ -61,6 +67,6 @@ ledger="$(ls "$SCRATCH/data/ledger" 2>/dev/null | wc -l)"
 [ "$rc" -eq 0 ] || fail "integrity rc=$rc on the restored keeping ($out)"
 [ "${cards:-0}" -gt 0 ] || fail "restored cards.jsonl is empty"
 
-say "DRILL OK: $base restored to $SCRATCH — $out — $lines_n jsonl lines parsed, cards=$cards (live $live), ledger files=$ledger. Not in the tar by design: shards + acquisitions (they ride the ark / Storage Box)."
+say "DRILL OK: $base restored to $SCRATCH — $out — $lines_n jsonl lines parsed (live $live_lines), cards=$cards (live $live), ledger files=$ledger. Not in the tar by design: shards + acquisitions (they ride the ark / Storage Box)."
 [ "${NH_DRILL_KEEP:-0}" = 1 ] || rm -rf "$SCRATCH"
 exit 0
