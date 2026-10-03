@@ -113,3 +113,20 @@ def test_the_fulfillment_ref_is_the_cards_own():
     lead = ask._lead_card({"id": "c", "title": "Chinese traditions", "shelf": "foreshadows", "body": body})
     assert lead["anchor_ref"] == "John 14:6"
     assert "anchor_ref" not in ask._lead_card({"id": "c", "title": "x", "shelf": "survival", "body": body})
+
+
+def test_a_lifted_discernment_chart_leads_with_its_own_words():
+    """_pair_discernment lifted the chart as a BRIEF (no body): the lead's excerpt was empty, the result's
+    snippet empty, and a shadow lead carried no fulfillment verse (measured live 2026-10-02)."""
+    from types import SimpleNamespace
+    from concordance import ask
+    chart = {"id": "card_foreshadow_chinese", "title": "Chinese traditions — Confucianism & Daoism",
+             "shelf": "foreshadows", "lifecycle_stage": "public", "visibility": "public", "surface": "secular",
+             "body": "The seed it kept: the Way. The fulfillment: 'I am the Way' (John 14:6).",
+             "extra": {"discerns_terms": ["taoism", "daoism", "tao te ching"]}}
+    cp = SimpleNamespace(cards={chart["id"]: chart})
+    hits = ask._pair_discernment([{"id": "card_other", "title": "x", "shelf": "reference", "body": "y"}],
+                                 "is there a connection between taoism and christianity", cp=cp)
+    assert hits[0]["id"] == "card_foreshadow_chinese" and hits[0].get("body"), hits[0]
+    lead = ask._lead_card(hits[0])
+    assert lead["excerpt"].startswith("The seed it kept") and lead["anchor_ref"] == "John 14:6"

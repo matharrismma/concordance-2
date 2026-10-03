@@ -653,7 +653,11 @@ def _pair_discernment(hits: List[Dict[str, Any]], text: str = "", cp=None) -> Li
                 from . import repellent as _rep
                 _rep.repel([source_to_repel])          # no-op when gated off
         if tripped:
-            lead = next((x for x in hits if x.get("id") == cid), None) or corpus._brief(chart)
+            # The chart leads as the FULL card, never a brief: a brief carries no body, so the lead
+            # built from it had an empty excerpt, the result an empty snippet, and the shadow no
+            # fulfillment verse (measured live 2026-10-02 on "is there a connection between taoism
+            # and christianity" — the chart led, with nothing of its own words beneath it).
+            lead = next((x for x in hits if x.get("id") == cid), None) or dict(chart)
             hits = [lead] + [x for x in hits if x.get("id") != cid]
     return hits
 
