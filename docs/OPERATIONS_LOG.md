@@ -1018,3 +1018,8 @@ is a backup now.
   grow measured. The psalm of the day now rides `/daily` (Psalm 126 today). The Lighthouse folder is used only by its own
   substrate-backup timer now and is archived whole on the ark.
 - Live assay floor: 42 probes. CI: 2208 passed.
+- **Hive, second turn** (9fbe51c, 23:07 UTC): the first turn had run its two writing workers in check mode — the hive's own
+  `--apply` never reached them. Fixed (apply_argv), pinned. Second supervised turn: **5 ok, 0 failed**, 2 min 33 s, 1.2 GB
+  peak, $0.00 — watch 10/10 hold; **shepherd filed 14 options** for open wants from public-domain sources; connections
+  proposed; theorymap rewrote the floor; grow: nothing to draw — the keeping is fully connected on this gate. The hive runs
+  daily at 10:00 UTC from now on.
