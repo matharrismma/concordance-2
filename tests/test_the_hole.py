@@ -244,3 +244,30 @@ def test_a_chart_shares_the_asked_word_through_its_terms_and_bands(monkeypatch):
             "bands": ["foreshadow", "zoroaster", "magi"], "extra": {"discerns_terms": ["zoroastrianism", "zoroaster"]}}
     assert ask._shares_a_word("what did the magi of zoroaster expect", zoro)
     assert not ask._shares_a_word("what did the magi of zoroaster expect", dict(zoro, shelf="gutenberg"))
+
+
+def test_a_discerned_term_matches_whole_words_only(monkeypatch):
+    """The LDS chart's term "lds" matched inside "handhelds": a VHF handheld card was tiered reference by
+    the chart that discerns Mormonism and that chart led the answer to "can I use my baofeng without a
+    license" (live 2026-10-03). A term trips as a whole term on both paths — the gate and the pairing."""
+    from types import SimpleNamespace
+    from concordance import alignment, ask
+    assert not alignment.term_in("lds", "vhf/uhf fm handhelds (baofeng-class)")
+    assert alignment.term_in("lds", "the lds church") and alignment.term_in("latter-day saints", "the latter-day saints, in love")
+    assert alignment.term_in("ma'at", "egyptian ma'at and judgment") and not alignment.term_in("maat", "the format")
+    pub = {"lifecycle_stage": "public", "visibility": "public", "surface": "secular"}
+    lds = {"id": "card_foreshadow_mormonism_lds_under_the_test", "title": "The Latter-day Saints under the test",
+           "shelf": "foreshadows", "body": "x", "extra": {"discerns_terms": ["mormon", "lds"]}, **pub}
+    cp = SimpleNamespace(cards={lds["id"]: lds})
+    handheld = {"id": "card_comms_handheld_vhf_uhf", "title": "VHF/UHF FM handhelds (Baofeng-class)", "shelf": "communications",
+                "bands": ["radio", "ham", "handheld"], "body": "y"}
+    hits = ask._pair_discernment([handheld], "can I use my baofeng without a license", cp=cp)
+    assert hits[0]["id"] == "card_comms_handheld_vhf_uhf" and all(h["id"] != lds["id"] for h in hits)
+    hits = ask._pair_discernment([handheld], "is the lds church christian", cp=cp)
+    assert hits[0]["id"] == lds["id"]                                        # the whole term still trips
+    monkeypatch.setenv("CONCORDANCE_ALIGNMENT", "1")
+    monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(_REPO / "data"))
+    alignment._CACHE["key"] = None
+    assert alignment.verdict(handheld, set()) == (True, 1.0)                 # no longer damped by "lds"
+    assert alignment.context("can I use my baofeng without a license") == set()
+    alignment._CACHE["key"] = None

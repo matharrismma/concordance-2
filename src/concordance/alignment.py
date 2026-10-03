@@ -25,6 +25,7 @@ are byte-for-byte unchanged until a node opts in. Held for review.
 from __future__ import annotations
 
 import json
+import re
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -81,6 +82,22 @@ def _index() -> Tuple[List[Tuple[str, str, str]], Dict[str, str]]:
     return terms, chart_tier
 
 
+_TERM_RE: Dict[str, "re.Pattern[str]"] = {}
+
+
+def term_in(phrase: str, hay: str) -> bool:
+    """Does the discerned term occur in the text as a WHOLE term — not inside another word? The LDS
+    chart's term "lds" matched inside "handhelds" (2026-10-03): a VHF handheld card was tiered reference
+    by the chart that discerns Mormonism, and the chart was lifted over it on "can I use my baofeng
+    without a license". Bounded on both sides by a non-alphanumeric; the ONE matcher the gate and the
+    front door's discernment pairing both use, so they cannot drift."""
+    pat = _TERM_RE.get(phrase)
+    if pat is None:
+        pat = re.compile("(?<![a-z0-9])" + re.escape(phrase) + "(?![a-z0-9])")
+        _TERM_RE[phrase] = pat
+    return pat.search(hay) is not None
+
+
 def context(query_text: str) -> Set[str]:
     """The chart ids the QUERY explicitly names — a deliberate call for that subject. Empty when the
     gate is off, so the caller does no work."""
@@ -88,7 +105,7 @@ def context(query_text: str) -> Set[str]:
         return set()
     terms, _ = _index()
     q = " " + str(query_text or "").lower() + " "
-    return {cid for phrase, _tier, cid in terms if phrase in q}
+    return {cid for phrase, _tier, cid in terms if term_in(phrase, q)}
 
 
 def _tier_of(card: Dict[str, Any], terms: List[Tuple[str, str, str]],
@@ -105,7 +122,7 @@ def _tier_of(card: Dict[str, Any], terms: List[Tuple[str, str, str]],
            + " " + str(card.get("subject") or "")).lower()
     found_ref: Optional[Tuple[str, Optional[str]]] = None
     for phrase, tier, cid in terms:
-        if phrase in hay:
+        if term_in(phrase, hay):
             if tier == "sectioned":
                 return "sectioned", cid            # the stricter wall wins immediately
             if found_ref is None:

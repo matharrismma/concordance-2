@@ -639,7 +639,8 @@ def _pair_discernment(hits: List[Dict[str, Any]], text: str = "", cp=None) -> Li
     chart_ids = {c.get("id") for c, _ in watch}         # the discernment charts themselves — NEVER repelled
     for chart, terms in watch:
         cid = chart.get("id")
-        tripped = any(t in q for t in terms)          # the QUESTION names the charted practice
+        from . import alignment as _align
+        tripped = any(_align.term_in(t, q) for t in terms)   # the QUESTION names the charted practice (whole terms)
         if not tripped:
             source_to_repel = None
             for h in hits:                              # or a RESULT is a source on it
@@ -651,7 +652,7 @@ def _pair_discernment(hits: List[Dict[str, Any]], text: str = "", cp=None) -> Li
                     continue
                 hay = (str(h.get("title") or "") + " " + " ".join(str(b) for b in (h.get("bands") or []))
                        + " " + str(h.get("subject") or "")).lower()
-                if any(t in hay for t in terms):
+                if any(_align.term_in(t, hay) for t in terms):     # whole terms: "lds" is not in "handhelds"
                     tripped = True
                     # REPELLENT (no-entry pheromone): mark the PRIMARY SOURCE under the test so it stops
                     # crowding queries it does not answer — but NEVER a discernment chart (they share the
