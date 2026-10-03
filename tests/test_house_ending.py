@@ -94,3 +94,97 @@ def test_house_never_raises_on_a_strange_answer():
         assert h["door"] in doors.VERBS and h["next_step"]["do"]
         h = doors.house(tool, {"results": "not-a-list", "trail": None, "seal": 3, "candidates": [1, 2]})
         assert h["next_step"]["do"]
+
+
+def _schema():
+    r = handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, EngineConfig())
+    return {t["name"]: set(((t.get("inputSchema") or {}).get("properties") or {})) for t in r["result"]["tools"]}
+
+
+def _executable_as_given(h, props):
+    """The one step names a real tool and carries ONLY arguments that tool declares — a step that a
+    caller follows as given must run, not silently search for nothing (caught 2026-10-02: ask steps
+    carried `q`, the tool reads `text`; verify steps carried `claim`, the tool took none)."""
+    nxt = h["next_step"]
+    if "tool" not in nxt:
+        return
+    assert nxt["tool"] in props, nxt
+    extra = set(nxt.get("params") or {}) - props[nxt["tool"]]
+    assert not extra, f"{nxt['tool']} does not take {sorted(extra)}: {nxt}"
+
+
+def test_a_crisis_ends_with_help_first_and_no_tool():
+    """A crisis answer carries no path on purpose; the generic ending reached it and pointed a cry at
+    `discern` ("name what you brought"). Help IS the ending — the number first, no tool, because a
+    real person performs this step, not the engine."""
+    body, err = _call("ask", {"text": "i want to end my life"})
+    assert not err and body["kind"] == "crisis"
+    h = body["house"]
+    assert h["door"] == "WALK" and h["kind"] == "help" and h["trail"] == "resources"
+    assert "988" in h["next_step"]["do"] and "real person" in h["next_step"]["do"]
+    assert "tool" not in h["next_step"], h["next_step"]
+    assert h["next_step"]["do"].startswith("Reach a real person right now")
+
+
+def test_a_first_person_ache_is_met_as_comfort_with_the_number_in_hand():
+    """"i feel hopeless and alone" is comfort, not crisis (the crisis net is never widened with bare
+    emotion words) — but it was told "go to the person — plainly and gently": there is no other
+    person. The ending now sits with the word and names someone who loves them; and because
+    hopelessness is despair-grade, the helpline rides along quietly as a resource."""
+    body, err = _call("ask", {"text": "i feel hopeless and alone"})
+    assert not err and body["kind"] == "comfort"
+    assert body["path"]["type"] == "comfort" and "go to the person" not in body["path"]["step"].lower()
+    assert "someone who loves you" in body["path"]["step"]
+    assert body["resources"] and "988" in body["resources"][0]["label"]
+    h = _assert_house(body, "WALK", "path")
+    assert h["next_step"]["do"] == body["path"]["step"]            # the path IS the ending
+    _executable_as_given(h, _schema())
+    body, err = _call("ask", {"text": "I feel anxious about my exam"})
+    assert not err and body["kind"] == "comfort" and "resources" not in body   # not despair-grade
+
+
+def test_an_empty_ask_is_an_error_on_the_agent_door_as_on_the_web():
+    body, err = _call("ask", {"text": "   "})
+    assert err and "house" not in body and "text required" in body["error"]
+    body, err = _call("ask", {"q": "i feel hopeless and alone"})            # the wrong key is an empty ask
+    assert err
+
+
+def test_a_plain_claim_through_the_agent_door_is_verified_as_given():
+    """find_verifier's ending hands `verify` {claim, domain}; the tool must take exactly that (the
+    web twin has since 2026-09-05) and answer in the one verify shape: verdict, trail, seal."""
+    body, err = _call("verify", {"claim": "2+2=4"})
+    assert not err and body["verdict"] == "HOLDS" and body["claims_found"] == 1 and body["trail"][0]["status"] == "CONFIRMED"
+    h = _assert_house(body, "CHECK", "verdict")
+    assert h["next_step"]["tool"] == "seal_fetch" and h["seal"]
+    body, err = _call("verify", {"claim": "the speed of light is 299792458 m/s", "domain": "astronomy"})
+    assert not err and body["verdict"] == "HOLDS" and body["domain_hint"] == "astronomy"
+    assert body["checks"][0]["domain"] == "physical_constants"        # the extractor decides, not the hint
+    body, err = _call("verify", {"claim": "iron melts at 1538 C"})
+    assert not err and body["verdict"] == "INCOMPLETE" and body["gap_at"] == "iron melts at 1538 C"
+    assert "NOTHING about whether the claim is true" in body["means"]
+    h = _assert_house(body, "CHECK", "verdict")
+    assert h["next_step"]["tool"] == "find_verifier" and h["next_step"]["params"] == {"query": "iron melts at 1538 C"}
+    _executable_as_given(h, _schema())
+    body, err = _call("verify", {"claim": "2+2=5"})
+    assert not err and body["verdict"] == "BROKEN" and body["house"]["next_step"]["tool"] == "verify"
+
+
+def test_every_house_step_is_executable_as_given():
+    """Sweep every door with empty and rich synthetic answers (plus the real calls above): each next
+    step's params are a subset of what the named tool declares."""
+    props = _schema()
+    rich = {"verdict": "INCOMPLETE", "claim": "iron melts at 1538 C", "gap_at": "iron melts at 1538 C",
+            "trail": [{"id": "a1", "status": "NOT_APPLICABLE", "claim": "iron melts at 1538 C"}],
+            "seal": {"cite_url": "/s/abc", "content_hash": "abc"}, "results": [{"id": "card-1", "title": "x"}],
+            "candidates": [{"domain": "physics"}], "checks": [{"claim": "2+2=4"}], "query": "iron",
+            "found": True, "kind": "element", "id": "card-1", "word": "iron", "ref": "John 1:1",
+            "path": {"step": "Sit with John 1:1", "anchor": {"ref": "John 1:1"}, "type": "comfort"},
+            "position": {"unit": "u1"}, "detail": "iron", "input": "iron", "strongs": "G26",
+            "fingerprint": "fp", "key": "k", "cards": ["card-1"], "decks": [{"id": "d1"}], "source": {"url": "u"}}
+    for tool in sorted(doors.ALL_DOORS):
+        for answer in ({}, rich, {**rich, "verdict": "BROKEN", "trail": [{"id": "a1", "status": "MISMATCH"}]},
+                       {**rich, "verdict": "HOLDS"}, {**rich, "found": False, "results": [], "candidates": [],
+                                                       "checks": [], "path": {"step": "x", "type": "claim"}},
+                       {"kind": "crisis", "resources": [{"label": "Call or text 988"}]}):
+            _executable_as_given(doors.house(tool, answer, {"query": "iron"}), props)

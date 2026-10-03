@@ -564,10 +564,14 @@
           return '<div class="hit"><b>'+esc(v.ref||'')+'</b><span class="sn">'+
                  esc((v.web_text||'').slice(0,190))+'</span></div>'; }).join('');
     }
-    if(d.resources && d.resources.length)
-      h += '<div class="res">'+d.resources.map(function(r){
+    // crisis: the resources ARE the answer, first. Comfort carries a quiet helpline line too (the
+    // despair-grade words, 2026-10-02) — that one comes LAST, after the Word and the real people.
+    var resLines = function(){ return d.resources.map(function(r){
         return r.ref ? '<div class="hit"><a href="'+esc(r.ref)+'">'+esc(r.label)+'</a></div>'
-                     : '<div class="hit">'+esc(r.label)+'</div>'; }).join('')+'</div>';
+                     : '<div class="hit">'+esc(r.label)+'</div>'; }).join(''); };
+    var resLater = !!(d.resources && d.resources.length && d.real_help && d.real_help.length);
+    if(d.resources && d.resources.length && !resLater)
+      h += '<div class="res">'+resLines()+'</div>';
     if(d.scripture && d.scripture.length)
       h += d.scripture.map(function(s){
         return '<div class="hit"><b>'+esc(s.ref||s.title||'')+'</b><span class="sn">'+esc(s.text||s.snippet||'')+'</span></div>'; }).join('');
@@ -592,7 +596,8 @@
     if(d.real_help && d.real_help.length)
       h += '<div class="res"><div class="note" style="margin:.35rem 0 .15rem">'+
            'You don’t have to carry it alone — reach for real people:</div>'+
-           d.real_help.map(function(x){ return '<div class="hit">'+esc(x)+'</div>'; }).join('')+'</div>';
+           d.real_help.map(function(x){ return '<div class="hit">'+esc(x)+'</div>'; }).join('')+
+           (resLater ? resLines() : '')+'</div>';
     // the study, when it was asked for: a public-domain commentator in his own words,
     // and where Scripture itself speaks to the same thing — found and attributed
     if(d.commentary && d.commentary.text)

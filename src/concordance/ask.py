@@ -412,6 +412,23 @@ _COMFORT_VERSE = {
     "discouraged": "Joshua 1:9", "helpless": "Psalm 46:1", "restless": "Matthew 11:28",
 }
 _DISTRESS_WORDS = tuple(_COMFORT_VERSE.keys())
+# Despair-grade distress — hopelessness and aloneness are the classic antecedents of ideation, and a
+# person who types "i feel hopeless and alone" is below the crisis lane (no ideation: comfort is the
+# fitting lane, and it stays so) but is not an exam-nerves "anxious". The comfort answer for these
+# words carries the helpline quietly as its last line, so the number is already in hand if the
+# weight grows. Same asymmetry as the crisis net: an unneeded line is a small cost. 2026-10-02.
+_DESPAIR_GRADE = frozenset({"hopeless", "despair", "depressed", "helpless", "empty", "alone",
+                            "lonely", "abandoned", "broken", "heartbroken", "hurting", "lost"})
+_IF_HEAVIER = {"label": "If it gets heavier than you can carry — call or text 988 (US, 24/7), or "
+                        "findahelpline.com for your country", "ref": "tel:988"}
+
+
+def despair_grade(text: str) -> bool:
+    """True when a first-person distress text carries a despair-grade word (and is not a crisis)."""
+    if not distress_ref(text):
+        return False
+    low = " " + normalize(text) + " "
+    return any((" " + w) in low for w in _DESPAIR_GRADE)
 _FIRST_PERSON = re.compile(r"\b(i|im|i'm|i\s*am|my|me|ive|i've|feel|feeling)\b", re.I)
 # A how-to / instructional question seeks INSTRUCTION, not comfort — even when it carries a word
 # that is elsewhere a cry ("how do I set a broken bone", "how do I treat a burn"). The procedural
@@ -1397,15 +1414,17 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
                 if one.get("status") == "ok":
                     verse.extend({"ref": v.get("ref", r), "text": v.get("text", "")}
                                  for v in (one.get("verses") or [])[:2])
-        return _witnessed({**base, "kind": "comfort",
-                           "message": "I'm here, and you're not carrying it alone. Let me sit "
-                                      "with you a minute — and tell me what you need; I'll help.",
-                           "seat": seat,
-                           "scripture": verse[:6],
-                           "real_help": ["Someone who loves you — tell them how you are",
-                                         "A pastor, or a local church",
-                                         "Prayer — He hears, and He is near to the brokenhearted"]},
-                          text, witness, gate_just_opened, topical=False)
+        comfort = {**base, "kind": "comfort",
+                   "message": "I'm here, and you're not carrying it alone. Let me sit "
+                              "with you a minute — and tell me what you need; I'll help.",
+                   "seat": seat,
+                   "scripture": verse[:6],
+                   "real_help": ["Someone who loves you — tell them how you are",
+                                 "A pastor, or a local church",
+                                 "Prayer — He hears, and He is near to the brokenhearted"]}
+        if despair_grade(text):
+            comfort["resources"] = [_IF_HEAVIER]          # the number, quietly, already in hand
+        return _witnessed(comfort, text, witness, gate_just_opened, topical=False)
 
     if kind == "verify":
         from .receipts import attach

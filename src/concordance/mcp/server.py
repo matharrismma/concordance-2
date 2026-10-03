@@ -53,7 +53,10 @@ def _secular_tools() -> List[dict]:
                          "(HOLDS / BROKEN / INCOMPLETE / SYSTEM_ERROR), the worked trail, AND a "
                          "sealed receipt "
                          "{content_hash, cite_url} you can re-fetch and re-verify (seal_fetch). "
-                         "Two forms: (a) MATH — {mode, params}; (b) ANY DOMAIN — pass `steps`, a "
+                         "Three forms: (a) PLAIN — {claim}: a plain-language claim; the engine finds "
+                         "the checkable claim(s) in it (de-identified in an airlock first), verifies and "
+                         "seals them, or answers INCOMPLETE if no extractor recognizes one; "
+                         "(b) MATH — {mode, params}; (c) ANY DOMAIN — pass `steps`, a "
                          "list of {id, domain, spec} where spec is that domain's packet (e.g. "
                          "{domain:'physics', spec:{PHYS_VERIFY:{mass_kg, acceleration_m_per_s2, "
                          "claimed_force_N}}}). ~60 secular domains are covered (physics, medicine, "
@@ -64,6 +67,8 @@ def _secular_tools() -> List[dict]:
                          "and says NOTHING about whether the claim is true — never relay it to a "
                          "human as a refutation. INCOMPLETE means no verifier applied (`gap_at`)."),
          "inputSchema": {"type": "object", "properties": {
+             "claim": {"type": "string", "description": "PLAIN form: a plain-language claim, in the caller's words"},
+             "domain": {"type": "string", "description": "PLAIN form: an optional domain hint (from find_verifier); recorded, never trusted to pick the verifier"},
              "mode": {"type": "string", "description": "MATH form: equality | inequality | derivative | integral | limit | solve"},
              "params": {"type": "object", "description": "MATH form: e.g. {expr_a, expr_b, variables} for equality"},
              "steps": {"type": "array", "description": "DOMAIN form: [{id, domain, spec}] — spec is the domain's packet",
@@ -1135,6 +1140,47 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     # consult the flag above.
     knowledge = True
     if name == "verify":
+        claim = str(args.get("claim") or "").strip()
+        if claim and not isinstance(args.get("steps"), list) and not args.get("mode"):
+            # THE PLAIN-CLAIM DOOR, on the agent plane (2026-10-02). POST /verify has taken a plain-
+            # language `claim` since 2026-09-05; this tool did not — yet the house ending's own step
+            # after find_verifier/audit/lookup hands `verify` exactly that ("verify it through
+            # <domain>" with {claim, domain}), so the one step was not executable as given. Same
+            # path as the web twin: the airlock de-identifies the claim (a claim that cannot be
+            # de-identified is QUARANTINED, never sent), the auditor FINDS the checkable claim(s),
+            # the derivation verifies them, one seal is attached. The result keeps the derivation
+            # shape (verdict, trail, seal) so a reader of `verify` reads one shape, and adds the
+            # per-claim checks. `domain` is a hint from find_verifier, recorded, never trusted to
+            # pick the verifier — the extractors decide, or the verdict is INCOMPLETE.
+            from .. import audit as _audit
+            from .. import airlock as _airlock
+            seal_on = args.get("seal", True) is not False
+            passage = _airlock.through(claim, lambda skel: _audit.audit(skel, config, seal=seal_on), minimal=True)
+            if passage.leaked:
+                return {"verdict": "QUARANTINE", "claim": claim, "claims_found": 0, "trail": [], "seal": None,
+                        "generated": False,
+                        "note": ("The claim could not be de-identified safely, so nothing was sent to the "
+                                 "verifier and nothing was sealed — strip the personal details and try again.")}
+            ar = passage.result if isinstance(passage.result, dict) else {}
+            results = ar.get("results") or []
+            trail = [{"id": f"a{i + 1}", "domain": c.get("domain"), "status": c.get("status"),
+                      "detail": c.get("detail", ""), "claim": c.get("claim")} for i, c in enumerate(results)]
+            verdict = str(ar.get("verdict") or "")
+            out = {"verdict": "INCOMPLETE" if verdict == "NOTHING_TO_CHECK" else verdict,
+                   "claim": claim, "claims_found": ar.get("claims_found", 0), "held": ar.get("held", 0),
+                   "broken": ar.get("broken", 0), "unchecked": ar.get("unchecked", 0),
+                   "checks": [{"claim": c.get("claim"), "verdict": c.get("status"), "domain": c.get("domain"),
+                               "detail": c.get("detail")} for c in results],
+                   "trail": trail, "seal": ar.get("seal") if isinstance(ar.get("seal"), dict) else None,
+                   "generated": False, "note": ar.get("note", "")}
+            if args.get("domain"):
+                out["domain_hint"] = str(args["domain"])
+            if out["verdict"] == "INCOMPLETE":
+                out["gap_at"] = claim
+                out["means"] = ("no deterministic extractor recognized a checkable claim in these words; this says "
+                                "NOTHING about whether the claim is true. State it as a number with its unit, or "
+                                "bring the domain's packet as steps=[{id, domain, spec}].")
+            return out
         if isinstance(args.get("steps"), list):
             res = verify_derivation(args["steps"])
             dom = str(args["steps"][0].get("domain") or "mathematics") if args["steps"] else "mathematics"
@@ -1535,6 +1581,11 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         # classifier's verdict, never the caller's assertion, so an agent cannot claim its way in.
         from .. import ask as _ask
         text = str(args.get("text") or "")
+        if not text.strip():
+            # the web twin (POST /ask) refuses an empty text with 400; the agent door silently
+            # searched for nothing and answered "found nothing" (caught 2026-10-02 when a step
+            # carried the wrong key). An empty ask is an error, not an answer.
+            return {"error": "text required — what you are bringing, in your own words"}
         kind = _ask.classify(text)
         opened = _ask.gate_signal(text)
         result = _ask.respond(text, config, gate_open=bool(allow_witness or opened),

@@ -131,8 +131,12 @@ def house(tool: str, r: dict, args: dict = None) -> dict:
                             "CHECK", "verify")
             else:
                 gap = next((s for s in trail_steps if _status_is(s, "NOT_APPLICABLE", "ERROR")), None)
-                nxt = _step("find the door for what could not be checked, then verify with that domain",
-                            "CHECK", "find_verifier", {"q": str((gap or {}).get("id") or r.get("claim") or "")})
+                # find_verifier's one argument is `query`, and a step id ("a1") is no query — the
+                # claim's own words are (caught 2026-10-02: the step was not executable as given)
+                words = str((gap or {}).get("claim") or r.get("claim") or r.get("gap_at") or asked or "")
+                nxt = (_step("find the door for what could not be checked, then verify with that domain",
+                             "CHECK", "find_verifier", {"query": words}) if words else
+                       _step("bring one claim, stated as a number with its unit", "CHECK", "verify"))
         elif tool == "audit":
             kind, trail = "checks", "checks"
             sl = r.get("seal") if isinstance(r.get("seal"), dict) else {}
@@ -148,13 +152,13 @@ def house(tool: str, r: dict, args: dict = None) -> dict:
             c = _first(r.get("candidates"), "domain")
             nxt = (_step(f"verify it through {c['domain']}", "CHECK", "verify",
                          {"claim": str(r.get("query") or asked), "domain": c["domain"]})
-                   if c else _step("ask it as a question instead", "WALK", "ask", {"q": str(r.get("query") or asked)}))
+                   if c else _step("ask it as a question instead", "WALK", "ask", {"text": str(r.get("query") or asked)}))
         elif tool == "search":
             kind, trail = "cards", "results"
             top = _first(r.get("results"), "id")
             nxt = (_step("open the top card", "FIND", "card_get", {"id": top["id"]})
                    if top else _step("ask it as a question; a situation in, one step out", "WALK", "ask",
-                                     {"q": str(r.get("query") or asked)}))
+                                     {"text": str(r.get("query") or asked)}))
         elif tool == "card_get":
             kind, trail = "card", "connections"
             if r.get("id"):
@@ -169,7 +173,7 @@ def house(tool: str, r: dict, args: dict = None) -> dict:
             kind, trail = "value", "source"
             k = r.get("kind")
             if not r.get("found"):
-                nxt = _step("ask it as a question", "WALK", "ask", {"q": str(r.get("detail") or "")[:120]})
+                nxt = _step("ask it as a question", "WALK", "ask", {"text": str(r.get("detail") or "")[:120]})
             elif k == "principles":
                 p = _first(r.get("value"), "pattern")
                 q = _first((p or {}).get("principles"), "card")
@@ -196,7 +200,16 @@ def house(tool: str, r: dict, args: dict = None) -> dict:
             ref = anchor.get("ref") if isinstance(anchor, dict) else (anchor if isinstance(anchor, str) else None)
             top = _first(r.get("results"), "id")
             q = str(r.get("q") or r.get("query") or asked)
-            if ref:
+            if str(r.get("kind") or "") == "crisis":
+                # A crisis answer carries no path on purpose (a person in crisis needs real people,
+                # not a quest) — so the generic "name what you brought" ending reached it, pointing a
+                # cry at `discern` (caught 2026-10-02). Help is the ending. No tool performs this
+                # step; a real person does. The resources ARE the trail.
+                kind, trail = "help", "resources" if "resources" in r else None
+                first = _first(r.get("resources"), "label")
+                nxt = _step("Reach a real person right now — " + (str(first["label"]) if first else
+                            "call or text 988 (US), or findahelpline.com for your country"), "WALK")
+            elif ref:
                 nxt = _step(do, "WORD", "read_passage", {"ref": ref})
             elif top:
                 nxt = _step(do, "WALK", "card_get", {"id": top["id"]})
@@ -207,21 +220,26 @@ def house(tool: str, r: dict, args: dict = None) -> dict:
         elif tool == "discern":
             kind, trail = "discernment", "why"
             own = r.get("next")
-            nxt = own if isinstance(own, dict) else _step("ask it", "WALK", "ask", {"q": str(r.get("input") or asked)})
+            nxt = own if isinstance(own, dict) else _step("ask it", "WALK", "ask", {"text": str(r.get("input") or asked)})
         elif tool == "coach_next":
             kind, trail = "unit", "position"
             u = r.get("unit")
             uid = u.get("id") if isinstance(u, dict) else u
-            nxt = _step("open the unit and do the one thing it asks", "WALK", "coach_unit",
-                        {"subject": str(r.get("subject") or ""), "unit": uid})
+            # coach_unit takes {id, subject} — the step once carried `unit` (caught by the
+            # executable-as-given sweep, 2026-10-02); no unit id => ask the Coach for the next one
+            nxt = (_step("open the unit and do the one thing it asks", "WALK", "coach_unit",
+                         {"id": str(uid), "subject": str(r.get("subject") or "")} if r.get("subject") else {"id": str(uid)})
+                   if uid else _step("ask the Coach for the next unit", "WALK", "coach_next"))
         elif tool == "identity_create":
             kind, trail = "record", "message"
             nxt = _step("prove you hold it", "KEEP", "identity_verify")
         elif tool == "study_create":
             kind, trail = "record", "card_ids"
+            # study_export takes the study's `key` — the one the caller created it under (the step
+            # once carried `study`, which no tool takes; caught by the executable-as-given sweep)
             s = r.get("study")
-            nxt = _step("export it, so it travels with you", "KEEP", "study_export",
-                        {"study": s.get("id") if isinstance(s, dict) else s})
+            key = str((args or {}).get("key") or (s.get("key") if isinstance(s, dict) else "") or r.get("key") or "")
+            nxt = _step("export it, so it travels with you", "KEEP", "study_export", {"key": key} if key else None)
         elif tool == "decks":
             kind, trail = "cards", "decks"
             d = _first(r.get("decks"), "id")

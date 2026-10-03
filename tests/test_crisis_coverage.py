@@ -486,3 +486,18 @@ def test_is_crisis_degrades_to_substrings_if_the_backstop_breaks(monkeypatch):
     assert not ask.is_crisis("convert 5 km to miles")             # and benign stays benign
     caught = sum(1 for q in RED_TEAM_BLIND if ask.is_crisis(q))   # the substring floor still holds
     assert caught >= _SUBSTRING_ONLY_FLOOR
+
+
+def test_despair_grade_comfort_carries_the_number_but_stays_below_the_crisis_lane():
+    """"i feel hopeless and alone" is NOT ideation — comfort is its lane and stays so (the crisis net
+    is never widened with bare emotion words: [[crisis-false-positive-lives-in-the-semantic-backstop]]).
+    But hopelessness and aloneness are the classic antecedents, so the comfort answer for a despair-
+    grade word carries the helpline quietly as its last line; exam nerves do not; a how-to never does;
+    a crisis is the higher lane and never reaches comfort. 2026-10-02."""
+    assert ask.classify("i feel hopeless and alone") == "comfort" and not ask.is_crisis("i feel hopeless and alone")
+    assert ask.despair_grade("i feel hopeless and alone")
+    assert ask.despair_grade("I feel so lonely lately")
+    assert not ask.despair_grade("I feel anxious about my exam")        # distress, not despair-grade
+    assert not ask.despair_grade("how do I fix a broken pipe")           # a how-to is never a cry
+    assert not ask.despair_grade("i want to end my life")                # crisis: the higher lane, not comfort
+    assert "988" in ask._IF_HEAVIER["label"]

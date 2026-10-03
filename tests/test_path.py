@@ -19,6 +19,7 @@ def test_question_type_classifies_the_nine():
         ("how do I grow spiritually", "", "formation"),
         ("why does God allow suffering", "seeker", "wisdom"),
         ("I want to end my life", "crisis", "crisis"),
+        ("i feel hopeless and alone", "comfort", "comfort"),   # a first-person ache is not "a person you carry"
     ]
     for q, kind, want in cases:
         assert path.question_type(q, kind) == want, f"{q!r} ({kind}) -> {path.question_type(q, kind)} != {want}"
@@ -64,3 +65,19 @@ def test_anchor_is_honestly_absent_when_nothing_fits(monkeypatch):
 def test_an_existing_answer_verse_becomes_the_anchor():
     a = path.anchor("comfort me", existing=[{"ref": "Psalm 34:18", "text": "The LORD is near…"}])
     assert a and a["ref"] == "Psalm 34:18"
+
+
+def test_comfort_sits_with_the_word_and_names_someone_who_loves_you(monkeypatch):
+    """A first-person ache ("i feel hopeless and alone") was typed 'relational' and told to "go to
+    the person — plainly and gently": there is no other person, it is the one who typed it (caught
+    2026-10-02 through the agent door). The comfort step: the found word, read slowly, then one
+    person who loves them told how they are today — with or without an anchor."""
+    p = path.compose("i feel hopeless and alone", kind="comfort",
+                     scripture=[{"ref": "Deuteronomy 31:6", "text": "Be strong and courageous."}])
+    assert p["type"] == "comfort" and "not carrying it alone" in p["framing"]
+    assert p["step"].startswith("Sit with Deuteronomy 31:6") and "someone who loves you" in p["step"]
+    assert p["anchor"]["ref"] == "Deuteronomy 31:6"
+    monkeypatch.setattr(path, "_resolve", lambda ref: None)
+    bare = path.compose("i feel hopeless and alone", kind="comfort")
+    assert bare["type"] == "comfort" and bare["anchor"] is None
+    assert "someone who loves you" in bare["step"] and "go to the person" not in bare["step"].lower()

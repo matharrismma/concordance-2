@@ -22,7 +22,7 @@ from typing import Any, Dict, List, Optional
 # `kind` (from ask.classify) already carries the strong routes; map those first, then read the
 # remaining `search` queries by their shape. Order matters — the first match wins.
 _KIND_TYPE = {
-    "crisis": "crisis", "decision": "decision", "ultimate": "wisdom", "comfort": "relational",
+    "crisis": "crisis", "decision": "decision", "ultimate": "wisdom", "comfort": "comfort",
     "date": "historical", "resourceful": "resource", "seeker": "wisdom",
     "scripture": "doctrine", "word_study": "doctrine",
 }
@@ -132,6 +132,7 @@ _FRAMING = {
     "crisis": "This needs a real person, now — not a search.",
     "decision": "This is a decision to weigh, not just a fact to look up.",
     "relational": "This is about a person you carry.",
+    "comfort": "This is your own weight — and you are not carrying it alone.",
     "doctrine": "This is a question about the Word.",
     "wisdom": "This is one of the questions people have always asked.",
     "resource": "This is a practical need — something to do.",
@@ -153,6 +154,15 @@ def _step(qtype: str, subject: str, lead: Optional[Dict[str, Any]],
     if qtype == "relational":
         return ("Go to the person — plainly and gently" +
                 (f", and carry this word: {anchor_v['ref']}." if anchor_v else "."))
+    if qtype == "comfort":
+        # A first-person ache ("i feel hopeless and alone") was typed "relational" and told to "go to
+        # the person — plainly and gently" — there is no other person; it is the one who typed it
+        # (caught 2026-10-02 through the agent door). The fitting step: the word that was found,
+        # read slowly, and one person who loves them told how they are today.
+        return ((f"Sit with {anchor_v['ref']} — read it slowly — then tell someone who loves you "
+                 f"how you are today.") if anchor_v
+                else "Tell someone who loves you how you are today — and bring the exact ache here; "
+                     "the Word has a word for it.")
     if qtype == "doctrine":
         return (f"Read {anchor_v['ref']} in its own words, then the commentary beside it."
                 if anchor_v else (f"Open '{lead_t}' and read it in the Word's own words." if lead_t
