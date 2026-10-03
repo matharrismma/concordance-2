@@ -128,7 +128,7 @@ def test_the_welcome_receives_an_agent_at_the_door():
                                            EngineConfig(face))["result"]["tools"]}
         import re
         for tok in set(re.findall(r"[a-z]+_[a-z_]+", w)):
-            if tok in ("next_step", "confession_sig"):
+            if tok in ("next_step", "public_key", "confession_sig"):      # route body keys, not tools
                 continue
             assert tok in names, (face, tok)
     wit = doors.welcome("witness")
