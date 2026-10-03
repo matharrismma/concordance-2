@@ -66,17 +66,32 @@ def _fore(sid, name, era, seed, shortfall, fulfillment, bands, terms=None):
 PRINCIPLES = [
     _card("praeparatio_evangelica",
           "Praeparatio evangelica — the foreshadow and the fulfillment",
-          ("The principle beneath this whole shelf: God did not leave the nations without witness (Acts "
-           "14:17). He wrote his law on every heart (Romans 2:14-15), showed his power in what is made "
-           "(Romans 1:19-20), and set the times and places of the nations 'that they should seek God, and "
-           "perhaps feel their way toward him' (Acts 17:26-27). So among the peoples he scattered SEEDS of "
-           "the Word (Justin Martyr's logos spermatikos) and SHADOWS of the thing to come (Colossians "
-           "2:16-17) — the true Light that enlightens everyone (John 1:9) breaking in refracted. We honor "
-           "the seed and the shadow generously; and because a shadow exists only where a body casts it, we "
-           "name the Body plainly. We do not hide the fulfillment for fear of the light — that would be to "
-           "love the shadow more than the One who cast it."),
-          "principle", ["praeparatio", "logos spermatikos", "shadow", "fulfillment", "acts17", "justin martyr"],
-          {"anchor": "Acts 17:23-28; Colossians 2:16-17; John 1:9; Romans 1:19-2:15"}),
+          ("The principle beneath this whole shelf, in three clauses (Matt's framing, 2026-10-02, carried "
+           "faithfully and anchored on the text). BEFORE CHRIST: the nations scattered at the tower of Babel "
+           "(Genesis 11:1-9) each carried PARTS of the story — 'God, having in the past spoken to the fathers "
+           "through the prophets at many times and in various ways' (Hebrews 1:1) — and every part has the "
+           "same HOLE: a resemblance to Christ in any pre-Christian faith is the outline of what that faith "
+           "lacked, a Person with a name, a face, and a date; never a parallel, never an equivalence. God did "
+           "not leave the nations without witness (Acts 14:17). He wrote his law on every heart (Romans "
+           "2:14-15), showed his power in what is made (Romans 1:19-20), and set the times and places of the "
+           "nations 'that they should seek God, and perhaps feel their way toward him' (Acts 17:26-27). So "
+           "among the peoples he scattered SEEDS of the Word (Justin Martyr's logos spermatikos) and SHADOWS "
+           "of the thing to come (Colossians 2:16-17) — the true Light that enlightens everyone (John 1:9) "
+           "breaking in refracted. CHRIST FILLED THE HOLE: 'at the end of these days [God] has spoken to us "
+           "by his Son' (Hebrews 1:2); 'I am the way' (John 14:6) — he fulfilled the parts and became the "
+           "Way, and at Pentecost the tongues of Babel heard it each in their own (Acts 2:6-11). AFTER "
+           "CHRIST: whatever arises after him and redefines, demotes, or denies the Son stands in opposition "
+           "and is measured by the test of the spirits (1 John 4:2-3), in love, never aimed at persons. We "
+           "honor the seed and the shadow generously; and because a shadow exists only where a body casts "
+           "it, we name the Body plainly. We do not hide the fulfillment for fear of the light — that would "
+           "be to love the shadow more than the One who cast it."),
+          "principle", ["praeparatio", "logos spermatikos", "shadow", "fulfillment", "acts17", "justin martyr",
+                        "babel", "parts of the story", "the hole"],
+          {"anchor": "Genesis 11:1-9; Hebrews 1:1-2; Acts 17:23-28; Colossians 2:16-17; John 1:9; John 14:6; "
+                     "Acts 2:6-11; Romans 1:19-2:15; 1 John 4:2-3",
+           "frame": {"before_christ": "the nations at Babel carried parts of the story; every part has the hole",
+                     "christ": "fulfilled the parts and became the Way (John 14:6; Hebrews 1:1-2; Acts 2)",
+                     "after_christ": "opposition — tested by 1 John 4:2-3, in love, never persons"}}),
     _card("the_test_of_the_spirits",
           "The test of the spirits — 1 John 4:2-3 (held in love)",
           ("The calibration for what came AFTER Christ, carried as Matt's framing and anchored on the text: "
@@ -449,13 +464,16 @@ def main() -> int:
     spine = {
         "id": SPINE, "kind": "reference", "title": "The nations' foreshadows — seeds of the Word, fulfilled in Christ",
         "body": ("Every faith of the nations that came before Christ, credited MAGNANIMOUSLY where it "
-                 "contributed positively and read as a foreshadow — the seeds of the Word scattered among the "
+                 "contributed positively and read as a foreshadow — the nations scattered at Babel (Genesis 11) "
+                 "each carrying parts of the story (Hebrews 1:1-2), the seeds of the Word scattered among the "
                  "peoples (Acts 17), the shadow whose substance is Christ (Colossians 2:17), the true Light "
-                 "refracted (John 1:9). We honor the seed and name the fulfillment plainly, for we do not hide "
-                 "the light. What arose after Christ is measured by the test of the spirits — whether it "
-                 "confesses or denies the Son come in the flesh (1 John 4:2-3) — carried as Matt's framing, "
-                 "anchored on the text, and held always in love: the door to the fulfillment stands open to "
-                 "all. 'We don't lie, but we love you.'"),
+                 "refracted (John 1:9). Every part has the hole Christ filled; a likeness to him in a faith "
+                 "before him is the outline of what it lacked. We honor the seed and name the fulfillment "
+                 "plainly, for we do not hide the light: he fulfilled the parts and became the Way (John 14:6). "
+                 "What arose after Christ is measured by the test of the spirits — whether it confesses or "
+                 "denies the Son come in the flesh (1 John 4:2-3) — carried as Matt's framing, anchored on the "
+                 "text, and held always in love: the door to the fulfillment stands open to all. 'We don't "
+                 "lie, but we love you.'"),
         "source": {"label": "The nations' foreshadows, calibrated to the Word (Acts 17)", "url": "",
                    "domain": "religion", "authority_tier": "reference"},
         "shelf": "spine", "box": "spine",

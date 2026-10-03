@@ -1280,14 +1280,37 @@ def _lead_excerpt(body: str, n: int = 620) -> str:
     return cut[:dot + 1] if dot > n * 0.55 else cut.rstrip() + "…"
 
 
+# The shelves that are PARTS OF THE STORY with the hole Christ filled (Matt, 2026-10-02): a nation's
+# foreshadow, a signpost. Their fitting anchor is the fulfillment verse the card itself names.
+_SHADOW_SHELVES = frozenset({"foreshadows", "signposts"})
+
+
+def _fulfillment_ref(title: str, body: str) -> str:
+    """The verse a shadow card names as its fulfillment: the reference in its title (signposts carry
+    'fulfilled in John 14:6'), else the first reference after the word 'fulfillment' in its body, else
+    the first reference in the body. '' when it names none. Found in the card's own words."""
+    t, b = str(title or ""), str(body or "")
+    m = _VERSE_RE.search(t)
+    if m:
+        return m.group(0).strip()
+    i = b.lower().find("fulfillment")
+    m = _VERSE_RE.search(b, i if i >= 0 else 0)
+    return m.group(0).strip() if m else ""
+
+
 def _lead_card(card: Dict[str, Any]) -> Dict[str, Any]:
     """The single best hit, shaped to LEAD: title, a full excerpt of its own words, and its source
     (the provenance IS the proof for a found card). Nothing generated — this is the card's content."""
     src = card.get("source") or {}
-    return {"id": card.get("id"), "title": card.get("title"), "shelf": card.get("shelf"),
+    lead = {"id": card.get("id"), "title": card.get("title"), "shelf": card.get("shelf"),
             "excerpt": _lead_excerpt(card.get("body") or ""),
             "source": {"label": src.get("label", ""), "url": src.get("url", ""),
                        "authority_tier": src.get("authority_tier", "")}}
+    if card.get("shelf") in _SHADOW_SHELVES:
+        ref = _fulfillment_ref(card.get("title") or "", card.get("body") or "")
+        if ref:
+            lead["anchor_ref"] = ref            # the verse the card itself names as the fulfillment
+    return lead
 
 
 # The librarian's line for a plain found answer: warm, and honest about what it is (kept + cited,

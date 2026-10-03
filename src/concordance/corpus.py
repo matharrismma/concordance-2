@@ -1203,11 +1203,62 @@ def load_cards(path: Optional[Path] = None,
                         continue
                     if isinstance(c, dict) and c.get("id"):
                         _keep(c)
+        # THE SIGNPOSTS AS CARDS (2026-10-02; Matt: "the nations at the tower of Babel having parts of
+        # the story, but Christ fulfilled them"). data/prophecy/signposts.jsonl served /prophecy alone —
+        # search and ask could not reach the clearest statements of the hole Christ filled (measured:
+        # search("the way logos derek") -> nothing; /card?id=signpost_... -> not found). ONE source: the
+        # same file, shaped as cards at load time — never a second file to drift. Shelf `signposts`,
+        # a member of the foreshadows spine, so the walk from any nation's part leads to the Way.
+        from . import prophecy as _prophecy       # the same resolver /prophecy uses (honors its env)
+        sp_path = _prophecy._file()
+        if not sp_path.exists():
+            sp_path = p.parent / "prophecy" / "signposts.jsonl"
+        if sp_path.exists():
+            with open(sp_path, encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        rec = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    c = _signpost_card(rec)
+                    if c is not None and c["id"] not in out:
+                        _keep(c)
         for overlay in ("reference_bridges.jsonl", "keystone_bridges.jsonl",
                         "nesting_bridges.jsonl", "works_bridges.jsonl", "element_bridges.jsonl",
                         "ncs_bridges.jsonl"):
             _apply_bridges(out, p.parent / overlay)
     return out
+
+
+def _signpost_card(rec: dict) -> Optional[dict]:
+    """A prophecy signpost record {id, title, verdict, verification, wisdom, triggers, domains, category}
+    shaped as a card for the keeping: the body is the record's own two paragraphs (the verification —
+    what was found — then the wisdom — where it points), nothing added. Returns None for a record with
+    no id or title."""
+    if not isinstance(rec, dict) or not rec.get("id") or not rec.get("title"):
+        return None
+    body = " ".join(x for x in (str(rec.get("verification") or "").strip(),
+                                str(rec.get("wisdom") or "").strip()) if x)
+    trig = rec.get("triggers") if isinstance(rec.get("triggers"), dict) else {}
+    kws = [str(k).lower() for k in (trig.get("keywords") or []) if k]
+    return {
+        "id": str(rec["id"]), "kind": "reference", "title": str(rec["title"])[:180], "body": body,
+        "source": {"label": "Signposts among the nations — parts of the story, and the hole Christ filled "
+                            "(Genesis 11; Hebrews 1:1-2; Acts 17)",
+                   "url": f"/prophecy.html#{rec['id']}", "domain": "religion", "authority_tier": "reference"},
+        "shelf": "signposts", "box": "signpost",
+        "bands": ["signpost", "prophecy", "foreshadow", "praeparatio", "the hole"]
+                 + [str(d) for d in (rec.get("domains") or [])] + kws[:8],
+        "subject": str(rec["title"])[:180],
+        "connections": [{"to_card_id": "card_spine_foreshadows", "relationship": "member_of",
+                         "evidence": "a part of the story carried by the nations, fulfilled in Christ"}],
+        "author": "engine", "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
+        "lifecycle_stage": "public", "volatility": "permanent", "surface": "secular", "generated": False,
+        "extra": {"verdict": rec.get("verdict"), "category": rec.get("category"), "triggers": trig},
+    }
 
 
 # inverse labels for DIRECTIONAL (hierarchical) edges, so the reciprocal points the other way and
@@ -1372,6 +1423,41 @@ def query_subject(text: str) -> str:
     return s
 
 
+# Spellings of the same Chinese classics and names (Wade-Giles · pinyin · the older missionary
+# forms). Multi-word or proper names only — a bare "tao"/"dao" swap would reach Taos and the Dao
+# of unrelated titles. Lower-case; matched as substrings of the lower-cased query.
+_ROMANIZATION = (
+    ("tao te ching", "tao teh king", "tao-teh-king", "daodejing", "dao de jing", "tao-te-ching"),
+    ("lao tzu", "laozi", "lao-tze", "lao tze", "lao-tzu", "lao tsu"),
+    ("chuang tzu", "zhuangzi", "chuang-tzu", "chuang tsu"),
+    ("i ching", "yijing", "yi king", "book of changes"),
+    ("sun tzu", "sunzi", "sun-tzu"),
+    ("confucius", "kongzi", "kung fu-tzu", "k'ung fu-tzu"),
+    ("mencius", "mengzi"),
+    ("the analects", "lun yu", "lunyu"),
+)
+
+
+def _alias_queries(query: str) -> List[str]:
+    """The query re-spelled through each romanization group it touches (one swap per variant),
+    deduped, the original excluded. Pure; empty for a query naming none of the works."""
+    q = str(query or "")
+    low = q.lower()
+    outq: List[str] = []
+    for group in _ROMANIZATION:
+        for form in group:
+            if form in low:
+                i = low.index(form)
+                for alt in group:
+                    if alt == form:
+                        continue
+                    cand = q[:i] + alt + q[i + len(form):]
+                    if cand.lower() != low and cand not in outq:
+                        outq.append(cand)
+                break
+    return outq
+
+
 def search_question(query: str, limit: int = 25, include_witness: bool = True,
                     shelves: Optional[set] = None) -> List[dict]:
     """Search a free-text QUESTION: the necessity-only subject first (frame stripped), then the raw text,
@@ -1399,6 +1485,16 @@ def search_question(query: str, limit: int = 25, include_witness: bool = True,
         if len(out) >= limit:
             break
         _take(src)
+
+    # ROMANIZATION (2026-10-02): the keeping holds Legge's "Tao Teh King" (Gutenberg 216) and Carus's
+    # "Tao-teh-king"; a reader asks for the "Tao Te Ching" or the "Daodejing" — Wade-Giles, pinyin and
+    # the older spellings never met, so the classic was in the house and unreachable (measured: ask
+    # "what does the tao te ching say about the way" -> nothing). Each alias group is one work or one
+    # name; the literal query keeps the front slots and the aliases only fill what remains.
+    for alt in _alias_queries(subj if subj != raw else raw):
+        if len(out) >= limit:
+            break
+        _take(alt)
 
     # RECALL, SHARPENED BY THE THESAURUS. Only when the literal query UNDER-FILLS: broaden the
     # subject word by a few WordNet synonyms so "automobile" reaches material that only says "car".

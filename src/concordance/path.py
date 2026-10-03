@@ -136,6 +136,7 @@ _FRAMING = {
     "doctrine": "This is a question about the Word.",
     "wisdom": "This is one of the questions people have always asked.",
     "resource": "This is a practical need — something to do.",
+    "shadow": "This is one of the nations' parts of the story — read it for the hole Christ filled.",
     "timing": "This is a question of timing.",
     "formation": "This is about growing, over time.",
     "historical": "This is a matter of record.",
@@ -167,6 +168,16 @@ def _step(qtype: str, subject: str, lead: Optional[Dict[str, Any]],
         return (f"Read {anchor_v['ref']} in its own words, then the commentary beside it."
                 if anchor_v else (f"Open '{lead_t}' and read it in the Word's own words." if lead_t
                                   else "Search the Word for this, and read the passage itself."))
+    if qtype == "shadow":
+        # A foreshadow or a signpost (Matt, 2026-10-02: "They all have the hole that Christ filled …
+        # Christ fulfilled them, and he became the way"): the card's three movements, then the verse
+        # it names as the fulfillment — never "open it, it has the steps" (the practical register
+        # a reader met on this question, measured live).
+        where = f"Open '{lead_t}'" if lead_t else "Open the card"
+        return (f"{where} — the seed it kept, where it fell short, the One it pointed to — then read "
+                f"{anchor_v['ref']} in its own words: the hole, and the Person who filled it." if anchor_v
+                else f"{where} — the seed it kept, where it fell short, the One it pointed to; then read "
+                     "John 14:6 in its own words.")
     if qtype == "formation":
         return "Begin one small practice this week — the Field Kit gives a seven-day step to walk."
     if qtype in ("historical", "timing"):
@@ -196,6 +207,15 @@ def compose(text: str, *, kind: str = "", subject: str = "",
     classified type, ONE next step pointing at real material, and a fitting resolved verse or None."""
     qtype = question_type(text, kind)
     anchor_v = anchor(text, existing=scripture)
+    # A found lead on a SHADOW shelf (a nation's foreshadow, a signpost) is read as a part of the story
+    # with the hole Christ filled — whatever the question's surface shape — and anchors on the verse
+    # the card itself names as the fulfillment, resolved from the canon (never pasted on).
+    if isinstance(lead, dict) and lead.get("shelf") in ("foreshadows", "signposts"):
+        qtype = "shadow"
+        ref = str(lead.get("anchor_ref") or "")
+        got = _resolve(ref) if ref else None
+        if got:
+            anchor_v = got
     return {
         "type": qtype,
         "framing": _FRAMING.get(qtype, ""),
