@@ -80,6 +80,9 @@ STEPS = [
         "part": "DEMAND",
         "estimate": 0.0,
         "argv": [PYTHON, "tools/shepherd_rounds.py"],
+        # 2026-10-03: the first turn on a timer printed "Nothing was written. Re-run with --apply" — the hive's own
+        # --apply never reached the worker. In apply mode the worker files what it dug.
+        "apply_argv": [PYTHON, "tools/shepherd_rounds.py", "--apply"],
         "note": "dig the want list -- what people actually asked for and we did not have",
     },
     {
@@ -101,6 +104,7 @@ STEPS = [
         "part": "SUPPLY",
         "estimate": 0.0,
         "argv": [PYTHON, "tools/grow.py"],
+        "apply_argv": [PYTHON, "tools/grow.py", "--apply"],   # same lesson: --check draws nothing
         "note": "one turn of the standing growth cycle: measure, safe edges, record",
     },
 ]
@@ -134,7 +138,8 @@ def run_step(step, apply_it):
 
     started = time.time()
     try:
-        proc = subprocess.run(step["argv"], cwd=ROOT, env=_env(),
+        argv = step.get("apply_argv") or step["argv"]          # apply mode runs the worker's apply form
+        proc = subprocess.run(argv, cwd=ROOT, env=_env(),
                               capture_output=True, text=True, timeout=1800)
         rc = proc.returncode
         tail = (proc.stdout or proc.stderr or "").strip().splitlines()
