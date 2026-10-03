@@ -108,6 +108,14 @@ def house(tool: str, r: dict, args: dict = None) -> dict:
     verb = TOOL_VERB.get(tool, "")
     kind, trail, seal, nxt = "answer", None, None, None
     asked = _arg(args, "query", "q", "claim", "text", "ref", "word", "id")
+    if tool not in ALL_DOORS:
+        # an INTERNAL's answer ends by pointing back to the door it serves; PLUMBING says so plainly
+        k = TOOL_KIND.get(tool, "INTERNAL").lower()
+        first = (TOOL_DOORS.get(verb) or [None])[0]
+        nxt = (_step(f"this is plumbing of {verb or 'the house'}; a reader's door is {first}", verb or "CHECK", first)
+               if k == "plumbing" else
+               _step(f"an internal of {verb}; the door it serves is {first}", verb or "CHECK", first))
+        return {"door": verb, "kind": k, "trail": None, "seal": None, "next_step": nxt, "ends": ENDS}
     try:
         trail_steps = r.get("trail") if isinstance(r.get("trail"), list) else []
         if tool == "verify":
@@ -175,14 +183,27 @@ def house(tool: str, r: dict, args: dict = None) -> dict:
             kind, trail = "senses", "senses"
             nxt = _step("the words that stand with it", "FIND", "thesaurus", {"word": str(r.get("word") or asked)})
         elif tool == "ask":
+            # THE PATH IS THE ENDING. wayfind.path already answers with ONE next step in words
+            # (path.step), a type, a framing and a Scripture anchor that fits; the house carries
+            # those same words as its `do` and binds them to the one tool that performs them —
+            # the anchor to read_passage, a found card to card_get, a claim to verify — so the
+            # path and the ending are one object, not two.
             kind = "path"
-            trail = "path" if "path" in r else ("trail" if "trail" in r else None)
-            own = r.get("next")
-            if not isinstance(own, dict) and isinstance(r.get("path"), dict):
-                own = r["path"].get("next_step") or r["path"].get("next")
-            nxt = own if isinstance(own, dict) else _step(
-                "name what you brought: a word, a question, a claim, a verse", "WALK", "discern",
-                {"text": str(r.get("q") or r.get("query") or asked)})
+            trail = "path" if "path" in r else ("results" if "results" in r else None)
+            p = r.get("path") if isinstance(r.get("path"), dict) else {}
+            do = str(p.get("step") or "name what you brought: a word, a question, a claim, a verse")
+            anchor = p.get("anchor")
+            ref = anchor.get("ref") if isinstance(anchor, dict) else (anchor if isinstance(anchor, str) else None)
+            top = _first(r.get("results"), "id")
+            q = str(r.get("q") or r.get("query") or asked)
+            if ref:
+                nxt = _step(do, "WORD", "read_passage", {"ref": ref})
+            elif top:
+                nxt = _step(do, "WALK", "card_get", {"id": top["id"]})
+            elif str(p.get("type") or "").lower() == "claim":
+                nxt = _step(do, "CHECK", "verify", {"claim": q})
+            else:
+                nxt = _step(do, "WALK", "discern", {"text": q})
         elif tool == "discern":
             kind, trail = "discernment", "why"
             own = r.get("next")

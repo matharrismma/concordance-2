@@ -1833,8 +1833,9 @@ def handle(request: dict, config: EngineConfig, session: Optional[Dict[str, Any]
                 "isError": True}}
         # THE HOUSE ENDING (2026-10-02): a door's answer ends the same way on every door — a verdict
         # or a card, the trail, a seal, ONE next step — so an agent is never handed a lobby.
+        # An internal's ending points back to the door it serves; plumbing says it is plumbing.
         from .. import doors as _doors
-        if name in _doors.ALL_DOORS and isinstance(result, dict):
+        if name in _doors.TOOL_VERB and isinstance(result, dict):
             result = dict(result, house=_doors.house(name, result, args))
         return {"jsonrpc": "2.0", "id": rid, "result": {
             "content": [{"type": "text", "text": json.dumps(result, ensure_ascii=False)}], "isError": False}}

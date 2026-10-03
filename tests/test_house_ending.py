@@ -3,8 +3,14 @@ its web twin — ends the same way: a verdict or a card · the trail · a seal �
 step is a rule per door filled with the answer's own ids; it names a real tool; a non-door tool gets
 no ending; an error gets no ending."""
 import json
+import os
+import tempfile
 
-from concordance import doors
+# a scratch keeping: `verify` mints a receipt card, and minting touches the corpus — on a laptop the
+# real keeping is a minutes-long load (OneDrive rehydrates the shards); the ending is what is pinned
+os.environ["CONCORDANCE_DATA_DIR"] = tempfile.mkdtemp(prefix="nh-house-")
+
+from concordance import doors  # noqa: E402
 from concordance.engine import EngineConfig
 from concordance.mcp.server import handle
 from concordance.web import api
@@ -61,9 +67,14 @@ def test_find_and_keep_doors_end_the_same_way():
     assert h["next_step"]["tool"] in ("deck_open", "study_create")
 
 
-def test_a_non_door_tool_and_an_error_carry_no_ending():
+def test_an_internal_points_back_to_its_door_and_an_error_carries_no_ending():
     body, err = _call("kernel", {})
-    assert not err and "house" not in body                                    # an internal, not a door
+    assert not err
+    h = body["house"]                                                        # an internal of CHECK
+    assert h["door"] == "CHECK" and h["kind"] == "internal" and h["trail"] is None
+    assert h["next_step"]["tool"] == "verify" and "door it serves" in h["next_step"]["do"]
+    body, err = _call("now", {})
+    assert not err and body["house"]["kind"] == "plumbing" and body["house"]["next_step"]["tool"] == "search"
     body, err = _call("card_get", {})                                        # a door, but an error: no ending
     assert err and "house" not in body
 
