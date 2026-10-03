@@ -229,3 +229,18 @@ def test_an_after_christ_chart_walks_as_tested_not_as_a_shadow(monkeypatch):
     before = ask._lead_card({"id": "card_foreshadow_stoicism", "shelf": "foreshadows", "box": "foreshadow",
                              "title": "Stoicism", "body": "The fulfillment: the law on the heart (Romans 2:15)."})
     assert before["box"] == "foreshadow" and path.compose("stoics", kind="found", lead=before)["type"] == "shadow"
+
+
+def test_a_chart_shares_the_asked_word_through_its_terms_and_bands(monkeypatch):
+    """Second half of the Zoroaster miss: `_shares_a_word` reads title + body, and the Zoroastrianism card's
+    body never says "zoroaster" (it says Ahura Mazda, Saoshyant, the Magi) — so the lead was judged weak and
+    the answer went to the web. On the discernment shelves the terms and bands carry the asked word.
+    The subject seat is what the live keeping names (the rarest asked word: "zoroaster"); pinned, not
+    left to an empty test keeping's arbitrary seat."""
+    from concordance import ask
+    monkeypatch.setattr(corpus, "subject_of", lambda text: "zoroaster")
+    zoro = {"id": "card_foreshadow_zoroastrianism", "title": "Zoroastrianism", "shelf": "foreshadows",
+            "body": "one wise Lord (Ahura Mazda), a coming Savior (Saoshyant), the resurrection of the body",
+            "bands": ["foreshadow", "zoroaster", "magi"], "extra": {"discerns_terms": ["zoroastrianism", "zoroaster"]}}
+    assert ask._shares_a_word("what did the magi of zoroaster expect", zoro)
+    assert not ask._shares_a_word("what did the magi of zoroaster expect", dict(zoro, shelf="gutenberg"))

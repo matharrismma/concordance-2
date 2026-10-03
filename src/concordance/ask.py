@@ -508,6 +508,12 @@ def _shares_a_word(text: str, card: Dict[str, Any]) -> bool:
     if not q:
         return True                                   # nothing specific asked — don't second-guess
     hay = _content_tokens((card.get("title") or "") + " " + (card.get("body") or ""))
+    if card.get("shelf") in _SHADOW_SHELVES:
+        # a chart carries its subject in the terms it discerns and its bands ("Zoroastrianism" is the
+        # title; "zoroaster" and "magi" are the words a person asks with) — same rule as
+        # _title_names_subject, same shelves only; the guard is unchanged everywhere else
+        ex = card.get("extra") if isinstance(card.get("extra"), dict) else {}
+        hay |= _content_tokens(" ".join(str(t) for t in list(ex.get("discerns_terms") or []) + list(card.get("bands") or [])))
     try:
         subject = corpus.subject_of(text)
     except Exception:  # noqa: BLE001 — no corpus loaded is not a reason to reject a hit
