@@ -17,7 +17,7 @@
 #     backups/      the nightly data tars + .sha256 (tools/backup.sh), the memory seals, the substrate tars
 #     shards/       data/shards (the frozen freight: the shelves' full bodies, 1.9 GB) — rsync deltas
 #     acquisitions/ data/acquisitions (the stored source archives)
-#     releases/     the field pack + commons bundle, when cut
+#     releases/     /srv/nh-releases — the field pack + the weekly Kiwix ZIM (served at /releases/)
 # Run by nh-storagebox.timer (03:40, after backup.sh at 03:00). Logs to /home/nh/backups/storagebox.log.
 set -u
 ENV="${NH_STORAGEBOX_ENV:-/home/nh/.config/nh/storagebox.env}"
@@ -56,6 +56,6 @@ ok=0
 push /home/nh/backups backups --include='*.tar.gz' --include='*.sha256' --include='*.log' --exclude='*' || ok=1
 push "$ROOT/data/shards" shards || ok=1
 push "$ROOT/data/acquisitions" acquisitions || ok=1
-push /home/nh/releases releases || ok=1
+push /srv/nh-releases releases || ok=1     # the public releases root (served at narrowhighway.com/releases/)
 if [ "$ok" = 0 ]; then say "storage box in step with the trunk"; else say "storage box: one or more pushes failed"; fi
 exit $ok

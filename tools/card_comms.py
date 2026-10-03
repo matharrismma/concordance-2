@@ -139,6 +139,30 @@ CARDS = [
      "relay for everyone. Nodes relay even when your phone is off."),
 
     # ── distress, calling for help, and the plan ─────────────────────────────
+    ("handheld_vhf_uhf", "VHF/UHF FM handhelds (Baofeng-class) — voice and listening, and where the license lines fall", "ham", FCC97, "https://www.ecfr.gov/current/title-47/chapter-I/subchapter-D/part-97",
+     "baofeng uv-5r handheld ht dual band vhf uhf fm voice 2 meter 70 cm license ham gmrs frs scanner noaa receive legal",
+     "A dual-band FM handheld (the $25 Baofeng class) transmits VOICE on 136–174 MHz (2 m) and 400–520 MHz "
+     "(70 cm), typically 1–5 W: a few km simplex handheld to handheld, far more through a repeater on a hill. "
+     "RECEIVING is always lawful: NOAA weather (162.400–162.550 MHz), local repeaters, scanning. TRANSMITTING "
+     "is where the lines fall. On the amateur 2 m / 70 cm bands you need an amateur license (Technician — a "
+     "35-question exam, no Morse; Part 97). On FRS/GMRS/MURS the rules (Part 95) require type-accepted "
+     "equipment — a generic dual-band handheld is NOT certified for those services, so GMRS use needs a "
+     "GMRS-certified radio plus the no-exam GMRS license (one license covers the family). The emergency "
+     "exception (Part 97.403/97.405 and the distress conventions) permits any means to protect life. What "
+     "a family does with them: a licensed voice net (two Technicians in a household is enough), a weather "
+     "and repeater listening post, and a programmed channel plan on paper in the kit. Below LoRa in the "
+     "ladder: voice, not data; no mesh; no encryption on amateur bands."),
+    ("packet_over_handheld", "Text over a handheld — packet radio (AX.25 / APRS) with a sound-card TNC", "ham", FCC97, "https://www.ecfr.gov/current/title-47/chapter-I/subchapter-D/part-97",
+     "packet radio ax.25 aprs direwolf tnc kiss 1200 baud afsk 144.390 handheld text data over voice radio amateur",
+     "A VHF handheld can carry TEXT: packet radio sends short digital frames (AX.25) as 1200-baud audio tones "
+     "(AFSK) over the ordinary voice channel. The parts: the handheld, a cable to a sound-card interface or a "
+     "small KISS TNC, and a computer or phone running a software modem (Direwolf is the open-source one). "
+     "APRS — position + short messages — rides this on 144.390 MHz in the US with a continent of digipeaters "
+     "already listening. It is slow (a few hundred bytes a second), it needs an amateur license, and on "
+     "amateur bands traffic must be in the clear (no encryption; signing is fine — a signed message is "
+     "readable). That is exactly why Meshtastic lives on the license-free ISM band with its encryption, and "
+     "why a packet link is the licensed, longer-reach cousin: a Lighthouse node's signed Daily Word and "
+     "short answers fit a packet frame. Field-test pending on a real link, stated honestly."),
     ("distress_signals", "Calling for help — the signals everyone should know", "emergency", INTL_DISTRESS, "",
      "distress signal mayday sos three whistle blasts fires ground to air rescue emergency call help",
      "MAYDAY (spoken three times) is the voice distress call for grave, immediate danger; PAN-PAN "

@@ -1,0 +1,17 @@
+[Unit]
+Description=Narrow Highway — cut the field library as a Kiwix ZIM into the releases root (weekly)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=nh
+WorkingDirectory=/home/nh/concordance-2
+Environment=CONCORDANCE_RELEASES=/srv/nh-releases
+Environment=CONCORDANCE_DATA_DIR=/home/nh/concordance-2/data
+Environment=PYTHONPATH=/home/nh/concordance-2/src
+EnvironmentFile=-/home/nh/concordance-2/.env
+ExecStart=/home/nh/concordance-2/.venv/bin/python tools/export_zim.py
+Nice=15
+IOSchedulingClass=idle
+MemoryMax=3G
+MemorySwapMax=0

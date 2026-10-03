@@ -1,13 +1,12 @@
 # Narrow Highway — Caddy reverse proxy (auto-TLS via Let's Encrypt).
 #
+#
+#
 # CURRENT LIVE REALITY (2026-07-02): 1.0 (nh-engine :8000) is RETIRED — everything is 2.0.
 #   narrowhighway.com      -> :8002  (2.0 secular; front door, app, engine, seals, card permalinks)
 #   api.narrowhighway.com  -> :8002  (2.0 secular; verify/derivation.verify/search/seal/mcp/identity)
 #   narrowhighway.org      -> :8001  (2.0 witness)
 #   narrowhighway.tv       -> :8002  (2.0 secular; the TV GUIDE at /tv — watch/listen/learn)
-# 1.0 files remain at /home/nh/Lighthouse (+ archive ~/backups/lighthouse-1.0-full-*.tar.gz);
-# re-enable with `sudo systemctl enable --now nh-engine` and restore this file from a backup.
-# Rollback points: .pre2cut (.com cutover), .pretv (.tv), .pre1retire (this 1.0 retirement).
 
 api.narrowhighway.com {
 	encode gzip zstd
@@ -16,11 +15,11 @@ api.narrowhighway.com {
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
-	# 1.0 retired — api served by 2.0 secular. 1.0-only granular endpoints are intentionally gone
-	# (accepted MCP tool-parity delta: ~103 granular 1.0 tools -> 2.0's consolidated set).
-	reverse_proxy 127.0.0.1:8002 {
-		lb_try_duration 10s
-		lb_try_interval 250ms
+	route {
+		reverse_proxy 127.0.0.1:8002 {
+			lb_try_duration 10s
+			lb_try_interval 250ms
+		}
 	}
 	log {
 		output file /var/log/caddy/api.access.log
@@ -35,30 +34,34 @@ narrowhighway.com {
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
-
-	# Retired 1.0 lifestyle pages -> home (content archived, recoverable) so cited links don't hard-404.
 	@legacy path /almanac.html /apothecary.html /walk.html /kept.html /enter.html /packets.html /breath.html /missions.html /search.html /voices
-	redir @legacy / 301
-	# Retired 1.0 pages -> their nearest 2.0 home (preserve crawl equity; no hard 404).
-	redir /about.html /guarantees.html 301
-	redir /today.html /journal.html 301
-	redir /curriculum.html /read.html 301
-	redir /submit-curriculum.html /read.html 301
-	# (removed 2026-08-29: /workshop.html is now a REAL 2.0 page — the contributor door — not a 1.0 stub)
-	redir /guidance.html /ask.html 301
-	redir /canon.html /bible.html 301
-	redir /bibles.html /bible.html 301
-	redir /bible-trivia.html /bible.html 301
-	redir /reach.html /community.html 301
-	redir /outreach.html /community.html 301
-	redir /assembly.html /community.html 301
-	redir /media-center.html https://narrowhighway.tv/ 301
-
-	# 2.0 secular serves everything — front door, app, engine, seals, AND the card permalinks
-	# (render_card_html at /card.html?id= and /card/<id>). No more 1.0 fallback.
-	reverse_proxy 127.0.0.1:8002 {
-		lb_try_duration 10s
-		lb_try_interval 250ms
+	route {
+		# Retired 1.0 lifestyle pages -> home (content archived) so cited links don't hard-404.
+		redir @legacy / 301
+		# Retired 1.0 pages -> their nearest 2.0 home.
+		redir /about.html /guarantees.html 301
+		redir /today.html /journal.html 301
+		redir /curriculum.html /read.html 301
+		redir /submit-curriculum.html /read.html 301
+		redir /guidance.html /ask.html 301
+		redir /canon.html /bible.html 301
+		redir /bibles.html /bible.html 301
+		redir /bible-trivia.html /bible.html 301
+		redir /reach.html /community.html 301
+		redir /outreach.html /community.html 301
+		redir /assembly.html /community.html 301
+		redir /media-center.html https://narrowhighway.tv/ 301
+		# Releases (2026-10-03): the field pack and the Kiwix ZIM, each with its sha256 — served as files from
+		# /srv/nh-releases (cut by nh-zim.timer / tools/cut_field_pack.py). A known branch: one place, one hash.
+		redir /releases /releases/ 301
+		handle_path /releases/* {
+			root * /srv/nh-releases
+			file_server
+		}
+		reverse_proxy 127.0.0.1:8002 {
+			lb_try_duration 10s
+			lb_try_interval 250ms
+		}
 	}
 	log {
 		output file /var/log/caddy/site.access.log
@@ -67,11 +70,13 @@ narrowhighway.com {
 }
 
 narrowhighway.org {
-	reverse_proxy 127.0.0.1:8001 {
-		lb_try_duration 10s
-		lb_try_interval 250ms
-	}
 	encode gzip zstd
+	route {
+		reverse_proxy 127.0.0.1:8001 {
+			lb_try_duration 10s
+			lb_try_interval 250ms
+		}
+	}
 }
 
 narrowhighway.tv {
@@ -81,16 +86,14 @@ narrowhighway.tv {
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
-
-	# The watch/listen/learn face — the TV GUIDE. Served by the 2.0 SECULAR engine (:8002), which
-	# serves the guide correctly (the witness :8001 was serving the .org clone + a 301 redirect loop).
-	# Rewrite the bare domain to the CLEAN /tv, NOT /tv.html — the app 301s /tv.html -> /tv, which fed
-	# the rewrite back into itself and looped. narrowhighway.tv/ now serves the guide directly, 200.
 	@root path /
-	rewrite @root /tv
-	reverse_proxy 127.0.0.1:8002 {
-		lb_try_duration 10s
-		lb_try_interval 250ms
+	route {
+		# The bare domain -> the CLEAN /tv (not /tv.html, which 301s back and would loop).
+		rewrite @root /tv
+		reverse_proxy 127.0.0.1:8002 {
+			lb_try_duration 10s
+			lb_try_interval 250ms
+		}
 	}
 	log {
 		output file /var/log/caddy/tv.access.log
