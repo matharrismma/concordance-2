@@ -205,11 +205,34 @@ def verify_physical_constant(spec: Dict[str, Any]) -> VerifierResult:
         actual_norm = _normalize_unit(record["unit"])
         data["claimed_unit_normalized"] = claimed_norm
         if claimed_norm != actual_norm and claimed_unit_raw.lower() != record["unit"].lower():
-            return mismatch(
-                name,
-                f"{canonical} unit mismatch: actual {record['unit']}, claimed {claimed_unit_raw}",
-                data,
-            )
+            # THE UNIT NORMALIZER (2026-10-03, R4). A stated unit that is not the constant's own is
+            # CONVERTED when it is a unit of the same dimension ("150000 km/s" -> 1.5e8 m/s, then the
+            # value is judged — a wrong value under a right kind of unit is BROKEN, a right one HOLDS;
+            # "m s^-1" and "J K^-1 mol^-1" simply confirm); it MISMATCHES when it is a unit of a different
+            # dimension ("the speed of light is 3e8 kg" is a false claim about what c is); and it is
+            # DECLINED — never a false BROKEN — when the engine does not know the unit at all.
+            from . import si_units as _si
+            converted = _si.convert(claim, claimed_unit_raw, record["unit"])
+            if converted is not None:
+                data["claimed_value_in_unit"] = converted
+                data["converted_from"] = claimed_unit_raw
+                claim = converted
+                diff = abs(claim - actual)
+            else:
+                pc, pa = _si.parse(claimed_unit_raw), _si.parse(record["unit"])
+                if pc is not None and pa is not None:
+                    return mismatch(
+                        name,
+                        f"{canonical} unit mismatch: claimed {claimed_unit_raw} is a unit of "
+                        f"{_si.describe(pc[0])}; the constant's unit {record['unit']} is {_si.describe(pa[0])}",
+                        data,
+                    )
+                return na(
+                    name,
+                    f"{canonical}: the unit {claimed_unit_raw!r} is not one the engine knows — declined, "
+                    f"not judged (state it in {record['unit']} or an SI equivalent)",
+                    data,
+                )
     if diff <= threshold:
         return confirm(
             name,

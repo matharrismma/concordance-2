@@ -261,8 +261,14 @@ def _pc_pattern() -> re.Pattern:
             r"\b(?:the\s+)?(" + alt + r")\s+" + _EQ +
             r"\s*(?:about|approximately|roughly|around|~|≈)?\s*"
             r"(\d[\d,]*(?:\.\d+)?(?:\s*[eE]\s*[-+]?\d+)?)"
-            r"\s*([^\s.,;:!?]{1,14})?", re.I)
+            r"[ \t]*((?:[^\s.,;:!?()]{1,14}(?:[ \t]+|(?=[.,;:!?)]|$))){0,4})", re.I)
     return _PC_PAT
+
+
+# Prose that follows a number and is not a unit — "299792458 in a vacuum" must not read "in" as inches
+# (a true claim turned BROKEN by a preposition). A unit run that STARTS with one of these is no unit.
+_PC_PROSE = frozenset({"in", "a", "an", "at", "to", "as", "is", "on", "of", "or", "by", "it", "if", "so",
+                       "no", "and", "the", "for", "that", "which", "when", "with", "from", "was", "are"})
 
 
 def _x_physical_constant(text: str):
@@ -277,15 +283,23 @@ def _x_physical_constant(text: str):
         except ValueError:
             continue
         cv: Dict[str, Any] = {"constant": canon, "claimed_value": value}
-        unit = (m.group(3) or "").strip()
-        if unit:
+        tokens = (m.group(3) or "").split()
+        if tokens and tokens[0].lower() not in _PC_PROSE:
             stored = _pc._CONSTANTS[canon]["unit"]
-            if unit.lower() == stored.lower() or _pc._normalize_unit(unit) == _pc._normalize_unit(stored):
-                cv["claimed_unit"] = unit
+            first = tokens[0]
+            if first.lower() == stored.lower() or _pc._normalize_unit(first) == _pc._normalize_unit(stored):
+                cv["claimed_unit"] = first
             else:
-                # A stated unit that does not match -> DECLINE (unchecked), never confirm on the bare
-                # value: that path minted a false HOLDS for "299792458 km/s" (see the note above).
-                continue
+                # THE UNIT NORMALIZER (2026-10-03, R4): the longest run of tokens that is a unit of the
+                # constant's own dimension ("m s^-1 in vacuum" -> "m s^-1"), else the longest run that is a
+                # unit at all (a wrong dimension is a claim to answer); the verifier converts, mismatches,
+                # or declines. A run no part of which is a unit the engine knows -> DECLINE (unchecked),
+                # never confirm on the bare value: that path minted a false HOLDS for "299792458 km/s".
+                from .verifiers import si_units as _si
+                best = _si.longest_unit_prefix(tokens, stored)
+                if best is None:
+                    continue
+                cv["claimed_unit"] = best[0]
         out.append((_q(text, m), "physical_constants", {"CONST_VERIFY": cv}))
     return out
 
