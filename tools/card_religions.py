@@ -49,11 +49,18 @@ def _card(sid, title, body, box, bands, extra, subject=None):
 
 
 def _fore(sid, name, era, seed, shortfall, fulfillment, bands, terms=None):
-    body = (f"{name} ({era}). The seed it kept: {seed}. Where the shadow fell short: {shortfall}. The "
-            f"fulfillment (named, not hidden — we do not fear the light): {fulfillment}. (Credited in "
+    # THE FRAME (Matt, 2026-10-02: "They all have the hole that Christ filled … the nations at the tower
+    # of babel having parts of the story, but Christ fulfilled them, and he became the way"): a part of
+    # the story, the hole, Christ filled it. The three movements keep their data (seed / shortfall /
+    # fulfillment) and are now NAMED in those words, so a reader meets the hole as the hole.
+    body = (f"{name} ({era}) — a part of the story carried by the nations scattered at Babel (Genesis 11; "
+            f"Hebrews 1:1). The part it kept: {seed}. THE HOLE — what was missing: {shortfall}. Christ filled "
+            f"it — the fulfillment (named, not hidden; we do not fear the light): {fulfillment}. (A likeness "
+            f"to Christ in a faith before him is the outline of what it lacked, never a parallel. Credited in "
             f"love as a foreshadow — praeparatio evangelica, Acts 17:23; the shadow whose substance is "
             f"Christ, Colossians 2:17.)")
-    extra = {"era": era, "seed": seed, "shortfall": shortfall, "fulfillment": fulfillment}
+    extra = {"era": era, "seed": seed, "shortfall": shortfall, "fulfillment": fulfillment,
+             "frame": {"part": seed, "hole": shortfall, "filled": fulfillment}}
     # `terms` are DISTINCTIVE worldview markers (never a word shared with the faith — no "logos",
     # "resurrection", "conscience", "the way") so a primary source of THIS tradition is tiered to
     # `reference` (down-weighted unless sought) while foundational classics that carry no such marker
@@ -484,6 +491,15 @@ def main() -> int:
         "author": "engine", "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
         "lifecycle_stage": "public", "volatility": "permanent", "surface": "secular", "generated": False,
     }
+    # THE THIRD CLAUSE on every card that arose after Christ ("Everything after that is in opposition"):
+    # named in Matt's word, bound to the test, in love — appended once here so no body drifts from it.
+    for c in AFTER:
+        c["body"] = (c["body"].rstrip() + " AFTER CHRIST: it arose after him; where it redefines, demotes, "
+                     "or denies the Son it stands in opposition (1 John 4:2-3) — a test of teachings, never "
+                     "of persons, and the door to the Son stands open.")
+        ex = c.get("extra")
+        if isinstance(ex, dict):
+            ex["frame"] = {"after_christ": "opposition where it denies the Son (1 John 4:2-3); tested in love, never persons"}
     cards = [spine] + PRINCIPLES + FORESHADOWS + AFTER
     # ALIGNMENT TIERS (gate the keeping by agreement — Matt 2026-09-28). A card that carries
     # discerns_terms names a subject we do not hold in agreement; its PRIMARY SOURCES are tiered so they

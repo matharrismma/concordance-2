@@ -150,3 +150,25 @@ def test_the_discernment_is_never_gated_by_shelf(monkeypatch):
     keep, damp = alignment.verdict(legge, set())
     assert keep and damp == alignment._REF_DAMP                       # a primary source: referenceable, damped
     alignment._CACHE["key"] = None
+
+
+def test_every_foreshadow_card_carries_the_frame():
+    """Matt, 2026-10-03: "apply the same frame to the other foreshadow cards." Every pre-Christ card names
+    its three movements in the frame's words (a part of the story · THE HOLE · Christ filled it) and keeps
+    the fulfillment verse findable; every after-Christ card carries the third clause (opposition where it
+    denies the Son, tested in love, never persons)."""
+    from concordance import ask
+    cards = _records(_REPO / "data" / "religions_cards.jsonl")
+    fore = [c for c in cards if (c.get("box") == "foreshadow")]
+    after = [c for c in cards if c["id"].endswith("_under_the_test") or c["id"].endswith("post_christ_pattern")]
+    assert len(fore) == 10 and len(after) == 10, (len(fore), len(after))
+    for c in fore:
+        b = c["body"]
+        for words in ("a part of the story carried by the nations scattered at Babel", "The part it kept:",
+                      "THE HOLE — what was missing:", "Christ filled it — the fulfillment", "never a parallel"):
+            assert words in b, (c["id"], words)
+        assert set(c["extra"]["frame"]) == {"part", "hole", "filled"}
+        assert ask._fulfillment_ref(c["title"], b), c["id"]              # the verse it names is still found
+    for c in after:
+        assert "AFTER CHRIST: it arose after him" in c["body"] and "stands in opposition (1 John 4:2-3)" in c["body"], c["id"]
+        assert "never of persons" in c["body"] and c["extra"]["frame"]["after_christ"].startswith("opposition")

@@ -174,9 +174,9 @@ def _step(qtype: str, subject: str, lead: Optional[Dict[str, Any]],
         # it names as the fulfillment — never "open it, it has the steps" (the practical register
         # a reader met on this question, measured live).
         where = f"Open '{lead_t}'" if lead_t else "Open the card"
-        return (f"{where} — the seed it kept, where it fell short, the One it pointed to — then read "
+        return (f"{where} — the part it kept, the hole, and the One who filled it — then read "
                 f"{anchor_v['ref']} in its own words: the hole, and the Person who filled it." if anchor_v
-                else f"{where} — the seed it kept, where it fell short, the One it pointed to; then read "
+                else f"{where} — the part it kept, the hole, and the One who filled it; then read "
                      "John 14:6 in its own words.")
     if qtype == "formation":
         return "Begin one small practice this week — the Field Kit gives a seven-day step to walk."
