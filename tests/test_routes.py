@@ -113,6 +113,7 @@ GOLDEN_API_GET = {
     "/mesh/signable",  # deliberate addition (the bytes to sign, so a key never crosses the wire)
     "/attest",  # deliberate addition (bear witness to a record you hold; GET lists the witnesses)
     "/wants",   # deliberate addition (the WANT LIST — the library grows by its misses; 2026-08-01)
+    "/v1/chat/completions", "/v1/models",   # deliberate addition (THE OPENAI-COMPATIBLE DOOR, no model behind it; 2026-10-03)
     # deliberate addition 2026-08-01 — what the engine writes goes in wearing its open question,
     # and the first reader to recall it is asked to close it. `/unchecked` publishes the standing
     # list; `/unchecked/answer` is the door the ask on every such card points at.
