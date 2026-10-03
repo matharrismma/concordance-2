@@ -129,6 +129,16 @@ def house(tool: str, r: dict, args: dict = None) -> dict:
                 bad = next((s for s in trail_steps if _status_is(s, "MISMATCH")), None)
                 nxt = _step(f"open the step that broke ({(bad or {}).get('id', '?')}), correct that claim, verify again",
                             "CHECK", "verify")
+            elif isinstance(r.get("found_fact"), dict) and r["found_fact"].get("field"):
+                # R5: a found fact is cited, never sealed — the one step opens the table it came from
+                ff = r["found_fact"]
+                nxt = _step(f"a found fact, not a computed verdict: the table says {ff.get('value')} "
+                            f"({'agrees' if ff.get('agrees') else 'does not agree'}) — cite the table itself",
+                            "FIND", "lookup", {"kind": "element", "params": {"name": str(ff.get("subject") or "")}})
+            elif isinstance(r.get("want"), dict) and r["want"].get("query"):
+                # R5: the keeping holds nothing on this yet — the one step is the want, and the library goes to find it
+                nxt = _step("the keeping holds nothing on this yet — open the want, and the library goes to find a "
+                            "public-domain source", "FIND", "want_open", {"query": str(r["want"]["query"])})
             else:
                 gap = next((s for s in trail_steps if _status_is(s, "NOT_APPLICABLE", "ERROR")), None)
                 # find_verifier's one argument is `query`, and a step id ("a1") is no query — the

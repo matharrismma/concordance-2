@@ -1004,17 +1004,12 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             # no receipt is minted for a find). The receipt stays reserved for what was actually
             # computed; the two outcomes never blur. Honest, and the door is useful instead of dead.
             if not out["claims_found"]:
+                # R5 (2026-10-03): a found FACT that agrees or not (the keeping's own sourced table), or
+                # on-subject cards only (title names the subject), or "not held yet" with a WANT OFFERED —
+                # never three unrelated cards labelled FOUND, never a computed verdict, never a receipt.
+                from .. import factfind as _ff
                 try:
-                    # search_question strips the claim's frame to the subject (the airlock, lever #1),
-                    # so an agent's lookup claim FINDs on-subject cards, not frame-matched noise.
-                    hits = corpus.search_question(passage.checked or claim, limit=3) or []
-                    if hits:
-                        out["found"] = [corpus._brief(c) for c in hits]
-                        out["note"] = ("No computable claim to prove here — the engine proves numbers, "
-                                       "formulas and constants with a receipt. The keeping does hold "
-                                       "this subject, FOUND and cited below (not a computed verdict, no "
-                                       "receipt): read the source and decide. For a question rather than "
-                                       "a claim, use /ask.")
+                    out.update(_ff.verify_fallback(claim, passage.checked))
                 except Exception:  # noqa: BLE001 — the find is a bonus; never break the verify answer
                     pass
             return _ok(out)

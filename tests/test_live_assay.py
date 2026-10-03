@@ -70,7 +70,9 @@ def test_the_probe_file_is_sound():
         if p.get("body") is not None:
             json.dumps(p["body"])
     known = [p["id"] for p in probes if p.get("known_miss")]
-    assert "verify.wrong.constant.km.per.s.breaks" in known and "ask.cry.help.first" not in known
+    assert "verify.lookup.fact.iron.melts.holds.someday" in known            # the assay's want list
+    assert "verify.wrong.constant.km.per.s.breaks" not in known               # graduated to the floor (R4, 2026-10-03)
+    assert "ask.cry.help.first" not in known
 
 
 def test_seal_clean_reads_the_receipt(monkeypatch):

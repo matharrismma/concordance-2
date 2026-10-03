@@ -164,7 +164,9 @@ def test_a_plain_claim_through_the_agent_door_is_verified_as_given():
     assert not err and body["verdict"] == "INCOMPLETE" and body["gap_at"] == "iron melts at 1538 C"
     assert "NOTHING about whether the claim is true" in body["means"]
     h = _assert_house(body, "CHECK", "verdict")
-    assert h["next_step"]["tool"] == "find_verifier" and h["next_step"]["params"] == {"query": "iron melts at 1538 C"}
+    # R5 (2026-10-03): a lookup fact the keeping does not hold ends with the WANT offered, not a verifier hunt
+    assert body["found"] == [] and body["want"]["query"] == "iron melts"
+    assert h["next_step"]["tool"] == "want_open" and h["next_step"]["params"] == {"query": "iron melts"}
     _executable_as_given(h, _schema())
     body, err = _call("verify", {"claim": "2+2=5"})
     assert not err and body["verdict"] == "BROKEN" and body["house"]["next_step"]["tool"] == "verify"
@@ -188,3 +190,21 @@ def test_every_house_step_is_executable_as_given():
                                                        "checks": [], "path": {"step": "x", "type": "claim"}},
                        {"kind": "crisis", "resources": [{"label": "Call or text 988"}]}):
             _executable_as_given(doors.house(tool, answer, {"query": "iron"}), props)
+
+
+def test_a_found_fact_is_cited_and_a_want_is_the_one_step():
+    """R5: when nothing is computable the CHECK door answers with a found fact or a want offered, and the
+    house ending follows — the lookup table to cite, or the want to open — executable as given."""
+    props = _schema()
+    h = doors.house("verify", {"verdict": "INCOMPLETE", "claim": "the atomic mass of iron is 55.845",
+                               "found_fact": {"field": "atomic_mass", "subject": "iron", "value": 55.845, "agrees": True}})
+    assert h["next_step"]["tool"] == "lookup" and h["next_step"]["params"] == {"kind": "element", "params": {"name": "iron"}}
+    assert "found fact, not a computed verdict" in h["next_step"]["do"] and "agrees" in h["next_step"]["do"]
+    _executable_as_given(h, props)
+    h = doors.house("verify", {"verdict": "INCOMPLETE", "claim": "iron melts at 1538 C", "found": [],
+                               "want": {"query": "iron melts", "offer": "x", "how": "y"}})
+    assert h["next_step"]["tool"] == "want_open" and h["next_step"]["params"] == {"query": "iron melts"}
+    _executable_as_given(h, props)
+    body, err = _call("verify", {"claim": "the atomic mass of iron is 55.845"})
+    assert not err and body["verdict"] == "INCOMPLETE" and body["found_fact"]["agrees"] is True
+    assert body["house"]["next_step"]["tool"] == "lookup"

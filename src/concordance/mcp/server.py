@@ -1180,6 +1180,11 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
                 out["means"] = ("no deterministic extractor recognized a checkable claim in these words; this says "
                                 "NOTHING about whether the claim is true. State it as a number with its unit, or "
                                 "bring the domain's packet as steps=[{id, domain, spec}].")
+                from .. import factfind as _ff         # R5: a found fact / on-subject cards / a want offered
+                try:
+                    out.update(_ff.verify_fallback(claim))
+                except Exception:  # noqa: BLE001 — the find is a bonus; never break the verdict
+                    pass
             return out
         if isinstance(args.get("steps"), list):
             res = verify_derivation(args["steps"])
