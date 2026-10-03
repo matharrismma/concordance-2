@@ -16,6 +16,7 @@ Endpoints:
   GET  /word_study?strongs=  (witness) → Strong's definition + occurrences
 """
 from __future__ import annotations
+from pathlib import Path
 
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import parse_qsl, urlencode
@@ -645,6 +646,29 @@ def _cached_scan(key, compute):
     return val
 
 
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+_FOUNDATION_DOCS = (("FOUNDATION.md", "frozen 2026-07-25 — the foundation and the mission"),
+                    ("docs/WORLD.md", "the world document — every subsystem in order"),
+                    ("HANDOFF.md", "the handoff — how the whole thing is carried forward"))
+
+
+def _foundation_hashes() -> Dict[str, Any]:
+    """The sha256 of each constitution document as it is on disk NOW — a reader can hash their copy
+    and compare; a changed hash is a changed constitution. Absent files are reported absent."""
+    import hashlib
+    out: Dict[str, Any] = {"note": ("sha256 of each document as served from this node now; recompute on your copy "
+                                    "— tamper-evident continuity"), "documents": []}
+    for rel, what in _FOUNDATION_DOCS:
+        p = _REPO_ROOT / rel
+        try:
+            raw = p.read_bytes()
+            out["documents"].append({"file": rel, "what": what, "sha256": hashlib.sha256(raw).hexdigest(),
+                                     "bytes": len(raw)})
+        except OSError:
+            out["documents"].append({"file": rel, "what": what, "sha256": None, "bytes": 0})
+    return out
+
+
 def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
              config: EngineConfig, session_gate_open: bool = False,
              operator: bool = False) -> Response:
@@ -718,6 +742,11 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         who = (query.get("witness") or "").strip() or None
         return _ok(_automaton.consult(seeking, witness=who))
 
+    if method == "GET" and path == "/seals":
+        from .. import seals as _seals
+        base = "https://narrowhighway.org"
+        return _ok(_seals.summary(cite_base=base))
+
     if method == "GET" and path == "/identity":
         # identity = what the engine IS (the dry, efficient truth); persona = WHO it is to talk to
         # (the separate voice / movie-style experience). The card system stays pure efficiency.
@@ -727,6 +756,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _ok({"surface": surface, "name": _branding.name_for(surface),
                     "identity": config.identity, "persona": config.persona,
                     "motto": _branding.MOTTO,
+                    # THE SEALED CONSTITUTION (2026-10-03, moat lever 3): the frozen foundation's own hash,
+                    # computed from the file at request time — tamper-evident continuity, never hardcoded
+                    "foundation": _foundation_hashes(),
                     "mission": ("Narrow Highway gives humans and agents a governed way to find, check, "
                                 "use, and preserve information without losing its source, authority, "
                                 "or history."),
@@ -3038,6 +3070,8 @@ ROUTES = [
     {"path": "/health/memory", "methods": ("GET",), "api": True},
     {"path": "/now", "methods": ("GET",), "api": True},
     {"path": "/identity", "methods": ("GET",), "api": True},
+    # THE SEAL LEDGER as a public number (2026-10-03, moat lever 1): minted, re-verified, when
+    {"path": "/seals", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/route", "methods": ("GET",), "api": True},
     {"path": "/bind/challenge", "methods": ("GET",), "api": True},
     {"path": "/bind", "methods": ("POST",), "rl": True},

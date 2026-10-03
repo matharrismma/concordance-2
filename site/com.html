@@ -544,7 +544,22 @@ fetch(<span class="st">"https://narrowhighway.com/audit"</span>, {
   <a href="/proof.html">what we prove</a>
   <span class="sep"></span>
   <span>A conduit, not a source &middot; nothing is generated</span>
+  <span class="sep"></span>
+  <a href="/proof.html" id="seals-line" title="every seal is permanent and re-checkable; the chain is re-verified hourly">seals &hellip;</a>
 </div></footer>
+<script>
+// THE SEAL LEDGER on the front door (2026-10-03): live-wired from /seals, never hardcoded.
+(function(){
+  var el = document.getElementById('seals-line'); if (!el) return;
+  fetch('/seals', {cache: 'no-store'}).then(function(r){ return r.json(); }).then(function(d){
+    var s = d && d.seals; if (!s) return;
+    var when = s.re_verified_at ? new Date(s.re_verified_at) : null;
+    var ago = when ? Math.max(0, Math.round((Date.now() - when.getTime()) / 60000)) : null;
+    el.textContent = s.minted.toLocaleString() + ' seals minted' +
+      (s.ok === true ? ' \u00b7 all ' + s.verified.toLocaleString() + ' re-verified' + (ago !== null ? ' ' + ago + ' min ago' : '') : (s.ok === false ? ' \u00b7 integrity FAILED' : ''));
+  }).catch(function(){ el.textContent = 'seals'; });
+})();
+</script>
 
 <script>
 (function(){

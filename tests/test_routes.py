@@ -114,6 +114,7 @@ GOLDEN_API_GET = {
     "/attest",  # deliberate addition (bear witness to a record you hold; GET lists the witnesses)
     "/wants",   # deliberate addition (the WANT LIST — the library grows by its misses; 2026-08-01)
     "/v1/chat/completions", "/v1/models",   # deliberate addition (THE OPENAI-COMPATIBLE DOOR, no model behind it; 2026-10-03)
+    "/seals",   # deliberate addition (THE SEAL LEDGER as a public number — moat lever 1; 2026-10-03)
     # deliberate addition 2026-08-01 — what the engine writes goes in wearing its open question,
     # and the first reader to recall it is asked to close it. `/unchecked` publishes the standing
     # list; `/unchecked/answer` is the door the ask on every such card points at.
@@ -167,6 +168,7 @@ GOLDEN_RATELIMITED = {
 
 
 GOLDEN_READ_LIMITED = {   # every route that scans/sorts the whole corpus per request — the read bucket
+    "/seals",   # deliberate addition (THE SEAL LEDGER — a read, the generous bucket; 2026-10-03)
     "/search", "/witness", "/cards/stats", "/cards", "/daily", "/card/connections",
     "/locate", "/library/health", "/growth",
     "/coach/text", "/tortoise",  # coach lesson text + the tortoise reader — each streams/scans a PD source per request
