@@ -1,0 +1,12 @@
+[Unit]
+Description=Narrow Highway — the restore drill (restore the newest nightly tar to scratch and check it; monthly)
+
+[Service]
+Type=oneshot
+User=nh
+WorkingDirectory=/home/nh/concordance-2
+EnvironmentFile=-/home/nh/concordance-2/.env
+ExecStart=/bin/bash /home/nh/concordance-2/tools/ark/restore_drill.sh
+Nice=15
+IOSchedulingClass=idle
+MemoryMax=3G

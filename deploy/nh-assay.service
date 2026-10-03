@@ -1,0 +1,13 @@
+[Unit]
+Description=Narrow Highway — the live assay with a ratchet (ask the running engine this week's questions; recall may only rise)
+After=network-online.target nh-org.service nh-com-2.service
+
+[Service]
+Type=oneshot
+User=nh
+WorkingDirectory=/home/nh/concordance-2
+Environment=ASSAY_DIR=/home/nh/backups/assay
+Environment=PYTHONPATH=/home/nh/concordance-2/src
+EnvironmentFile=-/home/nh/concordance-2/.env
+ExecStart=/home/nh/concordance-2/.venv/bin/python tools/live_assay.py
+Nice=10
