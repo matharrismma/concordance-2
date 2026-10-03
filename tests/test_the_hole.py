@@ -209,3 +209,23 @@ def test_a_chart_names_its_subject_by_its_terms_and_bands():
     assert not ask._title_names_subject("how do I purify water", zoro)
     other = dict(zoro, id="card_src_book_x", shelf="gutenberg")
     assert not ask._title_names_subject("what did the magi of zoroaster expect", other)   # unchanged elsewhere
+
+
+def test_an_after_christ_chart_walks_as_tested_not_as_a_shadow(monkeypatch):
+    """"is mormonism christian" led with the LDS chart framed as "one of the nations' parts of the story —
+    the hole Christ filled" (live 2026-10-03). Everything after Christ is in opposition where it denies
+    the Son: its register is the test, in love, and its anchor is the test the card itself names."""
+    from concordance import ask
+    monkeypatch.setattr(path, "_resolve", lambda ref: {"ref": ref, "text": "(the verse's own words)"})
+    body = ("Credited where it contributes: devotion to family. And then, held to the one test in love: it "
+            "denies the Son's eternal deity — the dividing line of 1 John 4:2-3. The door stands open (John 3:16).")
+    lead = ask._lead_card({"id": "card_foreshadow_mormonism_lds_under_the_test", "shelf": "foreshadows",
+                           "box": "under_the_test", "title": "The Latter-day Saints under the test", "body": body})
+    assert lead["box"] == "under_the_test" and lead["anchor_ref"] == "1 John 4:2-3"
+    p = path.compose("is mormonism christian", kind="found", lead=lead)
+    assert p["type"] == "tested" and "after Christ" in p["framing"] and "never a person" in p["framing"]
+    assert "where it denies the Son" in p["step"] and "1 John 4:2-3" in p["step"] and "the hole" not in p["step"]
+    assert p["anchor"]["ref"] == "1 John 4:2-3"
+    before = ask._lead_card({"id": "card_foreshadow_stoicism", "shelf": "foreshadows", "box": "foreshadow",
+                             "title": "Stoicism", "body": "The fulfillment: the law on the heart (Romans 2:15)."})
+    assert before["box"] == "foreshadow" and path.compose("stoics", kind="found", lead=before)["type"] == "shadow"

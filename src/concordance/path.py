@@ -137,6 +137,8 @@ _FRAMING = {
     "wisdom": "This is one of the questions people have always asked.",
     "resource": "This is a practical need — something to do.",
     "shadow": "This is one of the nations' parts of the story — read it for the hole Christ filled.",
+    "tested": "This arose after Christ — it is measured by whether it confesses the Son (1 John 4:2-3), "
+              "in love, and never a person.",
     "timing": "This is a question of timing.",
     "formation": "This is about growing, over time.",
     "historical": "This is a matter of record.",
@@ -178,6 +180,14 @@ def _step(qtype: str, subject: str, lead: Optional[Dict[str, Any]],
                 f"{anchor_v['ref']} in its own words: the hole, and the Person who filled it." if anchor_v
                 else f"{where} — the part it kept, the hole, and the One who filled it; then read "
                      "John 14:6 in its own words.")
+    if qtype == "tested":
+        # "Everything after that is in opposition" — an after-Christ chart is not a part of the story
+        # with a hole; it is measured by the test, in love: what it keeps, where it denies the Son,
+        # and the door that stands open.
+        where = f"Open '{lead_t}'" if lead_t else "Open the card"
+        ref = anchor_v["ref"] if anchor_v else "1 John 4:2-3"
+        return (f"{where} — what it keeps, where it denies the Son, and the door that stands open — then "
+                f"read {ref} in its own words.")
     if qtype == "formation":
         return "Begin one small practice this week — the Field Kit gives a seven-day step to walk."
     if qtype in ("historical", "timing"):
@@ -211,7 +221,7 @@ def compose(text: str, *, kind: str = "", subject: str = "",
     # with the hole Christ filled — whatever the question's surface shape — and anchors on the verse
     # the card itself names as the fulfillment, resolved from the canon (never pasted on).
     if isinstance(lead, dict) and lead.get("shelf") in ("foreshadows", "signposts"):
-        qtype = "shadow"
+        qtype = "tested" if lead.get("box") == "under_the_test" else "shadow"
         ref = str(lead.get("anchor_ref") or "")
         got = _resolve(ref) if ref else None
         if got:

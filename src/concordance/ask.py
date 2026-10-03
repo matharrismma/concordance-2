@@ -1322,9 +1322,14 @@ def _lead_card(card: Dict[str, Any]) -> Dict[str, Any]:
             "source": {"label": src.get("label", ""), "url": src.get("url", ""),
                        "authority_tier": src.get("authority_tier", "")}}
     if card.get("shelf") in _SHADOW_SHELVES:
-        ref = _fulfillment_ref(card.get("title") or "", card.get("body") or "")
-        if ref:
-            lead["anchor_ref"] = ref            # the verse the card itself names as the fulfillment
+        lead["box"] = card.get("box")           # "foreshadow" (before Christ) vs "under_the_test" (after)
+        body = card.get("body") or ""
+        if card.get("box") == "under_the_test" and "1 John 4:2-3" in body:
+            lead["anchor_ref"] = "1 John 4:2-3"  # the test every after-Christ chart names in its own words
+        else:
+            ref = _fulfillment_ref(card.get("title") or "", body)
+            if ref:
+                lead["anchor_ref"] = ref        # the verse the card itself names as the fulfillment
     return lead
 
 
