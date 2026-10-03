@@ -1,0 +1,10 @@
+[Unit]
+Description=Nightly push of the keeping to the Hetzner Storage Box, after the box's own backup (03:00)
+
+[Timer]
+OnCalendar=*-*-* 03:40:00 UTC
+RandomizedDelaySec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

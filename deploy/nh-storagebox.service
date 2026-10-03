@@ -1,0 +1,12 @@
+[Unit]
+Description=Narrow Highway — push the keeping to the Hetzner Storage Box (the first off-box copy; inert until configured)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=nh
+WorkingDirectory=/home/nh/concordance-2
+ExecStart=/bin/bash /home/nh/concordance-2/tools/ark/storagebox_sync.sh
+Nice=15
+IOSchedulingClass=idle
