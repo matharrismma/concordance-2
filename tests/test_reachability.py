@@ -43,6 +43,8 @@ AGENT_ONLY = {
     "/steward/cost-destroyed", "/study", "/study_find", "/teachings", "/thread/verify",
     "/want", "/works/artifact", "/works/verify",
     "/health",
+    # THE OPENAI-COMPATIBLE DOOR (2026-10-03): a client's door, not a page's — announced in llms.txt
+    "/v1/chat/completions", "/v1/models",
     # A readiness probe for the voice faculty (ceiling ElevenLabs vs. sovereign floor) — read by the
     # console's own script and by operators checking the voice is up, not a page a reader visits.
     "/speak/health",

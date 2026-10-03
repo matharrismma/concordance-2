@@ -289,3 +289,12 @@ A live remote MCP server (Streamable HTTP, JSON-RPC, no auth, no SDK):
 ## Foundation
 It serves truth because Truth is a Person (John 14:6); a conduit, not the source. A window, not
 a wall. The fuller witness is at https://narrowhighway.org.
+
+## OpenAI-compatible door (no model behind it)
+
+Point any client that speaks the OpenAI chat shape at this host and ask for the model `narrow-highway`:
+`POST /v1/chat/completions` (streaming supported: one chunk, then `[DONE]`) and `GET /v1/models`. The last
+user turn walks the same front door a person does (a cry for help is answered with help first; a claim gets
+a verdict and a seal; a question gets the keeping's own words with their source). The reply is composed only
+of found text; the full structured answer rides along under `narrow_highway` (verdict, seal, house ending).
+Nothing is generated — `generated: false` on every reply. No key, no account.

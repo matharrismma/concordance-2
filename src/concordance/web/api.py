@@ -1219,6 +1219,38 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             pass
         return _ok(r)
 
+    if method == "GET" and path == "/v1/models":
+        from . import openai_door as _od
+        return _ok({"object": "list", "data": _od.MODELS})
+
+    if method == "POST" and path == "/v1/chat/completions":
+        # THE OPENAI-COMPATIBLE DOOR. A client that speaks the OpenAI chat shape (Open WebUI, LM Studio,
+        # Continue, a phone app, `openai` in a script) points its base URL here and asks for the model
+        # "narrow-highway". The last user turn walks through the SAME front door a person does — crisis
+        # first, then the classifier — and the reply is composed from the answer's own found text; the
+        # structured answer (verdict, seal, house ending) rides along under `narrow_highway`. Nothing is
+        # generated. Streaming is one chunk and [DONE] — honest, since nothing here is produced token by
+        # token. The Gate keys on the text and the session cookie, exactly as /ask.
+        from . import openai_door as _od
+        from .. import ask as _ask, doors as _doors
+        if not isinstance(body, dict):
+            return _err(400, "JSON object body required")
+        text = _od.last_user_text(body.get("messages"))
+        if not text:
+            return _err(400, "messages must end with a user turn carrying text")
+        prior_open = (surface == "witness") or session_gate_open
+        gate_open = prior_open or _ask.gate_signal(text)
+        r = _ask.respond(text, config, gate_open=gate_open, gate_just_opened=gate_open and not prior_open)
+        if isinstance(r, dict) and "error" not in r:
+            try:
+                r = dict(r, house=_doors.house("ask", r, {"text": text}))   # the ending rides along, as on /ask
+            except Exception:  # noqa: BLE001 — the reply never fails for want of its ending
+                pass
+        comp = _od.completion(r, model=str(body.get("model") or _od.MODEL))
+        if body.get("stream"):
+            return 200, {"_sse": _od.sse_chunks(comp)}
+        return _ok(comp)
+
     if method == "POST" and path == "/ask":
         # The conduit front door: find + verify + cite, never generate. Deterministic router.
         if not isinstance(body, dict) or not str(body.get("text") or "").strip():
@@ -3033,6 +3065,10 @@ ROUTES = [
     {"path": "/path", "methods": ("GET",), "api": True},
     {"path": "/days", "methods": ("POST",), "rl": True},
     {"path": "/ask", "methods": ("POST",), "rl": True},
+    # THE OPENAI-COMPATIBLE DOOR (2026-10-03, "lean into the open doors"): the shape every chat client
+    # speaks, answered by the engine — no model behind it (web/openai_door.py)
+    {"path": "/v1/chat/completions", "methods": ("POST",), "rl": True, "api": True},
+    {"path": "/v1/models", "methods": ("GET",), "api": True},
     {"path": "/console", "methods": ("POST",), "rl": True},
     {"path": "/journal", "methods": ("GET", "POST"), "api": True},
     {"path": "/steward/budget", "methods": ("POST",)},
@@ -3687,7 +3723,22 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             if (u.path == "/ask" and isinstance(payload, dict) and payload.get("gate_open")
                     and not session_gate_open):
                 extra = {"Set-Cookie": "nh_gate=open; Path=/; Max-Age=31536000; SameSite=Lax"}
+            if isinstance(payload, dict) and isinstance(payload.get("_sse"), list):
+                self._sse(status, payload["_sse"])      # the OpenAI door's streaming form
+                return
             self._json(status, payload, extra)
+
+        def _sse(self, status: int, chunks: list) -> None:
+            """One-shot server-sent events: the whole reply in one chunk, then [DONE] — for clients that
+            insist on `stream: true`. No chunked encoding: the body is complete, so it carries its length."""
+            data = "".join(chunks).encode("utf-8")
+            self.send_response(status)
+            self.send_header("content-type", "text/event-stream; charset=utf-8")
+            self.send_header("cache-control", "no-store")
+            self.send_header("x-content-type-options", "nosniff")
+            self.send_header("content-length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
 
         def do_GET(self) -> None:
             self._do("GET")
