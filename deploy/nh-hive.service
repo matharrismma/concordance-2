@@ -46,6 +46,13 @@ Environment=NH_REPO_ROOT=/home/nh/concordance-2
 # on 2026-08-02 the first time a scheduler ran it instead of a person: it prints an edge as
 # 'A' ⟷ 'B', and one non-ASCII arrow raised UnicodeEncodeError and took down the whole cycle.
 Environment=PYTHONIOENCODING=utf-8
+# 2026-10-03: the box's own env (CONCORDANCE_FREEZE_SHELVES etc.) so every worker loads the keeping lean, and a
+# hard memory cap so a heavy turn can never take the two serving faces down with it.
+EnvironmentFile=-/home/nh/concordance-2/.env
+MemoryMax=3G
+MemorySwapMax=0
+Nice=15
+IOSchedulingClass=idle
 ExecStart=/home/nh/concordance-2/.venv/bin/python tools/hive_cycle.py --apply
 # Longer than the watchman: the connection finder alone reads the whole keeping (~1 minute here,
 # more as the corpus grows), and grow.py walks every shelf.

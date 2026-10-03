@@ -190,7 +190,7 @@ body.intro .whisper{opacity:0;animation:rise .9s .6s ease forwards}
   <p class="creed">
     <span class="b">What is not the answer is eliminated, so the narrow path is illuminated by what survives.</span><br>
     <!-- THE FIVE DOORS (2026-10-02): this box IS Check; the other four verbs, then the engine behind the door. -->
-    <span class="s">FOUND · CHECKED · SEALED &nbsp;·&nbsp; <a href="/explore.html">Find →</a> &nbsp;·&nbsp; <a href="/situations.html">Walk →</a> &nbsp;·&nbsp; <a href="/profile.html">Keep →</a> &nbsp;·&nbsp; <a href="https://narrowhighway.org/bible.html">Word →</a> &nbsp;·&nbsp; <a href="/com.html">the engine →</a></span>
+    <span class="s">FOUND · CHECKED · SEALED<span id="seals-n" title="seals minted; every one re-verified hourly"></span> &nbsp;·&nbsp; <a href="/explore.html">Find →</a> &nbsp;·&nbsp; <a href="/situations.html">Walk →</a> &nbsp;·&nbsp; <a href="/profile.html">Keep →</a> &nbsp;·&nbsp; <a href="https://narrowhighway.org/bible.html">Word →</a> &nbsp;·&nbsp; <a href="/com.html">the engine →</a></span>
   </p>
 </div>
 
@@ -399,6 +399,9 @@ document.body.classList.add("intro");setTimeout(()=>document.body.classList.remo
 const urlq=new URLSearchParams(location.search).get("q");
 if(urlq){document.getElementById("q").value=urlq;open(urlq)}
 
+// the seal count on the front door (2026-10-03), LIVE-WIRED from /seals — the ledger is a public number
+api("/seals").then(function(d){var s=d&&d.seals; var el=document.getElementById("seals-n");
+  if(el&&s&&s.minted){el.textContent=" ("+s.minted.toLocaleString()+(s.ok===true?", re-verified":"")+")";}}).catch(function(){});
 // the kept count, LIVE-WIRED from /capabilities — never a hardcoded number that drifts
 api("/capabilities").then(function(d){var n=d&&d.substrate&&d.substrate.cards&&d.substrate.cards.count;
   if(n){var el=document.getElementById("keptn");if(el)el.textContent=Number(n).toLocaleString();}}).catch(function(){});

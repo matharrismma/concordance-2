@@ -50,3 +50,13 @@ def test_the_route_serves_the_ledger_and_identity_carries_the_foundations_hash()
     assert docs["FOUNDATION.md"]["sha256"] == want and docs["FOUNDATION.md"]["bytes"] > 100
     assert "frozen 2026-07-25" in docs["FOUNDATION.md"]["what"] and "docs/WORLD.md" in docs
     assert "tamper-evident" in ident["foundation"]["note"]
+
+
+def test_the_psalm_of_the_day_is_the_old_calendar_rule():
+    import datetime as dt
+    assert api.psalm_of_the_day(dt.date(2026, 1, 1))["ref"] == "Psalm 1"
+    assert api.psalm_of_the_day(dt.date(2026, 5, 30))["ref"] == "Psalm 150"      # day 150
+    assert api.psalm_of_the_day(dt.date(2026, 5, 31))["ref"] == "Psalm 1"        # wraps
+    assert api.psalm_of_the_day(dt.date(2026, 10, 3))["ref"] == "Psalm 126"      # day 276 -> 126
+    st, p = api.dispatch("GET", "/daily", {}, None, EngineConfig())[:2]
+    assert st in (200, 404) and (st == 404 or p["psalm_of_the_day"]["ref"].startswith("Psalm "))

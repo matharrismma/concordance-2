@@ -652,6 +652,14 @@ _FOUNDATION_DOCS = (("FOUNDATION.md", "frozen 2026-07-25 — the foundation and 
                     ("HANDOFF.md", "the handoff — how the whole thing is carried forward"))
 
 
+def psalm_of_the_day(day=None) -> Dict[str, Any]:
+    """Psalm ((day_of_year - 1) % 150) + 1 for the given date (UTC today by default)."""
+    import datetime as _dt
+    d = day or _dt.datetime.now(_dt.timezone.utc).date()
+    n = ((d.timetuple().tm_yday - 1) % 150) + 1
+    return {"ref": f"Psalm {n}", "read": f"/passage?ref=Psalm%20{n}", "rule": "((day of year - 1) mod 150) + 1"}
+
+
 def _foundation_hashes() -> Dict[str, Any]:
     """The sha256 of each constitution document as it is on disk NOW — a reader can hash their copy
     and compare; a changed hash is a changed constitution. Absent files are reported absent."""
@@ -2049,7 +2057,12 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     if method == "GET" and path == "/daily":
         _seed = query.get("seed") or None
         c = _cached_scan("daily:%s" % (_seed or ""), lambda: corpus.daily(_seed))
-        return _ok(c) if c is not None else _err(404, "the keeping is empty")
+        if c is None:
+            return _err(404, "the keeping is empty")
+        # THE PSALM OF THE DAY (2026-10-03): the one thing the retired Lighthouse 1.0 daily-reading timer did
+        # that 2.0 did not — ((day_of_year - 1) % 150) + 1, deterministic by date, the same calculation the 1.0
+        # assembly page used. A reference to read, never a reading authored here.
+        return _ok(dict(c, psalm_of_the_day=psalm_of_the_day()))
 
     if method == "GET" and path == "/card/connections":
         cid = (query.get("id") or "").strip()
