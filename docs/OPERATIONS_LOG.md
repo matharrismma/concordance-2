@@ -995,3 +995,26 @@ sha256-verified, restored to scratch, **integrity OK — ledger 748/748 verified
 restored keeping, 1,044,475 jsonl lines parsed (live 1,044,912 — the keeping grew since 03:00), cards 25,087 = live, 748
 ledger files. Not in the tar by design: the shards and the acquisitions (they ride the ark and the Storage Box). A backup
 is a backup now.
+
+## 2026-10-03 (night) — "go in order": the unit normalizer, fact find, the seal ledger, the hive cutover
+
+- **R4 — the SI unit normalizer** (`verifiers/si_units.py`, 2fbb79c). "The speed of light is 150000 km/s" → BROKEN (converted to
+  1.5e8 m/s and judged); "299792.458 km/s" → HOLDS; "J K^-1 mol^-1" → HOLDS; "300000000 kg" → BROKEN (a unit of mass; c is a
+  speed, both dimensions named); "furlongs per fortnight" → declined, not judged. A preposition after the number is not a
+  unit ("299792458 in a vacuum" checks the bare value). The km/s probe graduated from the assay's want list to its floor.
+- **R5 — fact find** (`factfind.py`, c5985ed). When nothing is computable the CHECK door answers in one of three honest
+  shapes: a FOUND FACT from the keeping's own sourced table (iron's standard atomic weight 55.845, IUPAC — agrees/disagrees;
+  cited, no receipt); on-subject cards only (the title must name the subject); or found: [] with a WANT OFFERED. The keeping
+  holds no melting points; "iron melts at 1538 C" says so plainly and offers the want, and stays the assay's want-list item.
+- **The seal ledger as a public number** (`seals.py`, GET /seals, 3823021): 755 seals minted since 2026-06-28, 750 of 750
+  re-verified by the hourly integrity check, 1,859 sealed records, 992 receipt cards — computed at request time, shown on
+  the root creed line, the .com footer and the proof page. `/identity` carries the sha256 of FOUNDATION.md (frozen
+  2026-07-25), docs/WORLD.md and HANDOFF.md as served now: a reader hashes their copy and compares.
+- **The hive cutover** (c65fcb0). nh-gather.timer (Lighthouse 1.0's API-based generator, $0.15 this month, writing
+  devotionals nothing in 2.0 reads) and nh-daily-reading.timer (a psalm rendered into a folder no site serves) are
+  disabled. 2.0's own hive — never deployed since it was written on 2026-08-02 — is installed under a 3 GB cap in the
+  10:00 slot. First supervised turn, 22:59 UTC: **5 ok, 0 failed, 0 skipped**, 2 min 49 s, 1.4 GB peak, $0.00: watch 10/10
+  doors hold; shepherd dug the want list; connections proposed (never sealed); theorymap rewrote site/theories.html;
+  grow measured. The psalm of the day now rides `/daily` (Psalm 126 today). The Lighthouse folder is used only by its own
+  substrate-backup timer now and is archived whole on the ark.
+- Live assay floor: 42 probes. CI: 2208 passed.
