@@ -3848,8 +3848,9 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
 _dispatch_core = dispatch
 
 
-def dispatch(method, path, query, body, config, **kw):  # noqa: F811 — the wrapped door
-    status, payload = _dispatch_core(method, path, query, body, config, **kw)
+def dispatch(method, path, query, body, config, session_gate_open=False, operator=False):  # noqa: F811 — the wrapped door
+    # the SAME signature as the core (callers pass the flags positionally — CI caught **kw swallowing none)
+    status, payload = _dispatch_core(method, path, query, body, config, session_gate_open, operator)
     if status == 200 and isinstance(payload, dict) and "error" not in payload:
         from .. import doors as _doors
         tool = _doors.DOOR_ROUTES.get(path)
