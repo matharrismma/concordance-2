@@ -30,6 +30,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 _REF_DAMP = 0.6                 # a reference-tier card ranks lower when its subject is not what was sought
+_DISCERNMENT_SHELVES = frozenset({"foreshadows", "signposts"})   # the charts and the signposts: never gated
 _CACHE: Dict[str, Any] = {"key": None, "terms": [], "chart_tier": {}}
 
 
@@ -94,6 +95,12 @@ def _tier_of(card: Dict[str, Any], terms: List[Tuple[str, str, str]],
              chart_tier: Dict[str, str]) -> Tuple[str, Optional[str]]:
     if str(card.get("id") or "") in chart_tier:
         return "aligned", None                     # a discernment chart is the discernment — never gated
+    if card.get("shelf") in _DISCERNMENT_SHELVES:
+        # The whole foreshadows shelf and the signposts ARE the discernment — each names the hole and
+        # the One who filled it — yet a signpost whose title says "Tao" was tiered `reference` (×0.6)
+        # by the very chart that discerns Taoism, and fell out of the first screen for "the way logos
+        # derek" (measured live 2026-10-02). The discernment is never gated, by shelf, not only by id.
+        return "aligned", None
     hay = (str(card.get("title") or "") + " " + " ".join(str(b) for b in (card.get("bands") or []))
            + " " + str(card.get("subject") or "")).lower()
     found_ref: Optional[Tuple[str, Optional[str]]] = None

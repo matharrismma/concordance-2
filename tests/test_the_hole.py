@@ -130,3 +130,23 @@ def test_a_lifted_discernment_chart_leads_with_its_own_words():
     assert hits[0]["id"] == "card_foreshadow_chinese" and hits[0].get("body"), hits[0]
     lead = ask._lead_card(hits[0])
     assert lead["excerpt"].startswith("The seed it kept") and lead["anchor_ref"] == "John 14:6"
+
+
+def test_the_discernment_is_never_gated_by_shelf(monkeypatch):
+    """With the alignment gate on, a signpost whose title names Tao was tiered `reference` (×0.6) by the
+    chart that discerns Taoism and fell out of the first screen; the discernment is never gated — by
+    shelf, not only by chart id. A primary source of the tradition is still damped (the gate still works)."""
+    from concordance import alignment
+    monkeypatch.setenv("CONCORDANCE_ALIGNMENT", "1")
+    monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(_REPO / "data"))
+    alignment._CACHE["key"] = None                                   # re-read the atlas under this data dir
+    sp = corpus._signpost_card({"id": "signpost_tao_logos_derek_the_way",
+                                "title": "The nations reached for the Way — Tao, Logos, Derek — each with the hole; Christ filled it (John 14:6)",
+                                "verification": "v", "wisdom": "w", "triggers": {"keywords": ["Lao Tzu", "Tao Teh King"]}})
+    assert alignment.verdict(sp, set()) == (True, 1.0)
+    fore = {"id": "card_foreshadow_x", "shelf": "foreshadows", "title": "A Taoism chart with no terms", "bands": ["lao tzu"]}
+    assert alignment.verdict(fore, set()) == (True, 1.0)
+    legge = {"id": "card_src_book_216", "shelf": "gutenberg", "title": "The Tao Teh King — Laozi", "bands": ["lao tzu"]}
+    keep, damp = alignment.verdict(legge, set())
+    assert keep and damp == alignment._REF_DAMP                       # a primary source: referenceable, damped
+    alignment._CACHE["key"] = None
