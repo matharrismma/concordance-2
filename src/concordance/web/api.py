@@ -2768,7 +2768,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # witness content, and a reader who cannot check our claims cannot trust them.
         from .. import capabilities as _caps
         from .. import doors as _doors
-        return _ok(dict(_caps.statement(surface), doors=_doors.doors()))
+        return _ok(dict(_caps.statement(surface), doors=_doors.doors(), welcome=_doors.welcome(surface)))
 
     if method == "GET" and path == "/systems":
         # THE SYSTEMS HANDICAP — operational health of every subsystem as one number each (a golf

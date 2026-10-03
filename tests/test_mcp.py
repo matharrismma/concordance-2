@@ -28,6 +28,11 @@ def test_initialize():
     r = _call("initialize")
     assert r["result"]["serverInfo"]["name"] == "narrow-highway"
     assert r["result"]["protocolVersion"]
+    # THE WELCOME (2026-10-02): the instructions a client hands its model on connect are the door an
+    # agent is received at — one source, the house itself (doors.welcome), per face
+    from concordance import doors
+    assert r["result"]["instructions"] == doors.welcome(SEC.surface)
+    assert handle({"jsonrpc": "2.0", "id": 2, "method": "initialize"}, WIT)["result"]["instructions"] == doors.welcome("witness")
 
 
 def test_tools_list_is_surface_gated():

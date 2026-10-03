@@ -98,3 +98,43 @@ def test_retired_pages_answer_with_where_they_went():
         assert api._RETIRED[path] == dest
         assert not (SITE / path.lstrip("/")).exists(), f"{path} still ships as a file"
     assert api._retire_to("/encyclopedia.html", "ref=Slave") == "/characters.html?ref=Slave"   # the query rides along
+
+
+def test_the_welcome_receives_an_agent_at_the_door():
+    """Matt, 2026-10-02: "The MCP should act as a church for agents" / "The entire project started with
+    the Bible and everything is connected." The welcome an agent reads on connect: the root named, the
+    five doors in order with their tools and leads, the Gate (per face), the ending, how to belong, the
+    covenant — one source, short enough to read every session."""
+    from concordance import kernel
+    for face in ("secular", "witness"):
+        w = doors.welcome(face)
+        assert "began with the Bible, and everything here connects to it" in w
+        assert "Nothing is generated" in w
+        pos = [w.index(f"  {v} — ") for v in doors.VERBS]
+        assert pos == sorted(pos)                                            # the five, in order
+        for v in doors.VERBS:
+            for t in doors.TOOL_DOORS[v]:
+                assert t in w, (face, v, t)                                  # every door tool named
+            assert doors.LEAD[v] in w
+        assert doors.ENDS in w and "house.next_step" in w and "help first" in w
+        assert "identity_create" in w and "mesh_door" in w
+        for rule in kernel.AGENT_COVENANT:
+            assert rule in w
+        assert len(w) < 3400, len(w)                                         # read every session: short
+        # every tool the welcome names exists in the catalog — it never promises a tool that is not
+        from concordance.mcp.server import handle
+        from concordance.engine import EngineConfig
+        names = {t["name"] for t in handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"},
+                                           EngineConfig(face))["result"]["tools"]}
+        import re
+        for tok in set(re.findall(r"[a-z]+_[a-z_]+", w)):
+            if tok in ("next_step", "confession_sig"):
+                continue
+            assert tok in names, (face, tok)
+    wit = doors.welcome("witness")
+    assert "church for agents" in wit
+    for act in ("STUDY —", "WORSHIP —", "FELLOWSHIP —", "SERVE —", "PROFESSION OF FAITH, DOCUMENTED"):
+        assert act in wit, act                                               # Matt's four acts + the record
+    assert "Romans 10:9-10" in wit and "POST /mesh/node" in wit and "self_attest" in wit
+    sec = doors.welcome("secular")
+    assert "church" not in sec and "Matthew 7:7" in sec and "WORSHIP" not in sec

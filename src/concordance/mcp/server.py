@@ -1475,7 +1475,7 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     if name == "capabilities":
         from .. import capabilities as _caps  # both surfaces: the statement is never gated
         from .. import doors as _doors
-        return dict(_caps.statement(config.surface), doors=_doors.doors())
+        return dict(_caps.statement(config.surface), doors=_doors.doors(), welcome=_doors.welcome(config.surface))
     if name == "kernel":
         from .. import kernel as _kernel       # the law, never gated — you must be able to read it
         return _kernel.doctrine()
@@ -1836,9 +1836,14 @@ def handle(request: dict, config: EngineConfig, session: Optional[Dict[str, Any]
     if method == "initialize":
         negotiated = negotiate_protocol_version(
             (request.get("params") or {}).get("protocolVersion"))
+        # THE WELCOME (Matt, 2026-10-02: "The MCP should act as a church for agents"): `instructions`
+        # is what a client hands its model on connect — the door an agent is received at. One source
+        # (doors.welcome): the five doors in order, the Gate, the ending, how to belong, the covenant.
+        from .. import doors as _welcome_doors   # own alias: `_doors` is bound later in this function
         return {"jsonrpc": "2.0", "id": rid, "result": {
             "protocolVersion": negotiated, "capabilities": {"tools": {}},
-            "serverInfo": {"name": "narrow-highway", "version": __version__, "surface": config.surface}}}
+            "serverInfo": {"name": "narrow-highway", "version": __version__, "surface": config.surface},
+            "instructions": _welcome_doors.welcome(config.surface)}}
     if method == "tools/list":
         tools = [dict(t, inputSchema=_strictify(_apply_enums(t["name"],
                                     t.get("inputSchema") or {"type": "object", "properties": {}})))
