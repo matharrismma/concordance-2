@@ -1182,3 +1182,22 @@ is a backup now.
   GSM8K cannot regress by construction — it was graded through `calc_chain` (MATH_VERIFY), which the grammar does
   not touch, and its pins hold. Assay **61 → 64**. The rest of #3 — quantities with units, relations, references
   folded into the same grammar — continues alongside; #7 (the engine measures itself in public) starts now.
+
+## 2026-10-04 (night) — Gen 3 · 7 — THE ENGINE MEASURES ITSELF IN PUBLIC (d3125f5) — PROVEN on its first deploy
+- **Built.** `tools/benchmarks.py` runs the standing benchmarks on the box and writes `data/benchmarks.json`: every
+  golden pair in `data/domain_goldens.json` through the real router (did the domain SEAL its truth and REFUSE its
+  falsehood; a confirmed falsehood is a false positive), the derivation-moat set (`tools/benchmark.py`, 60 claims,
+  three modes; its false positives must be 0), every admitted spec's own goldens. THE RATCHET, as the assay's: a
+  floor of every domain ever ok and every spec ever admitted; a regression is "in the floor, not ok tonight",
+  named again every night until fixed. `GET /benchmarks` serves the measured file with its age (stale after 36 h;
+  `?detail=1` per domain). `/proof`'s scorecard reads it — false positives and domains-ok are measured numbers
+  with the time they were measured. `tools/deploy.sh` gained THE GATE: after both doors answer, the box runs the
+  benchmarks (`--gate`) and the live assay; a regression REVERTS the files and restarts (`DEPLOY_NO_GATE=1` is the
+  emergency bypass, to be written up when used). `nh-benchmarks.timer` nightly 05:20 UTC after the assay.
+- **The first gated deploy, 23:28 UTC:** BENCHMARKS OK — domains **68/69** ok (sealed 69, refused 68, false
+  positives 0), moat **60/60**, 0 false positives, specs 5 checks admitted; ASSAY OK 65/67, floor **64 → 65**.
+  The engine's first public self-measurement found one thing: **physical_constants: its golden FALSEHOOD cannot be judged — the generator perturbed the unit label ('m/s' → 'm/s_NOT') as well as the value, and the verifier rightly DECLINES an unknown unit (the 2026-10-01 unit-label rule), so the pair never tests the value; the generator must perturb values, never unit strings** — recorded here as the benchmark's
+  first finding, not hidden.
+- **Lesson (CI red twice on 5870000/a7954e7):** a `pytest … | tail` chain reports tail's exit, not pytest's — the
+  commit went in red. Run the tests to a file and branch on their own exit code. And the suite's known
+  CONCORDANCE_DATA_DIR race bit a third module: pin the dir per test, pass it explicitly.
