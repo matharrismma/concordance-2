@@ -1165,3 +1165,20 @@ is a backup now.
   (true and false packets); the NEW check `voltage_divider` — no Python behind it — answers HOLDS (12 V, 1 kΩ/2 kΩ
   → 8 V) and BROKEN (claimed 4 V) through POST /verify. CI green; assay **58 → 60**. Capability 2 is DONE by its
   own proof. Next in order: 3 (a claim grammar) and 7 (the engine measures itself in public) run alongside.
+
+## 2026-10-04 (night) — Gen 3 · 3 (first cut) — THE CLAIM GRAMMAR (a759d7b) — arithmetic claims, one parser
+- **Built.** `audit.py`: sum, product, quotient and word arithmetic were four pair/chain regexes (the cardinal of
+  2026-10-03 was a pair cut out of a chain; a mixed expression was a miss by design). One grammar now —
+  `expr := term (op term)*`, `term := NUM | (expr) | -term`, ops `+ − × ÷ % plus minus times multiplied-by
+  divided-by mod` — takes the MAXIMAL expression ending at the claim verb and hands the whole of it to the
+  mathematics equality verifier (precedence honoured). The zero-false-positive discipline lives in the tokenizer:
+  tokens adjacent (only whitespace between), at least one binary operator, a symbolic minus binary only with its
+  spaces ("3-5" is a range), "/" and "x" operators only between numbers ("$18.50/hr" is a rate), "^" and "%" end an
+  expression (their extractors own them), division by a literal zero stays a gap. The labels the pins know survive
+  (sum / product / quotient / arith_words); a mix is "expression".
+- **Proof against the charter.** Every audit golden holds unchanged (127 audit/compose/house pins); the
+  mixed-operator claims that were misses are verdicts — live: "2 + 3 * 4 = 14" HOLDS, "(2 + 3) * 4 = 20" HOLDS,
+  "10 − 2 × 3 = 4" HOLDS, "2 plus 3 times 4 is 14" HOLDS, "2 + 3 * 4 = 20" BROKEN, "pages 3-5 is 2 pages" nothing;
+  GSM8K cannot regress by construction — it was graded through `calc_chain` (MATH_VERIFY), which the grammar does
+  not touch, and its pins hold. Assay **61 → 64**. The rest of #3 — quantities with units, relations, references
+  folded into the same grammar — continues alongside; #7 (the engine measures itself in public) starts now.
