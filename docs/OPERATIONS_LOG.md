@@ -1139,3 +1139,10 @@ is a backup now.
   (task "NarrowHighway Node Sync").
 - **Found on the way:** the YouTube encoder (ffmpeg) had outlived its supervisor and was still pushing to YouTube — the
   uplink hog — stopped; the retire script now takes it too.
+- **PROOF (the charter's own test for #1), 2026-10-04 23:30 UTC:** the desktop node, over stdio, answers `seal_fetch` for
+  `7092e2f4d58c4214762cd7400ec062c1cf921a42f50274eeb36e1744b87305f7` — the 13-step digital-root derivation sealed on
+  the box this afternoon, weeks after the desktop's last snapshot — byte-identical to the box's `/seal`; the manifest
+  probe verifies the signature; the assay floor rose, not fell. The first catch-up died at 31 min on a read timeout
+  mid-file (the desktop line) → `/sync/file` honors Range, the node streams and resumes from the stalled byte, smallest
+  first (0657a25, deployed); the catch-up of the 894 MB of keeping files restarted with resume in place.
+  **Capability 1 is DONE by its own proof; capability 2 (verifiers as data) may start.**
