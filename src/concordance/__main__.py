@@ -14,16 +14,45 @@ from .web import serve
 
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    usage = ("usage: python -m concordance <serve|mcp|connect> ...\n"
+    usage = ("usage: python -m concordance <serve|mcp|connect|sync> ...\n"
              "  serve [--surface secular|witness] [--port N] [--host H] [--site DIR|--no-site]\n"
              "  mcp   [--surface secular|witness]   (MCP server over stdio, for agents)\n"
-             "  connect [calendar|email|storage]    (read YOUR own tools, locally; keeps nothing)")
+             "  connect [calendar|email|storage]    (read YOUR own tools, locally; keeps nothing)\n"
+             "  sync  [--branch NAME] [--dry-run]   (pull the keeping from every KNOWN branch — Gen 3 · 1)\n"
+             "  sync --add-branch NAME URL FINGERPRINT   (pin a branch by hand: the trust root)\n"
+             "  sync --whoami                       (this node's fingerprint + public key)")
     if not argv:
         print(usage)
         return 0
     if argv[0] == "connect":
         from .connect import run as connect_run
         return connect_run(argv[1:])
+    if argv[0] == "sync":
+        import json as _json
+        from . import replicate as _rep
+        opts = argv[1:]
+        if "--whoami" in opts:
+            print(_json.dumps(_rep.node_public(), indent=1))
+            return 0
+        if "--add-branch" in opts:
+            j = opts.index("--add-branch")
+            if len(opts) < j + 4:
+                print(usage)
+                return 2
+            rec = _rep.add_branch(opts[j + 1], opts[j + 2], opts[j + 3])
+            print(_json.dumps(rec, indent=1))
+            return 0
+        only = ""
+        for j, o in enumerate(opts):
+            if o == "--branch" and j + 1 < len(opts):
+                only = opts[j + 1]
+        reports = _rep.sync_all(only=only, dry_run="--dry-run" in opts)
+        if not reports:
+            print("no known branches — pin one: python -m concordance sync --add-branch NAME URL FINGERPRINT")
+            return 2
+        for r in reports:
+            print(_json.dumps(r, indent=1))
+        return 0 if all(r.get("ok") for r in reports) else 1
     if argv[0] == "mcp":
         from .mcp import serve_stdio
         surface = "secular"

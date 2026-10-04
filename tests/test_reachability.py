@@ -51,6 +51,8 @@ AGENT_ONLY = {
     # THE BIBLES BY LANGUAGE (2026-10-04, Lighthouse 1.0 integrated): the catalogue a client reads
     # before asking /passage?lang=; the reader page passes lang through, the list is the agent's.
     "/languages",
+    # EVERY COPY IS WHOLE (Gen 3 · 1): a node's doors, read by `python -m concordance sync`, never by a page
+    "/sync/manifest", "/sync/ledger", "/sync/file",
     # The six MCP profile mounts (task #123): an agent's client mounts one plane by URL;
     # a human page linking them would be a door drawn for someone who cannot walk through it.
     # The full /mcp is documented on the connect page; the profiles are documented beside it.

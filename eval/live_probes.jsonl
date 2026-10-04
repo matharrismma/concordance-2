@@ -41,6 +41,10 @@
 {"id": "verify.divisor.count.twelve.has.six", "method": "POST", "path": "/verify", "body": {"claim": "the number of divisors of 12 is 6"}, "expect": [{"at": "verdict", "eq": "HOLDS"}]}
 {"id": "verify.divisor.count.wrong.is.broken", "method": "POST", "path": "/verify", "body": {"claim": "10 has 6 divisors"}, "expect": [{"at": "verdict", "eq": "BROKEN"}]}
 {"id": "unknown.route.names.the.door", "path": "/original_words", "query": {"ref": "John 1:1"}, "status": 404, "expect": [{"at": "did_you_mean[0]", "eq": "/original"}, {"at": "routes", "eq": "/capabilities"}]}
+{"id": "sync.manifest.is.signed.by.the.branch", "path": "/sync/manifest", "expect": [{"at": "alg", "eq": "ed25519"}, {"at": "node.fingerprint", "exists": true}, {"at": "sig", "exists": true}, {"at": "files", "min_len": 60}, {"at": "ledger.head", "exists": true}]}
+{"id": "sync.ledger.since.genesis.pages", "path": "/sync/ledger", "query": {"limit": 2}, "expect": [{"at": "count", "eq": 2}, {"at": "records[0].precedent.content_hash", "exists": true}, {"at": "done", "eq": false}]}
+{"id": "sync.file.refuses.the.private", "path": "/sync/file", "query": {"name": "node_identity.json"}, "status": 404, "expect": [{"at": "code", "eq": "NOT_FOUND"}]}
+{"id": "identity.names.the.node", "path": "/identity", "expect": [{"at": "node.fingerprint", "exists": true}, {"at": "node.signing", "eq": true}]}
 {"id": "languages.sixteen.held.plus.web", "path": "/languages", "expect": [{"at": "count", "eq": 17}, {"at": "languages[*].lang", "has": "es"}, {"at": "languages[*].lang", "has": "he"}, {"at": "languages[*].license", "has": "Public Domain"}]}
 {"id": "passage.spanish.john.3.16", "path": "/passage", "query": {"ref": "John 3:16", "lang": "es"}, "expect": [{"at": "status", "eq": "ok"}, {"at": "translation", "eq": "Reina-Valera 1909"}, {"at": "verses[0].text", "contains": "Porque de tal manera"}]}
 {"id": "passage.chinese.genesis.1.1", "path": "/passage", "query": {"ref": "Genesis 1:1", "lang": "zh"}, "expect": [{"at": "verses[0].text", "contains": "起初"}]}

@@ -755,13 +755,31 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         base = "https://narrowhighway.org"
         return _ok(_seals.summary(cite_base=base))
 
+    if method == "GET" and path == "/sync/manifest":
+        # EVERY COPY IS WHOLE (Gen 3 · 1, 2026-10-04): this node as a BRANCH — its identity, its chain head and
+        # the hash of every keeping file, signed. A node pins this node's fingerprint by hand and pulls.
+        from .. import replicate as _rep
+        return _ok(_rep.manifest())
+
+    if method == "GET" and path == "/sync/ledger":
+        from .. import replicate as _rep
+        hashes_only = str(query.get("hashes_only") or "").lower() in ("1", "true", "yes")
+        try:
+            limit = int(query.get("limit") or 500)
+        except ValueError:
+            limit = 500
+        return _ok(_rep.ledger_since((query.get("since") or "").strip(), limit, hashes_only=hashes_only))
+
     if method == "GET" and path == "/identity":
         # identity = what the engine IS (the dry, efficient truth); persona = WHO it is to talk to
         # (the separate voice / movie-style experience). The card system stays pure efficiency.
         # The FROZEN mission + kernel + agent covenant (Matt, 2026-07-25) are served here so any
         # agent that reads /identity reads the law it is bound by.
         from .. import branding as _branding
+        from .. import replicate as _rep
         return _ok({"surface": surface, "name": _branding.name_for(surface),
+                    # THE NODE (Gen 3 · 1): who this copy is — fingerprint + public key (public, safe to pin)
+                    "node": _rep.node_public(),
                     "identity": config.identity, "persona": config.persona,
                     "motto": _branding.MOTTO,
                     # THE SEALED CONSTITUTION (2026-10-03, moat lever 3): the frozen foundation's own hash,
@@ -3096,6 +3114,11 @@ ROUTES = [
     {"path": "/identity", "methods": ("GET",), "api": True},
     # THE SEAL LEDGER as a public number (2026-10-03, moat lever 1): minted, re-verified, when
     {"path": "/seals", "methods": ("GET",), "api": True, "rl": "read"},
+    # EVERY COPY IS WHOLE (Gen 3 · 1, 2026-10-04): the branch side of node sync — signed manifest, the chain
+    # since a hash, one keeping file's bytes (served raw by the handler, declared here so it is catalogued)
+    {"path": "/sync/manifest", "methods": ("GET",), "api": True, "rl": "read"},
+    {"path": "/sync/ledger", "methods": ("GET",), "api": True, "rl": "read"},
+    {"path": "/sync/file", "methods": ("GET",), "api": True, "rl": "read", "serve": True},   # raw bytes: the handler, not dispatch
     {"path": "/route", "methods": ("GET",), "api": True},
     {"path": "/bind/challenge", "methods": ("GET",), "api": True},
     {"path": "/bind", "methods": ("POST",), "rl": True},
@@ -3719,6 +3742,24 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 self.end_headers()
                 if body:
                     self.wfile.write(body)
+                return
+            if method == "GET" and u.path == "/sync/file":
+                # one allow-listed keeping file, raw, with its sha256 — a node re-hashes before it writes
+                from .. import replicate as _rep
+                name = (parse_qs(u.query).get("name", [""]) or [""])[0]
+                blob = _rep.file_bytes(name)
+                if blob is None:
+                    return self._json(404, not_found(u.path))
+                data, sha = blob
+                self.send_response(200)
+                self.send_header("content-type", "application/x-ndjson; charset=utf-8" if name.endswith(".jsonl")
+                                 else "application/json; charset=utf-8")
+                self.send_header("x-sha256", sha)
+                self.send_header("x-content-type-options", "nosniff")
+                self.send_header("cache-control", "no-store")
+                self.send_header("content-length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
                 return
             if u.path == "/speak":  # optional voice ceiling — returns audio/mpeg, else 503 -> floor
                 text = (parse_qs(u.query).get("text", [""]) or [""])[0]
