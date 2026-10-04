@@ -1112,3 +1112,8 @@ is a backup now.
 - **Move 3 (the television) — Matt's.** Keep the desktop as the broadcast station (it holds the library; costs the
   uplink) or move a curated slice to the box/Storage Box and stream from Hetzner. The streamer is stopped now; its
   task is enabled and returns at next logon or `Start-ScheduledTask`.
+- **Move 3 decided (Matt, 2026-10-04): "go with most efficient. We can build out .TV at a later date."** No stream
+  now: the YouTube broadcaster task joins the retire script (it re-encoded 24/7 from the desktop uplink, looping the
+  May 18 schedule). Nothing is lost for the build-out: the five channel schedules are in the Lighthouse archive on the
+  ark (lighthouse-20261003.tar.gz), the 339 GB PD media library stays on D:\library_files, and the HLS producer
+  (fast_channel_youtube_live.py) is portable and model-free. The elevated click is still Matt's.
