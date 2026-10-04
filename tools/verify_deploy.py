@@ -53,6 +53,15 @@ DEST = "/home/nh/concordance-2"
 HARD_DIRS = ("src/", "tests/", "tools/", "conductor/", "site/")
 HARD_FILES = ("README.md", "HANDOFF.md", "pyproject.toml")
 
+# BOX-OWNED: tracked files that a process ON THE BOX rewrites in place, so the box's copy is the
+# live truth and the repo's is the seed (2026-10-03: the hive's theorymap step writes
+# site/theories.html every turn; the deploy then reported it DIFFERENT — a true report of a
+# designed state, which teaches the reader to ignore DIFFERENT). Reported under their own heading,
+# never a drift verdict; MISSING still is (absent is absent). Name the writer, so a reader can check.
+BOX_OWNED = {
+    "site/theories.html": "nh-hive theorymap (tools/hive_cycle.py), daily 10:00 UTC",
+}
+
 # Runs on the box. Reads "<blob> <path>" lines on stdin, recomputes each path's git blob id from
 # its bytes with CR stripped, and lists untracked files under the HARD dirs. Pure stdlib.
 _REMOTE = r'''
@@ -134,13 +143,15 @@ def main() -> int:
         return 0 if soft else 1
     missing, diff, extra = res
     hard_missing = [p for p in missing if _is_hard(p)]
-    hard_diff = [p for p in diff if _is_hard(p)]
+    hard_diff = [p for p in diff if _is_hard(p) and p not in BOX_OWNED]
+    box_owned = [f"{p}  <- {BOX_OWNED[p]}" for p in diff if p in BOX_OWNED]
     soft_missing = [p for p in missing if not _is_hard(p)]
     soft_diff = [p for p in diff if not _is_hard(p)]
     n_hard = sum(1 for p in tracked if _is_hard(p))
     print(f"HARD scope (src tests tools conductor site + root files) — {n_hard} tracked")
     _report("MISSING on the box", hard_missing, 12)
     _report("DIFFERENT", hard_diff, 12)
+    _report("BOX-OWNED (rewritten on the box by design; the box is the live truth)", box_owned, 12)
     _report("EXTRA on the box (untracked here; reported, never deleted)", extra, 8)
     hard_ok = not (hard_missing or hard_diff)
     if hard_ok:
