@@ -312,6 +312,26 @@ def pull(branch: Dict[str, Any], fetch: Optional[Fetch] = None, data_dir: Option
                            "fingerprint": branch.get("fingerprint"), "at": int(time.time()), "dry_run": dry_run,
                            "records_pulled": 0, "cas_pulled": 0, "files_pulled": 0, "bytes": 0,
                            "local_only_set_aside": 0, "refused": [], "detail": ""}
+    lock = d / "sync.lock"
+    if not dry_run:
+        # one pull at a time per data dir: a nightly timer must never overlap a long first catch-up
+        held = _read_json(lock) or {}
+        if held and time.time() - float(held.get("at") or 0) < 6 * 3600:
+            rep["detail"] = f"another sync holds {lock.name} since {int(held.get('at') or 0)} (pid {held.get('pid')})"
+            return rep
+        d.mkdir(parents=True, exist_ok=True)
+        _atomic_write(lock, json.dumps({"pid": os.getpid(), "at": int(time.time())}).encode("utf-8"))
+    try:
+        return _pull_locked(rep, branch, fetch, d, dry_run)
+    finally:
+        if not dry_run:
+            try:
+                lock.unlink()
+            except OSError:
+                pass
+
+
+def _pull_locked(rep: Dict[str, Any], branch: Dict[str, Any], fetch: Fetch, d: Path, dry_run: bool) -> Dict[str, Any]:
     status, raw = fetch("/sync/manifest")
     if status != 200:
         rep["detail"] = f"manifest: HTTP {status}"

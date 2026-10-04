@@ -1117,3 +1117,25 @@ is a backup now.
   May 18 schedule). Nothing is lost for the build-out: the five channel schedules are in the Lighthouse archive on the
   ark (lighthouse-20261003.tar.gz), the 339 GB PD media library stays on D:\library_files, and the HLS producer
   (fast_channel_youtube_live.py) is portable and model-free. The elevated click is still Matt's.
+
+## 2026-10-04 — Gen 3 · 1 — EVERY COPY IS WHOLE: the keeping syncs between nodes (9ceddf4)
+- **The charter.** Matt: "what capabilities should a Gen 3 of this project have?" → eight, in order (docs/GEN3_CHARTER.md:
+  every copy whole · verifiers as data · a claim grammar · the Word in the reader's tongue · the household keeping ·
+  standing by fruit · the engine measures itself in public · the appliance) → "agreed, build in order."
+- **Built.** `src/concordance/replicate.py`. Branch side on every node: `GET /sync/manifest` (identity + chain head +
+  sha256 of every keeping file, Ed25519-signed; 89 files / 1,287 MB on the box, first call 1.1 s, cached after),
+  `GET /sync/ledger?since=H` (the chain after a hash with its bound CAS records; `hashes_only=1` for the common-prefix
+  search), `GET /sync/file?name=` (raw, x-sha256, handler-served), `/identity.node`. Node side: `python -m concordance
+  sync` over `data/known_branches.json` pinned by hand (`--add-branch`, `--whoami`, `--dry-run`); one pull at a time
+  per data dir (`sync.lock`). Explicit ALLOW list of what travels; never the node key, inboxes, profiles, groups, mesh,
+  caches, backups. A local-only chain tail is set aside in `ledger-local/`, never deleted. The box's key lives at
+  `/home/nh/.config/nh/node_identity.json` (0600, `CONCORDANCE_NODE_KEY_FILE` in .env). Pinned (8 tests, hermetic —
+  `cas.store()` mints into the LIVE corpus, a 450-second lesson), probed (4), CI green, assay **54 → 58**.
+- **The box is branch `nh_74e58b3581ab1b74e97a0c924e0cf5dc` (nh-engine-1); the desktop node is
+  `nh_60aabafec6e4e55d95f446406f9490db` (HarrisMotors).** First catch-up from the desktop: the 122 local ledger
+  records were not a prefix of the box's chain → set aside; **776 records + the bound CAS records pulled and the chain
+  verified end to end**; 36 keeping files (894 MB) streaming at ~75 KB/s on the desktop line — the proof (a seal
+  minted on the box served by the desktop node) follows when it lands. Daily at 23:30: `tools/ark/node_sync.cmd`
+  (task "NarrowHighway Node Sync").
+- **Found on the way:** the YouTube encoder (ffmpeg) had outlived its supervisor and was still pushing to YouTube — the
+  uplink hog — stopped; the retire script now takes it too.

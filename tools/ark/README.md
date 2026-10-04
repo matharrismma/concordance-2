@@ -8,5 +8,6 @@ folder is the continuity copy — a known branch). Scheduled on the desktop with
 | NarrowHighway Backup | Sat 23:00 | `backup.ps1` — full snapshot of /home/nh streamed over ssh, verified end to end, seals counted | `D:\NarrowHighway-Backups\snapshots\` |
 | NarrowHighway Ark Pull | Wed 23:00 | `ark_pull.cmd` → `tools/ark_pull.sh shards` — the nightly data tar + the shards, re-hashed | `D:\NarrowHighway-Backups\hetzner\` |
 | NarrowHighway Memory Seal | daily 22:00 | `seal_memory.cmd` → `seal_memory.sh` — the decision memory, tar + sha256, to the ark AND the box | `D:\NarrowHighway-Backups\memory\` + `/home/nh/backups/` |
+| NarrowHighway Node Sync | daily 23:30 | `node_sync.cmd` → `python -m concordance sync` — the desktop as a 2.0 NODE: pulls the keeping from the box (a KNOWN branch, fingerprint pinned in `data/known_branches.json`): the signed manifest, the seal ledger since its head, every changed keeping file re-hashed before it is written (Gen 3 · 1) | the repo's `data/` + `D:/NarrowHighway-Backups/node_sync.log` |
 
 See docs/THE_CAMEL_2026-10-03.md for the tiers and the rule of known branches. 2026-10-03.
