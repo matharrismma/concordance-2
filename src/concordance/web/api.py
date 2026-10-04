@@ -2286,7 +2286,16 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not ref:
             return _err(400, "ref required")
         from ..verifiers import scripture  # lazy: witness-only
-        return _ok(scripture.read_passage(ref))
+        return _ok(scripture.read_passage(ref, (query.get("lang") or "en").strip()))
+
+    if method == "GET" and path == "/languages":
+        # THE BIBLES THIS NODE HOLDS (2026-10-04, Lighthouse 1.0 integrated, not retired): one public-
+        # domain translation per language, read from the data dir now. Five 1.0 languages are HELD at
+        # the licence gate (see tools/migrate_bible.py) and are simply absent here.
+        from ..verifiers import scripture  # lazy
+        langs = scripture.languages()
+        return _ok({"languages": langs, "count": len(langs),
+                    "note": "GET /passage?ref=John 3:16&lang=es — every row is public domain; the WEB is 'en'."})
 
     if method == "GET" and path == "/word_study":
         s = (query.get("strongs") or "").strip()
@@ -2840,7 +2849,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # witness content, and a reader who cannot check our claims cannot trust them.
         from .. import capabilities as _caps
         from .. import doors as _doors
-        return _ok(dict(_caps.statement(surface), doors=_doors.doors(), welcome=_doors.welcome(surface)))
+        from ..verifiers import scripture as _scr
+        return _ok(dict(_caps.statement(surface), doors=_doors.doors(), welcome=_doors.welcome(surface),
+                        bible_languages=[x["lang"] for x in _scr.languages()]))
 
     if method == "GET" and path == "/systems":
         # THE SYSTEMS HANDICAP — operational health of every subsystem as one number each (a golf
@@ -3206,6 +3217,7 @@ ROUTES = [
     {"path": "/seal", "methods": ("GET",), "api": True},
     {"path": "/resolve", "methods": ("GET",), "api": True},
     {"path": "/passage", "methods": ("GET",), "api": True},
+    {"path": "/languages", "methods": ("GET",), "api": True},   # the Bibles held, by language (2026-10-04)
     {"path": "/word_study", "methods": ("GET",), "api": True},
     {"path": "/cross_refs", "methods": ("GET",), "api": True},
     {"path": "/word_occurrences", "methods": ("GET",), "api": True},

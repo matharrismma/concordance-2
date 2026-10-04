@@ -66,7 +66,7 @@ GOLDEN_API_GET = {
     "/search", "/seal", "/resolve", "/word_study",
     "/card", "/cards", "/cards/stats", "/daily", "/witness", "/grid", "/grid/dimension",
     "/card/connections", "/graph", "/floor", "/locate", "/library/health", "/growth",
-    "/thread", "/threads", "/threads/search", "/thread/verify", "/passage", "/apothecary",
+    "/thread", "/threads", "/threads/search", "/thread/verify", "/passage", "/languages", "/apothecary",
     "/pronounce", "/cross_refs", "/word_occurrences", "/original", "/canon",
     "/commentary", "/journal", "/journal/dates", "/steward", "/tsk",
     "/character", "/characters", "/prophecy",

@@ -41,6 +41,10 @@
 {"id": "verify.divisor.count.twelve.has.six", "method": "POST", "path": "/verify", "body": {"claim": "the number of divisors of 12 is 6"}, "expect": [{"at": "verdict", "eq": "HOLDS"}]}
 {"id": "verify.divisor.count.wrong.is.broken", "method": "POST", "path": "/verify", "body": {"claim": "10 has 6 divisors"}, "expect": [{"at": "verdict", "eq": "BROKEN"}]}
 {"id": "unknown.route.names.the.door", "path": "/original_words", "query": {"ref": "John 1:1"}, "status": 404, "expect": [{"at": "did_you_mean[0]", "eq": "/original"}, {"at": "routes", "eq": "/capabilities"}]}
+{"id": "languages.sixteen.held.plus.web", "path": "/languages", "expect": [{"at": "count", "eq": 17}, {"at": "languages[*].lang", "has": "es"}, {"at": "languages[*].lang", "has": "he"}, {"at": "languages[*].license", "has": "Public Domain"}]}
+{"id": "passage.spanish.john.3.16", "path": "/passage", "query": {"ref": "John 3:16", "lang": "es"}, "expect": [{"at": "status", "eq": "ok"}, {"at": "translation", "eq": "Reina-Valera 1909"}, {"at": "verses[0].text", "contains": "Porque de tal manera"}]}
+{"id": "passage.chinese.genesis.1.1", "path": "/passage", "query": {"ref": "Genesis 1:1", "lang": "zh"}, "expect": [{"at": "verses[0].text", "contains": "起初"}]}
+{"id": "passage.unknown.language.names.the.held", "path": "/passage", "query": {"ref": "John 3:16", "lang": "xx"}, "expect": [{"at": "status", "eq": "not_found"}, {"at": "languages", "min_len": 17}]}
 {"id": "verify.137.is.prime", "method": "POST", "path": "/verify", "body": {"claim": "137 is a prime number"}, "expect": [{"at": "verdict", "eq": "HOLDS"}]}
 {"id": "verify.element.atomic.number.holds", "method": "POST", "path": "/verify", "body": {"claim": "the atomic number of iron is 26"}, "expect": [{"at": "verdict", "eq": "HOLDS"}]}
 {"id": "verify.lookup.fact.iron.melts.holds.someday", "method": "POST", "path": "/verify", "body": {"claim": "iron melts at 1538 C"}, "expect": [{"at": "found_fact.agrees", "eq": true}], "known_miss": true}

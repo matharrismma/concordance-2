@@ -264,14 +264,95 @@ class Bible:
 # ── module-level default Bible (lazy, from bible_en.jsonl) ───────────────
 
 _DEFAULT: Optional[Bible] = None
+_BIBLES: Dict[str, Bible] = {}          # lang -> Bible (lazy; "en" is also _DEFAULT)
+_LANGUAGES: Optional[List[Dict[str, Any]]] = None
 
 
-def _bible_path() -> Path:
-    env = os.environ.get("CONCORDANCE_BIBLE_EN", "").strip()
-    if env:
-        return Path(env)
+def _data_dir() -> Path:
     data = os.environ.get("CONCORDANCE_DATA_DIR", "").strip()
-    return (Path(data) if data else Path("data")) / "bible_en.jsonl"
+    return Path(data) if data else Path("data")
+
+
+def _bible_path(lang: str = "en") -> Path:
+    if lang == "en":
+        env = os.environ.get("CONCORDANCE_BIBLE_EN", "").strip()
+        if env:
+            return Path(env)
+    return _data_dir() / f"bible_{lang}.jsonl"
+
+
+def _norm_lang(lang: Any) -> str:
+    l = str(lang or "en").strip().lower().replace("_", "-")
+    return l.split("-")[0] or "en"
+
+
+def bible(lang: str = "en") -> "Bible":
+    """The Bible in ONE language — "en" is the WEB; every other language is a public-domain
+    translation migrated from the 1.0 keeping (tools/migrate_bible.py --all, 2026-10-04: Matt agreed to
+    integrate Lighthouse 1.0 rather than retire it). Loaded once per language, on first use."""
+    l = _norm_lang(lang)
+    if l == "en":
+        return default_bible()
+    b = _BIBLES.get(l)
+    if b is None:
+        b = Bible(_load_verses(_bible_path(l)))
+        _BIBLES[l] = b
+    return b
+
+
+def languages() -> List[Dict[str, Any]]:
+    """Every Bible this node holds: [{lang, translation, year, license, verses, file}] — read from the
+    data dir NOW (the first row of each bible_<lang>.jsonl names the translation), never typed in.
+    Only what is on disk is listed; a language that was held at the licence gate is simply absent."""
+    global _LANGUAGES
+    if _LANGUAGES is not None:
+        return _LANGUAGES
+    out: List[Dict[str, Any]] = []
+    d = _data_dir()
+    try:
+        files = sorted(d.glob("bible_*.jsonl"))
+    except OSError:
+        files = []
+    for f in files:
+        lang = f.stem[len("bible_"):]
+        if not lang or not lang.isalpha():
+            continue
+        first: Dict[str, Any] = {}
+        n = 0
+        try:
+            with open(f, encoding="utf-8") as fh:
+                for line in fh:
+                    if not line.strip():
+                        continue
+                    n += 1
+                    if not first:
+                        try:
+                            first = json.loads(line)
+                        except json.JSONDecodeError:
+                            first = {}
+        except OSError:
+            continue
+        if n == 0:
+            continue
+        out.append({"lang": lang,
+                    "translation": first.get("translation") or ("World English Bible" if lang == "en" else None),
+                    "year": first.get("year"),
+                    "license": first.get("license") or ("Public Domain" if lang == "en" else None),
+                    "verses": n, "file": f.name})
+    _LANGUAGES = out
+    return out
+
+
+def _unknown_language(ref: str, lang: str, shape: str) -> Dict[str, Any]:
+    have = [x["lang"] for x in languages()]
+    base = {"ref": ref, "status": "not_found", "lang": lang,
+            "detail": f"no Bible held in language {lang!r}; held: {', '.join(have) or 'none'} (GET /languages)",
+            "languages": have}
+    if shape == "passage":
+        base.update({"verses": [], "count": 0})
+    else:
+        base["text"] = ""
+    return base
 
 
 def _load_verses(path: Path) -> Iterable[dict]:
@@ -298,20 +379,37 @@ def default_bible(path: Optional[Path] = None) -> Bible:
 
 
 def _reset() -> None:
-    """Test hook: drop the cached default so a new data path is picked up."""
-    global _DEFAULT
+    """Test hook: drop the cached default (and every other language) so a new data path is picked up."""
+    global _DEFAULT, _LANGUAGES
     _DEFAULT = None
+    _LANGUAGES = None
+    _BIBLES.clear()
 
 
-def resolve_ref(ref: str) -> Dict[str, Any]:
-    """Resolve a reference to its WEB text: {ref, text, status: ok|not_found|source_missing}."""
-    return default_bible().resolve(ref)
+def resolve_ref(ref: str, lang: str = "en") -> Dict[str, Any]:
+    """Resolve a reference to its text — the WEB by default, or a held translation by lang:
+    {ref, text, status: ok|not_found|source_missing, lang, translation}."""
+    l = _norm_lang(lang)
+    if l != "en" and not _bible_path(l).exists():
+        return _unknown_language(ref, l, "ref")
+    out = dict(bible(l).resolve(ref))
+    out.setdefault("lang", l)
+    return out
 
 
-def read_passage(ref: str) -> Dict[str, Any]:
-    """Read a passage (single verse / range / whole chapter) of the WEB — {ref, verses, count,
-    status}. The core reading primitive the study experience is built on."""
-    return default_bible().passage(ref)
+def read_passage(ref: str, lang: str = "en") -> Dict[str, Any]:
+    """Read a passage (single verse / range / whole chapter) — the WEB by default, or a held
+    translation by lang (GET /languages lists them): {ref, verses, count, status, lang, translation}.
+    The core reading primitive the study experience is built on."""
+    l = _norm_lang(lang)
+    if l != "en" and not _bible_path(l).exists():
+        return _unknown_language(ref, l, "passage")
+    out = dict(bible(l).passage(ref))
+    out["lang"] = l
+    if out.get("status") == "ok":
+        meta = next((x for x in languages() if x["lang"] == l), None)
+        out["translation"] = (meta or {}).get("translation")
+    return out
 
 
 def passage_text(ref: str) -> str:

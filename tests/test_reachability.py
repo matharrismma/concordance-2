@@ -48,6 +48,9 @@ AGENT_ONLY = {
     # A readiness probe for the voice faculty (ceiling ElevenLabs vs. sovereign floor) — read by the
     # console's own script and by operators checking the voice is up, not a page a reader visits.
     "/speak/health",
+    # THE BIBLES BY LANGUAGE (2026-10-04, Lighthouse 1.0 integrated): the catalogue a client reads
+    # before asking /passage?lang=; the reader page passes lang through, the list is the agent's.
+    "/languages",
     # The six MCP profile mounts (task #123): an agent's client mounts one plane by URL;
     # a human page linking them would be a door drawn for someone who cannot walk through it.
     # The full /mcp is documented on the connect page; the profiles are documented beside it.

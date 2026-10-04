@@ -732,9 +732,12 @@ def _witness_tools() -> List[dict]:
          "description": "Resolve a Scripture reference to its World English Bible text.",
          "inputSchema": {"type": "object", "properties": {"ref": {"type": "string"}}, "required": ["ref"]}},
         {"name": "read_passage",
-         "description": ("Read a passage of the WEB — a single verse, a range (John 3:16-18), or a "
-                         "whole chapter (John 3)."),
-         "inputSchema": {"type": "object", "properties": {"ref": {"type": "string"}}, "required": ["ref"]}},
+         "description": ("Read a passage — a single verse, a range (John 3:16-18), or a whole chapter "
+                         "(John 3). The WEB by default; lang picks a held public-domain translation "
+                         "(es, fr, de, zh, he, la, ru, ar, ja, ko, …; an unknown lang lists what is held)."),
+         "inputSchema": {"type": "object", "properties": {"ref": {"type": "string"},
+                                                          "lang": {"type": "string", "description": "ISO 639-1, default en"}},
+                         "required": ["ref"]}},
         {"name": "word_study",
          "description": "Strong's word study — original-language definition + pronunciation + every occurrence.",
          "inputSchema": {"type": "object", "properties": {
@@ -1735,7 +1738,7 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         return scripture.resolve_ref(args.get("ref", ""))
     if name == "read_passage" and knowledge:
         from ..verifiers import scripture  # lazy: witness-only
-        return scripture.read_passage(args.get("ref", ""))
+        return scripture.read_passage(args.get("ref", ""), str(args.get("lang") or "en"))
     if name == "word_study" and knowledge:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.word_study(args.get("strongs", ""))
@@ -1915,6 +1918,14 @@ def serve_stdio(surface: str = "secular") -> None:
     """
     config = EngineConfig(surface)
     session: Dict[str, Any] = {}
+    # JSON-RPC over stdio is UTF-8 by contract, whatever the console's code page: on Windows the default
+    # stdout is cp1252 and the first non-ASCII character (an arrow in the welcome) killed the desktop
+    # node with UnicodeEncodeError (2026-10-04, the first run of the desktop as a 2.0 node).
+    for stream in (sys.stdin, sys.stdout):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")   # type: ignore[attr-defined]
+        except (AttributeError, ValueError):
+            pass
     for line in sys.stdin:
         line = line.strip()
         if not line:
