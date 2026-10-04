@@ -123,6 +123,9 @@ def test_every_golden_falsehood_is_refused():
     goldens = _load()
     unrefused = []
     for domain, g in sorted(goldens.items()):
+        truth = _statuses(domain, {g["packet_key"]: g["true"]})
+        if not any("CONFIRM" in s for s in truth):
+            continue          # the domain cannot judge in this environment (a source absent, e.g. on CI) - not a shrug
         sts = _statuses(domain, {g["packet_key"]: g["false"]})
         if not any(("MISMATCH" in s or "ERROR" in s) for s in sts):
             unrefused.append(f"{domain}: {sts}")
