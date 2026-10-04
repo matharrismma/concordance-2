@@ -266,6 +266,10 @@ def _http_fetch(base_url: str, timeout: int = 120) -> Fetch:
                 return r.status, r.read()
         except urllib.error.HTTPError as e:
             return e.code, e.read()
+        except (urllib.error.URLError, OSError, TimeoutError) as e:
+            # a dropped line (the branch restarting mid-pull, a timeout) is a refusal of that one request,
+            # never a crash: what was written stays, and the next run resumes by hash
+            return 0, str(e).encode("utf-8", "replace")
     return fetch
 
 
