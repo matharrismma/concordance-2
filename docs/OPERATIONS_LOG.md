@@ -1077,3 +1077,4 @@ is a backup now.
 - **Open decision (chips filed):** (a) rebuild concordance.db from the lemma column (98.5%, per-verse positions) — the
   method fix — which changes served Strong's (ἦν G2258 → εἰμί G1510) and occurrence counts, and expands the
   MorphGNT-derived layer under the share-alike question above; (b) the Greek verse cards' license label. Matt's call.
+- CI green (run 37204689922, ff6ac17). Deployed 13:12–13:14 UTC, both faces 200, HARD scope box==repo. Live on 8001/8002: John 1:1 14/17 (ἀρχῇ, τὸν, θεόν untagged, verse_pos 0,2,3…16), Revelation 7:4 5/16, Genesis 1:1 7/7 complete, Romans 1:29 and 1 Cor 13:7 0 tagged but the verse shown whole; John 99:99 → total null, never a claim. bible.html verified in the browser: 17 in order — 14 chips + 3 dashed words — under the coverage line.
