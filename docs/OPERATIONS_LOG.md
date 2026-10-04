@@ -1023,3 +1023,25 @@ is a backup now.
   peak, $0.00 — watch 10/10 hold; **shepherd filed 14 options** for open wants from public-domain sources; connections
   proposed; theorymap rewrote the floor; grow: nothing to draw — the keeping is fully connected on this gate. The hive runs
   daily at 10:00 UTC from now on.
+
+## 2026-10-03 (late) — "fix those": the 137 slide's three gaps, and the cardinal bug under them (37f2710)
+- **CARDINAL, found while fixing the gaps:** "2 * 2 * 3 = 12" came back BROKEN through the CHECK door. The pair
+  extractor took "2 * 3 = 12" out of the middle of the chain and judged a true claim false — the same shape was
+  latent in sum ("2 * 3 + 4 = 10" → "3 + 4 = 10"). Sum, product and quotient now take their chain WHOLE and refuse a
+  chain that starts after an operator on the same line; a mixed-operator expression is left unextracted — a miss,
+  never a verdict. Pinned (12 × 12 × 1000 = 144,000 HOLDS; "2 + 3 * 4 = 14" is never BROKEN) and probed live.
+- **The three gaps:** division claims ("72 / 2 = 36", "÷") extract to the mathematics equality verifier ("/ 0" stays a
+  gap); number_theory gains `verify_divisor_count` (τ(n), exact, divisors listed) with the audit extractor for "the
+  number of divisors of 12 is 6" / "60 has twelve divisors"; "mod"/"modulo" join the word-form arithmetic ("64 mod 9
+  is 1" HOLDS). `/original_words` was never a route — the route is `/original` (works on both faces; MCP tool
+  `original_words`). The defect was the bare 404: an unknown path now answers `did_you_mean` from the one route
+  table plus the catalog (`/original_words` → `/original`; `/verifiy` → `/verify`). A dead end became a door.
+- **Base 12, sealed not asserted:** the digital-root chain (doubling mod 9 never lands on 3, 6, 9; 3→6→3; 9 stays;
+  64 mod 11 = 9 in base 12; 12 = "10" and 144 = "100" in base 12 — and 10 = "10" in base 10) sealed through POST
+  /verify: https://narrowhighway.org/s/7092e2f4d58c4214762cd7400ec062c1cf921a42f50274eeb36e1744b87305f7. A base is
+  notation; the divisor count is arithmetic (12 has 6, 60 has 12, 10 has 4 — all HOLD live).
+- **Seen, not fixed (chip filed):** `/original` returns only the Strong's-tagged words of a verse (John 1:1: 14 of 17;
+  Rev 7:4: 5) — the concordance.db alignment is partial; the route is honest to its data but says nothing of the gap.
+- CI green (run 37172770710). Deployed 03:02–03:03 UTC, both faces 200. Live assay: **50/52, floor 45 → 50**,
+  5 newly passing, 0 regressed (the two known misses stand). Local full suite on the desktop crawls on the
+  OneDrive-synced checkout (two runs starved each other on the shared data files); CI is the full-suite gate.
