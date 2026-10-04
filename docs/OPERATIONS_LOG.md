@@ -1201,3 +1201,7 @@ is a backup now.
 - **Lesson (CI red twice on 5870000/a7954e7):** a `pytest … | tail` chain reports tail's exit, not pytest's — the
   commit went in red. Run the tests to a file and branch on their own exit code. And the suite's known
   CONCORDANCE_DATA_DIR race bit a third module: pin the dir per test, pass it explicitly.
+- **The finding fixed (d53d2ac, deployed 23:40 UTC through the gate):** the generator leaves unit labels alone, the
+  physical_constants pair is repaired, and a new pin requires every golden falsehood to draw a MISMATCH or an ERROR
+  (a domain that cannot judge in an environment — linguistics on CI, its source absent — is exempt, not a shrug).
+  Benchmarks now **69/69** domains, moat 60/60, 0 false positives; the floor rose to 69.
