@@ -172,6 +172,11 @@ def run_for_domain(domain: str, packet, surface: str = "secular") -> List[Verifi
             results.extend(wmod.run(packet))
     for cross in CROSS_CUTTING_VERIFIERS:
         results.extend(cross.run(packet))
+    # VERIFIERS AS DATA (Gen 3 · 2, 2026-10-04): the admitted specs of this domain, run by the generic
+    # evaluator; a result a module already produced shadows the spec's. A domain with no module is
+    # served by its specs alone — a new domain without a deploy.
+    from . import spec as _spec
+    results.extend(_spec.run_for_domain(d, packet, have=(r.name for r in results)))
     return results
 
 

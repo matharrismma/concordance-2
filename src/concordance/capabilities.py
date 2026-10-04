@@ -40,6 +40,14 @@ NOTE = ("A conduit, not a source: the engine FINDS and VERIFIES; it does not gen
         "actually does, and none can be misread as a bigger claim than it is.")
 
 
+def _spec_count() -> int:
+    try:
+        from .verifiers import spec as _spec
+        return int(_spec.catalog()["count"])
+    except Exception:  # noqa: BLE001 — a count, never a crash in the capability statement
+        return 0
+
+
 def _verifiers() -> Dict[str, Any]:
     from . import verifiers as V
 
@@ -79,6 +87,12 @@ def _verifiers() -> Dict[str, Any]:
         "cross_cutting": {
             "count": len(V.CROSS_CUTTING_VERIFIERS),
             "means": "verifiers that run on every packet regardless of domain",
+        },
+        "spec_checks": {
+            "count": _spec_count(),
+            "means": ("checks held as DATA (data/verifier_specs.jsonl) and run by the generic evaluator — laws "
+                      "contributed through the gate, proven by their own goldens, shipped without a deploy; "
+                      "GET /specs lists them"),
         },
     }
 

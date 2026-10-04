@@ -1,0 +1,82 @@
+{
+  "id": "spec_electrical",
+  "domain": "electrical",
+  "packet_key": "ELEC_VERIFY",
+  "title": "Electrical circuits — the laws of Ohm, Joule, Kirchhoff, and the RC charge",
+  "note": "Gen 3 · 2, 2026-10-04: the Python verifier (verifiers/electrical.py) re-expressed as data. The first four checks mirror the code and must give identical verdicts on the domain goldens; voltage_divider is NEW and ships without a deploy.",
+  "sources": [
+    {"label": "G. S. Ohm, Die galvanische Kette, mathematisch bearbeitet (1827)", "pd": true},
+    {"label": "J. P. Joule, On the Production of Heat by Voltaic Electricity (1841)", "pd": true},
+    {"label": "G. Kirchhoff, Ueber den Durchgang eines elektrischen Stromes durch eine Ebene (1845)", "pd": true}
+  ],
+  "checks": [
+    {
+      "check": "ohms_law",
+      "law": "V = I · R",
+      "inputs": {"I": "current_A", "R": "resistance_ohm"},
+      "claimed": "voltage_V",
+      "compute": "I * R",
+      "tolerance": {"rel": 1e-3, "abs": 1e-6},
+      "guards": [{"when": "R < 0", "error": "resistance must be non-negative"}],
+      "goldens": {
+        "true": {"voltage_V": 12.0, "current_A": 0.5, "resistance_ohm": 24.0},
+        "false": {"voltage_V": 13.0, "current_A": 0.5, "resistance_ohm": 24.0}
+      }
+    },
+    {
+      "check": "power",
+      "law": "P = V · I = I² · R = V² / R",
+      "inputs": {"V": "voltage_V", "I": "current_A", "R": "resistance_ohm"},
+      "claimed": "power_W_claim",
+      "compute": ["V * I", "I ** 2 * R", "V ** 2 / R"],
+      "tolerance": {"rel": 1e-3, "abs": 1e-6},
+      "guards": [{"when": "R == 0", "error": "cannot compute V²/R with R = 0"}],
+      "goldens": {
+        "true": {"voltage_V": 12.0, "current_A": 0.5, "resistance_ohm": 24.0, "power_W_claim": 6.0},
+        "false": {"voltage_V": 12.0, "current_A": 0.5, "resistance_ohm": 24.0, "power_W_claim": 7.0}
+      }
+    },
+    {
+      "check": "kirchhoff_voltage_loop",
+      "law": "ΣV = 0 around any closed loop (KVL)",
+      "inputs": {"V": "voltages_in_loop"},
+      "claimed": "claimed_loop_sum_V",
+      "compute": "sum(V)",
+      "tolerance": {"rel": 1e-3, "abs": 1e-6},
+      "goldens": {
+        "true": {"voltages_in_loop": [9, -4.5, -4.5], "claimed_loop_sum_V": 0.0},
+        "false": {"voltages_in_loop": [9, -4.5, -4.5], "claimed_loop_sum_V": 42.0}
+      }
+    },
+    {
+      "check": "rc_time_constant",
+      "law": "v(t) = V · (1 − e^(−t / RC))",
+      "inputs": {"R": "resistance_ohm_rc", "C": "capacitance_F", "t": "elapsed_s", "V": "supply_V"},
+      "claimed": "claimed_capacitor_voltage_V",
+      "compute": "V * (1 - exp(-t / (R * C)))",
+      "tolerance": {"rel": 1e-3, "abs": 1e-3},
+      "guards": [
+        {"when": "R <= 0 or C <= 0", "error": "R and C must be positive"},
+        {"when": "t < 0", "error": "elapsed time cannot be negative"}
+      ],
+      "goldens": {
+        "true": {"resistance_ohm_rc": 1000, "capacitance_F": 1e-6, "elapsed_s": 0.001, "supply_V": 5.0, "claimed_capacitor_voltage_V": 3.16},
+        "false": {"resistance_ohm_rc": 1000, "capacitance_F": 1e-6, "elapsed_s": 0.001, "supply_V": 5.0, "claimed_capacitor_voltage_V": 13.82}
+      }
+    },
+    {
+      "check": "voltage_divider",
+      "law": "V_out = V_in · R2 / (R1 + R2)",
+      "inputs": {"Vin": "vin_V", "R1": "r1_ohm", "R2": "r2_ohm"},
+      "claimed": "claimed_vout_V",
+      "compute": "Vin * R2 / (R1 + R2)",
+      "tolerance": {"rel": 1e-3, "abs": 1e-6},
+      "guards": [{"when": "R1 < 0 or R2 < 0", "error": "resistances must be non-negative"},
+                 {"when": "R1 + R2 == 0", "error": "R1 + R2 must be positive"}],
+      "goldens": {
+        "true": {"vin_V": 12.0, "r1_ohm": 1000, "r2_ohm": 2000, "claimed_vout_V": 8.0},
+        "false": {"vin_V": 12.0, "r1_ohm": 1000, "r2_ohm": 2000, "claimed_vout_V": 4.0}
+      }
+    }
+  ]
+}

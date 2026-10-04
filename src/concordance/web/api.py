@@ -755,6 +755,11 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         base = "https://narrowhighway.org"
         return _ok(_seals.summary(cite_base=base))
 
+    if method == "GET" and path == "/specs":
+        # VERIFIERS AS DATA (Gen 3 · 2): every check this node holds as a spec — law, inputs, sources, seal
+        from ..verifiers import spec as _spec
+        return _ok(_spec.catalog())
+
     if method == "GET" and path == "/sync/manifest":
         # EVERY COPY IS WHOLE (Gen 3 · 1, 2026-10-04): this node as a BRANCH — its identity, its chain head and
         # the hash of every keeping file, signed. A node pins this node's fingerprint by hand and pulls.
@@ -3116,6 +3121,7 @@ ROUTES = [
     {"path": "/seals", "methods": ("GET",), "api": True, "rl": "read"},
     # EVERY COPY IS WHOLE (Gen 3 · 1, 2026-10-04): the branch side of node sync — signed manifest, the chain
     # since a hash, one keeping file's bytes (served raw by the handler, declared here so it is catalogued)
+    {"path": "/specs", "methods": ("GET",), "api": True},   # VERIFIERS AS DATA — the checks held as specs (Gen 3 · 2)
     {"path": "/sync/manifest", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/sync/ledger", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/sync/file", "methods": ("GET",), "api": True, "rl": "read", "serve": True},   # raw bytes: the handler, not dispatch

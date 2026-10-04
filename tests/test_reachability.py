@@ -53,6 +53,8 @@ AGENT_ONLY = {
     "/languages",
     # EVERY COPY IS WHOLE (Gen 3 · 1): a node's doors, read by `python -m concordance sync`, never by a page
     "/sync/manifest", "/sync/ledger", "/sync/file",
+    # VERIFIERS AS DATA (Gen 3 · 2): the spec catalogue, read by agents and the operator's tool
+    "/specs",
     # The six MCP profile mounts (task #123): an agent's client mounts one plane by URL;
     # a human page linking them would be a door drawn for someone who cannot walk through it.
     # The full /mcp is documented on the connect page; the profiles are documented beside it.

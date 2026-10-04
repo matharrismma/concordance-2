@@ -48,6 +48,7 @@ GENESIS = ledger.GENESIS_HASH
 ALLOW = (
     "cards.jsonl", "*_cards.jsonl", "*_spine.jsonl", "*_spines.jsonl", "*_seeds.jsonl", "*_bridges.jsonl",
     "bible_*.jsonl", "canon.jsonl", "dictionary_supplement.jsonl", "witnesses.jsonl", "domain_goldens.json",
+    "verifier_specs.jsonl",      # VERIFIERS AS DATA (Gen 3 · 2): the laws held as specs ride with the keeping
 )
 NEVER = ("node_identity.json", "known_branches.json", "sync_status.json", "contact_inbox.jsonl",
          "web_cache.jsonl", "watch.json", "watch_org.json", "watch_history.jsonl", "activity.jsonl",
@@ -269,6 +270,7 @@ FetchFile = Callable[[str, int], Tuple[int, bytes, bool]]
 
 CHUNK = 1 << 20
 FILE_TRIES = 6
+RETRY_PAUSE = 5          # seconds × attempt between tries of one file (tests set 0)
 
 
 def _http_fetch(base_url: str, timeout: int = 120) -> Fetch:
@@ -331,6 +333,8 @@ def _download(fetch_file: FetchFile, name: str, want_sha: str, want_bytes: int, 
         offset = len(have)
         if offset >= want_bytes and want_bytes > 0:
             break
+        if attempt and RETRY_PAUSE:
+            time.sleep(min(60, RETRY_PAUSE * attempt))                        # a restarting branch is back in ~30 s
         st, body, complete = fetch_file(f"/sync/file?name={urllib.parse.quote(name)}", offset)
         if st == 206:
             have.extend(body)

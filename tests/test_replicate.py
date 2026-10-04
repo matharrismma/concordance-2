@@ -20,6 +20,7 @@ from concordance import cas, ledger, replicate  # noqa: E402
 from concordance.validate import canonical_json_bytes
 
 pytestmark = pytest.mark.skipif(not replicate.identity.signing_available(), reason="needs cryptography")
+replicate.RETRY_PAUSE = 0          # the stall tests retry at once
 
 
 def _mint(d: Path, n: int, prev: str, t0: float) -> str:
