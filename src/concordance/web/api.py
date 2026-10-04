@@ -759,10 +759,11 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # THE ENGINE MEASURES ITSELF IN PUBLIC (Gen 3 · 7): the standing benchmarks as tools/benchmarks.py
         # measured them on this node (nightly, and at every deploy) — served from the file, with its age.
         import datetime as _dt
-        import os as _benv                      # own alias: dispatch rebinds _os locally further down
+        import json as _bjson
+        import os as _benv                      # own aliases: dispatch rebinds _os locally further down
         bp = Path(_benv.environ.get("CONCORDANCE_DATA_DIR", "").strip() or "data") / "benchmarks.json"
         try:
-            b = json.loads(bp.read_text(encoding="utf-8"))
+            b = _bjson.loads(bp.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             return _err(404, "benchmarks never run on this node (tools/benchmarks.py)")
         age_h = None
