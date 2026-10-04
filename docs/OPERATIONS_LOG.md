@@ -1078,3 +1078,37 @@ is a backup now.
   method fix — which changes served Strong's (ἦν G2258 → εἰμί G1510) and occurrence counts, and expands the
   MorphGNT-derived layer under the share-alike question above; (b) the Greek verse cards' license label. Matt's call.
 - CI green (run 37204689922, ff6ac17). Deployed 13:12–13:14 UTC, both faces 200, HARD scope box==repo. Live on 8001/8002: John 1:1 14/17 (ἀρχῇ, τὸν, θεόν untagged, verse_pos 0,2,3…16), Revelation 7:4 5/16, Genesis 1:1 7/7 complete, Romans 1:29 and 1 Cor 13:7 0 tagged but the verse shown whole; John 99:99 → total null, never a claim. bible.html verified in the browser: 17 in order — 14 chips + 3 dashed words — under the coverage line.
+
+## 2026-10-04 — Lighthouse 1.0: integrated, not retired (232cc33)
+- **The look.** The desktop's hidden python (PID 2080, 18 CPU-hours) was the Lighthouse 1.0 engine — uvicorn on :8000,
+  504 routes in 151 families against 2.0's 211 in 121 — started by the `Concordance-API` logon task, kept alive by two
+  watchdogs, exposed through the Cloudflared service; the YouTube fast channel (five scheduled channels over a 339 GB
+  PD media library on D:) ran beside it and had looped the May 18 schedule for four and a half months from the
+  desktop uplink. api.narrowhighway.com already resolves to the box (Caddy → 8002). The Claude Desktop "concordance"
+  connector pointed at localhost:8000 — this app was 1.0's last caller.
+- **Matt: "instead of retiring it, is there a way to integrate it?" → "agreed."** The one body: fold what 1.0 holds
+  into 2.0, make the desktop a 2.0 NODE (camel tier 3), never a second engine. Of the 120 families only 1.0 has, most
+  are experiments the constitution refused (swarm, agent/tts/serial-generate/radio-produce = model + ElevenLabs,
+  wallet, market) or rebuilt in 2.0 form; 1.0's "61,008 journal entries" are activity events, not content. Augustine's
+  Confessions turned out to be IN the keeping already (1,469 lines, §aug_conf sections) — search ranking missed it.
+- **Move 1 (the connector + the engine).** `claude_desktop_config.json` (backed up `.bak-20261004`): the 1.0 connector
+  replaced by `narrowhighway` = `python -m concordance mcp --surface witness` on the desktop checkout (PYTHONPATH src,
+  CONCORDANCE_DATA_DIR data, PYTHONIOENCODING utf-8) — the one kernel, locally, offline-capable; the live box stays
+  attached through the claude.ai connector. Its first run died on cp1252 meeting an arrow in the welcome →
+  `serve_stdio` now reconfigures stdin/stdout to UTF-8 (pinned). Stopped non-elevated: the engine watchdog, the
+  watchdog shell, the YouTube streamer. STILL RUNNING, elevated (Access is denied from this session; three UAC
+  attempts came back "canceled" instantly): the engine, its launcher shell, the three task registrations, the
+  Cloudflared service. `C:\Users\hdven\OneDrive\Desktop\retire_lighthouse_desktop.ps1` (+ the double-click `.cmd`)
+  finishes it; it leaves the YouTube task alone (move 3 is Matt's) and touches no backup task.
+- **Move 2 (the Bibles).** 2.0 was English-only (John 3:16 lang=es returned the WEB). `tools/migrate_bible.py --all`
+  under the STRICT PD gate: 16 languages crossed on established grounds (ar Smith-Van Dyck 1865, de Luther 1912, es
+  RV 1909, fa OPV 1895, fr Segond 1910, he Leningrad, it Diodati, ja Kogoyaku, ko 1910, la Clementina, my Judson, nl
+  Statenvertaling, ru Synodal, uk Kulish, vi 1934, zh CUV); 5 HELD with the reason (hi IRV = CC BY-SA; ht unidentified
+  edition; pt unidentified; ro Cornilescu contested; sw Kiswahili Contemporary = Biblica) and filed as PD gathers on
+  the want list (want_d98918a430ac … want_ce704ae285a5). 177 MB to the box (compressed — the raw transfer crawled at
+  45 KB/s). `scripture.bible(lang)/languages()/read_passage(ref, lang)`; `GET /passage?lang=`, `GET /languages`,
+  `/capabilities.bible_languages`; MCP `read_passage(lang)` (97 tools unchanged). Live on both faces: 17 languages,
+  John 3:16 in es/zh/he/la/ja, an unknown lang names what is held. CI green; assay **54/56, floor 50 → 54**.
+- **Move 3 (the television) — Matt's.** Keep the desktop as the broadcast station (it holds the library; costs the
+  uplink) or move a curated slice to the box/Storage Box and stream from Hetzner. The streamer is stopped now; its
+  task is enabled and returns at next logon or `Start-ScheduledTask`.
