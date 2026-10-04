@@ -1146,3 +1146,22 @@ is a backup now.
   mid-file (the desktop line) → `/sync/file` honors Range, the node streams and resumes from the stalled byte, smallest
   first (0657a25, deployed); the catch-up of the 894 MB of keeping files restarted with resume in place.
   **Capability 1 is DONE by its own proof; capability 2 (verifiers as data) may start.**
+
+## 2026-10-04 (night) — Gen 3 · 2 — VERIFIERS AS DATA, NOT DEPLOYS (34d73c7) — PROVEN
+- **Built.** `verifiers/spec.py`: one generic evaluator runs a declarative spec — a law applied to a claim. The
+  expression language is an AST whitelist (numbers, bound inputs, + − × ÷ ** %, lists/indexing, a fixed set of math
+  functions; anything else is an ERROR, never run). A check fires when its inputs and the claimed key are present; a
+  compute LIST is a set of equivalent forms that must all match (the cross-check `electrical.power` does in code);
+  guards name errors; tolerance is the spec's (a caller may tighten, never loosen). **A spec carries its own goldens
+  and is refused at load if they fail.** SHADOW: a result a Python module already produced shadows the spec's — a
+  spec extends, never contradicts, code; a domain with no module is served by its specs alone. Only admitted specs
+  run; the file is re-read on change — a new law runs without a restart. `GET /specs` lists what a node holds;
+  `/capabilities.verifiers.spec_checks` counts it; `verifier_specs.jsonl` rides with capability 1's sync.
+  `tools/spec_verifier.py` is the operator's door (--check / --admit with a CAS seal / --shadow / --catalog); the
+  contributor's door with standing is capability 6.
+- **The charter's proof, live on the box.** `eval/specs/electrical.json` re-expresses the electrical verifier as
+  data; admitted as data on the box (seal `a47e58944ed7da7652f4ae67159b14e618c19ad85b18eb3fea9c844d2ac44fb2`),
+  **no restart**: the shadow run shows *identical verdicts on every check both produce* across the domain goldens
+  (true and false packets); the NEW check `voltage_divider` — no Python behind it — answers HOLDS (12 V, 1 kΩ/2 kΩ
+  → 8 V) and BROKEN (claimed 4 V) through POST /verify. CI green; assay **58 → 60**. Capability 2 is DONE by its
+  own proof. Next in order: 3 (a claim grammar) and 7 (the engine measures itself in public) run alongside.
