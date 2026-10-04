@@ -322,6 +322,21 @@ def test_the_coach_reads_scripture_in_the_original_tongue(monkeypatch):
     assert r["source"]["ref"] == "/bible.html?ref=John 3:16"
 
 
+def test_the_coach_never_says_the_tagged_words_are_the_whole_verse(monkeypatch):
+    # John 1:1 has 17 words; 14 carry a Strong's number in concordance.db. The spoken count is the
+    # verse's, and the caption is the whole verse in order — the untagged words in their places.
+    import concordance.verifiers.scripture as S
+    monkeypatch.setattr(S, "read_passage", lambda ref: {"ref": "John 1:1", "verses": [{"text": "In the beginning was the Word."}]})
+    monkeypatch.setattr(S, "original_words", lambda ref: {
+        "ref": "John 1:1", "status": "ok", "count": 2,
+        "words": [{"word": "Ἐν", "strongs": "G1722", "verse_pos": 0}, {"word": "ἦν", "strongs": "G2258", "verse_pos": 2}],
+        "coverage": {"tagged": 2, "total": 3, "aligned": True, "complete": False,
+                     "untagged_positions": [1], "untagged_words": ["ἀρχῇ"]}})
+    r = console._read("read John 1:1 in the original", None, True)
+    assert "3 words, 2 of them with a Strong's number" in r["spoken"]
+    assert r["caption"] == "Ἐν ἀρχῇ ἦν" and r["original"]["total"] == 3
+
+
 def test_the_coach_finds_a_whole_work_and_opens_the_reading_room(monkeypatch):
     import concordance.tortoise as T
     monkeypatch.setattr(console._corpus, "search", lambda q, **k: [

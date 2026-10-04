@@ -56,6 +56,9 @@
   .chip{display:inline-block; background:rgba(201,162,74,.06); border:1px solid var(--line); color:var(--ink); font:inherit; font-size:.95rem; padding:.2rem .5rem; margin:.15rem; cursor:pointer; border-radius:2px}
   .chip:hover{border-color:var(--gold)}
   .chip .sn{color:var(--goldsoft); font-size:.66rem; margin-left:.35rem}
+  /* an untagged word of the verse — shown in its place, never dropped; nothing to tap into */
+  .word{display:inline-block; border:1px dashed var(--line); color:var(--dim); font-size:.95rem; padding:.2rem .5rem; margin:.15rem; border-radius:2px}
+  .coverage{font-size:.78rem; margin:.1rem 0 .3rem}
   .xref{display:block; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid var(--line); color:var(--ink); font:inherit; padding:.4rem 0; cursor:pointer; font-size:.92rem}
   .xref:hover{color:var(--gold)}
   .xref .sc{color:var(--dim); font-size:.72rem; margin-left:.5rem}
@@ -193,12 +196,31 @@ async function openStudy(ref, rowEl, studyEl){
     getJSON('/prophecy?ref=' + encodeURIComponent(ref)),
   ]);
   let html = '';
-  if(orig && orig.words && orig.words.length){
-    html += '<div class="slabel">the original words</div><div class="chips">' +
-      orig.words.map(w => '<button class="chip" data-strongs="' + esc(w.strongs) + '">' +
-        esc(w.word) + '<span class="sn">' + esc(w.strongs) + '</span></button>').join('') + '</div>';
+  // The whole verse, in order. /original returns the words that carry a Strong's number (the chips)
+  // AND the coverage — how many words the verse has, which positions are untagged, and those words —
+  // so a reader is never shown 14 words as if they were the whole of John 1:1's 17.
+  const cov = (orig && orig.coverage) || {};
+  const chipOf = w => '<button class="chip" data-strongs="' + esc(w.strongs) + '">' +
+      esc(w.word) + '<span class="sn">' + esc(w.strongs) + '</span></button>';
+  const tagged = (orig && orig.words) || [];
+  if(tagged.length || (cov.aligned && cov.total)){
+    let seq;
+    if(cov.aligned && cov.total){
+      const byPos = {}; tagged.forEach(w => { if(w.verse_pos !== undefined) byPos[w.verse_pos] = w; });
+      const un = {}; (cov.untagged_positions || []).forEach((p, i) => { un[p] = (cov.untagged_words || [])[i]; });
+      seq = [];
+      for(let i = 0; i < cov.total; i++){
+        if(byPos[i]) seq.push(chipOf(byPos[i]));
+        else if(un[i] !== undefined) seq.push('<span class="word" title="no Strong\'s number tagged here">' + esc(un[i]) + '</span>');
+      }
+    } else {
+      seq = tagged.map(chipOf);
+    }
+    html += '<div class="slabel">the original words</div><div class="chips">' + seq.join('') + '</div>';
+    if(orig.note) html += '<div class="dim coverage">' + esc(orig.note) + '</div>';
   } else {
-    html += '<div class="dim" style="font-size:.85rem">No tagged original words for this verse.</div>';
+    html += '<div class="dim" style="font-size:.85rem">No tagged original words for this verse.' +
+      (orig && orig.note ? ' ' + esc(orig.note) : '') + '</div>';
   }
   html += '<div class="wordpanel"></div>';
   if(cmt && cmt.status === 'ok' && cmt.commentary && cmt.commentary.length){

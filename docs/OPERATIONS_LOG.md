@@ -1045,3 +1045,35 @@ is a backup now.
 - CI green (run 37172770710). Deployed 03:02–03:03 UTC, both faces 200. Live assay: **50/52, floor 45 → 50**,
   5 newly passing, 0 regressed (the two known misses stand). Local full suite on the desktop crawls on the
   OneDrive-synced checkout (two runs starved each other on the shared data files); CI is the full-suite gate.
+
+## 2026-10-04 — the Strong's gap, measured and made visible: a reader is never told 14 words is the verse
+- **Measured against the full word tables** (the Lighthouse source still holds greek.db 137,554 words / hebrew.db
+  306,785 words, the same tables tools/card_scripture.py carded): concordance.db tags **59,845 of 137,554 Greek words
+  (43.5%)** — 3 of 7,927 verses whole, 14 verses with no row at all (Luke 4:19, Romans 1:29-31, 12:12-13, 1 Cor 13:7,
+  Eph 5:10 …) — and **300,807 of 306,785 Hebrew words (98.1%)**, 79.3% of verses whole. John 1:1 is 14 of 17 (ἀρχῇ, τὸν,
+  θεόν untagged); Revelation 7:4 is 5 of 16.
+- **The discordance indicts the method, not the data.** Lighthouse's build_concordance.py read MorphGNT column 5 (the
+  NORMALIZED surface form) as the lemma, so a Greek word was tagged only when its inflected form equals a Strong's
+  lemma (ἦν → G2258, λόγος → G3056; ἀρχῇ → nothing). The lemma IS in the source (column 6); the fuller greek.db built
+  from it maps 98.5%. Second fact: a Greek `word_pos` is the word's line index in its BOOK file (Rev 7:4 starts at 2747);
+  a Hebrew `word_pos` is per-verse. Both facts are now stated on `Concordance.verse_words`.
+- **Licenses, verified at the source (not from memory):** SBLGNT text — **CC BY 4.0** (sblgnt.com/license; the greek.db
+  meta's "EULA, non-commercial" is stale). MorphGNT morphology + lemmatization — **CC BY-SA 3.0** (share-alike, the class
+  corpus._DISALLOWED_LICENSE withholds; the Greek Strong's in concordance.db AND greek.db were derived from these lemmas,
+  and the greek_nt verse cards carry `extra.lemmas` under a label naming only SBLGNT). OSHB/morphhb — WLC text public
+  domain, tagging **CC BY 4.0** (inside the reference-corpus gate PD/CC0/CC-BY; not strict PD). Robinson-Pierpont
+  Byzantine Majority Text (byztxt, RP2018) — **Unlicense/public domain, every word Strong's-tagged** — a PD fully-tagged
+  Greek NT, but the BYZANTINE text, not the SBLGNT: no PD fill exists for the SBLGNT's words. Tischendorf-data: no
+  license stated. No strict-PD Strong's-tagged Hebrew OT found.
+- **Shipped — the gap made visible from what is kept:** `/original` (and the MCP tool, and `scripture_for`) now return
+  `coverage {tagged, total, untagged_positions, untagged_words, complete, aligned, card}` + `note`. The verse's full word
+  list comes from its held verse card (`card_src_greek_nt_john_1_1` … extra.text); tagged words are placed inside it —
+  Hebrew by position, Greek by in-order token match (letters only; sigla and punctuation dropped) — proven to give ONE
+  constant offset in every one of the 7,913 tagged Greek verses and to align all 23,213 Hebrew verses. Each placed word
+  carries `verse_pos`. Where the card is not held: `total: null` and the note says these are not necessarily the whole
+  verse. bible.html renders the whole verse in order — chips for tagged words, dashed plain words for the untagged — under
+  a coverage line; the console speaks "17 words, 14 of them with a Strong's number", never "14 words". Nothing generated:
+  the untagged words are the card's own. Pinned in tests/test_canon_original.py (+9) and tests/test_console.py (+1).
+- **Open decision (chips filed):** (a) rebuild concordance.db from the lemma column (98.5%, per-verse positions) — the
+  method fix — which changes served Strong's (ἦν G2258 → εἰμί G1510) and occurrence counts, and expands the
+  MorphGNT-derived layer under the share-alike question above; (b) the Greek verse cards' license label. Matt's call.

@@ -820,8 +820,10 @@ def _witness_tools() -> List[dict]:
         # had HTTP routes but no twin — an agent could not reach what a person could see.
         {"name": "original_words",
          "description": ("The original-language words behind a verse (Hebrew/Greek, with Strong's "
-                         "where known) — FOUND in the lexicon, never generated. Pass ref, e.g. "
-                         "'John 3:16'."),
+                         "where known) — FOUND in the lexicon, never generated. Returns the tagged words "
+                         "AND coverage {tagged, total, untagged_positions, untagged_words, complete}: "
+                         "the tagged words are not the whole verse (Greek ~44% tagged, Hebrew ~98%), and "
+                         "the untagged words are shown, never dropped. Pass ref, e.g. 'John 3:16'."),
          "inputSchema": {"type": "object", "properties": {"ref": {"type": "string"}},
                          "required": ["ref"]}},
         {"name": "canon",

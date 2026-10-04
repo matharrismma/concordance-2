@@ -708,10 +708,20 @@ def _read(text: str, config: Any, gate_open: bool, *, source_text: Optional[str]
         if _IN_ORIGINAL.search(text):
             ow = _sc.original_words(ref)
             words = ow.get("words") or []
+            cov = ow.get("coverage") or {}
+            total = cov.get("total")                  # the verse's word count when the verse is held whole
             tongue = "Greek" if (words and str(words[0].get("strongs", "")).startswith("G")) else "Hebrew"
             orig = " ".join(w.get("word", "") for w in words)
+            if cov.get("aligned") and total:          # the whole verse in order, untagged words included
+                seq = {w.get("verse_pos"): w.get("word", "") for w in words}
+                for p, uw in zip(cov.get("untagged_positions") or [], cov.get("untagged_words") or []):
+                    seq[p] = uw
+                orig = " ".join(seq.get(i, "") for i in range(total)).strip() or orig
+            # Never "14 words" for a 17-word verse: name the verse's count, then how many are tagged.
+            count_said = (f"{total} words, {len(words)} of them with a Strong's number"
+                          if total and total != len(words) else f"{len(words)} words")
             spoken = ((f"{eng} — {shown}. " if eng else "") +
-                      (f"In the {tongue} it was given, {len(words)} words. Open it to read each one to "
+                      (f"In the {tongue} it was given, {count_said}. Open it to read each one to "
                        f"its Strong's — the very tongue, by the cube." if words else
                        "I could not reach the original words just now."))
             return {"intent": "read", "kind": "scripture_original", "headline": f"{shown} — in the {tongue}",
@@ -720,7 +730,7 @@ def _read(text: str, config: Any, gate_open: bool, *, source_text: Optional[str]
                     "next": [{"label": "Read it in the original", "ref": f"/bible.html?ref={shown}"},
                              {"label": f"Learn {tongue} by the cube",
                               "ref": "/read.html?subject=" + ("grc" if tongue == "Greek" else "he")}],
-                    "original": {"tongue": tongue, "count": len(words)}, "generated": False}
+                    "original": {"tongue": tongue, "count": len(words), "total": total}, "generated": False}
         if eng:
             return {"intent": "read", "kind": "scripture", "headline": shown, "spoken": f"{eng} — {shown}.",
                     "caption": eng, "source": {"title": shown, "ref": f"/bible.html?ref={shown}"},

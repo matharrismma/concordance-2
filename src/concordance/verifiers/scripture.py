@@ -376,9 +376,10 @@ def for_word(word: str) -> Dict[str, Any]:
         first = results[0]
         b, ch, v = first.get("book_num"), first.get("chapter"), first.get("verse")
         words = c.verse_words(b, ch, v) if b else []
-        return {"word": word, "status": "ok" if words else "no_words",
-                "count": (es or {}).get("count", len(results)), "ref": first.get("ref"),
-                "english": first.get("text"), "words": words}
+        out = {"word": word, "status": "ok" if words else "no_words",
+               "count": (es or {}).get("count", len(results)), "ref": first.get("ref"),
+               "english": first.get("text"), "words": words}
+        return _with_coverage(out, b, ch, v, words) if b else out   # the same honesty as /original
     except Exception as e:  # noqa: BLE001
         return {"status": "unavailable", "detail": str(e)[:200]}
 
@@ -407,9 +408,144 @@ def word_occurrences(strongs_num: str) -> Dict[str, Any]:
         return {"status": "unavailable", "detail": str(e)[:200]}
 
 
+# ---------------------------------------------------------------------------------------------
+# COVERAGE — the reader is never told that the tagged words are the whole verse (2026-10-04).
+#
+# concordance.db holds only the words that carry a Strong's number: the Greek side tags 43.5% of
+# the SBLGNT's 137,554 words (the Lighthouse builder matched MorphGNT's NORMALIZED-FORM column
+# against Strong's lemmas, so only words whose inflected form equals the lemma hit — John 1:1 is
+# 14 of 17, ἀρχῇ missing; Revelation 7:4 is 5 of 16), the Hebrew side 98.1% of the WLC's 306,785.
+# Two further facts of that table, both measured against the full word tables and both load-
+# bearing here: a GREEK word_pos is the word's line index in its BOOK file (cumulative, so
+# Revelation 7:4 starts at 2747), a HEBREW word_pos is per-verse and 0-based.
+#
+# The whole verse IS kept — one verse card per verse on the greek_nt / hebrew_ot shelves
+# (tools/card_scripture.py: extra.text = every surface word, space-joined). So the gap is made
+# visible from what is held, not filled from anything generated: the tagged words are placed
+# inside the verse's full word list (Hebrew by position; Greek by in-order token match, proven to
+# give ONE constant offset in all 7,913 tagged verses), and whatever is not placed is reported as
+# untagged — with the words themselves, so the verse is shown whole. A conduit surfaces what is
+# kept; where the card is not held, the payload says the whole-verse count is unknown.
+# ---------------------------------------------------------------------------------------------
+
+_CARD_SLUG_RE = re.compile(r"[^a-z0-9]+")
+
+
+def _verse_card_id(b: int, c: int, v: int) -> Optional[str]:
+    """The id of the verse's card on the greek_nt / hebrew_ot shelf (tools/card_scripture.py)."""
+    try:
+        from ..strongs.concordance import BOOK_NAMES
+    except Exception:  # noqa: BLE001
+        return None
+    name = BOOK_NAMES.get(int(b))
+    if not name:
+        return None
+    shelf = "greek_nt" if int(b) >= 40 else "hebrew_ot"
+    slug = _CARD_SLUG_RE.sub("_", f"{name}-{c}-{v}".lower()).strip("_")
+    return f"card_src_{shelf}_{slug}"
+
+
+def _verse_card_tokens(b: int, c: int, v: int) -> Tuple[Optional[List[str]], Optional[str]]:
+    """The verse's full surface word list from its held card, or (None, None) when not held."""
+    cid = _verse_card_id(b, c, v)
+    if not cid:
+        return None, None
+    try:
+        from .. import corpus as _corpus  # lazy: the keeping, not the verifier
+        card = _corpus.get_card(cid)
+    except Exception:  # noqa: BLE001
+        return None, None
+    extra = (card or {}).get("extra") if isinstance(card, dict) else None
+    text = (extra or {}).get("text") if isinstance(extra, dict) else None
+    toks = str(text).split() if text else []
+    return (toks, cid) if toks else (None, None)
+
+
+def _letters(s: str) -> str:
+    """NFC, letters and combining marks only — drops punctuation and the SBLGNT's critical sigla
+    (⸀ ⸂ ⸃ …) that the tagged words carry and the card tokens do not."""
+    import unicodedata
+    return "".join(ch for ch in unicodedata.normalize("NFC", s or "")
+                   if unicodedata.category(ch)[0] in ("L", "M"))
+
+
+def _align_in_order(words: List[Dict[str, Any]], tokens: List[str]) -> Optional[List[int]]:
+    """Place each tagged word on the next verse token with the same letters, in order.
+    None if any tagged word cannot be placed — then no positions are claimed."""
+    nt = [_letters(t) for t in tokens]
+    out: List[int] = []
+    j = 0
+    for w in words:
+        nw = _letters(str(w.get("word", "")))
+        k = j
+        while k < len(nt) and nt[k] != nw:
+            k += 1
+        if k >= len(nt):
+            return None
+        out.append(k)
+        j = k + 1
+    return out
+
+
+def tag_coverage(words: List[Dict[str, Any]], tokens: Optional[List[str]], hebrew: bool,
+                 card: Optional[str] = None) -> Dict[str, Any]:
+    """How much of a verse the tagged words cover — {tagged, total, untagged_positions,
+    untagged_words, complete, aligned, card}. Pure: words are verse_words() rows, tokens the verse's
+    full surface word list (None when the verse is not held whole). Sets verse_pos (0-based, within
+    the verse) on each placed word. Never claims completeness it cannot show: total None → unknown;
+    aligned False → counts only, no positions."""
+    tagged = len(words)
+    if not tokens:
+        return {"tagged": tagged, "total": None, "untagged_positions": None, "untagged_words": None,
+                "complete": None, "aligned": False, "card": card}
+    total = len(tokens)
+    positions: Optional[List[int]] = None
+    if hebrew and words:
+        pos = [int(w.get("word_pos", -1)) for w in words]
+        if min(pos) >= 0 and max(pos) < total and len(set(pos)) == len(pos):
+            positions = pos                                   # Hebrew word_pos IS the verse position
+    if positions is None:
+        positions = _align_in_order(words, tokens) if words else []
+    if positions is None:
+        return {"tagged": tagged, "total": total, "untagged_positions": None, "untagged_words": None,
+                "complete": None, "aligned": False, "card": card}
+    for w, p in zip(words, positions):
+        w["verse_pos"] = p
+    placed = set(positions)
+    untagged = [i for i in range(total) if i not in placed]
+    return {"tagged": tagged, "total": total, "untagged_positions": untagged,
+            "untagged_words": [tokens[i] for i in untagged], "complete": not untagged,
+            "aligned": True, "card": card}
+
+
+def _coverage_note(cov: Dict[str, Any]) -> str:
+    tagged, total = cov.get("tagged", 0), cov.get("total")
+    if total is None:
+        return ("These are the words of the verse that carry a Strong's number here — not necessarily the "
+                "whole verse; the verse's full word count is not held.")
+    if not cov.get("aligned"):
+        return (f"{tagged} tagged words of a {total}-word verse; they could not be placed within it, so no "
+                f"positions are claimed.")
+    if cov.get("complete"):
+        return f"All {total} words of the verse carry a Strong's number here."
+    n = len(cov.get("untagged_positions") or [])
+    return (f"{tagged} of {total} words carry a Strong's number here; {n} do not and are shown untagged, "
+            f"never dropped.")
+
+
+def _with_coverage(payload: Dict[str, Any], b: int, ch: int, v: int, words: List[Dict[str, Any]]) -> Dict[str, Any]:
+    tokens, cid = _verse_card_tokens(b, ch, v)
+    cov = tag_coverage(words, tokens, hebrew=int(b) < 40, card=cid)
+    payload["coverage"] = cov
+    payload["note"] = _coverage_note(cov)
+    return payload
+
+
 def original_words(ref: str) -> Dict[str, Any]:
-    """The tagged original words of a single verse — {ref, words:[{word_pos,word,strongs}], status}.
-    Lets the reader tap the ORIGINAL word (not the English gloss) to open its study."""
+    """The tagged original words of a single verse — {ref, status, count, words:[{word_pos, word,
+    strongs, verse_pos?}], coverage:{tagged, total, untagged_positions, untagged_words, complete,
+    aligned, card}, note}. Lets the reader tap the ORIGINAL word (not the English gloss) to open its
+    study — and tells the reader how much of the verse the tagged words are (see COVERAGE above)."""
     try:
         from ..strongs import Concordance
     except Exception as e:  # noqa: BLE001
@@ -421,7 +557,8 @@ def original_words(ref: str) -> Dict[str, Any]:
             return {"ref": ref, "status": "not_found", "words": [], "detail": "could not parse reference"}
         b, ch, v = bcv
         words = c.verse_words(b, ch, v)
-        return {"ref": ref, "status": "ok" if words else "no_words", "count": len(words), "words": words}
+        out = {"ref": ref, "status": "ok" if words else "no_words", "count": len(words), "words": words}
+        return _with_coverage(out, b, ch, v, words)
     except Exception as e:  # noqa: BLE001
         return {"status": "unavailable", "detail": str(e)[:200]}
 

@@ -301,8 +301,15 @@ class Concordance:
         return self.strongs_verses(strongs_num, limit=limit)
 
     def verse_words(self, b: int, c: int, v: int) -> list:
-        """The tagged ORIGINAL words of a verse, in order: [{word_pos, word, strongs}].
-        This is what makes a word tappable in the reader — the original word, not the gloss."""
+        """The TAGGED original words of a verse, in order: [{word_pos, word, strongs}].
+        This is what makes a word tappable in the reader — the original word, not the gloss.
+
+        Not the whole verse. concordance.db holds only words that carry a Strong's number (Greek
+        43.5% of the SBLGNT's words, Hebrew 98.1% of the WLC's — measured 2026-10-04 against the full
+        word tables). word_pos is a GREEK word's line index in its book file (cumulative across the
+        book) and a HEBREW word's 0-based position within the verse. verifiers.scripture.original_words
+        places these inside the verse's full word list and reports the coverage; use it where a
+        reader could mistake the tagged words for the verse."""
         conc = self._get_conc()
         if conc is None:
             return []
