@@ -72,11 +72,24 @@
     <div class="stat pass"><b>178</b><span>theories mapped</span></div>
     <div class="stat"><b>285</b><span>relations between them</span></div>
     <div class="stat"><b data-cap="verifiers.secular_modules">69</b><span>domains covered</span></div>
-    <div class="stat zero"><b>0</b><span>false positives · in this assay</span></div>
+    <div class="stat zero"><b id="bench-fp">0</b><span>false positives · measured <a href="/benchmarks" id="bench-when">on the box</a></span></div>
+    <div class="stat pass"><b id="bench-domains">&hellip;</b><span>domains that sealed their truth and refused their falsehood, tonight</span></div>
     <div class="stat pass"><b id="seals-minted">&hellip;</b><span>seals minted, all re-verified hourly</span></div>
   </section>
   <p class="sub" id="seals-detail">The ledger: <a href="/seals">/seals</a> reports the count, the last hourly re-verification and the oldest seal, computed now.</p>
   <script>
+  // THE ENGINE MEASURES ITSELF IN PUBLIC (Gen 3 · 7, 2026-10-04): the scorecard reads /benchmarks — every domain
+  // golden, the derivation moat and every admitted spec, run on the box nightly and at every deploy (a regression
+  // refuses the deploy). Measured, never typed in.
+  (function(){
+    fetch('/benchmarks', {cache: 'no-store'}).then(function(r){ return r.ok ? r.json() : null; }).then(function(b){
+      if (!b) return;
+      var fp = (b.domains && b.domains.false_positives || 0) + (b.moat && b.moat.false_positives || 0);
+      var e = document.getElementById('bench-fp'); if (e) e.textContent = fp.toLocaleString();
+      var d = document.getElementById('bench-domains'); if (d && b.domains) d.textContent = b.domains.ok.toLocaleString() + ' / ' + b.domains.count.toLocaleString();
+      var w = document.getElementById('bench-when'); if (w && b.generated_at) w.textContent = (b.stale ? 'STALE, last ' : '') + b.generated_at.replace('T', ' ').slice(0, 16) + ' UTC';
+    }).catch(function(){});
+  })();
   // live-wired from /seals (2026-10-03): the ledger is a public number, never a typed-in one
   (function(){
     fetch('/seals', {cache: 'no-store'}).then(function(r){ return r.json(); }).then(function(d){

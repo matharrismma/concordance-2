@@ -755,6 +755,29 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         base = "https://narrowhighway.org"
         return _ok(_seals.summary(cite_base=base))
 
+    if method == "GET" and path == "/benchmarks":
+        # THE ENGINE MEASURES ITSELF IN PUBLIC (Gen 3 · 7): the standing benchmarks as tools/benchmarks.py
+        # measured them on this node (nightly, and at every deploy) — served from the file, with its age.
+        import datetime as _dt
+        import os as _benv                      # own alias: dispatch rebinds _os locally further down
+        bp = Path(_benv.environ.get("CONCORDANCE_DATA_DIR", "").strip() or "data") / "benchmarks.json"
+        try:
+            b = json.loads(bp.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return _err(404, "benchmarks never run on this node (tools/benchmarks.py)")
+        age_h = None
+        try:
+            t = _dt.datetime.fromisoformat(str(b.get("generated_at")))
+            age_h = round((_dt.datetime.now(_dt.timezone.utc) - t).total_seconds() / 3600, 2)
+        except (TypeError, ValueError):
+            pass
+        b["age_hours"] = age_h
+        b["stale"] = (age_h is None) or (age_h > 36)
+        by = (b.get("domains") or {}).pop("by_domain", None)
+        if str(query.get("detail") or "") in ("1", "true"):
+            b["domains"]["by_domain"] = by
+        return _ok(b)
+
     if method == "GET" and path == "/specs":
         # VERIFIERS AS DATA (Gen 3 · 2): every check this node holds as a spec — law, inputs, sources, seal
         from ..verifiers import spec as _spec
@@ -3122,6 +3145,7 @@ ROUTES = [
     # EVERY COPY IS WHOLE (Gen 3 · 1, 2026-10-04): the branch side of node sync — signed manifest, the chain
     # since a hash, one keeping file's bytes (served raw by the handler, declared here so it is catalogued)
     {"path": "/specs", "methods": ("GET",), "api": True},   # VERIFIERS AS DATA — the checks held as specs (Gen 3 · 2)
+    {"path": "/benchmarks", "methods": ("GET",), "api": True},   # THE ENGINE MEASURES ITSELF IN PUBLIC (Gen 3 · 7)
     {"path": "/sync/manifest", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/sync/ledger", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/sync/file", "methods": ("GET",), "api": True, "rl": "read", "serve": True},   # raw bytes: the handler, not dispatch

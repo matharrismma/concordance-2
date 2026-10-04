@@ -108,6 +108,23 @@ echo "-- restarting secular (nh-com-2, :8002) --"
 ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "sudo systemctl restart nh-com-2"
 poll 8002 "secular" || { revert; exit 1; }
 
+# 3b. THE GATE (Gen 3 · 7, 2026-10-04): both doors answer — now the engine measures itself before the deploy
+#     is called done. The live assay (every probe that has ever passed must still pass) and the standing
+#     benchmarks (every domain golden, the derivation moat, every admitted spec — ratcheted against the
+#     previous run) run ON THE BOX. A regression REVERTS the files and restarts: a deploy refused, in public.
+#     DEPLOY_NO_GATE=1 skips it (an emergency only; say so in the ops log).
+if [ "${DEPLOY_NO_GATE:-}" != "1" ]; then
+    echo "-- the gate: live assay + standing benchmarks on the box --"
+    gate_rc=0
+    ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "cd '$DEST' && ASSAY_DIR=/home/nh/backups/assay PYTHONPATH=src CONCORDANCE_DATA_DIR='$DEST/data' .venv/bin/python tools/benchmarks.py --gate 2>&1 | tail -2" || gate_rc=1
+    ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "cd '$DEST' && ASSAY_DIR=/home/nh/backups/assay PYTHONPATH=src CONCORDANCE_DATA_DIR='$DEST/data' .venv/bin/python tools/live_assay.py 2>&1 | tail -1" || gate_rc=1
+    if [ "$gate_rc" != "0" ]; then
+        echo "!! THE GATE REFUSED THIS DEPLOY (a regression) — reverting"
+        revert
+        exit 1
+    fi
+fi
+
 echo "-- deployed: $* --"
 
 # 4. PROVE the box matches the repo, module for module. The deploy target is not a checkout:

@@ -1,0 +1,14 @@
+[Unit]
+Description=Narrow Highway — the standing benchmarks (every domain golden, the derivation moat, every admitted spec), ratcheted; the engine measures itself in public (Gen 3 · 7)
+After=network-online.target nh-org.service nh-com-2.service
+
+[Service]
+Type=oneshot
+User=nh
+WorkingDirectory=/home/nh/concordance-2
+Environment=ASSAY_DIR=/home/nh/backups/assay
+Environment=PYTHONPATH=/home/nh/concordance-2/src
+Environment=CONCORDANCE_DATA_DIR=/home/nh/concordance-2/data
+EnvironmentFile=-/home/nh/concordance-2/.env
+ExecStart=/home/nh/concordance-2/.venv/bin/python tools/benchmarks.py
+Nice=10

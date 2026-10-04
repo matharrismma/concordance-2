@@ -117,6 +117,7 @@ GOLDEN_API_GET = {
     "/seals",   # deliberate addition (THE SEAL LEDGER as a public number — moat lever 1; 2026-10-03)
     "/sync/manifest", "/sync/ledger", "/sync/file",   # deliberate addition (EVERY COPY IS WHOLE — Gen 3 · 1; 2026-10-04)
     "/specs",   # deliberate addition (VERIFIERS AS DATA — Gen 3 · 2; 2026-10-04)
+    "/benchmarks",   # deliberate addition (THE ENGINE MEASURES ITSELF IN PUBLIC — Gen 3 · 7; 2026-10-04)
     # deliberate addition 2026-08-01 — what the engine writes goes in wearing its open question,
     # and the first reader to recall it is asked to close it. `/unchecked` publishes the standing
     # list; `/unchecked/answer` is the door the ask on every such card points at.
