@@ -41,60 +41,179 @@ def _q(text: str, m: re.Match) -> str:
 
 # Each extractor: (name, fn(text) -> list[(quote, domain, spec)]). Pure and conservative.
 
-# A chain taken from the MIDDLE of an expression is a false verdict waiting to happen (2026-10-03, the
-# 137 slide: "2 * 2 * 3 = 12" came back BROKEN — the pair extractor took "2 * 3 = 12" and judged a true
-# claim false; the same shape was latent in sum: "2 * 3 + 4 = 10" -> "3 + 4 = 10"). Every chain extractor
-# now takes its chain WHOLE, and refuses one that is preceded by an operator or a digit — a mixed-operator
-# expression is left unextracted: a miss, never a verdict.
-_OP_LEFT = re.compile(r"(?:[+*/×÷\-]|\d\s*x)[ \t]*\Z", re.I)   # an OPERATOR on the same line; a number on the line above is not one
+# ── THE CLAIM GRAMMAR (Gen 3 · 3, 2026-10-04) — one deterministic parser for arithmetic claims ─────
+# Until today sum, product, quotient and word-arithmetic were four pair/chain regexes; the cardinal bug of
+# 2026-10-03 ("2 * 2 * 3 = 12" judged BROKEN) was a pair taken out of a chain, and a mixed expression
+# ("2 + 3 * 4 = 14") was a miss by design. The grammar tokenizes a sentence (numbers, operators, parens,
+# the claim verb, everything else as junk) and takes the MAXIMAL expression that ends at the claim verb:
+#   expr := term (op term)*     term := NUM | '(' expr ')' | '-' term     op := + | - | * | / | % | words
+# with the same zero-false-positive discipline as before, now in one place:
+#   * tokens must be adjacent (only whitespace between), so "3 times and 4 people" is not a claim;
+#   * an expression must contain at least one binary operator;
+#   * a symbolic minus is binary only with whitespace on both sides ("3-5" is a range, "3 - 5" is a sum);
+#   * "/" and "x" are operators only between numbers ("$18.50/hr" is a rate, "3 x $4.50" a product);
+#   * "^" and "%" end an expression (the power and percent extractors own them);
+#   * division by a literal zero is left unextracted — a gap, never a verdict.
+# The whole expression goes to the mathematics equality verifier, which honours precedence; the label
+# keeps the names the pins know — sum / product / quotient / arith_words — and "expression" for a mix.
+_T_NUM = r"\$?\s?\d[\d,]*(?:\.\d+)?"
+_T_WORD_OP = r"(?i:plus|minus|times|multiplied\s+by|divided\s+by|modulo|mod)(?![A-Za-z])"
+_T_EQ = r"(?:=|(?i:equals|comes\s+to|totals?|is)(?![A-Za-z]))"
+_TOKEN = re.compile(
+    r"(?P<num>" + _T_NUM + r")"
+    r"|(?P<wop>" + _T_WORD_OP + r")"
+    r"|(?P<eq>" + _T_EQ + r")"
+    r"|(?P<x>(?<=[\d\s])[xX×*](?=\s*\$?\d|\s*\())"
+    r"|(?P<bminus>(?<=\s)-(?=\s))"
+    r"|(?P<uminus>-(?=\s*\$?\d|\s*\())"
+    r"|(?P<op>[+/÷])"
+    r"|(?P<lp>\()|(?P<rp>\))"
+    r"|(?P<junk>[^\s])"
+)
+_WORD_TO_OP = {"plus": "+", "minus": "-", "times": "*", "multipliedby": "*", "dividedby": "/", "mod": "%", "modulo": "%"}
+_SYM_TO_OP = {"+": "+", "-": "-", "*": "*", "x": "*", "X": "*", "×": "*", "/": "/", "÷": "/"}
 
 
-def _mid_chain(text: str, start: int) -> bool:
-    return bool(_OP_LEFT.search(text[:start]))
-
-
-def _chain(text: str, op_rx: str, joiner: str, label: str):
-    """"a OP b OP c ... = d" with ONE operator repeated — the whole chain, left to right."""
+def _tokens(text: str):
+    """[(kind, value, start, end)] — numbers, operators, parens, the claim verb; everything else is junk."""
     out = []
-    for m in re.finditer(r"\$?\d[\d,]*(?:\.\d+)?(?:\s*" + op_rx + r"\s*\$?\d[\d,]*(?:\.\d+)?)+\s*" + _EQ +
-                         r"\s*" + _NUM, text, re.I):
-        if _mid_chain(text, m.start()):
+    for m in _TOKEN.finditer(text):
+        kind = m.lastgroup
+        v = m.group(0)
+        if kind == "num":
+            out.append(("num", v.replace("$", "").replace(",", "").strip(), m.start(), m.end()))
+        elif kind == "wop":
+            out.append(("op", _WORD_TO_OP[re.sub(r"\s+", "", v.lower())], m.start(), m.end(), "word"))
+        elif kind in ("x", "op", "bminus"):
+            out.append(("op", _SYM_TO_OP[v], m.start(), m.end(), "sym"))
+        elif kind == "uminus":
+            out.append(("neg", "-", m.start(), m.end()))
+        elif kind == "eq":
+            out.append(("eq", v, m.start(), m.end()))
+        elif kind == "lp":
+            out.append(("lp", "(", m.start(), m.end()))
+        elif kind == "rp":
+            out.append(("rp", ")", m.start(), m.end()))
+        else:
+            out.append(("junk", v, m.start(), m.end()))
+    return out
+
+
+def _adjacent(text: str, a_end: int, b_start: int) -> bool:
+    return text[a_end:b_start].strip() == ""
+
+
+def _parse_expr(toks, i, text):
+    """Greedy expr starting at toks[i]; returns (next_index, parts, n_ops, kinds) or None."""
+    r = _parse_term(toks, i, text)
+    if r is None:
+        return None
+    j, parts, n_ops, kinds = r
+    while j < len(toks) and toks[j][0] == "op" and _adjacent(text, toks[j - 1][3], toks[j][2]):
+        t = _parse_term(toks, j + 1, text) if j + 1 < len(toks) and _adjacent(text, toks[j][3], toks[j + 1][2]) else None
+        if t is None:
+            break
+        k, tparts, tn, tk = t
+        parts = parts + [toks[j][1]] + tparts
+        n_ops += 1 + tn
+        kinds |= {toks[j][4]} | tk
+        j = k
+    return j, parts, n_ops, kinds
+
+
+def _parse_term(toks, i, text):
+    if i >= len(toks):
+        return None
+    k, v = toks[i][0], toks[i][1]
+    if k == "num":
+        return i + 1, [v], 0, set()
+    if k == "neg" and i + 1 < len(toks) and _adjacent(text, toks[i][3], toks[i + 1][2]):
+        r = _parse_term(toks, i + 1, text)
+        if r is None:
+            return None
+        j, parts, n, kinds = r
+        return j, ["-"] + parts, n, kinds
+    if k == "lp" and i + 1 < len(toks) and _adjacent(text, toks[i][3], toks[i + 1][2]):
+        r = _parse_expr(toks, i + 1, text)
+        if r is None:
+            return None
+        j, parts, n, kinds = r
+        if j < len(toks) and toks[j][0] == "rp" and _adjacent(text, toks[j - 1][3], toks[j][2]):
+            return j + 1, ["("] + parts + [")"], n, kinds
+    return None
+
+
+def _label(parts, kinds) -> str:
+    ops = {p for p in parts if p in ("+", "-", "*", "/", "%")}
+    if kinds == {"word"}:
+        return "arith_words"
+    if ops == {"+"}:
+        return "sum"
+    if ops == {"*"}:
+        return "product"
+    if ops == {"/"}:
+        return "quotient"
+    return "expression"
+
+
+def _x_grammar(text: str, want: str):
+    """Every arithmetic claim "<expr> <verb> <number>" in the text whose label is `want`."""
+    out = []
+    toks = _tokens(text or "")
+    i = 0
+    while i < len(toks):
+        if toks[i][0] not in ("num", "lp", "neg"):
+            i += 1
             continue
-        left = m.group(0).rsplit(m.group(1), 1)[0]   # everything left of the claimed total
-        nums = [t.replace(",", "") for t in re.findall(r"\d[\d,]*(?:\.\d+)?", left)]
-        if len(nums) < 2 or (joiner == "/" and any(_f(n) == 0 for n in nums[1:])):
-            continue                                   # division by zero: a gap, never a verdict
-        out.append((_q(text, m), "mathematics",
-                    {"mode": "equality", "params": {"expr_a": joiner.join(nums), "expr_b": str(_f(m.group(1)))}}))
+        r = _parse_expr(toks, i, text)
+        if r is None:
+            i += 1
+            continue
+        j, parts, n_ops, kinds = r
+        if n_ops == 0 or j >= len(toks) or toks[j][0] != "eq" or not _adjacent(text, toks[j - 1][3], toks[j][2]):
+            i += 1
+            continue
+        # the claimed value: an optional sign and a number, adjacent to the verb
+        k = j + 1
+        sign = ""
+        if k < len(toks) and toks[k][0] == "neg" and _adjacent(text, toks[j][3], toks[k][2]):
+            sign, k = "-", k + 1
+        if not (k < len(toks) and toks[k][0] == "num" and _adjacent(text, toks[k - 1][3], toks[k][2])):
+            i += 1
+            continue
+        claimed = sign + toks[k][1]
+        if any(parts[q] == "/" and q + 1 < len(parts) and _f(parts[q + 1]) == 0 for q in range(len(parts)) if parts[q] == "/"):
+            i = k + 1
+            continue                                                  # division by zero: a gap, never a verdict
+        label = _label(parts, kinds)
+        if label == want:
+            span = text[toks[i][2]:toks[k][3]]
+            quote = re.sub(r"\s+", " ", span).strip()[:160]
+            out.append((quote, "mathematics",
+                        {"mode": "equality", "params": {"expr_a": " ".join(parts), "expr_b": claimed}}))
+        i = k + 1
     return out
 
 
 def _x_sum(text: str):
-    out = []
-    for m in re.finditer(r"\$?\d[\d,]*(?:\.\d+)?(?:\s*\+\s*\$?\d[\d,]*(?:\.\d+)?)+\s*" + _EQ +
-                         r"\s*" + _NUM, text, re.I):
-        if _mid_chain(text, m.start()):
-            continue
-        left = m.group(0).rsplit(m.group(1), 1)[0]   # everything left of the claimed total
-        nums = [t.replace(",", "") for t in re.findall(r"\d[\d,]*(?:\.\d+)?", left)]
-        if len(nums) < 2:
-            continue
-        expr_a = "+".join(nums)
-        out.append((_q(text, m), "mathematics",
-                    {"mode": "equality", "params": {"expr_a": expr_a, "expr_b": str(_f(m.group(1)))}}))
-    return out
+    return _x_grammar(text, "sum")
 
 
 def _x_product(text: str):
-    """"2 * 2 * 3 = 12", "12 x 12 x 1000 = 144,000" — the whole product chain (see _chain)."""
-    return _chain(text, r"(?:x|×|\*)", "*", "product")
+    return _x_grammar(text, "product")
 
 
 def _x_quotient(text: str):
-    """"72 / 2 = 36", "144 ÷ 12 = 12", "100 / 5 / 2 = 10" — a division chain, left to right (2026-10-03:
-    "72 / 2 = 36" was NOTHING_TO_CHECK while "72 * 2 = 144" held). The word form ("divided by") is
-    _x_arith_words'. Division by zero is left unextracted — a gap, never a verdict."""
-    return _chain(text, r"(?:/|÷)", "/", "quotient")
+    return _x_grammar(text, "quotient")
+
+
+def _x_arith_words(text: str):
+    return _x_grammar(text, "arith_words")
+
+
+def _x_expression(text: str):
+    """A mixed or parenthesised expression — "2 + 3 * 4 = 14", "(2 + 3) * 4 = 20", "10 - 2 * 3 = 4"."""
+    return _x_grammar(text, "expression")
 
 
 def _x_divisor_count(text: str):
@@ -116,26 +235,6 @@ def _x_divisor_count(text: str):
 
 _SMALL_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9,
                 "ten": 10, "eleven": 11, "twelve": 12, "sixteen": 16, "twenty": 20, "twenty-four": 24}
-
-_ARITH_WORDS = {"plus": "+", "minus": "-", "times": "*", "multiplied by": "*", "divided by": "/",
-                "mod": "%", "modulo": "%"}
-
-
-def _x_arith_words(text: str):
-    """"A plus/minus/times/divided by B is C" — arithmetic stated in WORDS (the symbol forms are
-    _x_sum / _x_product). Unambiguous: two numbers joined by a NAMED operator, with the claim verb
-    directly on the result. Because the operator must sit between two numbers and the verb must follow
-    the second number immediately, prose like "2 plus a few more, is 4 enough?" cannot match — the
-    same zero-false-positive discipline as every other extractor."""
-    out = []
-    for m in re.finditer(_NUM + r"\s*(plus|minus|times|multiplied by|divided by|modulo|mod)\s*" + _NUM +
-                         r"\s*" + _EQ + r"\s*" + _NUM, text, re.I):
-        op = _ARITH_WORDS[m.group(2).lower()]
-        out.append((_q(text, m), "mathematics",
-                    {"mode": "equality", "params": {"expr_a": f"{_f(m.group(1))}{op}{_f(m.group(3))}",
-                                                    "expr_b": str(_f(m.group(4)))}}))
-    return out
-
 
 def _x_each(text: str):
     """"N units at $X each = $Y" — quantity times unit price. Unambiguous: the words name the
@@ -970,6 +1069,7 @@ def _x_sequence_fact(text: str):
 
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("quotient", _x_quotient), ("arith_words", _x_arith_words),
+    ("expression", _x_expression),      # THE CLAIM GRAMMAR (Gen 3 · 3): a mixed/parenthesised expression
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
     ("combinations", _x_combinations), ("permutations", _x_permutations),
     ("propositional_logic", _x_propositional_logic),
