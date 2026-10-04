@@ -114,3 +114,16 @@ def test_the_golden_pairs_are_real_falsifications():
 
 if __name__ == "__main__":
     sys.exit(int(pytest.main([__file__, "-q"])))
+
+
+def test_every_golden_falsehood_is_refused():
+    """2026-10-04 - the first finding of the standing benchmarks (Gen 3 . 7): physical_constants' falsehood was
+    not CONFIRMED (so the older pin passed) but not REFUSED either - a mangled unit label made the verifier
+    decline, and the value was never judged. A falsehood must draw a MISMATCH or an ERROR, not a shrug."""
+    goldens = _load()
+    unrefused = []
+    for domain, g in sorted(goldens.items()):
+        sts = _statuses(domain, {g["packet_key"]: g["false"]})
+        if not any(("MISMATCH" in s or "ERROR" in s) for s in sts):
+            unrefused.append(f"{domain}: {sts}")
+    assert not unrefused, "golden falsehoods that nothing refused: " + "; ".join(unrefused)

@@ -88,6 +88,12 @@ def _falsify(spec: dict, extra_keys=()) -> dict | None:
                         out[k], changed[0] = (v * 2 + 7.5 if v else 42.0), True
                         continue
                     if isinstance(v, str):
+                        if "unit" in k.lower():
+                            # 2026-10-04 (the first finding of tools/benchmarks.py): a mangled unit label makes
+                            # the verifier DECLINE (unknown unit, the 2026-10-01 rule), so the pair never tests
+                            # the value. The falsehood is the VALUE; the unit stays what it was.
+                            out[k] = v
+                            continue
                         out[k], changed[0] = (v + "_NOT"), True
                         continue
                 out[k] = _perturb(v)

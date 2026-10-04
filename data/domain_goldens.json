@@ -1764,7 +1764,7 @@
  },
  "physical_constants": {
   "false": {
-   "claimed_unit": "m/s_NOT",
+   "claimed_unit": "m/s",
    "claimed_value": 599584923.5,
    "constant": "speed_of_light",
    "rel_tol": 0.0001
