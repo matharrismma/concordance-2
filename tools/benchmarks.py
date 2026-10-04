@@ -108,9 +108,9 @@ def latest_assay() -> Optional[Dict[str, Any]]:
     return {k: j.get(k) for k in ("date", "at", "probes", "passed", "failed", "floor", "regressed", "newly_passing")}
 
 
-def run(dry_run: bool = False) -> Dict[str, Any]:
+def run(dry_run: bool = False, data_dir: Optional[Path] = None) -> Dict[str, Any]:
     t0 = time.time()
-    data = _data_dir()
+    data = Path(data_dir) if data_dir else _data_dir()
     out_path = data / "benchmarks.json"
     prev: Dict[str, Any] = {}
     if out_path.exists():

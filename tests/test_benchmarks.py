@@ -30,6 +30,24 @@ GOLDENS = {
 }
 
 
+import pytest  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _own_data_dir():
+    """Other modules re-point CONCORDANCE_DATA_DIR at import (the suite's known race); the route and the
+    runner read the env at call time, so each test here pins it back to this module's scratch dir."""
+    prior = os.environ.get("CONCORDANCE_DATA_DIR")
+    os.environ["CONCORDANCE_DATA_DIR"] = str(TMP)
+    try:
+        yield
+    finally:
+        if prior is None:
+            os.environ.pop("CONCORDANCE_DATA_DIR", None)
+        else:
+            os.environ["CONCORDANCE_DATA_DIR"] = prior
+
+
 def _write_goldens(g):
     (TMP / "domain_goldens.json").write_text(json.dumps(g), encoding="utf-8")
 
@@ -48,14 +66,14 @@ def test_a_golden_pair_is_judged_as_the_gate_judges_it():
 
 def test_the_run_writes_the_file_and_names_a_regression_against_the_previous_run():
     _write_goldens(GOLDENS)
-    s = BM.run()
+    s = BM.run(data_dir=TMP)
     assert s["domains"]["ok"] == 2 and s["regressed"] is False and (TMP / "benchmarks.json").exists()
     assert s["moat"]["false_positives"] == 0 and s["moat"]["cases"] > 20
     # the next night a domain breaks: the previous run makes it a regression
     broken = json.loads(json.dumps(GOLDENS))
     broken["electrical"]["true"]["voltage_V"] = 99.0
     _write_goldens(broken)
-    s2 = BM.run()
+    s2 = BM.run(data_dir=TMP)
     assert s2["domains"]["ok"] == 1 and s2["regressions"] == ["electrical"] and s2["regressed"] is True
     assert s2["previous"]["domains_ok"] == 2 and (TMP / "benchmarks.prev.json").exists()
     assert BM.main(["--gate"]) == 1 and BM.main([]) == 0
@@ -63,7 +81,7 @@ def test_the_run_writes_the_file_and_names_a_regression_against_the_previous_run
 
 def test_the_route_serves_the_measured_file_with_its_age():
     _write_goldens(GOLDENS)
-    BM.run()
+    BM.run(data_dir=TMP)
     st, body = api.dispatch("GET", "/benchmarks", {}, None, EngineConfig())[:2]
     assert st == 200 and body["domains"]["ok"] == 2 and body["stale"] is False and body["age_hours"] < 1
     # an old file says so
