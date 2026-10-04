@@ -175,6 +175,56 @@ def test_a_tampered_file_or_record_in_flight_is_refused(world):
     assert not (n / "cards.jsonl").exists()
 
 
+def test_a_stalled_file_resumes_with_range_and_still_verifies(world):
+    """2026-10-04: the first catch-up died 31 minutes in on a read timeout mid-way through a 41 MB file (the
+    desktop line). A stall now keeps what arrived and resumes from that byte; the whole file is still hashed
+    against the manifest before it is moved into place."""
+    b, n, spec = world
+    (b / "cards.jsonl").write_bytes(b"".join(b'{"id": "card_%06d"}\n' % i for i in range(20000)))   # ~400 KB
+    calls = []
+
+    def flaky(path, offset=0):
+        calls.append(offset)
+        from urllib.parse import parse_qs, urlparse
+        q = {k: v[0] for k, v in parse_qs(urlparse(path).query).items()}
+        data, sha, total = replicate.file_bytes(q["name"], b, offset)
+        if q["name"] == "cards.jsonl" and offset == 0:
+            return 0, data[:100_000], False                               # the line stalls after 100 KB
+        return (206 if offset else 200), data, True
+    rep = replicate.pull(spec, fetch=_fake_fetch(b), data_dir=n, fetch_file=flaky)
+    assert rep["ok"] and rep["refused"] == [] and (n / "cards.jsonl").read_bytes() == (b / "cards.jsonl").read_bytes()
+    assert calls[0] == 0 and 100_000 in calls and not (n / "cards.jsonl.part").exists()
+    # a branch that ignores Range (answers 200 from the top) still ends verified
+    (b / "cards.jsonl").write_bytes(b"x" * 50_000)
+    calls.clear()
+
+    def ignores_range(path, offset=0):
+        from urllib.parse import parse_qs, urlparse
+        q = {k: v[0] for k, v in parse_qs(urlparse(path).query).items()}
+        data, sha, total = replicate.file_bytes(q["name"], b, 0)
+        calls.append(offset)
+        if q["name"] == "cards.jsonl" and offset == 0:
+            return 0, data[:10_000], False
+        return 200, data, True
+    rep = replicate.pull(spec, fetch=_fake_fetch(b), data_dir=n, fetch_file=ignores_range)
+    assert rep["ok"] and (n / "cards.jsonl").read_bytes() == b"x" * 50_000
+
+
+def test_a_file_that_never_completes_keeps_its_partial_for_next_time(world):
+    b, n, spec = world
+
+    def dead(path, offset=0):
+        from urllib.parse import parse_qs, urlparse
+        q = {k: v[0] for k, v in parse_qs(urlparse(path).query).items()}
+        data, sha, total = replicate.file_bytes(q["name"], b, offset)
+        if q["name"] == "cards.jsonl":
+            return 0, data[:5] if offset == 0 else b"", False
+        return 200, data, True
+    rep = replicate.pull(spec, fetch=_fake_fetch(b), data_dir=n, fetch_file=dead)
+    assert rep["ok"] is True and any("incomplete" in r["why"] for r in rep["refused"])
+    assert (n / "cards.jsonl.part").read_bytes() == (b / "cards.jsonl").read_bytes()[:5] and not (n / "cards.jsonl").exists()
+
+
 def test_known_branches_are_pinned_by_hand_and_the_node_has_a_public_face(tmp_path):
     d = tmp_path / "n"
     d.mkdir()

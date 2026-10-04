@@ -3747,11 +3747,19 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 # one allow-listed keeping file, raw, with its sha256 — a node re-hashes before it writes
                 from .. import replicate as _rep
                 name = (parse_qs(u.query).get("name", [""]) or [""])[0]
-                blob = _rep.file_bytes(name)
+                offset = 0
+                rng = (self.headers.get("range") or "").strip()
+                if rng.startswith("bytes=") and rng.endswith("-") and rng[6:-1].isdigit():
+                    offset = int(rng[6:-1])                       # "bytes=N-": resume a stalled pull from N
+                blob = _rep.file_bytes(name, offset=offset)
                 if blob is None:
-                    return self._json(404, not_found(u.path))
-                data, sha = blob
-                self.send_response(200)
+                    return self._json(416 if offset else 404, {"error": "range not satisfiable", "code": "RANGE"}
+                                      if offset else not_found(u.path))
+                data, sha, total = blob
+                self.send_response(206 if offset else 200)
+                if offset:
+                    self.send_header("content-range", f"bytes {offset}-{total - 1}/{total}")
+                self.send_header("accept-ranges", "bytes")
                 self.send_header("content-type", "application/x-ndjson; charset=utf-8" if name.endswith(".jsonl")
                                  else "application/json; charset=utf-8")
                 self.send_header("x-sha256", sha)

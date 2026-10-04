@@ -242,19 +242,33 @@ def ledger_since(since: str = "", limit: int = 500, data_dir: Optional[Path] = N
             "chain_count": len(chain)}
 
 
-def file_bytes(name: str, data_dir: Optional[Path] = None) -> Optional[Tuple[bytes, str]]:
-    """(bytes, sha256) of one allow-listed keeping file, or None."""
+def file_bytes(name: str, data_dir: Optional[Path] = None, offset: int = 0) -> Optional[Tuple[bytes, str, int]]:
+    """(bytes from offset, sha256 OF THE WHOLE FILE, total length) of one allow-listed keeping file, or None.
+    The offset is what lets a node on a bad line resume a 40 MB file instead of starting over (Range)."""
     if not allowed(name):
         return None
     p = _data_dir(data_dir) / name
     if not p.is_file():
         return None
-    data = p.read_bytes()
-    return data, hashlib.sha256(data).hexdigest()
+    total = p.stat().st_size
+    sha = _sha256_file(p)
+    offset = max(0, int(offset or 0))
+    if offset > total:
+        return None
+    with open(p, "rb") as f:
+        f.seek(offset)
+        data = f.read()
+    return data, sha, total
 
 
 # ── the node side: pull from a known branch ─────────────────────────────────────────────────────
 Fetch = Callable[[str], Tuple[int, bytes]]
+# a file fetch: (path, offset) -> (status, bytes, complete). Streams in chunks; on a stall it hands back what
+# arrived with complete=False so the caller keeps the partial and resumes with Range.
+FetchFile = Callable[[str, int], Tuple[int, bytes, bool]]
+
+CHUNK = 1 << 20
+FILE_TRIES = 6
 
 
 def _http_fetch(base_url: str, timeout: int = 120) -> Fetch:
@@ -271,6 +285,89 @@ def _http_fetch(base_url: str, timeout: int = 120) -> Fetch:
             # never a crash: what was written stays, and the next run resumes by hash
             return 0, str(e).encode("utf-8", "replace")
     return fetch
+
+
+def _http_fetch_file(base_url: str, timeout: int = 120) -> FetchFile:
+    def fetch_file(path: str, offset: int = 0) -> Tuple[int, bytes, bool]:
+        headers = {"user-agent": "narrowhighway-node/1", "accept": "*/*"}
+        if offset > 0:
+            headers["range"] = f"bytes={offset}-"
+        req = urllib.request.Request(base_url.rstrip("/") + path, headers=headers)
+        buf = bytearray()
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as r:   # noqa: S310 — a pinned known branch
+                status = r.status
+                while True:
+                    chunk = r.read(CHUNK)
+                    if not chunk:
+                        break
+                    buf.extend(chunk)
+                return status, bytes(buf), True
+        except urllib.error.HTTPError as e:
+            return e.code, e.read(), True
+        except (urllib.error.URLError, OSError, TimeoutError):
+            return 0, bytes(buf), False            # the stall: keep what arrived, resume from here
+    return fetch_file
+
+
+def _fetch_file_from(fetch: Fetch) -> FetchFile:
+    """Adapt a plain fetch (tests, JSON-only transports) to the file signature: whole body, complete."""
+    def fetch_file(path: str, offset: int = 0) -> Tuple[int, bytes, bool]:
+        st, body = fetch(path)
+        return st, (body[offset:] if st == 200 and offset else body), True
+    return fetch_file
+
+
+def _download(fetch_file: FetchFile, name: str, want_sha: str, want_bytes: int, dest: Path,
+              rep: Dict[str, Any]) -> bool:
+    """Bring one keeping file to dest.part across stalls — resume with Range from what arrived — then
+    verify the whole file's sha256 against the manifest and move it into place. Never writes a byte that
+    did not verify."""
+    part = dest.with_name(dest.name + ".part")
+    have = bytearray(part.read_bytes()) if part.is_file() else bytearray()
+    if len(have) > want_bytes:
+        have = bytearray()
+    for attempt in range(FILE_TRIES):
+        offset = len(have)
+        if offset >= want_bytes and want_bytes > 0:
+            break
+        st, body, complete = fetch_file(f"/sync/file?name={urllib.parse.quote(name)}", offset)
+        if st == 206:
+            have.extend(body)
+        elif st == 200:
+            have = bytearray(body) if offset == 0 or body else have    # a branch that ignores Range sends it all
+        elif st == 0:
+            if offset:
+                have.extend(body)
+            else:
+                have = bytearray(body)
+            if not body:
+                continue                                                  # nothing moved; try again
+        else:
+            rep["refused"].append({"file": name, "why": f"HTTP {st}"})
+            _discard(part)
+            return False
+        if complete:
+            break
+        _atomic_write(part, bytes(have))                                  # keep the partial for next time
+    if len(have) != want_bytes or hashlib.sha256(bytes(have)).hexdigest() != want_sha:
+        if len(have) < want_bytes and len(have) > 0:
+            _atomic_write(part, bytes(have))                              # a stall: resume next run
+            rep["refused"].append({"file": name, "why": f"incomplete after {FILE_TRIES} tries ({len(have)}/{want_bytes} bytes kept)"})
+        else:
+            _discard(part)
+            rep["refused"].append({"file": name, "why": "sha256 does not match the manifest"})
+        return False
+    _atomic_write(dest, bytes(have))
+    _discard(part)
+    return True
+
+
+def _discard(p: Path) -> None:
+    try:
+        p.unlink()
+    except OSError:
+        pass
 
 
 def _read_json(p: Path) -> Optional[Dict[str, Any]]:
@@ -305,13 +402,16 @@ def add_branch(name: str, url: str, fingerprint: str, data_dir: Optional[Path] =
 
 
 def pull(branch: Dict[str, Any], fetch: Optional[Fetch] = None, data_dir: Optional[Path] = None,
-         dry_run: bool = False) -> Dict[str, Any]:
+         dry_run: bool = False, fetch_file: Optional[FetchFile] = None) -> Dict[str, Any]:
     """Pull the keeping from one known branch. Refuses an unsigned or mis-pinned manifest. Every ledger
     record is re-hashed and chain-linked before it is written; every CAS record is re-hashed; every file is
     re-hashed. Never deletes: a local-only chain tail (seals this node minted while the branch moved on) is
     set aside in ledger-local/ and reported, so the node's chain mirrors the branch's."""
     d = _data_dir(data_dir)
-    fetch = fetch or _http_fetch(str(branch["url"]))
+    if fetch is None:
+        fetch = _http_fetch(str(branch["url"]))
+        fetch_file = fetch_file or _http_fetch_file(str(branch["url"]))
+    fetch_file = fetch_file or _fetch_file_from(fetch)
     rep: Dict[str, Any] = {"ok": False, "branch": branch.get("name"), "url": branch.get("url"),
                            "fingerprint": branch.get("fingerprint"), "at": int(time.time()), "dry_run": dry_run,
                            "records_pulled": 0, "cas_pulled": 0, "files_pulled": 0, "bytes": 0,
@@ -326,7 +426,7 @@ def pull(branch: Dict[str, Any], fetch: Optional[Fetch] = None, data_dir: Option
         d.mkdir(parents=True, exist_ok=True)
         _atomic_write(lock, json.dumps({"pid": os.getpid(), "at": int(time.time())}).encode("utf-8"))
     try:
-        return _pull_locked(rep, branch, fetch, d, dry_run)
+        return _pull_locked(rep, branch, fetch, fetch_file, d, dry_run)
     finally:
         if not dry_run:
             try:
@@ -335,7 +435,8 @@ def pull(branch: Dict[str, Any], fetch: Optional[Fetch] = None, data_dir: Option
                 pass
 
 
-def _pull_locked(rep: Dict[str, Any], branch: Dict[str, Any], fetch: Fetch, d: Path, dry_run: bool) -> Dict[str, Any]:
+def _pull_locked(rep: Dict[str, Any], branch: Dict[str, Any], fetch: Fetch, fetch_file: FetchFile, d: Path,
+                 dry_run: bool) -> Dict[str, Any]:
     status, raw = fetch("/sync/manifest")
     if status != 200:
         rep["detail"] = f"manifest: HTTP {status}"
@@ -352,7 +453,7 @@ def _pull_locked(rep: Dict[str, Any], branch: Dict[str, Any], fetch: Fetch, d: P
     rep["branch_head"] = (m.get("ledger") or {}).get("head")
     rep["branch_files"] = len(m.get("files") or [])
     _pull_ledger(rep, fetch, d, dry_run)          # a broken chain stops the ledger, never the files
-    _pull_files(rep, m, fetch, d, dry_run)
+    _pull_files(rep, m, fetch_file, d, dry_run)
     rep["ok"] = not rep["detail"]
     if not dry_run and rep["records_pulled"]:
         chk = ledger.verify_chain(d / "ledger", cas_base=d / "cas")
@@ -430,32 +531,23 @@ def _pull_ledger(rep: Dict[str, Any], fetch: Fetch, d: Path, dry_run: bool) -> N
     rep["head_after"] = expected_prev
 
 
-def _pull_files(rep: Dict[str, Any], m: Dict[str, Any], fetch: Fetch, d: Path, dry_run: bool) -> None:
-    # ── the keeping files: pull every sha256 we do not hold ──
-    for entry in m.get("files") or []:
-        name = str(entry.get("name") or "")
-        want = str(entry.get("sha256") or "")
-        if not allowed(name) or not want:
-            continue
+def _pull_files(rep: Dict[str, Any], m: Dict[str, Any], fetch_file: FetchFile, d: Path, dry_run: bool) -> None:
+    # ── the keeping files: pull every sha256 we do not hold — smallest first, so a slow line still lands most ──
+    entries = sorted((e for e in (m.get("files") or []) if allowed(str(e.get("name") or "")) and e.get("sha256")),
+                     key=lambda e: int(e.get("bytes") or 0))
+    for entry in entries:
+        name, want, size = str(entry["name"]), str(entry["sha256"]), int(entry.get("bytes") or 0)
         p = d / name
         have = _sha256_file(p) if p.is_file() else ""
         if have == want:
             continue
         if dry_run:
             rep["files_pulled"] += 1
-            rep["bytes"] += int(entry.get("bytes") or 0)
+            rep["bytes"] += size
             continue
-        status, raw = fetch(f"/sync/file?name={urllib.parse.quote(name)}")
-        if status != 200:
-            rep["refused"].append({"file": name, "why": f"HTTP {status}"})
-            continue
-        got = hashlib.sha256(raw).hexdigest()
-        if got != want:
-            rep["refused"].append({"file": name, "why": "sha256 does not match the manifest"})
-            continue
-        _atomic_write(p, raw)
-        rep["files_pulled"] += 1
-        rep["bytes"] += len(raw)
+        if _download(fetch_file, name, want, size, p, rep):
+            rep["files_pulled"] += 1
+            rep["bytes"] += size
 
 
 def _finish(rep: Dict[str, Any], d: Path, dry_run: bool) -> Dict[str, Any]:
