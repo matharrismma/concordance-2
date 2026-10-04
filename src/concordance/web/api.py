@@ -3036,7 +3036,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _ok(rec) if rec is not None else _err(404, "teaching not found")
         return _ok(teachings_mod.queue())
 
-    return _err(404, "not found")
+    return 404, not_found(path)
 
 
 # ── Route registry — ONE declaration per route ───────────────────────────
@@ -3380,6 +3380,32 @@ def _retire_to(path: str, query: str) -> str:
 
 # The JSON/API GET paths (served even with a static site mounted) — DERIVED from ROUTES.
 _API_GET_PATHS = frozenset(r["path"] for r in ROUTES if r.get("api"))
+
+
+def did_you_mean(path: str, n: int = 3) -> List[str]:
+    """An unknown path -> the closest KNOWN routes, from the one route table (2026-10-03: GET
+    /original_words answered a bare {"error": "not found"}; the route is /original and the MCP tool is
+    original_words — a caller who knows the tool's name can't find the door). A 404 that points nowhere
+    is a dead end; one that names the nearest doors and the catalog is a house ending."""
+    import difflib
+    p = "/" + (path or "").strip().strip("/").lower()
+    if p == "/":
+        return []
+    paths = sorted({r["path"] for r in ROUTES})
+    hits = difflib.get_close_matches(p, paths, n=n, cutoff=0.6)
+    stem = p.split("_")[0]                       # /original_words -> /original ; /word_study -> /word (if a route)
+    if stem != p and stem in paths and stem not in hits:
+        hits.insert(0, stem)
+    return hits[:n]
+
+
+def not_found(path: str) -> Dict[str, Any]:
+    out: Dict[str, Any] = {"error": "not found", "code": "NOT_FOUND", "path": path}
+    dym = did_you_mean(path)
+    if dym:
+        out["did_you_mean"] = dym
+    out["routes"] = "/capabilities"
+    return out
 # The rate-limited paths (consulted in serve()) — DERIVED from ROUTES.
 #
 # TWO buckets, because a read and a write are not the same risk. Both were sharing one 120/min
@@ -3485,7 +3511,7 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             # tested without warming the server; None means no such file (or an escape attempt).
             fp = resolve_site_file(site, path)
             if fp is None:
-                return self._json(404, {"error": "not found"})
+                return self._json(404, not_found(path))
             body = fp.read_bytes()
             ctype = mimetypes.guess_type(str(fp))[0] or "application/octet-stream"
             self.send_response(200)

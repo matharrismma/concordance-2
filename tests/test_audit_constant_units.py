@@ -82,6 +82,33 @@ def test_a_declarative_primality_claim_is_checkable():
     assert _verdict("91 is composite.") == "HOLDS"
 
 
+def test_division_and_divisor_counts_are_checkable():
+    """2026-10-03: "72 / 2 = 36" was NOTHING_TO_CHECK while "72 * 2 = 144" held; "the number of divisors of 12 is 6"
+    had no verifier. Twelve is the smallest number with six divisors; sixty has twelve — the reason they organize
+    wholes, and the honest answer to "is the universe base 12": a base is notation; the divisor count is arithmetic."""
+    assert _verdict("72 / 2 = 36.") == "HOLDS" and _verdict("72 / 2 = 35.") == "BROKEN"
+    assert _verdict("144 ÷ 12 = 12.") == "HOLDS" and _verdict("72 divided by 2 is 36.") == "HOLDS"
+    assert _verdict("the number of divisors of 12 is 6.") == "HOLDS"
+    assert _verdict("12 has 6 divisors.") == "HOLDS" and _verdict("60 has twelve divisors.") == "HOLDS"
+    assert _verdict("the number of divisors of 12 is 5.") == "BROKEN"
+    assert _verdict("10 has 6 divisors.") == "BROKEN"                        # 1, 2, 5, 10
+    r = audit("1 / 0 = 0.", CFG, seal=False)
+    assert r["verdict"] not in ("HOLDS", "BROKEN")                          # division by zero: a gap, never a verdict
+
+
+def test_a_chain_is_taken_whole_never_from_the_middle():
+    """2026-10-03, cardinal: "2 * 2 * 3 = 12" was BROKEN — the pair extractor took "2 * 3 = 12" out of the
+    middle and judged a true claim false. A chain is taken whole; a chain that starts mid-expression is
+    left alone (a miss, never a verdict)."""
+    assert _verdict("2 * 2 * 3 = 12.") == "HOLDS" and _verdict("12 * 12 * 1000 = 144,000.") == "HOLDS"
+    assert _verdict("2 x 3 x 4 = 24.") == "HOLDS" and _verdict("2 * 3 * 4 = 25.") == "BROKEN"
+    assert _verdict("100 / 5 / 2 = 10.") == "HOLDS" and _verdict("100 / 5 / 2 = 40.") == "BROKEN"
+    assert _verdict("1 + 2 + 3 = 6.") == "HOLDS"
+    for mixed in ("2 + 3 * 4 = 14.", "10 - 2 * 3 = 4.", "2 * 3 + 4 = 10.", "100 / 5 + 2 = 22."):
+        assert audit(mixed, CFG, seal=False)["verdict"] != "BROKEN", mixed  # true claims; never judged false
+    assert _verdict("64 mod 9 is 1.") == "HOLDS" and _verdict("64 mod 9 is 2.") == "BROKEN"
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]:
         fn()

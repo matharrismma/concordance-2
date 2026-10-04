@@ -36,6 +36,11 @@
 {"id": "verify.lookup.fact.atomic.mass.found.agrees", "method": "POST", "path": "/verify", "body": {"claim": "the atomic mass of iron is 55.845"}, "expect": [{"at": "verdict", "eq": "NOTHING_TO_CHECK"}, {"at": "found_fact.agrees", "eq": true}, {"at": "found_fact.source", "contains": "IUPAC"}, {"at": "receipt", "eq": null}]}
 {"id": "verify.exact.codata.alpha.not.eaten.by.the.airlock", "method": "POST", "path": "/verify", "body": {"claim": "the fine structure constant is 0.0072973525693"}, "expect": [{"at": "verdict", "eq": "HOLDS"}]}
 {"id": "verify.alpha.one.over.137.is.a.rounding", "method": "POST", "path": "/verify", "body": {"claim": "the fine structure constant is 0.00729927"}, "expect": [{"at": "verdict", "eq": "BROKEN"}]}
+{"id": "verify.division.claim.holds", "method": "POST", "path": "/verify", "body": {"claim": "72 / 2 = 36"}, "expect": [{"at": "verdict", "eq": "HOLDS"}]}
+{"id": "verify.product.chain.taken.whole", "method": "POST", "path": "/verify", "body": {"claim": "2 * 2 * 3 = 12"}, "expect": [{"at": "verdict", "eq": "HOLDS"}]}
+{"id": "verify.divisor.count.twelve.has.six", "method": "POST", "path": "/verify", "body": {"claim": "the number of divisors of 12 is 6"}, "expect": [{"at": "verdict", "eq": "HOLDS"}]}
+{"id": "verify.divisor.count.wrong.is.broken", "method": "POST", "path": "/verify", "body": {"claim": "10 has 6 divisors"}, "expect": [{"at": "verdict", "eq": "BROKEN"}]}
+{"id": "unknown.route.names.the.door", "path": "/original_words", "query": {"ref": "John 1:1"}, "status": 404, "expect": [{"at": "did_you_mean[0]", "eq": "/original"}, {"at": "routes", "eq": "/capabilities"}]}
 {"id": "verify.137.is.prime", "method": "POST", "path": "/verify", "body": {"claim": "137 is a prime number"}, "expect": [{"at": "verdict", "eq": "HOLDS"}]}
 {"id": "verify.element.atomic.number.holds", "method": "POST", "path": "/verify", "body": {"claim": "the atomic number of iron is 26"}, "expect": [{"at": "verdict", "eq": "HOLDS"}]}
 {"id": "verify.lookup.fact.iron.melts.holds.someday", "method": "POST", "path": "/verify", "body": {"claim": "iron melts at 1538 C"}, "expect": [{"at": "found_fact.agrees", "eq": true}], "known_miss": true}

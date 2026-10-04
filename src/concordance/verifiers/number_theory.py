@@ -297,7 +297,59 @@ def verify_prime_counting(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"pi({x}) = {actual}, claimed {claimed}; PNT estimate x/ln(x) = {est:.1f}", data)
 
 
+def _divisors(n: int):
+    out = []
+    d = 1
+    while d * d <= n:
+        if n % d == 0:
+            out.append(d)
+            if d != n // d:
+                out.append(n // d)
+        d += 1
+    return sorted(out)
+
+
+def verify_divisor_count(spec):
+    """τ(n): the number of positive divisors of n — "12 has 6 divisors", "the number of divisors of 60 is 12".
+    Exact and deterministic (2026-10-03; the reason 12 and 60 organize wholes: the most divisors for their
+    size). Optionally the divisors themselves (claimed_divisors) are compared as a set."""
+    name = "number_theory.divisor_count"
+    try:
+        n = int(spec.get("divisors_of"))
+    except (TypeError, ValueError):
+        return error(name, "divisors_of must be an integer")
+    if n < 1 or n > 10**12:
+        return error(name, f"divisors_of {n} out of range (1..1e12)")
+    actual = _divisors(n)
+    data = {"n": n, "divisors": actual if len(actual) <= 64 else actual[:64], "actual_count": len(actual)}
+    claimed_count = spec.get("claimed_divisor_count")
+    claimed_set = spec.get("claimed_divisors")
+    problems = []
+    if claimed_count is not None:
+        try:
+            cc = int(claimed_count)
+            data["claimed_divisor_count"] = cc
+            if cc != len(actual):
+                problems.append(f"{n} has {len(actual)} divisors, not {cc}")
+        except (TypeError, ValueError):
+            return error(name, "claimed_divisor_count must be an integer")
+    if claimed_set is not None:
+        try:
+            cs = sorted(int(x) for x in claimed_set)
+            data["claimed_divisors"] = cs
+            if cs != actual:
+                problems.append(f"divisors of {n} are {actual}, not {cs}")
+        except (TypeError, ValueError):
+            return error(name, "claimed_divisors must be integers")
+    if claimed_count is None and claimed_set is None:
+        return na(name)
+    if problems:
+        return mismatch(name, "; ".join(problems), data)
+    return confirm(name, f"{n} has {len(actual)} divisors: {actual if len(actual) <= 16 else str(actual[:16]) + '…'}", data)
+
+
 _RULES = [
+    (lambda nv: ("divisors_of" in nv and ("claimed_divisor_count" in nv or "claimed_divisors" in nv)), verify_divisor_count),
     (lambda nv: ("n_prime" in nv and "claimed_prime" in nv), verify_primality),
     (lambda nv: ("limit" in nv and "claimed_prime_count" in nv), verify_prime_counting),
     (lambda nv: (all(k in nv for k in ("gcd_a", "gcd_b", "claimed_gcd"))), verify_gcd),

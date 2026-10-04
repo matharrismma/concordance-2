@@ -73,6 +73,19 @@ def test_unknown_route_404():
     assert dispatch("GET", "/nope", {}, None, SEC)[0] == 404
 
 
+def test_an_unknown_route_names_the_nearest_doors():
+    """2026-10-03: GET /original_words (the MCP tool's name) answered a bare {"error": "not found"} while the
+    route is /original. The 404 now carries the nearest known routes and the catalog — a dead end becomes a
+    door. Derived from ROUTES, so a renamed route can never leave a stale suggestion behind."""
+    from concordance.web.api import did_you_mean, not_found
+    s, body = dispatch("GET", "/original_words", {"ref": "John 1:1"}, None, SEC)
+    assert s == 404 and body["code"] == "NOT_FOUND" and body["routes"] == "/capabilities"
+    assert body["did_you_mean"][0] == "/original"
+    assert "/health" in did_you_mean("/healthz") and "/verify" in did_you_mean("/verifiy")
+    assert "did_you_mean" not in not_found("/zzzzzzzz-nothing-like-this")    # nothing close: say nothing
+    assert did_you_mean("/") == [] and did_you_mean("") == []
+
+
 def test_http_mcp_endpoint():
     # remote MCP over HTTP: tools/call verify -> HOLDS
     s, p = dispatch("POST", "/mcp", {}, {"jsonrpc": "2.0", "id": 1, "method": "tools/call",

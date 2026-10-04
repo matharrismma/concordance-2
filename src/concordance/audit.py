@@ -41,10 +41,40 @@ def _q(text: str, m: re.Match) -> str:
 
 # Each extractor: (name, fn(text) -> list[(quote, domain, spec)]). Pure and conservative.
 
+# A chain taken from the MIDDLE of an expression is a false verdict waiting to happen (2026-10-03, the
+# 137 slide: "2 * 2 * 3 = 12" came back BROKEN — the pair extractor took "2 * 3 = 12" and judged a true
+# claim false; the same shape was latent in sum: "2 * 3 + 4 = 10" -> "3 + 4 = 10"). Every chain extractor
+# now takes its chain WHOLE, and refuses one that is preceded by an operator or a digit — a mixed-operator
+# expression is left unextracted: a miss, never a verdict.
+_OP_LEFT = re.compile(r"(?:[+*/×÷\-]|\d\s*x)[ \t]*\Z", re.I)   # an OPERATOR on the same line; a number on the line above is not one
+
+
+def _mid_chain(text: str, start: int) -> bool:
+    return bool(_OP_LEFT.search(text[:start]))
+
+
+def _chain(text: str, op_rx: str, joiner: str, label: str):
+    """"a OP b OP c ... = d" with ONE operator repeated — the whole chain, left to right."""
+    out = []
+    for m in re.finditer(r"\$?\d[\d,]*(?:\.\d+)?(?:\s*" + op_rx + r"\s*\$?\d[\d,]*(?:\.\d+)?)+\s*" + _EQ +
+                         r"\s*" + _NUM, text, re.I):
+        if _mid_chain(text, m.start()):
+            continue
+        left = m.group(0).rsplit(m.group(1), 1)[0]   # everything left of the claimed total
+        nums = [t.replace(",", "") for t in re.findall(r"\d[\d,]*(?:\.\d+)?", left)]
+        if len(nums) < 2 or (joiner == "/" and any(_f(n) == 0 for n in nums[1:])):
+            continue                                   # division by zero: a gap, never a verdict
+        out.append((_q(text, m), "mathematics",
+                    {"mode": "equality", "params": {"expr_a": joiner.join(nums), "expr_b": str(_f(m.group(1)))}}))
+    return out
+
+
 def _x_sum(text: str):
     out = []
     for m in re.finditer(r"\$?\d[\d,]*(?:\.\d+)?(?:\s*\+\s*\$?\d[\d,]*(?:\.\d+)?)+\s*" + _EQ +
                          r"\s*" + _NUM, text, re.I):
+        if _mid_chain(text, m.start()):
+            continue
         left = m.group(0).rsplit(m.group(1), 1)[0]   # everything left of the claimed total
         nums = [t.replace(",", "") for t in re.findall(r"\d[\d,]*(?:\.\d+)?", left)]
         if len(nums) < 2:
@@ -56,16 +86,39 @@ def _x_sum(text: str):
 
 
 def _x_product(text: str):
+    """"2 * 2 * 3 = 12", "12 x 12 x 1000 = 144,000" — the whole product chain (see _chain)."""
+    return _chain(text, r"(?:x|×|\*)", "*", "product")
+
+
+def _x_quotient(text: str):
+    """"72 / 2 = 36", "144 ÷ 12 = 12", "100 / 5 / 2 = 10" — a division chain, left to right (2026-10-03:
+    "72 / 2 = 36" was NOTHING_TO_CHECK while "72 * 2 = 144" held). The word form ("divided by") is
+    _x_arith_words'. Division by zero is left unextracted — a gap, never a verdict."""
+    return _chain(text, r"(?:/|÷)", "/", "quotient")
+
+
+def _x_divisor_count(text: str):
+    """"the number of divisors of 12 is 6", "12 has 6 divisors", "60 has twelve divisors" -> number_theory τ(n)."""
     out = []
-    for m in re.finditer(_NUM + r"\s*(?:x|×|\*)\s*" + _NUM + r"\s*" + _EQ + r"\s*" + _NUM,
-                         text, re.I):
-        a, b, c = _f(m.group(1)), _f(m.group(2)), _f(m.group(3))
-        out.append((_q(text, m), "mathematics",
-                    {"mode": "equality", "params": {"expr_a": f"{a}*{b}", "expr_b": str(c)}}))
+    pats = (r"(?:the\s+)?number\s+of\s+(?:positive\s+)?divisors\s+of\s+(\d{1,12})\s+" + _EQ + r"\s*(\d{1,4})\b",
+            r"\b(\d{1,12})\s+has\s+(?:exactly\s+)?(\d{1,4}|[a-z]+)\s+(?:positive\s+)?divisors\b")
+    for pat in pats:
+        for m in re.finditer(pat, text, re.I):
+            n = int(m.group(1))
+            k_raw = m.group(2).lower()
+            k = int(k_raw) if k_raw.isdigit() else _SMALL_WORDS.get(k_raw)
+            if k is None:
+                continue
+            out.append((_q(text, m), "number_theory",
+                        {"NUM_VERIFY": {"divisors_of": n, "claimed_divisor_count": k}}))
     return out
 
 
-_ARITH_WORDS = {"plus": "+", "minus": "-", "times": "*", "multiplied by": "*", "divided by": "/"}
+_SMALL_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9,
+                "ten": 10, "eleven": 11, "twelve": 12, "sixteen": 16, "twenty": 20, "twenty-four": 24}
+
+_ARITH_WORDS = {"plus": "+", "minus": "-", "times": "*", "multiplied by": "*", "divided by": "/",
+                "mod": "%", "modulo": "%"}
 
 
 def _x_arith_words(text: str):
@@ -75,7 +128,7 @@ def _x_arith_words(text: str):
     the second number immediately, prose like "2 plus a few more, is 4 enough?" cannot match — the
     same zero-false-positive discipline as every other extractor."""
     out = []
-    for m in re.finditer(_NUM + r"\s*(plus|minus|times|multiplied by|divided by)\s*" + _NUM +
+    for m in re.finditer(_NUM + r"\s*(plus|minus|times|multiplied by|divided by|modulo|mod)\s*" + _NUM +
                          r"\s*" + _EQ + r"\s*" + _NUM, text, re.I):
         op = _ARITH_WORDS[m.group(2).lower()]
         out.append((_q(text, m), "mathematics",
@@ -916,7 +969,7 @@ def _x_sequence_fact(text: str):
 
 
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
-    ("sum", _x_sum), ("product", _x_product), ("arith_words", _x_arith_words),
+    ("sum", _x_sum), ("product", _x_product), ("quotient", _x_quotient), ("arith_words", _x_arith_words),
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
     ("combinations", _x_combinations), ("permutations", _x_permutations),
     ("propositional_logic", _x_propositional_logic),
@@ -926,7 +979,7 @@ _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("physics_force", _x_physics_force), ("kinetic_energy", _x_kinetic_energy),
     ("kinematics", _x_kinematics),
     ("molar_mass", _x_molar_mass), ("element_fact", _x_element_fact),
-    ("sequence_fact", _x_sequence_fact), ("primality", _x_primality),
+    ("sequence_fact", _x_sequence_fact), ("primality", _x_primality), ("divisor_count", _x_divisor_count),
     ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),
     ("compound_interest", _x_compound), ("rule_of_72", _x_rule72),
