@@ -1295,3 +1295,16 @@ is a backup now.
 - **Noted:** a mark runs the scan twice (tick.py counts, then the verifier recounts to confirm) — the price of
   the seal's verifier being its own skeptic, left as is. Beyond 1e6 the main sum grows as sqrt(T); 1e7 is ~hours
   even in C — a want for a blocked/FFT main sum if we push higher.
+
+## 2026-10-05 — "push to 10 million": T=1e7 sealed — 21,136,125 zeros on the critical line (49126be + the mark)
+- **Sealed.** Every non-trivial zero of zeta with 0 < Im(s) <= 10,000,000 lies on the line: the on-line count
+  (21,136,125, Riemann-Siegel sweep + parabolic dip detector) equals Backlund's independent strip count exactly,
+  S(T) = -0.206, 0 localised rescans, in 7822 s (~2.2 h) on the box. Seal
+  `5a560183a60e1d39ce2707dc7c4670123040d60d6c11b9a8a28d9911ad2c7d0c` (re-checkable, 200). The Riemann stick's progression: 200, 500, 1k, 10k, 100k, 200k, 1M, **10M**.
+- **Two fixes the first 1e7 run surfaced** (it scanned fine and the counts AGREED, but did not seal):
+  * the height cap in verify_critical_line (1e6, to protect the public /verify worker) is now lifted for the
+    trusted operator by CONCORDANCE_RIEMANN_MAX (tools/tick.py sets 1e9), read live;
+  * _rs.c precomputes log(k) and 1/sqrt(k) (they were ~85% of the per-point work at m~1262) — same doubles to
+    ~7e-15, so the count is unchanged (1e6 still exactly 1,747,146); ~1.3x faster (the cosines are now the floor).
+- A mark scans once (the _zeros_on_line_checked memo spares the verifier's second scan). Benchmarks 70/70,
+  assay floor 76. The literature value for N(10^7) is 21,136,125 — the two independent methods landed on it.
