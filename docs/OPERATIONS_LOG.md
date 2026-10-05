@@ -1228,3 +1228,30 @@ is a backup now.
   **68/70, floor 68** (three new probes: Spanish, Chinese, Russian names).
 - **Not yet (the rest of #4):** the house ending's four labels are still English chrome; a simplified-script
   Chinese name for John is absent from the source (Wikidata has only the traditional label) — a want, not a guess.
+
+## 2026-10-05 — THE TICK STICK: the Millennium problems as open questions with sealed marks (6a92c53)
+- **Matt:** "The Millennium problems. I feel like we have gathered enough to make an attempt at them." The look said
+  otherwise (no card for any of the six; "Yang-Mills" landed on the Greek for mill) and the constitution says what an
+  attempt can be: the engine finds, checks and seals — it does not author a proof. **Matt: "We build a tick stick. A
+  tool that allows us to infer closer and closer."** A joiner ticks the points of a crooked wall he can reach and
+  infers the shape from the ticks, never past the last mark.
+- **Built.** `tickstick.py`: a stick is an open question; a tick is a mark the engine can stand behind — bound /
+  instance / witness (must name a HOLDS seal in this keeping; checked before acceptance), equivalence / exclusion
+  (must name a source), note. The FIT is computed from the ticks and nothing else: the greatest sealed bound (a
+  ratchet), sealed instances, cited equivalences and exclusions, and the open remainder — it never says the question
+  is settled. Doors `GET /sticks`, `GET/POST /stick`, `POST /tick`; `data/sticks.jsonl` rides with the node sync.
+  `docs/TICK_STICK.md` is the method.
+- **The first mark.** `number_theory.critical_line`: every zero of ζ up to a height T lies on the critical line, by
+  two INDEPENDENT counts that must agree — sign changes of Hardy's Z on the line and Backlund's argument-principle
+  count N(T) = θ(T)/π + 1 + S(T) in the strip, S(T) followed continuously from σ = 2 to ½. A missed close pair makes
+  the counts disagree (a miss stays a miss). Turing's/Backlund's method, the way every published verification is
+  done; ours is small and sealed. `tools/tick.py riemann T` mints the mark through the same sealing path as POST
+  /verify with the 8-second shed lifted.
+- **Live on the box.** Seven sticks (`tools/tick.py seed`; Poincaré kept as the solved one). Riemann: three sealed
+  bounds in progression — **T = 200 (79 zeros) `d66bae9d…`, T = 500 (269) `28a7b4d2…`, T = 1000 (649)
+  `6317ceac…`** — plus three cited equivalences (Schoenfeld 1976, Robin 1984, Titchmarsh §14.25); fit: *verified up to
+  height T 1000; beyond: not verified here*. P versus NP carries the three barriers as cited exclusions (Baker–Gill–
+  Solovay 1975, Razborov–Rudich 1997, Aaronson–Wigderson 2009). The other four are open sticks awaiting marks. CI
+  green; the gate passed; four probes added.
+- **What this is and is not.** It is the map a human attempt needs and the honest referee for one — verified to here,
+  excluded there, open beyond. It is not, and will not become, a proof generator.
