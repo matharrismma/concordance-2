@@ -351,7 +351,7 @@ def verify_divisor_count(spec):
 _TWO_PI = 6.283185307179586
 _RS_FLOAT_FROM = 500.0          # below this the first-order Riemann–Siegel error (~ t^-3/4) is too large; mpmath there
 _DIP = 0.08                     # |Z| this small at two neighbouring samples without a crossing: look closer, exactly
-_MAX_HEIGHT = 200000.0
+_MAX_HEIGHT = 1000000.0
 
 
 def _theta(t: float) -> float:
@@ -390,29 +390,45 @@ def _exact_changes(a: float, b: float, n: int = 48) -> int:
     return _changes(vals)
 
 
+def _grid(a: float, b: float, h: float):
+    """The scan grid from a to b: a quarter apart below the seam, h above — streamed, never stored."""
+    t = a
+    yield t
+    while t < b:
+        t = min(t + (0.25 if t < _RS_FLOAT_FROM + 1.0 else h), b)
+        yield t
+
+
+def _count_changes(a: float, b: float, h: float) -> int:
+    """Sign changes of Z on the grid from a to b, with one exact correction: a span whose two samples both sit
+    within the formula's own error (3·t^(-3/4); 0.05 below the seam) without a crossing is recounted with mpmath,
+    so the formula's error can never hide or invent a pair. One grid, one count — streamed in O(1) memory, so a
+    million-high scan does not need a million-long list."""
+    count = 0
+    prev_t = None
+    prev = 0.0
+    for t in _grid(a, b, h):
+        v = _z(t)
+        if prev_t is not None:
+            if (prev < 0) != (v < 0):
+                count += 1
+            else:
+                tol = 0.05 if t < _RS_FLOAT_FROM + 1.0 else 3.0 * t ** -0.75
+                if max(abs(prev), abs(v)) < tol:
+                    count += _exact_changes(prev_t, t, 64)
+        prev_t, prev = t, v
+    return count
+
+
 def _zeros_on_line(T: float, step: float = 0.25) -> int:
     """Zeros ON the critical line in (0, T]: sign changes of Z on ONE grid — mpmath a quarter apart below the
     seam (t < 501, where the float formula's error is too large), the float Riemann–Siegel formula a
-    twenty-fourth of the mean spacing apart above it — plus one exact correction: a span whose two samples
-    are both within the formula's own error (3·t^(-3/4); 0.05 below the seam) without a crossing is recounted
-    with mpmath, so the formula's error can never hide or invent a pair. One grid, one count: nothing is counted
-    twice. What a pair closer than the grid could still hide, Backlund's strip count exposes; the caller then
-    localises by that count and rescans exactly."""
+    twenty-fourth of the mean spacing apart above it — with the exact correction of _count_changes. What a pair
+    closer than the grid could still hide, Backlund's strip count exposes; the caller then localises by that
+    count and rescans exactly."""
     import math
     spacing = _TWO_PI / math.log(max(T, 20.0) / _TWO_PI)
-    h = min(step, spacing / 24)
-    ts = [1.0]
-    while ts[-1] < T:
-        ts.append(min(ts[-1] + (0.25 if ts[-1] < _RS_FLOAT_FROM + 1.0 else h), T))
-    vals = [_z(t) for t in ts]
-    count = _changes(vals)
-    for i in range(1, len(ts)):
-        if (vals[i - 1] < 0) != (vals[i] < 0):
-            continue
-        tol = 0.05 if ts[i] < _RS_FLOAT_FROM + 1.0 else 3.0 * ts[i] ** -0.75
-        if max(abs(vals[i - 1]), abs(vals[i])) < tol:
-            count += _exact_changes(ts[i - 1], ts[i], 64)
-    return count
+    return _count_changes(1.0, T, min(step, spacing / 24))
 
 
 def _zeros_on_line_checked(T: float):
@@ -429,10 +445,7 @@ def _zeros_on_line_checked(T: float):
         h = min(0.25, spacing / 24)
 
         def seg(a: float, b: float) -> int:
-            ts = [a]
-            while ts[-1] < b:
-                ts.append(min(ts[-1] + (0.25 if ts[-1] < _RS_FLOAT_FROM + 1.0 else h), b))
-            return _changes([_z(t) for t in ts])
+            return _count_changes(a, b, h)
 
         def nstrip(t: float) -> float:
             return 0.0 if t <= 14.0 else _zeros_in_strip(t)[0]
