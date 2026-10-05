@@ -48,3 +48,28 @@ A P versus NP stick carries the barriers as cited exclusions (relativization —
 proofs — Razborov, Rudich 1997; algebrization — Aaronson, Wigderson 2009): an attempt that does not pass them is
 not an attempt. The stick is the map of the territory, which is what a human attempt needs, and the honest
 referee for one.
+
+## Narrowing by elimination — the program
+
+Matt, 2026-10-05: *"We narrow the window and rerun again. We keep narrowing until we basically solve. We do this
+for all of the Millennium problems."* And: *"We are looking at what it is not."*
+
+The stick does not try to prove a Millennium problem — the engine finds, checks, and seals; it does not author
+proofs, and these questions are open. What it does is chart, by elimination, the window where the question could
+still fail, and push that window with every rerun:
+
+1. **Each tool eliminates a region.** A sealed bound ("no zero off the critical line below height T"), a sealed
+   witness from another tool ("no Robin counterexample below N"), a cited barrier ("relativizing proofs cannot
+   settle P vs NP") — each rules out somewhere a failure could hide.
+2. **The fit reports the surviving window** (`fit.window`): what every elimination leaves standing. A failure, if
+   one exists, must evade all of them at once.
+3. **Rerun to push the frontier.** The next pass extends an elimination (a larger N, a higher height) or registers
+   a new tool. Each pass that finds no counterexample narrows the surviving window. The verifiers run through the
+   engine (POST /verify, the nightly benchmark), not by hand.
+
+**The honest ceiling.** Narrowing is evidence, never a proof. "Basically solve" means driving the window as far as
+the tools allow and stating exactly what remains. And it only narrows numerically where there IS a numeric
+counterexample-window: Riemann (zero height, Robin's inequality, and more) and Birch–Swinnerton-Dyer (curve by
+curve). For P vs NP, the Hodge conjecture, Yang–Mills, and Navier–Stokes there is no numeric window to shrink —
+their marks are the cited proof-barriers, which say which proofs cannot settle them, not how far a search has
+reached. `fit.window.narrows_numerically` says which kind a stick is. Poincaré is kept as the one that is solved.

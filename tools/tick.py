@@ -6,6 +6,7 @@
     PYTHONPATH=src python tools/tick.py lnh                   # Dirac's Large Numbers Hypothesis: seal N1, cite the rest
     PYTHONPATH=src python tools/tick.py alpha                 # the fine-structure constant: seal alpha, cite the 137
     PYTHONPATH=src python tools/tick.py robin [N]             # chart the Riemann window by elimination (Robin to N)
+    PYTHONPATH=src python tools/tick.py window [stick]        # the surviving window of each stick (narrow by elimination)
     PYTHONPATH=src python tools/tick.py riemann 200          # verify every zero up to T = 200 is on the line,
                                                              # SEAL it through the same path as POST /verify, tick
     PYTHONPATH=src python tools/tick.py read stick_riemann_hypothesis
@@ -391,6 +392,19 @@ def main() -> int:
         return alpha()
     if a[0] == "robin":
         return robin(int(a[1]) if len(a) > 1 else 1000000)
+    if a[0] == "window":
+        from concordance import tickstick as T
+        ids = [a[1]] if len(a) > 1 else sorted(T.fold())
+        for sid in ids:
+            st = T.read(sid)
+            if not st.get("ok"):
+                print(sid, "— no such stick"); continue
+            w = st["fit"]["window"]
+            print(f"\n{sid}  ({'narrows numerically' if w['narrows_numerically'] else 'barrier problem — no numeric window'})")
+            for e in w["eliminations"]:
+                print("   - " + e)
+            print("   surviving: " + w["surviving"])
+        return 0
     if a[0] == "riemann":
         return riemann(float(a[1]) if len(a) > 1 else 100.0)
     if a[0] == "bsd":

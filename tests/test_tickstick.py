@@ -80,6 +80,16 @@ def test_a_stick_takes_sealed_marks_and_cited_marks_and_fits_no_further_than_the
     assert nt["ok"] and nt["fit"]["record"][0]["claim"].startswith("Method:") and nt["fit"]["record"][0]["by"] == "the record"
     assert nt["fit"]["sealed_ticks"] == 2 and nt["fit"]["cited_ticks"] == 1   # the note counts as neither
     assert nt["fit"]["verified_up_to"]["up_to"] == 100 and nt["fit"]["progression"][-1]["seal"]   # bound + seal unchanged
+    # the surviving window (narrow by elimination): a sealed bound makes it narrow numerically
+    w = nt["fit"]["window"]
+    assert w["narrows_numerically"] is True and any("no failure below" in e for e in w["eliminations"])
+    assert "evade every elimination" in w["surviving"]
+    # a stick with only cited barriers does not narrow numerically
+    bar = tickstick.create("A barrier-only open question for the window test", field="logic")["id"]
+    tickstick.tick(bar, "exclusion", "a relativizing argument cannot settle this question",
+                   source="a cited barrier, 1975")
+    bw = tickstick.read(bar)["fit"]["window"]
+    assert bw["narrows_numerically"] is False and bw["eliminations"] and "barrier" in bw["note"]
     # a stick with sealed instances but no bound says so — the general question stays open
     r2 = tickstick.create("Birch and Swinnerton-Dyer conjecture", field="number_theory")
     inst = tickstick.tick(r2["id"], "instance", "E = 11a1: L(E,1) != 0 => rank 0 (Kolyvagin)", seal=h)

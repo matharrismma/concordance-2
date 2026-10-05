@@ -115,6 +115,28 @@ def fit(stick: Dict[str, Any]) -> Dict[str, Any]:
                        "the general question stays open")
     else:
         out["open"] = "no sealed bound yet — the stick has only cited marks" if (equivalences or exclusions) else "no marks yet"
+    # THE SURVIVING WINDOW (narrow by elimination; Matt, 2026-10-05): every bound, witness and exclusion RULES OUT
+    # a region where the question could fail. The window is what those eliminations leave standing — pushed up each
+    # rerun. A problem with only cited exclusions (a proof-barrier problem) has no numeric window to shrink, and
+    # says so; one with sealed eliminations names the frontier past which it is untested.
+    eliminations = []
+    if best:
+        eliminations.append(f"no failure below {best.get('unit') or 'the bound'} {best['up_to']:g} (direct)")
+    for t in witnesses:
+        eliminations.append((t.get("claim") or "")[:160])
+    for t in exclusions:
+        eliminations.append("ruled out: " + (t.get("claim") or "")[:150])
+    out["window"] = {
+        "eliminations": eliminations,
+        "surviving": (("a failure, if any, must evade every elimination above at once — the frontier is pushed to "
+                       + (f"{best.get('unit') or 'the bound'} {best['up_to']:g}" if best else "the marks listed"))
+                      if eliminations else "nothing eliminated yet"),
+        "narrows_numerically": bool(best or witnesses),
+        "note": ("Narrow by elimination: we chart what the question is NOT, and rerun to push the frontier. Each pass "
+                 "that finds no counterexample narrows the surviving window; it is evidence, never a proof. A problem "
+                 "whose only marks are cited barriers has no numeric window to shrink — the barriers say which proofs "
+                 "cannot settle it, not how far a search has reached."),
+    }
     out["note"] = ("The fit is exactly what the ticks establish: a sealed bound, sealed instances, cited equivalences and "
                    "exclusions. It never says the question is settled; it says verified to here, excluded there, open beyond.")
     return out
