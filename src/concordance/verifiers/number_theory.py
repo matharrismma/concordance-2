@@ -439,6 +439,56 @@ def _dip_crossings(t0: float, t1: float, t2: float, v0: float, v1: float, v2: fl
     return _exact_changes(t0, t2, 96)
 
 
+def _count_above_np(start: float, b: float, h: float, carry_t, carry_v, block: int = 1 << 22) -> int:
+    """The vectorised twin of the streamed count above the seam: sign changes on the grid, with the SAME tol and
+    parabolic-dip exact corrections, but the bulk work in numpy so a half-billion-point sweep needs no
+    half-billion-step python loop. Candidate spans (within-error pairs, parabola dips) are merged and recounted
+    exactly once each — never twice. Identical counts to the streamed path (pinned); used only when numpy is
+    present, above the seam."""
+    import math
+    from . import riemann_accel
+    np = riemann_accel._numpy()
+    count = 0
+    n_total = int(math.ceil((b - start) / h)) + 1
+    done = 0
+    while done < n_total:
+        k = min(block, n_total - done)
+        ts = np.minimum(start + (done + np.arange(k)) * h, b)
+        vs = np.asarray(riemann_accel.z_array(ts), float)
+        if carry_t is not None:
+            ts = np.concatenate(([carry_t], ts))
+            vs = np.concatenate(([carry_v], vs))
+        sb = vs < 0.0
+        cross = sb[:-1] != sb[1:]
+        count += int(cross.sum())
+        tol = 3.0 * np.power(ts[1:], -0.75)
+        tolpair = (~cross) & (np.maximum(np.abs(vs[:-1]), np.abs(vs[1:])) < tol)
+        v0, v1, v2 = vs[:-2], vs[1:-1], vs[2:]
+        same = (sb[:-2] == sb[1:-1]) & (sb[1:-1] == sb[2:])
+        s = np.where(v1 > 0, 1.0, -1.0)
+        u0, u1, u2 = s * v0, s * v1, s * v2
+        curv = u0 - 2 * u1 + u2
+        with np.errstate(divide="ignore", invalid="ignore"):
+            vmin = u1 - (u2 - u0) ** 2 / (8 * curv)
+        dip = same & (u1 <= u0) & (u1 <= u2) & (curv > 0) & (vmin < 0.0)
+        spans = [(int(i), int(i) + 1) for i in np.nonzero(tolpair)[0]]
+        spans += [(int(j), int(j) + 2) for j in np.nonzero(dip)[0]]  # triple centred at j+1 -> indices j..j+2
+        if spans:
+            spans.sort()
+            merged = []
+            for lo, hi in spans:
+                if merged and lo <= merged[-1][1]:
+                    merged[-1] = (merged[-1][0], max(merged[-1][1], hi))
+                else:
+                    merged.append((lo, hi))
+            for lo, hi in merged:                                    # a crossing-free span: exact replaces coarse 0
+                count += _exact_changes(float(ts[lo]), float(ts[hi]), 32 * (hi - lo) + 32)
+        carry_t = float(ts[-1])
+        carry_v = float(vs[-1])
+        done += k
+    return count
+
+
 def _count_changes(a: float, b: float, h: float) -> int:
     """Sign changes of Z on the grid from a to b. Two local corrections keep the float scan honest, each judged
     by exact mpmath so the formula's error can neither hide nor invent a pair:
@@ -484,7 +534,11 @@ def _count_changes(a: float, b: float, h: float) -> int:
         if t >= b and t < seam:                                    # the whole span was below the seam
             fold(t, float(mp.siegelz(t)))
             return count
-    # above the seam: the fast bulk sweep (C / numpy / python), from where the grid now stands
+    # above the seam: vectorised when numpy is present (a half-billion-point grid needs no python loop), else
+    # the streamed fold. Both make the same decisions and the same count.
+    from . import riemann_accel
+    if riemann_accel._numpy() is not False:
+        return count + _count_above_np(t, b, h, w_t[-1] if w_t else None, w_v[-1] if w_v else None)
     for tt, vv in _above_seam_values(t, b, h):
         fold(tt, vv)
     return count
@@ -501,10 +555,20 @@ def _zeros_on_line(T: float, step: float = 0.25) -> int:
     return _count_changes(1.0, T, min(step, spacing / 24))
 
 
+_CHECKED_MEMO: dict = {}
+
+
 def _zeros_on_line_checked(T: float):
     """(zeros on the line, N(T) in the strip, S(T), localised rescans): the scan, then the independent count; where
     the scan is short, bisect by the strip count (cheap) until the deficit sits in a narrow span and rescan it
-    exactly. Returns the final on-line count — which may still be short: then nothing is certified."""
+    exactly. Returns the final on-line count — which may still be short: then nothing is certified.
+
+    Memoised within the process: minting a mark calls this once in tools/tick.py and again inside the verifier
+    (the verifier is its own skeptic), and at T = 10^7 a scan is an hour — the deterministic result is the same
+    both times, so the second call reuses the first rather than scanning twice."""
+    key = round(float(T), 6)
+    if key in _CHECKED_MEMO:
+        return _CHECKED_MEMO[key]
     import math
     n_strip, S = _zeros_in_strip(T)
     on_line = _zeros_on_line(T)
@@ -538,7 +602,10 @@ def _zeros_on_line_checked(T: float):
         nonlocal_rescans = [0]
         on_line = localise(1.0, T, 0.0, n_strip)
         rescans = nonlocal_rescans[0]
-    return on_line, n_strip, S, rescans
+    out = (on_line, n_strip, S, rescans)
+    if len(_CHECKED_MEMO) < 64:                                   # a small bound: this is a within-process reuse, not a cache
+        _CHECKED_MEMO[key] = out
+    return out
 
 
 def _zeros_in_strip(T: float, sigma_steps: int = 0):
