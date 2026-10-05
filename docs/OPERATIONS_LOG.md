@@ -1308,3 +1308,23 @@ is a backup now.
     ~7e-15, so the count is unchanged (1e6 still exactly 1,747,146); ~1.3x faster (the cosines are now the floor).
 - A mark scans once (the _zeros_on_line_checked memo spares the verifier's second scan). Benchmarks 70/70,
   assay floor 76. The literature value for N(10^7) is 21,136,125 — the two independent methods landed on it.
+
+## 2026-10-05 — the Riemann attempt documented in its stick, and the Large Numbers Hypothesis as a stick (afe2c47, 4e18127)
+- **Riemann documented (afe2c47, live).** fit() now surfaces the note ticks as `record` and carries each bound's
+  seal in the progression. `tools/tick.py document` wrote four notes onto stick_riemann_hypothesis — method (two
+  independent counts must agree), the honest record (the first 1e6 came up 18 short and sealed nothing), compute
+  (C/numpy/python, exact mpmath near zeros), open (bound at 1e7; the hypothesis itself unproven). The stick now
+  reads, live: verified to T=1e7 (seal 5a560183), 8 sealed bounds 200→1e7 each with its seal, 3 cited
+  equivalences, the 4-line record, and the honest "open beyond".
+- **Large Numbers Hypothesis (4e18127, live) — "large number hypothesis".** Dirac's LNH as a tick stick, the
+  project's discernment exactly: SEAL the arithmetic, CITE the conjecture, endorse nothing. `tools/tick.py lnh`:
+  * WITNESS (sealed `46d112d47badc282…`, re-checkable 200): N1 = e^2/(4*pi*eps0*G*m_p*m_e) = 2.268661e39, the
+    electromagnetic-to-gravitational force ratio, computed from the engine's attested CODATA constants (numeric mode);
+  * NOTE: Dirac's N2 = T_Hubble/atomic-time ~ 10^40.7 is within an order of magnitude — cited, not sealed (N2 rests
+    on the Hubble time, a measured cosmological quantity, not a constant);
+  * EXCLUSION (cited: lunar laser ranging Williams-Turyshev-Boggs 2004; Oklo Shlyakhter 1976 / Damour-Dyson 1996):
+    the time-varying-G prediction is disfavored — |G_dot/G| is bounded far below a 1/t law;
+  * NOTE: a coincidence of magnitudes is not a law; the engine seals that N1 IS ~2.27e39 and endorses nothing more.
+  Fit: one sealed witness, the general question open. Eight sticks now stand (7 Millennium + LNH).
+- Ties the standing guardrail [[project_numbers_bases_triangulation_2026-06-13]] (seal the arithmetic, attribute
+  the pattern, NO numerology) — the LNH stick is that rule made a public, re-checkable object.
