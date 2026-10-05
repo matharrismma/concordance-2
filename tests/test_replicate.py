@@ -226,6 +226,21 @@ def test_a_file_that_never_completes_keeps_its_partial_for_next_time(world):
     assert (n / "cards.jsonl.part").read_bytes() == (b / "cards.jsonl").read_bytes()[:5] and not (n / "cards.jsonl").exists()
 
 
+def test_a_dead_pulls_lock_is_taken_over_but_a_live_one_is_honoured(world):
+    """2026-10-05: a catch-up killed by its runner left sync.lock behind; the nightly timer would have been
+    refused for six hours. The holder now heartbeats; a stale heartbeat is a dead pull's."""
+    b, n, spec = world
+    lock = n / "sync.lock"
+    n.mkdir(exist_ok=True)
+    lock.write_text(json.dumps({"pid": 1, "at": int(time.time()) - 7200, "beat": int(time.time()) - 7200}), encoding="utf-8")
+    rep = replicate.pull(spec, fetch=_fake_fetch(b), data_dir=n)
+    assert rep["ok"] and rep["records_pulled"] == 3 and not lock.exists()           # the dead lock was taken over
+    lock.write_text(json.dumps({"pid": 1, "at": int(time.time()), "beat": int(time.time())}), encoding="utf-8")
+    rep = replicate.pull(spec, fetch=_fake_fetch(b), data_dir=n)
+    assert rep["ok"] is False and "another sync holds" in rep["detail"] and lock.exists()   # a live one is honoured
+    lock.unlink()
+
+
 def test_known_branches_are_pinned_by_hand_and_the_node_has_a_public_face(tmp_path):
     d = tmp_path / "n"
     d.mkdir()

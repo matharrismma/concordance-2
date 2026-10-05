@@ -272,6 +272,17 @@ FetchFile = Callable[[str, int], Tuple[int, bytes, bool]]
 CHUNK = 1 << 20
 FILE_TRIES = 6
 RETRY_PAUSE = 5          # seconds × attempt between tries of one file (tests set 0)
+LOCK_STALE_S = 3600      # a lock not refreshed for an hour belongs to a dead pull (2026-10-05: a killed catch-up
+                         # left its lock for six hours and would have refused the nightly timer)
+_HEARTBEAT: Optional[Callable[[], None]] = None
+
+
+def _beat() -> None:
+    if _HEARTBEAT is not None:
+        try:
+            _HEARTBEAT()
+        except OSError:
+            pass
 
 
 def _http_fetch(base_url: str, timeout: int = 120) -> Fetch:
@@ -305,6 +316,7 @@ def _http_fetch_file(base_url: str, timeout: int = 120) -> FetchFile:
                     if not chunk:
                         break
                     buf.extend(chunk)
+                    _beat()                                   # a long file on a slow line still shows a live pull
                 return status, bytes(buf), True
         except urllib.error.HTTPError as e:
             return e.code, e.read(), True
@@ -336,6 +348,7 @@ def _download(fetch_file: FetchFile, name: str, want_sha: str, want_bytes: int, 
             break
         if attempt and RETRY_PAUSE:
             time.sleep(min(60, RETRY_PAUSE * attempt))                        # a restarting branch is back in ~30 s
+        _beat()
         st, body, complete = fetch_file(f"/sync/file?name={urllib.parse.quote(name)}", offset)
         if st == 206:
             have.extend(body)
@@ -422,17 +435,27 @@ def pull(branch: Dict[str, Any], fetch: Optional[Fetch] = None, data_dir: Option
                            "records_pulled": 0, "cas_pulled": 0, "files_pulled": 0, "bytes": 0,
                            "local_only_set_aside": 0, "refused": [], "detail": ""}
     lock = d / "sync.lock"
+    global _HEARTBEAT
     if not dry_run:
-        # one pull at a time per data dir: a nightly timer must never overlap a long first catch-up
+        # one pull at a time per data dir: a nightly timer must never overlap a long first catch-up. The holder
+        # refreshes the lock as it works (every chunk, every page); a lock not refreshed for LOCK_STALE_S is a
+        # dead pull's and is taken over.
         held = _read_json(lock) or {}
-        if held and time.time() - float(held.get("at") or 0) < 6 * 3600:
-            rep["detail"] = f"another sync holds {lock.name} since {int(held.get('at') or 0)} (pid {held.get('pid')})"
+        age = time.time() - float(held.get("beat") or held.get("at") or 0)
+        if held and age < LOCK_STALE_S:
+            rep["detail"] = (f"another sync holds {lock.name} (pid {held.get('pid')}, last heartbeat {int(age)} s ago)")
             return rep
         d.mkdir(parents=True, exist_ok=True)
-        _atomic_write(lock, json.dumps({"pid": os.getpid(), "at": int(time.time())}).encode("utf-8"))
+        started = int(time.time())
+
+        def _touch() -> None:
+            _atomic_write(lock, json.dumps({"pid": os.getpid(), "at": started, "beat": int(time.time())}).encode("utf-8"))
+        _touch()
+        _HEARTBEAT = _touch
     try:
         return _pull_locked(rep, branch, fetch, fetch_file, d, dry_run)
     finally:
+        _HEARTBEAT = None
         if not dry_run:
             try:
                 lock.unlink()
