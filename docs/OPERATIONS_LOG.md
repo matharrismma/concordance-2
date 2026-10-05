@@ -1337,3 +1337,18 @@ is a backup now.
   NOTE keeps the discernment — seal the value, cite the claims, endorse nothing. The 137 numerology made a
   public object that refuses itself. Nine sticks now. Also: the sticks probe asserts membership not a brittle
   count (the gate had correctly refused a deploy when the 8th stick broke "count eq 7").
+
+## 2026-10-05 — RH by elimination: not the brute scan, the other tools charting a narrower window (d932455)
+- Matt, three turns: we are NOT running the normal method (the brute zero-scan to 1e8, a ~3-day job); use the
+  ticks from the OTHER tools to chart a narrower window; and we are looking at what RH is NOT. So RH is charted
+  by ELIMINATION, and the eliminations are run by the engine itself, not by hand.
+- `verify_robin` (number_theory; domain alias "robin"/"robins_inequality"; its own golden so the nightly
+  benchmark runs it — domains 70->71; callable at POST /verify). Robin 1984: RH <=> sigma(n) < e^gamma*n*ln ln n
+  for all n > 5040. The divisor-sum sieve finds NO counterexample in (5040, N] and so RULES OUT an RH failure by
+  this route below N — it narrows the window, it does not confirm RH. Bounded N <= 2e7; numpy sieve.
+- Live on the Riemann stick: a sealed WITNESS (elimination), c083a632…, "no RH counterexample via the divisor-sum
+  route at n <= 20,000,000 (closest approach n=10,080, ratio 0.9858 < 1)"; and a note stating the frame — the
+  stick is charted by what RH is NOT: no zero off the line below height 1e7 (directly), no Robin counterexample
+  below 2e7 (through the divisor sum), so a counterexample must evade every eliminated region at once. The
+  pursuit of 1e8 by brute scan is set aside for this: a counterexample's window is pushed up by cheap, exact
+  eliminations from independent tools, which is the engine's own method (narrow by elimination).
