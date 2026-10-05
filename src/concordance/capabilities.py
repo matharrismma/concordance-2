@@ -102,12 +102,6 @@ def _verifiers() -> Dict[str, Any]:
                       "contributed through the gate, proven by their own goldens, shipped without a deploy; "
                       "GET /specs lists them"),
         },
-        "riemann_backend": {
-            "which": _rs_backend(),
-            "means": ("the bulk Riemann-Siegel sweep (the Riemann stick): 'c' when _rs.c is compiled here, else "
-                      "'numpy', else 'python' — all compute the same formula and defer to exact mpmath near every "
-                      "zero, so the zero count is identical whichever is live; a speed, never a verdict"),
-        },
     }
 
 
@@ -228,6 +222,11 @@ def statement(surface: str = "secular") -> Dict[str, Any]:
             "no_account_required": True,
             "parity": ("every study surface a human reads as a page is a tool an agent can call over "
                        "the same data, under the same gate, with the same refusals"),
+            "riemann_backend": _rs_backend(),
+            "riemann_backend_means": ("the bulk Riemann-Siegel sweep (the Riemann stick): 'c' when _rs.c is "
+                      "compiled on this node, else 'numpy', else 'python' — all compute the same formula and "
+                      "defer to exact mpmath near every zero, so the zero count is identical whichever is live; "
+                      "a speed, never a verdict"),
         },
         "how_to_read_this": ("Each count carries a 'means' line. Compare like with like: "
                              "'domain_names_accepted' counts router aliases, NOT capabilities; "
