@@ -399,24 +399,94 @@ def _grid(a: float, b: float, h: float):
         yield t
 
 
+def _above_seam_values(a: float, b: float, h: float, block: int = 1 << 18):
+    """Stream (t, Z(t)) across [a, b] with step h, evaluating Z in BLOCKS through the fastest backend present
+    (C, then numpy, then pure python — riemann_accel). Every backend computes the same Riemann-Siegel formula;
+    near a zero the caller recounts exactly, so the count does not depend on which backend ran."""
+    from . import riemann_accel
+    buf: list = []
+    t = a
+    while True:
+        buf.append(t)
+        if len(buf) >= block or t >= b:
+            vals = riemann_accel.z_array(buf)
+            for tt, vv in zip(buf, vals):
+                yield tt, float(vv)
+            buf = []
+            if t >= b:
+                return
+        t = min(t + h, b)
+
+
+def _dip_crossings(t0: float, t1: float, t2: float, v0: float, v1: float, v2: float):
+    """A same-sign triple can hide a CLOSE PAIR the grid stepped over: Z dips toward zero between t0 and t2 but
+    no sample landed in the dip. Fit the parabola through the three points; when its vertex is predicted to reach
+    below zero (a crossing the grid missed), rescan [t0, t2] EXACTLY and return the true count there — else 0.
+    Local and cheap: no argument-principle count. A principled near-miss detector, not a magic threshold; the
+    exact recount is the judge, and the strip count downstream is the independent authority."""
+    if (v0 < 0) != (v1 < 0) or (v1 < 0) != (v2 < 0):
+        return 0                                                   # a crossing already sits in this triple
+    s = 1.0 if v1 > 0 else -1.0
+    u0, u1, u2 = s * v0, s * v1, s * v2
+    if u1 > u0 or u1 > u2:
+        return 0                                                   # the middle is not a dip
+    curv = u0 - 2.0 * u1 + u2
+    if curv <= 0:
+        return 0                                                   # concave: no interior minimum to worry about
+    vertex_min = u1 - (u2 - u0) ** 2 / (8.0 * curv)
+    if vertex_min >= 0.0:
+        return 0                                                   # the model stays above zero: no missed pair
+    return _exact_changes(t0, t2, 96)
+
+
 def _count_changes(a: float, b: float, h: float) -> int:
-    """Sign changes of Z on the grid from a to b, with one exact correction: a span whose two samples both sit
-    within the formula's own error (3·t^(-3/4); 0.05 below the seam) without a crossing is recounted with mpmath,
-    so the formula's error can never hide or invent a pair. One grid, one count — streamed in O(1) memory, so a
-    million-high scan does not need a million-long list."""
+    """Sign changes of Z on the grid from a to b. Two local corrections keep the float scan honest, each judged
+    by exact mpmath so the formula's error can neither hide nor invent a pair:
+      * a span whose two samples both sit within the formula's error without a crossing is recounted exactly;
+      * a same-sign triple whose parabola dips below zero (a close pair the grid stepped over) is recounted exactly.
+    The triple test fires at most once every two steps (a skip after it fires), so it can never COUNT A CROSSING
+    TWICE — the worst it can do is miss a second pair in the same span, which the strip count downstream exposes.
+    Below the seam Z is exact (mpmath) a quarter apart; above it the bulk sweep runs through riemann_accel."""
+    import mpmath as mp
+    seam = _RS_FLOAT_FROM + 1.0
     count = 0
-    prev_t = None
-    prev = 0.0
-    for t in _grid(a, b, h):
-        v = _z(t)
-        if prev_t is not None:
-            if (prev < 0) != (v < 0):
+    w_t: list = []
+    w_v: list = []
+    skip = 0
+
+    def fold(t: float, v: float):
+        nonlocal count, skip
+        if w_t:
+            if (w_v[-1] < 0) != (v < 0):
                 count += 1
             else:
-                tol = 0.05 if t < _RS_FLOAT_FROM + 1.0 else 3.0 * t ** -0.75
-                if max(abs(prev), abs(v)) < tol:
-                    count += _exact_changes(prev_t, t, 64)
-        prev_t, prev = t, v
+                tol = 0.05 if t < seam else 3.0 * t ** -0.75
+                if max(abs(w_v[-1]), abs(v)) < tol:
+                    count += _exact_changes(w_t[-1], t, 64)
+        w_t.append(t)
+        w_v.append(v)
+        if len(w_t) == 3:
+            if skip > 0:
+                skip -= 1
+            elif w_t[0] >= seam:                                   # the triple test lives above the seam
+                extra = _dip_crossings(w_t[0], w_t[1], w_t[2], w_v[0], w_v[1], w_v[2])
+                if extra:
+                    count += extra
+                    skip = 1                                       # don't let the next triple re-scan the same span
+            w_t.pop(0)
+            w_v.pop(0)
+
+    # below the seam: exact (mpmath), a quarter apart — the small reference region
+    t = a
+    while t < seam and t < b:
+        fold(t, float(mp.siegelz(t)))
+        t = min(t + 0.25, b)
+        if t >= b and t < seam:                                    # the whole span was below the seam
+            fold(t, float(mp.siegelz(t)))
+            return count
+    # above the seam: the fast bulk sweep (C / numpy / python), from where the grid now stands
+    for tt, vv in _above_seam_values(t, b, h):
+        fold(tt, vv)
     return count
 
 

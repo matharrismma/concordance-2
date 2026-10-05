@@ -48,6 +48,14 @@ def _spec_count() -> int:
         return 0
 
 
+def _rs_backend() -> str:
+    try:
+        from .verifiers import riemann_accel as _ra
+        return _ra.backend()
+    except Exception:  # noqa: BLE001
+        return "python"
+
+
 def _verifiers() -> Dict[str, Any]:
     from . import verifiers as V
 
@@ -93,6 +101,12 @@ def _verifiers() -> Dict[str, Any]:
             "means": ("checks held as DATA (data/verifier_specs.jsonl) and run by the generic evaluator — laws "
                       "contributed through the gate, proven by their own goldens, shipped without a deploy; "
                       "GET /specs lists them"),
+        },
+        "riemann_backend": {
+            "which": _rs_backend(),
+            "means": ("the bulk Riemann-Siegel sweep (the Riemann stick): 'c' when _rs.c is compiled here, else "
+                      "'numpy', else 'python' — all compute the same formula and defer to exact mpmath near every "
+                      "zero, so the zero count is identical whichever is live; a speed, never a verdict"),
         },
     }
 
