@@ -135,5 +135,13 @@ def test_the_book_named_in_the_readers_tongue_answers_in_it():
     assert scripture.localize_ref("1 Juan 1:9") == ("1 John 1:9", ["es"])
     assert scripture.localize_ref("Génesis 1:1") == ("Genesis 1:1", ["es"])    # the gathered key has no accent
     assert scripture.localize_ref("Nowhere 3:16") == ("Nowhere 3:16", [])
+    # prose is not a reference: on the first live run "what is 2 + 2" became Isaiah 2 in French through a
+    # two-letter alias ("Is"); a fragment with words, inner digits or a short Latin token is left alone
+    names = json.loads((Path(os.environ["CONCORDANCE_DATA_DIR"]) / "bible_book_names.json").read_text(encoding="utf-8"))
+    names["names"]["fr"] = {"is": "Isaiah", "esaie": "Isaiah"}
+    (Path(os.environ["CONCORDANCE_DATA_DIR"]) / "bible_book_names.json").write_text(json.dumps(names), encoding="utf-8")
+    assert scripture.localize_ref("is 2") == ("is 2", [])
+    assert scripture.localize_ref("what is 2 + 2") == ("what is 2 + 2", [])
+    assert scripture.localize_ref("Esaie 2:1") == ("Isaiah 2:1", ["fr"])      # the real name still resolves
     st, body = api.dispatch("GET", "/passage", {"ref": "Juan 3:16"}, None, EngineConfig("witness"))[:2]
     assert st == 200 and body["translation"] == "Reina-Valera 1909" and body["lang"] == "es"

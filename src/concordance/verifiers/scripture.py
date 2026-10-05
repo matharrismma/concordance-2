@@ -394,6 +394,14 @@ def localize_ref(ref: str) -> Tuple[str, List[str]]:
     key = _norm_name(raw)
     if not key:
         return ref, []
+    # a local book name is one to three words, with digits only as a leading ordinal; a Latin-script name
+    # is at least three letters — "what is 2 + 2" is not "Isaiah 2" in French (the first live run, 2026-10-05)
+    words = key.split()
+    if len(words) > 3 or any(w.isdigit() for w in words[1:]) or (words[0].isdigit() and len(words) == 1):
+        return ref, []
+    letters = key.replace(" ", "")
+    if letters.isascii() and len(letters.lstrip("123")) < 3:
+        return ref, []
     hits: Dict[str, List[str]] = {}
     for lang, table in book_names().items():
         eng = table.get(key)

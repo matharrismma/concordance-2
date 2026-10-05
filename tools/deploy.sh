@@ -116,8 +116,10 @@ poll 8002 "secular" || { revert; exit 1; }
 if [ "${DEPLOY_NO_GATE:-}" != "1" ]; then
     echo "-- the gate: live assay + standing benchmarks on the box --"
     gate_rc=0
-    ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "cd '$DEST' && ASSAY_DIR=/home/nh/backups/assay PYTHONPATH=src CONCORDANCE_DATA_DIR='$DEST/data' .venv/bin/python tools/benchmarks.py --gate 2>&1 | tail -2" || gate_rc=1
-    ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "cd '$DEST' && ASSAY_DIR=/home/nh/backups/assay PYTHONPATH=src CONCORDANCE_DATA_DIR='$DEST/data' .venv/bin/python tools/live_assay.py 2>&1 | tail -1" || gate_rc=1
+    # no pipes here: `cmd | tail` reports tail's exit, not cmd's — the first gated deploy let a REGRESSED assay
+    # through that way (2026-10-05). Each check writes its report to a file; its own exit code is the verdict.
+    ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "cd '$DEST' && ASSAY_DIR=/home/nh/backups/assay PYTHONPATH=src CONCORDANCE_DATA_DIR='$DEST/data' .venv/bin/python tools/benchmarks.py --gate > /tmp/nh-gate-bench.txt 2>&1; rc=\$?; tail -2 /tmp/nh-gate-bench.txt; exit \$rc" || gate_rc=1
+    ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "cd '$DEST' && ASSAY_DIR=/home/nh/backups/assay PYTHONPATH=src CONCORDANCE_DATA_DIR='$DEST/data' .venv/bin/python tools/live_assay.py > /tmp/nh-gate-assay.txt 2>&1; rc=\$?; tail -1 /tmp/nh-gate-assay.txt; grep -E '^FAIL' /tmp/nh-gate-assay.txt | head -5; exit \$rc" || gate_rc=1
     if [ "$gate_rc" != "0" ]; then
         echo "!! THE GATE REFUSED THIS DEPLOY (a regression) — reverting"
         revert

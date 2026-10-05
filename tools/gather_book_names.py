@@ -153,6 +153,10 @@ def main() -> int:
                 key = norm(raw)
                 if not key:
                     continue
+                # an abbreviation in Latin script shorter than three letters ("Is", "Am", "Mt") is prose, not a
+                # name: "what is 2 + 2" became Isaiah 2 in French on the first live run (2026-10-05)
+                if re.fullmatch(r"[a-z ]+", key) and len(key.replace(" ", "")) < 3:
+                    continue
                 if n and b in _SPLIT:
                     # "Books of Samuel" is one item for two books: the shared name is kept NUMBERED only
                     names[lang][f"{n} {key}"] = b
@@ -171,8 +175,8 @@ def main() -> int:
             root = eng[2:] if eng[:1].isdigit() and eng[1:2] == " " else eng
             root_names[root] = root_names.get(root, 0) + 1
             for tok in set(key.split()):
-                if tok.isdigit() or len(tok) < 2:
-                    continue
+                if tok.isdigit() or len(tok) < 2 or (tok.isascii() and len(tok) < 3):
+                    continue                                              # the same rule as the raw keys: no short Latin fragments
                 tok_hits.setdefault(tok, {}).setdefault(root, 0)
                 tok_hits[tok][root] += 1
         for tok, by_root in tok_hits.items():
