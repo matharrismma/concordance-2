@@ -107,6 +107,9 @@ def fit(stick: Dict[str, Any]) -> Dict[str, Any]:
     }
     if best:
         out["open"] = f"beyond {best.get('unit') or 'the bound'} {best['up_to']:g}: not verified here"
+    elif instances or witnesses:
+        out["open"] = (f"no sealed bound; {len(instances)} sealed instance(s) and {len(witnesses)} witness(es) — "
+                       "the general question stays open")
     else:
         out["open"] = "no sealed bound yet — the stick has only cited marks" if (equivalences or exclusions) else "no marks yet"
     out["note"] = ("The fit is exactly what the ticks establish: a sealed bound, sealed instances, cited equivalences and "

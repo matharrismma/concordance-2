@@ -74,6 +74,10 @@ def test_a_stick_takes_sealed_marks_and_cited_marks_and_fits_no_further_than_the
     assert eq["ok"] and eq["fit"]["cited_ticks"] == 1 and eq["fit"]["sealed_ticks"] == 2
     st = tickstick.read(sid)
     assert st["ok"] and len(st["ticks"]) == 3 and st["fit"]["equivalent_statements"][0].startswith("RH is equivalent")
+    # a stick with sealed instances but no bound says so — the general question stays open
+    r2 = tickstick.create("Birch and Swinnerton-Dyer conjecture", field="number_theory")
+    inst = tickstick.tick(r2["id"], "instance", "E = 11a1: L(E,1) != 0 => rank 0 (Kolyvagin)", seal=h)
+    assert inst["ok"] and inst["fit"]["verified_instances"] == 1 and "general question stays open" in inst["fit"]["open"]
     assert "never says the question is settled" in st["fit"]["note"]
     assert tickstick.tick(sid, "miracle", "it is proven")["ok"] is False
     assert tickstick.read("stick_nope")["ok"] is False
