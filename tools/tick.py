@@ -3,6 +3,7 @@
 
     PYTHONPATH=src python tools/tick.py seed                 # open the first sticks with their cited marks
     PYTHONPATH=src python tools/tick.py document              # write the Riemann attempt's record onto its stick
+    PYTHONPATH=src python tools/tick.py lnh                   # Dirac's Large Numbers Hypothesis: seal N1, cite the rest
     PYTHONPATH=src python tools/tick.py riemann 200          # verify every zero up to T = 200 is on the line,
                                                              # SEAL it through the same path as POST /verify, tick
     PYTHONPATH=src python tools/tick.py read stick_riemann_hypothesis
@@ -211,6 +212,68 @@ def document() -> int:
     return 0
 
 
+def lnh() -> int:
+    """Dirac's Large Numbers Hypothesis as a tick stick: SEAL the arithmetic (the dimensionless ratios the
+    engine can compute from its attested constants), CITE the conjecture and its observational constraints,
+    and endorse nothing. A coincidence of magnitudes is not a law — the project's standing discernment."""
+    import math
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    from concordance.verifiers import physical_constants as PC
+    C = PC._CONSTANTS
+    e = C["elementary_charge"]["value"]; eps0 = C["vacuum_permittivity"]["value"]
+    G = C["gravitational_constant"]["value"]; mp = C["proton_mass"]["value"]; me = C["electron_mass"]["value"]
+    N1 = e ** 2 / (4 * math.pi * eps0 * G * mp * me)
+    expr = f"({e!r})**2 / (4*pi*({eps0!r})*({G!r})*({mp!r})*({me!r}))"   # the attested CODATA values, embedded
+    r = verify_derivation([{"id": "N1", "domain": "mathematics",
+          "spec": {"mode": "numeric", "params": {"numeric_expr": expr, "claimed_value": N1, "rel_tol": 1e-9}}}])
+    if r.get("verdict") != "HOLDS":
+        print("the ratio did not verify:", json.dumps(r)[:400]); return 1
+    r = receipts.attach(r, config=EngineConfig(), domain="physical_constants")
+    seal = (r.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted"); return 1
+    print("sealed N1", seal)
+    sid = TS.create("Dirac's Large Numbers Hypothesis",
+                    statement=("The large dimensionless ratios of nature are all near 10^40 and, Dirac conjectured, "
+                               "causally linked — so the gravitational constant would weaken as the universe ages "
+                               "(G proportional to 1/t). It is a physical conjecture about whether a coincidence of "
+                               "magnitudes is a law."),
+                    field="physics",
+                    references=["P. A. M. Dirac, The Cosmological Constants, Nature 139 (1937) 323",
+                                "P. A. M. Dirac, A New Basis for Cosmology, Proc. Roy. Soc. A 165 (1938) 199"])["id"]
+    marks = [
+        ("witness", f"The electromagnetic-to-gravitational force ratio between a proton and an electron, "
+                    f"N1 = e^2 / (4*pi*eps0*G*m_p*m_e) = {N1:.6e} (~10^39.4), computed from the engine's attested "
+                    f"CODATA constants — the first of Dirac's large numbers, as an arithmetic fact", dict(seal=seal)),
+        ("note", "[the coincidence] Dirac's second large number is the age of the universe in atomic time units, "
+                 "N2 = T_Hubble / (e^2/(4*pi*eps0*m_e*c^3)) ~ 10^40.7 — within about one order of magnitude of N1. "
+                 "The Large Numbers Hypothesis is the conjecture that this nearness is not accidental but a "
+                 "relation, from which Dirac drew G proportional to 1/t. N2 rests on the Hubble time, a measured "
+                 "cosmological quantity, not a constant — so it is cited, not sealed.", {}),
+        ("exclusion", "The hypothesis's physical prediction — a time-varying G — is strongly constrained by "
+                      "observation: lunar laser ranging bounds |G_dot/G| below a few * 10^-13 per year, far smaller "
+                      "than the ~10^-10 per year a Dirac 1/t law needs; Big Bang nucleosynthesis and the Oklo "
+                      "natural reactor bound the variation of the constants over billions of years. The causal "
+                      "hypothesis is disfavored.",
+         dict(source="J. G. Williams, S. G. Turyshev, D. H. Boggs, Phys. Rev. Lett. 93 (2004) 261101 (lunar laser "
+                     "ranging); A. I. Shlyakhter, Nature 264 (1976) 340 and T. Damour & F. Dyson, Nucl. Phys. B 480 "
+                     "(1996) 37 (the Oklo reactor)")),
+        ("note", "[discernment] The engine seals that N1 IS ~2.27*10^39 — the arithmetic is a fact. It does not "
+                 "endorse that N1 and N2 being near 10^40 is a law; a coincidence of magnitudes is not one, and the "
+                 "observational bounds above weigh against the causal claim. Seal the arithmetic, cite the "
+                 "conjecture, endorse nothing.", {}),
+    ]
+    for kind, claim, kw in marks:
+        res = TS.tick(sid, kind, claim, by="Narrow Highway — the large-numbers reading, 2026-10-05", **kw)
+        print(("  " + kind) if res.get("ok") else ("  REFUSED " + kind + ": " + res.get("error", "")))
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "excluded": len(f["excluded_approaches"]),
+                      "record": len(f["record"]), "open": f["open"]}, indent=1))
+    return 0
+
+
 def main() -> int:
     a = sys.argv[1:]
     if not a:
@@ -220,6 +283,8 @@ def main() -> int:
         return seed()
     if a[0] == "document":
         return document()
+    if a[0] == "lnh":
+        return lnh()
     if a[0] == "riemann":
         return riemann(float(a[1]) if len(a) > 1 else 100.0)
     if a[0] == "bsd":
