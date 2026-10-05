@@ -1328,3 +1328,12 @@ is a backup now.
   Fit: one sealed witness, the general question open. Eight sticks now stand (7 Millennium + LNH).
 - Ties the standing guardrail [[project_numbers_bases_triangulation_2026-06-13]] (seal the arithmetic, attribute
   the pattern, NO numerology) — the LNH stick is that rule made a public, re-checkable object.
+
+## 2026-10-05 — "Fine Number Constant": the fine-structure constant as a stick (2359262)
+- Read as the fine-structure constant. `tools/tick.py alpha` opened stick_the_fine_structure_constant: WITNESS
+  seals alpha = e^2/(2*eps0*h*c) = 7.2973525693e-3, 1/alpha = 137.035999, from the attested CODATA constants
+  (seal a35b3122…, re-checkable 200); NOTE records that 1/alpha is NOT the integer 137 and Eddington's 1/137 is
+  historical and false; EXCLUSION cites the Oklo + atomic-clock bounds that make alpha constant to the evidence;
+  NOTE keeps the discernment — seal the value, cite the claims, endorse nothing. The 137 numerology made a
+  public object that refuses itself. Nine sticks now. Also: the sticks probe asserts membership not a brittle
+  count (the gate had correctly refused a deploy when the 8th stick broke "count eq 7").
