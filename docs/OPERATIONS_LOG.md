@@ -1255,3 +1255,19 @@ is a backup now.
   green; the gate passed; four probes added.
 - **What this is and is not.** It is the map a human attempt needs and the honest referee for one — verified to here,
   excluded there, open beyond. It is not, and will not become, a proof generator.
+
+## 2026-10-05 — "push and keep going": Riemann to ten thousand by Riemann–Siegel; the BSD stick gets its first sealed instances
+- **Riemann, pushed.** The on-line count now runs the Riemann–Siegel formula in floats (a hundred times faster than
+  mpmath) a twenty-fourth of the mean spacing apart above t = 501, mpmath a quarter apart below, on ONE grid with one
+  exact correction (a span whose two samples both sit within the formula's own error without a crossing is recounted
+  with mpmath). Two wrong turns on the way, both caught by the independent strip count: a plain float scan missed close
+  pairs (t ≈ 2262.9, |Z| ≈ 0.003); a layered refinement double-counted near crossings. One grid, one count, nothing
+  counted twice. Agreement at T = 50, 100, 1000, 3000, 10000 in ~20 s each; the door's cap rises to 200000.
+  **Mark: T = 10000 — 10,142 zeros, all on the line, seal `a4e07b75…`**; **T = 100000 — 138,069 zeros, all on the line, seal `7f393638…`, 79 s on the box**.
+- **BSD, first marks.** `verifiers/elliptic_curves.py` (the 70th domain): a_p by point counting, a_n multiplicatively,
+  L(E,1) by the approximate functional equation whose cutoff-independence CHECKS the root number, L′(E,1) by E1, and
+  the analytic rank with the theorem that carries it (Kolyvagin; Gross–Zagier) or the honest "≥ 2 numerically". Sealed
+  on the BSD stick: **11a1** (L(E,1) = 0.253842 ⇒ rank 0, instance `ea3a1e78…`), **37a1** (L′(E,1) = 0.305999 ⇒ rank 1,
+  instance `d69c398b…`), **389a1** (analytic rank ≥ 2 numerically, witness `e3ad1055…`), **5077a1** (≥ 3, witness
+  `d483293b…`). Conductors divisible by 2 or 3 are declined (no Tate's algorithm) — a want.
+- The live-wired-numbers guard caught the seventieth verifier ("69 domains" on three surfaces → 70). Benchmarks 70/70.
