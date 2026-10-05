@@ -755,9 +755,96 @@ def verify_robin(spec):
                          f"sigma/(e^gamma n lnln n)={closest_ratio:.4f} < 1): no RH counterexample by this route below {N}", data)
 
 
+def verify_schoenfeld(spec):
+    """RH BY ELIMINATION, through the prime count (Schoenfeld 1976: RH <=> |pi(x) - li(x)| < sqrt(x)*ln(x)/(8*pi)
+    for every x >= 2657). A different tool from Robin's divisor sum, pointed at the same window from another side.
+    This does not confirm RH; it RULES OUT a region where RH could fail. A counterexample would be some x >= 2657
+    where the prime count strays from li(x) by sqrt(x)*ln(x)/(8*pi) or more; we check every x in [2657, X] and find
+    none, so a first failure by this route must lie beyond X. We are looking at what it is NOT.
+
+    The check is exact, not a sample. pi(x) is sieved exactly; li(x) is monotone increasing and pi(x) is a step
+    function, so on each unit interval [n, n+1) the supremum of |pi - li| is reached at a known endpoint. On the
+    thin low window (where the inequality is tightest, which is why Schoenfeld's threshold sits at 2657) we take
+    that exact per-integer supremum, li(n+1) - pi(n), and require it below the interval's least right-hand side
+    RHS(n). Higher up, where the margin opens wide, an adaptive grid brackets pi and li between monotone envelopes
+    and certifies each span at once. Either way the verdict is a bound that holds for ALL real x in [2657, X].
+      NUM_VERIFY: {"schoenfeld_to": 1000000, "claimed_schoenfeld_holds": true, "claimed_closest_approach_n": 2658}  (X <= 2e7)"""
+    import math
+    name = "number_theory.schoenfeld"
+    try:
+        X = int(spec.get("schoenfeld_to"))
+    except (TypeError, ValueError):
+        return error(name, "schoenfeld_to must be an integer (the height X to eliminate below)")
+    if X <= 2657:
+        return error(name, "schoenfeld_to must exceed 2657 (Schoenfeld's inequality is stated for x >= 2657)")
+    if X > 20_000_000:
+        return error(name, f"schoenfeld_to {X} exceeds the exact-sieve cap (2e7); the surviving window is charted in bounded steps")
+    eight_pi = 8.0 * math.pi
+    def rhs(x):   # Schoenfeld's right-hand side, increasing on [2657, inf): least on an interval at its left end
+        return math.sqrt(x) * math.log(x) / eight_pi
+    try:
+        import numpy as np
+        import mpmath as mp
+        sieve = np.ones(X + 2, dtype=bool); sieve[:2] = False
+        for i in range(2, int((X + 1) ** 0.5) + 1):
+            if sieve[i]:
+                sieve[i * i::i] = False
+        pref = np.cumsum(sieve, dtype=np.int64)        # pref[x] = pi(x), exact
+        worst_ratio = 0.0; worst_n = 2657; counterexamples: List[int] = []
+        with mp.workdps(20):                           # li to ~20 digits, then float: ample for the ratio
+            L = min(X, 25000)                          # exact per-integer where the margin is thin
+            for n in range(2657, L):
+                sup = float(mp.li(n + 1)) - int(pref[n])        # sup of |pi - li| on [n, n+1): li up, pi flat
+                r = sup / rhs(n)
+                if r > worst_ratio:
+                    worst_ratio, worst_n = r, n
+                if sup >= rhs(n) and len(counterexamples) < 8:
+                    counterexamples.append(n)
+            if X > L:                                  # adaptive envelope above: margin wide, span many x per li call
+                a = L
+                li_a = float(mp.li(a))
+                while a < X:
+                    step = max(2, int(0.1 * math.sqrt(a) * math.log(a) * math.log(a) / eight_pi))
+                    b = min(X, a + step)
+                    li_b = float(mp.li(b))
+                    pa, pb = int(pref[a]), int(pref[b])
+                    env = max(pb - li_a, li_b - pa, abs(pa - li_a), abs(pb - li_b))  # sup|pi-li| on [a,b], monotone bracket
+                    if env >= rhs(a) and len(counterexamples) < 8:   # the envelope carries slack, so it is used only to
+                        counterexamples.append(a)                    # catch a violation, never to set the closest approach
+                    a, li_a = b, li_b
+    except ImportError:
+        return na(name, "the Schoenfeld check needs numpy and mpmath")
+    except MemoryError:
+        return error(name, f"schoenfeld_to {X} is too large for memory on this node")
+    holds = not counterexamples
+    data = {"schoenfeld_to": X, "schoenfeld_holds": holds, "closest_approach_n": worst_n,
+            "closest_approach_ratio": round(worst_ratio, 6), "counterexamples": counterexamples,
+            "equivalent": "RH <=> |pi(x) - li(x)| < sqrt(x)*ln(x)/(8*pi) for all x >= 2657 (Schoenfeld, Math. Comp. 30 (1976) 337-360)",
+            "eliminates": (f"no Schoenfeld violation in [2657, {X}] — a first RH failure by this route must exceed {X}"
+                           if holds else f"a Schoenfeld violation at or below {X}: RH would be FALSE")}
+    claimed_holds = spec.get("claimed_schoenfeld_holds")
+    claimed_n = spec.get("claimed_closest_approach_n")
+    if claimed_holds is None and claimed_n is None:
+        return na(name, "claim claimed_schoenfeld_holds and/or claimed_closest_approach_n")
+    problems = []
+    if claimed_holds is not None and bool(claimed_holds) != holds:
+        problems.append(f"Schoenfeld holds to {X} is {holds}, claimed {bool(claimed_holds)}")
+    if claimed_n is not None:
+        try:
+            if int(claimed_n) != worst_n:
+                problems.append(f"closest approach in [2657,{X}] is x={worst_n}, claimed {int(claimed_n)}")
+        except (TypeError, ValueError):
+            return error(name, "claimed_closest_approach_n must be an integer")
+    if problems:
+        return mismatch(name, "; ".join(problems), data)
+    return confirm(name, f"Schoenfeld's bound holds for every x in [2657, {X}] (closest approach x={worst_n}, "
+                         f"|pi-li|/(sqrt(x) ln x/8pi)={worst_ratio:.4f} < 1): no RH counterexample by the prime-count route below {X}", data)
+
+
 _RULES = [
     (lambda nv: ("critical_line_height" in nv and "claimed_zeros_on_line" in nv), verify_critical_line),
     (lambda nv: ("robin_to" in nv and ("claimed_robin_holds" in nv or "claimed_closest_approach_n" in nv)), verify_robin),
+    (lambda nv: ("schoenfeld_to" in nv and ("claimed_schoenfeld_holds" in nv or "claimed_closest_approach_n" in nv)), verify_schoenfeld),
     (lambda nv: ("divisors_of" in nv and ("claimed_divisor_count" in nv or "claimed_divisors" in nv)), verify_divisor_count),
     (lambda nv: ("n_prime" in nv and "claimed_prime" in nv), verify_primality),
     (lambda nv: ("limit" in nv and "claimed_prime_count" in nv), verify_prime_counting),

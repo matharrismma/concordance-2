@@ -59,8 +59,11 @@ proofs, and these questions are open. What it does is chart, by elimination, the
 still fail, and push that window with every rerun:
 
 1. **Each tool eliminates a region.** A sealed bound ("no zero off the critical line below height T"), a sealed
-   witness from another tool ("no Robin counterexample below N"), a cited barrier ("relativizing proofs cannot
-   settle P vs NP") — each rules out somewhere a failure could hide.
+   witness from another tool ("no Robin counterexample below N", "no Schoenfeld prime-count violation below X"), a
+   cited barrier ("relativizing proofs cannot settle P vs NP") — each rules out somewhere a failure could hide. The
+   Riemann stick now carries three independent eliminations: the two zero counts directly (to height 10^7), the
+   divisor sum (Robin 1984), and the prime count (Schoenfeld 1976, `|pi(x) - li(x)| < sqrt(x) ln x / (8 pi)` for
+   x >= 2657, exact to x = 2·10^7). A counterexample would have to evade all three at once.
 2. **The fit reports the surviving window** (`fit.window`): what every elimination leaves standing. A failure, if
    one exists, must evade all of them at once.
 3. **Rerun to push the frontier.** The next pass extends an elimination (a larger N, a higher height) or registers

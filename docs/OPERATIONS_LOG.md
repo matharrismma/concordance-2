@@ -1365,3 +1365,22 @@ is a backup now.
   proof, and these questions are open. P vs NP carries its 3 barriers; Hodge/Yang-Mills/Navier-Stokes have no
   eliminations yet; Poincare is the one that is solved (Perelman). The verifiers that eliminate run through the
   engine (POST /verify, nightly benchmark 71/71), so each new tool and each rerun narrows the window on its own.
+
+## 2026-10-05 — Schoenfeld: the Riemann window charted from the prime count too (a third tool)
+- Matt: "register the Schoenfeld prime-counting elimination for Riemann." A different tool from Robin's divisor
+  sum, pointed at the same window from another side. Schoenfeld 1976 (Math. Comp. 30, 337-360): RH <=>
+  |pi(x) - li(x)| < sqrt(x)*ln(x)/(8*pi) for all x >= 2657. `verify_schoenfeld` (number_theory; domain alias
+  "schoenfeld"/"schoenfelds_inequality"; its own golden so the nightly benchmark runs it — domains 71->72;
+  callable at POST /verify). It eliminates an RH failure by the prime-count route below X; it does not confirm RH.
+- The check is EXACT, not a sample, and cheap: pi(x) is sieved exactly; li(x) is monotone and pi is a step
+  function, so on each unit interval the sup of |pi-li| sits at a known endpoint. On the thin low window
+  [2657, 25000] (the inequality is tightest right at the 2657 threshold — true closest approach 0.9799 at x=2658)
+  we take the exact per-integer sup li(n+1)-pi(n) < RHS(n); above it, where the margin opens as (ln x)^2, an
+  adaptive grid brackets pi and li between monotone envelopes and certifies each span at once. Even at the 2e7
+  sieve cap the whole verdict is ~1.2s, so unlike the Riemann zero-scan the public door runs it in full.
+- Live on the Riemann stick: a sealed WITNESS (elimination), 64183efb…, "no RH counterexample via the prime-count
+  route at x <= 20,000,000 (closest approach x=2658, |pi-li|/(sqrt(x) ln x/8pi) = 0.9799 < 1)"; and a note: the
+  stick now carries THREE independent eliminations — the two zero counts directly (to height 1e7), the divisor sum
+  (Robin, to 2e7), and the prime count (Schoenfeld, to 2e7). A counterexample must evade all three at once.
+  Narrowing is evidence, never a proof — the surviving window is where RH stays untested. Gate: BENCHMARKS OK
+  domains 72/72 (0 false positives), ASSAY OK newly passing verify.schoenfeld.runs.through.the.engine, regressed [].

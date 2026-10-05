@@ -6,6 +6,7 @@
     PYTHONPATH=src python tools/tick.py lnh                   # Dirac's Large Numbers Hypothesis: seal N1, cite the rest
     PYTHONPATH=src python tools/tick.py alpha                 # the fine-structure constant: seal alpha, cite the 137
     PYTHONPATH=src python tools/tick.py robin [N]             # chart the Riemann window by elimination (Robin to N)
+    PYTHONPATH=src python tools/tick.py schoenfeld [X]        # chart it from the prime count too (Schoenfeld to X)
     PYTHONPATH=src python tools/tick.py window [stick]        # the surviving window of each stick (narrow by elimination)
     PYTHONPATH=src python tools/tick.py riemann 200          # verify every zero up to T = 200 is on the line,
                                                              # SEAL it through the same path as POST /verify, tick
@@ -377,6 +378,48 @@ def robin(N: int = 1000000) -> int:
     return 0
 
 
+def schoenfeld(X: int = 2000000) -> int:
+    """Chart the Riemann window by ELIMINATION through the prime count — a different tool from Robin's divisor
+    sum, pointed at the same window from another side. Schoenfeld 1976: RH <=> |pi(x) - li(x)| < sqrt(x)*ln(x)/
+    (8*pi) for all x >= 2657. The exact check finds no violation in [2657, X], so a first RH failure by this route
+    must lie beyond X. Seals the computation and ticks a WITNESS (an elimination) on the Riemann stick."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    from concordance.verifiers import number_theory as NT
+    pre = NT.verify_schoenfeld({"schoenfeld_to": X, "claimed_schoenfeld_holds": True})
+    if pre.status != "CONFIRMED":
+        print("Schoenfeld did not hold (or errored):", pre.status, (pre.detail or "")[:140]); return 1
+    closest = pre.data["closest_approach_n"]
+    r = verify_derivation([{"id": "schoenfeld", "domain": "number_theory",
+          "spec": {"NUM_VERIFY": {"schoenfeld_to": X, "claimed_schoenfeld_holds": True, "claimed_closest_approach_n": closest}}}])
+    if r.get("verdict") != "HOLDS":
+        print("the elimination did not verify:", json.dumps(r)[:300]); return 1
+    r = receipts.attach(r, config=EngineConfig(), domain="number_theory")
+    seal = (r.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted"); return 1
+    print("sealed Schoenfeld elimination", seal)
+    sid = TS.create("Riemann hypothesis")["id"]
+    claim = (f"No zero of zeta lies off the critical line by way of a Schoenfeld (prime-count) violation at x <= "
+             f"{X:,}: the exact check finds none in [2657, {X:,}] (closest approach x={closest:,}, "
+             f"|pi-li|/(sqrt(x) ln x/8pi) = {pre.data['closest_approach_ratio']} < 1). RH cannot fail by this route "
+             f"below {X:,} — a third, independent tool narrowing the window, by elimination from the prime count.")
+    res = TS.tick(sid, "witness", claim, seal=seal, by="Narrow Highway — the elimination reading, 2026-10-05")
+    print("  witness" if res.get("ok") else ("  REFUSED: " + res.get("error", "")))
+    note = ("[by elimination] A third reading of what RH is NOT, from the prime count: Schoenfeld 1976 makes RH "
+            "equivalent to |pi(x) - li(x)| < sqrt(x) ln x / (8 pi) for every x >= 2657, and the exact check finds no "
+            "violation to x=" + f"{X:,}" + ". With the two zero counts (direct, to height 1e7) and the divisor sum "
+            "(Robin), three independent tools now eliminate regions where RH could fail; a counterexample must evade "
+            "all of them at once. Narrowing is evidence, never a proof — the surviving window is where RH stays untested.")
+    if note not in {t.get("claim") for t in TS.read(sid).get("ticks", [])}:
+        TS.tick(sid, "note", note, by="Narrow Highway — the elimination reading, 2026-10-05")
+        print("  note (the elimination frame)")
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
+    return 0
+
+
 def main() -> int:
     a = sys.argv[1:]
     if not a:
@@ -392,6 +435,8 @@ def main() -> int:
         return alpha()
     if a[0] == "robin":
         return robin(int(a[1]) if len(a) > 1 else 1000000)
+    if a[0] == "schoenfeld":
+        return schoenfeld(int(a[1]) if len(a) > 1 else 2000000)
     if a[0] == "window":
         from concordance import tickstick as T
         ids = [a[1]] if len(a) > 1 else sorted(T.fold())
