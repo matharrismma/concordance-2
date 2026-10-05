@@ -1271,3 +1271,27 @@ is a backup now.
   instance `d69c398b…`), **389a1** (analytic rank ≥ 2 numerically, witness `e3ad1055…`), **5077a1** (≥ 3, witness
   `d483293b…`). Conductors divisible by 2 or 3 are declined (no Tate's algorithm) — a want.
 - The live-wired-numbers guard caught the seventieth verifier ("69 domains" on three surfaces → 70). Benchmarks 70/70.
+
+## 2026-10-05 — "Do C then numpy": the Riemann sweep accelerated, and a million zeros sealed (2f3cd99, b5c66f2)
+- **The problem it solves.** The pure-python critical-line scan to T=1e6 took 4.2 hours and came up 18 zeros
+  short of Backlund's independent strip count — so it rightly sealed NOTHING (a miss stayed a miss). Both the
+  speed and the shortfall are fixed.
+- **C then numpy (src/concordance/verifiers/_rs.c + riemann_accel.py).** The bulk sweep of Hardy's Z runs through
+  the fastest backend present: **C** compiled on first use (`cc -O3 -fopenmp`, parallel across cores, ~2.4 us/point
+  at T=1e6; on the box's libm it matches python to the last bit, 0.0 diff), else **numpy** (vectorised over
+  equal-m grid points), else the **pure-python** reference. All compute the same first-order Riemann-Siegel
+  formula and the scan defers to exact mpmath near every zero, so the COUNT is identical whichever ran — a speed,
+  never a verdict. The compiled .so lives in the data cache (per-node, never synced); _rs.c ships and each node
+  builds it. `/capabilities.boundaries.riemann_backend` names the live one (box: "c").
+- **The dip detector (number_theory._count_changes / _dip_crossings).** A same-sign triple whose fitted parabola
+  is predicted to dip below zero is a close pair the grid stepped over; it is recounted EXACTLY with mpmath. It
+  fires at most once every two steps (a skip after it fires), so it can never count a crossing twice — the worst
+  it can do is miss a second pair in one span, which the strip count then exposes. This is what closed the 18-zero
+  gap at a million. The scan evaluates Z in blocks and folds in O(1) memory (no million-long list).
+- **Sealed.** T=1e6: **on-line 1,747,146 = strip 1,747,146**, 0 localised rescans, **220 s** (was 15,193 s and
+  off by 18). Seal `9a6b18a8f0238c548c963171fd63af30ecaedfa39756300b094ec2d733d0ee29` (re-checkable, 200). The
+  Riemann stick's progression: 200, 500, 1000, 10000, 100000, 200000, **1,000,000**; fit: verified up to height
+  T 1e6, open beyond. Benchmarks 70/70, assay floor 75. CI green; the gate passed.
+- **Noted:** a mark runs the scan twice (tick.py counts, then the verifier recounts to confirm) — the price of
+  the seal's verifier being its own skeptic, left as is. Beyond 1e6 the main sum grows as sqrt(T); 1e7 is ~hours
+  even in C — a want for a blocked/FFT main sum if we push higher.
