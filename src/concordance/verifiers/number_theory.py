@@ -354,6 +354,18 @@ _DIP = 0.08                     # |Z| this small at two neighbouring samples wit
 _MAX_HEIGHT = 1000000.0
 
 
+def _grid_divisor() -> float:
+    """Samples per mean zero spacing on the critical-line scan (default 24). A coarser grid is SOUND — it can only
+    FAIL to match Backlund's independent count, never falsely match — so at great heights, where the cost is the
+    grid, CONCORDANCE_RIEMANN_GRID may lower it (validated against a known N(T) before it is trusted)."""
+    import os as _os
+    try:
+        d = float(_os.environ.get("CONCORDANCE_RIEMANN_GRID", "") or 24.0)
+    except ValueError:
+        d = 24.0
+    return d if d >= 3.0 else 24.0
+
+
 def _theta(t: float) -> float:
     import math
     return t / 2 * math.log(t / _TWO_PI) - t / 2 - math.pi / 8 + 1 / (48 * t) + 7 / (5760 * t ** 3)
@@ -552,7 +564,7 @@ def _zeros_on_line(T: float, step: float = 0.25) -> int:
     count and rescans exactly."""
     import math
     spacing = _TWO_PI / math.log(max(T, 20.0) / _TWO_PI)
-    return _count_changes(1.0, T, min(step, spacing / 24))
+    return _count_changes(1.0, T, min(step, spacing / _grid_divisor()))
 
 
 _CHECKED_MEMO: dict = {}
@@ -576,7 +588,7 @@ def _zeros_on_line_checked(T: float):
     rescans = 0
     if on_line < want:
         spacing = _TWO_PI / math.log(max(T, 20.0) / _TWO_PI)
-        h = min(0.25, spacing / 24)
+        h = min(0.25, spacing / _grid_divisor())
 
         def seg(a: float, b: float) -> int:
             return _count_changes(a, b, h)
@@ -682,8 +694,70 @@ def verify_critical_line(spec):
                          f"every zero to this height is on the critical line", data)
 
 
+_EULER_GAMMA = 0.5772156649015329
+
+
+def verify_robin(spec):
+    """RH BY ELIMINATION, through the divisor sum (Robin 1984: RH <=> sigma(n) < e^gamma * n * ln ln n for every
+    n > 5040). This does not confirm RH; it RULES OUT a region where RH could fail. A counterexample would be a
+    number n > 5040 whose divisors sum to at least e^gamma * n * ln ln n; the sieve checks every n in (5040, N]
+    and finds none, so a first Robin counterexample — and with it any RH failure by this route — must lie beyond N.
+    We are looking at what it is NOT: the surviving window for a counterexample is pushed past N.
+      NUM_VERIFY: {"robin_to": 1000000, "claimed_robin_holds": true, "claimed_closest_approach_n": 10080}  (N <= 2e7)"""
+    import math
+    name = "number_theory.robin"
+    try:
+        N = int(spec.get("robin_to"))
+    except (TypeError, ValueError):
+        return error(name, "robin_to must be an integer (the height N to eliminate below)")
+    if N <= 5040:
+        return error(name, "robin_to must exceed 5040 (Robin's inequality is for n > 5040; n <= 5040 has known exceptions)")
+    if N > 20_000_000:
+        return error(name, f"robin_to {N} exceeds the exact-sieve cap (2e7); the surviving window is charted in bounded steps")
+    try:
+        import numpy as np
+        sigma = np.zeros(N + 1, dtype=np.int64)
+        for d in range(1, N + 1):
+            sigma[d::d] += d
+        n = np.arange(5041, N + 1)
+        bound = math.exp(_EULER_GAMMA) * n * np.log(np.log(n))
+        ratio = sigma[5041:N + 1] / bound
+        viol = n[ratio >= 1.0]
+        idx = int(np.argmax(ratio))
+        closest_n = int(n[idx]); closest_ratio = float(ratio[idx])
+        violations = [int(v) for v in viol[:8]]
+    except ImportError:
+        return na(name, "the Robin sieve needs numpy")
+    except MemoryError:
+        return error(name, f"robin_to {N} is too large for memory on this node")
+    holds = not violations
+    data = {"robin_to": N, "robin_holds": holds, "closest_approach_n": closest_n,
+            "closest_approach_ratio": round(closest_ratio, 6), "counterexamples": violations,
+            "equivalent": "RH <=> sigma(n) < e^gamma * n * ln ln n for all n > 5040 (Robin 1984)",
+            "eliminates": (f"no Robin counterexample in (5040, {N}] — a first RH failure by this route must exceed {N}"
+                           if holds else f"a Robin counterexample at or below {N}: RH would be FALSE")}
+    claimed_holds = spec.get("claimed_robin_holds")
+    claimed_n = spec.get("claimed_closest_approach_n")
+    if claimed_holds is None and claimed_n is None:
+        return na(name, "claim claimed_robin_holds and/or claimed_closest_approach_n")
+    problems = []
+    if claimed_holds is not None and bool(claimed_holds) != holds:
+        problems.append(f"Robin holds to {N} is {holds}, claimed {bool(claimed_holds)}")
+    if claimed_n is not None:
+        try:
+            if int(claimed_n) != closest_n:
+                problems.append(f"closest approach in (5040,{N}] is n={closest_n}, claimed {int(claimed_n)}")
+        except (TypeError, ValueError):
+            return error(name, "claimed_closest_approach_n must be an integer")
+    if problems:
+        return mismatch(name, "; ".join(problems), data)
+    return confirm(name, f"Robin holds for every n in (5040, {N}] (closest approach n={closest_n}, "
+                         f"sigma/(e^gamma n lnln n)={closest_ratio:.4f} < 1): no RH counterexample by this route below {N}", data)
+
+
 _RULES = [
     (lambda nv: ("critical_line_height" in nv and "claimed_zeros_on_line" in nv), verify_critical_line),
+    (lambda nv: ("robin_to" in nv and ("claimed_robin_holds" in nv or "claimed_closest_approach_n" in nv)), verify_robin),
     (lambda nv: ("divisors_of" in nv and ("claimed_divisor_count" in nv or "claimed_divisors" in nv)), verify_divisor_count),
     (lambda nv: ("n_prime" in nv and "claimed_prime" in nv), verify_primality),
     (lambda nv: ("limit" in nv and "claimed_prime_count" in nv), verify_prime_counting),

@@ -1976,6 +1976,19 @@
    "minor_premise": "All S are M"
   }
  },
+ "robin": {
+  "false": {
+   "claimed_closest_approach_n": 20160,
+   "claimed_robin_holds": false,
+   "robin_to": 100000
+  },
+  "packet_key": "NUM_VERIFY",
+  "true": {
+   "claimed_closest_approach_n": 10080,
+   "claimed_robin_holds": true,
+   "robin_to": 100000
+  }
+ },
  "soil_science": {
   "false": {
    "area_hectares": 2.0,

@@ -26,6 +26,9 @@ VERIFIERS: Dict[str, str] = {
     # formal reasoning
     "mathematics": _P + "mathematics", "math": _P + "mathematics",
     "number_theory": _P + "number_theory",
+    # RH by elimination through the divisor sum (Robin 1984) — a number_theory check, named so the engine
+    # routes a Robin query and the nightly benchmark runs it on its own golden (2026-10-05)
+    "robin": _P + "number_theory", "robins_inequality": _P + "number_theory",
     "combinatorics": _P + "combinatorics",
     "geometry": _P + "geometry",
     "formal_logic": _P + "formal_logic", "logic": _P + "formal_logic",

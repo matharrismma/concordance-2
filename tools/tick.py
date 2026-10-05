@@ -5,6 +5,7 @@
     PYTHONPATH=src python tools/tick.py document              # write the Riemann attempt's record onto its stick
     PYTHONPATH=src python tools/tick.py lnh                   # Dirac's Large Numbers Hypothesis: seal N1, cite the rest
     PYTHONPATH=src python tools/tick.py alpha                 # the fine-structure constant: seal alpha, cite the 137
+    PYTHONPATH=src python tools/tick.py robin [N]             # chart the Riemann window by elimination (Robin to N)
     PYTHONPATH=src python tools/tick.py riemann 200          # verify every zero up to T = 200 is on the line,
                                                              # SEAL it through the same path as POST /verify, tick
     PYTHONPATH=src python tools/tick.py read stick_riemann_hypothesis
@@ -334,6 +335,47 @@ def alpha() -> int:
     return 0
 
 
+def robin(N: int = 1000000) -> int:
+    """Chart the Riemann window by ELIMINATION through a different tool (the divisor sum). Robin 1984:
+    RH <=> sigma(n) < e^gamma*n*ln ln n for all n > 5040. The sieve finds no counterexample in (5040, N], so a
+    first RH failure by this route must lie beyond N — we mark what RH is NOT, and push the surviving window up.
+    Seals the computation and ticks a WITNESS (an elimination) on the Riemann stick."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    from concordance.verifiers import number_theory as NT
+    pre = NT.verify_robin({"robin_to": N, "claimed_robin_holds": True})
+    if pre.status != "CONFIRMED":
+        print("Robin did not hold (or errored):", pre.status, (pre.detail or "")[:140]); return 1
+    closest = pre.data["closest_approach_n"]
+    r = verify_derivation([{"id": "robin", "domain": "number_theory",
+          "spec": {"NUM_VERIFY": {"robin_to": N, "claimed_robin_holds": True, "claimed_closest_approach_n": closest}}}])
+    if r.get("verdict") != "HOLDS":
+        print("the elimination did not verify:", json.dumps(r)[:300]); return 1
+    r = receipts.attach(r, config=EngineConfig(), domain="number_theory")
+    seal = (r.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted"); return 1
+    print("sealed Robin elimination", seal)
+    sid = TS.create("Riemann hypothesis")["id"]
+    claim = (f"No zero of zeta lies off the critical line by way of a Robin (divisor-sum) counterexample at n <= "
+             f"{N:,}: the sieve finds none in (5040, {N:,}] (closest approach n={closest:,}, "
+             f"sigma/(e^gamma n lnln n) = {pre.data['closest_approach_ratio']} < 1). RH cannot fail by this route "
+             f"below {N:,} — a second, independent tool narrowing the window, by elimination.")
+    res = TS.tick(sid, "witness", claim, seal=seal, by="Narrow Highway — the elimination reading, 2026-10-05")
+    print("  witness" if res.get("ok") else ("  REFUSED: " + res.get("error", "")))
+    note = ("[by elimination] The Riemann stick is charted by what RH is NOT. Directly: the two independent zero "
+            "counts agree to height 1e7, so NO zero lies off the line below it. Through the divisor sum (Robin): no "
+            "counterexample to n=" + f"{N:,}" + ". A counterexample to RH, if one exists, must therefore evade every "
+            "eliminated region at once — the surviving window is where RH remains untested, and each tool narrows it.")
+    if note not in {t.get("claim") for t in TS.read(sid).get("ticks", [])}:
+        TS.tick(sid, "note", note, by="Narrow Highway — the elimination reading, 2026-10-05")
+        print("  note (the elimination frame)")
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
+    return 0
+
+
 def main() -> int:
     a = sys.argv[1:]
     if not a:
@@ -347,6 +389,8 @@ def main() -> int:
         return lnh()
     if a[0] == "alpha":
         return alpha()
+    if a[0] == "robin":
+        return robin(int(a[1]) if len(a) > 1 else 1000000)
     if a[0] == "riemann":
         return riemann(float(a[1]) if len(a) > 1 else 100.0)
     if a[0] == "bsd":
