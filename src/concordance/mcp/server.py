@@ -1738,7 +1738,7 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         return scripture.resolve_ref(args.get("ref", ""))
     if name == "read_passage" and knowledge:
         from ..verifiers import scripture  # lazy: witness-only
-        return scripture.read_passage(args.get("ref", ""), str(args.get("lang") or "en"))
+        return scripture.read_passage(args.get("ref", ""), (str(args.get("lang") or "").strip() or None))
     if name == "word_study" and knowledge:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.word_study(args.get("strongs", ""))

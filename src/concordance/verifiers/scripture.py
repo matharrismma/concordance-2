@@ -343,6 +343,83 @@ def languages() -> List[Dict[str, Any]]:
     return out
 
 
+# ── THE WORD IN THE READER'S TONGUE (Gen 3 · 4, 2026-10-04): the book named as the reader names it ──
+# data/bible_book_names.json is GATHERED from Wikidata (CC0) by tools/gather_book_names.py — every book's
+# labels and aliases in each held language, normalised — never authored. "Juan 3:16", "约翰福音 3:16",
+# "Johannes 3,16" resolve to John 3:16 and, unless the caller chose a language, the answer comes in the
+# tongue the book was named in.
+_NAMES: Dict[str, Any] = {"path": None, "mtime": None, "names": {}}
+_ANY_REF_RE = re.compile(r"^\s*(?P<book>.+?)\s*(?P<ch>\d+)\s*(?:[:,.]\s*(?P<v>\d+)(?:\s*-\s*(?P<v2>\d+))?)?\s*$")
+
+
+def _norm_name(s: str) -> str:
+    import unicodedata
+    s = unicodedata.normalize("NFKD", (s or "").casefold())
+    s = "".join(ch for ch in s if not unicodedata.combining(ch))     # an accent the reader dropped does not matter
+    s = re.sub(r"[\u0591-\u05C7]", "", s)          # Hebrew points
+    s = re.sub(r"[\u064B-\u0652\u0670]", "", s)    # Arabic harakat
+    s = re.sub(r"[^\w\s]", " ", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def book_names() -> Dict[str, Dict[str, str]]:
+    """{lang: {normalised local name: English canonical book}} — re-read when the gathered file changes."""
+    p = _data_dir() / "bible_book_names.json"
+    try:
+        mtime = p.stat().st_mtime_ns
+    except OSError:
+        return {}
+    if _NAMES["path"] == str(p) and _NAMES["mtime"] == mtime:
+        return _NAMES["names"]
+    try:
+        names = (json.loads(p.read_text(encoding="utf-8")) or {}).get("names") or {}
+    except (OSError, ValueError):
+        names = {}
+    _NAMES.update({"path": str(p), "mtime": mtime, "names": names})
+    return names
+
+
+def localize_ref(ref: str) -> Tuple[str, List[str]]:
+    """("John 3:16", ["es"]) for "Juan 3:16"; (ref, []) when the book is not a gathered local name.
+    An English name the reader already resolves is left alone — English is a held language too."""
+    m = _ANY_REF_RE.match(ref or "")
+    if not m:
+        return ref, []
+    raw = m.group("book")
+    try:
+        if default_bible().book_candidates(raw):
+            return ref, []
+    except Exception:  # noqa: BLE001 — a missing WEB must not break the local name path
+        pass
+    key = _norm_name(raw)
+    if not key:
+        return ref, []
+    hits: Dict[str, List[str]] = {}
+    for lang, table in book_names().items():
+        eng = table.get(key)
+        if eng:
+            hits.setdefault(eng, []).append(lang)
+    if not hits:
+        return ref, []
+    eng = max(hits, key=lambda e: len(hits[e]))
+    out = f"{eng} {m.group('ch')}"
+    if m.group("v"):
+        out += f":{m.group('v')}" + (f"-{m.group('v2')}" if m.group("v2") else "")
+    return out, sorted(hits[eng])
+
+
+def _choose_lang(lang: Optional[str], detected: List[str]) -> str:
+    """The caller's language wins when given (even "en"); else the tongue the book was named in, if that
+    Bible is held; else English."""
+    if lang is not None and str(lang).strip():
+        return _norm_lang(lang)
+    held = {x["lang"] for x in languages()}
+    for l in detected:
+        if l in held:
+            return l
+    return "en"
+
+
 def _unknown_language(ref: str, lang: str, shape: str) -> Dict[str, Any]:
     have = [x["lang"] for x in languages()]
     base = {"ref": ref, "status": "not_found", "lang": lang,
@@ -386,26 +463,34 @@ def _reset() -> None:
     _BIBLES.clear()
 
 
-def resolve_ref(ref: str, lang: str = "en") -> Dict[str, Any]:
-    """Resolve a reference to its text — the WEB by default, or a held translation by lang:
-    {ref, text, status: ok|not_found|source_missing, lang, translation}."""
-    l = _norm_lang(lang)
+def resolve_ref(ref: str, lang: Optional[str] = None) -> Dict[str, Any]:
+    """Resolve a reference to its text — the WEB by default, or a held translation by lang, or the tongue
+    the book was named in ("Juan 3:16" → Reina-Valera): {ref, text, status, lang, translation}."""
+    eng, detected = localize_ref(ref)
+    l = _choose_lang(lang, detected)
     if l != "en" and not _bible_path(l).exists():
         return _unknown_language(ref, l, "ref")
-    out = dict(bible(l).resolve(ref))
+    out = dict(bible(l).resolve(eng))
     out.setdefault("lang", l)
+    if detected:
+        out["asked"] = ref
+        out["named_in"] = detected
     return out
 
 
-def read_passage(ref: str, lang: str = "en") -> Dict[str, Any]:
-    """Read a passage (single verse / range / whole chapter) — the WEB by default, or a held
-    translation by lang (GET /languages lists them): {ref, verses, count, status, lang, translation}.
-    The core reading primitive the study experience is built on."""
-    l = _norm_lang(lang)
+def read_passage(ref: str, lang: Optional[str] = None) -> Dict[str, Any]:
+    """Read a passage (single verse / range / whole chapter) — the WEB by default, a held translation by
+    lang (GET /languages lists them), or the tongue the book was named in: {ref, verses, count, status,
+    lang, translation}. The core reading primitive the study experience is built on."""
+    eng, detected = localize_ref(ref)
+    l = _choose_lang(lang, detected)
     if l != "en" and not _bible_path(l).exists():
         return _unknown_language(ref, l, "passage")
-    out = dict(bible(l).passage(ref))
+    out = dict(bible(l).passage(eng))
     out["lang"] = l
+    if detected:
+        out["asked"] = ref
+        out["named_in"] = detected
     if out.get("status") == "ok":
         meta = next((x for x in languages() if x["lang"] == l), None)
         out["translation"] = (meta or {}).get("translation")
