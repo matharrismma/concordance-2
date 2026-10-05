@@ -575,6 +575,35 @@
    "temp_K": 298.15
   }
  },
+ "elliptic_curves": {
+  "false": {
+   "a_invariants": [
+    0,
+    -1,
+    1,
+    -10,
+    -20
+   ],
+   "claimed_L1": 0.515184,
+   "claimed_analytic_rank": 1,
+   "conductor": 11,
+   "root_number": 1
+  },
+  "packet_key": "ELLIPTIC_VERIFY",
+  "true": {
+   "a_invariants": [
+    0,
+    -1,
+    1,
+    -10,
+    -20
+   ],
+   "claimed_L1": 0.253842,
+   "claimed_analytic_rank": 0,
+   "conductor": 11,
+   "root_number": 1
+  }
+ },
  "energy": {
   "false": {
    "claimed_balance_kwh_day": 15.5,

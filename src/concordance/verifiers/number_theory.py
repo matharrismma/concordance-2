@@ -348,40 +348,141 @@ def verify_divisor_count(spec):
     return confirm(name, f"{n} has {len(actual)} divisors: {actual if len(actual) <= 16 else str(actual[:16]) + '…'}", data)
 
 
-def _zeros_on_line(T: float, step: float = 0.25) -> int:
-    """Sign changes of Hardy's Z(t) on (0, T]: zeros ON the critical line, each simple. A pair closer than `step`
-    would be missed — and then the strip count below disagrees, so a miss stays a miss, never a false seal."""
+_TWO_PI = 6.283185307179586
+_RS_FLOAT_FROM = 300.0          # below this the first-order Riemann–Siegel error (~ t^-3/4) is too large; mpmath there
+_DIP = 0.08                     # |Z| this small at two neighbouring samples without a crossing: look closer, exactly
+_MAX_HEIGHT = 200000.0
+
+
+def _theta(t: float) -> float:
+    import math
+    return t / 2 * math.log(t / _TWO_PI) - t / 2 - math.pi / 8 + 1 / (48 * t) + 7 / (5760 * t ** 3)
+
+
+def _rs_z(t: float) -> float:
+    """Hardy's Z(t) by the Riemann–Siegel formula in floats: the main sum and the first correction term
+    (error ~ t^(-3/4)). A hundred times faster than mpmath; wherever |Z| is small the exact function decides."""
+    import math
+    a = math.sqrt(t / _TWO_PI)
+    m = int(a)
+    th = _theta(t)
+    acc = 0.0
+    for n in range(1, m + 1):
+        acc += math.cos(th - t * math.log(n)) / math.sqrt(n)
+    q = a - m
+    c0 = math.cos(_TWO_PI * (q * q - q - 1 / 16)) / math.cos(_TWO_PI * q)
+    return 2 * acc + (-1) ** (m - 1) * a ** -0.5 * c0
+
+
+def _z(t: float) -> float:
     import mpmath as mp
-    t, prev, n = 1.0, mp.siegelz(1.0), 0
-    while t < T:
-        t2 = min(t + step, T)
-        cur = mp.siegelz(t2)
-        if (prev < 0) != (cur < 0):
-            n += 1
-        t, prev = t2, cur
-    return n
+    return float(mp.siegelz(t)) if t < _RS_FLOAT_FROM else _rs_z(t)
 
 
-def _zeros_in_strip(T: float, sigma_steps: int = 60):
+def _changes(vals) -> int:
+    return sum(1 for i in range(1, len(vals)) if (vals[i - 1] < 0) != (vals[i] < 0))
+
+
+def _exact_changes(a: float, b: float, n: int = 48) -> int:
+    import mpmath as mp
+    vals = [float(mp.siegelz(a + (b - a) * k / n)) for k in range(n + 1)]
+    return _changes(vals)
+
+
+def _zeros_on_line(T: float, step: float = 0.25) -> int:
+    """Zeros ON the critical line in (0, T]: sign changes of Z on a grid a quarter of the mean spacing apart
+    (float Riemann–Siegel above t = 300, mpmath below), and wherever two neighbouring samples are both within
+    _DIP of zero without a crossing — the signature of a close pair — the span is rescanned EXACTLY (mpmath, 48
+    points). What this cannot see, the strip count below exposes; the caller then localises and rescans."""
+    import math
+    spacing = _TWO_PI / math.log(max(T, 20.0) / _TWO_PI)
+    h = min(step, spacing / 4)
+    ts = [1.0]
+    while ts[-1] < T:
+        ts.append(min(ts[-1] + h, T))
+    vals = [_z(t) for t in ts]
+    count = _changes(vals)
+    i = 1
+    while i < len(ts):
+        if (vals[i - 1] < 0) == (vals[i] < 0) and abs(vals[i - 1]) < _DIP and abs(vals[i]) < _DIP:
+            lo, hi = max(0, i - 2), min(len(ts) - 1, i + 1)
+            count += _exact_changes(ts[lo], ts[hi]) - _changes(vals[lo:hi + 1])
+            i = hi + 1
+            continue
+        i += 1
+    return count
+
+
+def _zeros_on_line_checked(T: float):
+    """(zeros on the line, N(T) in the strip, S(T), localised rescans): the scan, then the independent count; where
+    the scan is short, bisect by the strip count (cheap) until the deficit sits in a narrow span and rescan it
+    exactly. Returns the final on-line count — which may still be short: then nothing is certified."""
+    import math
+    n_strip, S = _zeros_in_strip(T)
+    on_line = _zeros_on_line(T)
+    want = int(round(n_strip))
+    rescans = 0
+    if on_line < want:
+        spacing = _TWO_PI / math.log(max(T, 20.0) / _TWO_PI)
+        h = min(0.25, spacing / 4)
+
+        def seg(a: float, b: float) -> int:
+            ts = [a]
+            while ts[-1] < b:
+                ts.append(min(ts[-1] + h, b))
+            return _changes([_z(t) for t in ts])
+
+        def nstrip(t: float) -> float:
+            return 0.0 if t <= 14.0 else _zeros_in_strip(t)[0]
+
+        budget = [64]
+
+        def localise(a: float, b: float, na: float, nb: float) -> int:
+            have = seg(a, b)
+            need = int(round(nb - na))
+            if have >= need or budget[0] <= 0:
+                return have
+            if b - a <= 6 * h:
+                nonlocal_rescans[0] += 1
+                return _exact_changes(a, b, 96)
+            m = (a + b) / 2
+            nm = nstrip(m)
+            budget[0] -= 1
+            return localise(a, m, na, nm) + localise(m, b, nm, nb)
+
+        nonlocal_rescans = [0]
+        on_line = localise(1.0, T, 0.0, n_strip)
+        rescans = nonlocal_rescans[0]
+    return on_line, n_strip, S, rescans
+
+
+def _zeros_in_strip(T: float, sigma_steps: int = 0):
     """Backlund's count by the argument principle, independent of the line: N(T) = θ(T)/π + 1 + S(T), with
-    S(T) = (1/π)·arg ζ(½ + iT) followed continuously from σ = 2 (where the argument is small) down to σ = ½."""
+    S(T) = (1/π)·arg ζ(½ + iT) followed continuously from σ = 2 (where the argument is small) down to σ = ½.
+    The step count grows with T; if N(T) does not land on an integer the steps are doubled once."""
     import math
     import mpmath as mp
+    steps = sigma_steps or min(2000, 120 + int(T / 400))
     th = mp.siegeltheta(T)
-    prev = mp.arg(mp.zeta(mp.mpc(2.0, T)))
-    total = prev
-    ds = 1.5 / sigma_steps
-    for k in range(1, sigma_steps + 1):
-        a = mp.arg(mp.zeta(mp.mpc(2.0 - k * ds, T)))
-        d = a - prev
-        while d > math.pi:
-            d -= 2 * math.pi
-        while d < -math.pi:
-            d += 2 * math.pi
-        total += d
-        prev = a
-    S = float(total / math.pi)
-    return float(th / math.pi + 1 + S), S
+    for attempt in range(2):
+        prev = mp.arg(mp.zeta(mp.mpc(2.0, T)))
+        total = prev
+        ds = 1.5 / steps
+        for k in range(1, steps + 1):
+            a = mp.arg(mp.zeta(mp.mpc(2.0 - k * ds, T)))
+            d = a - prev
+            while d > math.pi:
+                d -= 2 * math.pi
+            while d < -math.pi:
+                d += 2 * math.pi
+            total += d
+            prev = a
+        S = float(total / math.pi)
+        N = float(th / math.pi + 1 + S)
+        if abs(N - round(N)) < 0.05:
+            break
+        steps *= 2
+    return N, S
 
 
 def verify_critical_line(spec):
@@ -397,18 +498,19 @@ def verify_critical_line(spec):
         claimed = int(spec.get("claimed_zeros_on_line"))
     except (TypeError, ValueError):
         return error(name, "critical_line_height (a number) and claimed_zeros_on_line (an integer) are required")
-    if not (14 < T <= 2000):
-        return error(name, f"height {T} out of range: the first zero is at t ≈ 14.13; this door computes up to T = 2000")
+    if not (14 < T <= _MAX_HEIGHT):
+        return error(name, f"height {T} out of range: the first zero is at t ≈ 14.13; this door computes up to T = {_MAX_HEIGHT:g}")
     try:
-        on_line = _zeros_on_line(T)
-        n_strip, S = _zeros_in_strip(T)
+        on_line, n_strip, S, rescans = _zeros_on_line_checked(T)
     except Exception as e:  # noqa: BLE001 — a computation that fails is an error, never a verdict
         return error(name, f"computation failed: {type(e).__name__}: {e}")
     if abs(n_strip - round(n_strip)) > 0.05:
         return error(name, f"the strip count did not land on an integer (N(T) = {n_strip:.4f}); refine and retry")
     n_strip_i = int(round(n_strip))
     data = {"height": T, "zeros_on_line": on_line, "zeros_in_strip": n_strip_i, "S_T": round(S, 4), "claimed": claimed,
-            "method": "sign changes of Hardy's Z on the line vs Backlund's argument-principle count in the strip",
+            "localised_rescans": rescans,
+            "method": ("sign changes of Hardy's Z on the line (Riemann–Siegel in floats above t = 300, exact where |Z| dips, "
+                       "deficits localised by the strip count and rescanned exactly) vs Backlund's argument-principle count"),
             "means": "every zero with 0 < Im(s) <= T lies on Re(s) = 1/2 — a verification to this height, not a proof"}
     if on_line != n_strip_i:
         return mismatch(name, f"{on_line} zeros found on the line but N({T:g}) = {n_strip_i} in the strip — the line "

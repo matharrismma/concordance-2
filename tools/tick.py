@@ -94,9 +94,8 @@ def riemann(T_height: float) -> int:
     # the mark is honest only if the claim is what the engine finds: count first, then claim that count
     from concordance.verifiers import number_theory as NT
     t0 = time.time()
-    on_line = NT._zeros_on_line(T_height)
-    n_strip, S = NT._zeros_in_strip(T_height)
-    print(f"T = {T_height:g}: on the line {on_line}, in the strip {n_strip:.4f} (S = {S:.3f}) in {time.time() - t0:.1f}s")
+    on_line, n_strip, S, rescans = NT._zeros_on_line_checked(T_height)
+    print(f"T = {T_height:g}: on the line {on_line}, in the strip {n_strip:.4f} (S = {S:.3f}, {rescans} localised rescans) in {time.time() - t0:.1f}s")
     if on_line != int(round(n_strip)):
         print("the two counts disagree — no mark is made (a miss stays a miss)")
         return 1
@@ -121,6 +120,55 @@ def riemann(T_height: float) -> int:
     return 0 if r.get("ok") else 1
 
 
+# The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
+# J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
+CURVES = {
+    "11a1":   {"a": [0, -1, 1, -10, -20], "N": 11,   "w": 1,  "rank": 0},
+    "37a1":   {"a": [0, 0, 1, -1, 0],     "N": 37,   "w": -1, "rank": 1},
+    "389a1":  {"a": [0, 1, 1, -2, 0],     "N": 389,  "w": 1,  "rank": 2},
+    "5077a1": {"a": [0, 0, 1, -7, 6],     "N": 5077, "w": -1, "rank": 3},
+}
+
+
+def bsd(label: str) -> int:
+    """A mark on the Birch and Swinnerton-Dyer stick: compute L(E,1) (and L'(E,1)), seal it, and tick an INSTANCE
+    when a theorem carries the analytic rank to the algebraic rank (0 or 1), a WITNESS when it does not (≥ 2)."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    c = CURVES.get(label)
+    if not c:
+        print(f"unknown curve {label!r}; held: {sorted(CURVES)}")
+        return 2
+    spec = {"a_invariants": c["a"], "conductor": c["N"], "root_number": c["w"],
+            "claimed_analytic_rank": c["rank"] if c["rank"] <= 1 else c["rank"]}
+    res = verify_derivation([{"id": "l_value", "domain": "elliptic_curves", "spec": {"ELLIPTIC_VERIFY": spec}}])
+    if res.get("verdict") != "HOLDS":
+        print("the verifier did not HOLD:", json.dumps(res)[:500])
+        return 1
+    res = receipts.attach(res, config=EngineConfig(), domain="elliptic_curves")
+    seal = (res.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted")
+        return 1
+    step = (res.get("steps") or res.get("trail") or [{}])[0] if isinstance(res.get("steps") or res.get("trail"), list) else {}
+    print("sealed", seal, (res.get("seal") or {}).get("cite_url"))
+    sid = TS.create("Birch and Swinnerton-Dyer conjecture")["id"]
+    if c["rank"] <= 1:
+        kind = "instance"
+        claim = (f"E = {label} (conductor {c['N']}): L(E,1) {'≠ 0' if c['rank'] == 0 else '= 0 with L′(E,1) ≠ 0'} computed by the "
+                 f"approximate functional equation; analytic rank {c['rank']} ⇒ rank E(Q) = {c['rank']} "
+                 f"({'Kolyvagin 1989' if c['rank'] == 0 else 'Gross–Zagier 1986 + Kolyvagin 1989'}); BSD's rank statement holds for E")
+    else:
+        kind = "witness"
+        claim = (f"E = {label} (conductor {c['N']}): L(E,1) = 0 and the first {c['rank']-1} derivative(s) vanish numerically — analytic "
+                 f"rank ≥ {c['rank']}; the algebraic rank {c['rank']} is Cremona's table's, no theorem carries it here")
+    r = TS.tick(sid, kind, claim, seal=seal, by="tools/tick.py bsd")
+    print(json.dumps({"ok": r.get("ok"), "error": r.get("error"), "kind": kind, "instances": (r.get("fit") or {}).get("verified_instances"),
+                      "witnesses": (r.get("fit") or {}).get("witnesses")}, indent=1))
+    return 0 if r.get("ok") else 1
+
+
 def main() -> int:
     a = sys.argv[1:]
     if not a:
@@ -130,6 +178,8 @@ def main() -> int:
         return seed()
     if a[0] == "riemann":
         return riemann(float(a[1]) if len(a) > 1 else 100.0)
+    if a[0] == "bsd":
+        return bsd(a[1] if len(a) > 1 else "11a1")
     if a[0] == "read":
         from concordance import tickstick as T
         print(json.dumps(T.read(a[1]) if len(a) > 1 else T.listing(), indent=1, ensure_ascii=False))

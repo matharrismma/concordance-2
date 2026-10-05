@@ -118,6 +118,8 @@ VERIFIERS: Dict[str, str] = {
     "condensed_matter": _P + "condensed_matter", "solid_state": _P + "condensed_matter",
     "game_theory": _P + "game_theory", "games": _P + "game_theory", "strategy": _P + "game_theory",
     "archaeology": _P + "archaeology", "radiocarbon": _P + "archaeology", "radiometric_dating": _P + "archaeology",
+    # the elliptic-curve L-value door for the Birch and Swinnerton-Dyer stick (tick stick, 2026-10-05)
+    "elliptic_curves": _P + "elliptic_curves", "elliptic": _P + "elliptic_curves", "bsd": _P + "elliptic_curves",
 }
 
 # Witness-surface verifiers — surfaced ONLY when surface == "witness" (the .org overlay).
