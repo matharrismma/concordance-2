@@ -1205,3 +1205,26 @@ is a backup now.
   physical_constants pair is repaired, and a new pin requires every golden falsehood to draw a MISMATCH or an ERROR
   (a domain that cannot judge in an environment — linguistics on CI, its source absent — is exempt, not a shrug).
   Benchmarks now **69/69** domains, moat 60/60, 0 false positives; the floor rose to 69.
+
+## 2026-10-05 — Gen 3 · 4 (first cut) — THE WORD IN THE READER'S TONGUE (2ce8d91 · 784f853)
+- **Gathered, never authored.** `tools/gather_book_names.py` takes the 66 books' names in every held language from
+  Wikidata (CC0): each item found by its English name with a Bible disambiguation and VERIFIED by its description;
+  labels + aliases in 16 languages (zh, zh-hans, zh-hant folded into zh). The SHORT names are DERIVED: a token that
+  names a book in most of that book's names and in few of any other's ("juan" in John's, in a few of Revelation's)
+  is the bare name; numbered siblings fold into their root the way an English reader treats a bare "John"; keys
+  casefolded, accents and points stripped. 66/66 books; es/de/fr/ru/zh/ja/ko/… complete; reported misses: Burmese
+  14, Arabic 1–2 Kings, Vietnamese 2 — never filled in by hand. `data/bible_book_names.json` (data-only) rides with
+  capability 1's sync.
+- **Built.** `scripture.localize_ref`: "Juan 3:16", "Johannes 3,16", "約翰福音3:16", "Иоанна 3:16", "Jean 3:16" →
+  John 3:16; unless the caller chose a language, the passage comes in the tongue the book was named in; an English
+  name stays English; an ambiguous name (Johannes: de and nl) picks a held Bible and says what it saw
+  (`named_in`); lang=None is auto, lang="en" is the caller's choice. Live on both faces in six tongues.
+- **The first live run regressed, and the gate let it through — both fixed the same hour.** "what is 2 + 2" came
+  back as Isaiah 2 in French: a two-letter Wikidata alias ("Is") was a key and the ask door's candidate "is 2"
+  matched it. Fixes: the gather drops Latin keys and derived tokens under three letters; `localize_ref` acts only on
+  one to three words, digits only as a leading ordinal, Latin names of three letters or more (pinned). And the
+  gate's `cmd | tail` had reported tail's exit, so the REGRESSED assay did not refuse the deploy — each check now
+  writes a file and its own exit code is the verdict. The corrected gate passed 784f853: benchmarks 69/69, assay
+  **68/70, floor 68** (three new probes: Spanish, Chinese, Russian names).
+- **Not yet (the rest of #4):** the house ending's four labels are still English chrome; a simplified-script
+  Chinese name for John is absent from the source (Wikidata has only the traditional label) — a want, not a guess.
