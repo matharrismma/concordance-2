@@ -4,6 +4,7 @@
     PYTHONPATH=src python tools/tick.py seed                 # open the first sticks with their cited marks
     PYTHONPATH=src python tools/tick.py document              # write the Riemann attempt's record onto its stick
     PYTHONPATH=src python tools/tick.py lnh                   # Dirac's Large Numbers Hypothesis: seal N1, cite the rest
+    PYTHONPATH=src python tools/tick.py alpha                 # the fine-structure constant: seal alpha, cite the 137
     PYTHONPATH=src python tools/tick.py riemann 200          # verify every zero up to T = 200 is on the line,
                                                              # SEAL it through the same path as POST /verify, tick
     PYTHONPATH=src python tools/tick.py read stick_riemann_hypothesis
@@ -274,6 +275,65 @@ def lnh() -> int:
     return 0
 
 
+def alpha() -> int:
+    """The fine-structure constant as a tick stick: its open question is why alpha ~ 1/137.036 has its value and
+    whether it is truly constant. SEAL the measured value from the engine's attested constants, CITE the "137"
+    numerology as the false historical claim it is, endorse nothing. (Ties the 137-slide discernment.)"""
+    import math
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    from concordance.verifiers import physical_constants as PC
+    C = PC._CONSTANTS
+    e = C["elementary_charge"]["value"]; eps0 = C["vacuum_permittivity"]["value"]
+    h = C["planck_constant"]["value"]; c = C["speed_of_light"]["value"]
+    alpha_v = e ** 2 / (2 * eps0 * h * c)
+    inv = 1.0 / alpha_v
+    expr = f"({e!r})**2 / (2*({eps0!r})*({h!r})*({c!r}))"
+    r = verify_derivation([{"id": "alpha", "domain": "mathematics",
+          "spec": {"mode": "numeric", "params": {"numeric_expr": expr, "claimed_value": alpha_v, "rel_tol": 1e-9}}}])
+    if r.get("verdict") != "HOLDS":
+        print("alpha did not verify:", json.dumps(r)[:400]); return 1
+    r = receipts.attach(r, config=EngineConfig(), domain="physical_constants")
+    seal = (r.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted"); return 1
+    print("sealed alpha", seal)
+    sid = TS.create("The fine-structure constant",
+                    statement=("Why does the fine-structure constant have the value alpha ~ 1/137.036, and is it "
+                               "truly constant across space and time? No accepted theory derives it from first "
+                               "principles; the open question is its value and its constancy, not its measurement."),
+                    field="physics",
+                    references=["CODATA 2018 recommended values",
+                                "A. S. Eddington, Relativity Theory of Protons and Electrons (1936) — the 1/137 claim"])["id"]
+    marks = [
+        ("witness", f"alpha = e^2 / (2*eps0*h*c) = {alpha_v:.10e}, so 1/alpha = {inv:.6f}, computed from the engine's "
+                    f"attested CODATA constants (numeric mode) — the measured value, as a fact", dict(seal=seal)),
+        ("note", f"[the 137] 1/alpha = {inv:.6f} is NOT the integer 137: it is a measured dimensionless number, "
+                 f"137.035999084(21) in CODATA 2018. Eddington argued 1/alpha was exactly an integer (first 136, then "
+                 f"137); that is historical and false. The '137' that invites numerology is the rounded reciprocal of "
+                 f"a measured quantity — base-independent as a magnitude, but its digit string is not a law.", {}),
+        ("exclusion", "The claim that alpha varies measurably across space or time is tightly bounded: the Oklo "
+                      "natural reactor limits any change over ~2 billion years to |d(alpha)/alpha| below ~10^-7, and "
+                      "laboratory atomic-clock comparisons bound the present drift to parts in 10^17 per year. "
+                      "Reported astronomical variation (quasar absorption) is contested and not established. To the "
+                      "evidence, alpha is constant.",
+         dict(source="T. Damour & F. Dyson, Nucl. Phys. B 480 (1996) 37 (Oklo); CODATA 2018; "
+                     "atomic-clock bounds, e.g. Rosenband et al., Science 319 (2008) 1808")),
+        ("note", "[discernment] The engine seals that alpha IS ~1/137.036 — the arithmetic and the measurement are "
+                 "facts. It does not endorse that 137 'means' anything beyond the measured constant; no first-"
+                 "principles derivation of its value is known, here or anywhere. Seal the value, cite the claims, "
+                 "endorse nothing.", {}),
+    ]
+    for kind, claim, kw in marks:
+        res = TS.tick(sid, kind, claim, by="Narrow Highway — the fine-structure reading, 2026-10-05", **kw)
+        print(("  " + kind) if res.get("ok") else ("  REFUSED " + kind + ": " + res.get("error", "")))
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "excluded": len(f["excluded_approaches"]),
+                      "record": len(f["record"]), "open": f["open"]}, indent=1))
+    return 0
+
+
 def main() -> int:
     a = sys.argv[1:]
     if not a:
@@ -285,6 +345,8 @@ def main() -> int:
         return document()
     if a[0] == "lnh":
         return lnh()
+    if a[0] == "alpha":
+        return alpha()
     if a[0] == "riemann":
         return riemann(float(a[1]) if len(a) > 1 else 100.0)
     if a[0] == "bsd":
