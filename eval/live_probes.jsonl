@@ -54,6 +54,9 @@
 {"id": "identity.names.the.node", "path": "/identity", "expect": [{"at": "node.fingerprint", "exists": true}, {"at": "node.signing", "eq": true}]}
 {"id": "languages.sixteen.held.plus.web", "path": "/languages", "expect": [{"at": "count", "eq": 17}, {"at": "languages[*].lang", "has": "es"}, {"at": "languages[*].lang", "has": "he"}, {"at": "languages[*].license", "has": "Public Domain"}]}
 {"id": "passage.spanish.john.3.16", "path": "/passage", "query": {"ref": "John 3:16", "lang": "es"}, "expect": [{"at": "status", "eq": "ok"}, {"at": "translation", "eq": "Reina-Valera 1909"}, {"at": "verses[0].text", "contains": "Porque de tal manera"}]}
+{"id": "passage.named.in.spanish.answers.in.spanish", "path": "/passage", "query": {"ref": "Juan 3:16"}, "expect": [{"at": "status", "eq": "ok"}, {"at": "lang", "eq": "es"}, {"at": "translation", "eq": "Reina-Valera 1909"}, {"at": "named_in[*]", "has": "es"}]}
+{"id": "passage.named.in.chinese.answers.in.chinese", "path": "/passage", "query": {"ref": "約翰福音 3:16"}, "expect": [{"at": "lang", "eq": "zh"}, {"at": "verses[0].text", "contains": "神爱世人"}]}
+{"id": "passage.named.in.russian.answers.in.russian", "path": "/passage", "query": {"ref": "Иоанна 3:16"}, "expect": [{"at": "lang", "eq": "ru"}, {"at": "translation", "eq": "Russian Synodal Translation"}]}
 {"id": "passage.chinese.genesis.1.1", "path": "/passage", "query": {"ref": "Genesis 1:1", "lang": "zh"}, "expect": [{"at": "verses[0].text", "contains": "起初"}]}
 {"id": "passage.unknown.language.names.the.held", "path": "/passage", "query": {"ref": "John 3:16", "lang": "xx"}, "expect": [{"at": "status", "eq": "not_found"}, {"at": "languages", "min_len": 17}]}
 {"id": "verify.137.is.prime", "method": "POST", "path": "/verify", "body": {"claim": "137 is a prime number"}, "expect": [{"at": "verdict", "eq": "HOLDS"}]}
