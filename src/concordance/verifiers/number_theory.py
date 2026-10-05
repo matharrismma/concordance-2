@@ -348,7 +348,79 @@ def verify_divisor_count(spec):
     return confirm(name, f"{n} has {len(actual)} divisors: {actual if len(actual) <= 16 else str(actual[:16]) + '…'}", data)
 
 
+def _zeros_on_line(T: float, step: float = 0.25) -> int:
+    """Sign changes of Hardy's Z(t) on (0, T]: zeros ON the critical line, each simple. A pair closer than `step`
+    would be missed — and then the strip count below disagrees, so a miss stays a miss, never a false seal."""
+    import mpmath as mp
+    t, prev, n = 1.0, mp.siegelz(1.0), 0
+    while t < T:
+        t2 = min(t + step, T)
+        cur = mp.siegelz(t2)
+        if (prev < 0) != (cur < 0):
+            n += 1
+        t, prev = t2, cur
+    return n
+
+
+def _zeros_in_strip(T: float, sigma_steps: int = 60):
+    """Backlund's count by the argument principle, independent of the line: N(T) = θ(T)/π + 1 + S(T), with
+    S(T) = (1/π)·arg ζ(½ + iT) followed continuously from σ = 2 (where the argument is small) down to σ = ½."""
+    import math
+    import mpmath as mp
+    th = mp.siegeltheta(T)
+    prev = mp.arg(mp.zeta(mp.mpc(2.0, T)))
+    total = prev
+    ds = 1.5 / sigma_steps
+    for k in range(1, sigma_steps + 1):
+        a = mp.arg(mp.zeta(mp.mpc(2.0 - k * ds, T)))
+        d = a - prev
+        while d > math.pi:
+            d -= 2 * math.pi
+        while d < -math.pi:
+            d += 2 * math.pi
+        total += d
+        prev = a
+    S = float(total / math.pi)
+    return float(th / math.pi + 1 + S), S
+
+
+def verify_critical_line(spec):
+    """THE FIRST MARK ON THE RIEMANN STICK (tick stick, 2026-10-05): every zero of ζ with 0 < t ≤ T lies on the
+    critical line. Two INDEPENDENT counts must agree — the zeros found ON the line (sign changes of Hardy's Z)
+    and the zeros IN the strip (Backlund's argument-principle count N(T)) — and both must equal the claim.
+    This is Turing's/Backlund's method, the way every published verification is done; ours is small and
+    re-checkable. It is a verification up to a height, never a proof of the hypothesis.
+      NUM_VERIFY: {"critical_line_height": 100, "claimed_zeros_on_line": 29}      (T ≤ 2000 here)"""
+    name = "number_theory.critical_line"
+    try:
+        T = float(spec.get("critical_line_height"))
+        claimed = int(spec.get("claimed_zeros_on_line"))
+    except (TypeError, ValueError):
+        return error(name, "critical_line_height (a number) and claimed_zeros_on_line (an integer) are required")
+    if not (14 < T <= 2000):
+        return error(name, f"height {T} out of range: the first zero is at t ≈ 14.13; this door computes up to T = 2000")
+    try:
+        on_line = _zeros_on_line(T)
+        n_strip, S = _zeros_in_strip(T)
+    except Exception as e:  # noqa: BLE001 — a computation that fails is an error, never a verdict
+        return error(name, f"computation failed: {type(e).__name__}: {e}")
+    if abs(n_strip - round(n_strip)) > 0.05:
+        return error(name, f"the strip count did not land on an integer (N(T) = {n_strip:.4f}); refine and retry")
+    n_strip_i = int(round(n_strip))
+    data = {"height": T, "zeros_on_line": on_line, "zeros_in_strip": n_strip_i, "S_T": round(S, 4), "claimed": claimed,
+            "method": "sign changes of Hardy's Z on the line vs Backlund's argument-principle count in the strip",
+            "means": "every zero with 0 < Im(s) <= T lies on Re(s) = 1/2 — a verification to this height, not a proof"}
+    if on_line != n_strip_i:
+        return mismatch(name, f"{on_line} zeros found on the line but N({T:g}) = {n_strip_i} in the strip — the line "
+                              f"count is short (a close pair, or a zero off the line); nothing is certified", data)
+    if claimed != on_line:
+        return mismatch(name, f"up to T = {T:g} there are {on_line} zeros, all on the line; claimed {claimed}", data)
+    return confirm(name, f"up to T = {T:g}: {on_line} zeros on the line = N(T) = {n_strip_i} in the strip; "
+                         f"every zero to this height is on the critical line", data)
+
+
 _RULES = [
+    (lambda nv: ("critical_line_height" in nv and "claimed_zeros_on_line" in nv), verify_critical_line),
     (lambda nv: ("divisors_of" in nv and ("claimed_divisor_count" in nv or "claimed_divisors" in nv)), verify_divisor_count),
     (lambda nv: ("n_prime" in nv and "claimed_prime" in nv), verify_primality),
     (lambda nv: ("limit" in nv and "claimed_prime_count" in nv), verify_prime_counting),

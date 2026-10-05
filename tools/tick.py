@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+"""THE TICK STICK — make a mark (docs/TICK_STICK.md; Matt, 2026-10-05).
+
+    PYTHONPATH=src python tools/tick.py seed                 # open the first sticks with their cited marks
+    PYTHONPATH=src python tools/tick.py riemann 200          # verify every zero up to T = 200 is on the line,
+                                                             # SEAL it through the same path as POST /verify, tick
+    PYTHONPATH=src python tools/tick.py read stick_riemann_hypothesis
+
+A sealed mark is minted exactly as the verify door mints one (derivation → receipts.attach → CAS + ledger), so the
+tick's seal is a real, re-checkable entry in this node's keeping. The verify door's 8-second shed does not apply
+here: the tool raises CONCORDANCE_VERIFY_TIMEOUT_S before the engine loads, because a mark at T = 2000 takes minutes
+and is still a verification, not a proof. Run it ON THE BRANCH (the box): a mark minted on a replica stays there
+until marks travel back (Gen 3 · 1b).
+"""
+from __future__ import annotations
+
+import json
+import os
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "src"))
+os.environ.setdefault("CONCORDANCE_DATA_DIR", str(ROOT / "data"))
+os.environ.setdefault("CONCORDANCE_VERIFY_TIMEOUT_S", "1800")     # before derivation is imported
+
+STICKS = [
+    {"question": "Riemann hypothesis", "field": "number_theory",
+     "statement": "Every non-trivial zero of the Riemann zeta function has real part 1/2.",
+     "references": ["Riemann, Ueber die Anzahl der Primzahlen unter einer gegebenen Grösse (1859)",
+                    "Clay Mathematics Institute, Millennium Prize Problems (2000)"],
+     "ticks": [
+         {"kind": "equivalence", "claim": "RH is equivalent to |pi(x) - li(x)| < sqrt(x) log(x) / (8 pi) for all x >= 2657",
+          "source": "L. Schoenfeld, Sharper bounds for the Chebyshev functions theta(x) and psi(x). II, Math. Comp. 30 (1976) 337-360"},
+         {"kind": "equivalence", "claim": "RH is equivalent to sigma(n) < e^gamma n log log n for all n > 5040 (Robin's inequality)",
+          "source": "G. Robin, Grandes valeurs de la fonction somme des diviseurs et hypothese de Riemann, J. Math. Pures Appl. 63 (1984) 187-213"},
+         {"kind": "equivalence", "claim": "RH is equivalent to the Mertens-type bound M(x) = O(x^(1/2 + epsilon)) for every epsilon > 0",
+          "source": "E. C. Titchmarsh, The Theory of the Riemann Zeta-Function, 2nd ed. (1986), Theorem 14.25"},
+     ]},
+    {"question": "P versus NP", "field": "computer_science",
+     "statement": "Is every problem whose solutions can be verified in polynomial time also solvable in polynomial time?",
+     "references": ["S. Cook, The complexity of theorem-proving procedures, STOC (1971)",
+                    "Clay Mathematics Institute, Millennium Prize Problems (2000)"],
+     "ticks": [
+         {"kind": "exclusion", "claim": "relativizing proof techniques cannot resolve P vs NP: there are oracles A, B with P^A = NP^A and P^B != NP^B",
+          "source": "T. Baker, J. Gill, R. Solovay, Relativizations of the P =? NP question, SIAM J. Comput. 4 (1975) 431-442"},
+         {"kind": "exclusion", "claim": "natural proofs cannot separate P from NP if strong pseudorandom generators exist",
+          "source": "A. Razborov, S. Rudich, Natural proofs, J. Comput. System Sci. 55 (1997) 24-35"},
+         {"kind": "exclusion", "claim": "algebrizing proof techniques cannot resolve P vs NP",
+          "source": "S. Aaronson, A. Wigderson, Algebrization: a new barrier in complexity theory, ACM Trans. Comput. Theory 1 (2009) 2:1-2:54"},
+     ]},
+    {"question": "Navier-Stokes existence and smoothness", "field": "physics",
+     "statement": "Do smooth, globally defined solutions exist for the three-dimensional incompressible Navier-Stokes equations with smooth initial data?",
+     "references": ["Clay Mathematics Institute, Millennium Prize Problems (2000)"], "ticks": []},
+    {"question": "Yang-Mills existence and mass gap", "field": "physics",
+     "statement": "Does a quantum Yang-Mills theory exist on R^4 for any compact simple gauge group, with a mass gap Delta > 0?",
+     "references": ["Clay Mathematics Institute, Millennium Prize Problems (2000)"], "ticks": []},
+    {"question": "Hodge conjecture", "field": "mathematics",
+     "statement": "On a projective non-singular complex algebraic variety, is every Hodge class a rational linear combination of classes of algebraic cycles?",
+     "references": ["Clay Mathematics Institute, Millennium Prize Problems (2000)"], "ticks": []},
+    {"question": "Birch and Swinnerton-Dyer conjecture", "field": "number_theory",
+     "statement": "For an elliptic curve E over Q, is the rank of E(Q) equal to the order of vanishing of L(E, s) at s = 1?",
+     "references": ["B. Birch, H. P. F. Swinnerton-Dyer, Notes on elliptic curves. II, J. Reine Angew. Math. 218 (1965) 79-108",
+                    "Clay Mathematics Institute, Millennium Prize Problems (2000)"], "ticks": []},
+    {"question": "Poincare conjecture", "field": "mathematics",
+     "statement": "Every simply connected closed 3-manifold is homeomorphic to the 3-sphere. SOLVED: Perelman, 2002-2003.",
+     "references": ["G. Perelman, The entropy formula for the Ricci flow and its geometric applications, arXiv:math/0211159 (2002)",
+                    "G. Perelman, Ricci flow with surgery on three-manifolds, arXiv:math/0303109 (2003)"],
+     "ticks": [{"kind": "note", "claim": "Solved by Perelman (2002-2003) via Hamilton's Ricci flow with surgery; prize declined 2010. The stick is kept as the one Millennium problem with a proof.",
+                "source": "Clay Mathematics Institute, 2010"}]},
+]
+
+
+def seed() -> int:
+    from concordance import tickstick as T
+    for s in STICKS:
+        r = T.create(s["question"], s.get("statement", ""), s.get("field", ""), s.get("references"))
+        sid = r["id"]
+        print(("opened " if not r.get("existed") else "exists ") + sid)
+        have = {(t.get("kind"), t.get("claim")) for t in T.read(sid).get("ticks", [])}
+        for t in s.get("ticks", []):
+            if (t["kind"], t["claim"]) in have:
+                continue
+            rr = T.tick(sid, t["kind"], t["claim"], source=t.get("source", ""), by="tools/tick.py seed")
+            print("  " + ("tick " + t["kind"] if rr.get("ok") else "REFUSED: " + rr.get("error", "")))
+    return 0
+
+
+def riemann(T_height: float) -> int:
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    # the mark is honest only if the claim is what the engine finds: count first, then claim that count
+    from concordance.verifiers import number_theory as NT
+    t0 = time.time()
+    on_line = NT._zeros_on_line(T_height)
+    n_strip, S = NT._zeros_in_strip(T_height)
+    print(f"T = {T_height:g}: on the line {on_line}, in the strip {n_strip:.4f} (S = {S:.3f}) in {time.time() - t0:.1f}s")
+    if on_line != int(round(n_strip)):
+        print("the two counts disagree — no mark is made (a miss stays a miss)")
+        return 1
+    steps = [{"id": "critical_line", "domain": "number_theory",
+              "spec": {"NUM_VERIFY": {"critical_line_height": T_height, "claimed_zeros_on_line": on_line}}}]
+    res = verify_derivation(steps)
+    if res.get("verdict") != "HOLDS":
+        print("the verifier did not HOLD:", json.dumps(res)[:400])
+        return 1
+    res = receipts.attach(res, config=EngineConfig(), domain="number_theory")
+    seal = (res.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted:", json.dumps(res.get("seal"))[:200])
+        return 1
+    print("sealed", seal, (res.get("seal") or {}).get("cite_url"))
+    sid = TS.create("Riemann hypothesis")["id"]
+    r = TS.tick(sid, "bound", f"every non-trivial zero of zeta with 0 < Im(s) <= {T_height:g} lies on the critical line "
+                              f"({on_line} zeros; the on-line count equals Backlund's strip count)",
+                seal=seal, up_to=T_height, unit="height T", by="tools/tick.py riemann")
+    print(json.dumps({"ok": r.get("ok"), "error": r.get("error"), "fit": (r.get("fit") or {}).get("verified_up_to"),
+                      "open": (r.get("fit") or {}).get("open")}, indent=1))
+    return 0 if r.get("ok") else 1
+
+
+def main() -> int:
+    a = sys.argv[1:]
+    if not a:
+        print(__doc__)
+        return 2
+    if a[0] == "seed":
+        return seed()
+    if a[0] == "riemann":
+        return riemann(float(a[1]) if len(a) > 1 else 100.0)
+    if a[0] == "read":
+        from concordance import tickstick as T
+        print(json.dumps(T.read(a[1]) if len(a) > 1 else T.listing(), indent=1, ensure_ascii=False))
+        return 0
+    print(__doc__)
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

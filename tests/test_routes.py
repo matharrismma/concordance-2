@@ -118,6 +118,7 @@ GOLDEN_API_GET = {
     "/sync/manifest", "/sync/ledger", "/sync/file",   # deliberate addition (EVERY COPY IS WHOLE — Gen 3 · 1; 2026-10-04)
     "/specs",   # deliberate addition (VERIFIERS AS DATA — Gen 3 · 2; 2026-10-04)
     "/benchmarks",   # deliberate addition (THE ENGINE MEASURES ITSELF IN PUBLIC — Gen 3 · 7; 2026-10-04)
+    "/sticks", "/stick",   # deliberate addition (THE TICK STICK — open questions with sealed marks; 2026-10-05)
     # deliberate addition 2026-08-01 — what the engine writes goes in wearing its open question,
     # and the first reader to recall it is asked to close it. `/unchecked` publishes the standing
     # list; `/unchecked/answer` is the door the ask on every such card points at.
@@ -167,6 +168,7 @@ GOLDEN_RATELIMITED = {
     "/kernel/gate",  # run one proposed state-change through the kernel — rate-limited like every POST (task #152)
     "/playbook/signable", "/playbook/submit",  # the Playbook two-step signed write — rate-limited like every write (task #153)
     "/plow",  # The Plow POST computes a transition — rate-limited like every POST (task #155)
+    "/stick", "/tick",   # deliberate addition (THE TICK STICK doors are writes; 2026-10-05)
 }
 
 

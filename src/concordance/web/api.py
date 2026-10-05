@@ -755,6 +755,37 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         base = "https://narrowhighway.org"
         return _ok(_seals.summary(cite_base=base))
 
+    if method == "GET" and path == "/sticks":
+        # THE TICK STICK (Matt, 2026-10-05): open questions with the marks the engine can stand behind
+        from .. import tickstick as _ts
+        return _ok(_ts.listing())
+
+    if method == "GET" and path == "/stick":
+        from .. import tickstick as _ts
+        sid = (query.get("id") or "").strip()
+        if not sid:
+            return _err(400, "id required (GET /sticks lists them)")
+        r = _ts.read(sid)
+        return _ok(r) if r.get("ok") else _err(404, r.get("error", "no such stick"))
+
+    if method == "POST" and path == "/stick":
+        from .. import tickstick as _ts
+        if not isinstance(body, dict):
+            return _err(400, "question required")
+        r = _ts.create(str(body.get("question") or ""), str(body.get("statement") or ""), str(body.get("field") or ""),
+                       [str(x) for x in (body.get("references") or [])] if isinstance(body.get("references"), list) else None)
+        return _ok(r) if r.get("ok") else _err(400, r.get("error", "refused"))
+
+    if method == "POST" and path == "/tick":
+        # a sealed tick must name a HOLDS seal in this keeping; a cited tick must name its source
+        from .. import tickstick as _ts
+        if not isinstance(body, dict):
+            return _err(400, "stick, kind, claim required")
+        r = _ts.tick(str(body.get("stick") or ""), str(body.get("kind") or ""), str(body.get("claim") or ""),
+                     seal=str(body.get("seal") or ""), source=str(body.get("source") or ""),
+                     up_to=body.get("up_to"), unit=str(body.get("unit") or ""), by=str(body.get("by") or ""))
+        return _ok(r) if r.get("ok") else _err(400, r.get("error", "refused"))
+
     if method == "GET" and path == "/benchmarks":
         # THE ENGINE MEASURES ITSELF IN PUBLIC (Gen 3 · 7): the standing benchmarks as tools/benchmarks.py
         # measured them on this node (nightly, and at every deploy) — served from the file, with its age.
@@ -3147,6 +3178,10 @@ ROUTES = [
     # since a hash, one keeping file's bytes (served raw by the handler, declared here so it is catalogued)
     {"path": "/specs", "methods": ("GET",), "api": True},   # VERIFIERS AS DATA — the checks held as specs (Gen 3 · 2)
     {"path": "/benchmarks", "methods": ("GET",), "api": True},   # THE ENGINE MEASURES ITSELF IN PUBLIC (Gen 3 · 7)
+    # THE TICK STICK (2026-10-05): an open question, the marks the engine can stand behind, the fit they establish
+    {"path": "/sticks", "methods": ("GET",), "api": True},
+    {"path": "/stick", "methods": ("GET", "POST"), "api": True, "rl": True},
+    {"path": "/tick", "methods": ("POST",), "rl": True},
     {"path": "/sync/manifest", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/sync/ledger", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/sync/file", "methods": ("GET",), "api": True, "rl": "read", "serve": True},   # raw bytes: the handler, not dispatch
