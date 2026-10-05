@@ -50,6 +50,7 @@ ALLOW = (
     "bible_*.jsonl", "canon.jsonl", "dictionary_supplement.jsonl", "witnesses.jsonl", "domain_goldens.json",
     "verifier_specs.jsonl",      # VERIFIERS AS DATA (Gen 3 · 2): the laws held as specs ride with the keeping
     "bible_book_names.json",     # THE WORD IN THE READER'S TONGUE (Gen 3 · 4): the gathered book names
+    "sticks.jsonl",              # THE TICK STICK (2026-10-05): open questions and their sealed marks
 )
 NEVER = ("node_identity.json", "known_branches.json", "sync_status.json", "contact_inbox.jsonl",
          "web_cache.jsonl", "watch.json", "watch_org.json", "watch_history.jsonl", "activity.jsonl",
