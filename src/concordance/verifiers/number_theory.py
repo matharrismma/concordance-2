@@ -650,8 +650,17 @@ def verify_critical_line(spec):
         claimed = int(spec.get("claimed_zeros_on_line"))
     except (TypeError, ValueError):
         return error(name, "critical_line_height (a number) and claimed_zeros_on_line (an integer) are required")
-    if not (14 < T <= _MAX_HEIGHT):
-        return error(name, f"height {T} out of range: the first zero is at t ≈ 14.13; this door computes up to T = {_MAX_HEIGHT:g}")
+    import os as _os
+    # The cap protects the public /verify path (which sheds at 8 s but whose worker thread keeps computing):
+    # a stranger cannot make the box sweep to T=1e9. The trusted operator's tool (tools/tick.py) lifts it by
+    # setting CONCORDANCE_RIEMANN_MAX, because an offline mark is meant to run long. Read live, not at import.
+    try:
+        max_h = float(_os.environ.get("CONCORDANCE_RIEMANN_MAX", "") or _MAX_HEIGHT)
+    except ValueError:
+        max_h = _MAX_HEIGHT
+    if not (14 < T <= max_h):
+        return error(name, f"height {T} out of range: the first zero is at t ≈ 14.13; this door computes up to "
+                           f"T = {max_h:g} (CONCORDANCE_RIEMANN_MAX lifts it for an offline mark)")
     try:
         on_line, n_strip, S, rescans = _zeros_on_line_checked(T)
     except Exception as e:  # noqa: BLE001 — a computation that fails is an error, never a verdict

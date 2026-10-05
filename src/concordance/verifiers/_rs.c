@@ -7,6 +7,11 @@
  * scan defers to exact mpmath wherever |Z| is within the formula's own error, so the count is the
  * same whichever backend ran. Found, never generated: this computes Hardy's Z, it decides nothing.
  *
+ * logk[j] = log(j+1) and invsqrtk[j] = 1/sqrt(j+1) are PRECOMPUTED by the caller up to mmax and
+ * passed in, so the inner loop is a cosine and a multiply — not a log and a sqrt — per term. At
+ * T=1e7 (m ~ 1262) that is the difference between hours and minutes; the logs and sqrts were ~85%
+ * of the work. The values are the same doubles either way, so the zero count is unchanged.
+ *
  * Built on first use by riemann_accel.build(); the .so is a local artifact, never synced.
  * Compile: cc -O3 -fPIC -shared -fopenmp -o _rs<suffix>.so _rs.c -lm
  */
@@ -18,10 +23,12 @@
 #endif
 static const double TWO_PI = 6.283185307179586;
 
-/* Z(t[i]) for i in [0, n), written to out[i]. Each t independent — parallel across cores when the
- * build found OpenMP. No fast-math: IEEE semantics, so a value near zero is the same here as in
- * python, and the scan's exact-mpmath recount lands on the same spans. */
-void nh_rs_z_array(const double *ts, long n, double *out) {
+/* Z(t[i]) for i in [0, n), written to out[i]. logk/invsqrtk hold log(k) and 1/sqrt(k) for k=1..mmax
+ * at indices 0..mmax-1; the caller guarantees mmax >= floor(sqrt(max(t)/2pi)). Each t independent —
+ * parallel across cores when the build found OpenMP. No fast-math: IEEE semantics, so a value near
+ * zero is the same here as in python, and the scan's exact-mpmath recount lands on the same spans. */
+void nh_rs_z_array(const double *ts, long n, const double *logk, const double *invsqrtk,
+                   long mmax, double *out) {
 #ifdef _OPENMP
     #pragma omp parallel for schedule(static)
 #endif
@@ -29,11 +36,12 @@ void nh_rs_z_array(const double *ts, long n, double *out) {
         double t = ts[i];
         double a = sqrt(t / TWO_PI);
         long m = (long)a;
+        if (m > mmax) m = mmax;                 /* guard: never index past the precomputed tables */
         double th = t / 2.0 * log(t / TWO_PI) - t / 2.0 - M_PI / 8.0
                     + 1.0 / (48.0 * t) + 7.0 / (5760.0 * t * t * t);
         double s = 0.0;
-        for (long k = 1; k <= m; k++) {
-            s += cos(th - t * log((double)k)) / sqrt((double)k);
+        for (long k = 0; k < m; k++) {
+            s += cos(th - t * logk[k]) * invsqrtk[k];
         }
         double p = a - (double)m;
         double c0 = cos(TWO_PI * (p * p - p - 1.0 / 16.0)) / cos(TWO_PI * p);

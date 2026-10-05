@@ -109,7 +109,8 @@ def _load_c():
             return _C
         lib = ctypes.CDLL(str(so))
         fn = lib.nh_rs_z_array
-        fn.argtypes = [ctypes.c_void_p, ctypes.c_long, ctypes.c_void_p]
+        fn.argtypes = [ctypes.c_void_p, ctypes.c_long, ctypes.c_void_p, ctypes.c_void_p,
+                       ctypes.c_long, ctypes.c_void_p]
         fn.restype = None
         _C = fn
     except Exception:  # noqa: BLE001 — any failure falls through to numpy/python
@@ -145,13 +146,31 @@ def _np_z(ts):
     return out
 
 
+_C_TABLES = {"mmax": 0, "logk": None, "invsqrtk": None}
+
+
+def _tables(mmax: int):
+    """Precomputed log(k) and 1/sqrt(k) for k=1..mmax, grown as needed and reused across blocks."""
+    np = _numpy()
+    if mmax > _C_TABLES["mmax"]:
+        ks = np.arange(1, mmax + 1, dtype=float)
+        _C_TABLES.update({"mmax": mmax, "logk": np.ascontiguousarray(np.log(ks)),
+                          "invsqrtk": np.ascontiguousarray(1.0 / np.sqrt(ks))})
+    return _C_TABLES["logk"], _C_TABLES["invsqrtk"], _C_TABLES["mmax"]
+
+
 def _c_z(ts):
     import ctypes
     np = _numpy()
     fn = _load_c()
     ts = np.ascontiguousarray(ts, dtype=float)
     out = np.empty_like(ts)
-    fn(ts.ctypes.data_as(ctypes.c_void_p), ts.size, out.ctypes.data_as(ctypes.c_void_p))
+    tmax = float(ts.max()) if ts.size else 20.0
+    mmax = max(1, int((tmax / _TWO_PI) ** 0.5) + 1)
+    logk, invsqrtk, mm = _tables(mmax)
+    fn(ts.ctypes.data_as(ctypes.c_void_p), ts.size,
+       logk.ctypes.data_as(ctypes.c_void_p), invsqrtk.ctypes.data_as(ctypes.c_void_p),
+       mm, out.ctypes.data_as(ctypes.c_void_p))
     return out
 
 
