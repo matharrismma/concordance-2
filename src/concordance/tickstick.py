@@ -122,6 +122,8 @@ def fit(stick: Dict[str, Any]) -> Dict[str, Any]:
     eliminations = []
     if best:
         eliminations.append(f"no failure below {best.get('unit') or 'the bound'} {best['up_to']:g} (direct)")
+    for t in instances:                                   # an instance IS an elimination: verified for one case
+        eliminations.append("verified for a case: " + (t.get("claim") or "")[:150])
     for t in witnesses:
         eliminations.append((t.get("claim") or "")[:160])
     for t in exclusions:

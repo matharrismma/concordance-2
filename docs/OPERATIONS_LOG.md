@@ -1352,3 +1352,16 @@ is a backup now.
   below 2e7 (through the divisor sum), so a counterexample must evade every eliminated region at once. The
   pursuit of 1e8 by brute scan is set aside for this: a counterexample's window is pushed up by cheap, exact
   eliminations from independent tools, which is the engine's own method (narrow by elimination).
+
+## 2026-10-05 — narrow by elimination, across all the sticks (ac11028)
+- Matt: narrow the window and rerun, keep narrowing until we basically solve, for ALL the Millennium problems;
+  we are looking at what it is NOT. Every stick now carries fit.window: what each bound/instance/witness/
+  exclusion ELIMINATES and what survives (a failure must evade them all at once). narrows_numerically splits
+  the problems with a real numeric counterexample-window (Riemann: height 1e7 + Robin 2e7; BSD: curve by curve;
+  plus the LNH and fine-structure sticks) from the BARRIER problems (P vs NP, Hodge, Yang-Mills, Navier-Stokes)
+  whose marks are cited proof-obstructions — no numeric window to shrink. tools/tick.py window reads them all.
+- HONEST CEILING (docs/TICK_STICK.md): narrowing is evidence, never a proof; "basically solve" = drive the
+  window as far as the tools allow and state what remains; the engine finds and checks, it does not author the
+  proof, and these questions are open. P vs NP carries its 3 barriers; Hodge/Yang-Mills/Navier-Stokes have no
+  eliminations yet; Poincare is the one that is solved (Perelman). The verifiers that eliminate run through the
+  engine (POST /verify, nightly benchmark 71/71), so each new tool and each rerun narrows the window on its own.
