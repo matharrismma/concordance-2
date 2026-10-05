@@ -94,6 +94,7 @@ def fit(stick: Dict[str, Any]) -> Dict[str, Any]:
     witnesses = [t for t in ticks if t.get("kind") == "witness"]
     equivalences = [t for t in ticks if t.get("kind") == "equivalence"]
     exclusions = [t for t in ticks if t.get("kind") == "exclusion"]
+    notes = [t for t in ticks if t.get("kind") == "note"]
     out: Dict[str, Any] = {
         "verified_up_to": ({"up_to": best["up_to"], "unit": best.get("unit"), "claim": best.get("claim"), "seal": best.get("seal"),
                             "at": best.get("at")} if best else None),
@@ -101,9 +102,11 @@ def fit(stick: Dict[str, Any]) -> Dict[str, Any]:
         "witnesses": len(witnesses),
         "equivalent_statements": [t.get("claim") for t in equivalences],
         "excluded_approaches": [t.get("claim") for t in exclusions],
+        "record": [{"claim": t.get("claim"), "by": t.get("by"), "at": t.get("at")} for t in notes],
         "sealed_ticks": sum(1 for t in ticks if t.get("kind") in SEALED_KINDS),
         "cited_ticks": sum(1 for t in ticks if t.get("kind") in CITED_KINDS),
-        "progression": [{"up_to": t["up_to"], "at": t.get("at")} for t in sorted(bounds, key=lambda t: str(t.get("at")))],
+        "progression": [{"up_to": t["up_to"], "seal": t.get("seal"), "at": t.get("at")}
+                        for t in sorted(bounds, key=lambda t: t["up_to"])],
     }
     if best:
         out["open"] = f"beyond {best.get('unit') or 'the bound'} {best['up_to']:g}: not verified here"

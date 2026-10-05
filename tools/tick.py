@@ -2,6 +2,7 @@
 """THE TICK STICK — make a mark (docs/TICK_STICK.md; Matt, 2026-10-05).
 
     PYTHONPATH=src python tools/tick.py seed                 # open the first sticks with their cited marks
+    PYTHONPATH=src python tools/tick.py document              # write the Riemann attempt's record onto its stick
     PYTHONPATH=src python tools/tick.py riemann 200          # verify every zero up to T = 200 is on the line,
                                                              # SEAL it through the same path as POST /verify, tick
     PYTHONPATH=src python tools/tick.py read stick_riemann_hypothesis
@@ -170,6 +171,46 @@ def bsd(label: str) -> int:
     return 0 if r.get("ok") else 1
 
 
+RIEMANN_RECORD = [
+    ("method", "Two independent counts must agree before any bound is sealed: the sign changes of Hardy's Z(t) ON "
+               "the critical line (Riemann-Siegel), and Backlund's argument-principle count N(T) = theta(T)/pi + 1 "
+               "+ S(T) IN the strip. Agreement is the verification; disagreement seals nothing. This is "
+               "Turing's/Backlund's method, how every published verification is done. It verifies RH UP TO A "
+               "HEIGHT T; it is not, and does not become, a proof of the hypothesis."),
+    ("the honest record", "The first attempt at T=1,000,000 came up 18 zeros short of the strip count — close pairs "
+               "the grid stepped over — and sealed NOTHING. A parabolic dip detector (recounting exactly wherever "
+               "the sampled curve is predicted to dip below zero) closed the gap, and the independent strip count "
+               "stays the authority: no bound was ever sealed on a count that did not agree."),
+    ("compute", "Hardy's Z is swept by a C kernel (Riemann-Siegel, OpenMP, log(k) and 1/sqrt(k) precomputed), numpy "
+               "where no compiler is present, pure python as the floor — all the same formula, deferring to exact "
+               "mpmath near every zero, so the zero count is the same whichever backend ran. T=10,000,000 "
+               "(21,136,125 zeros) took about 2.2 hours on one four-core box; the two methods landed on the known "
+               "value N(1e7) = 21,136,125."),
+    ("open", "The sealed bound stands at T=10,000,000 (progression 200, 500, 1k, 10k, 100k, 200k, 1M, 10M). Beyond "
+               "it the cosines of the main sum are the cost floor; a blocked or FFT main sum would reach higher. "
+               "The hypothesis itself — that EVERY non-trivial zero, to infinite height, lies on the line — is "
+               "unproven here and everywhere. The stick records how far the verification reaches, not that it is settled."),
+]
+
+
+def document() -> int:
+    """Write the attempt's RECORD onto the Riemann stick as note ticks (Matt, 2026-10-05: document the whole
+    attempt in the stick). Idempotent: a note already present by its text is not added again."""
+    from concordance import tickstick as T
+    sid = T.create("Riemann hypothesis")["id"]
+    have = {t.get("claim") for t in T.read(sid).get("ticks", [])}
+    added = 0
+    for label, text in RIEMANN_RECORD:
+        claim = f"[{label}] {text}"
+        if claim in have:
+            continue
+        r = T.tick(sid, "note", claim, by="Narrow Highway — the Riemann attempt, 2026-10-05")
+        print(("noted: " + label) if r.get("ok") else ("REFUSED " + label + ": " + r.get("error", "")))
+        added += 1 if r.get("ok") else 0
+    print(json.dumps({"stick": sid, "notes_added": added, "record_lines": len(T.read(sid)["fit"]["record"])}, indent=1))
+    return 0
+
+
 def main() -> int:
     a = sys.argv[1:]
     if not a:
@@ -177,6 +218,8 @@ def main() -> int:
         return 2
     if a[0] == "seed":
         return seed()
+    if a[0] == "document":
+        return document()
     if a[0] == "riemann":
         return riemann(float(a[1]) if len(a) > 1 else 100.0)
     if a[0] == "bsd":

@@ -74,6 +74,12 @@ def test_a_stick_takes_sealed_marks_and_cited_marks_and_fits_no_further_than_the
     assert eq["ok"] and eq["fit"]["cited_ticks"] == 1 and eq["fit"]["sealed_ticks"] == 2
     st = tickstick.read(sid)
     assert st["ok"] and len(st["ticks"]) == 3 and st["fit"]["equivalent_statements"][0].startswith("RH is equivalent")
+    # a note documents the attempt without counting toward the fit; it surfaces in the record, not the bound
+    nt = tickstick.tick(sid, "note", "Method: two independent counts must agree before any bound is sealed.",
+                        by="the record")
+    assert nt["ok"] and nt["fit"]["record"][0]["claim"].startswith("Method:") and nt["fit"]["record"][0]["by"] == "the record"
+    assert nt["fit"]["sealed_ticks"] == 2 and nt["fit"]["cited_ticks"] == 1   # the note counts as neither
+    assert nt["fit"]["verified_up_to"]["up_to"] == 100 and nt["fit"]["progression"][-1]["seal"]   # bound + seal unchanged
     # a stick with sealed instances but no bound says so — the general question stays open
     r2 = tickstick.create("Birch and Swinnerton-Dyer conjecture", field="number_theory")
     inst = tickstick.tick(r2["id"], "instance", "E = 11a1: L(E,1) != 0 => rank 0 (Kolyvagin)", seal=h)
