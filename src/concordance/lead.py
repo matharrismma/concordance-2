@@ -123,7 +123,10 @@ def lead(situation: str, *, apply_fn: Optional[Callable[[str], Dict[str, Any]]] 
                                         "is the Word and the technique to live out, not a verdict to compute"},
         "guard": ("Composes what the engine holds — the biblical type, the tool, the technique, the "
                   "strategy — and applies only what is checkable. It authors nothing and renders no verdict "
-                  "of its own; the verifiers are the authority, and Christ is where every road leads."),
-        "next": ("apply the tool to a checkable claim (POST /verify), read the strategy's where-it-failed "
-                 "before using the pattern, and sit with the Word that met this hour"),
+                  "of its own; the verifiers are the authority, and Christ is where every road leads. "
+                  "It OFFERS; it never decides for you. Liberty is inherent here and your free will is "
+                  "paramount — a coach proposes the path, the walking of it is yours."),
+        "next": ("the choice and the act are yours — the engine never decides for you. If you will: apply "
+                 "the tool to a checkable claim (POST /verify), read the strategy's where-it-failed before "
+                 "using the pattern, and sit with the Word that met this hour"),
     }
