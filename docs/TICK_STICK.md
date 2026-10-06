@@ -73,6 +73,14 @@ still fail, and push that window with every rerun:
    evidence from mathematical physics for the Hilbert-Polya spectral picture — the zeros behave like the spectrum
    of a random Hermitian operator. It is evidence, not a proof, and says nothing about on-line-ness.
 
+   **The sight picture.** `number_theory.count_residual` reads the same zeros and looks at the signed residual of
+   the count, `S(T) = N(T) - (theta(T)/pi + 1)` — where the smooth prediction *missed*. RH (Selberg) requires the
+   misses to balance at zero, with a spread of order `sqrt((1/2 pi^2) ln ln T)`, never walking off the `ln T`
+   envelope. They do: mean within 0.001 of zero, spread 0.4 against a Selberg scale of 0.34, no `|S|` above 1.3
+   where `ln T` is 9.2. This is the early-warning mark — were the residual ever to drift or its spread to outrun
+   the envelope, the miss would be seen marching toward the edge long before any inequality broke. Evidence, not
+   a proof.
+
    **A count is not a verification.** The stick also carries a WITNESS of the zero *count* at a great height —
    `number_theory.zero_count` (Turing's method, cross-checked against the Riemann-von Mangoldt term within
    Backlund's bound on S(T)): 3,945,951,430,271 zeros up to T = 10^12. It is marked as exactly what it is — the

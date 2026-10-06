@@ -2052,6 +2052,17 @@
       }
     }
   },
+  "count_residual": {
+    "packet_key": "NUM_VERIFY",
+    "true": {
+      "residual_check": true,
+      "claimed_residual_consistent": true
+    },
+    "false": {
+      "residual_check": true,
+      "claimed_residual_consistent": false
+    }
+  },
   "soil_science": {
     "false": {
       "area_hectares": 2.0,

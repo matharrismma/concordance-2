@@ -1431,3 +1431,20 @@ is a backup now.
 - Riemann stick now: direct bound at height 1e7 + SIX witnesses (Robin, Schoenfeld, zero-count 1e12, Lagarias,
   Nicolas, GUE). Gate each time: BENCHMARKS OK (74/74, 75/75, 76/76; 0 false positives), ASSAY OK newly passing the
   lagarias/nicolas/gue probes, regressed []. Narrowing is evidence, never a proof; RH is open.
+
+## 2026-10-05 — the sight picture: S(T), the count's signed residual, tracked against RH's envelope
+- Matt's metaphor: "sighting in a rifle scope. Gotta shoot to see where you missed." The miss has structure — a
+  signed residual — and watching it is sharper than pass/fail. For the zero count the residual is named exactly:
+  N(T) = theta(T)/pi + 1 + S(T); S(T) is where the smooth prediction missed.
+- verify_count_residual (number_theory; alias "count_residual"/"s_of_t"; own golden, domains 76->77; POST /verify).
+  Reads the stored Odlyzko zeros (data/zeta_zeros.jsonl), samples S(t) across [50, ~9878], and checks RH's Selberg
+  prediction: misses balance (mean ~ 0), spread of order sqrt((1/2pi^2) ln ln T), and no |S| above the ln T
+  envelope. Measured: mean -0.001, sd 0.406 (Selberg scale 0.335), max|S| 1.28 << ln T 9.20. The count misses the
+  smooth curve by a hair in both directions and never walks off, exactly as RH requires. Sealed WITNESS ac94af82…
+  on the Riemann stick. tools/tick.py residual.
+- This is the EARLY-WARNING mark: were S(T) ever to drift or its spread to outrun the envelope, the group would be
+  seen marching toward the edge before any inequality actually broke — a candidate signal sharper than a bare
+  counterexample hunt. Today the group is tight and centered: no drift, no walk-off.
+- Riemann stick now: direct bound (height 1e7) + SEVEN witnesses — Robin, Schoenfeld, zero-count(1e12), Lagarias,
+  Nicolas, GUE (spacings), and the S(T) residual (the count's miss). Gate: BENCHMARKS OK 77/77 (0 false positives),
+  ASSAY OK newly passing verify.count_residual.runs, regressed []. Narrowing is evidence, never a proof; RH is open.

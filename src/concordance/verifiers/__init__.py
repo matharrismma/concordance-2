@@ -38,6 +38,8 @@ VERIFIERS: Dict[str, str] = {
     # two more RH-equivalent eliminations, same divisor-sum / primorial machinery (2026-10-05)
     "lagarias": _P + "number_theory", "lagarias_inequality": _P + "number_theory",
     "nicolas": _P + "number_theory", "nicolas_criterion": _P + "number_theory",
+    # the sight picture: S(T), the signed residual of the zero count, tracked against RH's Selberg envelope
+    "count_residual": _P + "number_theory", "s_of_t": _P + "number_theory",
     "combinatorics": _P + "combinatorics",
     "geometry": _P + "geometry",
     "formal_logic": _P + "formal_logic", "logic": _P + "formal_logic",

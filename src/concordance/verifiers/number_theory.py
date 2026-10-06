@@ -1035,8 +1035,79 @@ def verify_zero_count(spec):
                          f"claim they lie on the line", data)
 
 
+def _load_zeta_gammas():
+    """The stored imaginary parts of the zeta zeros (data/zeta_zeros.jsonl, Odlyzko's published table)."""
+    import json
+    import os
+    from pathlib import Path
+    d = Path(os.environ.get("CONCORDANCE_DATA_DIR", "").strip() or "data")
+    p = d / "zeta_zeros.jsonl"
+    if not p.exists():
+        return None
+    g: List[float] = []
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("{"):
+            continue
+        try:
+            g.append(float(line))
+        except ValueError:
+            continue
+    return g
+
+
+def verify_count_residual(spec):
+    """THE SIGHT PICTURE on the Riemann stick (2026-10-05). The zero count splits as N(T) = theta(T)/pi + 1 + S(T);
+    S(T) is the SIGNED RESIDUAL — where the smooth prediction missed. RH (Selberg) requires S(T) to stay small,
+    centered at zero, with a spread of order sqrt((1/2 pi^2) ln ln T), never walking off. We read Odlyzko's zeros,
+    sample S(t) across the range, and check: the misses balance (mean ~ 0), the spread is of the Selberg order,
+    and |S| stays well under the ln T envelope. A match is EVIDENCE the zeros are distributed as RH requires — it
+    is not a proof, and says nothing about whether any zero lies on the line. (The early-warning mark: were S(T)
+    ever to drift or its spread to outrun the envelope, the miss would be seen walking toward the edge.)
+      NUM_VERIFY: {"residual_check": true, "claimed_residual_consistent": true}"""
+    import math
+    name = "number_theory.count_residual"
+    g = _load_zeta_gammas()
+    if not g or len(g) < 1000:
+        return na(name, "the residual check needs data/zeta_zeros.jsonl (the zeta zeros table)")
+    try:
+        import bisect
+        import numpy as np
+        import mpmath as mp
+    except ImportError:
+        return na(name, "the residual check needs numpy and mpmath")
+    Thi = g[-1]
+    ts = np.linspace(50.0, Thi - 5.0, 4000)
+    S = np.array([bisect.bisect_right(g, float(t)) - float(mp.siegeltheta(t) / math.pi + 1.0) for t in ts])
+    mean = float(S.mean()); sd = float(S.std()); mx = float(np.abs(S).max())
+    selberg = math.sqrt((1.0 / (2 * math.pi ** 2)) * math.log(math.log(Thi)))   # RH/Selberg spread at the top height
+    envelope = math.log(Thi)
+    mean_ok = abs(mean) <= 0.1                        # the misses balance around the bullseye
+    spread_ok = 0.5 * selberg <= sd <= 3.0 * selberg  # the spread is of the Selberg order, not growing like ln T
+    no_walkoff = mx <= envelope                       # |S| stays well under ln T — no shot walks off the paper
+    consistent = bool(mean_ok and spread_ok and no_walkoff)
+    data = {"zeros_used": len(g), "height": round(Thi, 3), "samples": len(ts), "mean_S": round(mean, 4),
+            "sd_S": round(sd, 4), "max_abs_S": round(mx, 4), "selberg_sd_scale": round(selberg, 4),
+            "ln_T_envelope": round(envelope, 3), "mean_centered": mean_ok, "spread_selberg_order": spread_ok,
+            "no_walkoff": no_walkoff, "consistent_with_rh": consistent,
+            "means": ("the signed residual S(T) = N(T) - (theta(T)/pi + 1) of the zero count is centered at zero "
+                      "with spread of the Selberg order sqrt((1/2 pi^2) ln ln T) and stays within the ln T "
+                      "envelope — the misses balance and never walk off. EVIDENCE the zeros are distributed as RH "
+                      "requires; NOT a proof and NOT a claim about any zero lying on the line")}
+    claimed = spec.get("claimed_residual_consistent")
+    if claimed is None:
+        return na(name, "claim claimed_residual_consistent", data)
+    if bool(claimed) != consistent:
+        return mismatch(name, f"residual-consistent-with-RH is {consistent} (mean {mean:+.4f}, sd {sd:.4f} vs "
+                              f"Selberg {selberg:.4f}, max|S| {mx:.3f} vs ln T {envelope:.2f}), claimed {bool(claimed)}", data)
+    return confirm(name, f"the count residual S(T) over [50, {Thi:.0f}]: mean {mean:+.4f} (centered), sd {sd:.4f} "
+                         f"(Selberg order {selberg:.4f}), max|S| {mx:.3f} << ln T {envelope:.2f} — the misses balance "
+                         f"and never walk off, as RH requires. Evidence, not a proof.", data)
+
+
 _RULES = [
     (lambda nv: ("critical_line_height" in nv and "claimed_zeros_on_line" in nv), verify_critical_line),
+    (lambda nv: ("residual_check" in nv and "claimed_residual_consistent" in nv), verify_count_residual),
     (lambda nv: ("robin_to" in nv and ("claimed_robin_holds" in nv or "claimed_closest_approach_n" in nv)), verify_robin),
     (lambda nv: ("schoenfeld_to" in nv and ("claimed_schoenfeld_holds" in nv or "claimed_closest_approach_n" in nv)), verify_schoenfeld),
     (lambda nv: ("zero_count_height" in nv and "claimed_zero_count" in nv), verify_zero_count),

@@ -10,6 +10,7 @@
     PYTHONPATH=src python tools/tick.py lagarias [N]          # and through Lagarias's elementary inequality (to N)
     PYTHONPATH=src python tools/tick.py nicolas [P]           # and through Nicolas's primorial criterion (primes to P)
     PYTHONPATH=src python tools/tick.py gue                   # another domain: the zeros' spacings are GUE (random-matrix)
+    PYTHONPATH=src python tools/tick.py residual              # the sight picture: S(T), the count's signed miss, vs RH's envelope
     PYTHONPATH=src python tools/tick.py count [T]             # count the zeros at a great height (Turing; a count, not on-line)
     PYTHONPATH=src python tools/tick.py bsd [label|all]      # BSD: seal one curve, or every curve in the ingested table
     PYTHONPATH=src python tools/tick.py window [stick]        # the surviving window of each stick (narrow by elimination)
@@ -518,6 +519,42 @@ def nicolas(P: int = 1000000) -> int:
     return 0
 
 
+def residual() -> int:
+    """THE SIGHT PICTURE. Seal S(T) = N(T) - (theta(T)/pi + 1), the signed residual of the zero count — where the
+    smooth prediction missed. The verifier shows the misses balance (mean ~ 0), the spread is of the Selberg order,
+    and nothing walks off the ln T envelope, as RH requires. A WITNESS on the Riemann stick: the early-warning mark
+    that would show the group drifting toward the edge if it ever did. Evidence, never a proof."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    from concordance.verifiers import number_theory as NT
+    pre = NT.verify_count_residual({"residual_check": True, "claimed_residual_consistent": True})
+    if pre.status != "CONFIRMED":
+        print("the residual check did not confirm (or errored):", pre.status, (pre.detail or "")[:160]); return 1
+    r = verify_derivation([{"id": "residual", "domain": "number_theory",
+          "spec": {"NUM_VERIFY": {"residual_check": True, "claimed_residual_consistent": True}}}])
+    if r.get("verdict") != "HOLDS":
+        print("the elimination did not verify:", json.dumps(r)[:300]); return 1
+    r = receipts.attach(r, config=EngineConfig(), domain="number_theory")
+    seal = (r.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted"); return 1
+    print("sealed count-residual witness", seal)
+    sid = TS.create("Riemann hypothesis")["id"]
+    d = pre.data
+    claim = (f"The sight picture: the signed residual S(T) = N(T) - (theta(T)/pi + 1) of the zero count, sampled "
+             f"across the first {d['zeros_used']:,} zeros (to height {d['height']:.0f}), has mean {d['mean_S']:+.4f} "
+             f"(centered — the misses balance), spread {d['sd_S']:.4f} (of the Selberg order {d['selberg_sd_scale']:.4f}), "
+             f"and max |S| {d['max_abs_S']:.3f}, far under the ln T envelope {d['ln_T_envelope']:.2f}. The count misses "
+             f"the smooth curve by a hair in both directions and never walks off, exactly as RH requires. The "
+             f"early-warning mark — evidence, not a proof, and no claim about any zero lying on the line.")
+    res = TS.tick(sid, "witness", claim, seal=seal, by="Narrow Highway — the sight picture (S(T) residual), 2026-10-05")
+    print("  witness" if res.get("ok") else ("  REFUSED: " + res.get("error", "")))
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "witnesses": f["witnesses"]}, indent=1))
+    return 0
+
+
 def gue() -> int:
     """AN ANSWER IN ANOTHER DOMAIN. The Montgomery-Odlyzko law: the spacings of the zeta zeros follow the GUE of
     random matrix theory. The statistics verifier tests Odlyzko's published zeros for that signature (unit mean,
@@ -613,6 +650,8 @@ def main() -> int:
         return nicolas(int(a[1]) if len(a) > 1 else 1000000)
     if a[0] == "gue":
         return gue()
+    if a[0] == "residual":
+        return residual()
     if a[0] == "count":
         return count(float(a[1]) if len(a) > 1 else 1000000000.0)
     if a[0] == "window":
