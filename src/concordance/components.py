@@ -76,9 +76,14 @@ COMPONENTS: List[Dict[str, Any]] = [
     {"primitive": "resistor", "name": "Rate limiter / Damp", "plane": "Reflex", "layer": "Precision cartridge",
      "status": "Verified", "modules": ["ratelimit", "alignment"],
      "note": "limits / damps the flow (the read bucket, the ×0.6 down-weight)"},
-    {"primitive": "transformer", "name": "Bridges / Tongue", "plane": "Conductor", "layer": "Precision cartridge",
-     "status": "Experimental", "modules": ["graph"],
-     "note": "couples two circuits — cross-domain bridges, the reader's tongue"},
+    {"primitive": "transformer", "name": "Bridges", "plane": "Conductor", "layer": "Precision cartridge",
+     "status": "Verified", "modules": ["graph"],
+     "note": "couples two circuits — the cross-domain edges; every relation card-backed with a typed kind "
+             "and evidence, and every endpoint resolves (edge audit on the live needle)"},
+    {"primitive": "transformer", "name": "The Tongue", "plane": "Conductor", "layer": "Precision cartridge",
+     "status": "Experimental", "modules": ["translate"],
+     "note": "steps a signal across tongues — the reader's tongue: glosses from held lexicons (biblical "
+             "Greek + Hebrew, Strong's), never composes; NO_LEXICON for the rest (a first cut, Latin next)"},
     {"primitive": "relay", "name": "Node sync / Mesh relay", "plane": "Scribe", "layer": "Precision cartridge",
      "status": "Verified", "modules": ["replicate", "mesh"],
      "note": "a signed bundle trips a far node"},
@@ -205,6 +210,20 @@ def _substance() -> Dict[str, Any]:
         return {"pending": True, "detail": "run tools/substance_meter.py (timer) to populate data/substance.json"}
 
 
+def _edges() -> Dict[str, Any]:
+    """The last edge audit (tools/edge_meter.py writes data/edges.json on a timer) — the live needle for
+    Bridges: every relation resolves (valid) and is card-backed, out of all connection edges."""
+    import json
+    p = _data_dir() / "edges.json"
+    try:
+        d = json.loads(p.read_text(encoding="utf-8"))
+        return {"edges": d.get("edges"), "valid_ratio": d.get("valid_ratio"),
+                "dangling": d.get("dangling"), "card_backed_ratio": d.get("card_backed_ratio"),
+                "measured_at": d.get("measured_at")}
+    except (OSError, ValueError):
+        return {"pending": True, "detail": "run tools/edge_meter.py (timer) to populate data/edges.json"}
+
+
 def _status_live(declared: str, wired: bool) -> str:
     """The reported status: the declared evidence class, downgraded to reality if the part is not wired.
     Never upgraded — a part cannot claim a status its code does not support."""
@@ -216,6 +235,7 @@ def _status_live(declared: str, wired: bool) -> str:
 def report() -> Dict[str, Any]:
     """The whole machine, computed now. Cheap: import resolution + one small JSON read, no corpus."""
     substance = _substance()
+    edges = _edges()
     comps: List[Dict[str, Any]] = []
     for c in COMPONENTS:
         r = _resolvable(c.get("modules") or [])
@@ -223,6 +243,8 @@ def report() -> Dict[str, Any]:
                "status_live": _status_live(c.get("status", "Concept"), r["wired"])}
         if c["name"] == "The Keeping":
             row["reading"] = substance          # the live needle: substance ratio, measured
+        elif c["name"] == "Bridges":
+            row["reading"] = edges              # the live needle: edges resolve / card-backed
         comps.append(row)
     regs: List[Dict[str, Any]] = []
     for g in REGULATORS:
@@ -239,7 +261,7 @@ def report() -> Dict[str, Any]:
         "chain": PLANES, "plane_order": _PLANE_ORDER,
         "layers": LAYERS, "status_ladder": STATUS_LADDER,
         "components": comps, "regulators": regs, "fire_order": _FIRE_ORDER,
-        "substance": substance,
+        "substance": substance, "edges": edges,
         "counts": {"components": len(comps), "wired": sum(1 for c in comps if c["wired"]),
                    "regulators": len(regs), "by_primitive": by_primitive, "by_plane": by_plane},
         "note": ("The engine as a vacuum-tube computer: every part classified by primitive, placed on the "

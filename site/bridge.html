@@ -54,6 +54,7 @@
   .tube .tp{font-family:ui-sans-serif,system-ui,sans-serif;font-size:.62rem;text-transform:uppercase;
     letter-spacing:.09em;color:var(--copper);margin-top:.15rem}
   .tube .tm{color:var(--muted);font-size:.72rem;margin-top:.3rem;line-height:1.35}
+  .tube .tube-meter{margin-top:.4rem;font-size:.72rem;color:var(--glow);font-family:ui-monospace,Consolas,monospace}
   .tube .tg{margin-top:.4rem;font-size:.68rem;color:var(--muted2);display:flex;gap:.5rem;flex-wrap:wrap}
   .tag{border:1px solid var(--hair);border-radius:20px;padding:.02rem .45rem}
   .st-Verified,.st-Production-ready{color:var(--pass);border-color:#3f5e3a}
@@ -198,9 +199,14 @@ function render(d){
   var t=document.getElementById("tubes");
   t.innerHTML=(C.components||[]).map(function(c){
     var cls=!c.wired?"off":(c.status_live==="Verified"||c.status_live==="Production-ready")?"on":"warm";
+    var rd=c.reading, meter="";
+    if(rd && !rd.pending){
+      if(rd.substance_ratio!=null) meter='<div class="tube-meter">'+(100*rd.substance_ratio).toFixed(1)+'% substance · '+num(rd.holdings)+' holdings</div>';
+      else if(rd.valid_ratio!=null) meter='<div class="tube-meter">'+(100*rd.valid_ratio).toFixed(1)+'% valid · '+num(rd.edges)+' edges · '+num(rd.dangling)+' dangling</div>';
+    }
     return '<div class="tube '+cls+'"><div class="tn">'+esc(c.name)+'</div>'+
       '<div class="tp">'+esc(c.primitive)+'</div>'+
-      '<div class="tm">'+esc(c.note||"")+'</div>'+
+      '<div class="tm">'+esc(c.note||"")+'</div>'+ meter +
       '<div class="tg"><span class="tag">'+esc(c.plane)+'</span>'+
         '<span class="tag st-'+esc((c.status_live||"").replace(/[^A-Za-z-]/g,""))+'">'+esc(c.status_live)+'</span></div></div>';
   }).join("");
