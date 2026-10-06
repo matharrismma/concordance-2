@@ -216,8 +216,11 @@ def _history(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
         tf = payload.get("traffic") if isinstance(payload.get("traffic"), dict) else {}
         tot = (tf or {}).get("totals") or {}
         keep = payload.get("keeping") or {}
+        comp = payload.get("components") if isinstance(payload.get("components"), dict) else {}
+        subr = (comp.get("substance") or {}).get("substance_ratio")
         snap = {"date": today, "t": int(time.time()),
                 "cards": keep.get("cards"), "public": keep.get("public"),
+                "substance": subr,
                 "seals": (payload.get("seals") or {}).get("count"),
                 "ledger_verified": (payload.get("ledger") or {}).get("verified"),
                 "req": tot.get("requests"), "human": tot.get("human"),

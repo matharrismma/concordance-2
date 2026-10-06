@@ -209,9 +209,11 @@ function render(d){
   var H=d.history||[];
   function col(key){return H.map(function(r){return r[key];});}
   var k=d.keeping||{},lg=d.ledger||{};
+  var sub=((d.components||{}).substance)||{};
   var vitals=[
     {k:"cards kept",n:num(k.cards),s:col("cards"),c:"var(--brass)"},
     {k:"served public",n:num(k.public),s:col("public"),c:"var(--pass)"},
+    {k:"keeping substance",n:(sub.substance_ratio!=null?(100*sub.substance_ratio).toFixed(1)+"%":"—"),s:col("substance"),c:"var(--glow)"},
     {k:"seals minted",n:num((d.seals||{}).count),s:col("seals"),c:"var(--glow)"},
     {k:"ledger verified",n:(lg.verified==null?"—":lg.verified+(lg.total!=null?"/"+lg.total:"")),s:col("ledger_verified"),c:"var(--copper)",bad:lg.ok===false},
     {k:"requests/day",n:num(((d.traffic||{}).totals||{}).requests),s:col("req"),c:"var(--brass)"},

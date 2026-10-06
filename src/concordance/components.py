@@ -62,8 +62,8 @@ COMPONENTS: List[Dict[str, Any]] = [
      "note": "one-way flow — proof can't exit, a miss can't pass as a hit"},
     {"primitive": "capacitor", "name": "The Keeping", "plane": "Plant", "layer": "Wear element",
      "status": "Experimental", "modules": ["corpus", "corpus_db"],
-     "note": "stores charge, smooths, releases on demand — the reservoir (55.8% substance / 44.2% stub, "
-             "measured 2026-10-06; stubs concentrated in science/OEIS, world, dictionary)"},
+     "note": "stores charge, smooths, releases on demand — the reservoir; substance ratio on the live "
+             "needle (substance_meter), stubs concentrated in science/OEIS, world, dictionary"},
     {"primitive": "capacitor", "name": "Wants / Candidates", "plane": "Plant", "layer": "Consumable",
      "status": "Verified", "modules": ["wants", "candidates"],
      "note": "holds a miss until it is filled; a held commitment"},
@@ -192,6 +192,19 @@ def _reading(slug: str) -> Dict[str, Any]:
     return {"pending": True}
 
 
+def _substance() -> Dict[str, Any]:
+    """The last substance measurement (tools/substance_meter.py writes data/substance.json on a timer).
+    The live needle for The Keeping — a real number, not an estimate. Honest `pending` until first run."""
+    import json
+    p = _data_dir() / "substance.json"
+    try:
+        d = json.loads(p.read_text(encoding="utf-8"))
+        return {"substance_ratio": d.get("substance_ratio"), "stub_ratio": d.get("stub_ratio"),
+                "holdings": d.get("holdings"), "measured_at": d.get("measured_at")}
+    except (OSError, ValueError):
+        return {"pending": True, "detail": "run tools/substance_meter.py (timer) to populate data/substance.json"}
+
+
 def _status_live(declared: str, wired: bool) -> str:
     """The reported status: the declared evidence class, downgraded to reality if the part is not wired.
     Never upgraded — a part cannot claim a status its code does not support."""
@@ -202,11 +215,15 @@ def _status_live(declared: str, wired: bool) -> str:
 
 def report() -> Dict[str, Any]:
     """The whole machine, computed now. Cheap: import resolution + one small JSON read, no corpus."""
+    substance = _substance()
     comps: List[Dict[str, Any]] = []
     for c in COMPONENTS:
         r = _resolvable(c.get("modules") or [])
-        comps.append({**c, "wired": r["wired"], "missing": r["missing"],
-                      "status_live": _status_live(c.get("status", "Concept"), r["wired"])})
+        row = {**c, "wired": r["wired"], "missing": r["missing"],
+               "status_live": _status_live(c.get("status", "Concept"), r["wired"])}
+        if c["name"] == "The Keeping":
+            row["reading"] = substance          # the live needle: substance ratio, measured
+        comps.append(row)
     regs: List[Dict[str, Any]] = []
     for g in REGULATORS:
         r = _resolvable(g.get("modules") or [])
@@ -222,6 +239,7 @@ def report() -> Dict[str, Any]:
         "chain": PLANES, "plane_order": _PLANE_ORDER,
         "layers": LAYERS, "status_ladder": STATUS_LADDER,
         "components": comps, "regulators": regs, "fire_order": _FIRE_ORDER,
+        "substance": substance,
         "counts": {"components": len(comps), "wired": sum(1 for c in comps if c["wired"]),
                    "regulators": len(regs), "by_primitive": by_primitive, "by_plane": by_plane},
         "note": ("The engine as a vacuum-tube computer: every part classified by primitive, placed on the "
