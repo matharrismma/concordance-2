@@ -3024,6 +3024,14 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import systems as _systems
         return _ok(_systems.report())
 
+    if method == "GET" and path == "/components":
+        # THE COMPONENTS — the engine as a vacuum-tube computer (docs/COMPONENTS.md): every part by
+        # primitive, on the one authority chain (Main→Steward→Conductor→Reflex→Scribe→witness), with
+        # layer, earned evidence status, and the regulators' live readings. UNGATED like /systems —
+        # knowing the machine's parts is not witness content. Feeds The Bridge.
+        from .. import components as _components
+        return _ok(_components.report())
+
     if method == "GET" and path == "/kernel":
         # THE GATE KERNEL — the law, published where agents READ it. The five moves, the eight-rule
         # agent covenant, the six KINDS, the authority lattice, and the nine-field record. UNGATED:
@@ -3413,6 +3421,7 @@ ROUTES = [
     {"path": "/study_find", "methods": ("GET",), "api": True},
     {"path": "/capabilities", "methods": ("GET",), "api": True},
     {"path": "/systems", "methods": ("GET",), "api": True, "rl": "read"},
+    {"path": "/components", "methods": ("GET",), "api": True, "rl": "read"},   # the vacuum-tube map → The Bridge
     {"path": "/kernel", "methods": ("GET",), "api": True},
     {"path": "/kernel/gate", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/playbook", "methods": ("GET",), "api": True},
@@ -3760,13 +3769,14 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             from .keep import request_is_operator
             q = {k: v[0] for k, v in parse_qs(u.query).items()}
             peer_ip = self.client_address[0] if self.client_address else ""
-            if u.path == "/keep.json":
+            if u.path in ("/keep.json", "/bridge.json"):
                 if not request_is_operator(peer_ip, self.headers, q):
                     return self._json(404, {"error": "not found"})   # the DATA stays gated
                 return self._json(200, _keep_dash(config), {"cache-control": "no-store"})
-            # the SHELL — only a sign-in prompt; reveals no operator data
+            # the SHELL — only a sign-in prompt; reveals no operator data. THE BRIDGE is the renamed
+            # operator console (Matt, 2026-10-06); keep.html is kept as a thin redirect to it.
             if site is not None:
-                return self._static("keep.html")
+                return self._static("bridge.html")
             return self._json(404, {"error": "not found"})
 
         def _do(self, method: str) -> None:
@@ -3831,6 +3841,7 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                          "# Agents: read /llms.txt, then use /search and /card. No login, and\n"
                          "# nothing here records who read what.\n"
                          "User-agent: *\nAllow: /\nDisallow: /keep\nDisallow: /keep.html\n"
+                         "Disallow: /bridge\nDisallow: /bridge.html\n"
                          "Disallow: /improve\nDisallow: /improve.html\n\n"
                          "# SEO backlink crawlers — this capacity belongs to readers.\n"
                          + "".join(f"User-agent: {n}\nDisallow: /\n" for n in seo)
@@ -3846,8 +3857,9 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 self.end_headers()
                 self.wfile.write(b)
                 return
-            if method == "GET" and u.path in ("/keep", "/keep.html", "/keep.json"):
-                return self._keep(u)  # operator-gated dashboard
+            if method == "GET" and u.path in ("/keep", "/keep.html", "/keep.json",
+                                               "/bridge", "/bridge.html", "/bridge.json"):
+                return self._keep(u)  # operator-gated dashboard — The Bridge
             if method == "GET" and u.path.startswith("/s/"):  # server-rendered citable receipt
                 h = u.path[3:].split("/")[0].strip()
                 status, html = render_seal_html(h, cas.fetch_anywhere(h))

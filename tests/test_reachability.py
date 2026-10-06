@@ -138,6 +138,17 @@ AGENT_ONLY = {
     # endpoints stand ready for them. Sibling /journal/dates is already declared above.
     "/days", "/journal",
 
+    # THE WALK + COACH flow, agent/API side (2026-10-06): /lead is THE LEAD conductor (a situation in, the
+    # discerned biblical type + tool + technique + strategy out — the HTTP twin of the WALK door's ask/
+    # discern/coach_next tools); /trajectory is the outcome ledger (success guides, failure narrows — posted
+    # by the coach flow, read back by it). Both agent/API surface, not a human page.
+    "/lead", "/trajectory",
+    # PROFESSIONS OF FAITH, agent/API side (2026-10-06): /profess seals a profession, /profession/witness
+    # bears witness (two-or-three, Deut 19:15), /profession reads one + its witnesses + the lineage to
+    # Polycarp. Reached by agents (and the MCP tools profess/witness_profession/profession) and the mesh
+    # confession flow, never a public <a href>.
+    "/profess", "/profession", "/profession/witness",
+
     # THE COMMONS: nothing here is agent-only any more. C1b declared the six shelf routes on this
     # list with a promise that `shelf.html` would land in C1c and they would come off it — C1c
     # landed, and they came off. That is what the declaration was for.
@@ -150,7 +161,8 @@ UNLISTED_PAGES = {
     "404.html",
     "coach.html",         # Coach (the audio-native desk; internal codename console) — reached by voice / direct URL / home-screen install, an E-Ink-first tool, not a page on the public witness nav
     "tv.html",            # narrowhighway.tv (the museum/broadcast shell) — reached by direct URL / the .tv domain, curated to what the viewer seeks, not a page on the witness nav
-    "keep.html",          # the operator's own surface, noindex — a public list is not its place
+    "bridge.html",        # THE BRIDGE — the operator's console (the vacuum-tube computer, live + on trend), noindex; the renamed keep, reached by direct URL, token-gated
+    "keep.html",          # the operator's own surface, noindex — now a thin redirect to The Bridge; a public list is not its place
     "steward.html",       # the Steward's instrument (budget, rounds, cost-destroyed) — plumbing in the five-doors map (2026-10-02); documented on connect.html, never a reader's door
     "encyclopedia.html",  # a redirect stub onto characters.html; a second door to one room
     "ask.html",           # the landing's predecessor, kept for old links

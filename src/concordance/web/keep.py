@@ -190,6 +190,47 @@ def _contact_box() -> Dict[str, Any]:
         return {"waiting": None, "recent": []}
 
 
+def _history(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """The TREND — one daily snapshot of the key tallies, appended lazily (once per UTC day, on the
+    first operator poll of the day), so every number grows a real line over time. No fabricated
+    history: the series starts the day this ships and accrues honestly. Returns the last ~30 days.
+    Best-effort throughout — a trend must never break the live panel."""
+    import datetime
+    import json
+    base = os.environ.get("CONCORDANCE_DATA_DIR", "").strip() or "data"
+    path = os.path.join(base, "keep_history.jsonl")
+    today = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+    rows: List[Dict[str, Any]] = []
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for ln in f:
+                ln = ln.strip()
+                if ln:
+                    try:
+                        rows.append(json.loads(ln))
+                    except ValueError:
+                        pass
+    except OSError:
+        rows = []
+    if not any(r.get("date") == today for r in rows):
+        tf = payload.get("traffic") if isinstance(payload.get("traffic"), dict) else {}
+        tot = (tf or {}).get("totals") or {}
+        keep = payload.get("keeping") or {}
+        snap = {"date": today, "t": int(time.time()),
+                "cards": keep.get("cards"), "public": keep.get("public"),
+                "seals": (payload.get("seals") or {}).get("count"),
+                "ledger_verified": (payload.get("ledger") or {}).get("verified"),
+                "req": tot.get("requests"), "human": tot.get("human"),
+                "agent": tot.get("agent"), "bot": tot.get("bot")}
+        try:
+            with open(path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(snap) + "\n")
+            rows.append(snap)
+        except OSError:
+            pass
+    return rows[-30:]
+
+
 def dashboard(config: EngineConfig) -> Dict[str, Any]:
     """The live state — what the operator needs to see at a glance. All best-effort."""
     try:
@@ -212,7 +253,7 @@ def dashboard(config: EngineConfig) -> Dict[str, Any]:
     except Exception:
         precedents = None
 
-    return {
+    out = {
         "ok": True,
         "version": __version__,
         "surface": config.surface,
@@ -240,3 +281,15 @@ def dashboard(config: EngineConfig) -> Dict[str, Any]:
             "recent": list(reversed(telemetry.recent(50))),  # newest first for the feed
         },
     }
+    # THE BRIDGE: the live component/regulator map (the vacuum-tube computer) + the trend. Both
+    # best-effort — a reporting layer must never sink the operator's window.
+    try:
+        from .. import components
+        out["components"] = components.report()
+    except Exception:  # noqa: BLE001
+        out["components"] = None
+    try:
+        out["history"] = _history(out)
+    except Exception:  # noqa: BLE001
+        out["history"] = []
+    return out

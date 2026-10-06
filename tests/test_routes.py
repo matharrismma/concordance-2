@@ -115,6 +115,7 @@ GOLDEN_API_GET = {
     "/wants",   # deliberate addition (the WANT LIST — the library grows by its misses; 2026-08-01)
     "/v1/chat/completions", "/v1/models",   # deliberate addition (THE OPENAI-COMPATIBLE DOOR, no model behind it; 2026-10-03)
     "/seals",   # deliberate addition (THE SEAL LEDGER as a public number — moat lever 1; 2026-10-03)
+    "/components",   # deliberate addition (THE COMPONENTS — the vacuum-tube map → The Bridge; 2026-10-06)
     "/sync/manifest", "/sync/ledger", "/sync/file",   # deliberate addition (EVERY COPY IS WHOLE — Gen 3 · 1; 2026-10-04)
     "/specs",   # deliberate addition (VERIFIERS AS DATA — Gen 3 · 2; 2026-10-04)
     "/benchmarks",   # deliberate addition (THE ENGINE MEASURES ITSELF IN PUBLIC — Gen 3 · 7; 2026-10-04)
@@ -189,6 +190,7 @@ GOLDEN_READ_LIMITED = {   # every route that scans/sorts the whole corpus per re
     "/coach/text", "/tortoise",  # coach lesson text + the tortoise reader — each streams/scans a PD source per request
     "/recombine",  # recombines found clauses from a corpus search per request — read bucket, like /search
     "/systems",  # cheap (disk + import resolution, no corpus) but placed in the generous bucket anyway
+    "/components",  # the vacuum-tube map — cheap (import resolution + one small JSON read), generous bucket like /systems
     "/tv/automaton",  # scans the witness cloud to let a witness testify in his own PD words — read-bucket limited like /witness
 }
 

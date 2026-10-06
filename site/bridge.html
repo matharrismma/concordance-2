@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/shell.js"></script>
+<meta name="robots" content="noindex, nofollow">
+<title>The Bridge — Narrow Highway</title>
+<style>
+  /* THE BRIDGE — the operator's console: the engine as a vacuum-tube computer, read live and on trend.
+     Steampunk: brass + glass on dark, glowing tubes, needle gauges, copper runs. (Matt, 2026-10-06) */
+  :root{
+    --bg:#15110c; --panel:#1e1812; --panel2:#241c14; --hair:#3a2e20; --copper:#b87333;
+    --brass:#c9a24a; --brass-dim:#8a7433; --ink:#efe6d2; --muted:#a2957c; --muted2:#776a54;
+    --glow:#f4c542; --pass:#8fd08a; --warn:#e0b05a; --fail:#e0795f; --glass:#0d0b08;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(1200px 500px at 50% -10%, #221a11 0%, var(--bg) 60%) fixed;
+    color:var(--ink);font:15px/1.5 "Iowan Old Style",Georgia,"Times New Roman",serif;
+    padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+  .wrap{max-width:1040px;margin:0 auto;padding:1.4rem 1.1rem 4rem}
+  a{color:var(--brass)}
+  h1{font-size:1.9rem;letter-spacing:.02em;margin:0 0 .2rem;font-weight:600}
+  h1 .rivet{color:var(--copper)}
+  .lede{color:var(--muted);margin:.1rem 0 1.4rem;font-size:.95rem}
+  .dot{display:inline-block;width:.62rem;height:.62rem;border-radius:50%;background:var(--muted2);
+    box-shadow:0 0 0 2px #0004, 0 0 8px currentColor;margin-right:.5rem;vertical-align:middle}
+  h2{font-family:ui-sans-serif,system-ui,sans-serif;font-size:.74rem;font-weight:700;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--brass);margin:1.9rem 0 .7rem;padding-bottom:.35rem;
+    border-bottom:1px solid var(--hair)}
+  h2 .sub{color:var(--muted2);font-weight:400;letter-spacing:.04em;text-transform:none;font-size:.72rem}
+  .card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--hair);
+    border-radius:10px;padding:1rem 1.1rem;box-shadow:inset 0 1px 0 #ffffff0d, 0 2px 6px #0006}
+
+  /* the backplane — the authority chain, left to right */
+  .chain{display:flex;flex-wrap:wrap;gap:.5rem;align-items:stretch}
+  .plane{flex:1 1 120px;min-width:0;background:var(--glass);border:1px solid var(--hair);
+    border-top:2px solid var(--copper);border-radius:7px;padding:.55rem .6rem}
+  .plane .nm{font-family:ui-sans-serif,system-ui,sans-serif;font-weight:700;font-size:.82rem;color:var(--brass);letter-spacing:.03em}
+  .plane .ow{color:var(--muted);font-size:.72rem;margin-top:.2rem;line-height:1.35}
+  .plane .ar{color:var(--copper);text-align:center;font-size:1rem;margin:.1rem 0}
+
+  /* component tubes */
+  .tubes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem}
+  .tube{position:relative;background:var(--glass);border:1px solid var(--hair);border-radius:9px;
+    padding:.6rem .65rem .6rem .95rem;overflow:hidden}
+  .tube::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--muted2)}
+  .tube.on::before{background:var(--glow);box-shadow:0 0 10px var(--glow),0 0 22px #f4c54288}
+  .tube.warm::before{background:var(--warn)}
+  .tube.off::before{background:var(--fail)}
+  .tube .tn{font-weight:600;font-size:.92rem}
+  .tube .tp{font-family:ui-sans-serif,system-ui,sans-serif;font-size:.62rem;text-transform:uppercase;
+    letter-spacing:.09em;color:var(--copper);margin-top:.15rem}
+  .tube .tm{color:var(--muted);font-size:.72rem;margin-top:.3rem;line-height:1.35}
+  .tube .tg{margin-top:.4rem;font-size:.68rem;color:var(--muted2);display:flex;gap:.5rem;flex-wrap:wrap}
+  .tag{border:1px solid var(--hair);border-radius:20px;padding:.02rem .45rem}
+  .st-Verified,.st-Production-ready{color:var(--pass);border-color:#3f5e3a}
+  .st-Experimental,.st-Prototype-pending{color:var(--warn);border-color:#5e4e2a}
+  .st-Concept,.st-Supplier-dependent{color:var(--muted);border-color:var(--hair)}
+
+  /* regulator gauges */
+  .gauges{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.7rem}
+  .gauge{background:var(--glass);border:1px solid var(--hair);border-radius:10px;padding:.7rem .8rem}
+  .gauge .gh{display:flex;align-items:baseline;gap:.4rem;justify-content:space-between}
+  .gauge .gn{font-weight:600;font-size:.95rem}
+  .gauge .stage{font-family:ui-monospace,Consolas,monospace;font-size:.6rem;color:var(--copper);
+    border:1px solid var(--hair);border-radius:4px;padding:.03rem .3rem;text-transform:uppercase}
+  .gauge .gov{color:var(--muted);font-size:.74rem;margin:.3rem 0 .45rem;line-height:1.35}
+  .gauge .rd{font-family:ui-monospace,Consolas,monospace;font-size:.82rem;color:var(--brass)}
+  .gauge .rd.pending{color:var(--muted2)}
+  .gauge .fb{color:var(--muted2);font-size:.68rem;margin-top:.35rem;border-top:1px dashed var(--hair);padding-top:.3rem}
+
+  /* vitals with sparkline trend */
+  .vitals{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.7rem}
+  .vital{background:var(--glass);border:1px solid var(--hair);border-radius:10px;padding:.75rem .85rem}
+  .vital .n{font-size:1.7rem;color:var(--glow);line-height:1;font-variant-numeric:tabular-nums}
+  .vital .k{font-family:ui-sans-serif,system-ui,sans-serif;font-size:.66rem;text-transform:uppercase;
+    letter-spacing:.08em;color:var(--muted);margin-top:.25rem}
+  .vital svg{display:block;width:100%;height:34px;margin-top:.5rem;overflow:visible}
+  .ok{color:var(--pass)} .bad{color:var(--fail)}
+
+  table.feed{width:100%;border-collapse:collapse;font-size:.88rem}
+  table.feed td{padding:.34rem .4rem;border-bottom:1px solid var(--hair);vertical-align:top}
+  table.feed td.t{color:var(--muted2);white-space:nowrap;font-family:ui-monospace,Consolas,monospace;font-size:.76rem}
+  .pill{display:inline-block;font-size:.68rem;padding:.04rem .45rem;border-radius:20px;border:1px solid var(--hair);color:var(--muted)}
+  .pill.HOLDS,.pill.CONFIRMED{color:var(--pass);border-color:#3f5e3a}
+  .pill.BROKEN,.pill.ERROR,.pill.MISMATCH{color:var(--fail);border-color:#5e3a34}
+  .msg{border:1px solid var(--hair);border-radius:7px;padding:.6rem .75rem;margin:.5rem 0;background:#0f0c08}
+  #closed{max-width:30rem}
+  input,button{font:inherit}
+  input{flex:1;min-width:0;padding:.55rem .7rem;background:var(--glass);border:1px solid var(--hair);
+    border-radius:7px;color:var(--ink)}
+  button{background:linear-gradient(180deg,var(--copper),#8f5a28);border:1px solid #6e461f;color:#fff;
+    border-radius:7px;padding:.55rem 1rem;cursor:pointer}
+  .foot{color:var(--muted2);font-size:.78rem;margin-top:2rem;border-top:1px solid var(--hair);padding-top:.9rem}
+  .meta{color:var(--muted2);font-size:.74rem}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1><span class="dot" id="live"></span>THE&nbsp;BRIDGE<span class="rivet"> ⚙</span></h1>
+  <p class="lede">The operator's console — the engine as a vacuum-tube computer, read live and on trend.
+    <span class="meta" id="updated"></span></p>
+
+  <div id="closed" class="card" hidden>
+    <strong>Operator sign-in</strong>
+    <p class="meta" style="margin:.5rem 0 .7rem">The Bridge serves only the operator. Your token stays in
+    this browser and is sent as a header — never in the URL.</p>
+    <form id="signin" style="display:flex;gap:.5rem">
+      <input id="tok" type="password" placeholder="operator token" autocomplete="current-password" aria-label="operator token">
+      <button type="submit">Enter</button>
+    </form>
+    <p id="err" class="meta" style="color:var(--fail);min-height:1rem;margin:.5rem 0 0"></p>
+  </div>
+
+  <div id="dash" hidden>
+    <h2>The authority chain <span class="sub">· Main proposes · Steward admits · Conductor runs · Reflex enforces · Scribe records · witness seals</span></h2>
+    <div class="chain" id="chain"></div>
+
+    <h2>The regulators <span class="sub">· crisis → ingest → verify → deploy → continuous · each closes against a number, an owner, a fallback</span></h2>
+    <div class="gauges" id="gauges"></div>
+
+    <h2>The components <span class="sub">· by primitive · a tube glows when it is wired and Verified</span></h2>
+    <div class="tubes" id="tubes"></div>
+
+    <h2>Vitals <span class="sub">· live, with the daily trend beneath</span></h2>
+    <div class="vitals" id="vitals"></div>
+
+    <h2>Traffic <span class="sub">· humans / agents / bots · advisory, from the access logs</span></h2>
+    <p class="meta" id="traffic"></p>
+
+    <h2>Messages <span class="sub" id="msgs-n"></span></h2>
+    <div id="msgs"></div>
+    <p class="meta" id="msgs-empty">No messages yet — they arrive from the contact page.</p>
+
+    <h2>Live activity <span class="sub">· advisory ops log, not the integrity record</span></h2>
+    <table class="feed"><tbody id="feed"></tbody></table>
+
+    <p class="foot">
+      <span id="ident"></span> · integrity <span id="integ">—</span>.
+      Components and regulators are computed live (<a href="/components">/components</a>); the vitals trend
+      accrues one point per day. Full definition: docs/COMPONENTS.md.
+    </p>
+  </div>
+</main>
+
+<script>
+var TOKEN=(function(){try{var u=new URLSearchParams(location.search).get("token");
+  if(u){localStorage.setItem("nh_keep_token",u);history.replaceState(null,"",location.pathname);return u;}
+  return localStorage.getItem("nh_keep_token")||"";}catch(e){return "";}})();
+function esc(s){var d=document.createElement("div");d.textContent=(s==null?"":String(s));return d.innerHTML;}
+function num(x){return x==null?"—":Number(x).toLocaleString();}
+function fmtTime(t){if(!t)return"";var d=new Date(t*1000);return d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"});}
+function ago(sec){if(!sec)return"";var s=Math.max(0,Math.floor(Date.now()/1000-sec));
+  if(s<60)return s+"s";if(s<3600)return Math.floor(s/60)+"m";if(s<86400)return Math.floor(s/3600)+"h";return Math.floor(s/86400)+"d";}
+
+function spark(vals,color){
+  vals=(vals||[]).filter(function(v){return v!=null&&!isNaN(v);});
+  if(vals.length<2)return '<svg viewBox="0 0 100 34" preserveAspectRatio="none"></svg>';
+  var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),rg=(mx-mn)||1;
+  var pts=vals.map(function(v,i){var x=i/(vals.length-1)*100;var y=32-((v-mn)/rg)*30;return x.toFixed(1)+","+y.toFixed(1);}).join(" ");
+  var last=vals[vals.length-1],first=vals[0],up=last>=first;
+  return '<svg viewBox="0 0 100 34" preserveAspectRatio="none"><polyline points="'+pts+'" fill="none" stroke="'+(color||"var(--brass)")+'" stroke-width="1.5" vector-effect="non-scaling-stroke"/>'+
+    '<circle cx="100" cy="'+(32-((last-mn)/rg)*30).toFixed(1)+'" r="2" fill="'+(up?"var(--pass)":"var(--warn)")+'"/></svg>';
+}
+
+function render(d){
+  document.getElementById("closed").hidden=true;
+  document.getElementById("dash").hidden=false;
+  document.getElementById("live").style.color="var(--pass)";
+  document.getElementById("updated").textContent="updated "+new Date().toLocaleTimeString();
+  document.getElementById("ident").textContent=(d.surface||"")+" surface · v"+(d.version||"—");
+
+  var C=d.components||{};
+  // the chain
+  var ch=document.getElementById("chain");
+  ch.innerHTML=(C.chain||[]).map(function(p,i){
+    return '<div class="plane"><div class="nm">'+esc(p.plane)+'</div><div class="ow">'+esc(p.owns)+'</div></div>'+
+      (i<(C.chain.length-1)?'<div class="plane" style="flex:0 0 14px;border:0;background:none;display:flex;align-items:center;justify-content:center"><span class="ar">→</span></div>':'');
+  }).join("");
+
+  // the regulators
+  var g=document.getElementById("gauges");
+  g.innerHTML=(C.regulators||[]).map(function(r){
+    var rd=r.reading||{},pending=rd.pending;
+    var read;
+    if(pending)read='pending — '+esc(rd.detail||"meter not wired");
+    else read=Object.keys(rd).filter(function(k){return k!=="note"&&k!=="tiers";}).map(function(k){return esc(k)+" "+esc(typeof rd[k]==="boolean"?(rd[k]?"yes":"no"):rd[k]);}).join(" · ");
+    return '<div class="gauge"><div class="gh"><span class="gn">'+esc(r.name)+'</span><span class="stage">'+esc(r.fires_at)+'</span></div>'+
+      '<div class="gov">'+esc(r.governs)+'</div>'+
+      '<div class="rd'+(pending?" pending":"")+'">'+read+'</div>'+
+      '<div class="fb">fallback: '+esc(r.fallback)+'</div></div>';
+  }).join("");
+
+  // the tubes
+  var t=document.getElementById("tubes");
+  t.innerHTML=(C.components||[]).map(function(c){
+    var cls=!c.wired?"off":(c.status_live==="Verified"||c.status_live==="Production-ready")?"on":"warm";
+    return '<div class="tube '+cls+'"><div class="tn">'+esc(c.name)+'</div>'+
+      '<div class="tp">'+esc(c.primitive)+'</div>'+
+      '<div class="tm">'+esc(c.note||"")+'</div>'+
+      '<div class="tg"><span class="tag">'+esc(c.plane)+'</span>'+
+        '<span class="tag st-'+esc((c.status_live||"").replace(/[^A-Za-z-]/g,""))+'">'+esc(c.status_live)+'</span></div></div>';
+  }).join("");
+
+  // vitals + trend
+  var H=d.history||[];
+  function col(key){return H.map(function(r){return r[key];});}
+  var k=d.keeping||{},lg=d.ledger||{};
+  var vitals=[
+    {k:"cards kept",n:num(k.cards),s:col("cards"),c:"var(--brass)"},
+    {k:"served public",n:num(k.public),s:col("public"),c:"var(--pass)"},
+    {k:"seals minted",n:num((d.seals||{}).count),s:col("seals"),c:"var(--glow)"},
+    {k:"ledger verified",n:(lg.verified==null?"—":lg.verified+(lg.total!=null?"/"+lg.total:"")),s:col("ledger_verified"),c:"var(--copper)",bad:lg.ok===false},
+    {k:"requests/day",n:num(((d.traffic||{}).totals||{}).requests),s:col("req"),c:"var(--brass)"},
+    {k:"humans/day",n:num(((d.traffic||{}).totals||{}).human),s:col("human"),c:"var(--pass)"},
+  ];
+  document.getElementById("vitals").innerHTML=vitals.map(function(v){
+    return '<div class="vital"><div class="n'+(v.bad?" bad":"")+'">'+v.n+'</div><div class="k">'+v.k+'</div>'+spark(v.s,v.c)+'</div>';
+  }).join("");
+
+  // traffic line
+  var T=(d.traffic||{}).totals||{};
+  document.getElementById("traffic").textContent=d.traffic?
+    (num(T.requests)+" requests over "+((d.traffic||{}).window_days||"?")+"d · "+num(T.human)+" human · "+num(T.agent)+" agent · "+num(T.monitor)+" monitor · "+num(T.bot)+" bot"):
+    "No traffic rollup yet — it runs on a timer from the access logs.";
+
+  // messages
+  var box=d.contact||{},msgs=box.recent||[];
+  document.getElementById("msgs-n").textContent=box.waiting?("· "+num(box.waiting)+" in the inbox"):"";
+  document.getElementById("msgs-empty").hidden=msgs.length>0;
+  document.getElementById("msgs").innerHTML=msgs.map(function(m){
+    var who=[m.name,m.email].filter(Boolean).map(esc).join(" · ")||"anonymous";
+    var when=m.at?new Date(m.at*1000).toLocaleString():"";
+    return '<div class="msg"><div style="display:flex;gap:.5rem;flex-wrap:wrap;font-size:.8rem"><strong>'+who+'</strong>'+
+      (m.subject?' <span style="color:var(--brass)">'+esc(m.subject)+'</span>':'')+
+      '<span class="meta" style="margin-left:auto">'+esc(when)+'</span></div>'+
+      '<div style="margin-top:.3rem;white-space:pre-wrap;word-break:break-word">'+esc(m.message||"")+'</div></div>';
+  }).join("");
+
+  // activity feed
+  var recent=(d.activity||{}).recent||[];
+  document.getElementById("feed").innerHTML=recent.map(function(e){
+    var det=esc(e.action);
+    if(e.verdict)det+=' <span class="pill '+esc(e.verdict)+'">'+esc(e.verdict)+'</span>';
+    if(e.query!=null)det+=' <span class="meta">“'+esc(e.query)+'” → '+esc(e.count==null?"?":e.count)+'</span>';
+    if(e.found!=null)det+=' <span class="meta">'+(e.found?"found":"miss")+'</span>';
+    return '<tr><td class="t">'+esc(fmtTime(e.t))+'</td><td>'+det+' <span class="pill">'+esc(e.surface||"")+'</span></td></tr>';
+  }).join("");
+
+  // integrity line
+  var ig=d.integrity;
+  document.getElementById("integ").innerHTML=!ig?'<span class="meta">not yet run</span>':
+    (ig.ok?'<span class="ok">✓ verified</span>':'<span class="bad">✗ FAILED</span>');
+}
+
+function closed(){
+  document.getElementById("dash").hidden=true;
+  document.getElementById("closed").hidden=false;
+  document.getElementById("live").style.color="var(--fail)";
+}
+
+function refresh(){
+  return fetch("/bridge.json?t="+Date.now(),{headers:TOKEN?{"X-Keep-Token":TOKEN}:{},cache:"no-store"})
+    .then(function(r){if(r.status===404){closed();return null;}if(!r.ok)return null;return r.json();})
+    .then(function(d){if(d)render(d);})
+    .catch(function(){/* keep the last good view */});
+}
+document.getElementById("signin").addEventListener("submit",function(e){
+  e.preventDefault();var v=document.getElementById("tok").value.trim();if(!v)return;
+  TOKEN=v;try{localStorage.setItem("nh_keep_token",v);}catch(_){}
+  document.getElementById("err").textContent="checking…";
+  refresh().then(function(){var c=document.getElementById("dash").hidden;
+    document.getElementById("err").textContent=c?"That token didn't open the Bridge.":"";});
+});
+refresh();setInterval(refresh,15000);
+</script>
+</body>
+</html>
