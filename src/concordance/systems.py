@@ -71,10 +71,15 @@ SUBSYSTEMS: List[Dict[str, Any]] = [
     {"name": "Crisis / Safety", "slug": "crisis",
      "modules": ["crisis_semantic", "floor", "seeds"]},
     {"name": "Coach / Shepherd", "slug": "coach",
-     "modules": ["coach", "disciple", "formation", "serve"]},
+     # the engine IS the coach (Matt, 2026-10-06): lead composes the discerned solution/tool/technique/
+     # strategy and applies it; trajectory measures what works (success guides, failure narrows, the
+     # coaching-tree floor, downline value, and the fruit test) — the mission's own mechanisms.
+     "modules": ["coach", "disciple", "formation", "serve", "lead", "trajectory", "archetypes"]},
     {"name": "Field Library", "slug": "field",
      # not degraded: it answers correctly for what it holds (compute is exact, the survival/apothecary
      # cards are real) — it is thinly STOCKED, a growth process the tortoise handles, not a defect.
+     # chess is the refined-system witness that is a top-level module here; pressure_fighting and
+     # game_theory are verifier domains, counted in the verifier total, not as field modules
      "modules": ["apothecary", "almanac", "playbook", "compute", "science_cards", "chess"],
      "issues": [{"what": "shelves thinly stocked (the tortoise grows them on demand)", "supported": True}]},
     {"name": "Museum / TV", "slug": "tv", "modules": ["tv"],
