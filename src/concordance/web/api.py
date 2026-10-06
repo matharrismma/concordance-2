@@ -1166,6 +1166,35 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                          sealed=bool(res.get("seal")))
         return _ok(res)
 
+    if method == "POST" and path == "/lead":
+        # THE LEAD (Matt, 2026-10-06): one body that discerns the SOLUTION (the biblical type this
+        # situation is an instance of — the most applicable, it leads), the TOOL, the TECHNIQUE (a game
+        # witness), and the STRATEGY (the figures' patterns and where they failed), then APPLIES the gate
+        # to whatever is computably checkable. Composes archetypes + router + principles + the witnesses +
+        # the gate; authors nothing, renders no verdict of its own; crisis outranks all. Body: {situation}.
+        if not isinstance(body, dict):
+            return _err(400, "JSON object body required")
+        situation = str(body.get("situation") or body.get("text") or "").strip()
+        if not situation:
+            return _err(400, "a situation is required")
+        from .. import lead as _lead, audit as _audit, airlock as _airlock
+
+        def _apply(s: str):
+            seal_on = str(query.get("seal", "1")).lower() not in ("0", "false", "no", "off")
+            passage = _airlock.through(s, lambda skel: _audit.audit(skel, config, seal=seal_on), minimal=True)
+            if passage.leaked:
+                return {"verdict": "QUARANTINE", "claims_found": 0, "checks": [], "receipt": None}
+            ar = passage.result or {}
+            seal = ar.get("seal") or {}
+            return {"verdict": ar.get("verdict"), "claims_found": ar.get("claims_found", 0),
+                    "checks": [{"claim": c.get("claim"), "verdict": c.get("status"), "domain": c.get("domain"),
+                                "detail": c.get("detail")} for c in (ar.get("results") or [])],
+                    "receipt": seal.get("cite_url") or (f"/s/{seal['content_hash']}" if seal.get("content_hash") else None)}
+
+        res = _lead.lead(situation, apply_fn=_apply)
+        telemetry.record("lead", surface=surface, verdict=(res.get("applied") or {}).get("verdict"))
+        return _ok(res)
+
     if method == "GET" and path == "/path":
         # Wayfinding — a floorplan of the keeping. Given what you're asking (q) and optionally the
         # thread you're in, return where you stand, the connected rooms (on-topic by construction),
@@ -3207,6 +3236,7 @@ ROUTES = [
     {"path": "/path", "methods": ("GET",), "api": True},
     {"path": "/days", "methods": ("POST",), "rl": True},
     {"path": "/ask", "methods": ("POST",), "rl": True},
+    {"path": "/lead", "methods": ("POST",), "api": True, "rl": True},
     # THE OPENAI-COMPATIBLE DOOR (2026-10-03, "lean into the open doors"): the shape every chat client
     # speaks, answered by the engine — no model behind it (web/openai_door.py)
     {"path": "/v1/chat/completions", "methods": ("POST",), "rl": True, "api": True},
