@@ -280,6 +280,21 @@ def delete(content_hash: str, *, base_dir: Optional[Path] = None) -> bool:
     return True
 
 
+def checksum_of_total(*, base_dir: Optional[Path] = None) -> Dict[str, Any]:
+    """THE CHECKSUM OF THE TOTAL (Matt, 2026-10-06: 'let the math be the beginning and the end — a checksum
+    of the total'). Every record is content-addressed, so its name IS the sha256 of its content: the math at
+    the BEGINNING of each seal. This folds them into one root — the math at the END, over the whole. The root
+    is sha256 over every content hash, sorted, newline-joined: it changes if any seal is added, removed, or
+    (because a record's name is its own hash) altered. Recompute it anywhere and compare; the total is one
+    re-checkable number. Deterministic, stdlib, no corpus."""
+    import hashlib
+    hashes = sorted(list_hashes(base_dir=base_dir))
+    root = hashlib.sha256("\n".join(hashes).encode("utf-8")).hexdigest()
+    return {"root": root, "count": len(hashes),
+            "means": ("sha256 over every sealed content hash, sorted — one checksum of the whole keeping. "
+                      "Each seal is the math at the beginning; this root is the math at the end.")}
+
+
 def stats(*, base_dir: Optional[Path] = None) -> Dict[str, Any]:
     base = base_dir or _cas_dir()
     hashes = list_hashes(base_dir=base)

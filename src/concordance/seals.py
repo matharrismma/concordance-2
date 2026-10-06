@@ -38,6 +38,16 @@ def _count_lines(p: Path) -> int:
         return 0
 
 
+def _total_checksum(d: Path) -> Dict[str, Any]:
+    """The one checksum over the whole sealed keeping (cas.checksum_of_total), guarded so it never breaks
+    the summary."""
+    try:
+        from . import cas
+        return cas.checksum_of_total(base_dir=d / "cas")
+    except Exception:  # noqa: BLE001 — a reporting number must never sink the summary
+        return {"root": None, "count": 0}
+
+
 def summary(data_dir: Optional[Path] = None, cite_base: str = "https://narrowhighway.org") -> Dict[str, Any]:
     """The ledger's public numbers. Cheap: reads the status file, counts the chain, opens its first and
     last entries for their dates. Honest when nothing is there yet: zeros and nulls, never invented."""
@@ -67,6 +77,7 @@ def summary(data_dir: Optional[Path] = None, cite_base: str = "https://narrowhig
         "broken_links": len(led.get("broken_links") or []),
         "cas_records": int(cas.get("total") or 0),
         "cas_bad": len(cas.get("bad") or []),
+        "total_checksum": _total_checksum(d),
         "receipt_cards": _count_lines(d / "receipt_cards.jsonl"),
         "oldest": oldest,
         "newest": newest,
