@@ -33,6 +33,43 @@ Fix the datum first, or every later placement is true to nothing.
 
 ---
 
+## 0.5 The operating principle — will is the fuel, reality is the harness, the Tesla valve is the shape
+
+Matt, 2026-10-06: *"Will is the fuel, reality is the harness, Tesla valve is the mechanism framework."*
+
+Before the parts, the law that governs how they are shaped. It sits above the numbered assembly and every
+stage below is one expression of it.
+
+- **Will is the fuel.** The mainspring is wound by the person's free will; nothing moves until they choose
+  to feed it. The engine never winds itself — a mechanism that supplies its own will is a generator picking
+  its own path, the one destructive act, and it is coercion. This is the literal mechanism behind the
+  constitution's rule *liberty is inherent, free will is paramount, eliminating free will ends the game*:
+  no will, no fuel, the movement stops. The watch waits to be wound; it does not wind the wearer.
+- **Reality is the harness.** The plate, the going train, the balance — the mapped reality of sealed
+  constants, verifiers and laws — do not make the energy and do not spend it for the wearer. They harness
+  loose will into directed motion: they decide only *where the energy may go*, which is the frame the whole
+  harness hangs on (the datum, §0). Christ is that frame; every train leads to it.
+- **The Tesla valve is the shape.** A Tesla valve passes flow one way and resists the reverse with **no
+  moving parts** — direction enforced by geometry, not by a mind deciding each time (no LLM; deterministic).
+  The whole movement is cut to this shape. The escapement, the gate, the alignment diode and the airlock
+  are not separate safeguards bolted on; they are leaves of one valve:
+
+  | Forward — runs free | Reverse — refused by the shape itself |
+  |---|---|
+  | a claim → check → verdict → seal | a proof pushed back *out* of the engine (narrowing is evidence, never proof) |
+  | evidence → truth | a failure passing as success (a win needs a witness) |
+  | a sourced answer read off the map | invention where the map is silent (silence or a named want instead) |
+  | the aligned, sealed node into the keeping | the unaligned or unsealed flowing in (the gate holds the door) |
+  | every road → Christ | laundering one domain as another (borrow the form, launder nothing) |
+
+**The valve test, for any new part:** does it let life and truth run forward *and physically refuse the
+reverse by its structure*? If the reverse can be pushed through — a proof extracted, a miss relabelled a
+hit, an unsealed edge trusted — it is not a valve yet, and it is not placed until it is. This is why the
+honest ceiling (§5) is not a disclaimer but the geometry: the things the watch will not do are the
+directions the shape will not pass.
+
+---
+
 ## 1. The parts on the bench
 
 Each part exists today. The third column is its place in the movement; the fourth is its honest state.
