@@ -841,6 +841,135 @@ def verify_schoenfeld(spec):
                          f"|pi-li|/(sqrt(x) ln x/8pi)={worst_ratio:.4f} < 1): no RH counterexample by the prime-count route below {X}", data)
 
 
+def verify_lagarias(spec):
+    """RH BY ELIMINATION, through the divisor sum in its elementary form (Lagarias 2002: RH <=> sigma(n) <=
+    H_n + exp(H_n)*ln(H_n) for every n >= 1, where H_n = 1 + 1/2 + ... + 1/n, with equality only at n = 1).
+    This is Robin's inequality made exception-free and elementary — no e^gamma, no n > 5040 carve-out. It does not
+    confirm RH; it RULES OUT a failure by this route. A counterexample would be an n with sigma(n) strictly above
+    H_n + exp(H_n) ln H_n; the sieve checks every n in [1, N] and finds none, so a first failure must lie beyond N.
+      NUM_VERIFY: {"lagarias_to": 100000, "claimed_lagarias_holds": true, "claimed_closest_approach_n": 3}  (N <= 2e7)"""
+    import math
+    name = "number_theory.lagarias"
+    try:
+        N = int(spec.get("lagarias_to"))
+    except (TypeError, ValueError):
+        return error(name, "lagarias_to must be an integer (the height N to eliminate below)")
+    if N < 2:
+        return error(name, "lagarias_to must be at least 2")
+    if N > 20_000_000:
+        return error(name, f"lagarias_to {N} exceeds the exact-sieve cap (2e7); the surviving window is charted in bounded steps")
+    try:
+        import numpy as np
+        sigma = np.zeros(N + 1, dtype=np.float64)
+        for d in range(1, N + 1):
+            sigma[d::d] += d
+        Hn = np.cumsum(1.0 / np.arange(1, N + 1))        # Hn[i] = H_{i+1}
+        with np.errstate(divide="ignore", invalid="ignore"):
+            rhs = Hn + np.exp(Hn) * np.log(Hn)
+        rhs[0] = Hn[0]                                    # n = 1: ln H_1 = ln 1 = 0, so rhs = H_1 = 1 (equality case)
+        s = sigma[1:]
+        viol = np.nonzero(s > rhs + 1e-9)[0] + 1          # strict violations (the n=1 equality is not one)
+        ratio = s / rhs
+        idx2 = int(np.argmax(ratio[1:])) + 1              # tightest approach among n >= 2 (n=1 is the trivial equality)
+        closest_n = int(idx2 + 1)                         # array index -> n
+        closest_ratio = float(ratio[idx2])
+        violations = [int(v) for v in viol[:8]]
+    except ImportError:
+        return na(name, "the Lagarias sieve needs numpy")
+    except MemoryError:
+        return error(name, f"lagarias_to {N} is too large for memory on this node")
+    holds = not violations
+    data = {"lagarias_to": N, "lagarias_holds": holds, "closest_approach_n": closest_n,
+            "closest_approach_ratio": round(closest_ratio, 6), "counterexamples": violations,
+            "equivalent": "RH <=> sigma(n) <= H_n + exp(H_n) ln H_n for all n >= 1, equality only at n=1 (Lagarias 2002)",
+            "eliminates": (f"no Lagarias counterexample in [1, {N}] — a first RH failure by this route must exceed {N}"
+                           if holds else f"a Lagarias counterexample at or below {N}: RH would be FALSE")}
+    claimed_holds = spec.get("claimed_lagarias_holds")
+    claimed_n = spec.get("claimed_closest_approach_n")
+    if claimed_holds is None and claimed_n is None:
+        return na(name, "claim claimed_lagarias_holds and/or claimed_closest_approach_n")
+    problems = []
+    if claimed_holds is not None and bool(claimed_holds) != holds:
+        problems.append(f"Lagarias holds to {N} is {holds}, claimed {bool(claimed_holds)}")
+    if claimed_n is not None:
+        try:
+            if int(claimed_n) != closest_n:
+                problems.append(f"closest approach in [2,{N}] is n={closest_n}, claimed {int(claimed_n)}")
+        except (TypeError, ValueError):
+            return error(name, "claimed_closest_approach_n must be an integer")
+    if problems:
+        return mismatch(name, "; ".join(problems), data)
+    return confirm(name, f"Lagarias holds for every n in [1, {N}] (tightest n>=2 at n={closest_n}, "
+                         f"sigma/(H_n+e^H_n ln H_n)={closest_ratio:.4f} < 1): no RH counterexample by this route below {N}", data)
+
+
+def verify_nicolas(spec):
+    """RH BY ELIMINATION, through the primorials (Nicolas 1983: RH <=> for every primorial N_k = 2*3*5*...*p_k,
+    N_k / (phi(N_k) * ln ln N_k) > e^gamma). Equivalently prod_{p <= p_k} p/(p-1) > e^gamma * ln(theta(p_k)),
+    which is computed in floats without ever forming the astronomically large primorial. A counterexample would be
+    a primorial whose ratio drops to e^gamma or below; none is found among the primorials of the primes up to P,
+    so a first failure by this route must use a prime beyond P. It does not confirm RH.
+      NUM_VERIFY: {"nicolas_primes_to": 100000, "claimed_nicolas_holds": true, "claimed_closest_prime": 99991}  (P <= 1e7)"""
+    import math
+    name = "number_theory.nicolas"
+    try:
+        P = int(spec.get("nicolas_primes_to"))
+    except (TypeError, ValueError):
+        return error(name, "nicolas_primes_to must be an integer (the prime bound P)")
+    if P < 3:
+        return error(name, "nicolas_primes_to must be at least 3 (the first meaningful primorial is 6)")
+    if P > 10_000_000:
+        return error(name, f"nicolas_primes_to {P} exceeds the sieve cap (1e7)")
+    try:
+        import numpy as np
+        sieve = np.ones(P + 1, dtype=bool); sieve[:2] = False
+        for i in range(2, int(P ** 0.5) + 1):
+            if sieve[i]:
+                sieve[i * i::i] = False
+        primes = np.nonzero(sieve)[0]
+    except ImportError:
+        return na(name, "the Nicolas sieve needs numpy")
+    except MemoryError:
+        return error(name, f"nicolas_primes_to {P} is too large for memory on this node")
+    eg = math.exp(_EULER_GAMMA)
+    prod = 1.0; theta = 0.0
+    min_ratio = float("inf"); min_prime = 0; violations: List[int] = []
+    for p in primes:
+        p = int(p)
+        prod *= p / (p - 1.0)
+        theta += math.log(p)
+        if theta > 1.0:                                  # ln ln N_k = ln(theta(p_k)) > 0 (needs N_k > e, i.e. p_k >= 3)
+            ratio = prod / math.log(theta)
+            if ratio < min_ratio:
+                min_ratio, min_prime = ratio, p
+            if ratio <= eg and len(violations) < 8:
+                violations.append(p)
+    holds = not violations
+    data = {"nicolas_primes_to": P, "nicolas_holds": holds, "closest_prime": min_prime,
+            "closest_ratio": round(min_ratio, 6), "e_gamma": round(eg, 6), "counterexamples": violations,
+            "equivalent": "RH <=> N_k/(phi(N_k) ln ln N_k) > e^gamma for every primorial N_k (Nicolas 1983)",
+            "eliminates": (f"no Nicolas counterexample among primorials of primes <= {P} — a first RH failure by this "
+                           f"route must use a prime beyond {P}" if holds else
+                           f"a Nicolas counterexample at a prime <= {P}: RH would be FALSE")}
+    claimed_holds = spec.get("claimed_nicolas_holds")
+    claimed_prime = spec.get("claimed_closest_prime")
+    if claimed_holds is None and claimed_prime is None:
+        return na(name, "claim claimed_nicolas_holds and/or claimed_closest_prime")
+    problems = []
+    if claimed_holds is not None and bool(claimed_holds) != holds:
+        problems.append(f"Nicolas holds to {P} is {holds}, claimed {bool(claimed_holds)}")
+    if claimed_prime is not None:
+        try:
+            if int(claimed_prime) != min_prime:
+                problems.append(f"closest approach among primes <= {P} is p={min_prime}, claimed {int(claimed_prime)}")
+        except (TypeError, ValueError):
+            return error(name, "claimed_closest_prime must be an integer")
+    if problems:
+        return mismatch(name, "; ".join(problems), data)
+    return confirm(name, f"Nicolas holds for every primorial of a prime <= {P} (closest at p={min_prime}, "
+                         f"ratio={min_ratio:.5f} > e^gamma={eg:.5f}): no RH counterexample by this route below {P}", data)
+
+
 _MAX_COUNT_HEIGHT = 1.0e13
 
 
@@ -911,6 +1040,8 @@ _RULES = [
     (lambda nv: ("robin_to" in nv and ("claimed_robin_holds" in nv or "claimed_closest_approach_n" in nv)), verify_robin),
     (lambda nv: ("schoenfeld_to" in nv and ("claimed_schoenfeld_holds" in nv or "claimed_closest_approach_n" in nv)), verify_schoenfeld),
     (lambda nv: ("zero_count_height" in nv and "claimed_zero_count" in nv), verify_zero_count),
+    (lambda nv: ("lagarias_to" in nv and ("claimed_lagarias_holds" in nv or "claimed_closest_approach_n" in nv)), verify_lagarias),
+    (lambda nv: ("nicolas_primes_to" in nv and ("claimed_nicolas_holds" in nv or "claimed_closest_prime" in nv)), verify_nicolas),
     (lambda nv: ("divisors_of" in nv and ("claimed_divisor_count" in nv or "claimed_divisors" in nv)), verify_divisor_count),
     (lambda nv: ("n_prime" in nv and "claimed_prime" in nv), verify_primality),
     (lambda nv: ("limit" in nv and "claimed_prime_count" in nv), verify_prime_counting),

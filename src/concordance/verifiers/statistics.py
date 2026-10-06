@@ -621,6 +621,89 @@ def verify_measurement_consistency(spec: Dict[str, Any]) -> VerifierResult:
 
 
 # Verified golden for the domain-golden benchmark: a z-test whose two-sided p at z=1.96 is 0.05.
+def _wigner_gue_variance() -> float:
+    """Variance of the GUE (beta=2) Wigner surmise p(s) = (32/pi^2) s^2 exp(-4 s^2/pi), mean 1 — a reference
+    value for the spacing distribution of a random Hermitian matrix's eigenvalues, computed, not hardcoded."""
+    ss = np.linspace(0.0, 8.0, 40000)
+    p = (32.0 / math.pi ** 2) * ss ** 2 * np.exp(-4.0 * ss ** 2 / math.pi)
+    m = float(np.trapezoid(ss * p, ss))
+    return float(np.trapezoid((ss - m) ** 2 * p, ss))
+
+
+def _load_zeta_zeros():
+    """The stored imaginary parts of the zeta zeros (data/zeta_zeros.jsonl, Odlyzko's published table). Returns
+    (gammas, meta) or (None, None) if the table is not present on this node."""
+    import json
+    import os
+    from pathlib import Path
+    d = Path(os.environ.get("CONCORDANCE_DATA_DIR", "").strip() or "data")
+    p = d / "zeta_zeros.jsonl"
+    if not p.exists():
+        return None, None
+    gam: List[float] = []
+    meta = None
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith("{"):
+            obj = json.loads(line)
+            if isinstance(obj, dict) and "_meta" in obj:
+                meta = obj["_meta"]
+            continue
+        try:
+            gam.append(float(line))
+        except ValueError:
+            continue
+    return gam, meta
+
+
+def verify_gue_spacing(spec: Dict[str, Any]) -> VerifierResult:
+    """AN ANSWER IN ANOTHER DOMAIN for the Riemann stick (2026-10-05). The Montgomery-Odlyzko law: the spacings
+    between zeta zeros follow the Gaussian Unitary Ensemble of random matrix theory — the eigenvalue statistics of
+    a random Hermitian operator. We take Odlyzko's published zeros, unfold them to unit mean density
+    (w_n = theta(gamma_n)/pi), and test the nearest-neighbour spacings: unit mean, strong level repulsion (few
+    small spacings), and a small variance far from the Poisson value 1.0. A match is statistical EVIDENCE for the
+    Hilbert-Polya spectral picture of the zeros; it is NOT a proof of RH, and says nothing about whether any zero
+    lies on the line.
+      STAT_VERIFY: {"zeta_spacing": {"claimed_consistent_with_gue": true}}"""
+    name = "statistics.gue_spacing"
+    _ensure_stats()
+    try:
+        import mpmath as mp
+    except ImportError:
+        return na(name, "the GUE spacing check needs mpmath")
+    gam, meta = _load_zeta_zeros()
+    if not gam or len(gam) < 100:
+        return na(name, "the GUE spacing check needs data/zeta_zeros.jsonl (the zeta zeros table)")
+    w = np.array([float(mp.siegeltheta(g) / math.pi) for g in gam])   # unfold to unit mean density
+    s = np.diff(w)
+    mean = float(s.mean()); var = float(s.var()); frac_small = float((s < 0.5).mean())
+    vG = _wigner_gue_variance()
+    unfold_ok = abs(mean - 1.0) <= 0.02        # the unfolding must give unit mean spacing
+    repulsion = frac_small <= 0.20             # GUE ~0.09; Poisson ~0.40 — level repulsion
+    gue_var = 0.08 <= var <= 0.30              # GUE-like; the Poisson value 1.0 is excluded
+    consistent = bool(unfold_ok and repulsion and gue_var)
+    data = {"zeros_used": len(gam), "mean_spacing": round(mean, 5), "variance": round(var, 5),
+            "frac_below_half_mean": round(frac_small, 4), "gue_wigner_variance": round(vG, 4),
+            "poisson_variance": 1.0, "consistent_with_gue": consistent,
+            "source": (meta or {}).get("source"),
+            "means": ("the nearest-neighbour spacings of the zeta zeros follow the GUE of random matrix theory "
+                      "(Montgomery-Odlyzko), not Poisson — statistical EVIDENCE for the Hilbert-Polya spectral "
+                      "picture, NOT a proof of RH and NOT a claim about any zero lying on the line")}
+    if not unfold_ok:
+        return error(name, f"the unfolding is off (mean spacing {mean:.4f} != 1) — the zeros or theta are wrong", data)
+    claimed = spec.get("claimed_consistent_with_gue")
+    if claimed is None:
+        return na(name, "claim claimed_consistent_with_gue", data)
+    if bool(claimed) != consistent:
+        return mismatch(name, f"GUE-consistent is {consistent} (variance {var:.4f} vs Poisson 1.0, "
+                              f"{frac_small*100:.1f}% of spacings below half-mean), claimed {bool(claimed)}", data)
+    return confirm(name, f"the first {len(gam):,} zeta zeros: unfolded spacing variance {var:.4f} (random-matrix "
+                         f"GUE-like, far from the Poisson value 1.0), {frac_small*100:.1f}% below half-mean "
+                         f"(level repulsion) — consistent with GUE. Evidence for Hilbert-Polya, not a proof.", data)
+
+
 GOLDEN_PACKET_KEY = "STAT_VERIFY"
 GOLDEN_EXAMPLE = {"test": "z", "z": 1.96, "tail": "two-sided", "claimed_p": 0.05}
 
@@ -649,6 +732,9 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
 
     if cc.get("measurements"):
         results.append(verify_measurement_consistency(cc))
+
+    if sv.get("zeta_spacing"):
+        results.append(verify_gue_spacing(sv["zeta_spacing"]))
 
     if not results:
         results.append(na("statistics", "no STAT_VERIFY artifacts present"))

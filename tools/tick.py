@@ -7,6 +7,9 @@
     PYTHONPATH=src python tools/tick.py alpha                 # the fine-structure constant: seal alpha, cite the 137
     PYTHONPATH=src python tools/tick.py robin [N]             # chart the Riemann window by elimination (Robin to N)
     PYTHONPATH=src python tools/tick.py schoenfeld [X]        # chart it from the prime count too (Schoenfeld to X)
+    PYTHONPATH=src python tools/tick.py lagarias [N]          # and through Lagarias's elementary inequality (to N)
+    PYTHONPATH=src python tools/tick.py nicolas [P]           # and through Nicolas's primorial criterion (primes to P)
+    PYTHONPATH=src python tools/tick.py gue                   # another domain: the zeros' spacings are GUE (random-matrix)
     PYTHONPATH=src python tools/tick.py count [T]             # count the zeros at a great height (Turing; a count, not on-line)
     PYTHONPATH=src python tools/tick.py bsd [label|all]      # BSD: seal one curve, or every curve in the ingested table
     PYTHONPATH=src python tools/tick.py window [stick]        # the surviving window of each stick (narrow by elimination)
@@ -449,6 +452,107 @@ def schoenfeld(X: int = 2000000) -> int:
     return 0
 
 
+def lagarias(N: int = 1000000) -> int:
+    """Chart the Riemann window by ELIMINATION through Lagarias's elementary inequality (RH <=> sigma(n) <=
+    H_n + exp(H_n) ln H_n for all n, equality only at n=1). The sieve finds no counterexample in [1, N], so a
+    first RH failure by this route must lie beyond N. Seals the computation and ticks a WITNESS on the Riemann stick."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    from concordance.verifiers import number_theory as NT
+    pre = NT.verify_lagarias({"lagarias_to": N, "claimed_lagarias_holds": True})
+    if pre.status != "CONFIRMED":
+        print("Lagarias did not hold (or errored):", pre.status, (pre.detail or "")[:140]); return 1
+    closest = pre.data["closest_approach_n"]
+    r = verify_derivation([{"id": "lagarias", "domain": "number_theory",
+          "spec": {"NUM_VERIFY": {"lagarias_to": N, "claimed_lagarias_holds": True, "claimed_closest_approach_n": closest}}}])
+    if r.get("verdict") != "HOLDS":
+        print("the elimination did not verify:", json.dumps(r)[:300]); return 1
+    r = receipts.attach(r, config=EngineConfig(), domain="number_theory")
+    seal = (r.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted"); return 1
+    print("sealed Lagarias elimination", seal)
+    sid = TS.create("Riemann hypothesis")["id"]
+    claim = (f"No zero of zeta lies off the critical line by way of a Lagarias (elementary divisor-sum) "
+             f"counterexample at n <= {N:,}: the sieve finds none in [1, {N:,}] (tightest n>=2 at n={closest:,}, "
+             f"sigma/(H_n+e^H_n ln H_n) = {pre.data['closest_approach_ratio']} < 1). Lagarias 2002 — Robin made "
+             f"exception-free — a fourth independent tool narrowing the window, by elimination.")
+    res = TS.tick(sid, "witness", claim, seal=seal, by="Narrow Highway — the elimination reading, 2026-10-05")
+    print("  witness" if res.get("ok") else ("  REFUSED: " + res.get("error", "")))
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "witnesses": f["witnesses"]}, indent=1))
+    return 0
+
+
+def nicolas(P: int = 1000000) -> int:
+    """Chart the Riemann window by ELIMINATION through Nicolas's primorial criterion (RH <=> N_k/(phi(N_k) ln ln
+    N_k) > e^gamma for every primorial). No counterexample is found among the primorials of the primes up to P, so
+    a first RH failure by this route must use a prime beyond P. Seals the computation and ticks a WITNESS."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    from concordance.verifiers import number_theory as NT
+    pre = NT.verify_nicolas({"nicolas_primes_to": P, "claimed_nicolas_holds": True})
+    if pre.status != "CONFIRMED":
+        print("Nicolas did not hold (or errored):", pre.status, (pre.detail or "")[:140]); return 1
+    closest = pre.data["closest_prime"]
+    r = verify_derivation([{"id": "nicolas", "domain": "number_theory",
+          "spec": {"NUM_VERIFY": {"nicolas_primes_to": P, "claimed_nicolas_holds": True, "claimed_closest_prime": closest}}}])
+    if r.get("verdict") != "HOLDS":
+        print("the elimination did not verify:", json.dumps(r)[:300]); return 1
+    r = receipts.attach(r, config=EngineConfig(), domain="number_theory")
+    seal = (r.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted"); return 1
+    print("sealed Nicolas elimination", seal)
+    sid = TS.create("Riemann hypothesis")["id"]
+    claim = (f"No zero of zeta lies off the critical line by way of a Nicolas (primorial) counterexample using a "
+             f"prime <= {P:,}: every primorial's ratio N_k/(phi(N_k) ln ln N_k) stays above e^gamma (closest at "
+             f"p={closest:,}, ratio = {pre.data['closest_ratio']} > {pre.data['e_gamma']}). Nicolas 1983 — a fifth "
+             f"independent tool narrowing the window, by elimination.")
+    res = TS.tick(sid, "witness", claim, seal=seal, by="Narrow Highway — the elimination reading, 2026-10-05")
+    print("  witness" if res.get("ok") else ("  REFUSED: " + res.get("error", "")))
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "witnesses": f["witnesses"]}, indent=1))
+    return 0
+
+
+def gue() -> int:
+    """AN ANSWER IN ANOTHER DOMAIN. The Montgomery-Odlyzko law: the spacings of the zeta zeros follow the GUE of
+    random matrix theory. The statistics verifier tests Odlyzko's published zeros for that signature (unit mean,
+    level repulsion, variance far from Poisson) and seals a WITNESS on the Riemann stick — cross-domain EVIDENCE
+    for the Hilbert-Polya spectral picture, framed as evidence, never a proof, and never a claim about on-line-ness."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    from concordance.verifiers import statistics as ST
+    pre = ST.verify_gue_spacing({"claimed_consistent_with_gue": True})
+    if pre.status != "CONFIRMED":
+        print("the GUE check did not confirm (or errored):", pre.status, (pre.detail or "")[:160]); return 1
+    r = verify_derivation([{"id": "gue", "domain": "statistics",
+          "spec": {"STAT_VERIFY": {"zeta_spacing": {"claimed_consistent_with_gue": True}}}}])
+    if r.get("verdict") != "HOLDS":
+        print("the elimination did not verify:", json.dumps(r)[:300]); return 1
+    r = receipts.attach(r, config=EngineConfig(), domain="statistics")
+    seal = (r.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted"); return 1
+    print("sealed GUE spacing witness", seal)
+    sid = TS.create("Riemann hypothesis")["id"]
+    claim = (f"An answer from another domain: the nearest-neighbour spacings of the first {pre.data['zeros_used']:,} "
+             f"zeta zeros (Odlyzko's table), unfolded to unit mean, have variance {pre.data['variance']} — GUE-like "
+             f"(random matrix theory), far from the Poisson value 1.0, with {pre.data['frac_below_half_mean']*100:.1f}% "
+             f"below half-mean (level repulsion). The Montgomery-Odlyzko law: the zeros behave like the spectrum of a "
+             f"random Hermitian operator. This is EVIDENCE for the Hilbert-Polya picture, not a proof, and says "
+             f"nothing about whether any zero lies on the line.")
+    res = TS.tick(sid, "witness", claim, seal=seal, by="Narrow Highway — the cross-domain reading (RMT), 2026-10-05")
+    print("  witness" if res.get("ok") else ("  REFUSED: " + res.get("error", "")))
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "witnesses": f["witnesses"]}, indent=1))
+    return 0
+
+
 def count(T: float = 1000000000.0) -> int:
     """Count the zeros at a GREAT height — far beyond any on-line sweep — and seal it as a WITNESS that says
     exactly what it is: HOW MANY non-trivial zeros of ζ have 0 < Im(ρ) <= T, by Turing's method, cross-checked
@@ -503,6 +607,12 @@ def main() -> int:
         return robin(int(a[1]) if len(a) > 1 else 1000000)
     if a[0] == "schoenfeld":
         return schoenfeld(int(a[1]) if len(a) > 1 else 2000000)
+    if a[0] == "lagarias":
+        return lagarias(int(a[1]) if len(a) > 1 else 1000000)
+    if a[0] == "nicolas":
+        return nicolas(int(a[1]) if len(a) > 1 else 1000000)
+    if a[0] == "gue":
+        return gue()
     if a[0] == "count":
         return count(float(a[1]) if len(a) > 1 else 1000000000.0)
     if a[0] == "window":

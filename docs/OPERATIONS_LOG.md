@@ -1409,3 +1409,25 @@ is a backup now.
 - Gate: BENCHMARKS OK domains 73/73 (0 false positives), ASSAY OK newly passing verify.zero_count.runs.through.the
   .engine + verify.elliptic.53a1.rank.one.by.gross.zagier, regressed []. The bsd stick probe was de-brittled to
   stable structure (witnesses eq 2, instances exist, narrows_numerically) — not a count that the ingestion changes.
+
+## 2026-10-05 — two more RH eliminations (Lagarias, Nicolas) and the cross-domain answer (GUE / random matrix)
+- Matt, after the "what equation safely fits / is there an answer in another domain" exchange: "yes. do that."
+- LAGARIAS (number_theory; alias "lagarias"; own golden, domains 73->74; POST /verify). RH <=> sigma(n) <=
+  H_n + exp(H_n) ln H_n for all n>=1 (equality only at n=1) — Robin made elementary and exception-free (no e^gamma,
+  no 5040 carve-out). Same numpy sigma sieve. Sealed WITNESS 049273ee… on the Riemann stick to n <= 2e7 (tightest
+  n>=2 at n=12, ratio 0.9886 < 1). tools/tick.py lagarias [N].
+- NICOLAS (number_theory; alias "nicolas"; own golden, domains 74->75; POST /verify). RH <=> N_k/(phi(N_k) ln ln
+  N_k) > e^gamma for every primorial N_k. Computed in floats as prod p/(p-1) / ln(theta(p_k)) — never forming the
+  huge primorial. Sealed WITNESS ab857806… to prime bound 1e7 (closest at the largest primorial, ratio 1.78210 >
+  e^gamma 1.78107 — the criterion is TIGHT, margin ~1e-3). tools/tick.py nicolas [P].
+- GUE — THE ANSWER IN ANOTHER DOMAIN (statistics; alias "gue"/"zeta_spacing"; own golden, domains 75->76; POST
+  /verify). Montgomery-Odlyzko: the zeta zeros' spacings follow the Gaussian Unitary Ensemble of random matrix
+  theory. verify_gue_spacing reads data/zeta_zeros.jsonl (Odlyzko's first 10,000 zeros, ingested with provenance),
+  unfolds via w_n = theta(gamma_n)/pi, and tests unit mean + level repulsion (frac(s<0.5)=8.8%, vs Poisson ~40%) +
+  variance 0.1541 (GUE-like, Poisson=1.0). Sealed WITNESS deefbb6d… on the Riemann stick — EVIDENCE for the
+  Hilbert-Polya spectral picture, explicitly NOT a proof and NOT a claim about on-line-ness. tools/tick.py gue.
+- numpy 2.5 note: np.trapz is gone -> np.trapezoid (the GUE Wigner-variance reference integral). Odlyzko's table
+  fetched from his site (www-users.cse.umn.edu/~odlyzko/zeta_tables/zeros1); LMFDB had bot-challenged the box earlier.
+- Riemann stick now: direct bound at height 1e7 + SIX witnesses (Robin, Schoenfeld, zero-count 1e12, Lagarias,
+  Nicolas, GUE). Gate each time: BENCHMARKS OK (74/74, 75/75, 76/76; 0 false positives), ASSAY OK newly passing the
+  lagarias/nicolas/gue probes, regressed []. Narrowing is evidence, never a proof; RH is open.

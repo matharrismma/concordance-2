@@ -2013,6 +2013,45 @@
       "claimed_zero_count": 1747000
     }
   },
+  "lagarias": {
+    "packet_key": "NUM_VERIFY",
+    "true": {
+      "lagarias_to": 100000,
+      "claimed_lagarias_holds": true,
+      "claimed_closest_approach_n": 12
+    },
+    "false": {
+      "lagarias_to": 100000,
+      "claimed_lagarias_holds": false,
+      "claimed_closest_approach_n": 99999
+    }
+  },
+  "nicolas": {
+    "packet_key": "NUM_VERIFY",
+    "true": {
+      "nicolas_primes_to": 100000,
+      "claimed_nicolas_holds": true,
+      "claimed_closest_prime": 99991
+    },
+    "false": {
+      "nicolas_primes_to": 100000,
+      "claimed_nicolas_holds": false,
+      "claimed_closest_prime": 2
+    }
+  },
+  "gue": {
+    "packet_key": "STAT_VERIFY",
+    "true": {
+      "zeta_spacing": {
+        "claimed_consistent_with_gue": true
+      }
+    },
+    "false": {
+      "zeta_spacing": {
+        "claimed_consistent_with_gue": false
+      }
+    }
+  },
   "soil_science": {
     "false": {
       "area_hectares": 2.0,

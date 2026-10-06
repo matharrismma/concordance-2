@@ -61,9 +61,17 @@ still fail, and push that window with every rerun:
 1. **Each tool eliminates a region.** A sealed bound ("no zero off the critical line below height T"), a sealed
    witness from another tool ("no Robin counterexample below N", "no Schoenfeld prime-count violation below X"), a
    cited barrier ("relativizing proofs cannot settle P vs NP") — each rules out somewhere a failure could hide. The
-   Riemann stick now carries three independent eliminations: the two zero counts directly (to height 10^7), the
-   divisor sum (Robin 1984), and the prime count (Schoenfeld 1976, `|pi(x) - li(x)| < sqrt(x) ln x / (8 pi)` for
-   x >= 2657, exact to x = 2·10^7). A counterexample would have to evade all three at once.
+   Riemann stick now carries five independent eliminations: the two zero counts directly (to height 10^7); the
+   divisor sum (Robin 1984, and Lagarias 2002, its elementary exception-free form `sigma(n) <= H_n + e^H_n ln H_n`);
+   the prime count (Schoenfeld 1976, `|pi(x) - li(x)| < sqrt(x) ln x / (8 pi)` for x >= 2657, exact to x = 2·10^7);
+   and the primorials (Nicolas 1983, `N_k/(phi(N_k) ln ln N_k) > e^gamma`). A counterexample would have to evade
+   every one at once.
+
+   **An answer in another domain.** `statistics.gue_spacing` takes Odlyzko's published zeros, unfolds them to unit
+   mean density, and shows their nearest-neighbour spacings follow the Gaussian Unitary Ensemble of random matrix
+   theory (Montgomery-Odlyzko): variance far below the Poisson value 1.0, with strong level repulsion. That is
+   evidence from mathematical physics for the Hilbert-Polya spectral picture — the zeros behave like the spectrum
+   of a random Hermitian operator. It is evidence, not a proof, and says nothing about on-line-ness.
 
    **A count is not a verification.** The stick also carries a WITNESS of the zero *count* at a great height —
    `number_theory.zero_count` (Turing's method, cross-checked against the Riemann-von Mangoldt term within

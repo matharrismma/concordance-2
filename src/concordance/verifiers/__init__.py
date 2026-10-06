@@ -35,11 +35,17 @@ VERIFIERS: Dict[str, str] = {
     # the zero count N(T) at a great height (Turing's method) — cheap, counts the zeros in the strip, routed and
     # run nightly like the other number_theory marks (2026-10-05)
     "zero_count": _P + "number_theory", "zeta_zero_count": _P + "number_theory",
+    # two more RH-equivalent eliminations, same divisor-sum / primorial machinery (2026-10-05)
+    "lagarias": _P + "number_theory", "lagarias_inequality": _P + "number_theory",
+    "nicolas": _P + "number_theory", "nicolas_criterion": _P + "number_theory",
     "combinatorics": _P + "combinatorics",
     "geometry": _P + "geometry",
     "formal_logic": _P + "formal_logic", "logic": _P + "formal_logic",
     "probability": _P + "probability",
     "statistics": _P + "statistics",
+    # the cross-domain answer for Riemann: the zeta zeros' spacings follow random-matrix (GUE) statistics
+    # (Montgomery-Odlyzko) — a statistics-domain mark on a number-theory question (2026-10-05)
+    "gue": _P + "statistics", "zeta_spacing": _P + "statistics",
     # "do these independent measurements agree?" — the concordance check lives in statistics
     "measurement_consistency": _P + "statistics",
     "measurement_agreement": _P + "statistics",
