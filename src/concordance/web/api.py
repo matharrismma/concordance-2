@@ -1201,16 +1201,22 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # outcome (a SUCCESS needs a witness — never self-graded; a FAILURE is recorded freely).
         from .. import trajectory as _traj
         if method == "GET":
+            if query.get("tree"):
+                return _ok(_traj.tree(str(query["tree"])))
+            if query.get("balance"):
+                return _ok(_traj.balance(str(query["balance"])))
+            if query.get("standard"):
+                return _ok(_traj.standard(str(query["standard"])) or {"detail": "no proven standard yet"})
             pth = str(query.get("path") or "").strip()
             if not pth:
-                return _err(400, "path required (?path=…)")
+                return _err(400, "path required (?path=… · or ?tree=/?balance=/?standard=<unit>)")
             return _ok(_traj.measure(pth))
         if method == "POST":
             if not isinstance(body, dict) or not str(body.get("path") or "").strip():
-                return _err(400, "body {path, success, seal|witness} required")
+                return _err(400, "body {path, success, seal|witness, parent?} required")
             r = _traj.record(str(body["path"]), bool(body.get("success")),
                              seal=str(body.get("seal") or ""), witness=str(body.get("witness") or ""),
-                             note=str(body.get("note") or ""))
+                             note=str(body.get("note") or ""), parent=str(body.get("parent") or ""))
             if not r.get("ok"):
                 return _err(400, r.get("error") or "could not record")
             return _ok(r)
