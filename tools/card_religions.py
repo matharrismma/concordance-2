@@ -188,17 +188,30 @@ FORESHADOWS = [
           "one' (John 17:22)",
           ["hinduism", "vedic", "rita", "sacrifice"],
           terms=["hinduism", "vedic religion", "vedanta", "upanishads", "the vedas", "brahman", "atman", "moksha"]),
-    _fore("buddhism", "Buddhism", "c. 5th c. BC",
+    _fore("buddhism", "Buddhism — and Nāgārjuna's Middle Way (Madhyamaka)", "c. 5th c. BC; Madhyamaka c. 2nd c. AD",
           "an unflinching diagnosis of the human condition — that life as we grasp it is shot through with "
-          "suffering (dukkha) — profound compassion, and a refusal to rest in the emptiness of created idols",
-          "it found no personal God to cry to and no Redeemer to send, and set the goal as the extinction of "
-          "the self (nirvana) rather than communion with the Living One",
-          "the suffering it named so honestly is real (Romans 8:20-22), but the answer is not to be blown out "
-          "like a candle — it is a Man of Sorrows who bore it (Isaiah 53:3-4) and a self not annihilated but "
-          "raised",
-          ["buddhism", "dukkha", "suffering", "compassion", "nirvana"],
+          "suffering (dukkha) — profound compassion, and a refusal to rest in the emptiness of created idols. "
+          "Its sharpest flowering is Nāgārjuna's MIDDLE WAY: that nothing has svabhāva (inherent, independent "
+          "self-existence); all things arise DEPENDENTLY (pratītyasamutpāda), neither self-standing "
+          "(eternalism) nor nothing at all (nihilism) but RELATIONAL — a true seeing echoed in physics, where "
+          "a system's properties exist only relative to what it interacts with (Rovelli's relational quantum "
+          "mechanics; the Tsirelson bound 2√2 shows no pre-assigned local values can reproduce the "
+          "correlations). Being is relational, not lodged in the isolated thing — a real fragment of the light",
+          "it found no personal God to cry to and no Redeemer to send, set the goal as the extinction of the "
+          "self (nirvana) rather than communion with the Living One — and in the Middle Way the relations hang "
+          "on emptiness (śūnyatā) all the way down: a web with no Ground, relation without a One in whom it "
+          "coheres, the self dissolved rather than redeemed",
+          "the suffering it named so honestly is real (Romans 8:20-22), and the relational seeing is real — but "
+          "the answer is not to be blown out like a candle, and the web does not hang on emptiness: in Christ "
+          "ALL THINGS HOLD TOGETHER (Colossians 1:17), the relations have their Ground in the Logos through "
+          "whom all were made (John 1:3), the shadow whose substance is Christ (Colossians 2:17); a Man of "
+          "Sorrows bore the dukkha (Isaiah 53:3-4) and the self is not annihilated but raised",
+          ["buddhism", "dukkha", "suffering", "compassion", "nirvana", "madhyamaka", "middle way",
+           "emptiness", "dependent origination", "relational", "nagarjuna"],
           terms=["buddhism", "buddhist", "the buddha", "nirvana", "dukkha", "four noble truths",
-                 "eightfold path", "bodhisattva", "theravada", "mahayana"]),
+                 "eightfold path", "bodhisattva", "theravada", "mahayana", "nagarjuna", "madhyamaka",
+                 "middle way", "emptiness", "sunyata", "śūnyatā", "dependent origination",
+                 "pratityasamutpada", "pratītyasamutpāda", "two truths", "svabhava", "svabhāva"]),
     _fore("chinese", "Chinese traditions — Confucianism & Daoism", "c. 6th–5th c. BC",
           "the moral order and the cultivation of virtue, filial reverence, the rectification of names — and, "
           "in Daoism, 'the Way' (the Dao): an ineffable Source from which all things flow, and the wisdom of "

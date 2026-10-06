@@ -480,6 +480,64 @@ def aharonov_bohm() -> int:
     return 0
 
 
+def relational() -> int:
+    """Relational quantum mechanics as a sealed anchor (Matt, 2026-10-06: "Nagarjuna's middle way and
+    Rovelli especially" / "Seal the anchor"). SEAL the computable signature that properties are NOT
+    pre-assigned intrinsic values but exist only relative to the interacting system: the Tsirelson bound,
+    the quantum maximum of the CHSH correlation, S_max = 2*sqrt(2) ~ 2.8284, above the classical/local-
+    realist bound of 2. No assignment of pre-existing local values reproduces it (Bell). Seal the
+    arithmetic; attribute the relational reading (Rovelli's RQM, and its resonance with Nagarjuna);
+    launder nothing — emptiness is not quantum mechanics, and the web holds together in Christ (Col 1:17)."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    tsirelson = 2 * (2 ** 0.5)
+    r = verify_derivation([{"id": "tsirelson_bound", "domain": "mathematics",
+          "spec": {"mode": "numeric", "params": {"numeric_expr": "2*sqrt(2)", "claimed_value": tsirelson, "rel_tol": 1e-9}}}])
+    if r.get("verdict") != "HOLDS":
+        print("the Tsirelson bound did not verify:", json.dumps(r)[:400]); return 1
+    r = receipts.attach(r, config=EngineConfig(), domain="mathematics")
+    seal = (r.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted"); return 1
+    print("sealed the Tsirelson bound", seal)
+    sid = TS.create("Relational quantum mechanics",
+                    statement=("A quantum system has no observer-independent intrinsic properties; its values "
+                               "exist only relative to the system it interacts with. The quantum maximum of the "
+                               "CHSH correlation, the Tsirelson bound 2*sqrt(2), exceeds the classical/local-"
+                               "realist bound of 2 — no pre-assigned local values reproduce it."),
+                    field="physics",
+                    references=["C. Rovelli, 'Relational Quantum Mechanics', Int. J. Theor. Phys. 35 (1996) 1637",
+                                "C. Rovelli, Helgoland (2020)",
+                                "B. S. Cirel'son (Tsirelson), Lett. Math. Phys. 4 (1980) 93",
+                                "J. S. Bell, Physics 1 (1964) 195; A. Aspect et al., Phys. Rev. Lett. 49 (1982) 1804"])["id"]
+    if any(t.get("seal") == seal for t in TS.read(sid).get("ticks", [])):
+        print("  already sealed on the stick — not duplicated"); return 0
+    marks = [
+        ("witness", f"The Tsirelson bound S_max = 2*sqrt(2) = {tsirelson:.10f}, the quantum maximum of the CHSH "
+                    f"correlation, above the classical/local-realist bound S <= 2 — an arithmetic fact. Bell's "
+                    f"theorem: no assignment of pre-existing local intrinsic values to the parts reproduces the "
+                    f"quantum correlations; the values are not there before the interaction.", dict(seal=seal)),
+        ("note", "[the principle] Properties are RELATIONAL: a system's values exist only relative to the system "
+                 "it interacts with (Rovelli's relational quantum mechanics). Substance is in the relation, not in "
+                 "the thing held apart — the physical witness to our own architecture (the fascia, the graph of "
+                 "sealed edges) and to the reading that the keeping's brief reference cards are relationally whole. "
+                 "Rovelli names the resonance with Nagarjuna's dependent origination (Helgoland).", {}),
+        ("note", "[discernment / the guard] The engine seals that the Tsirelson bound IS 2*sqrt(2) and that quantum "
+                 "correlations exceed the classical bound — physics, a fact. It does NOT claim that Nagarjuna's "
+                 "emptiness IS quantum mechanics (Rovelli himself keeps it resonance, not identity), nor that "
+                 "relationality is the last word. The relational FORM is the true fragment; its lack is a Ground, "
+                 "and in Christ all things hold together (Colossians 1:17) — the web is real and coheres in the "
+                 "Logos (John 1:3). Borrow the form; launder nothing.", {}),
+    ]
+    for kind, claim, kw in marks:
+        res = TS.tick(sid, kind, claim, by="Narrow Highway — the relational reading, 2026-10-06", **kw)
+        print(("  " + kind) if res.get("ok") else ("  REFUSED " + kind + ": " + res.get("error", "")))
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
+    return 0
+
+
 def alpha() -> int:
     """The fine-structure constant as a tick stick: its open question is why alpha ~ 1/137.036 has its value and
     whether it is truly constant. SEAL the measured value from the engine's attested constants, CITE the "137"
@@ -815,6 +873,8 @@ def main() -> int:
         return fiber()
     if a[0] in ("symphony", "music"):
         return symphony()
+    if a[0] in ("relational", "rovelli"):
+        return relational()
     if a[0] == "robin":
         return robin(int(a[1]) if len(a) > 1 else 1000000)
     if a[0] == "schoenfeld":
