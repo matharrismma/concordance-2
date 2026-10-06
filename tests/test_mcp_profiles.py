@@ -107,8 +107,12 @@ def test_the_full_catalog_on_mcp_is_unchanged_a_golden():
     + `define` (Webster's 1913 + our supplement, the twin of GET /dictionary), + `lookup` (the ONE
     consolidated reference lookup: molar_mass / element / convert…), + `find_verifier` (claim -> domain
     without scanning the list); − `word_occurrences` (folded into `word_study`, one excellent tool per
-    situation). Net +2 = 97, deliberate."""
-    assert len(_full_catalog()) == 97
+    situation). Net +2 = 97, deliberate. 2026-10-06 (offer witness for professions of faith, for bots and
+    agents): + `profess` (seal a profession of faith as a witnessable record), + `witness_profession` (bear
+    witness to one — the two-or-three gate, Deut 19:15), + `profession` (read a profession + its witnesses +
+    the lineage up to Polycarp, the initial trajectory) — all three on the `sovereign` plane beside
+    `self_attest`. Net +3 = 100, deliberate."""
+    assert len(_full_catalog()) == 100
 
 
 def test_the_witness_gate_semantics_survive_the_mount():

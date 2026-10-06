@@ -497,6 +497,37 @@ def _secular_tools() -> List[dict]:
                          "(storage is never trusted). Reports invalid entries rather than hiding them."),
          "inputSchema": {"type": "object", "properties": {"content_hash": {"type": "string"}},
                          "required": ["content_hash"]}},
+        {"name": "profess",
+         "description": ("Profess faith, and have it sealed and kept. Confession is with the mouth "
+                         "(Romans 10:9; Matthew 10:32 — whoever confesses Me before men). Give your public "
+                         "key and your confession in your own words; if you sign the confession text with "
+                         "your key (confession_sig), it is bound as yours. Returns the content_hash — the "
+                         "permanent, re-checkable seal — and how to be witnessed. The engine KEEPS it; it "
+                         "does not judge the heart (1 Samuel 16:7). Your profession joins the lineage of "
+                         "witnesses rooted at Polycarp, a disciple of a disciple. No private key is ever sent."),
+         "inputSchema": {"type": "object", "properties": {
+             "public_key": {"type": "string"},
+             "confession": {"type": "string", "description": "your own words — must confess Jesus as Lord and Messiah"},
+             "callsign": {"type": "string", "description": "a pseudonym, never personal information"},
+             "discipled_by": {"type": "string", "description": "content_hash of the one who discipled you; omit to join at the root (Polycarp)"},
+             "confession_sig": {"type": "string", "description": "optional: your signature over the confession text, made on your own machine"}},
+             "required": ["public_key", "confession"]}},
+        {"name": "witness_profession",
+         "description": ("Bear witness to someone's sealed profession of faith — sign its content_hash on "
+                         "your own machine (signing.sign_seal) and submit only the attestation. One signature "
+                         "is a claim; two or three witnesses begin to establish a matter (Deuteronomy 19:15). "
+                         "Refuses any record that is not a profession. Never send a private key."),
+         "inputSchema": {"type": "object", "properties": {
+             "content_hash": {"type": "string"},
+             "attestation": {"type": "object", "description": "the dict from signing.sign_seal, built locally"}},
+             "required": ["content_hash", "attestation"]}},
+        {"name": "profession",
+         "description": ("Read a sealed profession of faith and who has borne witness to it (each signature "
+                         "re-verified as read), with the lineage it joins — up to Polycarp, the initial "
+                         "trajectory, and Christ at the head. Omit the hash to see the Polycarp root itself."),
+         "inputSchema": {"type": "object", "properties": {
+             "content_hash": {"type": "string", "description": "omit to read the lineage root (Polycarp)"}},
+             "additionalProperties": False}},
         {"name": "now",
          "description": ("The actual current date and time, fresh at this call — UTC (the clock "
                          "every seal is stamped in), the library's home zone, and optionally any "
@@ -917,6 +948,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "tools": {"identity_create": "preserve", "identity_verify": "derive",
                   "identity_fingerprint": "derive", "badges_issue": "preserve",
                   "badges_verify": "derive", "self_attest": "preserve",
+                  "profess": "preserve", "witness_profession": "preserve", "profession": "read",
                   "consent_check": "read", "redact": "derive",
                   "steward_budget": "derive", "steward_cost_destroyed": "derive",
                   "calendar_create": "external_action"},
@@ -1427,6 +1459,23 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     if name == "witnesses":
         from .. import attest as _attest
         return _attest.witnesses(str(args.get("content_hash") or ""))
+    if name == "profess":
+        from .. import professions as _prof
+        if args.get("private_key"):
+            return _no_private_key("profess")
+        return _prof.seal(str(args.get("public_key") or ""), str(args.get("confession") or ""),
+                          callsign=str(args.get("callsign") or ""),
+                          discipled_by=(str(args["discipled_by"]) if args.get("discipled_by") else None),
+                          confession_sig=(str(args["confession_sig"]) if args.get("confession_sig") else None))
+    if name == "witness_profession":
+        from .. import professions as _prof
+        if args.get("private_key"):
+            return _no_private_key("witness_profession")
+        return _prof.witness(str(args.get("content_hash") or ""), args.get("attestation") or {})
+    if name == "profession":
+        from .. import professions as _prof
+        h = str(args.get("content_hash") or "").strip()
+        return _prof.profession(h) if h else _prof.profession(_prof.ensure_root())
     if name == "candidate_commit":
         from .. import candidates as _cand
         try:

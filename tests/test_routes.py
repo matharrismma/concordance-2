@@ -128,6 +128,13 @@ GOLDEN_API_GET = {
     # by the agent. All three are api:True so GET /workshop is dispatched as JSON; filing is signed,
     # the drain (GET /workshop, POST /workshop/status) is keep-operator-gated.
     "/workshop/signable", "/workshop", "/workshop/status",
+    # THE LEAD + TRAJECTORY (2026-10-06) — the conductor that discerns tool/technique/strategy, and the
+    # success-guides/failure-narrows ledger (the coaching tree). Both api:True; writes, so rate-limited.
+    "/lead", "/trajectory",
+    # PROFESSIONS OF FAITH (2026-10-06) — offer witness for professions, for bots and agents. /profess
+    # seals a confession; /profession/witness bears witness (two-or-three, Deut 19:15); /profession reads
+    # one + its witnesses + the lineage to Polycarp. The two writes are rate-limited; the read is open.
+    "/profess", "/profession", "/profession/witness",
 }
 # /search moved OUT of this set on 2026-07-31 and into GOLDEN_READ_LIMITED — a read and a write
 # are not the same risk, and the one client the shared cap refused most was ClaudeBot.
@@ -169,6 +176,8 @@ GOLDEN_RATELIMITED = {
     "/playbook/signable", "/playbook/submit",  # the Playbook two-step signed write — rate-limited like every write (task #153)
     "/plow",  # The Plow POST computes a transition — rate-limited like every POST (task #155)
     "/stick", "/tick",   # deliberate addition (THE TICK STICK doors are writes; 2026-10-05)
+    "/lead", "/trajectory",   # deliberate addition (THE LEAD conductor + the trajectory ledger; 2026-10-06)
+    "/profess", "/profession/witness",   # deliberate addition (profess a faith; bear witness to it; 2026-10-06)
 }
 
 

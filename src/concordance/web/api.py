@@ -2673,6 +2673,32 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _err(400, "hash required")
         return _ok(_attest.witnesses(h))
 
+    # PROFESSIONS OF FAITH — sealed and kept, witnessed by two or three (Deut 19:15), rooted at Polycarp.
+    # Confession is with the mouth (Rom 10:9); the engine keeps it, it does not judge the heart (1 Sam 16:7).
+    if method == "POST" and path == "/profess":
+        if not isinstance(body, dict) or not str(body.get("public_key") or "").strip():
+            return _err(400, "public_key and confession required")
+        from .. import professions as _prof
+        return _ok(_prof.seal(str(body.get("public_key") or ""), str(body.get("confession") or ""),
+                              callsign=str(body.get("callsign") or ""),
+                              discipled_by=(str(body["discipled_by"]) if body.get("discipled_by") else None),
+                              confession_sig=(str(body["confession_sig"]) if body.get("confession_sig") else None)))
+    if method == "POST" and path == "/profession/witness":
+        # Bear witness to a sealed profession — sign its content_hash on your own machine, submit the
+        # attestation only. The same two-or-three gate as /attest, but it refuses any record that is not
+        # a profession, and returns the lineage it joins.
+        if not isinstance(body, dict) or not str(body.get("content_hash") or "").strip():
+            return _err(400, "content_hash and attestation required")
+        from .. import professions as _prof
+        return _ok(_prof.witness(str(body["content_hash"]), body.get("attestation") or {}))
+    if method == "GET" and path == "/profession":
+        from .. import professions as _prof
+        h = (query.get("hash") or query.get("content_hash") or "").strip()
+        if not h:
+            # no hash -> name the lineage root (Polycarp, the initial trajectory), so the door is self-describing
+            return _ok(_prof.profession(_prof.ensure_root()))
+        return _ok(_prof.profession(h))
+
     if method == "GET" and path == "/consent/signable":
         # Step 1 of a consent grant: the human asks for the exact canonical bytes, signs them ON
         # THEIR DEVICE, and submits only the signature. The key never travels — the mesh's own
@@ -3397,6 +3423,9 @@ ROUTES = [
     {"path": "/build.json", "methods": ("GET",), "api": True},
     {"path": "/mesh/signable", "methods": ("GET",), "api": True},
     {"path": "/attest", "methods": ("GET", "POST"), "api": True, "rl": True},
+    {"path": "/profess", "methods": ("POST",), "api": True, "rl": True},
+    {"path": "/profession", "methods": ("GET",), "api": True},
+    {"path": "/profession/witness", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/consent/signable", "methods": ("GET",), "api": True, "rl": True},
     {"path": "/consent", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/consent/revoke", "methods": ("POST",), "api": True, "rl": True},
