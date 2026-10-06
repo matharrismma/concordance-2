@@ -6,6 +6,7 @@
     PYTHONPATH=src python tools/tick.py lnh                   # Dirac's Large Numbers Hypothesis: seal N1, cite the rest
     PYTHONPATH=src python tools/tick.py alpha                 # the fine-structure constant: seal alpha, cite the 137
     PYTHONPATH=src python tools/tick.py ab                    # the Aharonov-Bohm effect: seal the flux quantum + phase law
+    PYTHONPATH=src python tools/tick.py fiber                 # fiber optic calibration: seal the decibel scale + the method
     PYTHONPATH=src python tools/tick.py robin [N]             # chart the Riemann window by elimination (Robin to N)
     PYTHONPATH=src python tools/tick.py schoenfeld [X]        # chart it from the prime count too (Schoenfeld to X)
     PYTHONPATH=src python tools/tick.py lagarias [N]          # and through Lagarias's elementary inequality (to N)
@@ -312,6 +313,60 @@ def lnh() -> int:
     return 0
 
 
+def fiber() -> int:
+    """Fiber optic calibration as a sealed anchor + the method stick (docs/FIBER_OPTIC_CALIBRATION.md).
+    SEAL the decibel identity that the loss scale rests on — a factor of two in optical power is exactly
+    3.0102999566 dB (10^(3.0103/10) = 2) — and open the method stick: reference, read the ticks (OTDR),
+    correct to source, triangulate many references (the concordance/Birge check) to the converged narrow
+    signal. The calibration method, named in hardware. Seal the arithmetic; calibrate to FIND; launder nothing."""
+    import math
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    db_half = 10.0 * math.log10(2.0)         # 3.0102999566... dB per factor of two in power
+    expr = f"10**(({db_half!r})/10)"          # the inverse identity, arithmetic only: = 2 exactly
+    r = verify_derivation([{"id": "decibel_half_power", "domain": "mathematics",
+          "spec": {"mode": "numeric", "params": {"numeric_expr": expr, "claimed_value": 2.0, "rel_tol": 1e-9}}}])
+    if r.get("verdict") != "HOLDS":
+        print("the decibel identity did not verify:", json.dumps(r)[:400]); return 1
+    r = receipts.attach(r, config=EngineConfig(), domain="mathematics")
+    seal = (r.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted"); return 1
+    print("sealed the decibel identity", seal)
+    sid = TS.create("Fiber optic calibration",
+                    statement=("Recover a true signal through a lossy medium by referencing it to a known launch "
+                               "and combining many references so the distortion of any one cancels. The engine's "
+                               "calibration method, named in hardware."),
+                    field="engineering")["id"]
+    if any(t.get("seal") == seal for t in TS.read(sid).get("ticks", [])):
+        print("  already sealed on the stick — not duplicated"); return 0
+    marks = [
+        ("witness", f"The decibel is a relative scale: a factor of two in optical power is exactly "
+                    f"{db_half:.10f} dB (10^({db_half:.6f}/10) = 2). Optical loss L(dB) = 10*log10(P_in/P_out) is "
+                    f"meaningful only against a reference launch, which is subtracted; an OTDR locates an event by "
+                    f"the round trip d = c*t/(2*n_g). An arithmetic fact — the scale calibration stands on.", dict(seal=seal)),
+        ("note", "[the method] Four steps, each already a part of the engine: (1) REFERENCE — a well-refined system "
+                 "is a known signal (docs/THE_WATCH.md, the games tick sticks); (2) READ THE TICKS — the OTDR trace "
+                 "is the tick stick, each mark sealed (docs/TICK_STICK.md); (3) CORRECT TO SOURCE — calibrate the "
+                 "receiver to the source, the reading trusted only relative to a known reference; (4) TRIANGULATE — "
+                 "combine independent references with the concordance/Birge check (statistics.measurement_consistency), "
+                 "where a spread beyond the error bars indicts the method, not the constant. The output is the "
+                 "converged narrow signal: the window of success that survives every source's distortion.", {}),
+        ("note", "[the guard] Calibration FINDS the signal; it does not pronounce it true. The decibel identity and "
+                 "the OTDR relation are exact and sealed. Borrowing the method to combine references about strategy "
+                 "or life is a way to FIND the narrow window, never a claim that the references obey Maxwell's "
+                 "equations. The verifiers remain the only authority on truth. Seal the arithmetic; calibrate to "
+                 "find; launder nothing.", {}),
+    ]
+    for kind, claim, kw in marks:
+        res = TS.tick(sid, kind, claim, by="Narrow Highway — fiber optic calibration, 2026-10-06", **kw)
+        print(("  " + kind) if res.get("ok") else ("  REFUSED " + kind + ": " + res.get("error", "")))
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
+    return 0
+
+
 def aharonov_bohm() -> int:
     """The Aharonov-Bohm effect as a sealed physics anchor (Matt, 2026-10-06: "We create the tick lines of
     probability. We use the Aharonov-Bohm effect."). SEAL the computable law from the engine's attested
@@ -344,6 +399,8 @@ def aharonov_bohm() -> int:
                     field="physics",
                     references=["Y. Aharonov and D. Bohm, Phys. Rev. 115 (1959) 485",
                                 "A. Tonomura et al., Phys. Rev. Lett. 56 (1986) 792 (definitive, flux shielded)"])["id"]
+    if any(t.get("seal") == seal for t in TS.read(sid).get("ticks", [])):
+        print("  already sealed on the stick — not duplicated"); return 0
     marks = [
         ("witness", f"The magnetic flux quantum Phi0 = h/(2e) = {phi0:.9e} Wb, computed from the engine's attested "
                     f"constants (the single-charge quantum h/e = 2*Phi0 = {h/e:.9e} Wb). The Aharonov-Bohm phase is "
@@ -699,6 +756,8 @@ def main() -> int:
         return alpha()
     if a[0] in ("aharonov_bohm", "ab"):
         return aharonov_bohm()
+    if a[0] in ("fiber", "calibration"):
+        return fiber()
     if a[0] == "robin":
         return robin(int(a[1]) if len(a) > 1 else 1000000)
     if a[0] == "schoenfeld":
