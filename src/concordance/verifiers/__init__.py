@@ -136,7 +136,10 @@ VERIFIERS: Dict[str, str] = {
     "game_theory": _P + "game_theory",
     # the Pressure Fighting System's combat grammar, enforced (Matt, 2026-10-06): a closed-set
     # classification of an exchange, MATCH/NO_MATCH, the first link of the chain to optimal
-    "pressure_fighting": _P + "pressure_fighting", "combat_grammar": _P + "pressure_fighting", "games": _P + "game_theory", "strategy": _P + "game_theory",
+    "pressure_fighting": _P + "pressure_fighting", "combat_grammar": _P + "pressure_fighting",
+    # chess — the third game-type witness, the one where optimal is computable (PERFT-proven rules engine
+    # in concordance/chess.py; this adapter makes a chess claim chain + seal like the others)
+    "chess": _P + "chess", "games": _P + "game_theory", "strategy": _P + "game_theory",
     "archaeology": _P + "archaeology", "radiocarbon": _P + "archaeology", "radiometric_dating": _P + "archaeology",
     # the elliptic-curve L-value door for the Birch and Swinnerton-Dyer stick (tick stick, 2026-10-05)
     "elliptic_curves": _P + "elliptic_curves", "elliptic": _P + "elliptic_curves", "bsd": _P + "elliptic_curves",
