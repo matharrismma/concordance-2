@@ -597,6 +597,92 @@ def alpha() -> int:
     return 0
 
 
+def alpha_orbitals() -> int:
+    """Anchor the fine-structure constant in the ATOM (Matt, 2026-10-06: "atomic orbitals" / "suborbitals").
+    alpha is not an abstract number: it BUILDS THE ORBITALS — the ground-state electron's speed v1 = alpha*c,
+    the Rydberg binding energy 1/2 alpha^2 m_e c^2, the Bohr radius hbar/(alpha m_e c) — and SPLITS THE
+    SUBORBITALS — the fine structure, the spin-orbit/relativistic lifting of the l,j degeneracy, suppressed
+    by alpha^2, the origin of the name. Each sealed from the attested constants (from base, non-circular)
+    and cross-checked against CODATA a_0 and R_inf. Marks ADD to the fine-structure stick; idempotent."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    from concordance.verifiers import physical_constants as PC
+    C = PC._CONSTANTS
+    e = C["elementary_charge"]["value"]; eps0 = C["vacuum_permittivity"]["value"]
+    h = C["planck_constant"]["value"]; c = C["speed_of_light"]["value"]
+    me = C["electron_mass"]["value"]; hbar = C["reduced_planck_constant"]["value"]
+    a0_codata = C["bohr_radius"]["value"]; Rinf = C["rydberg_constant"]["value"]
+    alpha_v = e ** 2 / (2 * eps0 * h * c)
+    v1 = alpha_v * c                                    # ground-state orbital speed
+    E_R = 0.5 * alpha_v ** 2 * me * c ** 2              # Rydberg (binding) energy, J
+    a0 = hbar / (alpha_v * me * c)                      # Bohr radius, m
+    fine = alpha_v ** 2                                 # fine-structure suppression (E_fs/E_gross ~ alpha^2)
+    E_R_eV = E_R / e
+    a0_rel = abs(a0 - a0_codata) / a0_codata
+    ER_rel = abs(E_R - h * c * Rinf) / (h * c * Rinf)   # E_R should equal h*c*R_inf
+
+    def seal_num(nid, expr, val):
+        r = verify_derivation([{"id": nid, "domain": "mathematics",
+              "spec": {"mode": "numeric", "params": {"numeric_expr": expr, "claimed_value": val, "rel_tol": 1e-9}}}])
+        if r.get("verdict") != "HOLDS":
+            print("  %s did not verify: %s" % (nid, json.dumps(r)[:300])); return None
+        r = receipts.attach(r, config=EngineConfig(), domain="physical_constants")
+        return (r.get("seal") or {}).get("content_hash")
+
+    s_v = seal_num("alpha_orbital_speed", f"({e!r})**2/(2*({eps0!r})*({h!r}))", v1)
+    s_E = seal_num("rydberg_energy", f"({e!r})**4*({me!r})/(8*({eps0!r})**2*({h!r})**2)", E_R)
+    s_a = seal_num("bohr_radius", f"({eps0!r})*({h!r})**2/(3.141592653589793*({me!r})*({e!r})**2)", a0)
+    s_f = seal_num("fine_structure_suppression", f"(({e!r})**2/(2*({eps0!r})*({h!r})*({c!r})))**2", fine)
+    if not all([s_v, s_E, s_a, s_f]):
+        print("a seal failed; aborting"); return 1
+    print("sealed: orbital speed", s_v, "| rydberg", s_E, "| bohr radius", s_a, "| fine structure", s_f)
+
+    sid = TS.create("The fine-structure constant",
+                    statement=("Why does the fine-structure constant have the value alpha ~ 1/137.036, and is it "
+                               "truly constant across space and time? No accepted theory derives it from first "
+                               "principles; the open question is its value and its constancy, not its measurement."),
+                    field="physics",
+                    references=["CODATA 2018 recommended values",
+                                "A. Sommerfeld, Ann. Phys. 356 (1916) 1 (the fine structure of the hydrogen spectrum)"])["id"]
+    ticks = TS.read(sid).get("ticks", [])
+    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
+    seen_claims = {t.get("claim") for t in ticks}
+    marks = [
+        ("witness", f"[orbital - speed] The ground-state (n=1) electron's orbital speed is v1 = alpha*c = "
+                    f"e^2/(2*eps0*h) = {v1:.6e} m/s ~ c/137: alpha IS v/c for the innermost orbital.", s_v),
+        ("witness", f"[orbital - energy] The Rydberg (hydrogen binding/ionization) energy is E_R = 1/2 alpha^2 "
+                    f"m_e c^2 = m_e e^4/(8 eps0^2 h^2) = {E_R:.6e} J = {E_R_eV:.4f} eV - the gross-structure "
+                    f"scale; it equals h*c*R_inf to {ER_rel:.0e} (CODATA R_inf), confirming the derivation.", s_E),
+        ("witness", f"[orbital - size] The Bohr radius is a_0 = hbar/(alpha*m_e*c) = 4*pi*eps0*hbar^2/(m_e e^2) = "
+                    f"{a0:.6e} m, matching CODATA a_0 to {a0_rel:.0e}: alpha sets the atom's size (a_0 = the "
+                    f"reduced Compton wavelength / alpha).", s_a),
+        ("witness", f"[suborbital - fine structure] The suborbital splitting - the spin-orbit and relativistic "
+                    f"lifting of the l,j degeneracy within a shell - is suppressed by alpha^2 = {fine:.6e} "
+                    f"relative to the gross structure (fine-structure energy ~ 1/2 alpha^4 m_e c^2 ~ alpha^2 * "
+                    f"Rydberg ~ 7.2e-4 eV). This alpha^2-fineness of the spectral lines is why Sommerfeld (1916) "
+                    f"named it the FINE-STRUCTURE constant.", s_f),
+        ("note", "[the anchor] alpha is not an abstract number: it is the atom's architecture. The orbital "
+                 "electron's speed (alpha*c), the binding energy (alpha^2), the size (1/alpha in reduced-Compton "
+                 "units), and the fineness of the suborbital splitting (alpha^2) all follow from it - the name is "
+                 "the meaning, the fine structure of the orbitals. Seal the arithmetic; WHY alpha has this value "
+                 "stays the open question.", None),
+    ]
+    added = 0
+    for kind, claim, sealv in marks:
+        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
+            print("  (already) " + kind); continue
+        kw = dict(seal=sealv) if sealv else {}
+        res = TS.tick(sid, kind, claim, by="Narrow Highway - the atomic-orbital reading, 2026-10-06", **kw)
+        if res.get("ok"):
+            added += 1; print("  " + kind)
+        else:
+            print("  REFUSED " + kind + ": " + res.get("error", ""))
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
+    return 0
+
+
 def robin(N: int = 1000000) -> int:
     """Chart the Riemann window by ELIMINATION through a different tool (the divisor sum). Robin 1984:
     RH <=> sigma(n) < e^gamma*n*ln ln n for all n > 5040. The sieve finds no counterexample in (5040, N], so a
@@ -867,6 +953,8 @@ def main() -> int:
         return lnh()
     if a[0] == "alpha":
         return alpha()
+    if a[0] in ("alpha_orbitals", "orbitals", "suborbitals"):
+        return alpha_orbitals()
     if a[0] in ("aharonov_bohm", "ab"):
         return aharonov_bohm()
     if a[0] in ("fiber", "calibration"):
