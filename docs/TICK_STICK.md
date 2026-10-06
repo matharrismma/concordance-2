@@ -64,6 +64,20 @@ still fail, and push that window with every rerun:
    Riemann stick now carries three independent eliminations: the two zero counts directly (to height 10^7), the
    divisor sum (Robin 1984), and the prime count (Schoenfeld 1976, `|pi(x) - li(x)| < sqrt(x) ln x / (8 pi)` for
    x >= 2657, exact to x = 2·10^7). A counterexample would have to evade all three at once.
+
+   **A count is not a verification.** The stick also carries a WITNESS of the zero *count* at a great height —
+   `number_theory.zero_count` (Turing's method, cross-checked against the Riemann-von Mangoldt term within
+   Backlund's bound on S(T)): 3,945,951,430,271 zeros up to T = 10^12. It is marked as exactly what it is — the
+   count in the strip, far beyond the on-line sweep's reach of 10^7, and NOT a claim that those zeros lie on the
+   line. It extends the stick's reach; it does not narrow the on-line window.
+
+   **Birch-Swinnerton-Dyer narrows curve by curve.** `elliptic_curves.l_value` re-derives L(E,1), the root number
+   (cutoff-independence) and the analytic rank, and Kolyvagin / Gross-Zagier carry analytic rank 0 or 1 to the
+   algebraic rank. The curves come from an ingested table (`data/elliptic_curves.jsonl`, John Cremona's ecdata,
+   conductor coprime to 6) — 30 sealed INSTANCES (rank 0 and 1) plus the rank-2 (389a1) and rank-3 (5077a1)
+   WITNESSES. BSD is verified for each of these curves; every curve added narrows the stick. `tools/tick.py bsd all`
+   seals the whole table, skipping any curve already sealed.
+
 2. **The fit reports the surviving window** (`fit.window`): what every elimination leaves standing. A failure, if
    one exists, must evade all of them at once.
 3. **Rerun to push the frontier.** The next pass extends an elimination (a larger N, a higher height) or registers

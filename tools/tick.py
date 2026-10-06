@@ -7,6 +7,8 @@
     PYTHONPATH=src python tools/tick.py alpha                 # the fine-structure constant: seal alpha, cite the 137
     PYTHONPATH=src python tools/tick.py robin [N]             # chart the Riemann window by elimination (Robin to N)
     PYTHONPATH=src python tools/tick.py schoenfeld [X]        # chart it from the prime count too (Schoenfeld to X)
+    PYTHONPATH=src python tools/tick.py count [T]             # count the zeros at a great height (Turing; a count, not on-line)
+    PYTHONPATH=src python tools/tick.py bsd [label|all]      # BSD: seal one curve, or every curve in the ingested table
     PYTHONPATH=src python tools/tick.py window [stick]        # the surviving window of each stick (narrow by elimination)
     PYTHONPATH=src python tools/tick.py riemann 200          # verify every zero up to T = 200 is on the line,
                                                              # SEAL it through the same path as POST /verify, tick
@@ -137,6 +139,30 @@ CURVES = {
 }
 
 
+def _load_curve_table() -> None:
+    """Fold data/elliptic_curves.jsonl (ingested from Cremona's ecdata, with provenance) into CURVES, so the BSD
+    stick is charted from a real table and not a handful of hand-typed curves. The engine still re-derives L(E,1),
+    the root number and the analytic rank for every one — the table is the set of curve identities, nothing trusted."""
+    p = Path(os.environ.get("CONCORDANCE_DATA_DIR", str(ROOT / "data"))) / "elliptic_curves.jsonl"
+    if not p.exists():
+        return
+    try:
+        for line in p.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            row = json.loads(line)
+            if "_meta" in row:
+                continue
+            CURVES[row["label"]] = {"a": row["a_invariants"], "N": row["conductor"],
+                                    "w": row["root_number"], "rank": row["rank"]}
+    except (OSError, ValueError, KeyError):
+        pass                                              # the four built-ins above stand if the table is unreadable
+
+
+_load_curve_table()
+
+
 def bsd(label: str) -> int:
     """A mark on the Birch and Swinnerton-Dyer stick: compute L(E,1) (and L'(E,1)), seal it, and tick an INSTANCE
     when a theorem carries the analytic rank to the algebraic rank (0 or 1), a WITNESS when it does not (≥ 2)."""
@@ -161,6 +187,9 @@ def bsd(label: str) -> int:
     step = (res.get("steps") or res.get("trail") or [{}])[0] if isinstance(res.get("steps") or res.get("trail"), list) else {}
     print("sealed", seal, (res.get("seal") or {}).get("cite_url"))
     sid = TS.create("Birch and Swinnerton-Dyer conjecture")["id"]
+    if any(t.get("seal") == seal for t in TS.read(sid).get("ticks", [])):
+        print("  already on the stick (same seal) — not duplicated")
+        return 0
     if c["rank"] <= 1:
         kind = "instance"
         claim = (f"E = {label} (conductor {c['N']}): L(E,1) {'≠ 0' if c['rank'] == 0 else '= 0 with L′(E,1) ≠ 0'} computed by the "
@@ -420,6 +449,43 @@ def schoenfeld(X: int = 2000000) -> int:
     return 0
 
 
+def count(T: float = 1000000000.0) -> int:
+    """Count the zeros at a GREAT height — far beyond any on-line sweep — and seal it as a WITNESS that says
+    exactly what it is: HOW MANY non-trivial zeros of ζ have 0 < Im(ρ) <= T, by Turing's method, cross-checked
+    against the Riemann-von Mangoldt term within Backlund's bound on S(T). It is the count in the strip, NOT a
+    claim that they lie on the line. It extends the stick's reach (the on-line sweep reached 1e7); it does not
+    certify the hypothesis any further."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    from concordance.verifiers import number_theory as NT
+    pre = NT.verify_zero_count({"zero_count_height": T})      # no claim: NA carries the count in its data
+    if pre.status == "ERROR" or not pre.data:
+        print("the count errored:", (pre.detail or "")[:160]); return 1
+    n = pre.data.get("zero_count")
+    if not n:
+        print("no count produced"); return 1
+    r = verify_derivation([{"id": "zero_count", "domain": "number_theory",
+          "spec": {"NUM_VERIFY": {"zero_count_height": T, "claimed_zero_count": int(n)}}}])
+    if r.get("verdict") != "HOLDS":
+        print("the count did not verify:", json.dumps(r)[:300]); return 1
+    r = receipts.attach(r, config=EngineConfig(), domain="number_theory")
+    seal = (r.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted"); return 1
+    print("sealed zero count", seal)
+    sid = TS.create("Riemann hypothesis")["id"]
+    claim = (f"Counted, NOT shown on the line: ζ has exactly {int(n):,} non-trivial zeros with 0 < Im(ρ) <= "
+             f"{T:,.0f}, by Turing's method (S(T) = {pre.data['S_T']:+.3f}, within Backlund's bound "
+             f"{pre.data['s_bound']:.2f}). The on-line sweep reaches height 1e7; this is the zero COUNT far "
+             f"beyond it — it extends the stick's reach, it does not assert these zeros lie on the critical line.")
+    res = TS.tick(sid, "witness", claim, seal=seal, by="Narrow Highway — the count, honest about its reach, 2026-10-05")
+    print("  witness" if res.get("ok") else ("  REFUSED: " + res.get("error", "")))
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
+    return 0
+
+
 def main() -> int:
     a = sys.argv[1:]
     if not a:
@@ -437,6 +503,8 @@ def main() -> int:
         return robin(int(a[1]) if len(a) > 1 else 1000000)
     if a[0] == "schoenfeld":
         return schoenfeld(int(a[1]) if len(a) > 1 else 2000000)
+    if a[0] == "count":
+        return count(float(a[1]) if len(a) > 1 else 1000000000.0)
     if a[0] == "window":
         from concordance import tickstick as T
         ids = [a[1]] if len(a) > 1 else sorted(T.fold())
@@ -453,6 +521,12 @@ def main() -> int:
     if a[0] == "riemann":
         return riemann(float(a[1]) if len(a) > 1 else 100.0)
     if a[0] == "bsd":
+        if len(a) > 1 and a[1] == "all":                  # seal every curve in the ingested table
+            rc = 0
+            for label in sorted(CURVES, key=lambda k: (CURVES[k]["N"], k)):
+                print(f"\n── {label} ──")
+                rc |= bsd(label)
+            return rc
         return bsd(a[1] if len(a) > 1 else "11a1")
     if a[0] == "read":
         from concordance import tickstick as T

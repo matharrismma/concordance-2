@@ -48,8 +48,14 @@ def _legendre(a: int, p: int) -> int:
 
 
 def _ap_good(p: int, a1: int, a2: int, a3: int, a4: int, a6: int) -> int:
-    """a_p = p + 1 - #E(F_p), #E(F_p) = 1 (infinity) + Σ_x (1 + χ(D(x))) with
-    D(x) = (a1 x + a3)² + 4(x³ + a2 x² + a4 x + a6) — the discriminant in y after completing the square (p odd)."""
+    """a_p = p + 1 - #E(F_p). For ODD p, #E(F_p) = 1 (infinity) + Σ_x (1 + χ(D(x))) with
+    D(x) = (a1 x + a3)² + 4(x³ + a2 x² + a4 x + a6) — the discriminant in y after completing the square.
+    At p = 2 that square-completion (dividing by 2) is invalid, so count the points of the Weierstrass equation
+    directly: y² + a1 x y + a3 y = x³ + a2 x² + a4 x + a6 over F_2, plus the point at infinity."""
+    if p == 2:
+        cnt = sum(1 for x in (0, 1) for y in (0, 1)
+                  if (y * y + a1 * x * y + a3 * y - (x ** 3 + a2 * x * x + a4 * x + a6)) % 2 == 0)
+        return 2 + 1 - (cnt + 1)                          # a_2 = 3 - #E(F_2)
     total = 0
     for x in range(p):
         d = ((a1 * x + a3) ** 2 + 4 * (x * x * x + a2 * x * x + a4 * x + a6)) % p

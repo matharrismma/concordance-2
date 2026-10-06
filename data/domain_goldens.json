@@ -2002,6 +2002,17 @@
       "claimed_closest_approach_n": 12345
     }
   },
+  "zero_count": {
+    "packet_key": "NUM_VERIFY",
+    "true": {
+      "zero_count_height": 1000000,
+      "claimed_zero_count": 1747146
+    },
+    "false": {
+      "zero_count_height": 1000000,
+      "claimed_zero_count": 1747000
+    }
+  },
   "soil_science": {
     "false": {
       "area_hectares": 2.0,

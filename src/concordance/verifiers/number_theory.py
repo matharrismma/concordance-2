@@ -841,10 +841,76 @@ def verify_schoenfeld(spec):
                          f"|pi-li|/(sqrt(x) ln x/8pi)={worst_ratio:.4f} < 1): no RH counterexample by the prime-count route below {X}", data)
 
 
+_MAX_COUNT_HEIGHT = 1.0e13
+
+
+def _s_bound(T: float) -> float:
+    """A rigorous upper bound on |S(T)| (Backlund's inequality in the classical form). N(T) must land within this
+    of the smooth term θ(T)/π + 1; a count that strays further is a computation that slipped, not a true count."""
+    import math
+    return 0.137 * math.log(T) + 0.443 * math.log(math.log(T)) + 1.588
+
+
+def verify_zero_count(spec):
+    """THE ZERO COUNT AT A GREAT HEIGHT (Riemann stick, 2026-10-05). How MANY non-trivial zeros of ζ have
+    0 < Im(ρ) <= T — counted, cheaply, far beyond the height any on-line sweep can reach. This is NOT an
+    assertion that those zeros lie on the critical line (that is verify_critical_line's slow, per-zero work); it
+    is the count in the strip, and the stick records it as exactly that.
+
+    Trustworthy by two independent routes agreeing, the stick's standing discipline: the count comes from Turing's
+    method (mpmath.nzeros, which certifies that no zero was skipped), and it is cross-checked against the
+    Riemann-von Mangoldt smooth term θ(T)/π + 1 — their difference is S(T), and a true count keeps |S(T)| within
+    Backlund's proven bound. A count that violated that bound would be a slip in the computation, and is refused.
+    (At T = 10^6 and 10^7 this count equals our own two-count on-line sweeps exactly — 1,747,146 and 21,136,125.)
+      NUM_VERIFY: {"zero_count_height": 1000000000, "claimed_zero_count": 2846548032}   (T <= 1e13)"""
+    import math
+    name = "number_theory.zero_count"
+    try:
+        T = float(spec.get("zero_count_height"))
+    except (TypeError, ValueError):
+        return error(name, "zero_count_height must be a number (the height T to count zeros up to)")
+    if not (14.0 < T <= _MAX_COUNT_HEIGHT):
+        return error(name, f"height {T:g} out of range: the first zero is at t ≈ 14.13; this count goes up to "
+                           f"T = {_MAX_COUNT_HEIGHT:g} (Turing's method stays cheap, but a finite door)")
+    try:
+        import mpmath as mp
+        with mp.workdps(30):
+            n_turing = int(mp.nzeros(T))                       # Turing's method: the certified count in (0, T]
+        main = float(_theta(T) / math.pi + 1.0)                # Riemann-von Mangoldt smooth term
+        S = n_turing - main                                    # the implied S(T)
+        bound = _s_bound(T)
+    except ImportError:
+        return na(name, "the zero count needs mpmath")
+    except Exception as e:  # noqa: BLE001 — a computation that fails is an error, never a verdict
+        return error(name, f"computation failed: {type(e).__name__}: {e}")
+    consistent = abs(S) <= bound
+    data = {"height": T, "zero_count": n_turing, "main_term": round(main, 3), "S_T": round(S, 4),
+            "s_bound": round(bound, 4), "consistent_with_bound": consistent,
+            "method": "Turing's method (mpmath.nzeros), cross-checked against θ(T)/π + 1 within Backlund's bound on S(T)",
+            "means": ("the number of non-trivial zeros with 0 < Im(ρ) <= T — a COUNT in the strip, NOT a verification "
+                      "that they lie on the critical line")}
+    if not consistent:
+        return error(name, f"the count N({T:g}) = {n_turing} implies S(T) = {S:.3f}, outside Backlund's bound "
+                           f"{bound:.3f} — the computation slipped; nothing is sealed")
+    claimed = spec.get("claimed_zero_count")
+    if claimed is None:
+        return na(name, "claim claimed_zero_count (the integer count of zeros up to the height)", data)
+    try:
+        claimed_i = int(claimed)
+    except (TypeError, ValueError):
+        return error(name, "claimed_zero_count must be an integer")
+    if claimed_i != n_turing:
+        return mismatch(name, f"N({T:g}) = {n_turing:,} zeros in the strip (Turing's method), claimed {claimed_i:,}", data)
+    return confirm(name, f"ζ has exactly {n_turing:,} non-trivial zeros with 0 < Im(ρ) <= {T:g} (Turing's method; "
+                         f"S(T) = {S:+.3f} within Backlund's bound {bound:.2f}) — the count to this height, not a "
+                         f"claim they lie on the line", data)
+
+
 _RULES = [
     (lambda nv: ("critical_line_height" in nv and "claimed_zeros_on_line" in nv), verify_critical_line),
     (lambda nv: ("robin_to" in nv and ("claimed_robin_holds" in nv or "claimed_closest_approach_n" in nv)), verify_robin),
     (lambda nv: ("schoenfeld_to" in nv and ("claimed_schoenfeld_holds" in nv or "claimed_closest_approach_n" in nv)), verify_schoenfeld),
+    (lambda nv: ("zero_count_height" in nv and "claimed_zero_count" in nv), verify_zero_count),
     (lambda nv: ("divisors_of" in nv and ("claimed_divisor_count" in nv or "claimed_divisors" in nv)), verify_divisor_count),
     (lambda nv: ("n_prime" in nv and "claimed_prime" in nv), verify_primality),
     (lambda nv: ("limit" in nv and "claimed_prime_count" in nv), verify_prime_counting),

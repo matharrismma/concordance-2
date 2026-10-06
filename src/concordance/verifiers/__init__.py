@@ -32,6 +32,9 @@ VERIFIERS: Dict[str, str] = {
     # RH by elimination through the prime count (Schoenfeld 1976) — the same window from another side, routed and
     # run nightly like the Robin check (2026-10-05)
     "schoenfeld": _P + "number_theory", "schoenfelds_inequality": _P + "number_theory",
+    # the zero count N(T) at a great height (Turing's method) — cheap, counts the zeros in the strip, routed and
+    # run nightly like the other number_theory marks (2026-10-05)
+    "zero_count": _P + "number_theory", "zeta_zero_count": _P + "number_theory",
     "combinatorics": _P + "combinatorics",
     "geometry": _P + "geometry",
     "formal_logic": _P + "formal_logic", "logic": _P + "formal_logic",

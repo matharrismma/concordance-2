@@ -1384,3 +1384,28 @@ is a backup now.
   (Robin, to 2e7), and the prime count (Schoenfeld, to 2e7). A counterexample must evade all three at once.
   Narrowing is evidence, never a proof — the surviving window is where RH stays untested. Gate: BENCHMARKS OK
   domains 72/72 (0 false positives), ASSAY OK newly passing verify.schoenfeld.runs.through.the.engine, regressed [].
+
+## 2026-10-05 — two more eliminations: the zero count at a great height, and a real BSD curve table
+- Matt: "build those" — the two eliminations named at the end of the Schoenfeld work.
+- RIEMANN, the zero COUNT far beyond the sweep. `verify_zero_count` (number_theory; alias "zero_count"/
+  "zeta_zero_count"; own golden, domains 72->73; POST /verify). N(T) by Turing's method (mpmath.nzeros, which
+  certifies no zero is skipped), cross-checked against the Riemann-von Mangoldt term θ(T)/π+1 within Backlund's
+  proven bound on S(T) — a count that broke the bound would be a slip and is refused. Reproduces our own two-count
+  on-line sweeps exactly at 1e6 (1,747,146) and 1e7 (21,136,125). Cheap: ~1.4s at 1e10, ~17s at 1e12. Sealed a
+  WITNESS on the Riemann stick, cd0459fc…, "3,945,951,430,271 non-trivial zeros with 0 < Im(ρ) <= 1e12" — marked
+  honestly as a COUNT in the strip, NOT a claim they lie on the line. The on-line sweep reaches 1e7; this extends
+  the stick's reach, it does not certify the hypothesis any further. tools/tick.py count [T].
+- BSD, a real curve table. A bug surfaced first: `_ap_good` computed a_2 with the odd-prime Legendre formula,
+  valid only for odd p — right for 11a1/17a1 by coincidence (so the old seals were unaffected), WRONG for 19a1,
+  35a1, 37b1, 49a1, … (e.g. 19a1 gave a_2 = -2, true 0). The wrong a_2 shifted the approximate functional equation,
+  which the verifier then misread as a wrong root number. Fixed: a_2 by direct point count over F_2. With it, all
+  30 test curves confirm (was 12/30), the two rank>=2 witnesses still confirm, and the elliptic_curves golden holds.
+- Ingested `data/elliptic_curves.jsonl` from John Cremona's ecdata (allcurves.00000-09999; optimal curves,
+  conductor coprime to 6; the engine re-derives L, w and the analytic rank, so Cremona's rank is only the claim it
+  checks): 30 rank-0/1 curves + 389a1 (rank 2) + 5077a1 (rank 3). `tools/tick.py bsd all` sealed every one as an
+  INSTANCE (rank 0/1, Kolyvagin/Gross-Zagier) or WITNESS (rank >= 2), skipping any already on the stick by seal.
+  BSD stick now: 30 sealed instances + 2 witnesses (was 2 + 2). The LMFDB API bot-challenged the box, so the data
+  came from Cremona's ecdata on GitHub raw instead; the CAPTCHA was not touched.
+- Gate: BENCHMARKS OK domains 73/73 (0 false positives), ASSAY OK newly passing verify.zero_count.runs.through.the
+  .engine + verify.elliptic.53a1.rank.one.by.gross.zagier, regressed []. The bsd stick probe was de-brittled to
+  stable structure (witnesses eq 2, instances exist, narrows_numerically) — not a count that the ingestion changes.
