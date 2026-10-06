@@ -7,6 +7,7 @@
     PYTHONPATH=src python tools/tick.py alpha                 # the fine-structure constant: seal alpha, cite the 137
     PYTHONPATH=src python tools/tick.py ab                    # the Aharonov-Bohm effect: seal the flux quantum + phase law
     PYTHONPATH=src python tools/tick.py fiber                 # fiber optic calibration: seal the decibel scale + the method
+    PYTHONPATH=src python tools/tick.py symphony              # the coherence witness: seal the Pythagorean comma + temperament
     PYTHONPATH=src python tools/tick.py robin [N]             # chart the Riemann window by elimination (Robin to N)
     PYTHONPATH=src python tools/tick.py schoenfeld [X]        # chart it from the prime count too (Schoenfeld to X)
     PYTHONPATH=src python tools/tick.py lagarias [N]          # and through Lagarias's elementary inequality (to N)
@@ -310,6 +311,60 @@ def lnh() -> int:
     f = TS.read(sid)["fit"]
     print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "excluded": len(f["excluded_approaches"]),
                       "record": len(f["record"]), "open": f["open"]}, indent=1))
+    return 0
+
+
+def symphony() -> int:
+    """The symphony as the COHERENCE witness (Matt, 2026-10-06). Music is a refined system with a full
+    ruleset whose narrow window is 'what sounds whole'. SEAL the computable law: the Pythagorean comma
+    (3/2)^12 / 2^7 — twelve pure fifths overshoot seven octaves by this gap — which is WHY the scale must
+    be tempered; equal temperament is the calibration that distributes the comma evenly (each fifth
+    flattened by 1/12 comma) so every key is playable (the tempered semitone 2^(1/12); the octave 2 exact).
+    The coherence axis the generals and games do not cover: many independent voices concorded into one
+    body. Seal the ratios; the beauty is gathered, not pronounced; borrow the form."""
+    import math
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    comma = (3 / 2) ** 12 / 2 ** 7            # the Pythagorean comma ~ 1.0136432647705078
+    expr = "(3/2)**12 / 2**7"
+    r = verify_derivation([{"id": "pythagorean_comma", "domain": "mathematics",
+          "spec": {"mode": "numeric", "params": {"numeric_expr": expr, "claimed_value": comma, "rel_tol": 1e-12}}}])
+    if r.get("verdict") != "HOLDS":
+        print("the comma did not verify:", json.dumps(r)[:400]); return 1
+    r = receipts.attach(r, config=EngineConfig(), domain="mathematics")
+    seal = (r.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted"); return 1
+    print("sealed the Pythagorean comma", seal)
+    sid = TS.create("The symphony",
+                    statement=("Music is a refined system whose narrow window is coherence — what sounds whole. "
+                               "Many independent voices concorded into one body; tension sought and resolved; "
+                               "a form that, once heard, feels inevitable."),
+                    field="music")["id"]
+    if any(t.get("seal") == seal for t in TS.read(sid).get("ticks", [])):
+        print("  already sealed on the stick — not duplicated"); return 0
+    semitone = 2 ** (1 / 12)
+    marks = [
+        ("witness", f"The harmonic basis is exact ratio: the octave 2:1, the perfect fifth 3:2. Twelve pure fifths "
+                    f"overshoot seven octaves by the Pythagorean comma (3/2)^12 / 2^7 = {comma:.13f} — so the scale "
+                    f"cannot be both pure and closed. Equal temperament is the calibration that distributes the comma "
+                    f"evenly: the semitone is 2^(1/12) = {semitone:.10f} and twelve of them close the octave at "
+                    f"exactly 2. An arithmetic fact; the reason every key is playable.", dict(seal=seal)),
+        ("note", "[the principle] The symphony is the one-body pattern made audible: counterpoint is many "
+                 "independent voices, each whole, concorded into one body under one movement (1 Cor 12, etheto) — "
+                 "not a swarm of soloists and not a unison. Tension is sought so it can be resolved; the theme is "
+                 "stated, developed, and returned; the form feels inevitable because every part serves the whole. "
+                 "This is the COHERENCE axis the generals and the games do not reach.", {}),
+        ("note", "[the guard] The engine seals the ratios and the comma — the arithmetic is a fact. It does NOT "
+                 "pronounce what is beautiful or that life obeys sonata form; the coherence the symphony witnesses "
+                 "is a principle we GATHER, never a verdict the engine renders. Borrow the form; launder nothing.", {}),
+    ]
+    for kind, claim, kw in marks:
+        res = TS.tick(sid, kind, claim, by="Narrow Highway — the symphony, the coherence witness, 2026-10-06", **kw)
+        print(("  " + kind) if res.get("ok") else ("  REFUSED " + kind + ": " + res.get("error", "")))
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
     return 0
 
 
@@ -758,6 +813,8 @@ def main() -> int:
         return aharonov_bohm()
     if a[0] in ("fiber", "calibration"):
         return fiber()
+    if a[0] in ("symphony", "music"):
+        return symphony()
     if a[0] == "robin":
         return robin(int(a[1]) if len(a) > 1 else 1000000)
     if a[0] == "schoenfeld":
