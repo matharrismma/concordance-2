@@ -210,6 +210,21 @@ def _substance() -> Dict[str, Any]:
         return {"pending": True, "detail": "run tools/substance_meter.py (timer) to populate data/substance.json"}
 
 
+def _coverage() -> Dict[str, Any]:
+    """The last verify-coverage measurement (tools/coverage_meter.py writes data/coverage.json) — the live
+    needle for the Verifiers: subject breadth, benchmarked domains, and unit-test depth. The real number,
+    not the curated '~52%' estimate."""
+    import json
+    p = _data_dir() / "coverage.json"
+    try:
+        d = json.loads(p.read_text(encoding="utf-8"))
+        return {"domains": d.get("domains"), "benchmarked": d.get("benchmarked"),
+                "unit_tested": d.get("unit_tested"), "unit_tested_ratio": d.get("unit_tested_ratio"),
+                "measured_at": d.get("measured_at")}
+    except (OSError, ValueError):
+        return {"pending": True, "detail": "run tools/coverage_meter.py (timer) to populate data/coverage.json"}
+
+
 def _edges() -> Dict[str, Any]:
     """The last edge audit (tools/edge_meter.py writes data/edges.json on a timer) — the live needle for
     Bridges: every relation resolves (valid) and is card-backed, out of all connection edges."""
@@ -236,6 +251,7 @@ def report() -> Dict[str, Any]:
     """The whole machine, computed now. Cheap: import resolution + one small JSON read, no corpus."""
     substance = _substance()
     edges = _edges()
+    coverage = _coverage()
     comps: List[Dict[str, Any]] = []
     for c in COMPONENTS:
         r = _resolvable(c.get("modules") or [])
@@ -245,6 +261,8 @@ def report() -> Dict[str, Any]:
             row["reading"] = substance          # the live needle: substance ratio, measured
         elif c["name"] == "Bridges":
             row["reading"] = edges              # the live needle: edges resolve / card-backed
+        elif c["name"] == "Verifiers":
+            row["reading"] = coverage           # the live needle: domain breadth / benchmarked / unit-tested
         comps.append(row)
     regs: List[Dict[str, Any]] = []
     for g in REGULATORS:
@@ -261,7 +279,7 @@ def report() -> Dict[str, Any]:
         "chain": PLANES, "plane_order": _PLANE_ORDER,
         "layers": LAYERS, "status_ladder": STATUS_LADDER,
         "components": comps, "regulators": regs, "fire_order": _FIRE_ORDER,
-        "substance": substance, "edges": edges,
+        "substance": substance, "edges": edges, "coverage": coverage,
         "counts": {"components": len(comps), "wired": sum(1 for c in comps if c["wired"]),
                    "regulators": len(regs), "by_primitive": by_primitive, "by_plane": by_plane},
         "note": ("The engine as a vacuum-tube computer: every part classified by primitive, placed on the "

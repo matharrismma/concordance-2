@@ -203,6 +203,7 @@ function render(d){
     if(rd && !rd.pending){
       if(rd.substance_ratio!=null) meter='<div class="tube-meter">'+(100*rd.substance_ratio).toFixed(1)+'% substance · '+num(rd.holdings)+' holdings</div>';
       else if(rd.valid_ratio!=null) meter='<div class="tube-meter">'+(100*rd.valid_ratio).toFixed(1)+'% valid · '+num(rd.edges)+' edges · '+num(rd.dangling)+' dangling</div>';
+      else if(rd.domains!=null) meter='<div class="tube-meter">'+num(rd.domains)+' domains · '+num(rd.benchmarked)+' benchmarked · '+(rd.unit_tested_ratio!=null?(100*rd.unit_tested_ratio).toFixed(0)+'% unit-tested':'')+'</div>';
     }
     return '<div class="tube '+cls+'"><div class="tn">'+esc(c.name)+'</div>'+
       '<div class="tp">'+esc(c.primitive)+'</div>'+
