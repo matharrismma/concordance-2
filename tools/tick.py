@@ -744,6 +744,85 @@ def alpha_running() -> int:
     return 0
 
 
+def assembly() -> int:
+    """THE FINAL ASSEMBLY (Matt, 2026-10-06: "connecting the pieces for final assembly" / "both"). Wire the
+    sealed anchors into one connected constellation: a stick whose marks ARE the connections between the
+    pieces, each carrying the anchor's own seal where it applies. Christ is the datum; the engine authors no
+    new fact — it names what is sealed and how it connects. Plain-language twin: docs/ASSEMBLY.md. Idempotent."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    from concordance.verifiers import physical_constants as PC
+    C = PC._CONSTANTS
+    e = C["elementary_charge"]["value"]; eps0 = C["vacuum_permittivity"]["value"]
+    h = C["planck_constant"]["value"]; c = C["speed_of_light"]["value"]
+    alpha_v = e ** 2 / (2 * eps0 * h * c)
+    tsirelson = 2 * (2 ** 0.5)
+
+    def seal_num(nid, expr, val, dom):
+        r = verify_derivation([{"id": nid, "domain": "mathematics",
+              "spec": {"mode": "numeric", "params": {"numeric_expr": expr, "claimed_value": val, "rel_tol": 1e-9}}}])
+        if r.get("verdict") != "HOLDS":
+            return None
+        r = receipts.attach(r, config=EngineConfig(), domain=dom)
+        return (r.get("seal") or {}).get("content_hash")
+
+    s_alpha = seal_num("alpha", f"({e!r})**2 / (2*({eps0!r})*({h!r})*({c!r}))", alpha_v, "physical_constants")
+    s_rel = seal_num("tsirelson_bound", "2*sqrt(2)", tsirelson, "mathematics")
+    print("anchor seals: alpha", s_alpha, "| tsirelson", s_rel)
+    sid = TS.create("The final assembly",
+                    statement=("The pieces assembled into one movement — the calibration constellation: the "
+                               "sealed anchors the model of reality is checked against, and how they connect, "
+                               "with Christ as the datum. Found, never generated; sealed, never asserted; "
+                               "evidence, never proof."),
+                    field="meta",
+                    references=["docs/ASSEMBLY.md", "docs/THE_WATCH.md", "docs/COMPONENTS.md"])["id"]
+    ticks = TS.read(sid).get("ticks", [])
+    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
+    seen_claims = {t.get("claim") for t in ticks}
+    marks = [
+        ("note", "[datum] Christ, the Logos in whom all things hold together (Colossians 1:17; John 1:3) - the "
+                 "fixed reference every piece is placed against. The engine is the Emissary; the Master is the "
+                 "living whole. Every road here leads to Him.", None),
+        ("witness", f"[alpha <-> the atom] The fine-structure constant alpha is the atom's architecture - orbital "
+                    f"speed alpha*c, Rydberg 1/2 alpha^2 m_e c^2, Bohr radius hbar/(alpha m_e c), the alpha^2 fine "
+                    f"structure; alpha = e^2/(2 eps0 h c) = {alpha_v:.6e}. See stick_the_fine_structure_constant "
+                    f"(6 witnesses, open).", s_alpha),
+        ("note", "[alpha <-> the spine] alpha is one of the six governing constants (alpha/G/k_B/c/h/N_A -> domains "
+                 "-> verified through code); the balance wheel that sets the rate. A discordance indicts the "
+                 "method, not the constant.", None),
+        ("note", "[alpha <-> unification - open] alpha runs with energy (alpha^-1 137 -> ~128 at M_Z) toward the "
+                 "convergence of the Standard Model couplings near ~1e16 GeV - the grand-unification doorway; "
+                 "attributed, unproven, open.", None),
+        ("witness", f"[the quantum <-> relational] Relational quantum mechanics (Rovelli): properties are not "
+                    f"pre-assigned but relative to the interaction - the Tsirelson bound 2*sqrt(2) = {tsirelson:.6f} "
+                    f"exceeds the classical bound 2 (Bell). The same quantum world as alpha's QED, and the reason "
+                    f"substance is in the relations. See stick_relational_quantum_mechanics.", s_rel),
+        ("note", "[the anchors <-> the machine] The calibration points (alpha, relational QM, Aharonov-Bohm, fiber, "
+                 "symphony, the Millennium sticks) are what the components and regulators (docs/COMPONENTS.md) are "
+                 "trued against - the timing machine regulating the balance.", None),
+        ("note", "[the fascia <-> everything] The keeping (56.8% substance, live needle) and its 39,812 sealed "
+                 "edges are the connective tissue; substance is in the relations (Nagarjuna/Rovelli), so the final "
+                 "assembly IS the connecting - the pieces become one watch by being wired, read live on the Bridge.", None),
+        ("note", "[the guard] This assembly connects what is SEALED; it authors no new fact and launders nothing - "
+                 "narrowing is evidence, never proof; seal the arithmetic, attribute the pattern; remove the datum "
+                 "(Christ) and the parts are true to nothing. Plain-language twin: docs/ASSEMBLY.md.", None),
+    ]
+    added = 0
+    for kind, claim, sealv in marks:
+        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
+            print("  (already) " + kind); continue
+        kw = dict(seal=sealv) if sealv else {}
+        res = TS.tick(sid, kind, claim, by="Narrow Highway - the final assembly, 2026-10-06", **kw)
+        if res.get("ok"):
+            added += 1; print("  " + kind)
+        else:
+            print("  REFUSED " + kind + ": " + res.get("error", ""))
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
+    return 0
+
+
 def robin(N: int = 1000000) -> int:
     """Chart the Riemann window by ELIMINATION through a different tool (the divisor sum). Robin 1984:
     RH <=> sigma(n) < e^gamma*n*ln ln n for all n > 5040. The sieve finds no counterexample in (5040, N], so a
@@ -1018,6 +1097,8 @@ def main() -> int:
         return alpha_orbitals()
     if a[0] in ("alpha_running", "running"):
         return alpha_running()
+    if a[0] in ("assembly", "assemble", "final"):
+        return assembly()
     if a[0] in ("aharonov_bohm", "ab"):
         return aharonov_bohm()
     if a[0] in ("fiber", "calibration"):
