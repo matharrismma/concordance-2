@@ -1207,6 +1207,10 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                 return _ok(_traj.balance(str(query["balance"])))
             if query.get("standard"):
                 return _ok(_traj.standard(str(query["standard"])) or {"detail": "no proven standard yet"})
+            if query.get("downline"):
+                return _ok(_traj.downline_value(str(query["downline"])))
+            if query.get("fruit"):
+                return _ok(_traj.fruit(str(query["fruit"])))
             pth = str(query.get("path") or "").strip()
             if not pth:
                 return _err(400, "path required (?path=… · or ?tree=/?balance=/?standard=<unit>)")

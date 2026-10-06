@@ -265,6 +265,65 @@ def tree(unit: str, *, data_dir: Optional[Path] = None) -> Dict[str, Any]:
             "standard_floor": (std or {}).get("floor"), "nodes": nodes}
 
 
+def downline_value(path: str, *, data_dir: Optional[Path] = None) -> Dict[str, Any]:
+    """The value a path has created DOWNLINE — the mission's measure (Matt, 2026-10-06: 'we judge ourselves
+    on their success and the value they create downline'). A node's value is its own witnessed fruit (sealed
+    or witnessed successes) PLUS the fruit of every branch that builds on it: the multiplication, each one
+    served becoming one sent. The engine is the coach; its self-judgment is the total fruit of the tree."""
+    root = _slug(path)
+    succ: Dict[str, int] = {}
+    children: Dict[str, List[str]] = {}
+    for e in _events(data_dir):
+        if e.get("event") == "outcome" and e.get("success"):
+            succ[e["path"]] = succ.get(e["path"], 0) + 1
+        elif e.get("event") == "lineage" and e.get("path") and e.get("parent"):
+            children.setdefault(e["parent"], []).append(e["path"])
+
+    def rec(pid: str, seen: set):
+        if pid in seen:
+            return 0, 0
+        seen.add(pid)
+        own = succ.get(pid, 0)
+        down, desc = own, 0
+        for c in sorted(set(children.get(pid, []))):
+            d, td = rec(c, seen)
+            down += d
+            desc += 1 + td
+        return down, desc
+
+    down, desc = rec(root, set())
+    return {"path": root, "own_fruit": succ.get(root, 0), "direct_branches": len(set(children.get(root, []))),
+            "total_descendants": desc, "downline_fruit": down,
+            "means": ("own witnessed fruit + the fruit of every branch that builds on this — the value "
+                      "created downline. The coach is judged by the harvest of the whole line, not its own.")}
+
+
+def fruit(path: str, *, data_dir: Optional[Path] = None) -> Dict[str, Any]:
+    """Judge by the fruit (Matthew 7:16-20; John 15:1-8). Two questions, not one: DOES it produce fruit,
+    and IS the fruit good? Bearing = fruit exists down the line; good = the fruit is high-quality (a strong
+    floor), WITNESSED (never self-graded), and not declining. A branch that bears no fruit is taken away
+    (John 15:2); a branch that bears corrupt fruit is cut down (Matt 7:19); a branch that bears good fruit
+    is kept and pruned to bear MORE (John 15:2). The engine is judged by this, and judges itself by it."""
+    dv = downline_value(path, data_dir=data_dir)
+    m = measure(path, data_dir=data_dir)
+    bears = dv["downline_fruit"] > 0
+    floor = m.get("floor")
+    good = bool(bears and (floor is not None and floor >= 0.5)
+                and m.get("direction") != "declining" and m.get("verdict") != "failing")
+    verdict = "barren" if not bears else ("good" if good else "corrupt")
+    frame = {"barren": "bears no fruit — taken away (John 15:2)",
+             "good": "good fruit — kept, and pruned to bear more (John 15:2)",
+             "corrupt": "it bears, but not good fruit — examined, and if it stays corrupt, cut down (Matt 7:19)"
+             }[verdict]
+    return {"path": _slug(path), "produces_fruit": bears, "fruit_is_good": good, "verdict": verdict,
+            "own_fruit": dv["own_fruit"], "downline_fruit": dv["downline_fruit"],
+            "total_descendants": dv["total_descendants"], "floor": floor, "direction": m.get("direction"),
+            "frame": frame,
+            "means": ("by their fruits ye shall know them (Matt 7:16): the measure is bearing AND goodness. "
+                      "Good fruit is witnessed (never self-graded), stands on a strong floor, and is not "
+                      "declining — and the only fruit that finally counts is what flows down the whole line.")}
+
+
 def balance(unit: str, *, max_positions: int = MAX_POSITIONS_PER_UNIT,
             data_dir: Optional[Path] = None) -> Dict[str, Any]:
     """Continuously balance a unit toward a bounded set of positions (default 144,000 per unit). Reports the
