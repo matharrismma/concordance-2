@@ -1,0 +1,163 @@
+{
+  "artifact": "canonical_combat_grammar",
+  "grammar_version": "0.2.0",
+  "status": "DRAFT: v0.2 author amendments 2026-08-26 (two-ended rope, reorient, candidate finish, effort floor); pending three-coach classification exercise",
+  "authority_classes": {
+    "invariant": "Physics, legality, or safety that does not bend to style.",
+    "doctrine": "Team identity that guides choices across contexts.",
+    "default": "Preferred answer unless context supplies a better one.",
+    "style_preference": "Chosen A-side destination or weapon family.",
+    "fighter_variable": "Changes with athlete, opponent, rules, clock, or injury.",
+    "evidence_rule": "Defines what earns adoption or removal."
+  },
+  "rulesets": [
+    "mma_pro_5r",
+    "mma_pro_3r",
+    "mma_amateur",
+    "grappling_nogi",
+    "grappling_gi"
+  ],
+  "uncertainty_rule": "Every observable dimension permits the value 'unclear'. Identity, version, and ruleset fields do not. An observation that cannot be made is recorded as unclear, never guessed.",
+  "athlete_identity_rule": "Exactly one athlete_id is selected before an exchange is classified and cannot change between frames of that exchange.",
+  "dimensions": {
+    "control_target": {
+      "question": "Which physical region is being governed?",
+      "values": [
+        "ankle",
+        "knee",
+        "hip",
+        "wrist",
+        "elbow",
+        "shoulder",
+        "torso",
+        "head_neck",
+        "unclear"
+      ]
+    },
+    "control_configuration": {
+      "question": "Which relationship produces the control?",
+      "values": [
+        "inside_tie",
+        "underhook",
+        "two_on_one",
+        "body_lock",
+        "front_headlock",
+        "claw",
+        "leg_ride",
+        "none",
+        "unclear"
+      ]
+    },
+    "fight_state": {
+      "question": "What is the environmental and positional context?",
+      "values": [
+        "open_range",
+        "clinch",
+        "wall",
+        "top",
+        "bottom",
+        "turtle",
+        "back",
+        "mount",
+        "transition",
+        "unclear"
+      ]
+    },
+    "progression_rung": {
+      "question": "What degree of functional ascent does the selected athlete hold?",
+      "values": [
+        "unattached",
+        "attached",
+        "inside_control",
+        "dominant_orientation",
+        "immobilization",
+        "finishing_position",
+        "finish",
+        "unclear"
+      ]
+    },
+    "plane": {
+      "question": "In what orientation and leverage geometry does the control operate?",
+      "surface": [
+        "open_space",
+        "wall",
+        "mat",
+        "wall_mat_junction",
+        "unclear"
+      ],
+      "defined_by": [
+        "athlete",
+        "opponent",
+        "contested",
+        "unclear"
+      ]
+    },
+    "outcome": {
+      "question": "What is the immediate purpose of the state?",
+      "values": [
+        "damage",
+        "advancement",
+        "reorient",
+        "immobilization",
+        "submission",
+        "stand_up",
+        "safe_exit",
+        "unclear"
+      ]
+    },
+    "leak": {
+      "question": "What visible loss of value or structure is present?",
+      "values": [
+        "space_without_purpose",
+        "long_lever_contest",
+        "base_exposed",
+        "failed_identity",
+        "unsealed_exit",
+        "none",
+        "unclear"
+      ]
+    },
+    "end": {
+      "question": "Toward which end of the rope is the finishing rung oriented? Required when progression_rung is finishing_position or finish; otherwise none.",
+      "values": [
+        "head",
+        "ankle",
+        "none",
+        "unclear"
+      ]
+    }
+  },
+  "design_properties": [
+    "Mutual clarity: each field answers one question and does not duplicate another field.",
+    "Closed identifiers: every state, control, transition, leak, and authored option has a stable ID.",
+    "Honest uncertainty: every occludable observation permits unclear.",
+    "Persistent athlete identity across an exchange.",
+    "Versioning: every classification and evidence record cites grammar_version and card_version.",
+    "Ruleset awareness: differences are explicit, never hidden inside universal language."
+  ],
+  "authority_assignment_rule": "Authority classes are assigned by the author, not by a reviewer and not by a model. Doctrine lines keep their authored wording in all classes; a class annotates a line, it never rewrites it. Absolutes in the doctrine are deliberate coaching form; their exceptions live in the author's assignments and the position cards, not in softened text.",
+  "author_consistent_assignments": {
+    "note": "Assignments already implied by the author's own language, recorded for the author's confirmation; all others pending the author's pass.",
+    "assignments": [
+      {
+        "statement": "Mount and back mount are always the goal.",
+        "authority": "style_preference",
+        "basis": "The author's own line: we choose that destination and take what is given."
+      },
+      {
+        "statement": "Seventy percent before the finishing position.",
+        "authority": "doctrine",
+        "basis": "Kept as authored, pitcher teaching included. For measured trials only, cards define probe versus commit with abort criteria; the doctrine language is not replaced."
+      }
+    ],
+    "If you got it, you were right": "doctrine",
+    "Test it; use what works consistently": "evidence_rule",
+    "Never miss an opportunity to finish": "doctrine",
+    "Do not reach for a sub beyond your rung": "doctrine",
+    "Head and ankle are treated the same": "doctrine",
+    "Always be willing to go to max effort; never fear full duration": "doctrine"
+  },
+  "candidate_rule": "A finish attempted from below finishing_position is a candidate finish. It is MATCH for the round if achieved, and is never among a card's two authored options until it has met the card's evidence floor. The film judges the decision at the moment of commitment: position maintained -> no leak; position abandoned -> leak recorded. A miss from below the rung is hunting: NO_MATCH, RED review.",
+  "two_ended_rope": "Head and ankle are symmetric finishing ends. The athlete climbs toward whichever is open and may reorient at any rung; reorient is a legal outcome distinct from advancement.",
+  "effort_floor": "Always willing to go to max effort; never fear full duration. FLOOR line at class doctrine, backed by the log: rounds completed at declared intensity, witnessed. No game plan may assume a reserve the log does not show. The 70 percent jab-sub law is positional, not an effort ceiling."
+}

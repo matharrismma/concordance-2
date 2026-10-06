@@ -1,0 +1,398 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "title": "PFS Position Card v0.2",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "state_id",
+  "name",
+  "card_version",
+  "grammar_version",
+  "ruleset",
+  "authority",
+  "starting_state",
+  "held_test",
+  "no_match_test",
+  "athlete_objective",
+  "opponent_objective",
+  "allowed_tools",
+  "reaction_a",
+  "reaction_b",
+  "our_exit",
+  "their_exits_to_seal",
+  "controlled_retreat",
+  "preferred_next_state",
+  "recovery_state",
+  "probe_commit_rule",
+  "safety",
+  "evidence_requirements"
+ ],
+ "properties": {
+  "state_id": {
+   "type": "string",
+   "pattern": "^st_[a-z0-9_]+$"
+  },
+  "name": {
+   "type": "string",
+   "minLength": 3
+  },
+  "card_version": {
+   "type": "string"
+  },
+  "grammar_version": {
+   "type": "string"
+  },
+  "ruleset": {
+   "enum": [
+    "mma_pro_5r",
+    "mma_pro_3r",
+    "mma_amateur",
+    "grappling_nogi",
+    "grappling_gi"
+   ]
+  },
+  "authority": {
+   "enum": [
+    "invariant",
+    "doctrine",
+    "default",
+    "style_preference",
+    "fighter_variable",
+    "evidence_rule"
+   ]
+  },
+  "starting_state": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "roles",
+    "contacts",
+    "orientation",
+    "plane",
+    "fight_state",
+    "progression_rung",
+    "end"
+   ],
+   "properties": {
+    "roles": {
+     "type": "string",
+     "minLength": 5
+    },
+    "contacts": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "minItems": 0
+    },
+    "orientation": {
+     "type": "string",
+     "minLength": 3
+    },
+    "plane": {
+     "enum": [
+      "open_space",
+      "wall",
+      "mat",
+      "wall_mat_junction"
+     ]
+    },
+    "fight_state": {
+     "enum": [
+      "open_range",
+      "clinch",
+      "wall",
+      "top",
+      "bottom",
+      "turtle",
+      "back",
+      "mount",
+      "transition"
+     ]
+    },
+    "progression_rung": {
+     "enum": [
+      "unattached",
+      "attached",
+      "inside_control",
+      "dominant_orientation",
+      "immobilization",
+      "finishing_position"
+     ]
+    },
+    "end": {
+     "enum": [
+      "head",
+      "ankle",
+      "none"
+     ]
+    }
+   }
+  },
+  "held_test": {
+   "type": "string",
+   "minLength": 20,
+   "description": "Film-visible MATCH condition two coaches can score."
+  },
+  "no_match_test": {
+   "type": "string",
+   "minLength": 20
+  },
+  "athlete_objective": {
+   "type": "string",
+   "minLength": 10
+  },
+  "opponent_objective": {
+   "type": "string",
+   "minLength": 10
+  },
+  "allowed_tools": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "athlete",
+    "opponent"
+   ],
+   "properties": {
+    "athlete": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "minItems": 1
+    },
+    "opponent": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "minItems": 1
+    }
+   }
+  },
+  "reaction_a": {
+   "$ref": "#/definitions/branch"
+  },
+  "reaction_b": {
+   "$ref": "#/definitions/branch"
+  },
+  "our_exit": {
+   "type": "string",
+   "minLength": 5
+  },
+  "their_exits_to_seal": {
+   "type": "array",
+   "items": {
+    "type": "string",
+    "pattern": "^ex_[a-z0-9_]+$"
+   },
+   "minItems": 1
+  },
+  "controlled_retreat": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "permitted_lower_rung",
+    "preserved_connection"
+   ],
+   "properties": {
+    "permitted_lower_rung": {
+     "enum": [
+      "unattached",
+      "attached",
+      "inside_control",
+      "dominant_orientation",
+      "immobilization"
+     ]
+    },
+    "preserved_connection": {
+     "type": "string",
+     "minLength": 3
+    }
+   }
+  },
+  "preferred_next_state": {
+   "type": "string",
+   "pattern": "^st_[a-z0-9_]+$"
+  },
+  "recovery_state": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "state_id",
+    "first_behavior"
+   ],
+   "properties": {
+    "state_id": {
+     "type": "string",
+     "pattern": "^st_[a-z0-9_]+$"
+    },
+    "first_behavior": {
+     "type": "string",
+     "minLength": 5
+    }
+   }
+  },
+  "probe_commit_rule": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "position_preservation",
+    "abort_criteria"
+   ],
+   "properties": {
+    "position_preservation": {
+     "type": "string",
+     "minLength": 10
+    },
+    "abort_criteria": {
+     "type": "string",
+     "minLength": 10
+    }
+   }
+  },
+  "safety": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "intensity",
+    "prohibited_actions",
+    "tap_release",
+    "reset_rule"
+   ],
+   "properties": {
+    "intensity": {
+     "type": "string"
+    },
+    "prohibited_actions": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "tap_release": {
+     "type": "string"
+    },
+    "reset_rule": {
+     "type": "string"
+    }
+   }
+  },
+  "evidence_requirements": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "min_valid_trials",
+    "min_match",
+    "min_partners",
+    "min_sessions",
+    "witness_required",
+    "film_required_when_available"
+   ],
+   "properties": {
+    "min_valid_trials": {
+     "type": "integer",
+     "minimum": 10
+    },
+    "min_match": {
+     "type": "integer",
+     "minimum": 7
+    },
+    "min_partners": {
+     "type": "integer",
+     "minimum": 3
+    },
+    "min_sessions": {
+     "type": "integer",
+     "minimum": 2
+    },
+    "witness_required": {
+     "const": true
+    },
+    "film_required_when_available": {
+     "const": true
+    }
+   }
+  },
+  "candidates": {
+   "type": "array",
+   "description": "Candidate finishes: achieved below finishing_position, not yet at the evidence floor. Never one of the two authored options.",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "candidate_id",
+     "end",
+     "observed_matches",
+     "observed_trials",
+     "partners",
+     "sessions",
+     "film_refs",
+     "status"
+    ],
+    "properties": {
+     "candidate_id": {
+      "type": "string",
+      "pattern": "^cand_[a-z0-9_]+$"
+     },
+     "end": {
+      "enum": [
+       "head",
+       "ankle"
+      ]
+     },
+     "observed_matches": {
+      "type": "integer",
+      "minimum": 0
+     },
+     "observed_trials": {
+      "type": "integer",
+      "minimum": 1
+     },
+     "partners": {
+      "type": "integer",
+      "minimum": 1
+     },
+     "sessions": {
+      "type": "integer",
+      "minimum": 1
+     },
+     "film_refs": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1
+     },
+     "status": {
+      "enum": [
+       "candidate",
+       "promoted",
+       "retired"
+      ]
+     }
+    }
+   }
+  }
+ },
+ "definitions": {
+  "branch": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "trigger",
+    "response_technique_id"
+   ],
+   "properties": {
+    "trigger": {
+     "type": "string",
+     "minLength": 10
+    },
+    "response_technique_id": {
+     "type": "string",
+     "pattern": "^tq_[a-z0-9_]+$"
+    }
+   }
+  }
+ }
+}

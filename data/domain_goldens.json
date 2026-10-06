@@ -878,6 +878,45 @@
       ]
     }
   },
+  "pressure_fighting": {
+    "packet_key": "PFS_VERIFY",
+    "true": {
+      "observation": {
+        "exchange_id": "exch_001",
+        "athlete_id": "ath_a",
+        "frame_seq": 1,
+        "grammar_version": "0.2.0",
+        "control_target": "torso",
+        "control_configuration": "body_lock",
+        "fight_state": "wall",
+        "progression_rung": "inside_control",
+        "plane_surface": "wall",
+        "plane_defined_by": "athlete",
+        "outcome": "advancement",
+        "leak": "none",
+        "end": "none",
+        "candidate": false
+      }
+    },
+    "false": {
+      "observation": {
+        "exchange_id": "exch_001",
+        "athlete_id": "ath_a",
+        "frame_seq": 3,
+        "grammar_version": "0.2.0",
+        "control_target": "torso",
+        "control_configuration": "body_lock",
+        "fight_state": "wall",
+        "progression_rung": "winning",
+        "plane_surface": "wall",
+        "plane_defined_by": "athlete",
+        "outcome": "advancement",
+        "leak": "none",
+        "end": "none",
+        "candidate": false
+      }
+    }
+  },
   "genetics": {
     "false": {
       "claimed_amino_acid": "M_NOT",
