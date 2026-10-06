@@ -135,6 +135,7 @@ VERIFIERS: Dict[str, str] = {
     "neuroscience": _P + "neuroscience", "neuro": _P + "neuroscience", "neurophysiology": _P + "neuroscience",
     "electrochemistry": _P + "electrochemistry", "echem": _P + "electrochemistry",
     "condensed_matter": _P + "condensed_matter", "solid_state": _P + "condensed_matter",
+    "phonon": _P + "condensed_matter", "phonons": _P + "condensed_matter",   # lattice vibrations live in the solid state
     "game_theory": _P + "game_theory",
     # the Pressure Fighting System's combat grammar, enforced (Matt, 2026-10-06): a closed-set
     # classification of an exchange, MATCH/NO_MATCH, the first link of the chain to optimal

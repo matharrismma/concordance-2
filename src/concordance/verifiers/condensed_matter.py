@@ -164,8 +164,115 @@ def verify_quantum_hall(spec: Dict[str, Any]) -> VerifierResult:
     return na(name)
 
 
+def verify_phonon_energy(spec: Dict[str, Any]) -> VerifierResult:
+    """E = hbar*omega — a phonon is a QUANTUM of lattice vibration, its energy set by its frequency."""
+    name = "condensed_matter.phonon_energy"
+    w, claimed = spec.get("phonon_omega"), spec.get("claimed_phonon_energy_J")
+    if w is None or claimed is None:
+        return na(name)
+    try:
+        wf, cl = float(w), float(claimed)
+    except (TypeError, ValueError):
+        return error(name, "all inputs must be numeric")
+    if wf < 0:
+        return error(name, f"angular frequency must be non-negative (omega={wf})")
+    actual = _HBAR * wf
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-4)
+    data = {"omega": wf, "E_J": actual, "E_eV": actual / 1.602176634e-19, "claimed_J": cl,
+            "formula": "E = hbar*omega"}
+    if _close(actual, cl, rel_tol=rel_tol):
+        return confirm(name, f"E = hbar*omega = {actual:.4g} J ({data['E_eV']:.4g} eV) (matches {cl})", data)
+    return mismatch(name, f"E = hbar*omega = {actual:.4g} J, claimed {cl}", data)
+
+
+def verify_debye_temperature(spec: Dict[str, Any]) -> VerifierResult:
+    """theta_D = hbar*omega_D/k_B — the Debye temperature, the cutoff that caps the phonon spectrum."""
+    name = "condensed_matter.debye_temperature"
+    wd, claimed = spec.get("debye_frequency"), spec.get("claimed_debye_temp_K")
+    if wd is None or claimed is None:
+        return na(name)
+    try:
+        wdf, cl = float(wd), float(claimed)
+    except (TypeError, ValueError):
+        return error(name, "all inputs must be numeric")
+    if wdf <= 0:
+        return error(name, f"Debye frequency must be positive (omega_D={wdf})")
+    actual = _HBAR * wdf / _C["boltzmann_constant"]
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-4)
+    data = {"omega_D": wdf, "theta_D_K": actual, "claimed_K": cl, "formula": "theta_D = hbar*omega_D/k_B"}
+    if _close(actual, cl, rel_tol=rel_tol):
+        return confirm(name, f"theta_D = hbar*omega_D/k_B = {actual:.4g} K (matches {cl})", data)
+    return mismatch(name, f"theta_D = {actual:.4g} K, claimed {cl}", data)
+
+
+def verify_phonon_occupation(spec: Dict[str, Any]) -> VerifierResult:
+    """n(omega,T) = 1/(exp(hbar*omega/k_B T) - 1) — the Bose-Einstein occupation of a phonon mode."""
+    name = "condensed_matter.phonon_occupation"
+    w, T, claimed = spec.get("phonon_omega"), spec.get("temperature_K"), spec.get("claimed_occupation")
+    if w is None or T is None or claimed is None:
+        return na(name)
+    try:
+        wf, Tf, cl = float(w), float(T), float(claimed)
+    except (TypeError, ValueError):
+        return error(name, "all inputs must be numeric")
+    if wf <= 0 or Tf <= 0:
+        return error(name, f"frequency and temperature must be positive (omega={wf}, T={Tf})")
+    x = _HBAR * wf / (_C["boltzmann_constant"] * Tf)
+    actual = 1.0 / math.expm1(x)                                   # expm1 keeps it stable for small and large x
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    data = {"omega": wf, "T": Tf, "x_hw_over_kT": x, "occupation": actual, "claimed": cl,
+            "formula": "n = 1/(exp(hbar*omega/k_B T) - 1)"}
+    if _close(actual, cl, rel_tol=rel_tol):
+        return confirm(name, f"n = 1/(exp({x:.4g})-1) = {actual:.4g} (matches {cl})", data)
+    return mismatch(name, f"n = {actual:.4g}, claimed {cl}", data)
+
+
+def verify_sound_velocity(spec: Dict[str, Any]) -> VerifierResult:
+    """v_s = a*sqrt(K/m) — the long-wavelength (k->0) acoustic-branch sound speed of the monatomic chain."""
+    name = "condensed_matter.sound_velocity"
+    K, m, a, claimed = (spec.get(x) for x in ("spring_const", "atom_mass", "lattice_a", "claimed_sound_velocity"))
+    if any(v is None for v in (K, m, a, claimed)):
+        return na(name)
+    try:
+        Kf, mf, af, cl = float(K), float(m), float(a), float(claimed)
+    except (TypeError, ValueError):
+        return error(name, "all inputs must be numeric")
+    if Kf <= 0 or mf <= 0 or af <= 0:
+        return error(name, f"spring constant, mass and spacing must be positive (K={Kf}, m={mf}, a={af})")
+    actual = af * math.sqrt(Kf / mf)
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-3)
+    data = {"K": Kf, "m": mf, "a": af, "v_s": actual, "claimed": cl, "formula": "v_s = a*sqrt(K/m)"}
+    if _close(actual, cl, rel_tol=rel_tol):
+        return confirm(name, f"v_s = a*sqrt(K/m) = {actual:.4g} m/s (matches {cl})", data)
+    return mismatch(name, f"v_s = {actual:.4g} m/s, claimed {cl}", data)
+
+
+def verify_dulong_petit(spec: Dict[str, Any]) -> VerifierResult:
+    """The Dulong-Petit law — at high T a crystal's molar heat capacity approaches 3R (each atom carries
+    3 vibrational modes, k_B each): C = 3R ~ 24.94 J/(mol*K), the classical ceiling the phonon gas obeys."""
+    name = "condensed_matter.dulong_petit"
+    claimed = spec.get("claimed_molar_heat_capacity")
+    if claimed is None:
+        return na(name)
+    try:
+        cl = float(claimed)
+    except (TypeError, ValueError):
+        return error(name, "claimed_molar_heat_capacity must be numeric")
+    actual = 3.0 * _C["gas_constant"]
+    rel_tol = clamp_tol(spec, "tolerance_relative", 1e-2)
+    data = {"molar_heat_capacity_J_per_mol_K": actual, "claimed": cl, "formula": "C = 3R"}
+    if _close(actual, cl, rel_tol=rel_tol):
+        return confirm(name, f"C = 3R = {actual:.4f} J/(mol*K) (matches {cl})", data)
+    return mismatch(name, f"C = 3R = {actual:.4f} J/(mol*K), claimed {cl}", data)
+
+
 _RULES = [
     (("spring_const", "atom_mass", "wavevector", "lattice_a", "claimed_omega"), verify_phonon_dispersion),
+    (("phonon_omega", "claimed_phonon_energy_J"), verify_phonon_energy),
+    (("debye_frequency", "claimed_debye_temp_K"), verify_debye_temperature),
+    (("phonon_omega", "temperature_K", "claimed_occupation"), verify_phonon_occupation),
+    (("spring_const", "atom_mass", "lattice_a", "claimed_sound_velocity"), verify_sound_velocity),
+    (("claimed_molar_heat_capacity",), verify_dulong_petit),
     (("number_density", "claimed_fermi_J"), verify_fermi_energy),
     (("diff_order", "wavelength_m", "plane_spacing_m", "claimed_theta_deg"), verify_bragg),
     (lambda cm: ("claimed_von_klitzing_ohm" in cm or "claimed_josephson_ghz_per_v" in cm
