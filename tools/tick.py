@@ -5,6 +5,7 @@
     PYTHONPATH=src python tools/tick.py document              # write the Riemann attempt's record onto its stick
     PYTHONPATH=src python tools/tick.py lnh                   # Dirac's Large Numbers Hypothesis: seal N1, cite the rest
     PYTHONPATH=src python tools/tick.py alpha                 # the fine-structure constant: seal alpha, cite the 137
+    PYTHONPATH=src python tools/tick.py ab                    # the Aharonov-Bohm effect: seal the flux quantum + phase law
     PYTHONPATH=src python tools/tick.py robin [N]             # chart the Riemann window by elimination (Robin to N)
     PYTHONPATH=src python tools/tick.py schoenfeld [X]        # chart it from the prime count too (Schoenfeld to X)
     PYTHONPATH=src python tools/tick.py lagarias [N]          # and through Lagarias's elementary inequality (to N)
@@ -308,6 +309,62 @@ def lnh() -> int:
     f = TS.read(sid)["fit"]
     print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "excluded": len(f["excluded_approaches"]),
                       "record": len(f["record"]), "open": f["open"]}, indent=1))
+    return 0
+
+
+def aharonov_bohm() -> int:
+    """The Aharonov-Bohm effect as a sealed physics anchor (Matt, 2026-10-06: "We create the tick lines of
+    probability. We use the Aharonov-Bohm effect."). SEAL the computable law from the engine's attested
+    constants: the magnetic flux quantum Phi0 = h/(2e); the AB phase is qPhi/hbar, periodic in the enclosed
+    flux with period h/e (a 2*pi wrap), a gauge-invariant observable (contour integral A.dl = Phi) even where
+    B = 0. The witness to the invariant the games triangulate: the GLOBAL structure governs, not the local
+    force. Seal the arithmetic; endorse no analogy as truth (the probability instrument only FINDS)."""
+    import math
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    from concordance.verifiers import physical_constants as PC
+    C = PC._CONSTANTS
+    e = C["elementary_charge"]["value"]; h = C["planck_constant"]["value"]
+    phi0 = h / (2 * e)                       # superconducting flux quantum
+    expr = f"({h!r})/(2*({e!r}))"
+    r = verify_derivation([{"id": "flux_quantum", "domain": "mathematics",
+          "spec": {"mode": "numeric", "params": {"numeric_expr": expr, "claimed_value": phi0, "rel_tol": 1e-9}}}])
+    if r.get("verdict") != "HOLDS":
+        print("the flux quantum did not verify:", json.dumps(r)[:400]); return 1
+    r = receipts.attach(r, config=EngineConfig(), domain="physical_constants")
+    seal = (r.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted"); return 1
+    print("sealed the flux quantum", seal)
+    sid = TS.create("The Aharonov-Bohm effect",
+                    statement=("A charged particle's phase is shifted by the electromagnetic potential even in a "
+                               "region where the field is zero; the shift is set by the enclosed flux, a global "
+                               "property, not by any local force."),
+                    field="physics",
+                    references=["Y. Aharonov and D. Bohm, Phys. Rev. 115 (1959) 485",
+                                "A. Tonomura et al., Phys. Rev. Lett. 56 (1986) 792 (definitive, flux shielded)"])["id"]
+    marks = [
+        ("witness", f"The magnetic flux quantum Phi0 = h/(2e) = {phi0:.9e} Wb, computed from the engine's attested "
+                    f"constants (the single-charge quantum h/e = 2*Phi0 = {h/e:.9e} Wb). The Aharonov-Bohm phase is "
+                    f"d(phi) = q*Phi/hbar, periodic in the enclosed flux with period h/e (a 2*pi wrap) and "
+                    f"gauge-invariant through the holonomy (contour integral A.dl = Phi) even where B = 0 — an "
+                    f"arithmetic fact from the constants.", dict(seal=seal)),
+        ("note", "[the principle] The controlling influence is the GLOBAL potential and topology, not the local "
+                 "field: the particle is moved by a region it never enters. This is the physical witness to the "
+                 "invariant the games triangulate — define the structure (the plane, the ring, the enclosed flux) "
+                 "and you govern the outcome without local force. 'The one who defines the plane defines reality.'", {}),
+        ("note", "[discernment / the guard] The engine seals that the flux quantum IS h/2e and that the phase law "
+                 "holds — the arithmetic is a fact. It does NOT claim that strategy, a fight, or a game is quantum "
+                 "mechanics. The Aharonov-Bohm FORM (paths, phase, interference, holonomy) is borrowed as an "
+                 "instrument for FINDING likely paths — the tick lines of probability — and never renders a verdict. "
+                 "The games' verifiers remain the only authority on truth. Borrow the form; launder nothing.", {}),
+    ]
+    for kind, claim, kw in marks:
+        res = TS.tick(sid, kind, claim, by="Narrow Highway — the Aharonov-Bohm reading, 2026-10-06", **kw)
+        print(("  " + kind) if res.get("ok") else ("  REFUSED " + kind + ": " + res.get("error", "")))
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
     return 0
 
 
@@ -640,6 +697,8 @@ def main() -> int:
         return lnh()
     if a[0] == "alpha":
         return alpha()
+    if a[0] in ("aharonov_bohm", "ab"):
+        return aharonov_bohm()
     if a[0] == "robin":
         return robin(int(a[1]) if len(a) > 1 else 1000000)
     if a[0] == "schoenfeld":
