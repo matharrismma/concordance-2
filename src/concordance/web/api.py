@@ -1195,6 +1195,26 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         telemetry.record("lead", surface=surface, verdict=(res.get("applied") or {}).get("verdict"))
         return _ok(res)
 
+    if path == "/trajectory":
+        # THE TRAJECTORY OF A PATH (Matt, 2026-10-06): success guides, failure narrows. GET ?path= measures
+        # a path's trajectory (Wilson floor + direction); POST {path, success, seal|witness} records an
+        # outcome (a SUCCESS needs a witness — never self-graded; a FAILURE is recorded freely).
+        from .. import trajectory as _traj
+        if method == "GET":
+            pth = str(query.get("path") or "").strip()
+            if not pth:
+                return _err(400, "path required (?path=…)")
+            return _ok(_traj.measure(pth))
+        if method == "POST":
+            if not isinstance(body, dict) or not str(body.get("path") or "").strip():
+                return _err(400, "body {path, success, seal|witness} required")
+            r = _traj.record(str(body["path"]), bool(body.get("success")),
+                             seal=str(body.get("seal") or ""), witness=str(body.get("witness") or ""),
+                             note=str(body.get("note") or ""))
+            if not r.get("ok"):
+                return _err(400, r.get("error") or "could not record")
+            return _ok(r)
+
     if method == "GET" and path == "/path":
         # Wayfinding — a floorplan of the keeping. Given what you're asking (q) and optionally the
         # thread you're in, return where you stand, the connected rooms (on-topic by construction),
@@ -3237,6 +3257,7 @@ ROUTES = [
     {"path": "/days", "methods": ("POST",), "rl": True},
     {"path": "/ask", "methods": ("POST",), "rl": True},
     {"path": "/lead", "methods": ("POST",), "api": True, "rl": True},
+    {"path": "/trajectory", "methods": ("GET", "POST"), "api": True, "rl": True},
     # THE OPENAI-COMPATIBLE DOOR (2026-10-03, "lean into the open doors"): the shape every chat client
     # speaks, answered by the engine — no model behind it (web/openai_door.py)
     {"path": "/v1/chat/completions", "methods": ("POST",), "rl": True, "api": True},

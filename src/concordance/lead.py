@@ -46,7 +46,7 @@ def lead(situation: str, *, apply_fn: Optional[Callable[[str], Dict[str, Any]]] 
     """A situation in; the discerned solution + tool + technique + strategy out, with what is checkable
     applied. Composes archetypes, router, principles, the game witnesses, and the gate — never generating.
     `apply_fn(situation) -> audit result` is injected so the seed stays pure; the door binds the real gate."""
-    from . import ask, archetypes, router, principles
+    from . import ask, archetypes, router, principles, trajectory
 
     t = (str(situation) if situation else "").strip()
     if not t:
@@ -90,8 +90,22 @@ def lead(situation: str, *, apply_fn: Optional[Callable[[str], Dict[str, Any]]] 
         except Exception:  # noqa: BLE001 — apply is a beat of the proposal; it must not sink it
             applied = None
 
+    # the PATH signature — a stable id for THIS discerned path, so its outcome can be reported back to the
+    # trajectory ledger (success guides, failure narrows); the caller reports via POST /trajectory.
+    comps = []
+    if types:
+        comps.append(types[0].get("id") or "")
+    comps.append(route.get("member") or "?")
+    if strat.get("found") and strat["patterns"]:
+        comps.append(strat["patterns"][0].get("pattern") or "")
+    path_id = " · ".join(c for c in comps if c)
+
+    track = trajectory.measure(path_id) if path_id else {"n": 0}
+
     return {
-        "situation": t, "kind": "situation",
+        "situation": t, "kind": "situation", "path_id": path_id,
+        "track_record": (track if track.get("n") else {"n": 0, "note": "a new path — no outcomes yet; "
+                         "report how it goes via POST /trajectory so success can guide and failure narrow"}),
         "solution": solution or {"found": False,
                                  "note": "no biblical type clearly matched — said rather than forced"},
         "discerned": {

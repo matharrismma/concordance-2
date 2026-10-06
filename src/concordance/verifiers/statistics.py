@@ -621,6 +621,40 @@ def verify_measurement_consistency(spec: Dict[str, Any]) -> VerifierResult:
 
 
 # Verified golden for the domain-golden benchmark: a z-test whose two-sided p at z=1.96 is 0.05.
+def verify_trajectory(spec: Dict[str, Any]) -> VerifierResult:
+    """The path-trajectory floor, checked (Matt 2026-10-06, 'a good method to measure the trajectory of each
+    path'). The Wilson score lower bound for s successes in n trials is the conservative, evidence-weighted
+    success rate — it rises toward s/n as n grows (the path narrows). Here the engine SEALS that the floor
+    was computed correctly, so a ranking by 'what works' rests on math, not a made-up score.
+      STAT_VERIFY: {"trajectory": {"successes": 9, "trials": 10, "confidence": 0.95, "claimed_floor": 0.5956}}"""
+    name = "statistics.trajectory"
+    tj = spec if "successes" in spec else (spec.get("trajectory") or {})
+    try:
+        s = int(tj.get("successes")); n = int(tj.get("trials"))
+    except (TypeError, ValueError):
+        return error(name, "successes and trials must be integers")
+    if not (0 <= s <= n) or n <= 0:
+        return error(name, "need 0 <= successes <= trials and trials > 0")
+    conf = float(tj.get("confidence", 0.95))
+    from .. import trajectory as _tj
+    lb, centre, ub = _tj.wilson(s, n, conf)
+    data = {"successes": s, "trials": n, "confidence": conf, "floor": round(lb, 6),
+            "centre": round(centre, 6), "ceiling": round(ub, 6), "width": round(ub - lb, 6),
+            "rate": round(s / n, 6),
+            "means": "the Wilson lower bound: a conservative success rate earned by evidence; it narrows as n grows"}
+    claimed = tj.get("claimed_floor")
+    if claimed is None:
+        return na(name, "claim claimed_floor (the Wilson lower bound)")
+    try:
+        cl = float(claimed)
+    except (TypeError, ValueError):
+        return error(name, "claimed_floor must be numeric")
+    if abs(cl - lb) > 1e-4:
+        return mismatch(name, f"Wilson floor for {s}/{n} at {conf:g} is {lb:.4f}, claimed {cl:.4f}", data)
+    return confirm(name, f"Wilson floor for {s}/{n} at {conf:g} is {lb:.4f} (rate {s/n:.4f}); the conservative "
+                         f"success rate, earned by evidence — matches the claim", data)
+
+
 def _wigner_gue_variance() -> float:
     """Variance of the GUE (beta=2) Wigner surmise p(s) = (32/pi^2) s^2 exp(-4 s^2/pi), mean 1 — a reference
     value for the spacing distribution of a random Hermitian matrix's eigenvalues, computed, not hardcoded."""
@@ -735,6 +769,9 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
 
     if sv.get("zeta_spacing"):
         results.append(verify_gue_spacing(sv["zeta_spacing"]))
+
+    if sv.get("trajectory"):
+        results.append(verify_trajectory(sv["trajectory"]))
 
     if not results:
         results.append(na("statistics", "no STAT_VERIFY artifacts present"))

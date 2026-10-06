@@ -2104,6 +2104,25 @@
       }
     }
   },
+  "trajectory": {
+    "packet_key": "STAT_VERIFY",
+    "true": {
+      "trajectory": {
+        "successes": 9,
+        "trials": 10,
+        "confidence": 0.95,
+        "claimed_floor": 0.5958
+      }
+    },
+    "false": {
+      "trajectory": {
+        "successes": 9,
+        "trials": 10,
+        "confidence": 0.95,
+        "claimed_floor": 0.8
+      }
+    }
+  },
   "count_residual": {
     "packet_key": "NUM_VERIFY",
     "true": {

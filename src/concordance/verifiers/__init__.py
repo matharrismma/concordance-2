@@ -48,6 +48,8 @@ VERIFIERS: Dict[str, str] = {
     # the cross-domain answer for Riemann: the zeta zeros' spacings follow random-matrix (GUE) statistics
     # (Montgomery-Odlyzko) — a statistics-domain mark on a number-theory question (2026-10-05)
     "gue": _P + "statistics", "zeta_spacing": _P + "statistics",
+    # the path-trajectory floor (Wilson lower bound) — measure what works, earned by evidence (2026-10-06)
+    "trajectory": _P + "statistics",
     # "do these independent measurements agree?" — the concordance check lives in statistics
     "measurement_consistency": _P + "statistics",
     "measurement_agreement": _P + "statistics",
