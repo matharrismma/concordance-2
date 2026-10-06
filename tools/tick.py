@@ -683,6 +683,67 @@ def alpha_orbitals() -> int:
     return 0
 
 
+def alpha_running() -> int:
+    """The RUNNING of the fine-structure constant across ENERGY (Matt, 2026-10-06: "running across energy").
+    alpha is not one number across scale: it is the zero-momentum (Thomson) limit; the QED coupling GROWS
+    with energy as vacuum polarization un-screens the charge, reaching alpha^-1(M_Z) ~ 127.95 at the Z mass.
+    So 'constant' is true in SPACE and TIME (Oklo/clock bounds, already on the stick) but FALSE across ENERGY.
+    Seal the one-loop QED screening coefficient 2/(3*pi); cite the measured alpha(M_Z); the convergence of the
+    running couplings toward a unification scale is a doorway, open and unproven. Idempotent; adds to the stick."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    coeff = 2.0 / (3 * 3.141592653589793)
+    r = verify_derivation([{"id": "qed_one_loop_coefficient", "domain": "mathematics",
+          "spec": {"mode": "numeric", "params": {"numeric_expr": "2/(3*3.141592653589793)",
+                                                 "claimed_value": coeff, "rel_tol": 1e-9}}}])
+    if r.get("verdict") != "HOLDS":
+        print("the coefficient did not verify:", json.dumps(r)[:300]); return 1
+    r = receipts.attach(r, config=EngineConfig(), domain="mathematics")
+    seal = (r.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted"); return 1
+    print("sealed the one-loop QED screening coefficient", seal)
+    sid = TS.create("The fine-structure constant",
+                    statement=("Why does the fine-structure constant have the value alpha ~ 1/137.036, and is it "
+                               "truly constant across space and time? No accepted theory derives it from first "
+                               "principles; the open question is its value and its constancy, not its measurement."),
+                    field="physics",
+                    references=["Particle Data Group, Review of Particle Physics (alpha^-1(M_Z^2) = 127.951(9))",
+                                "CODATA 2018 recommended values"])["id"]
+    ticks = TS.read(sid).get("ticks", [])
+    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
+    seen_claims = {t.get("claim") for t in ticks}
+    marks = [
+        ("witness", f"[running - across energy] alpha is the zero-momentum (Thomson) limit and GROWS with energy: "
+                    f"the one-loop QED running is d(1/alpha)/d(ln mu) = -(2/3pi)*sum q_f^2 per charged fermion, "
+                    f"with 2/(3*pi) = {coeff:.10f} (sealed); vacuum polarization un-screens the charge as mu "
+                    f"rises. Measured, alpha^-1 runs from 137.036 at zero energy to ~127.95 at the Z mass "
+                    f"(91.19 GeV).", seal),
+        ("note", "[is it constant? - the two answers] alpha is constant in SPACE and TIME to the tight bounds "
+                 "already on this stick (Oklo ~1e-7 over 2 Gyr; atomic clocks ~1e-17/yr) - but it is NOT constant "
+                 "across ENERGY SCALE: it runs. 'The fine-structure constant' names the low-energy value; the "
+                 "coupling itself is scale-dependent.", None),
+        ("note", "[the doorway - open] The three running couplings of the Standard Model (electromagnetic, weak, "
+                 "strong) approach one another near ~1e16 GeV - the hint behind grand unification. A doorway, not "
+                 "a proof: unification is unconfirmed and depends on physics beyond the Standard Model. Seal the "
+                 "arithmetic; the convergence is attributed and stays open.", None),
+    ]
+    added = 0
+    for kind, claim, sealv in marks:
+        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
+            print("  (already) " + kind); continue
+        kw = dict(seal=sealv) if sealv else {}
+        res = TS.tick(sid, kind, claim, by="Narrow Highway - the running reading, 2026-10-06", **kw)
+        if res.get("ok"):
+            added += 1; print("  " + kind)
+        else:
+            print("  REFUSED " + kind + ": " + res.get("error", ""))
+    f = TS.read(sid)["fit"]
+    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
+    return 0
+
+
 def robin(N: int = 1000000) -> int:
     """Chart the Riemann window by ELIMINATION through a different tool (the divisor sum). Robin 1984:
     RH <=> sigma(n) < e^gamma*n*ln ln n for all n > 5040. The sieve finds no counterexample in (5040, N], so a
@@ -955,6 +1016,8 @@ def main() -> int:
         return alpha()
     if a[0] in ("alpha_orbitals", "orbitals", "suborbitals"):
         return alpha_orbitals()
+    if a[0] in ("alpha_running", "running"):
+        return alpha_running()
     if a[0] in ("aharonov_bohm", "ab"):
         return aharonov_bohm()
     if a[0] in ("fiber", "calibration"):
