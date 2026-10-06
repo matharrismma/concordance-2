@@ -1381,6 +1381,31 @@ def search(query: str, limit: int = 25, include_witness: bool = True,
             have.add(hit.get("id"))
             if len(out) >= limit:
                 break
+
+    # THE SEMANTIC SUPPLEMENT — the answer-path, live (docs/THE_WATCH.md step 5). Only when there is ROOM
+    # below the lexical hits (a thin result is the paraphrase case), reach matches that share MEANING but
+    # not words: expand the query with sealed meaning-neighbours and run the SAME ranker on the expanded
+    # query. Appended BELOW, never reordering the trusted lexical hits; the ranker's own subject partition
+    # (now seeing the expansion terms) keeps it honest. Labeled via="meaning". It can only ADD, never hurt.
+    if len(out) < limit:
+        try:
+            from . import semantic
+            if semantic.available():
+                extra = semantic.expand(query.split())
+                if extra:
+                    have = {c.get("id") for c in out}
+                    exp_q = query + " " + " ".join(extra)
+                    for hit in corpus.search(exp_q, limit, include_witness, shelves):
+                        if hit.get("id") in have or not is_public(hit):
+                            continue
+                        hit = dict(hit)
+                        hit["via"] = "meaning"
+                        out.append(hit)
+                        have.add(hit.get("id"))
+                        if len(out) >= limit:
+                            break
+        except Exception:
+            pass                      # the supplement must never break the trusted search
     return [rehydrate(c) for c in out]
 
 
