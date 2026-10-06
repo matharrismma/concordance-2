@@ -62,7 +62,8 @@ COMPONENTS: List[Dict[str, Any]] = [
      "note": "one-way flow — proof can't exit, a miss can't pass as a hit"},
     {"primitive": "capacitor", "name": "The Keeping", "plane": "Plant", "layer": "Wear element",
      "status": "Experimental", "modules": ["corpus", "corpus_db"],
-     "note": "stores charge, smooths, releases on demand — the reservoir (stock still thin)"},
+     "note": "stores charge, smooths, releases on demand — the reservoir (55.8% substance / 44.2% stub, "
+             "measured 2026-10-06; stubs concentrated in science/OEIS, world, dictionary)"},
     {"primitive": "capacitor", "name": "Wants / Candidates", "plane": "Plant", "layer": "Consumable",
      "status": "Verified", "modules": ["wants", "candidates"],
      "note": "holds a miss until it is filled; a held commitment"},

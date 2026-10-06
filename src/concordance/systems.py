@@ -63,10 +63,15 @@ SUBSYSTEMS: List[Dict[str, Any]] = [
      # couldn't catch it. Fixed (a525611): the pronunciation genre loses the exact-title boost; the
      # six live subject lookups that led with phonemes now lead with the definition, ask_probe holds
      # 25/25. Both ranker facets are now closed AND deployed. Still marked degraded, deliberately:
-     # the remaining reason is STOCKING, not the ranker — ~67% of the keeping is a thin pointer, so
-     # for a niche subject the honest answer is still a gap. Flipping to connected wants a scale
-     # re-measure (a live_passes-style 100-probe run), not a unit test — held until that evidence.
-     "issues": [{"what": "~67% word-match stubs (a stocking gap, not a ranker defect)", "supported": True},
+     # the remaining reason is STOCKING, not the ranker. 2026-10-06: MEASURED over the whole keeping
+     # (ops.substance across the resident cards + the shard bodies in cards.json, connection edges
+     # excluded) — 873,971 holdings, 55.8% substance / 44.2% stub, NOT the ~67% that was estimated
+     # here. And the stubs are concentrated: ~97% of them sit in three shelves — science/OEIS (87%
+     # stub), world (60%), dictionary (52%) — and much of that is brief-BY-NATURE reference (an OEIS
+     # sequence, a headword), complete as-is, not a stocking failure. Flipping to connected still
+     # wants a retrieval-QUALITY probe (does a real query land on an answer?), not just composition.
+     "issues": [{"what": "44.2% stub bodies (measured 2026-10-06; 97% in science/OEIS, world, "
+                         "dictionary — much brief-by-nature) — a stocking gap, not a ranker defect", "supported": True},
                 {"what": "ranker blind to substance vs headword — FIXED (32ed21a + a525611)", "supported": True}]},
     {"name": "Crisis / Safety", "slug": "crisis",
      "modules": ["crisis_semantic", "floor", "seeds"]},
