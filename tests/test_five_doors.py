@@ -39,7 +39,7 @@ def test_every_catalog_tool_belongs_to_one_verb_and_the_doors_are_real():
 
 def test_a_new_agent_meets_the_doors_first_and_every_tool_leads_with_its_verb():
     cat = _catalog()
-    assert len(cat) == 100                                  # +3 (2026-10-06): profess · witness_profession · profession
+    assert len(cat) == 101                                  # +3 (2026-10-06): profess · witness_profession · profession; +1 manufacture (Conductor M2)
     first = [t["name"] for t in cat[:4]]
     assert first == doors.TOOL_DOORS["CHECK"], first        # CHECK's doors open the list
     kinds = [doors.TOOL_KIND[t["name"]] for t in cat]

@@ -131,6 +131,7 @@
 
     <h2>Traffic <span class="sub">· humans / agents / bots · advisory, from the access logs</span></h2>
     <p class="meta" id="traffic"></p>
+    <p class="meta" id="traffic-hosts"></p>
 
     <h2>Messages <span class="sub" id="msgs-n"></span></h2>
     <div id="msgs"></div>
@@ -235,6 +236,13 @@ function render(d){
   document.getElementById("traffic").textContent=d.traffic?
     (num(T.requests)+" requests over "+((d.traffic||{}).window_days||"?")+"d · "+num(T.human)+" human · "+num(T.agent)+" agent · "+num(T.monitor)+" monitor · "+num(T.bot)+" bot"):
     "No traffic rollup yet — it runs on a timer from the access logs.";
+  // PER DOOR — the witness (.org) and the museum (.tv) measured as their own faces, not blended into
+  // the .com total. Always lists all four so a missing face reads as "—" (a visible gap, not a silent one).
+  var H=(d.traffic||{}).hosts||{};
+  var FACES=[["narrowhighway.com",".com"],["narrowhighway.org",".org"],["narrowhighway.tv",".tv"],["api.narrowhighway.com","api"]];
+  document.getElementById("traffic-hosts").textContent = d.traffic ?
+    ("by door — "+FACES.map(function(f){ var v=H[f[0]];
+       return f[1]+" "+(v?num(v.requests)+" ("+num(v.human)+"h·"+num(v.agent)+"a·"+num(v.bot)+"b)":"—"); }).join("   ")) : "";
 
   // messages
   var box=d.contact||{},msgs=box.recent||[];

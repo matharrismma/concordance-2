@@ -392,6 +392,7 @@
 
     <div class="foot">
       <span id="found">A conduit, not a source · nothing is generated</span>
+      <a href="/proof.html">the proof</a>
       <a href="https://narrowhighway.com">the engine</a>
       <a href="/connect.html">for your agent</a>
       <a href="/live.html">under the hood →</a>
@@ -542,10 +543,15 @@
       // word for it. The .com face makes the receipt the hero; the witness face buried it in a grey
       // footnote ("· receipt"). Where a seal exists, it leads its own line — a permanent, re-runnable
       // proof. Only rendered when there IS one, so the affordance never promises a receipt we can't show.
-      if(d.audit.seal)
+      // d.audit.seal is the seal OBJECT {content_hash, cite_url, ledgered}; the re-checkable page is its
+      // cite_url (/s/<hash>). The chip states the guarantee the engine just kept and makes "sealed" the
+      // one-click proof — the same words the .com face uses, so both faces read as one engine.
+      var _seal = d.audit.seal, _surl = _seal && (_seal.cite_url || (_seal.content_hash ? '/s/'+_seal.content_hash : ''));
+      if(_surl)
         h += '<div style="margin:.55rem 0;padding:.6rem .85rem;border:1px solid rgba(201,162,74,.35);border-radius:8px;background:rgba(201,162,74,.05)">'+
-             '<a href="'+esc(d.audit.seal)+'" style="color:#c9a24a;font-weight:600;text-decoration:none">Re-check this yourself →</a>'+
-             '<span class="note" style="display:block;margin-top:.15rem">A permanent receipt — don’t trust us, re-run it.</span></div>';
+             '<span style="font-weight:600;color:#4a6a34">found · verified · '+
+             '<a href="'+esc(_surl)+'" style="color:#c9a24a;text-decoration:none">sealed ↗</a> — not generated</span>'+
+             '<span class="note" style="display:block;margin-top:.15rem">A permanent receipt you can re-run — don’t trust us, re-check it yourself.</span></div>';
     }
     // A word study: the word itself, how it sounds, what it means, and how often it is used.
     // This had no renderer at all — it only ever showed the standing note, so removing that

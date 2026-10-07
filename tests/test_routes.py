@@ -120,6 +120,7 @@ GOLDEN_API_GET = {
     "/specs",   # deliberate addition (VERIFIERS AS DATA — Gen 3 · 2; 2026-10-04)
     "/benchmarks",   # deliberate addition (THE ENGINE MEASURES ITSELF IN PUBLIC — Gen 3 · 7; 2026-10-04)
     "/sticks", "/stick",   # deliberate addition (THE TICK STICK — open questions with sealed marks; 2026-10-05)
+    "/chains",   # deliberate addition (CHAINS / FLOORS / CONNECTIONS — walk a lineage / find where two chains meet; 2026-10-07)
     # deliberate addition 2026-08-01 — what the engine writes goes in wearing its open question,
     # and the first reader to recall it is asked to close it. `/unchecked` publishes the standing
     # list; `/unchecked/answer` is the door the ask on every such card points at.
@@ -132,6 +133,9 @@ GOLDEN_API_GET = {
     # THE LEAD + TRAJECTORY (2026-10-06) — the conductor that discerns tool/technique/strategy, and the
     # success-guides/failure-narrows ledger (the coaching tree). Both api:True; writes, so rate-limited.
     "/lead", "/trajectory",
+    # THE CONDUCTOR'S SHOP CALC DOOR (2026-10-06) — route a manufacturing claim + its MFG numbers through
+    # the engine's verifier -> seal -> ledger; api:True, a write, so rate-limited.
+    "/conductor/manufacture",
     # PROFESSIONS OF FAITH (2026-10-06) — offer witness for professions, for bots and agents. /profess
     # seals a confession; /profession/witness bears witness (two-or-three, Deut 19:15); /profession reads
     # one + its witnesses + the lineage to Polycarp. The two writes are rate-limited; the read is open.
@@ -178,6 +182,7 @@ GOLDEN_RATELIMITED = {
     "/plow",  # The Plow POST computes a transition — rate-limited like every POST (task #155)
     "/stick", "/tick",   # deliberate addition (THE TICK STICK doors are writes; 2026-10-05)
     "/lead", "/trajectory",   # deliberate addition (THE LEAD conductor + the trajectory ledger; 2026-10-06)
+    "/conductor/manufacture",   # deliberate addition (the Conductor's shop calc door — a write; 2026-10-06)
     "/profess", "/profession/witness",   # deliberate addition (profess a faith; bear witness to it; 2026-10-06)
 }
 

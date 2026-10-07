@@ -51,8 +51,10 @@ def test_every_effect_is_from_the_declared_vocabulary():
 
 def test_core_stays_small_a_ratchet():
     """The consolidation directive made countable: core is the front door, and a front door with
-    dozens of handles is a wall. Raising this number is a decision, not a drift."""
-    assert len(PROFILES["core"]["tools"]) <= 12, sorted(PROFILES["core"]["tools"])
+    dozens of handles is a wall. Raising this number is a decision, not a drift.
+    2026-10-06: 12 -> 13, the Conductor's `manufacture` calc door — a deterministic verify -> seal,
+    sibling to candidate_* — joined core. A decision, made in the open."""
+    assert len(PROFILES["core"]["tools"]) <= 13, sorted(PROFILES["core"]["tools"])
 
 
 def test_the_read_planes_hold_no_publish_or_external_tools():
@@ -111,8 +113,11 @@ def test_the_full_catalog_on_mcp_is_unchanged_a_golden():
     agents): + `profess` (seal a profession of faith as a witnessable record), + `witness_profession` (bear
     witness to one — the two-or-three gate, Deut 19:15), + `profession` (read a profession + its witnesses +
     the lineage up to Polycarp, the initial trajectory) — all three on the `sovereign` plane beside
-    `self_attest`. Net +3 = 100, deliberate."""
-    assert len(_full_catalog()) == 100
+    `self_attest`. Net +3 = 100, deliberate. 2026-10-06 (the Conductor's shop-domain calc door, M2):
+    + `manufacture` (route an engineering claim + its MFG numbers through the manufacturing verifier ->
+    seal -> hash-chained ledger, reporting the disposition; connects organs, rebuilds none) on the `core`
+    plane beside candidate_*. +1 = 101, deliberate."""
+    assert len(_full_catalog()) == 101
 
 
 def test_the_witness_gate_semantics_survive_the_mount():

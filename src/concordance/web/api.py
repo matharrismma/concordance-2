@@ -260,7 +260,7 @@ def render_seal_html(content_hash: str, record: Optional[Dict[str, Any]]) -> Tup
             f"<link rel=canonical href=\"{CANONICAL_WITNESS}/s/{_esc(content_hash)}\">"
             f"<meta property=\"og:type\" content=article>"
             f"<meta name=\"twitter:card\" content=\"summary\"></head><body>"
-            f"{_site_header('<a href=/#verify>Verify</a><a href=/seal.html>Seal</a>')}<main class=wrap>"
+            f"{_site_header('<a href=/checkit.html>Verify</a><a href=/proof.html>Seal</a>')}<main class=wrap>"
             f"<h1>The receipt</h1><div class=\"verdict {vcls}\" style=\"font-size:1.4rem\">{label}</div>"
             f"<p class=lede>A permanent, tamper-evident record of a verification. The content hash IS "
             f"the proof — re-fetch it and the bytes must match, or it is not this record.</p>"
@@ -308,7 +308,7 @@ def render_badge_html(badge_hash: str, verify_result: Optional[Dict[str, Any]]) 
             f"<meta name=description content=\"{desc}\">"
             f"<meta property=\"og:title\" content=\"Badge · {copy}\">"
             f"<meta property=\"og:description\" content=\"{desc}\"></head><body>"
-            f"{_site_header('<a href=/#verify>Verify</a><a href=/seal.html>Seal</a>')}<main class=wrap>"
+            f"{_site_header('<a href=/checkit.html>Verify</a><a href=/proof.html>Seal</a>')}<main class=wrap>"
             f"<h1>{_esc(heading)}</h1><div class=\"verdict holds\" style=\"font-size:1.4rem\">{copy}</div>"
             f"<p class=lede>A badge is a receipt you OWN. It claims no mastery, skill, or level — only "
             f"that {_esc(str(n))} sealed verifications still stand when you re-check them. The evidence "
@@ -520,7 +520,7 @@ def render_card_html(card_id: str, card: Optional[Dict[str, Any]]) -> Tuple[int,
             f"<meta property=\"og:url\" content=\"{canonical}\">"
             f"<meta name=\"twitter:card\" content=\"summary\">"
             f"<script type=\"application/ld+json\">{ld_json}</script></head><body>"
-            f"{_site_header('<a href=/search>Search</a><a href=/#verify>Verify</a>')}<main class=wrap>"
+            f"{_site_header('<a href=/search>Search</a><a href=/checkit.html>Verify</a>')}<main class=wrap>"
             # THE INVITATION (Matt, 2026-08-01: "Imagine this is the only site someone has.").
             # 95% of measured traffic is agents, and the card page is where their citations land a
             # person — /card/* is the most-hit path on the site. That person arrives mid-library,
@@ -785,6 +785,22 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                      seal=str(body.get("seal") or ""), source=str(body.get("source") or ""),
                      up_to=body.get("up_to"), unit=str(body.get("unit") or ""), by=str(body.get("by") or ""))
         return _ok(r) if r.get("ok") else _err(400, r.get("error", "refused"))
+
+    if method == "GET" and path == "/chains":
+        # CHAINS / FLOORS / CONNECTIONS (Matt, 2026-10-07): walk a lineage of discovery from a floor, or
+        # find where two chains CONNECT. Bounded traversal over the keeping's connection graph (ids only,
+        # no bodies) — ?root=<card_id> for the lineage, or ?a=<id>&b=<id> for the meeting point.
+        from .. import chains as _chains
+        rel = (query.get("rel") or "enables").strip() or "enables"
+        a = (query.get("a") or "").strip()
+        b = (query.get("b") or "").strip()
+        root = (query.get("root") or "").strip()
+        if a and b:
+            conn = _chains.intersect(a, b, rels={rel} if rel else None)
+            return _ok({"a": a, "b": b, "rel": rel, "connection": conn})
+        if root:
+            return _ok(_chains.chain(root, rel=rel))
+        return _err(400, "give ?root=<card_id> for a lineage, or ?a=<id>&b=<id> for where two chains connect")
 
     if method == "GET" and path == "/benchmarks":
         # THE ENGINE MEASURES ITSELF IN PUBLIC (Gen 3 · 7): the standing benchmarks as tools/benchmarks.py
@@ -1195,6 +1211,24 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         telemetry.record("lead", surface=surface, verdict=(res.get("applied") or {}).get("verdict"))
         return _ok(res)
 
+    if method == "POST" and path == "/conductor/manufacture":
+        # THE CONDUCTOR'S SHOP CALC DOOR (M2): route an engineering claim + its MFG numbers through the
+        # engine's own manufacturing verifier -> seal -> hash-chained ledger, and report the disposition
+        # (CALCULATED/CONTROLLED/PROVISIONAL/OPEN). Connects organs, rebuilds none; the engine verifies
+        # the calc, the engineer decides the label; crisis outranks all. Body: {claim, calc, disposition?}.
+        if not isinstance(body, dict):
+            return _err(400, "JSON object body required")
+        claim = str(body.get("claim") or "").strip()
+        calc = body.get("calc")
+        if not claim:
+            return _err(400, "a claim is required")
+        if not isinstance(calc, dict) or not calc:
+            return _err(400, "calc must be a non-empty MFG_VERIFY spec object")
+        from .. import manufacture as _manufacture
+        res = _manufacture.manufacture(claim, calc, disposition=body.get("disposition"), config=config)
+        telemetry.record("manufacture", surface=surface, verdict=res.get("verdict"))
+        return _ok(res)
+
     if path == "/trajectory":
         # THE TRAJECTORY OF A PATH (Matt, 2026-10-06): success guides, failure narrows. GET ?path= measures
         # a path's trajectory (Wilson floor + direction); POST {path, success, seal|witness} records an
@@ -1446,7 +1480,11 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if r.get("kind") not in ("verify", "crisis") and any(c.isdigit() for c in text):
             try:
                 from .. import audit as _audit
-                _a = _audit.audit(text, config, seal=False)
+                # Seal the checked turn so the visitor sees the engine's guarantee made real (a live,
+                # re-checkable /s/<hash> receipt) — but index=False: the ambient audit is high-frequency,
+                # so it seals durably (CAS + ledger) WITHOUT inserting a receipt card into the live corpus.
+                # Content-addressing dedups identical claims; the steward budget caps growth (Jevons).
+                _a = _audit.audit(text, config, seal=True, index=False)
                 if _a.get("claims_found"):
                     r["audit"] = _a
             except Exception:  # noqa: BLE001
@@ -3274,6 +3312,7 @@ ROUTES = [
     # THE TICK STICK (2026-10-05): an open question, the marks the engine can stand behind, the fit they establish
     {"path": "/sticks", "methods": ("GET",), "api": True},
     {"path": "/stick", "methods": ("GET", "POST"), "api": True, "rl": True},
+    {"path": "/chains", "methods": ("GET",), "api": True},   # walk a discovery lineage / find where two chains connect (2026-10-07)
     {"path": "/tick", "methods": ("POST",), "rl": True},
     {"path": "/sync/manifest", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/sync/ledger", "methods": ("GET",), "api": True, "rl": "read"},
@@ -3301,6 +3340,7 @@ ROUTES = [
     {"path": "/days", "methods": ("POST",), "rl": True},
     {"path": "/ask", "methods": ("POST",), "rl": True},
     {"path": "/lead", "methods": ("POST",), "api": True, "rl": True},
+    {"path": "/conductor/manufacture", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/trajectory", "methods": ("GET", "POST"), "api": True, "rl": True},
     # THE OPENAI-COMPATIBLE DOOR (2026-10-03, "lean into the open doors"): the shape every chat client
     # speaks, answered by the engine — no model behind it (web/openai_door.py)

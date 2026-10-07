@@ -77,6 +77,13 @@ narrowhighway.org {
 			lb_try_interval 250ms
 		}
 	}
+	# The witness MUST be measured too — without this block .org logging froze (org.access.log stale
+	# since 2026-08-29) and the Bridge could never show .org traffic. Matches site/tv's json log so
+	# tools/traffic_rollup.py (glob /var/log/caddy/*.access.log) rolls it into data/traffic.json.
+	log {
+		output file /var/log/caddy/org.access.log
+		format json
+	}
 }
 
 narrowhighway.tv {

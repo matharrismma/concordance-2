@@ -123,9 +123,13 @@ def _load_minted() -> set:
     return _MINTED
 
 
-def mint(result: Dict[str, Any], domain: str, seal: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """Persist the verification as a card if new, and add it to the live corpus so it is found
-    immediately. Idempotent (pay once). Best-effort — returns None on skip or any failure."""
+def mint(result: Dict[str, Any], domain: str, seal: Dict[str, Any],
+         *, index: bool = True) -> Optional[Dict[str, Any]]:
+    """Persist the verification as a card if new, and (when `index` is True) add it to the live corpus
+    so it is found immediately. Idempotent (pay once). Best-effort — returns None on skip or any
+    failure. `index=False` (cold batch sealing) still persists the durable card but does NOT touch the
+    live corpus, so a cold one-shot process never pays a full corpus build; the card is folded in at
+    the next load."""
     try:
         card = card_for(result, domain, seal)
         if not card:
@@ -139,11 +143,12 @@ def mint(result: Dict[str, Any], domain: str, seal: Dict[str, Any]) -> Optional[
             with open(p, "a", encoding="utf-8") as fh:
                 fh.write(json.dumps(card, ensure_ascii=False) + "\n")
             minted.add(card["id"])
-        try:
-            from . import corpus as _corpus
-            _corpus.add_to_default(card)         # searchable now, no restart
-        except Exception:  # noqa: BLE001
-            pass
+        if index:
+            try:
+                from . import corpus as _corpus
+                _corpus.add_to_default(card)     # searchable now, no restart
+            except Exception:  # noqa: BLE001
+                pass
         return card
     except Exception:  # noqa: BLE001
         return None

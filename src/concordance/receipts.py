@@ -52,6 +52,18 @@ def _public_base(config: EngineConfig) -> str:
     return "https://narrowhighway.org"
 
 
+def _index_default() -> bool:
+    """Whether a freshly sealed receipt is ALSO inserted into the live corpus immediately.
+
+    Default True — the server/door path keeps the "searchable in the same breath" promise (and the
+    server has the corpus resident, so it is O(1)). A cold one-shot batch tool (tools/tick.py, the
+    Monte Carlo simulator) sets CONCORDANCE_SEAL_INDEX=0 so each seal stays bounded: the CAS object,
+    the ledger link, and the durable card copies are all still written, but the live corpus is not
+    touched — avoiding a ~6 GB/~90 s corpus build on a process that would exit immediately. The card
+    becomes searchable at the next corpus load (a deploy already reloads)."""
+    return os.environ.get("CONCORDANCE_SEAL_INDEX", "1").strip().lower() not in ("0", "false", "no", "off")
+
+
 def _auto_summary(result: Dict[str, Any], domain: str) -> str:
     claim = ""
     for e in (result.get("trail") or []):
@@ -105,15 +117,29 @@ def record_from_derivation(result: Dict[str, Any], *, domain: str = "mathematics
 
 
 def mint(result: Dict[str, Any], *, config: EngineConfig, domain: str = "mathematics",
-         summary: Optional[str] = None, sealed_at: Optional[float] = None) -> Dict[str, Any]:
-    """Mint a re-checkable seal for a derivation result.
+         summary: Optional[str] = None, sealed_at: Optional[float] = None,
+         index: bool = True) -> Dict[str, Any]:
+    """Mint a re-checkable seal, assembled as an ordered sequence of BOUNDED components — each delivers
+    its portion of the receipt and none scans the whole ledger or corpus:
 
-    Returns {ok: True, content_hash, cite_url, ledgered} on success (the CAS write succeeded
-    and the seal is re-fetchable), or {ok: False, error} on failure. Never raises — but never
-    lies: ok is True only if a real seal was stored."""
+      1. record — the canonical WitnessRecord (portion: the record);
+      2. seal   — content-address it in the CAS (portion: content_hash + cite_url);
+      3. chain  — append PASS records to the hash chain (portion: ledgered + precedent), O(1) via the
+                  ledger's head pointer and serialized so concurrent sealers cannot fork the chain.
+
+    Returns {ok: True, content_hash, cite_url, ledgered} on success (the CAS write succeeded and the
+    seal is re-fetchable), or {ok: False, error} on failure. Never raises — but never lies: ok is True
+    only if a real seal was stored. `index` carries to the CAS card step (True keeps the receipt
+    searchable immediately; False defers that to the next corpus load)."""
     try:
+        # 1. RECORD (portion: the witness record) — bounded, pure transform.
         record = record_from_derivation(result, domain=domain)
-        content_hash = cas.store(record.to_dict())  # content-addressed, idempotent
+        # 2. SEAL (portion: content_hash + cite_url) — content-addressed, O(1) write, idempotent.
+        content_hash = cas.store(record.to_dict(), index=index)
+        if not content_hash:
+            return {"ok": False, "error": "seal step produced no content_hash"}
+        # 3. CHAIN (portion: ledgered + precedent) — PASS only; the append is O(1) via the ledger's
+        #    head pointer and serialized by _LEDGER_LOCK so concurrent sealers cannot fork the chain.
         ledgered = False
         if record.overall == "PASS":
             axis = record.axis_coords.axis if record.axis_coords else domain
@@ -138,24 +164,30 @@ def mint(result: Dict[str, Any], *, config: EngineConfig, domain: str = "mathema
 
 
 def attach(result: Dict[str, Any], *, config: EngineConfig, domain: str = "mathematics",
-           enabled: bool = True) -> Dict[str, Any]:
+           enabled: bool = True, index: Optional[bool] = None) -> Dict[str, Any]:
     """Return a copy of `result` with an honest seal attached.
 
     seal = {content_hash, cite_url, ledgered} when a real seal was stored; seal = null with a
-    seal_error when minting was attempted and failed; seal omitted only when disabled."""
+    seal_error when minting was attempted and failed; seal omitted only when disabled.
+
+    `index` controls immediate corpus searchability of the receipt/verified cards: None (default)
+    reads CONCORDANCE_SEAL_INDEX (see `_index_default` — True unless a cold batch tool sets it off);
+    True/False force it. The seal itself (CAS object + ledger link) is identical regardless."""
     out = dict(result)
     if not enabled:
         return out
-    s = mint(result, config=config, domain=domain)
+    idx = _index_default() if index is None else bool(index)
+    s = mint(result, config=config, domain=domain, index=idx)
     if s.get("ok"):
         out["seal"] = {"content_hash": s["content_hash"], "cite_url": s["cite_url"],
                        "ledgered": s.get("ledgered", False)}
-        # Every verifier produces a card: the sealed result joins the one keeping, so the
-        # science and math live in the same graph as Scripture. Off to the side — a mint
-        # failure never touches the seal — and idempotent (the same fact is one card).
+        # 4. KEEP (portion: the verified card) — the sealed result joins the one keeping, so the
+        # science and math live in the same graph as Scripture. Off to the side — a mint failure
+        # never touches the seal — and idempotent (the same fact is one card). On the cold path
+        # (index=False) the card still persists; only its live-corpus insert is deferred.
         try:
             from . import science_cards
-            science_cards.mint(result, domain, out["seal"])
+            science_cards.mint(result, domain, out["seal"], index=idx)
         except Exception:  # noqa: BLE001
             pass
     else:

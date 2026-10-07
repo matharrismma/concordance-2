@@ -58,25 +58,33 @@ def _record_path(base: Path, h: str) -> Path:
 
 
 def store(record_dict: Dict[str, Any], *, base_dir: Optional[Path] = None,
-          overwrite: bool = False) -> str:
+          overwrite: bool = False, index: bool = True) -> str:
     """Store a record dict. Returns its content_hash. Idempotent, append-only.
 
     A MINTED RECEIPT ALSO BECOMES A CARD — see `_mint_receipt_card`. This is the one place a seal
     is born (badges, the ledger and receipts.py all come through here), so it is the one place the
     obligation belongs.
+
+    `index` (default True) keeps the current behavior: the receipt card is minted AND inserted into
+    the live corpus so it is searchable in the same breath. `index=False` (cold batch sealing) still
+    writes the durable CAS object and the receipt card copy, but does NOT touch the live corpus —
+    avoiding a full corpus build on a cold process. The card becomes searchable at the next corpus
+    load. The seal itself (this CAS object, and the ledger link in receipts.mint) is identical either
+    way; only immediate searchability is deferred.
     """
     base = base_dir or _cas_dir()
     h = content_hash_of(record_dict)
     path = _record_path(base, h)
     if path.exists() and not overwrite:
-        _mint_receipt_card(h, record_dict)   # idempotent; heals a seal whose card never landed
+        if index:
+            _mint_receipt_card(h, record_dict)   # idempotent; heals a seal whose card never landed
         return h
     path.parent.mkdir(parents=True, exist_ok=True)
     stored = dict(record_dict)
     stored["content_hash"] = h
     from .validate import canonical_json_bytes
     path.write_bytes(canonical_json_bytes(stored))  # same canonical form (ensure_ascii=False)
-    _mint_receipt_card(h, stored)
+    _mint_receipt_card(h, stored, index=index)
     return h
 
 
@@ -101,6 +109,13 @@ def store(record_dict: Dict[str, Any], *, base_dir: Optional[Path] = None,
 # address or it is not that record.
 _RECEIPT_SHELF = "seals"
 _RECEIPT_SPINE = "card_spine_seals"
+
+# Cold-path (index=False) bookkeeping: on a one-shot process with no resident corpus we cannot ask
+# the corpus whether a card already exists, so we dedup within the process instead. Harmless across
+# processes — content-addressing gives the same id, and the corpus folds receipt_cards.jsonl by id
+# on its next load.
+_COLD_CARDS_WRITTEN: set = set()
+_COLD_SPINE_WRITTEN: bool = False
 
 
 def _receipt_spine() -> Dict[str, Any]:
@@ -145,17 +160,24 @@ def card_to_record(card: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     return rec
 
 
-def _mint_receipt_card(content_hash: str, record: Dict[str, Any]) -> None:
+def _mint_receipt_card(content_hash: str, record: Dict[str, Any], *, index: bool = True) -> None:
     """Best-effort, and deliberately so: a seal must never fail because the keeping is busy.
 
-    Writes to `data/receipt_cards.jsonl` (loaded with the rest of the keeping) and inserts into the
-    live corpus so the receipt is findable in the same breath it is minted — not after a restart.
+    Writes to `data/receipt_cards.jsonl` (loaded with the rest of the keeping) and, when `index` is
+    True, inserts into the live corpus so the receipt is findable in the same breath it is minted —
+    not after a restart. When `index` is False (cold batch sealing) the durable jsonl card is still
+    written, but the live corpus is NOT touched (no `get_card` build, no `add_to_default`), so a cold
+    one-shot process never pays a full corpus load; the card becomes searchable at the next load.
     """
+    global _COLD_SPINE_WRITTEN
     try:
         from . import corpus
         cid = receipt_card_id(content_hash)
-        if corpus.get_card(cid) is not None:
-            return                                            # idempotent
+        if index:
+            if corpus.get_card(cid) is not None:
+                return                                        # idempotent (warm path)
+        elif cid in _COLD_CARDS_WRITTEN:
+            return                                            # idempotent within this process
         rec = dict(record)
         rec.pop("content_hash", None)
         verdict = str(rec.get("verdict") or rec.get("status") or "").strip()
@@ -178,19 +200,25 @@ def _mint_receipt_card(content_hash: str, record: Dict[str, Any]) -> None:
                              "evidence": "a sealed record, kept as a card"}],
         }
         subj = str(rec.get("card_id") or rec.get("subject_card") or "").strip()
-        if subj and subj != cid and corpus.get_card(subj) is not None:
+        if index and subj and subj != cid and corpus.get_card(subj) is not None:
             card["connections"].append({"to_card_id": subj, "relationship": "seals",
                                         "evidence": "this receipt seals that card's claim"})
         path = _cas_dir().parent / "receipt_cards.jsonl"
         path.parent.mkdir(parents=True, exist_ok=True)
         to_write = [card]
-        if corpus.get_card(_RECEIPT_SPINE) is None:
+        spine_needed = (corpus.get_card(_RECEIPT_SPINE) is None) if index else (not _COLD_SPINE_WRITTEN)
+        if spine_needed:
             to_write.insert(0, _receipt_spine())   # the anchor, minted once, before its first child
         with open(path, "a", encoding="utf-8") as fh:
             for c in to_write:
                 fh.write(json.dumps(c, ensure_ascii=False) + "\n")
-        for c in to_write:
-            corpus.add_to_default(c)
+        if index:
+            for c in to_write:
+                corpus.add_to_default(c)           # searchable now (warm path)
+        else:
+            _COLD_CARDS_WRITTEN.add(cid)           # deferred to next corpus load (cold path)
+            if spine_needed:
+                _COLD_SPINE_WRITTEN = True
     except Exception:  # noqa: BLE001 — the seal is the promise; the card is the durability
         pass
 

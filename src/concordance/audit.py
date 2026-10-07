@@ -1193,7 +1193,7 @@ def compose_uses(steps: List[Dict[str, Any]], text: str) -> List[Dict[str, Any]]
     return steps
 
 
-def audit(text: str, config, seal: bool = True) -> Dict[str, Any]:
+def audit(text: str, config, seal: bool = True, index: bool = True) -> Dict[str, Any]:
     """Extract -> compose the stated chain -> verify the lot as one derivation -> attach one seal.
 
     Composition (2026-09-25): after extraction, `compose_uses` sets a `uses` edge wherever the author
@@ -1260,7 +1260,10 @@ def audit(text: str, config, seal: bool = True) -> Dict[str, Any]:
     if seal:
         from . import receipts
         dom = steps[0]["domain"]
-        sealed = receipts.attach(dres, config=config, domain=dom, enabled=True)
+        # `index` carries the bounded-seal choice: the explicit /verify door indexes the receipt card into
+        # the live corpus (True); the high-frequency ambient /ask audit seals durably but does NOT (False),
+        # so a visible re-checkable seal on every checked turn never bloats the corpus (Jevons governor).
+        sealed = receipts.attach(dres, config=config, domain=dom, enabled=True, index=index)
         if sealed.get("seal"):
             out["seal"] = sealed["seal"]
     return out

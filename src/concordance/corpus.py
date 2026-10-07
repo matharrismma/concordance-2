@@ -1101,6 +1101,7 @@ def load_cards(path: Optional[Path] = None,
                       "access_tools_cards.jsonl",   # the connection to lawful free tools (logistics: tag onto paid carriers)
                       "church_cards.jsonl",         # the churches, calibrated from their own confessions (not judged)
                       "contributors_cards.jsonl",   # the builders of the Floor (historians/scientists/mathematicians), credited with love
+                      "chain_cards.jsonl",          # discovery-chain nodes: the floor spine + builder cards for a lineage (tools/seed_standard_model_chain.py); edges live in chain_bridges.jsonl
                       "religions_cards.jsonl",      # the pre-Christian faiths as foreshadow (Acts 17) + the test of the spirits (1 John 4)
                       "survival_cards.jsonl",       # the field library — outdoor/survival/bushcraft/homestead, PD sources (serve the off-grid + destitute)
                       "comms_cards.jsonl",          # the communications shelf — radio & field comms (FCC/ITU/NOAA PD) for the mesh + off-grid (the whisper layer beside the field library)
@@ -1228,7 +1229,7 @@ def load_cards(path: Optional[Path] = None,
                         _keep(c)
         for overlay in ("reference_bridges.jsonl", "keystone_bridges.jsonl",
                         "nesting_bridges.jsonl", "works_bridges.jsonl", "element_bridges.jsonl",
-                        "ncs_bridges.jsonl"):
+                        "ncs_bridges.jsonl", "chain_bridges.jsonl"):
             _apply_bridges(out, p.parent / overlay)
     return out
 
@@ -1268,6 +1269,10 @@ _INVERSE_REL = {
     "member_of": "has_member", "part_of": "has_part", "nested_in": "contains",
     "figure_of": "has_figure", "pre_registered_validation_of": "validated_by",
     "leads_to": "reached_from", "points_beyond_itself": "pointed_to_by",
+    # a discovery chain: a later work BUILDS_ON an earlier one; the floor ENABLES what follows, so a
+    # chain can be walked forward from its floor. A new relationship — existing `precedes` edges keep
+    # their current symmetric behavior.
+    "builds_on": "enables",
 }
 
 

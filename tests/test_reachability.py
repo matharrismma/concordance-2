@@ -57,6 +57,8 @@ AGENT_ONLY = {
     "/specs",
     # THE TICK STICK (2026-10-05): read by agents and the operator's tool; a page comes with the first stick
     "/sticks", "/stick", "/tick",
+    # CHAINS / FLOORS / CONNECTIONS (2026-10-07): an agent/API read — walk a lineage, find where two chains meet
+    "/chains",
     # The six MCP profile mounts (task #123): an agent's client mounts one plane by URL;
     # a human page linking them would be a door drawn for someone who cannot walk through it.
     # The full /mcp is documented on the connect page; the profiles are documented beside it.
@@ -143,6 +145,10 @@ AGENT_ONLY = {
     # discern/coach_next tools); /trajectory is the outcome ledger (success guides, failure narrows — posted
     # by the coach flow, read back by it). Both agent/API surface, not a human page.
     "/lead", "/trajectory",
+    # THE CONDUCTOR'S SHOP CALC DOOR, agent/API side (2026-10-06): /conductor/manufacture routes an
+    # engineering claim + its MFG numbers through the manufacturing verifier -> seal -> ledger (the HTTP
+    # twin of the `manufacture` MCP tool). Reached by a shop agent, never a public <a href>.
+    "/conductor/manufacture",
     # PROFESSIONS OF FAITH, agent/API side (2026-10-06): /profess seals a profession, /profession/witness
     # bears witness (two-or-three, Deut 19:15), /profession reads one + its witnesses + the lineage to
     # Polycarp. Reached by agents (and the MCP tools profess/witness_profession/profession) and the mesh

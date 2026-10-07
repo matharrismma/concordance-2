@@ -84,6 +84,56 @@ SEEDS = [
 LEVELS = [s["id"] for s in SEEDS]
 
 
+# The framework as a whole, charted as a REFERENCE discernment card: its thesis, its citations, its
+# explicit FALSIFIERS (the packet's own wrong-ladder detectors, as prose — never sealable claims), and
+# the medical guardrail in the body so it travels on every surface. It is NOT a level of the causal
+# stack (kept out of LEVELS, so the "modulates" chain never treats it as a sixth layer); it nests under
+# the keystone like the spine cards. Card-schema "reference" tier (stays aligned) — NOT the alignment
+# atlas's religion/occult "reference" (no extra.alignment, no discerns_terms); and no MED_VERIFY: the
+# falsifiers stay prose, never a seal that could be mis-read as a clinical endorsement.
+FRAMEWORK = {
+    "id": "card_ncs_framework_discernment",
+    "kind": "reference",
+    "title": "Nested Control Systems — the framework, with its falsifiers",
+    "body": (
+        "The Nested Control-Systems framework reads chronic dysregulation as failure in a NESTED stack "
+        "of control layers rather than as separate competing diseases: a computational frame "
+        "(predictive processing) over control loops (LC-NE adaptive gain; neurovisceral integration / "
+        "the prefrontal-vagal brake) over effectors (the autonomic branches), with interoception as the "
+        "feedback dashboard; broadened across the body as cellular-stress, metabolic, immune, tissue and "
+        "systemic layers. Its one claim: these layers NEST, they do not compete — the same presentation "
+        "can arise from a different entry layer, which is why rival single-cause theories each explained "
+        "only a part. Gathered and attributed, never authored: Friston (2005); Aston-Jones & Cohen "
+        "(2005); Thayer & Lane (2000, 2009); Barrett & Simmons (2015); Stephan et al. (2023).\n\n"
+        "It is a FALSIFIABLE hypothesis, not a settled result. It is falsified if: HRV/RSA reactivity "
+        "does not differ with dysregulation despite clear behavioural signs (the neurovisceral axis is "
+        "not primary); the pupillary LC-NE phasic response is normal through transitions (adaptive gain "
+        "is not the arousal mechanism); precision-weighting interventions change behaviour with no "
+        "autonomic or marker change (predictive processing is not central); interoceptive "
+        "prediction-error markers do not track symptoms once anxiety is controlled for (allostatic "
+        "interoception is weak); or a primary gut->brain cause normalises core traits with no autonomic "
+        "intermediate (the control-system framing is the wrong ladder). The pre-registered test is the "
+        "keystone's NHANES program; within-person baseline->perturbation->recovery trajectories, not "
+        "group averages, are where it stands or falls.\n\n"
+        "This describes MECHANISM only. It is not medical advice, not a diagnosis, and not a protocol or "
+        "a dose. Do not start, stop, or delay any care based on it. If you may be in danger or in "
+        "crisis, contact a clinician or emergency help now."
+    ),
+    "source": {"label": ("Nested Control-Systems framework — Friston 2005; Aston-Jones & Cohen 2005; "
+                          "Thayer & Lane 2000/2009; Barrett & Simmons 2015; Stephan et al. 2023"),
+               "url": "", "domain": "biology", "authority_tier": "reference"},
+    "shelf": "regulation", "box": "nested control systems",
+    "bands": ["nested control systems", "regulation", "control theory", "falsifiers", "discernment",
+              "not medical advice"],
+    "connections": [], "author": "engine", "created_at": 0.0, "updated_at": 0.0,
+    "visibility": "public", "lifecycle_stage": "public", "volatility": "permanent",
+    "surface": "secular", "generated": False,
+    "subject": "Nested Control Systems — the framework, with its falsifiers",
+}
+
+ALL = SEEDS + [FRAMEWORK]
+
+
 def main() -> int:
     edges = []
     seen = set()
@@ -95,12 +145,14 @@ def main() -> int:
         seen.add(key)
         edges.append({"a": a, "b": b, "relationship": rel, "evidence": ev, "a_title": a_title})
 
-    by_id = {s["id"]: s for s in SEEDS}
+    by_id = {s["id"]: s for s in ALL}
     # (1) nest every spine theory under the framework keystone — "they nest, they do not compete"
     for s in SEEDS:
-        lvl = s["bands"][-1] if False else s["title"]
         add(s["id"], KEYSTONE, "member_of",
             "a spine theory (a level of the one nested control-systems stack)", s["title"])
+    # (1b) the framework-overview card nests under the keystone too — the thesis + its falsifiers
+    add(FRAMEWORK["id"], KEYSTONE, "member_of",
+        "the framework as a whole: its thesis, its citations, and its explicit falsifiers", FRAMEWORK["title"])
     # (2) the causal stack, top-down: each level modulates the one below (computational → actuator)
     for i in range(len(LEVELS) - 1):
         add(LEVELS[i], LEVELS[i + 1], "modulates",
@@ -113,13 +165,23 @@ def main() -> int:
     add(DEMO, KEYSTONE, "demonstrates",
         "the nested-control validity rules, worked and sealed in The Works", "The nested control-systems rule")
 
+    seeds_text = "\n".join(json.dumps(s, ensure_ascii=False) for s in ALL) + "\n"
+    bridges_text = "\n".join(json.dumps(e, ensure_ascii=False) for e in edges) + "\n"
+
+    # The controlled path: --check previews what WOULD be written and writes nothing. A generator that
+    # picks its own output path (or writes blind) is a destructive act; --check is how this one is read
+    # before it writes. Run it watched from the repo root, then git diff the two data files.
+    if "--check" in sys.argv:
+        print("--check: no write. Would write data/ncs_seeds.jsonl (%d cards) + data/ncs_bridges.jsonl "
+              "(%d edges)." % (len(ALL), len(edges)))
+        print("\n--- new framework card (%s) ---\n%s" % (FRAMEWORK["id"], FRAMEWORK["body"]))
+        return 0
+
     d = Path("data")
     d.mkdir(parents=True, exist_ok=True)
-    (d / "ncs_seeds.jsonl").write_text(
-        "\n".join(json.dumps(s, ensure_ascii=False) for s in SEEDS) + "\n", encoding="utf-8")
-    (d / "ncs_bridges.jsonl").write_text(
-        "\n".join(json.dumps(e, ensure_ascii=False) for e in edges) + "\n", encoding="utf-8")
-    print(f"seeded {len(SEEDS)} spine theories + {len(edges)} nesting edges "
+    (d / "ncs_seeds.jsonl").write_text(seeds_text, encoding="utf-8")
+    (d / "ncs_bridges.jsonl").write_text(bridges_text, encoding="utf-8")
+    print(f"seeded {len(SEEDS)} spine theories + the framework card + {len(edges)} nesting edges "
           f"(under {KEYSTONE}, chained, bound to {DEMO})")
     return 0
 

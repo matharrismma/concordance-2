@@ -754,6 +754,21 @@ def _secular_tools() -> List[dict]:
          "inputSchema": {"type": "object", "properties": {
              "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}},
              "required": ["hash"]}},
+        {"name": "manufacture",
+         "description": ("The Conductor's shop-domain calc door: route an engineering claim + its "
+                         "numbers through the engine's manufacturing verifier -> seal -> hash-chained "
+                         "ledger, and report the disposition (CALCULATED/CONTROLLED/PROVISIONAL/OPEN). "
+                         "The engine verifies the calc; the engineer decides the label; nothing is "
+                         "invented. calc is an MFG_VERIFY spec: an RSS tolerance stack "
+                         "{tolerances,claimed_rss}, a sigma level {dpmo,claimed_sigma}, SPC limits "
+                         "{mean,sigma,claimed_ucl,claimed_lcl}, or Cp/Cpk {usl,lsl,process_mean,"
+                         "process_sigma,claimed_cp_capable}."),
+         "inputSchema": {"type": "object", "properties": {
+             "claim": {"type": "string"},
+             "calc": {"type": "object"},
+             "disposition": {"type": "string",
+                             "enum": ["CALCULATED", "CONTROLLED", "PROVISIONAL", "OPEN"]}},
+             "required": ["claim", "calc"]}},
     ]
 
 
@@ -926,7 +941,8 @@ PROFILES: Dict[str, Dict[str, Any]] = {
                   "now": "read", "capabilities": "read",
                   "kernel": "read", "kernel_gate": "derive",
                   "candidate_commit": "preserve", "candidate_narrow": "preserve",   # narrow() is pure, but the handler mints a best-effort receipt (candidates.receipt) — a write, labelled honestly (handoff review 2026-10-02)
-                  "candidate_get": "read"},
+                  "candidate_get": "read",
+                  "manufacture": "preserve"},   # the Conductor's calc door: verify -> seal -> ledger (a write)
     },
     "library": {
         "version": "1.0.0",
@@ -1528,6 +1544,14 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
             return {"error": "no seal of a candidate kind under that hash — seal_fetch serves "
                              "generic seals"}
         return rec
+    if name == "manufacture":
+        from .. import manufacture as _mfg
+        claim = str(args.get("claim") or "")
+        calc = args.get("calc")
+        if not isinstance(calc, dict) or not calc:
+            return {"error": "calc required — a non-empty MFG_VERIFY spec object"}
+        disp = str(args["disposition"]) if args.get("disposition") else None
+        return _mfg.manufacture(claim, calc, disposition=disp, config=config)
     if name == "now":
         from .. import ops as _ops   # both surfaces, never gated: the time of day belongs to all
         return _ops.now(str(args.get("tz") or "").strip() or None)

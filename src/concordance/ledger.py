@@ -96,6 +96,47 @@ def _ledger_chain_files(ledger_dir: Optional[Path] = None) -> List[Path]:
     return sorted(d.glob("*.json"), key=_sort_key)
 
 
+_HEAD_NAME = ".chain.head"  # O(1) tip pointer; NOT matched by *.json globs, so every reader ignores it
+
+
+def _chain_tip(ledger_dir: Path, *, exclude: Optional[Path] = None) -> tuple:
+    """The chain's current tip as (prev_hash, sealed_at).
+
+    O(1) via the `.chain.head` pointer; a full directory scan only if the pointer is missing, corrupt,
+    or names a file that is gone. Correctness never depends on the pointer — a lost head costs one scan,
+    and the next successful append re-establishes it. `exclude` is the file being written now (it is
+    never its own predecessor)."""
+    d = ledger_dir
+    head_path = d / _HEAD_NAME
+    head = _read_precedent_file(head_path) if head_path.exists() else None
+    if isinstance(head, dict):
+        tip_name, tip_hash = head.get("tip_file"), head.get("content_hash")
+        if (tip_name and tip_hash and (exclude is None or tip_name != exclude.name)
+                and (d / tip_name).exists()):
+            ts = head.get("sealed_at")
+            return (tip_hash, ts if isinstance(ts, (int, float)) else 0.0)
+    # fallback: derive the tip from the directory (the pre-pointer behavior)
+    existing = [f for f in _ledger_chain_files(d) if exclude is None or f != exclude]
+    if not existing:
+        return (GENESIS_HASH, 0.0)
+    last = _read_precedent_file(existing[-1]) or {}
+    prev_hash = last.get("content_hash") or (compute_content_hash(last) if last else GENESIS_HASH)
+    ts = last.get("sealed_at")
+    return (prev_hash, ts if isinstance(ts, (int, float)) else 0.0)
+
+
+def _write_head(ledger_dir: Path, tip_file: str, content_hash: str, sealed_at: float) -> None:
+    """Point `.chain.head` at the new tip, atomically. Best-effort: a failed write just means the next
+    append falls back to a scan. MUST be called inside the chain lock so the pointer cannot fork."""
+    try:
+        payload = {"tip_file": tip_file, "content_hash": content_hash, "sealed_at": sealed_at}
+        tmp = ledger_dir / (_HEAD_NAME + ".tmp")
+        tmp.write_text(json.dumps(payload), encoding="utf-8")
+        tmp.replace(ledger_dir / _HEAD_NAME)   # atomic replace on POSIX and Windows
+    except OSError:
+        pass
+
+
 def verify_chain(ledger_dir: Optional[Path] = None, *,
                  cas_base: Optional[Path] = None) -> Dict[str, Any]:
     """Walk the ledger in chain order and verify integrity: recompute each
@@ -281,20 +322,9 @@ def seal_to_ledger(record: WitnessRecord, *, summary: str,
         if target.exists() and not overwrite:
             raise FileExistsError(f"precedent file already exists at {target}")
 
-        existing = [f for f in _ledger_chain_files(d) if f != target]
-        tail_sealed = 0.0
-        if not existing:
-            prev_hash = GENESIS_HASH
-        else:
-            last_data = _read_precedent_file(existing[-1])
-            if isinstance((last_data or {}).get("sealed_at"), (int, float)):
-                tail_sealed = last_data["sealed_at"]
-            if last_data and "content_hash" in last_data:
-                prev_hash = last_data["content_hash"]
-            elif last_data:
-                prev_hash = compute_content_hash(last_data)
-            else:
-                prev_hash = GENESIS_HASH
+        # The tail — O(1) via the head pointer, never a scan of the whole ledger (a missing/corrupt
+        # pointer self-heals with a single fallback scan; see _chain_tip).
+        prev_hash, tail_sealed = _chain_tip(d, exclude=target)
 
         # Stamp an auto seal monotonically past the tail: chain order is BY sealed_at, so a new
         # record that precedes the tail would make chain-order and prev-linkage disagree and read
@@ -311,6 +341,11 @@ def seal_to_ledger(record: WitnessRecord, *, summary: str,
         with open(target, "w", encoding="utf-8") as f:
             json.dump(precedent_payload, f, indent=2)
             f.write("\n")
+        # Advance the O(1) tip pointer — inside the lock, so it cannot fork. Only when this write is at
+        # least as late as the prior tip; an explicit earlier timestamp leaves the pointer and the next
+        # append self-heals by scan.
+        if precedent_payload["sealed_at"] >= tail_sealed:
+            _write_head(d, target.name, precedent_payload["content_hash"], precedent_payload["sealed_at"])
     return target
 
 
