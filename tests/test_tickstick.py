@@ -113,3 +113,39 @@ def test_the_routes_open_read_and_mark_a_stick():
     assert st == 200 and body["count"] >= 2 and any(r["id"] == "stick_riemann_hypothesis" for r in body["sticks"])
     st, body = api.dispatch("POST", "/tick", {}, {"stick": "stick_p_versus_np", "kind": "bound", "claim": "x", "seal": "zz"}, cfg)[:2]
     assert st == 400
+
+
+def test_a_mark_keeps_its_full_text_and_a_cut_copy_is_superseded_by_its_fuller_self():
+    """2026-10-08: the claim cap was 600, and 45 kept marks - the guard notes, mostly - were stored cut mid-sentence;
+    a re-run could never match its own cut copy, so it added the note again. The cap is CLAIM_CAP (2000) now; a mark
+    kept cut at the old cap is superseded in the reading by a later tick of the same kind and seal whose text begins
+    with the whole cut text; an exact duplicate collapses onto its first copy. The file keeps every event (append-
+    only); the reading shows each mark once, in full, and says how many it superseded."""
+    r = tickstick.create("A long note is kept whole", statement="cap pin", field="test")
+    sid = r["id"]
+    full = ("[the guard] " + ("every word of this note is kept, up to the cap; " * 30)).strip()   # tick() strips
+    assert 600 < len(full) < tickstick.CLAIM_CAP
+    # the old store: the note cut at 600, twice (a re-run's duplicate), written as the old cap wrote it
+    tickstick._append({"event": "tick", "stick": sid, "kind": "note", "claim": full[:600], "at": 1, "by": "old"})
+    tickstick._append({"event": "tick", "stick": sid, "kind": "note", "claim": full[:600], "at": 2, "by": "old"})
+    st = tickstick.read(sid)
+    assert len(st["ticks"]) == 1 and st["superseded"] == 1 and len(st["ticks"][0]["claim"]) == 600
+    assert tickstick.tick(sid, "note", full, by="new")["ok"]
+    st = tickstick.read(sid)
+    assert len(st["ticks"]) == 1 and st["ticks"][0]["claim"] == full and st["superseded"] == 2
+    assert len(st["fit"]["record"]) == 1
+    # a sealed witness the same way: the cut copy yields to the full one carrying the same seal
+    h = _sealed_holds()
+    w = ("[witness] " + ("sealed and kept whole; " * 40)).strip()
+    tickstick._append({"event": "tick", "stick": sid, "kind": "witness", "claim": w[:600], "seal": h, "at": 3, "by": "old"})
+    assert tickstick.tick(sid, "witness", w, seal=h, by="new")["ok"]
+    st = tickstick.read(sid)
+    ws = [x for x in st["ticks"] if x["kind"] == "witness"]
+    assert len(ws) == 1 and ws[0]["claim"] == w and st["fit"]["witnesses"] == 1 and st["superseded"] == 3
+    # a different mark that merely shares a prefix is NOT collapsed: only a strict extension of the whole cut text is
+    assert tickstick.tick(sid, "note", "[the guard] but a different note", by="new")["ok"]
+    assert len([x for x in tickstick.read(sid)["ticks"] if x["kind"] == "note"]) == 2
+    # the cap itself: past CLAIM_CAP a claim is cut, and its length says so
+    assert tickstick.tick(sid, "note", "x" * (tickstick.CLAIM_CAP + 100), by="new")["ok"]
+    assert max(len(x["claim"]) for x in tickstick.read(sid)["ticks"]) == tickstick.CLAIM_CAP
+

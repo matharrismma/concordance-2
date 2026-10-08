@@ -34,6 +34,13 @@ A sealed tick is refused unless `seal` is the content hash of a HOLDS verificati
 verify first through POST /verify (or `tools/tick.py`), then tick. A cited tick is refused without a source.
 Sticks live in `data/sticks.jsonl` and ride with the node sync (Gen 3 · 1), so every node holds the same marks.
 
+A claim is kept whole up to 2,000 characters (`tickstick.CLAIM_CAP`; it was 600 until 2026-10-08, and 45 kept marks -
+the guard notes, mostly - were stored cut mid-sentence). The file is append-only, so a mark kept cut at the old cap
+stays in it; the reading supersedes it by a later tick of the same kind and seal whose text begins with the whole cut
+text, collapses an exact duplicate onto its first copy, and reports how many it superseded (`superseded`). Every
+stick in `tools/tick.py` mints through `_mint_marks`, which skips a mark already kept in full and ticks a cut one
+again in full - so re-running a stick is the repair.
+
 ## The first stick: the Riemann hypothesis
 
 `number_theory.critical_line` counts the zeros of ζ two independent ways and requires them to agree: the zeros

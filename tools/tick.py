@@ -310,13 +310,7 @@ def lnh() -> int:
                  "observational bounds above weigh against the causal claim. Seal the arithmetic, cite the "
                  "conjecture, endorse nothing.", {}),
     ]
-    for kind, claim, kw in marks:
-        res = TS.tick(sid, kind, claim, by="Narrow Highway — the large-numbers reading, 2026-10-05", **kw)
-        print(("  " + kind) if res.get("ok") else ("  REFUSED " + kind + ": " + res.get("error", "")))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "excluded": len(f["excluded_approaches"]),
-                      "record": len(f["record"]), "open": f["open"]}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway — the large-numbers reading, 2026-10-05")
 
 
 def symphony() -> int:
@@ -361,9 +355,6 @@ def symphony() -> int:
 
     s_synt = _seal("syntonic_comma", "81/80", synt)
     s_et5 = _seal("equal_tempered_fifth", "2**(7/12)", et5)
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"The harmonic basis is exact ratio: the octave 2:1, the perfect fifth 3:2. Twelve pure fifths "
                     f"overshoot seven octaves by the Pythagorean comma (3/2)^12 / 2^7 = {comma:.13f} — so the scale "
@@ -394,19 +385,7 @@ def symphony() -> int:
                  "wise compromise — many voices into one body, the four-into-one the forces and Langlands also seek, "
                  "heard rather than proven. Narrowing is evidence, never a perfect proof.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway — the symphony, the coherence witness, 2026-10-07", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway — the symphony, the coherence witness, 2026-10-07")
 
 
 def fiber() -> int:
@@ -435,8 +414,6 @@ def fiber() -> int:
                                "and combining many references so the distortion of any one cancels. The engine's "
                                "calibration method, named in hardware."),
                     field="engineering")["id"]
-    if any(t.get("seal") == seal for t in TS.read(sid).get("ticks", [])):
-        print("  already sealed on the stick — not duplicated"); return 0
     marks = [
         ("witness", f"The decibel is a relative scale: a factor of two in optical power is exactly "
                     f"{db_half:.10f} dB (10^({db_half:.6f}/10) = 2). Optical loss L(dB) = 10*log10(P_in/P_out) is "
@@ -455,12 +432,7 @@ def fiber() -> int:
                  "equations. The verifiers remain the only authority on truth. Seal the arithmetic; calibrate to "
                  "find; launder nothing.", {}),
     ]
-    for kind, claim, kw in marks:
-        res = TS.tick(sid, kind, claim, by="Narrow Highway — fiber optic calibration, 2026-10-06", **kw)
-        print(("  " + kind) if res.get("ok") else ("  REFUSED " + kind + ": " + res.get("error", "")))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway — fiber optic calibration, 2026-10-06")
 
 
 def aharonov_bohm() -> int:
@@ -495,8 +467,6 @@ def aharonov_bohm() -> int:
                     field="physics",
                     references=["Y. Aharonov and D. Bohm, Phys. Rev. 115 (1959) 485",
                                 "A. Tonomura et al., Phys. Rev. Lett. 56 (1986) 792 (definitive, flux shielded)"])["id"]
-    if any(t.get("seal") == seal for t in TS.read(sid).get("ticks", [])):
-        print("  already sealed on the stick — not duplicated"); return 0
     marks = [
         ("witness", f"The magnetic flux quantum Phi0 = h/(2e) = {phi0:.9e} Wb, computed from the engine's attested "
                     f"constants (the single-charge quantum h/e = 2*Phi0 = {h/e:.9e} Wb). The Aharonov-Bohm phase is "
@@ -513,12 +483,7 @@ def aharonov_bohm() -> int:
                  "instrument for FINDING likely paths — the tick lines of probability — and never renders a verdict. "
                  "The games' verifiers remain the only authority on truth. Borrow the form; launder nothing.", {}),
     ]
-    for kind, claim, kw in marks:
-        res = TS.tick(sid, kind, claim, by="Narrow Highway — the Aharonov-Bohm reading, 2026-10-06", **kw)
-        print(("  " + kind) if res.get("ok") else ("  REFUSED " + kind + ": " + res.get("error", "")))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway — the Aharonov-Bohm reading, 2026-10-06")
 
 
 def relational() -> int:
@@ -552,8 +517,6 @@ def relational() -> int:
                                 "C. Rovelli, Helgoland (2020)",
                                 "B. S. Cirel'son (Tsirelson), Lett. Math. Phys. 4 (1980) 93",
                                 "J. S. Bell, Physics 1 (1964) 195; A. Aspect et al., Phys. Rev. Lett. 49 (1982) 1804"])["id"]
-    if any(t.get("seal") == seal for t in TS.read(sid).get("ticks", [])):
-        print("  already sealed on the stick — not duplicated"); return 0
     marks = [
         ("witness", f"The Tsirelson bound S_max = 2*sqrt(2) = {tsirelson:.10f}, the quantum maximum of the CHSH "
                     f"correlation, above the classical/local-realist bound S <= 2 — an arithmetic fact. Bell's "
@@ -571,12 +534,7 @@ def relational() -> int:
                  "and in Christ all things hold together (Colossians 1:17) — the web is real and coheres in the "
                  "Logos (John 1:3). Borrow the form; launder nothing.", {}),
     ]
-    for kind, claim, kw in marks:
-        res = TS.tick(sid, kind, claim, by="Narrow Highway — the relational reading, 2026-10-06", **kw)
-        print(("  " + kind) if res.get("ok") else ("  REFUSED " + kind + ": " + res.get("error", "")))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway — the relational reading, 2026-10-06")
 
 
 def alpha() -> int:
@@ -629,13 +587,7 @@ def alpha() -> int:
                  "principles derivation of its value is known, here or anywhere. Seal the value, cite the claims, "
                  "endorse nothing.", {}),
     ]
-    for kind, claim, kw in marks:
-        res = TS.tick(sid, kind, claim, by="Narrow Highway — the fine-structure reading, 2026-10-05", **kw)
-        print(("  " + kind) if res.get("ok") else ("  REFUSED " + kind + ": " + res.get("error", "")))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "witnesses": f["witnesses"], "excluded": len(f["excluded_approaches"]),
-                      "record": len(f["record"]), "open": f["open"]}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway — the fine-structure reading, 2026-10-05")
 
 
 def alpha_orbitals() -> int:
@@ -686,9 +638,6 @@ def alpha_orbitals() -> int:
                     field="physics",
                     references=["CODATA 2018 recommended values",
                                 "A. Sommerfeld, Ann. Phys. 356 (1916) 1 (the fine structure of the hydrogen spectrum)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[orbital - speed] The ground-state (n=1) electron's orbital speed is v1 = alpha*c = "
                     f"e^2/(2*eps0*h) = {v1:.6e} m/s ~ c/137: alpha IS v/c for the innermost orbital.", s_v),
@@ -709,19 +658,7 @@ def alpha_orbitals() -> int:
                  "the meaning, the fine structure of the orbitals. Seal the arithmetic; WHY alpha has this value "
                  "stays the open question.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the atomic-orbital reading, 2026-10-06", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the atomic-orbital reading, 2026-10-06")
 
 
 def alpha_running() -> int:
@@ -752,9 +689,6 @@ def alpha_running() -> int:
                     field="physics",
                     references=["Particle Data Group, Review of Particle Physics (alpha^-1(M_Z^2) = 127.951(9))",
                                 "CODATA 2018 recommended values"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[running - across energy] alpha is the zero-momentum (Thomson) limit and GROWS with energy: "
                     f"the one-loop QED running is d(1/alpha)/d(ln mu) = -(2/3pi)*sum q_f^2 per charged fermion, "
@@ -770,19 +704,7 @@ def alpha_running() -> int:
                  "a proof: unification is unconfirmed and depends on physics beyond the Standard Model. Seal the "
                  "arithmetic; the convergence is attributed and stays open.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the running reading, 2026-10-06", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the running reading, 2026-10-06")
 
 
 def forces() -> int:
@@ -831,9 +753,6 @@ def forces() -> int:
                     references=["Particle Data Group, Review of Particle Physics (M_W, M_Z, alpha_s(M_Z), sin^2 theta_W)",
                                 "X. Fan, T. G. Myers, B. A. D. Sukra, G. Gabrielse, Phys. Rev. Lett. 130 (2023) 071801 (a_e)",
                                 "S. Weinberg, Phys. Rev. Lett. 19 (1967) 1264 (electroweak unification)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[QED - the crown jewel] Quantum electrodynamics is the quantum field theory of alpha: the U(1) "
                     f"gauge theory of electron and photon, with alpha its one coupling. Its defining prediction is the "
@@ -876,19 +795,7 @@ def forces() -> int:
                  "unity the narrowing points toward; the engine marks the narrowing and refuses to fabricate the "
                  "proof.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the four-forces reading (QED/QFT), 2026-10-06", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the four-forces reading (QED/QFT), 2026-10-06")
 
 
 def markov() -> int:
@@ -928,9 +835,6 @@ def markov() -> int:
                     references=["Clay Mathematics Institute, Millennium Prize Problems (2000)",
                                 "S. Durr et al., Ab initio determination of light hadron masses, Science 322 (2008) 1224",
                                 "N. Metropolis et al., J. Chem. Phys. 21 (1953) 1087 (the Markov-chain sampling rule)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[the mechanism] A Markov chain with transition matrix P converges to a stationary distribution "
                     f"pi with pi*P = pi; if it obeys detailed balance pi_i P_ij = pi_j P_ji it is reversible and pi is "
@@ -954,19 +858,7 @@ def markov() -> int:
                  "quantum-field-theory picture the four-forces reading opened. Seal the mechanism; the mass gap stays "
                  "the open problem.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the Markov-chain reading (lattice QCD), 2026-10-06", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the Markov-chain reading (lattice QCD), 2026-10-06")
 
 
 def lqg() -> int:
@@ -1015,9 +907,6 @@ def lqg() -> int:
                                 "Nucl. Phys. B 442 (1995) 593",
                                 "A. Ashtekar, J. Baez, A. Corichi, K. Krasnov, Quantum geometry and black hole "
                                 "entropy, Phys. Rev. Lett. 80 (1998) 904 (the Immirzi determination)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[the scale - where gravity meets the quantum] The Planck area is lP^2 = hbar*G/c^3 = "
                     f"{lP2:.4e} m^2 (Planck length lP = {lP:.4e} m), sealed from the attested G, hbar, c. This is "
@@ -1047,20 +936,7 @@ def lqg() -> int:
                  "mathematical STRUCTURE but not yet EVIDENCE - narrowing is evidence, never proof, and a theory "
                  "with no test has made no mark on reality yet.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the loop-quantum-gravity reading, 2026-10-06", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"]),
-                      "open": f["open"]}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the loop-quantum-gravity reading, 2026-10-06")
 
 
 def schrodinger() -> int:
@@ -1116,9 +992,6 @@ def schrodinger() -> int:
                     references=["E. Schrodinger, Ann. Phys. 384 (1926) 361 (the wave equation)",
                                 "CODATA 2018 recommended values",
                                 "N. Bohr (1913) / the hydrogen spectrum; J. Balmer (1885)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[hydrogen - the gross structure] Solving the time-independent Schrodinger equation for "
                     f"the Coulomb potential gives the exact bound-state energies E_n = -(1/2) alpha^2 m_e c^2 / "
@@ -1154,20 +1027,7 @@ def schrodinger() -> int:
                  "a sealed anchor here — see stick_relational_quantum_mechanics) are live readings, none proven. "
                  "Seal the arithmetic; the meaning stays the open question.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the Schrodinger-equation reading, 2026-10-06", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"]),
-                      "open": f["open"]}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the Schrodinger-equation reading, 2026-10-06")
 
 
 def regev() -> int:
@@ -1212,9 +1072,6 @@ def regev() -> int:
                     field="computer_science",
                     references=["P. W. Shor, SIAM J. Comput. 26 (1997) 1484 (polynomial-time factoring)",
                                 "O. Regev, An Efficient Quantum Factoring Algorithm, arXiv:2308.06572 (2023)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[Shor's classical core - N=15] With a=2, the order of 2 mod 15 is r=4 (2^4 = 16 = 1 mod "
                     f"15). Then N divides 2^4 - 1 = (2^2 - 1)(2^2 + 1) = 3 * 5 = {n15} (sealed) — exactly the "
@@ -1240,20 +1097,7 @@ def regev() -> int:
                  "sharpened the sword and forged the shield. The engine's cryptography verifier checks the number "
                  "theory; it does not run a quantum circuit. Seal the arithmetic; attribute the algorithms.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the quantum-factoring reading (Shor/Regev), 2026-10-06", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"]),
-                      "open": f["open"]}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the quantum-factoring reading (Shor/Regev), 2026-10-06")
 
 
 def grassmannian() -> int:
@@ -1304,9 +1148,6 @@ def grassmannian() -> int:
                     field="mathematics",
                     references=["A. Postnikov, Total positivity, Grassmannians, and networks, arXiv:math/0609764 (2006)",
                                 "N. Arkani-Hamed & J. Trnka, The Amplituhedron, JHEP 10 (2014) 030"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[the object] The positive Grassmannian Gr>=0(k,n) (Postnikov 2006) is the k x n matrices "
                     f"mod GL(k) whose maximal minors (Plucker coordinates) are all >= 0. Concretely, the totally "
@@ -1353,20 +1194,7 @@ def grassmannian() -> int:
                  "the engine checks truth, it does not compute physics amplitudes; the likeness is the "
                  "discernment, never a fit (the Hole).", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the positive-Grassmannian reading, 2026-10-06", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"]),
-                      "open": f["open"]}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the positive-Grassmannian reading, 2026-10-06")
 
 
 def godel() -> int:
@@ -1407,9 +1235,6 @@ def godel() -> int:
                     references=["K. Godel, Uber formal unentscheidbare Satze..., Monatsh. Math. Phys. 38 (1931) 173",
                                 "L. Kirby & J. Paris, Accessible independence results for Peano arithmetic, "
                                 "Bull. LMS 14 (1982) 285 (Goodstein's theorem is true but PA-unprovable)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[the numbering - sealed] Godel made arithmetic speak about itself by encoding a symbol "
                     f"sequence as a product of prime powers: (1,2,3) -> 2^1 * 3^2 * 5^3 = {g1} (sealed). By the "
@@ -1441,20 +1266,7 @@ def godel() -> int:
                  "things hold together (Colossians 1:17) — the datum, not a theorem of the system. Discernment, "
                  "attributed; the engine seals only the arithmetic.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the Godel reading, 2026-10-06", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"]),
-                      "open": f["open"]}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the Godel reading, 2026-10-06")
 
 
 def strings() -> int:
@@ -1482,9 +1294,6 @@ def strings() -> int:
     print("sealed: bosonic D=26", s_bos, "| superstring D=10", s_sup)
 
     sid = TS.create("Quantum gravity")["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", "[string theory - the bosonic critical dimension] In string theory the graviton is a "
                     "vibration of a closed string. The string's zero-point energy regularises (via the "
@@ -1502,19 +1311,7 @@ def strings() -> int:
                  "remains the Hole the gauge unification does not hold. Seal the arithmetic; the physical claim "
                  "stays open.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the string-theory reading, 2026-10-06", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the string-theory reading, 2026-10-06")
 
 
 def gut() -> int:
@@ -1547,9 +1344,6 @@ def gut() -> int:
     print("sealed: a3^-1", s3, "| a2^-1", s2, "| a1^-1", s1)
 
     sid = TS.create("The fine-structure constant")["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[the three couplings at M_Z] On the GUT-normalised footing the Standard Model's three "
                     f"gauge couplings are, at the Z mass: alpha_3^-1 = 1/alpha_s = 1/0.1179 = {a3inv:.2f} "
@@ -1563,19 +1357,7 @@ def gut() -> int:
                  "but no proton decay and no superpartner has been seen, so it is unconfirmed: the fit that "
                  "must never pass the last mark. Seal the couplings; attribute the convergence; it stays open.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the grand-unification reading, 2026-10-06", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the grand-unification reading, 2026-10-06")
 
 
 def measurement() -> int:
@@ -1601,9 +1383,6 @@ def measurement() -> int:
     print("sealed: Born rule", s_born)
 
     sid = TS.create("The Schrodinger equation")["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", "[the Born rule - what all must reproduce] For a qubit a|0> + b|1> with (a,b) = (0.6, 0.8), "
                     "the measured-outcome probabilities are |a|^2 = 0.36 and |b|^2 = 0.64, and they sum to one: "
@@ -1620,19 +1399,7 @@ def measurement() -> int:
                  "outline of what is missing, none crowned. Seal the Born rule; attribute the readings; the "
                  "meaning stays the open question.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the measurement-problem reading, 2026-10-06", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the measurement-problem reading, 2026-10-06")
 
 
 def langlands() -> int:
@@ -1675,9 +1442,6 @@ def langlands() -> int:
                                 "A. Wiles, Modular elliptic curves and Fermat's Last Theorem, Ann. Math. 141 (1995) 443",
                                 "C. Breuil, B. Conrad, F. Diamond, R. Taylor, J. AMS 14 (2001) 843 (modularity for all E/Q)",
                                 "L. Lafforgue, Invent. Math. 147 (2002) 1 (Langlands for GL(n) over function fields)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[modularity - the curve side meets the form side, p=2] For the elliptic curve 11a1 "
                     f"(y^2 + y = x^3 - x^2 - 10x - 20), counting points over F_2 gives #E(F_2) = 5, so the trace "
@@ -1701,20 +1465,7 @@ def langlands() -> int:
                  "four forces under alpha, it is a unity the proven cases POINT AT without completing. Seal the "
                  "instances (a_p), attribute the conjecture, keep it open - narrowing is evidence, never proof.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the Langlands reading, 2026-10-07", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"]),
-                      "open": f["open"]}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the Langlands reading, 2026-10-07")
 
 
 def trigonometry() -> int:
@@ -1757,9 +1508,6 @@ def trigonometry() -> int:
                     field="mathematics",
                     references=["L. Euler, Introductio in analysin infinitorum (1748) (e^{i theta} = cos + i sin)",
                                 "spherical trigonometry (Gauss-Bonnet; the angle sum exceeds pi by area/R^2)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[1 - computation is approximation] sin(theta) = theta - theta^3/6 + theta^5/120 - ... "
                     f"To two terms, sin(0.1) ~ 0.1 - 0.1^3/6 = {two_term:.8f} (sealed); the exact value differs "
@@ -1785,20 +1533,7 @@ def trigonometry() -> int:
                  "what-it-lacks pattern as the Hole. Seal the arithmetic, affirm the true senses, claim nothing "
                  "past them. Map, never launder.", None),
     ]
-    added = 0
-    for kind, claim, *rest in marks:
-        sealv = rest[0] if rest else None
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the trigonometry reading, 2026-10-07", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the trigonometry reading, 2026-10-07")
 
 
 def _rh_seal_num(nid, expr, val, domain="mathematics", tol=1e-9):
@@ -1815,24 +1550,36 @@ def _rh_seal_num(nid, expr, val, domain="mathematics", tol=1e-9):
 
 
 def _mint_marks(sid, marks, by):
-    """Shared mint loop: idempotent, seal-or-claim guarded."""
+    """Shared mint loop - every stick mints through it (2026-10-08: the 25 inline copies and the two kw-dict
+    loops were folded in; alpha() had no duplicate guard at all). A mark is (kind, claim, seal) or (kind, claim,
+    kw-dict with seal= and/or source=). Idempotent, seal-or-claim guarded. A mark already kept in full is skipped. One kept CUT at
+    an older cap - its stored text a strict prefix of the mark (2026-10-08: the cap was 600; 45 kept marks, mostly
+    the guard notes, were stored mid-sentence) - is ticked again in full, and the reader supersedes the cut copy
+    (tickstick._collapse). A sealed mark whose wording changed but whose seal is kept stays as kept: the seal governs."""
     from concordance import tickstick as TS
+    cap = getattr(TS, "CLAIM_CAP", 600)
     ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     added = 0
     for kind, claim, *rest in marks:
-        sealv = rest[0] if rest else None
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
+        extra = rest[0] if rest else None
+        kw = dict(extra) if isinstance(extra, dict) else (dict(seal=extra) if extra else {})
+        sealv = kw.get("seal")
+        want = (claim or "").strip()[:cap]
+        same = [t for t in ticks if t.get("kind") == kind and (t.get("seal") or "") == (sealv or "")]
+        whole = any((t.get("claim") or "") == want for t in same)
+        cut = any(len(want) > len(t.get("claim") or "") and want.startswith(t.get("claim") or "") for t in same)
+        if whole or (sealv and same and not cut):
             print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
+        if cut:
+            print("  (superseding a cut copy) " + kind)
         res = TS.tick(sid, kind, claim, by=by, **kw)
         if res.get("ok"):
             added += 1; print("  " + kind)
         else:
             print("  REFUSED " + kind + ": " + res.get("error", ""))
     f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
+    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"]),
+                      "open": f["open"]}, indent=1))
     return 0
 
 
@@ -3581,6 +3328,617 @@ def paths() -> int:
     return _mint_marks(sid, marks, by="Narrow Highway - the path, continuously found between two points, 2026-10-08")
 
 
+def surfaces() -> int:
+    """PARAMETRIZATION OF SURFACES (Matt, 2026-10-08). A surface is reached through a map r(u, v) from a flat patch of
+    parameters onto the curved thing. The map carries a MEASURE (the area element |r_u x r_v| = sqrt(EG - F^2)) and a
+    CURVATURE (K), and Gauss's Theorema Egregium says K is intrinsic: an inhabitant measures it from inside without
+    leaving the surface. Seal six numbers through the sphere, the torus and a graph: the Earth's area from
+    latitude-longitude, a parametrized point that lands ON the sphere, Pappus's torus, the torus's curvature changing
+    sign, the Monge area factor, and Gauss-Bonnet closing the sphere at 4 pi = 2 pi chi. No single chart covers the
+    sphere (at the poles the lat-long area element vanishes): a parametrization is a map, never the territory. New
+    stick; idempotent."""
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    earth = 4 * pi * 6371 ** 2                                   # km^2: int int R^2 sin(theta) dtheta dphi
+    on = ((3 ** 0.5 / 2) * (2 ** 0.5 / 2)) ** 2 * 2 + (1 / 2) ** 2   # theta = pi/3, phi = pi/4 lands on r = 1
+    torus = 4 * pi ** 2 * 3 * 1                                  # Pappus: R = 3, r = 1
+    k_out = 1 / (1 * (3 + 1))                                    # K at the outer equator; inner = -1/(r(R-r)) = -1/2
+    monge = (1 + 3 ** 2 + 4 ** 2) ** 0.5                         # z = 3x + 4y: dA = sqrt(1 + fx^2 + fy^2) dx dy
+    gb = (1 / 6371 ** 2) * (4 * pi * 6371 ** 2)                  # int K dA over the sphere = 4 pi = 2 pi * chi, chi = 2
+    s_e = _rh_seal_num("earth_area_from_latitude_longitude", "4 * 3.141592653589793 * 6371 ** 2", float(earth))
+    s_o = _rh_seal_num("parametrized_point_lands_on_the_sphere", "((3**0.5/2)*(2**0.5/2))**2 * 2 + (1/2)**2",
+                       float(on), tol=1e-12)
+    s_t = _rh_seal_num("torus_area_pappus", "4 * 3.141592653589793 ** 2 * 3 * 1", float(torus))
+    s_k = _rh_seal_num("torus_gauss_curvature_outer_equator", "1/(1*(3+1))", float(k_out), tol=1e-12)
+    s_m = _rh_seal_num("monge_patch_area_factor", "(1 + 3**2 + 4**2) ** 0.5", float(monge), tol=1e-12)
+    s_g = _rh_seal_num("gauss_bonnet_sphere_total_curvature",
+                       "(1 / 6371 ** 2) * (4 * 3.141592653589793 * 6371 ** 2)", float(gb), tol=1e-12)
+    if not all([s_e, s_o, s_t, s_k, s_m, s_g]):
+        print("a seal failed; aborting"); return 1
+    print("sealed earth", s_e, "| on-sphere", s_o, "| torus", s_t, "| K", s_k, "| monge", s_m, "| gauss-bonnet", s_g)
+    sid = TS.create("Parametrization of surfaces - the map that carries a measure and a curvature",
+                    statement=("A surface is reached through a map r(u, v) from flat parameters onto the curved thing. "
+                               "The map carries a measure - the area element sqrt(EG - F^2) - and a curvature K, and "
+                               "the curvature is intrinsic: an inhabitant can measure it from inside (Gauss). Latitude "
+                               "and longitude are the parameters we live on; the Earth's 510 million km^2 is the map's "
+                               "own integral. Total curvature is a topological count (Gauss-Bonnet). No single chart "
+                               "covers the sphere: a parametrization is a map, never the territory."),
+                    field="mathematics",
+                    references=["C. F. Gauss, Disquisitiones generales circa superficies curvas (1827): the Theorema Egregium",
+                                "Pappus of Alexandria, Collection VII (c. AD 320): the centroid theorems (the torus's area and volume)",
+                                "G. Monge, Application de l'analyse a la geometrie (1807): the graph z = f(x, y) as a surface",
+                                "O. Bonnet (1848); Gauss-Bonnet: int K dA = 2 pi chi",
+                                "L. E. J. Brouwer (1912): no nowhere-zero tangent field on S^2 - no single chart covers the sphere",
+                                "Isaiah 40:22; Job 38:5; Proverbs 8:27; Psalm 104:2"])["id"]
+    marks = [
+        ("witness", f"[the map carries a measure - the Earth from latitude and longitude] r(theta, phi) = R (sin theta "
+                    f"cos phi, sin theta sin phi, cos theta); |r_theta x r_phi| = R^2 sin theta; integrated over the "
+                    f"patch, 4 pi R^2. With R = 6371 km that is {earth:,.0f} km^2 (sealed) - the 510 million km^2 in "
+                    f"every atlas comes out of the parametrization's own area element. Lines of latitude and longitude "
+                    f"ARE the parameters (u, v): the map we live on.", s_e),
+        ("witness", f"[the map lands on the surface] At theta = pi/3, phi = pi/4: x^2 + y^2 + z^2 = "
+                    f"(sqrt3/2 * sqrt2/2)^2 * 2 + (1/2)^2 = {on:.1f} (sealed). Every parameter pair lands exactly on the "
+                    f"sphere: a parametrization does not approximate the surface, it NAMES its points. Two parameters "
+                    f"for a two-dimensional thing - the dimension is counted by the map.", s_o),
+        ("witness", f"[a surface built by sweeping a circle - the torus] r(u, v) = ((R + r cos v) cos u, (R + r cos v) "
+                    f"sin u, r sin v); area 4 pi^2 R r: with R = 3, r = 1 that is {torus:.3f} (sealed). Pappus, fourth "
+                    f"century: the area is the circle's circumference 2 pi r times the distance 2 pi R its centre "
+                    f"travels. The parametrization turns a 1,700-year-old theorem into a two-line integral.", s_t),
+        ("witness", f"[curvature from the map - and it changes sign] On the torus K = cos v / (r (R + r cos v)): at "
+                    f"the outer equator K = 1/(r(R+r)) = {k_out} (sealed), at the inner equator -1/(r(R-r)) = -0.5 - "
+                    f"sphere-like outside, saddle-like inside, and over the whole torus it cancels to 0 = 2 pi chi, "
+                    f"chi = 0 (the topology stick's Euler characteristic). Gauss's Theorema Egregium: K depends only on "
+                    f"E, F, G - an inhabitant measures it from WITHIN. We are a measure (the clock stick): the curvature "
+                    f"of the world is readable from inside it.", s_k),
+        ("witness", f"[a graph is a surface too - the Monge patch] z = f(x, y) gives dA = sqrt(1 + f_x^2 + f_y^2) dx "
+                    f"dy; for z = 3x + 4y the factor is sqrt 26 = {monge:.4f} (sealed): the tilted plane holds "
+                    f"{monge:.3f} times the area of its shadow. Every function of two variables is a parametrized "
+                    f"surface, and the Jacobian is its measure - the same object as the determinant that scales every "
+                    f"change of variables.", s_m),
+        ("witness", f"[Gauss-Bonnet closes the sphere] int K dA = (1/R^2)(4 pi R^2) = 4 pi = {gb:.6f} (sealed) = "
+                    f"2 pi * 2: the total curvature of ANY surface shaped like a sphere is 4 pi, however it is dented. "
+                    f"The measure is local (the parametrization); the total is a count (the topology). The metric is "
+                    f"read point by point; the shape is an integer.", s_g),
+        ("note", "[the map, and the guard] No single chart covers the sphere: at the poles sin theta = 0 and the "
+                 "lat-long area element vanishes - the MAP fails exactly where the territory does not. An atlas is "
+                 "several charts with their overlaps agreed (Brouwer: no smooth nowhere-zero field lives on S^2). The "
+                 "first fundamental form (E, F, G) is the same object as the metric g_mu_nu of the spacetime stick: "
+                 "general relativity is the parametrization of a four-surface, and the trigonometry stick's third "
+                 "sense (flat is the limit of curved) is K -> 0. Scripture: 'he that sitteth upon the circle of the "
+                 "earth' (Isa 40:22); 'Who hath laid the measures thereof... who hath stretched the line upon it?' "
+                 "(Job 38:5); 'when he set a compass upon the face of the depth' (Prov 8:27); 'who stretchest out the "
+                 "heavens like a curtain' (Ps 104:2) - a surface, measured, stretched. GUARDS: a parametrization is a "
+                 "chart, never the surface; curvature-from-inside is physics, a person reading his world from within "
+                 "is a discernment, never a fit. Six numbers sealed; the rest cited. Ties: trigonometry (sense 3), "
+                 "topology (chi), clock (the observer as measure), gamma (hyperspheres), pi (4 pi R^2), spm (the "
+                 "workspace is an area on the unit sphere)."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - the parametrization of surfaces, 2026-10-08")
+
+
+def pi_constant() -> int:
+    """PI (Matt, 2026-10-08). The constant of the circle is the constant of rotation, which is why it is everywhere.
+    Seal seven numbers: Archimedes' two gaps (223/71 < pi < 22/7 - pi fenced by elimination, the first tick-stick),
+    Machin's identity as an IDENTITY (16 atan 1/5 - 4 atan 1/239 = pi, through the evaluator's own atan), the
+    Leibniz series' uselessness (ten terms, error ~ 1/N), the molten sea of 1 Kings 7:23 judged at its STATED
+    precision (|pi - 3| inside the half-unit of a one-figure measure - neither the charge nor the gematria trick),
+    the Gaussian integral through the integral itself (sqrt pi where there is no circle), and Re(e^(i pi)) = -1.
+    Irrationality (Lambert) and transcendence (Lindemann) are cited theorems, proved elsewhere. New stick;
+    idempotent."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    above = 22 / 7 - pi
+    below = pi - 223 / 71
+    machin = 16 * math.atan(1 / 5) - 4 * math.atan(1 / 239)
+    leib = 4 * (1 - 1 / 3 + 1 / 5 - 1 / 7 + 1 / 9 - 1 / 11 + 1 / 13 - 1 / 15 + 1 / 17 - 1 / 19)
+    sea = abs(pi - 30 / 10)
+    gauss = pi ** 0.5
+    s_a = _rh_seal_num("archimedes_upper_gap_22_over_7", "22/7 - 3.141592653589793", float(above))
+    s_b = _rh_seal_num("archimedes_lower_gap_223_over_71", "3.141592653589793 - 223/71", float(below))
+    s_m = _rh_seal_num("machin_identity", "16*atan(1/5) - 4*atan(1/239)", float(machin), tol=1e-12)
+    s_l = _rh_seal_num("leibniz_series_ten_terms",
+                       "4*(1 - 1/3 + 1/5 - 1/7 + 1/9 - 1/11 + 1/13 - 1/15 + 1/17 - 1/19)", float(leib), tol=1e-12)
+    s_s = _rh_seal_num("molten_sea_gap_at_stated_precision", "abs(3.141592653589793 - 30/10)", float(sea))
+    s_g = _rh_seal_num("gaussian_integral_is_sqrt_pi", "integrate(exp(-x**2), (x, -oo, oo))", float(gauss), tol=1e-12)
+    s_e = _rh_seal_num("euler_identity_real_part", "re(exp(I*pi))", -1.0, tol=1e-12)
+    if not all([s_a, s_b, s_m, s_l, s_s, s_g, s_e]):
+        print("a seal failed; aborting"); return 1
+    print("sealed archimedes", s_a, s_b, "| machin", s_m, "| leibniz", s_l, "| sea", s_s, "| gauss", s_g, "| euler", s_e)
+    sid = TS.create("Pi - the constant of the circle is the constant of rotation",
+                    statement=("Pi was never found; it was fenced. Archimedes narrowed it between 223/71 and 22/7 by "
+                               "elimination; Machin's identity is exact and its series carried the digits; the obvious "
+                               "series is true and useless (error ~ 1/N). The molten sea's 30 cubits round 10 is a "
+                               "one-figure measure of a vessel, judged at its stated precision: to one figure pi is 3 - "
+                               "neither the charge nor the gematria trick survives. Pi appears where there is no circle "
+                               "(the Gaussian integral, Stirling, Coulomb) because it is the constant of rotation; "
+                               "e^(i pi) = -1 is the half-turn. Irrational and transcendental by cited theorem: no "
+                               "fraction ends it and no compass squares the circle."),
+                    field="mathematics",
+                    references=["Archimedes, Measurement of a Circle (c. 250 BC): 223/71 < pi < 22/7 by the 96-gon",
+                                "J. Machin (1706): pi/4 = 4 atan(1/5) - atan(1/239), 100 digits by hand",
+                                "Madhava (c. 1400), J. Gregory (1671), G. W. Leibniz (1676): the arctangent series",
+                                "J. H. Lambert (1768): pi is irrational; F. Lindemann (1882): pi is transcendental",
+                                "L. Euler, Introductio in analysin infinitorum (1748): e^(i pi) + 1 = 0",
+                                "the Gaussian integral (Laplace 1812): int exp(-x^2) dx = sqrt pi",
+                                "1 Kings 7:23; 2 Chronicles 4:2; Proverbs 8:27",
+                                "src/concordance/verifiers/base.py - stated_precision: the claim's own figures set the bar"])["id"]
+    marks = [
+        ("witness", f"[Archimedes fenced pi by elimination - the first tick-stick] With a 96-gon inside and outside the "
+                    f"circle: 223/71 < pi < 22/7. The upper gap 22/7 - pi = {above:.7f} (sealed) is positive: pi is "
+                    f"below the fence. He never 'found' pi; he narrowed where it could be - a window 1/497 wide, with "
+                    f"the truth inside. That is this engine's method, 2,270 years old.", s_a),
+        ("witness", f"[the lower fence] pi - 223/71 = {below:.7f} > 0 (sealed): the second post of Archimedes' window. "
+                    f"Two bounds and the truth between them; a window, not a value - the surviving interval is the "
+                    f"honest statement, and every later digit only narrowed it.", s_b),
+        ("witness", f"[Machin's identity - exact, not approximate] pi = 16 atan(1/5) - 4 atan(1/239) = {machin:.15f} "
+                    f"(sealed as an identity through the evaluator's own arctangent, not as a decimal). With its series "
+                    f"Machin computed 100 digits by hand in 1706; the same shape carried pi to the billions. An identity "
+                    f"is a road; the digits are mileposts.", s_m),
+        ("witness", f"[why the obvious series is useless] Leibniz: pi = 4 (1 - 1/3 + 1/5 - ...). Ten terms give "
+                    f"{leib:.4f} (sealed), off by {pi - leib:.4f} ~ 1/10: the error after N terms is about 1/N, so six "
+                    f"digits cost a million terms. A true series can be a bad tool - convergence is a RATE. The Monte "
+                    f"Carlo stick's 1/sqrt N is the same lesson from the other side.", s_l),
+        ("witness", f"[the molten sea - a measure, judged at its stated precision] 1 Kings 7:23: ten cubits from brim "
+                    f"to brim, a line of thirty cubits round about. 30/10 = 3, and |pi - 3| = {sea:.4f} (sealed) is "
+                    f"inside the half-unit (0.5) of a figure stated to the ones place. 'Ten' and 'thirty' are one-figure "
+                    f"measures of a vessel; to one figure, pi IS 3 - the same rule the front door applies to '9.81'. So "
+                    f"the engine refuses both charges: not 'the Bible says pi = 3' (the text states a measurement, not a "
+                    f"constant), and not the letter-count trick (a 111/106 ratio 'recovering' 3.1416 - gematria is "
+                    f"refused here by rule). Seal the arithmetic; attribute the pattern; claim nothing past the "
+                    f"figures.", s_s),
+        ("witness", f"[pi where there is no circle] int exp(-x^2) dx from -oo to oo = sqrt pi = {gauss:.6f} (sealed "
+                    f"through the integral itself). The bell curve's area is pi's square root; pi is in Stirling's "
+                    f"sqrt(2 pi n), in Coulomb's 1/(4 pi eps0), in h-bar = h/(2 pi) - anywhere a rotation or a sum over "
+                    f"all directions hides. The Gaussian stick's kernel, the entropy stick's Stirling and the Fourier "
+                    f"stick's phase all carry it.", s_g),
+        ("witness", "[five constants in one line] Re(e^(i pi)) = -1 (sealed): e^(i pi) + 1 = 0 - Euler, 1748: growth "
+                    "(e), rotation (i), the turn (pi), one and zero. pi is the half-turn; the Fourier stick's rotation "
+                    "is 2 pi per cycle; the surfaces stick's 4 pi R^2 is the sphere seen from every direction. The "
+                    "constant of the circle is the constant of rotation, which is why it is everywhere.", s_e),
+        ("note", "[what pi is not, and the guard] Irrational (Lambert 1768) and transcendental (Lindemann 1882): no "
+                 "fraction ends it and no compass-and-straightedge construction squares the circle - the construct "
+                 "stick's ruler stops here. Both are theorems proved elsewhere and CITED here; this stick seals only "
+                 "arithmetic and does not pretend a proof it did not run. Scripture: 'he set a compass upon the face "
+                 "of the depth' (Prov 8:27) - the circle drawn; the molten sea measured (1 Kgs 7:23, 2 Chr 4:2). "
+                 "GUARDS: the molten sea is a measure to one figure, never a value of pi; the gematria route is "
+                 "refused; pi's digits are not a message (seal the arithmetic, attribute the pattern). Seven seals; the "
+                 "rest cited. Ties: surfaces (4 pi R^2), spm (the cone's solid angle), fourier, gaussian, e, construct, "
+                 "monte_carlo, trigonometry."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - pi, fenced not found, 2026-10-08")
+
+
+def spm() -> int:
+    """SPHERICAL PARALLEL MECHANISM (Matt, 2026-10-08). Three motors on a base, three two-link legs, one platform,
+    and EVERY joint axis through one centre: every point of every link moves on a sphere about that centre, so the
+    machine lives in SO(3) and its kinematics is spherical trigonometry (Gosselin & Angeles 1989; the Agile Eye,
+    Gosselin & Hamel 1994). Seal five numbers: Grubler-Kutzbach with lambda = 3 gives M = 3 (and with lambda = 6
+    gives -3 - the method decides the count, a discordance indicts the method), the spherical four-bar's 1 DOF, the
+    Agile Eye's 140-degree cone as a solid angle on the unit sphere (the surfaces stick's own integral), and two
+    quarter-turns about perpendicular axes composing to a 120-degree turn about the diagonal (rotations compose,
+    they do not add; Euler 1775). The human eye (Listing's law), the gyrotourbillon (the clock stick) and
+    Ezekiel's wheel are likenesses, kept as such. New stick; idempotent."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    m_sph = 3 * (8 - 1 - 9) + 9                          # lambda = 3: rotations about one centre
+    m_spa = 6 * (8 - 1 - 9) + 9                          # lambda = 6: the wrong group for these links
+    m_4bar = 3 * (4 - 1 - 4) + 4                         # the spherical four-bar: one leg's loop
+    cone = 2 * pi * (1 - math.cos(70 * pi / 180))        # sr: a cone of 140 degrees opening (half-angle 70)
+    frac = cone / (4 * pi)
+    turn = math.acos(-1 / 2) * 180 / pi                  # R_z(90) R_x(90): trace 0 -> cos theta = -1/2
+    s_3 = _rh_seal_num("grubler_kutzbach_spherical_lambda_3", "3*(8-1-9)+9", float(m_sph), tol=1e-12)
+    s_6 = _rh_seal_num("grubler_kutzbach_spatial_lambda_6_on_the_same_links", "6*(8-1-9)+9", float(m_spa), tol=1e-12)
+    s_4 = _rh_seal_num("spherical_four_bar_one_dof", "3*(4-1-4)+4", float(m_4bar), tol=1e-12)
+    s_c = _rh_seal_num("agile_eye_cone_solid_angle", "2*3.141592653589793*(1 - cos(70*3.141592653589793/180))",
+                       float(cone))
+    s_t = _rh_seal_num("two_quarter_turns_compose_to_120_degrees", "acos(-1/2)*180/3.141592653589793", float(turn))
+    if not all([s_3, s_6, s_4, s_c, s_t]):
+        print("a seal failed; aborting"); return 1
+    print("sealed M(3)", s_3, "| M(6)", s_6, "| four-bar", s_4, "| cone", s_c, "| 120", s_t)
+    sid = TS.create("Spherical parallel mechanism - three motors, one centre, every link on a sphere",
+                    statement=("Three motors on a base, three two-link legs, one platform, and every joint axis through "
+                               "one centre: every point of every link moves on a sphere about that centre, so the "
+                               "machine lives in the rotation group and its kinematics is spherical trigonometry. "
+                               "Grubler-Kutzbach counts 3 degrees of freedom only with the right motion group (lambda "
+                               "= 3); the spatial formula says -3 and the machine moves - the method decides. Its "
+                               "workspace is a cap on the unit sphere; its three inputs compose into one rotation "
+                               "(Euler); the inverse problem is closed-form and the forward problem is a degree-8 "
+                               "polynomial. The human eye, the gyrotourbillon and Ezekiel's wheel are likenesses."),
+                    field="engineering",
+                    references=["C. Gosselin, J. Angeles, The optimum kinematic design of a spherical three-degree-of-freedom parallel manipulator, ASME J. Mech. Trans. Autom. Des. 111 (1989) 202-207",
+                                "C. Gosselin, J.-F. Hamel, The Agile Eye: a high-performance three-degree-of-freedom camera-orienting device, IEEE ICRA (1994)",
+                                "C. Gosselin, J. Angeles, Singularity analysis of closed-loop kinematic chains, IEEE Trans. Robot. Autom. 6 (1990) 281-290",
+                                "C. Gosselin, J. Sefrioui, M. J. Richard, On the direct kinematics of spherical three-degree-of-freedom parallel manipulators, ASME J. Mech. Des. 116 (1994)",
+                                "M. Grubler (1883), K. Kutzbach (1929): the mobility count M = lambda (n - 1 - j) + sum f_i",
+                                "L. Euler (1775): every displacement of a sphere about its centre is one rotation about one axis",
+                                "J. B. Listing (1845), F. C. Donders (1847): the eye's torsion is fixed by its gaze",
+                                "Matthew 6:22; 2 Chronicles 16:9; Ezekiel 1:16-17",
+                                "stick_the_clock (the gyrotourbillon); stick_parametrization_of_surfaces (the workspace as an area on the unit sphere)"])["id"]
+    marks = [
+        ("witness", f"[three motors, one centre - the count that works only on the sphere] n = 8 links (base, platform, "
+                    f"three proximal, three distal), j = 9 revolute joints, every axis through one centre. "
+                    f"Grubler-Kutzbach with lambda = 3 (rotations about that point): M = 3 (8 - 1 - 9) + 9 = "
+                    f"{m_sph} (sealed) - three inputs, three degrees of freedom of orientation, no more and no less. "
+                    f"A spherical mechanism is a planar mechanism on a sphere of finite radius, and the plane is the "
+                    f"sphere with K -> 0 (the surfaces stick).", s_3),
+        ("witness", f"[the method decides the count - a discordance indicts the method] The spatial formula (lambda = "
+                    f"6) on the same links gives 6 (8 - 1 - 9) + 9 = {m_spa} (sealed): 'overconstrained, immobile'. "
+                    f"The mechanism moves. The arithmetic was not wrong; the GROUP was - every axis passes through one "
+                    f"point, so the links move in SO(3), not SE(3), and the formula's assumption is what failed. When "
+                    f"a formula contradicts a working thing, re-examine the method, never the thing.", s_6),
+        ("witness", f"[one leg, one loop, one freedom] The spherical four-bar - four links, four axes through one "
+                    f"centre - has 3 (4 - 1 - 4) + 4 = {m_4bar} degree of freedom (sealed), the same count as the "
+                    f"planar four-bar: turn the crank and the rocker follows, on a sphere instead of a plane. Spherical "
+                    f"trigonometry (the trigonometry stick's third sense) is the whole of its kinematics: cos c = cos a "
+                    f"cos b + sin a sin b cos C replaces the planar law of cosines.", s_4),
+        ("witness", f"[the workspace is a cap on the unit sphere] The Agile Eye (Gosselin & Hamel 1994) orients a "
+                    f"camera within a cone of 140 degrees, with +/-30 degrees of torsion, at angular velocities above "
+                    f"1000 degrees per second (cited). That cone is a solid angle 2 pi (1 - cos 70 deg) = {cone:.4f} "
+                    f"steradians (sealed), {100 * frac:.1f}% of all directions - a third of the sky. An orientation "
+                    f"device's workspace is an AREA on the unit sphere: the parametrization's own integral of sin theta "
+                    f"dtheta dphi. Three sticks, one object: the sphere mapped, measured by pi, moved upon.", s_c),
+        ("witness", f"[rotations compose, they do not add] A quarter-turn about x and then a quarter-turn about z: the "
+                    f"product [[0,0,1],[1,0,0],[0,1,0]] (x -> y -> z) has trace 0, so cos theta = (0 - 1)/2 and theta = "
+                    f"acos(-1/2) = {turn:.0f} degrees (sealed) about the diagonal (1,1,1)/sqrt 3 - not 180, and the other "
+                    f"order gives a different axis. Euler (1775): every orientation is ONE rotation about one axis "
+                    f"through the centre, and the three motors compose into exactly that one. The inverse problem "
+                    f"(which inputs give this orientation) is closed-form; the forward problem (which orientation do "
+                    f"these inputs give) is a degree-8 polynomial with up to eight real poses (Gosselin, Sefrioui & "
+                    f"Richard 1994) - the parallel machine's signature: easy to command, hard to predict.", s_t),
+        ("note", "[the eye, the clock, Ezekiel's wheel - and the guard] The human eye is a spherical parallel mechanism: "
+                 "six muscles about one centre, three degrees of freedom, and Listing's law gives one of them up - "
+                 "torsion is fixed by gaze - so the eye uses two of three, the SPM with one input held. The "
+                 "gyrotourbillon of the clock stick is a spherical mechanism too: cages turning about axes through "
+                 "the balance's centre. Singularity (Gosselin & Angeles 1990): when the three intermediate axes fall "
+                 "in one plane the platform gains a motion no motor controls - the machine is surest in the middle "
+                 "of its cap and lost at the edge. Scripture: 'The light of the body is the eye' (Mt 6:22); 'the "
+                 "eyes of the LORD run to and fro throughout the whole earth' (2 Chr 16:9) - over a sphere; 'a wheel "
+                 "in the middle of a wheel... they went upon their four sides: and they turned not when they went' "
+                 "(Ezek 1:16-17) - the oldest description we have of motion about one centre in every direction, "
+                 "given as 'the appearance of the wheels' - a LIKENESS, kept as one. GUARDS: Grubler is a count, not "
+                 "a proof of mobility (it fails on paradoxical linkages in both directions; only the arithmetic is "
+                 "sealed); the Agile Eye's figures are cited; the eye and Ezekiel are discernments, never fits. Five "
+                 "numbers sealed; the rest cited."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - the spherical parallel mechanism, 2026-10-08")
+
+
+def geneva() -> int:
+    """A MECHANICAL COMPUTER - the Geneva drive or similar (Matt, 2026-10-08). A Geneva drive turns continuous
+    rotation into INTERMITTENT motion: one pin, one slot, one index per revolution, and a locking disc that holds the
+    wheel still between indexes - a continuous input made discrete, a counter in brass. That is what a mechanical
+    computer is: the mechanism IS the computation. Seal seven numbers: the 4-slot Geneva's engagement and dwell (90
+    degrees driving, 3/4 of the cycle at rest), the film projector's pull-down at 24 frames/s, the tangential-entry
+    pin radius C sin(pi/4), the Antikythera's Metonic gear ratio against the sky (2 hours in 19 years), Babbage's
+    seventh difference (7! = 5040: a 7th-degree polynomial by addition alone), and four 4-slot wheels counting 4^4 =
+    256 states - a byte. The tick-stick is a Geneva: it advances only when a seal enters the slot, and dwells between
+    marks. New stick; idempotent."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    engaged = 180 - 360 / 4                              # degrees of the driver's turn with the pin in a slot
+    dwell = 1 / 2 + 1 / 4                                # fraction of the cycle the wheel is locked still
+    pulldown = 1 / (24 * 4)                              # s: one frame's advance at 24 frames/s, 4-slot Geneva
+    pin = math.sin(45 * pi / 180)                        # crank radius over centre distance: tangential entry
+    metonic = 235 / 19 - 365.2422 / 29.530589            # months/yr: the gear ratio minus the sky
+    hours = metonic * 19 * 29.530589 * 24                # the drift over one 19-year cycle, in hours
+    seventh = 5040                                       # 7!: the seventh difference of n^7
+    states = 4 ** 4                                      # four 4-slot wheels in a chain
+    s_e = _rh_seal_num("geneva_four_slot_engaged_angle", "180 - 360/4", float(engaged), tol=1e-12)
+    s_d = _rh_seal_num("geneva_four_slot_dwell_fraction", "1/2 + 1/4", float(dwell), tol=1e-12)
+    s_p = _rh_seal_num("projector_pulldown_time_24_fps", "1/(24*4)", float(pulldown), tol=1e-12)
+    s_r = _rh_seal_num("geneva_pin_radius_tangential_entry", "sin(45*3.141592653589793/180)", float(pin), tol=1e-12)
+    s_m = _rh_seal_num("antikythera_metonic_ratio_minus_the_sky", "235/19 - 365.2422/29.530589", float(metonic))
+    s_7 = _rh_seal_num("difference_engine_seventh_difference", "factorial(7)", float(seventh), tol=1e-12)
+    s_b = _rh_seal_num("four_geneva_wheels_count_a_byte", "4**4", float(states), tol=1e-12)
+    if not all([s_e, s_d, s_p, s_r, s_m, s_7, s_b]):
+        print("a seal failed; aborting"); return 1
+    print("sealed engaged", s_e, "| dwell", s_d, "| pulldown", s_p, "| pin", s_r, "| metonic", s_m, "| 7!", s_7, "| byte", s_b)
+    sid = TS.create("A mechanical computer - the Geneva drive: continuous turned discrete, the mechanism is the computation",
+                    statement=("A Geneva drive turns continuous rotation into intermittent motion: one pin, one slot, one "
+                               "index per revolution, a locking disc holding the wheel still between - a continuous "
+                               "input made discrete, a counter in brass. A mechanical computer is exactly this: "
+                               "components whose geometry is the computation. The Antikythera mechanism carried the "
+                               "Metonic cycle in teeth to two hours in nineteen years; Babbage tabulated seventh-degree "
+                               "polynomials by addition alone; four Geneva wheels count a byte. The dwell is where the "
+                               "work is done; the lock makes it one-way. The tick-stick is a Geneva: one sealed mark, "
+                               "one index, dwell between."),
+                    field="engineering",
+                    references=["the Geneva drive / Maltese cross: the stop-work of Swiss watchmaking; the intermittent sprocket of the film projector",
+                                "T. Freeth et al., Decoding the ancient Greek astronomical calculator known as the Antikythera Mechanism, Nature 444 (2006) 587-591",
+                                "Meton of Athens (432 BC): 235 synodic months = 19 years",
+                                "C. Babbage, On the Mathematical Powers of the Calculating Engine (1837); Difference Engine No. 2 (built 1991, Science Museum, London)",
+                                "B. Pascal, the Pascaline (1642): the sautoir carry",
+                                "Genesis 1:14; Ecclesiastes 3:1; Psalm 90:12; Daniel 2:21; Ezekiel 1:16",
+                                "docs/TICK_STICK.md - a stick is a counter: one sealed mark, one index"])["id"]
+    marks = [
+        ("witness", f"[one pin, one slot, one index - continuous made discrete] A 4-slot Geneva: each index turns the "
+                    f"wheel 360/4 = 90 degrees, and the pin is in a slot for 180 - 360/4 = {engaged:.0f} degrees of the "
+                    f"driver's turn (sealed); for an n-slot wheel, 180 - 360/n. A continuous input produces a "
+                    f"staircase: the quantizer, the sampler, the counter - the analog-to-digital converter's brass "
+                    f"ancestor.", s_e),
+        ("witness", f"[the dwell is where the work is done] For the other 270 degrees the locking disc holds the wheel "
+                    f"still: the dwell fraction is 1/2 + 1/4 = {dwell} of the cycle (sealed; 1/2 + 1/n in general). "
+                    f"Move, hold, read: every computer has this shape, and the clock stick's escapement is the "
+                    f"Geneva's cousin - lock, release, lock. The work is done in the hold.", s_d),
+        ("witness", f"[a frame exists only in the dwell] A film projector at 24 frames per second with a 4-slot Geneva "
+                    f"pulls each frame down in 1/(24 * 4) = {pulldown * 1000:.1f} ms (sealed) and holds it still for the "
+                    f"other {(1 / 24 - pulldown) * 1000:.1f} ms while the shutter opens. The picture is the hold; the "
+                    f"motion is the gap between pictures.", s_p),
+        ("witness", f"[zero impact - the geometry of a clean index] For the pin to enter the slot along the slot's own "
+                    f"direction the crank radius must be C sin(180/n deg): for n = 4, C sin 45 = {pin:.4f} C (sealed). "
+                    f"Enter tangentially or hammer the wheel - the geometry decides whether the mechanism lasts. And the "
+                    f"locking disc makes it one-way: between indexes the wheel cannot be back-driven. The ratchet, the "
+                    f"diode, the Tesla valve: one-way geometry, and the tick-stick's rule that a miss stays a miss.", s_r),
+        ("witness", f"[the Antikythera mechanism computed the sky with teeth] c. 100 BC: 235 synodic months = 19 years "
+                    f"(Meton). The gear train's ratio 235/19 against the sky's 365.2422/29.530589 differs by "
+                    f"{metonic:.6f} months per year (sealed) - about {hours:.1f} hours in nineteen years. A gear ratio "
+                    f"is a rational number and the sky is not; the mechanism maps the truth to the precision its teeth "
+                    f"allow, and the tooth count states that precision. 'Let them be for signs, and for seasons, and "
+                    f"for days, and years' (Gen 1:14) - the lights were given to be computed.", s_m),
+        ("witness", f"[Babbage - a polynomial by addition alone] The second difference of n^2 is (16 - 9) - (9 - 4) = "
+                    f"2, constant; the seventh difference of any seventh-degree polynomial is 7! times its leading "
+                    f"coefficient, and 7! = {seventh} (sealed). Difference Engine No. 2 tabulates seventh-degree "
+                    f"polynomials to 31 digits with no multiplication at all: add, carry, repeat. The method of "
+                    f"differences is this engine's own principle - a hard function reduced to a chain of simple "
+                    f"verified steps, no oracle in the loop.", s_7),
+        ("witness", f"[intermittent motion counts - four wheels, one byte] A 4-slot Geneva turns once per four turns of "
+                    f"its driver: a divide-by-four. Four in a chain count 4^4 = {states} states (sealed) - one byte in "
+                    f"brass, two centuries before the transistor; Pascal's 1642 carry and the odometer are the decimal "
+                    f"version. A mechanical computer is discrete components orchestrated by geometry: the vacuum-tube "
+                    f"computer's principle, and this engine's - every verifier a gear, the gate a pin, the carry only "
+                    f"when a seal engages.", s_b),
+        ("note", "[the tick-stick is a Geneva - and the guard] A stick advances only when a pin enters a slot: one "
+                 "sealed mark, one index; between marks, dwell. The ledger's chain is the locking disc (no "
+                 "back-driving: a miss stays a miss); the deploy gate is the pin that must enter tangentially or the "
+                 "index is refused. Scripture: 'To every thing there is a season, and a time to every purpose' (Eccl "
+                 "3:1) - dwell and index; 'teach us to number our days' (Ps 90:12) - a counter; 'he changeth the "
+                 "times and the seasons' (Dan 2:21); 'a wheel in the middle of a wheel' (Ezek 1:16). GUARDS: the "
+                 "Geneva is a likeness of the engine, not its mechanism (the engine is software; its components are "
+                 "verifiers; the brass is a discernment); the Antikythera's gear counts are the reconstruction's "
+                 "(Freeth 2006), cited; seven numbers sealed, the rest cited. Ties: clock (escapement), spm (one "
+                 "centre), fourier (sampling), laplace and monte_carlo (discrete against continuous), diagrams (the "
+                 "schematic), the vacuum-tube computer (systems.py is the map)."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - the mechanical computer, the Geneva drive, 2026-10-08")
+
+
+def diagrams() -> int:
+    """FEYNMAN DIAGRAMS - SCHEMATICS (Matt, 2026-10-08). A Feynman diagram is a schematic: lines are components
+    (propagators), vertices are junctions (couplings), and the amplitude is READ off the drawing by fixed rules the
+    way a netlist is read off a circuit - 'Write the vision, and make it plain upon tables, that he may run that
+    readeth it' (Hab 2:2). The drawing IS the computation. Seal seven numbers: Schwinger's one diagram (alpha/2pi =
+    0.0011614, 99.85% of the electron's magnetic moment), the two-loop class (-1.77e-6: each vertex costs sqrt alpha,
+    so the series narrows), the three-loop sum landing on the measured value to 4 parts in 10^8, the loop count
+    L = I - V + 1, the SAME count on a Wheatstone bridge (B - N + 1 = 3 meshes: a Feynman diagram and a schematic
+    are one graph), Wick's 15 pairings of six fields, and an RC schematic read as its corner frequency. Dyson: the
+    series is asymptotic - the drawing is a map, cited. New stick; idempotent."""
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    a = 1 / 137.035999084                                # CODATA 2018 (which itself leans on a_e - see the guard)
+    one = a / (2 * pi)                                   # Schwinger 1948: the one-loop vertex correction
+    two = -0.328478965 * (a / pi) ** 2                   # Petermann / Sommerfield 1957: the two-loop class
+    three = one + two + 1.181241456 * (a / pi) ** 3      # + Laporta / Remiddi 1996: the three-loop class
+    measured = 0.00115965218073                          # Hanneke, Fogwell, Gabrielse 2008
+    loops = 3 - 3 + 1                                    # L = I - V + 1: the one-loop vertex correction
+    meshes = 6 - 4 + 1                                   # B - N + 1: the Wheatstone bridge
+    wick = 15                                            # 5!!: pairings of six field operators
+    fc = 1 / (2 * pi * 10000 * 10 ** (-6))               # Hz: R = 10 kOhm, C = 1 uF
+    A = "(1/137.035999084)"
+    s_1 = _rh_seal_num("schwinger_one_loop_alpha_over_2pi", A + "/(2*3.141592653589793)", float(one))
+    s_2 = _rh_seal_num("two_loop_class_petermann_sommerfield", "-0.328478965*(" + A + "/3.141592653589793)**2", float(two))
+    s_3 = _rh_seal_num("three_loop_sum_electron_anomaly",
+                       A + "/(2*3.141592653589793) - 0.328478965*(" + A + "/3.141592653589793)**2 + 1.181241456*(" + A + "/3.141592653589793)**3",
+                       float(three))
+    s_l = _rh_seal_num("feynman_loop_count_vertex_correction", "3 - 3 + 1", float(loops), tol=1e-12)
+    s_k = _rh_seal_num("wheatstone_bridge_independent_meshes", "6 - 4 + 1", float(meshes), tol=1e-12)
+    s_w = _rh_seal_num("wick_pairings_of_six_fields", "factorial2(5)", float(wick), tol=1e-12)
+    s_f = _rh_seal_num("rc_schematic_corner_frequency", "1/(2*3.141592653589793*10000*10**(-6))", float(fc))
+    if not all([s_1, s_2, s_3, s_l, s_k, s_w, s_f]):
+        print("a seal failed; aborting"); return 1
+    print("sealed one-loop", s_1, "| two-loop", s_2, "| three-loop", s_3, "| loops", s_l, "| meshes", s_k, "| wick", s_w, "| rc", s_f)
+    sid = TS.create("Feynman diagrams are schematics - the drawing is the computation",
+                    statement=("A Feynman diagram is a schematic: lines are components (propagators), vertices are "
+                               "junctions (couplings), and the amplitude is read off the drawing by fixed rules the way "
+                               "a netlist is read off a circuit. One drawing gives 99.85% of the electron's magnetic "
+                               "moment; three classes of drawings land on the measurement to four parts in a hundred "
+                               "million; each vertex costs sqrt(alpha), so the series narrows. The loop count L = I - V "
+                               "+ 1 is the same cycle rank as a circuit's mesh count: a Feynman diagram and a schematic "
+                               "are one graph. Dyson: the series is asymptotic - the drawing is a faithful map, term by "
+                               "term, never a closed form."),
+                    field="physics",
+                    references=["R. P. Feynman, Space-Time Approach to Quantum Electrodynamics, Phys. Rev. 76 (1949) 769-789",
+                                "J. Schwinger, On Quantum-Electrodynamics and the Magnetic Moment of the Electron, Phys. Rev. 73 (1948) 416",
+                                "A. Petermann (1957), C. M. Sommerfield (1957): the two-loop coefficient -0.328478965",
+                                "S. Laporta, E. Remiddi, Phys. Lett. B 379 (1996) 283: the three-loop coefficient 1.181241456; T. Aoyama, T. Kinoshita, M. Nio (2012-2019): four and five loops",
+                                "D. Hanneke, S. Fogwell, G. Gabrielse, Phys. Rev. Lett. 100 (2008) 120801: a_e = 0.00115965218073(28)",
+                                "F. J. Dyson, Divergence of perturbation theory in quantum electrodynamics, Phys. Rev. 85 (1952) 631",
+                                "G. C. Wick, The evaluation of the collision matrix, Phys. Rev. 80 (1950) 268",
+                                "G. Kirchhoff (1847): the loop and node laws; the cycle rank B - N + 1",
+                                "Habakkuk 2:2; Exodus 25:40; 1 Chronicles 28:19",
+                                "src/concordance/systems.py and site/bridge.html - the engine's own schematic"])["id"]
+    marks = [
+        ("witness", f"[one drawing, one number - Schwinger 1948] The simplest correction to the electron's magnetism "
+                    f"is one diagram: a photon thrown across the vertex. Its value is alpha/(2 pi) = {one:.8f} (sealed) "
+                    f"against the measured anomaly {measured:.8f}: one drawing gives {100 * one / measured:.2f}%. "
+                    f"Feynman's rules assign a factor to every line and every junction; multiply them, integrate the "
+                    f"loop, and the amplitude is READ off the picture - a schematic that computes.", s_1),
+        ("witness", f"[why the series narrows - each vertex costs sqrt alpha] The two-loop class (seven diagrams; "
+                    f"Petermann and Sommerfield, 1957) contributes -0.328478965 (alpha/pi)^2 = {two:.3e} (sealed): "
+                    f"{100 * abs(two) / one:.2f}% of the first term. Every vertex carries sqrt alpha ~ 0.085, so each "
+                    f"added loop costs about alpha/pi ~ 1/430 - a drawing's complexity prices its own weight. The big "
+                    f"term first, the corrections narrowing: the ratchet.", s_2),
+        ("witness", f"[three classes of drawings land on the measurement] alpha/2pi - 0.328478965 (alpha/pi)^2 + "
+                    f"1.181241456 (alpha/pi)^3 = {three:.11f} (sealed) against the measured {measured:.11f}: "
+                    f"{abs(three - measured) / measured * 1e9:.0f} parts in 10^9, and the remainder is the size of the "
+                    f"four-loop class (cited: 891 diagrams, Kinoshita). GUARD: the alpha used here (CODATA 2018) "
+                    f"leans on a_e itself; the independent test takes alpha from atom recoil (Cs 2018, Rb 2020) and "
+                    f"agrees at the 10^-9 level with a one-to-two sigma tension between the two - a verified "
+                    f"consistency, stated at its precision.", s_3),
+        ("witness", f"[the loop count is a graph count] A connected diagram with I internal lines and V vertices has "
+                    f"L = I - V + 1 independent loops: the one-loop vertex correction, I = 3, V = 3, gives {loops} "
+                    f"(sealed). Each loop is one power of h-bar (the paths stick: tree level is the classical path) "
+                    f"and one four-dimensional integral to do. The drawing's topology IS its order.", s_l),
+        ("witness", f"[the schematic has the same count] A Wheatstone bridge - six branches, four nodes - has 6 - 4 + "
+                    f"1 = {meshes} independent meshes (sealed; Kirchhoff 1847), and the same formula, the graph's cycle "
+                    f"rank (the topology stick's Euler count), gave the Feynman loop count above. A Feynman diagram and "
+                    f"a circuit schematic are one object: a graph whose lines carry rules and whose loops are the "
+                    f"integrals - or the mesh equations - to solve.", s_k),
+        ("witness", f"[the drawing enumerates what the algebra would lose] Six field operators pair in 5!! = {wick} "
+                    f"ways (sealed; Wick 1950) - each pairing a line, each complete pairing one diagram. The diagram "
+                    f"is bookkeeping an eye can check; without it the terms are lost. Dyson 1952: the number of "
+                    f"diagrams grows like n! and the series is asymptotic (radius of convergence zero) - the map is "
+                    f"faithful term by term and never a closed form. Cited, never sealed.", s_w),
+        ("witness", f"[a schematic read as a number] R = 10 kOhm and C = 1 uF on a schematic: the corner f_c = "
+                    f"1/(2 pi R C) = {fc:.2f} Hz (sealed), a pole at s = -1/RC = -100 rad/s on the Laplace stick's "
+                    f"s-plane. The symbol library (Ohm, Laplace) plus the drawing gives the number - a circuit "
+                    f"simulator reads the netlist exactly as Feynman's rules read the diagram. The engine's own "
+                    f"schematic is systems.py and the Bridge: fifteen components, their edges priced, the roll-call "
+                    f"at boot.", s_f),
+        ("note", "[the vision made plain - and the guard] Habakkuk 2:2: 'Write the vision, and make it plain upon "
+                 "tables, that he may run that readeth it' - a drawing plain enough to be executed. Exodus 25:40: "
+                 "'according to their pattern, which was shewed thee in the mount'; 1 Chronicles 28:19: 'the LORD "
+                 "made me understand in writing by his hand upon me, even all the works of this pattern' - the "
+                 "tabernacle and the temple built from a given schematic. GUARDS: a diagram is one term of a series, "
+                 "not the physics; the series is asymptotic (Dyson); the Scripture patterns are a likeness of "
+                 "schematic-reading, never a fit; alpha's provenance is stated. Seven numbers sealed; the rest cited. "
+                 "Ties: feynman (the sum over paths these diagrams expand), alpha, forces (a_e), topology (cycle "
+                 "rank), laplace (the s-plane), smith_chart, geneva (the mechanical computer), the vacuum-tube "
+                 "computer (systems.py is the map)."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - Feynman diagrams as schematics, 2026-10-08")
+
+
+def delta() -> int:
+    """THE DOT ABSTRACTED - Dirac's delta and the inner product (Matt, 2026-10-08: 'we create the dots, but we need to
+    be able to abstract the dot'). The delta is not a function with a value - delta(0) is no number - but a FUNCTIONAL,
+    defined entirely by what it returns against every function: <delta_a, f> = f(a). In the quantum vector space the
+    dot is |x>, and the wavefunction is the inner product psi(x) = <x|psi>: the state READ at a point. The dots are
+    orthogonal, they resolve the identity (every state is a sum of dots), and a dot alone is not in the space - no
+    normalizable self, no momentum. 'The delta is only nonzero when i = j: we are back to the dot product' (Matt) -
+    Kronecker's delta is the dot product of basis vectors, Dirac's is the same with the index made continuous. Seal
+    nine numbers through the evaluator's own integrals and arithmetic: the nascent delta's area, its sifting of x^2 at
+    2, a box state's norm, a reading over a region, orthogonality, the Kronecker sift and the 3-4-12-13 norm,
+    Parseval, and Delta x Delta p = hbar/2 for every width (the perfect dot has no motion). Same logic as every
+    stick: seal the arithmetic, cite the theorems, keep the likeness a likeness. New stick; idempotent."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    area = 1.0                                           # int gaussian_sigma dx, sigma = 1/100
+    sift = 4 + (1 / 100) ** 2                            # int gaussian_sigma(x - 2) x^2 dx = 4 + sigma^2
+    norm = 1.0                                           # <psi_1|psi_1> for sqrt2 sin(pi x) on [0, 1]
+    third = 1 / 3 - math.sin(2 * pi / 3) / (2 * pi)      # P(left third) in the ground state
+    orth = 1.0                                           # 1 + <psi_1|psi_2>: the zero, judged against one
+    share = 2 * (4 / pi ** 3) ** 2 * 30                  # c_1^2 / ||f||^2 for f = x(1 - x): the first dot's share
+    hbar2 = 1.054571817 * 10 ** (-34) / 2                # Delta x Delta p for a Gaussian packet, every sigma
+    comp = 3 * 0 + 4 * 1 + 12 * 0                        # v . e_2 for v = (3, 4, 12): the Kronecker delta sifts
+    norm3 = 3 * 3 + 4 * 4 + 12 * 12                      # v . v = 169 = 13^2: Parseval in three dimensions
+    s_k = _rh_seal_num("kronecker_delta_sifts_the_component", "3*0 + 4*1 + 12*0", float(comp), tol=1e-12)
+    s_v = _rh_seal_num("dot_product_norm_parseval_in_three_dimensions", "3*3 + 4*4 + 12*12", float(norm3), tol=1e-12)
+    s_a = _rh_seal_num("nascent_delta_has_unit_area", "integrate(100*exp(-5000*x**2)/sqrt(2*pi), (x, -oo, oo))",
+                       float(area), tol=1e-12)
+    s_s = _rh_seal_num("nascent_delta_sifts_x_squared_at_2",
+                       "integrate(100*exp(-5000*(x-2)**2)/sqrt(2*pi) * x**2, (x, -oo, oo))", float(sift), tol=1e-12)
+    s_n = _rh_seal_num("box_ground_state_inner_product_with_itself", "integrate(2*sin(pi*x)**2, (x, 0, 1))",
+                       float(norm), tol=1e-12)
+    s_t = _rh_seal_num("box_ground_state_read_over_the_left_third", "integrate(2*sin(pi*x)**2, (x, 0, 1/3))", float(third))
+    s_o = _rh_seal_num("box_modes_orthogonal_one_plus_zero", "1 + integrate(2*sin(pi*x)*sin(2*pi*x), (x, 0, 1))",
+                       float(orth), tol=1e-12)
+    s_p = _rh_seal_num("parseval_first_mode_share_of_the_norm", "2*(4/3.141592653589793**3)**2 * 30", float(share))
+    s_h = _rh_seal_num("gaussian_packet_dx_dp_is_hbar_over_2",
+                       "(1/100) * (1.054571817 * 10**(-34) / (2 * (1/100)))", float(hbar2))
+    if not all([s_a, s_s, s_n, s_t, s_o, s_k, s_v, s_p, s_h]):
+        print("a seal failed; aborting"); return 1
+    print("sealed area", s_a, "| sift", s_s, "| norm", s_n, "| third", s_t, "| orth", s_o, "| kronecker", s_k, "| 13^2", s_v,
+          "| parseval", s_p, "| hbar/2", s_h)
+    sid = TS.create("The dot abstracted - Dirac's delta, the inner product, and the wavefunction as a reading at a point",
+                    statement=("We create the dots; the delta is the dot abstracted. It is not a function with a value "
+                               "- delta(0) is no number - but a functional, defined entirely by what it returns against "
+                               "every function: <delta_a, f> = f(a). In the quantum vector space the dot is |x> and the "
+                               "wavefunction is the inner product psi(x) = <x|psi>, the state read at a point. The dots "
+                               "are orthogonal; they resolve the identity, so every state is a sum of dots weighted by "
+                               "its inner products with them; and a dot alone is not in the space - it has no "
+                               "normalizable self and no momentum. The delta is only nonzero when i = j: Kronecker's "
+                               "delta is the dot product of basis vectors, and Dirac's is the same with the index made "
+                               "continuous - the meaning of a dot is its pairing with everything else."),
+                    field="physics",
+                    references=["P. A. M. Dirac, The Principles of Quantum Mechanics (1930): the delta function, bra and ket",
+                                "L. Schwartz, Theorie des distributions (1950): the delta made rigorous as a functional",
+                                "I. M. Gelfand, N. Ya. Vilenkin, Generalized Functions IV (1964): the rigged Hilbert space where |x> lives",
+                                "M. Born (1926): |<x|psi>|^2 is where the particle may be found",
+                                "Parseval (1799); F. Riesz, E. Fischer (1907): completeness - the dots resolve the identity",
+                                "W. Heisenberg (1927), E. H. Kennard (1927): Delta x Delta p >= hbar/2, equality for the Gaussian packet",
+                                "Psalm 147:4; Matthew 10:30; Acts 17:28; Colossians 1:17",
+                                "stick_scribing_mark_the_points_let_the_lines_connect_them; stick_the_schrodinger_equation; stick_lebesgue_theory_measure_and_integration_by_layers"])["id"]
+    marks = [
+        ("witness", f"[the dot that is not a function] A Gaussian of width sigma = 1/100 integrates to {area:.1f} "
+                    f"(sealed through the integral); as sigma -> 0 it becomes the delta - infinitely tall, infinitely "
+                    f"thin, area one. delta(0) is not a number. The delta is defined by what it does UNDER the integral: "
+                    f"a functional, not a value. The dot abstracted is a rule for reading, not a thing with a height "
+                    f"(Dirac 1930; Schwartz 1950 made it rigorous).", s_a),
+        ("witness", f"[sifting - the dot reads any function at a point] int gaussian_sigma(x - 2) x^2 dx = 4 + sigma^2 "
+                    f"= {sift:.4f} (sealed): the nascent dot at 2 reads x^2 at 2, up to sigma^2, and in the limit "
+                    f"<delta_a, f> = f(a) exactly. The inner product with the dot IS evaluation. That is what "
+                    f"'abstract the dot' means: the dot is the pairing that returns the value of anything at that "
+                    f"place.", s_s),
+        ("witness", f"[the wavefunction is the state read at the dot] In the quantum vector space the dot is |x> and "
+                    f"psi(x) = <x|psi>. For a particle in a box of length 1, the ground state sqrt2 sin(pi x) has "
+                    f"<psi|psi> = int 2 sin^2(pi x) dx = {norm:.1f} (sealed): the state's inner product with itself is "
+                    f"the whole, and |psi(x)|^2 read at each dot is where the particle may be found (Born 1926). The "
+                    f"function is nothing but the list of its readings at the dots.", s_n),
+        ("witness", f"[a reading over a region is an inner product too] The probability of finding that particle in "
+                    f"the left third is int_0^(1/3) 2 sin^2(pi x) dx = {third:.5f} (sealed) - less than a third, "
+                    f"because the state is thin at the walls: the dots near the wall read nearly zero, the dots in the "
+                    f"middle read most. Reading at a point and reading over a region are the same operation, the "
+                    f"Lebesgue stick's measure concentrated or spread.", s_t),
+        ("witness", f"[the dots are orthogonal] <psi_1|psi_2> = int 2 sin(pi x) sin(2 pi x) dx = 0 - sealed as "
+                    f"1 + <psi_1|psi_2> = {orth:.1f}, because a zero can only be judged against something. Distinct "
+                    f"basis dots do not overlap, and neither do |x> and |x'>: <x|x'> = delta(x - x'), nothing unless the "
+                    f"same dot. Orthogonality is what lets a reading at one dot say nothing about another - each dot "
+                    f"carries its own.", s_o),
+        ("witness", f"[the delta is only nonzero when i = j - we are back to the dot product] (Matt, 2026-10-08.) "
+                    f"<e_i|e_j> = delta_ij, the Kronecker delta: 1 when i = j, 0 otherwise. In finite dimensions the "
+                    f"dot abstracted IS the dot product. v = (3, 4, 12): v . e_2 = 3*0 + 4*1 + 12*0 = {comp} (sealed) "
+                    f"- the basis dot sifts out the component, exactly as int delta(x - a) f(x) dx = f(a); and v . v = "
+                    f"{norm3} = 13^2 (sealed) - Parseval in three dimensions. Dirac's delta is Kronecker's with the "
+                    f"index made continuous: sum_j delta_ij v_j = v_i becomes int delta(x - x') psi(x') dx' = psi(x). "
+                    f"Same logic from the first dot to the last: a thing is known by what it returns when dotted "
+                    f"against every other.", s_k),
+        ("witness", f"[the length is the sum of the readings] v . v = 3^2 + 4^2 + 12^2 = {norm3} = 13^2 (sealed): the "
+                    f"norm is the sum of the squared inner products with the basis dots - the discrete form of "
+                    f"<psi|psi> = int |psi(x)|^2 dx = 1 above, and of Parseval below. A vector is recovered whole from "
+                    f"its dots; nothing is lost in the reading when the dots are orthogonal and complete.", s_v),
+        ("witness", f"[the dots resolve the identity - Parseval] Sum |n><n| = 1: expand f = x(1 - x) in the box modes; "
+                    f"its first coefficient squared, c_1^2 = 2 (4/pi^3)^2, is {share:.5f} of ||f||^2 = 1/30 (sealed as "
+                    f"c_1^2 * 30); the third mode adds 0.00137, and the sum converges to 1. Every state is a sum of "
+                    f"dots weighted by its inner products with them: the dots span the space, and nothing in it "
+                    f"escapes the reading.", s_p),
+        ("witness", f"[a dot alone has no motion] A Gaussian packet of width sigma has Delta p = hbar/(2 sigma), so "
+                    f"Delta x Delta p = hbar/2 = {hbar2:.3e} J s for EVERY sigma (sealed at sigma = 1/100 m) - the "
+                    f"minimum (Kennard 1927). As sigma -> 0 the packet becomes the dot and Delta p -> infinity: the "
+                    f"perfect dot has no momentum at all, and <x|x> = delta(0) is not finite - the dot is not itself a "
+                    f"state in the space (it lives in the rigged Hilbert space, Gelfand 1964, cited). Abstracting the "
+                    f"dot costs every knowledge of its motion.", s_h),
+        ("note", "[we create the dots - the engine's reading, and the guard] This keeping is dots: cards, marks, seals, "
+                 "each made one at a time. The dot abstracted is the inner product: a card's meaning is not a value it "
+                 "carries but what it returns against every query - the index, the connections and the chains ARE the "
+                 "pairing, and a card alone is delta(0), unreadable. Matt (2026-10-08): 'we create the dots, but we "
+                 "need to be able to abstract the dot.' Scripture: 'He telleth the number of the stars; he calleth them "
+                 "all by their names' (Ps 147:4) - every dot counted, and named by its relation; 'the very hairs of "
+                 "your head are all numbered' (Mt 10:30); 'in him we live, and move, and have our being' (Acts 17:28) - "
+                 "the space; 'by him all things consist' (Col 1:17) - hold together: the inner product that makes a "
+                 "space of the dots. GUARDS: a distribution is not a function and delta(0) is not a number; the "
+                 "position dot is not a normalizable state (the rigged Hilbert space is cited, not sealed); what the "
+                 "Born reading means stays on the measurement stick; the engine's cards as dots is a likeness, never a "
+                 "fit. Nine numbers sealed; the rest cited. Ties: scribe (mark the points, let the lines connect "
+                 "them), schrodinger, measurement, fourier (the delta's transform is flat - every frequency alike), "
+                 "gaussian (the nascent delta is the Gaussian kernel), lebesgue, paths, surfaces (a dot on a chart)."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - the dot abstracted, 2026-10-08")
+
+
 def jevons() -> int:
     """JEVONS' PARADOX (Matt, 2026-10-07, two steps after the seal refactor cut per-seal cost ~100x). As the
     EFFICIENCY of using a resource rises, total CONSUMPTION tends to rise too, not fall: the efficiency gain
@@ -3677,9 +4035,6 @@ def topology() -> int:
                     references=["Euler's polyhedron formula V - E + F = 2 (Euler 1758; Descartes earlier)",
                                 "the Gauss-Bonnet theorem: integral of curvature = 2*pi*chi",
                                 "the classification of closed surfaces by genus and orientability"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[the invariant is indifferent to the construct] Cube: 8 - 12 + 6 = {int(cube)}. "
                     f"Tetrahedron: 4 - 6 + 4 = {int(tetra)}. Octahedron: 6 - 12 + 8 = {int(octa)} (all sealed). "
@@ -3711,20 +4066,7 @@ def topology() -> int:
                  "carry the barriers, and never claim the proof (ties stick_riemann_hypothesis and "
                  "[[project_tick_stick_millennium_problems_2026-10-05]]).", None),
     ]
-    added = 0
-    for kind, claim, *rest in marks:
-        sealv = rest[0] if rest else None
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - topology / Euler characteristic, 2026-10-07", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - topology / Euler characteristic, 2026-10-07")
 
 
 def construct() -> int:
@@ -3763,9 +4105,6 @@ def construct() -> int:
                     field="meta",
                     references=["the invariants of a coordinate transformation (Euclidean / Lorentz)",
                                 "positional notation: a quantity is base-independent (ties the no-gematria guard)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[a coordinate is a construct; the invariant is real] Rotate the axes 90 degrees and the "
                     f"point (3, 4) is relabelled (-4, 3) - different numbers - yet its length is unchanged: "
@@ -3790,20 +4129,7 @@ def construct() -> int:
                  "(Col 1:17), is not a construct but the ground the constructs serve. Scripture leads; the "
                  "construct serves; remove the ground and the map is calibrated to nothing.", None),
     ]
-    added = 0
-    for kind, claim, *rest in marks:
-        sealv = rest[0] if rest else None
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the construct-creation reading, 2026-10-07", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the construct-creation reading, 2026-10-07")
 
 
 def units_matter() -> int:
@@ -3843,9 +4169,6 @@ def units_matter() -> int:
                     field="physics",
                     references=["NASA Mars Climate Orbiter Mishap Investigation Board report (1999)",
                                 "BIPM, The International System of Units (SI); the international inch = 0.0254 m (1959)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[the Mars Climate Orbiter - units cost a mission] In 1999 the $327M orbiter was lost "
                     f"because one team supplied impulse in pound-force-seconds while the navigation software "
@@ -3870,20 +4193,7 @@ def units_matter() -> int:
                  "A number without its correct unit is not yet true. Ties the constant governance (a discordance "
                  "indicts the method) and the Fable-review findings.", None),
     ]
-    added = 0
-    for kind, claim, *rest in marks:
-        sealv = rest[0] if rest else None
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the units-matter reading, 2026-10-07", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the units-matter reading, 2026-10-07")
 
 
 def maxwell() -> int:
@@ -3929,9 +4239,6 @@ def maxwell() -> int:
                     references=["J. C. Maxwell, A Treatise on Electricity and Magnetism (1873)",
                                 "F. & H. London (1935); Bardeen, Cooper & Schrieffer, Phys. Rev. 108 (1957) 1175",
                                 "P. W. Anderson, Phys. Rev. 130 (1963) 439 (gauge invariance and mass)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[Maxwell - light IS electromagnetism] The four equations predict electromagnetic waves "
                     f"travelling at c = 1/sqrt(mu0 eps0) = {c_maxwell:.6f} m/s (sealed from the attested "
@@ -3961,20 +4268,7 @@ def maxwell() -> int:
                  "pairing factor), attributes BCS/London/Anderson-Higgs, and keeps the high-Tc mechanism open. "
                  "Seal the arithmetic; the unresolved stays unresolved. Map, never launder.", None),
     ]
-    added = 0
-    for kind, claim, *rest in marks:
-        sealv = rest[0] if rest else None
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the Maxwell/superconductivity reading, 2026-10-07", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the Maxwell/superconductivity reading, 2026-10-07")
 
 
 def spacetime() -> int:
@@ -4019,9 +4313,6 @@ def spacetime() -> int:
                     references=["H. Minkowski, Raum und Zeit (1908) (the spacetime interval)",
                                 "B. DeWitt, Phys. Rev. 160 (1967) 1113 (the Wheeler-DeWitt equation)",
                                 "D. Page & W. Wootters, Phys. Rev. D 27 (1983) 2885 (time from entanglement)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[time is not absolute] A clock moving at v = 0.6c runs slow by the Lorentz factor "
                     f"gamma = 1/sqrt(1 - v^2/c^2) = 1/sqrt(1 - 0.36) = {gamma} (sealed). Time is not a universal "
@@ -4053,21 +4344,7 @@ def spacetime() -> int:
                  "interval, t_P), attributes the physics, keeps the question open, and lets Scripture lead; the "
                  "wrap serves. Borrow the form; launder nothing."),
     ]
-    added = 0
-    for kind, claim, *rest in marks:
-        sealv = rest[0] if rest else None
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the time-and-space reading, 2026-10-07", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"]),
-                      "open": f["open"]}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the time-and-space reading, 2026-10-07")
 
 
 def mandelbrot() -> int:
@@ -4106,9 +4383,6 @@ def mandelbrot() -> int:
                     references=["B. Mandelbrot, Fractal aspects of z -> lambda z(1-z) (1980)",
                                 "A. Douady & J. Hubbard, Etude dynamique des polynomes complexes (1984) "
                                 "(M is connected)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", "[escape is a definite rejection] c is in M iff the orbit z -> z^2 + c from z=0 never "
                     "leaves |z| <= 2. For c=1 the orbit is 0 -> 1 -> 2 -> 5: the third step is "
@@ -4133,19 +4407,7 @@ def mandelbrot() -> int:
                  "proof - the same shape as the positive-geometry core. A component: one organ of the one body. "
                  "Map, never launder: seal the orbit and the bulb; the likeness to the engine is discernment.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the Mandelbrot reading (a component), 2026-10-07", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the Mandelbrot reading (a component), 2026-10-07")
 
 
 def gaussian() -> int:
@@ -4188,9 +4450,6 @@ def gaussian() -> int:
                                "claim that reality itself is Gaussian."),
                     field="mathematics",
                     references=["C. E. Rasmussen & C. K. I. Williams, Gaussian Processes for Machine Learning (2006)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[the kernel is the relation] A GP is fixed by its covariance k(x,x'). For the "
                     f"squared-exponential kernel exp(-(x-x')^2 / 2l^2), two points one length-scale apart share "
@@ -4217,19 +4476,7 @@ def gaussian() -> int:
                  "arithmetic (the kernel, the posterior); borrow the form; launder nothing. The map serves the "
                  "datum: remove the Cornerstone and the field is calibrated to nothing.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the Gaussian-process reading (the form of the map), 2026-10-07", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the Gaussian-process reading (the form of the map), 2026-10-07")
 
 
 def lagrange() -> int:
@@ -4266,9 +4513,6 @@ def lagrange() -> int:
                     field="mathematics",
                     references=["J.-L. Lagrange, Mecanique analytique (1788)",
                                 "Karush (1939); Kuhn & Tucker (1951) — the inequality-constraint (KKT) extension"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", "[the constraint picks the point] Maximize f = x*y subject to g: x + y = 10. The condition "
                     "grad f = lambda grad g gives (y, x) = lambda(1, 1), so x = y = lambda; with the constraint, "
@@ -4292,19 +4536,7 @@ def lagrange() -> int:
                  "never generated. Reality is the harness; the multiplier is the price of its boundary. This is a "
                  "mathematical fact read as discernment: borrow the form, launder nothing.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the Lagrange-multiplier reading, 2026-10-07", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the Lagrange-multiplier reading, 2026-10-07")
 
 
 def feynman() -> int:
@@ -4349,9 +4581,6 @@ def feynman() -> int:
                     references=["R. P. Feynman, Rev. Mod. Phys. 20 (1948) 367 (space-time approach / path integral)",
                                 "R. P. Feynman, QED: The Strange Theory of Light and Matter (1985)",
                                 "CODATA 2018 recommended values (Planck length)"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("witness", f"[least action - the straight path wins] A free particle (m=1) going from x=0 to x=1 in "
                     f"time T=1: the classical straight path (v=1) has action S = integral 1/2 v^2 dt = "
@@ -4383,20 +4612,7 @@ def feynman() -> int:
                  "length is the near edge of the Hole (ties stick_quantum_gravity). Seal the arithmetic; the "
                  "quantum theory of gravity stays open.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the least-action reading (Feynman), 2026-10-07", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"]),
-                      "open": f["open"]}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the least-action reading (Feynman), 2026-10-07")
 
 
 def capstone() -> int:
@@ -4505,9 +4721,6 @@ def assembly() -> int:
                                "evidence, never proof."),
                     field="meta",
                     references=["docs/ASSEMBLY.md", "docs/THE_WATCH.md", "docs/COMPONENTS.md"])["id"]
-    ticks = TS.read(sid).get("ticks", [])
-    seen_seals = {t.get("seal") for t in ticks if t.get("seal")}
-    seen_claims = {t.get("claim") for t in ticks}
     marks = [
         ("note", "[datum] Christ, the Logos in whom all things hold together (Colossians 1:17; John 1:3) - the "
                  "fixed reference every piece is placed against. The engine is the Emissary; the Master is the "
@@ -4572,19 +4785,7 @@ def assembly() -> int:
                  "narrowing is evidence, never proof; seal the arithmetic, attribute the pattern; remove the datum "
                  "(Christ) and the parts are true to nothing. Plain-language twin: docs/ASSEMBLY.md.", None),
     ]
-    added = 0
-    for kind, claim, sealv in marks:
-        if (sealv and sealv in seen_seals) or (not sealv and claim in seen_claims):
-            print("  (already) " + kind); continue
-        kw = dict(seal=sealv) if sealv else {}
-        res = TS.tick(sid, kind, claim, by="Narrow Highway - the final assembly, 2026-10-06", **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"])}, indent=1))
-    return 0
+    return _mint_marks(sid, marks, by="Narrow Highway - the final assembly, 2026-10-06")
 
 
 def robin(N: int = 1000000) -> int:
@@ -4967,6 +5168,18 @@ def main() -> int:
         return clock()
     if a[0] in ("paths", "path", "path_integral", "brachistochrone", "least_action", "path_of_life", "new_paths", "sum_over_histories"):
         return paths()
+    if a[0] in ("surfaces", "surface", "parametrization", "parametrisation", "parametrization_of_surfaces", "parametric_surface", "first_fundamental_form", "gauss_curvature", "theorema_egregium"):
+        return surfaces()
+    if a[0] in ("pi", "pi_constant", "circle_constant", "archimedes", "machin", "molten_sea", "squaring_the_circle"):
+        return pi_constant()
+    if a[0] in ("spm", "spherical_parallel_mechanism", "spherical_parallel", "spherical_mechanism", "agile_eye", "parallel_mechanism", "orientation_mechanism", "grubler", "kutzbach"):
+        return spm()
+    if a[0] in ("geneva", "geneva_drive", "maltese_cross", "mechanical_computer", "mechanical", "intermittent_motion", "indexing", "antikythera", "difference_engine", "babbage", "counter"):
+        return geneva()
+    if a[0] in ("diagrams", "diagram", "feynman_diagrams", "feynman_diagram", "schematics", "schematic", "circuit_diagram", "netlist", "vertex", "propagator"):
+        return diagrams()
+    if a[0] in ("delta", "dirac_delta", "dirac", "dot", "the_dot", "abstract_the_dot", "inner_product", "wavefunction", "wave_function", "hilbert_space", "bra_ket", "braket", "completeness", "sifting"):
+        return delta()
     if a[0] in ("assembly", "assemble", "final"):
         return assembly()
     if a[0] in ("aharonov_bohm", "ab"):

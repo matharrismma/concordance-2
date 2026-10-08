@@ -30,7 +30,13 @@ import os
 import re
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
+
+# THE CLAIM CAP (2026-10-08): was 600. Forty-five kept marks - almost all the guard notes, the discernment that
+# closes each stick - were stored cut mid-sentence and read that way on the site, and a re-run could never match
+# its own cut copy, so it added the note again. 2000 now (the statement's own cap). The log is append-only: a mark
+# kept cut at the old cap stays in the file and is SUPERSEDED in the reading by its fuller self (_collapse).
+CLAIM_CAP = 2000
 
 SEALED_KINDS = ("bound", "instance", "witness")
 CITED_KINDS = ("equivalence", "exclusion")
@@ -82,7 +88,34 @@ def fold(data_dir: Optional[Path] = None) -> Dict[str, Dict[str, Any]]:
             st = sticks.get(ev.get("stick"))
             if st is not None:
                 st["ticks"].append({k: v for k, v in ev.items() if k not in ("event", "stick")})
+    for st in sticks.values():
+        st["ticks"], st["superseded"] = _collapse(st["ticks"])
     return sticks
+
+
+def _collapse(ticks: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
+    """Each mark once, in full. A tick is superseded by a LATER tick of the same kind and seal whose claim begins
+    with the whole of its own (a copy cut at an older cap, then kept whole), and an exact duplicate collapses onto
+    its first copy. A different mark that merely shares a prefix is kept: only a strict extension of the entire cut
+    text supersedes. Returns (the ticks that stand, how many were superseded)."""
+    keep: List[Dict[str, Any]] = []
+    dropped = 0
+    for i, t in enumerate(ticks):
+        kind, seal, claim = t.get("kind"), t.get("seal") or "", t.get("claim") or ""
+        gone = False
+        for j, u in enumerate(ticks):
+            if j == i or u.get("kind") != kind or (u.get("seal") or "") != seal:
+                continue
+            uc = u.get("claim") or ""
+            if j > i and len(uc) > len(claim) and uc.startswith(claim):
+                gone = True; break                           # a later, fuller self
+            if j < i and uc == claim:
+                gone = True; break                           # an exact earlier copy
+        if gone:
+            dropped += 1
+        else:
+            keep.append(t)
+    return keep, dropped
 
 
 # ── the fit: what the ticks jointly establish, and no more ──────────────────────────────────────
@@ -184,7 +217,7 @@ def tick(stick_id: str, kind: str, claim: str, *, seal: str = "", source: str = 
     claim = (claim or "").strip()
     if len(claim) < 8:
         return {"ok": False, "error": "a tick needs a claim (8+ characters)"}
-    ev: Dict[str, Any] = {"event": "tick", "stick": stick_id, "kind": kind, "claim": claim[:600], "at": int(time.time()),
+    ev: Dict[str, Any] = {"event": "tick", "stick": stick_id, "kind": kind, "claim": claim[:CLAIM_CAP], "at": int(time.time()),
                           "by": (by or "")[:80]}
     if kind in SEALED_KINDS:
         seal = (seal or "").strip().lower()
