@@ -122,7 +122,11 @@ def main() -> int:
         total_dt = time.time() - t_start
         led = list((tmp / "ledger").glob("*.json")) if (tmp / "ledger").exists() else []
         rc = tmp / "receipt_cards.jsonl"
-        rc_lines = sum(1 for _ in open(rc, encoding="utf-8")) if rc.exists() else 0
+        if rc.exists():
+            with open(rc, encoding="utf-8") as _f:
+                rc_lines = sum(1 for _ in _f)
+        else:
+            rc_lines = 0
         cas_objs = sum(1 for _ in (tmp / "cas").rglob("*.json")) if (tmp / "cas").exists() else 0
         head_exists = (tmp / "ledger" / ".chain.head").exists()
 

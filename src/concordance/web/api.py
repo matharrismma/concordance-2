@@ -795,6 +795,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         a = (query.get("a") or "").strip()
         b = (query.get("b") or "").strip()
         root = (query.get("root") or "").strip()
+        for cid in (x for x in (a, b, root) if x):
+            if _chains._default_get_card(cid) is None:
+                return _err(404, f"no card with id {cid!r}")      # a lineage of nothing is not a lineage
         if a and b:
             conn = _chains.intersect(a, b, rels={rel} if rel else None)
             return _ok({"a": a, "b": b, "rel": rel, "connection": conn})
@@ -1482,9 +1485,12 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                 from .. import audit as _audit
                 # Seal the checked turn so the visitor sees the engine's guarantee made real (a live,
                 # re-checkable /s/<hash> receipt) — but index=False: the ambient audit is high-frequency,
-                # so it seals durably (CAS + ledger) WITHOUT inserting a receipt card into the live corpus.
-                # Content-addressing dedups identical claims; the steward budget caps growth (Jevons).
-                _a = _audit.audit(text, config, seal=True, index=False)
+                # so it seals durably (CAS + ledger) WITHOUT a card: index=False keeps it out of the live corpus
+                # and card=False (2026-10-08) keeps it out of receipt_cards / verified_cards too — THAT is the
+                # governor (Jevons): the ambient path can grow the CAS and the ledger by one object per DISTINCT
+                # true claim (content-addressed), never the card files that every boot re-reads. The explicit
+                # /verify door still mints cards; there is no steward budget on this path and none is claimed.
+                _a = _audit.audit(text, config, seal=True, index=False, card=False)
                 if _a.get("claims_found"):
                     r["audit"] = _a
                 else:
@@ -3322,7 +3328,7 @@ ROUTES = [
     # THE TICK STICK (2026-10-05): an open question, the marks the engine can stand behind, the fit they establish
     {"path": "/sticks", "methods": ("GET",), "api": True},
     {"path": "/stick", "methods": ("GET", "POST"), "api": True, "rl": True},
-    {"path": "/chains", "methods": ("GET",), "api": True},   # walk a discovery lineage / find where two chains connect (2026-10-07)
+    {"path": "/chains", "methods": ("GET",), "api": True, "rl": "read"},   # walk a discovery lineage / find where two chains connect (2026-10-07)
     {"path": "/tick", "methods": ("POST",), "rl": True},
     {"path": "/sync/manifest", "methods": ("GET",), "api": True, "rl": "read"},
     {"path": "/sync/ledger", "methods": ("GET",), "api": True, "rl": "read"},

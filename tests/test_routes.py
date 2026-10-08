@@ -187,7 +187,8 @@ GOLDEN_RATELIMITED = {
 }
 
 
-GOLDEN_READ_LIMITED = {   # every route that scans/sorts the whole corpus per request — the read bucket
+GOLDEN_READ_LIMITED = {
+    "/chains",   # 2026-10-08: bounded BFS over the keeping — read-limited like its siblings (review)   # every route that scans/sorts the whole corpus per request — the read bucket
     "/seals",   # deliberate addition (THE SEAL LEDGER — a read, the generous bucket; 2026-10-03)
     "/sync/manifest", "/sync/ledger", "/sync/file",   # deliberate addition (node sync hashes the keeping — a read; 2026-10-04)
     "/search", "/witness", "/cards/stats", "/cards", "/daily", "/card/connections",

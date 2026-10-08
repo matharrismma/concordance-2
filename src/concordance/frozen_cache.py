@@ -1,21 +1,25 @@
 """THE FROZEN CACHE — persist what the boot re-derives from unchanged files (2026-10-08).
 
 The launch roll-call measured the corpus warm at ~40 s / ~1 GB on the box, 98% of boot time. Phased, the bulk
-is `load_cards` tokenizing the full text of every FROZEN card — hundreds of thousands of them — only to count
-document frequency (`_df_extra`) and to keep a compact (call, title, surface) index of the public frozen ids
-(`_frozen`). Both are pure functions of the frozen cards' files and the freeze set: they change only when those
-files change. So they are built once and persisted here, and a boot whose inputs are unchanged LOADS them.
+is `load_cards` over the FROZEN shelves' files — hundreds of thousands of cards tokenized only to count
+document frequency (`_df_extra`), parsed and shelved only to be discarded, and a compact (call, title,
+surface) index of the public frozen ids kept (`_frozen`). All of it is a pure function of those files and the
+freeze set: it changes only when they change. So it is built once and persisted here, and a boot whose inputs
+are unchanged LOADS it — and, as of v3, reads from each cached file ONLY the lines that stayed resident, by
+recorded byte offset (a file with none is never opened).
 
 What makes this honest rather than a stale read:
   * The key covers exactly the files that CONTRIBUTED frozen cards at the cold build (identity = name, size,
-    mtime_ns), the freeze set, the format version and the Python version. Any change to any of them misses.
-    It deliberately does NOT cover files that contributed no frozen card — receipt_cards.jsonl grows with every
-    seal and would miss on every boot — and a frozen card that later appears in such a file is still handled
-    LIVE by load_cards and merged, so nothing is ever silently missing (see corpus.default_corpus).
+    mtime_ns), the freeze set, the format version and the Python version. Any change to any of them misses —
+    and the offsets are only ever used under that same key, against a byte-identical file.
+  * Only BIG contributors (>= min_contribution() frozen cards) are cached; small, volatile ones —
+    receipt_cards.jsonl and verified_cards.jsonl carry a few domain-shelf cards and grow with every seal —
+    are processed live every boot and merged, so the key holds still across seals and nothing is missing.
   * A corrupt, truncated, foreign-version or wrong-key file is a miss, never an exception, never a partial read.
-  * CONCORDANCE_FROZEN_CACHE=0 turns it off entirely (the safety valve); the cold path is byte-for-byte the
-    old one.
-Format: marshal (stdlib, fast; version-bound, hence the key). Stored under the data dir (untracked).
+  * CONCORDANCE_FROZEN_CACHE=0 turns it off entirely (the safety valve); the cold path is the old one.
+Format: marshal (stdlib, fast; version-bound, hence the key). Shared strings (interned call numbers and
+surfaces) keep their sharing across dump/load — marshal writes refs for identical objects — so the memory
+cut made at the cold build survives the cache. Stored under the data dir (untracked).
 """
 from __future__ import annotations
 
@@ -23,15 +27,14 @@ import hashlib
 import marshal
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-VERSION = 2   # v2: + skip_files — cached contributors with no resident cards, skipped wholesale on a hit
+VERSION = 4   # v3: per-contributor resident-line OFFSETS (a hit seeks to resident lines; [] = never opened)
+              # v4: the contributor names + key live in a JSON SIDECAR, so peek never decodes the big file
 FILE = "frozen_df.cache"
-# Only a file that contributes at least this many frozen cards is cached and skipped on a hit. Smaller
-# contributors — receipt_cards.jsonl and verified_cards.jsonl carry a few domain-shelf (frozen) cards and
-# grow with every seal — are processed LIVE on every boot (cheap by definition) and merged, so the key
-# stays stable across seals and nothing is ever missing. Overridable for tests (a tiny corpus is all small).
+META = "frozen_df.meta.json"
 MIN_CONTRIBUTION = 1000
 
 
@@ -51,7 +54,8 @@ def cache_path(data_dir: Path) -> Path:
 
 
 def file_identity(p: Path) -> Tuple[str, int, int]:
-    """(name, size, mtime_ns) — what must be unchanged for a file's frozen contribution to be unchanged."""
+    """(name, size, mtime_ns) — what must be unchanged for a file's frozen contribution AND its resident-line
+    offsets to be unchanged."""
     st = p.stat()
     return (p.name, int(st.st_size), int(st.st_mtime_ns))
 
@@ -66,12 +70,19 @@ def make_key(contributors: Iterable[Path], frozen: Iterable[str]) -> str:
     return h.hexdigest()
 
 
+def meta_path(path: Path) -> Path:
+    return path.with_name(META)
+
+
 def peek_contributors(path: Path) -> Optional[List[str]]:
-    """The contributor file NAMES a cache was built from — read without trusting anything else in it, so the
-    caller can compute today's key over those same files and decide hit or miss. None if unreadable."""
+    """The contributor file NAMES a cache was built from — from the tiny JSON sidecar (measured 2026-10-08:
+    peeking by decoding the 85 MB marshal cost ~2.9 s of a 3.7 s cache load). Read without trusting anything
+    else, so the caller can compute today's key over those same files and decide hit or miss. None if absent
+    or unreadable (then the cache misses and is rebuilt)."""
     try:
-        with open(path, "rb") as f:
-            obj = marshal.load(f)
+        import json
+        with open(meta_path(path), "r", encoding="utf-8") as f:
+            obj = json.load(f)
         if not isinstance(obj, dict) or obj.get("version") != VERSION:
             return None
         names = obj.get("contributors")
@@ -83,38 +94,49 @@ def peek_contributors(path: Path) -> Optional[List[str]]:
 
 
 def load(path: Path, key: str) -> Optional[Dict[str, Any]]:
-    """{df, fz, contributors} when the file is whole and was built from exactly these inputs; else None."""
+    """{df, fz, contributors, offsets, read_ms, decode_ms} when the file is whole and was built from exactly
+    these inputs; else None. `offsets[name]` = the byte offsets of that contributor's RESIDENT lines ([] = none)."""
     try:
+        t0 = time.perf_counter()
         with open(path, "rb") as f:
-            obj = marshal.load(f)
+            obj = marshal.load(f)           # streamed: never the raw bytes AND the decoded tables at once
+        t1 = t2 = time.perf_counter()
         if not isinstance(obj, dict) or obj.get("version") != VERSION or obj.get("key") != key:
             return None
-        df, fz, names = obj.get("df"), obj.get("fz"), obj.get("contributors")
-        if not isinstance(df, dict) or not isinstance(fz, dict) or not isinstance(names, list):
+        df, fz, names, offs = obj.get("df"), obj.get("fz"), obj.get("contributors"), obj.get("offsets")
+        if not isinstance(df, dict) or not isinstance(fz, dict) or not isinstance(names, list) or not isinstance(offs, dict):
             return None
-        skip = obj.get("skip_files") or []
-        if not isinstance(skip, list) or not set(skip) <= set(names):
+        if not set(offs) <= set(names):
             return None
-        return {"df": df, "fz": fz, "contributors": names, "skip_files": skip}
+        if not all(isinstance(v, list) and all(isinstance(o, int) for o in v) for v in offs.values()):
+            return None
+        return {"df": df, "fz": fz, "contributors": names, "offsets": offs,
+                "read_ms": round((t1 - t0) * 1000.0, 1), "decode_ms": round((t2 - t1) * 1000.0, 1)}
     except Exception:  # noqa: BLE001
         return None
 
 
 def save(path: Path, key: str, df: Dict[str, int], fz: Dict[str, tuple], contributors: List[str],
-         skip_files: Optional[List[str]] = None) -> bool:
+         offsets: Dict[str, List[int]]) -> bool:
     """Atomic (tmp + replace); never raises — a cache that cannot be written simply is not there next boot.
-    `skip_files`: the cached contributors that hold NO resident card, so a hit need not open them at all."""
+    `offsets`: per cached contributor, the byte offsets of its resident lines ([] = nothing resident)."""
+    tmp = None
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_suffix(path.suffix + ".tmp")
         with open(tmp, "wb") as f:
             marshal.dump({"version": VERSION, "key": key, "contributors": list(contributors),
-                          "skip_files": list(skip_files or []), "df": dict(df), "fz": dict(fz)}, f)
+                          "offsets": {n: list(v) for n, v in offsets.items()}, "df": dict(df), "fz": dict(fz)}, f)
         os.replace(tmp, path)
+        import json
+        mtmp = meta_path(path).with_suffix(".json.tmp")
+        mtmp.write_text(json.dumps({"version": VERSION, "key": key, "contributors": list(contributors)}), encoding="utf-8")
+        os.replace(mtmp, meta_path(path))
         return True
     except Exception:  # noqa: BLE001
         try:
-            tmp.unlink()  # type: ignore[possibly-undefined]
+            if tmp is not None:
+                tmp.unlink()
         except Exception:  # noqa: BLE001
             pass
         return False

@@ -219,9 +219,13 @@ def verify_gravitational_scale(spec: Dict[str, Any]) -> VerifierResult:
         if isinstance(aw, str) and aw.strip():
             mm = _re.match(r"\s*([-+]?[\d.,]+(?:[eE][-+]?\d+)?)\s*(.*)$", aw)
             if mm:
-                lit = mm.group(1)
                 unit = _re.sub(r"\s+", " ", mm.group(2).strip().lower())
-                factor = 1000.0 if unit in ("km/s", "kilometers per second", "kilometres per second") else 1.0
+                if unit in ("km/s", "kilometers per second", "kilometres per second"):
+                    lit, factor = mm.group(1), 1000.0
+                elif unit in ("m/s", "meters per second", "metres per second", ""):
+                    lit, factor = mm.group(1), 1.0
+                else:
+                    lit, factor = None, 1.0      # an unknown unit earns NO window (review 2026-10-08: "24,000 mph")
         return _gscale.compare(name, _gscale.escape_velocity_m_s(M, r),
                                spec["claimed_escape_velocity_m_s"], 1e-3,
                                {"formula": "v = sqrt(2 G M / r)"}, as_written=lit, unit_factor=factor)

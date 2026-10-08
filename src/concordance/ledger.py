@@ -111,8 +111,12 @@ def _chain_tip(ledger_dir: Path, *, exclude: Optional[Path] = None) -> tuple:
     head = _read_precedent_file(head_path) if head_path.exists() else None
     if isinstance(head, dict):
         tip_name, tip_hash = head.get("tip_file"), head.get("content_hash")
+        # The pointer is trusted ONLY if the newest ledger file is its tip. Anything written behind its
+        # back — a `sync` pull (replicate writes ledger files directly), a hand copy — is caught here by
+        # one scandir, falls to the scan, and the next successful append re-establishes the pointer.
+        # (Review 2026-10-08: a pull past the tip would otherwise fork the chain at the next seal.)
         if (tip_name and tip_hash and (exclude is None or tip_name != exclude.name)
-                and (d / tip_name).exists()):
+                and (d / tip_name).exists() and _newest_ledger_file(d, exclude=exclude) == tip_name):
             ts = head.get("sealed_at")
             return (tip_hash, ts if isinstance(ts, (int, float)) else 0.0)
     # fallback: derive the tip from the directory (the pre-pointer behavior)
@@ -123,6 +127,27 @@ def _chain_tip(ledger_dir: Path, *, exclude: Optional[Path] = None) -> tuple:
     prev_hash = last.get("content_hash") or (compute_content_hash(last) if last else GENESIS_HASH)
     ts = last.get("sealed_at")
     return (prev_hash, ts if isinstance(ts, (int, float)) else 0.0)
+
+
+def _newest_ledger_file(ledger_dir: Path, *, exclude: Optional[Path] = None) -> Optional[str]:
+    """The name of the most recently written ledger file (by mtime, ties by name) — a cheap check that
+    nothing has been appended behind the head pointer's back. None when the directory holds no ledger file."""
+    import os
+    best = None
+    try:
+        with os.scandir(ledger_dir) as it:
+            for e in it:
+                if not e.name.endswith(".json") or e.name.startswith(".") or (exclude is not None and e.name == exclude.name):
+                    continue
+                try:
+                    key = (e.stat().st_mtime_ns, e.name)
+                except OSError:
+                    continue
+                if best is None or key > best:
+                    best = key
+    except OSError:
+        return None
+    return best[1] if best else None
 
 
 def _write_head(ledger_dir: Path, tip_file: str, content_hash: str, sealed_at: float) -> None:

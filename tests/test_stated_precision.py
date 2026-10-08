@@ -105,3 +105,11 @@ def test_numeric_mode_without_a_literal_is_unchanged():
     assert M.verify_numeric({"numeric_expr": "sqrt(2)", "claimed_value": 1.41421356237}).status == "CONFIRMED"
     # a handed-in tolerance still only tightens (clamp_tol): it cannot do what the literal does
     assert M.verify_numeric({"numeric_expr": "sqrt(2)", "claimed_value": 1.41421, "rel_tol": 1e-2}).status == "MISMATCH"
+
+
+def test_escape_velocity_unknown_unit_earns_no_window():
+    """Review 2026-10-08: an as-written claim in a unit the verifier does not know must not widen the window
+    in the wrong unit — '24,000 mph' is 4% off and would have passed at a factor of 1."""
+    spec = {"escape_mass_kg": 5.9722e24, "escape_radius_m": 6.371e6,
+            "claimed_escape_velocity_m_s": 10729.0, "claimed_escape_velocity_as_written": "24,000 mph"}
+    assert AST.verify_gravitational_scale(spec).status == "MISMATCH"

@@ -68,6 +68,7 @@ def main(argv=None) -> int:
 
     surface, port, host = "secular", 8000, "127.0.0.1"
     witness_port, secular_port = 8001, 8002      # --surface both: ONE process, every surface, one corpus
+    port_given = False
     default_site = Path(__file__).resolve().parents[2] / "site"
     site = str(default_site) if default_site.is_dir() else None
 
@@ -78,7 +79,7 @@ def main(argv=None) -> int:
         if o == "--surface" and i + 1 < len(opts):
             surface = opts[i + 1]; i += 2
         elif o == "--port" and i + 1 < len(opts):
-            port = int(opts[i + 1]); i += 2
+            port = int(opts[i + 1]); port_given = True; i += 2
         elif o == "--witness-port" and i + 1 < len(opts):
             witness_port = int(opts[i + 1]); i += 2
         elif o == "--secular-port" and i + 1 < len(opts):
@@ -93,6 +94,10 @@ def main(argv=None) -> int:
             i += 1
 
     if surface == "both":
+        if port_given:
+            print("--surface both takes --witness-port and --secular-port, not --port (refusing rather than "
+                  "silently binding 8001/8002)", file=sys.stderr)
+            return 2
         # one corpus for both surfaces (2026-10-08): witness + secular listeners in one process
         from .web import api as _api
         _api.serve_many(host=host, listeners=[(witness_port, "witness"), (secular_port, "secular")], site_dir=site)

@@ -107,3 +107,16 @@ if __name__ == "__main__":
             fn()
             print("ok", name)
     print("ALL PASS")
+
+
+def test_chains_door_404s_an_unknown_card_and_is_rate_limited():
+    """Review 2026-10-08: a lineage of a card that does not exist is not a lineage (was a 200 with length 1),
+    and the door is read-rate-limited like every sibling route."""
+    from concordance.web.api import dispatch, ROUTES
+    from concordance.config import EngineConfig
+    st, payload = dispatch("GET", "/chains", {"root": "card_does_not_exist_xyz"}, None, EngineConfig("secular"))
+    assert st == 404 and "no card" in payload.get("error", "")
+    st, _ = dispatch("GET", "/chains", {"a": "card_does_not_exist_xyz", "b": "also_missing"}, None, EngineConfig("secular"))
+    assert st == 404
+    route = next(r for r in ROUTES if r["path"] == "/chains")
+    assert route.get("rl") == "read"

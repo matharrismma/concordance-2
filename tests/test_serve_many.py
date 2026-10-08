@@ -51,3 +51,13 @@ def test_cli_routes_both_to_serve_many(monkeypatch):
     seen.clear()
     M.main(["serve", "--surface", "witness", "--port", "18001", "--no-site"])
     assert seen["single"]["surface"] == "witness" and seen["single"]["port"] == 18001 and "listeners" not in seen
+
+
+def test_cli_refuses_port_with_both(monkeypatch, capsys):
+    import concordance.__main__ as M
+    from concordance.web import api as _api
+    called = {}
+    monkeypatch.setattr(_api, "serve_many", lambda **kw: called.update(many=kw))
+    monkeypatch.setattr(M, "serve", lambda **kw: called.update(single=kw))
+    rc = M.main(["serve", "--surface", "both", "--port", "9000", "--no-site"])
+    assert rc == 2 and not called and "--witness-port" in capsys.readouterr().err

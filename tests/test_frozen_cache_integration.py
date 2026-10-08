@@ -42,10 +42,10 @@ def _seed(d: Path):
         {"id": "r1", "title": "Receipt one", "body": "sealed arithmetic receipt", "shelf": FROZEN}])
 
 
-def _build(monkeypatch, d: Path):
+def _build(monkeypatch, d: Path, frozen=frozenset({FROZEN})):
     monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(d))
     monkeypatch.delenv("CONCORDANCE_CARDS_JSONL", raising=False)
-    monkeypatch.setattr(corpus, "frozen_shelves", lambda: frozenset({FROZEN}))
+    monkeypatch.setattr(corpus, "frozen_shelves", lambda: frozenset(frozen))
     corpus._DEFAULT = None
     c = corpus.default_corpus()
     return c, dict(corpus.LOAD_PHASES)
@@ -67,8 +67,23 @@ def test_miss_then_hit_is_identical_and_skips_tokenizing(tmp_path, monkeypatch):
         assert ph2["frozen_cache"] == "hit"
         assert c2._df_extra == c1._df_extra and c2._frozen == c1._frozen   # identical corpus
         assert ph2["files_skipped"] == 1                                    # gutenberg never opened
+        assert ph2["files_seeked"] == 2                                     # cards.jsonl + source_cards.jsonl: resident lines only
         assert "s3" in c2.cards and "c1" in c2.cards                       # the mixed file's resident card survived
-        assert ph2["frozen_cards_cached"] == 4 and ph2["frozen_cards"] == 5  # c3,c4,s1,s2 skipped at the shelf; r1 live
+        assert ph2["frozen_cards_cached"] == 6 and ph2["frozen_cards"] == 1  # c3,c4,d1,d2,s1,s2 from the cache; only r1 seen, live
+        # the memory cut: the stored call and surface strings ARE the interned objects (one object per distinct
+        # value), and the sharing survives the cache roundtrip. Surfaces share across every entry; calls share
+        # only where two cards carry the same call — deep_call gives sublayered shelves a call PER CARD, so the
+        # fixture's d1/d2 differ on purpose (measured: that is why interning calls buys little on big shelves).
+        import sys as _sys
+        for c in (c1, c2):
+            assert c._frozen["d1"][2] is c._frozen["c3"][2] is c._frozen["r1"][2]
+            assert c._frozen["d1"][0] is _sys.intern(c._frozen["d1"][0])
+            assert c._frozen["d1"][0] != c._frozen["d2"][0]
+        # RSS deltas are measured, not asserted: in this process the PREVIOUS corpus was just dropped, so the
+        # collector can free more than the new build adds and the delta goes negative. At boot it is positive.
+        assert ph2["rss_kb_total_delta"] is None or isinstance(ph2["rss_kb_total_delta"], int)
+        for k in ("rss_kb_cache_delta", "rss_kb_load_delta", "rss_kb_index_delta"):
+            assert k in ph2
     finally:
         corpus._DEFAULT = prior
 
@@ -114,5 +129,30 @@ def test_valve_off_never_reads_or_writes(tmp_path, monkeypatch):
     try:
         _, ph = _build(monkeypatch, tmp_path)
         assert ph["frozen_cache"] == "off" and not FC.cache_path(tmp_path).exists()
+    finally:
+        corpus._DEFAULT = prior
+
+
+def test_frozen_non_file_cards_are_not_double_counted_on_a_hit(tmp_path, monkeypatch):
+    """Review 2026-10-08: the prophecy signposts are shaped at load from a non-file source. If their shelf is
+    frozen, their DF must not be both saved in the cache AND re-tokenized live on a hit."""
+    import json as _json
+    monkeypatch.setenv("CONCORDANCE_FROZEN_CACHE_MIN", "2")
+    monkeypatch.delenv("CONCORDANCE_FROZEN_CACHE", raising=False)
+    _seed(tmp_path)
+    (tmp_path / "prophecy").mkdir()
+    (tmp_path / "prophecy" / "signposts.jsonl").write_text(_json.dumps(
+        {"id": "sp1", "title": "The Way", "verification": "the way was found in every nation",
+         "wisdom": "and it points to Christ"}) + "\n", encoding="utf-8")
+    from concordance import prophecy as _prophecy
+    monkeypatch.setattr(_prophecy, "_file", lambda: tmp_path / "prophecy" / "signposts.jsonl")
+    sp_shelf = corpus._signpost_card({"id": "x", "title": "x"})["shelf"]     # whatever shelf the shaping assigns
+    prior = corpus._DEFAULT
+    try:
+        c1, ph1 = _build(monkeypatch, tmp_path, frozen={FROZEN, sp_shelf})
+        assert ph1["frozen_cache"] == "miss" and "sp1" in c1._frozen and c1._df_extra.get("nation") == 1
+        c2, ph2 = _build(monkeypatch, tmp_path, frozen={FROZEN, sp_shelf})
+        assert ph2["frozen_cache"] == "hit"
+        assert c2._df_extra == c1._df_extra and c2._frozen == c1._frozen     # counted exactly once, both ways
     finally:
         corpus._DEFAULT = prior

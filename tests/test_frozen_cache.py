@@ -36,9 +36,11 @@ def test_roundtrip_is_exact_and_wrong_key_is_a_miss(tmp_path):
     p = FC.cache_path(tmp_path)
     df = {"light": 3, "salt": 1, "shepherd": 2}
     fz = {"c3": ("scripture.psalms", "Shepherd", "witness"), "c9": ("dictionary.source", "Zymurgy", "secular")}
-    assert FC.save(p, "key-A", df, fz, ["cards.jsonl", "dictionary_cards.jsonl"])
+    offs = {"cards.jsonl": [0, 118, 231], "dictionary_cards.jsonl": []}
+    assert FC.save(p, "key-A", df, fz, ["cards.jsonl", "dictionary_cards.jsonl"], offs)
     got = FC.load(p, "key-A")
     assert got and got["df"] == df and got["fz"] == fz and got["contributors"] == ["cards.jsonl", "dictionary_cards.jsonl"]
+    assert got["offsets"] == offs and got["read_ms"] >= 0 and got["decode_ms"] >= 0
     assert FC.peek_contributors(p) == ["cards.jsonl", "dictionary_cards.jsonl"]
     assert FC.load(p, "key-B") is None                                      # built from other inputs: miss
 
@@ -48,7 +50,7 @@ def test_corrupt_truncated_or_foreign_is_a_miss_never_an_error(tmp_path):
     assert FC.load(p, "k") is None and FC.peek_contributors(p) is None      # absent
     p.write_bytes(b"\x00\x01garbage")
     assert FC.load(p, "k") is None and FC.peek_contributors(p) is None      # corrupt
-    FC.save(p, "k", {"a": 1}, {}, ["x.jsonl"])
+    FC.save(p, "k", {"a": 1}, {}, ["x.jsonl"], {"x.jsonl": []})
     data = p.read_bytes()
     p.write_bytes(data[: len(data) // 2])                                   # truncated
     assert FC.load(p, "k") is None
@@ -62,3 +64,12 @@ def test_safety_valve(monkeypatch):
     assert FC.enabled()
     monkeypatch.setenv("CONCORDANCE_FROZEN_CACHE", "0")
     assert not FC.enabled()
+
+
+def test_peek_reads_the_sidecar_and_a_missing_sidecar_is_a_miss(tmp_path):
+    p = FC.cache_path(tmp_path)
+    assert FC.save(p, "k", {"a": 1}, {"x": ("c", "t", "s")}, ["cards.jsonl"], {"cards.jsonl": [0]})
+    assert FC.meta_path(p).exists() and FC.peek_contributors(p) == ["cards.jsonl"]
+    FC.meta_path(p).unlink()
+    assert FC.peek_contributors(p) is None                                   # no sidecar: miss, rebuild
+    assert FC.load(p, "k")["fz"] == {"x": ("c", "t", "s")}                   # the big file itself is intact

@@ -58,7 +58,7 @@ def _record_path(base: Path, h: str) -> Path:
 
 
 def store(record_dict: Dict[str, Any], *, base_dir: Optional[Path] = None,
-          overwrite: bool = False, index: bool = True) -> str:
+          overwrite: bool = False, index: bool = True, card: bool = True) -> str:
     """Store a record dict. Returns its content_hash. Idempotent, append-only.
 
     A MINTED RECEIPT ALSO BECOMES A CARD — see `_mint_receipt_card`. This is the one place a seal
@@ -77,14 +77,19 @@ def store(record_dict: Dict[str, Any], *, base_dir: Optional[Path] = None,
     path = _record_path(base, h)
     if path.exists() and not overwrite:
         if index:
-            _mint_receipt_card(h, record_dict)   # idempotent; heals a seal whose card never landed
+            if card:
+                _mint_receipt_card(h, record_dict)   # idempotent; heals a seal whose card never landed
         return h
     path.parent.mkdir(parents=True, exist_ok=True)
     stored = dict(record_dict)
     stored["content_hash"] = h
     from .validate import canonical_json_bytes
     path.write_bytes(canonical_json_bytes(stored))  # same canonical form (ensure_ascii=False)
-    _mint_receipt_card(h, stored, index=index)
+    if card:
+        # card=False (2026-10-08): the ambient /ask seal keeps the CAS object + the ledger link (the /s/<hash>
+        # receipt is real) but mints NO card — receipt_cards / verified_cards grow only from explicit seals,
+        # and the cold-path bookkeeping below never runs inside the warm server.
+        _mint_receipt_card(h, stored, index=index)
     return h
 
 

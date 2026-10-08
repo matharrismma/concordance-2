@@ -118,7 +118,7 @@ def record_from_derivation(result: Dict[str, Any], *, domain: str = "mathematics
 
 def mint(result: Dict[str, Any], *, config: EngineConfig, domain: str = "mathematics",
          summary: Optional[str] = None, sealed_at: Optional[float] = None,
-         index: bool = True) -> Dict[str, Any]:
+         index: bool = True, card: bool = True) -> Dict[str, Any]:
     """Mint a re-checkable seal, assembled as an ordered sequence of BOUNDED components — each delivers
     its portion of the receipt and none scans the whole ledger or corpus:
 
@@ -135,7 +135,7 @@ def mint(result: Dict[str, Any], *, config: EngineConfig, domain: str = "mathema
         # 1. RECORD (portion: the witness record) — bounded, pure transform.
         record = record_from_derivation(result, domain=domain)
         # 2. SEAL (portion: content_hash + cite_url) — content-addressed, O(1) write, idempotent.
-        content_hash = cas.store(record.to_dict(), index=index)
+        content_hash = cas.store(record.to_dict(), index=index, card=card)
         if not content_hash:
             return {"ok": False, "error": "seal step produced no content_hash"}
         # 3. CHAIN (portion: ledgered + precedent) — PASS only; the append is O(1) via the ledger's
@@ -164,7 +164,7 @@ def mint(result: Dict[str, Any], *, config: EngineConfig, domain: str = "mathema
 
 
 def attach(result: Dict[str, Any], *, config: EngineConfig, domain: str = "mathematics",
-           enabled: bool = True, index: Optional[bool] = None) -> Dict[str, Any]:
+           enabled: bool = True, index: Optional[bool] = None, card: bool = True) -> Dict[str, Any]:
     """Return a copy of `result` with an honest seal attached.
 
     seal = {content_hash, cite_url, ledgered} when a real seal was stored; seal = null with a
@@ -177,7 +177,7 @@ def attach(result: Dict[str, Any], *, config: EngineConfig, domain: str = "mathe
     if not enabled:
         return out
     idx = _index_default() if index is None else bool(index)
-    s = mint(result, config=config, domain=domain, index=idx)
+    s = mint(result, config=config, domain=domain, index=idx, card=card)
     if s.get("ok"):
         out["seal"] = {"content_hash": s["content_hash"], "cite_url": s["cite_url"],
                        "ledgered": s.get("ledgered", False)}
@@ -187,7 +187,8 @@ def attach(result: Dict[str, Any], *, config: EngineConfig, domain: str = "mathe
         # (index=False) the card still persists; only its live-corpus insert is deferred.
         try:
             from . import science_cards
-            science_cards.mint(result, domain, out["seal"], index=idx)
+            if card:
+                science_cards.mint(result, domain, out["seal"], index=idx)
         except Exception:  # noqa: BLE001
             pass
     else:

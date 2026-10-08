@@ -1035,7 +1035,9 @@ def load_cards(path: Optional[Path] = None,
                _frozen_out: Optional[Dict[str, tuple]] = None,
                _skip_frozen_in: Optional[set] = None,
                _contrib_out: Optional[Dict[str, List[int]]] = None,
-               _skip_files: Optional[set] = None) -> Dict[str, dict]:
+               _offsets_in: Optional[Dict[str, List[int]]] = None,
+               _offsets_out: Optional[Dict[str, List[int]]] = None,
+               _nofile_out: Optional[Dict[str, Any]] = None) -> Dict[str, dict]:
     """Load cards from a JSONL file into an id -> card dict. Empty if absent.
 
     `_df_out` (internal — default_corpus passes it): a dict that receives the document
@@ -1056,12 +1058,14 @@ def load_cards(path: Optional[Path] = None,
     frozen = frozen_shelves()
     from time import perf_counter as _pc
     _ph: Dict[str, Any] = {"frozen_df_ms": 0.0, "frozen_cards": 0, "resident_cards": 0,
-                           "frozen_cards_cached": 0, "files_skipped": 0}
+                           "frozen_cards_cached": 0, "files_skipped": 0, "files_seeked": 0}
+    from sys import intern as _intern   # one object per distinct call number / surface across 840k frozen entries
     # THE FROZEN CACHE (2026-10-08, frozen_cache.py): `_contrib_out` receives, per SOURCE FILE NAME, how many
     # [frozen, resident] cards it held (so default_corpus can key the cache on exactly the files that matter,
     # and skip wholesale the ones with nothing resident); a file named in `_skip_frozen_in` has its frozen
-    # cards' DF and index entries already loaded from the cache, so they are counted and skipped — never
-    # re-tokenized; a file in `_skip_files` is not even opened. Everything else is handled live, as before.
+    # cards' DF and index entries already loaded from the cache (a safety net: on a hit those files are read by
+    # `_offsets_in` — only their RESIDENT lines, by byte offset — so no frozen card is even seen; a file whose
+    # recorded offsets are empty is not opened at all). Everything else is handled live, exactly as before.
     _cur: Dict[str, Optional[str]] = {"name": p.name}
 
     def _keep(c: dict) -> None:
@@ -1082,30 +1086,64 @@ def load_cards(path: Optional[Path] = None,
                 return                   # its DF and index entry came from the frozen cache
             if _df_out is not None:
                 _t = _pc()
-                for t in set(_tokens(_card_text(c))):
+                toks = set(_tokens(_card_text(c)))
+                for t in toks:
                     _df_out[t] = _df_out.get(t, 0) + 1
+                if src is None and _nofile_out is not None:
+                    # a frozen card from a NON-file source (the prophecy signposts, shaped at load): counted
+                    # here, but kept OUT of the saved cache — a hit tokenizes it live, so it must not be in both
+                    nd = _nofile_out["df"]
+                    for t in toks:
+                        nd[t] = nd.get(t, 0) + 1
                 _ph["frozen_df_ms"] += (_pc() - _t) * 1000.0
             if _frozen_out is not None and is_public(c):
-                _frozen_out[c["id"]] = (c.get("call") or "", c.get("title") or c["id"],
-                                        c.get("surface") or "?")
-            return                       # no resident stub — the shard holds the body + the graph
+                _frozen_out[c["id"]] = (_intern(c.get("call") or ""), c.get("title") or c["id"],
+                                        _intern(c.get("surface") or "?"))
+                if src is None and _nofile_out is not None:
+                    _nofile_out["ids"].append(c["id"])
+            return False                 # no resident stub — the shard holds the body + the graph
         _ph["resident_cards"] += 1
         if _contrib_out is not None and _cur["name"] is not None:
             _contrib_out.setdefault(_cur["name"], [0, 0])[1] += 1
         out[c["id"]] = c
+        return True
+
+    def _line(raw: bytes, off: Optional[int]) -> None:
+        line = raw.strip()
+        if not line:
+            return
+        try:
+            c = json.loads(line)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return
+        if isinstance(c, dict) and c.get("id"):
+            if _keep(c) and off is not None and _offsets_out is not None and _cur["name"] is not None:
+                _offsets_out.setdefault(_cur["name"], []).append(off)
+
+    def _read(fp: Path, name: Optional[str]) -> None:
+        """One source file. Cold path: every line, recording the byte offset of each line that stayed
+        resident. Cache hit (the file is in `_offsets_in`, byte-identical under the key): seek to exactly
+        those lines and read nothing else - a file with none is never opened. THE BOOT CUT (2026-10-08 v3):
+        a hit used to parse and shelve ~480k frozen cards from mixed files only to discard them."""
+        _cur["name"] = name
+        offs = _offsets_in.get(name) if (_offsets_in is not None and name is not None) else None
+        if offs is not None and not offs:
+            _ph["files_skipped"] += 1      # cached, and nothing resident in it: not even opened
+            return
+        with open(fp, "rb") as f:
+            if offs is not None:
+                _ph["files_seeked"] += 1
+                for off in offs:
+                    f.seek(off)
+                    _line(f.readline(), None)
+            else:
+                off = 0
+                for raw in f:
+                    _line(raw, off)
+                    off += len(raw)
 
     _t_main = _pc()
-    with open(p, encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                c = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if isinstance(c, dict) and c.get("id"):
-                _keep(c)
+    _read(p, p.name)
     _ph["cards_jsonl_ms"] = round((_pc() - _t_main) * 1000.0, 1)
     _t_extras = _pc()
     # further sources that join the SAME graph as Scripture and the tradition:
@@ -1227,21 +1265,7 @@ def load_cards(path: Optional[Path] = None,
             xp = p.parent / extra
             if not xp.exists():
                 continue
-            if _skip_files and extra in _skip_files:
-                _ph["files_skipped"] += 1     # cached, and nothing resident in it: not even opened
-                continue
-            _cur["name"] = extra
-            with open(xp, encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        c = json.loads(line)
-                    except json.JSONDecodeError:
-                        continue
-                    if isinstance(c, dict) and c.get("id"):
-                        _keep(c)
+            _read(xp, extra)
         # THE SIGNPOSTS AS CARDS (2026-10-02; Matt: "the nations at the tower of Babel having parts of
         # the story, but Christ fulfilled them"). data/prophecy/signposts.jsonl served /prophecy alone —
         # search and ask could not reach the clearest statements of the hole Christ filled (measured:
@@ -1362,23 +1386,29 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
             if _DEFAULT is None:
                 from time import perf_counter as _pc
                 from . import frozen_cache as _fc
+                from .systems import rss_kb as _rss
                 df: Dict[str, int] = {}
                 fz: Dict[str, tuple] = {}
                 LOAD_PHASES.clear()
                 _t0 = _pc()
+                _r0 = _rss()
                 # THE FROZEN CACHE (2026-10-08). The frozen shelves' document-frequency table and compact index
                 # are pure functions of the files that hold frozen cards; a boot whose inputs are unchanged loads
-                # them instead of tokenizing every frozen card again. Keyed on exactly the BIG contributors
+                # them instead of tokenizing every frozen card again, and (v3) reads from each cached file only
+                # the lines that stayed resident, by recorded byte offset. Keyed on exactly the BIG contributors
                 # (>= frozen_cache.min_contribution() frozen cards) + the freeze set; small, volatile contributors
-                # (receipt_cards, verified_cards — a few domain-shelf cards, growing with every seal) are processed
+                # (receipt_cards, verified_cards - a few domain-shelf cards, growing with every seal) are processed
                 # live every boot and merged, so the key holds still across seals and nothing is ever missing.
+                # RSS is read at each boundary so the memory of each structure is measured, not estimated.
                 p_main = path or _cards_path()
                 data_dir = p_main.parent
                 frozen = frozen_shelves()
                 state = "off"
                 skip: Optional[set] = None
-                skip_files: Optional[set] = None
-                cache_load_ms = cache_save_ms = 0.0
+                offsets_in: Optional[Dict[str, List[int]]] = None
+                offsets_out: Optional[Dict[str, List[int]]] = None
+                cache_load_ms = cache_read_ms = cache_decode_ms = cache_save_ms = 0.0
+                n_cached_fz = 0
 
                 def _resolve(name: str) -> Path:
                     return p_main if name == p_main.name else data_dir / name
@@ -1386,47 +1416,75 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
                 if _fc.enabled() and frozen:
                     state = "miss"
                     _tc = _pc()
-                    names = _fc.peek_contributors(_fc.cache_path(data_dir)) or []
+                    cpath = _fc.cache_path(data_dir)
+                    names = _fc.peek_contributors(cpath) or []
                     files = [_resolve(n) for n in names]
                     if names and all(f.exists() for f in files):
-                        got = _fc.load(_fc.cache_path(data_dir), _fc.make_key(files, frozen))
+                        got = _fc.load(cpath, _fc.make_key(files, frozen))
                         if got:
-                            df.update(got["df"])
-                            fz.update(got["fz"])
+                            df, fz = got["df"], got["fz"]          # the loaded tables ARE the tables - no copy
                             skip = set(got["contributors"])
-                            skip_files = set(got.get("skip_files") or [])
+                            offsets_in = got["offsets"]
+                            cache_read_ms, cache_decode_ms = got["read_ms"], got["decode_ms"]
+                            n_cached_fz = len(fz)
                             state = "hit"
+                    if state == "miss":
+                        offsets_out = {}
                     cache_load_ms = (_pc() - _tc) * 1000.0
+                nofile: Dict[str, Any] = {"df": {}, "ids": []}
+                _r1 = _rss()
                 contrib: Dict[str, List[int]] = {}
                 cards = load_cards(path, _df_out=df, _frozen_out=fz, _skip_frozen_in=skip,
-                                   _contrib_out=contrib, _skip_files=skip_files)
+                                   _contrib_out=contrib, _offsets_in=offsets_in, _offsets_out=offsets_out,
+                                   _nofile_out=(nofile if offsets_out is not None else None))
                 _t1 = _pc()
+                _r2 = _rss()
+                if state == "hit":
+                    LOAD_PHASES["frozen_cards_cached"] = n_cached_fz   # served from the cache, never seen by load_cards
                 cached_names: List[str] = sorted(skip) if skip else []
-                cached_skip: List[str] = sorted(skip_files) if skip_files else []
+                cached_skip: List[str] = sorted(n for n, o in (offsets_in or {}).items() if not o)
                 if state == "miss":
                     _ts = _pc()
                     mn = _fc.min_contribution()
                     big = sorted(n for n, (k, _r) in contrib.items() if k >= mn)
                     small = [_resolve(n) for n, (k, _r) in contrib.items() if 0 < k < mn]
                     big_files = [_resolve(n) for n in big]
-                    # a cached contributor with NOTHING resident need not be opened on a hit (never the main file)
-                    only_frozen = [n for n in big if contrib[n][1] == 0 and n != p_main.name]
                     if big and all(f.exists() for f in big_files):
-                        df_c, fz_c = _without_files(df, fz, small, frozen) if small else (df, fz)
-                        if _fc.save(_fc.cache_path(data_dir), _fc.make_key(big_files, frozen), df_c, fz_c, big,
-                                    only_frozen):
-                            cached_names, cached_skip = big, only_frozen
+                        if small or nofile["ids"] or nofile["df"]:
+                            df_c, fz_c = _without_files(df, fz, small, frozen)      # copies, small files subtracted
+                            for t, n in nofile["df"].items():                        # ... and the non-file frozen cards
+                                m = df_c.get(t, 0) - n
+                                if m > 0:
+                                    df_c[t] = m
+                                else:
+                                    df_c.pop(t, None)
+                            for cid in nofile["ids"]:
+                                fz_c.pop(cid, None)
+                        else:
+                            df_c, fz_c = df, fz
+                        offs = {n: list((offsets_out or {}).get(n, [])) for n in big}   # [] = nothing resident
+                        if _fc.save(_fc.cache_path(data_dir), _fc.make_key(big_files, frozen), df_c, fz_c, big, offs):
+                            cached_names = big
+                            cached_skip = sorted(n for n, o in offs.items() if not o)
                     cache_save_ms = (_pc() - _ts) * 1000.0
                 _DEFAULT = Corpus(cards, df_extra=df, frozen_idx=fz)
                 _t2 = _pc()
+                _r3 = _rss()
+
+                def _delta(a, b):
+                    return (b - a) if (a is not None and b is not None) else None
+
                 LOAD_PHASES.update({"load_cards_ms": round((_t1 - _t0) * 1000.0, 1),
                                     "index_build_ms": round((_t2 - _t1) * 1000.0, 1),
                                     "total_ms": round((_t2 - _t0) * 1000.0, 1),
                                     "resident_cards": len(cards), "frozen_index": len(fz),
                                     "df_tokens": len(df),
                                     "frozen_cache": state, "cache_load_ms": round(cache_load_ms, 1),
+                                    "cache_read_ms": round(cache_read_ms, 1), "cache_decode_ms": round(cache_decode_ms, 1),
                                     "cache_save_ms": round(cache_save_ms, 1),
-                                    "cached_contributors": cached_names, "cached_skip_files": cached_skip})
+                                    "cached_contributors": cached_names, "cached_skip_files": cached_skip,
+                                    "rss_kb_cache_delta": _delta(_r0, _r1), "rss_kb_load_delta": _delta(_r1, _r2),
+                                    "rss_kb_index_delta": _delta(_r2, _r3), "rss_kb_total_delta": _delta(_r0, _r3)})
     return _DEFAULT
 
 

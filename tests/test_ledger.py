@@ -176,3 +176,20 @@ if __name__ == "__main__":
         fn()
         print(f"  ok  {fn.__name__}")
     print(f"\n{len(fns)} ledger tests passed — the chain holds, tampering is caught.")
+
+
+def test_chain_tip_sees_a_file_newer_than_the_head(tmp_path):
+    """Review 2026-10-08: a `sync` pull writes ledger files behind the head pointer's back; the next seal must
+    link to the TRUE tip, not the stale pointer. The pointer is trusted only when the newest file is its tip."""
+    import json, os, time
+    from concordance import ledger as L
+    d = tmp_path
+    (d / "a.json").write_text(json.dumps({"content_hash": "A", "sealed_at": 1.0}), encoding="utf-8")
+    L._write_head(d, "a.json", "A", 1.0)
+    assert L._chain_tip(d) == ("A", 1.0)                      # pointer trusted: a.json IS the newest
+    time.sleep(0.02)
+    (d / "b.json").write_text(json.dumps({"content_hash": "B", "sealed_at": 2.0}), encoding="utf-8")
+    os.utime(d / "b.json", None)                              # written behind the pointer's back (a pull)
+    assert L._chain_tip(d) == ("B", 2.0)                      # the scan wins; the pointer is stale
+    L._write_head(d, "b.json", "B", 2.0)
+    assert L._chain_tip(d) == ("B", 2.0)                      # re-established
