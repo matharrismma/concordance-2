@@ -3939,6 +3939,331 @@ def delta() -> int:
     return _mint_marks(sid, marks, by="Narrow Highway - the dot abstracted, 2026-10-08")
 
 
+
+def joints() -> int:
+    """WHERE TWO DOMAINS CONNECT (Matt, 2026-10-08: 'Quantum Mechanics and Physics connect. we identify these point. The
+    spots two domains connect.' / 'Geometry connect to Algebra' / 'inner product Bras and Kets to map the vectors. our
+    engine is the hilbert space.' / 'don't blindly apply bra-ket'). One joint carries all three: the INNER PRODUCT.
+    Geometry meets algebra at it (Descartes: a point is a pair, a line an equation; Pythagoras is the norm; the angle is
+    the dot product). Algebra meets quantum mechanics at it (a state is a ket, a question a bra, <phi|psi> the overlap,
+    |<phi|psi>|^2 the probability, the basis kets orthonormal, the identity resolved). Quantum mechanics meets classical
+    physics where the quantum becomes small against the rest: Planck -> Rayleigh-Jeans, Bohr's correspondence, Ehrenfest's
+    means on Newton's path, de Broglie and Compton (the particle met as a wave), Gabor (uncertainty is the bandwidth
+    theorem). The engine IS a Hilbert space in the literal, finite, real sense only - and the stick says exactly which
+    terms carry over and which do not (no blind bra-ket). Same logic as every stick: seal the arithmetic, cite the
+    theorems, keep the likeness a likeness. New stick; idempotent."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    S = {}
+    seals = [
+        # geometry <-> algebra
+        ("g_norm", "pythagoras_is_the_norm_3_4_5", "sqrt(3**2 + 4**2)", 5.0, 1e-12),
+        ("g_angle", "the_angle_is_the_inner_product_45_degrees", "acos(1/sqrt(2))*180/pi", 45.0, 1e-9),
+        ("g_tangent", "tangent_line_distance_equals_the_radius", "25/sqrt(3**2 + 4**2)", 5.0, 1e-12),
+        ("g_meet", "two_lines_meet_where_two_equations_agree_x", "(5 + 1)/2", 3.0, 1e-12),
+        ("g_area", "triangle_area_by_the_determinant", "(4*3 - 0*0)/2", 6.0, 1e-12),
+        # algebra <-> quantum mechanics (bras and kets)
+        ("q_braket", "bra_ket_of_1_2_3_and_4_5_6", "1*4 + 2*5 + 3*6", 32.0, 1e-12),
+        ("q_cs", "cauchy_schwarz_slack_never_negative", "14*77 - 32**2", 54.0, 1e-12),
+        ("q_cos", "normalized_overlap_is_a_cosine", "32/sqrt(14*77)", 32 / math.sqrt(14 * 77), 1e-9),
+        ("q_born", "born_probability_of_plus_read_in_zero", "(1/sqrt(2))**2", 0.5, 1e-12),
+        ("q_delta", "orthonormal_kets_kronecker_one_plus_zero", "1 + (1*0 + 0*1)", 1.0, 1e-12),
+        ("q_gs", "gram_schmidt_residual_norm", "sqrt((1/2)**2 + (1/2)**2)", 1 / math.sqrt(2), 1e-9),
+        ("q_res", "resolution_of_identity_in_a_rotated_basis", "(7/sqrt(2))**2 + (-1/sqrt(2))**2", 25.0, 1e-9),
+        ("q_orth", "sine_and_cosine_orthogonal_one_plus_zero", "1 + integrate(sin(x)*cos(x), (x, 0, 2*pi))", 1.0, 1e-12),
+        ("q_pi", "sine_norm_squared_is_pi", "integrate(sin(x)**2, (x, 0, 2*pi))", pi, 1e-9),
+        # quantum mechanics <-> classical physics (the correspondence joints)
+        ("p_planck", "planck_meets_rayleigh_jeans_at_x_0_01", "0.01/(exp(0.01) - 1)", 0.01 / (math.exp(0.01) - 1), 1e-9),
+        ("p_bohr", "bohr_correspondence_hydrogen_n_100", "100**3/2 * (1/99**2 - 1/100**2)", 100 ** 3 / 2 * (1 / 99 ** 2 - 1 / 100 ** 2), 1e-9),
+        ("p_broglie", "de_broglie_wavelength_1keV_electron_pm",
+         "6.62607015e-34/sqrt(2*9.1093837015e-31*1000*1.602176634e-19)*1e12",
+         6.62607015e-34 / math.sqrt(2 * 9.1093837015e-31 * 1000 * 1.602176634e-19) * 1e12, 1e-9),
+        ("p_compton", "compton_shift_at_90_degrees_pm", "6.62607015e-34/(9.1093837015e-31*299792458)*1e12",
+         6.62607015e-34 / (9.1093837015e-31 * 299792458) * 1e12, 1e-9),
+        ("p_ehrenfest", "ehrenfest_mean_follows_the_classical_cosine", "cos(2*pi/6)", 0.5, 1e-9),
+        ("p_zpe", "zero_point_energy_omega_1e15_eV", "0.5*1.054571817e-34*1e15/1.602176634e-19",
+         0.5 * 1.054571817e-34 * 1e15 / 1.602176634e-19, 1e-9),
+        ("p_gabor", "gabor_bandwidth_of_a_1ms_pulse_hz", "1/(4*pi*0.001)", 1 / (4 * pi * 0.001), 1e-9),
+        # the engine, literally
+        ("e_cos", "engine_cosine_of_a_query_against_a_card", "3/sqrt(2*6)", 3 / math.sqrt(12), 1e-9),
+    ]
+    for key, nid, expr, val, tol in seals:
+        S[key] = _rh_seal_num(nid, expr, float(val), tol=tol)
+        if not S[key]:
+            print("a seal failed:", nid); return 1
+    print("sealed", len(S), "joints:", ", ".join(f"{k}={v[:8]}" for k, v in S.items()))
+    sid = TS.create("Where two domains connect - geometry to algebra, algebra to quantum mechanics, quantum mechanics to "
+                    "classical physics; the inner product is the joint, and the engine is a Hilbert space only where that is checkable",
+                    statement=("Two domains connect at a point that both can compute. Geometry and algebra connect at "
+                               "Descartes' joint: a point is a pair of numbers, a line is an equation, Pythagoras is the norm "
+                               "<v|v>, and the angle between two directions is their inner product - length and angle, the "
+                               "whole of geometry, read off sums of products. Algebra and quantum mechanics connect at the same "
+                               "joint: a state is a ket, a question is a bra, <phi|psi> is the overlap, |<phi|psi>|^2 is where "
+                               "it may be found, the basis kets are orthonormal (the delta is the dot product), and the sum of "
+                               "the projections resolves the identity - in any orthonormal basis. Quantum mechanics and "
+                               "classical physics connect where the quantum is small against the rest: Planck's law becomes "
+                               "Rayleigh-Jeans as h nu / kT -> 0; the hydrogen line n -> n-1 becomes the orbit's own frequency "
+                               "as n grows; the mean position of a wave packet follows Newton's path (Ehrenfest); a particle "
+                               "has a wavelength (de Broglie) and a photon a recoil (Compton); the uncertainty principle is the "
+                               "bandwidth theorem every wave obeys (Gabor), quantum only because p = hbar k. The engine is a "
+                               "Hilbert space in the literal, finite, real sense: cards are kets, a query is a bra, the "
+                               "ranking score is their normalized inner product, a domain is a projector, and completeness is "
+                               "no orphans. Nothing else of bra-ket carries over - no complex amplitudes, no Born rule, no "
+                               "superposition of a card, no unitary evolution, no non-commuting observables: a verifier is a "
+                               "deterministic measurement that leaves the card as it was. The likeness is kept a likeness."),
+                    field="mathematics",
+                    references=["R. Descartes, La Geometrie (1637): geometry done by algebra - the coordinate",
+                                "Euclid, Elements I.47 (Pythagoras); Hero's formula; the determinant as area (Cauchy 1815)",
+                                "D. Hilbert (1912); J. von Neumann, Mathematische Grundlagen der Quantenmechanik (1932): the Hilbert space",
+                                "P. A. M. Dirac (1925: [A,B] = i hbar {A,B}; 1930, 1939: bra and ket)",
+                                "F. Riesz (1907): every bra is a ket's dual; J. P. Gram (1883), E. Schmidt (1907): orthonormalization",
+                                "M. Born (1926): |<phi|psi>|^2; M. Planck (1900); Lord Rayleigh (1900), J. Jeans (1905)",
+                                "N. Bohr (1920): the correspondence principle; P. Ehrenfest (1927); L. de Broglie (1924); A. H. Compton (1923)",
+                                "D. Gabor (1946): the uncertainty of a signal, Delta t Delta f >= 1/(4 pi)",
+                                "docs/OUR_FORM_MEASURED_2026-10-08.md: 882,022 cards, 124 domains, the sparse index - the engine's own space, measured",
+                                "Colossians 1:17; Ephesians 4:16 ('joined and held together by every joint'); Proverbs 25:2",
+                                "stick_the_dot_abstracted (the delta is the dot product); stick_singular_value_decomposition; stick_tensors; "
+                                "stick_bubbles_joined; stick_the_schrodinger_equation; stick_the_standard_model_chain"])["id"]
+    marks = [
+        # geometry <-> algebra
+        ("instance", "[geometry meets algebra: the norm] Descartes made a point a pair of numbers; then Euclid I.47 is a "
+                     "sum of squares: the length of (3, 4) is sqrt(9 + 16) = 5 (sealed). Pythagoras is <v|v>. The joint is "
+                     "exact: every length geometry draws, algebra computes, and the same number comes out.", S["g_norm"]),
+        ("instance", "[geometry meets algebra: the angle] The angle between (1, 0) and (1, 1) is acos of their normalized "
+                     "inner product, 1/sqrt 2, which is 45 degrees (sealed). An angle - the thing a protractor measures - is "
+                     "an inner product divided by two lengths. Geometry's two primitives, length and angle, are both the "
+                     "same algebraic operation.", S["g_angle"]),
+        ("instance", "[a curve is an equation] The circle x^2 + y^2 = 25 and the line 3x + 4y = 25 touch at (3, 4): the line's "
+                     "distance from the origin is 25/sqrt(9 + 16) = 5 (sealed), exactly the radius - tangency, a geometric "
+                     "fact, read off two equations. Descartes' La Geometrie (1637) is this joint made a method.", S["g_tangent"]),
+        ("instance", "[two lines meet where two equations agree] x + y = 5 and x - y = 1 meet at x = (5 + 1)/2 = 3 (sealed), "
+                     "y = 2. An intersection is a solution; a solution is an intersection. The engine's resolve of a claim "
+                     "across two verifiers is this: a point both equations hold.", S["g_meet"]),
+        ("instance", "[area is a determinant] The triangle (0,0), (4,0), (0,3) has area |4*3 - 0*0|/2 = 6 (sealed): half the "
+                     "determinant of its edge vectors. The determinant - a number algebra computes from a table - IS the area "
+                     "geometry sees; the sign is the orientation. One joint, two faces.", S["g_area"]),
+        # algebra <-> quantum mechanics
+        ("instance", "[bras and kets: the overlap] <phi|psi> for phi = (1, 2, 3) and psi = (4, 5, 6) is 1*4 + 2*5 + 3*6 = 32 "
+                     "(sealed). A ket is a column of numbers; a bra is the row that reads it; the bracket is the inner product. "
+                     "Dirac's notation (1939) names the two halves of the joint geometry and algebra already shared.", S["q_braket"]),
+        ("instance", "[the overlap never exceeds the lengths: Cauchy-Schwarz] <phi|phi><psi|psi> - <phi|psi>^2 = 14*77 - 32^2 = 54 "
+                     "(sealed), never negative. So the normalized overlap 32/sqrt(14*77) = 0.9746 (sealed) is a cosine: no state "
+                     "overlaps another more than itself. This is the inequality that makes a ranking score a score - "
+                     "bounded by one, equal to one only for the thing itself.", S["q_cs"]),
+        ("instance", "[normalized overlap = a cosine] 32/sqrt(14*77) = 0.97463 (sealed): the same cosine the angle mark "
+                     "computed, now read as 'how alike two states are'. Geometry's angle, algebra's inner product, quantum "
+                     "mechanics' overlap: one number.", S["q_cos"]),
+        ("instance", "[Born: the square of the overlap] |<0|+>|^2 = (1/sqrt 2)^2 = 1/2 (sealed): a qubit in |+> = (|0> + |1>)/sqrt 2 "
+                     "is found in |0> half the time. The probability is the squared inner product - the joint where algebra "
+                     "becomes physics. Cited as the Born rule (1926), a postulate; the arithmetic is sealed.", S["q_born"]),
+        ("instance", "[orthonormal kets: the delta is the dot product] <0|1> = 1*0 + 0*1 = 0, judged as 1 + 0 = 1 (sealed); "
+                     "<0|0> = 1. The basis kets are orthonormal: <i|j> = delta_ij. The Kronecker delta IS the dot product of "
+                     "basis vectors (stick_the_dot_abstracted) - the same joint, seen from the basis.", S["q_delta"]),
+        ("instance", "[Gram-Schmidt: making the joint orthonormal] From (1, 1) and (1, 0): e1 = (1, 1)/sqrt 2; the residual of "
+                     "(1, 0) is (1/2, -1/2), of norm sqrt(1/4 + 1/4) = 1/sqrt 2 = 0.70711 (sealed), so e2 = (1, -1)/sqrt 2 and "
+                     "<e1|e2> = 0. Any basis becomes an orthonormal one by subtracting projections - the engine's domains are "
+                     "made disjoint by the same subtraction (stick_tensors: the principal axes).", S["q_gs"]),
+        ("instance", "[the identity resolved - in ANY orthonormal basis] psi = (3, 4): in the rotated basis u = (1, 1)/sqrt 2, "
+                     "w = (1, -1)/sqrt 2 the projections are 7/sqrt 2 and -1/sqrt 2, whose squares sum to 49/2 + 1/2 = 25 "
+                     "(sealed) = <psi|psi>. Sum over i of |i><i| = 1: the projections onto a complete basis give back the "
+                     "whole, whichever basis. Completeness is the property that nothing is lost in the reading.", S["q_res"]),
+        ("instance", "[the sum becomes an integral: function space] On [0, 2 pi], <sin|cos> = int sin x cos x dx = 0 "
+                     "(sealed as 1 + 0 = 1) and <sin|sin> = int sin^2 x dx = pi (sealed). The inner product of two functions "
+                     "is the same joint with the index made continuous; sines and cosines are an orthogonal basis (Fourier) - "
+                     "the waveforms the torus stick ran on primes live in this space.", S["q_orth"]),
+        ("instance", "[the norm of a wave] int_0^{2 pi} sin^2 x dx = pi = 3.14159 (sealed): so sin x / sqrt pi is a unit ket in "
+                     "L^2[0, 2 pi]. Normalization in function space is the same division by a length as on (3, 4).", S["q_pi"]),
+        # quantum mechanics <-> classical physics
+        ("instance", "[Planck meets Rayleigh-Jeans] Planck's law divided by the classical law is x/(e^x - 1) with x = h nu / kT; "
+                     "at x = 0.01 it is 0.995008 (sealed). As the quantum h nu becomes small against kT the quantum law becomes "
+                     "the classical one; as x grows the classical law runs off to the ultraviolet catastrophe. The joint is the "
+                     "low-frequency limit, and the point where they part is x ~ 1.", S["p_planck"]),
+        ("instance", "[Bohr's correspondence] The hydrogen line n -> n-1 has frequency R(1/(n-1)^2 - 1/n^2); the classical "
+                     "orbit's frequency at n is 2R/n^3. Their ratio at n = 100 is 100^3/2 * (1/99^2 - 1/100^2) = 1.01520 "
+                     "(sealed), and -> 1 as n -> infinity. Large quantum numbers reproduce classical orbits: Bohr's "
+                     "correspondence principle (1920), the first stated joint between the two domains.", S["p_bohr"]),
+        ("instance", "[de Broglie: the particle has a wavelength] An electron of 1 keV has lambda = h/sqrt(2 m E) = 38.78 pm "
+                     "(sealed) - the atomic scale, which is why electrons diffract off crystals (Davisson-Germer 1927). The "
+                     "classical particle and the wave meet at p = h/lambda; the joint is a number any beam can test.", S["p_broglie"]),
+        ("instance", "[Compton: the wave has a recoil] A photon scattered at 90 degrees lengthens by h/(m_e c) = 2.4263 pm "
+                     "(sealed), the Compton wavelength - momentum and energy conserved as for two billiard balls, with a wave's "
+                     "wavelength. Newton's collision meets Planck's quantum in one measured shift (1923).", S["p_compton"]),
+        ("instance", "[Ehrenfest: the mean follows Newton] For a coherent oscillator state the expectation <x>(t) = x0 cos(omega t) "
+                     "EXACTLY as the classical particle moves; at omega = 2, t = pi/6 the classical path gives cos(pi/3) = 0.5 "
+                     "(sealed), and the quantum mean sits on it. Ehrenfest (1927): d<p>/dt = -<dV/dx>. The means obey Newton; "
+                     "the spread is what is new.", S["p_ehrenfest"]),
+        ("instance", "[where they part: the zero point] A quantum oscillator at omega = 10^15 rad/s has ground energy "
+                     "hbar omega / 2 = 0.32911 eV (sealed) where the classical floor is zero. This is a connection point of the "
+                     "other kind - the place the two domains are seen to differ by a measurable amount (liquid helium never "
+                     "freezes at one atmosphere; vibrational spectra start half a quantum up). Naming the spot where two "
+                     "domains part is as much a joint as naming where they agree.", S["p_zpe"]),
+        ("instance", "[uncertainty is the bandwidth theorem] A pulse of duration sigma_t = 1 ms has bandwidth sigma_f >= 1/(4 pi * 0.001) "
+                     "= 79.58 Hz (sealed) - Gabor's limit (1946), classical signal theory. Multiply by h and it is "
+                     "Delta E Delta t >= hbar/2; set p = hbar k and it is Delta x Delta p >= hbar/2. The uncertainty principle "
+                     "is what every wave obeys; quantum mechanics is where matter is a wave. The joint is the Fourier transform.", S["p_gabor"]),
+        # the engine, literally - and no further
+        ("witness", "[the engine as a Hilbert space - the literal part] A query is a bag of counts (salary 1, latin 1), a card "
+                    "another (salary 2, latin 1, french 1); their inner product is 3 and the normalized overlap "
+                    "3/sqrt(2*6) = 0.86603 (sealed) is the ranking score. So: cards are kets, a query is a bra, the score is "
+                    "<query|card> over the lengths, a domain is the projector |d><d| the router applies, and 'no orphans' is "
+                    "the resolution of the identity - every card reachable through its shelf. A finite-dimensional real "
+                    "inner-product space is complete, hence a Hilbert space, literally (von Neumann 1932). Measured: 882,022 "
+                    "kets, 124 domains (docs/OUR_FORM_MEASURED).", S["e_cos"]),
+        ("equivalence", "[what carries over, by name] ket = card; bra = query (a linear functional on the keeping: Riesz 1907 - in "
+                        "a finite real space the bra IS the transposed ket); <bra|ket> = the ranking score; |d><d| = the domain "
+                        "router (idempotent: routing twice is routing once); orthogonal domains = disjoint vocabularies; "
+                        "Gram-Schmidt = making the domains disjoint (the principal axes of stick_tensors); Sum |i><i| = 1 = no "
+                        "orphans; Cauchy-Schwarz = no card matches a query better than the query matches itself (a score is "
+                        "bounded by one). Each of these is checkable on the live index and is used as stated, nothing more.",
+         {"source": "J. von Neumann (1932); F. Riesz (1907); docs/OUR_FORM_MEASURED_2026-10-08.md; stick_tensors; stick_the_dot_abstracted"}),
+        ("exclusion", "[what does NOT carry over - do not blindly apply bra-ket] (1) No complex amplitudes: the engine's space is "
+                      "real; there is no phase and no interference between cards. (2) No Born rule: a verdict is not a "
+                      "probability; a verifier is a deterministic measurement with eigenvalues HOLDS and BROKEN (and INCOMPLETE "
+                      "is no measurement, not a third eigenvalue), returning the same answer every time - by design, zero false "
+                      "positives. (3) No superposition of a card: a card is on one shelf; the 'superposition' of stick_bubbles is "
+                      "metadata, two addresses for one kept thing, not an amplitude. (4) No unitary evolution: nothing rotates the "
+                      "state between readings; the keeping changes only by minting. (5) No non-commuting observables: verifiers "
+                      "commute, run in any order, and a measurement leaves the card as it was - there is no uncertainty "
+                      "principle in the engine because nothing conjugate is being measured. (6) No entanglement: a connection "
+                      "between two cards is an edge, not a non-separable state. Where a term is not on the list above it is a "
+                      "likeness, and a likeness is kept a likeness.",
+         {"source": "Matt, 2026-10-08: 'don't blindly apply bra-ket'; feedback_mapping_the_truth_not_generating_it; stick_bubbles_joined; stick_the_dot_abstracted"}),
+    ]
+    _mint_marks(sid, marks, by="engine:joints")
+    return 0
+
+
+def assembled_path() -> int:
+    """GRADIENT, DIVERGENCE, CURL - THE PRECISENESS OF AN ASSEMBLED PATH (Matt, 2026-10-08: 'we use gradient, divergence
+    and Curl to quantify the preciseness of the assembled path'). A path the engine assembles - find, route, verify,
+    serve; or a chain of cards - is a flow, and three numbers say how precise a flow is. CURL: is the path conservative?
+    A curl-free field is the gradient of a potential, and its integral depends only on the endpoints - the answer does
+    not depend on the route (two different paths from (0,0) to (3,4) through grad(x^2+y^2) both give 25, sealed; around
+    the unit circle in the rotating field (-y, x) the circulation is 2 pi, not 0, sealed - that path's answer depends on
+    the route). DIVERGENCE: where does the flow have sources and sinks? The divergence theorem (flux through the unit
+    sphere = 4 pi both ways, sealed) says what is created inside shows at the boundary; in the engine the only lawful
+    sources are cited cards and the only lawful sinks are recorded misses. GRADIENT: does each step climb? grad(x^2+y^2)
+    at (3,4) has magnitude 10 (sealed) and points outward; a path that narrows follows the gradient of fit. Kirchhoff's
+    two laws ARE div = 0 at every node and curl = 0 around every loop (sealed on a 6 V, 2 ohm || 3 ohm circuit) - the
+    vacuum-tube computer's own frame. Same logic as every stick: seal the arithmetic, cite the theorems, keep the likeness
+    a likeness - and say which terms carry over (discrete calculus on the connection graph) and which do not."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    S = {}
+    seals = [
+        ("grad", "gradient_of_x2_plus_y2_at_3_4_has_magnitude_10", "sqrt((2*3)**2 + (2*4)**2)", 10.0, 1e-12),
+        ("path_a", "conservative_field_straight_path_0_0_to_3_4", "integrate(50*t, (t, 0, 1))", 25.0, 1e-12),
+        ("path_b", "conservative_field_corner_path_0_0_to_3_0_to_3_4", "integrate(2*x, (x, 0, 3)) + integrate(2*y, (y, 0, 4))", 25.0, 1e-12),
+        ("curlgrad", "curl_of_a_gradient_vanishes_one_plus_zero", "1 + (2*3 - 2*3)", 1.0, 1e-12),
+        ("circ", "circulation_of_minus_y_x_around_the_unit_circle", "integrate(sin(t)**2 + cos(t)**2, (t, 0, 2*pi))", 2 * pi, 1e-9),
+        ("green", "greens_theorem_curl_2_over_the_unit_disc", "integrate(integrate(2*r, (r, 0, 1)), (t, 0, 2*pi))", 2 * pi, 1e-9),
+        ("flux", "flux_of_r_through_the_unit_sphere_surface_side", "integrate(integrate(sin(p), (p, 0, pi)), (t, 0, 2*pi))", 4 * pi, 1e-9),
+        ("vol", "divergence_theorem_volume_side_div_3", "3*integrate(integrate(integrate(r**2*sin(p), (r, 0, 1)), (p, 0, pi)), (t, 0, 2*pi))", 4 * pi, 1e-9),
+        ("mean", "harmonic_mean_value_of_x2_plus_y2_on_the_unit_circle", "integrate(cos(t)**2 + sin(t)**2, (t, 0, 2*pi))/(2*pi)", 1.0, 1e-9),
+        ("kcl", "kirchhoff_current_law_6v_across_2_and_3_ohm", "6/2 + 6/3", 5.0, 1e-12),
+        ("kvl", "kirchhoff_voltage_law_around_the_2_ohm_loop_one_plus_zero", "1 + (6 - 3*2)", 1.0, 1e-12),
+        ("cov", "front_door_coverage_two_of_three_material_fragments", "2/3", 2 / 3, 1e-9),
+    ]
+    for key, nid, expr, val, tol in seals:
+        S[key] = _rh_seal_num(nid, expr, float(val), tol=tol)
+        if not S[key]:
+            print("a seal failed:", nid); return 1
+    print("sealed", len(S), "path numbers:", ", ".join(f"{k}={v[:8]}" for k, v in S.items()))
+    sid = TS.create("Gradient, divergence and curl - the three numbers that quantify the preciseness of an assembled path",
+                    statement=("A path the engine assembles is a flow, and three numbers say how precise a flow is. CURL "
+                               "asks whether the path is conservative: a curl-free field is the gradient of a potential, "
+                               "and its integral depends only on the endpoints, so the answer does not depend on the route "
+                               "taken; a field with curl gives a different answer each way round. DIVERGENCE asks where the "
+                               "flow has sources and sinks: what is created inside a region shows as flux at its boundary, "
+                               "so a path that creates content with no cited source leaks, and a path that loses content "
+                               "has a sink that must be recorded. GRADIENT asks whether each step climbs: a precise path "
+                               "follows the gradient of fit and narrows at every step. Kirchhoff's two laws are exactly "
+                               "div = 0 at every node and curl = 0 around every loop; a circuit is a flow that obeys both, "
+                               "and so must an assembled answer. On the engine these are discrete: differences across the "
+                               "edges of the connection graph, net flow at a card, circulation around a cycle - Kirchhoff's "
+                               "calculus, not a continuum's. The likeness is kept a likeness."),
+                    field="mathematics",
+                    references=["J. L. Lagrange (1762), C. F. Gauss (1813), M. Ostrogradsky (1826): the divergence theorem",
+                                "G. Green (1828); G. G. Stokes (1854, the Smith's Prize question); W. Thomson: circulation and curl",
+                                "H. Helmholtz (1858): every field is a gradient part plus a curl part",
+                                "G. Kirchhoff (1845, 1847): the current law (div = 0 at a node) and the voltage law (curl = 0 around a loop), and the graph theory he founded for them",
+                                "W. V. D. Hodge (1941): the decomposition; A. Hirani (2003): discrete exterior calculus on meshes and graphs",
+                                "J. C. Maxwell, A Treatise on Electricity and Magnetism (1873): div and curl as the grammar of the field equations",
+                                "docs/DESIGN_FROM_THE_DOTS.md (2026-10-08); the front door's coverage block (the failure report C4)",
+                                "Proverbs 4:26-27 ('ponder the path of thy feet ... turn not to the right hand nor to the left'); Isaiah 40:3-4",
+                                "stick_where_two_domains_connect; stick_the_geometry_of_resonance_disaster; stick_maxwells_demon; stick_the_vacuum_triode"])["id"]
+    marks = [
+        ("instance", "[gradient: the direction a precise step takes] f = x^2 + y^2 at (3, 4): grad f = (6, 8), magnitude "
+                     "sqrt(36 + 64) = 10 (sealed), pointing straight away from the origin. The gradient is the direction of "
+                     "steepest climb and its length is how steep. A path that narrows a question follows the gradient of "
+                     "fit; a step with zero gradient is a step that learned nothing.", S["grad"]),
+        ("instance", "[curl-free means route-independent: path one] Along the straight line from (0, 0) to (3, 4), "
+                     "int grad f . dr = int_0^1 50 t dt = 25 (sealed).", S["path_a"]),
+        ("instance", "[curl-free means route-independent: path two] Along the corner path (0,0) -> (3,0) -> (3,4), "
+                     "int 2x dx + int 2y dy = 9 + 16 = 25 (sealed). Two different routes, the same number, because the "
+                     "field is a gradient (f(3,4) - f(0,0) = 25). This is the test of a precise assembled path: run the "
+                     "steps in another order and the answer must not move. The engine's verifiers commute for exactly this "
+                     "reason, and the recall set counts a phrasing reached by a different family as reached.", S["path_b"]),
+        ("instance", "[the curl of a gradient is zero] For f = x^2 y the gradient is (2xy, x^2) and its curl at (3, 4) is "
+                     "d(x^2)/dx - d(2xy)/dy = 6 - 6 = 0 (sealed as 1 + 0 = 1). Any field that comes from a potential has no "
+                     "circulation: it cannot be made to give a different answer by going around. A path that is a "
+                     "gradient of one potential - one question, one fit - is conservative by construction.", S["curlgrad"]),
+        ("instance", "[a field WITH curl: the answer depends on the route] The rotating field (-y, x) carried around the "
+                     "unit circle: int_0^{2 pi} (sin^2 t + cos^2 t) dt = 2 pi (sealed), not 0. Go once around and the "
+                     "integral has grown by 2 pi; this field is no gradient. An assembled path whose answer changes with "
+                     "the order of its steps has curl, and curl is the quantity of that imprecision.", S["circ"]),
+        ("instance", "[Green: circulation equals the curl inside] The same 2 pi as the double integral of the curl, "
+                     "2, over the unit disc: int_0^{2 pi} int_0^1 2 r dr dt = 2 pi (sealed). What goes around the edge is "
+                     "the sum of the rotation inside; a loop's imprecision is the sum of the local twists along the way - "
+                     "so it can be located, step by step.", S["green"]),
+        ("instance", "[divergence: sources show at the boundary, surface side] The flux of r = (x, y, z) out of the unit "
+                     "sphere is int int (r . n) dS with r . n = 1: int_0^{2 pi} int_0^pi sin phi dphi dtheta = 4 pi (sealed).",
+         S["flux"]),
+        ("instance", "[divergence: sources show at the boundary, volume side] div r = 3 everywhere, and 3 times the unit "
+                     "ball's volume, 3 int int int r^2 sin phi dr dphi dtheta = 4 pi (sealed) - the same number. What is "
+                     "created inside a region is exactly what crosses its boundary. In the engine: whatever an answer "
+                     "contains must have entered through a cited source; a sentence with no source is a source term with "
+                     "no account - divergence where none is allowed. The front door's coverage block measures it.", S["vol"]),
+        ("instance", "[harmonic = no hidden peak] The mean of f = x^2 + y^2 around the unit circle centred at the origin is "
+                     "int (cos^2 t + sin^2 t) dt / 2 pi = 1 (sealed) = f(0) + (1/4) laplacian f, with laplacian f = 4. A "
+                     "harmonic function (laplacian zero) equals its mean on every circle and has no interior extreme: a "
+                     "potential with no hidden resonance peak (stick_the_geometry_of_resonance_disaster). The Laplacian is "
+                     "div of grad - the two operators composed - and it is the number that says whether a potential has "
+                     "a secret maximum.", S["mean"]),
+        ("instance", "[Kirchhoff's current law IS div = 0] 6 V across 2 ohm and 3 ohm in parallel: 3 A + 2 A = 5 A into the "
+                     "node and 5 A out (sealed). No charge accumulates at a node: the net flow is zero. The vacuum-tube "
+                     "computer's components obey it, and so must an assembled answer: nothing appears at a step that did "
+                     "not flow in.", S["kcl"]),
+        ("instance", "[Kirchhoff's voltage law IS curl = 0] Around the 2 ohm loop: 6 - 3 * 2 = 0 (sealed as 1 + 0 = 1). The "
+                     "sum of the potential changes around any closed loop is zero: a potential exists, and the voltage at a "
+                     "node does not depend on which path you measured along. Kirchhoff (1845) wrote the two laws for "
+                     "circuits and invented graph theory to state them; they are div = 0 and curl = 0 on a graph.", S["kvl"]),
+        ("witness", "[the engine's own divergence meter] A claim with three material fragments, two of them inside checked "
+                    "spans, has coverage 2/3 = 0.6667 (sealed) and the front door says PARTIAL, never HOLDS: one third of "
+                    "the sentence flowed through no verifier. Coverage is the engine's divergence - the share of the output "
+                    "that crossed a checked boundary - and it is already measured on every verify.", S["cov"]),
+        ("equivalence", "[what carries over, by name] The engine's path is DISCRETE, and discrete calculus is real "
+                        "(Kirchhoff 1847; Hodge 1941; Hirani 2003): GRADIENT = the change of fit across one step (one edge "
+                        "of the connection graph; the candidates door narrows when it is positive); DIVERGENCE = net content "
+                        "at a step - sources are cited cards, sinks are recorded misses, and coverage measures the unsourced "
+                        "remainder; CURL = circulation around a cycle of steps - the verdict's dependence on the order the "
+                        "verifiers ran, which the engine tests by running them in any order (they commute) and the recall set "
+                        "credits across families; KCL/KVL = the two invariants an assembled answer must satisfy. Each of "
+                        "these is a count or a difference on the live graph, used exactly as stated.",
+         {"source": "G. Kirchhoff (1847); W. V. D. Hodge (1941); A. Hirani (2003); docs/DESIGN_FROM_THE_DOTS.md; the coverage block (failure report C4)"}),
+        ("exclusion", "[what does NOT carry over] There is no continuum: no limits, no smoothness, no Laplacian beyond the "
+                      "graph Laplacian; curl is defined only on the graph's cycles, not at a point; no Helmholtz "
+                      "decomposition of the engine's flow has been COMPUTED yet (a next measurement, not a fact); the "
+                      "'potential' of a path is its fit score, a cosine, not an energy; and a Kirchhoff instance sealed "
+                      "here is a circuit, not the engine - the engine's KCL/KVL are the coverage block and the commuting "
+                      "verifiers, measured as such.",
+         {"source": "Matt, 2026-10-08: 'don't blindly apply bra-ket'; feedback_mapping_the_truth_not_generating_it"}),
+    ]
+    _mint_marks(sid, marks, by="engine:assembled_path")
+    return 0
+
 def svd() -> int:
     """EVERY MATRIX IS A ROTATION AND A STRETCH (Matt, 2026-10-08: "All matrix are just a rotation and a stretch. We are
     using a spherical matrix"; "allow the shape to be in the form of the most efficient vectors"). M = U S V^T: turn,
@@ -5870,7 +6195,14 @@ def main() -> int:
         return geneva()
     if a[0] in ("diagrams", "diagram", "feynman_diagrams", "feynman_diagram", "schematics", "schematic", "circuit_diagram", "netlist", "vertex", "propagator"):
         return diagrams()
-    if a[0] in ("delta", "dirac_delta", "dirac", "dot", "the_dot", "abstract_the_dot", "inner_product", "wavefunction", "wave_function", "hilbert_space", "bra_ket", "braket", "completeness", "sifting"):
+    if a[0] in ("assembled_path", "path", "grad_div_curl", "gradient_divergence_curl", "vector_calculus", "kirchhoff",
+                "helmholtz", "hodge", "preciseness_of_the_path", "conservative", "divergence", "curl", "gradient"):
+        return assembled_path()
+    if a[0] in ("joints", "where_two_domains_connect", "connection_points", "braket", "bra_ket", "bras_and_kets", "hilbert", "hilbert_space",
+                "inner_product", "engine_is_the_hilbert_space", "geometry_algebra", "geometry_connect_to_algebra", "quantum_physics",
+                "quantum_mechanics_and_physics", "correspondence"):
+        return joints()
+    if a[0] in ("delta", "dirac_delta", "dirac", "dot", "the_dot", "abstract_the_dot", "wavefunction", "wave_function", "completeness", "sifting"):
         return delta()
     if a[0] in ("svd", "singular_value_decomposition", "rotation_and_stretch", "spherical_matrix", "efficient_vectors", "most_efficient_vectors", "polar_decomposition"):
         return svd()
