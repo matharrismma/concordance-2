@@ -650,9 +650,12 @@ def _x_sqrt(text: str):
     "1" is not extracted at all (a one-figure approximation of an irrational is too coarse to judge either
     way; a miss stays a miss)."""
     import math
-    from .verifiers.base import stated_tolerance_abs
+    from .verifiers.base import stated_window, hedged_before
     out = []
-    for m in re.finditer(r"(?:the\s+)?square\s+root\s+of\s+" + _NUM + r"\s*" + _EQ + r"\s*" + _NUM, text, re.I):
+    pats = (r"(?:the\s+)?square\s+root\s+of\s+" + _NUM + r"\s*" + _EQ + r"\s*" + _HEDGE + _NUM,
+            r"\bsqrt\s*\(\s*" + _NUM + r"\s*\)\s*(?:=|is|equals)\s*" + _HEDGE + _NUM,       # sqrt(144) = 12 (recall, 2026-10-08)
+            r"√\s*" + _NUM + r"\s*(?:=|≈|~|is|equals)\s*" + _HEDGE + _NUM)                   # √2 ≈ 1.414
+    for m in (mm for pat in pats for mm in re.finditer(pat, text, re.I)):
         n = _f(m.group(1))
         if n < 0:
             continue
@@ -661,7 +664,7 @@ def _x_sqrt(text: str):
                         {"mode": "equality", "params": {"expr_a": f"sqrt({int(n)})", "expr_b": str(_f(m.group(2)))}}))
             continue
         lit = m.group(2).replace("$", "").strip()
-        if stated_tolerance_abs(lit) is None:                            # one significant figure earns nothing
+        if stated_window(lit, hedged_before(text[:m.start(2)])) is None:   # one figure earns nothing unless hedged
             continue
         expr_n = str(int(n)) if n == int(n) else repr(n)
         out.append((_q(text, m), "mathematics",
@@ -680,10 +683,18 @@ def _x_circle(text: str):
     approx = r"(?:about|approximately|roughly|around|~|≈)?\s*"
     for m in re.finditer(rad + r"area\s+(?:of\s+)?" + approx + _NUM, text, re.I):
         out.append((_q(text, m), "geometry",
-                    {"GEOM_VERIFY": {"circle_radius": _f(m.group(1)), "claimed_circle_area": _f(m.group(2))}}))
+                    {"GEOM_VERIFY": {"circle_radius": _f(m.group(1)), "claimed_circle_area": _f(m.group(2)),
+                                     "claimed_circle_area_as_written": m.group(2)}}))
     for m in re.finditer(rad + r"circumference\s+(?:of\s+)?" + approx + _NUM, text, re.I):
         out.append((_q(text, m), "geometry",
-                    {"GEOM_VERIFY": {"circle_radius": _f(m.group(1)), "claimed_circle_circumference": _f(m.group(2))}}))
+                    {"GEOM_VERIFY": {"circle_radius": _f(m.group(1)), "claimed_circle_circumference": _f(m.group(2)),
+                                     "claimed_circle_circumference_as_written": m.group(2)}}))
+    # property first (recall, 2026-10-08): "the area of a circle with radius 3 is 28.27"
+    for m in re.finditer(r"(?:the\s+)?(area|circumference)\s+of\s+(?:a|the)\s+circle\s+(?:of|with)\s+(?:an?\s+)?radius\s+(?:of\s+)?"
+                         + _NUM + r"\s+(?:is|=|equals)\s+" + approx + _NUM, text, re.I):
+        key = "claimed_circle_area" if m.group(1).lower() == "area" else "claimed_circle_circumference"
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"circle_radius": _f(m.group(2)), key: _f(m.group(3)), key + "_as_written": m.group(3)}}))
     return out
 
 
@@ -693,7 +704,7 @@ def _x_physics_force(text: str):
     n = r"(\d[\d,]*(?:\.\d+)?)"
     pat = (n + r"\s*kg\b[^.\n]{0,25}?\bat\s+" + n +
            r"\s*(?:m/s\^?2|m/s²|m/s/s|meters?\s+per\s+second\s+squared)\b[^.\n]{0,25}?"
-           r"(?:exerts?|is|=|equals|produces?|gives?|has)\s*(?:a\s+)?(?:force\s+of\s+)?" + n +
+           r"(?:exerts?|is|=|equals|produces?|gives?|has|needs?|requires?|takes?)\s*(?:a\s+)?(?:force\s+of\s+)?" + n +
            r"\s*(?:N|newtons?)\b")
     out = []
     for m in re.finditer(pat, text, re.I):
@@ -775,11 +786,16 @@ def _x_polygon_angles(text: str):
     pat = (r"\b(" + names + r")\b[^.\n]{0,40}?interior\s+angles?\b[^.\n]{0,20}?"
            r"(?:sum[a-z]*(?:\s+to)?|add\s+up\s+to|is|are|=|equals?|total[a-z]*)\s*" +
            r"(\d[\d,]*(?:\.\d+)?)\s*(?:°|degrees?|deg)\b")
+    rev = (r"interior\s+angles?\s+of\s+(?:a|an|the)\s+(" + names + r")\b[^.\n]{0,20}?"
+           r"(?:sum[a-z]*(?:\s+to)?|add\s+up\s+to|is|are|=|equals?|total[a-z]*)\s*" +
+           r"(\d[\d,]*(?:\.\d+)?)\s*(?:°|degrees?|deg)\b")                       # reversed (recall, 2026-10-08)
     out = []
-    for m in re.finditer(pat, text, re.I):
-        out.append((_q(text, m), "geometry",
-                    {"GEOM_VERIFY": {"polygon_n": _POLY[m.group(1).lower()],
-                                     "claimed_interior_angle_sum_deg": _f(m.group(2))}}))
+    for p in (pat, rev):
+        for m in re.finditer(p, text, re.I):
+            out.append((_q(text, m), "geometry",
+                        {"GEOM_VERIFY": {"polygon_n": _POLY[m.group(1).lower()],
+                                         "claimed_interior_angle_sum_deg": _f(m.group(2)),
+                                         "claimed_interior_angle_sum_deg_as_written": m.group(2)}}))
     return out
 
 
@@ -813,11 +829,24 @@ def _x_rectangle(text: str):
     for m in re.finditer(dims + r"area\s+(?:of\s+)?" + approx + n, text, re.I):
         out.append((_q(text, m), "geometry",
                     {"GEOM_VERIFY": {"rect_length": _f(m.group(1)), "rect_width": _f(m.group(2)),
-                                     "claimed_rect_area": _f(m.group(3))}}))
+                                     "claimed_rect_area": _f(m.group(3)),
+                                     "claimed_rect_area_as_written": m.group(3)}}))
+    unit = r"(?:\s*(?:m|cm|mm|km|ft|feet|foot|in|inches|yards?|yd|meters?|metres?))?"
+    first = (r"\b" + n + unit + r"\s*(?:by|×|x)\s*" + n + unit + r"\s+rectangle\s+(?:has|is|=|with)\s+(?:an?\s+)?area\s+(?:of\s+)?" + approx + n)
+    for m in re.finditer(first, text, re.I):                          # dims first (recall, 2026-10-08)
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"rect_length": _f(m.group(1)), "rect_width": _f(m.group(2)),
+                                     "claimed_rect_area": _f(m.group(3)), "claimed_rect_area_as_written": m.group(3)}}))
+    with_units = (r"rectangle\s+" + n + unit + r"\s*(?:by|×|x)\s*" + n + unit + r"[^.\n]{0,25}?\b(?:has|is|=|with)\s+(?:an?\s+)?area\s+(?:of\s+)?" + approx + n)
+    for m in re.finditer(with_units, text, re.I):                     # "a rectangle 5 m by 8 m has an area of 40 square meters"
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"rect_length": _f(m.group(1)), "rect_width": _f(m.group(2)),
+                                     "claimed_rect_area": _f(m.group(3)), "claimed_rect_area_as_written": m.group(3)}}))
     for m in re.finditer(dims + r"perimeter\s+(?:of\s+)?" + approx + n, text, re.I):
         out.append((_q(text, m), "geometry",
                     {"GEOM_VERIFY": {"rect_length": _f(m.group(1)), "rect_width": _f(m.group(2)),
-                                     "claimed_rect_perimeter": _f(m.group(3))}}))
+                                     "claimed_rect_perimeter": _f(m.group(3)),
+                                     "claimed_rect_perimeter_as_written": m.group(3)}}))
     return out
 
 
@@ -888,11 +917,19 @@ def _x_sphere(text: str):
     for m in re.finditer(rad + r"volume\s+(?:of\s+)?" + approx + n, text, re.I):
         out.append((_q(text, m), "geometry",
                     {"GEOM_VERIFY": {"sphere_radius": _f(m.group(1)),
-                                     "claimed_sphere_volume": _f(m.group(2))}}))
+                                     "claimed_sphere_volume": _f(m.group(2)),
+                                     "claimed_sphere_volume_as_written": m.group(2)}}))
     for m in re.finditer(rad + r"surface\s+area\s+(?:of\s+)?" + approx + n, text, re.I):
         out.append((_q(text, m), "geometry",
                     {"GEOM_VERIFY": {"sphere_radius": _f(m.group(1)),
-                                     "claimed_sphere_surface_area": _f(m.group(2))}}))
+                                     "claimed_sphere_surface_area": _f(m.group(2)),
+                                     "claimed_sphere_surface_area_as_written": m.group(2)}}))
+    # property first (recall, 2026-10-08): "the volume of a sphere with radius 3 is 113.1"
+    for m in re.finditer(r"(?:the\s+)?(volume|surface\s+area)\s+of\s+(?:a|the)\s+sphere\s+(?:of|with)\s+(?:an?\s+)?radius\s+(?:of\s+)?"
+                         + n + r"\s+(?:is|=|equals)\s+" + approx + n, text, re.I):
+        key = "claimed_sphere_volume" if m.group(1).lower() == "volume" else "claimed_sphere_surface_area"
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"sphere_radius": _f(m.group(2)), key: _f(m.group(3)), key + "_as_written": m.group(3)}}))
     return out
 
 
@@ -908,11 +945,19 @@ def _x_cube(text: str):
     for m in re.finditer(side + r"volume\s+(?:of\s+)?" + approx + n, text, re.I):
         out.append((_q(text, m), "geometry",
                     {"GEOM_VERIFY": {"cube_side": _f(m.group(1)),
-                                     "claimed_cube_volume": _f(m.group(2))}}))
+                                     "claimed_cube_volume": _f(m.group(2)),
+                                     "claimed_cube_volume_as_written": m.group(2)}}))
     for m in re.finditer(side + r"surface\s+area\s+(?:of\s+)?" + approx + n, text, re.I):
         out.append((_q(text, m), "geometry",
                     {"GEOM_VERIFY": {"cube_side": _f(m.group(1)),
-                                     "claimed_cube_surface_area": _f(m.group(2))}}))
+                                     "claimed_cube_surface_area": _f(m.group(2)),
+                                     "claimed_cube_surface_area_as_written": m.group(2)}}))
+    # property first (recall, 2026-10-08): "the volume of a cube of side 4 is 64"
+    for m in re.finditer(r"(?:the\s+)?(volume|surface\s+area)\s+of\s+(?:a|the)\s+cube\s+(?:of|with)\s+(?:an?\s+)?(?:side|edge)\s+(?:lengths?\s+)?(?:of\s+)?"
+                         + n + r"\s+(?:is|=|equals)\s+" + approx + n, text, re.I):
+        key = "claimed_cube_volume" if m.group(1).lower() == "volume" else "claimed_cube_surface_area"
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"cube_side": _f(m.group(2)), key: _f(m.group(3)), key + "_as_written": m.group(3)}}))
     return out
 
 
@@ -929,7 +974,15 @@ def _x_cylinder(text: str):
     for m in re.finditer(dims, text, re.I):
         out.append((_q(text, m), "geometry",
                     {"GEOM_VERIFY": {"cyl_radius": _f(m.group(1)), "cyl_height": _f(m.group(2)),
-                                     "claimed_cyl_volume": _f(m.group(3))}}))
+                                     "claimed_cyl_volume": _f(m.group(3)),
+                                     "claimed_cyl_volume_as_written": m.group(3)}}))
+    # property first (recall, 2026-10-08): "the volume of a cylinder with radius 2 and height 5 is 62.83"
+    for m in re.finditer(r"(?:the\s+)?volume\s+of\s+(?:a|the)\s+cylinder\s+(?:of|with)\s+(?:an?\s+)?radius\s+(?:of\s+)?" + n +
+                         r"\s+and\s+(?:an?\s+)?height\s+(?:of\s+)?" + n + r"\s+(?:is|=|equals)\s+" + approx + n, text, re.I):
+        out.append((_q(text, m), "geometry",
+                    {"GEOM_VERIFY": {"cyl_radius": _f(m.group(1)), "cyl_height": _f(m.group(2)),
+                                     "claimed_cyl_volume": _f(m.group(3)),
+                                     "claimed_cyl_volume_as_written": m.group(3)}}))
     return out
 
 
@@ -952,6 +1005,12 @@ def _x_combinations(text: str):
             out.append((_q(text, m), "combinatorics",
                         {"COMB_VERIFY": {"comb_n": int(m.group(1)), "comb_k": int(m.group(2)),
                                          "claimed_combinations": int(m.group(3))}}))
+    # "the number of ways to choose 3 from 10 is 120" (recall, 2026-10-08): k first, then n
+    for m in re.finditer(r"(?:the\s+number\s+of\s+)?ways\s+to\s+(?:choose|pick|select)\s+" + d +
+                         r"\s+(?:from|out\s+of)\s+" + d + eq + d, text, re.I):
+        out.append((_q(text, m), "combinatorics",
+                    {"COMB_VERIFY": {"comb_n": int(m.group(2)), "comb_k": int(m.group(1)),
+                                     "claimed_combinations": int(m.group(3))}}))
     return out
 
 
@@ -966,6 +1025,8 @@ def _x_permutations(text: str):
         d + r"\s+permute\s+" + d + eq + d,
         r"(?:number\s+of\s+)?permutations?\s+of\s+" + d +
         r"\s+(?:things?|items?|objects?|elements?)\s+taken\s+" + d + r"\s+at\s+a\s+time" + eq + d,
+        r"(?:number\s+of\s+)?permutations?\s+of\s+" + d + r"\s+taken\s+" + d + r"\s+at\s+a\s+time\s*(?:is|=|equals?|:)\s*" + d,
+        r"\b" + d + r"\s*P\s*" + d + eq + d,                                         # 5P3 = 60 (recall, 2026-10-08)
     )
     out = []
     for pat in pats:
@@ -973,6 +1034,16 @@ def _x_permutations(text: str):
             out.append((_q(text, m), "combinatorics",
                         {"COMB_VERIFY": {"perm_n": int(m.group(1)), "perm_k": int(m.group(2)),
                                          "claimed_permutations": int(m.group(3))}}))
+    # arranging ALL of them: n! (recall, 2026-10-08) - "the number of ways to arrange 5 books is 120",
+    # "there are 720 ways to order 6 people"
+    for m in re.finditer(r"(?:the\s+number\s+of\s+)?ways\s+to\s+(?:arrange|order)\s+" + d + r"\s+[a-z]+\s*(?:is|=|equals?)\s*" + d, text, re.I):
+        out.append((_q(text, m), "combinatorics",
+                    {"COMB_VERIFY": {"perm_n": int(m.group(1)), "perm_k": int(m.group(1)),
+                                     "claimed_permutations": int(m.group(2))}}))
+    for m in re.finditer(r"there\s+are\s+" + d + r"\s+ways\s+to\s+(?:arrange|order)\s+" + d + r"\s+[a-z]+", text, re.I):
+        out.append((_q(text, m), "combinatorics",
+                    {"COMB_VERIFY": {"perm_n": int(m.group(2)), "perm_k": int(m.group(2)),
+                                     "claimed_permutations": int(m.group(1))}}))
     return out
 
 

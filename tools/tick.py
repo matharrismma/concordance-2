@@ -4520,6 +4520,117 @@ def tensor() -> int:
     return _mint_marks(sid, marks, by="Narrow Highway - tensors, the arrangement inside the bubbles, 2026-10-08")
 
 
+def modulation() -> int:
+    """AM AND FM, WITH DIAGONALIZATION (Matt, 2026-10-08: "AM and FM along with diagonalization"). A message rides a
+    carrier either as its amplitude (AM: two sidebands, bandwidth twice the message, at most a third of the power in
+    the message) or as its frequency (FM: Carson's rule, a modulation index, the carrier's share given by a Bessel
+    function and vanishing at beta = 2.405). Why either survives a wire or the air: a linear time-invariant channel is
+    DIAGONAL in the basis of sinusoids - each frequency is multiplied by one gain and nothing mixes - and
+    diagonalization is the finding of that basis: the frame in which a matrix is only its eigenvalues, where powers
+    are trivial and the most efficient vectors are the axes. Eleven numbers sealed. New stick; idempotent."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    bw_am = 2 * 5000                                     # Hz: a 5 kHz message on any carrier
+    share = 1 / (2 + 1)                                  # AM at full modulation: the sidebands' share of the power
+    sides = 1 + math.cos(3) * math.cos(1) - (math.cos(2) + math.cos(4)) / 2   # product-to-sum, judged against one
+    carson = 2 * (75000 + 15000)                         # Hz: broadcast FM, 75 kHz deviation, 15 kHz message
+    beta = 75 / 15                                       # the modulation index
+    j0_1 = sum((-1) ** k * 0.5 ** (2 * k) / math.factorial(k) ** 2 for k in range(21))      # J_0(1): the carrier at beta = 1
+    j0_z = 1 + sum((-1) ** k * (2.404826 / 2) ** (2 * k) / math.factorial(k) ** 2 for k in range(31))   # 1 + J_0(2.405)
+    lam1, lam2 = (4 + 4 ** 0.5) / 2, (4 - 4 ** 0.5) / 2   # eigenvalues of [[2,1],[1,2]]: 3 and 1
+    axis = (1 * 2 * 1 + 1 * 1 * 1 + 1 * 1 * 1 + 1 * 2 * 1) / 2   # v^T A v along (1,1)/sqrt2: the matrix is just 3
+    pow10 = 3 ** 10 + 1 ** 10                            # trace of A^10, from the diagonal alone
+    unit = (1 / 2 ** 0.5) ** 2 + (1 / 2 ** 0.5) ** 2     # the two-point Fourier basis vector is unit
+    a = _rh_seal_num("am_bandwidth_is_twice_the_message", "2*5000", float(bw_am), tol=1e-12)
+    b = _rh_seal_num("am_sidebands_share_at_full_modulation", "1/(2+1)", float(share), tol=1e-12)
+    c = _rh_seal_num("mixing_two_tones_makes_two_sidebands", "1 + cos(3)*cos(1) - (cos(2)+cos(4))/2", float(sides), tol=1e-12)
+    d = _rh_seal_num("carson_rule_broadcast_fm", "2*(75000 + 15000)", float(carson), tol=1e-12)
+    e = _rh_seal_num("fm_modulation_index", "75/15", float(beta), tol=1e-12)
+    f = _rh_seal_num("fm_carrier_share_bessel_j0_at_beta_1", "Sum((-1)**k*(1/2)**(2*k)/factorial(k)**2, (k, 0, 20))", float(j0_1))
+    g = _rh_seal_num("fm_carrier_vanishes_at_beta_2_405", "1 + Sum((-1)**k*(2.404826/2)**(2*k)/factorial(k)**2, (k, 0, 30))", float(j0_z))
+    h = _rh_seal_num("eigenvalues_of_the_two_point_channel", "(4 + sqrt(16 - 12))/2", float(lam1), tol=1e-12)
+    i = _rh_seal_num("the_matrix_along_its_own_axis", "(1*2*1 + 1*1*1 + 1*1*1 + 1*2*1)/2", float(axis), tol=1e-12)
+    j = _rh_seal_num("powers_made_trivial_by_the_diagonal", "3**10 + 1**10", float(pow10), tol=1e-12)
+    k_ = _rh_seal_num("the_fourier_basis_is_unit", "(1/sqrt(2))**2 + (1/sqrt(2))**2", float(unit), tol=1e-12)
+    if not all([a, b, c, d, e, f, g, h, i, j, k_]):
+        print("a seal failed; aborting"); return 1
+    print("sealed AM", a, b, c, "| FM", d, e, f, g, "| diagonal", h, i, j, k_)
+    sid = TS.create("AM and FM, with diagonalization - a message rides a carrier, and a channel is diagonal in the basis of sinusoids",
+                    statement=("A message rides a carrier as its amplitude or as its frequency. AM: two sidebands, a "
+                               "bandwidth of twice the message, at most a third of the power in the message. FM: Carson's "
+                               "rule, a modulation index, the carrier's share a Bessel function that vanishes at 2.405. Why "
+                               "either survives the channel: a linear time-invariant channel is diagonal in the basis of "
+                               "sinusoids - each frequency multiplied by one gain, nothing mixed - and diagonalization is "
+                               "the finding of that basis, the frame in which a matrix is only its eigenvalues, powers are "
+                               "trivial, and the most efficient vectors are the axes."),
+                    field="engineering",
+                    references=["R. A. Fessenden (1906): amplitude modulation on the air; E. H. Armstrong (1933): wide-band FM",
+                                "J. R. Carson, Notes on the theory of modulation, Proc. IRE 10 (1922) 57-64: the bandwidth rule",
+                                "F. W. Bessel (1824): the functions that weight an FM carrier and its sidebands",
+                                "J. Fourier (1822); the convolution theorem: a time-invariant system is diagonal in the sinusoids",
+                                "A. Cayley (1858), C. Jordan (1870): eigenvalues and the diagonal form",
+                                "1 Corinthians 14:7-10; Proverbs 25:11; Matthew 11:15",
+                                "stick_every_matrix_is_a_rotation_and_a_stretch (the SVD); stick_the_complex_field_is_the_physics_of_waves (Fourier); stick_tensors_how_the_data_is_arranged_inside_the_bubbles"])["id"]
+    marks = [
+        ("witness", f"[AM - the message is the height] Multiply a 5 kHz message onto any carrier and the spectrum has the "
+                    f"carrier and two sidebands, one 5 kHz above and one below: bandwidth 2 x 5000 = {bw_am:,} Hz (sealed). "
+                    f"The product of two cosines is a sum of two: cos3 cos1 = (cos2 + cos4)/2, sealed as 1 + the "
+                    f"difference = {sides:.0f}. Mixing is addition in frequency - the Fourier stick's rotation, applied.", a),
+        ("witness", f"[AM pays for its carrier] At full modulation the sidebands carry m^2/(2 + m^2) = 1/3 = {share:.4f} "
+                    f"of the power (sealed); the carrier, which says nothing, takes two thirds. AM is simple to receive "
+                    f"and expensive to send: the message rides as amplitude, and so does every burst of noise.", b),
+        ("witness", f"[the identity that is the mixer] 1 + cos3 cos1 - (cos2 + cos4)/2 = {sides:.0f} (sealed): the "
+                    f"product-to-sum identity, judged against one because a zero can only be judged against something. "
+                    f"Every mixer, every sideband, every heterodyne receiver is this one line of trigonometry.", c),
+        ("witness", f"[FM - the message is the pitch] Broadcast FM swings the carrier 75 kHz either way for a 15 kHz "
+                    f"message: Carson's rule gives a bandwidth of 2 (75,000 + 15,000) = {carson:,} Hz (sealed), and the "
+                    f"modulation index beta = 75/15 = {beta:.0f} (sealed). The message is in WHEN the wave crosses zero, "
+                    f"not how high it goes - which is why amplitude noise cannot touch it (Armstrong 1933).", d),
+        ("witness", f"[beta] 75 / 15 = {beta:.0f} (sealed): the peak phase swing in radians, {beta * 180 / pi:.0f} degrees. "
+                    f"The larger beta, the more sidebands carry the message and the wider the band: FM buys its quiet "
+                    f"with bandwidth, a trade AM cannot make.", e),
+        ("witness", f"[the carrier's share is a Bessel function] In FM the carrier's amplitude is J_0(beta): at beta = 1, "
+                    f"J_0(1) = {j0_1:.6f} (sealed through its series, 21 terms) - the carrier keeps 76.5% of its "
+                    f"amplitude and the sidebands take the rest, with J_1, J_2, ... weighting each pair. The total power "
+                    f"never changes (sum of J_n^2 = 1, cited); FM only moves it.", f),
+        ("witness", f"[the carrier vanishes] At beta = 2.405 J_0 is zero: 1 + J_0(2.404826) = {j0_z:.7f} (sealed, 31 "
+                    f"terms) - the carrier disappears entirely and every watt is in the sidebands. Engineers set a "
+                    f"transmitter's deviation by finding this null on a spectrum analyser: the zero of a Bessel "
+                    f"function, measured in the air.", g),
+        ("witness", f"[diagonalization - the frame where a matrix is only its numbers] A = [[2,1],[1,2]] has eigenvalues "
+                    f"(4 +- sqrt(16 - 12))/2 = {lam1:.0f} and {lam2:.0f} (the larger sealed), along (1,1)/sqrt2 and "
+                    f"(1,-1)/sqrt2. Seen along its own axis the matrix is just the number 3: v^T A v = {axis:.0f} "
+                    f"(sealed). Those two axes are exactly the two-point Fourier basis, and A is a circulant - a "
+                    f"channel: the sinusoids are the eigenvectors of every time-invariant system (the convolution "
+                    f"theorem, cited). That is why a message on a carrier survives a wire: the channel multiplies each "
+                    f"frequency by one gain and mixes nothing.", h),
+        ("witness", f"[the matrix is just 3 along its axis] (1,1) A (1,1)^T / 2 = {axis:.0f} (sealed): in the eigenbasis "
+                    f"the whole 2x2 object is two numbers on a diagonal. The 'most efficient vectors' of the svd stick "
+                    f"are these axes; a symmetric matrix's SVD IS its diagonalization.", i),
+        ("witness", f"[powers made trivial] A^10 in the diagonal frame is diag(3^10, 1^10), trace 3^10 + 1 = {pow10:,} "
+                    f"(sealed) - no multiplication of matrices at all. The Fibonacci stick's Binet formula is the same "
+                    f"move; so is every transfer function on the Laplace stick's s-plane: diagonalize, then the hard "
+                    f"thing is a product of numbers.", j),
+        ("witness", f"[the basis is unit] (1/sqrt2)^2 + (1/sqrt2)^2 = {unit:.0f} (sealed): the Fourier basis vector has "
+                    f"length one, so the change of frame is a rotation (the spherical matrix) - it distorts nothing, and "
+                    f"the energy of a signal is the same summed over time or over frequency (Parseval, the dot "
+                    f"stick).", k_),
+        ("note", "[the discernment, and the guard] A channel that is diagonal in sinusoids is why radio works; a keeping "
+                 "that is diagonal in its domains is why the engine's gate can be a product of independent verifiers "
+                 "(the form measured 2026-10-08: the domains are nearly orthogonal). AM and FM are two ways to put one "
+                 "message on one carrier - the two surfaces of this engine put one keeping on two carriers, .com and "
+                 ".org, a LIKENESS kept as one. Scripture: 'there are, it may be, so many kinds of voices in the world, "
+                 "and none of them is without signification' (1 Cor 14:10) - many channels, each with meaning; 'A word "
+                 "fitly spoken is like apples of gold in pictures of silver' (Prov 25:11) - the right frame; 'He that "
+                 "hath ears to hear, let him hear' (Mt 11:15) - tuning. GUARDS: Carson's rule is an approximation "
+                 "(cited as such); the Bessel values are sealed through their series, not looked up; the engine likeness "
+                 "is a discernment. Eleven numbers sealed; the rest cited. Ties: svd, fourier, laplace, delta, "
+                 "fibonacci, tensor."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - AM and FM, with diagonalization, 2026-10-08")
+
+
 def jevons() -> int:
     """JEVONS' PARADOX (Matt, 2026-10-07, two steps after the seal refactor cut per-seal cost ~100x). As the
     EFFICIENCY of using a resource rises, total CONSUMPTION tends to rise too, not fall: the efficiency gain
@@ -5775,6 +5886,8 @@ def main() -> int:
         return triode()
     if a[0] in ("tensor", "tensors", "metric_tensor", "invariants", "principal_axes", "data_inside_the_bubbles"):
         return tensor()
+    if a[0] in ("modulation", "am_fm", "am", "fm", "amplitude_modulation", "frequency_modulation", "diagonalization", "diagonalisation", "eigenbasis", "carrier", "sidebands", "bessel"):
+        return modulation()
     if a[0] in ("assembly", "assemble", "final"):
         return assembly()
     if a[0] in ("aharonov_bohm", "ab"):

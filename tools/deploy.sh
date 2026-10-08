@@ -134,6 +134,9 @@ if [ "${DEPLOY_NO_GATE:-}" != "1" ]; then
     # The front door (2026-10-07): sentences, not packets, through the auditor funnel — the one layer the
     # other two checks never touched. A claim that was reached-and-correct must stay so; a false positive refuses.
     ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "cd '$DEST' && PYTHONPATH=src CONCORDANCE_DATA_DIR='$DEST/data' .venv/bin/python tools/frontdoor.py --gate > /tmp/nh-gate-frontdoor.txt 2>&1; rc=\$?; tail -1 /tmp/nh-gate-frontdoor.txt; exit \$rc" || gate_rc=1
+    # The recall set (2026-10-08, the failure report H1): per-extractor phrasings in real-document registers — the
+    # ways a claim is actually written. A phrasing once reached-and-correct must stay so; a false positive refuses.
+    ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "cd '$DEST' && PYTHONPATH=src CONCORDANCE_DATA_DIR='$DEST/data' .venv/bin/python tools/recall.py --gate > /tmp/nh-gate-recall.txt 2>&1; rc=\$?; tail -1 /tmp/nh-gate-recall.txt; exit \$rc" || gate_rc=1
     if [ "$gate_rc" != "0" ]; then
         echo "!! THE GATE REFUSED THIS DEPLOY (a regression) — reverting"
         revert

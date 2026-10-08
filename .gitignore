@@ -156,3 +156,4 @@ data/pd_texts/
 # The front-door benchmark's claim set — CONTENT (git-tracked), like domain_goldens.json; the nightly
 # results (frontdoor.json) and the floor it ratchets against are box-generated and stay untracked.
 !data/frontdoor_claims.json
+!data/recall_phrasings.json

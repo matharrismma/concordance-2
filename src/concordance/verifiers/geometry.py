@@ -28,6 +28,18 @@ import math
 from typing import Any, Dict, List
 
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+
+
+def _window(spec: Dict[str, Any], threshold: float, actual: float) -> float:
+    """THE ONE RULE (2026-10-08, the failure report H6, found by the recall set): when the prose door hands over the
+    claimed value as written (any `*_as_written` key), its stated figures set the window - half a unit in the last
+    place, doubled by a hedge, exact for a one-figure claim without one. A structured call keeps the flat default."""
+    key = next((k for k in spec if k.endswith("_as_written") and spec.get(k) not in (None, "")), None)
+    if key is None:
+        return threshold
+    from .base import window_for
+    thr, _info = window_for(spec, key, threshold, 1.0, actual)
+    return thr
 from .base import dispatch  # declarative run() driver
 
 
@@ -74,6 +86,7 @@ def verify_pythagorean(spec: Dict[str, Any]) -> VerifierResult:
     rel_tol = clamp_tol(spec, "tolerance_relative", 1e-6)
     diff = abs(sides_squared_sum - c_squared)
     threshold = max(1e-9, rel_tol * c_squared)
+    threshold = _window(spec, threshold, c_squared)
     actual = (diff <= threshold) and (cf >= af and cf >= bf)
     data = {"a": af, "b": bf, "c": cf,
             "a_sq_plus_b_sq": sides_squared_sum,
@@ -107,6 +120,7 @@ def verify_polygon_angle_sum(spec: Dict[str, Any]) -> VerifierResult:
     rel_tol = clamp_tol(spec, "tolerance_relative", 1e-6)
     diff = abs(actual - c)
     threshold = max(1e-6, rel_tol * actual)
+    threshold = _window(spec, threshold, actual)
     data = {"n": nf, "actual_sum_deg": actual, "claimed_sum_deg": c,
             "diff_deg": diff, "rule": "(n-2)·180°"}
     if diff <= threshold:
@@ -148,6 +162,7 @@ def verify_circle_properties(spec: Dict[str, Any]) -> VerifierResult:
             data["claimed_area"] = ac
             diff = abs(actual_area - ac)
             threshold = max(1e-6, rel_tol * actual_area) if actual_area > 0 else 1e-6
+            threshold = _window(spec, threshold, actual_area)
             data["area_diff"] = diff
             if diff > threshold:
                 mismatches.append(f"area: actual {actual_area:.6f}, claimed {ac}")
@@ -159,6 +174,7 @@ def verify_circle_properties(spec: Dict[str, Any]) -> VerifierResult:
             data["claimed_circumference"] = cc
             diff = abs(actual_circ - cc)
             threshold = max(1e-6, rel_tol * actual_circ) if actual_circ > 0 else 1e-6
+            threshold = _window(spec, threshold, actual_circ)
             data["circumference_diff"] = diff
             if diff > threshold:
                 mismatches.append(f"circumference: actual {actual_circ:.6f}, claimed {cc}")
@@ -197,6 +213,7 @@ def verify_rectangle_properties(spec: Dict[str, Any]) -> VerifierResult:
             caf = float(ca)
             data["claimed_rect_area"] = caf
             threshold = max(1e-6, rel_tol * actual_area) if actual_area > 0 else 1e-6
+            threshold = _window(spec, threshold, actual_area)
             diff = abs(actual_area - caf)
             data["area_diff"] = diff
             if diff > threshold:
@@ -209,6 +226,7 @@ def verify_rectangle_properties(spec: Dict[str, Any]) -> VerifierResult:
             cpf = float(cp)
             data["claimed_rect_perimeter"] = cpf
             threshold = max(1e-6, rel_tol * actual_perim) if actual_perim > 0 else 1e-6
+            threshold = _window(spec, threshold, actual_perim)
             diff = abs(actual_perim - cpf)
             data["perimeter_diff"] = diff
             if diff > threshold:
@@ -251,6 +269,7 @@ def verify_sphere_properties(spec: Dict[str, Any]) -> VerifierResult:
             cvf = float(cv)
             data["claimed_sphere_volume"] = cvf
             threshold = max(1e-6, rel_tol * actual_vol) if actual_vol > 0 else 1e-6
+            threshold = _window(spec, threshold, actual_vol)
             diff = abs(actual_vol - cvf)
             data["volume_diff"] = diff
             if diff > threshold:
@@ -263,6 +282,7 @@ def verify_sphere_properties(spec: Dict[str, Any]) -> VerifierResult:
             caf = float(ca)
             data["claimed_sphere_surface_area"] = caf
             threshold = max(1e-6, rel_tol * actual_area) if actual_area > 0 else 1e-6
+            threshold = _window(spec, threshold, actual_area)
             diff = abs(actual_area - caf)
             data["area_diff"] = diff
             if diff > threshold:
@@ -308,6 +328,7 @@ def verify_cylinder_properties(spec: Dict[str, Any]) -> VerifierResult:
             cvf = float(cv)
             data["claimed_cyl_volume"] = cvf
             threshold = max(1e-6, rel_tol * actual_vol) if actual_vol > 0 else 1e-6
+            threshold = _window(spec, threshold, actual_vol)
             diff = abs(actual_vol - cvf)
             data["volume_diff"] = diff
             if diff > threshold:
@@ -348,6 +369,7 @@ def verify_cube_properties(spec: Dict[str, Any]) -> VerifierResult:
             cvf = float(cv)
             data["claimed_cube_volume"] = cvf
             threshold = max(1e-6, rel_tol * actual_vol) if actual_vol > 0 else 1e-6
+            threshold = _window(spec, threshold, actual_vol)
             diff = abs(actual_vol - cvf)
             data["volume_diff"] = diff
             if diff > threshold:
@@ -360,6 +382,7 @@ def verify_cube_properties(spec: Dict[str, Any]) -> VerifierResult:
             caf = float(ca)
             data["claimed_cube_surface_area"] = caf
             threshold = max(1e-6, rel_tol * actual_area) if actual_area > 0 else 1e-6
+            threshold = _window(spec, threshold, actual_area)
             diff = abs(actual_area - caf)
             data["area_diff"] = diff
             if diff > threshold:
