@@ -1864,6 +1864,266 @@
     "truth": false,
     "text": "the word strength has 3 syllables"
    }
+  ],
+  "rhyme": [
+   {
+    "id": "rhy_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "cat rhymes with hat"
+   },
+   {
+    "id": "rhy_2",
+    "register": "forum",
+    "truth": true,
+    "text": "the words moon and spoon rhyme"
+   },
+   {
+    "id": "rhy_3",
+    "register": "textbook",
+    "truth": false,
+    "text": "orange rhymes with door"
+   },
+   {
+    "id": "rhy_4",
+    "register": "forum",
+    "truth": true,
+    "text": "banana is a perfect rhyme for bandana"
+   },
+   {
+    "id": "rhy_5",
+    "register": "chat",
+    "truth": true,
+    "text": "cat does not rhyme with dog"
+   }
+  ],
+  "homophone": [
+   {
+    "id": "hom_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "there and their are homophones"
+   },
+   {
+    "id": "hom_2",
+    "register": "forum",
+    "truth": true,
+    "text": "night is a homophone of knight"
+   },
+   {
+    "id": "hom_3",
+    "register": "chat",
+    "truth": false,
+    "text": "cat and dog are homophones"
+   },
+   {
+    "id": "hom_4",
+    "register": "forum",
+    "truth": true,
+    "text": "flower and flour sound the same"
+   },
+   {
+    "id": "hom_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "bear and beer are pronounced the same"
+   }
+  ],
+  "stress": [
+   {
+    "id": "str_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "banana is stressed on the second syllable"
+   },
+   {
+    "id": "str_2",
+    "register": "forum",
+    "truth": true,
+    "text": "the stress in photograph falls on the first syllable"
+   },
+   {
+    "id": "str_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "the word photography has its stress on the second syllable"
+   },
+   {
+    "id": "str_4",
+    "register": "chat",
+    "truth": false,
+    "text": "banana is stressed on the first syllable"
+   },
+   {
+    "id": "str_5",
+    "register": "forum",
+    "truth": true,
+    "text": "in the word hotel the stress is on the last syllable"
+   }
+  ],
+  "silent_letter": [
+   {
+    "id": "sil_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the k in knife is silent"
+   },
+   {
+    "id": "sil_2",
+    "register": "forum",
+    "truth": true,
+    "text": "the word climb has a silent b"
+   },
+   {
+    "id": "sil_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "the t in castle is silent"
+   },
+   {
+    "id": "sil_4",
+    "register": "chat",
+    "truth": false,
+    "text": "the k in kite is silent"
+   },
+   {
+    "id": "sil_5",
+    "register": "forum",
+    "truth": true,
+    "text": "the e in cake is silent"
+   }
+  ],
+  "vowel_sound": [
+   {
+    "id": "vow_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the word cake has a long a sound"
+   },
+   {
+    "id": "vow_2",
+    "register": "forum",
+    "truth": true,
+    "text": "cat has a short a sound"
+   },
+   {
+    "id": "vow_3",
+    "register": "chat",
+    "truth": false,
+    "text": "the a in cat is long"
+   },
+   {
+    "id": "vow_4",
+    "register": "textbook",
+    "truth": true,
+    "text": "the vowel sound in bike is long i"
+   },
+   {
+    "id": "vow_5",
+    "register": "forum",
+    "truth": true,
+    "text": "the word hot has a short o sound"
+   }
+  ],
+  "edge_sound": [
+   {
+    "id": "edg_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "phone starts with the f sound"
+   },
+   {
+    "id": "edg_2",
+    "register": "forum",
+    "truth": true,
+    "text": "the word city begins with the s sound"
+   },
+   {
+    "id": "edg_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "cats ends with the s sound"
+   },
+   {
+    "id": "edg_4",
+    "register": "forum",
+    "truth": true,
+    "text": "dogs ends with the z sound"
+   },
+   {
+    "id": "edg_5",
+    "register": "chat",
+    "truth": true,
+    "text": "the first sound in gem is j"
+   },
+   {
+    "id": "edg_6",
+    "register": "textbook",
+    "truth": false,
+    "text": "knife begins with the k sound"
+   }
+  ],
+  "etymology": [
+   {
+    "id": "ety_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "salary comes from Latin"
+   },
+   {
+    "id": "ety_2",
+    "register": "forum",
+    "truth": true,
+    "text": "the word salary comes from the Latin word salarium"
+   },
+   {
+    "id": "ety_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "philosophy is of Greek origin"
+   },
+   {
+    "id": "ety_4",
+    "register": "chat",
+    "truth": true,
+    "text": "the word algebra comes from Arabic"
+   },
+   {
+    "id": "ety_5",
+    "register": "forum",
+    "truth": false,
+    "text": "strength comes from Latin"
+   },
+   {
+    "id": "ety_6",
+    "register": "textbook",
+    "truth": true,
+    "text": "window is of Old Norse origin"
+   },
+   {
+    "id": "ety_7",
+    "register": "forum",
+    "truth": true,
+    "text": "muscle comes from the Latin word for little mouse"
+   },
+   {
+    "id": "ety_8",
+    "register": "chat",
+    "truth": false,
+    "text": "algebra comes from Greek"
+   },
+   {
+    "id": "ety_9",
+    "register": "textbook",
+    "truth": true,
+    "text": "the word candidate derives from the Latin candidatus"
+   },
+   {
+    "id": "ety_10",
+    "register": "forum",
+    "truth": false,
+    "text": "philosophy is not of Greek origin"
+   }
   ]
  }
 }

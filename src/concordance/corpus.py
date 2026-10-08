@@ -1255,6 +1255,10 @@ def load_cards(path: Optional[Path] = None,
                       # ISBE 1915 (D5) — 9,380 scholarly stub cards; the full public-domain
                       # article renders from data/acquisitions/isbe.db on the card page.
                       "isbe_cards.jsonl",
+                      # THE ETYMOLOGIES (2026-10-08, Matt: "Etymology and phonics") — Webster 1913's origin
+                      # of ~49k headwords, one card each (tools/card_etymology.py, public domain); read by
+                      # wordcraft.verify_origin so "salary comes from Latin" is judged from the source.
+                      "etymology_cards.jsonl",
                       # The Corpus — technical, academic cards minted from the stored sources
                       # (nuclides, stars, foods, ports, indicators, …); always growing.
                       "source_spines.jsonl", "source_cards.jsonl", "web_cache.jsonl",

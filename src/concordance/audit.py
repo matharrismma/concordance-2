@@ -1504,6 +1504,197 @@ def _x_letter_rank(text: str):
     return out
 
 
+# ── PHONICS + ETYMOLOGY (Matt, 2026-10-08: "Etymology and phonics") ─────────────────────────────────
+# Sound, read off the keeping's pronunciation shelf (CMU, ARPABET): rhymes, homophones, the stressed syllable,
+# silent letters, the long/short vowel names of phonics, the first and last sounds. Origin, read off the
+# etymology shelf (Webster 1913, public domain): "X comes from Latin", "the Latin word salarium", "the Latin
+# word for little mouse", "of Greek origin". Routed to verifiers/wordcraft.py, which names its convention and
+# declines what the shelf cannot tell (a word not held, a vowel letter's silence, a comparison that is not a
+# derivation) rather than guessing.
+_TW = r"(?:the\s+)?(?:words?\s+|names?\s+|terms?\s+)?"
+_PRON_STOP = frozenset({"it", "this", "that", "which", "word", "name", "term", "he", "she", "they", "we", "you", "i",
+                        "one", "who", "what", "each", "either", "neither", "both", "all", "something", "nothing", "everything"})
+_ORD = {"first": 1, "1st": 1, "second": 2, "2nd": 2, "third": 3, "3rd": 3, "fourth": 4, "4th": 4, "fifth": 5, "5th": 5,
+        "sixth": 6, "6th": 6, "last": -1, "final": -1, "penultimate": -2, "second-to-last": -2, "second to last": -2,
+        "next-to-last": -2, "next to last": -2}
+_ORD_RE = "|".join(re.escape(k) for k in sorted(_ORD, key=len, reverse=True))
+_NEG_DOES = r"(?:(?P<neg>does\s+not|doesn't|did\s+not|didn't|cannot|can't)\s+)?"
+
+
+def _wd(m, key="w"):
+    """The word a pattern named, or None when it is a stop word (a pronoun, 'word', 'it')."""
+    w = m.group(key)
+    return None if (not w or w.lower() in _PRON_STOP) else w
+
+
+def _x_rhyme(text: str):
+    out = []
+    for m in re.finditer(_TW + _WQ + r"\b(?P<a>" + _W + r")" + _WQ + r"\s+" + _NEG_DOES + r"rhymes?\s+with\s+" + _WQ + r"(?P<b>" + _W + r")" + _WQ, text, re.I):
+        a = _wd(m, "a")
+        if a:
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word_a": a, "word_b": m.group("b"), "claimed_rhyme": not bool(m.group("neg"))}}))
+    for m in re.finditer(_TW + _WQ + r"\b(?P<a>" + _W + r")" + _WQ + r"\s+and\s+" + _WQ + r"(?P<b>" + _W + r")" + _WQ + r"\s+(?:(?P<neg>do\s+not|don't)\s+)?rhyme\b", text, re.I):
+        a = _wd(m, "a")
+        if a:
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word_a": a, "word_b": m.group("b"), "claimed_rhyme": not bool(m.group("neg"))}}))
+    for m in re.finditer(_TW + _WQ + r"\b(?P<a>" + _W + r")" + _WQ + r"\s+is\s+(?P<neg>not\s+)?a\s+(?:perfect\s+|true\s+|full\s+)?rhyme\s+(?:for|with|of)\s+" + _WQ + r"(?P<b>" + _W + r")" + _WQ, text, re.I):
+        a = _wd(m, "a")
+        if a:
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word_a": a, "word_b": m.group("b"), "claimed_rhyme": not bool(m.group("neg"))}}))
+    return out
+
+
+def _x_homophone(text: str):
+    out = []
+    pair = _TW + _WQ + r"\b(?P<a>" + _W + r")" + _WQ + r"\s+and\s+" + _WQ + r"(?P<b>" + _W + r")" + _WQ
+    for m in re.finditer(pair + r"\s+are\s+(?P<neg>not\s+)?homophones\b", text, re.I):
+        a = _wd(m, "a")
+        if a:
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word_a": a, "word_b": m.group("b"), "claimed_homophone": not bool(m.group("neg"))}}))
+    for m in re.finditer(_TW + _WQ + r"\b(?P<a>" + _W + r")" + _WQ + r"\s+is\s+(?P<neg>not\s+)?a\s+homophone\s+(?:of|for|with)\s+" + _WQ + r"(?P<b>" + _W + r")" + _WQ, text, re.I):
+        a = _wd(m, "a")
+        if a:
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word_a": a, "word_b": m.group("b"), "claimed_homophone": not bool(m.group("neg"))}}))
+    for m in re.finditer(pair + r"\s+(?:(?P<neg>do\s+not|don't)\s+)?(?:sound|are\s+pronounced|are\s+said)\s+(?P<how>the\s+same|alike|identically|differently)\b", text, re.I):
+        a = _wd(m, "a")
+        if a:
+            same = m.group("how").lower() != "differently"
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word_a": a, "word_b": m.group("b"), "claimed_homophone": same != bool(m.group("neg"))}}))
+    for m in re.finditer(_TW + _WQ + r"\b(?P<a>" + _W + r")" + _WQ + r"\s+(?:is\s+pronounced|sounds)\s+(?:the\s+same\s+as|exactly\s+like|identically\s+to|identical\s+to)\s+" + _WQ + r"(?P<b>" + _W + r")" + _WQ, text, re.I):
+        a = _wd(m, "a")
+        if a:
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word_a": a, "word_b": m.group("b"), "claimed_homophone": True}}))
+    return out
+
+
+def _x_stress(text: str):
+    out = []
+    syl = r"(?:the\s+|its\s+)?(?P<ord>" + _ORD_RE + r")\s+syllable\b"
+    pats = [
+        _TW + _WQ + r"\b(?P<w>" + _W + r")" + _WQ + r"\s+(?:is|gets|was)\s+(?:stressed|accented|emphasized)\s+on\s+" + syl,
+        r"\b(?:the\s+)?(?:stress|accent|emphasis|primary\s+stress)\s+(?:in|of|on)\s+" + _TW + _WQ + r"(?P<w>" + _W + r")" + _WQ + r"\s+(?:falls|is|lies|goes|comes)\s+on\s+" + syl,
+        _TW + _WQ + r"\b(?P<w>" + _W + r")" + _WQ + r"\s+(?:has|carries|takes|puts)\s+(?:its\s+|the\s+)?(?:primary\s+|main\s+)?(?:stress|accent|emphasis)\s+on\s+" + syl,
+        r"\bin\s+" + _TW + _WQ + r"(?P<w>" + _W + r")" + _WQ + r",?\s+the\s+(?:stress|accent|emphasis)\s+(?:is|falls|lies)\s+on\s+" + syl,
+        r"\bthe\s+(?P<ord>" + _ORD_RE + r")\s+syllable\s+of\s+" + _TW + _WQ + r"(?P<w>" + _W + r")" + _WQ + r"\s+(?:is|gets|carries\s+the)\s+(?:stressed|accented|stress|emphasized)\b",
+    ]
+    for pat in pats:
+        for m in re.finditer(pat, text, re.I):
+            w = _wd(m)
+            if w:
+                out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word": w, "claimed_stress_syllable": _ORD[m.group("ord").lower()]}}))
+    return out
+
+
+def _x_silent_letter(text: str):
+    out = []
+    L = _WQ + r"(?P<l>[A-Za-z])" + _WQ
+    for m in re.finditer(r"\bthe\s+(?:letter\s+)?" + L + r"\s+in\s+" + _TW + _WQ + r"(?P<w>" + _W + r")" + _WQ + r"\s+(?:is|stays|remains)\s+(?P<neg>not\s+)?(?P<how>silent|pronounced|sounded|voiced|unpronounced|unsounded)\b", text, re.I):
+        w = _wd(m)
+        if w:
+            silent = m.group("how").lower() in ("silent", "unpronounced", "unsounded")
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word": w, "letter": m.group("l").lower(), "claimed_silent": silent != bool(m.group("neg"))}}))
+    for m in re.finditer(_TW + _WQ + r"\b(?P<w>" + _W + r")" + _WQ + r"\s+(?:has|contains|is\s+spelled\s+with|is\s+written\s+with|begins\s+with|starts\s+with|ends\s+with)\s+a\s+silent\s+" + L + r"(?![A-Za-z])", text, re.I):
+        w = _wd(m)
+        if w:
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word": w, "letter": m.group("l").lower(), "claimed_silent": True}}))
+    for m in re.finditer(r"\bthe\s+(?:letter\s+)?" + L + r"\s+(?:is|stays)\s+(?P<neg>not\s+)?(?P<how>silent|pronounced|sounded)\s+in\s+" + _TW + _WQ + r"(?P<w>" + _W + r")" + _WQ, text, re.I):
+        w = _wd(m)
+        if w:
+            silent = m.group("how").lower() == "silent"
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word": w, "letter": m.group("l").lower(), "claimed_silent": silent != bool(m.group("neg"))}}))
+    return out
+
+
+def _x_vowel_sound(text: str):
+    from .verifiers import wordcraft as _wc
+    snd = r"(?P<snd>" + "|".join(re.escape(k) for k in sorted(_wc.VOWEL_SOUNDS, key=len, reverse=True)) + r")"
+    out = []
+    for m in re.finditer(_TW + _WQ + r"\b(?P<w>" + _W + r")" + _WQ + r"\s+(?:has|contains|uses|makes|carries)\s+(?:(?P<neg>no|not\s+a|not\s+the)\s+|(?:a|an|the)\s+)?" + snd + r"(?:\s+(?:vowel\s+sound|vowel|sound))?\b", text, re.I):
+        w = _wd(m)
+        if w:
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word": w, "claimed_vowel_sound": m.group("snd").lower(), "claimed": not bool(m.group("neg"))}}))
+    for m in re.finditer(_TW + _WQ + r"\b(?P<w>" + _W + r")" + _WQ + r"\s+(?:does\s+not|doesn't)\s+(?:have|contain|use|make)\s+(?:a|an|the)\s+" + snd + r"(?:\s+(?:vowel\s+sound|vowel|sound))?\b", text, re.I):
+        w = _wd(m)
+        if w:
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word": w, "claimed_vowel_sound": m.group("snd").lower(), "claimed": False}}))
+    for m in re.finditer(r"\bthe\s+(?:letter\s+)?" + _WQ + r"(?P<v>[aeiou])" + _WQ + r"\s+in\s+" + _TW + _WQ + r"(?P<w>" + _W + r")" + _WQ + r"\s+(?:is|sounds|makes|says|has|takes)\s+(?:a\s+|the\s+|its\s+)?(?P<neg>not\s+)?(?P<ls>long|short)(?:\s+(?:sound|vowel|vowel\s+sound))?\b", text, re.I):
+        w = _wd(m)
+        if w:
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word": w, "claimed_vowel_sound": f"{m.group('ls').lower()} {m.group('v').lower()}", "claimed": not bool(m.group("neg"))}}))
+    for m in re.finditer(r"\bthe\s+vowel(?:\s+sound)?\s+in\s+" + _TW + _WQ + r"(?P<w>" + _W + r")" + _WQ + r"\s+is\s+(?:a\s+|an\s+|the\s+)?" + snd + r"\b", text, re.I):
+        w = _wd(m)
+        if w:
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word": w, "claimed_vowel_sound": m.group("snd").lower(), "claimed": True}}))
+    return out
+
+
+def _x_edge_sound(text: str):
+    from .verifiers import wordcraft as _wc
+    snd = r"/?(?P<snd>" + "|".join(re.escape(k) for k in sorted(_wc.SOUND_NAMES, key=len, reverse=True)) + r")/?"
+    first = {"starts", "begins", "opens", "first", "initial", "opening"}
+    out = []
+    for m in re.finditer(_TW + _WQ + r"\b(?P<w>" + _W + r")" + _WQ + r"\s+" + _NEG_DOES + r"(?P<pos>starts?|begins?|opens?|ends?|finish(?:es)?|closes?)\s+with\s+(?:a|an|the)\s+" + snd + r"\s+sound\b", text, re.I):
+        w = _wd(m)
+        if w:
+            pos = "first" if m.group("pos").lower().rstrip("s") in {p.rstrip("s") for p in first} or m.group("pos").lower() in first else "last"
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word": w, "claimed_edge_sound": m.group("snd").lower(), "position": pos, "claimed": not bool(m.group("neg"))}}))
+    for m in re.finditer(r"\bthe\s+(?P<pos>first|initial|opening|last|final|closing)\s+sound\s+(?:in|of)\s+" + _TW + _WQ + r"(?P<w>" + _W + r")" + _WQ + r"\s+is\s+(?P<neg>not\s+)?(?:a\s+|an\s+|the\s+)?" + snd + r"(?:\s+sound)?\b", text, re.I):
+        w = _wd(m)
+        if w:
+            pos = "first" if m.group("pos").lower() in first else "last"
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word": w, "claimed_edge_sound": m.group("snd").lower(), "position": pos, "claimed": not bool(m.group("neg"))}}))
+    for m in re.finditer(_TW + _WQ + r"\b(?P<w>" + _W + r")" + _WQ + r"\s+(?P<pos>starts|begins|ends)\s+with\s+the\s+sound\s+" + snd + r"\b", text, re.I):
+        w = _wd(m)
+        if w:
+            pos = "first" if m.group("pos").lower() in first else "last"
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word": w, "claimed_edge_sound": m.group("snd").lower(), "position": pos, "claimed": True}}))
+    return out
+
+
+_SRC_STOP = frozenset({"and", "or", "in", "the", "a", "an", "which", "meaning", "that", "where", "via", "through", "by",
+                       "into", "as", "with", "during", "around", "about", "but", "so", "because", "while", "when", "it",
+                       "its", "not", "also", "originally", "literally", "itself", "to", "from", "then", "ultimately",
+                       "rather", "language", "speakers", "times", "roots", "root", "word", "words", "form", "forms"})
+
+
+def _x_etymology(text: str):
+    from .verifiers import wordcraft as _wc
+    langs = r"(?P<lang>" + "|".join(re.escape(k) for k in sorted(_wc.LANG_ABBR, key=len, reverse=True)) + r")"
+    head = _TW + _WQ + r"\b(?P<w>" + _W + r")" + _WQ + r"\s+"
+    src = r"(?:\s+(?:word|noun|verb|root|term|name|form|adjective))?(?:\s+for\s+(?P<gloss>[A-Za-z][A-Za-z' \-]{1,40}?)(?=[.,;:!?)]|\s+(?:and|or|which|that|because|via|through|by|in|meaning|but)\b|$)|\s+" + _WQ + r"(?P<src>[A-Za-z][A-Za-z\-]{2,})" + _WQ + r")?"
+    neg = r"(?:(?P<neg>does\s+not|doesn't|did\s+not|didn't|is\s+not|isn't|was\s+not|wasn't)\s+)?"
+    verbs = (r"(?:comes?|came|derives?|derived|descends?|descended|originates?|originated|stems?|stemmed|hails|is\s+derived|was\s+derived|"
+             r"is\s+borrowed|was\s+borrowed|is\s+taken|was\s+taken|was\s+adopted|is\s+adopted|entered\s+english|came\s+into\s+english)")
+    frm = r"\s+(?:(?:to\s+us\s+|into\s+english\s+|ultimately\s+|originally\s+|directly\s+)?from|out\s+of|via|through)\s+(?:the\s+|an?\s+)?"
+    pats = [
+        head + neg + verbs + frm + langs + src,
+        head + r"(?:is|was)\s+(?P<neg>not\s+)?(?:of|from)\s+(?:(?:ultimately|originally|partly|purely)\s+)?" + langs + r"\s+(?:origin|derivation|extraction|descent|stock|provenance)\b",
+        head + r"(?:is|was)\s+(?P<neg>not\s+)?" + langs + r"\s+in\s+origin\b",
+        head + r"(?:is|was)\s+(?P<neg>not\s+)?(?:a|an)\s+" + langs + r"\s+(?:word|loanword|loan-word|borrowing|loan|term)\b",
+        head + r"(?:is|was)\s+(?P<neg>not\s+)?(?:a\s+)?loan(?:word|-word)?\s+from\s+(?:the\s+)?" + langs + r"\b",
+        head + r"has\s+(?:a\s+|an\s+|its\s+)?(?P<neg>no\s+)?" + langs + r"\s+(?:origin|root|roots|etymology|ancestry)\b",
+        head + r"(?:traces|goes|dates)\s+back\s+to\s+(?:the\s+|an?\s+)?" + langs + src,
+        r"\b(?:the\s+)?(?:origin|etymology|root|source)\s+of\s+" + _TW + _WQ + r"(?P<w>" + _W + r")" + _WQ + r"\s+(?:is|was|lies\s+in)\s+(?:the\s+)?" + langs + src,
+        r"\b(?:the\s+)?" + langs + r"\s+(?:word\s+|root\s+|noun\s+|verb\s+)?" + _WQ + r"(?P<src>[A-Za-z][A-Za-z\-]{2,})" + _WQ + r"\s+(?:gives|gave|yields|yielded|produced|became)\s+(?:us\s+)?(?:the\s+)?(?:english\s+)?(?:word\s+)?" + _WQ + r"(?P<w>" + _W + r")" + _WQ,
+    ]
+    out = []
+    for pat in pats:
+        for m in re.finditer(pat, text, re.I):
+            w = _wd(m)
+            if not w or w.lower() in _wc.LANG_ABBR:
+                continue
+            spec = {"word": w, "claimed_language": re.sub(r"\s+", " ", m.group("lang").lower()),
+                    "claimed_origin": not bool(m.groupdict().get("neg"))}
+            sw = m.groupdict().get("src")
+            if sw and sw.lower() not in _SRC_STOP and sw.lower() not in _wc.LANG_ABBR:
+                spec["claimed_source_word"] = sw
+            gl = m.groupdict().get("gloss")
+            if gl and gl.strip():
+                spec["claimed_gloss"] = gl.strip()
+            out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": spec}))
+    return out
+
+
 # ── element FACTS (fact-verifier, 2026-09-25): a lookup claim becomes a VERDICT ──────────────────────
 # The gap Matt named: a lookup like "the atomic number of carbon is 6" returned NOTHING_TO_CHECK + FOUND,
 # never a verdict. The periodic_table verifier + IUPAC data already exist (definitional identity, zero
@@ -1586,6 +1777,8 @@ _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("fallacy_kind", _x_fallacy_kind),
     ("word_letters", _x_word_letters), ("anagram", _x_anagram), ("palindrome", _x_palindrome),
     ("edit_distance", _x_edit_distance), ("alphabet", _x_alphabet), ("plural", _x_plural), ("letter_rank", _x_letter_rank),
+    ("rhyme", _x_rhyme), ("homophone", _x_homophone), ("stress", _x_stress), ("silent_letter", _x_silent_letter),
+    ("vowel_sound", _x_vowel_sound), ("edge_sound", _x_edge_sound), ("etymology", _x_etymology),
     ("circle", _x_circle), ("pythagorean", _x_pythagorean), ("polygon_angles", _x_polygon_angles),
     ("rectangle", _x_rectangle), ("triangle_inequality", _x_triangle_inequality),
     ("sphere", _x_sphere), ("cube", _x_cube), ("cylinder", _x_cylinder),

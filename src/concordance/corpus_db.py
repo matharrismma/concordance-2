@@ -248,6 +248,9 @@ SHARD_ASSIGN = {
     # The Country Studies (LoC FRD / Army Area Handbook, PD) — reference bulk, routed to the world
     # shard for a future freeze; resident until the next shard rebuild.
     "countries": "world",
+    # The etymology shelf (Webster 1913 origins, ~49k cards, 2026-10-08) — word-level reference beside the
+    # lexicon; routed to the word shard for a future freeze, resident until the next shard rebuild.
+    "etymology": "word",
 }
 CORE = "core"                                  # always thawed
 
