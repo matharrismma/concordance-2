@@ -218,6 +218,16 @@ def _integration(degree: int) -> str:
     return "isolated" if degree == 0 else ("thin" if degree <= 1 else "connected")
 
 
+def _receiver_status() -> Optional[Dict[str, Any]]:
+    """The receiver ladder (receiver.status) — pure over the gate artifacts; a failure to read it never takes
+    the systems report down with it."""
+    try:
+        from . import receiver as _receiver
+        return _receiver.status()
+    except Exception as e:  # noqa: BLE001
+        return {"complete": False, "read": f"the receiver could not be read: {type(e).__name__}", "stages": []}
+
+
 def report() -> Dict[str, Any]:
     """The whole course, sorted worst-first so what needs attention reads first. Cheap enough per
     request: disk stats + import resolution + the module-import graph, no corpus."""
@@ -239,6 +249,10 @@ def report() -> Dict[str, Any]:
         # THE LAUNCH ROLL-CALL (2026-10-08): what the last boot measured — ms and resident memory per
         # subsystem, the heavy singletons, and every edge priced by what it pulls in. None until a boot ran.
         "boot": last_checkin(),
+        # THE RECEIVER (2026-10-08, Matt: "the receiver is a complete system. We will be complete when we have
+        # all components that function correctly"): the superheterodyne's stages, each bound to its component
+        # and its proof read from the gate artifacts; complete only when every stage and the whole are proven.
+        "receiver": _receiver_status(),
         "counts": {
             "connected": sum(1 for r in rows if r["live"]["status"] == "connected"),
             "degraded": sum(1 for r in rows if r["live"]["status"] == "degraded"),

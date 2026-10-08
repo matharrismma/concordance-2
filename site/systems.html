@@ -92,6 +92,11 @@
   .state{color:var(--ink-2);font-size:.9rem;padding:1.4rem}
   @media (max-width:640px){h1{font-size:2rem} .summary{grid-template-columns:1fr}
     .score{border-right:none;border-bottom:1px solid var(--line-2);padding:0 0 1.2rem}}
+  .receiver h2{margin:1.2em 0 .3em;font-size:1.05em;letter-spacing:.02em}
+  .receiver-read,.receiver-whole{margin:.3em 0 .8em;opacity:.9}
+  .receiver-table td.l{vertical-align:top}
+  .receiver-table .tech{opacity:.7;font-size:.9em}
+  .receiver-table .st{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -112,7 +117,16 @@
 
   <div class="card">
     <div class="cardhead"><h2>The course card</h2><span class="hint">sorted by handicap — what needs attention reads first</span></div>
-    <div class="scroll"><table>
+    <div class="scroll"><section id="receiver" class="receiver">
+      <h2>The receiver</h2>
+      <p class="receiver-read" id="receiver-read">Reading the receiver…</p>
+      <div class="tablewrap"><table class="receiver-table">
+        <thead><tr><th class="l">Stage</th><th class="l">Component</th><th class="l">Proof</th><th>Status</th></tr></thead>
+        <tbody id="receiver-rows"></tbody>
+      </table></div>
+      <p class="receiver-whole" id="receiver-whole"></p>
+    </section>
+    <table>
       <thead><tr><th class="l">Subsystem</th><th>Status</th><th>Live</th><th>Tested</th><th>SOP</th><th>Supported</th><th class="r" title="launch roll-call: import time at the last boot">Boot ms</th><th class="r" title="launch roll-call: resident memory added at the last boot">Boot MB</th><th class="r">Handicap</th></tr></thead>
       <tbody id="rows"><tr><td colspan="9" class="state">Loading…</td></tr></tbody>
     </table></div>
@@ -145,6 +159,24 @@
       + `process resident ${mb(b.rss_kb_process)} MB; heaviest by time <b>${esc(b.heaviest_ms)}</b>, by memory <b>${esc(b.heaviest_kb)}</b>.`
       + (sg ? `<br><span class="mods">${sg}</span>` : "") + `</p>`;
   }
+  function stClass(st){ return st==="proven" ? "g" : (st==="failing" ? "c" : "a"); }
+  function renderReceiver(r){
+    if(!r || !r.stages){ document.getElementById("receiver-read").textContent = "No receiver reading."; return; }
+    document.getElementById("receiver-read").innerHTML =
+      `<b>${r.complete ? "Complete." : "Incomplete."}</b> ${esc(r.read)}`;
+    document.getElementById("receiver-rows").innerHTML = (r.stages||[]).map(s=>`
+      <tr>
+        <td class="l"><div class="name">${esc(s.stage)}</div><div class="tech">${esc(s.tech)}</div></td>
+        <td class="l"><div>${esc(s.component)}</div><div class="mods">${esc((s.modules||[]).join(" · "))}</div></td>
+        <td class="l"><div>${esc(s.proof)}</div><div class="tech">${esc(s.read)}</div></td>
+        <td class="st"><span class="pill ${stClass(s.status)}"><span class="dot"></span>${esc(s.status)}</span></td>
+      </tr>`).join("");
+    const w = r.whole||{};
+    document.getElementById("receiver-whole").innerHTML =
+      `<b>The whole</b> — ${w.ok ? "proven end to end" : "not proven end to end"}: `
+      + (w.gates||[]).map(g=>`${esc(g.gate)} <span class="pill ${stClass(g.status)}"><span class="dot"></span>${esc(g.status)}</span>`).join(" · ")
+      + `<br><span class="tech">${esc(w.note||"")}</span>`;
+  }
   function render(d){
     document.getElementById("course").textContent = d.course_handicap;
     const c = d.counts;
@@ -154,6 +186,7 @@
       + `<span class="tally a"><span class="dot"></span>${c.degraded} degraded</span>`
       + `<span class="tally c"><span class="dot"></span>${c.out} out</span></div>`
       + bootLine(d.boot);
+    renderReceiver(d.receiver);
     document.getElementById("rows").innerHTML = d.subsystems.map(s=>`
       <tr>
         <td class="sys"><div class="name">${esc(s.name)}</div><div class="mods">${esc((s.modules||[]).join(" · "))}</div></td>
