@@ -4573,6 +4573,158 @@ def transceiver() -> int:
     _mint_marks(sid, marks, by="engine:transceiver")
     return 0
 
+
+def fractal_maps() -> int:
+    """FRACTALS AS MAPS AND SORTING ALGORITHMS (Matt, 2026-10-08: 'fractals as maps and sorting algorithms'; earlier the same
+    day: 'a fractal is the complication that we create to add on the core engine'). A fractal is a map that is the same at
+    every scale: its dimension is log N / log s (Sierpinski 1.585, Koch 1.262, Cantor 0.631, Menger 2.727 - sealed), a
+    finite area can wear an infinite coastline (the snowflake's area converges to 8/5, sealed, while its perimeter grows
+    (4/3)^n), and the length you measure depends on the ruler you state (Richardson: halving the ruler on a D = 1.25 coast
+    multiplies the length by 2^0.25 - sealed - which is the stated-precision rule drawn as a coastline). A space-filling
+    curve is a fractal used AS a map: the Hilbert and Z-order curves turn a many-dimensional address into one line while
+    keeping neighbours near (Morton's interleave of (5, 3) is 27, sealed) - the call number's job. A sorting algorithm is
+    how a map is made usable: merge sort is a fractal (the same split at every scale; n log2 n = 10,240 comparisons at
+    n = 1024, sealed, against the comparison lower bound log2(1024!) = 8,769, sealed); quicksort's expected 2 n ln n and
+    its n^2 worst case; binary search on the sorted keeping at log2(882,022) = 19.75 probes; radix sort on a call number -
+    linear in the digits, 4.9x fewer operations than comparing at this size. And a map OF a map: iterating z -> z^2 + c
+    at c = 1 escapes through 1, 2, 5, 26 (sealed) while c = -1 stays bounded - the Mandelbrot set is the map of which
+    maps stay home; the logistic map's 2-cycle at r = 3.2 (0.7995, sealed) is the first step of its own cascade. Same
+    logic as every stick; the engine mapping names what carries over (the floor tree is a trie, the call number a radix
+    key, the kernel's recursion a fractal) and what does not (nothing in the engine iterates on itself)."""
+    import math
+    from concordance import tickstick as TS
+    S = {}
+    seals = [
+        ("sierp", "hausdorff_dimension_of_the_sierpinski_triangle", "log(3)/log(2)", math.log(3) / math.log(2), 1e-9),
+        ("koch", "hausdorff_dimension_of_the_koch_curve", "log(4)/log(3)", math.log(4) / math.log(3), 1e-9),
+        ("cantor", "hausdorff_dimension_of_the_cantor_set", "log(2)/log(3)", math.log(2) / math.log(3), 1e-9),
+        ("menger", "hausdorff_dimension_of_the_menger_sponge", "log(20)/log(3)", math.log(20) / math.log(3), 1e-9),
+        ("snow", "koch_snowflake_area_converges_to_8_over_5", "1 + (1/3)/(1 - 4/9)", 1.6, 1e-12),
+        ("perim", "koch_snowflake_perimeter_after_10_steps_in_units_of_the_first", "(4/3)**10", (4 / 3) ** 10, 1e-9),
+        ("coast", "richardson_coast_d_1_25_halving_the_ruler_multiplies_the_length", "2**0.25", 2 ** 0.25, 1e-9),
+        ("morton", "z_order_interleave_of_x_5_y_3", "0*32 + 1*16 + 1*8 + 0*4 + 1*2 + 1*1", 27.0, 1e-12),
+        ("hilbert", "hilbert_curve_of_order_10_fills_4_to_the_10_cells", "4**10", 1048576.0, 1e-12),
+        ("merge", "merge_sort_comparisons_n_log2_n_at_1024", "1024*log(1024)/log(2)", 10240.0, 1e-9),
+        ("lower", "comparison_sort_lower_bound_log2_of_1024_factorial", "log(factorial(1024))/log(2)", math.lgamma(1025) / math.log(2), 1e-9),
+        ("quick", "quicksort_expected_comparisons_2_n_ln_n_at_1024", "2*1024*log(1024)", 2 * 1024 * math.log(1024), 1e-9),
+        ("worst", "quicksort_worst_case_n_n_minus_1_over_2_at_1024", "1024*1023/2", 523776.0, 1e-12),
+        ("bsearch", "binary_search_probes_on_the_keeping_log2_882022", "log(882022)/log(2)", math.log2(882022), 1e-9),
+        ("radix", "radix_sort_advantage_over_comparisons_log2_n_over_4_digit_groups", "log(882022)/log(2)/4", math.log2(882022) / 4, 1e-9),
+        ("mandel", "z_squared_plus_c_at_c_1_escapes_through_1_2_5_26", "(((0**2+1)**2+1)**2+1)**2+1", 26.0, 1e-12),
+        ("logistic", "logistic_map_2_cycle_upper_point_at_r_3_2", "(4.2 + sqrt(0.2*4.2))/6.4", (4.2 + math.sqrt(0.2 * 4.2)) / 6.4, 1e-9),
+    ]
+    for key, nid, expr, val, tol in seals:
+        S[key] = _rh_seal_num(nid, expr, float(val), tol=tol)
+        if not S[key]:
+            print("a seal failed:", nid); return 1
+    print("sealed", len(S), "fractal and sorting numbers:", ", ".join(f"{k}={v[:8]}" for k, v in S.items()))
+    sid = TS.create("Fractals as maps and sorting algorithms - the same shape at every scale, the ruler that sets the length, "
+                    "the curve that makes a many-dimensional address one line, and the sorts that make a map usable",
+                    statement=("A fractal is a map that is the same at every scale. Its dimension is log N / log s; a finite "
+                               "area can wear an infinite coastline; and the length you measure depends on the ruler you "
+                               "state - halve the ruler on a coast of dimension 1.25 and the length grows by 2^0.25. A "
+                               "space-filling curve is a fractal used as a map: the Hilbert and Z-order curves turn a "
+                               "many-dimensional address into one line while keeping neighbours near, which is a call "
+                               "number's job. A sorting algorithm is how a map is made usable: merge sort is itself a "
+                               "fractal, the same split at every scale, costing n log n against a lower bound of log n! "
+                               "that no comparison sort can beat; quicksort pays the same on average and n^2 when the "
+                               "pivot is unlucky; a sorted keeping is searched in log n probes; and a key made of digits "
+                               "is sorted in linear time by its digits. A map can also be a map OF a map: iterate "
+                               "z -> z^2 + c and ask which c stay bounded, and the answer is the Mandelbrot set; the "
+                               "logistic map's doublings are the first steps of its own cascade. For the engine: the floor "
+                               "tree is a trie and the call number a radix key, the kernel's recursion is a fractal (a "
+                               "complication is a smaller copy of it), stated precision is the ruler, and a space-filling "
+                               "key is the lever that keeps a domain's neighbours on one shelf. Nothing in the engine "
+                               "iterates on itself. The likeness is kept a likeness."),
+                    field="mathematics",
+                    references=["F. Hausdorff (1918): dimension; H. von Koch (1904); W. Sierpinski (1915); G. Cantor (1883); K. Menger (1926)",
+                                "L. F. Richardson (1961): the coastline; B. Mandelbrot (1967): How Long Is the Coast of Britain?; (1982): The Fractal Geometry of Nature",
+                                "G. Peano (1890), D. Hilbert (1891): space-filling curves; G. M. Morton (1966): the Z-order key",
+                                "J. von Neumann (1945): merge sort; C. A. R. Hoare (1961): quicksort; D. E. Knuth, TAOCP vol. 3 (1973): the comparison lower bound; J. Stirling (1730)",
+                                "R. M. May (1976): the logistic map; M. Feigenbaum (1978): the cascade; M. Dewey (1876): the call number",
+                                "docs/OUR_FORM_MEASURED_2026-10-08.md (882,022 cards; the floor tree); docs/DESIGN_FROM_THE_DOTS.md",
+                                "Matthew 13:47-48 (the net gathered every kind, and they sat down and sorted); 1 Corinthians 14:40",
+                                "stick_bubbles_joined; stick_tensors; stick_where_two_domains_connect; stick_a_superheterodyne_receiver"])["id"]
+    marks = [
+        ("instance", "[dimension: the same shape at every scale, counted] The Sierpinski triangle is 3 copies of itself at half "
+                     "size: dimension log 3 / log 2 = 1.585 (sealed). Koch: 4 copies at a third, 1.262 (sealed). Cantor: 2 at "
+                     "a third, 0.631 (sealed). Menger: 20 at a third, 2.727 (sealed). A fractal's dimension is the exponent "
+                     "that relates how many copies to how small - the one number that says 'the same at every scale'.",
+         S["sierp"]),
+        ("instance", "[Koch 1.262]", S["koch"]),
+        ("instance", "[Cantor 0.631]", S["cantor"]),
+        ("instance", "[Menger 2.727]", S["menger"]),
+        ("instance", "[a finite area with an infinite edge] The Koch snowflake's area converges to 1 + (1/3)/(1 - 4/9) = 8/5 "
+                     "of its first triangle (sealed) while its perimeter after ten steps is already (4/3)^10 = 17.76 times the "
+                     "first (sealed) and grows without bound. A keeping can be finite and its boundary of detail endless: "
+                     "the map is bounded, the coastline is not.", S["snow"]),
+        ("instance", "[the perimeter at step ten]", S["perim"]),
+        ("instance", "[the ruler sets the length - the coastline IS stated precision] Richardson: L = F epsilon^(1 - D). On a "
+                     "coast of dimension 1.25, halving the ruler multiplies the measured length by 2^0.25 = 1.189 (sealed). "
+                     "There is no length without a stated ruler; the engine judges a claim at the precision it states for "
+                     "the same reason (feedback_stated_precision_sets_the_bar): the number depends on the ruler, so the "
+                     "ruler must be read first.", S["coast"]),
+        ("instance", "[a fractal used as a map: the Z-order key] Interleave the bits of x = 5 (101) and y = 3 (011) as "
+                     "y2 x2 y1 x1 y0 x0 = 011011 = 27 (sealed). One number now addresses a point of the plane, and points that "
+                     "are near on the plane are mostly near on the line - Morton's key (1966), the Hilbert curve's cousin. "
+                     "That is what a call number does for the keeping: a many-dimensional address (domain, class, item; the "
+                     "bubbles' grid) made one shelf line with neighbours kept adjacent.", S["morton"]),
+        ("instance", "[the Hilbert curve fills the square] Order 10 visits 4^10 = 1,048,576 cells (sealed), every one once, "
+                     "and it keeps locality better than any other space-filling curve - the key to use when the domains "
+                     "are orthogonalized and the keeping is laid on one line (docs/DESIGN_FROM_THE_DOTS.md, lever 2).",
+         S["hilbert"]),
+        ("instance", "[merge sort is a fractal] Split in two, sort each half the same way, merge: the recursion tree is the "
+                     "same shape at every level, log2 n levels deep and n wide, so n log2 n = 10,240 comparisons at n = 1024 "
+                     "(sealed). The kernel's own shape - find, distinguish, verify, serve - runs the same way at every scale "
+                     "(a complication is a smaller copy of it); merge sort is that shape as an algorithm.", S["merge"]),
+        ("instance", "[no comparison sort can beat log2 n!] At n = 1024 the bound is log2(1024!) = 8,769 comparisons "
+                     "(sealed, through the evaluator's own factorial); merge sort's 10,240 is within 17% of it. A bound that "
+                     "cannot be beaten is a bound worth sealing: it says how much of the cost is the problem and how much "
+                     "the method.", S["lower"]),
+        ("instance", "[quicksort: the same on average, n^2 when unlucky] Expected 2 n ln n = 14,196 comparisons at 1024 "
+                     "(sealed); worst case n(n-1)/2 = 523,776 (sealed) when every pivot is the smallest. The method's "
+                     "average is fine; its boundary is the sorted input. Success guides, failure narrows the path.",
+         S["quick"]),
+        ("instance", "[the worst case]", S["worst"]),
+        ("instance", "[a sorted keeping is searched in log n probes] log2(882,022) = 19.75 (sealed): twenty probes find any "
+                     "card by its key once the keeping is sorted - against 882,022 by scanning and 1 by the delta read. "
+                     "Sorting is what makes a map usable; the id read is what makes it instant.", S["bsearch"]),
+        ("instance", "[radix: a key made of digits sorts in linear time] A call number shelf.class.item is a digit key; "
+                     "radix sort in 4 digit groups costs 4 n against n log2 n for comparisons - at this size log2 n / 4 = 4.94 "
+                     "times fewer operations (sealed). The call number is not only an address: it is the key that sorts "
+                     "the keeping without comparing cards.", S["radix"]),
+        ("instance", "[a map of a map: the Mandelbrot set] Iterate z -> z^2 + c from 0. At c = 1: 1, 2, 5, 26 (sealed) - "
+                     "past 2 by the third step, escaping. At c = -1: -1, 0, -1, 0 - bounded forever. The Mandelbrot set is "
+                     "the map of which c stay home; its boundary is a fractal of dimension 2. A map's behaviour, mapped.",
+         S["mandel"]),
+        ("instance", "[the logistic map's first doubling] At r = 3.2 the fixed point 1 - 1/r = 0.6875 has gone unstable and "
+                     "the orbit settles on a 2-cycle whose upper point is (r + 1 + sqrt((r - 3)(r + 1)))/(2r) = 0.7995 "
+                     "(sealed). The doublings continue at Feigenbaum's ratio 4.669 (cited) into chaos: the same map, "
+                     "self-similar in its own parameter.", S["logistic"]),
+        ("postulate", "[the postulate it builds on] The kernel is self-similar: find, distinguish, verify, serve, keep the "
+                      "trail works at every scale it has been built at - the engine, a complication, a standalone coach - "
+                      "and a complication is a smaller copy of it with its own postulates. Not kept as a fact: five writings "
+                      "of it across different domains converged on one shape, and from that working the truth is "
+                      "inferred, never proven.",
+         {"source": "Matt, 2026-10-08: 'a fractal is the complication that we create to add on the core engine'; project_one_kernel_and_workready_forge; project_gen3_charter_every_copy_is_whole"}),
+        ("equivalence", "[what carries over, by name] The floor tree is a TRIE (part_of at every depth, the same shape - a "
+                        "fractal map of the keeping, measured: 882,022 cards, 0 orphans); the call number is a RADIX KEY "
+                        "(shelf.class.item sorts by digits, no comparison); the frozen cache's offsets are a SORTED INDEX "
+                        "(the boot seeks, it does not scan); FTS top-k is a PARTIAL SORT with a heap (k log n); the kernel's "
+                        "recursion is MERGE SORT'S shape; stated precision is RICHARDSON'S RULER; a space-filling key "
+                        "(Hilbert/Z-order over the orthogonalized domains) is the NEXT LEVER for keeping a domain's "
+                        "neighbours on one shelf. Each is a structure the code already has, named.",
+         {"source": "docs/OUR_FORM_MEASURED_2026-10-08.md; docs/DESIGN_FROM_THE_DOTS.md; src/concordance/corpus.py (call_number, deep_call, the frozen cache)"}),
+        ("exclusion", "[what does NOT carry over] Nothing in the engine iterates on itself - no z -> z^2 + c, no map fed its own "
+                      "output, no self-generation (the found-never-generated law is exactly this exclusion); the keeping's "
+                      "fractal dimension has NOT been measured (the floor tree's branching counted as log N / log s is a next "
+                      "measurement, not a fact); sorting is on keys, never on truth - a verdict is not a rank; and a "
+                      "space-filling key is proposed, not built.",
+         {"source": "Matt, 2026-10-08: 'don't blindly apply bra-ket'; feedback_mapping_the_truth_not_generating_it"}),
+    ]
+    _mint_marks(sid, marks, by="engine:fractal_maps")
+    return 0
+
 def svd() -> int:
     """EVERY MATRIX IS A ROTATION AND A STRETCH (Matt, 2026-10-08: "All matrix are just a rotation and a stretch. We are
     using a spherical matrix"; "allow the shape to be in the form of the most efficient vectors"). M = U S V^T: turn,
@@ -6504,6 +6656,9 @@ def main() -> int:
         return geneva()
     if a[0] in ("diagrams", "diagram", "feynman_diagrams", "feynman_diagram", "schematics", "schematic", "circuit_diagram", "netlist", "vertex", "propagator"):
         return diagrams()
+    if a[0] in ("fractal_maps", "fractals", "fractal", "fractals_as_maps", "sorting", "sorting_algorithms", "sort",
+                "merge_sort", "quicksort", "hilbert_curve", "z_order", "morton", "coastline", "mandelbrot", "logistic_map", "radix"):
+        return fractal_maps()
     if a[0] in ("transceiver", "radio", "am_fm_radio", "superheterodyne", "static", "filter_the_static", "limiter",
                 "discriminator", "noise_floor", "shannon", "capacity", "selectivity", "image_frequency"):
         return transceiver()
