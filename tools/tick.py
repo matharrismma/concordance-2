@@ -3352,6 +3352,74 @@ def laplace() -> int:
     return _mint_marks(sid, marks, by="Narrow Highway - Laplace and entropy, 2026-10-07")
 
 
+def electromagnetism() -> int:
+    """ELECTROMAGNETISM AND GEOMETRY (Matt, 2026-10-08). Maxwell's equations are geometry: the field is a
+    2-form F, Faraday's law and the no-monopole law are dF = 0, Ampere-Maxwell and Gauss's law are d*F = J;
+    the inverse square IS the sphere (flux conserved through 4 pi r^2); c falls out of two vacuum constants
+    (1/sqrt(mu0 eps0)); the vacuum has an impedance Z0 = sqrt(mu0/eps0); and the invariance of that c forced
+    the geometry of spacetime itself (Lorentz, Minkowski) - E and B are one antisymmetric tensor. Seal the
+    four numbers; map, never launder. New stick; idempotent."""
+    from concordance import tickstick as TS
+    mu0_e = "(1.25663706212 * 10 ** (-6))"           # CODATA 2018 vacuum permeability, N/A^2
+    eps0_e = "(8.8541878128 * 10 ** (-12))"          # CODATA 2018 vacuum permittivity, F/m
+    c_expr = "1 / (" + mu0_e + " * " + eps0_e + ") ** 0.5"
+    z0_expr = "(" + mu0_e + " / " + eps0_e + ") ** 0.5"
+    c_from = 1 / ((1.25663706212 * 10 ** (-6)) * (8.8541878128 * 10 ** (-12))) ** 0.5
+    z0 = ((1.25663706212 * 10 ** (-6)) / (8.8541878128 * 10 ** (-12))) ** 0.5
+    quarter = (1 / 2) ** 2                            # double the radius: the sphere's area quadruples
+    gamma = 1 / (1 - 0.6 ** 2) ** 0.5                 # Lorentz factor at v = 0.6c
+    s_c = _rh_seal_num("light_from_mu0_eps0", c_expr, float(c_from))
+    s_q = _rh_seal_num("inverse_square_is_the_sphere", "(1 / 2) ** 2", float(quarter))
+    s_z = _rh_seal_num("impedance_of_free_space", z0_expr, float(z0))
+    s_g = _rh_seal_num("lorentz_factor_from_invariant_c", "1 / (1 - 0.6 ** 2) ** 0.5", float(gamma), tol=1e-12)
+    if not all([s_c, s_q, s_z, s_g]):
+        print("a seal failed; aborting"); return 1
+    print("sealed c", s_c, "| 1/4", s_q, "| Z0", s_z, "| gamma", s_g)
+    sid = TS.create("Electromagnetism and geometry",
+                    statement=("Maxwell's equations are geometry. The field is a 2-form F: dF = 0 and d*F = J "
+                               "are the whole theory in two lines of exterior calculus. The inverse square is "
+                               "the sphere; c falls out of the vacuum's two constants; the vacuum has an "
+                               "impedance; and the invariance of that c forced the geometry of spacetime "
+                               "itself - E and B are one tensor, mixed by a boost."),
+                    field="physics",
+                    references=["Maxwell 1865, A Dynamical Theory of the Electromagnetic Field: c = 1/sqrt(mu0 eps0)",
+                                "Gauss's law as flux conservation through a closed surface (4 pi r^2)",
+                                "Z0 = sqrt(mu0/eps0) = 376.73 ohm; Lorentz 1904, Einstein 1905, Minkowski 1908",
+                                "F = dA on a U(1) bundle; the Aharonov-Bohm phase as holonomy"])["id"]
+    marks = [
+        ("witness", f"[c falls out of the vacuum's two constants] Maxwell computed the speed of his waves from two "
+                    f"laboratory constants and found light: 1/sqrt(mu0 eps0) = {c_from:.9g} m/s (sealed), which is "
+                    f"c = 299,792,458 m/s to the precision of the listed values. In the 2018 SI eps0 is DEFINED through "
+                    f"mu0 and c, so the circle closes exactly - not a coincidence, a geometry: light is the vacuum's own "
+                    f"ratio.", s_c),
+        ("witness", f"[the inverse square IS the sphere] Double the distance from a charge and the field falls to "
+                    f"(1/2)^2 = {quarter} (sealed) - because the flux through a closed surface is conserved and a "
+                    f"sphere's area is 4 pi r^2. Gauss's law is not a separate fact about charge; it is the geometry "
+                    f"of three-dimensional space. The 4 pi in alpha = e^2 / (4 pi eps0 hbar c) is this same sphere "
+                    f"(the alpha stick).", s_q),
+        ("witness", f"[the vacuum has a shape] sqrt(mu0 / eps0) = {z0:.6f} ohm (sealed) - the impedance of free space, "
+                    f"the fixed ratio of E to H in every plane wave. It is the number every transmission line and the "
+                    f"Smith chart normalize against (the smith_chart stick): the Mobius geometry of reflection is "
+                    f"measured from this one point.", s_z),
+        ("witness", f"[EM forced the geometry of spacetime] Maxwell's c is the same in every frame; the only geometry "
+                    f"that keeps it so is Lorentz/Minkowski. At v = 0.6c, gamma = 1 / sqrt(1 - 0.36) = {gamma} "
+                    f"(sealed). E and B are not two fields but one antisymmetric tensor F_mu_nu; a boost mixes them, "
+                    f"as a rotation mixes x and y. Relativity was not added to electromagnetism - it was found inside "
+                    f"it.", s_g),
+        ("note", "[Maxwell IS geometry - the full map] F = dA: the field is the curvature of a U(1) connection A. "
+                 "dF = 0 (Faraday's law + no magnetic monopoles) and d*F = J (Ampere-Maxwell + Gauss) are the entire "
+                 "theory - div and curl (the vector_calculus stick) are its native operators, and Faraday's lines of "
+                 "force were the first physical field drawn as geometry rather than action at a distance. Maxwell's "
+                 "displacement current was added by thought, not experiment, because the geometry demanded closure: "
+                 "without it there are no waves. The Aharonov-Bohm phase (the aharonov_bohm stick) is the holonomy of "
+                 "A around a loop - pure geometry, a phase with no force on the path. The Poynting vector S = E x B is "
+                 "an oriented area. Guard: map, never launder. The engine's one-way geometry (diode, airlock, an "
+                 "append-only seal) is a LIKENESS to a connection whose holonomy cannot be undone - a discernment, "
+                 "never a fit; nothing here is authored, the four numbers are sealed and the rest is cited."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - electromagnetism and geometry, 2026-10-08")
+
+
 def jevons() -> int:
     """JEVONS' PARADOX (Matt, 2026-10-07, two steps after the seal refactor cut per-seal cost ~100x). As the
     EFFICIENCY of using a resource rises, total CONSUMPTION tends to rise too, not fall: the efficiency gain
@@ -4732,6 +4800,8 @@ def main() -> int:
         return euler_e()
     if a[0] in ("laplace", "laplace_transform", "transfer_function", "s_plane", "differential_equations", "ode", "entropy_fits"):
         return laplace()
+    if a[0] in ("electromagnetism", "em", "electromagnetism_and_geometry", "field_geometry", "maxwell_geometry"):
+        return electromagnetism()
     if a[0] in ("assembly", "assemble", "final"):
         return assembly()
     if a[0] in ("aharonov_bohm", "ab"):

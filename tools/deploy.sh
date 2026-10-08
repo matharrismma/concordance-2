@@ -120,6 +120,9 @@ if [ "${DEPLOY_NO_GATE:-}" != "1" ]; then
     # through that way (2026-10-05). Each check writes its report to a file; its own exit code is the verdict.
     ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "cd '$DEST' && ASSAY_DIR=/home/nh/backups/assay PYTHONPATH=src CONCORDANCE_DATA_DIR='$DEST/data' .venv/bin/python tools/benchmarks.py --gate > /tmp/nh-gate-bench.txt 2>&1; rc=\$?; tail -2 /tmp/nh-gate-bench.txt; exit \$rc" || gate_rc=1
     ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "cd '$DEST' && ASSAY_DIR=/home/nh/backups/assay PYTHONPATH=src CONCORDANCE_DATA_DIR='$DEST/data' .venv/bin/python tools/live_assay.py > /tmp/nh-gate-assay.txt 2>&1; rc=\$?; tail -1 /tmp/nh-gate-assay.txt; grep -E '^FAIL' /tmp/nh-gate-assay.txt | head -5; exit \$rc" || gate_rc=1
+    # The front door (2026-10-07): sentences, not packets, through the auditor funnel — the one layer the
+    # other two checks never touched. A claim that was reached-and-correct must stay so; a false positive refuses.
+    ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "cd '$DEST' && PYTHONPATH=src CONCORDANCE_DATA_DIR='$DEST/data' .venv/bin/python tools/frontdoor.py --gate > /tmp/nh-gate-frontdoor.txt 2>&1; rc=\$?; tail -1 /tmp/nh-gate-frontdoor.txt; exit \$rc" || gate_rc=1
     if [ "$gate_rc" != "0" ]; then
         echo "!! THE GATE REFUSED THIS DEPLOY (a regression) — reverting"
         revert

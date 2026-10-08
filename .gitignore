@@ -153,3 +153,6 @@ data/pd_texts/
 # The principles of those who won — curated CONTENT (git-tracked), verbatim public-domain words; AFTER the
 # data/**/*.jsonl re-ignore so it wins (like the dictionary supplement). The PD texts stay untracked.
 !data/principle_cards.jsonl
+# The front-door benchmark's claim set — CONTENT (git-tracked), like domain_goldens.json; the nightly
+# results (frontdoor.json) and the floor it ratchets against are box-generated and stay untracked.
+!data/frontdoor_claims.json

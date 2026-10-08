@@ -434,7 +434,9 @@ def _x_physical_constant(text: str):
             value = float(m.group(2).replace(",", "").replace(" ", ""))
         except ValueError:
             continue
-        cv: Dict[str, Any] = {"constant": canon, "claimed_value": value}
+        # The literal AS WRITTEN rides along (2026-10-07): the verifier reads the stated precision off it,
+        # so "9.81" — right to the three figures the person gave — is not refused by a flat tolerance.
+        cv: Dict[str, Any] = {"constant": canon, "claimed_value": value, "claimed_literal": m.group(2)}
         tokens = (m.group(3) or "").split()
         if tokens and tokens[0].lower() not in _PC_PROSE:
             stored = _pc._CONSTANTS[canon]["unit"]
@@ -568,20 +570,31 @@ def _x_factorial(text: str):
 
 
 def _x_sqrt(text: str):
-    """"the square root of N is M" — ONLY when N is a PERFECT SQUARE, so the result is exact and the
-    exact-symbolic equality verifier is the right tool. sqrt of a non-perfect-square is an irrational
-    approximation that would break harshly, so it is skipped (a miss stays a miss)."""
+    """"the square root of N is M". A PERFECT SQUARE goes to the exact-symbolic equality verifier (the result
+    is exact, so equality is the right tool — unchanged since 2026-09-15). Any other N (2026-10-07) is an
+    irrational approximation the exact verifier would break harshly, so it goes to the NUMERIC verifier and
+    is judged at the precision the person STATED (verifiers.base.stated_tolerance_abs: half a unit in the
+    last written place) — and only when they stated two or more significant figures: "1.41421" is checked,
+    "1" is not extracted at all (a one-figure approximation of an irrational is too coarse to judge either
+    way; a miss stays a miss)."""
     import math
+    from .verifiers.base import stated_tolerance_abs
     out = []
     for m in re.finditer(r"(?:the\s+)?square\s+root\s+of\s+" + _NUM + r"\s*" + _EQ + r"\s*" + _NUM, text, re.I):
         n = _f(m.group(1))
-        if n < 0 or n != int(n):
+        if n < 0:
             continue
-        root = math.isqrt(int(n))
-        if root * root != int(n):            # not a perfect square -> skip
+        if n == int(n) and math.isqrt(int(n)) ** 2 == int(n):          # a perfect square: the exact path
+            out.append((_q(text, m), "mathematics",
+                        {"mode": "equality", "params": {"expr_a": f"sqrt({int(n)})", "expr_b": str(_f(m.group(2)))}}))
             continue
+        lit = m.group(2).replace("$", "").strip()
+        if stated_tolerance_abs(lit) is None:                            # one significant figure earns nothing
+            continue
+        expr_n = str(int(n)) if n == int(n) else repr(n)
         out.append((_q(text, m), "mathematics",
-                    {"mode": "equality", "params": {"expr_a": f"sqrt({int(n)})", "expr_b": str(_f(m.group(2)))}}))
+                    {"mode": "numeric", "params": {"numeric_expr": f"sqrt({expr_n})",
+                                                   "claimed_value": _f(m.group(2)), "claimed_literal": lit}}))
     return out
 
 
@@ -1088,6 +1101,13 @@ _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("physical_constant", _x_physical_constant), ("unit_conversion", _x_unit_conversion),
     ("unit_fact", _x_unit_fact),
 )
+
+# THE SECOND STAGE (2026-10-07): unit-anchored slot-fillers, registered AFTER the regexes so a sentence
+# both catch dedups to the original. The regexes are word-order bound ("a 2 kg object at 3 m/s has kinetic
+# energy 9 J" caught; "the kinetic energy of a 2 kg mass at 3 m/s is 9 J" missed) and reached 13 of the 80
+# verified domains; a filler reads the packet keys off the units each number carries, whatever the order.
+from .slotfill import FILLERS as _SLOT_FILLERS  # noqa: E402 — no cycle: slotfill imports nothing of ours
+_EXTRACTORS = _EXTRACTORS + _SLOT_FILLERS
 
 
 def extract(text: str) -> List[Dict[str, Any]]:

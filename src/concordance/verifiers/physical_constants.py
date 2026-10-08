@@ -22,7 +22,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol, stated_precision, stated_tolerance_abs
 
 
 # Each entry: (canonical_value, unit, is_exact, source_note)
@@ -233,7 +233,36 @@ def verify_physical_constant(spec: Dict[str, Any]) -> VerifierResult:
                     f"not judged (state it in {record['unit']} or an SI equivalent)",
                     data,
                 )
+    # STATED PRECISION (2026-10-07). The literal as the person wrote it ("9.81") earns half a unit in its
+    # last stated place — two or more significant figures only, so a one-figure "3e8" never passes as the
+    # exact value. "earth gravity is 9.81 m/s^2" was refused live by the flat 1e-4: right to every figure
+    # stated, called false. Scaled by any unit conversion above (the literal is in the CLAIMED unit).
+    # Only the claim's own literal can widen the window; the structured door, which sends no literal, keeps
+    # the strict default unchanged.
+    stated_used = False
+    lit = spec.get("claimed_literal")
+    if lit is not None and diff > threshold:
+        try:
+            orig = float(claimed)
+            factor = (claim / orig) if orig else 1.0
+        except (TypeError, ValueError, ZeroDivisionError):
+            factor = 1.0
+        tol = stated_tolerance_abs(lit, unit_factor=abs(factor))
+        sp = stated_precision(lit)
+        if tol is not None:
+            data["stated_sigfigs"] = sp[0] if sp else None
+            data["stated_tolerance"] = tol
+            if diff <= tol:
+                threshold = tol
+                stated_used = True
     if diff <= threshold:
+        if stated_used:
+            return confirm(
+                name,
+                f"{canonical} = {actual} {record['unit']} — the claim {claim} matches to the "
+                f"{data.get('stated_sigfigs')} significant figure(s) stated (exact {actual})",
+                data,
+            )
         return confirm(
             name,
             f"{canonical} = {actual} {record['unit']} (claim {claim} within {rel_tol:.0e})",

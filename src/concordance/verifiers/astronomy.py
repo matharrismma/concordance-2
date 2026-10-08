@@ -210,9 +210,21 @@ def verify_gravitational_scale(spec: Dict[str, Any]) -> VerifierResult:
             return error(name, "escape_mass_kg / escape_radius_m must be numeric")
         if M <= 0 or r <= 0:
             return error(name, "mass and radius must be positive")
+        # The claim AS WRITTEN ("11.2 km/s"), when the front door hands it over, lets the check honour the
+        # precision the person stated (scale_base.compare / base.stated_tolerance_abs, 2026-10-07): 11186 m/s
+        # IS 11.2 km/s to three figures. The structured door sends none and keeps the strict 1e-3.
+        import re as _re
+        lit, factor = None, 1.0
+        aw = spec.get("claimed_escape_velocity_as_written")
+        if isinstance(aw, str) and aw.strip():
+            mm = _re.match(r"\s*([-+]?[\d.,]+(?:[eE][-+]?\d+)?)\s*(.*)$", aw)
+            if mm:
+                lit = mm.group(1)
+                unit = _re.sub(r"\s+", " ", mm.group(2).strip().lower())
+                factor = 1000.0 if unit in ("km/s", "kilometers per second", "kilometres per second") else 1.0
         return _gscale.compare(name, _gscale.escape_velocity_m_s(M, r),
                                spec["claimed_escape_velocity_m_s"], 1e-3,
-                               {"formula": "v = sqrt(2 G M / r)"})
+                               {"formula": "v = sqrt(2 G M / r)"}, as_written=lit, unit_factor=factor)
     if "schwarzschild_mass_kg" in spec and "claimed_schwarzschild_radius_m" in spec:
         try:
             M = float(spec["schwarzschild_mass_kg"])

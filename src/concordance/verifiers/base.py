@@ -13,6 +13,7 @@ Ported as-is from 1.0 — domain-neutral.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, Sequence, Tuple, Union
 
@@ -67,6 +68,49 @@ def clamp_tol(spec: Dict[str, Any], key: str, default: float) -> float:
         return min(abs(float(v)), abs(default))
     except (TypeError, ValueError):
         return default
+
+
+_LITERAL = re.compile(r"[-+]?(\d*)(?:\.(\d*))?(?:[eE]([-+]?\d+))?")
+
+
+def stated_precision(literal: Any) -> Optional[Tuple[int, float]]:
+    """(significant figures, half a unit in the last stated place) of a number AS THE PERSON WROTE IT.
+
+    "9.81" -> (3, 0.005)   "5730" -> (3, 5.0)   "3.0e8" -> (2, 5e6)   "3e8" -> (1, 5e7)   "0.0025" -> (2, 5e-5)
+    A bare integer's trailing zeros are NOT counted significant ("300000000" is one figure) — the
+    conservative reading, so a round number never claims more precision than it shows. None when the
+    literal is not a number. Pure."""
+    s = str(literal if literal is not None else "").strip().replace(",", "").replace(" ", "").replace("$", "")
+    m = _LITERAL.fullmatch(s)
+    if not m or not (m.group(1) or m.group(2)):
+        return None
+    ip, fp, ex = m.group(1) or "", m.group(2), int(m.group(3) or 0)
+    if fp is not None:                       # a decimal point was written: every written decimal counts
+        digits = (ip + fp).lstrip("0")
+        return (len(digits) if digits else 1, 0.5 * 10.0 ** (ex - len(fp)))
+    core = ip.lstrip("0")
+    if not core:
+        return (1, 0.5 * 10.0 ** ex)
+    stripped = core.rstrip("0")
+    trailing = len(core) - len(stripped)
+    return (len(stripped), 0.5 * 10.0 ** (ex + trailing))
+
+
+def stated_tolerance_abs(literal: Any, unit_factor: float = 1.0) -> Optional[float]:
+    """The absolute tolerance a claim EARNS from its own stated precision — half a unit in its last stated
+    place, scaled to the verifier's unit by `unit_factor` (a claim in km/s judged in m/s: 1000) — or None
+    when it earns none: an unreadable literal, or a single significant figure, so "3e8" or "300000000"
+    never passes as the exact value. The claim's own literal is the ONLY thing that can widen a window;
+    a caller never hands in a tolerance (cf. clamp_tol, which only ever tightens). (2026-10-07: "earth
+    gravity is 9.81 m/s^2" was refused by a flat 1e-4 — right to every figure stated, called false.)"""
+    sp = stated_precision(literal)
+    if sp is None or sp[0] < 2:
+        return None
+    try:
+        f = abs(float(unit_factor)) or 1.0
+    except (TypeError, ValueError):
+        f = 1.0
+    return sp[1] * f
 
 
 # A rule is (requirement, verify_fn). requirement is EITHER a sequence of keys that must ALL
