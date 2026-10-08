@@ -39,7 +39,10 @@ from typing import Any, Dict, List, Optional, Tuple
 CLAIM_CAP = 2000
 
 SEALED_KINDS = ("bound", "instance", "witness")
-CITED_KINDS = ("equivalence", "exclusion")
+# A POSTULATE (Matt, 2026-10-08: "They work, so we don't keep them as fact, but we can make them work, so we can infer
+# that truth is there"): a cited mark that is taken as a working assumption and NEVER as a fact; the sealed instances that
+# work under it are the evidence that the truth is there. The fit counts them and says "inferred", never "proven".
+CITED_KINDS = ("equivalence", "exclusion", "postulate")
 KINDS = SEALED_KINDS + CITED_KINDS + ("note",)
 
 
@@ -127,6 +130,7 @@ def fit(stick: Dict[str, Any]) -> Dict[str, Any]:
     witnesses = [t for t in ticks if t.get("kind") == "witness"]
     equivalences = [t for t in ticks if t.get("kind") == "equivalence"]
     exclusions = [t for t in ticks if t.get("kind") == "exclusion"]
+    postulates = [t for t in ticks if t.get("kind") == "postulate"]
     notes = [t for t in ticks if t.get("kind") == "note"]
     out: Dict[str, Any] = {
         "verified_up_to": ({"up_to": best["up_to"], "unit": best.get("unit"), "claim": best.get("claim"), "seal": best.get("seal"),
@@ -135,6 +139,7 @@ def fit(stick: Dict[str, Any]) -> Dict[str, Any]:
         "witnesses": len(witnesses),
         "equivalent_statements": [t.get("claim") for t in equivalences],
         "excluded_approaches": [t.get("claim") for t in exclusions],
+        "postulates": [t.get("claim") for t in postulates],
         "record": [{"claim": t.get("claim"), "by": t.get("by"), "at": t.get("at")} for t in notes],
         "sealed_ticks": sum(1 for t in ticks if t.get("kind") in SEALED_KINDS),
         "cited_ticks": sum(1 for t in ticks if t.get("kind") in CITED_KINDS),
@@ -147,7 +152,12 @@ def fit(stick: Dict[str, Any]) -> Dict[str, Any]:
         out["open"] = (f"no sealed bound; {len(instances)} sealed instance(s) and {len(witnesses)} witness(es) — "
                        "the general question stays open")
     else:
-        out["open"] = "no sealed bound yet — the stick has only cited marks" if (equivalences or exclusions) else "no marks yet"
+        out["open"] = "no sealed bound yet — the stick has only cited marks" if (equivalences or exclusions or postulates) else "no marks yet"
+    if postulates:
+        worked = len(instances) + len(witnesses) + len(bounds)
+        out["inferred"] = (f"{len(postulates)} postulate(s) cited, {worked} sealed mark(s) work under them: they work, so the "
+                           "truth is inferred there — never proven, never kept as fact")
+        out["open"] += "; " + out["inferred"]
     # THE SURVIVING WINDOW (narrow by elimination; Matt, 2026-10-05): every bound, witness and exclusion RULES OUT
     # a region where the question could fail. The window is what those eliminations leave standing — pushed up each
     # rerun. A problem with only cited exclusions (a proof-barrier problem) has no numeric window to shrink, and

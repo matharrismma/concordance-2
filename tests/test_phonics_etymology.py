@@ -40,11 +40,18 @@ def _specs(text: str):
 # shelf-reading phrasing as SYSTEM_ERROR; the gate now warms the keeping first, and the lookup never builds.
 def test_a_cold_lookup_declines_without_building_the_corpus():
     from concordance import corpus as C
-    assert not C.loaded()
-    assert W._shelf_card_of("salary", "etymology", "card_src_etym_", "etymology") is None
-    assert W.verify_origin({"word": "salary", "claimed_language": "latin"}).status == "NOT_APPLICABLE"
-    assert W.verify_rhyme({"word_a": "cat", "word_b": "hat", "claimed_rhyme": True}).status == "NOT_APPLICABLE"
-    assert not C.loaded(), "the shelf lookup must not build the corpus"
+    # another test file in the same pytest process may already have built the (empty) singleton: isolate it, so
+    # the rule is pinned in a truly cold state whatever the run order, and restore it afterwards
+    prev = C._DEFAULT
+    C._DEFAULT = None
+    try:
+        assert not C.loaded()
+        assert W._shelf_card_of("salary", "etymology", "card_src_etym_", "etymology") is None
+        assert W.verify_origin({"word": "salary", "claimed_language": "latin"}).status == "NOT_APPLICABLE"
+        assert W.verify_rhyme({"word_a": "cat", "word_b": "hat", "claimed_rhyme": True}).status == "NOT_APPLICABLE"
+        assert not C.loaded(), "the shelf lookup must not build the corpus"
+    finally:
+        C._DEFAULT = prev
 
 
 # ── the pronunciation shelf, read whole ──────────────────────────────────────────────────────────────────────

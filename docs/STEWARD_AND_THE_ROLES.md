@@ -30,7 +30,18 @@ holds the coach doors and ask in one hand and the complications in the other.
 
 ## 2. The rule that keeps the base light
 
-A complication is:
+*Matt, 2026-10-08: "Think of postulates and a fractal is the complication that we create to add on the core
+engine."* A complication is two things and nothing more. Its **postulates**: the working assumptions that domain
+takes as true and the engine keeps as cited, never sealed (money is counted in a ledger where debits equal
+credits; a long a is EY; the cube is five anchors across three times). They work, so the truth is inferred there,
+and the tick-stick store now carries them as the kind `postulate`, counted in every fit as inferred, never proven.
+And its **fractal**: the kernel's own shape, find → distinguish → verify → serve → keep the trail, repeated inside
+the complication at a smaller scale. That is why a complication adds no mechanism to the core: it is a smaller
+copy of the mechanism plus the postulates of its domain. Cubo is the proof. Its README inherits the design law
+word for word, and the kernel has been written five times across Matt's own domains and converged on the same
+shape each time.
+
+In the engine's terms, a complication is:
 
 - a **verifier/extractor module** (found, never generated; declines what it cannot tell),
 - its **data** (shelves that can be frozen; found-fact tables; coach tracks), box-local, never in core,

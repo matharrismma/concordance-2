@@ -17,6 +17,7 @@ exactly what they establish:
 | witness     | a sealed computation that exhibits something                      | the ledger seal                  |
 | equivalence | a cited theorem: this statement ⇔ that one                        | the source                       |
 | exclusion   | a cited barrier: proofs of this kind cannot settle the question   | the source                       |
+| postulate   | a cited working assumption, never a fact; the sealed marks that work under it are the evidence the truth is there (the fit says *inferred*, never proven) | the source                       |
 | note        | a remark by a named author (never counts toward the fit)          | —                                |
 
 **The fit** is computed from the ticks and nothing else: the greatest sealed bound, the sealed instances, the cited

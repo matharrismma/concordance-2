@@ -4117,6 +4117,18 @@ def joints() -> int:
                         "orphans; Cauchy-Schwarz = no card matches a query better than the query matches itself (a score is "
                         "bounded by one). Each of these is checkable on the live index and is used as stated, nothing more.",
          {"source": "J. von Neumann (1932); F. Riesz (1907); docs/OUR_FORM_MEASURED_2026-10-08.md; stick_tensors; stick_the_dot_abstracted"}),
+        ("postulate", "[a postulate it builds on] The Born rule: the probability of finding |psi> in |phi> is |<phi|psi>|^2 "
+                      "(Born 1926). Not kept as a fact: taken as the working rule of the quantum joint, and every sealed instance "
+                      "above that uses it (|<0|+>|^2 = 1/2) works - so the truth is inferred there, never proven here.",
+         {"source": "M. Born, Zur Quantenmechanik der Stossvorgaenge (1926)"}),
+        ("postulate", "[a postulate it builds on] The state postulate: a physical state is a ray in a Hilbert space and an "
+                      "observable is a Hermitian operator on it (von Neumann 1932). The bras, kets and orthonormal bases sealed "
+                      "above work under it; its truth is inferred from a century of working, not proven by any seal.",
+         {"source": "J. von Neumann, Mathematische Grundlagen der Quantenmechanik (1932); P. A. M. Dirac (1930)"}),
+        ("postulate", "[a postulate it builds on] Dirac's quantization rule: the commutator [A, B] = i hbar {A, B} of the "
+                      "classical Poisson bracket (Dirac 1925) - the stated joint between the two mechanics. The correspondence "
+                      "instances sealed above (Planck -> Rayleigh-Jeans, Bohr n = 100, Ehrenfest) work under it.",
+         {"source": "P. A. M. Dirac, The Fundamental Equations of Quantum Mechanics (1925)"}),
         ("exclusion", "[what does NOT carry over - do not blindly apply bra-ket] (1) No complex amplitudes: the engine's space is "
                       "real; there is no phase and no interference between cards. (2) No Born rule: a verdict is not a "
                       "probability; a verifier is a deterministic measurement with eigenvalues HOLDS and BROKEN (and INCOMPLETE "
@@ -4253,6 +4265,12 @@ def assembled_path() -> int:
                         "credits across families; KCL/KVL = the two invariants an assembled answer must satisfy. Each of "
                         "these is a count or a difference on the live graph, used exactly as stated.",
          {"source": "G. Kirchhoff (1847); W. V. D. Hodge (1941); A. Hirani (2003); docs/DESIGN_FROM_THE_DOTS.md; the coverage block (failure report C4)"}),
+        ("postulate", "[the design postulate] An assembled answer obeys Kirchhoff's two laws on its own graph: nothing "
+                      "appears at a step that did not flow in from a cited source (div = 0 away from the keeping), and the "
+                      "verdict does not depend on the order the steps ran (curl = 0 around every loop). Not kept as a fact: "
+                      "it is made to work - the coverage block and the commuting verifiers are the instances - and from its "
+                      "working the truth of the design is inferred, never proven.",
+         {"source": "Matt, 2026-10-08; docs/DESIGN_FROM_THE_DOTS.md; G. Kirchhoff (1845)"}),
         ("exclusion", "[what does NOT carry over] There is no continuum: no limits, no smoothness, no Laplacian beyond the "
                       "graph Laplacian; curl is defined only on the graph's cycles, not at a point; no Helmholtz "
                       "decomposition of the engine's flow has been COMPUTED yet (a next measurement, not a fact); the "

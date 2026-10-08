@@ -149,3 +149,19 @@ def test_a_mark_keeps_its_full_text_and_a_cut_copy_is_superseded_by_its_fuller_s
     assert tickstick.tick(sid, "note", "x" * (tickstick.CLAIM_CAP + 100), by="new")["ok"]
     assert max(len(x["claim"]) for x in tickstick.read(sid)["ticks"]) == tickstick.CLAIM_CAP
 
+
+
+def test_a_postulate_is_cited_never_a_fact_and_the_fit_says_inferred():
+    """Matt, 2026-10-08: 'Think postulates. They work, so we don't keep them as fact, but we can make them work, so we
+    can infer that truth is there.' A postulate is a cited kind (a source is required); the fit counts the sealed marks
+    that work under it and says INFERRED, never proven."""
+    sid = tickstick.create("Does the Born rule hold?", statement="Probability is the squared overlap.", field="physics",
+                           references=["M. Born (1926)"])["id"]
+    assert tickstick.tick(sid, "postulate", "The Born rule: the probability of an outcome is |<phi|psi>|^2")["ok"] is False  # no source
+    r = tickstick.tick(sid, "postulate", "The Born rule: the probability of an outcome is |<phi|psi>|^2", source="M. Born (1926)")
+    assert r["ok"] is True
+    f = tickstick.read(sid)["fit"]
+    assert f["postulates"] == ["The Born rule: the probability of an outcome is |<phi|psi>|^2"]
+    assert "1 postulate(s) cited, 0 sealed mark(s)" in f["inferred"] and "inferred" in f["inferred"] and "proven" in f["inferred"]
+    assert "fact" not in f["open"].split("never kept as fact")[0].split("never proven")[-1]   # the word fact appears only in the denial
+    assert f["cited_ticks"] == 1 and f["sealed_ticks"] == 0
