@@ -4417,6 +4417,162 @@ def line_integrals() -> int:
     _mint_marks(sid, marks, by="engine:line_integrals")
     return 0
 
+
+def transceiver() -> int:
+    """THE ENGINE AS A TRANSCEIVER (Matt, 2026-10-08: 'look at it as AM or FM radio. think of us as a transceiver. We filter
+    out the static like a triode vacuum tube'). A receiver takes whatever carrier a signal arrives on, mixes it down to ONE
+    intermediate frequency where a sharp filter can be built once (Armstrong's superheterodyne, 1918), strips the
+    amplitude in a limiter, and reads the message off the structure in a discriminator - that is FM (Armstrong 1933), and
+    it is why FM rejects static: static adds amplitude, and the limiter throws amplitude away. AM keeps the message in
+    the loudness, pays two thirds of its power for a carrier that says nothing, and hears every lightning strike. The
+    image frequency is the station that lands on the same IF by the other road - the receiver's false positive, which the
+    preselector must reject. The triode (de Forest 1906; Child 1911, Langmuir 1913) is the filter's muscle: a small grid
+    voltage governs a large plate current, with a cutoff where the flow stops. The engine is the FM set: every phrasing is
+    mixed to one packet, assertion strength is stripped, the verifier reads only the checkable structure, the image is the
+    moat's false positive, the grid is the gate and cutoff is a decline. A transceiver, not a receiver: it transmits on the
+    reader's band - the complication - and what it receives through the gated door grows the keeping. Same logic as every
+    stick: seal the arithmetic, cite the laws, keep the likeness a likeness, and say what does not carry over."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    S = {}
+    seals = [
+        ("am", "am_sideband_power_fraction_at_full_modulation", "(1**2/2)/(1 + 1**2/2)", 1 / 3, 1e-12),
+        ("carson", "carsons_rule_fm_bandwidth_75_khz_deviation_15_khz_audio", "2*(75 + 15)", 180.0, 1e-12),
+        ("fm_gain", "fm_noise_advantage_three_beta_squared_beta_5", "3*5**2", 75.0, 1e-12),
+        ("fm_db", "fm_noise_advantage_in_decibels", "10*log(75)/log(10)", 10 * math.log10(75), 1e-9),
+        ("child", "child_langmuir_doubling_the_voltage_multiplies_the_current", "2**1.5", 2 ** 1.5, 1e-12),
+        ("mu", "triode_amplification_factor_mu_is_gm_times_rp", "2e-3*1e4", 20.0, 1e-12),
+        ("gain", "common_cathode_stage_gain_with_10_kohm_load", "20*10/(10 + 10)", 10.0, 1e-12),
+        ("cutoff", "triode_cutoff_grid_voltage_250_v_plate_mu_20", "-250/20", -12.5, 1e-12),
+        ("IF", "superheterodyne_intermediate_frequency_1000_khz_station_1455_khz_oscillator", "1455 - 1000", 455.0, 1e-12),
+        ("image", "the_image_frequency_that_lands_on_the_same_if", "1455 + 455", 1910.0, 1e-12),
+        ("Q", "selectivity_q_of_a_1_mhz_circuit_10_khz_wide", "1e6/1e4", 100.0, 1e-12),
+        ("C", "tuning_capacitance_for_100_uh_at_1_mhz_in_pf", "1/((2*pi*1e6)**2*100e-6)*1e12", 1 / ((2 * pi * 1e6) ** 2 * 100e-6) * 1e12, 1e-9),
+        ("shannon", "shannon_capacity_3_khz_channel_at_30_db_in_bits_per_s", "3000*log(1001)/log(2)", 3000 * math.log2(1001), 1e-9),
+        ("ktb", "thermal_noise_floor_290_k_10_khz_in_watts", "1.380649e-23*290*1e4", 1.380649e-23 * 290 * 1e4, 1e-9),
+        ("dbm", "thermal_noise_floor_in_dbm", "10*log(1.380649e-23*290*1e4/1e-3)/log(10)", 10 * math.log10(1.380649e-23 * 290 * 1e4 / 1e-3), 1e-9),
+    ]
+    for key, nid, expr, val, tol in seals:
+        S[key] = _rh_seal_num(nid, expr, float(val), tol=tol)
+        if not S[key]:
+            print("a seal failed:", nid); return 1
+    print("sealed", len(S), "radio numbers:", ", ".join(f"{k}={v[:8]}" for k, v in S.items()))
+    sid = TS.create("A superheterodyne receiver - the engine as a transceiver: every phrasing mixed to one intermediate "
+                    "frequency, the static filtered like a triode, FM not AM",
+                    statement=("A receiver takes whatever carrier a signal arrives on and mixes it down to one intermediate "
+                               "frequency, where a sharp filter is built once; the image frequency is the other station that "
+                               "lands there by the other road, and the preselector must reject it. AM keeps the message in the "
+                               "loudness, spends two thirds of its power on a carrier that says nothing, and hears every "
+                               "lightning strike; FM keeps the message in the structure, strips the amplitude in a limiter, "
+                               "reads the frequency in a discriminator, and so throws the static away - the wider the "
+                               "deviation, the greater the gain against noise. A triode is a small grid voltage governing a "
+                               "large plate current, with a cutoff where the flow stops; it amplifies without inventing, in "
+                               "its linear region. Every channel has a noise floor and a capacity, and nothing is heard below "
+                               "the one or carried above the other. The engine is the FM set: every phrasing is mixed to one "
+                               "packet, assertion strength is stripped before reading, the verifier reads only the checkable "
+                               "structure, the image is the moat's false positive, the grid is the gate and cutoff is a "
+                               "decline. It is a transceiver, not a receiver: it transmits on the reader's band, which is the "
+                               "complication, and what it receives through the gated door grows the keeping. The likeness "
+                               "is kept a likeness."),
+                    field="physics",
+                    references=["E. H. Armstrong (1918): the superheterodyne; (1933): frequency modulation and its noise rejection",
+                                "J. R. Carson (1922): the bandwidth rule for FM",
+                                "L. de Forest (1906): the Audion; C. D. Child (1911), I. Langmuir (1913): the 3/2-power law",
+                                "C. E. Shannon (1948): channel capacity; H. Nyquist (1928), J. B. Johnson (1928): thermal noise",
+                                "stick_amplitude_and_frequency_modulation; stick_the_vacuum_triode; stick_the_geometry_of_resonance_disaster; stick_maxwells_demon",
+                                "feedback_stated_precision_sets_the_bar; the moat benchmark (tools/benchmarks.py); the alignment gate",
+                                "1 Kings 19:11-12 (the still small voice after the wind, the earthquake and the fire); Matthew 11:15; Romans 10:17"])["id"]
+    marks = [
+        ("instance", "[AM spends its power on a carrier that says nothing] At full modulation the sidebands - the only part "
+                     "that carries the message - hold (m^2/2)/(1 + m^2/2) = 1/3 of the power (sealed); the carrier takes the "
+                     "other two thirds. And because the message rides in the amplitude, every lightning strike is heard as "
+                     "message. AM is the rhetoric channel: the loudness is the content.", S["am"]),
+        ("instance", "[FM: the message in the structure] Carson's rule: deviation 75 kHz, audio to 15 kHz, bandwidth "
+                     "2(75 + 15) = 180 kHz (sealed). FM spends bandwidth, not loudness; the limiter clips every station to "
+                     "one amplitude and the discriminator reads only the frequency, so static - which is amplitude - is "
+                     "thrown away before the message is read.", S["carson"]),
+        ("instance", "[the FM advantage against noise] With modulation index beta = 75/15 = 5 the signal-to-noise gain over AM "
+                     "is 3 beta^2 = 75 (sealed), 18.75 dB (sealed). The wider the deviation - the more structure the message "
+                     "is given - the more static is rejected. The engine's deviation is the packet: the more of a claim that "
+                     "is checkable structure, the less its loudness can do.", S["fm_gain"]),
+        ("instance", "[18.75 dB] The same advantage in decibels, 10 log10 75 (sealed).", S["fm_db"]),
+        ("instance", "[the superheterodyne: one intermediate frequency] A 1000 kHz station mixed with a 1455 kHz oscillator "
+                     "lands at 1455 - 1000 = 455 kHz (sealed), and so does every other station once the oscillator is tuned: "
+                     "the sharp filter is built ONCE, at 455. The engine's IF is the packet - every phrasing of a claim, "
+                     "whatever carrier it arrives on, is mixed to one spec, and the verifier is built once for that spec.",
+         S["IF"]),
+        ("instance", "[the image: the receiver's false positive] A station at 1455 + 455 = 1910 kHz (sealed) ALSO lands at "
+                     "455 by the other road. The preselector ahead of the mixer must reject it or the set hears two "
+                     "stations as one. The engine's image is a different claim landing in the same packet - and the moat "
+                     "benchmark (60 of 60, 0 false positives) is the preselector's test.", S["image"]),
+        ("instance", "[selectivity is Q] A 1 MHz circuit 10 kHz wide has Q = 100 (sealed): the adjacent station 10 kHz away "
+                     "is at the half-power edge. Selectivity is the engine's routing precision, and adjacent-channel "
+                     "interference is the Gram matrix's off-diagonal mass - the 124 domains' overlap, measured at 12.4% "
+                     "routing recall (docs/DESIGN_FROM_THE_DOTS.md).", S["Q"]),
+        ("instance", "[tuning is resonance] 100 uH resonates at 1 MHz with C = 1/((2 pi f)^2 L) = 253.3 pF (sealed). The tuned "
+                     "circuit is the peak the resonance stick warned about, used on purpose: at resonance the wanted station "
+                     "is tall and the rest are small. Tuning the engine to a domain is choosing the projector.", S["C"]),
+        ("instance", "[the triode: a small grid governs a large flow] Child-Langmuir: I = K V^{3/2}, so doubling the plate "
+                     "voltage multiplies the current by 2^{1.5} = 2.828 (sealed). With g_m = 2 mA/V and r_p = 10 k, mu = 20 "
+                     "(sealed); a common-cathode stage into 10 k has gain mu R_L/(R_L + r_p) = 10 (sealed). The grid is the "
+                     "gate: a volt on the grid moves ten volts on the plate, and nothing on the plate came from anywhere but "
+                     "the cathode's supply - amplification without invention, in the linear region.", S["child"]),
+        ("instance", "[mu = 20] The amplification factor g_m r_p (sealed).", S["mu"]),
+        ("instance", "[gain 10] The stage gain with the load (sealed).", S["gain"]),
+        ("instance", "[cutoff is a decline] At V_g = -V_p/mu = -250/20 = -12.5 V (sealed) the plate current stops: the grid has "
+                     "closed the tube. The engine's cutoff is NOTHING_TO_CHECK and DECLINED - the gate closes the flow "
+                     "instead of amplifying static into an answer.", S["cutoff"]),
+        ("instance", "[the noise floor: the smallest thing that can be heard] kTB at 290 K over 10 kHz is 4.00e-17 W "
+                     "(sealed), -134 dBm (sealed). Every channel has a floor below which no signal is heard. The engine's "
+                     "floor is the weakest phrasing an extractor still demodulates - the recall set's misses (31 of 334) are "
+                     "the signals below the floor.", S["ktb"]),
+        ("instance", "[-134 dBm] The same floor in dBm (sealed).", S["dbm"]),
+        ("instance", "[capacity: the ceiling of the channel] Shannon: a 3 kHz channel at 30 dB carries at most "
+                     "3000 log2(1001) = 29,902 bit/s (sealed). No scheme carries more; the best ones approach it. The front "
+                     "door has a capacity too - what one packet shape can carry - and a complication widens the band rather "
+                     "than shouting into the old one.", S["shannon"]),
+        ("postulate", "[the engine's postulate, in radio terms] The message is in the structure, never in the amplitude: how "
+                      "loudly a claim is asserted never changes its truth, only the window it states (a hedge widens the "
+                      "window; a confidence word is clipped). The engine is built FM. Not kept as a fact: the front door, the "
+                      "stated-precision rule and the governor are its working instances, and from their working the truth of "
+                      "the design is inferred.",
+         {"source": "Matt, 2026-10-08; feedback_stated_precision_sets_the_bar; the failure report C2 (governed claims declined)"}),
+        ("equivalence", "[the superheterodyne receiver, stage by stage, against the engine] ANTENNA: the phrasing arrives on "
+                        "whatever carrier the writer used (a textbook, a forum, a chat). RF PRESELECTOR: the tuned front end "
+                        "that rejects the image before mixing - the crisis net, the PII redaction and the governor (a negated, "
+                        "believed or hypothetical sentence is not mixed down as a claim). MIXER + LOCAL OSCILLATOR: the "
+                        "extractor, tuned to one claim kind, beats the phrasing down to baseband. IF FILTER: the packet spec - "
+                        "one shape per verifier, sharp, built once; the selectivity of the whole set lives here. LIMITER: the "
+                        "stated-precision rule - amplitude (assertion strength) clipped, the hedge read as the window. "
+                        "DISCRIMINATOR: the verifier - the message read off the structure alone, HOLDS or BROKEN. AGC: the "
+                        "fixed verdict frame - the output is the same size whatever the input's loudness (HOLDS, BROKEN, "
+                        "PARTIAL, INCOMPLETE, DECLINED). AUDIO STAGE: the render - the verdict, the worked trail and the "
+                        "receipt in the reader's language, the complication's band. SPEAKER: the surface, .com or .org. "
+                        "SQUELCH: NOTHING_TO_CHECK - silence rather than static when no station is tuned.",
+         {"source": "E. H. Armstrong (1918); Matt, 2026-10-08: 'a superheterodyne receiver'; src/concordance/audit.py (the front door, in that order)"}),
+        ("equivalence", "[what carries over, by name] antenna = the phrasings; mixer + IF = the extractor and the ONE packet "
+                        "shape per verifier (the superheterodyne's trick: filter sharply once); limiter = the governor and the "
+                        "stated-precision rule (amplitude = assertion strength, stripped before reading; the hedge is read as "
+                        "the window); discriminator = the verifier (reads only the checkable structure); image = the false "
+                        "positive, image rejection = the moat (60/60, 0 FP); selectivity = routing precision (adjacent-channel "
+                        "interference = the Gram off-diagonal); sensitivity = recall (303/334); noise figure = false "
+                        "positives (0); noise floor = the phrasings no extractor reaches; cathode = the keeping, grid = the "
+                        "gate, plate = the served answer, cutoff = a decline, linear region = the found-never-generated core, "
+                        "distortion = laundering (harmonics that were not in the input); duplexer = the diode and the airlock "
+                        "(the transmitter must not deafen the receiver: the alignment gate); transmit band = the complication "
+                        "the Steward tunes to. Each is a count the engine already keeps, used as stated.",
+         {"source": "tools/benchmarks.py (the moat); tools/recall.py; docs/DESIGN_FROM_THE_DOTS.md; the alignment gate; stick_the_vacuum_triode"}),
+        ("exclusion", "[what does NOT carry over] No field, no carrier frequency, no decibels on the engine's counts; no "
+                      "capture effect - the engine never lets the stronger of two claims win, it declines; 'static' is not "
+                      "random power but structured non-claims (hedges, governed sentences, uncited text, PII) found by rule; "
+                      "the noise floor is a list of misses, not a temperature; and Shannon's capacity bounds a channel, not "
+                      "a keeping - the keeping grows.",
+         {"source": "Matt, 2026-10-08: 'don't blindly apply bra-ket'; feedback_mapping_the_truth_not_generating_it"}),
+    ]
+    _mint_marks(sid, marks, by="engine:transceiver")
+    return 0
+
 def svd() -> int:
     """EVERY MATRIX IS A ROTATION AND A STRETCH (Matt, 2026-10-08: "All matrix are just a rotation and a stretch. We are
     using a spherical matrix"; "allow the shape to be in the form of the most efficient vectors"). M = U S V^T: turn,
@@ -6348,6 +6504,9 @@ def main() -> int:
         return geneva()
     if a[0] in ("diagrams", "diagram", "feynman_diagrams", "feynman_diagram", "schematics", "schematic", "circuit_diagram", "netlist", "vertex", "propagator"):
         return diagrams()
+    if a[0] in ("transceiver", "radio", "am_fm_radio", "superheterodyne", "static", "filter_the_static", "limiter",
+                "discriminator", "noise_floor", "shannon", "capacity", "selectivity", "image_frequency"):
+        return transceiver()
     if a[0] in ("line_integrals", "line_integral", "electrodynamics", "maxwell", "ampere", "faraday", "gauss_law", "work",
                 "action", "path_integral", "feynman_path", "sum_over_paths", "hamiltons_principle"):
         return line_integrals()
