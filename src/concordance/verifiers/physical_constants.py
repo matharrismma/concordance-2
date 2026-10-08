@@ -22,7 +22,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol, stated_precision, stated_tolerance_abs
+from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol, stated_precision, stated_tolerance_abs, window_for
 
 
 # Each entry: (canonical_value, unit, is_exact, source_note)
@@ -239,22 +239,20 @@ def verify_physical_constant(spec: Dict[str, Any]) -> VerifierResult:
     # stated, called false. Scaled by any unit conversion above (the literal is in the CLAIMED unit).
     # Only the claim's own literal can widen the window; the structured door, which sends no literal, keeps
     # the strict default unchanged.
+    # THE ONE RULE (2026-10-08, H6): with a literal the stated window REPLACES the flat default — doubled by a
+    # hedge word, granted to a one-figure claim only by a hedge, exact otherwise (window_for).
     stated_used = False
     lit = spec.get("claimed_literal")
-    if lit is not None and diff > threshold:
+    if lit is not None:
         try:
             orig = float(claimed)
             factor = (claim / orig) if orig else 1.0
         except (TypeError, ValueError, ZeroDivisionError):
             factor = 1.0
-        tol = stated_tolerance_abs(lit, unit_factor=abs(factor))
-        sp = stated_precision(lit)
-        if tol is not None:
-            data["stated_sigfigs"] = sp[0] if sp else None
-            data["stated_tolerance"] = tol
-            if diff <= tol:
-                threshold = tol
-                stated_used = True
+        threshold, info = window_for(spec, "claimed_literal", threshold, abs(factor), actual)
+        data.update(info)
+        data["stated_tolerance"] = threshold
+        stated_used = True
     if diff <= threshold:
         if stated_used:
             return confirm(

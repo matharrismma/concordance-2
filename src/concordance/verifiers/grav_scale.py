@@ -48,8 +48,9 @@ def gravitational_force_N(m1: float, m2: float, r: float) -> float:
 
 
 def compare(name: str, actual: float, claimed: Any, rel_tol: float,
-            data: Dict[str, Any], as_written: Any = None, unit_factor: float = 1.0) -> VerifierResult:
+            data: Dict[str, Any], as_written: Any = None, unit_factor: float = 1.0,
+            hedged: bool = False) -> VerifierResult:
     """Compare a computed G-anchored quantity against a claimed value (delegates to scale_base).
     `as_written` / `unit_factor`: the claim as the person stated it, for stated-precision judgement."""
     return _sb.compare(name, actual, claimed, rel_tol, data, anchor=("G", _G),
-                       as_written=as_written, unit_factor=unit_factor)
+                       as_written=as_written, unit_factor=unit_factor, hedged=hedged)

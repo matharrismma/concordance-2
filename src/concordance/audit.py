@@ -30,6 +30,8 @@ _DAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "su
 # it ("$29.3 million" -> 29.3e6; the failure report H5 found "million" dropped and 29.3 compared to 29,320,113)
 _NUM = r"\$?\s*(\d[\d,]*(?:\.\d+)?(?:\s*(?:thousand|million|billion|trillion)\b)?)"
 _EQ = r"(?:=|is|equals|comes to|totals?)"      # the claim verb
+# an optional hedge before a claimed number — kept INSIDE the quote so extract() can read it (the one rule, H6)
+_HEDGE = r"(?:about|approximately|approx\.?|roughly|around|nearly|almost|close\s+to|circa|~|≈)?\s*"
 
 
 def _f(s: str) -> float:
@@ -260,7 +262,7 @@ def _x_each(text: str):
 def _x_percent(text: str):
     out = []
     for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:%|percent|pct)\s*(?:of|tip on|tax on|discount on|off(?: of)?|on)\s*"
-                         + _NUM + r"\s*" + _EQ + r"\s*" + _NUM, text, re.I):
+                         + _NUM + r"\s*" + _EQ + r"\s*" + _HEDGE + _NUM, text, re.I):
         pct, base, claimed = _f(m.group(1)), _f(m.group(2)), _f(m.group(3))
         out.append((_q(text, m), "mathematics",
                     {"mode": "equality", "params": {"expr_a": f"({pct}/100)*{base}",
@@ -280,7 +282,7 @@ def _x_gross_pay(text: str):
     # "22 machine hours at $95/hr = $2,090", not "22 hours ...". One optional word only, to stay
     # unambiguous (it cannot swallow another number or cross a claim).
     for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(?:[a-z]+\s+)?hours?\s*(?:at|@)\s*\$\s*(\d+(?:\.\d+)?)"
-                         r"\s*(?:/hr|/hour|per hour|an hour|hourly)?\s*" + _EQ + r"\s*" + _NUM,
+                         r"\s*(?:/hr|/hour|per hour|an hour|hourly)?\s*" + _EQ + r"\s*" + _HEDGE + _NUM,
                          text, re.I):
         out.append((_q(text, m), "labor",
                     {"LABOR_VERIFY": {"hours_worked": _f(m.group(1)), "hourly_rate": _f(m.group(2)),
@@ -291,18 +293,19 @@ def _x_gross_pay(text: str):
 def _x_annual_hourly(text: str):
     out = []
     for m in re.finditer(_NUM + r"\s*(?:a year|per year|/year|annually|annual(?: salary)?)"
-                         r"[^.\n]{0,40}?" + _EQ + r"\s*" + _NUM +
+                         r"[^.\n]{0,40}?" + _EQ + r"\s*" + _HEDGE + _NUM +
                          r"\s*(?:/hr|/hour|per hour|an hour|hourly)", text, re.I):
         out.append((_q(text, m), "labor",
                     {"LABOR_VERIFY": {"annual_salary": _f(m.group(1)),
-                                      "claimed_hourly_equivalent": _f(m.group(2))}}))
+                                      "claimed_hourly_equivalent": _f(m.group(2)),
+                                      "claimed_hourly_as_written": m.group(2)}}))
     return out
 
 
 def _x_hourly_annual(text: str):
     """"$20 per hour is $41,600 per year" (2026-10-08, the failure report H1) — the mirror of _x_annual_hourly."""
     out = []
-    for m in re.finditer(_NUM + r"\s*(?:/hr|/hour|per hour|an hour|hourly)[^.\n]{0,30}?" + _EQ + r"\s*" + _NUM +
+    for m in re.finditer(_NUM + r"\s*(?:/hr|/hour|per hour|an hour|hourly)[^.\n]{0,30}?" + _EQ + r"\s*" + _HEDGE + _NUM +
                          r"\s*(?:a year|per year|/year|/yr|annually|per annum)", text, re.I):
         out.append((_q(text, m), "labor",
                     {"LABOR_VERIFY": {"hourly_rate": _f(m.group(1)), "claimed_annual_salary": _f(m.group(2)),
@@ -316,7 +319,7 @@ def _x_compound(text: str):
     out = []
     for m in re.finditer(_NUM + r"[^.\n]{0,30}?\bat\s*(\d+(?:\.\d+)?)\s*%[^.\n]{0,40}?"
                          r"\bcompound\w*\b[^.\n]{0,40}?(\d+(?:\.\d+)?)\s*years?"
-                         r"[^.\n]{0,30}?(?:=|is|grows to|becomes|yields|worth)\s*" + _NUM,
+                         r"[^.\n]{0,30}?(?:=|is|grows to|becomes|yields|worth)\s*" + _HEDGE + _NUM,
                          text, re.I):
         out.append((_q(text, m), "finance",
                     {"FIN_VERIFY": {"principal": _f(m.group(1)), "rate": _f(m.group(2)) / 100.0,
@@ -325,7 +328,7 @@ def _x_compound(text: str):
     # the other common ordering: "... for N years compounded ... = X"
     for m in re.finditer(_NUM + r"[^.\n]{0,30}?\bat\s*(\d+(?:\.\d+)?)\s*%[^.\n]{0,30}?"
                          r"for\s*(\d+(?:\.\d+)?)\s*years?[^.\n]{0,30}?\bcompound\w*\b"
-                         r"[^.\n]{0,30}?(?:=|is|grows to|becomes|yields|worth)\s*" + _NUM,
+                         r"[^.\n]{0,30}?(?:=|is|grows to|becomes|yields|worth)\s*" + _HEDGE + _NUM,
                          text, re.I):
         out.append((_q(text, m), "finance",
                     {"FIN_VERIFY": {"principal": _f(m.group(1)), "rate": _f(m.group(2)) / 100.0,
@@ -333,7 +336,7 @@ def _x_compound(text: str):
                                     "claimed_future_value_as_written": m.group(4)}}))
     # the third ordering (2026-10-08, the failure report H2): "... compounded annually grows to X over/in/after N years"
     for m in re.finditer(_NUM + r"[^.\n]{0,30}?\bat\s*(\d+(?:\.\d+)?)\s*%[^.\n]{0,40}?\bcompound\w*\b[^.\n]{0,30}?"
-                         r"(?:=|is|grows to|becomes|yields|worth)\s*" + _NUM +
+                         r"(?:=|is|grows to|becomes|yields|worth)\s*" + _HEDGE + _NUM +
                          r"[^.\n]{0,20}?\b(?:over|in|after|within)\s*(\d+(?:\.\d+)?)\s*years?", text, re.I):
         out.append((_q(text, m), "finance",
                     {"FIN_VERIFY": {"principal": _f(m.group(1)), "rate": _f(m.group(2)) / 100.0,
@@ -348,7 +351,8 @@ def _x_rule72(text: str):
                          r"(\d+(?:\.\d+)?)\s*years?", text, re.I):
         out.append((_q(text, m), "economics",
                     {"ECON_VERIFY": {"rate_percent": _f(m.group(1)),
-                                     "claimed_doubling_years": _f(m.group(2))}}))
+                                     "claimed_doubling_years": _f(m.group(2)),
+                                     "claimed_doubling_years_as_written": m.group(2)}}))
     return out
 
 
@@ -455,38 +459,73 @@ _PC_PROSE = frozenset({"in", "a", "an", "at", "to", "as", "is", "on", "of", "or"
                        "no", "and", "the", "for", "that", "which", "when", "with", "from", "was", "are"})
 
 
-def _x_physical_constant(text: str):
+def _pc_spec(name: str, num_text: str, unit_text: str) -> Optional[Dict[str, Any]]:
+    """The CONST_VERIFY packet for a named constant, a number as written and the unit tokens after it — or
+    None when the name is not a constant the engine knows, the number does not parse, or the unit run is not a
+    unit it knows (declined, never confirmed on the bare value)."""
     from .verifiers import physical_constants as _pc
+    canon = _pc._canonical(name)
+    if canon not in _pc._CONSTANTS:            # the name must resolve to a constant it truly knows
+        return None
+    try:
+        value = float(num_text.replace(",", "").replace(" ", ""))
+    except ValueError:
+        return None
+    # The literal AS WRITTEN rides along (2026-10-07): the verifier reads the stated precision off it,
+    # so "9.81" — right to the three figures the person gave — is not refused by a flat tolerance.
+    cv: Dict[str, Any] = {"constant": canon, "claimed_value": value, "claimed_literal": num_text}
+    tokens = (unit_text or "").split()
+    if tokens and tokens[0].lower() not in _PC_PROSE:
+        stored = _pc._CONSTANTS[canon]["unit"]
+        first = tokens[0]
+        if first.lower() == stored.lower() or _pc._normalize_unit(first) == _pc._normalize_unit(stored):
+            cv["claimed_unit"] = first
+        else:
+            # THE UNIT NORMALIZER (2026-10-03, R4): the longest run of tokens that is a unit of the
+            # constant's own dimension ("m s^-1 in vacuum" -> "m s^-1"), else the longest run that is a
+            # unit at all (a wrong dimension is a claim to answer); the verifier converts, mismatches,
+            # or declines. A run no part of which is a unit the engine knows -> DECLINE (unchecked),
+            # never confirm on the bare value: that path minted a false HOLDS for "299792458 km/s".
+            from .verifiers import si_units as _si
+            best = _si.longest_unit_prefix(tokens, stored)
+            if best is None:
+                return None
+            cv["claimed_unit"] = best[0]
+    return cv
+
+
+_PC_REV_PAT: Optional[re.Pattern] = None
+
+
+def _pc_rev_pattern() -> re.Pattern:
+    """Value first (2026-10-08, H6): "approximately 300,000 km/s is the speed of light"."""
+    global _PC_REV_PAT
+    if _PC_REV_PAT is None:
+        from .verifiers import physical_constants as _pc
+        names = {k.replace("_", " ") for k in _pc._CONSTANTS}
+        for k in _pc._ALIASES:
+            phrase = k.replace("_", " ")
+            if " " in phrase or phrase in _PC_SAFE_SINGLE:
+                names.add(phrase)
+        alt = "|".join(re.escape(n) for n in sorted(names, key=len, reverse=True))
+        _PC_REV_PAT = re.compile(
+            r"(?:about|approximately|roughly|around|~|≈)?\s*"
+            r"(\d[\d,]*(?:\.\d+)?(?:\s*[eE]\s*[-+]?\d+)?)"
+            r"[ \t]*((?:(?!(?:is|equals)\b)[^\s.,;:!?()]{1,14}[ \t]+){0,3})"
+            r"(?:is|equals)\s+(?:the\s+)?(" + alt + r")\b", re.I)
+    return _PC_REV_PAT
+
+
+def _x_physical_constant(text: str):
     out = []
     for m in _pc_pattern().finditer(text):
-        canon = _pc._canonical(m.group(1))
-        if canon not in _pc._CONSTANTS:            # the name must resolve to a constant it truly knows
-            continue
-        try:
-            value = float(m.group(2).replace(",", "").replace(" ", ""))
-        except ValueError:
-            continue
-        # The literal AS WRITTEN rides along (2026-10-07): the verifier reads the stated precision off it,
-        # so "9.81" — right to the three figures the person gave — is not refused by a flat tolerance.
-        cv: Dict[str, Any] = {"constant": canon, "claimed_value": value, "claimed_literal": m.group(2)}
-        tokens = (m.group(3) or "").split()
-        if tokens and tokens[0].lower() not in _PC_PROSE:
-            stored = _pc._CONSTANTS[canon]["unit"]
-            first = tokens[0]
-            if first.lower() == stored.lower() or _pc._normalize_unit(first) == _pc._normalize_unit(stored):
-                cv["claimed_unit"] = first
-            else:
-                # THE UNIT NORMALIZER (2026-10-03, R4): the longest run of tokens that is a unit of the
-                # constant's own dimension ("m s^-1 in vacuum" -> "m s^-1"), else the longest run that is a
-                # unit at all (a wrong dimension is a claim to answer); the verifier converts, mismatches,
-                # or declines. A run no part of which is a unit the engine knows -> DECLINE (unchecked),
-                # never confirm on the bare value: that path minted a false HOLDS for "299792458 km/s".
-                from .verifiers import si_units as _si
-                best = _si.longest_unit_prefix(tokens, stored)
-                if best is None:
-                    continue
-                cv["claimed_unit"] = best[0]
-        out.append((_q(text, m), "physical_constants", {"CONST_VERIFY": cv}))
+        cv = _pc_spec(m.group(1), m.group(2), m.group(3) or "")
+        if cv is not None:
+            out.append((_q(text, m), "physical_constants", {"CONST_VERIFY": cv}))
+    for m in _pc_rev_pattern().finditer(text):
+        cv = _pc_spec(m.group(3), m.group(1), m.group(2) or "")
+        if cv is not None:
+            out.append((_q(text, m), "physical_constants", {"CONST_VERIFY": cv}))
     return out
 
 
@@ -672,16 +711,18 @@ def _x_molar_mass(text: str):
     (?-i:) even though the surrounding words are not."""
     out = []
     for m in re.finditer(r"molar\s+mass\s+of\s+(?-i:([A-Z][a-z]?\d*(?:[A-Z][a-z]?\d*)*))\s+"
-                         + _EQ + r"\s*" + _NUM + r"\s*(?:g\s*/\s*mol|grams?\s+per\s+mole?)?", text, re.I):
+                         + _EQ + r"\s*" + _HEDGE + _NUM + r"\s*(?:g\s*/\s*mol|grams?\s+per\s+mole?)?", text, re.I):
         out.append((_q(text, m), "periodic_table",
-                    {"PT_VERIFY": {"formula": m.group(1), "claimed_molar_mass": _f(m.group(2))}}))
+                    {"PT_VERIFY": {"formula": m.group(1), "claimed_molar_mass": _f(m.group(2)),
+                                   "claimed_literal": m.group(2)}}))
     # formula first, the unit REQUIRED (2026-10-08, the failure report H3): "aspirin C9H8O4 is 180.16 g/mol".
     # Two or more element groups, so a lone capitalised word never reads as a formula.
     for m in re.finditer(r"(?-i:\b([A-Z][a-z]?\d*(?:[A-Z][a-z]?\d*)+))\s+(?:is|=|equals|has\s+a\s+molar\s+mass\s+of|"
                          r"has\s+molar\s+mass)\s*(?:about|approximately|roughly|~|≈)?\s*" + _NUM +
                          r"\s*(?:g\s*/\s*mol|grams?\s+per\s+mole?)\b", text, re.I):
         out.append((_q(text, m), "periodic_table",
-                    {"PT_VERIFY": {"formula": m.group(1), "claimed_molar_mass": _f(m.group(2))}}))
+                    {"PT_VERIFY": {"formula": m.group(1), "claimed_molar_mass": _f(m.group(2)),
+                                   "claimed_literal": m.group(2)}}))
     return out
 
 
@@ -753,7 +794,8 @@ def _x_kinetic_energy(text: str):
     for m in re.finditer(pat, text, re.I):
         out.append((_q(text, m), "physics",
                     {"PHYS_VERIFY": {"mass_kg": _f(m.group(1)), "velocity_m_per_s": _f(m.group(2)),
-                                     "claimed_kinetic_energy_J": _f(m.group(3))}}))
+                                     "claimed_kinetic_energy_J": _f(m.group(3)),
+                                     "claimed_kinetic_energy_as_written": m.group(3)}}))
     return out
 
 
@@ -1174,6 +1216,38 @@ from .slotfill import FILLERS as _SLOT_FILLERS  # noqa: E402 — no cycle: slotf
 _EXTRACTORS = _EXTRACTORS + _SLOT_FILLERS
 
 
+def _literal_holder(spec: Dict[str, Any]):
+    """(the dict that carries the claimed literal, its key) — the math {mode, params} shape or the single
+    {WRAPPER: {...}} shape — or (None, None)."""
+    holder = spec.get("params") if isinstance(spec.get("params"), dict) else None
+    if holder is None:
+        inner = [v for v in spec.values() if isinstance(v, dict)]
+        holder = inner[0] if len(inner) == 1 else None
+    if not holder:
+        return None, None
+    key = next((k for k in holder if k == "claimed_literal" or k.endswith("_as_written")), None)
+    return (holder, key) if key else (None, None)
+
+
+def _mark_hedge(quote: str, spec: Dict[str, Any]) -> None:
+    """THE ONE RULE's hedge (2026-10-08, H6), read ONCE for every extractor: when a hedge word (about,
+    approximately, roughly, ~) precedes the claimed number inside the quote, `hedged: True` is set beside the
+    literal, and the verifier's window follows base.stated_window. Nothing else widens a prose claim."""
+    holder, key = _literal_holder(spec)
+    if holder is None:
+        return
+    lit = str(holder[key])
+    i = quote.rfind(lit)
+    if i < 0:
+        mnum = re.match(r"\$?\s*(-?\d[\d,]*(?:\.\d+)?)", lit)
+        i = quote.rfind(mnum.group(1)) if mnum else -1
+    if i < 0:
+        return
+    from .verifiers.base import hedged_before
+    if hedged_before(quote[:i]):
+        holder["hedged"] = True
+
+
 def extract(text: str) -> List[Dict[str, Any]]:
     """All certain claims in the text, as verify_derivation steps (id, domain, spec, claim).
     Deduped on (domain, spec); order = extractor order, then position."""
@@ -1182,6 +1256,7 @@ def extract(text: str) -> List[Dict[str, Any]]:
     seen = set()
     for xname, fn in _EXTRACTORS:
         for quote, domain, spec in fn(text):
+            _mark_hedge(quote, spec)
             key = (domain, repr(sorted(spec.items())))
             if key in seen:
                 continue
@@ -1191,6 +1266,72 @@ def extract(text: str) -> List[Dict[str, Any]]:
             if len(steps) >= MAX_CLAIMS:
                 return steps
     return steps
+
+
+# ── THE STRUCTURED HINT (2026-10-08, the failure report H7) ──────────────────────────────────────
+# A numeric claim no extractor recognized used to be routed to "open a want" — a dead end, since a want is for
+# a missing SOURCE and arithmetic needs none. Now the door hands back a TEMPLATE for the structured form, built
+# from the words (never evaluated here): the person edits it and sends it, or asks find_verifier for the
+# domain's packet. Offered, never run — the engine does not pick the claim's own path.
+_HINT_VERB = re.compile(r"\s(?:=|is|equals|comes\s+to|totals?|makes|gives|yields|comes\s+out\s+to)\s", re.I)
+_HINT_NUM = re.compile(r"-?\d[\d,]*(?:\.\d+)?")
+_HINT_OPS = re.compile(r"[-+*/^()%]|\b(?:plus|minus|times|multiplied\s+by|divided\s+by|x|×|÷|mod)\b", re.I)
+
+
+def _as_expression(words: str) -> str:
+    """The arithmetic left in a run of words: numbers, operators and parentheses, word-operators mapped; when
+    no operator survives, the words themselves inside angle brackets — a slot to fill, never a guess."""
+    s = words.strip()
+    for w, op in sorted(_WORD_TO_OP.items(), key=lambda kv: -len(kv[0])):
+        s = re.sub(r"\b" + w.replace("by", r"\s*by") + r"\b", " " + op + " ", s, flags=re.I)
+    s = s.replace("×", "*").replace("÷", "/").replace("$", "").replace(",", "")
+    s = re.sub(r"(?<=\d)\s*x\s*(?=\d)", " * ", s, flags=re.I)
+    kept = re.findall(r"\d+(?:\.\d+)?|[-+*/^()%]", s)
+    if len(kept) == 1 and re.match(r"\d", kept[0]):
+        return kept[0]                                         # a lone number is already an expression
+    # valid only when numbers and binary operators alternate (parentheses aside): "40 18.50 /" is not arithmetic
+    core = [t for t in kept if t not in "()"]
+    alternates = (len(core) >= 3 and all(bool(re.match(r"\d", t)) == (i % 2 == 0) for i, t in enumerate(core))
+                  and re.match(r"\d", core[-1]) is not None)
+    if alternates and kept.count("(") == kept.count(")"):
+        return " ".join(kept)
+    return "<" + re.sub(r"\s+", " ", words.strip()) + ">"
+
+
+def looks_arithmetic(text: str) -> bool:
+    """Two or more numbers, or a number beside an operator: words that carry arithmetic to check."""
+    t = text or ""
+    nums = _HINT_NUM.findall(t)
+    return len(nums) >= 2 or (len(nums) == 1 and bool(_HINT_OPS.search(t)))
+
+
+def structured_hint(text: str) -> Optional[Dict[str, Any]]:
+    """The template for the structured door, built from the words — or None when they carry no number."""
+    t = re.sub(r"\s+", " ", (text or "")).strip()
+    nums = _HINT_NUM.findall(t)
+    if not nums:
+        return None
+    out: Dict[str, Any] = {
+        "why": ("no extractor recognized these words as a checkable claim; the structured form checks the "
+                "arithmetic directly — edit the template, then send it"),
+        "send": {"http": "POST /verify with the template as the JSON body", "mcp": "verify {mode, params}"},
+        "edit": "expr_a and expr_b must be arithmetic (numbers and + - * / ^ ( )); replace any <words> with the expression they stand for",
+        "domain_packet": ("for a physical or financial claim, find_verifier {claim} names the domain and its packet; "
+                          "then POST /verify {steps: [{id, domain, spec}]}"),
+    }
+    verbs = list(_HINT_VERB.finditer(t))
+    if verbs:
+        v = verbs[-1]
+        lhs, rhs = t[:v.start()], t[v.end():]
+        if _HINT_NUM.search(lhs) and _HINT_NUM.search(rhs):
+            out["template"] = {"mode": "equality", "params": {"expr_a": _as_expression(lhs), "expr_b": _as_expression(rhs)}}
+            return out
+    try:
+        claimed = float(nums[-1].replace(",", ""))
+    except ValueError:
+        claimed = nums[-1]
+    out["template"] = {"mode": "numeric", "params": {"numeric_expr": "<the expression>", "claimed_value": claimed}}
+    return out
 
 
 _CHAIN_CONNECTIVE = re.compile(

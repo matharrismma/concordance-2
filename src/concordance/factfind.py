@@ -397,6 +397,19 @@ def verify_fallback(claim: str, checked: Optional[str] = None,
                        "with a receipt. The keeping does hold this subject, FOUND and cited below (not a computed "
                        "verdict, no receipt): read the source and decide. For a question rather than a claim, use /ask.")
         return out
+    # H7 (2026-10-08): words that carry arithmetic go to the STRUCTURED form with a template — a want is for a
+    # missing source, and arithmetic needs none. A numeric lookup-shaped claim keeps the want and gets the
+    # template too, so neither door is a dead end.
+    from . import audit as _audit
+    hint = _audit.structured_hint(claim or "")
+    if hint:
+        out["structured"] = hint
+    if hint and _audit.looks_arithmetic(claim or ""):
+        out["found"] = []
+        out["note"] = ("No extractor recognized these words as a checkable claim, but they carry arithmetic: the "
+                       "structured form checks it directly — edit the template in `structured` and send it, or ask "
+                       "find_verifier for the domain's packet. (A want is for a missing source; arithmetic needs none.)")
+        return out
     want_q = f"{subject} {ff['property']}" if ff and ff.get("property") else (claim or "").strip()[:200]
     out["found"] = []
     out["want"] = {"query": want_q,

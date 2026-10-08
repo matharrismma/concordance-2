@@ -316,11 +316,15 @@ def verify_kinetic_energy_basic(spec: Dict[str, Any]) -> VerifierResult:
     rel_tol = clamp_tol(spec, "rel_tol", 1e-3)
     abs_tol = clamp_tol(spec, "abs_tol", 1e-6)
     threshold = max(abs_tol, abs(actual) * rel_tol)
+    extra: Dict[str, Any] = {}
+    if spec.get("claimed_kinetic_energy_as_written"):            # the one rule (2026-10-08, H6)
+        from .base import window_for
+        threshold, extra = window_for(spec, "claimed_kinetic_energy_as_written", threshold, 1.0, actual)
     diff = abs(actual - Kf)
     data = {
         "mass_kg": mf, "velocity_m_per_s": vf,
         "actual_kinetic_energy_J": actual, "claimed_kinetic_energy_J": Kf,
-        "diff": diff, "tol_abs": threshold,
+        "diff": diff, "tol_abs": threshold, **extra,
         "formula": "KE = ½ m v²",
         "source": "classical mechanics (definition of kinetic energy)",
     }

@@ -1248,6 +1248,11 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
                     out.update(_ff.verify_fallback(claim))
                 except Exception:  # noqa: BLE001 — the find is a bonus; never break the verdict
                     pass
+                if out.get("structured"):                    # H7 (2026-10-08): the words carry a number — a template, not a dead end
+                    out["means"] = ("no deterministic extractor recognized a checkable claim in these words; this says "
+                                    "NOTHING about whether the claim is true. `structured` holds a template for the "
+                                    "structured form — edit it and send it as {mode, params}, or bring the domain's packet "
+                                    "as steps=[{id, domain, spec}] (find_verifier names it).")
             return out
         if isinstance(args.get("steps"), list):
             res = verify_derivation(args["steps"])

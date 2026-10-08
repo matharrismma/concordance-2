@@ -106,7 +106,8 @@ def x_kinetic_energy_units(text: str) -> List[Tuple[str, str, Dict[str, Any]]]:
             continue
         out.append((_quote(sent), "physics",
                     {"PHYS_VERIFY": {"mass_kg": _f(m.group(1)), "velocity_m_per_s": _f(v.group(1)),
-                                     "claimed_kinetic_energy_J": _f(e.group(1))}}))
+                                     "claimed_kinetic_energy_J": _f(e.group(1)),
+                                     "claimed_kinetic_energy_as_written": e.group(1)}}))
     return out
 
 
@@ -124,7 +125,8 @@ def x_molar_mass_named(text: str) -> List[Tuple[str, str, Dict[str, Any]]]:
         if not formula:
             continue
         out.append((_quote(m.group(0)), "periodic_table",
-                    {"PT_VERIFY": {"formula": formula, "claimed_molar_mass": _f(m.group(2)), "named": name}}))
+                    {"PT_VERIFY": {"formula": formula, "claimed_molar_mass": _f(m.group(2)), "named": name,
+                                   "claimed_literal": m.group(2)}}))      # the one rule (2026-10-08, H6)
     return out
 
 

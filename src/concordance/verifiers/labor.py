@@ -111,6 +111,11 @@ def verify_annual_to_hourly(spec: Dict[str, Any]) -> VerifierResult:
     data = {"annual_salary": af, "annual_hours": annual_hours,
             "actual_hourly": round(actual, 4), "claimed_hourly": c,
             "formula": f"hourly = annual / {annual_hours}"}
+    if spec.get("claimed_hourly_as_written"):                       # the one rule (2026-10-08, H6)
+        from .base import literal_scale, window_for
+        lit_num, factor = literal_scale(spec["claimed_hourly_as_written"])
+        tol, info = window_for({**spec, "_lit": lit_num}, "_lit", tol, factor, actual)
+        data.update(info)
     if abs(actual - c) <= tol:
         return confirm(name, f"hourly = ${actual:.4f} (matches claim)", data)
     return mismatch(name, f"hourly = ${actual:.4f}, claimed ${c:.4f}", data)
@@ -138,12 +143,10 @@ def verify_hourly_to_annual(spec: Dict[str, Any]) -> VerifierResult:
             "claimed_annual": c, "formula": f"annual = hourly * {annual_hours:g} (52 weeks x 40 hours)"}
     lit = spec.get("claimed_annual_as_written")
     if lit:
-        from .base import literal_scale, stated_precision, stated_tolerance_abs
+        from .base import literal_scale, window_for
         lit_num, factor = literal_scale(lit)
-        stated = stated_tolerance_abs(lit_num, unit_factor=factor)
-        if stated is not None:
-            tol = stated
-            data["stated_sigfigs"] = (stated_precision(lit_num) or (0, 0.0))[0]
+        tol, info = window_for({**spec, "_lit": lit_num}, "_lit", tol, factor, actual)
+        data.update(info)
     if abs(actual - c) <= tol:
         return confirm(name, f"annual = ${rf:g} x {annual_hours:g} h = ${actual:,.2f} (matches claim ${c:,.2f})", data)
     return mismatch(name, f"annual = ${rf:g} x {annual_hours:g} h = ${actual:,.2f}, claimed ${c:,.2f}", data)

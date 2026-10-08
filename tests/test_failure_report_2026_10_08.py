@@ -127,3 +127,63 @@ def test_high_rows_the_fixes_reach():
     assert _verdict("1 mile is 1.6 km") == "HOLDS"                                   # two stated figures
     assert _verdict("1 mile is 1.7 km") == "BROKEN"
     assert _verdict("100 kilometers is 62.14 miles") == "HOLDS"
+
+
+# ── H6: the one tolerance rule ───────────────────────────────────────────────────────────────────
+def test_h6_one_rule_the_stated_figures_set_the_window_and_only_a_hedge_widens_it():
+    """H6: "about 10 years" passed for 10.29, a one-year miss passed, "approximately 300,000 km/s" and
+    "1 mile is 1.6 km" were BROKEN — four windows, four rules. Now one (verifiers.base.stated_window): two or
+    more stated figures earn half a unit in the last place; a hedge word doubles it and grants it to a
+    one-figure claim; nothing else widens a prose claim. Structured calls (no literal) keep their own defaults."""
+    from concordance.verifiers.base import stated_window, hedged_before
+    assert stated_window("9.81") == 0.005 and stated_window("9.81", hedged=True) == 0.01
+    assert stated_window("10") is None and stated_window("10", hedged=True) == 5.0
+    assert stated_window("300,000", hedged=True, unit_factor=1000) == 5e7
+    assert hedged_before("the speed of light is about ") and hedged_before("roughly") and hedged_before("~")
+    assert not hedged_before("the speed of light is ")
+    # rule of 72 at 7% (10.29): "about 10 years" holds by its hedge; a bare one-figure "10" is judged exactly
+    assert _verdict("at 7% money doubles in about 10 years") == "HOLDS"
+    r = _run("at 7% money doubles in 10 years")
+    assert r["verdict"] == "BROKEN" and "about 10 years" in r["results"][0]["detail"]
+    assert _verdict("at 7% money doubles in 10.3 years") == "HOLDS"
+    # value-first constant: a one-figure claim granted its window by the hedge, and only by the hedge
+    assert _verdict("approximately 300,000 km/s is the speed of light") == "HOLDS"
+    assert _verdict("300,000 km/s is the speed of light") == "BROKEN"
+    assert _verdict("approximately 400,000 km/s is the speed of light") == "BROKEN"
+    # a hedge doubles a stated window to a full unit in the last place: "about 1.7 km" (1.609 is one unit off)
+    # holds by the hedge, "1.7 km" bare does not, and "about 1.8 km" is out either way
+    assert _verdict("1 mile is about 1.6 km") == "HOLDS"
+    assert _verdict("1 mile is about 1.7 km") == "HOLDS" and _verdict("1 mile is 1.7 km") == "BROKEN"
+    assert _verdict("1 mile is about 1.8 km") == "BROKEN"
+    # molar mass through the same rule: two figures hold, one figure is exact, a hedged one figure earns ±5
+    assert _verdict("the molar mass of water is 18 g/mol") == "HOLDS"
+    assert _verdict("the molar mass of water is 20 g/mol") == "BROKEN"
+    assert _verdict("the molar mass of water is about 20 g/mol") == "HOLDS"
+    assert _verdict("the molar mass of water is about 30 g/mol") == "BROKEN"
+    # the structured door carries no literal and keeps its own default
+    from concordance.verifiers import economics as E
+    assert E.verify_rule_of_72({"rate_percent": 7, "claimed_doubling_years": 10}).status == "CONFIRMED"
+
+
+# ── H7: no dead end for a numeric claim ──────────────────────────────────────────────────────────
+def test_h7_an_unparsed_numeric_claim_gets_a_structured_template_not_a_want():
+    """H7: arithmetic the extractors could not parse was routed to "open a want" — a want is for a missing
+    SOURCE, and arithmetic needs none. The door now hands back a template for the structured form, built from
+    the words and never evaluated; a lookup-shaped numeric claim keeps the find path and gets the template too."""
+    from concordance import factfind
+    from concordance.audit import structured_hint, looks_arithmetic
+    text = "the total of 3 widgets at 4 dollars comes to 12 dollars"
+    assert _verdict(text) == "NOTHING_TO_CHECK" and looks_arithmetic(text)
+    fb = factfind.verify_fallback(text, search=lambda q, limit=3: [])
+    assert "want" not in fb and fb["structured"]["template"]["mode"] == "equality"
+    assert fb["structured"]["template"]["params"]["expr_b"] == "12"
+    assert fb["structured"]["template"]["params"]["expr_a"].startswith("<")      # a slot to fill, never a guess
+    assert "structured form" in fb["note"]
+    h = structured_hint("40 hours at $18.50/hr = $800.00")
+    assert h["template"]["mode"] == "equality" and h["template"]["params"]["expr_b"] == "800.00"
+    assert h["template"]["params"]["expr_a"].startswith("<")                      # "40 18.50 /" is not arithmetic
+    assert structured_hint("twelve divided by three is four") is None            # no number, no template
+    assert structured_hint("3 times 4 plus 1 equals 13")["template"]["params"] == {"expr_a": "3 * 4 + 1", "expr_b": "13"}
+    fb2 = factfind.verify_fallback("the mayor of Springfield is 55 years old", search=lambda q, limit=3: [])
+    assert "want" in fb2 and fb2["structured"]["template"]["mode"] == "numeric"
+

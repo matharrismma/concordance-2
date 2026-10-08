@@ -60,12 +60,13 @@ def verify_conversion(spec: Dict[str, Any]) -> VerifierResult:
     # claimed literal, when the prose door hands it over, sets the window; a structured call stays at rel_tol.
     lit = spec.get("claimed_literal")
     if lit not in (None, ""):
-        from .base import stated_precision, stated_tolerance_abs
-        stated = stated_tolerance_abs(lit)
-        if stated is not None:
-            threshold = stated
+        from .base import window_for
+        threshold, info = window_for(spec, "claimed_literal", threshold, 1.0, actual)
+        data_extra = info
+    else:
+        data_extra = {}
     data = {"from_value": fv, "from_unit": fu, "to_unit": tu,
-            "actual_value": actual, "claimed_value": tv, "rel_tol": rel_tol,
+            "actual_value": actual, "claimed_value": tv, "rel_tol": rel_tol, **data_extra,
             "source": "SI / US customary conversion factors"}
     if abs(actual - tv) <= threshold:
         return confirm(name, f"{_fmt(fv)} {fu} = {_fmt(actual)} {tu} (claim {_fmt(tv)} within {rel_tol:.0e})", data)

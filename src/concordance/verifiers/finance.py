@@ -111,13 +111,10 @@ def verify_compound_interest(spec: Dict[str, Any]) -> VerifierResult:
     # literal keep the flat tolerances above.
     lit = spec.get("claimed_future_value_as_written")
     if lit:
-        from .base import literal_scale, stated_precision, stated_tolerance_abs
+        from .base import literal_scale, window_for
         lit_num, factor = literal_scale(lit)
-        stated = stated_tolerance_abs(lit_num, unit_factor=factor)
-        if stated is not None:
-            threshold = stated
-            data["stated_sigfigs"] = (stated_precision(lit_num) or (0, 0.0))[0]
-            data["stated_tolerance_abs"] = stated
+        threshold, info = window_for({**spec, "_lit": lit_num}, "_lit", threshold, factor, actual)
+        data.update(info)
     if diff <= threshold:
         return confirm(name,
                        f"FV = {pf}·(1+{rf}/{nf})^({nf}·{tf}) = {actual:.4f} (matches claim {cf}, diff {diff:.4f})",

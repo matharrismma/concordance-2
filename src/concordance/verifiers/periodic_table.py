@@ -372,6 +372,10 @@ def verify_molar_mass(spec: Dict[str, Any]) -> VerifierResult:
     data = {"formula": formula, "composition": comp,
             "actual_molar_mass_g_per_mol": round(total, 4), "claimed_molar_mass": cl,
             "rule": "M = Σ(count × atomic_mass)"}
+    if spec.get("claimed_literal") not in (None, ""):                # the one rule (2026-10-08, H6)
+        from .base import window_for
+        threshold, info = window_for(spec, "claimed_literal", threshold, 1.0, total)
+        data.update(info)
     if abs(total - cl) <= threshold:
         return confirm(name, f"{formula} molar mass = {total:.4f} g/mol (claim {cl} within {rel_tol:g})", data)
     return mismatch(name, f"{formula} molar mass = {total:.4f} g/mol, not {cl}", data)

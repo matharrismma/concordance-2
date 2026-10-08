@@ -117,6 +117,63 @@ def stated_precision(literal: Any) -> Optional[Tuple[int, float]]:
     return (len(stripped), 0.5 * 10.0 ** (ex + trailing))
 
 
+_HEDGE_RE = None
+
+
+def hedged_before(before: Any) -> bool:
+    """True when the text just before a claimed number ends in a hedge word: about, approximately, roughly,
+    around, nearly, almost, close to, circa, an estimated, ~ or ≈. Pure."""
+    global _HEDGE_RE
+    import re
+    if _HEDGE_RE is None:
+        _HEDGE_RE = re.compile(r"(?:\b(?:about|approximately|approx|roughly|around|nearly|almost|close\s+to|circa|"
+                               r"ca|an?\s+estimated|on\s+the\s+order\s+of)\.?|[~≈])\s*$", re.I)
+    return bool(_HEDGE_RE.search(str(before or "")[-32:]))
+
+
+def stated_window(literal: Any, hedged: bool = False, unit_factor: float = 1.0) -> Optional[float]:
+    """THE ONE TOLERANCE RULE for a claim stated in words (2026-10-08, the failure report H6: "about 10 years"
+    passed for 10.29, a one-year miss passed, "approximately 300,000 km/s" and "1 mile is 1.6 km" were BROKEN —
+    four windows, four rules). Now one:
+      * two or more significant figures -> half a unit in the last stated place ("9.81" -> ±0.005);
+      * a hedge word doubles that to a full unit ("about 9.81" -> ±0.01) and GRANTS the half-unit window to a
+        one-figure claim that otherwise earns none ("about 10" -> ±5; "approximately 300,000 km/s" -> ±50,000);
+      * nothing else widens it: a one-figure claim with no hedge ("10", "3e8") is judged exactly.
+    `unit_factor` scales the window into the computed unit (km/s judged in m/s: 1000). None = no window."""
+    sp = stated_precision(literal)
+    if sp is None:
+        return None
+    try:
+        f = abs(float(unit_factor)) or 1.0
+    except (TypeError, ValueError):
+        f = 1.0
+    sig, half = sp
+    if sig >= 2:
+        return (2.0 * half if hedged else half) * f
+    return half * f if hedged else None
+
+
+def window_for(spec: Dict[str, Any], literal_key: str, default: float, unit_factor: float = 1.0,
+               actual: Optional[float] = None) -> Tuple[float, Dict[str, Any]]:
+    """The threshold a verifier compares against, and what to record about it. No literal in the spec (the
+    structured door): the verifier's own `default`, and nothing recorded. A literal (the prose door): the stated
+    window — or EXACT (float noise only) when a one-figure claim carries no hedge, because nothing but the
+    figures and a hedge may widen a prose claim's window. `hedged` rides in the spec beside the literal
+    (audit.extract sets it when a hedge word precedes the number in the quote)."""
+    lit = spec.get(literal_key)
+    if lit in (None, ""):
+        return default, {}
+    hedged = bool(spec.get("hedged"))
+    w = stated_window(lit, hedged, unit_factor)
+    sp = stated_precision(lit)
+    exact = 1e-9 * max(1.0, abs(float(actual))) if actual is not None else 1e-9
+    info = {"stated_literal": str(lit), "stated_sigfigs": sp[0] if sp else None, "hedged": hedged,
+            "stated_window": w if w is not None else 0.0,
+            "rule": ("half a unit in the last stated place (two or more figures); a hedge word doubles it and "
+                     "grants it to a one-figure claim; nothing else widens it")}
+    return (w if w is not None else exact), info
+
+
 def stated_tolerance_abs(literal: Any, unit_factor: float = 1.0) -> Optional[float]:
     """The absolute tolerance a claim EARNS from its own stated precision — half a unit in its last stated
     place, scaled to the verifier's unit by `unit_factor` (a claim in km/s judged in m/s: 1000) — or None

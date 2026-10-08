@@ -164,9 +164,18 @@ def verify_rule_of_72(spec: Dict[str, Any]) -> VerifierResult:
     tol = clamp_tol(spec, "tolerance", 0.5)
     data = {"rate_percent": rp, "actual_doubling_years": round(actual, 2),
             "claimed_doubling_years": c, "formula": "years ≈ 72 / rate_percent"}
+    # THE ONE RULE (2026-10-08, H6): "doubles in about 10 years" at 7% (10.29) holds by its hedge; a bare "10"
+    # states one figure and no hedge, so it is judged exactly and told how to say it.
+    if spec.get("claimed_doubling_years_as_written"):
+        from .base import window_for
+        tol, info = window_for(spec, "claimed_doubling_years_as_written", tol, 1.0, actual)
+        data.update(info)
     if abs(actual - c) <= tol:
-        return confirm(name, f"72 / {rp}% = {actual:.2f} years (matches claim)", data)
-    return mismatch(name, f"doubling time = {actual:.2f} years, claimed {c}", data)
+        return confirm(name, f"72 / {rp}% = {actual:.2f} years (matches claim {c:g} within {tol:g})", data)
+    how = ((f" — '{spec['claimed_doubling_years_as_written']}' states one figure and no hedge, so it is judged "
+            f"exactly; 'about {c:g} years' or '{actual:.1f} years' would hold")
+           if spec.get("claimed_doubling_years_as_written") and tol < 0.5 else "")
+    return mismatch(name, f"doubling time = 72 / {rp}% = {actual:.2f} years, claimed {c:g}{how}", data)
 
 
 def verify_inflation_adjusted(spec: Dict[str, Any]) -> VerifierResult:

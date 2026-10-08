@@ -228,7 +228,8 @@ def verify_gravitational_scale(spec: Dict[str, Any]) -> VerifierResult:
                     lit, factor = None, 1.0      # an unknown unit earns NO window (review 2026-10-08: "24,000 mph")
         return _gscale.compare(name, _gscale.escape_velocity_m_s(M, r),
                                spec["claimed_escape_velocity_m_s"], 1e-3,
-                               {"formula": "v = sqrt(2 G M / r)"}, as_written=lit, unit_factor=factor)
+                               {"formula": "v = sqrt(2 G M / r)"}, as_written=lit, unit_factor=factor,
+                               hedged=bool(spec.get("hedged")))
     if "schwarzschild_mass_kg" in spec and "claimed_schwarzschild_radius_m" in spec:
         try:
             M = float(spec["schwarzschild_mass_kg"])

@@ -12,12 +12,12 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, Optional, Tuple
 
-from .base import VerifierResult, confirm, mismatch, error, stated_precision, stated_tolerance_abs
+from .base import VerifierResult, confirm, mismatch, error, stated_precision, stated_tolerance_abs, stated_window
 
 
 def compare(name: str, actual: float, claimed: Any, rel_tol: float, data: Dict[str, Any],
             anchor: Optional[Tuple[str, float]] = None, as_written: Optional[str] = None,
-            unit_factor: float = 1.0) -> VerifierResult:
+            unit_factor: float = 1.0, hedged: bool = False) -> VerifierResult:
     """Confirm/mismatch on a computed quantity vs a claimed value. Fail-closed on bad input.
 
     `anchor` = (constant_name, constant_value); when given it is recorded in the trail so the seal
@@ -40,14 +40,21 @@ def compare(name: str, actual: float, claimed: Any, rel_tol: float, data: Dict[s
     if anchor:
         d[anchor[0]] = anchor[1]
     label = data.get("formula", name)
+    if as_written:
+        # THE ONE RULE (2026-10-08, H6): a stated literal sets the window — doubled by a hedge, exact for a
+        # one-figure claim without one — and the flat rel_tol no longer passes a prose claim first.
+        tol = stated_window(as_written, hedged, unit_factor)
+        sp = stated_precision(as_written)
+        d["stated_sigfigs"] = sp[0] if sp else None
+        d["hedged"] = bool(hedged)
+        d["stated_tolerance"] = tol if tol is not None else 0.0
+        if tol is not None and abs(actual - cl) <= tol:
+            return confirm(name, f"{label} = {actual:.6g} — matches {as_written} to the {sp[0] if sp else '?'} "
+                                 f"significant figure(s) stated{' (hedged)' if hedged else ''} (exact {actual:.6g})", d)
+        if tol is None and abs(actual - cl) <= 1e-9 * abs(actual):
+            return confirm(name, f"{label} = {actual:.6g} (matches {cl} exactly)", d)
+        return mismatch(name, f"{label} = {actual:.6g}, claimed {cl} (stated to {sp[0] if sp else '?'} figure(s)"
+                              f"{' with a hedge' if hedged else ''}: window ±{tol if tol is not None else 0:g})", d)
     if rel <= rel_tol:
         return confirm(name, f"{label} = {actual:.6g} (matches {cl}, rel {rel:.1e})", d)
-    if as_written:
-        tol = stated_tolerance_abs(as_written, unit_factor=unit_factor)
-        sp = stated_precision(as_written)
-        if tol is not None and abs(actual - cl) <= tol:
-            d["stated_sigfigs"] = sp[0] if sp else None
-            d["stated_tolerance"] = tol
-            return confirm(name, f"{label} = {actual:.6g} — matches {as_written} to the {sp[0] if sp else '?'} "
-                                 f"significant figure(s) stated (exact {actual:.6g})", d)
     return mismatch(name, f"{label} = {actual:.6g}, claimed {cl} (rel {rel:.1e} > {rel_tol:.0e})", d)

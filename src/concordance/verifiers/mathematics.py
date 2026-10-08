@@ -16,7 +16,7 @@ import re as _re
 from typing import Any, Dict, List
 
 from .base import VerifierResult, clamp_tol, confirm, error, mismatch, na
-from .base import stated_precision, stated_tolerance_abs
+from .base import stated_precision, stated_tolerance_abs, stated_window, window_for
 from .base import dispatch  # declarative run() driver
 
 sympify = simplify = diff = integrate = limit = solve = None
@@ -284,7 +284,7 @@ def verify_equality(spec: Dict[str, Any]) -> VerifierResult:
             except _PARSE_ERRORS:
                 pass
             lit = spec.get("claimed_literal")
-            tol = stated_tolerance_abs(lit) if lit not in (None, "") else None
+            tol = stated_window(lit, bool(spec.get("hedged"))) if lit not in (None, "") else None
             if tol is not None:
                 try:
                     fa, fb = float(ea.evalf()), float(eb.evalf())
@@ -753,16 +753,13 @@ def verify_numeric(spec: Dict[str, Any]) -> VerifierResult:
     # caller that sends no literal keeps the strict default unchanged (clamp_tol still only tightens).
     stated_used = False
     lit = spec.get("claimed_literal")
-    if lit is not None and diff > threshold:
-        from .base import stated_precision, stated_tolerance_abs
-        tol = stated_tolerance_abs(lit)
-        sp = stated_precision(lit)
-        if tol is not None:
-            data["stated_sigfigs"] = sp[0] if sp else None
-            data["stated_tolerance"] = tol
-            if diff <= tol:
-                threshold = tol
-                stated_used = True
+    if lit is not None:
+        # THE ONE RULE (2026-10-08, H6): the stated window replaces the flat default; a hedge doubles it; a
+        # one-figure claim is exact without a hedge (window_for).
+        threshold, info = window_for(spec, "claimed_literal", threshold, 1.0, fv)
+        data.update(info)
+        data["stated_tolerance"] = threshold
+        stated_used = True
     if diff <= threshold:
         if stated_used:
             return confirm(name, f"{expr} = {fv:.10g} — the claim {cv} matches to the "
