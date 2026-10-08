@@ -34,6 +34,19 @@ def _specs(text: str):
     return out
 
 
+# ── a cold process never builds the corpus inside a verify budget: the lookup declines, nothing is built ─────
+# (first in the file on purpose: no test before it may have built the corpus). 2026-10-08 on the box: the
+# recall gate's cold process started the ~18 s corpus build inside the 8 s verify budget and shed every
+# shelf-reading phrasing as SYSTEM_ERROR; the gate now warms the keeping first, and the lookup never builds.
+def test_a_cold_lookup_declines_without_building_the_corpus():
+    from concordance import corpus as C
+    assert not C.loaded()
+    assert W._shelf_card_of("salary", "etymology", "card_src_etym_", "etymology") is None
+    assert W.verify_origin({"word": "salary", "claimed_language": "latin"}).status == "NOT_APPLICABLE"
+    assert W.verify_rhyme({"word_a": "cat", "word_b": "hat", "claimed_rhyme": True}).status == "NOT_APPLICABLE"
+    assert not C.loaded(), "the shelf lookup must not build the corpus"
+
+
 # ── the pronunciation shelf, read whole ──────────────────────────────────────────────────────────────────────
 def test_variants_tails_and_stress():
     body = "strength: pronounced (ARPABET) S T R EH1 NG K TH; also S T R EH1 NG TH. From the CMU Pronouncing Dictionary."

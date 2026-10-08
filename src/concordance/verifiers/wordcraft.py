@@ -145,6 +145,8 @@ def _shelf_card_of(word: str, shelf: str, prefix: str, must_have: str) -> Option
     stays as the fallback for a word whose id is spelt differently. Never raises."""
     try:
         from .. import corpus as _corpus
+        if not _corpus.loaded():
+            return None          # a cold process never starts the corpus build inside a verify budget: declined
         c = _corpus.default_corpus()
         w = str(word or "").strip().lower()
         cid = _card_id(prefix, w)

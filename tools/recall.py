@@ -75,6 +75,20 @@ def run(dry_run: bool = False, data_dir: Optional[Path] = None, phrasings_path: 
     families: Dict[str, List[Dict[str, Any]]] = {}
     if ppath.exists():
         families = json.loads(ppath.read_text(encoding="utf-8")).get("families") or {}
+    # WARM THE KEEPING FIRST (2026-10-08). The shelf-reading checks (syllables, rhyme, origin ...) read the
+    # corpus but never build it inside a verify budget (corpus.loaded()); so the gate builds it here, once,
+    # before the clock starts - on the box that is the frozen-cache boot (~18 s), in a test's empty data dir
+    # it is nothing. Without this every shelf-reading phrasing was shed as SYSTEM_ERROR and never judged.
+    t_warm = time.time()
+    corpus_state = "none"
+    if (data / "cards.jsonl").exists():
+        try:
+            from concordance import corpus as _corpus
+            _corpus.default_corpus()
+            corpus_state = "warm"
+        except Exception as e:  # noqa: BLE001 - a keeping that will not load is reported, never hidden
+            corpus_state = f"failed: {str(e)[:120]}"
+    warm_s = round(time.time() - t_warm, 1)
     rows = bench(families)
     floor: List[str] = []
     if floor_path.exists():
@@ -102,6 +116,7 @@ def run(dry_run: bool = False, data_dir: Optional[Path] = None, phrasings_path: 
     summary = {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "host": socket.gethostname(), "seconds": round(time.time() - t0, 1),
+        "corpus": corpus_state, "corpus_warm_seconds": warm_s,
         "families": len(families), "phrasings": n, "reached": reached, "correct": len(correct_now),
         "recall": round(reached / n, 3) if n else None,
         "false_positives": sum(1 for r in rows if r["false_positive"]),

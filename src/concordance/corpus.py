@@ -1383,6 +1383,13 @@ def add_to_default(card: dict) -> None:
         _DEFAULT.add_card(card)
 
 
+def loaded() -> bool:
+    """True once the default corpus has been built in this process. A verifier that only READS a shelf asks this
+    first and declines when False: a cold process must never start the ~18 s corpus build inside a verify
+    budget (2026-10-08: the recall gate shed every shelf-reading row as SYSTEM_ERROR that way)."""
+    return _DEFAULT is not None
+
+
 def default_corpus(path: Optional[Path] = None) -> Corpus:
     global _DEFAULT
     if _DEFAULT is None:  # double-checked lock: build once, even under concurrent first-hits
