@@ -277,6 +277,21 @@ def report() -> Dict[str, Any]:
 _LAST_CHECKIN: Optional[Dict[str, Any]] = None
 
 
+def _ensure_rollcall_handler() -> None:
+    """The service configures no logging handler anywhere, so INFO lines vanish — verified 2026-10-08: after a
+    boot the journal held only systemd's own lines (including its "1.2G memory peak"), never a Python one. The
+    roll-call is the operator's launch record, so it carries its own handler: stderr (the unit's journal), INFO,
+    THIS logger only (propagate off — nothing else in the engine gets chattier), attached once."""
+    if any(getattr(h, "_rollcall", False) for h in _log.handlers):
+        return
+    h = logging.StreamHandler(sys.stderr)
+    h.setFormatter(logging.Formatter("%(asctime)s %(message)s", "%Y-%m-%dT%H:%M:%S"))
+    setattr(h, "_rollcall", True)
+    _log.addHandler(h)
+    _log.setLevel(logging.INFO)
+    _log.propagate = False
+
+
 def _data_dir() -> Path:
     return Path(os.environ.get("CONCORDANCE_DATA_DIR", "").strip() or str(_ROOT / "data"))
 
@@ -338,6 +353,8 @@ def checkin(extra: Optional[List[Dict[str, Any]]] = None, *, write: bool = True,
     priced by what it pulls in. Writes data/boot_checkin.json (box-generated; untracked) and logs one line per
     subsystem. Pure stdlib; never raises."""
     global _LAST_CHECKIN
+    if log:
+        _ensure_rollcall_handler()
     t_all = time.perf_counter()
     rss_start = rss_kb()
     rows: List[Dict[str, Any]] = []

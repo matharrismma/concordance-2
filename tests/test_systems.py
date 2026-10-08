@@ -80,6 +80,19 @@ def test_checkin_every_subsystem_reports(tmp_path, monkeypatch):
     assert systems.report()["boot"]["total"] == out["total"]
 
 
+def test_rollcall_lines_reach_the_journal_once(tmp_path, monkeypatch, capsys):
+    """The engine configures no logging handler, so the roll-call carries its own: stderr, this logger only,
+    attached ONCE however many boots run in a process — and the journal line per subsystem actually appears."""
+    import logging
+    monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
+    systems.checkin(write=False, log=True)
+    systems.checkin(write=False, log=True)
+    mine = [h for h in systems._log.handlers if getattr(h, "_rollcall", False)]
+    assert len(mine) == 1 and systems._log.level == logging.INFO and systems._log.propagate is False
+    err = capsys.readouterr().err
+    assert "check-in" in err and "Front Door / Ask" in err and "ready" in err.lower()
+
+
 def test_rss_reading_is_a_number_or_honestly_none():
     v = systems.rss_kb()
     assert v is None or (isinstance(v, int) and v > 0)

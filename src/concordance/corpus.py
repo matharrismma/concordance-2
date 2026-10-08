@@ -1014,6 +1014,13 @@ class Corpus:
 _DEFAULT: Optional[Corpus] = None
 _DEFAULT_LOCK = threading.Lock()
 
+# THE LOAD, PHASED (2026-10-08) — the launch roll-call measured the corpus warm at 39,949 ms / 994.6 MB on the
+# box, 98% of boot time. One number cannot be optimized; its parts can. load_cards() and default_corpus() fill
+# this with where the time went: the cards.jsonl pass, the extras + signposts + bridges, the frozen-shelf
+# document-frequency tokenization (every frozen card's full text, tokenized at boot only to count DF), and
+# the index build (Corpus.__init__). A handful of counters, no extra memory; read at /systems -> boot.
+LOAD_PHASES: Dict[str, Any] = {}
+
 
 def _cards_path() -> Path:
     env = os.environ.get("CONCORDANCE_CARDS_JSONL", "").strip()
@@ -1025,7 +1032,10 @@ def _cards_path() -> Path:
 
 def load_cards(path: Optional[Path] = None,
                _df_out: Optional[Dict[str, int]] = None,
-               _frozen_out: Optional[Dict[str, tuple]] = None) -> Dict[str, dict]:
+               _frozen_out: Optional[Dict[str, tuple]] = None,
+               _skip_frozen_in: Optional[set] = None,
+               _contrib_out: Optional[Dict[str, List[int]]] = None,
+               _skip_files: Optional[set] = None) -> Dict[str, dict]:
     """Load cards from a JSONL file into an id -> card dict. Empty if absent.
 
     `_df_out` (internal — default_corpus passes it): a dict that receives the document
@@ -1044,6 +1054,15 @@ def load_cards(path: Optional[Path] = None,
     if not p.exists():
         return out
     frozen = frozen_shelves()
+    from time import perf_counter as _pc
+    _ph: Dict[str, Any] = {"frozen_df_ms": 0.0, "frozen_cards": 0, "resident_cards": 0,
+                           "frozen_cards_cached": 0, "files_skipped": 0}
+    # THE FROZEN CACHE (2026-10-08, frozen_cache.py): `_contrib_out` receives, per SOURCE FILE NAME, how many
+    # [frozen, resident] cards it held (so default_corpus can key the cache on exactly the files that matter,
+    # and skip wholesale the ones with nothing resident); a file named in `_skip_frozen_in` has its frozen
+    # cards' DF and index entries already loaded from the cache, so they are counted and skipped — never
+    # re-tokenized; a file in `_skip_files` is not even opened. Everything else is handled live, as before.
+    _cur: Dict[str, Optional[str]] = {"name": p.name}
 
     def _keep(c: dict) -> None:
         # SHELVE at the gate: every card gets its call + facets here, computed from the FULL card
@@ -1054,15 +1073,28 @@ def load_cards(path: Optional[Path] = None,
         # (IDF unchanged), a PUBLIC card leaves only a compact (call, title) index entry for browse /
         # the call-tree, and the full card rehydrates from the shard on read. Withheld frozen: DF only.
         if c.get("shelf") in frozen:
+            _ph["frozen_cards"] += 1
+            src = _cur["name"]
+            if _contrib_out is not None and src is not None:
+                _contrib_out.setdefault(src, [0, 0])[0] += 1
+            if _skip_frozen_in and src is not None and src in _skip_frozen_in:
+                _ph["frozen_cards_cached"] += 1
+                return                   # its DF and index entry came from the frozen cache
             if _df_out is not None:
+                _t = _pc()
                 for t in set(_tokens(_card_text(c))):
                     _df_out[t] = _df_out.get(t, 0) + 1
+                _ph["frozen_df_ms"] += (_pc() - _t) * 1000.0
             if _frozen_out is not None and is_public(c):
                 _frozen_out[c["id"]] = (c.get("call") or "", c.get("title") or c["id"],
                                         c.get("surface") or "?")
             return                       # no resident stub — the shard holds the body + the graph
+        _ph["resident_cards"] += 1
+        if _contrib_out is not None and _cur["name"] is not None:
+            _contrib_out.setdefault(_cur["name"], [0, 0])[1] += 1
         out[c["id"]] = c
 
+    _t_main = _pc()
     with open(p, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -1074,6 +1106,8 @@ def load_cards(path: Optional[Path] = None,
                 continue
             if isinstance(c, dict) and c.get("id"):
                 _keep(c)
+    _ph["cards_jsonl_ms"] = round((_pc() - _t_main) * 1000.0, 1)
+    _t_extras = _pc()
     # further sources that join the SAME graph as Scripture and the tradition:
     #   verified_cards.jsonl — minted live from sealed verifications (data-only, gitignored)
     #   reference_cards.jsonl — the deep reference work already in the verifiers (periodic table,
@@ -1193,6 +1227,10 @@ def load_cards(path: Optional[Path] = None,
             xp = p.parent / extra
             if not xp.exists():
                 continue
+            if _skip_files and extra in _skip_files:
+                _ph["files_skipped"] += 1     # cached, and nothing resident in it: not even opened
+                continue
+            _cur["name"] = extra
             with open(xp, encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
@@ -1214,6 +1252,7 @@ def load_cards(path: Optional[Path] = None,
         sp_path = _prophecy._file()
         if not sp_path.exists():
             sp_path = p.parent / "prophecy" / "signposts.jsonl"
+        _cur["name"] = None              # signposts are shaped at load, not a cacheable source file: always live
         if sp_path.exists():
             with open(sp_path, encoding="utf-8") as f:
                 for line in f:
@@ -1231,6 +1270,9 @@ def load_cards(path: Optional[Path] = None,
                         "nesting_bridges.jsonl", "works_bridges.jsonl", "element_bridges.jsonl",
                         "ncs_bridges.jsonl", "chain_bridges.jsonl"):
             _apply_bridges(out, p.parent / overlay)
+    _ph["extras_ms"] = round((_pc() - _t_extras) * 1000.0, 1)
+    _ph["frozen_df_ms"] = round(_ph["frozen_df_ms"], 1)
+    LOAD_PHASES.update(_ph)
     return out
 
 
@@ -1318,11 +1360,107 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
     if _DEFAULT is None:  # double-checked lock: build once, even under concurrent first-hits
         with _DEFAULT_LOCK:
             if _DEFAULT is None:
+                from time import perf_counter as _pc
+                from . import frozen_cache as _fc
                 df: Dict[str, int] = {}
                 fz: Dict[str, tuple] = {}
-                _DEFAULT = Corpus(load_cards(path, _df_out=df, _frozen_out=fz),
-                                  df_extra=df, frozen_idx=fz)
+                LOAD_PHASES.clear()
+                _t0 = _pc()
+                # THE FROZEN CACHE (2026-10-08). The frozen shelves' document-frequency table and compact index
+                # are pure functions of the files that hold frozen cards; a boot whose inputs are unchanged loads
+                # them instead of tokenizing every frozen card again. Keyed on exactly the BIG contributors
+                # (>= frozen_cache.min_contribution() frozen cards) + the freeze set; small, volatile contributors
+                # (receipt_cards, verified_cards — a few domain-shelf cards, growing with every seal) are processed
+                # live every boot and merged, so the key holds still across seals and nothing is ever missing.
+                p_main = path or _cards_path()
+                data_dir = p_main.parent
+                frozen = frozen_shelves()
+                state = "off"
+                skip: Optional[set] = None
+                skip_files: Optional[set] = None
+                cache_load_ms = cache_save_ms = 0.0
+
+                def _resolve(name: str) -> Path:
+                    return p_main if name == p_main.name else data_dir / name
+
+                if _fc.enabled() and frozen:
+                    state = "miss"
+                    _tc = _pc()
+                    names = _fc.peek_contributors(_fc.cache_path(data_dir)) or []
+                    files = [_resolve(n) for n in names]
+                    if names and all(f.exists() for f in files):
+                        got = _fc.load(_fc.cache_path(data_dir), _fc.make_key(files, frozen))
+                        if got:
+                            df.update(got["df"])
+                            fz.update(got["fz"])
+                            skip = set(got["contributors"])
+                            skip_files = set(got.get("skip_files") or [])
+                            state = "hit"
+                    cache_load_ms = (_pc() - _tc) * 1000.0
+                contrib: Dict[str, List[int]] = {}
+                cards = load_cards(path, _df_out=df, _frozen_out=fz, _skip_frozen_in=skip,
+                                   _contrib_out=contrib, _skip_files=skip_files)
+                _t1 = _pc()
+                cached_names: List[str] = sorted(skip) if skip else []
+                cached_skip: List[str] = sorted(skip_files) if skip_files else []
+                if state == "miss":
+                    _ts = _pc()
+                    mn = _fc.min_contribution()
+                    big = sorted(n for n, (k, _r) in contrib.items() if k >= mn)
+                    small = [_resolve(n) for n, (k, _r) in contrib.items() if 0 < k < mn]
+                    big_files = [_resolve(n) for n in big]
+                    # a cached contributor with NOTHING resident need not be opened on a hit (never the main file)
+                    only_frozen = [n for n in big if contrib[n][1] == 0 and n != p_main.name]
+                    if big and all(f.exists() for f in big_files):
+                        df_c, fz_c = _without_files(df, fz, small, frozen) if small else (df, fz)
+                        if _fc.save(_fc.cache_path(data_dir), _fc.make_key(big_files, frozen), df_c, fz_c, big,
+                                    only_frozen):
+                            cached_names, cached_skip = big, only_frozen
+                    cache_save_ms = (_pc() - _ts) * 1000.0
+                _DEFAULT = Corpus(cards, df_extra=df, frozen_idx=fz)
+                _t2 = _pc()
+                LOAD_PHASES.update({"load_cards_ms": round((_t1 - _t0) * 1000.0, 1),
+                                    "index_build_ms": round((_t2 - _t1) * 1000.0, 1),
+                                    "total_ms": round((_t2 - _t0) * 1000.0, 1),
+                                    "resident_cards": len(cards), "frozen_index": len(fz),
+                                    "df_tokens": len(df),
+                                    "frozen_cache": state, "cache_load_ms": round(cache_load_ms, 1),
+                                    "cache_save_ms": round(cache_save_ms, 1),
+                                    "cached_contributors": cached_names, "cached_skip_files": cached_skip})
     return _DEFAULT
+
+
+def _without_files(df: Dict[str, int], fz: Dict[str, tuple], files: List[Path], frozen) -> tuple:
+    """Copies of the frozen DF table and index with the frozen cards of `files` removed — the small, volatile
+    contributors that must stay LIVE (so the cache key holds still across seals). Re-reads only those files,
+    which are small by definition, mirroring load_cards' own gate (shelve, then the shelf test)."""
+    df2, fz2 = dict(df), dict(fz)
+    for fp in files:
+        try:
+            with open(fp, encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        c = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if not (isinstance(c, dict) and c.get("id")):
+                        continue
+                    shelve(c)
+                    if c.get("shelf") not in frozen:
+                        continue
+                    for t in set(_tokens(_card_text(c))):
+                        n = df2.get(t, 0) - 1
+                        if n > 0:
+                            df2[t] = n
+                        else:
+                            df2.pop(t, None)
+                    fz2.pop(c["id"], None)
+        except OSError:
+            continue
+    return df2, fz2
 
 
 def subject_of(query: str) -> Optional[str]:

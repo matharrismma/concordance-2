@@ -4155,6 +4155,8 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
         try:
             from .. import systems as _systems
             _singletons = [_systems.measure("corpus (default_corpus)", corpus.default_corpus)]
+            # the corpus warm, PHASED: where its time went (corpus.LOAD_PHASES) rides in its own row
+            _singletons[0]["phases"] = dict(getattr(corpus, "LOAD_PHASES", None) or {})
 
             def _warm_graph() -> None:
                 from .. import graph as _graph_warm
