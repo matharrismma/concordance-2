@@ -24,6 +24,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import unicodedata
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -262,11 +263,42 @@ def unit(unit_id: str, subject: str = DEFAULT_SUBJECT) -> Dict[str, Any]:
             "note": _NOTE, "generated": False}
 
 
+# THE ANSWER LAW, shared with Cubo (Matt's standalone language coach, reviewed 2026-10-08): the learner may type
+# without accents and the frame still recognizes the answer; display always keeps the orthography. Kept on purpose
+# because they are letters, not decoration: the kana voicing marks (が is not か) and the tilde of ñ (año is not ano).
+_KANA_VOICING = frozenset({"\u3099", "\u309a"})
+_NO_SPACE_SCRIPT = re.compile(r"[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff]")   # kana and CJK write without word spaces
+
+
 def _norm_answer(s: str) -> str:
-    """Fold an answer for comparison: lowercase, drop punctuation and the extra whitespace an OCR or a
-    speaker adds — keep the letters of ANY script (so Greek/Hebrew/Latin answers compare too)."""
-    s = re.sub(r"[.,;:!?\"'’“”()\[\]\-–—]+", " ", (s or "").lower())
-    return re.sub(r"\s+", " ", s).strip()
+    """Fold an answer for comparison: case-insensitive; accent-insensitive (combining marks dropped, so a learner's
+    Latin accents, Greek breathings and Hebrew points are optional); punctuation-free in ANY script (the Japanese
+    。 and 、 included); whitespace collapsed — and space-FREE for scripts that write without word spaces, so
+    ここにいます equals the teaching form ここに います. Keeps the letters of every script."""
+    out = []
+    prev = ""
+    for ch in unicodedata.normalize("NFD", (s or "").lower()):
+        if unicodedata.category(ch) == "Mn" and ch not in _KANA_VOICING and not (ch == "\u0303" and prev == "n"):
+            continue
+        out.append(ch)
+        if unicodedata.category(ch) != "Mn":
+            prev = ch
+    t = unicodedata.normalize("NFC", "".join(out))
+    t = re.sub(r"[^\w\s]", " ", t)
+    t = re.sub(r"\s+", " ", t).strip()
+    if _NO_SPACE_SCRIPT.search(t):
+        t = t.replace(" ", "")
+    return t
+
+
+def _whole(answer_n: str, given_n: str) -> bool:
+    """The WHOLE authored answer stands inside the learner's longer reply ("sim, fui para a porta") — never the
+    reverse: a fragment of the answer ("porta") is not the answer. Space-free scripts compare by containment."""
+    if not answer_n or not given_n:
+        return False
+    if _NO_SPACE_SCRIPT.search(answer_n):
+        return answer_n in given_n
+    return f" {answer_n} " in f" {given_n} "
 
 
 def check_answer(unit_id: str, answer: str, subject: str = DEFAULT_SUBJECT) -> Dict[str, Any]:
@@ -287,12 +319,13 @@ def check_answer(unit_id: str, answer: str, subject: str = DEFAULT_SUBJECT) -> D
     given_n = _norm_answer(answer)
     correct_n = _norm_answer(correct)
     verdict = "unclear"
-    if given_n and correct_n and (given_n == correct_n or given_n in correct_n or correct_n in given_n):
+    if given_n and correct_n and (given_n == correct_n or _whole(correct_n, given_n)):
         verdict = "correct"
     else:
+        # the authored distractors name a KNOWN wrong turn (Cubo's choices); a fragment is never a match either way
         for ch in (chk.get("choices") or []):
             cn = _norm_answer(ch)
-            if cn and cn != correct_n and given_n and (given_n == cn or given_n in cn or cn in given_n):
+            if cn and cn != correct_n and given_n and (given_n == cn or _whole(cn, given_n)):
                 verdict = "incorrect"
                 break
     return {"kind": "coach_check", "unit": unit_id, "subject": u.get("subject", subject),

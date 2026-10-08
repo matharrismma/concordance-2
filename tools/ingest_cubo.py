@@ -27,8 +27,26 @@ try:
 except Exception:  # noqa: BLE001
     pass
 
-CURR = Path("data") / "curriculum"
+_DATA = __import__("os").environ.get("CONCORDANCE_DATA_DIR", "").strip()
+CURR = (Path(_DATA) if _DATA else Path("data")) / "curriculum"
 SRC = CURR / "cubo"
+
+
+def load_choices(src_dir: Path) -> dict:
+    """unit id -> the authored distractor `choices`, read from Cubo's bucket files (corpus/<subject>/*.json).
+    Cubo's export drops `choices` as a local extension, but the live coach reads them to name a KNOWN wrong
+    turn ("incorrect", with the teaching note) instead of "unclear" — reviewed 2026-10-08."""
+    out: dict = {}
+    for p in sorted(src_dir.rglob("*.json")):
+        try:
+            d = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for u in (d.get("units", []) if isinstance(d, dict) else []):
+            ch = (u.get("check") or {}).get("choices")
+            if u.get("id") and isinstance(ch, list) and ch:
+                out[u["id"]] = list(ch)
+    return out
 
 
 def load_units(path: Path) -> list:
@@ -40,11 +58,15 @@ def load_units(path: Path) -> list:
 
 def main() -> int:
     check = "--check" in sys.argv
+    choices: dict = {}
+    if "--choices-from" in sys.argv:                 # Cubo's bucket files (corpus/<subject>/*.json), carrying `choices`
+        choices = load_choices(Path(sys.argv[sys.argv.index("--choices-from") + 1]))
     exports = sorted(SRC.glob("coach_export_*.json"))
     if not exports:
         print(f"no Cubo exports in {SRC}", file=sys.stderr)
         return 2
     total_added = 0
+    total_choices = 0
     for ex in exports:
         d = json.loads(ex.read_text(encoding="utf-8"))
         subject = d.get("subject")
@@ -58,15 +80,24 @@ def main() -> int:
         merged = existing + add
         merged.sort(key=lambda u: (u.get("track", ""), u.get("unit_seq", 10 ** 9)))
         tracks = sorted({u.get("track") for u in merged})
+        # the authored distractors, added to a unit that lacks them (idempotent; an authored list is never replaced)
+        n_ch = 0
+        for u in merged:
+            ch = choices.get(u.get("id"))
+            if ch and isinstance(u.get("check"), dict) and not u["check"].get("choices"):
+                u["check"]["choices"] = list(ch)
+                n_ch += 1
         print(f"  {subject}: {len(existing)} existing + {len(add)} from Cubo = {len(merged)} units "
-              f"· tracks {tracks}")
+              f"· tracks {tracks}" + (f" · choices carried to {n_ch}" if n_ch else ""))
         total_added += len(add)
-        if not check:
+        total_choices += n_ch
+        if not check and (add or n_ch):
             dest.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     if check:
-        print(f"\n  --check: {total_added} units would be added across {len(exports)} subjects. Nothing written.")
+        print(f"\n  --check: {total_added} units would be added, choices carried to {total_choices}, "
+              f"across {len(exports)} subjects. Nothing written.")
     else:
-        print(f"\n  merged {total_added} Cubo units into the coach curriculum.")
+        print(f"\n  merged {total_added} Cubo units into the coach curriculum; choices carried to {total_choices}.")
     return 0
 
 

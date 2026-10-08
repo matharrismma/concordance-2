@@ -91,6 +91,7 @@ test_craft.py
 test_crisis_coverage.py
 test_crossref.py
 test_cryptography.py
+test_cubo_live_seam.py
 test_cut_field_pack.py
 test_cybersecurity.py
 test_dates.py
