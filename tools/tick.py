@@ -4282,6 +4282,141 @@ def assembled_path() -> int:
     _mint_marks(sid, marks, by="engine:assembled_path")
     return 0
 
+
+def line_integrals() -> int:
+    """GRADIENTS AND LINE INTEGRALS OVER VECTOR FIELDS - ELECTRODYNAMICS AND FEYNMAN'S PATHS (Matt, 2026-10-08:
+    'Gradients line integrals over vector fields. Look at the electrodynamics and feynman diagrams'). A line integral
+    adds a field along a path. If the field is a gradient the integral is the potential difference between the ends
+    and the path does not matter (the fundamental theorem for line integrals; the electrostatic field: work by a
+    detour comes out the same; the loop law of a circuit). If the field is NOT a gradient the loop integral is not
+    zero: Ampere's loop around a wire gives mu_0 I; Faraday's loop in a changing field gives an EMF - electrodynamics
+    is the study of the fields whose line integrals around loops are set by what is inside and what is changing.
+    The action S = int (T - V) dt is a line integral along a path in time; the classical path is where it is stationary
+    (Hamilton), and Feynman summed e^{iS/hbar} over every path - the phase of a stone's path spins 10^34 times, so
+    only the stationary path survives; the diagrams are the terms of that sum, each vertex a factor sqrt(alpha), and
+    the first number they ever gave was Schwinger's alpha/2pi. Maxwell's equations, Hamilton's principle and the sum
+    over paths enter as POSTULATES: they work, so the truth is inferred there, never kept as fact. Same logic as every
+    stick; the engine mapping stays narrow and says what does not carry over."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    S = {}
+    seals = [
+        ("ftli", "fundamental_theorem_for_line_integrals_x2y_from_1_1_to_2_3", "integrate(2*(1+t)*(2+3*t), (t, 0, 1))", 11.0, 1e-12),
+        ("work", "work_in_a_coulomb_field_radial_path_1_to_2", "integrate(1/r**2, (r, 1, 2))", 0.5, 1e-12),
+        ("detour", "work_in_a_coulomb_field_by_a_detour_1_to_3_to_2", "integrate(1/r**2, (r, 1, 3)) + integrate(1/r**2, (r, 3, 2))", 0.5, 1e-12),
+        ("ampere", "amperes_loop_around_a_10_a_wire_at_5_cm_is_mu0_i", "integrate(4*pi*1e-7*10/(2*pi*0.05)*0.05, (t, 0, 2*pi))", 4 * pi * 1e-7 * 10, 1e-9),
+        ("faraday", "faradays_emf_loop_radius_0_1_m_in_b_rising_0_5_t_per_s", "0.5*pi*0.1**2", 0.5 * pi * 0.1 ** 2, 1e-9),
+        ("gauss_q", "gauss_flux_of_a_nanocoulomb_is_q_over_epsilon0", "1e-9/8.8541878128e-12", 1e-9 / 8.8541878128e-12, 1e-9),
+        ("gauss_s", "gauss_flux_of_a_nanocoulomb_by_the_surface_integral_at_30_cm",
+         "integrate(integrate(1e-9/(4*pi*8.8541878128e-12*0.3**2)*0.3**2*sin(p), (p, 0, pi)), (t, 0, 2*pi))", 1e-9 / 8.8541878128e-12, 1e-9),
+        ("action", "action_of_a_free_kilogram_at_2_m_per_s_for_3_s", "integrate(0.5*1*2**2, (t, 0, 3))", 6.0, 1e-12),
+        ("phase", "that_action_in_units_of_hbar_the_phase_of_the_path", "6/1.054571817e-34", 6 / 1.054571817e-34, 1e-9),
+        ("schwinger", "schwingers_one_loop_term_alpha_over_2pi", "0.0072973525693/(2*pi)", 0.0072973525693 / (2 * pi), 1e-9),
+    ]
+    for key, nid, expr, val, tol in seals:
+        S[key] = _rh_seal_num(nid, expr, float(val), tol=tol)
+        if not S[key]:
+            print("a seal failed:", nid); return 1
+    print("sealed", len(S), "line integrals:", ", ".join(f"{k}={v[:8]}" for k, v in S.items()))
+    sid = TS.create("Gradients and line integrals over vector fields - from Maxwell's loops to Feynman's paths",
+                    statement=("A line integral adds a field along a path. When the field is a gradient, the integral is "
+                               "the potential difference between the ends and the path does not matter: work in the "
+                               "electrostatic field comes out the same by any detour, and the loop law of a circuit is this "
+                               "fact. When the field is not a gradient, the integral around a loop is set by what is inside "
+                               "and what is changing: Ampere's loop around a current gives mu_0 I; Faraday's loop in a changing "
+                               "field gives an electromotive force; Gauss's flux through a closed surface gives the charge "
+                               "inside. These four loop-and-surface statements are Maxwell's equations, and they are "
+                               "postulates - kept because they work. The action is a line integral along a path in time; the "
+                               "classical path makes it stationary (Hamilton), and Feynman summed the phase e^{iS/hbar} over "
+                               "every path: for a stone the phase spins ten-to-the-thirty-four times between neighbouring paths, "
+                               "so only the stationary one survives, and for an electron the surviving paths are many. "
+                               "Feynman's diagrams are the terms of that sum, each vertex a factor of sqrt(alpha); the first "
+                               "number they gave was Schwinger's alpha / 2 pi. For the engine, the static loop law is the "
+                               "assembled path's curl = 0, and Faraday is the one honest likeness: a loop's answer changes "
+                               "when the field changes during the circuit - a stale read is a lie. The likeness is kept a "
+                               "likeness."),
+                    field="physics",
+                    references=["J. C. Maxwell, A Dynamical Theory of the Electromagnetic Field (1865); Treatise (1873)",
+                                "M. Faraday (1831): induction; A.-M. Ampere (1826); C. F. Gauss (1835, published 1867)",
+                                "W. R. Hamilton (1834-35): the principle of stationary action",
+                                "R. P. Feynman, Space-Time Approach to Non-Relativistic Quantum Mechanics (1948); Space-Time Approach to Quantum Electrodynamics (1949)",
+                                "J. Schwinger (1948): the anomalous magnetic moment alpha/2pi; F. J. Dyson (1949): the diagrams as a series",
+                                "G. Kirchhoff (1845): the loop law; stick_gradient_divergence_and_curl; stick_feynman_diagrams_schematics; stick_four_forces_under_alpha; stick_where_two_domains_connect",
+                                "Psalm 19:4 ('their line is gone out through all the earth'); Hebrews 11:3",
+                                "feedback_a_stale_read_is_a_lie_to_the_reader (the Faraday likeness)"])["id"]
+    marks = [
+        ("instance", "[the fundamental theorem for line integrals] For f = x^2 y from (1, 1) to (2, 3) along the straight "
+                     "line, int grad f . dr = int_0^1 2(1+t)(2+3t) dt = 11 (sealed) = f(2, 3) - f(1, 1) = 12 - 1. The integral "
+                     "of a gradient along any path is the difference of the potential at the ends. The path integral of a "
+                     "gradient is a subtraction.", S["ftli"]),
+        ("instance", "[work in the Coulomb field, the direct path] E = 1/r^2 (k q = 1): the work moving a unit charge from "
+                     "r = 1 to r = 2 is int_1^2 dr/r^2 = 1/2 (sealed) = phi(1) - phi(2) with phi = 1/r.", S["work"]),
+        ("instance", "[the same work by a detour] Out to r = 3 and back to r = 2: int_1^3 + int_3^2 = (1 - 1/3) + (1/3 - 1/2) = "
+                     "1/2 (sealed). The electrostatic field is a gradient (E = -grad phi), so the work does not depend on the "
+                     "route - which is why a voltage exists at all, and why Kirchhoff's loop law holds in a circuit at rest: "
+                     "the loop integral of a gradient field is zero.", S["detour"]),
+        ("instance", "[Ampere: a loop integral that is NOT zero] Around a 10 A wire at 5 cm, B = mu_0 I / (2 pi r) and "
+                     "the loop integral of B . dl = mu_0 I = 1.2566e-5 T m (sealed, through the integral around the circle). "
+                     "B is no gradient: its curl is mu_0 J, and the line integral around the loop measures the current "
+                     "threading it. A field with curl is read by its loops.", S["ampere"]),
+        ("instance", "[Faraday: a changing field makes E circulate] A loop of radius 0.1 m in a field rising at 0.5 T/s has "
+                     "EMF = d(B A)/dt = 0.5 * pi * 0.01 = 0.015708 V (sealed). The loop integral of E is no longer zero: curl "
+                     "E = -dB/dt. The electrostatic field was conservative; the electrodynamic field is not, exactly where "
+                     "and while the source changes. Every generator runs on this line integral.", S["faraday"]),
+        ("instance", "[Gauss, by the law] The flux of E out of any closed surface around a nanocoulomb is q / epsilon_0 = "
+                     "112.941 V m (sealed).", S["gauss_q"]),
+        ("instance", "[Gauss, by the surface integral] The same flux computed over a sphere of radius 0.3 m as int int "
+                     "E r^2 sin phi dphi dtheta = 112.941 V m (sealed): the divergence theorem in electrostatics, the "
+                     "surface reading the charge inside. The four Maxwell statements are two loop integrals and two "
+                     "surface integrals: electrodynamics is written in line and surface integrals over vector fields.",
+         S["gauss_s"]),
+        ("instance", "[the action is a line integral along a path in time] A free kilogram at 2 m/s for 3 s: "
+                     "S = int (T - V) dt = int_0^3 (1/2)(1)(4) dt = 6 J s (sealed). Hamilton: the path actually taken makes S "
+                     "stationary - the gradient of S over the space of paths is zero there. The classical path is the "
+                     "gradient-zero point of a line integral.", S["action"]),
+        ("instance", "[why a stone takes one path] That action in units of hbar is 6 / 1.0546e-34 = 5.69e34 (sealed): the "
+                     "phase e^{iS/hbar} of neighbouring paths differs by that many radians, so their contributions cancel "
+                     "everywhere except where S is stationary. Feynman's sum over paths (1948) contains Hamilton's principle "
+                     "as its stationary term; for an electron S/hbar is of order one and many paths survive - that is "
+                     "the whole difference between a stone and an electron.", S["phase"]),
+        ("instance", "[the first number the diagrams gave] Each vertex of a Feynman diagram carries sqrt(alpha), so the "
+                     "one-loop correction to the electron's magnetic moment is of order alpha: Schwinger's term alpha / 2 pi "
+                     "= 0.00116141 (sealed), measured to a part in a billion since (stick_four_forces_under_alpha). A "
+                     "diagram is a path drawn; its amplitude is the product of what sits on the path; the series narrows "
+                     "because each vertex costs sqrt(alpha).", S["schwinger"]),
+        ("postulate", "[a postulate it builds on] Maxwell's equations: the flux of E through a closed surface is q / epsilon_0; "
+                      "the flux of B is zero; the loop integral of E is minus the rate of change of magnetic flux; the loop "
+                      "integral of B is mu_0 I plus mu_0 epsilon_0 times the rate of change of electric flux. Not kept as a "
+                      "fact: every instance sealed above works under them, and so does every motor, radio and lamp.",
+         {"source": "J. C. Maxwell (1865, 1873); O. Heaviside (1884): the four-equation form"}),
+        ("postulate", "[a postulate it builds on] Hamilton's principle: the path a system takes between two states makes the "
+                      "action stationary. The free-particle instance works under it; it is inferred, not proven, and it is the "
+                      "stationary term of Feynman's sum.",
+         {"source": "W. R. Hamilton, On a General Method in Dynamics (1834)"}),
+        ("postulate", "[a postulate it builds on] Feynman's sum over paths: the amplitude to go from a to b is the sum over "
+                      "every path of e^{iS/hbar}. Equivalent to Schrodinger's equation (Feynman 1948); the diagrams are its "
+                      "perturbative terms (1949). It works - QED's numbers agree with experiment to a part in a billion - "
+                      "so the truth is inferred there, never kept as fact.",
+         {"source": "R. P. Feynman (1948, 1949); F. J. Dyson (1949)"}),
+        ("equivalence", "[what carries over, by name] The assembled path's curl = 0 (stick_gradient_divergence_and_curl) IS the "
+                        "static loop law: an answer assembled from a keeping held still is the line integral of a gradient, "
+                        "route-independent, and its 'voltage' - the fit between the ends - exists. Faraday names the one "
+                        "lawful exception: when the keeping CHANGES during the circuit of a path, the loop's answer is no "
+                        "longer zero; the engine's rule for that is the snapshot and the frozen cache, and the covenant that "
+                        "a stale read is a lie. A Feynman diagram is a chain of sealed steps drawn, each vertex a verifier "
+                        "(stick_feynman_diagrams_schematics); a longer chain is weaker, which is why the gate prefers the "
+                        "shortest sealed path.",
+         {"source": "feedback_a_stale_read_is_a_lie_to_the_reader; stick_gradient_divergence_and_curl; stick_feynman_diagrams_schematics"}),
+        ("exclusion", "[what does NOT carry over] The engine has no action, no phase and no hbar: a chain's 'amplitude' is not "
+                      "a probability and nothing interferes; there is no sum over paths in the engine - a claim takes the "
+                      "paths the extractors open, deterministically; Faraday's derivative is a likeness - the engine measures "
+                      "staleness by the snapshot's identity, not by a rate; and no engine quantity is a field on a continuum.",
+         {"source": "Matt, 2026-10-08: 'don't blindly apply bra-ket'; feedback_mapping_the_truth_not_generating_it"}),
+    ]
+    _mint_marks(sid, marks, by="engine:line_integrals")
+    return 0
+
 def svd() -> int:
     """EVERY MATRIX IS A ROTATION AND A STRETCH (Matt, 2026-10-08: "All matrix are just a rotation and a stretch. We are
     using a spherical matrix"; "allow the shape to be in the form of the most efficient vectors"). M = U S V^T: turn,
@@ -6213,6 +6348,9 @@ def main() -> int:
         return geneva()
     if a[0] in ("diagrams", "diagram", "feynman_diagrams", "feynman_diagram", "schematics", "schematic", "circuit_diagram", "netlist", "vertex", "propagator"):
         return diagrams()
+    if a[0] in ("line_integrals", "line_integral", "electrodynamics", "maxwell", "ampere", "faraday", "gauss_law", "work",
+                "action", "path_integral", "feynman_path", "sum_over_paths", "hamiltons_principle"):
+        return line_integrals()
     if a[0] in ("assembled_path", "path", "grad_div_curl", "gradient_divergence_curl", "vector_calculus", "kirchhoff",
                 "helmholtz", "hodge", "preciseness_of_the_path", "conservative", "divergence", "curl", "gradient"):
         return assembled_path()
