@@ -1,6 +1,6 @@
 """Run the engine from the command line.
 
-    python -m concordance serve [--surface secular|witness] [--port N] [--host H] [--site DIR|--no-site]
+    python -m concordance serve [--surface secular|witness|both] [--port N] [--witness-port N] [--secular-port N] [--host H] [--site DIR|--no-site]
 
 Serves the sovereign HTTP API and (by default) the static site, same-origin, stdlib only.
 """
@@ -15,7 +15,7 @@ from .web import serve
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     usage = ("usage: python -m concordance <serve|mcp|connect|sync> ...\n"
-             "  serve [--surface secular|witness] [--port N] [--host H] [--site DIR|--no-site]\n"
+             "  serve [--surface secular|witness|both] [--port N] [--witness-port N] [--secular-port N] [--host H] [--site DIR|--no-site]\n"
              "  mcp   [--surface secular|witness]   (MCP server over stdio, for agents)\n"
              "  connect [calendar|email|storage]    (read YOUR own tools, locally; keeps nothing)\n"
              "  sync  [--branch NAME] [--dry-run]   (pull the keeping from every KNOWN branch — Gen 3 · 1)\n"
@@ -67,6 +67,7 @@ def main(argv=None) -> int:
         return 0
 
     surface, port, host = "secular", 8000, "127.0.0.1"
+    witness_port, secular_port = 8001, 8002      # --surface both: ONE process, every surface, one corpus
     default_site = Path(__file__).resolve().parents[2] / "site"
     site = str(default_site) if default_site.is_dir() else None
 
@@ -78,6 +79,10 @@ def main(argv=None) -> int:
             surface = opts[i + 1]; i += 2
         elif o == "--port" and i + 1 < len(opts):
             port = int(opts[i + 1]); i += 2
+        elif o == "--witness-port" and i + 1 < len(opts):
+            witness_port = int(opts[i + 1]); i += 2
+        elif o == "--secular-port" and i + 1 < len(opts):
+            secular_port = int(opts[i + 1]); i += 2
         elif o == "--host" and i + 1 < len(opts):
             host = opts[i + 1]; i += 2
         elif o == "--site" and i + 1 < len(opts):
@@ -87,6 +92,11 @@ def main(argv=None) -> int:
         else:
             i += 1
 
+    if surface == "both":
+        # one corpus for both surfaces (2026-10-08): witness + secular listeners in one process
+        from .web import api as _api
+        _api.serve_many(host=host, listeners=[(witness_port, "witness"), (secular_port, "secular")], site_dir=site)
+        return 0
     serve(host=host, port=port, surface=surface, site_dir=site)
     return 0
 

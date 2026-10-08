@@ -74,8 +74,7 @@ cd '$DEST'
 while IFS= read -r f; do
     [ -n \"\$f\" ] && rm -f '$DEST'/\"\$f\"
 done < '$SNAP/added.txt'
-sudo systemctl restart nh-org
-sudo systemctl restart nh-com-2
+if systemctl is-enabled --quiet nh-engine 2>/dev/null; then sudo systemctl restart nh-engine; else sudo systemctl restart nh-org; sudo systemctl restart nh-com-2; fi
 " || echo "   !! the revert itself failed — go in by hand: $SNAP holds prev.tar + added.txt"
     echo "-- reverted. re-checking both doors --"
     poll 8001 "witness (reverted)" || echo "   !! STILL DOWN after revert — manual intervention needed"
@@ -97,16 +96,28 @@ poll() {  # poll <port> <label> — patient: transient 000s right after restart 
     echo "   $2 did NOT come back within 90s (last: $code)"; return 1
 }
 
-# The witness is the CANARY: it restarts first and must answer 200 before the secular service is
-# touched at all. If it does not come back, we revert and stop — the secular half is still serving
-# the old code and has never been restarted, so readers on .com never saw the bad deploy.
-echo "-- restarting witness (nh-org, :8001) --"
-ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "sudo systemctl restart nh-org"
-poll 8001 "witness" || { revert; exit 1; }
+# ONE ENGINE, BOTH FACES (2026-10-08, Matt: "one corpus for both surfaces"). When nh-engine is enabled, ONE
+# process serves the witness (:8001) and the secular (:8002) from one corpus: restart it once and poll BOTH
+# ports — if either does not come back, revert. Until it is enabled (and again if it is ever disabled), the
+# two old units run exactly as before, the witness first as the canary. Rollback of the cutover is
+# `sudo systemctl disable --now nh-engine; sudo systemctl enable --now nh-org nh-com-2` and this script adapts.
+if ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "systemctl is-enabled --quiet nh-engine 2>/dev/null"; then
+    echo "-- restarting the engine (nh-engine: witness :8001 + secular :8002, one process, one corpus) --"
+    ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "sudo systemctl restart nh-engine"
+    poll 8001 "witness" || { revert; exit 1; }
+    poll 8002 "secular" || { revert; exit 1; }
+else
+    # The witness is the CANARY: it restarts first and must answer 200 before the secular service is
+    # touched at all. If it does not come back, we revert and stop — the secular half is still serving
+    # the old code and has never been restarted, so readers on .com never saw the bad deploy.
+    echo "-- restarting witness (nh-org, :8001) --"
+    ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "sudo systemctl restart nh-org"
+    poll 8001 "witness" || { revert; exit 1; }
 
-echo "-- restarting secular (nh-com-2, :8002) --"
-ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "sudo systemctl restart nh-com-2"
-poll 8002 "secular" || { revert; exit 1; }
+    echo "-- restarting secular (nh-com-2, :8002) --"
+    ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "sudo systemctl restart nh-com-2"
+    poll 8002 "secular" || { revert; exit 1; }
+fi
 
 # 3b. THE GATE (Gen 3 · 7, 2026-10-04): both doors answer — now the engine measures itself before the deploy
 #     is called done. The live assay (every probe that has ever passed must still pass) and the standing

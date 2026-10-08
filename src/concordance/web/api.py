@@ -4254,6 +4254,36 @@ def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
     httpd.serve_forever()
 
 
+def serve_many(host: str, listeners: "list[tuple[int, str]]", site_dir: str = None) -> None:
+    """ONE PROCESS, EVERY SURFACE (Matt, 2026-10-08: "one corpus for both surfaces").
+
+    Each (port, surface) gets its own listener and handler — the witness on 8001, the secular on 8002,
+    Caddy's upstreams unchanged — but they share ONE interpreter, one corpus, one graph, one set of verify
+    deps and one launch roll-call: the warm runs once, on the first listener, and the rest find the
+    singletons already resident. Measured before this: two processes, two corpora of ~1.1 GB each, the
+    idle one paged out to swap so the .org paid swap-in on its first use after idle.
+
+    The trade, stated: one failure domain — a crash takes both faces down together (deploy.sh's gate and
+    auto-revert remain; its staggered witness-first canary does not apply to one unit). Ctrl-C stops all."""
+    import threading
+    servers = []
+    for i, (port, surface) in enumerate(listeners):
+        httpd = build_server(host, port, surface, site_dir, warm=(i == 0))
+        where = f" + site {site_dir}" if site_dir else ""
+        tail = "" if i else "   [one process, one corpus, every surface]"
+        print(f"Narrow Highway API ({surface}) on http://{host}:{port}{where}{tail}")
+        servers.append((surface, httpd))
+    threads = [threading.Thread(target=h.serve_forever, name=f"serve-{s}", daemon=True) for s, h in servers]
+    for t in threads:
+        t.start()
+    try:
+        for t in threads:
+            t.join()
+    except KeyboardInterrupt:
+        for _, h in servers:
+            h.shutdown()
+
+
 # ── THE HOUSE ENDING on the web twins (2026-10-02, Matt: "keep going API") ─────────────────────
 # A door's answer ends the same way on every door — a verdict or a card, the trail, a seal, ONE next
 # step — whether it arrives through the agent catalog or its web twin. One wrapper around dispatch,
