@@ -34,7 +34,7 @@ def test_every_stage_has_its_radio_name_its_component_and_a_proof():
         assert s["stage"] not in seen
         seen.add(s["stage"])
     assert {"antenna", "preselector", "mixer + local oscillator", "IF filter", "limiter", "discriminator", "AGC",
-            "audio stage", "speaker", "squelch", "duplexer", "power supply (cathode)"} == seen
+            "audio stage", "speaker", "squelch", "duplexer", "band switch", "power supply (cathode)"} == seen
 
 
 def test_with_no_gate_artifacts_the_receiver_is_incomplete_and_says_what_is_not_yet_proven():
@@ -53,7 +53,7 @@ def test_with_the_gate_artifacts_green_the_receiver_is_complete():
     d = Path(tempfile.mkdtemp(prefix="nh-rx-"))
     _gates(d)
     st = R.status(d)
-    assert st["complete"] is True and st["missing"] == [] and st["proven"] == st["total"] == 12
+    assert st["complete"] is True and st["missing"] == [] and st["proven"] == st["total"] == 13
     assert st["whole"]["ok"] is True and len(st["whole"]["gates"]) == 5
     assert "complete" in st["read"]
     by = {s["stage"]: s for s in st["stages"]}

@@ -228,6 +228,16 @@ def _receiver_status() -> Optional[Dict[str, Any]]:
         return {"complete": False, "read": f"the receiver could not be read: {type(e).__name__}", "stages": []}
 
 
+def _engagement_map() -> Optional[Dict[str, Any]]:
+    """The band switch (engagement.engagement_map) — static, cheap; a failure never takes the report down."""
+    try:
+        from . import engagement as _engagement
+        return _engagement.engagement_map()
+    except Exception as e:  # noqa: BLE001
+        return {"intents": [], "names": {"ok": False, "missing": [f"{type(e).__name__}"]},
+                "read": f"the engagement map could not be read: {type(e).__name__}"}
+
+
 def report() -> Dict[str, Any]:
     """The whole course, sorted worst-first so what needs attention reads first. Cheap enough per
     request: disk stats + import resolution + the module-import graph, no corpus."""
@@ -253,6 +263,10 @@ def report() -> Dict[str, Any]:
         # all components that function correctly"): the superheterodyne's stages, each bound to its component
         # and its proof read from the gate artifacts; complete only when every stage and the whole are proven.
         "receiver": _receiver_status(),
+        # THE BAND SWITCH (2026-10-08, Matt: "engages only the correct components for the intended purpose"):
+        # the engagement map, intent by intent — what each door engages and what it must never touch; every
+        # name resolves to code, and tests/test_engagement.py runs each intent with the forbidden parts armed.
+        "engagement": _engagement_map(),
         "counts": {
             "connected": sum(1 for r in rows if r["live"]["status"] == "connected"),
             "degraded": sum(1 for r in rows if r["live"]["status"] == "degraded"),

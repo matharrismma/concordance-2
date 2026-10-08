@@ -116,6 +116,7 @@ test_electrochemistry.py
 test_elliptic_curves.py
 test_encyclopedia_and_voices.py
 test_energy.py
+test_engagement.py
 test_engine.py
 test_ephemeris.py
 test_equation_audit_2026_10_01.py
