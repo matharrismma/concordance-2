@@ -1184,6 +1184,236 @@ def _x_propositional_logic(text: str):
     return out
 
 
+# ── FORMAL LOGIC AS A STRENGTH (Matt, 2026-10-08) ─────────────────────────────────────────────────
+# The one parser above (_parse_prop) was reached only through "is a tautology / contradiction / satisfiable".
+# Here the rest of what people actually write about propositional logic: a RELATION between two clauses
+# ("P implies Q is equivalent to not Q implies not P", "P and Q entails P"), an ARGUMENT judged valid or not
+# ("If P then Q; P; therefore Q is valid" - entailment of the conclusion by the premises), a categorical
+# SYLLOGISM ("All men are mortal; Socrates is a man; therefore Socrates is mortal is valid" - rhetoric's
+# mood-and-figure table, the major premise chosen by the conclusion's predicate, singular terms read as
+# universal), the COUNTS a truth table carries (2^n rows, 2^(2^n) functions) and the NAMED FORMS judged by their
+# own schemas (modus ponens is valid; affirming the consequent is a fallacy). Same discipline: a clause that does
+# not parse wholly is not extracted; a miss stays a miss.
+_LOGIC_HEAD = re.compile(r"^\s*(?:(?:(?i:\b(?:and|or|not|implies|then)\b)|[B-HJ-Z]|[()])\s*)+")
+_LOGIC_EQUIV = re.compile(r"\b(?:is|are)\s+(?P<neg>not\s+)?(?:logically\s+)?equivalent\s+to\b|(?P<sym>\s≡\s)", re.I)
+_LOGIC_ENTAIL = re.compile(r"\b(?P<neg>does\s+not\s+|doesn't\s+|do\s+not\s+|don't\s+)?(?:entails?|logically\s+impl(?:y|ies))\b", re.I)
+_LOGIC_VALID = re.compile(r"\b(?:is|are)\s+(?P<neg>not\s+)?(?:an?\s+)?(?P<kind>valid|invalid)(?:\s+(?:argument|inference|form|syllogism|reasoning))?\b", re.I)
+_LOGIC_THEREFORE = re.compile(r"\b(?:therefore|hence|thus|so|ergo|it\s+follows\s+that|consequently)\b[,:]?\s*|∴\s*", re.I)
+_LOGIC_FORMS = {
+    "modus ponens": (["p >> q", "p"], "q"), "modus tollens": (["p >> q", "~q"], "~p"),
+    "hypothetical syllogism": (["p >> q", "q >> r"], "p >> r"), "disjunctive syllogism": (["p | q", "~p"], "q"),
+    "constructive dilemma": (["(p >> q) & (r >> s)", "p | r"], "q | s"),
+    "affirming the consequent": (["p >> q", "q"], "p"), "denying the antecedent": (["p >> q", "~p"], "~q"),
+    "affirming a disjunct": (["p | q", "p"], "~q"),
+}
+_LOGIC_FORM_RE = re.compile(
+    r"\b(?P<form>" + "|".join(re.escape(k) for k in sorted(_LOGIC_FORMS, key=len, reverse=True)) + r")\b\s+(?:is|are)\s+"
+    r"(?P<neg>not\s+)?(?:an?\s+)?(?:(?P<fal>(?:formal\s+)?fallac(?:y|ious)|invalid(?:\s+\w+)?)|(?P<val>valid(?:\s+\w+)?)|(?P<ok>a\s+valid\s+\w+))\b", re.I)
+_SMALL_WORDS = ("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve")
+
+
+def _small(tok: str) -> int:
+    """'five' -> 5; a digit string -> its int."""
+    t = tok.strip().lower()
+    return _SMALL_WORDS.index(t) + 1 if t in _SMALL_WORDS else int(t)
+
+
+_SING = {"men": "man", "women": "woman", "people": "person", "children": "child", "mice": "mouse", "geese": "goose",
+         "feet": "foot", "teeth": "tooth", "oxen": "ox", "humans": "human", "mortals": "mortal"}
+
+
+def _sing(term: str) -> str:
+    """One lower-case singular for a syllogism term, so 'men' and 'man' are the same middle term."""
+    t = re.sub(r"\s+", " ", term.strip().lower())
+    t = re.sub(r"^(?:a|an|the)\s+", "", t)
+    if t in _SING:
+        return _SING[t]
+    if len(t) > 4 and t.endswith("ies"):
+        return t[:-3] + "y"
+    if len(t) > 4 and (t.endswith("ses") or t.endswith("xes") or t.endswith("ches") or t.endswith("shes")):
+        return t[:-2]
+    if len(t) > 3 and t.endswith("s") and not t.endswith("ss"):
+        return t[:-1]
+    return t
+
+
+def _categorical(clause: str):
+    """'All men are mortal' / 'No fish are mammals' / 'Some S are (not) P' / 'Socrates is a man' -> a premise in
+    rhetoric's grammar with singular terms, or None."""
+    c = clause.strip().rstrip(".").strip()
+    m = re.match(r"^(all|every|no|some)\s+(.+?)\s+(?:are|is)(\s+not)?\s+(?:an?\s+)?(.+)$", c, re.I)
+    if m:
+        q = m.group(1).lower()
+        q = "all" if q == "every" else q
+        return "%s %s are %s%s" % (q.capitalize(), _sing(m.group(2)), "not " if m.group(3) else "", _sing(m.group(4)))
+    m = re.match(r"^([A-Z][\w-]*)\s+is\s+(not\s+)?(?:an?\s+)?([a-z][\w\s-]*)$", c)
+    if m:                                                     # a singular term read as universal: Socrates is a man
+        return "%s %s are %s%s" % ("No" if m.group(2) else "All", m.group(1).lower(), "", _sing(m.group(3))) \
+            if not m.group(2) else "No %s are %s" % (m.group(1).lower(), _sing(m.group(3)))
+    return None
+
+
+def _x_logic_relations(text: str):
+    """"P implies Q is equivalent to not Q implies not P" -> formal_logic.equivalence; "P and Q entails P" ->
+    formal_logic.entailment. Both polarities. Both clauses must parse wholly."""
+    out = []
+    for m in _LOGIC_EQUIV.finditer(text):
+        tm = _LOGIC_TRAIL.search(text[:m.start()])
+        hm = _LOGIC_HEAD.match(text[m.end():])
+        if not tm or not hm:
+            continue
+        pa, pb = _parse_prop(tm.group(0).strip()), _parse_prop(hm.group(0).strip())
+        if not pa or not pb:
+            continue
+        quote = re.sub(r"\s+", " ", tm.group(0).strip() + " " + text[m.start():m.end()].strip() + " " + hm.group(0).strip())[:160]
+        out.append((quote, "formal_logic",
+                    {"LOGIC_VERIFY": {"variables": sorted(set(pa[1]) | set(pb[1])), "formula_a": pa[0], "formula_b": pb[0],
+                                      "claimed_equivalent": not bool(m.group("neg"))}}))
+    for m in _LOGIC_ENTAIL.finditer(text):
+        tm = _LOGIC_TRAIL.search(text[:m.start()])
+        hm = _LOGIC_HEAD.match(text[m.end():])
+        if not tm or not hm:
+            continue
+        pa, pb = _parse_prop(tm.group(0).strip()), _parse_prop(hm.group(0).strip())
+        if not pa or not pb:
+            continue
+        quote = re.sub(r"\s+", " ", tm.group(0).strip() + " " + text[m.start():m.end()].strip() + " " + hm.group(0).strip())[:160]
+        out.append((quote, "formal_logic",
+                    {"LOGIC_VERIFY": {"variables": sorted(set(pa[1]) | set(pb[1])), "premises": [pa[0]], "conclusion": pb[0],
+                                      "claimed_entailment": not bool(m.group("neg"))}}))
+    return out
+
+
+def _x_argument_form(text: str):
+    """"If P then Q; P; therefore Q is valid" -> formal_logic.entailment (premises |= conclusion); "If P then Q; Q;
+    therefore P is a valid argument" breaks honestly (affirming the consequent). Premises split on ';' or ',';
+    the conclusion follows 'therefore/hence/thus/so'; every clause must parse wholly."""
+    out = []
+    for vm in _LOGIC_VALID.finditer(text):
+        before = text[:vm.start()]
+        parts = list(_LOGIC_THEREFORE.finditer(before))
+        if not parts:
+            continue
+        th = parts[-1]
+        prem_text, conc_text = before[:th.start()], before[th.end():]
+        # the argument starts after the last sentence break before the premises
+        prem_text = re.split(r"[.!?\n]", prem_text)[-1]
+        clauses = [c.strip().strip(",;") for c in re.split(r"[;,]", prem_text) if c.strip().strip(",;")]
+        if not clauses:
+            continue
+        premises, variables = [], set()
+        ok = True
+        for c in clauses:
+            c2 = re.sub(r"^(?:(?:if|and|given\s+that|suppose|assume|that)\s+)+", "", c.strip(), flags=re.I)
+            p = _parse_prop(c2)
+            if not p:
+                ok = False; break
+            premises.append(p[0]); variables |= set(p[1])
+        pc = _parse_prop(re.sub(r"^(?:(?:then|if|that)\s+)+", "", conc_text.strip().strip(",;"), flags=re.I))
+        if not ok or not pc:
+            continue
+        variables |= set(pc[1])
+        claimed_valid = (vm.group("kind").lower() == "valid") != bool(vm.group("neg"))
+        quote = re.sub(r"\s+", " ", (prem_text + " " + before[th.start():] + text[vm.start():vm.end()]).strip())[:160]
+        out.append((quote, "formal_logic",
+                    {"LOGIC_VERIFY": {"variables": sorted(variables), "premises": premises, "conclusion": pc[0],
+                                      "claimed_entailment": claimed_valid}}))
+    return out
+
+
+def _x_syllogism(text: str):
+    """"All men are mortal; Socrates is a man; therefore Socrates is mortal is valid" -> rhetoric.syllogism_validity.
+    Two categorical premises and a categorical conclusion; the MAJOR premise is the one carrying the conclusion's
+    predicate (the verifier infers the figure from that order); singular terms are read as universal and plurals
+    singularised so the middle term matches."""
+    out = []
+    for vm in _LOGIC_VALID.finditer(text):
+        before = text[:vm.start()]
+        parts = list(_LOGIC_THEREFORE.finditer(before))
+        if not parts:
+            continue
+        th = parts[-1]
+        prem_text = re.split(r"[.!?\n]", before[:th.start()])[-1]
+        clauses = [c.strip().strip(",;") for c in re.split(r"[;]", prem_text) if c.strip().strip(",;")]
+        if len(clauses) != 2:
+            clauses = [c.strip().strip(",;") for c in re.split(r"[;,]", prem_text) if c.strip().strip(",;")]
+        if len(clauses) == 1:                                          # "Every man is mortal and Socrates is a man"
+            clauses = [c.strip() for c in re.split(r"\s+and\s+", clauses[0]) if c.strip()]
+        if len(clauses) != 2:
+            continue
+        cats = [_categorical(c) for c in clauses]
+        conc = _categorical(before[th.end():].strip().strip(",;"))
+        if not all(cats) or not conc:
+            continue
+        cm = re.match(r"^(All|No|Some) (.+?) are (?:not )?(.+)$", conc)
+        if not cm:
+            continue
+        conc_pred = cm.group(3)
+        major = next((c for c in cats if re.search(r"\b%s\b" % re.escape(conc_pred), c)), None)
+        if major is None:
+            continue
+        minor = cats[0] if cats[1] == major else cats[1]
+        claimed_valid = (vm.group("kind").lower() == "valid") != bool(vm.group("neg"))
+        quote = re.sub(r"\s+", " ", (prem_text + " " + before[th.start():] + text[vm.start():vm.end()]).strip())[:160]
+        out.append((quote, "rhetoric",
+                    {"RHET_VERIFY": {"major_premise": major, "minor_premise": minor, "conclusion": conc,
+                                     "claimed_valid": claimed_valid}}))
+    return out
+
+
+def _x_logic_counts(text: str):
+    """The arithmetic a truth table carries: "a truth table for 3 variables has 8 rows" (2^n), "there are 16 binary
+    boolean functions" (2^(2^n)), "a formula with 4 variables has 16 possible assignments"."""
+    out = []
+    for m in re.finditer(r"(?:truth\s+table\s+(?:for|with|of|on)\s+|formula\s+(?:with|in|over)\s+|with\s+)(\d+|" + "|".join(_SMALL_WORDS) + r")\s+(?:propositional\s+)?variables?\b[^.\n]{0,30}?"
+                         r"\b(?:has|needs|contains|requires|gives)\s+(\d[\d,]*)\s+(?:rows?|lines?|possible\s+assignments?|assignments?|interpretations?|valuations?)\b", text, re.I):
+        n, claimed = _small(m.group(1)), m.group(2)
+        out.append((_q(text, m), "mathematics",
+                    {"mode": "equality", "params": {"expr_a": f"2**{n}", "expr_b": claimed.replace(",", ""), "claimed_literal": claimed}}))
+    for m in re.finditer(r"there\s+are\s+(\d[\d,]*)\s+(?:distinct\s+|possible\s+|different\s+)?(?:(binary|unary|ternary|two-input|one-input|three-input)|(\d+)-(?:ary|place|input))\s+(?:boolean|truth|logical)\s+(?:functions?|operators?|connectives?)\b", text, re.I):
+        claimed = m.group(1)
+        word = (m.group(2) or "").lower()
+        arity = {"unary": 1, "one-input": 1, "binary": 2, "two-input": 2, "ternary": 3, "three-input": 3}.get(word) if word else int(m.group(3))
+        if not arity:
+            continue
+        out.append((_q(text, m), "mathematics",
+                    {"mode": "equality", "params": {"expr_a": f"2**{2 ** arity}", "expr_b": claimed.replace(",", ""), "claimed_literal": claimed}}))   # no nested tower: the evaluator refuses it
+    return out
+
+
+def _x_named_forms(text: str):
+    """"modus ponens is valid" / "affirming the consequent is a fallacy" -> formal_logic.entailment on the form's
+    own schema (the catalogue above): a named form is valid exactly when its premises entail its conclusion."""
+    out = []
+    for m in _LOGIC_FORM_RE.finditer(text):
+        form = m.group("form").lower()
+        prem, conc = _LOGIC_FORMS[form]
+        neg = bool(m.group("neg"))
+        says_valid = bool(m.group("val") or m.group("ok"))
+        claimed_valid = (says_valid != neg) if (says_valid or m.group("fal")) else None
+        if claimed_valid is None:
+            continue
+        if m.group("fal"):
+            claimed_valid = neg                             # "is a fallacy" claims invalid; "is not a fallacy" claims valid
+        variables = sorted({ch for f in prem + [conc] for ch in f if ch in "pqrs"})
+        out.append((_q(text, m), "formal_logic",
+                    {"LOGIC_VERIFY": {"variables": variables, "premises": list(prem), "conclusion": conc,
+                                      "claimed_entailment": claimed_valid, "named_form": form}}))
+    return out
+
+
+def _x_fallacy_kind(text: str):
+    """"ad hominem is an informal fallacy" / "affirming the consequent is a formal fallacy" -> rhetoric's catalogue."""
+    from .verifiers import rhetoric as _rh
+    names = sorted(_rh._FALLACIES, key=len, reverse=True)
+    out = []
+    for m in re.finditer(r"\b(" + "|".join(re.escape(n) for n in names) + r")\b\s+(?:is|are)\s+(?P<neg>not\s+)?(?:an?\s+)?(?P<kind>formal|informal)\s+fallac(?:y|ies)\b", text, re.I):
+        claimed_formal = (m.group("kind").lower() == "formal") != bool(m.group("neg"))
+        out.append((_q(text, m), "rhetoric",
+                    {"RHET_VERIFY": {"fallacy_name": m.group(1).lower(), "claimed_is_formal_fallacy": claimed_formal}}))
+    return out
+
+
 # ── element FACTS (fact-verifier, 2026-09-25): a lookup claim becomes a VERDICT ──────────────────────
 # The gap Matt named: a lookup like "the atomic number of carbon is 6" returned NOTHING_TO_CHECK + FOUND,
 # never a verdict. The periodic_table verifier + IUPAC data already exist (definitional identity, zero
@@ -1261,7 +1491,9 @@ _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("expression", _x_expression),      # THE CLAIM GRAMMAR (Gen 3 · 3): a mixed/parenthesised expression
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
     ("combinations", _x_combinations), ("permutations", _x_permutations),
-    ("propositional_logic", _x_propositional_logic),
+    ("propositional_logic", _x_propositional_logic), ("logic_relations", _x_logic_relations), ("argument_form", _x_argument_form),
+    ("syllogism", _x_syllogism), ("logic_counts", _x_logic_counts), ("named_forms", _x_named_forms),
+    ("fallacy_kind", _x_fallacy_kind),
     ("circle", _x_circle), ("pythagorean", _x_pythagorean), ("polygon_angles", _x_polygon_angles),
     ("rectangle", _x_rectangle), ("triangle_inequality", _x_triangle_inequality),
     ("sphere", _x_sphere), ("cube", _x_cube), ("cylinder", _x_cylinder),

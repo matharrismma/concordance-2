@@ -2,299 +2,1588 @@
  "about": "Per-extractor phrasing recall (the failure report H1, 2026-10-08). For each extractor family: the ways a claim of that kind is actually written, in the registers of real documents (invoice, news, textbook, forum, report, spreadsheet, speech), each truth worked by hand, true and false side by side. Authored in those registers, not scraped, so every truth is exact. tools/recall.py runs them through the real front door and reports recall per family, ratcheted.",
  "families": {
   "sum": [
-   {"id": "sum_1", "register": "invoice", "truth": true, "text": "Subtotal 12.50 + 3.25 = 15.75"},
-   {"id": "sum_2", "register": "report", "truth": true, "text": "The three line items, 40 + 60 + 25, come to 125."},
-   {"id": "sum_3", "register": "textbook", "truth": true, "text": "3 plus 4 equals 7"},
-   {"id": "sum_4", "register": "speech", "truth": true, "text": "Three plus four is seven"},
-   {"id": "sum_5", "register": "invoice", "truth": false, "text": "Subtotal 12.50 + 3.25 = 16.75"},
-   {"id": "sum_6", "register": "report", "truth": false, "text": "40 + 60 + 25 = 135"}
+   {
+    "id": "sum_1",
+    "register": "invoice",
+    "truth": true,
+    "text": "Subtotal 12.50 + 3.25 = 15.75"
+   },
+   {
+    "id": "sum_2",
+    "register": "report",
+    "truth": true,
+    "text": "The three line items, 40 + 60 + 25, come to 125."
+   },
+   {
+    "id": "sum_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "3 plus 4 equals 7"
+   },
+   {
+    "id": "sum_4",
+    "register": "speech",
+    "truth": true,
+    "text": "Three plus four is seven"
+   },
+   {
+    "id": "sum_5",
+    "register": "invoice",
+    "truth": false,
+    "text": "Subtotal 12.50 + 3.25 = 16.75"
+   },
+   {
+    "id": "sum_6",
+    "register": "report",
+    "truth": false,
+    "text": "40 + 60 + 25 = 135"
+   }
   ],
   "product": [
-   {"id": "product_1", "register": "invoice", "truth": true, "text": "Order: 3 x $4.50 = $13.50"},
-   {"id": "product_2", "register": "textbook", "truth": true, "text": "6 times 7 is 42"},
-   {"id": "product_3", "register": "forum", "truth": true, "text": "A 12 by 8 grid has 96 cells"},
-   {"id": "product_4", "register": "spreadsheet", "truth": true, "text": "qty 15 * unit 2.40 = 36.00"},
-   {"id": "product_5", "register": "textbook", "truth": false, "text": "6 times 7 is 48"},
-   {"id": "product_6", "register": "invoice", "truth": false, "text": "3 x $4.50 = $12.50"}
+   {
+    "id": "product_1",
+    "register": "invoice",
+    "truth": true,
+    "text": "Order: 3 x $4.50 = $13.50"
+   },
+   {
+    "id": "product_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "6 times 7 is 42"
+   },
+   {
+    "id": "product_3",
+    "register": "forum",
+    "truth": true,
+    "text": "A 12 by 8 grid has 96 cells"
+   },
+   {
+    "id": "product_4",
+    "register": "spreadsheet",
+    "truth": true,
+    "text": "qty 15 * unit 2.40 = 36.00"
+   },
+   {
+    "id": "product_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "6 times 7 is 48"
+   },
+   {
+    "id": "product_6",
+    "register": "invoice",
+    "truth": false,
+    "text": "3 x $4.50 = $12.50"
+   }
   ],
   "quotient": [
-   {"id": "quotient_1", "register": "textbook", "truth": true, "text": "144 / 12 = 12"},
-   {"id": "quotient_2", "register": "speech", "truth": true, "text": "100 divided by 4 is 25"},
-   {"id": "quotient_3", "register": "forum", "truth": true, "text": "Split 90 three ways: 90 / 3 = 30"},
-   {"id": "quotient_4", "register": "forum", "truth": true, "text": "90 split three ways is 30 each"},
-   {"id": "quotient_5", "register": "textbook", "truth": false, "text": "144 / 12 = 11"},
-   {"id": "quotient_6", "register": "speech", "truth": false, "text": "100 divided by 4 is 20"}
+   {
+    "id": "quotient_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "144 / 12 = 12"
+   },
+   {
+    "id": "quotient_2",
+    "register": "speech",
+    "truth": true,
+    "text": "100 divided by 4 is 25"
+   },
+   {
+    "id": "quotient_3",
+    "register": "forum",
+    "truth": true,
+    "text": "Split 90 three ways: 90 / 3 = 30"
+   },
+   {
+    "id": "quotient_4",
+    "register": "forum",
+    "truth": true,
+    "text": "90 split three ways is 30 each"
+   },
+   {
+    "id": "quotient_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "144 / 12 = 11"
+   },
+   {
+    "id": "quotient_6",
+    "register": "speech",
+    "truth": false,
+    "text": "100 divided by 4 is 20"
+   }
   ],
   "expression": [
-   {"id": "expression_1", "register": "textbook", "truth": true, "text": "2 + 3 * 4 = 14"},
-   {"id": "expression_2", "register": "textbook", "truth": true, "text": "(2 + 3) * 4 = 20"},
-   {"id": "expression_3", "register": "forum", "truth": true, "text": "10 - 2 * 3 = 4"},
-   {"id": "expression_4", "register": "invoice", "truth": true, "text": "100 - 15 - 5 = 80"},
-   {"id": "expression_5", "register": "textbook", "truth": false, "text": "2 + 3 * 4 = 20"},
-   {"id": "expression_6", "register": "forum", "truth": false, "text": "(10 - 2) * 3 = 20"}
+   {
+    "id": "expression_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "2 + 3 * 4 = 14"
+   },
+   {
+    "id": "expression_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "(2 + 3) * 4 = 20"
+   },
+   {
+    "id": "expression_3",
+    "register": "forum",
+    "truth": true,
+    "text": "10 - 2 * 3 = 4"
+   },
+   {
+    "id": "expression_4",
+    "register": "invoice",
+    "truth": true,
+    "text": "100 - 15 - 5 = 80"
+   },
+   {
+    "id": "expression_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "2 + 3 * 4 = 20"
+   },
+   {
+    "id": "expression_6",
+    "register": "forum",
+    "truth": false,
+    "text": "(10 - 2) * 3 = 20"
+   }
   ],
   "percent": [
-   {"id": "percent_1", "register": "textbook", "truth": true, "text": "15% of 200 is 30"},
-   {"id": "percent_2", "register": "invoice", "truth": true, "text": "A 20 percent tip on $45 comes to $9"},
-   {"id": "percent_3", "register": "report", "truth": true, "text": "27 is 64.3% of 42"},
-   {"id": "percent_4", "register": "news", "truth": true, "text": "Sales rose from 200 to 250, a 25% increase"},
-   {"id": "percent_5", "register": "report", "truth": false, "text": "27 is 71% of 42"},
-   {"id": "percent_6", "register": "textbook", "truth": false, "text": "15 percent of 200 is 40"}
+   {
+    "id": "percent_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "15% of 200 is 30"
+   },
+   {
+    "id": "percent_2",
+    "register": "invoice",
+    "truth": true,
+    "text": "A 20 percent tip on $45 comes to $9"
+   },
+   {
+    "id": "percent_3",
+    "register": "report",
+    "truth": true,
+    "text": "27 is 64.3% of 42"
+   },
+   {
+    "id": "percent_4",
+    "register": "news",
+    "truth": true,
+    "text": "Sales rose from 200 to 250, a 25% increase"
+   },
+   {
+    "id": "percent_5",
+    "register": "report",
+    "truth": false,
+    "text": "27 is 71% of 42"
+   },
+   {
+    "id": "percent_6",
+    "register": "textbook",
+    "truth": false,
+    "text": "15 percent of 200 is 40"
+   }
   ],
   "gross_pay": [
-   {"id": "gross_pay_1", "register": "spreadsheet", "truth": true, "text": "40 hours at $18.50/hr = $740.00"},
-   {"id": "gross_pay_2", "register": "report", "truth": true, "text": "She worked 22 hours at $15 an hour, which comes to $330"},
-   {"id": "gross_pay_3", "register": "spreadsheet", "truth": true, "text": "Timesheet: 37.5 hours @ $20/hour = $750"},
-   {"id": "gross_pay_4", "register": "news", "truth": true, "text": "Her 40-hour week at $18.50 an hour pays $740"},
-   {"id": "gross_pay_5", "register": "spreadsheet", "truth": false, "text": "40 hours at $18.50/hr = $760.00"},
-   {"id": "gross_pay_6", "register": "report", "truth": false, "text": "22 hours at $15 an hour totals $300"}
+   {
+    "id": "gross_pay_1",
+    "register": "spreadsheet",
+    "truth": true,
+    "text": "40 hours at $18.50/hr = $740.00"
+   },
+   {
+    "id": "gross_pay_2",
+    "register": "report",
+    "truth": true,
+    "text": "She worked 22 hours at $15 an hour, which comes to $330"
+   },
+   {
+    "id": "gross_pay_3",
+    "register": "spreadsheet",
+    "truth": true,
+    "text": "Timesheet: 37.5 hours @ $20/hour = $750"
+   },
+   {
+    "id": "gross_pay_4",
+    "register": "news",
+    "truth": true,
+    "text": "Her 40-hour week at $18.50 an hour pays $740"
+   },
+   {
+    "id": "gross_pay_5",
+    "register": "spreadsheet",
+    "truth": false,
+    "text": "40 hours at $18.50/hr = $760.00"
+   },
+   {
+    "id": "gross_pay_6",
+    "register": "report",
+    "truth": false,
+    "text": "22 hours at $15 an hour totals $300"
+   }
   ],
   "annual_hourly": [
-   {"id": "annual_hourly_1", "register": "forum", "truth": true, "text": "$52,000 a year is $25 per hour"},
-   {"id": "annual_hourly_2", "register": "report", "truth": true, "text": "An annual salary of $41,600 works out to $20/hr"},
-   {"id": "annual_hourly_3", "register": "news", "truth": true, "text": "$62,400 annually is $30 an hour"},
-   {"id": "annual_hourly_4", "register": "forum", "truth": true, "text": "On a 2080-hour year, $52,000 is $25 hourly"},
-   {"id": "annual_hourly_5", "register": "forum", "truth": false, "text": "$52,000 a year is $30 per hour"},
-   {"id": "annual_hourly_6", "register": "report", "truth": false, "text": "$41,600 per year equals $25/hour"}
+   {
+    "id": "annual_hourly_1",
+    "register": "forum",
+    "truth": true,
+    "text": "$52,000 a year is $25 per hour"
+   },
+   {
+    "id": "annual_hourly_2",
+    "register": "report",
+    "truth": true,
+    "text": "An annual salary of $41,600 works out to $20/hr"
+   },
+   {
+    "id": "annual_hourly_3",
+    "register": "news",
+    "truth": true,
+    "text": "$62,400 annually is $30 an hour"
+   },
+   {
+    "id": "annual_hourly_4",
+    "register": "forum",
+    "truth": true,
+    "text": "On a 2080-hour year, $52,000 is $25 hourly"
+   },
+   {
+    "id": "annual_hourly_5",
+    "register": "forum",
+    "truth": false,
+    "text": "$52,000 a year is $30 per hour"
+   },
+   {
+    "id": "annual_hourly_6",
+    "register": "report",
+    "truth": false,
+    "text": "$41,600 per year equals $25/hour"
+   }
   ],
   "hourly_annual": [
-   {"id": "hourly_annual_1", "register": "forum", "truth": true, "text": "$20 per hour is $41,600 per year"},
-   {"id": "hourly_annual_2", "register": "news", "truth": true, "text": "$25/hr comes to $52,000 a year"},
-   {"id": "hourly_annual_3", "register": "report", "truth": true, "text": "At $30 an hour she makes $62,400 annually"},
-   {"id": "hourly_annual_4", "register": "speech", "truth": true, "text": "Forty hours a week at $20 is $41,600 a year"},
-   {"id": "hourly_annual_5", "register": "forum", "truth": false, "text": "$20 per hour is $45,000 per year"},
-   {"id": "hourly_annual_6", "register": "news", "truth": false, "text": "$25 an hour is $50,000 per year"}
+   {
+    "id": "hourly_annual_1",
+    "register": "forum",
+    "truth": true,
+    "text": "$20 per hour is $41,600 per year"
+   },
+   {
+    "id": "hourly_annual_2",
+    "register": "news",
+    "truth": true,
+    "text": "$25/hr comes to $52,000 a year"
+   },
+   {
+    "id": "hourly_annual_3",
+    "register": "report",
+    "truth": true,
+    "text": "At $30 an hour she makes $62,400 annually"
+   },
+   {
+    "id": "hourly_annual_4",
+    "register": "speech",
+    "truth": true,
+    "text": "Forty hours a week at $20 is $41,600 a year"
+   },
+   {
+    "id": "hourly_annual_5",
+    "register": "forum",
+    "truth": false,
+    "text": "$20 per hour is $45,000 per year"
+   },
+   {
+    "id": "hourly_annual_6",
+    "register": "news",
+    "truth": false,
+    "text": "$25 an hour is $50,000 per year"
+   }
   ],
   "compound_interest": [
-   {"id": "compound_1", "register": "textbook", "truth": true, "text": "$1,000 invested at 5% compounded annually for 10 years grows to $1,628.89"},
-   {"id": "compound_2", "register": "news", "truth": true, "text": "$18 million at 5% compounded annually grows to $29.3 million over 10 years"},
-   {"id": "compound_3", "register": "report", "truth": true, "text": "$5,000 at 4% compounded annually for 3 years is worth $5,624.32"},
-   {"id": "compound_4", "register": "forum", "truth": true, "text": "Invest $1,000 at 5% for 10 years compounded yearly and you have about $1,630"},
-   {"id": "compound_5", "register": "textbook", "truth": false, "text": "$1,000 at 5% compounded annually for 10 years grows to $1,500"},
-   {"id": "compound_6", "register": "report", "truth": false, "text": "$5,000 at 4% compounded annually for 3 years becomes $6,000"}
+   {
+    "id": "compound_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "$1,000 invested at 5% compounded annually for 10 years grows to $1,628.89"
+   },
+   {
+    "id": "compound_2",
+    "register": "news",
+    "truth": true,
+    "text": "$18 million at 5% compounded annually grows to $29.3 million over 10 years"
+   },
+   {
+    "id": "compound_3",
+    "register": "report",
+    "truth": true,
+    "text": "$5,000 at 4% compounded annually for 3 years is worth $5,624.32"
+   },
+   {
+    "id": "compound_4",
+    "register": "forum",
+    "truth": true,
+    "text": "Invest $1,000 at 5% for 10 years compounded yearly and you have about $1,630"
+   },
+   {
+    "id": "compound_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "$1,000 at 5% compounded annually for 10 years grows to $1,500"
+   },
+   {
+    "id": "compound_6",
+    "register": "report",
+    "truth": false,
+    "text": "$5,000 at 4% compounded annually for 3 years becomes $6,000"
+   }
   ],
   "rule_of_72": [
-   {"id": "rule72_1", "register": "forum", "truth": true, "text": "At 7% money doubles in about 10 years"},
-   {"id": "rule72_2", "register": "textbook", "truth": true, "text": "At 6%, an investment doubles in 12 years"},
-   {"id": "rule72_3", "register": "news", "truth": true, "text": "A 9% return doubles your money in roughly 8 years"},
-   {"id": "rule72_4", "register": "textbook", "truth": true, "text": "Rule of 72: at 3% it takes 24 years to double"},
-   {"id": "rule72_5", "register": "forum", "truth": false, "text": "At 8% your money doubles in 6 years"},
-   {"id": "rule72_6", "register": "forum", "truth": false, "text": "At 7% money doubles in 15 years"}
+   {
+    "id": "rule72_1",
+    "register": "forum",
+    "truth": true,
+    "text": "At 7% money doubles in about 10 years"
+   },
+   {
+    "id": "rule72_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "At 6%, an investment doubles in 12 years"
+   },
+   {
+    "id": "rule72_3",
+    "register": "news",
+    "truth": true,
+    "text": "A 9% return doubles your money in roughly 8 years"
+   },
+   {
+    "id": "rule72_4",
+    "register": "textbook",
+    "truth": true,
+    "text": "Rule of 72: at 3% it takes 24 years to double"
+   },
+   {
+    "id": "rule72_5",
+    "register": "forum",
+    "truth": false,
+    "text": "At 8% your money doubles in 6 years"
+   },
+   {
+    "id": "rule72_6",
+    "register": "forum",
+    "truth": false,
+    "text": "At 7% money doubles in 15 years"
+   }
   ],
   "elapsed_years": [
-   {"id": "elapsed_1", "register": "textbook", "truth": true, "text": "From 2024 to 2028 is 4 years"},
-   {"id": "elapsed_2", "register": "news", "truth": true, "text": "The war lasted 4 years (1914-1918)"},
-   {"id": "elapsed_3", "register": "textbook", "truth": true, "text": "Between 1500 and 2000 there are 500 years"},
-   {"id": "elapsed_4", "register": "report", "truth": true, "text": "She served from 2010 to 2018, eight years"},
-   {"id": "elapsed_5", "register": "textbook", "truth": false, "text": "From 2024 to 2028 is 3 years"},
-   {"id": "elapsed_6", "register": "news", "truth": false, "text": "The Hundred Years' War lasted 100 years (1337-1453)"}
+   {
+    "id": "elapsed_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "From 2024 to 2028 is 4 years"
+   },
+   {
+    "id": "elapsed_2",
+    "register": "news",
+    "truth": true,
+    "text": "The war lasted 4 years (1914-1918)"
+   },
+   {
+    "id": "elapsed_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "Between 1500 and 2000 there are 500 years"
+   },
+   {
+    "id": "elapsed_4",
+    "register": "report",
+    "truth": true,
+    "text": "She served from 2010 to 2018, eight years"
+   },
+   {
+    "id": "elapsed_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "From 2024 to 2028 is 3 years"
+   },
+   {
+    "id": "elapsed_6",
+    "register": "news",
+    "truth": false,
+    "text": "The Hundred Years' War lasted 100 years (1337-1453)"
+   }
   ],
   "day_of_week": [
-   {"id": "dow_1", "register": "textbook", "truth": true, "text": "July 4, 1776 was a Thursday"},
-   {"id": "dow_2", "register": "news", "truth": true, "text": "January 1, 2000 fell on a Saturday"},
-   {"id": "dow_3", "register": "forum", "truth": true, "text": "December 25, 2025 is a Thursday"},
-   {"id": "dow_4", "register": "textbook", "truth": false, "text": "July 4, 1776 was a Friday"},
-   {"id": "dow_5", "register": "news", "truth": false, "text": "January 1, 2000 was a Sunday"}
+   {
+    "id": "dow_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "July 4, 1776 was a Thursday"
+   },
+   {
+    "id": "dow_2",
+    "register": "news",
+    "truth": true,
+    "text": "January 1, 2000 fell on a Saturday"
+   },
+   {
+    "id": "dow_3",
+    "register": "forum",
+    "truth": true,
+    "text": "December 25, 2025 is a Thursday"
+   },
+   {
+    "id": "dow_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "July 4, 1776 was a Friday"
+   },
+   {
+    "id": "dow_5",
+    "register": "news",
+    "truth": false,
+    "text": "January 1, 2000 was a Sunday"
+   }
   ],
   "leap_year": [
-   {"id": "leap_1", "register": "textbook", "truth": true, "text": "2024 is a leap year"},
-   {"id": "leap_2", "register": "textbook", "truth": true, "text": "1900 was not a leap year"},
-   {"id": "leap_3", "register": "forum", "truth": true, "text": "2000 was a leap year"},
-   {"id": "leap_4", "register": "news", "truth": true, "text": "2100 will not be a leap year"},
-   {"id": "leap_5", "register": "textbook", "truth": false, "text": "1900 was a leap year"},
-   {"id": "leap_6", "register": "forum", "truth": false, "text": "2023 is a leap year"}
+   {
+    "id": "leap_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "2024 is a leap year"
+   },
+   {
+    "id": "leap_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "1900 was not a leap year"
+   },
+   {
+    "id": "leap_3",
+    "register": "forum",
+    "truth": true,
+    "text": "2000 was a leap year"
+   },
+   {
+    "id": "leap_4",
+    "register": "news",
+    "truth": true,
+    "text": "2100 will not be a leap year"
+   },
+   {
+    "id": "leap_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "1900 was a leap year"
+   },
+   {
+    "id": "leap_6",
+    "register": "forum",
+    "truth": false,
+    "text": "2023 is a leap year"
+   }
   ],
   "power": [
-   {"id": "power_1", "register": "textbook", "truth": true, "text": "2^10 = 1024"},
-   {"id": "power_2", "register": "speech", "truth": true, "text": "3 to the power of 4 is 81"},
-   {"id": "power_3", "register": "textbook", "truth": true, "text": "10^3 is 1000"},
-   {"id": "power_4", "register": "speech", "truth": true, "text": "Two to the tenth is 1,024"},
-   {"id": "power_5", "register": "textbook", "truth": false, "text": "2^10 = 1000"},
-   {"id": "power_6", "register": "speech", "truth": false, "text": "3^4 = 64"}
+   {
+    "id": "power_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "2^10 = 1024"
+   },
+   {
+    "id": "power_2",
+    "register": "speech",
+    "truth": true,
+    "text": "3 to the power of 4 is 81"
+   },
+   {
+    "id": "power_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "10^3 is 1000"
+   },
+   {
+    "id": "power_4",
+    "register": "speech",
+    "truth": true,
+    "text": "Two to the tenth is 1,024"
+   },
+   {
+    "id": "power_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "2^10 = 1000"
+   },
+   {
+    "id": "power_6",
+    "register": "speech",
+    "truth": false,
+    "text": "3^4 = 64"
+   }
   ],
   "factorial": [
-   {"id": "factorial_1", "register": "textbook", "truth": true, "text": "5! = 120"},
-   {"id": "factorial_2", "register": "textbook", "truth": true, "text": "The factorial of 6 is 720"},
-   {"id": "factorial_3", "register": "forum", "truth": true, "text": "10! equals 3,628,800"},
-   {"id": "factorial_4", "register": "speech", "truth": true, "text": "Five factorial is 120"},
-   {"id": "factorial_5", "register": "textbook", "truth": false, "text": "5! = 100"},
-   {"id": "factorial_6", "register": "forum", "truth": false, "text": "6! is 620"}
+   {
+    "id": "factorial_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "5! = 120"
+   },
+   {
+    "id": "factorial_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "The factorial of 6 is 720"
+   },
+   {
+    "id": "factorial_3",
+    "register": "forum",
+    "truth": true,
+    "text": "10! equals 3,628,800"
+   },
+   {
+    "id": "factorial_4",
+    "register": "speech",
+    "truth": true,
+    "text": "Five factorial is 120"
+   },
+   {
+    "id": "factorial_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "5! = 100"
+   },
+   {
+    "id": "factorial_6",
+    "register": "forum",
+    "truth": false,
+    "text": "6! is 620"
+   }
   ],
   "sqrt": [
-   {"id": "sqrt_1", "register": "textbook", "truth": true, "text": "the square root of 2 is 1.41421"},
-   {"id": "sqrt_2", "register": "textbook", "truth": true, "text": "sqrt(144) = 12"},
-   {"id": "sqrt_3", "register": "forum", "truth": true, "text": "The square root of 50 is about 7.07"},
-   {"id": "sqrt_4", "register": "textbook", "truth": true, "text": "√2 ≈ 1.414"},
-   {"id": "sqrt_5", "register": "textbook", "truth": false, "text": "the square root of 10 is 3.262"},
-   {"id": "sqrt_6", "register": "textbook", "truth": false, "text": "sqrt(144) = 13"}
+   {
+    "id": "sqrt_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the square root of 2 is 1.41421"
+   },
+   {
+    "id": "sqrt_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "sqrt(144) = 12"
+   },
+   {
+    "id": "sqrt_3",
+    "register": "forum",
+    "truth": true,
+    "text": "The square root of 50 is about 7.07"
+   },
+   {
+    "id": "sqrt_4",
+    "register": "textbook",
+    "truth": true,
+    "text": "√2 ≈ 1.414"
+   },
+   {
+    "id": "sqrt_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "the square root of 10 is 3.262"
+   },
+   {
+    "id": "sqrt_6",
+    "register": "textbook",
+    "truth": false,
+    "text": "sqrt(144) = 13"
+   }
   ],
   "combinations": [
-   {"id": "comb_1", "register": "textbook", "truth": true, "text": "The number of ways to choose 3 from 10 is 120"},
-   {"id": "comb_2", "register": "textbook", "truth": true, "text": "10 choose 3 = 120"},
-   {"id": "comb_3", "register": "forum", "truth": true, "text": "52 choose 5 is 2598960"},
-   {"id": "comb_4", "register": "news", "truth": true, "text": "There are 2,598,960 five-card hands from 52 cards"},
-   {"id": "comb_5", "register": "textbook", "truth": false, "text": "10 choose 3 = 100"},
-   {"id": "comb_6", "register": "textbook", "truth": false, "text": "C(10,3) = 720"}
+   {
+    "id": "comb_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "The number of ways to choose 3 from 10 is 120"
+   },
+   {
+    "id": "comb_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "10 choose 3 = 120"
+   },
+   {
+    "id": "comb_3",
+    "register": "forum",
+    "truth": true,
+    "text": "52 choose 5 is 2598960"
+   },
+   {
+    "id": "comb_4",
+    "register": "news",
+    "truth": true,
+    "text": "There are 2,598,960 five-card hands from 52 cards"
+   },
+   {
+    "id": "comb_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "10 choose 3 = 100"
+   },
+   {
+    "id": "comb_6",
+    "register": "textbook",
+    "truth": false,
+    "text": "C(10,3) = 720"
+   }
   ],
   "permutations": [
-   {"id": "perm_1", "register": "textbook", "truth": true, "text": "The number of ways to arrange 5 books is 120"},
-   {"id": "perm_2", "register": "textbook", "truth": true, "text": "5P3 = 60"},
-   {"id": "perm_3", "register": "forum", "truth": true, "text": "There are 720 ways to order 6 people"},
-   {"id": "perm_4", "register": "textbook", "truth": true, "text": "Permutations of 4 taken 2 at a time: 12"},
-   {"id": "perm_5", "register": "textbook", "truth": false, "text": "5P3 = 125"},
-   {"id": "perm_6", "register": "textbook", "truth": false, "text": "4P2 = 16"}
+   {
+    "id": "perm_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "The number of ways to arrange 5 books is 120"
+   },
+   {
+    "id": "perm_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "5P3 = 60"
+   },
+   {
+    "id": "perm_3",
+    "register": "forum",
+    "truth": true,
+    "text": "There are 720 ways to order 6 people"
+   },
+   {
+    "id": "perm_4",
+    "register": "textbook",
+    "truth": true,
+    "text": "Permutations of 4 taken 2 at a time: 12"
+   },
+   {
+    "id": "perm_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "5P3 = 125"
+   },
+   {
+    "id": "perm_6",
+    "register": "textbook",
+    "truth": false,
+    "text": "4P2 = 16"
+   }
   ],
   "circle": [
-   {"id": "circle_1", "register": "textbook", "truth": true, "text": "A circle of radius 2 has area 12.566"},
-   {"id": "circle_2", "register": "forum", "truth": true, "text": "The circumference of a circle with radius 1 is 6.283"},
-   {"id": "circle_3", "register": "textbook", "truth": true, "text": "the area of a circle with radius 3 is 28.27"},
-   {"id": "circle_4", "register": "textbook", "truth": false, "text": "A circle of radius 2 has area 14.566"},
-   {"id": "circle_5", "register": "forum", "truth": false, "text": "The circumference of a circle with radius 1 is 3.14"}
+   {
+    "id": "circle_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "A circle of radius 2 has area 12.566"
+   },
+   {
+    "id": "circle_2",
+    "register": "forum",
+    "truth": true,
+    "text": "The circumference of a circle with radius 1 is 6.283"
+   },
+   {
+    "id": "circle_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "the area of a circle with radius 3 is 28.27"
+   },
+   {
+    "id": "circle_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "A circle of radius 2 has area 14.566"
+   },
+   {
+    "id": "circle_5",
+    "register": "forum",
+    "truth": false,
+    "text": "The circumference of a circle with radius 1 is 3.14"
+   }
   ],
   "pythagorean": [
-   {"id": "pyth_1", "register": "textbook", "truth": true, "text": "a right triangle with legs 3 and 4 has hypotenuse 5"},
-   {"id": "pyth_2", "register": "forum", "truth": true, "text": "A right triangle with legs 5 and 12 has a hypotenuse of 13"},
-   {"id": "pyth_3", "register": "textbook", "truth": true, "text": "legs of 8 and 15 give a hypotenuse of 17"},
-   {"id": "pyth_4", "register": "textbook", "truth": false, "text": "a right triangle with legs 3 and 4 has hypotenuse 6"},
-   {"id": "pyth_5", "register": "forum", "truth": false, "text": "A right triangle with legs 5 and 12 has a hypotenuse of 14"}
+   {
+    "id": "pyth_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "a right triangle with legs 3 and 4 has hypotenuse 5"
+   },
+   {
+    "id": "pyth_2",
+    "register": "forum",
+    "truth": true,
+    "text": "A right triangle with legs 5 and 12 has a hypotenuse of 13"
+   },
+   {
+    "id": "pyth_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "legs of 8 and 15 give a hypotenuse of 17"
+   },
+   {
+    "id": "pyth_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "a right triangle with legs 3 and 4 has hypotenuse 6"
+   },
+   {
+    "id": "pyth_5",
+    "register": "forum",
+    "truth": false,
+    "text": "A right triangle with legs 5 and 12 has a hypotenuse of 14"
+   }
   ],
   "polygon_angles": [
-   {"id": "poly_1", "register": "textbook", "truth": true, "text": "The interior angles of a hexagon sum to 720 degrees"},
-   {"id": "poly_2", "register": "textbook", "truth": true, "text": "the interior angles of a pentagon add up to 540 degrees"},
-   {"id": "poly_3", "register": "forum", "truth": true, "text": "A triangle's interior angles sum to 180 degrees"},
-   {"id": "poly_4", "register": "textbook", "truth": false, "text": "The interior angles of a hexagon sum to 540 degrees"},
-   {"id": "poly_5", "register": "textbook", "truth": false, "text": "the interior angles of a pentagon add up to 720 degrees"}
+   {
+    "id": "poly_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "The interior angles of a hexagon sum to 720 degrees"
+   },
+   {
+    "id": "poly_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "the interior angles of a pentagon add up to 540 degrees"
+   },
+   {
+    "id": "poly_3",
+    "register": "forum",
+    "truth": true,
+    "text": "A triangle's interior angles sum to 180 degrees"
+   },
+   {
+    "id": "poly_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "The interior angles of a hexagon sum to 540 degrees"
+   },
+   {
+    "id": "poly_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "the interior angles of a pentagon add up to 720 degrees"
+   }
   ],
   "rectangle": [
-   {"id": "rect_1", "register": "textbook", "truth": true, "text": "A 3 by 4 rectangle has area 12"},
-   {"id": "rect_2", "register": "forum", "truth": true, "text": "a rectangle 5 m by 8 m has an area of 40 square meters"},
-   {"id": "rect_3", "register": "report", "truth": true, "text": "The 12 by 20 lot covers 240 square feet"},
-   {"id": "rect_4", "register": "textbook", "truth": false, "text": "A 3 by 4 rectangle has area 14"},
-   {"id": "rect_5", "register": "forum", "truth": false, "text": "a rectangle 5 m by 8 m has an area of 45 square meters"}
+   {
+    "id": "rect_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "A 3 by 4 rectangle has area 12"
+   },
+   {
+    "id": "rect_2",
+    "register": "forum",
+    "truth": true,
+    "text": "a rectangle 5 m by 8 m has an area of 40 square meters"
+   },
+   {
+    "id": "rect_3",
+    "register": "report",
+    "truth": true,
+    "text": "The 12 by 20 lot covers 240 square feet"
+   },
+   {
+    "id": "rect_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "A 3 by 4 rectangle has area 14"
+   },
+   {
+    "id": "rect_5",
+    "register": "forum",
+    "truth": false,
+    "text": "a rectangle 5 m by 8 m has an area of 45 square meters"
+   }
   ],
   "sphere": [
-   {"id": "sphere_1", "register": "textbook", "truth": true, "text": "A sphere of radius 1 has volume 4.19"},
-   {"id": "sphere_2", "register": "textbook", "truth": true, "text": "the volume of a sphere with radius 3 is 113.1"},
-   {"id": "sphere_3", "register": "forum", "truth": true, "text": "A sphere of radius 2 has surface area 50.27"},
-   {"id": "sphere_4", "register": "textbook", "truth": false, "text": "A sphere of radius 1 has volume 3.14"},
-   {"id": "sphere_5", "register": "forum", "truth": false, "text": "A sphere of radius 2 has surface area 25.13"}
+   {
+    "id": "sphere_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "A sphere of radius 1 has volume 4.19"
+   },
+   {
+    "id": "sphere_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "the volume of a sphere with radius 3 is 113.1"
+   },
+   {
+    "id": "sphere_3",
+    "register": "forum",
+    "truth": true,
+    "text": "A sphere of radius 2 has surface area 50.27"
+   },
+   {
+    "id": "sphere_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "A sphere of radius 1 has volume 3.14"
+   },
+   {
+    "id": "sphere_5",
+    "register": "forum",
+    "truth": false,
+    "text": "A sphere of radius 2 has surface area 25.13"
+   }
   ],
   "cube": [
-   {"id": "cube_1", "register": "textbook", "truth": true, "text": "A cube with side 3 has volume 27"},
-   {"id": "cube_2", "register": "forum", "truth": true, "text": "the volume of a cube of side 4 is 64"},
-   {"id": "cube_3", "register": "textbook", "truth": true, "text": "A cube with side 2 has surface area 24"},
-   {"id": "cube_4", "register": "textbook", "truth": false, "text": "A cube with side 3 has volume 9"},
-   {"id": "cube_5", "register": "forum", "truth": false, "text": "the volume of a cube of side 4 is 16"}
+   {
+    "id": "cube_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "A cube with side 3 has volume 27"
+   },
+   {
+    "id": "cube_2",
+    "register": "forum",
+    "truth": true,
+    "text": "the volume of a cube of side 4 is 64"
+   },
+   {
+    "id": "cube_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "A cube with side 2 has surface area 24"
+   },
+   {
+    "id": "cube_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "A cube with side 3 has volume 9"
+   },
+   {
+    "id": "cube_5",
+    "register": "forum",
+    "truth": false,
+    "text": "the volume of a cube of side 4 is 16"
+   }
   ],
   "cylinder": [
-   {"id": "cyl_1", "register": "textbook", "truth": true, "text": "A cylinder of radius 1 and height 2 has volume 6.283"},
-   {"id": "cyl_2", "register": "forum", "truth": true, "text": "the volume of a cylinder with radius 2 and height 5 is 62.83"},
-   {"id": "cyl_3", "register": "textbook", "truth": false, "text": "A cylinder of radius 1 and height 2 has volume 3.14"},
-   {"id": "cyl_4", "register": "forum", "truth": false, "text": "the volume of a cylinder with radius 2 and height 5 is 31.4"}
+   {
+    "id": "cyl_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "A cylinder of radius 1 and height 2 has volume 6.283"
+   },
+   {
+    "id": "cyl_2",
+    "register": "forum",
+    "truth": true,
+    "text": "the volume of a cylinder with radius 2 and height 5 is 62.83"
+   },
+   {
+    "id": "cyl_3",
+    "register": "textbook",
+    "truth": false,
+    "text": "A cylinder of radius 1 and height 2 has volume 3.14"
+   },
+   {
+    "id": "cyl_4",
+    "register": "forum",
+    "truth": false,
+    "text": "the volume of a cylinder with radius 2 and height 5 is 31.4"
+   }
   ],
   "physics_force": [
-   {"id": "force_1", "register": "textbook", "truth": true, "text": "F = ma: a 2 kg mass accelerating at 3 m/s^2 needs 6 N"},
-   {"id": "force_2", "register": "forum", "truth": true, "text": "a force of 10 N on a 5 kg mass gives an acceleration of 2 m/s^2"},
-   {"id": "force_3", "register": "textbook", "truth": true, "text": "the force on a 4 kg mass at 2.5 m/s^2 is 10 newtons"},
-   {"id": "force_4", "register": "textbook", "truth": false, "text": "a 2 kg mass accelerating at 3 m/s^2 needs 5 N"},
-   {"id": "force_5", "register": "forum", "truth": false, "text": "a force of 10 N on a 5 kg mass gives an acceleration of 4 m/s^2"}
+   {
+    "id": "force_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "F = ma: a 2 kg mass accelerating at 3 m/s^2 needs 6 N"
+   },
+   {
+    "id": "force_2",
+    "register": "forum",
+    "truth": true,
+    "text": "a force of 10 N on a 5 kg mass gives an acceleration of 2 m/s^2"
+   },
+   {
+    "id": "force_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "the force on a 4 kg mass at 2.5 m/s^2 is 10 newtons"
+   },
+   {
+    "id": "force_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "a 2 kg mass accelerating at 3 m/s^2 needs 5 N"
+   },
+   {
+    "id": "force_5",
+    "register": "forum",
+    "truth": false,
+    "text": "a force of 10 N on a 5 kg mass gives an acceleration of 4 m/s^2"
+   }
   ],
   "kinetic_energy": [
-   {"id": "ke_1", "register": "textbook", "truth": true, "text": "the kinetic energy of a 2 kg mass at 3 m/s is 9 J"},
-   {"id": "ke_2", "register": "forum", "truth": true, "text": "a 10 kg mass at 2 m/s has kinetic energy of 20 joules"},
-   {"id": "ke_3", "register": "news", "truth": true, "text": "A 1,000 kg car at 20 m/s carries 200,000 J of kinetic energy"},
-   {"id": "ke_4", "register": "textbook", "truth": false, "text": "the kinetic energy of a 2 kg mass at 3 m/s is 12 J"},
-   {"id": "ke_5", "register": "forum", "truth": false, "text": "a 10 kg mass at 2 m/s has kinetic energy of 40 joules"}
+   {
+    "id": "ke_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the kinetic energy of a 2 kg mass at 3 m/s is 9 J"
+   },
+   {
+    "id": "ke_2",
+    "register": "forum",
+    "truth": true,
+    "text": "a 10 kg mass at 2 m/s has kinetic energy of 20 joules"
+   },
+   {
+    "id": "ke_3",
+    "register": "news",
+    "truth": true,
+    "text": "A 1,000 kg car at 20 m/s carries 200,000 J of kinetic energy"
+   },
+   {
+    "id": "ke_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "the kinetic energy of a 2 kg mass at 3 m/s is 12 J"
+   },
+   {
+    "id": "ke_5",
+    "register": "forum",
+    "truth": false,
+    "text": "a 10 kg mass at 2 m/s has kinetic energy of 40 joules"
+   }
   ],
   "kinematics": [
-   {"id": "kin_1", "register": "textbook", "truth": true, "text": "A car accelerating at 2 m/s^2 from rest reaches 20 m/s in 10 s"},
-   {"id": "kin_2", "register": "textbook", "truth": true, "text": "starting from rest at 3 m/s^2 for 4 s gives a velocity of 12 m/s"},
-   {"id": "kin_3", "register": "textbook", "truth": false, "text": "A car accelerating at 2 m/s^2 from rest reaches 30 m/s in 10 s"},
-   {"id": "kin_4", "register": "textbook", "truth": false, "text": "starting from rest at 3 m/s^2 for 4 s gives a velocity of 7 m/s"}
+   {
+    "id": "kin_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "A car accelerating at 2 m/s^2 from rest reaches 20 m/s in 10 s"
+   },
+   {
+    "id": "kin_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "starting from rest at 3 m/s^2 for 4 s gives a velocity of 12 m/s"
+   },
+   {
+    "id": "kin_3",
+    "register": "textbook",
+    "truth": false,
+    "text": "A car accelerating at 2 m/s^2 from rest reaches 30 m/s in 10 s"
+   },
+   {
+    "id": "kin_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "starting from rest at 3 m/s^2 for 4 s gives a velocity of 7 m/s"
+   }
   ],
   "molar_mass": [
-   {"id": "molar_1", "register": "textbook", "truth": true, "text": "the molar mass of H2O is 18.015 g/mol"},
-   {"id": "molar_2", "register": "report", "truth": true, "text": "aspirin C9H8O4 is 180.16 g/mol"},
-   {"id": "molar_3", "register": "forum", "truth": true, "text": "the molar mass of CO2 is 44.01 g/mol"},
-   {"id": "molar_4", "register": "textbook", "truth": true, "text": "water H2O has a molar mass of 18.02 g/mol"},
-   {"id": "molar_5", "register": "textbook", "truth": false, "text": "the molar mass of H2O is 20 g/mol"},
-   {"id": "molar_6", "register": "report", "truth": false, "text": "aspirin C9H8O4 is 190.16 g/mol"}
+   {
+    "id": "molar_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the molar mass of H2O is 18.015 g/mol"
+   },
+   {
+    "id": "molar_2",
+    "register": "report",
+    "truth": true,
+    "text": "aspirin C9H8O4 is 180.16 g/mol"
+   },
+   {
+    "id": "molar_3",
+    "register": "forum",
+    "truth": true,
+    "text": "the molar mass of CO2 is 44.01 g/mol"
+   },
+   {
+    "id": "molar_4",
+    "register": "textbook",
+    "truth": true,
+    "text": "water H2O has a molar mass of 18.02 g/mol"
+   },
+   {
+    "id": "molar_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "the molar mass of H2O is 20 g/mol"
+   },
+   {
+    "id": "molar_6",
+    "register": "report",
+    "truth": false,
+    "text": "aspirin C9H8O4 is 190.16 g/mol"
+   }
   ],
   "molar_mass_named": [
-   {"id": "molarn_1", "register": "textbook", "truth": true, "text": "the molar mass of water is 18.015 g/mol"},
-   {"id": "molarn_2", "register": "forum", "truth": true, "text": "the molar mass of carbon dioxide is 44.01 g/mol"},
-   {"id": "molarn_3", "register": "news", "truth": true, "text": "The molar mass of water is about 18 g/mol"},
-   {"id": "molarn_4", "register": "textbook", "truth": false, "text": "the molar mass of water is 20 g/mol"},
-   {"id": "molarn_5", "register": "forum", "truth": false, "text": "the molar mass of carbon dioxide is 40 g/mol"}
+   {
+    "id": "molarn_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the molar mass of water is 18.015 g/mol"
+   },
+   {
+    "id": "molarn_2",
+    "register": "forum",
+    "truth": true,
+    "text": "the molar mass of carbon dioxide is 44.01 g/mol"
+   },
+   {
+    "id": "molarn_3",
+    "register": "news",
+    "truth": true,
+    "text": "The molar mass of water is about 18 g/mol"
+   },
+   {
+    "id": "molarn_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "the molar mass of water is 20 g/mol"
+   },
+   {
+    "id": "molarn_5",
+    "register": "forum",
+    "truth": false,
+    "text": "the molar mass of carbon dioxide is 40 g/mol"
+   }
   ],
   "element_fact": [
-   {"id": "elem_1", "register": "textbook", "truth": true, "text": "the atomic number of iron is 26"},
-   {"id": "elem_2", "register": "forum", "truth": true, "text": "carbon has atomic number 6"},
-   {"id": "elem_3", "register": "textbook", "truth": true, "text": "the atomic number of gold is 79"},
-   {"id": "elem_4", "register": "textbook", "truth": false, "text": "the atomic number of iron is 28"},
-   {"id": "elem_5", "register": "forum", "truth": false, "text": "carbon has atomic number 8"}
+   {
+    "id": "elem_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the atomic number of iron is 26"
+   },
+   {
+    "id": "elem_2",
+    "register": "forum",
+    "truth": true,
+    "text": "carbon has atomic number 6"
+   },
+   {
+    "id": "elem_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "the atomic number of gold is 79"
+   },
+   {
+    "id": "elem_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "the atomic number of iron is 28"
+   },
+   {
+    "id": "elem_5",
+    "register": "forum",
+    "truth": false,
+    "text": "carbon has atomic number 8"
+   }
   ],
   "primality": [
-   {"id": "prime_1", "register": "textbook", "truth": true, "text": "17 is prime"},
-   {"id": "prime_2", "register": "forum", "truth": true, "text": "137 is a prime number"},
-   {"id": "prime_3", "register": "textbook", "truth": true, "text": "2 is prime"},
-   {"id": "prime_4", "register": "forum", "truth": false, "text": "91 is a prime number"},
-   {"id": "prime_5", "register": "textbook", "truth": false, "text": "15 is prime"}
+   {
+    "id": "prime_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "17 is prime"
+   },
+   {
+    "id": "prime_2",
+    "register": "forum",
+    "truth": true,
+    "text": "137 is a prime number"
+   },
+   {
+    "id": "prime_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "2 is prime"
+   },
+   {
+    "id": "prime_4",
+    "register": "forum",
+    "truth": false,
+    "text": "91 is a prime number"
+   },
+   {
+    "id": "prime_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "15 is prime"
+   }
   ],
   "divisor_count": [
-   {"id": "div_1", "register": "textbook", "truth": true, "text": "the number of divisors of 12 is 6"},
-   {"id": "div_2", "register": "forum", "truth": true, "text": "28 has 6 divisors"},
-   {"id": "div_3", "register": "textbook", "truth": true, "text": "the number of divisors of 36 is 9"},
-   {"id": "div_4", "register": "forum", "truth": false, "text": "10 has 6 divisors"},
-   {"id": "div_5", "register": "textbook", "truth": false, "text": "the number of divisors of 12 is 5"}
+   {
+    "id": "div_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the number of divisors of 12 is 6"
+   },
+   {
+    "id": "div_2",
+    "register": "forum",
+    "truth": true,
+    "text": "28 has 6 divisors"
+   },
+   {
+    "id": "div_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "the number of divisors of 36 is 9"
+   },
+   {
+    "id": "div_4",
+    "register": "forum",
+    "truth": false,
+    "text": "10 has 6 divisors"
+   },
+   {
+    "id": "div_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "the number of divisors of 12 is 5"
+   }
   ],
   "sequence_fact": [
-   {"id": "seq_1", "register": "textbook", "truth": true, "text": "the 10th Fibonacci number is 55"},
-   {"id": "seq_2", "register": "forum", "truth": true, "text": "the 12th Fibonacci number is 144"},
-   {"id": "seq_3", "register": "textbook", "truth": false, "text": "the 10th Fibonacci number is 60"},
-   {"id": "seq_4", "register": "forum", "truth": false, "text": "the 12th Fibonacci number is 150"}
+   {
+    "id": "seq_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the 10th Fibonacci number is 55"
+   },
+   {
+    "id": "seq_2",
+    "register": "forum",
+    "truth": true,
+    "text": "the 12th Fibonacci number is 144"
+   },
+   {
+    "id": "seq_3",
+    "register": "textbook",
+    "truth": false,
+    "text": "the 10th Fibonacci number is 60"
+   },
+   {
+    "id": "seq_4",
+    "register": "forum",
+    "truth": false,
+    "text": "the 12th Fibonacci number is 150"
+   }
   ],
   "math_constant": [
-   {"id": "mconst_1", "register": "textbook", "truth": true, "text": "pi is 3.14159"},
-   {"id": "mconst_2", "register": "forum", "truth": true, "text": "the golden ratio is 1.618"},
-   {"id": "mconst_3", "register": "speech", "truth": true, "text": "pi is about 3.14"},
-   {"id": "mconst_4", "register": "textbook", "truth": false, "text": "pi is 3.15"},
-   {"id": "mconst_5", "register": "forum", "truth": false, "text": "the golden ratio is 1.718"}
+   {
+    "id": "mconst_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "pi is 3.14159"
+   },
+   {
+    "id": "mconst_2",
+    "register": "forum",
+    "truth": true,
+    "text": "the golden ratio is 1.618"
+   },
+   {
+    "id": "mconst_3",
+    "register": "speech",
+    "truth": true,
+    "text": "pi is about 3.14"
+   },
+   {
+    "id": "mconst_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "pi is 3.15"
+   },
+   {
+    "id": "mconst_5",
+    "register": "forum",
+    "truth": false,
+    "text": "the golden ratio is 1.718"
+   }
   ],
   "physical_constant": [
-   {"id": "pconst_1", "register": "textbook", "truth": true, "text": "the speed of light is 299,792,458 m/s"},
-   {"id": "pconst_2", "register": "news", "truth": true, "text": "approximately 300,000 km/s is the speed of light"},
-   {"id": "pconst_3", "register": "textbook", "truth": true, "text": "Avogadro's number is 6.022e23"},
-   {"id": "pconst_4", "register": "forum", "truth": true, "text": "earth gravity is 9.81 m/s^2"},
-   {"id": "pconst_5", "register": "textbook", "truth": false, "text": "the speed of light is 150,000 km/s"},
-   {"id": "pconst_6", "register": "forum", "truth": false, "text": "earth gravity is 9.91 m/s^2"}
+   {
+    "id": "pconst_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the speed of light is 299,792,458 m/s"
+   },
+   {
+    "id": "pconst_2",
+    "register": "news",
+    "truth": true,
+    "text": "approximately 300,000 km/s is the speed of light"
+   },
+   {
+    "id": "pconst_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "Avogadro's number is 6.022e23"
+   },
+   {
+    "id": "pconst_4",
+    "register": "forum",
+    "truth": true,
+    "text": "earth gravity is 9.81 m/s^2"
+   },
+   {
+    "id": "pconst_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "the speed of light is 150,000 km/s"
+   },
+   {
+    "id": "pconst_6",
+    "register": "forum",
+    "truth": false,
+    "text": "earth gravity is 9.91 m/s^2"
+   }
   ],
   "unit_conversion": [
-   {"id": "uconv_1", "register": "textbook", "truth": true, "text": "1 mile is 1.609 km"},
-   {"id": "uconv_2", "register": "news", "truth": true, "text": "100 kilometers is 62.14 miles"},
-   {"id": "uconv_3", "register": "forum", "truth": true, "text": "5 feet is 1.524 meters"},
-   {"id": "uconv_4", "register": "report", "truth": true, "text": "The 2.5 kg parcel weighs 5.51 pounds"},
-   {"id": "uconv_5", "register": "textbook", "truth": false, "text": "1 mile is 1.7 km"},
-   {"id": "uconv_6", "register": "news", "truth": false, "text": "100 kilometers is 72.14 miles"}
+   {
+    "id": "uconv_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "1 mile is 1.609 km"
+   },
+   {
+    "id": "uconv_2",
+    "register": "news",
+    "truth": true,
+    "text": "100 kilometers is 62.14 miles"
+   },
+   {
+    "id": "uconv_3",
+    "register": "forum",
+    "truth": true,
+    "text": "5 feet is 1.524 meters"
+   },
+   {
+    "id": "uconv_4",
+    "register": "report",
+    "truth": true,
+    "text": "The 2.5 kg parcel weighs 5.51 pounds"
+   },
+   {
+    "id": "uconv_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "1 mile is 1.7 km"
+   },
+   {
+    "id": "uconv_6",
+    "register": "news",
+    "truth": false,
+    "text": "100 kilometers is 72.14 miles"
+   }
   ],
   "unit_fact": [
-   {"id": "ufact_1", "register": "textbook", "truth": true, "text": "there are 5280 feet in a mile"},
-   {"id": "ufact_2", "register": "textbook", "truth": true, "text": "there are 1000 meters in a kilometer"},
-   {"id": "ufact_3", "register": "forum", "truth": true, "text": "there are 16 ounces in a pound"},
-   {"id": "ufact_4", "register": "textbook", "truth": false, "text": "there are 5000 feet in a mile"},
-   {"id": "ufact_5", "register": "forum", "truth": false, "text": "there are 12 ounces in a pound"}
+   {
+    "id": "ufact_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "there are 5280 feet in a mile"
+   },
+   {
+    "id": "ufact_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "there are 1000 meters in a kilometer"
+   },
+   {
+    "id": "ufact_3",
+    "register": "forum",
+    "truth": true,
+    "text": "there are 16 ounces in a pound"
+   },
+   {
+    "id": "ufact_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "there are 5000 feet in a mile"
+   },
+   {
+    "id": "ufact_5",
+    "register": "forum",
+    "truth": false,
+    "text": "there are 12 ounces in a pound"
+   }
   ],
   "escape_velocity": [
-   {"id": "esc_1", "register": "textbook", "truth": true, "text": "the escape velocity of earth is 11.2 km/s"},
-   {"id": "esc_2", "register": "forum", "truth": true, "text": "the escape velocity of the moon is 2.4 km/s"},
-   {"id": "esc_3", "register": "textbook", "truth": false, "text": "the escape velocity of earth is 15 km/s"},
-   {"id": "esc_4", "register": "forum", "truth": false, "text": "the escape velocity of the moon is 3.4 km/s"}
+   {
+    "id": "esc_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the escape velocity of earth is 11.2 km/s"
+   },
+   {
+    "id": "esc_2",
+    "register": "forum",
+    "truth": true,
+    "text": "the escape velocity of the moon is 2.4 km/s"
+   },
+   {
+    "id": "esc_3",
+    "register": "textbook",
+    "truth": false,
+    "text": "the escape velocity of earth is 15 km/s"
+   },
+   {
+    "id": "esc_4",
+    "register": "forum",
+    "truth": false,
+    "text": "the escape velocity of the moon is 3.4 km/s"
+   }
   ],
   "ohms_law": [
-   {"id": "ohm_1", "register": "textbook", "truth": true, "text": "a 10 ohm resistor with 2 amps drops 20 volts"},
-   {"id": "ohm_2", "register": "forum", "truth": true, "text": "a 4 ohm resistor carrying 3 amps drops 12 volts"},
-   {"id": "ohm_3", "register": "textbook", "truth": false, "text": "a 10 ohm resistor with 2 amps drops 30 volts"},
-   {"id": "ohm_4", "register": "forum", "truth": false, "text": "a 4 ohm resistor carrying 3 amps drops 15 volts"}
+   {
+    "id": "ohm_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "a 10 ohm resistor with 2 amps drops 20 volts"
+   },
+   {
+    "id": "ohm_2",
+    "register": "forum",
+    "truth": true,
+    "text": "a 4 ohm resistor carrying 3 amps drops 12 volts"
+   },
+   {
+    "id": "ohm_3",
+    "register": "textbook",
+    "truth": false,
+    "text": "a 10 ohm resistor with 2 amps drops 30 volts"
+   },
+   {
+    "id": "ohm_4",
+    "register": "forum",
+    "truth": false,
+    "text": "a 4 ohm resistor carrying 3 amps drops 15 volts"
+   }
+  ],
+  "logic_relations": [
+   {
+    "id": "lrel_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "P implies Q is equivalent to not Q implies not P"
+   },
+   {
+    "id": "lrel_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "not (P and Q) is equivalent to not P or not Q"
+   },
+   {
+    "id": "lrel_3",
+    "register": "forum",
+    "truth": true,
+    "text": "P and Q entails P"
+   },
+   {
+    "id": "lrel_4",
+    "register": "textbook",
+    "truth": true,
+    "text": "P and (P implies Q) entails Q"
+   },
+   {
+    "id": "lrel_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "P or Q is equivalent to P and Q"
+   },
+   {
+    "id": "lrel_6",
+    "register": "forum",
+    "truth": false,
+    "text": "P entails P and Q"
+   },
+   {
+    "id": "lrel_7",
+    "register": "speech",
+    "truth": true,
+    "text": "(P or Q) and not P entails Q"
+   }
+  ],
+  "argument_form": [
+   {
+    "id": "larg_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "If P then Q; P; therefore Q is valid"
+   },
+   {
+    "id": "larg_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "If P then Q; not Q; therefore not P is valid"
+   },
+   {
+    "id": "larg_3",
+    "register": "forum",
+    "truth": true,
+    "text": "P or Q; not P; therefore Q is a valid inference"
+   },
+   {
+    "id": "larg_4",
+    "register": "textbook",
+    "truth": true,
+    "text": "If P then Q, and if Q then R, therefore if P then R is valid"
+   },
+   {
+    "id": "larg_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "If P then Q; Q; therefore P is a valid argument"
+   },
+   {
+    "id": "larg_6",
+    "register": "forum",
+    "truth": false,
+    "text": "If P then Q; not P; therefore not Q is valid"
+   },
+   {
+    "id": "larg_7",
+    "register": "speech",
+    "truth": true,
+    "text": "Given that P implies Q and that P holds, it follows that Q is valid"
+   }
+  ],
+  "syllogism": [
+   {
+    "id": "lsyl_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "All men are mortal; Socrates is a man; therefore Socrates is mortal is valid"
+   },
+   {
+    "id": "lsyl_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "All cats are mammals; all mammals are animals; therefore all cats are animals is a valid syllogism"
+   },
+   {
+    "id": "lsyl_3",
+    "register": "forum",
+    "truth": true,
+    "text": "No fish are mammals; all whales are mammals; therefore no whales are fish is valid"
+   },
+   {
+    "id": "lsyl_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "All cats are mammals; all dogs are mammals; therefore all cats are dogs is valid"
+   },
+   {
+    "id": "lsyl_5",
+    "register": "forum",
+    "truth": false,
+    "text": "Some men are tall; all men are mortal; therefore all mortals are tall is valid"
+   },
+   {
+    "id": "lsyl_6",
+    "register": "speech",
+    "truth": true,
+    "text": "Every man is mortal and Socrates is a man, so Socrates is mortal is valid"
+   }
+  ],
+  "logic_counts": [
+   {
+    "id": "lcnt_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "A truth table for 3 variables has 8 rows"
+   },
+   {
+    "id": "lcnt_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "there are 16 binary boolean functions"
+   },
+   {
+    "id": "lcnt_3",
+    "register": "forum",
+    "truth": true,
+    "text": "a formula with 4 variables has 16 possible assignments"
+   },
+   {
+    "id": "lcnt_4",
+    "register": "textbook",
+    "truth": true,
+    "text": "there are 4 unary boolean functions"
+   },
+   {
+    "id": "lcnt_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "A truth table for 3 variables has 6 rows"
+   },
+   {
+    "id": "lcnt_6",
+    "register": "forum",
+    "truth": false,
+    "text": "there are 8 binary boolean functions"
+   },
+   {
+    "id": "lcnt_7",
+    "register": "speech",
+    "truth": true,
+    "text": "With five variables a truth table needs 32 rows"
+   }
+  ],
+  "named_forms": [
+   {
+    "id": "lnam_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "modus ponens is valid"
+   },
+   {
+    "id": "lnam_2",
+    "register": "forum",
+    "truth": true,
+    "text": "affirming the consequent is a fallacy"
+   },
+   {
+    "id": "lnam_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "modus tollens is a valid form"
+   },
+   {
+    "id": "lnam_4",
+    "register": "textbook",
+    "truth": true,
+    "text": "ad hominem is an informal fallacy"
+   },
+   {
+    "id": "lnam_5",
+    "register": "forum",
+    "truth": false,
+    "text": "modus ponens is a fallacy"
+   },
+   {
+    "id": "lnam_6",
+    "register": "textbook",
+    "truth": false,
+    "text": "affirming the consequent is valid"
+   },
+   {
+    "id": "lnam_7",
+    "register": "speech",
+    "truth": false,
+    "text": "ad hominem is a formal fallacy"
+   }
   ]
  }
 }
