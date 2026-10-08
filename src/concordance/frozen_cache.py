@@ -97,10 +97,17 @@ def load(path: Path, key: str) -> Optional[Dict[str, Any]]:
     """{df, fz, contributors, offsets, read_ms, decode_ms} when the file is whole and was built from exactly
     these inputs; else None. `offsets[name]` = the byte offsets of that contributor's RESIDENT lines ([] = none)."""
     try:
+        # Read the bytes, then decode. MEASURED on the box (2026-10-08): streaming marshal.load(f) = 2.8 s;
+        # f.read() + marshal.loads(bytes) = 34 ms + 0.82 s. The transient copy is 85 MB for ~30 ms on a box
+        # with ~5.9 GB available; two seconds of every boot is the larger cost. (A review suggestion tried
+        # the streaming form; the number decided.)
         t0 = time.perf_counter()
         with open(path, "rb") as f:
-            obj = marshal.load(f)           # streamed: never the raw bytes AND the decoded tables at once
-        t1 = t2 = time.perf_counter()
+            data = f.read()
+        t1 = time.perf_counter()
+        obj = marshal.loads(data)
+        t2 = time.perf_counter()
+        del data
         if not isinstance(obj, dict) or obj.get("version") != VERSION or obj.get("key") != key:
             return None
         df, fz, names, offs = obj.get("df"), obj.get("fz"), obj.get("contributors"), obj.get("offsets")
