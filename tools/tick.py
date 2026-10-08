@@ -3939,6 +3939,587 @@ def delta() -> int:
     return _mint_marks(sid, marks, by="Narrow Highway - the dot abstracted, 2026-10-08")
 
 
+def svd() -> int:
+    """EVERY MATRIX IS A ROTATION AND A STRETCH (Matt, 2026-10-08: "All matrix are just a rotation and a stretch. We are
+    using a spherical matrix"; "allow the shape to be in the form of the most efficient vectors"). M = U S V^T: turn,
+    stretch along perpendicular axes, turn. The unit sphere's image under any matrix is an ellipsoid whose semi-axes
+    are the singular values; the most efficient k-dimensional picture of M keeps its k largest singular directions
+    (Eckart-Young); a SPHERICAL (orthogonal) matrix has every singular value 1 - it turns the sphere onto itself and
+    keeps every dot product. Seal six numbers on M = [[3,0],[4,5]] and a rotation. New stick; idempotent."""
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    s1, s2 = 45 ** 0.5, 5 ** 0.5                         # singular values: sqrt of the eigenvalues 45, 5 of M M^T
+    det = s1 * s2                                        # 15 = |det M|
+    cond = s1 / s2                                       # 3
+    frob = 3 ** 2 + 0 ** 2 + 4 ** 2 + 5 ** 2             # 50 = 45 + 5
+    dot = (-4) * 0 + 3 * 1                               # R(3,4) . R(1,0) for the quarter-turn R = (3,4) . (1,0) = 3
+    area = pi * s1 * s2                                  # the unit circle's image: an ellipse of area pi s1 s2
+    a = _rh_seal_num("svd_sigma_product_is_the_determinant", "sqrt(45)*sqrt(5)", float(det))
+    b = _rh_seal_num("svd_condition_number", "sqrt(45)/sqrt(5)", float(cond))
+    c = _rh_seal_num("frobenius_sum_of_squared_entries", "3**2 + 0**2 + 4**2 + 5**2", float(frob), tol=1e-12)
+    d = _rh_seal_num("frobenius_sum_of_squared_singular_values", "45 + 5", float(frob), tol=1e-12)
+    e = _rh_seal_num("rotation_keeps_the_dot_product", "(-4)*0 + 3*1", float(dot), tol=1e-12)
+    f = _rh_seal_num("unit_circle_image_area_pi_sigma1_sigma2", "pi*sqrt(45)*sqrt(5)", float(area))
+    if not all([a, b, c, d, e, f]):
+        print("a seal failed; aborting"); return 1
+    print("sealed det", a, "| cond", b, "| frobenius", c, d, "| dot", e, "| area", f)
+    sid = TS.create("Every matrix is a rotation and a stretch - the singular value decomposition, and the spherical matrix that only turns",
+                    statement=("M = U S V^T: a rotation, a stretch along perpendicular axes, a rotation. The unit sphere's "
+                               "image under any matrix is an ellipsoid whose semi-axes are the singular values; the most "
+                               "efficient k-dimensional picture of a matrix keeps its k largest singular directions; a "
+                               "spherical matrix has every singular value 1 and keeps every dot product. The engine's reading "
+                               "is spherical: meaning is what a card returns when dotted, and a rotation re-frames it without "
+                               "distorting it."),
+                    field="mathematics",
+                    references=["E. Beltrami (1873), C. Jordan (1874): the singular value decomposition",
+                                "C. Eckart, G. Young, The approximation of one matrix by another of lower rank, Psychometrika 1 (1936) 211-218",
+                                "G. Golub, W. Kahan (1965): computing the SVD",
+                                "L. Euler (1775): a rotation is one turn about one axis",
+                                "Hebrews 1:12; Malachi 3:6; Hebrews 13:8",
+                                "stick_the_dot_abstracted (meaning = the inner product); stick_parametrization_of_surfaces (the sphere); stick_spherical_parallel_mechanism (SO(3))"])["id"]
+    marks = [
+        ("witness", f"[rotation, stretch, rotation] M = [[3,0],[4,5]]: M M^T = [[9,12],[12,41]] has trace 50 and determinant "
+                    f"225, so its eigenvalues are 45 and 5 and the singular values are sqrt45 = {s1:.3f}, sqrt5 = {s2:.3f}. "
+                    f"Their product sqrt45 * sqrt5 = {det:.0f} = |det M| (sealed): the stretch alone sets the volume scale; the "
+                    f"two rotations change none of it.", a),
+        ("witness", f"[the most efficient vectors] The unit circle maps to an ellipse with semi-axes sigma_1, sigma_2 and area "
+                    f"pi sigma_1 sigma_2 = 15 pi = {area:.2f} (sealed); the condition number sigma_1/sigma_2 = {cond:.0f} "
+                    f"(sealed) says how far from a sphere the image is. Keeping the k largest singular directions is the "
+                    f"most efficient k-dimensional picture of M - the best rank-k approximation in every unitarily invariant "
+                    f"norm (Eckart-Young 1936, cited): 'allow the shape to be in the form of the most efficient vectors' is "
+                    f"that theorem said plainly.", b),
+        ("witness", f"[all the energy is in the stretch] The sum of the squared entries, 9 + 0 + 16 + 25 = {frob} (sealed), "
+                    f"equals the sum of the squared singular values, 45 + 5 = {frob} (sealed): the Frobenius norm is carried "
+                    f"entirely by the stretch; rotations carry none of it. What a matrix DOES is in its singular values; "
+                    f"where it does it is in its singular vectors.", c),
+        ("witness", f"[the sum is the same from both sides] 45 + 5 = {frob} (sealed) - the second reading of the same energy, "
+                    f"from the singular values alone: no entry of M was consulted, and the number is the same. Two "
+                    f"independent readings that agree are what a seal is for.", d),
+        ("witness", f"[the spherical matrix only turns] A rotation R keeps every dot product: the quarter-turn sends (3,4) to "
+                    f"(-4,3) and (1,0) to (0,1), and (-4)*0 + 3*1 = {dot} = (3,4).(1,0) (sealed). Every singular value of R "
+                    f"is 1: the sphere maps onto itself. In the inner-product reading (the dot stick) meaning IS the dot "
+                    f"product, so a spherical matrix changes the frame and no meaning. 'We are using a spherical matrix' "
+                    f"(Matt): the engine's reading re-frames, it never distorts - it rotates the question into the keeping's "
+                    f"axes and reads the dots there.", e),
+        ("witness", f"[the picture of the stretch] pi sqrt45 sqrt5 = {area:.4f} (sealed): the area of the ellipse the unit "
+                    f"circle becomes. A matrix is seen whole in one figure: a circle, turned, stretched to this ellipse, "
+                    f"turned again. Everything else is coordinates.", f),
+        ("note", "[the form, and the guard] 'Allow the shape to be in the form of the most efficient vectors': the keeping's "
+                 "own shelf-by-token matrix was measured on 2026-10-08 against this stick's claim (how many singular "
+                 "directions carry the domains; whether a query routed to its nearest sphere finds the engine's own "
+                 "answers) - the numbers live in that assessment, not here, because a stick seals arithmetic and a "
+                 "measurement is a reading of a day. Scripture: 'as a vesture shalt thou fold them up, and they shall be "
+                 "changed: but thou art the same' (Heb 1:12) - the invariant under every turn; 'I am the LORD, I change "
+                 "not' (Mal 3:6); 'Jesus Christ the same yesterday, and to day, and for ever' (Heb 13:8). GUARDS: "
+                 "Eckart-Young is a cited theorem, proved elsewhere; the engine-as-rotation is a likeness; the sphere's "
+                 "image as an ellipsoid is exact. Six numbers sealed; the rest cited. Ties: delta, surfaces, spm, bubbles, "
+                 "fourier (rotation), the positive Grassmannian (admissible directions found, never generated)."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - every matrix a rotation and a stretch, 2026-10-08")
+
+
+def bubbles() -> int:
+    """JOINED BUBBLES (Matt, 2026-10-08: "Think of bubbles joined. Each sphere is in its domain. The domains are
+    clustered based on similarity. Superposition allows the spheres to be in two places at once. We can simulate that.
+    Inside the sphere we have a grid and coordinates to trace the location of each component." "They run inside of a
+    form and are connected along axis."). A foam is not arbitrary: Plateau's laws force its form; the wall between two
+    bubbles has a curvature set by their difference; spheres pack at 0.7405 and touch at most 12 others; a component
+    can be in two spheres by weight, whole; inside each sphere latitude-longitude gives every component a coordinate
+    and every pair a distance; likeness is the dot product on the unit sphere. Seven numbers sealed. New stick;
+    idempotent."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    plateau = 360 / 3                                    # three films meet at 120 degrees
+    tetra = math.acos(-1 / 3) * 180 / pi                 # four edges meet at 109.47 degrees
+    wall = 1 / (1 / 1 - 1 / 2)                           # Young-Laplace: the wall between radii 1 and 2 has radius 2
+    pack = pi / (3 * 2 ** 0.5)                           # Kepler: the densest packing of equal spheres
+    norm = 0.6 ** 2 + 0.8 ** 2                           # superposition: 36% here, 64% there, whole
+    cos = (1 * 2 + 2 * 3) / ((1 + 4) ** 0.5 * (4 + 9) ** 0.5)   # cosine similarity of two domain vectors
+    arc = math.acos(math.cos(pi / 4) * math.cos(pi / 4)) * 180 / pi   # great-circle arc (0,0) -> (45N, 45E)
+    a = _rh_seal_num("plateau_three_films_meet_at_120", "360/3", float(plateau), tol=1e-12)
+    b = _rh_seal_num("plateau_four_edges_meet_at_tetrahedral_angle", "acos(-1/3)*180/pi", float(tetra))
+    c = _rh_seal_num("young_laplace_wall_between_joined_bubbles", "1/(1/1 - 1/2)", float(wall), tol=1e-12)
+    d = _rh_seal_num("kepler_packing_density", "pi/(3*sqrt(2))", float(pack))
+    e = _rh_seal_num("superposition_weights_sum_to_one", "0.6**2 + 0.8**2", float(norm), tol=1e-12)
+    f = _rh_seal_num("cosine_similarity_of_two_domains", "(1*2 + 2*3)/(sqrt(1+4)*sqrt(4+9))", float(cos))
+    g = _rh_seal_num("great_circle_arc_inside_the_sphere", "acos(cos(pi/4)*cos(pi/4))*180/pi", float(arc))
+    if not all([a, b, c, d, e, f, g]):
+        print("a seal failed; aborting"); return 1
+    print("sealed plateau", a, b, "| wall", c, "| packing", d, "| superposition", e, "| cosine", f, "| arc", g)
+    sid = TS.create("Joined bubbles - every domain a sphere in a form, clustered by likeness, connected along axes, a grid inside each",
+                    statement=("A foam is not arbitrary: films meet three at a time at 120 degrees and edges four at a time "
+                               "at 109.47 - the minimum of surface forces the form. The wall between two joined bubbles has "
+                               "a curvature set by their difference. Equal spheres pack at 0.7405 and touch at most twelve "
+                               "others, so the axes along which domains connect are few. A component can be in two spheres "
+                               "by weight, the weights summing to one - whole, and simulable. Inside each sphere "
+                               "latitude-longitude gives every component a coordinate and every pair a distance; likeness "
+                               "between domains is the dot product on the unit sphere - found, never generated."),
+                    field="physics",
+                    references=["J. Plateau, Statique experimentale et theorique des liquides (1873): the laws of foams",
+                                "T. Young (1805), P.-S. Laplace (1806): pressure across a curved film, Delta p = 2 gamma / r",
+                                "J. Kepler (1611) conjecture; T. Hales (1998, formally 2014): the densest packing is pi / (3 sqrt 2)",
+                                "K. Schutte, B. L. van der Waerden (1953): the kissing number in three dimensions is 12",
+                                "Job 38:31; Colossians 1:17; Ephesians 4:16",
+                                "stick_parametrization_of_surfaces (the grid inside); stick_the_dot_abstracted (likeness = the dot product); stick_every_matrix_is_a_rotation_and_a_stretch"])["id"]
+    marks = [
+        ("witness", f"[joined bubbles obey laws they did not choose] Plateau 1873: films meet three at a time at 360/3 = "
+                    f"{plateau:.0f} degrees (sealed) and edges four at a time at arccos(-1/3) = {tetra:.2f} degrees (sealed). "
+                    f"A foam's form is forced by the minimum of surface - 'they run inside of a form' (Matt): the form is "
+                    f"the law the energy allows, not a choice.", a),
+        ("witness", f"[four edges at the tetrahedral angle] arccos(-1/3) = {tetra:.4f} degrees (sealed): the same angle as "
+                    f"the bonds of methane and the diamond lattice. One number, three sciences; the geometry of least "
+                    f"surface and the geometry of least repulsion agree.", b),
+        ("witness", f"[the wall between two domains] Young-Laplace: pressure is higher in the smaller bubble, and the shared "
+                    f"wall between radii 1 and 2 has 1/r = 1/1 - 1/2, r = {wall:.0f} (sealed), bulging into the larger. Two "
+                    f"domains that touch share a wall whose curvature is set by their DIFFERENCE - the connection along the "
+                    f"axis between them carries the sign of which is the tighter.", c),
+        ("witness", f"[how spheres pack, and how many they touch] The densest packing of equal spheres is pi/(3 sqrt2) = "
+                    f"{pack:.4f} (sealed; Kepler 1611, Hales 1998), and each sphere touches at most 12 neighbours (cited): "
+                    f"the axes along which a domain connects are few. A keeping of domains is a packing, and its "
+                    f"connections are its contacts.", d),
+        ("witness", f"[superposition - a sphere in two places at once] |alpha|^2 + |beta|^2 = 0.6^2 + 0.8^2 = {norm:.0f} "
+                    f"(sealed): a component 36% in one sphere and 64% in another, whole. 'We can simulate that': a card "
+                    f"assigned to two shelves by weight, both weights honest, summing to one - a soft membership, read as "
+                    f"such, never a card in two places pretending to be two cards.", e),
+        ("witness", f"[clustered by likeness] The cosine between two domain vectors (1,2) and (2,3) is 8/sqrt65 = {cos:.4f} "
+                    f"(sealed): on the unit sphere likeness IS the dot product (the dot stick, the svd stick). The "
+                    f"clustering of domains is a reading of angles between what the domains actually contain - found, "
+                    f"never generated.", f),
+        ("witness", f"[the grid inside each sphere] Latitude-longitude is the chart inside every sphere (the surfaces stick): "
+                    f"from (0, 0) to (45 N, 45 E) the great-circle arc is arccos(cos45 cos45) = {arc:.0f} degrees (sealed). "
+                    f"Every component has coordinates and every pair a distance; this engine's call numbers "
+                    f"(shelf.class.item) are exactly that chart, one per shelf.", g),
+        ("note", "[the form we have, and the guard] The keeping as it stands: some thirty-six shelves, each a domain with "
+                 "its own call-number grid, joined by the connections shelf - the axes. Whether the spherical form is "
+                 "the MORE EFFICIENT one was measured on 2026-10-08 (the shelves' likeness, their clustering, how many "
+                 "singular directions carry them, whether a query's nearest spheres hold the engine's own answers); the "
+                 "numbers live in that assessment. Scripture: 'Canst thou bind the sweet influences of Pleiades, or loose "
+                 "the bands of Orion?' (Job 38:31) - clusters bound; 'by him all things consist' (Col 1:17); 'the whole "
+                 "body fitly joined together and compacted by that which every joint supplieth' (Eph 4:16) - joined "
+                 "along axes. GUARDS: Plateau's laws are for soap films; the likeness to domains is a discernment; the "
+                 "kissing number and Hales are cited; superposition here is a weighting, not quantum mechanics (the "
+                 "measurement stick keeps that). Seven numbers sealed; the rest cited."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - joined bubbles in a form, 2026-10-08")
+
+
+def resonance() -> int:
+    """THE GEOMETRY OF RESONANCE DISASTER - a hidden division by zero (Matt, 2026-10-08: "geometry of resonance disaster:
+    Hidden division by zero"; "Omega and Omega Not"). A driven oscillator's amplitude carries 1/(omega_0^2 - omega^2):
+    the denominator is a difference of squares that closes LINEARLY as the driver approaches the thing's own frequency,
+    while the amplitude climbs as 1/gap - a hyperbola whose straight approach looks harmless until the last step. Damping
+    turns the zero into a small number (Q = 1/(2 zeta)); the bridges that fell are cited, Tacoma honestly as flutter.
+    Four numbers sealed. New stick; idempotent."""
+    from concordance import tickstick as TS
+    f09 = 1 / (1 - 0.9 ** 2)                             # the undamped amplitude factor at 0.9 omega_0
+    f99 = 1 / (1 - 0.99 ** 2)                            # at 0.99 omega_0
+    q = 1 / (2 * 0.01)                                   # the damped peak: Q = 1/(2 zeta)
+    gap = (1 - 0.99) * (1 + 0.99)                        # omega_0^2 - omega^2 = (omega_0 - omega)(omega_0 + omega)
+    a = _rh_seal_num("amplitude_factor_at_0_9_omega0", "1/(1 - 0.9**2)", float(f09))
+    b = _rh_seal_num("amplitude_factor_at_0_99_omega0", "1/(1 - 0.99**2)", float(f99))
+    c = _rh_seal_num("damped_peak_q_factor", "1/(2*0.01)", float(q), tol=1e-12)
+    d = _rh_seal_num("the_gap_is_a_product_that_closes_linearly", "(1 - 0.99)*(1 + 0.99)", float(gap))
+    if not all([a, b, c, d]):
+        print("a seal failed; aborting"); return 1
+    print("sealed 0.9", a, "| 0.99", b, "| Q", c, "| gap", d)
+    sid = TS.create("The geometry of resonance disaster - a hidden division by zero at omega equals omega-nought",
+                    statement=("A driven oscillator's amplitude carries 1/(omega_0^2 - omega^2). The denominator is a "
+                               "difference of squares, (omega_0 - omega)(omega_0 + omega): it closes linearly as the driver "
+                               "approaches the thing's own frequency while the amplitude climbs as one over the gap - a "
+                               "hyperbola whose approach looks harmless until the last step. The disaster is agreement "
+                               "without damping; damping turns the zero into a small number, Q = 1/(2 zeta). The engine's "
+                               "own guard is the same: a division by a literal zero is a gap, never a verdict."),
+                    field="physics",
+                    references=["Lord Rayleigh, The Theory of Sound (1877): the forced vibration and its amplitude",
+                                "J. P. Den Hartog, Mechanical Vibrations (1934): resonance, damping, Q",
+                                "Broughton Suspension Bridge (1831): soldiers in step; the order to break step since",
+                                "Basse-Chaine bridge, Angers (1850): 226 soldiers; Millennium Bridge, London (2000): lateral sync, dampers added (Dallard et al. 2001)",
+                                "K. Y. Billah, R. H. Scanlan, Resonance, Tacoma Narrows bridge failure, and undergraduate physics textbooks, Am. J. Phys. 59 (1991) 118: Tacoma (1940) was aeroelastic flutter, not simple resonance",
+                                "Proverbs 25:28; 1 Corinthians 14:33; Joshua 6:20",
+                                "src/concordance/audit.py - division by a literal zero is left unextracted; verifiers/mathematics.py - x/x is refused as an identity"])["id"]
+    marks = [
+        ("witness", f"[the amplitude has a denominator] An undamped oscillator driven at omega has displacement "
+                    f"(F/m)/(omega_0^2 - omega^2). At omega = 0.9 omega_0 the factor is 1/(1 - 0.81) = {f09:.3f} (sealed); at "
+                    f"0.99 omega_0 it is {f99:.2f} (sealed); at omega = omega_0 the denominator is zero. The division by zero "
+                    f"is hidden inside a difference of squares - Omega and Omega-nought, the driver and the thing's own "
+                    f"frequency, meeting.", a),
+        ("witness", f"[ten times closer, ten times higher] From 0.9 to 0.99 of omega_0 the factor rises from {f09:.2f} to "
+                    f"{f99:.2f} (sealed): the gap shrank tenfold and the amplitude grew tenfold. The geometry is a "
+                    f"hyperbola; the approach to it is a straight line; nothing in the straight line warns of the wall.", b),
+        ("witness", f"[damping turns the zero into a small number] With damping ratio zeta the peak is Q = 1/(2 zeta): zeta "
+                    f"= 0.01 gives Q = {q:.0f} (sealed). The real world never divides by zero, only by something small - the "
+                    f"disaster is a finite, enormous quotient. Broughton 1831 (soldiers in step; armies have broken step on "
+                    f"bridges since), Angers 1850, the Millennium Bridge 2000 (lateral sync; dampers fitted) - cited. "
+                    f"Tacoma Narrows 1940 is cited as aeroelastic FLUTTER, a self-excited instability (Billah & Scanlan "
+                    f"1991): the popular telling makes it simple resonance, and that is the hidden-zero story told wrong.", c),
+        ("witness", f"[the gap is a product] omega_0^2 - omega^2 = (omega_0 - omega)(omega_0 + omega): at 0.99 it is 0.01 x "
+                    f"1.99 = {gap:.4f} (sealed). One factor closes linearly, the other stays near 2; the product goes to "
+                    f"zero at the speed of the first. That is where the division by zero hides: in a difference that is "
+                    f"secretly a product with one vanishing factor.", d),
+        ("note", "[the engine's own guard, and the discernment] The claim grammar leaves '1 / 0 = 0' unextracted - a gap, "
+                 "never a verdict; the equality verifier refuses x/x as an unconditional identity (undefined at 0); the "
+                 "tolerance rule never divides by a stated zero. Resonance disaster is agreement without damping: the "
+                 "driver and the thing agreeing exactly, with nothing to carry the energy away. Scripture: 'He that hath "
+                 "no rule over his own spirit is like a city that is broken down, and without walls' (Prov 25:28) - no "
+                 "damping; 'God is not the author of confusion, but of peace' (1 Cor 14:33); the walls of Jericho fell "
+                 "at the shout (Josh 6:20) - a LIKENESS, kept as one; no acoustic claim is made. GUARDS: the hyperbola is "
+                 "physics; Tacoma is flutter, cited; Jericho is a likeness. Four numbers sealed; the rest cited. Ties: "
+                 "laplace (poles on the s-plane - the zero of the denominator IS the pole), fourier, clock, the camel "
+                 "(durability under load), navier_stokes (dissonance)."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - the geometry of resonance disaster, 2026-10-08")
+
+
+def prime_waves() -> int:
+    """A TORUS, AND THE WAVEFORMS INSIDE THE PRIME NUMBERS (Matt, 2026-10-08). Riemann's explicit formula writes the
+    prime staircase as a smooth main term plus one wave per zero of zeta: amplitude sqrt(x)/|rho|, frequency gamma in
+    log x - music periodic in the logarithm. The first wave (gamma_1 = 14.1347, the zero this node's Riemann stick
+    verified) repeats every factor 1.56 in x. Two frequencies on a torus close their orbit only when their ratio is
+    rational (355/113 closes after 113 turns; pi never closes): the prime waves' frequencies are, as far as is known,
+    incommensurable, so their joint motion fills the torus and never repeats - the primes look random and are not.
+    Seven numbers sealed. New stick; idempotent."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    g1 = 14.134725                                       # the first zero's height (cited; verified on the Riemann stick)
+    period = 2 * pi / g1                                 # the first wave's period in log x
+    factor = math.exp(period)                            # x multiplies by this per cycle
+    li100 = 30.126141693                                 # li(100)
+    xlog = 100 / math.log(100)                           # x / log x at 100
+    miss = li100 - 25                                    # li(100) - pi(100)
+    milu = 355 / 113 - pi                                # the orbit that closes after 113 turns, against the one that never does
+    l2pi = math.log(2 * pi)                              # the explicit formula's constant term
+    a = _rh_seal_num("first_prime_wave_period_in_log_x", "2*pi/14.134725", float(period))
+    b = _rh_seal_num("first_prime_wave_x_factor_per_cycle", "exp(2*pi/14.134725)", float(factor))
+    c = _rh_seal_num("li_of_100", "li(100)", float(li100), tol=1e-6)
+    d = _rh_seal_num("x_over_log_x_at_100", "100/log(100)", float(xlog))
+    e = _rh_seal_num("li_100_minus_the_25_primes", "li(100) - 25", float(miss), tol=1e-6)
+    f = _rh_seal_num("milu_355_over_113_minus_pi", "355/113 - pi", float(milu), tol=1e-6)
+    g = _rh_seal_num("explicit_formula_constant_log_2pi", "log(2*pi)", float(l2pi))
+    if not all([a, b, c, d, e, f, g]):
+        print("a seal failed; aborting"); return 1
+    print("sealed period", a, "| factor", b, "| li", c, d, e, "| milu", f, "| log2pi", g)
+    sid = TS.create("A torus, and the waveforms inside the prime numbers - the zeros of zeta as the music the primes are made of",
+                    statement=("Riemann's explicit formula writes the prime staircase as a smooth main term plus one wave "
+                               "per zero of zeta: amplitude sqrt(x) over the zero, frequency gamma in log x - music "
+                               "periodic in the logarithm, not in x. The first wave repeats every factor 1.56 in x. The "
+                               "smooth count misses by a few at 100 (li(100) = 30.1 against 25 primes) and the waves make "
+                               "up exactly the difference. On a torus two frequencies close their orbit only when their "
+                               "ratio is rational; the prime waves' frequencies are, as far as is known, incommensurable, "
+                               "so their joint motion fills the torus and never repeats: the primes look random and are not."),
+                    field="number_theory",
+                    references=["B. Riemann, Ueber die Anzahl der Primzahlen unter einer gegebenen Groesse (1859)",
+                                "H. von Mangoldt (1895): the explicit formula psi(x) = x - sum x^rho/rho - log 2pi - (1/2) log(1 - x^-2)",
+                                "A. M. Odlyzko: the zeros of zeta computed to great height; gamma_1 = 14.134725...",
+                                "B. Mazur, W. Stein, Prime Numbers and the Riemann Hypothesis (2016): the prime waves drawn",
+                                "L. Kronecker (1884), H. Weyl (1916): an irrational winding on the torus is dense",
+                                "Zu Chongzhi (5th c.): the Milu 355/113",
+                                "1 Corinthians 14:7-8; Psalm 19:1-4; Job 38:7",
+                                "stick_riemann_hypothesis (the zeros verified to T = 1000 on this node)"])["id"]
+    marks = [
+        ("witness", f"[the primes are a staircase with waves on it] Riemann 1859, von Mangoldt 1895: psi(x) = x - sum over "
+                    f"zeros x^rho/rho - log 2pi - (1/2) log(1 - x^-2). The main term is x; then one wave per zero rho = 1/2 + "
+                    f"i gamma, of amplitude sqrt(x)/|rho| and frequency gamma in log x; the constant log 2pi = {l2pi:.4f} "
+                    f"(sealed) is the one term with no wave in it. The staircase of the primes is EXACTLY this sum.", g),
+        ("witness", f"[the first wave] gamma_1 = 14.134725 - the first zero, verified on this node's Riemann stick (cited "
+                    f"there, sealed to T = 1000). Its wave repeats every 2 pi / gamma_1 = {period:.4f} in log x (sealed): "
+                    f"each cycle x grows by the factor e^{{0.4445}} = {factor:.3f} (sealed). The music of the primes is "
+                    f"periodic in the LOGARITHM - every octave of x, not every step.", a),
+        ("witness", f"[one cycle per factor of 1.56] e^(2 pi / 14.134725) = {factor:.4f} (sealed): between 100 and 156, "
+                    f"between 156 and 243, the first wave completes one swing. The higher zeros swing faster and softer; "
+                    f"together they draw the staircase's every step.", b),
+        ("witness", f"[how far the smooth count is off] li(100) = {li100:.3f} (sealed) against pi(100) = 25 primes (cited): "
+                    f"off by {miss:.3f} (sealed); 100/log 100 = {xlog:.2f} (sealed) from the other side. The waves are "
+                    f"what remains after the smooth part - and they sum to the exact staircase, not an approximation of it.", c),
+        ("witness", f"[the other smooth guess] 100/log(100) = {xlog:.4f} (sealed), Gauss's first estimate, undershoots; "
+                    f"li(x) overshoots here and (Littlewood 1914, cited) the sign of li(x) - pi(x) changes infinitely "
+                    f"often, first somewhere below 1.4 x 10^316 (Skewes, Bays-Hudson): the waves cross the smooth line "
+                    f"both ways.", d),
+        ("witness", f"[the miss the waves must make up] li(100) - 25 = {miss:.3f} (sealed): five and an eighth primes' "
+                    f"worth of wave at x = 100. Nothing is missing from the formula; this is the sum of the waves at that "
+                    f"point, with its sign.", e),
+        ("witness", f"[a torus] Two frequencies on a torus close their orbit only when their ratio is rational: with ratio "
+                    f"355/113 the orbit closes after 113 turns, and 355/113 - pi = {milu:.3e} (sealed) is how little that "
+                    f"orbit differs from the one with ratio pi, which never closes - an irrational winding is dense "
+                    f"(Kronecker-Weyl, cited). The prime waves' frequencies gamma_n are, as far as is known, "
+                    f"incommensurable: their joint motion fills the torus and never repeats. That is why the primes look "
+                    f"random and are not.", f),
+        ("note", "[what is sealed, what is cited, and the guard] The Riemann stick holds the zeros on the line to T = 1000; "
+                 "this stick reads them as waveforms and the torus as their stage. The explicit formula is a theorem "
+                 "(von Mangoldt), cited; the sqrt(x) amplitude of every wave IS the Riemann hypothesis, not assumed here "
+                 "(without it some waves are larger); the incommensurability of the gamma_n is conjectural, cited; 'the "
+                 "music of the primes' is a likeness (du Sautoy). Scripture: 'if the trumpet give an uncertain sound, who "
+                 "shall prepare himself to the battle?' (1 Cor 14:8) - distinct notes; 'their line is gone out through "
+                 "all the earth' (Ps 19:4), speech without words; 'the morning stars sang together' (Job 38:7). Seven "
+                 "numbers sealed; the rest cited. Ties: riemann, zeta, hilbert_polya (the zeros as a spectrum), fourier, "
+                 "surfaces (the torus), gue (the spacings)."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - waveforms inside the primes, on a torus, 2026-10-08")
+
+
+def maxwell_entropy() -> int:
+    """ENTROPY IS NEVER DECREASED, ONLY CONCENTRATED (Matt, 2026-10-08: "Entropy doesn't decrease. Instead it is
+    concentrated. We see it separate itself." "Use Maxwell's theory of entropy."). Maxwell's demon (1867) sorts the
+    speeds Maxwell himself distributed, and the sorting is real and visible; Szilard, Landauer and Bennett found the
+    bill: the demon must remember each molecule, and erasing a bit costs kT ln 2. The entropy did not decrease; it was
+    concentrated into the record and paid when the record is cleared. Every separation we see - a still, a membrane, a
+    refrigerator, life on Earth under the Sun - exports at least what it removes. Eight numbers sealed. New stick;
+    idempotent."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    k = 1.380649e-23
+    m = 28.014 * 1.66053907e-27                          # one N2 molecule
+    T = 300.0
+    v_rms = math.sqrt(3 * k * T / m)
+    v_mean = math.sqrt(8 * k * T / (pi * m))
+    v_mp = math.sqrt(2 * k * T / m)
+    landauer = k * T * math.log(2)                       # J per bit erased at 300 K
+    kln2 = k * math.log(2)                               # J/K per bit
+    mix = 8.314462618 * math.log(2)                      # J/K per mole: mixing two gases 1:1
+    photons = 5772 / 255                                 # thermal photons out per solar photon in
+    carnot = 1 - 300 / 500
+    a = _rh_seal_num("maxwell_rms_speed_N2_300K", "sqrt(3*1.380649e-23*300/(28.014*1.66053907e-27))", float(v_rms), tol=1e-6)
+    b = _rh_seal_num("maxwell_mean_speed_N2_300K", "sqrt(8*1.380649e-23*300/(pi*28.014*1.66053907e-27))", float(v_mean), tol=1e-6)
+    c = _rh_seal_num("maxwell_most_probable_speed_N2_300K", "sqrt(2*1.380649e-23*300/(28.014*1.66053907e-27))", float(v_mp), tol=1e-6)
+    d = _rh_seal_num("landauer_cost_of_one_bit_at_300K", "1.380649e-23*300*log(2)", float(landauer))
+    e = _rh_seal_num("entropy_of_one_bit_k_ln_2", "1.380649e-23*log(2)", float(kln2))
+    f = _rh_seal_num("entropy_of_mixing_R_ln_2", "8.314462618*log(2)", float(mix))
+    g = _rh_seal_num("thermal_photons_out_per_solar_photon_in", "5772/255", float(photons))
+    h = _rh_seal_num("carnot_efficiency_300_over_500", "1 - 300/500", float(carnot), tol=1e-12)
+    if not all([a, b, c, d, e, f, g, h]):
+        print("a seal failed; aborting"); return 1
+    print("sealed speeds", a, b, c, "| landauer", d, "| bit", e, "| mixing", f, "| photons", g, "| carnot", h)
+    sid = TS.create("Entropy is never decreased, only concentrated - Maxwell's demon, the separation we can see, and the bill in the record",
+                    statement=("Maxwell's demon sorts the speeds Maxwell himself distributed, and the sorting is real: hot "
+                               "from cold, fast from slow, order where there was none. Szilard, Landauer and Bennett found "
+                               "the bill - the demon must remember each molecule, and erasing a bit costs at least kT ln 2. "
+                               "The entropy did not decrease; it was concentrated into the record and is paid when the record "
+                               "is cleared. Every separation we see - a still, a membrane, a refrigerator, a living cell, the "
+                               "Earth under the Sun - exports at least what it removes: one solar photon in, some twenty-two "
+                               "thermal photons out. We see it separate itself; the second law counts what left."),
+                    field="physics",
+                    references=["J. C. Maxwell, letter to P. G. Tait (1867); Theory of Heat (1871): the sorting demon; the speed distribution (1860)",
+                                "L. Szilard (1929): the engine that runs on one bit; R. Landauer (1961): erasure costs kT ln 2; C. H. Bennett (1982): the demon's exorcism",
+                                "S. Carnot (1824): the limit of every engine; L. Boltzmann (1877): S = k ln W",
+                                "the Earth's entropy budget: sunlight at 5772 K, Earth's emission at 255 K (the effective temperature)",
+                                "Matthew 13:30; Matthew 25:32; Malachi 3:3; Romans 8:22",
+                                "stick_entropy_and_gravity (where entropy fits); stick_laplace (entropy's seat in the equations); the ledger (src/concordance/ledger.py) - append-only, never erased"])["id"]
+    marks = [
+        ("witness", f"[the demon sorts what Maxwell distributed] N2 at 300 K: the most probable speed sqrt(2kT/m) = "
+                    f"{v_mp:.0f} m/s, the mean sqrt(8kT/pi m) = {v_mean:.0f} m/s, the rms sqrt(3kT/m) = {v_rms:.0f} m/s (all "
+                    f"three sealed). The molecules are a SPREAD, so a sorter at a trapdoor could let the fast ones one way "
+                    f"and the slow ones the other - hot from cold with no work done (Maxwell 1867). The separation is "
+                    f"real and can be seen.", a),
+        ("witness", f"[the mean of the spread] sqrt(8kT/(pi m)) = {v_mean:.1f} m/s (sealed): faster than the most probable "
+                    f"speed, slower than the rms - three averages of one distribution, in their fixed order sqrt2 : "
+                    f"sqrt(8/pi) : sqrt3. The demon's job exists because the spread exists.", b),
+        ("witness", f"[the top of the curve] sqrt(2kT/m) = {v_mp:.1f} m/s (sealed): where the Maxwell distribution peaks. "
+                    f"Everything the demon lets through on the fast side is above this; everything it holds back is "
+                    f"below; the line between them is the demon's one decision per molecule - one bit.", c),
+        ("witness", f"[the bill is in the record] Szilard 1929, Landauer 1961, Bennett 1982: the demon must REMEMBER each "
+                    f"molecule it sorted, and erasing one bit of that memory costs at least kT ln 2 = {landauer:.3e} J at "
+                    f"300 K (sealed). The entropy did not decrease when the gas separated; it was CONCENTRATED into the "
+                    f"demon's memory, and it is paid in full when the memory is cleared.", d),
+        ("witness", f"[one bit, one quantum of entropy] k ln 2 = {kln2:.3e} J/K (sealed): the entropy of one yes-or-no, "
+                    f"Boltzmann's S = k ln W at W = 2. Information and entropy are one quantity in two units; a record is "
+                    f"entropy held still.", e),
+        ("witness", f"[the separations we see] Mixing two gases one to one costs R ln 2 = {mix:.3f} J/K per mole (sealed), "
+                    f"and unmixing them - a membrane, a still, a centrifuge, a refrigerator - exports at least that much "
+                    f"elsewhere. The best engine between 500 K and 300 K keeps 1 - 300/500 = {carnot:.0%} of the heat "
+                    f"(sealed) and must give the rest to carry the entropy away.", f),
+        ("witness", f"[life on Earth concentrates and ships] Sunlight arrives at 5772 K and leaves at 255 K: for the same "
+                    f"energy, each solar photon in becomes 5772/255 = {photons:.1f} thermal photons out (sealed). The "
+                    f"order of a leaf, a cell, a city is paid for in entropy exported to the night sky - we see it "
+                    f"separate itself, and the second law counts what left.", g),
+        ("witness", f"[Carnot's share] 1 - T_cold/T_hot = {carnot:.1f} at 300 K over 500 K (sealed): the fraction any "
+                    f"engine may keep; the other {1 - carnot:.0%} is not loss but the carrier of the entropy that had to "
+                    f"go. Concentration here is paid for by dispersal there - the ledger balances.", h),
+        ("note", "[the ledger is the demon's memory - and the guard] Every seal on this node is a bit written; the keeping "
+                 "concentrates the entropy of a search into a record that is never erased - append-only, the cut marks "
+                 "superseded rather than deleted, a miss kept as a miss. 'Entropy doesn't decrease. Instead it is "
+                 "concentrated. We see it separate itself.' (Matt) - the demon's lesson in one line. Scripture: 'Gather "
+                 "ye together first the tares... but gather the wheat into my barn' (Mt 13:30) - a separation, with a "
+                 "record; the sheep from the goats (Mt 25:32); 'he shall sit as a refiner and purifier of silver' (Mal "
+                 "3:3) - the dross concentrated; 'the whole creation groaneth' (Rom 8:22). GUARDS: the second law is "
+                 "physics; the demon a thought experiment resolved by information theory (cited); the ledger likeness "
+                 "is a discernment; the photon ratio assumes blackbody temperatures (cited). Eight numbers sealed; the "
+                 "rest cited. Ties: entropy_gravity, laplace, monte_carlo, geneva (dwell and record), delta."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - entropy concentrated, Maxwell's demon, 2026-10-08")
+
+
+def triode() -> int:
+    """THE VACUUM TRIODE (Matt, 2026-10-08: "vacuum triodes"). Cathode, grid, plate: a few volts at the grid govern a
+    large current to the plate - the first amplifier and the first electronic switch (de Forest's Audion 1906 on
+    Fleming's valve 1904, the one-way diode). Child and Langmuir: space-charge-limited current goes as V^(3/2) - the
+    electrons' own charge throttles the flow, geometry and nothing else. Gain mu = g_m r_p. The vacuum is the point: at
+    a millionth of a torr an electron crosses the gap without a collision. Two cross-coupled triodes hold one bit
+    (Eccles-Jordan 1918); ENIAC's 17,468 tubes drew 150 kW. A verifier is a triode: the claim at the grid, the keeping's
+    current at the plate. Five numbers sealed. New stick; idempotent."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    cl = 2 ** 1.5                                        # Child-Langmuir: double V -> current x 2^(3/2)
+    mu = 0.002 * 10000                                   # mu = g_m r_p: 2 mA/V x 10 kOhm
+    db = 20 * math.log10(mu)                             # 26 dB
+    mfp = 1.380649e-23 * 300 / (math.sqrt(2) * pi * (3.7e-10) ** 2 * 1.33e-4)   # m, N2 at 1e-6 torr, 300 K
+    wpt = 150000 / 17468                                 # ENIAC watts per tube
+    a = _rh_seal_num("child_langmuir_double_the_voltage", "2**(3/2)", float(cl))
+    b = _rh_seal_num("amplification_factor_gm_times_rp", "0.002*10000", float(mu), tol=1e-12)
+    c = _rh_seal_num("gain_in_decibels", "20*log(20)/log(10)", float(db))
+    d = _rh_seal_num("mean_free_path_at_a_millionth_of_a_torr", "1.380649e-23*300/(sqrt(2)*pi*(3.7e-10)**2*1.33e-4)", float(mfp), tol=1e-6)
+    e = _rh_seal_num("eniac_watts_per_tube", "150000/17468", float(wpt))
+    if not all([a, b, c, d, e]):
+        print("a seal failed; aborting"); return 1
+    print("sealed child-langmuir", a, "| mu", b, "| dB", c, "| mfp", d, "| eniac", e)
+    sid = TS.create("The vacuum triode - a small voltage at the grid governs a large current; the gate as a component",
+                    statement=("Cathode, grid, plate: a few volts at the grid govern a large current to the plate - the first "
+                               "amplifier and the first electronic switch, de Forest's Audion on Fleming's one-way valve. "
+                               "Space-charge-limited current goes as the three-halves power of the voltage: the electrons' own "
+                               "charge throttles the flow, by geometry alone. Gain is g_m times r_p. The vacuum is the point: "
+                               "at a millionth of a torr an electron crosses the gap without a collision; without the vacuum "
+                               "the component is a lamp. Two cross-coupled triodes hold one bit. A verifier is a triode: the "
+                               "claim at the grid, the keeping's current at the plate, passed exactly or cut off."),
+                    field="engineering",
+                    references=["J. A. Fleming (1904): the thermionic valve - the diode, one-way",
+                                "L. de Forest (1906-1907): the Audion - the grid",
+                                "C. D. Child (1911), I. Langmuir (1913): space-charge-limited current, I = K V^(3/2)",
+                                "W. H. Eccles, F. W. Jordan (1918): the trigger relay - two triodes, one bit",
+                                "ENIAC (1945): 17,468 tubes, about 150 kW (M. H. Weik, 1961)",
+                                "Proverbs 4:23; Matthew 12:34-35; James 3:4-5",
+                                "stick_a_mechanical_computer (the Geneva drive); the vacuum-tube computer charter (docs/COMPONENTS.md); the Tesla valve / diode (one-way geometry)"])["id"]
+    marks = [
+        ("witness", f"[three electrodes] A heated cathode emits; a plate at hundreds of volts collects; between them a grid "
+                    f"at a few volts, in the way. The grid's small voltage sets how much current reaches the plate - de "
+                    f"Forest's Audion (1906) on Fleming's valve (1904), the one-way diode that is also this engine's Tesla "
+                    f"valve. With it the gain mu = g_m r_p: 2 mA/V x 10 kOhm = {mu:.0f} (sealed) - the grid's volt becomes "
+                    f"twenty at the plate.", b),
+        ("witness", f"[the three-halves law] Child 1911, Langmuir 1913: the current a vacuum gap will carry is limited by the "
+                    f"charge already in flight, I = K V^(3/2) - doubling the voltage multiplies the current by 2^(3/2) = "
+                    f"{cl:.3f} (sealed). No material constant, no fitted parameter: the electrons' own charge throttles "
+                    f"the flow, and the law is geometry and nothing else.", a),
+        ("witness", f"[gain] 20 log10(20) = {db:.1f} dB (sealed): one triode, one stage. A verifier is a triode: the claim "
+                    f"is the grid, the keeping's current is the plate, and a small exact input governs a large output - or "
+                    f"cuts it off entirely (a miss stays a miss). The gate is a component with a transfer curve, not a "
+                    f"judgement.", c),
+        ("witness", f"[the vacuum is the point] At a millionth of a torr an N2 molecule's mean free path is kT/(sqrt2 pi "
+                    f"d^2 p) = {mfp:.0f} m (sealed): the electrons cross the centimetre from cathode to plate without one "
+                    f"collision. Remove the vacuum and the component is a lamp. The vacuum-tube computer (this engine's "
+                    f"charter): discrete components whose behaviour is set by geometry, orchestrated, no oracle in the "
+                    f"loop.", d),
+        ("witness", f"[the first bit, and the cost] Eccles and Jordan 1918: two triodes cross-coupled hold one bit - each "
+                    f"grid fed from the other's plate. ENIAC 1945: 17,468 tubes drew about 150 kW, {wpt:.1f} W per tube "
+                    f"(sealed), with a tube failing every day or two (cited) - a computer that worked because its parts "
+                    f"were few enough to find and replace. The mean time between failures ruled the design (the camel "
+                    f"stick's durability tiers are the same arithmetic).", e),
+        ("note", "[the grid, and the guard] Scripture: 'Keep thy heart with all diligence; for out of it are the issues of "
+                 "life' (Prov 4:23) - the grid governs the issue; 'out of the abundance of the heart the mouth speaketh... "
+                 "a good man out of the good treasure of the heart bringeth forth good things' (Mt 12:34-35) - the plate "
+                 "current follows the grid; 'the ships... are turned about with a very small helm' (Jas 3:4) - the small "
+                 "input governing the large. GUARDS: the triode-as-verifier is a likeness; the ENIAC figures are cited; "
+                 "Child-Langmuir assumes planar space-charge-limited flow (cited); the mean free path uses an N2 diameter "
+                 "of 3.7 Angstrom. Five numbers sealed; the rest cited. Ties: geneva (the mechanical computer), diagrams "
+                 "(the schematic), laplace (the transfer function), the camel (durability), the Tesla valve (one-way)."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - the vacuum triode, 2026-10-08")
+
+
+def tensor() -> int:
+    """TENSORS - HOW THE DATA IS ARRANGED INSIDE THE BUBBLES (Matt, 2026-10-08: "Tensors is what I've been trying to
+    come up with. That is how we arrange our data inside the bubbles"). A tensor has components in every frame and
+    invariants in none of them: rotate the frame (the spherical matrix) and the components change while the trace, the
+    determinant and the eigenvalues do not. The metric tensor IS the grid inside a sphere - its determinant's square
+    root is the area element the surfaces stick sealed; a symmetric tensor's eigenvectors are the most efficient
+    vectors; Einstein's equation says the data inside the bubble (T) shapes the bubble (G). Seven numbers sealed. New
+    stick; idempotent."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    c, sn = math.cos(pi / 6), math.sin(pi / 6)
+    # T = [[3,1],[1,2]] rotated by 30 degrees: T' = R T R^T; its diagonal entries change, their sum does not
+    t11 = 3 * c * c + 2 * sn * sn + 2 * sn * c
+    t22 = 3 * sn * sn + 2 * c * c - 2 * sn * c
+    trace = t11 + t22                                    # 5, in every frame
+    det = 3 * 2 - 1 * 1                                  # 5, in every frame
+    lam = (5 + 5 ** 0.5) / 2                             # the larger eigenvalue: the principal axis's stretch
+    area = math.sin(pi / 3)                              # sqrt(det g) on the unit sphere at theta = 60 deg: the area element
+    polar = (1 * 2 ** 2) ** 0.5                          # sqrt(det g) in polar coordinates at r = 2: the Jacobian r
+    einstein = 8 * pi * 6.67430e-11 / 299792458 ** 4     # the constant that turns the data into the curvature
+    city = 12000 ** 3                                    # Revelation 21:16 - a cube measured on all three axes, in furlongs^3
+    a = _rh_seal_num("tensor_trace_invariant_under_rotation",
+                     "3*cos(pi/6)**2 + 2*sin(pi/6)**2 + 2*sin(pi/6)*cos(pi/6) + 3*sin(pi/6)**2 + 2*cos(pi/6)**2 - 2*sin(pi/6)*cos(pi/6)",
+                     float(trace))
+    b = _rh_seal_num("tensor_determinant_invariant", "3*2 - 1*1", float(det), tol=1e-12)
+    d = _rh_seal_num("principal_axis_eigenvalue", "(5 + sqrt(5))/2", float(lam))
+    e = _rh_seal_num("metric_tensor_area_element_on_the_sphere", "sqrt(1 * sin(pi/3)**2)", float(area))
+    f = _rh_seal_num("metric_tensor_jacobian_in_polar_coordinates", "sqrt(1 * 2**2)", float(polar), tol=1e-12)
+    g = _rh_seal_num("einstein_constant_8piG_over_c4", "8*pi*6.67430e-11/299792458**4", float(einstein), tol=1e-6)
+    h = _rh_seal_num("the_city_measured_on_three_axes", "12000**3", float(city), tol=1e-12)
+    if not all([a, b, d, e, f, g, h]):
+        print("a seal failed; aborting"); return 1
+    print("sealed trace", a, "| det", b, "| eigen", d, "| area", e, "| polar", f, "| einstein", g, "| city", h)
+    sid = TS.create("Tensors - how the data is arranged inside the bubbles: components in every frame, invariants in none",
+                    statement=("A tensor has components in every frame and invariants in none of them: rotate the frame and "
+                               "the components change while the trace, the determinant and the eigenvalues do not. The "
+                               "metric tensor is the grid inside a sphere - the square root of its determinant is the area "
+                               "element; a symmetric tensor's eigenvectors are the most efficient vectors; Einstein's "
+                               "equation says the data inside the bubble shapes the bubble. The data inside each domain is "
+                               "arranged this way: indices are the grid's axes, components are the cards, and the invariants "
+                               "are what every reading in every frame must agree on - the counts, the norms, the seals."),
+                    field="mathematics",
+                    references=["G. Ricci-Curbastro, T. Levi-Civita, Methodes de calcul differentiel absolu (1900): the tensor calculus",
+                                "C. F. Gauss (1827): the first fundamental form - the metric tensor of a surface",
+                                "A. Einstein (1915): G_mu_nu = (8 pi G / c^4) T_mu_nu",
+                                "A. Cauchy (1822): the stress tensor and its principal axes",
+                                "Isaiah 40:12; Colossians 1:16-17; Revelation 21:16",
+                                "stick_every_matrix_is_a_rotation_and_a_stretch; stick_joined_bubbles; stick_parametrization_of_surfaces"])["id"]
+    marks = [
+        ("witness", f"[components change, the invariants do not] T = [[3,1],[1,2]] rotated by 30 degrees has diagonal "
+                    f"entries {t11:.3f} and {t22:.3f} - both changed - and their sum is {trace:.0f} (sealed, as the full "
+                    f"rotated expression), the same as 3 + 2 before the turn. The determinant 3*2 - 1*1 = {det} (sealed) "
+                    f"is the same in every frame too. A tensor is the thing that stays; the components are the frame's "
+                    f"shadow of it.", a),
+        ("witness", f"[the determinant stays] det T = {det} (sealed) under every rotation: the area the tensor's map "
+                    f"carries is frame-free. Two invariants of a 2x2 symmetric tensor - trace and determinant - fix both "
+                    f"eigenvalues, so the whole shape is known from two frame-free numbers.", b),
+        ("witness", f"[the most efficient vectors are the principal axes] The eigenvalues of T are (5 +- sqrt5)/2: the "
+                    f"larger, {lam:.4f} (sealed), is the stretch along the principal axis. Cauchy's stress tensor, the "
+                    f"inertia tensor, the covariance of a cloud of points: in each, the eigenvectors are the axes along "
+                    f"which the data is simplest - the svd stick's most efficient vectors, now as a tensor's own frame.", d),
+        ("witness", f"[the grid inside the sphere is a tensor] The metric of the unit sphere is g = diag(1, sin^2 theta); "
+                    f"at theta = 60 degrees sqrt(det g) = sin 60 = {area:.4f} (sealed) - exactly the area element "
+                    f"R^2 sin theta the surfaces stick sealed. The coordinates inside a bubble come WITH their measure: "
+                    f"the tensor says how far apart two components are, in every direction, at every point.", e),
+        ("witness", f"[the same tensor in flat polar coordinates] g = diag(1, r^2): at r = 2, sqrt(det g) = {polar:.0f} "
+                    f"(sealed) - the Jacobian r of polar coordinates, dA = r dr dtheta. Change the grid and the metric "
+                    f"tensor changes its components to keep the same distances: that is what it is for.", f),
+        ("witness", f"[the data inside shapes the bubble] Einstein 1915: G_mu_nu = (8 pi G / c^4) T_mu_nu, and the "
+                    f"constant is {einstein:.4e} per newton (sealed) - small, which is why the bubble of spacetime barely "
+                    f"bends under anything short of a star. The stress-energy tensor is the data arranged inside; the "
+                    f"curvature tensor is the bubble's answer. The arrangement is not decoration: it is what the bubble "
+                    f"becomes.", g),
+        ("witness", f"[a city measured on three axes] 'The length and the breadth and the height of it are equal' (Rev "
+                    f"21:16): twelve thousand furlongs each way, 12000^3 = {city:.4g} cubic furlongs (sealed) - a thing "
+                    f"measured on every axis at once, which is what a rank-3 array is. The measure is given; the meaning "
+                    f"is not claimed here.", h),
+        ("note", "[how we arrange the data, and the guard] Inside each domain the data is a tensor: the indices are the "
+                 "grid's axes (shelf, class, item; token; surface), the components are the cards, and the invariants are "
+                 "what every reading in every frame must agree on - counts, norms, seals, the number of a card's "
+                 "connections. The keeping as measured on 2026-10-08 is a sparse card-by-token-by-shelf array with 30.0 "
+                 "million nonzero entries over 882,022 cards and 124 shelves (docs/OUR_FORM_MEASURED_2026-10-08.md). A "
+                 "spherical matrix rotates its components; a stretch would distort them; the invariants are the "
+                 "meaning. Scripture: 'Who hath measured the waters in the hollow of his hand, and meted out heaven with "
+                 "the span... and weighed the mountains in scales' (Isa 40:12) - measure on every axis; 'by him all "
+                 "things consist' (Col 1:17) - hold together: the metric. GUARDS: Einstein's equation is cited physics; "
+                 "the city's cube is a measure given, not a claim about its meaning; the keeping-as-tensor is a "
+                 "description of a data structure, not a theorem. Seven numbers sealed; the rest cited. Ties: svd, "
+                 "bubbles, surfaces, spacetime, delta."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - tensors, the arrangement inside the bubbles, 2026-10-08")
+
+
 def jevons() -> int:
     """JEVONS' PARADOX (Matt, 2026-10-07, two steps after the seal refactor cut per-seal cost ~100x). As the
     EFFICIENCY of using a resource rises, total CONSUMPTION tends to rise too, not fall: the efficiency gain
@@ -5180,6 +5761,20 @@ def main() -> int:
         return diagrams()
     if a[0] in ("delta", "dirac_delta", "dirac", "dot", "the_dot", "abstract_the_dot", "inner_product", "wavefunction", "wave_function", "hilbert_space", "bra_ket", "braket", "completeness", "sifting"):
         return delta()
+    if a[0] in ("svd", "singular_value_decomposition", "rotation_and_stretch", "spherical_matrix", "efficient_vectors", "most_efficient_vectors", "polar_decomposition"):
+        return svd()
+    if a[0] in ("bubbles", "joined_bubbles", "foam", "plateau", "spheres_in_a_form", "domains_as_spheres", "superposition", "connected_along_axis"):
+        return bubbles()
+    if a[0] in ("resonance", "resonance_disaster", "hidden_division_by_zero", "omega", "omega_nought", "tacoma", "driven_oscillator"):
+        return resonance()
+    if a[0] in ("prime_waves", "waveforms_in_primes", "torus", "torus_primes", "zeta_waves", "explicit_formula", "music_of_the_primes"):
+        return prime_waves()
+    if a[0] in ("maxwell_entropy", "maxwells_demon", "maxwell_demon", "demon", "entropy_concentrated", "landauer", "second_law"):
+        return maxwell_entropy()
+    if a[0] in ("triode", "vacuum_triode", "vacuum_tube", "audion", "child_langmuir", "tube"):
+        return triode()
+    if a[0] in ("tensor", "tensors", "metric_tensor", "invariants", "principal_axes", "data_inside_the_bubbles"):
+        return tensor()
     if a[0] in ("assembly", "assemble", "final"):
         return assembly()
     if a[0] in ("aharonov_bohm", "ab"):
