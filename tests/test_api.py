@@ -109,7 +109,9 @@ def test_free_text_verify_airlocks_context():
     # the verifier sees the claim, and never come back in the response. The arithmetic still verifies.
     _, r = dispatch("POST", "/verify", {},
                     {"claim": "my friend said email me at a@b.com and 2 plus 2 is 4"}, SEC)
-    assert r["verdict"] == "HOLDS" and r["held"] >= 1
+    # PARTIAL since 2026-10-08 (the failure report, C4): the arithmetic held, but "my friend said email me at ..."
+    # is text nobody checked, and the headline says so instead of a top-level HOLDS over the whole sentence.
+    assert r["verdict"] == "PARTIAL" and r["held"] >= 1 and not r["coverage"]["complete"]
     blob = json.dumps(r)
     assert "a@b.com" not in blob        # PII de-identified in the airlock, never echoed back
     assert "friend said" not in blob    # attribution framing held on the caller's side, not returned

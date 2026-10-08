@@ -56,6 +56,14 @@ def verify_conversion(spec: Dict[str, Any]) -> VerifierResult:
         actual = fv * a[1] / b[1]
 
     threshold = abs(actual) * rel_tol if actual != 0 else 1e-9
+    # STATED PRECISION (2026-10-08): "1 mile is 1.6 km" is right to the two figures it states (1.60934). The
+    # claimed literal, when the prose door hands it over, sets the window; a structured call stays at rel_tol.
+    lit = spec.get("claimed_literal")
+    if lit not in (None, ""):
+        from .base import stated_precision, stated_tolerance_abs
+        stated = stated_tolerance_abs(lit)
+        if stated is not None:
+            threshold = stated
     data = {"from_value": fv, "from_unit": fu, "to_unit": tu,
             "actual_value": actual, "claimed_value": tv, "rel_tol": rel_tol,
             "source": "SI / US customary conversion factors"}

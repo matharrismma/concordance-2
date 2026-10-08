@@ -50,7 +50,7 @@ def _secular_tools() -> List[dict]:
     return [
         {"name": "verify",
          "description": ("Verify a claim deterministically — returns a verdict "
-                         "(HOLDS / BROKEN / INCOMPLETE / SYSTEM_ERROR), the worked trail, AND a "
+                         "(HOLDS / PARTIAL / BROKEN / INCOMPLETE / SYSTEM_ERROR), the worked trail, AND a "
                          "sealed receipt "
                          "{content_hash, cite_url} you can re-fetch and re-verify (seal_fetch). "
                          "Three forms: (a) PLAIN — {claim}: a plain-language claim; the engine finds "
@@ -65,7 +65,7 @@ def _secular_tools() -> List[dict]:
                          "READ THE VERDICT EXACTLY: only BROKEN is a finding about the claim. "
                          "SYSTEM_ERROR means OUR verifier could not run (see `means` and `error_at`) "
                          "and says NOTHING about whether the claim is true — never relay it to a "
-                         "human as a refutation. INCOMPLETE means no verifier applied (`gap_at`)."),
+                         "human as a refutation. INCOMPLETE means no verifier applied (`gap_at`), or every claim found was governed by a negation, a reported belief or a condition and was DECLINED. PARTIAL means the checked fragment held and material text around it was NOT checked (`coverage.unchecked_text`) — never quote PARTIAL as HOLDS."),
          "inputSchema": {"type": "object", "properties": {
              "claim": {"type": "string", "description": "PLAIN form: a plain-language claim, in the caller's words"},
              "domain": {"type": "string", "description": "PLAIN form: an optional domain hint (from find_verifier); recorded, never trusted to pick the verifier"},
@@ -1225,10 +1225,20 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
                    "checks": [{"claim": c.get("claim"), "verdict": c.get("status"), "domain": c.get("domain"),
                                "detail": c.get("detail")} for c in results],
                    "trail": trail, "seal": ar.get("seal") if isinstance(ar.get("seal"), dict) else None,
+                   "coverage": ar.get("coverage"),
                    "generated": False, "note": ar.get("note", "")}
             if args.get("domain"):
                 out["domain_hint"] = str(args["domain"])
-            if out["verdict"] == "INCOMPLETE":
+            governed = ((ar.get("coverage") or {}).get("governed") or []) if isinstance(ar.get("coverage"), dict) else []
+            if out["verdict"] == "INCOMPLETE" and governed:
+                # 2026-10-08 (the failure report C2): every checkable claim here is governed — a negation, a reported
+                # belief or a condition in its sentence — so it was DECLINED, not checked as asserted.
+                out["gap_at"] = claim
+                out["means"] = ("every checkable claim in these words is governed by a negation, a reported belief or a "
+                                "condition (see coverage.governed), so it was declined rather than checked as if "
+                                "asserted; this says NOTHING about whether the bare claim is true. State the bare "
+                                "claim to check it.")
+            elif out["verdict"] == "INCOMPLETE":
                 out["gap_at"] = claim
                 out["means"] = ("no deterministic extractor recognized a checkable claim in these words; this says "
                                 "NOTHING about whether the claim is true. State it as a number with its unit, or "

@@ -16,6 +16,7 @@ import re as _re
 from typing import Any, Dict, List
 
 from .base import VerifierResult, clamp_tol, confirm, error, mismatch, na
+from .base import stated_precision, stated_tolerance_abs
 from .base import dispatch  # declarative run() driver
 
 sympify = simplify = diff = integrate = limit = solve = None
@@ -267,6 +268,34 @@ def verify_equality(spec: Dict[str, Any]) -> VerifierResult:
                     f"{a} == {b} holds only off the singular set (denominator vanishes at: "
                     f"{_dm}); not an unconditional identity")
             return confirm("mathematics.equality", _worked_equality(a, b, ea, eb))
+        # EXACT DECIMALS (2026-10-08, the failure report C3): "0.1 + 0.2 = 0.3" is TRUE, and IEEE-754 left
+        # 5.55e-17 behind, which read as a mismatch. When both sides are plain numbers, re-read every decimal
+        # as the exact rational it writes (0.1 = 1/10) and compare exactly — the same arithmetic that already
+        # made 1/3 + 1/3 + 1/3 = 1 hold. Then, and only then, the claim's own precision: a claimed literal
+        # stated to two or more figures earns half a unit in its last place (stated_tolerance_abs); a
+        # one-figure literal earns nothing, and a structured call with no literal stays exact.
+        if not getattr(ea, "free_symbols", set()) and not getattr(eb, "free_symbols", set()):
+            try:
+                ra, rb = _parse(a, var_names, rational=True), _parse(b, var_names, rational=True)
+                if simplify(ra - rb) == 0:
+                    return confirm("mathematics.equality",
+                                   f"{a} = {b}; by exact rational arithmetic both sides reduce to {ra}",
+                                   {"exact_rational": str(ra)})
+            except _PARSE_ERRORS:
+                pass
+            lit = spec.get("claimed_literal")
+            tol = stated_tolerance_abs(lit) if lit not in (None, "") else None
+            if tol is not None:
+                try:
+                    fa, fb = float(ea.evalf()), float(eb.evalf())
+                except Exception:
+                    fa = fb = None
+                if fa is not None and abs(fa - fb) <= tol:
+                    sig = (stated_precision(lit) or (0, 0.0))[0]
+                    return confirm("mathematics.equality",
+                                   f"{a} = {fa:.10g} agrees with {b} at the stated precision of {sig} significant "
+                                   f"figure(s) (half a unit in the last place = ±{tol:g})",
+                                   {"actual": fa, "claimed": fb, "stated_sigfigs": sig, "stated_tolerance_abs": tol})
         return mismatch("mathematics.equality", f"{a} - ({b}) simplifies to {diff_}")
     except _PARSE_ERRORS as e:
         return na("mathematics.equality", f"cannot parse expression: {e}")

@@ -73,6 +73,27 @@ def clamp_tol(spec: Dict[str, Any], key: str, default: float) -> float:
 _LITERAL = re.compile(r"[-+]?(\d*)(?:\.(\d*))?(?:[eE]([-+]?\d+))?")
 
 
+_SCALE_WORDS = {"thousand": 1e3, "million": 1e6, "billion": 1e9, "trillion": 1e12,
+                "k": 1e3, "m": 1e6, "mn": 1e6, "b": 1e9, "bn": 1e9}
+
+
+def literal_scale(literal: Any) -> Tuple[str, float]:
+    """The number AS WRITTEN and its scale: "$29.3 million" -> ("29.3", 1e6); "$5k" -> ("5", 1e3);
+    "41,600" -> ("41,600", 1.0). The literal keeps its own digits so stated_precision reads the figures the
+    person gave, and the scale word becomes a factor (the failure report's H5: "$29.3 million" was read as 29.3).
+    A one-letter scale (k, M, B, bn) counts only when attached to a $-number ("$29.3M"); a spaced "m" is metres."""
+    import re
+    s = str(literal or "").strip()
+    m = re.match(r"^\$?\s*(-?\d[\d,]*(?:\.\d+)?)\s*(thousand|million|billion|trillion)\b", s, re.I)
+    if m:
+        return m.group(1), _SCALE_WORDS[m.group(2).lower()]
+    m = re.match(r"^\$\s*(-?\d[\d,]*(?:\.\d+)?)(k|m|mn|b|bn)\b", s, re.I)
+    if m:
+        return m.group(1), _SCALE_WORDS[m.group(2).lower()]
+    m = re.match(r"^\$?\s*(-?\d[\d,]*(?:\.\d+)?)", s)
+    return (m.group(1) if m else s), 1.0
+
+
 def stated_precision(literal: Any) -> Optional[Tuple[int, float]]:
     """(significant figures, half a unit in the last stated place) of a number AS THE PERSON WROTE IT.
 

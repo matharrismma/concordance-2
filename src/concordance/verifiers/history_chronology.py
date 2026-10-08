@@ -54,7 +54,7 @@ def verify_year_arithmetic(spec: Dict[str, Any]) -> VerifierResult:
     """Elapsed years between two signed years (positive=CE, negative=BCE).
 
     actual_elapsed = to_year - from_year.
-    Tolerance: absolute 1 year.
+    Tolerance: none — judged exactly (2026-10-08).
     """
     name = "history_chronology.year_arithmetic"
     from_y  = spec.get("from_year")
@@ -70,7 +70,11 @@ def verify_year_arithmetic(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, "from_year / to_year / claimed_elapsed_years must be integers")
     actual = ty - fy
     diff = abs(actual - cl)
-    tol  = 1
+    # EXACT (2026-10-08, the failure report C1): the tolerance was 1 year, so "2024 to 2028 is 3 years" and
+    # "... is 5 years" both HELD, and "2020 to 2021 is 2 years" held at a 100% error. A count of years is an
+    # integer claim; it is judged exactly. An inclusive count ("5 years, 2024 through 2028") is a different
+    # claim and a different number, named in the detail when the miss is exactly one.
+    tol  = 0
     data = {
         "rule": _YEAR_ARITH_RULE,
         "from_year": fy,
@@ -85,8 +89,9 @@ def verify_year_arithmetic(spec: Dict[str, Any]) -> VerifierResult:
         return confirm(name,
                        f"elapsed {actual} years ({fy} → {ty}) matches claim {cl} (diff {diff})",
                        data)
+    why = " — an inclusive count or a no-year-0 slip is a different number" if diff == 1 else ""
     return mismatch(name,
-                    f"actual elapsed {actual}, claimed {cl} (diff {diff} > tol {tol})",
+                    f"actual elapsed {actual} years ({fy} → {ty}), claimed {cl} (diff {diff}; judged exactly{why})",
                     data)
 
 
@@ -220,7 +225,7 @@ def verify_elapsed_years_bce_to_ce(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, f"to_CE must be a positive integer, got {tc}")
     actual  = fb + tc - 1
     diff    = abs(actual - cl)
-    tol     = 1
+    tol     = 0            # exact (2026-10-08): a count of years is an integer claim; "no year 0" is the rule stated
     data = {
         "rule": _BCE_TO_CE_RULE,
         "from_BCE": fb,

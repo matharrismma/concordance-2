@@ -105,6 +105,19 @@ def verify_compound_interest(spec: Dict[str, Any]) -> VerifierResult:
     data = {"principal": pf, "rate": rf, "compounding_per_year": nf, "years": tf,
             "actual_future_value": actual, "claimed_future_value": cf,
             "diff": diff, "formula": "A = P·(1 + r/n)^(n·t)"}
+    # STATED PRECISION (2026-10-08, the failure report C3): "$29.3 million" is right to the three figures it
+    # states (FV = 29.3201 million). The literal as written, with its scale word, sets the window: half a unit
+    # in its last stated place, times the scale; below two figures no window. Structured calls without the
+    # literal keep the flat tolerances above.
+    lit = spec.get("claimed_future_value_as_written")
+    if lit:
+        from .base import literal_scale, stated_precision, stated_tolerance_abs
+        lit_num, factor = literal_scale(lit)
+        stated = stated_tolerance_abs(lit_num, unit_factor=factor)
+        if stated is not None:
+            threshold = stated
+            data["stated_sigfigs"] = (stated_precision(lit_num) or (0, 0.0))[0]
+            data["stated_tolerance_abs"] = stated
     if diff <= threshold:
         return confirm(name,
                        f"FV = {pf}·(1+{rf}/{nf})^({nf}·{tf}) = {actual:.4f} (matches claim {cf}, diff {diff:.4f})",

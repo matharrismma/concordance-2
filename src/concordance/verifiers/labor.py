@@ -116,6 +116,39 @@ def verify_annual_to_hourly(spec: Dict[str, Any]) -> VerifierResult:
     return mismatch(name, f"hourly = ${actual:.4f}, claimed ${c:.4f}", data)
 
 
+def verify_hourly_to_annual(spec: Dict[str, Any]) -> VerifierResult:
+    """Annual equivalent = hourly_rate * 2080 (52 × 40 hours) — the mirror of annual_to_hourly (2026-10-08, the
+    failure report H1: "$20 per hour is $41,600 per year" reached no verifier). The claimed literal, when the prose
+    door hands it over, sets the window at its stated precision; otherwise exact to the cent."""
+    name = "labor.hourly_to_annual"
+    rate = spec.get("hourly_rate")
+    claimed = spec.get("claimed_annual_salary")
+    if rate is None or claimed is None:
+        return na(name)
+    annual_hours = float(spec.get("annual_hours", _STANDARD_ANNUAL_HOURS))
+    try:
+        rf, c = float(rate), float(claimed)
+    except (TypeError, ValueError):
+        return error(name, "hourly_rate and claimed_annual_salary must be numeric")
+    if annual_hours <= 0:
+        return error(name, f"annual_hours must be > 0, got {annual_hours}")
+    actual = rf * annual_hours
+    tol = clamp_tol(spec, "tolerance", 0.01)
+    data = {"hourly_rate": rf, "annual_hours": annual_hours, "actual_annual": round(actual, 2),
+            "claimed_annual": c, "formula": f"annual = hourly * {annual_hours:g} (52 weeks x 40 hours)"}
+    lit = spec.get("claimed_annual_as_written")
+    if lit:
+        from .base import literal_scale, stated_precision, stated_tolerance_abs
+        lit_num, factor = literal_scale(lit)
+        stated = stated_tolerance_abs(lit_num, unit_factor=factor)
+        if stated is not None:
+            tol = stated
+            data["stated_sigfigs"] = (stated_precision(lit_num) or (0, 0.0))[0]
+    if abs(actual - c) <= tol:
+        return confirm(name, f"annual = ${rf:g} x {annual_hours:g} h = ${actual:,.2f} (matches claim ${c:,.2f})", data)
+    return mismatch(name, f"annual = ${rf:g} x {annual_hours:g} h = ${actual:,.2f}, claimed ${c:,.2f}", data)
+
+
 def verify_take_home_pay(spec: Dict[str, Any]) -> VerifierResult:
     """Take-home = gross * (1 - total_tax_rate)"""
     name = "labor.take_home_pay"
@@ -169,6 +202,7 @@ _RULES = [
     (lambda lv: ("hourly_rate" in lv and "hours_worked" in lv and "claimed_gross_pay" in lv), verify_gross_pay),
     (lambda lv: ("hourly_rate" in lv and "regular_hours" in lv and "claimed_overtime_pay" in lv), verify_overtime_pay),
     (lambda lv: ("annual_salary" in lv and "claimed_hourly_equivalent" in lv), verify_annual_to_hourly),
+    (lambda lv: ("hourly_rate" in lv and "claimed_annual_salary" in lv), verify_hourly_to_annual),
     (lambda lv: ("gross_pay" in lv and "total_tax_rate" in lv and "claimed_take_home" in lv), verify_take_home_pay),
     (lambda lv: ("claimed_hourly_rate" in lv and "claimed_compliant" in lv), verify_minimum_wage_check),
 ]

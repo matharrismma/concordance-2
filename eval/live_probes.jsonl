@@ -86,7 +86,11 @@
 {"id": "verify.137.is.prime", "method": "POST", "path": "/verify", "body": {"claim": "137 is a prime number"}, "expect": [{"at": "verdict", "eq": "HOLDS"}]}
 {"id": "verify.element.atomic.number.holds", "method": "POST", "path": "/verify", "body": {"claim": "the atomic number of iron is 26"}, "expect": [{"at": "verdict", "eq": "HOLDS"}]}
 {"id": "verify.lookup.fact.iron.melts.holds.someday", "method": "POST", "path": "/verify", "body": {"claim": "iron melts at 1538 C"}, "expect": [{"at": "found_fact.agrees", "eq": true}], "known_miss": true}
-{"id": "verify.pii.sealed.clean", "method": "POST", "path": "/verify", "body": {"claim": "my patient John Smith, SSN 123-45-6789, weighs 80 kg and 80 kg is 176.4 lb"}, "expect": [{"at": "verdict", "eq": "HOLDS"}], "seal_clean": ["John Smith", "123-45-6789"]}
+{"id": "verify.pii.sealed.clean", "method": "POST", "path": "/verify", "body": {"claim": "my patient John Smith, SSN 123-45-6789, weighs 80 kg and 80 kg is 176.4 lb"}, "expect": [{"at": "verdict", "eq": "PARTIAL"}], "seal_clean": ["John Smith", "123-45-6789"]}
+{"id": "report.c1.elapsed.years.exact", "method": "POST", "path": "/verify", "body": {"claim": "From 2024 to 2028 is 3 years"}, "expect": [{"at": "verdict", "eq": "BROKEN"}]}
+{"id": "report.c2.negation.declined", "method": "POST", "path": "/verify", "body": {"claim": "It is false that 2 + 2 = 4"}, "expect": [{"at": "verdict", "eq": "INCOMPLETE"}]}
+{"id": "report.c3.decimals.exact", "method": "POST", "path": "/verify", "body": {"claim": "0.1 + 0.2 = 0.3"}, "expect": [{"at": "verdict", "eq": "HOLDS"}]}
+{"id": "report.c4.uncovered.text.partial", "method": "POST", "path": "/verify", "body": {"claim": "2 + 2 = 4, therefore vaccines cause autism and the earth is 6,000 km in diameter"}, "expect": [{"at": "verdict", "eq": "PARTIAL"}]}
 {"id": "lookup.element.iron", "path": "/lookup", "query": {"kind": "element", "symbol": "Fe"}, "expect": [{"at": "found", "eq": true}, {"at": "house.door", "eq": "FIND"}]}
 # ── the doors: the house, the welcome, the OpenAI-compatible door ─────────────────────────────────────────────────────
 {"id": "capabilities.five.doors.and.the.welcome", "path": "/capabilities", "expect": [{"at": "doors", "len": 5}, {"at": "welcome", "contains": "began with the Bible"}]}

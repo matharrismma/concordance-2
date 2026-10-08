@@ -1126,6 +1126,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                 "checks": [{"claim": c.get("claim"), "verdict": c.get("status"),
                             "domain": c.get("domain"), "detail": c.get("detail")}
                            for c in (ar.get("results") or [])],
+                # COVERAGE (2026-10-08, the failure report C4): what the verdict stands on and what it does NOT —
+                # PARTIAL names the unchecked text here; a governed (declined) claim names its governor.
+                "coverage": ar.get("coverage"),
                 "receipt": receipt, "generated": False,
                 "note": ("found and verified across the engine's domains, never generated; only the "
                          "claims named were checked; the receipt is permanent and re-checkable; the "
@@ -1208,6 +1211,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return {"verdict": ar.get("verdict"), "claims_found": ar.get("claims_found", 0),
                     "checks": [{"claim": c.get("claim"), "verdict": c.get("status"), "domain": c.get("domain"),
                                 "detail": c.get("detail")} for c in (ar.get("results") or [])],
+                    "coverage": ar.get("coverage"),
                     "receipt": seal.get("cite_url") or (f"/s/{seal['content_hash']}" if seal.get("content_hash") else None)}
 
         res = _lead.lead(situation, apply_fn=_apply)

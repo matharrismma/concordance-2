@@ -53,4 +53,7 @@ def test_the_discipline_moved_into_the_tokenizer():
     assert _x("1 / 0 = 0") == []                                        # division by zero: a gap, never a verdict
     assert _x("1 + 1 = 2 and 2 * 3 = 6") == [("sum", "1 + 1", "2"), ("product", "2 * 3", "6")]
     r = audit("3 x 4 = 12. The 5 x 5 grid has 25 cells.", CFG, seal=False)
-    assert r["verdict"] == "HOLDS" and r["claims_found"] == 1            # "5 x 5 grid" carries no claim verb
+    # "5 x 5 grid" carries no claim verb, so one claim is found — and since 2026-10-08 (the failure report, C4) the
+    # top-level verdict is PARTIAL, not HOLDS: the grid sentence holds numbers nobody checked, and the headline says so.
+    assert r["verdict"] == "PARTIAL" and r["claims_found"] == 1 and r["held"] == 1
+    assert any("25 cells" in x for x in r["coverage"]["unchecked_text"])

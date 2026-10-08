@@ -170,7 +170,7 @@
   .turn{ margin:0 0 2rem }
   .you{ color:var(--ink); font-weight:600 }
   .said{ margin:.4rem 0 0; color:#3d3426 }
-  .verdict{ font-weight:700 } .verdict.HOLDS{ color:#4a6a34 } .verdict.BROKEN{ color:#8a3b1e }
+  .verdict{ font-weight:700 } .verdict.HOLDS{ color:#4a6a34 } .verdict.BROKEN{ color:#8a3b1e } .verdict.PARTIAL{ color:#8a6a2f }
   .trail{ color:var(--ink-soft); font-size:.9rem }
   .hit{ border-top:1px solid rgba(138,106,47,.22); padding:.6rem 0 }
   .hit b{ font-weight:600; color:var(--ink) }
@@ -518,6 +518,7 @@
     if(d.verify){
       var v=d.verify;
       h += '<div><span class="verdict '+esc(v.verdict)+'">'+esc(v.verdict)+'</span>'+
+           (v.verdict==='PARTIAL' ? ' <span class="sn">the checked part holds; the rest of the text was not checked</span>' : '')+
            (v.steps!=null?' <span class="trail">· '+esc(v.confirmed_steps)+'/'+esc(v.steps)+' confirmed</span>':'')+'</div>';
       if(v.trail && v.trail.length)
         h += '<div class="trail">'+v.trail.slice(0,4).map(function(t){

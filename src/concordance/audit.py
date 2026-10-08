@@ -26,12 +26,16 @@ _MONTHS = {"january": 1, "february": 2, "march": 3, "april": 4, "may": 5, "june"
            "july": 7, "august": 8, "september": 9, "october": 10, "november": 11, "december": 12}
 _DAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
 
-_NUM = r"\$?\s*(\d[\d,]*(?:\.\d+)?)"          # a money-or-plain number (commas ok, $ ok)
+# a money-or-plain number (commas ok, $ ok), with an optional scale WORD kept inside the group so _f can read
+# it ("$29.3 million" -> 29.3e6; the failure report H5 found "million" dropped and 29.3 compared to 29,320,113)
+_NUM = r"\$?\s*(\d[\d,]*(?:\.\d+)?(?:\s*(?:thousand|million|billion|trillion)\b)?)"
 _EQ = r"(?:=|is|equals|comes to|totals?)"      # the claim verb
 
 
 def _f(s: str) -> float:
-    return float(s.replace(",", "").replace("$", "").strip())
+    from .verifiers.base import literal_scale
+    lit, factor = literal_scale(s)
+    return float(lit.replace(",", "").replace("$", "").strip()) * factor
 
 
 def _q(text: str, m: re.Match) -> str:
@@ -190,7 +194,8 @@ def _x_grammar(text: str, want: str):
             span = text[toks[i][2]:toks[k][3]]
             quote = re.sub(r"\s+", " ", span).strip()[:160]
             out.append((quote, "mathematics",
-                        {"mode": "equality", "params": {"expr_a": " ".join(parts), "expr_b": claimed}}))
+                        {"mode": "equality", "params": {"expr_a": " ".join(parts), "expr_b": claimed,
+                                                        "claimed_literal": claimed}}))
         i = k + 1
     return out
 
@@ -259,7 +264,13 @@ def _x_percent(text: str):
         pct, base, claimed = _f(m.group(1)), _f(m.group(2)), _f(m.group(3))
         out.append((_q(text, m), "mathematics",
                     {"mode": "equality", "params": {"expr_a": f"({pct}/100)*{base}",
-                                                    "expr_b": str(claimed)}}))
+                                                    "expr_b": str(claimed), "claimed_literal": m.group(3)}}))
+    # the reversed form (2026-10-08, the failure report H1): "27 is 71% of 42", "$27 million is 71% of $42 million"
+    for m in re.finditer(_NUM + r"\s+" + _EQ + r"\s+(\d+(?:\.\d+)?)\s*(?:%|percent|pct)\s+of\s+" + _NUM, text, re.I):
+        claimed, pct, base = _f(m.group(1)), _f(m.group(2)), _f(m.group(3))
+        out.append((_q(text, m), "mathematics",
+                    {"mode": "equality", "params": {"expr_a": f"({pct}/100)*{base}",
+                                                    "expr_b": str(claimed), "claimed_literal": m.group(1)}}))
     return out
 
 
@@ -288,6 +299,17 @@ def _x_annual_hourly(text: str):
     return out
 
 
+def _x_hourly_annual(text: str):
+    """"$20 per hour is $41,600 per year" (2026-10-08, the failure report H1) — the mirror of _x_annual_hourly."""
+    out = []
+    for m in re.finditer(_NUM + r"\s*(?:/hr|/hour|per hour|an hour|hourly)[^.\n]{0,30}?" + _EQ + r"\s*" + _NUM +
+                         r"\s*(?:a year|per year|/year|/yr|annually|per annum)", text, re.I):
+        out.append((_q(text, m), "labor",
+                    {"LABOR_VERIFY": {"hourly_rate": _f(m.group(1)), "claimed_annual_salary": _f(m.group(2)),
+                                      "claimed_annual_as_written": m.group(2)}}))
+    return out
+
+
 def _x_compound(text: str):
     """The word 'compound' is REQUIRED in the matched span — 'at 5% for 10 years' alone is
     ambiguous between simple and compound interest, so it is honestly skipped."""
@@ -298,7 +320,8 @@ def _x_compound(text: str):
                          text, re.I):
         out.append((_q(text, m), "finance",
                     {"FIN_VERIFY": {"principal": _f(m.group(1)), "rate": _f(m.group(2)) / 100.0,
-                                    "years": _f(m.group(3)), "claimed_future_value": _f(m.group(4))}}))
+                                    "years": _f(m.group(3)), "claimed_future_value": _f(m.group(4)),
+                                    "claimed_future_value_as_written": m.group(4)}}))
     # the other common ordering: "... for N years compounded ... = X"
     for m in re.finditer(_NUM + r"[^.\n]{0,30}?\bat\s*(\d+(?:\.\d+)?)\s*%[^.\n]{0,30}?"
                          r"for\s*(\d+(?:\.\d+)?)\s*years?[^.\n]{0,30}?\bcompound\w*\b"
@@ -306,7 +329,16 @@ def _x_compound(text: str):
                          text, re.I):
         out.append((_q(text, m), "finance",
                     {"FIN_VERIFY": {"principal": _f(m.group(1)), "rate": _f(m.group(2)) / 100.0,
-                                    "years": _f(m.group(3)), "claimed_future_value": _f(m.group(4))}}))
+                                    "years": _f(m.group(3)), "claimed_future_value": _f(m.group(4)),
+                                    "claimed_future_value_as_written": m.group(4)}}))
+    # the third ordering (2026-10-08, the failure report H2): "... compounded annually grows to X over/in/after N years"
+    for m in re.finditer(_NUM + r"[^.\n]{0,30}?\bat\s*(\d+(?:\.\d+)?)\s*%[^.\n]{0,40}?\bcompound\w*\b[^.\n]{0,30}?"
+                         r"(?:=|is|grows to|becomes|yields|worth)\s*" + _NUM +
+                         r"[^.\n]{0,20}?\b(?:over|in|after|within)\s*(\d+(?:\.\d+)?)\s*years?", text, re.I):
+        out.append((_q(text, m), "finance",
+                    {"FIN_VERIFY": {"principal": _f(m.group(1)), "rate": _f(m.group(2)) / 100.0,
+                                    "years": _f(m.group(4)), "claimed_future_value": _f(m.group(3)),
+                                    "claimed_future_value_as_written": m.group(3)}}))
     return out
 
 
@@ -494,7 +526,8 @@ def _x_unit_conversion(text: str):
             continue
         out.append((_q(text, m), "unit_conversion",
                     {"CONV_VERIFY": {"from_value": _f(m.group(1)), "from_unit": u1,
-                                     "to_value": _f(m.group(3)), "to_unit": u2}}))
+                                     "to_value": _f(m.group(3)), "to_unit": u2,
+                                     "claimed_literal": m.group(3)}}))
     return out
 
 
@@ -642,6 +675,36 @@ def _x_molar_mass(text: str):
                          + _EQ + r"\s*" + _NUM + r"\s*(?:g\s*/\s*mol|grams?\s+per\s+mole?)?", text, re.I):
         out.append((_q(text, m), "periodic_table",
                     {"PT_VERIFY": {"formula": m.group(1), "claimed_molar_mass": _f(m.group(2))}}))
+    # formula first, the unit REQUIRED (2026-10-08, the failure report H3): "aspirin C9H8O4 is 180.16 g/mol".
+    # Two or more element groups, so a lone capitalised word never reads as a formula.
+    for m in re.finditer(r"(?-i:\b([A-Z][a-z]?\d*(?:[A-Z][a-z]?\d*)+))\s+(?:is|=|equals|has\s+a\s+molar\s+mass\s+of|"
+                         r"has\s+molar\s+mass)\s*(?:about|approximately|roughly|~|≈)?\s*" + _NUM +
+                         r"\s*(?:g\s*/\s*mol|grams?\s+per\s+mole?)\b", text, re.I):
+        out.append((_q(text, m), "periodic_table",
+                    {"PT_VERIFY": {"formula": m.group(1), "claimed_molar_mass": _f(m.group(2))}}))
+    return out
+
+
+_MATH_CONSTS = (
+    (r"(?:the\s+)?(?:number\s+)?pi|π", "pi"),
+    (r"euler'?s\s+number(?:\s+e)?|the\s+constant\s+e", "E"),
+    (r"(?:the\s+)?golden\s+ratio|phi|φ", "GoldenRatio"),
+)
+_MATH_CONST_RE = re.compile(
+    r"\b(?P<name>" + "|".join(p for p, _ in _MATH_CONSTS) + r")\s+(?:is|=|equals|≈|~)\s*"
+    r"(?:about|approximately|roughly|around|~|≈)?\s*(?P<val>\d+(?:\.\d+)?)(?![\d.]*\s*(?:%|percent))", re.I)
+
+
+def _x_math_constant(text: str):
+    """"pi is 3.14" (2026-10-08, the failure report H4): the mathematical constants, judged at the precision
+    stated — "3.14" is right to three figures; "pi is 3" is one figure and earns no window."""
+    out = []
+    for m in _MATH_CONST_RE.finditer(text):
+        name = m.group("name").lower()
+        sym = next(s for p, s in _MATH_CONSTS if re.fullmatch(p, name, re.I))
+        out.append((_q(text, m), "mathematics",
+                    {"mode": "numeric", "params": {"numeric_expr": sym, "claimed_value": float(m.group("val")),
+                                                   "claimed_literal": m.group("val")}}))
     return out
 
 
@@ -1096,6 +1159,7 @@ _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("units_each", _x_each), ("percent", _x_percent),
     ("gross_pay", _x_gross_pay), ("annual_hourly", _x_annual_hourly),
     ("compound_interest", _x_compound), ("rule_of_72", _x_rule72),
+    ("hourly_annual", _x_hourly_annual), ("math_constant", _x_math_constant),
     ("elapsed_years", _x_elapsed_years), ("day_of_week", _x_day_of_week),
     ("leap_year", _x_leap_year), ("nutrition_label", _x_nutrition),
     ("physical_constant", _x_physical_constant), ("unit_conversion", _x_unit_conversion),
@@ -1213,14 +1277,103 @@ def compose_uses(steps: List[Dict[str, Any]], text: str) -> List[Dict[str, Any]]
     return steps
 
 
+# ── GOVERNED CLAIMS + COVERAGE (2026-10-08, the failure report C2 and C4) ─────────────────────────
+# C2: "It is false that 2 + 2 = 4" HELD, because the extractor lifted "2 + 2 = 4" out of its sentence and the
+# negation never reached the verifier. A claim the text does not assert plainly — a negation, a reported belief
+# (nobody believes, denies, doubts) or a hypothetical (suppose, assume, unless) governs it in the same sentence,
+# or the sentence calls it false right after it — is DECLINED, never checked as if asserted. The engine verifies
+# what the text says, not a fragment. ("if"/"whether" are left out on purpose: "check if 2 + 2 = 4" is a request.)
+# C4: "2 + 2 = 4, therefore vaccines cause autism" HELD at the top level after checking one clause. The headline
+# is what gets quoted, so the top-level verdict is HOLDS only when the checked claims COVER the text: material
+# text outside every checked span — a number, a governed claim, or three or more content words in a row — makes
+# it PARTIAL. BROKEN stays BROKEN (a false claim is false whatever surrounds it).
+_GOV_BEFORE = re.compile(
+    r"\b(?:not|no|never|false|untrue|wrong|incorrect|isn't|aren't|wasn't|weren't|don't|doesn't|didn't|cannot|"
+    r"can't|couldn't|nobody|no\s+one|no-one|none|nothing|den(?:y|ies|ied)|doubt(?:s|ed|ful)?|disput(?:e|es|ed)|"
+    r"believ(?:e|es|ed|ing)|belief|think(?:s)?|thought|alleg(?:ed|es|edly)|suppos(?:e|ed|edly|ing)|"
+    r"assum(?:e|es|ed|ing)|imagine|pretend(?:s|ed)?|hypothetically|unless|myth|lie|lies|hoax|mistaken(?:ly)?|"
+    r"wrongly|erroneous(?:ly)?|falsely|contrary\s+to)\b", re.I)
+_GOV_AFTER = re.compile(
+    r"^\W{0,3}(?:(?:is|was|'s|that's|which\s+is|that\s+is)\s+(?:not\s+(?:true|right|correct|so)|false|wrong|"
+    r"incorrect|untrue|a\s+lie|a\s+myth|nonsense|mistaken|bogus|disputed|doubtful)|isn't|is\s+not|wasn't)\b", re.I)
+_SENT_BREAK = re.compile(r"[.!?;\n]")
+_STOP = frozenset("""a an the and or but so then also is are was were be been being am it its it's this that these
+those which who whom whose what there here of to in on at by for from with as about around approximately roughly
+nearly almost exactly just only very really indeed true truly correct correctly right yes ok okay note check please
+see i we you they he she them us my our your their me him her fact facts clearly obviously course certainly sure
+dollars dollar usd cents percent per each every total totals totalling totaling overall meanwhile too either neither
+both all any some such more less than equal equals therefore thus hence because since while when where after before
+during between among within without into onto over under up down out off again further once still yet now today
+currently well simply plainly actually basically namely etc""".split())
+
+
+def _governor(norm: str, start: int, end: int) -> Optional[str]:
+    """The phrase that governs the claim at norm[start:end] in its own sentence, or None."""
+    sent_start = max((m.end() for m in _SENT_BREAK.finditer(norm, 0, start)), default=0)
+    m_end = _SENT_BREAK.search(norm, end)
+    sent_end = m_end.start() if m_end else len(norm)
+    before, after = norm[sent_start:start], norm[end:sent_end]
+    hits = list(_GOV_BEFORE.finditer(before))
+    if hits:
+        return hits[-1].group(0)
+    m = _GOV_AFTER.search(after)
+    return m.group(0).strip(" ,") if m else None
+
+
+def _material(frag: str) -> bool:
+    toks = re.findall(r"[A-Za-z][A-Za-z'’\-]*|\d[\d,.]*", frag)
+    if any(ch.isdigit() for t in toks for ch in t):
+        return True
+    run = best = 0
+    for t in toks:
+        if t.lower().strip("'’-") in _STOP:
+            run = 0
+        else:
+            run += 1
+            best = max(best, run)
+    return best >= 3
+
+
+def _material_fragments(norm: str, quotes: List[str], locate) -> List[str]:
+    """The pieces of the (whitespace-normalised) text that no checked quote covers and that still say something:
+    a number, or three or more content words in a row. Connectives, articles, units and filler do not count."""
+    mask = bytearray(len(norm))
+    for q in quotes:
+        qn = re.sub(r"\s+", " ", q or "").strip()
+        p = locate(q)
+        if p >= 0 and qn:
+            mask[p:p + len(qn)] = b"\x01" * len(qn)
+    frags, cur = [], []
+    for i, ch in enumerate(norm):
+        if mask[i]:
+            if cur:
+                frags.append("".join(cur)); cur = []
+        else:
+            cur.append(ch)
+    if cur:
+        frags.append("".join(cur))
+    out = []
+    for f in frags:
+        if _material(f):
+            out.append(re.sub(r"^\W+|\W+$", "", f.strip())[:140])
+    return out
+
+
 def audit(text: str, config, seal: bool = True, index: bool = True, card: bool = True) -> Dict[str, Any]:
-    """Extract -> compose the stated chain -> verify the lot as one derivation -> attach one seal.
+    """Extract -> compose the stated chain -> decline what the text does not assert -> verify the rest as one
+    derivation -> attach one seal to that fragment -> say what was NOT checked.
 
     Composition (2026-09-25): after extraction, `compose_uses` sets a `uses` edge wherever the author
     chained two claims ("A, so B" reusing A's number). The moat then checks the LINK as well as each
     step, so a conclusion that rests on a false premise no longer stands on its own — the reasoning is
     verified, not just the isolated facts. The derivation runs in TEXT order so a `uses` ref (always an
-    earlier claim) is processed first; the report keeps extraction order."""
+    earlier claim) is processed first; the report keeps extraction order.
+
+    Governed claims and coverage (2026-10-08, the failure report): see _GOV_BEFORE / _material_fragments above.
+    Verdicts: HOLDS (every checked claim held AND the checked claims cover the text), PARTIAL (the checked
+    fragment held; material text was not checked — named in `coverage.unchecked_text`), BROKEN, INCOMPLETE
+    (nothing could be checked, or every claim found is governed and was declined), NOTHING_TO_CHECK."""
+    text = (text or "")[:MAX_TEXT]
     steps = extract(text)
     if not steps:
         return {"claims_found": 0, "results": [], "verdict": "NOTHING_TO_CHECK",
@@ -1228,27 +1381,47 @@ def audit(text: str, config, seal: bool = True, index: bool = True, card: bool =
                          "certain patterns (sums, percentages, pay, interest, dates, labels) — "
                          "it would rather miss a claim than check the wrong one.")}
     compose_uses(steps, text)
+    norm, locate = _norm_pos(text)
+    governed = []
+    for s_ in steps:
+        p = locate(s_.get("claim") or "")
+        if p < 0:
+            continue
+        g = _governor(norm, p, p + len(re.sub(r"\s+", " ", s_["claim"]).strip()))
+        if g:
+            s_["governed"] = g
+            governed.append(s_)
+    checked = [s_ for s_ in steps if not s_.get("governed")]
+    gov_ids = {s_["id"] for s_ in governed}
     from .derivation import verify_derivation
-    _, locate = _norm_pos(text)
     # The derivation must process a used step before the step that uses it. `uses` edges always point
     # from a later claim back to an earlier one, so text order satisfies that; an unlocatable claim
     # sorts to the end (stable). The report below still comes back in extraction order.
-    order = sorted(range(len(steps)),
-                   key=lambda i: (locate(steps[i].get("claim") or "") if locate(steps[i].get("claim") or "") >= 0
+    order = sorted(range(len(checked)),
+                   key=lambda i: (locate(checked[i].get("claim") or "") if locate(checked[i].get("claim") or "") >= 0
                                   else 10 ** 9, i))
     dsteps = []
     for i in order:
-        s = steps[i]
-        d = {"id": s["id"], "domain": s["domain"], "spec": s["spec"], "claim": s["claim"]}
-        if s.get("uses"):
-            d["uses"] = s["uses"]
+        s_ = checked[i]
+        d = {"id": s_["id"], "domain": s_["domain"], "spec": s_["spec"], "claim": s_["claim"]}
+        uses = [u for u in (s_.get("uses") or []) if u not in gov_ids]
+        if uses:
+            d["uses"] = uses
         dsteps.append(d)
-    dres = verify_derivation(dsteps)
+    dres = verify_derivation(dsteps) if dsteps else {"verdict": "INCOMPLETE", "trail": []}
     trail_by_id = {t["id"]: t for t in dres["trail"]}
     results = []
     held = broken = unchecked = 0
-    for s in steps:
-        t = trail_by_id.get(s["id"], {"status": "ERROR", "detail": ""})
+    for s_ in steps:
+        if s_.get("governed"):
+            unchecked += 1
+            results.append({"claim": s_["claim"], "extractor": s_["extractor"], "domain": s_["domain"],
+                            "status": "DECLINED", "governed_by": s_["governed"],
+                            "detail": (f"governed by '{s_['governed']}': the text does not assert this claim plainly "
+                                       "(a negation, a reported belief or a condition governs it), so it was not "
+                                       "checked — state the bare claim to check it")})
+            continue
+        t = trail_by_id.get(s_["id"], {"status": "ERROR", "detail": ""})
         st = t["status"]
         if st == "CONFIRMED":
             held += 1
@@ -1256,7 +1429,7 @@ def audit(text: str, config, seal: bool = True, index: bool = True, card: bool =
             broken += 1
         else:  # NOT_APPLICABLE / ERROR — we did not get a result, which is not a finding
             unchecked += 1
-        r = {"claim": s["claim"], "extractor": s["extractor"], "domain": s["domain"],
+        r = {"claim": s_["claim"], "extractor": s_["extractor"], "domain": s_["domain"],
              "status": st, "detail": t.get("detail", "")}
         if t.get("uses"):
             # this claim was read as building on the named earlier claim(s) — the prose said "so"/"therefore"
@@ -1265,6 +1438,19 @@ def audit(text: str, config, seal: bool = True, index: bool = True, card: bool =
             # raw-checked here, but it rests on a premise that did NOT hold — so it does not stand alone
             r["builds_on_unconfirmed"] = t["builds_on_unconfirmed"]
         results.append(r)
+    leftover = _material_fragments(norm, [s_["claim"] for s_ in steps], locate)
+    complete = not leftover and not governed
+    verdict = dres["verdict"]
+    if governed and not checked:
+        verdict = "INCOMPLETE"
+    elif verdict == "HOLDS" and not complete:
+        verdict = "PARTIAL"
+    note = f"{len(checked)} claim(s) checked — the rest of the text was NOT. "
+    if leftover:
+        note += "Not checked: " + "; ".join(f"'{x}'" for x in leftover[:4]) + ". "
+    if governed:
+        note += "Declined (governed, not asserted plainly): " + "; ".join(f"'{s_['claim']}'" for s_ in governed[:4]) + ". "
+    note += "Every claim shows its source quote; nothing was generated."
     out: Dict[str, Any] = {
         "claims_found": len(steps), "held": held,
         # `broken` is a finding about the CLAIM; `unchecked` is a fact about US. The old single
@@ -1273,16 +1459,19 @@ def audit(text: str, config, seal: bool = True, index: bool = True, card: bool =
         # Kept as the sum for callers that already read it; read the split instead.
         "broken": broken, "unchecked": unchecked,
         "broken_or_unchecked": broken + unchecked,
-        "results": results, "verdict": dres["verdict"],
-        "note": (f"{len(steps)} claim(s) checked — the rest of the text was NOT. "
-                 "Every claim shows its source quote; nothing was generated."),
+        "results": results, "verdict": verdict,
+        "coverage": {"complete": complete, "checked": [s_["claim"] for s_ in checked],
+                     "unchecked_text": leftover,
+                     "governed": [{"claim": s_["claim"], "by": s_["governed"]} for s_ in governed]},
+        "note": note,
     }
-    if seal:
+    if seal and dsteps:
         from . import receipts
-        dom = steps[0]["domain"]
+        dom = checked[0]["domain"]
         # `index` carries the bounded-seal choice: the explicit /verify door indexes the receipt card into
         # the live corpus (True); the high-frequency ambient /ask audit seals durably but does NOT (False),
         # so a visible re-checkable seal on every checked turn never bloats the corpus (Jevons governor).
+        # The seal covers the checked fragment only — never the text around it.
         sealed = receipts.attach(dres, config=config, domain=dom, enabled=True, index=index, card=card)
         if sealed.get("seal"):
             out["seal"] = sealed["seal"]
