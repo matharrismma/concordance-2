@@ -291,6 +291,13 @@ def dashboard(config: EngineConfig) -> Dict[str, Any]:
         out["components"] = components.report()
     except Exception:  # noqa: BLE001
         out["components"] = None
+    # THE LAUNCH ROLL-CALL (2026-10-08): what the last boot measured — every subsystem checked in with its
+    # import time and resident-memory delta, the heavy singletons, the edges priced by what they pull in.
+    try:
+        from .. import systems as _systems
+        out["boot"] = _systems.last_checkin()
+    except Exception:  # noqa: BLE001
+        out["boot"] = None
     try:
         out["history"] = _history(out)
     except Exception:  # noqa: BLE001

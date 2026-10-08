@@ -133,6 +133,10 @@
     <p class="meta" id="traffic"></p>
     <p class="meta" id="traffic-hosts"></p>
 
+    <h2>Launch roll-call <span class="sub">· every subsystem checked in at the last boot · speed and memory per piece</span></h2>
+    <p class="meta" id="boot"></p>
+    <p class="meta" id="boot-pieces"></p>
+
     <h2>Messages <span class="sub" id="msgs-n"></span></h2>
     <div id="msgs"></div>
     <p class="meta" id="msgs-empty">No messages yet — they arrive from the contact page.</p>
@@ -243,6 +247,23 @@ function render(d){
   document.getElementById("traffic-hosts").textContent = d.traffic ?
     ("by door — "+FACES.map(function(f){ var v=H[f[0]];
        return f[1]+" "+(v?num(v.requests)+" ("+num(v.human)+"h·"+num(v.agent)+"a·"+num(v.bot)+"b)":"—"); }).join("   ")) : "";
+
+  // THE LAUNCH ROLL-CALL — the last boot's measurement: ready/total, total ms, resident MB, the heaviest piece,
+  // then every piece with its own ms / MB (the heavy singletons first). A missing reading shows "?", never 0.
+  var B=d.boot;
+  var mbs=function(kb){ return kb==null?"?":(kb/1024).toFixed(kb>=10240?0:1); };
+  var mss=function(v){ return v==null?"?":(v>=100?num(Math.round(v)):Number(v).toFixed(1)); };
+  document.getElementById("boot").textContent = B ?
+    (B.at+" on "+B.host+" — "+B.ready+"/"+B.total+" checked in · "+mss(B.total_ms)+" ms (roll-call "+mss(B.rollcall_ms)+
+     " + singletons "+mss(B.singletons_ms)+") · process resident "+mbs(B.rss_kb_process)+" MB · heaviest by time: "+
+     (B.heaviest_ms||"—")+", by memory: "+(B.heaviest_kb||"—")) :
+    "No launch roll-call recorded yet — it runs at the next boot.";
+  document.getElementById("boot-pieces").textContent = B ?
+    ((B.singletons||[]).map(function(x){ return x.label+" "+mss(x.ms)+" ms / "+mbs(x.rss_kb)+" MB"+(x.ok?"":" (FAILED)"); })
+      .concat((B.subsystems||[]).slice().sort(function(a,b){ return (b.ms||0)-(a.ms||0); })
+        .map(function(r){ return r.slug+" "+mss(r.ms)+" ms / "+mbs(r.rss_kb)+" MB"+(r.status==="absent"?" (ABSENT)":"")+
+          (r.ms===0&&r.preloaded&&r.preloaded.length?" (preloaded)":""); }))
+      .join("   ")) : "";
 
   // messages
   var box=d.contact||{},msgs=box.recent||[];

@@ -51,3 +51,47 @@ def test_endpoint_serves_the_report():
     assert st == 200
     assert payload["course_handicap"] == systems.report()["course_handicap"]
     assert payload["subsystems"] and "handicap" in payload["subsystems"][0]
+
+
+# ---- THE LAUNCH ROLL-CALL (2026-10-08): every subsystem checks in with speed and memory ----
+
+def test_measure_times_a_step_and_never_raises():
+    ok = systems.measure("noop", lambda: None)
+    assert ok["ok"] and ok["ms"] >= 0 and ok["error"] is None
+    bad = systems.measure("boom", lambda: (_ for _ in ()).throw(RuntimeError("x")))
+    assert not bad["ok"] and "RuntimeError" in bad["error"] and bad["ms"] >= 0
+
+
+def test_checkin_every_subsystem_reports(tmp_path, monkeypatch):
+    monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(tmp_path))
+    out = systems.checkin(extra=[systems.measure("fake singleton", lambda: None)], write=True, log=False)
+    assert out["total"] == len(systems.SUBSYSTEMS) == len(out["subsystems"])
+    for r in out["subsystems"]:
+        assert r["status"] in ("ready", "degraded", "absent"), r
+        assert r["ms"] >= 0
+        assert r["rss_kb"] is None or r["rss_kb"] >= 0
+        assert set(r["loaded_now"]) | set(r["preloaded"]) | {m.split(":")[0] for m in r["missing"]} == set(
+            next(s["modules"] for s in systems.SUBSYSTEMS if s["slug"] == r["slug"]))
+    assert out["absent"] == [], out["absent"]            # on a healthy tree nothing is absent
+    assert out["singletons"][0]["label"] == "fake singleton"
+    assert all("pulls_ms" in e for e in out["edges"])     # every edge priced by what it pulls in
+    assert (tmp_path / "boot_checkin.json").exists()
+    assert systems.last_checkin()["at"] == out["at"]     # the report reads what the boot wrote
+    assert systems.report()["boot"]["total"] == out["total"]
+
+
+def test_rss_reading_is_a_number_or_honestly_none():
+    v = systems.rss_kb()
+    assert v is None or (isinstance(v, int) and v > 0)
+
+
+def test_isolated_checkin_tool_measures_a_piece_alone():
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+    import checkin as C
+    out = C.run(only=["crisis"], singletons=False, timeout=120, write=False)
+    assert out["rows"] and out["rows"][0]["slug"] == "crisis"
+    r = out["rows"][0]
+    assert r.get("error") is None, r
+    assert r["ms"] >= 0 and r["loaded"] >= 1
+    assert "baseline" in out and out["baseline"].get("base_ms", 0) >= 0
+    assert C.table(out).splitlines()[0].startswith("baseline")

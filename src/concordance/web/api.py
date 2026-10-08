@@ -4148,12 +4148,25 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
     # cold C-extension import inside the per-verification timeout (which could shed a TRUE claim
     # to a transient ERROR — errs safe, but a false negative). See derivation.warm().
     if warm:
+        # THE LAUNCH ROLL-CALL (2026-10-08): each warm step is timed with its resident-memory delta, then every
+        # subsystem checks in (systems.checkin: ms + KB per piece, edges priced by what they pull in), one
+        # journal line each, written to data/boot_checkin.json and served at /systems and on The Bridge.
+        # Each step is best-effort exactly as before — the boot never fails on a measurement.
         try:
-            corpus.default_corpus()
-            from .. import graph as _graph_warm
-            _graph_warm._graph()
-            from ..derivation import warm as _warm_verify
-            _warm_verify()
+            from .. import systems as _systems
+            _singletons = [_systems.measure("corpus (default_corpus)", corpus.default_corpus)]
+
+            def _warm_graph() -> None:
+                from .. import graph as _graph_warm
+                _graph_warm._graph()
+
+            def _warm_verify_deps() -> None:
+                from ..derivation import warm as _warm_verify
+                _warm_verify()
+
+            _singletons.append(_systems.measure("graph (_graph)", _warm_graph))
+            _singletons.append(_systems.measure("verify deps (derivation.warm)", _warm_verify_deps))
+            _systems.checkin(extra=_singletons)
         except Exception:
             pass
 

@@ -17,11 +17,19 @@ resolution, no corpus load). The dashboard (site/systems.html) reads report(); G
 """
 from __future__ import annotations
 
+import importlib
 import importlib.util
+import json
+import logging
 import os
 import re
+import socket
+import sys
+import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List, Optional
+
+_log = logging.getLogger("concordance.systems")
 
 _ROOT = Path(__file__).resolve().parents[2]          # repo root (…/concordance-2)
 _SRC = _ROOT / "src" / "concordance"
@@ -228,6 +236,9 @@ def report() -> Dict[str, Any]:
         "course_handicap": round(total / n, 1) if n else 0.0,
         "subsystems": rows,
         "graph": g,
+        # THE LAUNCH ROLL-CALL (2026-10-08): what the last boot measured — ms and resident memory per
+        # subsystem, the heavy singletons, and every edge priced by what it pulls in. None until a boot ran.
+        "boot": last_checkin(),
         "counts": {
             "connected": sum(1 for r in rows if r["live"]["status"] == "connected"),
             "degraded": sum(1 for r in rows if r["live"]["status"] == "degraded"),
@@ -243,5 +254,181 @@ def report() -> Dict[str, Any]:
             "integration": "degree = how many other subsystems it wires to (import edges); "
                            "isolated(0) / thin(≤1) / connected — the polymathic mesh, fractal with the card graph",
             "note": "a golf handicap — low is strong, 0 is scratch; the mean is the course handicap",
+            "boot": "the launch roll-call: each subsystem imported at boot and timed (ms) with its resident-memory "
+                    "delta (KB); modules the server had already imported are marked preloaded (cost paid in the "
+                    "server's own startup); tools/checkin.py measures each piece ALONE for its true cold cost",
         },
     }
+
+
+# ── THE LAUNCH ROLL-CALL (Matt, 2026-10-08: "each subsystem check in on launch ... see speed and memory of
+# each piece. We optimize each and the connections between them to get full capability.") ─────────────────
+#
+# Two instruments, deliberately split, because they answer different questions:
+#   checkin()          IN-PROCESS, at boot: what this server actually loads, what each subsystem costs to bring
+#                      in beyond what is already resident, and what each import edge PULLS IN. Cheap; never
+#                      fails boot; one journal line per subsystem; written to data/boot_checkin.json.
+#   tools/checkin.py   ISOLATED, on demand: each subsystem imported ALONE in a fresh interpreter — its true cold
+#                      ms and peak RSS with nothing else resident, minus a bare-interpreter baseline. The
+#                      optimizable number. Also the heavy singletons (corpus, graph, verify deps) by themselves.
+# Stdlib only. Memory is RESIDENT SET (RSS): /proc on Linux (the box), psapi on Windows (the desk); None where
+# neither is available — a missing number is reported as missing, never as zero.
+
+_LAST_CHECKIN: Optional[Dict[str, Any]] = None
+
+
+def _data_dir() -> Path:
+    return Path(os.environ.get("CONCORDANCE_DATA_DIR", "").strip() or str(_ROOT / "data"))
+
+
+def rss_kb() -> Optional[int]:
+    """Resident set size of THIS process in KB, or None if the platform offers no cheap reading."""
+    try:
+        if os.name == "posix" and os.path.exists("/proc/self/statm"):
+            with open("/proc/self/statm", "r", encoding="ascii") as f:
+                pages = int(f.read().split()[1])
+            return pages * (os.sysconf("SC_PAGE_SIZE") // 1024)
+        if os.name == "nt":
+            import ctypes
+            import ctypes.wintypes as w
+
+            class _PMC(ctypes.Structure):
+                _fields_ = [("cb", w.DWORD), ("PageFaultCount", w.DWORD),
+                            ("PeakWorkingSetSize", ctypes.c_size_t), ("WorkingSetSize", ctypes.c_size_t),
+                            ("QuotaPeakPagedPoolUsage", ctypes.c_size_t), ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                            ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t), ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                            ("PagefileUsage", ctypes.c_size_t), ("PeakPagefileUsage", ctypes.c_size_t)]
+            # argtypes/restype are REQUIRED: without them the pseudo-handle from GetCurrentProcess is marshalled
+            # as a 32-bit int and the call fails silently (measured 2026-10-08: None on the desk until declared)
+            k32 = ctypes.windll.kernel32
+            k32.GetCurrentProcess.restype = w.HANDLE
+            f = ctypes.windll.psapi.GetProcessMemoryInfo
+            f.argtypes = [w.HANDLE, ctypes.POINTER(_PMC), w.DWORD]
+            f.restype = w.BOOL
+            pmc = _PMC()
+            pmc.cb = ctypes.sizeof(_PMC)
+            if f(k32.GetCurrentProcess(), ctypes.byref(pmc), pmc.cb):
+                return int(pmc.WorkingSetSize // 1024)
+    except Exception:  # noqa: BLE001 — a reading we cannot take is None, never a crash and never a fake 0
+        pass
+    return None
+
+
+def measure(label: str, fn: Callable[[], Any]) -> Dict[str, Any]:
+    """Time one step and its resident-memory delta. Never raises: a failing step is recorded, not thrown —
+    the boot must go on (the original warm block swallowed errors for the same reason)."""
+    t0 = time.perf_counter()
+    r0 = rss_kb()
+    ok, err = True, None
+    try:
+        fn()
+    except Exception as e:  # noqa: BLE001
+        ok, err = False, (type(e).__name__ + ": " + str(e))[:160]
+    r1 = rss_kb()
+    return {"label": label, "ms": round((time.perf_counter() - t0) * 1000.0, 1),
+            "rss_kb": (r1 - r0) if (r0 is not None and r1 is not None) else None, "ok": ok, "error": err}
+
+
+def checkin(extra: Optional[List[Dict[str, Any]]] = None, *, write: bool = True, log: bool = True) -> Dict[str, Any]:
+    """Every subsystem checks in: import each of its modules, timed, with the resident-memory delta.
+
+    A module the server already imported before the roll-call is marked `preloaded` — its cost was paid in the
+    server's own startup and is NOT re-attributed here (an honest zero, labelled). `extra` carries the heavy
+    singletons the caller measured around the warm (corpus, graph, verify deps). Every import edge is then
+    priced by what it pulls in. Writes data/boot_checkin.json (box-generated; untracked) and logs one line per
+    subsystem. Pure stdlib; never raises."""
+    global _LAST_CHECKIN
+    t_all = time.perf_counter()
+    rss_start = rss_kb()
+    rows: List[Dict[str, Any]] = []
+    for s in SUBSYSTEMS:
+        ms = 0.0
+        kb = 0
+        kb_known = True
+        loaded_now: List[str] = []
+        preloaded: List[str] = []
+        missing: List[str] = []
+        for m in s["modules"]:
+            name = "concordance." + m
+            if name in sys.modules:
+                preloaded.append(m)
+                continue
+            t0 = time.perf_counter()
+            r0 = rss_kb()
+            try:
+                importlib.import_module(name)
+                loaded_now.append(m)
+            except Exception as e:  # noqa: BLE001 — an absent piece is a finding, never a boot failure
+                missing.append(f"{m}: {type(e).__name__}")
+            ms += (time.perf_counter() - t0) * 1000.0
+            r1 = rss_kb()
+            if r0 is None or r1 is None:
+                kb_known = False
+            else:
+                kb += max(0, r1 - r0)
+        status = "absent" if missing else ("degraded" if s.get("degraded") else "ready")
+        rows.append({"slug": s["slug"], "name": s["name"], "status": status, "ms": round(ms, 1),
+                     "rss_kb": kb if kb_known else None, "loaded_now": loaded_now, "preloaded": preloaded,
+                     "missing": missing})
+    singletons = list(extra or [])
+    by_slug = {r["slug"]: {"status": r["status"], "ms": r["ms"], "rss_kb": r["rss_kb"]} for r in rows}
+    g = subsystem_graph()
+    edges = [{**e, "pulls_ms": by_slug.get(e["to"], {}).get("ms"), "pulls_kb": by_slug.get(e["to"], {}).get("rss_kb")}
+             for e in g["edges"]]
+    roll_ms = round((time.perf_counter() - t_all) * 1000.0, 1)
+    out: Dict[str, Any] = {
+        "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "host": socket.gethostname(), "pid": os.getpid(), "python": sys.version.split()[0],
+        "platform": sys.platform,
+        "rollcall_ms": roll_ms,
+        "singletons_ms": round(sum(float(x.get("ms") or 0) for x in singletons), 1),
+        "total_ms": round(roll_ms + sum(float(x.get("ms") or 0) for x in singletons), 1),
+        "rss_kb_start": rss_start, "rss_kb_process": rss_kb(),
+        "ready": sum(1 for r in rows if r["status"] != "absent"), "total": len(rows),
+        "absent": [r["slug"] for r in rows if r["status"] == "absent"],
+        "heaviest_ms": max(rows, key=lambda r: r["ms"])["slug"] if rows else None,
+        "heaviest_kb": (max((r for r in rows if r["rss_kb"] is not None), key=lambda r: r["rss_kb"], default={"slug": None})["slug"]),
+        "subsystems": rows, "singletons": singletons, "by_slug": by_slug, "edges": edges,
+        "note": ("the roll-call measures what boot loads beyond the server's own imports (preloaded modules cost "
+                 "0 here, labelled); the heavy singletons are measured around the warm; tools/checkin.py gives each "
+                 "piece's cost alone"),
+    }
+    if log:
+        for r in rows:
+            _log.info("check-in %-30s %-8s %8.1f ms %9s KB  (%d loaded now, %d preloaded%s)",
+                      r["name"], r["status"], r["ms"], (r["rss_kb"] if r["rss_kb"] is not None else "?"),
+                      len(r["loaded_now"]), len(r["preloaded"]),
+                      ("; MISSING " + ", ".join(r["missing"])) if r["missing"] else "")
+        for x in singletons:
+            _log.info("check-in %-30s %-8s %8.1f ms %9s KB%s", x.get("label"), "ok" if x.get("ok") else "FAILED",
+                      float(x.get("ms") or 0), (x.get("rss_kb") if x.get("rss_kb") is not None else "?"),
+                      (" — " + str(x.get("error"))) if x.get("error") else "")
+        _log.info("check-in: %d/%d ready, %.1f ms (roll-call %.1f + singletons %.1f), process RSS %s KB",
+                  out["ready"], out["total"], out["total_ms"], roll_ms, out["singletons_ms"],
+                  out["rss_kb_process"] if out["rss_kb_process"] is not None else "?")
+    if write:
+        try:
+            d = _data_dir()
+            d.mkdir(parents=True, exist_ok=True)
+            p = d / "boot_checkin.json"
+            tmp = p.with_suffix(".json.tmp")
+            tmp.write_text(json.dumps(out, indent=1), encoding="utf-8")
+            os.replace(tmp, p)
+        except Exception:  # noqa: BLE001 — the record is best-effort; the boot never depends on the disk
+            pass
+    _LAST_CHECKIN = out
+    return out
+
+
+def last_checkin() -> Optional[Dict[str, Any]]:
+    """The last roll-call: this process's own if it ran one, else the last one written to disk (so a request
+    process that did not boot-check — tests, a tool — still shows the last known), else None."""
+    if _LAST_CHECKIN is not None:
+        return _LAST_CHECKIN
+    try:
+        p = _data_dir() / "boot_checkin.json"
+        if p.exists():
+            return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        pass
+    return None
