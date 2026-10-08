@@ -1414,6 +1414,96 @@ def _x_fallacy_kind(text: str):
     return out
 
 
+# ── LINGUISTICS AS A STRENGTH (Matt, 2026-10-08): the computable claims about words ───────────────
+# What a word's letters say is arithmetic: letters, vowels, consonants, syllables and phonemes (the pronunciation
+# shelf), anagrams, palindromes, edit distance, an alphabet's size, a noun's plural, a letter's rank in English.
+# Routed to verifiers/wordcraft.py, which names its convention in every detail. Meaning stays with the lexicon's
+# doors (define, word_study); etymology is not in the keeping and is not pretended.
+_W = r"[A-Za-z][A-Za-z'\-]*"
+_WQ = r"[\"'\u2018\u2019\u201c\u201d]?"
+_COUNT = r"(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|no)"
+
+
+def _count(tok: str) -> int:
+    t = tok.strip().lower()
+    return 0 if t == "no" else _small(t)
+
+
+def _x_word_letters(text: str):
+    out = []
+    for m in re.finditer(r"\b(?:the\s+)?word\s+" + _WQ + "(" + _W + ")" + _WQ + r"\s+(?:has|contains)\s+" + _COUNT +
+                         r"\s+(letters?|vowels?|consonants?|syllables?|phonemes?|sounds?)\b", text, re.I):
+        kind = m.group(3).lower().rstrip("s")
+        kind = {"letter": "letters", "vowel": "vowels", "consonant": "consonants", "syllable": "syllables",
+                "phoneme": "phonemes", "sound": "phonemes"}[kind]
+        out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word": m.group(1), "claimed_" + kind: _count(m.group(2))}}))
+    for m in re.finditer(_WQ + r"\b(" + _W + ")" + _WQ + r"\s+is\s+an?\s+(\d+)-(letter|syllable)\s+word\b", text, re.I):
+        kind = "letters" if m.group(3).lower() == "letter" else "syllables"
+        out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word": m.group(1), "claimed_" + kind: int(m.group(2))}}))
+    return out
+
+
+def _x_anagram(text: str):
+    out = []
+    for m in re.finditer(_WQ + r"\b(" + _W + ")" + _WQ + r"\s+is\s+(not\s+)?an\s+anagram\s+of\s+" + _WQ + "(" + _W + ")" + _WQ, text, re.I):
+        out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word_a": m.group(1), "word_b": m.group(3),
+                                                                "claimed_anagram": not bool(m.group(2))}}))
+    return out
+
+
+def _x_palindrome(text: str):
+    out = []
+    for m in re.finditer(_WQ + r"\b(" + _W + ")" + _WQ + r"\s+is\s+(not\s+)?a\s+palindrome\b", text, re.I):
+        if m.group(1).lower() in ("it", "this", "that", "which", "word", "name"):
+            continue
+        out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word": m.group(1), "claimed_palindrome": not bool(m.group(2))}}))
+    return out
+
+
+def _x_edit_distance(text: str):
+    out = []
+    for m in re.finditer(_WQ + r"\b(" + _W + ")" + _WQ + r"\s+and\s+" + _WQ + "(" + _W + ")" + _WQ +
+                         r"\s+are\s+" + _COUNT + r"\s+(?:edits?|letters?|changes?|steps?)\s+apart\b", text, re.I):
+        out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word_a": m.group(1), "word_b": m.group(2),
+                                                                "claimed_edit_distance": _count(m.group(3))}}))
+    for m in re.finditer(r"\b(?:the\s+)?(?:edit|levenshtein)\s+distance\s+(?:between|from)\s+" + _WQ + "(" + _W + ")" + _WQ +
+                         r"\s+(?:and|to)\s+" + _WQ + "(" + _W + ")" + _WQ + r"\s+(?:is|=|equals)\s+" + _COUNT + r"\b", text, re.I):
+        out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"word_a": m.group(1), "word_b": m.group(2),
+                                                                "claimed_edit_distance": _count(m.group(3))}}))
+    return out
+
+
+def _x_alphabet(text: str):
+    from .verifiers import wordcraft as _wc
+    names = "|".join(re.escape(k) for k in sorted(_wc.ALPHABETS, key=len, reverse=True))
+    out = []
+    for m in re.finditer(r"\b(?:the\s+)?(" + names + r")\s+alphabet\s+(?:has|contains|consists\s+of)\s+" + _COUNT + r"\s+letters?\b", text, re.I):
+        out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"alphabet": m.group(1).lower(), "claimed_alphabet_letters": _count(m.group(2))}}))
+    for m in re.finditer(r"\b(" + names + r")\s+has\s+" + _COUNT + r"\s+letters?\b(?:\s+in\s+(?:its|the)\s+alphabet)?", text, re.I):
+        out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"alphabet": m.group(1).lower(), "claimed_alphabet_letters": _count(m.group(2))}}))
+    return out
+
+
+def _x_plural(text: str):
+    out = []
+    for m in re.finditer(r"\bthe\s+plural\s+(?:form\s+)?of\s+" + _WQ + "(" + _W + ")" + _WQ + r"\s+is\s+" + _WQ + "(" + _W + ")" + _WQ, text, re.I):
+        out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"singular": m.group(1), "claimed_plural": m.group(2)}}))
+    return out
+
+
+_RANK_WORDS = {"most": 1, "second most": 2, "third most": 3, "fourth most": 4, "fifth most": 5, "least": 26, "second least": 25}
+
+
+def _x_letter_rank(text: str):
+    out = []
+    ranks = "|".join(re.escape(k) for k in sorted(_RANK_WORDS, key=len, reverse=True))
+    for m in re.finditer(r"\b(?:the\s+letter\s+)?" + _WQ + r"\b([A-Za-z])\b" + _WQ + r"\s+is\s+the\s+(" + ranks + r")\s+(?:common|frequent)\s+letter\s+in\s+(?:written\s+)?English\b", text, re.I):
+        out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"letter": m.group(1).lower(), "claimed_rank": _RANK_WORDS[m.group(2).lower()]}}))
+    for m in re.finditer(r"\bthe\s+(" + ranks + r")\s+(?:common|frequent)\s+letter\s+in\s+(?:written\s+)?English\s+is\s+" + _WQ + r"([A-Za-z])\b", text, re.I):
+        out.append((_q(text, m), "wordcraft", {"WORD_VERIFY": {"letter": m.group(2).lower(), "claimed_rank": _RANK_WORDS[m.group(1).lower()]}}))
+    return out
+
+
 # ── element FACTS (fact-verifier, 2026-09-25): a lookup claim becomes a VERDICT ──────────────────────
 # The gap Matt named: a lookup like "the atomic number of carbon is 6" returned NOTHING_TO_CHECK + FOUND,
 # never a verdict. The periodic_table verifier + IUPAC data already exist (definitional identity, zero
@@ -1494,6 +1584,8 @@ _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("propositional_logic", _x_propositional_logic), ("logic_relations", _x_logic_relations), ("argument_form", _x_argument_form),
     ("syllogism", _x_syllogism), ("logic_counts", _x_logic_counts), ("named_forms", _x_named_forms),
     ("fallacy_kind", _x_fallacy_kind),
+    ("word_letters", _x_word_letters), ("anagram", _x_anagram), ("palindrome", _x_palindrome),
+    ("edit_distance", _x_edit_distance), ("alphabet", _x_alphabet), ("plural", _x_plural), ("letter_rank", _x_letter_rank),
     ("circle", _x_circle), ("pythagorean", _x_pythagorean), ("polygon_angles", _x_polygon_angles),
     ("rectangle", _x_rectangle), ("triangle_inequality", _x_triangle_inequality),
     ("sphere", _x_sphere), ("cube", _x_cube), ("cylinder", _x_cylinder),

@@ -1584,6 +1584,286 @@
     "truth": false,
     "text": "ad hominem is a formal fallacy"
    }
+  ],
+  "word_letters": [
+   {
+    "id": "wl_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the word strengths has 9 letters"
+   },
+   {
+    "id": "wl_2",
+    "register": "forum",
+    "truth": true,
+    "text": "the word strengths has one vowel"
+   },
+   {
+    "id": "wl_3",
+    "register": "speech",
+    "truth": true,
+    "text": "strengths is a 9-letter word"
+   },
+   {
+    "id": "wl_4",
+    "register": "forum",
+    "truth": true,
+    "text": "the word rhythm has no vowels"
+   },
+   {
+    "id": "wl_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "the word strengths has 10 letters"
+   },
+   {
+    "id": "wl_6",
+    "register": "forum",
+    "truth": false,
+    "text": "the word queue has 2 vowels"
+   },
+   {
+    "id": "wl_7",
+    "register": "news",
+    "truth": true,
+    "text": "Mississippi has 11 letters, four of them s"
+   }
+  ],
+  "anagram": [
+   {
+    "id": "an_1",
+    "register": "forum",
+    "truth": true,
+    "text": "listen is an anagram of silent"
+   },
+   {
+    "id": "an_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "\"dormitory\" is an anagram of \"dirtyroom\""
+   },
+   {
+    "id": "an_3",
+    "register": "forum",
+    "truth": true,
+    "text": "listen is not an anagram of silver"
+   },
+   {
+    "id": "an_4",
+    "register": "forum",
+    "truth": false,
+    "text": "listen is an anagram of silver"
+   },
+   {
+    "id": "an_5",
+    "register": "speech",
+    "truth": true,
+    "text": "The letters of evil rearranged spell vile, so evil is an anagram of vile"
+   }
+  ],
+  "palindrome": [
+   {
+    "id": "pal_1",
+    "register": "forum",
+    "truth": true,
+    "text": "racecar is a palindrome"
+   },
+   {
+    "id": "pal_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "Level is a palindrome"
+   },
+   {
+    "id": "pal_3",
+    "register": "forum",
+    "truth": true,
+    "text": "engine is not a palindrome"
+   },
+   {
+    "id": "pal_4",
+    "register": "forum",
+    "truth": false,
+    "text": "engine is a palindrome"
+   },
+   {
+    "id": "pal_5",
+    "register": "speech",
+    "truth": true,
+    "text": "Read backwards, kayak is a palindrome"
+   }
+  ],
+  "edit_distance": [
+   {
+    "id": "ed_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "kitten and sitting are 3 edits apart"
+   },
+   {
+    "id": "ed_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "the edit distance between kitten and sitting is 3"
+   },
+   {
+    "id": "ed_3",
+    "register": "forum",
+    "truth": true,
+    "text": "the Levenshtein distance from flaw to lawn is 2"
+   },
+   {
+    "id": "ed_4",
+    "register": "textbook",
+    "truth": false,
+    "text": "the edit distance between kitten and sitting is 2"
+   },
+   {
+    "id": "ed_5",
+    "register": "forum",
+    "truth": false,
+    "text": "flaw and lawn are 4 edits apart"
+   }
+  ],
+  "alphabet": [
+   {
+    "id": "alph_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the Hebrew alphabet has 22 letters"
+   },
+   {
+    "id": "alph_2",
+    "register": "forum",
+    "truth": true,
+    "text": "English has 26 letters"
+   },
+   {
+    "id": "alph_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "the Greek alphabet has 24 letters"
+   },
+   {
+    "id": "alph_4",
+    "register": "news",
+    "truth": true,
+    "text": "the Russian alphabet consists of 33 letters"
+   },
+   {
+    "id": "alph_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "the Greek alphabet has 26 letters"
+   },
+   {
+    "id": "alph_6",
+    "register": "forum",
+    "truth": false,
+    "text": "the Hebrew alphabet has 26 letters"
+   }
+  ],
+  "plural": [
+   {
+    "id": "pl_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the plural of child is children"
+   },
+   {
+    "id": "pl_2",
+    "register": "textbook",
+    "truth": true,
+    "text": "the plural of city is cities"
+   },
+   {
+    "id": "pl_3",
+    "register": "forum",
+    "truth": true,
+    "text": "the plural form of mouse is mice"
+   },
+   {
+    "id": "pl_4",
+    "register": "forum",
+    "truth": true,
+    "text": "the plural of box is boxes"
+   },
+   {
+    "id": "pl_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "the plural of child is childs"
+   },
+   {
+    "id": "pl_6",
+    "register": "forum",
+    "truth": false,
+    "text": "the plural of mouse is mouses"
+   }
+  ],
+  "letter_rank": [
+   {
+    "id": "lr_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "E is the most common letter in English"
+   },
+   {
+    "id": "lr_2",
+    "register": "forum",
+    "truth": true,
+    "text": "the most common letter in English is E"
+   },
+   {
+    "id": "lr_3",
+    "register": "textbook",
+    "truth": true,
+    "text": "T is the second most common letter in English"
+   },
+   {
+    "id": "lr_4",
+    "register": "forum",
+    "truth": true,
+    "text": "Z is the least common letter in English"
+   },
+   {
+    "id": "lr_5",
+    "register": "textbook",
+    "truth": false,
+    "text": "the most common letter in English is T"
+   },
+   {
+    "id": "lr_6",
+    "register": "forum",
+    "truth": false,
+    "text": "Q is the most common letter in English"
+   }
+  ],
+  "syllables": [
+   {
+    "id": "syl_1",
+    "register": "textbook",
+    "truth": true,
+    "text": "the word encyclopedia has 6 syllables"
+   },
+   {
+    "id": "syl_2",
+    "register": "forum",
+    "truth": true,
+    "text": "the word strength has one syllable"
+   },
+   {
+    "id": "syl_3",
+    "register": "textbook",
+    "truth": false,
+    "text": "the word encyclopedia has 4 syllables"
+   },
+   {
+    "id": "syl_4",
+    "register": "forum",
+    "truth": false,
+    "text": "the word strength has 3 syllables"
+   }
   ]
  }
 }

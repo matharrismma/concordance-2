@@ -123,6 +123,8 @@ VERIFIERS: Dict[str, str] = {
     "photography": _P + "photography", "photo": _P + "photography",
     # humanities
     "linguistics": _P + "linguistics",
+    # the computable claims about words, letters and alphabets (linguistics as a strength, 2026-10-08)
+    "wordcraft": _P + "wordcraft", "words": _P + "wordcraft", "spelling": _P + "wordcraft", "letters": _P + "wordcraft",
     "music_theory": _P + "music_theory", "music": _P + "music_theory",
     "rhetoric": _P + "rhetoric", "argumentation": _P + "rhetoric", "fallacy": _P + "rhetoric",
     "philosophy": _P + "philosophy", "ethics": _P + "philosophy", "epistemology": _P + "philosophy",

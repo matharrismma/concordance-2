@@ -2274,5 +2274,44 @@
       "to_unit": "m",
       "to_value": 1000.0
     }
+  },
+  "wordcraft": {
+    "false": {
+      "alphabet": "hebrew",
+      "claimed_alphabet_letters": 51.5,
+      "claimed_anagram": false,
+      "claimed_consonants": 13.5,
+      "claimed_edit_distance": 15.5,
+      "claimed_letters": 17.5,
+      "claimed_palindrome": false,
+      "claimed_phonemes": 17.5,
+      "claimed_rank": 11.5,
+      "claimed_syllables": 11.5,
+      "claimed_vowels": 11.5,
+      "letter": "t",
+      "pronunciation": "L EH1 V AH0 L",
+      "word": "level",
+      "word_a": "listen",
+      "word_b": "silent"
+    },
+    "packet_key": "WORD_VERIFY",
+    "true": {
+      "alphabet": "hebrew",
+      "claimed_alphabet_letters": 22,
+      "claimed_anagram": true,
+      "claimed_consonants": 3,
+      "claimed_edit_distance": 4,
+      "claimed_letters": 5,
+      "claimed_palindrome": true,
+      "claimed_phonemes": 5,
+      "claimed_rank": 2,
+      "claimed_syllables": 2,
+      "claimed_vowels": 2,
+      "letter": "t",
+      "pronunciation": "L EH1 V AH0 L",
+      "word": "level",
+      "word_a": "listen",
+      "word_b": "silent"
+    }
   }
 }
