@@ -1487,6 +1487,16 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                 _a = _audit.audit(text, config, seal=True, index=False)
                 if _a.get("claims_found"):
                     r["audit"] = _a
+                else:
+                    # A FOUND FACT (2026-10-07): nothing computable, but the keeping's own sourced table may
+                    # hold the lookup fact the words name (a half-life, a boiling point, an atomic weight) —
+                    # the same honest answer the /verify door gives: cited, never a computed verdict, never a
+                    # receipt. Pure (the tables only, no corpus), so it costs nothing on the hot path.
+                    from .. import factfind as _ff
+                    _fact = _ff.find_fact(text)
+                    if _fact and _fact.get("field"):
+                        _fact["sentence"] = _ff.fact_sentence(_fact)
+                        r["found_fact"] = _fact
             except Exception:  # noqa: BLE001
                 pass
         # Anticipate — a step ahead: the likely next question, as clickable follow-ups. Best-effort,

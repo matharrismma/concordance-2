@@ -715,9 +715,29 @@ def verify_numeric(spec: Dict[str, Any]) -> VerifierResult:
         return error(name, f"could not evaluate {expr!r}: {type(e).__name__}")
     except (TypeError, ValueError):
         return mismatch(name, f"{expr} is not a pure number (has free symbols?)", {"expr": str(expr)})
-    data = {"expr": str(expr), "computed": fv, "claimed": cv, "rel_tol": rel_tol,
-            "abs_diff": abs(fv - cv)}
-    if abs(fv - cv) <= rel_tol * max(1.0, abs(fv)):
+    diff = abs(fv - cv)
+    threshold = rel_tol * max(1.0, abs(fv))
+    data = {"expr": str(expr), "computed": fv, "claimed": cv, "rel_tol": rel_tol, "abs_diff": diff}
+    # STATED PRECISION (2026-10-07), as physical_constants keeps it: the literal as the person wrote it
+    # ("1.41421") earns half a unit in its last stated place — two or more significant figures only, so a
+    # one-figure "1" never passes as sqrt(2). Only the claim's own literal can widen the window; a structured
+    # caller that sends no literal keeps the strict default unchanged (clamp_tol still only tightens).
+    stated_used = False
+    lit = spec.get("claimed_literal")
+    if lit is not None and diff > threshold:
+        from .base import stated_precision, stated_tolerance_abs
+        tol = stated_tolerance_abs(lit)
+        sp = stated_precision(lit)
+        if tol is not None:
+            data["stated_sigfigs"] = sp[0] if sp else None
+            data["stated_tolerance"] = tol
+            if diff <= tol:
+                threshold = tol
+                stated_used = True
+    if diff <= threshold:
+        if stated_used:
+            return confirm(name, f"{expr} = {fv:.10g} — the claim {cv} matches to the "
+                                 f"{data.get('stated_sigfigs')} significant figure(s) stated (computed {fv:.10g})", data)
         return confirm(name, f"{expr} = {fv:.10g} (claim {cv}, within {rel_tol:.0e})", data)
     return mismatch(name, f"{expr} = {fv:.10g}, claimed {cv}", data)
 

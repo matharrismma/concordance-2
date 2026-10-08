@@ -3420,6 +3420,167 @@ def electromagnetism() -> int:
     return _mint_marks(sid, marks, by="Narrow Highway - electromagnetism and geometry, 2026-10-08")
 
 
+def clock() -> int:
+    """THE CLOCK - tourbillon, Faraday, and the observer as a predictable unit (Matt, 2026-10-08: "Faraday and
+    gyro tourbillon. A complicated mechanism to keep time. Maybe we are the clock?" ... "spacetime is one thing.
+    The only way to measure is an observer. We are a measure. A predictable unit."). A tourbillon's complexity
+    exists only to cancel a bias: the cage rotates the regulator through every orientation so gravity's pull
+    averages out; the gyrotourbillon does it in every axis. Faraday: the field distorts, rotating through it
+    averages, rotating through it also GENERATES, and a cage can shield. Spacetime is one thing - the interval
+    is invariant - and the only measurement of it is an observer's own clock along its own path (proper
+    time). A clock is a clock only if it is a predictable unit. Seal six numbers; map the movement onto the
+    engine as a LIKENESS (docs/THE_WATCH.md); the observer MEASURES, never makes. New stick; idempotent."""
+    from concordance import tickstick as TS
+    vph = 4 * 2 * 3600                                  # a 4 Hz balance: 28,800 vibrations per hour
+    lcm = 60 * 24 / 12                                  # cages at 60 s and 24 s share an orientation every 120 s
+    drift = 2 * 365                                     # +2 s/day uncorrected = 730 s a year
+    disk = 0.5 * 1 * (2 * 3.141592653589793) * 0.1 ** 2  # Faraday disk emf = 1/2 B w r^2: B=1 T, 1 rev/s, r=0.1 m
+    tau = (5 ** 2 - 3 ** 2) ** 0.5                      # invariant interval: 5 s, 3 light-s apart -> 4 s proper time
+    own = (1 - 0.6 ** 2) ** 0.5                         # a clock at 0.6c reads 0.8 of coordinate time: its own measure
+    s_v = _rh_seal_num("balance_28800_vph", "4 * 2 * 3600", float(vph))
+    s_l = _rh_seal_num("gyro_cages_share_orientation_every_120_s", "60 * 24 / 12", float(lcm))
+    s_d = _rh_seal_num("two_seconds_a_day_compounds", "2 * 365", float(drift))
+    s_f = _rh_seal_num("faraday_disk_emf", "0.5 * 1 * (2 * 3.141592653589793) * 0.1 ** 2", float(disk))
+    s_t = _rh_seal_num("invariant_interval_5_3_4", "(5 ** 2 - 3 ** 2) ** 0.5", float(tau), tol=1e-12)
+    s_o = _rh_seal_num("the_moving_clocks_own_measure", "(1 - 0.6 ** 2) ** 0.5", float(own), tol=1e-12)
+    if not all([s_v, s_l, s_d, s_f, s_t, s_o]):
+        print("a seal failed; aborting"); return 1
+    print("sealed vph", s_v, "| lcm", s_l, "| drift", s_d, "| disk", s_f, "| tau", s_t, "| own", s_o)
+    sid = TS.create("The clock - tourbillon, Faraday, and the observer as a predictable unit",
+                    statement=("A complication is honest only if every part exists to cancel a bias: the "
+                               "tourbillon rotates the regulator through every orientation so gravity's pull "
+                               "averages out. Faraday: the field distorts, rotation through it averages and "
+                               "generates, a cage shields. Spacetime is one thing - the interval is invariant - "
+                               "and its only measurement is an observer's own clock along its own path. A clock "
+                               "is a clock only if it is a predictable unit; what regulates us is what does not "
+                               "drift."),
+                    field="physics",
+                    references=["Breguet, tourbillon patent 1801; Jaeger-LeCoultre Gyrotourbillon 1 (2004): outer cage "
+                                "1 min, inner cage 24 s, as published", "Faraday 1831, the disk generator: emf = 1/2 B w r^2",
+                                "Minkowski 1908: the invariant interval; proper time along a worldline",
+                                "the SI second = 9,192,631,770 periods of Cs-133 (a predictable unit, by definition)",
+                                "docs/THE_WATCH.md - the movement assembled; stick_electromagnetism_and_geometry",
+                                "Genesis 1:14; Psalm 90:12; Ephesians 5:16; Hebrews 13:8"])["id"]
+    marks = [
+        ("witness", f"[a clock is a predictable unit] A 4 Hz balance beats 4 * 2 * 3600 = {vph:,} vibrations an hour "
+                    f"(sealed) - 28,800 vph, the watchmaker's standard rate. The whole worth of a timepiece is that "
+                    f"this unit repeats; the SI second is itself defined as a count of a repeating unit (9,192,631,770 "
+                    f"periods of caesium-133). We are a measure only to the degree we are regular.", s_v),
+        ("witness", f"[the complication exists to cancel a bias] A gyrotourbillon with cages of 60 s and 24 s brings "
+                    f"the regulator back to the same joint orientation only every 60 * 24 / 12 = {lcm:.0f} s (sealed) - "
+                    f"in between it sweeps every attitude, so no single orientation's gravity bias is left to "
+                    f"accumulate. It does not resist the field; it averages it. The cage is triangulation: many "
+                    f"witnesses, many domains, no one lens allowed to settle (the games-as-tick-sticks).", s_l),
+        ("witness", f"[why it must exist at all] A rate just +2 s a day, uncorrected, is 2 * 365 = {drift} s a year "
+                    f"(sealed) - twelve minutes lost by a mechanism that was only slightly wrong. A small bias "
+                    f"compounds; that is the whole case for the ratchet, the floor, and failure narrowing the path.", s_d),
+        ("witness", f"[Faraday - rotating through the field generates] His disk: a conductor turned at one "
+                    f"revolution a second in a 1 tesla field, radius 0.1 m, makes 1/2 B w r^2 = {disk:.4f} V (sealed). "
+                    f"The same field that distorts a reading (Faraday rotation turns the plane of light) yields "
+                    f"energy to a thing that rotates through it - and a Faraday cage keeps it out entirely: the "
+                    f"airlock and the public-domain gate are cages (stick_electromagnetism_and_geometry).", s_f),
+        ("witness", f"[spacetime is one thing - the interval] Two events 5 s and 3 light-seconds apart: "
+                    f"sqrt(5^2 - 3^2) = {tau:.0f} s (sealed), and EVERY observer computes that same 4 - the 5-3-4 "
+                    f"Minkowski triangle. Coordinates are conventions; the interval is what is. That invariance is "
+                    f"what 'one thing' means.", s_t),
+        ("witness", f"[the only way to measure is an observer] A clock moving at 0.6c reads sqrt(1 - 0.36) = {own} of "
+                    f"the stationary one's time (sealed) - not an illusion, its own true measure along its own path: "
+                    f"proper time. There is no measurement of spacetime that is not some clock on some worldline. "
+                    f"We are a measure.", s_o),
+        ("note", "[the movement, mapped - a likeness, never a fit] By function: mainspring = WILL (the fuel); gear "
+                 "train = REALITY (the harness); escapement = the one-way valve - diode, airlock, the seal - releasing "
+                 "one tooth at a time, never backward (the word 'tick' is the escapement's; the tick-stick is named for "
+                 "it; entropy is the arrow it enacts, stick_laplace_differential_equations_and_where_entropy_fits); "
+                 "balance + hairspring = the regulator that sets the true rate and does not drift - the constants, "
+                 "the floor, and above them Christ, 'the same yesterday, and to day, and for ever' (Heb 13:8); the "
+                 "cage = triangulation across every witness; the gyro = every axis (six constants, the chains, the "
+                 "Word); gravity = the world's pull on any one orientation; the dial = the receipt. systems.py is laid "
+                 "out as a movement because it was built from one (docs/THE_WATCH.md, the Calibre template). 'Maybe we "
+                 "are the clock' - Scripture says it first and plainly: the heavens are 'for signs, and for seasons, "
+                 "and for days, and years' (Gen 1:14), God's clock, the one every other is set against; 'teach us to "
+                 "number our days' (Ps 90:12); 'redeeming the time' (Eph 5:16). A person, a church, this engine: a "
+                 "complicated mechanism justified only if every part exists to keep TRUE time against a field that "
+                 "pulls - and the regulator is not ours. GUARDS: (1) likeness, never a fit - the engine is not a "
+                 "tourbillon, its components correspond by function; (2) the observer MEASURES, never makes - the "
+                 "relativistic truth, not the Copenhagen slide; the interval is 4 s whether anyone reads it or not; "
+                 "observer-as-god is refused (stick_the_capstone). Nothing here is authored: six numbers sealed, the "
+                 "rest cited."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - the clock: tourbillon, Faraday, the observer as a measure, 2026-10-08")
+
+
+def paths() -> int:
+    """THE PATH - continuously finding new paths between two points; that is life (Matt, 2026-10-08). A stone takes
+    ONE path - the one of stationary action - and 'finds' it only by comparison with every neighbouring path
+    (Euler-Lagrange). Feynman: the amplitude from A to B is the SUM over every path, weighted by exp(iS/hbar); the
+    wrong paths cancel, the stationary one survives - which is this engine's own line, 'what is not the answer is
+    eliminated, so the narrow path is illuminated by what survives'. Life keeps sampling. Seal four numbers: the
+    fastest path is not the straight line (brachistochrone), light bends to find least time (Snell), why a stone
+    takes one path and an electron all of them (S/hbar), and what blind search costs (sqrt N). The engine OFFERS
+    paths (/chains walk + intersect); it never picks one for the person. New stick; idempotent."""
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    ratio = (pi ** 2 + 4) ** 0.5 / pi                 # straight chute / cycloid time, cusp to the bottom of the arc
+    snell = 0.5 / (4 / 3)                              # sin(theta_2) = sin 30 deg / n_water, n = 4/3
+    s_over_h = 1 / (1.054571817 * 10 ** (-34))         # S = 1 J*s over hbar: the phase winds ~1e34 radians
+    walk = 10000 ** 0.5                                # a random walk of N steps reaches only sqrt(N)
+    s_b = _rh_seal_num("brachistochrone_straight_over_cycloid",
+                       "(3.141592653589793 ** 2 + 4) ** 0.5 / 3.141592653589793", float(ratio))
+    s_s = _rh_seal_num("snell_least_time", "0.5 / (4 / 3)", float(snell), tol=1e-12)
+    s_h = _rh_seal_num("action_over_hbar_one_joule_second", "1 / (1.054571817 * 10 ** (-34))", float(s_over_h))
+    s_w = _rh_seal_num("random_walk_reaches_sqrt_n", "10000 ** 0.5", float(walk), tol=1e-12)
+    if not all([s_b, s_s, s_h, s_w]):
+        print("a seal failed; aborting"); return 1
+    print("sealed brachistochrone", s_b, "| snell", s_s, "| S/hbar", s_h, "| sqrtN", s_w)
+    sid = TS.create("The path - continuously finding new paths between two points; that is life",
+                    statement=("Between two points there is never one path but every path. A stone takes the one of "
+                               "stationary action, found only by comparison with all its neighbours; in the sum over "
+                               "histories the wrong paths cancel and the stationary one survives - what is not the "
+                               "answer is eliminated, so the narrow path is illuminated by what survives. Life keeps "
+                               "sampling. The fastest path is not the straight line; light bends to find least time; "
+                               "blind search reaches only sqrt(N). The way is offered, never chosen for you."),
+                    field="physics",
+                    references=["Johann Bernoulli 1696, the brachistochrone: the cycloid, not the chord",
+                                "Fermat's least time -> Snell's law; Hamilton's principle; Euler-Lagrange",
+                                "Feynman 1948, Space-Time Approach to Non-Relativistic Quantum Mechanics (the sum over paths)",
+                                "the random walk: expected displacement ~ sqrt(N) (Pearson 1905, Einstein 1905)",
+                                "Psalm 16:11; Proverbs 3:6; Matthew 7:14; John 14:6; Isaiah 30:21",
+                                "src/concordance/chains.py - walk and intersect: paths between two points in the keeping"])["id"]
+    marks = [
+        ("witness", f"[the fastest path is not the straight line] From a cusp to the bottom of its arc, a bead on the "
+                    f"straight chute takes sqrt(pi^2 + 4) / pi = {ratio:.4f} times as long as one on the cycloid (sealed) "
+                    f"- Bernoulli's brachistochrone, 1696. The shortest-looking path between two points is not the "
+                    f"quickest, and the only way to learn that is to try the curves: the calculus of variations was "
+                    f"born from this one problem.", s_b),
+        ("witness", f"[light finds the least-time path, every time] Entering water (n = 4/3) at 30 degrees, "
+                    f"sin(theta_2) = sin 30 / (4/3) = {snell} (sealed): it bends, because the straight line is not the "
+                    f"fastest way through two media. Fermat's principle - the path of least time - is Snell's law; "
+                    f"nature's paths are FOUND by comparison, not drawn.", s_s),
+        ("witness", f"[why a stone takes one path and an electron takes all of them] An action of one joule-second over "
+                    f"hbar winds the phase 1 / hbar = {s_over_h:.3g} radians (sealed): neighbouring paths cancel almost "
+                    f"perfectly and only the stationary one survives - the classical path emerges from the sum over "
+                    f"all paths by elimination. That cancellation is this engine's own tagline made physical: what is "
+                    f"not the answer is eliminated, so the narrow path is illuminated by what survives. Addition is "
+                    f"interference.", s_h),
+        ("witness", f"[what blind search costs] A random walk of 10,000 steps reaches only sqrt(10000) = {walk:.0f} "
+                    f"steps from where it began (sealed). New paths found by wandering are expensive - which is why the "
+                    f"narrow way is found by elimination (the tick-stick, the games, the floor), not by drift. "
+                    f"Diffusion is the entropy stick's arrow seen as a path.", s_w),
+        ("note", "[that is life - the map, and the guard] A stone's paths have already cancelled; a living thing keeps "
+                 "sampling, and death is when only one path remains. The engine does this literally: /chains walks "
+                 "from two roots and finds where they meet - new paths between two points in what is kept (the "
+                 "Standard-Model chain joined Fermi's tree to Maxwell's at Weinberg) - and the pressure-fighting chain "
+                 "routes positions to an optimum the same way. It OFFERS the paths; it never picks one for the person "
+                 "(liberty is inherent; a generator choosing its own path is the one destructive act). Scripture said "
+                 "it first: 'Thou wilt shew me the path of life' (Ps 16:11); 'he shall direct thy paths' (Prov 3:6); "
+                 "'This is the way, walk ye in it' (Isa 30:21); 'narrow is the way, which leadeth unto life' (Mt 7:14); "
+                 "and the two points themselves - 'I am the way' (Jn 14:6). GUARDS: the path integral is physics; life "
+                 "as path-finding is a likeness, a discernment, never a fit; stationary phase is the strongest image of "
+                 "elimination we have and it is still an image. Four numbers sealed; the rest cited."),
+    ]
+    return _mint_marks(sid, marks, by="Narrow Highway - the path, continuously found between two points, 2026-10-08")
+
+
 def jevons() -> int:
     """JEVONS' PARADOX (Matt, 2026-10-07, two steps after the seal refactor cut per-seal cost ~100x). As the
     EFFICIENCY of using a resource rises, total CONSUMPTION tends to rise too, not fall: the efficiency gain
@@ -4802,6 +4963,10 @@ def main() -> int:
         return laplace()
     if a[0] in ("electromagnetism", "em", "electromagnetism_and_geometry", "field_geometry", "maxwell_geometry"):
         return electromagnetism()
+    if a[0] in ("clock", "tourbillon", "gyrotourbillon", "we_are_the_clock", "proper_time", "observer_measure", "predictable_unit"):
+        return clock()
+    if a[0] in ("paths", "path", "path_integral", "brachistochrone", "least_action", "path_of_life", "new_paths", "sum_over_histories"):
+        return paths()
     if a[0] in ("assembly", "assemble", "final"):
         return assembly()
     if a[0] in ("aharonov_bohm", "ab"):

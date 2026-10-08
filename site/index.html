@@ -553,6 +553,18 @@
              '<a href="'+esc(_surl)+'" style="color:#c9a24a;text-decoration:none">sealed ↗</a> — not generated</span>'+
              '<span class="note" style="display:block;margin-top:.15rem">A permanent receipt you can re-run — don’t trust us, re-check it yourself.</span></div>';
     }
+    // A FOUND FACT (2026-10-07): nothing was computable, but the keeping's own sourced table holds the lookup
+    // fact the words name (a half-life, a boiling point). Cited, never a computed verdict, never a receipt —
+    // so no seal chip here, and the chip says "found" where the audit above says "held up".
+    if(d.found_fact && d.found_fact.field){
+      var ff=d.found_fact, agr=ff.agrees;
+      var fcls=(agr===true?'HOLDS':(agr===false?'BROKEN':'INCOMPLETE'));
+      var fword=(agr===true?'found · agrees':(agr===false?'found · does not agree':'found'));
+      h += '<div class="hit"><span class="verdict '+fcls+'">'+fword+'</span> '+esc(ff.subject||'')+' '+esc(ff.property||'')+
+           ' = '+esc(String(ff.value))+(ff.unit?' '+esc(ff.unit):'')+(ff.uncertainty!=null?' ± '+esc(String(ff.uncertainty)):'')+
+           '<span class="sn">'+esc(ff.source||'')+'</span></div>';
+      h += '<div class="note">found in the keeping’s sourced table and cited — not a computed verdict, no receipt</div>';
+    }
     // A word study: the word itself, how it sounds, what it means, and how often it is used.
     // This had no renderer at all — it only ever showed the standing note, so removing that
     // note left every Hebrew and Greek lookup blank on screen.

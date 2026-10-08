@@ -83,7 +83,39 @@ def _principles(params: Dict[str, Any]) -> Dict[str, Any]:
                    "principles (public-domain works, verbatim) + the Strategy Concordance", {"note": r.get("note")})
 
 
-_KINDS = {"molar_mass": _molar_mass, "element": _element, "convert": _convert, "principles": _principles}
+def _half_life(params: Dict[str, Any]) -> Dict[str, Any]:
+    """An isotope's half-life from the keeping's sourced table (ENSDF evaluations; see factfind) — named as
+    "carbon-14", "C-14", "14C" or an alias ("tritium"). found=False for an isotope the table does not hold."""
+    from . import factfind as ff
+    q = str(params.get("isotope") or params.get("name") or params.get("text") or "").strip()
+    iso = ff.isotope_in(q) if q else None
+    if not iso:
+        return _result("half_life", False, None, "name one isotope: 'carbon-14', 'C-14', '14C' or 'tritium'", ff._HL_SOURCE)
+    rec = ff._HALF_LIVES.get(iso)
+    if not rec:
+        return _result("half_life", False, None, f"the half-life table holds no entry for {iso} yet", ff._HL_SOURCE,
+                       {"isotope": iso})
+    value, unc, unit = rec
+    return _result("half_life", True, value, f"{iso} half-life = {value} {unit} +/- {unc}", ff._HL_SOURCE,
+                   {"isotope": iso, "unit": unit, "uncertainty": unc})
+
+
+def _boiling_point(params: Dict[str, Any]) -> Dict[str, Any]:
+    """A pure substance's NORMAL boiling point (101.325 kPa) from the keeping's sourced table (CRC Handbook; see
+    factfind). found=False for a substance the table does not hold, or a mixture ("sea water")."""
+    from . import factfind as ff
+    q = str(params.get("substance") or params.get("name") or params.get("text") or "").strip()
+    sub = ff.substance_in(q) if q else None
+    if not sub:
+        return _result("boiling_point", False, None,
+                       "name one pure substance the table holds (e.g. 'water', 'ethanol', 'mercury')", ff._BP_SOURCE)
+    value, unc = ff._BOILING_POINTS[sub]
+    return _result("boiling_point", True, value, f"{sub} normal boiling point = {value} degC +/- {unc} (at 101.325 kPa)",
+                   ff._BP_SOURCE, {"substance": sub, "unit": "degC", "uncertainty": unc})
+
+
+_KINDS = {"molar_mass": _molar_mass, "element": _element, "convert": _convert, "principles": _principles,
+          "half_life": _half_life, "boiling_point": _boiling_point}
 
 
 def kinds() -> list:

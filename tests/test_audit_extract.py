@@ -263,10 +263,33 @@ def test_sqrt_catches_a_wrong_perfect_square_claim():
     assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH"
 
 
-def test_sqrt_of_non_perfect_square_extracts_nothing():
-    """sqrt(2) = 1.41421... is irrational; the exact-symbolic verifier would break a correct
-    approximation harshly, so a non-perfect-square root is skipped (a miss stays a miss)."""
-    for t in ["the square root of 2 is 1.414", "square root of 10 is 3.16", "square root of 2.5 is 1.58"]:
+# ---- square roots of NON-perfect squares (2026-10-07): numeric, at the precision the person stated ----
+
+def test_sqrt_of_non_perfect_square_is_judged_at_stated_precision():
+    """sqrt(2) = 1.41421356... is irrational; the exact-symbolic equality verifier would break every correct
+    approximation, so until 2026-10-07 these were skipped. Now they go to the NUMERIC verifier and are judged
+    at the precision the person STATED — half a unit in the last written place, two or more significant
+    figures (verifiers.base.stated_tolerance_abs). The perfect-square path is untouched (pinned above)."""
+    for t in ["the square root of 2 is 1.41421", "the square root of 2 is 1.414", "square root of 10 is 3.16",
+              "square root of 2.5 is 1.58", "the square root of 200 is 14"]:
+        steps = extract(t)
+        assert [s["extractor"] for s in steps] == ["sqrt"], t
+        assert steps[0]["spec"]["mode"] == "numeric" and steps[0]["spec"]["params"]["claimed_literal"], t
+        res = audit(t, CFG, seal=False)
+        assert res["held"] == 1 and res["broken"] == 0, (t, res["results"])
+    assert extract("the square root of 144 is 12")[0]["spec"]["mode"] == "equality"
+
+
+def test_sqrt_of_non_perfect_square_refuses_the_false_twin():
+    for t in ["the square root of 2 is 1.51421", "the square root of 2 is 1.5", "square root of 10 is 3.26"]:
+        res = audit(t, CFG, seal=False)
+        assert res["broken"] == 1 and res["results"][0]["status"] == "MISMATCH", (t, res["results"])
+
+
+def test_sqrt_of_non_perfect_square_at_one_figure_extracts_nothing():
+    """One significant figure earns no window ("3" for sqrt(10) is neither right nor wrong at that
+    coarseness), so nothing is extracted — a miss stays a miss, never a harsh MISMATCH on a rounding."""
+    for t in ["the square root of 2 is 1", "square root of 10 is 3", "the square root of 50 is 7"]:
         assert "sqrt" not in _extractors(t), t
 
 

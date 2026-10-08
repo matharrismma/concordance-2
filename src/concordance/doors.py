@@ -132,9 +132,16 @@ def house(tool: str, r: dict, args: dict = None) -> dict:
             elif isinstance(r.get("found_fact"), dict) and r["found_fact"].get("field"):
                 # R5: a found fact is cited, never sealed — the one step opens the table it came from
                 ff = r["found_fact"]
-                nxt = _step(f"a found fact, not a computed verdict: the table says {ff.get('value')} "
-                            f"({'agrees' if ff.get('agrees') else 'does not agree'}) — cite the table itself",
-                            "FIND", "lookup", {"kind": "element", "params": {"name": str(ff.get("subject") or "")}})
+                # the fact names the table it came from (element / half_life / boiling_point); older shapes default
+                look = ff.get("lookup") if isinstance(ff.get("lookup"), dict) else \
+                    {"kind": "element", "params": {"name": str(ff.get("subject") or "")}}
+                said = ("no value was claimed" if ff.get("agrees") is None else
+                        ("agrees" if ff.get("agrees") else "does not agree"))
+                unit = f" {ff['unit']}" if ff.get("unit") else ""
+                nxt = _step(f"a found fact, not a computed verdict: the table says {ff.get('value')}{unit} "
+                            f"({said}) — cite the table itself",
+                            "FIND", "lookup", {"kind": str(look.get("kind") or "element"),
+                                               "params": dict(look.get("params") or {})})
             elif isinstance(r.get("want"), dict) and r["want"].get("query"):
                 # R5: the keeping holds nothing on this yet — the one step is the want, and the library goes to find it
                 nxt = _step("the keeping holds nothing on this yet — open the want, and the library goes to find a "

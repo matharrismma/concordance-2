@@ -50,3 +50,66 @@ def test_the_fallback_says_not_held_and_offers_a_want_when_nothing_names_the_sub
     assert out["found_fact"]["agrees"] is True and "not a computed verdict" in out["note"]
     out = factfind.verify_fallback("x", search=lambda q, limit=3: (_ for _ in ()).throw(RuntimeError("down")))
     assert out["found"] == [] and "want" in out                                                # a failing search never breaks it
+
+
+# ---- the sourced tables of 2026-10-07: half-lives (ENSDF) and normal boiling points (CRC) ----
+
+def test_a_half_life_is_a_found_fact_from_the_sourced_table():
+    ff = factfind.find_fact("the half life of carbon-14 is 5730 years")
+    assert ff["subject"] == "carbon-14" and ff["field"] == "half_life" and ff["unit"] == "y"
+    assert ff["value"] == 5700.0 and ff["uncertainty"] == 30.0 and "ENSDF" in ff["source"]
+    assert ff["claimed"] == 5730.0 and ff["stated_sigfigs"] == 3 and ff["agrees"] is True   # bands overlap: 30 <= 30 + 5
+    assert ff["lookup"] == {"kind": "half_life", "params": {"isotope": "carbon-14"}}
+    assert factfind.find_fact("the half life of carbon-14 is 7730 years")["agrees"] is False
+    assert factfind.find_fact("the half-life of tritium is 12.32 years")["subject"] == "hydrogen-3"
+    co = factfind.find_fact("cobalt-60 has a half-life of 5.27 years")           # the table is in days; the claim in years
+    assert co["unit"] == "d" and co["agrees"] is True
+    u = factfind.find_fact("uranium-238 has a half-life of 4.468 billion years")
+    assert u["claimed"] == 4.468e9 and u["agrees"] is True
+    assert factfind.find_fact("14C has a half-life of 5,700 y")["agrees"] is True
+    # one figure earns no window of its own: compared at the source's band alone (the verifiers' "3e8" rule)
+    one = factfind.find_fact("the half-life of iodine-131 is 8 days")
+    assert one["stated_sigfigs"] == 1 and one["agrees"] is False
+    # found, nothing claimed -> nothing compared
+    q = factfind.find_fact("what is the half-life of C-14")
+    assert q["value"] == 5700.0 and q["claimed"] is None and q["agrees"] is None
+    # an isotope the table lacks is named as not held — the isotope, and the table
+    sr = factfind.find_fact("the half-life of strontium-90 is 28.8 years")
+    assert sr["held"] is False and sr["subject"] == "strontium-90" and sr["table"] == "half_life"
+    out = factfind.verify_fallback("the half-life of strontium-90 is 28.8 years", search=lambda q, limit=3: [])
+    assert "half-life table holds no entry for strontium-90" in out["note"] and out["want"]["query"] == "strontium-90 half-life"
+    out = factfind.verify_fallback("the half life of carbon-14 is 5730 years", search=lambda q, limit=3: [])
+    assert out["found_fact"]["agrees"] is True and "agrees with the claimed 5730.0 years" in out["note"] and "no receipt" in out["note"]
+
+
+def test_a_normal_boiling_point_is_a_found_fact_from_the_sourced_table():
+    ff = factfind.find_fact("water boils at 100 C at sea level")
+    assert ff["subject"] == "water" and ff["field"] == "boiling_point_C" and ff["value"] == 99.97 and "CRC" in ff["source"]
+    assert ff["stated_sigfigs"] == 1 and ff["agrees"] is True        # 100 lies inside 99.97 +/- 0.05; one figure adds nothing
+    assert factfind.find_fact("water boils at 90 C at sea level")["agrees"] is False
+    assert factfind.find_fact("water boils at 212 F")["agrees"] is True                # Fahrenheit, converted
+    assert factfind.find_fact("water boils at 373.15 K")["agrees"] is True             # Kelvin, converted
+    assert factfind.find_fact("the boiling point of ethanol is 78.3 C")["agrees"] is True
+    assert factfind.find_fact("ethanol boils at 88 C")["agrees"] is False
+    assert factfind.find_fact("the boiling point of mercury is 356.6 C")["agrees"] is True   # an element: the table first
+    assert factfind.find_fact("ethyl alcohol boils at 78 degrees C")["subject"] == "ethyl alcohol"
+    # not the NORMAL boiling point, or not a pure substance, or two substances -> not this table: nothing found
+    assert factfind.find_fact("water boils at 99.6 C at 1 bar") is None
+    assert factfind.find_fact("sea water boils at 100 C") is None
+    assert factfind.find_fact("water boils at 100 C and ethanol at 78 C") is None
+    # a substance the table lacks falls through to the old honest answer (gold is deliberately not tabled)
+    assert factfind.find_fact("the boiling point of gold is 2970 C")["held"] is False
+    out = factfind.verify_fallback("water boils at 100 C at sea level", search=lambda q, limit=3: [])
+    assert out["found_fact"]["agrees"] is True and "agrees with the claimed 100.0 degC" in out["note"]
+    assert "one figure earns no window" in out["note"] and "no receipt" in out["note"]
+
+
+def test_lookup_kinds_open_the_same_tables():
+    from concordance import lookup
+    assert {"half_life", "boiling_point"} <= set(lookup.kinds())
+    hl = lookup.lookup("half_life", {"isotope": "C-14"})
+    assert hl["found"] and hl["value"] == 5700.0 and hl["unit"] == "y" and hl["isotope"] == "carbon-14"
+    assert lookup.lookup("half_life", {"isotope": "strontium-90"})["found"] is False
+    bp = lookup.lookup("boiling_point", {"substance": "water"})
+    assert bp["found"] and bp["value"] == 99.97 and bp["unit"] == "degC"
+    assert lookup.lookup("boiling_point", {"substance": "gold"})["found"] is False
