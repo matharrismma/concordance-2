@@ -334,6 +334,7 @@ test_stated_precision.py
 test_statistics.py
 test_stdlib_only.py
 test_steward.py
+test_steward_speaks.py
 test_stigmergy.py
 test_strongs.py
 test_study_index.py

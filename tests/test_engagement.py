@@ -93,14 +93,16 @@ def test_word_engages_no_verifier_no_seal_no_face(monkeypatch):
 
 
 def test_learn_engages_no_search_no_verifier_no_seal_no_face(monkeypatch):
+    monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(TMP))     # another test module may have pointed the env elsewhere at import
     (TMP / "curriculum").mkdir(parents=True, exist_ok=True)
     (TMP / "curriculum" / "qe_en.json").write_text(json.dumps([{
         "id": "qe_1", "unit_seq": 1, "track": "t", "title": "t", "rule": "r", "examples": ["Estoy aquí."],
         "decodable_sentence": "Estoy aquí.", "modes": [],
         "check": {"prompt": "?", "answer": "Estoy aquí.", "choices": ["Estoy aquí.", "Estoy en la cama."], "teaching_note": "n"}}]),
         encoding="utf-8")
-    _arm(monkeypatch, _intent("LEARN")["must_not"])
     from concordance import coach
+    coach.reload()                                             # the subject list is discovered once; re-read it now that qe exists
+    _arm(monkeypatch, _intent("LEARN")["must_not"])
     assert coach.check_answer("qe_1", "estoy aqui", "qe")["verdict"] == "correct"
     assert coach.check_answer("qe_1", "estoy en la cama", "qe")["verdict"] == "incorrect"
 

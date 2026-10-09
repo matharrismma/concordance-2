@@ -1345,8 +1345,8 @@ def _lead_card(card: Dict[str, Any]) -> Dict[str, Any]:
 _FOUND_LEAD = "Here's the clearest thing the keeping holds on this — in its own words, with its source:"
 
 
-def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
-            gate_just_opened: bool = False) -> Dict[str, Any]:
+def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
+                  gate_just_opened: bool = False) -> Dict[str, Any]:
     """Compose a conduit response: found + verified + cited + curated material only. No LLM.
 
     The Gate: on the witness surface — or once a .com conversation has opened the door — the full
@@ -2120,3 +2120,38 @@ def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
         out["resources"] = [{"label": "The free libraries & references", "ref": "/corpus.html"},
                             {"label": "Check a specific claim, verified", "ref": "/check.html"}]
     return _witnessed(out, text, witness, gate_just_opened)
+
+
+# ── THE STEWARD SPEAKS (Matt, 2026-10-08: "steward does speak" · "same voice. Just another role" · "Harmonics.
+# cords are different shapes of same note") ─────────────────────────────────────────────────────────────
+# The Steward is not a second voice beside the front door; it IS the front door's voice taking a role. A role
+# is a harmonic of the one voice: the same fundamental (the kernel — found, verified, cited, crisis first) in a
+# different shape (the face's manner, its shelves, its verifiers). So when a situation fits a face, the response
+# the door already composed carries `role` — the face's name, manner and the material it gathered, verified and
+# discerned — and nothing about how the door speaks changes. Crisis stays byte-identical (a role never sounds
+# over a cry). Task determines title: the money face is the Bookkeeper; the Steward is the voice that brings it.
+def _with_role(text: str, config: EngineConfig, r: Dict[str, Any]) -> Dict[str, Any]:
+    try:
+        if not isinstance(r, dict) or "error" in r or r.get("kind") == "crisis":
+            return r
+        from . import faces as _faces
+        fid = _faces.route(text)
+        if not fid:
+            return r
+        served = _faces.compose(fid, text, config)
+        if not isinstance(served, dict) or served.get("kind") != "served":
+            return r
+        role = {"id": fid, **{k: v for k, v in served.items() if k not in ("face", "kind")}}
+        role["means"] = (f"the same voice, in the role of {served.get('name')} — a harmonic of the one voice: "
+                         "found, verified, cited; never generated")
+        return {**r, "role": role}
+    except Exception:  # noqa: BLE001 — the door never fails for want of a role
+        return r
+
+
+def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
+            gate_just_opened: bool = False) -> Dict[str, Any]:
+    """Compose a conduit response (see _respond_core) and, when a face fits the situation, carry the role in
+    the same voice (_with_role). The Steward speaks here; a role is just another shape of this one voice."""
+    r = _respond_core(text, config, gate_open=gate_open, gate_just_opened=gate_just_opened)
+    return _with_role(text, config, r)

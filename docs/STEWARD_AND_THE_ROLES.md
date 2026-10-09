@@ -90,8 +90,18 @@ Each rung is a live test of the next. Nothing on the ladder uses a model.
    Franklin/Carnegie/Ford's rules on money as the role's voice.
 3. **Civics**, then **the Shop**.
 
-## 6. Open for Matt
+## 6. Decided (Matt, 2026-10-08)
 
-- The names: Steward for the guide, and then what the money role is called (the collision in §3).
-- Whether the Steward speaks through `ask` (situation → one next step) as its voice, or through a new door.
-- The order in §5.
+- **Task determines title.** A role is named by its task. The money face's task is to count the cost, so it is
+  **the Bookkeeper** (faces.py; the id `face_steward` stays, an id is an address). **The Steward** is the one
+  voice that meets the visitor and brings the right role.
+- **Lowest-hanging fruit first.** The order in §5 is read in that light: the Steward speaking came first because
+  `ask` already routed to the faces.
+- **The Steward speaks through `ask`, in the same voice. "Just another role."** There is no second voice. When a
+  situation fits a face, `ask.respond` carries `role` — the face's name, manner and the material it gathered,
+  verified and discerned — and nothing about how the door speaks changes. Crisis is byte-identical; a role never
+  sounds over a cry; a walk never seals.
+- **Harmonics.** "Chords are different shapes of the same note." A role is a harmonic of the one voice: the same
+  fundamental, the kernel (found, verified, cited, crisis first), in a different shape (the face's manner, shelves
+  and verifiers are its timbre). Two roles sounding together is a chord, not two voices. Pinned in
+  tests/test_steward_speaks.py.

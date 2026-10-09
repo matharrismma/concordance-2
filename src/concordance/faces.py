@@ -24,15 +24,18 @@ from . import physiology
 #   discernment  — whether the discern calibration applies (worldview/spiritual weight)
 #   manner       — the FIXED frame for how the servant speaks (never generated)
 _FACES: Dict[str, Dict[str, Any]] = {
+    # TASK DETERMINES TITLE (Matt, 2026-10-08): this face's task is to count the cost, so it is the Bookkeeper.
+    # "the Steward" is the one voice that meets the visitor and brings the right role (ask.respond → role);
+    # the id stays — an id is an address, not a title.
     "face_steward": {
-        "name": "the Steward",
+        "name": "the Bookkeeper",
         "scope": ["money", "budget", "debt", "provision", "save", "spend", "tithe", "steward",
                   "afford", "cost", "income", "expense", "loan", "rent", "mortgage"],
         "shelves": {"economics", "reference"},
         "verifiers": ["finance", "economics"],
         "discernment": True,
         # the steward COUNTS the cost and never EXECUTES a transaction (loss-leaders + stewardship)
-        "manner": "the steward — count the cost plainly, never act for you; provision is under God, "
+        "manner": "the bookkeeper — count the cost plainly, never act for you; provision is under God, "
                   "who gives and is trusted (Matthew 6). We inform; the stewarding stays yours.",
     },
     "face_tutor": {

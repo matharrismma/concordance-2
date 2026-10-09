@@ -34,8 +34,10 @@ INTENTS: List[Dict[str, Any]] = [
      "stages": ["antenna", "mixer + local oscillator", "audio stage", "power supply (cathode)"]},
     {"intent": "WALK", "purpose": "a situation in, one next step out",
      "entry": "ask.respond",
-     "engages": ["ask.respond", "ask.is_crisis", "corpus.Corpus.search", "derivation.verify_derivation"],
-     "engages_note": "crisis first, always; a checkable claim inside the situation may be verified",
+     "engages": ["ask.respond", "ask.is_crisis", "corpus.Corpus.search", "derivation.verify_derivation",
+                 "faces.route", "faces.compose"],
+     "engages_note": "crisis first, always; a checkable claim inside the situation may be verified; when a face fits, the "
+                     "Steward brings the role in the same voice (ask._with_role) — composed, never sealed",
      "must_not": ["receipts.attach", "ledger.seal_to_ledger", "coach.check_answer"],
      "must_not_note": "ask never seals and never grades",
      "stages": ["antenna", "preselector", "mixer + local oscillator", "audio stage", "speaker"]},

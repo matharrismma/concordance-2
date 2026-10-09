@@ -40,7 +40,7 @@ def test_served_path_gathers_and_turns_the_eye_upward():
                         crisis_fn=lambda t: False,
                         search_fn=lambda q, shelves=None, limit=6: cards,
                         discern_fn=lambda t: {"kind": "guidance", "claim": None})
-    assert out["kind"] == "served" and out["name"] == "the Steward"
+    assert out["kind"] == "served" and out["name"] == "the Bookkeeper"   # task determines title (2026-10-08)
     assert [g["id"] for g in out["gathered"]] == ["card_a", "card_b"]   # the keeping's substance
     assert "never" in out["manner"].lower()                            # steward never executes
     assert "upward" in out["means"]                                    # points beyond itself
