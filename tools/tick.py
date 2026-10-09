@@ -1426,6 +1426,100 @@ def law() -> int:
     _mint_marks(sid, marks, by="tools/tick.py law")
     return 0
 
+
+def geometry_stick() -> int:
+    """GEOMETRY - SEALED through geometry.GEOM_VERIFY (cover every domain, integrate what we have). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "pyth": _seal_through("geometry", "GEOM_VERIFY", {"pyth_a": 3, "pyth_b": 4, "pyth_c": 5, "claimed_right_triangle": True}),
+        "circle": _seal_through("geometry", "GEOM_VERIFY", {"circle_radius": 1, "claimed_circle_area": 3.141592653589793, "claimed_circle_circumference": 6.283185307179586}),
+        "poly": _seal_through("geometry", "GEOM_VERIFY", {"polygon_n": 5, "claimed_interior_angle_sum_deg": 540}),
+        "sphere": _seal_through("geometry", "GEOM_VERIFY", {"sphere_radius": 3, "claimed_sphere_volume": 113.097, "claimed_sphere_surface_area": 113.097}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "geometry facts")
+    sid = TS.create("Geometry - the shapes, verified and sealed")["id"]
+    marks = [
+        ("instance", "[the right triangle] 3-4-5: a^2 + b^2 = 9 + 16 = 25 = c^2, a right triangle (sealed through "
+                     "geometry.GEOM_VERIFY) - the Pythagorean theorem, the hinge of distance.", S["pyth"]),
+        ("instance", "[the circle] radius 1: area pi r^2 = 3.14159 and circumference 2 pi r = 6.28319 (sealed) - pi, "
+                     "the constant of the circle.", S["circle"]),
+        ("instance", "[the pentagon] a 5-gon's interior angles sum to (5-2)*180 = 540 degrees (sealed) - the angle sum "
+                     "grows by 180 with each side.", S["poly"]),
+        ("instance", "[the sphere] radius 3: volume (4/3) pi r^3 = 113.10 and surface 4 pi r^2 = 113.10 (sealed; equal "
+                     "only at r = 3).", S["sphere"]),
+        ("postulate", "[the ground] Euclid's definitions, postulates and the measure of the plane - the theorems are "
+                      "sealed, the parallel postulate is cited (its denial gives the non-Euclidean geometries, equally "
+                      "valid). We follow Euclid: definitions, postulates, theorems.",
+         {"source": "Euclid, Elements; geometry.GEOM_VERIFY"}),
+        ("note", "[declined] A figure's meaning, a proof's elegance, a construction's intent are not measured here; the "
+                 "engine seals the measure.", {"source": "src/concordance/verifiers/geometry.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py geometry_stick")
+    return 0
+
+
+def probability_stick() -> int:
+    """PROBABILITY - SEALED through probability.PROB_VERIFY. Idempotent."""
+    from concordance import tickstick as TS
+    sixth = 1.0 / 6.0
+    S = {
+        "ev": _seal_through("probability", "PROB_VERIFY", {"outcomes": [1, 2, 3, 4, 5, 6], "probabilities": [sixth] * 6, "claimed_expected_value": 3.5}),
+        "binom": _seal_through("probability", "PROB_VERIFY", {"binomial_n": 10, "binomial_p": 0.5, "binomial_k": 5, "claimed_binomial_probability": 0.24609375}),
+        "bmean": _seal_through("probability", "PROB_VERIFY", {"binomial_n": 10, "binomial_p": 0.5, "claimed_binomial_mean": 5}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "probability facts")
+    sid = TS.create("Probability - the distributions, verified and sealed")["id"]
+    marks = [
+        ("instance", "[the fair die] E[X] = sum p_i x_i = (1+2+3+4+5+6)/6 = 3.5 (sealed through probability.PROB_VERIFY) "
+                     "- the expected value, the balance point of the distribution.", S["ev"]),
+        ("instance", "[ten fair coins] P(exactly 5 heads) = C(10,5)(1/2)^10 = 0.24609 (sealed) - the binomial, the law "
+                     "of repeated yes/no trials.", S["binom"]),
+        ("instance", "[its mean] E[Binom(10, 0.5)] = n p = 5 (sealed) - half the flips, on average.", S["bmean"]),
+        ("postulate", "[the ground] Kolmogorov's axioms: a probability is a measure of total mass one. The theorems "
+                      "are sealed; what the numbers MEAN for a single future event is the open question of "
+                      "interpretation (frequentist vs Bayesian), carried, not kept as fact.",
+         {"source": "A. Kolmogorov (1933); probability.PROB_VERIFY"}),
+        ("note", "[declined] Whether a model's probabilities are the RIGHT ones for the world is a modelling judgment, "
+                 "not sealed here; the engine certifies the probability arithmetic.",
+         {"source": "src/concordance/verifiers/probability.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py probability_stick")
+    return 0
+
+
+def chemistry_stick() -> int:
+    """CHEMISTRY - SEALED through chemistry.CHEM_VERIFY. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "eq": _seal_through("chemistry", "CHEM_VERIFY", {"equation": "2 H2 + O2 -> 2 H2O"}),
+        "thermo": _seal_through("chemistry", "CHEM_VERIFY", {"delta_H_kJ_mol": -285.8, "delta_S_J_mol_K": -163.2, "temperature_K": 298, "claimed_spontaneous": True}),
+        "ph": _seal_through("chemistry", "CHEM_VERIFY", {"pH": 3.0, "claimed_classification": "acidic"}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "chemistry facts")
+    sid = TS.create("Chemistry - reactions and solutions, verified and sealed")["id"]
+    marks = [
+        ("instance", "[a balanced equation] 2 H2 + O2 -> 2 H2O: four H and two O on each side, charge balanced (sealed "
+                     "through chemistry.CHEM_VERIFY) - conservation of mass, the first law of the reaction.", S["eq"]),
+        ("instance", "[spontaneity] For liquid water's formation, dH = -285.8 kJ/mol and dS = -163.2 J/mol/K; at 298 K, "
+                     "dG = dH - T dS < 0, so the reaction is spontaneous (sealed) - the second law deciding direction.", S["thermo"]),
+        ("instance", "[acidity] pH 3.0 is acidic (sealed): pH below 7 is acid, above is base, 7 neutral - the logarithm "
+                     "of the hydrogen-ion concentration.", S["ph"]),
+        ("postulate", "[the ground] Conservation of mass and charge, and the laws of thermodynamics - sealed where "
+                      "applied. The detailed mechanism of a reaction is a model, inferred from evidence, not kept as "
+                      "fact.", {"source": "chemistry.CHEM_VERIFY; the laws of thermodynamics"}),
+        ("note", "[declined] Reaction mechanisms beyond the balance, toxicity, dosage and safety judgments are declined "
+                 "- the engine seals the stoichiometry and the sign of dG, not the clinical call.",
+         {"source": "src/concordance/verifiers/chemistry.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py chemistry_stick")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -8139,6 +8233,12 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("geometry_stick", "geometry"):
+        return geometry_stick()
+    if a[0] in ("probability_stick", "probability"):
+        return probability_stick()
+    if a[0] in ("chemistry_stick", "chemistry"):
+        return chemistry_stick()
     if a[0] in ("economics", "finance_stick"):
         return economics()
     if a[0] in ("logistics", "operations_research", "optimization"):

@@ -132,3 +132,6 @@
 {"id": "economics.finance.sealed", "path": "/stick", "query": {"id": "stick_economics_the_finance_arithmetic_verified_and_sealed"}, "expect": [{"at": "fit.verified_instances", "eq": 5}, {"at": "fit.postulates", "min_len": 1}]}
 {"id": "logistics.optimization.sealed", "path": "/stick", "query": {"id": "stick_logistics_the_optimization_core_verified_and_sealed"}, "expect": [{"at": "fit.verified_instances", "eq": 3}, {"at": "fit.postulates", "min_len": 1}]}
 {"id": "law.structural.checks.sealed", "path": "/stick", "query": {"id": "stick_law_structural_checks_on_public_domain_us_law_sealed"}, "expect": [{"at": "fit.verified_instances", "eq": 5}, {"at": "fit.postulates", "min_len": 1}]}
+{"id": "geometry.shapes.sealed", "path": "/stick", "query": {"id": "stick_geometry_the_shapes_verified_and_sealed"}, "expect": [{"at": "fit.verified_instances", "eq": 4}, {"at": "fit.postulates", "min_len": 1}]}
+{"id": "probability.distributions.sealed", "path": "/stick", "query": {"id": "stick_probability_the_distributions_verified_and_sealed"}, "expect": [{"at": "fit.verified_instances", "eq": 3}, {"at": "fit.postulates", "min_len": 1}]}
+{"id": "chemistry.reactions.sealed", "path": "/stick", "query": {"id": "stick_chemistry_reactions_and_solutions_verified_and_sealed"}, "expect": [{"at": "fit.verified_instances", "eq": 3}, {"at": "fit.postulates", "min_len": 1}]}
