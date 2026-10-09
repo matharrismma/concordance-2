@@ -1749,6 +1749,70 @@ def one_force() -> int:
     _mint_marks(sid, marks, by="tools/tick.py one_force")
     return 0
 
+
+def gravity() -> int:
+    """IS GRAVITY A FORCE? (Matt, 2026-10-09). Two answers, and their disagreement is why gravity is the holdout in
+    'the one force'. Newton: yes, a force, F = G m M / r^2. Einstein (general relativity, the deeper and tested
+    theory): NO - mass-energy curves spacetime and bodies follow geodesics; a free-falling body feels no force at all.
+    SEALED - the observations that decide it: (1) g is an ACCELERATION independent of the falling mass (the equivalence
+    principle, Galileo); (2) light bends past the Sun by 1.75 arcsec - exactly TWICE the Newtonian 'force on light'
+    value of 0.875, the 1919 eclipse measuring the GR number - so gravity is geometry, not a force pulling on mass;
+    (3) gravity dilates time (the gravitational redshift). The framework question is the postulate; the quantum answer
+    (a graviton) is unknown. Idempotent."""
+    import math
+    from concordance import tickstick as TS
+    G = 6.67430e-11; c = 2.99792458e8; Msun = 1.98892e30; Rsun = 6.957e8; Mearth = 5.972e24; Rearth = 6.371e6
+    ARC = 180.0 / math.pi * 3600.0
+    S = {
+        "g": _rh_seal_num("surface_gravity_of_earth_gm_over_r_squared_m_s2", "6.67430e-11*5.972e24/(6.371e6)**2", G * Mearth / Rearth ** 2),
+        "defl": _rh_seal_num("light_deflection_at_the_suns_limb_general_relativity_arcsec",
+                             "4*6.67430e-11*1.98892e30/((2.99792458e8)**2*6.957e8)*(180/pi*3600)", 4 * G * Msun / (c ** 2 * Rsun) * ARC),
+        "two": _rh_seal_num("gr_light_deflection_is_twice_the_newtonian_value",
+                            "(4*6.67430e-11*1.98892e30)/(2*6.67430e-11*1.98892e30)", 2.0, tol=1e-12),
+        "z": _rh_seal_num("gravitational_redshift_at_the_suns_surface_gm_over_rc2",
+                          "6.67430e-11*1.98892e30/(6.957e8*(2.99792458e8)**2)", G * Msun / (Rsun * c ** 2)),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "gravity numbers")
+    sid = TS.create("Is gravity a force - geometry, decided by the light that bends")["id"]
+    marks = [
+        ("instance", "[the equivalence principle] At Earth's surface g = G M / R^2 = 9.82 m/s^2 (sealed) - an "
+                     "ACCELERATION, the same for a feather and a cannonball (Galileo), independent of the falling "
+                     "body's mass. That is the tell: a real force (electric, say) depends on the body's charge, but "
+                     "gravity's 'pull' depends only on where you are, not on what you are - because it is not a pull. "
+                     "A body in free fall feels NOTHING (Einstein's happiest thought); what you feel standing still is "
+                     "the ground pushing you off your natural path.", S["g"]),
+        ("instance", "[the light that decides it, SEALED] Light grazing the Sun bends by 4 G M / (c^2 R) = 1.75 arcsec "
+                     "(sealed) - exactly TWICE the 0.875 arcsec a naive Newtonian 'force on a light corpuscle' would "
+                     "give (the factor of 2 sealed). Light has no mass, so a force law F = G m M / r^2 has nothing to "
+                     "pull on; yet light falls, because it follows the straightest path through spacetime that mass has "
+                     "CURVED. Eddington's 1919 eclipse measured the 1.75, not the 0.875 - geometry, not force.", S["defl"]),
+        ("instance", "[gravity bends time] The gravitational redshift: a clock deeper in a gravity well runs slower, and "
+                     "light climbing out loses energy by G M / (R c^2) = 2.12e-6 at the Sun's surface (sealed; Pound and "
+                     "Rebka measured it on Earth, and GPS corrects for it daily). A force changes a path; only curvature "
+                     "bends TIME itself.", S["z"]),
+        ("postulate", "[the answer, framework by framework] NEWTON: yes, a force, F = G m M / r^2 - an excellent "
+                      "effective description (sealed on the astronomy and black-hole sticks), and still how we compute "
+                      "orbits. EINSTEIN (general relativity, the deeper theory, tested above): NO - gravity is the "
+                      "curvature of spacetime, and 'the force of gravity' is an inertial artifact of being held off "
+                      "your geodesic, like the centrifugal 'force'. QUANTUM: the other three forces are the exchange of "
+                      "gauge bosons; IF gravity is quantized the same way it would be a force carried by the spin-2 "
+                      "graviton - but no consistent quantum theory of gravity exists. So: as a force it is only "
+                      "Newton's approximation; as geometry it is Einstein's reality; as a quantum force it is an open "
+                      "problem. It works, so each reading's truth is inferred in its domain, never kept as the whole fact.",
+         {"source": "I. Newton (1687); A. Einstein, general relativity (1915); A. Eddington (1919); Pound-Rebka (1959)"}),
+        ("note", "[why it is the holdout, and the clue] Gravity is the one of the four that is better described as "
+                 "GEOMETRY than as force - which is exactly why it has not joined the other three (which are forces in "
+                 "the quantum-field sense) in a single theory. The clue cuts the way Matt's intuition points: if gravity "
+                 "is geometry, perhaps the others are too (Kaluza-Klein, extra dimensions, string theory's geometric "
+                 "unification). 'It is all one force' may be 'it is all one geometry'. Ties the one-force stick, the "
+                 "black-holes stick, and electromagnetism-and-geometry.",
+         {"source": "the one map; stick_the_one_force, stick_black_holes, stick_electromagnetism_and_geometry"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py gravity")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -8462,6 +8526,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("is_gravity_a_force", "gravity_force", "force_or_geometry"):
+        return gravity()
     if a[0] in ("one_force", "the_one_force", "forces", "unification"):
         return one_force()
     if a[0] in ("black_holes", "black_hole", "schwarzschild", "hawking"):
