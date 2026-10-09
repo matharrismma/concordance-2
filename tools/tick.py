@@ -1289,6 +1289,143 @@ def genomics() -> int:
     _mint_marks(sid, marks, by="tools/tick.py genomics")
     return 0
 
+
+def _seal_through(domain, artifact_key, spec):
+    """Verify a claim through an existing domain verifier and return its seal (verify -> receipts.attach)."""
+    from concordance import receipts
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    res = verify_derivation([{"id": "x", "domain": domain, "spec": {artifact_key: spec}}])
+    if res.get("verdict") != "HOLDS":
+        print("  did NOT hold:", domain, res.get("verdict")); return None
+    res = receipts.attach(res, config=EngineConfig(), domain=domain)
+    return (res.get("seal") or {}).get("content_hash")
+
+
+def economics() -> int:
+    """ECONOMICS - SEALED THROUGH THE EXISTING VERIFIER (Matt, 2026-10-09: cover every domain, easiest first,
+    integrate what we have). The deterministic finance arithmetic certified and sealed via economics.ECON_VERIFY
+    (public-domain formulas): compound interest, the rule of 72, present and future value, price elasticity, GDP per
+    capita. The predictive layer - valuations, market direction, policy outcomes - is declined. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "compound": _seal_through("economics", "ECON_VERIFY", {"principal": 1000, "rate": 0.05, "compounding_periods": 12, "time_years": 10, "claimed_compound_amount": 1647.01}),
+        "rule72": _seal_through("economics", "ECON_VERIFY", {"rate_percent": 7, "claimed_doubling_years": 10.3}),
+        "pv": _seal_through("economics", "ECON_VERIFY", {"future_value": 1000, "discount_rate": 0.05, "time_years": 3, "claimed_present_value": 863.84}),
+        "ped": _seal_through("economics", "ECON_VERIFY", {"pct_change_quantity": -10, "pct_change_price": 5, "claimed_price_elasticity": -2.0}),
+        "gdp": _seal_through("economics", "ECON_VERIFY", {"gdp": 21000000000000, "population": 331000000, "claimed_gdp_per_capita": 63444}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "economics facts")
+    sid = TS.create("Economics - the finance arithmetic, verified and sealed")["id"]
+    marks = [
+        ("instance", "[compound interest] $1000 at 5% compounded monthly for 10 years grows to A = P(1 + r/n)^(nt) = "
+                     "1000(1 + 0.05/12)^120 = $1647.01 (sealed through economics.ECON_VERIFY). Interest on interest - the "
+                     "engine of saving and of debt.", S["compound"]),
+        ("instance", "[the rule of 72] At 7%, money doubles in about 72/7 = 10.3 years (sealed) - the mental shortcut "
+                     "for the doubling time, accurate to the half-year here.", S["rule72"]),
+        ("instance", "[present value] $1000 due in 3 years, discounted at 5%, is worth PV = FV/(1+r)^t = $863.84 today "
+                     "(sealed). The time value of money: a dollar later is worth less than a dollar now.", S["pv"]),
+        ("instance", "[price elasticity] A 10% fall in quantity against a 5% rise in price is PED = (-10)/(5) = -2.0 "
+                     "(sealed) - demand is elastic: quantity moves more than price.", S["ped"]),
+        ("instance", "[GDP per capita] $21 trillion over 331 million people is $63,444 per person (sealed) - the measure "
+                     "divided by the people it is spread across.", S["gdp"]),
+        ("postulate", "[the model it assumes] These are accounting identities and definitions, true by arithmetic. The "
+                      "wider theory (supply and demand, rational actors, ceteris paribus) is a MODEL - it works often "
+                      "enough to reason with, so its conclusions are inferred, never kept as fact; the engine seals the "
+                      "arithmetic and declines the forecast.",
+         {"source": "standard public-domain finance formulas; economics.ECON_VERIFY"}),
+        ("note", "[what is declined] Asset valuations, market direction, interest-rate moves, policy outcomes and any "
+                 "forecast are DECLINED, cited or left as a want - not investment advice, and a miss stays a miss. The "
+                 "engine certifies the computation, not the prediction.",
+         {"source": "src/concordance/verifiers/economics.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py economics")
+    return 0
+
+
+def logistics() -> int:
+    """LOGISTICS / OPERATIONS RESEARCH - SEALED (Matt, 2026-10-09: cover every domain, integrate what we have). The
+    optimization core certified and sealed via operations_research.OR_VERIFY: the 0-1 knapsack optimum (by dynamic
+    programming), linear-constraint feasibility, assignment cost. This is the solve path made concrete - EXCLUDE the
+    infeasible, find the optimum, and where exact is too costly, GET CLOSE with a bounded approximation. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "knap": _seal_through("operations_research", "OR_VERIFY", {"items": [{"weight": 2, "value": 3}, {"weight": 3, "value": 4}, {"weight": 4, "value": 5}], "capacity": 5, "claimed_optimal_value": 7}),
+        "lp": _seal_through("operations_research", "OR_VERIFY", {"variable_values": {"x": 2.0, "y": 3.0}, "constraints": [{"lhs_coeffs": {"x": 1.0, "y": 1.0}, "operator": "<=", "rhs": 10.0}, {"lhs_coeffs": {"x": 1.0}, "operator": ">=", "rhs": 0.0}], "claimed_feasible": True}),
+        "assign": _seal_through("operations_research", "OR_VERIFY", {"assignment": [[0, 1], [1, 0]], "cost_matrix": [[9, 2], [6, 4]], "claimed_total_cost": 8}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "logistics facts")
+    sid = TS.create("Logistics - the optimization core, verified and sealed")["id"]
+    marks = [
+        ("instance", "[the knapsack optimum] Three items (weight, value) = (2,3), (3,4), (4,5) in a bag of capacity 5: "
+                     "the best is items 1 and 2 - weight 5, value 7 (sealed by dynamic programming through "
+                     "operations_research.OR_VERIFY). The exact optimum of an NP-hard problem, found cheaply here "
+                     "because the capacity is small - exactly the solve path's point.", S["knap"]),
+        ("instance", "[feasibility] The point x=2, y=3 satisfies x + y <= 10 and x >= 0 (sealed) - the EXCLUDE jaw: a "
+                     "candidate that breaks a constraint is cut; one that holds survives.", S["lp"]),
+        ("instance", "[assignment cost] Worker 0 to job 1 (cost 2) and worker 1 to job 0 (cost 6) total 8 (sealed) - "
+                     "the cost of a stated matching, the kernel of routing and scheduling.", S["assign"]),
+        ("postulate", "[the model] The constraints are linear and the costs and durations are known and fixed - the "
+                      "model under which the optimum is exact. Real demand, traffic and times are uncertain; there the "
+                      "answer is a bounded estimate (get close), not an exact optimum.",
+         {"source": "operations_research.OR_VERIFY; the solve path (card_floor_the_solve_path)"}),
+        ("note", "[on the solve path] Logistics IS the solve path applied: exclude the infeasible (the moat on the "
+                 "constraints), find the optimum where it is cheap (knapsack DP, LP), and get close with a proven bound "
+                 "where exact is NP-hard at scale (the approximation door). Demand forecasts and real-world variance are "
+                 "declined.",
+         {"source": "src/concordance/verifiers/operations_research.py; the get-close door"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py logistics")
+    return 0
+
+
+def law() -> int:
+    """LAW - STRUCTURAL CHECKS, SEALED (Matt, 2026-10-09: cover every domain, integrate what we have). US federal,
+    public-domain / constitutional text only; STRUCTURAL and arithmetic checks, NOT legal advice. Sealed via
+    law.LAW_VERIFY: the five elements of a contract, the constitutional age minimums, FLSA overtime, the four Miranda
+    elements. Interpretation, application, case outcomes and state law are declined - consult a licensed attorney.
+    Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "contract": _seal_through("law", "LAW_VERIFY", {"has_offer": True, "has_acceptance": True, "has_consideration": True, "has_capacity": True, "has_legality": True, "claimed_contract_valid": True}),
+        "pres": _seal_through("law", "LAW_VERIFY", {"office": "president", "age": 36, "claimed_meets_age_requirement": True}),
+        "sen": _seal_through("law", "LAW_VERIFY", {"office": "senator", "age": 30, "claimed_meets_age_requirement": True}),
+        "ot": _seal_through("law", "LAW_VERIFY", {"hours_worked": 48, "regular_rate": 20.00, "claimed_overtime_pay": 240.00}),
+        "mir": _seal_through("law", "LAW_VERIFY", {"warnings_given": ["You have the right to remain silent.", "Anything you say can be used against you in court.", "You have the right to an attorney.", "If you cannot afford an attorney one will be appointed for you."], "claimed_miranda_complete": True}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "law facts")
+    sid = TS.create("Law - structural checks on public-domain US law, sealed")["id"]
+    marks = [
+        ("instance", "[a contract's elements] Offer, acceptance, consideration, capacity and legality - all five present "
+                     "makes a structurally valid contract (sealed through law.LAW_VERIFY). The checklist, not the "
+                     "judgment of a court.", S["contract"]),
+        ("instance", "[the age to serve - President] The Constitution sets 35 as the minimum for President (Art. II sec 1); "
+                     "age 36 meets it (sealed).", S["pres"]),
+        ("instance", "[Senator] 30 is the minimum for a Senator (Art. I sec 3); age 30 meets it exactly (sealed).", S["sen"]),
+        ("instance", "[FLSA overtime] 48 hours at $20 regular: 8 hours over 40, paid at time-and-a-half, is 8 x 20 x 1.5 "
+                     "= $240 overtime (sealed). The arithmetic of the Fair Labor Standards Act.", S["ot"]),
+        ("instance", "[the Miranda warning] All four elements present - the right to silence, the use against you, the "
+                     "right to an attorney, and appointment if you cannot afford one (sealed). The completeness of the "
+                     "warning, checked.", S["mir"]),
+        ("postulate", "[the frame, and its hard edge] These are STRUCTURAL and arithmetic checks on US federal, "
+                      "public-domain and constitutional text. They are NOT legal advice. Whether a contract is "
+                      "enforceable, how a statute applies to the facts, how a court would rule - all of that is "
+                      "interpretation, and the engine does not do it.",
+         {"source": "US Constitution; Fair Labor Standards Act; Miranda v. Arizona (1966); law.LAW_VERIFY"}),
+        ("note", "[what is declined, loudly] Legal interpretation, the application of law to particular facts, case "
+                 "outcomes, state and local law, and anything that would be advice are DECLINED - consult a licensed "
+                 "attorney. The engine certifies the structure, never the counsel.",
+         {"source": "src/concordance/verifiers/law.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py law")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -8002,6 +8139,12 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("economics", "finance_stick"):
+        return economics()
+    if a[0] in ("logistics", "operations_research", "optimization"):
+        return logistics()
+    if a[0] in ("law", "law_stick"):
+        return law()
     if a[0] in ("genomics", "genetic_code", "genetics_stick"):
         return genomics()
     if a[0] in ("grimm_law", "grimm", "sound_law", "sound_laws"):
