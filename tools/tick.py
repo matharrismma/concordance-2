@@ -1962,6 +1962,68 @@ def the_hamiltonian() -> int:
     _mint_marks(sid, marks, by="tools/tick.py the_hamiltonian")
     return 0
 
+
+def the_lagrangian() -> int:
+    """THE LAGRANGIAN - the Hamiltonian's dual, the path chosen (Matt, 2026-10-09: "Lagrangian too?"). L = T - V, and
+    the action S = integral of L dt. Its law is the principle of least action (delta S = 0): of all paths, nature
+    takes the one where the action is stationary. SEALED here: the free-particle Legendre relation H = p q' - L (the
+    H<->L bridge in mechanics), and Snell's critical angle from Fermat's least-time principle. The principle itself
+    and its quantum form (Feynman's path integral - all paths, e^(iS/hbar), the classical one by interference) are
+    ALREADY sealed on stick_the_principle_of_least_action; the H<->L Legendre transform on
+    stick_the_legendre_transform_mark_the_points_create_the_line. This stick places the Lagrangian as the
+    Hamiltonian's dual and gathers them. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "legendre": _rh_seal_num("free_particle_legendre_h_equals_p_qdot_minus_l", "6*3 - 9", 9.0, tol=1e-9),
+        "snell": _rh_seal_num("snell_critical_angle_sine_n2_over_n1_glass_to_air", "1.0/1.5", 0.6666666666666666, tol=1e-9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "Lagrangian numbers")
+    sid = TS.create("The Lagrangian - the Hamiltonian's dual and the path")["id"]
+    marks = [
+        ("instance", "[the Lagrangian is the Hamiltonian's dual, SEALED] They are Legendre transforms of one another: "
+                     "H = sum p q' - L (sealed on stick_the_legendre_transform_mark_the_points_create_the_line). In "
+                     "mechanics, a free particle has L = (1/2) m v^2 (m=2, v=3 gives 9), momentum p = m v = 6, so "
+                     "H = p v - L = 6*3 - 9 = 9 (sealed). H is energy, T + V, the generator of TIME; L is T - V, the "
+                     "generator of the PATH. Two faces of one dynamics.", S["legendre"]),
+        ("instance", "[least action yields the measured laws, SEALED] Fermat's least-time principle (least action for "
+                     "light) gives Snell's law and the critical angle sin(theta_c) = n2/n1 = 1.0/1.5 = 0.667 (sealed), "
+                     "glass to air - the total internal reflection that holds light inside an optical fibre. The "
+                     "variational principle is not a mood; it produces the law you measure.", S["snell"]),
+        ("note", "[the principle - many paths, one chosen] The Lagrangian's law is delta S = 0: of all conceivable "
+                 "paths, nature takes the one where the action S = integral L dt is stationary. Euler-Lagrange gives "
+                 "Newton's F = ma from L = (1/2) m v^2 - V, and the same one principle gives Maxwell and general "
+                 "relativity. 'Many potentials, one end' as a law of the PATH. Already sealed as "
+                 "stick_the_principle_of_least_action.",
+         {"source": "the principle of least action; Euler-Lagrange; stick_the_principle_of_least_action"}),
+        ("note", "[the quantum truth - the path integral] Feynman: a quantum system takes ALL paths, each weighted by "
+                 "e^(iS/hbar); they interfere, and where the action is stationary the phases reinforce (the classical "
+                 "path), elsewhere they cancel; as hbar -> 0 only the least-action path survives. The many paths are "
+                 "real; the one emerges by interference. Ties the capstone (many potentials) and the Hamiltonian "
+                 "(e^(-iHt/hbar)); sealed on stick_the_principle_of_least_action.",
+         {"source": "R. Feynman, the path integral (sum over histories); stick_the_principle_of_least_action; card_floor_the_capstone"}),
+        ("note", "[one scalar for all of physics; the relativistic face] The Lagrangian is a single scalar, and the "
+                 "whole Standard Model is DEFINED by its Lagrangian. Unlike the Hamiltonian, which singles out time, "
+                 "the Lagrangian treats space and time together (Lorentz-covariant), so it is the native language of "
+                 "relativity and quantum field theory. Ties card_floor_standard_model.",
+         {"source": "the Standard Model Lagrangian; the manifest Lorentz covariance of the action"}),
+        ("note", "[the teleological echo, honestly] The action principle reads as purposive: fix the start and the "
+                 "end, and the path between is the one that extremizes the action, as if the end were given. That is a "
+                 "real variational feature and the precise mathematical echo of 'many possibilities but the same end' "
+                 "- stated as the resonance it is, never laundered into a proof of purpose.",
+         {"source": "the variational (boundary-value) form of the action principle"}),
+        ("note", "[on the one map] The Lagrangian floor joins the Hamiltonian floor as its Legendre dual, and gathers "
+                 "the pieces already sealed - stick_the_principle_of_least_action (least action + the path integral) "
+                 "and stick_the_legendre_transform_mark_the_points_create_the_line (H<->L). It rests on the capstone "
+                 "(the many paths), the solve path (delta S = 0 is an optimization: exclude the non-stationary, "
+                 "converge on the stationary point), and card_floor_standard_model (the Standard Model is a "
+                 "Lagrangian). Ties card_floor_the_lagrangian and card_floor_the_hamiltonian.",
+         {"source": "the one map; card_floor_the_lagrangian; tools/seed_the_lagrangian.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py the_lagrangian")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -8677,6 +8739,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("lagrangian", "the_lagrangian", "lagrangian_mechanics", "the_path_chosen"):
+        return the_lagrangian()
     if a[0] in ("hamiltonian", "the_hamiltonian", "energy_operator", "law_of_the_flow"):
         return the_hamiltonian()
     if a[0] in ("is_gravity_a_force", "gravity_force", "force_or_geometry"):
