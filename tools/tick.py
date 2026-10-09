@@ -1085,6 +1085,75 @@ def get_close() -> int:
     _mint_marks(sid, marks, by="tools/tick.py get_close")
     return 0
 
+
+def change_of_domain() -> int:
+    """CHANGE OF DOMAIN - THE EXACT FLIP (Matt, 2026-10-09: "putting the problem in a Hilbert Space" - "build it").
+    Put the problem in the space where it diagonalizes, solve it as independent scalars, map back. Demonstrated and
+    sealed on three flips: (1) FIBONACCI by the eigenbasis - the coupled recurrence [[1,1],[1,0]] has eigenvalues phi
+    and psi (the golden ratio and its conjugate); the trace phi+psi = 1 and the determinant phi*psi = -1 are sealed,
+    and Binet's formula (phi^10 - psi^10)/sqrt(5) = 55 is sealed - the nth term is independent scalar powers in the
+    eigenbasis. (2) A MARKOV steady state as the lambda = 1 eigenvector - the detailed balance 0.1*(5/6) = 0.5*(1/6)
+    sealed to zero, the stationary pi_1 = 5/6 sealed. (3) the FOURIER flip - the convolution sum identity (sum a)(sum
+    b) = 12 sealed (the convolution theorem's consequence; the full ifft(fft.fft) = direct check is in the verifier
+    spectral.py). The verifier CHECKS the flip is valid (A v = lambda v) before trusting it. Idempotent."""
+    import math
+    from concordance import tickstick as TS
+    S = {}
+    seals = [
+        ("fib_trace", "fibonacci_matrix_trace_phi_plus_psi", "(1+sqrt(5))/2 + (1-sqrt(5))/2", 1.0, 1e-12),
+        ("fib_det", "fibonacci_matrix_determinant_phi_times_psi", "((1+sqrt(5))/2)*((1-sqrt(5))/2)", -1.0, 1e-12),
+        ("binet", "fibonacci_10_by_binet_in_the_eigenbasis", "(((1+sqrt(5))/2)**10 - ((1-sqrt(5))/2)**10)/sqrt(5)", 55.0, 1e-9),
+        ("markov_bal", "markov_detailed_balance_lambda_1_eigenvector", "0.1*(5/6) - 0.5*(1/6)", 0.0, 1e-12),
+        ("markov_pi", "markov_stationary_pi_1", "0.5/(0.1+0.5)", 5.0/6.0, 1e-12),
+        ("conv_sum", "fourier_convolution_sum_identity_sum_a_times_sum_b", "(1+2+3)*(1+1)", 12.0, 1e-12),
+    ]
+    for key, nid, expr, val, tol in seals:
+        S[key] = _rh_seal_num(nid, expr, float(val), tol=tol)
+        if not S[key]:
+            print("a seal failed:", nid); return 1
+    print("sealed", len(S), "change-of-domain numbers")
+    sid = TS.create("Change of domain - solve in the eigenbasis, map back")["id"]
+    marks = [
+        ("instance", "[Fibonacci by the eigenbasis] The recurrence F_n = F_{n-1} + F_{n-2} is the matrix M = [[1,1],[1,0]] "
+                     "applied n times - coupled in the standard basis. M diagonalizes: its eigenvalues are phi = "
+                     "(1+sqrt5)/2 and psi = (1-sqrt5)/2, with trace phi+psi = 1 (sealed) and determinant phi*psi = -1 "
+                     "(sealed). In the eigenbasis the nth power is just phi^n and psi^n - independent scalars - and "
+                     "mapping back gives Binet: F_10 = (phi^10 - psi^10)/sqrt5 = 55 (sealed, an exact integer). The flip "
+                     "turned iteration into a closed form.", S["binet"]),
+        ("instance", "[a Markov steady state as the lambda = 1 eigenvector] A two-state chain with rates 0.1 and 0.5 has "
+                     "its stationary distribution at the eigenvector of eigenvalue 1: detailed balance 0.1*(5/6) = "
+                     "0.5*(1/6), i.e. the difference is 0 (sealed), giving pi_1 = 0.5/(0.1+0.5) = 5/6 (sealed). The long-run "
+                     "behaviour - a hard limit of powers in the standard basis - is one eigenvector in the eigenbasis.",
+         S["markov_bal"]),
+        ("instance", "[the Fourier flip] Multiplying (1 + 2x + 3x^2)(1 + x) convolves the coefficients. Convolution is "
+                     "O(n^2) directly and pointwise multiplication in the frequency basis (DFT(a*b) = DFT(a).DFT(b)). A "
+                     "sealed consequence: the convolution's coefficients sum to (sum a)(sum b) = 6*2 = 12 (sealed); the "
+                     "full ifft(fft.fft) = direct-convolution check is run in the verifier. Convolution is multiplication "
+                     "in the frequency domain.", S["conv_sum"]),
+        ("postulate", "[what it rests on] The spectral theorem: a diagonalizable operator is, in its eigenbasis, a "
+                      "diagonal matrix - the coupled system becomes independent scalars, and any function of the operator "
+                      "is that function applied to each eigenvalue. The flip is EXACT when the eigenbasis exists and is "
+                      "known; the engine verifies A v = lambda v before trusting it. Taken as the frame these flips work "
+                      "in; from their working the method is inferred, never kept as a universal fact - a defective matrix "
+                      "has no such basis, and a problem with no cheap diagonalizing basis is where the barriers bite.",
+         {"source": "the spectral theorem; Binet (1843); J. Fourier (1822); the convolution theorem"}),
+        ("note", "[don't blindly apply bra-ket] The flip is a win only when the diagonalizing basis is known and cheap "
+                 "to apply: Fourier is O(n log n), a general diagonalization is O(n^3), and for an NP-complete problem the "
+                 "basis would be exponentially large or exponentially hard to find - the barrier, re-appearing, not "
+                 "evaded. Exact here (structure present: linearity, a symmetry, a modularity); where it is absent, fall "
+                 "through to the get-close approximation with a proven bound.",
+         {"source": "src/concordance/verifiers/spectral.py; the P vs NP barriers (card_floor_p_vs_np); "
+                    "the get-close door (stick_get_fairly_close_with_a_proven_bound)"}),
+        ("note", "[the engine is the Hilbert space] The domains are its subspaces, the verifiers its operators, and the "
+                 "joints where two domains connect (card_floor_millennium, card_floor_the_instruments) are the inner "
+                 "products. Solving is choosing the domain whose best aspect diagonalizes your problem, working there, and "
+                 "mapping back - exact in the eigenbasis (here), approximate by relaxation (get close). This is the "
+                 "transceiver reading: find the carrier, demodulate, read the message.",
+         {"source": "the one map; src/concordance/verifiers/spectral.py and approximation.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py change_of_domain")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -7798,6 +7867,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("change_of_domain", "spectral", "diagonalize", "eigenbasis"):
+        return change_of_domain()
     if a[0] in ("get_close", "approximation", "bounded_estimate"):
         return get_close()
     if a[0] in ("logarithm_chain", "logarithm", "log_chain"):

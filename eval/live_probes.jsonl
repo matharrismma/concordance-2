@@ -122,3 +122,5 @@
 {"id": "map.the.instruments.floor.reads.the.import.graph", "path": "/chains", "query": {"floor": "card_floor_the_instruments"}, "expect": [{"at": "parts", "min_len": 3}, {"at": "chain.nodes", "min_len": 20}, {"at": "merges[*].id", "has": "card_instr_chemistry"}, {"at": "serves[*].at", "has": "card_question_riemann"}]}
 {"id": "get.close.stick.is.anchored", "path": "/stick", "query": {"id": "stick_get_fairly_close_with_a_proven_bound"}, "expect": [{"at": "fit.postulates", "min_len": 1}, {"at": "fit.record", "min_len": 2}]}
 {"id": "map.approximation.serves.p.vs.np", "path": "/chains", "query": {"floor": "card_floor_the_instruments"}, "expect": [{"at": "serves[*].from", "has": "card_instr_approximation"}, {"at": "serves[*].at", "has": "card_question_p_vs_np"}]}
+{"id": "change.of.domain.stick.is.anchored", "path": "/stick", "query": {"id": "stick_change_of_domain_solve_in_the_eigenbasis_map_back"}, "expect": [{"at": "fit.postulates", "min_len": 1}, {"at": "fit.record", "min_len": 2}]}
+{"id": "map.spectral.serves.p.vs.np", "path": "/chains", "query": {"floor": "card_floor_the_instruments"}, "expect": [{"at": "serves[*].from", "has": "card_instr_spectral"}]}

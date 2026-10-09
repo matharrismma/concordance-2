@@ -30,6 +30,10 @@ VERIFIERS: Dict[str, str] = {
     # path's approximation step: anchor + one bounded step, the error a Taylor/Lipschitz remainder.
     "approximation": _P + "approximation", "get_close": _P + "approximation",
     "bounded_estimate": _P + "approximation",
+    # change of domain: put the problem in the space where it diagonalizes, solve there, map back (2026-10-09:
+    # "putting the problem in a Hilbert Space") - the eigenbasis flip and the Fourier flip.
+    "spectral": _P + "spectral", "change_of_domain": _P + "spectral", "eigenbasis": _P + "spectral",
+    "diagonalize": _P + "spectral",
     # RH by elimination through the divisor sum (Robin 1984) — a number_theory check, named so the engine
     # routes a Robin query and the nightly benchmark runs it on its own golden (2026-10-05)
     "robin": _P + "number_theory", "robins_inequality": _P + "number_theory",

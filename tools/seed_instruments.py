@@ -49,7 +49,8 @@ GLOBAL_FLOOR = "card_k_floor_of_discovery"
 # the roots of the instrument trees (the deepest shared floors + each island's root)
 # riemann_accel (the Riemann-Siegel acceleration) and number_theory mutually import; the collapsed graph makes
 # the acceleration upstream (a tool number_theory builds on), so it is a root of its own tree.
-ROOTS = ["si_units", "_boolean", "number_theory", "riemann_accel", "scripture", "elliptic_curves", "approximation"]
+ROOTS = ["si_units", "_boolean", "number_theory", "riemann_accel", "scripture", "elliptic_curves", "approximation",
+         "spectral"]
 
 # a readable title where the module name is not self-explaining
 TITLES = {
@@ -62,6 +63,7 @@ TITLES = {
     "elliptic_curves": "Elliptic curves", "mathematics": "Mathematics — the numeric substrate",
     "computer_science": "Computer science", "formal_logic": "Formal logic", "scripture": "Scripture",
     "linguistics": "Linguistics", "approximation": "Get close - a bounded estimate",
+    "spectral": "Change of domain - the eigenbasis flip",
 }
 
 # the gate: the validators that sit above every verifier (module in source.ref; the edge to what they gate)
@@ -102,6 +104,9 @@ SERVICE = [
     ("approximation", "card_question_p_vs_np",
      "the get-close door: a bounded estimate (anchor + one step, Taylor/Lipschitz error) - the practical response to "
      "the three barriers, which say an exact answer cannot always be found by rule"),
+    ("spectral", "card_question_p_vs_np",
+     "the change-of-domain door: put the problem in the eigenbasis where it diagonalizes, solve as independent "
+     "scalars, map back - exact when the basis is cheap (Fourier, diagonalization), the structured sibling of get-close"),
 ]
 
 
