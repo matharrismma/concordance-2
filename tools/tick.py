@@ -839,7 +839,8 @@ def millennium_map() -> int:
                                   "card_joint_l_functions on the one map"}),
         ("note", "[the joints, cited] On the one map (card_floor_millennium) this stick connects to Yang-Mills at the "
                  "GUE statistics (Montgomery 1973, Odlyzko 1987, Verbaarschot 1994 - the spacing witness already sealed "
-                 "here), to Hodge and P versus NP at Deligne's proven Riemann hypothesis over finite fields (1974), and "
+                 "here), to Hodge and P versus NP at the Weil conjectures - the Riemann hypothesis over finite fields, "
+                 "proven by Deligne 1974, while the hypothesis itself stays open - and "
                  "to P versus NP at the Diophantine form of RH (Davis-Matiyasevich-Robinson 1976). No joint with "
                  "Navier-Stokes was found - a miss, recorded.",
          {"source": "tools/seed_millennium_chain.py; docs/MILLENNIUM_PREPAREDNESS.md"}),
@@ -870,9 +871,11 @@ def millennium_map() -> int:
          {"source": "V. I. Arnold, Ann. Inst. Fourier 16 (1966); D. Forster, D. R. Nelson, M. J. Stephen, PRA 16 (1977)"}),
     ], by=by)
     _mint_marks(TS.create("P versus NP")["id"], [
-        ("note", "[the joints, cited] On the one map this stick connects to Riemann and Hodge at Deligne 1974 - the one "
-                 "proven Riemann hypothesis, whose positivity Mulmuley's geometric complexity theory leans on (the one "
-                 "road not excluded by a barrier); to Riemann at the Diophantine form of RH (Davis-Matiyasevich-Robinson "
+        ("note", "[the joints, cited - restated for precision, 2026-10-09] On the one map this stick connects to Riemann "
+                 "and Hodge at Deligne 1974 - the Weil conjectures, the Riemann hypothesis for varieties over FINITE "
+                 "FIELDS, a theorem; the Riemann hypothesis itself stays open - whose positivity Mulmuley's geometric "
+                 "complexity theory leans on (the one road not excluded by a barrier); to Riemann at the Diophantine form "
+                 "of RH (Davis-Matiyasevich-Robinson "
                  "1976); to BSD at Manin 1971 (finite Sha makes the rank computable); to Yang-Mills at the NP-hard sign "
                  "problem (Troyer-Wiese 2005).",
          {"source": "P. Deligne, Publ. Math. IHES 43 (1974); K. Mulmuley, J. ACM 58 (2011); Yu. I. Manin, Russian Math. "

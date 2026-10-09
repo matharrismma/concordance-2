@@ -195,7 +195,7 @@ mathematics already made, cited to its record (the records carded by `tools/card
 |---|---|---|---|
 | GUE statistics | Riemann ↔ Yang–Mills | Montgomery 1973, Odlyzko 1987, Verbaarschot 1994, Berry–Keating 1999 | the Riemann stick's spacing witness |
 | One L-function machinery | Riemann ↔ BSD | Wiles 1995 | ξ(s) = ξ(1 − s) at s = 0.3; L(11a1, 1) |
-| The one proven RH (Weil) | Riemann ↔ Hodge ↔ P vs NP | Deligne 1974, Mulmuley 2011 | cited |
+| The Weil conjectures (RH over finite fields, a theorem; RH itself open) | Riemann ↔ Hodge ↔ P vs NP | Deligne 1974, Mulmuley 2011 | cited |
 | The Tate conjecture | Hodge ↔ BSD | Tate 1965, Artin–Tate 1966, Milne 1975 | cited |
 | Bochner's vanishing | Hodge ↔ Poincaré | Bochner 1946, Myers 1941, Hamilton 1982 | Myers on the unit S³ |
 | The renormalization group | Yang–Mills ↔ Navier–Stokes | Wilson 1974, Forster–Nelson–Stephen 1977 | the running coupling; the Kolmogorov scale |
@@ -213,5 +213,12 @@ no joint; the map shows the indirect path (through Yang–Mills) and says so. `G
 Nothing is unified by us. The historical fact the floor records is that the joints are where the proofs came from —
 Perelman imported a PDE into topology, Wiles' modularity gave BSD its L-function — and the honest state is that no
 joint on this map supplies a missing step for any of the six open questions. The map says where a step taken on one
-would transfer, and where the field itself converges: the proven Riemann hypothesis at the centre.
+would transfer, and where the field itself converges: the Weil conjectures at the centre — the Riemann hypothesis
+over finite fields, a theorem — while the Riemann hypothesis itself stays open.
+
+*Precision, 2026-10-09 (Matt: "Proven Riemann?"):* an earlier draft of this section and the joint card's title said
+"the one proven Riemann hypothesis"; on the map the label truncated to exactly the wrong reading. The Riemann
+hypothesis is NOT proven. Deligne 1974 proved the Weil conjectures, its analogue over finite fields. The wording was
+corrected everywhere it could be, and the one place it cannot be edited — a note already minted on the P versus NP
+stick — carries a restated note beside it, since a removal is a record.
 

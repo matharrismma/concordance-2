@@ -8,7 +8,8 @@ the seven Millennium problems onto the same graph, in the same two files, as the
 
   * a FLOOR, card_floor_millennium — part_of the one Floor of Discovery. Its PARTS are what is PROVEN or OBSERVED:
     the ten joints where two of the problems meet at one established thing (GUE statistics, the L-function
-    machinery, Deligne's proven Riemann hypothesis over finite fields, the Tate conjecture, Bochner's vanishing,
+    machinery, the Weil conjectures (the Riemann hypothesis over finite fields, Deligne 1974 - the hypothesis itself
+    stays open), the Tate conjecture, Bochner's vanishing,
     the renormalization group, the sign problem, Manin's algorithm, the Diophantine form of RH, Arnold's geodesics).
   * seven OPEN ENDS, card_question_<problem> — the questions as the Clay Mathematics Institute states them, each
     pointing at its tick stick, where what is sealed, cited and open is read live. They hang off the floor
@@ -92,8 +93,9 @@ FLOOR_CARD = {
     "title": "The Millennium floor - seven open questions, and where they connect",
     "body": ("The seven Millennium Prize Problems on the one map of reality. The FLOOR is what is proven or observed: "
              "the joints where two of the questions meet at one established thing - the GUE statistics shared by zeta "
-             "zeros and the lattice Dirac operator, the one L-function machinery, Deligne's proven Riemann hypothesis "
-             "over finite fields, the Tate conjecture that is Hodge's arithmetic twin and BSD over function fields, "
+             "zeros and the lattice Dirac operator, the one L-function machinery, the Weil conjectures (the Riemann "
+             "hypothesis over finite fields, a theorem by Deligne 1974 - the Riemann hypothesis itself stays open), the "
+             "Tate conjecture that is Hodge's arithmetic twin and BSD over function fields, "
              "Bochner's vanishing under positive Ricci curvature, the renormalization group, the NP-hard sign problem, "
              "Manin's algorithm under finite Sha, the Diophantine form of RH, Arnold's geodesic flow. The questions "
              "are the OPEN ENDS hanging off that floor; one of them, Poincare, is closed (Perelman 2002-2003). Nothing "
@@ -169,11 +171,14 @@ JOINTS = [
          bands=["L-functions", "modularity", "functional equation"], joins=("riemann", "bsd"),
          cites=("wiles_1995",), seal="xi_functional_equation_at_s_0_3 (Riemann stick) and the 11a1 instance (BSD stick)"),
     dict(slug="weil_conjectures",
-         title="The one proven Riemann hypothesis: Deligne 1974, over finite fields",
-         body=("The Weil conjectures are the Riemann hypothesis for varieties over finite fields, and they are a "
-               "theorem (Deligne 1974). The proof runs on weights - the finite-field shadow of Hodge theory - and the "
-               "positivity it establishes is what Mulmuley's geometric complexity theory, the one road to P versus NP "
-               "not excluded by a barrier, leans on. A proven hypothesis at the centre, three open questions around it."),
+         title="The Weil conjectures (Deligne 1974): the Riemann hypothesis over finite fields, a theorem",
+         body=("The Weil conjectures are the analogue of the Riemann hypothesis for the zeta functions of varieties "
+               "over FINITE FIELDS, and they are a theorem (Deligne 1974): every eigenvalue of Frobenius on the i-th "
+               "cohomology has absolute value q^(i/2). The Riemann hypothesis itself - zeta over the rationals - stays "
+               "OPEN, and Deligne's proof has not transferred to it. The proof runs on weights - the finite-field shadow "
+               "of Hodge theory - and the positivity it establishes is what Mulmuley's geometric complexity theory, the "
+               "one road to P versus NP not excluded by a barrier, leans on. A proven analogue at the centre, three open "
+               "questions around it."),
          bands=["weil conjectures", "finite fields", "weights"], joins=("riemann", "hodge", "p_vs_np"),
          cites=("deligne_1974", "mulmuley_2011"), seal=""),
     dict(slug="tate_conjecture",
