@@ -47,7 +47,9 @@ SPINE = "card_spine_instruments"
 GLOBAL_FLOOR = "card_k_floor_of_discovery"
 
 # the roots of the instrument trees (the deepest shared floors + each island's root)
-ROOTS = ["si_units", "_boolean", "number_theory", "scripture", "elliptic_curves"]
+# riemann_accel (the Riemann-Siegel acceleration) and number_theory mutually import; the collapsed graph makes
+# the acceleration upstream (a tool number_theory builds on), so it is a root of its own tree.
+ROOTS = ["si_units", "_boolean", "number_theory", "riemann_accel", "scripture", "elliptic_curves"]
 
 # a readable title where the module name is not self-explaining
 TITLES = {
