@@ -139,3 +139,44 @@ ladder ends somewhere.
 
 Nothing out of thin air. Every link sealed or cited. The surviving window read, never guessed. A proof is the
 chain closed.
+
+## The inclusion — 2026-10-09
+
+*Matt: "find all 17 and add them." · "find"*
+
+The sixteen wants the attempts left on the box's ledger were searched, every record checked against Crossref or the
+source's own page, and the finds INCLUDED:
+
+- **46 sources carded by their record** (`tools/card_millennium_sources.py` → `data/millennium_cards.jsonl`, shelf
+  `millennium`, spine `card_spine_millennium_sources` part_of the Floor): authors, year, title, venue, DOI or arXiv
+  number, the canonical page and a free copy where one exists, the license AS FOUND, the want each fills and the
+  stick it serves. Metadata, never a paper's text. The mint gate (no share-alike, no non-commercial) refused nothing
+  among the 46, and it decided two things: the LMFDB — Attribution with the same-license condition — stays a
+  citation in `CURVES_BSD_INPUTS` and is not carded; Odlyzko's tables state no terms, so `zeros1` is held on the
+  untrusted ark and its numbers are not carded.
+- **The two found tables cross-checked and sealed** (`tools/tick.py sources_crosscheck`), read and not trusted:
+  `zeros1` holds 649 zeros below T = 1000 — equal to the count the Riemann stick sealed on its own, read off the
+  stick rather than typed; its first zero agrees with the engine's `zetazero(1)` within the table's stated 3·10⁻⁹;
+  the Riemann–von Mangoldt main term at its 100,000th zero (T = 74920.827498994) is 99999.405 (seal 10a45f84…),
+  so S(T) = 0.595 there. Cremona's `allbsd.00000-09999` (ecdata, Artistic License 2.0) carries on its 11a1 and 37a1
+  rows exactly the inputs the BSD seals cite, and the full formula holds on the rows' own numbers — 11a1 to
+  3.9·10⁻¹⁵ (seal b18b1436…), 37a1 to 1.8·10⁻¹⁶ (seal 0a960637…). The column order is undocumented in the
+  repository's README; the formula holding on every 11a row is what proves it.
+- **The ledger:** 32 finds filed as options; the 12 source wants CLOSED on their cards; the 4 build wants — the
+  strong-coupling calculator (Drouffe–Zuber 1983, Wilson 1974), the SAT door (Davis–Logemann–Loveland 1962,
+  GRASP 1999), the Hodge-diamond calculator (Hirzebruch 1966), the spectral solver (Orszag 1971) — hold their
+  methods' sources and STAY OPEN. The Ricci-flow integrator and the Odlyzko–Schönhage main sum are noted beside
+  Hamilton 1982 and Odlyzko–Schönhage 1988. The methods are on the shelf; the code is not written.
+- **Corrections recorded, not silently applied:** the P versus NP want named arXiv:1512.00334 for Find–Golovnev–
+  Hirsch–Kulikov — that identifier is an astronomy paper; the paper is ECCC TR15-166 / FOCS 2016. Atiyah–Hirzebruch
+  is Topology 1, 1962 (the want said 1961). Blum's record is dated 1983 by Crossref (the issue is February 1984).
+  Ladyzhenskaya 1959 is Comm. Pure Appl. Math. 12, 427–433, not a Steklov volume. Fujita–Kato's DOI is
+  10.1007/BF00276188 (the first guess resolved to Giga 1985 — which is why every DOI was checked).
+
+**Two defects found in the box forager, recorded here, not fixed here.** First, no relevance floor: on 13 of the 16
+wants the overnight forager had filed keyword hits as options — *Directions for cooking by troops* for Cook 1971,
+*Navigate your stars* for Yang–Mills, *The Principles of Vegetable-Gardening* for the Hodge diamond. Second, the
+comb cell holds 8 options and the noise had taken the slots, so 13 real finds could not be filed as options (the
+closings carry them: each closed want names its card). The fix belongs to the forager, not the ledger: a relevance
+floor before filing, and a cell that counts only options above it.
+

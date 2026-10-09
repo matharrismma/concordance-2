@@ -251,6 +251,7 @@ SHARD_ASSIGN = {
     # The etymology shelf (Webster 1913 origins, ~49k cards, 2026-10-08) — word-level reference beside the
     # lexicon; routed to the word shard for a future freeze, resident until the next shard rebuild.
     "etymology": "word",
+    "millennium": "science",
 }
 CORE = "core"                                  # always thawed
 

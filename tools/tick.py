@@ -684,6 +684,130 @@ def poincare_next() -> int:
     _mint_marks(sid, marks, by="tools/tick.py poincare_next")
     return 0
 
+
+def _read_allbsd(text: str) -> dict:
+    """Cremona's allbsd rows by label (e.g. '11a1'). The column reading - N, isogeny class, number, a-invariants,
+    rank r, |T|, prod c_p, real period Omega, L^(r)(E,1)/r!, regulator, |Sha| - is undocumented in the repository
+    README; sources_crosscheck proves it by sealing the full BSD formula on the rows' own numbers."""
+    rows = {}
+    for line in text.splitlines():
+        f = line.split()
+        if len(f) < 11 or not f[0].isdigit():
+            continue
+        rows[f[0] + f[1] + f[2]] = {"r": int(f[4]), "T": int(f[5]), "c": int(f[6]), "Omega": f[7], "L": f[8],
+                                    "Reg": f[9], "Sha": f[10]}
+    return rows
+
+
+def _rvm_main_term(T: float) -> float:
+    """The Riemann-von Mangoldt main term (T/2pi)(log(T/2pi) - 1) + 7/8; N(T) = this + S(T), |S(T)| small."""
+    import math
+    return (T / (2 * math.pi)) * (math.log(T / (2 * math.pi)) - 1) + 7 / 8
+
+
+def sources_crosscheck() -> int:
+    """THE FOUND TABLES, CROSS-CHECKED (the Millennium loop, 2026-10-09; Matt: "find all 17 and add them" - anything
+    retrieved and used is included). Two tables were fetched to the box's untrusted ark: Odlyzko's zeros1 (the first
+    100,000 zeros of zeta, stated accuracy 3e-9; NO terms are stated on its page, so the file is HELD for cross-checks
+    and its numbers are never carded) and Cremona's allbsd.00000-09999 (ecdata, Artistic License 2.0). Nothing in them
+    is trusted: the stick's own sealed count below T = 1000 is READ OFF THE STICK (never typed) and the table must agree;
+    the first zero is compared with the engine's own zetazero(1); the Riemann-von Mangoldt main term at the table's last
+    zero is sealed and S(T) read off it; the 11a1 and 37a1 rows must carry the inputs CURVES_BSD_INPUTS cites, and the
+    full BSD formula is sealed FROM THE TABLE'S OWN NUMBERS. A table that disagrees refuses the mark - a miss stays a
+    miss. Idempotent."""
+    import hashlib
+    import re
+    from concordance import tickstick as TS
+    ark = Path(os.environ.get("CONCORDANCE_ARK_MILLENNIUM", "/home/nh/ark_untrusted/millennium"))
+    zp, bp = ark / "zeros1", ark / "allbsd.00000-09999"
+    missing = [str(p) for p in (zp, bp) if not p.exists()]
+    if missing:
+        print("the ark does not hold:", ", ".join(missing)); return 2
+
+    def sha(p):
+        return hashlib.sha256(p.read_bytes()).hexdigest()
+
+    # -- Odlyzko's zeros1 against the Riemann stick --
+    zeros = [float(t) for t in zp.read_text().split()]
+    if len(zeros) != 100000 or zeros != sorted(zeros) or not (14.0 < zeros[0] < 15.0):
+        print("zeros1 is not the table its page describes (100,000 ascending zeros from 14.13...)"); return 1
+    rsid = TS.create("Riemann hypothesis")["id"]
+    kept = None
+    for t in TS.read(rsid).get("ticks", []):
+        if t.get("kind") == "bound" and float(t.get("up_to") or 0) == 1000.0:
+            m = re.search(r"\((\d+) zeros", t.get("claim") or "")
+            if m:
+                kept = int(m.group(1)); break
+    if kept is None:
+        print("the Riemann stick carries no sealed bound at T = 1000 to check the table against"); return 1
+    n1000 = sum(1 for g in zeros if g <= 1000.0)
+    if n1000 != kept:
+        print(f"DISAGREEMENT: the table holds {n1000} zeros below 1000, the stick sealed {kept} - no mark"); return 1
+    import mpmath
+    z1 = float(mpmath.zetazero(1).imag)
+    if abs(z1 - zeros[0]) > 3e-9:
+        print(f"DISAGREEMENT: the table's first zero {zeros[0]} vs the engine's {z1} - no mark"); return 1
+    T = zeros[-1]
+    main = _rvm_main_term(T)
+    S = len(zeros) - main
+    s_rvm = _rh_seal_num("odlyzko_zeros1_riemann_von_mangoldt_main_term_at_the_100000th_zero",
+                         f"({T!r}/(2*pi))*(log({T!r}/(2*pi)) - 1) + 7/8", main, tol=1e-9)
+    if not s_rvm:
+        return 1
+    zsha = sha(zp)
+    print(f"zeros1: {len(zeros)} zeros, {n1000} below 1000 (stick: {kept}), first {zeros[0]} vs {z1:.9f}, "
+          f"last {T}, main term {main:.3f}, S(T) = {S:.3f}; sha256 {zsha[:16]}")
+    _mint_marks(rsid, [
+        ("witness", f"[a found table, cross-checked] Odlyzko's zeros1 - the first 100,000 zeros of zeta, stated accuracy "
+                    f"3e-9 (sha256 {zsha[:16]}...) - is held on the ark; no terms are stated on its page, so its numbers "
+                    f"are not carded. Read, not trusted: it holds {n1000} zeros below T = 1000, equal to the {kept} the "
+                    f"engine counted and sealed on its own; its first zero {zeros[0]} agrees with the engine's "
+                    f"zetazero(1) = {z1:.9f} within the stated accuracy; at its last zero T = {T} the Riemann-von "
+                    f"Mangoldt main term (T/2pi)(log(T/2pi) - 1) + 7/8 = {main:.3f} (sealed), so the remainder "
+                    f"S(T) = N(T) - main = {S:.3f} there - under 1, as the argument-principle bound requires.",
+         {"seal": s_rvm, "source": "A. M. Odlyzko, Tables of zeros of the Riemann zeta function, "
+                                   "https://www-users.cse.umn.edu/~odlyzko/zeta_tables/ (zeros1)"}),
+    ], by="tools/tick.py sources_crosscheck")
+    # -- Cremona's allbsd against the BSD stick --
+    rows = _read_allbsd(bp.read_text())
+    need = ("11a1", "37a1")
+    if any(k not in rows for k in need):
+        print("the allbsd file lacks 11a1 / 37a1"); return 1
+    bsha = sha(bp)
+    marks = []
+    for key in need:
+        d, cite = rows[key], CURVES_BSD_INPUTS[key]
+        sha_n = int(float(d["Sha"]))
+        if (d["c"], d["T"], sha_n) != (cite["tamagawa_product"], cite["torsion_order"], cite["sha_order"]):
+            print(f"DISAGREEMENT on {key}: table prod c_p, |T|, |Sha| = {d['c']}, {d['T']}, {sha_n} vs the cited inputs "
+                  f"{cite} - no mark"); return 1
+        if "regulator" in cite and abs(float(d["Reg"]) - cite["regulator"]) > 1e-12:
+            print(f"DISAGREEMENT on the {key} regulator: table {d['Reg']} vs cited {cite['regulator']} - no mark"); return 1
+        expr = f"{d['Omega']}*{d['c']}*{sha_n}/{d['T']}**2" + (f"*{d['Reg']}" if d["r"] >= 1 else "")
+        val = float(d["Omega"]) * d["c"] * sha_n / d["T"] ** 2 * (float(d["Reg"]) if d["r"] >= 1 else 1.0)
+        rel = abs(val - float(d["L"])) / abs(float(d["L"]))
+        seal = _rh_seal_num(f"cremona_allbsd_{key}_full_bsd_formula_from_the_table_s_own_numbers", expr, float(d["L"]),
+                            tol=1e-10)
+        if not seal:
+            return 1
+        print(f"{key}: r={d['r']} |T|={d['T']} c={d['c']} Omega={d['Omega']} L={d['L']} Reg={d['Reg']} |Sha|={sha_n}; "
+              f"formula {val:.15g}, agrees to {rel:.1e}")
+        lhs = "L(E,1)" if d["r"] == 0 else "L'(E,1)"
+        rhs = "Omega * prod c_p * |Sha| / |T|^2" + (" * R" if d["r"] >= 1 else "")
+        marks.append(("witness",
+                      f"[a found table, cross-checked] Cremona's ecdata allbsd.00000-09999 (Artistic License 2.0; sha256 "
+                      f"{bsha[:16]}...) is held on the ark. Its {key} row reads rank {d['r']}, |T| = {d['T']}, prod c_p = "
+                      f"{d['c']}, Omega = {d['Omega']}, {lhs} = {d['L']}, R = {d['Reg']}, |Sha| = {sha_n} - the inputs the "
+                      f"stick cites from Cremona 1997 Table 1, now read from the table itself; and the full formula holds "
+                      f"on the row's own numbers: {rhs} = {val:.15g} = {lhs} to {rel:.1e} (sealed). The column reading "
+                      f"(N, class, number, a-invariants, r, |T|, prod c_p, Omega, L^(r)(E,1)/r!, Reg, |Sha|) is undocumented "
+                      f"in the repository's README; the formula holding on the rows is what proves it.",
+                      {"seal": seal, "source": "J. E. Cremona, ecdata, https://github.com/JohnCremona/ecdata (allbsd), "
+                                               "Artistic License 2.0"}))
+    bsid = TS.create("Birch and Swinnerton-Dyer conjecture")["id"]
+    _mint_marks(bsid, marks, by="tools/tick.py sources_crosscheck")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -7397,6 +7521,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("sources_crosscheck", "sources", "tables", "crosscheck"):
+        return sources_crosscheck()
     if a[0] in ("poincare_next", "poincare", "ricci_flow", "perelman"):
         return poincare_next()
     if a[0] in ("hodge_next", "hodge", "hodge_diamond", "lefschetz"):

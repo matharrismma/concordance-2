@@ -1259,6 +1259,12 @@ def load_cards(path: Optional[Path] = None,
                       # of ~49k headwords, one card each (tools/card_etymology.py, public domain); read by
                       # wordcraft.verify_origin so "salary comes from Latin" is judged from the source.
                       "etymology_cards.jsonl",
+                      # THE MILLENNIUM SOURCES (2026-10-09, Matt: "find all 17 and add them") — the papers, tables
+                      # and problem descriptions the seven Millennium sticks cite, one reference card each
+                      # (tools/card_millennium_sources.py): the bibliographic record, the canonical and the free
+                      # copy, the license AS FOUND, the want it fills and the stick it serves. Metadata, never
+                      # the papers' text; the two found tables are held on the ark and cross-checked, not carded.
+                      "millennium_cards.jsonl",
                       # The Corpus — technical, academic cards minted from the stored sources
                       # (nuclides, stars, foods, ports, indicators, …); always growing.
                       "source_spines.jsonl", "source_cards.jsonl", "web_cache.jsonl",
