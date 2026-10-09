@@ -48,6 +48,7 @@ test_caps_fresh.py
 test_cas.py
 test_chain.py
 test_chains.py
+test_chains_seeded.py
 test_characters.py
 test_chemistry.py
 test_chess.py

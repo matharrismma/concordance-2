@@ -26,7 +26,10 @@ HAS_OPEN_END = "has_open_end"
 
 # THE FLOORS ON THE ONE MAP (Matt, 2026-10-09: "put them on one map, but make it the one map for the project").
 # A registry the map page lists, not a scan of the keeping. Add a floor here when its seed lands.
-FLOORS = ("card_floor_standard_model", "card_floor_millennium")
+FLOORS = ("card_floor_standard_model", "card_floor_millennium",
+          # the chains (tools/seed_chains.py, 2026-10-09): the logarithm, and the seven problems as lineages
+          "card_floor_logarithm", "card_floor_riemann", "card_floor_bsd", "card_floor_navier_stokes",
+          "card_floor_yang_mills", "card_floor_p_vs_np", "card_floor_hodge", "card_floor_poincare")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
@@ -100,12 +103,14 @@ def intersect(a_start: str, b_start: str, *, rels: Optional[Set[str]] = None,
 
 
 def floor_map(floor: str, *, get_card: Optional[Callable] = None, max_nodes: int = 512) -> Optional[Dict]:
-    """A floor as the one map reads it: its PARTS (what is proven - part_of the floor), its OPEN ENDS (the questions
-    hanging off it), and WHERE THE ENDS CONNECT. For each pair of ends: the hub both touch directly (a shared
-    connects_at neighbour, with the two edges' own evidence), else the nearest node both reach over connects_at
-    edges (an indirect path, reported as `via`), else nothing - and a pair with no direct hub is a recorded MISS,
-    never a joint. A floor with no open ends pairs its parts over the forward `enables` edges instead (the
-    Standard Model: Fermi and Maxwell meet at Weinberg). Ids, titles and the edges' evidence only; no bodies."""
+    """A floor as the one map reads it. Its PARTS (what is proven - part_of the floor: a chain's roots, or a joints
+    floor's joints); its OPEN ENDS (the questions hanging off it); THE CHAIN - everything reachable forward from the
+    parts over `enables`, with its edges, bounded; the CONFLUENCES - where two parts' trees meet (intersect over
+    `enables`), found, never declared; the JOINTS - for a floor with two or more ends, the hub each pair touches
+    directly (a shared connects_at neighbour, with the two edges' own evidence), else the nearest node both reach,
+    else a recorded MISS; and the ENTRIES - for each end, the chain's own links it connects_at (where this chain
+    enters the question). A floor with no ends reports its confluences as its joints (the Standard Model: Fermi and
+    Maxwell meet at Weinberg). Ids, titles and the edges' evidence only; no bodies."""
     get_card = get_card or _default_get_card          # resolved at call time, never bound at import
     fc = get_card(floor)
     if fc is None:
@@ -124,13 +129,32 @@ def floor_map(floor: str, *, get_card: Optional[Callable] = None, max_nodes: int
 
     parts = _neighbors(fc, {HAS_PART})
     ends = _neighbors(fc, {HAS_OPEN_END})
-    nodes = ends if ends else parts
+    # the chain: breadth-first forward from the roots over `enables`, bounded
+    chain_ids: List[str] = []
+    chain_edges: List[Dict] = []
+    queue = list(parts)
+    seen: Set[str] = set(parts)
+    while queue and len(chain_ids) < 96:
+        cid = queue.pop(0)
+        chain_ids.append(cid)
+        for n in _neighbors(get_card(cid), {ENABLES}):
+            chain_edges.append({"from": cid, "to": n})
+            if n not in seen:
+                seen.add(n)
+                queue.append(n)
+    reach = set(chain_ids)
+    confluences: List[Dict] = []
+    for i in range(len(parts)):
+        for j in range(i + 1, len(parts)):
+            via = intersect(parts[i], parts[j], rels={ENABLES}, get_card=get_card, max_nodes=max_nodes)
+            if via and via != floor:
+                confluences.append({"a": parts[i], "b": parts[j], "at": via, "title": node(via)["title"]})
     joints: List[Dict] = []
     misses: List[Dict] = []
-    for i in range(len(nodes)):
-        for j in range(i + 1, len(nodes)):
-            a, b = nodes[i], nodes[j]
-            if ends:
+    if ends:
+        for i in range(len(ends)):
+            for j in range(i + 1, len(ends)):
+                a, b = ends[i], ends[j]
                 ha, hb = hubs(a), hubs(b)
                 shared = [h for h in ha if h in hb]
                 if shared:
@@ -138,16 +162,21 @@ def floor_map(floor: str, *, get_card: Optional[Callable] = None, max_nodes: int
                         joints.append({"a": a, "b": b, "at": h, "via": None, "evidence": [ha[h], hb[h]]})
                     continue
                 via = intersect(a, b, rels={CONNECTS_AT}, get_card=get_card, max_nodes=max_nodes)
-            else:
-                via = intersect(a, b, rels={ENABLES}, get_card=get_card, max_nodes=max_nodes)
-                if via and via != floor:
-                    joints.append({"a": a, "b": b, "at": via, "via": None, "evidence": [node(via)["title"], ""]})
-                    continue
-            misses.append({"a": a, "b": b, "at": None, "via": (via if via != floor else None), "evidence": []})
+                misses.append({"a": a, "b": b, "at": None, "via": (via if via != floor else None), "evidence": []})
+    else:
+        met = {(c["a"], c["b"]) for c in confluences}
+        joints = [{"a": c["a"], "b": c["b"], "at": c["at"], "via": None, "evidence": [c["title"], ""]} for c in confluences]
+        for i in range(len(parts)):
+            for j in range(i + 1, len(parts)):
+                if (parts[i], parts[j]) not in met:
+                    misses.append({"a": parts[i], "b": parts[j], "at": None, "via": None, "evidence": []})
+    entries = [{"end": e, "at": h, "evidence": ev} for e in ends for h, ev in hubs(e).items() if h in reach]
     hub_ids = sorted({j["at"] for j in joints})
     return {"floor": floor, "title": fc.get("title") or floor,
             "parts": [node(p) for p in parts], "ends": [node(e) for e in ends],
-            "hubs": [node(h) for h in hub_ids], "joints": joints, "misses": misses}
+            "hubs": [node(h) for h in hub_ids], "joints": joints, "misses": misses,
+            "confluences": confluences, "entries": entries,
+            "chain": {"nodes": [node(c) for c in chain_ids], "edges": chain_edges}}
 
 
 def _read_jsonl(p) -> List[dict]:
@@ -164,7 +193,7 @@ def _read_jsonl(p) -> List[dict]:
     return out
 
 
-def merge_seed(data_dir, cards: List[dict], bridges: List[dict]) -> Dict[str, int]:
+def merge_seed(data_dir, cards: List[dict], bridges: List[dict], drop_edges=()) -> Dict[str, int]:
     """THE ONE MAP has one pair of files - data/chain_cards.jsonl and data/chain_bridges.jsonl - and more than one
     seed writes them (the Standard Model, the Millennium floor, the next). Each seed MERGES: by card id and by edge
     (a, b, relationship), its own rows replacing older copies, every other seed's rows kept in order. Idempotent,
@@ -180,7 +209,9 @@ def merge_seed(data_dir, cards: List[dict], bridges: List[dict]) -> Dict[str, in
         return (e.get("a"), e.get("b"), e.get("relationship"))
 
     mine_b = {key(e): e for e in bridges}
-    out_b = [mine_b.pop(key(e)) if key(e) in mine_b else e for e in _read_jsonl(bp)] + list(mine_b.values())
+    gone = {tuple(k) for k in drop_edges}                 # edges this seed RETIRES (corpus._apply_bridges keeps
+    old_b = [e for e in _read_jsonl(bp) if key(e) not in gone]   # one edge per ordered pair, so a stale one would shadow)
+    out_b = [mine_b.pop(key(e)) if key(e) in mine_b else e for e in old_b] + list(mine_b.values())
     nl = "\n"
     cp.write_text(nl.join(json.dumps(c, ensure_ascii=False) for c in out_c) + nl, encoding="utf-8", newline=nl)
     bp.write_text(nl.join(json.dumps(e, ensure_ascii=False) for e in out_b) + nl, encoding="utf-8", newline=nl)

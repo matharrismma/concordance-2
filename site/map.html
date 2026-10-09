@@ -322,18 +322,47 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
       s+='<text x="'+tx+'" y="'+ty+'" font-size="12" text-anchor="'+anchor+'" fill="var(--ink)">'+esc(short(e.title,30))+'</text></a>'; }
     return s+'</svg>';
   }
+  function drawChain(m){
+    // a lineage: the chain's nodes by layer (longest path from a root), left to right; the confluence ringed; the
+    // open end large (filled when its stick reads CLOSED); the logarithm's entries as dotted spokes from the end
+    var nodes=m.chain.nodes, edges=m.chain.edges, i, j, id;
+    var byId={}; for(i=0;i<nodes.length;i++) byId[nodes[i].id]=nodes[i];
+    var layer={}; for(i=0;i<nodes.length;i++) layer[nodes[i].id]=0;
+    for(var pass=0;pass<nodes.length;pass++){ var moved=false; for(j=0;j<edges.length;j++){ var e=edges[j]; if(layer[e.to]!=null && layer[e.from]!=null && layer[e.to]<layer[e.from]+1){ layer[e.to]=layer[e.from]+1; moved=true; } } if(!moved) break; }
+    var cols={}, maxL=0; for(id in layer){ (cols[layer[id]]=cols[layer[id]]||[]).push(id); if(layer[id]>maxL) maxL=layer[id]; }
+    var W=760, rowH=34, maxRows=1; for(id in cols){ if(cols[id].length>maxRows) maxRows=cols[id].length; }
+    var H=Math.max(200, maxRows*rowH+70), colW=(W-120)/Math.max(1,maxL), pos={};
+    for(var L=0;L<=maxL;L++){ var col=cols[L]||[], n=col.length; for(i=0;i<n;i++){ pos[col[i]]={x:60+L*colW, y:H/2+(i-(n-1)/2)*rowH}; } }
+    var endIds={}; for(i=0;i<m.ends.length;i++) endIds[m.ends[i].id]=m.ends[i];
+    var conf={}; for(i=0;i<m.confluences.length;i++) conf[m.confluences[i].at]=1;
+    var s='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:'+W+'px;display:block;margin:.4rem auto" role="img" aria-label="'+esc(m.title)+'">';
+    for(j=0;j<edges.length;j++){ var pa=pos[edges[j].from], pb=pos[edges[j].to]; if(pa&&pb) s+='<line x1="'+pa.x+'" y1="'+pa.y+'" x2="'+pb.x+'" y2="'+pb.y+'" stroke="var(--seal)" stroke-opacity=".45"/>'; }
+    for(i=0;i<m.entries.length;i++){ var en=m.entries[i], pe=pos[en.end], ph=pos[en.at]; if(pe&&ph) s+='<line x1="'+pe.x+'" y1="'+pe.y+'" x2="'+ph.x+'" y2="'+ph.y+'" stroke="var(--ink-soft)" stroke-dasharray="2 5" stroke-opacity=".7"/>'; }
+    for(i=0;i<nodes.length;i++){ var nd=nodes[i], p=pos[nd.id]; if(!p) continue; var isEnd=!!endIds[nd.id], closed=isEnd&&(endIds[nd.id].state||"").indexOf("CLOSED")===0;
+      s+='<a href="/card/'+encodeURIComponent(nd.id)+'">';
+      if(conf[nd.id]) s+='<circle cx="'+p.x+'" cy="'+p.y+'" r="11" fill="none" stroke="var(--seal)" stroke-width="1.5"/>';
+      s+='<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(isEnd?8:4.5)+'" fill="'+(isEnd?(closed?"var(--seal)":"var(--bg)"):"var(--seal)")+'" stroke="var(--ink)" stroke-width="'+(isEnd?1.5:0)+'"/>';
+      var above=((cols[layer[nd.id]]||[]).indexOf(nd.id)%2===0), ty=p.y+(above?-10:17);
+      s+='<text x="'+p.x+'" y="'+ty+'" font-size="9.5" text-anchor="middle" fill="'+(isEnd?"var(--ink)":"var(--ink-soft)")+'">'+esc(short(nd.title.split(" — ")[0],26))+'</text></a>'; }
+    return s+'</svg>';
+  }
   function block(m){
     var h='<div style="margin:0 0 1.6rem">';
     h+='<h3 style="font-size:1.05rem; margin:.2rem 0 .4rem">'+link({id:m.floor,title:m.title})+'</h3>';
     if(m.parts.length) h+='<p style="font-size:.85rem; color:var(--ink-soft); margin:.2rem 0">proven, the floor\u2019s parts: '+m.parts.map(link).join(" \u00b7 ")+'</p>';
     if(m.ends.length) h+='<p style="font-size:.85rem; color:var(--ink-soft); margin:.2rem 0">open ends: '+m.ends.map(function(e){ var st=e.state? ' <span class="mono" style="color:'+((e.state.indexOf("CLOSED")===0)?"var(--seal)":"var(--ink-faint)")+'">'+esc(short(e.state,52))+'</span>':''; return link(e)+st; }).join(" \u00b7 ")+'</p>';
-    h+=draw(m);
+    var lineage=(m.chain&&m.chain.nodes&&m.chain.nodes.length>m.parts.length);
+    h+=(m.ends.length>=2&&m.joints.length)? draw(m) : (lineage? drawChain(m) : draw(m));
+    if(m.confluences&&m.confluences.length) h+='<p style="font-size:.85rem; color:var(--ink-soft); margin:.3rem 0">where the two trees become one: '+m.confluences.map(function(c){ return link({id:c.at,title:c.title}); }).join(" \u00b7 ")+'</p>';
+    if(m.entries&&m.entries.length) h+='<p style="font-size:.85rem; color:var(--ink-soft); margin:.3rem 0">where it enters: '+m.entries.map(function(en){ return esc(en.end_title||en.end)+' at '+link({id:en.at,title:en.at_title||en.at}); }).join(" \u00b7 ")+'</p>';
     h+='<ul style="list-style:none; padding:0; margin:.4rem 0 0; font-size:.85rem; color:var(--ink-soft)">';
     var i; for(i=0;i<m.joints.length;i++){ var j=m.joints[i]; h+='<li style="margin:.25rem 0"><span style="color:var(--ink)">'+esc(j.a_title)+' \u2194 '+esc(j.b_title)+'</span> at '+link({id:j.at,title:j.at_title||j.at})+(j.evidence&&j.evidence[0]? ' <span class="mono" style="color:var(--ink-faint)">'+esc(short(j.evidence[0].split(". ").slice(1).join(". "),140))+'</span>':'')+'</li>'; }
-    for(i=0;i<m.misses.length;i++){ var ms=m.misses[i]; h+='<li style="margin:.25rem 0; color:var(--ink-faint)">'+esc(ms.a_title)+' \u2194 '+esc(ms.b_title)+' \u2014 no joint found'+(ms.via? '; connected only through '+esc(ms.via_title||ms.via):'')+'.</li>'; }
+    if(!(m.entries&&m.entries.length)) for(i=0;i<m.misses.length;i++){ var ms=m.misses[i]; h+='<li style="margin:.25rem 0; color:var(--ink-faint)">'+esc(ms.a_title)+' \u2194 '+esc(ms.b_title)+' \u2014 no joint found'+(ms.via? '; connected only through '+esc(ms.via_title||ms.via):'')+'.</li>'; }
     return h+'</ul></div>';
   }
-  function names(m){ var t={}; [].concat(m.parts,m.ends,m.hubs).forEach(function(n){ t[n.id]=n.title; }); t[m.floor]=m.title;
+  function names(m){ var t={}; [].concat(m.parts,m.ends,m.hubs,(m.chain&&m.chain.nodes)||[]).forEach(function(n){ t[n.id]=n.title; }); t[m.floor]=m.title;
+    (m.entries||[]).forEach(function(en){ en.end_title=t[en.end]||en.end; en.at_title=t[en.at]||en.at; });
+    (m.confluences||[]).forEach(function(c){ c.title=t[c.at]||c.title||c.at; });
     m.joints.forEach(function(j){ j.a_title=t[j.a]||j.a; j.b_title=t[j.b]||j.b; j.at_title=t[j.at]||j.at; });
     m.misses.forEach(function(j){ j.a_title=t[j.a]||j.a; j.b_title=t[j.b]||j.b; j.via_title=t[j.via]||j.via; }); return m; }
   function states(m){

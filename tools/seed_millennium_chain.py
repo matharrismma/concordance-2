@@ -239,8 +239,12 @@ JOINTS = [
 ]
 
 # the Clay descriptions the questions cite (source cards that already exist on the shelf)
-DESCRIBED_BY = {"navier_stokes": "fefferman_2000", "yang_mills": "jaffe_witten_2000", "hodge": "deligne_2000",
-                "poincare": "perelman_2002"}
+# ONE EDGE PER ORDERED PAIR in the overlay (corpus._apply_bridges): the Yang-Mills, Hodge and Poincare questions now
+# reach their descriptions through the chains (builds_on, tools/seed_chains.py) and the logarithm (connects_at), so
+# only the Navier-Stokes description is cited here; the three retired edges are dropped from the shared file.
+DESCRIBED_BY = {"navier_stokes": "fefferman_2000"}
+RETIRED_EDGES = [(_q("yang_mills"), _src("jaffe_witten_2000"), "cites"), (_q("hodge"), _src("deligne_2000"), "cites"),
+                 (_q("poincare"), _src("perelman_2002"), "cites")]
 
 CARDS: List[dict] = [FLOOR_CARD] + QUESTIONS + [_joint(j["slug"], j["title"], j["body"], j["bands"]) for j in JOINTS]
 
@@ -299,7 +303,7 @@ def main() -> int:
     if errs:
         return 1
     from concordance.chains import merge_seed
-    n = merge_seed(DATA, CARDS, BRIDGES)
+    n = merge_seed(DATA, CARDS, BRIDGES, drop_edges=RETIRED_EDGES)
     print(f"merged {DATA/'chain_cards.jsonl'} ({n['cards']} cards, {len(CARDS)} from this seed) and "
           f"{DATA/'chain_bridges.jsonl'} ({n['bridges']} edges, {len(BRIDGES)} from this seed)")
     return 0

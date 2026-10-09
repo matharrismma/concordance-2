@@ -899,6 +899,88 @@ def millennium_map() -> int:
     ], by=by)
     return 0
 
+
+def logarithm_chain() -> int:
+    """THE LOGARITHM CHAIN (Matt, 2026-10-09: "logarithms fit here correct?" - "same"). The logarithm is the instrument
+    the Millennium joints share; its chain is seeded on the one map (tools/seed_chains.py). The arithmetic where it
+    enters four of the problems is sealed here, on the sticks that exist: Riemann - Gauss's logarithmic integral
+    overshoots the prime count at 1000 (pi(1000) counted here, li(1000) evaluated here, the difference sealed) - the
+    error the hypothesis bounds; Navier-Stokes - the law of the wall at y+ = 100 with kappa = 0.41, B = 5.0 (the
+    constants as commonly stated, inputs named in the mark); P versus NP - the length of 2^64 is floor(log10 2^64) + 1
+    = 20 digits: the input length IS the logarithm; Poincare - the entropy of one fair coin, log 2 = 0.693 nats, the
+    unit of the entropy Perelman's W functional is built from. BSD, Yang-Mills and Hodge are cited as notes (their
+    logarithms are already sealed or carried on the stick). Idempotent."""
+    import math
+    from concordance import tickstick as TS
+    from sympy import primepi
+    import mpmath
+    n1000 = int(primepi(1000))                         # counted, not typed
+    li1000 = float(mpmath.li(1000))
+    s_li = _rh_seal_num("li_1000_minus_the_prime_count", f"li(1000) - {n1000}", li1000 - n1000, tol=1e-9)
+    s_ln2 = _rh_seal_num("entropy_of_one_fair_coin_log_2", "log(2)", math.log(2), tol=1e-12)
+    s_wall = _rh_seal_num("law_of_the_wall_u_plus_at_y_plus_100", "(1/0.41)*log(100) + 5.0", (1 / 0.41) * math.log(100) + 5.0,
+                          tol=1e-9)
+    s_dig = _rh_seal_num("digits_of_2_to_the_64", "floor(log(2**64, 10)) + 1", 20.0, tol=1e-12)
+    if not (s_li and s_ln2 and s_wall and s_dig):
+        print("a seal failed; no marks"); return 1
+    print("sealed li(1000)-pi(1000):", s_li[:12], "| log 2:", s_ln2[:12], "| the wall at y+=100:", s_wall[:12],
+          "| digits of 2^64:", s_dig[:12])
+    by = "tools/tick.py logarithm_chain"
+    _mint_marks(TS.create("Riemann hypothesis")["id"], [
+        ("witness", f"[the logarithm, sealed] Gauss read the prime count off his log tables and guessed li(x); at x = 1000 "
+                    f"the logarithmic integral is li(1000) = {li1000:.6f} and the count is pi(1000) = {n1000} (counted here), "
+                    f"so li overshoots by {li1000 - n1000:.6f} (sealed). The Riemann hypothesis is exactly a bound on that "
+                    f"overshoot: |pi(x) - li(x)| < sqrt(x) log(x) / (8 pi) for x >= 2657 (Schoenfeld, cited on this stick). "
+                    f"The logarithm is the ruler the whole question is measured with - log zeta, N(T), li(x).",
+         {"seal": s_li, "source": "C. F. Gauss, letter to Encke (1849); L. Schoenfeld, Math. Comp. 30 (1976); "
+                                  "card_floor_logarithm on the one map"}),
+    ], by=by)
+    _mint_marks(TS.create("Navier-Stokes existence and smoothness")["id"], [
+        ("witness", "[the logarithm, sealed] The law of the wall (von Karman 1930): in a turbulent boundary layer the "
+                    "velocity profile is logarithmic in the distance from the wall, u+ = (1/kappa) ln(y+) + B. With the "
+                    f"constants as commonly stated, kappa = 0.41 and B = 5.0, at y+ = 100 this gives u+ = "
+                    f"{(1 / 0.41) * math.log(100) + 5.0:.4f} (sealed; the constants are inputs, not derived). The one "
+                    "logarithm turbulence is known to obey, beside the power law of the cascade.",
+         {"seal": s_wall, "source": "T. von Karman, Nachr. Ges. Wiss. Gottingen (1930) 58-76; card_floor_logarithm"}),
+    ], by=by)
+    _mint_marks(TS.create("P versus NP")["id"], [
+        ("witness", "[the logarithm, sealed] The length of the input is the logarithm of the number: 2^64 has "
+                    "floor(log10(2^64)) + 1 = 20 digits (sealed). 'Polynomial time' means polynomial in that length - "
+                    "Cobham 1965, Edmonds 1965 - so the whole question is posed on a logarithmic ruler: a number N is "
+                    "written in log N symbols, and an algorithm polynomial in N is exponential in its input.",
+         {"seal": s_dig, "source": "A. Cobham, The intrinsic computational difficulty of functions (1965); J. Edmonds, "
+                                   "Canad. J. Math. 17 (1965); card_floor_logarithm"}),
+    ], by=by)
+    _mint_marks(TS.create("Poincare conjecture")["id"], [
+        ("witness", "[the logarithm, sealed] Perelman's first paper is titled the entropy formula, and his W functional is "
+                    "a log-Sobolev inequality: the entropy minus the integral of u log u, in the line that runs Boltzmann "
+                    "1877 (S = k log W) to Shannon 1948 (H = -sum p log p). The unit of that measure is the entropy of one "
+                    f"fair coin, log 2 = {math.log(2):.6f} nats = 1 bit (sealed). The logarithm is the measure the closing "
+                    "mark's monotone quantity is built from.",
+         {"seal": s_ln2, "source": "G. Perelman, arXiv math/0211159 (2002); C. E. Shannon, Bell Syst. Tech. J. 27 (1948); "
+                                   "L. Boltzmann, Wien. Ber. 76 (1877); card_floor_logarithm"}),
+    ], by=by)
+    _mint_marks(TS.create("Birch and Swinnerton-Dyer conjecture")["id"], [
+        ("note", "[the logarithm, cited] The height of a rational point is the logarithm of the size of its coordinates "
+                 "(Weil 1929), made quadratic by Neron and Tate (1965); the regulator cited on 37a1, R = 0.0511, is a "
+                 "determinant of those logarithms, and Gross-Zagier ties L'(E, 1) to the height of a Heegner point. The "
+                 "logarithm is how the conjecture measures its points.",
+         {"source": "A. Weil, Acta Math. 52 (1929); A. Neron, Ann. Math. 82 (1965); card_floor_logarithm"}),
+    ], by=by)
+    _mint_marks(TS.create("Yang-Mills existence and mass gap")["id"], [
+        ("note", "[the logarithm, cited] The coupling runs as one over the logarithm of the scale - Gell-Mann and Low's "
+                 "renormalization group (1954), asymptotic freedom (Gross-Wilczek, Politzer 1973); alpha_s from M_Z to "
+                 "10 GeV at one loop is sealed on this stick. The mass gap is the scale where that logarithm runs out.",
+         {"source": "M. Gell-Mann, F. E. Low, Phys. Rev. 95 (1954); card_floor_logarithm"}),
+    ], by=by)
+    _mint_marks(TS.create("Hodge conjecture")["id"], [
+        ("note", "[the logarithm, cited] Mixed Hodge theory is built on forms with logarithmic poles, dz/z (Deligne, "
+                 "Theorie de Hodge II, 1971), and the monodromy of a degenerating family enters through its logarithm "
+                 "(Schmid 1973). The logarithmic differential is the one form the theory cannot do without.",
+         {"source": "P. Deligne, Publ. Math. IHES 40 (1971); W. Schmid, Invent. Math. 22 (1973); card_floor_logarithm"}),
+    ], by=by)
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -7612,6 +7694,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("logarithm_chain", "logarithm", "log_chain"):
+        return logarithm_chain()
     if a[0] in ("millennium_map", "one_map", "joints_map"):
         return millennium_map()
     if a[0] in ("sources_crosscheck", "sources", "tables", "crosscheck"):

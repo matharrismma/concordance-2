@@ -222,3 +222,33 @@ hypothesis is NOT proven. Deligne 1974 proved the Weil conjectures, its analogue
 corrected everywhere it could be, and the one place it cannot be edited — a note already minted on the P versus NP
 stick — carries a restated note beside it, since a removal is a record.
 
+## The chains — 2026-10-09
+
+*Matt: "logarithms fit here correct?" · "same" · "same with the millennium"*
+
+Each of the seven is now a CHAIN on the one map, the same form as the Standard Model: a floor whose parts are the two
+roots the question began from, a lineage of records (each cited; the old ones public domain), the confluence FOUND by
+`chains.intersect` over the forward edges, and the open end hanging off the floor and standing on the latest links
+(`tools/seed_chains.py`; `GET /chains?floor=card_floor_<slug>` returns parts, the chain's nodes and edges, confluences,
+entries; the map page draws the lineage left to right with the confluence ringed).
+
+| Chain | The two roots | Where they become one | The open end stands on |
+|---|---|---|---|
+| Riemann | Euler's product 1737 · Legendre's count 1798 | Riemann 1859 | Conrey 1989, Platt–Trudgian 2021 |
+| BSD | Poincaré's group law 1901 · Hasse 1936 | Birch–Swinnerton-Dyer 1965 | Kolyvagin 1989, Bhargava–Skinner–Zhang 2014, Cassels 1962 |
+| Navier–Stokes | Euler's ideal fluid 1757 · Navier 1822 | Stokes 1845 | CKN 1982, BKM 1984, Tao 2016 |
+| Yang–Mills | Maxwell · Wightman's axioms 1956 | Jaffe–Witten 2000 | Osterwalder–Seiler 1978, Morningstar–Peardon 1999 |
+| P versus NP | Turing 1936 · Shannon's circuits 1949 | Cook 1971 | Williams 2011, FGHK 2016, Mulmuley–Sohoni 2001 |
+| Hodge | Riemann's periods 1857 · Lefschetz 1924 | Hodge 1941 | Deligne 2000, Voisin 2002, Atiyah–Hirzebruch 1962 |
+| Poincaré | Poincaré 1904 · Eells–Sampson 1964 | Hamilton 1995 | Perelman 2003, Kleiner–Lott 2008 — CLOSED |
+
+**The logarithm chain.** Two roots — Napier's table (1614) and Saint-Vincent's hyperbola (1647) — become one function
+in Euler's Introductio (1748). From there the logarithm ENTERS each question, and the entry is an edge on the map:
+the explicit formula and the zero count into Riemann (sealed: li(1000) − π(1000) = 9.61), the height into BSD, the
+running coupling into Yang–Mills, the law of the wall into Navier–Stokes (sealed: u⁺ at y⁺ = 100), the input length
+into P versus NP (sealed: 2⁶⁴ has 20 digits), the logarithmic pole into Hodge, the entropy into Poincaré (sealed: log 2,
+one fair coin). `tools/tick.py logarithm_chain` minted the four seals on the sticks that exist; no new stick.
+
+Every DOI on the chains was checked against Crossref before carding (one guess was wrong and caught: Griffiths 1968).
+Nothing is unified by us; a chain is success building on success, found and cited.
+
