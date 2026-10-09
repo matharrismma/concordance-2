@@ -25,6 +25,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
 DATA = Path(os.environ.get("CONCORDANCE_DATA_DIR", str(ROOT / "data")))
 
 SPINE = "card_spine_builders"
@@ -157,13 +158,11 @@ def main() -> int:
         print(f"[check] {len(CARDS)} cards, {len(BRIDGES)} bridges; "
               f"{'OK' if not [e for e in errs if 'missing' in e] else 'ERRORS'}")
         return 1 if [e for e in errs if "missing" in e] else 0
-    DATA.mkdir(parents=True, exist_ok=True)
-    (DATA / "chain_cards.jsonl").write_text(
-        "\n".join(json.dumps(c, ensure_ascii=False) for c in CARDS) + "\n", encoding="utf-8")
-    (DATA / "chain_bridges.jsonl").write_text(
-        "\n".join(json.dumps(e, ensure_ascii=False) for e in BRIDGES) + "\n", encoding="utf-8")
-    print(f"wrote {DATA/'chain_cards.jsonl'} ({len(CARDS)} cards) and "
-          f"{DATA/'chain_bridges.jsonl'} ({len(BRIDGES)} edges)")
+    # THE ONE MAP (2026-10-09): the two files are shared with every other floor's seed - MERGE, never overwrite
+    from concordance.chains import merge_seed
+    n = merge_seed(DATA, CARDS, BRIDGES)
+    print(f"merged {DATA/'chain_cards.jsonl'} ({n['cards']} cards, {len(CARDS)} from this seed) and "
+          f"{DATA/'chain_bridges.jsonl'} ({n['bridges']} edges, {len(BRIDGES)} from this seed)")
     return 0
 
 

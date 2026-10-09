@@ -112,3 +112,5 @@
 {"id": "lead.discerns.and.applies.a.checkable.situation", "method": "POST", "path": "/lead", "body": {"situation": "47 times 19 is 893"}, "expect": [{"at": "applied.verdict", "eq": "HOLDS"}, {"at": "applied.receipt", "exists": true}]}
 {"id": "lead.finds.the.biblical.type.that.leads", "method": "POST", "path": "/lead", "body": {"situation": "I walked away from God and I am ashamed to come back"}, "expect": [{"at": "solution.biblical_type", "contains": "Prodigal"}, {"at": "solution.word", "min_len": 1}]}
 {"id": "seals.carry.a.checksum.of.the.total", "path": "/seals", "expect": [{"at": "seals.total_checksum.root", "exists": true}, {"at": "seals.total_checksum.count", "exists": true}]}
+{"id": "map.lists.the.floors", "path": "/chains", "query": {"floors": "1"}, "expect": [{"at": "floors[*].id", "has": "card_floor_millennium"}, {"at": "floors[*].id", "has": "card_floor_standard_model"}]}
+{"id": "map.the.millennium.floor.reads.its.ends.and.joints", "path": "/chains", "query": {"floor": "card_floor_millennium"}, "expect": [{"at": "ends", "min_len": 7}, {"at": "parts", "min_len": 10}, {"at": "joints", "min_len": 10}, {"at": "misses", "min_len": 1}]}

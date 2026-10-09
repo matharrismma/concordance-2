@@ -180,3 +180,38 @@ comb cell holds 8 options and the noise had taken the slots, so 13 real finds co
 closings carry them: each closed want names its card). The fix belongs to the forager, not the ledger: a relevance
 floor before filing, and a cell that counts only options above it.
 
+## On the one map — 2026-10-09
+
+*Matt: "Is there an opportunity to find the connections between the problems and using aspects of others to
+connect?" · "Put them on one map, but make it the one map for the project. We want to map reality as we know it
+and these fall on that."*
+
+The seven are now nodes on the keeping's graph — the map of reality rooted in the Floor of Discovery, drawn by
+`site/map.html`, walked by `chains.py` — in the same two files and the same floor logic as the Standard-Model chain
+(`tools/seed_millennium_chain.py`). The floor `card_floor_millennium` is what is proven: ten JOINTS, each a join
+mathematics already made, cited to its record (the records carded by `tools/card_millennium_sources.py`):
+
+| Joint | Who it joins | The record | Sealed |
+|---|---|---|---|
+| GUE statistics | Riemann ↔ Yang–Mills | Montgomery 1973, Odlyzko 1987, Verbaarschot 1994, Berry–Keating 1999 | the Riemann stick's spacing witness |
+| One L-function machinery | Riemann ↔ BSD | Wiles 1995 | ξ(s) = ξ(1 − s) at s = 0.3; L(11a1, 1) |
+| The one proven RH (Weil) | Riemann ↔ Hodge ↔ P vs NP | Deligne 1974, Mulmuley 2011 | cited |
+| The Tate conjecture | Hodge ↔ BSD | Tate 1965, Artin–Tate 1966, Milne 1975 | cited |
+| Bochner's vanishing | Hodge ↔ Poincaré | Bochner 1946, Myers 1941, Hamilton 1982 | Myers on the unit S³ |
+| The renormalization group | Yang–Mills ↔ Navier–Stokes | Wilson 1974, Forster–Nelson–Stephen 1977 | the running coupling; the Kolmogorov scale |
+| The sign problem | Yang–Mills ↔ P vs NP | Troyer–Wiese 2005 | cited |
+| Manin's algorithm | BSD ↔ P vs NP | Manin 1971 | cited |
+| The Diophantine form of RH | Riemann ↔ P vs NP | Davis–Matiyasevich–Robinson 1976 | cited |
+| Arnold's geodesics | Navier–Stokes ↔ Poincaré | Arnold 1966 | cited; it has not produced regularity |
+
+The seven questions are the floor's OPEN ENDS (`card_question_*`, each pointing at its stick, whose live fit the map
+page shows beside the node). `GET /chains?floor=card_floor_millennium` reads the floor: parts, ends, joints — each
+joint the hub both ends touch, with the two edges' own evidence — and the one MISS: Riemann and Navier–Stokes share
+no joint; the map shows the indirect path (through Yang–Mills) and says so. `GET /chains?floors=1` lists the floors;
+`site/map.html` draws them under "Where two trees connect", the Standard Model beside the Millennium floor.
+
+Nothing is unified by us. The historical fact the floor records is that the joints are where the proofs came from —
+Perelman imported a PDE into topology, Wiles' modularity gave BSD its L-function — and the honest state is that no
+joint on this map supplies a missing step for any of the six open questions. The map says where a step taken on one
+would transfer, and where the field itself converges: the proven Riemann hypothesis at the centre.
+

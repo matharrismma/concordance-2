@@ -217,6 +217,7 @@ test_mesh_read_auth.py
 test_mesh_signed_speech.py
 test_meshtastic_bridge.py
 test_meteorology.py
+test_millennium_map.py
 test_millennium_sources.py
 test_mission_string.py
 test_moderation.py

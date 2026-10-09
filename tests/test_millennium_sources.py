@@ -58,6 +58,9 @@ def test_the_gate_refuses_share_alike_and_non_commercial_at_the_mint():
 def test_every_want_named_is_one_the_attempts_opened_and_builds_stay_open():
     wants = set(M.WANTS.values())
     for s in M.SOURCES:
+        if s["problem"] == "joint":
+            assert s["want"] == "", s["key"]            # a joint's record serves the one map, not a want
+            continue
         assert s["want"] in wants, s["key"]
     assert M.BUILD_WANTS <= wants
     # a build want receives only a METHOD source - never a card that would close it as done

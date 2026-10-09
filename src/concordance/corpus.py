@@ -1349,6 +1349,9 @@ _INVERSE_REL = {
     # chain can be walked forward from its floor. A new relationship — existing `precedes` edges keep
     # their current symmetric behavior.
     "builds_on": "enables",
+    # THE ONE MAP (2026-10-09): an open question hangs off a floor; the floor lists its open ends. Lateral joints
+    # (connects_at) stay symmetric by default.
+    "open_end_of": "has_open_end",
 }
 
 

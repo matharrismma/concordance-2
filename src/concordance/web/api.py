@@ -795,6 +795,15 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         a = (query.get("a") or "").strip()
         b = (query.get("b") or "").strip()
         root = (query.get("root") or "").strip()
+        # THE ONE MAP (Matt, 2026-10-09): ?floors=1 lists the floors the map page draws; ?floor=<id> reads one -
+        # its parts, its open ends, and where the ends connect (or the recorded miss). Ids, titles, evidence only.
+        if (query.get("floors") or "").strip():
+            return _ok({"floors": [{"id": f, "title": (_chains._default_get_card(f) or {}).get("title") or f}
+                                   for f in _chains.FLOORS]})
+        floor = (query.get("floor") or "").strip()
+        if floor:
+            m = _chains.floor_map(floor)
+            return _ok(m) if m is not None else _err(404, f"no card with id {floor!r}")
         for cid in (x for x in (a, b, root) if x):
             if _chains._default_get_card(cid) is None:
                 return _err(404, f"no card with id {cid!r}")      # a lineage of nothing is not a lineage

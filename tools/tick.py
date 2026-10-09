@@ -808,6 +808,94 @@ def sources_crosscheck() -> int:
     _mint_marks(bsid, marks, by="tools/tick.py sources_crosscheck")
     return 0
 
+
+def millennium_map() -> int:
+    """THE ONE MAP (Matt, 2026-10-09: "put them on one map, but make it the one map for the project"). The joints
+    between the seven problems live on the keeping's graph (tools/seed_millennium_chain.py); the arithmetic of the two
+    joints that HAVE arithmetic is sealed here, on the sticks that already exist - no new stick: (1) zeta and L(E,s)
+    are one machinery: the completed zeta's functional equation xi(s) = xi(1 - s) checked at s = 0.3 (gamma and zeta
+    evaluated by the engine, the ratio sealed as 1), a witness on the Riemann stick beside the BSD stick's L(11a1, 1)
+    computed by the same approximate functional equation; (2) Myers 1941 under the hypothesis Hamilton 1982 starts
+    from: Ric >= (n - 1)k gives diam <= pi/sqrt(k), equality on the round sphere - the unit S^3 at k = 1, diam = pi,
+    sealed on the Poincare stick beside Bochner 1946 (positive Ricci kills harmonic one-forms, b_1 = 0 - Hodge's
+    tool under Poincare's hypothesis). The other joints are cited as notes on their sticks, with sources. Nothing is
+    unified by us: every joint is a join mathematics already made. Idempotent."""
+    from concordance import tickstick as TS
+    s_xi = _rh_seal_num("xi_functional_equation_at_s_0_3",
+                        "(pi**(-0.3/2)*gamma(0.3/2)*zeta(0.3))/(pi**(-0.7/2)*gamma(0.7/2)*zeta(0.7))", 1.0, tol=1e-9)
+    s_my = _rh_seal_num("myers_diameter_bound_on_the_unit_s3", "pi/sqrt(1)", 3.141592653589793, tol=1e-12)
+    if not (s_xi and s_my):
+        print("a seal failed; no marks"); return 1
+    print("sealed xi(s) = xi(1 - s) at 0.3:", s_xi[:12], "| Myers on the unit S^3:", s_my[:12])
+    by = "tools/tick.py millennium_map"
+    _mint_marks(TS.create("Riemann hypothesis")["id"], [
+        ("witness", "[the joint with BSD, sealed] Zeta and L(E,s) are one machinery - an Euler product, a functional "
+                    "equation about a centre, a critical line. The completed zeta xi(s) = pi^(-s/2) Gamma(s/2) zeta(s) "
+                    "satisfies xi(s) = xi(1 - s): checked at s = 0.3, the ratio xi(0.3)/xi(0.7) = 1 (sealed, gamma and "
+                    "zeta evaluated here). The BSD stick's L(11a1, 1) = 0.2538 is computed by the same approximate "
+                    "functional equation with the root number in place of the symmetry. Modularity (Wiles 1995) is what "
+                    "gives L(E,s) its continuation; the Grand Riemann Hypothesis names both at once.",
+         {"seal": s_xi, "source": "A. Wiles, Modular elliptic curves and Fermat's last theorem, Ann. Math. 141 (1995); "
+                                  "card_joint_l_functions on the one map"}),
+        ("note", "[the joints, cited] On the one map (card_floor_millennium) this stick connects to Yang-Mills at the "
+                 "GUE statistics (Montgomery 1973, Odlyzko 1987, Verbaarschot 1994 - the spacing witness already sealed "
+                 "here), to Hodge and P versus NP at Deligne's proven Riemann hypothesis over finite fields (1974), and "
+                 "to P versus NP at the Diophantine form of RH (Davis-Matiyasevich-Robinson 1976). No joint with "
+                 "Navier-Stokes was found - a miss, recorded.",
+         {"source": "tools/seed_millennium_chain.py; docs/MILLENNIUM_PREPAREDNESS.md"}),
+    ], by=by)
+    _mint_marks(TS.create("Poincare conjecture")["id"], [
+        ("witness", "[the joint with Hodge, sealed] Myers 1941: a complete manifold with Ric >= (n - 1)k has diameter "
+                    "at most pi/sqrt(k), with equality on the round sphere - the unit S^3 at k = 1 has diameter pi "
+                    "(sealed). Bochner 1946: positive Ricci curvature admits no non-zero harmonic one-form, so b_1 = 0 - "
+                    "the harmonic forms of Hodge theory vanishing under the very hypothesis Hamilton 1982 starts from. "
+                    "Hodge's tool and Poincare's hypothesis meet on the sphere.",
+         {"seal": s_my, "source": "S. B. Myers, Duke Math. J. 8 (1941); S. Bochner, Bull. AMS 52 (1946); "
+                                  "card_joint_bochner_vanishing on the one map"}),
+    ], by=by)
+    _mint_marks(TS.create("Yang-Mills existence and mass gap")["id"], [
+        ("note", "[the joints, cited] On the one map this stick connects to Riemann at the GUE statistics - the low-lying "
+                 "spectrum of the lattice Dirac operator follows chiral random matrix theory (Verbaarschot 1994) as the "
+                 "zeta zeros follow GUE (sealed on the Riemann stick); to Navier-Stokes at the renormalization group "
+                 "(Wilson 1974; Forster-Nelson-Stephen 1977 for the stirred fluid), where in both the continuum limit of "
+                 "a finite system is the question; and to P versus NP at the sign problem, NP-hard (Troyer-Wiese 2005).",
+         {"source": "J. J. M. Verbaarschot, PRL 72 (1994); D. Forster, D. R. Nelson, M. J. Stephen, PRA 16 (1977); "
+                    "M. Troyer, U.-J. Wiese, PRL 94 (2005)"}),
+    ], by=by)
+    _mint_marks(TS.create("Navier-Stokes existence and smoothness")["id"], [
+        ("note", "[the joints, cited] On the one map this stick connects to Yang-Mills at the renormalization group "
+                 "(the Kolmogorov scale sealed here, the running coupling sealed there) and to Poincare at Arnold 1966 - "
+                 "Euler flow as geodesic flow on the volume-preserving diffeomorphisms, the geometric analysis "
+                 "Perelman's proof lives in; it has not produced regularity. No joint with Riemann - a miss, recorded.",
+         {"source": "V. I. Arnold, Ann. Inst. Fourier 16 (1966); D. Forster, D. R. Nelson, M. J. Stephen, PRA 16 (1977)"}),
+    ], by=by)
+    _mint_marks(TS.create("P versus NP")["id"], [
+        ("note", "[the joints, cited] On the one map this stick connects to Riemann and Hodge at Deligne 1974 - the one "
+                 "proven Riemann hypothesis, whose positivity Mulmuley's geometric complexity theory leans on (the one "
+                 "road not excluded by a barrier); to Riemann at the Diophantine form of RH (Davis-Matiyasevich-Robinson "
+                 "1976); to BSD at Manin 1971 (finite Sha makes the rank computable); to Yang-Mills at the NP-hard sign "
+                 "problem (Troyer-Wiese 2005).",
+         {"source": "P. Deligne, Publ. Math. IHES 43 (1974); K. Mulmuley, J. ACM 58 (2011); Yu. I. Manin, Russian Math. "
+                    "Surveys 26 (1971); M. Davis, Yu. Matiyasevich, J. Robinson, Proc. Symp. Pure Math. 28 (1976)"}),
+    ], by=by)
+    _mint_marks(TS.create("Hodge conjecture")["id"], [
+        ("note", "[the joints, cited] On the one map this stick connects to BSD at the Tate conjecture - Hodge's "
+                 "arithmetic twin, equivalent for an elliptic surface over a finite field to BSD for its fibre "
+                 "(Tate 1965, Artin-Tate 1966, Milne 1975); to Riemann and P versus NP at Deligne 1974, whose weights "
+                 "are the finite-field shadow of Hodge theory; to Poincare at Bochner 1946 (sealed on the Poincare "
+                 "stick).",
+         {"source": "J. Tate, Algebraic cycles and poles of zeta functions (1965); M. Artin, J. Tate, Sem. Bourbaki 306 "
+                    "(1966); J. S. Milne, Ann. Math. 102 (1975)"}),
+    ], by=by)
+    _mint_marks(TS.create("Birch and Swinnerton-Dyer conjecture")["id"], [
+        ("note", "[the joints, cited] On the one map this stick connects to Riemann at the one L-function machinery "
+                 "(xi(s) = xi(1 - s) sealed on the Riemann stick; L(11a1, 1) sealed here by the same approximate "
+                 "functional equation), to Hodge at the Tate conjecture (Artin-Tate 1966, Milne 1975), and to P versus "
+                 "NP at Manin 1971: if Sha is finite the rank is computable, and today it is not known to be.",
+         {"source": "J. S. Milne, Ann. Math. 102 (1975); Yu. I. Manin, Russian Math. Surveys 26 (1971)"}),
+    ], by=by)
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -7521,6 +7609,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("millennium_map", "one_map", "joints_map"):
+        return millennium_map()
     if a[0] in ("sources_crosscheck", "sources", "tables", "crosscheck"):
         return sources_crosscheck()
     if a[0] in ("poincare_next", "poincare", "ricci_flow", "perelman"):

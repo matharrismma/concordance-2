@@ -213,6 +213,13 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
     </div>
   </section>
 
+  <!-- WHERE TWO TREES CONNECT — the floors, their open ends, and the joints (live from /chains) -->
+  <section class="blk" id="floors">
+    <div class="sec-h"><h2>Where two trees connect</h2><span class="n">live from /chains</span></div>
+    <p style="color:var(--ink-soft); margin:.2rem 0 1rem; max-width:66ch; font-size:.95rem">Knowledge grows as chains from a floor. Each floor below is what is <em>proven</em>; the open questions hang off it, and a joint is where two of them meet at one established thing &mdash; found in the literature, cited, and sealed where the join is arithmetic. Nothing here is unified by us. A pair with no joint is shown as a miss.</p>
+    <div id="floorsOut" class="constel" style="padding:1.1rem"><p class="empty">Reading the floors&hellip;</p></div>
+  </section>
+
   <!-- THE LIBRARY'S MEDIA — the format transparency -->
   <section class="blk">
     <div class="sec-h"><h2>The library's media</h2><span class="n">live from /graph?scope=formats</span></div>
@@ -278,6 +285,63 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
   <a href="/">home</a> &middot; <a href="/systems.html">systems</a> &middot; <a href="/capabilities">capabilities</a>
 </div></footer>
 
+<script>
+(function(){
+  // WHERE TWO TREES CONNECT - the floors on the one map (Matt, 2026-10-09). Live from /chains: the floors, each
+  // floor's parts (proven), open ends (the questions, with their stick's live state), and the joints. Drawn as a
+  // small SVG per floor: the ends on a ring, each joint at the mean of the ends it joins, the misses dashed.
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+  function getj(path){ return fetch(path,{headers:{accept:"application/json"}}).then(function(r){ return r.json().then(function(j){ return (j&&j.data)?j.data:j; }); }).catch(function(){ return null; }); }
+  function short(t,n){ t=String(t||""); return t.length>n? t.slice(0,n-1)+"\u2026" : t; }
+  function link(n){ return '<a href="/card/'+encodeURIComponent(n.id)+'" style="color:var(--seal)">'+esc(n.title)+'</a>'; }
+  function draw(m){
+    var W=720, H=420, cx=W/2, cy=H/2, R=165;
+    var ends=m.ends.length? m.ends : m.parts, pos={}, i;
+    for(i=0;i<ends.length;i++){ var a=-Math.PI/2+2*Math.PI*i/ends.length; pos[ends[i].id]={x:cx+R*Math.cos(a), y:cy+R*Math.sin(a)}; }
+    var hubs={}, j;
+    for(j=0;j<m.joints.length;j++){ var jt=m.joints[j]; (hubs[jt.at]=hubs[jt.at]||[]).push(jt); }
+    var s='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:'+W+'px;display:block;margin:.4rem auto" role="img" aria-label="'+esc(m.title)+'">';
+    for(j=0;j<m.misses.length;j++){ var ms=m.misses[j], pa=pos[ms.a], pb=pos[ms.b]; if(pa&&pb) s+='<line x1="'+pa.x+'" y1="'+pa.y+'" x2="'+pb.x+'" y2="'+pb.y+'" stroke="var(--out)" stroke-dasharray="4 6" stroke-opacity=".55"/>'; }
+    var hid; for(hid in hubs){ var js=hubs[hid], sx=0, sy=0, n=0, k, seen={};
+      for(k=0;k<js.length;k++){ ["a","b"].forEach(function(q){ var id=js[k][q]; if(!seen[id]&&pos[id]){ seen[id]=1; sx+=pos[id].x; sy+=pos[id].y; n++; } }); }
+      var hx=n?sx/n:cx, hy=n?sy/n:cy;
+      var id2; for(id2 in seen){ s+='<line x1="'+pos[id2].x+'" y1="'+pos[id2].y+'" x2="'+hx+'" y2="'+hy+'" stroke="var(--seal)" stroke-opacity=".6"/>'; }
+      var title=(js[0].evidence&&js[0].evidence[0])? js[0].evidence[0].split(". ")[0] : hid;
+      s+='<a href="/card/'+encodeURIComponent(hid)+'"><circle cx="'+hx+'" cy="'+hy+'" r="5" fill="var(--seal)"/><text x="'+(hx+8)+'" y="'+(hy-6)+'" font-size="10" fill="var(--ink-soft)">'+esc(short(title,34))+'</text></a>';
+    }
+    for(i=0;i<ends.length;i++){ var e=ends[i], p=pos[e.id], closed=(e.state||"").indexOf("CLOSED")===0;
+      s+='<a href="/card/'+encodeURIComponent(e.id)+'"><circle cx="'+p.x+'" cy="'+p.y+'" r="9" fill="'+(closed?"var(--seal)":"var(--bg)")+'" stroke="var(--ink)" stroke-width="1.5"/>';
+      var tx=p.x+(p.x>cx+1?14:(p.x<cx-1?-14:0)), anchor=p.x>cx+1?"start":(p.x<cx-1?"end":"middle"), ty=p.y+(Math.abs(p.x-cx)<=1?(p.y<cy?-14:22):4);
+      s+='<text x="'+tx+'" y="'+ty+'" font-size="12" text-anchor="'+anchor+'" fill="var(--ink)">'+esc(short(e.title,30))+'</text></a>'; }
+    return s+'</svg>';
+  }
+  function block(m){
+    var h='<div style="margin:0 0 1.6rem">';
+    h+='<h3 style="font-size:1.05rem; margin:.2rem 0 .4rem">'+link({id:m.floor,title:m.title})+'</h3>';
+    if(m.parts.length) h+='<p style="font-size:.85rem; color:var(--ink-soft); margin:.2rem 0">proven, the floor\u2019s parts: '+m.parts.map(link).join(" \u00b7 ")+'</p>';
+    if(m.ends.length) h+='<p style="font-size:.85rem; color:var(--ink-soft); margin:.2rem 0">open ends: '+m.ends.map(function(e){ var st=e.state? ' <span class="mono" style="color:'+((e.state.indexOf("CLOSED")===0)?"var(--seal)":"var(--ink-faint)")+'">'+esc(short(e.state,52))+'</span>':''; return link(e)+st; }).join(" \u00b7 ")+'</p>';
+    h+=draw(m);
+    h+='<ul style="list-style:none; padding:0; margin:.4rem 0 0; font-size:.85rem; color:var(--ink-soft)">';
+    var i; for(i=0;i<m.joints.length;i++){ var j=m.joints[i]; h+='<li style="margin:.25rem 0"><span style="color:var(--ink)">'+esc(j.a_title)+' \u2194 '+esc(j.b_title)+'</span> at '+link({id:j.at,title:j.at_title||j.at})+(j.evidence&&j.evidence[0]? ' <span class="mono" style="color:var(--ink-faint)">'+esc(short(j.evidence[0].split(". ").slice(1).join(". "),140))+'</span>':'')+'</li>'; }
+    for(i=0;i<m.misses.length;i++){ var ms=m.misses[i]; h+='<li style="margin:.25rem 0; color:var(--ink-faint)">'+esc(ms.a_title)+' \u2194 '+esc(ms.b_title)+' \u2014 no joint found'+(ms.via? '; connected only through '+esc(ms.via_title||ms.via):'')+'.</li>'; }
+    return h+'</ul></div>';
+  }
+  function names(m){ var t={}; [].concat(m.parts,m.ends,m.hubs).forEach(function(n){ t[n.id]=n.title; }); t[m.floor]=m.title;
+    m.joints.forEach(function(j){ j.a_title=t[j.a]||j.a; j.b_title=t[j.b]||j.b; j.at_title=t[j.at]||j.at; });
+    m.misses.forEach(function(j){ j.a_title=t[j.a]||j.a; j.b_title=t[j.b]||j.b; j.via_title=t[j.via]||j.via; }); return m; }
+  function states(m){
+    return Promise.all(m.ends.map(function(e){ if(!e.stick) return null; return getj("/stick?id="+encodeURIComponent(e.stick)).then(function(st){ e.state=(st&&st.fit&&st.fit.open)||""; }); })).then(function(){ return m; });
+  }
+  var out=$("floorsOut"); if(!out) return;
+  getj("/chains?floors=1").then(function(d){
+    var floors=(d&&d.floors)||[]; if(!floors.length){ out.innerHTML='<p class="empty">No floors are seeded on this engine.</p>'; return; }
+    return Promise.all(floors.map(function(f){ return getj("/chains?floor="+encodeURIComponent(f.id)).then(function(m){ return m? states(names(m)) : null; }); })).then(function(ms){
+      out.innerHTML = ms.filter(Boolean).map(block).join("") || '<p class="empty">The floors could not be read.</p>';
+    });
+  }).catch(function(){ out.innerHTML='<p class="empty">The floors could not be read.</p>'; });
+})();
+</script>
 <script src="/graph.js"></script>
 <script>
 (function(){

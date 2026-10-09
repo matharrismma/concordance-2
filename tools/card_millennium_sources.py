@@ -56,9 +56,12 @@ STICKS = {
     "p_vs_np": ("stick_p_versus_np", "P versus NP"),
     "hodge": ("stick_hodge_conjecture", "Hodge"),
     "poincare": ("stick_poincare_conjecture", "Poincare"),
+    # THE ONE MAP (2026-10-09): the records the joints between the problems stand on. No stick of their own - the
+    # joints live on the keeping's graph (tools/seed_millennium_chain.py, card_floor_millennium).
+    "joint": ("card_floor_millennium", "joints between the problems"),
 }
 DOMAIN = {"riemann": "mathematics", "bsd": "mathematics", "navier_stokes": "mathematics", "yang_mills": "physics",
-          "p_vs_np": "computer_science", "hodge": "mathematics", "poincare": "mathematics"}
+          "p_vs_np": "computer_science", "hodge": "mathematics", "poincare": "mathematics", "joint": "mathematics"}
 
 # The wants the attempts opened on the box (data/wants.jsonl, 2026-10-09). A SOURCE want closes when its texts are
 # carded; a BUILD want (a calculator, a door) only receives its method's source as an option and stays open.
@@ -96,6 +99,11 @@ L_CUP_AUTHOR = "posted on the author's site by permission of Cambridge Universit
 L_BOOK = "the publisher's copyright — cited by its record; no free copy"
 L_GT = "no license field in the Crossref record; Geometry & Topology (MSP) — cited; the arXiv copy is free"
 L_AJM = "no license field in the Crossref record; Asian Journal of Mathematics — cited; the arXiv copy is free"
+L_ANNALS = "no license field in the Crossref record; Annals of Mathematics (Princeton; JSTOR) — cited"
+L_NUMDAM = "free to read on Numdam — cited"
+L_DUKE = "no license field in the Crossref record; Duke Mathematical Journal — cited"
+L_TURPION = "no license field in the Crossref record; Russian Mathematical Surveys (Turpion/IOP) — cited"
+L_CHAPTER = "a book chapter — the publisher's copyright, cited by its record"
 
 # key, problem, kind, authors, year, title, venue, doi, arxiv, url (canonical), free (a free copy), license, role,
 # want, note
@@ -387,6 +395,98 @@ SOURCES: List[Dict[str, str]] = [
          doi="10.4310/AJM.2006.v10.n2.a2", arxiv="math/0612069 (the revised version)",
          url="https://doi.org/10.4310/AJM.2006.v10.n2.a2", free="https://arxiv.org/abs/math/0612069", license=L_AJM,
          role="the third write-up — a receipt of the proof", want=WANTS["poincare_sources"]),
+    # ── the joints (THE ONE MAP, 2026-10-09) — the records the joints between the problems stand on ──
+    dict(key="montgomery_1973", problem="joint", kind="paper", authors="H. L. Montgomery", year="1973",
+         title="The pair correlation of zeros of the zeta function",
+         venue="Proc. Symp. Pure Math. 24 (AMS, 1973) 181–193", doi="10.1090/pspum/024/9944", arxiv="",
+         url="https://doi.org/10.1090/pspum/024/9944", free="", license=L_AMS,
+         role="the GUE joint: the pair correlation of zeta zeros is the random-matrix one (Riemann ↔ Yang-Mills)",
+         want=""),
+    dict(key="odlyzko_1987", problem="joint", kind="paper", authors="A. M. Odlyzko", year="1987",
+         title="On the distribution of spacings between zeros of the zeta function",
+         venue="Math. Comp. 48 (1987) 273–308", doi="10.1090/S0025-5718-1987-0866115-0", arxiv="",
+         url="https://doi.org/10.1090/S0025-5718-1987-0866115-0",
+         free="https://www.ams.org/journals/mcom/1987-48-177/S0025-5718-1987-0866115-0/", license=L_AMS,
+         role="the GUE joint: the spacings computed and seen to follow GUE (Riemann ↔ Yang-Mills)", want=""),
+    dict(key="verbaarschot_1994", problem="joint", kind="paper", authors="J. J. M. Verbaarschot", year="1994",
+         title="Spectrum of the QCD Dirac operator and chiral random matrix theory",
+         venue="Phys. Rev. Lett. 72 (1994) 2531–2533", doi="10.1103/PhysRevLett.72.2531", arxiv="hep-th/9401059",
+         url="https://doi.org/10.1103/PhysRevLett.72.2531", free="https://arxiv.org/abs/hep-th/9401059", license=L_APS,
+         role="the GUE joint: the lattice Dirac spectrum obeys chiral random matrix theory (Riemann ↔ Yang-Mills)",
+         want=""),
+    dict(key="berry_keating_1999", problem="joint", kind="paper", authors="M. V. Berry, J. P. Keating", year="1999",
+         title="The Riemann zeros and eigenvalue asymptotics", venue="SIAM Review 41 (1999) 236–266",
+         doi="10.1137/S0036144598347497", arxiv="", url="https://doi.org/10.1137/S0036144598347497", free="",
+         license=L_SIAM, role="the GUE joint from the other side: the zeros as eigenvalues (Hilbert-Polya)", want=""),
+    dict(key="wiles_1995", problem="joint", kind="paper", authors="A. Wiles", year="1995",
+         title="Modular elliptic curves and Fermat's last theorem", venue="Ann. Math. 141 (1995) 443–551",
+         doi="10.2307/2118559", arxiv="", url="https://doi.org/10.2307/2118559", free="", license=L_ANNALS,
+         role="the L-function joint: modularity gives L(E,s) its analytic continuation (Riemann ↔ BSD)", want=""),
+    dict(key="deligne_1974", problem="joint", kind="paper", authors="P. Deligne", year="1974",
+         title="La conjecture de Weil. I", venue="Publ. Math. IHÉS 43 (1974) 273–307", doi="10.1007/BF02684373",
+         arxiv="", url="https://doi.org/10.1007/BF02684373",
+         free="http://www.numdam.org/item/PMIHES_1974__43__273_0/", license=L_NUMDAM,
+         role="the Weil joint: the one proven Riemann hypothesis, over finite fields (Riemann ↔ Hodge ↔ P vs NP)",
+         want=""),
+    dict(key="mulmuley_2011", problem="joint", kind="paper", authors="K. D. Mulmuley", year="2011",
+         title="On P vs. NP and geometric complexity theory", venue="J. ACM 58 (2011) 5:1–26",
+         doi="10.1145/1944345.1944346", arxiv="0908.1936", url="https://doi.org/10.1145/1944345.1944346",
+         free="https://arxiv.org/abs/0908.1936", license=L_ACM,
+         role="the Weil joint: GCT's road leans on positivity of the kind Deligne proved (P vs NP ↔ Riemann)", want=""),
+    dict(key="tate_1965", problem="joint", kind="book", authors="J. Tate", year="1965",
+         title="Algebraic cycles and poles of zeta functions",
+         venue="Arithmetical Algebraic Geometry (Purdue 1963), Harper & Row, 1965, 93–110", doi="", arxiv="",
+         url="https://www.claymath.org/millennium/hodge-conjecture/", free="", license=L_CHAPTER,
+         role="the Tate joint: the conjecture that is Hodge's arithmetic twin (Hodge ↔ BSD)", want=""),
+    dict(key="artin_tate_1966", problem="joint", kind="paper", authors="M. Artin, J. Tate", year="1966",
+         title="On the conjectures of Birch and Swinnerton-Dyer and a geometric analog",
+         venue="Séminaire Bourbaki 9 (1964–66), exp. 306, 415–440", doi="", arxiv="",
+         url="http://www.numdam.org/item/SB_1964-1966__9__415_0/", free="http://www.numdam.org/item/SB_1964-1966__9__415_0/",
+         license=L_NUMDAM, role="the Tate joint: BSD over a function field as the Tate conjecture for the surface (Hodge ↔ BSD)",
+         want=""),
+    dict(key="milne_1975", problem="joint", kind="paper", authors="J. S. Milne", year="1975",
+         title="On a conjecture of Artin and Tate", venue="Ann. Math. 102 (1975) 517–533", doi="10.2307/1971042",
+         arxiv="", url="https://doi.org/10.2307/1971042", free="", license=L_ANNALS,
+         role="the Tate joint: Artin-Tate proven, Tate ⇔ BSD ⇔ Brauer finite for an elliptic surface (Hodge ↔ BSD)",
+         want=""),
+    dict(key="bochner_1946", problem="joint", kind="paper", authors="S. Bochner", year="1946",
+         title="Vector fields and Ricci curvature", venue="Bull. Amer. Math. Soc. 52 (1946) 776–797",
+         doi="10.1090/S0002-9904-1946-08647-4", arxiv="", url="https://doi.org/10.1090/S0002-9904-1946-08647-4",
+         free="https://www.ams.org/journals/bull/1946-52-09/S0002-9904-1946-08647-4/", license=L_AMS,
+         role="the Bochner joint: positive Ricci curvature kills harmonic one-forms (Hodge ↔ Poincare)", want=""),
+    dict(key="myers_1941", problem="joint", kind="paper", authors="S. B. Myers", year="1941",
+         title="Riemannian manifolds with positive mean curvature", venue="Duke Math. J. 8 (1941) 401–404",
+         doi="10.1215/S0012-7094-41-00832-3", arxiv="", url="https://doi.org/10.1215/S0012-7094-41-00832-3", free="",
+         license=L_DUKE, role="the Bochner joint: the diameter bound under positive Ricci, equality on the sphere - sealed",
+         want=""),
+    dict(key="forster_nelson_stephen_1977", problem="joint", kind="paper",
+         authors="D. Forster, D. R. Nelson, M. J. Stephen", year="1977",
+         title="Large-distance and long-time properties of a randomly stirred fluid", venue="Phys. Rev. A 16 (1977) 732–749",
+         doi="10.1103/PhysRevA.16.732", arxiv="", url="https://doi.org/10.1103/PhysRevA.16.732", free="", license=L_APS,
+         role="the renormalization-group joint: Wilson's RG run on the Navier-Stokes fluid (Yang-Mills ↔ Navier-Stokes)",
+         want=""),
+    dict(key="troyer_wiese_2005", problem="joint", kind="paper", authors="M. Troyer, U.-J. Wiese", year="2005",
+         title="Computational complexity and fundamental limitations to fermionic quantum Monte Carlo simulations",
+         venue="Phys. Rev. Lett. 94 (2005) 170201", doi="10.1103/PhysRevLett.94.170201", arxiv="cond-mat/0408370",
+         url="https://doi.org/10.1103/PhysRevLett.94.170201", free="https://arxiv.org/abs/cond-mat/0408370", license=L_APS,
+         role="the sign-problem joint: the lattice sign problem is NP-hard (Yang-Mills ↔ P vs NP)", want=""),
+    dict(key="manin_1971", problem="joint", kind="paper", authors="Yu. I. Manin", year="1971",
+         title="Cyclotomic fields and modular curves", venue="Russian Math. Surveys 26:6 (1971) 7–78",
+         doi="10.1070/RM1971v026n06ABEH001272", arxiv="", url="https://doi.org/10.1070/RM1971v026n06ABEH001272", free="",
+         license=L_TURPION, role="the Manin joint: finite Sha makes the rank effectively computable (BSD ↔ P vs NP)",
+         want=""),
+    dict(key="davis_matiyasevich_robinson_1976", problem="joint", kind="paper",
+         authors="M. Davis, Yu. Matiyasevich, J. Robinson", year="1976",
+         title="Hilbert's tenth problem: Diophantine equations: positive aspects of a negative solution",
+         venue="Proc. Symp. Pure Math. 28 (AMS, 1976) 323–378", doi="10.1090/pspum/028.2/0432534", arxiv="",
+         url="https://doi.org/10.1090/pspum/028.2/0432534", free="", license=L_AMS,
+         role="the Diophantine joint: RH as one Diophantine equation with no solutions (Riemann ↔ P vs NP)", want=""),
+    dict(key="arnold_1966", problem="joint", kind="paper", authors="V. I. Arnold", year="1966",
+         title="Sur la géométrie différentielle des groupes de Lie de dimension infinie et ses applications à "
+               "l'hydrodynamique des fluides parfaits", venue="Ann. Inst. Fourier 16 (1966) 319–361", doi="10.5802/aif.233",
+         arxiv="", url="https://doi.org/10.5802/aif.233", free="http://www.numdam.org/item/AIF_1966__16_1_319_0/",
+         license=L_NUMDAM, role="the Arnold joint: Euler flow as geodesic flow on the diffeomorphisms (Navier-Stokes ↔ Poincare)",
+         want=""),
 ]
 
 # As found 2026-10-09 (lmfdb.org/datasets and lmfdb.org/api/options: "all data is licensed under CC-BY-SA"). Spelled
@@ -418,8 +518,11 @@ def body(s: Dict[str, str]) -> str:
     parts.append(f"Canonical: {s['url']}.")
     parts.append(f"Free copy: {s['free']}." if s.get("free") else "No free copy found; cited by its record.")
     parts.append(f"License as found: {s['license']}.")
-    kind = "a build item's method" if s["want"] in BUILD_WANTS else "fills the want"
-    parts.append(f"Serves the {pname} stick ({stick}): {s['role']} — {kind} {s['want']}.")
+    if s["problem"] == "joint":
+        parts.append(f"Serves the {pname} on the one map ({stick}): {s['role']}.")
+    else:
+        kind = "a build item's method" if s["want"] in BUILD_WANTS else "fills the want"
+        parts.append(f"Serves the {pname} stick ({stick}): {s['role']} — {kind} {s['want']}.")
     if s.get("note"):
         parts.append("Note: " + s["note"].replace("{LMFDB_LICENSE}", LMFDB_LICENSE))
     return " ".join(parts)
@@ -482,7 +585,8 @@ def main() -> int:
     args = ap.parse_args()
     cs = cards()
     print(f"sources: {len(SOURCES)}; cards: {len(cs)} (+1 spine); wants served: "
-          f"{len(set(s['want'] for s in SOURCES))} of {len(WANTS)}")
+          f"{len(set(s['want'] for s in SOURCES if s['want']))} of {len(WANTS)}; joints' records: "
+          f"{sum(1 for s in SOURCES if s['problem'] == 'joint')}")
     if args.dry_run:
         print("--dry-run: nothing written.")
         return 0
