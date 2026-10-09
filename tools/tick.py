@@ -1154,6 +1154,71 @@ def change_of_domain() -> int:
     _mint_marks(sid, marks, by="tools/tick.py change_of_domain")
     return 0
 
+
+def grimm_law() -> int:
+    """GRIMM'S LAW - A SOUND LAW, VERIFIED AND SEALED (Matt, 2026-10-09: "How do we use this for linguistics?" -
+    "build it"). The first consonant shift: in Germanic the Proto-Indo-European voiceless stops became voiceless
+    fricatives - p -> f, t -> th, k -> h - regularly, across the vocabulary. That regularity is CHECKABLE on cognate
+    pairs attested by the comparative method (Latin, which kept the stops, against English, which shifted). The
+    sound_law verifier confirms each correspondence on its cited pairs and the verdict is SEALED. What is cited: the
+    cognate pairs (attested) and the proto-form (a reconstruction - a postulate, never sealed). What is sealed: that
+    the correspondence holds on every cited pair. Idempotent."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    LAWS = [
+        ("p", "f", "Grimm's law: PIE *p -> Germanic f",
+         [["pater", "father"], ["piscis", "fish"], ["pes", "foot"], ["plenus", "full"], ["pellis", "fell"]]),
+        ("t", "th", "Grimm's law: PIE *t -> Germanic th",
+         [["tres", "three"], ["tu", "thou"], ["tenuis", "thin"]]),
+        ("c", "h", "Grimm's law: PIE *k -> Germanic h",
+         [["cornu", "horn"], ["canis", "hound"], ["centum", "hundred"], ["caput", "head"], ["cor", "heart"]]),
+    ]
+    seals = {}
+    for so, to, label, pairs in LAWS:
+        spec = {"SOUNDLAW_VERIFY": {"pairs": pairs, "source_onset": so, "target_onset": to, "law": label,
+                                    "claimed_regular": True}}
+        res = verify_derivation([{"id": "law", "domain": "sound_law", "spec": spec}])
+        if res.get("verdict") != "HOLDS":
+            print("the law did not hold:", label, res.get("verdict")); return 1
+        res = receipts.attach(res, config=EngineConfig(), domain="sound_law")
+        seal = (res.get("seal") or {}).get("content_hash")
+        if not seal:
+            print("no seal minted for", label); return 1
+        seals[so] = (seal, label, pairs)
+        print("sealed", label, seal[:12])
+    sid = TS.create("Grimm's law - a regular sound correspondence, verified")["id"]
+    marks = [
+        ("instance", "[PIE *p -> Germanic f, verified] Latin kept the stop, English shifted it: pater/father, "
+                     "piscis/fish, pes/foot, plenus/full, pellis/fell - the correspondence p -> f holds at the onset "
+                     "on all five cited cognate pairs (sealed through sound_law). A regular law, not five coincidences; "
+                     "the cognates are attested by the comparative method, the proto-form *ph2ter is a reconstruction.",
+         seals["p"][0]),
+        ("instance", "[PIE *t -> Germanic th, verified] tres/three, tu/thou, tenuis/thin - t -> th on every cited pair "
+                     "(sealed).", seals["t"][0]),
+        ("instance", "[PIE *k -> Germanic h, verified] cornu/horn, canis/hound, centum/hundred, caput/head, cor/heart "
+                     "- Latin c (/k/) answers English h on all five (sealed). centum/hundred is the very pair that names "
+                     "the centum/satem split of the family.", seals["c"][0]),
+        ("postulate", "[what is cited, not proven] The cognate pairs are ATTESTED by the comparative method; the "
+                      "Proto-Indo-European forms (*p, *t, *k, *ph2ter) are RECONSTRUCTIONS - they work (they predict the "
+                      "attested forms by regular law), so the proto-language is inferred, never kept as a fact and never "
+                      "sealed. The engine seals only what it checked: that the correspondence holds on the cited pairs.",
+         {"source": "J. Grimm, Deutsche Grammatik (1822); K. Verner (1877) for the exceptions; the comparative method"}),
+        ("note", "[how linguistics uses this] A sound law is a regular correspondence - math on the vocabulary, "
+                 "exactly checkable and sealable, and refutable (a pair that breaks it is named). The engine CERTIFIES "
+                 "the correspondence with its cited cognates as the reason, DECLINES the reconstruction beyond the "
+                 "attested (a postulate), and a false law (p -> p, or a non-cognate pair) is caught. Verner's law is the "
+                 "famous residue - the apparent exceptions to Grimm that a deeper regularity (PIE accent) explained; the "
+                 "exceptions become a want, not a fudge.",
+         {"source": "src/concordance/verifiers/sound_law.py; the one map, card_floor_indo_european"}),
+        ("note", "[on the one map] Etymology is chains from a floor where two trees connect: the proto-language is the "
+                 "floor, the sound laws are the chain, a cognate is the confluence where two language-branches meet "
+                 "(father and pater meet at PIE *ph2ter). card_floor_indo_european draws it.",
+         {"source": "tools/seed_indo_european.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py grimm_law")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -7867,6 +7932,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("grimm_law", "grimm", "sound_law", "sound_laws"):
+        return grimm_law()
     if a[0] in ("change_of_domain", "spectral", "diagonalize", "eigenbasis"):
         return change_of_domain()
     if a[0] in ("get_close", "approximation", "bounded_estimate"):

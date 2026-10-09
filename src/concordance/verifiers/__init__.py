@@ -34,6 +34,10 @@ VERIFIERS: Dict[str, str] = {
     # "putting the problem in a Hilbert Space") - the eigenbasis flip and the Fourier flip.
     "spectral": _P + "spectral", "change_of_domain": _P + "spectral", "eigenbasis": _P + "spectral",
     "diagonalize": _P + "spectral",
+    # sound laws: regular correspondences of historical linguistics, verified on cited cognate pairs
+    # (2026-10-09: "How do we use this for linguistics?").
+    "sound_law": _P + "sound_law", "sound_laws": _P + "sound_law", "grimms_law": _P + "sound_law",
+    "historical_linguistics": _P + "sound_law",
     # RH by elimination through the divisor sum (Robin 1984) — a number_theory check, named so the engine
     # routes a Robin query and the nightly benchmark runs it on its own golden (2026-10-05)
     "robin": _P + "number_theory", "robins_inequality": _P + "number_theory",
