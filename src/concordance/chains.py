@@ -40,7 +40,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_tree_of_life",
           # the capstone (tools/seed_the_capstone.py, 2026-10-09): one source, many potentials, one end - the reply
           # to Copenhagen; the floor the others stand on, threading between Copenhagen's silence and many-worlds' excess
-          "card_floor_the_capstone")
+          "card_floor_the_capstone",
+          # the Hamiltonian (tools/seed_the_hamiltonian.py, 2026-10-09): the law of the flow - the energy operator and
+          # generator of time evolution; four pillars on the capstone + solve path, the measurement gap its open end
+          "card_floor_the_hamiltonian")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:

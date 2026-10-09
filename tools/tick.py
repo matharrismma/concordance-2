@@ -1897,6 +1897,71 @@ def the_capstone() -> int:
     _mint_marks(sid, marks, by="tools/tick.py the_capstone")
     return 0
 
+
+def the_hamiltonian() -> int:
+    """THE HAMILTONIAN - the law of the flow (Matt, 2026-10-09: "How does Hamiltonian fit?"). The energy operator and
+    the generator of time evolution: it governs how the many potentials develop between the one source and the one
+    end. SEALED: its eigenvalues ARE the allowed energies (hydrogen's ground state, 13.6057 eV, from the fundamental
+    constants; the 1/n^2 ladder). It fits in four exact places - (1) Hermitian H -> UNITARY evolution -> the total
+    probability is conserved (the capstone's 'sum to one', preserved through time); (2) the change-of-domain door is
+    diagonalizing H; (3) one generator classical<->quantum = the no-cut reply to Copenhagen; (4) Noether: energy is
+    the conserved invariant, the same end through the flow. The OPEN EDGE: H never picks one outcome - that gap is
+    the measurement problem, where the single-actualization postulate lives. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "rydberg": _rh_seal_num("hydrogen_ground_state_binding_energy_from_constants_ev",
+                                "9.1093837015e-31*(1.602176634e-19)**4/(8*(8.8541878128e-12)**2*(6.62607015e-34)**2)/1.602176634e-19",
+                                13.6057, tol=1e-3),
+        "n2": _rh_seal_num("hydrogen_first_excited_level_one_over_n_squared_ev", "13.6057/2**2", 3.401425, tol=1e-6),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "Hamiltonian numbers")
+    sid = TS.create("The Hamiltonian - the law of the flow")["id"]
+    marks = [
+        ("instance", "[the spectrum - H's eigenvalues ARE the allowed energies, SEALED] The Hamiltonian is the energy "
+                     "operator; H psi = E psi, and the eigenvalues E are the energies a system can have. Hydrogen's "
+                     "ground state, from the fundamental constants m_e, e, epsilon_0 and h, is 13.6057 eV (sealed) - "
+                     "the energy to ionize it. Solve the Hamiltonian, get the spectrum; the rest of chemistry reads "
+                     "that spectrum.", S["rydberg"]),
+        ("instance", "[the shape of the spectrum, SEALED] Hydrogen's levels fall as 1/n^2: the first excited state is "
+                     "E_1/4 = 3.40 eV (sealed). The whole ladder of an atom, and the spectral lines we see, are the "
+                     "Hamiltonian's eigenvalues - the allowed energies and nothing between them.", S["n2"]),
+        ("note", "[why the many total one, through time] H is Hermitian (self-adjoint), so time evolution "
+                 "e^(-iHt/hbar) is UNITARY, and unitary evolution conserves the total probability. The capstone's "
+                 "sealed 'sum to one' is not just an instant - the Hamiltonian preserves it at every moment of the "
+                 "flow. The law that keeps the many potentials adding to one, through time, is H. Ties "
+                 "stick_the_capstone_one_source_many_potentials_one_end and card_floor_the_capstone.",
+         {"source": "the Schrodinger equation i hbar d/dt psi = H psi; unitarity of e^(-iHt/hbar); card_floor_the_capstone"}),
+        ("note", "[the change-of-domain door is diagonalizing H] The solve path's eigenbasis flip is, in quantum "
+                 "mechanics, diagonalizing the Hamiltonian: its eigenvectors are the stationary states, its "
+                 "eigenvalues the energies. 'Go to the eigenbasis' and 'go to the Hamiltonian's frame' are one move. "
+                 "Ties card_floor_the_solve_path and src/concordance/verifiers/spectral.py.",
+         {"source": "the spectral theorem for self-adjoint operators; card_floor_the_solve_path"}),
+        ("note", "[the no-cut bridge - the reply to Copenhagen made precise] The same generator, energy, runs "
+                 "classical mechanics (Hamilton's equations dq/dt = dH/dp, dp/dt = -dH/dq) and quantum mechanics "
+                 "(Schrodinger). The correspondence is continuous (Ehrenfest's theorem; the Poisson bracket becoming "
+                 "the commutator). There is no scale where energy stops being the Hamiltonian, so the quantum-to-"
+                 "classical passage needs no Heisenberg cut. That is the scale-invariant reply to Copenhagen, in one "
+                 "operator.",
+         {"source": "Ehrenfest's theorem; the classical limit of the Schrodinger equation; the correspondence principle"}),
+        ("note", "[Noether - the conserved end] Time-translation symmetry gives exactly one conserved quantity, and "
+                 "it is the Hamiltonian - the energy. It is the invariant along every path the system can take. "
+                 "'Many possibilities but the story ends the same way' has a precise echo: whatever path the "
+                 "potentials flow, H is conserved. The invariant is the end carried through the middle.",
+         {"source": "E. Noether (1918): time-translation symmetry <-> conservation of energy"}),
+        ("postulate", "[the open edge - the measurement gap] Unitary H evolution NEVER selects a single outcome; it "
+                      "flows the whole superposition forward, deterministically and reversibly. What the Hamiltonian "
+                      "does not describe is the actualization - which one outcome occurs. That is the measurement "
+                      "problem (von Neumann's two processes: unitary evolution, and measurement), and it is exactly "
+                      "where the capstone's single-actualization postulate lives. Every interpretation agrees on H; "
+                      "they differ only on this gap. H is sealed law; the one end is the honest postulate beyond it - "
+                      "it works, so the one is inferred there, never kept as fact.",
+         {"source": "the measurement problem; J. von Neumann, the two processes (unitary evolution vs. measurement); card_floor_the_capstone"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py the_hamiltonian")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -8612,6 +8677,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("hamiltonian", "the_hamiltonian", "energy_operator", "law_of_the_flow"):
+        return the_hamiltonian()
     if a[0] in ("is_gravity_a_force", "gravity_force", "force_or_geometry"):
         return gravity()
     if a[0] in ("one_force", "the_one_force", "forces", "unification"):

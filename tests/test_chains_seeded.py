@@ -37,7 +37,7 @@ def _graph():
 def test_the_seed_validates_and_every_endpoint_resolves():
     assert S3._validate() == []
     assert len(S3.CHAINS) == 8 and len(S3.RECORDS) >= 55
-    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 15
+    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 16
 
 
 def test_each_chain_walks_from_its_roots_to_its_open_end_and_meets_where_the_seed_expects():
@@ -115,7 +115,7 @@ def test_the_chains_door_reads_a_chain_floor(monkeypatch):
     assert st == 200 and len(body["chain"]["nodes"]) >= 12 and body["confluences"][0]["at"] == "card_chain_riemann_1859"
     st, payload = dispatch("GET", "/chains", {"floors": "1"}, None, EngineConfig("secular"))
     body = payload.get("data") or payload
-    assert st == 200 and len(body["floors"]) == 15
+    assert st == 200 and len(body["floors"]) == 16
 
 
 def test_the_capstone_floor_gathers_the_others_and_marks_the_two_barriers():
@@ -137,3 +137,21 @@ def test_the_capstone_floor_gathers_the_others_and_marks_the_two_barriers():
     serves = {s["at"] for s in m["serves"]}
     assert {"card_floor_standard_model", "card_floor_tree_of_life", "card_floor_the_solve_path"} <= serves
     assert "card_capstone_copenhagen" in serves and "card_capstone_many_worlds" in serves
+
+
+def test_the_hamiltonian_floor_rests_on_the_capstone_and_solve_path_with_the_measurement_gap_open():
+    """The Hamiltonian (Matt, 2026-10-09): the law of the flow - four pillars resting on the capstone and the solve
+    path, with the measurement gap as its one open end. Pinned on the seed alone."""
+    import seed_the_hamiltonian as S5
+    assert S5._validate() == []
+    cards = {c["id"]: json.loads(json.dumps(c)) for c in S5.CARDS}
+    for cid in ("card_floor_the_capstone", "card_floor_the_solve_path", "card_k_floor_of_discovery"):
+        cards.setdefault(cid, {"id": cid, "title": cid, "connections": []})
+    overlay = Path(tempfile.mkdtemp(prefix="nh-ham-")) / "overlay.jsonl"
+    overlay.write_text("\n".join(json.dumps(e) for e in S5.BRIDGES) + "\n", encoding="utf-8")
+    corpus._apply_bridges(cards, overlay)
+    m = chains.floor_map(S5.FLOOR, get_card=cards.get)
+    assert m and len(m["parts"]) == 4 and len(m["ends"]) == 1
+    assert m["ends"][0]["id"] == "card_question_measurement_gap"
+    serves = {s["at"] for s in m["serves"]}
+    assert {"card_floor_the_capstone", "card_floor_the_solve_path"} <= serves
