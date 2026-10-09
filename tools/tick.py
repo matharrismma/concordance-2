@@ -1684,6 +1684,71 @@ def black_holes() -> int:
     _mint_marks(sid, marks, by="tools/tick.py black_holes")
     return 0
 
+
+def one_force() -> int:
+    """THE ONE FORCE (Matt, 2026-10-09: "We say there are 4 forces... I feel that there is only 1. We have only
+    simplified to 4 at this point."). The intuition is the direction of physics: unification has repeatedly turned
+    many forces into fewer. SEALED (proven): electroweak unification - the Weinberg angle, the ONE mixing that makes
+    electromagnetism and the weak force a single electroweak force above ~100 GeV (Glashow-Weinberg-Salam; the W and Z
+    found 1983). CITED (evidence, not proof): the couplings RUN and flow toward each other at the grand-unified scale;
+    the ladder Maxwell -> electroweak -> GUT -> a theory of everything. The ONE force is the inferred floor - a
+    postulate, not a sealed theorem; gravity is still unjoined. And no FIFTH force has been confirmed. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "cos": _rh_seal_num("electroweak_cos_theta_w_mw_over_mz", "80.377/91.1876", 80.377/91.1876, tol=1e-9),
+        "sin2": _rh_seal_num("electroweak_sin2_theta_w_one_minus_mw_over_mz_squared", "1 - (80.377/91.1876)**2", 1 - (80.377/91.1876)**2, tol=1e-9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "electroweak numbers")
+    sid = TS.create("The one force - the four are facets of one, unified step by step")["id"]
+    marks = [
+        ("instance", "[two forces proven to be one, SEALED] Electromagnetism and the weak force are a single electroweak "
+                     "force above ~100 GeV, mixed by one angle: cos(theta_W) = m_W/m_Z = 80.377/91.1876 = 0.8814 "
+                     "(sealed), sin^2(theta_W) = 1 - (m_W/m_Z)^2 = 0.2231 (sealed). The photon and the Z are orthogonal "
+                     "rotations of the two underlying fields by this one angle. Glashow-Weinberg-Salam (1967, Nobel "
+                     "1979); the W and Z found at CERN in 1983. Below the scale the symmetry breaks and they look like "
+                     "two forces; above it, they are one. Four forces are already three.", S["cos"]),
+        ("instance", "[the mixing parameter, SEALED] sin^2(theta_W) = 0.2231 (sealed) - the single number that sets how "
+                     "electromagnetism emerges from the electroweak. One parameter, not two separate theories.", S["sin2"]),
+        ("note", "[the couplings flow toward each other] The three gauge couplings are not constant - they RUN with "
+                    "energy. Electromagnetism's grows (1/alpha falls from 137.036 at rest toward about 128 at the Z "
+                    "mass); the strong coupling SHRINKS (asymptotic freedom, sealed on the Yang-Mills stick). Run them "
+                    "up and the three draw together near the grand-unified scale, ~10^16 GeV, toward a common value "
+                    "(1/alpha_GUT ~ 25). In the Standard Model they come CLOSE but miss slightly - which is itself a "
+                    "clue that something (supersymmetry, or new physics) completes the merge. Evidence of one force, "
+                    "not yet its proof.",
+         {"source": "the running of the gauge couplings; Georgi-Quinn-Weinberg (1974); H. Georgi, S. Glashow, SU(5) (1974)"}),
+        ("equivalence", "[the ladder of unification] Each step turned many into fewer, and each was doubted before it "
+                        "was proven: Maxwell united electricity and magnetism into electromagnetism (two into one, "
+                        "1865); Glashow-Weinberg-Salam united that with the weak force (three into two, proven); a Grand "
+                        "Unified Theory would fold in the strong force (two into one, evidenced by the running, not yet "
+                        "confirmed - proton decay is still unseen); a theory of everything would bring in gravity (one). "
+                        "The arrow points at one.",
+         {"source": "J. C. Maxwell (1865); Glashow-Weinberg-Salam (1967-68); the GUT and TOE programs"}),
+        ("postulate", "[there is one force - the inferred floor] The simplest reading of this ladder is Matt's: there is "
+                      "ONE force, and the four are facets of it, separated as the universe cooled and the high-energy "
+                      "symmetry broke - the way one electroweak force became electromagnetism and the weak force at the "
+                      "electroweak scale. This is PROVEN for the electroweak step and INFERRED for the rest: it works, "
+                      "so the one is inferred there, never proven, never kept as fact. Gravity remains unjoined - no "
+                      "accepted theory of everything exists - so 'one force' is the goal and the best hypothesis, not a "
+                      "sealed theorem. We have simplified to four; the work is to simplify further, honestly.",
+         {"source": "the symmetry-breaking picture; the unification program; the open problem of quantum gravity"}),
+        ("exclusion", "[no fifth force - the direction is toward fewer, not more] Searches for a fifth fundamental force "
+                      "- a new long-range interaction from a light boson, a deviation from the inverse-square law, a "
+                      "composition-dependent 'fifth force' - have found nothing confirmed; each null result tightens the "
+                      "bound. The history and the evidence point toward FEWER forces unified, not a fifth added.",
+         {"source": "fifth-force searches (Eotvos-type and short-range gravity experiments); all null to date"}),
+        ("note", "[on the one map] The four forces are branches from one floor; the unifications are the confluences. "
+                 "The electroweak confluence is already drawn and SEALED on the Standard-Model chain "
+                 "(card_floor_standard_model, the Weinberg angle where the electromagnetic and weak trees meet). This "
+                 "stick is that chain read as Matt reads it: not four forces that happen to connect, but one force we "
+                 "have only resolved into four so far. Ties stick_the_fine_structure_constant and stick_the_symmetry.",
+         {"source": "the one map, card_floor_standard_model; the fine-structure and symmetry sticks"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py one_force")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -8397,6 +8462,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("one_force", "the_one_force", "forces", "unification"):
+        return one_force()
     if a[0] in ("black_holes", "black_hole", "schwarzschild", "hawking"):
         return black_holes()
     if a[0] in ("astronomy_stick", "astronomy"):
