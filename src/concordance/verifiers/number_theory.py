@@ -996,8 +996,10 @@ def verify_li_criterion(spec):
         return error(name, "li_to must be an integer (the index N to check lambda_n > 0 up to)")
     if N < 1:
         return error(name, "li_to must be at least 1")
-    if N > 60:
-        return error(name, f"li_to {N} exceeds the precision cap (60) of the Taylor expansion here; chart in bounded steps")
+    if N > 25:
+        # measured 2026-10-09: n = 12 in 7 s, n = 20 within a minute on the box, n = 30 at dps 130 in 3943 s locally -
+        # the Taylor expansion's cost is steep in n; past 25 the Keiper/Maslanka tables (a want) are the honest reach
+        return error(name, f"li_to {N} exceeds the practical cap (25) of the Taylor expansion here (n = 30 took 66 minutes); chart in bounded steps")
     try:
         from mpmath import mp, mpf, zeta, gamma, pi, log, taylor, euler
     except ImportError:

@@ -64,6 +64,19 @@ cited. The process improved by the attempt: a numeric seal belongs to the mathem
 and a file a running chain will stage must not be edited until the chain has committed (this stick's code landed
 under the BSD commit, 51d94ff, by staging order).
 
+**Yang–Mills, 2026-10-09.** On the existence-and-mass-gap stick: six sealed instances, the pure-gauge beta
+coefficients b₀ = 11 and b₁ = 102, the running of α_s from M_Z to 10 GeV at one loop, the nonperturbative weight
+e^(−8π²/g²) = 7.5·10⁻²⁴ at α_s(M_Z), the string tension (440 MeV)² as sixteen tonnes-force, the 0⁺⁺ glueball's
+Compton wavelength 0.114 fm; the postulate stated as what "existence" means (the Osterwalder–Schrader and Wightman
+axioms); the proven links cited, asymptotic freedom (Gross–Wilczek, Politzer 1973) and the lattice theory's gap and
+confinement at strong coupling (Osterwalder–Seiler 1978, Wilson 1974); the measured link cited with its error bar
+(Morningstar–Peardon 1999) and Balaban's partial continuum program; the road closed, perturbation theory to every
+order (the gap is e^(−8π²/b₀g²), every derivative zero at g = 0, the series asymptotic); the window read: existence on
+R⁴ in the axiomatic sense and the gap surviving the continuum limit. Gaps, each an open want: the cited texts and
+the FLAG lattice compilation; a strong-coupling-expansion calculator so the proven lattice gap is computed here at
+a stated coupling, not only cited. Also in this iteration: the Li cap set from the measured time (thirty terms took
+sixty-six minutes; the practical cap is twenty-five, the Keiper/Maslanka tables the honest reach beyond it).
+
 ## Why Riemann is first
 
 It has the only ratcheted bound in the store (T = 10⁷), the most verifiers behind it, and three equivalences

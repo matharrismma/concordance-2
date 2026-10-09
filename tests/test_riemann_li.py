@@ -24,7 +24,7 @@ def test_li_criterion_holds_to_twelve_and_matches_the_known_values():
 def test_a_false_claim_is_refused_and_the_cap_is_honest():
     assert NT.verify_li_criterion({"li_to": 6, "claimed_li_positive": False}).status == "MISMATCH"
     assert NT.verify_li_criterion({"li_to": 0, "claimed_li_positive": True}).status == "ERROR"
-    assert NT.verify_li_criterion({"li_to": 61, "claimed_li_positive": True}).status == "ERROR"
+    assert NT.verify_li_criterion({"li_to": 26, "claimed_li_positive": True}).status == "ERROR"   # the measured cap: 30 took 66 min
     assert NT.verify_li_criterion({"li_to": 4}).status == "NOT_APPLICABLE"
 
 

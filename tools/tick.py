@@ -364,6 +364,103 @@ def navier_stokes_next() -> int:
     _mint_marks(sid, marks, by="tools/tick.py navier_stokes_next")
     return 0
 
+
+def yang_mills_next() -> int:
+    """YANG-MILLS EXISTENCE AND MASS GAP - THE NEXT LINKS (the Millennium loop, 2026-10-09; the law: nothing out of thin
+    air, everything bound). The 'mass gap is a measure' stick holds the gap as a spectral difference, the Yukawa range and
+    b0 for six flavours; the 'existence and mass gap' stick holds the lattice-sampling witnesses. Now, on the latter: the
+    pure-gauge beta coefficients b0 = 11 and b1 = 102 (sealed); the running of alpha_s from M_Z to 10 GeV at one loop
+    (sealed); the nonperturbative weight e^(-8 pi^2 / g^2) = 7.5e-24 at alpha_s(M_Z), the reason no finite order of
+    perturbation theory can see a gap (sealed); the QCD string tension (440 MeV)^2 in newtons - sixteen tonnes-force on a
+    quark (sealed); the 0++ glueball's Compton wavelength 0.114 fm from the lattice mass 1730 MeV (sealed). Then the
+    proven links cited - asymptotic freedom (Gross-Wilczek, Politzer 1973), the mass gap of the LATTICE theory at strong
+    coupling (Osterwalder-Seiler 1978), confinement at strong coupling (Wilson 1974) - the measured link (Morningstar-
+    Peardon 1999), the excluded road (perturbation theory to every order), the POSTULATE (the Osterwalder-Schrader /
+    Wightman axioms: what 'existence' means), and the window read: the continuum limit. Idempotent."""
+    import math
+    from concordance import tickstick as TS
+    b0_5 = 11 - 2 * 5 / 3
+    a_mz, mz = 0.1180, 91.1876
+    a10 = a_mz / (1 + a_mz * b0_5 / (2 * math.pi) * math.log(10 / mz))
+    w = math.exp(-8 * math.pi ** 2 / (4 * math.pi * a_mz))
+    sigma_N = (0.440 ** 2) / 0.1973269804 * 1.602176634e-10 / 1e-15
+    compton = 197.3269804 / 1730
+    S = {}
+    seals = [
+        ("b0", "pure_gauge_one_loop_beta_coefficient_b0_11", "11 - (2/3)*0", 11.0, 1e-12),
+        ("b1", "pure_gauge_two_loop_beta_coefficient_b1_102", "102 - (38/3)*0", 102.0, 1e-12),
+        ("run", "alpha_s_run_from_m_z_to_10_gev_one_loop_nf_5", "0.1180/(1 + 0.1180*(11 - 2*5/3)/(2*pi)*log(10/91.1876))", a10, 1e-9),
+        ("weight", "nonperturbative_weight_exp_minus_8pi2_over_g2_at_alpha_s_m_z", "exp(-8*pi**2/(4*pi*0.1180))", w, 1e-9),
+        ("sigma", "qcd_string_tension_440_mev_squared_in_newtons", "(0.440**2)/0.1973269804 * 1.602176634e-10/1e-15", sigma_N, 1e-9),
+        ("compton", "glueball_0pp_compton_wavelength_fm_from_1730_mev", "197.3269804/1730", compton, 1e-9),
+    ]
+    for key, nid, expr, val, tol in seals:
+        S[key] = _rh_seal_num(nid, expr, float(val), tol=tol)
+        if not S[key]:
+            print("a seal failed:", nid); return 1
+    print("sealed", len(S), "Yang-Mills numbers:", ", ".join(f"{k}={v[:8]}" for k, v in S.items()))
+    sid = TS.create("Yang-Mills existence and mass gap")["id"]
+    marks = [
+        ("instance", "[the beta function, pure gauge] b0 = 11 - (2/3) n_f = 11 and b1 = 102 - (38/3) n_f = 102 for SU(3) with no "
+                     "quarks (sealed): both positive, so the coupling falls with energy - asymptotic freedom, PROVEN at one loop "
+                     "by Gross-Wilczek and Politzer (1973) and the reason the theory is defined at short distance at all.",
+         S["b0"]),
+        ("instance", "[b1 = 102]", S["b1"]),
+        ("instance", "[the coupling runs, sealed] At one loop with five flavours, alpha_s(10 GeV) = alpha_s(M_Z) / (1 + alpha_s "
+                     "b0/(2 pi) ln(10/M_Z)) = 0.1731 from 0.1180 (sealed; the world average alpha_s(M_Z) = 0.1180 cited from the "
+                     "PDG). The coupling grows toward low energy, which is where a gap must form and where the series stops "
+                     "being usable.", S["run"]),
+        ("instance", "[why perturbation theory cannot see the gap] The natural nonperturbative weight e^(-8 pi^2 / g^2) at "
+                     "alpha_s(M_Z) is e^(-53.25) = 7.5e-24 (sealed). Every derivative of that function vanishes at g = 0: it is "
+                     "invisible to every order of the expansion in g. A mass gap, if it exists, is of this kind - the series, "
+                     "asymptotic in any case, cannot produce it. This is the road closed below.", S["weight"]),
+        ("instance", "[the string between two quarks] The lattice string tension sqrt(sigma) = 440 MeV gives sigma = "
+                     "(0.44 GeV)^2 / (hbar c) = 0.98 GeV/fm = 1.57e5 N (sealed) - about sixteen tonnes-force, constant with "
+                     "distance. A linear potential is what a gapped, confining theory looks like from outside; the lattice "
+                     "measures it (Wilson's area law, proven at strong coupling).", S["sigma"]),
+        ("instance", "[the gap as a length] The lightest glueball, 0++ at 1730 MeV on the lattice (Morningstar-Peardon 1999, "
+                     "cited), has Compton wavelength hbar c / m = 0.114 fm (sealed): the range below which the pure gauge "
+                     "field's lowest excitation lives. A gap of this size is what the Clay statement asks to be proven to "
+                     "survive the continuum limit.", S["compton"]),
+        ("postulate", "[the postulate it builds on - what 'existence' means] A quantum Yang-Mills theory on R^4 EXISTS when its "
+                      "Euclidean correlation functions satisfy the Osterwalder-Schrader axioms (reflection positivity, "
+                      "Euclidean invariance, clustering, regularity) and so reconstruct a Hilbert space with a Hamiltonian "
+                      "obeying the Wightman axioms; the MASS GAP is Delta > 0 between the vacuum and the next spectral point. "
+                      "Not kept as a fact: the lattice theory works under them at every finite spacing, and from that working "
+                      "the truth of the continuum statement is inferred - never proven, never kept as fact.",
+         {"source": "K. Osterwalder, R. Schrader (1973, 1975); A. Jaffe, E. Witten, Quantum Yang-Mills theory (Clay Mathematics Institute, 2000)"}),
+        ("equivalence", "[proven links] Asymptotic freedom (Gross-Wilczek 1973; Politzer 1973): the beta function is negative "
+                        "for b0 > 0 - PROVEN, the theory's ultraviolet behaviour is under control. The LATTICE theory has a "
+                        "mass gap and confines at strong coupling (Osterwalder-Seiler 1978, building on Wilson 1974's area law "
+                        "by cluster expansion) - PROVEN, for every finite lattice spacing in the strong-coupling regime. The "
+                        "open link is the continuum limit: lattice spacing to zero with the gap staying open - which is the "
+                        "weak-coupling regime, where the proof does not reach.",
+         {"source": "D. J. Gross, F. Wilczek, Phys. Rev. Lett. 30 (1973); H. D. Politzer, Phys. Rev. Lett. 30 (1973); K. Osterwalder, E. Seiler, Ann. Phys. 110 (1978); K. G. Wilson, Phys. Rev. D 10 (1974)"}),
+        ("equivalence", "[measured, carried as a measurement] The lattice glueball spectrum: 0++ at 1730(50)(80) MeV, 2++ at "
+                        "2400(25)(120) MeV in pure SU(3) gauge theory extrapolated to the continuum (Morningstar-Peardon 1999; "
+                        "Chen et al. 2006). A measurement with an error bar, not a theorem: it is the gap SEEN, at the precision "
+                        "the lattice states. Balaban's renormalization-group program (1980s) constructs the ultraviolet limit "
+                        "in finite volume - a partial continuum result, cited.",
+         {"source": "C. J. Morningstar, M. Peardon, Phys. Rev. D 60 (1999); Y. Chen et al., Phys. Rev. D 73 (2006); T. Balaban, Comm. Math. Phys. (1984-1989)"}),
+        ("exclusion", "[a road closed] No finite order of perturbation theory produces a mass gap: the gap scales as "
+                      "e^(-8 pi^2 / (b0 g^2)) (the dimensional transmutation of Lambda_QCD), a function with every derivative "
+                      "zero at g = 0, and the perturbative series is asymptotic (Dyson 1952). A proof must be nonperturbative "
+                      "- constructive field theory, the lattice with a controlled continuum limit, or a method not yet "
+                      "written.",
+         {"source": "F. J. Dyson, Phys. Rev. 85 (1952); A. Jaffe, E. Witten (2000), section on the problem's difficulty"}),
+        ("note", "[the surviving window, read] Sealed: the beta coefficients, the running coupling, the nonperturbative "
+                 "weight, the string tension, the glueball's length. Proven (cited): asymptotic freedom; the lattice gap and "
+                 "confinement at strong coupling. Measured (cited): the lattice glueball mass with its error bar. Excluded: "
+                 "perturbation theory to every order. Open: EXISTENCE in the Osterwalder-Schrader sense on R^4 and the gap "
+                 "surviving the continuum limit for any compact simple group. Gaps become wants: the cited texts for "
+                 "inclusion; the FLAG review's lattice compilation; a strong-coupling-expansion calculator so the lattice gap "
+                 "at a stated coupling is COMPUTED here, not only cited. Every link sealed or cited; nothing out of thin air; "
+                 "the chain not closed.",
+         {"source": "A. Jaffe, E. Witten (2000); stick_yang_mills_the_mass_gap_is_a_measure; stick_four_forces_under_alpha"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py yang_mills_next")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -7077,6 +7174,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("yang_mills_next", "ym_next", "mass_gap_next", "string_tension", "glueball", "asymptotic_freedom"):
+        return yang_mills_next()
     if a[0] in ("navier_stokes_next", "ns_next", "existence_and_smoothness", "taylor_green", "poiseuille"):
         return navier_stokes_next()
     if a[0] in ("bsd_formula", "bsd_full", "birch_formula", "bsd_next"):
