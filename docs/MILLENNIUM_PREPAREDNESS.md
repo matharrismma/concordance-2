@@ -283,3 +283,29 @@ shows them with the stick's live fit. Fourteen, each basis a mark really on the 
 The stick keeps its seals; the chart is a cited pointer, never a copy. The two trees are one graph now, at fourteen
 joints the project had already made and never wired.
 
+## The other joints — every validator and verifier — 2026-10-09
+
+*Matt: "now look for the other joints. Every validator and verifier."*
+
+The engine's instruments are on the one map too (`tools/seed_instruments.py`, `card_floor_the_instruments`), their
+joints FOUND from the real import graph — extracted from the verifier files at seed time, so the map cannot drift from
+the code. The shape it found:
+
+- A **measure spine**: `si_units → physical_constants → scale_base →` the six scale libraries (α, G, c, k_B, N_A, ħ)
+  `→` the domains. Its **confluences**, where several scales meet in one domain, are found not declared: **chemistry**
+  (α + N_A + k_B), **physics** (G + ħ + c), **photonics** (α + ħ), **thermodynamics** (N_A + k_B), **astronomy** (G + c).
+- A **logic cluster**: `_boolean → mathematics / computer_science / formal_logic`.
+- Two **islands**: `number_theory ↔ riemann_accel`, and `linguistics ← scripture`.
+- **Sixty leaf verifiers** on the base alone — no inter-verifier joint. A leaf is not a failure; its check stands by
+  itself (law, medicine, agriculture, …). Counted, not forced — a miss stays a miss.
+
+Above them the **gate** that validates every verdict: the **derivation router** (routes a spec to its verifier,
+reduces to one moat status — the apex where every verdict converges), the **moat** (0 false positives, the hard gate),
+the **seal** (content-addressed, hash-chained), the **doorkeeper** (committed and intact). And the **service joints**
+to the one map: `number_theory` and `riemann_accel → the Riemann question`, `elliptic_curves → the BSD question`,
+`physical_constants → the fine-structure chart`, `mathematics → the whole map` (its numeric mode evaluates every
+expression the map seals). `floor_map` surfaces the merges and the serves; the map page draws the instrument lineage
+and lists them.
+
+Found from the code's own imports, never invented; each card is a pointer, the module keeps the logic.
+

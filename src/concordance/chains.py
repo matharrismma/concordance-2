@@ -29,7 +29,9 @@ HAS_OPEN_END = "has_open_end"
 FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           # the chains (tools/seed_chains.py, 2026-10-09): the logarithm, and the seven problems as lineages
           "card_floor_logarithm", "card_floor_riemann", "card_floor_bsd", "card_floor_navier_stokes",
-          "card_floor_yang_mills", "card_floor_p_vs_np", "card_floor_hodge", "card_floor_poincare")
+          "card_floor_yang_mills", "card_floor_p_vs_np", "card_floor_hodge", "card_floor_poincare",
+          # the instruments (tools/seed_instruments.py, 2026-10-09): every verifier and validator, found from imports
+          "card_floor_the_instruments")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
@@ -177,6 +179,21 @@ def floor_map(floor: str, *, get_card: Optional[Callable] = None, max_nodes: int
     # its joints, already reported above)
     entries = [{"end": e, "at": h, "evidence": ev} for e in ends for h, ev in hubs(e).items()
                if h in reach and h not in part_set]
+    # MERGES - where several instruments meet: a chain node two or more others build on (in-degree in the chain,
+    # found from the real edges). The generalization of "where two trees connect" to the whole import graph.
+    indeg: Dict[str, List[str]] = {}
+    for e in chain_edges:
+        indeg.setdefault(e["to"], []).append(e["from"])
+    merges = [{"id": n, "title": node(n)["title"], "from": [node(f)["title"] for f in indeg[n]]}
+              for n in chain_ids if len(indeg.get(n, [])) >= 2]
+    # SERVES - a chain node that connects_at a node OUTSIDE this floor's chain (an instrument serving the one map)
+    serves: List[Dict] = []
+    for cid in chain_ids:
+        for c in ((get_card(cid) or {}).get("connections") or []):
+            if isinstance(c, dict) and c.get("relationship") == CONNECTS_AT and c.get("to_card_id") \
+                    and c["to_card_id"] not in reach:
+                serves.append({"from": cid, "from_title": node(cid)["title"], "at": c["to_card_id"],
+                               "at_title": node(c["to_card_id"])["title"], "evidence": c.get("evidence") or ""})
     # the sticks charted onto this floor and its nodes (2026-10-09: the function following the form) - each a
     # chart card whose source.ref is a tick stick, reached by the reciprocal `charted_by` edge
     charts: List[Dict] = []
@@ -198,7 +215,7 @@ def floor_map(floor: str, *, get_card: Optional[Callable] = None, max_nodes: int
     return {"floor": floor, "charts": charts, "title": fc.get("title") or floor,
             "parts": [node(p) for p in parts], "ends": [node(e) for e in ends],
             "hubs": [node(h) for h in hub_ids], "joints": joints, "misses": misses,
-            "confluences": confluences, "entries": entries,
+            "confluences": confluences, "entries": entries, "merges": merges, "serves": serves,
             "chain": {"nodes": [node(c) for c in chain_ids], "edges": chain_edges}}
 
 
