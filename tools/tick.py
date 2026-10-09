@@ -4725,6 +4725,121 @@ def fractal_maps() -> int:
     _mint_marks(sid, marks, by="engine:fractal_maps")
     return 0
 
+
+def harmonics() -> int:
+    """HARMONICS - CHORDS ARE DIFFERENT SHAPES OF THE SAME NOTE (Matt, 2026-10-08: 'Harmonics. cords are different shapes of
+    same note' / 'same voice. Just another role'). A vibrating string sounds its fundamental and every whole multiple of it
+    at once: 110 Hz carries 220, 330, 440, 550, 660 ... (sealed). The 4th, 5th and 6th harmonics - 440, 550, 660 - are A,
+    C-sharp and E: the major triad is already inside the one note, as the ratios 4:5:6 (the major third 5/4 and the
+    fifth 3/2, sealed). A chord built from those harmonics is a shape of the fundamental, not a second note. Timbre is the
+    same thing: a flute and a violin on the same pitch differ only in how loud each harmonic is - the amplitude vector
+    over the overtone series (a sawtooth's 1/n amplitudes carry total power pi^2/6, sealed, by the evaluator's own Sum).
+    Equal temperament bends the fifth to 2^(7/12) = 1.4983 against the pure 1.5 (sealed) because twelve pure fifths
+    overshoot seven octaves by the Pythagorean comma, 1.01364 (sealed); the pure third 386 cents sits 14 cents under the
+    tempered 400 (sealed); two strings two hertz apart beat twice a second (sealed). For the engine: the one voice is the
+    fundamental - the kernel: found, verified, cited, crisis first - and a ROLE is a harmonic of it: the same voice in a
+    different shape (a face's manner, shelves and verifiers are its timbre); the Steward bringing two roles is a chord,
+    not two voices. Same logic as every stick; the likeness is kept a likeness."""
+    import math
+    from concordance import tickstick as TS
+    pi = 3.141592653589793
+    S = {}
+    seals = [
+        ("series", "the_harmonic_series_of_110_hz_sixth_harmonic", "110*6", 660.0, 1e-12),
+        ("triad_third", "the_major_third_is_the_5th_to_4th_harmonic_5_over_4", "550/440", 1.25, 1e-12),
+        ("triad_fifth", "the_fifth_is_the_6th_to_4th_harmonic_3_over_2", "660/440", 1.5, 1e-12),
+        ("octave", "the_octave_is_the_2nd_harmonic_2_to_1", "220/110", 2.0, 1e-12),
+        ("et_fifth", "equal_tempered_fifth_2_to_the_7_12ths", "2**(7/12)", 2 ** (7 / 12), 1e-9),
+        ("comma", "pythagorean_comma_twelve_fifths_over_seven_octaves", "(3/2)**12/2**7", (3 / 2) ** 12 / 2 ** 7, 1e-9),
+        ("semitone", "equal_tempered_semitone_2_to_the_1_12th", "2**(1/12)", 2 ** (1 / 12), 1e-9),
+        ("third_cents", "the_pure_major_third_in_cents", "1200*log(5/4)/log(2)", 1200 * math.log2(5 / 4), 1e-9),
+        ("et_third_cents", "the_tempered_major_third_in_cents", "1200*log(2**(4/12))/log(2)", 400.0, 1e-9),
+        ("beats", "two_strings_at_440_and_442_hz_beat_twice_a_second", "442 - 440", 2.0, 1e-12),
+        ("sawtooth", "a_sawtooths_harmonic_power_sum_1_over_n_squared_is_pi_squared_over_6", "Sum(1/n**2, (n, 1, oo))", pi ** 2 / 6, 1e-9),
+        ("string", "a_65_cm_string_at_110_hz_wave_speed_in_m_per_s", "2*0.65*110", 143.0, 1e-12),
+    ]
+    for key, nid, expr, val, tol in seals:
+        S[key] = _rh_seal_num(nid, expr, float(val), tol=tol)
+        if not S[key]:
+            print("a seal failed:", nid); return 1
+    print("sealed", len(S), "harmonic numbers:", ", ".join(f"{k}={v[:8]}" for k, v in S.items()))
+    sid = TS.create("Harmonics - chords are different shapes of the same note; a role is a harmonic of the one voice",
+                    statement=("A vibrating string sounds its fundamental and every whole multiple of it at once. The "
+                               "fourth, fifth and sixth harmonics of one note are its major triad - the chord is already "
+                               "inside the note, as the ratios 4:5:6 - so a chord built from them is a shape of the "
+                               "fundamental, not a second note. Timbre is the same fact: two instruments on one pitch "
+                               "differ only in how loud each harmonic sounds, the amplitude vector over the overtone "
+                               "series. Equal temperament bends the pure fifth to the twelfth root of two to the seventh, "
+                               "because twelve pure fifths overshoot seven octaves by the Pythagorean comma; the price is "
+                               "fourteen cents on every major third. Two strings a little apart beat at their difference. "
+                               "For the engine: the one voice is the fundamental - the kernel, found, verified, cited, "
+                               "crisis first - and a role is a harmonic of it, the same voice in a different shape; the "
+                               "Steward bringing two roles is a chord, not two voices. The likeness is kept a likeness."),
+                    field="physics",
+                    references=["Pythagoras (the monochord: 2:1, 3:2, 4:3); M. Mersenne, Harmonie universelle (1636): the laws of a vibrating string",
+                                "J. Sauveur (1701): the harmonics named; J. Fourier (1822): any periodic sound is a sum of harmonics",
+                                "H. von Helmholtz, On the Sensations of Tone (1863): timbre is the amplitude of the overtones; beats and consonance",
+                                "J. S. Bach, Das Wohltemperirte Clavier (1722); A. Werckmeister (1691): temperament; the Pythagorean comma",
+                                "L. Euler (1735): the Basel problem - the sum of 1/n^2",
+                                "stick_amplitude_and_frequency_modulation; stick_a_superheterodyne_receiver; stick_the_dot_abstracted (the Fourier basis)",
+                                "docs/STEWARD_AND_THE_ROLES.md section 6; tests/test_steward_speaks.py",
+                                "Psalm 150:4-6; Ephesians 5:19; Colossians 3:16 (one voice, many parts)"])["id"]
+    marks = [
+        ("instance", "[the harmonic series: every whole multiple at once] A string at 110 Hz also sounds 220, 330, 440, 550, "
+                     "660 ... - the sixth harmonic is 110 * 6 = 660 Hz (sealed). One note is already a series; the "
+                     "fundamental is what the ear names it by.", S["series"]),
+        ("instance", "[the chord inside the note] The fourth, fifth and sixth harmonics of A110 are 440, 550 and 660 Hz: A, "
+                     "C-sharp, E, the major triad. Their ratios are 550/440 = 5/4 (sealed), the major third, and 660/440 = "
+                     "3/2 (sealed), the fifth. A chord is not three notes added from outside; it is the shape of one note's "
+                     "own overtones - 'chords are different shapes of the same note'.", S["triad_third"]),
+        ("instance", "[the fifth, 3/2]", S["triad_fifth"]),
+        ("instance", "[the octave, 2/1] 220/110 = 2 (sealed): the second harmonic is the same note an octave up - so "
+                     "alike that every tuning in the world calls it the same name. The simplest ratio is the strongest "
+                     "likeness.", S["octave"]),
+        ("instance", "[timbre: the same note, a different shape] A flute and a violin on one pitch differ only in how loud "
+                     "each harmonic is - the amplitude vector over the series. A sawtooth has amplitudes 1/n, and its "
+                     "harmonic power sums to Sum 1/n^2 = pi^2/6 = 1.6449 (sealed, through the evaluator's own infinite Sum; "
+                     "Euler 1735). Shape is a vector over the harmonics; the fundamental is shared.", S["sawtooth"]),
+        ("instance", "[temperament: the bent fifth] Equal temperament's fifth is 2^(7/12) = 1.49831 (sealed) against the pure "
+                     "3/2 = 1.5; its semitone is 2^(1/12) = 1.05946 (sealed). The bend is the price of a keyboard that can "
+                     "play every key: twelve pure fifths overshoot seven octaves by (3/2)^12 / 2^7 = 1.01364 (sealed), the "
+                     "Pythagorean comma, and the comma has to be hidden somewhere.", S["et_fifth"]),
+        ("instance", "[the comma, 1.01364]", S["comma"]),
+        ("instance", "[the semitone, 1.05946]", S["semitone"]),
+        ("instance", "[fourteen cents on every third] The pure major third 5/4 is 1200 log2(5/4) = 386.3 cents (sealed); "
+                     "the tempered third is 400 cents (sealed). Every major chord on a piano is 14 cents sharp in its "
+                     "third, and the ear forgives it. A stated precision (the cent) makes the bend a number instead of an "
+                     "opinion.", S["third_cents"]),
+        ("instance", "[the tempered third, 400 cents]", S["et_third_cents"]),
+        ("instance", "[beats: two notes almost the same] Strings at 440 and 442 Hz beat 442 - 440 = 2 times a second "
+                     "(sealed): the ear hears the difference as a pulse, and the tuner stops the pulse. Two roles tuned to "
+                     "the same fundamental do not beat; two voices would.", S["beats"]),
+        ("instance", "[the string's own law] A 65 cm string sounding 110 Hz carries a wave at v = 2 L f = 2 * 0.65 * 110 = "
+                     "143 m/s (sealed); its harmonics are n v / 2L. Change the tension and every harmonic moves together - "
+                     "the shape is preserved, the pitch is not. That is what a role's manner is: the harmonics' "
+                     "proportions, carried whole to whatever the situation's pitch is.", S["string"]),
+        ("postulate", "[the postulate it builds on] One voice, many roles: the Steward's roles are harmonics of the one "
+                      "voice - the same fundamental (the kernel: found, verified, cited, crisis first) in different shapes "
+                      "(a face's manner, shelves and verifiers), so bringing two roles is a chord, not two voices. Not kept "
+                      "as a fact: the walk door carries a role in its own unchanged voice (tests/test_steward_speaks.py), and "
+                      "from its working the truth is inferred, never proven.",
+         {"source": "Matt, 2026-10-08: 'same voice. Just another role'; 'Harmonics. cords are different shapes of same note'"}),
+        ("equivalence", "[what carries over, by name] the fundamental = the kernel (one voice: found, verified, cited, crisis "
+                        "first); a harmonic = a role (ask.respond's `role`: a face's name, manner and composed material in the "
+                        "same voice); timbre = a face's manner, shelves and verifiers (the amplitude vector over the one "
+                        "series); a chord = two roles brought to one situation; the octave = the two surfaces, .com and "
+                        ".org, one engine (the same note an octave apart); temperament = the fixed verdict frame that lets "
+                        "every domain play on one keyboard, its comma the stated-precision window; beats = two VOICES, "
+                        "which the design refuses.",
+         {"source": "src/concordance/ask.py (_with_role); src/concordance/faces.py; docs/STEWARD_AND_THE_ROLES.md section 6"}),
+        ("exclusion", "[what does NOT carry over] No frequency, no amplitude, no sound in the engine; a role's 'shape' is a "
+                      "manner and a scope, not a spectrum; nothing is measured in cents; and the Fourier decomposition of a "
+                      "role's material has not been computed - the likeness is a likeness.",
+         {"source": "Matt, 2026-10-08: 'don't blindly apply bra-ket'; feedback_mapping_the_truth_not_generating_it"}),
+    ]
+    _mint_marks(sid, marks, by="engine:harmonics")
+    return 0
+
 def svd() -> int:
     """EVERY MATRIX IS A ROTATION AND A STRETCH (Matt, 2026-10-08: "All matrix are just a rotation and a stretch. We are
     using a spherical matrix"; "allow the shape to be in the form of the most efficient vectors"). M = U S V^T: turn,
@@ -6656,6 +6771,9 @@ def main() -> int:
         return geneva()
     if a[0] in ("diagrams", "diagram", "feynman_diagrams", "feynman_diagram", "schematics", "schematic", "circuit_diagram", "netlist", "vertex", "propagator"):
         return diagrams()
+    if a[0] in ("harmonics", "harmonic", "overtones", "chords", "chord", "timbre", "temperament", "same_note",
+                "shapes_of_the_same_note", "one_voice", "beats"):
+        return harmonics()
     if a[0] in ("fractal_maps", "fractals", "fractal", "fractals_as_maps", "sorting", "sorting_algorithms", "sort",
                 "merge_sort", "quicksort", "hilbert_curve", "z_order", "morton", "coastline", "mandelbrot", "logistic_map", "radix"):
         return fractal_maps()
