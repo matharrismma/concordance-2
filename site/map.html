@@ -296,20 +296,26 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
   function short(t,n){ t=String(t||""); return t.length>n? t.slice(0,n-1)+"\u2026" : t; }
   function link(n){ return '<a href="/card/'+encodeURIComponent(n.id)+'" style="color:var(--seal)">'+esc(n.title)+'</a>'; }
   function draw(m){
-    var W=720, H=420, cx=W/2, cy=H/2, R=165;
+    var W=720, H=440, cx=W/2, cy=H/2, R=170;
     var ends=m.ends.length? m.ends : m.parts, pos={}, i;
     for(i=0;i<ends.length;i++){ var a=-Math.PI/2+2*Math.PI*i/ends.length; pos[ends[i].id]={x:cx+R*Math.cos(a), y:cy+R*Math.sin(a)}; }
-    var hubs={}, j;
-    for(j=0;j<m.joints.length;j++){ var jt=m.joints[j]; (hubs[jt.at]=hubs[jt.at]||[]).push(jt); }
+    var hubs={}, order=[], j;
+    for(j=0;j<m.joints.length;j++){ var jt=m.joints[j]; if(!hubs[jt.at]){ hubs[jt.at]={js:[],seen:{}}; order.push(jt.at); } hubs[jt.at].js.push(jt); }
+    // each hub at the mean of the ends it joins, pulled a little toward the ring so the centre does not crowd
+    var hid, k; for(k=0;k<order.length;k++){ hid=order[k]; var hb=hubs[hid], sx=0, sy=0, n=0, q;
+      for(q=0;q<hb.js.length;q++){ ["a","b"].forEach(function(key){ var id=hb.js[q][key]; if(!hb.seen[id]&&pos[id]){ hb.seen[id]=1; sx+=pos[id].x; sy+=pos[id].y; n++; } }); }
+      var hx=n?sx/n:cx, hy=n?sy/n:cy; hx=cx+(hx-cx)*0.72; hy=cy+(hy-cy)*0.72; hb.x=hx; hb.y=hy; }
+    // nudge hubs that fell on the same spot apart (opposite ends meet at the centre), a few passes
+    var pass; for(pass=0;pass<4;pass++){ for(k=0;k<order.length;k++){ for(q=0;q<k;q++){ var A=hubs[order[k]], B=hubs[order[q]];
+      if(Math.abs(A.x-B.x)<70 && Math.abs(A.y-B.y)<18){ A.y+=20; A.x+= (k%2? 26:-26); } } } }
     var s='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:'+W+'px;display:block;margin:.4rem auto" role="img" aria-label="'+esc(m.title)+'">';
-    for(j=0;j<m.misses.length;j++){ var ms=m.misses[j], pa=pos[ms.a], pb=pos[ms.b]; if(pa&&pb) s+='<line x1="'+pa.x+'" y1="'+pa.y+'" x2="'+pb.x+'" y2="'+pb.y+'" stroke="var(--out)" stroke-dasharray="4 6" stroke-opacity=".55"/>'; }
-    var hid; for(hid in hubs){ var js=hubs[hid], sx=0, sy=0, n=0, k, seen={};
-      for(k=0;k<js.length;k++){ ["a","b"].forEach(function(q){ var id=js[k][q]; if(!seen[id]&&pos[id]){ seen[id]=1; sx+=pos[id].x; sy+=pos[id].y; n++; } }); }
-      var hx=n?sx/n:cx, hy=n?sy/n:cy;
-      var id2; for(id2 in seen){ s+='<line x1="'+pos[id2].x+'" y1="'+pos[id2].y+'" x2="'+hx+'" y2="'+hy+'" stroke="var(--seal)" stroke-opacity=".6"/>'; }
-      var title=(js[0].evidence&&js[0].evidence[0])? js[0].evidence[0].split(". ")[0] : hid;
-      s+='<a href="/card/'+encodeURIComponent(hid)+'"><circle cx="'+hx+'" cy="'+hy+'" r="5" fill="var(--seal)"/><text x="'+(hx+8)+'" y="'+(hy-6)+'" font-size="10" fill="var(--ink-soft)">'+esc(short(title,34))+'</text></a>';
-    }
+    for(j=0;j<m.misses.length;j++){ var ms=m.misses[j], pa=pos[ms.a], pb=pos[ms.b]; if(pa&&pb) s+='<line x1="'+pa.x+'" y1="'+pa.y+'" x2="'+pb.x+'" y2="'+pb.y+'" stroke="var(--out)" stroke-dasharray="4 6" stroke-opacity=".45"/>'; }
+    for(k=0;k<order.length;k++){ hid=order[k]; var h=hubs[hid], id2;
+      for(id2 in h.seen){ s+='<line x1="'+pos[id2].x+'" y1="'+pos[id2].y+'" x2="'+h.x+'" y2="'+h.y+'" stroke="var(--seal)" stroke-opacity=".6"/>'; } }
+    for(k=0;k<order.length;k++){ hid=order[k]; var hh=hubs[hid];
+      var title=(hh.js[0].evidence&&hh.js[0].evidence[0])? hh.js[0].evidence[0].split(". ")[0] : hid;
+      var left=(k%2===1), lx=hh.x+(left?-8:8), anc=left?"end":"start";
+      s+='<a href="/card/'+encodeURIComponent(hid)+'"><circle cx="'+hh.x+'" cy="'+hh.y+'" r="5" fill="var(--seal)"/><text x="'+lx+'" y="'+(hh.y-7)+'" font-size="10" text-anchor="'+anc+'" fill="var(--ink-soft)">'+esc(short(title,30))+'</text></a>'; }
     for(i=0;i<ends.length;i++){ var e=ends[i], p=pos[e.id], closed=(e.state||"").indexOf("CLOSED")===0;
       s+='<a href="/card/'+encodeURIComponent(e.id)+'"><circle cx="'+p.x+'" cy="'+p.y+'" r="9" fill="'+(closed?"var(--seal)":"var(--bg)")+'" stroke="var(--ink)" stroke-width="1.5"/>';
       var tx=p.x+(p.x>cx+1?14:(p.x<cx-1?-14:0)), anchor=p.x>cx+1?"start":(p.x<cx-1?"end":"middle"), ty=p.y+(Math.abs(p.x-cx)<=1?(p.y<cy?-14:22):4);
