@@ -1352,6 +1352,9 @@ _INVERSE_REL = {
     # THE ONE MAP (2026-10-09): an open question hangs off a floor; the floor lists its open ends. Lateral joints
     # (connects_at) stay symmetric by default.
     "open_end_of": "has_open_end",
+    # a tick stick placed on the one map charts a node; the node lists the sticks that chart it (2026-10-09:
+    # "allow the function to follow the form").
+    "charts": "charted_by",
 }
 
 

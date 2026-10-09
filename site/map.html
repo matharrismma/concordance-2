@@ -353,6 +353,9 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
     if(m.ends.length) h+='<p style="font-size:.85rem; color:var(--ink-soft); margin:.2rem 0">open ends: '+m.ends.map(function(e){ var st=e.state? ' <span class="mono" style="color:'+((e.state.indexOf("CLOSED")===0)?"var(--seal)":"var(--ink-faint)")+'">'+esc(short(e.state,52))+'</span>':''; return link(e)+st; }).join(" \u00b7 ")+'</p>';
     var lineage=(m.chain&&m.chain.nodes&&m.chain.nodes.length>m.parts.length);
     h+=(m.ends.length>=2&&m.joints.length)? draw(m) : (lineage? drawChain(m) : draw(m));
+    if(m.charts&&m.charts.length){ h+='<p style="font-size:.85rem; color:var(--ink-soft); margin:.4rem 0 .2rem">charted onto this floor \u2014 the engine\u2019s own sticks in their place:</p><ul style="list-style:none; padding:0; margin:0 0 .3rem; font-size:.85rem">';
+      for(var ci=0;ci<m.charts.length;ci++){ var ch=m.charts[ci]; var st=ch.state?' <span class="mono" style="color:'+((ch.state.indexOf("CLOSED")===0)?"var(--seal)":"var(--ink-faint)")+'">'+esc(short(ch.state,48))+'</span>':''; h+='<li style="margin:.18rem 0">'+link({id:ch.id,title:ch.title})+' <span style="color:var(--ink-faint)">at '+esc(ch.of_title||ch.of)+'</span>'+st+'</li>'; }
+      h+='</ul>'; }
     if(m.confluences&&m.confluences.length) h+='<p style="font-size:.85rem; color:var(--ink-soft); margin:.3rem 0">where the two trees become one: '+m.confluences.map(function(c){ return link({id:c.at,title:c.title}); }).join(" \u00b7 ")+'</p>';
     if(m.entries&&m.entries.length) h+='<p style="font-size:.85rem; color:var(--ink-soft); margin:.3rem 0">where it enters: '+m.entries.map(function(en){ return esc(en.end_title||en.end)+' at '+link({id:en.at,title:en.at_title||en.at}); }).join(" \u00b7 ")+'</p>';
     h+='<ul style="list-style:none; padding:0; margin:.4rem 0 0; font-size:.85rem; color:var(--ink-soft)">';
@@ -366,7 +369,8 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
     m.joints.forEach(function(j){ j.a_title=t[j.a]||j.a; j.b_title=t[j.b]||j.b; j.at_title=t[j.at]||j.at; });
     m.misses.forEach(function(j){ j.a_title=t[j.a]||j.a; j.b_title=t[j.b]||j.b; j.via_title=t[j.via]||j.via; }); return m; }
   function states(m){
-    return Promise.all(m.ends.map(function(e){ if(!e.stick) return null; return getj("/stick?id="+encodeURIComponent(e.stick)).then(function(st){ e.state=(st&&st.fit&&st.fit.open)||""; }); })).then(function(){ return m; });
+    var items=[].concat(m.ends, m.charts||[]);
+    return Promise.all(items.map(function(e){ if(!e.stick) return null; return getj("/stick?id="+encodeURIComponent(e.stick)).then(function(st){ e.state=(st&&st.fit&&st.fit.open)||""; }); })).then(function(){ return m; });
   }
   var out=$("floorsOut"); if(!out) return;
   getj("/chains?floors=1").then(function(d){

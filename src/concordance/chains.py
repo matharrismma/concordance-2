@@ -177,8 +177,25 @@ def floor_map(floor: str, *, get_card: Optional[Callable] = None, max_nodes: int
     # its joints, already reported above)
     entries = [{"end": e, "at": h, "evidence": ev} for e in ends for h, ev in hubs(e).items()
                if h in reach and h not in part_set]
+    # the sticks charted onto this floor and its nodes (2026-10-09: the function following the form) - each a
+    # chart card whose source.ref is a tick stick, reached by the reciprocal `charted_by` edge
+    charts: List[Dict] = []
+    seen_ch: Set[str] = set()
+    for owner in [floor] + parts + ends + sorted({j["at"] for j in joints}):
+        oc = get_card(owner)
+        for c in ((oc or {}).get("connections") or []):
+            if isinstance(c, dict) and c.get("relationship") == "charted_by" and c.get("to_card_id"):
+                ch = c["to_card_id"]
+                if ch in seen_ch:
+                    continue
+                seen_ch.add(ch)
+                cc = get_card(ch) or {}
+                charts.append({"id": ch, "title": cc.get("title") or ch,
+                               "stick": str((cc.get("source") or {}).get("ref") or ""),
+                               "of": owner, "of_title": (oc or {}).get("title") or owner,
+                               "evidence": c.get("evidence") or ""})
     hub_ids = sorted({j["at"] for j in joints})
-    return {"floor": floor, "title": fc.get("title") or floor,
+    return {"floor": floor, "charts": charts, "title": fc.get("title") or floor,
             "parts": [node(p) for p in parts], "ends": [node(e) for e in ends],
             "hubs": [node(h) for h in hub_ids], "joints": joints, "misses": misses,
             "confluences": confluences, "entries": entries,

@@ -50,6 +50,7 @@ test_chain.py
 test_chains.py
 test_chains_seeded.py
 test_characters.py
+test_charts.py
 test_chemistry.py
 test_chess.py
 test_claim_grammar.py

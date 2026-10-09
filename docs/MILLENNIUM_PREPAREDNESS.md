@@ -252,3 +252,34 @@ one fair coin). `tools/tick.py logarithm_chain` minted the four seals on the sti
 Every DOI on the chains was checked against Crossref before carding (one guess was wrong and caught: Griffiths 1968).
 Nothing is unified by us; a chain is success building on success, found and cited.
 
+## The function follows the form — 2026-10-09
+
+*Matt: "Look for connections across the project." → "allow the function to follow the form." → "Yes. Go through each one."*
+
+The review found the project had charted reality twice: 82 tick sticks (the arc) and the ten map floors (the chains and
+joints), referencing each other nowhere. The sticks are number (the Tree of Knowledge); the graph is the named (the
+Tree of Life); they met only at the seven Millennium questions. So the sticks that chart a node of the one map are now
+placed ON it (`tools/seed_charts.py`): a CHART card per stick (a stub, its stick in `source.ref`, member_of
+`card_spine_charts`), a cited `charts` edge to the node, and `floor_map` collects each node's charts and the map page
+shows them with the stick's live fit. Fourteen, each basis a mark really on the stick:
+
+| Stick | Charts | Basis |
+|---|---|---|
+| The Standard Model chain | the Standard Model floor | the Weinberg angle, where two trees connect |
+| The fine structure constant | the Standard Model floor | α, the coupling where electromagnetism emerges |
+| The Langlands program | the L-function joint | modularity: the curve side meets the form side |
+| The finite-field (Weil) RH | the Weil joint | \|α\|² = q over a finite field — RH over finite fields |
+| The de Bruijn–Newman constant | the Riemann question | the window 0 ≤ Λ ≤ 0.22; RH is Λ = 0 |
+| The zeta function | the Riemann question | ζ(2) = π²/6, the functional equation |
+| The waveforms in the primes | the Riemann question | the explicit formula ψ(x), the zeros as frequencies |
+| Navier–Stokes dissonance | the Navier–Stokes question | the supercritical scaling, why 3D is hard |
+| The Yang–Mills gap, a measure | the Yang–Mills question | Δ = E₁ − E₀, the gap as a spectral difference |
+| The positive Grassmannian | the Yang–Mills question | the amplituhedron computes YM amplitudes |
+| e | the logarithm floor | e = Σ 1/k!, the base of the natural logarithm |
+| Entropy — Maxwell's demon | the logarithm floor | S = k log W, the logarithm as a count of states |
+| Gödel's incompleteness | the P versus NP question | Gödel numbering, the encoding of computation |
+| Topology and Euler's formula | the Poincaré question | V − E + F = 2, the invariant χ(S³) uses |
+
+The stick keeps its seals; the chart is a cited pointer, never a copy. The two trees are one graph now, at fourteen
+joints the project had already made and never wired.
+
