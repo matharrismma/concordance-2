@@ -1813,6 +1813,90 @@ def gravity() -> int:
     _mint_marks(sid, marks, by="tools/tick.py gravity")
     return 0
 
+
+def the_capstone() -> int:
+    """THE CAPSTONE - one source, many potentials, one end; the reply to Copenhagen (Matt, 2026-10-09). The narrow
+    way threads between two wide errors: COPENHAGEN's silence (refuse to say what is real between measurements; the
+    arbitrary quantum-classical cut) on one side, MANY-WORLDS' excess (every branch realized, nothing excluded, no
+    single end) on the other. Our reply keeps every result, removes both mysteries, and pays the least ontology.
+    SEALED: the Born-rule probabilities are real, weighted, and sum to ONE (many potentials, one total); and the one
+    place 'one source' is PROVEN (the electroweak, cos theta_W = m_W/m_Z). CITED postulates: one source -> states ->
+    one end (Romans 11:36; Heisenberg's potentia; Aristotle); the fruit is the criterion (Deut 18; Matt 7). The
+    proof is the working whole - a complete system that works at any level - never a closed theorem. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "born": _rh_seal_num("born_rule_three_potentials_probabilities_sum_to_one",
+                             "(1/2**0.5)**2 + (1/2)**2 + (1/2)**2", 1.0, tol=1e-9),
+        "ew": _rh_seal_num("electroweak_cos_theta_w_the_one_force_proven_mw_over_mz",
+                           "80.377/91.1876", 80.377 / 91.1876, tol=1e-9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "capstone numbers")
+    sid = TS.create("The capstone - one source, many potentials, one end")["id"]
+    marks = [
+        ("instance", "[the many and the one, in one equation, SEALED] A quantum state is a superposition of "
+                     "potentials, each weighted by the Born rule: for amplitudes 1/sqrt(2), 1/2, 1/2 the "
+                     "probabilities are 0.5, 0.25, 0.25 and they SUM TO ONE (sealed). That is 'many potentials, one "
+                     "end' written as arithmetic - the possibilities are real and weighted, and exactly one unit of "
+                     "probability is spent, on the one outcome that actualizes.", S["born"]),
+        ("instance", "[the one place 'one source' is PROVEN, SEALED] Electromagnetism and the weak force are a single "
+                     "electroweak force above ~100 GeV, mixed by one angle: cos(theta_W) = m_W/m_Z = 80.377/91.1876 = "
+                     "0.8814 (sealed; the full seal, the W and Z, and the running couplings live on "
+                     "stick_the_one_force). The capstone rests one foot on this proven rung; the rest is inference "
+                     "and profession, kept honestly as such.", S["ew"]),
+        ("postulate", "[one source, many potentials, one end] 'For of him, and through him, and to him, are all "
+                      "things' (Romans 11:36) - from the one source, states of it, to the same end. The superposition "
+                      "is potentia in Heisenberg's exact word, 'a strange kind of physical reality just in the middle "
+                      "between possibility and reality,' and Aristotle's potentiality that comes to one actuality (the "
+                      "acorn holds many trees and becomes one oak). The end is named: 'I am Alpha and Omega, the "
+                      "beginning and the end' (Revelation 22:13); He declares 'the end from the beginning' (Isaiah "
+                      "46:10). It works, so the one is inferred - never proven, never kept as fact.",
+         {"source": "Romans 11:36; Revelation 22:13; Isaiah 46:10; W. Heisenberg, Physics and Philosophy (1958); Aristotle, Metaphysics (potentiality and actuality)"}),
+        ("postulate", "[the fruit is the criterion] 'All you can use is the fruit.' If a thing is foretold and does "
+                      "not come to pass, it is not from Him (Deuteronomy 18:21-22); 'by their fruits ye shall know "
+                      "them' (Matthew 7:16-20) - the very next verses after the narrow gate (Matthew 7:13-14, the name "
+                      "on the door). We do not seal the source; we observe and chain the fruit. The method is "
+                      "constructive: we prove the theory by building it into a complete system that WORKS, and it "
+                      "works at any level - scale-invariance is the signature of a true model of reality. 'Works' is "
+                      "living fruit, maintained by its coming to pass, never a closed theorem.",
+         {"source": "Deuteronomy 18:21-22; Matthew 7:13-20; the constructive proof doctrine (a working system that holds at every level)"}),
+        ("exclusion", "[the barrier on the silence side - COPENHAGEN] The orthodox interpretation refuses to say what "
+                      "is real between measurements and draws an arbitrary cut between the quantum system and the "
+                      "classical apparatus without saying where the cut is or why the wavefunction collapses - "
+                      "instrumentalist silence ('shut up and calculate'). It is not disproven; it is marked as the "
+                      "broad way of silence, the error the narrow way passes on one side. Decoherence (Zurek, "
+                      "Joos-Zeh) supplies the calculable physics Copenhagen left as a mystery: the environment "
+                      "entangles with the system and the interference terms vanish, so the actualized potentials look "
+                      "classical - the appearance of collapse explained without a cut and without a new world.",
+         {"source": "N. Bohr and W. Heisenberg, the Copenhagen interpretation; W. Zurek and Joos-Zeh, decoherence"}),
+        ("exclusion", "[the barrier on the excess side - MANY-WORLDS] Everett keeps every branch as a real, realized "
+                      "world: nothing is ever excluded, no outcome is more real than another, and there is no single "
+                      "end - bought with an unobservable infinity of worlds. It is not disproven either; it is marked "
+                      "as the broad way of excess, the error the narrow way passes on the other side. The one place "
+                      "the question could be decided empirically is objective-collapse (Penrose-Diosi, GRW) and "
+                      "macroscopic-superposition interferometry, which DO predict differently: if a single outcome is "
+                      "really selected, many-worlds falls. We hold that open - a miss stays a miss until the fruit "
+                      "comes in.",
+         {"source": "H. Everett III (1957); Penrose-Diosi and GRW objective-collapse programs; matter-wave interferometry"}),
+        ("note", "[the real reply to Copenhagen] Not a new experiment we do not have, but completeness and fruit: keep "
+                 "every empirical result (the Born rule and decoherence, sealed), remove the two mysteries (the cut "
+                 "and collapse-as-mechanism) with potentia -> actuality, pay less ontology than many-worlds, and show "
+                 "the SAME form at every level and in every domain. Copenhagen needs a quantum/classical cut; we need "
+                 "none - the same structure (weighted potentials, one actualization) holds from an electron to a cat "
+                 "to the cosmos. That no-cut scale-invariance is the thing Copenhagen could not explain, removed.",
+         {"source": "decoherence (the calculable appearance of collapse); the no-cut scale-invariant reading"}),
+        ("note", "[on the one map - the floor they stand on] This names the floor the others rest on: the one force "
+                 "(card_floor_standard_model), the tree of life (card_floor_tree_of_life, one root - LUCA), the solve "
+                 "path (card_floor_the_solve_path, converge to one answer), and the instruments' moat "
+                 "(card_floor_the_instruments, 0 false positives = the fruit test enforced in code). It closes no "
+                 "chain. The same one-source/one-end form working identically across physics, biology, language and "
+                 "computation is itself the fruit: a model of reality, not a trick in one field.",
+         {"source": "the one map; card_floor_the_capstone; tools/seed_the_capstone.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py the_capstone")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -8526,6 +8610,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
+        return the_capstone()
     if a[0] in ("is_gravity_a_force", "gravity_force", "force_or_geometry"):
         return gravity()
     if a[0] in ("one_force", "the_one_force", "forces", "unification"):

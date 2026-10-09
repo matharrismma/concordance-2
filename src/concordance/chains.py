@@ -37,7 +37,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           # linguistics (tools/seed_indo_european.py, 2026-10-09): the Indo-European family, cognates as confluences
           "card_floor_indo_european",
           # genomics (tools/seed_tree_of_life.py, 2026-10-09): the tree of life, homologous genes as confluences
-          "card_floor_tree_of_life")
+          "card_floor_tree_of_life",
+          # the capstone (tools/seed_the_capstone.py, 2026-10-09): one source, many potentials, one end - the reply
+          # to Copenhagen; the floor the others stand on, threading between Copenhagen's silence and many-worlds' excess
+          "card_floor_the_capstone")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
