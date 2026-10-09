@@ -746,6 +746,7 @@ def verify_numeric(spec: Dict[str, Any]) -> VerifierResult:
         return mismatch(name, f"{expr} is not a pure number (has free symbols?)", {"expr": str(expr)})
     diff = abs(fv - cv)
     threshold = rel_tol * max(1.0, abs(fv))
+    strict_threshold = threshold   # the exact-match window, before any stated-precision widening below
     data = {"expr": str(expr), "computed": fv, "claimed": cv, "rel_tol": rel_tol, "abs_diff": diff}
     # STATED PRECISION (2026-10-07), as physical_constants keeps it: the literal as the person wrote it
     # ("1.41421") earns half a unit in its last stated place — two or more significant figures only, so a
@@ -761,11 +762,27 @@ def verify_numeric(spec: Dict[str, Any]) -> VerifierResult:
         data["stated_tolerance"] = threshold
         stated_used = True
     if diff <= threshold:
+        # EXPLAIN WHY IT IS WHAT IT IS (2026-10-09): a certification must say whether the claim is EXACT or only
+        # correct to the precision stated. A bare "holds" on "sqrt(150) is 12" reads as an equality; it is not
+        # (sqrt(150) = 12.2474). So when the claim holds only through the stated-precision window, the verdict names
+        # it an APPROXIMATION and gives the exact value, so no reader mistakes "to 2 s.f." for "equals".
+        exact = diff <= strict_threshold
+        data["exact"] = bool(exact)
+        if stated_used and not exact:
+            sig = data.get("stated_sigfigs")
+            data["approximation"] = True
+            return confirm(name, f"{expr} = {fv:.10g}, and your '{lit}' is correct to the {sig} significant "
+                                 f"figure(s) you wrote — but it is an APPROXIMATION, not exact: the exact value is "
+                                 f"{fv:.10g}, not {cv}.", data)
         if stated_used:
-            return confirm(name, f"{expr} = {fv:.10g} — the claim {cv} matches to the "
-                                 f"{data.get('stated_sigfigs')} significant figure(s) stated (computed {fv:.10g})", data)
-        return confirm(name, f"{expr} = {fv:.10g} (claim {cv}, within {rel_tol:.0e})", data)
-    return mismatch(name, f"{expr} = {fv:.10g}, claimed {cv}", data)
+            return confirm(name, f"{expr} = {fv:.10g} — the claim {cv} is exact (to the "
+                                 f"{data.get('stated_sigfigs')} significant figure(s) stated).", data)
+        if not exact:
+            data["approximation"] = True
+            return confirm(name, f"{expr} = {fv:.10g}, which the claim {cv} matches within {rel_tol:.0e} "
+                                 f"(display rounding; the exact value is {fv:.10g}).", data)
+        return confirm(name, f"{expr} = {fv:.10g} — the claim {cv} is exact.", data)
+    return mismatch(name, f"{expr} = {fv:.10g}, claimed {cv} — off by {diff:.4g}.", data)
 
 
 def verify_number_theory(spec: Dict[str, Any]) -> VerifierResult:
