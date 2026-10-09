@@ -143,6 +143,7 @@ def floor_map(floor: str, *, get_card: Optional[Callable] = None, max_nodes: int
                 seen.add(n)
                 queue.append(n)
     reach = set(chain_ids)
+    part_set = set(parts)
     confluences: List[Dict] = []
     for i in range(len(parts)):
         for j in range(i + 1, len(parts)):
@@ -156,7 +157,9 @@ def floor_map(floor: str, *, get_card: Optional[Callable] = None, max_nodes: int
             for j in range(i + 1, len(ends)):
                 a, b = ends[i], ends[j]
                 ha, hb = hubs(a), hubs(b)
-                shared = [h for h in ha if h in hb]
+                # a joint counts on THIS floor only at a hub of this floor - one of its parts or a link of its
+                # chain - so the logarithm floor does not repeat the joints floor's hubs
+                shared = [h for h in ha if h in hb and (h in reach or h in part_set)]
                 if shared:
                     for h in shared:
                         joints.append({"a": a, "b": b, "at": h, "via": None, "evidence": [ha[h], hb[h]]})
@@ -170,7 +173,10 @@ def floor_map(floor: str, *, get_card: Optional[Callable] = None, max_nodes: int
             for j in range(i + 1, len(parts)):
                 if (parts[i], parts[j]) not in met:
                     misses.append({"a": parts[i], "b": parts[j], "at": None, "via": None, "evidence": []})
-    entries = [{"end": e, "at": h, "evidence": ev} for e in ends for h, ev in hubs(e).items() if h in reach]
+    # where this floor's CHAIN enters an open end: a link of the lineage (never a part - a joints floor's parts are
+    # its joints, already reported above)
+    entries = [{"end": e, "at": h, "evidence": ev} for e in ends for h, ev in hubs(e).items()
+               if h in reach and h not in part_set]
     hub_ids = sorted({j["at"] for j in joints})
     return {"floor": floor, "title": fc.get("title") or floor,
             "parts": [node(p) for p in parts], "ends": [node(e) for e in ends],
