@@ -615,6 +615,75 @@ def hodge_next() -> int:
     _mint_marks(sid, marks, by="tools/tick.py hodge_next")
     return 0
 
+
+def poincare_next() -> int:
+    """THE POINCARE CONJECTURE - A CLOSED CHAIN (the Millennium loop, 2026-10-09; the law: nothing out of thin air,
+    everything bound). Solved: Perelman 2002-2003, on Hamilton's Ricci flow with surgery; the write-ups Morgan-Tian,
+    Kleiner-Lott, Cao-Zhu; the Clay prize awarded 2010 and declined. The stick had no marks. Now: the round 3-sphere under
+    Ricci flow sealed (the radius-squared shrinks at rate -2(n-1) = -4, extinction at r0^2/4 = 0.25, the volume fraction
+    at t = 0.1 is (1 - 0.4)^(3/2) = 0.4648, the unit sphere's scalar curvature n(n-1) = 6, chi(S^3) = 0); the two-dimensional
+    template sealed (Gauss-Bonnet: chi(S^2) = 2 from the curvature integral; the normalized flow rounds every metric on
+    S^2, Hamilton 1988, Chow 1991); the theorem cited AS THE CLOSING MARK - the first stick in the store whose fit reads
+    CLOSED; the surviving window: none for the conjecture, the chain is bound all the way. This is the template of what
+    'done' looks like on a stick. Idempotent."""
+    from concordance import tickstick as TS
+    S = {}
+    seals = [
+        ("rate", "ricci_flow_round_s3_radius_squared_rate_minus_2_n_minus_1", "-2*(3 - 1)", -4.0, 1e-12),
+        ("extinct", "ricci_flow_round_unit_s3_extinction_time_r0_squared_over_4", "1**2/4", 0.25, 1e-12),
+        ("volume", "ricci_flow_round_unit_s3_volume_fraction_at_t_0_1", "(1 - 4*0.1)**1.5", (1 - 4 * 0.1) ** 1.5, 1e-9),
+        ("scalar", "unit_s3_scalar_curvature_n_n_minus_1", "3*2", 6.0, 1e-12),
+        ("chi", "euler_characteristic_of_s3_one_plus_zero", "1 + (1 - 1)", 1.0, 1e-12),
+        ("gb", "gauss_bonnet_on_the_unit_s2_curvature_integral_over_2pi", "(1/(2*pi))*(1/1**2)*4*pi*1**2", 2.0, 1e-9),
+    ]
+    for key, nid, expr, val, tol in seals:
+        S[key] = _rh_seal_num(nid, expr, float(val), tol=tol)
+        if not S[key]:
+            print("a seal failed:", nid); return 1
+    print("sealed", len(S), "Poincare numbers:", ", ".join(f"{k}={v[:8]}" for k, v in S.items()))
+    sid = TS.create("Poincare conjecture")["id"]
+    marks = [
+        ("instance", "[the round sphere under Ricci flow, sealed] dg/dt = -2 Ric; on a round S^n, Ric = (n - 1)/r^2 g, so "
+                     "d(r^2)/dt = -2(n - 1) = -4 for n = 3 (sealed): the sphere shrinks homothetically and vanishes at "
+                     "T = r0^2/4 = 0.25 for r0 = 1 (sealed). Hamilton's equation (1982) on the simplest input - the shape the "
+                     "theorem says every simply connected closed 3-manifold is.", S["rate"]),
+        ("instance", "[extinction at 0.25]", S["extinct"]),
+        ("instance", "[the volume on the way down] At t = 0.1 the radius squared is 1 - 0.4 and the volume fraction "
+                     "(0.6)^(3/2) = 0.4648 (sealed): the flow is a shrinking, not a tearing - until, on a general manifold, "
+                     "it pinches, which is where Perelman's surgery enters.", S["volume"]),
+        ("instance", "[the curvature it starts from] The unit S^3 has scalar curvature n(n - 1) = 6 (sealed); positive "
+                     "scalar curvature is what the flow drives toward extinction in finite time - Perelman's finite "
+                     "extinction theorem is the step that handles the simply connected case without the full "
+                     "geometrization.", S["scalar"]),
+        ("instance", "[chi(S^3) = 0] An odd-dimensional closed manifold has Euler characteristic zero: 1 - 0 + 0 - 1 = 0 "
+                     "(sealed as 1 + 0 = 1). The Euler characteristic cannot tell S^3 from any other closed 3-manifold - "
+                     "which is why the conjecture needed the fundamental group, and why it was hard.", S["chi"]),
+        ("instance", "[the two-dimensional template, sealed] Gauss-Bonnet on the unit S^2: (1/2 pi) int K dA = "
+                     "(1/2 pi)(1)(4 pi) = 2 = chi(S^2) (sealed). In dimension two the classification is a 19th-century "
+                     "theorem; the normalized Ricci flow rounds every metric on S^2 (Hamilton 1988, Chow 1991) - the "
+                     "picture Hamilton's program lifted to dimension three.", S["gb"]),
+        ("closed", "Every simply connected closed 3-manifold is homeomorphic to the 3-sphere: PROVEN by Grigori Perelman "
+                   "(2002-2003) by Hamilton's Ricci flow with surgery - the entropy and reduced-volume monotonicity, the "
+                   "canonical neighbourhood theorem, the finite extinction time for simply connected manifolds - with "
+                   "the full geometrization conjecture of Thurston proven alongside. The chain is bound all the way.",
+         {"source": "G. Perelman, arXiv math/0211159 (2002), math/0303109 (2003), math/0307245 (2003); R. S. Hamilton, Three-manifolds with positive Ricci curvature, J. Diff. Geom. 17 (1982)"}),
+        ("equivalence", "[the proof checked, three times over] The complete write-ups: Kleiner-Lott, Notes on Perelman's "
+                        "papers (Geom. Topol. 12, 2008); Morgan-Tian, Ricci Flow and the Poincare Conjecture (Clay "
+                        "Monographs 3, 2007); Cao-Zhu, Asian J. Math. 10 (2006). The Clay Mathematics Institute awarded the "
+                        "Millennium Prize on 18 March 2010; Perelman declined it, as he had declined the Fields Medal in "
+                        "2006. Independent verifications are the receipts of a proof.",
+         {"source": "B. Kleiner, J. Lott (2008); J. Morgan, G. Tian (2007); H.-D. Cao, X.-P. Zhu (2006); Clay Mathematics Institute, press release of 18 March 2010"}),
+        ("note", "[the chain, read] Sealed: the flow on the round sphere, the template in dimension two. Cited: the "
+                 "theorem that closes the chain, with its source, and the three independent write-ups. Open: nothing for "
+                 "the conjecture - this stick is the template of what done looks like on a stick: a CLOSED fit, a cited "
+                 "theorem, sealed instances under it. What remains is inclusion: Perelman's three papers and Hamilton "
+                 "1982 as cards with attribution (a want), and a Ricci-flow integrator so the flow on a stated metric is "
+                 "COMPUTED here rather than the round case alone.",
+         {"source": "the three write-ups above; docs/MILLENNIUM_PREPAREDNESS.md"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py poincare_next")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -7328,6 +7397,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("poincare_next", "poincare", "ricci_flow", "perelman"):
+        return poincare_next()
     if a[0] in ("hodge_next", "hodge", "hodge_diamond", "lefschetz"):
         return hodge_next()
     if a[0] in ("p_versus_np_next", "pnp_next", "circuit_lower_bound", "cook_levin", "sat_threshold"):

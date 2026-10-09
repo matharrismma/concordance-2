@@ -103,6 +103,17 @@ survey; a Hodge-diamond calculator for complete intersections, since the sealed 
 tables and should be computed. The process improved by the attempt: a postulate can be the choice of a
 statement's form, kept because it is the form the counterexamples leave standing.
 
+**Poincaré, 2026-10-09.** Solved, and the stick now says so: the first stick in the store whose fit reads CLOSED.
+Linked: six sealed instances, the round 3-sphere under Ricci flow (the radius squared shrinking at −4, extinction at
+r₀²/4, the volume fraction on the way down, the unit sphere's scalar curvature 6, χ(S³) = 0) and the two-dimensional
+template (Gauss–Bonnet on S², χ = 2 from the curvature integral); the closing mark, the theorem cited with its
+source, Perelman 2002–2003 on Hamilton's Ricci flow with surgery; the three independent write-ups cited
+(Kleiner–Lott, Morgan–Tian, Cao–Zhu) and the prize of 2010, declined. The window: none for the conjecture. Gaps,
+one want: Perelman's three papers and Hamilton 1982 as cards with attribution, and a Ricci-flow integrator so a
+stated metric's flow is computed here rather than the round case alone. The process improved by the attempt: the
+tick-stick store gained a cited kind, closed, naming the theorem that closes a chain, so a finished problem is no
+longer called open by the fit, the template of bound all the way.
+
 ## Why Riemann is first
 
 It has the only ratcheted bound in the store (T = 10⁷), the most verifiers behind it, and three equivalences

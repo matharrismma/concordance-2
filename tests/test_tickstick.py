@@ -165,3 +165,16 @@ def test_a_postulate_is_cited_never_a_fact_and_the_fit_says_inferred():
     assert "1 postulate(s) cited, 0 sealed mark(s)" in f["inferred"] and "inferred" in f["inferred"] and "proven" in f["inferred"]
     assert "fact" not in f["open"].split("never kept as fact")[0].split("never proven")[-1]   # the word fact appears only in the denial
     assert f["cited_ticks"] == 1 and f["sealed_ticks"] == 0
+
+
+def test_a_closed_mark_names_the_theorem_and_the_fit_reads_closed():
+    """2026-10-09: a solved problem's stick carries the theorem that closed it (cited); its fit reads CLOSED."""
+    sid = tickstick.create("Is every simply connected closed 3-manifold a 3-sphere?", statement="The Poincare conjecture.",
+                           field="mathematics", references=["Perelman (2002, 2003)"])["id"]
+    assert tickstick.tick(sid, "closed", "Yes: proven by Perelman via Hamilton's Ricci flow with surgery")["ok"] is False  # a source is required
+    r = tickstick.tick(sid, "closed", "Yes: proven by Perelman via Hamilton's Ricci flow with surgery", source="G. Perelman, arXiv math/0211159, math/0303109, math/0307245")
+    assert r["ok"] is True
+    f = tickstick.read(sid)["fit"]
+    assert f["open"].startswith("CLOSED") and "Perelman" in f["open"]
+    assert f["closed_by"] == ["Yes: proven by Perelman via Hamilton's Ricci flow with surgery"]
+    assert f["cited_ticks"] == 1

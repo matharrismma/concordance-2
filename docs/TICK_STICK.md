@@ -18,6 +18,7 @@ exactly what they establish:
 | equivalence | a cited theorem: this statement ⇔ that one                        | the source                       |
 | exclusion   | a cited barrier: proofs of this kind cannot settle the question   | the source                       |
 | postulate   | a cited working assumption, never a fact; the sealed marks that work under it are the evidence the truth is there (the fit says *inferred*, never proven) | the source                       |
+| closed      | the cited theorem that closes the chain; the fit then reads CLOSED instead of open — the template of bound all the way | the source                       |
 | note        | a remark by a named author (never counts toward the fit)          | —                                |
 
 **The fit** is computed from the ticks and nothing else: the greatest sealed bound, the sealed instances, the cited

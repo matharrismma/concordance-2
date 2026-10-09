@@ -42,7 +42,10 @@ SEALED_KINDS = ("bound", "instance", "witness")
 # A POSTULATE (Matt, 2026-10-08: "They work, so we don't keep them as fact, but we can make them work, so we can infer
 # that truth is there"): a cited mark that is taken as a working assumption and NEVER as a fact; the sealed instances that
 # work under it are the evidence that the truth is there. The fit counts them and says "inferred", never "proven".
-CITED_KINDS = ("equivalence", "exclusion", "postulate")
+# CLOSED (2026-10-09, the Millennium loop reaching Poincare): a cited mark naming the THEOREM that closes the chain, with
+# its source. A stick with one reads CLOSED in its fit - the template of "bound all the way" - and the general question is
+# no longer called open. Cited, like every theorem; the proof is the source's, the chain's links are the stick's.
+CITED_KINDS = ("equivalence", "exclusion", "postulate", "closed")
 KINDS = SEALED_KINDS + CITED_KINDS + ("note",)
 
 
@@ -131,6 +134,7 @@ def fit(stick: Dict[str, Any]) -> Dict[str, Any]:
     equivalences = [t for t in ticks if t.get("kind") == "equivalence"]
     exclusions = [t for t in ticks if t.get("kind") == "exclusion"]
     postulates = [t for t in ticks if t.get("kind") == "postulate"]
+    closed = [t for t in ticks if t.get("kind") == "closed"]
     notes = [t for t in ticks if t.get("kind") == "note"]
     out: Dict[str, Any] = {
         "verified_up_to": ({"up_to": best["up_to"], "unit": best.get("unit"), "claim": best.get("claim"), "seal": best.get("seal"),
@@ -140,6 +144,7 @@ def fit(stick: Dict[str, Any]) -> Dict[str, Any]:
         "equivalent_statements": [t.get("claim") for t in equivalences],
         "excluded_approaches": [t.get("claim") for t in exclusions],
         "postulates": [t.get("claim") for t in postulates],
+        "closed_by": [t.get("claim") for t in closed],
         "record": [{"claim": t.get("claim"), "by": t.get("by"), "at": t.get("at")} for t in notes],
         "sealed_ticks": sum(1 for t in ticks if t.get("kind") in SEALED_KINDS),
         "cited_ticks": sum(1 for t in ticks if t.get("kind") in CITED_KINDS),
@@ -153,6 +158,8 @@ def fit(stick: Dict[str, Any]) -> Dict[str, Any]:
                        "the general question stays open")
     else:
         out["open"] = "no sealed bound yet — the stick has only cited marks" if (equivalences or exclusions or postulates) else "no marks yet"
+    if closed:
+        out["open"] = "CLOSED — " + str(closed[0].get("claim") or "")[:200]
     if postulates:
         worked = len(instances) + len(witnesses) + len(bounds)
         out["inferred"] = (f"{len(postulates)} postulate(s) cited, {worked} sealed mark(s) work under them: they work, so the "
