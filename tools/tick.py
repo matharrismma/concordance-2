@@ -523,6 +523,36 @@ def p_versus_np_next() -> int:
                         "proven PAST all three barriers on this stick, the first in decades, by an algorithm for "
                         "circuit-satisfiability turned into a separation.",
          {"source": "S. A. Cook (1971); L. Levin (1973); R. M. Karp (1972); J. Hartmanis, R. E. Stearns (1965); R. E. Ladner (1975); R. Williams, Non-uniform ACC circuit lower bounds (2011)"}),
+        ("exclusion", "relativizing proof techniques cannot resolve P vs NP: there are oracles A, B with P^A = NP^A and P^B != NP^B - the FIRST barrier (Baker, Gill, Solovay 1975). It blocks diagonalization "
+                      "and simulation, the techniques that relativize (hold relative to every oracle): P^A = NP^A for "
+                      "any PSPACE-complete A, since P^PSPACE = PSPACE = NP^PSPACE, while a diagonalized B gives "
+                      "P^B != NP^B - so no argument that relativizes can decide the unrelativized question. First "
+                      "breached by arithmetization: IP = PSPACE (Shamir 1992) does not relativize.",
+         {"source": "T. Baker, J. Gill, R. Solovay, Relativizations of the P =? NP question, SIAM J. Comput. 4 (1975) 431-442; A. Shamir, IP = PSPACE, J. ACM 39 (1992)"}),
+        ("exclusion", "natural proofs cannot separate P from NP if strong pseudorandom generators exist - the SECOND barrier (Razborov, Rudich 1997). A proof is 'natural' when its "
+                      "hard-function property is CONSTRUCTIVE (recognizable in time 2^O(n)), LARGE (holds for a "
+                      "2^-O(n) fraction of all Boolean functions), and USEFUL (implies a circuit lower bound). Almost "
+                      "every combinatorial lower bound proven is natural; but a natural property useful against P/poly "
+                      "would itself break the pseudorandom generators P/poly is believed to contain, so a separation "
+                      "must be non-natural - it must give up one of the three conditions.",
+         {"source": "A. A. Razborov, S. Rudich, Natural proofs, J. Comput. System Sci. 55 (1997) 24-35"}),
+        ("exclusion", "algebrizing proof techniques cannot resolve P vs NP - the THIRD barrier (Aaronson, Wigderson 2009). Algebrization extends "
+                      "relativization to low-degree polynomial (algebraic) oracle extensions, so it captures "
+                      "arithmetization itself - the very technique that beat the first barrier. A result that "
+                      "algebrizes still cannot separate P from NP, nor prove NP is not in P/poly; a separation must be "
+                      "non-algebrizing.",
+         {"source": "S. Aaronson, A. Wigderson, Algebrization: a new barrier in complexity theory, ACM Trans. Comput. Theory 1 (2009) 2:1-2:54"}),
+        ("note", "[the barrier map, identified] Three barriers stand between any proof and P vs NP, each ruling out a "
+                 "family of techniques proven unable to reach it: RELATIVIZATION (Baker-Gill-Solovay 1975) rules out "
+                 "diagonalization and simulation; NATURAL PROOFS (Razborov-Rudich 1997) rules out the standard "
+                 "combinatorial circuit lower bounds; ALGEBRIZATION (Aaronson-Wigderson 2009) rules out the "
+                 "arithmetization that had evaded the first. Each was breached in turn - arithmetization passed "
+                 "relativization (IP = PSPACE, 1992), then algebrization showed that road also stops short. The one "
+                 "lower bound known to pass all three is Williams 2011 (NEXP not in ACC0): non-relativizing, "
+                 "non-natural, non-algebrizing - the needle's eye any proof of P != NP must thread. The barriers are "
+                 "why the surviving window above (3 + 1/86) n is the whole problem; the sources are carded on the "
+                 "P vs NP chain (card_floor_p_vs_np).",
+         {"source": "T. Baker, J. Gill, R. Solovay (1975); A. A. Razborov, S. Rudich (1997); S. Aaronson, A. Wigderson (2009); A. Shamir, IP = PSPACE (1992); R. Williams, Non-uniform ACC circuit lower bounds (2011)"}),
         ("note", "[the surviving window, read] Sealed: the lower-bound ladder's rungs, the hierarchy factor, the brute-force "
                  "count, the threshold instance, the reduction's cost. Proven (cited): SAT is complete, P != EXPTIME, "
                  "Ladner, Williams. Excluded (cited, already on this stick): relativization, natural proofs, algebrization "
