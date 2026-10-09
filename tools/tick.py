@@ -1615,6 +1615,75 @@ def music_theory_stick() -> int:
     _mint_marks(sid, marks, by="tools/tick.py music_theory_stick")
     return 0
 
+
+def black_holes() -> int:
+    """BLACK HOLES - THE FOUR-CONSTANT CONFLUENCE, SEALED (Matt, 2026-10-09: "What about Black Holes?"). A black hole
+    is where gravity, relativity, the quantum and thermodynamics meet: the Bekenstein-Hawking entropy S = k_B c^3 A /
+    (4 G hbar) is the one formula that contains G, c, hbar AND k_B together. Sealed (solar mass): the Schwarzschild
+    radius (through astronomy.ASTRO_VERIFY), the Hawking temperature, the Bekenstein-Hawking entropy as the horizon
+    AREA in Planck units over 4 (the holographic principle), and the photon sphere / ISCO. The open parts - the
+    information paradox, the singularity, the interior - are declined, cited as the postulate's edge. Idempotent."""
+    import math
+    from concordance import tickstick as TS
+    G = 6.67430e-11; c = 2.99792458e8; hbar = 1.054571817e-34; kB = 1.380649e-23; Msun = 1.98892e30
+    rs = 2 * G * Msun / c ** 2
+    Th = hbar * c ** 3 / (8 * math.pi * G * Msun * kB)
+    lP2 = hbar * G / c ** 3
+    S_over_kB = math.pi * rs ** 2 / lP2
+    S = {
+        "rs": _seal_through("astronomy", "ASTRO_VERIFY", {"schwarzschild_mass_kg": Msun, "claimed_schwarzschild_radius_m": round(rs, 1)}),
+        "T": _rh_seal_num("hawking_temperature_of_a_solar_mass_black_hole_kelvin",
+                          "1.054571817e-34*(2.99792458e8)**3/(8*pi*6.67430e-11*1.98892e30*1.380649e-23)", Th),
+        "S": _rh_seal_num("bekenstein_hawking_entropy_solar_mass_over_kb_is_horizon_area_over_4_planck_areas",
+                          "pi*(2*6.67430e-11*1.98892e30/(2.99792458e8)**2)**2/(1.054571817e-34*6.67430e-11/(2.99792458e8)**3)", S_over_kB),
+        "ph": _rh_seal_num("photon_sphere_of_a_solar_mass_black_hole_three_gm_over_c2_m",
+                           "3*6.67430e-11*1.98892e30/(2.99792458e8)**2", 1.5 * rs),
+        "isco": _rh_seal_num("innermost_stable_circular_orbit_six_gm_over_c2_m",
+                             "6*6.67430e-11*1.98892e30/(2.99792458e8)**2", 3 * rs),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "black-hole numbers; r_s=%.1fm T_H=%.3eK S/kB=%.3e" % (rs, Th, S_over_kB))
+    sid = TS.create("Black holes - the four-constant confluence, verified and sealed")["id"]
+    marks = [
+        ("instance", "[the horizon] The Schwarzschild radius r_s = 2 G M / c^2: the Sun, if squeezed inside 2954 m "
+                     "(2.95 km), becomes a black hole (sealed through astronomy.ASTRO_VERIFY) - the radius at which the "
+                     "escape velocity reaches the speed of light. The Earth's would be 9 mm.", S["rs"]),
+        ("instance", "[it has a temperature] Hawking: a black hole radiates as a body at T = hbar c^3 / (8 pi G M k_B). "
+                     "For a solar mass that is 6.17e-8 K (sealed) - far colder than the 2.7 K of space, so it absorbs "
+                     "more than it emits; big black holes barely evaporate, and the lifetime scales as M^3, nearly "
+                     "eternal. The quantum (hbar) gives gravity a temperature.", S["T"]),
+        ("instance", "[entropy is AREA, not volume] The Bekenstein-Hawking entropy is the horizon area in Planck units, "
+                     "over four: S / k_B = A / (4 l_P^2) = pi r_s^2 / l_P^2 = 1.05e77 for the Sun (sealed) - more entropy "
+                     "than all the ordinary matter that could form it. Entropy scaling with AREA, not volume, is the "
+                     "holographic principle: the information of a region lives on its boundary. This single formula "
+                     "holds G, c, hbar and k_B at once - gravity, relativity, the quantum and thermodynamics in one "
+                     "number.", S["S"]),
+        ("instance", "[where light orbits] The photon sphere sits at 1.5 r_s = 3 G M / c^2 = 4431 m - the radius at "
+                     "which light itself can orbit (the bright ring in the Event Horizon Telescope image); the "
+                     "innermost stable circular orbit for matter is at 3 r_s = 6 G M / c^2 = 8862 m, the inner edge of "
+                     "an accretion disk (both sealed).", S["ph"]),
+        ("postulate", "[the frame, and its hard edge] These follow from general relativity plus quantum field theory on "
+                      "curved spacetime - the SEMICLASSICAL approximation. It works (it predicts Hawking radiation and "
+                      "the area law), so its truth is inferred there, never kept as fact. At the singularity general "
+                      "relativity breaks down and a full theory of quantum gravity is UNKNOWN - that is the open "
+                      "frontier, not a sealed result.",
+         {"source": "K. Schwarzschild (1916); J. Bekenstein (1973); S. Hawking (1974-75); 't Hooft & Susskind, holography"}),
+        ("note", "[the confluence on the one map] A black hole is the node where four trees meet: gravity (grav_scale), "
+                 "relativity (rela_scale, c), the quantum (the Planck scale, planck_scale) and thermodynamics/"
+                 "information (the entropy and information-theory sticks; entropy = area in BITS). It ties to "
+                 "stick_quantum_gravity and stick_entropy_and_gravity. The Bekenstein-Hawking formula is the single "
+                 "most famous equation uniting all four fundamental constants.",
+         {"source": "the one map; planck_scale, grav_scale, rela_scale; the information-theory and entropy sticks"}),
+        ("note", "[what is declined - the open questions] The INFORMATION PARADOX (does evaporation destroy "
+                 "information, violating quantum unitarity? the firewall, ER=EPR, the island formula) is OPEN - the "
+                 "engine does not adjudicate it. What lies inside the horizon is not observable; the singularity is "
+                 "where the model fails. These are declined or carried as the postulate's edge - a miss stays a miss.",
+         {"source": "the black-hole information paradox (open); src/concordance/verifiers/astronomy.py, grav_scale.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py black_holes")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -8328,6 +8397,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("black_holes", "black_hole", "schwarzschild", "hawking"):
+        return black_holes()
     if a[0] in ("astronomy_stick", "astronomy"):
         return astronomy_stick()
     if a[0] in ("information_theory_stick", "information_theory", "info_theory"):

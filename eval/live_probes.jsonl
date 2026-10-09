@@ -138,3 +138,4 @@
 {"id": "astronomy.orbits.sealed", "path": "/stick", "query": {"id": "stick_astronomy_orbits_and_distances_verified_and_sealed"}, "expect": [{"at": "fit.verified_instances", "eq": 3}, {"at": "fit.postulates", "min_len": 1}]}
 {"id": "information.theory.sealed", "path": "/stick", "query": {"id": "stick_information_theory_the_measure_of_a_message_verified_and_sea"}, "expect": [{"at": "fit.verified_instances", "eq": 3}, {"at": "fit.postulates", "min_len": 1}]}
 {"id": "music.theory.sealed", "path": "/stick", "query": {"id": "stick_music_theory_intervals_and_tuning_verified_and_sealed"}, "expect": [{"at": "fit.verified_instances", "eq": 3}, {"at": "fit.postulates", "min_len": 1}]}
+{"id": "black.holes.four.constant.confluence.sealed", "path": "/stick", "query": {"id": "stick_black_holes_the_four_constant_confluence_verified_and_sealed"}, "expect": [{"at": "fit.verified_instances", "eq": 4}, {"at": "fit.postulates", "min_len": 1}]}
