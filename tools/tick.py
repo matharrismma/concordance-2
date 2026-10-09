@@ -1219,6 +1219,76 @@ def grimm_law() -> int:
     _mint_marks(sid, marks, by="tools/tick.py grimm_law")
     return 0
 
+
+def genomics() -> int:
+    """GENOMICS - THE GENETIC CODE, SEALED (Matt, 2026-10-09: "We will cover every domain. Starting with genomics").
+    The code is a deterministic table (NCBI translation table 1, public domain) - like Webster for etymology - so a
+    genomic claim is exactly checkable. Sealed: the code's arithmetic (64 = 4^3 codons, 61 sense + 3 stop, the
+    six-fold degeneracy of leucine), real translations run through the genetics verifier (ATG -> Met the start, TGG ->
+    Trp the only one, ATGGCCTAA -> MA*), and a Hardy-Weinberg equilibrium run through biology. What is sealed is what
+    is CHECKED; gene function, phenotype and clinical meaning are declined, not guessed. Idempotent."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+
+    def seal_domain(domain, artifact_key, spec):
+        res = verify_derivation([{"id": "g", "domain": domain, "spec": {artifact_key: spec}}])
+        if res.get("verdict") != "HOLDS":
+            print("did not hold:", domain, spec, res.get("verdict")); return None
+        res = receipts.attach(res, config=EngineConfig(), domain=domain)
+        return (res.get("seal") or {}).get("content_hash")
+
+    S = {}
+    # the code's arithmetic (numeric seals)
+    S["codons"] = _rh_seal_num("genetic_code_number_of_codons_four_cubed", "4**3", 64.0, tol=1e-12)
+    S["sense"] = _rh_seal_num("genetic_code_sense_codons_sixty_four_minus_three_stops", "4**3 - 3", 61.0, tol=1e-12)
+    S["hw"] = _rh_seal_num("hardy_weinberg_sum_p_sq_two_pq_q_sq_equals_one", "0.6**2 + 2*0.6*0.4 + 0.4**2", 1.0, tol=1e-12)
+    # real verdicts, sealed through the verifiers
+    S["atg"] = seal_domain("genetics", "GENETICS_VERIFY", {"codon": "ATG", "claimed_amino_acid": "M"})
+    S["tgg"] = seal_domain("genetics", "GENETICS_VERIFY", {"codon": "TGG", "claimed_amino_acid": "W"})
+    S["tr"] = seal_domain("genetics", "GENETICS_VERIFY", {"sequence": "ATGGCCTAA", "claimed_protein": "MA*"})
+    S["hwe"] = seal_domain("biology", "BIO_VERIFY", {"hardy_weinberg": {"counts": [360, 480, 160]}})
+    for k, v in S.items():
+        if not v:
+            print("a seal failed:", k); return 1
+    print("sealed", len(S), "genomics facts")
+    sid = TS.create("Genomics - the genetic code, verified and sealed")["id"]
+    marks = [
+        ("instance", "[the code counted] Three bases, four letters: 4^3 = 64 codons (sealed), of which 61 are sense and "
+                     "3 are stop (TAA, TAG, TGA) - 64 - 3 = 61 (sealed). Sixty-one sense codons map onto twenty amino "
+                     "acids, so the code is degenerate: leucine, serine and arginine have six codons each; methionine "
+                     "and tryptophan have one. The redundancy sits in the third base - the wobble.", S["codons"]),
+        ("instance", "[translation, verified] ATG -> Met (sealed through the genetics verifier): the start codon, and "
+                     "the only codon for methionine. The reading begins here.", S["atg"]),
+        ("instance", "[the only one] TGG -> Trp (sealed): tryptophan is the one amino acid with a single codon - which "
+                     "is why a mutation in it is rarely silent.", S["tgg"]),
+        ("instance", "[a whole reading frame] ATG GCC TAA translates to Met-Ala-stop, the protein 'MA*' (sealed through "
+                     "the verifier): start, one residue, stop - transcription and translation run as a checkable chain, "
+                     "DNA -> mRNA -> protein, the central dogma.", S["tr"]),
+        ("instance", "[Hardy-Weinberg, verified] With allele frequencies p = 0.6, q = 0.4, the genotype frequencies are "
+                     "p^2 + 2pq + q^2 = 0.36 + 0.48 + 0.16 = 1 (sealed), so in a population of 1000 the counts 360 : 480 "
+                     ": 160 are in equilibrium - run through the biology verifier (chi-square = 0, sealed). The law that "
+                     "says a population not evolving keeps its allele frequencies.", S["hwe"]),
+        ("postulate", "[what is cited, not proven] The genetic code is NEAR-universal, not universal - mitochondria and "
+                      "some lineages read a few codons differently; the engine seals table 1 (the standard code) and "
+                      "names the variant table where one applies. Ancestral gene sequences are RECONSTRUCTIONS, like a "
+                      "proto-language - postulates, cited, never sealed. The code's origin is open science.",
+         {"source": "NCBI translation table 1 (public domain); F. Crick, the central dogma (1958); G. Hardy, W. Weinberg (1908)"}),
+        ("note", "[how genomics uses this] The deterministic layer - the code, complementarity, GC content, reading "
+                 "frames, Mendelian and Hardy-Weinberg ratios - is exactly checkable, sealed, and refutable (a wrong "
+                 "codon or a broken equilibrium is caught). The INTERPRETIVE layer - gene function, genotype-to-"
+                 "phenotype, clinical significance - is declined, cited, or left as a want; a miss stays a miss. The "
+                 "engine certifies the sequence arithmetic, not the meaning of the gene.",
+         {"source": "src/concordance/verifiers/genetics.py, biology.py; the one map, card_floor_tree_of_life"}),
+        ("note", "[on the one map] Phylogeny is the comparative method for genes: the tree of life is chains from a "
+                 "floor where two trees connect - LUCA the floor, the three domains the branches, a homologous gene the "
+                 "confluence where lineages meet (the small-subunit ribosomal RNA is in every cell, as 'father' is in "
+                 "every Indo-European branch). card_floor_tree_of_life draws it.",
+         {"source": "tools/seed_tree_of_life.py; the Indo-European floor is the same form"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py genomics")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -7932,6 +8002,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("genomics", "genetic_code", "genetics_stick"):
+        return genomics()
     if a[0] in ("grimm_law", "grimm", "sound_law", "sound_laws"):
         return grimm_law()
     if a[0] in ("change_of_domain", "spectral", "diagonalize", "eigenbasis"):

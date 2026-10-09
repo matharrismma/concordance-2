@@ -370,6 +370,7 @@ test_training.py
 test_trajectory.py
 test_translate.py
 test_traveler_chain.py
+test_tree_of_life.py
 test_trust_kernel_edges.py
 test_tv.py
 test_unchecked.py

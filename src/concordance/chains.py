@@ -35,7 +35,9 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           # the solve path (tools/seed_solve_path.py, 2026-10-09): both doors as the steps of the method
           "card_floor_the_solve_path",
           # linguistics (tools/seed_indo_european.py, 2026-10-09): the Indo-European family, cognates as confluences
-          "card_floor_indo_european")
+          "card_floor_indo_european",
+          # genomics (tools/seed_tree_of_life.py, 2026-10-09): the tree of life, homologous genes as confluences
+          "card_floor_tree_of_life")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
