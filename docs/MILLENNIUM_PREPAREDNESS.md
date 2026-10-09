@@ -91,6 +91,18 @@ instance's satisfiability is computed and sealed here. The process improved by t
 carries a coefficient with a unit, so a lower-bound ladder ratchets the way a verification height does; and the
 want ledger's 300-character rule held, so a long want is split, never truncated.
 
+**Hodge, 2026-10-09.** The stick had no marks. Linked: seven sealed instances of the diamond's arithmetic, the Euler
+characteristics of projective 3-space (4), a K3 surface (24), an abelian surface (0), the quintic threefold (−200)
+and a genus-3 curve (−4), the K3's second Betti number 22, the quintic's middle Betti number 204; the postulate
+stated as the form that works, rational coefficients on projective varieties; the proven links cited, Lefschetz
+(1,1) for divisors and hard Lefschetz carrying it to codimension n − 1, so every variety of dimension at most
+three is closed, with Weil's abelian fourfolds the first open case; the two exclusions that fix the statement's
+edge, Atiyah–Hirzebruch 1961 (the integral form is false) and Voisin 2002 (the Kähler form is false); the window
+read: codimension two and up in dimension four and up. Gaps, each an open want: the cited texts and Lewis's
+survey; a Hodge-diamond calculator for complete intersections, since the sealed diamonds were typed from known
+tables and should be computed. The process improved by the attempt: a postulate can be the choice of a
+statement's form, kept because it is the form the counterexamples leave standing.
+
 ## Why Riemann is first
 
 It has the only ratcheted bound in the store (T = 10⁷), the most verifiers behind it, and three equivalences

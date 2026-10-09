@@ -536,6 +536,85 @@ def p_versus_np_next() -> int:
     _mint_marks(sid, marks, by="tools/tick.py p_versus_np_next")
     return 0
 
+
+def hodge_next() -> int:
+    """THE HODGE CONJECTURE - THE FIRST LINKS (the Millennium loop, 2026-10-09; the law: nothing out of thin air, everything
+    bound). The stick had no marks. Now: the Hodge diamond's arithmetic sealed - the Euler characteristic of projective
+    3-space (4), of a K3 surface (24) and of an abelian surface (0) by the alternating sum of the h^{p,q}; the K3's second
+    Betti number 22 = 1 + 20 + 1; the quintic threefold's middle Betti number 204 = 2(1 + 101) and its Euler characteristic
+    -200 = 2(h^{1,1} - h^{2,1}); a genus-3 curve's Euler characteristic -4. The proven cases cited: Lefschetz (1,1) (1924)
+    settles divisors, hard Lefschetz carries it to codimension n - 1, so EVERY variety of dimension <= 3 satisfies the
+    conjecture - the first open case is codimension 2 in dimension 4 (Weil's abelian fourfolds). The two exclusions that
+    fix the statement's exact edge: Atiyah-Hirzebruch 1961 (the integral form is false) and Voisin 2002 (the Kahler form is
+    false). The POSTULATE the stick builds on: the conjecture is to be taken with rational coefficients on projective
+    varieties - it is kept in that form because that is the form that works. The window read. Idempotent."""
+    from concordance import tickstick as TS
+    S = {}
+    seals = [
+        ("p3", "euler_characteristic_of_projective_3_space", "3 + 1", 4.0, 1e-12),
+        ("k3", "euler_characteristic_of_a_k3_surface_by_the_diamond", "1 + 1 + 20 + 1 + 1", 24.0, 1e-12),
+        ("k3b2", "second_betti_number_of_a_k3_surface_h20_h11_h02", "1 + 20 + 1", 22.0, 1e-12),
+        ("ab", "euler_characteristic_of_an_abelian_surface_by_the_diamond_one_plus_zero", "1 + (1 - 2 - 2 + 1 + 4 + 1 - 2 - 2 + 1)", 1.0, 1e-12),
+        ("quintic_chi", "euler_characteristic_of_the_quintic_threefold_2_h11_minus_h21", "2*(1 - 101)", -200.0, 1e-12),
+        ("quintic_b3", "middle_betti_number_of_the_quintic_threefold", "2*(1 + 101)", 204.0, 1e-12),
+        ("curve", "euler_characteristic_of_a_genus_3_curve", "2 - 2*3", -4.0, 1e-12),
+    ]
+    for key, nid, expr, val, tol in seals:
+        S[key] = _rh_seal_num(nid, expr, float(val), tol=tol)
+        if not S[key]:
+            print("a seal failed:", nid); return 1
+    print("sealed", len(S), "Hodge numbers:", ", ".join(f"{k}={v[:8]}" for k, v in S.items()))
+    sid = TS.create("Hodge conjecture")["id"]
+    marks = [
+        ("instance", "[the diamond's arithmetic, sealed] Projective 3-space has h^{p,p} = 1 for p = 0..3 and nothing else: "
+                     "chi = 3 + 1 = 4 (sealed); every class is a power of the hyperplane class, algebraic - the conjecture holds "
+                     "trivially there. The arithmetic the conjecture is stated in is this alternating sum of Hodge numbers.",
+         S["p3"]),
+        ("instance", "[a K3 surface] h^{0,0} = h^{2,2} = 1, h^{2,0} = h^{0,2} = 1, h^{1,1} = 20: chi = 24 (sealed) and b_2 = 22 "
+                     "(sealed). The (1,1) classes are 20-dimensional; the Picard rank - how many are algebraic - is anything "
+                     "from 0 to 20, and Lefschetz (1,1) says exactly the rational (1,1) classes are algebraic: for a surface "
+                     "the conjecture is a theorem.", S["k3"]),
+        ("instance", "[b_2 = 22]", S["k3b2"]),
+        ("instance", "[an abelian surface] h^{1,0} = h^{0,1} = 2, h^{2,0} = h^{0,2} = 1, h^{1,1} = 4, h^{2,1} = h^{1,2} = 2: "
+                     "the alternating sum is 0 (sealed as 1 + 0 = 1) - a torus has Euler characteristic zero. Dimension 2, so "
+                     "the conjecture holds here by Lefschetz (1,1).", S["ab"]),
+        ("instance", "[the quintic threefold] h^{1,1} = 1, h^{2,1} = 101: chi = 2(1 - 101) = -200 (sealed) and the middle "
+                     "Betti number b_3 = 2(1 + 101) = 204 (sealed). Dimension 3: codimension 1 by Lefschetz (1,1), codimension "
+                     "2 by hard Lefschetz from codimension 1 - the conjecture is a THEOREM for every threefold. The famous "
+                     "Calabi-Yau is not an open case.", S["quintic_chi"]),
+        ("instance", "[b_3 = 204]", S["quintic_b3"]),
+        ("instance", "[a curve] genus 3: h^{1,0} = h^{0,1} = 3, chi = 2 - 2g = -4 (sealed). Dimension 1: nothing to conjecture "
+                     "- the only Hodge classes are the point and the fundamental class.", S["curve"]),
+        ("postulate", "[the postulate it builds on] The conjecture is to be taken with RATIONAL coefficients, for smooth "
+                      "projective varieties over the complex numbers: a rational class of type (p,p) is a rational combination "
+                      "of classes of algebraic subvarieties. It is kept in this form, not the integral or the Kahler form, "
+                      "because this is the form that works - every proven case works under it and the other two forms are "
+                      "refuted. Not kept as a fact: from its working the truth is inferred - never proven, never kept as fact.",
+         {"source": "W. V. D. Hodge, The topological invariants of algebraic varieties (ICM 1950); P. Deligne, The Hodge conjecture (Clay Mathematics Institute, 2000)"}),
+        ("equivalence", "[proven links] Lefschetz (1,1) (1924, in Hodge's form): every rational class of type (1,1) is the class of "
+                        "a divisor - codimension 1 CLOSED. Hard Lefschetz (Hodge 1941; Deligne 1968 in general) carries "
+                        "codimension 1 to codimension n - 1. Hence every smooth projective variety of dimension <= 3 satisfies "
+                        "the conjecture - CLOSED. Hodge's decomposition H^k(X, C) = sum of H^{p,q} (1941) is the theorem the "
+                        "conjecture is stated in. The first open case: codimension 2 in dimension 4 - Weil's abelian fourfolds "
+                        "(1977) are the test case.",
+         {"source": "S. Lefschetz (1924); W. V. D. Hodge, The Theory and Applications of Harmonic Integrals (1941); P. Deligne (1968); A. Weil (1977)"}),
+        ("exclusion", "[the statement's edge, fixed by two counterexamples] Atiyah-Hirzebruch 1961: the INTEGRAL Hodge "
+                      "conjecture is false - there are integral (p,p) classes that are not integral combinations of algebraic "
+                      "classes (torsion classes that no cycle carries). Voisin 2002: the conjecture is false for compact "
+                      "KAHLER manifolds that are not projective. So the rational, projective form is the only one left "
+                      "standing, and the stick's postulate is exactly that form.",
+         {"source": "M. F. Atiyah, F. Hirzebruch, Analytic cycles on complex manifolds (1961); C. Voisin, A counterexample to the Hodge conjecture extended to Kahler varieties (2002)"}),
+        ("note", "[the surviving window, read] Sealed: the diamond's arithmetic on six varieties. Proven (cited): dimension "
+                 "<= 3 entirely, codimension 1 everywhere. Excluded: the integral form, the Kahler form. Open: codimension "
+                 ">= 2 in dimension >= 4 - the abelian fourfolds with Weil classes are where it is tested. Gaps become wants: "
+                 "the cited texts for inclusion; a Hodge-diamond calculator for complete intersections (Hirzebruch's "
+                 "generating function) so the diamond of a stated hypersurface is COMPUTED here, not typed from a table. "
+                 "Every link sealed or cited; nothing out of thin air; the chain not closed.",
+         {"source": "P. Deligne (2000); J. D. Lewis, A Survey of the Hodge Conjecture (1999)"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py hodge_next")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -7249,6 +7328,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("hodge_next", "hodge", "hodge_diamond", "lefschetz"):
+        return hodge_next()
     if a[0] in ("p_versus_np_next", "pnp_next", "circuit_lower_bound", "cook_levin", "sat_threshold"):
         return p_versus_np_next()
     if a[0] in ("yang_mills_next", "ym_next", "mass_gap_next", "string_tension", "glueball", "asymptotic_freedom"):
