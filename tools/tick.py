@@ -1520,6 +1520,101 @@ def chemistry_stick() -> int:
     _mint_marks(sid, marks, by="tools/tick.py chemistry_stick")
     return 0
 
+
+def astronomy_stick() -> int:
+    """ASTRONOMY - SEALED through astronomy.ASTRO_VERIFY. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "kepler": _seal_through("astronomy", "ASTRO_VERIFY", {"orbital_period_years": 1.0, "semi_major_axis_au": 1.0, "claimed_kepler_consistent": True}),
+        "grav": _seal_through("astronomy", "ASTRO_VERIFY", {"mass_1_kg": 5.972e24, "mass_2_kg": 1.989e30, "separation_m": 1.496e11, "claimed_gravitational_force_N": 3.54e22}),
+        "parallax": _seal_through("astronomy", "ASTRO_VERIFY", {"parallax_arcsec": 0.1, "claimed_distance_parsec": 10}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "astronomy facts")
+    sid = TS.create("Astronomy - orbits and distances, verified and sealed")["id"]
+    marks = [
+        ("instance", "[Kepler's third law] The Earth: period 1 year, semi-major axis 1 AU, so T^2 = a^3 = 1 (sealed "
+                     "through astronomy.ASTRO_VERIFY) - the harmony of the spheres, the square of the year is the cube "
+                     "of the distance.", S["kepler"]),
+        ("instance", "[gravity holds the orbit] The Sun pulls the Earth with F = G m1 m2 / r^2 = 3.54e22 N (sealed) - "
+                     "Newton's law, the same force that drops an apple.", S["grav"]),
+        ("instance", "[the parallax ladder] A star with parallax 0.1 arcsecond is 1/0.1 = 10 parsecs away (sealed) - "
+                     "the first rung of the distance ladder, trigonometry on the Earth's orbit.", S["parallax"]),
+        ("postulate", "[the ground] Newtonian gravity and Kepler's laws - sealed where applied, and themselves the "
+                      "low-field limit of general relativity (cited). The universe's large-scale model (dark matter, "
+                      "dark energy) is inferred from evidence, carried, not kept as fact.",
+         {"source": "J. Kepler (1619); I. Newton (1687); astronomy.ASTRO_VERIFY"}),
+        ("note", "[declined] Cosmological interpretation, the existence and nature of dark matter, and the fate of the "
+                 "universe are declined; the engine seals the orbital arithmetic.",
+         {"source": "src/concordance/verifiers/astronomy.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py astronomy_stick")
+    return 0
+
+
+def information_theory_stick() -> int:
+    """INFORMATION THEORY - SEALED through information_theory.INFO_VERIFY. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "entropy": _seal_through("information_theory", "INFO_VERIFY", {"probabilities": [0.5, 0.5], "claimed_entropy_bits": 1.0}),
+        "hamming": _seal_through("information_theory", "INFO_VERIFY", {"string_a": "10110", "string_b": "11010", "claimed_hamming": 2}),
+        "bsc": _seal_through("information_theory", "INFO_VERIFY", {"bsc_error_rate": 0.0, "claimed_capacity_bits": 1.0}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "information-theory facts")
+    sid = TS.create("Information theory - the measure of a message, verified and sealed")["id"]
+    marks = [
+        ("instance", "[the bit] A fair coin has Shannon entropy H = -sum p log2 p = 1.000 bit (sealed through "
+                     "information_theory.INFO_VERIFY) - the unit of information, the answer to one yes/no question. "
+                     "This is the logarithm on the solve path, measuring a choice.", S["entropy"]),
+        ("instance", "[distance in code] The Hamming distance between 10110 and 11010 is 2 - two positions differ "
+                     "(sealed); the number of single-bit errors that separate two codewords, the basis of "
+                     "error-correction.", S["hamming"]),
+        ("instance", "[a clean channel] A binary symmetric channel with error rate 0 has capacity C = 1 - H2(0) = 1 "
+                     "bit per use (sealed) - Shannon's limit, the most a channel can carry.", S["bsc"]),
+        ("postulate", "[the ground] Shannon's 1948 axioms: information is -sum p log p, and a channel has a hard "
+                      "capacity no code can beat. Sealed where applied; the theory is the floor the whole digital world "
+                      "stands on.", {"source": "C. E. Shannon (1948); information_theory.INFO_VERIFY"}),
+        ("note", "[declined] The MEANING or value of a message is not information in this sense - the engine measures "
+                 "the message's surprise and the channel's limit, not what the message is worth.",
+         {"source": "src/concordance/verifiers/information_theory.py; the logarithm floor"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py information_theory_stick")
+    return 0
+
+
+def music_theory_stick() -> int:
+    """MUSIC THEORY - SEALED through music_theory.MUS_VERIFY (beside the harmonics stick). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "fifth": _seal_through("music_theory", "MUS_VERIFY", {"note_a": "C", "note_b": "G", "claimed_semitones": 7}),
+        "octave": _seal_through("music_theory", "MUS_VERIFY", {"freq_a": 440, "freq_b": 880, "claimed_interval": "octave"}),
+        "a440": _seal_through("music_theory", "MUS_VERIFY", {"midi_note": 69, "claimed_frequency_hz": 440.0}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "music-theory facts")
+    sid = TS.create("Music theory - intervals and tuning, verified and sealed")["id"]
+    marks = [
+        ("instance", "[the perfect fifth] C to G is 7 semitones (sealed through music_theory.MUS_VERIFY) - the interval "
+                     "whose frequency ratio is 3:2, the most consonant after the octave.", S["fifth"]),
+        ("instance", "[the octave] 440 Hz to 880 Hz is the ratio 2:1, an octave (sealed) - the same note, one register "
+                     "up; doubling the frequency.", S["octave"]),
+        ("instance", "[concert pitch] MIDI note 69 is 440 Hz, the A above middle C (sealed) - the reference the whole "
+                     "orchestra tunes to, under equal temperament f = 440 * 2^((n-69)/12).", S["a440"]),
+        ("postulate", "[the ground] The harmonic series is exact ratio (octave 2:1, fifth 3:2) - sealed on the harmonics "
+                      "stick; equal temperament is the compromise that pays the Pythagorean comma evenly so every key "
+                      "is playable, a tuning CHOICE, not a law of nature.",
+         {"source": "the harmonic series; J. S. Bach's well-tempered compromise; music_theory.MUS_VERIFY; the harmonics stick"}),
+        ("note", "[declined] Whether a chord is beautiful, a melody good, a performance moving - taste is not measured "
+                 "here; the engine seals the intervals and the tuning arithmetic.",
+         {"source": "src/concordance/verifiers/music_theory.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py music_theory_stick")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -8233,6 +8328,12 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("astronomy_stick", "astronomy"):
+        return astronomy_stick()
+    if a[0] in ("information_theory_stick", "information_theory", "info_theory"):
+        return information_theory_stick()
+    if a[0] in ("music_theory_stick", "music_theory", "music"):
+        return music_theory_stick()
     if a[0] in ("geometry_stick", "geometry"):
         return geometry_stick()
     if a[0] in ("probability_stick", "probability"):
