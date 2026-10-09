@@ -21,6 +21,22 @@ store on the box (82 sticks), not typed.
 | 6 | **Hodge conjecture** | no marks | the Hodge diamond's arithmetic is within reach | seal Hodge numbers as instances (projective space; a K3 surface's h^(1,1) = 20 and χ = 24 by the alternating sum); cite the Lefschetz (1,1) theorem as the proven case p = 1; cite Atiyah–Hirzebruch 1961 (the integral Hodge conjecture is false) and Voisin 2002 (false for compact Kähler) as exclusions that fix the statement's exact edge |
 | 7 | **Poincaré conjecture** | no marks | the round sphere under Ricci flow shrinks at a computable rate | **solved** (Perelman 2002–03, on Hamilton's Ricci flow; Morgan–Tian, Kleiner–Lott, Cao–Zhu): cite it and mark the chain CLOSED; seal one instance (S³ of radius r₀ reaches extinction at t = r₀²/4). This stick is the template of what "bound all the way" looks like |
 
+## The attempt log
+
+*Matt: "use the attempt to fill in the gaps with what you must locate" · "Every attempt improves our matrix and
+process" · "Anything you retrieve and use needs to be included."*
+
+**Riemann, 2026-10-09.** Linked: Li's criterion sealed to n = 20 through a new verifier
+(`number_theory.li_criterion`, the Keiper–Li coefficients computed by Taylor expansion and cross-checked against
+λ₁'s closed form before any verdict); Li 1997 cited as an equivalence; the de Bruijn–Newman constant cited with its
+two proven bounds, Λ ≥ 0 (Rodgers–Tao 2018) and Λ ≤ 0.2 (Platt–Trudgian 2021), RH ⇔ Λ = 0, the surviving window
+[0, 0.2] written on the stick. Gaps exposed, each now an open want on the box: Odlyzko's zero tables (a found table
+to cross-check the sealed counts); Platt–Trudgian 2021 (the verified height 3·10¹², to cite beside the sealed 10⁷);
+Odlyzko–Schönhage 1988 (the blocked main sum that lifts the cost floor the stick's open note names past 10⁷, a
+build item once located); the Keiper/Maslanka tables of λ_n to 3300 (a cross-check past the Taylor cap of 60). The
+process improved by the attempt: a verifier that errors when its own computation disagrees with a closed form, and
+the rule that a gap is written as a want naming its source.
+
 ## Why Riemann is first
 
 It has the only ratcheted bound in the store (T = 10⁷), the most verifiers behind it, and three equivalences

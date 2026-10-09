@@ -295,6 +295,7 @@ test_retrieval_verifier.py
 test_review_fixes.py
 test_rhetoric.py
 test_riemann_accel.py
+test_riemann_li.py
 test_router.py
 test_routes.py
 test_schema.py

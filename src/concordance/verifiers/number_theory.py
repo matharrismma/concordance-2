@@ -980,6 +980,62 @@ def _s_bound(T: float) -> float:
     return 0.137 * math.log(T) + 0.443 * math.log(math.log(T)) + 1.588
 
 
+
+def verify_li_criterion(spec):
+    """RH BY ELIMINATION, through Li's criterion (Li 1997: RH <=> lambda_n > 0 for every n >= 1, where
+    log xi(1/(1 - z)) = sum_n lambda_n z^n / n, xi the completed zeta). The coefficients are computed here from the
+    Taylor expansion of log xi(1/(1 - z)) at z = 0 by mpmath at high precision, and the computation is cross-checked
+    against the closed form lambda_1 = 1 + gamma/2 - log(4 pi)/2 (Bombieri-Lagarias 1999) before any verdict: if the
+    two disagree the check ERRORS, never confirms. A single lambda_n <= 0 would refute RH; none is found for n <= N, so
+    a first RH failure by this route must lie beyond N. The surviving window is pushed past N.
+      NUM_VERIFY: {"li_to": 30, "claimed_li_positive": true}      (N <= 60 here; lambda_n are also returned, 12 digits)"""
+    name = "number_theory.li_criterion"
+    try:
+        N = int(spec.get("li_to"))
+    except (TypeError, ValueError):
+        return error(name, "li_to must be an integer (the index N to check lambda_n > 0 up to)")
+    if N < 1:
+        return error(name, "li_to must be at least 1")
+    if N > 60:
+        return error(name, f"li_to {N} exceeds the precision cap (60) of the Taylor expansion here; chart in bounded steps")
+    try:
+        from mpmath import mp, mpf, zeta, gamma, pi, log, taylor, euler
+    except ImportError:
+        return na(name, "Li's criterion needs mpmath")
+    saved = mp.dps
+    try:
+        mp.dps = 40 + 3 * N
+
+        def xi(t):
+            if t == 1:
+                return mpf(1) / 2                      # (s - 1) zeta(s) -> 1, pi^(-1/2) Gamma(1/2) = 1
+            return (t * (t - 1) / 2) * pi ** (-t / 2) * gamma(t / 2) * zeta(t)
+
+        c = taylor(lambda z: log(xi(1 / (1 - z))), 0, N)
+        lam = [n * c[n] for n in range(1, N + 1)]
+        closed_1 = 1 + euler / 2 - log(4 * pi) / 2
+        drift = abs(lam[0] - closed_1)
+        if drift > mpf(10) ** (-(mp.dps // 2)):
+            return error(name, f"the computed lambda_1 disagrees with its closed form by {mp.nstr(drift, 3)} — no verdict")
+        values = [float(mp.nstr(v, 12)) for v in lam]
+        nonpos = [n for n, v in enumerate(lam, 1) if v <= 0]
+        least_n = min(range(1, N + 1), key=lambda n: lam[n - 1])
+    finally:
+        mp.dps = saved
+    holds = not nonpos
+    data = {"li_to": N, "li_positive": holds, "lambda": values, "least_lambda_n": least_n,
+            "lambda_1_closed_form": "1 + gamma/2 - log(4 pi)/2", "nonpositive": nonpos,
+            "equivalent": "RH <=> lambda_n > 0 for all n >= 1 (Li 1997)",
+            "eliminates": (f"no lambda_n <= 0 for n <= {N} — a first RH failure by this route must exceed {N}"
+                           if holds else f"lambda_n <= 0 at n = {nonpos[0]}: RH would be FALSE")}
+    claimed = spec.get("claimed_li_positive")
+    if claimed is None:
+        return na(name, "claim claimed_li_positive")
+    if bool(claimed) != holds:
+        return mismatch(name, f"lambda_n > 0 for all n <= {N} is {holds}, claimed {bool(claimed)}", data)
+    return confirm(name, f"Li's criterion holds for n <= {N}: every lambda_n > 0 (lambda_1 = {values[0]:.12f} = its closed form, "
+                         f"lambda_{N} = {values[-1]:.6f}); no RH counterexample by this route below {N}", data)
+
 def verify_zero_count(spec):
     """THE ZERO COUNT AT A GREAT HEIGHT (Riemann stick, 2026-10-05). How MANY non-trivial zeros of ζ have
     0 < Im(ρ) <= T — counted, cheaply, far beyond the height any on-line sweep can reach. This is NOT an
@@ -1112,6 +1168,7 @@ _RULES = [
     (lambda nv: ("schoenfeld_to" in nv and ("claimed_schoenfeld_holds" in nv or "claimed_closest_approach_n" in nv)), verify_schoenfeld),
     (lambda nv: ("zero_count_height" in nv and "claimed_zero_count" in nv), verify_zero_count),
     (lambda nv: ("lagarias_to" in nv and ("claimed_lagarias_holds" in nv or "claimed_closest_approach_n" in nv)), verify_lagarias),
+    (lambda nv: ("li_to" in nv and "claimed_li_positive" in nv), verify_li_criterion),
     (lambda nv: ("nicolas_primes_to" in nv and ("claimed_nicolas_holds" in nv or "claimed_closest_prime" in nv)), verify_nicolas),
     (lambda nv: ("divisors_of" in nv and ("claimed_divisor_count" in nv or "claimed_divisors" in nv)), verify_divisor_count),
     (lambda nv: ("n_prime" in nv and "claimed_prime" in nv), verify_primality),

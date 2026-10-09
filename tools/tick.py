@@ -141,6 +141,66 @@ def riemann(T_height: float) -> int:
     return 0 if r.get("ok") else 1
 
 
+
+def riemann_li(n_max: int = 30) -> int:
+    """THE RIEMANN STICK, NEXT LINKS (Matt, 2026-10-09: 'start with Riemann'; the law: nothing out of thin air,
+    everything bound). Two links the stick did not yet hold: (1) Li's criterion (Li 1997: RH <=> lambda_n > 0 for all
+    n), sealed through number_theory.li_criterion for n <= n_max - the engine computes the lambda_n itself and
+    cross-checks lambda_1 against its closed form before any verdict; (2) the de Bruijn-Newman window: Newman's
+    constant satisfies Lambda >= 0 (Rodgers-Tao 2018, Newman's conjecture proven) and Lambda <= 0.2 (Platt-Trudgian
+    2021), and RH is exactly the statement Lambda = 0 - so the surviving window is [0, 0.2], read, never guessed.
+    Bound chain: a witness sealed by the verifier, three equivalences cited, one note on the window. Idempotent."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    t0 = time.time()
+    steps = [{"id": "li_criterion", "domain": "number_theory",
+              "spec": {"NUM_VERIFY": {"li_to": int(n_max), "claimed_li_positive": True}}}]
+    res = verify_derivation(steps)
+    if res.get("verdict") != "HOLDS":
+        print("the verifier did not HOLD:", json.dumps(res)[:400]); return 1
+    res = receipts.attach(res, config=EngineConfig(), domain="number_theory")
+    seal = (res.get("seal") or {}).get("content_hash")
+    if not seal:
+        print("no seal minted:", json.dumps(res.get("seal"))[:200]); return 1
+    trail = (res.get("trail") or res.get("steps") or [{}])
+    detail = ""
+    for st in trail:
+        if isinstance(st, dict) and "li_criterion" in json.dumps(st):
+            detail = str(st.get("detail") or (st.get("result") or {}).get("detail") or "")[:300]; break
+    print(f"sealed Li's criterion to n = {n_max} in {time.time() - t0:.1f}s:", seal, "|", detail[:160])
+    sid = TS.create("Riemann hypothesis")["id"]
+    marks = [
+        ("witness", f"No zero of zeta lies off the critical line by way of a Li counterexample at n <= {n_max}: every "
+                    f"Keiper-Li coefficient lambda_n, n = 1..{n_max}, computed from the Taylor expansion of log xi(1/(1-z)) "
+                    f"and cross-checked against lambda_1 = 1 + gamma/2 - log(4 pi)/2, is positive (sealed through "
+                    f"number_theory.li_criterion). Li 1997: RH <=> lambda_n > 0 for all n >= 1, so a first RH failure by "
+                    f"this route must lie beyond n = {n_max}. {detail[:200]}", seal),
+        ("equivalence", "RH is equivalent to lambda_n > 0 for every n >= 1, where log xi(1/(1 - z)) = sum lambda_n z^n / n "
+                        "(Li's criterion); each lambda_n is a sum over the zeros, lambda_n = sum_rho [1 - (1 - 1/rho)^n], "
+                        "and under RH lambda_n ~ (n/2) log n (Bombieri-Lagarias).",
+         {"source": "X.-J. Li, The positivity of a sequence of numbers and the Riemann hypothesis, J. Number Theory 65 (1997); E. Bombieri, J. C. Lagarias, Complements to Li's criterion (1999)"}),
+        ("equivalence", "RH is equivalent to Lambda = 0, where Lambda is the de Bruijn-Newman constant: the zeros of the "
+                        "heat-deformed xi, H_t(z), are all real for t >= Lambda and not all real for t < Lambda; RH is the "
+                        "statement that t = 0 is already on the real side.",
+         {"source": "N. G. de Bruijn (1950); C. M. Newman (1976): the constant defined, and the conjecture Lambda >= 0"}),
+        ("equivalence", "Lambda >= 0 is PROVEN (Rodgers-Tao 2018: Newman's conjecture) and Lambda <= 0.2 is PROVEN "
+                        "(Platt-Trudgian 2021, sharpening Polymath15's 0.22 and Ki-Kim-Lee's < 1/2). The surviving window "
+                        "for the de Bruijn-Newman constant is the closed interval [0, 0.2]; RH is the statement that it "
+                        "is the left endpoint. If RH is true it is only barely so: the zeros cannot move further toward "
+                        "the real line than they are.",
+         {"source": "B. Rodgers, T. Tao, The de Bruijn-Newman constant is non-negative, Forum Math. Pi 8 (2020); D. Platt, T. Trudgian, The Riemann hypothesis is true up to 3*10^12 (2021) and the bound Lambda <= 0.2"}),
+        ("note", "[the surviving window, read] Direct: the zeros are on the line to height 10^7 (sealed) and counted to "
+                 "10^12 (Turing). By elimination: Robin, Lagarias, Schoenfeld to 2*10^7, Nicolas with primes to 10^7, and "
+                 f"now Li to n = {n_max} - none finds the counterexample. By theorem: the de Bruijn-Newman constant lies in "
+                 "[0, 0.2] and RH is Lambda = 0. Every link is sealed or cited; nothing is out of thin air; the chain is "
+                 "not closed. The next links by cost: Li to 60; the height past 10^7 (the open note names the precision "
+                 "that stops the C kernel); Platt-Trudgian's 3*10^12 as a cited bound beside the sealed 10^7.",
+         {"source": "this stick's own ticks; docs/MILLENNIUM_PREPAREDNESS.md"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py riemann_li")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 CURVES = {
@@ -6845,6 +6905,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("riemann_li", "li_criterion", "li", "de_bruijn_newman", "newman", "riemann_next"):
+        return riemann_li(int(a[1]) if len(a) > 1 else 30)
     if a[0] == "riemann":
         return riemann(float(a[1]) if len(a) > 1 else 100.0)
     if a[0] == "bsd":
