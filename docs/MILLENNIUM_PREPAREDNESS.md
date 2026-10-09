@@ -50,6 +50,20 @@ the formula can be sealed curve by curve (license to be checked before carding);
 computed and not cited. The process improved by the attempt: a verifier whose inputs must name their source or it
 errors, and a rank the theorems do not carry is declined, never guessed.
 
+**Navier–Stokes, 2026-10-09.** The existence-and-smoothness stick had no marks. Linked: seven sealed instances the
+evaluator can recompute, the Taylor–Green vortex's energy decay and the energy identity holding on it exactly,
+Poiseuille's flux, the Kolmogorov length, Leray's blow-up exponent from scaling, the critical Lebesgue exponent
+p = d, the Reynolds number; the equations themselves as the postulate (Navier 1822, Stokes 1845); the proven links
+cited, Leray 1934 (weak solutions for all time), Ladyzhenskaya 1959 (2D closed), Fujita–Kato 1964 (small data
+closed), Caffarelli–Kohn–Nirenberg 1982 (the singular set at most one-dimensional, of measure zero),
+Beale–Kato–Majda 1984 and the Ladyzhenskaya–Prodi–Serrin criteria with the Escauriaza–Seregin–Šverák endpoint;
+the barrier cited, Tao 2016 (the energy method alone cannot close it); the window read: 3D, large data, the Clay
+statement. Gaps, each an open want: the cited texts for inclusion; a spectral solver on the periodic box so the
+Beale–Kato–Majda quantity, the time integral of the maximum vorticity, can be watched and sealed rather than
+cited. The process improved by the attempt: a numeric seal belongs to the mathematics domain whatever its subject,
+and a file a running chain will stage must not be edited until the chain has committed (this stick's code landed
+under the BSD commit, 51d94ff, by staging order).
+
 ## Why Riemann is first
 
 It has the only ratcheted bound in the store (T = 10⁷), the most verifiers behind it, and three equivalences

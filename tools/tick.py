@@ -295,7 +295,7 @@ def navier_stokes_next() -> int:
         ("reynolds", "reynolds_number_u_1_l_1_nu_1e_6", "1*1/1e-6", 1e6, 1e-9),
     ]
     for key, nid, expr, val, tol in seals:
-        S[key] = _rh_seal_num(nid, expr, float(val), domain="physics" if key in ("poiseuille", "kolmogorov", "reynolds") else "mathematics", tol=tol)
+        S[key] = _rh_seal_num(nid, expr, float(val), tol=tol)        # numeric mode lives in the mathematics domain
         if not S[key]:
             print("a seal failed:", nid); return 1
     print("sealed", len(S), "Navier-Stokes numbers:", ", ".join(f"{k}={v[:8]}" for k, v in S.items()))
