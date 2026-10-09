@@ -37,7 +37,7 @@ def _graph():
 def test_the_seed_validates_and_every_endpoint_resolves():
     assert S3._validate() == []
     assert len(S3.CHAINS) == 8 and len(S3.RECORDS) >= 55
-    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 17
+    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 18
 
 
 def test_each_chain_walks_from_its_roots_to_its_open_end_and_meets_where_the_seed_expects():
@@ -115,7 +115,7 @@ def test_the_chains_door_reads_a_chain_floor(monkeypatch):
     assert st == 200 and len(body["chain"]["nodes"]) >= 12 and body["confluences"][0]["at"] == "card_chain_riemann_1859"
     st, payload = dispatch("GET", "/chains", {"floors": "1"}, None, EngineConfig("secular"))
     body = payload.get("data") or payload
-    assert st == 200 and len(body["floors"]) == 17
+    assert st == 200 and len(body["floors"]) == 18
 
 
 def test_the_capstone_floor_gathers_the_others_and_marks_the_two_barriers():
@@ -173,3 +173,21 @@ def test_the_lagrangian_floor_is_the_hamiltonians_dual_and_gathers_least_action(
     assert m and len(m["parts"]) == 4
     serves = {s["at"] for s in m["serves"]}
     assert {"card_floor_the_hamiltonian", "card_floor_the_capstone", "card_floor_standard_model"} <= serves
+
+
+def test_noethers_theorem_is_the_seam_between_the_lagrangian_and_the_hamiltonian():
+    """Noether (Matt, 2026-10-09): symmetry is the source of conservation - four pillars resting on the Lagrangian,
+    the capstone, the Hamiltonian and the Standard Model. Pinned on the seed alone."""
+    import seed_noethers_theorem as S7
+    assert S7._validate() == []
+    cards = {c["id"]: json.loads(json.dumps(c)) for c in S7.CARDS}
+    for cid in ("card_floor_the_lagrangian", "card_floor_the_capstone", "card_floor_the_hamiltonian",
+                "card_floor_standard_model", "card_k_floor_of_discovery"):
+        cards.setdefault(cid, {"id": cid, "title": cid, "connections": []})
+    overlay = Path(tempfile.mkdtemp(prefix="nh-noe-")) / "overlay.jsonl"
+    overlay.write_text("\n".join(json.dumps(e) for e in S7.BRIDGES) + "\n", encoding="utf-8")
+    corpus._apply_bridges(cards, overlay)
+    m = chains.floor_map(S7.FLOOR, get_card=cards.get)
+    assert m and len(m["parts"]) == 4
+    serves = {s["at"] for s in m["serves"]}
+    assert {"card_floor_the_lagrangian", "card_floor_the_hamiltonian", "card_floor_standard_model"} <= serves

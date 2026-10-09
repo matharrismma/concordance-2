@@ -46,7 +46,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_the_hamiltonian",
           # the Lagrangian (tools/seed_the_lagrangian.py, 2026-10-09): the Hamiltonian's Legendre dual - least action,
           # the path integral; four pillars on the Hamiltonian + capstone + solve path + Standard Model
-          "card_floor_the_lagrangian")
+          "card_floor_the_lagrangian",
+          # Noether's theorem (tools/seed_noethers_theorem.py, 2026-10-09): symmetry is the source of conservation -
+          # the seam between L and H; four pillars on the Lagrangian + capstone + Hamiltonian + Standard Model
+          "card_floor_noethers_theorem")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:

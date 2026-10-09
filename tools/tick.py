@@ -2024,6 +2024,64 @@ def the_lagrangian() -> int:
     _mint_marks(sid, marks, by="tools/tick.py the_lagrangian")
     return 0
 
+
+def the_noether() -> int:
+    """NOETHER'S THEOREM - symmetry is the source of conservation (Matt, 2026-10-09: "noether's theorum?"). For every
+    continuous symmetry of the action there is a conserved quantity, and conversely (Emmy Noether, 1918). Time-
+    translation symmetry -> energy; space-translation -> momentum; rotation -> angular momentum; the phase (gauge)
+    symmetry -> electric charge. It is the seam between the Lagrangian (symmetries of the action) and the Hamiltonian
+    (the conserved energy), and the precise form of 'many possibilities but the same end': the conserved quantity is
+    the invariant carried unchanged through every path. SEALED: momentum conservation predicts a collision's outcome;
+    angular-momentum conservation the skater's spin-up. The theorem itself is cited to Noether. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "momentum": _rh_seal_num("momentum_conservation_inelastic_collision_final_speed_m_s", "(2*3 + 1*0)/(2+1)", 2.0, tol=1e-9),
+        "angular": _rh_seal_num("angular_momentum_conservation_skater_spin_up_rad_s", "4*1/0.5", 8.0, tol=1e-9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "Noether numbers")
+    sid = TS.create("Noether's theorem - every symmetry a conservation law")["id"]
+    marks = [
+        ("instance", "[space-translation symmetry -> momentum conserved, SEALED] The laws are the same here as there; "
+                     "Noether forces momentum to be conserved. A 2 kg mass at 3 m/s strikes a 1 kg mass at rest and "
+                     "they stick: momentum is conserved, so the final speed is (2*3 + 1*0)/(2+1) = 2 m/s (sealed). The "
+                     "symmetry predicts the outcome - you never had to measure it, the invariance decided it.", S["momentum"]),
+        ("instance", "[rotational symmetry -> angular momentum conserved, SEALED] The laws are the same in every "
+                     "direction; Noether forces angular momentum L = I omega to be conserved. A skater with moment of "
+                     "inertia 4 spinning at 1 rad/s pulls her arms in to 0.5: omega = (4*1)/0.5 = 8 rad/s (sealed) - "
+                     "she spins eight-fold faster for the fourth of the inertia. The symmetry is why.", S["angular"]),
+        ("equivalence", "[the theorem - every continuous symmetry a conservation law] Emmy Noether (1918): for every "
+                        "continuous symmetry of the action there is a conserved quantity, and conversely. Time-"
+                        "translation -> energy; space-translation -> momentum; rotation -> angular momentum; the phase "
+                        "(gauge) symmetry of the wavefunction -> electric charge; the Standard Model's gauge "
+                        "symmetries -> its conserved currents. The deepest structural theorem in physics: it says WHY "
+                        "the conservation laws hold.",
+         {"source": "E. Noether, Invariante Variationsprobleme (1918)"}),
+        ("note", "[the seam between the two floors] Noether lives on the action (Lagrangian) side - it is a statement "
+                 "about symmetries of the action - and the quantity it produces from time-symmetry is exactly the "
+                 "Hamiltonian, the energy. So Noether is the seam between the two floors just built: the Lagrangian's "
+                 "symmetries PRODUCE the Hamiltonian's conserved energy. Ties card_floor_the_lagrangian and "
+                 "card_floor_the_hamiltonian.",
+         {"source": "the variational origin of the conserved Noether current; card_floor_the_lagrangian, card_floor_the_hamiltonian"}),
+        ("note", "[found, never decreed - and the 'same end'] Conservation laws are not arbitrary rules we impose; "
+                 "they are FOUND, compelled as the necessary shadow of a symmetry. You do not postulate conservation "
+                 "of energy - it is forced by the laws not changing in time. That is the engine's own stance (found, "
+                 "never generated), and the precise form of 'many possibilities but the story ends the same': the "
+                 "conserved quantity is the invariant carried unchanged through every path, the same at the end as at "
+                 "the beginning. Ties card_floor_the_capstone.",
+         {"source": "the engine's found-never-generated stance; card_floor_the_capstone"}),
+        ("note", "[the constancy of the law - resonance, stated honestly] The symmetry Noether needs is the constancy "
+                 "of the law: the same yesterday, today and tomorrow; the same here and everywhere. Scripture's image "
+                 "of that constancy - 'I am the LORD, I change not' (Malachi 3:6); 'Jesus Christ the same yesterday, "
+                 "and today, and for ever' (Hebrews 13:8) - is the theological resonance of time-translation "
+                 "symmetry. The physics is the theorem; the Scripture is the README it rhymes with. Stated as "
+                 "resonance, never laundered one into the other.",
+         {"source": "Malachi 3:6; Hebrews 13:8; the time-translation symmetry Noether's energy law requires"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py the_noether")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -8739,6 +8797,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("noether", "noethers_theorem", "noether_theorem", "conservation_laws"):
+        return the_noether()
     if a[0] in ("lagrangian", "the_lagrangian", "lagrangian_mechanics", "the_path_chosen"):
         return the_lagrangian()
     if a[0] in ("hamiltonian", "the_hamiltonian", "energy_operator", "law_of_the_flow"):
