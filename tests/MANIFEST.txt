@@ -334,6 +334,7 @@ test_site.py
 test_slotfill.py
 test_smith_chart.py
 test_soil_science.py
+test_solve_path.py
 test_sources.py
 test_sources_ark.py
 test_spectral.py

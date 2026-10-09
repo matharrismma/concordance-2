@@ -31,7 +31,9 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_logarithm", "card_floor_riemann", "card_floor_bsd", "card_floor_navier_stokes",
           "card_floor_yang_mills", "card_floor_p_vs_np", "card_floor_hodge", "card_floor_poincare",
           # the instruments (tools/seed_instruments.py, 2026-10-09): every verifier and validator, found from imports
-          "card_floor_the_instruments")
+          "card_floor_the_instruments",
+          # the solve path (tools/seed_solve_path.py, 2026-10-09): both doors as the steps of the method
+          "card_floor_the_solve_path")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
