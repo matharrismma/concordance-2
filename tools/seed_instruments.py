@@ -49,7 +49,7 @@ GLOBAL_FLOOR = "card_k_floor_of_discovery"
 # the roots of the instrument trees (the deepest shared floors + each island's root)
 # riemann_accel (the Riemann-Siegel acceleration) and number_theory mutually import; the collapsed graph makes
 # the acceleration upstream (a tool number_theory builds on), so it is a root of its own tree.
-ROOTS = ["si_units", "_boolean", "number_theory", "riemann_accel", "scripture", "elliptic_curves"]
+ROOTS = ["si_units", "_boolean", "number_theory", "riemann_accel", "scripture", "elliptic_curves", "approximation"]
 
 # a readable title where the module name is not self-explaining
 TITLES = {
@@ -61,7 +61,7 @@ TITLES = {
     "number_theory": "Number theory", "riemann_accel": "The Riemann-Siegel acceleration",
     "elliptic_curves": "Elliptic curves", "mathematics": "Mathematics — the numeric substrate",
     "computer_science": "Computer science", "formal_logic": "Formal logic", "scripture": "Scripture",
-    "linguistics": "Linguistics",
+    "linguistics": "Linguistics", "approximation": "Get close - a bounded estimate",
 }
 
 # the gate: the validators that sit above every verifier (module in source.ref; the edge to what they gate)
@@ -99,6 +99,9 @@ SERVICE = [
     ("mathematics", "card_floor_logarithm",
      "mathematics' numeric mode evaluates every expression the whole map seals - including li(1000), log 2, the "
      "law of the wall - the universal instrument"),
+    ("approximation", "card_question_p_vs_np",
+     "the get-close door: a bounded estimate (anchor + one step, Taylor/Lipschitz error) - the practical response to "
+     "the three barriers, which say an exact answer cannot always be found by rule"),
 ]
 
 

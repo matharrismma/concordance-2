@@ -1011,6 +1011,80 @@ def logarithm_chain() -> int:
     ], by=by)
     return 0
 
+
+def get_close() -> int:
+    """GET FAIRLY CLOSE, WITH A PROVEN BOUND (Matt, 2026-10-09: "What we need is a way to get fairly close." - "build").
+    The set path's approximation step, demonstrated and sealed: anchor on a point known exactly, take ONE step toward
+    the target, bound the step. For three elementary functions the estimate (f0 + f1*(x-x0)), the Taylor error bound
+    (sup|f''|*(x-x0)^2/2) and the SLACK (the bound minus the true distance, > 0 - so the true value provably lies
+    inside) are each sealed. The verifier src/concordance/verifiers/approximation.py does this for any query, and
+    REFUSES a closeness claim the true value does not satisfy (0 false positives). This is how you cope with the
+    barriers: not an exact answer by rule, but a close one with a proven error. Idempotent."""
+    import math
+    from concordance import tickstick as TS
+    S = {}
+    # (label, estimate expr, err expr, slack expr) - each sealed; slack > 0 proves the true value is inside
+    rows = [
+        ("sqrt(26) from sqrt(25)=5",
+         "5 + (1/(2*sqrt(25)))*(26 - 25)", "(1/(4*25**1.5))*(26 - 25)**2/2",
+         "(1/(4*25**1.5))*(26 - 25)**2/2 - abs(5 + (1/(2*sqrt(25)))*(26 - 25) - sqrt(26))"),
+        ("exp(0.1) from exp(0)=1",
+         "exp(0) + exp(0)*(0.1 - 0)", "exp(0.1)*(0.1 - 0)**2/2",
+         "exp(0.1)*(0.1 - 0)**2/2 - abs(exp(0) + exp(0)*(0.1 - 0) - exp(0.1))"),
+        ("ln(1.1) from ln(1)=0",
+         "log(1) + (1/1)*(1.1 - 1)", "(1/1**2)*(1.1 - 1)**2/2",
+         "(1/1**2)*(1.1 - 1)**2/2 - abs(log(1) + (1/1)*(1.1 - 1) - log(1.1))"),
+    ]
+    vals = {
+        "sqrt(26) from sqrt(25)=5": (5.1, 0.001, 0.001 - abs(5.1 - math.sqrt(26))),
+        "exp(0.1) from exp(0)=1": (1.1, math.exp(0.1) * 0.01 / 2, math.exp(0.1) * 0.01 / 2 - abs(1.1 - math.exp(0.1))),
+        "ln(1.1) from ln(1)=0": (0.1, 0.005, 0.005 - abs(0.1 - math.log(1.1))),
+    }
+    for label, e_expr, b_expr, s_expr in rows:
+        ev, bv, sv = vals[label]
+        S[label + "/est"] = _rh_seal_num("get_close_" + label.split(" ")[0] + "_estimate", e_expr, float(ev), tol=1e-9)
+        S[label + "/err"] = _rh_seal_num("get_close_" + label.split(" ")[0] + "_error_bound", b_expr, float(bv), tol=1e-9)
+        S[label + "/slk"] = _rh_seal_num("get_close_" + label.split(" ")[0] + "_slack_true_value_inside", s_expr, float(sv), tol=1e-9)
+        if not (S[label + "/est"] and S[label + "/err"] and S[label + "/slk"]):
+            print("a seal failed for", label); return 1
+        if sv <= 0:
+            print("the slack is not positive for", label, "- the bound would not hold"); return 1
+    print("sealed", len(S), "get-close numbers")
+    sid = TS.create("Get fairly close, with a proven bound")["id"]
+    marks = [
+        ("instance", "[the anchor and one step, sealed] sqrt(26) anchored at sqrt(25) = 5: estimate 5 + (1/2*1/5)(26-25) "
+                     "= 5.1 (sealed), Taylor error bound (sup|f''|)(1)^2/2 = (1/(4*25^1.5))/2 = 0.001 (sealed). The true "
+                     "sqrt(26) = 5.09902 lies inside [5.099, 5.101] - the slack 0.001 - |5.1 - sqrt(26)| = 2.0e-5 is "
+                     "sealed POSITIVE, so the bound provably holds. One evaluation at the anchor, not a search.",
+         S["sqrt(26) from sqrt(25)=5/slk"]),
+        ("instance", "[a second] exp(0.1) anchored at exp(0) = 1: estimate 1 + 1*(0.1) = 1.1 (sealed), error bound "
+                     "exp(0.1)(0.1)^2/2 = 0.00553 (sealed). True exp(0.1) = 1.10517 inside; slack 3.5e-4 sealed positive.",
+         S["exp(0.1) from exp(0)=1/slk"]),
+        ("instance", "[a third] ln(1.1) anchored at ln(1) = 0: estimate 0 + 1*(0.1) = 0.1 (sealed), error bound "
+                     "(1)(0.1)^2/2 = 0.005 (sealed). True ln(1.1) = 0.09531 inside; slack 3.1e-4 sealed positive.",
+         S["ln(1.1) from ln(1)=0/slk"]),
+        ("postulate", "[what it rests on] The error bound is Taylor's theorem with the Lagrange remainder: for f twice "
+                      "differentiable, |f(x) - (f(x0) + f'(x0)(x - x0))| <= (sup|f''| on the interval)(x - x0)^2/2. It is "
+                      "a theorem, so the bound holds whenever the supplied curvature bound is a true sup - the engine "
+                      "computes it exactly for the elementary functions, and takes it as given otherwise; from its "
+                      "working the estimate's trustworthiness is inferred, never the exact value kept as fact.",
+         {"source": "Taylor's theorem with the Lagrange form of the remainder; B. Taylor (1715), J.-L. Lagrange (1797)"}),
+        ("note", "[0 false positives] The door never calls a thing close that is not: a closeness claim 'f(x) within e "
+                 "of v' is CONFIRMED only when the true value (for a known function) or the bounded estimate lies in "
+                 "[v-e, v+e]; a claim with too small an e is a MISMATCH. The bound is checked, never assumed - a "
+                 "'fairly close' answer always carries how close.",
+         {"source": "src/concordance/verifiers/approximation.py (APPROX_VERIFY)"}),
+        ("note", "[the set path's approximation step] The barriers (card_floor_p_vs_np) say an exact answer cannot "
+                 "always be found by rule; this is the rule for getting close. Anchor on a solved neighbour or an easy "
+                 "surrogate (relax the hard constraint, keep the first term), take one bounded step, seal the gap. "
+                 "Refinement tightens the bound only if the decision needs it; most of the time fairly close, with a "
+                 "proven bound, is the answer and you stop. The proposer stays free; the bound carries the certainty.",
+         {"source": "the set path: exclude from outside (the barriers, the moat), converge from inside (approximation, "
+                    "refinement); src/concordance/verifiers/approximation.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py get_close")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -7724,6 +7798,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("get_close", "approximation", "bounded_estimate"):
+        return get_close()
     if a[0] in ("logarithm_chain", "logarithm", "log_chain"):
         return logarithm_chain()
     if a[0] in ("millennium_map", "one_map", "joints_map"):

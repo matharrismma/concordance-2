@@ -10,6 +10,7 @@ test_almanac.py
 test_alpha_anchored_checks.py
 test_api.py
 test_apothecary.py
+test_approximation.py
 test_archaeology.py
 test_architecture.py
 test_ask.py

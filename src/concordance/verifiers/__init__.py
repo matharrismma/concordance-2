@@ -26,6 +26,10 @@ VERIFIERS: Dict[str, str] = {
     # formal reasoning
     "mathematics": _P + "mathematics", "math": _P + "mathematics",
     "number_theory": _P + "number_theory",
+    # get fairly close, with a proven bound (2026-10-09: "What we need is a way to get fairly close.") - the set
+    # path's approximation step: anchor + one bounded step, the error a Taylor/Lipschitz remainder.
+    "approximation": _P + "approximation", "get_close": _P + "approximation",
+    "bounded_estimate": _P + "approximation",
     # RH by elimination through the divisor sum (Robin 1984) — a number_theory check, named so the engine
     # routes a Robin query and the nightly benchmark runs it on its own golden (2026-10-05)
     "robin": _P + "number_theory", "robins_inequality": _P + "number_theory",
