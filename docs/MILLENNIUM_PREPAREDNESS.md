@@ -77,6 +77,20 @@ the FLAG lattice compilation; a strong-coupling-expansion calculator so the prov
 a stated coupling, not only cited. Also in this iteration: the Li cap set from the measured time (thirty terms took
 sixty-six minutes; the practical cap is twenty-five, the Keiper/Maslanka tables the honest reach beyond it).
 
+**P versus NP, 2026-10-09.** The stick held three cited barriers and nothing sealed. Linked: the one ratcheting
+bound the problem has, the best proven circuit lower bound for an explicit function, (3 + 1/86)n gates
+(Find–Golovnev–Hirsch–Kulikov 2016, raised from Blum 1984's 3n), sealed at n = 1000 and carried as the stick's
+bound, so its open line now reads "beyond 3.0116 n gates: not verified here"; five more sealed instances, the time
+hierarchy's separating factor, the brute-force count 2⁵⁰, the 3-SAT threshold instance at 4.267 clauses per
+variable, Cook–Levin's quadratic blow-up; the postulate stated, polynomial time is feasibility on the Church–Turing
+model (Cobham, Edmonds 1965); the proven links cited, Cook–Levin and Karp (P = NP ⇔ SAT ∈ P), Hartmanis–Stearns (P ≠
+EXPTIME), Ladner 1975, Williams 2011 (a lower bound proven past all three barriers); the window read: everything
+between linear and superpolynomial. Gaps, each an open want: the cited texts and Aaronson's survey for inclusion;
+geometric complexity theory as the one road not yet excluded, cited; a bounded SAT solver door so a stated
+instance's satisfiability is computed and sealed here. The process improved by the attempt: the stick's bound kind
+carries a coefficient with a unit, so a lower-bound ladder ratchets the way a verification height does; and the
+want ledger's 300-character rule held, so a long want is split, never truncated.
+
 ## Why Riemann is first
 
 It has the only ratcheted bound in the store (T = 10⁷), the most verifiers behind it, and three equivalences

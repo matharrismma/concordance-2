@@ -461,6 +461,81 @@ def yang_mills_next() -> int:
     _mint_marks(sid, marks, by="tools/tick.py yang_mills_next")
     return 0
 
+
+def p_versus_np_next() -> int:
+    """P VERSUS NP - THE NEXT LINKS (the Millennium loop, 2026-10-09; the law: nothing out of thin air, everything bound).
+    The stick held three cited barriers (relativization, natural proofs, algebrization) and nothing sealed. Now: the
+    one ratcheting BOUND the problem has - the best proven circuit lower bound for an explicit function, 3n (Blum 1984)
+    raised to (3 + 1/86) n (Find-Golovnev-Hirsch-Kulikov 2016), sealed at n = 1000 and carried as the stick's bound with
+    the window above it (superlinear is unknown; 2^n / n would be needed); the hierarchy theorem's separating factor; the
+    brute-force count 2^50; the 3-SAT threshold instance; Cook-Levin's quadratic blow-up. Proven links cited: Cook 1971 /
+    Levin 1973 (P = NP <=> SAT in P), Hartmanis-Stearns 1965 (P != EXPTIME), Ladner 1975, Williams 2011 (NEXP not in ACC0,
+    a lower bound past all three barriers). The POSTULATE: polynomial time is feasibility (Cobham 1965, Edmonds 1965) on
+    the Church-Turing model. The window read. Idempotent."""
+    import math
+    from concordance import tickstick as TS
+    S = {}
+    seals = [
+        ("blum", "blum_1984_circuit_lower_bound_3n_at_n_1000", "3*1000", 3000.0, 1e-12),
+        ("fghk", "fghk_2016_circuit_lower_bound_3_plus_1_over_86_n_at_n_1000", "(3 + 1/86)*1000", (3 + 1 / 86) * 1000, 1e-9),
+        ("hier", "time_hierarchy_separating_factor_log_n_at_n_1e6", "log(1e6)", math.log(1e6), 1e-9),
+        ("brute", "brute_force_assignments_of_50_variables", "2**50", 2.0 ** 50, 1e-12),
+        ("sat", "three_sat_satisfiability_threshold_clauses_at_n_1000", "4.267*1000", 4267.0, 1e-9),
+        ("cook", "cook_levin_circuit_size_t_squared_at_t_1e6", "(1e6)**2", 1e12, 1e-9),
+    ]
+    for key, nid, expr, val, tol in seals:
+        S[key] = _rh_seal_num(nid, expr, float(val), tol=tol)
+        if not S[key]:
+            print("a seal failed:", nid); return 1
+    print("sealed", len(S), "P vs NP numbers:", ", ".join(f"{k}={v[:8]}" for k, v in S.items()))
+    sid = TS.create("P versus NP")["id"]
+    marks = [
+        ("bound", "The best PROVEN circuit lower bound for an explicit Boolean function is (3 + 1/86) n - o(n) gates "
+                  "(Find, Golovnev, Hirsch, Kulikov 2016), raised from Blum's 3n - o(n) of 1984; at n = 1000 that is 3011.6 "
+                  "gates (sealed). Every lower bound ever proven for an explicit function is linear; P != NP by circuits "
+                  "would need superpolynomial. This is the stick's one ratcheting number: the window above it is the whole "
+                  "problem.", {"seal": S["fghk"], "up_to": 3 + 1 / 86, "unit": "n gates (explicit lower bound)"}),
+        ("instance", "[the ladder's first rung] Blum 1984: 3n - o(n) gates for an explicit function - 3000 at n = 1000 "
+                     "(sealed). Thirty-two years to raise it by n/86.", S["blum"]),
+        ("instance", "[the one separation that is easy] The time hierarchy theorem (Hartmanis-Stearns 1965): more time "
+                     "decides more; DTIME(n^2) is strictly inside DTIME(n^2 log^2 n), and so P != EXPTIME - PROVEN. The "
+                     "separating factor at n = 10^6 is log n = 13.8 (sealed). The theorem works by diagonalization, which "
+                     "relativizes - which is exactly why it cannot reach P vs NP (the first barrier on this stick).",
+         S["hier"]),
+        ("instance", "[what brute force costs] Fifty Boolean variables have 2^50 = 1.13e15 assignments (sealed). SAT asks "
+                     "whether one of them works; P = NP would mean the question never needs the count.", S["brute"]),
+        ("instance", "[where hardness lives, measured] Random 3-SAT at n variables goes from almost surely satisfiable to "
+                     "almost surely not at about 4.267 clauses per variable (Mertens-Mezard-Zecchina 2006, the cavity "
+                     "prediction; the threshold's existence is Friedgut's theorem) - 4267 clauses at n = 1000 (sealed as "
+                     "the instance of a stated constant). The hardest instances cluster at the transition.", S["sat"]),
+        ("instance", "[Cook-Levin: the reduction's cost] A computation of t steps becomes a circuit of O(t^2) gates "
+                     "(t = 10^6 gives 10^12, sealed), so every NP problem reduces to SAT in polynomial time - which is why "
+                     "ONE problem carries the whole question: P = NP if and only if SAT is in P.", S["cook"]),
+        ("postulate", "[the postulate it builds on] Polynomial time is feasibility: a problem is tractable when some "
+                      "algorithm solves every instance of size n within n^k steps for a fixed k, on a Turing machine - "
+                      "the Cobham-Edmonds thesis on the Church-Turing model. Not kept as a fact: every algorithm in use "
+                      "works under it, and the classes P and NP are defined by it; from its working the truth of the "
+                      "framing is inferred - never proven, never kept as fact.",
+         {"source": "A. Cobham (1965); J. Edmonds, Paths, trees, and flowers (1965); A. Church (1936), A. Turing (1936)"}),
+        ("equivalence", "[proven links] Cook 1971 / Levin 1973: SAT is NP-complete, so P = NP <=> SAT in P; Karp 1972: "
+                        "twenty-one problems join it. Hartmanis-Stearns 1965: P != EXPTIME. Ladner 1975: if P != NP there "
+                        "are NP problems neither in P nor NP-complete. Williams 2011: NEXP is not in ACC0 - a lower bound "
+                        "proven PAST all three barriers on this stick, the first in decades, by an algorithm for "
+                        "circuit-satisfiability turned into a separation.",
+         {"source": "S. A. Cook (1971); L. Levin (1973); R. M. Karp (1972); J. Hartmanis, R. E. Stearns (1965); R. E. Ladner (1975); R. Williams, Non-uniform ACC circuit lower bounds (2011)"}),
+        ("note", "[the surviving window, read] Sealed: the lower-bound ladder's rungs, the hierarchy factor, the brute-force "
+                 "count, the threshold instance, the reduction's cost. Proven (cited): SAT is complete, P != EXPTIME, "
+                 "Ladner, Williams. Excluded (cited, already on this stick): relativization, natural proofs, algebrization "
+                 "- a proof must use the specific structure of computation in a way none of those do. Open: everything "
+                 "between (3 + 1/86) n and superpolynomial. Gaps become wants: the cited texts (Cook, Karp, Blum, FGHK, "
+                 "Williams) and Aaronson's survey for inclusion; the geometric complexity theory program (Mulmuley-Sohoni) "
+                 "as the one road not yet excluded, cited; a SAT solver door so a stated instance's satisfiability is "
+                 "COMPUTED and sealed here. Every link sealed or cited; nothing out of thin air; the chain not closed.",
+         {"source": "S. Aaronson, P =? NP (2016), in Open Problems in Mathematics; K. Mulmuley, M. Sohoni (2001); this stick's three exclusions"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py p_versus_np_next")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -7174,6 +7249,8 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("p_versus_np_next", "pnp_next", "circuit_lower_bound", "cook_levin", "sat_threshold"):
+        return p_versus_np_next()
     if a[0] in ("yang_mills_next", "ym_next", "mass_gap_next", "string_tension", "glueball", "asymptotic_freedom"):
         return yang_mills_next()
     if a[0] in ("navier_stokes_next", "ns_next", "existence_and_smoothness", "taylor_green", "poiseuille"):
