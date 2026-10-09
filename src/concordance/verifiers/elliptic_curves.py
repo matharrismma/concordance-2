@@ -201,8 +201,119 @@ def verify_l_value(spec: Dict[str, Any]) -> VerifierResult:
     return confirm(name, f"L(E,1) = {L1:.6f} (cutoff-independent, so w = {w:+d} is right); analytic rank {rank_bound}; {theorem}", data)
 
 
+
+def real_period(ainv: List[int]) -> Dict[str, Any]:
+    """Omega_E, the real period of the Neron differential, COMPUTED: on the short model Y^2 = X^3 - 27 c4 X - 54 c6
+    (X = 36x + 3 b2, Y = 108(2y + a1 x + a3), so dX/(2Y) = omega/6), the integral 2 int_{e1}^{inf} dX / sqrt(f) over the
+    unbounded real component equals 2 * Omega_short, hence Omega = 3 * that integral, times 2 when the discriminant is
+    positive (two real components; the BSD period integrates over all of E(R)). Checked against Cremona's tables for
+    11a1, 37a1, 389a1 and 5077a1 in tests/test_bsd_formula.py."""
+    from mpmath import mp, mpf, quad, sqrt, polyroots, inf, re as _re
+    c4, c6, disc = _c4_c6(*ainv)
+    saved = mp.dps
+    try:
+        mp.dps = 25
+        roots = polyroots([1, 0, -27 * c4, -54 * c6])
+        real = sorted([_re(r) for r in roots if abs(r.imag) < mpf(10) ** -10])
+        e1 = real[-1]
+        f = lambda X: 1 / sqrt(X ** 3 - 27 * c4 * X - 54 * c6)      # noqa: E731
+        I = 2 * quad(f, [e1, inf])
+        comps = 2 if disc > 0 else 1
+        omega = 3 * _re(I) * comps
+        return {"omega": float(omega), "components": comps, "largest_real_root_short_model": float(e1)}
+    finally:
+        mp.dps = saved
+
+
+def verify_bsd_formula(spec: Dict[str, Any]) -> VerifierResult:
+    """THE FULL BIRCH-SWINNERTON-DYER FORMULA ON ONE CURVE (2026-10-09, the Millennium loop). For analytic rank 0:
+    L(E,1) / Omega = |Sha| * prod c_p / |E(Q)_tors|^2; for rank 1: L'(E,1) / Omega = |Sha| * prod c_p * R / |T|^2.
+    COMPUTED here: L(E,1) or L'(E,1) by the approximate functional equation, Omega by integration (real_period).
+    CITED inputs (never computed here; the spec must name their source): tamagawa_product, torsion_order, sha_order
+    (default 1) and, for rank 1, regulator. The check is the equality of the two sides to the AFE's precision; a
+    curve of analytic rank >= 2 is DECLINED (no theorem carries it). Honest about what it is: for rank 0 and 1 the
+    formula is a THEOREM for these curves once Sha is known (Kolyvagin; Gross-Zagier), so a confirmed instance is a
+    sealed link of a proven case, with its cited inputs named.
+      ELLIPTIC_VERIFY: {"a_invariants": [0,-1,1,-10,-20], "conductor": 11, "root_number": 1, "tamagawa_product": 5,
+                        "torsion_order": 5, "sha_order": 1, "inputs_source": "Cremona's tables / LMFDB 11.a3",
+                        "claimed_bsd_holds": true}"""
+    name = "elliptic_curves.bsd_formula"
+    try:
+        ainv = [int(x) for x in spec.get("a_invariants")]
+        N = int(spec.get("conductor"))
+        w = int(spec.get("root_number"))
+        cp = int(spec.get("tamagawa_product"))
+        tors = int(spec.get("torsion_order"))
+        sha = int(spec.get("sha_order", 1))
+    except (TypeError, ValueError):
+        return error(name, "a_invariants, conductor, root_number, tamagawa_product and torsion_order (integers) are required; sha_order defaults to 1")
+    if spec.get("claimed_bsd_holds") is None:
+        return na(name, "claim claimed_bsd_holds")
+    if len(ainv) != 5 or w not in (-1, 1) or N < 11 or cp < 1 or tors < 1 or sha < 1:
+        return error(name, "a_invariants must be five integers; root_number +1/-1; conductor >= 11; tamagawa_product, torsion_order, sha_order >= 1")
+    if N % 2 == 0 or N % 3 == 0:
+        return na(name, f"conductor {N} is divisible by 2 or 3: the reduction type at 2 and 3 is not held here — declined")
+    if N > 200000:
+        return error(name, f"conductor {N} is beyond this door (<= 200000)")
+    source = str(spec.get("inputs_source") or "").strip()
+    if not source:
+        return error(name, "inputs_source is required: the Tamagawa product, torsion and Sha are CITED inputs, never computed here")
+    c4, c6, disc = _c4_c6(*ainv)
+    if disc == 0:
+        return error(name, "the discriminant is zero: not an elliptic curve")
+    M = int(10 * math.sqrt(N)) + 200
+    try:
+        an = _an(M, N, ainv)
+        L1a, L1b = _L1(an, N, w, 1.0), _L1(an, N, w, 1.3)
+        if abs(L1a - L1b) > 1e-6 * max(1.0, abs(L1a)):
+            return mismatch(name, f"the L-value depends on the cutoff ({L1a:.8f} vs {L1b:.8f}): the root number or conductor is wrong", {})
+        per = real_period(ainv)
+    except Exception as e:  # noqa: BLE001
+        return error(name, f"computation failed: {type(e).__name__}: {e}")
+    omega = per["omega"]
+    data: Dict[str, Any] = {"curve": {"a_invariants": ainv, "conductor": N, "c4": c4, "c6": c6, "discriminant": disc},
+                            "computed": {"L1": L1a, "omega": omega, "real_components": per["components"]},
+                            "cited": {"tamagawa_product": cp, "torsion_order": tors, "sha_order": sha, "source": source}}
+    if abs(L1a) > 1e-8:
+        rank = 0
+        left = L1a / omega
+        right = sha * cp / (tors ** 2)
+        data["formula"] = "L(E,1) / Omega = |Sha| * prod c_p / |T|^2"
+        data["theorem"] = "rank 0: L(E,1) != 0 => rank E(Q) = 0 and Sha finite (Kolyvagin 1989); the formula is then a theorem for this curve"
+    elif w == -1:
+        Lp = _Lprime1(an, N)
+        data["computed"]["Lprime1"] = Lp
+        if abs(Lp) <= 1e-8:
+            return na(name, "L(E,1) = 0 and L'(E,1) = 0 numerically: analytic rank >= 3, no theorem carries the formula — declined")
+        try:
+            R = float(spec.get("regulator"))
+        except (TypeError, ValueError):
+            return error(name, "rank 1 needs the regulator (the canonical height of a generator) as a cited input")
+        rank = 1
+        data["cited"]["regulator"] = R
+        left = Lp / omega
+        right = sha * cp * R / (tors ** 2)
+        data["formula"] = "L'(E,1) / Omega = |Sha| * prod c_p * R / |T|^2"
+        data["theorem"] = "rank 1: L(E,1) = 0, L'(E,1) != 0 => rank E(Q) = 1 and Sha finite (Gross-Zagier 1986, Kolyvagin 1989); the formula is then a theorem for this curve"
+    else:
+        return na(name, "L(E,1) = 0 with root number +1: analytic rank >= 2, no theorem carries the formula — declined")
+    data["rank"] = rank
+    data["left_side"] = left
+    data["right_side"] = right
+    tol = clamp_tol(spec, "tolerance_relative", 1e-4)
+    holds = abs(left - right) <= tol * max(abs(right), 1e-12)
+    data["bsd_holds"] = holds
+    if bool(spec.get("claimed_bsd_holds")) != holds:
+        return mismatch(name, f"{data['formula']}: left {left:.8f}, right {right:.8f} ({'equal' if holds else 'NOT equal'} to {tol:g}); "
+                              f"claimed {bool(spec.get('claimed_bsd_holds'))}", data)
+    return confirm(name, f"{data['formula']} holds for this curve to {tol:g}: {left:.8f} = {right:.8f} (L computed by the AFE, "
+                         f"Omega = {omega:.10f} computed by integration; Tamagawa {cp}, torsion {tors}, Sha {sha}"
+                         f"{', regulator ' + format(data['cited']['regulator'], '.10f') if rank == 1 else ''} cited from {source}); {data['theorem']}", data)
+
+
 _RULES = [
-    (lambda ev: all(k in ev for k in ("a_invariants", "conductor", "root_number")), verify_l_value),
+    (lambda ev: all(k in ev for k in ("a_invariants", "conductor", "root_number", "tamagawa_product", "torsion_order")), verify_bsd_formula),
+    (lambda ev: all(k in ev for k in ("a_invariants", "conductor", "root_number")) and "tamagawa_product" not in ev, verify_l_value),
 ]
 
 

@@ -37,6 +37,19 @@ build item once located); the Keiper/Maslanka tables of λ_n to 3300 (a cross-ch
 process improved by the attempt: a verifier that errors when its own computation disagrees with a closed form, and
 the rule that a gap is written as a want naming its source.
 
+**Birch and Swinnerton-Dyer, 2026-10-09.** Linked: the FULL formula sealed for 11a1 (rank 0: L(E,1)/Ω = |Sha|·∏c_p/|T|²
+= 1/5) and 37a1 (rank 1: L′(E,1)/Ω = R) through a new verifier (`elliptic_curves.bsd_formula`): the L-value by the
+approximate functional equation and the real period by integration are COMPUTED here (the period checked against
+Cremona's tables for four curves to a part in a billion, both signs of the discriminant); the Tamagawa product,
+torsion, |Sha| and the regulator are CITED inputs the spec must source, now included beside the a-invariants in the
+tick tool. Cited as links: Kolyvagin 1989 and Gross–Zagier 1986 (rank 0 and 1 are theorems), the modularity
+theorem (the left side always exists), the proven proportion (Bhargava–Skinner–Zhang 2014: at least 66.48% of
+curves satisfy BSD, carried as a bound with the window above it), Cassels 1962 (|Sha| is a square). The stick went
+from 30 rank instances to 32, with the formula itself now on it. Gaps, each an open want: Cremona's full tables, so
+the formula can be sealed curve by curve (license to be checked before carding); Silverman 1988, so the regulator is
+computed and not cited. The process improved by the attempt: a verifier whose inputs must name their source or it
+errors, and a rank the theorems do not carry is declined, never guessed.
+
 ## Why Riemann is first
 
 It has the only ratcheted bound in the store (T = 10⁷), the most verifiers behind it, and three equivalences

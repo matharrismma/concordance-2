@@ -35,6 +35,7 @@ test_biology.py
 test_bookofdays.py
 test_branch.py
 test_bridges.py
+test_bsd_formula.py
 test_byom.py
 test_cabinet.py
 test_calendar_time.py

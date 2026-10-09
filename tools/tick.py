@@ -201,8 +201,180 @@ def riemann_li(n_max: int = 30) -> int:
     _mint_marks(sid, marks, by="tools/tick.py riemann_li")
     return 0
 
+
+def bsd_formula() -> int:
+    """THE BSD STICK, NEXT LINKS (the Millennium loop, 2026-10-09; the law: nothing out of thin air, everything bound).
+    The stick held 30 instances of the RANK (L(E,1) or L'(E,1) computed, the rank carried by theorem). It did not hold
+    the FORMULA. Now: the full Birch-Swinnerton-Dyer formula sealed for 11a1 (rank 0: L(E,1)/Omega = |Sha| prod c_p / |T|^2
+    = 1/5) and 37a1 (rank 1: L'(E,1)/Omega = |Sha| prod c_p R / |T|^2 = R) through elliptic_curves.bsd_formula - the
+    L-value and the real period COMPUTED here, the Tamagawa product, torsion, Sha and regulator CITED from Cremona's tables
+    and included beside the a-invariants. Then the theorems that close links (Kolyvagin 1989, Gross-Zagier 1986, the
+    modularity theorem) as equivalences, the proven proportion (Bhargava-Skinner-Zhang 2014: at least 66.48% of elliptic
+    curves satisfy BSD) as a cited bound, Cassels 1962 (|Sha| is a square when finite), and the surviving window. Idempotent."""
+    from concordance import receipts, tickstick as TS
+    from concordance.derivation import verify_derivation
+    from concordance.engine import EngineConfig
+    sid = TS.create("Birch and Swinnerton-Dyer conjecture")["id"]
+    marks = []
+    for label in ("11a1", "37a1"):
+        c, inp = CURVES[label], CURVES_BSD_INPUTS[label]
+        spec = {"a_invariants": c["a"], "conductor": c["N"], "root_number": c["w"], **inp, "claimed_bsd_holds": True}
+        res = verify_derivation([{"id": "bsd_formula", "domain": "elliptic_curves", "spec": {"ELLIPTIC_VERIFY": spec}}])
+        if res.get("verdict") != "HOLDS":
+            print(label, "the verifier did not HOLD:", json.dumps(res)[:500]); return 1
+        res = receipts.attach(res, config=EngineConfig(), domain="elliptic_curves")
+        seal = (res.get("seal") or {}).get("content_hash")
+        if not seal:
+            print(label, "no seal minted"); return 1
+        detail = ""
+        for st in (res.get("trail") or res.get("steps") or []):
+            if isinstance(st, dict) and "bsd_formula" in json.dumps(st):
+                detail = str(st.get("detail") or (st.get("result") or {}).get("detail") or "")[:260]; break
+        print("sealed", label, seal, "|", detail[:120])
+        if label == "11a1":
+            marks.append(("instance", f"E = 11a1 (conductor 11), THE FULL FORMULA: L(E,1)/Omega = |Sha| * prod c_p / |T|^2 = 1 * 5 / 5^2 = 1/5 "
+                                      f"- L(E,1) computed by the approximate functional equation and Omega = 1.2692093043 computed by "
+                                      f"integration (sealed); the Tamagawa product 5, torsion 5 and |Sha| = 1 cited from Cremona's tables "
+                                      f"(LMFDB 11.a3). For analytic rank 0 the formula is a theorem for this curve once Sha is known "
+                                      f"(Kolyvagin 1989); this is a sealed link of a proven case. {detail[:160]}", seal))
+        else:
+            marks.append(("instance", f"E = 37a1 (conductor 37), THE FULL FORMULA at rank 1: L'(E,1)/Omega = |Sha| * prod c_p * R / |T|^2 = R "
+                                      f"= 0.0511114082 - L'(E,1) computed by the approximate functional equation and Omega = 5.9869172925 "
+                                      f"computed by integration (sealed); the regulator (the canonical height of the generator (0,0)), "
+                                      f"Tamagawa 1, torsion 1 and |Sha| = 1 cited from Cremona's tables (LMFDB 37.a1). Gross-Zagier 1986 "
+                                      f"and Kolyvagin 1989 make rank 1 a proven case. {detail[:160]}", seal))
+    marks += [
+        ("equivalence", "For analytic rank 0 or 1, BSD's rank statement is a THEOREM: L(E,1) != 0 => rank E(Q) = 0 and Sha(E) finite "
+                        "(Kolyvagin 1989, using Gross-Zagier 1986 and Kolyvagin's Euler system); L(E,1) = 0 with L'(E,1) != 0 => rank 1 "
+                        "and Sha finite. The modularity theorem (Wiles 1995; Breuil-Conrad-Diamond-Taylor 2001) makes L(E,s) entire "
+                        "for every elliptic curve over Q, so the left side always exists.",
+         {"source": "V. Kolyvagin (1989); B. Gross, D. Zagier (1986); A. Wiles (1995); C. Breuil, B. Conrad, F. Diamond, R. Taylor (2001)"}),
+        ("equivalence", "A PROVEN PROPORTION, carried as a bound: at least 66.48% of elliptic curves over Q (ordered by naive height) have "
+                        "rank 0 or 1 and satisfy the Birch and Swinnerton-Dyer rank conjecture (Bhargava-Skinner-Zhang 2014, with "
+                        "Bhargava-Shankar on the average size of Selmer groups and Skinner-Urban / Zhang on the converse to Gross-"
+                        "Zagier-Kolyvagin). The window above the bound - the remaining proportion and every curve of rank >= 2 - "
+                        "stays open.",
+         {"source": "M. Bhargava, C. Skinner, W. Zhang, A majority of elliptic curves over Q satisfy the Birch and Swinnerton-Dyer conjecture (2014, arXiv:1407.1826); M. Bhargava, A. Shankar (2015)"}),
+        ("equivalence", "If Sha(E) is finite, its order is a perfect square (Cassels 1962, the alternating pairing on Sha) - so the "
+                        "formula's |Sha| is never a non-square; the stick's two sealed instances carry |Sha| = 1 = 1^2.",
+         {"source": "J. W. S. Cassels, Arithmetic on curves of genus 1 IV (1962)"}),
+        ("note", "[the surviving window, read] Sealed: the rank for 30 curves of conductor <= 5077 (Kolyvagin/Gross-Zagier carry "
+                 "rank 0 and 1; rank 2 and 3 are reported numerically, no theorem) and now the FULL FORMULA for 11a1 and 37a1 "
+                 "with the period computed and the arithmetic inputs cited. Cited: the rank-0/1 theorem, modularity, the proven "
+                 ">= 66.48% proportion, Cassels' square. Open: every curve of analytic rank >= 2 (389a1, 5077a1 on this stick), the "
+                 "finiteness of Sha in general, and the formula for the remaining proportion. Gaps become wants: Cremona's full "
+                 "tables (Tamagawa numbers, torsion, regulators, |Sha| for every curve of conductor <= 500000) so the formula can "
+                 "be sealed curve by curve; the canonical height, so the regulator is COMPUTED and not cited. Every link sealed "
+                 "or cited; nothing out of thin air; the chain not closed.",
+         {"source": "this stick's own ticks; docs/MILLENNIUM_PREPAREDNESS.md"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py bsd_formula")
+    return 0
+
+
+def navier_stokes_next() -> int:
+    """NAVIER-STOKES EXISTENCE AND SMOOTHNESS - THE FIRST LINKS (the Millennium loop, 2026-10-09; the law: nothing out of
+    thin air, everything bound). The dissonance-and-dispersion stick holds the scaling (3D supercritical, 2D critical);
+    the existence-and-smoothness stick held nothing. Now: the exact solutions the evaluator can seal - the Taylor-Green
+    vortex's energy decays as e^(-2 nu |k|^2 t) and the energy identity dE/dt = -2 nu Z holds on it exactly; Poiseuille's
+    flux between plates; the Kolmogorov length (nu^3/epsilon)^(1/4); Leray's blow-up exponent 1/2 from scaling; the
+    Reynolds number - then the proven links cited (Leray 1934, Ladyzhenskaya 1959 in 2D, Fujita-Kato 1964 for small data,
+    Caffarelli-Kohn-Nirenberg 1982's bound on the singular set, Beale-Kato-Majda 1984, the Ladyzhenskaya-Prodi-Serrin
+    criteria with the Escauriaza-Seregin-Sverak endpoint), the barrier cited (Tao 2016: the energy method alone cannot
+    close it), the equations as the POSTULATE, and the surviving window read. Idempotent."""
+    import math
+    from concordance import tickstick as TS
+    S = {}
+    seals = [
+        ("tg", "taylor_green_energy_fraction_nu_0_01_t_5", "exp(-4*0.01*5)", math.exp(-4 * 0.01 * 5), 1e-9),
+        ("identity", "energy_identity_on_taylor_green_one_plus_zero", "1 + ((-4*0.01) - (-2*0.01*2))", 1.0, 1e-12),
+        ("poiseuille", "poiseuille_flux_per_unit_width_g_100_h_0_01_mu_1e_3", "2*100*0.01**3/(3*1e-3)", 2 * 100 * 0.01 ** 3 / (3 * 1e-3), 1e-9),
+        ("kolmogorov", "kolmogorov_length_nu_1e_6_epsilon_1_in_m", "(1e-6**3/1.0)**0.25", (1e-6 ** 3 / 1.0) ** 0.25, 1e-9),
+        ("leray", "leray_blow_up_exponent_from_scaling", "(2 - 1)/2", 0.5, 1e-12),
+        ("critical", "the_critical_lebesgue_exponent_equals_the_dimension_one_plus_zero", "1 + (3 - 3)", 1.0, 1e-12),
+        ("reynolds", "reynolds_number_u_1_l_1_nu_1e_6", "1*1/1e-6", 1e6, 1e-9),
+    ]
+    for key, nid, expr, val, tol in seals:
+        S[key] = _rh_seal_num(nid, expr, float(val), domain="physics" if key in ("poiseuille", "kolmogorov", "reynolds") else "mathematics", tol=tol)
+        if not S[key]:
+            print("a seal failed:", nid); return 1
+    print("sealed", len(S), "Navier-Stokes numbers:", ", ".join(f"{k}={v[:8]}" for k, v in S.items()))
+    sid = TS.create("Navier-Stokes existence and smoothness")["id"]
+    marks = [
+        ("instance", "[an exact solution, sealed] The Taylor-Green vortex u = (cos x sin y, -sin x cos y) e^(-2 nu t) solves the "
+                     "incompressible equations exactly in 2D; |k|^2 = 2, so its energy decays as e^(-4 nu t): at nu = 0.01, t = 5 "
+                     "the fraction left is e^(-0.2) = 0.81873 (sealed). A smooth solution for all time, with every digit "
+                     "checkable - the kind of link the stick is built from.", S["tg"]),
+        ("instance", "[the energy identity holds on it exactly] dE/dt = -2 nu Z with the enstrophy Z = |k|^2 E = 2E: "
+                     "-4 nu E = -2 nu (2E), the difference judged as 1 + 0 = 1 (sealed). The energy inequality is the one "
+                     "estimate every weak solution obeys (Leray); on an exact solution it is an equality.", S["identity"]),
+        ("instance", "[Poiseuille, the flow a pipe fitter uses] Between plates 2h apart under pressure gradient G, "
+                     "u(y) = (G/2 mu)(h^2 - y^2) and the flux per unit width is 2 G h^3 / (3 mu): G = 100 Pa/m, h = 1 cm, "
+                     "mu = 1 mPa s gives 0.0667 m^2/s (sealed). Steady, exact, smooth, and in every plumbing handbook.",
+         S["poiseuille"]),
+        ("instance", "[Kolmogorov's smallest eddy] eta = (nu^3 / epsilon)^(1/4): water (nu = 10^-6 m^2/s) dissipating 1 W/kg "
+                     "has eta = 31.6 micrometres (sealed). The cascade ends where viscosity wins; a singularity would have "
+                     "to hide below every such scale, and the dissonance stick's supercritical scaling says 3D leaves it "
+                     "room.", S["kolmogorov"]),
+        ("instance", "[Leray's rate, from scaling alone] u_lambda(x,t) = lambda u(lambda x, lambda^2 t): time scales as "
+                     "lambda^2 and velocity as lambda, so if a solution blows up at T* then sup|u| >= c (T* - t)^(-1/2), "
+                     "exponent (2 - 1)/2 = 1/2 (sealed; Leray 1934). Any singularity must grow at least this fast - a bound "
+                     "on how a failure could look, not a failure.", S["leray"]),
+        ("instance", "[the critical space is L^3 in 3D] The L^p norm is scale-invariant exactly when p = d: 3 - 3 = 0 "
+                     "(sealed as 1 + 0 = 1). The endpoint regularity criterion lives there (Escauriaza-Seregin-Sverak 2003: "
+                     "a solution bounded in L^3 cannot blow up); the energy space L^2 sits below it, which is the whole "
+                     "difficulty.", S["critical"]),
+        ("instance", "[the Reynolds number names the regime] Re = U L / nu = 1 * 1 / 10^-6 = 10^6 (sealed): a metre of water "
+                     "at a metre per second is far past the transition to turbulence, where the cascade runs and the "
+                     "question is asked.", S["reynolds"]),
+        ("postulate", "[the postulate it builds on] The incompressible Navier-Stokes equations: a fluid is a continuum, "
+                      "obeys Newton's second law element by element, and its stress is pressure plus a viscous part linear "
+                      "in the rate of strain (Stokes 1845). Not kept as a fact: every pipe, wing, pump and weather forecast "
+                      "works under them, and from that working the truth is inferred - never proven, never kept as fact.",
+         {"source": "C.-L. Navier (1822); G. G. Stokes, On the theories of the internal friction of fluids in motion (1845)"}),
+        ("equivalence", "[proven links] Leray 1934: a weak solution with finite energy exists for all time for any finite-"
+                        "energy data in 3D (uniqueness and smoothness are what is open). Ladyzhenskaya 1959: in 2D the "
+                        "solution is unique and smooth for all time - the 2D problem is CLOSED. Fujita-Kato 1964: in 3D, "
+                        "small data in H^(1/2) give a global smooth solution - the small-data problem is CLOSED. The open "
+                        "window is 3D, large data.",
+         {"source": "J. Leray, Acta Math. 63 (1934); O. A. Ladyzhenskaya (1959); H. Fujita, T. Kato, Arch. Rational Mech. Anal. 16 (1964)"}),
+        ("equivalence", "[the bound on where a singularity could be] Caffarelli-Kohn-Nirenberg 1982: for a suitable weak "
+                        "solution the singular set in space-time has one-dimensional parabolic Hausdorff measure zero - a "
+                        "singularity, if any, cannot fill a curve. Beale-Kato-Majda 1984: blow-up at T* happens if and only "
+                        "if the integral of the maximum vorticity up to T* is infinite - the one quantity to watch. "
+                        "Ladyzhenskaya-Prodi-Serrin: u in L^p_t L^q_x with 2/p + 3/q <= 1 (q > 3) forces smoothness; "
+                        "Escauriaza-Seregin-Sverak 2003 closed the endpoint q = 3.",
+         {"source": "L. Caffarelli, R. Kohn, L. Nirenberg, Comm. Pure Appl. Math. 35 (1982); J. T. Beale, T. Kato, A. Majda, Comm. Math. Phys. 94 (1984); L. Escauriaza, G. Seregin, V. Sverak (2003)"}),
+        ("exclusion", "[a road closed] Tao 2016: an averaged version of the 3D equations, which obeys the same energy "
+                      "identity and the same scaling, has a smooth solution that blows up in finite time. So no argument "
+                      "that uses only the energy identity, the scaling and the general shape of the nonlinearity can prove "
+                      "regularity - a proof must use finer structure of the true equations. The energy method alone is "
+                      "excluded.",
+         {"source": "T. Tao, Finite time blowup for an averaged three-dimensional Navier-Stokes equation, J. Amer. Math. Soc. 29 (2016)"}),
+        ("note", "[the surviving window, read] Sealed: exact solutions and the identities on them, the scaling exponents, "
+                 "the dissipation scale. Proven (cited): existence of weak solutions (Leray), 2D closed (Ladyzhenskaya), "
+                 "small data closed (Fujita-Kato), the singular set at most one-dimensional and of measure zero (CKN), the "
+                 "blow-up criteria (BKM, LPS, ESS). Excluded: the energy method alone (Tao). Open: 3D, large data, the "
+                 "Clay statement (Fefferman 2000) - either global smooth solutions exist for every smooth finite-energy "
+                 "datum, or one datum blows up. Gaps become wants: the sources above for inclusion; a numerical solver "
+                 "(spectral, on the torus) so a candidate datum's vorticity integral - the BKM quantity - can be WATCHED "
+                 "and sealed, not just cited. Every link sealed or cited; nothing out of thin air; the chain not closed.",
+         {"source": "C. Fefferman, Existence and smoothness of the Navier-Stokes equation (Clay Mathematics Institute, 2000); stick_navier_stokes_dissonance_and_dispersion"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py navier_stokes_next")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
+# The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
+# 1997, Table 1; LMFDB 11.a3 / 37.a1): the Tamagawa product, the torsion order, |Sha| (proven finite and trivial for these
+# by Kolyvagin), and for rank 1 the regulator (the canonical height of the generator (0,0) on 37a1). Cited, never computed.
+CURVES_BSD_INPUTS = {
+    "11a1": {"tamagawa_product": 5, "torsion_order": 5, "sha_order": 1,
+             "inputs_source": "J. E. Cremona, Algorithms for Modular Elliptic Curves (1997), Table 1; LMFDB 11.a3"},
+    "37a1": {"tamagawa_product": 1, "torsion_order": 1, "sha_order": 1, "regulator": 0.0511114082399688,
+             "inputs_source": "J. E. Cremona, Algorithms for Modular Elliptic Curves (1997), Table 1; LMFDB 37.a1"},
+}
 CURVES = {
     "11a1":   {"a": [0, -1, 1, -10, -20], "N": 11,   "w": 1,  "rank": 0},
     "37a1":   {"a": [0, 0, 1, -1, 0],     "N": 37,   "w": -1, "rank": 1},
@@ -6905,6 +7077,10 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
+    if a[0] in ("navier_stokes_next", "ns_next", "existence_and_smoothness", "taylor_green", "poiseuille"):
+        return navier_stokes_next()
+    if a[0] in ("bsd_formula", "bsd_full", "birch_formula", "bsd_next"):
+        return bsd_formula()
     if a[0] in ("riemann_li", "li_criterion", "li", "de_bruijn_newman", "newman", "riemann_next"):
         return riemann_li(int(a[1]) if len(a) > 1 else 30)
     if a[0] == "riemann":
