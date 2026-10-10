@@ -37,7 +37,7 @@ def _graph():
 def test_the_seed_validates_and_every_endpoint_resolves():
     assert S3._validate() == []
     assert len(S3.CHAINS) == 8 and len(S3.RECORDS) >= 55
-    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 41
+    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 46
 
 
 def test_each_chain_walks_from_its_roots_to_its_open_end_and_meets_where_the_seed_expects():
@@ -115,7 +115,7 @@ def test_the_chains_door_reads_a_chain_floor(monkeypatch):
     assert st == 200 and len(body["chain"]["nodes"]) >= 12 and body["confluences"][0]["at"] == "card_chain_riemann_1859"
     st, payload = dispatch("GET", "/chains", {"floors": "1"}, None, EngineConfig("secular"))
     body = payload.get("data") or payload
-    assert st == 200 and len(body["floors"]) == 41
+    assert st == 200 and len(body["floors"]) == 46
 
 
 def test_the_capstone_floor_gathers_the_others_and_marks_the_two_barriers():
@@ -609,3 +609,28 @@ def test_batch2_earth_life_applied_floors():
         m = chains.floor_map(S.FLOOR, get_card=cards.get)
         assert m and len(m["parts"]) == nparts, S.FLOOR
         assert expect <= {s["at"] for s in m["serves"]}, S.FLOOR
+
+
+def test_batch3_social_and_applied_floors():
+    """Batch 3 down the list (Matt, 2026-10-10): logistics, law, education, agriculture, hydrology - each rests on
+    the right lower floors (logistics and law cite existing sticks). Pinned on the seeds alone."""
+    import seed_logistics as LOG, seed_law as LAW, seed_education as EDU
+    import seed_agriculture as AGR, seed_hydrology as HYD
+    specs = [
+        (LOG, {"card_floor_economics", "card_floor_computer_science", "card_floor_game_theory"}, 3),
+        (LAW, {"card_floor_the_instruments", "card_floor_the_mind", "card_floor_economics"}, 3),
+        (EDU, {"card_floor_the_mind", "card_floor_statistics"}, 2),
+        (AGR, {"card_floor_biology", "card_floor_chemistry", "card_floor_ecology"}, 3),
+        (HYD, {"card_floor_earth_science", "card_floor_chemistry", "card_floor_meteorology"}, 3),
+    ]
+    for S, expect, nparts in specs:
+        assert S._validate() == [], S.FLOOR
+        cards = {c["id"]: json.loads(json.dumps(c)) for c in S.CARDS}
+        for cid in list(expect) + ["card_k_floor_of_discovery"]:
+            cards.setdefault(cid, {"id": cid, "title": cid, "connections": []})
+        overlay = Path(tempfile.mkdtemp(prefix="nh-b3-")) / "overlay.jsonl"
+        overlay.write_text("\n".join(json.dumps(e) for e in S.BRIDGES) + "\n", encoding="utf-8")
+        corpus._apply_bridges(cards, overlay)
+        m = chains.floor_map(S.FLOOR, get_card=cards.get)
+        assert m and len(m["parts"]) == nparts, S.FLOOR
+        assert expect <= {x["at"] for x in m["serves"]}, S.FLOOR

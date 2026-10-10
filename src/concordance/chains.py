@@ -100,7 +100,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_medicine", "card_floor_materials_science", "card_floor_optics",
           # batch 2 (2026-10-10): meteorology, oceanography, ecology, geography, nutrition (earth/life/applied)
           "card_floor_meteorology", "card_floor_oceanography", "card_floor_ecology",
-          "card_floor_geography", "card_floor_nutrition")
+          "card_floor_geography", "card_floor_nutrition",
+          # batch 3 (2026-10-10): logistics + law (cite existing sticks), education, agriculture, hydrology
+          "card_floor_logistics", "card_floor_law", "card_floor_education",
+          "card_floor_agriculture", "card_floor_hydrology")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:

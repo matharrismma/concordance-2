@@ -3271,6 +3271,102 @@ def nutrition() -> int:
     _mint_marks(sid, marks, by="tools/tick.py nutrition")
     return 0
 
+
+def education() -> int:
+    """EDUCATION - how a mind learns and is taught (Matt, 2026-10-10, down the list). Memory fades on a forgetting
+    curve (retention ~ e^-t/S), beaten by spaced repetition and the testing effect; text has a measurable reading
+    level (Flesch). SEALED: the 1/e retention after one time-constant, and a Flesch reading-ease score. Rests on the
+    mind (learning and memory) and statistics (assessment). Teaching is training. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "forgetting": _rh_seal_num("forgetting_curve_retention_one_over_e", "1/2.718281828459045", 1 / 2.718281828459045, tol=1e-9),
+        "flesch": _rh_seal_num("flesch_reading_ease_15_wps_1_5_syllables", "206.835 - 1.015*15 - 84.6*1.5", 206.835 - 1.015 * 15 - 84.6 * 1.5, tol=1e-6),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "education numbers")
+    sid = TS.create("Education - how a mind learns and is taught")["id"]
+    marks = [
+        ("instance", "[memory fades - the forgetting curve, SEALED] Without review, retention falls as e^(-t/S): "
+                     "after one time-constant only 1/e = 0.368 (sealed), about a third, remains. Ebbinghaus measured "
+                     "it on himself. The fix is SPACED repetition and the TESTING effect - recall, not reread - which "
+                     "flatten the curve. Teaching is training the memory. Ties card_floor_the_mind.", S["forgetting"]),
+        ("instance", "[text has a reading level - Flesch, SEALED] Readability is measurable: Flesch reading ease = "
+                     "206.835 - 1.015*(words/sentence) - 84.6*(syllables/word); at 15 words per sentence and 1.5 "
+                     "syllables per word that is 64.7 (sealed), plain standard English. Shorter sentences and words "
+                     "read easier - a formula, not a taste. Ties card_floor_statistics.", S["flesch"]),
+        ("note", "[on the one map] Education rests on the mind (learning is neural change, memory is storage) and "
+                 "statistics (assessment, item response, the measurement of learning). Teaching is training: present, "
+                 "recall, space, test - the same loop by which any system is taught. Ties card_floor_education.",
+         {"source": "the one map; Ebbinghaus; the testing effect; teaching-is-training; card_floor_education"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py education")
+    return 0
+
+
+def agriculture() -> int:
+    """AGRICULTURE - feeding the world from soil, sun, and chemistry (Matt, 2026-10-10, down the list). Crops fix
+    carbon by photosynthesis (glucose, C6H12O6) and need fixed nitrogen (the Haber-Bosch process, N2 + 3H2 -> 2NH3,
+    which feeds roughly half the world). SEALED: ammonia per mole of nitrogen, and the molar mass of glucose. Rests
+    on biology (the crop), chemistry (fertilizer and photosynthesis) and ecology (the agro-ecosystem). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "haber": _rh_seal_num("ammonia_mass_per_mole_n2_haber_bosch_g", "2*17", 2 * 17, tol=1e-12),
+        "glucose": _rh_seal_num("molar_mass_of_glucose_c6h12o6_g_mol", "6*12 + 12*1 + 6*16", 6 * 12 + 12 * 1 + 6 * 16, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "agriculture numbers")
+    sid = TS.create("Agriculture - soil, sun, and chemistry into food")["id"]
+    marks = [
+        ("instance", "[fixing nitrogen - Haber-Bosch, SEALED] Plants need nitrogen they cannot take from the air; "
+                     "the Haber-Bosch process makes ammonia, N2 + 3H2 -> 2NH3, 2*17 = 34 g of ammonia per 28 g of "
+                     "nitrogen (sealed). Synthetic fertilizer from this reaction feeds roughly half the world's "
+                     "population - chemistry became bread. Ties card_floor_chemistry.", S["haber"]),
+        ("instance", "[fixing carbon - photosynthesis, SEALED] A crop builds sugar from air and water: 6 CO2 + 6 H2O "
+                     "-> C6H12O6 + 6 O2, and glucose has molar mass 6*12 + 12*1 + 6*16 = 180 g/mol (sealed). Sunlight "
+                     "drives it; the harvest is stored sunlight. Ties card_floor_biology and card_floor_chemistry.", S["glucose"]),
+        ("note", "[on the one map] Agriculture rests on biology (the crop and livestock), chemistry (fertilizer, "
+                 "photosynthesis, the soil's reactions) and ecology (pests, pollinators, the 10 percent rule that "
+                 "makes plants cheaper food than meat). The applied science that turns soil, sun and chemistry into "
+                 "food. Ties card_floor_agriculture.",
+         {"source": "the one map; Haber-Bosch; photosynthesis; card_floor_agriculture; tools/seed_agriculture.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py agriculture")
+    return 0
+
+
+def hydrology() -> int:
+    """HYDROLOGY - the water cycle and the flow of rivers (Matt, 2026-10-10, down the list). River discharge is
+    velocity times cross-section (Q = v A); only a small fraction of Earth's water is fresh. SEALED: a discharge and
+    the freshwater percentage. Rests on earth science (the planet's water), chemistry (water as solvent) and
+    meteorology (precipitation). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "discharge": _rh_seal_num("river_discharge_velocity_times_area_m3_s", "2*5", 2 * 5, tol=1e-12),
+        "freshwater": _rh_seal_num("percent_of_earths_water_that_is_fresh", "100 - 97.5", 100 - 97.5, tol=1e-9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "hydrology numbers")
+    sid = TS.create("Hydrology - the water cycle and the flow of rivers")["id"]
+    marks = [
+        ("instance", "[the flow of a river - discharge, SEALED] Discharge is how much water passes per second: "
+                     "Q = v * A, velocity times cross-section. A stream 2 m/s across 5 m^2 carries 2*5 = 10 cubic "
+                     "metres per second (sealed). Conservation of mass (the continuity equation) governs every river, "
+                     "pipe and flood. Ties card_floor_earth_science.", S["discharge"]),
+        ("instance", "[how little is fresh, SEALED] Of all the water on Earth only 100 - 97.5 = 2.5 percent is fresh "
+                     "(sealed), and most of that is locked in ice and deep groundwater - a sliver is the rivers and "
+                     "lakes we drink from. The water cycle (evaporation, precipitation, runoff) keeps it moving. "
+                     "Ties card_floor_meteorology (precipitation).", S["freshwater"]),
+        ("note", "[on the one map] Hydrology rests on earth science (the basins, the cycle), chemistry (water the "
+                 "universal solvent, carrying salts and life) and meteorology (precipitation is where the cycle "
+                 "touches the sky). The study of water in motion over and under the land. Ties card_floor_hydrology.",
+         {"source": "the one map; the continuity equation; the water cycle; card_floor_hydrology; tools/seed_hydrology.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py hydrology")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9986,6 +10082,12 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("education", "learning", "pedagogy", "the_classroom"):
+        return education()
+    if a[0] in ("agriculture", "farming", "agronomy", "crops"):
+        return agriculture()
+    if a[0] in ("hydrology", "the_water_cycle", "watershed", "rivers"):
+        return hydrology()
     if a[0] in ("meteorology", "weather", "climate", "the_atmosphere"):
         return meteorology()
     if a[0] in ("oceanography", "the_ocean", "marine", "seawater"):
