@@ -2658,6 +2658,62 @@ def quantum_harmonic_oscillator() -> int:
     _mint_marks(sid, marks, by="tools/tick.py quantum_harmonic_oscillator")
     return 0
 
+
+def consciousness_receiver() -> int:
+    """CONSCIOUSNESS AS A RECEIVER - the crystal radio (Matt, 2026-10-09: "pretty clearly non local. We are an
+    antennae/receiver. Closest to a crystal radio."). Matt's reading of the hard problem: consciousness is non-local,
+    and the brain TUNES to it rather than generating it - a receiver, closest to a crystal radio (an LC tuned circuit
+    plus a diode, running on the signal itself). SEALED: the radio PHYSICS - the LC resonant frequency and the
+    carrier wavelength. CITED, DECLINED: the transmission/filter hypothesis of consciousness (James, Huxley,
+    Bergson) - a postulate the engine cannot seal, the hard problem held open. Map, never launder. Charts onto the
+    mind floor. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "resonance": _rh_seal_num("crystal_radio_lc_resonant_frequency_hz",
+                                  "1/(2*3.141592653589793*(250e-6*101.3e-12)**0.5)",
+                                  1 / (2 * 3.141592653589793 * (250e-6 * 101.3e-12) ** 0.5), tol=1e-6),
+        "wavelength": _rh_seal_num("am_carrier_wavelength_c_over_f_metres", "299792458/1.0e6", 299792458 / 1.0e6, tol=1e-9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "crystal-radio numbers")
+    sid = TS.create("Consciousness as a receiver - the crystal radio")["id"]
+    marks = [
+        ("instance", "[the tuning - LC resonance, SEALED] A crystal radio selects a station with a tuned circuit: an "
+                     "inductor and a capacitor resonate at f = 1/(2 pi sqrt(L C)). With L = 250 microhenry and C = "
+                     "101 picofarad that is about 1.0 MHz (sealed), in the AM band. The receiver does not CREATE the "
+                     "broadcast; it tunes to one already in the air, and (famously) runs on the signal's own energy, "
+                     "no battery. Ties the resonance stick and card_floor_maxwells_equations.", S["resonance"]),
+        ("instance", "[the signal is electromagnetism, SEALED] That 1 MHz carrier has wavelength lambda = c/f = 300 m "
+                     "(sealed) - a Maxwell wave, present whether or not any receiver is tuned to it. The receiver adds "
+                     "nothing to the signal; it only picks it up. The content is in the broadcast, not in the radio. "
+                     "Ties card_floor_maxwells_equations.", S["wavelength"]),
+        ("postulate", "[consciousness as a receiver - Matt's discernment, CITED and DECLINED] The reading: "
+                      "consciousness is NON-LOCAL, and the brain is an antenna/receiver - closest to a crystal radio - "
+                      "that TUNES to it rather than generating it. This is a named, serious hypothesis: William "
+                      "James's transmission theory (1898), Aldous Huxley's brain-as-reducing-valve, Henri Bergson's "
+                      "filter theory - the brain as filter and receiver, not source. The engine CANNOT seal it: it is "
+                      "not a measurable quantity, it is the hard problem itself. So it is cited as a postulate and "
+                      "DECLINED as proof - held as a hypothesis, never laundered into a theorem. The radio physics "
+                      "above is sealed; this reading of it is not. Answers the open end card_question_the_hard_problem.",
+         {"source": "W. James, Human Immortality (1898); A. Huxley, The Doors of Perception; H. Bergson, Matter and Memory; the transmission/filter theory of mind"}),
+        ("note", "[the receiver is already the engine's own form] The engine already models itself as a RECEIVER "
+                 "(receiver.py: the superheterodyne stages; the diode as the one-way element; the airlock). Matt's "
+                 "view says the mind is the same form - a receiver tuned to a non-local source. The crystal radio's "
+                 "two organs map the project's: the LC tuned circuit is resonance/selection (tune to the one signal), "
+                 "the diode is the one-way element (the Tesla valve, will=fuel one way). One source broadcast (the "
+                 "capstone); many receivers tuned to it. Ties card_floor_the_capstone and the receiver.",
+         {"source": "receiver.py (the superheterodyne receiver); the diode / Tesla valve; the capstone's one source"}),
+        ("note", "[non-local - the quantum rhyme, stated honestly] 'Non-local' has a precise cousin in physics: "
+                 "entanglement (sealed on the quantum floor, the Tsirelson bound) is non-local correlation without a "
+                 "signal. The hypothesis borrows the word as an analogy, not a derivation - entanglement does not "
+                 "carry consciousness, and nothing here claims it does. Stated as a rhyme, never as a proof. Ties "
+                 "card_floor_quantum_mechanics.",
+         {"source": "quantum non-locality (Bell/Tsirelson); stated as analogy, not derivation; card_floor_quantum_mechanics"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py consciousness_receiver")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9373,6 +9429,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("consciousness", "crystal_radio", "transmission_theory", "antenna"):
+        return consciousness_receiver()
     if a[0] in ("quantum_harmonic_oscillator", "qho", "zero_point_energy", "ladder_operators"):
         return quantum_harmonic_oscillator()
     if a[0] in ("the_mind", "neuroscience", "neuron", "cognition"):

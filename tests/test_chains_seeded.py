@@ -417,3 +417,21 @@ def test_quantum_harmonic_oscillator_is_charted_onto_the_quantum_mechanics_floor
     m = chains.floor_map("card_floor_quantum_mechanics", get_card=cards.get)
     assert m is not None
     assert "stick_the_quantum_harmonic_oscillator_zero_point_and_the_ladder" in {c["stick"] for c in m["charts"]}
+
+
+def test_consciousness_receiver_is_charted_onto_the_mind_floor():
+    """Consciousness as a receiver (Matt, 2026-10-09): a cited hypothesis for the hard problem, charted onto
+    card_floor_the_mind - the radio physics sealed, the consciousness claim declined. Pinned on the seeds."""
+    import seed_the_mind as MIND
+    import seed_consciousness_receiver as S20
+    assert S20._validate() == []
+    cards = {c["id"]: json.loads(json.dumps(c)) for c in MIND.CARDS + S20.CARDS}
+    for cid in ("card_floor_physical_chemistry", "card_floor_biology", "card_floor_the_instruments",
+                "card_floor_thermodynamics", "card_floor_the_capstone", "card_k_floor_of_discovery"):
+        cards.setdefault(cid, {"id": cid, "title": cid, "connections": []})
+    overlay = Path(tempfile.mkdtemp(prefix="nh-consc-")) / "overlay.jsonl"
+    overlay.write_text("\n".join(json.dumps(e) for e in MIND.BRIDGES + S20.BRIDGES) + "\n", encoding="utf-8")
+    corpus._apply_bridges(cards, overlay)
+    m = chains.floor_map("card_floor_the_mind", get_card=cards.get)
+    assert m is not None
+    assert "stick_consciousness_as_a_receiver_the_crystal_radio" in {c["stick"] for c in m["charts"]}
