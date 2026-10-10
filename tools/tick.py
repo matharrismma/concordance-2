@@ -2608,6 +2608,56 @@ def the_mind() -> int:
     _mint_marks(sid, marks, by="tools/tick.py the_mind")
     return 0
 
+
+def quantum_harmonic_oscillator() -> int:
+    """THE QUANTUM HARMONIC OSCILLATOR - zero-point and the ladder (Matt, 2026-10-09). The one exactly-solvable
+    quantum system, and the most important model in physics: E_n = (n + 1/2) hbar omega. The ground state is NOT
+    zero - the ZERO-POINT energy 1/2 hbar omega, forced by uncertainty; the levels are an evenly-spaced LADDER
+    (rungs of hbar omega) climbed by raising/lowering operators. Every potential near its minimum is a QHO (chemical
+    bonds, phonons), and every quantum FIELD is a set of oscillators whose rungs are particles - the bridge from
+    quantum mechanics to the Standard Model. SEALED (in units of hbar omega): the zero-point 1/2 and E_2 = 5/2.
+    Charts onto the quantum-mechanics floor. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "zero_point": _rh_seal_num("qho_ground_state_zero_point_in_hbar_omega", "0 + 0.5", 0 + 0.5, tol=1e-12),
+        "ladder": _rh_seal_num("qho_second_level_n_plus_half_in_hbar_omega", "2 + 0.5", 2 + 0.5, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "QHO numbers")
+    sid = TS.create("The quantum harmonic oscillator - zero-point and the ladder")["id"]
+    marks = [
+        ("instance", "[the vacuum is not empty - zero-point energy, SEALED] The oscillator's ground state is E_0 = "
+                     "1/2 hbar omega (sealed, 0.5 in units of hbar omega), NOT zero. Even in its lowest state, even "
+                     "at absolute zero, it keeps energy - the zero-point energy, forced by the uncertainty principle "
+                     "(you cannot pin both position and momentum to zero at once). The vacuum trembles. Ties the "
+                     "uncertainty pillar on card_floor_quantum_mechanics.", S["zero_point"]),
+        ("instance", "[the evenly-spaced ladder, SEALED] E_n = (n + 1/2) hbar omega: the levels are a ladder with "
+                     "equal rungs of hbar omega. E_2 = 5/2 hbar omega (sealed, 2.5), E_3 = 7/2, and the spacing is "
+                     "always exactly hbar omega. Raising and lowering operators (a-dagger, a) step up and down the "
+                     "ladder one quantum at a time - Hermitian-operator algebra. Ties card_floor_quantum_mechanics "
+                     "and the Hamiltonian (E_n are its eigenvalues).", S["ladder"]),
+        ("note", "[the most important model in physics] The QHO is the one exactly-solvable system that approximates "
+                 "EVERY potential near its minimum - so every chemical bond vibrates as a QHO (infrared spectroscopy "
+                 "reads its hbar omega), every crystal's heat lives in oscillators (phonons), and the whole machinery "
+                 "of small vibrations is this one solution. Ties card_floor_chemistry (molecular vibration) and "
+                 "card_floor_the_hamiltonian.",
+         {"source": "the harmonic approximation near a potential minimum; molecular vibration; phonons"}),
+        ("note", "[the bridge from QM to QFT - a particle is a quantum of a field] In quantum field theory each mode "
+                 "of a field is a harmonic oscillator, and its rungs ARE particles: one quantum = one particle, "
+                 "raised by a-dagger (create), lowered by a (annihilate). The photon is a rung of the electromagnetic "
+                 "field's oscillator; the Standard Model's particles are rungs of their fields' oscillators. The "
+                 "humble oscillator is how the Standard Model counts particles. Ties card_floor_standard_model and "
+                 "card_floor_maxwells_equations.",
+         {"source": "canonical quantization; creation and annihilation operators; the field as oscillators; card_floor_standard_model"}),
+        ("note", "[on the one map] Charted onto the quantum-mechanics floor: the QHO is where uncertainty forces a "
+                 "zero-point, where the ladder (raising/lowering) operators live, and where fields become particles - "
+                 "the bridge to the Standard Model. Ties card_floor_quantum_mechanics.",
+         {"source": "the one map; card_floor_quantum_mechanics; tools/seed_quantum_harmonic_oscillator.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py quantum_harmonic_oscillator")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9323,6 +9373,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("quantum_harmonic_oscillator", "qho", "zero_point_energy", "ladder_operators"):
+        return quantum_harmonic_oscillator()
     if a[0] in ("the_mind", "neuroscience", "neuron", "cognition"):
         return the_mind()
     if a[0] in ("earth_science", "geology", "plate_tectonics", "radiometric_dating"):

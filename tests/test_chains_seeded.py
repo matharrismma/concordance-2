@@ -398,3 +398,22 @@ def test_the_mind_floor_tops_the_ladder_with_the_hard_problem_as_its_open_end():
     assert m["ends"][0]["id"] == "card_question_the_hard_problem"
     serves = {s["at"] for s in m["serves"]}
     assert {"card_floor_biology", "card_floor_the_instruments", "card_floor_thermodynamics"} <= serves
+
+
+def test_quantum_harmonic_oscillator_is_charted_onto_the_quantum_mechanics_floor():
+    """The QHO (Matt, 2026-10-09): a system charted onto card_floor_quantum_mechanics (no new floor), with the
+    field-as-oscillators tie to the Standard Model. Pinned on the seeds."""
+    import seed_quantum_mechanics as QM
+    import seed_quantum_harmonic_oscillator as S19
+    assert S19._validate() == []
+    cards = {c["id"]: json.loads(json.dumps(c)) for c in QM.CARDS + S19.CARDS}
+    for cid in ("card_floor_the_hamiltonian", "card_floor_maxwells_equations", "card_floor_the_capstone",
+                "card_floor_the_instruments", "card_floor_relativity", "card_floor_standard_model",
+                "card_k_floor_of_discovery"):
+        cards.setdefault(cid, {"id": cid, "title": cid, "connections": []})
+    overlay = Path(tempfile.mkdtemp(prefix="nh-qho-")) / "overlay.jsonl"
+    overlay.write_text("\n".join(json.dumps(e) for e in QM.BRIDGES + S19.BRIDGES) + "\n", encoding="utf-8")
+    corpus._apply_bridges(cards, overlay)
+    m = chains.floor_map("card_floor_quantum_mechanics", get_card=cards.get)
+    assert m is not None
+    assert "stick_the_quantum_harmonic_oscillator_zero_point_and_the_ladder" in {c["stick"] for c in m["charts"]}
