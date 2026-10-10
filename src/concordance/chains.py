@@ -70,7 +70,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_physical_chemistry",
           # biology (tools/seed_biology.py, 2026-10-09): life = self-replicating chemistry; the genetic code, evolution,
           # Hardy-Weinberg, metabolism; stands on chemistry + thermodynamics, connects the tree of life into the ladder
-          "card_floor_biology")
+          "card_floor_biology",
+          # earth science (tools/seed_earth_science.py, 2026-10-09): the planet - radiometric deep time, plate tectonics,
+          # minerals; stands on physical chemistry + chemistry + thermodynamics, hands biology its deep time
+          "card_floor_earth_science")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:

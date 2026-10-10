@@ -2513,6 +2513,51 @@ def biology() -> int:
     _mint_marks(sid, marks, by="tools/tick.py biology")
     return 0
 
+
+def earth_science() -> int:
+    """EARTH SCIENCE - the planet (Matt, 2026-10-09, down the domain list). The rock that life stands on: RADIOMETRIC
+    dating reads deep time from decay (the first-order half-life, the same law as chemical kinetics); PLATE TECTONICS
+    is the mantle as a heat engine; MINERALS are chemistry; DEEP TIME is what evolution needs. SEALED: the
+    radiometric fraction after two half-lives, and the Richter energy factor per magnitude unit. Rests on physical
+    chemistry, chemistry, thermodynamics and biology. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "radiometric": _rh_seal_num("radiometric_fraction_after_two_half_lives", "(1/2)**2", (1 / 2) ** 2, tol=1e-12),
+        "richter": _rh_seal_num("richter_energy_factor_per_magnitude_unit", "10**1.5", 10 ** 1.5, tol=1e-9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "earth-science numbers")
+    sid = TS.create("Earth science - the planet, read in deep time")["id"]
+    marks = [
+        ("instance", "[radiometric dating - reading deep time, SEALED] A radioactive isotope halves every half-life, "
+                     "so after two half-lives a quarter remains: (1/2)^2 = 0.25 (sealed). Measuring the ratio of "
+                     "parent to daughter dates a rock - uranium-lead gives the age of the Earth, 4.54 billion years. "
+                     "It is the first-order decay law, the same one chemical kinetics seals; geology borrows the "
+                     "clock from physical chemistry.", S["radiometric"]),
+        ("instance", "[seismology - the Richter scale, SEALED] Earthquake magnitude is logarithmic: each unit is ten "
+                     "times the ground motion and 10^1.5 = 31.6 times the energy (sealed). A magnitude 7 releases "
+                     "about a thousand times the energy of a magnitude 5. Seismic waves also X-ray the interior - how "
+                     "we know the Earth has a liquid outer core.", S["richter"]),
+        ("note", "[plate tectonics - the mantle is a heat engine] The crust rides plates driven by convection in the "
+                 "mantle: the Earth's internal heat (radioactive decay plus primordial heat) rising and sinking, a "
+                 "heat engine bounded by the second law. Continents drift, oceans open and close, mountains rise. "
+                 "Ties card_floor_thermodynamics.",
+         {"source": "plate tectonics; mantle convection; the Earth's heat budget; card_floor_thermodynamics"}),
+        ("note", "[minerals and the rock cycle are chemistry] Rocks are assemblages of minerals, and minerals are "
+                 "crystal chemistry - silicates, carbonates, oxides, each a definite composition and lattice. The "
+                 "rock cycle (igneous, sedimentary, metamorphic) is chemistry and physics run over deep time. Ties "
+                 "card_floor_chemistry.",
+         {"source": "mineralogy; the rock cycle; crystal chemistry; card_floor_chemistry"}),
+        ("note", "[on the one map - deep time is what life needs] Earth science rests on physical chemistry (the "
+                 "decay clock), chemistry (minerals), and thermodynamics (the mantle engine), and it hands biology "
+                 "the one thing evolution requires: DEEP TIME. Radiometric dating proves the 4.5-billion-year stage "
+                 "on which the tree of life grew. Ties card_floor_biology and card_floor_physical_chemistry.",
+         {"source": "the one map; radiometric deep time; card_floor_biology; tools/seed_earth_science.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py earth_science")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9228,6 +9273,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("earth_science", "geology", "plate_tectonics", "radiometric_dating"):
+        return earth_science()
     if a[0] in ("biology", "the_cell", "molecular_biology", "life"):
         return biology()
     if a[0] in ("physical_chemistry", "kinetics", "equilibrium", "electrochemistry"):
