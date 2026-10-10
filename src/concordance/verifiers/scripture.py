@@ -748,6 +748,19 @@ def original_words(ref: str) -> Dict[str, Any]:
             return {"ref": ref, "status": "not_found", "words": [], "detail": "could not parse reference"}
         b, ch, v = bcv
         words = c.verse_words(b, ch, v)
+        # Outcome 3 of the flip back (Matt, 2026-10-10): mark the words better LEFT IN THE TONGUE
+        # (agape, logos, hesed, ...) so the reader keeps the original + its definition rather than a
+        # lossy single-word gloss. Curated set; lazy import avoids a translate<->scripture cycle.
+        try:
+            from .. import translate as _T
+            for w in words:
+                irr = _T.irreducible(w.get("strongs"))
+                if irr:
+                    w["keep_in_tongue"] = True
+                    w["tongue"] = {"strongs": irr["strongs"], "translit": irr["translit"],
+                                   "reason": irr["reason"]}
+        except Exception:                                         # noqa: BLE001
+            pass
         out = {"ref": ref, "status": "ok" if words else "no_words", "count": len(words), "words": words}
         return _with_coverage(out, b, ch, v, words)
     except Exception as e:  # noqa: BLE001

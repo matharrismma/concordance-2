@@ -294,3 +294,38 @@ def test_texts_that_share_no_addresses_refuse_rather_than_invent():
     r = T.derive_lexicon({"9:9": ["x"]}, PAR_KNOWN, min_count=1)
     assert r["status"] == "no_overlap"
     assert "cannot be aligned" in r["detail"]
+
+
+@needs_lex
+def test_outcome_three_keeps_irreducible_words_in_the_tongue():
+    """The flip back's third outcome (Matt, 2026-10-10: "some words better left in the original
+    tongue with definitions"): an irreducible word is flagged keep_in_tongue with its translit and
+    carries the lexicon's definition; an ordinary word is not flagged."""
+    # the lookup joins the lexicon's own definition, never a composed one
+    agape = T.irreducible("G26")
+    assert agape and agape["translit"] == "agape" and agape["definition"]
+    assert T.irreducible("H2617")["translit"] == "hesed"
+    assert T.irreducible("G999999") is None          # not in the curated set
+    # gloss flags logos (irreducible) but not kai ("and")
+    g = T.gloss(GREEK)
+    by_tok = {}
+    for t in g["tokens"]:
+        by_tok.setdefault(t["folded"], t)
+    logos = next((t for t in g["tokens"] if t.get("keep_in_tongue")), None)
+    assert logos is not None and logos["tongue"]["translit"] == "logos"
+    assert g["coverage"]["kept_in_tongue"] >= 1
+    # a resolved ordinary word (kai, "and") is NOT kept in the tongue
+    kai = next((t for t in g["tokens"] if t["folded"].startswith("και") or t["token"].startswith("κα")), None)
+    if kai and kai["status"] == "resolved":
+        assert not kai.get("keep_in_tongue")
+
+
+@needs_lex
+def test_outcome_three_definition_comes_from_the_lexicon_not_the_curated_file():
+    """The curated file holds translit + reason only; the DEFINITION is read live from the lexicon
+    (cite, never duplicate). So every irreducible entry resolves a real lexicon definition."""
+    from concordance.translate import _irreducible_set
+    for strongs in _irreducible_set():
+        r = T.irreducible(strongs)
+        assert r is not None, strongs
+        assert r["definition"], f"{strongs} has no lexicon definition"

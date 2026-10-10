@@ -48,6 +48,12 @@ from typing import Any, Dict, List, Optional
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 _LEX_DIR = os.path.join(_ROOT, "data", "strongs", "original", "lexicon")
+# OUTCOME 3 of the flip back (Matt, 2026-10-10): some words are better left in the original tongue
+# WITH their definition, because the map back to a single English word is not single-valued. A
+# CURATED set (not a threshold), each strongs verified in the lexicon; the definition is read from
+# the lexicon, never duplicated here.
+_IRRED_PATH = os.path.join(_ROOT, "data", "strongs", "original", "irreducible.json")
+_IRRED_CACHE: Optional[Dict[str, Dict[str, str]]] = None
 
 # Scripts identified by the Unicode block a character falls in. Deterministic, offline, and no
 # statistical language guessing -- this reports the SCRIPT, which is a fact about the bytes, and
@@ -210,6 +216,48 @@ def _entry(language: str, num: str) -> Optional[Dict[str, Any]]:
             "derivation": e.get("derivation"), "source": lx["source"]}
 
 
+def _irreducible_set() -> Dict[str, Dict[str, str]]:
+    """The curated {strongs: {translit, reason}} map, loaded once. Keys starting with '_' (notes)
+    are dropped. Missing/unreadable file -> empty (the feature degrades to nothing, never errors)."""
+    global _IRRED_CACHE
+    if _IRRED_CACHE is None:
+        try:
+            raw = json.load(open(_IRRED_PATH, encoding="utf-8"))
+            _IRRED_CACHE = {k: v for k, v in raw.items()
+                            if not k.startswith("_") and isinstance(v, dict)}
+        except Exception:                                         # noqa: BLE001
+            _IRRED_CACHE = {}
+    return _IRRED_CACHE
+
+
+def irreducible(strongs: str) -> Optional[Dict[str, Any]]:
+    """Is this Strong's number better LEFT IN THE TONGUE? Returns {strongs, translit, reason,
+    definition, source} (definition read live from the lexicon), or None. The third outcome of the
+    flip back: keep the original word with its definition instead of a lossy single-word gloss."""
+    s = (strongs or "").strip().upper()
+    entry = _irreducible_set().get(s)
+    if not entry:
+        return None
+    lang = "greek_biblical" if s.startswith("G") else "hebrew_biblical" if s.startswith("H") else None
+    lex = _entry(lang, s) if lang else None
+    return {"strongs": s, "translit": entry.get("translit"), "reason": entry.get("reason"),
+            "definition": (lex or {}).get("definition"), "source": (lex or {}).get("source")}
+
+
+def _mark_tongue(token: Dict[str, Any]) -> Dict[str, Any]:
+    """Outcome 3, applied to a resolved gloss token: if any candidate's Strong's is irreducible,
+    flag the token to be KEPT in the tongue, carrying translit + reason (its definition is already
+    in the candidate). The caller renders the original word, not a single English gloss."""
+    for e in token.get("candidates") or []:
+        irr = irreducible(e.get("strongs"))
+        if irr:
+            token["keep_in_tongue"] = True
+            token["tongue"] = {"strongs": irr["strongs"], "translit": irr["translit"],
+                               "reason": irr["reason"]}
+            break
+    return token
+
+
 def gloss(text: str, language: Optional[str] = None, limit: int = 400) -> Dict[str, Any]:
     """Word-by-word gloss from a held lexicon. Reports what it could NOT resolve.
 
@@ -272,9 +320,10 @@ def gloss(text: str, language: Optional[str] = None, limit: int = 400) -> Dict[s
             elif len(entries) > 1:
                 note = ("more than one lexicon entry folds to this form; all are shown rather "
                         "than one being chosen")
-            tokens.append({"pos": i, "token": tok, "folded": f, "status": "resolved",
-                           "match": "prefix_stripped" if stripped else "direct",
-                           "candidates": entries, "note": note})
+            tokens.append(_mark_tongue(
+                {"pos": i, "token": tok, "folded": f, "status": "resolved",
+                 "match": "prefix_stripped" if stripped else "direct",
+                 "candidates": entries, "note": note}))
         else:
             tokens.append({"pos": i, "token": tok, "folded": f, "status": "unresolved",
                            "note": ("no lexicon entry matches this form. Running text is "
@@ -289,6 +338,7 @@ def gloss(text: str, language: Optional[str] = None, limit: int = 400) -> Dict[s
         "tokens": tokens,
         "coverage": {"total": total, "resolved": resolved,
                      "unresolved": total - resolved,
+                     "kept_in_tongue": sum(1 for t in tokens if t.get("keep_in_tongue")),
                      "pct": round(100.0 * resolved / total, 1) if total else 0.0},
         "truncated": len(raw) > limit,
         "boundary": ("This is a GLOSS, not a translation. Every definition above is a held "
