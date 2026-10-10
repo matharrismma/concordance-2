@@ -80,6 +80,13 @@ CHARTS: List[Dict[str, str]] = [
     dict(key="euler_char", stick="stick_topology_and_euler_s_formula", node="card_question_poincare",
          title="Topology and Euler's formula", basis="the stick seals V - E + F = 2 for the Platonic solids - the "
                "topological invariant; chi is the invariant the Poincaré question's sealed instances use (chi(S^3) = 0)"),
+    dict(key="language_round_trip",
+         stick="stick_scripture_study_is_the_eigenbasis_round_trip_flip_work_flip_",
+         node="card_floor_indo_european",
+         title="Scripture study is the eigenbasis round-trip",
+         basis="the stick seals the held Strong's lexicon, 5523 Greek + 8674 Hebrew = 14197 lemmas - the "
+               "original-language basis the surface text is flipped into for study (flip, work, flip back), the "
+               "tongue this linguistics floor reconstructs"),
 ]
 
 
@@ -133,6 +140,10 @@ def known_nodes() -> set:
         import seed_standard_model_chain as S1
         ids |= {c["id"] for c in S1.CARDS} | {c["id"] for c in S2.CARDS} | {c["id"] for c in S3.CARDS}
         ids |= {f"card_joint_{j['slug']}" for j in S2.JOINTS}
+        # every registered floor on the one map is a valid chart node, not only the original
+        # chain/joint seeds (the domain floors - indo_european, etc. - are the map too)
+        from concordance import chains as _chains
+        ids |= set(_chains.FLOORS)
     except Exception as e:  # pragma: no cover
         print("could not load the sibling seeds:", e)
     return ids

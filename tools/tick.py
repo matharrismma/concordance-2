@@ -10073,6 +10073,76 @@ def count(T: float = 1000000000.0) -> int:
     return 0
 
 
+def language_round_trip() -> int:
+    """THE EIGENBASIS ROUND-TRIP IN LANGUAGE (Matt, 2026-10-10: "flipping to original language,
+    doing the work, and flipping back"; "some words better left in the original tongue with
+    definitions"). Study is a change of basis: FLIP to the original (where meaning is invariant),
+    DO THE WORK where it is exact and sealable, FLIP BACK by aligning the gloss - never by
+    generating prose. Sealed anchor: the held eigenbasis is the Strong's lexicon, 5523 Greek +
+    8674 Hebrew = 14197 lemmas. Idempotent."""
+    from concordance import tickstick as TS
+    S = {"lex": _rh_seal_num("the_held_biblical_lexicon_5523_greek_plus_8674_hebrew_lemmas",
+                             "5523+8674", 14197)}
+    if not all(S.values()):
+        return 1
+    print("sealed the held-lexicon size")
+    sid = TS.create("Scripture study is the eigenbasis round-trip - flip, work, flip back")["id"]
+    marks = [
+        ("instance", "[the basis we flip into, SEALED] The flip is not a guess: the engine holds a real lexicon, "
+                     "5523 Greek + 8674 Hebrew = 14197 Strong's lemmas (sealed). To study a verse is to change basis "
+                     "from the surface text into this tagged original, where every word carries its lemma - the "
+                     "eigenbasis of the text (scripture.original_words; translate.gloss reports its coverage and "
+                     "never guesses).", S["lex"]),
+        ("equivalence", "[flip -> work -> flip back] The same shape as the change-of-domain stick (solve where it "
+                        "diagonalizes, map back) and the Fourier/Legendre flips. FLIP: original_words / gloss lift "
+                        "the surface to the Strong's basis. WORK: word_study, cross_references, root x pattern, "
+                        "cognates - exact, invariant, sealable there. FLIP BACK: translate.align places the gloss on "
+                        "the reader's text. The original is the basis in which the invariant meaning is computed; a "
+                        "translation is a projection of it.",
+         {"source": "stick_change_of_domain_solve_in_the_eigenbasis_map_back; src/concordance/verifiers/scripture.py; src/concordance/translate.py"}),
+        ("note", "[the flip back has THREE outcomes, not two] (1) a faithful single image -> align the gloss in the "
+                 "reader's tongue; (2) no lexicon entry -> UNRESOLVED, kept visible, never guessed (translate.py "
+                 "already does this); (3) IRREDUCIBLE -> keep the original word, transliterated, WITH its definition. "
+                 "Outcome 3 is the no-compose rule at the word level: where the target basis has no faithful "
+                 "coordinate, cite the original instead of fabricating an English one.",
+         {"source": "src/concordance/translate.py (gloss / align / the no-composed-sentence refusal)"}),
+        ("note", "[when a word is better left in the tongue - the multivalued inverse] A word is irreducible exactly "
+                 "when its map back is NOT single-valued: English SPLITS one original into many (logos G3056 -> "
+                 "account, cause, word, reason, speech ... 25 distinct KJV renderings; dabar H1697 -> word, matter, "
+                 "thing ... 74; pneuma -> ghost, life, spirit, mind; nephesh -> soul, life, being) OR several "
+                 "originals COLLAPSE to one English (agape G26 and phileo G5368 both -> 'love'; the distinction is "
+                 "lost). Measured across all 14197 lemmas from the KJV renderings themselves.",
+         {"source": "the irreducible-set measurement over the Strong's kjv_def fields (one->many and many->one fan-out)"}),
+        ("note", "[the irreducible set is KEPT, not generated] Raw fan-out measures GRAMMATICAL flexibility (kata, en, "
+                 "eis map to many English prepositions by context) as much as semantic field, so no threshold can "
+                 "define the set - it would wrongly keep 'kata' untranslated. The leave-in-the-tongue set is a "
+                 "curated, auditable list of CONTENT words (like the synonym lists), informed by the measurement and "
+                 "by conviction - because a generator picking its own path is a destructive act.",
+         {"source": "feedback_a_generator_picking_its_own_path_is_a_destructive_act; the fan-out measurement (grammatical vs semantic breadth)"}),
+        ("exclusion", "[no composed translation] translate.py returns no generated sentence: a fluent English "
+                      "paragraph no source contains is the fabricated inverse, authority with no chain. The flip back "
+                      "is gloss-and-align, cited, gaps visible - never prose. This is the whole design of the "
+                      "translation layer, not a limitation of it.",
+         {"source": "src/concordance/translate.py (there is no honest way for this engine to produce a translated sentence)"}),
+        ("exclusion", "[no gematria] The diagonalization in the biblical tongues is MORPHOLOGICAL - root x pattern, "
+                      "lemma = Strong's number - never numerological. Seal the arithmetic, attribute the pattern; a "
+                      "letter's number-value is never read as its meaning.",
+         {"source": "project_numbers_bases_triangulation (seal arithmetic, attribute pattern, no gematria)"}),
+        ("postulate", "[the limit - meaning is not a lemma-sum] Diagonalize at root / pattern / lemma, where it is "
+                      "exact and sealable; do NOT reduce meaning to a sum of glosses. 'The fear of the LORD' is not "
+                      "fear + LORD; idiom and theological depth are the coupled, non-linear layer. There the engine "
+                      "gathers witnesses - cross_references, commentary, the harmony - and declines to author.",
+         {"source": "feedback_gather_dont_author_wisdom_aligns; feedback_the_bible_is_the_readme_of_reality"}),
+        ("note", "[on the one map] Links the scripture layer (original_words / word_study) and the translation layer "
+                 "to the change-of-domain stick and the linguistics floor (card_floor_indo_european). Phonics is the "
+                 "same move in English (the phoneme basis: wordcraft/CMU); etymology is the Webster shelf (wordcraft); "
+                 "Strong's cognates are one lane of linguistics, not its definition.",
+         {"source": "the one map; card_floor_indo_european; src/concordance/domain_resolver.py (the language re-link)"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py language_round_trip")
+    return 0
+
+
 def main() -> int:
     a = sys.argv[1:]
     if not a:
@@ -10420,6 +10490,8 @@ def main() -> int:
                 rc |= bsd(label)
             return rc
         return bsd(a[1] if len(a) > 1 else "11a1")
+    if a[0] in ("language_round_trip", "flip_to_original", "original_tongue", "leave_in_the_tongue", "eigenbasis_language"):
+        return language_round_trip()
     if a[0] == "read":
         from concordance import tickstick as T
         print(json.dumps(T.read(a[1]) if len(a) > 1 else T.listing(), indent=1, ensure_ascii=False))
