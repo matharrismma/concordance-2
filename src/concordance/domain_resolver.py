@@ -78,10 +78,21 @@ _SYNONYMS: Dict[str, Tuple[str, ...]] = {
     "labor": ("hourly", "per hour", "an hour", "hourly rate", "wage", "wages", "salary",
               "annual salary", "overtime", "gross pay", "net pay", "paycheck", "minimum wage",
               "hours worked", "hours", "hour", "paid", "earnings", "take home", "pay period"),
+    # wordcraft IS our phonics program (CMU/ARPABET: rhyme, homophone, silent letter, vowel/edge
+    # sound, syllables) AND the etymology shelf (Webster 1913: "X comes from Latin"). Both verify
+    # here, so both route here.
     "wordcraft": ("homophone", "homophones", "anagram", "anagrams", "palindrome", "syllable",
                   "syllables", "vowel", "vowels", "consonant", "consonants", "silent letter",
                   "silent", "pronounced", "phoneme", "begins with", "starts with",
-                  "most common letter", "spelled", "letters in"),
+                  "most common letter", "spelled", "letters in",
+                  # phonics (the pronunciation shelf)
+                  "rhyme", "rhymes", "rhyming", "vowel sound", "long vowel", "short vowel",
+                  "the sound", "sound of",
+                  # etymology (the Webster 1913 shelf)
+                  "etymology", "from latin", "from greek", "from arabic", "from french",
+                  "comes from latin", "comes from greek", "derives from", "derived from",
+                  "latin word", "greek word", "loanword", "root word", "originally meant",
+                  "borrowed from"),
     "chemistry": ("molar", "molarity", "mole", "moles", "compound", "concentration", "stoichiometry",
                   "reaction", "molar mass", "molecular weight", "molecular mass", "grams per mole",
                   "acidic", "sodium", "chloride", "solute"),
@@ -119,10 +130,10 @@ _SYNONYMS: Dict[str, Tuple[str, ...]] = {
                      "equivalent to", "logically equivalent", "tautology", "contrapositive",
                      "biconditional", "if and only if", "de morgan", "modus ponens",
                      "modus tollens", "consequent", "antecedent"),
-    "linguistics": ("from latin", "from greek", "comes from latin", "comes from greek",
-                    "derives from", "derived from", "etymology", "cognate", "cognates",
-                    "loanword", "root word", "borrowed from", "proto", "from arabic",
-                    "from french", "from german", "latin word", "greek word", "originally meant"),
+    # linguistics is GENERAL; Strong's/Biblical word relations are one specialized lane, NOT the
+    # primary meaning of linguistics (Matt, 2026-10-10). General etymology lives in wordcraft
+    # (Webster shelf); historical sound change in sound_law. Keep the general cognate cue here.
+    "linguistics": ("cognate", "cognates"),
     "history_chronology": ("bce", "century", "centuries", "elapsed years", "years between",
                            "lasted", "dynasty", "ancient", "millennium", "reign"),
     "computer_science": ("logic gate", "and gate", "boolean", "binary", "algorithm", "truth table",
