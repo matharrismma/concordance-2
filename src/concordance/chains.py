@@ -49,7 +49,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_the_lagrangian",
           # Noether's theorem (tools/seed_noethers_theorem.py, 2026-10-09): symmetry is the source of conservation -
           # the seam between L and H; four pillars on the Lagrangian + capstone + Hamiltonian + Standard Model
-          "card_floor_noethers_theorem")
+          "card_floor_noethers_theorem",
+          # Maxwell's equations (tools/seed_maxwells_equations.py, 2026-10-09): the first unification - electricity,
+          # magnetism and light one field; cites stick_maxwell_s_...; pillars on capstone + Noether + Lagrangian + SM
+          "card_floor_maxwells_equations")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
