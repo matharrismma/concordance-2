@@ -10073,6 +10073,40 @@ def count(T: float = 1000000000.0) -> int:
     return 0
 
 
+def semantics() -> int:
+    """SEMANTIC RELATIONS - comprehensive linguistics, step 3 (Matt, 2026-10-10). Synonymy and the
+    IS-A (hypernym) hierarchy from the held WordNet thesaurus, SEALED through linguistics.LING_VERIFY
+    (the thesaurus is SQLite, independent of the corpus, so it seals cold); antonymy is not held and
+    declines. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "syn": _seal_through("linguistics", "LING_VERIFY", {"relation_a": "car", "relation_b": "automobile", "claimed_relation": "synonym"}),
+        "isa": _seal_through("linguistics", "LING_VERIFY", {"relation_a": "dog", "relation_b": "canine", "claimed_relation": "is_a"}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "semantic relations")
+    sid = TS.create("Semantic relations - synonymy and the IS-A hierarchy")["id"]
+    marks = [
+        ("instance", "[synonymy, SEALED] 'car' and 'automobile' are WordNet synonyms (sealed through "
+                     "linguistics.LING_VERIFY). The thesaurus is a conduit, not an author - every pair comes from "
+                     "WordNet, cited 'in at least one sense', never asserted as interchangeable.", S["syn"]),
+        ("instance", "[IS-A, SEALED] 'a dog is a kind of canine' - WordNet places canine above dog in the IS-A "
+                     "hierarchy (sealed), and transitively up to carnivore. Hypernymy is the upward connect-the-dots "
+                     "of meaning.", S["isa"]),
+        ("note", "[antonymy declines - the limit named] The held thesaurus has synonyms and IS-A hypernyms only; "
+                 "antonyms are NOT held, so an antonym claim DECLINES rather than guesses, and meronymy / entailment "
+                 "are not held either. 0 false positives: a relation WordNet does not hold cannot be confirmed.",
+         {"source": "src/concordance/verifiers/linguistics.py verify_semantic_relation; data/thesaurus.db (WordNet)"}),
+        ("note", "[on the one map - comprehensive linguistics, step 3] Semantics joins phonology, orthography, "
+                 "etymology, morphology and transliteration on the linguistics floor (card_floor_indo_european). "
+                 "Closed-class POS and typology remain.",
+         {"source": "card_floor_indo_european; the linguistics coverage map"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py semantics")
+    return 0
+
+
 def alphafold() -> int:
     """ALPHAFOLD AND PROTEIN FOLDING - the self-healing matrix in biology (Matt, 2026-10-10: "then
     look at Alpha Fold"). A protein's sequence determines ONE native structure, and denatured it
@@ -10681,6 +10715,8 @@ def main() -> int:
         return transliteration()
     if a[0] in ("alphafold", "protein_folding", "folding", "anfinsen", "levinthal"):
         return alphafold()
+    if a[0] in ("semantics", "semantic_relations", "synonymy", "wordnet"):
+        return semantics()
     if a[0] == "read":
         from concordance import tickstick as T
         print(json.dumps(T.read(a[1]) if len(a) > 1 else T.listing(), indent=1, ensure_ascii=False))

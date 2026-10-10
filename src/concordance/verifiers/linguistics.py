@@ -363,6 +363,61 @@ def verify_romanization(original: str, claimed: str, script: Optional[str] = Non
                     f"does not match it (a different valid scheme may exist; this is the engine's)", data)
 
 
+# SEMANTIC RELATIONS (Matt, 2026-10-10: comprehensive linguistics, step 3). Synonymy and IS-A
+# (hypernymy) from the held WordNet thesaurus (data/thesaurus.db - SQLite, independent of the
+# corpus, so it works cold). Antonymy is NOT held and declines. The verdict always says "per
+# WordNet, in at least one sense" - we report the authority's relation, cited, never assert
+# interchangeability. 0 false positives: a relation WordNet does not hold cannot be confirmed.
+def _normw(w: Any) -> str:
+    return str(w or "").strip().lower()
+
+
+def _broader_chain(word: str, maxdepth: int = 6) -> set:
+    """The transitive IS-A set above `word` (WordNet hypernyms, bounded depth)."""
+    from .. import thesaurus as TH
+    seen, frontier, chain = set(), [_normw(word)], set()
+    for _ in range(maxdepth):
+        nxt = []
+        for w in frontier:
+            for b in TH.broader(w, limit=0):
+                nb = _normw(b)
+                if nb and nb not in seen:
+                    seen.add(nb)
+                    chain.add(nb)
+                    nxt.append(nb)
+        if not nxt:
+            break
+        frontier = nxt
+    return chain
+
+
+def verify_semantic_relation(a: str, b: str, relation: str) -> VerifierResult:
+    name = "linguistics.semantic_relation"
+    from .. import thesaurus as TH
+    if not TH.available():
+        return na(name, "the WordNet thesaurus is not available in this process")
+    a0, b0 = _normw(a), _normw(b)
+    if not a0 or not b0:
+        return na(name, "need two words and a claimed_relation (synonym, broader/is_a, antonym)")
+    rel = _normw(relation).replace(" ", "_")
+    if rel in ("synonym", "synonyms", "synonymous"):
+        syns_a = {_normw(x) for x in TH.synonyms(a0, limit=0)}
+        syns_b = {_normw(x) for x in TH.synonyms(b0, limit=0)}
+        data = {"a": a0, "b": b0, "relation": "synonym", "source": "WordNet (thesaurus.db)"}
+        if b0 in syns_a or a0 in syns_b:
+            return confirm(name, f"'{a0}' and '{b0}' are WordNet synonyms in at least one sense", data)
+        return mismatch(name, f"WordNet does not list '{a0}' and '{b0}' as synonyms in any sense", data)
+    if rel in ("broader", "hypernym", "is_a", "isa", "kind_of", "a_kind_of"):
+        chain = _broader_chain(a0)
+        data = {"a": a0, "b": b0, "relation": "is_a", "source": "WordNet IS-A hierarchy"}
+        if b0 in chain:
+            return confirm(name, f"per WordNet, '{b0}' is above '{a0}' in the IS-A hierarchy (in at least one sense)", data)
+        return mismatch(name, f"WordNet does not place '{b0}' above '{a0}' in the IS-A hierarchy", data)
+    if rel in ("antonym", "antonyms", "opposite"):
+        return na(name, "antonyms are not held in the thesaurus (synonyms and IS-A hypernyms only); declined")
+    return na(name, f"unknown semantic relation {relation!r} (use synonym, broader/is_a, or antonym)")
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     """Dispatch every applicable linguistics check for the packet's LING_VERIFY block."""
     results: List[VerifierResult] = []
@@ -388,6 +443,9 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
 
     if "original" in lv and "romanization_claim" in lv:
         results.append(verify_romanization(lv["original"], lv["romanization_claim"], lv.get("script")))
+
+    if "relation_a" in lv and "relation_b" in lv and "claimed_relation" in lv:
+        results.append(verify_semantic_relation(lv["relation_a"], lv["relation_b"], lv["claimed_relation"]))
 
     if not results:
         results.append(na("linguistics", "no LING_VERIFY artifacts present"))

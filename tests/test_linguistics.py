@@ -21,3 +21,19 @@ def test_romanization_is_greek_only_and_zero_false_positive():
     assert LN.verify_romanization("λόγος", "logy").status == "MISMATCH"
     assert LN.verify_romanization("שלום", "shalom").status == "NOT_APPLICABLE"  # Hebrew declines
     assert LN.verify_romanization("cat", "kat").status == "NOT_APPLICABLE"
+
+
+def test_semantic_relations_report_wordnet_cited():
+    """Semantic relations (Matt, 2026-10-10: comprehensive linguistics, step 3). Synonymy and IS-A
+    come from the held WordNet thesaurus, cited; antonymy is not held and declines; an unheld
+    relation is a MISMATCH, never a false confirm."""
+    import pytest
+    from concordance import thesaurus as TH
+    if not TH.available():
+        pytest.skip("thesaurus.db not present")
+    assert LN.verify_semantic_relation("car", "automobile", "synonym").status == "CONFIRMED"
+    assert LN.verify_semantic_relation("dog", "happy", "synonym").status == "MISMATCH"
+    assert LN.verify_semantic_relation("dog", "canine", "is_a").status == "CONFIRMED"
+    assert LN.verify_semantic_relation("dog", "carnivore", "is_a").status == "CONFIRMED"   # transitive
+    assert LN.verify_semantic_relation("dog", "mineral", "is_a").status == "MISMATCH"
+    assert LN.verify_semantic_relation("hot", "cold", "antonym").status == "NOT_APPLICABLE"  # not held

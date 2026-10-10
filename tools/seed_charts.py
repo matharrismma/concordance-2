@@ -107,6 +107,13 @@ CHARTS: List[Dict[str, str]] = [
          title="Transliteration - romanizing the original tongue",
          basis="the stick seals Greek romanizations by a fixed scheme (logos, theos) through linguistics.LING_VERIFY; "
                "general transliteration broadens this linguistics floor beyond the Strong's lexicon"),
+    dict(key="semantics",
+         stick="stick_semantic_relations_synonymy_and_the_is_a_hierarchy",
+         node="card_floor_indo_european",
+         title="Semantic relations - synonymy and the IS-A hierarchy",
+         basis="the stick seals WordNet synonymy (car = automobile) and IS-A (a dog is a canine) through "
+               "linguistics.LING_VERIFY; semantics is the meaning layer of this linguistics floor, cited from "
+               "WordNet, antonymy declined"),
     dict(key="alphafold",
          stick="stick_alphafold_and_protein_folding_the_self_healing_matrix_in_bio",
          node="card_floor_biology",

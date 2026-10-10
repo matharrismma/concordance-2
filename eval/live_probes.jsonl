@@ -224,3 +224,4 @@
 {"id": "map.capstone.charts.self_healing", "path": "/chains", "query": {"floor": "card_floor_the_capstone"}, "expect": [{"at": "charts[*].stick", "has": "stick_one_path_many_entries_a_self_healing_matrix_not_many_paths"}]}
 {"id": "map.indo_european.charts.transliteration", "path": "/chains", "query": {"floor": "card_floor_indo_european"}, "expect": [{"at": "charts[*].stick", "has": "stick_transliteration_romanizing_the_original_tongue"}]}
 {"id": "map.biology.charts.alphafold", "path": "/chains", "query": {"floor": "card_floor_biology"}, "expect": [{"at": "charts[*].stick", "has": "stick_alphafold_and_protein_folding_the_self_healing_matrix_in_bio"}]}
+{"id": "map.indo_european.charts.semantics", "path": "/chains", "query": {"floor": "card_floor_indo_european"}, "expect": [{"at": "charts[*].stick", "has": "stick_semantic_relations_synonymy_and_the_is_a_hierarchy"}]}
