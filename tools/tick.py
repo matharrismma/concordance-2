@@ -2959,6 +2959,53 @@ def game_theory() -> int:
     _mint_marks(sid, marks, by="tools/tick.py game_theory")
     return 0
 
+
+def acoustics() -> int:
+    """ACOUSTICS - waves, loudness, and harmonics (Matt, 2026-10-10, down the domain list - after game theory). Sound
+    is a pressure WAVE in a medium (v = f lambda); LOUDNESS is logarithmic (the decibel); PITCH is frequency and
+    TIMBRE is the harmonic series; a moving source shifts pitch (the DOPPLER effect, the acoustic cousin of the
+    redshift). SEALED: concert A's wavelength in air, a 30 dB power ratio, and a third harmonic. Rests on chemistry
+    (the medium), the mind (perception), quantum mechanics (phonons), and relativity (Doppler). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "wavelength": _rh_seal_num("concert_a_wavelength_in_air_v_over_f_metres", "343/440", 343 / 440, tol=1e-9),
+        "decibel": _rh_seal_num("thirty_decibels_is_a_thousandfold_power_ratio", "10**3", 10 ** 3, tol=1e-12),
+        "harmonic": _rh_seal_num("third_harmonic_of_220_hz", "3*220", 3 * 220, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "acoustics numbers")
+    sid = TS.create("Acoustics - waves, loudness, and harmonics")["id"]
+    marks = [
+        ("instance", "[sound is a wave in a medium, SEALED] Sound is a travelling pressure wave, and v = f lambda: at "
+                     "the speed of sound in air (343 m/s), concert A at 440 Hz has wavelength 343/440 = 0.78 m "
+                     "(sealed). Unlike light, sound needs a MEDIUM - no air, no sound - and its speed is set by the "
+                     "medium's stiffness and density. Ties card_floor_chemistry (the medium).", S["wavelength"]),
+        ("instance", "[loudness is logarithmic - the decibel, SEALED] Our ears span a trillion-fold range of "
+                     "intensity, so loudness is measured in decibels, a logarithm: every 10 dB is a tenfold power "
+                     "ratio, so 30 dB is 10^3 = 1000 times the power (sealed). Perception compresses huge ranges into "
+                     "manageable scales - the same logarithm that runs through the whole map. Ties card_floor_the_mind "
+                     "(perception).", S["decibel"]),
+        ("instance", "[pitch and timbre - the harmonics, SEALED] Pitch is frequency; a vibrating string or pipe also "
+                     "rings at integer multiples, the harmonic series, and their mix is TIMBRE (why a violin and a "
+                     "flute at the same pitch sound different). The third harmonic of 220 Hz is 3*220 = 660 Hz "
+                     "(sealed). The exact ratios are the harmonics stick; quantized, a sound wave's quanta are "
+                     "PHONONS. Ties card_floor_quantum_mechanics (phonons) and the harmonics stick.", S["harmonic"]),
+        ("note", "[the Doppler effect - the acoustic redshift] A source moving toward you raises the pitch, away "
+                 "lowers it (the passing siren) - the Doppler effect, because the waves bunch ahead and stretch "
+                 "behind. It is the exact acoustic cousin of the relativistic redshift of light (sealed on the "
+                 "gravity stick, and the basis of cosmic expansion). Same geometry, different medium. Ties "
+                 "card_floor_relativity.",
+         {"source": "the Doppler effect; the acoustic analogue of the redshift; card_floor_relativity"}),
+        ("note", "[on the one map] Acoustics rests on chemistry (sound needs a material medium), the mind "
+                 "(loudness and pitch are perception - logarithmic), quantum mechanics (phonons, the quanta of "
+                 "lattice vibration, tie to the harmonic oscillator), and relativity (the Doppler effect). The "
+                 "physics of hearing, standing between matter and mind. Ties card_floor_acoustics.",
+         {"source": "the one map; card_floor_acoustics; tools/seed_acoustics.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py acoustics")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9674,6 +9721,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("acoustics", "sound", "the_decibel", "doppler"):
+        return acoustics()
     if a[0] in ("game_theory", "nash_equilibrium", "prisoners_dilemma", "zero_sum"):
         return game_theory()
     if a[0] in ("computer_science", "computation", "algorithms", "the_bit"):

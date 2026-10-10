@@ -37,7 +37,7 @@ def _graph():
 def test_the_seed_validates_and_every_endpoint_resolves():
     assert S3._validate() == []
     assert len(S3.CHAINS) == 8 and len(S3.RECORDS) >= 55
-    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 32
+    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 33
 
 
 def test_each_chain_walks_from_its_roots_to_its_open_end_and_meets_where_the_seed_expects():
@@ -115,7 +115,7 @@ def test_the_chains_door_reads_a_chain_floor(monkeypatch):
     assert st == 200 and len(body["chain"]["nodes"]) >= 12 and body["confluences"][0]["at"] == "card_chain_riemann_1859"
     st, payload = dispatch("GET", "/chains", {"floors": "1"}, None, EngineConfig("secular"))
     body = payload.get("data") or payload
-    assert st == 200 and len(body["floors"]) == 32
+    assert st == 200 and len(body["floors"]) == 33
 
 
 def test_the_capstone_floor_gathers_the_others_and_marks_the_two_barriers():
@@ -544,3 +544,22 @@ def test_game_theory_floor_rests_on_solve_path_and_economics():
     assert m and len(m["parts"]) == 4
     serves = {s["at"] for s in m["serves"]}
     assert {"card_floor_the_solve_path", "card_floor_economics", "card_floor_biology"} <= serves
+
+
+def test_acoustics_floor_stands_between_matter_and_mind():
+    """Acoustics (Matt, 2026-10-10, after game theory): sound - four pillars reaching to chemistry, the mind,
+    quantum mechanics and relativity. Pinned on the seed alone."""
+    import seed_acoustics as S27
+    assert S27._validate() == []
+    cards = {c["id"]: json.loads(json.dumps(c)) for c in S27.CARDS}
+    for cid in ("card_floor_chemistry", "card_floor_the_mind", "card_floor_quantum_mechanics",
+                "card_floor_relativity", "card_k_floor_of_discovery"):
+        cards.setdefault(cid, {"id": cid, "title": cid, "connections": []})
+    overlay = Path(tempfile.mkdtemp(prefix="nh-ac-")) / "overlay.jsonl"
+    overlay.write_text("\n".join(json.dumps(e) for e in S27.BRIDGES) + "\n", encoding="utf-8")
+    corpus._apply_bridges(cards, overlay)
+    m = chains.floor_map(S27.FLOOR, get_card=cards.get)
+    assert m and len(m["parts"]) == 4
+    serves = {s["at"] for s in m["serves"]}
+    assert {"card_floor_chemistry", "card_floor_the_mind", "card_floor_quantum_mechanics",
+            "card_floor_relativity"} <= serves

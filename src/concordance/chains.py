@@ -91,7 +91,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_computer_science",
           # game theory (tools/seed_game_theory.py, 2026-10-10): equilibrium, dilemmas, strategy - matching pennies,
           # the prisoner's dilemma; rests on the solve path (fixed point) + economics + the mind + biology (ESS)
-          "card_floor_game_theory")
+          "card_floor_game_theory",
+          # acoustics (tools/seed_acoustics.py, 2026-10-10): sound - the wave, the decibel, harmonics, Doppler; rests
+          # on chemistry (medium) + the mind (perception) + quantum mechanics (phonons) + relativity (Doppler)
+          "card_floor_acoustics")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
