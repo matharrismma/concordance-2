@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+"""WARM A BOOK OF SCRIPTURE into the operator's voice (Matt, 2026-10-10: "Psalms and proverbs
+would be the first I'd focus on"). Like tools/warm_voice.py for the curriculum, but for whole
+books: it voices each verse ONCE through voice.speak (the content-addressed cache means the paid
+API is touched at most once per distinct verse; a verse already voiced is a free hit). The engine
+SPEAKS the kept, verified WEB text - it does not generate a word of it.
+
+    PYTHONPATH=src python tools/warm_scripture.py --book Proverbs --dry-run   # counts, spends nothing
+    ELEVENLABS_API_KEY=... ELEVENLABS_VOICE_ID=... PYTHONPATH=src python tools/warm_scripture.py --book Proverbs
+    ...                                             ... --book Psalms --limit 200
+
+Runs where the keys and the bible live (the box). A dry run needs no key and spends nothing.
+Idempotent, bounded, honest: it reports verses, characters, new (spent) vs hits.
+"""
+from __future__ import annotations
+
+import argparse
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:  # noqa: BLE001
+    pass
+
+from concordance import voice  # noqa: E402
+from concordance.verifiers import scripture as S  # noqa: E402
+
+# book -> chapter count (the whole-book warmers we support; extend as needed)
+CHAPTERS = {"Psalms": 150, "Proverbs": 31, "Ecclesiastes": 12, "Song of Solomon": 8}
+
+
+def verses_of(book: str):
+    n = CHAPTERS.get(book)
+    if not n:
+        raise SystemExit(f"unknown book {book!r}; known: {', '.join(sorted(CHAPTERS))}")
+    for ch in range(1, n + 1):
+        r = S.read_passage(f"{book} {ch}")
+        for v in (r.get("verses") or []):
+            t = " ".join((v.get("text") or "").split()).strip()
+            if t:
+                yield v.get("ref") or f"{book} {ch}", t
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--book", required=True)
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--limit", type=int, default=0)
+    a = ap.parse_args(argv)
+
+    cache = voice._cache_dir()
+    items = list(verses_of(a.book))
+    total_chars = sum(len(t) for _, t in items)
+    cached = sum(1 for _, t in items if (cache / (voice._digest(t) + ".mp3")).is_file())
+    new = len(items) - cached
+    new_chars = sum(len(t) for _, t in items if not (cache / (voice._digest(t) + ".mp3")).is_file())
+    print(f"{a.book}: {len(items)} verses, {total_chars} chars; already voiced {cached}, "
+          f"NEW {new} ({new_chars} chars ~= credits)")
+    if a.dry_run:
+        print("dry run - nothing synthesized, nothing spent.")
+        return 0
+    if not voice.configured():
+        print("ELEVENLABS_API_KEY / ELEVENLABS_VOICE_ID not set - cannot synthesize; aborting.")
+        return 2
+    done = spent = fail = 0
+    for ref, t in items:
+        if a.limit and spent >= a.limit:
+            break
+        res = voice.speak(t)
+        if res is None:
+            fail += 1
+            continue
+        _, how = res
+        done += 1
+        if how != "hit":
+            spent += 1
+            if spent % 25 == 0:
+                print(f"  [{done}/{len(items)}] synthesized {spent} new ... {ref}")
+            time.sleep(0.2)                        # gentle on the API
+    print(f"done · {done} voiced · {spent} newly synthesized · {fail} unavailable. "
+          f"The kept verses now speak instantly and free, in the operator's voice.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
