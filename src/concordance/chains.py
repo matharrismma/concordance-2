@@ -61,7 +61,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_relativity",
           # quantum mechanics (tools/seed_quantum_mechanics.py, 2026-10-09): the framework the physics region lives in;
           # adds quantization + uncertainty + entanglement; pillars on Hamiltonian + Maxwell + capstone + instruments + relativity
-          "card_floor_quantum_mechanics")
+          "card_floor_quantum_mechanics",
+          # chemistry (tools/seed_chemistry.py, 2026-10-09): the world of substances - QM applied; the periodic table;
+          # pillars on QM (periodic table) + Maxwell (bond) + thermodynamics (Delta G) + Noether (conservation)
+          "card_floor_chemistry")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:

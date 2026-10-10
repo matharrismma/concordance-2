@@ -2371,6 +2371,55 @@ def hermitian_operators() -> int:
     _mint_marks(sid, marks, by="tools/tick.py hermitian_operators")
     return 0
 
+
+def chemistry_floor() -> int:
+    """CHEMISTRY - quantum mechanics applied, the periodic table (Matt, 2026-10-09: "chemistry too"). Chemistry is the
+    Schrodinger equation for electrons around nuclei, plus the Pauli exclusion principle, plus electromagnetism. The
+    PERIODIC TABLE falls out of how electrons fill quantum shells (shell n holds 2n^2); THERMODYNAMICS decides which
+    reactions run (Delta G < 0); CONSERVATION of atoms makes every equation balance. SEALED here: the shell capacity
+    2n^2 and water's molar mass. Reactions, Gibbs spontaneity and pH are already sealed on the chemistry stick
+    (stick_chemistry_reactions_and_solutions_verified_and_sealed), which this cites. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "shell": _rh_seal_num("periodic_shell_capacity_two_n_squared_n3", "2*3**2", 2 * 3 ** 2, tol=1e-12),
+        "water": _rh_seal_num("molar_mass_of_water_from_atomic_masses_g_mol", "2*1.008 + 16.00", 2 * 1.008 + 16.00, tol=1e-9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "chemistry numbers")
+    sid = TS.create("Chemistry - quantum mechanics applied, the periodic table")["id"]
+    marks = [
+        ("instance", "[the periodic table from quantum shells, SEALED] The elements are ordered by how electrons fill "
+                     "quantum shells, and shell n holds 2 n^2 electrons: the third shell holds 2 * 3^2 = 18 (sealed) - "
+                     "which is why the periodic table is 18 columns wide and the transition metals appear. (n=1 holds "
+                     "2, helium; n=2 holds 8, the octet rule and neon.) The whole table is the Schrodinger equation "
+                     "plus the Pauli exclusion principle: many elements, one filling rule.", S["shell"]),
+        ("instance", "[conservation of mass - the mole, SEALED] Water's molar mass is 2 * 1.008 + 16.00 = 18.016 g/mol "
+                     "(sealed), the sum of its atoms: hydrogen twice, oxygen once. Atoms are conserved in every "
+                     "reaction - 2 H2 + O2 -> 2 H2O is balanced (sealed on the chemistry stick) - so mass is "
+                     "conserved. Chemistry's first law, and Noether's conserved quantity in a chemical frame.", S["water"]),
+        ("note", "[chemistry IS quantum mechanics applied] Every bond, every reaction, every colour is the Schrodinger "
+                 "equation for electrons around nuclei, plus Pauli exclusion, plus electromagnetism. Hydrogen's 13.6 "
+                 "eV ground state (sealed on the Hamiltonian) is its first line. Chemistry is not separate from "
+                 "physics - it is physics at the scale of atoms, emergent and a science in its own right at once. "
+                 "Ties card_floor_quantum_mechanics (orbitals, Pauli) and card_floor_maxwells_equations (the bond is "
+                 "electromagnetic).",
+         {"source": "the electronic Schrodinger equation; the Pauli exclusion principle; card_floor_quantum_mechanics"}),
+        ("note", "[thermodynamics decides which way] A reaction runs when Delta G = Delta H - T Delta S < 0 (sealed on "
+                 "stick_chemistry_reactions_and_solutions_verified_and_sealed): the second law, deciding direction. "
+                 "Chemistry rests on the quantum for what is POSSIBLE and on thermodynamics for what actually "
+                 "HAPPENS. Ties card_floor_thermodynamics.",
+         {"source": "Gibbs free energy; the second law; stick_chemistry_reactions_and_solutions_verified_and_sealed; card_floor_thermodynamics"}),
+        ("note", "[on the one map] The chemistry floor rests on quantum mechanics (the periodic table from orbitals "
+                 "and Pauli), thermodynamics (Delta G decides direction), Maxwell (the bond is electromagnetic), and "
+                 "conservation (atoms and mass, Noether). It cites the reactions, Gibbs spontaneity and pH already "
+                 "sealed on the chemistry stick. The world of substances, standing on the physics region. Ties "
+                 "card_floor_chemistry.",
+         {"source": "the one map; card_floor_chemistry; tools/seed_chemistry.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py chemistry_floor")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9086,6 +9135,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("periodic_table", "chemical_bonding", "the_elements", "the_mole"):
+        return chemistry_floor()
     if a[0] in ("hermitian", "hermitian_operators", "observables", "real_eigenvalues"):
         return hermitian_operators()
     if a[0] in ("gauge_theory", "particle_physics", "quark_model", "gluons"):
