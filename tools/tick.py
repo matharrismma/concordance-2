@@ -2468,6 +2468,51 @@ def physical_chemistry() -> int:
     _mint_marks(sid, marks, by="tools/tick.py physical_chemistry")
     return 0
 
+
+def biology() -> int:
+    """BIOLOGY - life is self-replicating chemistry (Matt, 2026-10-09, down the domain list). The next rung of the
+    emergence ladder: physics -> chemistry -> life. A cell is chemistry organized to copy itself and run on free
+    energy; DNA spells proteins in a triplet code (4^3 = 64 codons), and evolution by variation and selection builds
+    the tree of life from one root. SEALED: the codon count, and Hardy-Weinberg equilibrium (through the biology
+    verifier). Rests on chemistry and thermodynamics; connects to the tree of life. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "codon": _rh_seal_num("genetic_code_triplet_codon_count_four_cubed", "4**3", 4 ** 3, tol=1e-12),
+        "hwe": _seal_through("biology", "BIO_VERIFY", {"hardy_weinberg": {"counts": [360, 480, 160]}}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "biology facts")
+    sid = TS.create("Biology - the genetic code and the tree of life")["id"]
+    marks = [
+        ("instance", "[the genetic code is a triplet code, SEALED] DNA spells proteins in three-letter words: four "
+                     "bases read in triplets give 4^3 = 64 codons (sealed) for 20 amino acids plus stop - the digital "
+                     "code of life, read almost the same in every organism. The molecule of heredity is chemistry "
+                     "(sealed floor below); the code it carries is information. Ties card_floor_chemistry and the "
+                     "information instrument.", S["codon"]),
+        ("instance", "[population genetics - the frequencies sum to one, SEALED] Hardy-Weinberg: in a non-evolving "
+                     "population the genotype frequencies p^2 + 2pq + q^2 sum to 1 (sealed through the biology "
+                     "verifier). Departures from it are exactly where evolution shows - selection, drift, migration, "
+                     "mutation. Many genotypes, one total: the capstone's 'sum to one' in a gene pool.", S["hwe"]),
+        ("note", "[life is chemistry that copies itself] A cell is chemistry (the floor below) organized to replicate "
+                 "and to run on free energy - DNA, proteins, membranes, metabolism, all molecules and reactions. Life "
+                 "does not break the second law: it is a local decrease in entropy paid for by a larger increase "
+                 "around it (heat, waste). Ties card_floor_chemistry and card_floor_thermodynamics.",
+         {"source": "molecular biology; bioenergetics; the second law and living systems; card_floor_chemistry"}),
+        ("note", "[common descent - the tree of life] All life descends from one root (LUCA); the near-universal "
+                 "genetic code and the universal genes are the evidence (card_floor_tree_of_life). Evolution by "
+                 "variation and natural selection is the mechanism, and Hardy-Weinberg is its null hypothesis. One "
+                 "source, branching into every living thing. Ties card_floor_tree_of_life.",
+         {"source": "common descent; natural selection; card_floor_tree_of_life"}),
+        ("note", "[on the one map] Biology stands on chemistry (life is self-replicating chemistry) and "
+                 "thermodynamics (it runs on free energy), and connects to the tree of life (its evolutionary "
+                 "structure) and the capstone (allele frequencies sum to one). The rung of the emergence ladder where "
+                 "matter begins to copy itself. Ties card_floor_biology.",
+         {"source": "the one map; card_floor_biology; tools/seed_biology.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py biology")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9183,6 +9228,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("biology", "the_cell", "molecular_biology", "life"):
+        return biology()
     if a[0] in ("physical_chemistry", "kinetics", "equilibrium", "electrochemistry"):
         return physical_chemistry()
     if a[0] in ("periodic_table", "chemical_bonding", "the_elements", "the_mole"):

@@ -37,7 +37,7 @@ def _graph():
 def test_the_seed_validates_and_every_endpoint_resolves():
     assert S3._validate() == []
     assert len(S3.CHAINS) == 8 and len(S3.RECORDS) >= 55
-    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 24
+    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 25
 
 
 def test_each_chain_walks_from_its_roots_to_its_open_end_and_meets_where_the_seed_expects():
@@ -115,7 +115,7 @@ def test_the_chains_door_reads_a_chain_floor(monkeypatch):
     assert st == 200 and len(body["chain"]["nodes"]) >= 12 and body["confluences"][0]["at"] == "card_chain_riemann_1859"
     st, payload = dispatch("GET", "/chains", {"floors": "1"}, None, EngineConfig("secular"))
     body = payload.get("data") or payload
-    assert st == 200 and len(body["floors"]) == 24
+    assert st == 200 and len(body["floors"]) == 25
 
 
 def test_the_capstone_floor_gathers_the_others_and_marks_the_two_barriers():
@@ -342,3 +342,21 @@ def test_physical_chemistry_floor_stands_on_chemistry():
     assert m and len(m["parts"]) == 4
     serves = {s["at"] for s in m["serves"]}
     assert {"card_floor_chemistry", "card_floor_thermodynamics", "card_floor_maxwells_equations"} <= serves
+
+
+def test_biology_floor_stands_on_chemistry_and_connects_the_tree_of_life():
+    """Biology (Matt, 2026-10-09, down the domain list): life = self-replicating chemistry - four pillars reaching to
+    chemistry/instruments, the tree of life, the capstone and thermodynamics. Pinned on the seed alone."""
+    import seed_biology as S16
+    assert S16._validate() == []
+    cards = {c["id"]: json.loads(json.dumps(c)) for c in S16.CARDS}
+    for cid in ("card_floor_chemistry", "card_floor_the_instruments", "card_floor_tree_of_life",
+                "card_floor_the_capstone", "card_floor_thermodynamics", "card_k_floor_of_discovery"):
+        cards.setdefault(cid, {"id": cid, "title": cid, "connections": []})
+    overlay = Path(tempfile.mkdtemp(prefix="nh-bio-")) / "overlay.jsonl"
+    overlay.write_text("\n".join(json.dumps(e) for e in S16.BRIDGES) + "\n", encoding="utf-8")
+    corpus._apply_bridges(cards, overlay)
+    m = chains.floor_map(S16.FLOOR, get_card=cards.get)
+    assert m and len(m["parts"]) == 4
+    serves = {s["at"] for s in m["serves"]}
+    assert {"card_floor_chemistry", "card_floor_tree_of_life", "card_floor_thermodynamics"} <= serves

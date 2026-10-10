@@ -67,7 +67,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_chemistry",
           # physical chemistry (tools/seed_physical_chemistry.py, 2026-10-09): deeper in chemistry - rate, equilibrium,
           # acid-base, redox; stands on chemistry; pillars reach to thermodynamics (Delta G=-RT lnK) and Maxwell (redox)
-          "card_floor_physical_chemistry")
+          "card_floor_physical_chemistry",
+          # biology (tools/seed_biology.py, 2026-10-09): life = self-replicating chemistry; the genetic code, evolution,
+          # Hardy-Weinberg, metabolism; stands on chemistry + thermodynamics, connects the tree of life into the ladder
+          "card_floor_biology")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
