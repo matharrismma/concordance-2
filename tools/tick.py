@@ -2197,6 +2197,71 @@ def relativity() -> int:
     _mint_marks(sid, marks, by="tools/tick.py relativity")
     return 0
 
+
+def quantum_mechanics() -> int:
+    """QUANTUM MECHANICS - the quantum and its limits (Matt, 2026-10-09: "What about Quantum mechanics?"). Not another
+    floor beside the others; the FRAMEWORK they inhabit. Superposition and the Born rule (capstone), the Schrodinger
+    equation (Hamiltonian), the path integral (Lagrangian) are already placed. This floor gathers them and adds the
+    three foundations not yet sealed: QUANTIZATION (the quantum of action hbar; light in lumps, E = hf), UNCERTAINTY
+    (Delta x Delta p >= hbar/2, a proven limit not an ignorance), and ENTANGLEMENT (Bell/Tsirelson: the world is not
+    locally real; an entangled pair is ONE state). Idempotent."""
+    from concordance import tickstick as TS
+    hbar = 6.62607015e-34 / (2 * 3.141592653589793)
+    e_photon = 6.62607015e-34 * 5.45e14 / 1.602176634e-19
+    tsirelson = 2 * 2 ** 0.5
+    S = {
+        "hbar": _rh_seal_num("reduced_planck_constant_quantum_of_action_js",
+                             "6.62607015e-34/(2*3.141592653589793)", hbar, tol=1e-9),
+        "photon": _rh_seal_num("green_photon_energy_e_equals_hf_ev",
+                               "6.62607015e-34*5.45e14/1.602176634e-19", e_photon, tol=1e-9),
+        "bell": _rh_seal_num("tsirelson_bound_chsh_quantum_correlation", "2*2**0.5", tsirelson, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "quantum numbers")
+    sid = TS.create("Quantum mechanics - the quantum and its limits")["id"]
+    marks = [
+        ("instance", "[the quantum of action, SEALED] The quantum is real and discrete: the quantum of action is "
+                     "hbar = h/(2 pi) = 1.0546e-34 J s (sealed). Action, angular momentum and energy come in units set "
+                     "by it; where it matters the world is granular, not continuous. It is also the floor of "
+                     "uncertainty - the smallest the product of two complementary spreads can be.", S["hbar"]),
+        ("instance", "[light comes in lumps - E = hf, SEALED] A photon of green light (5.45e14 Hz) carries "
+                     "E = hf = 2.25 eV (sealed). Planck and Einstein: radiation is quantized, energy in discrete "
+                     "quanta. The sharp spectrum of every atom - hydrogen's 13.6 eV, sealed on the Hamiltonian - is "
+                     "this discreteness; the photon is the electromagnetic field quantized. Ties "
+                     "card_floor_maxwells_equations.", S["photon"]),
+        ("instance", "[the world is not locally real - entanglement, SEALED] An entangled pair is ONE state, not two; "
+                     "measuring one instantly fixes the other. Bell proved no locally-real theory can match quantum "
+                     "predictions: the CHSH correlation is capped at 2 for any local-realist world, but quantum "
+                     "mechanics reaches 2 sqrt(2) = 2.83 (sealed, the Tsirelson bound), and experiment sides with "
+                     "2.83 (Aspect; the 2022 Nobel). Many parts, one indivisible state - 'one source, states of that "
+                     "force' at the deepest level. No faster-than-light signal passes, so it still answers to "
+                     "relativity.", S["bell"]),
+        ("note", "[the framework the physics region lives in] Quantum mechanics is not a floor beside the others; it "
+                 "is the framework they inhabit. Superposition, the Born rule and the measurement gap are on the "
+                 "capstone; the Schrodinger equation and unitary evolution on the Hamiltonian; the path integral on "
+                 "the Lagrangian; gauge symmetry giving charge on Noether and Maxwell; the Born rule and the "
+                 "interpretations on stick_the_schrodinger_equation. This floor gathers them "
+                 "and adds quantization, uncertainty and entanglement. Ties card_floor_the_capstone, "
+                 "card_floor_the_hamiltonian, card_floor_the_lagrangian.",
+         {"source": "the Hilbert-space formulation; card_floor_the_capstone, card_floor_the_hamiltonian, card_floor_the_lagrangian"}),
+        ("note", "[the uncertainty principle - a proven limit, not an ignorance] Position and momentum cannot both be "
+                 "sharp: Delta x Delta p >= hbar/2. This is not a failure of measurement - a particle does not HAVE a "
+                 "sharp position and momentum at once, because they are non-commuting observables ([x, p] = i hbar). "
+                 "A proven limit, FOUND in the structure: the physical cousin of the engine's own refusal to assert "
+                 "beyond what it can check. Ties card_floor_the_instruments (the moat - decline what cannot be known).",
+         {"source": "Heisenberg's uncertainty principle; the canonical commutator [x,p] = i hbar; card_floor_the_instruments"}),
+        ("note", "[on the one map] The superposition is many potentials (capstone); the discrete spectrum is the "
+                 "Hamiltonian's eigenvalues; entanglement is 'one source, states of that force'; the uncertainty bound "
+                 "is a found limit like the engine's decline. Quantum mechanics is the native tongue of the whole "
+                 "physics region. Married to relativity it becomes quantum field theory (the Standard Model); their "
+                 "UNFINISHED marriage with gravity is the open frontier (quantum gravity). Ties card_floor_relativity "
+                 "and card_floor_standard_model.",
+         {"source": "the one map; quantum field theory; the open problem of quantum gravity; card_floor_relativity"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py quantum_mechanics")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -8912,6 +8977,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("quantum_mechanics", "qm", "uncertainty", "entanglement"):
+        return quantum_mechanics()
     if a[0] in ("relativity", "special_relativity", "general_relativity", "lorentz"):
         return relativity()
     if a[0] in ("thermodynamics", "thermo", "laws_of_thermodynamics", "carnot"):

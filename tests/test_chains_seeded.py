@@ -37,7 +37,7 @@ def _graph():
 def test_the_seed_validates_and_every_endpoint_resolves():
     assert S3._validate() == []
     assert len(S3.CHAINS) == 8 and len(S3.RECORDS) >= 55
-    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 21
+    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 22
 
 
 def test_each_chain_walks_from_its_roots_to_its_open_end_and_meets_where_the_seed_expects():
@@ -115,7 +115,7 @@ def test_the_chains_door_reads_a_chain_floor(monkeypatch):
     assert st == 200 and len(body["chain"]["nodes"]) >= 12 and body["confluences"][0]["at"] == "card_chain_riemann_1859"
     st, payload = dispatch("GET", "/chains", {"floors": "1"}, None, EngineConfig("secular"))
     body = payload.get("data") or payload
-    assert st == 200 and len(body["floors"]) == 21
+    assert st == 200 and len(body["floors"]) == 22
 
 
 def test_the_capstone_floor_gathers_the_others_and_marks_the_two_barriers():
@@ -249,3 +249,22 @@ def test_relativity_floor_ties_the_physics_region():
     serves = {s["at"] for s in m["serves"]}
     assert {"card_floor_maxwells_equations", "card_floor_the_hamiltonian", "card_floor_the_lagrangian",
             "card_floor_noethers_theorem"} <= serves
+
+
+def test_quantum_mechanics_floor_is_the_framework_and_adds_uncertainty_and_entanglement():
+    """Quantum mechanics (Matt, 2026-10-09): the framework the physics region lives in - four pillars resting on the
+    Hamiltonian, Maxwell, the capstone, the instruments and relativity. Pinned on the seed alone."""
+    import seed_quantum_mechanics as S11
+    assert S11._validate() == []
+    cards = {c["id"]: json.loads(json.dumps(c)) for c in S11.CARDS}
+    for cid in ("card_floor_the_hamiltonian", "card_floor_maxwells_equations", "card_floor_the_capstone",
+                "card_floor_the_instruments", "card_floor_relativity", "card_k_floor_of_discovery"):
+        cards.setdefault(cid, {"id": cid, "title": cid, "connections": []})
+    overlay = Path(tempfile.mkdtemp(prefix="nh-qm-")) / "overlay.jsonl"
+    overlay.write_text("\n".join(json.dumps(e) for e in S11.BRIDGES) + "\n", encoding="utf-8")
+    corpus._apply_bridges(cards, overlay)
+    m = chains.floor_map(S11.FLOOR, get_card=cards.get)
+    assert m and len(m["parts"]) == 4
+    serves = {s["at"] for s in m["serves"]}
+    assert {"card_floor_the_hamiltonian", "card_floor_the_capstone", "card_floor_the_instruments",
+            "card_floor_relativity"} <= serves

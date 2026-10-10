@@ -58,7 +58,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_thermodynamics",
           # relativity (tools/seed_relativity.py, 2026-10-09): many frames, one invariant; ties the physics region -
           # pillars on Maxwell + capstone (special), Hamiltonian (E=mc^2), Lagrangian (GR), Noether (Poincare)
-          "card_floor_relativity")
+          "card_floor_relativity",
+          # quantum mechanics (tools/seed_quantum_mechanics.py, 2026-10-09): the framework the physics region lives in;
+          # adds quantization + uncertainty + entanglement; pillars on Hamiltonian + Maxwell + capstone + instruments + relativity
+          "card_floor_quantum_mechanics")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
