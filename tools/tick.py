@@ -2139,6 +2139,64 @@ def thermodynamics() -> int:
     _mint_marks(sid, marks, by="tools/tick.py thermodynamics")
     return 0
 
+
+def relativity() -> int:
+    """RELATIVITY - many frames, one invariant (Matt, 2026-10-09: "Relativity"). SPECIAL relativity: the laws and the
+    speed of light are the same in every inertial frame; observers disagree on time and length but agree on c and on
+    the invariant interval. GENERAL relativity: gravity is the curvature of spacetime (its tests - light deflection
+    1.75 arcsec, the gravitational redshift - are sealed on the gravity stick). SEALED here: the Lorentz factor (time
+    dilation / length contraction) and E = m c^2 (mass and energy are one). It came from Maxwell (whose equations are
+    Lorentz-covariant and fix c), its symmetry group feeds Noether, and GR is a Lagrangian field theory (the
+    Einstein-Hilbert action). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "gamma": _rh_seal_num("lorentz_factor_gamma_at_0_6c", "1/(1 - 0.6**2)**0.5", 1.25, tol=1e-9),
+        "emc2": _rh_seal_num("electron_rest_energy_e_equals_mc2_mev",
+                             "9.1093837015e-31*(2.99792458e8)**2/1.602176634e-19/1e6",
+                             9.1093837015e-31 * (2.99792458e8) ** 2 / 1.602176634e-19 / 1e6, tol=1e-9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "relativity numbers")
+    sid = TS.create("Relativity - many frames, one invariant")["id"]
+    marks = [
+        ("instance", "[many frames, one invariant - the Lorentz factor, SEALED] The laws and the speed of light are "
+                     "the same in every inertial frame; observers disagree on when and where, but agree on c and on "
+                     "the invariant interval s^2 = (ct)^2 - x^2. A clock moving at 0.6c runs slow by the Lorentz "
+                     "factor gamma = 1/sqrt(1 - v^2/c^2) = 1/sqrt(1 - 0.36) = 1.25 (sealed) - it ticks 1.25 times "
+                     "slower, and lengths contract by the same factor. Many frames, one invariant truth; the Lorentz "
+                     "transformation is a rotation in spacetime that preserves the interval.", S["gamma"]),
+        ("instance", "[mass and energy are one - E = m c^2, SEALED] The electron's rest energy is m_e c^2 = 0.511 MeV "
+                     "(sealed). Mass and energy are the same thing, and because c^2 is enormous a tiny mass is a vast "
+                     "energy - the Sun shining, the bomb, the mass defect of every nucleus. Another unification: "
+                     "'many into one'.", S["emc2"]),
+        ("note", "[special relativity came from Maxwell] Maxwell's equations are Lorentz-covariant and make c the same "
+                 "in every frame; reconciling that constancy with mechanics FORCED special relativity. SR is the "
+                 "resolution of the tension Maxwell exposed. Rests on card_floor_maxwells_equations.",
+         {"source": "the Lorentz covariance of Maxwell's equations; Einstein (1905); card_floor_maxwells_equations"}),
+        ("note", "[general relativity - gravity is geometry, already sealed] General relativity says gravity is the "
+                 "curvature of spacetime: mass-energy curves it (the Einstein field equations), and bodies follow "
+                 "geodesics - the equivalence principle. Its tests are sealed on "
+                 "stick_is_gravity_a_force_geometry_decided_by_the_light_that_bends: the 1.75 arcsec deflection of "
+                 "starlight (twice the Newtonian value, Eddington 1919) and the gravitational redshift. GR is a "
+                 "Lagrangian field theory - the Einstein-Hilbert action - so it rests on card_floor_the_lagrangian.",
+         {"source": "A. Einstein, general relativity (1915); the Einstein-Hilbert action; stick_is_gravity_a_force_geometry_decided_by_the_light_that_bends"}),
+        ("note", "[the symmetry feeds Noether; mass is rest energy in the Hamiltonian] The symmetry group of "
+                 "relativity - the Poincare group (boosts, rotations, translations) - is a continuous symmetry, so by "
+                 "Noether it gives conserved quantities: energy, momentum, angular momentum, the stress-energy "
+                 "tensor. And E = m c^2 means mass IS rest energy - it enters the Hamiltonian as the energy a body "
+                 "has even at rest. Ties card_floor_noethers_theorem and card_floor_the_hamiltonian.",
+         {"source": "the Poincare symmetry group; Noether's theorem; mass-energy equivalence; card_floor_noethers_theorem"}),
+        ("note", "[on the one map] Relativity ties the whole physics region: it rests on Maxwell (its origin), the "
+                 "Lagrangian (the Einstein-Hilbert action), Noether (the Poincare symmetry), the Hamiltonian (rest "
+                 "energy), and the capstone (many frames, one invariant truth - the same shape as many potentials, "
+                 "one end). The invariant interval is the 'same end' of special relativity: what every observer "
+                 "agrees on beneath their differing views. Ties card_floor_the_capstone.",
+         {"source": "the one map; card_floor_relativity; card_floor_the_capstone"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py relativity")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -8854,6 +8912,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("relativity", "special_relativity", "general_relativity", "lorentz"):
+        return relativity()
     if a[0] in ("thermodynamics", "thermo", "laws_of_thermodynamics", "carnot"):
         return thermodynamics()
     if a[0] in ("noether", "noethers_theorem", "noether_theorem", "conservation_laws"):
