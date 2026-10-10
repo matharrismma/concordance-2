@@ -471,3 +471,21 @@ def test_statistics_floor_is_the_method_of_science():
     assert m and len(m["parts"]) == 4
     serves = {s["at"] for s in m["serves"]}
     assert {"card_floor_the_instruments", "card_floor_the_capstone", "card_floor_biology"} <= serves
+
+
+def test_tesseract_is_charted_onto_the_capstone():
+    """The tesseract (Matt, 2026-10-09): a 4-cube charted onto card_floor_the_capstone (the shadow/one theme), with
+    a connects_at to relativity. Pinned on the seeds."""
+    import seed_the_capstone as CAP
+    import seed_tesseract as S23
+    assert S23._validate() == []
+    cards = {c["id"]: json.loads(json.dumps(c)) for c in CAP.CARDS + S23.CARDS}
+    for cid in ("card_floor_standard_model", "card_floor_tree_of_life", "card_floor_the_solve_path",
+                "card_floor_the_instruments", "card_floor_relativity", "card_k_floor_of_discovery"):
+        cards.setdefault(cid, {"id": cid, "title": cid, "connections": []})
+    overlay = Path(tempfile.mkdtemp(prefix="nh-tess-")) / "overlay.jsonl"
+    overlay.write_text("\n".join(json.dumps(e) for e in CAP.BRIDGES + S23.BRIDGES) + "\n", encoding="utf-8")
+    corpus._apply_bridges(cards, overlay)
+    m = chains.floor_map("card_floor_the_capstone", get_card=cards.get)
+    assert m is not None
+    assert "stick_the_tesseract_the_4_cube_and_its_shadow" in {c["stick"] for c in m["charts"]}

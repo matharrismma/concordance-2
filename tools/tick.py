@@ -2813,6 +2813,54 @@ def statistics() -> int:
     _mint_marks(sid, marks, by="tools/tick.py statistics")
     return 0
 
+
+def tesseract() -> int:
+    """THE TESSERACT - the 4-cube and its shadow (Matt, 2026-10-09). The 4-dimensional analogue of a cube (the
+    "8-cell"): 16 vertices, 32 edges, 24 square faces, 8 cubic cells. SEALED: the vertex and edge counts (an n-cube
+    has 2^n vertices and n*2^(n-1) edges), and the 4D Euler identity V - E + F - C = 0 (the boundary is a 3-sphere,
+    the analogue of the polyhedron formula V - E + F = 2). We never see it directly - only a 3D SHADOW - the
+    project's own image of seeing projections of a higher reality. Charts onto the capstone. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "vertices": _rh_seal_num("tesseract_vertices_two_to_the_fourth", "2**4", 2 ** 4, tol=1e-12),
+        "edges": _rh_seal_num("tesseract_edges_n_times_two_to_n_minus_one", "4*2**3", 4 * 2 ** 3, tol=1e-12),
+        "euler4d": _rh_seal_num("tesseract_euler_alternating_sum_v_e_f_c", "16 - 32 + 24 - 8", 16 - 32 + 24 - 8, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "tesseract numbers")
+    sid = TS.create("The tesseract - the 4-cube and its shadow")["id"]
+    marks = [
+        ("instance", "[the 4-cube - its 16 corners, SEALED] A tesseract is the 4D analogue of a cube: an n-cube has "
+                     "2^n vertices, so the tesseract has 2^4 = 16 (sealed). A square has 4 corners, a cube 8, the "
+                     "tesseract 16 - each a point with four coordinates in 4D space.", S["vertices"]),
+        ("instance", "[its 32 edges, SEALED] An n-cube has n * 2^(n-1) edges: the tesseract has 4 * 2^3 = 32 (sealed). "
+                     "It also has 24 square faces and 8 cubic CELLS - which is why it is called the '8-cell', bounded "
+                     "by eight cubes the way a cube is bounded by six squares.", S["edges"]),
+        ("instance", "[Euler in 4D - the alternating sum is zero, SEALED] For a cube, V - E + F = 8 - 12 + 6 = 2 "
+                     "(sealed on the topology stick). For the tesseract the alternating sum runs one term further: "
+                     "V - E + F - C = 16 - 32 + 24 - 8 = 0 (sealed). The boundary of a 4-polytope is a 3-sphere, whose "
+                     "Euler characteristic is 0 - the 4D analogue of the polyhedron formula. Ties "
+                     "stick_topology_and_euler_s_formula.", S["euler4d"]),
+        ("note", "[we see only its shadow] We cannot picture a tesseract directly; we see a 3D SHADOW of it (a small "
+                 "cube nested inside a large one, joined corner to corner), the way a cube casts a 2D shadow on "
+                 "paper. A 4D object passing through our space would look like a cube that appears, turns inside out "
+                 "and shrinks away - as a sphere crossing flatland is a circle that swells and vanishes. This is the "
+                 "project's own image: we see shadows and projections of a higher reality, 'now we see through a "
+                 "glass, darkly' (1 Corinthians 13:12). Many 3D shadows, one 4D object - the capstone's many-and-one, "
+                 "in geometry. Ties card_floor_the_capstone.",
+         {"source": "the projection of the 4-cube; the flatland analogy (E. Abbott); 1 Corinthians 13:12; card_floor_the_capstone"}),
+        ("note", "[the fourth dimension, made rigorous] The tesseract is a fourth SPATIAL dimension made exact - "
+                 "distinct from relativity's 4D spacetime (three of space, one of time), but the same lesson: reality "
+                 "can hold more dimensions than the three we move in freely, and a mind confined to three can still "
+                 "reason about them exactly (the counts above are proof). The engine itself lives in a "
+                 "high-dimensional space - its domains are the axes - and the tesseract is the humblest nontrivial "
+                 "window into dimensions beyond sight. Ties card_floor_relativity and stick_geometry_the_shapes_verified_and_sealed.",
+         {"source": "higher-dimensional geometry; relativity's spacetime vs a 4th spatial dimension; card_floor_relativity"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py tesseract")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9528,6 +9576,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("tesseract", "hypercube", "four_cube", "eight_cell"):
+        return tesseract()
     if a[0] in ("statistics", "stats", "inference", "the_normal_distribution"):
         return statistics()
     if a[0] in ("cryptography", "rsa", "public_key_cryptography", "cipher"):
