@@ -58,12 +58,26 @@ _SYNONYMS: Dict[str, Tuple[str, ...]] = {
     "statistics": ("average", "mean", "median", "deviation", "variance", "correlation", "sample",
                    "samples", "confidence", "regression", "percentile", "measurements", "measurement"),
     "mathematics": ("prove", "proof", "equation", "simplify", "identity", "expression",
-                    "derivative", "integral", "algebra"),
+                    "derivative", "integral", "algebra", "fibonacci", "golden ratio",
+                    "square root", "to the power", "power of", "squared", "cubed",
+                    "percent", "percentage"),
     "geometry": ("triangle", "rectangle", "circle", "area", "perimeter", "angle", "angles",
                  "radius", "diameter", "hypotenuse", "pythagorean"),
-    "number_theory": ("prime", "primes", "factor", "factors", "divisible", "remainder", "modulo"),
+    "number_theory": ("prime", "primes", "factor", "factors", "divisible", "remainder", "modulo",
+                      "divisor", "divisors", "number of divisors", "factorial"),
+    "combinatorics": ("choose", "combination", "combinations", "permutation", "permutations",
+                      "arrange", "arrangement", "arrangements", "ways to arrange", "ways to choose",
+                      "derangement", "derangements", "binomial coefficient"),
+    "labor": ("hourly", "per hour", "an hour", "hourly rate", "wage", "wages", "salary",
+              "annual salary", "overtime", "gross pay", "net pay", "paycheck", "minimum wage",
+              "hours worked", "hours", "hour", "paid", "earnings", "take home", "pay period"),
+    "wordcraft": ("homophone", "homophones", "anagram", "anagrams", "palindrome", "syllable",
+                  "syllables", "vowel", "vowels", "consonant", "consonants", "silent letter",
+                  "silent", "pronounced", "phoneme", "begins with", "starts with",
+                  "most common letter", "spelled", "letters in"),
     "chemistry": ("molar", "molarity", "mole", "moles", "compound", "concentration", "stoichiometry",
-                  "reaction", "molar mass", "acidic", "sodium", "chloride", "solute"),
+                  "reaction", "molar mass", "molecular weight", "molecular mass", "grams per mole",
+                  "acidic", "sodium", "chloride", "solute"),
     "physics": ("velocity", "acceleration", "momentum", "gravity", "friction", "kinetic",
                 "terminal velocity", "projectile", "newtons"),
     "thermodynamics": ("heat", "cool", "cooling", "boil", "boiling", "freeze", "entropy",
@@ -87,11 +101,14 @@ _SYNONYMS: Dict[str, Tuple[str, ...]] = {
     "music_theory": ("chord", "chords", "note", "notes", "scale", "interval", "octave", "triad",
                      "key signature"),
     "calendar_time": ("days between", "weekday", "leap year", "passover", "pentecost", "easter",
-                      "how many days", "date falls"),
+                      "how many days", "date falls", "day of the week", "fell on", "what day",
+                      "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"),
     "exercise_science": ("protein per", "bodyweight", "reps", "heart rate", "workout", "one rep",
                          "calories burned"),
     "formal_logic": ("syllogism", "premise", "premises", "conclusion", "valid argument",
-                     "implication", "logically valid", "inference"),
+                     "implication", "logically valid", "inference", "implies", "equivalent",
+                     "equivalent to", "logically equivalent", "tautology", "contrapositive",
+                     "biconditional", "if and only if", "de morgan"),
     "computer_science": ("logic gate", "and gate", "boolean", "binary", "algorithm", "truth table",
                          "bitwise"),
     "cryptography": ("password", "passphrase", "encryption", "encrypt", "brute force", "cipher",
@@ -211,6 +228,33 @@ def _build() -> None:
     _BUILT = True
 
 
+# A claim can be bare arithmetic with no domain word at all ("40 + 60 + 25 = 125", "5! = 120",
+# "sqrt(144) = 12", "pi is 3.14159"): no vocabulary to match, but the STRUCTURE names the
+# destination — route by the shape of the key (radix), not by scanning the corpus. This is a
+# FALLBACK, consulted only when the vocabulary did not reach the floor, so a real domain word
+# always wins. The hyphen is deliberately NOT an operator here: "2026-05-02" is a date, not a
+# subtraction, and none of the bare-arithmetic forms need subtraction.
+_ARITH_OP = re.compile(r"\d\s*[+*/×÷^%]\s*\d")
+_ARITH_WORD = re.compile(r"\d\s*(?:x|times|divided by|plus|minus)\b|\bto the power\b"
+                         r"|\bsquare root\b|\bsqrt\b|\d\s*%|\bpercent\b")
+_ARITH_BANG = re.compile(r"\d\s*!")
+_ARITH_CONST = re.compile(r"\b(?:pi|tau|phi|euler)\b")
+
+
+def _structural(text: str) -> Optional[str]:
+    """The domain a bare numeric claim computes to, or None — shape only, never vocabulary.
+    A factorial bang -> number_theory; arithmetic, roots, powers, percent, a named constant ->
+    mathematics (verify_numeric / verify_equality / verify_number_theory see the actual claim)."""
+    s = text.lower()
+    if not any(ch.isdigit() for ch in s):
+        return None
+    if _ARITH_BANG.search(s):
+        return "number_theory"
+    if _ARITH_OP.search(s) or _ARITH_WORD.search(s) or _ARITH_CONST.search(s):
+        return "mathematics"
+    return None
+
+
 def resolve_domain(text: str, k: int = 3, margin: float = 0.34, floor: float = 2.5) -> Dict:
     """Name the verify DOMAIN(s) a plain claim should go to. Model-free; explains itself.
 
@@ -250,6 +294,11 @@ def resolve_domain(text: str, k: int = 3, margin: float = 0.34, floor: float = 2
         seen_phrase.add(phrase)
 
     if not scores:
+        dom = _structural(t)
+        if dom:
+            return {"query": t, "crisis": False,
+                    "candidates": [{"domain": dom, "score": 2.6, "why": ["numeric form"]}],
+                    "decision": dom, "ask": False, "reason": f"{dom}: a bare numeric/arithmetic form"}
         return {"query": t, "crisis": False, "candidates": [], "decision": None,
                 "ask": True, "reason": "no verifier vocabulary matched — try search, or rephrase"}
 
@@ -265,6 +314,22 @@ def resolve_domain(text: str, k: int = 3, margin: float = 0.34, floor: float = 2
     if top_score >= floor and (len(ranked) == 1 or lead >= margin):
         return {"query": t, "crisis": False, "candidates": cands, "decision": top_dom,
                 "ask": False, "reason": f"{top_dom}: matched {cands[0]['why']}"}
+    # Basis overlap, not genuine ambiguity: if the SAME term drove both leaders ("molar mass" for
+    # chemistry AND periodic_table), that is one signal split across overlapping domains, not two
+    # interpretations — route to the stronger. The sine/cosine lesson: this tie is non-orthogonality,
+    # not a real choice, and either verifier would see the same claim. A near-tie driven by
+    # DIFFERENT terms is a real ambiguity and still asks, below.
+    if top_score >= floor and len(cands) > 1 and (set(cands[0]["why"]) & set(cands[1]["why"])):
+        return {"query": t, "crisis": False, "candidates": cands, "decision": top_dom, "ask": False,
+                "reason": f"{top_dom}: {cands[0]['why']} (shared term across overlapping domains, strongest wins)"}
+    # Vocabulary was too weak to name a domain (below the floor): try the structural form before
+    # giving up. A genuine near-tie between real domains (top >= floor) still asks — never guessed.
+    if top_score < floor:
+        dom = _structural(t)
+        if dom:
+            return {"query": t, "crisis": False,
+                    "candidates": [{"domain": dom, "score": 2.6, "why": ["numeric form"]}] + cands,
+                    "decision": dom, "ask": False, "reason": f"{dom}: a bare numeric/arithmetic form"}
     return {"query": t, "crisis": False, "candidates": cands, "decision": None, "ask": True,
             "reason": "more than one domain fits — ask which: " + ", ".join(c["domain"] for c in cands)}
 
