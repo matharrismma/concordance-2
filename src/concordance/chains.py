@@ -79,7 +79,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_the_mind",
           # cryptography (tools/seed_cryptography.py, 2026-10-09): public keys and hard problems - RSA round-trip,
           # perfect secrecy; rests on the instruments + P vs NP (hardness) + Riemann (primes); bridges to the Millennium
-          "card_floor_cryptography")
+          "card_floor_cryptography",
+          # statistics (tools/seed_statistics.py, 2026-10-09): the normal law and the method of science - describe,
+          # CLT, infer; rests on the instruments + capstone (CLT=many-into-one) + biology (the empirical method)
+          "card_floor_statistics")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:

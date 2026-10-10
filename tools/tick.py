@@ -2763,6 +2763,56 @@ def cryptography() -> int:
     _mint_marks(sid, marks, by="tools/tick.py cryptography")
     return 0
 
+
+def statistics() -> int:
+    """STATISTICS - the normal law and the method of science (Matt, 2026-10-09, down the domain list). How we draw
+    one conclusion from many noisy measurements. DESCRIBE (mean, variance, standard deviation); the CENTRAL LIMIT
+    THEOREM makes sums of anything tend to the normal law (the standard error shrinks as 1/sqrt(n)); INFER (z-scores,
+    hypothesis tests). SEALED: a standard deviation, a z-score, and the standard error. Rests on the instruments
+    (probability), the capstone (distributions sum to one; many measurements, one estimate), and biology (the method
+    of every empirical science). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "sd": _rh_seal_num("standard_deviation_of_a_sample", "((9+1+1+1+0+0+4+16)/8)**0.5", ((9 + 1 + 1 + 1 + 0 + 0 + 4 + 16) / 8) ** 0.5, tol=1e-9),
+        "z": _rh_seal_num("z_score_x_minus_mu_over_sigma", "(7-5)/2", (7 - 5) / 2, tol=1e-12),
+        "se": _rh_seal_num("standard_error_sigma_over_sqrt_n_clt", "2/4**0.5", 2 / 4 ** 0.5, tol=1e-9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "statistics numbers")
+    sid = TS.create("Statistics - the normal law and the method of science")["id"]
+    marks = [
+        ("instance", "[describe - the standard deviation, SEALED] For the sample {2,4,4,4,5,5,7,9} the mean is 5 and "
+                     "the standard deviation is sqrt(((9+1+1+1+0+0+4+16)/8)) = 2 (sealed) - the typical distance from "
+                     "the mean, the ruler of spread. Mean and standard deviation are the first thing data tells you.", S["sd"]),
+        ("instance", "[standardize - the z-score, SEALED] A value of 7 in that sample is z = (7-5)/2 = 1 (sealed) - "
+                     "one standard deviation above the mean. The z-score puts every measurement on one common scale, "
+                     "and under the normal law about 68 percent of data fall within z = +/- 1, 95 percent within "
+                     "+/- 2.", S["z"]),
+        ("instance", "[the central limit theorem - the standard error, SEALED] Average n measurements and the "
+                     "uncertainty of the mean shrinks as the standard error sigma/sqrt(n): for sigma = 2 and n = 4 it "
+                     "is 2/sqrt(4) = 1 (sealed). More data, a tighter estimate - and the average tends to the normal "
+                     "law whatever the original shape. Many noisy measurements converge to one estimate.", S["se"]),
+        ("note", "[the central limit theorem - many into one shape] Sum or average enough independent things - "
+                 "whatever their individual distributions - and the result tends to the SAME bell curve, the normal "
+                 "law. It is why the normal is everywhere, and it is the capstone's shape again: many possibilities "
+                 "converging to one form. Ties card_floor_the_capstone.",
+         {"source": "the central limit theorem; the normal (Gaussian) law; card_floor_the_capstone"}),
+        ("note", "[the method of every empirical science] Statistics is how a claim is TESTED against noisy data: a "
+                 "hypothesis, a test statistic, a p-value, a confidence interval. Hardy-Weinberg is its biology face "
+                 "(sealed on the biology floor); measurement error is its physics face; it is the discipline that "
+                 "turns data into a verdict - the same job the engine does deterministically. Ties card_floor_biology "
+                 "and card_floor_the_instruments.",
+         {"source": "hypothesis testing; confidence intervals; the method of empirical science; card_floor_biology"}),
+        ("note", "[on the one map] Statistics rests on the instruments (the probability machinery), the capstone (the "
+                 "central limit theorem is many-into-one, and a distribution integrates to one), and biology (the "
+                 "method of empirical science). The formal domain that lets every other domain test itself against "
+                 "measurement. Ties card_floor_statistics.",
+         {"source": "the one map; card_floor_statistics; tools/seed_statistics.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py statistics")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9478,6 +9528,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("statistics", "stats", "inference", "the_normal_distribution"):
+        return statistics()
     if a[0] in ("cryptography", "rsa", "public_key_cryptography", "cipher"):
         return cryptography()
     if a[0] in ("consciousness", "crystal_radio", "transmission_theory", "antenna"):
