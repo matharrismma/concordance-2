@@ -94,6 +94,19 @@ CHARTS: List[Dict[str, str]] = [
          basis="the stick seals a segmentation as letter arithmetic (unbreakable = un 2 + break 5 + able 4 = 11); "
                "morphology is the root x pattern basis of a word, the first gap filled to make this linguistics "
                "floor comprehensive"),
+    dict(key="self_healing_matrix",
+         stick="stick_one_path_many_entries_a_self_healing_matrix_not_many_paths",
+         node="card_floor_the_capstone",
+         title="One path, many entries, a self-healing matrix - not many paths",
+         basis="the stick seals the Hamming [7,4] perfect code (2^(7-4) = 8 syndromes), where every corrupted word "
+               "heals to the one valid codeword - one path, many entries, self-healing; it refines this capstone's "
+               "'one source, many potentials, one end' as a basin that returns, not a fan of paths"),
+    dict(key="transliteration",
+         stick="stick_transliteration_romanizing_the_original_tongue",
+         node="card_floor_indo_european",
+         title="Transliteration - romanizing the original tongue",
+         basis="the stick seals Greek romanizations by a fixed scheme (logos, theos) through linguistics.LING_VERIFY; "
+               "general transliteration broadens this linguistics floor beyond the Strong's lexicon"),
 ]
 
 

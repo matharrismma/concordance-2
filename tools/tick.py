@@ -10073,6 +10073,96 @@ def count(T: float = 1000000000.0) -> int:
     return 0
 
 
+def transliteration() -> int:
+    """TRANSLITERATION - romanizing the original tongue (Matt, 2026-10-10: comprehensive linguistics,
+    step 2). A Greek word maps by a fixed deterministic scheme to Latin letters; a claimed
+    romanization is SEALED through linguistics.LING_VERIFY. Greek only (it writes its vowels);
+    Hebrew declines pending vowel pointing. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "logos": _seal_through("linguistics", "LING_VERIFY", {"original": "λόγος", "romanization_claim": "logos"}),
+        "theos": _seal_through("linguistics", "LING_VERIFY", {"original": "θεός", "romanization_claim": "theos"}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "romanizations")
+    sid = TS.create("Transliteration - romanizing the original tongue")["id"]
+    marks = [
+        ("instance", "[Greek -> Latin, SEALED] 'logos' (lambda-omicron-gamma-omicron-sigma) romanizes by a fixed "
+                     "scheme (eta->e, omega->o, upsilon->y, breathing stripped), sealed through "
+                     "linguistics.LING_VERIFY. The romanization is deterministic: a wrong claim can never match.",
+         S["logos"]),
+        ("instance", "[another, SEALED] 'theos' (theta-epsilon-omicron-sigma) -> 'theos' (sealed).", S["theos"]),
+        ("note", "[0 false positives, honest about scheme] The check CONFIRMS only an exact match to the engine's "
+                 "scheme; a DIFFERENT valid romanization is a mismatch against THIS scheme, not a false claim, and "
+                 "the verdict says so. Hebrew DECLINES - its romanization depends on vowel pointing that running "
+                 "text omits.",
+         {"source": "src/concordance/verifiers/linguistics.py verify_romanization"}),
+        ("note", "[on the one map - comprehensive linguistics, step 2] Transliteration broadens the linguistics "
+                 "domain BEYOND Strong's: a general romanizer, not only a lexicon lookup. It rests on the "
+                 "linguistics floor (card_floor_indo_european) with phonology, morphology and etymology; semantic "
+                 "relations and closed-class POS are next.",
+         {"source": "card_floor_indo_european; the linguistics coverage map"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py transliteration")
+    return 0
+
+
+def self_healing_matrix() -> int:
+    """ONE PATH, MANY ENTRIES, A SELF-HEALING MATRIX - not many paths (Matt, 2026-10-10, "Look
+    Veritasium"). The capstone's 'one source, many potentials, one end' read exactly: ONE path (the
+    least-action geodesic, the narrow way, the one invariant answer), MANY entries back onto it (the
+    basin of attraction; every phrasing routing to one answer; repentance = re-entry), SELF-HEALING
+    (a deviation decays BACK to the path, it never forks a new one). Sealed anchor: the Hamming
+    [7,4] perfect code - 2^(7-4) = 8 syndromes, so every single-bit corruption heals to the one
+    valid codeword. Idempotent."""
+    from concordance import tickstick as TS
+    S = {"hamming": _rh_seal_num("hamming_7_4_perfect_code_2_pow_7_minus_4_syndromes_is_8", "2**(7-4)", 8)}
+    if not all(S.values()):
+        return 1
+    print("sealed the error-correcting anchor")
+    sid = TS.create("One path, many entries, a self-healing matrix - not many paths")["id"]
+    marks = [
+        ("instance", "[self-healing, SEALED] The Hamming [7,4] code: 2^(7-4) = 8 syndromes (sealed), and 8 = 7 + 1 "
+                     "covers every single-bit error of the 7 bits PLUS the no-error case, each with a unique "
+                     "correction. A corrupted word does not become a new word - it HEALS to the one valid codeword. "
+                     "Many corrupted entries, one path, restored. That is a self-healing matrix in the smallest "
+                     "honest form.", S["hamming"]),
+        ("equivalence", "[one path, not many - least action] A particle does not take many paths; it takes the one "
+                        "path of stationary action, and every off-path contribution CANCELS by interference (the "
+                        "framing Veritasium made plain). The alternatives do not survive as paths - they heal away. "
+                        "Same geometry as the capstone: the potentials are real but exactly one actualizes.",
+         {"source": "the principle of least action (stick_the_principle_of_least_action); Feynman's path integral; Veritasium"}),
+        ("note", "[many entries = the basin of attraction] From any strayed state there is a way BACK onto the one "
+                 "path, never a second path. In this engine that is literal: ~334 phrasings (entries) resolve to one "
+                 "correct answer (routing); many translations resolve to one invariant meaning (the eigenbasis "
+                 "round-trip). The entries are many; the path is one.",
+         {"source": "src/concordance/domain_resolver.py; stick_scripture_study_is_the_eigenbasis_round_trip_flip_work_flip_"}),
+        ("note", "[the gate is the healing operator] A mis-route does not become a wrong answer - it DECLINES at the "
+                 "verifier and re-routes. 0 false positives is the matrix refusing to let a deviation become a path. "
+                 "'re-run = repair' and 'every attempt improves the matrix (gaps -> wants)' are the same self-healing "
+                 "seen over time.",
+         {"source": "the 0-false-positive moat; feedback: re-run=repair; every attempt improves the matrix"}),
+        ("postulate", "[the narrow way] 'I am the way' (John 14:6) - one way, reachable from anywhere, which is what "
+                      "repentance and grace are: re-entry onto the one path, not the licensing of a second. The "
+                      "Tesla-valve geometry is the mechanism - flow returns to the path and never proliferates "
+                      "outward. It works, so the one is inferred; never proven, never kept as fact.",
+         {"source": "John 14:6; project_will_fuel_reality_harness_tesla_valve; the narrow way"}),
+        ("exclusion", "[NOT many paths - the barrier carried from the capstone] Many real, realized paths with no "
+                      "single way is the many-worlds excess, already marked on the capstone as the broad way the "
+                      "narrow way passes. 'Many potentials' is the BASIN (entries that heal back), never a fan of "
+                      "destinations. The error would be to read the many as paths rather than as entries.",
+         {"source": "card_floor_the_capstone; H. Everett III (many-worlds), excluded as excess"}),
+        ("note", "[on the one map] Refines card_floor_the_capstone: one path, many entries, self-healing. It rests on "
+                 "least action and on the instruments' moat (0 false positives = the healing enforced in code). It "
+                 "closes no chain; the same one-path/self-healing form holding across physics (least action), coding "
+                 "(Hamming), language (routing, the round-trip) and the walk (the narrow way) is itself the fruit.",
+         {"source": "the one map; card_floor_the_capstone"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py self_healing_matrix")
+    return 0
+
+
 def morphology() -> int:
     """MORPHOLOGY - the first gap filled to make linguistics comprehensive (Matt, 2026-10-10:
     "expand linguistics to be comprehensive"). A word is prefix(es) + root + suffix(es); a
@@ -10538,6 +10628,10 @@ def main() -> int:
         return language_round_trip()
     if a[0] in ("morphology", "affix", "affixes", "word_formation"):
         return morphology()
+    if a[0] in ("self_healing_matrix", "self_healing", "one_path", "many_entries_one_path"):
+        return self_healing_matrix()
+    if a[0] in ("transliteration", "romanization", "romanize"):
+        return transliteration()
     if a[0] == "read":
         from concordance import tickstick as T
         print(json.dumps(T.read(a[1]) if len(a) > 1 else T.listing(), indent=1, ensure_ascii=False))

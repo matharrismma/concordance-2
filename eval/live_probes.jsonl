@@ -221,3 +221,5 @@
 {"id": "map.music.rests.on.acoustics", "path": "/chains", "query": {"floor": "card_floor_music"}, "expect": [{"at": "parts", "min_len": 3}, {"at": "serves[*].at", "has": "card_floor_acoustics"}, {"at": "serves[*].at", "has": "card_floor_metrology"}]}
 {"id": "map.indo_european.charts.scripture_round_trip", "path": "/chains", "query": {"floor": "card_floor_indo_european"}, "expect": [{"at": "charts[*].stick", "has": "stick_scripture_study_is_the_eigenbasis_round_trip_flip_work_flip_"}]}
 {"id": "map.indo_european.charts.morphology", "path": "/chains", "query": {"floor": "card_floor_indo_european"}, "expect": [{"at": "charts[*].stick", "has": "stick_morphology_a_word_is_prefix_root_and_suffix"}]}
+{"id": "map.capstone.charts.self_healing", "path": "/chains", "query": {"floor": "card_floor_the_capstone"}, "expect": [{"at": "charts[*].stick", "has": "stick_one_path_many_entries_a_self_healing_matrix_not_many_paths"}]}
+{"id": "map.indo_european.charts.transliteration", "path": "/chains", "query": {"floor": "card_floor_indo_european"}, "expect": [{"at": "charts[*].stick", "has": "stick_transliteration_romanizing_the_original_tongue"}]}

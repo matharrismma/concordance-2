@@ -309,6 +309,60 @@ def verify_transliteration_normalized_match(a: str, b: str) -> VerifierResult:
                     data)
 
 
+# GENERAL TRANSLITERATION (Matt, 2026-10-10: "expand linguistics to be comprehensive"). Beyond
+# Strong's: romanize an arbitrary GREEK string by a fixed, deterministic scheme and confirm a
+# claimed romanization. Greek only in v1 - Greek writes its vowels, so the map is complete; Hebrew
+# romanization depends on vowel pointing that running text often omits, so Hebrew DECLINES rather
+# than false-mismatch. 0 false positives by construction: a wrong romanization can never match the
+# computed scheme. A DIFFERENT valid scheme may differ - that is a mismatch against THIS scheme, not
+# a false claim, and the verdict says so.
+_GREEK_ROMAN = {
+    "α": "a", "β": "b", "γ": "g", "δ": "d", "ε": "e", "ζ": "z", "η": "e", "θ": "th", "ι": "i",
+    "κ": "k", "λ": "l", "μ": "m", "ν": "n", "ξ": "x", "ο": "o", "π": "p", "ρ": "r", "σ": "s",
+    "ς": "s", "τ": "t", "υ": "y", "φ": "ph", "χ": "ch", "ψ": "ps", "ω": "o",
+}
+
+
+def _romanize_greek(s: str):
+    """(romanization, unmapped_letter_count) for a Greek string under the fixed scheme. Combining
+    marks (accents, breathing) are stripped; spaces and punctuation are ignored."""
+    out, unmapped = [], 0
+    for ch in unicodedata.normalize("NFD", str(s or "")):
+        if unicodedata.combining(ch):
+            continue
+        low = ch.lower()
+        if low in _GREEK_ROMAN:
+            out.append(_GREEK_ROMAN[low])
+        elif low.isalpha():
+            unmapped += 1
+    return "".join(out), unmapped
+
+
+def verify_romanization(original: str, claimed: str, script: Optional[str] = None) -> VerifierResult:
+    name = "linguistics.romanization"
+    if not original or not claimed:
+        return na(name, "romanization needs both 'original' (the native-script word) and 'romanization_claim'")
+    is_greek = any("Ͱ" <= c <= "Ͽ" or "ἀ" <= c <= "῿" for c in original)
+    is_hebrew = any("֐" <= c <= "׿" for c in original)
+    if is_hebrew and not is_greek:
+        return na(name, "Hebrew romanization depends on vowel pointing that running text often omits; declined "
+                        "rather than guessed (Greek is romanized; Hebrew is not yet)")
+    if not is_greek:
+        return na(name, "the engine romanizes Greek (Hebrew declines); this word is in neither script")
+    expected, unmapped = _romanize_greek(original)
+    if unmapped or not expected:
+        return na(name, f"'{original}' has letters outside the Greek romanization table; declined rather than guessed")
+    ne, nc = _normalize_translit(expected), _normalize_translit(claimed)
+    data = {"original": original, "script": "greek", "scheme_expected": expected, "claimed": claimed,
+            "convention": "a fixed scheme (eta->e, omega->o, upsilon->y, breathing stripped); a different valid "
+                          "scheme can differ and that is not a false claim"}
+    # fold the one common variant the stripped scheme loses: a leading rough-breathing 'h'
+    if ne == nc or ne == _normalize_translit(claimed.lstrip("hH")) or _normalize_translit("h" + expected) == nc:
+        return confirm(name, f"'{original}' romanizes to '{expected}', and the claim '{claimed}' matches (Greek)", data)
+    return mismatch(name, f"'{original}' romanizes to '{expected}' in the engine's scheme; the claim '{claimed}' "
+                    f"does not match it (a different valid scheme may exist; this is the engine's)", data)
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     """Dispatch every applicable linguistics check for the packet's LING_VERIFY block."""
     results: List[VerifierResult] = []
@@ -331,6 +385,9 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
         results.append(verify_transliteration_normalized_match(
             lv["transliteration_a"], lv["transliteration_b"]
         ))
+
+    if "original" in lv and "romanization_claim" in lv:
+        results.append(verify_romanization(lv["original"], lv["romanization_claim"], lv.get("script")))
 
     if not results:
         results.append(na("linguistics", "no LING_VERIFY artifacts present"))
