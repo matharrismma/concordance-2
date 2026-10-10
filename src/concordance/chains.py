@@ -97,7 +97,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_acoustics",
           # batch down the list (2026-10-10): medicine (biology+physical chem+statistics), materials science
           # (chemistry+physical chem+quantum), optics (Maxwell+quantum)
-          "card_floor_medicine", "card_floor_materials_science", "card_floor_optics")
+          "card_floor_medicine", "card_floor_materials_science", "card_floor_optics",
+          # batch 2 (2026-10-10): meteorology, oceanography, ecology, geography, nutrition (earth/life/applied)
+          "card_floor_meteorology", "card_floor_oceanography", "card_floor_ecology",
+          "card_floor_geography", "card_floor_nutrition")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:

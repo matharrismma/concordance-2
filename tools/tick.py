@@ -3113,6 +3113,164 @@ def optics() -> int:
     _mint_marks(sid, marks, by="tools/tick.py optics")
     return 0
 
+
+def meteorology() -> int:
+    """METEOROLOGY - the atmosphere as a heat engine (Matt, 2026-10-10, down the list). Air rising cools at the dry
+    adiabatic lapse rate g/cp ~ 9.75 C/km; a mole of gas fills 22.4 L at STP (the ideal gas law). SEALED: the lapse
+    rate and the molar volume. Rests on thermodynamics (the heat engine), earth science (the planet), statistics
+    (forecasting is probabilistic). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "lapse": _rh_seal_num("dry_adiabatic_lapse_rate_g_over_cp_c_per_km", "9.8/1005*1000", 9.8 / 1005 * 1000, tol=1e-9),
+        "molar": _rh_seal_num("ideal_gas_molar_volume_at_stp_litres", "8.314*273.15/101325*1000", 8.314 * 273.15 / 101325 * 1000, tol=1e-6),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "meteorology numbers")
+    sid = TS.create("Meteorology - the atmosphere as a heat engine")["id"]
+    marks = [
+        ("instance", "[air rising cools - the lapse rate, SEALED] A dry air parcel lifted expands and cools at "
+                     "g/cp = 9.8/1005*1000 = 9.75 C per kilometre (sealed). This adiabatic cooling makes clouds, "
+                     "storms and the whole vertical structure of weather - the atmosphere is a heat engine driven by "
+                     "the Sun. Ties card_floor_thermodynamics.", S["lapse"]),
+        ("instance", "[the gas law - a mole fills 22.4 L, SEALED] At standard temperature and pressure a mole of any "
+                     "ideal gas fills RT/P = 8.314*273.15/101325 = 22.4 litres (sealed). Pressure, temperature and "
+                     "volume move together (PV = nRT) - the law behind every barometer and weather balloon. Ties "
+                     "card_floor_thermodynamics.", S["molar"]),
+        ("note", "[on the one map] Meteorology rests on thermodynamics (the atmospheric heat engine), earth science "
+                 "(the rotating planet - the Coriolis effect, the oceans), and statistics (forecasts are "
+                 "probabilities, and chaos limits them). Ties card_floor_meteorology.",
+         {"source": "the one map; the atmospheric heat engine; card_floor_meteorology; tools/seed_meteorology.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py meteorology")
+    return 0
+
+
+def oceanography() -> int:
+    """OCEANOGRAPHY - the salt sea in motion (Matt, 2026-10-10, down the list). Pressure rises about one atmosphere
+    per 10 m of depth; seawater is about 3.5 percent salt. SEALED: the gauge pressure at 100 m and the salinity
+    fraction. Rests on earth science (the planet's water), chemistry (dissolved salts) and thermodynamics (currents,
+    the thermocline). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "pressure": _rh_seal_num("ocean_gauge_pressure_atm_at_100m", "100/10", 100 / 10, tol=1e-12),
+        "salinity": _rh_seal_num("mean_seawater_salinity_percent", "35/1000*100", 35 / 1000 * 100, tol=1e-9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "oceanography numbers")
+    sid = TS.create("Oceanography - the salt sea in motion")["id"]
+    marks = [
+        ("instance", "[the weight of water - pressure with depth, SEALED] Water adds about one atmosphere of pressure "
+                     "every 10 metres, so at 100 m the gauge pressure is 100/10 = 10 atm (sealed), eleven absolute. "
+                     "It is why the deep sea crushes, and why depth is read as pressure. Ties card_floor_earth_science.", S["pressure"]),
+        ("instance", "[the salt sea, SEALED] Seawater is about 35 grams of salt per kilogram - 35/1000*100 = 3.5 "
+                     "percent (sealed), mostly sodium chloride. Salinity with temperature sets the water's density, "
+                     "and density differences drive the deep thermohaline circulation that moves the planet's heat. "
+                     "Ties card_floor_chemistry and card_floor_thermodynamics.", S["salinity"]),
+        ("note", "[on the one map] Oceanography rests on earth science (the ocean basins and the water cycle), "
+                 "chemistry (dissolved salts and gases), and thermodynamics (currents and the thermocline, a heat "
+                 "engine like the atmosphere). The sea covers 71 percent of the planet and buffers its climate. Ties "
+                 "card_floor_oceanography.",
+         {"source": "the one map; thermohaline circulation; card_floor_oceanography; tools/seed_oceanography.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py oceanography")
+    return 0
+
+
+def ecology() -> int:
+    """ECOLOGY - energy and number in the living world (Matt, 2026-10-10, down the list). Energy drops about tenfold
+    each trophic level (the 10 percent rule); a logistic population grows fastest at half its carrying capacity.
+    SEALED: the trophic transfer and the fastest-growth point. Rests on biology (populations), statistics (dynamics)
+    and earth science (habitat). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "trophic": _rh_seal_num("trophic_ten_percent_rule_kcal", "1000*0.1", 1000 * 0.1, tol=1e-9),
+        "logistic": _rh_seal_num("logistic_fastest_growth_at_half_carrying_capacity", "1000/2", 1000 / 2, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "ecology numbers")
+    sid = TS.create("Ecology - energy and number in the living world")["id"]
+    marks = [
+        ("instance", "[energy up the food chain - the 10 percent rule, SEALED] Only about a tenth of the energy at "
+                     "one trophic level reaches the next: 1000 kcal of plants feed 1000*0.1 = 100 kcal of herbivores "
+                     "(sealed), and 10 of carnivores. This is why food chains are short and top predators rare - "
+                     "the second law, paid at every step. Ties card_floor_biology and card_floor_thermodynamics.", S["trophic"]),
+        ("instance", "[how populations grow - the logistic, SEALED] A population grows fastest not when largest but "
+                     "at HALF its carrying capacity: for K = 1000, the peak growth is at 1000/2 = 500 (sealed). "
+                     "Logistic growth (and predator-prey cycles) is the arithmetic of number in the wild. Ties "
+                     "card_floor_statistics.", S["logistic"]),
+        ("note", "[on the one map] Ecology rests on biology (the organisms and the tree of life), statistics "
+                 "(population dynamics, sampling), and earth science (climate and habitat). It is the accounting of "
+                 "energy and number across the living world. Ties card_floor_ecology.",
+         {"source": "the one map; trophic dynamics; the logistic equation; card_floor_ecology; tools/seed_ecology.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py ecology")
+    return 0
+
+
+def geography() -> int:
+    """GEOGRAPHY - the measured Earth (Matt, 2026-10-10, down the list). A degree of latitude is about 111 km (the
+    meridian over 360); the Earth turns 15 degrees of longitude per hour (the basis of time zones). SEALED: both.
+    Rests on earth science (the planet) and the instruments (coordinates and projection are geometry). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "degree": _rh_seal_num("kilometres_per_degree_of_latitude", "40075/360", 40075 / 360, tol=1e-6),
+        "timezone": _rh_seal_num("degrees_of_longitude_per_hour_of_rotation", "360/24", 360 / 24, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "geography numbers")
+    sid = TS.create("Geography - the measured Earth")["id"]
+    marks = [
+        ("instance", "[the size of a degree, SEALED] The Earth's circumference is about 40075 km, so one degree of "
+                     "latitude is 40075/360 = 111 km (sealed), and a minute of arc is a nautical mile. Coordinates "
+                     "turn the globe into addressable space - the grid every map and GPS stands on. Ties "
+                     "card_floor_earth_science.", S["degree"]),
+        ("instance", "[longitude is time - the time zones, SEALED] The Earth turns once in 24 hours, so 360/24 = 15 "
+                     "degrees of longitude per hour (sealed). Longitude and local time are the same measurement - "
+                     "which is why finding longitude at sea waited on an accurate clock. Ties card_floor_the_instruments "
+                     "(the geometry of coordinates).", S["timezone"]),
+        ("note", "[on the one map] Geography rests on earth science (the planet it charts) and the instruments "
+                 "(coordinates, projections and distance are geometry - and every flat map must distort, since a "
+                 "sphere has no flat image). The science of WHERE. Ties card_floor_geography.",
+         {"source": "the one map; map projection; great-circle distance; card_floor_geography; tools/seed_geography.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py geography")
+    return 0
+
+
+def nutrition() -> int:
+    """NUTRITION - the body's fuel, counted (Matt, 2026-10-10, down the list). The Atwater factors: carbohydrate and
+    protein 4 kcal/g, fat 9. SEALED: a meal's calories and fat's energy density over carbohydrate's. Rests on
+    chemistry (metabolism is reactions), biology (the body that burns it) and medicine (health). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "meal": _rh_seal_num("meal_calories_atwater_50c_20p_10f", "50*4 + 20*4 + 10*9", 50 * 4 + 20 * 4 + 10 * 9, tol=1e-12),
+        "fatdensity": _rh_seal_num("fat_energy_density_over_carbohydrate_nine_over_four", "9/4", 9 / 4, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "nutrition numbers")
+    sid = TS.create("Nutrition - the body's fuel, counted")["id"]
+    marks = [
+        ("instance", "[counting the fuel - the Atwater factors, SEALED] Food energy is carbohydrate and protein at "
+                     "4 kcal/g and fat at 9: a meal of 50 g carb, 20 g protein and 10 g fat is 50*4 + 20*4 + 10*9 = "
+                     "370 kcal (sealed). The calorie is heat - what the food releases when burned - so nutrition is "
+                     "thermodynamics in the body. Ties card_floor_chemistry.", S["meal"]),
+        ("instance", "[why fat is rich, SEALED] Fat packs 9/4 = 2.25 times the energy of carbohydrate per gram "
+                     "(sealed), which is why the body stores energy as fat and why fatty foods are calorie-dense. "
+                     "The same oxidation chemistry that runs a flame runs metabolism. Ties card_floor_biology.", S["fatdensity"]),
+        ("note", "[on the one map] Nutrition rests on chemistry (metabolism is oxidation, and the calorie is heat), "
+                 "biology (the body that burns and stores it), and medicine (diet and health). The engine seals the "
+                 "arithmetic of energy and macronutrients; it does not prescribe a diet - that is a clinical call, "
+                 "declined. Ties card_floor_nutrition.",
+         {"source": "the one map; the Atwater system; card_floor_nutrition; tools/seed_nutrition.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py nutrition")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9828,6 +9986,16 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("meteorology", "weather", "climate", "the_atmosphere"):
+        return meteorology()
+    if a[0] in ("oceanography", "the_ocean", "marine", "seawater"):
+        return oceanography()
+    if a[0] in ("ecology", "ecosystems", "the_biosphere", "food_web"):
+        return ecology()
+    if a[0] in ("geography", "cartography", "map_projection", "latitude_longitude"):
+        return geography()
+    if a[0] in ("nutrition", "diet", "calories", "macronutrients"):
+        return nutrition()
     if a[0] in ("medicine", "pharmacology", "epidemiology", "physiology"):
         return medicine()
     if a[0] in ("materials_science", "materials", "crystallography", "solid_state"):
