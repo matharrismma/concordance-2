@@ -37,3 +37,17 @@ def test_semantic_relations_report_wordnet_cited():
     assert LN.verify_semantic_relation("dog", "carnivore", "is_a").status == "CONFIRMED"   # transitive
     assert LN.verify_semantic_relation("dog", "mineral", "is_a").status == "MISMATCH"
     assert LN.verify_semantic_relation("hot", "cold", "antonym").status == "NOT_APPLICABLE"  # not held
+
+
+def test_closed_class_pos_and_typology_are_deterministic():
+    """Closed-class POS and language typology (Matt, 2026-10-10: comprehensive linguistics, steps
+    4-5). Function words tag deterministically; open-class words decline. Language families come
+    from a curated reference; an unknown language declines. 0 false positives throughout."""
+    assert LN.verify_pos("the", "article").status == "CONFIRMED"
+    assert LN.verify_pos("the", "determiner").status == "CONFIRMED"      # multi-class
+    assert LN.verify_pos("and", "preposition").status == "MISMATCH"
+    assert LN.verify_pos("dog", "noun").status == "NOT_APPLICABLE"       # open-class declines
+    assert LN.verify_language_family("english", "Indo-European").status == "CONFIRMED"
+    assert LN.verify_language_family("english", "Romance").status == "MISMATCH"
+    assert LN.verify_language_family("arabic", "Semitic").status == "CONFIRMED"
+    assert LN.verify_language_family("klingon", "anything").status == "NOT_APPLICABLE"

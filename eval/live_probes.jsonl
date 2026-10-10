@@ -225,3 +225,5 @@
 {"id": "map.indo_european.charts.transliteration", "path": "/chains", "query": {"floor": "card_floor_indo_european"}, "expect": [{"at": "charts[*].stick", "has": "stick_transliteration_romanizing_the_original_tongue"}]}
 {"id": "map.biology.charts.alphafold", "path": "/chains", "query": {"floor": "card_floor_biology"}, "expect": [{"at": "charts[*].stick", "has": "stick_alphafold_and_protein_folding_the_self_healing_matrix_in_bio"}]}
 {"id": "map.indo_european.charts.semantics", "path": "/chains", "query": {"floor": "card_floor_indo_european"}, "expect": [{"at": "charts[*].stick", "has": "stick_semantic_relations_synonymy_and_the_is_a_hierarchy"}]}
+{"id": "map.indo_european.charts.pos", "path": "/chains", "query": {"floor": "card_floor_indo_european"}, "expect": [{"at": "charts[*].stick", "has": "stick_closed_class_part_of_speech_the_function_words"}]}
+{"id": "map.indo_european.charts.typology", "path": "/chains", "query": {"floor": "card_floor_indo_european"}, "expect": [{"at": "charts[*].stick", "has": "stick_language_typology_the_families_of_tongues"}]}

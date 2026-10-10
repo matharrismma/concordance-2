@@ -114,6 +114,19 @@ CHARTS: List[Dict[str, str]] = [
          basis="the stick seals WordNet synonymy (car = automobile) and IS-A (a dog is a canine) through "
                "linguistics.LING_VERIFY; semantics is the meaning layer of this linguistics floor, cited from "
                "WordNet, antonymy declined"),
+    dict(key="closed_class_pos",
+         stick="stick_closed_class_part_of_speech_the_function_words",
+         node="card_floor_indo_european",
+         title="Closed-class part of speech - the function words",
+         basis="the stick seals function-word tags (the=article, and=conjunction) through linguistics.LING_VERIFY; "
+               "the closed classes are finite and deterministic, open-class declines - syntax on this floor"),
+    dict(key="typology",
+         stick="stick_language_typology_the_families_of_tongues",
+         node="card_floor_indo_european",
+         title="Language typology - the families of tongues",
+         basis="the stick seals language families (English is Indo-European, Arabic is Semitic) through "
+               "linguistics.LING_VERIFY; typology is the family tree of tongues, the home this Indo-European floor "
+               "is named for"),
     dict(key="alphafold",
          stick="stick_alphafold_and_protein_folding_the_self_healing_matrix_in_bio",
          node="card_floor_biology",

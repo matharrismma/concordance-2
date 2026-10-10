@@ -418,6 +418,139 @@ def verify_semantic_relation(a: str, b: str, relation: str) -> VerifierResult:
     return na(name, f"unknown semantic relation {relation!r} (use synonym, broader/is_a, or antonym)")
 
 
+# CLOSED-CLASS PART OF SPEECH (Matt, 2026-10-10: comprehensive linguistics, step 4; syntax kept
+# CLOSED-CLASS ONLY by choice). The function words are a finite, enumerable set, so their POS is
+# deterministic. An OPEN-class word (noun/verb/adjective/adverb) depends on usage and morphology and
+# is DECLINED here - the honest offline floor. A word may hold several closed classes (that = pronoun
+# / conjunction / determiner); each is a true answer, and the verdict names them all. 0 false
+# positives: a POS is confirmed only by membership in the curated closed-class set.
+_CLOSED_POS = {
+    "article": {"a", "an", "the"},
+    "preposition": {"in", "on", "at", "by", "for", "with", "to", "of", "from", "into", "onto", "over",
+                    "under", "about", "above", "below", "between", "through", "during", "before",
+                    "after", "since", "until", "against", "among", "around", "behind", "beside",
+                    "beyond", "near", "off", "out", "upon", "within", "without", "toward", "towards",
+                    "across", "along", "down", "up"},
+    "pronoun": {"i", "you", "he", "she", "it", "we", "they", "me", "him", "her", "us", "them", "my",
+                "your", "his", "its", "our", "their", "mine", "yours", "hers", "ours", "theirs",
+                "this", "that", "these", "those", "who", "whom", "whose", "which", "what", "myself",
+                "yourself", "himself", "herself", "itself", "ourselves", "themselves", "anyone",
+                "everyone", "someone", "nobody", "something", "anything", "everything", "nothing"},
+    "conjunction": {"and", "or", "but", "nor", "yet", "so", "for", "if", "because", "although",
+                    "though", "while", "whereas", "unless", "until", "since", "when", "whenever",
+                    "wherever", "whether", "that", "as", "both", "either", "neither"},
+    "auxiliary": {"is", "am", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do",
+                  "does", "did", "can", "could", "will", "would", "shall", "should", "may", "might",
+                  "must", "ought"},
+    "determiner": {"this", "that", "these", "those", "some", "any", "each", "every", "all", "both",
+                   "either", "neither", "no", "much", "many", "more", "most", "few", "little",
+                   "several", "enough", "such", "what", "which", "whose", "the", "a", "an"},
+}
+_OPEN_POS = {"noun", "verb", "adjective", "adverb", "open", "open-class", "open_class"}
+
+
+def verify_pos(word: str, claimed_pos: str) -> VerifierResult:
+    name = "linguistics.part_of_speech"
+    w = _normw(word)
+    pos = _normw(claimed_pos).replace("-", "_")
+    if not w or not pos:
+        return na(name, "need a word and a claimed_pos (article/preposition/pronoun/conjunction/auxiliary/determiner)")
+    classes = sorted(c for c, words in _CLOSED_POS.items() if w in words)
+    data = {"word": w, "claimed_pos": pos, "closed_classes_held": classes}
+    if not classes:
+        return na(name, f"'{w}' is not a closed-class (function) word; open-class part of speech "
+                        f"(noun/verb/adjective/adverb) depends on usage and is not determined here")
+    also = [c for c in classes if c != pos]
+    if pos in classes:
+        extra = f" (it can also be a {', '.join(also)})" if also else ""
+        return confirm(name, f"'{w}' is a {pos} - a closed-class function word{extra}", data)
+    if pos in _OPEN_POS:
+        return mismatch(name, f"'{w}' is a closed-class word ({'/'.join(classes)}), not a {pos}", data)
+    if pos in _CLOSED_POS:
+        return mismatch(name, f"'{w}' is a closed-class word ({'/'.join(classes)}), not a {pos}", data)
+    return na(name, f"unknown part of speech {claimed_pos!r}")
+
+
+# TYPOLOGY / LANGUAGE FAMILIES (Matt, 2026-10-10: comprehensive linguistics, step 5). A curated
+# reference: a language -> the family labels it falls under (branch and top family). A claim "X is
+# a Y language" is confirmed iff Y is in X's chain. Curated (not generated); an unknown language
+# DECLINES. 0 false positives: a family not in the language's chain cannot be confirmed.
+_LANG_FAMILY = {
+    "english": {"germanic", "west germanic", "indo-european"},
+    "german": {"germanic", "west germanic", "indo-european"},
+    "dutch": {"germanic", "west germanic", "indo-european"},
+    "swedish": {"germanic", "north germanic", "indo-european"},
+    "norwegian": {"germanic", "north germanic", "indo-european"},
+    "danish": {"germanic", "north germanic", "indo-european"},
+    "gothic": {"germanic", "east germanic", "indo-european"},
+    "spanish": {"romance", "italic", "indo-european"},
+    "french": {"romance", "italic", "indo-european"},
+    "italian": {"romance", "italic", "indo-european"},
+    "portuguese": {"romance", "italic", "indo-european"},
+    "romanian": {"romance", "italic", "indo-european"},
+    "latin": {"italic", "indo-european"},
+    "greek": {"hellenic", "indo-european"},
+    "russian": {"slavic", "balto-slavic", "indo-european"},
+    "polish": {"slavic", "balto-slavic", "indo-european"},
+    "ukrainian": {"slavic", "balto-slavic", "indo-european"},
+    "lithuanian": {"baltic", "balto-slavic", "indo-european"},
+    "hindi": {"indo-aryan", "indo-iranian", "indo-european"},
+    "sanskrit": {"indo-aryan", "indo-iranian", "indo-european"},
+    "persian": {"iranian", "indo-iranian", "indo-european"},
+    "farsi": {"iranian", "indo-iranian", "indo-european"},
+    "irish": {"celtic", "indo-european"},
+    "welsh": {"celtic", "indo-european"},
+    "armenian": {"armenian", "indo-european"},
+    "albanian": {"albanian", "indo-european"},
+    "arabic": {"semitic", "afro-asiatic"},
+    "hebrew": {"semitic", "afro-asiatic"},
+    "aramaic": {"semitic", "afro-asiatic"},
+    "amharic": {"semitic", "afro-asiatic"},
+    "mandarin": {"sinitic", "sino-tibetan"},
+    "chinese": {"sinitic", "sino-tibetan"},
+    "cantonese": {"sinitic", "sino-tibetan"},
+    "tibetan": {"tibeto-burman", "sino-tibetan"},
+    "burmese": {"tibeto-burman", "sino-tibetan"},
+    "japanese": {"japonic"},
+    "korean": {"koreanic"},
+    "turkish": {"turkic"},
+    "mongolian": {"mongolic"},
+    "finnish": {"finnic", "finno-ugric", "uralic"},
+    "hungarian": {"ugric", "finno-ugric", "uralic"},
+    "estonian": {"finnic", "finno-ugric", "uralic"},
+    "swahili": {"bantu", "niger-congo"},
+    "yoruba": {"niger-congo"},
+    "zulu": {"bantu", "niger-congo"},
+    "tamil": {"dravidian"},
+    "telugu": {"dravidian"},
+    "kannada": {"dravidian"},
+    "vietnamese": {"vietic", "austroasiatic"},
+    "khmer": {"austroasiatic"},
+    "tagalog": {"austronesian"},
+    "indonesian": {"malayo-polynesian", "austronesian"},
+    "hawaiian": {"polynesian", "austronesian"},
+}
+
+
+def _famnorm(s: Any) -> str:
+    return re.sub(r"[\s_-]+", "", _normw(s))
+
+
+def verify_language_family(language: str, claimed_family: str) -> VerifierResult:
+    name = "linguistics.language_family"
+    lang = _normw(language)
+    fams = _LANG_FAMILY.get(lang)
+    if fams is None:
+        return na(name, f"'{language}' is not in the engine's curated language-family reference; declined rather "
+                        f"than guessed")
+    want = _famnorm(claimed_family)
+    held = {_famnorm(f) for f in fams}
+    data = {"language": lang, "claimed_family": claimed_family, "families_held": sorted(fams)}
+    if want in held:
+        return confirm(name, f"'{lang}' is a {claimed_family} language (families: {', '.join(sorted(fams))})", data)
+    return mismatch(name, f"'{lang}' is not {claimed_family}; it is {', '.join(sorted(fams))}", data)
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     """Dispatch every applicable linguistics check for the packet's LING_VERIFY block."""
     results: List[VerifierResult] = []
@@ -446,6 +579,12 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
 
     if "relation_a" in lv and "relation_b" in lv and "claimed_relation" in lv:
         results.append(verify_semantic_relation(lv["relation_a"], lv["relation_b"], lv["claimed_relation"]))
+
+    if "pos_word" in lv and "claimed_pos" in lv:
+        results.append(verify_pos(lv["pos_word"], lv["claimed_pos"]))
+
+    if "language" in lv and "claimed_family" in lv:
+        results.append(verify_language_family(lv["language"], lv["claimed_family"]))
 
     if not results:
         results.append(na("linguistics", "no LING_VERIFY artifacts present"))

@@ -10073,6 +10073,71 @@ def count(T: float = 1000000000.0) -> int:
     return 0
 
 
+def closed_class_pos() -> int:
+    """CLOSED-CLASS PART OF SPEECH - comprehensive linguistics, step 4 (Matt, 2026-10-10; syntax
+    kept closed-class only by choice). The function words tag deterministically; open-class
+    declines. Sealed through linguistics.LING_VERIFY. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "article": _seal_through("linguistics", "LING_VERIFY", {"pos_word": "the", "claimed_pos": "article"}),
+        "conj": _seal_through("linguistics", "LING_VERIFY", {"pos_word": "and", "claimed_pos": "conjunction"}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "closed-class tags")
+    sid = TS.create("Closed-class part of speech - the function words")["id"]
+    marks = [
+        ("instance", "[a closed class, SEALED] 'the' is an article (sealed through linguistics.LING_VERIFY). The "
+                     "function words - articles, prepositions, pronouns, conjunctions, auxiliaries, determiners - "
+                     "are a finite, enumerable set, so their part of speech is deterministic.", S["article"]),
+        ("instance", "[another, SEALED] 'and' is a conjunction (sealed).", S["conj"]),
+        ("note", "[open class declines - the offline floor] A noun/verb/adjective/adverb depends on usage and "
+                 "morphology; the engine DECLINES open-class POS rather than guess. Syntax is kept closed-class "
+                 "only by choice; deep parsing is the declined floor. 0 false positives: a POS is confirmed only by "
+                 "membership in the curated closed-class set.",
+         {"source": "src/concordance/verifiers/linguistics.py verify_pos"}),
+        ("note", "[on the one map - comprehensive linguistics, step 4] Closed-class POS joins the linguistics floor "
+                 "(card_floor_indo_european) with phonology, morphology, etymology, transliteration and semantics.",
+         {"source": "card_floor_indo_european"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py closed_class_pos")
+    return 0
+
+
+def typology() -> int:
+    """LANGUAGE TYPOLOGY / FAMILIES - comprehensive linguistics, step 5, the last of this pass
+    (Matt, 2026-10-10). A language's family from a curated reference, sealed through
+    linguistics.LING_VERIFY. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "english": _seal_through("linguistics", "LING_VERIFY", {"language": "english", "claimed_family": "Indo-European"}),
+        "arabic": _seal_through("linguistics", "LING_VERIFY", {"language": "arabic", "claimed_family": "Semitic"}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "language families")
+    sid = TS.create("Language typology - the families of tongues")["id"]
+    marks = [
+        ("instance", "[a family, SEALED] English is an Indo-European language (sealed through "
+                     "linguistics.LING_VERIFY): Germanic -> West Germanic -> Indo-European. The family tree of "
+                     "tongues is the comparative method's fruit - and the home of this very floor.", S["english"]),
+        ("instance", "[a different family, SEALED] Arabic is Semitic (Afro-Asiatic), sealed - NOT Indo-European. "
+                     "The families are distinct; a claim across them is a mismatch.", S["arabic"]),
+        ("note", "[curated, declines the unknown] The reference is a curated list of languages -> families; an "
+                 "unknown language DECLINES rather than guesses. 0 false positives: a family not in the language's "
+                 "chain cannot be confirmed.",
+         {"source": "src/concordance/verifiers/linguistics.py verify_language_family"}),
+        ("note", "[on the one map - the comprehensive-linguistics pass is COMPLETE] Typology closes this pass on the "
+                 "linguistics floor (card_floor_indo_european): phonology, orthography, etymology, historical sound "
+                 "change and the Biblical lexicon already held; morphology, transliteration, semantics, closed-class "
+                 "POS and typology added - with deep parsing declined as the honest offline floor. Linguistics went "
+                 "from a Strong's-only lane to a comprehensive domain.",
+         {"source": "card_floor_indo_european; the linguistics coverage map"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py typology")
+    return 0
+
+
 def semantics() -> int:
     """SEMANTIC RELATIONS - comprehensive linguistics, step 3 (Matt, 2026-10-10). Synonymy and the
     IS-A (hypernym) hierarchy from the held WordNet thesaurus, SEALED through linguistics.LING_VERIFY
@@ -10717,6 +10782,10 @@ def main() -> int:
         return alphafold()
     if a[0] in ("semantics", "semantic_relations", "synonymy", "wordnet"):
         return semantics()
+    if a[0] in ("closed_class_pos", "part_of_speech", "pos", "function_words"):
+        return closed_class_pos()
+    if a[0] in ("typology", "language_family", "language_families", "families_of_tongues"):
+        return typology()
     if a[0] == "read":
         from concordance import tickstick as T
         print(json.dumps(T.read(a[1]) if len(a) > 1 else T.listing(), indent=1, ensure_ascii=False))
