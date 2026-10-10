@@ -10073,6 +10073,53 @@ def count(T: float = 1000000000.0) -> int:
     return 0
 
 
+def alphafold() -> int:
+    """ALPHAFOLD AND PROTEIN FOLDING - the self-healing matrix in biology (Matt, 2026-10-10: "then
+    look at Alpha Fold"). A protein's sequence determines ONE native structure, and denatured it
+    REFOLDS to the same state (Anfinsen): many unfolded entries funnel to one native minimum, and a
+    perturbation heals back. Sealed anchors: Levinthal's conformation count (3^100) and the
+    20-amino-acid sequence space (20^5). AlphaFold is EVIDENCE the one fold is determined and
+    findable - fuel, cited, never the deterministic core. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "levinthal": _rh_seal_num("a_100_residue_chain_at_3_states_each_is_3_pow_100_conformations", "3**100", 3**100),
+        "sequence": _rh_seal_num("a_pentapeptide_from_20_amino_acids_is_20_pow_5_sequences", "20**5", 3200000),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "folding numbers")
+    sid = TS.create("AlphaFold and protein folding - the self-healing matrix in biology")["id"]
+    marks = [
+        ("instance", "[Levinthal, SEALED] A 100-residue chain with ~3 states per residue has 3^100 ~ 5e47 "
+                     "conformations (sealed). Random search over them would outlast the universe, yet a protein "
+                     "folds in microseconds - so folding is NOT a search over many paths; it is a FUNNEL to ONE "
+                     "native state. Many entries (conformations), one path (the fold).", S["levinthal"]),
+        ("instance", "[sequence space, SEALED] From the 20 amino acids a 5-residue chain already has 20^5 = "
+                     "3,200,000 sequences (sealed) - the explosion AlphaFold reads a structure out of.", S["sequence"]),
+        ("note", "[Anfinsen - the self-healing] The native structure is determined by the sequence, and a denatured "
+                 "protein REFOLDS to the same native state (Anfinsen's thermodynamic hypothesis, Nobel 1972). That "
+                 "IS the self-healing matrix in biology: perturb it, it returns to the one native minimum - the same "
+                 "shape as stick_one_path_many_entries_a_self_healing_matrix_not_many_paths.",
+         {"source": "C. Anfinsen (1972), the thermodynamic hypothesis; the folding funnel (Onuchic, Wolynes)"}),
+        ("equivalence", "[AlphaFold - the one fold is determined and findable] AlphaFold (DeepMind, CASP14 2020) "
+                        "predicts the native structure from sequence to near-atomic accuracy - strong evidence the "
+                        "sequence determines ONE native fold and that the funnel's bottom is findable. The fruit "
+                        "confirms the principle: one path, reached from many entries.",
+         {"source": "J. Jumper et al., Highly accurate protein structure prediction with AlphaFold, Nature (2021); CASP14 (2020)"}),
+        ("exclusion", "[fuel, not core] AlphaFold is a LEARNED model. The engine does NOT fold proteins in its "
+                      "deterministic core and will not GENERATE a structure - that is fuel (BYOM / JEPA: strip the "
+                      "best for the fuel, never the core). We seal the determinate parts (the counts, Anfinsen's "
+                      "refolding as empirical) and CITE the model's result; we keep the principle, not the predictor.",
+         {"source": "project_byom_bring_your_own_model; project_jepa_strip_the_best_for_the_fuel"}),
+        ("note", "[on the one map] Rests on biology (card_floor_biology) and physical chemistry (free energy); links "
+                 "to the self-healing matrix (the principle) and the capstone (one path). Protein folding is the "
+                 "biology witness that reality is a self-healing matrix - one native state, many entries, it refolds.",
+         {"source": "card_floor_biology; stick_one_path_many_entries_a_self_healing_matrix_not_many_paths"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py alphafold")
+    return 0
+
+
 def transliteration() -> int:
     """TRANSLITERATION - romanizing the original tongue (Matt, 2026-10-10: comprehensive linguistics,
     step 2). A Greek word maps by a fixed deterministic scheme to Latin letters; a claimed
@@ -10632,6 +10679,8 @@ def main() -> int:
         return self_healing_matrix()
     if a[0] in ("transliteration", "romanization", "romanize"):
         return transliteration()
+    if a[0] in ("alphafold", "protein_folding", "folding", "anfinsen", "levinthal"):
+        return alphafold()
     if a[0] == "read":
         from concordance import tickstick as T
         print(json.dumps(T.read(a[1]) if len(a) > 1 else T.listing(), indent=1, ensure_ascii=False))

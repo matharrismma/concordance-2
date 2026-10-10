@@ -107,6 +107,13 @@ CHARTS: List[Dict[str, str]] = [
          title="Transliteration - romanizing the original tongue",
          basis="the stick seals Greek romanizations by a fixed scheme (logos, theos) through linguistics.LING_VERIFY; "
                "general transliteration broadens this linguistics floor beyond the Strong's lexicon"),
+    dict(key="alphafold",
+         stick="stick_alphafold_and_protein_folding_the_self_healing_matrix_in_bio",
+         node="card_floor_biology",
+         title="AlphaFold and protein folding - the self-healing matrix in biology",
+         basis="the stick seals Levinthal's conformation count (3^100) and the 20-amino-acid sequence space (20^5); "
+               "a protein funnels from many conformations to one native state and refolds to it (Anfinsen) - the "
+               "self-healing matrix made flesh on this biology floor"),
 ]
 
 
