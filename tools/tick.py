@@ -3501,6 +3501,72 @@ def soil_science() -> int:
     _mint_marks(sid, marks, by="tools/tick.py soil_science")
     return 0
 
+
+def metrology() -> int:
+    """METROLOGY - measurement and the SI (Matt, 2026-10-10, down the list). Measurement is the ground of every
+    sealed number: the SI now DEFINES its units by fixing constants (the metre by fixing c = 299792458 m/s exactly),
+    and every unit converts to the base by exact factors (1 inch = 2.54 cm). SEALED: the defined speed of light and
+    the inch. Rests on the instruments (the 6-constant measure spine) and quantum mechanics (the kilogram is now
+    fixed by the Planck constant). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "c": _rh_seal_num("speed_of_light_defines_the_metre_m_s", "299792458", 299792458, tol=1e-6),
+        "inch": _rh_seal_num("inch_to_centimetre_exact_cm", "2.54", 2.54, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "metrology numbers")
+    sid = TS.create("Metrology - measurement and the SI")["id"]
+    marks = [
+        ("instance", "[units are defined by constants, SEALED] Since 2019 the SI fixes seven constants and builds the "
+                     "units from them: the metre is the distance light travels in 1/299792458 of a second, so c = "
+                     "299792458 m/s EXACTLY (sealed), the kilogram is fixed by the Planck constant, the second by the "
+                     "caesium frequency. Measurement is anchored to nature's constants, not to artifacts. Ties "
+                     "card_floor_the_instruments and card_floor_quantum_mechanics.", S["c"]),
+        ("instance", "[conversion is exact - the inch, SEALED] Units convert by defined factors: 1 inch = 2.54 cm "
+                     "exactly (sealed, the 1959 agreement). Dimensional analysis - tracking the units through a "
+                     "calculation - catches errors and is itself a verifier (a sealed number carries its unit). Ties "
+                     "card_floor_the_instruments.", S["inch"]),
+        ("note", "[on the one map] Metrology is the ground under every other floor: the 6-constant measure spine "
+                 "(the instruments) governs the domains, and every seal is a number WITH a unit. The SI's move to "
+                 "define units by constants is the same stance as the engine - anchor to the invariant, not the "
+                 "artifact. Ties card_floor_metrology.",
+         {"source": "the one map; the 2019 SI redefinition; dimensional analysis; card_floor_metrology"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py metrology")
+    return 0
+
+
+def calendar_time() -> int:
+    """THE CALENDAR - keeping time by sun and number (Matt, 2026-10-10, down the list). The day is one rotation
+    (86400 seconds), the year one orbit (about 365.2422 days); the Gregorian calendar approximates the year as
+    365.2425 by a leap rule (97 leap days per 400 years). SEALED: the seconds in a day and the Gregorian mean year.
+    Rests on astronomy (the orbit and the rotation) and metrology (the second). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "secondsday": _rh_seal_num("seconds_in_a_day", "24*60*60", 24 * 60 * 60, tol=1e-12),
+        "gregorian": _rh_seal_num("gregorian_mean_year_days", "365 + 97/400", 365 + 97 / 400, tol=1e-9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "calendar numbers")
+    sid = TS.create("The calendar - keeping time by sun and number")["id"]
+    marks = [
+        ("instance", "[the day - one rotation, SEALED] A day is one turn of the Earth, divided 24 x 60 x 60 = 86400 "
+                     "seconds (sealed). The division into 24, 60, 60 is Babylonian (base 60); the second is now the "
+                     "SI base unit, fixed by the caesium atom. Ties card_floor_astronomy (the rotation).", S["secondsday"]),
+        ("instance", "[the year - one orbit, and the leap rule, SEALED] A tropical year is about 365.2422 days - not "
+                     "whole - so the Gregorian calendar adds 97 leap days every 400 years, averaging 365 + 97/400 = "
+                     "365.2425 (sealed), off by only 26 seconds a year. The leap rule (every 4, except centuries, "
+                     "except every 400) is number chasing the sun. Ties card_floor_astronomy (the orbit).", S["gregorian"]),
+        ("note", "[on the one map] The calendar rests on astronomy (the day is the rotation, the year the orbit) and "
+                 "metrology (the second, the SI base unit). It is the oldest applied science - reconciling the "
+                 "incommensurable periods of day, month and year by number. Ties card_floor_the_calendar.",
+         {"source": "the one map; the Gregorian reform (1582); the SI second; card_floor_the_calendar"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py calendar_time")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -10216,6 +10282,10 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("metrology", "si_units", "the_metre", "unit_conversion"):
+        return metrology()
+    if a[0] in ("calendar", "timekeeping", "the_calendar", "leap_year"):
+        return calendar_time()
     if a[0] in ("nuclear_physics", "the_nucleus", "radioactivity", "fission"):
         return nuclear_physics()
     if a[0] in ("quantum_computing", "qubits", "the_qubit", "quantum_computer"):

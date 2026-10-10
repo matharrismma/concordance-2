@@ -106,7 +106,9 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_agriculture", "card_floor_hydrology",
           # batch 4 (2026-10-10): nuclear physics, quantum computing, networking, soil science, astronomy (cite)
           "card_floor_nuclear_physics", "card_floor_quantum_computing", "card_floor_networking",
-          "card_floor_soil_science", "card_floor_astronomy")
+          "card_floor_soil_science", "card_floor_astronomy",
+          # batch 5 (2026-10-10): metrology (measurement/SI) and the calendar (timekeeping) - the ground under measure
+          "card_floor_metrology", "card_floor_the_calendar")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
