@@ -108,7 +108,11 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_nuclear_physics", "card_floor_quantum_computing", "card_floor_networking",
           "card_floor_soil_science", "card_floor_astronomy",
           # batch 5 (2026-10-10): metrology (measurement/SI) and the calendar (timekeeping) - the ground under measure
-          "card_floor_metrology", "card_floor_the_calendar")
+          "card_floor_metrology", "card_floor_the_calendar",
+          # music (tools/seed_music.py, 2026-10-10): the orphaned music-theory stick, placed on the map - interval
+          # ratios (2:1, 3:2), equal temperament (2^(1/12)), A440; rests on acoustics (harmonic series) + metrology
+          # (pitch in hertz) + the instruments (the music verifier). No new stick - cites the sealed music-theory stick.
+          "card_floor_music")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
