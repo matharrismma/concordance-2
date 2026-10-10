@@ -73,7 +73,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_biology",
           # earth science (tools/seed_earth_science.py, 2026-10-09): the planet - radiometric deep time, plate tectonics,
           # minerals; stands on physical chemistry + chemistry + thermodynamics, hands biology its deep time
-          "card_floor_earth_science")
+          "card_floor_earth_science",
+          # the mind (tools/seed_the_mind.py, 2026-10-09): matter aware of itself - the neuron, computation, the
+          # expensive brain; top of the emergence ladder; open end = the hard problem of consciousness (DECLINED)
+          "card_floor_the_mind")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:

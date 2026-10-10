@@ -37,7 +37,7 @@ def _graph():
 def test_the_seed_validates_and_every_endpoint_resolves():
     assert S3._validate() == []
     assert len(S3.CHAINS) == 8 and len(S3.RECORDS) >= 55
-    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 26
+    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 27
 
 
 def test_each_chain_walks_from_its_roots_to_its_open_end_and_meets_where_the_seed_expects():
@@ -115,7 +115,7 @@ def test_the_chains_door_reads_a_chain_floor(monkeypatch):
     assert st == 200 and len(body["chain"]["nodes"]) >= 12 and body["confluences"][0]["at"] == "card_chain_riemann_1859"
     st, payload = dispatch("GET", "/chains", {"floors": "1"}, None, EngineConfig("secular"))
     body = payload.get("data") or payload
-    assert st == 200 and len(body["floors"]) == 26
+    assert st == 200 and len(body["floors"]) == 27
 
 
 def test_the_capstone_floor_gathers_the_others_and_marks_the_two_barriers():
@@ -379,3 +379,22 @@ def test_earth_science_floor_stands_on_chemistry_and_hands_biology_deep_time():
     serves = {s["at"] for s in m["serves"]}
     assert {"card_floor_physical_chemistry", "card_floor_chemistry", "card_floor_thermodynamics",
             "card_floor_biology"} <= serves
+
+
+def test_the_mind_floor_tops_the_ladder_with_the_hard_problem_as_its_open_end():
+    """The mind (Matt, 2026-10-09, down the domain list): matter aware of itself - three pillars on physical
+    chemistry/biology/instruments/thermodynamics, with the hard problem of consciousness as its one open end."""
+    import seed_the_mind as S18
+    assert S18._validate() == []
+    cards = {c["id"]: json.loads(json.dumps(c)) for c in S18.CARDS}
+    for cid in ("card_floor_physical_chemistry", "card_floor_biology", "card_floor_the_instruments",
+                "card_floor_thermodynamics", "card_floor_the_capstone", "card_k_floor_of_discovery"):
+        cards.setdefault(cid, {"id": cid, "title": cid, "connections": []})
+    overlay = Path(tempfile.mkdtemp(prefix="nh-mind-")) / "overlay.jsonl"
+    overlay.write_text("\n".join(json.dumps(e) for e in S18.BRIDGES) + "\n", encoding="utf-8")
+    corpus._apply_bridges(cards, overlay)
+    m = chains.floor_map(S18.FLOOR, get_card=cards.get)
+    assert m and len(m["parts"]) == 3 and len(m["ends"]) == 1
+    assert m["ends"][0]["id"] == "card_question_the_hard_problem"
+    serves = {s["at"] for s in m["serves"]}
+    assert {"card_floor_biology", "card_floor_the_instruments", "card_floor_thermodynamics"} <= serves

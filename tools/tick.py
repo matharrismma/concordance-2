@@ -2558,6 +2558,56 @@ def earth_science() -> int:
     _mint_marks(sid, marks, by="tools/tick.py earth_science")
     return 0
 
+
+def the_mind() -> int:
+    """THE MIND - matter aware of itself (Matt, 2026-10-09, down the domain list). The top rung of the emergence
+    ladder: physics -> chemistry -> life -> mind. The NEURON signals by electrochemistry (the membrane potential, a
+    Nernst voltage); the brain COMPUTES (networks, information); it is metabolically expensive (a fifth of the body's
+    energy for a fiftieth of its mass). SEALED: the Nernst factor at body temperature, and the brain's energy ratio.
+    Its one OPEN END is the hard problem of consciousness - why there is subjective experience at all - which the
+    engine DECLINES, a miss that stays a miss. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "nernst": _rh_seal_num("nernst_factor_per_decade_at_body_temp_mv",
+                               "8.314*310/96485*2.302585092994046*1000", 8.314 * 310 / 96485 * 2.302585092994046 * 1000, tol=1e-9),
+        "energy": _rh_seal_num("brain_energy_share_over_mass_share_ratio", "20/2", 20 / 2, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "mind numbers")
+    sid = TS.create("The mind - the neuron, computation, and the hard problem")["id"]
+    marks = [
+        ("instance", "[the neuron signals by electrochemistry, SEALED] A nerve impulse is a wave of voltage across a "
+                     "membrane, set by ion gradients through the Nernst equation. At body temperature (310 K) the "
+                     "Nernst factor is RT/F times ln 10 = 61.5 mV per tenfold concentration ratio (sealed). The "
+                     "resting potential (about -70 mV) and every action potential are this electrochemistry - the "
+                     "mind runs on the same cell biology and ion physics as the rest of life. Ties "
+                     "card_floor_physical_chemistry (the Nernst voltage) and card_floor_biology.", S["nernst"]),
+        ("instance", "[the expensive organ, SEALED] The brain is about 2 percent of body mass but burns about 20 "
+                     "percent of the body's resting energy - a ratio of 20/2 = 10 (sealed). Thought is costly; "
+                     "awareness is paid for in glucose and oxygen, a steep local order bought with a larger disorder "
+                     "(the second law). Ties card_floor_thermodynamics and card_floor_biology.", S["energy"]),
+        ("note", "[the brain computes] A neuron sums weighted inputs and fires past a threshold; networks of them "
+                 "learn, represent and predict. The brain is an information processor - neural coding, memory, "
+                 "inference - which is why artificial neural networks borrow its shape. Ties card_floor_the_instruments "
+                 "(the information instrument) and, through computation, the whole engine.",
+         {"source": "neural coding; McCulloch-Pitts and the perceptron; computational neuroscience; card_floor_the_instruments"}),
+        ("note", "[the hard problem - DECLINED, the open edge] Everything above is the EASY problem: how the brain "
+                 "processes information, which is physical and sealable. The HARD problem is why there is subjective "
+                 "experience at all - why it is like something to be a mind. No measurement reaches it; it is not a "
+                 "physical quantity the engine can seal. So the engine DECLINES it and marks it as the floor's open "
+                 "end - a miss that stays a miss, mapped honestly, never laundered into a theorem. Ties "
+                 "card_floor_the_capstone (the limit of what can be sealed).",
+         {"source": "D. Chalmers, the hard problem of consciousness; the easy/hard distinction; map, never launder"}),
+        ("note", "[on the one map] The mind rests on physical chemistry and biology (the neuron is electrochemistry "
+                 "in a cell), thermodynamics (the expensive brain), and the instruments (it computes). It is the top "
+                 "rung of the emergence ladder - matter that became life and then became aware - and its open end, "
+                 "the hard problem, is the one place the ladder runs past what can be sealed. Ties card_floor_the_mind.",
+         {"source": "the one map; the emergence ladder; card_floor_the_mind; tools/seed_the_mind.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py the_mind")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9273,6 +9323,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("the_mind", "neuroscience", "neuron", "cognition"):
+        return the_mind()
     if a[0] in ("earth_science", "geology", "plate_tectonics", "radiometric_dating"):
         return earth_science()
     if a[0] in ("biology", "the_cell", "molecular_biology", "life"):
