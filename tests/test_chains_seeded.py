@@ -286,3 +286,22 @@ def test_the_standard_model_content_is_charted_onto_the_existing_floor():
     charts = {c["stick"] for c in m["charts"]}
     assert "stick_the_standard_model_gauge_forces_and_quarks" in charts
     assert m["charts"][0]["of"] == "card_floor_standard_model"  # charted onto the floor itself
+
+
+def test_hermitian_operators_are_charted_onto_the_quantum_mechanics_floor():
+    """Hermitian operators (Matt, 2026-10-09): the formal object under the quantum region, charted onto the EXISTING
+    card_floor_quantum_mechanics (no new floor), with the Hilbert-Polya tie to Riemann. Pinned on the seeds."""
+    import seed_quantum_mechanics as QM
+    import seed_hermitian_operators as S13
+    assert S13._validate() == []
+    cards = {c["id"]: json.loads(json.dumps(c)) for c in QM.CARDS + S13.CARDS}
+    for cid in ("card_floor_the_hamiltonian", "card_floor_maxwells_equations", "card_floor_the_capstone",
+                "card_floor_the_instruments", "card_floor_relativity", "card_floor_riemann",
+                "card_k_floor_of_discovery"):
+        cards.setdefault(cid, {"id": cid, "title": cid, "connections": []})
+    overlay = Path(tempfile.mkdtemp(prefix="nh-herm-")) / "overlay.jsonl"
+    overlay.write_text("\n".join(json.dumps(e) for e in QM.BRIDGES + S13.BRIDGES) + "\n", encoding="utf-8")
+    corpus._apply_bridges(cards, overlay)
+    m = chains.floor_map("card_floor_quantum_mechanics", get_card=cards.get)
+    assert m is not None
+    assert "stick_hermitian_operators_real_eigenvalues_the_observables" in {c["stick"] for c in m["charts"]}

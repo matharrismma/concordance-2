@@ -2312,6 +2312,65 @@ def standard_model_content() -> int:
     _mint_marks(sid, marks, by="tools/tick.py standard_model_content")
     return 0
 
+
+def hermitian_operators() -> int:
+    """HERMITIAN OPERATORS - real eigenvalues, the observables (Matt, 2026-10-09: "hermitian operators?"). A Hermitian
+    (self-adjoint) operator A = A-dagger has three properties that underlie the whole quantum region: (1) REAL
+    eigenvalues - which is why every observable (energy, position, momentum, spin) is Hermitian, since a measurement
+    yields a real number; (2) an orthonormal eigenbasis (the spectral theorem) - the change-of-domain door and the
+    Hamiltonian's stationary states; (3) it generates UNITARY evolution (e^{iA} is unitary), so a Hermitian
+    Hamiltonian conserves probability. SEALED: the real eigenvalues of a Hermitian matrix. Ties Hilbert-Polya and
+    Riemann. Idempotent."""
+    from concordance import tickstick as TS
+    import math
+    tr, det = 4.0, 3.0            # the Hermitian matrix [[2,1],[1,2]]: trace 4, determinant 3
+    disc = tr ** 2 - 4 * det      # = 4 > 0, so the eigenvalues are REAL
+    S = {
+        "eig_hi": _rh_seal_num("hermitian_matrix_2112_eigenvalue_max", "(4 + (4**2 - 4*3)**0.5)/2", (tr + math.sqrt(disc)) / 2, tol=1e-9),
+        "eig_lo": _rh_seal_num("hermitian_matrix_2112_eigenvalue_min", "(4 - (4**2 - 4*3)**0.5)/2", (tr - math.sqrt(disc)) / 2, tol=1e-9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "Hermitian eigenvalues")
+    sid = TS.create("Hermitian operators - real eigenvalues, the observables")["id"]
+    marks = [
+        ("instance", "[real eigenvalues - why observables are Hermitian, SEALED] A Hermitian operator has REAL "
+                     "eigenvalues. The Hermitian matrix [[2,1],[1,2]] has eigenvalues (4 +/- sqrt(16 - 12))/2 = 3 and "
+                     "1 (both sealed, both real). This is THE reason every observable - energy, position, momentum, "
+                     "spin - is a Hermitian operator: a measurement returns a real number, and Hermiticity guarantees "
+                     "the spectrum is real. The eigenvalues are the values a measurement can return.", S["eig_hi"]),
+        ("instance", "[the second real eigenvalue, SEALED] The same matrix's other eigenvalue is 1 (sealed). Two real "
+                     "eigenvalues, and (because the matrix is Hermitian) eigenvectors that are orthogonal - a complete "
+                     "basis. A spin measurement is exactly this: a 2x2 Hermitian operator with two real eigenvalues "
+                     "(up and down).", S["eig_lo"]),
+        ("note", "[the three properties, and where each already lives] A Hermitian (self-adjoint) operator A = "
+                 "A-dagger has: (1) real eigenvalues - the measured values (above); (2) an orthonormal eigenbasis, by "
+                 "the spectral theorem - which IS the change-of-domain door on the solve path and the Hamiltonian's "
+                 "stationary states; (3) it generates unitary evolution, e^{iA} unitary, so a Hermitian Hamiltonian "
+                 "gives e^{-iHt/hbar} that conserves probability (the capstone's 'sum to one'). Ties "
+                 "card_floor_the_hamiltonian, card_floor_the_solve_path, card_floor_quantum_mechanics.",
+         {"source": "the spectral theorem for self-adjoint operators; Stone's theorem (Hermitian generators of unitary groups)"}),
+        ("note", "[the reading rotates, never distorts] Observables are Hermitian operators; the unitaries that are "
+                 "their exponentials are ROTATIONS between eigenbases that leave the physics unchanged - the engine's "
+                 "own 'spherical matrix: the reading rotates, never distorts'. A change of basis re-expresses the same "
+                 "state; the eigenvalues, the real facts, do not move. The observable is the invariant; the frame is "
+                 "free.",
+         {"source": "unitary change of basis; the invariance of the spectrum; the domains-and-tensors form"}),
+        ("note", "[Hilbert-Polya - the bridge to Riemann] If the nontrivial zeros of the Riemann zeta function were "
+                 "the eigenvalues of a Hermitian operator, they would be forced REAL - and that is exactly the "
+                 "Riemann Hypothesis (the zeros on the critical line). That is the Hilbert-Polya conjecture "
+                 "(stick_hilbert_polya; card_floor_riemann). So Hermitian operators tie the quantum region to the "
+                 "deepest open problem in mathematics: RH as a statement that a certain operator is Hermitian. Ties "
+                 "card_floor_riemann.",
+         {"source": "the Hilbert-Polya conjecture; stick_hilbert_polya; card_floor_riemann"}),
+        ("note", "[on the one map] Hermitian operators are the formal object under the whole quantum region: "
+                 "observables (real spectra), the eigenbasis door, unitary evolution and the Born rule all rest on "
+                 "them. Charted onto the quantum-mechanics floor. Ties card_floor_quantum_mechanics.",
+         {"source": "the one map; card_floor_quantum_mechanics; tools/seed_hermitian_operators.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py hermitian_operators")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9027,6 +9086,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("hermitian", "hermitian_operators", "observables", "real_eigenvalues"):
+        return hermitian_operators()
     if a[0] in ("gauge_theory", "particle_physics", "quark_model", "gluons"):
         return standard_model_content()
     if a[0] in ("quantum_mechanics", "qm", "uncertainty", "entanglement"):
