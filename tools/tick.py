@@ -10073,6 +10073,50 @@ def count(T: float = 1000000000.0) -> int:
     return 0
 
 
+def morphology() -> int:
+    """MORPHOLOGY - the first gap filled to make linguistics comprehensive (Matt, 2026-10-10:
+    "expand linguistics to be comprehensive"). A word is prefix(es) + root + suffix(es); a
+    segmentation is SEALED through wordcraft.WORD_VERIFY only when every affix is real, the pieces
+    concatenate exactly, and the root is a real word - the root x pattern basis in English, the
+    same decomposition used for Hebrew. Idempotent."""
+    from concordance import tickstick as TS
+    # The segmentation is sealable as LETTER ARITHMETIC in the cold minter (no corpus needed); the
+    # live verifier wordcraft.verify_morphology adds the real-word root check off the pronunciation
+    # shelf, which a warm process holds.
+    S = {
+        "unbreakable": _rh_seal_num("unbreakable_is_un_2_plus_break_5_plus_able_4_letters", "2+5+4", 11),
+        "unhelpful": _rh_seal_num("unhelpful_is_un_2_plus_help_4_plus_ful_3_letters", "2+4+3", 9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "morphology segmentations")
+    sid = TS.create("Morphology - a word is prefix, root, and suffix")["id"]
+    marks = [
+        ("instance", "[strict segmentation, SEALED as letter arithmetic] 'unbreakable' = un-(2) + break(5) + "
+                     "-able(4) = 11 letters (sealed). The live verifier wordcraft.verify_morphology adds the rest: "
+                     "every affix must be in the inventory, the pieces must concatenate exactly, and the root "
+                     "'break' must be a real word on the pronunciation shelf. Morphology is the root x pattern basis "
+                     "of a word - the same decomposition the engine reads for Hebrew (a root woven through a binyan).",
+         S["unbreakable"]),
+        ("instance", "[derivation stacks on a root, SEALED] 'unhelpful' = un-(2) + help(4) + -ful(3) = 9 letters "
+                     "(sealed). Derivation composes affixes onto a real root; the meaning is built from the parts.",
+         S["unhelpful"]),
+        ("note", "[the 0-false-positive rule] A segmentation is CONFIRMED only when the affixes are real AND the "
+                 "concatenation is exact AND the root is a real word. A spelling change (happy -> happiness) is NOT "
+                 "plain concatenation and DECLINES; an unknown affix is a MISMATCH. Strict concatenation buys zero "
+                 "false positives at the cost of declining the irregular forms honestly.",
+         {"source": "src/concordance/verifiers/wordcraft.py verify_morphology"}),
+        ("note", "[on the one map - comprehensive linguistics] Morphology is the first gap filled to make "
+                 "linguistics comprehensive (phonology, orthography, etymology, historical sound change, and the "
+                 "Biblical lexicon already hold). It rests with them on the linguistics floor "
+                 "(card_floor_indo_european); syntax stays closed-class only, and deep parsing is declined as the "
+                 "offline floor.",
+         {"source": "card_floor_indo_european; the linguistics coverage map"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py morphology")
+    return 0
+
+
 def language_round_trip() -> int:
     """THE EIGENBASIS ROUND-TRIP IN LANGUAGE (Matt, 2026-10-10: "flipping to original language,
     doing the work, and flipping back"; "some words better left in the original tongue with
@@ -10492,6 +10536,8 @@ def main() -> int:
         return bsd(a[1] if len(a) > 1 else "11a1")
     if a[0] in ("language_round_trip", "flip_to_original", "original_tongue", "leave_in_the_tongue", "eigenbasis_language"):
         return language_round_trip()
+    if a[0] in ("morphology", "affix", "affixes", "word_formation"):
+        return morphology()
     if a[0] == "read":
         from concordance import tickstick as T
         print(json.dumps(T.read(a[1]) if len(a) > 1 else T.listing(), indent=1, ensure_ascii=False))

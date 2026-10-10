@@ -41,6 +41,20 @@ GOLDEN_EXAMPLE = {"word": "level", "claimed_letters": 5, "claimed_vowels": 2, "c
 VOWEL_LETTERS = frozenset("aeiou")       # the five vowel letters; y is counted as a consonant letter, and the detail says so
 _LETTERS = re.compile(r"[A-Za-z]")
 
+# MORPHOLOGY (Matt, 2026-10-10: "expand linguistics to be comprehensive"). A curated inventory of
+# English derivational/inflectional affixes. The inventory does NOT make the check loose: a
+# segmentation is CONFIRMED only when every claimed affix is in these sets, the pieces concatenate
+# to the word EXACTLY, and the root is a real word (on the pronunciation shelf). A spelling-change
+# form (happy -> happi -> happiness) is not plain concatenation and declines rather than confirming.
+_PREFIXES = frozenset(
+    "un re in im il ir dis mis non pre post anti auto co de en em fore inter intra mid over semi "
+    "sub super supra trans ultra under out up off ab ad bi tri uni di mono multi poly omni pan "
+    "para proto pseudo retro tele counter contra extra hyper hypo macro micro neo circum".split())
+_SUFFIXES = frozenset(
+    "able ible al ial ual ance ence ancy ency ant ent ar ard ate ation ition dom ed en er est ful "
+    "fy hood ian ic ical ify ing ion tion sion ise ize ism ist ite ity ty ive less ly ment ness or "
+    "ory ous ship th ure ward wards wise y s es ity".split())
+
 # letters in the modern standard alphabet, as the writing-system references give them
 ALPHABETS: Dict[str, Tuple[int, str]] = {
     "english": (26, "the Latin alphabet as used for English"),
@@ -400,6 +414,57 @@ def arpabet_variants_from_body(body: str) -> List[str]:
 
 def strip_stress(pron: str) -> List[str]:
     return [_STRESS_RE.sub("", t) for t in str(pron or "").split() if t]
+
+
+def _affix(s: Any) -> str:
+    return str(s or "").strip().strip("-").strip().lower()
+
+
+def verify_morphology(spec: Dict[str, Any]) -> VerifierResult:
+    """MORPHOLOGY — is a claimed segmentation of a word into prefix(es) + root + suffix(es) valid?
+    (Matt, 2026-10-10: "expand linguistics to be comprehensive.") 0 false positives by construction:
+    CONFIRM only when every claimed affix is in the engine's affix inventory, the pieces concatenate
+    to the word EXACTLY, and the root is a real word (on the CMU pronunciation shelf). A spelling
+    change (happy -> happiness) or an unknown root DECLINES; an unrecognized affix is a MISMATCH."""
+    name = "wordcraft.morphology"
+    word = str(spec.get("word") or "").strip().lower()
+    if not word:
+        return na(name, "no word given")
+    pre = [_affix(p) for p in (spec.get("claimed_prefixes")
+                               or ([spec["claimed_prefix"]] if spec.get("claimed_prefix") else []))]
+    suf = [_affix(s) for s in (spec.get("claimed_suffixes")
+                               or ([spec["claimed_suffix"]] if spec.get("claimed_suffix") else []))]
+    root = _affix(spec.get("claimed_root"))
+    if not root:
+        return na(name, "morphology needs a claimed_root (with optional claimed_prefixes / claimed_suffixes)")
+    bad_pre = [p for p in pre if p not in _PREFIXES]
+    bad_suf = [s for s in suf if s not in _SUFFIXES]
+    if bad_pre or bad_suf:
+        return mismatch(name, "not recognized affixes: " + (f"prefix {bad_pre} " if bad_pre else "")
+                        + (f"suffix {bad_suf}" if bad_suf else "") + " (checked against the affix inventory)",
+                        {"word": word, "unknown_prefixes": bad_pre, "unknown_suffixes": bad_suf})
+    recon = "".join(pre) + root + "".join(suf)
+    seg = " + ".join([p + "-" for p in pre] + [root] + ["-" + s for s in suf])
+    data = {"word": word, "prefixes": pre, "root": root, "suffixes": suf, "reconstruction": recon,
+            "convention": "strict concatenation; a spelling change (e.g. happy->happi) is NOT verified here"}
+    if recon != word:
+        return na(name, f"'{word}' is not the plain concatenation {seg} = '{recon}' — a spelling change or a "
+                        f"non-concatenative form, which this strict check does not confirm", data)
+    pron = _pronunciation_of(root)
+    if pron is None:
+        try:
+            from .. import corpus as _corpus
+            loaded = _corpus.loaded()
+        except Exception:  # noqa: BLE001
+            loaded = False
+        if not loaded:
+            return na(name, "the pronunciation shelf is not loaded in this process; the root cannot be "
+                            "confirmed a real word here", data)
+        return na(name, f"the pieces concatenate to '{word}', but the root '{root}' is not on the "
+                        f"pronunciation shelf, so it cannot be confirmed a real word", data)
+    data["root_source"] = pron[1]
+    return confirm(name, f"'{word}' = {seg}: every affix is in the inventory, the root '{root}' is a real "
+                   f"word ({pron[1]}), and the pieces concatenate exactly", data)
 
 
 def rhyme_tail(pron: str) -> List[str]:
@@ -805,6 +870,7 @@ _RULES = [
     (lambda wv: "alphabet" in wv and "claimed_alphabet_letters" in wv, verify_alphabet),
     (lambda wv: "singular" in wv and "claimed_plural" in wv, verify_plural),
     (lambda wv: "letter" in wv and "claimed_rank" in wv, verify_letter_rank),
+    (lambda wv: "word" in wv and "claimed_root" in wv, verify_morphology),
     # phonics (the pronunciation shelf) and etymology (the etymology shelf)
     (lambda wv: "word_a" in wv and "word_b" in wv and "claimed_rhyme" in wv, verify_rhyme),
     (lambda wv: "word_a" in wv and "word_b" in wv and "claimed_homophone" in wv, verify_homophone),

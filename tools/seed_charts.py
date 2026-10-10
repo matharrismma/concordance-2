@@ -87,6 +87,13 @@ CHARTS: List[Dict[str, str]] = [
          basis="the stick seals the held Strong's lexicon, 5523 Greek + 8674 Hebrew = 14197 lemmas - the "
                "original-language basis the surface text is flipped into for study (flip, work, flip back), the "
                "tongue this linguistics floor reconstructs"),
+    dict(key="morphology",
+         stick="stick_morphology_a_word_is_prefix_root_and_suffix",
+         node="card_floor_indo_european",
+         title="Morphology - a word is prefix, root, and suffix",
+         basis="the stick seals a segmentation as letter arithmetic (unbreakable = un 2 + break 5 + able 4 = 11); "
+               "morphology is the root x pattern basis of a word, the first gap filled to make this linguistics "
+               "floor comprehensive"),
 ]
 
 

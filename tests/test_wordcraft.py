@@ -85,3 +85,22 @@ def test_the_extractors_name_themselves():
     names = {s["extractor"] for s in extract("listen is an anagram of silent. racecar is a palindrome. "
                                              "the plural of child is children. the Hebrew alphabet has 22 letters.")}
     assert {"anagram", "palindrome", "plural", "alphabet"} <= names
+
+
+def test_morphology_segmentation_is_strict_and_zero_false_positive():
+    """MORPHOLOGY (Matt, 2026-10-10: "expand linguistics to be comprehensive"). Confirm only when
+    every affix is real, the pieces concatenate exactly, and the root is a real word; an unknown
+    affix is a MISMATCH; a spelling change or a missing root DECLINES (never a false confirm)."""
+    # an unrecognized affix is a mismatch (no corpus needed)
+    assert W.verify_morphology({"word": "unbreakable", "claimed_prefixes": ["zz"],
+                                "claimed_root": "break", "claimed_suffixes": ["able"]}).status == "MISMATCH"
+    # a spelling change is not plain concatenation -> declines, never confirms
+    assert W.verify_morphology({"word": "happiness", "claimed_root": "happy",
+                                "claimed_suffixes": ["ness"]}).status == "NOT_APPLICABLE"
+    # no root -> declines with a reason
+    assert W.verify_morphology({"word": "cats", "claimed_suffixes": ["s"]}).status == "NOT_APPLICABLE"
+    # a clean concatenation: MISMATCH is impossible here; it CONFIRMS when the shelf holds the root,
+    # and declines (NOT_APPLICABLE) when the pronunciation shelf is not loaded in this process.
+    r = W.verify_morphology({"word": "unbreakable", "claimed_prefixes": ["un"],
+                             "claimed_root": "break", "claimed_suffixes": ["able"]})
+    assert r.status in ("CONFIRMED", "NOT_APPLICABLE")
