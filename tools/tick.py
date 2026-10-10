@@ -2420,6 +2420,54 @@ def chemistry_floor() -> int:
     _mint_marks(sid, marks, by="tools/tick.py chemistry_floor")
     return 0
 
+
+def physical_chemistry() -> int:
+    """PHYSICAL CHEMISTRY - rate, equilibrium, acid-base, redox (Matt, 2026-10-09: "deeper in chemistry"). What makes
+    chemistry predictive beyond 'possible' (the quantum) and 'which way' (thermodynamics): KINETICS (how fast - the
+    first-order half-life), EQUILIBRIUM (the balance point - Delta G = -RT ln K), ACID-BASE (pKa + pKb = pKw = 14),
+    and ELECTROCHEMISTRY (the cell potential - the Daniell battery, 1.10 V). Four seals, standing on the chemistry
+    floor. Idempotent."""
+    from concordance import tickstick as TS
+    import math
+    S = {
+        "kinetics": _rh_seal_num("first_order_half_life_ln2_over_k_seconds", "0.6931471805599453/0.1",
+                                 0.6931471805599453 / 0.1, tol=1e-9),
+        "equil": _rh_seal_num("standard_free_energy_from_k_minus_rt_lnk_kj_mol",
+                              "-8.314*298*2.302585092994046/1000", -8.314 * 298 * 2.302585092994046 / 1000, tol=1e-9),
+        "acidbase": _rh_seal_num("pka_plus_pkb_equals_pkw_at_25c", "4.75 + 9.25", 4.75 + 9.25, tol=1e-12),
+        "redox": _rh_seal_num("daniell_cell_standard_potential_volts", "0.34 - (-0.76)", 0.34 - (-0.76), tol=1e-9),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "physical-chemistry numbers")
+    sid = TS.create("Physical chemistry - rate, equilibrium, acid-base, redox")["id"]
+    marks = [
+        ("instance", "[kinetics - how fast, SEALED] Thermodynamics says which way a reaction goes; kinetics says how "
+                     "fast. For a first-order reaction the half-life is t_1/2 = ln 2 / k, independent of how much you "
+                     "start with: for k = 0.1 per second, t_1/2 = 0.693/0.1 = 6.93 s (sealed). The same law governs "
+                     "radioactive decay - rate is its own science, sitting on top of direction.", S["kinetics"]),
+        ("instance", "[equilibrium - the balance point, SEALED] A reaction settles at equilibrium, and the "
+                     "equilibrium constant K is fixed by the free energy: Delta G-naught = -RT ln K. For K = 10 at "
+                     "298 K, Delta G-naught = -8.314 * 298 * ln 10 / 1000 = -5.71 kJ/mol (sealed). The bridge from "
+                     "thermodynamics (free energy) to the measured ratio of products to reactants.", S["equil"]),
+        ("instance", "[acid-base - the conjugate pair, SEALED] For any acid and its conjugate base, pKa + pKb = pKw = "
+                     "14 at 25 C (sealed; acetic acid pKa 4.75, its conjugate base pKb 9.25). This is Ka * Kb = Kw, "
+                     "the autoionization of water, written in logarithms - the backbone of pH, buffers and "
+                     "titrations.", S["acidbase"]),
+        ("instance", "[electrochemistry - the battery, SEALED] A redox reaction can be split into two half-cells, and "
+                     "the cell potential is E-cell = E-cathode - E-anode. The Daniell cell (copper and zinc) gives "
+                     "0.34 - (-0.76) = 1.10 V (sealed) - the voltage of the first practical battery. Chemistry "
+                     "becomes electricity: redox is electrons moving, so it rests on electromagnetism.", S["redox"]),
+        ("note", "[on the one map] Physical chemistry stands on the chemistry floor and reaches into the physics "
+                 "region: kinetics and acid-base on chemistry, equilibrium on thermodynamics (Delta G = -RT ln K), "
+                 "and electrochemistry on Maxwell (redox is electrons moving - an electrical process). The laws that "
+                 "turn chemistry from a description into a prediction. Ties card_floor_chemistry, "
+                 "card_floor_thermodynamics, card_floor_maxwells_equations.",
+         {"source": "the one map; card_floor_physical_chemistry; tools/seed_physical_chemistry.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py physical_chemistry")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9135,6 +9183,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("physical_chemistry", "kinetics", "equilibrium", "electrochemistry"):
+        return physical_chemistry()
     if a[0] in ("periodic_table", "chemical_bonding", "the_elements", "the_mole"):
         return chemistry_floor()
     if a[0] in ("hermitian", "hermitian_operators", "observables", "real_eigenvalues"):

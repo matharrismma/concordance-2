@@ -64,7 +64,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_quantum_mechanics",
           # chemistry (tools/seed_chemistry.py, 2026-10-09): the world of substances - QM applied; the periodic table;
           # pillars on QM (periodic table) + Maxwell (bond) + thermodynamics (Delta G) + Noether (conservation)
-          "card_floor_chemistry")
+          "card_floor_chemistry",
+          # physical chemistry (tools/seed_physical_chemistry.py, 2026-10-09): deeper in chemistry - rate, equilibrium,
+          # acid-base, redox; stands on chemistry; pillars reach to thermodynamics (Delta G=-RT lnK) and Maxwell (redox)
+          "card_floor_physical_chemistry")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
