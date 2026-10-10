@@ -85,7 +85,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_statistics",
           # economics (tools/seed_economics.py, 2026-10-10): minds that choose meeting scarcity - cites the finance
           # stick; pillars on the mind (choice) + statistics (measurement) + instruments (the arithmetic)
-          "card_floor_economics")
+          "card_floor_economics",
+          # computer science (tools/seed_computer_science.py, 2026-10-10): bits, logic, computability - the byte, the
+          # 16 Boolean functions, merge sort; rests on the instruments + P vs NP (complexity) + the mind (computes)
+          "card_floor_computer_science")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:

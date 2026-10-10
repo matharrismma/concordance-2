@@ -2861,6 +2861,57 @@ def tesseract() -> int:
     _mint_marks(sid, marks, by="tools/tick.py tesseract")
     return 0
 
+
+def computer_science() -> int:
+    """COMPUTER SCIENCE - bits, logic, and what can be computed (Matt, 2026-10-10, down the domain list). Information
+    is BITS (a byte is 2^8 = 256 values); logic gates build from the 2^(2^2) = 16 Boolean functions of two inputs;
+    good ALGORITHMS beat bad ones (merge sort's n log n against n^2); and COMPUTABILITY/complexity say what a machine
+    can do at all and how fast (the halting problem, undecidable; P vs NP, open). SEALED: the byte, the Boolean-gate
+    count, and the merge-sort comparison count. Rests on the instruments (information), P vs NP (complexity) and the
+    mind (which computes). The engine itself is one such machine. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "byte": _rh_seal_num("a_byte_is_two_to_the_eighth_values", "2**8", 2 ** 8, tol=1e-12),
+        "boolean": _rh_seal_num("boolean_functions_of_two_inputs_two_to_the_fourth", "2**4", 2 ** (2 ** 2), tol=1e-12),
+        "mergesort": _rh_seal_num("merge_sort_comparisons_n_log2_n_for_eight", "8*3", 8 * 3, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "computer-science numbers")
+    sid = TS.create("Computer science - bits, logic, and what can be computed")["id"]
+    marks = [
+        ("instance", "[information is bits, SEALED] Everything digital is bits, and n bits name 2^n things: a byte of "
+                     "8 bits is 2^8 = 256 values (sealed) - a character, a shade, a number from 0 to 255. The bit is "
+                     "the atom of information (the Shannon bit, sealed on the information instrument); computing is "
+                     "what you can do with enough of them.", S["byte"]),
+        ("instance", "[logic gates - the 16 functions of two inputs, SEALED] A gate maps inputs to a bit; of two "
+                     "inputs there are exactly 2^(2^2) = 16 possible Boolean functions (sealed) - AND, OR, XOR, NAND "
+                     "and the rest. NAND alone can build them all, and from gates come adders, memory, processors. "
+                     "All of computation is wired from this finite logic.", S["boolean"]),
+        ("instance", "[algorithms matter - merge sort, SEALED] The same task can cost wildly different work. Sorting "
+                     "8 items by merge sort takes about n log2 n = 8 * 3 = 24 comparisons (sealed); the naive way "
+                     "takes n^2 = 64. As n grows the gap explodes - this is why ALGORITHMS, not just faster hardware, "
+                     "are the heart of the field.", S["mergesort"]),
+        ("note", "[computability - what a machine can do at all] A Turing machine defines what is computable, and the "
+                 "universal machine runs any program - the engine, your laptop, the brain's computation are all "
+                 "instances. But some problems are UNDECIDABLE: the halting problem (will a program stop?) has no "
+                 "algorithm, proved by Turing. A hard limit found in the structure, like the uncertainty principle - "
+                 "not ignorance, a proof. Ties card_floor_p_vs_np and card_floor_the_mind.",
+         {"source": "A. Turing (1936); the universal machine; the halting problem; card_floor_p_vs_np"}),
+        ("note", "[complexity - how fast, and the open frontier] Beyond CAN it be computed lies HOW FAST: big-O "
+                 "counts the work, P is the tractable, NP the checkable, and whether P = NP is the open Millennium "
+                 "problem on the map. Cryptography bets it is not (factoring is hard). Computation sits exactly on "
+                 "the P vs NP floor. Ties card_floor_p_vs_np and card_floor_cryptography.",
+         {"source": "computational complexity; big-O; P vs NP; card_floor_p_vs_np; card_floor_cryptography"}),
+        ("note", "[on the one map] Computer science rests on the instruments (the bit is Shannon information; logic "
+                 "is the formal-logic instrument), P vs NP (computability and complexity), and the mind (which "
+                 "computes - neural networks borrow the brain's shape). The engine is itself one such machine, a "
+                 "deterministic computation over the keeping. Ties card_floor_computer_science.",
+         {"source": "the one map; card_floor_computer_science; tools/seed_computer_science.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py computer_science")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9576,6 +9627,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("computer_science", "computation", "algorithms", "the_bit"):
+        return computer_science()
     if a[0] in ("tesseract", "hypercube", "four_cube", "eight_cell"):
         return tesseract()
     if a[0] in ("statistics", "stats", "inference", "the_normal_distribution"):
