@@ -3006,6 +3006,113 @@ def acoustics() -> int:
     _mint_marks(sid, marks, by="tools/tick.py acoustics")
     return 0
 
+
+def medicine() -> int:
+    """MEDICINE - the body measured and mended (Matt, 2026-10-10, down the list). Physiology is biology at the scale
+    of organs; pharmacology is chemistry's kinetics (a drug's half-life); epidemiology is statistics on populations
+    (the herd-immunity threshold). SEALED: a body-mass index, a three-half-life drug fraction, and the herd-immunity
+    threshold for R0 = 4. Rests on biology, physical chemistry (kinetics) and statistics. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "bmi": _rh_seal_num("body_mass_index_kg_over_m_squared", "70/1.75**2", 70 / 1.75 ** 2, tol=1e-9),
+        "halflife": _rh_seal_num("drug_fraction_after_three_half_lives", "(1/2)**3", (1 / 2) ** 3, tol=1e-12),
+        "herd": _rh_seal_num("herd_immunity_threshold_one_minus_one_over_r0_for_r0_4", "1 - 1/4", 1 - 1 / 4, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "medicine numbers")
+    sid = TS.create("Medicine - the body measured and mended")["id"]
+    marks = [
+        ("instance", "[physiology is measured biology, SEALED] The body-mass index is weight over height squared: "
+                     "70 kg / (1.75 m)^2 = 22.9 (sealed) - one number among the vitals (blood pressure, temperature, "
+                     "the blood panel) that turn a body into readable data. Medicine is biology (the floor below) "
+                     "measured at the scale of organs. Ties card_floor_biology.", S["bmi"]),
+        ("instance", "[pharmacology is kinetics, SEALED] A drug clears by first-order decay, the same law as "
+                     "radiocarbon: after three half-lives one eighth remains, (1/2)^3 = 0.125 (sealed). Dosing "
+                     "intervals, steady-state levels and toxicity all follow the half-life - chemistry's kinetics, "
+                     "applied to the bloodstream. Ties card_floor_physical_chemistry.", S["halflife"]),
+        ("instance", "[epidemiology is statistics, SEALED] An outbreak with reproduction number R0 = 4 needs "
+                     "1 - 1/4 = 0.75, that is 75 percent, immune to stop spreading - the herd-immunity threshold "
+                     "(sealed). Public health is statistics on populations: incidence, trials, confidence intervals. "
+                     "Ties card_floor_statistics and card_floor_biology.", S["herd"]),
+        ("note", "[the honest edge - decline the clinical call] The engine seals the arithmetic (a BMI, a dose "
+                 "fraction, a threshold); it does NOT diagnose, prescribe, or give personal medical advice - that is "
+                 "a licensed clinical judgment, declined. A miss stays a miss. On the map, medicine rests on biology "
+                 "(physiology), physical chemistry (pharmacokinetics) and statistics (epidemiology). Ties "
+                 "card_floor_medicine.",
+         {"source": "the one map; the decline of clinical advice; card_floor_medicine; tools/seed_medicine.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py medicine")
+    return 0
+
+
+def materials_science() -> int:
+    """MATERIALS SCIENCE - how atoms pack and solids behave (Matt, 2026-10-10, down the list). Crystals pack with a
+    definite efficiency (the FCC atomic packing factor pi/(3 sqrt2) = 0.74); solids deform by Hooke's law (strain =
+    stress / Young's modulus). SEALED: the FCC packing fraction and an elastic strain. Rests on chemistry (the
+    lattice) and quantum mechanics (the band structure that makes a metal a conductor). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "fcc": _rh_seal_num("fcc_atomic_packing_factor_pi_over_three_root_two", "3.141592653589793/(3*2**0.5)", 3.141592653589793 / (3 * 2 ** 0.5), tol=1e-9),
+        "hooke": _rh_seal_num("elastic_strain_stress_over_youngs_modulus", "200e6/200e9", 200e6 / 200e9, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "materials numbers")
+    sid = TS.create("Materials science - how atoms pack and solids behave")["id"]
+    marks = [
+        ("instance", "[how atoms pack - the packing factor, SEALED] In a face-centred cubic metal the atoms, taken "
+                     "as hard spheres, fill pi/(3 sqrt 2) = 0.74 of space (sealed) - the densest possible packing of "
+                     "equal spheres (Kepler's conjecture, now proved). The lattice is chemistry (the bonds) arranged "
+                     "in a crystal; its geometry sets density, cleavage and strength. Ties card_floor_chemistry.", S["fcc"]),
+        ("instance", "[how solids deform - Hooke's law, SEALED] Pull on a solid and it stretches in proportion: "
+                     "strain = stress / Young's modulus. A 200 MPa stress on steel (E = 200 GPa) gives strain "
+                     "200e6/200e9 = 0.001, a tenth of a percent (sealed). Elastic below the yield point, plastic "
+                     "above it - the whole of mechanical engineering starts here.", S["hooke"]),
+        ("note", "[why a metal conducts - quantum] Whether a solid is a conductor, insulator or semiconductor is set "
+                 "by its electron BAND structure - the quantum mechanics of electrons in the periodic lattice "
+                 "(the shells of the periodic table, spread into bands). Silicon's half-filled gap is why the whole "
+                 "digital age exists. Ties card_floor_quantum_mechanics. On the one map, materials science rests on "
+                 "chemistry (the lattice) and quantum mechanics (the bands). Ties card_floor_materials_science.",
+         {"source": "band theory; the periodic lattice; card_floor_quantum_mechanics; card_floor_materials_science"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py materials_science")
+    return 0
+
+
+def optics() -> int:
+    """OPTICS - how light bends, focuses, and slows (Matt, 2026-10-10, down the list). Light is a Maxwell wave that
+    slows in matter (v = c/n) and bends at boundaries (refraction); lenses focus it by the thin-lens equation
+    1/f = 1/do + 1/di. SEALED: the image distance of a thin lens, and the speed of light in glass. Rests on Maxwell
+    (light is electromagnetism) and quantum mechanics (the photon). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "lens": _rh_seal_num("thin_lens_image_distance_f10_do30", "1/(1/10 - 1/30)", 1 / (1 / 10 - 1 / 30), tol=1e-9),
+        "glass": _rh_seal_num("speed_of_light_in_glass_c_over_n_1_5", "299792458/1.5", 299792458 / 1.5, tol=1e-6),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "optics numbers")
+    sid = TS.create("Optics - how light bends, focuses, and slows")["id"]
+    marks = [
+        ("instance", "[lenses focus - the thin-lens equation, SEALED] A converging lens of focal length 10 cm, with "
+                     "an object at 30 cm, forms an image at 1/(1/10 - 1/30) = 15 cm (sealed). The thin-lens equation "
+                     "1/f = 1/do + 1/di governs every camera, eye and telescope; magnification is the ratio of the "
+                     "distances. Optics is geometry applied to Maxwell's light.", S["lens"]),
+        ("instance", "[light slows in matter, SEALED] Light travels at c in vacuum but c/n in a medium: in glass "
+                     "(n = 1.5) that is 299792458/1.5 = 2.0e8 m/s (sealed). The slowing is refraction - why a straw "
+                     "looks bent, why a prism splits colours (n depends on wavelength), and, at the critical angle, "
+                     "why an optical fibre holds light (sealed on the Lagrangian). Ties card_floor_maxwells_equations.", S["glass"]),
+        ("note", "[the photon - optics is also quantum] A beam is also a stream of photons (E = hf, sealed on the "
+                 "quantum floor); the photoelectric effect, lasers and the quantum of light live here. Classical "
+                 "rays and quantum photons are the two faces of the same light. On the one map, optics rests on "
+                 "Maxwell (light is an electromagnetic wave) and quantum mechanics (the photon). Ties "
+                 "card_floor_optics.",
+         {"source": "the photon; wave-particle duality of light; card_floor_maxwells_equations; card_floor_quantum_mechanics"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py optics")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9721,6 +9828,12 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("medicine", "pharmacology", "epidemiology", "physiology"):
+        return medicine()
+    if a[0] in ("materials_science", "materials", "crystallography", "solid_state"):
+        return materials_science()
+    if a[0] in ("optics", "lenses", "refraction", "the_lens"):
+        return optics()
     if a[0] in ("acoustics", "sound", "the_decibel", "doppler"):
         return acoustics()
     if a[0] in ("game_theory", "nash_equilibrium", "prisoners_dilemma", "zero_sum"):

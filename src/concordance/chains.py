@@ -94,7 +94,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_game_theory",
           # acoustics (tools/seed_acoustics.py, 2026-10-10): sound - the wave, the decibel, harmonics, Doppler; rests
           # on chemistry (medium) + the mind (perception) + quantum mechanics (phonons) + relativity (Doppler)
-          "card_floor_acoustics")
+          "card_floor_acoustics",
+          # batch down the list (2026-10-10): medicine (biology+physical chem+statistics), materials science
+          # (chemistry+physical chem+quantum), optics (Maxwell+quantum)
+          "card_floor_medicine", "card_floor_materials_science", "card_floor_optics")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:

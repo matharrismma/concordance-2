@@ -37,7 +37,7 @@ def _graph():
 def test_the_seed_validates_and_every_endpoint_resolves():
     assert S3._validate() == []
     assert len(S3.CHAINS) == 8 and len(S3.RECORDS) >= 55
-    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 33
+    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 36
 
 
 def test_each_chain_walks_from_its_roots_to_its_open_end_and_meets_where_the_seed_expects():
@@ -115,7 +115,7 @@ def test_the_chains_door_reads_a_chain_floor(monkeypatch):
     assert st == 200 and len(body["chain"]["nodes"]) >= 12 and body["confluences"][0]["at"] == "card_chain_riemann_1859"
     st, payload = dispatch("GET", "/chains", {"floors": "1"}, None, EngineConfig("secular"))
     body = payload.get("data") or payload
-    assert st == 200 and len(body["floors"]) == 33
+    assert st == 200 and len(body["floors"]) == 36
 
 
 def test_the_capstone_floor_gathers_the_others_and_marks_the_two_barriers():
@@ -563,3 +563,24 @@ def test_acoustics_floor_stands_between_matter_and_mind():
     serves = {s["at"] for s in m["serves"]}
     assert {"card_floor_chemistry", "card_floor_the_mind", "card_floor_quantum_mechanics",
             "card_floor_relativity"} <= serves
+
+
+def test_batch1_medicine_materials_optics_floors():
+    """Batch down the list (Matt, 2026-10-10): medicine, materials science, optics - each rests on the right
+    lower floors. Pinned on the seeds alone."""
+    import seed_medicine as MED, seed_materials_science as MAT, seed_optics as OPT
+    for S, floor, expect in [
+        (MED, MED.FLOOR, {"card_floor_biology", "card_floor_physical_chemistry", "card_floor_statistics"}),
+        (MAT, MAT.FLOOR, {"card_floor_chemistry", "card_floor_physical_chemistry", "card_floor_quantum_mechanics"}),
+        (OPT, OPT.FLOOR, {"card_floor_maxwells_equations", "card_floor_quantum_mechanics"}),
+    ]:
+        assert S._validate() == [], floor
+        cards = {c["id"]: json.loads(json.dumps(c)) for c in S.CARDS}
+        for cid in list(expect) + ["card_k_floor_of_discovery"]:
+            cards.setdefault(cid, {"id": cid, "title": cid, "connections": []})
+        overlay = Path(tempfile.mkdtemp(prefix="nh-b1-")) / "overlay.jsonl"
+        overlay.write_text("\n".join(json.dumps(e) for e in S.BRIDGES) + "\n", encoding="utf-8")
+        corpus._apply_bridges(cards, overlay)
+        m = chains.floor_map(floor, get_card=cards.get)
+        assert m and len(m["parts"]) == 3, floor
+        assert expect <= {s["at"] for s in m["serves"]}, floor
