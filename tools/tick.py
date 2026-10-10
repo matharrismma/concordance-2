@@ -2714,6 +2714,55 @@ def consciousness_receiver() -> int:
     _mint_marks(sid, marks, by="tools/tick.py consciousness_receiver")
     return 0
 
+
+def cryptography() -> int:
+    """CRYPTOGRAPHY - public keys and hard problems (Matt, 2026-10-09, down the domain list). Secrecy built on number
+    theory and computational hardness: RSA encrypts with a public key and decrypts with a private one, its security
+    resting on the belief that FACTORING is hard (the P vs NP region); the one-time pad has PERFECT secrecy (Shannon).
+    SEALED: the RSA round-trip (m -> c -> m by modular exponentiation) and Fermat's little theorem (why decryption
+    recovers the message). Rests on the instruments (number theory, information), P vs NP (hardness), and Riemann
+    (the primes). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "encrypt": _rh_seal_num("rsa_encrypt_m_pow_e_mod_n", "4**3 % 33", 4 ** 3 % 33, tol=1e-9),
+        "decrypt": _rh_seal_num("rsa_decrypt_c_pow_d_mod_n_recovers_m", "31**7 % 33", 31 ** 7 % 33, tol=1e-9),
+        "fermat": _rh_seal_num("fermats_little_theorem_a_pow_p_minus_1_mod_p", "2**6 % 7", 2 ** 6 % 7, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "cryptography numbers")
+    sid = TS.create("Cryptography - public keys and hard problems")["id"]
+    marks = [
+        ("instance", "[the RSA round-trip - encrypt, SEALED] RSA with primes 3 and 11 (n = 33, public exponent e = "
+                     "3): encrypting the message m = 4 is c = 4^3 mod 33 = 31 (sealed). Anyone with the public key "
+                     "can lock the message; the modular exponentiation is one-way without the private key.", S["encrypt"]),
+        ("instance", "[the RSA round-trip - decrypt, SEALED] With the private exponent d = 7, decrypting is 31^7 mod "
+                     "33 = 4 (sealed) - the original message returns. Public key locks, private key unlocks, and the "
+                     "two are mathematically inverse. The whole of asymmetric cryptography is this round-trip.", S["decrypt"]),
+        ("instance", "[why it works - Fermat's little theorem, SEALED] Decryption recovers the message because a^(p-1) "
+                     "= 1 mod p for prime p: for a = 2, p = 7, 2^6 mod 7 = 1 (sealed). This is the number theory that "
+                     "makes e and d inverse modulo phi(n) - RSA is built on the primes and on Fermat/Euler.", S["fermat"]),
+        ("note", "[security rests on hardness - the P vs NP region] RSA is secure only because FACTORING n back into "
+                 "its primes is believed hard - no known fast (polynomial) algorithm. That belief lives in the P vs "
+                 "NP region of the map: if P = NP, or a fast factoring algorithm were found, RSA would fall. Shor's "
+                 "quantum algorithm already factors fast IN PRINCIPLE (stick_quantum_factoring), which is why "
+                 "post-quantum cryptography is being built. Ties card_floor_p_vs_np.",
+         {"source": "the RSA hardness assumption; integer factorisation; Shor's algorithm; card_floor_p_vs_np"}),
+        ("note", "[perfect secrecy - Shannon] One scheme is provably unbreakable: the one-time pad (XOR the message "
+                 "with a truly random key as long as the message, used once). Shannon proved it has PERFECT secrecy - "
+                 "the ciphertext reveals nothing about the message - because the key's entropy equals the message's. "
+                 "Its cost (a key as long as all traffic, never reused) is why we fall back to hardness-based schemes "
+                 "for everything else. Ties card_floor_the_instruments (information theory).",
+         {"source": "the one-time pad; C. Shannon, perfect secrecy (1949); card_floor_the_instruments"}),
+        ("note", "[on the one map] Cryptography stands on the instruments (number theory and information), the P vs NP "
+                 "region (its security IS a hardness assumption), and Riemann (it runs on the primes, whose "
+                 "distribution the zeta function governs). The applied domain where the Millennium problems become a "
+                 "daily tool: every secure connection bets that factoring is hard. Ties card_floor_cryptography.",
+         {"source": "the one map; card_floor_cryptography; tools/seed_cryptography.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py cryptography")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9429,6 +9478,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("cryptography", "rsa", "public_key_cryptography", "cipher"):
+        return cryptography()
     if a[0] in ("consciousness", "crystal_radio", "transmission_theory", "antenna"):
         return consciousness_receiver()
     if a[0] in ("quantum_harmonic_oscillator", "qho", "zero_point_energy", "ladder_operators"):

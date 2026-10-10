@@ -76,7 +76,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_earth_science",
           # the mind (tools/seed_the_mind.py, 2026-10-09): matter aware of itself - the neuron, computation, the
           # expensive brain; top of the emergence ladder; open end = the hard problem of consciousness (DECLINED)
-          "card_floor_the_mind")
+          "card_floor_the_mind",
+          # cryptography (tools/seed_cryptography.py, 2026-10-09): public keys and hard problems - RSA round-trip,
+          # perfect secrecy; rests on the instruments + P vs NP (hardness) + Riemann (primes); bridges to the Millennium
+          "card_floor_cryptography")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
