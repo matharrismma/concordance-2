@@ -2082,6 +2082,63 @@ def the_noether() -> int:
     _mint_marks(sid, marks, by="tools/tick.py the_noether")
     return 0
 
+
+def thermodynamics() -> int:
+    """THERMODYNAMICS - the arrow and the one end (Matt, 2026-10-09: "Thermodynamics too"). The four laws. The FIRST
+    law is energy conservation (= Noether's energy from time-translation symmetry). The SECOND law - entropy of an
+    isolated system never decreases - is the one place physics is NOT time-reversible: it is the arrow of time, the
+    one-way flow, and the engine of 'the story ends the same way' (of the vast many microstates, almost all reach the
+    one maximum-entropy macrostate). SEALED here: the Carnot bound (the second law's hard limit on any engine) and a
+    first-law energy balance. Entropy = information (Landauer, Maxwell's demon) is already sealed on
+    stick_entropy_is_never_decreased_only_concentrated_maxwell_s_demon; Boltzmann S = k ln W and Bekenstein-Hawking
+    on stick_entropy_and_gravity. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "carnot": _rh_seal_num("carnot_efficiency_bound_1_minus_tc_over_th", "1 - 300/600", 0.5, tol=1e-12),
+        "actual": _rh_seal_num("heat_engine_actual_efficiency_work_over_heat_in", "40/100", 0.4, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "thermodynamics numbers")
+    sid = TS.create("Thermodynamics - the arrow and the one end")["id"]
+    marks = [
+        ("instance", "[the second law bounds every engine, SEALED] No heat engine can beat the Carnot efficiency "
+                     "eta = 1 - T_c/T_h. Between 600 K and 300 K that is 1 - 300/600 = 0.5 (sealed): at most half the "
+                     "heat drawn from the hot reservoir can become work, the rest MUST be dumped cold. Not an "
+                     "engineering limit - a law. The second law written as a number you cannot cross.", S["carnot"]),
+        ("instance", "[the first law, and the bound honoured, SEALED] A real engine takes 100 J of heat and does 40 J "
+                     "of work, so by the first law (energy conserved) it exhausts 60 J: 100 = 40 + 60. Its efficiency "
+                     "is W/Q_h = 40/100 = 0.4 (sealed) - below the Carnot 0.5, exactly as the second law demands. "
+                     "Energy is conserved (first law) AND degraded (second law) in the same stroke.", S["actual"]),
+        ("note", "[the first law IS Noether's energy] The first law - energy is conserved, dU = dQ - dW - is exactly "
+                 "the conserved energy Noether derives from time-translation symmetry. Thermodynamics' first law rests "
+                 "on the Noether floor: the same invariant, now accounting heat and work. Ties card_floor_noethers_theorem.",
+         {"source": "the first law of thermodynamics; Noether's energy; card_floor_noethers_theorem"}),
+        ("note", "[the second law IS the arrow and the one end] The microscopic laws (Hamilton, Schrodinger) are "
+                 "time-reversible; the second law is where irreversibility ENTERS - entropy never decreases - and that "
+                 "is the arrow of time. It is the engine of 'the story ends the same way': of the vast many "
+                 "microstates, almost all flow to the ONE maximum-entropy macrostate (equilibrium), the end nearly "
+                 "every path reaches. Many microstates, one macrostate - 'many possibilities, the same end' as a law. "
+                 "And it is the one-way geometry itself (the Tesla valve, the diode): heat and time flow one way. "
+                 "Ties card_floor_the_capstone and the Hamiltonian's measurement gap (the arrow, decoherence).",
+         {"source": "the second law of thermodynamics; the thermodynamic arrow of time; card_floor_the_capstone"}),
+        ("note", "[statistical mechanics - many into one] Statistical mechanics is the bridge from the reversible "
+                 "microscopic to the irreversible macroscopic: 10^23 particles, one temperature and one pressure. The "
+                 "one macrostate emerges from the many microstates, counted by Boltzmann's S = k_B ln W (sealed on "
+                 "stick_entropy_and_gravity). The microscopic law is the Hamiltonian; the macrostate is what almost "
+                 "all its trajectories reach. Ties card_floor_the_hamiltonian.",
+         {"source": "statistical mechanics; Boltzmann S = k_B ln W; stick_entropy_and_gravity; card_floor_the_hamiltonian"}),
+        ("note", "[entropy IS information] Entropy in joules-per-kelvin and entropy in bits are the same thing: "
+                 "Boltzmann S = k_B ln W, Shannon H = -sum p log p. Landauer's limit - erasing one bit costs at least "
+                 "k_B T ln2 of energy - is the bridge, and where Maxwell's demon is exorcised. Already sealed on "
+                 "stick_entropy_is_never_decreased_only_concentrated_maxwell_s_demon; a black hole's "
+                 "Bekenstein-Hawking entropy (its horizon area) on stick_black_holes and stick_entropy_and_gravity. "
+                 "Ties the information-theory instrument and the black-hole work.",
+         {"source": "Landauer's principle; Boltzmann and Shannon entropy; stick_entropy_is_never_decreased_only_concentrated_maxwell_s_demon; stick_entropy_and_gravity"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py thermodynamics")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -8797,6 +8854,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("thermodynamics", "thermo", "laws_of_thermodynamics", "carnot"):
+        return thermodynamics()
     if a[0] in ("noether", "noethers_theorem", "noether_theorem", "conservation_laws"):
         return the_noether()
     if a[0] in ("lagrangian", "the_lagrangian", "lagrangian_mechanics", "the_path_chosen"):

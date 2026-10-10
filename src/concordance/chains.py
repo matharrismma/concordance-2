@@ -52,7 +52,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_noethers_theorem",
           # Maxwell's equations (tools/seed_maxwells_equations.py, 2026-10-09): the first unification - electricity,
           # magnetism and light one field; cites stick_maxwell_s_...; pillars on capstone + Noether + Lagrangian + SM
-          "card_floor_maxwells_equations")
+          "card_floor_maxwells_equations",
+          # thermodynamics (tools/seed_thermodynamics.py, 2026-10-09): the arrow and the one end - the four laws;
+          # pillars on Noether (1st law) + capstone (2nd law/arrow) + Hamiltonian (stat mech) + instruments (entropy=info)
+          "card_floor_thermodynamics")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
