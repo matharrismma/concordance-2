@@ -3367,6 +3367,140 @@ def hydrology() -> int:
     _mint_marks(sid, marks, by="tools/tick.py hydrology")
     return 0
 
+
+def nuclear_physics() -> int:
+    """NUCLEAR PHYSICS - binding, decay, and the strong force (Matt, 2026-10-10, down the list). The nucleus is held
+    by the strong force against electric repulsion; mass converts to binding energy at 931.5 MeV per atomic mass
+    unit (E = mc^2); unstable nuclei decay on a half-life. SEALED: the amu-to-MeV conversion and a four-half-life
+    decay fraction. Rests on the Standard Model (the strong force), relativity (E=mc^2) and quantum mechanics
+    (tunnelling). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "amu": _rh_seal_num("energy_per_atomic_mass_unit_mev", "1.66053906660e-27*(2.99792458e8)**2/1.602176634e-19/1e6", 1.66053906660e-27 * (2.99792458e8) ** 2 / 1.602176634e-19 / 1e6, tol=1e-4),
+        "decay": _rh_seal_num("fraction_remaining_after_four_half_lives", "(1/2)**4", (1 / 2) ** 4, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "nuclear numbers")
+    sid = TS.create("Nuclear physics - binding, decay, and the strong force")["id"]
+    marks = [
+        ("instance", "[mass is energy - the amu, SEALED] One atomic mass unit of mass converts to 931.5 MeV of energy "
+                     "(sealed, by E = mc^2) - the currency of nuclear binding. A nucleus weighs LESS than its parts; "
+                     "the missing mass (the mass defect) is the binding energy that holds it, and releasing it is "
+                     "what fission and fusion do. Ties card_floor_relativity.", S["amu"]),
+        ("instance", "[decay on a clock, SEALED] An unstable nucleus decays by a fixed half-life: after four of them "
+                     "(1/2)^4 = 0.0625, one sixteenth, remains (sealed). Alpha, beta and gamma decay follow this one "
+                     "exponential law (the same as pharmacokinetics and radiocarbon) - and alpha decay happens by "
+                     "quantum tunnelling. Ties card_floor_quantum_mechanics.", S["decay"]),
+        ("note", "[the strong force binds it] The nucleus is packed protons and neutrons that electrically REPEL; "
+                 "what holds them is the strong force (the residue of the gluon force between quarks, on the Standard "
+                 "Model floor), strong but short-ranged. Binding energy peaks at iron - why fusion powers stars up to "
+                 "iron and fission powers reactors down to it. On the one map, nuclear physics rests on the Standard "
+                 "Model, relativity and quantum mechanics. Ties card_floor_nuclear_physics.",
+         {"source": "the one map; the strong force; the binding-energy curve; card_floor_standard_model; card_floor_nuclear_physics"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py nuclear_physics")
+    return 0
+
+
+def quantum_computing() -> int:
+    """QUANTUM COMPUTING - qubits and superposition (Matt, 2026-10-10, down the list). A qubit is a superposition of
+    0 and 1, so n qubits hold 2^n amplitudes at once; the power comes from interference (Grover's sqrt-N search,
+    Shor's factoring). SEALED: the state-space size of 10 qubits, and Grover's speedup over a million. Rests on
+    quantum mechanics (superposition, entanglement) and computer science (computation). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "states": _rh_seal_num("ten_qubit_state_space_two_to_the_tenth", "2**10", 2 ** 10, tol=1e-12),
+        "grover": _rh_seal_num("grover_search_steps_sqrt_of_a_million", "1000000**0.5", 1000000 ** 0.5, tol=1e-6),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "quantum-computing numbers")
+    sid = TS.create("Quantum computing - qubits and superposition")["id"]
+    marks = [
+        ("instance", "[the exponential state space, SEALED] A qubit is a superposition of 0 and 1, so n qubits carry "
+                     "2^n amplitudes at once: 10 qubits hold 2^10 = 1024 (sealed), 300 qubits more amplitudes than "
+                     "there are atoms in the universe. The promise and the difficulty both live in that exponential. "
+                     "Ties card_floor_quantum_mechanics (superposition).", S["states"]),
+        ("instance", "[the speedup is interference, SEALED] A quantum computer is not just parallel - you must make "
+                     "the wrong answers INTERFERE away. Grover's algorithm searches an unsorted million in about "
+                     "sqrt(1000000) = 1000 steps (sealed), not a million; Shor's factors in polynomial time, which is "
+                     "why it threatens RSA. Ties card_floor_computer_science and card_floor_cryptography.", S["grover"]),
+        ("note", "[on the one map] Quantum computing rests on quantum mechanics (superposition and entanglement are "
+                 "the resource) and computer science (it is still computation, with its own complexity class, BQP). "
+                 "It does not break computability - only, for a few problems, the cost. Ties "
+                 "card_floor_quantum_computing.",
+         {"source": "the one map; superposition and interference; Grover and Shor; card_floor_quantum_computing"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py quantum_computing")
+    return 0
+
+
+def networking() -> int:
+    """NETWORKING - addresses, packets, and capacity (Matt, 2026-10-10, down the list). The internet routes PACKETS
+    between ADDRESSES (IPv4 has 2^32); a channel has a hard capacity (Shannon). SEALED: the IPv4 address space and a
+    subnet's size. Rests on computer science (the machines and protocols) and the instruments (information theory,
+    the channel capacity). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "ipv4": _rh_seal_num("ipv4_address_space_two_to_the_thirty_two", "2**32", 2 ** 32, tol=1e-3),
+        "subnet": _rh_seal_num("addresses_in_a_slash_24_subnet_two_to_the_eighth", "2**8", 2 ** 8, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "networking numbers")
+    sid = TS.create("Networking - addresses, packets, and capacity")["id"]
+    marks = [
+        ("instance", "[addresses - the IPv4 space, SEALED] An IPv4 address is 32 bits, so there are 2^32 = about 4.3 "
+                     "billion of them (sealed) - and we ran out, which is why IPv6 (128 bits) exists. A /24 subnet "
+                     "holds 2^8 = 256 addresses (sealed). Addressing is just counting in binary. Ties "
+                     "card_floor_computer_science.", S["ipv4"]),
+        ("instance", "[a subnet is a power of two, SEALED] Splitting the address space into subnets is slicing powers "
+                     "of two: a /24 gives 2^8 = 256 (sealed), a /16 gives 2^16. The whole routing hierarchy is "
+                     "binary arithmetic on addresses. Ties card_floor_computer_science.", S["subnet"]),
+        ("note", "[capacity - Shannon's limit] A channel carries at most C = B log2(1 + S/N) bits per second "
+                 "(Shannon) - no code beats it, the same capacity that bounds the information instrument. Packets, "
+                 "protocols (TCP/IP) and error-correction all live under that ceiling. On the one map, networking "
+                 "rests on computer science and the instruments. Ties card_floor_networking.",
+         {"source": "the one map; the Shannon-Hartley capacity; TCP/IP; card_floor_the_instruments; card_floor_networking"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py networking")
+    return 0
+
+
+def soil_science() -> int:
+    """SOIL SCIENCE - the living skin of the land (Matt, 2026-10-10, down the list). Soil is mineral, water, air and
+    organic matter in rough proportion, alive with microbes, holding nutrients by a carbon-to-nitrogen balance.
+    SEALED: the composition of an ideal loam summing to 100 percent, and the soil carbon-to-nitrogen ratio. Rests on
+    chemistry (minerals and nutrients), earth science (weathering, the parent rock) and biology (the microbes and
+    roots). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "composition": _rh_seal_num("ideal_loam_composition_percent_sum", "45+25+25+5", 45 + 25 + 25 + 5, tol=1e-12),
+        "cn": _rh_seal_num("soil_carbon_to_nitrogen_ratio", "10/1", 10 / 1, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "soil numbers")
+    sid = TS.create("Soil science - the living skin of the land")["id"]
+    marks = [
+        ("instance", "[what soil is made of, SEALED] An ideal loam is about 45 percent mineral, 25 percent water, 25 "
+                     "percent air and 5 percent organic matter - 45+25+25+5 = 100 (sealed). Half of soil is pore "
+                     "space (water and air); that is what roots breathe and drink. Ties card_floor_earth_science "
+                     "(weathered rock) and card_floor_chemistry.", S["composition"]),
+        ("instance", "[the carbon-nitrogen balance, SEALED] Soil organic matter sits near a carbon-to-nitrogen ratio "
+                     "of about 10 to 1 (sealed); microbes decompose fast when the ratio is low and tie up nitrogen "
+                     "when it is high. The fertility of the soil is this living chemistry. Ties card_floor_biology "
+                     "and card_floor_chemistry.", S["cn"]),
+        ("note", "[on the one map] Soil is the thin living skin where rock, water, air and life meet: it rests on "
+                 "chemistry (the mineral nutrients and pH), earth science (the parent rock weathered over deep time) "
+                 "and biology (the microbes, fungi and roots). Lose it and agriculture fails. Ties "
+                 "card_floor_soil_science.",
+         {"source": "the one map; soil composition; the C:N ratio; card_floor_soil_science; tools/seed_soil_science.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py soil_science")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -10082,6 +10216,14 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("nuclear_physics", "the_nucleus", "radioactivity", "fission"):
+        return nuclear_physics()
+    if a[0] in ("quantum_computing", "qubits", "the_qubit", "quantum_computer"):
+        return quantum_computing()
+    if a[0] in ("networking", "the_internet", "packets", "protocols"):
+        return networking()
+    if a[0] in ("soil_science", "soil", "pedology", "the_soil"):
+        return soil_science()
     if a[0] in ("education", "learning", "pedagogy", "the_classroom"):
         return education()
     if a[0] in ("agriculture", "farming", "agronomy", "crops"):

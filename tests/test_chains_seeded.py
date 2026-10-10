@@ -37,7 +37,7 @@ def _graph():
 def test_the_seed_validates_and_every_endpoint_resolves():
     assert S3._validate() == []
     assert len(S3.CHAINS) == 8 and len(S3.RECORDS) >= 55
-    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 46
+    assert set(S3.FLOORS) <= set(chains.FLOORS) and len(chains.FLOORS) == 51
 
 
 def test_each_chain_walks_from_its_roots_to_its_open_end_and_meets_where_the_seed_expects():
@@ -115,7 +115,7 @@ def test_the_chains_door_reads_a_chain_floor(monkeypatch):
     assert st == 200 and len(body["chain"]["nodes"]) >= 12 and body["confluences"][0]["at"] == "card_chain_riemann_1859"
     st, payload = dispatch("GET", "/chains", {"floors": "1"}, None, EngineConfig("secular"))
     body = payload.get("data") or payload
-    assert st == 200 and len(body["floors"]) == 46
+    assert st == 200 and len(body["floors"]) == 51
 
 
 def test_the_capstone_floor_gathers_the_others_and_marks_the_two_barriers():
@@ -633,4 +633,29 @@ def test_batch3_social_and_applied_floors():
         corpus._apply_bridges(cards, overlay)
         m = chains.floor_map(S.FLOOR, get_card=cards.get)
         assert m and len(m["parts"]) == nparts, S.FLOOR
+        assert expect <= {x["at"] for x in m["serves"]}, S.FLOOR
+
+
+def test_batch4_specialized_floors():
+    """Batch 4 (Matt, 2026-10-10): nuclear physics, quantum computing, networking, soil science, astronomy (cite).
+    Pinned on the seeds alone."""
+    import seed_nuclear_physics as NUC, seed_quantum_computing as QC, seed_networking as NET
+    import seed_soil_science as SOIL, seed_astronomy as AST
+    specs=[
+        (NUC,{"card_floor_standard_model","card_floor_relativity","card_floor_quantum_mechanics"},3),
+        (QC,{"card_floor_quantum_mechanics","card_floor_computer_science"},2),
+        (NET,{"card_floor_computer_science","card_floor_the_instruments"},2),
+        (SOIL,{"card_floor_chemistry","card_floor_earth_science","card_floor_biology"},3),
+        (AST,{"card_floor_relativity","card_floor_maxwells_equations","card_floor_the_instruments"},3),
+    ]
+    for S,expect,nparts in specs:
+        assert S._validate()==[], S.FLOOR
+        cards={c["id"]: json.loads(json.dumps(c)) for c in S.CARDS}
+        for cid in list(expect)+["card_k_floor_of_discovery"]:
+            cards.setdefault(cid, {"id": cid, "title": cid, "connections": []})
+        overlay=Path(tempfile.mkdtemp(prefix="nh-b4-"))/"overlay.jsonl"
+        overlay.write_text("\n".join(json.dumps(e) for e in S.BRIDGES)+"\n", encoding="utf-8")
+        corpus._apply_bridges(cards, overlay)
+        m=chains.floor_map(S.FLOOR, get_card=cards.get)
+        assert m and len(m["parts"])==nparts, S.FLOOR
         assert expect <= {x["at"] for x in m["serves"]}, S.FLOOR
