@@ -88,7 +88,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_economics",
           # computer science (tools/seed_computer_science.py, 2026-10-10): bits, logic, computability - the byte, the
           # 16 Boolean functions, merge sort; rests on the instruments + P vs NP (complexity) + the mind (computes)
-          "card_floor_computer_science")
+          "card_floor_computer_science",
+          # game theory (tools/seed_game_theory.py, 2026-10-10): equilibrium, dilemmas, strategy - matching pennies,
+          # the prisoner's dilemma; rests on the solve path (fixed point) + economics + the mind + biology (ESS)
+          "card_floor_game_theory")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:

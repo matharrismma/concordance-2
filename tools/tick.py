@@ -2912,6 +2912,53 @@ def computer_science() -> int:
     _mint_marks(sid, marks, by="tools/tick.py computer_science")
     return 0
 
+
+def game_theory() -> int:
+    """GAME THEORY - equilibrium, dilemmas, and strategy (Matt, 2026-10-10, down the domain list). The mathematics of
+    strategic choice: a NASH EQUILIBRIUM is a fixed point where no one gains by deviating alone; the PRISONER'S
+    DILEMMA shows rational players reaching a worse outcome than cooperation would give; ZERO-SUM games have a
+    minimax value (von Neumann), reached by MIXED strategies when no pure one works. SEALED: the fair zero-sum mixed
+    value (0) and the dilemma's cooperation gap (2). Rests on economics (incentives), the mind (rational agents),
+    the solve path (equilibrium is a fixed point), and biology (evolutionary games). Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "matching": _rh_seal_num("matching_pennies_fair_mixed_strategy_value", "0.5*1 + 0.5*(-1)", 0.5 * 1 + 0.5 * (-1), tol=1e-12),
+        "dilemma": _rh_seal_num("prisoners_dilemma_cooperation_minus_defection_payoff_gap", "3 - 1", 3 - 1, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "game-theory numbers")
+    sid = TS.create("Game theory - equilibrium, dilemmas, and strategy")["id"]
+    marks = [
+        ("instance", "[zero-sum - the mixed value, SEALED] In matching pennies no pure choice wins (whatever you "
+                     "pick, the opponent can beat it), so the equilibrium is to randomize 50/50, and the expected "
+                     "payoff is 0.5*1 + 0.5*(-1) = 0 (sealed). Von Neumann's minimax theorem: every finite zero-sum "
+                     "game has a value, reached by mixed strategies. Many moves, one value.", S["matching"]),
+        ("instance", "[the prisoner's dilemma - the price of rationality, SEALED] Two players each do better to DEFECT "
+                     "whatever the other does, so both defect and score 1 each - yet mutual cooperation would score "
+                     "3 each, a gap of 3 - 1 = 2 (sealed). The Nash equilibrium is not the best outcome: rational "
+                     "self-interest reaches a worse place than trust would. The tragedy of the commons, arms races, "
+                     "and pollution are this one game.", S["dilemma"]),
+        ("note", "[the Nash equilibrium - a fixed point] An equilibrium is a profile where no player gains by "
+                 "changing alone - a FIXED POINT of best-response, which Nash proved always exists (in mixed "
+                 "strategies) by Brouwer's fixed-point theorem. Finding it is the solve path's converge step: the "
+                 "stable point where the jaws meet. Ties card_floor_the_solve_path.",
+         {"source": "J. Nash (1950); Brouwer's fixed-point theorem; card_floor_the_solve_path"}),
+        ("note", "[strategy rests on choosing minds and incentives] A game is agents choosing under incentives - so "
+                 "game theory sits on economics (the payoffs are incentives) and the mind (the players reason about "
+                 "each other). It is the strategy concordance made exact: the stated rules of those who win, as a "
+                 "mathematics. Ties card_floor_economics and card_floor_the_mind.",
+         {"source": "strategic interaction; incentives and rational agents; card_floor_economics, card_floor_the_mind"}),
+        ("note", "[evolutionary games - fitness is the payoff] Replace rational choice with reproduction and the same "
+                 "math governs biology: an evolutionarily stable strategy is a Nash equilibrium no mutant can invade "
+                 "(hawk-dove, the evolution of cooperation). Game theory and biology meet at the gene pool. Ties "
+                 "card_floor_biology. On the one map, game theory ties card_floor_the_solve_path, card_floor_economics, "
+                 "card_floor_the_mind and card_floor_biology.",
+         {"source": "evolutionary game theory; the ESS (Maynard Smith); card_floor_biology; the one map"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py game_theory")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -9627,6 +9674,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("game_theory", "nash_equilibrium", "prisoners_dilemma", "zero_sum"):
+        return game_theory()
     if a[0] in ("computer_science", "computation", "algorithms", "the_bit"):
         return computer_science()
     if a[0] in ("tesseract", "hypercube", "four_cube", "eight_cell"):
