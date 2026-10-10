@@ -2262,6 +2262,56 @@ def quantum_mechanics() -> int:
     _mint_marks(sid, marks, by="tools/tick.py quantum_mechanics")
     return 0
 
+
+def standard_model_content() -> int:
+    """THE STANDARD MODEL - the gauge forces and the quark model (Matt, 2026-10-09: "standard model"). The floor
+    (card_floor_standard_model) and the chain stick already exist (the electroweak confluence where the two trees
+    meet); the electroweak mixing is sealed on the one-force stick and the capstone. This stick seals the CONTENT not
+    yet sealed: the quark charges (fractional parts summing to the whole charges of the proton and neutron) and the
+    gauge group's gluon count. Three of the four forces, unified as gauge theories; the most tested theory in
+    physics; the first three rungs of the one force. Charts onto the existing floor. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "proton": _rh_seal_num("proton_charge_from_quark_charges_uud", "2/3 + 2/3 - 1/3", 2 / 3 + 2 / 3 - 1 / 3, tol=1e-9),
+        "gluons": _rh_seal_num("number_of_gluons_dim_su3_n_squared_minus_one", "3**2 - 1", 8.0, tol=1e-12),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "Standard-Model numbers")
+    sid = TS.create("The Standard Model - gauge forces and quarks")["id"]
+    marks = [
+        ("instance", "[the whole from fractional parts - the quark model, SEALED] The proton is three quarks, "
+                     "up-up-down, with fractional charges +2/3, +2/3, -1/3 that sum to exactly 2/3 + 2/3 - 1/3 = 1 "
+                     "(sealed) - the integer charge of the proton from thirds. The neutron (up-down-down) sums to 0. "
+                     "Hadrons are made of quarks whose odd fractional charges always add to whole numbers; the "
+                     "fractions are never seen alone (confinement).", S["proton"]),
+        ("instance", "[the gauge group - 8 gluons of colour, SEALED] The strong force is the SU(3) gauge theory, and a "
+                     "gauge group SU(N) has N^2 - 1 force carriers: SU(3) gives 3^2 - 1 = 8 gluons (sealed). The "
+                     "Standard Model is SU(3) x SU(2) x U(1) - the strong force, the weak force and electromagnetism, "
+                     "three of the four forces written as gauge theories on one footing.", S["gluons"]),
+        ("note", "[what it unifies - three of the four, the first rungs of the one force] The electroweak "
+                 "(SU(2) x U(1)) is the proven unification - the Weinberg angle is sealed on stick_the_one_force and "
+                 "on the capstone - and the strong force SU(3) joins it in the Standard Model. Twelve matter "
+                 "particles (6 quarks, 6 leptons), the force carriers (the photon, the W and Z, 8 gluons), and the "
+                 "Higgs that gives them mass. The most tested theory in physics, and the first three rungs of 'the "
+                 "one force'. Ties card_floor_the_capstone and stick_the_one_force.",
+         {"source": "the Standard Model SU(3)xSU(2)xU(1); the electroweak unification; card_floor_the_capstone"}),
+        ("note", "[it IS quantum field theory - quantum mechanics married to relativity] The Standard Model is a "
+                 "quantum field theory: quantum mechanics made consistent with special relativity. Its particles are "
+                 "excitations of fields; its gauge symmetries, by Noether, give its conserved charges. It sits exactly "
+                 "where quantum mechanics and relativity meet. What it leaves out is GRAVITY - the open frontier, "
+                 "quantum gravity. Ties card_floor_quantum_mechanics and card_floor_relativity.",
+         {"source": "quantum field theory; the gauge/Noether currents; the open problem of quantum gravity; card_floor_quantum_mechanics"}),
+        ("note", "[on the one map - the hub] The Standard-Model floor (card_floor_standard_model) already exists as "
+                 "the electroweak confluence where the two trees meet (Maxwell and Fermi at Weinberg), and Maxwell, "
+                 "Noether, relativity and quantum mechanics all REST on it. This stick charts the gauge content and "
+                 "the quark model onto that floor - the hub of the physics region, named in full. Ties "
+                 "card_floor_standard_model.",
+         {"source": "the one map; card_floor_standard_model; tools/seed_standard_model_content.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py standard_model_content")
+    return 0
+
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
 # The BSD-formula inputs the attempt of 2026-10-09 located and INCLUDES (Cremona, Algorithms for Modular Elliptic Curves,
@@ -8977,6 +9027,8 @@ def main() -> int:
         return 0
     if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
         return the_capstone()
+    if a[0] in ("gauge_theory", "particle_physics", "quark_model", "gluons"):
+        return standard_model_content()
     if a[0] in ("quantum_mechanics", "qm", "uncertainty", "entanglement"):
         return quantum_mechanics()
     if a[0] in ("relativity", "special_relativity", "general_relativity", "lorentz"):

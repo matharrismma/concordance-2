@@ -268,3 +268,21 @@ def test_quantum_mechanics_floor_is_the_framework_and_adds_uncertainty_and_entan
     serves = {s["at"] for s in m["serves"]}
     assert {"card_floor_the_hamiltonian", "card_floor_the_capstone", "card_floor_the_instruments",
             "card_floor_relativity"} <= serves
+
+
+def test_the_standard_model_content_is_charted_onto_the_existing_floor():
+    """Standard Model (Matt, 2026-10-09): the gauge content and quark model, charted onto the EXISTING
+    card_floor_standard_model (no new floor). Pinned on the seed + the standard-model chain seed."""
+    import seed_standard_model_chain as S1
+    import seed_standard_model_content as S12
+    assert S12._validate() == []
+    cards = {c["id"]: json.loads(json.dumps(c)) for c in S1.CARDS + S12.CARDS}
+    cards.setdefault("card_k_floor_of_discovery", {"id": "card_k_floor_of_discovery", "title": "", "connections": []})
+    overlay = Path(tempfile.mkdtemp(prefix="nh-sm-")) / "overlay.jsonl"
+    overlay.write_text("\n".join(json.dumps(e) for e in S1.BRIDGES + S12.BRIDGES) + "\n", encoding="utf-8")
+    corpus._apply_bridges(cards, overlay)
+    m = chains.floor_map("card_floor_standard_model", get_card=cards.get)
+    assert m is not None
+    charts = {c["stick"] for c in m["charts"]}
+    assert "stick_the_standard_model_gauge_forces_and_quarks" in charts
+    assert m["charts"][0]["of"] == "card_floor_standard_model"  # charted onto the floor itself
