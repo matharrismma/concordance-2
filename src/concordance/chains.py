@@ -82,7 +82,10 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           "card_floor_cryptography",
           # statistics (tools/seed_statistics.py, 2026-10-09): the normal law and the method of science - describe,
           # CLT, infer; rests on the instruments + capstone (CLT=many-into-one) + biology (the empirical method)
-          "card_floor_statistics")
+          "card_floor_statistics",
+          # economics (tools/seed_economics.py, 2026-10-10): minds that choose meeting scarcity - cites the finance
+          # stick; pillars on the mind (choice) + statistics (measurement) + instruments (the arithmetic)
+          "card_floor_economics")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
