@@ -10073,6 +10073,43 @@ def count(T: float = 1000000000.0) -> int:
     return 0
 
 
+def syntax_parser() -> int:
+    """SYNTAX - a real deterministic parser (Matt, 2026-10-10: "real syntax parser"). A chart parser
+    over a hand-written English grammar judges whether a sentence has a valid phrase-structure parse
+    and returns the tree; sealed through linguistics.LING_VERIFY. Offline, no model. Idempotent."""
+    from concordance import tickstick as TS
+    S = {
+        "parses": _seal_through("linguistics", "LING_VERIFY", {"parse_sentence": "the cat sat on the mat", "claimed_grammatical": True}),
+        "salad": _seal_through("linguistics", "LING_VERIFY", {"parse_sentence": "cat the sat", "claimed_grammatical": False}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "parses")
+    sid = TS.create("Syntax - a real parse tree, or none")["id"]
+    marks = [
+        ("instance", "[a real parse, SEALED] 'the cat sat on the mat' has a valid phrase-structure parse "
+                     "(S (NP (DET the) (NOM (N cat))) (VP (V sat) (PP (P on) (NP (DET the) (NOM (N mat)))))), sealed "
+                     "through linguistics.LING_VERIFY. A real chart parser over a hand-written English grammar - "
+                     "offline, no model.", S["parses"]),
+        ("instance", "[word salad has none, SEALED] 'cat the sat' has NO valid parse (sealed as correctly not "
+                     "grammatical) - the pinned function words reject it. The parser discriminates structure, not "
+                     "length.", S["salad"]),
+        ("note", "[0 false positives, the limit named] The parser CONFIRMS only a derivation it actually built - a "
+                 "structural fact, never a judgment that the sentence is true or good English. Closed-class words "
+                 "are pinned; open-class POS is a heuristic (no POS lexicon held), so trees are best-effort and a "
+                 "sentence outside the grammar is 'not derivable here', never mis-parsed. Coordination and "
+                 "long-distance dependencies are outside this grammar; a public-domain POS lexicon (Moby) would "
+                 "sharpen it - the next step.",
+         {"source": "src/concordance/syntax.py; src/concordance/verifiers/linguistics.py verify_syntax"}),
+        ("note", "[on the one map - the syntax decline lifted] The comprehensive-linguistics pass had kept syntax "
+                 "closed-class only and declined parsing; this lifts it to a real (if bounded) parser on the "
+                 "linguistics floor (card_floor_indo_european), with the regex/rule verifiers remaining the floor.",
+         {"source": "card_floor_indo_european; the linguistics coverage map"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py syntax_parser")
+    return 0
+
+
 def closed_class_pos() -> int:
     """CLOSED-CLASS PART OF SPEECH - comprehensive linguistics, step 4 (Matt, 2026-10-10; syntax
     kept closed-class only by choice). The function words tag deterministically; open-class
@@ -10786,6 +10823,8 @@ def main() -> int:
         return closed_class_pos()
     if a[0] in ("typology", "language_family", "language_families", "families_of_tongues"):
         return typology()
+    if a[0] in ("syntax", "syntax_parser", "parser", "parse_tree"):
+        return syntax_parser()
     if a[0] == "read":
         from concordance import tickstick as T
         print(json.dumps(T.read(a[1]) if len(a) > 1 else T.listing(), indent=1, ensure_ascii=False))

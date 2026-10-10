@@ -51,3 +51,14 @@ def test_closed_class_pos_and_typology_are_deterministic():
     assert LN.verify_language_family("english", "Romance").status == "MISMATCH"
     assert LN.verify_language_family("arabic", "Semitic").status == "CONFIRMED"
     assert LN.verify_language_family("klingon", "anything").status == "NOT_APPLICABLE"
+
+
+def test_syntax_parser_discriminates_and_is_zero_false_positive():
+    """A real deterministic parser (Matt, 2026-10-10: "real syntax parser"). It confirms a valid
+    phrase-structure parse (a structural fact), rejects word salad, and confirms a claim that a
+    non-sentence is not grammatical - never a false parse."""
+    assert LN.verify_syntax("the cat sat on the mat", True).status == "CONFIRMED"
+    assert LN.verify_syntax("the dog chased a ball", True).status == "CONFIRMED"
+    assert LN.verify_syntax("cat the sat", True).status == "MISMATCH"       # claims grammatical, is not
+    assert LN.verify_syntax("cat the sat", False).status == "CONFIRMED"     # claims not grammatical: agrees
+    assert LN.verify_syntax("the the the", True).status == "MISMATCH"

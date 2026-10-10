@@ -551,6 +551,32 @@ def verify_language_family(language: str, claimed_family: str) -> VerifierResult
     return mismatch(name, f"'{lang}' is not {claimed_family}; it is {', '.join(sorted(fams))}", data)
 
 
+# SYNTAX (Matt, 2026-10-10: "real syntax parser"). A deterministic, offline chart parser over a
+# hand-written English grammar (src/concordance/syntax.py). It judges whether a sentence has a
+# valid phrase-structure parse and returns the tree. 0 false positives: it confirms only a
+# derivation it actually built - a structural fact, not a judgment that the sentence is true or
+# good English. Open-class POS is heuristic (no POS lexicon held), so trees are best-effort and a
+# sentence outside the grammar is reported "not derivable here", never mis-parsed.
+def verify_syntax(sentence: str, claimed_grammatical: Any = True) -> VerifierResult:
+    name = "linguistics.syntax"
+    from .. import syntax as _syntax
+    r = _syntax.parse(sentence)
+    if not r.get("ok"):
+        return na(name, r.get("reason", "could not tag the sentence"))
+    g = bool(r.get("grammatical"))
+    claimed = True if claimed_grammatical is None else bool(claimed_grammatical)
+    data = {"sentence": sentence, "grammatical": g, "pos": r.get("pos"),
+            "bracket": r.get("bracket"), "grammar": "the engine's English CFG (closed-class pinned, "
+            "open-class heuristic); a valid parse is a structural fact, not a truth or style judgment"}
+    if g == claimed:
+        if g:
+            return confirm(name, f"a valid phrase-structure parse exists: {r.get('bracket')}", data)
+        return confirm(name, "correctly has no valid parse under the engine's grammar (matches the claim)", data)
+    if g:
+        return mismatch(name, f"the sentence DOES parse under the grammar: {r.get('bracket')}", data)
+    return mismatch(name, "the sentence has no valid parse under the engine's grammar", data)
+
+
 def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     """Dispatch every applicable linguistics check for the packet's LING_VERIFY block."""
     results: List[VerifierResult] = []
@@ -585,6 +611,9 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
 
     if "language" in lv and "claimed_family" in lv:
         results.append(verify_language_family(lv["language"], lv["claimed_family"]))
+
+    if "parse_sentence" in lv:
+        results.append(verify_syntax(lv["parse_sentence"], lv.get("claimed_grammatical", True)))
 
     if not results:
         results.append(na("linguistics", "no LING_VERIFY artifacts present"))

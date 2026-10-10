@@ -127,6 +127,13 @@ CHARTS: List[Dict[str, str]] = [
          basis="the stick seals language families (English is Indo-European, Arabic is Semitic) through "
                "linguistics.LING_VERIFY; typology is the family tree of tongues, the home this Indo-European floor "
                "is named for"),
+    dict(key="syntax",
+         stick="stick_syntax_a_real_parse_tree_or_none",
+         node="card_floor_indo_european",
+         title="Syntax - a real parse tree, or none",
+         basis="the stick seals a real chart-parser result (the cat sat on the mat parses; cat the sat does not) "
+               "through linguistics.LING_VERIFY; a deterministic offline parser lifts the open-class syntax decline "
+               "on this linguistics floor"),
     dict(key="alphafold",
          stick="stick_alphafold_and_protein_folding_the_self_healing_matrix_in_bio",
          node="card_floor_biology",

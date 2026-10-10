@@ -227,3 +227,4 @@
 {"id": "map.indo_european.charts.semantics", "path": "/chains", "query": {"floor": "card_floor_indo_european"}, "expect": [{"at": "charts[*].stick", "has": "stick_semantic_relations_synonymy_and_the_is_a_hierarchy"}]}
 {"id": "map.indo_european.charts.pos", "path": "/chains", "query": {"floor": "card_floor_indo_european"}, "expect": [{"at": "charts[*].stick", "has": "stick_closed_class_part_of_speech_the_function_words"}]}
 {"id": "map.indo_european.charts.typology", "path": "/chains", "query": {"floor": "card_floor_indo_european"}, "expect": [{"at": "charts[*].stick", "has": "stick_language_typology_the_families_of_tongues"}]}
+{"id": "map.indo_european.charts.syntax", "path": "/chains", "query": {"floor": "card_floor_indo_european"}, "expect": [{"at": "charts[*].stick", "has": "stick_syntax_a_real_parse_tree_or_none"}]}
