@@ -450,7 +450,7 @@ def entry(ref: str, *, get_card=None, data_dir: Optional[Path] = None) -> Dict[s
         out["text"] = None
     try:
         c = confirmations(ref, get_card=get_card, data_dir=data_dir)
-        out["reality"] = {"count": c["count"], "nodes": c["nodes"][:12]}
+        out["reality"] = {"count": c["count"], "nodes": c["nodes"][:24]}
     except Exception:  # noqa: BLE001
         out["reality"] = {"count": 0, "nodes": []}
     try:

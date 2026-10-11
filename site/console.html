@@ -90,6 +90,14 @@
   .weave .wstudy .uses:hover{ text-decoration:underline }
   .weave .cmt{ font-size:1.02rem; color:var(--ink) }
   .weave .cmt .who{ color:var(--dim); font-size:.84rem; font-style:italic; display:block; margin-top:.3rem }
+  /* go deep — tap a reality node to open its verified, sealed math (the inner workings) */
+  .weave .deep{ margin:.7rem 0 0; border-left:2px solid var(--ink); padding:.1rem 0 .1rem .8rem }
+  .weave .deep .dtitle{ font-weight:600; font-size:1.05rem; margin:0 0 .35rem }
+  .weave .deep .dstmt{ font-size:1rem; margin:0 0 .7rem }
+  .weave .deep .dmark{ font-size:.95rem; margin:0 0 .5rem; padding-left:.8rem; border-left:1px solid var(--line) }
+  .weave .deep .dmark .mk{ font-family:system-ui,sans-serif; font-size:.64rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); display:block }
+  .weave .deep .seal{ color:var(--gold); font-size:.8rem; font-family:system-ui,sans-serif; text-decoration:none; margin-left:.3rem; white-space:nowrap }
+  .weave .deep .dopen{ color:var(--dim); font-size:.92rem; font-style:italic; margin:.4rem 0 0 }
   /* the ask bar — type or speak */
   .ask{ position:sticky; bottom:0; background:var(--paper); border-top:1px solid var(--rule);
         padding:.8rem 0 calc(.4rem + env(safe-area-inset-bottom)); display:flex; gap:.5rem; align-items:center }
@@ -274,8 +282,9 @@ async function weaveInto(ref, el){
   if(!d) return;
   const parts = [];
   const rz = (d.reality && d.reality.nodes) || [];
-  if(rz.length) parts.push('<div class="dim-row"><span class="k">in reality · '+esc(d.reality.count||rz.length)+' rooted here</span>'
-    + rz.map(n=>'<button class="chip" data-ask="'+esc(n.title)+'">'+esc(n.title)+'</button>').join('')+'</div>');
+  if(rz.length) parts.push('<div class="dim-row"><span class="k">in reality · '+esc(d.reality.count||rz.length)+' rooted here · tap to go deep</span>'
+    + rz.map(n=>'<button class="chip rnode" data-node="'+esc(n.node||'')+'" data-kind="'+esc(n.kind||'')+'" data-title="'+esc(n.title)+'">'+esc(n.title)+'</button>').join('')
+    + '<div class="deepbox" hidden></div></div>');
   const xr = (d.cross_references && d.cross_references.refs) || [];
   if(xr.length) parts.push('<div class="dim-row"><span class="k">cross-references · treasury of scripture</span>'
     + xr.map(x=>'<button class="chip" data-ask="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div>');
@@ -296,6 +305,51 @@ async function weaveInto(ref, el){
   el.innerHTML = '<div class="weave"><div class="wlab">the Word connects</div>'+parts.join('')+'</div>';
   el.querySelectorAll('.chip[data-ask]').forEach(b=> b.onclick=()=>ask(b.dataset.ask));
   bindWordStudy(el, ow && ow.words);   // tap a word -> its original, definition, and other uses
+  // GO DEEP — tap a reality node to open its verified, sealed math (the inner workings of reality)
+  const dbox = el.querySelector('.deepbox');
+  el.querySelectorAll('.rnode').forEach(b=> b.onclick=()=>{
+    if(!b.dataset.node){ ask(b.dataset.title); return; }   // offline fallback
+    openDeep(b.dataset.node, b.dataset.kind, b.dataset.title, dbox);
+  });
+}
+
+// GO DEEP INTO REALITY — a stick opens its sealed marks (each re-checkable), a floor opens what it stands
+// on and its open ends, a domain opens its root. Found and sealed; study runs all the way down.
+function openDeep(node, kind, title, box){
+  if(!box) return;
+  box.hidden=false; box.innerHTML='<div class="deep"><span class="dim">opening '+esc(title)+' …</span></div>';
+  const raw = node.indexOf(':')>=0 ? node.slice(node.indexOf(':')+1) : node;
+  const J = r => r.ok ? r.json().then(j=> j && j.data ? j.data : j) : null;
+  if(kind==='stick'){
+    fetch(API+'/stick?id='+encodeURIComponent(raw)).then(J).then(function(s){
+      if(!s){ box.hidden=true; return; }
+      const marks = (s.ticks||[]).filter(m=> m.kind==='witness'||m.kind==='instance'||m.kind==='bound');
+      let h='<div class="deep"><div class="dtitle">'+esc(s.question||title)+'</div>';
+      if(s.statement) h+='<p class="dstmt">'+esc(s.statement)+'</p>';
+      h+= marks.slice(0,6).map(function(m){
+        const seal = m.seal ? ' <a class="seal" href="/s/'+esc(m.seal)+'" target="_blank" rel="noopener">● re-check</a>'
+                            : (m.source?' <span class="seal">cited</span>':'');
+        return '<div class="dmark"><span class="mk">'+esc(m.kind)+' · sealed</span>'+esc(m.claim)+seal+'</div>'; }).join('');
+      const fit=s.fit||{}; if(fit.open) h+='<p class="dopen">'+esc(fit.open)+'</p>';
+      box.innerHTML=h+'</div>';
+    }).catch(()=>{ box.hidden=true; });
+  } else if(kind==='floor'){
+    fetch(API+'/chains?floor='+encodeURIComponent(raw)).then(J).then(function(m){
+      if(!m){ box.hidden=true; return; }
+      const names = a => (a||[]).map(x=> esc(x.title||x.id||String(x))).slice(0,6).join(' · ');
+      let h='<div class="deep"><div class="dtitle">'+esc(title)+'</div>';
+      if(m.parts&&m.parts.length) h+='<div class="dmark"><span class="mk">proven — what it stands on</span>'+names(m.parts)+'</div>';
+      if(m.ends&&m.ends.length) h+='<div class="dmark"><span class="mk">open ends</span>'+names(m.ends)+'</div>';
+      if(m.joints&&m.joints.length) h+='<div class="dmark"><span class="mk">joints — where two trees meet</span>'+(m.joints||[]).map(j=>esc(j.title||j.at||j.id||'')).filter(Boolean).slice(0,6).join(' · ')+'</div>';
+      box.innerHTML=h+'</div>';
+    }).catch(()=>{ box.hidden=true; });
+  } else {
+    fetch(API+'/roots?node='+encodeURIComponent(node)).then(J).then(function(d){
+      let h='<div class="deep"><div class="dtitle">'+esc(title)+'</div><p class="dstmt">A verifier domain — checked deterministically, with no false positives.</p>';
+      if(d&&d.refs&&d.refs.length) h+='<p class="dopen">rooted in '+esc(d.refs.join(' · '))+(d.through?' (via '+esc(d.through.split(':').pop().replace('card_floor_','').replace(/_/g,' '))+')':'')+'</p>';
+      box.innerHTML=h+'</div>';
+    }).catch(()=>{ box.hidden=true; });
+  }
 }
 
 // TAP A WORD — the augmented Bible: where there is DOUBT the word is kept in the tongue (marked gold) with
