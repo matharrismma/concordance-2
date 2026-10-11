@@ -838,6 +838,25 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         return _err(400, "give ?node=<floor:card_floor_x | domain:x | stick:x> for its root (the lead), "
                          "?verse=<ref> for every node rooted there (the concordance), or ?coverage=1")
 
+    if method == "GET" and path == "/papers":
+        # FORAGE (Matt, 2026-10-11): search current theories/white papers across ALL domains (OpenAlex) to
+        # see whether a theory fits an open want, or a structure in one field answers another. ?q=<query>
+        # forages; ?fit=<structure> cross-references all domains for a structural fit (grouped by domain).
+        # Found and CITED, never ingested: candidates to verify, not sealed truth; the keeping stays PD.
+        from .. import papers as _papers
+        q = (query.get("q") or query.get("query") or "").strip()
+        fit = (query.get("fit") or "").strip()
+        try:
+            limit = int(query.get("limit") or (12 if fit else 8))
+        except ValueError:
+            limit = 8
+        if fit:
+            return _ok(_papers.structural_fit(fit, limit=limit))
+        if q:
+            return _ok(_papers.search(q, limit=limit))
+        return _err(400, "give ?q=<query> to forage current theories, or ?fit=<structural description> to "
+                         "cross-reference all domains for a structural fit")
+
     if method == "GET" and path == "/benchmarks":
         # THE ENGINE MEASURES ITSELF IN PUBLIC (Gen 3 · 7): the standing benchmarks as tools/benchmarks.py
         # measured them on this node (nightly, and at every deploy) — served from the file, with its age.
@@ -3363,6 +3382,7 @@ ROUTES = [
     {"path": "/specs", "methods": ("GET",), "api": True},   # VERIFIERS AS DATA — the checks held as specs (Gen 3 · 2)
     {"path": "/benchmarks", "methods": ("GET",), "api": True},   # THE ENGINE MEASURES ITSELF IN PUBLIC (Gen 3 · 7)
     {"path": "/roots", "methods": ("GET",), "api": True, "rl": "read"},   # THE CONCORDANCE OF REALITY — the Word under the map (2026-10-11)
+    {"path": "/papers", "methods": ("GET",), "api": True, "rl": "read"},   # FORAGE — current theories across all domains, for a structural fit (2026-10-11)
     # THE TICK STICK (2026-10-05): an open question, the marks the engine can stand behind, the fit they establish
     {"path": "/sticks", "methods": ("GET",), "api": True},
     {"path": "/stick", "methods": ("GET", "POST"), "api": True, "rl": True},
