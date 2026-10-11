@@ -47,6 +47,9 @@
             border-radius:2px; margin:0 0 1rem }
   .verdict.no{ border-color:var(--rule); color:var(--ink) }
   .verdict.na{ border-color:var(--line); color:var(--dim) }
+  /* render 2 — the Word under an answer: the verse its subject is rooted in (a quiet lead line) */
+  .rootlead{ font-family:system-ui,sans-serif; font-size:.82rem; color:var(--dim); margin:-.4rem 0 1.1rem }
+  .rootlead b{ color:var(--gold); font-weight:600; font-family:Georgia,serif }
   /* the engine trail — a calm static schematic of how the answer was found; one frame, no motion */
   .trail{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:.7rem 0; margin:1.4rem 0;
           font-family:system-ui,sans-serif; font-size:.72rem; letter-spacing:.06em; color:var(--dim);
@@ -205,6 +208,7 @@ function render(r){
     const label = (v==='true'||v==='verified') ? '✓ verified true' : (v==='false') ? '✕ false' : '— can’t certify';
     html += '<div class="verdict '+cls+'">'+label+'</div>';
   }
+  html += '<div id="rootlead"></div>';
   html += '<div class="body">'+bodyOf(r)+'</div>';
   if(r.source && (r.source.title||r.source.ref)){
     const ref = r.source.ref || ''; const t = r.source.title || ref;
@@ -224,7 +228,23 @@ function render(r){
   // THE WORD CONNECTED — for a passage, weave in the unified entry (reality, cross-refs, original, commentary)
   const wref = weaveRefOf(r);
   if(wref){ const w=document.createElement('div'); w.id='weave'; pageEl.appendChild(w); weaveInto(wref, w); }
+  rootLeadInto(r, document.getElementById('rootlead'));   // render 2 — the Word under this answer
   if(MODE==='listen') speak(window._lastSpoken);
+}
+
+// render 2 — show the verse a CHECK's subject is rooted in (a quiet lead line). Coach and search answers
+// already open on the Word (the engine weaves it in); a verify skips that, so here it gets its root too.
+// Found, never asserted: the line appears only when the domain is actually rooted in the keeping.
+function rootLeadInto(r, el){
+  if(!el || !(r.kind==='verify' || r.verdict)) return;
+  const m = String(r.spoken||r.caption||'').match(/\b([a-z][a-z_]{2,})\.[a-z_]+\s*:/);
+  const dom = m && m[1];
+  if(!dom) return;
+  fetch(API+'/roots?node=domain:'+encodeURIComponent(dom)).then(x=>x.ok?x.json():null).then(d=>{
+    if(d && d.refs && d.refs.length){
+      el.innerHTML = '<div class="rootlead">rooted in <b>'+esc(d.refs.join(' · '))+'</b></div>';
+    }
+  }).catch(()=>{});
 }
 
 function weaveRefOf(r){

@@ -220,6 +220,18 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
     <div id="floorsOut" class="constel" style="padding:1.1rem"><p class="empty">Reading the floors&hellip;</p></div>
   </section>
 
+  <!-- THE WORD UNDER THE MAP — the concordance of reality (live from /roots), keyed by Scripture -->
+  <section class="blk" id="wordmap">
+    <div class="sec-h"><h2>The Word under the map</h2><span class="n">live from /roots</span></div>
+    <p style="color:var(--ink-soft); margin:.2rem 0 1rem; max-width:66ch; font-size:.95rem">Every proven node of the map is rooted in the verse it answers to &mdash; a concordance of reality around the Bible. Enter a reference to see where reality bears witness to it. Found, verified, cited; an anchor is the operator's discernment, and an un&#8209;rooted node is an open want, never a forced fit.</p>
+    <div style="display:flex; gap:.5rem; margin:0 0 1rem; flex-wrap:wrap">
+      <input id="rootsQ" placeholder="a verse — Genesis 1:1, Colossians 1:17, Psalm 102:25" autocomplete="off"
+             style="flex:1 1 16rem; min-width:0; background:var(--panel); border:1px solid var(--line); color:var(--ink); font:inherit; font-size:.95rem; padding:.5rem .7rem; border-radius:8px">
+      <button id="rootsGo" type="button" style="background:var(--ink); color:var(--bg); border:0; border-radius:8px; font:inherit; font-size:.9rem; padding:.5rem 1rem; cursor:pointer">Show</button>
+    </div>
+    <div id="rootsOut" class="constel" style="padding:1.1rem"><p class="empty" id="rootsCov">Measuring how much of reality is rooted in the Word&hellip;</p></div>
+  </section>
+
   <!-- THE LIBRARY'S MEDIA — the format transparency -->
   <section class="blk">
     <div class="sec-h"><h2>The library's media</h2><span class="n">live from /graph?scope=formats</span></div>
@@ -592,6 +604,43 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
     }).join("") || '<p class="empty">No media sorted yet.</p>';
     el.addEventListener("click",function(e){ var b=e.target.closest("[data-shelf]"); if(b) jumpTo(b.getAttribute("data-shelf")); });
   }).catch(function(){ var el=document.getElementById("media"); if(el) el.innerHTML='<p class="empty">The media view is resting.</p>'; });
+})();
+</script>
+<script>
+// THE WORD UNDER THE MAP (2026-10-11) — the concordance of reality, keyed by Scripture. A verse -> every
+// node of the map rooted in it (direct or inherited). Found, never generated; an open node is a want.
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+  function getj(path){ return fetch(path,{headers:{accept:"application/json"}}).then(function(r){ return r.json().then(function(j){ return (j&&j.data)?j.data:j; }); }).catch(function(){ return null; }); }
+  var out=$("rootsOut"), q=$("rootsQ"), go=$("rootsGo"), cov=$("rootsCov");
+  if(!out) return;
+  getj("/roots?coverage=1").then(function(d){
+    if(cov && d && d.total_nodes){ cov.textContent = d.resolved+" of "+d.total_nodes+" nodes of reality are rooted in the Word ("+d.pct+"%) — "+d.direct+" directly, "+d.inherited+" inherited. Enter a verse to see which."; }
+    else if(cov){ cov.textContent = "Enter a verse to see where reality bears witness to it."; }
+  });
+  function pill(n){
+    return '<span style="display:inline-block; background:var(--panel); border:1px solid var(--line); color:var(--ink-soft); border-radius:999px; padding:.22rem .6rem; font-size:.82rem; margin:0 .35rem .4rem 0">'
+      + esc(n.title) + (n.via==='inherited' ? ' <span style="opacity:.5">inherited</span>' : '') + '</span>';
+  }
+  function show(ref){
+    ref=(ref||"").trim(); if(!ref) return;
+    out.innerHTML='<p class="empty">Reading where reality bears witness to '+esc(ref)+'&hellip;</p>';
+    getj("/roots?verse="+encodeURIComponent(ref)).then(function(d){
+      if(!d || !d.nodes || !d.nodes.length){ out.innerHTML='<p class="empty">No node of the map is rooted in '+esc(ref)+' yet — an open want.</p>'; return; }
+      var byKind={floor:[],domain:[],stick:[]}; d.nodes.forEach(function(n){ (byKind[n.kind]||(byKind[n.kind]=[])).push(n); });
+      var labels={floor:"floors — the proven spine", domain:"domains — the verifiers", stick:"sticks — the open questions"};
+      var html='<p style="color:var(--ink-soft); margin:0 0 1rem">'+d.count+' node'+(d.count===1?'':'s')+' of reality rooted in <b style="color:var(--ink)">'+esc(d.verse)+'</b>:</p>';
+      ["floor","domain","stick"].forEach(function(k){
+        if(!byKind[k] || !byKind[k].length) return;
+        html+='<div style="margin:0 0 .9rem"><div style="text-transform:uppercase; letter-spacing:.08em; font-size:.68rem; color:var(--ink-faint); margin:0 0 .4rem">'+labels[k]+'</div>'
+          + byKind[k].map(pill).join('') + '</div>';
+      });
+      out.innerHTML=html;
+    });
+  }
+  if(go) go.onclick=function(){ show(q.value); };
+  if(q) q.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); show(q.value); } });
 })();
 </script>
 </body>
