@@ -86,15 +86,84 @@ SUBJECT_FLOOR = {
     "statistics": F+"statistics", "probability": F+"statistics",
     "calendar": F+"the_calendar", "history_chronology": F+"the_calendar", "chronology": F+"the_calendar",
 }
-_KEYS = sorted(SUBJECT_FLOOR, key=len, reverse=True)
 _FLOORS = set(chains.FLOORS)
+
+# batch 2 (2026-10-11, Matt: "connect them all") — the math tools, the method, the signals, the
+# principles, the engine's own pieces. Each a subject that plainly belongs under its floor.
+SUBJECT_FLOOR.update({
+    # the mathematical method and its instruments
+    "singular value": F+"the_instruments", "every matrix": F+"the_instruments", "tensor": F+"the_instruments",
+    "lagrange multiplier": F+"the_instruments", "gradient": F+"the_instruments", "divergence": F+"the_instruments",
+    "line integral": F+"the_instruments", "integrals and derivatives": F+"the_instruments",
+    "lebesgue": F+"the_instruments", "trigonometry": F+"the_instruments", "fibonacci": F+"the_instruments",
+    "gamma function": F+"the_instruments", "parametrization": F+"the_instruments", "parametrisation": F+"the_instruments",
+    "complex number": F+"the_instruments", "using imaginary": F+"the_instruments", "mandelbrot": F+"the_instruments",
+    "tesseract": F+"the_instruments", "euclid": F+"the_instruments", "scribing": F+"the_instruments",
+    "higher-dimensional spheres": F+"the_instruments", "the dot abstracted": F+"the_instruments",
+    "combinatorics": F+"the_instruments", "geometry": F+"the_instruments", "linear algebra": F+"the_instruments",
+    "mathematics": F+"the_instruments",
+    # number theory / the Riemann criteria
+    "hilbert-polya": F+"riemann", "riemann hypothesis": F+"riemann", "dirichlet": F+"riemann", "number theory": F+"riemann",
+    # the specific math-problem floors
+    "birch": F+"bsd", "swinnerton": F+"bsd", "hodge conjecture": F+"hodge", "poincare conjecture": F+"poincare",
+    "p versus np": F+"p_vs_np", "navier-stokes": F+"navier_stokes", "yang-mills": F+"yang_mills",
+    # the solve path — the method of getting there
+    "change of domain": F+"the_solve_path", "get fairly close": F+"the_solve_path", "proven bound": F+"the_solve_path",
+    "the path": F+"the_solve_path", "where two domains connect": F+"the_solve_path",
+    # quantum
+    "hermitian": F+"quantum_mechanics", "schrodinger": F+"quantum_mechanics", "dirac": F+"quantum_mechanics",
+    "aharonov": F+"quantum_mechanics", "quantum harmonic": F+"quantum_mechanics", "relational quantum": F+"quantum_mechanics",
+    "the complex field": F+"quantum_mechanics",
+    # electromagnetism / signals / optics
+    "superheterodyne": F+"maxwells_equations", "transceiver": F+"maxwells_equations", "receiver": F+"maxwells_equations",
+    "am and fm": F+"maxwells_equations", "smith chart": F+"maxwells_equations", "cayley transform": F+"maxwells_equations",
+    "vacuum triode": F+"maxwells_equations", "fiber optic": F+"optics",
+    # the standard model and the forces
+    "standard model": F+"standard_model", "feynman": F+"standard_model", "the one force": F+"standard_model",
+    "the symmetry": F+"standard_model", "gauge": F+"standard_model",
+    # relativity
+    "is gravity a force": F+"relativity", "time and space": F+"relativity", "quantum gravity": F+"relativity",
+    # the physics principles and seams
+    "noether": F+"noethers_theorem", "the hamiltonian": F+"the_hamiltonian", "least action": F+"the_lagrangian",
+    "the lagrangian": F+"the_lagrangian", "legendre transform": F+"the_lagrangian",
+    # the capstone — the engine's wholeness themes
+    "the capstone": F+"the_capstone", "construct creation": F+"the_capstone", "final assembly": F+"the_capstone",
+    "the symphony": F+"the_capstone", "joined bubbles": F+"the_capstone", "the clock": F+"the_capstone",
+    "tourbillon": F+"the_capstone",
+    # the rest
+    "monte carlo": F+"statistics", "gaussian process": F+"statistics", "jevons": F+"economics",
+    "resonance disaster": F+"acoustics", "spherical parallel": F+"materials_science", "three motors": F+"materials_science",
+    "god works in multiplication": F+"logarithm", "genomics": F+"biology", "information theory": F+"computer_science",
+})
+
+# where a DOMAIN's name alone does not name a floor — explicit, precise, no fuzzy match. Each floor is
+# anchored (batch 3) so the domain inherits a real verse.
+DOMAIN_OVERRIDE = {
+    "combinatorics": "the_instruments", "geometry": "the_instruments", "linear_algebra": "the_instruments",
+    "mathematics": "the_instruments", "number_theory": "riemann", "formal_logic": "computer_science",
+    "information_theory": "computer_science", "lagarias": "riemann", "nicolas": "riemann", "robin": "riemann",
+    "schoenfeld": "riemann", "gue": "riemann", "zero_count": "riemann", "count_residual": "riemann",
+    "condensed_matter": "quantum_mechanics", "physics": "the_hamiltonian", "physical_constants": "metrology",
+    "exercise_science": "medicine", "operations_research": "logistics", "real_estate": "economics",
+    "document_validation": "cryptography", "pressure_fighting": "game_theory", "sports_analytics": "game_theory",
+    "trajectory": "the_solve_path", "archaeology": "geography", "philosophy": "the_mind",
+}
+# the last few sticks whose short lead matched no key — placed precisely by id (no fuzzy guess).
+STICK_OVERRIDE = {
+    "stick_earth_science_the_planet_read_in_deep_time": "earth_science",
+    "stick_harmonics_chords_are_different_shapes_of_the_same_note_a_rol": "acoustics",
+    "stick_pi_the_constant_of_the_circle_is_the_constant_of_rotation": "the_instruments",
+    "stick_the_mind_the_neuron_computation_and_the_hard_problem": "the_mind",
+}
+_KEYS = sorted(SUBJECT_FLOOR, key=len, reverse=True)   # recompute after the update
 
 
 def floor_for(text: str):
     s = re.sub(r"[_]+", " ", (text or "").lower())
     lead = re.split(r"\s[-–]\s", s)[0]   # for a stick title, the subject before ' - '
     for k in _KEYS:
-        if re.search(r"(?<![a-z])" + re.escape(k), lead) and SUBJECT_FLOOR[k] in _FLOORS:
+        kk = re.sub(r"_+", " ", k)            # a multi-word key is stored with spaces OR underscores; match either
+        if re.search(r"(?<![a-z])" + re.escape(kk), lead) and SUBJECT_FLOOR[k] in _FLOORS:
             return SUBJECT_FLOOR[k]
     return None
 
@@ -112,15 +181,15 @@ def main(argv=None):
     for d in doms:
         if f"{F}{d}" in _FLOORS:
             continue                                # already name-matches a floor
-        fl = floor_for(d)
-        if fl:
+        fl = (F + DOMAIN_OVERRIDE[d]) if d in DOMAIN_OVERRIDE else floor_for(d)
+        if fl and fl in _FLOORS:
             proposals.append((roots.node_id("domain", d), fl, f"the {d.replace('_',' ')} domain is a part of {fl.replace(F,'')}"))
     for r in sticks:
         sid = r["id"]
         if sid in si:
             continue                                # already charted onto the map
-        fl = floor_for(r.get("question") or sid)
-        if fl:
+        fl = (F + STICK_OVERRIDE[sid]) if sid in STICK_OVERRIDE else floor_for(r.get("question") or sid)
+        if fl and fl in _FLOORS:
             proposals.append((roots.node_id("stick", sid), fl, f"'{(r.get('question') or sid)[:50]}' is a part of {fl.replace(F,'')}"))
 
     kept = 0
