@@ -32,27 +32,44 @@ from concordance.verifiers import scripture as S  # noqa: E402
 CHAPTERS = {"Psalms": 150, "Proverbs": 31, "Ecclesiastes": 12, "Song of Solomon": 8}
 
 
+def _verses_of_ref(ref: str):
+    r = S.read_passage(ref)
+    for v in (r.get("verses") or []):
+        t = " ".join((v.get("text") or "").split()).strip()
+        if t:
+            yield v.get("ref") or ref, t
+
+
 def verses_of(book: str):
     n = CHAPTERS.get(book)
     if not n:
         raise SystemExit(f"unknown book {book!r}; known: {', '.join(sorted(CHAPTERS))}")
     for ch in range(1, n + 1):
-        r = S.read_passage(f"{book} {ch}")
-        for v in (r.get("verses") or []):
-            t = " ".join((v.get("text") or "").split()).strip()
-            if t:
-                yield v.get("ref") or f"{book} {ch}", t
+        yield from _verses_of_ref(f"{book} {ch}")
+
+
+def verses_of_refs(refs):
+    """Warm an explicit set of passage refs (a chapter or a verse range each), e.g. a named
+    passage like the Sermon on the Mount = Matthew 5, 6, 7."""
+    for ref in refs:
+        yield from _verses_of_ref(ref)
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--book", required=True)
+    ap.add_argument("--book", help="a whole book: " + ", ".join(sorted(CHAPTERS)))
+    ap.add_argument("--ref", action="append", default=[],
+                    help="a passage ref (chapter or verse range), repeatable; e.g. --ref 'Matthew 5'")
+    ap.add_argument("--label", default="", help="a name for the --ref set, e.g. 'Sermon on the Mount'")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
     a = ap.parse_args(argv)
+    if not a.book and not a.ref:
+        raise SystemExit("give --book <Book> or one or more --ref <passage>")
 
     cache = voice._cache_dir()
-    items = list(verses_of(a.book))
+    items = list(verses_of(a.book)) if a.book else list(verses_of_refs(a.ref))
+    a.book = a.book or (a.label or " + ".join(a.ref))
     total_chars = sum(len(t) for _, t in items)
     cached = sum(1 for _, t in items if (cache / (voice._digest(t) + ".mp3")).is_file())
     new = len(items) - cached
