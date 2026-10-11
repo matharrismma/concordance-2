@@ -78,7 +78,16 @@
   .weave .chip{ font:inherit; font-size:.96rem; background:none; border:0; border-bottom:1px solid var(--line);
                 color:var(--ink); padding:.15rem 0; margin:0 .9rem .2rem 0; cursor:pointer; display:inline-block }
   .weave .chip:hover{ color:var(--gold) }
-  .weave .orig{ font-size:1.25rem; line-height:1.9; direction:ltr }
+  .weave .orig{ font-size:1.25rem; line-height:1.95; direction:ltr }
+  .weave .orig .ow{ cursor:pointer; border-bottom:1px dotted transparent; padding:0 .04em }
+  .weave .orig .ow:hover{ border-bottom-color:var(--gold); color:var(--gold) }
+  .weave .orig .ow.doubt{ color:var(--gold); border-bottom:1px dotted var(--gold) }  /* kept in the tongue */
+  .weave .wstudy{ margin:.7rem 0 0; font-size:1rem; line-height:1.55; color:var(--ink);
+                  border-left:2px solid var(--gold); padding:.1rem 0 .1rem .8rem }
+  .weave .wstudy .tl{ font-style:italic; color:var(--dim) }
+  .weave .wstudy .uses{ display:inline-block; margin-top:.4rem; font-size:.84rem; color:var(--gold); cursor:pointer;
+                        font-family:system-ui,sans-serif }
+  .weave .wstudy .uses:hover{ text-decoration:underline }
   .weave .cmt{ font-size:1.02rem; color:var(--ink) }
   .weave .cmt .who{ color:var(--dim); font-size:.84rem; font-style:italic; display:block; margin-top:.3rem }
   /* the ask bar — type or speak */
@@ -271,15 +280,52 @@ async function weaveInto(ref, el){
   if(xr.length) parts.push('<div class="dim-row"><span class="k">cross-references · treasury of scripture</span>'
     + xr.map(x=>'<button class="chip" data-ask="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div>');
   const ow = d.original_words;
-  if(ow && ow.words && ow.words.length) parts.push('<div class="dim-row"><span class="k">in the original · '+esc(ow.tongue||'')+'</span>'
-    + '<div class="orig">'+ ow.words.map(w=>esc(w.word)).join(' ') +'</div></div>');
+  if(ow && ow.words && ow.words.length){
+    const ws = ow.words.map((w,i)=> '<span class="ow'+(w.doubt?' doubt':'')+'" data-i="'+i+'" data-s="'+esc(w.strongs||'')+'">'+esc(w.word)+'</span>').join(' ');
+    parts.push('<div class="dim-row"><span class="k">in the original · '+esc(ow.tongue||'')+' · tap a word</span>'
+      + '<div class="orig">'+ws+'</div><div class="wstudy" hidden></div></div>');
+  }
   const cm = d.commentary;
   if(cm && cm.text) parts.push('<div class="dim-row"><span class="k">commentary</span><div class="cmt">'+esc(cm.text)
     + '<span class="who">'+esc(cm.source||'')+'</span></div></div>');
+  const sm = d.sermons;
+  if(sm && sm.length) parts.push('<div class="dim-row"><span class="k">sermons &amp; the cloud</span>'
+    + sm.map(s=>'<div class="cmt">'+esc(s.text)+'<span class="who">'+esc(s.who||'')+(s.work?' · '+esc(s.work):'')+'</span></div>').join('')+'</div>');
   if(!parts.length && d.note) parts.push('<p class="dim">'+esc(d.note)+'</p>');
   if(!parts.length) return;
   el.innerHTML = '<div class="weave"><div class="wlab">the Word connects</div>'+parts.join('')+'</div>';
   el.querySelectorAll('.chip[data-ask]').forEach(b=> b.onclick=()=>ask(b.dataset.ask));
+  bindWordStudy(el, ow && ow.words);   // tap a word -> its original, definition, and other uses
+}
+
+// TAP A WORD — the augmented Bible: where there is DOUBT the word is kept in the tongue (marked gold) with
+// its definition; any tagged word opens its study (definition + a way to every other use). Found, cited.
+function bindWordStudy(el, words){
+  if(!words) return;
+  const panel = el.querySelector('.wstudy');
+  function bindUses(p){ p.querySelectorAll('.uses[data-ask]').forEach(u=> u.onclick=()=>ask(u.dataset.ask)); }
+  el.querySelectorAll('.orig .ow').forEach(function(span){
+    span.onclick = function(){
+      if(!panel) return;
+      const w = words[+span.dataset.i] || {}; const s = w.strongs || '';
+      panel.hidden = false;
+      const uses = s ? '<span class="uses" data-ask="every use of '+esc(s)+' in Scripture">see every use in Scripture ('+esc(s)+') ↗</span>' : '';
+      if(w.doubt && w.definition){
+        panel.innerHTML = '<b>'+esc(w.word)+'</b> <span class="tl">'+esc(w.translit||'')+'</span> — kept in the tongue, for its fullness.<br>'+esc(w.definition)+'<br>'+uses;
+        bindUses(panel); return;
+      }
+      if(!s){ panel.innerHTML = '<span class="tl">'+esc(w.word)+' — no Strong’s tag here.</span>'; return; }
+      panel.innerHTML = '<span class="tl">reading '+esc(w.word)+' …</span>';
+      fetch(API+'/word_study?strongs='+encodeURIComponent(s)).then(r=>r.ok?r.json():null).then(function(j){
+        const dd = j && j.data ? j.data : j;
+        let def = dd && (dd.definition!=null ? dd.definition : (dd.entry && dd.entry.definition));
+        if(def && typeof def!=='string') def = def.gloss || def.definition || def.text || JSON.stringify(def);
+        const tl = (dd && (dd.transliteration || dd.translit || (dd.entry&&dd.entry.transliteration))) || '';
+        if(def){ panel.innerHTML = '<b>'+esc(w.word)+'</b> <span class="tl">'+esc(tl)+'</span> — '+esc(String(def).slice(0,420))+'<br>'+uses; bindUses(panel); }
+        else { panel.innerHTML = '<b>'+esc(w.word)+'</b> <span class="tl">'+esc(s)+'</span><br>'+uses; bindUses(panel); }
+      }).catch(()=>{ panel.innerHTML = '<span class="tl">'+esc(w.word)+' ('+esc(s)+')</span>'; });
+    };
+  });
 }
 
 // offline/preview fallback. Only Genesis 1:1 carries baked data — captured verbatim from the live box

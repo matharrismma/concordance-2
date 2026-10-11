@@ -461,12 +461,23 @@ def entry(ref: str, *, get_card=None, data_dir: Optional[Path] = None) -> Dict[s
     except Exception:  # noqa: BLE001
         out["cross_references"] = None
     try:
+        from . import translate as _tr
+    except Exception:  # noqa: BLE001
+        _tr = None
+    try:
         ow = sc.original_words(ref) if sc else {}
         ws = ow.get("words") or []
         tongue = "Greek" if (ws and str(ws[0].get("strongs", "")).startswith("G")) else ("Hebrew" if ws else None)
-        out["original_words"] = ({"tongue": tongue,
-                                  "words": [{"word": w.get("word"), "strongs": w.get("strongs")} for w in ws][:40]}
-                                 if ws else None)
+        words = []
+        for w in ws[:60]:
+            s = w.get("strongs")
+            # WHERE THERE IS DOUBT, DON'T CONVERT — a word better left in the tongue is marked, and its
+            # definition is carried so the reader keeps the actual word instead of a lossy single gloss.
+            irr = (_tr.irreducible(s) if (_tr and s) else None)
+            words.append({"word": w.get("word"), "strongs": s, "doubt": bool(irr),
+                          "translit": (irr or {}).get("translit"),
+                          "definition": (((irr.get("definition") or "")[:220]) or None) if irr else None})
+        out["original_words"] = {"tongue": tongue, "words": words} if words else None
     except Exception:  # noqa: BLE001
         out["original_words"] = None
     try:
@@ -480,6 +491,16 @@ def entry(ref: str, *, get_card=None, data_dir: Optional[Path] = None) -> Dict[s
         out["commentary"] = {"source": cm.get("attribution"), "text": txt[:900]} if txt else None
     except Exception:  # noqa: BLE001
         out["commentary"] = None
+    # SERMONS & THE CLOUD — the witnesses whose own words frame this passage (Spurgeon's sermons, et al.),
+    # verbatim and attributed, public domain. Connect to the texts we hold. Proposes, never confirms.
+    try:
+        from . import witness as _wit
+        vtext = " ".join(v.get("text", "") for v in ((out.get("text") or {}).get("verses") or [])) or ref
+        seen = (_wit.see(vtext, k=2) or {}).get("seeing") or []
+        out["sermons"] = [{"who": s.get("witness"), "work": s.get("work"), "text": (s.get("text") or "")[:460]}
+                          for s in seen if str(s.get("text") or "").strip()] or None
+    except Exception:  # noqa: BLE001
+        out["sermons"] = None
     return out
 
 
