@@ -297,6 +297,29 @@ def test_the_leading_verbs_win_over_the_broad_schedule_cue():
     assert console.classify_intent("remind me to pray at noon") == "schedule"
 
 
+def test_a_bare_scripture_reference_is_read_as_a_passage(monkeypatch):
+    """Typed alone, 'Psalm 23' is a request to READ the passage — the Console as a book: dispatch
+    routes it to _read and the payload carries the ordered, numbered verses. A question ABOUT a
+    passage keeps its words and stays on the ask path; a ref-shaped non-book ('Report 12') never
+    routes to the reader (it does not resolve to Scripture)."""
+    import concordance.verifiers.scripture as S
+    monkeypatch.setattr(S, "read_passage", lambda ref, lang=None: {
+        "ref": "Psalms 23", "status": "ok",
+        "verses": [{"ref": "Psalms 23:1", "verse": 1, "text": "The LORD is my shepherd; I shall lack nothing."},
+                   {"ref": "Psalms 23:2", "verse": 2, "text": "He makes me lie down in green pastures."}]})
+    assert console._is_bare_scripture_ref("Psalm 23")
+    assert console._is_bare_scripture_ref("John 3:16")
+    assert console._is_bare_scripture_ref("Romans 8:28-30")
+    assert not console._is_bare_scripture_ref("what does Psalm 23 mean")   # a question, not a bare ref
+    r = console.dispatch("Psalm 23", None)
+    assert r["intent"] == "read" and r["kind"] == "scripture"
+    assert [v["verse"] for v in r["verses"]] == [1, 2]
+    assert "shepherd" in r["spoken"]
+    # ref-shaped but not Scripture → the resolver returns no verses → stays on the ask path
+    monkeypatch.setattr(S, "read_passage", lambda ref, lang=None: {"status": "not_found", "verses": []})
+    assert not console._is_bare_scripture_ref("Report 12")
+
+
 def test_the_coach_starts_the_cube_a_conversation_names(monkeypatch):
     import concordance.coach as C
     monkeypatch.setattr(C, "_discover", lambda: ["grc", "en"])

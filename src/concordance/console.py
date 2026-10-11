@@ -63,6 +63,25 @@ _LANG_WORDS = {
     "to read": "read",
 }
 _REF_RE = re.compile(r"\b((?:[1-3]\s+)?[A-Za-z][A-Za-z.]{1,18}\s+\d{1,3}(?::\d{1,3})?)")
+# A BARE passage reference — the WHOLE input is just a reference ("Psalm 23", "John 3:16",
+# "Romans 8:28-30", "1 John 1:9"). Typed alone, that is a request to READ the passage, not a
+# question about it ("what does Psalm 23 mean" keeps the extra words and stays on the ask path).
+_BARE_REF_RE = re.compile(r"^\s*(?:[1-3]\s*)?[A-Za-z][A-Za-z.]{1,18}\.?\s+\d{1,3}"
+                          r"(?::\d{1,3}(?:\s*[-–]\s*\d{1,3})?)?\s*$")
+
+
+def _is_bare_scripture_ref(text: str) -> bool:
+    """True only when the whole input is a passage reference AND it actually resolves to Scripture —
+    so 'Report 12' or 'Section 3:4' (shaped like a ref, but no such book) is never swept into the
+    reader; it stays on the ask path. The read_passage call is a resident-corpus dict lookup."""
+    t = (text or "").strip()
+    if not _BARE_REF_RE.match(t):
+        return False
+    try:
+        from .verifiers import scripture as _sc
+        return bool((_sc.read_passage(t) or {}).get("verses"))
+    except Exception:  # noqa: BLE001 — a missing/corrupt corpus just declines to the ask path
+        return False
 _IN_ORIGINAL = re.compile(r"\bin (?:the )?(original|greek|hebrew|koine|tongue)\b", re.I)
 
 
@@ -732,10 +751,20 @@ def _read(text: str, config: Any, gate_open: bool, *, source_text: Optional[str]
                               "ref": "/read.html?subject=" + ("grc" if tongue == "Greek" else "he")}],
                     "original": {"tongue": tongue, "count": len(words), "total": total}, "generated": False}
         if eng:
-            return {"intent": "read", "kind": "scripture", "headline": shown, "spoken": f"{eng} — {shown}.",
-                    "caption": eng, "source": {"title": shown, "ref": f"/bible.html?ref={shown}"},
-                    "next": [{"label": "Read the chapter", "ref": f"/bible.html?ref={shown}"},
-                             {"label": "Hear it in the original", "ref": f"/bible.html?ref={shown}"}],
+            # the passage AS A BOOK PAGE: the ordered, numbered verses (bounded so the payload stays
+            # small / LoRa-ready — the whole chapter is one tap away on the reader). The spoken form is
+            # the shown text itself, so the radio reads exactly what the page shows.
+            CAP = 24
+            vlist = [{"verse": v.get("verse"), "text": v.get("text", "")} for v in verses[:CAP]]
+            shown_text = " ".join(v["text"] for v in vlist).strip() or eng
+            more = max(0, len(verses) - CAP)
+            return {"intent": "read", "kind": "scripture", "headline": shown,
+                    "spoken": f"{shown_text} — {shown}.",
+                    "caption": shown_text, "verses": vlist, "truncated": bool(more), "more": more,
+                    "source": {"title": shown, "ref": f"/bible.html?ref={shown}"},
+                    "next": ([{"label": f"Read the whole chapter ({more} more verses)" if more
+                               else "Read the chapter", "ref": f"/bible.html?ref={shown}"},
+                              {"label": "Hear it in the original", "ref": f"/bible.html?ref={shown}"}]),
                     "generated": False}
 
     # a WORK — strip the read cue (and any "section on / part about / chapter on"), find a readable
@@ -898,6 +927,10 @@ def dispatch(text: str, config: Any, *, owner: Optional[str] = None, gate_open: 
     if isinstance(answering, dict) and answering.get("unit"):
         return _check(text, answering, config)
     intent = classify_intent(text)
+    # A bare passage reference ("Psalm 23", "John 3:16") is a request to READ it — the Console as a
+    # book. Questions about a passage keep their words and stay on the ask path (the coach).
+    if intent == "ask" and _is_bare_scripture_ref(text):
+        intent = "read"
     if intent == "crisis":
         return _spoken_crisis(_ask.respond(text, config))
     if intent == "dictate":

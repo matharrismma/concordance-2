@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Console — Narrow Highway</title>
+<meta name="description" content="One console: ask or speak anything, and the keeping answers — read it as a book, or listen as a radio. The coach guides; every answer shows how it was found, verified, and cited. Found, never generated.">
+<style>
+  /* E-INK FIRST (docs/CONSOLE.md): high-contrast, serif, page-not-scroll, no motion, static in one
+     frame. A book that is a whole library. Audio and page complete each other. */
+  :root{
+    --paper:#f6f4ee; --ink:#15130f; --dim:#6b6660; --line:#d8d3c7; --gold:#9a7b27; --rule:#1c1a16;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --paper:#111010; --ink:#eceae3; --dim:#9a958b; --line:#2c2a25; --gold:#c9a24a; --rule:#eceae3; color-scheme:dark; }}
+  :root[data-theme="dark"]{ --paper:#111010; --ink:#eceae3; --dim:#9a958b; --line:#2c2a25; --gold:#c9a24a; --rule:#eceae3; color-scheme:dark; }
+  *{ box-sizing:border-box }
+  html,body{ margin:0; background:var(--paper); color:var(--ink) }
+  body{ font-family:Georgia,'Iowan Old Style','Times New Roman',serif; line-height:1.6;
+        -webkit-font-smoothing:antialiased; }
+  *,*::before,*::after{ animation:none !important; transition:none !important }  /* E-Ink: no motion */
+  .book{ max-width:40rem; margin:0 auto; min-height:100svh; display:flex; flex-direction:column;
+         padding:calc(1.1rem + env(safe-area-inset-top)) 1.3rem calc(1.1rem + env(safe-area-inset-bottom)); }
+  header.bar{ display:flex; align-items:baseline; justify-content:space-between; gap:1rem;
+              border-bottom:1px solid var(--line); padding-bottom:.7rem }
+  .brand{ font-size:.82rem; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); text-decoration:none }
+  .brand b{ color:var(--ink); font-weight:600 }
+  /* radio / book toggle */
+  .mode{ display:inline-flex; border:1px solid var(--line); border-radius:2px; overflow:hidden }
+  .mode button{ font:inherit; font-size:.74rem; letter-spacing:.12em; text-transform:uppercase; background:none;
+                color:var(--dim); border:0; padding:.3rem .7rem; cursor:pointer }
+  .mode button[aria-pressed="true"]{ background:var(--ink); color:var(--paper) }
+  main.page{ flex:1 0 auto; padding:2rem 0 1rem }
+  .greet{ color:var(--dim); font-style:italic; font-size:1.02rem; margin:0 0 1.4rem }
+  .headline{ font-size:1.9rem; line-height:1.2; margin:.2rem 0 1rem; font-weight:600; text-wrap:balance }
+  .body{ font-size:1.18rem }
+  .body p{ margin:.2rem 0 1rem }
+  .vn{ color:var(--gold); font-size:.72em; vertical-align:super; margin-right:.3em; font-family:system-ui,sans-serif }
+  .word{ cursor:pointer; border-bottom:1px dotted var(--line) }
+  .word:hover{ border-bottom-color:var(--gold); color:var(--gold) }
+  .src{ color:var(--dim); font-size:.9rem; margin:.4rem 0 1.2rem }
+  .src a{ color:var(--gold); text-decoration:none }
+  /* a verdict — the CHECK door's answer, plainly: certified true, false, or honestly declined */
+  .verdict{ font-family:system-ui,sans-serif; font-size:.78rem; letter-spacing:.12em; text-transform:uppercase;
+            display:inline-block; padding:.28rem .7rem; border:1px solid var(--gold); color:var(--gold);
+            border-radius:2px; margin:0 0 1rem }
+  .verdict.no{ border-color:var(--rule); color:var(--ink) }
+  .verdict.na{ border-color:var(--line); color:var(--dim) }
+  /* the engine trail — a calm static schematic of how the answer was found; one frame, no motion */
+  .trail{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:.7rem 0; margin:1.4rem 0;
+          font-family:system-ui,sans-serif; font-size:.72rem; letter-spacing:.06em; color:var(--dim);
+          display:flex; flex-wrap:wrap; align-items:center; gap:.5rem }
+  .trail .lab{ text-transform:uppercase; letter-spacing:.12em; color:var(--ink); opacity:.55 }
+  .trail .step{ white-space:nowrap }
+  .trail .step b{ color:var(--ink); font-weight:600 }
+  .trail .arr{ color:var(--line) }
+  .trail .seal{ color:var(--gold) }
+  /* connections — the coach pointing on */
+  .conn{ margin:1rem 0 }
+  .conn .lab{ font-family:system-ui,sans-serif; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--dim) }
+  .conn button, .conn .go{ display:block; width:100%; text-align:left; font:inherit; font-size:1.02rem; background:none;
+                border:0; border-bottom:1px solid var(--line); color:var(--ink); padding:.55rem 0; cursor:pointer;
+                text-decoration:none }
+  .conn button:hover, .conn .go:hover{ color:var(--gold) }
+  .conn button::before, .conn .go::before{ content:"→ "; color:var(--gold) }
+  .conn .go::after{ content:" ↗"; color:var(--dim); font-size:.8em }  /* leaves the console to a reader page */
+  /* the ask bar — type or speak */
+  .ask{ position:sticky; bottom:0; background:var(--paper); border-top:1px solid var(--rule);
+        padding:.8rem 0 calc(.4rem + env(safe-area-inset-bottom)); display:flex; gap:.5rem; align-items:center }
+  .ask input{ flex:1 1 auto; font:inherit; font-size:1.05rem; background:none; border:0; border-bottom:1px solid var(--line);
+              color:var(--ink); padding:.5rem .2rem; min-width:0 }
+  .ask input:focus{ outline:none; border-bottom-color:var(--gold) }
+  .ask button{ font:inherit; font-size:.92rem; background:var(--ink); color:var(--paper); border:0; border-radius:2px;
+               padding:.5rem .9rem; cursor:pointer }
+  .ask .mic{ background:none; color:var(--ink); border:1px solid var(--line); padding:.45rem .6rem; font-size:1.05rem }
+  .ask .mic[aria-pressed="true"]{ border-color:var(--gold); color:var(--gold) }
+  .row{ display:flex; gap:.8rem; align-items:center; flex-wrap:wrap; margin:.2rem 0 1rem }
+  .act{ font-family:system-ui,sans-serif; font-size:.74rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dim);
+        background:none; border:1px solid var(--line); border-radius:2px; padding:.35rem .7rem; cursor:pointer }
+  .act[aria-pressed="true"], .act:hover{ color:var(--gold); border-color:var(--gold) }
+  .dim{ color:var(--dim) }
+  .kept{ color:var(--gold); font-size:.84rem; font-family:system-ui,sans-serif }
+  footer{ color:var(--dim); font-size:.74rem; border-top:1px solid var(--line); padding-top:.7rem; margin-top:1rem }
+</style>
+</head>
+<body>
+<div class="book">
+  <header class="bar">
+    <a class="brand" href="/">Narrow <b>Highway</b> · the console</a>
+    <span class="mode" role="group" aria-label="Listen or read">
+      <button id="m-listen" aria-pressed="false" title="Listen — it reads to you, hands-free">Listen</button>
+      <button id="m-read" aria-pressed="true" title="Read — the page rests; study at your own pace">Read</button>
+    </span>
+  </header>
+
+  <main class="page" id="page">
+    <p class="greet" id="greet">Speak or type anything — a verse, a question, a note to keep. I'll find it,
+      check it, and read it to you; the page holds still while you listen, or rests while you read.</p>
+  </main>
+
+  <div class="ask">
+    <button class="mic" id="mic" title="Speak" aria-pressed="false" hidden>🎙</button>
+    <input id="q" placeholder="a verse · define a word · check a claim · a situation you're facing · note that…" aria-label="Ask or speak" autocomplete="off">
+    <button id="go">Ask</button>
+  </div>
+  <footer>Found, verified, and cited — never generated. A window to Him, not a wall.</footer>
+</div>
+
+<script src="speak.js"></script>
+<script>
+const API = "";                       // same-origin on the box; falls back to a sample in preview
+const pageEl = document.getElementById('page');
+const qEl = document.getElementById('q');
+let MODE = (function(){ try{ return localStorage.getItem('nh-console-mode') || 'read'; }catch(e){ return 'read'; } })();
+
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
+function setMode(m){
+  MODE=m;
+  document.getElementById('m-listen').setAttribute('aria-pressed', m==='listen');
+  document.getElementById('m-read').setAttribute('aria-pressed', m==='read');
+  try{ localStorage.setItem('nh-console-mode', m); }catch(e){}
+}
+document.getElementById('m-listen').onclick = ()=>{ setMode('listen'); if(window._lastSpoken) speak(window._lastSpoken); };
+document.getElementById('m-read').onclick = ()=>{ setMode('read'); try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(e){} };
+setMode(MODE);
+
+function speak(text){ if(text && window.NHSpeak) NHSpeak.play(text); }
+
+// THE ENGINE TRAIL — a calm, static schematic of how THIS answer was found. Built from the reply's
+// own fields (the door it took, whether it was verified/sealed, the source it cites). One frame, no motion.
+function trailOf(r){
+  // the door it entered
+  const door = ({check:'check', ask:'asked', walk:'asked', find:'find', word:'the word', read:'the word',
+                 crisis:'crisis net', dictate:'kept', schedule:'schedule', copies:'copies', learn:'the cube'})[r.intent] || 'asked';
+  const steps = ['<span class="step"><span class="lab">from</span> <b>'+esc(door)+'</b></span>'];
+  // the work it did — the verifier that carried it (what the engine actually ran)
+  const checked = ({verify:'verified', define:'defined', word:'read in the original', search:'found in the keeping',
+                    scripture:'read from the keeping', scripture_original:'read in the original',
+                    coach:'matched to the path', note:'written verbatim', crisis:'real people first'})[r.kind];
+  if(checked) steps.push('<span class="step"><b>'+esc(checked)+'</b></span>');
+  if(r.source && (r.source.title||r.source.ref)) steps.push('<span class="step"><span class="lab">source</span> <b>'+esc(r.source.title||r.source.ref)+'</b></span>');
+  if(r.kind==='verify' || r.kind==='define' || r.kind==='word' || (r.source && r.source.seal)) steps.push('<span class="step seal">● sealed</span>');
+  return '<div class="trail">'+steps.join('<span class="arr">→</span>')+'</div>';
+}
+
+// A connection is either a re-ask (stays on this one surface — the chaining workflow) or a deep link to
+// a reader page (study on your own). The backend sends `connections` as card threads {title,id} and
+// `next` as page links {label,ref}; the sample sends plain strings. Normalize all three honestly:
+//   string / card-thread / bare title → RE-ASK in the console (chain)
+//   {label, ref:"/page.html…"}        → NAVIGATE to that reader page (marked ↗)
+//   label-only guidance (ref:null)    → dropped (the ask bar already invites anything)
+function connItem(c){
+  if(typeof c === 'string'){ const s=c.trim(); return s ? {label:s, ask:s} : null; }
+  if(!c || typeof c !== 'object') return null;
+  const label = String(c.label || c.title || c.text || '').trim();
+  if(!label) return null;
+  let ref = String(c.ref || (c.id ? '/card/'+c.id : '')).trim();
+  const isPage = /^(https?:)?\//.test(ref) && !/^\/card\//.test(ref);
+  if(isPage) return {label:label, href:ref};
+  if(c.title || c.id) return {label:label, ask:String(c.title||label)};  // a card → re-ask, stay on surface
+  return null;  // guidance-only (e.g. "ask about anything else") → not a real step
+}
+function renderConnections(r){
+  const cs = (r.connections||[]).concat(r.next||[]).map(connItem).filter(Boolean).slice(0,5);
+  if(!cs.length) return '';
+  const html = cs.map(c => c.href
+      ? '<a class="go" href="'+esc(c.href)+'">'+esc(c.label)+'</a>'
+      : '<button data-ask="'+esc(c.ask)+'">'+esc(c.label)+'</button>').join('');
+  return '<div class="conn"><div class="lab">the coach points on</div>'+html+'</div>';
+}
+
+function bodyOf(r){
+  if(r.verses && r.verses.length){
+    let html = r.verses.map(v => '<p><span class="vn">'+esc(v.verse)+'</span>'+esc(v.text)+'</p>').join('');
+    if(r.more) html += '<p class="dim">… '+esc(r.more)+' more verse'+(r.more===1?'':'s')+' in the chapter.</p>';
+    return html;
+  }
+  // a plain answer may carry several paragraphs (the Word, then the answer, then a witness) separated
+  // by blank lines — keep them as separate paragraphs so it reads like a page, not a wall.
+  const paras = String(r.caption || r.spoken || '').split(/\n{2,}/).map(s=>s.trim()).filter(Boolean);
+  return (paras.length ? paras : ['']).map(p => '<p>'+esc(p)+'</p>').join('');
+}
+
+function render(r){
+  window._lastSpoken = r.spoken || r.caption || '';
+  let html = '';
+  if(r.headline) html += '<div class="headline">'+esc(r.headline)+'</div>';
+  if(r.verdict){
+    const v = String(r.verdict).toLowerCase();
+    const cls = (v==='true'||v==='verified') ? '' : (v==='false') ? 'no' : 'na';
+    const label = (v==='true'||v==='verified') ? '✓ verified true' : (v==='false') ? '✕ false' : '— can’t certify';
+    html += '<div class="verdict '+cls+'">'+label+'</div>';
+  }
+  html += '<div class="body">'+bodyOf(r)+'</div>';
+  if(r.source && (r.source.title||r.source.ref)){
+    const ref = r.source.ref || ''; const t = r.source.title || ref;
+    html += '<div class="src">'+ (ref ? '<a href="'+esc(ref)+'">'+esc(t)+'</a>' : esc(t)) +'</div>';
+  }
+  html += trailOf(r);
+  html += '<div class="row">'
+       +  '<button class="act" id="replay" title="Read this aloud in the operator\'s voice">▶ Listen</button>'
+       +  '<button class="act" id="keep" title="Keep this, verbatim, in your record">✍ Keep</button>'
+       +  '<span class="kept" id="kept" hidden>kept</span>'
+       +  '</div>';
+  html += renderConnections(r);
+  pageEl.innerHTML = html;
+  const rp=document.getElementById('replay'); if(rp) rp.onclick=()=>speak(window._lastSpoken);
+  const kp=document.getElementById('keep'); if(kp) kp.onclick=()=>keep(r);
+  pageEl.querySelectorAll('.conn [data-ask]').forEach(b=> b.onclick=()=>ask(b.dataset.ask));
+  if(MODE==='listen') speak(window._lastSpoken);
+}
+
+async function ask(text){
+  text = (text!=null ? text : qEl.value).trim();
+  if(!text) return;
+  qEl.value='';
+  pageEl.innerHTML = '<p class="dim">finding, checking, citing…</p>';
+  try{
+    const resp = await fetch(API+'/console', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text:text})});
+    if(!resp.ok) throw new Error('offline');
+    render(await resp.json());
+  }catch(e){
+    render(SAMPLE(text));   // preview / offline: a baked answer so the one experience always renders
+  }
+}
+document.getElementById('go').onclick = ()=>ask();
+qEl.addEventListener('keydown', e=>{ if(e.key==='Enter') ask(); });
+
+function keep(r){
+  const k=document.getElementById('kept'); if(k){ k.hidden=false; }
+  try{ fetch(API+'/console',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'note that: '+(r.caption||r.headline||'')})}); }catch(e){}
+}
+
+// voice input — the ears (Web Speech API), sovereign and optional; hidden where unsupported
+(function(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const mic = document.getElementById('mic');
+  if(!SR){ return; }
+  mic.hidden=false;
+  const rec = new SR(); rec.lang='en-US'; rec.interimResults=false; let on=false;
+  mic.onclick=()=>{ if(on){ rec.stop(); return; } try{ rec.start(); on=true; mic.setAttribute('aria-pressed','true'); }catch(e){} };
+  rec.onresult=e=>{ const t=e.results[0][0].transcript; qEl.value=t; ask(t); };
+  rec.onend=()=>{ on=false; mic.setAttribute('aria-pressed','false'); };
+})();
+
+// A baked sample so the single experience renders fully in preview (and offline). On the box the
+// real POST /console answers; this is only the fallback. COVENANT: it shows only found or computed
+// truth — public-domain Scripture (WEB) and arithmetic it actually computes here. For every other
+// door it shows the WORKFLOW SHAPE (the trail, the door, the verifier) and says plainly that the box
+// answers from the keeping; it never fabricates a definition, a lexicon entry, or a verse it lacks.
+const PREVIEW = 'On the box this is answered from the keeping — found, verified, and cited. This preview '
+              + 'shows the shape: the door it takes, the check it runs, the source it would seal.';
+
+function SAMPLE(text){
+  const t=(text||'').toLowerCase().trim();
+
+  // CHECK — a claim the engine can actually settle here: simple arithmetic, computed, not invented.
+  const m = t.match(/(-?\d+(?:\.\d+)?)\s*([x×*+\-])\s*(-?\d+(?:\.\d+)?)\s*=\s*(-?\d+(?:\.\d+)?)/);
+  if(m){
+    const a=+m[1], b=+m[3], claimed=+m[4], op=m[2];
+    const got = (op==='+')?a+b : (op==='-')?a-b : a*b;
+    const ok = Math.abs(got-claimed) < 1e-9;
+    const expr = a+' '+(op==='x'||op==='×'?'×':op)+' '+b+' = '+claimed;
+    return { intent:'check', kind:'verify', headline:expr, verdict: ok?'true':'false',
+      caption: ok ? 'Checked by exact arithmetic: the two sides agree.'
+                  : 'Checked by exact arithmetic: the left side is '+got+', not '+claimed+'.',
+      spoken: expr+(ok?' is true.':' is false; it should be '+got+'.'),
+      source:{title:'exact arithmetic', seal:true},
+      connections:['check: 12 × 12 = 144','what is the speed of light'] };
+  }
+
+  // WORD — Scripture passage, read verbatim (public domain, genuinely found).
+  if(t.indexOf('psalm 23')>=0 || t.indexOf('shepherd')>=0){
+    return { intent:'word', kind:'search', headline:'Psalm 23',
+      verses:[{verse:1,text:'The LORD is my shepherd; I shall lack nothing.'},
+              {verse:2,text:'He makes me lie down in green pastures. He leads me beside still waters.'},
+              {verse:3,text:'He restores my soul. He guides me in the paths of righteousness for his name’s sake.'}],
+      spoken:'The LORD is my shepherd; I shall lack nothing. He makes me lie down in green pastures. He leads me beside still waters. He restores my soul.',
+      source:{title:'Psalms 23 (World English Bible)', ref:'/bible.html?ref=Psalm%2023'},
+      connections:['John 10:11','the original words behind “shepherd”','Isaiah 40:11'] };
+  }
+  if(t.indexOf('john 3:16')>=0){
+    return { intent:'word', kind:'search', headline:'John 3:16',
+      verses:[{verse:16,text:'For God so loved the world, that he gave his only born Son, that whoever believes in him should not perish, but have eternal life.'}],
+      spoken:'For God so loved the world, that he gave his only born Son, that whoever believes in him should not perish, but have eternal life.',
+      source:{title:'John 3:16 (World English Bible)', ref:'/bible.html?ref=John%203:16'},
+      connections:['the original words behind “loved”','Romans 5:8','1 John 4:9'] };
+  }
+
+  // WORD — original tongue: the box reads Strong's / the lexicon; preview shows the door + source.
+  if(/\b(original|greek|hebrew|strong|aramaic)\b/.test(t) || t.indexOf('word behind')>=0){
+    return { intent:'word', kind:'word', headline:'The original words',
+      caption:PREVIEW+' The word is read in its own tongue — the lexeme, its lemma, and where it stands in Scripture.',
+      spoken:'On the box, the word is read in its original tongue and cited to the lexicon.',
+      source:{title:"Strong's / the lexicon", seal:true},
+      connections:['Psalm 23','John 3:16'] };
+  }
+
+  // FIND — define a word: the box reads the dictionary shelf; preview shows the door + source.
+  const dm = t.match(/^(?:define|definition of|what does|meaning of)\s+(.+?)(?:\s+mean)?[?.]?$/);
+  if(dm || t.indexOf('define ')===0){
+    const word = (dm && dm[1] ? dm[1] : t.replace(/^define\s+/,'')).replace(/[^a-z\- ]/gi,'').trim();
+    return { intent:'find', kind:'define', headline: word ? '“'+word+'”' : 'A word',
+      caption:PREVIEW+' A definition is read from the dictionary shelf, with its roots and sounds.',
+      spoken:'On the box, this word is defined from the dictionary and cited.',
+      source:{title:"Webster's 1913 · the dictionary shelf", seal:true},
+      connections:['the original words behind it','use it in a sentence from Scripture'] };
+  }
+
+  // KEEP — a note to keep: the scribe writes it VERBATIM. Echoing the user's own words is not inventing.
+  const nm = t.match(/^(?:note that|note:|remember that|remember:|keep this:?)\s*(.+)$/);
+  if(nm){
+    const said = nm[1].trim();
+    return { intent:'dictate', kind:'note', headline:'Kept',
+      caption:'“'+said+'”',
+      spoken:'Kept, word for word.',
+      source:{title:'your record · written verbatim'},
+      connections:['read it back','what does the keeping say about this'] };
+  }
+
+  // WALK — a situation: one next step out, with the anchor that fits. Preview frames honestly and
+  // points to an anchor verse (named, not quoted — the box fetches the verified text).
+  if(/\b(i feel|i'm|i am|anxious|afraid|worried|angry|alone|lost|tempted|should i|my (wife|husband|friend|son|daughter|boss|mother|father))\b/.test(t)){
+    return { intent:'walk', kind:'coach', headline:'One step from here',
+      caption:PREVIEW+' A situation comes in; one next step goes out — the pattern that fits, the figures who faced it, and the anchor to stand on.',
+      spoken:'On the box, this brings back one next step and the anchor that fits.',
+      source:{title:'the path · matched, not guessed'},
+      connections:['Philippians 4:6-7','Psalm 23','Matthew 6:34'] };
+  }
+
+  // default — the keeping answers; preview shows the shape.
+  return { intent:'ask', kind:'search', headline:esc(text) || 'The keeping',
+    caption:PREVIEW,
+    spoken:'On the box this is answered from the keeping, found and cited.',
+    source:{title:'the keeping'}, connections:['Psalm 23','define grace','check: 7 × 8 = 56','I feel anxious'] };
+}
+
+// open on a calm first page
+render(SAMPLE('Psalm 23'));
+document.getElementById('greet') && (document.getElementById('greet').style.display='none');
+</script>
+</body>
+</html>
