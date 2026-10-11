@@ -29,7 +29,24 @@ from concordance import voice  # noqa: E402
 from concordance.verifiers import scripture as S  # noqa: E402
 
 # book -> chapter count (the whole-book warmers we support; extend as needed)
-CHAPTERS = {"Psalms": 150, "Proverbs": 31, "Ecclesiastes": 12, "Song of Solomon": 8}
+CHAPTERS = {"Psalms": 150, "Proverbs": 31, "Ecclesiastes": 12, "Song of Solomon": 8,
+            "Matthew": 28, "Mark": 16, "Luke": 24, "John": 21,
+            "Genesis": 50, "Isaiah": 66, "Romans": 16}
+
+
+def verses_of_redletter():
+    """The WORDS IN RED - Jesus's spoken words, per verse, from the WEB \\wj markers sourced into
+    data/red_letter.json (see tools parse of the USFX). Voices the kept red-letter text itself."""
+    import json
+    import os
+    data = Path(os.environ.get("CONCORDANCE_DATA_DIR") or "data")
+    rl = data / "red_letter.json"
+    if not rl.is_file():
+        raise SystemExit("data/red_letter.json not found - source the words in red first")
+    for ref, t in json.loads(rl.read_text(encoding="utf-8")).items():
+        t = " ".join(str(t or "").split()).strip()
+        if t:
+            yield ref, t
 
 
 def _verses_of_ref(ref: str):
@@ -61,15 +78,20 @@ def main(argv=None):
     ap.add_argument("--ref", action="append", default=[],
                     help="a passage ref (chapter or verse range), repeatable; e.g. --ref 'Matthew 5'")
     ap.add_argument("--label", default="", help="a name for the --ref set, e.g. 'Sermon on the Mount'")
+    ap.add_argument("--redletter", action="store_true", help="the Words in Red (data/red_letter.json)")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
     a = ap.parse_args(argv)
-    if not a.book and not a.ref:
-        raise SystemExit("give --book <Book> or one or more --ref <passage>")
+    if not a.book and not a.ref and not a.redletter:
+        raise SystemExit("give --book <Book>, one or more --ref <passage>, or --redletter")
 
     cache = voice._cache_dir()
-    items = list(verses_of(a.book)) if a.book else list(verses_of_refs(a.ref))
-    a.book = a.book or (a.label or " + ".join(a.ref))
+    if a.redletter:
+        items = list(verses_of_redletter()); a.book = "Words in Red"
+    elif a.book:
+        items = list(verses_of(a.book))
+    else:
+        items = list(verses_of_refs(a.ref)); a.book = a.label or " + ".join(a.ref)
     total_chars = sum(len(t) for _, t in items)
     cached = sum(1 for _, t in items if (cache / (voice._digest(t) + ".mp3")).is_file())
     new = len(items) - cached
