@@ -78,6 +78,24 @@ def test_resolve_direct_then_inherited(tmp_path, monkeypatch):
     assert si_res["via"] == "inherited" and si_res["through"] == "floor:card_floor_thermodynamics"
 
 
+def test_a_placement_files_a_node_under_a_floor_for_inheritance(tmp_path, monkeypatch):
+    import concordance.chains as chains
+    monkeypatch.setattr(chains, "FLOORS", ("card_floor_acoustics", "card_floor_biology"))
+    # a filing must point at a real floor
+    bad = roots.place("stick:stick_x", "card_floor_nonsense", verify=True, data_dir=tmp_path)
+    assert bad["ok"] is False
+    roots.place("stick:stick_acoustics_waves", "card_floor_acoustics", why="acoustics", by="proposed",
+                verify=True, data_dir=tmp_path)
+    assert roots.placements_fold(tmp_path)["stick:stick_acoustics_waves"]["floor"] == "card_floor_acoustics"
+    # an uncharted stick with no direct anchor and no chart inherits through its FILING once the floor is anchored
+    roots.anchor("floor:card_floor_acoustics", ["Psalm 150:3-5"], verify=False, data_dir=tmp_path)
+    r = roots.resolve("stick:stick_acoustics_waves", get_card=lambda cid: None, stick_index={}, data_dir=tmp_path)
+    assert r["via"] == "inherited" and r["through"] == "floor:card_floor_acoustics" and r["refs"] == ["Psalm 150:3-5"]
+    # retract the filing -> back to a want
+    roots.place("stick:stick_acoustics_waves", "", verify=False, data_dir=tmp_path)
+    assert roots.resolve("stick:stick_acoustics_waves", get_card=lambda cid: None, stick_index={}, data_dir=tmp_path) is None
+
+
 def test_an_unconnected_node_stays_a_want(tmp_path, monkeypatch):
     import concordance.chains as chains
     monkeypatch.setattr(chains, "FLOORS", ("card_floor_thermodynamics",))

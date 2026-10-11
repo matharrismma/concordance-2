@@ -192,6 +192,63 @@ def coverage(data_dir: Optional[Path] = None) -> Dict[str, Any]:
                      "is the operator's discernment; the engine only suggests (roots.suggest).")}
 
 
+# ── PLACEMENTS — a light taxonomy edge: a node is FILED UNDER the floor whose subject it shares ───────
+# Inheritance needs only the floor, not a per-mark basis, so a node too far from the map to chart (an
+# uncharted stick, an unmapped domain) can still be FILED under its floor by subject — a categorization
+# the operator keeps, not a proof the engine forges. data/placements.jsonl, append-only/folded like the
+# anchors; an empty floor retracts. Marked `by` ('proposed' vs 'operator'). resolve() reads it last, so a
+# real chart or a name-match always wins over a filing.
+def _pl_path(data_dir: Optional[Path] = None) -> Path:
+    d = Path(data_dir) if data_dir else Path(os.environ.get("CONCORDANCE_DATA_DIR", "").strip() or "data")
+    return d / "placements.jsonl"
+
+
+def placements_fold(data_dir: Optional[Path] = None) -> Dict[str, Dict[str, Any]]:
+    """The current floor a node is filed under — latest write wins; an empty floor retracts."""
+    out: Dict[str, Dict[str, Any]] = {}
+    p = _pl_path(data_dir)
+    if not p.exists():
+        return out
+    with open(p, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                ev = json.loads(line)
+            except (ValueError, TypeError):
+                continue
+            node = ev.get("node")
+            if not node:
+                continue
+            floor = str(ev.get("floor") or "").strip()
+            if not floor:
+                out.pop(node, None)
+                continue
+            out[node] = {"node": node, "floor": floor, "why": ev.get("why") or "",
+                         "by": ev.get("by") or "operator", "at": ev.get("at")}
+    return out
+
+
+def place(node: str, floor: str, *, why: str = "", by: str = "operator",
+          verify: bool = True, data_dir: Optional[Path] = None) -> Dict[str, Any]:
+    """File a node under a floor (a taxonomy edge for inheritance). With verify=True the floor must be a
+    real floor on the one map, or it is refused. An empty floor retracts the filing."""
+    node = (node or "").strip()
+    floor = (floor or "").strip()
+    if not node:
+        raise ValueError("a node id is required")
+    if floor and verify and floor not in _floors_set():
+        return {"ok": False, "node": node, "refused": floor,
+                "why": "not a floor on the one map — a filing must point at a real floor"}
+    ev = {"node": node, "floor": floor, "why": why, "by": by, "at": round(time.time(), 3)}
+    p = _pl_path(data_dir)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with open(p, "a", encoding="utf-8") as f:
+        f.write(json.dumps(ev, ensure_ascii=False) + "\n")
+    return {"ok": True, **({"retracted": True} if not floor else {"placement": ev})}
+
+
 # ── INHERITANCE (move 2) — a node not directly anchored inherits the root of the floor it sits on ─────
 # The one map already holds the edges; this only reads them. Three ways a node reaches a floor, strongest
 # edge first: a STICK is CHARTED onto a node of the map (the `charts` bridge, tools/seed_charts.py); a
@@ -245,26 +302,33 @@ def stick_floor_index(get_card=None) -> Dict[str, str]:
     return idx
 
 
-def _floor_of(node: str, get_card, floors: set, stick_index: Optional[Dict[str, str]]) -> List[str]:
-    """The floor id(s) a node sits on, for inheritance — nearest first."""
+def _floor_of(node: str, get_card, floors: set, stick_index: Optional[Dict[str, str]],
+              placements: Optional[Dict[str, str]] = None) -> List[str]:
+    """The floor id(s) a node sits on, for inheritance — strongest edge first, a taxonomy FILING last."""
+    out: List[str] = []
     kind, _, raw = (node or "").partition(":")
     if kind == "domain":
         cand = f"card_floor_{raw}"
-        return [cand] if cand in floors else []
-    if kind == "stick":
+        if cand in floors:
+            out.append(cand)
+    elif kind == "stick":
         fl = (stick_index or {}).get(raw)
-        return [fl] if fl else []
-    if kind == "floor":
-        return [conn.get("to_card_id") for conn in ((get_card(raw) or {}).get("connections") or [])
+        if fl:
+            out.append(fl)
+    elif kind == "floor":
+        out += [conn.get("to_card_id") for conn in ((get_card(raw) or {}).get("connections") or [])
                 if conn.get("relationship") in ("builds_on", "part_of") and conn.get("to_card_id") in floors]
-    return []
+    placed = (placements or {}).get(node)      # the filing — last, so a real edge always wins
+    if placed and placed in floors and placed not in out:
+        out.append(placed)
+    return out
 
 
 def resolve(node: str, *, get_card=None, stick_index: Optional[Dict[str, str]] = None,
-            data_dir: Optional[Path] = None) -> Optional[Dict[str, Any]]:
+            placements: Optional[Dict[str, str]] = None, data_dir: Optional[Path] = None) -> Optional[Dict[str, Any]]:
     """A node's root — DIRECT or INHERITED. A direct anchor wins; else the node inherits the anchor of
-    the floor it sits on (the lead through the map). {node, refs, why, by, via, through} or None when the
-    node reaches no anchored floor (still a want). `by='inherited'` never passes for a kept anchor."""
+    the floor it sits on (the lead through the map, or the floor it is filed under). {node, refs, why, by,
+    via, through} or None when the node reaches no anchored floor (still a want)."""
     node = (node or "").strip()
     direct = root_of(node, data_dir)
     if direct:
@@ -274,7 +338,9 @@ def resolve(node: str, *, get_card=None, stick_index: Optional[Dict[str, str]] =
     floors = _floors_set()
     if stick_index is None and node.startswith("stick:"):
         stick_index = stick_floor_index(gc)
-    for fl in _floor_of(node, gc, floors, stick_index):
+    if placements is None:
+        placements = {n: r["floor"] for n, r in placements_fold(data_dir).items()}
+    for fl in _floor_of(node, gc, floors, stick_index, placements):
         fa = root_of(node_id("floor", fl), data_dir)
         if fa:
             return {"node": node, "refs": fa["refs"], "why": fa["why"], "by": "inherited",
@@ -290,6 +356,7 @@ def resolved_coverage(get_card=None, data_dir: Optional[Path] = None) -> Dict[st
     gc = get_card or corpus.get_card
     uni = _universe(data_dir)
     si = stick_floor_index(gc)
+    pl = {n: r["floor"] for n, r in placements_fold(data_dir).items()}
     floors = _floors_set()
     out: Dict[str, Any] = {}
     agg = {"total": 0, "direct": 0, "inherited": 0, "open": 0, "unconnected": 0}
@@ -297,7 +364,7 @@ def resolved_coverage(get_card=None, data_dir: Optional[Path] = None) -> Dict[st
         row = {"total": 0, "direct": 0, "inherited": 0, "open": 0, "unconnected": 0}
         for n in uni.get(k, []):
             row["total"] += 1
-            r = resolve(n, get_card=gc, stick_index=si, data_dir=data_dir)
+            r = resolve(n, get_card=gc, stick_index=si, placements=pl, data_dir=data_dir)
             if r and r["via"] == "direct":
                 row["direct"] += 1
             elif r:
@@ -306,7 +373,7 @@ def resolved_coverage(get_card=None, data_dir: Optional[Path] = None) -> Dict[st
                 row["open"] += 1
                 # "unconnected" is the inherit-dependent want: a stick/domain that reaches no floor at
                 # all. An open FLOOR is root-level — its fix is a direct anchor, not map-connecting.
-                if k != "floor" and not _floor_of(n, gc, floors, si):
+                if k != "floor" and not _floor_of(n, gc, floors, si, pl):
                     row["unconnected"] += 1
         out[k] = row
         for key in agg:
