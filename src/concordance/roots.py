@@ -388,6 +388,101 @@ def resolved_coverage(get_card=None, data_dir: Optional[Path] = None) -> Dict[st
                      "must first be connected to the map before it can be rooted in the Word.")}
 
 
+def _title_of(node: str, kind: str, get_card, stick_titles: Dict[str, str]) -> str:
+    raw = node.split(":", 1)[1] if ":" in node else node
+    if kind == "domain":
+        return raw.replace("_", " ")
+    if kind == "stick":
+        return stick_titles.get(node, raw.replace("stick_", "").replace("_", " "))
+    c = get_card(raw) or {}
+    return c.get("title") or raw.replace("card_floor_", "").replace("_", " ")
+
+
+def confirmations(ref: str, *, get_card=None, data_dir: Optional[Path] = None) -> Dict[str, Any]:
+    """THE CONCORDANCE for a verse — every reality-node rooted in it, DIRECTLY or by inheritance. The
+    outward direction: a verse of Scripture -> every place in the keeping's map of reality that answers
+    to it, each with how it is rooted (direct / inherited, and through which floor). Found, never
+    generated. {verse, count, nodes:[{node, kind, title, via, through}]}."""
+    want = _norm_ref(ref)
+    if not want:
+        return {"verse": ref, "count": 0, "nodes": []}
+    from . import corpus
+    gc = get_card or corpus.get_card
+    si = stick_floor_index(gc)
+    pl = {n: r["floor"] for n, r in placements_fold(data_dir).items()}
+    uni = _universe(data_dir)
+    stick_titles: Dict[str, str] = {}
+    try:
+        from . import tickstick
+        stick_titles = {("stick:" + r["id"]): (r.get("question") or r["id"])
+                        for r in tickstick.listing(data_dir)["sticks"]}
+    except Exception:  # noqa: BLE001
+        pass
+    out: List[Dict[str, Any]] = []
+    for k in KINDS:
+        for n in uni.get(k, []):
+            r = resolve(n, get_card=gc, stick_index=si, placements=pl, data_dir=data_dir)
+            if r and any(_norm_ref(x) == want for x in r["refs"]):
+                out.append({"node": n, "kind": k, "title": _title_of(n, k, gc, stick_titles),
+                            "via": r["via"], "through": r.get("through")})
+    out.sort(key=lambda d: (0 if d["via"] == "direct" else 1, d["kind"], d["title"].lower()))
+    return {"verse": ref, "count": len(out), "nodes": out}
+
+
+def entry(ref: str, *, get_card=None, data_dir: Optional[Path] = None) -> Dict[str, Any]:
+    """THE UNIFIED CONCORDANCE ENTRY — a verse and everything the keeping ties to it, in one view:
+    the TEXT, its CONFIRMATIONS in reality (the roots — the new connection), its CROSS-REFERENCES (TSK),
+    its ORIGINAL WORDS (Strong's), and the COMMENTARY. The concordance of reality woven into the
+    concordance of Scripture, keyed by the Word. Found, never generated — each dimension is a real,
+    cited public-domain source; a dimension the keeping cannot reach is honestly null, never invented."""
+    ref = (ref or "").strip()
+    out: Dict[str, Any] = {"verse": ref}
+    try:
+        from .verifiers import scripture as sc
+    except Exception:  # noqa: BLE001
+        sc = None
+    try:
+        ps = sc.read_passage(ref) if sc else {}
+        out["text"] = {"ref": ps.get("ref") or ref,
+                       "verses": [{"verse": v.get("verse"), "text": v.get("text")}
+                                  for v in (ps.get("verses") or [])][:12]}
+    except Exception:  # noqa: BLE001
+        out["text"] = None
+    try:
+        c = confirmations(ref, get_card=get_card, data_dir=data_dir)
+        out["reality"] = {"count": c["count"], "nodes": c["nodes"][:12]}
+    except Exception:  # noqa: BLE001
+        out["reality"] = {"count": 0, "nodes": []}
+    try:
+        from . import xrefs
+        xr = xrefs.for_ref(ref, limit=12)
+        out["cross_references"] = {"source": "Treasury of Scripture Knowledge",
+                                   "refs": [r["ref"] for r in (xr.get("cross_references") or [])]}
+    except Exception:  # noqa: BLE001
+        out["cross_references"] = None
+    try:
+        ow = sc.original_words(ref) if sc else {}
+        ws = ow.get("words") or []
+        tongue = "Greek" if (ws and str(ws[0].get("strongs", "")).startswith("G")) else ("Hebrew" if ws else None)
+        out["original_words"] = ({"tongue": tongue,
+                                  "words": [{"word": w.get("word"), "strongs": w.get("strongs")} for w in ws][:40]}
+                                 if ws else None)
+    except Exception:  # noqa: BLE001
+        out["original_words"] = None
+    try:
+        from . import commentary
+        cm = commentary.for_ref(ref)
+        txt = ""
+        for b in (cm.get("commentary") or []):
+            txt = b.get("text") or b.get("body") or b.get("comment") or ""
+            if txt:
+                break
+        out["commentary"] = {"source": cm.get("attribution"), "text": txt[:900]} if txt else None
+    except Exception:  # noqa: BLE001
+        out["commentary"] = None
+    return out
+
+
 def suggest(text: str, k: int = 3) -> Dict[str, Any]:
     """OFFER candidate anchors for a node from what the keeping already holds — the Words-in-Red theme
     index first (Christ's own teaching on the matter), then the concordance (a key term -> its verse),

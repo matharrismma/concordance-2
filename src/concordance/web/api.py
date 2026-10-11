@@ -814,6 +814,30 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
             return _ok(_chains.chain(root, rel=rel))
         return _err(400, "give ?root=<card_id> for a lineage, or ?a=<id>&b=<id> for where two chains connect")
 
+    if method == "GET" and path == "/roots":
+        # THE CONCORDANCE OF REALITY (Matt, 2026-10-11): the Word under the map. ?node=<id> -> the verse a
+        # node is anchored in or inherits (the LEAD); ?verse=<ref> -> every reality-node rooted in that
+        # verse (the CONCORDANCE, outward); ?coverage=1 -> how much of reality is rooted. Found, never
+        # generated — an anchor is the operator's discernment, kept, and every tie is a real verse/edge.
+        from .. import roots as _roots
+        node = (query.get("node") or "").strip()
+        verse = (query.get("verse") or query.get("ref") or "").strip()
+        weave = (query.get("weave") or "").strip()
+        if (query.get("coverage") or "").strip():
+            return _ok(_roots.resolved_coverage())
+        if weave:
+            # THE UNIFIED ENTRY — a verse woven to everything: text, reality (roots), cross-refs (TSK),
+            # original words (Strong's), commentary. Connect it all, keyed by the Word.
+            return _ok(_roots.entry(weave))
+        if node:
+            r = _roots.resolve(node)
+            return _ok(r) if r else _ok({"node": node, "rooted": False,
+                       "note": "not yet rooted in the Word — an open want (the engine suggests, the operator keeps)"})
+        if verse:
+            return _ok(_roots.confirmations(verse))
+        return _err(400, "give ?node=<floor:card_floor_x | domain:x | stick:x> for its root (the lead), "
+                         "?verse=<ref> for every node rooted there (the concordance), or ?coverage=1")
+
     if method == "GET" and path == "/benchmarks":
         # THE ENGINE MEASURES ITSELF IN PUBLIC (Gen 3 · 7): the standing benchmarks as tools/benchmarks.py
         # measured them on this node (nightly, and at every deploy) — served from the file, with its age.
@@ -3338,6 +3362,7 @@ ROUTES = [
     # since a hash, one keeping file's bytes (served raw by the handler, declared here so it is catalogued)
     {"path": "/specs", "methods": ("GET",), "api": True},   # VERIFIERS AS DATA — the checks held as specs (Gen 3 · 2)
     {"path": "/benchmarks", "methods": ("GET",), "api": True},   # THE ENGINE MEASURES ITSELF IN PUBLIC (Gen 3 · 7)
+    {"path": "/roots", "methods": ("GET",), "api": True, "rl": "read"},   # THE CONCORDANCE OF REALITY — the Word under the map (2026-10-11)
     # THE TICK STICK (2026-10-05): an open question, the marks the engine can stand behind, the fit they establish
     {"path": "/sticks", "methods": ("GET",), "api": True},
     {"path": "/stick", "methods": ("GET", "POST"), "api": True, "rl": True},
