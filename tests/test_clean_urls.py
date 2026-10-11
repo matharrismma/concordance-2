@@ -51,13 +51,14 @@ def test_agent_endpoints_and_ambiguous_pages_do_not_move():
 
 # ---- the bare homepage: SORTED BY SURFACE (Matt, 2026-09-01) ----
 
-def test_secular_bare_home_serves_the_engine():
-    # Matt, 2026-09-01: "the .com should be more secular and obviously geared to computing." "/" on the
-    # secular surface serves the engine face, not the .org family desk. Updated 2026-09-21 ("make it the
-    # front door", home_for): the bare home now serves concordance.html — "a guide to what is true", the
-    # discern-anything box over the live engine — and the manifesto (com.html) moved behind it, at /com.html.
-    assert home_for("secular", SITE, "/") == "/concordance.html"
-    assert home_for("secular", SITE, "/index.html") == "/concordance.html"
+def test_both_surfaces_land_in_the_console_hero():
+    # THE UNIFIED HERO (Matt, 2026-10-11: "the User experience is unified and we land immediately into our
+    # hero."): both faces now land in THE CONSOLE — the one augmented-Bible surface. The prior secular
+    # front door (concordance.html) and the witness desk (index.html) are the fallbacks (see below).
+    assert home_for("secular", SITE, "/") == "/console.html"
+    assert home_for("secular", SITE, "/index.html") == "/console.html"
+    assert home_for("witness", SITE, "/") == "/console.html"
+    assert home_for("witness", SITE, "/index.html") == "/console.html"
 
 
 def test_home_leaves_every_other_path_untouched():
@@ -66,10 +67,13 @@ def test_home_leaves_every_other_path_untouched():
     assert home_for("secular", SITE, "/about") == "/about"
 
 
-def test_witness_home_is_the_desk():
-    # .org (witness) keeps the desk — Scripture, wisdom, the family — the foundation named plain.
-    assert home_for("witness", SITE, "/") == "/"
-    assert home_for("witness", SITE, "/index.html") == "/index.html"
+def test_home_falls_back_when_the_console_is_absent(tmp_path):
+    # Reversible and guarded: with no console.html, the secular face falls back to its front door and the
+    # witness face to its desk — never a 500.
+    (tmp_path / "concordance.html").write_text("x", encoding="utf-8")
+    (tmp_path / "index.html").write_text("x", encoding="utf-8")
+    assert home_for("secular", tmp_path, "/") == "/concordance.html"
+    assert home_for("witness", tmp_path, "/") == "/"
 
 
 def test_clean_path_serves_the_html_twin():

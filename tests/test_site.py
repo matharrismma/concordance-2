@@ -125,7 +125,12 @@ def test_every_page_offers_a_way_home():
               # reader.html (the tortoise reader) and crossing.html (an Atlas single-view) carry their
               # own minimal home link, not the shared nh-home.js; concordance.html is the LIVE .com front
               # door served at / by home_for() (2026-09-21), reached as the domain root, not via nh-home.js.
-              "reader.html", "crossing.html", "concordance.html"}
+              "reader.html", "crossing.html", "concordance.html",
+              # THE UNIFIED HERO (2026-10-11): console.html carries its own brand-home link (href="/"),
+              # not the shared nh-home.js; it is served at / by home_for() on both faces. bridge.html is
+              # the operator console with its own home control; keep.html is the operator sign-in shell
+              # that redirects to bridge.html (a thin redirect, not a page that carries nh-home.js).
+              "console.html", "bridge.html", "keep.html"}
     missing = [f.name for f in SITE.glob("*.html")
                if f.name != "index.html" and f.name not in hidden
                and "nh-home.js" not in f.read_text(encoding="utf-8")]
@@ -203,7 +208,10 @@ def test_the_palette_reaches_every_public_page():
                # concordance.html — the LIVE .com front door, served at / on the secular surface by
                # home_for() (Matt, 2026-09-21: "make it the front door"). A human reaches it as the domain
                # root, never a /concordance.html <a href> — the same surface-routing excuse as com.html.
-               "concordance.html"}
+               "concordance.html",
+               # console.html — THE UNIFIED HERO, served at / by home_for() on both faces (2026-10-11);
+               # bridge.html — the operator console. Reached by surface routing / redirect, not the palette.
+               "console.html", "bridge.html"}
     unreachable = sorted(
         p.name for p in SITE.glob("*.html") if p.name not in listed and p.name not in excused)
     assert not unreachable, f"no way to reach: {unreachable} (list them or excuse them by name)"

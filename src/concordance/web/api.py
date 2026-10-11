@@ -4274,11 +4274,19 @@ def home_for(surface: str, site, path: str) -> str:
       family, the foundation named plain. (A religious-forward .org pass is the next step.)
     Guarded on the file existing so a missing concordance.html falls back to the manifesto, then the
     desk, never a 500. Reversible: point this back at /com.html (or drop the branch) to restore."""
-    if surface == "secular" and path in ("/", "/index.html"):
-        if resolve_site_file(site, "/concordance.html"):
-            return "/concordance.html"
-        if resolve_site_file(site, "/com.html"):
-            return "/com.html"
+    # THE UNIFIED HERO (Matt, 2026-10-11: "the User experience is unified and we land immediately into our
+    # hero."): BOTH faces now land in THE CONSOLE - the one augmented-Bible surface you can listen to, or
+    # study to the inner workings of reality. One experience, reached by asking, not a menu. Guarded on the
+    # file; falls back to the prior secular front door, then the desk (index.html), never a 500. Reversible:
+    # drop the console branch to restore the two-home behaviour.
+    if path in ("/", "/index.html"):
+        if resolve_site_file(site, "/console.html"):
+            return "/console.html"
+        if surface == "secular":
+            if resolve_site_file(site, "/concordance.html"):
+                return "/concordance.html"
+            if resolve_site_file(site, "/com.html"):
+                return "/com.html"
     return path
 
 

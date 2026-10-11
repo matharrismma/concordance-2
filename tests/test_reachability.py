@@ -42,6 +42,9 @@ AGENT_ONLY = {
     "/places", "/push/key", "/push/subscribe", "/shelf", "/steward/budget",
     "/steward/cost-destroyed", "/study", "/study_find", "/teachings", "/thread/verify",
     "/want", "/works/artifact", "/works/verify",
+    # FORAGE (2026-10-11): /papers searches current theories across all domains (OpenAlex) for a
+    # structural fit to an open want — the research loop's agent/operator endpoint, not a page's.
+    "/papers",
     "/health",
     # THE OPENAI-COMPATIBLE DOOR (2026-10-03): a client's door, not a page's — announced in llms.txt
     "/v1/chat/completions", "/v1/models",
@@ -191,6 +194,10 @@ UNLISTED_PAGES = {
     # explore.html (which IS linked, from com.html + the Ctrl-K palette). Kept as lightweight direct-URL
     # and share/print targets, each with its own "← narrowhighway.com" home link; not linked into the nav.
     "atlas.html", "bridges.html", "calculations.html", "domains.html", "one_body.html", "spiral.html",
+    # THE UNIFIED HERO (2026-10-11): console.html is served at / by home_for() on BOTH faces (the domain
+    # root — surface routing the static link-checker cannot see); bridge.html is the operator console,
+    # reached via keep.html's redirect. Neither is a nav <a href>, same limit as com.html.
+    "console.html", "bridge.html",
 }
 
 
