@@ -65,6 +65,19 @@
   .conn button:hover, .conn .go:hover{ color:var(--gold) }
   .conn button::before, .conn .go::before{ content:"→ "; color:var(--gold) }
   .conn .go::after{ content:" ↗"; color:var(--dim); font-size:.8em }  /* leaves the console to a reader page */
+  /* the woven entry — the Word connected to everything: reality, cross-refs, original, commentary */
+  .weave{ border-top:1px solid var(--line); margin:1.4rem 0 0; padding-top:1rem }
+  .weave .wlab{ font-family:system-ui,sans-serif; font-size:.68rem; letter-spacing:.14em; text-transform:uppercase;
+                color:var(--gold); margin:0 0 1rem }
+  .weave .dim-row{ margin:0 0 1rem }
+  .weave .dim-row .k{ font-family:system-ui,sans-serif; font-size:.66rem; letter-spacing:.1em; text-transform:uppercase;
+                      color:var(--dim); display:block; margin:0 0 .3rem }
+  .weave .chip{ font:inherit; font-size:.96rem; background:none; border:0; border-bottom:1px solid var(--line);
+                color:var(--ink); padding:.15rem 0; margin:0 .9rem .2rem 0; cursor:pointer; display:inline-block }
+  .weave .chip:hover{ color:var(--gold) }
+  .weave .orig{ font-size:1.25rem; line-height:1.9; direction:ltr }
+  .weave .cmt{ font-size:1.02rem; color:var(--ink) }
+  .weave .cmt .who{ color:var(--dim); font-size:.84rem; font-style:italic; display:block; margin-top:.3rem }
   /* the ask bar — type or speak */
   .ask{ position:sticky; bottom:0; background:var(--paper); border-top:1px solid var(--rule);
         padding:.8rem 0 calc(.4rem + env(safe-area-inset-bottom)); display:flex; gap:.5rem; align-items:center }
@@ -208,7 +221,57 @@ function render(r){
   const rp=document.getElementById('replay'); if(rp) rp.onclick=()=>speak(window._lastSpoken);
   const kp=document.getElementById('keep'); if(kp) kp.onclick=()=>keep(r);
   pageEl.querySelectorAll('.conn [data-ask]').forEach(b=> b.onclick=()=>ask(b.dataset.ask));
+  // THE WORD CONNECTED — for a passage, weave in the unified entry (reality, cross-refs, original, commentary)
+  const wref = weaveRefOf(r);
+  if(wref){ const w=document.createElement('div'); w.id='weave'; pageEl.appendChild(w); weaveInto(wref, w); }
   if(MODE==='listen') speak(window._lastSpoken);
+}
+
+function weaveRefOf(r){
+  const scripture = (r.verses && r.verses.length) || r.kind==='scripture' || r.intent==='word' || r.intent==='read';
+  if(!scripture) return null;
+  const h = String(r.headline||'').trim();
+  if(/\d+\s*:\s*\d+/.test(h)) return h;                                   // already a verse
+  if(r.verses && r.verses.length) return h.replace(/\s+/g,' ')+':'+r.verses[0].verse;  // chapter -> verse 1
+  return h || null;
+}
+
+// fetch the unified entry (GET /roots?weave=) and render it as a calm, static panel. Found text only:
+// on the box the real sources answer; offline it shows an honest note (never fabricated connections).
+async function weaveInto(ref, el){
+  let d;
+  try{ const resp = await fetch(API+'/roots?weave='+encodeURIComponent(ref)); if(!resp.ok) throw 0; d = await resp.json(); }
+  catch(e){ d = WEAVE_SAMPLE(ref); }
+  if(!d) return;
+  const parts = [];
+  const rz = (d.reality && d.reality.nodes) || [];
+  if(rz.length) parts.push('<div class="dim-row"><span class="k">in reality · '+esc(d.reality.count||rz.length)+' rooted here</span>'
+    + rz.map(n=>'<button class="chip" data-ask="'+esc(n.title)+'">'+esc(n.title)+'</button>').join('')+'</div>');
+  const xr = (d.cross_references && d.cross_references.refs) || [];
+  if(xr.length) parts.push('<div class="dim-row"><span class="k">cross-references · treasury of scripture</span>'
+    + xr.map(x=>'<button class="chip" data-ask="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div>');
+  const ow = d.original_words;
+  if(ow && ow.words && ow.words.length) parts.push('<div class="dim-row"><span class="k">in the original · '+esc(ow.tongue||'')+'</span>'
+    + '<div class="orig">'+ ow.words.map(w=>esc(w.word)).join(' ') +'</div></div>');
+  const cm = d.commentary;
+  if(cm && cm.text) parts.push('<div class="dim-row"><span class="k">commentary</span><div class="cmt">'+esc(cm.text)
+    + '<span class="who">'+esc(cm.source||'')+'</span></div></div>');
+  if(!parts.length && d.note) parts.push('<p class="dim">'+esc(d.note)+'</p>');
+  if(!parts.length) return;
+  el.innerHTML = '<div class="weave"><div class="wlab">the Word connects</div>'+parts.join('')+'</div>';
+  el.querySelectorAll('.chip[data-ask]').forEach(b=> b.onclick=()=>ask(b.dataset.ask));
+}
+
+// offline/preview fallback. Only Genesis 1:1 carries baked data — captured verbatim from the live box
+// (real WEB text, real TSK refs, real Hebrew, real Matthew Henry). Every other verse shows an honest note.
+function WEAVE_SAMPLE(ref){
+  const r=(ref||'').toLowerCase();
+  if(r.indexOf('genesis 1:1')>=0) return {
+    reality:{count:4,nodes:[{title:'The Standard Model'},{title:'The fine-structure constant'},{title:'atomic'}]},
+    cross_references:{refs:['John 1:1-3','Hebrews 11:3','Isaiah 45:18','Revelation 4:11','Colossians 1:16-17']},
+    original_words:{tongue:'Hebrew',words:[{word:'בְּרֵאשִׁית'},{word:'בָּרָא'},{word:'אֱלֹהִים'},{word:'אֵת'},{word:'הַשָּׁמַיִם'}]},
+    commentary:{source:"Matthew Henry's Commentary",text:'In these verses we have the work of creation in its epitome.'}};
+  return {note:'The Word’s connections — its cross-references, original words, and confirmations in reality — load from the keeping on the box.'};
 }
 
 async function ask(text){
@@ -279,6 +342,13 @@ function SAMPLE(text){
       spoken:'The LORD is my shepherd; I shall lack nothing. He makes me lie down in green pastures. He leads me beside still waters. He restores my soul.',
       source:{title:'Psalms 23 (World English Bible)', ref:'/bible.html?ref=Psalm%2023'},
       connections:['John 10:11','the original words behind “shepherd”','Isaiah 40:11'] };
+  }
+  if(t.indexOf('genesis 1:1')>=0){
+    return { intent:'word', kind:'scripture', headline:'Genesis 1:1',
+      verses:[{verse:1,text:'In the beginning, God created the heavens and the earth.'}],
+      spoken:'In the beginning, God created the heavens and the earth.',
+      source:{title:'Genesis 1:1 (World English Bible)', ref:'/bible.html?ref=Genesis%201:1'},
+      connections:['John 1:1-3','Colossians 1:16-17','Hebrews 11:3'] };
   }
   if(t.indexOf('john 3:16')>=0){
     return { intent:'word', kind:'search', headline:'John 3:16',
