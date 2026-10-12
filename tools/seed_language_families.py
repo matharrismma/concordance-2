@@ -98,12 +98,48 @@ FAMILIES = [
 ]
 
 
+# COGNATE CONFLUENCES - one etymon descending down several branches and meeting at its proto-form (the
+# confluence, exactly as Indo-European's cognates work). Austronesian is the comparative method's showcase:
+# the numerals and body-part words are regular across Formosan (the Taiwan homeland) and Malayo-Polynesian.
+# (fam, slug, headword, proto, gloss, {branch_slug: attested reflexes}). Reflexes are attested; the proto
+# is a reconstruction (a postulate, not sealed). More families' cognates are a continuing want.
+COGNATES = [
+    ("austronesian", "mata", "mata", "*mata (Proto-Austronesian)", "eye",
+     {"formosan": "Amis mata", "malayo_polynesian": "Malay mata, Tagalog mata, Malagasy maso, Hawaiian maka, Māori mata, Fijian mata"}),
+    ("austronesian", "lima", "lima", "*lima (Proto-Austronesian)", "five; hand",
+     {"formosan": "Amis lima", "malayo_polynesian": "Malay lima, Tagalog lima, Hawaiian lima, Māori rima, Fijian lima, Malagasy dimy"}),
+    ("austronesian", "telu", "telu", "*telu (Proto-Austronesian)", "three",
+     {"formosan": "Amis tulu", "malayo_polynesian": "Tagalog tatlo, Malagasy telo, Hawaiian kolu, Māori toru, Fijian tolu"}),
+]
+
+
 def _floor_id(fam: str) -> str:
     return f"card_floor_{fam}"
 
 
 def _branch_id(fam: str, slug: str) -> str:
     return f"card_{fam}_branch_{slug}"
+
+
+def _cognate_id(fam: str, slug: str) -> str:
+    return f"card_{fam}_cognate_{slug}"
+
+
+def cognate_card(fam, name, slug, head, proto, gloss, reflexes) -> dict:
+    refl = "; ".join(f"{b.replace('_', '-')}: {f}" for b, f in reflexes.items())
+    return {
+        "id": _cognate_id(fam, slug), "kind": "reference",
+        "title": f"{head} — a cognate across {name} ({proto})",
+        "body": (f"The word for '{gloss}', one etymon descending down several branches of {name} and meeting at the "
+                 f"reconstructed {proto}. Reflexes (attested): {refl}. The reflexes are attested by the comparative "
+                 f"method; {proto} is a reconstruction (a postulate, not sealed). This cognate is where the branches "
+                 f"that carry it connect - a confluence on the {name} floor."),
+        "source": _src(name), "shelf": "codex", "box": "cognate",
+        "bands": [name.lower(), "cognate", head, "etymology", "linguistics"],
+        "subject": head, "connections": [], "author": "engine", "created_at": 0.0, "updated_at": 0.0,
+        "visibility": "public", "lifecycle_stage": "public", "volatility": "permanent", "surface": "secular",
+        "generated": False,
+    }
 
 
 def _src(name: str) -> dict:
@@ -150,6 +186,9 @@ def _edge(a, b, rel, ev) -> dict:
     return {"a": a, "b": b, "relationship": rel, "evidence": ev}
 
 
+_FAM_NAME = {f[0]: f[1] for f in FAMILIES}
+_FAM_BRANCHES = {f[0]: {b[0] for b in f[3]} for f in FAMILIES}
+
 CARDS: List[dict] = []
 BRIDGES: List[dict] = []
 for _fam, _name, _proto, _branches in FAMILIES:
@@ -160,6 +199,15 @@ for _fam, _name, _proto, _branches in FAMILIES:
         CARDS.append(branch_card(_fam, _name, _slug, _bname, _langs))
         BRIDGES.append(_edge(_branch_id(_fam, _slug), _fid, "part_of",
                              f"a branch (tree) of the {_name} family: {_bname}"))
+
+# cognate confluences: each cognate builds_on every branch that carries it, so intersect(branch, branch)
+# over `enables` lands on the cognate - where the branches of that family meet (the IE confluence pattern)
+for _fam, _slug, _head, _proto, _gloss, _reflexes in COGNATES:
+    _name = _FAM_NAME[_fam]
+    CARDS.append(cognate_card(_fam, _name, _slug, _head, _proto, _gloss, _reflexes))
+    for _b in _reflexes:
+        BRIDGES.append(_edge(_cognate_id(_fam, _slug), _branch_id(_fam, _b), "builds_on",
+                             f"{_head}: the {_b.replace('_', '-')} reflexes {_reflexes[_b]}"))
 
 FLOOR_IDS = [_floor_id(f[0]) for f in FAMILIES]
 
@@ -191,8 +239,9 @@ def main() -> int:
     for e in errs:
         print("  VALIDATION:", e)
     if check:
+        _nbranch = len(CARDS) - len(FAMILIES) - len(COGNATES)
         print(f"[check] {len(FAMILIES)} families, {len(CARDS)} cards "
-              f"({len(FAMILIES)} floors + {len(CARDS) - len(FAMILIES)} branches), {len(BRIDGES)} edges; "
+              f"({len(FAMILIES)} floors + {_nbranch} branches + {len(COGNATES)} cognates), {len(BRIDGES)} edges; "
               f"{'OK' if not errs else 'ERRORS'}")
         print("  floor ids:", ", ".join(FLOOR_IDS))
         return 1 if errs else 0
