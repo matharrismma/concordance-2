@@ -336,11 +336,25 @@ def resolve_domain(text: str, k: int = 3, margin: float = 0.34, floor: float = 2
 
     top_dom, top_score = ranked[0]
     second = ranked[1][1] if len(ranked) > 1 else 0.0
+    # BORN RULE + LOGARITHMS (Matt, 2026-10-12), SURFACED as a first-class confidence signal: route by
+    # amplitude SQUARED, normalized to a probability distribution over the candidates; entropy (logs) is
+    # the ambiguity, crosstalk the runner-up's share. The DECISION keeps the proven pairwise margin
+    # (lead = 1 - second/top >= margin) — which IS this confidence for two candidates. Measured: swapping
+    # the decision to the full-distribution confidence only DEFERS more many-way ties (route 81.4% ->
+    # 77.8%) with invariance flat, no clear gain for a resolver the answer path already masks — so the
+    # math says keep the decision and EXPOSE the signal (for the FIND door, display, and a future,
+    # recall-measured rework). See the validated design in memory.
+    amps = [max(0.0, s) ** 2 for _, s in ranked[:max(k, 3)]]
+    _Z = sum(amps) or 1.0
+    probs = [a / _Z for a in amps]
+    entropy = -sum(p * math.log2(p) for p in probs if p > 0.0)
+    meta = {"confidence": round(probs[0] if probs else 0.0, 3), "entropy": round(entropy, 3),
+            "crosstalk": round(second / top_score, 3) if top_score else 0.0}
     # Name a single domain only when the leader is strong AND clearly ahead; else ask.
     lead = (top_score - second) / top_score if top_score else 0.0
     if top_score >= floor and (len(ranked) == 1 or lead >= margin):
         return {"query": t, "crisis": False, "candidates": cands, "decision": top_dom,
-                "ask": False, "reason": f"{top_dom}: matched {cands[0]['why']}"}
+                "ask": False, "reason": f"{top_dom}: matched {cands[0]['why']}", **meta}
     # Basis overlap, not genuine ambiguity: if the SAME term drove both leaders ("molar mass" for
     # chemistry AND periodic_table), that is one signal split across overlapping domains, not two
     # interpretations — route to the stronger. The sine/cosine lesson: this tie is non-orthogonality,
@@ -348,7 +362,7 @@ def resolve_domain(text: str, k: int = 3, margin: float = 0.34, floor: float = 2
     # DIFFERENT terms is a real ambiguity and still asks, below.
     if top_score >= floor and len(cands) > 1 and (set(cands[0]["why"]) & set(cands[1]["why"])):
         return {"query": t, "crisis": False, "candidates": cands, "decision": top_dom, "ask": False,
-                "reason": f"{top_dom}: {cands[0]['why']} (shared term across overlapping domains, strongest wins)"}
+                "reason": f"{top_dom}: {cands[0]['why']} (shared term across overlapping domains, strongest wins)", **meta}
     # Vocabulary was too weak to name a domain (below the floor): try the structural form before
     # giving up. A genuine near-tie between real domains (top >= floor) still asks — never guessed.
     if top_score < floor:
@@ -356,9 +370,9 @@ def resolve_domain(text: str, k: int = 3, margin: float = 0.34, floor: float = 2
         if dom:
             return {"query": t, "crisis": False,
                     "candidates": [{"domain": dom, "score": 2.6, "why": ["numeric form"]}] + cands,
-                    "decision": dom, "ask": False, "reason": f"{dom}: a bare numeric/arithmetic form"}
+                    "decision": dom, "ask": False, "reason": f"{dom}: a bare numeric/arithmetic form", **meta}
     return {"query": t, "crisis": False, "candidates": cands, "decision": None, "ask": True,
-            "reason": "more than one domain fits — ask which: " + ", ".join(c["domain"] for c in cands)}
+            "reason": "more than one domain fits — ask which: " + ", ".join(c["domain"] for c in cands), **meta}
 
 
 def domains() -> List[str]:

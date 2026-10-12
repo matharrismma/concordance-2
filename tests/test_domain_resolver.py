@@ -48,3 +48,19 @@ if __name__ == "__main__":
         fn()
         print("  ok ", fn.__name__)
     print("domain-resolver tests passed.")
+
+
+def test_born_confidence_and_entropy_are_surfaced_and_separate_confident_from_ambiguous():
+    """Matt's seed (2026-10-12): the resolver surfaces a Born-rule confidence (amplitude squared,
+    normalized) and its entropy (logs). A confident route reads high confidence / low entropy; a tie
+    reads low confidence / high entropy. The DECISION is unchanged (the pairwise margin); this is the
+    signal exposed for the FIND door and a future measured rework."""
+    c = resolve_domain("is 17 prime")
+    assert c["decision"] == "number_theory"
+    assert c["confidence"] >= 0.70 and c["entropy"] <= 1.0
+    a = resolve_domain("the speed of light is 299792458 m/s")
+    assert a["decision"] is None                        # a genuine tie still asks
+    assert a["confidence"] <= 0.5 and a["entropy"] >= 1.2
+    # every candidate-bearing result carries the three signals
+    for field in ("confidence", "entropy", "crosstalk"):
+        assert field in c and field in a
