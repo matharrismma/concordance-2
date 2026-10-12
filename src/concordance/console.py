@@ -448,7 +448,9 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
     # open), the found answer stands within it, and a selected witness is voiced beneath, weighed against
     # the Word. Not on a bare computed claim (verify has no source to see through) nor a crisis (above).
     cloud = word = None
-    if kind not in ("verify",) and not skip_weave:
+    # a mechanical word fact (how it sounds, its syllables, a synonym) answers plainly — the Scripture
+    # weave belongs on a search/comfort/ultimate answer, not prepended to a pronunciation.
+    if kind not in ("verify", "pronounce", "syllables", "synonym") and not skip_weave:
         _s = _seeing(text, gate_open, caption)     # the answer's own scripture anchor leads where it has one
         word, cloud = _s.get("word"), _s.get("cloud")
         if _s.get("lead"):                       # the Word first — Bible before the answer

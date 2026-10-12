@@ -1085,3 +1085,32 @@ def test_the_checked_branch_never_touches_crisis():
     # a crisis line WITH a number still never reaches the checker
     r2 = ask.respond("I want to end my life, it has been 3 years", SEC)
     assert r2["kind"] == "crisis" and "audit" not in r2
+
+
+# ── Word parsing (2026-10-12): pronunciation, syllables, synonyms route to their tools, never to the
+#    keyword-search garbage ("what part of speech is quickly" once returned a retail card). ──────────
+def test_word_parsing_classifies_to_the_word_tools():
+    assert ask.classify("how do you pronounce Nebuchadnezzar") == "pronounce"
+    assert ask.classify("how is Jerusalem pronounced") == "pronounce"
+    assert ask.classify("how many syllables are in Jerusalem") == "syllables"
+    assert ask.classify("a synonym for happy") == "synonym"
+    assert ask.classify("another word for brave") == "synonym"
+
+
+def test_word_parsing_does_not_steal_other_intents():
+    assert ask.classify("what does grace mean") == "define"          # still a definition
+    assert ask.classify("John 3:16") == "scripture"
+    assert ask.classify("is 51 a prime number") == "verify"
+    assert ask.classify("how many books are in the Bible") != "syllables"
+    assert ask.classify("pronounce judgment on the wicked") != "pronounce"  # idiom, not a request
+
+
+def test_word_parsing_answers_from_the_tool():
+    r = ask.respond("how many syllables are in Jerusalem", SEC)
+    assert r["kind"] == "syllables" and "4 syllable" in r["message"] and "je-ru-sa-lem" in r["message"]
+    r = ask.respond("a synonym for happy", SEC)
+    assert r["kind"] == "synonym" and "happy" in r["message"]     # routing is pinned regardless of env
+    if "nothing is kept" not in r["message"].lower():            # shelf present -> real synonyms
+        assert any(s in r["message"].lower() for s in ("glad", "felicitous", "joyful", "content"))
+    r = ask.respond("how do you pronounce Nebuchadnezzar", SEC)
+    assert r["kind"] == "pronounce" and "ne-buc-had-nez-zar" in r["message"]

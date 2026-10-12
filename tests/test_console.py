@@ -318,6 +318,19 @@ def test_a_topical_query_still_renders_the_card_normally(monkeypatch):
     assert "check that one yet" not in r["headline"].lower()
 
 
+def test_a_word_fact_answer_leads_plainly_without_a_verse_prepend(monkeypatch):
+    """A mechanical word fact (pronunciation/syllables/synonym) must answer plainly — the Scripture
+    weave is skipped for these kinds, so "how many syllables in Jerusalem" leads with the count, not a
+    prepended verse about Jerusalem."""
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "syllables", "generated": False,
+        "message": "“Jerusalem” has 4 syllables: je-ru-sa-lem.",
+        "source": {"title": "the syllable guide"}})
+    r = console.dispatch("how many syllables are in Jerusalem", SEC)
+    assert "4 syllable" in r["spoken"]
+    assert r["spoken"].lstrip().startswith("“Jerusalem”")          # leads with the answer, no verse first
+
+
 def test_intake_keeps_the_location_not_the_blob():
     a = console.intake_artifact(source_location="/sd/photos/well_pump.jpg", kind="image",
                                 extracted_text="Shurflo 9300, 24V")

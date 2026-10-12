@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import re
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
 
 from . import corpus
 from .config import EngineConfig
@@ -820,6 +820,40 @@ def define_term(text: str) -> Optional[str]:
     return None
 
 
+# WORD PARSING (2026-10-12): pronunciation, syllables, synonyms — each a WORD request that must route to
+# its sovereign tool (pronounce / thesaurus), never to keyword search (which returned garbage: "what
+# part of speech is quickly" -> a retail card; "how do you pronounce Nebuchadnezzar" -> empty). The
+# target is a SINGLE trailing word and the trigger phrase is specific, so this is 0-FP; when the tool
+# holds nothing for the word, respond() gives an honest miss, never a guess.
+_WP_WORD = r"['\"]?(?P<w>[A-Za-z][A-Za-z'\-]{1,30})['\"]?"
+_WP_PRON_AFTER = re.compile(
+    r"\b(?:how\s+(?:do\s+(?:you|i|we|they)\s+|to\s+)?(?:pronounce|say)|the\s+pronunciation\s+of)\s+"
+    r"(?:the\s+(?:word|name)\s+)?" + _WP_WORD, re.I)
+_WP_PRON_BEFORE = re.compile(
+    r"\bhow\s+is\s+(?:the\s+(?:word|name)\s+)?" + _WP_WORD + r"\s+pronounced\b", re.I)
+_WP_SYLL = re.compile(
+    r"\b(?:how\s+many\s+syllables?\s+(?:are\s+|does\s+|is\s+)?(?:in|of)|syllables?\s+(?:in|of)|"
+    r"syllable\s+count\s+(?:of|for))\s+(?:the\s+(?:word|name)\s+)?" + _WP_WORD, re.I)
+_WP_SYN = re.compile(
+    r"\b(?:(?:a\s+|an\s+|another\s+|some\s+|the\s+)?synonyms?\s+(?:for|of)|another\s+word\s+for|"
+    r"words?\s+(?:that\s+mean|meaning)\s+the\s+same\s+as|a\s+word\s+similar\s+to)\s+"
+    r"(?:the\s+word\s+)?" + _WP_WORD, re.I)
+
+
+def word_parse_intent(text: str) -> Tuple[Optional[str], Optional[str]]:
+    """(kind, word) for a pronunciation / syllable / synonym request, else (None, None). 0-FP: a
+    specific trigger plus a single trailing word. respond() gives an honest miss if the tool is empty."""
+    t = (text or "").strip()
+    for pat, kind in ((_WP_PRON_AFTER, "pronounce"), (_WP_PRON_BEFORE, "pronounce"),
+                      (_WP_SYLL, "syllables"), (_WP_SYN, "synonym")):
+        m = pat.search(t)
+        if m:
+            w = (m.group("w") or "").strip("-' ")
+            if w and re.fullmatch(r"[A-Za-z][A-Za-z'\-]{1,30}", w):
+                return kind, w
+    return None, None
+
+
 # Understanding what they're ASKING — the subject is what remains when the question-scaffolding is
 # taken away. "how far away is the moon" is a question about the MOON; searching the whole sentence
 # lets "far/away/is/the" drown it (and even mis-predict the deck). We keep the content words.
@@ -1172,6 +1206,9 @@ def classify(text: str) -> str:
         return "ultimate"
     if _wants_resourceful(text or ""):     # "what can I do with what I have" → the practical keeping
         return "resourceful"
+    _wp, _ = word_parse_intent(text or "")  # "pronounce X" / "syllables in X" / "synonym for X" → the word tools
+    if _wp:
+        return _wp
     if define_term(text or ""):            # "what does X mean" / "define X" → a term lookup, not FTS
         return "define"
     if _pins.looks_like_note(text or ""):
@@ -1562,6 +1599,43 @@ def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
         return {**base, "message": ("The meaning of “" + term + "”, as it is kept:")
                 if hits else ("Nothing is kept under “" + term + "” yet."),
                 "results": [corpus._brief(c) for c in hits]}
+
+    if kind in ("pronounce", "syllables", "synonym"):
+        # WORD PARSING — route to the sovereign tool, answer from what it holds, honest miss otherwise.
+        _w = word_parse_intent(text)[1] or ""
+        if kind == "pronounce":
+            from . import pronounce as _pron
+            try:
+                g = _pron.guide(_w) if _w else {}
+            except Exception:  # noqa: BLE001
+                g = {}
+            resp = (g.get("respelling") or "").strip()
+            msg = (f"“{_w}” is said {resp}." if resp else f"I can’t sound out “{_w}” yet.")
+            return {**base, "message": msg,
+                    "source": {"title": "the pronunciation guide — from the tongues tool"}}
+        if kind == "syllables":
+            from . import pronounce as _pron
+            try:
+                syl = _pron.syllables(_w) if _w else []
+            except Exception:  # noqa: BLE001
+                syl = []
+            if syl:
+                n = len(syl)
+                msg = f"“{_w}” has {n} syllable" + ("s" if n != 1 else "") + ": " + "-".join(syl) + "."
+            else:
+                msg = f"I can’t break “{_w}” into syllables yet."
+            return {**base, "message": msg, "source": {"title": "the syllable guide"}}
+        # synonym
+        from . import thesaurus as _th
+        try:
+            syns = _th.synonyms(_w, limit=8) if _w else []
+        except Exception:  # noqa: BLE001
+            syns = []
+        if syns:
+            msg = f"Words kept as synonyms for “{_w}”: " + ", ".join(syns) + "."
+        else:
+            msg = f"Nothing is kept as a synonym for “{_w}” yet."
+        return {**base, "message": msg, "source": {"title": "the thesaurus"}}
 
     if kind == "word_study" and witness:
         from .verifiers import scripture
