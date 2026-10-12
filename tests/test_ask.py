@@ -1130,3 +1130,16 @@ def test_a_leading_article_plus_number_is_not_a_scripture_reference():
     # real references are untouched
     assert ask.find_ref("Genesis 10") == "Genesis 10"
     assert ask.find_ref("read Romans 8") == "Romans 8"
+
+
+def test_etymology_questions_route_to_the_etymology_shelf():
+    """2026-10-12: "where does the word telephone come from" / "the etymology of democracy" route to the
+    etymology shelf, not keyword search (which returned a Chinese-characters card). Narrow: the broader
+    "where does X come from" must say "the word", so science/geography questions are never mistaken."""
+    assert ask.classify("where does the word telephone come from") == "etymology"
+    assert ask.classify("the etymology of democracy") == "etymology"
+    assert ask.classify("the origin of the word salary") == "etymology"
+    # not a word-origin question -> never etymology
+    assert ask.classify("where does rain come from") != "etymology"
+    assert ask.classify("the origin of life") != "etymology"
+    assert ask.classify("where does the Nile come from") != "etymology"

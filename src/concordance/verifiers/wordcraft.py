@@ -182,6 +182,14 @@ def _shelf_card_of(word: str, shelf: str, prefix: str, must_have: str) -> Option
     return None
 
 
+def etymology_of(word: str) -> List[str]:
+    """The etymology texts Webster 1913 holds for a word (the bracketed [ … ] derivations), or [] when
+    the word is not on the keeping's etymology shelf (or no corpus is loaded). Found, never generated —
+    the peer of `define` (meaning) and `pronounce` (sound), reading the etymology shelf."""
+    card = _shelf_card_of(str(word or ""), "etymology", "card_src_etym_", "etymology")
+    return etymologies_from_body(str(card.get("body") or "")) if card else []
+
+
 def _pronunciation_of(word: str) -> Optional[Tuple[str, str]]:
     """(ARPABET, source label) — the FIRST pronunciation on the keeping's pronunciation shelf, or None."""
     card = _shelf_card_of(word, "pronunciation", "card_src_pron_", "(ARPABET)")

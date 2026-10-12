@@ -850,6 +850,12 @@ _WP_SYN = re.compile(
     r"\b(?:(?:a\s+|an\s+|another\s+|some\s+|the\s+)?synonyms?\s+(?:for|of)|another\s+word\s+for|"
     r"words?\s+(?:that\s+mean|meaning)\s+the\s+same\s+as|a\s+word\s+similar\s+to)\s+"
     r"(?:the\s+word\s+)?" + _WP_WORD, re.I)
+# ETYMOLOGY (the question form -> the etymology shelf). "etymology of X" is unambiguous; the broader
+# "origin of / where does X come from" is required to say "the word" so "where does rain come from"
+# (science) and "the origin of life" are never mistaken for a word-origin lookup.
+_WP_ETYM1 = re.compile(r"\b(?:the\s+)?etymolog(?:y|ies)\s+of\s+(?:the\s+word\s+)?" + _WP_WORD, re.I)
+_WP_ETYM2 = re.compile(r"\b(?:the\s+)?(?:origin|derivation|roots?)\s+of\s+the\s+word\s+" + _WP_WORD, re.I)
+_WP_ETYM3 = re.compile(r"\bwhere\s+(?:does|did)\s+the\s+word\s+" + _WP_WORD + r"\s+(?:come\s+from|originate|derive)", re.I)
 
 
 def word_parse_intent(text: str) -> Tuple[Optional[str], Optional[str]]:
@@ -857,7 +863,8 @@ def word_parse_intent(text: str) -> Tuple[Optional[str], Optional[str]]:
     specific trigger plus a single trailing word. respond() gives an honest miss if the tool is empty."""
     t = (text or "").strip()
     for pat, kind in ((_WP_PRON_AFTER, "pronounce"), (_WP_PRON_BEFORE, "pronounce"),
-                      (_WP_SYLL, "syllables"), (_WP_SYN, "synonym")):
+                      (_WP_SYLL, "syllables"), (_WP_SYN, "synonym"),
+                      (_WP_ETYM1, "etymology"), (_WP_ETYM2, "etymology"), (_WP_ETYM3, "etymology")):
         m = pat.search(t)
         if m:
             w = (m.group("w") or "").strip("-' ")
@@ -1611,6 +1618,20 @@ def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
         return {**base, "message": ("The meaning of “" + term + "”, as it is kept:")
                 if hits else ("Nothing is kept under “" + term + "” yet."),
                 "results": [corpus._brief(c) for c in hits]}
+
+    if kind == "etymology":
+        from .verifiers import wordcraft as _wc
+        _w = word_parse_intent(text)[1] or ""
+        etyms = []
+        try:
+            etyms = _wc.etymology_of(_w) if _w else []
+        except Exception:  # noqa: BLE001
+            etyms = []
+        if etyms:
+            msg = f"“{_w}”, as Webster 1913 gives its roots — " + "; ".join(e for e in etyms[:2]) + "."
+        else:
+            msg = f"“{_w}” is not on the etymology shelf yet."
+        return {**base, "message": msg, "source": {"title": "the etymology shelf — Webster’s 1913"}}
 
     if kind in ("pronounce", "syllables", "synonym"):
         # WORD PARSING — route to the sovereign tool, answer from what it holds, honest miss otherwise.
