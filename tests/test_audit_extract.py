@@ -674,3 +674,16 @@ def test_sequence_fact_zero_false_positives():
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))
+
+
+def test_a_bare_syllogism_is_checked_without_an_explicit_valid_claim():
+    """2026-10-12: a bare syllogism ("…therefore Socrates is mortal") carries no "is valid" claim, but the
+    "therefore" asserts the conclusion follows — so it is checked (claimed_valid=True) instead of falling to
+    a keyword search (which returned a Socrates BIOGRAPHY). A non-sequitur breaks; a non-argument never fires."""
+    assert _extractors("All men are mortal; Socrates is a man; therefore Socrates is mortal") == ["syllogism"]
+    res = audit("All men are mortal; Socrates is a man; therefore Socrates is mortal", CFG, seal=False)
+    assert res["held"] == 1 and res["broken"] == 0
+    res = audit("All men are mortal; Socrates is mortal; therefore Socrates is a man", CFG, seal=False)
+    assert res["broken"] == 1                                   # the undistributed-middle fallacy is caught
+    assert _extractors("I think, therefore I am") == []         # 0-FP: not a checkable argument
+    assert _extractors("it was raining therefore the ground was wet") == []

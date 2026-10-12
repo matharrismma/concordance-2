@@ -1326,42 +1326,49 @@ def _x_argument_form(text: str):
 
 
 def _x_syllogism(text: str):
-    """"All men are mortal; Socrates is a man; therefore Socrates is mortal is valid" -> rhetoric.syllogism_validity.
+    """"All men are mortal; Socrates is a man; therefore Socrates is mortal" -> rhetoric.syllogism_validity.
     Two categorical premises and a categorical conclusion; the MAJOR premise is the one carrying the conclusion's
     predicate (the verifier infers the figure from that order); singular terms are read as universal and plurals
-    singularised so the middle term matches."""
+    singularised so the middle term matches. The "therefore" ASSERTS the conclusion follows, so a BARE syllogism
+    (no explicit "is valid") is checked with claimed_valid=True — a wrong one ("…; Socrates is mortal; therefore
+    Socrates is a man") then breaks honestly. An explicit "is valid / is not valid" overrides that default. Every
+    structural guard (two categorical premises, a categorical All/No/Some conclusion) is kept, so it stays 0-FP:
+    "I think, therefore I am" and "it was raining therefore the ground was wet" do not parse and never fire."""
     out = []
-    for vm in _LOGIC_VALID.finditer(text):
-        before = text[:vm.start()]
-        parts = list(_LOGIC_THEREFORE.finditer(before))
-        if not parts:
-            continue
-        th = parts[-1]
-        prem_text = re.split(r"[.!?\n]", before[:th.start()])[-1]
-        clauses = [c.strip().strip(",;") for c in re.split(r"[;]", prem_text) if c.strip().strip(",;")]
-        if len(clauses) != 2:
-            clauses = [c.strip().strip(",;") for c in re.split(r"[;,]", prem_text) if c.strip().strip(",;")]
-        if len(clauses) == 1:                                          # "Every man is mortal and Socrates is a man"
-            clauses = [c.strip() for c in re.split(r"\s+and\s+", clauses[0]) if c.strip()]
-        if len(clauses) != 2:
-            continue
-        cats = [_categorical(c) for c in clauses]
-        conc = _categorical(before[th.end():].strip().strip(",;"))
-        if not all(cats) or not conc:
-            continue
-        cm = re.match(r"^(All|No|Some) (.+?) are (?:not )?(.+)$", conc)
-        if not cm:
-            continue
-        conc_pred = cm.group(3)
-        major = next((c for c in cats if re.search(r"\b%s\b" % re.escape(conc_pred), c)), None)
-        if major is None:
-            continue
-        minor = cats[0] if cats[1] == major else cats[1]
+    ths = list(_LOGIC_THEREFORE.finditer(text))
+    if not ths:
+        return out
+    th = ths[-1]                                                       # the last 'therefore' leads the conclusion
+    before, after = text[:th.start()], text[th.end():].strip()
+    claimed_valid = True                                               # the bare 'therefore' claims the conclusion follows
+    vm = _LOGIC_VALID.search(after)
+    if vm:                                                             # an explicit claim overrides the default
         claimed_valid = (vm.group("kind").lower() == "valid") != bool(vm.group("neg"))
-        quote = re.sub(r"\s+", " ", (prem_text + " " + before[th.start():] + text[vm.start():vm.end()]).strip())[:160]
-        out.append((quote, "rhetoric",
-                    {"RHET_VERIFY": {"major_premise": major, "minor_premise": minor, "conclusion": conc,
-                                     "claimed_valid": claimed_valid}}))
+        after = after[:vm.start()].strip()
+    prem_text = re.split(r"[.!?\n]", before)[-1]
+    clauses = [c.strip().strip(",;") for c in re.split(r"[;]", prem_text) if c.strip().strip(",;")]
+    if len(clauses) != 2:
+        clauses = [c.strip().strip(",;") for c in re.split(r"[;,]", prem_text) if c.strip().strip(",;")]
+    if len(clauses) == 1:                                              # "Every man is mortal and Socrates is a man"
+        clauses = [c.strip() for c in re.split(r"\s+and\s+", clauses[0]) if c.strip()]
+    if len(clauses) != 2:
+        return out
+    cats = [_categorical(c) for c in clauses]
+    conc = _categorical(after.strip().strip(",;."))
+    if not all(cats) or not conc:
+        return out
+    cm = re.match(r"^(All|No|Some) (.+?) are (?:not )?(.+)$", conc)
+    if not cm:
+        return out
+    conc_pred = cm.group(3)
+    major = next((c for c in cats if re.search(r"\b%s\b" % re.escape(conc_pred), c)), None)
+    if major is None:
+        return out
+    minor = cats[0] if cats[1] == major else cats[1]
+    quote = re.sub(r"\s+", " ", text.strip())[:160]
+    out.append((quote, "rhetoric",
+                {"RHET_VERIFY": {"major_premise": major, "minor_premise": minor, "conclusion": conc,
+                                 "claimed_valid": claimed_valid}}))
     return out
 
 
