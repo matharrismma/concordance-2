@@ -1114,3 +1114,19 @@ def test_word_parsing_answers_from_the_tool():
         assert any(s in r["message"].lower() for s in ("glad", "felicitous", "joyful", "content"))
     r = ask.respond("how do you pronounce Nebuchadnezzar", SEC)
     assert r["kind"] == "pronounce" and "ne-buc-had-nez-zar" in r["message"]
+
+
+def test_a_leading_article_plus_number_is_not_a_scripture_reference():
+    """2026-10-12: "the 10 commandments" resolved to Genesis 10:1 — the resolver stripped "the" and read
+    "10" as a chapter. No book is an article, so find_ref must not accept "the N" (likewise "the 12
+    disciples", "the 7 churches"). The real alias "the ten commandments" -> Exodus 20 still routes."""
+    # "the 10 commandments" now resolves to Exodus 20 (the digit-form alias), NOT Genesis 10:1
+    assert ask.find_ref("the 10 commandments") == "Exodus 20:1-17"
+    assert ask.find_ref("the ten commandments") == "Exodus 20:1-17"
+    # a leading article + number with no passage alias falls through to search, never a false ref
+    assert ask.find_ref("the 12 disciples") is None
+    assert ask.find_ref("the 7 churches") is None
+    assert ask.classify("the 12 disciples") != "scripture"
+    # real references are untouched
+    assert ask.find_ref("Genesis 10") == "Genesis 10"
+    assert ask.find_ref("read Romans 8") == "Romans 8"

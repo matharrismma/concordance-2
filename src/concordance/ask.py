@@ -365,6 +365,7 @@ _PASSAGES = {
     "sermon on the mount": "Matthew 5:1-12", "golden rule": "Matthew 7:12",
     "great commission": "Matthew 28:18-20", "greatest commandment": "Matthew 22:36-40",
     "great commandment": "Matthew 22:36-40", "ten commandments": "Exodus 20:1-17",
+    "10 commandments": "Exodus 20:1-17",        # the digit form, so "the 10 commandments" reads too
     "the fall": "Genesis 3:1-24", "noahs ark": "Genesis 6:9-22",
     "the flood": "Genesis 7:1-24", "tower of babel": "Genesis 11:1-9",
     "david and goliath": "1 Samuel 17:32-51", "shepherds psalm": "Psalm 23:1-6",
@@ -733,7 +734,12 @@ def find_ref(text: str):
     try:
         from .verifiers import scripture as _sc2
         for mc in _CHAPTER.finditer(t):
-            cand = re.sub(r"\s+", " ", mc.group(1).strip()) + " " + mc.group(2)
+            book = re.sub(r"\s+", " ", mc.group(1).strip())
+            # a leading article is not a book: the resolver strips "the" and reads "the 10 commandments"
+            # as Genesis 10 (likewise "the 12 disciples", "the 7 churches"). No book is an article.
+            if book.lower() in _NOT_A_BOOK:
+                continue
+            cand = book + " " + mc.group(2)
             if _sc2.read_passage(cand).get("verses"):
                 return cand
     except Exception:  # noqa: BLE001
@@ -745,6 +751,7 @@ _MATH_EQ = re.compile(r"^\s*(.+?)\s*=\s*(.+?)\s*$")
 _REF = re.compile(r"\b[1-3]?\s?[A-Za-z]{2,}\.?\s+\d{1,3}:\d{1,3}\b")
 # a bare "<book> <chapter>" (no verse) — validated against the canon in find_ref before it is trusted
 _CHAPTER = re.compile(r"\b([1-3]?\s?[A-Za-z]{2,})\.?\s+(\d{1,3})\b")
+_NOT_A_BOOK = frozenset({"the", "a", "an"})      # a leading article the resolver must not read as a book
 _STRONGS = re.compile(r"\b([GHgh]\d{1,4})\b")
 
 
