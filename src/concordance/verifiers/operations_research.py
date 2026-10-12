@@ -120,24 +120,32 @@ def verify_lp_feasibility(spec: Dict[str, Any]) -> VerifierResult:
 # ---------------------------------------------------------------------------
 
 def _topological_sort(tasks: List[Dict[str, Any]]) -> Optional[List[str]]:
-    """Kahn's algorithm; returns ordered list of task ids or None if cycle."""
-    in_degree: Dict[str, int] = {}
-    successors: Dict[str, List[str]] = {}
+    """Kahn's algorithm; returns ordered list of task ids or None if a cycle exists.
+
+    For each dependency (``tid`` depends on ``dep``) we add the edge dep -> tid,
+    so ``dep`` is scheduled before ``tid`` and ``tid`` carries one unit of
+    in-degree. A dependency that names no known task is ignored here, matching
+    the earliest-finish pass which treats an unknown predecessor as finishing at
+    time 0 — so a dangling reference can never be mistaken for a cycle.
+    """
+    ids = {t["id"] for t in tasks}
+    in_degree: Dict[str, int] = {tid: 0 for tid in ids}
+    successors: Dict[str, List[str]] = {tid: [] for tid in ids}
 
     for t in tasks:
         tid = t["id"]
-        in_degree.setdefault(tid, 0)
-        successors.setdefault(tid, [])
         for dep in (t.get("depends_on") or []):
-            successors.setdefault(dep, [])
-            in_degree[tid] = in_degree.get(tid, 0) + 1
+            if dep not in ids:
+                continue  # dangling dependency; ignored (see docstring)
+            successors[dep].append(tid)
+            in_degree[tid] += 1
 
     queue = [tid for tid, deg in in_degree.items() if deg == 0]
     order: List[str] = []
     while queue:
         tid = queue.pop(0)
         order.append(tid)
-        for succ in successors.get(tid, []):
+        for succ in successors[tid]:
             in_degree[succ] -= 1
             if in_degree[succ] == 0:
                 queue.append(succ)
