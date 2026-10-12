@@ -308,6 +308,23 @@ def test_from_prose_narrows_multi_claim_prose_and_retains_the_losers():
         "two survivors -> no single winner, both retained as alternatives"
 
 
+def test_nPr_nCr_notation_routes_to_combinatorics_not_the_math_moat():
+    """2026-10-12: "5P3 = 60" / "P(5,3) = 60" / "5C2 = 10" / "C(5,2) = 10" have an '=', so the math moat
+    claimed them, tried to sympify "5P3"/"P(5,3)", failed, and quarantined a checkable claim. The
+    notation is DOMAIN form, not arithmetic — _arithmetic_side now declines it so _route_prose sends it
+    to combinatorics, which judges it exactly. Ordinary arithmetic still routes to the math moat."""
+    for text, status in (("5P3 = 60", "pass"), ("P(5,3) = 60", "pass"), ("5P3 = 125", "reject"),
+                         ("5C2 = 10", "pass"), ("C(5,2) = 10", "pass"), ("5C2 = 7", "reject")):
+        cs = cand.from_prose(text)
+        assert cs is not None, text
+        c = cs["candidates"][0]
+        assert c["verification_status"] == status, (text, c["verification_status"])
+        assert c["evidence"]["domain"] == "combinatorics", text
+    # ordinary arithmetic is untouched — still the math moat, not combinatorics
+    c = cand.from_prose("2 + 2 = 4")["candidates"][0]
+    assert c["verification_status"] == "pass" and c["evidence"].get("mode") == "equality"
+
+
 def test_from_prose_returns_none_when_nothing_is_checkable():
     """No certain claim -> None, so a caller falls back rather than presenting an empty
     narrowing as an answer (a miss must stay a miss)."""

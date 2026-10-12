@@ -996,6 +996,7 @@ def _x_combinations(text: str):
     pats = (
         d + r"\s+choose\s+" + d + eq + d,
         r"\bC\s*\(\s*" + d + r"\s*,\s*" + d + r"\s*\)" + eq + d,
+        r"\b" + d + r"\s*C\s*" + d + eq + d,                                          # 5C2 = 10 (compact nCr)
         r"(?:number\s+of\s+)?combinations?\s+of\s+" + d +
         r"\s+(?:things?|items?|objects?|elements?)\s+taken\s+" + d + r"\s+at\s+a\s+time" + eq + d,
     )

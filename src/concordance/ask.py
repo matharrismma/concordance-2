@@ -753,6 +753,11 @@ def _looks_math(t: str) -> bool:
     if not m:
         return False
     sides = m.group(1) + m.group(2)
+    # nPr / nCr notation (5P3, P(5,3), 5C2, C(5,2)) is COMBINATORICS, not arithmetic — the sympy math
+    # door can't parse it and would return a false "can't verify". Decline here so it flows to the
+    # candidate engine, which routes it to the combinatorics verifier (P(5,3)=60 -> HOLDS).
+    if re.search(r"\b\d+\s*[PC]\s*\d+\b|[PC]\s*\(\s*\d+\s*,\s*\d+\s*\)", sides):
+        return False
     return bool(re.search(r"[0-9x+\-*/^()]", sides)) and not re.search(r"[A-Za-z]{4,}", sides)
 
 
