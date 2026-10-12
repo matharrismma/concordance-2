@@ -1209,13 +1209,17 @@ _LOGIC_FORMS = {
 _LOGIC_FORM_RE = re.compile(
     r"\b(?P<form>" + "|".join(re.escape(k) for k in sorted(_LOGIC_FORMS, key=len, reverse=True)) + r")\b\s+(?:is|are)\s+"
     r"(?P<neg>not\s+)?(?:an?\s+)?(?:(?P<fal>(?:formal\s+)?fallac(?:y|ious)|invalid(?:\s+\w+)?)|(?P<val>valid(?:\s+\w+)?)|(?P<ok>a\s+valid\s+\w+))\b", re.I)
-_SMALL_WORDS = ("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve")
+# The ORDERED number words (one->1 by position), distinct from _SMALL_WORDS (the dict at the divisor
+# extractor above). They were BOTH named _SMALL_WORDS: this tuple silently shadowed the dict, so
+# _x_divisor_count's `_SMALL_WORDS.get(...)` hit a tuple and raised inside audit.extract — turning every
+# "N has K divisors" claim into a fall-through. Renamed so neither shadows the other.
+_NUMBER_WORDS = ("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve")
 
 
 def _small(tok: str) -> int:
     """'five' -> 5; a digit string -> its int."""
     t = tok.strip().lower()
-    return _SMALL_WORDS.index(t) + 1 if t in _SMALL_WORDS else int(t)
+    return _NUMBER_WORDS.index(t) + 1 if t in _NUMBER_WORDS else int(t)
 
 
 _SING = {"men": "man", "women": "woman", "people": "person", "children": "child", "mice": "mouse", "geese": "goose",
@@ -1365,7 +1369,7 @@ def _x_logic_counts(text: str):
     """The arithmetic a truth table carries: "a truth table for 3 variables has 8 rows" (2^n), "there are 16 binary
     boolean functions" (2^(2^n)), "a formula with 4 variables has 16 possible assignments"."""
     out = []
-    for m in re.finditer(r"(?:truth\s+table\s+(?:for|with|of|on)\s+|formula\s+(?:with|in|over)\s+|with\s+)(\d+|" + "|".join(_SMALL_WORDS) + r")\s+(?:propositional\s+)?variables?\b[^.\n]{0,30}?"
+    for m in re.finditer(r"(?:truth\s+table\s+(?:for|with|of|on)\s+|formula\s+(?:with|in|over)\s+|with\s+)(\d+|" + "|".join(_NUMBER_WORDS) + r")\s+(?:propositional\s+)?variables?\b[^.\n]{0,30}?"
                          r"\b(?:has|needs|contains|requires|gives)\s+(\d[\d,]*)\s+(?:rows?|lines?|possible\s+assignments?|assignments?|interpretations?|valuations?)\b", text, re.I):
         n, claimed = _small(m.group(1)), m.group(2)
         out.append((_q(text, m), "mathematics",

@@ -65,6 +65,9 @@ _ALIASES: Dict[str, str] = {
     "hbar": "reduced_planck_constant",
     "e": "elementary_charge",
     "electron_charge": "elementary_charge",
+    "charge_of_an_electron": "elementary_charge",
+    "charge_of_the_electron": "elementary_charge",
+    "charge_of_electron": "elementary_charge",
     "k_b": "boltzmann_constant",
     "kb": "boltzmann_constant",
     "boltzmann": "boltzmann_constant",
@@ -99,6 +102,9 @@ _ALIASES: Dict[str, str] = {
     "sigma": "stefan_boltzmann_constant",
     "g": "standard_gravity",          # surface gravity, not G!
     "earth_gravity": "standard_gravity",
+    "acceleration_due_to_gravity": "standard_gravity",   # the common phrasing of g (not G)
+    "gravitational_acceleration": "standard_gravity",
+    "acceleration_of_gravity": "standard_gravity",
     "atm": "atmosphere",
     "1_atm": "atmosphere",
     "f": "faraday_constant",

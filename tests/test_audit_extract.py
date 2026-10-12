@@ -110,6 +110,21 @@ def test_scientific_notation_and_apostrophe_names_extract():
     assert res["held"] == 1
 
 
+def test_natural_phrasings_of_g_and_electron_charge_now_extract():
+    """2B coverage (2026-10-12): natural phrasings that returned NONE now reach the SAME 0-FP verifier.
+    'acceleration due to gravity' is g (standard_gravity, 9.80665 m/s^2), NOT G (gravitational_constant).
+    The verifier stays the judge: a wrong value is still BROKEN, so no false positive is introduced."""
+    assert _extractors("the acceleration due to gravity is 9.8 m/s^2") == ["physical_constant"]
+    res = audit("the acceleration due to gravity is 9.8 m/s^2", CFG, seal=False)
+    assert res["held"] == 1 and res["broken"] == 0
+    assert res["results"][0]["domain"] == "physical_constants"
+    # a WRONG g is caught — the alias widens reach, never forces a HOLDS
+    assert audit("the acceleration due to gravity is 15 m/s^2", CFG, seal=False)["broken"] == 1
+    # g (9.8) and G (6.674e-11) stay distinct — the alias must not collapse them
+    assert audit("the gravitational constant is 6.674e-11", CFG, seal=False)["held"] == 1
+    assert audit("the charge of an electron is 1.602e-19 C", CFG, seal=False)["held"] == 1
+
+
 def test_a_bare_symbol_or_common_word_is_not_a_constant_claim():
     """Conservative: a lone symbol/greek letter or a common word is far too ambiguous in prose, so it
     is NOT matched as a constant. The required numeric value guards the rest — better to miss than to
