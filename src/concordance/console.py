@@ -323,7 +323,6 @@ _VERDICT_PHRASE = {
     "false": ("That does not hold.",          "false", "I checked it, and it does not hold. "),
     "na":    ("I can only go so far on that.", "na",    "I could not fully verify that. "),
 }
-_VERIFY_TO_TOKEN = {"HOLDS": "true", "BROKEN": "false", "INCOMPLETE": "na"}
 
 
 def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
@@ -357,8 +356,7 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
         # keyword cards are dropped; a check's "next" is to re-verify, not to wander a topic cluster.
         audit = r["audit"]
         rows = audit.get("results") or []
-        survived, rejected, held = audit.get("survived", 0), audit.get("rejected", 0), audit.get("held", 0)
-        token = "false" if rejected else ("true" if (survived and not held) else "na")
+        token = r.get("verdict") or _ask.verdict_token(r) or "na"   # computed once in respond(); shared fn is the fallback
         headline, console_verdict, lead = _VERDICT_PHRASE[token]
         detail = _trim((rows[0].get("detail") if len(rows) == 1 else "") or r.get("message") or "", 420)
         spoken = (lead + detail).strip()
@@ -417,9 +415,8 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
         # not generated (the verify payload carries verdict/detail/trail + a re-checkable seal). Without
         # this branch the payload fell through to the miss below, and the engine's one job read as a gap.
         v = r["verify"]
-        verdict = (v.get("verdict") or "").upper()
         detail = _trim(v.get("detail") or "", 420)
-        token = _VERIFY_TO_TOKEN.get(verdict)
+        token = r.get("verdict") or _ask.verdict_token(r)   # computed once in respond(); shared fn is the fallback
         if token:                                 # the SAME verdict display as the checked path above
             headline, console_verdict, lead = _VERDICT_PHRASE[token]
             spoken = (lead + detail).strip()

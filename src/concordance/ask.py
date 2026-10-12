@@ -1333,9 +1333,36 @@ def _scripture_from_keeping(text: str, limit: int = 2):
     return out
 
 
+_VERIFY_VERDICT_TOKEN = {"HOLDS": "true", "BROKEN": "false", "INCOMPLETE": "na"}
+
+
+def verdict_token(r: Dict[str, Any]) -> Optional[str]:
+    """The surface-agnostic verdict of a checked claim — "true" / "false" / "na" — read from a verify
+    payload (HOLDS/BROKEN/INCOMPLETE) or a candidate 'checked' audit (its tallies). None when there is no
+    verdict (a SYSTEM_ERROR, or not a check). Computed in ONE place so no surface re-derives it (the path
+    of least resistance: the answer is settled once, and the console and the desk only format it)."""
+    v = r.get("verify")
+    if isinstance(v, dict) and v.get("verdict"):
+        return _VERIFY_VERDICT_TOKEN.get(str(v["verdict"]).upper())
+    a = r.get("audit")
+    if isinstance(a, dict) and (a.get("results") is not None or a.get("survived") is not None):
+        if a.get("rejected"):
+            return "false"
+        if a.get("survived") and not a.get("held"):
+            return "true"
+        return "na"
+    return None
+
+
 def _witnessed(r: Dict[str, Any], text: str, witness: bool, just_opened: bool,
                topical: bool = True) -> Dict[str, Any]:
     """Once the door is open, bring the Word — and keep bringing it. Present, don't cross."""
+    # THE VERDICT, COMPUTED ONCE: the surface-agnostic true/false/na for a checked claim, so neither the
+    # console nor the desk re-derives it (the renderer core unification — compute once, surfaces format).
+    if r.get("verdict") is None:
+        _tok = verdict_token(r)
+        if _tok:
+            r["verdict"] = _tok
     # THE PATH (2026-08-12, the Lighthouse Model Spec: "the output is a PATH, never an answer").
     # Above the cards, a discerned ONE next step + a fitting anchor — composed from what was found,
     # nothing generated. Attached on BOTH surfaces (discernment is not gated), for the retrieval kinds
