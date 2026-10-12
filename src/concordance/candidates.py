@@ -352,8 +352,9 @@ def _arithmetic_side(side: str) -> bool:
     # nPr / nCr notation — compact (5P3, 5C2) or functional (P(5,3), C(5,2)) — looks like arithmetic to
     # the math moat, which then tries to sympify it, fails, and quarantines a perfectly checkable
     # permutation/combination claim. It is DOMAIN notation, not arithmetic — leave it to _route_prose
-    # (the combinatorics extractor), which judges it exactly.
-    if re.fullmatch(r"\d+\s*[PC]\s*\d+|[PC]\s*\(\s*\d+\s*,\s*\d+\s*\)", s):
+    # (the combinatorics extractor). ONE shared rule with the front door (ask._looks_math).
+    from . import audit as _audit
+    if _audit.COMBINATORICS_NOTATION_RE.fullmatch(s):
         return False
     return _SIDE_RE.fullmatch(s) is not None
 

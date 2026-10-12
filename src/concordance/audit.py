@@ -986,6 +986,12 @@ def _x_cylinder(text: str):
     return out
 
 
+# nPr / nCr notation — compact (5P3, 5C2) or functional (P(5,3), C(5,2)). ONE source of truth for "this
+# is combinatorics, not plain arithmetic to sympify", used by the front door (ask._looks_math) and the
+# candidate router (candidates._arithmetic_side) so the rule lives in exactly one place, not three.
+COMBINATORICS_NOTATION_RE = re.compile(r"\b\d+\s*[PC]\s*\d+\b|[PC]\s*\(\s*\d+\s*,\s*\d+\s*\)")
+
+
 def _x_combinations(text: str):
     """"5 choose 2 is 10" / "C(5,2) = 10" / "combinations of 5 things taken 2 at a time is 10" — routes
     to combinatorics.combinations (C(n,k) = n!/(k!·(n-k)!)). Strongly anchored (the word "choose", the
