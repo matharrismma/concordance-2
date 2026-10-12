@@ -51,6 +51,41 @@ def _norm_ref(ref: str) -> str:
     return re.sub(r"\s+", " ", (ref or "").strip().lower())
 
 
+def _ref_span(ref: str):
+    """Parse a single-chapter reference to (book, chapter, v_lo, v_hi); a whole chapter spans all its
+    verses. Returns None for anything the passage regex cannot read (cross-chapter ranges, prose) — the
+    caller then falls back to exact normal-form equality. Reuses the scripture verifier's own parser, so
+    the book aliases and the passage grammar stay in one place."""
+    try:
+        from .verifiers.scripture import _PASSAGE_RE, _norm_book
+    except Exception:  # noqa: BLE001
+        return None
+    m = _PASSAGE_RE.match(ref or "")
+    if not m:
+        return None
+    book = _norm_book(m.group(1))
+    if not book:
+        return None
+    ch = int(m.group(2))
+    vs, ve = m.group(3), m.group(4)
+    if vs is None:
+        return (book, ch, 1, 10 ** 6)        # a whole chapter: every verse in it
+    lo = int(vs)
+    hi = int(ve) if ve else lo
+    return (book, ch, min(lo, hi), max(lo, hi))
+
+
+def _refs_touch(a: str, b: str) -> bool:
+    """True if two references name an OVERLAPPING passage — same book and chapter, with overlapping verse
+    spans. So a verse inside a rooted range matches the node rooted to that range (Ephesians 4:5 finds a
+    node rooted to Ephesians 4:4-6), and a chapter query gathers its verses. Falls back to exact
+    normal-form equality when either side will not parse (a superset of the old exact match)."""
+    sa, sb = _ref_span(a), _ref_span(b)
+    if sa and sb:
+        return sa[0] == sb[0] and sa[1] == sb[1] and max(sa[2], sb[2]) <= min(sa[3], sb[3])
+    return _norm_ref(a) == _norm_ref(b)
+
+
 def _append(ev: Dict[str, Any], data_dir: Optional[Path] = None) -> None:
     p = _path(data_dir)
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -133,12 +168,11 @@ def nodes_rooted_at(ref: str, data_dir: Optional[Path] = None) -> List[Dict[str,
     """THE CONCORDANCE (data level) — every node whose anchor includes this reference. Loose match on
     the normal form; the two-way resolver (move 2) refines with the canonical scripture resolver so a
     chapter query gathers its verses. Found, never generated."""
-    want = _norm_ref(ref)
-    if not want:
+    if not (ref or "").strip():
         return []
     out = []
     for a in fold(data_dir).values():
-        if any(_norm_ref(r) == want for r in a["refs"]):
+        if any(_refs_touch(r, ref) for r in a["refs"]):
             out.append(a)
     return sorted(out, key=lambda a: a["node"])
 
@@ -403,8 +437,7 @@ def confirmations(ref: str, *, get_card=None, data_dir: Optional[Path] = None) -
     outward direction: a verse of Scripture -> every place in the keeping's map of reality that answers
     to it, each with how it is rooted (direct / inherited, and through which floor). Found, never
     generated. {verse, count, nodes:[{node, kind, title, via, through}]}."""
-    want = _norm_ref(ref)
-    if not want:
+    if not (ref or "").strip():
         return {"verse": ref, "count": 0, "nodes": []}
     from . import corpus
     gc = get_card or corpus.get_card
@@ -422,7 +455,7 @@ def confirmations(ref: str, *, get_card=None, data_dir: Optional[Path] = None) -
     for k in KINDS:
         for n in uni.get(k, []):
             r = resolve(n, get_card=gc, stick_index=si, placements=pl, data_dir=data_dir)
-            if r and any(_norm_ref(x) == want for x in r["refs"]):
+            if r and any(_refs_touch(x, ref) for x in r["refs"]):
                 out.append({"node": n, "kind": k, "title": _title_of(n, k, gc, stick_titles),
                             "via": r["via"], "through": r.get("through")})
     out.sort(key=lambda d: (0 if d["via"] == "direct" else 1, d["kind"], d["title"].lower()))
