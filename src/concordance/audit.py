@@ -1779,8 +1779,64 @@ def _x_sequence_fact(text: str):
     return out
 
 
+def _parse_int_poly(s: str):
+    """A univariate integer polynomial in x -> coefficients highest-degree-first, or None. Accepts
+    "x^2 - 5x + 6", "2x^3 - x - 3", "-x^2 + 4". Conservative: integer coefficients only, the one
+    variable x, no division, no other letters — anything else returns None (held, never a wrong parse)."""
+    t = (s or "").strip().lower().replace(" ", "").replace("**", "^").replace("*", "")
+    if not t or "x" not in t or "/" in t or re.search(r"[a-wyz]", t):   # only 'x' may appear as a letter
+        return None
+    powmap: Dict[int, int] = {}
+    for term in re.findall(r"[+-]?[^+-]+", t):
+        if term in ("+", "-", ""):
+            continue
+        m = re.fullmatch(r"([+-]?)(\d*)x(?:\^(\d+))?", term)
+        if m:
+            coef = (int(m.group(2)) if m.group(2) else 1) * (-1 if m.group(1) == "-" else 1)
+            power = int(m.group(3)) if m.group(3) else 1
+            powmap[power] = powmap.get(power, 0) + coef
+            continue
+        m = re.fullmatch(r"([+-]?\d+)", term)                           # a constant term
+        if m:
+            powmap[0] = powmap.get(0, 0) + int(m.group(1))
+            continue
+        return None                                                     # an unparseable term -> not a clean poly
+    if not powmap or max(powmap) < 1:
+        return None
+    deg = max(powmap)
+    return [powmap.get(p, 0) for p in range(deg, -1, -1)]
+
+
+_RR_NUM = re.compile(r"-?\d+(?:/\d+)?")
+_RR_SET = re.compile(r"\b(?:the\s+)?rational\s+roots?\s+of\s+(.+?)\s+(?:are|is|=|:)\s+(.+?)[.?!]?\s*$", re.I)
+_RR_ONE = re.compile(r"\b(-?\d+(?:/\d+)?)\s+is\s+(?:an?\s+)?roots?\s+of\s+(.+?)[.?!]?\s*$", re.I)
+
+
+def _x_rational_roots(text: str):
+    """"the rational roots of x^2 - 5x + 6 are 2 and 3" -> polynomial.rational_roots (the COMPLETE set,
+    by the Rational Root Theorem); "3/2 is a root of 2x^2 - x - 3" -> polynomial.root. The polynomial
+    must parse as a clean integer polynomial in x, or nothing extracts (0-FP)."""
+    out = []
+    for m in _RR_SET.finditer(text):
+        coeffs = _parse_int_poly(m.group(1))
+        if not coeffs:
+            continue
+        roots = _RR_NUM.findall(m.group(2))
+        if not roots and not re.search(r"\bnone\b|\bno\s+rational", m.group(2), re.I):
+            continue                                                    # "are 2 and 3" needs numbers; "are none" is the empty set
+        out.append((_q(text, m), "polynomial",
+                    {"POLY_VERIFY": {"coeffs": coeffs, "claimed_rational_roots": roots}}))
+    for m in _RR_ONE.finditer(text):
+        coeffs = _parse_int_poly(m.group(2))
+        if coeffs:
+            out.append((_q(text, m), "polynomial",
+                        {"POLY_VERIFY": {"coeffs": coeffs, "claimed_root": m.group(1)}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("quotient", _x_quotient), ("arith_words", _x_arith_words),
+    ("rational_roots", _x_rational_roots),
     ("expression", _x_expression),      # THE CLAIM GRAMMAR (Gen 3 · 3): a mixed/parenthesised expression
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
     ("combinations", _x_combinations), ("permutations", _x_permutations),

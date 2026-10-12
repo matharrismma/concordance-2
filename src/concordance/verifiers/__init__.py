@@ -53,6 +53,9 @@ VERIFIERS: Dict[str, str] = {
     # the sight picture: S(T), the signed residual of the zero count, tracked against RH's Selberg envelope
     "count_residual": _P + "number_theory", "s_of_t": _P + "number_theory",
     "combinatorics": _P + "combinatorics",
+    # the Rational Root Theorem: the complete set of rational roots of an integer-coefficient
+    # polynomial, enumerated (p | a_0, q | a_n) and tested exactly (2026-10-12)
+    "polynomial": _P + "polynomial", "rational_roots": _P + "polynomial", "rational_root": _P + "polynomial",
     "geometry": _P + "geometry",
     "formal_logic": _P + "formal_logic", "logic": _P + "formal_logic",
     "probability": _P + "probability",

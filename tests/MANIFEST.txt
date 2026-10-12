@@ -261,6 +261,7 @@ test_pins.py
 test_planck_units.py
 test_playbook.py
 test_plow.py
+test_polynomial.py
 test_practical_rank.py
 test_precedent.py
 test_present.py

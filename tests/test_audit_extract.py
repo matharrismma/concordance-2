@@ -687,3 +687,15 @@ def test_a_bare_syllogism_is_checked_without_an_explicit_valid_claim():
     assert res["broken"] == 1                                   # the undistributed-middle fallacy is caught
     assert _extractors("I think, therefore I am") == []         # 0-FP: not a checkable argument
     assert _extractors("it was raining therefore the ground was wet") == []
+
+
+def test_rational_roots_extracts_and_the_polynomial_parses():
+    """2026-10-12 (RRT): "the rational roots of x^2 - 5x + 6 are 2 and 3" -> polynomial, a wrong set
+    breaks, and a non-polynomial ("roots of the problem are deep") never fires (0-FP)."""
+    assert _extractors("the rational roots of x^2 - 5x + 6 are 2 and 3") == ["rational_roots"]
+    res = audit("the rational roots of x^2 - 5x + 6 are 2 and 3", CFG, seal=False)
+    assert res["held"] == 1 and res["broken"] == 0 and res["results"][0]["domain"] == "polynomial"
+    assert audit("the rational roots of x^2 - 5x + 6 are 2 and 4", CFG, seal=False)["broken"] == 1
+    assert audit("3/2 is a root of 2x^2 - x - 3", CFG, seal=False)["held"] == 1
+    assert _extractors("the roots of the problem are deep") == []        # not a polynomial
+    assert _extractors("I planted roots of a tree in the garden") == []
