@@ -873,6 +873,49 @@ def word_parse_intent(text: str) -> Tuple[Optional[str], Optional[str]]:
     return None, None
 
 
+# WORD TOOLS — ONE common path, the variance is only the tool and how its result reads. Each row is
+#   kind: (source label, lookup(word) -> raw result, format(word, result) -> the message).
+# respond() pulls the word, runs the lookup, and formats it (an honest miss when the tool holds nothing).
+# Adding a word tool is ONE ROW here and one detector in word_parse_intent — never another dispatch branch.
+def _wt_pronounce(w):
+    from . import pronounce as _p
+    return ((_p.guide(w) or {}).get("respelling") or "").strip()
+
+
+def _wt_syllables(w):
+    from . import pronounce as _p
+    return _p.syllables(w) or []
+
+
+def _wt_synonym(w):
+    from . import thesaurus as _t
+    return _t.synonyms(w, limit=8) or []
+
+
+def _wt_etymology(w):
+    from .verifiers import wordcraft as _wc
+    return _wc.etymology_of(w) or []
+
+
+def _wt_syl_msg(w, syl):
+    n = len(syl)
+    return f"“{w}” has {n} syllable{'s' if n != 1 else ''}: " + "-".join(syl) + "."
+
+
+WORD_TOOLS = {
+    "pronounce": ("the pronunciation guide — from the tongues tool", _wt_pronounce,
+                  lambda w, r: f"“{w}” is said {r}." if r else f"I can’t sound out “{w}” yet."),
+    "syllables": ("the syllable guide", _wt_syllables,
+                  lambda w, r: _wt_syl_msg(w, r) if r else f"I can’t break “{w}” into syllables yet."),
+    "synonym":   ("the thesaurus", _wt_synonym,
+                  lambda w, r: (f"Words kept as synonyms for “{w}”: " + ", ".join(r) + ".") if r
+                  else f"Nothing is kept as a synonym for “{w}” yet."),
+    "etymology": ("the etymology shelf — Webster’s 1913", _wt_etymology,
+                  lambda w, r: (f"“{w}”, as Webster 1913 gives its roots — " + "; ".join(r[:2]) + ".") if r
+                  else f"“{w}” is not on the etymology shelf yet."),
+}
+
+
 # Understanding what they're ASKING — the subject is what remains when the question-scaffolding is
 # taken away. "how far away is the moon" is a question about the MOON; searching the whole sentence
 # lets "far/away/is/the" drown it (and even mis-predict the deck). We keep the content words.
@@ -1619,56 +1662,16 @@ def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
                 if hits else ("Nothing is kept under “" + term + "” yet."),
                 "results": [corpus._brief(c) for c in hits]}
 
-    if kind == "etymology":
-        from .verifiers import wordcraft as _wc
+    if kind in WORD_TOOLS:
+        # ONE common path for every word tool (pronounce / syllables / synonym / etymology): pull the
+        # word, run the registered lookup, format the hit or an honest miss. The variance is the row.
+        label, lookup, fmt = WORD_TOOLS[kind]
         _w = word_parse_intent(text)[1] or ""
-        etyms = []
         try:
-            etyms = _wc.etymology_of(_w) if _w else []
-        except Exception:  # noqa: BLE001
-            etyms = []
-        if etyms:
-            msg = f"“{_w}”, as Webster 1913 gives its roots — " + "; ".join(e for e in etyms[:2]) + "."
-        else:
-            msg = f"“{_w}” is not on the etymology shelf yet."
-        return {**base, "message": msg, "source": {"title": "the etymology shelf — Webster’s 1913"}}
-
-    if kind in ("pronounce", "syllables", "synonym"):
-        # WORD PARSING — route to the sovereign tool, answer from what it holds, honest miss otherwise.
-        _w = word_parse_intent(text)[1] or ""
-        if kind == "pronounce":
-            from . import pronounce as _pron
-            try:
-                g = _pron.guide(_w) if _w else {}
-            except Exception:  # noqa: BLE001
-                g = {}
-            resp = (g.get("respelling") or "").strip()
-            msg = (f"“{_w}” is said {resp}." if resp else f"I can’t sound out “{_w}” yet.")
-            return {**base, "message": msg,
-                    "source": {"title": "the pronunciation guide — from the tongues tool"}}
-        if kind == "syllables":
-            from . import pronounce as _pron
-            try:
-                syl = _pron.syllables(_w) if _w else []
-            except Exception:  # noqa: BLE001
-                syl = []
-            if syl:
-                n = len(syl)
-                msg = f"“{_w}” has {n} syllable" + ("s" if n != 1 else "") + ": " + "-".join(syl) + "."
-            else:
-                msg = f"I can’t break “{_w}” into syllables yet."
-            return {**base, "message": msg, "source": {"title": "the syllable guide"}}
-        # synonym
-        from . import thesaurus as _th
-        try:
-            syns = _th.synonyms(_w, limit=8) if _w else []
-        except Exception:  # noqa: BLE001
-            syns = []
-        if syns:
-            msg = f"Words kept as synonyms for “{_w}”: " + ", ".join(syns) + "."
-        else:
-            msg = f"Nothing is kept as a synonym for “{_w}” yet."
-        return {**base, "message": msg, "source": {"title": "the thesaurus"}}
+            result = lookup(_w) if _w else None
+        except Exception:  # noqa: BLE001 — a tool that holds nothing is an honest miss, never a crash
+            result = None
+        return {**base, "message": fmt(_w, result), "source": {"title": label}}
 
     if kind == "word_study" and witness:
         from .verifiers import scripture
