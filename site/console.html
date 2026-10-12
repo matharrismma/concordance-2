@@ -5,125 +5,175 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Console — Narrow Highway</title>
 <meta name="description" content="One console: ask or speak anything, and the keeping answers — read it as a book, or listen as a radio. The coach guides; every answer shows how it was found, verified, and cited. Found, never generated.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap">
 <style>
-  /* E-INK FIRST (docs/CONSOLE.md): high-contrast, serif, page-not-scroll, no motion, static in one
-     frame. A book that is a whole library. Audio and page complete each other. */
+  /* THE CONSOLE — a reverent instrument. Illuminated manuscript meets a brass device you consult:
+     Hitchhiker's-Guide warmth, cathedral reverence, steampunk craft. Parchment & brass by day; a
+     candlelit cathedral by night. Still by default — motion is slight, mechanical, and opt-out
+     (docs/CONSOLE.md: high-contrast serif, page-not-scroll, complete in one frame). */
   :root{
-    --paper:#f6f4ee; --ink:#15130f; --dim:#6b6660; --line:#d8d3c7; --gold:#9a7b27; --rule:#1c1a16;
+    --paper:#f1ece0; --panel:#e9e2d1; --ink:#1b1712; --ink-soft:#574e42; --dim:#8a8070;
+    --line:#d3c9b4; --hair:#e2dac7; --brass:#9a7623; --brass-lit:#b78f36; --copper:#9c5a36;
+    --seal:#8c2f23; --rule:#2a241b;
+    --serif:Georgia,'Iowan Old Style','Palatino Linotype',serif;
+    --display:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+    --plaque:ui-sans-serif,system-ui,'Segoe UI',sans-serif;
+    --mono:ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace;
     color-scheme:light;
   }
   @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
-    --paper:#111010; --ink:#eceae3; --dim:#9a958b; --line:#2c2a25; --gold:#c9a24a; --rule:#eceae3; color-scheme:dark; }}
-  :root[data-theme="dark"]{ --paper:#111010; --ink:#eceae3; --dim:#9a958b; --line:#2c2a25; --gold:#c9a24a; --rule:#eceae3; color-scheme:dark; }
+    --paper:#12121a; --panel:#1a1a23; --ink:#ece5d4; --ink-soft:#a79d8a; --dim:#746b5a;
+    --line:#2b2934; --hair:#232230; --brass:#cfa54c; --brass-lit:#e4bf6a; --copper:#c97d55;
+    --seal:#c45a49; --rule:#ece5d4; color-scheme:dark; }}
+  :root[data-theme="dark"]{ --paper:#12121a; --panel:#1a1a23; --ink:#ece5d4; --ink-soft:#a79d8a;
+    --dim:#746b5a; --line:#2b2934; --hair:#232230; --brass:#cfa54c; --brass-lit:#e4bf6a;
+    --copper:#c97d55; --seal:#c45a49; --rule:#ece5d4; color-scheme:dark; }
   *{ box-sizing:border-box }
   html,body{ margin:0; background:var(--paper); color:var(--ink) }
-  body{ font-family:Georgia,'Iowan Old Style','Times New Roman',serif; line-height:1.6;
-        -webkit-font-smoothing:antialiased; }
-  *,*::before,*::after{ animation:none !important; transition:none !important }  /* E-Ink: no motion */
-  .book{ max-width:40rem; margin:0 auto; min-height:100svh; display:flex; flex-direction:column;
-         padding:calc(1.1rem + env(safe-area-inset-top)) 1.3rem calc(1.1rem + env(safe-area-inset-bottom)); }
-  header.bar{ display:flex; align-items:baseline; justify-content:space-between; gap:1rem;
-              border-bottom:1px solid var(--line); padding-bottom:.7rem }
-  .brand{ font-size:.82rem; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); text-decoration:none }
-  .brand b{ color:var(--ink); font-weight:600 }
-  /* radio / book toggle */
-  .mode{ display:inline-flex; border:1px solid var(--line); border-radius:2px; overflow:hidden }
-  .mode button{ font:inherit; font-size:.74rem; letter-spacing:.12em; text-transform:uppercase; background:none;
-                color:var(--dim); border:0; padding:.3rem .7rem; cursor:pointer }
-  .mode button[aria-pressed="true"]{ background:var(--ink); color:var(--paper) }
-  main.page{ flex:1 0 auto; padding:2rem 0 1rem }
-  .greet{ color:var(--dim); font-style:italic; font-size:1.02rem; margin:0 0 1.4rem }
-  .headline{ font-size:1.9rem; line-height:1.2; margin:.2rem 0 1rem; font-weight:600; text-wrap:balance }
-  .body{ font-size:1.18rem }
-  .body p{ margin:.2rem 0 1rem }
-  .vn{ color:var(--gold); font-size:.72em; vertical-align:super; margin-right:.3em; font-family:system-ui,sans-serif }
+  body{ font-family:var(--serif); line-height:1.62; -webkit-font-smoothing:antialiased;
+        text-rendering:optimizeLegibility; }
+  /* motion: slight and mechanical, never flashy — and off entirely when the reader asks for stillness */
+  @media (prefers-reduced-motion:no-preference){
+    .mode button,.act,.conn button,.conn .go,.weave .chip,.weave .orig .ow,.weave .wstudy .uses,
+    .weave .deep .seal,.ask input,.ask #go,.ask .mic,.src a,.word,.rootlead a{
+      transition:color .18s ease, border-color .18s ease, background-color .18s ease }
+    #page>*{ animation:settle .5s ease both }
+    @keyframes settle{ from{ opacity:0; transform:translateY(.3rem) } to{ opacity:1; transform:none } }
+  }
+  .book{ max-width:41rem; margin:0 auto; min-height:100svh; display:flex; flex-direction:column;
+         padding:calc(1rem + env(safe-area-inset-top)) 1.35rem calc(1rem + env(safe-area-inset-bottom)); }
+
+  /* the lintel — an engraved nameplate under a brass cornice */
+  header.bar{ display:flex; align-items:center; justify-content:space-between; gap:1rem;
+              padding-bottom:.7rem; border-bottom:1px solid var(--brass); box-shadow:0 1px 0 var(--hair) }
+  .brand{ font-family:var(--plaque); font-size:.74rem; letter-spacing:.2em; text-transform:uppercase;
+          color:var(--dim); text-decoration:none; display:inline-flex; align-items:center; gap:.5em }
+  .brand b{ color:var(--brass); font-weight:600; letter-spacing:.16em }
+  .brand .fleur{ color:var(--brass); font-size:1.05em; line-height:1 }
+
+  /* the brass switch — Listen / Read */
+  .mode{ display:inline-flex; border:1px solid var(--brass); border-radius:3px; overflow:hidden; background:var(--panel) }
+  .mode button{ font-family:var(--plaque); font-size:.68rem; letter-spacing:.15em; text-transform:uppercase;
+                background:none; color:var(--dim); border:0; padding:.36rem .72rem; cursor:pointer;
+                display:inline-flex; align-items:center; gap:.42em }
+  .mode button+button{ border-left:1px solid var(--brass) }
+  .mode button[aria-pressed="true"]{ background:var(--brass); color:var(--paper) }
+  .mode button svg{ width:.92em; height:.92em }
+
+  main.page{ flex:1 0 auto; padding:2.1rem 0 1rem }
+  .greet{ color:var(--ink-soft); font-family:var(--display); font-style:italic; font-size:1.42rem;
+          line-height:1.42; margin:0 0 1.5rem; max-width:34rem }
+  .headline{ font-family:var(--display); font-size:2.7rem; line-height:1.06; margin:.1rem 0 1rem;
+             font-weight:600; letter-spacing:.004em; text-wrap:balance; color:var(--ink) }
+  .body{ font-size:1.2rem; line-height:1.66 }
+  .body p{ margin:.2rem 0 1.05rem }
+  .vn{ color:var(--brass); font-size:.64em; vertical-align:super; margin-right:.32em; font-family:var(--plaque); font-weight:600 }
   .word{ cursor:pointer; border-bottom:1px dotted var(--line) }
-  .word:hover{ border-bottom-color:var(--gold); color:var(--gold) }
-  .src{ color:var(--dim); font-size:.9rem; margin:.4rem 0 1.2rem }
-  .src a{ color:var(--gold); text-decoration:none }
-  /* a verdict — the CHECK door's answer, plainly: certified true, false, or honestly declined */
-  .verdict{ font-family:system-ui,sans-serif; font-size:.78rem; letter-spacing:.12em; text-transform:uppercase;
-            display:inline-block; padding:.28rem .7rem; border:1px solid var(--gold); color:var(--gold);
-            border-radius:2px; margin:0 0 1rem }
-  .verdict.no{ border-color:var(--rule); color:var(--ink) }
+  .word:hover{ border-bottom-color:var(--brass); color:var(--brass) }
+  .src{ color:var(--dim); font-family:var(--plaque); font-size:.78rem; letter-spacing:.03em; margin:.5rem 0 1.2rem }
+  .src a{ color:var(--brass); text-decoration:none; border-bottom:1px solid transparent }
+  .src a:hover{ border-bottom-color:var(--brass) }
+  /* a verdict — a wax seal struck on the page: certified true, false, or honestly declined */
+  .verdict{ font-family:var(--plaque); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+            display:inline-flex; align-items:center; gap:.45em; padding:.3rem .8rem; border:1px solid var(--brass);
+            color:var(--brass); border-radius:2px; margin:0 0 1rem; background:var(--panel) }
+  .verdict.no{ border-color:var(--seal); color:var(--seal) }
   .verdict.na{ border-color:var(--line); color:var(--dim) }
   /* render 2 — the Word under an answer: the verse its subject is rooted in (a quiet lead line) */
-  .rootlead{ font-family:system-ui,sans-serif; font-size:.82rem; color:var(--dim); margin:-.4rem 0 1.1rem }
-  .rootlead b{ color:var(--gold); font-weight:600; font-family:Georgia,serif }
-  /* the engine trail — a calm static schematic of how the answer was found; one frame, no motion */
-  .trail{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:.7rem 0; margin:1.4rem 0;
-          font-family:system-ui,sans-serif; font-size:.72rem; letter-spacing:.06em; color:var(--dim);
+  .rootlead{ font-family:var(--plaque); font-size:.8rem; color:var(--dim); margin:-.3rem 0 1.1rem }
+  .rootlead b{ color:var(--brass); font-weight:600; font-family:var(--display); font-size:1.14em }
+  /* the engine trail — a brass instrument's readout of how the answer was found; one frame */
+  .trail{ border-top:1px solid var(--hair); border-bottom:1px solid var(--hair); padding:.6rem 0; margin:1.4rem 0;
+          font-family:var(--mono); font-size:.68rem; letter-spacing:.01em; color:var(--dim);
           display:flex; flex-wrap:wrap; align-items:center; gap:.5rem }
-  .trail .lab{ text-transform:uppercase; letter-spacing:.12em; color:var(--ink); opacity:.55 }
+  .trail .lab{ text-transform:uppercase; letter-spacing:.14em; color:var(--ink); opacity:.5 }
   .trail .step{ white-space:nowrap }
   .trail .step b{ color:var(--ink); font-weight:600 }
-  .trail .arr{ color:var(--line) }
-  .trail .seal{ color:var(--gold) }
+  .trail .arr{ color:var(--brass); opacity:.65 }
+  .trail .seal{ color:var(--brass) }
   /* connections — the coach pointing on */
-  .conn{ margin:1rem 0 }
-  .conn .lab{ font-family:system-ui,sans-serif; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--dim) }
-  .conn button, .conn .go{ display:block; width:100%; text-align:left; font:inherit; font-size:1.02rem; background:none;
-                border:0; border-bottom:1px solid var(--line); color:var(--ink); padding:.55rem 0; cursor:pointer;
+  .conn{ margin:1.2rem 0 }
+  .conn .lab{ font-family:var(--plaque); font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--dim) }
+  .conn button, .conn .go{ display:block; width:100%; text-align:left; font-family:var(--serif); font-size:1.08rem; background:none;
+                border:0; border-bottom:1px solid var(--hair); color:var(--ink); padding:.58rem 0; cursor:pointer;
                 text-decoration:none }
-  .conn button:hover, .conn .go:hover{ color:var(--gold) }
-  .conn button::before, .conn .go::before{ content:"→ "; color:var(--gold) }
+  .conn button:hover, .conn .go:hover{ color:var(--brass); border-bottom-color:var(--brass) }
+  .conn button::before, .conn .go::before{ content:"❧"; color:var(--brass); font-size:.9em; margin-right:.55em }
   .conn .go::after{ content:" ↗"; color:var(--dim); font-size:.8em }  /* leaves the console to a reader page */
   /* the woven entry — the Word connected to everything: reality, cross-refs, original, commentary */
-  .weave{ border-top:1px solid var(--line); margin:1.4rem 0 0; padding-top:1rem }
-  .weave .wlab{ font-family:system-ui,sans-serif; font-size:.68rem; letter-spacing:.14em; text-transform:uppercase;
-                color:var(--gold); margin:0 0 1rem }
-  .weave .dim-row{ margin:0 0 1rem }
-  .weave .dim-row .k{ font-family:system-ui,sans-serif; font-size:.66rem; letter-spacing:.1em; text-transform:uppercase;
-                      color:var(--dim); display:block; margin:0 0 .3rem }
-  .weave .chip{ font:inherit; font-size:.96rem; background:none; border:0; border-bottom:1px solid var(--line);
-                color:var(--ink); padding:.15rem 0; margin:0 .9rem .2rem 0; cursor:pointer; display:inline-block }
-  .weave .chip:hover{ color:var(--gold) }
-  .weave .orig{ font-size:1.25rem; line-height:1.95; direction:ltr }
-  .weave .orig .ow{ cursor:pointer; border-bottom:1px dotted transparent; padding:0 .04em }
-  .weave .orig .ow:hover{ border-bottom-color:var(--gold); color:var(--gold) }
-  .weave .orig .ow.doubt{ color:var(--gold); border-bottom:1px dotted var(--gold) }  /* kept in the tongue */
-  .weave .wstudy{ margin:.7rem 0 0; font-size:1rem; line-height:1.55; color:var(--ink);
-                  border-left:2px solid var(--gold); padding:.1rem 0 .1rem .8rem }
-  .weave .wstudy .tl{ font-style:italic; color:var(--dim) }
-  .weave .wstudy .uses{ display:inline-block; margin-top:.4rem; font-size:.84rem; color:var(--gold); cursor:pointer;
-                        font-family:system-ui,sans-serif }
+  .weave{ border-top:1px solid var(--brass); margin:1.6rem 0 0; padding-top:1.1rem }
+  .weave .wlab{ font-family:var(--plaque); font-size:.66rem; letter-spacing:.22em; text-transform:uppercase;
+                color:var(--brass); margin:0 0 1.1rem; display:flex; align-items:center; gap:.7em }
+  .weave .wlab::before, .weave .wlab::after{ content:""; height:1px; background:var(--hair); flex:1 }
+  .weave .dim-row{ margin:0 0 1.15rem }
+  .weave .dim-row .k{ font-family:var(--plaque); font-size:.62rem; letter-spacing:.14em; text-transform:uppercase;
+                      color:var(--dim); display:block; margin:0 0 .4rem }
+  .weave .chip{ font-family:var(--serif); font-size:.98rem; background:var(--panel); border:1px solid var(--hair);
+                border-radius:2px; color:var(--ink); padding:.2rem .55rem; margin:0 .4rem .4rem 0; cursor:pointer; display:inline-block }
+  .weave .chip:hover{ color:var(--brass); border-color:var(--brass) }
+  .weave .orig{ font-family:var(--display); font-size:1.5rem; line-height:1.85; direction:ltr }
+  .weave .orig .ow{ cursor:pointer; border-bottom:1px dotted transparent; padding:0 .05em }
+  .weave .orig .ow:hover{ border-bottom-color:var(--brass); color:var(--brass) }
+  .weave .orig .ow.doubt{ color:var(--brass); border-bottom:1px solid var(--brass) }  /* kept in the tongue */
+  .weave .wstudy{ margin:.7rem 0 0; font-size:1rem; line-height:1.56; color:var(--ink);
+                  border-left:2px solid var(--brass); padding:.15rem 0 .15rem .85rem;
+                  background:linear-gradient(90deg,var(--panel),transparent 65%) }
+  .weave .wstudy .tl{ font-style:italic; color:var(--copper); font-family:var(--display); font-size:1.12em }
+  .weave .wstudy .uses{ display:inline-block; margin-top:.4rem; font-size:.8rem; color:var(--brass); cursor:pointer;
+                        font-family:var(--plaque) }
   .weave .wstudy .uses:hover{ text-decoration:underline }
-  .weave .cmt{ font-size:1.02rem; color:var(--ink) }
-  .weave .cmt .who{ color:var(--dim); font-size:.84rem; font-style:italic; display:block; margin-top:.3rem }
+  .weave .cmt{ font-size:1.04rem; color:var(--ink); line-height:1.6 }
+  .weave .cmt .who{ color:var(--copper); font-family:var(--plaque); font-size:.74rem; letter-spacing:.03em; font-style:normal; display:block; margin-top:.35rem }
   /* go deep — tap a reality node to open its verified, sealed math (the inner workings) */
-  .weave .deep{ margin:.7rem 0 0; border-left:2px solid var(--ink); padding:.1rem 0 .1rem .8rem }
-  .weave .deep .dtitle{ font-weight:600; font-size:1.05rem; margin:0 0 .35rem }
-  .weave .deep .dstmt{ font-size:1rem; margin:0 0 .7rem }
-  .weave .deep .dmark{ font-size:.95rem; margin:0 0 .5rem; padding-left:.8rem; border-left:1px solid var(--line) }
-  .weave .deep .dmark .mk{ font-family:system-ui,sans-serif; font-size:.64rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); display:block }
-  .weave .deep .seal{ color:var(--gold); font-size:.8rem; font-family:system-ui,sans-serif; text-decoration:none; margin-left:.3rem; white-space:nowrap }
-  .weave .deep .dopen{ color:var(--dim); font-size:.92rem; font-style:italic; margin:.4rem 0 0 }
-  /* the ask bar — type or speak */
-  .ask{ position:sticky; bottom:0; background:var(--paper); border-top:1px solid var(--rule);
-        padding:.8rem 0 calc(.4rem + env(safe-area-inset-bottom)); display:flex; gap:.5rem; align-items:center }
-  .ask input{ flex:1 1 auto; font:inherit; font-size:1.05rem; background:none; border:0; border-bottom:1px solid var(--line);
-              color:var(--ink); padding:.5rem .2rem; min-width:0 }
-  .ask input:focus{ outline:none; border-bottom-color:var(--gold) }
-  .ask button{ font:inherit; font-size:.92rem; background:var(--ink); color:var(--paper); border:0; border-radius:2px;
-               padding:.5rem .9rem; cursor:pointer }
-  .ask .mic{ background:none; color:var(--ink); border:1px solid var(--line); padding:.45rem .6rem; font-size:1.05rem }
-  .ask .mic[aria-pressed="true"]{ border-color:var(--gold); color:var(--gold) }
-  .row{ display:flex; gap:.8rem; align-items:center; flex-wrap:wrap; margin:.2rem 0 1rem }
-  .act{ font-family:system-ui,sans-serif; font-size:.74rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dim);
-        background:none; border:1px solid var(--line); border-radius:2px; padding:.35rem .7rem; cursor:pointer }
-  .act[aria-pressed="true"], .act:hover{ color:var(--gold); border-color:var(--gold) }
+  .weave .deep{ margin:.8rem 0 0; border-left:2px solid var(--ink); padding:.15rem 0 .15rem .85rem }
+  .weave .deep .dtitle{ font-family:var(--display); font-weight:600; font-size:1.34rem; margin:0 0 .4rem }
+  .weave .deep .dstmt{ font-size:1rem; margin:0 0 .7rem; color:var(--ink-soft) }
+  .weave .deep .dmark{ font-size:.96rem; margin:0 0 .55rem; padding-left:.85rem; border-left:1px solid var(--hair) }
+  .weave .deep .dmark .mk{ font-family:var(--plaque); font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); display:block; margin-bottom:.12rem }
+  .weave .deep .seal{ color:var(--brass); font-size:.76rem; font-family:var(--plaque); text-decoration:none; margin-left:.35rem; white-space:nowrap }
+  .weave .deep .seal:hover{ text-decoration:underline }
+  .weave .deep .dopen{ color:var(--dim); font-size:.92rem; font-style:italic; margin:.5rem 0 0 }
+  /* the ask bar — a brass query line: type or speak */
+  .ask{ position:sticky; bottom:0; background:var(--paper); border-top:1px solid var(--brass);
+        padding:.75rem 0 calc(.4rem + env(safe-area-inset-bottom)); display:flex; gap:.5rem; align-items:center }
+  .ask input{ flex:1 1 auto; font-family:var(--serif); font-size:1.08rem; background:none; border:0; border-bottom:1px solid var(--line);
+              color:var(--ink); padding:.5rem .3rem; min-width:0 }
+  .ask input::placeholder{ color:var(--dim); font-style:italic }
+  .ask input:focus{ outline:none; border-bottom-color:var(--brass) }
+  .ask #go{ font-family:var(--plaque); font-size:.72rem; letter-spacing:.16em; text-transform:uppercase;
+               background:var(--brass); color:var(--paper); border:1px solid var(--brass); border-radius:3px;
+               padding:.5rem 1rem; cursor:pointer; display:inline-flex; align-items:center; gap:.45em }
+  .ask #go:hover{ background:var(--brass-lit); border-color:var(--brass-lit) }
+  .ask #go svg{ width:.95em; height:.95em }
+  .ask .mic{ background:var(--panel); color:var(--ink-soft); border:1px solid var(--line); border-radius:3px;
+             padding:.42rem .52rem; cursor:pointer; display:inline-flex; align-items:center }
+  .ask .mic svg{ width:1.05rem; height:1.05rem }
+  .ask .mic[aria-pressed="true"]{ border-color:var(--brass); color:var(--brass) }
+  /* instrument buttons — Listen / Keep / Copy */
+  .row{ display:flex; gap:.7rem; align-items:center; flex-wrap:wrap; margin:.3rem 0 1rem }
+  .act{ font-family:var(--plaque); font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--dim);
+        background:var(--panel); border:1px solid var(--line); border-radius:3px; padding:.4rem .8rem; cursor:pointer;
+        display:inline-flex; align-items:center; gap:.5em }
+  .act svg{ width:.95em; height:.95em }
+  .act[aria-pressed="true"], .act:hover{ color:var(--brass); border-color:var(--brass) }
   .dim{ color:var(--dim) }
-  .kept{ color:var(--gold); font-size:.84rem; font-family:system-ui,sans-serif }
-  footer{ color:var(--dim); font-size:.74rem; border-top:1px solid var(--line); padding-top:.7rem; margin-top:1rem }
+  .kept{ color:var(--brass); font-size:.78rem; letter-spacing:.06em; font-family:var(--plaque) }
+  /* the colophon */
+  footer{ color:var(--dim); font-family:var(--plaque); font-size:.7rem; letter-spacing:.03em; text-align:center;
+          border-top:1px solid var(--hair); padding-top:.95rem; margin-top:1.4rem }
+  footer .fleur{ color:var(--brass); display:block; margin-bottom:.35rem; font-size:1.15rem; line-height:1 }
 </style>
 </head>
 <body>
 <div class="book">
   <header class="bar">
-    <a class="brand" href="/">Narrow <b>Highway</b> · the console</a>
+    <a class="brand" href="/"><span class="fleur" aria-hidden="true">&#10070;</span>Narrow&nbsp;<b>Highway</b> &middot; the console</a>
     <span class="mode" role="group" aria-label="Listen or read">
-      <button id="m-listen" aria-pressed="false" title="Listen — it reads to you, hands-free">Listen</button>
-      <button id="m-read" aria-pressed="true" title="Read — the page rests; study at your own pace">Read</button>
+      <button id="m-listen" aria-pressed="false" title="Listen — it reads to you, hands-free">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h3.5L13 19V5L7.5 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a9 9 0 0 1 0 12"/></svg>Listen</button>
+      <button id="m-read" aria-pressed="true" title="Read — the page rests; study at your own pace">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5C10 5.1 7.5 4.4 4.5 4.4V17c3 0 5.5.7 7.5 2.1 2-1.4 4.5-2.1 7.5-2.1V4.4c-3 0-5.5.7-7.5 2.1z"/><path d="M12 6.5v12.6"/></svg>Read</button>
     </span>
   </header>
 
@@ -133,11 +183,14 @@
   </main>
 
   <div class="ask">
-    <button class="mic" id="mic" title="Speak" aria-pressed="false" hidden>🎙</button>
+    <button class="mic" id="mic" title="Speak" aria-label="Speak" aria-pressed="false" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21M8.5 21h7"/></svg>
+    </button>
     <input id="q" placeholder="a verse · define a word · check a claim · a situation you're facing · note that…" aria-label="Ask or speak" autocomplete="off">
-    <button id="go">Ask</button>
+    <button id="go" title="Consult the keeping">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 4C13.5 5.5 8.5 10.5 6.5 17L5 20.5"/><path d="M6.5 17c2.5 0 4-.8 5.2-2"/><path d="M13.5 7.2l3.3 3.3"/></svg>Ask</button>
   </div>
-  <footer>Found, verified, and cited — never generated. A window to Him, not a wall.</footer>
+  <footer><span class="fleur" aria-hidden="true">&#10070;</span>Found, verified, and cited — never generated. A window to Him, not a wall.</footer>
 </div>
 
 <script src="speak.js"></script>
@@ -232,9 +285,11 @@ function render(r){
     html += '<div class="src">'+ (ref ? '<a href="'+esc(ref)+'">'+esc(t)+'</a>' : esc(t)) +'</div>';
   }
   html += trailOf(r);
+  const icoListen = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h3.5L13 19V5L7.5 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg>';
+  const icoKeep = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3.2"/><path d="M12 5V7M12 17v2M5 12h2M17 12h2"/></svg>';
   html += '<div class="row">'
-       +  '<button class="act" id="replay" title="Read this aloud in the operator\'s voice">▶ Listen</button>'
-       +  '<button class="act" id="keep" title="Keep this, verbatim, in your record">✍ Keep</button>'
+       +  '<button class="act" id="replay" title="Read this aloud in the operator\'s voice">' + icoListen + 'Listen</button>'
+       +  '<button class="act" id="keep" title="Keep this, verbatim, in your record">' + icoKeep + 'Keep</button>'
        +  '<span class="kept" id="kept" hidden>kept</span>'
        +  '</div>';
   html += renderConnections(r);
