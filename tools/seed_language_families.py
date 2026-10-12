@@ -67,7 +67,7 @@ FAMILIES = [
         ("korean", "Korean", "Korean and the Jeju language"),
     ]),
     ("austroasiatic", "Austroasiatic", "Proto-Austroasiatic", [
-        ("vietic", "Vietic", "Vietnamese, Muơng"),
+        ("vietic", "Vietic", "Vietnamese, Mường"),
         ("khmeric", "Khmeric", "Khmer (Cambodian)"),
         ("munda", "Munda", "Santali and the Munda languages of India"),
     ]),

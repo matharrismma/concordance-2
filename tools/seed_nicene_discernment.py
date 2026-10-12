@@ -87,19 +87,21 @@ MARKS = [
      {"source": "M. B. Eddy, Science and Health with Key to the Scriptures (1875, public domain); Luke 24:39; "
                 "John 20:27; theology_doctrine.bodily_resurrection"}),
     ("exclusion",
-     "[Oneness Pentecostalism - departs, cited] By its own doctrine (the 'Oneness' or 'Jesus Only' teaching) God "
-     "is one person who manifests in three modes or offices (Father, Son, Spirit) successively - modalism - rather "
-     "than three co-eternal persons. This denies the Nicene three-person confession. As with naming, the modes are "
-     "labelled, so the structural test alone cannot decide it; the departure is cited to the creed's three-person "
-     "clause and the group's own teaching.",
-     {"source": "United Pentecostal Church International, Fundamental Doctrine (the Oneness of God); the Nicene "
-                "Creed (325/381) - three persons; Matthew 28:19; 2 Corinthians 13:14"}),
+     "[Oneness (Apostolic) Pentecostalism - departs, cited] By its own doctrine (the 'Oneness' teaching) God is one "
+     "person who is Father, Son and Holy Spirit as manifestations or offices of the one God (which Oneness theology "
+     "holds can be simultaneous, e.g. the Father in heaven and the Son on earth) - not three co-eternal, co-equal "
+     "persons. This denies the Nicene three-person confession. As with naming, the manifestations are labelled, so "
+     "the structural test alone cannot decide it; the departure is cited to the creed's three-person clause and the "
+     "group's own teaching.",
+     {"source": "United Pentecostal Church International, Fundamental Doctrine; D. K. Bernard, 'The Oneness of God'; "
+                "the Nicene Creed (325/381) - three persons; Matthew 28:19; 2 Corinthians 13:14"}),
     ("note",
      "[the charity and the limit, cited] This names departures from a CONFESSION, in each group's own published "
      "words, measured against the historic creed - not a judgment of any person, which belongs to the Lord. The "
      "engine seals none of it: a creedal confession is cited, never a sealed theorem. The structural checks it can "
-     "make (the Spirit named as a person; a bodily resurrection) are a signpost on the witness surface, not the "
-     "verdict; the truth is in the Word and in Christ, not in this tool. We expose but do not humiliate: we don't "
+     "make are narrow (whether the three persons are NAMED at all in the confession; whether a bodily resurrection "
+     "is affirmed) - a signpost on the witness surface, not the verdict, and not an assessment of personhood or "
+     "essence; the truth is in the Word and in Christ, not in this tool. We expose but do not humiliate: we don't "
      "lie, but we love you.",
      {"source": "src/concordance/verifiers/theology_doctrine.py; tools/card_churches.py (calibrate, not judge)"}),
 ]

@@ -51,6 +51,11 @@ SD = "card_church_seventh_day_adventist"
 RM = "card_church_restoration_movement_churches_of_christ_disciples"
 EV = "card_church_evangelical_interdenominational"
 CR = "card_church_the_ecumenical_creeds_the_shared_ground"
+# Two ancient apostolic traditions that PREDATE the East–West split and are NOT in card_churches.jsonl — this
+# seed mints them so the floor does not erase them: the Church of the East (distinct after Ephesus, 431) and
+# Oriental Orthodoxy (distinct after Chalcedon, 451, which it did not receive).
+COE = "card_church_of_the_east"
+OO = "card_church_oriental_orthodoxy"
 
 # the traditions carried by this floor (reused by id; must exist in data/church_cards.jsonl)
 TRADITIONS = [EO, RC, LU, RE, AN, BA, ME, PE, AB, CO, SD, RM, EV, CR]
@@ -61,22 +66,31 @@ TRADITIONS = [EO, RC, LU, RE, AN, BA, ME, PE, AB, CO, SD, RM, EV, CR]
 # root is a direct part of the floor; every tradition hangs in the chain below it. A node with two or more
 # parents is a MERGE (where streams meet) - Evangelicalism is exactly that.
 DESCENT = [
-    (CR, APOSTOLIC, "the ecumenical creeds (Apostles'; Nicene, 325/381; Chalcedon, 451) — the shared apostolic confession, the center that holds (Ephesians 4:4-6)"),
-    (EO, APOSTOLIC, "the undivided Church of the first millennium; the East after the East–West (Great) Schism, AD 1054"),
-    (RC, APOSTOLIC, "the undivided Church of the first millennium; the West (Rome) after the East–West (Great) Schism, AD 1054"),
+    (CR, APOSTOLIC, "the Nicene Creed (325/381) — the confession the traditions broadly hold in common, the center that holds (Ephesians 4:4-6); the Apostles' Creed in the West; Chalcedon (451) received by the Chalcedonian churches (East and West), the point at which Oriental Orthodoxy diverged — so not universal"),
+    # the first ENDURING divisions, before the East–West split: Ephesus (431) and Chalcedon (451)
+    (COE, APOSTOLIC, "the ancient Church of the East (East-Syriac, called 'Nestorian') — distinct after the Council of Ephesus, AD 431, over the Christology of Nestorius; the first enduring division"),
+    (OO, APOSTOLIC, "Oriental Orthodoxy (Miaphysite) — Coptic, Syriac, Armenian, Ethiopian, Eritrean, Malankara — distinct after the Council of Chalcedon, AD 451, which it did not receive"),
+    (EO, APOSTOLIC, "the Chalcedonian Church of the first millennium; the East after the East–West (Great) Schism, AD 1054 — the first great division between the Greek East and the Latin West"),
+    (RC, APOSTOLIC, "the Chalcedonian Church of the first millennium; the West (Rome) after the East–West (Great) Schism, AD 1054"),
     (LU, RC, "the Reformation: Luther's Ninety-Five Theses (1517); the Augsburg Confession (1530)"),
     (RE, RC, "the Reformation in Switzerland: Zwingli and Calvin (1520s–1540s); the Westminster Confession (1646)"),
     (AN, RC, "the English Reformation: the Act of Supremacy (1534); the Thirty-Nine Articles (1571)"),
-    (AB, RC, "the Radical Reformation: the Schleitheim Confession (1527)"),
+    (AB, RE, "the Radical Reformation out of the Swiss/Zwinglian Reformed movement in Zurich — the first believer's baptism (Grebel, Manz, Blaurock, 1525); the Schleitheim Confession (1527)"),
     (CO, AN, "the English Separatists / Independents out of the Church of England: the Savoy Declaration (1658)"),
     (BA, CO, "the English Separatist stream: the first Baptist congregation (Smyth and Helwys, 1609); the 1689 Confession"),
     (ME, AN, "the Wesleyan revival within the Church of England (1738); the Methodist separation (1784)"),
     (PE, ME, "the Holiness / Methodist stream: the Azusa Street revival (1906)"),
-    (RM, BA, "the Stone–Campbell Restoration Movement out of the Presbyterian and Baptist churches: the Declaration and Address (1809)"),
-    (SD, BA, "the Millerite Adventist revival (1840s) out of the Baptist and Methodist churches; organized 1863"),
-    # Evangelicalism is the MERGE of the Protestant streams - a trans-denominational renewal (Lausanne, 1974)
+    # the Restoration Movement is a MERGE of the Reformed/Presbyterian and Baptist streams (its own two roots)
+    (RM, RE, "the Stone–Campbell Restoration Movement — its Presbyterian/Reformed root (Barton Stone, Cane Ridge 1801; the Campbells' Seceder-Presbyterian background): the Declaration and Address (1809)"),
+    (RM, BA, "the Stone–Campbell Restoration Movement — believer's baptism and early Baptist association: the Declaration and Address (1809)"),
+    # Seventh-day Adventism out of the Millerite revival — a merge of the Baptist and Methodist streams
+    (SD, BA, "the Millerite Adventist revival (1840s) — William Miller a Baptist; organized 1863"),
+    (SD, ME, "the Millerite Adventist revival (1840s) — drawing Methodists as well; organized 1863"),
+    # Evangelicalism is the MERGE of the Protestant streams - a trans-denominational renewal (the Lausanne
+    # Covenant, 1974, principally drafted by John Stott, an Anglican)
     (EV, LU, "a trans-denominational renewal confessing the gospel across the Protestant streams (Lausanne, 1974)"),
     (EV, RE, "a trans-denominational renewal confessing the gospel across the Protestant streams (Lausanne, 1974)"),
+    (EV, AN, "a trans-denominational renewal across the Protestant streams (Lausanne, 1974; the Covenant drafted by John Stott, an Anglican)"),
     (EV, BA, "a trans-denominational renewal confessing the gospel across the Protestant streams (Lausanne, 1974)"),
     (EV, ME, "a trans-denominational renewal confessing the gospel across the Protestant streams (Lausanne, 1974)"),
     (EV, PE, "a trans-denominational renewal confessing the gospel across the Protestant streams (Lausanne, 1974)"),
@@ -88,7 +102,10 @@ DESCENT = [
 # a merge. These stale edges are dropped so a re-run fully reconciles.
 DROP = ([(t, FLOOR, "part_of") for t in TRADITIONS]
         + [(CR, x, "connects_at") for x in (EO, RC, LU, RE, AN)]
-        + [(EV, x, "connects_at") for x in (LU, RE, BA, ME, PE)])
+        + [(EV, x, "connects_at") for x in (LU, RE, BA, ME, PE)]
+        # the first run descended the Anabaptists from Rome; the accurate parent is the Swiss/Reformed stream
+        # they broke from (Zurich, 1525), so the old edge is retired and replaced by (AB, RE) in the descent.
+        + [(AB, RC, "builds_on")])
 
 
 def apostolic_card() -> dict:
@@ -98,8 +115,10 @@ def apostolic_card() -> dict:
         "body": ("The one Church as it began: the apostles and the first disciples at Pentecost, when the "
                  "Holy Spirit was poured out and about three thousand were added in a day (Acts 2). The root "
                  "every tradition below descends from — one body, one Spirit, one Lord, one faith, one "
-                 "baptism (Ephesians 4:4-6). It held undivided through the first millennium; the branches "
-                 "that follow are its visible, datable divisions, gathered and cited, never judged."),
+                 "baptism (Ephesians 4:4-6). The root every tradition below descends from; the branches that "
+                 "follow are its visible, datable divisions — the first enduring ones at the Councils of Ephesus "
+                 "(431) and Chalcedon (451), then the great East–West Schism (1054) and the Reformation — "
+                 "gathered and cited, never judged."),
         "source": {"label": "The apostolic Church — Acts of the Apostles", "url": "",
                    "domain": "theology", "authority_tier": "reference"},
         "shelf": "churches", "box": "tradition",
@@ -119,15 +138,15 @@ def floor_card() -> dict:
     return {
         "id": FLOOR, "kind": "note",
         "title": "The Church through history — the descent of the traditions from the apostolic root",
-        "body": ("The one Church as a floor on the one map: the Early Biblical Church (Acts 2) is the root, "
-                 "and the traditions gathered in the keeping (Eastern Orthodoxy, Roman Catholicism, the "
-                 "Reformation churches and their heirs) are the trees that descend from it by DATABLE events "
-                 "— the East–West Schism of 1054, the Reformation of 1517, the English Reformation of "
-                 "1534, and on. The branches and their confessions are attested; each lineage is a cited "
-                 "historical event, never a sealed theorem and never a verdict on a tradition or a believer. "
-                 "The ecumenical creeds are the shared ground the traditions confess in common (the center "
-                 "that holds, Ephesians 4:4-6). We calibrate, we do not judge. Found, never generated "
-                 "(tools/seed_church_history.py)."),
+        "body": ("The one Church as a floor on the one map: the Early Biblical Church (Acts 2) is the root, and "
+                 "the traditions are the trees that descend from it by DATABLE events — the first enduring "
+                 "divisions at the Councils of Ephesus (431, the Church of the East) and Chalcedon (451, the "
+                 "Oriental Orthodox), then the great East–West Schism (1054), the Reformation (1517), the English "
+                 "Reformation (1534), and on. The branches and their confessions are attested; each lineage is a "
+                 "cited historical event, never a sealed theorem and never a verdict on a tradition or a believer. "
+                 "The Nicene Creed (325/381) is the ground most traditions confess in common (the center that "
+                 "holds, Ephesians 4:4-6); Chalcedon is not universal (the Oriental Orthodox do not receive it). "
+                 "We calibrate, we do not judge. Found, never generated (tools/seed_church_history.py)."),
         "source": {"label": "Narrow Highway — the Church-history floor (gathered church history)", "url": "",
                    "ref": SPINE, "authority_tier": "engine_derived"},
         "shelf": "codex", "box": "floor",
@@ -139,7 +158,52 @@ def floor_card() -> dict:
     }
 
 
-CARDS: List[dict] = [floor_card(), apostolic_card()]
+def _ancient_card(cid, title, body, confession, emphasis, era, scripture, bands) -> dict:
+    return {
+        "id": cid, "kind": "reference", "title": title, "body": body,
+        "source": {"label": "An ancient apostolic tradition — its own confession", "url": "",
+                   "domain": "theology", "authority_tier": "reference"},
+        "shelf": "churches", "box": "tradition",
+        "bands": ["church", "tradition", "ancient", "apostolic"] + list(bands),
+        "subject": title.split(" — ")[0],
+        "connections": [{"to_card_id": SPINE, "relationship": "member_of",
+                         "evidence": "an ancient apostolic tradition of the one Church"}],
+        "author": "engine", "created_at": 0.0, "updated_at": 0.0, "visibility": "public",
+        "lifecycle_stage": "public", "volatility": "permanent", "surface": "secular", "generated": False,
+        "extra": {"confession": confession, "emphasis": emphasis, "era": era, "scripture": scripture},
+    }
+
+
+def church_of_the_east_card() -> dict:
+    return _ancient_card(
+        COE, "The Church of the East — the East-Syriac tradition (distinct after AD 431)",
+        ("The ancient Church of the East (East-Syriac; historically called 'Nestorian', a name it disputes), which "
+         "spread along the Silk Road to Persia, India and China. It became distinct after the Council of Ephesus "
+         "(AD 431) over the Christology associated with Nestorius. It confesses the Nicene faith; today it endures as "
+         "the Assyrian Church of the East and the Ancient Church of the East. An apostolic tradition the map must not "
+         "erase — gathered and cited, never judged."),
+        "the Nicene Creed; the Christology of the Church of the East (two qnome in one prosopon)",
+        "endurance under persecution; the gospel carried to the ends of the known earth",
+        "distinct after AD 431 (Council of Ephesus)", "Acts 1:8; Matthew 28:19; John 1:14",
+        ["church of the east", "assyrian", "east syriac", "nestorian", "ephesus 431"])
+
+
+def oriental_orthodoxy_card() -> dict:
+    return _ancient_card(
+        OO, "Oriental Orthodoxy — the non-Chalcedonian (Miaphysite) churches (distinct after AD 451)",
+        ("The Oriental Orthodox communion — Coptic, Syriac, Armenian Apostolic, Ethiopian, Eritrean and Malankara "
+         "(Indian) churches (~60 million today). It holds the first three ecumenical councils (Nicaea, Constantinople, "
+         "Ephesus) and the Nicene Creed, but did NOT receive the Council of Chalcedon (AD 451); it confesses one united "
+         "nature of the incarnate Word (Miaphysite), distinguishing itself from both Nestorianism and Eutychianism. An "
+         "ancient apostolic communion — gathered and cited, never judged; recent dialogues have narrowed the historic "
+         "Christological difference with the Chalcedonian churches to largely terminological."),
+        "the first three ecumenical councils; the Nicene Creed; Miaphysite Christology (St Cyril of Alexandria)",
+        "the unbroken ancient liturgy and asceticism; faithfulness through centuries under Islamic and other rule",
+        "distinct after AD 451 (Council of Chalcedon)", "John 1:14; Colossians 2:9; Philippians 2:6-7",
+        ["oriental orthodox", "miaphysite", "coptic", "armenian", "syriac", "ethiopian", "chalcedon 451"])
+
+
+CARDS: List[dict] = [floor_card(), apostolic_card(), church_of_the_east_card(), oriental_orthodoxy_card()]
 
 
 def _edge(a, b, rel, ev) -> dict:
