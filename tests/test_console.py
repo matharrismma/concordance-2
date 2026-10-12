@@ -251,6 +251,44 @@ def test_a_verify_surfaces_a_normalized_verdict_for_the_badge(monkeypatch):
     assert _mk("SYSTEM_ERROR") is None
 
 
+def test_a_checked_claim_renders_the_verdict_not_the_keyword_card(monkeypatch):
+    """REGRESSION (2026-10-12): the candidate engine verifies a claim and respond() attaches BOTH the
+    verdict (audit) AND topical keyword-search cards. The Console was rendering the keyword card as the
+    headline ("speed of light is 299,792,458 m/s" -> "Fluid mechanics") and burying the real check.
+    A `checked` payload must render the VERDICT, drop the keyword cards, and surface the badge."""
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "checked", "generated": False,
+        "audit": {"results": [{"claim": "the speed of light is 299792458 m/s", "status": "pass",
+                               "detail": "physical_constants.value: speed_of_light = 299792458.0 m/s "
+                                         "— matches to the 9 significant figures stated"}],
+                  "survived": 1, "rejected": 0, "held": 0, "seal": "/s/abc123"},
+        "message": "I checked 1 claim in what you wrote — 1 held up. Here is each, with its receipt.",
+        "results": [{"id": "card_fluid_mechanics", "title": "Fluid mechanics (Bernoulli, Reynolds)",
+                     "snippet": "the study of fluids in motion"}]})
+    r = console.dispatch("the speed of light is 299792458 m/s", SEC)
+    assert r["verdict"] == "true"                               # the badge fires
+    assert "checks out" in r["headline"].lower()                # the verdict, not the keyword card
+    assert "fluid mechanics" not in r["headline"].lower()       # the topical card is gone from the headline
+    assert "fluid mechanics" not in (r.get("spoken") or "").lower()
+    assert "speed_of_light" in (r.get("spoken") or "").lower()  # the actual check is spoken
+    assert r["source"] and r["source"]["ref"] == "/s/abc123"    # the re-checkable receipt is offered
+
+
+def test_a_checked_claim_that_fails_renders_false(monkeypatch):
+    """A checked set with a rejected claim renders as ✕ (false), not a topical search card."""
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "checked", "generated": False,
+        "audit": {"results": [{"claim": "the atomic number of gold is 80", "status": "reject",
+                               "detail": "periodic_table.element: Au (gold) Z=79, not 80"}],
+                  "survived": 0, "rejected": 1, "held": 0, "seal": None},
+        "message": "I checked 1 claim — 1 did not.",
+        "results": [{"id": "card_x", "title": "The periodic table", "snippet": "elements"}]})
+    r = console.dispatch("the atomic number of gold is 80", SEC)
+    assert r["verdict"] == "false"
+    assert "does not hold" in r["headline"].lower()
+    assert "periodic table" not in r["headline"].lower()
+
+
 def test_intake_keeps_the_location_not_the_blob():
     a = console.intake_artifact(source_location="/sd/photos/well_pump.jpg", kind="image",
                                 extracted_text="Shurflo 9300, 24V")

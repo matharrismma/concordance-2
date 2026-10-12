@@ -314,7 +314,33 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
     headline = ""
     console_verdict: Optional[str] = None     # surfaced for a verify so the Console can show the badge
 
-    if results:
+    if kind == "checked" and isinstance(r.get("audit"), dict):
+        # THE CANDIDATE ENGINE CHECKED A CLAIM. respond() attaches BOTH the real verdict (r["audit"],
+        # from candidates.as_checked) AND keyword-search cards (r["results"]) that merely sit near the
+        # topic. Rendering results[0] first buried the verdict and showed a random topical card as the
+        # headline ("the speed of light is 299,792,458 m/s" -> "Fluid mechanics"). Here we render the
+        # CHECK itself — the verdict the engine actually computed — exactly like a bare verify. The
+        # keyword cards are dropped; a check's "next" is to re-verify, not to wander a topic cluster.
+        audit = r["audit"]
+        rows = audit.get("results") or []
+        survived, rejected, held = audit.get("survived", 0), audit.get("rejected", 0), audit.get("held", 0)
+        if rejected:
+            headline, console_verdict, lead = "That does not hold.", "false", "I checked it, and it does not hold. "
+        elif survived and not held:
+            headline, console_verdict, lead = "It checks out.", "true", "Verified — it holds. "
+        else:
+            headline, console_verdict, lead = "I can only go so far on that.", "na", "I could not fully verify that. "
+        detail = _trim((rows[0].get("detail") if len(rows) == 1 else "") or r.get("message") or "", 420)
+        spoken = (lead + detail).strip()
+        caption = spoken
+        kind = "verify"                      # one surface for "a claim was checked" (verify + checked)
+        seal = audit.get("seal")
+        if isinstance(seal, str) and seal:
+            ref = seal if seal.startswith("/") else "/s/" + seal
+            source = {"title": "the worked check — re-verify it yourself", "ref": ref}
+        else:
+            source = {"title": "the worked check"}
+    elif results:
         top = results[0]
         title = (top.get("title") or "").strip()
         snippet = _trim(top.get("snippet") or top.get("surface") or "", 260)
