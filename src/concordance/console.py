@@ -314,6 +314,18 @@ def _looks_like_unchecked_claim(text: str) -> bool:
     return bool(_CLAIM_REL.search(t)) and bool(_CLAIM_MEASURE.search(t))
 
 
+# THE VERDICT DISPLAY — ONE source of truth for how a checked claim reads on the Console, shared by the
+# two paths that produce a verdict: the candidate-engine "checked" audit and a bare "verify" payload.
+#   token -> (headline, badge tag, the lead sentence before the worked detail).
+# (A verify SYSTEM_ERROR is handled apart — our failure is never a verdict on their claim.)
+_VERDICT_PHRASE = {
+    "true":  ("It checks out.",               "true",  "Verified — it holds. "),
+    "false": ("That does not hold.",          "false", "I checked it, and it does not hold. "),
+    "na":    ("I can only go so far on that.", "na",    "I could not fully verify that. "),
+}
+_VERIFY_TO_TOKEN = {"HOLDS": "true", "BROKEN": "false", "INCOMPLETE": "na"}
+
+
 def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
     """The coach faculty: a verified answer, spoken short, a connection woven in, the source deferred —
     and the CLOUD OF WITNESSES woven in beneath it, the Word first and the cloud weighed against it."""
@@ -346,12 +358,8 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
         audit = r["audit"]
         rows = audit.get("results") or []
         survived, rejected, held = audit.get("survived", 0), audit.get("rejected", 0), audit.get("held", 0)
-        if rejected:
-            headline, console_verdict, lead = "That does not hold.", "false", "I checked it, and it does not hold. "
-        elif survived and not held:
-            headline, console_verdict, lead = "It checks out.", "true", "Verified — it holds. "
-        else:
-            headline, console_verdict, lead = "I can only go so far on that.", "na", "I could not fully verify that. "
+        token = "false" if rejected else ("true" if (survived and not held) else "na")
+        headline, console_verdict, lead = _VERDICT_PHRASE[token]
         detail = _trim((rows[0].get("detail") if len(rows) == 1 else "") or r.get("message") or "", 420)
         spoken = (lead + detail).strip()
         caption = spoken
@@ -411,18 +419,10 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
         v = r["verify"]
         verdict = (v.get("verdict") or "").upper()
         detail = _trim(v.get("detail") or "", 420)
-        if verdict == "HOLDS":
-            headline = "It checks out."
-            spoken = ("Verified — it holds. " + detail).strip()
-            console_verdict = "true"
-        elif verdict == "BROKEN":
-            headline = "That does not hold."
-            spoken = ("I checked it, and it does not hold. " + detail).strip()
-            console_verdict = "false"
-        elif verdict == "INCOMPLETE":
-            headline = "I can only go so far on that."
-            spoken = ("I could not fully verify that. " + detail).strip()
-            console_verdict = "na"
+        token = _VERIFY_TO_TOKEN.get(verdict)
+        if token:                                 # the SAME verdict display as the checked path above
+            headline, console_verdict, lead = _VERDICT_PHRASE[token]
+            spoken = (lead + detail).strip()
         else:  # SYSTEM_ERROR — our failure, never a false verdict on their claim (no verdict badge)
             headline = "I could not run the check."
             spoken = ("I hit an error checking that — that is my failure, not a false claim. " + detail).strip()
