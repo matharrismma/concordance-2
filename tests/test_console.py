@@ -233,6 +233,22 @@ def test_a_checkable_claim_gets_the_verdict_not_a_false_miss(monkeypatch):
     assert "does not hold" in r["spoken"].lower() and "91" in r["spoken"]
     assert r["source"] and r["source"]["ref"] == "/s/abc123"   # the re-checkable receipt is offered
     assert "tortoise" not in r                                  # a computed verdict has no source to fetch
+    assert r["verdict"] == "false"                              # surfaced for the badge (BROKEN -> false)
+
+
+def test_a_verify_surfaces_a_normalized_verdict_for_the_badge(monkeypatch):
+    """The Console shows a ✓/✕ badge off a top-level `verdict`. The engine computes HOLDS/BROKEN/
+    INCOMPLETE; it must normalize that to true/false/na so the one-source verdict reaches the UI.
+    A SYSTEM_ERROR is OUR failure, never a verdict on their claim, so it surfaces no badge (None)."""
+    def _mk(v):
+        monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+            "kind": "verify", "generated": False,
+            "verify": {"verdict": v, "detail": "", "trail": [], "seal": {}}})
+        return console.dispatch("check", SEC)["verdict"]
+    assert _mk("HOLDS") == "true"
+    assert _mk("BROKEN") == "false"
+    assert _mk("INCOMPLETE") == "na"
+    assert _mk("SYSTEM_ERROR") is None
 
 
 def test_intake_keeps_the_location_not_the_blob():

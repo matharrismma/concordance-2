@@ -312,6 +312,7 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
     nexts: List[Dict[str, Any]] = []
     source: Optional[Dict[str, str]] = None
     headline = ""
+    console_verdict: Optional[str] = None     # surfaced for a verify so the Console can show the badge
 
     if results:
         top = results[0]
@@ -349,13 +350,16 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
         if verdict == "HOLDS":
             headline = "It checks out."
             spoken = ("Verified — it holds. " + detail).strip()
+            console_verdict = "true"
         elif verdict == "BROKEN":
             headline = "That does not hold."
             spoken = ("I checked it, and it does not hold. " + detail).strip()
+            console_verdict = "false"
         elif verdict == "INCOMPLETE":
             headline = "I can only go so far on that."
             spoken = ("I could not fully verify that. " + detail).strip()
-        else:  # SYSTEM_ERROR — our failure, never a false verdict on their claim
+            console_verdict = "na"
+        else:  # SYSTEM_ERROR — our failure, never a false verdict on their claim (no verdict badge)
             headline = "I could not run the check."
             spoken = ("I hit an error checking that — that is my failure, not a false claim. " + detail).strip()
         caption = spoken
@@ -404,6 +408,7 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
     from . import guard as _guard
     return _guard.enforce({
         "intent": "ask", "kind": kind, "headline": headline, "spoken": spoken, "caption": caption,
+        "verdict": console_verdict,
         "source": source, "connections": connections, "next": nexts, "frame": frame[:8],
         "word": word, "cloud": cloud, "resources": r.get("resources"), "note": r.get("note"),
         "generated": False,

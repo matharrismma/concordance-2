@@ -163,6 +163,30 @@
   footer{ color:var(--dim); font-family:var(--plaque); font-size:.7rem; letter-spacing:.03em; text-align:center;
           border-top:1px solid var(--hair); padding-top:.95rem; margin-top:1.4rem }
   footer .fleur{ color:var(--brass); display:block; margin-bottom:.35rem; font-size:1.15rem; line-height:1 }
+
+  /* THE LANDING — the instrument proves itself: a worked check runs as the hero, then it invites your own.
+     No menu, no jargon, no guessing — you learn it by watching one answer work. */
+  .hero-line{ font-family:var(--display); font-size:2.6rem; line-height:1.06; font-weight:600; margin:.1rem 0 .55rem; text-wrap:balance; color:var(--ink) }
+  .hero-sub{ color:var(--ink-soft); font-size:1.12rem; line-height:1.5; margin:0 0 1.3rem; max-width:34rem }
+  .hero-sub b{ color:var(--brass); font-weight:600 }
+  .demo{ border:1px solid var(--brass); border-radius:4px; background:var(--panel); padding:1.15rem 1.1rem .95rem; margin:0 0 1.5rem; position:relative }
+  .demo .tag{ position:absolute; top:-.6rem; left:1rem; background:var(--paper); padding:0 .5rem; font-family:var(--plaque); font-size:.6rem; letter-spacing:.18em; text-transform:uppercase; color:var(--brass) }
+  .demo .claim{ font-family:var(--display); font-size:1.5rem; line-height:1.18; margin:.15rem 0 .7rem; color:var(--ink) }
+  .demo .verdict{ margin:0 0 .7rem }
+  .demo .body{ font-size:1.04rem; line-height:1.55 }
+  .demo .body p{ margin:.1rem 0 .5rem }
+  .demo .d-src{ color:var(--dim); font-family:var(--plaque); font-size:.72rem; letter-spacing:.03em; margin:.55rem 0 0 }
+  .demo .trail{ margin:.8rem 0 0 }
+  .invite .inv-lab{ font-family:var(--display); font-style:italic; font-size:1.35rem; color:var(--ink-soft); margin:0 0 .75rem }
+  .examples{ display:flex; flex-direction:column; gap:.5rem; margin:0 0 1rem }
+  .examples button{ text-align:left; font:inherit; font-family:var(--serif); font-size:1.02rem; background:var(--panel); border:1px solid var(--line);
+                    border-radius:3px; color:var(--ink); padding:.55rem .8rem; cursor:pointer; display:flex; align-items:baseline; gap:.65em; flex-wrap:wrap }
+  .examples button:hover{ border-color:var(--brass) }
+  .examples button .ex-k{ font-family:var(--plaque); font-size:.6rem; letter-spacing:.13em; text-transform:uppercase; color:var(--brass); min-width:6.2rem; flex:0 0 auto }
+  .examples button .ex-q{ color:var(--ink-soft); font-style:italic }
+  .examples button:hover .ex-q{ color:var(--brass) }
+  .another{ font-family:var(--plaque); font-size:.72rem; letter-spacing:.06em; color:var(--brass); background:none; border:0; cursor:pointer; padding:.2rem 0; display:inline-flex; align-items:center; gap:.4em }
+  .another:hover{ text-decoration:underline }
 </style>
 </head>
 <body>
@@ -268,16 +292,26 @@ function bodyOf(r){
   return (paras.length ? paras : ['']).map(p => '<p>'+esc(p)+'</p>').join('');
 }
 
+// The verdict badge — only for the known verify tokens the engine surfaces (true/verified · false · na,
+// and the raw HOLDS/BROKEN/INCOMPLETE as a defensive fallback). Any other value (e.g. a coach "correct")
+// renders no badge, so it never mislabels a non-verify answer. Found/computed by the engine, never made up.
+function verdictBadge(verdict){
+  if(!verdict) return '';
+  const v = String(verdict).toLowerCase();
+  if(v==='true' || v==='verified' || v==='holds')
+    return '<div class="verdict">✓ verified true</div>';
+  if(v==='false' || v==='broken')
+    return '<div class="verdict no">✕ doesn’t hold</div>';
+  if(v==='na' || v==='incomplete')
+    return '<div class="verdict na">— can’t certify</div>';
+  return '';
+}
+
 function render(r){
   window._lastSpoken = r.spoken || r.caption || '';
   let html = '';
   if(r.headline) html += '<div class="headline">'+esc(r.headline)+'</div>';
-  if(r.verdict){
-    const v = String(r.verdict).toLowerCase();
-    const cls = (v==='true'||v==='verified') ? '' : (v==='false') ? 'no' : 'na';
-    const label = (v==='true'||v==='verified') ? '✓ verified true' : (v==='false') ? '✕ false' : '— can’t certify';
-    html += '<div class="verdict '+cls+'">'+label+'</div>';
-  }
+  html += verdictBadge(r.verdict);
   html += '<div id="rootlead"></div>';
   html += '<div class="body">'+bodyOf(r)+'</div>';
   if(r.source && (r.source.title||r.source.ref)){
@@ -513,6 +547,32 @@ function SAMPLE(text){
       connections:['check: 12 × 12 = 144','what is the speed of light'] };
   }
 
+  // CHECK — primality, COMPUTED here by trial division (not invented), mirroring the box's
+  // number_theory.primality verifier so the preview shows the same verdict the engine seals.
+  const pm = t.match(/\bis\s+(\d{1,7})\s+(?:a\s+)?prime(?:\s+number)?\b/);
+  if(pm){
+    const n=+pm[1];
+    let prime=n>=2; for(let i=2;i*i<=n;i++){ if(n%i===0){ prime=false; break; } }
+    let factor=''; if(!prime && n>=2){ for(let i=2;i*i<=n;i++){ if(n%i===0){ factor=i+' × '+(n/i); break; } } }
+    return { intent:'check', kind:'verify', headline: prime?'It checks out.':'That does not hold.',
+      verdict: prime?'true':'false',
+      caption: prime ? ('Checked by the primality test: '+n+' is prime — no divisor but 1 and itself.')
+                     : ('Checked by the primality test: '+n+' is not prime'+(factor?' — '+factor:'')+'.'),
+      spoken: prime?(n+' is prime.'):(n+' is not prime'+(factor?'; '+factor+'.':'.')),
+      source:{title:'number_theory.primality — the worked check', seal:true},
+      connections:['is 17 prime?','7 × 8 = 56'] };
+  }
+
+  // CHECK — a defined physical constant (SI: c ≡ 299,792,458 m/s exactly). Found/defined, not invented.
+  if(t.indexOf('speed of light')>=0 && t.replace(/[\s,]/g,'').indexOf('299792458')>=0){
+    return { intent:'check', kind:'verify', headline:'the speed of light in vacuum is 299,792,458 m/s',
+      verdict:'verified',
+      caption:'Checked against the defined SI value: since 1983 the metre is fixed so that c is exactly 299,792,458 metres per second. The claim matches to the stated precision.',
+      spoken:'True — the speed of light in vacuum is exactly 299,792,458 metres per second, by definition.',
+      source:{title:'SI definition of the metre (BIPM); CODATA', seal:true},
+      connections:['is 1 mile 1.609 km?','what is the fine-structure constant?'] };
+  }
+
   // WORD — Scripture passage, read verbatim (public domain, genuinely found).
   if(t.indexOf('psalm 23')>=0 || t.indexOf('shepherd')>=0){
     return { intent:'word', kind:'search', headline:'Psalm 23',
@@ -588,8 +648,68 @@ function SAMPLE(text){
 
 // THE HERO — land immediately in the one experience, on the verse where Scripture meets the inner
 // workings of reality: "In the beginning, God created…" opens to the physics of creation beneath it.
-render(SAMPLE('Genesis 1:1'));
+// THE LANDING — the instrument proves itself. On arrival it runs a real check in front of you (the claim,
+// the verdict, the worked trail, the source it stands on), frames it in one honest line, then invites your
+// own. "↻ another" cycles what it can do, so the breadth teaches itself. Found, verified, cited — watch.
+const DEMOS = [
+  {q:"is 51 a prime number?",     tag:"watch it refuse a wrong answer"},
+  {q:"Psalm 23:1",                tag:"watch it open the Word"},
+  {q:"I’m anxious about money",   tag:"watch it meet you where you are"},
+  {q:"what does ‘grace’ mean?",   tag:"watch it look one up"},
+];
+const EXAMPLES = [
+  {k:"check a claim",   q:"is 17 a prime number?"},
+  {k:"look it up",      q:"what does ‘grace’ mean?"},
+  {k:"talk it through", q:"I’m anxious about money"},
+  {k:"read the Bible",  q:"Psalm 23"},
+];
+let _demoIx = 0;
+
+function renderHero(){
+  const chips = EXAMPLES.map(e =>
+    '<button data-ask="'+esc(e.q)+'"><span class="ex-k">'+esc(e.k)+'</span>'
+    + '<span class="ex-q">“'+esc(e.q)+'”</span></button>').join('');
+  pageEl.innerHTML =
+    '<h1 class="hero-line">Ask anything. Nothing here is guessed.</h1>'
+    + '<p class="hero-sub">Every answer is <b>found in a real source, checked, and cited back to it</b> — '
+    + 'never generated. In a world of AI that makes things up, this one shows its work. Watch:</p>'
+    + '<div class="demo" id="demo"></div>'
+    + '<div class="invite"><p class="inv-lab">Now bring yours —</p>'
+    + '<div class="examples">'+chips+'</div>'
+    + '<button class="another" id="another">↻ show another</button></div>';
+  pageEl.querySelectorAll('.examples [data-ask]').forEach(b=> b.onclick=()=>ask(b.dataset.ask));
+  const an=document.getElementById('another'); if(an) an.onclick=()=>{ _demoIx=(_demoIx+1)%DEMOS.length; runDemo(); };
+  runDemo();
+}
+
+function runDemo(){
+  const d = DEMOS[_demoIx], box = document.getElementById('demo');
+  if(!box) return;
+  box.innerHTML = '<span class="tag">'+esc(d.tag)+'</span><div class="dim" style="padding:.3rem 0">checking “'+esc(d.q)+'” …</div>';
+  fetch(API+'/console',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:d.q})})
+    .then(r=> r.ok ? r.json() : Promise.reject())
+    .then(a=> renderDemoInto(box, d, a))
+    .catch(()=> renderDemoInto(box, d, SAMPLE(d.q)));
+}
+
+function renderDemoInto(box, d, a){
+  if(!box) return;
+  let h = '<span class="tag">'+esc(d.tag)+'</span>';
+  h += '<div class="claim">'+esc(a.headline || d.q)+'</div>';
+  h += verdictBadge(a.verdict);
+  if(a.verses && a.verses.length){
+    h += '<div class="body">'+a.verses.slice(0,2).map(v=>'<p><span class="vn">'+esc(v.verse)+'</span>'+esc(v.text)+'</p>').join('')+'</div>';
+  } else {
+    const line=String(a.caption||a.spoken||'').split(/\n{2,}/)[0];
+    if(line) h += '<div class="body"><p>'+esc(line)+'</p></div>';
+  }
+  if(a.source && (a.source.title||a.source.ref)) h += '<div class="d-src">source · '+esc(a.source.title||a.source.ref)+'</div>';
+  h += trailOf(a);
+  box.innerHTML = h;
+}
+
 document.getElementById('greet') && (document.getElementById('greet').style.display='none');
+renderHero();
 </script>
 </body>
 </html>
