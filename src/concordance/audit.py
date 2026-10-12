@@ -16,7 +16,9 @@ years between dates; day-of-week and leap-year claims; nutrition labels (the 4-9
 """
 from __future__ import annotations
 
+import copy
 import re
+from functools import lru_cache
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 MAX_TEXT = 20_000     # characters of input scanned (DoS bound; each claim is pool-bounded anyway)
@@ -1945,10 +1947,9 @@ def _mark_hedge(quote: str, spec: Dict[str, Any]) -> None:
         holder["hedged"] = True
 
 
-def extract(text: str) -> List[Dict[str, Any]]:
-    """All certain claims in the text, as verify_derivation steps (id, domain, spec, claim).
-    Deduped on (domain, spec); order = extractor order, then position."""
-    text = (text or "")[:MAX_TEXT]
+def _extract_run(text: str) -> List[Dict[str, Any]]:
+    """The actual recognition pass — run every extractor over the text. Pure and deterministic
+    (plain regex, no model), so its result is memoized by extract() below."""
     steps: List[Dict[str, Any]] = []
     seen = set()
     for xname, fn in _EXTRACTORS:
@@ -1963,6 +1964,22 @@ def extract(text: str) -> List[Dict[str, Any]]:
             if len(steps) >= MAX_CLAIMS:
                 return steps
     return steps
+
+
+@lru_cache(maxsize=256)
+def _extract_memo(text: str) -> Tuple[Dict[str, Any], ...]:
+    return tuple(_extract_run(text))
+
+
+def extract(text: str) -> List[Dict[str, Any]]:
+    """All certain claims in the text, as verify_derivation steps (id, domain, spec, claim).
+    Deduped on (domain, spec); order = extractor order, then position.
+
+    RECOGNIZE ONCE (2026-10-12): the ~N-extractor pass is deterministic, so it is MEMOIZED per text —
+    a request extracts a claim once in from_prose and again in the blind route() (which reads only
+    raw_text, by design), and both now share the one computed recognition. Callers get fresh deep copies
+    so the cache is read-only and can never be corrupted; the key is bounded by MAX_TEXT."""
+    return [copy.deepcopy(s) for s in _extract_memo((text or "")[:MAX_TEXT])]
 
 
 # ── THE STRUCTURED HINT (2026-10-08, the failure report H7) ──────────────────────────────────────
