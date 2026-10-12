@@ -105,4 +105,126 @@ def for_ref(ref: str, limit: int = 20) -> Dict[str, Any]:
     return {**base, "ref": _fmt(bn, ch, v, v), "status": "ok", "count": len(refs), "cross_references": refs}
 
 
-__all__ = ["for_ref", "SOURCE", "LICENSE", "ATTRIBUTION", "BOOK_NAMES"]
+# ── Book×book aggregate (the cross-reference MAP) ───────────────────────────────────────────────
+# Display abbreviations for the matrix axes (Gen, Ex, ... Rev) — not the OSIS codes, not the input
+# aliases; the short labels a reader expects on a cross-reference chart.
+BOOK_ABBREV = {
+    1: "Gen", 2: "Ex", 3: "Lev", 4: "Num", 5: "Deut", 6: "Josh", 7: "Jdg", 8: "Ruth", 9: "1Sa",
+    10: "2Sa", 11: "1Kg", 12: "2Kg", 13: "1Ch", 14: "2Ch", 15: "Ezra", 16: "Neh", 17: "Est",
+    18: "Job", 19: "Ps", 20: "Pr", 21: "Eccl", 22: "Son", 23: "Isa", 24: "Jer", 25: "Lam",
+    26: "Ezk", 27: "Dan", 28: "Hos", 29: "Joel", 30: "Am", 31: "Ob", 32: "Jon", 33: "Mic",
+    34: "Nah", 35: "Hab", 36: "Zep", 37: "Hag", 38: "Zec", 39: "Mal", 40: "Mat", 41: "Mar",
+    42: "Luk", 43: "Jn", 44: "Acts", 45: "Rom", 46: "1Co", 47: "2Co", 48: "Gal", 49: "Eph",
+    50: "Phil", 51: "Col", 52: "1Th", 53: "2Th", 54: "1Ti", 55: "2Ti", 56: "Titus", 57: "Phm",
+    58: "Heb", 59: "Jas", 60: "1Pe", 61: "2Pe", 62: "1Jn", 63: "2Jn", 64: "3Jn", 65: "Jude",
+    66: "Rev",
+}
+# The sections of the canon, in order (the matrix's axis groups). By book number.
+BOOK_GROUPS = [
+    {"label": "Law", "books": list(range(1, 6))},                        # Genesis–Deuteronomy
+    {"label": "History", "books": list(range(6, 18))},                   # Joshua–Esther
+    {"label": "Poetry", "books": list(range(18, 23))},                   # Job–Song of Solomon
+    {"label": "Major Prophets", "books": list(range(23, 28))},           # Isaiah–Daniel
+    {"label": "Minor Prophets", "books": list(range(28, 40))},           # Hosea–Malachi
+    {"label": "Gospels & Acts", "books": list(range(40, 45))},           # Matthew–Acts
+    {"label": "Pauline Epistles", "books": list(range(45, 58))},         # Romans–Philemon
+    {"label": "General Epistles & Revelation", "books": list(range(58, 67))},  # Hebrews–Revelation
+]
+
+_MATRIX_CACHE: Optional[Dict[str, Any]] = None
+
+
+def _connect_ro(db_path: Path) -> "sqlite3.Connection":
+    try:
+        return sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    except sqlite3.Error:
+        return sqlite3.connect(str(db_path))
+
+
+def book_matrix() -> Dict[str, Any]:
+    """The book→book cross-reference MATRIX (66×66), aggregated from the openbible/TSK links by ONE SQL
+    GROUP BY — SQLite streams the ~340k rows on disk and returns only the grouped pairs, so this is
+    sub-second and tiny in memory (never fetchall() the raw rows). Memoized per process (the DB is
+    immutable under a running service). `votes` = summed relevance weight source-book→target-book;
+    `links` = number of verse links. Found + cited, never generated; honest source_missing when absent."""
+    global _MATRIX_CACHE
+    if _MATRIX_CACHE is not None:
+        return _MATRIX_CACHE
+    books = [{"n": i, "name": BOOK_NAMES[i], "abbr": BOOK_ABBREV[i], "testament": "OT" if i <= 39 else "NT"}
+             for i in range(1, 67)]
+    base = {"source": SOURCE, "license": LICENSE, "attribution": ATTRIBUTION,
+            "books": books, "groups": BOOK_GROUPS}
+    db_path = _db_path()
+    if not db_path.exists():
+        return {**base, "status": "source_missing", "cells": [], "n_cells": 0, "total_links": 0}
+    con = _connect_ro(db_path)
+    try:
+        rows = con.execute(
+            "SELECT from_book, to_book, SUM(votes), COUNT(*) FROM cross_refs "
+            "GROUP BY from_book, to_book").fetchall()
+    finally:
+        con.close()
+    cells = [{"from": int(fb), "to": int(tb), "votes": int(v or 0), "links": int(n or 0)}
+             for (fb, tb, v, n) in rows if fb and tb]
+    _MATRIX_CACHE = {**base, "status": "ok", "n_books": 66, "n_cells": len(cells),
+                     "total_links": sum(c["links"] for c in cells), "cells": cells}
+    return _MATRIX_CACHE
+
+
+def book_pair(from_book: int, to_book: int, limit: int = 60) -> Dict[str, Any]:
+    """The actual verse links from one book to another, ranked by votes — the drill-down behind a
+    matrix cell. from_book/to_book are book numbers (1–66). Found + cited, never generated."""
+    base = {"from": BOOK_NAMES.get(int(from_book) if str(from_book).isdigit() else 0, str(from_book)),
+            "to": BOOK_NAMES.get(int(to_book) if str(to_book).isdigit() else 0, str(to_book)),
+            "source": SOURCE, "attribution": ATTRIBUTION, "links": []}
+    try:
+        fb, tb = int(from_book), int(to_book)
+    except (TypeError, ValueError):
+        return {**base, "status": "not_found", "detail": "from/to must be book numbers 1-66"}
+    if not (1 <= fb <= 66 and 1 <= tb <= 66):
+        return {**base, "status": "not_found", "detail": "book numbers are 1-66"}
+    base["from"], base["to"] = BOOK_NAMES[fb], BOOK_NAMES[tb]
+    db_path = _db_path()
+    if not db_path.exists():
+        return {**base, "status": "source_missing"}
+    con = _connect_ro(db_path)
+    try:
+        rows = con.execute(
+            "SELECT from_chapter, from_verse, to_chapter, to_verse_start, to_verse_end, votes "
+            "FROM cross_refs WHERE from_book=? AND to_book=? "
+            "ORDER BY votes DESC, from_chapter, from_verse LIMIT ?",
+            (fb, tb, max(1, min(int(limit), 500)))).fetchall()
+    finally:
+        con.close()
+    links = [{"from": f"{BOOK_NAMES[fb]} {fc}:{fv}", "to": _fmt(tb, tc, tvs, tve), "votes": int(votes or 0)}
+             for (fc, fv, tc, tvs, tve, votes) in rows]
+    return {**base, "status": "ok", "count": len(links), "links": links}
+
+
+def book_of(ref: str) -> Optional[int]:
+    """The book number (1–66) a reference names, or None — robust to ranges and bare names
+    ('Ephesians 4:4-6' → 49, '1 John 4:1' → 62, 'Genesis' → 1). Reuses the book resolver."""
+    m = re.match(r"^\s*([1-3]?\s*[A-Za-z][A-Za-z. ]*?)\s+\d", ref or "")
+    return _resolve_book(m.group(1) if m else (ref or ""))
+
+
+def book_connections(book_num: int, limit: int = 8) -> Dict[str, Any]:
+    """The strongest OUTGOING book connections from a given book — for weaving a verse's book context
+    into the Console / map. Reads the memoized matrix; no extra query."""
+    try:
+        bn = int(book_num)
+    except (TypeError, ValueError):
+        return {"book": str(book_num), "status": "not_found", "connections": []}
+    m = book_matrix()
+    name = BOOK_NAMES.get(bn, str(bn))
+    if m.get("status") != "ok":
+        return {"book": name, "status": m.get("status", "source_missing"), "connections": []}
+    out = sorted((c for c in m["cells"] if c["from"] == bn and c["to"] != bn),
+                 key=lambda c: c["votes"], reverse=True)[:max(1, int(limit))]
+    conns = [{"book": BOOK_NAMES[c["to"]], "abbr": BOOK_ABBREV[c["to"]], "votes": c["votes"], "links": c["links"]}
+             for c in out]
+    return {"book": name, "status": "ok", "connections": conns}
+
+
+__all__ = ["for_ref", "book_matrix", "book_pair", "book_connections", "book_of", "SOURCE", "LICENSE",
+           "ATTRIBUTION", "BOOK_NAMES", "BOOK_ABBREV", "BOOK_GROUPS"]

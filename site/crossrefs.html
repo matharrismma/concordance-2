@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cross-Reference Map — Narrow Highway</title>
+<meta name="description" content="The Word connects to itself: every book of the Bible and how it cross-references every other, from the Treasury of Scripture Knowledge, as one map. Tap a cell for the verse links. Found and cited, never generated.">
+<style>
+  /* The Word's own web of self-reference — a book×book matrix, in the reverent parchment-and-brass of
+     the Console. Light by day; a candlelit cathedral by night. Found + cited, never generated. */
+  :root{
+    --paper:#f1ece0; --panel:#e9e2d1; --ink:#1b1712; --ink-soft:#574e42; --dim:#8a8070;
+    --line:#d3c9b4; --hair:#e2dac7; --brass:#9a7623; --brass-lit:#b78f36;
+    --ot:#2f4b8f; --nt:#9a2f27; --cross:#6b3a86; --self:#9a7623;   /* OT blue · NT red · cross purple · self brass */
+    --serif:Georgia,'Iowan Old Style','Palatino Linotype',serif;
+    --display:'Cormorant Garamond',Georgia,serif;
+    --plaque:ui-sans-serif,system-ui,'Segoe UI',sans-serif;
+    --mono:ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --paper:#12121a; --panel:#1a1a23; --ink:#ece5d4; --ink-soft:#a79d8a; --dim:#746b5a;
+    --line:#2b2934; --hair:#242230; --brass:#cfa54c; --brass-lit:#e3c06c;
+    --ot:#6f8fd8; --nt:#e07a6f; --cross:#b088d8; --self:#cfa54c; color-scheme:dark; }}
+  :root[data-theme="dark"]{ --paper:#12121a; --panel:#1a1a23; --ink:#ece5d4; --ink-soft:#a79d8a;
+    --dim:#746b5a; --line:#2b2934; --hair:#242230; --brass:#cfa54c; --brass-lit:#e3c06c;
+    --ot:#6f8fd8; --nt:#e07a6f; --cross:#b088d8; --self:#cfa54c; color-scheme:dark; }
+  *{ box-sizing:border-box }
+  html,body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif) }
+  .wrap{ max-width:72rem; margin:0 auto; padding:1.4rem 1.2rem calc(2rem + env(safe-area-inset-bottom)) }
+  h1{ font-family:var(--display); font-weight:600; font-size:2.4rem; line-height:1.05; margin:.2rem 0 .4rem; text-wrap:balance }
+  .sub{ color:var(--ink-soft); font-size:1.08rem; max-width:44rem; margin:0 0 1rem; line-height:1.5 }
+  .sub b{ color:var(--brass); font-weight:600 }
+  .legend{ display:flex; flex-wrap:wrap; gap:.3rem 1.1rem; font-family:var(--plaque); font-size:.74rem; color:var(--dim); margin:0 0 1rem; align-items:center }
+  .legend .sw{ display:inline-block; width:.8rem; height:.8rem; border-radius:2px; margin-right:.35em; vertical-align:-1px }
+  .note{ font-family:var(--plaque); font-size:.72rem; color:var(--dim); margin:.2rem 0 1rem }
+
+  .matrix-scroll{ overflow-x:auto; overflow-y:hidden; border:1px solid var(--brass); border-radius:3px; background:var(--panel); padding:0 }
+  .matrix{ display:grid; width:max-content; margin:0 auto }
+  .hd{ position:relative; height:84px }
+  .hd span{ position:absolute; bottom:4px; left:50%; transform-origin:left bottom; transform:rotate(-60deg);
+            white-space:nowrap; font-family:var(--plaque); font-size:9.5px; letter-spacing:.02em; color:var(--ink-soft) }
+  .rl{ font-family:var(--plaque); font-size:9.5px; color:var(--ink-soft); text-align:right; padding-right:4px; line-height:var(--cell); white-space:nowrap }
+  .cell{ width:var(--cell); height:var(--cell); outline:.5px solid rgba(0,0,0,.03) }
+  .cell.has{ cursor:pointer }
+  .cell.has:hover{ outline:1.5px solid var(--brass); outline-offset:-1px; z-index:2 }
+  .cell.sel{ outline:2px solid var(--brass-lit); outline-offset:-1px; z-index:3 }
+  .corner{ font-family:var(--plaque); font-size:9px; color:var(--dim); text-align:right; padding-right:4px; align-self:end; padding-bottom:4px }
+  /* group separators: a brass hairline on the leading edge of each group */
+  .cell.gcol{ box-shadow:inset 1px 0 0 var(--brass) }
+  .cell.grow{ box-shadow:inset 0 1px 0 var(--brass) }
+  .cell.gcol.grow{ box-shadow:inset 1px 0 0 var(--brass), inset 0 1px 0 var(--brass) }
+  .hd.gcol{ box-shadow:inset 1px 0 0 var(--brass) }
+  .rl.grow{ box-shadow:inset 0 1px 0 var(--brass) }
+
+  /* group bands above the matrix */
+  .groups{ display:flex; width:max-content; margin:0 auto; font-family:var(--plaque); font-size:.64rem;
+           letter-spacing:.1em; text-transform:uppercase; color:var(--brass) }
+  .groups .gb{ text-align:center; border-bottom:1px solid var(--brass); padding:.1rem 0; overflow:hidden; white-space:nowrap }
+
+  .axis-note{ font-family:var(--plaque); font-size:.72rem; color:var(--dim); margin:.6rem 0 0; display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap }
+
+  /* the drill-down panel */
+  .panel{ margin:1.4rem 0 0; border-top:1px solid var(--brass); padding-top:1rem }
+  .panel .ph{ font-family:var(--display); font-size:1.5rem; font-weight:600; margin:0 0 .2rem }
+  .panel .pmeta{ font-family:var(--plaque); font-size:.76rem; color:var(--dim); margin:0 0 .8rem }
+  .panel .link{ display:flex; gap:.6rem; align-items:baseline; padding:.3rem 0; border-bottom:1px solid var(--hair); font-size:1.02rem }
+  .panel .link .v{ color:var(--brass); font-family:var(--plaque); font-size:.72rem; min-width:2.2rem; text-align:right }
+  .panel .link a{ color:var(--ink); text-decoration:none; border-bottom:1px dotted var(--line) }
+  .panel .link a:hover{ color:var(--brass); border-bottom-color:var(--brass) }
+  .panel .arr{ color:var(--dim) }
+  .panel .close{ float:right; font-family:var(--plaque); font-size:.74rem; color:var(--brass); background:none; border:1px solid var(--line); border-radius:3px; padding:.2rem .6rem; cursor:pointer }
+  .msg{ color:var(--ink-soft); font-style:italic; padding:1rem 0 }
+  footer{ color:var(--dim); font-family:var(--plaque); font-size:.7rem; text-align:center; border-top:1px solid var(--hair); margin-top:1.6rem; padding-top:.9rem }
+  a.home{ color:var(--brass); text-decoration:none }
+</style>
+</head>
+<body>
+<script src="/shell.js"></script>
+<div class="wrap">
+  <h1>The Word connects to itself</h1>
+  <p class="sub">Every book of the Bible, and how it cross-references every other — the <b>Treasury of Scripture Knowledge</b>, as one map. Source book down the side, target book across the top; a brighter cell means more links. Tap any cell for the actual verse references.</p>
+  <div class="legend">
+    <span><span class="sw" style="background:var(--ot)"></span>Old Testament → Old Testament</span>
+    <span><span class="sw" style="background:var(--nt)"></span>New Testament → New Testament</span>
+    <span><span class="sw" style="background:var(--cross)"></span>across the Testaments</span>
+    <span><span class="sw" style="background:var(--self)"></span>a book to itself</span>
+  </div>
+  <div id="groups" class="groups" aria-hidden="true"></div>
+  <div class="matrix-scroll"><div class="matrix" id="matrix"></div></div>
+  <div class="axis-note"><span id="stat"></span><span>down the side = the source · across the top = the target</span></div>
+  <div class="panel" id="panel" hidden></div>
+  <div id="msg" class="msg" hidden></div>
+  <footer>
+    <div>Cross-reference data courtesy of <a class="home" href="https://www.openbible.info/labs/cross-references/" rel="noopener">openbible.info</a> (CC BY), based on the public-domain Treasury of Scripture Knowledge.</div>
+    <div style="margin-top:.3rem">Found, verified, and cited — never generated. <a class="home" href="/">Narrow Highway</a></div>
+  </footer>
+</div>
+
+<script>
+const API = "";
+const CELL = 13;               // px
+function getj(path){
+  return fetch(API + path, {headers:{accept:"application/json"}}).then(r=>r.json()).then(j=> (j && j.data!==undefined) ? j.data : j);
+}
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
+
+const matrixEl = document.getElementById('matrix');
+const groupsEl = document.getElementById('groups');
+const panelEl = document.getElementById('panel');
+const msgEl = document.getElementById('msg');
+const statEl = document.getElementById('stat');
+let BOOKS = [], GROUPS = [];
+
+function colorFor(from, to, links, maxLog){
+  const op = 0.08 + 0.92 * (Math.log(1+links) / maxLog);   // log-scaled, always a little visible
+  let v = '--cross';
+  if (from === to) v = '--self';
+  else if (from <= 39 && to <= 39) v = '--ot';
+  else if (from >= 40 && to >= 40) v = '--nt';
+  return `color-mix(in srgb, var(${v}) ${Math.round(op*100)}%, transparent)`;
+}
+
+// the leading book-number of each group (for the brass separators)
+function groupStarts(){ const s = new Set(); GROUPS.forEach(g => s.add(g.books[0])); return s; }
+
+function render(m){
+  if (!m || m.status !== 'ok' || !m.cells || !m.cells.length){
+    msgEl.hidden = false;
+    msgEl.textContent = (m && m.status === 'source_missing')
+      ? 'The cross-reference dataset is not loaded on this server yet. The map will appear once it is built.'
+      : 'The cross-reference map is unavailable right now.';
+    return;
+  }
+  BOOKS = m.books; GROUPS = m.groups || [];
+  const n = BOOKS.length;
+  const idx = {}; BOOKS.forEach((b,i)=> idx[b.n]=i);   // book number -> 0..n-1
+  // cell lookup + max
+  const links = {}; let maxLinks = 1;
+  m.cells.forEach(c => { links[c.from+'_'+c.to] = c; if (c.links>maxLinks) maxLinks=c.links; });
+  const maxLog = Math.log(1+maxLinks);
+  const starts = groupStarts();
+
+  matrixEl.style.setProperty('--cell', CELL+'px');
+  matrixEl.style.gridTemplateColumns = `auto repeat(${n}, ${CELL}px)`;
+
+  const frag = document.createDocumentFragment();
+  // header row: corner + rotated column labels
+  const corner = document.createElement('div'); corner.className='corner'; corner.textContent='src \\ tgt';
+  frag.appendChild(corner);
+  BOOKS.forEach(b => {
+    const h = document.createElement('div'); h.className = 'hd' + (starts.has(b.n)?' gcol':'');
+    const sp = document.createElement('span'); sp.textContent = b.abbr; h.appendChild(sp);
+    frag.appendChild(h);
+  });
+  // body rows
+  BOOKS.forEach(rb => {
+    const rl = document.createElement('div');
+    rl.className = 'rl' + (starts.has(rb.n)?' grow':'');
+    rl.style.lineHeight = CELL+'px'; rl.textContent = rb.abbr;
+    frag.appendChild(rl);
+    BOOKS.forEach(cb => {
+      const cell = document.createElement('div');
+      let cls = 'cell';
+      if (starts.has(cb.n)) cls += ' gcol';
+      if (starts.has(rb.n)) cls += ' grow';
+      const c = links[rb.n+'_'+cb.n];
+      if (c){
+        cls += ' has';
+        cell.style.background = colorFor(rb.n, cb.n, c.links, maxLog);
+        cell.dataset.from = rb.n; cell.dataset.to = cb.n;
+        cell.title = `${rb.name} → ${cb.name}: ${c.links} link${c.links===1?'':'s'}`;
+      }
+      cell.className = cls;
+      frag.appendChild(cell);
+    });
+  });
+  matrixEl.appendChild(frag);
+
+  // group bands above the matrix (aligned over the 66 columns; the left label column is skipped)
+  GROUPS.forEach(g => {
+    const gb = document.createElement('div'); gb.className='gb';
+    gb.style.width = (g.books.length*CELL)+'px'; gb.textContent = g.label;
+    groupsEl.appendChild(gb);
+  });
+  groupsEl.style.marginLeft = (matrixEl.querySelector('.corner').offsetWidth)+'px';
+
+  statEl.textContent = `${n} books · ${m.n_cells.toLocaleString()} connected pairs · ${m.total_links.toLocaleString()} verse links`;
+
+  matrixEl.addEventListener('click', onCell);
+}
+
+let selected = null;
+function onCell(e){
+  const cell = e.target.closest('.cell.has'); if (!cell) return;
+  if (selected) selected.classList.remove('sel');
+  selected = cell; cell.classList.add('sel');
+  const from = cell.dataset.from, to = cell.dataset.to;
+  panelEl.hidden = false;
+  panelEl.innerHTML = '<div class="msg">reading the links…</div>';
+  getj(`/xrefs/books?from=${from}&to=${to}&limit=80`).then(d => drawPanel(d)).catch(()=>{
+    panelEl.innerHTML = '<div class="msg">could not read the links.</div>';
+  });
+  panelEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function drawPanel(d){
+  if (!d || d.status !== 'ok'){ panelEl.innerHTML = '<div class="msg">no links to show.</div>'; return; }
+  let html = '<button class="close" id="pclose">close</button>';
+  html += `<div class="ph">${esc(d.from)} <span class="arr">→</span> ${esc(d.to)}</div>`;
+  html += `<div class="pmeta">${d.count} verse link${d.count===1?'':'s'}, ranked by relevance · tap a verse to read it</div>`;
+  (d.links||[]).forEach(l => {
+    html += `<div class="link"><span class="v">${l.votes}</span>`
+          + `<a href="/?q=${encodeURIComponent(l.from)}" title="read ${esc(l.from)}">${esc(l.from)}</a>`
+          + `<span class="arr">→</span>`
+          + `<a href="/?q=${encodeURIComponent(l.to)}" title="read ${esc(l.to)}">${esc(l.to)}</a></div>`;
+  });
+  panelEl.innerHTML = html;
+  const b = document.getElementById('pclose');
+  if (b) b.onclick = ()=>{ panelEl.hidden = true; if (selected){ selected.classList.remove('sel'); selected=null; } };
+}
+
+getj('/xrefs/books').then(render).catch(()=>{
+  msgEl.hidden = false; msgEl.textContent = 'The cross-reference map is unavailable right now.';
+});
+</script>
+</body>
+</html>

@@ -2612,6 +2612,20 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         from .. import xrefs
         return _ok(xrefs.for_ref(ref, limit=limit))
 
+    if method == "GET" and path == "/xrefs/books":
+        # The book×book cross-reference MAP — the Word's own web of self-reference, aggregated from the
+        # openbible/TSK links. No params: the whole 66×66 matrix (memoized). ?from=&to= (book numbers):
+        # the actual verse links behind one cell (the drill-down). Found + cited; honest source_missing.
+        from .. import xrefs
+        fb, tb = query.get("from"), query.get("to")
+        if fb and tb:
+            try:
+                limit = int(query.get("limit", "60"))
+            except (TypeError, ValueError):
+                limit = 60
+            return _ok(xrefs.book_pair(fb, tb, limit=limit))
+        return _ok(xrefs.book_matrix())
+
     if method == "GET" and path == "/character":
         # A Bible figure from Easton's (1897, PD) — summary + every verse that speaks of them.
         name = (query.get("name") or "").strip()
@@ -3524,6 +3538,7 @@ ROUTES = [
     {"path": "/canon", "methods": ("GET",), "api": True},
     {"path": "/commentary", "methods": ("GET",), "api": True},
     {"path": "/tsk", "methods": ("GET",), "api": True},
+    {"path": "/xrefs/books", "methods": ("GET",), "api": True, "rl": "read"},  # the book×book cross-reference map (2026-10-12)
     {"path": "/character", "methods": ("GET",), "api": True},
     {"path": "/characters", "methods": ("GET",), "api": True},
     {"path": "/prophecy", "methods": ("GET",), "api": True},

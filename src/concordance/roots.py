@@ -491,8 +491,14 @@ def entry(ref: str, *, get_card=None, data_dir: Optional[Path] = None) -> Dict[s
         xr = xrefs.for_ref(ref, limit=12)
         out["cross_references"] = {"source": "Treasury of Scripture Knowledge",
                                    "refs": [r["ref"] for r in (xr.get("cross_references") or [])]}
+        # the book-level web: which books this verse's book most connects to (the cross-reference map,
+        # zoomed out) — the Word connected to itself, woven beside the verse's own cross-references.
+        bn = xrefs.book_of(ref)
+        bc = xrefs.book_connections(bn, limit=6) if bn else None
+        out["book_connections"] = bc if (bc and bc.get("status") == "ok" and bc.get("connections")) else None
     except Exception:  # noqa: BLE001
         out["cross_references"] = None
+        out["book_connections"] = None
     try:
         from . import translate as _tr
     except Exception:  # noqa: BLE001

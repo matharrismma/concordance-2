@@ -343,6 +343,10 @@ async function weaveInto(ref, el){
   const xr = (d.cross_references && d.cross_references.refs) || [];
   if(xr.length) parts.push('<div class="dim-row"><span class="k">cross-references · treasury of scripture</span>'
     + xr.map(x=>'<button class="chip" data-ask="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div>');
+  const bc = d.book_connections;
+  if(bc && bc.connections && bc.connections.length) parts.push('<div class="dim-row"><span class="k">'
+    + esc(bc.book)+' connects most to · <a href="/crossrefs" style="color:var(--brass);text-decoration:none">the whole map ↗</a></span>'
+    + bc.connections.map(c=>'<button class="chip" data-ask="'+esc(c.book)+'">'+esc(c.book)+'</button>').join('')+'</div>');
   const ow = d.original_words;
   if(ow && ow.words && ow.words.length){
     const ws = ow.words.map((w,i)=> '<span class="ow'+(w.doubt?' doubt':'')+'" data-i="'+i+'" data-s="'+esc(w.strongs||'')+'">'+esc(w.word)+'</span>').join(' ');
@@ -444,6 +448,7 @@ function WEAVE_SAMPLE(ref){
   if(r.indexOf('genesis 1:1')>=0) return {
     reality:{count:4,nodes:[{title:'The Standard Model'},{title:'The fine-structure constant'},{title:'atomic'}]},
     cross_references:{refs:['John 1:1-3','Hebrews 11:3','Isaiah 45:18','Revelation 4:11','Colossians 1:16-17']},
+    book_connections:{book:'Genesis',connections:[{book:'Psalms'},{book:'Exodus'},{book:'Hebrews'},{book:'Isaiah'},{book:'Romans'},{book:'Matthew'}]},
     original_words:{tongue:'Hebrew',words:[{word:'בְּרֵאשִׁית'},{word:'בָּרָא'},{word:'אֱלֹהִים'},{word:'אֵת'},{word:'הַשָּׁמַיִם'}]},
     commentary:{source:"Matthew Henry's Commentary",text:'In these verses we have the work of creation in its epitome.'}};
   return {note:'The Word’s connections — its cross-references, original words, and confirmations in reality — load from the keeping on the box.'};
