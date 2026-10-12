@@ -24,3 +24,26 @@ def test_thermodynamic_feasibility():
     wrong = C.verify_thermodynamic_feasibility({"delta_H_kJ_mol": -100, "delta_S_J_mol_K": 50,
                                                 "temperature_K": 298, "claimed_spontaneous": False})
     assert wrong.status == "MISMATCH"
+
+
+def _st(spec):
+    return [r.status for r in C.run({"CHEM_VERIFY": spec})]
+
+
+def test_name_to_formula_by_atom_count():
+    # 2026-10-12: "water is H2O" and equivalents (C2H5OH == C2H6O), aliases resolved, wrong -> mismatch
+    assert _st({"name": "water", "claimed_formula": "H2O"}) == ["CONFIRMED"]
+    assert _st({"name": "ethanol", "claimed_formula": "C2H5OH"}) == ["CONFIRMED"]
+    assert _st({"name": "salt", "claimed_formula": "NaCl"}) == ["CONFIRMED"]        # alias
+    assert _st({"name": "water", "claimed_formula": "CO2"}) == ["MISMATCH"]
+    assert _st({"name": "foobar", "claimed_formula": "H2O"}) == ["NOT_APPLICABLE"]  # unknown declined
+
+
+def test_phase_points_judged_at_stated_precision():
+    assert _st({"substance": "water", "property": "boiling", "claimed_c": 100, "claimed_literal": "100"}) == ["CONFIRMED"]
+    assert _st({"substance": "water", "property": "freezing", "claimed_c": 0, "claimed_literal": "0"}) == ["CONFIRMED"]
+    assert _st({"substance": "iron", "property": "melting", "claimed_c": 1538, "claimed_literal": "1538"}) == ["CONFIRMED"]
+    assert _st({"substance": "ethanol", "property": "boiling", "claimed_c": 78, "claimed_literal": "78"}) == ["CONFIRMED"]
+    assert _st({"substance": "ethanol", "property": "boiling", "claimed_c": 79, "claimed_literal": "79"}) == ["MISMATCH"]
+    # sublimes/decomposes -> no standard point at 1 atm -> declined, never a wrong verdict
+    assert _st({"substance": "carbon dioxide", "property": "boiling", "claimed_c": -78, "claimed_literal": "-78"}) == ["NOT_APPLICABLE"]

@@ -699,3 +699,16 @@ def test_rational_roots_extracts_and_the_polynomial_parses():
     assert audit("3/2 is a root of 2x^2 - x - 3", CFG, seal=False)["held"] == 1
     assert _extractors("the roots of the problem are deep") == []        # not a polynomial
     assert _extractors("I planted roots of a tree in the garden") == []
+
+
+def test_substance_claims_extract_and_non_substances_do_not():
+    """2026-10-12: "water is H2O" and "the boiling point of water is 100 C" check against the substance
+    table; a wrong value breaks; and "Jesus is Lord" / "it is OK" never parse as a formula claim (the bare
+    "X is <formula>" form fires only for a KNOWN substance)."""
+    assert _extractors("water is H2O") == ["substance"]
+    assert audit("water is H2O", CFG, seal=False)["held"] == 1
+    assert audit("water is CO2", CFG, seal=False)["broken"] == 1
+    assert audit("the boiling point of water is 100 C", CFG, seal=False)["held"] == 1
+    assert audit("the boiling point of ethanol is 79 C", CFG, seal=False)["broken"] == 1
+    for t in ("Jesus is Lord", "she is Mary", "it is OK", "the book is good"):
+        assert "substance" not in _extractors(t), t

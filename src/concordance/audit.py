@@ -1834,9 +1834,44 @@ def _x_rational_roots(text: str):
     return out
 
 
+_SUB_PHASE = re.compile(
+    r"\bthe\s+(?P<prop>boiling|melting|freezing)\s+point\s+of\s+(?P<sub>[a-z][a-z ]{1,28}?)\s+"
+    r"(?:is|are|=|equals?)\s+(?P<num>-?\d+(?:\.\d+)?)\s*(?:°|º|deg(?:rees?)?)?\s*(?:c\b|celsius|centigrade)\b", re.I)
+_SUB_FORMULA_EXPLICIT = re.compile(
+    r"\bthe\s+(?:chemical\s+)?formula\s+(?:for|of)\s+(?P<sub>[a-z][a-z ]{1,28}?)\s+(?:is|=)\s+(?P<f>(?:[A-Z][a-z]?\d*)+)\b")
+_SUB_FORMULA_BARE = re.compile(
+    r"\b(?P<sub>[a-z][a-z ]{1,28}?)\s+(?:is|=|has\s+the\s+formula)\s+(?P<f>(?:[A-Z][a-z]?\d*)+)\b")
+
+
+def _x_substance(text: str):
+    """"the boiling point of water is 100 C" -> chemistry.phase_point; "water is H2O" / "the formula for
+    water is H2O" -> chemistry.formula. The bare "X is <formula>" fires ONLY when X is a known substance
+    (so "it is OK" is never a formula claim); the explicit "formula of X" and the phase anchor are strong
+    enough to fire regardless, and the verifier declines any substance it does not hold (0-FP)."""
+    from .verifiers import chemistry as _chem
+    out, seen = [], set()
+    for m in _SUB_PHASE.finditer(text):
+        sub = m.group("sub").strip()
+        out.append((_q(text, m), "chemistry",
+                    {"CHEM_VERIFY": {"substance": sub, "property": m.group("prop").lower(),
+                                     "claimed_c": float(m.group("num")), "claimed_literal": m.group("num")}}))
+    for m in _SUB_FORMULA_EXPLICIT.finditer(text):
+        sub = m.group("sub").strip()
+        out.append((_q(text, m), "chemistry", {"CHEM_VERIFY": {"name": sub, "claimed_formula": m.group("f")}}))
+        seen.add(sub.lower())
+    for m in _SUB_FORMULA_BARE.finditer(text):
+        sub = m.group("sub").strip()
+        if sub.lower() in seen:
+            continue
+        _, rec = _chem.substance(sub)                      # bare "X is <formula>" only for a KNOWN substance
+        if rec is not None:
+            out.append((_q(text, m), "chemistry", {"CHEM_VERIFY": {"name": sub, "claimed_formula": m.group("f")}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("quotient", _x_quotient), ("arith_words", _x_arith_words),
-    ("rational_roots", _x_rational_roots),
+    ("rational_roots", _x_rational_roots), ("substance", _x_substance),
     ("expression", _x_expression),      # THE CLAIM GRAMMAR (Gen 3 · 3): a mixed/parenthesised expression
     ("power", _x_power), ("factorial", _x_factorial), ("sqrt", _x_sqrt),
     ("combinations", _x_combinations), ("permutations", _x_permutations),

@@ -406,6 +406,121 @@ def verify_ph_classification(spec: Dict[str, Any]) -> VerifierResult:
                     {"pH": pH_f, "actual": actual, "claimed": claim_norm})
 
 
+# ── SUBSTANCES: common compounds/elements by name, with their formula and standard phase points ──────
+# Formula is compared by ATOM COUNT (so "C2H5OH" and "C2H6O" both match ethanol). Melting/boiling points
+# are standard values at 1 atm (°C); None where the substance sublimes or decomposes rather than melting
+# or boiling cleanly at 1 atm. Curated, attributed (standard references / CRC Handbook), judged at the
+# stated precision — a wrong value MISMATCHES, an unknown substance is DECLINED (never a false HOLDS).
+_SUBSTANCES: Dict[str, Dict[str, Any]] = {
+    "water": {"formula": "H2O", "mp_c": 0.0, "bp_c": 100.0},
+    "hydrogen peroxide": {"formula": "H2O2", "mp_c": -0.43, "bp_c": 150.2},
+    "carbon dioxide": {"formula": "CO2", "mp_c": None, "bp_c": None},      # sublimes at 1 atm (-78.5 °C)
+    "carbon monoxide": {"formula": "CO", "mp_c": -205.0, "bp_c": -191.5},
+    "ozone": {"formula": "O3", "mp_c": -192.2, "bp_c": -112.0},
+    "ammonia": {"formula": "NH3", "mp_c": -77.7, "bp_c": -33.34},
+    "methane": {"formula": "CH4", "mp_c": -182.5, "bp_c": -161.5},
+    "ethane": {"formula": "C2H6", "mp_c": -182.8, "bp_c": -88.6},
+    "propane": {"formula": "C3H8", "mp_c": -187.7, "bp_c": -42.1},
+    "butane": {"formula": "C4H10", "mp_c": -138.3, "bp_c": -0.5},
+    "ethanol": {"formula": "C2H6O", "mp_c": -114.1, "bp_c": 78.37},
+    "methanol": {"formula": "CH4O", "mp_c": -97.6, "bp_c": 64.7},
+    "acetone": {"formula": "C3H6O", "mp_c": -94.7, "bp_c": 56.05},
+    "acetic acid": {"formula": "C2H4O2", "mp_c": 16.6, "bp_c": 118.1},
+    "benzene": {"formula": "C6H6", "mp_c": 5.5, "bp_c": 80.1},
+    "glucose": {"formula": "C6H12O6", "mp_c": None, "bp_c": None},         # decomposes
+    "sucrose": {"formula": "C12H22O11", "mp_c": None, "bp_c": None},       # decomposes
+    "sodium chloride": {"formula": "NaCl", "mp_c": 801.0, "bp_c": 1413.0},
+    "sodium hydroxide": {"formula": "NaOH", "mp_c": 318.0, "bp_c": 1388.0},
+    "sodium bicarbonate": {"formula": "NaHCO3", "mp_c": None, "bp_c": None},  # decomposes
+    "calcium carbonate": {"formula": "CaCO3", "mp_c": None, "bp_c": None},    # decomposes
+    "sulfuric acid": {"formula": "H2SO4", "mp_c": 10.3, "bp_c": 337.0},
+    "hydrochloric acid": {"formula": "HCl", "mp_c": -114.2, "bp_c": -85.0},
+    "nitric acid": {"formula": "HNO3", "mp_c": -42.0, "bp_c": 83.0},
+    "hydrogen": {"formula": "H2", "mp_c": -259.14, "bp_c": -252.87},
+    "oxygen": {"formula": "O2", "mp_c": -218.79, "bp_c": -182.96},
+    "nitrogen": {"formula": "N2", "mp_c": -210.0, "bp_c": -195.79},
+    "chlorine": {"formula": "Cl2", "mp_c": -101.5, "bp_c": -34.04},
+    "iron": {"formula": "Fe", "mp_c": 1538.0, "bp_c": 2862.0},
+    "gold": {"formula": "Au", "mp_c": 1064.18, "bp_c": 2856.0},
+    "copper": {"formula": "Cu", "mp_c": 1084.62, "bp_c": 2562.0},
+    "aluminum": {"formula": "Al", "mp_c": 660.32, "bp_c": 2470.0},
+    "mercury": {"formula": "Hg", "mp_c": -38.83, "bp_c": 356.73},
+    "lead": {"formula": "Pb", "mp_c": 327.46, "bp_c": 1749.0},
+    "silver": {"formula": "Ag", "mp_c": 961.78, "bp_c": 2162.0},
+    "tungsten": {"formula": "W", "mp_c": 3422.0, "bp_c": 5555.0},
+}
+_SUBSTANCE_ALIASES: Dict[str, str] = {
+    "salt": "sodium chloride", "table salt": "sodium chloride", "rock salt": "sodium chloride",
+    "baking soda": "sodium bicarbonate", "bicarbonate of soda": "sodium bicarbonate",
+    "lye": "sodium hydroxide", "caustic soda": "sodium hydroxide",
+    "table sugar": "sucrose", "sugar": "sucrose", "cane sugar": "sucrose",
+    "grain alcohol": "ethanol", "ethyl alcohol": "ethanol", "alcohol": "ethanol",
+    "wood alcohol": "methanol", "methyl alcohol": "methanol",
+    "muriatic acid": "hydrochloric acid", "limestone": "calcium carbonate", "chalk": "calcium carbonate",
+    "quicklime": "calcium carbonate", "aluminium": "aluminum", "dry ice": "carbon dioxide",
+    "laughing gas": None,  # nitrous oxide is not in the table; resolve to a miss, never the wrong one
+}
+
+
+def substance(name: str):
+    """(canonical_name, record) for a known substance (aliases resolved), or (name, None)."""
+    n = " ".join((name or "").strip().lower().split())
+    n = _SUBSTANCE_ALIASES.get(n, n)
+    return n, (_SUBSTANCES.get(n) if isinstance(n, str) else None)
+
+
+def _matches_at_precision(actual: float, claimed: float, claimed_literal: str) -> bool:
+    """Judge at the STATED precision: round the table value to the decimals the claim stated. "100" holds
+    for water; "78" holds for ethanol (78.37); "79" does not."""
+    lit = str(claimed_literal or "").strip()
+    dec = len(lit.split(".", 1)[1]) if "." in lit else 0
+    return round(actual, dec) == round(float(claimed), dec)
+
+
+def verify_name_formula(spec: Dict[str, Any]) -> VerifierResult:
+    name = "chemistry.formula"
+    nm, rec = substance(spec.get("name", ""))
+    claimed = str(spec.get("claimed_formula") or "").strip()
+    if rec is None:
+        return na(name, f"{nm!r} is not in the substance table — declined, not judged")
+    if not claimed:
+        return na(name)
+    try:
+        want, got = _parse_formula(rec["formula"]), _parse_formula(claimed)
+    except Exception:  # noqa: BLE001
+        return error(name, f"could not parse the formula {claimed!r}")
+    if want == got:
+        return confirm(name, f"{nm} is {rec['formula']} (matches claim {claimed})",
+                       {"name": nm, "formula": rec["formula"], "claimed": claimed})
+    return mismatch(name, f"{nm} is {rec['formula']}, not {claimed}",
+                    {"name": nm, "formula": rec["formula"], "claimed": claimed})
+
+
+def verify_phase_point(spec: Dict[str, Any]) -> VerifierResult:
+    name = "chemistry.phase_point"
+    nm, rec = substance(spec.get("substance", ""))
+    prop = str(spec.get("property") or "").strip().lower()
+    if rec is None:
+        return na(name, f"{nm!r} is not in the substance table — declined, not judged")
+    if spec.get("claimed_c") is None or prop not in ("boiling", "melting", "freezing"):
+        return na(name)
+    key = "bp_c" if prop == "boiling" else "mp_c"       # freezing point = melting point
+    actual = rec.get(key)
+    label = "boiling point" if prop == "boiling" else ("freezing point" if prop == "freezing" else "melting point")
+    if actual is None:
+        return na(name, f"{nm} has no standard {label} at 1 atm (it sublimes or decomposes) — declined")
+    try:
+        claimed = float(spec["claimed_c"])
+    except (TypeError, ValueError):
+        return error(name, "claimed temperature must be a number")
+    lit = spec.get("claimed_literal", spec["claimed_c"])
+    if _matches_at_precision(actual, claimed, str(lit)):
+        return confirm(name, f"the {label} of {nm} is {actual} °C at 1 atm (matches {lit} to the stated precision)",
+                       {"substance": nm, "property": prop, "actual_c": actual, "claimed_c": claimed})
+    return mismatch(name, f"the {label} of {nm} is {actual} °C at 1 atm, not {lit}",
+                    {"substance": nm, "property": prop, "actual_c": actual, "claimed_c": claimed})
+
+
 GOLDEN_PACKET_KEY = "CHEM_VERIFY"
 GOLDEN_EXAMPLE = {"amount_mol": 1.0, "claimed_particle_count": 6.02214076e23}  # N = n * N_A
 
@@ -445,6 +560,14 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     # Particle count N = n * N_A — the N_A-set bridge from moles to molecules.
     if "amount_mol" in chem_verify and "claimed_particle_count" in chem_verify:
         results.append(verify_avogadro_count(chem_verify))
+
+    # Name -> formula ("water is H2O"), compared by atom count.
+    if "name" in chem_verify and "claimed_formula" in chem_verify:
+        results.append(verify_name_formula(chem_verify))
+
+    # Phase point ("the boiling point of water is 100 C"), judged at the stated precision.
+    if "substance" in chem_verify and "property" in chem_verify and "claimed_c" in chem_verify:
+        results.append(verify_phase_point(chem_verify))
 
     if not results:
         results.append(na("chemistry", "no CHEM_VERIFY artifacts present"))
