@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cross-Reference Map — Narrow Highway</title>
 <meta name="description" content="The Word connects to itself: every book of the Bible and how it cross-references every other, from the Treasury of Scripture Knowledge, as one map. Tap a cell for the verse links. Found and cited, never generated.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap">
 <style>
   /* The Word's own web of self-reference — a book×book matrix, in the reverent parchment-and-brass of
      the Console. Light by day; a candlelit cathedral by night. Found + cited, never generated. */
@@ -86,8 +88,7 @@
     <span><span class="sw" style="background:var(--cross)"></span>across the Testaments</span>
     <span><span class="sw" style="background:var(--self)"></span>a book to itself</span>
   </div>
-  <div id="groups" class="groups" aria-hidden="true"></div>
-  <div class="matrix-scroll"><div class="matrix" id="matrix"></div></div>
+  <div class="matrix-scroll"><div id="groups" class="groups" aria-hidden="true"></div><div class="matrix" id="matrix"></div></div>
   <div class="axis-note"><span id="stat"></span><span>down the side = the source · across the top = the target</span></div>
   <div class="panel" id="panel" hidden></div>
   <div id="msg" class="msg" hidden></div>
@@ -103,7 +104,7 @@ const CELL = 13;               // px
 function getj(path){
   return fetch(API + path, {headers:{accept:"application/json"}}).then(r=>r.json()).then(j=> (j && j.data!==undefined) ? j.data : j);
 }
-function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 const matrixEl = document.getElementById('matrix');
 const groupsEl = document.getElementById('groups');
@@ -208,9 +209,9 @@ function drawPanel(d){
   if (!d || d.status !== 'ok'){ panelEl.innerHTML = '<div class="msg">no links to show.</div>'; return; }
   let html = '<button class="close" id="pclose">close</button>';
   html += `<div class="ph">${esc(d.from)} <span class="arr">→</span> ${esc(d.to)}</div>`;
-  html += `<div class="pmeta">${d.count} verse link${d.count===1?'':'s'}, ranked by relevance · tap a verse to read it</div>`;
+  html += `<div class="pmeta">${esc(d.count)} verse link${d.count===1?'':'s'}, ranked by relevance · tap a verse to read it</div>`;
   (d.links||[]).forEach(l => {
-    html += `<div class="link"><span class="v">${l.votes}</span>`
+    html += `<div class="link"><span class="v">${esc(l.votes)}</span>`
           + `<a href="/?q=${encodeURIComponent(l.from)}" title="read ${esc(l.from)}">${esc(l.from)}</a>`
           + `<span class="arr">→</span>`
           + `<a href="/?q=${encodeURIComponent(l.to)}" title="read ${esc(l.to)}">${esc(l.to)}</a></div>`;

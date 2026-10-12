@@ -200,7 +200,7 @@ const pageEl = document.getElementById('page');
 const qEl = document.getElementById('q');
 let MODE = (function(){ try{ return localStorage.getItem('nh-console-mode') || 'read'; }catch(e){ return 'read'; } })();
 
-function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function setMode(m){
   MODE=m;
   document.getElementById('m-listen').setAttribute('aria-pressed', m==='listen');
