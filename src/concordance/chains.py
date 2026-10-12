@@ -112,7 +112,11 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           # music (tools/seed_music.py, 2026-10-10): the orphaned music-theory stick, placed on the map - interval
           # ratios (2:1, 3:2), equal temperament (2^(1/12)), A440; rests on acoustics (harmonic series) + metrology
           # (pitch in hertz) + the instruments (the music verifier). No new stick - cites the sealed music-theory stick.
-          "card_floor_music")
+          "card_floor_music",
+          # church history (tools/seed_church_history.py, 2026-10-11): the Church through history - the descent of the
+          # traditions from the apostolic root (Acts 2) by datable schisms and reformations (1054, 1517, 1534, ...);
+          # reuses the gathered tradition cards (card_churches.py); the creeds are the shared ground. Calibrate, not judge.
+          "card_floor_church_history")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
