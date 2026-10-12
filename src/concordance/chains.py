@@ -116,7 +116,13 @@ FLOORS = ("card_floor_standard_model", "card_floor_millennium",
           # church history (tools/seed_church_history.py, 2026-10-11): the Church through history - the descent of the
           # traditions from the apostolic root (Acts 2) by datable schisms and reformations (1054, 1517, 1534, ...);
           # reuses the gathered tradition cards (card_churches.py); the creeds are the shared ground. Calibrate, not judge.
-          "card_floor_church_history")
+          "card_floor_church_history",
+          # the world's language families (tools/seed_language_families.py, 2026-10-11): one floor per family, branches
+          # as the trees, the proto-language a cited postulate (never sealed) - the IE pattern for every other family.
+          # Kept separate (no "Altaic"); rooted to Babel (Genesis 11). Indo-European is already its own floor above.
+          "card_floor_uralic", "card_floor_turkic", "card_floor_mongolic", "card_floor_sino_tibetan",
+          "card_floor_japonic", "card_floor_koreanic", "card_floor_austroasiatic", "card_floor_austronesian",
+          "card_floor_niger_congo", "card_floor_afroasiatic", "card_floor_kartvelian", "card_floor_tupian")
 
 
 def _default_get_card(card_id: str) -> Optional[dict]:
