@@ -4235,6 +4235,22 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             _systems.checkin(extra=_singletons)
         except Exception:
             pass
+        # The substance split (a 548k-body walk) warms in the BACKGROUND, off the critical path: it must
+        # not delay the port binding or a request, but once it lands the capabilities statement serves the
+        # full split instead of "warming". capabilities is guarded regardless, so this only enriches it.
+        try:
+            import threading as _threading
+
+            def _warm_substance() -> None:
+                try:
+                    from .. import ops as _ops
+                    _ops.substance_of_the_keeping()
+                except Exception:
+                    pass
+
+            _threading.Thread(target=_warm_substance, name="nh-warm-substance", daemon=True).start()
+        except Exception:
+            pass
 
     return _QuietServer((host, port), Handler)
 

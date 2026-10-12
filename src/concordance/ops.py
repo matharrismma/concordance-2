@@ -120,6 +120,13 @@ def substance_of_the_keeping() -> Dict[str, Any]:
     return _SUBSTANCE_CACHE
 
 
+def substance_if_cached() -> Optional[Dict[str, Any]]:
+    """The memoized substance split IF it is already computed, else None — NEVER triggers the 548k-body
+    walk. For latency-sensitive callers (the capabilities statement, an orientation call) that want the
+    split only when it is free and must not block an agent on it."""
+    return _SUBSTANCE_CACHE
+
+
 def log(event: str, **fields: Any) -> Dict[str, Any]:
     """Append one operational record. Returns the record as written.
 

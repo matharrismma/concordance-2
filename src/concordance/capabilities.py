@@ -140,15 +140,16 @@ def _routes() -> Dict[str, Any]:
 
 
 def _substrate() -> Dict[str, Any]:
+    # ORIENTATION MUST NOT BLOCK (2026-10-11): this statement is an arriving agent's first call. It must
+    # never trigger the ~600k-card corpus build or the 548k-body substance walk on the request path — a
+    # 65s orientation call times out the client and is a bad front door. So the corpus counts are read
+    # only when the corpus is already WARM (corpus.loaded()), and the substance split only when it is
+    # already cached (ops.substance_if_cached, which never walks). A cold process reports "warming",
+    # never hangs; the boot warms both in the background.
     out: Dict[str, Any] = {}
     try:
         from . import corpus
-        st = corpus.stats() or {}
-        out["cards"] = {"count": st.get("total") or st.get("cards"),
-                        "means": "cards in the keeping (the shared corpus, both surfaces)"}
-        # The profile mounts (task #123): the capability statement is where a reader learns the
-        # narrow doors exist — a boundary nobody can discover is a boundary that does not reach
-        # the reader.
+        # the profile mounts are free and always shown — a boundary nobody can discover does not reach the reader
         try:
             from .mcp.server import PROFILES
             out["mcp_profiles"] = {
@@ -159,23 +160,28 @@ def _substrate() -> Dict[str, Any]:
                           "existing clients; community is off unless the host enables it")}
         except Exception:                                      # noqa: BLE001 — never break the statement
             pass
-        # G1 (docs/GAPS.md): a count claimed alone lets the million be hit without a sentence of
-        # substance. So the headline never travels without its split — measured once per process
-        # (ops memoizes; walking 548k bodies per request would knock reading into proving).
-        from . import ops
-        sub = ops.substance_of_the_keeping()
-        out["cards_substance"] = {
-            "count": sub["substance_cards"],
-            "means": sub["means"]["substance_cards"]}
-        out["cards_stubs"] = {
-            "count": sub["stub_cards"],
-            "means": sub["means"]["stub_cards"] + f" — stub_ratio {sub['stub_ratio']}"}
-        if sub.get("frozen_cards"):
-            out["cards_frozen"] = {
-                "count": sub["frozen_cards"],
-                "means": sub["means"]["frozen_cards"]}
-        if st.get("shelves"):
-            out["shelves"] = {"count": len(st["shelves"]), "means": "shelves the cards sit on"}
+        if not corpus.loaded():
+            out["cards"] = {"count": None,
+                            "means": "cards in the keeping (the shared corpus, both surfaces)",
+                            "note": "the keeping is still warming in this process — the count is served once the corpus is loaded"}
+        else:
+            # the headline count only — O(1); stats()' per-shelf/per-surface Counter walks ~900k ids and
+            # must never ride this orientation call.
+            out["cards"] = {"count": corpus.card_count(),
+                            "means": "cards in the keeping (the shared corpus, both surfaces)"}
+            # G1 (docs/GAPS.md): a count never travels without its substance split — but only when the split
+            # is already computed (the boot warms it in the background). Never walk 548k bodies on this call.
+            from . import ops
+            sub = ops.substance_if_cached()
+            if sub:
+                out["cards_substance"] = {"count": sub["substance_cards"], "means": sub["means"]["substance_cards"]}
+                out["cards_stubs"] = {"count": sub["stub_cards"],
+                                      "means": sub["means"]["stub_cards"] + f" — stub_ratio {sub['stub_ratio']}"}
+                if sub.get("frozen_cards"):
+                    out["cards_frozen"] = {"count": sub["frozen_cards"], "means": sub["means"]["frozen_cards"]}
+            else:
+                out["cards_substance"] = {"count": None,
+                                          "means": "the substance/stub split warms in the background; served once computed"}
     except Exception as e:  # noqa: BLE001 — a substrate we cannot read is reported, never guessed
         out["cards"] = {"count": None, "unavailable": str(e)[:120]}
     try:

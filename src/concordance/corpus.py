@@ -1827,6 +1827,13 @@ def browse(shelf: Optional[str] = None, limit: int = 20, offset: int = 0,
             "call": call, "facet": facet, "children": children, "cards": briefs}
 
 
+def card_count() -> int:
+    """The total number of public cards (resident + frozen index) — O(1), no walk. For latency-sensitive
+    callers (an orientation statement) that need the headline count without stats()' per-shelf/per-surface
+    Counter over the whole keeping (which walks ~900k ids and must never ride a request path)."""
+    return len(default_corpus()._public_sorted)
+
+
 def stats() -> Dict[str, Any]:
     """Counts over the WHOLE keeping — total, by shelf, by surface — resident cards AND the frozen
     index (lazy stubs), so the numbers reflect the full keeping, not just what's held in RAM."""
