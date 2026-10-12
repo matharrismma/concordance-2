@@ -124,6 +124,24 @@ def test_resolved_coverage_counts_inheritance(tmp_path, monkeypatch):
     assert cov["unconnected"] == 2   # astrology + stick_uncharted reach no floor at all
 
 
+def test_confirmations_is_the_outward_concordance(tmp_path, monkeypatch):
+    import concordance.chains as chains
+    import concordance.tickstick as tickstick
+    monkeypatch.setattr(chains, "FLOORS", ("card_floor_acoustics",))
+    monkeypatch.setattr(tickstick, "listing",
+                        lambda data_dir=None: {"sticks": [{"id": "stick_sound", "question": "Acoustics - sound"}]})
+    monkeypatch.setattr(roots, "stick_floor_index", lambda get_card=None: {})
+    (tmp_path / "domain_goldens.json").write_text('{"acoustics": {}}', encoding="utf-8")
+    roots.anchor("floor:card_floor_acoustics", ["Psalm 150:3-5"], verify=False, data_dir=tmp_path)
+    roots.place("stick:stick_sound", "card_floor_acoustics", verify=False, data_dir=tmp_path)
+    c = roots.confirmations("Psalm 150:3-5", get_card=lambda cid: None, data_dir=tmp_path)
+    nodes = {n["node"]: n for n in c["nodes"]}
+    assert c["count"] == 3
+    assert nodes["floor:card_floor_acoustics"]["via"] == "direct"
+    assert nodes["domain:acoustics"]["via"] == "inherited"      # by name-match
+    assert nodes["stick:stick_sound"]["via"] == "inherited"     # by filing
+
+
 def test_coverage_measures_the_gap_by_kind(tmp_path, monkeypatch):
     import concordance.chains as chains
     import concordance.tickstick as tickstick

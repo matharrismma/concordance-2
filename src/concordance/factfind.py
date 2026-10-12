@@ -399,12 +399,15 @@ def verify_fallback(claim: str, checked: Optional[str] = None,
         return out
     # H7 (2026-10-08): words that carry arithmetic go to the STRUCTURED form with a template — a want is for a
     # missing source, and arithmetic needs none. A numeric lookup-shaped claim keeps the want and gets the
-    # template too, so neither door is a dead end.
+    # template too, so neither door is a dead end. The arithmetic ANSWER fires only when find_fact recognized
+    # NOTHING (ff is None) — else an extractor DID recognize the claim (e.g. "the half-life of strontium-90 is
+    # 28.8 years": the isotope name carries its own "90"), the note's premise is false, and the lookup want is
+    # the right answer; the structured hint is still attached above, so that door is not a dead end either.
     from . import audit as _audit
     hint = _audit.structured_hint(claim or "")
     if hint:
         out["structured"] = hint
-    if hint and _audit.looks_arithmetic(claim or ""):
+    if ff is None and hint and _audit.looks_arithmetic(claim or ""):
         out["found"] = []
         out["note"] = ("No extractor recognized these words as a checkable claim, but they carry arithmetic: the "
                        "structured form checks it directly — edit the template in `structured` and send it, or ask "
