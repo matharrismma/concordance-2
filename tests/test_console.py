@@ -289,6 +289,35 @@ def test_a_checked_claim_that_fails_renders_false(monkeypatch):
     assert "periodic table" not in r["headline"].lower()
 
 
+def test_an_unchecked_numeric_claim_is_honest_not_a_topical_card(monkeypatch):
+    """2A (2026-10-12): a measurable assertion with no verifier ("a triangle has 180 degrees") fell to
+    keyword search and the Console rendered the nearest topical card ("Differential geometry") as the
+    answer — a dressed-up guess. It must say plainly it can't check that one, and offer the card as
+    RELATED reading + the want. No verdict badge (we never ran a check)."""
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "found", "generated": False,
+        "results": [{"id": "card_diff_geom", "title": "Differential geometry",
+                     "snippet": "curvature measured from inside"}]})
+    r = console.dispatch("a triangle has 180 degrees", SEC)
+    assert "check that one yet" in r["headline"].lower()         # honest non-check
+    assert "differential geometry" not in r["headline"].lower()  # not dressed as the answer
+    assert r.get("verdict") is None                              # no false verdict on a claim we never ran
+    assert r["spoken"].startswith("That reads like a claim")     # the honest line LEADS — no verse prepended
+    assert any("go find it" in (n.get("label") or "").lower() for n in (r.get("next") or []))
+
+
+def test_a_topical_query_still_renders_the_card_normally(monkeypatch):
+    """The 2A detector is NARROW: a topic-seek with no copula+number is NOT reframed — the keeping's
+    card is still the answer, so real searches are untouched."""
+    monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
+        "kind": "search", "generated": False,
+        "results": [{"id": "card_ten", "title": "The Ten Commandments",
+                     "snippet": "Exodus 20 — the Decalogue"}]})
+    r = console.dispatch("the 10 commandments", SEC)
+    assert "ten commandments" in r["headline"].lower()           # normal FIND path, card is the headline
+    assert "check that one yet" not in r["headline"].lower()
+
+
 def test_intake_keeps_the_location_not_the_blob():
     a = console.intake_artifact(source_location="/sd/photos/well_pump.jpg", kind="image",
                                 extracted_text="Shurflo 9300, 24V")

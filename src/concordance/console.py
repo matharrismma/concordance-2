@@ -293,6 +293,27 @@ def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[s
     return out
 
 
+# 2A — an UNCHECKED numeric/formula claim. When a declarative assertion carries a measurable payload
+# (a number, a chemical formula, an "=") but no verifier admitted it, respond() falls to keyword search
+# and the Console was rendering the nearest topical card's TITLE as if it were the answer
+# ("a triangle has 180 degrees" -> "Differential geometry"). That reads like a misroute. Here we DETECT
+# such a claim so the Console can say plainly "I can't check that one yet" and offer the related reading
+# + the want — honest, not a dressed-up guess. Deliberately NARROW (a copula/relation AND a digit), so a
+# topic-seek ("what are the ten commandments", "tell me about grace") and a non-numeric confession
+# ("God is love") are NOT caught — only a measurable factual assertion we couldn't verify.
+_CLAIM_REL = re.compile(r"\b(is|are|was|were|has|have|contains?|equals?|weighs?|measures?|equal to)\b|=", re.I)
+_CLAIM_MEASURE = re.compile(r"\d")
+
+
+def _looks_like_unchecked_claim(text: str) -> bool:
+    t = (text or "").strip()
+    if not t or _ask._is_question(t):
+        return False
+    if _ask._FIRST_PERSON_STATE.search(t) or _ask._FACTUAL_INTENT.search(t):
+        return False
+    return bool(_CLAIM_REL.search(t)) and bool(_CLAIM_MEASURE.search(t))
+
+
 def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
     """The coach faculty: a verified answer, spoken short, a connection woven in, the source deferred —
     and the CLOUD OF WITNESSES woven in beneath it, the Word first and the cloud weighed against it."""
@@ -313,6 +334,7 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
     source: Optional[Dict[str, str]] = None
     headline = ""
     console_verdict: Optional[str] = None     # surfaced for a verify so the Console can show the badge
+    skip_weave = False                        # 2A honest non-check: let the plain message lead, no verse prepend
 
     if kind == "checked" and isinstance(r.get("audit"), dict):
         # THE CANDIDATE ENGINE CHECKED A CLAIM. respond() attaches BOTH the real verdict (r["audit"],
@@ -340,6 +362,22 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
             source = {"title": "the worked check — re-verify it yourself", "ref": ref}
         else:
             source = {"title": "the worked check"}
+    elif results and _looks_like_unchecked_claim(text):
+        # 2A — a measurable claim we have no verifier for. Say so plainly; never dress the nearest
+        # topical card as the answer. Offer it as RELATED reading + the want. No verdict badge (honest
+        # non-check, not a false "can't certify" on a claim we simply never ran).
+        top = results[0]
+        title = (top.get("title") or "").strip()
+        headline = "I can’t check that one yet."
+        spoken = ("That reads like a claim I don’t have a verifier for yet — so I won’t guess. "
+                  "Here is the closest related reading in the keeping; or say “go find it” and I’ll set "
+                  "the steward to acquire a source for it.")
+        caption = spoken
+        skip_weave = True                     # the honest "I can't check that" leads; no verse before it
+        if title:
+            source = {"title": title + " — related, not a verdict", "ref": f"/card/{top.get('id','')}"}
+            nexts = [{"label": title, "ref": f"/card/{top.get('id','')}"},
+                     {"label": "Say “go find it” — set the steward to acquire a source", "ref": None}]
     elif results:
         top = results[0]
         title = (top.get("title") or "").strip()
@@ -410,7 +448,7 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
     # open), the found answer stands within it, and a selected witness is voiced beneath, weighed against
     # the Word. Not on a bare computed claim (verify has no source to see through) nor a crisis (above).
     cloud = word = None
-    if kind not in ("verify",):
+    if kind not in ("verify",) and not skip_weave:
         _s = _seeing(text, gate_open, caption)     # the answer's own scripture anchor leads where it has one
         word, cloud = _s.get("word"), _s.get("cloud")
         if _s.get("lead"):                       # the Word first — Bible before the answer
