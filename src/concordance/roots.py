@@ -51,28 +51,39 @@ def _norm_ref(ref: str) -> str:
     return re.sub(r"\s+", " ", (ref or "").strip().lower())
 
 
+# the five one-chapter books: a bare "Jude 3" means chapter 1, VERSE 3 (there is no chapter 3), and the
+# canonical stored form is "Jude 1:3" — the two must overlap.
+_ONE_CHAPTER_BOOKS = frozenset({31, 57, 63, 64, 65})  # Obadiah, Philemon, 2 John, 3 John, Jude
+
+
 def _ref_span(ref: str):
-    """Parse a single-chapter reference to (book, chapter, v_lo, v_hi); a whole chapter spans all its
-    verses. Returns None for anything the passage regex cannot read (cross-chapter ranges, prose) — the
-    caller then falls back to exact normal-form equality. Reuses the scripture verifier's own parser, so
-    the book aliases and the passage grammar stay in one place."""
+    """Parse a reference to (book_number, chapter, v_lo, v_hi) for overlap matching; a whole chapter spans
+    all its verses. The book is resolved to its CANONICAL NUMBER (1-66) so alias and singular/plural
+    spellings fold together ('Psalm'=='Psalms', 'Gen'=='Genesis', 'Jn'=='John'), and a bare number in a
+    one-chapter book is read as the verse of chapter 1 ('Jude 3' == 'Jude 1:3'). Returns None for anything
+    the passage grammar cannot read (cross-chapter ranges, prose) — the caller then falls back to exact
+    normal-form equality. Uses the passage grammar from the scripture verifier and the canonical book
+    resolver from xrefs (both single sources of truth)."""
     try:
-        from .verifiers.scripture import _PASSAGE_RE, _norm_book
+        from .verifiers.scripture import _PASSAGE_RE
+        from . import xrefs as _xrefs
     except Exception:  # noqa: BLE001
         return None
     m = _PASSAGE_RE.match(ref or "")
     if not m:
         return None
-    book = _norm_book(m.group(1))
-    if not book:
+    bn = _xrefs._resolve_book(m.group(1))        # canonical 1-66; aliases + singular/plural folded
+    if not bn:
         return None
     ch = int(m.group(2))
     vs, ve = m.group(3), m.group(4)
     if vs is None:
-        return (book, ch, 1, 10 ** 6)        # a whole chapter: every verse in it
+        if bn in _ONE_CHAPTER_BOOKS:
+            return (bn, 1, ch, ch)               # 'Jude 3' -> Jude 1:3 (the number is the verse)
+        return (bn, ch, 1, 10 ** 6)              # a whole chapter: every verse in it
     lo = int(vs)
     hi = int(ve) if ve else lo
-    return (book, ch, min(lo, hi), max(lo, hi))
+    return (bn, ch, min(lo, hi), max(lo, hi))
 
 
 def _refs_touch(a: str, b: str) -> bool:

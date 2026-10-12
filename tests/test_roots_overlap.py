@@ -61,6 +61,25 @@ def test_different_book_does_not_match(tmp_path):
     assert NODE not in _nodes("Mark 3:16", tmp_path)
 
 
+def test_one_chapter_book_bare_verse_matches(tmp_path):
+    # a one-chapter book is normally cited "Jude 3" (the number is the VERSE); the stored form is "Jude 1:3"
+    roots.anchor(NODE, ["Jude 1:3"], verify=False, data_dir=tmp_path)
+    assert NODE in _nodes("Jude 3", tmp_path)
+    assert NODE in _nodes("Jude 1:3", tmp_path)
+    assert NODE not in _nodes("Jude 4", tmp_path)
+    # a verse inside a one-chapter-book range, cited bare
+    roots.anchor(NODE, ["Philemon 1:4-7"], verify=False, data_dir=tmp_path)
+    assert NODE in _nodes("Philemon 6", tmp_path)
+
+
+def test_book_alias_and_singular_plural_fold(tmp_path):
+    roots.anchor(NODE, ["Psalms 23:1"], verify=False, data_dir=tmp_path)
+    assert NODE in _nodes("Psalm 23:1", tmp_path)        # singular spelling, the common query form
+    assert NODE not in _nodes("Psalm 24:1", tmp_path)
+    roots.anchor(NODE, ["Genesis 1:1"], verify=False, data_dir=tmp_path)
+    assert NODE in _nodes("Gen 1:1", tmp_path)           # abbreviation folds to the canonical book
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))
