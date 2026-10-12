@@ -69,9 +69,14 @@ def verify_sound_law(a: Dict[str, Any]) -> VerifierResult:
 
 
 def verify_vowel_shift(a: Dict[str, Any]) -> VerifierResult:
-    """A regular VOWEL shift (the Great Vowel Shift): each cited word's stressed vowel moves as the claimed
-    map says. `vowel_pairs` = [[word, old_vowel, new_vowel], ...]; `shift` = {old: new}. Confirms iff every
-    pair follows the map (and each is a real change); any pair that does not is an exception. 0 FP."""
+    """A regular VOWEL shift (e.g. the Great Vowel Shift): the cited correspondences are CONSISTENT with one
+    shift map. `vowel_pairs` = [[word, old_vowel, new_vowel], ...]; `shift` = {old: new}. Confirms iff every
+    row follows the map (a function, each a real change); any row that does not is an exception.
+    HONEST SCOPE: this checks the REGULARITY/consistency of the cited set against the claimed rule. It does
+    NOT independently reconstruct the vowel values — there is no pronunciation anchor in the packet, so the
+    vowels are the caller's cited comparative record, not verified here. Its CONFIRM therefore attests the
+    REGULARITY of the cited set, NOT the historical vowel facts, and must be CITED, never sealed as a
+    verified instance (unlike Grimm/Grassmann, which check real attested forms)."""
     name = "sound_law.vowel_shift"
     pairs = a.get("vowel_pairs")
     shift = a.get("shift")
@@ -91,16 +96,22 @@ def verify_vowel_shift(a: Dict[str, Any]) -> VerifierResult:
         else:
             exceptions.append(f"{word}: {ov}->{nv} (map says {ov}->{shift.get(ov, '∅')})")
     data = {"law": law, "shift": shift, "n_pairs": len(pairs), "holds": len(holds),
-            "exceptions": exceptions, "examples": holds[:8]}
+            "exceptions": exceptions, "examples": holds[:8],
+            "scope": ("checks that the cited (word, old_vowel, new_vowel) rows are internally CONSISTENT with a "
+                      "single regular shift map — a function, each a real change, no exception. It does NOT "
+                      "independently reconstruct the vowel values (no pronunciation anchor is in the packet); "
+                      "those are the cited comparative record. CONFIRM attests the regularity of the cited set, "
+                      "not the historical vowel facts, so it is CITED, never sealed as a verified instance.")}
     claimed = a.get("claimed_regular", True)
     if exceptions and claimed:
-        return mismatch(name, f"{law}: claimed regular, but {len(exceptions)} of {len(pairs)} cited words do not "
-                              f"shift as the map claims — {'; '.join(exceptions[:4])}", data)
+        return mismatch(name, f"{law}: claimed regular, but {len(exceptions)} of {len(pairs)} cited rows contradict "
+                              f"the shift map — {'; '.join(exceptions[:4])}", data)
     if exceptions:
-        return na(name, f"{law}: {len(exceptions)} of {len(pairs)} words are exceptions to the map", data)
-    return confirm(name, f"{law}: every one of the {len(pairs)} cited words' stressed vowels shifts exactly as the "
-                         f"map claims ({', '.join(holds[:6])}{'...' if len(holds) > 6 else ''}) — a regular vowel "
-                         f"shift. The words and their vowels are attested; the shift is the verified correspondence.", data)
+        return na(name, f"{law}: {len(exceptions)} of {len(pairs)} rows are exceptions to the map", data)
+    return confirm(name, f"{law}: the {len(pairs)} cited correspondences are REGULAR — each follows one shift map "
+                         f"({', '.join(holds[:6])}{'...' if len(holds) > 6 else ''}), a real change with no internal "
+                         f"exception. This checks the regularity/consistency of the CITED set; the vowel values are "
+                         f"the cited comparative record, not independently reconstructed here (see scope). Cite, don't seal.", data)
 
 
 _ASPIRATES = ("bh", "dh", "gh", "ph", "th", "kh", "jh")
@@ -163,11 +174,13 @@ def verify_dissimilation(a: Dict[str, Any]) -> VerifierResult:
 
 def verify_voicing(a: Dict[str, Any]) -> VerifierResult:
     """Verner's law — a Grimm voiceless fricative becomes VOICED unless the accent fell on the immediately
-    preceding syllable. `voicing` = [[word, accent_precedes(bool), voiceless, voiced, attested], ...]. The
-    accent position is the cited reconstruction; the LAW verified is that the attested segment is the
-    voiceless one exactly when the accent precedes, the voiced one otherwise. Confirms iff every cited word
-    matches that conditioning; a word that voices where the accent precedes (or stays voiceless where it does
-    not) is an exception. 0 FP."""
+    preceding syllable. `voicing` = [[word, accent_precedes(bool), voiceless, voiced, attested], ...].
+    HONEST SCOPE: all five fields are caller-supplied, so this checks the CONSISTENCY of the cited data with
+    the accent-conditioning rule (is the attested segment the voiceless one exactly when the accent precedes,
+    the voiced one otherwise?); it does NOT independently reconstruct the accent positions or the attested
+    forms. Its CONFIRM therefore attests the regularity of the cited set, NOT the historical facts, and must
+    be CITED, never sealed as a verified instance. `accent_precedes` must be a real boolean (a string like
+    "false" is rejected, not coerced)."""
     name = "sound_law.voicing"
     rows = a.get("voicing")
     if not isinstance(rows, list) or not rows:
@@ -178,7 +191,9 @@ def verify_voicing(a: Dict[str, Any]) -> VerifierResult:
     for r in rows:
         if not (isinstance(r, (list, tuple)) and len(r) == 5):
             return error(name, f"each row is [word, accent_precedes, voiceless, voiced, attested]; got {r!r}")
-        word, pre, vl, vd, att = str(r[0]), bool(r[1]), str(r[2]).strip(), str(r[3]).strip(), str(r[4]).strip()
+        if not isinstance(r[1], bool):
+            return error(name, f"accent_precedes must be a real boolean, not {r[1]!r} — a string would be silently coerced")
+        word, pre, vl, vd, att = str(r[0]), r[1], str(r[2]).strip(), str(r[3]).strip(), str(r[4]).strip()
         if vl == vd:
             return error(name, f"{word}: the voiceless and voiced segments are the same ('{vl}')")
         predicted = vl if pre else vd
@@ -186,16 +201,20 @@ def verify_voicing(a: Dict[str, Any]) -> VerifierResult:
             holds.append(f"{word}: accent {'precedes' if pre else 'shifted'} -> {att}")
         else:
             exceptions.append(f"{word}: accent {'precedes' if pre else 'shifted'} predicts {predicted}, attested {att}")
-    data = {"law": law, "n_words": len(rows), "holds": len(holds), "exceptions": exceptions, "examples": holds[:8]}
+    data = {"law": law, "n_words": len(rows), "holds": len(holds), "exceptions": exceptions, "examples": holds[:8],
+            "scope": ("checks the cited rows are CONSISTENT with the accent-conditioning rule; all fields are "
+                      "caller-supplied, so it does NOT independently reconstruct the accent positions or the forms. "
+                      "CONFIRM attests regularity of the cited set, not the historical facts — CITE, never seal.")}
     claimed = a.get("claimed_regular", True)
     if exceptions and claimed:
-        return mismatch(name, f"{law}: claimed regular, but {len(exceptions)} of {len(rows)} cited words do not follow "
+        return mismatch(name, f"{law}: claimed regular, but {len(exceptions)} of {len(rows)} cited rows do not follow "
                               f"the accent conditioning — {'; '.join(exceptions[:4])}", data)
     if exceptions:
-        return na(name, f"{law}: {len(exceptions)} of {len(rows)} words are exceptions", data)
-    return confirm(name, f"{law}: in every one of the {len(rows)} cited words the fricative is voiced exactly when the "
-                         f"accent did NOT precede it, voiceless when it did ({', '.join(holds[:5])}) — the regular "
-                         f"conditioning. The accent positions are the cited reconstruction; the conditioning is verified.", data)
+        return na(name, f"{law}: {len(exceptions)} of {len(rows)} rows are exceptions", data)
+    return confirm(name, f"{law}: in every one of the {len(rows)} cited rows the fricative is voiced exactly when the "
+                         f"accent did NOT precede it, voiceless when it did ({', '.join(holds[:5])}) — a regular "
+                         f"conditioning on the CITED set. The accent positions and forms are the cited reconstruction, "
+                         f"not independently verified here (see scope). Cite, don't seal.", data)
 
 
 _RULES = [

@@ -60,27 +60,39 @@ def great_vowel_shift() -> int:
     shift = {"iː": "aɪ", "eː": "iː", "aː": "eɪ", "oː": "uː", "uː": "aʊ"}
     pairs = [["bite", "iː", "aɪ"], ["meet", "eː", "iː"], ["name", "aː", "eɪ"],
              ["boot", "oː", "uː"], ["mouse", "uː", "aʊ"], ["geese", "eː", "iː"]]
-    seal = _seal({"law": "the Great Vowel Shift", "shift": shift, "vowel_pairs": pairs, "claimed_regular": True})
-    if not seal:
-        return 1
+    # A CONSISTENCY check, NOT a seal: sound_law.vowel_shift can only confirm the cited set is internally
+    # regular (it has no pronunciation anchor to reconstruct the vowels), so the Great Vowel Shift is CITED,
+    # never sealed as a verified instance - unlike Grimm (real onsets) and Grassmann (derives the form).
+    from concordance.derivation import verify_derivation
+    res = verify_derivation([{"id": "gvs", "domain": "sound_law",
+                              "spec": {"SOUNDLAW_VERIFY": {"law": "the Great Vowel Shift", "shift": shift,
+                                                           "vowel_pairs": pairs, "claimed_regular": True}}}])
+    if res.get("verdict") != "HOLDS":
+        print("  !! GVS cited set is not internally regular:", res.get("verdict")); return 1
     marks = [
-        ("instance",
-         "[the Great Vowel Shift, verified] Between c. 1400 and 1700 the Middle English long vowels raised and the "
-         "highest diphthongized, regularly across the vocabulary: bite iː→aɪ, meet eː→iː, "
-         "name aː→eɪ, boot oː→uː, mouse uː→aʊ - every cited word's stressed "
-         "vowel shifts exactly as the map claims (sealed through sound_law). A chain shift, not word-by-word change; "
-         "it is why English spelling and pronunciation parted ways.", seal),
         ("postulate",
-         "[cited, not proven] The Middle English vowel VALUES are reconstructed from spelling, rhyme, loanwords and the "
-         "orthoepists - a postulate; the shift is verified on them. The engine seals only the correspondence.",
+         "[the Great Vowel Shift - cited, not sealed] Between c. 1400 and 1700 the Middle English long vowels raised "
+         "and the highest diphthongized, regularly across the vocabulary: bite iː→aɪ, meet eː→iː, name aː→eɪ, "
+         "boot oː→uː, mouse uː→aʊ - a regular chain shift, why English spelling and sound parted ways. The engine "
+         "checks the cited correspondences are internally REGULAR (one rule, no exception), but it does NOT "
+         "independently reconstruct the Middle English vowels (there is no pronunciation anchor), so the shift is "
+         "CITED, never sealed as a verified instance - unlike Grimm (checks real onsets) and Grassmann (derives the form).",
          {"source": "O. Jespersen, A Modern English Grammar (1909); the standard histories of English; the comparative method"}),
         ("note",
+         "[the consistency check] sound_law.vowel_shift confirmed the six cited correspondences follow one regular map "
+         "with no internal exception. That is the REGULARITY of the cited set - not an independent reconstruction of "
+         "the vowels themselves, and not a sealed fact.",
+         {"source": "src/concordance/verifiers/sound_law.py vowel_shift"}),
+        ("note",
          "[on the one map] The counterpart of Grimm's law for VOWELS, on the Germanic branch (English) of "
-         "card_floor_indo_european. A sound law is math on the vocabulary - exactly checkable, sealable, refutable.",
-         {"source": "src/concordance/verifiers/sound_law.py vowel_shift; card_floor_indo_european"}),
+         "card_floor_indo_european.",
+         {"source": "card_floor_indo_european"}),
     ]
+    # Same question string as the first run so this updates the ONE existing stick (a new title would fork a
+    # near-duplicate slug). The earlier run minted a sealed "instance" here; it cannot be retracted (the seal
+    # governs), but the cited marks above now carry the honest scope, and no new seal is produced.
     _stick("The Great Vowel Shift - a regular vowel correspondence, verified",
-           "English long vowels raised and diphthongized regularly (c. 1400-1700).", marks,
+           "English long vowels raised and diphthongized regularly (c. 1400-1700); cited, not sealed.", marks,
            by="tools/seed_sound_laws.py great_vowel_shift")
     return 0
 
@@ -119,19 +131,23 @@ def verner() -> int:
         ["was (*wes-, accent on the root)", True, "s", "z", "s"],
         ["were (*wes-, accent shifted off the root)", False, "s", "z", "z"],
     ]
-    seal = _seal({"law": "Verner's law", "voicing": rows, "claimed_regular": True})
-    if not seal:
-        return 1
+    # A CONSISTENCY check, NOT a seal: sound_law.voicing only confirms the cited rows are consistent with the
+    # accent-conditioning rule (all five fields are the cited reconstruction; the engine reconstructs nothing
+    # itself), so Verner's law is CITED, never sealed as a verified instance. (Same honesty as the GVS above.)
+    from concordance.derivation import verify_derivation
+    res = verify_derivation([{"id": "verner", "domain": "sound_law",
+                              "spec": {"SOUNDLAW_VERIFY": {"law": "Verner's law", "voicing": rows, "claimed_regular": True}}}])
+    if res.get("verdict") != "HOLDS":
+        print("  !! Verner cited set is not consistent with the rule:", res.get("verdict")); return 1
     marks = [
-        ("instance",
-         "[Verner's law, verified] A voiceless fricative from Grimm's law became VOICED unless the Proto-Indo-European "
-         "accent fell on the immediately preceding syllable: *bhráater → brother (þ, accent on the root) but "
-         "*ph2téer → father (ð, accent on the suffix); *wés- → was (s) but *wes- with the accent "
-         "shifted → were (z, later r) - voiced exactly when the accent did NOT precede, on every cited word (sealed "
-         "through sound_law). This is the Germanic Grammatischer Wechsel.", seal),
         ("postulate",
-         "[cited, not proven] The Proto-Indo-European ACCENT positions are reconstructed (chiefly from Vedic Sanskrit "
-         "and Greek accent) - a postulate; the conditioning is verified on them.",
+         "[Verner's law - cited, not sealed] A voiceless fricative from Grimm's law became VOICED unless the "
+         "Proto-Indo-European accent fell on the immediately preceding syllable: *bhráater → brother (þ, accent on "
+         "the root) but *ph2téer → father (ð, accent on the suffix); *wés- → was (s) but *wes- with the accent "
+         "shifted → were (z, later r) - the Germanic Grammatischer Wechsel. The engine checks the cited rows are "
+         "CONSISTENT with that conditioning, but the accent positions and forms are the cited reconstruction (chiefly "
+         "from Vedic Sanskrit and Greek accent) - it reconstructs nothing itself - so this law is CITED, never sealed "
+         "as a verified instance, unlike Grimm (real onsets) and Grassmann (derives the form).",
          {"source": "K. Verner, 'Eine Ausnahme der ersten Lautverschiebung' (1877); the comparative method"}),
         ("note",
          "[the famous residue] Verner's law is the residue of Grimm's law - the apparent exceptions a deeper regularity "
@@ -139,8 +155,10 @@ def verner() -> int:
          "[[feedback_let_the_math_determine_truth_2026-10-06]]",
          {"source": "src/concordance/verifiers/sound_law.py voicing; card_floor_indo_european (Germanic branch)"}),
     ]
+    # Same question as the first run (updates the one stick; the earlier sealed instance cannot be retracted,
+    # the seal governs, but the cited marks now carry the honest scope and no new seal is produced).
     _stick("Verner's law - accent-conditioned voicing, verified",
-           "Grimm's fricatives voice unless the PIE accent preceded (the Germanic Grammatischer Wechsel).", marks,
+           "Grimm's fricatives voice unless the PIE accent preceded (the Germanic Grammatischer Wechsel); cited, not sealed.", marks,
            by="tools/seed_sound_laws.py verner")
     return 0
 
