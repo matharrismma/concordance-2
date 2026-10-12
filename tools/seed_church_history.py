@@ -199,9 +199,12 @@ def _validate() -> List[str]:
 
 
 def _anchor_floor() -> None:
-    """Root the floor to Scripture: Pentecost (the church born) and the one body."""
+    """Root the floor to Scripture: Pentecost (the church born) and the one body. We anchor both the
+    ranges AND their opening verses, because the Console weaves a single verse at a time - so a reader
+    landing on Acts 2:1 or Ephesians 4:4 still sees the floor surface (until roots matches verse ranges
+    by overlap, which is the general fix)."""
     from concordance import roots
-    refs = ["Acts 2:1-4", "Ephesians 4:4-6"]
+    refs = ["Acts 2:1-4", "Acts 2:1", "Ephesians 4:4-6", "Ephesians 4:4"]
     res = roots.anchor(roots.node_id("floor", FLOOR), refs, by="proposed",
                        why="the Church born at Pentecost; one body, one Spirit, one Lord", data_dir=DATA)
     print(f"  roots.anchor({FLOOR}) -> {res}")

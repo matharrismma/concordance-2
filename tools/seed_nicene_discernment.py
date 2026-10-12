@@ -113,7 +113,8 @@ def main() -> int:
     print("stick id:", sid)
     tick._mint_marks(sid, MARKS, by="tools/seed_nicene_discernment.py")
 
-    a = roots.anchor("stick:" + sid, ["1 John 4:1-3", "Jude 1:3"], by="proposed",
+    # anchor the range AND its opening verse (the Console weaves one verse at a time)
+    a = roots.anchor("stick:" + sid, ["1 John 4:1-3", "1 John 4:1", "Jude 1:3"], by="proposed",
                      why="test the spirits; the faith once for all delivered", data_dir=DATA)
     print("  roots.anchor ->", a)
     p = roots.place("stick:" + sid, FLOOR, by="proposed",
