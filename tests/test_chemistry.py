@@ -47,3 +47,11 @@ def test_phase_points_judged_at_stated_precision():
     assert _st({"substance": "ethanol", "property": "boiling", "claimed_c": 79, "claimed_literal": "79"}) == ["MISMATCH"]
     # sublimes/decomposes -> no standard point at 1 atm -> declined, never a wrong verdict
     assert _st({"substance": "carbon dioxide", "property": "boiling", "claimed_c": -78, "claimed_literal": "-78"}) == ["NOT_APPLICABLE"]
+
+
+def test_phase_points_accept_source_spread_but_catch_wrong_values():
+    # 2026-10-12: ethanol boils at 78.37; sources also give 78.3 — a half-degree is not an error, but
+    # 79 and 88.3 are. (A frontdoor fact, "the boiling point of ethanol is 78.3 C", must hold.)
+    assert _st({"substance": "ethanol", "property": "boiling", "claimed_c": 78.3, "claimed_literal": "78.3"}) == ["CONFIRMED"]
+    assert _st({"substance": "ethanol", "property": "boiling", "claimed_c": 88.3, "claimed_literal": "88.3"}) == ["MISMATCH"]
+    assert _st({"substance": "ethanol", "property": "boiling", "claimed_c": 79, "claimed_literal": "79"}) == ["MISMATCH"]

@@ -470,11 +470,16 @@ def substance(name: str):
 
 
 def _matches_at_precision(actual: float, claimed: float, claimed_literal: str) -> bool:
-    """Judge at the STATED precision: round the table value to the decimals the claim stated. "100" holds
-    for water; "78" holds for ethanol (78.37); "79" does not."""
+    """A phase point holds when the claim agrees at its STATED precision — round the table value to the
+    decimals the claim gave ("100" for water; "78" for ethanol 78.37) — OR lies within the empirical
+    source spread of the measured value (~0.3% or 0.5 °C), so "78.3" also holds for ethanol (sources give
+    78.3–78.4) while "79" and "88.3" do not. Measured values vary by source; a half-degree is not an error."""
+    claimed = float(claimed)
     lit = str(claimed_literal or "").strip()
     dec = len(lit.split(".", 1)[1]) if "." in lit else 0
-    return round(actual, dec) == round(float(claimed), dec)
+    if round(actual, dec) == round(claimed, dec):
+        return True
+    return abs(actual - claimed) <= max(0.5, 0.003 * abs(actual))
 
 
 def verify_name_formula(spec: Dict[str, Any]) -> VerifierResult:
