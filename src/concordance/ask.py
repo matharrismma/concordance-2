@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import re
 import time
+from functools import lru_cache
 from typing import Any, Dict, List, Optional, Tuple
 
 from . import corpus
@@ -708,9 +709,13 @@ def _shape_found_hits(hits: List[Dict[str, Any]], text: str, practical: bool) ->
     return _pair_discernment(hits, text)
 
 
+@lru_cache(maxsize=512)
 def find_ref(text: str):
     """The one place a scripture reference is discerned from prose. Strict form first, then
-    the church passage names, then phone-typed loose forms validated against the canon."""
+    the church passage names, then phone-typed loose forms validated against the canon.
+
+    RECOGNIZE ONCE: pure and deterministic within a serving process (the canon is loaded at boot and
+    never changes), and called both in classify() and in respond()'s scripture path — so memoize it."""
     t = text or ""
     m = _REF.search(t)
     if m:
@@ -1235,9 +1240,13 @@ def _wants_resourceful(text: str) -> bool:
     return bool(re.search(r"\bi have\b.+\bwhat (?:can|could|should|do) i\b", t))
 
 
+@lru_cache(maxsize=512)
 def classify(text: str) -> str:
     """Deterministically route the input. Crisis first (safety); then structured (Strong's,
-    scripture ref, math); then ultimate matters; else search the keeping."""
+    scripture ref, math); then ultimate matters; else search the keeping.
+
+    RECOGNIZE ONCE: pure and deterministic, and called 2–3× per request (gate_signal + respond, both
+    request-time with the corpus already warm) — so memoize it. The front-door address is computed once."""
     t = normalize(text)
     if is_crisis(text):
         return "crisis"
