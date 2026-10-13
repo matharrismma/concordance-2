@@ -574,6 +574,16 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
     if "substance" in chem_verify and "property" in chem_verify and "claimed_c" in chem_verify:
         results.append(verify_phase_point(chem_verify))
 
+    # Enantiomeric excess ee = |R−S|/(R+S)×100% — the measure of one-handedness in a chiral mixture.
+    if ("claimed_ee_percent" in chem_verify
+            and any(k in chem_verify for k in ("r", "s", "r_amount", "s_amount"))):
+        results.append(verify_enantiomeric_excess(chem_verify))
+
+    # Chiral amplification — the Kagan–Soai signature (Nobel 2026): product ee exceeds the seed ee
+    # (a positive non-linear effect; asymmetric autocatalysis runs it toward homochirality).
+    if all(k in chem_verify for k in ("seed_ee_percent", "product_ee_percent", "claimed_amplification")):
+        results.append(verify_chiral_amplification(chem_verify))
+
     if not results:
         results.append(na("chemistry", "no CHEM_VERIFY artifacts present"))
     return results
@@ -619,3 +629,76 @@ def verify_atomic_energy_scale(spec: Dict[str, Any]) -> VerifierResult:
         return _ascale.compare(name, _ascale.rydberg_energy_eV(), spec["claimed_rydberg_ev"], 1e-3,
                                {"formula": "Ry = R_inf h c = alpha^2 m_e c^2 / 2"})
     return na(name)
+
+
+# ── Chirality — one-handedness and its amplification (Kagan & Soai, Nobel Chemistry 2026) ─────────────
+# Life runs on a single handedness: L-amino acids, D-sugars. Enantiomeric excess MEASURES that
+# one-handedness; the Kagan–Soai discovery is that a small excess can be AMPLIFIED — the product's ee
+# exceeds the catalyst's (Kagan's non-linear effect), and in Soai's asymmetric autocatalysis the product
+# IS the catalyst, so the excess feeds back and the reaction runs toward a single enantiomer. The same
+# shape the keeping's own stigmergy follows: a small bias, reinforced, decides the whole. These checks
+# are exact arithmetic and a stated inequality — the lab discovery that amplification occurs is Kagan's
+# and Soai's, carried as a citation on the card, never asserted by the verifier.
+
+def verify_enantiomeric_excess(spec: Dict[str, Any]) -> VerifierResult:
+    """ee = |R − S| / (R + S) × 100% — the degree of ONE-handedness (0% = racemic 50/50; 100% = a single
+    enantiomer). R and S are the two mirror-image populations in any consistent unit (fraction, %, mol)."""
+    name = "chemistry.enantiomeric_excess"
+    r = spec.get("r", spec.get("r_amount"))
+    s = spec.get("s", spec.get("s_amount"))
+    claimed = spec.get("claimed_ee_percent")
+    if r is None or s is None or claimed is None:
+        return na(name)
+    try:
+        rf, sf, c = float(r), float(s), float(claimed)
+    except (TypeError, ValueError):
+        return error(name, "R, S, and claimed_ee_percent must be numeric")
+    if rf < 0 or sf < 0:
+        return error(name, "enantiomer populations cannot be negative")
+    total = rf + sf
+    if total == 0:
+        return error(name, "no enantiomers present (R + S = 0)")
+    actual = abs(rf - sf) / total * 100.0
+    diff = abs(actual - c)
+    threshold = max(0.1, 1e-3 * abs(actual))
+    data = {"r": rf, "s": sf, "actual_ee_percent": actual, "claimed_ee_percent": c,
+            "formula": "ee = |R − S| / (R + S) × 100%"}
+    if diff <= threshold:
+        return confirm(name, f"ee = |{rf:g} − {sf:g}| / {total:g} = {actual:.4g}% (matches {c:g}%)", data)
+    return mismatch(name, f"ee = {actual:.4g}%, claimed {c:g}% (diff {diff:.4g})", data)
+
+
+def verify_chiral_amplification(spec: Dict[str, Any]) -> VerifierResult:
+    """The Kagan–Soai signature (Nobel Chemistry 2026): a positive NON-LINEAR EFFECT — the product's
+    enantiomeric excess EXCEEDS the seed/catalyst's, so a small initial handedness comes out amplified;
+    Soai's asymmetric autocatalysis (the product is its own catalyst) runs it toward homochirality. This
+    checks the defining inequality of a stated case (product_ee vs seed_ee); it does not model the
+    kinetics — the discovery that this happens is Kagan's and Soai's, cited on the card."""
+    name = "chemistry.chiral_amplification"
+    seed = spec.get("seed_ee_percent")
+    prod = spec.get("product_ee_percent")
+    claimed = spec.get("claimed_amplification")
+    if seed is None or prod is None or claimed is None:
+        return na(name)
+    try:
+        seed_f, prod_f = float(seed), float(prod)
+    except (TypeError, ValueError):
+        return error(name, "seed_ee_percent and product_ee_percent must be numeric")
+    if not (0.0 <= seed_f <= 100.0) or not (0.0 <= prod_f <= 100.0):
+        return error(name, "enantiomeric excess must be between 0% and 100%")
+    amplified = prod_f > seed_f + 1e-9
+    data = {"seed_ee_percent": seed_f, "product_ee_percent": prod_f,
+            "actual_amplification": amplified, "claimed_amplification": bool(claimed),
+            "delta_ee_pp": prod_f - seed_f,
+            "mechanism": "non-linear effect (Kagan) / asymmetric autocatalysis (Soai)"}
+    if amplified == bool(claimed):
+        if amplified:
+            msg = (f"product ee {prod_f:g}% exceeds seed ee {seed_f:g}% (+{prod_f - seed_f:g} pp) — "
+                   f"handedness amplified (matches claim)")
+        else:
+            msg = (f"product ee {prod_f:g}% does not exceed seed ee {seed_f:g}% — "
+                   f"no amplification (matches claim)")
+        return confirm(name, msg, data)
+    return mismatch(name,
+                    f"product ee {prod_f:g}% vs seed ee {seed_f:g}%: amplified={amplified}, "
+                    f"claimed {bool(claimed)}", data)

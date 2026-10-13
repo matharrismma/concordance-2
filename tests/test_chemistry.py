@@ -39,6 +39,28 @@ def test_name_to_formula_by_atom_count():
     assert _st({"name": "foobar", "claimed_formula": "H2O"}) == ["NOT_APPLICABLE"]  # unknown declined
 
 
+def test_enantiomeric_excess():
+    # 2026-10-13: ee = |R-S|/(R+S)*100%. 99:1 -> 98% ee; racemic 50:50 -> 0%; R+S=0 declined.
+    assert _st({"r": 99, "s": 1, "claimed_ee_percent": 98}) == ["CONFIRMED"]
+    assert _st({"r": 50, "s": 50, "claimed_ee_percent": 0}) == ["CONFIRMED"]
+    assert _st({"r": 99, "s": 1, "claimed_ee_percent": 50}) == ["MISMATCH"]
+    assert _st({"r": 0, "s": 0, "claimed_ee_percent": 0}) == ["ERROR"]              # no enantiomers
+    assert C.verify_enantiomeric_excess({"claimed_ee_percent": 50}).status == "NOT_APPLICABLE"
+
+
+def test_chiral_amplification_kagan_soai():
+    # 2026-10-13: the Nobel 2026 signature — product ee EXCEEDS seed ee (positive non-linear effect).
+    assert _st({"seed_ee_percent": 5, "product_ee_percent": 95,
+                "claimed_amplification": True}) == ["CONFIRMED"]                     # Soai-like run-up
+    assert _st({"seed_ee_percent": 40, "product_ee_percent": 40,
+                "claimed_amplification": False}) == ["CONFIRMED"]                    # no amplification
+    assert _st({"seed_ee_percent": 40, "product_ee_percent": 20,
+                "claimed_amplification": True}) == ["MISMATCH"]                      # ee dropped, not amplified
+    assert _st({"seed_ee_percent": 150, "product_ee_percent": 95,
+                "claimed_amplification": True}) == ["ERROR"]                         # ee out of [0,100]
+    assert C.verify_chiral_amplification({"seed_ee_percent": 5}).status == "NOT_APPLICABLE"
+
+
 def test_phase_points_judged_at_stated_precision():
     assert _st({"substance": "water", "property": "boiling", "claimed_c": 100, "claimed_literal": "100"}) == ["CONFIRMED"]
     assert _st({"substance": "water", "property": "freezing", "claimed_c": 0, "claimed_literal": "0"}) == ["CONFIRMED"]

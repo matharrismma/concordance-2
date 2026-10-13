@@ -98,6 +98,41 @@ def test_read_resyncs_from_the_shared_store(on, tmp_path):
     assert stigmergy.strength("x") == pytest.approx(1.0, rel=0.05)   # and still our own unflushed deposit
 
 
+def test_search_cache_stands_down_when_stigmergy_is_enabled(monkeypatch):
+    """The radix search cache must not freeze the live pheromone ranking or skip the deposit a cache hit
+    never reaches. OFF: two identical searches score once (cached). ON: every call runs the live ranker
+    (bypassed), so the reinforcement loop keeps depositing and re-boosting."""
+    from concordance import corpus as _corpus
+
+    class _FakeCorpus:
+        def __init__(self):
+            import threading
+            self._search_cache = {}
+            self._search_lock = threading.Lock()
+
+    fake = _FakeCorpus()
+    monkeypatch.setattr(_corpus, "default_corpus", lambda: fake)
+    calls = {"n": 0}
+
+    def _fake_impl(corpus, query, limit, include_witness=True, shelves=None):
+        calls["n"] += 1
+        return [{"id": "card_a"}, {"id": "card_b"}]
+
+    monkeypatch.setattr(_corpus, "_search_impl", _fake_impl)
+
+    monkeypatch.delenv("CONCORDANCE_STIGMERGY", raising=False)   # OFF → cache serves the repeat
+    _corpus.search("light", limit=5)
+    _corpus.search("light", limit=5)
+    assert calls["n"] == 1
+
+    calls["n"] = 0
+    fake._search_cache.clear()
+    monkeypatch.setenv("CONCORDANCE_STIGMERGY", "1")             # ON → cache stands down, ranker runs live
+    _corpus.search("light", limit=5)
+    _corpus.search("light", limit=5)
+    assert calls["n"] == 2
+
+
 def test_concurrent_workers_lose_no_deposits(tmp_path):
     """The real proof: four independent processes hammer one shared card; every deposit must survive."""
     import json

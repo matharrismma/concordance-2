@@ -9,6 +9,8 @@ are deterministic.
 Checks performed:
   * qubit_normalization    |α|² + |β|² = 1 for single-qubit states; generalises to
                            n-qubit states via Σ|amplitude_i|² = 1.
+  * born_rule              P_i = |a_i|² / Σ|a_j|² — probability is amplitude squared (the law the
+                           double slit obeys; the measured outcome from interfering amplitudes).
   * grover_iterations      Optimal T = floor(π√N / 4). Verifies claimed iteration count.
   * shor_period            a^r ≡ 1 (mod N), r > 0, r is even (necessary for GCD step).
                            Optionally verifies that gcd(a^(r/2)±1, N) yields a non-trivial factor.
@@ -23,6 +25,9 @@ QCOMP_VERIFY packet shape (any subset of fields):
     {
       "amplitudes": [0.6, 0.8],                         # qubit state amplitudes (real or complex)
       "claimed_normalized": true,
+
+      "outcome_index": 1,                               # Born rule: P of this outcome = |a_i|²/Σ|a|²
+      "claimed_probability": 0.64,
 
       "n_items": 64,                                    # Grover's database size
       "claimed_grover_iterations": 6,
@@ -82,6 +87,41 @@ def verify_qubit_normalization(spec: Dict[str, Any]) -> VerifierResult:
 
 
 # ── Grover's algorithm ────────────────────────────────────────────────────────
+
+def verify_born_rule(spec: Dict[str, Any]) -> VerifierResult:
+    """The BORN RULE: the probability of measuring outcome i is P_i = |a_i|² / Σ_j|a_j|² — the squared
+    amplitude, normalized (for a normalized state Σ|a|²=1 it is simply |a_i|²). This is the law the double
+    slit obeys: the paths' amplitudes interfere, and what the detector COUNTS is their squared modulus.
+    One source, many potential amplitudes, one measured outcome — probability is amplitude squared."""
+    name = "quantum_computing.born_rule"
+    amps = spec.get("amplitudes")
+    idx = spec.get("outcome_index")
+    claimed = spec.get("claimed_probability")
+    if amps is None or idx is None or claimed is None:
+        return na(name)
+    try:
+        vals = [complex(a) for a in amps]
+        i = int(idx)
+        c = float(claimed)
+    except (TypeError, ValueError) as e:
+        return error(name, f"amplitudes/outcome_index/claimed_probability must be numeric: {e}")
+    if not vals:
+        return error(name, "amplitudes list is empty")
+    if i < 0 or i >= len(vals):
+        return error(name, f"outcome_index {i} out of range for {len(vals)} amplitudes")
+    norm_sq = sum(abs(a) ** 2 for a in vals)
+    if norm_sq == 0:
+        return error(name, "amplitudes are all zero (no state)")
+    actual = abs(vals[i]) ** 2 / norm_sq
+    tol = clamp_tol(spec, "tolerance", 1e-6)
+    diff = abs(actual - c)
+    data = {"outcome_index": i, "n_amplitudes": len(vals), "norm_squared": norm_sq,
+            "actual_probability": actual, "claimed_probability": c,
+            "formula": "P_i = |a_i|² / Σ|a_j|²"}
+    if diff <= max(tol, tol * abs(actual)):
+        return confirm(name, f"P({i}) = |a_{i}|²/Σ|a|² = {actual:.8f} (matches claim {c})", data)
+    return mismatch(name, f"P({i}) = {actual:.8f}, claimed {c} (diff {diff:.2g} > tol {tol})", data)
+
 
 def verify_grover_iterations(spec: Dict[str, Any]) -> VerifierResult:
     """Optimal iterations T = floor(π√N / 4)."""
@@ -279,6 +319,7 @@ _RULES = [
     (lambda qv: (qv.get("qubit_frequency_hz") is not None
                  and qv.get("claimed_qubit_energy_j") is not None), verify_qubit_energy),
     (lambda qv: ("amplitudes" in qv and "claimed_normalized" in qv), verify_qubit_normalization),
+    (lambda qv: ("amplitudes" in qv and "outcome_index" in qv and "claimed_probability" in qv), verify_born_rule),
     (lambda qv: ("n_items" in qv and "claimed_grover_iterations" in qv), verify_grover_iterations),
     (lambda qv: (all(k in qv for k in ("shor_a", "shor_N", "shor_r", "claimed_period_valid"))), verify_shor_period),
     (lambda qv: ("qber" in qv and "claimed_secure" in qv), verify_bb84_security),

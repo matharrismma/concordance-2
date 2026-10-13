@@ -1579,9 +1579,19 @@ def search(query: str, limit: int = 25, include_witness: bool = True,
     COMPARISON rung, and one answer searches the SAME text at several limits (main + scripture weave +
     also-in-keeping). Cache the top-K scored list per (query, shelves, witness) and slice it per limit —
     the merge/supplement only APPEND below, so a slice equals a direct search. Cleared on any add_card;
-    fresh copies out (read-only cache). A limit above K falls straight to the full ranker."""
+    fresh copies out (read-only cache). A limit above K falls straight to the full ranker.
+
+    STIGMERGY STANDS THE CACHE DOWN. The pheromone layer (gated off by default) reinforces a trail on
+    EVERY retrieval and its boost shifts as trails grow and evaporate — so a cached slice would both
+    freeze that live ranking AND skip the deposit a cache hit never reaches, silently crippling the
+    autocatalytic loop (the correct path can only wear smooth if every pass lays its pheromone). When a
+    node opts in, the cache steps aside and every call runs the live ranker (deposit + fresh boost). Off
+    — the default, and the live state — deposit is a no-op and the boost is exactly 1.0, so the cache is
+    byte-for-byte as before. (Repellent/alignment need no bypass: they are deterministic in (query,card)
+    with no per-read side effect, and the query is already in the cache key.)"""
     corpus = default_corpus()
-    if limit > _SEARCH_TOPK:
+    from . import stigmergy as _stig
+    if limit > _SEARCH_TOPK or _stig.enabled():
         return _search_impl(corpus, query, limit, include_witness, shelves)
     key = (str(query) if query else "", tuple(sorted(shelves)) if shelves else None, bool(include_witness))
     cache = corpus._search_cache
@@ -1959,10 +1969,23 @@ def health() -> Dict[str, Any]:
     ids = cp._public_sorted
     n = len(ids)
     resident_body = sum(1 for c in cp.cards.values() if is_public(c) and (c.get("body") or "").strip())
-    return {"ok": n > 0, "total": n,
-            "with_body": resident_body + len(cp._frozen),   # frozen bodies ride the shard
-            "shelves": len({cp._shelf_of(cid) for cid in ids}),
-            "surfaces": sorted({cp._surface_of(cid) for cid in ids})}
+    out = {"ok": n > 0, "total": n,
+           "with_body": resident_body + len(cp._frozen),   # frozen bodies ride the shard
+           "shelves": len({cp._shelf_of(cid) for cid in ids}),
+           "surfaces": sorted({cp._surface_of(cid) for cid in ids})}
+    # THE PHEROMONE TRAIL — the paths the keeping has worn smooth (ACO / Soai autocatalysis applied to
+    # recall). Off by default: reported as {enabled: false}, nothing else. On: how many trails are alive
+    # and the strongest few — the aggregate concentration per card, never who/what/that-anyone-read.
+    try:
+        from . import stigmergy as _stig
+        if _stig.enabled():
+            top = _stig.top(5)
+            out["stigmergy"] = {"enabled": True, "trails": len(_stig._TRAILS), "top": top}
+        else:
+            out["stigmergy"] = {"enabled": False}
+    except Exception:  # noqa: BLE001 — the health view never breaks on the pheromone layer
+        pass
+    return out
 
 
 def gauges() -> Dict[str, Any]:
