@@ -178,3 +178,19 @@ def test_a_closed_mark_names_the_theorem_and_the_fit_reads_closed():
     assert f["open"].startswith("CLOSED") and "Perelman" in f["open"]
     assert f["closed_by"] == ["Yes: proven by Perelman via Hamilton's Ricci flow with surgery"]
     assert f["cited_ticks"] == 1
+
+
+def test_retract_drops_a_sealed_mark_and_remint_restores_it():
+    """2026-10-13: an operator can retract a superseded/duplicate sealed mark (append-only, reversible)."""
+    seal = _sealed_holds()
+    sid = tickstick.create("A stick for the retraction test case")["id"]
+    assert tickstick.tick(sid, "witness", "a sealed witness mark for the retract test", seal=seal, by="test")["ok"]
+    assert any((t.get("seal") or "") == seal for t in tickstick.read(sid)["ticks"])
+    rr = tickstick.retract(sid, seal, by="operator", why="duplicate")
+    assert rr["ok"] and rr["was_present"] is True
+    assert not any((t.get("seal") or "") == seal for t in tickstick.read(sid)["ticks"])  # gone
+    # re-minting the same seal AFTER the retract brings it back (latest-wins, reversible)
+    tickstick.tick(sid, "witness", "a sealed witness mark for the retract test", seal=seal, by="test")
+    assert any((t.get("seal") or "") == seal for t in tickstick.read(sid)["ticks"])
+    # a bad seal is refused
+    assert tickstick.retract(sid, "nothex", by="operator")["ok"] is False

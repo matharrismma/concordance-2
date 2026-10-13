@@ -84,17 +84,29 @@ def _events(data_dir: Optional[Path] = None) -> List[Dict[str, Any]]:
 
 def fold(data_dir: Optional[Path] = None) -> Dict[str, Dict[str, Any]]:
     sticks: Dict[str, Dict[str, Any]] = {}
+    # A RETRACT event removes a kept mark by its seal (the operator dropping a superseded/duplicate mark),
+    # append-only like everything else — the log is never rewritten. Latest-wins per (stick, seal): a later
+    # re-mint of the same seal clears an earlier retract, so a retraction is reversible by re-minting.
+    retracted: Dict[tuple, bool] = {}
     for ev in _events(data_dir):
-        if ev.get("event") == "stick":
+        e = ev.get("event")
+        if e == "stick":
             sid = ev["id"]
             sticks[sid] = {"id": sid, "question": ev.get("question"), "statement": ev.get("statement"),
                            "field": ev.get("field"), "references": ev.get("references") or [],
                            "created_at": ev.get("at"), "ticks": []}
-        elif ev.get("event") == "tick":
+        elif e == "tick":
             st = sticks.get(ev.get("stick"))
             if st is not None:
                 st["ticks"].append({k: v for k, v in ev.items() if k not in ("event", "stick")})
-    for st in sticks.values():
+            if ev.get("seal"):
+                retracted[(ev.get("stick"), str(ev.get("seal")))] = False
+        elif e == "retract":
+            retracted[(ev.get("stick"), str(ev.get("seal") or ""))] = True
+    for sid, st in sticks.items():
+        drop = {seal for (s2, seal), gone in retracted.items() if gone and s2 == sid}
+        if drop:
+            st["ticks"] = [t for t in st["ticks"] if (t.get("seal") or "") not in drop]
         st["ticks"], st["superseded"] = _collapse(st["ticks"])
     return sticks
 
@@ -260,6 +272,25 @@ def tick(stick_id: str, kind: str, claim: str, *, seal: str = "", source: str = 
     _append(ev, data_dir)
     st = fold(data_dir)[stick_id]
     return {"ok": True, "stick": stick_id, "tick": ev, "fit": fit(st), "ticks": len(st["ticks"])}
+
+
+def retract(stick_id: str, seal: str, *, by: str = "operator", why: str = "",
+            data_dir: Optional[Path] = None) -> Dict[str, Any]:
+    """Retract a kept SEALED mark by its content hash — the operator removing a superseded or duplicate mark.
+    Append-only (the log is never rewritten): a retract event is recorded and fold() drops the tick with that
+    seal. Reversible — a later re-mint of the same seal clears it. Idempotent."""
+    sid = (stick_id or "").strip()
+    s = (seal or "").strip().lower()
+    if not sid or not re.fullmatch(r"[0-9a-f]{64}", s):
+        return {"ok": False, "error": "retract needs a stick_id and the 64-hex seal of the mark to remove"}
+    st = fold(data_dir).get(sid)
+    if st is None:
+        return {"ok": False, "error": f"no stick {sid!r}"}
+    had = any((t.get("seal") or "") == s for t in st["ticks"])
+    _append({"event": "retract", "stick": sid, "seal": s, "by": (by or "")[:80],
+             "why": (why or "")[:300], "at": int(time.time())}, data_dir)
+    after = fold(data_dir)[sid]
+    return {"ok": True, "stick": sid, "seal": s, "was_present": had, "ticks": len(after["ticks"])}
 
 
 def read(stick_id: str, data_dir: Optional[Path] = None) -> Dict[str, Any]:

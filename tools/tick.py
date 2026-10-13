@@ -10948,6 +10948,12 @@ def main() -> int:
         return chirality()
     if a[0] in ("double_slit", "doubleslit", "young", "two_slit", "interference"):
         return double_slit()
+    if a[0] == "retract":          # tick.py retract <stick_id> <seal>  — drop a superseded/duplicate sealed mark
+        if len(a) < 3:
+            print("usage: tick.py retract <stick_id> <64-hex seal>"); return 2
+        from concordance import tickstick as T
+        print(json.dumps(T.retract(a[1], a[2], by="tools/tick.py retract"), indent=1))
+        return 0
     if a[0] == "read":
         from concordance import tickstick as T
         print(json.dumps(T.read(a[1]) if len(a) > 1 else T.listing(), indent=1, ensure_ascii=False))
