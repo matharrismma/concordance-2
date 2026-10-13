@@ -314,15 +314,9 @@ def _looks_like_unchecked_claim(text: str) -> bool:
     return bool(_CLAIM_REL.search(t)) and bool(_CLAIM_MEASURE.search(t))
 
 
-# THE VERDICT DISPLAY — ONE source of truth for how a checked claim reads on the Console, shared by the
-# two paths that produce a verdict: the candidate-engine "checked" audit and a bare "verify" payload.
-#   token -> (headline, badge tag, the lead sentence before the worked detail).
-# (A verify SYSTEM_ERROR is handled apart — our failure is never a verdict on their claim.)
-_VERDICT_PHRASE = {
-    "true":  ("It checks out.",               "true",  "Verified — it holds. "),
-    "false": ("That does not hold.",          "false", "I checked it, and it does not hold. "),
-    "na":    ("I can only go so far on that.", "na",    "I could not fully verify that. "),
-}
+# THE VERDICT DISPLAY — ONE source of truth, now shared with respond() (ask.VERDICT_PHRASE): the Console's
+# two check paths (the candidate "checked" audit and a bare "verify" payload) and respond() all read it.
+_VERDICT_PHRASE = _ask.VERDICT_PHRASE
 
 
 def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:

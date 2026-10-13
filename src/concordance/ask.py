@@ -1335,6 +1335,15 @@ def _scripture_from_keeping(text: str, limit: int = 2):
 
 _VERIFY_VERDICT_TOKEN = {"HOLDS": "true", "BROKEN": "false", "INCOMPLETE": "na"}
 
+# THE CHECK-ANSWER PHRASING — ONE source of truth for how a checked claim reads, shared by respond()
+# (which attaches the canonical headline) and the Console (which also uses the lead for its spoken line).
+#   token -> (headline, badge tag, the lead sentence before the worked detail).
+VERDICT_PHRASE = {
+    "true":  ("It checks out.",               "true",  "Verified — it holds. "),
+    "false": ("That does not hold.",          "false", "I checked it, and it does not hold. "),
+    "na":    ("I can only go so far on that.", "na",    "I could not fully verify that. "),
+}
+
 
 def verdict_token(r: Dict[str, Any]) -> Optional[str]:
     """The surface-agnostic verdict of a checked claim — "true" / "false" / "na" — read from a verify
@@ -1357,12 +1366,15 @@ def verdict_token(r: Dict[str, Any]) -> Optional[str]:
 def _witnessed(r: Dict[str, Any], text: str, witness: bool, just_opened: bool,
                topical: bool = True) -> Dict[str, Any]:
     """Once the door is open, bring the Word — and keep bringing it. Present, don't cross."""
-    # THE VERDICT, COMPUTED ONCE: the surface-agnostic true/false/na for a checked claim, so neither the
-    # console nor the desk re-derives it (the renderer core unification — compute once, surfaces format).
+    # THE VERDICT + HEADLINE, COMPUTED ONCE: the surface-agnostic true/false/na AND the canonical
+    # headline for a checked claim, so neither the console nor the desk re-derives them (the renderer
+    # core unification — compute once, surfaces only format).
     if r.get("verdict") is None:
         _tok = verdict_token(r)
         if _tok:
             r["verdict"] = _tok
+            if not r.get("headline"):
+                r["headline"] = VERDICT_PHRASE[_tok][0]
     # THE PATH (2026-08-12, the Lighthouse Model Spec: "the output is a PATH, never an answer").
     # Above the cards, a discerned ONE next step + a fitting anchor — composed from what was found,
     # nothing generated. Attached on BOTH surfaces (discernment is not gated), for the retrieval kinds
