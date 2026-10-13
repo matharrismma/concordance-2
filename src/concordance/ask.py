@@ -1625,6 +1625,14 @@ def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
         m = _MATH_EQ.match(text)
         res = _verify({"mode": "equality",
                        "params": {"expr_a": m.group(1).strip(), "expr_b": m.group(2).strip(), "variables": {}}})
+        # PATH OF LEAST RESISTANCE: the fast sympy door settles clean arithmetic; anything it CANNOT
+        # settle (a domain claim that merely looks like an equation — nPr/nCr, a periodic-table or
+        # polynomial claim with an '=') falls through to the full recognizer, so no checkable claim
+        # dead-ends on the fast door and no future case needs a hand-coded exclusion in _looks_math.
+        if str(res.get("verdict")) in ("INCOMPLETE", "SYSTEM_ERROR"):
+            _checked = _candidate_checked(base, text, config, witness, gate_just_opened)
+            if _checked is not None:
+                return _checked
         return _witnessed({**base, "verify": attach(res, config=config, domain="mathematics")},
                           text, witness, gate_just_opened)
 
@@ -1818,21 +1826,9 @@ def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
     # TOP of respond(); every specific kind returned above; this is the general path only.
     # Additive and safe: no checkable claim -> from_prose returns None -> everything below runs
     # exactly as before. The narrowing must never break the answer, so it is fully guarded.
-    try:
-        from . import candidates as _cand
-        _cset = _cand.from_prose(text, config=config)
-    except Exception:  # noqa: BLE001 — narrowing is a bonus; the answer path must not depend on it
-        _cset = None
-    if _cset is not None:
-        try:
-            _cand.receipt(_cset, config=config)   # seal the WHOLE narrowing, losers included
-        except Exception:  # noqa: BLE001
-            pass
-        return _witnessed({**base, "kind": "checked",
-                           "audit": _cand.as_checked(_cset),
-                           "message": _cand.checked_message(_cset),
-                           "results": [corpus._brief(c) for c in corpus.search(text, limit=4)]},
-                          text, witness, gate_just_opened, topical=False)
+    _checked = _candidate_checked(base, text, config, witness, gate_just_opened)
+    if _checked is not None:
+        return _checked
 
     # ── the Body (1 Cor 12): no core kind claimed it, so ask the Router which member it
     # belongs to. Each specialist answers in fields the page already renders (message +
@@ -2285,6 +2281,30 @@ def _with_role(text: str, config: EngineConfig, r: Dict[str, Any]) -> Dict[str, 
         return {**r, "role": role}
     except Exception:  # noqa: BLE001 — the door never fails for want of a role
         return r
+
+
+def _candidate_checked(base: Dict[str, Any], text: str, config: "EngineConfig",
+                       witness: bool, gate_just_opened: bool) -> Optional[Dict[str, Any]]:
+    """Run the Candidate Engine (the full recognizer) and shape its result as a 'checked' answer, or
+    None when the text carries no checkable claim. ONE source for this construction — the general path
+    AND the verify door's fall-through both use it, so the fast sympy door can defer anything it cannot
+    settle to the full recognizer (the path of least resistance) without duplicating the shape."""
+    try:
+        from . import candidates as _cand
+        cset = _cand.from_prose(text, config=config)
+    except Exception:  # noqa: BLE001 — narrowing is a bonus; the answer path must not depend on it
+        return None
+    if cset is None:
+        return None
+    try:
+        _cand.receipt(cset, config=config)        # seal the WHOLE narrowing, losers included
+    except Exception:  # noqa: BLE001
+        pass
+    return _witnessed({**base, "kind": "checked",
+                       "audit": _cand.as_checked(cset),
+                       "message": _cand.checked_message(cset),
+                       "results": [corpus._brief(c) for c in corpus.search(text, limit=4)]},
+                      text, witness, gate_just_opened, topical=False)
 
 
 def respond(text: str, config: EngineConfig, *, gate_open: bool = False,
