@@ -2,12 +2,26 @@
   "polynomial": {
     "packet_key": "POLY_VERIFY",
     "true": {
-      "coeffs": [1, -5, 6],
-      "claimed_rational_roots": [2, 3]
+      "coeffs": [
+        1,
+        -5,
+        6
+      ],
+      "claimed_rational_roots": [
+        2,
+        3
+      ]
     },
     "false": {
-      "coeffs": [1, -5, 6],
-      "claimed_rational_roots": [2, 4]
+      "coeffs": [
+        1,
+        -5,
+        6
+      ],
+      "claimed_rational_roots": [
+        2,
+        4
+      ]
     }
   },
   "acoustics": {
@@ -213,12 +227,24 @@
   "chemistry": {
     "false": {
       "amount_mol": 1.0,
-      "claimed_particle_count": 1.204428152e+24
+      "claimed_particle_count": 1.204428152e+24,
+      "r": 99,
+      "s": 1,
+      "claimed_ee_percent": 50,
+      "seed_ee_percent": 40,
+      "product_ee_percent": 20,
+      "claimed_amplification": true
     },
     "packet_key": "CHEM_VERIFY",
     "true": {
       "amount_mol": 1.0,
-      "claimed_particle_count": 6.02214076e+23
+      "claimed_particle_count": 6.02214076e+23,
+      "r": 99,
+      "s": 1,
+      "claimed_ee_percent": 98,
+      "seed_ee_percent": 5,
+      "product_ee_percent": 95,
+      "claimed_amplification": true
     }
   },
   "combinatorics": {
@@ -1670,7 +1696,13 @@
       "object_distance_for_M": 0.1,
       "object_distance_m": 0.1,
       "theta1_deg": 30,
-      "wavelength_m": 5.5e-07
+      "wavelength_m": 5.5e-07,
+      "slit_separation_m": 0.0001,
+      "screen_distance_m": 1.0,
+      "claimed_fringe_spacing_m": 0.001,
+      "mass_kg": 9.109e-31,
+      "velocity_m_s": 1000000.0,
+      "claimed_de_broglie_m": 1e-09
     },
     "packet_key": "OPT_VERIFY",
     "true": {
@@ -1687,7 +1719,13 @@
       "object_distance_for_M": 0.1,
       "object_distance_m": 0.1,
       "theta1_deg": 30,
-      "wavelength_m": 5.5e-07
+      "wavelength_m": 5.5e-07,
+      "slit_separation_m": 0.0001,
+      "screen_distance_m": 1.0,
+      "claimed_fringe_spacing_m": 0.0055,
+      "mass_kg": 9.109e-31,
+      "velocity_m_s": 1000000.0,
+      "claimed_de_broglie_m": 7.274e-10
     }
   },
   "periodic_table": {
@@ -1914,7 +1952,9 @@
       "qber_threshold": 0.11,
       "shor_N": 15,
       "shor_a": 2,
-      "shor_r": 4
+      "shor_r": 4,
+      "outcome_index": 0,
+      "claimed_probability": 0.64
     },
     "packet_key": "QCOMP_VERIFY",
     "true": {
@@ -1933,7 +1973,9 @@
       "qber_threshold": 0.11,
       "shor_N": 15,
       "shor_a": 2,
-      "shor_r": 4
+      "shor_r": 4,
+      "outcome_index": 1,
+      "claimed_probability": 0.64
     }
   },
   "real_estate": {
