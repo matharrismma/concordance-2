@@ -25,6 +25,19 @@ def test_everyday_questions_reach_the_right_domain_menu():
         assert dom in _menu(q), (q, _menu(q))
 
 
+def test_new_capabilities_reach_their_verify_domain():
+    # 2026-10-13 gap fix #2: chirality / Born rule / double slit were front-door invisible
+    # (resolve_domain returned None). The cues route them to the domain whose verifier checks them.
+    checks = [
+        ("the enantiomeric excess of a 99 to 1 mixture of R and S is 98 percent", "chemistry"),
+        ("the product's enantiomeric excess exceeds the catalyst's in asymmetric autocatalysis", "chemistry"),
+        ("the born rule gives the probability as the amplitude squared", "quantum_computing"),
+        ("in a double slit the fringe spacing is 5 mm", "optics"),
+    ]
+    for q, dom in checks:
+        assert dom in _menu(q), (q, _menu(q))
+
+
 def test_crisis_is_never_routed_to_a_domain():
     r = resolve_domain("i want to end my life")
     assert r["crisis"] is True and r["candidates"] == []
