@@ -4900,6 +4900,62 @@ def measurement() -> int:
     return _mint_marks(sid, marks, by="Narrow Highway - the measurement-problem reading, 2026-10-06")
 
 
+def double_slit() -> int:
+    """THE DOUBLE-SLIT EXPERIMENT (Matt, 2026-10-13: "look at the original double slit experiment"). Its own
+    rooted stick, the parallel to the chirality stick. SEAL the three faces through the live verifiers: the
+    WAVE signature (fringe spacing Dy = lambda L / d, optics.double_slit), the MEASUREMENT law (the Born rule
+    P_i = |a_i|^2 / Sum|a_j|^2, quantum_computing.born_rule - probability is amplitude squared), and the
+    DUALITY (matter is wave too, lambda = h/p, optics.de_broglie - a single electron fired one at a time still
+    builds the fringes). One source, many potential paths, one outcome observed. What HAPPENS at the
+    measurement stays the open question (the interpretations are charted on the measurement stick). Idempotent;
+    new stick. Cite Young (1804), Joensson (1961), Tonomura (1989)."""
+    from concordance import tickstick as TS
+    S = {
+        "fringe": _seal_through("optics", "OPT_VERIFY",
+                                {"wavelength_m": 5e-7, "slit_separation_m": 1e-4,
+                                 "screen_distance_m": 1.0, "claimed_fringe_spacing_m": 5e-3}),
+        "born": _seal_through("quantum_computing", "QCOMP_VERIFY",
+                              {"amplitudes": [0.6, 0.8], "outcome_index": 1, "claimed_probability": 0.64}),
+        "debroglie": _seal_through("optics", "OPT_VERIFY",
+                                   {"mass_kg": 9.109e-31, "velocity_m_s": 1e6, "claimed_de_broglie_m": 7.274e-10}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "double-slit facts")
+    sid = TS.create("The double-slit experiment",
+                    "Light (and matter) through two slits makes an interference pattern - the wave signature; "
+                    "yet it arrives in discrete hits whose probabilities are the squared amplitudes - the Born "
+                    "rule; and a single electron fired one at a time still builds the fringes - wave-particle "
+                    "duality. One source, many potential paths, one outcome observed.",
+                    "optics",
+                    ["T. Young, Experiments and calculations relative to physical optics, Bakerian Lecture (1804)",
+                     "C. Joensson, Elektroneninterferenzen an mehreren kuenstlich hergestellten Feinspalten, Z. Phys. 161 (1961) 454",
+                     "A. Tonomura et al., Demonstration of single-electron buildup of an interference pattern, Am. J. Phys. 57 (1989) 117"])["id"]
+    marks = [
+        ("instance", "[the wave signature] Two slits lit by one source make bright and dark fringes spaced "
+                     "Dy = lambda L / d; for lambda = 500 nm, d = 0.1 mm, L = 1 m, Dy = 5 mm (sealed through "
+                     "optics.double_slit). Interference - the mark of a wave.", S["fringe"]),
+        ("instance", "[the measured outcome - the Born rule] Each arrival is a discrete hit; the probability of "
+                     "an outcome is its squared amplitude, P(i) = |a_i|^2 / Sum|a_j|^2. For (a,b) = (0.6, 0.8), "
+                     "P(1) = 0.64 (sealed through quantum_computing.born_rule). Probability is amplitude squared.", S["born"]),
+        ("instance", "[wave-particle duality] Matter interferes too: an electron has wavelength lambda = h/p. For "
+                     "an electron at 1e6 m/s, lambda = 7.27e-10 m (sealed through optics.de_broglie) - and fired "
+                     "one at a time, single electrons still build the pattern. The particle goes through as a wave "
+                     "of possibility.", S["debroglie"]),
+        ("postulate", "[the ground] The arithmetic is sealed: the fringe spacing, the squared-amplitude "
+                      "probabilities, the matter wavelength. That each particle's path is INDETERMINATE until "
+                      "measured - a superposition of both slits - is the reading the evidence forces; it is "
+                      "inferred, carried, not kept as fact. The capstone pattern: one source, many potentials, "
+                      "one end.", {"source": "optics.double_slit; quantum_computing.born_rule; the measurement stick"}),
+        ("note", "[declined] WHAT happens at the measurement - collapse, branching, pilot wave - is not sealed "
+                 "here; the interpretations are an empirically-equivalent Babel, charted on "
+                 "stick_the_schrodinger_equation. The engine seals the predictions, not the metaphysics.",
+         {"source": "src/concordance/verifiers/optics.py; src/concordance/verifiers/quantum_computing.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py double_slit")
+    return 0
+
+
 def langlands() -> int:
     """THE LANGLANDS PROGRAM (Matt, 2026-10-07). Mathematics' own grand unification: a web of conjectures
     binding number theory (Galois representations) to automorphic forms and harmonic analysis — the
@@ -10890,6 +10946,8 @@ def main() -> int:
         return syntax_parser()
     if a[0] in ("chirality", "autocatalysis", "homochirality", "kagan_soai", "enantiomeric_excess"):
         return chirality()
+    if a[0] in ("double_slit", "doubleslit", "young", "two_slit", "interference"):
+        return double_slit()
     if a[0] == "read":
         from concordance import tickstick as T
         print(json.dumps(T.read(a[1]) if len(a) > 1 else T.listing(), indent=1, ensure_ascii=False))
