@@ -4864,7 +4864,15 @@ def measurement() -> int:
     s_born = seal_num("born_rule_normalization", "0.6**2 + 0.8**2", 1.0)
     if not s_born:
         print("a seal failed; aborting"); return 1
-    print("sealed: Born rule", s_born)
+    print("sealed: Born rule normalization", s_born)
+
+    # THE BORN RULE ITSELF, sealed through the dedicated verifier (2026-10-13): not only that the outcome
+    # probabilities sum to one, but that EACH equals its squared amplitude, P_i = |a_i|^2 / Sum|a_j|^2.
+    s_born_rule = _seal_through("quantum_computing", "QCOMP_VERIFY",
+                                {"amplitudes": [0.6, 0.8], "outcome_index": 1, "claimed_probability": 0.64})
+    if not s_born_rule:
+        print("the Born-rule seal failed; aborting"); return 1
+    print("sealed: Born rule (per-outcome)", s_born_rule)
 
     sid = TS.create("The Schrodinger equation")["id"]
     marks = [
@@ -4873,6 +4881,12 @@ def measurement() -> int:
                     "0.6^2 + 0.8^2 = 1 (sealed). Every interpretation of quantum mechanics agrees on THIS "
                     "arithmetic - the predictions. They differ only on what 'happens' when the measurement is "
                     "made.", s_born),
+        ("witness", "[the Born rule itself, sealed as the rule] Not only that the probabilities sum to one, but "
+                    "that EACH outcome's probability equals its squared amplitude: P(i) = |a_i|^2 / Sum_j |a_j|^2. "
+                    "For (a,b) = (0.6, 0.8), P(1) = |0.8|^2 = 0.64 and P(0) = |0.6|^2 = 0.36 (sealed through "
+                    "quantum_computing.born_rule). Probability is amplitude squared - the law the double slit "
+                    "obeys: the paths' amplitudes interfere, and what the detector counts is their squared "
+                    "modulus.", s_born_rule),
         ("note", "[the interpretations - a Babel, none a fit] Copenhagen (the wavefunction collapses on "
                  "measurement; instrumentalist), Everett / many-worlds (no collapse; the universal "
                  "wavefunction branches), de Broglie-Bohm (a deterministic pilot wave, explicitly nonlocal), "
