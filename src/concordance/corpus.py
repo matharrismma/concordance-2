@@ -433,6 +433,13 @@ class Corpus:
         # The distinction is the ARGUMENT's presence, not the index's size — a shard-only node whose
         # resident keeping is empty still freezes, and must still read its shards.
         self._froze: bool = frozen_idx is not None
+        # SEARCH CACHE (radix vs comparison, 2026-10-13): the whole-keeping scoring is the expensive
+        # COMPARISON rung; one answer runs several searches on the SAME text at different limits (main +
+        # scripture weave + also-in-keeping). Cache the top-K scored list per (query, shelves, witness) and
+        # slice it for each limit — the merge/supplement only APPEND below, so a top-K slice equals a direct
+        # limit search. Cleared on any add_card (the keeping changed). Fresh copies out, so it is read-only.
+        self._search_cache: Dict[Any, tuple] = {}
+        self._search_lock = threading.Lock()
         self._by_token: Dict[str, List[str]] = {}
         self._df_extra: Dict[str, int] = dict(df_extra) if df_extra else {}
         for cid, c in cards.items():
@@ -663,6 +670,7 @@ class Corpus:
             card["call"] = call
             if cid not in self._cids_by_call.get(call, ()):
                 self._cids_by_call.setdefault(call, []).append(cid)
+        self._search_cache.clear()        # the keeping changed — drop any cached scorings
 
     def _index_card_ids(self) -> set:
         ids: set = set()
@@ -1562,8 +1570,33 @@ def subject_of(query: str) -> Optional[str]:
     return c._subject_of(toks, c._idf(toks))
 
 
+_SEARCH_TOPK = 60     # cache the top-K scored list; any limit <= K is served by slicing it
+
+
 def search(query: str, limit: int = 25, include_witness: bool = True,
            shelves: Optional[set] = None) -> List[dict]:
+    """Ranked search with a RADIX CACHE (2026-10-13): the whole-keeping scoring is the expensive
+    COMPARISON rung, and one answer searches the SAME text at several limits (main + scripture weave +
+    also-in-keeping). Cache the top-K scored list per (query, shelves, witness) and slice it per limit —
+    the merge/supplement only APPEND below, so a slice equals a direct search. Cleared on any add_card;
+    fresh copies out (read-only cache). A limit above K falls straight to the full ranker."""
+    corpus = default_corpus()
+    if limit > _SEARCH_TOPK:
+        return _search_impl(corpus, query, limit, include_witness, shelves)
+    key = (str(query) if query else "", tuple(sorted(shelves)) if shelves else None, bool(include_witness))
+    cache = corpus._search_cache
+    cached = cache.get(key)
+    if cached is None:
+        cached = tuple(_search_impl(corpus, query, _SEARCH_TOPK, include_witness, shelves))
+        with corpus._search_lock:
+            if len(cache) >= 2048:
+                cache.clear()
+            cache[key] = cached
+    return [dict(r) for r in cached[:limit]]
+
+
+def _search_impl(corpus: "Corpus", query: str, limit: int = 25, include_witness: bool = True,
+                 shelves: Optional[set] = None) -> List[dict]:
     """Ranked search over the default corpus (cards.jsonl) — the floor's retrieval primitive.
     The keeping is shared across both surfaces by default (the .com includes the religious
     cards too); pass include_witness=False for an optional secular-only view. `shelves` scopes
@@ -1573,7 +1606,6 @@ def search(query: str, limit: int = 25, include_witness: bool = True,
     so the shard FTS (which indexes the full text) fills the remaining slots, and any stub
     that made the cut is rehydrated. The reader never sees a lighter answer because the
     shelf rode the shard."""
-    corpus = default_corpus()
     out = corpus.search(query, limit, include_witness, shelves)
     frozen = frozen_shelves() if corpus._froze else frozenset()   # only a corpus built with freeze awareness merges shard freight
     if frozen and (shelves is None or (set(shelves) & frozen)) and len(out) < limit:
