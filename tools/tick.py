@@ -1521,6 +1521,55 @@ def chemistry_stick() -> int:
     return 0
 
 
+def chirality() -> int:
+    """CHIRALITY & ASYMMETRIC AUTOCATALYSIS - the 2026 Nobel Prize in Chemistry (Kagan & Soai, "non-linear
+    effects and autocatalysis in asymmetric organic synthesis"). SEALED through chemistry.CHEM_VERIFY: the
+    enantiomeric-excess arithmetic and the amplification SIGNATURE (product ee exceeds seed ee). The lab
+    discovery - that this happens, and runs toward homochirality - is Kagan's and Soai's, CITED, never
+    sealed by the engine. The one-handedness of life (L-amino acids, D-sugars) is carried as the open
+    question it answers. Idempotent. Matt, 2026-10-13: "Look at what they found." New stick."""
+    from concordance import tickstick as TS
+    S = {
+        "ee_hi": _seal_through("chemistry", "CHEM_VERIFY", {"r": 99, "s": 1, "claimed_ee_percent": 98}),
+        "ee_rac": _seal_through("chemistry", "CHEM_VERIFY", {"r": 50, "s": 50, "claimed_ee_percent": 0}),
+        "amp": _seal_through("chemistry", "CHEM_VERIFY",
+                             {"seed_ee_percent": 5, "product_ee_percent": 95, "claimed_amplification": True}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "chirality facts")
+    sid = TS.create("Chirality and asymmetric autocatalysis",
+                    "The 2026 Nobel Prize in Chemistry (Kagan & Soai). Enantiomeric excess measures "
+                    "one-handedness; a small excess can be amplified - the product's ee exceeds the catalyst's "
+                    "(Kagan's non-linear effect), and in Soai's asymmetric autocatalysis the product is its own "
+                    "catalyst, so the excess runs toward homochirality (one source, a small bias, one end).",
+                    "chemistry",
+                    ["Nobel Prize in Chemistry 2026 (H. B. Kagan, K. Soai), nobelprize.org/prizes/chemistry/2026",
+                     "H. B. Kagan et al., nonlinear effects in asymmetric synthesis, J. Am. Chem. Soc. 108 (1986) 2353",
+                     "K. Soai et al., asymmetric autocatalysis, Nature 378 (1995) 767"])["id"]
+    marks = [
+        ("instance", "[one-handedness, measured] A 99:1 mixture of the two mirror images has enantiomeric excess "
+                     "ee = |R-S|/(R+S) x 100% = |99-1|/100 = 98% (sealed through chemistry.CHEM_VERIFY) - how far a "
+                     "sample leans to a single hand.", S["ee_hi"]),
+        ("instance", "[the symmetric start] A 50:50 mixture is racemic: ee = 0% (sealed) - no handedness, the field "
+                     "a tiny bias breaks.", S["ee_rac"]),
+        ("instance", "[amplification - the Kagan-Soai signature] When product ee (95%) EXCEEDS seed ee (5%), a small "
+                     "handedness has been amplified: a positive non-linear effect (sealed). Soai's asymmetric "
+                     "autocatalysis - the product catalyzing its own formation - drives this toward homochirality. "
+                     "One source, a small bias, one end.", S["amp"]),
+        ("postulate", "[the ground] Enantiomeric excess and the inequality product_ee > seed_ee are exact arithmetic, "
+                      "sealed. THAT a near-symmetric start amplifies to one hand in the lab is the 2026 Nobel discovery "
+                      "of Kagan and Soai - cited, inferred from their experiments, never sealed here.",
+         {"source": "Nobel Prize in Chemistry 2026; Kagan (1986); Soai (1995)"}),
+        ("note", "[declined] How life came to use a single handedness (L-amino acids, D-sugars) is the open origin "
+                 "question this illuminates but does not close; the engine seals the ee arithmetic and the amplification "
+                 "inequality, not the account of life's beginning.",
+         {"source": "src/concordance/verifiers/chemistry.py (enantiomeric_excess, chiral_amplification)"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py chirality")
+    return 0
+
+
 def astronomy_stick() -> int:
     """ASTRONOMY - SEALED through astronomy.ASTRO_VERIFY. Idempotent."""
     from concordance import tickstick as TS
@@ -10825,6 +10874,8 @@ def main() -> int:
         return typology()
     if a[0] in ("syntax", "syntax_parser", "parser", "parse_tree"):
         return syntax_parser()
+    if a[0] in ("chirality", "autocatalysis", "homochirality", "kagan_soai", "enantiomeric_excess"):
+        return chirality()
     if a[0] == "read":
         from concordance import tickstick as T
         print(json.dumps(T.read(a[1]) if len(a) > 1 else T.listing(), indent=1, ensure_ascii=False))

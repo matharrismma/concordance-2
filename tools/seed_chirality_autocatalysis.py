@@ -42,7 +42,7 @@ DATA = Path(os.environ.get("CONCORDANCE_DATA_DIR", str(ROOT / "data")))
 NODE = "card_chirality_autocatalysis"
 SPINE = "card_spine_chirality_autocatalysis"
 GLOBAL_FLOOR = "card_k_floor_of_discovery"
-STICK = "stick_chirality_enantiomeric_excess_and_amplification"
+STICK = "stick_chirality_and_asymmetric_autocatalysis"
 
 F_CHEM = "card_floor_chemistry"
 F_PCHEM = "card_floor_physical_chemistry"
