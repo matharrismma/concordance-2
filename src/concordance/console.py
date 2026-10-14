@@ -406,6 +406,20 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
             spoken += f" A thread worth following: {threads[0]['title']}."
             nexts = [{"label": t["title"], "ref": f"/card/{t['id']}"} for t in threads[:2]]
         caption = f"{title}\n\n{top.get('snippet') or ''}"
+    elif kind == "comfort":
+        # MEET THEM FIRST — the pastoral presence (a found line), then the anchor verse beneath it. The
+        # generic scripture branch below would speak the verse and silently drop this meeting, so a
+        # hurting person got verses stacked with no "I'm here". The arc opens by meeting the person.
+        spoken = _trim(msg, 240) if msg else ""
+        v = (scripture[0] if isinstance(scripture, list) and scripture else {}) if scripture else {}
+        ref = (v.get("ref") or "").strip()
+        body = _trim(v.get("web") or v.get("text") or "", 220)
+        if body:
+            spoken = (spoken + " " if spoken else "") + body + (f" — {ref}." if ref else "")
+        headline = ref or "You're not alone."
+        caption = (((msg + "\n\n") if msg else "") + ((ref + "\n" + body) if ref else body)).strip() or spoken
+        if ref:
+            source = {"title": ref, "ref": f"/read.html?ref={ref}"}
     elif scripture:
         v = scripture[0] if isinstance(scripture, list) and scripture else {}
         ref = (v.get("ref") or "").strip()
@@ -468,9 +482,20 @@ def _coach(text: str, config: Any, gate_open: bool) -> Dict[str, Any]:
     # ALWAYS offer the next step — and ALWAYS a way to a new path. Paced (at most two threads, never a
     # wall) and never forced: the final choice is theirs (the Gate — we present, we do not cross).
     nexts.append({"label": "Or ask about anything else — your choice", "ref": None})
-    if len(nexts) > 1:
-        opts = "; ".join(n["label"] for n in nexts[:-1])
-        spoken += f" Where next — {opts}; or somewhere else entirely? Your choice."
+    # LAND ON ONE STEP — a shepherd points one way and leaves the door open; never a menu (the final
+    # choice is theirs — the Gate). The structured `nexts` chips above stay for the UI; the SPOKEN voice
+    # walks to the single most-fitting step: for a hurt, a real person to turn to; for a thread, the next
+    # reading; otherwise a quiet open door. Found/selected, not generated.
+    one_step = ""
+    rh = r.get("real_help") or []
+    if r.get("kind") == "comfort" and rh:
+        one_step = str(rh[0]).rstrip(".")
+    elif len(nexts) > 1 and nexts[0].get("ref"):
+        one_step = "follow the thread — " + str(nexts[0].get("label") or "").rstrip(".")
+    if one_step:
+        spoken += f" From here, one step: {one_step}. Or tell me where you are — I'll stay with you."
+    else:
+        spoken += " Where would you like to go from here? I'll stay with you."
 
     # THE GUARD at the door — a trusted voice (word / cloud / lens) is spoken only if it carries the
     # provenance tier that field is allowed to carry. Defense in depth against a projection surface:
