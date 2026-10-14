@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Parable — Narrow Highway</title>
+<meta name="description" content="Bring a situation; receive the one story Jesus told for it — in his own words, with his own meaning where he gave it, read as a book or heard aloud. Found, never generated.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap">
+<style>
+  /* THE PARABLE — the final register of the engine: a story you walk INTO. Same reverent instrument as
+     the Console (parchment & brass by day, a candlelit cathedral by night), narrowed to one thing: the
+     exact right parable, read as a page or heard aloud. Still by default; motion slight and opt-out. */
+  :root{
+    --paper:#f1ece0; --panel:#e9e2d1; --ink:#1b1712; --ink-soft:#574e42; --dim:#8a8070;
+    --line:#d3c9b4; --hair:#e2dac7; --brass:#9a7623; --brass-lit:#b78f36; --copper:#9c5a36;
+    --seal:#8c2f23; --red:#8c2f23;
+    --serif:Georgia,'Iowan Old Style','Palatino Linotype',serif;
+    --display:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+    --plaque:ui-sans-serif,system-ui,'Segoe UI',sans-serif;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --paper:#12121a; --panel:#1a1a23; --ink:#ece5d4; --ink-soft:#a79d8a; --dim:#746b5a;
+    --line:#2b2934; --hair:#232230; --brass:#cfa54c; --brass-lit:#e4bf6a; --copper:#c97d55;
+    --seal:#c45a49; --red:#d98b7d; color-scheme:dark; }}
+  :root[data-theme="dark"]{ --paper:#12121a; --panel:#1a1a23; --ink:#ece5d4; --ink-soft:#a79d8a;
+    --dim:#746b5a; --line:#2b2934; --hair:#232230; --brass:#cfa54c; --brass-lit:#e4bf6a;
+    --copper:#c97d55; --seal:#c45a49; --red:#d98b7d; color-scheme:dark; }
+  *{ box-sizing:border-box }
+  html,body{ margin:0; background:var(--paper); color:var(--ink) }
+  body{ font-family:var(--serif); line-height:1.62; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility }
+  .book{ max-width:41rem; margin:0 auto; min-height:100svh; display:flex; flex-direction:column;
+         padding:calc(1rem + env(safe-area-inset-top)) 1.35rem calc(1rem + env(safe-area-inset-bottom)) }
+  @media (prefers-reduced-motion:no-preference){
+    .mode button,.ask input,.ask #go,.src a{ transition:color .18s ease,border-color .18s ease,background-color .18s ease }
+    #page>*{ animation:settle .5s ease both }
+    @keyframes settle{ from{ opacity:0; transform:translateY(.3rem) } to{ opacity:1; transform:none } }
+  }
+  /* the lintel */
+  header.bar{ display:flex; align-items:center; justify-content:space-between; gap:1rem;
+              padding-bottom:.7rem; border-bottom:1px solid var(--brass); box-shadow:0 1px 0 var(--hair) }
+  .brand{ font-family:var(--plaque); font-size:.74rem; letter-spacing:.2em; text-transform:uppercase;
+          color:var(--dim); text-decoration:none; display:inline-flex; align-items:center; gap:.5em }
+  .brand b{ color:var(--brass); font-weight:600; letter-spacing:.16em }
+  .brand .fleur{ color:var(--brass); font-size:1.05em; line-height:1 }
+  .mode{ display:inline-flex; border:1px solid var(--brass); border-radius:3px; overflow:hidden; background:var(--panel) }
+  .mode button{ font-family:var(--plaque); font-size:.68rem; letter-spacing:.15em; text-transform:uppercase;
+                background:none; color:var(--dim); border:0; padding:.36rem .72rem; cursor:pointer }
+  .mode button+button{ border-left:1px solid var(--brass) }
+  .mode button[aria-pressed="true"]{ background:var(--brass); color:var(--paper) }
+
+  main.page{ flex:1 0 auto; padding:2.1rem 0 1rem }
+  .greet{ color:var(--ink-soft); font-family:var(--display); font-style:italic; font-size:1.5rem;
+          line-height:1.42; margin:0 0 1.6rem; max-width:32rem }
+
+  /* the ask */
+  .ask{ display:flex; gap:.5rem; align-items:stretch; margin:0 0 1.3rem }
+  .ask input{ flex:1 1 auto; font-family:var(--serif); font-size:1.08rem; color:var(--ink);
+              background:var(--panel); border:1px solid var(--line); border-radius:3px; padding:.7rem .85rem }
+  .ask input::placeholder{ color:var(--dim) }
+  .ask input:focus{ outline:none; border-color:var(--brass) }
+  .ask #go{ font-family:var(--plaque); font-size:.7rem; letter-spacing:.15em; text-transform:uppercase;
+            background:var(--brass); color:var(--paper); border:0; border-radius:3px; padding:0 1.1rem; cursor:pointer }
+  .seeds{ display:flex; flex-wrap:wrap; gap:.45rem; margin:-.4rem 0 1.4rem }
+  .seeds button{ font-family:var(--plaque); font-size:.72rem; color:var(--ink-soft); background:var(--panel);
+                 border:1px solid var(--hair); border-radius:999px; padding:.3rem .7rem; cursor:pointer }
+  .seeds button:hover{ border-color:var(--brass); color:var(--ink) }
+
+  /* the walked story */
+  .meet{ font-family:var(--display); font-style:italic; font-size:1.34rem; color:var(--ink-soft); margin:0 0 .5rem }
+  .title{ font-family:var(--display); font-size:2.5rem; line-height:1.05; font-weight:600; margin:.1rem 0 .15rem;
+          text-wrap:balance }
+  .attrib{ font-family:var(--plaque); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+           color:var(--red); margin:0 0 1.1rem; display:flex; gap:.6em; align-items:baseline; flex-wrap:wrap }
+  .attrib .ref{ color:var(--dim); letter-spacing:.1em }
+  .story{ font-size:1.235rem; line-height:1.72 }
+  .story p{ margin:0 0 1.05rem }
+  .story.red p::first-letter{ /* a quiet illuminated initial on the opening */ }
+  .drop::first-letter{ font-family:var(--display); font-weight:700; font-size:3.2rem; line-height:.8;
+                       float:left; padding:.08em .12em .02em 0; color:var(--copper) }
+  .turn{ border-top:1px solid var(--hair); margin:1.5rem 0 0; padding:1.2rem 0 0 }
+  .turn .lead{ font-family:var(--display); font-style:italic; font-size:1.3rem; color:var(--ink-soft); margin:0 0 .5rem }
+  .turn .ref{ font-family:var(--plaque); font-size:.7rem; letter-spacing:.13em; text-transform:uppercase; color:var(--red) }
+  .turn .t{ font-size:1.18rem; line-height:1.7; margin:.35rem 0 0 }
+  /* the companion — Matt's own narrative, when curated (hidden until then) */
+  .companion{ border-left:3px solid var(--brass); background:var(--panel); padding:.9rem 1.1rem;
+              margin:1.5rem 0 0; border-radius:0 3px 3px 0 }
+  .companion .k{ font-family:var(--plaque); font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; color:var(--dim) }
+  .companion .t{ font-size:1.1rem; line-height:1.64; font-style:italic; margin:.35rem 0 .2rem }
+  .companion .by{ font-family:var(--plaque); font-size:.72rem; color:var(--ink-soft) }
+  .step{ margin:1.7rem 0 .4rem; padding:1.05rem 1.15rem; border:1px solid var(--brass); border-radius:3px;
+         background:var(--panel); font-family:var(--display); font-style:italic; font-size:1.34rem; color:var(--ink) }
+  .src{ margin:1.2rem 0 0; font-family:var(--plaque); font-size:.78rem }
+  .src a{ color:var(--copper); text-decoration:none; border-bottom:1px solid var(--hair) }
+  .quiet{ color:var(--dim); font-family:var(--display); font-style:italic; font-size:1.3rem; line-height:1.5 }
+  .quiet a{ color:var(--copper) }
+  .note{ font-family:var(--plaque); font-size:.72rem; color:var(--dim); margin:.5rem 0 0 }
+  footer.foot{ margin-top:auto; padding-top:1.1rem; border-top:1px solid var(--hair);
+               font-family:var(--plaque); font-size:.7rem; color:var(--dim); letter-spacing:.04em }
+  footer.foot b{ color:var(--brass); font-weight:600 }
+  .busy{ color:var(--dim); font-family:var(--display); font-style:italic; font-size:1.3rem }
+</style>
+</head>
+<body>
+<div class="book">
+  <header class="bar">
+    <a class="brand" href="index.html"><span class="fleur">✦</span> <b>Narrow Highway</b> · the parable</a>
+    <div class="mode" role="group" aria-label="Read or listen">
+      <button id="m-read" aria-pressed="true">Read</button>
+      <button id="m-listen" aria-pressed="false">Listen</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <p class="greet">Tell me what's on you — and I'll bring you the story Jesus told for it.</p>
+    <div class="ask">
+      <input id="q" type="text" autocomplete="off" placeholder="e.g. I've wasted my life and I'm ashamed to come home…"
+             aria-label="What's on you">
+      <button id="go">Bring it</button>
+    </div>
+    <div class="seeds" id="seeds"></div>
+    <div id="page" aria-live="polite"></div>
+  </main>
+
+  <footer class="foot">
+    Every word of the story is Christ's own, <b>read from the keeping</b> and cited — found, never generated.
+    Where he gave the meaning, you hear his meaning; where he left it to sit, it sits.
+  </footer>
+</div>
+
+<script src="speak.js"></script>
+<script>
+const API = "";                 // same-origin on the box; falls to the labelled sample in preview
+let MODE = "read";
+let LAST = null;                // the last walked parable, for the Listen switch
+
+const esc = s => (s==null?"":String(s)).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $ = id => document.getElementById(id);
+
+const SEEDS = [
+  "I've wasted my life and I'm ashamed to come home",
+  "who is my neighbor — do I have to help them",
+  "I'm afraid to use my gifts, what if I fail",
+  "I can't forgive what they did to me",
+  "I keep drifting away from my faith",
+  "why does God let evil grow next to the good",
+];
+$('seeds').innerHTML = SEEDS.map(s=>`<button data-q="${esc(s)}">${esc(s)}</button>`).join('');
+$('seeds').onclick = e => { const b=e.target.closest('button'); if(b){ $('q').value=b.dataset.q; ask(); } };
+
+$('m-read').onclick   = ()=>{ setMode('read');   try{ window.speechSynthesis && speechSynthesis.cancel(); }catch(e){} };
+$('m-listen').onclick = ()=>{ setMode('listen'); if(LAST) sayParable(LAST); };
+function setMode(m){ MODE=m; $('m-read').setAttribute('aria-pressed', m==='read'); $('m-listen').setAttribute('aria-pressed', m==='listen'); }
+
+$('go').onclick = ask;
+$('q').addEventListener('keydown', e => { if(e.key==='Enter') ask(); });
+
+// read it aloud: on the box, speak.js (NHSpeak) fetches /speak for the operator's cloned voice and
+// falls to the browser floor; the words spoken are exactly the found words shown.
+function say(text){ try{ if(text && window.NHSpeak) NHSpeak.play(text); else if(window.speechSynthesis){ const u=new SpeechSynthesisUtterance(text); speechSynthesis.cancel(); speechSynthesis.speak(u);} }catch(e){} }
+function sayParable(p){
+  const parts = [p.meet, p.story && p.story.text, p.turn ? (p.turn.lead+' '+p.turn.text) : p.sit, p.step];
+  say(parts.filter(Boolean).join('  '));
+}
+
+function paras(text){ return String(text||"").split(/\n{2,}/).map(s=>s.trim()).filter(Boolean); }
+
+function renderParable(p){
+  LAST = p;
+  const body = paras(p.story && p.story.text);
+  const storyHTML = body.length
+    ? body.map((para,i)=>`<p${i===0?' class="drop"':''}>${esc(para)}</p>`).join('')
+    : `<p>${esc((p.story&&p.story.text)||'')}</p>`;
+  let turnHTML = '';
+  if(p.turn){
+    turnHTML = `<div class="turn"><div class="lead">${esc(p.turn.lead)} <span class="ref">${esc(p.turn.ref)}</span></div>`
+             + `<p class="t">${esc(p.turn.text)}</p></div>`;
+  } else if(p.sit){
+    turnHTML = `<div class="turn"><div class="lead">${esc(p.sit)}</div></div>`;
+  }
+  // the companion rides here once curated (p.companion); hidden until then.
+  let compHTML = '';
+  if(p.companion && p.companion.text){
+    compHTML = `<div class="companion"><div class="k">in our own day</div>`
+             + `<div class="t">“${esc(p.companion.text)}”</div>`
+             + `<div class="by">— ${esc(p.companion.by||'M.R. Harris')}</div></div>`;
+  }
+  const ref = (p.story&&p.story.ref)||'';
+  $('page').innerHTML =
+      `<p class="meet">${esc(p.meet)}</p>`
+    + `<h1 class="title">${esc(p.title)}</h1>`
+    + `<div class="attrib">${esc((p.story&&p.story.attribution)||'Christ Himself')} <span class="ref">${esc(ref)}</span></div>`
+    + `<div class="story red">${storyHTML}</div>`
+    + turnHTML
+    + compHTML
+    + `<div class="step">${esc(p.step)}</div>`
+    + (ref ? `<div class="src"><a href="read.html?ref=${encodeURIComponent(ref)}">Read the whole passage →</a></div>` : '');
+  if(MODE==='listen') sayParable(p);
+}
+
+function noStory(){
+  $('page').innerHTML = `<p class="quiet">There isn't one fixed parable for this one — not every ache has a single story.`
+    + ` Take it to the <a href="console.html">Console</a>, and the Word will meet you another way.</p>`;
+  LAST = null;
+}
+
+async function ask(){
+  const text = $('q').value.trim();
+  if(!text) return;
+  $('page').innerHTML = `<p class="busy">Looking for the story he told…</p>`;
+  try{
+    const resp = await fetch(API+'/console', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text})});
+    if(!resp.ok) throw 0;
+    const r = await resp.json();
+    if(r && r.parable) renderParable(r.parable);
+    else noStory();
+  }catch(e){
+    sampleFor(text);   // preview without the box — a labelled sample, real refs + verbatim excerpt
+  }
+}
+
+// PREVIEW-ONLY fallback (the box serves the full found passage). Honest: real refs and a verbatim
+// excerpt of the WEB text, never invented Scripture; it says plainly it is the sample.
+function sampleFor(text){
+  const t = text.toLowerCase();
+  let p = null;
+  if(/wast|asham|prodigal|come home|far from home|squander/.test(t)){
+    p = { title:"The Prodigal Son", meet:"Jesus told a story for this. Here it is, in his own words —",
+          story:{ ref:"Luke 15:11-32", attribution:"Christ Himself",
+            text:"He said, “A certain man had two sons. The younger of them said to his father, ‘Father, give me my share of your property.’ So he divided his livelihood between them.\n\n…and he arose and came to his father. But while he was still far off, his father saw him and was moved with compassion, and ran, and fell on his neck, and kissed him." },
+          turn:{ lead:"And he told them what it means —", ref:"Luke 15:31-32",
+            text:"“He said to him, ‘Son, you are always with me, and all that is mine is yours. But it was appropriate to celebrate and be glad, for this, your brother, was dead, and is alive again. He was lost, and is found.’”" },
+          step:"Now read it again, and ask: where am I in the story?" };
+  } else if(/neighbor|help (them|a stranger)|not my (people|problem)|mercy/.test(t)){
+    p = { title:"The Good Samaritan", meet:"Jesus told a story for this. Here it is, in his own words —",
+          story:{ ref:"Luke 10:25-37", attribution:"Christ Himself",
+            text:"…“A certain man was going down from Jerusalem to Jericho, and he fell among robbers… But a certain Samaritan, as he traveled, came where he was. When he saw him, he was moved with compassion, came to him, and bound up his wounds…”" },
+          turn:{ lead:"And he told them what it means —", ref:"Luke 10:36-37",
+            text:"“Which of these three do you think seemed to be a neighbor to him who fell among the robbers?” He said, “He who showed mercy on him.” Then Jesus said to him, “Go and do likewise.”" },
+          step:"Now read it again, and ask: where am I in the story?" };
+  }
+  if(p){
+    renderParable(p);
+    $('page').insertAdjacentHTML('beforeend', `<p class="note">Preview sample — the box reads the full passage from the keeping and will find the right parable for any situation.</p>`);
+  } else {
+    $('page').innerHTML = `<p class="quiet">Preview mode — run the engine (the box) to search every parable. Try one of the examples above.</p>`;
+  }
+}
+</script>
+</body>
+</html>

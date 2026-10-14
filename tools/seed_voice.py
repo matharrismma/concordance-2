@@ -102,6 +102,114 @@ def _from_pdf(path: Path) -> List[Dict]:
     return out
 
 
+# ── THE BOOKS — his narrative voice, widening the vocabulary (Matt, 2026-10-14: "build from the books a
+# decent vocabulary"). A novel is NOT pastoral address: it carries DIALOGUE (a character's voice, not
+# Matt's own) and dark/violent moments that must never surface as "a word on this" to someone hurting. So
+# the book ingest is hard-guarded — skip dialogue, skip a graphic stoplist, keep only clean reflective
+# sentences — and tiered BELOW the Christian writing. Verbatim units only; never style-mimicry.
+_DIALOGUE = re.compile(r"[“”\"]")                       # a double-quote => dialogue, a character speaks
+_DARK = re.compile(r"\b(kill(ed|ing|s)?|murder|blood(y|ied)?|corpse|rape|slaughter|gun|knife|stab|"
+                   r"damn(ed|it)?|bastard|whore|bitch|fuck|shit|naked|sex|breast|thigh|drunk|whiskey|"
+                   r"vomit|piss|rot(ting|ted)?|maggot|scream(ed|ing)?|torture)\b", re.I)
+_SENT = re.compile(r"[^.!?]*[.!?]")
+
+
+def _book_ok(s: str) -> bool:
+    s = s.strip()
+    if not (40 <= len(s) <= 240):
+        return False
+    if s[-1] not in ".!?" or s[0].islower():
+        return False
+    if _DIALOGUE.search(s) or _DARK.search(s):
+        return False
+    letters = sum(c.isalpha() for c in s)
+    if letters < 0.6 * len(s):                                   # tables / headers / junk
+        return False
+    caps = sum(1 for w in s.split() if w[:1].isupper())
+    if caps > 0.4 * max(1, len(s.split())):                      # name/place-heavy narration — skip
+        return False
+    return True
+
+
+def _epub_text(path: Path) -> str:
+    import zipfile
+    import html as _html
+    out = []
+    try:
+        with zipfile.ZipFile(str(path)) as z:
+            names = [n for n in z.namelist() if n.lower().endswith((".xhtml", ".html", ".htm"))]
+            for n in sorted(names):
+                try:
+                    raw = z.read(n).decode("utf-8", "ignore")
+                except Exception:  # noqa: BLE001
+                    continue
+                raw = re.sub(r"(?is)<(script|style|head)[^>]*>.*?</\1>", " ", raw)
+                raw = re.sub(r"(?s)<[^>]+>", " ", raw)
+                out.append(_html.unescape(raw))
+    except Exception as e:  # noqa: BLE001
+        print("  epub read failed:", path.name, e)
+    return " ".join(" ".join(x.split()) for x in out)
+
+
+def _from_book(path: Path) -> List[Dict]:
+    title = re.sub(r"\s*[—-].*$", "", path.stem).strip() or path.stem
+    if path.suffix.lower() == ".epub":
+        text = _epub_text(path)
+    else:
+        import docx
+        text = " ".join(p.text for p in docx.Document(str(path)).paragraphs)
+        text = " ".join(text.split())
+    out, k = [], 0
+    for m in _SENT.finditer(text):
+        s = m.group(0).strip()
+        if _book_ok(s):
+            out.append({"id": f"voice_book_{_slug(title)}_{k}", "text": s,
+                        "source": f"{title} (M.R. Harris)", "ref": "", "kind": "book", "by": _BY})
+            k += 1
+    return out
+
+
+# NOVELS ONLY — AN ALLOWLIST, safe by default. "Harris Projects MASTER" MIXES his fiction with
+# CONFIDENTIAL business/engine/planning docs (Project Prism, the Antidote Planning Bible, the NWGA JDA
+# assessment, the Universal Gradient Manifold, the Pressure Fighting System, series maps…). A stoplist is
+# whack-a-mole and one miss leaks confidential material into a public voice, so NOTHING enters unless its
+# title is a KNOWN NOVEL. Everything excluded is printed, so a novel missing from this list is visible and
+# Matt can add it — never silently dropped, never silently leaked. Fragments matched case-insensitively.
+_NOVELS = (
+    "apokalypsis", "the door", "root access", "the keeping", "the line", "dancing plague",
+    "tell me you got that", "treebound", "molasses", "kings of appalachia",
+)
+
+
+def _is_novel(stem: str) -> bool:
+    s = " ".join(re.sub(r"[_\-–—]", " ", stem.lower()).split())
+    return any(n in s for n in _NOVELS)
+
+
+def gather_books(dirs: List[Path]) -> List[Dict]:
+    recs: List[Dict] = []
+    kept, skipped = [], []
+    for d in dirs:
+        if not d.is_dir():
+            continue
+        for f in sorted(list(d.glob("*.epub")) + list(d.glob("*.docx"))):
+            if _is_novel(f.stem):
+                kept.append(f.name)
+                recs += _from_book(f)
+            else:
+                skipped.append(f.name)
+    if skipped:
+        print("  EXCLUDED (not on the novel allowlist — add a title to _NOVELS if it belongs):")
+        for n in skipped:
+            print("    -", n)
+    seen, uniq = set(), []
+    for r in recs:
+        key = r["text"][:160].lower()
+        if key not in seen:
+            seen.add(key); uniq.append(r)
+    return uniq
+
+
 def gather(src: Path) -> List[Dict]:
     recs: List[Dict] = []
     for f in sorted(src.glob("*.docx")):
@@ -117,9 +225,34 @@ def gather(src: Path) -> List[Dict]:
     return uniq
 
 
+_BOOK_DIRS = [Path(r"C:\Users\hdven\iCloudDrive\M.R_"),
+              Path(r"C:\Users\hdven\OneDrive\Desktop\Harris Projects MASTER")]
+BOOK_OUT = DATA / "voice_book_lines.jsonl"
+
+
 def main() -> int:
     argv = [a for a in sys.argv[1:] if a != "--check"]
     check = "--check" in sys.argv[1:]
+    if argv and argv[0] == "books":
+        dirs = [Path(a) for a in argv[1:]] or _BOOK_DIRS
+        recs = gather_books(dirs)
+        bysrc = {}
+        for r in recs:
+            bysrc[r["source"]] = bysrc.get(r["source"], 0) + 1
+        print(f"gathered {len(recs)} clean reflective units from {len(dirs)} book dir(s)")
+        for s in sorted(bysrc, key=lambda k: -bysrc[k])[:12]:
+            print(f"  {bysrc[s]:4}  {s}")
+        if check:
+            import random
+            random.seed(7)
+            print("--- random samples (what would be voiced) ---")
+            for r in random.sample(recs, min(10, len(recs))):
+                print(f"  [{r['source'][:28]:28}] {r['text']}")
+            return 0
+        DATA.mkdir(parents=True, exist_ok=True)
+        BOOK_OUT.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in recs) + "\n", encoding="utf-8")
+        print("wrote", BOOK_OUT, f"({len(recs)} units)")
+        return 0
     src = Path(argv[0]) if argv else Path(DEFAULT_DIR)
     if not src.is_dir():
         print("not a directory:", src); return 2

@@ -1083,6 +1083,18 @@ def _ask_path(text: str, config: Any, owner: Optional[str], gate_open: bool) -> 
     if r.get("kind") != "verify":
         r["tortoise"] = {"offered": True, "spoken": _clarify.TORTOISE_OFFER, "cost": "cheap",
                          "form": gate.get("form"), "subject": gate.get("filled")}
+    # THE PARABLE — the final register (NARROW→PARABLE). Where one of Christ's parables fits the
+    # situation by SHAPE (not a word), attach the walked story: meet → the parable verbatim → his own
+    # turn → one step. Found + cited, never generated; the precision guard in parable.for_situation keeps
+    # this silent on a factual claim, so it fires only on a real life-shape. The curated narrative
+    # illustration (Matt's own, once seeded) will ride beneath it here.
+    try:
+        from . import parable as _parable
+        pw = _parable.walk(text)
+        if pw:
+            r["parable"] = pw
+    except Exception:  # noqa: BLE001 — the answer stands even if the parable register cannot load
+        pass
     return r
 
 
