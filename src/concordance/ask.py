@@ -816,6 +816,28 @@ def _wants_a_companion(text: str) -> bool:
     return _arch.best(t) is not None
 
 
+# A BROUGHT BURDEN — a concrete life-hardship STATED (no feeling word, no "how do I"): "my marriage is
+# falling apart", "I lost my job", "my father died". The comfort gate above needs a feeling word or an
+# archetype, so these fell through to keyword search — "my marriage is falling apart" was landing on
+# VSEPR theory and deterministic chaos (2026-10-14, Matt: "it should construct an experience"). classify
+# routes a burden to the shepherd so the person is MET and the Word brought, never handed topical cards.
+# Curated + unambiguous (not a bare topic word); teachings._CUES then picks the fitting Red once here.
+_BROUGHT_BURDEN = re.compile(
+    r"\b(falling apart|fell apart|lost my job|losing my job|laid off|out of work|can'?t afford|"
+    r"afraid of dying|afraid to die|scared to die|passed away|passing away|"
+    r"(?:father|mother|dad|mom|husband|wife|son|daughter|brother|sister|friend)\s+(?:died|passed)|"
+    r"lost someone|lost my (?:faith|marriage|home|way)|can'?t forgive|giving up|give up on|"
+    r"so alone|no ?one cares|nobody cares|my marriage is|getting divorced|getting a divorce|"
+    r"ran away|far from god|burned out|can'?t go on|everything is (?:falling|crashing))\b", re.I)
+
+
+def brought_a_burden(text: str) -> bool:
+    """A concrete life-hardship stated — route to the shepherd, not search. Never a how-to or a factual
+    question ('how do I help someone whose marriage is failing' is a request, not a cry)."""
+    t = text or ""
+    return bool(_BROUGHT_BURDEN.search(t)) and not _FACTUAL_INTENT.search(t)
+
+
 # "What does X mean?" / "define X" / "the meaning of X" — a request to DEFINE a term. We look the
 # term up on the WORD shelves (lexicon = the tongues, dictionary = English) instead of keyword-matching
 # the whole sentence — which once answered "what does agape mean" with "mean deviation from the mean".
@@ -1273,6 +1295,8 @@ def classify(text: str) -> str:
     if distress_ref(text or ""):
         return "comfort"
     if _wants_a_companion(text or ""):     # broaden: meet a first-person struggle as a servant
+        return "comfort"
+    if brought_a_burden(text or ""):       # a concrete burden stated (no feeling word) → meet, don't search
         return "comfort"
     if any(w in t for w in _ULTIMATE_WORDS):
         return "ultimate"
