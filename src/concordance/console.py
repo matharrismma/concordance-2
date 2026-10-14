@@ -276,11 +276,25 @@ def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[s
         except Exception:  # noqa: BLE001 — the Word not reached here is a quiet trailhead, never a crash
             pass
 
-    # TIER 3 — the selected cloud of witnesses (already curated to align; PD-gated). One voice, verbatim.
+    # TIER 3 — a selected witness, FIT TO THE DISCERNED THEME (not a stray word). The old path took the
+    # top raw-overlap hit on the user's literal words, so "anxious about money" pulled a witness on
+    # refusing salvation at a fountain — it brushed "thirst", it did not fit. Now the cloud is matched
+    # against the ANCHOR the Word just landed on (the teaching's title + the subject), and a candidate is
+    # voiced only if it genuinely shares that theme; a witness that merely grazed a word is dropped,
+    # honest-empty. The quote stays found, verbatim, attributed — the CRAFT is choosing the one that fits.
+    # (Matt, 2026-10-14: "construct an experience… wisdom and discernment, nuance" — fit, never nearness.)
     try:
         from . import witness
-        seen = (witness.see(text, k=1) or {}).get("seeing") or []
-        f = seen[0] if seen else None
+        theme = set(_frame(text))
+        if best:
+            theme |= set(_frame((best.get("title") or "") + " " + (best.get("text") or "")))
+        query = " ".join(sorted(theme)) if theme else text
+        f = None
+        for cand in ((witness.see(query, k=6) or {}).get("seeing") or []):
+            ct = set(re.findall(r"[a-z]{3,}", (str(cand.get("text") or "")).lower()))
+            if len(theme & ct) >= 2:             # shares the discerned theme, not a lone word
+                f = cand
+                break
         if f and str(f.get("text") or "").strip():
             out["cloud"] = {k: f.get(k) for k in ("witness", "work", "ref", "text", "source")}
             out["cloud"]["tier"] = "witness"     # the operator-gathered, strict-PD cloud — a trusted voice
