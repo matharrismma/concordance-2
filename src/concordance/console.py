@@ -276,7 +276,25 @@ def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[s
         except Exception:  # noqa: BLE001 — the Word not reached here is a quiet trailhead, never a crash
             pass
 
-    # TIER 3 — a selected witness, FIT TO THE DISCERNED THEME (not a stray word). The old path took the
+    # THE COMPANION VOICE beneath the Word — PREFER MATT'S OWN WORDS (the house shepherd) where his
+    # writing reaches this moment; the public-domain witness cloud stands beside it as the fallback. Both
+    # verbatim, both fit to the anchor the Word landed on, both spoken in his cloned voice — never
+    # generated; the craft is choosing which of his (or the cloud's) words meets this burden.
+    # (composition layer #4, 2026-10-14 — his own writing as the voice.)
+    try:
+        from . import voice as _voice
+        anchor_ref = (best or {}).get("ref", "") if isinstance(best, dict) else ""
+        hv = (_voice.see(text, ref=anchor_ref, k=1) or {}).get("seeing") or []
+        if hv and str(hv[0].get("text") or "").strip():
+            fv = hv[0]
+            out["house"] = {"text": fv.get("text"), "source": fv.get("source"),
+                            "by": fv.get("by"), "tier": "house"}
+            out["tail"] = f" A word on this — “{_trim(fv['text'], 300)}”."
+            return out                       # his own fitting word leads the cloud — no second voice needed
+    except Exception:  # noqa: BLE001 — his voice not reaching here is a quiet fallback to the cloud, never a crash
+        pass
+
+    # TIER 3 (fallback) — a selected PUBLIC-DOMAIN witness, FIT TO THE DISCERNED THEME (not a stray word). The old path took the
     # top raw-overlap hit on the user's literal words, so "anxious about money" pulled a witness on
     # refusing salvation at a fountain — it brushed "thirst", it did not fit. Now the cloud is matched
     # against the ANCHOR the Word just landed on (the teaching's title + the subject), and a candidate is
