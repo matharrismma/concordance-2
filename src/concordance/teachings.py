@@ -87,6 +87,41 @@ _QUEUE: List[Dict[str, Any]] = [
 _BY_ID = {t["id"]: t for t in _QUEUE}
 
 
+# ── THE ACHES EACH TEACHING ANSWERS — the operator's alignment, made matchable ──────────────────────
+# A lexical match cannot read SENSE: "lost my job" grabbed The Lost Sheep (a lost sinner), "marriage
+# falling apart" grabbed the Olivet Discourse ("marrying and giving in marriage" in Noah's day; the stars
+# "fall"). A curated cue — the ache a teaching is FOR, in the words a person actually brings — beats any
+# such accidental collision and supplies the synonyms the stemmer can't (marriage↮marry, dying↮death).
+# DRAFT (2026-10-14): which of Christ's words meets which burden is MATT'S discernment; this is a first
+# pass for the common aches, to be curated. Found/indexed, never generated — the Red itself is untouched.
+_CUES: Dict[str, List[str]] = {
+    "som_06": ["marriage", "married", "wife", "husband", "spouse", "divorce", "separation",
+               "falling apart", "affair", "unfaithful", "cheating"],
+    "som_14": ["anxious", "anxiety", "worried", "worry", "money", "bills", "rent", "provision",
+               "afford", "lost my job", "no job", "out of work", "unemployed", "stressed"],
+    "som_09": ["enemy", "enemies", "revenge", "they hurt me", "someone who wronged", "hate me"],
+    "som_04": ["angry", "anger", "rage", "furious", "conflict"],
+    "som_13": ["greed", "greedy", "hoarding", "store up"],
+    "par_rich_fool": ["retirement", "wealth", "rich", "security", "nest egg", "enough money"],
+    "par_prodigal": ["ran away", "came back", "wasted", "ashamed", "shame", "unworthy",
+                     "far from home", "estranged", "my son", "my daughter", "prodigal"],
+    "par_lost_sheep": ["far from god", "backslidden", "strayed", "lost my faith", "fallen away",
+                       "wandered from god"],
+    "par_unforgiving": ["forgive", "bitterness", "grudge", "resentment"],
+    "iam_resurrection": ["dying", "death", "afraid to die", "afraid of dying", "terminal",
+                         "passing away", "the grave", "mortality"],
+    "iam_shepherd": ["lonely", "alone", "forsaken", "abandoned", "isolated", "nobody cares"],
+    "disc_paraclete": ["grief", "grieving", "mourning", "heart is troubled", "lost someone",
+                       "passed away", "my father died", "my mother died", "peace"],
+    "som_20": ["storms", "hard times", "everything is crashing", "will it hold", "foundation"],
+    "disc_vine": ["disconnected", "dry", "fruitless", "burned out", "abide"],
+    "iam_light": ["darkness", "in the dark", "despair", "cant see the way"],
+    "iam_way": ["meaning", "purpose", "searching", "which way", "lost the way"],
+}
+for _t in _QUEUE:
+    _t["cues"] = _CUES.get(_t["id"], [])
+
+
 def queue() -> Dict[str, Any]:
     """The work queue — every teaching, grouped, with its anchor reference."""
     groups: Dict[str, List[Dict[str, Any]]] = {}
@@ -283,21 +318,40 @@ def for_topic(text: str) -> Optional[Dict[str, Any]]:
     DISTINCTLY about a thing repeats its discriminating word; a common word every teaching shares counts
     for little). Returns {id,title,ref,group,text,score,red} with the Red verbatim, or None where no
     teaching aligns (a caller may then fall to the concordance)."""
+    low = (text or "").lower()
     q = set(_topic_stems(text))
     if not q:
         return None
     raw, idf = _topic_index()
-    best, best_score = None, 0.0
-    for t, title_st, body_ct in raw:
-        # BOTH title and body are IDF-weighted, so a DISTINCTIVE word (enemy, divorce, neighbour, rock,
-        # prodigal) carries the match and a common one (life, love, man) does not — the curated title
-        # weighed heaviest (4×), where the operator's alignment lives.
-        score = (4.0 * sum(idf.get(s, 1.0) for s in q & title_st)
-                 + sum(body_ct.get(s, 0) * idf.get(s, 1.0) for s in q))
-        if score > best_score:
-            best_score, best = score, t
-    if not best or best_score < 4.0:          # a distinctive title hit, or a word the teaching is ABOUT
-        return None
+    # CUE TIER FIRST — the operator's explicit alignment. A teaching that NAMES this ache answers it, and
+    # beats any accidental lexical collision (a word the teaching uses in another sense). A phrase cue
+    # matches as a substring; a single-word cue matches on its stem, so marriage/married and dying/death
+    # concord where the bare stemmer could not.
+    cue_best, cue_hits = None, 0
+    for t, _title_st, _body_ct in raw:
+        hits = sum(1 for c in (t.get("cues") or ())
+                   if ((" " in c and c in low) or (" " not in c and _stem(c) in q)))
+        if hits > cue_hits:
+            cue_hits, cue_best = hits, t
+    if cue_best:
+        best = cue_best
+        best_score = 100.0 * cue_hits    # a curated cue dominates; the operator's discernment wins
+    else:
+        # NO CURATED CUE — fall to the lexical index, but with a PRECISION GUARD so a single word used in
+        # another sense cannot win: a body-only match must cover at least two distinct query words.
+        best, best_score, best_shape = None, 0.0, (0, 0)
+        for t, title_st, body_ct in raw:
+            tmatch = q & title_st
+            bmatch = {s for s in q if body_ct.get(s, 0)}
+            score = (4.0 * sum(idf.get(s, 1.0) for s in tmatch)
+                     + sum(body_ct.get(s, 0) * idf.get(s, 1.0) for s in q))
+            if score > best_score:
+                best_score, best, best_shape = score, t, (len(tmatch), len(bmatch))
+        if not best or best_score < 4.0:
+            return None
+        n_title, n_body = best_shape
+        if n_title == 0 and n_body < 2:   # no title anchor and only one body word → a likely wrong sense
+            return None
     text_out = ""
     try:
         text_out = _passage_text(best["ref"])
