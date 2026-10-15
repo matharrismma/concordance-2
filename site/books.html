@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Library — Narrow Highway</title>
+<meta name="description" content="A free library — read the books on the shelf, or open your own .epub. Nothing is uploaded: your own file is read entirely in your browser and never leaves it.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap">
+<style>
+  /* THE READING ROOM — a free library in the same reverent instrument as the Console & the Parable:
+     parchment & brass by day, a candlelit cathedral by night. A book you can actually read — page, not
+     scroll. Your own epub is read ENTIRELY in your browser (store-nothing); the shelf is served free. */
+  :root{
+    --paper:#f1ece0; --panel:#e9e2d1; --ink:#1b1712; --ink-soft:#574e42; --dim:#8a8070;
+    --line:#d3c9b4; --hair:#e2dac7; --brass:#9a7623; --brass-lit:#b78f36; --copper:#9c5a36; --seal:#8c2f23;
+    --serif:Georgia,'Iowan Old Style','Palatino Linotype',serif;
+    --display:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+    --plaque:ui-sans-serif,system-ui,'Segoe UI',sans-serif;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --paper:#12121a; --panel:#1a1a23; --ink:#ece5d4; --ink-soft:#a79d8a; --dim:#746b5a;
+    --line:#2b2934; --hair:#232230; --brass:#cfa54c; --brass-lit:#e4bf6a; --copper:#c97d55; --seal:#c45a49;
+    color-scheme:dark; }}
+  :root[data-theme="dark"]{ --paper:#12121a; --panel:#1a1a23; --ink:#ece5d4; --ink-soft:#a79d8a;
+    --dim:#746b5a; --line:#2b2934; --hair:#232230; --brass:#cfa54c; --brass-lit:#e4bf6a; --copper:#c97d55;
+    --seal:#c45a49; color-scheme:dark; }
+  *{ box-sizing:border-box }
+  html,body{ margin:0; height:100%; background:var(--paper); color:var(--ink) }
+  body{ font-family:var(--serif); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility }
+  [hidden]{ display:none!important }
+  a{ color:var(--copper) }
+
+  .wrap{ max-width:54rem; margin:0 auto; height:100svh; overflow:hidden; display:flex; flex-direction:column;
+         padding:calc(.9rem + env(safe-area-inset-top)) 1.2rem calc(.9rem + env(safe-area-inset-bottom)) }
+  header.bar{ display:flex; align-items:center; justify-content:space-between; gap:1rem;
+              padding-bottom:.6rem; border-bottom:1px solid var(--brass); box-shadow:0 1px 0 var(--hair) }
+  .brand{ font-family:var(--plaque); font-size:.72rem; letter-spacing:.2em; text-transform:uppercase;
+          color:var(--dim); text-decoration:none; display:inline-flex; align-items:center; gap:.5em }
+  .brand b{ color:var(--brass); font-weight:600; letter-spacing:.16em }
+  .brand .fleur{ color:var(--brass) }
+  .btn{ font-family:var(--plaque); font-size:.67rem; letter-spacing:.14em; text-transform:uppercase;
+        background:var(--panel); color:var(--ink-soft); border:1px solid var(--brass); border-radius:3px;
+        padding:.34rem .7rem; cursor:pointer }
+  .btn:hover{ color:var(--ink) }
+  .btn.solid{ background:var(--brass); color:var(--paper) }
+
+  /* ── THE SHELF ── */
+  main.shelf{ flex:1 1 auto; min-height:0; overflow-y:auto; padding:1.6rem 0 1rem }
+  .greet{ font-family:var(--display); font-style:italic; font-size:1.5rem; color:var(--ink-soft); margin:0 0 .35rem }
+  .sub{ color:var(--dim); font-size:.95rem; margin:0 0 1.5rem }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr)); gap:1rem }
+  .card{ text-align:left; background:var(--panel); border:1px solid var(--line); border-radius:4px;
+         padding:0; cursor:pointer; overflow:hidden; display:flex; flex-direction:column; min-height:13rem;
+         box-shadow:0 1px 0 var(--hair) }
+  .card:hover{ border-color:var(--brass) }
+  .cv{ height:8.4rem; background:linear-gradient(150deg,var(--brass) 0%,var(--copper) 100%); position:relative;
+       display:flex; align-items:center; justify-content:center; padding:.6rem }
+  .cv span{ font-family:var(--display); color:var(--paper); font-weight:600; font-size:1.18rem; line-height:1.1;
+            text-align:center; text-shadow:0 1px 2px rgba(0,0,0,.25) }
+  .ct{ padding:.55rem .6rem .7rem }
+  .ct .t{ font-family:var(--display); font-weight:600; font-size:1.05rem; line-height:1.12; color:var(--ink) }
+  .ct .a{ font-family:var(--plaque); font-size:.68rem; color:var(--dim); margin-top:.2rem }
+  .drop{ margin:1.8rem 0 0; border:1.5px dashed var(--line); border-radius:4px; padding:1.5rem 1rem;
+         text-align:center; color:var(--dim); font-family:var(--display); font-style:italic; font-size:1.18rem }
+  .drop.hot{ border-color:var(--brass); color:var(--ink-soft); background:var(--panel) }
+  .drop .pick{ color:var(--copper); text-decoration:underline; cursor:pointer; font-style:normal;
+               font-family:var(--serif); font-size:1rem }
+  .privacy{ font-family:var(--plaque); font-size:.72rem; color:var(--dim); margin:.6rem 0 0 }
+
+  /* ── THE READER ── */
+  #reader{ flex:1 1 auto; display:flex; flex-direction:column; min-height:0 }
+  .rtop{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; padding:.2rem 0 .5rem }
+  .rtop .ti{ font-family:var(--display); font-size:1.15rem; font-weight:600; color:var(--ink);
+             overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  .rtop .grp{ display:flex; gap:.4rem; flex:0 0 auto }
+  .stage{ position:relative; flex:1 1 auto; min-height:0; overflow:hidden }
+  #view{ height:100%; column-fill:auto; column-gap:3rem; -webkit-column-gap:3rem;
+         font-size:1.18rem; line-height:1.66; color:var(--ink); padding:.2rem .1rem; }
+  #view h1,#view h2,#view h3{ font-family:var(--display); font-weight:600; line-height:1.12; text-wrap:balance;
+         break-after:avoid; margin:.2rem 0 .7rem }
+  #view h1{ font-size:1.9rem } #view h2{ font-size:1.5rem } #view h3{ font-size:1.25rem }
+  #view p{ margin:0 0 .85rem; text-align:justify; hyphens:auto; -webkit-hyphens:auto; orphans:2; widows:2 }
+  #view img{ max-width:100%; height:auto; display:block; margin:.6rem auto }
+  #view em,#view i{ font-style:italic } #view strong,#view b{ font-weight:700 }
+  #view blockquote{ margin:.6rem 1.2rem; color:var(--ink-soft); font-style:italic }
+  #view hr{ border:0; text-align:center; margin:1.1rem 0 }
+  #view hr::before{ content:"✦"; color:var(--brass) }
+  .tap{ position:absolute; top:0; bottom:0; width:22%; cursor:pointer; z-index:2 }
+  .tap.l{ left:0 } .tap.r{ right:0 }
+  .rbot{ display:flex; align-items:center; justify-content:space-between; gap:.8rem; padding:.55rem 0 .1rem;
+         border-top:1px solid var(--hair); font-family:var(--plaque); font-size:.72rem; color:var(--dim) }
+  .rbot .nav{ display:flex; gap:.4rem }
+  .prog{ flex:1 1 auto; text-align:center; letter-spacing:.06em }
+
+  /* ── TOC ── */
+  #toc{ position:fixed; inset:0; background:color-mix(in srgb,var(--paper) 94%, transparent); z-index:20;
+        display:flex; flex-direction:column; padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom) }
+  #toc .inner{ max-width:40rem; width:100%; margin:0 auto; padding:1.2rem; overflow:auto }
+  #toc h2{ font-family:var(--display); font-size:1.5rem; margin:.2rem 0 1rem; display:flex;
+           justify-content:space-between; align-items:center }
+  #toc ol{ list-style:none; margin:0; padding:0 }
+  #toc li{ border-bottom:1px solid var(--hair) }
+  #toc a{ display:block; padding:.6rem .2rem; color:var(--ink); text-decoration:none; font-size:1.05rem }
+  #toc a:hover{ color:var(--copper) }
+  .msg{ font-family:var(--display); font-style:italic; font-size:1.3rem; color:var(--dim); padding:2rem .2rem }
+  footer.foot{ margin-top:auto; padding-top:.9rem; border-top:1px solid var(--hair);
+               font-family:var(--plaque); font-size:.68rem; color:var(--dim) }
+  footer.foot b{ color:var(--brass) }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <a class="brand" href="index.html"><span class="fleur">✦</span> <b>Narrow Highway</b> · the library</a>
+    <div class="grp" style="display:flex;gap:.4rem">
+      <button class="btn" id="b-toc" hidden>Contents</button>
+      <button class="btn" id="b-shelf" hidden>Shelf</button>
+    </div>
+  </header>
+
+  <!-- THE SHELF -->
+  <main class="shelf" id="shelf">
+    <p class="greet">The library.</p>
+    <p class="sub">Read a book from the shelf — free, in full. Or open your own <b>.epub</b>; it is read in your browser and never leaves this device.</p>
+    <div class="grid" id="grid"><p class="msg" id="grid-msg">Opening the shelf…</p></div>
+    <div class="drop" id="drop">
+      Drag a <b>.epub</b> here to read it — <span class="pick" id="pick">or choose a file</span>.
+      <input id="file" type="file" accept=".epub,application/epub+zip" hidden>
+    </div>
+    <p class="privacy">Your own file is opened locally in your browser. Nothing is uploaded, stored, or sent anywhere.</p>
+  </main>
+
+  <!-- THE READER -->
+  <section id="reader" hidden>
+    <div class="rtop">
+      <div class="ti" id="r-title">—</div>
+      <div class="grp"><button class="btn" id="r-toc">Contents</button><button class="btn" id="r-shelf">Shelf</button></div>
+    </div>
+    <div class="stage">
+      <div class="tap l" id="tap-l" title="Previous page"></div>
+      <div class="tap r" id="tap-r" title="Next page"></div>
+      <div id="view"></div>
+    </div>
+    <div class="rbot">
+      <div class="nav"><button class="btn" id="p-prev">‹ Prev</button></div>
+      <div class="prog" id="prog">—</div>
+      <div class="nav"><button class="btn" id="p-next">Next ›</button></div>
+    </div>
+  </section>
+
+  <!-- TOC overlay -->
+  <div id="toc" hidden><div class="inner"><h2>Contents <button class="btn" id="toc-x">Close</button></h2><ol id="toc-list"></ol></div></div>
+
+  <footer class="foot">
+    A free reading room — read ours, or bring your own. <b>Store-nothing:</b> a file you open stays on your device.
+  </footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const dv = (u8,o)=> new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+const u16 = (u8,o)=> dv(u8).getUint16(o,true);
+const u32 = (u8,o)=> dv(u8).getUint32(o,true);
+const td = new TextDecoder('utf-8');
+
+// ── EPUB = a zip. Parse the central directory, inflate entries with the browser's own DecompressionStream
+//    (no library). Returns Map(path -> Uint8Array). Robust to stored (0) and deflate (8) entries.
+async function inflateRaw(u8){
+  const ds = new DecompressionStream('deflate-raw');
+  const buf = await new Response(new Blob([u8]).stream().pipeThrough(ds)).arrayBuffer();
+  return new Uint8Array(buf);
+}
+async function unzip(bytes){
+  const u8 = new Uint8Array(bytes);
+  // find End Of Central Directory (sig 0x06054b50), scanning back from the end
+  let eocd = -1;
+  for(let i=u8.length-22; i>=Math.max(0,u8.length-66000); i--){ if(u32(u8,i)===0x06054b50){ eocd=i; break; } }
+  if(eocd<0) throw new Error('not a zip (no EOCD)');
+  let count = u16(u8,eocd+10);
+  let off = u32(u8,eocd+16);           // offset of central directory
+  const files = new Map();
+  for(let n=0; n<count; n++){
+    if(u32(u8,off)!==0x02014b50) break;
+    const method = u16(u8,off+10);
+    const csize  = u32(u8,off+20);
+    const fnLen  = u16(u8,off+28);
+    const exLen  = u16(u8,off+30);
+    const cmLen  = u16(u8,off+32);
+    const lho    = u32(u8,off+42);
+    const name   = td.decode(u8.subarray(off+46, off+46+fnLen));
+    // local header: data starts after its own (possibly different) name+extra lengths
+    const lfn = u16(u8,lho+26), lex = u16(u8,lho+28);
+    const start = lho + 30 + lfn + lex;
+    const comp = u8.subarray(start, start+csize);
+    files.set(name, method===0 ? comp.slice() : await inflateRaw(comp));
+    off += 46 + fnLen + exLen + cmLen;
+  }
+  return files;
+}
+
+// ── parse the OPF: title/author, the spine (reading order) and the manifest (id -> href) ──
+function xml(bytes){ return new DOMParser().parseFromString(td.decode(bytes), 'application/xml'); }
+function dirOf(p){ const i=p.lastIndexOf('/'); return i<0?'':p.slice(0,i+1); }
+function resolve(base, href){
+  href = href.split('#')[0];
+  if(!href) return '';
+  const parts = (base+href).split('/'); const out=[];
+  for(const s of parts){ if(s==='.'||s==='') continue; if(s==='..') out.pop(); else out.push(s); }
+  return out.join('/');
+}
+async function openEpub(bytes, fallbackTitle){
+  const files = await unzip(bytes);
+  const container = xml(files.get('META-INF/container.xml'));
+  const opfPath = container.querySelector('rootfile').getAttribute('full-path');
+  const base = dirOf(opfPath);
+  const opf = xml(files.get(opfPath));
+  const title = (opf.querySelector('metadata title, metadata > *|title')?.textContent
+                 || opf.getElementsByTagName('dc:title')[0]?.textContent || fallbackTitle || 'Untitled').trim();
+  const author = (opf.getElementsByTagName('dc:creator')[0]?.textContent || '').trim();
+  // manifest: id -> {href(abs), type, props}
+  const man = {};
+  opf.querySelectorAll('manifest > item').forEach(it=>{
+    man[it.getAttribute('id')] = { href: resolve(base, it.getAttribute('href')),
+      type: it.getAttribute('media-type')||'', props: it.getAttribute('properties')||'' };
+  });
+  // spine: ordered absolute hrefs of the reading documents
+  const spine = [];
+  opf.querySelectorAll('spine > itemref').forEach(ir=>{
+    const m = man[ir.getAttribute('idref')]; if(m && /xhtml|html|xml/.test(m.type)) spine.push(m.href);
+  });
+  // TOC: epub3 nav first, else ncx
+  let toc = [];
+  const navItem = Object.values(man).find(m=>/\bnav\b/.test(m.props));
+  if(navItem && files.has(navItem.href)){
+    const navDoc = xml(files.get(navItem.href));
+    const navEl = [...navDoc.querySelectorAll('nav')].find(n=>(n.getAttribute('epub:type')||n.getAttribute('type'))==='toc') || navDoc.querySelector('nav');
+    const nb = dirOf(navItem.href);
+    navEl && navEl.querySelectorAll('a').forEach(a=> toc.push({ label:a.textContent.trim(), href:resolve(nb, a.getAttribute('href')) }));
+  }
+  if(!toc.length){
+    const ncx = Object.values(man).find(m=>/ncx/.test(m.type));
+    if(ncx && files.has(ncx.href)){
+      const nd = xml(files.get(ncx.href)); const nb = dirOf(ncx.href);
+      nd.querySelectorAll('navPoint').forEach(np=>{ const t=np.querySelector('navLabel text'); const c=np.querySelector('content');
+        if(t&&c) toc.push({ label:t.textContent.trim(), href:resolve(nb, c.getAttribute('src')) }); });
+    }
+  }
+  return { files, base, title, author, spine, toc };
+}
+
+// ── render a spine document into the page view, drawing images from the zip ──
+const blobUrls = [];
+function blobFor(book, abs){
+  const bytes = book.files.get(abs); if(!bytes) return '';
+  let mime = 'application/octet-stream';
+  if(/\.(png)$/i.test(abs)) mime='image/png'; else if(/\.(jpe?g)$/i.test(abs)) mime='image/jpeg';
+  else if(/\.(gif)$/i.test(abs)) mime='image/gif'; else if(/\.(svg)$/i.test(abs)) mime='image/svg+xml';
+  else if(/\.(webp)$/i.test(abs)) mime='image/webp';
+  const url = URL.createObjectURL(new Blob([bytes], {type:mime})); blobUrls.push(url); return url;
+}
+function renderChapter(book, href){
+  for(const u of blobUrls.splice(0)) URL.revokeObjectURL(u);
+  const bytes = book.files.get(href); const view = $('view');
+  if(!bytes){ view.innerHTML = '<p class="msg">(this chapter could not be read)</p>'; return; }
+  const doc = new DOMParser().parseFromString(td.decode(bytes), 'application/xhtml+xml');
+  const body = doc.body || doc.querySelector('body') || doc.documentElement;
+  // strip anything we won't honor; we apply our own typography
+  body.querySelectorAll('script,style,link,title,head').forEach(n=>n.remove());
+  const cdir = dirOf(href);
+  body.querySelectorAll('img').forEach(img=>{ const s=img.getAttribute('src'); if(s && !/^https?:|^data:/.test(s)) img.src = blobFor(book, resolve(cdir, s)); });
+  body.querySelectorAll('image').forEach(im=>{ const s=im.getAttribute('xlink:href')||im.getAttribute('href'); if(s){ const u=blobFor(book, resolve(cdir,s)); const i=document.createElement('img'); i.src=u; im.replaceWith(i);} });
+  body.querySelectorAll('a[href]').forEach(a=>{ const h=a.getAttribute('href'); if(h && !/^https?:|^mailto:/.test(h)) a.removeAttribute('href'); else a.target='_blank'; });
+  view.innerHTML = body.innerHTML;
+}
+
+// ── the paginated reader (columns the width of the page; flip by translating) ──
+const R = { book:null, idx:0, page:0, pages:1 };
+function layout(){
+  const view=$('view'), stage=view.parentElement;
+  const w = stage.clientWidth;
+  view.style.columnWidth = w+'px'; view.style.webkitColumnWidth = w+'px';
+  view.style.height = stage.clientHeight+'px';
+  view.scrollLeft = 0;
+  // total pages = scrollWidth / (page + gap). gap is 3rem; measure precisely from scrollWidth.
+  const gap = parseFloat(getComputedStyle(view).columnGap)||48;
+  R.pages = Math.max(1, Math.round((view.scrollWidth + gap) / (w + gap)));
+}
+function showPage(p){
+  const view=$('view'), stage=view.parentElement;
+  R.page = Math.max(0, Math.min(p, R.pages-1));
+  const w = stage.clientWidth; const gap = parseFloat(getComputedStyle(view).columnGap)||48;
+  view.style.transform = `translateX(${ -R.page*(w+gap) }px)`;
+  $('prog').textContent = `${chapterLabel()} · ${R.page+1}/${R.pages}`;
+  savePos();
+}
+function chapterLabel(){
+  const t = R.book.toc.find(x=>x.href===R.book.spine[R.idx]);
+  return t ? t.label : `Chapter ${R.idx+1} of ${R.book.spine.length}`;
+}
+function goChapter(i, toEnd){
+  R.idx = Math.max(0, Math.min(i, R.book.spine.length-1));
+  renderChapter(R.book, R.book.spine[R.idx]);
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ layout(); showPage(toEnd ? R.pages-1 : 0); }); });
+}
+function nextPage(){ if(R.page < R.pages-1) showPage(R.page+1); else if(R.idx < R.book.spine.length-1) goChapter(R.idx+1,false); }
+function prevPage(){ if(R.page > 0) showPage(R.page-1); else if(R.idx > 0) goChapter(R.idx-1,true); }
+function openToChapterHref(href){
+  const i = R.book.spine.indexOf(href.split('#')[0]);
+  goChapter(i<0?R.idx:i, false);
+}
+
+// position memory (per book, best-effort)
+function bookKey(){ return 'nh-read:'+(R.book?.title||'')+':'+(R.book?.spine.length||0); }
+function savePos(){ try{ localStorage.setItem(bookKey(), JSON.stringify({idx:R.idx,page:R.page})); }catch(e){} }
+function loadPos(){ try{ return JSON.parse(localStorage.getItem(bookKey())||'null'); }catch(e){ return null; } }
+
+async function startBook(bytes, fallbackTitle){
+  try{
+    $('grid-msg') && ($('grid-msg').textContent='Opening…');
+    const book = await openEpub(bytes, fallbackTitle);
+    if(!book.spine.length) throw new Error('no readable chapters found');
+    R.book = book;
+    $('r-title').textContent = book.title + (book.author?(' · '+book.author):'');
+    $('shelf').hidden = true; $('reader').hidden = false; $('b-shelf').hidden=false; $('b-toc').hidden=false;
+    buildToc();
+    const pos = loadPos();
+    goChapter(pos?pos.idx:0, false);
+    if(pos && pos.page) requestAnimationFrame(()=>requestAnimationFrame(()=>showPage(pos.page)));
+  }catch(err){
+    toShelf();
+    $('grid-msg') && ($('grid-msg').textContent = 'Could not open that file: '+err.message);
+  }
+}
+function buildToc(){
+  const list = $('toc-list'); list.innerHTML='';
+  const items = R.book.toc.length ? R.book.toc : R.book.spine.map((h,i)=>({label:'Chapter '+(i+1),href:h}));
+  items.forEach(it=>{ const li=document.createElement('li'); const a=document.createElement('a');
+    a.textContent=it.label||'(untitled)'; a.href='#';
+    a.onclick=e=>{ e.preventDefault(); $('toc').hidden=true; openToChapterHref(it.href); };
+    li.appendChild(a); list.appendChild(li); });
+}
+function toShelf(){ $('reader').hidden=true; $('shelf').hidden=false; $('b-shelf').hidden=true; $('b-toc').hidden=true; }
+
+// ── the shelf (our books, served free) ──
+async function loadShelf(){
+  try{
+    const r = await fetch('library/index.json', {cache:'no-cache'});
+    if(!r.ok) throw 0;
+    const data = await r.json();
+    const books = (data && data.books) || [];
+    const grid = $('grid'); grid.innerHTML='';
+    if(!books.length){ grid.innerHTML='<p class="msg">The shelf is being stocked.</p>'; return; }
+    books.forEach(b=>{
+      const c = document.createElement('button'); c.className='card';
+      c.innerHTML = `<div class="cv"><span>${esc(b.title)}</span></div>`
+        + `<div class="ct"><div class="t">${esc(b.title)}</div><div class="a">${esc(b.author||'')}</div></div>`;
+      c.onclick = async ()=>{ c.querySelector('.t').textContent='Opening…';
+        try{ const resp=await fetch('library/'+encodeURIComponent(b.file)); const buf=await resp.arrayBuffer(); startBook(buf, b.title); }
+        catch(e){ c.querySelector('.t').textContent='Could not open'; } };
+      grid.appendChild(c);
+    });
+  }catch(e){
+    $('grid').innerHTML = '<p class="msg">The shelf loads on the live site. Meanwhile, open your own .epub below.</p>';
+  }
+}
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+// ── wiring ──
+$('pick').onclick = ()=> $('file').click();
+$('file').onchange = e=>{ const f=e.target.files[0]; if(f) f.arrayBuffer().then(b=>startBook(b, f.name.replace(/\.epub$/i,''))); };
+const drop=$('drop');
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('hot');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('hot');}));
+drop.addEventListener('drop', e=>{ const f=e.dataTransfer.files[0]; if(f&&/\.epub$/i.test(f.name)) f.arrayBuffer().then(b=>startBook(b, f.name.replace(/\.epub$/i,''))); });
+$('r-shelf').onclick=$('b-shelf').onclick=toShelf;
+$('r-toc').onclick=$('b-toc').onclick=()=>{ $('toc').hidden=false; };
+$('toc-x').onclick=()=>{ $('toc').hidden=true; };
+$('p-next').onclick=$('tap-r').onclick=nextPage;
+$('p-prev').onclick=$('tap-l').onclick=prevPage;
+document.addEventListener('keydown', e=>{ if($('reader').hidden) return;
+  if(e.key==='ArrowRight'||e.key===' '){ e.preventDefault(); nextPage(); }
+  else if(e.key==='ArrowLeft'){ e.preventDefault(); prevPage(); }
+  else if(e.key==='Escape'){ if(!$('toc').hidden) $('toc').hidden=true; else toShelf(); } });
+let rz; window.addEventListener('resize', ()=>{ if($('reader').hidden) return; clearTimeout(rz); rz=setTimeout(()=>{ const p=R.page; layout(); showPage(Math.min(p,R.pages-1)); }, 150); });
+
+loadShelf();
+</script>
+</body>
+</html>
