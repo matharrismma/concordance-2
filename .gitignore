@@ -157,3 +157,6 @@ data/pd_texts/
 # results (frontdoor.json) and the floor it ratchets against are box-generated and stay untracked.
 !data/frontdoor_claims.json
 !data/recall_phrasings.json
+
+# published book binaries — box-side, never committed (metadata index IS tracked)
+site/library/*.epub

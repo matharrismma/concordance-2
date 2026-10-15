@@ -1,0 +1,44 @@
+{
+  "books": [
+    {
+      "title": "Apokalypsis",
+      "author": "M.R. Harris",
+      "file": "apokalypsis.epub"
+    },
+    {
+      "title": "Molasses",
+      "author": "M. R. Harris",
+      "file": "molasses.epub"
+    },
+    {
+      "title": "Tell Me You Got That",
+      "author": "M.R. Harris",
+      "file": "tell-me-you-got-that.epub"
+    },
+    {
+      "title": "The Dancing Plague",
+      "author": "M.R. Harris",
+      "file": "the-dancing-plague.epub"
+    },
+    {
+      "title": "The Door",
+      "author": "M.R. Harris",
+      "file": "the-door.epub"
+    },
+    {
+      "title": "Kings of Appalachia: The Keeping",
+      "author": "M.R. Harris",
+      "file": "kings-of-appalachia-the-keeping.epub"
+    },
+    {
+      "title": "Kings of Appalachia: The Line",
+      "author": "M.R. Harris",
+      "file": "kings-of-appalachia-the-line.epub"
+    },
+    {
+      "title": "Treebound",
+      "author": "M. R. Harris",
+      "file": "treebound.epub"
+    }
+  ]
+}
