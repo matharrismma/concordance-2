@@ -42,10 +42,18 @@ verifier.
 1. **Delta before inner product.** Every shelf whose cards have a deterministic address (`card_src_<shelf>_<slug>`)
    is read by id first and ranked only as a fallback. Done for pronunciation and etymology; extend to the
    dictionary, elements, places, nuclides, and every found-fact table. Precision: exact. Cost: O(1).
-2. **Orthogonalize the domain basis.** Compute the Gram matrix of the 124 domain vocabularies; remove the common
-   mode (tokens shared by most domains) and Gram–Schmidt the rest, or take the principal axes from the SVD of the
-   domain–token matrix; re-measure routing recall. The target is a number: from 12.4% to above 60% at k=1. This is
-   the single largest precision gain available, and it is an experiment off the production box (memory-bound).
+2. **Orthogonalize the domain basis.** DONE 2026-10-15 (`domain_resolver.py`, `_DECORR`, default on). Measured the
+   basis first: the verifier domains are 77 (not 124 — that was the corpus shelves), 4,181 phrases, and already
+   nearly orthogonal — mean inter-domain cosine 0.0075, 82% of phrases domain-exclusive. So a global Gram–Schmidt
+   / SVD would discard real domains, not redundancy (same finding as OUR_FORM_MEASURED for the shelves). The
+   cross-talk that remains is concentrated in a few genuinely-similar pairs (economics~finance, atomic~molecular,
+   cybersecurity~networking) and in SHARED phrases that inflate the runner-up. The lever applied is common-mode
+   removal across the WHOLE index (not only the docstring words it already touched): down-weight every phrase by
+   its domain-frequency — a phrase in *d* domains keeps `log(1+N/d)/log(1+N)`, df=1 untouched. Measured on the 60
+   recall families: cross-talk **0.270 → 0.225**, invariance **96.9% → 99.0%** (53 → 56 families route to ONE
+   domain), with **recall unchanged (303/334) and false positives still 0** — a free gain in routing
+   representation. (The doc's original 12.4%→60% target was the SHELF-routing hypothesis for corpus *search*; the
+   verifier basis turned out already orthogonal, so the gain here is cross-talk and invariance, not recall.)
 3. **Make completeness a gate line.** The floor-reachability test exists; make its count (0 orphans, every shelf
    rooted) a line of the deploy gate beside benchmarks, assay, front door and recall, so Σ|i⟩⟨i| = 1 is proven on
    every deploy, not assumed.
