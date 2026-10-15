@@ -675,6 +675,16 @@ def _secular_tools() -> List[dict]:
              "text": {"type": "string",
                       "description": "anything — a claim, a question, or what is on your mind"}},
              "required": ["text"]}},
+        {"name": "parable",
+         "description": ("Bring a situation in your own words; receive the ONE of Christ's parables whose "
+                         "SHAPE fits it — the story verbatim (the Prodigal Son, the Good Samaritan, the "
+                         "Talents, the Sower, Luke 15 / Matthew 13 / Matthew 25 ...), his OWN explanation "
+                         "where he gave one, and one next step. The WALK door's final register: a story you "
+                         "walk into and find yourself inside. Found and cited, never generated; honest "
+                         "silence where no single parable fits (not every situation has one story)."),
+         "inputSchema": {"type": "object", "properties": {
+             "text": {"type": "string", "description": "the situation, in your own words"}},
+             "required": ["text"]}},
         # THE CANDIDATE ENGINE (task #135, docs/RED_TEAM_CANDIDATE_ENGINE_2026-08-05.md).
         # Zone C between any generator and the moat: commit the complete raw set FIRST, then
         # narrow under a pre-registered policy, then seal the whole path — winners and losers.
@@ -1701,6 +1711,19 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         # cloud — the wise men's craft + their verbatim PD words). It isn't just one man's seeing.
         from .. import discern as _discern
         return _discern.served(str(args.get("text") or ""))
+    if name == "parable":
+        # The WALK door's final register: the one of Christ's parables whose shape fits the situation,
+        # walked (meet -> the story verbatim -> his own turn -> one step). Found + cited; None -> honest
+        # silence. The same register the HTTP /console attaches to any brought situation.
+        from .. import parable as _parable
+        text = str(args.get("text") or "")
+        if not text.strip():
+            return {"error": "text required — the situation, in your own words"}
+        w = _parable.walk(text)
+        if not w:
+            return {"found": False, "note": ("no single parable fits this one — not every situation has "
+                                             "one story. Bring it to `ask`, and the Word may meet it another way.")}
+        return {"found": True, **w}
     if name == "pronounce":
         from .. import pronounce as _pron  # neutral phonetic helper, both surfaces
         return _pron.guide(args.get("text", ""))
