@@ -15,9 +15,21 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from concordance import parable, teachings  # noqa: E402
 
+# Passage resolution needs the WEB Bible data (data/bible_en.jsonl), which is gitignored and absent in a
+# bare checkout / CI. The three tests that resolve verbatim text skip cleanly there; the routing and
+# 0-false-positive tests use resolve=False and always run.
+_HAS_BIBLE = len((parable._passage("John 3:16") or "").strip()) > 10
+
+
+def _need_bible():
+    if not _HAS_BIBLE:
+        import pytest
+        pytest.skip("Bible data (data/bible_en.jsonl) not present — passage resolution unavailable")
+
 
 def test_every_story_and_turn_resolves_verbatim():
     """No hollow reference: every parable's story resolves, and every turn Christ gave resolves too."""
+    _need_bible()
     for p in parable._PARABLES:
         story = parable._passage(p["story_ref"])
         assert len(story.strip()) > 40, f"{p['id']} story did not resolve: {p['story_ref']}"
@@ -65,6 +77,7 @@ def test_zero_false_positive_on_factual_and_non_parable():
 
 def test_walk_is_found_and_cited_not_generated():
     """walk() carries the verbatim story + Christ's own turn, cited; composes only the fixed frames."""
+    _need_bible()
     w = parable.walk("I've wasted my life and I'm ashamed to come home to God")
     assert w and w["id"] == "par_prodigal"
     assert w["story"]["ref"] == "Luke 15:11-32"
@@ -79,6 +92,7 @@ def test_walk_is_found_and_cited_not_generated():
 
 def test_a_sits_whole_parable_has_no_turn():
     """A similitude Christ left to sit (the mustard seed) walks with no turn and the 'sit' invitation."""
+    _need_bible()
     w = parable.walk("my faith feels too small to matter")
     assert w and w["id"] == "par_mustard"
     assert w["turn"] is None and w["sit"]

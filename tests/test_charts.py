@@ -39,7 +39,7 @@ def _graph():
 
 def test_the_seed_validates_and_every_chart_lands_on_a_real_node():
     assert SC._validate() == []
-    assert len(SC.CHARTS) == 14
+    assert len(SC.CHARTS) == 23
     nodes = SC.known_nodes()
     for c in SC.CHARTS:
         assert c["node"] in nodes, c["key"]
@@ -98,6 +98,6 @@ def test_every_chart_card_id_is_unique_and_merges_idempotently(monkeypatch):
     assert S1.main() == 0 and S2.main() == 0 and S3.main() == 0 and SC.main() == 0
     ids = [json.loads(l)["id"] for l in (d / "chain_cards.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
     assert len(ids) == len(set(ids))
-    assert sum(1 for i in ids if i.startswith("card_chart_")) == 14
+    assert sum(1 for i in ids if i.startswith("card_chart_")) == 23
     before = (d / "chain_cards.jsonl").read_bytes()
     assert SC.main() == 0 and (d / "chain_cards.jsonl").read_bytes() == before
