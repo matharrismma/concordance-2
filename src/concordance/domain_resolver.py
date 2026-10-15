@@ -266,8 +266,10 @@ def _build() -> None:
     if _INCLUDE_DOCSTRINGS:
         for dom, counts in doc_terms.items():
             for w, c in counts.items():
-                if df[w] >= max(6, ndom // 4):
-                    continue   # appears all over -> generic, skip
+                if df[w] >= max(6, ndom // 10):
+                    continue   # appears in many domains -> generic prose/code leak, skip at the source
+                               # (the tuning queue showed canonical/match/engine/physical/arithmetic...
+                               #  were routing noise; no real term spans 7+ of 77 unrelated domains)
                 idf = math.log(ndom / (df[w] + 0.5))
                 _add(_INDEX, w, dom, min(1.0, 0.25 * idf) + 0.05 * min(c, 3))
 
