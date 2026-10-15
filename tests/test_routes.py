@@ -27,6 +27,9 @@ from concordance.config import EngineConfig  # noqa: E402
 # registry refactor. The derived sets must equal these exactly.
 GOLDEN_API_GET = {
     "/health",
+    # synced 2026-10-15 (golden drift caught by CI): the cross-reference book map, the roots/verse-keying
+    # door, and the papers reference — all live GET routes added earlier without updating this golden.
+    "/xrefs/books", "/roots", "/papers",
     # The thesaurus reference door (2026-09-26): synonyms + broader terms from data/thesaurus.db, a
     # bounded word lookup like /pronounce; the same WordNet relation sharpens /search recall.
     "/thesaurus",
@@ -188,6 +191,8 @@ GOLDEN_RATELIMITED = {
 
 
 GOLDEN_READ_LIMITED = {
+    "/xrefs/books", "/roots", "/papers",   # synced 2026-10-15: the cross-reference book map, the roots/
+    # verse-keying door, and the papers reference each scan the keeping — reads, bounded like their siblings
     "/chains",   # 2026-10-08: bounded BFS over the keeping — read-limited like its siblings (review)   # every route that scans/sorts the whole corpus per request — the read bucket
     "/seals",   # deliberate addition (THE SEAL LEDGER — a read, the generous bucket; 2026-10-03)
     "/sync/manifest", "/sync/ledger", "/sync/file",   # deliberate addition (node sync hashes the keeping — a read; 2026-10-04)

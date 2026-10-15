@@ -106,6 +106,10 @@ def test_every_page_offers_a_way_home():
               # its own nav, not the shared desk control. systems.html/prophecy.html/map.html are
               # self-contained surfaces with their own nav (map.html is in the Ctrl-K palette).
               "com.html", "systems.html", "prophecy.html", "map.html",
+              # the reading surfaces carry their own E-Ink brand-home link, not the shared nh-home.js:
+              # books.html (the Library / reading room), parable.html (the WALK door's parable), both
+              # reached from the Console footer / direct URL, and reader.html (the tortoise source-reader).
+              "books.html", "parable.html", "reader.html", "crossrefs.html",
               # harmony.html + timeline.html are self-contained scripture study surfaces with their
               # own nav (modeled on prophecy.html), reached from the Bible study-desk nav (bible.html),
               # not the shared witness home control.
@@ -205,6 +209,9 @@ def test_the_palette_reaches_every_public_page():
                # contextual reader, not the nav. crossing.html — an Atlas single-view (geometry / the
                # logarithm), linked from com.html ("geometry, the crossing") like its torus/spiral siblings.
                "reader.html", "crossing.html",
+               # books.html (the Library / reading room) + parable.html (the WALK door's parable) — reached
+               # from the Console footer / the WALK flow / direct URL; crossrefs.html — a reference surface.
+               "books.html", "parable.html", "crossrefs.html",
                # concordance.html — the LIVE .com front door, served at / on the secular surface by
                # home_for() (Matt, 2026-09-21: "make it the front door"). A human reaches it as the domain
                # root, never a /concordance.html <a href> — the same surface-routing excuse as com.html.
