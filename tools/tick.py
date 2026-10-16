@@ -3591,6 +3591,441 @@ def stick_document_validation() -> int:
     return 0
 
 
+def stick_ephemeris() -> int:
+    """EPHEMERIS - the sky's calendar, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
+    ephemeris.EPH_VERIFY: the Julian Day of J2000.0 and of the first Gregorian day; four eclipses sealed as the new
+    and full moons they must be; the four 2024 equinoxes and solstices to the day; sunrise and sunset for New York
+    on 2025-07-04 and for the equator at the equinox; and Kepler's third law in its gravitational form for the Earth,
+    a geostationary satellite, and the Moon - whose two-body period falls 0.14 percent short of the sidereal month,
+    the Sun's perturbation, kept as the method's stated bound. Meeus's algorithms are CITED at their stated
+    precision; the dates are SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def ep(spec):
+        return _seal_through("ephemeris", "EPH_VERIFY", spec)
+
+    NYC = {"lat": 40.7128, "lon": -74.0060, "tz_offset_hours": -4}
+    S = {
+        "jd_j2000": ep({"iso_date": "2000-01-01", "claimed_julian_day": 2451545.0}),
+        "jd_gregorian": ep({"iso_date": "1582-10-15", "claimed_julian_day": 2299161.0}),
+        "new_moon_2024": ep({"iso_date": "2024-04-08", "claimed_moon_phase": "new"}),
+        "new_moon_2017": ep({"iso_date": "2017-08-21", "claimed_moon_phase": "new"}),
+        "full_moon_2022": ep({"iso_date": "2022-11-08", "claimed_moon_phase": "full"}),
+        "full_moon_2019": ep({"iso_date": "2019-01-21", "claimed_moon_phase": "full"}),
+        "march_equinox": ep({"year": 2024, "event": "vernal_equinox", "claimed_event_iso": "2024-03-20"}),
+        "june_solstice": ep({"year": 2024, "event": "summer_solstice", "claimed_event_iso": "2024-06-20"}),
+        "september_equinox": ep({"year": 2024, "event": "autumnal_equinox", "claimed_event_iso": "2024-09-22"}),
+        "december_solstice": ep({"year": 2024, "event": "winter_solstice", "claimed_event_iso": "2024-12-21"}),
+        "sun_nyc": ep({"iso_date": "2025-07-04", **NYC, "claimed_sunrise_hour": 5.52, "claimed_sunset_hour": 20.52}),
+        "sun_equator": ep({"iso_date": "2024-03-20", "lat": 0.0, "lon": 0.0, "tz_offset_hours": 0,
+                           "claimed_sunrise_hour": 6.0, "claimed_sunset_hour": 18.0}),
+        "orbit_earth": ep({"orbit_semi_major_m": 1.496e11, "orbit_central_mass_kg": 1.989e30,
+                           "claimed_orbital_period_s": 3.156e7}),
+        "orbit_geostationary": ep({"orbit_semi_major_m": 4.2164e7, "orbit_central_mass_kg": 5.9722e24,
+                                   "claimed_orbital_period_s": 86164.0}),
+        "orbit_moon": ep({"orbit_semi_major_m": 3.844e8, "orbit_central_mass_kg": 6.0457e24,
+                          "claimed_orbital_period_s": 2.3574e6}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "ephemeris dates")
+    sid = TS.create("Ephemeris - the sky's calendar, sealed",
+                    statement="Julian days, lunar phases, the equinoxes and solstices, sunrise and sunset, and "
+                              "orbital periods are closed-form functions of the date and the orbit.",
+                    field="ephemeris",
+                    references=["J. Meeus, Astronomical Algorithms, 2nd ed. (1998), ch. 7, 25, 27, 49",
+                                "NASA GSFC eclipse catalogue (F. Espenak): 2017-08-21, 2024-04-08 solar; "
+                                "2019-01-21, 2022-11-08 lunar",
+                                "USNO, Earth's Seasons - equinoxes, solstices (2024)",
+                                "J. Kepler, Harmonices Mundi (1619), Book V - the third law"])["id"]
+    EP = "sealed through ephemeris.EPH_VERIFY"
+    marks = [
+        ("instance", f"[J2000.0, SEALED] 2000-01-01 at noon UT is Julian Day 2,451,545.0 ({EP}; Meeus ch. 7) - the "
+                     "epoch every modern star catalogue is referred to. The Julian Day counts days since noon on "
+                     "1 January 4713 BC (Scaliger 1583), a single integer line through every calendar.", S["jd_j2000"]),
+        ("instance", f"[the first Gregorian day, SEALED] 1582-10-15, the day after 1582-10-04 in the reform, is JD "
+                     f"2,299,161.0 ({EP}). Ten dates were skipped; the day count was not - which is why astronomers "
+                     "count days and not dates.", S["jd_gregorian"]),
+        ("instance", f"[the 2024 eclipse was a new moon, SEALED] 2024-04-08 - the total solar eclipse across North "
+                     f"America - falls at the new moon ({EP}: mean lunar age within 1.5 d of 0). A solar eclipse is a "
+                     "new moon by definition: the Moon between us and the Sun.", S["new_moon_2024"]),
+        ("instance", f"[and 2017, SEALED] 2017-08-21, the 'Great American' eclipse, is a new moon ({EP}).", S["new_moon_2017"]),
+        ("instance", f"[a lunar eclipse is a full moon, SEALED] 2022-11-08, total lunar eclipse: full moon ({EP}). The "
+                     "Earth between Moon and Sun - the opposite configuration, half a synodic month from new.",
+         S["full_moon_2022"]),
+        ("instance", f"[and 2019, SEALED] 2019-01-21, the total lunar eclipse: full moon ({EP}).", S["full_moon_2019"]),
+        ("instance", f"[the March equinox, SEALED] 2024-03-20 ({EP}; USNO: 03:06 UT).", S["march_equinox"]),
+        ("instance", f"[the June solstice, SEALED] 2024-06-20 ({EP}; USNO: 20:51 UT) - the earliest June solstice since "
+                     "1796, the leap-cycle drift at its turn.", S["june_solstice"]),
+        ("instance", f"[the September equinox, SEALED] 2024-09-22 ({EP}; USNO: 12:44 UT).", S["september_equinox"]),
+        ("instance", f"[the December solstice, SEALED] 2024-12-21 ({EP}; USNO: 09:20 UT). Four dates a year the "
+                     "tilted Earth's orbit fixes; Meeus's Table 27 gives them to the day for a thousand years either way.",
+         S["december_solstice"]),
+        ("instance", f"[sunrise in New York, SEALED] 2025-07-04 at 40.71 N, 74.01 W, EDT: sunrise 5:31 (5.52 h), sunset "
+                     f"8:31 pm (20.52 h) ({EP}, within the verifier's 0.5 h window; USNO gives 5:31 and 20:31). The "
+                     "geometry of a tilted axis, with refraction's 0.833 deg added to the horizon.", S["sun_nyc"]),
+        ("instance", f"[the equator at the equinox, SEALED] 0 N, 0 E on 2024-03-20: sunrise 6:00, sunset 18:00 ({EP}). "
+                     "Equal night - with the refraction allowance the day runs about 12 h 7 min, which is why the date of "
+                     "truly equal day and night (the equilux) falls a few days before the equinox.", S["sun_equator"]),
+        ("instance", f"[Kepler's third law - the Earth, SEALED] a = 1.496e11 m about 1.989e30 kg: T = 2 pi sqrt(a^3 / G M) "
+                     f"= 3.156e7 s, one year ({EP}, through G).", S["orbit_earth"]),
+        ("instance", f"[the geostationary orbit, SEALED] a = 42,164 km about the Earth (5.9722e24 kg): T = 86,164 s, "
+                     f"one sidereal day ({EP}). A satellite there hangs over one meridian - the orbit Clarke proposed "
+                     "in 1945, placed by Kepler's law and G.", S["orbit_geostationary"]),
+        ("instance", f"[the Moon - the two-body period, SEALED] a = 384,400 km about Earth + Moon (6.0457e24 kg): T = "
+                     f"2.3574e6 s = 27.28 d ({EP}). The observed sidereal month is 27.3217 d = 2.3606e6 s - 0.14 percent "
+                     "longer. The discordance is the Sun's pull on the Moon, which the two-body formula omits: it "
+                     "indicts the METHOD at that precision, not G or the distance. The honest number is sealed; the "
+                     "sidereal month is cited.", S["orbit_moon"]),
+        ("postulate", "[the precision, CITED] Meeus's low-precision forms are used as stated: the equinox table "
+                      "without its periodic terms (good to about 2 days), the sunrise formula without the equation of "
+                      "time (about 0.5 h), the mean lunar age from a reference new moon (about 1.5 d). Each window is "
+                      "the stated precision and every claim above is judged at it; a claim finer than the method is "
+                      "declined, never waved through.",
+         {"source": "J. Meeus, Astronomical Algorithms (1998) ch. 25, 27, 49; src/concordance/verifiers/ephemeris.py"}),
+        ("note", "[on the one map] The ephemeris is the calendar (card_floor_the_calendar: the Julian day line, the "
+                 "Gregorian reform) read off the orbits (card_floor_astronomy: phases, eclipses, the seasons) under "
+                 "gravity (Kepler's third law in Newton's form, through G). Everything here is time as the sky keeps "
+                 "it - the clock we are inside of.",
+         {"source": "the one map; card_floor_the_calendar, card_floor_astronomy; the calendar stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py ephemeris")
+    return 0
+
+
+def stick_exercise_science() -> int:
+    """EXERCISE SCIENCE - the body's arithmetic, sealed (issue #11, 2026-10-16: reach, down the domain list).
+    Through exercise_science.EX_VERIFY: MET values from the Compendium of Physical Activities, energy expenditure
+    kcal = MET x kg x h, the Tanaka maximum heart rate 208 - 0.7 age at three ages, and Karvonen training zones on
+    the heart-rate reserve. The Compendium and the Tanaka regression are empirical and CITED as postulates; the
+    arithmetic they feed is SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def ex(spec):
+        return _seal_through("exercise_science", "EX_VERIFY", spec)
+
+    S = {
+        "met_running": ex({"activity": "running_6mph", "claimed_met": 9.8}),
+        "met_walking": ex({"activity": "walking_3mph", "claimed_met": 3.3}),
+        "met_sitting": ex({"activity": "sitting_quietly", "claimed_met": 1.3}),
+        "kcal_run": ex({"claimed_met": 9.8, "weight_kg": 70, "duration_hours": 0.5, "claimed_kcal": 343}),
+        "kcal_walk": ex({"claimed_met": 3.3, "weight_kg": 70, "duration_hours": 1.0, "claimed_kcal": 231}),
+        "hrmax_30": ex({"age_years": 30, "claimed_max_hr": 187}),
+        "hrmax_40": ex({"age_years": 40, "claimed_max_hr": 180}),
+        "hrmax_60": ex({"age_years": 60, "claimed_max_hr": 166}),
+        "zone_30": ex({"age_years": 30, "resting_hr": 60, "intensity_low": 0.5, "intensity_high": 0.7,
+                       "claimed_zone_low_bpm": 124, "claimed_zone_high_bpm": 149}),
+        "zone_50": ex({"age_years": 50, "resting_hr": 70, "intensity_low": 0.6, "intensity_high": 0.8,
+                       "claimed_zone_low_bpm": 132, "claimed_zone_high_bpm": 152}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "exercise-science numbers")
+    sid = TS.create("Exercise science - METs, calories and heart-rate zones, sealed",
+                    statement="Energy cost and training intensity are arithmetic over three measured inputs: the "
+                              "activity's MET, the body's mass, and the heart's range.",
+                    field="exercise_science",
+                    references=["B. E. Ainsworth et al., 2011 Compendium of Physical Activities, Med. Sci. Sports "
+                                "Exerc. 43 (2011) 1575",
+                                "H. Tanaka, K. D. Monahan, D. R. Seals, Age-predicted maximal heart rate revisited, "
+                                "J. Am. Coll. Cardiol. 37 (2001) 153",
+                                "M. J. Karvonen, E. Kentala, O. Mustala, Ann. Med. Exp. Biol. Fenn. 35 (1957) 307"])["id"]
+    EX = "sealed through exercise_science.EX_VERIFY"
+    marks = [
+        ("instance", f"[running at 6 mph, SEALED] 9.8 MET ({EX}; Compendium code 12050). One MET is resting metabolism, "
+                     "3.5 mL of oxygen per kg per minute; a ten-minute mile is nearly ten times rest.", S["met_running"]),
+        ("instance", f"[walking at 3 mph, SEALED] 3.3 MET ({EX}): a brisk walk is moderate intensity, the 3-6 MET band "
+                     "the guidelines name.", S["met_walking"]),
+        ("instance", f"[sitting quietly, SEALED] 1.3 MET ({EX}): awake and still is a third above sleep's 0.95.",
+         S["met_sitting"]),
+        ("instance", f"[a half-hour run, SEALED] 9.8 MET x 70 kg x 0.5 h = 343 kcal ({EX}): one MET-hour per kilogram is "
+                     "about one kilocalorie, so the product is the energy.", S["kcal_run"]),
+        ("instance", f"[an hour's walk, SEALED] 3.3 x 70 x 1 = 231 kcal ({EX}). The same hour, the same body, a third "
+                     "of the energy - intensity is what the MET measures.", S["kcal_walk"]),
+        ("instance", f"[maximum heart rate at 30, SEALED] 208 - 0.7 x 30 = 187 bpm ({EX}; Tanaka 2001).", S["hrmax_30"]),
+        ("instance", f"[at 40, SEALED] 208 - 28 = 180 bpm ({EX}) - where the old '220 - age' also says 180; the two "
+                     "lines cross at 40 and part on either side.", S["hrmax_40"]),
+        ("instance", f"[at 60, SEALED] 208 - 42 = 166 bpm ({EX}); '220 - age' would say 160. Tanaka's shallower slope "
+                     "was fit to older adults the old rule underestimated.", S["hrmax_60"]),
+        ("instance", f"[a Karvonen zone at 30, SEALED] Resting 60, maximum 187, reserve 127: the 50-70 percent zone is "
+                     f"60 + 0.5 x 127 = 124 to 60 + 0.7 x 127 = 149 bpm ({EX}). Karvonen (1957) scales the RESERVE, not "
+                     "the maximum, so a fit heart with a low resting rate trains in a wider band.", S["zone_30"]),
+        ("instance", f"[at 50, SEALED] Resting 70, maximum 173, reserve 103: 60-80 percent is 132 to 152 bpm ({EX}).",
+         S["zone_50"]),
+        ("postulate", "[the inputs, CITED] A MET value is a population mean from the Compendium (Ainsworth 2011); the "
+                      "maximal heart rate 208 - 0.7 age is a regression across 351 studies with a standard deviation "
+                      "near 10 bpm (Tanaka 2001); 1 MET = 3.5 mL O2/kg/min = 1 kcal/kg/h is a convention. They work, so "
+                      "the numbers above are inferred from them, never kept as fact about one person - a measured VO2max "
+                      "or a stress test replaces the estimate. The engine seals the arithmetic and declines the "
+                      "prescription.",
+         {"source": "Ainsworth et al., MSSE 43 (2011) 1575; Tanaka et al., JACC 37 (2001) 153; Karvonen et al. (1957)"}),
+        ("note", "[on the one map] The body at work is nutrition's ledger spent (card_floor_nutrition: the kilocalorie), "
+                 "physiology measured (card_floor_medicine: the heart's rate and reserve), and biology's metabolism "
+                 "(card_floor_biology: oxygen to work). Ties the nutrition and medicine sticks.",
+         {"source": "the one map; card_floor_nutrition, card_floor_medicine, card_floor_biology"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py exercise_science")
+    return 0
+
+
+def stick_history_chronology() -> int:
+    """HISTORY / CHRONOLOGY - year arithmetic with no year zero, sealed (issue #11, 2026-10-16: reach, down the
+    domain list). Through history_chronology.HIST_VERIFY: spans within one era by signed subtraction (Rome's kings to
+    its republic, Hastings to Columbus, the bicentennial), spans across the era boundary by the no-year-zero rule
+    (Caesar's death to the fall of Constantinople, 1 BC to AD 1, Rome founded to Rome fallen), century assignment
+    (1776, the year 100, the year 2000 and 2001), era labels, and decades. The era and its missing zero are
+    conventions, CITED; the counts are SEALED exactly. Idempotent."""
+    from concordance import tickstick as TS
+
+    def hc(spec):
+        return _seal_through("history_chronology", "HIST_VERIFY", spec)
+
+    S = {
+        "rome_kings_to_republic": hc({"from_year": -753, "to_year": -509, "claimed_elapsed_years": 244}),
+        "hastings_to_columbus": hc({"from_year": 1066, "to_year": 1492, "claimed_elapsed_years": 426}),
+        "bicentennial": hc({"from_year": 1776, "to_year": 1976, "claimed_elapsed_years": 200}),
+        "caesar_to_constantinople": hc({"from_BCE": 44, "to_CE": 1453, "claimed_elapsed": 1496}),
+        "no_year_zero": hc({"from_BCE": 1, "to_CE": 1, "claimed_elapsed": 1}),
+        "rome_founded_to_fallen": hc({"from_BCE": 753, "to_CE": 476, "claimed_elapsed": 1228}),
+        "century_1776": hc({"year_CE": 1776, "claimed_century": 18}),
+        "century_100": hc({"year_CE": 100, "claimed_century": 1}),
+        "century_2000": hc({"year_CE": 2000, "claimed_century": 20}),
+        "century_2001": hc({"year_CE": 2001, "claimed_century": 21}),
+        "era_44": hc({"year": -44, "claimed_era": "BCE"}),
+        "era_1453": hc({"year": 1453, "claimed_era": "CE"}),
+        "decade_1985": hc({"year_CE": 1985, "claimed_decade_start": 1980}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "chronology counts")
+    sid = TS.create("History and chronology - counting years with no year zero",
+                    statement="A span of years is an exact integer: signed subtraction within an era, and "
+                              "from_BCE + to_CE - 1 across the boundary, because the Christian era has no year 0.",
+                    field="history_chronology",
+                    references=["Dionysius Exiguus, Liber de Paschate (AD 525) - the anno Domini count",
+                                "Bede, De temporum ratione (AD 725) - counting backward from the Incarnation",
+                                "E. G. Richards, Mapping Time: The Calendar and its History (1998), ch. 2",
+                                "ISO 8601 / astronomical year numbering: year 0 = 1 BC (Cassini, 1740)"])["id"]
+    HC = "sealed through history_chronology.HIST_VERIFY"
+    marks = [
+        ("instance", f"[within an era, SEALED] From Rome's traditional founding, 753 BC, to the republic, 509 BC, is 244 "
+                     f"years ({HC}): both dates in one era, signed subtraction is exact.", S["rome_kings_to_republic"]),
+        ("instance", f"[Hastings to Columbus, SEALED] 1066 to 1492 is 426 years ({HC}).", S["hastings_to_columbus"]),
+        ("instance", f"[the bicentennial, SEALED] 1776 to 1976 is 200 years ({HC}) - judged exactly, so 199 and 201 "
+                     "would both be refused. A count of years is an integer claim.", S["bicentennial"]),
+        ("instance", f"[across the boundary, SEALED] From Caesar's death, 44 BC, to the fall of Constantinople, AD 1453, "
+                     f"is 44 + 1453 - 1 = 1496 years ({HC}) - not 1497. The missing year is the missing year zero.",
+         S["caesar_to_constantinople"]),
+        ("instance", f"[the rule itself, SEALED] 1 BC to AD 1 is ONE year ({HC}): the year before the era and the first "
+                     "year of it are adjacent. Any span that crosses the boundary is one less than the sum.",
+         S["no_year_zero"]),
+        ("instance", f"[Rome founded to Rome fallen, SEALED] 753 BC to AD 476 is 1228 years ({HC}): the Western empire's "
+                     "span as the textbooks give it.", S["rome_founded_to_fallen"]),
+        ("instance", f"[1776 is the 18th century, SEALED] ceil(1776 / 100) = 18 ({HC}): the century a year belongs to "
+                     "is one more than its hundreds, except at a round hundred.", S["century_1776"]),
+        ("instance", f"[the year 100, SEALED] ceil(100 / 100) = 1: the year 100 is the LAST year of the first century "
+                     f"({HC}), because the first century ran AD 1 to AD 100 - a hundred years with no zero to start from.",
+         S["century_100"]),
+        ("instance", f"[the year 2000, SEALED] 2000 is in the 20th century ({HC}). The millennium parties were a year "
+                     "early: the 21st began on 1 January 2001.", S["century_2000"]),
+        ("instance", f"[and 2001, SEALED] 2001 is the first year of the 21st ({HC}).", S["century_2001"]),
+        ("instance", f"[an era label, SEALED] -44 is BC (BCE) ({HC}): negative is before the era.", S["era_44"]),
+        ("instance", f"[and AD, SEALED] 1453 is AD (CE) ({HC}).", S["era_1453"]),
+        ("instance", f"[a decade, SEALED] 1985 is in the decade beginning 1980 ({HC}): floor to the ten.", S["decade_1985"]),
+        ("postulate", "[the era, CITED] The anno Domini count is Dionysius Exiguus's (525), carried backward by Bede "
+                      "(725) with no year zero - Roman numerals had none. Astronomers (Cassini 1740) and ISO 8601 insert "
+                      "a year 0 = 1 BC so that subtraction works across the boundary. Two conventions, both cited; the "
+                      "engine seals under the historian's (no zero) and names the rule in every cross-era count. "
+                      "Whether Dionysius placed the Incarnation correctly (Herod died 4 BC) is a question of evidence, "
+                      "declined here.",
+         {"source": "Dionysius Exiguus (525); Bede, De temporum ratione (725); Richards, Mapping Time (1998); ISO 8601"}),
+        ("note", "[on the one map] Chronology is the calendar's integer axis (card_floor_the_calendar: the era, the "
+                 "leap rule, the Julian day line that has no gap at the boundary) applied to the record of events. The "
+                 "ephemeris stick counts the same line in days; this one counts it in years and watches the one place "
+                 "the years skip.",
+         {"source": "the one map; card_floor_the_calendar; the calendar stick; the ephemeris stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py history_chronology")
+    return 0
+
+
+def stick_labor() -> int:
+    """LABOR - wages under the statute, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
+    labor.LABOR_VERIFY: gross pay, the FLSA time-and-a-half week, the 2080-hour year both ways (salary to hourly,
+    hourly to salary), take-home at a flat rate, and the federal minimum wage - a compliant wage sealed compliant and
+    a wage below the floor sealed non-compliant (claimed false). The statute's numbers are CITED as postulates; the
+    pay arithmetic is SEALED to the cent. Idempotent."""
+    from concordance import tickstick as TS
+
+    def lb(spec):
+        return _seal_through("labor", "LABOR_VERIFY", spec)
+
+    S = {
+        "gross": lb({"hourly_rate": 18.50, "hours_worked": 45, "claimed_gross_pay": 832.50}),
+        "overtime": lb({"hourly_rate": 18.50, "regular_hours": 40, "overtime_hours": 5, "claimed_overtime_pay": 878.75}),
+        "overtime_only": lb({"hourly_rate": 10.0, "regular_hours": 0, "overtime_hours": 10, "claimed_overtime_pay": 150.0}),
+        "annual_to_hourly": lb({"annual_salary": 52000, "claimed_hourly_equivalent": 25.0}),
+        "hourly_to_annual": lb({"hourly_rate": 20.0, "claimed_annual_salary": 41600}),
+        "take_home": lb({"gross_pay": 1000, "total_tax_rate": 0.28, "claimed_take_home": 720.0}),
+        "minimum_compliant": lb({"claimed_hourly_rate": 7.25, "claimed_compliant": True}),
+        "minimum_below": lb({"claimed_hourly_rate": 7.00, "claimed_compliant": False}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "labor computations")
+    sid = TS.create("Labor - wages, overtime and the minimum, sealed",
+                    statement="Pay is arithmetic over a rate, hours and the statute's multipliers: gross, time and "
+                              "a half past forty, the 2080-hour year, and a floor the rate must meet.",
+                    field="labor",
+                    references=["Fair Labor Standards Act of 1938, 29 U.S.C. section 206 (minimum wage) and section 207 "
+                                "(overtime)",
+                                "29 U.S.C. 206(a)(1)(C): $7.25 per hour, effective 24 July 2009",
+                                "U.S. Office of Personnel Management: 2,087 and 2,080 hours as the work-year conventions"])["id"]
+    LB = "sealed through labor.LABOR_VERIFY"
+    marks = [
+        ("instance", f"[gross pay, SEALED] $18.50 x 45 h = $832.50 ({LB}) - the straight product, before the statute "
+                     "touches it.", S["gross"]),
+        ("instance", f"[the FLSA week, SEALED] 40 h at $18.50 plus 5 h at 1.5 x $18.50: $740.00 + $138.75 = $878.75 "
+                     f"({LB}; 29 U.S.C. 207). The forty-first hour costs the employer half again as much - the premium "
+                     "is the law's lever against the long week.", S["overtime"]),
+        ("instance", f"[the premium alone, SEALED] Ten overtime hours at $10 pay $150 ({LB}): 1.5 x 10 x 10.",
+         S["overtime_only"]),
+        ("instance", f"[salary to hourly, SEALED] $52,000 a year is $25.00 an hour ({LB}): 52 weeks x 40 hours = 2080.",
+         S["annual_to_hourly"]),
+        ("instance", f"[hourly to salary, SEALED] $20 an hour is $41,600 a year ({LB}): the same 2080, the mirror "
+                     "direction.", S["hourly_to_annual"]),
+        ("instance", f"[take-home at a flat rate, SEALED] $1000 gross at a 28 percent total rate leaves $720 ({LB}). "
+                     "A flat rate is a model of withholding; real brackets are the tax code's, declined here.",
+         S["take_home"]),
+        ("instance", f"[the floor met, SEALED] $7.25 an hour meets the federal minimum of $7.25 ({LB}): the floor is "
+                     "inclusive.", S["minimum_compliant"]),
+        ("instance", f"[the floor missed, SEALED AS NON-COMPLIANT] $7.00 does not - sealed with claimed_compliant = "
+                     f"false ({LB}). A quarter under the statute is under the statute; the engine seals the negative as a "
+                     "negative.", S["minimum_below"]),
+        ("postulate", "[the statute, CITED] Time and a half past forty hours (29 U.S.C. 207) and $7.25 (29 U.S.C. "
+                      "206, since 2009) are LAW, not theorems - chosen by Congress, changeable by Congress, exceeded by "
+                      "many states; cited as postulates. The 2080-hour year is a convention (OPM also uses 2,087); the "
+                      "flat tax rate is a simplification. What is sealed is the arithmetic each one commands.",
+         {"source": "29 U.S.C. 206, 207; U.S. OPM fact sheet on the 2,087-hour year"}),
+        ("note", "[on the one map] Wages are the economics floor's price of labour (card_floor_economics) bounded by "
+                 "statute (the law stick: a rule with a citation, applied exactly). The engine seals the pay a rule "
+                 "produces and declines what the rule should be.",
+         {"source": "the one map; card_floor_economics; the law stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py labor")
+    return 0
+
+
+def stick_linear_algebra() -> int:
+    """LINEAR ALGEBRA - vectors and matrices, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
+    linear_algebra.LIN_VERIFY: the dot product, the cross product and its anticommutation, the 3-4-5 and 2-3-6-7
+    magnitudes, orthogonality and the 45-degree angle, a product AB and its reverse BA (they differ - sealed both),
+    det(AB) = det A det B, a singular determinant, the trace, real eigenvalues of a symmetric matrix and the pair
+    +/- i of a rotation, an inverse and the rotation whose inverse is its transpose, and a solved system. The vector
+    space axioms are CITED; the computations are SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def la(spec):
+        return _seal_through("linear_algebra", "LIN_VERIFY", spec)
+
+    A, B = [[1, 2], [3, 4]], [[5, 6], [7, 8]]
+    ROT = [[0, -1], [1, 0]]
+    S = {
+        "dot": la({"vec_a": [1, 2, 3], "vec_b": [4, 5, 6], "claimed_dot_product": 32}),
+        "cross": la({"vec_a": [1, 0, 0], "vec_b": [0, 1, 0], "claimed_cross_product": [0, 0, 1]}),
+        "cross_anti": la({"vec_a": [0, 1, 0], "vec_b": [1, 0, 0], "claimed_cross_product": [0, 0, -1]}),
+        "mag_345": la({"vec": [3, 4], "claimed_magnitude": 5}),
+        "mag_2367": la({"vec": [2, 3, 6], "claimed_magnitude": 7}),
+        "angle_90": la({"vec_a": [1, 0], "vec_b": [0, 1], "claimed_angle_deg": 90}),
+        "angle_45": la({"vec_a": [1, 1], "vec_b": [1, 0], "claimed_angle_deg": 45}),
+        "product_ab": la({"mat_a": A, "mat_b": B, "claimed_matrix_product": [[19, 22], [43, 50]]}),
+        "product_ba": la({"mat_a": B, "mat_b": A, "claimed_matrix_product": [[23, 34], [31, 46]]}),
+        "det_a": la({"matrix": A, "claimed_determinant": -2}),
+        "det_ab": la({"matrix": [[19, 22], [43, 50]], "claimed_determinant": 4}),
+        "det_singular": la({"matrix": [[1, 2], [2, 4]], "claimed_determinant": 0}),
+        "trace": la({"matrix": A, "claimed_trace": 5}),
+        "eig_symmetric": la({"matrix": [[2, 1], [1, 2]], "claimed_eigenvalues": [1, 3]}),
+        "eig_rotation": la({"matrix": ROT, "claimed_eigenvalues": ["1j", "-1j"]}),
+        "inverse": la({"matrix": A, "claimed_inverse": [[-2, 1], [1.5, -0.5]]}),
+        "inverse_rotation": la({"matrix": ROT, "claimed_inverse": [[0, 1], [-1, 0]]}),
+        "solve": la({"matrix": A, "vec_b": [5, 11], "claimed_solution": [1, 2]}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "linear-algebra computations")
+    sid = TS.create("Linear algebra - vectors and matrices, computed and sealed",
+                    statement="Every claim about vectors and matrices is decided by the arithmetic of the vector "
+                              "space axioms: products, norms, angles, determinants, eigenvalues, inverses, solutions.",
+                    field="linear_algebra",
+                    references=["G. Strang, Introduction to Linear Algebra, 5th ed. (2016)",
+                                "A. Cayley, A memoir on the theory of matrices, Phil. Trans. R. Soc. 148 (1858) 17",
+                                "J. W. Gibbs & E. B. Wilson, Vector Analysis (1901) - the dot and cross products"])["id"]
+    LA = "sealed through linear_algebra.LIN_VERIFY"
+    marks = [
+        ("instance", f"[the dot product, SEALED] (1,2,3) . (4,5,6) = 4 + 10 + 18 = 32 ({LA}): the sum of the "
+                     "componentwise products - a number from two vectors, zero when they are perpendicular.", S["dot"]),
+        ("instance", f"[the cross product, SEALED] i x j = k ({LA}): the right-hand rule, a vector perpendicular to both.",
+         S["cross"]),
+        ("instance", f"[it anticommutes, SEALED] j x i = -k ({LA}). Reverse the order and the sign flips - the cross "
+                     "product is not commutative, and the engine seals both orders rather than assume one.",
+         S["cross_anti"]),
+        ("instance", f"[3-4-5, SEALED] |(3,4)| = 5 ({LA}): Pythagoras as a norm.", S["mag_345"]),
+        ("instance", f"[2-3-6-7, SEALED] |(2,3,6)| = sqrt(4 + 9 + 36) = 7 ({LA}): the theorem in three dimensions, an "
+                     "integer again.", S["mag_2367"]),
+        ("instance", f"[orthogonal, SEALED] The angle between (1,0) and (0,1) is 90 deg ({LA}): cos theta = a.b / |a||b| "
+                     "= 0.", S["angle_90"]),
+        ("instance", f"[45 degrees, SEALED] Between (1,1) and (1,0): cos theta = 1 / sqrt 2, theta = 45 deg ({LA}).",
+         S["angle_45"]),
+        ("instance", f"[a product, SEALED] [[1,2],[3,4]] [[5,6],[7,8]] = [[19,22],[43,50]] ({LA}): row times column.",
+         S["product_ab"]),
+        ("instance", f"[the reverse product, SEALED] [[5,6],[7,8]] [[1,2],[3,4]] = [[23,34],[31,46]] ({LA}) - a "
+                     "different matrix. AB is not BA: matrix multiplication is not commutative, and composition of "
+                     "transformations does not care which you did first only when they happen to commute.",
+         S["product_ba"]),
+        ("instance", f"[a determinant, SEALED] det [[1,2],[3,4]] = 1 x 4 - 2 x 3 = -2 ({LA}): the signed area the "
+                     "matrix maps the unit square to; negative means it flips orientation.", S["det_a"]),
+        ("instance", f"[determinants multiply, SEALED] det(AB) = det [[19,22],[43,50]] = 950 - 946 = 4 = (-2)(-2) "
+                     f"({LA}): det(AB) = det A det B, the area scaling composes.", S["det_ab"]),
+        ("instance", f"[singular, SEALED] det [[1,2],[2,4]] = 0 ({LA}): the rows are dependent, the square is flattened "
+                     "to a line, no inverse exists.", S["det_singular"]),
+        ("instance", f"[the trace, SEALED] tr [[1,2],[3,4]] = 5 ({LA}): the diagonal sum, which equals the sum of the "
+                     "eigenvalues.", S["trace"]),
+        ("instance", f"[a symmetric matrix, SEALED] The eigenvalues of [[2,1],[1,2]] are 1 and 3 ({LA}), real, as a "
+                     "symmetric matrix's always are - with eigenvectors (1,-1) and (1,1), perpendicular.",
+         S["eig_symmetric"]),
+        ("instance", f"[a rotation, SEALED] The eigenvalues of the 90-degree rotation [[0,-1],[1,0]] are +i and -i "
+                     f"({LA}): no real vector keeps its direction under a quarter turn, so the eigenvalues leave the "
+                     "real line and sit on the unit circle. The characteristic polynomial is lambda^2 + 1.",
+         S["eig_rotation"]),
+        ("instance", f"[an inverse, SEALED] [[1,2],[3,4]]^-1 = [[-2,1],[1.5,-0.5]] ({LA}: A times the claimed inverse is "
+                     "the identity). The 2x2 formula: swap the diagonal, negate the off-diagonal, divide by the "
+                     "determinant.", S["inverse"]),
+        ("instance", f"[a rotation's inverse is its transpose, SEALED] [[0,-1],[1,0]]^-1 = [[0,1],[-1,0]] ({LA}): an "
+                     "orthogonal matrix undoes itself by transposition, because rotating back is rotating the other way.",
+         S["inverse_rotation"]),
+        ("instance", f"[a solved system, SEALED] [[1,2],[3,4]] x = (5,11) has x = (1,2) ({LA}: A x reproduces b). Two "
+                     "equations, two unknowns, a nonzero determinant - exactly one answer.", S["solve"]),
+        ("postulate", "[the axioms, CITED] A vector space is eight axioms over a field (closure, associativity, "
+                      "commutativity of addition, zero, negatives, and the two distributive and two scalar laws); a "
+                      "matrix is a linear map written in a basis (Cayley 1858). Cited, never sealed - every computation "
+                      "above is a theorem of them, decided by arithmetic.",
+         {"source": "Strang, Introduction to Linear Algebra (2016); Cayley, Phil. Trans. 148 (1858) 17"}),
+        ("note", "[the bound, stated] The verifier rests on numpy, the optional math extra: on a stdlib-only box it "
+                 "returns NOT_APPLICABLE and never a false result, so this stick is minted where numpy lives. Exact "
+                 "comparisons are at 1e-6 relative; a half-degree window on angles.",
+         {"source": "src/concordance/verifiers/linear_algebra.py; pyproject [math] extra"}),
+        ("note", "[on the one map] Linear algebra is the grammar of the change of domain (the change-of-domain stick: "
+                 "an eigenbasis is the axis where a matrix is diagonal), of the SVD (rotation, stretch, rotation), of "
+                 "tensors (the invariants under a change of basis), and of quantum mechanics (card_floor_quantum_mechanics: "
+                 "a Hermitian matrix's real eigenvalues are the observables; a unitary's unit-circle eigenvalues are the "
+                 "phases - the rotation sealed above is the simplest). Where two domains connect, there is a matrix "
+                 "between them.",
+         {"source": "the one map; the change-of-domain, svd and tensor sticks; card_floor_quantum_mechanics"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py linear_algebra")
+    return 0
+
+
 def game_theory() -> int:
     """GAME THEORY - equilibrium, dilemmas, and strategy (Matt, 2026-10-10, down the domain list). The mathematics of
     strategic choice: a NASH EQUILIBRIUM is a fixed point where no one gains by deviating alone; the PRISONER'S
@@ -11469,6 +11904,16 @@ def main() -> int:
         return stick_cybersecurity()
     if a[0] in ("document_validation", "check_digit", "checksum", "isbn", "luhn"):
         return stick_document_validation()
+    if a[0] in ("ephemeris", "julian_day", "moon_phase", "sunrise", "solstice"):
+        return stick_ephemeris()
+    if a[0] in ("exercise_science", "exercise", "met", "heart_rate", "karvonen"):
+        return stick_exercise_science()
+    if a[0] in ("history_chronology", "chronology", "no_year_zero", "era", "century"):
+        return stick_history_chronology()
+    if a[0] in ("labor", "wages", "overtime", "flsa", "payroll"):
+        return stick_labor()
+    if a[0] in ("linear_algebra", "matrices", "matrix", "determinant", "eigenvalues"):
+        return stick_linear_algebra()
     if a[0] in ("tesseract", "hypercube", "four_cube", "eight_cell"):
         return tesseract()
     if a[0] in ("statistics", "stats", "inference", "the_normal_distribution"):
