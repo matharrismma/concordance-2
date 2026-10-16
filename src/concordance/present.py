@@ -31,7 +31,7 @@ plausible label is the exact failure this project refuses.
 from __future__ import annotations
 
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
 # Kind → how a person says it, plus one glyph. A closed table: an unknown kind falls through to the

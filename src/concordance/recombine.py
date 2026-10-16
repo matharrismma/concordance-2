@@ -29,7 +29,7 @@ from __future__ import annotations
 import math
 import os
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 _WORD = re.compile(r"[a-z0-9]+")
 # function words that carry no intent — kept out of the QUERY so aptness matches on content, not "the"
