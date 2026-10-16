@@ -56,6 +56,31 @@ def test_every_suggestion_explains_itself_and_is_deterministic():
     assert [c["domain"] for c in r1["candidates"]] == [c["domain"] for c in r2["candidates"]]
 
 
+def test_witness_verifiers_route_only_on_the_witness_surface():
+    """Reach sprint (2026-10-16): the three witness verifiers were registered only in WITNESS_VERIFIERS, which
+    the resolver never read — a verse question on narrowhighway.org could not reach the scripture verifier.
+    They now route from a SEPARATE index on surface="witness" only; the secular face is untouched (the Gate
+    opens inward, never outward)."""
+    witness_domains = {"scripture", "theology_doctrine", "witness"}
+    checks = [
+        ("what does john 3:16 say about the world", "scripture"),
+        ("read me the passage in psalm 23", "scripture"),
+        ("is the trinity a doctrine of the nicene creed", "theology_doctrine"),
+        ("the apostles bore witness and gave their testimony of the gospel", "witness"),
+    ]
+    for q, dom in checks:
+        wit = [c["domain"] for c in resolve_domain(q, k=5, surface="witness")["candidates"]]
+        assert dom in wit, (q, wit)
+        sec = [c["domain"] for c in resolve_domain(q, k=5)["candidates"]]
+        assert not (set(sec) & witness_domains), ("a witness verifier routed on the secular face", q, sec)
+
+
+def test_the_secular_index_is_unchanged_by_the_witness_index():
+    # one query, one answer: naming the default surface changes nothing, and the witness index never leaks in
+    for q in ("is 17 a prime number", "what are the odds of rolling two sixes", "name the notes in a c major chord"):
+        assert resolve_domain(q, k=5) == resolve_domain(q, k=5, surface="secular")
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]:
         fn()

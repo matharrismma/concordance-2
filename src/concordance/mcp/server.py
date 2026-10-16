@@ -1674,7 +1674,7 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         return _lk.lookup(str(args.get("kind") or ""), args.get("params") or {})
     if name == "find_verifier":
         from .. import domain_resolver as _dr  # deterministic claim->domain resolver (no model)
-        return _dr.resolve_domain(str(args.get("query") or ""))
+        return _dr.resolve_domain(str(args.get("query") or ""), surface=config.surface)
     if name == "steward_budget":
         from .. import steward  # shows + plans; never moves money
         return steward.budget(args.get("income"), args.get("expenses") or [])

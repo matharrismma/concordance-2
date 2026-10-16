@@ -2130,7 +2130,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not q:
             return _err(400, "q required")
         from .. import domain_resolver as _dr
-        return _ok(_dr.resolve_domain(q))
+        return _ok(_dr.resolve_domain(q, surface=config.surface))
 
     # ── THE EXPERT FACES — callable life-domain servants (the Steward, Tutor, Social Worker, Theorist).
     # A face is a deterministic COMPOSER: it ARRANGES existing verifiers + shelves + discernment for a
