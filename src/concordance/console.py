@@ -223,6 +223,10 @@ def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[s
     Honest-empty where neither reaches — a silent trailhead, never a crash, never a generation.
     """
     out: Dict[str, Any] = {"word": None, "cloud": None, "lead": "", "tail": ""}
+    best = None   # the Word this thought landed on, if any. Defined at function scope so the companion
+                  # tiers below can reference it whether or not the Gate is open — it was set only inside
+                  # `if gate_open`, so a gate-closed answer raised NameError and SILENTLY dropped the whole
+                  # companion voice (house + witness cloud). That is why witnesses stopped being voiced.
 
     # TIER 1/2 — THE WORD FIRST. The concordance brings the verse that speaks to this; the coach's
     # thought opens on it. Brought when the door is open (seeking) — the Gate, Matt's own design.
@@ -290,7 +294,9 @@ def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[s
             out["house"] = {"text": fv.get("text"), "source": fv.get("source"),
                             "by": fv.get("by"), "tier": "house"}
             out["tail"] = f" A word on this — “{_trim(fv['text'], 300)}”."
-            return out                       # his own fitting word leads the cloud — no second voice needed
+            # FALL THROUGH to the witness cloud (Matt, 2026-10-15): his word no longer PREEMPTS the cloud.
+            # His own word LEADS; when the public-domain cloud adds a DISTINCT witness, it still speaks
+            # beneath it. (Reverses the 2026-10-14 "no second voice needed" — the cloud of witnesses stays.)
     except Exception:  # noqa: BLE001 — his voice not reaching here is a quiet fallback to the cloud, never a crash
         pass
 
@@ -310,7 +316,9 @@ def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[s
         f = None
         for cand in ((witness.see(query, k=6) or {}).get("seeing") or []):
             ct = set(re.findall(r"[a-z]{3,}", (str(cand.get("text") or "")).lower()))
-            if len(theme & ct) >= 2:             # shares the discerned theme, not a lone word
+            if theme and len(theme & ct) >= min(2, len(theme)):   # shares the discerned theme — ≥2 when the
+                                                 # theme is broad, but a NARROW theme (one distinct subject
+                                                 # word, like "faith") is fit by that one word, not silenced
                 f = cand
                 break
         if f and str(f.get("text") or "").strip():
@@ -319,7 +327,7 @@ def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[s
             who = (f.get("witness") or "a witness").strip()
             work = (f.get("work") or "").strip()
             attrib = who + (", " + work if work else "")
-            out["tail"] = f" And a witness sees it — {attrib}: “{_trim(f['text'], 240)}”."
+            out["tail"] = (out.get("tail") or "") + f" And a witness sees it — {attrib}: “{_trim(f['text'], 240)}”."
     except Exception:  # noqa: BLE001
         pass
     return out

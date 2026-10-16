@@ -152,7 +152,9 @@ def test_the_coach_answers_in_their_frame_and_offers_a_choice_of_whats_next(monk
     labels = [n["label"] for n in r["next"]]
     assert any("well" in l.lower() for l in labels)                 # a next step in their frame
     assert labels[-1].lower().startswith("or ask about anything else")
-    assert "Your choice" in r["spoken"] and len(r["spoken"]) < 700   # short — speakable, LoRa-small
+    # the SPOKEN voice now LANDS ON ONE STEP and leaves a door open ("Or tell me where you are") — the
+    # "Your choice" menu moved to the structured `next` chips above (checked at line 154); still short.
+    assert ("one step" in r["spoken"].lower() or "where you are" in r["spoken"].lower()) and len(r["spoken"]) < 700
 
 
 def test_whats_next_prefers_clean_titles_and_drops_the_unambiguously_broken(monkeypatch):
@@ -610,7 +612,7 @@ def test_the_coach_voices_the_cloud_of_witnesses(monkeypatch):
     import concordance.witness as W
     monkeypatch.setattr(W, "see", lambda text, **k: {"seeing": [
         {"witness": "Ellen G. White", "work": "Steps to Christ", "ref": "p.12",
-         "text": "The Lord Jesus is our helper.", "source": "PD"}]})
+         "text": "Faith lays hold of the Lord Jesus, our helper.", "source": "PD"}]})
     monkeypatch.setattr(console._ask, "respond", lambda *a, **k: {
         "kind": "search", "results": [{"id": "c1", "title": "Faith", "snippet": "kept"}], "generated": False})
     r = console._coach("what is faith", SEC, False)
