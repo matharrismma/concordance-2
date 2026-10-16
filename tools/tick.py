@@ -4026,6 +4026,423 @@ def stick_linear_algebra() -> int:
     return 0
 
 
+def stick_manufacturing() -> int:
+    """MANUFACTURING - the quality arithmetic, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
+    manufacturing.MFG_VERIFY: the Six Sigma table (3.4 defects per million is six sigma, 233 is five, 6210 is four,
+    66,807 is three), Shewhart's three-sigma control limits, process capability (a centred process sealed capable, an
+    off-centre one with the same spread sealed NOT capable - the Cpk lesson), and the root-sum-of-squares tolerance
+    stack against the worst case. The 1.5-sigma shift, the 3-sigma limits and the 1.33 threshold are conventions,
+    CITED; the arithmetic is SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def mf(spec):
+        return _seal_through("manufacturing", "MFG_VERIFY", spec)
+
+    S = {
+        "six_sigma": mf({"dpmo": 3.4, "claimed_sigma": 6.0}),
+        "five_sigma": mf({"dpmo": 233, "claimed_sigma": 5.0}),
+        "four_sigma": mf({"dpmo": 6210, "claimed_sigma": 4.0}),
+        "three_sigma": mf({"dpmo": 66807, "claimed_sigma": 3.0}),
+        "control_limits": mf({"mean": 100.0, "sigma": 2.0, "k": 3, "claimed_ucl": 106.0, "claimed_lcl": 94.0}),
+        "capable": mf({"usl": 110.0, "lsl": 90.0, "process_mean": 100.0, "process_sigma": 2.0, "claimed_cp_capable": True}),
+        "not_capable": mf({"usl": 110.0, "lsl": 90.0, "process_mean": 106.0, "process_sigma": 2.0, "claimed_cp_capable": False}),
+        "rss": mf({"tolerances": [0.01, 0.02, 0.015], "claimed_rss": 0.02693}),
+        "rss_equal": mf({"tolerances": [0.1, 0.1, 0.1], "claimed_rss": 0.17321}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "manufacturing numbers")
+    sid = TS.create("Manufacturing - sigma levels, control limits, capability and stack-up",
+                    statement="Quality is the normal distribution applied to a specification: defects per million "
+                              "map to sigma, limits sit at three sigma, capability is the spec width over six sigma, "
+                              "and independent tolerances add in quadrature.",
+                    field="manufacturing",
+                    references=["W. A. Shewhart, Economic Control of Quality of Manufactured Product (1931)",
+                                "M. J. Harry & R. Schroeder, Six Sigma (2000) - the 1.5-sigma shift convention",
+                                "ISO 22514-2:2013 process capability; V. E. Kane, Process capability indices, "
+                                "J. Qual. Tech. 18 (1986) 41",
+                                "ASME Y14.5 and the RSS method (Bender, SAE 1962)"])["id"]
+    MF = "sealed through manufacturing.MFG_VERIFY"
+    marks = [
+        ("instance", f"[six sigma, SEALED] 3.4 defects per million opportunities is the six-sigma level ({MF}). The "
+                     "number carries Motorola's 1.5-sigma shift: a process whose mean drifts 1.5 sigma still has 4.5 "
+                     "sigma to the nearer limit, and the normal tail beyond 4.5 sigma is 3.4 per million.",
+         S["six_sigma"]),
+        ("instance", f"[five sigma, SEALED] 233 per million ({MF}).", S["five_sigma"]),
+        ("instance", f"[four sigma, SEALED] 6,210 per million ({MF}): one part in 161.", S["four_sigma"]),
+        ("instance", f"[three sigma, SEALED] 66,807 per million ({MF}) - about 6.7 percent defective, the level most "
+                     "unmanaged processes run at. Each sigma is an order of magnitude; the table is the normal "
+                     "distribution's tail read as a ladder.", S["three_sigma"]),
+        ("instance", f"[Shewhart's limits, SEALED] Mean 100, sigma 2: UCL = 106, LCL = 94 ({MF}). Three sigma either "
+                     "side leaves 0.27 percent of a stable process outside - a point beyond the line is a signal, not "
+                     "noise, and the operator looks for a cause (Shewhart 1931).", S["control_limits"]),
+        ("instance", f"[capable, SEALED] Spec 90-110, process centred at 100 with sigma 2: Cp = 20 / 12 = 1.667 and Cpk "
+                     f"= 1.667, capable against the 1.33 threshold ({MF}).", S["capable"]),
+        ("instance", f"[not capable, SEALED AS NOT CAPABLE] The same spread centred at 106: Cp is still 1.667 but Cpk = "
+                     f"(110 - 106) / 6 = 0.667 - NOT capable, sealed with claimed false ({MF}). Cp measures the spread, "
+                     "Cpk the spread AND the centring; a tight process in the wrong place still makes scrap.",
+         S["not_capable"]),
+        ("instance", f"[a tolerance stack, SEALED] Three parts toleranced 0.010, 0.020 and 0.015: the statistical stack "
+                     f"is sqrt(0.0001 + 0.0004 + 0.000225) = 0.02693 ({MF}), against a worst case of 0.045.", S["rss"]),
+        ("instance", f"[equal tolerances, SEALED] Three at 0.1: RSS = 0.1 sqrt 3 = 0.17321 ({MF}) versus 0.3 worst case. "
+                     "Independent errors add in quadrature - the same sqrt N as random walks and measurement means.",
+         S["rss_equal"]),
+        ("postulate", "[the conventions, CITED] The 1.5-sigma shift (Harry & Schroeder), three-sigma limits (Shewhart), "
+                      "the 1.33 capability threshold (Kane 1986, ISO 22514) and RSS stacking all ASSUME a normal, stable, "
+                      "independent process. They work, so a process that meets them is inferred capable, never proven "
+                      "so: a non-normal or drifting process breaks every number above. The engine seals the arithmetic "
+                      "the conventions command and declines the assumption.",
+         {"source": "Shewhart (1931); Harry & Schroeder, Six Sigma (2000); Kane, J. Qual. Tech. 18 (1986) 41; ISO 22514-2"}),
+        ("note", "[on the one map] Every number here is the normal distribution's (card_floor_statistics: the tail "
+                 "integral, the sigma, quadrature addition) applied to a drawing's tolerance. The statistics stick "
+                 "holds the distribution; this stick holds the shop floor's use of it.",
+         {"source": "the one map; card_floor_statistics; the statistics stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py manufacturing")
+    return 0
+
+
+def stick_molecular_geometry() -> int:
+    """MOLECULAR GEOMETRY - VSEPR shapes and angles, sealed (issue #11, 2026-10-16: reach, down the domain list).
+    Through molecular_geometry.VSEPR_VERIFY: the twelve tabulated (steric number, lone pair) cases on their textbook
+    molecules - CO2 linear, BF3 trigonal planar, SO2 bent, CH4 tetrahedral at arccos(-1/3), NH3 trigonal pyramidal,
+    H2O bent, PCl5 trigonal bipyramidal, SF4 seesaw, ClF3 T-shaped, SF6 octahedral, BrF5 square pyramidal, XeF4
+    square planar. The VSEPR model and its measured lone-pair angles are CITED; the tetrahedral angle is a theorem
+    of geometry; the assignments are SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def vs(bd, lp, geo, angle=None):
+        spec = {"bonding_domains": bd, "lone_pairs": lp, "claimed_geometry": geo}
+        if angle is not None:
+            spec["claimed_bond_angle_deg"] = angle
+        return _seal_through("molecular_geometry", "VSEPR_VERIFY", spec)
+
+    S = {
+        "co2": vs(2, 0, "linear", 180.0),
+        "bf3": vs(3, 0, "trigonal_planar", 120.0),
+        "so2": vs(2, 1, "bent", 119.0),
+        "ch4": vs(4, 0, "tetrahedral", 109.47),
+        "nh3": vs(3, 1, "trigonal_pyramidal", 107.0),
+        "h2o": vs(2, 2, "bent", 104.5),
+        "pcl5": vs(5, 0, "trigonal_bipyramidal"),
+        "sf4": vs(4, 1, "seesaw"),
+        "clf3": vs(3, 2, "t_shaped"),
+        "sf6": vs(6, 0, "octahedral", 90.0),
+        "brf5": vs(5, 1, "square_pyramidal"),
+        "xef4": vs(4, 2, "square_planar", 90.0),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "VSEPR assignments")
+    sid = TS.create("Molecular geometry - VSEPR shapes and bond angles, sealed",
+                    statement="A molecule's shape follows from its steric number and lone pairs: electron domains "
+                              "repel to the arrangement of greatest separation, and the bond angle is that "
+                              "arrangement's angle.",
+                    field="molecular_geometry",
+                    references=["R. J. Gillespie & R. S. Nyholm, Inorganic stereochemistry, Q. Rev. Chem. Soc. 11 (1957) 339",
+                                "R. J. Gillespie, Molecular Geometry (1972)",
+                                "CRC Handbook of Chemistry and Physics, Structure of free molecules in the gas phase"])["id"]
+    VS = "sealed through molecular_geometry.VSEPR_VERIFY"
+    marks = [
+        ("instance", f"[CO2, SEALED] Two domains, no lone pairs: linear, 180 deg ({VS}). Two things repelling on a "
+                     "sphere go to opposite poles.", S["co2"]),
+        ("instance", f"[BF3, SEALED] Three domains: trigonal planar, 120 deg ({VS}).", S["bf3"]),
+        ("instance", f"[SO2, SEALED] Three domains, one a lone pair: bent, about 119 deg ({VS}). The shape is named "
+                     "by the atoms, the angle set by all three domains.", S["so2"]),
+        ("instance", f"[CH4, SEALED] Four domains: tetrahedral, 109.47 deg ({VS}) - arccos(-1/3), the angle from the "
+                     "centre of a regular tetrahedron to two vertices. Pure geometry, no chemistry in it: the "
+                     "geometry stick's 'Cat:Dog' pair, two domains confirming one number.", S["ch4"]),
+        ("instance", f"[NH3, SEALED] Four domains, one lone pair: trigonal pyramidal, 107 deg ({VS}). The lone pair "
+                     "takes more room than a bond and squeezes the H-N-H angle below tetrahedral.", S["nh3"]),
+        ("instance", f"[H2O, SEALED] Four domains, two lone pairs: bent, 104.5 deg ({VS}). Two lone pairs squeeze "
+                     "harder - the angle that makes water polar, and so a solvent, and so the medium of life.",
+         S["h2o"]),
+        ("instance", f"[PCl5, SEALED] Five domains: trigonal bipyramidal ({VS}) - two angles, 90 and 120, so no single "
+                     "bond angle is claimed; the verifier refuses one.", S["pcl5"]),
+        ("instance", f"[SF4, SEALED] Five domains, one lone pair: seesaw ({VS}) - the lone pair takes an equatorial "
+                     "site, where it crowds two neighbours at 90 deg instead of three.", S["sf4"]),
+        ("instance", f"[ClF3, SEALED] Five domains, two lone pairs: T-shaped ({VS}).", S["clf3"]),
+        ("instance", f"[SF6, SEALED] Six domains: octahedral, 90 deg ({VS}).", S["sf6"]),
+        ("instance", f"[BrF5, SEALED] Six domains, one lone pair: square pyramidal ({VS}).", S["brf5"]),
+        ("instance", f"[XeF4, SEALED] Six domains, two lone pairs: square planar, 90 deg ({VS}) - the lone pairs take "
+                     "the two axial sites, opposite each other, and the four fluorines lie in a plane. A noble gas "
+                     "with a shape.", S["xef4"]),
+        ("postulate", "[the model, CITED] VSEPR (Gillespie & Nyholm 1957) is a MODEL: electron domains repel and "
+                      "settle at maximum separation, lone pairs repel more than bonds. It works for main-group "
+                      "molecules and fails for many transition-metal ones, so a shape it predicts is inferred, never "
+                      "kept as fact - the measured structure is the fact (CRC tables: H2O 104.5 deg, NH3 106.7 deg). "
+                      "The 180, 120, 90 and 109.47 degree angles are geometry's theorems; the lone-pair angles are "
+                      "measurements the model only approximates.",
+         {"source": "Gillespie & Nyholm, Q. Rev. 11 (1957) 339; CRC Handbook, gas-phase structures"}),
+        ("note", "[on the one map] The shape of a molecule is chemistry (card_floor_chemistry: valence, bonding "
+                 "domains) meeting geometry (the geometry stick: the regular polyhedra and their central angles). The "
+                 "tetrahedral angle is the joint: one number, two floors, neither borrowing from the other.",
+         {"source": "the one map; card_floor_chemistry; the geometry stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py molecular_geometry")
+    return 0
+
+
+def stick_philosophy() -> int:
+    """PHILOSOPHY - the analytic checks, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
+    philosophy.PHIL_VERIFY: modal consistency (necessary-and-possible sealed consistent, necessary-but-impossible
+    sealed INCONSISTENT with claimed false, contingent sealed consistent), the four ethical frameworks on whether they
+    judge by outcomes, the a priori / a posteriori distinction on Kant's own examples, and Leibniz's law on equal and
+    unequal property sets. The principles are CITED - the axiom D of modal logic, the taxonomy of ethics, the
+    identity of indiscernibles and its dispute; the classifications are SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def ph(spec):
+        return _seal_through("philosophy", "PHIL_VERIFY", spec)
+
+    S = {
+        "modal_consistent": ph({"is_necessarily_true": True, "is_possibly_true": True, "claimed_consistent": True}),
+        "modal_contradiction": ph({"is_necessarily_true": True, "is_possibly_true": False, "claimed_consistent": False}),
+        "modal_contingent": ph({"is_necessarily_true": False, "is_possibly_true": True, "claimed_consistent": True}),
+        "consequentialist": ph({"framework_name": "consequentialist", "claimed_focuses_on_outcomes": True}),
+        "deontological": ph({"framework_name": "deontological", "claimed_focuses_on_outcomes": False}),
+        "virtue": ph({"framework_name": "virtue_ethics", "claimed_focuses_on_outcomes": False}),
+        "contractarian": ph({"framework_name": "contractarian", "claimed_focuses_on_outcomes": False}),
+        "a_priori": ph({"claim_requires_observation": False, "claimed_is_a_priori": True}),
+        "a_posteriori": ph({"claim_requires_observation": True, "claimed_is_a_priori": False}),
+        "identical": ph({"object_a_properties": ["red", "round", "heavy"], "object_b_properties": ["round", "red", "heavy"],
+                         "claimed_are_identical": True}),
+        "not_identical": ph({"object_a_properties": ["red", "round", "heavy"], "object_b_properties": ["red", "round", "light"],
+                             "claimed_are_identical": False}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "philosophy classifications")
+    sid = TS.create("Philosophy - modality, ethics, knowledge and identity, sealed",
+                    statement="The analytic checks of philosophy are decidable where they are formal: a modal "
+                              "contradiction, a framework's criterion, the source of a claim's warrant, the equality "
+                              "of two property sets.",
+                    field="philosophy",
+                    references=["S. Kripke, Semantical considerations on modal logic, Acta Phil. Fennica 16 (1963) 83",
+                                "I. Kant, Critique of Pure Reason (1781), Introduction - a priori and a posteriori",
+                                "G. W. Leibniz, Discourse on Metaphysics (1686) section 9; M. Black, The identity of "
+                                "indiscernibles, Mind 61 (1952) 153",
+                                "J. S. Mill, Utilitarianism (1863); Kant, Groundwork (1785); Aristotle, Nicomachean "
+                                "Ethics; Hobbes, Leviathan (1651)"])["id"]
+    PH = "sealed through philosophy.PHIL_VERIFY"
+    marks = [
+        ("instance", f"[necessary and possible, SEALED] A claim held necessarily true and possibly true is consistent "
+                     f"({PH}): what must be, can be. The principle box P implies diamond P is axiom D - valid in every "
+                     "serial frame, so in the systems T, S4 and S5 (the verifier files it under K).",
+         S["modal_consistent"]),
+        ("instance", f"[necessary but impossible, SEALED AS A CONTRADICTION] Necessarily true AND not possibly true is "
+                     f"inconsistent - sealed with claimed_consistent = false ({PH}). Box P and not-diamond P cannot both "
+                     "hold: a thing that must be the case cannot also be a thing that cannot be. The engine seals the "
+                     "contradiction as a contradiction.", S["modal_contradiction"]),
+        ("instance", f"[contingent, SEALED] Not necessary but possible is consistent ({PH}): the contingent - true in "
+                     "some worlds, false in others - is where most of what we say lives.", S["modal_contingent"]),
+        ("instance", f"[consequentialism, SEALED] Consequentialism judges an act by its outcomes: true ({PH}). Mill's "
+                     "greatest happiness is the type.", S["consequentialist"]),
+        ("instance", f"[deontology, SEALED] Deontology does not: false ({PH}) - the act's conformity to duty is the "
+                     "measure (Kant's categorical imperative), whatever follows.", S["deontological"]),
+        ("instance", f"[virtue ethics, SEALED] Virtue ethics does not: false ({PH}) - the agent's character is the "
+                     "measure (Aristotle).", S["virtue"]),
+        ("instance", f"[contractarianism, SEALED] Contractarianism does not: false ({PH}) - what rational agents would "
+                     "agree to is the measure (Hobbes, Rawls).", S["contractarian"]),
+        ("instance", f"[a priori, SEALED] A claim that needs no observation is a priori ({PH}): Kant's 7 + 5 = 12, known "
+                     "by reason alone.", S["a_priori"]),
+        ("instance", f"[a posteriori, SEALED] A claim that needs observation is a posteriori - sealed with "
+                     f"claimed_is_a_priori = false ({PH}): that water boils at 100 C at one atmosphere is learned by "
+                     "the thermometer, not the armchair.", S["a_posteriori"]),
+        ("instance", f"[Leibniz's law, SEALED] Two objects with the same properties - red, round, heavy, in any order - "
+                     f"are identical under the law ({PH}): the property SETS are equal.", S["identical"]),
+        ("instance", f"[and its contrapositive, SEALED] Red, round, heavy against red, round, light: not identical, "
+                     f"sealed with claimed false ({PH}). One differing property is enough; the engine names it.",
+         S["not_identical"]),
+        ("postulate", "[the principles, CITED] Axiom D (what is necessary is possible), the taxonomy of the four "
+                      "frameworks, Kant's a priori / a posteriori line, and Leibniz's law are PRINCIPLES, cited never "
+                      "sealed. Leibniz's law has two halves: the indiscernibility of identicals (uncontroversial) and the "
+                      "identity of indiscernibles - the half the verifier implements - which Black (1952) disputed with "
+                      "two qualitatively identical spheres. What is sealed is the set comparison; whether sameness of "
+                      "properties IS identity is left as the dispute it is.",
+         {"source": "Kripke (1963); Kant, Critique of Pure Reason, Introduction; Leibniz, Discourse section 9; "
+                    "Black, Mind 61 (1952) 153"}),
+        ("note", "[on the one map] Modal logic is propositional logic with two more operators (the formal-logic stick: "
+                 "box and diamond are duals, like and and or under negation). The frameworks are the discernment the "
+                 "mind does (card_floor_the_mind) made explicit. The engine seals what is decidable and declines what is "
+                 "wise: which framework is RIGHT is not a check, and a miss stays a miss.",
+         {"source": "the one map; the formal-logic stick; card_floor_the_mind"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py philosophy")
+    return 0
+
+
+def stick_photography() -> int:
+    """PHOTOGRAPHY - exposure, reciprocity, angle of view, hyperfocal distance, sealed (issue #11, 2026-10-16:
+    reach, down the domain list). Through photography.PHOTO_VERIFY: EV = log2(N^2/t) at f/8 1/250 and the sunny-16
+    rule at f/16 1/125, reciprocity (f/8 1/250 equivalent to f/11 1/125; one stop apart sealed NOT equivalent), the
+    angle of view of 24, 50 and 200 mm on a 36 mm frame, and the hyperfocal distance at f/8 for 50 mm and 24 mm.
+    The APEX convention and the 0.030 mm circle of confusion are CITED; the arithmetic is SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def pg(spec):
+        return _seal_through("photography", "PHOTO_VERIFY", spec)
+
+    S = {
+        "ev_f8_250": pg({"f_number": 8.0, "shutter_seconds": 1.0 / 250.0, "claimed_exposure_value": 13.97}),
+        "sunny_16": pg({"f_number": 16.0, "shutter_seconds": 1.0 / 125.0, "claimed_exposure_value": 14.97}),
+        "reciprocal": pg({"settings_a": [8.0, 1.0 / 250.0], "settings_b": [11.0, 1.0 / 125.0], "claimed_equivalent": True}),
+        "one_stop_apart": pg({"settings_a": [8.0, 1.0 / 250.0], "settings_b": [8.0, 1.0 / 125.0], "claimed_equivalent": False}),
+        "aov_50": pg({"focal_length_mm": 50.0, "sensor_dimension_mm": 36.0, "claimed_angle_of_view_deg": 39.6}),
+        "aov_24": pg({"focal_length_mm": 24.0, "sensor_dimension_mm": 36.0, "claimed_angle_of_view_deg": 73.7}),
+        "aov_200": pg({"focal_length_mm": 200.0, "sensor_dimension_mm": 36.0, "claimed_angle_of_view_deg": 10.3}),
+        "hyperfocal_50": pg({"focal_length_mm_for_h": 50.0, "f_number_for_h": 8.0, "circle_of_confusion_mm": 0.030,
+                             "claimed_hyperfocal_distance_m": 10.47}),
+        "hyperfocal_24": pg({"focal_length_mm_for_h": 24.0, "f_number_for_h": 8.0, "circle_of_confusion_mm": 0.030,
+                             "claimed_hyperfocal_distance_m": 2.42}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "photography numbers")
+    sid = TS.create("Photography - exposure value, reciprocity, angle of view, hyperfocal, sealed",
+                    statement="A camera's settings are logarithms and tangents: EV counts stops in base 2, the angle "
+                              "of view is 2 atan(d/2f), and the hyperfocal distance is f^2/(N c) + f.",
+                    field="photography",
+                    references=["ISO 2720:1974 - exposure meters and the APEX system (EV = log2(N^2/t) at ISO 100)",
+                                "Kodak, the sunny-16 rule (film data sheets, 20th c.)",
+                                "R. Kingslake, Optics in Photography (SPIE, 1992), ch. 4 and 5",
+                                "H. M. Merklinger, The INs and OUTs of FOCUS (1992) - depth of field and hyperfocal"])["id"]
+    PG = "sealed through photography.PHOTO_VERIFY"
+    marks = [
+        ("instance", f"[EV at f/8, 1/250, SEALED] EV = log2(64 x 250) = 13.97 ({PG}): the APEX scale, each unit one "
+                     "stop - a doubling of light.", S["ev_f8_250"]),
+        ("instance", f"[sunny 16, SEALED] f/16 at 1/125 (the nearest click to 1/ISO at ISO 100) is EV 14.97, EV 15 "
+                     f"({PG}): the rule of thumb for direct sun, which is why a light meter reads 15 on a clear noon.",
+         S["sunny_16"]),
+        ("instance", f"[reciprocity, SEALED] f/8 at 1/250 and f/11 at 1/125 are equivalent exposures ({PG}): one stop "
+                     "closed, one stop longer, the same light. f/11 is the nominal name of 8 sqrt 2 = 11.31; the 0.09 EV "
+                     "difference is the rounding of the f-stop series, inside the verifier's 0.1 EV window.",
+         S["reciprocal"]),
+        ("instance", f"[one stop apart, SEALED AS NOT EQUIVALENT] f/8 at 1/250 and f/8 at 1/125 differ by one stop - "
+                     f"sealed with claimed_equivalent = false ({PG}). Twice the time at the same aperture is twice the "
+                     "light; the engine seals the inequality as an inequality.", S["one_stop_apart"]),
+        ("instance", f"[the normal lens, SEALED] 50 mm on a 36 mm frame sees 2 atan(36 / 100) = 39.6 deg across ({PG}) "
+                     "- the horizontal angle of the 'normal' lens, roughly the angle of comfortable attention.",
+         S["aov_50"]),
+        ("instance", f"[wide, SEALED] 24 mm sees 73.7 deg ({PG}).", S["aov_24"]),
+        ("instance", f"[long, SEALED] 200 mm sees 10.3 deg ({PG}): the tangent is nearly linear here, so the angle "
+                     "falls almost as 1/f - four times the focal length, nearly a quarter of the angle.", S["aov_200"]),
+        ("instance", f"[hyperfocal at 50 mm f/8, SEALED] H = 50^2 / (8 x 0.030) + 50 = 10,467 mm = 10.47 m ({PG}). "
+                     "Focus there and everything from 5.2 m to infinity is acceptably sharp.", S["hyperfocal_50"]),
+        ("instance", f"[at 24 mm f/8, SEALED] H = 576 / 0.24 + 24 = 2.42 m ({PG}): the square of the focal length is "
+                     "why wide lenses carry so much depth of field.", S["hyperfocal_24"]),
+        ("postulate", "[the conventions, CITED] EV at ISO 100 is the APEX convention (ISO 2720); the f-stop series "
+                      "1, 1.4, 2, 2.8, 4, 5.6, 8, 11, 16 names powers of sqrt 2 rounded; the 0.030 mm circle of "
+                      "confusion is a convention for a 36 mm frame viewed as an 8 x 10 print at arm's length - another "
+                      "viewer, another number. Cited, never sealed; the arithmetic they command is what is sealed.",
+         {"source": "ISO 2720:1974; Kingslake, Optics in Photography (1992); Merklinger (1992)"}),
+        ("note", "[on the one map] A camera is applied optics (card_floor_optics: the thin lens, the aperture, the "
+                 "circle of confusion) counted in logarithms (card_floor_logarithm: EV is a base-2 scale, every unit a "
+                 "doubling). The optics stick holds the lens; this stick holds the exposure.",
+         {"source": "the one map; card_floor_optics, card_floor_logarithm; the optics stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py photography")
+    return 0
+
+
+def stick_photonics() -> int:
+    """PHOTONICS - guided, resonant, active and nonlinear light, sealed (issue #11, 2026-10-16: reach, down the
+    domain list). Through photonics.PHOT_VERIFY: the V-number of a step-index fibre (single-mode at 1550 nm, the same
+    fibre multimode at 1000 nm - the cutoff at V = 2.405, the first zero of J0), a ring resonator's free spectral
+    range, 40 km of silica at 0.2 dB/km, a lithium-niobate modulator's V_pi, second-harmonic power scaling as the
+    square, a diode laser above threshold and sealed DARK below it, a grating's first order, Beer-Lambert absorption,
+    the energy of a 500 nm photon through h, and the Compton wavelength and shifts through alpha. The measured
+    material constants are CITED; the relations are SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def ph(spec):
+        return _seal_through("photonics", "PHOT_VERIFY", spec)
+
+    S = {
+        "v_single_mode": ph({"core_radius_m": 4.1e-6, "numerical_aperture": 0.12, "wavelength_m": 1.55e-6, "claimed_v_number": 1.994}),
+        "v_multimode": ph({"core_radius_m": 4.1e-6, "numerical_aperture": 0.12, "wavelength_m": 1.0e-6, "claimed_v_number": 3.091}),
+        "ring_fsr": ph({"group_index": 4.2, "ring_length_m": 6.28e-5, "claimed_fsr_hz": 1.1366e12}),
+        "fiber_loss": ph({"input_power_dbm": 3.0, "attenuation_db_per_km": 0.2, "length_km": 40.0, "claimed_output_dbm": -5.0}),
+        "vpi": ph({"wavelength_m": 1.55e-6, "gap_m": 1e-5, "index": 2.2, "eo_coefficient_m_per_v": 3.08e-11,
+                   "length_m": 0.02, "claimed_vpi_v": 2.363}),
+        "shg": ph({"reference_fundamental_w": 1.0, "reference_shg_w": 0.01, "test_fundamental_w": 2.0, "claimed_shg_w": 0.04}),
+        "laser_above": ph({"threshold_current_a": 0.015, "slope_efficiency_w_per_a": 0.9, "drive_current_a": 0.05, "claimed_output_w": 0.0315}),
+        "laser_below": ph({"threshold_current_a": 0.015, "slope_efficiency_w_per_a": 0.9, "drive_current_a": 0.010, "claimed_output_w": 0.0}),
+        "grating": ph({"grating_period_m": 3.0e-6, "order": 1, "wavelength_m": 1.55e-6, "claimed_angle_deg": 31.11}),
+        "beer_lambert": ph({"input_intensity": 1.0, "coefficient_per_m": 200.0, "path_length_m": 0.001, "claimed_output_intensity": 0.8187}),
+        "photon_500nm": ph({"photon_wavelength_m": 500e-9, "claimed_photon_energy_ev": 2.480}),
+        "compton_wavelength": ph({"claimed_compton_wavelength_m": 2.4263e-12}),
+        "compton_90": ph({"compton_angle_deg": 90, "claimed_compton_shift_m": 2.4263e-12}),
+        "compton_180": ph({"compton_angle_deg": 180, "claimed_compton_shift_m": 4.8526e-12}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "photonics numbers")
+    sid = TS.create("Photonics - guided, resonant, active and nonlinear light, sealed",
+                    statement="Light engineered as a signal obeys closed forms: a mode count V, a resonator's FSR, "
+                              "loss in decibels, a modulator's V_pi, a square law, a threshold, a grating, an "
+                              "exponential, and the photon's E = h c / lambda.",
+                    field="photonics",
+                    references=["B. E. A. Saleh & M. C. Teich, Fundamentals of Photonics, 2nd ed. (2007)",
+                                "G. P. Agrawal, Fiber-Optic Communication Systems, 4th ed. (2010)",
+                                "T. Miya et al., Ultimate low-loss single-mode fibre at 1.55 um, Electron. Lett. 15 (1979) 106",
+                                "A. H. Compton, Phys. Rev. 21 (1923) 483; CODATA 2018 lambda_C = 2.42631e-12 m"])["id"]
+    PH = "sealed through photonics.PHOT_VERIFY"
+    marks = [
+        ("instance", f"[single-mode, SEALED] A step-index fibre with core radius 4.1 um and NA 0.12 at 1550 nm has V = "
+                     f"2 pi a NA / lambda = 1.994 ({PH}): below 2.405, so exactly one guided mode. 2.405 is the first "
+                     "zero of the Bessel function J0 - the cutoff is a theorem, the fibre is built to sit under it.",
+         S["v_single_mode"]),
+        ("instance", f"[the same fibre, multimode, SEALED] At 1000 nm the same fibre has V = 3.091 ({PH}): above cutoff, "
+                     "a second mode propagates. Single-mode is a property of fibre AND wavelength; the cutoff "
+                     "wavelength of this fibre is 2 pi a NA / 2.405 = 1286 nm.", S["v_multimode"]),
+        ("instance", f"[a ring resonator, SEALED] Group index 4.2, circumference 62.8 um: FSR = c / (n_g L) = 1.137 THz "
+                     f"({PH}) - the resonances of a silicon microring are spaced by the round-trip time's inverse.",
+         S["ring_fsr"]),
+        ("instance", f"[40 km of silica, SEALED] 3 dBm in, 0.2 dB/km over 40 km: 3 - 8 = -5 dBm out ({PH}). 0.2 dB/km "
+                     "at 1550 nm is the floor silica reached in 1979 (Miya et al.) - Rayleigh scattering's limit, "
+                     "which is why the world's traffic travels at that wavelength.", S["fiber_loss"]),
+        ("instance", f"[a lithium-niobate modulator, SEALED] lambda 1550 nm, gap 10 um, n = 2.2, r33 = 30.8 pm/V, "
+                     f"electrode 20 mm: V_pi = lambda d / (n^3 r L) = 2.36 V ({PH}) - the voltage that shifts the phase "
+                     "by pi, the number every data link is engineered around.", S["vpi"]),
+        ("instance", f"[second harmonic, SEALED] 1 W of fundamental makes 10 mW of second harmonic; 2 W makes 40 mW "
+                     f"({PH}): P_2w scales as P_w squared, because two photons become one.", S["shg"]),
+        ("instance", f"[a laser above threshold, SEALED] I_th = 15 mA, slope 0.9 W/A, driven at 50 mA: P = 0.9 x 0.035 = "
+                     f"31.5 mW ({PH}). Above threshold the output is linear in the current past it.", S["laser_above"]),
+        ("instance", f"[and below, SEALED DARK] Driven at 10 mA, under threshold: P = 0 ({PH}, sealed at zero). Below "
+                     "threshold gain does not beat loss and the device is an LED's faint glow at best, not a laser - "
+                     "the engine seals the dark as dark.", S["laser_below"]),
+        ("instance", f"[a grating, SEALED] Period 3 um, first order, 1550 nm: d sin theta = m lambda gives theta = "
+                     f"31.11 deg ({PH}).", S["grating"]),
+        ("instance", f"[Beer-Lambert, SEALED] alpha = 200/m over 1 mm: I = I0 e^(-0.2) = 0.8187 ({PH}). Absorption is "
+                     "exponential in the path; gain is the same law with alpha negative.", S["beer_lambert"]),
+        ("instance", f"[a green photon, SEALED] 500 nm carries E = h c / lambda = 2.480 eV ({PH}, through h). The "
+                     "energy that decides whether a photon can lift an electron across a gap - 2.48 eV is above "
+                     "silicon's 1.12, so silicon absorbs green and a solar cell works.", S["photon_500nm"]),
+        ("instance", f"[the Compton wavelength, SEALED] lambda_C = h / (m_e c) = 2.4263e-12 m ({PH}) = 2 pi alpha a_0 - "
+                     "the electron's length scale, through the fine-structure constant.", S["compton_wavelength"]),
+        ("instance", f"[the 90-degree shift, SEALED] A photon scattered at 90 deg lengthens by exactly lambda_C ({PH}): "
+                     "d lambda = lambda_C (1 - cos theta), and cos 90 = 0.", S["compton_90"]),
+        ("instance", f"[backscatter, SEALED] At 180 deg the shift is 2 lambda_C = 4.8526e-12 m ({PH}) - the maximum. "
+                     "Compton's 1923 measurement of this shift is where light's particle momentum became fact.",
+         S["compton_180"]),
+        ("postulate", "[the inputs, CITED] 0.2 dB/km (Miya 1979), r33 = 30.8 pm/V for LiNbO3, the group index 4.2 of "
+                      "a silicon waveguide, the slope efficiency and threshold of a diode are MEASURED; the weakly "
+                      "guiding step-index model behind V is an approximation that works for low-contrast fibres. Cited "
+                      "as postulates, inferred not kept; lambda_C is CODATA's and exact to its stated digits.",
+         {"source": "Saleh & Teich (2007); Agrawal (2010); Miya et al., Electron. Lett. 15 (1979) 106; CODATA 2018"}),
+        ("note", "[on the one map] Photonics is Maxwell's equations in a guide (card_floor_maxwells_equations: the "
+                 "mode condition, the grating), the photon through h and alpha (card_floor_quantum_mechanics: E = h nu; "
+                 "the alpha stick: lambda_C = 2 pi alpha a_0), and the decibel scale of the fibre-calibration stick. "
+                 "A connective domain: the same forms - wave, periodic, decay, logarithm, power law, threshold - the "
+                 "atlas carries elsewhere, here in glass.",
+         {"source": "the one map; card_floor_maxwells_equations, card_floor_quantum_mechanics; the alpha and "
+                    "fiber-calibration sticks"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py photonics")
+    return 0
+
+
 def game_theory() -> int:
     """GAME THEORY - equilibrium, dilemmas, and strategy (Matt, 2026-10-10, down the domain list). The mathematics of
     strategic choice: a NASH EQUILIBRIUM is a fixed point where no one gains by deviating alone; the PRISONER'S
@@ -11914,6 +12331,16 @@ def main() -> int:
         return stick_labor()
     if a[0] in ("linear_algebra", "matrices", "matrix", "determinant", "eigenvalues"):
         return stick_linear_algebra()
+    if a[0] in ("manufacturing", "six_sigma", "spc", "process_capability", "cpk"):
+        return stick_manufacturing()
+    if a[0] in ("molecular_geometry", "vsepr", "bond_angle", "molecular_shape"):
+        return stick_molecular_geometry()
+    if a[0] in ("philosophy", "modal_logic", "leibniz", "a_priori", "ethics"):
+        return stick_philosophy()
+    if a[0] in ("photography", "exposure_value", "f_stop", "hyperfocal", "sunny_16"):
+        return stick_photography()
+    if a[0] in ("photonics", "waveguide", "fiber_optics", "laser", "v_number"):
+        return stick_photonics()
     if a[0] in ("tesseract", "hypercube", "four_cube", "eight_cell"):
         return tesseract()
     if a[0] in ("statistics", "stats", "inference", "the_normal_distribution"):
