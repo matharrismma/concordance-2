@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional
 from .. import __version__, cas, corpus
 from ..config import EngineConfig
 from ..derivation import verify_derivation
+from .. import tool_registry as _registry  # single source of truth for tool routing (issue #2)
 # scripture (witness verifier) is imported LAZILY in the witness-gated tool branches below —
 # never at module top, so the secular surface never loads witness code.
 
@@ -941,83 +942,15 @@ def _no_private_key(tool: str) -> Dict[str, Any]:
 #   external_action touch a system OUTSIDE the library (calendar) — consent-gated
 EFFECTS = ("read", "derive", "preserve", "publish", "external_action")
 
+# The per-tool profile membership + capability is DERIVED from the single tool registry (issue #2):
+# each tool declares its profile+capability once there, so a tool can never be in two profiles or
+# none, and the profiles cannot drift from the catalog or the verbs. The per-plane prose (version +
+# description) is the registry's PROFILE_META; EFFECTS (above) stays the capability vocabulary.
 PROFILES: Dict[str, Dict[str, Any]] = {
-    "core": {
-        "version": "1.0.0",
-        "description": "Deterministic checks and receipts: verify a claim, audit a document, "
-                       "fetch and witness seals, read the engine's own capabilities and clock.",
-        "tools": {"verify": "derive", "audit": "derive", "seal_fetch": "read",
-                  "attest_record": "preserve", "witnesses": "read",
-                  "now": "read", "capabilities": "read",
-                  "kernel": "read", "kernel_gate": "derive",
-                  "candidate_commit": "preserve", "candidate_narrow": "preserve",   # narrow() is pure, but the handler mints a best-effort receipt (candidates.receipt) — a write, labelled honestly (handoff review 2026-10-02)
-                  "candidate_get": "read",
-                  "manufacture": "preserve"},   # the Conductor's calc door: verify -> seal -> ledger (a write)
-    },
-    "library": {
-        "version": "1.0.0",
-        "description": "Read-only retrieval over the keeping: search, cards, the grid, the "
-                       "conversational door. Provenance attached; nothing here writes.",
-        "tools": {"search": "read", "card_get": "read", "cards_browse": "read",
-                  "decks": "read", "deck_open": "read",
-                  "cards_stats": "read", "daily_card": "read", "grid_axis": "read",
-                  "grid_dimension": "read", "card_connections": "read", "locate": "read",
-                  "library_health": "read", "pronounce": "derive", "thesaurus": "derive",
-                  "define": "derive", "lookup": "derive", "find_verifier": "read", "study_find": "read",
-                  "seeds": "read", "ask": "read", "discern": "read", "parable": "read"},
-    },
-    "sovereign": {
-        "version": "1.0.0",
-        "description": "Identity, consent, and personal sovereignty: keys born on the device, "
-                       "signable payloads, the consent lock, private budgeting, redaction — and "
-                       "the one consent-gated external action (calendar).",
-        "tools": {"identity_create": "preserve", "identity_verify": "derive",
-                  "identity_fingerprint": "derive", "badges_issue": "preserve",
-                  "badges_verify": "derive", "self_attest": "preserve",
-                  "profess": "preserve", "witness_profession": "preserve", "profession": "read",
-                  "consent_check": "read", "redact": "derive",
-                  "steward_budget": "derive", "steward_cost_destroyed": "derive",
-                  "calendar_create": "external_action"},
-    },
-    "coach": {
-        "version": "1.0.0",
-        "description": "Bounded curriculum access and learning records. Kept apart from the "
-                       "community plane on purpose — the assessment's child-surface isolation.",
-        "tools": {"coach_subjects": "read", "coach_overview": "read", "coach_unit": "read",
-                  "coach_next": "read", "coach_recommend": "read", "coach_mastery": "preserve",
-                  "coach_guidance": "read", "study_create": "preserve",
-                  "study_export": "read", "study_import": "preserve"},
-    },
-    "witness": {
-        "version": "1.0.0",
-        "description": "Attributed Scripture study: the text, the original words, the "
-                       "cross-references, the charts — found and cited, never generated. "
-                       "Gate semantics unchanged from the main door.",
-        "tools": {"resolve": "read", "read_passage": "read", "word_study": "read",
-                  "cross_references": "read", "commentary": "read",
-                  "tsk_cross_references": "read", "character_get": "read",
-                  "characters_browse": "read", "prophecy_traces": "read", "harmony": "read",
-                  "timeline": "read", "backmatter": "read", "bible_places": "read",
-                  "narratives": "read", "original_words": "read", "canon": "read",
-                  "teachings": "read"},
-    },
-    "community": {
-        "version": "1.0.0",
-        "description": "The social plane: groups, shelves, the commons, the mesh, moderation, "
-                       "and the want loop. Every publish-class tool in the catalog lives here, "
-                       "and this profile is OFF by default on a hosted box — publishing is a "
-                       "separate deployment decision with governance attached.",
-        "tools": {"groups_list": "read", "group_get": "read", "group_create": "publish",
-                  "group_join": "publish", "group_contribute": "publish",
-                  "shelf_signable": "derive", "shelf_drop": "publish", "shelf_read": "read",
-                  "playbook_read": "read", "playbook_signable": "derive", "playbook_submit": "publish",
-                  "commons_read": "read", "curate_queue": "read", "curate_signable": "derive",
-                  "curate": "publish", "moderation_signable": "derive", "report": "publish",
-                  "mesh_map": "read", "mesh_inbox": "read", "mesh_door": "read",
-                  "mesh_signable": "derive", "mesh_leave_on_door": "publish",
-                  "mesh_post": "publish",
-                  "want_open": "preserve", "wants_list": "read", "want_offer": "publish"},
-    },
+    _p: {"version": _registry.PROFILE_META[_p]["version"],
+         "description": _registry.PROFILE_META[_p]["description"],
+         "tools": {_t.name: _t.capability for _t in _registry.REGISTRY if _t.profile == _p}}
+    for _p in _registry.PROFILE_ORDER
 }
 
 

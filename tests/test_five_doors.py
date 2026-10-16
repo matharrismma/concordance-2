@@ -4,7 +4,7 @@ verbs cannot drift between faces. docs/FIVE_DOORS_MAP.md is the audit; this pins
 import re
 from pathlib import Path
 
-from concordance import doors
+from concordance import doors, tool_registry
 from concordance.engine import EngineConfig
 from concordance.mcp.server import handle
 from concordance.web import api
@@ -39,7 +39,7 @@ def test_every_catalog_tool_belongs_to_one_verb_and_the_doors_are_real():
 
 def test_a_new_agent_meets_the_doors_first_and_every_tool_leads_with_its_verb():
     cat = _catalog()
-    assert len(cat) == 102                                  # +3 (2026-10-06): profess · witness_profession · profession; +1 manufacture (Conductor M2); +1 parable (WALK, 2026-10-15)
+    assert len(cat) == len(tool_registry.NAMES)             # count DERIVES from the single registry (issue #2): adding a tool is one entry there, no hand-edited count pin
     first = [t["name"] for t in cat[:4]]
     assert first == doors.TOOL_DOORS["CHECK"], first        # CHECK's doors open the list
     kinds = [doors.TOOL_KIND[t["name"]] for t in cat]

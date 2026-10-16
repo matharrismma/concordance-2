@@ -16,6 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from concordance.config import EngineConfig  # noqa: E402
+from concordance import tool_registry  # noqa: E402
 from concordance.mcp import handle  # noqa: E402
 from concordance.mcp.server import EFFECTS, PROFILES, profile_of  # noqa: E402
 
@@ -117,7 +118,7 @@ def test_the_full_catalog_on_mcp_is_unchanged_a_golden():
     + `manufacture` (route an engineering claim + its MFG numbers through the manufacturing verifier ->
     seal -> hash-chained ledger, reporting the disposition; connects organs, rebuilds none) on the `core`
     plane beside candidate_*. +1 = 101, deliberate."""
-    assert len(_full_catalog()) == 102   # +1 parable (WALK, 2026-10-15)
+    assert len(_full_catalog()) == len(tool_registry.NAMES)   # count DERIVES from the single registry (issue #2)
 
 
 def test_the_witness_gate_semantics_survive_the_mount():

@@ -43,6 +43,20 @@ def test_every_catalog_tool_has_a_dispatch_handler():
                          f"'unknown tool'): {missing} — add the dispatch, or remove the tool")
 
 
+def test_catalog_matches_the_single_registry():
+    """The other half of issue #2: the single tool registry (concordance.tool_registry) is the source
+    of every tool's verb/kind/profile/capability, and `doors`/`PROFILES`/counts derive from it. This
+    pins catalog <-> registry: a tool in the catalog with no registry entry has no verb/kind/profile
+    (it would vanish from the doors and escape profile review); a registry entry with no catalog tool
+    is a phantom. So adding a tool is one registry entry + its schema + its handler — all three checked
+    against each other here and above, never silent drift."""
+    from concordance import tool_registry
+    catalog = _catalog_names()
+    reg = set(tool_registry.NAMES)
+    assert catalog == reg, (f"catalog-but-not-in-registry: {sorted(catalog - reg)}; "
+                            f"registry-but-not-in-catalog: {sorted(reg - catalog)}")
+
+
 if __name__ == "__main__":
     test_every_catalog_tool_has_a_dispatch_handler()
     print("ok — every catalog tool has a dispatch handler")
