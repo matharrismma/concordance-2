@@ -7,8 +7,9 @@ These configs are *prepared*. **Deployment is the operator's** — it is outward
 touches DNS, the server, and live traffic. Nothing here deploys anything by itself.
 
 > **Current live reality — verified live 2026-07-12.** The cutover is **done**. Both faces
-> run 2.0: `nh-com-2.service` (narrowhighway.com) and `nh-org.service` (narrowhighway.org),
-> behind `caddy.service`. 1.0 (`nh-engine`) is retired. `.tv` also resolves and serves.
+> run 2.0 from ONE process, `nh-engine.service` (witness :8001 + secular :8002, one corpus; the
+> older pair `nh-org.service` + `nh-com-2.service` remains as the fallback), plus `nh-mcp.service`
+> (the dedicated MCP host, :8003), behind `caddy.service`. `.tv` also resolves and serves.
 > Cloudflare is in front as **DNS only (grey cloud)** — TLS terminates on our Caddy.
 > **There is no git repo on the box**: `/home/nh/concordance-2` is not version-controlled,
 > so pushing to `main` deploys nothing — deploys are **scp + `systemctl restart`**.
@@ -45,10 +46,10 @@ do not need it**. Scripture/word-study/search need it.
 
 ## 3. Services (both surfaces)
 ```bash
-sudo cp deploy/nh-com.service deploy/nh-org.service /etc/systemd/system/
+sudo cp deploy/nh-engine.service deploy/nh-mcp.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now nh-com nh-org
-systemctl status nh-com nh-org          # both active
+sudo systemctl enable --now nh-engine nh-mcp
+systemctl status nh-engine nh-mcp      # both active
 ```
 `.com` listens on `127.0.0.1:8000` (secular), `.org` on `127.0.0.1:8001` (witness).
 
@@ -92,7 +93,7 @@ failures never break a request.
 ## Notes
 - **Sovereign**: no external services required; runs offline. `sympy` (the moat) and
   `cryptography` (signing) are the only runtime deps worth installing; everything else is stdlib.
-- **Updating**: `git pull`, `pip install -e ".[math]"` if deps changed, `sudo systemctl restart nh-com nh-org`.
+- **Updating**: `git pull`, `pip install -e ".[math]"` if deps changed, `sudo systemctl restart nh-engine nh-mcp`.
 - **Docker alternative**: `docker build -t narrowhighway .`, then run two containers (`--surface
   secular -p 8000` and `--surface witness -p 8001`) with `-v /path/to/data:/data`.
 - The witness endpoints (`/resolve`, `/word_study`) are 404 on `.com` by design; the keeping

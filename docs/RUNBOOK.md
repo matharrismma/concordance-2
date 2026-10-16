@@ -26,9 +26,10 @@ For standing a box up from scratch (venv, data migration, systemd units), see
   §7 wants: no third party inside the conversation.
 - **Reverse proxy:** ✅ `caddy.service` — TLS (Let's Encrypt) + host routing + the
   host allowlist.
-- **App:** ✅ two systemd services, **not Docker**:
-  - `nh-com-2.service` → narrowhighway.com (secular plane)
-  - `nh-org.service` → narrowhighway.org (witness plane)
+- **App:** ✅ systemd services, **not Docker** (units in `deploy/`):
+  - `nh-engine.service` → ONE process serving both faces (witness :8001 + secular :8002, one corpus) — the current unit
+  - `nh-mcp.service` → the dedicated MCP host (:8003), the agents' door; `tools/deploy.sh` restarts it after the engine
+  - fallback pair if `nh-engine` is disabled: `nh-com-2.service` → narrowhighway.com · `nh-org.service` → narrowhighway.org
   - Interpreter: `PYTHONPATH=src /home/nh/concordance-2/.venv/bin/python -m concordance`
 - **Data:** ✅ `/home/nh/concordance-2/data/cards.jsonl` — append-only; **last line
   wins on duplicate id**, so re-appending is idempotent. Card/graph data **hot-reloads
@@ -74,7 +75,7 @@ Gate before shipping code: `PYTHONPATH=src .venv/bin/python tools/check.py` → 
 | Endpoint | Status |
 |---|---|
 | `/` · `/graph` · `/identity` · `/llms.txt` | ✅ 200 |
-| `/ask.html` · `/threads` | ✅ 200 (both .com and .org) |
+| `/ask.html` · `/threads` | `/ask.html` → 301 to `/` (the Console, since the consolidation); `/threads` ✅ 200 |
 | `/thread/verify` | ✅ route exists (400 without args) |
 | `narrowhighway.org/` · `narrowhighway.tv/` | ✅ 200 — already in the allowlist |
 | `/version` · `/health/lite` | ❌ 404 — 1.0 endpoints, never ported |

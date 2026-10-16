@@ -2,7 +2,7 @@
 """The other joints: every validator and verifier on the one map (Matt, 2026-10-09: "now look for the other joints.
 Every validator and verifier.").
 
-After the sticks took their place on the map (tools/seed_charts.py), the engine's INSTRUMENTS - the 89 verifiers and
+After the sticks took their place on the map (tools/seed_charts.py), the engine's INSTRUMENTS - every registered verifier and
 the gate that validates them - are placed too. The joints among them are FOUND, not invented: the real import graph,
 extracted from the verifier files at seed time (re-run after a code change and the map updates; it can never drift
 from the code). What that graph shows:
@@ -189,7 +189,7 @@ def floor_card() -> dict:
     conf = ", ".join(sorted(m for m in GRAPH if len(GRAPH[m]) >= 2))
     return {
         "id": FLOOR, "kind": "note", "title": "The instruments — every verifier and validator, and where they join",
-        "body": ("The engine's checking instruments on the one map: the 89 verifiers and the gate that validates them, "
+        "body": ("The engine's checking instruments on the one map: every registered verifier and the gate that validates them, "
                  "joined by their real import graph (read from the code at seed time, so it cannot drift). A MEASURE "
                  "spine runs si_units -> physical_constants -> scale_base -> the six scale libraries -> the domains, and "
                  "its confluences - where several scales meet in one domain - are found, not declared: "

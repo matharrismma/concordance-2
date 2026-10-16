@@ -38,7 +38,7 @@ def test_the_lead_card_carries_the_three_clauses():
 def test_the_tao_signpost_is_parts_with_a_hole_not_equivalence():
     sp_file = _REPO / "data" / "prophecy" / "signposts.jsonl"
     if not sp_file.exists():
-        pytest.skip("data/prophecy is data-only (gitignored): the signposts live on the box, not in git")
+        pytest.skip("data/prophecy signposts are data-only (box-side; only messianic.jsonl is tracked in git)")
     recs = {r["id"]: r for r in _records(sp_file)}
     sp = recs["signpost_tao_logos_derek_the_way"]
     assert " = " not in sp["title"] and "hole" in sp["title"] and "John 14:6" in sp["title"]
