@@ -12,6 +12,7 @@ from the secular core — it is witness-surface ranking and belongs with the .or
 from __future__ import annotations
 
 import json
+import logging
 import math
 import os
 import re
@@ -21,6 +22,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .ops import STUB_BODY_CHARS  # the one definition of "stub" — never redefined here
+
+_log = logging.getLogger("concordance.corpus")
 
 # A query token must be at least this distinctive (high IDF) to count as a real hit.
 # Tuned for a large corpus; lower it for small fixtures.
@@ -1066,7 +1069,8 @@ def load_cards(path: Optional[Path] = None,
     frozen = frozen_shelves()
     from time import perf_counter as _pc
     _ph: Dict[str, Any] = {"frozen_df_ms": 0.0, "frozen_cards": 0, "resident_cards": 0,
-                           "frozen_cards_cached": 0, "files_skipped": 0, "files_seeked": 0}
+                           "frozen_cards_cached": 0, "files_skipped": 0, "files_seeked": 0,
+                           "dup_edges_dropped": 0}
     from sys import intern as _intern   # one object per distinct call number / surface across 840k frozen entries
     # THE FROZEN CACHE (2026-10-08, frozen_cache.py): `_contrib_out` receives, per SOURCE FILE NAME, how many
     # [frozen, resident] cards it held (so default_corpus can key the cache on exactly the files that matter,
@@ -1113,6 +1117,9 @@ def load_cards(path: Optional[Path] = None,
         _ph["resident_cards"] += 1
         if _contrib_out is not None and _cur["name"] is not None:
             _contrib_out.setdefault(_cur["name"], [0, 0])[1] += 1
+        # exact duplicate inline edges (same target + same relationship) are dropped at the gate, first
+        # occurrence kept (issue #25) — so the resident graph never carries the same edge twice.
+        _ph["dup_edges_dropped"] += _dedupe_connections(c)
         out[c["id"]] = c
         return True
 
@@ -1346,9 +1353,16 @@ def _signpost_card(rec: dict) -> Optional[dict]:
     }
 
 
-# inverse labels for DIRECTIONAL (hierarchical) edges, so the reciprocal points the other way and
-# the floor can be walked as a tree. Anything not here is treated as symmetric (lateral) — the
-# reciprocal keeps the same label (shares_scripture, same_family, names_the_created_thing, …).
+# THE REVERSE LABEL (issue #25, step 1 — 2026-10-16). A bridge row {a, b, relationship} is applied to
+# BOTH cards, so the reverse card needs the right label. Three cases, each DECLARED:
+#   _INVERSE_REL    directional (hierarchical or ordered): the reciprocal carries the INVERSE label, so
+#                   the floor walks as a tree (up = member_of, down = has_member) and an order stays an
+#                   order (Z `precedes` Z+1, so Z+1 `follows` Z — never "precedes" both ways).
+#   _SYMMETRIC_REL  lateral: the reciprocal keeps the SAME label, by declaration.
+#   anything else   a GAP: mirrored with the same label (the old behavior) and logged ONCE per label,
+#                   so the gap is visible instead of silently minting a wrong direction.
+# Measured before this on the tracked seeds: 125 directional bridge rows mirrored with the same label
+# (precedes 117, modulates 4, embodies/verified_by/feeds_back/instance_of_one_floor 1 each).
 _INVERSE_REL = {
     "member_of": "has_member", "part_of": "has_part", "nested_in": "contains",
     "figure_of": "has_figure", "pre_registered_validation_of": "validated_by",
@@ -1363,7 +1377,74 @@ _INVERSE_REL = {
     # a tick stick placed on the one map charts a node; the node lists the sticks that chart it (2026-10-09:
     # "allow the function to follow the form").
     "charts": "charted_by",
+    # issue #25: the directional bridge relationships that had NO inverse, so the reverse edge carried the
+    # same label. Each pair is looked up in BOTH directions (_REVERSE_REL), so a row written from either
+    # end (`demonstrated_by`, `verified_by` both occur in the seeds) reverses to its partner.
+    "precedes": "follows",
+    "demonstrates": "demonstrated_by",
+    "paves": "paved_by",
+    "cites": "cited_by",
+    "modulates": "modulated_by",
+    "embodies": "embodied_by",
+    "verifies": "verified_by",
+    "culminates_in": "culmination_of",
+    "feeds_back": "fed_back_by",
+    "instance_of_one_floor": "has_instance_on_one_floor",
 }
+# the involutive lookup: forward AND inverse labels, so _reverse_rel(_reverse_rel(x)) == x for every x here.
+_REVERSE_REL: Dict[str, str] = {**_INVERSE_REL, **{v: k for k, v in _INVERSE_REL.items()}}
+
+# the lateral relationships, declared: a bridge with one of these carries the same label on both cards.
+_SYMMETRIC_REL = frozenset({
+    "connects_at", "same_family", "adjacent", "names_the_created_thing", "kindred", "concords_with",
+    "shares_scripture",
+    # a bridge row with NO relationship asserts only that the two are connected (see _BRIDGE_REL_FALLBACK)
+    "unspecified",
+})
+# a bridge row that carries no relationship. Was silently filled with "names_the_created_thing" (a
+# specific claim the row never made); now an explicit label, counted and logged per overlay.
+_BRIDGE_REL_FALLBACK = "unspecified"
+_REL_GAPS_LOGGED: set = set()
+
+
+def _reverse_rel(rel: str) -> str:
+    """The label the reverse card carries for a bridge labelled `rel`: the declared inverse of a directional
+    relationship, the same label for a declared symmetric one, and — for a label in neither table — the
+    same label with a warning logged once per label (the gap is kept visible, never silently mirrored)."""
+    r = _REVERSE_REL.get(rel)
+    if r is not None:
+        return r
+    if rel in _SYMMETRIC_REL:
+        return rel
+    if rel not in _REL_GAPS_LOGGED:
+        _REL_GAPS_LOGGED.add(rel)
+        _log.warning("bridge relationship %r is in neither _INVERSE_REL nor _SYMMETRIC_REL: the reverse edge "
+                     "carries the same label — declare it directional or symmetric (issue #25)", rel)
+    return rel
+
+
+def _dedupe_connections(card: dict) -> int:
+    """Drop EXACT duplicate inline edges (same to_card_id AND relationship) from one card, in place and
+    deterministically: the FIRST occurrence stays, in its position. Returns how many were dropped. An
+    edge to the same target with a DIFFERENT relationship is not a duplicate and stays (one edge per
+    pair per relationship). Non-dict entries are left untouched. (issue #25: 3,079 exact duplicates
+    locally, 108 of them `cites` inside single cards.)"""
+    links = card.get("connections")
+    if not isinstance(links, list) or len(links) < 2:
+        return 0
+    seen: set = set()
+    kept: List[Any] = []
+    for e in links:
+        if isinstance(e, dict):
+            k = (e.get("to_card_id"), e.get("relationship"))
+            if k in seen:
+                continue
+            seen.add(k)
+        kept.append(e)
+    dropped = len(links) - len(kept)
+    if dropped:
+        card["connections"] = kept
+    return dropped
 
 
 def _apply_bridges(cards: Dict[str, dict], overlay: Path) -> None:
@@ -1373,6 +1454,7 @@ def _apply_bridges(cards: Dict[str, dict], overlay: Path) -> None:
     0-FP: each bridge is an exact-subject match (an element or crop the Bible also names)."""
     if not overlay.exists():
         return
+    missing = 0
     for line in overlay.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line:
@@ -1382,19 +1464,28 @@ def _apply_bridges(cards: Dict[str, dict], overlay: Path) -> None:
         except json.JSONDecodeError:
             continue
         a, b = e.get("a"), e.get("b")
-        rel = e.get("relationship") or "names_the_created_thing"
+        rel = e.get("relationship")
+        if not rel:
+            missing += 1
+            rel = _BRIDGE_REL_FALLBACK
         ev = e.get("evidence") or ""
         ca, cb = cards.get(a), cards.get(b)
         if not ca or not cb:
             continue
-        # hierarchical edges are DIRECTIONAL — the reciprocal carries the inverse label so the floor
-        # can be walked as a tree (up = member_of/part_of/…, down = has_member/has_part/…). Lateral
-        # edges (shares_scripture, same_family, names_the_created_thing) stay symmetric.
-        rev = _INVERSE_REL.get(rel, rel)
+        # the reverse label is DECLARED (issue #25): the inverse for a directional edge so the floor walks as
+        # a tree and an order stays an order; the same label for a declared symmetric one; a logged gap otherwise.
+        rev = _reverse_rel(rel)
         for src, dst, r in ((ca, b, rel), (cb, a, rev)):
             links = src.setdefault("connections", [])
-            if not any(isinstance(x, dict) and x.get("to_card_id") == dst for x in links):
+            # one edge per (source, target) PER RELATIONSHIP: an exact duplicate is dropped; a second
+            # relationship on a pair already bridged with a different one is KEPT (it used to be silently
+            # dropped — 16 directions locally, 2 on the tracked seeds: `member_of` lost to `part_of`).
+            if not any(isinstance(x, dict) and x.get("to_card_id") == dst and x.get("relationship") == r
+                       for x in links):
                 links.append({"to_card_id": dst, "relationship": r, "evidence": ev})
+    if missing:
+        _log.warning("%s: %d bridge row(s) carry no relationship; applied as %r", overlay.name, missing,
+                     _BRIDGE_REL_FALLBACK)
 
 
 def add_to_default(card: dict) -> None:
