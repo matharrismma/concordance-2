@@ -179,7 +179,7 @@ pointing past itself to the Designer. Generator: [`tools/atlas_explore.py`](../t
   rests on / limits it / shares its form.
 - **Seven live views** (`explore.html`, one persistent selection): kernel · form wheel · one body · spiral ·
   domains · bridges · **strategy** (the same method turned on history — patterns × arenas × cases).
-- **The Crossing** (`crossing.html`): geometry is the doorway (`measure ~ length^d`, a narrow crosser — 4
+- **The Crossing** (`crossing.html` — retired, now `/concordance.html`): geometry is the doorway (`measure ~ length^d`, a narrow crosser — 4
   domains); the **logarithm** is the actual widest-crossing form (**13** verified domains, function =
   multiplicative → additive), the very form that closed the Atlas's last homological void (the Prime Number
   Theorem, `π(x) ~ x/ln x`). Closes at the **Macedonian cross** (Acts 16:9, διαβαίνω, "to cross over").
@@ -307,7 +307,7 @@ verifiers** the converters, and the **models are FUEL** — the manifold endures
 
 - **Server:** [`mcp/server.py`](../src/concordance/mcp/server.py) (JSON-RPC) + `mcp/http.py` (Streamable
   HTTP). Mounted at `POST /mcp` and six profile planes.
-- **Catalog: 95 tools across 6 profiles** — `core, library, sovereign, coach, witness, community` (every
+- **Catalog: 102 tools across 6 profiles** (live count: `tools/list` on `/mcp`; 102 at 2026-10-16) — `core, library, sovereign, coach, witness, community` (every
   tool in exactly one; community off unless the host enables it).
 - **Install:** `claude mcp add --transport http narrow-highway https://narrowhighway.com/mcp`. Sovereign:
   `python -m concordance mcp`. Agent card: **`/llms.txt`**.
@@ -330,10 +330,10 @@ verifiers** the converters, and the **models are FUEL** — the manifold endures
 
 - **Deploy:** `sh tools/deploy.sh <files>` — staggered restart, rollback snapshots, **box == repo** verified
   file-for-file. Deliberately does **not** touch git.
-- **Tests:** **252 `test_*.py`** ([`tests/`](../tests/)); `test_routes` locks the API surface. Crisis tests
+- **Tests:** **401 `test_*.py`** (at 2026-10-16) ([`tests/`](../tests/)); `test_routes` locks the API surface. Crisis tests
   run alone (documented global-cache race). **Watchman** discipline: tests prove code, e2e proves the
   library — CANNOT_CHECK ≠ pass. Verify runtime, not HTTP 200.
-- **Docs:** **49 `.md`** in [`docs/`](.) + `docs/SOP/subsystems/` per-subsystem procedures.
+- **Docs:** **91 `.md`** (69 at the top level; at 2026-10-16) in [`docs/`](.) + `docs/SOP/subsystems/` per-subsystem procedures.
 - **Git discipline:** commit by exact paths, human-reviewed; co-author trailer; deploy separate from commit.
 
 ---

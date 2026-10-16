@@ -6,7 +6,7 @@ surface via EngineConfig (see config.py). The floor and the watch discipline are
 docs/V2_DEFINITION.md.
 
 The going train (engine, gates, cas, record, verifiers) is mounting; the remaining
-complications (verifiers, benchmark) port per PORT_PLAN.md.
+complications (verifiers, benchmark) — the 1.0 port is complete (PORT_PLAN.md is historical).
 """
 from __future__ import annotations
 

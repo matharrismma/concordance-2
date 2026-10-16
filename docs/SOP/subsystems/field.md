@@ -10,7 +10,7 @@ RE-SEALED on the live 2.0 engine, verified-only) · `playbook` (the Body's confe
 append-only, four-gate confirmation routed through `kernel.gate`: quarantine → confirmed) · `compute` (the
 deterministic calculator — arithmetic, %, roots, unit + culinary + temperature conversion; declines unless
 exact) · `science_cards` · `chess`. Surfaces: `POST /ask` (a conversion routes to `compute`; a how-to routes to
-the practical pool), `GET /apothecary` + `POST /apothecary/propose`, `/almanac.html`, `/playbook.html` + signed
+the practical pool), `GET /apothecary` + `POST /apothecary/propose`, `/playbook.html` + signed
 playbook writes. **DEGRADED today** (`systems.py` `degraded:True`): the shelves are thinly stocked — 12 herb
 monographs, 41 re-sealed almanac entries.
 

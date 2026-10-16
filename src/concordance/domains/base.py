@@ -7,7 +7,7 @@ lives on RED.
 
 Most domains have no validator (verification on RED carries the weight); the loader
 returns None for those, and the engine treats that as a pass-through. The registry
-grows as domain validators port (see PORT_PLAN.md). Ported from 1.0; the registry
+grows as domain validators port (the 1.0 port is complete; PORT_PLAN.md is historical). Ported from 1.0; the registry
 starts empty in 2.0 — secular domain validators mount here as they land.
 """
 from __future__ import annotations

@@ -20,7 +20,7 @@ This is the map, not the change: every page, agent tool and route assigned to ON
 | `index.html` (.org desk) | 15 | 5 (the verbs, Word first) + about |
 | `com.html` (manifesto) | 15 | 0 — prose only, behind 'the engine →' |
 | `halls.html` | 7 | inside Walk |
-| agent catalog (MCP `core`) | 97 tools listed | 17 doors advertised; 80 internals by profile |
+| agent catalog (MCP) | 102 tools listed (at 2026-10-16; live: `tools/list`) | 17 doors advertised; 85 internals by profile |
 
 ## Pages — 49 audited: 6 doors · 5 kept beside a door · 32 folded · 4 retired · 2 plumbing
 
@@ -154,13 +154,13 @@ A door is what a new agent is shown first (the `core` profile). An internal stay
 
 **CHECK** (43): `/` `/activity.json` `/attest` `/audit` `/bind` `/bind/challenge` `/build.json` `/byom` `/capabilities` `/chess` `/codex/verify` `/console` `/context/run` `/defer` `/derivation/verify` `/find_verifier` `/fork` `/growth` `/health` `/health/memory` `/inlet` `/kernel` `/kernel/gate` `/land` `/library/health` `/mcp` `/now` `/recombine` `/resolve` `/returns` `/seal` `/speak` `/speak/health` `/steward` `/steward/ask` `/steward/budget` `/steward/cost-destroyed` `/thread/verify` `/unchecked` `/unchecked/answer` `/verify` `/witness` `/works/verify`
 
-**FIND** (53): `/almanac` `/apothecary` `/book` `/card` `/card.html` `/card/connections` `/cards` `/cards/for-the-group` `/cards/stats` `/catalog.html` `/codex` `/codex.html` `/codex/artifact` `/codex/connections` `/codex/scripture` `/codex/themes` `/daily` `/dictionary` `/floor` `/graph` `/grid` `/grid/dimension` `/library.html` `/locate` `/lookup` `/mcp/coach` `/mcp/community` `/mcp/core` `/mcp/library` `/mcp/sovereign` `/mcp/witness` `/pins` `/pins/done` `/pronounce` `/search` `/thesaurus` `/thread` `/thread/digest` `/thread/lineage` `/thread/recall` `/thread/recalled` `/threads` `/threads/search` `/tortoise` `/tv/automaton` `/tv/lineup` `/works` `/works.html` `/works/artifact` `/works/item` `/workshop` `/workshop/signable` `/workshop/status`
+**FIND** (53): `/almanac` `/apothecary` `/book` `/card` `/card/connections` `/cards` `/cards/for-the-group` `/cards/stats` `/catalog.html` `/codex` `/codex.html` `/codex/artifact` `/codex/connections` `/codex/scripture` `/codex/themes` `/daily` `/dictionary` `/floor` `/graph` `/grid` `/grid/dimension` `/library.html` `/locate` `/lookup` `/mcp/coach` `/mcp/community` `/mcp/core` `/mcp/library` `/mcp/sovereign` `/mcp/witness` `/pins` `/pins/done` `/pronounce` `/search` `/thesaurus` `/thread` `/thread/digest` `/thread/lineage` `/thread/recall` `/thread/recalled` `/threads` `/threads/search` `/tortoise` `/tv/automaton` `/tv/lineup` `/works` `/works.html` `/works/artifact` `/works/item` `/workshop` `/workshop/signable` `/workshop/status`
 
 **WALK** (24): `/archetype` `/archetypes` `/archetypes/match` `/ask` `/coach/guidance` `/coach/journey` `/coach/mastery` `/coach/next` `/coach/overview` `/coach/recommend` `/coach/subjects` `/coach/text` `/coach/unit` `/face` `/faces` `/formation` `/formation/help` `/formation/kinds` `/path` `/playbook` `/playbook/signable` `/playbook/submit` `/route` `/systems`
 
 **KEEP** (66): `/apothecary/propose` `/badges` `/block` `/commons` `/connect/event` `/consent` `/consent/revoke` `/consent/signable` `/contact` `/curate` `/curate/queue` `/curate/signable` `/days` `/deck` `/deck/open` `/decks` `/decks/predict` `/drop` `/drop/signable` `/group` `/group/contribute` `/group/join` `/groups` `/identity` `/identity/create` `/identity/describe` `/identity/fingerprint` `/identity/verify` `/journal` `/journal/dates` `/mesh` `/mesh/door` `/mesh/inbox` `/mesh/invite` `/mesh/link` `/mesh/map` `/mesh/node` `/mesh/post` `/mesh/redeem` `/mesh/signable` `/mesh/tend` `/moderation/signable` `/place` `/place/signable` `/plow` `/profile` `/profile/community` `/profile/community/signable` `/profile/community/view` `/profile/erase` `/profile/path` `/profile/save` `/profile/served` `/profile/signable` `/push/key` `/push/subscribe` `/push/unsubscribe` `/report` `/self-attest` `/shelf` `/study` `/study/export` `/study/import` `/study_find` `/want` `/wants`
 
-**WORD** (22): `/backmatter` `/canon` `/canon.html` `/character` `/characters` `/commentary` `/cross_refs` `/daily.html` `/harmony` `/hymns.html` `/narratives` `/original` `/passage` `/places` `/prophecy` `/scripture_for` `/seeds` `/teachings` `/timeline` `/tsk` `/word_occurrences` `/word_study`
+**WORD** (22): `/backmatter` `/canon` `/canon.html` `/character` `/characters` `/commentary` `/cross_refs` `/harmony` `/hymns.html` `/narratives` `/original` `/passage` `/places` `/prophecy` `/scripture_for` `/seeds` `/teachings` `/timeline` `/tsk` `/word_occurrences` `/word_study`
 
 </details>
 

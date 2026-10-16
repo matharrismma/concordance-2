@@ -7,8 +7,8 @@ only when a packet exercises that domain.
 
 VERIFIERS maps every SECULAR domain (canonical name + aliases) to its module. The
 witness-surface verifiers (scripture, theology, witness) are NOT here — they register
-only when surface == "witness" (the .org overlay, ported later). `governance` is also
-deferred: it carries a scriptural anchor (hotspot #5) and needs the strip refactor.
+only when surface == "witness" (the .org overlay — see WITNESS_VERIFIERS below). `governance` IS
+registered here (aliases: business, household, education).
 Cross-cutting verifiers are intentionally empty in the secular core.
 """
 from __future__ import annotations
@@ -167,7 +167,7 @@ VERIFIERS: Dict[str, str] = {
 
 # Witness-surface verifiers — surfaced ONLY when surface == "witness" (the .org overlay).
 # The foundation is shared on both surfaces; this governs only what the surface EXPOSES.
-# `scripture` (ref resolution) is deferred — it needs the Bible corpus data.
+# `scripture` (ref resolution) is registered here; it needs the Bible corpus (data/bible_en.jsonl) to answer.
 WITNESS_VERIFIERS: Dict[str, str] = {
     "theology_doctrine": _P + "theology_doctrine", "theology": _P + "theology_doctrine",
     "doctrine": _P + "theology_doctrine", "scripture_doctrine": _P + "theology_doctrine",

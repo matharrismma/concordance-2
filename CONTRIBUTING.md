@@ -18,8 +18,8 @@ Requires **Python ≥ 3.10** (CI runs 3.12). From a fresh clone:
 python -m pip install -e ".[math,signing,schema,dev]"
 ```
 
-Optional extras, installed only if you need them: `web` (FastAPI/uvicorn, to serve the site/API),
-`pdf` (robust PDF intake). The engine is **stdlib-first**: without the `math`/`signing`/`schema`
+The one further optional extra is `pdf` (robust PDF intake); the server itself is pure stdlib —
+`python -m concordance serve` needs no web framework. The engine is **stdlib-first**: without the `math`/`signing`/`schema`
 extras it still runs, with sovereign fallbacks (truth-table logic instead of sympy, a structural
 packet validator instead of jsonschema, unsigned seals instead of Ed25519).
 

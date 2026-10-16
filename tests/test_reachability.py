@@ -175,7 +175,6 @@ UNLISTED_PAGES = {
     "steward.html",       # the Steward's instrument (budget, rounds, cost-destroyed) — plumbing in the five-doors map (2026-10-02); documented on connect.html, never a reader's door
     "encyclopedia.html",  # a redirect stub onto characters.html; a second door to one room
     "ask.html",           # the landing's predecessor, kept for old links
-    "parable.html",       # the WALK door's parable surface — reached by the ask/WALK flow and direct URL, and served into /console; a focused surface, not a page on the public nav
     "crossrefs.html",     # a cross-reference reference surface — reached by direct URL, not on the public nav (pre-existing orphan, declared 2026-10-15)
     "profile.html",       # the opt-in sovereign keeping (ez-login) — reached by direct URL / the keeping flow, not the public nav
     "reader.html",        # the tortoise reader (the whole PD source on demand) — reached from search-result "read it" buttons and ?find= deep links, a contextual reader, not a page on the nav
