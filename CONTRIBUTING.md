@@ -83,6 +83,7 @@ PYTHONPATH=src python -m concordance mcp                         # the MCP serve
 | `site/` | the faces (the Console and the surfaces), static-first |
 | `tools/` | ops, the gate, benchmarks, and the data seeders |
 | `tests/` | the suite (data-backed tests skip without the keeping) |
+| `docs/ARCHITECTURE.md` | **start here** — the newcomer's map: the covenant, the verification path, the keeping, the five doors, the deploy ritual |
 | `docs/` | design docs — `V2_DEFINITION.md`, `COMPONENTS.md`, `FASCIA.md` are good entry points |
 | `deploy/` | systemd units + the deploy ritual |
 
