@@ -15,7 +15,20 @@ os.environ["CONCORDANCE_DATA_DIR"] = str(TMP)
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 
+import pytest  # noqa: E402
+
 from concordance import coach  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _pin_seam_data_dir():
+    """Order-independent isolation. coach reads CONCORDANCE_DATA_DIR per call, so another test mutating it
+    at runtime would send these writes to TMP but the reads elsewhere (the KeyError 'verdict' in-suite).
+    Re-pin the env per test and drop coach's subject cache so a stale empty load cannot linger."""
+    os.environ["CONCORDANCE_DATA_DIR"] = str(TMP)
+    coach._CACHE.clear()
+    coach._SUBJECTS = None
+    yield
 
 
 def _unit(uid, seq, answer, choices, track="cubo_qq"):

@@ -117,7 +117,7 @@ def test_the_full_catalog_on_mcp_is_unchanged_a_golden():
     + `manufacture` (route an engineering claim + its MFG numbers through the manufacturing verifier ->
     seal -> hash-chained ledger, reporting the disposition; connects organs, rebuilds none) on the `core`
     plane beside candidate_*. +1 = 101, deliberate."""
-    assert len(_full_catalog()) == 101
+    assert len(_full_catalog()) == 102   # +1 parable (WALK, 2026-10-15)
 
 
 def test_the_witness_gate_semantics_survive_the_mount():

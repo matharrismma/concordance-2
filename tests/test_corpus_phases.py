@@ -47,7 +47,12 @@ def test_default_corpus_reports_load_vs_index_build(tmp_path, monkeypatch):
         ph = dict(corpus.LOAD_PHASES)
     finally:
         corpus._DEFAULT = prior
-    assert len(c.cards) == ph["resident_cards"] == 3
+    # default_corpus() folds in the git-TRACKED extras (reference/theory/… cards) too, so the count is
+    # environment-dependent (a bare checkout/CI has those tracked files; a scratch dir does not). The
+    # env-independent invariant is: the phase counter agrees with the cards actually loaded, and the 3
+    # tiny cards are among them. (The exact-3 no-leak check belongs to the load_cards test above, which
+    # passes path= and so skips the extras.)
+    assert len(c.cards) == ph["resident_cards"] >= 3
     assert ph["index_build_ms"] >= 0 and ph["load_cards_ms"] >= 0
     assert abs(ph["total_ms"] - (ph["load_cards_ms"] + ph["index_build_ms"])) < 50   # the two parts are the whole
     assert ph["frozen_index"] == 0 and ph["df_tokens"] == 0                           # nothing frozen here

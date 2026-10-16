@@ -964,7 +964,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
                   "grid_dimension": "read", "card_connections": "read", "locate": "read",
                   "library_health": "read", "pronounce": "derive", "thesaurus": "derive",
                   "define": "derive", "lookup": "derive", "find_verifier": "read", "study_find": "read",
-                  "seeds": "read", "ask": "read", "discern": "read"},
+                  "seeds": "read", "ask": "read", "discern": "read", "parable": "read"},
     },
     "sovereign": {
         "version": "1.0.0",
