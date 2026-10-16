@@ -453,15 +453,20 @@ document.getElementById('search').addEventListener('input',e=>{const q=e.target.
 
 // tabs
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
-  layout=t.dataset.l;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));render();}));
+  layout=t.dataset.l;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));render();
+  try{history.replaceState(null,'','?view='+layout);}catch(e){}}));
 document.querySelectorAll('.chip').forEach(c=>{
   c.addEventListener('mouseenter',()=>{if(!pinned)showMaster(+c.dataset.mi);});
   c.addEventListener('click',()=>{pinned=true;showMaster(+c.dataset.mi);});});
 document.getElementById('reset').addEventListener('click',reset);
 fig.addEventListener('click',e=>{if(e.target.id==='bg')reset();});
 
-// init
-document.querySelector('.tab[data-l=kernel]').classList.add('on');
+// init — NHDeepLink: a view is addressable by URL. ?view=<layout> is what the six retired single-view
+// pages 301 to (api._RETIRED); #<layout> works too. An unknown name falls back to the kernel, and the
+// URL follows the tab (above) so any view can be shared as a link.
+const wantView=(new URLSearchParams(location.search).get('view')||location.hash.slice(1)||'').toLowerCase();
+if(RENDER[wantView])layout=wantView;
+document.querySelector('.tab[data-l='+layout+']').classList.add('on');
 render();reset();
 </script>
 </body></html>

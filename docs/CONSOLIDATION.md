@@ -34,7 +34,8 @@ The package is the **shared engine + these essential doors**:
 
 - **`.com` reach:** `concordance.html` (the live door, served at `/`) · `com.html` (the engine /
   manifesto, behind it at `/com.html`) · `explore.html` (the ONE interactive Atlas, 7 views) ·
-  `theories.html` + `calculations.html` + `crossing.html` (distinct data/payload) · `connect.html` +
+  `theories.html` (distinct data/payload; the calc-map and crossing pages since retired into
+  explore.html / concordance.html) · `connect.html` +
   `gateway.html` (the agent door) · `proof.html` / `about.html` / `contact.html`
 - **Human doors:** `halls.html` (lobby) → `coach.html` · `situations.html` · `plow.html` ·
   `wisdom.html` · `workshop.html`
@@ -58,7 +59,8 @@ The package is the **shared engine + these essential doors**:
   `tools/atlas_explore.py`. *Action:* treat them as **on-demand share/print snapshots** (generated,
   not hand-maintained). Keep `calculations` / `theories` / `crossing` (distinct data/theological
   payload). Evidence: `test_reachability.py:137-140`, `WORLD.md` §5.
-- **`surface-3` · Demote `domains.html`.** It is both a top-level spine-nav item (`shell.js:34`) *and*
+- **`surface-3` · Demote `domains.html`.** DONE 2026-10-16 (issue #16): retired into `explore.html?view=domains`,
+  with the five other single-view statics. It was both a top-level spine-nav item (`shell.js:34`) *and*
   one of `explore.html`'s 7 views — a sub-view promoted to a sibling of its own parent. *Action:* drop
   it from the top nav; it's reachable inside the Atlas.
 - **`surface-4` · Drop the `encyclopedia.html` stub — after repointing.** It's a JS+meta redirect twin
@@ -145,7 +147,8 @@ Commons shelf, a naming collision only). Leave them.
    `deck-2` (collapse systems family) is a routing-behaviour change (loses predict() granularity), so
    confirm before doing it. `deck-3` is **withdrawn** (see §3 — do not merge).
 3. **`surface-1` / `surface-2` / `surface-3`** — retire `checkit`, mark the 8 Atlas statics as
-   generated snapshots, demote `domains.html`.
+   generated snapshots, demote `domains.html` (the six Atlas statics were retired into `explore.html?view=…`
+   on 2026-10-16, issue #16; torus/completeness remain generated snapshots).
 4. **`surface-4`** — repoint `encyclopedia` citations, then drop the stub.
 5. **`facet-1`** — wire or drop the 7 dead facet types.
 6. One-line **`WORLD.md` §4** fix — it says `.com / = com.html`; it is now `concordance.html` (the flip
