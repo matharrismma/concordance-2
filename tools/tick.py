@@ -2962,6 +2962,171 @@ def computer_science() -> int:
     return 0
 
 
+def stick_formal_logic() -> int:
+    """FORMAL LOGIC - the laws of Boolean algebra, the inference forms, and NAND/NOR completeness (issue #12,
+    2026-10-16: a logic floor, down the domain list). Every law here is SEALED BY ITS TRUTH-TABLE PROOF through
+    formal_logic.LOGIC_VERIFY, never asserted: the Boolean-algebra laws as equivalences over p, q, r, each in both
+    dual forms; the inference forms as entailments - four valid, and the two classic fallacies sealed as NOT
+    entailing (claimed_entailment false: the seal records the fallacy honestly); functional completeness - NOT, AND
+    and OR each rebuilt from NAND alone and from NOR alone; and one minimization sealed through the minimal_form check
+    (Quine-McCluskey, exact to four variables). Boole's and Sheffer's postulates are CITED; the theorems are SEALED
+    (the Euclid rule). Idempotent."""
+    from concordance import tickstick as TS
+    V = ["p", "q", "r"]
+
+    def eq(a, b):
+        return _seal_through("formal_logic", "LOGIC_VERIFY",
+                             {"variables": V, "formula_a": a, "formula_b": b, "claimed_equivalent": True})
+
+    def ent(premises, conclusion, valid):
+        return _seal_through("formal_logic", "LOGIC_VERIFY",
+                             {"variables": V, "premises": premises, "conclusion": conclusion, "claimed_entailment": valid})
+
+    S = {
+        # the laws of Boolean algebra - each in both dual forms
+        "identity_and": eq("p & True", "p"),
+        "identity_or": eq("p | False", "p"),
+        "domination_and": eq("p & False", "False"),
+        "domination_or": eq("p | True", "True"),
+        "idempotent_and": eq("p & p", "p"),
+        "idempotent_or": eq("p | p", "p"),
+        "complement_and": eq("p & ~p", "False"),
+        "complement_or": eq("p | ~p", "True"),
+        "double_negation": eq("~~p", "p"),
+        "commutative_and": eq("p & q", "q & p"),
+        "commutative_or": eq("p | q", "q | p"),
+        "associative_and": eq("(p & q) & r", "p & (q & r)"),
+        "associative_or": eq("(p | q) | r", "p | (q | r)"),
+        "distributive_and": eq("p & (q | r)", "(p & q) | (p & r)"),
+        "distributive_or": eq("p | (q & r)", "(p | q) & (p | r)"),
+        "absorption_and": eq("p & (p | q)", "p"),
+        "absorption_or": eq("p | (p & q)", "p"),
+        "de_morgan_and": eq("~(p & q)", "~p | ~q"),
+        "de_morgan_or": eq("~(p | q)", "~p & ~q"),
+        # the inference forms - entailments; the two fallacies sealed as NOT entailing
+        "modus_ponens": ent(["p", "p >> q"], "q", True),
+        "modus_tollens": ent(["p >> q", "~q"], "~p", True),
+        "hypothetical_syllogism": ent(["p >> q", "q >> r"], "p >> r", True),
+        "disjunctive_syllogism": ent(["p | q", "~p"], "q", True),
+        "affirming_the_consequent": ent(["p >> q", "q"], "p", False),
+        "denying_the_antecedent": ent(["p >> q", "~p"], "~q", False),
+        # functional completeness - NAND alone, then NOR alone
+        "nand_not": eq("~p", "~(p & p)"),
+        "nand_and": eq("p & q", "~(~(p & q) & ~(p & q))"),
+        "nand_or": eq("p | q", "~(~(p & p) & ~(q & q))"),
+        "nor_not": eq("~p", "~(p | p)"),
+        "nor_or": eq("p | q", "~(~(p | q) | ~(p | q))"),
+        "nor_and": eq("p & q", "~(~(p | p) | ~(q | q))"),
+        # minimization - the absorption law as a minimum cover, through formal_logic.minimal_form
+        "minimal": _seal_through("formal_logic", "LOGIC_VERIFY",
+                                 {"variables": ["p", "q"], "formula": "(p & q) | (p & ~q)",
+                                  "claimed_minimal": "p", "claimed_minimal_terms": 1}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "formal-logic theorems")
+    sid = TS.create("Formal logic - Boolean algebra, inference forms, NAND and NOR",
+                    statement="Every law of propositional logic is a theorem of the two-element Boolean algebra, "
+                              "decided by its truth table.",
+                    field="formal_logic",
+                    references=["G. Boole, The Laws of Thought (1854)",
+                                "H. M. Sheffer, A set of five independent postulates for Boolean algebras (1913)"])["id"]
+    TT = "sealed by its truth table through formal_logic.LOGIC_VERIFY"
+    marks = [
+        # --- the laws of Boolean algebra ---
+        ("instance", f"[identity, SEALED] p & True = p: True is the identity for AND ({TT}). The algebra's two "
+                     "elements, 1 and 0, are the units of its two operations.", S["identity_and"]),
+        ("instance", f"[identity, the dual] p | False = p: False is the identity for OR ({TT}). Every law below has "
+                     "a dual - swap AND with OR and True with False - and the dual is a theorem too.", S["identity_or"]),
+        ("instance", f"[domination, SEALED] p & False = False ({TT}): False annihilates under AND.", S["domination_and"]),
+        ("instance", f"[domination, the dual] p | True = True ({TT}): True annihilates under OR.", S["domination_or"]),
+        ("instance", f"[idempotent, SEALED] p & p = p ({TT}): saying it twice adds nothing - unlike arithmetic, where "
+                     "x * x is not x.", S["idempotent_and"]),
+        ("instance", f"[idempotent, the dual] p | p = p ({TT}).", S["idempotent_or"]),
+        ("instance", f"[complement, SEALED] p & ~p = False ({TT}): the law of non-contradiction - a thing and its "
+                     "denial are never both true.", S["complement_and"]),
+        ("instance", f"[complement, the dual] p | ~p = True ({TT}): the law of excluded middle - one of them is.",
+         S["complement_or"]),
+        ("instance", f"[double negation, SEALED] ~~p = p ({TT}): in the two-element algebra a denial denied is the "
+                     "thing itself.", S["double_negation"]),
+        ("instance", f"[commutative, SEALED] p & q = q & p ({TT}).", S["commutative_and"]),
+        ("instance", f"[commutative, the dual] p | q = q | p ({TT}).", S["commutative_or"]),
+        ("instance", f"[associative, SEALED] (p & q) & r = p & (q & r) ({TT}): the grouping does not matter, so a "
+                     "chain of ANDs needs no parentheses.", S["associative_and"]),
+        ("instance", f"[associative, the dual] (p | q) | r = p | (q | r) ({TT}).", S["associative_or"]),
+        ("instance", f"[distributive, SEALED] p & (q | r) = (p & q) | (p & r) ({TT}): AND distributes over OR, as "
+                     "multiplication over addition.", S["distributive_and"]),
+        ("instance", f"[distributive, the dual] p | (q & r) = (p | q) & (p | r) ({TT}): OR distributes over AND too - "
+                     "the law arithmetic does NOT have (a + bc is not (a+b)(a+c)). This is where Boolean algebra "
+                     "parts from the algebra of numbers.", S["distributive_or"]),
+        ("instance", f"[absorption, SEALED] p & (p | q) = p ({TT}): the second factor is swallowed by the first.",
+         S["absorption_and"]),
+        ("instance", f"[absorption, the dual] p | (p & q) = p ({TT}).", S["absorption_or"]),
+        ("instance", f"[De Morgan, SEALED] ~(p & q) = ~p | ~q ({TT}): the denial of a conjunction is the disjunction "
+                     "of the denials - 'not both' is 'at least one is not'.", S["de_morgan_and"]),
+        ("instance", f"[De Morgan, the dual] ~(p | q) = ~p & ~q ({TT}): 'neither' is 'not this and not that'.",
+         S["de_morgan_or"]),
+        # --- the inference forms ---
+        ("instance", f"[modus ponens, SEALED] p, p >> q |= q ({TT}: no row makes both premises true and the "
+                     "conclusion false). The form every deduction stands on.", S["modus_ponens"]),
+        ("instance", f"[modus tollens, SEALED] p >> q, ~q |= ~p ({TT}): deny the consequent and the antecedent falls - "
+                     "the shape of refutation.", S["modus_tollens"]),
+        ("instance", f"[hypothetical syllogism, SEALED] p >> q, q >> r |= p >> r ({TT}): implications chain, which is "
+                     "why a proof can be long.", S["hypothetical_syllogism"]),
+        ("instance", f"[disjunctive syllogism, SEALED] p | q, ~p |= q ({TT}): eliminate one branch and the other "
+                     "remains - narrowing by elimination.", S["disjunctive_syllogism"]),
+        ("instance", "[affirming the consequent, SEALED AS A FALLACY] p >> q, q does NOT entail p: the seal records "
+                     "claimed_entailment = false, confirmed by the row p = False, q = True where both premises hold "
+                     "and the conclusion fails. 'If it rained the ground is wet; the ground is wet' does not give "
+                     "rain.", S["affirming_the_consequent"]),
+        ("instance", "[denying the antecedent, SEALED AS A FALLACY] p >> q, ~p does NOT entail ~q: sealed with "
+                     "claimed_entailment = false, the counter-row p = False, q = True. The engine seals what the "
+                     "table shows - a fallacy is kept as a fallacy, never dressed as a rule.",
+         S["denying_the_antecedent"]),
+        # --- functional completeness ---
+        ("instance", f"[NAND is complete: NOT, SEALED] ~p = ~(p & p) ({TT}): NOT from a single NAND with both inputs "
+                     "tied together - the first step of Sheffer's stroke.", S["nand_not"]),
+        ("instance", f"[NAND is complete: AND, SEALED] p & q = ~(~(p & q) & ~(p & q)) ({TT}): AND is a NAND followed "
+                     "by a NAND-as-NOT - two gates.", S["nand_and"]),
+        ("instance", f"[NAND is complete: OR, SEALED] p | q = ~(~(p & p) & ~(q & q)) ({TT}): OR is De Morgan read "
+                     "through NAND - three gates. With NOT, AND and OR all rebuilt, every Boolean function is "
+                     "reachable from NAND alone: the one gate a whole computer can be wired from.", S["nand_or"]),
+        ("instance", f"[NOR is complete: NOT, SEALED] ~p = ~(p | p) ({TT}): the dual stroke (Peirce's arrow).",
+         S["nor_not"]),
+        ("instance", f"[NOR is complete: OR, SEALED] p | q = ~(~(p | q) | ~(p | q)) ({TT}).", S["nor_or"]),
+        ("instance", f"[NOR is complete: AND, SEALED] p & q = ~(~(p | p) | ~(q | q)) ({TT}). NOR alone is also "
+                     "complete - the Apollo guidance computer was built from one three-input NOR gate, repeated.",
+         S["nor_and"]),
+        # --- minimization ---
+        ("instance", "[minimal form, SEALED] (p & q) | (p & ~q) minimizes to p - one product term, and no equivalent "
+                     "sum-of-products has fewer (sealed through formal_logic.minimal_form: Quine-McCluskey prime "
+                     "implicants and an exhaustive minimum cover, exact to four variables). Absorption, read as a "
+                     "circuit: two gates become a wire.", S["minimal"]),
+        # --- what is cited, not sealed ---
+        ("postulate", "[the postulates, CITED] Boole gave logic an algebra - the laws of thought as equations over "
+                      "0 and 1 (1854); Sheffer showed the whole algebra rests on five independent postulates and "
+                      "that a single operation, the stroke (NAND), suffices to define the rest (1913). The postulate "
+                      "sets are CITED, never sealed: an axiom is chosen, not proven. Every law above is a THEOREM of "
+                      "those postulates, and each one is sealed by the only proof the two-element algebra needs - "
+                      "its truth table.",
+         {"source": "G. Boole, The Laws of Thought (1854); H. M. Sheffer, A set of five independent postulates for "
+                    "Boolean algebras, Trans. AMS 14 (1913) 481-488"}),
+        ("note", "[the bound, stated] Every seal here is an exhaustive truth table over at most three variables - "
+                 "eight rows, complete and exact. The minimal_form check decides minimality exactly to FOUR variables "
+                 "(16 minterms, at most 13 prime implicants, an exhaustive cover); at five or more it returns "
+                 "NOT_APPLICABLE with the reason - bounded, never a guess. First-order logic (quantifiers) is not "
+                 "exposed by the verifier and is declined: a miss stays a miss.",
+         {"source": "src/concordance/verifiers/formal_logic.py, _boolean.py"}),
+        ("note", "[on the one map] Boolean algebra is one algebra with three faces: logic (this stick), circuits "
+                 "(computer_science.logic_gate - the 16 functions of two inputs) and sets (mathematics.set_algebra - "
+                 "union, intersection, complement obey the same laws). One Boolean core backs all three verifiers. "
+                 "Ties the computer-science stick and card_floor_computer_science.",
+         {"source": "the one map; the computer-science stick; src/concordance/verifiers/_boolean.py"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py formal_logic")
+    return 0
+
+
 def game_theory() -> int:
     """GAME THEORY - equilibrium, dilemmas, and strategy (Matt, 2026-10-10, down the domain list). The mathematics of
     strategic choice: a NASH EQUILIBRIUM is a fixed point where no one gains by deviating alone; the PRISONER'S
@@ -10828,6 +10993,8 @@ def main() -> int:
         return game_theory()
     if a[0] in ("computer_science", "computation", "algorithms", "the_bit"):
         return computer_science()
+    if a[0] in ("formal_logic", "formal-logic", "logic", "boolean", "boolean_algebra", "truth_table", "boole", "sheffer"):
+        return stick_formal_logic()
     if a[0] in ("tesseract", "hypercube", "four_cube", "eight_cell"):
         return tesseract()
     if a[0] in ("statistics", "stats", "inference", "the_normal_distribution"):
