@@ -3127,6 +3127,470 @@ def stick_formal_logic() -> int:
     return 0
 
 
+def stick_archaeology() -> int:
+    """ARCHAEOLOGY - the decay clock read backwards (issue #11, 2026-10-16: reach, down the domain list). Every
+    radiometric age is one law, t = -(T_half / ln 2) ln(N/N0), SEALED here through archaeology.ARCH_VERIFY for the
+    radiocarbon clock (the Cambridge half-life 5730 yr and the Libby convention 5568 yr), for the long clocks
+    (potassium-40, uranium-238 at the age of the Earth), and for the half-life count n = -log2(f). The half-lives
+    are measured constants, CITED as postulates; the ages are theorems of the decay law and are SEALED. Calibration
+    against the atmospheric record is declined. Idempotent."""
+    from concordance import tickstick as TS
+
+    def arch(spec):
+        return _seal_through("archaeology", "ARCH_VERIFY", spec)
+
+    S = {
+        "c14_half": arch({"fraction_remaining": 0.5, "claimed_age_years": 5730}),
+        "c14_quarter": arch({"fraction_remaining": 0.25, "claimed_age_years": 11460}),
+        "c14_percent": arch({"fraction_remaining": 0.01, "claimed_age_years": 38069}),
+        "c14_libby": arch({"fraction_remaining": 0.5, "half_life_years": 5568, "claimed_age_years": 5568}),
+        "k40": arch({"fraction_remaining_iso": 0.5, "half_life_years": 1.248e9, "claimed_age_years_iso": 1.248e9}),
+        "u238_earth": arch({"fraction_remaining_iso": 0.4944, "half_life_years": 4.468e9, "claimed_age_years_iso": 4.54e9}),
+        "three_halves": arch({"fraction_for_halflives": 0.125, "claimed_half_lives": 3}),
+        "ten_halves": arch({"fraction_for_halflives": 1.0 / 1024.0, "claimed_half_lives": 10}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "archaeology ages")
+    sid = TS.create("Archaeology - the decay clock, dated and sealed",
+                    statement="Every radiometric age is the exponential decay law read backwards: "
+                              "t = -(T_half / ln 2) ln(N/N0).",
+                    field="archaeology",
+                    references=["W. F. Libby, Radiocarbon Dating (1952; Nobel lecture 1960)",
+                                "H. Godwin, Half-life of radiocarbon, Nature 195 (1962) 984",
+                                "M. Stuiver & H. A. Polach, Discussion: reporting of 14C data, Radiocarbon 19 (1977) 355",
+                                "A. H. Jaffey et al., Precision measurement of half-lives of U-235 and U-238, "
+                                "Phys. Rev. C 4 (1971) 1889"])["id"]
+    SB = "sealed through archaeology.ARCH_VERIFY"
+    marks = [
+        ("instance", f"[one half-life, SEALED] Half the carbon-14 left means 5730 years: t = -(5730/ln 2) ln(0.5) = 5730 "
+                     f"({SB}). The Cambridge half-life, 5730 +/- 40 yr (Godwin 1962), is the physical constant.",
+         S["c14_half"]),
+        ("instance", f"[two half-lives, SEALED] A quarter left is 11,460 years ({SB}): each halving adds one half-life, "
+                     "so the clock is linear in the logarithm of what remains.", S["c14_quarter"]),
+        ("instance", f"[the practical limit, SEALED] One percent left is 38,069 years ({SB}): ln(0.01) = -4.605 half-lives "
+                     "of 1.4427 each. Below about one percent the count drowns in background, which is why radiocarbon "
+                     "reaches roughly 50,000 years and no further - the bound is the measurement, not the law.",
+         S["c14_percent"]),
+        ("instance", f"[the Libby convention, SEALED] With the Libby half-life, 5568 yr, half remaining reads 5568 years "
+                     f"({SB}, half_life_years = 5568). A conventional radiocarbon age is still reported on the 5568 scale "
+                     "(Stuiver & Polach 1977) and corrected later; the two scales differ by the factor 5730/5568 = 1.029. "
+                     "Two conventions, one law - and the convention is CITED, never confused with the constant.",
+         S["c14_libby"]),
+        ("instance", f"[the potassium clock, SEALED] Potassium-40, half-life 1.248 billion years: half remaining is 1.248 "
+                     f"Gyr ({SB}, the same law with its own T_half). The potassium-argon clock dates the volcanic layers "
+                     "that bracket the fossils.", S["k40"]),
+        ("instance", f"[the age of the Earth, SEALED] Uranium-238, half-life 4.468 Gyr: a sample with 49.44 percent of its "
+                     f"original U-238 is 4.54 Gyr old ({SB}) - the age of the Earth from the uranium-lead clock (Patterson "
+                     "1956, meteorite leads). The slow clocks reach what the fast one cannot.", S["u238_earth"]),
+        ("instance", f"[counting half-lives, SEALED] An eighth remaining is exactly three half-lives: n = -log2(1/8) = 3 "
+                     f"({SB}).", S["three_halves"]),
+        ("instance", f"[ten half-lives, SEALED] One part in 1024 is ten half-lives ({SB}): after ten half-lives a thousandth "
+                     "is left - the rule of thumb for when a radioactive source is 'gone'.", S["ten_halves"]),
+        ("postulate", "[the half-lives, CITED] 5730 +/- 40 yr (Godwin 1962), 5568 yr (Libby, the conventional scale), "
+                      "1.248 Gyr for K-40 and 4.468 Gyr for U-238 (Jaffey et al. 1971) are MEASURED constants: cited as "
+                      "postulates, never sealed. What is sealed is the arithmetic the law does with them.",
+         {"source": "Godwin, Nature 195 (1962) 984; Stuiver & Polach, Radiocarbon 19 (1977) 355; Jaffey et al., "
+                    "Phys. Rev. C 4 (1971) 1889"}),
+        ("postulate", "[the assumption the clock rests on] A radiocarbon age assumes the starting ratio N0 is known - "
+                      "that the atmosphere's carbon-14 was constant. It was not (solar activity, the carbon cycle, "
+                      "bomb carbon), so a raw age is CALIBRATED against tree rings and corals (IntCal). The engine seals "
+                      "the decay arithmetic and declines the calibration: a calibrated date is inferred from a curve, "
+                      "never kept as the law's own output.",
+         {"source": "P. J. Reimer et al., IntCal20, Radiocarbon 62 (2020) 725; the decay law assumes closed system + known N0"}),
+        ("note", "[on the one map] The decay clock is nuclear physics (card_floor_nuclear_physics: the exponential law and "
+                 "its half-life) read as a logarithm (card_floor_logarithm: t is proportional to ln of the fraction), "
+                 "applied to the Earth's record (card_floor_earth_science: radiometric dating). One law, three floors; "
+                 "this stick is where the archaeologist's spade meets the physicist's constant.",
+         {"source": "the one map; card_floor_nuclear_physics, card_floor_logarithm, card_floor_earth_science"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py archaeology")
+    return 0
+
+
+def stick_chess() -> int:
+    """CHESS - the rules decide (issue #11, 2026-10-16: reach, down the domain list). A claim about a position is
+    computed by the Laws of Chess, never judged: the classic mates (fool's, scholar's, smothered, back-rank) SEALED as
+    checkmate, a king-and-queen stalemate SEALED as stalemate and as not-check, move legality SEALED both ways (a
+    legal push, an illegal one sealed as illegal, en passant, castling), and the material count. All through
+    chess.CHESS_VERIFY over the perft-proven move generator. The Laws and the piece values are CITED; the verdicts
+    are SEALED. Idempotent."""
+    from concordance import tickstick as TS
+    START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    FOOLS = "rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3"
+    SCHOLAR = "r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4"
+    SMOTHER = "6rk/5Npp/8/8/8/8/8/6K1 b - - 0 1"
+    BACKRANK = "R5k1/5ppp/8/8/8/8/8/6K1 b - - 0 1"
+    STALE = "7k/5Q2/6K1/8/8/8/8/8 b - - 0 1"
+    EPASS = "rnbqkbnr/pp2pppp/8/2ppP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3"
+    KIWI = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
+
+    def pos(fen, claim, claimed, move=None):
+        spec = {"fen": fen, "claim": claim, "claimed": claimed}
+        if move:
+            spec["move"] = move
+        return _seal_through("chess", "CHESS_VERIFY", spec)
+
+    def material(fen, balance):
+        return _seal_through("chess", "CHESS_VERIFY", {"fen": fen, "claim": "material", "claimed_balance": balance})
+
+    S = {
+        "fools_mate": pos(FOOLS, "checkmate", True),
+        "scholars_mate": pos(SCHOLAR, "checkmate", True),
+        "smothered_mate": pos(SMOTHER, "checkmate", True),
+        "back_rank_mate": pos(BACKRANK, "checkmate", True),
+        "stalemate": pos(STALE, "stalemate", True),
+        "stalemate_not_check": pos(STALE, "check", False),
+        "start_not_check": pos(START, "check", False),
+        "start_not_mate": pos(START, "checkmate", False),
+        "e2e4_legal": pos(START, "legal_move", True, "e2e4"),
+        "e2e5_illegal": pos(START, "legal_move", False, "e2e5"),
+        "en_passant": pos(EPASS, "legal_move", True, "e5d6"),
+        "castling": pos(KIWI, "legal_move", True, "e1g1"),
+        "material_start": material(START, 0),
+        "material_scholar": material(SCHOLAR, 1),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "chess verdicts")
+    sid = TS.create("Chess - the rules decide: mate, stalemate, legality, material",
+                    statement="A claim about a chess position is decided by the Laws of Chess applied to the "
+                              "position - computed by the move generator, never judged.",
+                    field="chess",
+                    references=["FIDE Laws of Chess (2023), Articles 1-5",
+                                "F.-A. D. Philidor, Analyse du jeu des Echecs (1749) - the smothered mate",
+                                "src/concordance/chess.py - the perft-proven move generator (tests/test_chess.py)"])["id"]
+    CV = "sealed through chess.CHESS_VERIFY"
+    marks = [
+        ("instance", f"[fool's mate, SEALED] 1.f3 e5 2.g4 Qh4# - White to move is checkmated ({CV}). The shortest "
+                     "possible mate: two pawn moves open the diagonal to the king and nothing can interpose.",
+         S["fools_mate"]),
+        ("instance", f"[scholar's mate, SEALED] 1.e4 e5 2.Bc4 Nc6 3.Qh5 Nf6 4.Qxf7# - Black is checkmated ({CV}): the "
+                     "queen on f7 is guarded by the bishop on c4, the king has no flight square.", S["scholars_mate"]),
+        ("instance", f"[the smothered mate, SEALED] King h8, rook g8, pawns g7 h7; a white knight lands on f7 and it is "
+                     f"mate ({CV}). The king is smothered by its own pieces - Philidor's pattern (1749), the oldest "
+                     "named mate in the literature.", S["smothered_mate"]),
+        ("instance", f"[the back-rank mate, SEALED] King g8 behind its three pawns, a rook arrives on a8: mate ({CV}). "
+                     "The pawns that shielded the king are the wall that traps it.", S["back_rank_mate"]),
+        ("instance", f"[stalemate, SEALED] Black king h8, white queen f7, white king g6, Black to move: stalemate ({CV}). "
+                     "Every square the king could reach is attacked and no other piece exists - no legal move, so the "
+                     "game is drawn (Laws 5.2.1).", S["stalemate"]),
+        ("instance", f"[stalemate is not check, SEALED] In the same position check is FALSE - sealed with claimed = false "
+                     f"({CV}). Stalemate needs both: no legal move AND the king not attacked. The second condition is "
+                     "what separates a draw from a mate; the engine seals the negative as a negative.",
+         S["stalemate_not_check"]),
+        ("instance", f"[the start position is quiet, SEALED] From the initial position White is not in check (claimed = "
+                     f"false, {CV}).", S["start_not_check"]),
+        ("instance", f"[and not mated, SEALED] Nor checkmated (claimed = false, {CV}): twenty legal moves exist.",
+         S["start_not_mate"]),
+        ("instance", f"[a legal move, SEALED] e2e4 is legal from the start ({CV}): a pawn may advance two squares from "
+                     "its starting rank (Laws 3.7.2).", S["e2e4_legal"]),
+        ("instance", f"[an illegal move, SEALED AS ILLEGAL] e2e5 is NOT legal - sealed with claimed = false ({CV}). "
+                     "Three squares is not a pawn move; the generator lists the twenty legal moves and this is not "
+                     "among them. A miss stays a miss.", S["e2e5_illegal"]),
+        ("instance", f"[en passant, SEALED] After 1.e4 c5 2.e5 d5 the capture e5xd6 is legal ({CV}): a pawn that just "
+                     "advanced two squares may be taken as if it had moved one (Laws 3.7.4.1), on that move only.",
+         S["en_passant"]),
+        ("instance", f"[castling, SEALED] In the 'kiwipete' position White may castle kingside, e1g1 ({CV}): king and "
+                     "rook unmoved, squares between empty, no square the king crosses attacked (Laws 3.8.2). The "
+                     "position's perft(2) = 2039 is the standard that proves the generator.", S["castling"]),
+        ("instance", f"[material, SEALED] At the start the material balance is 0 ({CV}): both sides hold 8 + 6 + 6 + 10 + 9 "
+                     "= 39 points on the 1/3/3/5/9 scale.", S["material_start"]),
+        ("instance", f"[a pawn up, SEALED] After scholar's mate White is +1 ({CV}): the f7 pawn was the capture. The count "
+                     "is a convention; the capture is a fact.", S["material_scholar"]),
+        ("postulate", "[the Laws, CITED] The FIDE Laws of Chess are the postulate set: how each piece moves, check, "
+                      "checkmate, stalemate, en passant, castling. They are chosen rules, cited and never sealed; every "
+                      "verdict above is a theorem of them, computed exhaustively over the legal moves. The piece values "
+                      "1/3/3/5/9 are a convention of the literature, not a law.",
+         {"source": "FIDE Laws of Chess (2023); the 1/3/3/5/9 scale (standard literature convention)"}),
+        ("note", "[the bound, stated] The verifier decides what is TRUE of a position - mate, stalemate, legality, "
+                 "material - by exhaustive legal-move generation, proven by perft (start: 20 / 400 / 8902; kiwipete: "
+                 "2039 at depth 2). It never plays, evaluates, or recommends a move: what the best move is lies "
+                 "outside the closed set and is declined.",
+         {"source": "src/concordance/chess.py; tests/test_chess.py (perft counts)"}),
+        ("note", "[on the one map] Strategy has three witnesses here: game theory (the abstract equilibrium), the body "
+                 "under pressure (the combat grammar), and chess - the one where perfect information makes optimal "
+                 "literally computable, so it is the calibration rig for the other two. Ties the game-theory stick "
+                 "and card_floor_the_mind; the search tree is card_floor_computer_science.",
+         {"source": "the one map; the game-theory stick; card_floor_the_mind, card_floor_computer_science"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py chess")
+    return 0
+
+
+def stick_condensed_matter() -> int:
+    """CONDENSED MATTER - the solid state on the going train (issue #11, 2026-10-16: reach, down the domain list).
+    SEALED through condensed_matter.CONDMAT_VERIFY: the resistance quantum R_K = h/e^2 = mu_0 c / 2 alpha and the
+    Josephson constant 2e/h (the solid state measuring the fine-structure constant), a quantized Hall plateau, Bragg's
+    law on the silicon (111) line, the free-electron Fermi energies of copper and sodium, Dulong-Petit's 3R, a
+    phonon's energy, the Debye temperature of copper, the Bose-Einstein occupation at hbar omega = kT, and the
+    monatomic chain's zone-boundary frequency and sound speed. The models are CITED; the numbers are SEALED.
+    Idempotent."""
+    from concordance import tickstick as TS
+    import math
+
+    def cm(spec):
+        return _seal_through("condensed_matter", "CONDMAT_VERIFY", spec)
+
+    S = {
+        "von_klitzing": cm({"claimed_von_klitzing_ohm": 25812.807}),
+        "josephson": cm({"claimed_josephson_ghz_per_v": 483597.8}),
+        "hall_plateau": cm({"filling_factor": 2, "claimed_hall_resistance_ohm": 12906.4}),
+        "bragg_si111": cm({"diff_order": 1, "wavelength_m": 1.5406e-10, "plane_spacing_m": 3.1356e-10,
+                           "claimed_theta_deg": 14.22}),
+        "fermi_copper": cm({"number_density": 8.47e28, "claimed_fermi_J": 1.12e-18}),
+        "fermi_sodium": cm({"number_density": 2.65e28, "claimed_fermi_J": 5.19e-19}),
+        "dulong_petit": cm({"claimed_molar_heat_capacity": 24.94}),
+        "phonon_energy": cm({"phonon_omega": 2.0 * math.pi * 1e13, "claimed_phonon_energy_J": 6.6261e-21}),
+        "debye_copper": cm({"debye_frequency": 4.4906e13, "claimed_debye_temp_K": 343.0}),
+        "occupation": cm({"phonon_omega": 3.9279e13, "temperature_K": 300, "claimed_occupation": 0.58198}),
+        "zone_boundary": cm({"spring_const": 10.0, "atom_mass": 1e-26, "wavevector": math.pi / 3e-10,
+                             "lattice_a": 3e-10, "claimed_omega": 6.3246e13}),
+        "sound_speed": cm({"spring_const": 10.0, "atom_mass": 1e-26, "lattice_a": 3e-10,
+                           "claimed_sound_velocity": 9486.8}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "condensed-matter numbers")
+    sid = TS.create("Condensed matter - the solid state through alpha, sealed",
+                    statement="The solid state's quantized resistances, lattice diffraction, electron gas and phonon "
+                              "gas are closed-form relations over h, e, alpha, k_B and the lattice.",
+                    field="condensed_matter",
+                    references=["C. Kittel, Introduction to Solid State Physics, 8th ed. (2005), Tables 5.1 and 6.1",
+                                "K. von Klitzing, G. Dorda, M. Pepper, Phys. Rev. Lett. 45 (1980) 494",
+                                "B. D. Josephson, Phys. Lett. 1 (1962) 251",
+                                "CODATA 2018 / the 2019 SI: h and e exact, so R_K and K_J are exact"])["id"]
+    CM = "sealed through condensed_matter.CONDMAT_VERIFY"
+    marks = [
+        ("instance", f"[the resistance quantum, SEALED] R_K = h/e^2 = 25,812.807 ohm ({CM}), and the same number is "
+                     "mu_0 c / (2 alpha): a quantized Hall plateau is a measurement of the fine-structure constant. "
+                     "Since the 2019 SI fixed h and e, R_K is exact - the ohm is realized by a solid at low temperature "
+                     "in a strong field (von Klitzing 1980).", S["von_klitzing"]),
+        ("instance", f"[the Josephson constant, SEALED] K_J = 2e/h = 483,597.8 GHz/V ({CM}): a superconducting junction "
+                     "under microwaves steps its voltage in units of h f / 2e - the volt realized by counting. The '2' "
+                     "is the Cooper pair.", S["josephson"]),
+        ("instance", f"[a Hall plateau, SEALED] At filling factor nu = 2 the Hall resistance is R_K / 2 = 12,906.4 ohm "
+                     f"({CM}). The plateaus sit at R_K / nu to a part in a billion whatever the sample - topology, not "
+                     "material, fixes the number.", S["hall_plateau"]),
+        ("instance", f"[Bragg's law, SEALED] Copper K-alpha (1.5406 angstrom) on silicon's (111) planes (d = 3.1356 "
+                     f"angstrom): n lambda = 2 d sin theta gives theta = 14.22 deg, 2 theta = 28.44 deg ({CM}) - the "
+                     "silicon line every diffractometer is calibrated on (NIST SRM 640). The lattice is measured by the "
+                     "wave it reflects.", S["bragg_si111"]),
+        ("instance", f"[the Fermi energy of copper, SEALED] With n = 8.47e28 electrons per cubic metre, E_F = "
+                     f"(hbar^2/2m)(3 pi^2 n)^(2/3) = 1.12e-18 J = 7.0 eV ({CM}; Kittel Table 6.1). The conduction "
+                     "electrons fill states up to 7 eV even at absolute zero - a degenerate gas, Pauli's exclusion made "
+                     "macroscopic.", S["fermi_copper"]),
+        ("instance", f"[and of sodium, SEALED] n = 2.65e28 gives E_F = 5.19e-19 J = 3.24 eV ({CM}): fewer electrons per "
+                     "volume, a lower sea. The two-thirds power is the density of states in three dimensions.",
+         S["fermi_sodium"]),
+        ("instance", f"[Dulong-Petit, SEALED] C = 3R = 24.94 J/(mol K) ({CM}): at high temperature every atom's three "
+                     "vibrational modes carry k_B each. The classical ceiling the phonon gas rises to - and the law "
+                     "whose failure at low temperature (Einstein 1907, Debye 1912) was an early proof of quanta.",
+         S["dulong_petit"]),
+        ("instance", f"[a phonon's energy, SEALED] At 10 THz (omega = 2 pi x 1e13 rad/s) one phonon carries E = hbar "
+                     f"omega = 6.626e-21 J = 41.4 meV ({CM}): lattice vibration is quantized exactly as light is.",
+         S["phonon_energy"]),
+        ("instance", f"[the Debye temperature of copper, SEALED] omega_D = 4.4906e13 rad/s gives theta_D = hbar omega_D "
+                     f"/ k_B = 343 K ({CM}; Kittel Table 5.1). Above theta_D the lattice is classical (Dulong-Petit); "
+                     "below it the heat capacity falls as T^3.", S["debye_copper"]),
+        ("instance", f"[the occupation at hbar omega = k_B T, SEALED] n = 1/(e^1 - 1) = 0.58198 ({CM}; omega = 3.9279e13 "
+                     "rad/s at 300 K). Bose-Einstein statistics: phonons are bosons, so a mode holds a fractional mean "
+                     "number of quanta, not zero or one.", S["occupation"]),
+        ("instance", f"[the zone boundary, SEALED] A monatomic chain (K = 10 N/m, m = 1e-26 kg, a = 3 angstrom) at k = "
+                     f"pi/a vibrates at omega = 2 sqrt(K/m) = 6.3246e13 rad/s ({CM}): the dispersion omega = 2 sqrt(K/m) "
+                     "|sin(ka/2)| has its maximum at the Brillouin-zone edge, where neighbouring atoms move in "
+                     "antiphase. The chain has a top frequency; the continuum does not.", S["zone_boundary"]),
+        ("instance", f"[the sound speed, SEALED] The same chain's long-wavelength limit is v = a sqrt(K/m) = 9486.8 m/s "
+                     f"({CM}): where sin(ka/2) is ka/2 the dispersion is linear and the lattice is an elastic solid.",
+         S["sound_speed"]),
+        ("postulate", "[the models, CITED] The free-electron gas (Sommerfeld 1928), the Debye phonon gas (1912) and the "
+                      "monatomic chain are MODELS: they work for the simple metals and the simple lattices, so their "
+                      "numbers are inferred, never kept as fact. The measured inputs - n for copper and sodium, "
+                      "theta_D = 343 K, d(111) = 3.1356 angstrom - are cited from the tables.",
+         {"source": "Kittel, Introduction to Solid State Physics, 8th ed., Tables 5.1 and 6.1; Sommerfeld, Z. Phys. 47 "
+                    "(1928) 1; Debye, Ann. Phys. 39 (1912) 789"}),
+        ("note", "[on the one map] The solid state stands on quantum mechanics (card_floor_quantum_mechanics: E = hbar "
+                 "omega, the exclusion principle, Bose-Einstein occupation), on thermodynamics (card_floor_thermodynamics: "
+                 "Dulong-Petit, the Debye cutoff), and on the fine-structure constant (the alpha stick: R_K = mu_0 c / "
+                 "2 alpha). Diffraction is the wave floor of card_floor_materials_science. Where quantum mechanics meets "
+                 "a crystal, alpha becomes a resistance you can measure with a voltmeter.",
+         {"source": "the one map; card_floor_quantum_mechanics, card_floor_thermodynamics, card_floor_materials_science; "
+                    "the alpha stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py condensed_matter")
+    return 0
+
+
+def stick_cybersecurity() -> int:
+    """CYBERSECURITY - the published thresholds, sealed (issue #11, 2026-10-16: reach, down the domain list).
+    Through cybersecurity.CYBER_VERIFY: password entropy H = L log2 N (a printable-ASCII passphrase and a six-word
+    diceware phrase), the TLS status table (1.3 recommended, 1.2 current, 1.0 deprecated by RFC 8996, SSL 3 insecure
+    by RFC 7568), the CVSS v3.1 severity bands, IPv4 subnet host counts (including the /31 of RFC 3021), and the IANA
+    port ranges. The standards are CITED as postulates - they are decrees, not theorems; the arithmetic and the
+    lookups are SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def cy(spec):
+        return _seal_through("cybersecurity", "CYBER_VERIFY", spec)
+
+    S = {
+        "entropy_ascii": cy({"password_length": 16, "charset_size": 94, "claimed_entropy_bits": 104.87}),
+        "entropy_diceware": cy({"password_length": 6, "charset_size": 7776, "claimed_entropy_bits": 77.55}),
+        "tls13": cy({"tls_version": "1.3", "claimed_tls_status": "recommended"}),
+        "tls12": cy({"tls_version": "1.2", "claimed_tls_status": "current"}),
+        "tls10": cy({"tls_version": "1.0", "claimed_tls_status": "deprecated"}),
+        "ssl3": cy({"tls_version": "ssl3", "claimed_tls_status": "insecure"}),
+        "cvss_critical": cy({"cvss_base_score": 10.0, "claimed_cvss_severity": "critical"}),
+        "cvss_high": cy({"cvss_base_score": 7.5, "claimed_cvss_severity": "high"}),
+        "subnet_24": cy({"cidr_prefix": 24, "claimed_host_count": 254}),
+        "subnet_16": cy({"cidr_prefix": 16, "claimed_host_count": 65534}),
+        "subnet_31": cy({"cidr_prefix": 31, "claimed_host_count": 2}),
+        "port_443": cy({"port_number": 443, "claimed_port_class": "well_known"}),
+        "port_8080": cy({"port_number": 8080, "claimed_port_class": "registered"}),
+        "port_49152": cy({"port_number": 49152, "claimed_port_class": "dynamic"}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "cybersecurity checks")
+    sid = TS.create("Cybersecurity - entropy, TLS, CVSS, subnets and ports, sealed",
+                    statement="A security claim that rests on a published standard is decided by the standard's "
+                              "own arithmetic or table - entropy, status, band, count, class.",
+                    field="cybersecurity",
+                    references=["NIST SP 800-63B, Digital Identity Guidelines (2017), Appendix A",
+                                "RFC 8996 (2021) deprecating TLS 1.0 and 1.1; RFC 8446 (2018) TLS 1.3; RFC 7568 (2015) SSL 3.0",
+                                "FIRST, CVSS v3.1 Specification, section 5 (qualitative severity rating scale)",
+                                "RFC 3021 (2000) /31 point-to-point links; RFC 6335 (2011) IANA port ranges"])["id"]
+    CY = "sealed through cybersecurity.CYBER_VERIFY"
+    marks = [
+        ("instance", f"[entropy of a random passphrase, SEALED] Sixteen characters drawn uniformly from the 94 printable "
+                     f"ASCII symbols carry H = 16 log2(94) = 104.87 bits ({CY}). Each symbol is log2(94) = 6.55 bits; "
+                     "the bits add because the draws are independent.", S["entropy_ascii"]),
+        ("instance", f"[diceware, SEALED] Six words from a 7776-word list (five dice) carry 6 log2(7776) = 77.55 bits "
+                     f"({CY}): 12.9 bits a word. A phrase a person can remember with the strength of a random string.",
+         S["entropy_diceware"]),
+        ("instance", f"[TLS 1.3, SEALED] TLS 1.3 is 'recommended' ({CY}): RFC 8446 (2018) - one round trip, forward "
+                     "secrecy only, the legacy ciphers removed.", S["tls13"]),
+        ("instance", f"[TLS 1.2, SEALED] TLS 1.2 is 'current' ({CY}): still acceptable, widely deployed, with its weak "
+                     "cipher suites disabled.", S["tls12"]),
+        ("instance", f"[TLS 1.0, SEALED] TLS 1.0 is 'deprecated' ({CY}): RFC 8996 (2021) forbids its negotiation. A "
+                     "protocol does not rot; it is retired by a document with a number.", S["tls10"]),
+        ("instance", f"[SSL 3.0, SEALED] SSL 3.0 is 'insecure' ({CY}): RFC 7568 (2015), after POODLE showed its CBC "
+                     "padding leaks plaintext.", S["ssl3"]),
+        ("instance", f"[CVSS 10.0, SEALED] A base score of 10.0 is 'critical' ({CY}): the band 9.0-10.0 of CVSS v3.1. "
+                     "Log4Shell (CVE-2021-44228) scored exactly this.", S["cvss_critical"]),
+        ("instance", f"[CVSS 7.5, SEALED] 7.5 is 'high' ({CY}): the band 7.0-8.9. Heartbleed (CVE-2014-0160) scored 7.5 "
+                     "on v3 - a memory read, not a code execution, and the scale says so.", S["cvss_high"]),
+        ("instance", f"[a /24, SEALED] A /24 has 2^8 - 2 = 254 usable hosts ({CY}): one address is the network, one the "
+                     "broadcast.", S["subnet_24"]),
+        ("instance", f"[a /16, SEALED] A /16 has 2^16 - 2 = 65,534 ({CY}).", S["subnet_16"]),
+        ("instance", f"[a /31, SEALED] A /31 has 2 usable hosts, not 0 ({CY}): RFC 3021 lets a point-to-point link use "
+                     "both addresses. The rule has an exception and the exception has a number.", S["subnet_31"]),
+        ("instance", f"[port 443, SEALED] 443 is a well-known port, 0-1023 ({CY}): HTTPS (RFC 2818).", S["port_443"]),
+        ("instance", f"[port 8080, SEALED] 8080 is registered, 1024-49151 ({CY}): the conventional HTTP alternate.",
+         S["port_8080"]),
+        ("instance", f"[port 49152, SEALED] 49152 is the first dynamic port, 49152-65535 ({CY}; RFC 6335): the ephemeral "
+                     "range a client is given for the other end of its own connection.", S["port_49152"]),
+        ("postulate", "[the standards, CITED] The severity bands, the TLS statuses and the port ranges are DECREES - "
+                      "FIRST, the IETF and IANA chose them - so they are cited as postulates, never sealed as theorems. "
+                      "What is sealed is that the lookup was done right. The entropy formula assumes a UNIFORM random "
+                      "choice: NIST SP 800-63B says plainly that user-chosen passwords do not reach it, so H = L log2 N "
+                      "is an upper bound on what a person types, inferred never kept.",
+         {"source": "FIRST CVSS v3.1 spec section 5; RFC 8996, 8446, 7568, 3021, 6335; NIST SP 800-63B Appendix A"}),
+        ("note", "[on the one map] Security's arithmetic is information theory (the information-theory stick: entropy is "
+                 "log2 of the choices) and cryptography (card_floor_cryptography: the ciphers TLS carries), laid over the "
+                 "network (card_floor_networking: subnets, ports). The verifier seals the measurable layer and declines "
+                 "the judgment - whether a system is 'secure' is not a number.",
+         {"source": "the one map; the information-theory stick; card_floor_cryptography, card_floor_networking"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py cybersecurity")
+    return 0
+
+
+def stick_document_validation() -> int:
+    """DOCUMENT VALIDATION - the check digits, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
+    document_validation.DOC_VERIFY: ISBN-10 (mod 11, with the X check digit), ISBN-13 and EAN-13 / UPC-A (mod 10,
+    weights 1 and 3), and Luhn (payment cards and IMEI). Valid published identifiers are SEALED as valid; a
+    transposed ISBN-10 and a one-digit Luhn error are SEALED as invalid (claimed false); and the known blind spot of
+    the mod-10 code - an adjacent transposition of digits differing by 5 passes - is SEALED as the instance it is.
+    The code designs are CITED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def dv(spec):
+        return _seal_through("document_validation", "DOC_VERIFY", spec)
+
+    S = {
+        "isbn10": dv({"isbn10": "0306406152", "claimed_isbn10_valid": True}),
+        "isbn10_kr": dv({"isbn10": "0131103628", "claimed_isbn10_valid": True}),
+        "isbn10_x": dv({"isbn10": "080442957X", "claimed_isbn10_valid": True}),
+        "isbn10_transposed": dv({"isbn10": "0306460152", "claimed_isbn10_valid": False}),
+        "isbn13": dv({"isbn13": "9780306406157", "claimed_isbn13_valid": True}),
+        "isbn13_oreilly": dv({"isbn13": "9780596520687", "claimed_isbn13_valid": True}),
+        "luhn": dv({"luhn_number": "79927398713", "claimed_luhn_valid": True}),
+        "luhn_imei": dv({"luhn_number": "490154203237518", "claimed_luhn_valid": True}),
+        "luhn_one_digit": dv({"luhn_number": "79927398714", "claimed_luhn_valid": False}),
+        "ean13": dv({"ean_or_upc": "4006381333931", "claimed_ean_valid": True}),
+        "ean13_blind_spot": dv({"ean_or_upc": "4006831333931", "claimed_ean_valid": True}),
+        "upc_a": dv({"ean_or_upc": "036000291452", "claimed_ean_valid": True}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "check-digit verdicts")
+    sid = TS.create("Document validation - the check digits, sealed",
+                    statement="A check digit is a theorem of modular arithmetic: the weighted sum of a valid "
+                              "identifier is 0 mod 11 (ISBN-10) or 0 mod 10 (ISBN-13, EAN, UPC, Luhn).",
+                    field="document_validation",
+                    references=["ISO 2108:2017, International Standard Book Number",
+                                "H. P. Luhn, US Patent 2,950,048 (1960); ISO/IEC 7812-1",
+                                "GS1 General Specifications, section 7.9 (check digit calculation)",
+                                "J. A. Gallian, Error detection methods, ACM Computing Surveys 28 (1996) 504"])["id"]
+    DV = "sealed through document_validation.DOC_VERIFY"
+    marks = [
+        ("instance", f"[an ISBN-10, SEALED] 0-306-40615-2 is valid ({DV}): weights 10 down to 1, sum 0 mod 11.",
+         S["isbn10"]),
+        ("instance", f"[the C book, SEALED] 0-13-110362-8, The C Programming Language (2nd ed.), is valid ({DV}): "
+                     "the sum is 88 = 8 x 11.", S["isbn10_kr"]),
+        ("instance", f"[the X, SEALED] 0-8044-2957-X is valid ({DV}): mod 11 has eleven residues, so one check value is "
+                     "10 and is written X. The alphabet grew by one letter because the modulus is prime.", S["isbn10_x"]),
+        ("instance", f"[a transposition caught, SEALED AS INVALID] 0306460152 - the 0 and 6 of 0306406152 swapped - is "
+                     f"invalid, sealed with claimed = false ({DV}). Mod 11 with distinct weights catches EVERY adjacent "
+                     "transposition: swapping digits a and b shifts the sum by a - b, never 0 mod 11.",
+         S["isbn10_transposed"]),
+        ("instance", f"[an ISBN-13, SEALED] 978-0-306-40615-7 is valid ({DV}) - the same book as the ISBN-10 above, "
+                     "re-coded under the 978 prefix with a new check digit, mod 10 with weights 1 and 3.", S["isbn13"]),
+        ("instance", f"[another, SEALED] 978-0-596-52068-7 is valid ({DV}): the weighted sum is 130.", S["isbn13_oreilly"]),
+        ("instance", f"[Luhn, SEALED] 79927398713 passes Luhn ({DV}): double every second digit from the right, subtract "
+                     "9 from any double above 9, and the sum is 0 mod 10. Every payment card number ends in a Luhn "
+                     "digit.", S["luhn"]),
+        ("instance", f"[an IMEI, SEALED] 49-015420-323751-8 passes Luhn ({DV}): a phone's identity carries the same check "
+                     "as a card.", S["luhn_imei"]),
+        ("instance", f"[one digit wrong, SEALED AS INVALID] 79927398714 fails, sealed with claimed = false ({DV}). Luhn "
+                     "catches every single-digit error - the doubling-and-casting-out-nines makes each position's "
+                     "contribution a bijection on the digits.", S["luhn_one_digit"]),
+        ("instance", f"[an EAN-13, SEALED] 4006381333931 is valid ({DV}): weights 1,3,1,3,... sum 0 mod 10.", S["ean13"]),
+        ("instance", f"[the blind spot, SEALED] 4006831333931 - the 3 and 8 of the EAN above swapped - is ALSO valid "
+                     f"({DV}). Weights 1 and 3 differ by 2, so a swap of adjacent digits a, b shifts the sum by 2(a - b); "
+                     "when a - b = 5 that is 10, invisible mod 10. The code catches every single-digit error and most "
+                     "transpositions but not this one; the engine seals the limitation as an instance, not an "
+                     "exception.", S["ean13_blind_spot"]),
+        ("instance", f"[a UPC-A, SEALED] 036000291452 is valid ({DV}): twelve digits, read as an EAN-13 with a leading "
+                     "zero - the two codes are one scheme.", S["upc_a"]),
+        ("postulate", "[the designs, CITED] ISBN-10's mod 11 (ISO 2108), the mod-10 1/3 weighting of EAN and ISBN-13 "
+                      "(GS1), and Luhn's doubling (1960) are chosen designs: cited as postulates. What each design "
+                      "DETECTS is a theorem of modular arithmetic - sealed above by instance, proven in general by "
+                      "Gallian (1996): a prime modulus with distinct weights catches all single errors and all adjacent "
+                      "transpositions; mod 10 cannot catch them all, and the 5-apart swap is the proof.",
+         {"source": "ISO 2108:2017; GS1 General Specifications 7.9; Luhn, US 2,950,048; Gallian, ACM Comput. Surv. 28 (1996) 504"}),
+        ("note", "[on the one map] A check digit is an error-detecting code (card_floor_computer_science: parity and "
+                 "its generalizations), built from modular arithmetic (the number-theory floor: residues, a prime "
+                 "modulus) and judged by information theory (the information-theory stick: one redundant symbol buys "
+                 "detection, not correction). The engine never reads a card number or an identity - it checks a "
+                 "published example's arithmetic, nothing more.",
+         {"source": "the one map; card_floor_computer_science; the information-theory stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py document_validation")
+    return 0
+
+
 def game_theory() -> int:
     """GAME THEORY - equilibrium, dilemmas, and strategy (Matt, 2026-10-10, down the domain list). The mathematics of
     strategic choice: a NASH EQUILIBRIUM is a fixed point where no one gains by deviating alone; the PRISONER'S
@@ -10995,6 +11459,16 @@ def main() -> int:
         return computer_science()
     if a[0] in ("formal_logic", "formal-logic", "logic", "boolean", "boolean_algebra", "truth_table", "boole", "sheffer"):
         return stick_formal_logic()
+    if a[0] in ("archaeology", "radiocarbon", "carbon_dating", "decay_clock"):
+        return stick_archaeology()
+    if a[0] in ("chess", "checkmate", "stalemate", "perft"):
+        return stick_chess()
+    if a[0] in ("condensed_matter", "condensed-matter", "phonon", "quantum_hall", "von_klitzing"):
+        return stick_condensed_matter()
+    if a[0] in ("cybersecurity", "cyber", "tls", "cvss", "subnet"):
+        return stick_cybersecurity()
+    if a[0] in ("document_validation", "check_digit", "checksum", "isbn", "luhn"):
+        return stick_document_validation()
     if a[0] in ("tesseract", "hypercube", "four_cube", "eight_cell"):
         return tesseract()
     if a[0] in ("statistics", "stats", "inference", "the_normal_distribution"):
