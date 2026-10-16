@@ -241,7 +241,13 @@ def _build() -> None:
         if dom not in _DOMAINS:
             continue   # guard: a synonym for a domain the registry doesn't have is ignored, not phantomed
         for term in terms:
-            _add(_INDEX, term, dom, 3.0)
+            # Normalize exactly as _phrases tokenizes a query (3+ letter words, at most 3 of them). A curated
+            # phrase stored RAW with a short word in it ("speed of light", "day of the week") could never
+            # match a query and was a silent dead entry — 20 of 550 were (issue #22). Longer than the
+            # n-gram window is dead too, so it is skipped rather than stored.
+            term_n = " ".join(_WORD.findall(term.lower()))
+            if term_n and len(term_n.split()) <= 3:
+                _add(_INDEX, term_n, dom, 3.0)
 
     # (2) + (3) harvest each module's function names and docstring words, statically
     doc_terms: Dict[str, Dict[str, int]] = {}   # domain -> {word: count}

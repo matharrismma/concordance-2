@@ -81,6 +81,28 @@ def test_the_secular_index_is_unchanged_by_the_witness_index():
         assert resolve_domain(q, k=5) == resolve_domain(q, k=5, surface="secular")
 
 
+def test_curated_synonyms_are_stored_as_queries_tokenize():
+    """Issue #22: _add stored curated _SYNONYMS raw while _phrases tokenizes a query (3+ letter words, at most
+    3 of them), so 20 of 550 everyday phrases ("speed of light", "day of the week", "equivalent to") could never
+    match — silent dead entries. The build now normalizes them. Pin: every curated term's normalized form is in
+    the index, and the formerly dead phrasings route to the domain the curator meant."""
+    from concordance import domain_resolver as dr
+    dr._build()
+    for terms in dr._SYNONYMS.values():
+        for term in terms:
+            n = " ".join(dr._WORD.findall(term.lower()))
+            if n and len(n.split()) <= 3:
+                assert n in dr._INDEX, term
+    checks = [("what day of the week was july 4 1776", "calendar_time"),
+              ("how many ways to choose 3 from 10", "combinatorics"),
+              ("the number of divisors of 12 is 6", "number_theory"),
+              ("2 to the power of 10 is 1024", "mathematics"),
+              ("how much do i make an hour at 50000 a year", "labor"),
+              ("the speed of light is 299792458 m/s", "physical_constants")]
+    for q, dom in checks:
+        assert dom in _menu(q), (q, _menu(q))
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]:
         fn()
@@ -96,7 +118,12 @@ def test_born_confidence_and_entropy_are_surfaced_and_separate_confident_from_am
     c = resolve_domain("is 17 prime")
     assert c["decision"] == "number_theory"
     assert c["confidence"] >= 0.70 and c["entropy"] <= 1.0
-    a = resolve_domain("the speed of light is 299792458 m/s")
+    # "the speed of light..." USED to be this test's tie — only because the curated synonym "speed of light"
+    # was stored raw and could never match (issue #22). Normalized, it decides physical_constants as the
+    # curator intended; a real near-tie (three domains with a claim on a watt-hour bill) is the ambiguous case.
+    s = resolve_domain("the speed of light is 299792458 m/s")
+    assert s["decision"] == "physical_constants" and s["confidence"] >= 0.5
+    a = resolve_domain("a 60 watt bulb for 10 hours uses 0.6 kwh")
     assert a["decision"] is None                        # a genuine tie still asks
     assert a["confidence"] <= 0.5 and a["entropy"] >= 1.2
     # every candidate-bearing result carries the three signals
