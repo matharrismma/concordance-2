@@ -1,7 +1,7 @@
 # recurring-form probe — the fascia measure on the bench
 
 The connective-domain measure from [`docs/FASCIA.md`](../../docs/FASCIA.md): `fabric_routability.py`
-(Matt's Programmable Fabric routability sim) lifted from copper to **form**. It asks whether a family
+(Matt's hardware routability sim) lifted from copper to **form**. It asks whether a family
 of systems is *one recurring form* — measured against a random null — the way the fabric asks whether
 a net's pads route with few jumpers under placement-locality.
 

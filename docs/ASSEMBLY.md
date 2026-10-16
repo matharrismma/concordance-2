@@ -8,7 +8,7 @@ movement. Nothing here is new machinery — it is the wiring diagram. The sealed
 tick stick **stick_the_final_assembly** (a mark per connection, each carrying the anchor's own seal); this
 document is its plain-language twin.
 
-The method is the watchmaker's (Matt's own, from the Calibre 72 subsystem map and the Prism/robot bibles):
+The method is the watchmaker's (Matt's own hardware design discipline):
 deliberately factual, every part named by code that exists, gaps called out rather than inferred, one
 vocabulary across the whole design system.
 

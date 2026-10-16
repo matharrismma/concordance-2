@@ -51,10 +51,10 @@ sanctuary, the door between them open.
 
 ---
 
-## 0.5 The build discipline: rebuild it like a watch (Calibre 44)
+## 0.5 The build discipline: rebuild it like a watch
 
-2.0 is engineered like a fine mechanical movement — the operator's **Calibre 44** package is the
-exemplar (kept in `engineering-reference/`). The horology maps onto the engine, principle for principle:
+2.0 is engineered like a fine mechanical movement — the discipline of the operator's own watchmaking
+is the exemplar. The horology maps onto the engine, principle for principle:
 
 - **Christ at the center — the mainspring.** A watch's power comes from the mainspring at the heart,
   and every wheel turns from the center. Christ is the center of the architecture and the power that

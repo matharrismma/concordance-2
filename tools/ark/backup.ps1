@@ -66,7 +66,7 @@ $sha = (Get-FileHash -Algorithm SHA256 $Local).Hash.ToLower()
 Log "verified: ${size}GB, $($entries.Count) entries, ledger_seals=$ledger, key=present, sha256=$sha"
 
 # 4. Mirror the local card-source dir (the durable per-card JSONs, currently under OneDrive)
-$CardSrc = "C:\Users\hdven\OneDrive\Documents\Claude\Projects\Lighthouse\data\cards"
+$CardSrc = if ($env:CONCORDANCE_IMPORT_DIR) { Join-Path $env:CONCORDANCE_IMPORT_DIR "data\cards" } else { "$env:USERPROFILE\OneDrive\Documents\Claude\Projects\Lighthouse\data\cards" }
 if (Test-Path $CardSrc) {
     robocopy $CardSrc (Join-Path $Root "card-source-mirror") /MIR /NFL /NDL /NJH /NP | Out-Null
     if ($LASTEXITCODE -le 7) { Log "card-source mirror: OK ($((Get-ChildItem (Join-Path $Root 'card-source-mirror') -File).Count) files)" }

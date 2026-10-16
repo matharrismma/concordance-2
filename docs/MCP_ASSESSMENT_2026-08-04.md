@@ -60,7 +60,7 @@ Treat the repository as a strong architectural prototype and begin a focused MCP
 Repository overview and README claims.
 The stdlib JSON-RPC MCP server implementation in src/concordance/mcp/server.py.
 The Streamable HTTP wrapper in src/concordance/mcp/http.py.
-The V2 definition document describing the “one foundation, two surfaces” model and Calibre 44 engineering discipline.
+The V2 definition document describing the “one foundation, two surfaces” model and the watchmaking engineering discipline.
 Public repository structure and status statements.
 1.2 Review lenses
 Lens

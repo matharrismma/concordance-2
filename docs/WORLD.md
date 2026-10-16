@@ -39,7 +39,7 @@ whole territory.
   separate from git.
 
 ### 1b. The local working repo — where the work is done
-- **`C:\Users\hdven\OneDrive\Documents\Claude\Projects\concordance-2`** — **3.6 GB** total:
+- **`%USERPROFILE%\OneDrive\Documents\Claude\Projects\concordance-2`** — **3.6 GB** total:
   `src` 7.9 M · `tools` 2.8 M · `site` 100 M (incl. self-hosted fonts) · `tests` 8.5 M · `docs` 888 K ·
   **`data` 3.1 G (gitignored corpus/artifacts)** · `.git` 273 M.
 - The seeders here are the **source of truth** for the Atlas/calc/theory/bridge data; `data/*.jsonl` is
@@ -279,7 +279,7 @@ that does not name the occult returns Scripture; naming it surfaces it beside it
 
 ### 7.3 The gradient manifold (the structure, one form across the planes)
 
-The whole is one recurring form — energy (Matt's Universal Gradient Manifold, carded as
+The whole is one recurring form — energy (Matt's energy-systems architecture, carded as
 `card_doctrine_reservoir_manifold`), biology (ATP as the common interface), and this software: the **CARD**
 is the common interface, the **KEEPING** the reservoir, the **KERNEL/gate** the manifold, the **faces +
 verifiers** the converters, and the **models are FUEL** — the manifold endures while the fuels evolve
@@ -350,7 +350,7 @@ verifiers** the converters, and the **models are FUEL** — the manifold endures
 - **The alignment gate (§7.2):** the keeping tiered by agreement — occult explicit-only, other
   religions/philosophy referenceable/down-weighted, everything aligned else; 19 subjects tiered from the
   discernment atlas, gated and enabled.
-- **The gradient-manifold frame (§7.3):** Matt's UGM recognized as the project's structure — card = ATP,
+- **The gradient-manifold frame (§7.3):** Matt's energy-systems architecture recognized as the project's structure — card = ATP,
   keeping = reservoir, kernel = manifold, models = fuel.
 
 **Earlier (the site-experience arc, 2026-09-20):**

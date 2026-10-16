@@ -8,11 +8,14 @@ data/strongs/. Data lives beside the engine, not in git.
 """
 from __future__ import annotations
 
+import os
 import shutil
 import sys
 from pathlib import Path
 
-_DEFAULT_SRC = Path(r"C:\Users\hdven\OneDrive\Documents\Claude\Projects\Lighthouse\lw\00_source")
+# Source lives outside this repo; set CONCORDANCE_IMPORT_DIR or pass SRC as argv[1]. No personal path baked in.
+_IMPORT = Path(os.environ.get("CONCORDANCE_IMPORT_DIR", "").strip() or "./_import")
+_DEFAULT_SRC = _IMPORT / "lw" / "00_source"
 
 _FILES = [
     ("web/web.db", "web/web.db"),

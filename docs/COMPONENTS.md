@@ -3,11 +3,10 @@
 Matt, 2026-10-06: *"Think of a vacuum tube computer. That's an easy concept. We need the components …
 regulators, capacitors, diodes, transistors, Antennae, Vacuum tubes … I see it kind of steam punk."*
 
-This is the engine's subsystem map, in the shape of the Calibre 72 / 40U-72 movement map and the Prism and
-Humanoid-Robot design bibles — **one vocabulary across the whole design system** (the robot bible's Design
-Lineage already names Narrow Highway / Concordance, The Keeping, the Gradient Manifold, Programmable Fabric
-and Pressure Fighting as its own source concepts; the engine is a member of that family, built in software
-instead of titanium).
+This is the engine's subsystem map, in the shape of Matt's own hardware and precision-movement design
+bibles — **one vocabulary across the whole design system** (that private design lineage already names
+Narrow Highway / Concordance, The Keeping, the gradient manifold and the rest as its own source
+concepts; the engine is a member of that family, built in software instead of titanium).
 
 It is deliberately factual. Where a part is not yet proven, it is marked with its real evidence status
 rather than implied. No part is a metaphor only: every row names code that exists.
@@ -54,7 +53,7 @@ enthusiasm) · *Locate with datums, clamp with fasteners* · *Interfaces are pro
 
 ## 2. The layers (what may wear, what may not)
 
-From the movement map and Prism's permanent-vs-renewable rule. **The permanent structure locates and
+From the precision-movement map and its permanent-vs-renewable rule. **The permanent structure locates and
 protects; it must never become the wear part.**
 
 | Layer | Meaning | In the engine |
@@ -107,7 +106,7 @@ its primary plane is named, the span noted. Grounded in `src/concordance/` and `
 
 The regulators are the Steward and Reflex parts — the ones that govern what passes rather than compute
 data. Firing order is the authority chain: **crisis first, then ingest, then verify, then deploy, with
-balance and the diode continuous.** Each closes against a number, an owner, and a fallback (Prism's gate
+balance and the diode continuous.** Each closes against a number, an owner, and a fallback (the precision-instrument gate
 discipline); each has a live reading the Bridge will show.
 
 | Regulator | Plane | Governs | Fires at | Closes against (number) | Fallback |

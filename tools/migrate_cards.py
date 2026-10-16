@@ -17,10 +17,13 @@ from __future__ import annotations
 
 import glob
 import json
+import os
 import sys
 from pathlib import Path
 
-_DEFAULT_SRC = Path(r"C:\Users\hdven\OneDrive\Documents\Claude\Projects\Lighthouse\data\cards")
+# Source lives outside this repo; set CONCORDANCE_IMPORT_DIR or pass SRC as argv[1]. No personal path baked in.
+_IMPORT = Path(os.environ.get("CONCORDANCE_IMPORT_DIR", "").strip() or "./_import")
+_DEFAULT_SRC = _IMPORT / "data" / "cards"
 
 WITNESS_SHELVES = {"codex", "patristics", "hymns"}
 WITNESS_TIERS = {"words_in_red", "scripture", "creed", "catechism", "father"}

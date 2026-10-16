@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-recurring-form probe -- does the connective-domain measure see Matt's watch, PCB, and engine as
-ONE form, while REJECTING a null of unrelated systems?
+recurring-form probe -- does the connective-domain measure see Matt's precision instrument, hardware
+fabric, and engine as ONE form, while REJECTING a null of unrelated systems?
 
-This is `fabric_routability.py` (the Programmable Fabric routability sim) lifted from copper to
+This is a hardware routability sim lifted from copper to
 FORM. There, pads fuse to row+column rails; pads that share a rail chain for free; a net's cost is
 `(connected components among the rails its pads touch) - 1`, and RANDOM placement (the null) needs
 6-10x more jumpers than CLUSTERED placement (real pinouts). Here:

@@ -53,7 +53,7 @@ exit 0. Everything below is deployed and live-verified on both surfaces.**
    own mistakes and their corrections.
 2. This file, for state and gotchas.
 3. The memory index at
-   `C:\Users\hdven\.claude\projects\C--Users-hdven-OneDrive-Desktop\memory\MEMORY.md` — the standing
+   `%USERPROFILE%\.claude\projects\C--Users-hdven-OneDrive-Desktop\memory\MEMORY.md` — the standing
    guidance section at the top is the working discipline, not decoration.
 
 ## The ethos, compressed (load-bearing — do not optimize it away)
@@ -70,7 +70,7 @@ Serve families and children first. Free, no account.
 
 ## Environment
 
-- **Repo:** `C:\Users\hdven\OneDrive\Documents\Claude\Projects\concordance-2` (branch `master`).
+- **Repo:** `%USERPROFILE%\OneDrive\Documents\Claude\Projects\concordance-2` (branch `master`).
 - **Gate:** `PYTHONPATH=src python tools/check.py` → must print `=== GATE PASS ===`. **Read the real
   exit code**, not the tail of the log. ~5–6 min. Run it backgrounded and wait for the notification.
 - **Deploy:** `sh tools/deploy.sh <repo-relative files…>` — one tar-over-ssh, **staggered** restarts

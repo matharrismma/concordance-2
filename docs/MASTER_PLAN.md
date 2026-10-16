@@ -298,7 +298,7 @@ about what was not checked. A million cards of slop would be worse than 496,559 
 - Kingdom economy substrate maturation; The Way fellowship growth (Guardians/Guides).
 - Knowledge-layer outreach: academics + Jews via Hebrew/Greek (lexicon = plumb-line).
 - .tv watch/listen/learn face growth; kids channel.
-- Programmable Fabric PCB (Matt's hardware) — separate track, connects at the maker wing.
+- Matt's hardware PCB work — separate track, connects at the maker wing.
 
 ## §5 SOPs and MAPS (what we operate by)
 

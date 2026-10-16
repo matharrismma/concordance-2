@@ -4,7 +4,7 @@ A deterministic verification engine. It checks what is true and hands you a **re
 re-verify** — a verdict, the worked reasoning, and a permanent content-addressed seal. It
 eliminates what is not the answer so that what survives stands on its own.
 
-> Rebuilt like a watch (the Calibre 44 discipline): one bounded, counted movement; serviceable by
+> Rebuilt like a watch (the watchmaker's discipline): one bounded, counted movement; serviceable by
 > any competent hand; machine-honest — the accuracy *is* the finish. See
 > [`docs/V2_DEFINITION.md`](docs/V2_DEFINITION.md).
 

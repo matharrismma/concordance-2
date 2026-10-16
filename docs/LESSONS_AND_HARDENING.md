@@ -80,22 +80,22 @@ Neither would have been caught by reading the diff.
 Harvested 2026-07-30 from six planning documents plus the Calibre code drop, and carded on the
 `doctrine` shelf. Three of them indict something live:
 
-### L10 · A gate closes against a number, an OWNER, and a FALLBACK  *(Prism v2.3)*
+### L10 · A gate closes against a number, an OWNER, and a FALLBACK  *(a precision-instrument design bible)*
 `tools/check.py` closes against numbers — coverage floors, 0 false positives, a real exit code — and
 names **no owner and no fallback**. The punch list has completion tests but does not say who answers
 for each, or what happens when one cannot close.
 
-### L11 · Authority sunsets  *(The Way v0.2)*
-*"Startup authority sunsets into the ordinary governance system."* Our steward token is **one
+### L11 · Authority sunsets  *(a community governance plan)*
+Startup authority sunsets into the ordinary governance system. Our steward token is **one
 permanent secret, no expiry, no rotation, and no record of who holds it** — the precise opposite.
 
-### L12 · WAIT is a first-class result, and a refusal names its gate  *(Calibre engine.py)*
-`Result.PASS_ / WAIT / FAIL` with `Block.LAW | WAIT | WITNESS | MUTUAL | PROOF | ALIGN`. Every
-refusal says *which* gate stopped it, and `WAIT` is an outcome rather than a failure. Our three
-states are HOLDS / BROKEN / SYSTEM_ERROR and name no gate. `Block.WAIT` is also the **GOD gate** —
-the one of four we never built.
+### L12 · WAIT is a first-class result, and a refusal names its gate  *(a prior gating engine)*
+A prior gating engine used a three-state result (pass / wait / fail) where a refusal named *which*
+gate stopped it, and *wait* was an outcome rather than a failure. Our three states are HOLDS /
+BROKEN / SYSTEM_ERROR and name no gate. That *wait* state is also the **GOD gate** — the one of four
+we never built.
 
-### L13 · A stated degradation order  *(Humanoid Robot v0.2)*
+### L13 · A stated degradation order  *(a robotics control architecture)*
 Shards freeze and unfreeze and `core` can never be frozen — that *is* a degradation order, and it is
 written nowhere. A system that has not decided what it sheds will shed whatever fails first.
 
