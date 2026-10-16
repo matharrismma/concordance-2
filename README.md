@@ -7,6 +7,7 @@ eliminates what is not the answer so that what survives stands on its own.
 > Rebuilt like a watch (the watchmaker's discipline): one bounded, counted movement; serviceable by
 > any competent hand; machine-honest — the accuracy *is* the finish. See
 > [`docs/V2_DEFINITION.md`](docs/V2_DEFINITION.md).
+> New here? Start with [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — the newcomer's map (every count dated and derived from the code).
 
 ## The floor — seven primitives
 
