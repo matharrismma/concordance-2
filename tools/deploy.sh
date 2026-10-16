@@ -119,6 +119,16 @@ else
     poll 8002 "secular" || { revert; exit 1; }
 fi
 
+# THE DEDICATED MCP HOST (nh-mcp :8003, docs/MCP_HOST.md): a SECOND engine process whose only job is the
+# agents' door (/mcp), so a site restart never interrupts an agent. It runs the SAME code, so restart it
+# here too — staggered, AFTER the site engine is back — or it drifts. Guarded (only when enabled) and
+# NON-FATAL: a slow MCP never reverts a good site deploy; it is a separate door, checked and reported.
+if ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "systemctl is-enabled --quiet nh-mcp 2>/dev/null"; then
+    echo "-- restarting the dedicated MCP host (nh-mcp, :8003) --"
+    ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "sudo systemctl restart nh-mcp"
+    poll 8003 "mcp" || echo "   !! nh-mcp did not answer in time — /mcp may be degraded; check it by hand"
+fi
+
 # 3b. THE GATE (Gen 3 · 7, 2026-10-04): both doors answer — now the engine measures itself before the deploy
 #     is called done. The live assay (every probe that has ever passed must still pass) and the standing
 #     benchmarks (every domain golden, the derivation moat, every admitted spec — ratcheted against the
