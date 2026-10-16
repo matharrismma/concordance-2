@@ -26,7 +26,7 @@ import re
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from .verifiers import VERIFIERS
+from .verifiers import VERIFIERS, WITNESS_VERIFIERS
 
 # ORTHOGONALIZE THE DOMAIN BASIS (DESIGN_FROM_THE_DOTS lever 2). The domain vectors share phrases — the
 # Gram off-diagonals, which show up as cross-talk (the runner-up crowding the leader). Down-weight each
@@ -180,6 +180,24 @@ _INDEX: Dict[str, Dict[str, float]] = {}   # phrase -> {domain: weight}
 _DOMAINS: set = set()
 _BUILT = False
 
+# THE WITNESS INDEX — see _build(). Consulted only when resolve_domain(..., surface="witness").
+_WINDEX: Dict[str, Dict[str, float]] = {}   # phrase -> {witness domain: weight}
+_WDOMAINS: set = set()
+# curated everyday vocabulary for the three witness domains (the person's words on narrowhighway.org)
+_WSYNONYMS: Dict[str, Tuple[str, ...]] = {
+    # Terms are written the way _phrases tokenizes a query (words of 3+ letters, at most 3 of them), and the
+    # build normalizes them again as a guard — a curated phrase that can never match is a silent dead entry.
+    "scripture": ("verse", "verses", "passage", "chapter", "bible", "scripture", "scriptures", "book of",
+                  "bible say", "bible says", "gospel", "psalm", "psalms", "epistle",
+                  "old testament", "new testament", "genesis", "exodus", "matthew", "mark", "luke", "john",
+                  "romans", "revelation"),
+    "theology_doctrine": ("doctrine", "doctrines", "creed", "nicene", "trinity", "justification", "atonement",
+                          "sanctification", "catechism", "orthodox", "orthodoxy", "heresy", "council",
+                          "confession faith", "systematic theology"),
+    "witness": ("testimony", "testify", "profession faith", "bear witness", "three witnesses", "witnesses",
+                "attest", "attestation", "witnessed"),
+}
+
 
 def _canon_of(modpath: str) -> str:
     return modpath.rsplit(".", 1)[-1]
@@ -288,6 +306,43 @@ def _build() -> None:
             _f = math.log(1 + nd / _dfreq) / denom
             for _d in _doms:
                 _doms[_d] *= _f
+    # ── THE WITNESS INDEX (reach sprint, 2026-10-16). The witness-surface verifiers (scripture,
+    # theology_doctrine, witness) are registered only in WITNESS_VERIFIERS, which this resolver never read —
+    # so on narrowhighway.org a verse question could not reach the scripture verifier at all. They live in a
+    # SEPARATE index consulted only when surface == "witness": the secular index above (and its decorrelation
+    # over the N secular domains) is byte-identical, and the Gate holds — a witness verifier never routes on
+    # the secular face. Aliases + curated everyday words + the modules' verify_/check_ names; no idf pass
+    # (three domains — distinctive words reinforce; there is no secular basis to decorrelate against).
+    for alias, modpath in WITNESS_VERIFIERS.items():
+        dom = _canon_of(modpath)
+        _CANON.setdefault(alias, dom)
+        _WDOMAINS.add(dom)
+        _add(_WINDEX, alias.replace("_", " "), dom, 3.0)
+    for dom, terms in _WSYNONYMS.items():
+        for term in terms:
+            # normalize exactly as _phrases tokenizes a query; a phrase longer than the n-gram window is dead
+            term_n = " ".join(_WORD.findall(term.lower()))
+            if term_n and len(term_n.split()) <= 3:
+                _add(_WINDEX, term_n, dom, 3.0)
+    for dom in sorted(_WDOMAINS):
+        f = vdir / f"{dom}.py"
+        if not f.exists():
+            continue
+        try:
+            tree = ast.parse(f.read_text(encoding="utf-8"))
+        except (SyntaxError, OSError):
+            continue
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                nm = node.name
+                for pre in ("verify_", "check_", "_verify_"):
+                    if nm.startswith(pre):
+                        phrase = nm[len(pre):].replace("_", " ").strip()
+                        if phrase and phrase not in _STOP:
+                            _add(_WINDEX, phrase, dom, 2.0)
+                            for w in phrase.split():
+                                if w not in _STOP and len(w) >= 3:
+                                    _add(_WINDEX, w, dom, 1.5)
     _BUILT = True
 
 
@@ -318,7 +373,8 @@ def _structural(text: str) -> Optional[str]:
     return None
 
 
-def resolve_domain(text: str, k: int = 3, margin: float = 0.34, floor: float = 2.5) -> Dict:
+def resolve_domain(text: str, k: int = 3, margin: float = 0.34, floor: float = 2.5,
+                   surface: str = "secular") -> Dict:
     """Name the verify DOMAIN(s) a plain claim should go to. Model-free; explains itself.
 
     -> {query, crisis, candidates:[{domain, score, why}], decision, ask, reason}
@@ -355,6 +411,17 @@ def resolve_domain(text: str, k: int = 3, margin: float = 0.34, floor: float = 2
             if phrase not in seen_phrase:
                 why.setdefault(dom, []).append(phrase)
         seen_phrase.add(phrase)
+    if surface == "witness":
+        # the witness face also reaches the witness verifiers — the Gate opens inward, never outward
+        for phrase in _phrases(t):
+            hit = _WINDEX.get(phrase)
+            if not hit:
+                continue
+            for dom, w in hit.items():
+                scores[dom] = scores.get(dom, 0.0) + w
+                if phrase not in seen_phrase:
+                    why.setdefault(dom, []).append(phrase)
+            seen_phrase.add(phrase)
 
     if not scores:
         dom = _structural(t)
