@@ -28,7 +28,7 @@ Checks performed:
       formula_a === formula_b  <=>  identical truth tables.
   * formal_logic.minimal_form
       claimed_minimal is a two-level sum-of-products equivalent to formula (truth table), AND no
-      equivalent sum-of-products has fewer product terms: Quine-McCluskey prime implicants plus an
+      equivalent sum-of-products has fewer product terms: Quine-McCluskey Quine-McCluskey implicants plus an
       exhaustive minimum cover over the minterms, decided EXACTLY for <= 4 variables (16 minterms).
       Five or more variables -> NOT_APPLICABLE with the reason (bounded, never a guess); a claim that
       is not two-level (a negated group, >>, ^) -> NOT_APPLICABLE. MISMATCH names the true minimum.
