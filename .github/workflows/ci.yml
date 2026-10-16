@@ -28,6 +28,29 @@ jobs:
       - name: Lint (syntax errors, undefined names, misuse only)
         run: python -m ruff check src tools tests
 
+      # ROUTING-BASIS DIFF (issue #31). The resolver's phrase->domain index is harvested from every
+      # verifier's docstring, so editing ANY verifier can move ANOTHER domain's routing — on 2026-10-16
+      # "prime implicants" in formal_logic turned "is 17 prime" from a decision into a question, and the
+      # PR's diff never showed it. Build the index on the base branch (a throwaway worktree) and on this
+      # checkout, write what moved to the step summary, and FAIL when a pinned golden query's decision
+      # flips (then the PR must say why and move the pin deliberately). Skipped on master itself: no base.
+      - name: "Routing-basis diff against the base branch (issue #31)"
+        if: github.event_name == 'pull_request' || github.ref != 'refs/heads/master'
+        env:
+          BASE_REF: ${{ github.base_ref || 'master' }}
+        run: |
+          git fetch --no-tags --depth=1 origin "+refs/heads/$BASE_REF:refs/remotes/origin/$BASE_REF"
+          git worktree add --detach /tmp/base "origin/$BASE_REF"
+          python tools/routing_diff.py snapshot /tmp/routing_base.json --root /tmp/base
+          python tools/routing_diff.py snapshot /tmp/routing_head.json
+          status=0
+          python tools/routing_diff.py compare /tmp/routing_base.json /tmp/routing_head.json --fail-on-flip \
+            > /tmp/routing_diff.md || status=$?
+          cat /tmp/routing_diff.md
+          { echo "## Routing-basis diff: origin/$BASE_REF -> this checkout"; echo; cat /tmp/routing_diff.md; } \
+            >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
+
       - name: Moat benchmark — every case correct with 0 false-positives
         run: python tools/benchmark.py   # exits non-zero on any false-positive
 

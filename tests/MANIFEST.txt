@@ -306,6 +306,7 @@ test_riemann_accel.py
 test_riemann_li.py
 test_router.py
 test_routes.py
+test_routing_diff.py
 test_schema.py
 test_science_cards.py
 test_scripture.py
