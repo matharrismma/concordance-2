@@ -95,13 +95,10 @@ def test_every_page_offers_a_way_home():
     # tool, no shared nav by design, per the Domain Sort), the offline instrument apps (golf/grappling),
     # and the operator/sovereign/pastoral surfaces (playbook/plow/profile/situations). Declared here
     # rather than each carrying nh-home.js — the same treatment mesh.html/live.html already get.
-    hidden = {"mesh.html", "live.html", "checkit.html", "about.html", "halls.html", "golf.html",
+    hidden = {"live.html", "checkit.html", "about.html", "halls.html", "golf.html",
               "grappling.html", "music.html", "provision.html", "wisdom.html", "workshop.html",
               "coach.html", "tv.html", "playbook.html", "plow.html", "profile.html", "situations.html",
               "steward.html",
-              # improve.html — The Workshop, the operator's improvement-filing desk; carries its own
-              # header/home link, not the shared nh-home.js control. An operator surface, direct-URL only.
-              "improve.html",
               # com.html is the .com secular LANDING (surface sort, 2026-09-01): it IS home and carries
               # its own nav, not the shared desk control. systems.html/prophecy.html/map.html are
               # self-contained surfaces with their own nav (map.html is in the Ctrl-K palette).
@@ -120,16 +117,16 @@ def test_every_page_offers_a_way_home():
               # fellowship.html — the .org social hall (study groups + the commons + the confession-gated
               # mesh), its own nav, reached from the witness desk door and profile.html, not the shared control.
               "fellowship.html",
-              # the Atlas visualization family (tools/atlas_explore.py + the map generators) — full-viewport
-              # generated SVG surfaces that carry their OWN minimal home link (a target=_top "← narrowhighway.com"),
-              # not the shared witness desk control which would fight the canvas; explore.html is the unified
-              # interactive Atlas (also in the Ctrl-K palette), the other six are single-view static renderings.
-              "explore.html", "atlas.html", "bridges.html", "calculations.html", "domains.html",
-              "one_body.html", "spiral.html", "strategy.html", "completeness.html", "torus.html",
-              # reader.html (the tortoise reader) and crossing.html (an Atlas single-view) carry their
-              # own minimal home link, not the shared nh-home.js; concordance.html is the LIVE .com front
-              # door served at / by home_for() (2026-09-21), reached as the domain root, not via nh-home.js.
-              "reader.html", "crossing.html", "concordance.html",
+              # the Atlas visualization family (tools/atlas_explore.py + the torus/completeness generators) —
+              # full-viewport generated SVG surfaces that carry their OWN minimal home link (a target=_top
+              # "← narrowhighway.com"), not the shared witness desk control which would fight the canvas.
+              # explore.html is the ONE interactive Atlas (also in the Ctrl-K palette); its six single-view
+              # statics were retired 2026-10-16 (issue #16) into its ?view= layouts — see api._RETIRED.
+              "explore.html", "completeness.html", "torus.html",
+              # reader.html (the tortoise reader) carries its own minimal home link, not the shared
+              # nh-home.js; concordance.html is the LIVE .com front door served at / by home_for()
+              # (2026-09-21), reached as the domain root, not via nh-home.js.
+              "reader.html", "concordance.html",
               # THE UNIFIED HERO (2026-10-11): console.html carries its own brand-home link (href="/"),
               # not the shared nh-home.js; it is served at / by home_for() on both faces. bridge.html is
               # the operator console with its own home control; keep.html is the operator sign-in shell
@@ -180,7 +177,7 @@ def test_the_palette_reaches_every_public_page():
     # documented exclusions — see the comment above TOOLS in nh-tools.js. mesh.html is the HIDDEN
     # discovery surface: never in the palette (the whole point is that it is found, not advertised —
     # Matthew 13:44), served but revealing nothing until the agent opens it and confession is made.
-    excused = {"index.html", "keep.html", "ask.html", "encyclopedia.html", "mesh.html", "live.html",
+    excused = {"index.html", "keep.html", "ask.html", "encyclopedia.html", "live.html",
                # self-contained surfaces, reached by direct URL / their own nav, not the palette: the
                # efficiency front door + confession + lobby, the offline instruments, the operator pages
                "checkit.html", "about.html", "halls.html", "golf.html", "grappling.html",
@@ -188,8 +185,6 @@ def test_the_palette_reaches_every_public_page():
                # steward.html is reached the same way — a direct link from the chat's steward branch
                # (ask.py's "Open the Steward" resource), not the palette.
                "steward.html",
-               # improve.html — The Workshop, the operator's filing desk; reached by direct URL, not the palette.
-               "improve.html",
                # com.html is the .com bare homepage (served at "/"), like index.html; systems.html is the
                # operator dashboard and prophecy.html a direct-URL surface — reached by URL, not the palette.
                "com.html", "systems.html", "prophecy.html",
@@ -200,15 +195,14 @@ def test_the_palette_reaches_every_public_page():
                "gateway.html",
                # fellowship.html — the .org social hall, reached from the witness desk door + profile.html.
                "fellowship.html",
-               # the Atlas visualization family: explore.html (the unified interactive Atlas) IS in the palette;
-               # these are its single-view static renderings (one per explore.html layout) + the strategy view,
-               # reached from com.html / explore.html and as direct-URL share targets, not separate palette entries.
-               "atlas.html", "bridges.html", "calculations.html", "domains.html",
-               "one_body.html", "spiral.html", "strategy.html", "completeness.html", "torus.html",
+               # the Atlas visualization family: explore.html (the ONE interactive Atlas) IS in the palette;
+               # torus/completeness are its generated shape views, reached from com.html, not separate
+               # palette entries. The six single-view statics (one per explore.html layout) were retired
+               # 2026-10-16 (issue #16) into explore.html's ?view= layouts — api._RETIRED 301s each to its view.
+               "completeness.html", "torus.html",
                # reader.html — the tortoise reader, reached from search "read it" buttons / ?find=, a
-               # contextual reader, not the nav. crossing.html — an Atlas single-view (geometry / the
-               # logarithm), linked from com.html ("geometry, the crossing") like its torus/spiral siblings.
-               "reader.html", "crossing.html",
+               # contextual reader, not the nav.
+               "reader.html",
                # books.html (the Library / reading room) + parable.html (the WALK door's parable) — reached
                # from the Console footer / the WALK flow / direct URL; crossrefs.html — a reference surface.
                "books.html", "parable.html", "crossrefs.html",

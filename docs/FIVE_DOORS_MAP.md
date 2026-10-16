@@ -47,12 +47,12 @@ This is the map, not the change: every page, agent tool and route assigned to ON
 | `explore.html` | **DOOR** | the Atlas — ONE map; the seven layouts become views inside it |
 | `reader.html` | **KEEP-AS-IS** | the Reading Room — the tortoise reader; reached from any search result, a contextual reader |
 | `tv.html` | **KEEP-AS-IS** | narrowhighway.tv — Find with a screen; its own domain, one guide, no second nav |
-| `bridges.html` | **FOLD** | a generated view of the Atlas → a layout inside explore.html |
-| `calculations.html` | **FOLD** | generated view → a layout inside explore.html |
-| `domains.html` | **FOLD** | generated view → a layout inside explore.html |
+| `bridges.html` | **FOLDED** (2026-10-16, issue #16) | retired into the Atlas — 301 to `/explore.html?view=bridges` |
+| `calculations.html` | **FOLDED** (2026-10-16, issue #16) | retired into the Atlas — 301 to `/explore.html?view=wheel` |
+| `domains.html` | **FOLDED** (2026-10-16, issue #16) | retired into the Atlas — 301 to `/explore.html?view=domains` |
 | `map.html` | **FOLD** | 'the map of everything' (an audit page) → the Atlas index view |
-| `one_body.html` | **FOLD** | generated view → a layout inside explore.html |
-| `spiral.html` | **FOLD** | generated view → a layout inside explore.html |
+| `one_body.html` | **FOLDED** (2026-10-16, issue #16) | retired into the Atlas — 301 to `/explore.html?view=onebody` |
+| `spiral.html` | **FOLDED** (2026-10-16, issue #16) | retired into the Atlas — 301 to `/explore.html?view=spiral` |
 | `theories.html` | **FOLD** | the Floor's catalogue → a layout inside explore.html |
 | `torus.html` | **FOLD** | generated view → a layout inside explore.html |
 | `atlas.html` | **RETIRE** | an unlisted duplicate of explore.html |
@@ -69,7 +69,7 @@ This is the map, not the change: every page, agent tool and route assigned to ON
 | `music.html` | **FOLD** | a hall under Walk |
 | `playbook.html` | **FOLD** | Matt's doctrine of obedience — the Walk's rule of the road; a view under Walk |
 | `provision.html` | **FOLD** | a hall under Walk (work and livelihood) |
-| `strategy.html` | **FOLD** | patterns, cases, counter-cases and the figures' words are what Walk hands you; keep the page as Walk's 'the patterns' view |
+| `strategy.html` | **FOLDED** (2026-10-16, issue #16) | patterns, cases, counter-cases and the figures' words are what Walk hands you; 'the patterns' is now the Atlas's strategy view — 301 to `/explore.html?view=strategy` |
 | `systems.html` | **FOLD** | 'systems handicap' is an instrument — a hall, beside golf/music, not a top-level page |
 
 ### KEEP

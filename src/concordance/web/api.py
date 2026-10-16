@@ -3685,6 +3685,16 @@ _RETIRED = {
     "/tv.html": "https://narrowhighway.tv/",
     "/voices.html": "/bible.html",
     "/walk.html": "/read.html",
+    # THE ONE VISUALIZATION SURFACE (2026-10-16, issue #16): six single-view static renderings were
+    # explore.html's own layouts drawn twice (tools/*_map.py + *_view.py, unreferenced by deploy/CI/tests;
+    # four of the pages linked from nothing). Each goes to ITS view — explore.html reads ?view= (its
+    # NHDeepLink), and _retire_to merges whatever the old link carried onto it.
+    "/calculations.html": "/explore.html?view=wheel",    # the fractal calc map IS the form wheel
+    "/one_body.html": "/explore.html?view=onebody",
+    "/spiral.html": "/explore.html?view=spiral",
+    "/domains.html": "/explore.html?view=domains",
+    "/bridges.html": "/explore.html?view=bridges",
+    "/strategy.html": "/explore.html?view=strategy",     # Walk's 'the patterns' view, kept inside the Atlas
 }
 
 

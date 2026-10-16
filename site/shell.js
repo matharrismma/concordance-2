@@ -64,11 +64,10 @@
       "/concordance.html": "check", "/checkit.html": "check", "/proof.html": "check", "/com.html": "check",
       "/connect.html": "check", "/gateway.html": "check", "/live.html": "check", "/completeness.html": "check",
       "/explore.html": "find", "/reader.html": "find", "/map.html": "find", "/theories.html": "find",
-      "/bridges.html": "find", "/calculations.html": "find", "/domains.html": "find", "/one_body.html": "find",
-      "/spiral.html": "find", "/torus.html": "find", "/tv.html": "find",
+      "/torus.html": "find", "/tv.html": "find",
       "/situations.html": "walk", "/coach.html": "walk", "/halls.html": "walk", "/golf.html": "walk",
       "/grappling.html": "walk", "/music.html": "walk", "/provision.html": "walk", "/systems.html": "walk",
-      "/strategy.html": "walk", "/playbook.html": "walk",
+      "/playbook.html": "walk",
       "/profile.html": "keep", "/fellowship.html": "keep", "/workshop.html": "keep", "/plow.html": "keep",
       "/bible.html": "word", "/characters.html": "word", "/harmony.html": "word", "/timeline.html": "word",
       "/prophecy.html": "word", "/read.html": "word", "/wisdom.html": "word"

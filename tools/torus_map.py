@@ -215,7 +215,7 @@ nothing peripheral. <b>Drag to turn it</b> (or let it drift). __NPTS__ calculati
 </div>
 <noscript><div class="ns">This view turns the Atlas in your browser and needs JavaScript. The same body is
 laid out flat in <a href="/explore.html" style="color:#c69a4a">the interactive Atlas</a> and
-<a href="/spiral.html" style="color:#c69a4a">the spiral</a>.</div></noscript>
+<a href="/explore.html?view=spiral" style="color:#c69a4a">the spiral</a>.</div></noscript>
 
 <div class="controls">
   <label><input type="checkbox" id="cForm" checked> form&nbsp;rings <span style="color:#7d745f">(bridges)</span></label>

@@ -173,7 +173,7 @@ pointing past itself to the Designer. Generator: [`tools/atlas_explore.py`](../t
   families** (recorded in `seed_bridges.py` `MASTER_FAMILY`, exhaustive by construction): **Continuous 23**
   (how things change), **Discrete 5** (combine exactly), **Measure 1** (take up space), **Inference 1**
   (weigh a belief). Colored by family across all views; grouped and named in the panel.
-- **408 calculations** across **39 leaf forms** (a fractal calc map — `calculations.html`), each placed by
+- **408 calculations** across **39 leaf forms** (a fractal calc map — the form wheel in `explore.html`), each placed by
   its canonical form, joined to the theory it rests on, and bridged to the same computation in other fields.
 - **217 theories** — the **Floor** (`theories.html`): every theory the sciences run on, joined by what it
   rests on / limits it / shares its form.
@@ -183,8 +183,9 @@ pointing past itself to the Designer. Generator: [`tools/atlas_explore.py`](../t
   domains); the **logarithm** is the actual widest-crossing form (**13** verified domains, function =
   multiplicative → additive), the very form that closed the Atlas's last homological void (the Prime Number
   Theorem, `π(x) ~ x/ln x`). Closes at the **Macedonian cross** (Acts 16:9, διαβαίνω, "to cross over").
-- **Related surfaces:** `torus.html` (the (domain × form) shape), `bridges.html`, `one_body.html`,
-  `spiral.html`, `domains.html`, `completeness.html`, `strategy.html`. All generated; all carry the spine.
+- **Related surfaces:** `torus.html` (the (domain × form) shape) and `completeness.html`. Both generated;
+  both carry the spine. The six single-view statics (bridges / one body / spiral / domains / calculations /
+  strategy) were retired 2026-10-16 (issue #16) into `explore.html?view=…` — one surface, seven views.
 
 Intrinsic shape (measured, not asserted): after merging dual forms and closing the primes↔log seam, the
 honest signature is a **ring** — nothing central, nothing peripheral, one connected body.
@@ -362,7 +363,7 @@ verifiers** the converters, and the **models are FUEL** — the manifold endures
   the real function, closing at the Macedonian cross.
 - **Phase 3 — the reach → witness → museum road;** **Phase 4 — "for you and your family"** human doors;
   **the reciprocal loop** so the journey circles from any face.
-- **Housekeeping:** stale `calculations.html` / `theories.html` refreshed to current seed data.
+- **Housekeeping:** stale `theories.html` (and the calc map, since retired into `explore.html`) refreshed to current seed data.
 
 **Open, tracked (not bugs to auto-fix):**
 - The two **degraded** frontiers: **Find/the Tortoise** (pull can mis-select; guarded) and **the
