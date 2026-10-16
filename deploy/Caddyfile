@@ -16,6 +16,11 @@ api.narrowhighway.com {
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
 	route {
+		# /mcp -> the DEDICATED MCP host (nh-mcp :8003), decoupled from the site engine (applied live 2026-10-16)
+		reverse_proxy /mcp* 127.0.0.1:8003 {
+			lb_try_duration 10s
+			lb_try_interval 250ms
+		}
 		reverse_proxy 127.0.0.1:8002 {
 			lb_try_duration 10s
 			lb_try_interval 250ms

@@ -11,11 +11,11 @@ the site. Same code, the same **read-only** corpus.
 - The box has the headroom: ~5.7 GB free; the second engine adds ~1.3 GB.
 - `tools/deploy.sh` restarts `nh-mcp` alongside `nh-engine`, staggered, so the two never drift in code.
 
-## The one remaining step — route `/mcp` to it (a production Caddy change)
+## The `/mcp` route — APPLIED to the live Caddy on 2026-10-16, tracked in `deploy/Caddyfile`
 
-Until this is applied, `api.narrowhighway.com/mcp` still goes to the site engine (`:8002`). To hand the
-public `/mcp` traffic to the dedicated process, add a `/mcp` route to the `api.narrowhighway.com` block in
-`/etc/caddy/Caddyfile`, **before** its `:8002` upstream:
+`api.narrowhighway.com/mcp` goes to the dedicated process; everything else on that host still goes to the site
+engine. The block, in the `api.narrowhighway.com` route **before** its `:8002` upstream (the same text as the live
+`/etc/caddy/Caddyfile`):
 
 ```caddy
 	route {
@@ -31,7 +31,7 @@ public `/mcp` traffic to the dedicated process, add a `/mcp` route to the `api.n
 	}
 ```
 
-Apply it safely (back up, validate, reload — never edit-and-pray):
+To re-apply on a rebuilt box (back up, validate, reload — never edit-and-pray):
 
 ```bash
 sudo cp /etc/caddy/Caddyfile /etc/caddy/Caddyfile.bak.$(date +%Y%m%dT%H%M%S)
