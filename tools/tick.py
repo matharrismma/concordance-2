@@ -4443,6 +4443,143 @@ def stick_photonics() -> int:
     return 0
 
 
+def stick_real_estate() -> int:
+    """REAL ESTATE - property finance, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
+    real_estate.RE_VERIFY: the amortized monthly payment (the annuity formula) on a 30-year and a 15-year loan, the
+    cap rate, the gross rent multiplier, loan-to-value, debt-service coverage, and gross rental yield. The annuity
+    formula is a theorem of the geometric series and is SEALED by instance; the 80 percent LTV line, the 1.25 DSCR
+    floor and any cap rate's market meaning are conventions, CITED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def re_(spec):
+        return _seal_through("real_estate", "RE_VERIFY", spec)
+
+    S = {
+        "mortgage_30": re_({"loan_principal": 300000, "annual_rate": 0.065, "loan_term_months": 360, "claimed_monthly_payment": 1896.20}),
+        "mortgage_15": re_({"loan_principal": 300000, "annual_rate": 0.065, "loan_term_months": 180, "claimed_monthly_payment": 2613.32}),
+        "cap_rate": re_({"net_operating_income": 24000, "property_value": 400000, "claimed_cap_rate": 0.06}),
+        "grm": re_({"property_price": 300000, "annual_gross_rent": 24000, "claimed_grm": 12.5}),
+        "ltv": re_({"loan_amount": 240000, "appraised_value": 300000, "claimed_ltv": 0.80}),
+        "dscr": re_({"net_operating_income": 24000, "annual_debt_service": 22755, "claimed_dscr": 1.055}),
+        "yield": re_({"annual_rent": 18000, "property_value": 400000, "claimed_rental_yield": 0.045}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "real-estate numbers")
+    sid = TS.create("Real estate - mortgage, cap rate, LTV and coverage, sealed",
+                    statement="Property finance is the annuity formula and five ratios: payment, NOI over value, "
+                              "price over rent, loan over value, NOI over debt service, rent over value.",
+                    field="real_estate",
+                    references=["The annuity (amortization) formula M = P r (1+r)^n / ((1+r)^n - 1) - a geometric "
+                                "series, public domain",
+                                "Appraisal Institute, The Appraisal of Real Estate, 15th ed. (2020) - income "
+                                "capitalization",
+                                "Fannie Mae Selling Guide B2-1.2: the 80 percent LTV line for mortgage insurance"])["id"]
+    RE = "sealed through real_estate.RE_VERIFY"
+    marks = [
+        ("instance", f"[a 30-year mortgage, SEALED] $300,000 at 6.5 percent over 360 months: M = P r (1+r)^n / "
+                     f"((1+r)^n - 1) with r = 0.065/12 gives $1,896.20 a month ({RE}). The annuity formula is the sum "
+                     "of a geometric series: the loan equals the present value of the payments.", S["mortgage_30"]),
+        ("instance", f"[the same loan over 15 years, SEALED] 180 months: $2,613.32 ({RE}) - 38 percent more a month, "
+                     "but $392,000 less interest over the life of the loan (6.5 percent: $382,633 interest at 30 "
+                     "years against $170,398 at 15). Time is the lender's price.", S["mortgage_15"]),
+        ("instance", f"[cap rate, SEALED] NOI $24,000 on a $400,000 property is 6.0 percent ({RE}): the unlevered yield "
+                     "the income capitalization approach prices on.", S["cap_rate"]),
+        ("instance", f"[gross rent multiplier, SEALED] $300,000 over $24,000 of annual rent is 12.5 ({RE}): years of "
+                     "gross rent in the price, before expenses.", S["grm"]),
+        ("instance", f"[loan-to-value, SEALED] $240,000 on $300,000 appraised is 80 percent ({RE}): the line at which "
+                     "conventional lenders stop requiring mortgage insurance.", S["ltv"]),
+        ("instance", f"[debt-service coverage, SEALED] NOI $24,000 over $22,755 of annual debt service is 1.055 ({RE}): "
+                     "the income covers the payments with 5.5 percent to spare - below the 1.25 most lenders want.",
+         S["dscr"]),
+        ("instance", f"[gross rental yield, SEALED] $18,000 of rent on a $400,000 property is 4.5 percent ({RE}).",
+         S["yield"]),
+        ("postulate", "[the conventions, CITED] 80 percent LTV (Fannie Mae), a 1.25 DSCR floor, a 'good' cap rate - "
+                      "these are lender and market conventions, chosen and changeable, cited never sealed. The annuity "
+                      "formula is a theorem; the ratios are definitions; what a property is WORTH is a forecast and is "
+                      "declined. Nothing here is investment advice.",
+         {"source": "Fannie Mae Selling Guide B2-1.2; Appraisal Institute (2020); src/concordance/verifiers/real_estate.py"}),
+        ("note", "[on the one map] Property finance is the economics floor's time value of money (card_floor_economics; "
+                 "the economics stick: present value, compound interest) with the compounding of e (the e stick: "
+                 "(1 + r/n)^n) applied to one asset class. The same annuity formula prices a bond, a pension and a car "
+                 "loan.",
+         {"source": "the one map; card_floor_economics; the economics stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py real_estate")
+    return 0
+
+
+def stick_sports_analytics() -> int:
+    """SPORTS ANALYTICS - the published models, sealed (issue #11, 2026-10-16: reach, down the domain list).
+    Through sports_analytics.SPORT_VERIFY: Bill James's Pythagorean expectation (750 runs for, 600 against, and the
+    even case), the Elo expected score at a 100-point gap, at equal ratings, and the 400-point gap that defines the
+    scale as ten-to-one, the Elo update for a win and for a loss at K = 32, and games behind (a five-game gap and a
+    tie). The Pythagorean exponent and Elo's logistic with its 400 are fitted conventions, CITED; the arithmetic is
+    SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def sp(spec):
+        return _seal_through("sports_analytics", "SPORT_VERIFY", spec)
+
+    S = {
+        "pythagorean": sp({"runs_scored": 750, "runs_allowed": 600, "pythag_exponent": 2.0, "claimed_winning_pct": 0.610}),
+        "pythagorean_even": sp({"runs_scored": 600, "runs_allowed": 600, "pythag_exponent": 2.0, "claimed_winning_pct": 0.500}),
+        "elo_100": sp({"elo_a": 1600, "elo_b": 1500, "claimed_expected_score_a": 0.640}),
+        "elo_equal": sp({"elo_a": 1500, "elo_b": 1500, "claimed_expected_score_a": 0.500}),
+        "elo_400": sp({"elo_a": 1500, "elo_b": 1900, "claimed_expected_score_a": 0.0909}),
+        "elo_win": sp({"elo_a_pre": 1600, "elo_b_pre": 1500, "actual_score_a": 1.0, "elo_K": 32, "claimed_elo_a_post": 1611.52}),
+        "elo_loss": sp({"elo_a_pre": 1600, "elo_b_pre": 1500, "actual_score_a": 0.0, "elo_K": 32, "claimed_elo_a_post": 1579.52}),
+        "games_behind": sp({"leader_wins": 50, "leader_losses": 30, "team_wins": 45, "team_losses": 35, "claimed_games_behind": 5.0}),
+        "games_behind_tie": sp({"leader_wins": 50, "leader_losses": 30, "team_wins": 50, "team_losses": 30, "claimed_games_behind": 0.0}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "sports-analytics numbers")
+    sid = TS.create("Sports analytics - Pythagorean expectation, Elo, games behind, sealed",
+                    statement="A season's record is predicted from runs by a power law, a match by a logistic of "
+                              "the rating gap, and a standing by half the sum of two differences.",
+                    field="sports_analytics",
+                    references=["B. James, Baseball Abstract (1980s) - the Pythagorean expectation",
+                                "A. E. Elo, The Rating of Chessplayers, Past and Present (1978)",
+                                "FIDE Rating Regulations (2024), article 8 - the expected-score table and K factors"])["id"]
+    SP = "sealed through sports_analytics.SPORT_VERIFY"
+    marks = [
+        ("instance", f"[Pythagorean expectation, SEALED] 750 runs scored, 600 allowed: W = 750^2 / (750^2 + 600^2) = "
+                     f"0.610 ({SP}) - about 99 wins in 162. James's rule: a team's record follows from its run "
+                     "differential more faithfully than from its record so far.", S["pythagorean"]),
+        ("instance", f"[the even case, SEALED] Equal runs for and against give exactly 0.500 ({SP}), whatever the "
+                     "exponent - the formula is symmetric.", S["pythagorean_even"]),
+        ("instance", f"[a 100-point Elo gap, SEALED] 1600 against 1500: E = 1 / (1 + 10^(-100/400)) = 0.640 ({SP}). "
+                     "The stronger player is expected to score 64 percent - a win in nearly two games of three.",
+         S["elo_100"]),
+        ("instance", f"[equal ratings, SEALED] 1500 against 1500: 0.500 ({SP}).", S["elo_equal"]),
+        ("instance", f"[the 400-point gap, SEALED] 1500 against 1900: E = 1 / (1 + 10^1) = 0.0909 ({SP}). Four hundred "
+                     "points is DEFINED as ten-to-one odds - the 400 in the formula is the scale's unit, not a finding.",
+         S["elo_400"]),
+        ("instance", f"[a win, SEALED] 1600 beats 1500 at K = 32: R' = 1600 + 32 (1 - 0.640) = 1611.52 ({SP}). The "
+                     "favourite gains little for doing what was expected.", S["elo_win"]),
+        ("instance", f"[a loss, SEALED] The same player loses: R' = 1600 + 32 (0 - 0.640) = 1579.52 ({SP}) - and loses "
+                     "20.48 points, the surprise priced by the same expectation. Win and loss are not symmetric; "
+                     "expectation is the pivot.", S["elo_loss"]),
+        ("instance", f"[games behind, SEALED] A leader at 50-30 and a team at 45-35: GB = ((50 - 45) + (35 - 30)) / 2 = "
+                     f"5.0 ({SP}): half the sum of the two differences, so a half-game is possible when the teams have "
+                     "played different numbers of games.", S["games_behind"]),
+        ("instance", f"[a tie, SEALED] Identical records are 0.0 games behind ({SP}).", S["games_behind_tie"]),
+        ("postulate", "[the models, CITED] The exponent 2 is James's original; the best fit for baseball is nearer "
+                      "1.83 (and varies by sport) - a FITTED model, not a law. Elo's logistic with 400 and the K factor "
+                      "(FIDE uses 10, 20 and 40) are chosen conventions of a rating system. Cited as postulates: they "
+                      "work, so a prediction from them is inferred, never kept as fact; the standing is the fact.",
+         {"source": "James, Baseball Abstract; Elo (1978); FIDE Rating Regulations (2024) art. 8"}),
+        ("note", "[on the one map] The three models are statistics (card_floor_statistics: a power-law share, a "
+                 "logistic expectation, an update that moves by the surprise) applied to the record of games. The Elo "
+                 "scale was built for chess (the chess stick holds the board; this stick holds the rating) and the "
+                 "probability stick holds the odds the 400 encodes.",
+         {"source": "the one map; card_floor_statistics; the chess and probability sticks"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py sports_analytics")
+    return 0
+
+
 def game_theory() -> int:
     """GAME THEORY - equilibrium, dilemmas, and strategy (Matt, 2026-10-10, down the domain list). The mathematics of
     strategic choice: a NASH EQUILIBRIUM is a fixed point where no one gains by deviating alone; the PRISONER'S
@@ -12341,6 +12478,10 @@ def main() -> int:
         return stick_photography()
     if a[0] in ("photonics", "waveguide", "fiber_optics", "laser", "v_number"):
         return stick_photonics()
+    if a[0] in ("real_estate", "mortgage", "cap_rate", "amortization", "ltv"):
+        return stick_real_estate()
+    if a[0] in ("sports_analytics", "sports", "elo", "pythagorean_expectation", "games_behind"):
+        return stick_sports_analytics()
     if a[0] in ("tesseract", "hypercube", "four_cube", "eight_cell"):
         return tesseract()
     if a[0] in ("statistics", "stats", "inference", "the_normal_distribution"):
