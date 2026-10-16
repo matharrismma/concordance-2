@@ -4052,7 +4052,7 @@ def stick_manufacturing() -> int:
     if not all(S.values()):
         return 1
     print("sealed", len(S), "manufacturing numbers")
-    sid = TS.create("Manufacturing - sigma levels, control limits, capability and stack-up",
+    sid = TS.create("Manufacturing - sigma, control limits, capability, stack-up",
                     statement="Quality is the normal distribution applied to a specification: defects per million "
                               "map to sigma, limits sit at three sigma, capability is the spec width over six sigma, "
                               "and independent tolerances add in quadrature.",
@@ -4299,7 +4299,7 @@ def stick_photography() -> int:
     if not all(S.values()):
         return 1
     print("sealed", len(S), "photography numbers")
-    sid = TS.create("Photography - exposure value, reciprocity, angle of view, hyperfocal, sealed",
+    sid = TS.create("Photography - exposure, reciprocity, angle of view, hyperfocal",
                     statement="A camera's settings are logarithms and tangents: EV counts stops in base 2, the angle "
                               "of view is 2 atan(d/2f), and the hyperfocal distance is f^2/(N c) + f.",
                     field="photography",
@@ -4535,7 +4535,7 @@ def stick_sports_analytics() -> int:
     if not all(S.values()):
         return 1
     print("sealed", len(S), "sports-analytics numbers")
-    sid = TS.create("Sports analytics - Pythagorean expectation, Elo, games behind, sealed",
+    sid = TS.create("Sports analytics - Pythagorean expectation, Elo, games behind",
                     statement="A season's record is predicted from runs by a power law, a match by a logistic of "
                               "the rating gap, and a standing by half the sum of two differences.",
                     field="sports_analytics",
