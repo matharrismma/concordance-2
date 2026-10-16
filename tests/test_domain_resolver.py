@@ -103,6 +103,48 @@ def test_curated_synonyms_are_stored_as_queries_tokenize():
         assert dom in _menu(q), (q, _menu(q))
 
 
+def test_the_twenty_nine_domains_with_no_everyday_vocabulary_now_route():
+    """Reach (issue #11, 2026-10-16): 29 registered domains had no _SYNONYMS entry — a person's plain words could
+    not reach their verifier (13 were unreachable on every axis). Each now has everyday vocabulary, written as
+    queries tokenize and avoiding words other domains own. Pin: a representative phrasing DECIDES each domain,
+    and three controls still decide as before (no cross-talk regression)."""
+    checks = [
+        ("what is the determinant of a 3x3 identity matrix", "linear_algebra"),
+        ("is methane tetrahedral with 109.5 degree bond angles", "molecular_geometry"),
+        ("is 978-0-306-40615-7 a valid isbn", "document_validation"),
+        ("carbon dating a sample with 25 percent carbon left", "archaeology"),
+        ("the free spectral range of a ring resonator", "photonics"),
+        ("the shannon entropy of a fair coin is 1 bit", "information_theory"),
+        ("the youngs modulus of steel is 200 gpa", "materials_science"),
+        ("which element has atomic number 26", "periodic_table"),
+        ("a straw man argument misrepresents the position", "rhetoric"),
+        ("diagonalize the matrix and solve in the eigenbasis", "spectral"),
+        ("the elo rating expected score for 1600 vs 1400", "sports_analytics"),
+        ("a knight on e4 attacks 8 squares in chess", "chess"),
+        ("ballpark estimate within 10 percent", "approximation"),
+        ("the floor area ratio of the building", "architecture"),
+        ("search precision at 10 for the query", "retrieval"),
+        ("what is the nash equilibrium of the prisoners dilemma", "game_theory"),
+        ("how strong is a 12 character password entropy", "cybersecurity"),
+        ("the fermi energy of copper is 7 ev", "condensed_matter"),
+        ("is utilitarianism a consequentialist ethical framework", "philosophy"),
+        ("grimms law shifts p to f in proto germanic", "sound_law"),
+        ("the critical path of this project schedule", "operations_research"),
+        ("what is the cpk of a process with these control limits", "manufacturing"),
+        ("the action potential resting membrane potential of a neuron", "neuroscience"),
+        ("the rational roots of x^3 - 6x^2 + 11x - 6", "polynomial"),
+        ("how many solar panels for 10 kwh per day off grid", "energy"),
+        ("what is the cell potential of a zinc copper galvanic cell", "electrochemistry"),
+        # controls — unchanged routing
+        ("is 17 prime", "number_theory"),
+        ("what are the odds of rolling two sixes", "probability"),
+        ("the molar mass of water is 18", "chemistry"),
+    ]
+    for q, dom in checks:
+        r = resolve_domain(q, k=5)
+        assert r["decision"] == dom, (q, r["decision"], [c["domain"] for c in r["candidates"]])
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]:
         fn()
