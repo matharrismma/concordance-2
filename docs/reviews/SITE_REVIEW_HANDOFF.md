@@ -102,7 +102,7 @@ curl -s -b "$J" -o /dev/null -w '%{http_code}\n' https://narrowhighway.com/canon
 
 ## 7. The ChatGPT review — findings to validate + extend
 
-*(Full document: `C:\Users\hdven\Downloads\Phone Link\Narrow_Highway_2_0_Full_Review_and_Critique.docx` — extract with python/zipfile if you need it verbatim. Distilled below.)*
+*(Full document: `%USERPROFILE%\Downloads\Phone Link\Narrow_Highway_2_0_Full_Review_and_Critique.docx` — extract with python/zipfile if you need it verbatim. Distilled below.)*
 
 **Overall:** positive — "the first version that feels like it has a real center… a trust architecture." Scores (out of 10): Vision 9.0, Homepage 7.5, Info-architecture 6.5, Trust 7.0, Onboarding 6.0, Technical narrative 8.0, Christian fit 8.0, Mainstream fit 6.5, Launch readiness 6.0.
 

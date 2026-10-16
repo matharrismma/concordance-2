@@ -4,7 +4,7 @@
 Matt: "Seeds of knowledge, identified, categorized and mapped to create a floor of reality, and
 by seeing the design we will fear God. This is the first step to wisdom." (Proverbs 9:10)
 
-Most of the science is already seeded (the Universal Gradient Manifold, the autonomic spine /
+Most of the science is already seeded (an energy-systems architecture, the autonomic spine /
 nested-control framework, the RAS reception bridge). What was missing were the two framing seeds
 that make the design legible — the ones a person needs in order to SEE it:
 

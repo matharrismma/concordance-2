@@ -134,23 +134,23 @@ SYSTEMS = [
      {"surface": "witness"}),
     ("gradient_manifold", "The gradient manifold — one form across the planes",
      "This form is already kept here as doctrine (see 'the reservoir and the manifold', from Matt Harris's "
-     "Universal Gradient Manifold): the enduring value in an energy system is the RESERVOIR that stores a "
+     "energy-systems architecture): the enduring value in an energy system is the RESERVOIR that stores a "
      "gradient and the MANIFOLD that routes it, with ATP as biology's COMMON INTERFACE — one unit that "
      "decouples every source from every use. Collective intelligence is the BIOLOGICAL instance of that "
      "same manifold: a superorganism runs on a shared currency (ATP within a body; pheromone and "
      "trophallaxis across a colony) routed through a common medium.",
-     "THE MANIFOLD, ON THREE PLANES. Energy: the UGM — fuels are interchangeable, the manifold endures. "
+     "THE MANIFOLD, ON THREE PLANES. Energy: the energy architecture — fuels are interchangeable, the manifold endures. "
      "Biology: the superorganism — ATP / pheromone is the common interface, the colony the routed body. "
      "Software: OUR engine — the CARD is the common interface (every source, even a model's output through "
      "the airlock, transduced to one unit), the KEEPING is the reservoir, the KERNEL / gate is the "
      "manifold, the faces and verifiers are the converters, and recall / shards / stigmergy are the "
      "honeycomb (the charge-discharge RATE, not the store). The models are FUEL; the manifold is the "
      "enduring platform — 'a model of reality, not an LLM.' One form; three planes; the concordance of reality.",
-     ["gradient manifold", "ugm", "atp", "common interface", "reservoir", "manifold",
+     ["gradient manifold", "atp", "common interface", "reservoir", "manifold",
       "energy operating system", "source-agnostic", "card as currency", "concordance of reality"],
      {"extra_connections": [{"to_card_id": "card_doctrine_reservoir_manifold", "relationship": "relates_to",
-                             "evidence": "the collective-intelligence reading of the Universal Gradient "
-                                         "Manifold doctrine — the same routing form on the biological plane"}]}),
+                             "evidence": "the collective-intelligence reading of the energy-architecture "
+                                         "doctrine — the same routing form on the biological plane"}]}),
 ]
 
 

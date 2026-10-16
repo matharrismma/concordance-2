@@ -19,10 +19,15 @@ and author (listed below, with the reason); the rest are HELD and named — they
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
-_LH_DATA = Path(r"C:\Users\hdven\OneDrive\Documents\Claude\Projects\Lighthouse\data")
+# The source data lives OUTSIDE this repo (a local import, gitignored like the keeping). Point to it
+# with the CONCORDANCE_IMPORT_DIR env var, or pass explicit SRC/OUT paths as argv; no personal path
+# is baked into this public tool.
+_IMPORT = Path(os.environ.get("CONCORDANCE_IMPORT_DIR", "").strip() or "./_import")
+_LH_DATA = _IMPORT / "data"
 _DEFAULT_SRC = _LH_DATA / "bible_en" / "verses.jsonl"
 _OUT_DIR = Path(__file__).resolve().parent.parent / "data"
 

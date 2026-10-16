@@ -1098,7 +1098,7 @@ is a backup now.
   `serve_stdio` now reconfigures stdin/stdout to UTF-8 (pinned). Stopped non-elevated: the engine watchdog, the
   watchdog shell, the YouTube streamer. STILL RUNNING, elevated (Access is denied from this session; three UAC
   attempts came back "canceled" instantly): the engine, its launcher shell, the three task registrations, the
-  Cloudflared service. `C:\Users\hdven\OneDrive\Desktop\retire_lighthouse_desktop.ps1` (+ the double-click `.cmd`)
+  Cloudflared service. `%USERPROFILE%\OneDrive\Desktop\retire_lighthouse_desktop.ps1` (+ the double-click `.cmd`)
   finishes it; it leaves the YouTube task alone (move 3 is Matt's) and touches no backup task.
 - **Move 2 (the Bibles).** 2.0 was English-only (John 3:16 lang=es returned the WEB). `tools/migrate_bible.py --all`
   under the STRICT PD gate: 16 languages crossed on established grounds (ar Smith-Van Dyck 1865, de Luther 1912, es

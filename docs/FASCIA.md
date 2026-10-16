@@ -42,18 +42,19 @@ things with an analogy pencilled between them. Under the fascia view it is **one
 through four domain-lenses**. The variation is the refraction; the thing is invariant. That is what
 an isomorphism *is*: the same object appearing in different categories.
 
-**The primary worked example is Matt's own bench.** Three design bibles — `Project Prism` (a
-precision watch), the `Programmable Fabric PCB`, and this engine — are not three projects. They are
-one architecture uncovered three times:
+**The primary worked example is Matt's own bench.** Three private design bibles — a precision
+instrument, a reconfigurable hardware fabric, and this engine — are not three projects. They are
+one architecture uncovered three times (the private specifics are withheld; only the shared shape
+is shown):
 
-| structural primitive | Prism watch | Programmable Fabric PCB | Concordance engine |
+| structural primitive | precision instrument | reconfigurable fabric | Concordance engine |
 |---|---|---|---|
-| invariant core that locates & protects | permanent chassis + master datums | static 6-layer core | sealed verifier moat |
-| configurable layer on top | display cartridges | fabric banks | connective / candidate layer |
-| advance only on a measured gate | Gate 0A/0B closure tables | Rev A criteria + DRC | four gates |
-| locality / separation is a hard rule | L7 separated functions | placement-locality CAM rule | five-planes adjacency |
-| survive the company / no dependency | L12 published specs | $5k micro-fab anywhere | sovereign, no account |
-| fallback ladder | reduce-index → hybrid → … | 0.5oz → 1oz → parallel | three-state verdicts |
+| invariant core that locates & protects | a permanent chassis + master reference points | a fixed structural core | sealed verifier moat |
+| configurable layer on top | interchangeable modules | reconfigurable banks | connective / candidate layer |
+| advance only on a measured gate | staged feasibility-closure gates | staged design-rule criteria | four gates |
+| locality / separation is a hard rule | separated functional zones | a placement-locality rule | five-planes adjacency |
+| survive the company / no dependency | published, self-sufficient specs | fabricate-anywhere, low cost | sovereign, no account |
+| fallback ladder | a graceful reduction ladder | a capacity fallback ladder | three-state verdicts |
 
 ## 4. The measure — `fabric_routability.py`, lifted from copper to form
 

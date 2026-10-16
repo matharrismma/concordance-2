@@ -5,26 +5,28 @@ Matt, 2026-07-30, on six documents at once: *"They don't have to co-exist right 
 all of the concepts used that are beneficial."*
 
 So this does not adopt any document wholesale — no commercial frame, no capital plan, no hardware
-programme enters the system as policy. It harvests the CONCEPTS, attributed, and puts them where
-they can be found: in the keeping, searchable, in the graph, reachable by an agent.
+programme enters the system as policy. It harvests the CONCEPTS, attributed only by general
+category, and puts them where they can be found: in the keeping, searchable, in the graph,
+reachable by an agent.
 
-WHAT THE SIX DOCUMENTS SHARE, which is the actual finding. Read together — a theology companion, a
-company vision, a community capital plan, a watch design bible, an energy architecture, and a
-humanoid robot planning bible — they describe ONE pattern in six materials:
+WHAT THE DOCUMENTS SHARE, which is the actual finding. Read together — across theology,
+organization, and engineering — they describe ONE pattern in several materials:
 
     a request is not an authority · authority is bounded and separated from execution ·
     an independent witness observes the result · the record is sealed OUTSIDE the requester ·
     and the whole thing degrades in a stated order rather than collapsing
 
-The robot says it most plainly ("The Main may request… the record is sealed outside the requesting
-process"); The Way says it as governance (the household owns, the community governs, the Levites
-administer, and the founder's authority SUNSETS); the Floor says it as world physics (RED · FLOOR ·
-BROTHERS · GOD). This is [[feedback_systems_of_the_world_recurring_design_2026-07-25]] — one design
+A controlled-machine architecture says it most plainly (a request layer may propose, but the record
+is sealed outside the requesting process); a governance plan says it as organization (the local unit
+owns, the community governs, administration is delegated, and founder authority SUNSETS); the
+theology companion says it as world physics (RED · FLOOR · BROTHERS · GOD). This is one design
 over many planes — and it is worth carding precisely because the same shape keeps proving itself.
 
-CONDUIT, NOT AUTHOR. Every card below quotes or closely paraphrases Matt's own text and names the
-document it came from. `generated: false` — these are his words, gathered
-([[feedback_gather_dont_author_wisdom_aligns_2026-07-11]]), not mine invented.
+PRIVACY. The source documents are private IP. This public tool genericizes every identifier: the
+specific titles, version numbers, internal specifications, and any verbatim wording are kept OUT —
+only the general principle and its category survive here. `generated: false` — the principle is
+gathered from Matt's own work ([[feedback_gather_dont_author_wisdom_aligns_2026-07-11]]), not mine
+invented.
 
     PYTHONPATH=src python tools/card_doctrine.py            # write data/doctrine_cards.jsonl
     PYTHONPATH=src python tools/card_doctrine.py --dry-run  # show what would be written
@@ -41,32 +43,31 @@ sys.path.insert(0, str(ROOT / "src"))
 OUT = ROOT / "data" / "doctrine_cards.jsonl"
 SHELF = "doctrine"
 
-# Each source document, named once so every card can carry its provenance.
+# Each source document, named ONLY by its general category so a card can carry provenance without
+# disclosing private IP. The specific titles, versions, and any verbatim text are deliberately kept
+# out of this public repo (genericized 2026-10-16).
 SRC = {
-    "floor": ("The Floor of Discovery — Biblical Foundations of Concordance",
-              "Matt Harris, companion to Root Access: Master Planning Bible"),
-    "vision": ("Concordance — Company Vision & Offering at Scale", "Matt Harris"),
-    "way": ("The Way — Distributed and Planned Community Technical and Capital Plan v0.2",
-            "Matt Harris, working draft July 2026"),
-    "prism": ("Project Prism — The Architecture of Time, Design Bible v2.3", "Matt Harris"),
-    "ugm": ("Universal Gradient Manifold — A Heat-Source-Agnostic Energy Operating System",
-            "Matt Harris"),
-    "robot": ("Humanoid Robot — Integrated Architecture and Development Planning Bible v0.2",
-              "Matt Harris"),
+    "floor":  ("a biblical-foundations companion", "Matt Harris"),
+    "vision": ("a company vision document", "Matt Harris"),
+    "way":    ("a community governance and capital plan", "Matt Harris"),
+    "instrument": ("a precision-instrument design bible", "Matt Harris"),
+    "energy":     ("an energy-systems architecture", "Matt Harris"),
+    "robot":  ("a robotics control architecture", "Matt Harris"),
 }
 
 # (key, title, body, source key, what it already governs in the live system)
 CONCEPTS = [
     ("authority_chain",
      "A request is not an authority — the four-layer chain",
-     "\"The Main may request. The Steward may admit a bounded capability. The Motion Executive may "
-     "generate only approved trajectories. The Reflex layer continuously limits pressure, flow, "
-     "current, force, speed, balance, and joint state. Independent sensors witness the result, and "
-     "the record is sealed outside the requesting process.\"\n\n"
-     "Stated for a robot, this is the general law the other documents restate in their own "
-     "materials: intelligence may PROPOSE; a separate, independently governed layer determines what "
-     "may actually happen; and the record of what happened is kept somewhere the requester cannot "
-     "reach. The value is in the separation, not in any one layer's cleverness.",
+     "A request layer may PROPOSE an action; a separately governed layer admits only a bounded "
+     "capability; an execution layer may carry out only pre-approved motions; and a reflex layer "
+     "continuously limits the physical envelope — pressure, flow, current, force, speed, balance, "
+     "and joint state. Independent sensors witness the result, and the record is sealed outside the "
+     "requesting process.\n\n"
+     "Stated for a controlled machine, this is the general law the other documents restate in their "
+     "own materials: intelligence may PROPOSE; a separate, independently governed layer determines "
+     "what may actually happen; and the record of what happened is kept somewhere the requester "
+     "cannot reach. The value is in the separation, not in any one layer's cleverness.",
      "robot",
      "Already load-bearing here: `shelves.curate` refuses a typed name as authority and keeps the "
      "check in the module so neither the HTTP nor the MCP door can bypass it; `consent.guard()` "
@@ -77,8 +78,8 @@ CONCEPTS = [
      "The four gates — RED · FLOOR · BROTHERS · GOD",
      "RED — submission to the words spoken by Jesus as the ultimate attestation and computational "
      "standard; the first and hardest gate, and everything downstream activates only after it is "
-     "satisfied.\nFLOOR — the unified Bible and physical reality as ONE integrated floor: "
-     "\"Special Revelation and General Revelation are not two domains. They are one floor.\"\n"
+     "satisfied.\nFLOOR — the unified Bible and physical reality as ONE integrated floor: Special "
+     "Revelation and General Revelation are not two domains — they are one floor.\n"
      "BROTHERS — the witness principle (Deuteronomy 19:15, Matthew 18:16): nodes cannot "
      "self-validate; two or three witnesses establish a matter.\nGOD — final submission to the "
      "Architect; the moment every claim is weighed against the true floor.\n\n"
@@ -92,13 +93,13 @@ CONCEPTS = [
 
     ("reservoir_manifold",
      "The reservoir and the manifold — value is in the routing layer, not the engine",
-     "\"The most valuable asset in an energy system is not the fuel or the engine. It is the "
-     "reservoir that stores a gradient and the manifold that routes that gradient to useful work.\"\n\n"
+     "The most valuable asset in an energy system is not the fuel or the engine; it is the "
+     "reservoir that stores a gradient and the manifold that routes that gradient to useful work.\n\n"
      "Source → Gradient → Reservoir → Manifold → Converter → Work. Biology standardizes energy "
      "through ATP, and the key insight is not the molecule but the COMMON INTERFACE. The manifold "
      "decouples sources from loads and allows many inputs and many outputs; it is the enduring "
      "platform while fuels, engines, and storage technologies evolve.",
-     "ugm",
+     "energy",
      "The same shape as the keeping: sources → cards (the reservoir) → search and the graph (the "
      "manifold) → verifiers (the converter) → an answer a person can use. It is also why a card "
      "stays bare while presentation is derived on the way out — the record is the reservoir, and "
@@ -106,11 +107,11 @@ CONCEPTS = [
 
     ("gate_closure",
      "A gate closes against a number, an owner, and a fallback",
-     "\"Symmetry of rigor… every gate closes against a number, an owner and a fallback.\" Gate Zero "
-     "is feasibility BEFORE form: the architecture is not permitted to proceed on enthusiasm, only "
-     "on a first-order budget that closes. Numbers that are provisional are marked provisional — "
-     "\"design targets, not measured performance\".",
-     "prism",
+     "Symmetry of rigor: every gate closes against a number, an owner, and a fallback. Gate Zero "
+     "is feasibility BEFORE form — the architecture is not permitted to proceed on enthusiasm, only "
+     "on a first-order budget that closes. Numbers that are provisional are marked provisional "
+     "(design targets, not measured performance).",
+     "instrument",
      "Stronger than what this project's own gate does. `tools/check.py` closes against a number "
      "(coverage floors, 0 false positives, a real exit code) but names no OWNER and no FALLBACK for "
      "a failing gate. The punch list has completion tests; it does not say who answers for each or "
@@ -118,12 +119,11 @@ CONCEPTS = [
 
     ("authority_sunset",
      "Founder authority sunsets — the centre becomes a service, not a ruler",
-     "\"The founder has no permanent operational authority over local villages; startup authority "
-     "sunsets into the ordinary governance system.\" Launch steward authority ends automatically at "
-     "36 months or when three communities are operating, whichever comes first. Capital earns "
-     "economic rights, NEVER additional political votes. One household cannot purchase more "
-     "political power by contributing more capital.\n\n"
-     "\"The permanent centre is therefore a service architecture\": liquidity, administration, and "
+     "Founder and startup authority has no permanent operational hold over local units; it sunsets "
+     "automatically into the ordinary governance system once the venture is established. Capital "
+     "earns economic rights, NEVER additional political votes — one participant cannot purchase "
+     "more political power by contributing more capital.\n\n"
+     "The permanent centre is therefore a service architecture: liquidity, administration, and "
      "the common rule are supplied centrally; government and leaders are local.",
      "way",
      "Bears directly on the Commons. The steward token is today a single permanent secret with no "
@@ -133,10 +133,10 @@ CONCEPTS = [
 
     ("exit_is_funded",
      "A funded right of exit, or it is not voluntary",
-     "\"Membership is voluntary, and every household has a practical, FUNDED right of exit.\" No "
-     "single entity controls a member's housing, employment, money, church standing, healthcare, "
-     "and exit rights. Enrollment does not transfer title or create a lien unless separately and "
-     "expressly granted. The Seed Trust is \"a standing buyer, not a governing owner\".\n\n"
+     "Membership is voluntary, and every participant has a practical, FUNDED right of exit. No "
+     "single entity controls a participant's housing, employment, money, standing, healthcare, and "
+     "exit rights at once. Enrollment does not transfer title or create a lien unless separately "
+     "and expressly granted; the central fund is a standing buyer, not a governing owner.\n\n"
      "Membership levels are modular and separately signed, so participation is never confused with "
      "encumbrance.",
      "way",
@@ -147,10 +147,10 @@ CONCEPTS = [
 
     ("degradation_order",
      "A stated degradation order — what is shed first, decided before the pressure",
-     "The energy architecture names an explicit degradation order rather than letting a system "
-     "discover its priorities under load, and the operating states are steward-enforced with a "
-     "declared capability window. A system that has not decided what it sheds first will shed "
-     "whatever fails first, which is rarely what it would have chosen.",
+     "The architecture names an explicit degradation order rather than letting a system discover "
+     "its priorities under load, and the operating states are steward-enforced with a declared "
+     "capability window. A system that has not decided what it sheds first will shed whatever fails "
+     "first, which is rarely what it would have chosen.",
      "robot",
      "This project has the mechanism and not the statement: shards freeze and unfreeze, and the "
      "`core` shard can never be frozen — that IS a degradation order, but it is nowhere written as "
@@ -159,11 +159,11 @@ CONCEPTS = [
 
     ("agents_are_the_users",
      "The dominant users of intelligence will not be humans",
-     "\"By 2028–2030, the dominant users of intelligence will not be humans — they will be "
-     "autonomous agents and multi-agent systems generating and acting on billions of claims per "
-     "day.\" The failure modes named: hallucination and drift at machine speed; O(n²) coordination "
-     "collapsing under swarm volume; no external grounding; and an audit and liability crisis with "
-     "no scalable way to verify AI-mediated decisions.",
+     "By 2028–2030, the dominant users of intelligence will not be humans — they will be autonomous "
+     "agents and multi-agent systems generating and acting on billions of claims per day. The "
+     "failure modes named: hallucination and drift at machine speed; O(n²) coordination collapsing "
+     "under swarm volume; no external grounding; and an audit and liability crisis with no scalable "
+     "way to verify AI-mediated decisions.",
      "vision",
      "MEASURED, not predicted: on 2026-07-30 the access logs showed ClaudeBot at 44,439 requests — "
      "35% of ALL traffic — with GPTBot behind it, the card permalink the single most-used thing "
@@ -176,13 +176,13 @@ def build() -> list:
     cards = []
     spine = {
         "id": "card_spine_doctrine", "kind": "note",
-        "title": "The recurring architecture — one pattern, six materials",
-        "body": ("Concepts gathered from Matt Harris's planning documents — a theology companion, a "
-                 "company vision, a community capital plan, a watch design bible, an energy "
-                 "architecture, and a humanoid robot planning bible. Read together they describe "
-                 "ONE pattern in six materials: a request is not an authority; authority is bounded "
-                 "and separated from execution; an independent witness observes the result; the "
-                 "record is sealed outside the requester; and the whole degrades in a stated order.\n\n"
+        "title": "The recurring architecture — one pattern, several materials",
+        "body": ("Concepts gathered from Matt Harris's planning documents — across theology, "
+                 "organization, and engineering (the specific titles are private IP and kept out of "
+                 "the public record). Read together they describe ONE pattern in several materials: "
+                 "a request is not an authority; authority is bounded and separated from execution; "
+                 "an independent witness observes the result; the record is sealed outside the "
+                 "requester; and the whole degrades in a stated order.\n\n"
                  "These are carried as CONCEPTS, not adopted as policy. Where one already governs "
                  "something live, the card says so and names it."),
         "source": {"label": "Matt Harris — planning documents, 2026",
@@ -195,7 +195,7 @@ def build() -> list:
         # worth having: an idea nobody can walk to from the Floor is not part of the map.
         "connections": [{"to_card_id": "card_k_spine_the_word", "relationship": "part_of",
                          "evidence": "the pattern was unpacked from Scripture, not invented — "
-                                     "the Floor of Discovery names the Word as its source"}],
+                                     "the biblical-foundations companion names the Word as its source"}],
         "author": "matt", "created_at": 0.0, "updated_at": 0.0,
         "visibility": "public", "lifecycle_stage": "public", "volatility": "durable",
         "surface": "secular", "generated": False,

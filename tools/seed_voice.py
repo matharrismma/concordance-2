@@ -26,7 +26,7 @@ from typing import Dict, List
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = Path(os.environ.get("CONCORDANCE_DATA_DIR", "").strip() or str(ROOT / "data"))
-DEFAULT_DIR = r"C:\Users\hdven\iCloudDrive\Christian writing"
+DEFAULT_DIR = os.environ.get("CONCORDANCE_WRITING_DIR", "").strip()  # your writing folder; no personal path baked in
 OUT = DATA / "voice_lines.jsonl"
 
 _DATE = re.compile(r"^Date:\s*\d", re.I)
@@ -169,12 +169,12 @@ def _from_book(path: Path) -> List[Dict]:
     return out
 
 
-# NOVELS ONLY — AN ALLOWLIST, safe by default. "Harris Projects MASTER" MIXES his fiction with
-# CONFIDENTIAL business/engine/planning docs (Project Prism, the Antidote Planning Bible, the NWGA JDA
-# assessment, the Universal Gradient Manifold, the Pressure Fighting System, series maps…). A stoplist is
-# whack-a-mole and one miss leaks confidential material into a public voice, so NOTHING enters unless its
-# title is a KNOWN NOVEL. Everything excluded is printed, so a novel missing from this list is visible and
-# Matt can add it — never silently dropped, never silently leaked. Fragments matched case-insensitively.
+# NOVELS ONLY — AN ALLOWLIST, safe by default. The source directory MIXES his fiction with
+# CONFIDENTIAL business, engineering, and planning documents (private design bibles, planning and
+# assessment memos, series maps, and the like). A stoplist is whack-a-mole and one miss leaks
+# confidential material into a public voice, so NOTHING enters unless its title is a KNOWN NOVEL.
+# Everything excluded is printed, so a novel missing from this list is visible and Matt can add it —
+# never silently dropped, never silently leaked. Fragments matched case-insensitively.
 _NOVELS = (
     "apokalypsis", "the door", "root access", "the keeping", "the line", "dancing plague",
     "tell me you got that", "treebound", "molasses", "kings of appalachia",
@@ -225,8 +225,9 @@ def gather(src: Path) -> List[Dict]:
     return uniq
 
 
-_BOOK_DIRS = [Path(r"C:\Users\hdven\iCloudDrive\M.R_"),
-              Path(r"C:\Users\hdven\OneDrive\Desktop\Harris Projects MASTER")]
+# Book directories live outside this repo; set CONCORDANCE_BOOKS_DIRS (os.pathsep-separated) or pass
+# dirs as argv. No personal path baked into this public tool.
+_BOOK_DIRS = [Path(p) for p in os.environ.get("CONCORDANCE_BOOKS_DIRS", "").split(os.pathsep) if p.strip()]
 BOOK_OUT = DATA / "voice_book_lines.jsonl"
 
 
