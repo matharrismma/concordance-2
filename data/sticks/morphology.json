@@ -7,6 +7,51 @@
   "affixes",
   "word_formation"
  ],
- "handler": "morphology",
- "why_python": "pending migration (issue #13)"
+ "doc": "MORPHOLOGY - the first gap filled to make linguistics comprehensive (Matt, 2026-10-10:\n\"expand linguistics to be comprehensive\"). A word is prefix(es) + root + suffix(es); a\nsegmentation is SEALED through wordcraft.WORD_VERIFY only when every affix is real, the pieces\nconcatenate exactly, and the root is a real word - the root x pattern basis in English, the\nsame decomposition used for Hebrew. Idempotent.",
+ "seals": [
+  {
+   "key": "unbreakable",
+   "nid": "unbreakable_is_un_2_plus_break_5_plus_able_4_letters",
+   "expr": "2+5+4",
+   "value": 11,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "unhelpful",
+   "nid": "unhelpful_is_un_2_plus_help_4_plus_ful_3_letters",
+   "expr": "2+4+3",
+   "value": 9,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Morphology - a word is prefix, root, and suffix",
+   "by": "tools/tick.py morphology",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[strict segmentation, SEALED as letter arithmetic] 'unbreakable' = un-(2) + break(5) + -able(4) = 11 letters (sealed). The live verifier wordcraft.verify_morphology adds the rest: every affix must be in the inventory, the pieces must concatenate exactly, and the root 'break' must be a real word on the pronunciation shelf. Morphology is the root x pattern basis of a word - the same decomposition the engine reads for Hebrew (a root woven through a binyan).",
+     "seal": "unbreakable"
+    },
+    {
+     "kind": "instance",
+     "claim": "[derivation stacks on a root, SEALED] 'unhelpful' = un-(2) + help(4) + -ful(3) = 9 letters (sealed). Derivation composes affixes onto a real root; the meaning is built from the parts.",
+     "seal": "unhelpful"
+    },
+    {
+     "kind": "note",
+     "claim": "[the 0-false-positive rule] A segmentation is CONFIRMED only when the affixes are real AND the concatenation is exact AND the root is a real word. A spelling change (happy -> happiness) is NOT plain concatenation and DECLINES; an unknown affix is a MISMATCH. Strict concatenation buys zero false positives at the cost of declining the irregular forms honestly.",
+     "source": "src/concordance/verifiers/wordcraft.py verify_morphology"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map - comprehensive linguistics] Morphology is the first gap filled to make linguistics comprehensive (phonology, orthography, etymology, historical sound change, and the Biblical lexicon already hold). It rests with them on the linguistics floor (card_floor_indo_european); syntax stays closed-class only, and deep parsing is declined as the offline floor.",
+     "source": "card_floor_indo_european; the linguistics coverage map"
+    }
+   ]
+  }
+ ]
 }

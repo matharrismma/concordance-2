@@ -7,6 +7,46 @@
   "the_qubit",
   "quantum_computer"
  ],
- "handler": "quantum_computing",
- "why_python": "pending migration (issue #13)"
+ "doc": "QUANTUM COMPUTING - qubits and superposition (Matt, 2026-10-10, down the list). A qubit is a superposition of\n0 and 1, so n qubits hold 2^n amplitudes at once; the power comes from interference (Grover's sqrt-N search,\nShor's factoring). SEALED: the state-space size of 10 qubits, and Grover's speedup over a million. Rests on\nquantum mechanics (superposition, entanglement) and computer science (computation). Idempotent.",
+ "seals": [
+  {
+   "key": "states",
+   "nid": "ten_qubit_state_space_two_to_the_tenth",
+   "expr": "2**10",
+   "value": 1024,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "grover",
+   "nid": "grover_search_steps_sqrt_of_a_million",
+   "expr": "1000000**0.5",
+   "value": 1000.0,
+   "tol": 1e-06,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Quantum computing - qubits and superposition",
+   "by": "tools/tick.py quantum_computing",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the exponential state space, SEALED] A qubit is a superposition of 0 and 1, so n qubits carry 2^n amplitudes at once: 10 qubits hold 2^10 = 1024 (sealed), 300 qubits more amplitudes than there are atoms in the universe. The promise and the difficulty both live in that exponential. Ties card_floor_quantum_mechanics (superposition).",
+     "seal": "states"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the speedup is interference, SEALED] A quantum computer is not just parallel - you must make the wrong answers INTERFERE away. Grover's algorithm searches an unsorted million in about sqrt(1000000) = 1000 steps (sealed), not a million; Shor's factors in polynomial time, which is why it threatens RSA. Ties card_floor_computer_science and card_floor_cryptography.",
+     "seal": "grover"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Quantum computing rests on quantum mechanics (superposition and entanglement are the resource) and computer science (it is still computation, with its own complexity class, BQP). It does not break computability - only, for a few problems, the cost. Ties card_floor_quantum_computing.",
+     "source": "the one map; superposition and interference; Grover and Shor; card_floor_quantum_computing"
+    }
+   ]
+  }
+ ]
 }

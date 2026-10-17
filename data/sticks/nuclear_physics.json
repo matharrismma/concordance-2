@@ -7,6 +7,46 @@
   "radioactivity",
   "fission"
  ],
- "handler": "nuclear_physics",
- "why_python": "pending migration (issue #13)"
+ "doc": "NUCLEAR PHYSICS - binding, decay, and the strong force (Matt, 2026-10-10, down the list). The nucleus is held\nby the strong force against electric repulsion; mass converts to binding energy at 931.5 MeV per atomic mass\nunit (E = mc^2); unstable nuclei decay on a half-life. SEALED: the amu-to-MeV conversion and a four-half-life\ndecay fraction. Rests on the Standard Model (the strong force), relativity (E=mc^2) and quantum mechanics\n(tunnelling). Idempotent.",
+ "seals": [
+  {
+   "key": "amu",
+   "nid": "energy_per_atomic_mass_unit_mev",
+   "expr": "1.66053906660e-27*(2.99792458e8)**2/1.602176634e-19/1e6",
+   "value": 931.4941024171443,
+   "tol": 0.0001,
+   "domain": "mathematics"
+  },
+  {
+   "key": "decay",
+   "nid": "fraction_remaining_after_four_half_lives",
+   "expr": "(1/2)**4",
+   "value": 0.0625,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Nuclear physics - binding, decay, and the strong force",
+   "by": "tools/tick.py nuclear_physics",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[mass is energy - the amu, SEALED] One atomic mass unit of mass converts to 931.5 MeV of energy (sealed, by E = mc^2) - the currency of nuclear binding. A nucleus weighs LESS than its parts; the missing mass (the mass defect) is the binding energy that holds it, and releasing it is what fission and fusion do. Ties card_floor_relativity.",
+     "seal": "amu"
+    },
+    {
+     "kind": "instance",
+     "claim": "[decay on a clock, SEALED] An unstable nucleus decays by a fixed half-life: after four of them (1/2)^4 = 0.0625, one sixteenth, remains (sealed). Alpha, beta and gamma decay follow this one exponential law (the same as pharmacokinetics and radiocarbon) - and alpha decay happens by quantum tunnelling. Ties card_floor_quantum_mechanics.",
+     "seal": "decay"
+    },
+    {
+     "kind": "note",
+     "claim": "[the strong force binds it] The nucleus is packed protons and neutrons that electrically REPEL; what holds them is the strong force (the residue of the gluon force between quarks, on the Standard Model floor), strong but short-ranged. Binding energy peaks at iron - why fusion powers stars up to iron and fission powers reactors down to it. On the one map, nuclear physics rests on the Standard Model, relativity and quantum mechanics. Ties card_floor_nuclear_physics.",
+     "source": "the one map; the strong force; the binding-energy curve; card_floor_standard_model; card_floor_nuclear_physics"
+    }
+   ]
+  }
+ ]
 }

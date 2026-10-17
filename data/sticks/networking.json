@@ -7,6 +7,46 @@
   "packets",
   "protocols"
  ],
- "handler": "networking",
- "why_python": "pending migration (issue #13)"
+ "doc": "NETWORKING - addresses, packets, and capacity (Matt, 2026-10-10, down the list). The internet routes PACKETS\nbetween ADDRESSES (IPv4 has 2^32); a channel has a hard capacity (Shannon). SEALED: the IPv4 address space and a\nsubnet's size. Rests on computer science (the machines and protocols) and the instruments (information theory,\nthe channel capacity). Idempotent.",
+ "seals": [
+  {
+   "key": "ipv4",
+   "nid": "ipv4_address_space_two_to_the_thirty_two",
+   "expr": "2**32",
+   "value": 4294967296,
+   "tol": 0.001,
+   "domain": "mathematics"
+  },
+  {
+   "key": "subnet",
+   "nid": "addresses_in_a_slash_24_subnet_two_to_the_eighth",
+   "expr": "2**8",
+   "value": 256,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Networking - addresses, packets, and capacity",
+   "by": "tools/tick.py networking",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[addresses - the IPv4 space, SEALED] An IPv4 address is 32 bits, so there are 2^32 = about 4.3 billion of them (sealed) - and we ran out, which is why IPv6 (128 bits) exists. A /24 subnet holds 2^8 = 256 addresses (sealed). Addressing is just counting in binary. Ties card_floor_computer_science.",
+     "seal": "ipv4"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a subnet is a power of two, SEALED] Splitting the address space into subnets is slicing powers of two: a /24 gives 2^8 = 256 (sealed), a /16 gives 2^16. The whole routing hierarchy is binary arithmetic on addresses. Ties card_floor_computer_science.",
+     "seal": "subnet"
+    },
+    {
+     "kind": "note",
+     "claim": "[capacity - Shannon's limit] A channel carries at most C = B log2(1 + S/N) bits per second (Shannon) - no code beats it, the same capacity that bounds the information instrument. Packets, protocols (TCP/IP) and error-correction all live under that ceiling. On the one map, networking rests on computer science and the instruments. Ties card_floor_networking.",
+     "source": "the one map; the Shannon-Hartley capacity; TCP/IP; card_floor_the_instruments; card_floor_networking"
+    }
+   ]
+  }
+ ]
 }

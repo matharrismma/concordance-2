@@ -6,6 +6,120 @@
   "operations_research",
   "optimization"
  ],
- "handler": "logistics",
- "why_python": "pending migration (issue #13)"
+ "doc": "LOGISTICS / OPERATIONS RESEARCH - SEALED (Matt, 2026-10-09: cover every domain, integrate what we have). The\noptimization core certified and sealed via operations_research.OR_VERIFY: the 0-1 knapsack optimum (by dynamic\nprogramming), linear-constraint feasibility, assignment cost. This is the solve path made concrete - EXCLUDE the\ninfeasible, find the optimum, and where exact is too costly, GET CLOSE with a bounded approximation. Idempotent.",
+ "seals": [
+  {
+   "key": "knap",
+   "domain": "operations_research",
+   "artifact": "OR_VERIFY",
+   "spec": {
+    "items": [
+     {
+      "weight": 2,
+      "value": 3
+     },
+     {
+      "weight": 3,
+      "value": 4
+     },
+     {
+      "weight": 4,
+      "value": 5
+     }
+    ],
+    "capacity": 5,
+    "claimed_optimal_value": 7
+   }
+  },
+  {
+   "key": "lp",
+   "domain": "operations_research",
+   "artifact": "OR_VERIFY",
+   "spec": {
+    "variable_values": {
+     "x": 2.0,
+     "y": 3.0
+    },
+    "constraints": [
+     {
+      "lhs_coeffs": {
+       "x": 1.0,
+       "y": 1.0
+      },
+      "operator": "<=",
+      "rhs": 10.0
+     },
+     {
+      "lhs_coeffs": {
+       "x": 1.0
+      },
+      "operator": ">=",
+      "rhs": 0.0
+     }
+    ],
+    "claimed_feasible": true
+   }
+  },
+  {
+   "key": "assign",
+   "domain": "operations_research",
+   "artifact": "OR_VERIFY",
+   "spec": {
+    "assignment": [
+     [
+      0,
+      1
+     ],
+     [
+      1,
+      0
+     ]
+    ],
+    "cost_matrix": [
+     [
+      9,
+      2
+     ],
+     [
+      6,
+      4
+     ]
+    ],
+    "claimed_total_cost": 8
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Logistics - the optimization core, verified and sealed",
+   "by": "tools/tick.py logistics",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the knapsack optimum] Three items (weight, value) = (2,3), (3,4), (4,5) in a bag of capacity 5: the best is items 1 and 2 - weight 5, value 7 (sealed by dynamic programming through operations_research.OR_VERIFY). The exact optimum of an NP-hard problem, found cheaply here because the capacity is small - exactly the solve path's point.",
+     "seal": "knap"
+    },
+    {
+     "kind": "instance",
+     "claim": "[feasibility] The point x=2, y=3 satisfies x + y <= 10 and x >= 0 (sealed) - the EXCLUDE jaw: a candidate that breaks a constraint is cut; one that holds survives.",
+     "seal": "lp"
+    },
+    {
+     "kind": "instance",
+     "claim": "[assignment cost] Worker 0 to job 1 (cost 2) and worker 1 to job 0 (cost 6) total 8 (sealed) - the cost of a stated matching, the kernel of routing and scheduling.",
+     "seal": "assign"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the model] The constraints are linear and the costs and durations are known and fixed - the model under which the optimum is exact. Real demand, traffic and times are uncertain; there the answer is a bounded estimate (get close), not an exact optimum.",
+     "source": "operations_research.OR_VERIFY; the solve path (card_floor_the_solve_path)"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the solve path] Logistics IS the solve path applied: exclude the infeasible (the moat on the constraints), find the optimum where it is cheap (knapsack DP, LP), and get close with a proven bound where exact is NP-hard at scale (the approximation door). Demand forecasts and real-world variance are declined.",
+     "source": "src/concordance/verifiers/operations_research.py; the get-close door"
+    }
+   ]
+  }
+ ]
 }

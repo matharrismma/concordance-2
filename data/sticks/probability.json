@@ -5,6 +5,85 @@
   "probability_stick",
   "probability"
  ],
- "handler": "probability_stick",
- "why_python": "pending migration (issue #13)"
+ "doc": "PROBABILITY - SEALED through probability.PROB_VERIFY. Idempotent.",
+ "seals": [
+  {
+   "key": "ev",
+   "domain": "probability",
+   "artifact": "PROB_VERIFY",
+   "spec": {
+    "outcomes": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "probabilities": [
+     0.16666666666666666,
+     0.16666666666666666,
+     0.16666666666666666,
+     0.16666666666666666,
+     0.16666666666666666,
+     0.16666666666666666
+    ],
+    "claimed_expected_value": 3.5
+   }
+  },
+  {
+   "key": "binom",
+   "domain": "probability",
+   "artifact": "PROB_VERIFY",
+   "spec": {
+    "binomial_n": 10,
+    "binomial_p": 0.5,
+    "binomial_k": 5,
+    "claimed_binomial_probability": 0.24609375
+   }
+  },
+  {
+   "key": "bmean",
+   "domain": "probability",
+   "artifact": "PROB_VERIFY",
+   "spec": {
+    "binomial_n": 10,
+    "binomial_p": 0.5,
+    "claimed_binomial_mean": 5
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Probability - the distributions, verified and sealed",
+   "by": "tools/tick.py probability_stick",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the fair die] E[X] = sum p_i x_i = (1+2+3+4+5+6)/6 = 3.5 (sealed through probability.PROB_VERIFY) - the expected value, the balance point of the distribution.",
+     "seal": "ev"
+    },
+    {
+     "kind": "instance",
+     "claim": "[ten fair coins] P(exactly 5 heads) = C(10,5)(1/2)^10 = 0.24609 (sealed) - the binomial, the law of repeated yes/no trials.",
+     "seal": "binom"
+    },
+    {
+     "kind": "instance",
+     "claim": "[its mean] E[Binom(10, 0.5)] = n p = 5 (sealed) - half the flips, on average.",
+     "seal": "bmean"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the ground] Kolmogorov's axioms: a probability is a measure of total mass one. The theorems are sealed; what the numbers MEAN for a single future event is the open question of interpretation (frequentist vs Bayesian), carried, not kept as fact.",
+     "source": "A. Kolmogorov (1933); probability.PROB_VERIFY"
+    },
+    {
+     "kind": "note",
+     "claim": "[declined] Whether a model's probabilities are the RIGHT ones for the world is a modelling judgment, not sealed here; the engine certifies the probability arithmetic.",
+     "source": "src/concordance/verifiers/probability.py"
+    }
+   ]
+  }
+ ]
 }

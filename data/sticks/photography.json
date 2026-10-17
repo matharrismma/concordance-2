@@ -8,6 +8,182 @@
   "hyperfocal",
   "sunny_16"
  ],
- "handler": "stick_photography",
- "why_python": "pending migration (issue #13)"
+ "doc": "PHOTOGRAPHY - exposure, reciprocity, angle of view, hyperfocal distance, sealed (issue #11, 2026-10-16:\nreach, down the domain list). Through photography.PHOTO_VERIFY: EV = log2(N^2/t) at f/8 1/250 and the sunny-16\nrule at f/16 1/125, reciprocity (f/8 1/250 equivalent to f/11 1/125; one stop apart sealed NOT equivalent), the\nangle of view of 24, 50 and 200 mm on a 36 mm frame, and the hyperfocal distance at f/8 for 50 mm and 24 mm.\nThe APEX convention and the 0.030 mm circle of confusion are CITED; the arithmetic is SEALED. Idempotent.",
+ "seals": [
+  {
+   "key": "ev_f8_250",
+   "domain": "photography",
+   "artifact": "PHOTO_VERIFY",
+   "spec": {
+    "f_number": 8.0,
+    "shutter_seconds": 0.004,
+    "claimed_exposure_value": 13.97
+   }
+  },
+  {
+   "key": "sunny_16",
+   "domain": "photography",
+   "artifact": "PHOTO_VERIFY",
+   "spec": {
+    "f_number": 16.0,
+    "shutter_seconds": 0.008,
+    "claimed_exposure_value": 14.97
+   }
+  },
+  {
+   "key": "reciprocal",
+   "domain": "photography",
+   "artifact": "PHOTO_VERIFY",
+   "spec": {
+    "settings_a": [
+     8.0,
+     0.004
+    ],
+    "settings_b": [
+     11.0,
+     0.008
+    ],
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "one_stop_apart",
+   "domain": "photography",
+   "artifact": "PHOTO_VERIFY",
+   "spec": {
+    "settings_a": [
+     8.0,
+     0.004
+    ],
+    "settings_b": [
+     8.0,
+     0.008
+    ],
+    "claimed_equivalent": false
+   }
+  },
+  {
+   "key": "aov_50",
+   "domain": "photography",
+   "artifact": "PHOTO_VERIFY",
+   "spec": {
+    "focal_length_mm": 50.0,
+    "sensor_dimension_mm": 36.0,
+    "claimed_angle_of_view_deg": 39.6
+   }
+  },
+  {
+   "key": "aov_24",
+   "domain": "photography",
+   "artifact": "PHOTO_VERIFY",
+   "spec": {
+    "focal_length_mm": 24.0,
+    "sensor_dimension_mm": 36.0,
+    "claimed_angle_of_view_deg": 73.7
+   }
+  },
+  {
+   "key": "aov_200",
+   "domain": "photography",
+   "artifact": "PHOTO_VERIFY",
+   "spec": {
+    "focal_length_mm": 200.0,
+    "sensor_dimension_mm": 36.0,
+    "claimed_angle_of_view_deg": 10.3
+   }
+  },
+  {
+   "key": "hyperfocal_50",
+   "domain": "photography",
+   "artifact": "PHOTO_VERIFY",
+   "spec": {
+    "focal_length_mm_for_h": 50.0,
+    "f_number_for_h": 8.0,
+    "circle_of_confusion_mm": 0.03,
+    "claimed_hyperfocal_distance_m": 10.47
+   }
+  },
+  {
+   "key": "hyperfocal_24",
+   "domain": "photography",
+   "artifact": "PHOTO_VERIFY",
+   "spec": {
+    "focal_length_mm_for_h": 24.0,
+    "f_number_for_h": 8.0,
+    "circle_of_confusion_mm": 0.03,
+    "claimed_hyperfocal_distance_m": 2.42
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Photography - exposure, reciprocity, angle of view, hyperfocal",
+   "statement": "A camera's settings are logarithms and tangents: EV counts stops in base 2, the angle of view is 2 atan(d/2f), and the hyperfocal distance is f^2/(N c) + f.",
+   "field": "photography",
+   "references": [
+    "ISO 2720:1974 - exposure meters and the APEX system (EV = log2(N^2/t) at ISO 100)",
+    "Kodak, the sunny-16 rule (film data sheets, 20th c.)",
+    "R. Kingslake, Optics in Photography (SPIE, 1992), ch. 4 and 5",
+    "H. M. Merklinger, The INs and OUTs of FOCUS (1992) - depth of field and hyperfocal"
+   ],
+   "by": "tools/tick.py photography",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[EV at f/8, 1/250, SEALED] EV = log2(64 x 250) = 13.97 (sealed through photography.PHOTO_VERIFY): the APEX scale, each unit one stop - a doubling of light.",
+     "seal": "ev_f8_250"
+    },
+    {
+     "kind": "instance",
+     "claim": "[sunny 16, SEALED] f/16 at 1/125 (the nearest click to 1/ISO at ISO 100) is EV 14.97, EV 15 (sealed through photography.PHOTO_VERIFY): the rule of thumb for direct sun, which is why a light meter reads 15 on a clear noon.",
+     "seal": "sunny_16"
+    },
+    {
+     "kind": "instance",
+     "claim": "[reciprocity, SEALED] f/8 at 1/250 and f/11 at 1/125 are equivalent exposures (sealed through photography.PHOTO_VERIFY): one stop closed, one stop longer, the same light. f/11 is the nominal name of 8 sqrt 2 = 11.31; the 0.09 EV difference is the rounding of the f-stop series, inside the verifier's 0.1 EV window.",
+     "seal": "reciprocal"
+    },
+    {
+     "kind": "instance",
+     "claim": "[one stop apart, SEALED AS NOT EQUIVALENT] f/8 at 1/250 and f/8 at 1/125 differ by one stop - sealed with claimed_equivalent = false (sealed through photography.PHOTO_VERIFY). Twice the time at the same aperture is twice the light; the engine seals the inequality as an inequality.",
+     "seal": "one_stop_apart"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the normal lens, SEALED] 50 mm on a 36 mm frame sees 2 atan(36 / 100) = 39.6 deg across (sealed through photography.PHOTO_VERIFY) - the horizontal angle of the 'normal' lens, roughly the angle of comfortable attention.",
+     "seal": "aov_50"
+    },
+    {
+     "kind": "instance",
+     "claim": "[wide, SEALED] 24 mm sees 73.7 deg (sealed through photography.PHOTO_VERIFY).",
+     "seal": "aov_24"
+    },
+    {
+     "kind": "instance",
+     "claim": "[long, SEALED] 200 mm sees 10.3 deg (sealed through photography.PHOTO_VERIFY): the tangent is nearly linear here, so the angle falls almost as 1/f - four times the focal length, nearly a quarter of the angle.",
+     "seal": "aov_200"
+    },
+    {
+     "kind": "instance",
+     "claim": "[hyperfocal at 50 mm f/8, SEALED] H = 50^2 / (8 x 0.030) + 50 = 10,467 mm = 10.47 m (sealed through photography.PHOTO_VERIFY). Focus there and everything from 5.2 m to infinity is acceptably sharp.",
+     "seal": "hyperfocal_50"
+    },
+    {
+     "kind": "instance",
+     "claim": "[at 24 mm f/8, SEALED] H = 576 / 0.24 + 24 = 2.42 m (sealed through photography.PHOTO_VERIFY): the square of the focal length is why wide lenses carry so much depth of field.",
+     "seal": "hyperfocal_24"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the conventions, CITED] EV at ISO 100 is the APEX convention (ISO 2720); the f-stop series 1, 1.4, 2, 2.8, 4, 5.6, 8, 11, 16 names powers of sqrt 2 rounded; the 0.030 mm circle of confusion is a convention for a 36 mm frame viewed as an 8 x 10 print at arm's length - another viewer, another number. Cited, never sealed; the arithmetic they command is what is sealed.",
+     "source": "ISO 2720:1974; Kingslake, Optics in Photography (1992); Merklinger (1992)"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] A camera is applied optics (card_floor_optics: the thin lens, the aperture, the circle of confusion) counted in logarithms (card_floor_logarithm: EV is a base-2 scale, every unit a doubling). The optics stick holds the lens; this stick holds the exposure.",
+     "source": "the one map; card_floor_optics, card_floor_logarithm; the optics stick"
+    }
+   ]
+  }
+ ]
 }

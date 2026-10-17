@@ -9,6 +9,65 @@
   "dispersion",
   "dissonance"
  ],
- "handler": "navier_stokes",
- "why_python": "pending migration (issue #13)"
+ "doc": "NAVIER-STOKES / DISSONANCE AND DISPERSION (Matt, 2026-10-07: 'Navier-Stokes is almost the counter.\nWe need to look at Dissonance and dispersion'). The one Millennium problem where the tick-stick's\nnarrowing could FAIL to converge: in 3D the energy is scale-SUPERCRITICAL, leaving room a finite-time\nsingularity could hide in; in 2D the energy is scale-critical and global smoothness is PROVEN.\nDispersion (packets spreading) and dissipation fight the nonlinear cascade that would concentrate\nenergy into a 'dissonant' singularity. Seal the scaling arithmetic + the dispersion relation; mark 3D\nsmoothness open. New stick; idempotent.",
+ "seals": [
+  {
+   "key": "ns_energy_supercritical_3d",
+   "nid": "ns_energy_supercritical_3d",
+   "expr": "3 - 2",
+   "value": 1.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "ns_energy_critical_2d",
+   "nid": "ns_energy_critical_2d",
+   "expr": "2 - 2",
+   "value": 0.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "ns_dispersion_group_over_phase",
+   "nid": "ns_dispersion_group_over_phase",
+   "expr": "2 * 3 / 3",
+   "value": 2.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Navier-Stokes - dissonance and dispersion",
+   "statement": "Do smooth solutions of the 3D incompressible Navier-Stokes equations exist for all time, or can they blow up in finite time? Under the scaling symmetry the kinetic energy scales as lambda^(d-2): supercritical in 3D (+1), critical in 2D (0). Dispersion and viscous dissipation spread and damp energy; the nonlinear term cascades it toward small scales. The open question is whether dissipation always wins in 3D.",
+   "field": "meta",
+   "references": [
+    "the Clay Millennium problem: 3D global existence and smoothness",
+    "Leray-Hopf weak solutions (1934); 2D global regularity (Ladyzhenskaya)",
+    "Caffarelli-Kohn-Nirenberg (1982): singular set has parabolic dimension <= 1"
+   ],
+   "by": "Narrow Highway - Navier-Stokes, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[why 3D is almost the counter - supercritical scaling] Under u_lambda(x,t) = lambda u(lambda x, lambda^2 t) the energy integral of |u|^2 scales as lambda^(d-2); in 3D that exponent is 3 - 2 = 1 (sealed) > 0, so the conserved energy does NOT control the small scales where a singularity would form. That gap is the room a finite-time blow-up could hide in - the one place the narrowing method might meet a genuine singularity instead of a sealed answer.",
+     "seal": "ns_energy_supercritical_3d"
+    },
+    {
+     "kind": "witness",
+     "claim": "[why 2D is proven - critical scaling] In 2D the exponent is 2 - 2 = 0 (sealed): the energy is scale-INVARIANT, the a-priori bound controls every scale, and global smoothness is a THEOREM. The method narrows cleanly exactly when the controlled quantity is critical or subcritical; 3D sits just past that line.",
+     "seal": "ns_energy_critical_2d"
+    },
+    {
+     "kind": "witness",
+     "claim": "[dispersion vs concentration] A dispersive wave spreads: for omega ~ k^2 the group velocity is twice the phase velocity, 2k/k = 2 (sealed), so frequency components separate and the amplitude decays. Dispersion and viscous dissipation oppose the nonlinear cascade that would concentrate energy into a 'dissonant' singularity; whether they always prevail in 3D is the open question.",
+     "seal": "ns_dispersion_group_over_phase"
+    },
+    {
+     "kind": "note",
+     "claim": "[the honest marks] 3D global existence + smoothness is OPEN (Clay Millennium). Proven: 2D global regularity; Leray-Hopf weak solutions exist in 3D (uniqueness/smoothness unknown); Caffarelli-Kohn-Nirenberg - the singular set of a suitable weak solution has parabolic Hausdorff dimension at most 1. The engine seals the scaling arithmetic and the dispersion relation, cites the theorems, and marks 3D smoothness as the one unfired mark. 'Almost the counter' is held honestly: the narrowing might meet a singularity, not a proof. map, never launder (ties [[feedback_mapping_the_truth_not_generating_it_2026-10-07]])."
+    }
+   ]
+  }
+ ]
 }

@@ -10,6 +10,133 @@
   "landauer",
   "second_law"
  ],
- "handler": "maxwell_entropy",
- "why_python": "pending migration (issue #13)"
+ "doc": "ENTROPY IS NEVER DECREASED, ONLY CONCENTRATED (Matt, 2026-10-08: \"Entropy doesn't decrease. Instead it is\nconcentrated. We see it separate itself.\" \"Use Maxwell's theory of entropy.\"). Maxwell's demon (1867) sorts the\nspeeds Maxwell himself distributed, and the sorting is real and visible; Szilard, Landauer and Bennett found the\nbill: the demon must remember each molecule, and erasing a bit costs kT ln 2. The entropy did not decrease; it was\nconcentrated into the record and paid when the record is cleared. Every separation we see - a still, a membrane, a\nrefrigerator, life on Earth under the Sun - exports at least what it removes. Eight numbers sealed. New stick;\nidempotent.",
+ "seals": [
+  {
+   "key": "maxwell_rms_speed_N2_300K",
+   "nid": "maxwell_rms_speed_N2_300K",
+   "expr": "sqrt(3*1.380649e-23*300/(28.014*1.66053907e-27))",
+   "value": 516.833653303928,
+   "tol": 1e-06,
+   "domain": "mathematics"
+  },
+  {
+   "key": "maxwell_mean_speed_N2_300K",
+   "nid": "maxwell_mean_speed_N2_300K",
+   "expr": "sqrt(8*1.380649e-23*300/(pi*28.014*1.66053907e-27))",
+   "value": 476.1680092437432,
+   "tol": 1e-06,
+   "domain": "mathematics"
+  },
+  {
+   "key": "maxwell_most_probable_speed_N2_300K",
+   "nid": "maxwell_most_probable_speed_N2_300K",
+   "expr": "sqrt(2*1.380649e-23*300/(28.014*1.66053907e-27))",
+   "value": 421.992910831043,
+   "tol": 1e-06,
+   "domain": "mathematics"
+  },
+  {
+   "key": "landauer_cost_of_one_bit_at_300K",
+   "nid": "landauer_cost_of_one_bit_at_300K",
+   "expr": "1.380649e-23*300*log(2)",
+   "value": 2.870978885078724e-21,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "entropy_of_one_bit_k_ln_2",
+   "nid": "entropy_of_one_bit_k_ln_2",
+   "expr": "1.380649e-23*log(2)",
+   "value": 9.569929616929079e-24,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "entropy_of_mixing_R_ln_2",
+   "nid": "entropy_of_mixing_R_ln_2",
+   "expr": "8.314462618*log(2)",
+   "value": 5.763146321537762,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "thermal_photons_out_per_solar_photon_in",
+   "nid": "thermal_photons_out_per_solar_photon_in",
+   "expr": "5772/255",
+   "value": 22.63529411764706,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "carnot_efficiency_300_over_500",
+   "nid": "carnot_efficiency_300_over_500",
+   "expr": "1 - 300/500",
+   "value": 0.4,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Entropy is never decreased, only concentrated - Maxwell's demon, the separation we can see, and the bill in the record",
+   "statement": "Maxwell's demon sorts the speeds Maxwell himself distributed, and the sorting is real: hot from cold, fast from slow, order where there was none. Szilard, Landauer and Bennett found the bill - the demon must remember each molecule, and erasing a bit costs at least kT ln 2. The entropy did not decrease; it was concentrated into the record and is paid when the record is cleared. Every separation we see - a still, a membrane, a refrigerator, a living cell, the Earth under the Sun - exports at least what it removes: one solar photon in, some twenty-two thermal photons out. We see it separate itself; the second law counts what left.",
+   "field": "physics",
+   "references": [
+    "J. C. Maxwell, letter to P. G. Tait (1867); Theory of Heat (1871): the sorting demon; the speed distribution (1860)",
+    "L. Szilard (1929): the engine that runs on one bit; R. Landauer (1961): erasure costs kT ln 2; C. H. Bennett (1982): the demon's exorcism",
+    "S. Carnot (1824): the limit of every engine; L. Boltzmann (1877): S = k ln W",
+    "the Earth's entropy budget: sunlight at 5772 K, Earth's emission at 255 K (the effective temperature)",
+    "Matthew 13:30; Matthew 25:32; Malachi 3:3; Romans 8:22",
+    "stick_entropy_and_gravity (where entropy fits); stick_laplace (entropy's seat in the equations); the ledger (src/concordance/ledger.py) - append-only, never erased"
+   ],
+   "by": "Narrow Highway - entropy concentrated, Maxwell's demon, 2026-10-08",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[the demon sorts what Maxwell distributed] N2 at 300 K: the most probable speed sqrt(2kT/m) = 422 m/s, the mean sqrt(8kT/pi m) = 476 m/s, the rms sqrt(3kT/m) = 517 m/s (all three sealed). The molecules are a SPREAD, so a sorter at a trapdoor could let the fast ones one way and the slow ones the other - hot from cold with no work done (Maxwell 1867). The separation is real and can be seen.",
+     "seal": "maxwell_rms_speed_N2_300K"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the mean of the spread] sqrt(8kT/(pi m)) = 476.2 m/s (sealed): faster than the most probable speed, slower than the rms - three averages of one distribution, in their fixed order sqrt2 : sqrt(8/pi) : sqrt3. The demon's job exists because the spread exists.",
+     "seal": "maxwell_mean_speed_N2_300K"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the top of the curve] sqrt(2kT/m) = 422.0 m/s (sealed): where the Maxwell distribution peaks. Everything the demon lets through on the fast side is above this; everything it holds back is below; the line between them is the demon's one decision per molecule - one bit.",
+     "seal": "maxwell_most_probable_speed_N2_300K"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the bill is in the record] Szilard 1929, Landauer 1961, Bennett 1982: the demon must REMEMBER each molecule it sorted, and erasing one bit of that memory costs at least kT ln 2 = 2.871e-21 J at 300 K (sealed). The entropy did not decrease when the gas separated; it was CONCENTRATED into the demon's memory, and it is paid in full when the memory is cleared.",
+     "seal": "landauer_cost_of_one_bit_at_300K"
+    },
+    {
+     "kind": "witness",
+     "claim": "[one bit, one quantum of entropy] k ln 2 = 9.570e-24 J/K (sealed): the entropy of one yes-or-no, Boltzmann's S = k ln W at W = 2. Information and entropy are one quantity in two units; a record is entropy held still.",
+     "seal": "entropy_of_one_bit_k_ln_2"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the separations we see] Mixing two gases one to one costs R ln 2 = 5.763 J/K per mole (sealed), and unmixing them - a membrane, a still, a centrifuge, a refrigerator - exports at least that much elsewhere. The best engine between 500 K and 300 K keeps 1 - 300/500 = 40% of the heat (sealed) and must give the rest to carry the entropy away.",
+     "seal": "entropy_of_mixing_R_ln_2"
+    },
+    {
+     "kind": "witness",
+     "claim": "[life on Earth concentrates and ships] Sunlight arrives at 5772 K and leaves at 255 K: for the same energy, each solar photon in becomes 5772/255 = 22.6 thermal photons out (sealed). The order of a leaf, a cell, a city is paid for in entropy exported to the night sky - we see it separate itself, and the second law counts what left.",
+     "seal": "thermal_photons_out_per_solar_photon_in"
+    },
+    {
+     "kind": "witness",
+     "claim": "[Carnot's share] 1 - T_cold/T_hot = 0.4 at 300 K over 500 K (sealed): the fraction any engine may keep; the other 60% is not loss but the carrier of the entropy that had to go. Concentration here is paid for by dispersal there - the ledger balances.",
+     "seal": "carnot_efficiency_300_over_500"
+    },
+    {
+     "kind": "note",
+     "claim": "[the ledger is the demon's memory - and the guard] Every seal on this node is a bit written; the keeping concentrates the entropy of a search into a record that is never erased - append-only, the cut marks superseded rather than deleted, a miss kept as a miss. 'Entropy doesn't decrease. Instead it is concentrated. We see it separate itself.' (Matt) - the demon's lesson in one line. Scripture: 'Gather ye together first the tares... but gather the wheat into my barn' (Mt 13:30) - a separation, with a record; the sheep from the goats (Mt 25:32); 'he shall sit as a refiner and purifier of silver' (Mal 3:3) - the dross concentrated; 'the whole creation groaneth' (Rom 8:22). GUARDS: the second law is physics; the demon a thought experiment resolved by information theory (cited); the ledger likeness is a discernment; the photon ratio assumes blackbody temperatures (cited). Eight numbers sealed; the rest cited. Ties: entropy_gravity, laplace, monte_carlo, geneva (dwell and record), delta."
+    }
+   ]
+  }
+ ]
 }

@@ -5,6 +5,69 @@
   "music_theory_stick",
   "music_theory"
  ],
- "handler": "music_theory_stick",
- "why_python": "pending migration (issue #13)"
+ "doc": "MUSIC THEORY - SEALED through music_theory.MUS_VERIFY (beside the harmonics stick). Idempotent.",
+ "seals": [
+  {
+   "key": "fifth",
+   "domain": "music_theory",
+   "artifact": "MUS_VERIFY",
+   "spec": {
+    "note_a": "C",
+    "note_b": "G",
+    "claimed_semitones": 7
+   }
+  },
+  {
+   "key": "octave",
+   "domain": "music_theory",
+   "artifact": "MUS_VERIFY",
+   "spec": {
+    "freq_a": 440,
+    "freq_b": 880,
+    "claimed_interval": "octave"
+   }
+  },
+  {
+   "key": "a440",
+   "domain": "music_theory",
+   "artifact": "MUS_VERIFY",
+   "spec": {
+    "midi_note": 69,
+    "claimed_frequency_hz": 440.0
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Music theory - intervals and tuning, verified and sealed",
+   "by": "tools/tick.py music_theory_stick",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the perfect fifth] C to G is 7 semitones (sealed through music_theory.MUS_VERIFY) - the interval whose frequency ratio is 3:2, the most consonant after the octave.",
+     "seal": "fifth"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the octave] 440 Hz to 880 Hz is the ratio 2:1, an octave (sealed) - the same note, one register up; doubling the frequency.",
+     "seal": "octave"
+    },
+    {
+     "kind": "instance",
+     "claim": "[concert pitch] MIDI note 69 is 440 Hz, the A above middle C (sealed) - the reference the whole orchestra tunes to, under equal temperament f = 440 * 2^((n-69)/12).",
+     "seal": "a440"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the ground] The harmonic series is exact ratio (octave 2:1, fifth 3:2) - sealed on the harmonics stick; equal temperament is the compromise that pays the Pythagorean comma evenly so every key is playable, a tuning CHOICE, not a law of nature.",
+     "source": "the harmonic series; J. S. Bach's well-tempered compromise; music_theory.MUS_VERIFY; the harmonics stick"
+    },
+    {
+     "kind": "note",
+     "claim": "[declined] Whether a chord is beautiful, a melody good, a performance moving - taste is not measured here; the engine seals the intervals and the tuning arithmetic.",
+     "source": "src/concordance/verifiers/music_theory.py"
+    }
+   ]
+  }
+ ]
 }
