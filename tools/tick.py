@@ -3127,6 +3127,1459 @@ def stick_formal_logic() -> int:
     return 0
 
 
+def stick_archaeology() -> int:
+    """ARCHAEOLOGY - the decay clock read backwards (issue #11, 2026-10-16: reach, down the domain list). Every
+    radiometric age is one law, t = -(T_half / ln 2) ln(N/N0), SEALED here through archaeology.ARCH_VERIFY for the
+    radiocarbon clock (the Cambridge half-life 5730 yr and the Libby convention 5568 yr), for the long clocks
+    (potassium-40, uranium-238 at the age of the Earth), and for the half-life count n = -log2(f). The half-lives
+    are measured constants, CITED as postulates; the ages are theorems of the decay law and are SEALED. Calibration
+    against the atmospheric record is declined. Idempotent."""
+    from concordance import tickstick as TS
+
+    def arch(spec):
+        return _seal_through("archaeology", "ARCH_VERIFY", spec)
+
+    S = {
+        "c14_half": arch({"fraction_remaining": 0.5, "claimed_age_years": 5730}),
+        "c14_quarter": arch({"fraction_remaining": 0.25, "claimed_age_years": 11460}),
+        "c14_percent": arch({"fraction_remaining": 0.01, "claimed_age_years": 38069}),
+        "c14_libby": arch({"fraction_remaining": 0.5, "half_life_years": 5568, "claimed_age_years": 5568}),
+        "k40": arch({"fraction_remaining_iso": 0.5, "half_life_years": 1.248e9, "claimed_age_years_iso": 1.248e9}),
+        "u238_earth": arch({"fraction_remaining_iso": 0.4944, "half_life_years": 4.468e9, "claimed_age_years_iso": 4.54e9}),
+        "three_halves": arch({"fraction_for_halflives": 0.125, "claimed_half_lives": 3}),
+        "ten_halves": arch({"fraction_for_halflives": 1.0 / 1024.0, "claimed_half_lives": 10}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "archaeology ages")
+    sid = TS.create("Archaeology - the decay clock, dated and sealed",
+                    statement="Every radiometric age is the exponential decay law read backwards: "
+                              "t = -(T_half / ln 2) ln(N/N0).",
+                    field="archaeology",
+                    references=["W. F. Libby, Radiocarbon Dating (1952; Nobel lecture 1960)",
+                                "H. Godwin, Half-life of radiocarbon, Nature 195 (1962) 984",
+                                "M. Stuiver & H. A. Polach, Discussion: reporting of 14C data, Radiocarbon 19 (1977) 355",
+                                "A. H. Jaffey et al., Precision measurement of half-lives of U-235 and U-238, "
+                                "Phys. Rev. C 4 (1971) 1889"])["id"]
+    SB = "sealed through archaeology.ARCH_VERIFY"
+    marks = [
+        ("instance", f"[one half-life, SEALED] Half the carbon-14 left means 5730 years: t = -(5730/ln 2) ln(0.5) = 5730 "
+                     f"({SB}). The Cambridge half-life, 5730 +/- 40 yr (Godwin 1962), is the physical constant.",
+         S["c14_half"]),
+        ("instance", f"[two half-lives, SEALED] A quarter left is 11,460 years ({SB}): each halving adds one half-life, "
+                     "so the clock is linear in the logarithm of what remains.", S["c14_quarter"]),
+        ("instance", f"[the practical limit, SEALED] One percent left is 38,069 years ({SB}): ln(0.01) = -4.605 half-lives "
+                     "of 1.4427 each. Below about one percent the count drowns in background, which is why radiocarbon "
+                     "reaches roughly 50,000 years and no further - the bound is the measurement, not the law.",
+         S["c14_percent"]),
+        ("instance", f"[the Libby convention, SEALED] With the Libby half-life, 5568 yr, half remaining reads 5568 years "
+                     f"({SB}, half_life_years = 5568). A conventional radiocarbon age is still reported on the 5568 scale "
+                     "(Stuiver & Polach 1977) and corrected later; the two scales differ by the factor 5730/5568 = 1.029. "
+                     "Two conventions, one law - and the convention is CITED, never confused with the constant.",
+         S["c14_libby"]),
+        ("instance", f"[the potassium clock, SEALED] Potassium-40, half-life 1.248 billion years: half remaining is 1.248 "
+                     f"Gyr ({SB}, the same law with its own T_half). The potassium-argon clock dates the volcanic layers "
+                     "that bracket the fossils.", S["k40"]),
+        ("instance", f"[the age of the Earth, SEALED] Uranium-238, half-life 4.468 Gyr: a sample with 49.44 percent of its "
+                     f"original U-238 is 4.54 Gyr old ({SB}) - the age of the Earth from the uranium-lead clock (Patterson "
+                     "1956, meteorite leads). The slow clocks reach what the fast one cannot.", S["u238_earth"]),
+        ("instance", f"[counting half-lives, SEALED] An eighth remaining is exactly three half-lives: n = -log2(1/8) = 3 "
+                     f"({SB}).", S["three_halves"]),
+        ("instance", f"[ten half-lives, SEALED] One part in 1024 is ten half-lives ({SB}): after ten half-lives a thousandth "
+                     "is left - the rule of thumb for when a radioactive source is 'gone'.", S["ten_halves"]),
+        ("postulate", "[the half-lives, CITED] 5730 +/- 40 yr (Godwin 1962), 5568 yr (Libby, the conventional scale), "
+                      "1.248 Gyr for K-40 and 4.468 Gyr for U-238 (Jaffey et al. 1971) are MEASURED constants: cited as "
+                      "postulates, never sealed. What is sealed is the arithmetic the law does with them.",
+         {"source": "Godwin, Nature 195 (1962) 984; Stuiver & Polach, Radiocarbon 19 (1977) 355; Jaffey et al., "
+                    "Phys. Rev. C 4 (1971) 1889"}),
+        ("postulate", "[the assumption the clock rests on] A radiocarbon age assumes the starting ratio N0 is known - "
+                      "that the atmosphere's carbon-14 was constant. It was not (solar activity, the carbon cycle, "
+                      "bomb carbon), so a raw age is CALIBRATED against tree rings and corals (IntCal). The engine seals "
+                      "the decay arithmetic and declines the calibration: a calibrated date is inferred from a curve, "
+                      "never kept as the law's own output.",
+         {"source": "P. J. Reimer et al., IntCal20, Radiocarbon 62 (2020) 725; the decay law assumes closed system + known N0"}),
+        ("note", "[on the one map] The decay clock is nuclear physics (card_floor_nuclear_physics: the exponential law and "
+                 "its half-life) read as a logarithm (card_floor_logarithm: t is proportional to ln of the fraction), "
+                 "applied to the Earth's record (card_floor_earth_science: radiometric dating). One law, three floors; "
+                 "this stick is where the archaeologist's spade meets the physicist's constant.",
+         {"source": "the one map; card_floor_nuclear_physics, card_floor_logarithm, card_floor_earth_science"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py archaeology")
+    return 0
+
+
+def stick_chess() -> int:
+    """CHESS - the rules decide (issue #11, 2026-10-16: reach, down the domain list). A claim about a position is
+    computed by the Laws of Chess, never judged: the classic mates (fool's, scholar's, smothered, back-rank) SEALED as
+    checkmate, a king-and-queen stalemate SEALED as stalemate and as not-check, move legality SEALED both ways (a
+    legal push, an illegal one sealed as illegal, en passant, castling), and the material count. All through
+    chess.CHESS_VERIFY over the perft-proven move generator. The Laws and the piece values are CITED; the verdicts
+    are SEALED. Idempotent."""
+    from concordance import tickstick as TS
+    START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    FOOLS = "rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3"
+    SCHOLAR = "r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4"
+    SMOTHER = "6rk/5Npp/8/8/8/8/8/6K1 b - - 0 1"
+    BACKRANK = "R5k1/5ppp/8/8/8/8/8/6K1 b - - 0 1"
+    STALE = "7k/5Q2/6K1/8/8/8/8/8 b - - 0 1"
+    EPASS = "rnbqkbnr/pp2pppp/8/2ppP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3"
+    KIWI = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
+
+    def pos(fen, claim, claimed, move=None):
+        spec = {"fen": fen, "claim": claim, "claimed": claimed}
+        if move:
+            spec["move"] = move
+        return _seal_through("chess", "CHESS_VERIFY", spec)
+
+    def material(fen, balance):
+        return _seal_through("chess", "CHESS_VERIFY", {"fen": fen, "claim": "material", "claimed_balance": balance})
+
+    S = {
+        "fools_mate": pos(FOOLS, "checkmate", True),
+        "scholars_mate": pos(SCHOLAR, "checkmate", True),
+        "smothered_mate": pos(SMOTHER, "checkmate", True),
+        "back_rank_mate": pos(BACKRANK, "checkmate", True),
+        "stalemate": pos(STALE, "stalemate", True),
+        "stalemate_not_check": pos(STALE, "check", False),
+        "start_not_check": pos(START, "check", False),
+        "start_not_mate": pos(START, "checkmate", False),
+        "e2e4_legal": pos(START, "legal_move", True, "e2e4"),
+        "e2e5_illegal": pos(START, "legal_move", False, "e2e5"),
+        "en_passant": pos(EPASS, "legal_move", True, "e5d6"),
+        "castling": pos(KIWI, "legal_move", True, "e1g1"),
+        "material_start": material(START, 0),
+        "material_scholar": material(SCHOLAR, 1),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "chess verdicts")
+    sid = TS.create("Chess - the rules decide: mate, stalemate, legality, material",
+                    statement="A claim about a chess position is decided by the Laws of Chess applied to the "
+                              "position - computed by the move generator, never judged.",
+                    field="chess",
+                    references=["FIDE Laws of Chess (2023), Articles 1-5",
+                                "F.-A. D. Philidor, Analyse du jeu des Echecs (1749) - the smothered mate",
+                                "src/concordance/chess.py - the perft-proven move generator (tests/test_chess.py)"])["id"]
+    CV = "sealed through chess.CHESS_VERIFY"
+    marks = [
+        ("instance", f"[fool's mate, SEALED] 1.f3 e5 2.g4 Qh4# - White to move is checkmated ({CV}). The shortest "
+                     "possible mate: two pawn moves open the diagonal to the king and nothing can interpose.",
+         S["fools_mate"]),
+        ("instance", f"[scholar's mate, SEALED] 1.e4 e5 2.Bc4 Nc6 3.Qh5 Nf6 4.Qxf7# - Black is checkmated ({CV}): the "
+                     "queen on f7 is guarded by the bishop on c4, the king has no flight square.", S["scholars_mate"]),
+        ("instance", f"[the smothered mate, SEALED] King h8, rook g8, pawns g7 h7; a white knight lands on f7 and it is "
+                     f"mate ({CV}). The king is smothered by its own pieces - Philidor's pattern (1749), the oldest "
+                     "named mate in the literature.", S["smothered_mate"]),
+        ("instance", f"[the back-rank mate, SEALED] King g8 behind its three pawns, a rook arrives on a8: mate ({CV}). "
+                     "The pawns that shielded the king are the wall that traps it.", S["back_rank_mate"]),
+        ("instance", f"[stalemate, SEALED] Black king h8, white queen f7, white king g6, Black to move: stalemate ({CV}). "
+                     "Every square the king could reach is attacked and no other piece exists - no legal move, so the "
+                     "game is drawn (Laws 5.2.1).", S["stalemate"]),
+        ("instance", f"[stalemate is not check, SEALED] In the same position check is FALSE - sealed with claimed = false "
+                     f"({CV}). Stalemate needs both: no legal move AND the king not attacked. The second condition is "
+                     "what separates a draw from a mate; the engine seals the negative as a negative.",
+         S["stalemate_not_check"]),
+        ("instance", f"[the start position is quiet, SEALED] From the initial position White is not in check (claimed = "
+                     f"false, {CV}).", S["start_not_check"]),
+        ("instance", f"[and not mated, SEALED] Nor checkmated (claimed = false, {CV}): twenty legal moves exist.",
+         S["start_not_mate"]),
+        ("instance", f"[a legal move, SEALED] e2e4 is legal from the start ({CV}): a pawn may advance two squares from "
+                     "its starting rank (Laws 3.7.2).", S["e2e4_legal"]),
+        ("instance", f"[an illegal move, SEALED AS ILLEGAL] e2e5 is NOT legal - sealed with claimed = false ({CV}). "
+                     "Three squares is not a pawn move; the generator lists the twenty legal moves and this is not "
+                     "among them. A miss stays a miss.", S["e2e5_illegal"]),
+        ("instance", f"[en passant, SEALED] After 1.e4 c5 2.e5 d5 the capture e5xd6 is legal ({CV}): a pawn that just "
+                     "advanced two squares may be taken as if it had moved one (Laws 3.7.4.1), on that move only.",
+         S["en_passant"]),
+        ("instance", f"[castling, SEALED] In the 'kiwipete' position White may castle kingside, e1g1 ({CV}): king and "
+                     "rook unmoved, squares between empty, no square the king crosses attacked (Laws 3.8.2). The "
+                     "position's perft(2) = 2039 is the standard that proves the generator.", S["castling"]),
+        ("instance", f"[material, SEALED] At the start the material balance is 0 ({CV}): both sides hold 8 + 6 + 6 + 10 + 9 "
+                     "= 39 points on the 1/3/3/5/9 scale.", S["material_start"]),
+        ("instance", f"[a pawn up, SEALED] After scholar's mate White is +1 ({CV}): the f7 pawn was the capture. The count "
+                     "is a convention; the capture is a fact.", S["material_scholar"]),
+        ("postulate", "[the Laws, CITED] The FIDE Laws of Chess are the postulate set: how each piece moves, check, "
+                      "checkmate, stalemate, en passant, castling. They are chosen rules, cited and never sealed; every "
+                      "verdict above is a theorem of them, computed exhaustively over the legal moves. The piece values "
+                      "1/3/3/5/9 are a convention of the literature, not a law.",
+         {"source": "FIDE Laws of Chess (2023); the 1/3/3/5/9 scale (standard literature convention)"}),
+        ("note", "[the bound, stated] The verifier decides what is TRUE of a position - mate, stalemate, legality, "
+                 "material - by exhaustive legal-move generation, proven by perft (start: 20 / 400 / 8902; kiwipete: "
+                 "2039 at depth 2). It never plays, evaluates, or recommends a move: what the best move is lies "
+                 "outside the closed set and is declined.",
+         {"source": "src/concordance/chess.py; tests/test_chess.py (perft counts)"}),
+        ("note", "[on the one map] Strategy has three witnesses here: game theory (the abstract equilibrium), the body "
+                 "under pressure (the combat grammar), and chess - the one where perfect information makes optimal "
+                 "literally computable, so it is the calibration rig for the other two. Ties the game-theory stick "
+                 "and card_floor_the_mind; the search tree is card_floor_computer_science.",
+         {"source": "the one map; the game-theory stick; card_floor_the_mind, card_floor_computer_science"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py chess")
+    return 0
+
+
+def stick_condensed_matter() -> int:
+    """CONDENSED MATTER - the solid state on the going train (issue #11, 2026-10-16: reach, down the domain list).
+    SEALED through condensed_matter.CONDMAT_VERIFY: the resistance quantum R_K = h/e^2 = mu_0 c / 2 alpha and the
+    Josephson constant 2e/h (the solid state measuring the fine-structure constant), a quantized Hall plateau, Bragg's
+    law on the silicon (111) line, the free-electron Fermi energies of copper and sodium, Dulong-Petit's 3R, a
+    phonon's energy, the Debye temperature of copper, the Bose-Einstein occupation at hbar omega = kT, and the
+    monatomic chain's zone-boundary frequency and sound speed. The models are CITED; the numbers are SEALED.
+    Idempotent."""
+    from concordance import tickstick as TS
+    import math
+
+    def cm(spec):
+        return _seal_through("condensed_matter", "CONDMAT_VERIFY", spec)
+
+    S = {
+        "von_klitzing": cm({"claimed_von_klitzing_ohm": 25812.807}),
+        "josephson": cm({"claimed_josephson_ghz_per_v": 483597.8}),
+        "hall_plateau": cm({"filling_factor": 2, "claimed_hall_resistance_ohm": 12906.4}),
+        "bragg_si111": cm({"diff_order": 1, "wavelength_m": 1.5406e-10, "plane_spacing_m": 3.1356e-10,
+                           "claimed_theta_deg": 14.22}),
+        "fermi_copper": cm({"number_density": 8.47e28, "claimed_fermi_J": 1.12e-18}),
+        "fermi_sodium": cm({"number_density": 2.65e28, "claimed_fermi_J": 5.19e-19}),
+        "dulong_petit": cm({"claimed_molar_heat_capacity": 24.94}),
+        "phonon_energy": cm({"phonon_omega": 2.0 * math.pi * 1e13, "claimed_phonon_energy_J": 6.6261e-21}),
+        "debye_copper": cm({"debye_frequency": 4.4906e13, "claimed_debye_temp_K": 343.0}),
+        "occupation": cm({"phonon_omega": 3.9279e13, "temperature_K": 300, "claimed_occupation": 0.58198}),
+        "zone_boundary": cm({"spring_const": 10.0, "atom_mass": 1e-26, "wavevector": math.pi / 3e-10,
+                             "lattice_a": 3e-10, "claimed_omega": 6.3246e13}),
+        "sound_speed": cm({"spring_const": 10.0, "atom_mass": 1e-26, "lattice_a": 3e-10,
+                           "claimed_sound_velocity": 9486.8}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "condensed-matter numbers")
+    sid = TS.create("Condensed matter - the solid state through alpha, sealed",
+                    statement="The solid state's quantized resistances, lattice diffraction, electron gas and phonon "
+                              "gas are closed-form relations over h, e, alpha, k_B and the lattice.",
+                    field="condensed_matter",
+                    references=["C. Kittel, Introduction to Solid State Physics, 8th ed. (2005), Tables 5.1 and 6.1",
+                                "K. von Klitzing, G. Dorda, M. Pepper, Phys. Rev. Lett. 45 (1980) 494",
+                                "B. D. Josephson, Phys. Lett. 1 (1962) 251",
+                                "CODATA 2018 / the 2019 SI: h and e exact, so R_K and K_J are exact"])["id"]
+    CM = "sealed through condensed_matter.CONDMAT_VERIFY"
+    marks = [
+        ("instance", f"[the resistance quantum, SEALED] R_K = h/e^2 = 25,812.807 ohm ({CM}), and the same number is "
+                     "mu_0 c / (2 alpha): a quantized Hall plateau is a measurement of the fine-structure constant. "
+                     "Since the 2019 SI fixed h and e, R_K is exact - the ohm is realized by a solid at low temperature "
+                     "in a strong field (von Klitzing 1980).", S["von_klitzing"]),
+        ("instance", f"[the Josephson constant, SEALED] K_J = 2e/h = 483,597.8 GHz/V ({CM}): a superconducting junction "
+                     "under microwaves steps its voltage in units of h f / 2e - the volt realized by counting. The '2' "
+                     "is the Cooper pair.", S["josephson"]),
+        ("instance", f"[a Hall plateau, SEALED] At filling factor nu = 2 the Hall resistance is R_K / 2 = 12,906.4 ohm "
+                     f"({CM}). The plateaus sit at R_K / nu to a part in a billion whatever the sample - topology, not "
+                     "material, fixes the number.", S["hall_plateau"]),
+        ("instance", f"[Bragg's law, SEALED] Copper K-alpha (1.5406 angstrom) on silicon's (111) planes (d = 3.1356 "
+                     f"angstrom): n lambda = 2 d sin theta gives theta = 14.22 deg, 2 theta = 28.44 deg ({CM}) - the "
+                     "silicon line every diffractometer is calibrated on (NIST SRM 640). The lattice is measured by the "
+                     "wave it reflects.", S["bragg_si111"]),
+        ("instance", f"[the Fermi energy of copper, SEALED] With n = 8.47e28 electrons per cubic metre, E_F = "
+                     f"(hbar^2/2m)(3 pi^2 n)^(2/3) = 1.12e-18 J = 7.0 eV ({CM}; Kittel Table 6.1). The conduction "
+                     "electrons fill states up to 7 eV even at absolute zero - a degenerate gas, Pauli's exclusion made "
+                     "macroscopic.", S["fermi_copper"]),
+        ("instance", f"[and of sodium, SEALED] n = 2.65e28 gives E_F = 5.19e-19 J = 3.24 eV ({CM}): fewer electrons per "
+                     "volume, a lower sea. The two-thirds power is the density of states in three dimensions.",
+         S["fermi_sodium"]),
+        ("instance", f"[Dulong-Petit, SEALED] C = 3R = 24.94 J/(mol K) ({CM}): at high temperature every atom's three "
+                     "vibrational modes carry k_B each. The classical ceiling the phonon gas rises to - and the law "
+                     "whose failure at low temperature (Einstein 1907, Debye 1912) was an early proof of quanta.",
+         S["dulong_petit"]),
+        ("instance", f"[a phonon's energy, SEALED] At 10 THz (omega = 2 pi x 1e13 rad/s) one phonon carries E = hbar "
+                     f"omega = 6.626e-21 J = 41.4 meV ({CM}): lattice vibration is quantized exactly as light is.",
+         S["phonon_energy"]),
+        ("instance", f"[the Debye temperature of copper, SEALED] omega_D = 4.4906e13 rad/s gives theta_D = hbar omega_D "
+                     f"/ k_B = 343 K ({CM}; Kittel Table 5.1). Above theta_D the lattice is classical (Dulong-Petit); "
+                     "below it the heat capacity falls as T^3.", S["debye_copper"]),
+        ("instance", f"[the occupation at hbar omega = k_B T, SEALED] n = 1/(e^1 - 1) = 0.58198 ({CM}; omega = 3.9279e13 "
+                     "rad/s at 300 K). Bose-Einstein statistics: phonons are bosons, so a mode holds a fractional mean "
+                     "number of quanta, not zero or one.", S["occupation"]),
+        ("instance", f"[the zone boundary, SEALED] A monatomic chain (K = 10 N/m, m = 1e-26 kg, a = 3 angstrom) at k = "
+                     f"pi/a vibrates at omega = 2 sqrt(K/m) = 6.3246e13 rad/s ({CM}): the dispersion omega = 2 sqrt(K/m) "
+                     "|sin(ka/2)| has its maximum at the Brillouin-zone edge, where neighbouring atoms move in "
+                     "antiphase. The chain has a top frequency; the continuum does not.", S["zone_boundary"]),
+        ("instance", f"[the sound speed, SEALED] The same chain's long-wavelength limit is v = a sqrt(K/m) = 9486.8 m/s "
+                     f"({CM}): where sin(ka/2) is ka/2 the dispersion is linear and the lattice is an elastic solid.",
+         S["sound_speed"]),
+        ("postulate", "[the models, CITED] The free-electron gas (Sommerfeld 1928), the Debye phonon gas (1912) and the "
+                      "monatomic chain are MODELS: they work for the simple metals and the simple lattices, so their "
+                      "numbers are inferred, never kept as fact. The measured inputs - n for copper and sodium, "
+                      "theta_D = 343 K, d(111) = 3.1356 angstrom - are cited from the tables.",
+         {"source": "Kittel, Introduction to Solid State Physics, 8th ed., Tables 5.1 and 6.1; Sommerfeld, Z. Phys. 47 "
+                    "(1928) 1; Debye, Ann. Phys. 39 (1912) 789"}),
+        ("note", "[on the one map] The solid state stands on quantum mechanics (card_floor_quantum_mechanics: E = hbar "
+                 "omega, the exclusion principle, Bose-Einstein occupation), on thermodynamics (card_floor_thermodynamics: "
+                 "Dulong-Petit, the Debye cutoff), and on the fine-structure constant (the alpha stick: R_K = mu_0 c / "
+                 "2 alpha). Diffraction is the wave floor of card_floor_materials_science. Where quantum mechanics meets "
+                 "a crystal, alpha becomes a resistance you can measure with a voltmeter.",
+         {"source": "the one map; card_floor_quantum_mechanics, card_floor_thermodynamics, card_floor_materials_science; "
+                    "the alpha stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py condensed_matter")
+    return 0
+
+
+def stick_cybersecurity() -> int:
+    """CYBERSECURITY - the published thresholds, sealed (issue #11, 2026-10-16: reach, down the domain list).
+    Through cybersecurity.CYBER_VERIFY: password entropy H = L log2 N (a printable-ASCII passphrase and a six-word
+    diceware phrase), the TLS status table (1.3 recommended, 1.2 current, 1.0 deprecated by RFC 8996, SSL 3 insecure
+    by RFC 7568), the CVSS v3.1 severity bands, IPv4 subnet host counts (including the /31 of RFC 3021), and the IANA
+    port ranges. The standards are CITED as postulates - they are decrees, not theorems; the arithmetic and the
+    lookups are SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def cy(spec):
+        return _seal_through("cybersecurity", "CYBER_VERIFY", spec)
+
+    S = {
+        "entropy_ascii": cy({"password_length": 16, "charset_size": 94, "claimed_entropy_bits": 104.87}),
+        "entropy_diceware": cy({"password_length": 6, "charset_size": 7776, "claimed_entropy_bits": 77.55}),
+        "tls13": cy({"tls_version": "1.3", "claimed_tls_status": "recommended"}),
+        "tls12": cy({"tls_version": "1.2", "claimed_tls_status": "current"}),
+        "tls10": cy({"tls_version": "1.0", "claimed_tls_status": "deprecated"}),
+        "ssl3": cy({"tls_version": "ssl3", "claimed_tls_status": "insecure"}),
+        "cvss_critical": cy({"cvss_base_score": 10.0, "claimed_cvss_severity": "critical"}),
+        "cvss_high": cy({"cvss_base_score": 7.5, "claimed_cvss_severity": "high"}),
+        "subnet_24": cy({"cidr_prefix": 24, "claimed_host_count": 254}),
+        "subnet_16": cy({"cidr_prefix": 16, "claimed_host_count": 65534}),
+        "subnet_31": cy({"cidr_prefix": 31, "claimed_host_count": 2}),
+        "port_443": cy({"port_number": 443, "claimed_port_class": "well_known"}),
+        "port_8080": cy({"port_number": 8080, "claimed_port_class": "registered"}),
+        "port_49152": cy({"port_number": 49152, "claimed_port_class": "dynamic"}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "cybersecurity checks")
+    sid = TS.create("Cybersecurity - entropy, TLS, CVSS, subnets and ports, sealed",
+                    statement="A security claim that rests on a published standard is decided by the standard's "
+                              "own arithmetic or table - entropy, status, band, count, class.",
+                    field="cybersecurity",
+                    references=["NIST SP 800-63B, Digital Identity Guidelines (2017), Appendix A",
+                                "RFC 8996 (2021) deprecating TLS 1.0 and 1.1; RFC 8446 (2018) TLS 1.3; RFC 7568 (2015) SSL 3.0",
+                                "FIRST, CVSS v3.1 Specification, section 5 (qualitative severity rating scale)",
+                                "RFC 3021 (2000) /31 point-to-point links; RFC 6335 (2011) IANA port ranges"])["id"]
+    CY = "sealed through cybersecurity.CYBER_VERIFY"
+    marks = [
+        ("instance", f"[entropy of a random passphrase, SEALED] Sixteen characters drawn uniformly from the 94 printable "
+                     f"ASCII symbols carry H = 16 log2(94) = 104.87 bits ({CY}). Each symbol is log2(94) = 6.55 bits; "
+                     "the bits add because the draws are independent.", S["entropy_ascii"]),
+        ("instance", f"[diceware, SEALED] Six words from a 7776-word list (five dice) carry 6 log2(7776) = 77.55 bits "
+                     f"({CY}): 12.9 bits a word. A phrase a person can remember with the strength of a random string.",
+         S["entropy_diceware"]),
+        ("instance", f"[TLS 1.3, SEALED] TLS 1.3 is 'recommended' ({CY}): RFC 8446 (2018) - one round trip, forward "
+                     "secrecy only, the legacy ciphers removed.", S["tls13"]),
+        ("instance", f"[TLS 1.2, SEALED] TLS 1.2 is 'current' ({CY}): still acceptable, widely deployed, with its weak "
+                     "cipher suites disabled.", S["tls12"]),
+        ("instance", f"[TLS 1.0, SEALED] TLS 1.0 is 'deprecated' ({CY}): RFC 8996 (2021) forbids its negotiation. A "
+                     "protocol does not rot; it is retired by a document with a number.", S["tls10"]),
+        ("instance", f"[SSL 3.0, SEALED] SSL 3.0 is 'insecure' ({CY}): RFC 7568 (2015), after POODLE showed its CBC "
+                     "padding leaks plaintext.", S["ssl3"]),
+        ("instance", f"[CVSS 10.0, SEALED] A base score of 10.0 is 'critical' ({CY}): the band 9.0-10.0 of CVSS v3.1. "
+                     "Log4Shell (CVE-2021-44228) scored exactly this.", S["cvss_critical"]),
+        ("instance", f"[CVSS 7.5, SEALED] 7.5 is 'high' ({CY}): the band 7.0-8.9. Heartbleed (CVE-2014-0160) scored 7.5 "
+                     "on v3 - a memory read, not a code execution, and the scale says so.", S["cvss_high"]),
+        ("instance", f"[a /24, SEALED] A /24 has 2^8 - 2 = 254 usable hosts ({CY}): one address is the network, one the "
+                     "broadcast.", S["subnet_24"]),
+        ("instance", f"[a /16, SEALED] A /16 has 2^16 - 2 = 65,534 ({CY}).", S["subnet_16"]),
+        ("instance", f"[a /31, SEALED] A /31 has 2 usable hosts, not 0 ({CY}): RFC 3021 lets a point-to-point link use "
+                     "both addresses. The rule has an exception and the exception has a number.", S["subnet_31"]),
+        ("instance", f"[port 443, SEALED] 443 is a well-known port, 0-1023 ({CY}): HTTPS (RFC 2818).", S["port_443"]),
+        ("instance", f"[port 8080, SEALED] 8080 is registered, 1024-49151 ({CY}): the conventional HTTP alternate.",
+         S["port_8080"]),
+        ("instance", f"[port 49152, SEALED] 49152 is the first dynamic port, 49152-65535 ({CY}; RFC 6335): the ephemeral "
+                     "range a client is given for the other end of its own connection.", S["port_49152"]),
+        ("postulate", "[the standards, CITED] The severity bands, the TLS statuses and the port ranges are DECREES - "
+                      "FIRST, the IETF and IANA chose them - so they are cited as postulates, never sealed as theorems. "
+                      "What is sealed is that the lookup was done right. The entropy formula assumes a UNIFORM random "
+                      "choice: NIST SP 800-63B says plainly that user-chosen passwords do not reach it, so H = L log2 N "
+                      "is an upper bound on what a person types, inferred never kept.",
+         {"source": "FIRST CVSS v3.1 spec section 5; RFC 8996, 8446, 7568, 3021, 6335; NIST SP 800-63B Appendix A"}),
+        ("note", "[on the one map] Security's arithmetic is information theory (the information-theory stick: entropy is "
+                 "log2 of the choices) and cryptography (card_floor_cryptography: the ciphers TLS carries), laid over the "
+                 "network (card_floor_networking: subnets, ports). The verifier seals the measurable layer and declines "
+                 "the judgment - whether a system is 'secure' is not a number.",
+         {"source": "the one map; the information-theory stick; card_floor_cryptography, card_floor_networking"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py cybersecurity")
+    return 0
+
+
+def stick_document_validation() -> int:
+    """DOCUMENT VALIDATION - the check digits, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
+    document_validation.DOC_VERIFY: ISBN-10 (mod 11, with the X check digit), ISBN-13 and EAN-13 / UPC-A (mod 10,
+    weights 1 and 3), and Luhn (payment cards and IMEI). Valid published identifiers are SEALED as valid; a
+    transposed ISBN-10 and a one-digit Luhn error are SEALED as invalid (claimed false); and the known blind spot of
+    the mod-10 code - an adjacent transposition of digits differing by 5 passes - is SEALED as the instance it is.
+    The code designs are CITED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def dv(spec):
+        return _seal_through("document_validation", "DOC_VERIFY", spec)
+
+    S = {
+        "isbn10": dv({"isbn10": "0306406152", "claimed_isbn10_valid": True}),
+        "isbn10_kr": dv({"isbn10": "0131103628", "claimed_isbn10_valid": True}),
+        "isbn10_x": dv({"isbn10": "080442957X", "claimed_isbn10_valid": True}),
+        "isbn10_transposed": dv({"isbn10": "0306460152", "claimed_isbn10_valid": False}),
+        "isbn13": dv({"isbn13": "9780306406157", "claimed_isbn13_valid": True}),
+        "isbn13_oreilly": dv({"isbn13": "9780596520687", "claimed_isbn13_valid": True}),
+        "luhn": dv({"luhn_number": "79927398713", "claimed_luhn_valid": True}),
+        "luhn_imei": dv({"luhn_number": "490154203237518", "claimed_luhn_valid": True}),
+        "luhn_one_digit": dv({"luhn_number": "79927398714", "claimed_luhn_valid": False}),
+        "ean13": dv({"ean_or_upc": "4006381333931", "claimed_ean_valid": True}),
+        "ean13_blind_spot": dv({"ean_or_upc": "4006831333931", "claimed_ean_valid": True}),
+        "upc_a": dv({"ean_or_upc": "036000291452", "claimed_ean_valid": True}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "check-digit verdicts")
+    sid = TS.create("Document validation - the check digits, sealed",
+                    statement="A check digit is a theorem of modular arithmetic: the weighted sum of a valid "
+                              "identifier is 0 mod 11 (ISBN-10) or 0 mod 10 (ISBN-13, EAN, UPC, Luhn).",
+                    field="document_validation",
+                    references=["ISO 2108:2017, International Standard Book Number",
+                                "H. P. Luhn, US Patent 2,950,048 (1960); ISO/IEC 7812-1",
+                                "GS1 General Specifications, section 7.9 (check digit calculation)",
+                                "J. A. Gallian, Error detection methods, ACM Computing Surveys 28 (1996) 504"])["id"]
+    DV = "sealed through document_validation.DOC_VERIFY"
+    marks = [
+        ("instance", f"[an ISBN-10, SEALED] 0-306-40615-2 is valid ({DV}): weights 10 down to 1, sum 0 mod 11.",
+         S["isbn10"]),
+        ("instance", f"[the C book, SEALED] 0-13-110362-8, The C Programming Language (2nd ed.), is valid ({DV}): "
+                     "the sum is 88 = 8 x 11.", S["isbn10_kr"]),
+        ("instance", f"[the X, SEALED] 0-8044-2957-X is valid ({DV}): mod 11 has eleven residues, so one check value is "
+                     "10 and is written X. The alphabet grew by one letter because the modulus is prime.", S["isbn10_x"]),
+        ("instance", f"[a transposition caught, SEALED AS INVALID] 0306460152 - the 0 and 6 of 0306406152 swapped - is "
+                     f"invalid, sealed with claimed = false ({DV}). Mod 11 with distinct weights catches EVERY adjacent "
+                     "transposition: swapping digits a and b shifts the sum by a - b, never 0 mod 11.",
+         S["isbn10_transposed"]),
+        ("instance", f"[an ISBN-13, SEALED] 978-0-306-40615-7 is valid ({DV}) - the same book as the ISBN-10 above, "
+                     "re-coded under the 978 prefix with a new check digit, mod 10 with weights 1 and 3.", S["isbn13"]),
+        ("instance", f"[another, SEALED] 978-0-596-52068-7 is valid ({DV}): the weighted sum is 130.", S["isbn13_oreilly"]),
+        ("instance", f"[Luhn, SEALED] 79927398713 passes Luhn ({DV}): double every second digit from the right, subtract "
+                     "9 from any double above 9, and the sum is 0 mod 10. Every payment card number ends in a Luhn "
+                     "digit.", S["luhn"]),
+        ("instance", f"[an IMEI, SEALED] 49-015420-323751-8 passes Luhn ({DV}): a phone's identity carries the same check "
+                     "as a card.", S["luhn_imei"]),
+        ("instance", f"[one digit wrong, SEALED AS INVALID] 79927398714 fails, sealed with claimed = false ({DV}). Luhn "
+                     "catches every single-digit error - the doubling-and-casting-out-nines makes each position's "
+                     "contribution a bijection on the digits.", S["luhn_one_digit"]),
+        ("instance", f"[an EAN-13, SEALED] 4006381333931 is valid ({DV}): weights 1,3,1,3,... sum 0 mod 10.", S["ean13"]),
+        ("instance", f"[the blind spot, SEALED] 4006831333931 - the 3 and 8 of the EAN above swapped - is ALSO valid "
+                     f"({DV}). Weights 1 and 3 differ by 2, so a swap of adjacent digits a, b shifts the sum by 2(a - b); "
+                     "when a - b = 5 that is 10, invisible mod 10. The code catches every single-digit error and most "
+                     "transpositions but not this one; the engine seals the limitation as an instance, not an "
+                     "exception.", S["ean13_blind_spot"]),
+        ("instance", f"[a UPC-A, SEALED] 036000291452 is valid ({DV}): twelve digits, read as an EAN-13 with a leading "
+                     "zero - the two codes are one scheme.", S["upc_a"]),
+        ("postulate", "[the designs, CITED] ISBN-10's mod 11 (ISO 2108), the mod-10 1/3 weighting of EAN and ISBN-13 "
+                      "(GS1), and Luhn's doubling (1960) are chosen designs: cited as postulates. What each design "
+                      "DETECTS is a theorem of modular arithmetic - sealed above by instance, proven in general by "
+                      "Gallian (1996): a prime modulus with distinct weights catches all single errors and all adjacent "
+                      "transpositions; mod 10 cannot catch them all, and the 5-apart swap is the proof.",
+         {"source": "ISO 2108:2017; GS1 General Specifications 7.9; Luhn, US 2,950,048; Gallian, ACM Comput. Surv. 28 (1996) 504"}),
+        ("note", "[on the one map] A check digit is an error-detecting code (card_floor_computer_science: parity and "
+                 "its generalizations), built from modular arithmetic (the number-theory floor: residues, a prime "
+                 "modulus) and judged by information theory (the information-theory stick: one redundant symbol buys "
+                 "detection, not correction). The engine never reads a card number or an identity - it checks a "
+                 "published example's arithmetic, nothing more.",
+         {"source": "the one map; card_floor_computer_science; the information-theory stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py document_validation")
+    return 0
+
+
+def stick_ephemeris() -> int:
+    """EPHEMERIS - the sky's calendar, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
+    ephemeris.EPH_VERIFY: the Julian Day of J2000.0 and of the first Gregorian day; four eclipses sealed as the new
+    and full moons they must be; the four 2024 equinoxes and solstices to the day; sunrise and sunset for New York
+    on 2025-07-04 and for the equator at the equinox; and Kepler's third law in its gravitational form for the Earth,
+    a geostationary satellite, and the Moon - whose two-body period falls 0.14 percent short of the sidereal month,
+    the Sun's perturbation, kept as the method's stated bound. Meeus's algorithms are CITED at their stated
+    precision; the dates are SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def ep(spec):
+        return _seal_through("ephemeris", "EPH_VERIFY", spec)
+
+    NYC = {"lat": 40.7128, "lon": -74.0060, "tz_offset_hours": -4}
+    S = {
+        "jd_j2000": ep({"iso_date": "2000-01-01", "claimed_julian_day": 2451545.0}),
+        "jd_gregorian": ep({"iso_date": "1582-10-15", "claimed_julian_day": 2299161.0}),
+        "new_moon_2024": ep({"iso_date": "2024-04-08", "claimed_moon_phase": "new"}),
+        "new_moon_2017": ep({"iso_date": "2017-08-21", "claimed_moon_phase": "new"}),
+        "full_moon_2022": ep({"iso_date": "2022-11-08", "claimed_moon_phase": "full"}),
+        "full_moon_2019": ep({"iso_date": "2019-01-21", "claimed_moon_phase": "full"}),
+        "march_equinox": ep({"year": 2024, "event": "vernal_equinox", "claimed_event_iso": "2024-03-20"}),
+        "june_solstice": ep({"year": 2024, "event": "summer_solstice", "claimed_event_iso": "2024-06-20"}),
+        "september_equinox": ep({"year": 2024, "event": "autumnal_equinox", "claimed_event_iso": "2024-09-22"}),
+        "december_solstice": ep({"year": 2024, "event": "winter_solstice", "claimed_event_iso": "2024-12-21"}),
+        "sun_nyc": ep({"iso_date": "2025-07-04", **NYC, "claimed_sunrise_hour": 5.52, "claimed_sunset_hour": 20.52}),
+        "sun_equator": ep({"iso_date": "2024-03-20", "lat": 0.0, "lon": 0.0, "tz_offset_hours": 0,
+                           "claimed_sunrise_hour": 6.0, "claimed_sunset_hour": 18.0}),
+        "orbit_earth": ep({"orbit_semi_major_m": 1.496e11, "orbit_central_mass_kg": 1.989e30,
+                           "claimed_orbital_period_s": 3.156e7}),
+        "orbit_geostationary": ep({"orbit_semi_major_m": 4.2164e7, "orbit_central_mass_kg": 5.9722e24,
+                                   "claimed_orbital_period_s": 86164.0}),
+        "orbit_moon": ep({"orbit_semi_major_m": 3.844e8, "orbit_central_mass_kg": 6.0457e24,
+                          "claimed_orbital_period_s": 2.3574e6}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "ephemeris dates")
+    sid = TS.create("Ephemeris - the sky's calendar, sealed",
+                    statement="Julian days, lunar phases, the equinoxes and solstices, sunrise and sunset, and "
+                              "orbital periods are closed-form functions of the date and the orbit.",
+                    field="ephemeris",
+                    references=["J. Meeus, Astronomical Algorithms, 2nd ed. (1998), ch. 7, 25, 27, 49",
+                                "NASA GSFC eclipse catalogue (F. Espenak): 2017-08-21, 2024-04-08 solar; "
+                                "2019-01-21, 2022-11-08 lunar",
+                                "USNO, Earth's Seasons - equinoxes, solstices (2024)",
+                                "J. Kepler, Harmonices Mundi (1619), Book V - the third law"])["id"]
+    EP = "sealed through ephemeris.EPH_VERIFY"
+    marks = [
+        ("instance", f"[J2000.0, SEALED] 2000-01-01 at noon UT is Julian Day 2,451,545.0 ({EP}; Meeus ch. 7) - the "
+                     "epoch every modern star catalogue is referred to. The Julian Day counts days since noon on "
+                     "1 January 4713 BC (Scaliger 1583), a single integer line through every calendar.", S["jd_j2000"]),
+        ("instance", f"[the first Gregorian day, SEALED] 1582-10-15, the day after 1582-10-04 in the reform, is JD "
+                     f"2,299,161.0 ({EP}). Ten dates were skipped; the day count was not - which is why astronomers "
+                     "count days and not dates.", S["jd_gregorian"]),
+        ("instance", f"[the 2024 eclipse was a new moon, SEALED] 2024-04-08 - the total solar eclipse across North "
+                     f"America - falls at the new moon ({EP}: mean lunar age within 1.5 d of 0). A solar eclipse is a "
+                     "new moon by definition: the Moon between us and the Sun.", S["new_moon_2024"]),
+        ("instance", f"[and 2017, SEALED] 2017-08-21, the 'Great American' eclipse, is a new moon ({EP}).", S["new_moon_2017"]),
+        ("instance", f"[a lunar eclipse is a full moon, SEALED] 2022-11-08, total lunar eclipse: full moon ({EP}). The "
+                     "Earth between Moon and Sun - the opposite configuration, half a synodic month from new.",
+         S["full_moon_2022"]),
+        ("instance", f"[and 2019, SEALED] 2019-01-21, the total lunar eclipse: full moon ({EP}).", S["full_moon_2019"]),
+        ("instance", f"[the March equinox, SEALED] 2024-03-20 ({EP}; USNO: 03:06 UT).", S["march_equinox"]),
+        ("instance", f"[the June solstice, SEALED] 2024-06-20 ({EP}; USNO: 20:51 UT) - the earliest June solstice since "
+                     "1796, the leap-cycle drift at its turn.", S["june_solstice"]),
+        ("instance", f"[the September equinox, SEALED] 2024-09-22 ({EP}; USNO: 12:44 UT).", S["september_equinox"]),
+        ("instance", f"[the December solstice, SEALED] 2024-12-21 ({EP}; USNO: 09:20 UT). Four dates a year the "
+                     "tilted Earth's orbit fixes; Meeus's Table 27 gives them to the day for a thousand years either way.",
+         S["december_solstice"]),
+        ("instance", f"[sunrise in New York, SEALED] 2025-07-04 at 40.71 N, 74.01 W, EDT: sunrise 5:31 (5.52 h), sunset "
+                     f"8:31 pm (20.52 h) ({EP}, within the verifier's 0.5 h window; USNO gives 5:31 and 20:31). The "
+                     "geometry of a tilted axis, with refraction's 0.833 deg added to the horizon.", S["sun_nyc"]),
+        ("instance", f"[the equator at the equinox, SEALED] 0 N, 0 E on 2024-03-20: sunrise 6:00, sunset 18:00 ({EP}). "
+                     "Equal night - with the refraction allowance the day runs about 12 h 7 min, which is why the date of "
+                     "truly equal day and night (the equilux) falls a few days before the equinox.", S["sun_equator"]),
+        ("instance", f"[Kepler's third law - the Earth, SEALED] a = 1.496e11 m about 1.989e30 kg: T = 2 pi sqrt(a^3 / G M) "
+                     f"= 3.156e7 s, one year ({EP}, through G).", S["orbit_earth"]),
+        ("instance", f"[the geostationary orbit, SEALED] a = 42,164 km about the Earth (5.9722e24 kg): T = 86,164 s, "
+                     f"one sidereal day ({EP}). A satellite there hangs over one meridian - the orbit Clarke proposed "
+                     "in 1945, placed by Kepler's law and G.", S["orbit_geostationary"]),
+        ("instance", f"[the Moon - the two-body period, SEALED] a = 384,400 km about Earth + Moon (6.0457e24 kg): T = "
+                     f"2.3574e6 s = 27.28 d ({EP}). The observed sidereal month is 27.3217 d = 2.3606e6 s - 0.14 percent "
+                     "longer. The discordance is the Sun's pull on the Moon, which the two-body formula omits: it "
+                     "indicts the METHOD at that precision, not G or the distance. The honest number is sealed; the "
+                     "sidereal month is cited.", S["orbit_moon"]),
+        ("postulate", "[the precision, CITED] Meeus's low-precision forms are used as stated: the equinox table "
+                      "without its periodic terms (good to about 2 days), the sunrise formula without the equation of "
+                      "time (about 0.5 h), the mean lunar age from a reference new moon (about 1.5 d). Each window is "
+                      "the stated precision and every claim above is judged at it; a claim finer than the method is "
+                      "declined, never waved through.",
+         {"source": "J. Meeus, Astronomical Algorithms (1998) ch. 25, 27, 49; src/concordance/verifiers/ephemeris.py"}),
+        ("note", "[on the one map] The ephemeris is the calendar (card_floor_the_calendar: the Julian day line, the "
+                 "Gregorian reform) read off the orbits (card_floor_astronomy: phases, eclipses, the seasons) under "
+                 "gravity (Kepler's third law in Newton's form, through G). Everything here is time as the sky keeps "
+                 "it - the clock we are inside of.",
+         {"source": "the one map; card_floor_the_calendar, card_floor_astronomy; the calendar stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py ephemeris")
+    return 0
+
+
+def stick_exercise_science() -> int:
+    """EXERCISE SCIENCE - the body's arithmetic, sealed (issue #11, 2026-10-16: reach, down the domain list).
+    Through exercise_science.EX_VERIFY: MET values from the Compendium of Physical Activities, energy expenditure
+    kcal = MET x kg x h, the Tanaka maximum heart rate 208 - 0.7 age at three ages, and Karvonen training zones on
+    the heart-rate reserve. The Compendium and the Tanaka regression are empirical and CITED as postulates; the
+    arithmetic they feed is SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def ex(spec):
+        return _seal_through("exercise_science", "EX_VERIFY", spec)
+
+    S = {
+        "met_running": ex({"activity": "running_6mph", "claimed_met": 9.8}),
+        "met_walking": ex({"activity": "walking_3mph", "claimed_met": 3.3}),
+        "met_sitting": ex({"activity": "sitting_quietly", "claimed_met": 1.3}),
+        "kcal_run": ex({"claimed_met": 9.8, "weight_kg": 70, "duration_hours": 0.5, "claimed_kcal": 343}),
+        "kcal_walk": ex({"claimed_met": 3.3, "weight_kg": 70, "duration_hours": 1.0, "claimed_kcal": 231}),
+        "hrmax_30": ex({"age_years": 30, "claimed_max_hr": 187}),
+        "hrmax_40": ex({"age_years": 40, "claimed_max_hr": 180}),
+        "hrmax_60": ex({"age_years": 60, "claimed_max_hr": 166}),
+        "zone_30": ex({"age_years": 30, "resting_hr": 60, "intensity_low": 0.5, "intensity_high": 0.7,
+                       "claimed_zone_low_bpm": 124, "claimed_zone_high_bpm": 149}),
+        "zone_50": ex({"age_years": 50, "resting_hr": 70, "intensity_low": 0.6, "intensity_high": 0.8,
+                       "claimed_zone_low_bpm": 132, "claimed_zone_high_bpm": 152}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "exercise-science numbers")
+    sid = TS.create("Exercise science - METs, calories and heart-rate zones, sealed",
+                    statement="Energy cost and training intensity are arithmetic over three measured inputs: the "
+                              "activity's MET, the body's mass, and the heart's range.",
+                    field="exercise_science",
+                    references=["B. E. Ainsworth et al., 2011 Compendium of Physical Activities, Med. Sci. Sports "
+                                "Exerc. 43 (2011) 1575",
+                                "H. Tanaka, K. D. Monahan, D. R. Seals, Age-predicted maximal heart rate revisited, "
+                                "J. Am. Coll. Cardiol. 37 (2001) 153",
+                                "M. J. Karvonen, E. Kentala, O. Mustala, Ann. Med. Exp. Biol. Fenn. 35 (1957) 307"])["id"]
+    EX = "sealed through exercise_science.EX_VERIFY"
+    marks = [
+        ("instance", f"[running at 6 mph, SEALED] 9.8 MET ({EX}; Compendium code 12050). One MET is resting metabolism, "
+                     "3.5 mL of oxygen per kg per minute; a ten-minute mile is nearly ten times rest.", S["met_running"]),
+        ("instance", f"[walking at 3 mph, SEALED] 3.3 MET ({EX}): a brisk walk is moderate intensity, the 3-6 MET band "
+                     "the guidelines name.", S["met_walking"]),
+        ("instance", f"[sitting quietly, SEALED] 1.3 MET ({EX}): awake and still is a third above sleep's 0.95.",
+         S["met_sitting"]),
+        ("instance", f"[a half-hour run, SEALED] 9.8 MET x 70 kg x 0.5 h = 343 kcal ({EX}): one MET-hour per kilogram is "
+                     "about one kilocalorie, so the product is the energy.", S["kcal_run"]),
+        ("instance", f"[an hour's walk, SEALED] 3.3 x 70 x 1 = 231 kcal ({EX}). The same hour, the same body, a third "
+                     "of the energy - intensity is what the MET measures.", S["kcal_walk"]),
+        ("instance", f"[maximum heart rate at 30, SEALED] 208 - 0.7 x 30 = 187 bpm ({EX}; Tanaka 2001).", S["hrmax_30"]),
+        ("instance", f"[at 40, SEALED] 208 - 28 = 180 bpm ({EX}) - where the old '220 - age' also says 180; the two "
+                     "lines cross at 40 and part on either side.", S["hrmax_40"]),
+        ("instance", f"[at 60, SEALED] 208 - 42 = 166 bpm ({EX}); '220 - age' would say 160. Tanaka's shallower slope "
+                     "was fit to older adults the old rule underestimated.", S["hrmax_60"]),
+        ("instance", f"[a Karvonen zone at 30, SEALED] Resting 60, maximum 187, reserve 127: the 50-70 percent zone is "
+                     f"60 + 0.5 x 127 = 124 to 60 + 0.7 x 127 = 149 bpm ({EX}). Karvonen (1957) scales the RESERVE, not "
+                     "the maximum, so a fit heart with a low resting rate trains in a wider band.", S["zone_30"]),
+        ("instance", f"[at 50, SEALED] Resting 70, maximum 173, reserve 103: 60-80 percent is 132 to 152 bpm ({EX}).",
+         S["zone_50"]),
+        ("postulate", "[the inputs, CITED] A MET value is a population mean from the Compendium (Ainsworth 2011); the "
+                      "maximal heart rate 208 - 0.7 age is a regression across 351 studies with a standard deviation "
+                      "near 10 bpm (Tanaka 2001); 1 MET = 3.5 mL O2/kg/min = 1 kcal/kg/h is a convention. They work, so "
+                      "the numbers above are inferred from them, never kept as fact about one person - a measured VO2max "
+                      "or a stress test replaces the estimate. The engine seals the arithmetic and declines the "
+                      "prescription.",
+         {"source": "Ainsworth et al., MSSE 43 (2011) 1575; Tanaka et al., JACC 37 (2001) 153; Karvonen et al. (1957)"}),
+        ("note", "[on the one map] The body at work is nutrition's ledger spent (card_floor_nutrition: the kilocalorie), "
+                 "physiology measured (card_floor_medicine: the heart's rate and reserve), and biology's metabolism "
+                 "(card_floor_biology: oxygen to work). Ties the nutrition and medicine sticks.",
+         {"source": "the one map; card_floor_nutrition, card_floor_medicine, card_floor_biology"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py exercise_science")
+    return 0
+
+
+def stick_history_chronology() -> int:
+    """HISTORY / CHRONOLOGY - year arithmetic with no year zero, sealed (issue #11, 2026-10-16: reach, down the
+    domain list). Through history_chronology.HIST_VERIFY: spans within one era by signed subtraction (Rome's kings to
+    its republic, Hastings to Columbus, the bicentennial), spans across the era boundary by the no-year-zero rule
+    (Caesar's death to the fall of Constantinople, 1 BC to AD 1, Rome founded to Rome fallen), century assignment
+    (1776, the year 100, the year 2000 and 2001), era labels, and decades. The era and its missing zero are
+    conventions, CITED; the counts are SEALED exactly. Idempotent."""
+    from concordance import tickstick as TS
+
+    def hc(spec):
+        return _seal_through("history_chronology", "HIST_VERIFY", spec)
+
+    S = {
+        "rome_kings_to_republic": hc({"from_year": -753, "to_year": -509, "claimed_elapsed_years": 244}),
+        "hastings_to_columbus": hc({"from_year": 1066, "to_year": 1492, "claimed_elapsed_years": 426}),
+        "bicentennial": hc({"from_year": 1776, "to_year": 1976, "claimed_elapsed_years": 200}),
+        "caesar_to_constantinople": hc({"from_BCE": 44, "to_CE": 1453, "claimed_elapsed": 1496}),
+        "no_year_zero": hc({"from_BCE": 1, "to_CE": 1, "claimed_elapsed": 1}),
+        "rome_founded_to_fallen": hc({"from_BCE": 753, "to_CE": 476, "claimed_elapsed": 1228}),
+        "century_1776": hc({"year_CE": 1776, "claimed_century": 18}),
+        "century_100": hc({"year_CE": 100, "claimed_century": 1}),
+        "century_2000": hc({"year_CE": 2000, "claimed_century": 20}),
+        "century_2001": hc({"year_CE": 2001, "claimed_century": 21}),
+        "era_44": hc({"year": -44, "claimed_era": "BCE"}),
+        "era_1453": hc({"year": 1453, "claimed_era": "CE"}),
+        "decade_1985": hc({"year_CE": 1985, "claimed_decade_start": 1980}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "chronology counts")
+    sid = TS.create("History and chronology - counting years with no year zero",
+                    statement="A span of years is an exact integer: signed subtraction within an era, and "
+                              "from_BCE + to_CE - 1 across the boundary, because the Christian era has no year 0.",
+                    field="history_chronology",
+                    references=["Dionysius Exiguus, Liber de Paschate (AD 525) - the anno Domini count",
+                                "Bede, De temporum ratione (AD 725) - counting backward from the Incarnation",
+                                "E. G. Richards, Mapping Time: The Calendar and its History (1998), ch. 2",
+                                "ISO 8601 / astronomical year numbering: year 0 = 1 BC (Cassini, 1740)"])["id"]
+    HC = "sealed through history_chronology.HIST_VERIFY"
+    marks = [
+        ("instance", f"[within an era, SEALED] From Rome's traditional founding, 753 BC, to the republic, 509 BC, is 244 "
+                     f"years ({HC}): both dates in one era, signed subtraction is exact.", S["rome_kings_to_republic"]),
+        ("instance", f"[Hastings to Columbus, SEALED] 1066 to 1492 is 426 years ({HC}).", S["hastings_to_columbus"]),
+        ("instance", f"[the bicentennial, SEALED] 1776 to 1976 is 200 years ({HC}) - judged exactly, so 199 and 201 "
+                     "would both be refused. A count of years is an integer claim.", S["bicentennial"]),
+        ("instance", f"[across the boundary, SEALED] From Caesar's death, 44 BC, to the fall of Constantinople, AD 1453, "
+                     f"is 44 + 1453 - 1 = 1496 years ({HC}) - not 1497. The missing year is the missing year zero.",
+         S["caesar_to_constantinople"]),
+        ("instance", f"[the rule itself, SEALED] 1 BC to AD 1 is ONE year ({HC}): the year before the era and the first "
+                     "year of it are adjacent. Any span that crosses the boundary is one less than the sum.",
+         S["no_year_zero"]),
+        ("instance", f"[Rome founded to Rome fallen, SEALED] 753 BC to AD 476 is 1228 years ({HC}): the Western empire's "
+                     "span as the textbooks give it.", S["rome_founded_to_fallen"]),
+        ("instance", f"[1776 is the 18th century, SEALED] ceil(1776 / 100) = 18 ({HC}): the century a year belongs to "
+                     "is one more than its hundreds, except at a round hundred.", S["century_1776"]),
+        ("instance", f"[the year 100, SEALED] ceil(100 / 100) = 1: the year 100 is the LAST year of the first century "
+                     f"({HC}), because the first century ran AD 1 to AD 100 - a hundred years with no zero to start from.",
+         S["century_100"]),
+        ("instance", f"[the year 2000, SEALED] 2000 is in the 20th century ({HC}). The millennium parties were a year "
+                     "early: the 21st began on 1 January 2001.", S["century_2000"]),
+        ("instance", f"[and 2001, SEALED] 2001 is the first year of the 21st ({HC}).", S["century_2001"]),
+        ("instance", f"[an era label, SEALED] -44 is BC (BCE) ({HC}): negative is before the era.", S["era_44"]),
+        ("instance", f"[and AD, SEALED] 1453 is AD (CE) ({HC}).", S["era_1453"]),
+        ("instance", f"[a decade, SEALED] 1985 is in the decade beginning 1980 ({HC}): floor to the ten.", S["decade_1985"]),
+        ("postulate", "[the era, CITED] The anno Domini count is Dionysius Exiguus's (525), carried backward by Bede "
+                      "(725) with no year zero - Roman numerals had none. Astronomers (Cassini 1740) and ISO 8601 insert "
+                      "a year 0 = 1 BC so that subtraction works across the boundary. Two conventions, both cited; the "
+                      "engine seals under the historian's (no zero) and names the rule in every cross-era count. "
+                      "Whether Dionysius placed the Incarnation correctly (Herod died 4 BC) is a question of evidence, "
+                      "declined here.",
+         {"source": "Dionysius Exiguus (525); Bede, De temporum ratione (725); Richards, Mapping Time (1998); ISO 8601"}),
+        ("note", "[on the one map] Chronology is the calendar's integer axis (card_floor_the_calendar: the era, the "
+                 "leap rule, the Julian day line that has no gap at the boundary) applied to the record of events. The "
+                 "ephemeris stick counts the same line in days; this one counts it in years and watches the one place "
+                 "the years skip.",
+         {"source": "the one map; card_floor_the_calendar; the calendar stick; the ephemeris stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py history_chronology")
+    return 0
+
+
+def stick_labor() -> int:
+    """LABOR - wages under the statute, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
+    labor.LABOR_VERIFY: gross pay, the FLSA time-and-a-half week, the 2080-hour year both ways (salary to hourly,
+    hourly to salary), take-home at a flat rate, and the federal minimum wage - a compliant wage sealed compliant and
+    a wage below the floor sealed non-compliant (claimed false). The statute's numbers are CITED as postulates; the
+    pay arithmetic is SEALED to the cent. Idempotent."""
+    from concordance import tickstick as TS
+
+    def lb(spec):
+        return _seal_through("labor", "LABOR_VERIFY", spec)
+
+    S = {
+        "gross": lb({"hourly_rate": 18.50, "hours_worked": 45, "claimed_gross_pay": 832.50}),
+        "overtime": lb({"hourly_rate": 18.50, "regular_hours": 40, "overtime_hours": 5, "claimed_overtime_pay": 878.75}),
+        "overtime_only": lb({"hourly_rate": 10.0, "regular_hours": 0, "overtime_hours": 10, "claimed_overtime_pay": 150.0}),
+        "annual_to_hourly": lb({"annual_salary": 52000, "claimed_hourly_equivalent": 25.0}),
+        "hourly_to_annual": lb({"hourly_rate": 20.0, "claimed_annual_salary": 41600}),
+        "take_home": lb({"gross_pay": 1000, "total_tax_rate": 0.28, "claimed_take_home": 720.0}),
+        "minimum_compliant": lb({"claimed_hourly_rate": 7.25, "claimed_compliant": True}),
+        "minimum_below": lb({"claimed_hourly_rate": 7.00, "claimed_compliant": False}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "labor computations")
+    sid = TS.create("Labor - wages, overtime and the minimum, sealed",
+                    statement="Pay is arithmetic over a rate, hours and the statute's multipliers: gross, time and "
+                              "a half past forty, the 2080-hour year, and a floor the rate must meet.",
+                    field="labor",
+                    references=["Fair Labor Standards Act of 1938, 29 U.S.C. section 206 (minimum wage) and section 207 "
+                                "(overtime)",
+                                "29 U.S.C. 206(a)(1)(C): $7.25 per hour, effective 24 July 2009",
+                                "U.S. Office of Personnel Management: 2,087 and 2,080 hours as the work-year conventions"])["id"]
+    LB = "sealed through labor.LABOR_VERIFY"
+    marks = [
+        ("instance", f"[gross pay, SEALED] $18.50 x 45 h = $832.50 ({LB}) - the straight product, before the statute "
+                     "touches it.", S["gross"]),
+        ("instance", f"[the FLSA week, SEALED] 40 h at $18.50 plus 5 h at 1.5 x $18.50: $740.00 + $138.75 = $878.75 "
+                     f"({LB}; 29 U.S.C. 207). The forty-first hour costs the employer half again as much - the premium "
+                     "is the law's lever against the long week.", S["overtime"]),
+        ("instance", f"[the premium alone, SEALED] Ten overtime hours at $10 pay $150 ({LB}): 1.5 x 10 x 10.",
+         S["overtime_only"]),
+        ("instance", f"[salary to hourly, SEALED] $52,000 a year is $25.00 an hour ({LB}): 52 weeks x 40 hours = 2080.",
+         S["annual_to_hourly"]),
+        ("instance", f"[hourly to salary, SEALED] $20 an hour is $41,600 a year ({LB}): the same 2080, the mirror "
+                     "direction.", S["hourly_to_annual"]),
+        ("instance", f"[take-home at a flat rate, SEALED] $1000 gross at a 28 percent total rate leaves $720 ({LB}). "
+                     "A flat rate is a model of withholding; real brackets are the tax code's, declined here.",
+         S["take_home"]),
+        ("instance", f"[the floor met, SEALED] $7.25 an hour meets the federal minimum of $7.25 ({LB}): the floor is "
+                     "inclusive.", S["minimum_compliant"]),
+        ("instance", f"[the floor missed, SEALED AS NON-COMPLIANT] $7.00 does not - sealed with claimed_compliant = "
+                     f"false ({LB}). A quarter under the statute is under the statute; the engine seals the negative as a "
+                     "negative.", S["minimum_below"]),
+        ("postulate", "[the statute, CITED] Time and a half past forty hours (29 U.S.C. 207) and $7.25 (29 U.S.C. "
+                      "206, since 2009) are LAW, not theorems - chosen by Congress, changeable by Congress, exceeded by "
+                      "many states; cited as postulates. The 2080-hour year is a convention (OPM also uses 2,087); the "
+                      "flat tax rate is a simplification. What is sealed is the arithmetic each one commands.",
+         {"source": "29 U.S.C. 206, 207; U.S. OPM fact sheet on the 2,087-hour year"}),
+        ("note", "[on the one map] Wages are the economics floor's price of labour (card_floor_economics) bounded by "
+                 "statute (the law stick: a rule with a citation, applied exactly). The engine seals the pay a rule "
+                 "produces and declines what the rule should be.",
+         {"source": "the one map; card_floor_economics; the law stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py labor")
+    return 0
+
+
+def stick_linear_algebra() -> int:
+    """LINEAR ALGEBRA - vectors and matrices, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
+    linear_algebra.LIN_VERIFY: the dot product, the cross product and its anticommutation, the 3-4-5 and 2-3-6-7
+    magnitudes, orthogonality and the 45-degree angle, a product AB and its reverse BA (they differ - sealed both),
+    det(AB) = det A det B, a singular determinant, the trace, real eigenvalues of a symmetric matrix and the pair
+    +/- i of a rotation, an inverse and the rotation whose inverse is its transpose, and a solved system. The vector
+    space axioms are CITED; the computations are SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def la(spec):
+        return _seal_through("linear_algebra", "LIN_VERIFY", spec)
+
+    A, B = [[1, 2], [3, 4]], [[5, 6], [7, 8]]
+    ROT = [[0, -1], [1, 0]]
+    S = {
+        "dot": la({"vec_a": [1, 2, 3], "vec_b": [4, 5, 6], "claimed_dot_product": 32}),
+        "cross": la({"vec_a": [1, 0, 0], "vec_b": [0, 1, 0], "claimed_cross_product": [0, 0, 1]}),
+        "cross_anti": la({"vec_a": [0, 1, 0], "vec_b": [1, 0, 0], "claimed_cross_product": [0, 0, -1]}),
+        "mag_345": la({"vec": [3, 4], "claimed_magnitude": 5}),
+        "mag_2367": la({"vec": [2, 3, 6], "claimed_magnitude": 7}),
+        "angle_90": la({"vec_a": [1, 0], "vec_b": [0, 1], "claimed_angle_deg": 90}),
+        "angle_45": la({"vec_a": [1, 1], "vec_b": [1, 0], "claimed_angle_deg": 45}),
+        "product_ab": la({"mat_a": A, "mat_b": B, "claimed_matrix_product": [[19, 22], [43, 50]]}),
+        "product_ba": la({"mat_a": B, "mat_b": A, "claimed_matrix_product": [[23, 34], [31, 46]]}),
+        "det_a": la({"matrix": A, "claimed_determinant": -2}),
+        "det_ab": la({"matrix": [[19, 22], [43, 50]], "claimed_determinant": 4}),
+        "det_singular": la({"matrix": [[1, 2], [2, 4]], "claimed_determinant": 0}),
+        "trace": la({"matrix": A, "claimed_trace": 5}),
+        "eig_symmetric": la({"matrix": [[2, 1], [1, 2]], "claimed_eigenvalues": [1, 3]}),
+        "eig_rotation": la({"matrix": ROT, "claimed_eigenvalues": ["1j", "-1j"]}),
+        "inverse": la({"matrix": A, "claimed_inverse": [[-2, 1], [1.5, -0.5]]}),
+        "inverse_rotation": la({"matrix": ROT, "claimed_inverse": [[0, 1], [-1, 0]]}),
+        "solve": la({"matrix": A, "vec_b": [5, 11], "claimed_solution": [1, 2]}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "linear-algebra computations")
+    sid = TS.create("Linear algebra - vectors and matrices, computed and sealed",
+                    statement="Every claim about vectors and matrices is decided by the arithmetic of the vector "
+                              "space axioms: products, norms, angles, determinants, eigenvalues, inverses, solutions.",
+                    field="linear_algebra",
+                    references=["G. Strang, Introduction to Linear Algebra, 5th ed. (2016)",
+                                "A. Cayley, A memoir on the theory of matrices, Phil. Trans. R. Soc. 148 (1858) 17",
+                                "J. W. Gibbs & E. B. Wilson, Vector Analysis (1901) - the dot and cross products"])["id"]
+    LA = "sealed through linear_algebra.LIN_VERIFY"
+    marks = [
+        ("instance", f"[the dot product, SEALED] (1,2,3) . (4,5,6) = 4 + 10 + 18 = 32 ({LA}): the sum of the "
+                     "componentwise products - a number from two vectors, zero when they are perpendicular.", S["dot"]),
+        ("instance", f"[the cross product, SEALED] i x j = k ({LA}): the right-hand rule, a vector perpendicular to both.",
+         S["cross"]),
+        ("instance", f"[it anticommutes, SEALED] j x i = -k ({LA}). Reverse the order and the sign flips - the cross "
+                     "product is not commutative, and the engine seals both orders rather than assume one.",
+         S["cross_anti"]),
+        ("instance", f"[3-4-5, SEALED] |(3,4)| = 5 ({LA}): Pythagoras as a norm.", S["mag_345"]),
+        ("instance", f"[2-3-6-7, SEALED] |(2,3,6)| = sqrt(4 + 9 + 36) = 7 ({LA}): the theorem in three dimensions, an "
+                     "integer again.", S["mag_2367"]),
+        ("instance", f"[orthogonal, SEALED] The angle between (1,0) and (0,1) is 90 deg ({LA}): cos theta = a.b / |a||b| "
+                     "= 0.", S["angle_90"]),
+        ("instance", f"[45 degrees, SEALED] Between (1,1) and (1,0): cos theta = 1 / sqrt 2, theta = 45 deg ({LA}).",
+         S["angle_45"]),
+        ("instance", f"[a product, SEALED] [[1,2],[3,4]] [[5,6],[7,8]] = [[19,22],[43,50]] ({LA}): row times column.",
+         S["product_ab"]),
+        ("instance", f"[the reverse product, SEALED] [[5,6],[7,8]] [[1,2],[3,4]] = [[23,34],[31,46]] ({LA}) - a "
+                     "different matrix. AB is not BA: matrix multiplication is not commutative, and composition of "
+                     "transformations does not care which you did first only when they happen to commute.",
+         S["product_ba"]),
+        ("instance", f"[a determinant, SEALED] det [[1,2],[3,4]] = 1 x 4 - 2 x 3 = -2 ({LA}): the signed area the "
+                     "matrix maps the unit square to; negative means it flips orientation.", S["det_a"]),
+        ("instance", f"[determinants multiply, SEALED] det(AB) = det [[19,22],[43,50]] = 950 - 946 = 4 = (-2)(-2) "
+                     f"({LA}): det(AB) = det A det B, the area scaling composes.", S["det_ab"]),
+        ("instance", f"[singular, SEALED] det [[1,2],[2,4]] = 0 ({LA}): the rows are dependent, the square is flattened "
+                     "to a line, no inverse exists.", S["det_singular"]),
+        ("instance", f"[the trace, SEALED] tr [[1,2],[3,4]] = 5 ({LA}): the diagonal sum, which equals the sum of the "
+                     "eigenvalues.", S["trace"]),
+        ("instance", f"[a symmetric matrix, SEALED] The eigenvalues of [[2,1],[1,2]] are 1 and 3 ({LA}), real, as a "
+                     "symmetric matrix's always are - with eigenvectors (1,-1) and (1,1), perpendicular.",
+         S["eig_symmetric"]),
+        ("instance", f"[a rotation, SEALED] The eigenvalues of the 90-degree rotation [[0,-1],[1,0]] are +i and -i "
+                     f"({LA}): no real vector keeps its direction under a quarter turn, so the eigenvalues leave the "
+                     "real line and sit on the unit circle. The characteristic polynomial is lambda^2 + 1.",
+         S["eig_rotation"]),
+        ("instance", f"[an inverse, SEALED] [[1,2],[3,4]]^-1 = [[-2,1],[1.5,-0.5]] ({LA}: A times the claimed inverse is "
+                     "the identity). The 2x2 formula: swap the diagonal, negate the off-diagonal, divide by the "
+                     "determinant.", S["inverse"]),
+        ("instance", f"[a rotation's inverse is its transpose, SEALED] [[0,-1],[1,0]]^-1 = [[0,1],[-1,0]] ({LA}): an "
+                     "orthogonal matrix undoes itself by transposition, because rotating back is rotating the other way.",
+         S["inverse_rotation"]),
+        ("instance", f"[a solved system, SEALED] [[1,2],[3,4]] x = (5,11) has x = (1,2) ({LA}: A x reproduces b). Two "
+                     "equations, two unknowns, a nonzero determinant - exactly one answer.", S["solve"]),
+        ("postulate", "[the axioms, CITED] A vector space is eight axioms over a field (closure, associativity, "
+                      "commutativity of addition, zero, negatives, and the two distributive and two scalar laws); a "
+                      "matrix is a linear map written in a basis (Cayley 1858). Cited, never sealed - every computation "
+                      "above is a theorem of them, decided by arithmetic.",
+         {"source": "Strang, Introduction to Linear Algebra (2016); Cayley, Phil. Trans. 148 (1858) 17"}),
+        ("note", "[the bound, stated] The verifier rests on numpy, the optional math extra: on a stdlib-only box it "
+                 "returns NOT_APPLICABLE and never a false result, so this stick is minted where numpy lives. Exact "
+                 "comparisons are at 1e-6 relative; a half-degree window on angles.",
+         {"source": "src/concordance/verifiers/linear_algebra.py; pyproject [math] extra"}),
+        ("note", "[on the one map] Linear algebra is the grammar of the change of domain (the change-of-domain stick: "
+                 "an eigenbasis is the axis where a matrix is diagonal), of the SVD (rotation, stretch, rotation), of "
+                 "tensors (the invariants under a change of basis), and of quantum mechanics (card_floor_quantum_mechanics: "
+                 "a Hermitian matrix's real eigenvalues are the observables; a unitary's unit-circle eigenvalues are the "
+                 "phases - the rotation sealed above is the simplest). Where two domains connect, there is a matrix "
+                 "between them.",
+         {"source": "the one map; the change-of-domain, svd and tensor sticks; card_floor_quantum_mechanics"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py linear_algebra")
+    return 0
+
+
+def stick_manufacturing() -> int:
+    """MANUFACTURING - the quality arithmetic, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
+    manufacturing.MFG_VERIFY: the Six Sigma table (3.4 defects per million is six sigma, 233 is five, 6210 is four,
+    66,807 is three), Shewhart's three-sigma control limits, process capability (a centred process sealed capable, an
+    off-centre one with the same spread sealed NOT capable - the Cpk lesson), and the root-sum-of-squares tolerance
+    stack against the worst case. The 1.5-sigma shift, the 3-sigma limits and the 1.33 threshold are conventions,
+    CITED; the arithmetic is SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def mf(spec):
+        return _seal_through("manufacturing", "MFG_VERIFY", spec)
+
+    S = {
+        "six_sigma": mf({"dpmo": 3.4, "claimed_sigma": 6.0}),
+        "five_sigma": mf({"dpmo": 233, "claimed_sigma": 5.0}),
+        "four_sigma": mf({"dpmo": 6210, "claimed_sigma": 4.0}),
+        "three_sigma": mf({"dpmo": 66807, "claimed_sigma": 3.0}),
+        "control_limits": mf({"mean": 100.0, "sigma": 2.0, "k": 3, "claimed_ucl": 106.0, "claimed_lcl": 94.0}),
+        "capable": mf({"usl": 110.0, "lsl": 90.0, "process_mean": 100.0, "process_sigma": 2.0, "claimed_cp_capable": True}),
+        "not_capable": mf({"usl": 110.0, "lsl": 90.0, "process_mean": 106.0, "process_sigma": 2.0, "claimed_cp_capable": False}),
+        "rss": mf({"tolerances": [0.01, 0.02, 0.015], "claimed_rss": 0.02693}),
+        "rss_equal": mf({"tolerances": [0.1, 0.1, 0.1], "claimed_rss": 0.17321}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "manufacturing numbers")
+    sid = TS.create("Manufacturing - sigma, control limits, capability, stack-up",
+                    statement="Quality is the normal distribution applied to a specification: defects per million "
+                              "map to sigma, limits sit at three sigma, capability is the spec width over six sigma, "
+                              "and independent tolerances add in quadrature.",
+                    field="manufacturing",
+                    references=["W. A. Shewhart, Economic Control of Quality of Manufactured Product (1931)",
+                                "M. J. Harry & R. Schroeder, Six Sigma (2000) - the 1.5-sigma shift convention",
+                                "ISO 22514-2:2013 process capability; V. E. Kane, Process capability indices, "
+                                "J. Qual. Tech. 18 (1986) 41",
+                                "ASME Y14.5 and the RSS method (Bender, SAE 1962)"])["id"]
+    MF = "sealed through manufacturing.MFG_VERIFY"
+    marks = [
+        ("instance", f"[six sigma, SEALED] 3.4 defects per million opportunities is the six-sigma level ({MF}). The "
+                     "number carries Motorola's 1.5-sigma shift: a process whose mean drifts 1.5 sigma still has 4.5 "
+                     "sigma to the nearer limit, and the normal tail beyond 4.5 sigma is 3.4 per million.",
+         S["six_sigma"]),
+        ("instance", f"[five sigma, SEALED] 233 per million ({MF}).", S["five_sigma"]),
+        ("instance", f"[four sigma, SEALED] 6,210 per million ({MF}): one part in 161.", S["four_sigma"]),
+        ("instance", f"[three sigma, SEALED] 66,807 per million ({MF}) - about 6.7 percent defective, the level most "
+                     "unmanaged processes run at. Each sigma is an order of magnitude; the table is the normal "
+                     "distribution's tail read as a ladder.", S["three_sigma"]),
+        ("instance", f"[Shewhart's limits, SEALED] Mean 100, sigma 2: UCL = 106, LCL = 94 ({MF}). Three sigma either "
+                     "side leaves 0.27 percent of a stable process outside - a point beyond the line is a signal, not "
+                     "noise, and the operator looks for a cause (Shewhart 1931).", S["control_limits"]),
+        ("instance", f"[capable, SEALED] Spec 90-110, process centred at 100 with sigma 2: Cp = 20 / 12 = 1.667 and Cpk "
+                     f"= 1.667, capable against the 1.33 threshold ({MF}).", S["capable"]),
+        ("instance", f"[not capable, SEALED AS NOT CAPABLE] The same spread centred at 106: Cp is still 1.667 but Cpk = "
+                     f"(110 - 106) / 6 = 0.667 - NOT capable, sealed with claimed false ({MF}). Cp measures the spread, "
+                     "Cpk the spread AND the centring; a tight process in the wrong place still makes scrap.",
+         S["not_capable"]),
+        ("instance", f"[a tolerance stack, SEALED] Three parts toleranced 0.010, 0.020 and 0.015: the statistical stack "
+                     f"is sqrt(0.0001 + 0.0004 + 0.000225) = 0.02693 ({MF}), against a worst case of 0.045.", S["rss"]),
+        ("instance", f"[equal tolerances, SEALED] Three at 0.1: RSS = 0.1 sqrt 3 = 0.17321 ({MF}) versus 0.3 worst case. "
+                     "Independent errors add in quadrature - the same sqrt N as random walks and measurement means.",
+         S["rss_equal"]),
+        ("postulate", "[the conventions, CITED] The 1.5-sigma shift (Harry & Schroeder), three-sigma limits (Shewhart), "
+                      "the 1.33 capability threshold (Kane 1986, ISO 22514) and RSS stacking all ASSUME a normal, stable, "
+                      "independent process. They work, so a process that meets them is inferred capable, never proven "
+                      "so: a non-normal or drifting process breaks every number above. The engine seals the arithmetic "
+                      "the conventions command and declines the assumption.",
+         {"source": "Shewhart (1931); Harry & Schroeder, Six Sigma (2000); Kane, J. Qual. Tech. 18 (1986) 41; ISO 22514-2"}),
+        ("note", "[on the one map] Every number here is the normal distribution's (card_floor_statistics: the tail "
+                 "integral, the sigma, quadrature addition) applied to a drawing's tolerance. The statistics stick "
+                 "holds the distribution; this stick holds the shop floor's use of it.",
+         {"source": "the one map; card_floor_statistics; the statistics stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py manufacturing")
+    return 0
+
+
+def stick_molecular_geometry() -> int:
+    """MOLECULAR GEOMETRY - VSEPR shapes and angles, sealed (issue #11, 2026-10-16: reach, down the domain list).
+    Through molecular_geometry.VSEPR_VERIFY: the twelve tabulated (steric number, lone pair) cases on their textbook
+    molecules - CO2 linear, BF3 trigonal planar, SO2 bent, CH4 tetrahedral at arccos(-1/3), NH3 trigonal pyramidal,
+    H2O bent, PCl5 trigonal bipyramidal, SF4 seesaw, ClF3 T-shaped, SF6 octahedral, BrF5 square pyramidal, XeF4
+    square planar. The VSEPR model and its measured lone-pair angles are CITED; the tetrahedral angle is a theorem
+    of geometry; the assignments are SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def vs(bd, lp, geo, angle=None):
+        spec = {"bonding_domains": bd, "lone_pairs": lp, "claimed_geometry": geo}
+        if angle is not None:
+            spec["claimed_bond_angle_deg"] = angle
+        return _seal_through("molecular_geometry", "VSEPR_VERIFY", spec)
+
+    S = {
+        "co2": vs(2, 0, "linear", 180.0),
+        "bf3": vs(3, 0, "trigonal_planar", 120.0),
+        "so2": vs(2, 1, "bent", 119.0),
+        "ch4": vs(4, 0, "tetrahedral", 109.47),
+        "nh3": vs(3, 1, "trigonal_pyramidal", 107.0),
+        "h2o": vs(2, 2, "bent", 104.5),
+        "pcl5": vs(5, 0, "trigonal_bipyramidal"),
+        "sf4": vs(4, 1, "seesaw"),
+        "clf3": vs(3, 2, "t_shaped"),
+        "sf6": vs(6, 0, "octahedral", 90.0),
+        "brf5": vs(5, 1, "square_pyramidal"),
+        "xef4": vs(4, 2, "square_planar", 90.0),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "VSEPR assignments")
+    sid = TS.create("Molecular geometry - VSEPR shapes and bond angles, sealed",
+                    statement="A molecule's shape follows from its steric number and lone pairs: electron domains "
+                              "repel to the arrangement of greatest separation, and the bond angle is that "
+                              "arrangement's angle.",
+                    field="molecular_geometry",
+                    references=["R. J. Gillespie & R. S. Nyholm, Inorganic stereochemistry, Q. Rev. Chem. Soc. 11 (1957) 339",
+                                "R. J. Gillespie, Molecular Geometry (1972)",
+                                "CRC Handbook of Chemistry and Physics, Structure of free molecules in the gas phase"])["id"]
+    VS = "sealed through molecular_geometry.VSEPR_VERIFY"
+    marks = [
+        ("instance", f"[CO2, SEALED] Two domains, no lone pairs: linear, 180 deg ({VS}). Two things repelling on a "
+                     "sphere go to opposite poles.", S["co2"]),
+        ("instance", f"[BF3, SEALED] Three domains: trigonal planar, 120 deg ({VS}).", S["bf3"]),
+        ("instance", f"[SO2, SEALED] Three domains, one a lone pair: bent, about 119 deg ({VS}). The shape is named "
+                     "by the atoms, the angle set by all three domains.", S["so2"]),
+        ("instance", f"[CH4, SEALED] Four domains: tetrahedral, 109.47 deg ({VS}) - arccos(-1/3), the angle from the "
+                     "centre of a regular tetrahedron to two vertices. Pure geometry, no chemistry in it: the "
+                     "geometry stick's 'Cat:Dog' pair, two domains confirming one number.", S["ch4"]),
+        ("instance", f"[NH3, SEALED] Four domains, one lone pair: trigonal pyramidal, 107 deg ({VS}). The lone pair "
+                     "takes more room than a bond and squeezes the H-N-H angle below tetrahedral.", S["nh3"]),
+        ("instance", f"[H2O, SEALED] Four domains, two lone pairs: bent, 104.5 deg ({VS}). Two lone pairs squeeze "
+                     "harder - the angle that makes water polar, and so a solvent, and so the medium of life.",
+         S["h2o"]),
+        ("instance", f"[PCl5, SEALED] Five domains: trigonal bipyramidal ({VS}) - two angles, 90 and 120, so no single "
+                     "bond angle is claimed; the verifier refuses one.", S["pcl5"]),
+        ("instance", f"[SF4, SEALED] Five domains, one lone pair: seesaw ({VS}) - the lone pair takes an equatorial "
+                     "site, where it crowds two neighbours at 90 deg instead of three.", S["sf4"]),
+        ("instance", f"[ClF3, SEALED] Five domains, two lone pairs: T-shaped ({VS}).", S["clf3"]),
+        ("instance", f"[SF6, SEALED] Six domains: octahedral, 90 deg ({VS}).", S["sf6"]),
+        ("instance", f"[BrF5, SEALED] Six domains, one lone pair: square pyramidal ({VS}).", S["brf5"]),
+        ("instance", f"[XeF4, SEALED] Six domains, two lone pairs: square planar, 90 deg ({VS}) - the lone pairs take "
+                     "the two axial sites, opposite each other, and the four fluorines lie in a plane. A noble gas "
+                     "with a shape.", S["xef4"]),
+        ("postulate", "[the model, CITED] VSEPR (Gillespie & Nyholm 1957) is a MODEL: electron domains repel and "
+                      "settle at maximum separation, lone pairs repel more than bonds. It works for main-group "
+                      "molecules and fails for many transition-metal ones, so a shape it predicts is inferred, never "
+                      "kept as fact - the measured structure is the fact (CRC tables: H2O 104.5 deg, NH3 106.7 deg). "
+                      "The 180, 120, 90 and 109.47 degree angles are geometry's theorems; the lone-pair angles are "
+                      "measurements the model only approximates.",
+         {"source": "Gillespie & Nyholm, Q. Rev. 11 (1957) 339; CRC Handbook, gas-phase structures"}),
+        ("note", "[on the one map] The shape of a molecule is chemistry (card_floor_chemistry: valence, bonding "
+                 "domains) meeting geometry (the geometry stick: the regular polyhedra and their central angles). The "
+                 "tetrahedral angle is the joint: one number, two floors, neither borrowing from the other.",
+         {"source": "the one map; card_floor_chemistry; the geometry stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py molecular_geometry")
+    return 0
+
+
+def stick_philosophy() -> int:
+    """PHILOSOPHY - the analytic checks, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
+    philosophy.PHIL_VERIFY: modal consistency (necessary-and-possible sealed consistent, necessary-but-impossible
+    sealed INCONSISTENT with claimed false, contingent sealed consistent), the four ethical frameworks on whether they
+    judge by outcomes, the a priori / a posteriori distinction on Kant's own examples, and Leibniz's law on equal and
+    unequal property sets. The principles are CITED - the axiom D of modal logic, the taxonomy of ethics, the
+    identity of indiscernibles and its dispute; the classifications are SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def ph(spec):
+        return _seal_through("philosophy", "PHIL_VERIFY", spec)
+
+    S = {
+        "modal_consistent": ph({"is_necessarily_true": True, "is_possibly_true": True, "claimed_consistent": True}),
+        "modal_contradiction": ph({"is_necessarily_true": True, "is_possibly_true": False, "claimed_consistent": False}),
+        "modal_contingent": ph({"is_necessarily_true": False, "is_possibly_true": True, "claimed_consistent": True}),
+        "consequentialist": ph({"framework_name": "consequentialist", "claimed_focuses_on_outcomes": True}),
+        "deontological": ph({"framework_name": "deontological", "claimed_focuses_on_outcomes": False}),
+        "virtue": ph({"framework_name": "virtue_ethics", "claimed_focuses_on_outcomes": False}),
+        "contractarian": ph({"framework_name": "contractarian", "claimed_focuses_on_outcomes": False}),
+        "a_priori": ph({"claim_requires_observation": False, "claimed_is_a_priori": True}),
+        "a_posteriori": ph({"claim_requires_observation": True, "claimed_is_a_priori": False}),
+        "identical": ph({"object_a_properties": ["red", "round", "heavy"], "object_b_properties": ["round", "red", "heavy"],
+                         "claimed_are_identical": True}),
+        "not_identical": ph({"object_a_properties": ["red", "round", "heavy"], "object_b_properties": ["red", "round", "light"],
+                             "claimed_are_identical": False}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "philosophy classifications")
+    sid = TS.create("Philosophy - modality, ethics, knowledge and identity, sealed",
+                    statement="The analytic checks of philosophy are decidable where they are formal: a modal "
+                              "contradiction, a framework's criterion, the source of a claim's warrant, the equality "
+                              "of two property sets.",
+                    field="philosophy",
+                    references=["S. Kripke, Semantical considerations on modal logic, Acta Phil. Fennica 16 (1963) 83",
+                                "I. Kant, Critique of Pure Reason (1781), Introduction - a priori and a posteriori",
+                                "G. W. Leibniz, Discourse on Metaphysics (1686) section 9; M. Black, The identity of "
+                                "indiscernibles, Mind 61 (1952) 153",
+                                "J. S. Mill, Utilitarianism (1863); Kant, Groundwork (1785); Aristotle, Nicomachean "
+                                "Ethics; Hobbes, Leviathan (1651)"])["id"]
+    PH = "sealed through philosophy.PHIL_VERIFY"
+    marks = [
+        ("instance", f"[necessary and possible, SEALED] A claim held necessarily true and possibly true is consistent "
+                     f"({PH}): what must be, can be. The principle box P implies diamond P is axiom D - valid in every "
+                     "serial frame, so in the systems T, S4 and S5 (the verifier files it under K).",
+         S["modal_consistent"]),
+        ("instance", f"[necessary but impossible, SEALED AS A CONTRADICTION] Necessarily true AND not possibly true is "
+                     f"inconsistent - sealed with claimed_consistent = false ({PH}). Box P and not-diamond P cannot both "
+                     "hold: a thing that must be the case cannot also be a thing that cannot be. The engine seals the "
+                     "contradiction as a contradiction.", S["modal_contradiction"]),
+        ("instance", f"[contingent, SEALED] Not necessary but possible is consistent ({PH}): the contingent - true in "
+                     "some worlds, false in others - is where most of what we say lives.", S["modal_contingent"]),
+        ("instance", f"[consequentialism, SEALED] Consequentialism judges an act by its outcomes: true ({PH}). Mill's "
+                     "greatest happiness is the type.", S["consequentialist"]),
+        ("instance", f"[deontology, SEALED] Deontology does not: false ({PH}) - the act's conformity to duty is the "
+                     "measure (Kant's categorical imperative), whatever follows.", S["deontological"]),
+        ("instance", f"[virtue ethics, SEALED] Virtue ethics does not: false ({PH}) - the agent's character is the "
+                     "measure (Aristotle).", S["virtue"]),
+        ("instance", f"[contractarianism, SEALED] Contractarianism does not: false ({PH}) - what rational agents would "
+                     "agree to is the measure (Hobbes, Rawls).", S["contractarian"]),
+        ("instance", f"[a priori, SEALED] A claim that needs no observation is a priori ({PH}): Kant's 7 + 5 = 12, known "
+                     "by reason alone.", S["a_priori"]),
+        ("instance", f"[a posteriori, SEALED] A claim that needs observation is a posteriori - sealed with "
+                     f"claimed_is_a_priori = false ({PH}): that water boils at 100 C at one atmosphere is learned by "
+                     "the thermometer, not the armchair.", S["a_posteriori"]),
+        ("instance", f"[Leibniz's law, SEALED] Two objects with the same properties - red, round, heavy, in any order - "
+                     f"are identical under the law ({PH}): the property SETS are equal.", S["identical"]),
+        ("instance", f"[and its contrapositive, SEALED] Red, round, heavy against red, round, light: not identical, "
+                     f"sealed with claimed false ({PH}). One differing property is enough; the engine names it.",
+         S["not_identical"]),
+        ("postulate", "[the principles, CITED] Axiom D (what is necessary is possible), the taxonomy of the four "
+                      "frameworks, Kant's a priori / a posteriori line, and Leibniz's law are PRINCIPLES, cited never "
+                      "sealed. Leibniz's law has two halves: the indiscernibility of identicals (uncontroversial) and the "
+                      "identity of indiscernibles - the half the verifier implements - which Black (1952) disputed with "
+                      "two qualitatively identical spheres. What is sealed is the set comparison; whether sameness of "
+                      "properties IS identity is left as the dispute it is.",
+         {"source": "Kripke (1963); Kant, Critique of Pure Reason, Introduction; Leibniz, Discourse section 9; "
+                    "Black, Mind 61 (1952) 153"}),
+        ("note", "[on the one map] Modal logic is propositional logic with two more operators (the formal-logic stick: "
+                 "box and diamond are duals, like and and or under negation). The frameworks are the discernment the "
+                 "mind does (card_floor_the_mind) made explicit. The engine seals what is decidable and declines what is "
+                 "wise: which framework is RIGHT is not a check, and a miss stays a miss.",
+         {"source": "the one map; the formal-logic stick; card_floor_the_mind"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py philosophy")
+    return 0
+
+
+def stick_photography() -> int:
+    """PHOTOGRAPHY - exposure, reciprocity, angle of view, hyperfocal distance, sealed (issue #11, 2026-10-16:
+    reach, down the domain list). Through photography.PHOTO_VERIFY: EV = log2(N^2/t) at f/8 1/250 and the sunny-16
+    rule at f/16 1/125, reciprocity (f/8 1/250 equivalent to f/11 1/125; one stop apart sealed NOT equivalent), the
+    angle of view of 24, 50 and 200 mm on a 36 mm frame, and the hyperfocal distance at f/8 for 50 mm and 24 mm.
+    The APEX convention and the 0.030 mm circle of confusion are CITED; the arithmetic is SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def pg(spec):
+        return _seal_through("photography", "PHOTO_VERIFY", spec)
+
+    S = {
+        "ev_f8_250": pg({"f_number": 8.0, "shutter_seconds": 1.0 / 250.0, "claimed_exposure_value": 13.97}),
+        "sunny_16": pg({"f_number": 16.0, "shutter_seconds": 1.0 / 125.0, "claimed_exposure_value": 14.97}),
+        "reciprocal": pg({"settings_a": [8.0, 1.0 / 250.0], "settings_b": [11.0, 1.0 / 125.0], "claimed_equivalent": True}),
+        "one_stop_apart": pg({"settings_a": [8.0, 1.0 / 250.0], "settings_b": [8.0, 1.0 / 125.0], "claimed_equivalent": False}),
+        "aov_50": pg({"focal_length_mm": 50.0, "sensor_dimension_mm": 36.0, "claimed_angle_of_view_deg": 39.6}),
+        "aov_24": pg({"focal_length_mm": 24.0, "sensor_dimension_mm": 36.0, "claimed_angle_of_view_deg": 73.7}),
+        "aov_200": pg({"focal_length_mm": 200.0, "sensor_dimension_mm": 36.0, "claimed_angle_of_view_deg": 10.3}),
+        "hyperfocal_50": pg({"focal_length_mm_for_h": 50.0, "f_number_for_h": 8.0, "circle_of_confusion_mm": 0.030,
+                             "claimed_hyperfocal_distance_m": 10.47}),
+        "hyperfocal_24": pg({"focal_length_mm_for_h": 24.0, "f_number_for_h": 8.0, "circle_of_confusion_mm": 0.030,
+                             "claimed_hyperfocal_distance_m": 2.42}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "photography numbers")
+    sid = TS.create("Photography - exposure, reciprocity, angle of view, hyperfocal",
+                    statement="A camera's settings are logarithms and tangents: EV counts stops in base 2, the angle "
+                              "of view is 2 atan(d/2f), and the hyperfocal distance is f^2/(N c) + f.",
+                    field="photography",
+                    references=["ISO 2720:1974 - exposure meters and the APEX system (EV = log2(N^2/t) at ISO 100)",
+                                "Kodak, the sunny-16 rule (film data sheets, 20th c.)",
+                                "R. Kingslake, Optics in Photography (SPIE, 1992), ch. 4 and 5",
+                                "H. M. Merklinger, The INs and OUTs of FOCUS (1992) - depth of field and hyperfocal"])["id"]
+    PG = "sealed through photography.PHOTO_VERIFY"
+    marks = [
+        ("instance", f"[EV at f/8, 1/250, SEALED] EV = log2(64 x 250) = 13.97 ({PG}): the APEX scale, each unit one "
+                     "stop - a doubling of light.", S["ev_f8_250"]),
+        ("instance", f"[sunny 16, SEALED] f/16 at 1/125 (the nearest click to 1/ISO at ISO 100) is EV 14.97, EV 15 "
+                     f"({PG}): the rule of thumb for direct sun, which is why a light meter reads 15 on a clear noon.",
+         S["sunny_16"]),
+        ("instance", f"[reciprocity, SEALED] f/8 at 1/250 and f/11 at 1/125 are equivalent exposures ({PG}): one stop "
+                     "closed, one stop longer, the same light. f/11 is the nominal name of 8 sqrt 2 = 11.31; the 0.09 EV "
+                     "difference is the rounding of the f-stop series, inside the verifier's 0.1 EV window.",
+         S["reciprocal"]),
+        ("instance", f"[one stop apart, SEALED AS NOT EQUIVALENT] f/8 at 1/250 and f/8 at 1/125 differ by one stop - "
+                     f"sealed with claimed_equivalent = false ({PG}). Twice the time at the same aperture is twice the "
+                     "light; the engine seals the inequality as an inequality.", S["one_stop_apart"]),
+        ("instance", f"[the normal lens, SEALED] 50 mm on a 36 mm frame sees 2 atan(36 / 100) = 39.6 deg across ({PG}) "
+                     "- the horizontal angle of the 'normal' lens, roughly the angle of comfortable attention.",
+         S["aov_50"]),
+        ("instance", f"[wide, SEALED] 24 mm sees 73.7 deg ({PG}).", S["aov_24"]),
+        ("instance", f"[long, SEALED] 200 mm sees 10.3 deg ({PG}): the tangent is nearly linear here, so the angle "
+                     "falls almost as 1/f - four times the focal length, nearly a quarter of the angle.", S["aov_200"]),
+        ("instance", f"[hyperfocal at 50 mm f/8, SEALED] H = 50^2 / (8 x 0.030) + 50 = 10,467 mm = 10.47 m ({PG}). "
+                     "Focus there and everything from 5.2 m to infinity is acceptably sharp.", S["hyperfocal_50"]),
+        ("instance", f"[at 24 mm f/8, SEALED] H = 576 / 0.24 + 24 = 2.42 m ({PG}): the square of the focal length is "
+                     "why wide lenses carry so much depth of field.", S["hyperfocal_24"]),
+        ("postulate", "[the conventions, CITED] EV at ISO 100 is the APEX convention (ISO 2720); the f-stop series "
+                      "1, 1.4, 2, 2.8, 4, 5.6, 8, 11, 16 names powers of sqrt 2 rounded; the 0.030 mm circle of "
+                      "confusion is a convention for a 36 mm frame viewed as an 8 x 10 print at arm's length - another "
+                      "viewer, another number. Cited, never sealed; the arithmetic they command is what is sealed.",
+         {"source": "ISO 2720:1974; Kingslake, Optics in Photography (1992); Merklinger (1992)"}),
+        ("note", "[on the one map] A camera is applied optics (card_floor_optics: the thin lens, the aperture, the "
+                 "circle of confusion) counted in logarithms (card_floor_logarithm: EV is a base-2 scale, every unit a "
+                 "doubling). The optics stick holds the lens; this stick holds the exposure.",
+         {"source": "the one map; card_floor_optics, card_floor_logarithm; the optics stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py photography")
+    return 0
+
+
+def stick_photonics() -> int:
+    """PHOTONICS - guided, resonant, active and nonlinear light, sealed (issue #11, 2026-10-16: reach, down the
+    domain list). Through photonics.PHOT_VERIFY: the V-number of a step-index fibre (single-mode at 1550 nm, the same
+    fibre multimode at 1000 nm - the cutoff at V = 2.405, the first zero of J0), a ring resonator's free spectral
+    range, 40 km of silica at 0.2 dB/km, a lithium-niobate modulator's V_pi, second-harmonic power scaling as the
+    square, a diode laser above threshold and sealed DARK below it, a grating's first order, Beer-Lambert absorption,
+    the energy of a 500 nm photon through h, and the Compton wavelength and shifts through alpha. The measured
+    material constants are CITED; the relations are SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def ph(spec):
+        return _seal_through("photonics", "PHOT_VERIFY", spec)
+
+    S = {
+        "v_single_mode": ph({"core_radius_m": 4.1e-6, "numerical_aperture": 0.12, "wavelength_m": 1.55e-6, "claimed_v_number": 1.994}),
+        "v_multimode": ph({"core_radius_m": 4.1e-6, "numerical_aperture": 0.12, "wavelength_m": 1.0e-6, "claimed_v_number": 3.091}),
+        "ring_fsr": ph({"group_index": 4.2, "ring_length_m": 6.28e-5, "claimed_fsr_hz": 1.1366e12}),
+        "fiber_loss": ph({"input_power_dbm": 3.0, "attenuation_db_per_km": 0.2, "length_km": 40.0, "claimed_output_dbm": -5.0}),
+        "vpi": ph({"wavelength_m": 1.55e-6, "gap_m": 1e-5, "index": 2.2, "eo_coefficient_m_per_v": 3.08e-11,
+                   "length_m": 0.02, "claimed_vpi_v": 2.363}),
+        "shg": ph({"reference_fundamental_w": 1.0, "reference_shg_w": 0.01, "test_fundamental_w": 2.0, "claimed_shg_w": 0.04}),
+        "laser_above": ph({"threshold_current_a": 0.015, "slope_efficiency_w_per_a": 0.9, "drive_current_a": 0.05, "claimed_output_w": 0.0315}),
+        "laser_below": ph({"threshold_current_a": 0.015, "slope_efficiency_w_per_a": 0.9, "drive_current_a": 0.010, "claimed_output_w": 0.0}),
+        "grating": ph({"grating_period_m": 3.0e-6, "order": 1, "wavelength_m": 1.55e-6, "claimed_angle_deg": 31.11}),
+        "beer_lambert": ph({"input_intensity": 1.0, "coefficient_per_m": 200.0, "path_length_m": 0.001, "claimed_output_intensity": 0.8187}),
+        "photon_500nm": ph({"photon_wavelength_m": 500e-9, "claimed_photon_energy_ev": 2.480}),
+        "compton_wavelength": ph({"claimed_compton_wavelength_m": 2.4263e-12}),
+        "compton_90": ph({"compton_angle_deg": 90, "claimed_compton_shift_m": 2.4263e-12}),
+        "compton_180": ph({"compton_angle_deg": 180, "claimed_compton_shift_m": 4.8526e-12}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "photonics numbers")
+    sid = TS.create("Photonics - guided, resonant, active and nonlinear light, sealed",
+                    statement="Light engineered as a signal obeys closed forms: a mode count V, a resonator's FSR, "
+                              "loss in decibels, a modulator's V_pi, a square law, a threshold, a grating, an "
+                              "exponential, and the photon's E = h c / lambda.",
+                    field="photonics",
+                    references=["B. E. A. Saleh & M. C. Teich, Fundamentals of Photonics, 2nd ed. (2007)",
+                                "G. P. Agrawal, Fiber-Optic Communication Systems, 4th ed. (2010)",
+                                "T. Miya et al., Ultimate low-loss single-mode fibre at 1.55 um, Electron. Lett. 15 (1979) 106",
+                                "A. H. Compton, Phys. Rev. 21 (1923) 483; CODATA 2018 lambda_C = 2.42631e-12 m"])["id"]
+    PH = "sealed through photonics.PHOT_VERIFY"
+    marks = [
+        ("instance", f"[single-mode, SEALED] A step-index fibre with core radius 4.1 um and NA 0.12 at 1550 nm has V = "
+                     f"2 pi a NA / lambda = 1.994 ({PH}): below 2.405, so exactly one guided mode. 2.405 is the first "
+                     "zero of the Bessel function J0 - the cutoff is a theorem, the fibre is built to sit under it.",
+         S["v_single_mode"]),
+        ("instance", f"[the same fibre, multimode, SEALED] At 1000 nm the same fibre has V = 3.091 ({PH}): above cutoff, "
+                     "a second mode propagates. Single-mode is a property of fibre AND wavelength; the cutoff "
+                     "wavelength of this fibre is 2 pi a NA / 2.405 = 1286 nm.", S["v_multimode"]),
+        ("instance", f"[a ring resonator, SEALED] Group index 4.2, circumference 62.8 um: FSR = c / (n_g L) = 1.137 THz "
+                     f"({PH}) - the resonances of a silicon microring are spaced by the round-trip time's inverse.",
+         S["ring_fsr"]),
+        ("instance", f"[40 km of silica, SEALED] 3 dBm in, 0.2 dB/km over 40 km: 3 - 8 = -5 dBm out ({PH}). 0.2 dB/km "
+                     "at 1550 nm is the floor silica reached in 1979 (Miya et al.) - Rayleigh scattering's limit, "
+                     "which is why the world's traffic travels at that wavelength.", S["fiber_loss"]),
+        ("instance", f"[a lithium-niobate modulator, SEALED] lambda 1550 nm, gap 10 um, n = 2.2, r33 = 30.8 pm/V, "
+                     f"electrode 20 mm: V_pi = lambda d / (n^3 r L) = 2.36 V ({PH}) - the voltage that shifts the phase "
+                     "by pi, the number every data link is engineered around.", S["vpi"]),
+        ("instance", f"[second harmonic, SEALED] 1 W of fundamental makes 10 mW of second harmonic; 2 W makes 40 mW "
+                     f"({PH}): P_2w scales as P_w squared, because two photons become one.", S["shg"]),
+        ("instance", f"[a laser above threshold, SEALED] I_th = 15 mA, slope 0.9 W/A, driven at 50 mA: P = 0.9 x 0.035 = "
+                     f"31.5 mW ({PH}). Above threshold the output is linear in the current past it.", S["laser_above"]),
+        ("instance", f"[and below, SEALED DARK] Driven at 10 mA, under threshold: P = 0 ({PH}, sealed at zero). Below "
+                     "threshold gain does not beat loss and the device is an LED's faint glow at best, not a laser - "
+                     "the engine seals the dark as dark.", S["laser_below"]),
+        ("instance", f"[a grating, SEALED] Period 3 um, first order, 1550 nm: d sin theta = m lambda gives theta = "
+                     f"31.11 deg ({PH}).", S["grating"]),
+        ("instance", f"[Beer-Lambert, SEALED] alpha = 200/m over 1 mm: I = I0 e^(-0.2) = 0.8187 ({PH}). Absorption is "
+                     "exponential in the path; gain is the same law with alpha negative.", S["beer_lambert"]),
+        ("instance", f"[a green photon, SEALED] 500 nm carries E = h c / lambda = 2.480 eV ({PH}, through h). The "
+                     "energy that decides whether a photon can lift an electron across a gap - 2.48 eV is above "
+                     "silicon's 1.12, so silicon absorbs green and a solar cell works.", S["photon_500nm"]),
+        ("instance", f"[the Compton wavelength, SEALED] lambda_C = h / (m_e c) = 2.4263e-12 m ({PH}) = 2 pi alpha a_0 - "
+                     "the electron's length scale, through the fine-structure constant.", S["compton_wavelength"]),
+        ("instance", f"[the 90-degree shift, SEALED] A photon scattered at 90 deg lengthens by exactly lambda_C ({PH}): "
+                     "d lambda = lambda_C (1 - cos theta), and cos 90 = 0.", S["compton_90"]),
+        ("instance", f"[backscatter, SEALED] At 180 deg the shift is 2 lambda_C = 4.8526e-12 m ({PH}) - the maximum. "
+                     "Compton's 1923 measurement of this shift is where light's particle momentum became fact.",
+         S["compton_180"]),
+        ("postulate", "[the inputs, CITED] 0.2 dB/km (Miya 1979), r33 = 30.8 pm/V for LiNbO3, the group index 4.2 of "
+                      "a silicon waveguide, the slope efficiency and threshold of a diode are MEASURED; the weakly "
+                      "guiding step-index model behind V is an approximation that works for low-contrast fibres. Cited "
+                      "as postulates, inferred not kept; lambda_C is CODATA's and exact to its stated digits.",
+         {"source": "Saleh & Teich (2007); Agrawal (2010); Miya et al., Electron. Lett. 15 (1979) 106; CODATA 2018"}),
+        ("note", "[on the one map] Photonics is Maxwell's equations in a guide (card_floor_maxwells_equations: the "
+                 "mode condition, the grating), the photon through h and alpha (card_floor_quantum_mechanics: E = h nu; "
+                 "the alpha stick: lambda_C = 2 pi alpha a_0), and the decibel scale of the fibre-calibration stick. "
+                 "A connective domain: the same forms - wave, periodic, decay, logarithm, power law, threshold - the "
+                 "atlas carries elsewhere, here in glass.",
+         {"source": "the one map; card_floor_maxwells_equations, card_floor_quantum_mechanics; the alpha and "
+                    "fiber-calibration sticks"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py photonics")
+    return 0
+
+
+def stick_real_estate() -> int:
+    """REAL ESTATE - property finance, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
+    real_estate.RE_VERIFY: the amortized monthly payment (the annuity formula) on a 30-year and a 15-year loan, the
+    cap rate, the gross rent multiplier, loan-to-value, debt-service coverage, and gross rental yield. The annuity
+    formula is a theorem of the geometric series and is SEALED by instance; the 80 percent LTV line, the 1.25 DSCR
+    floor and any cap rate's market meaning are conventions, CITED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def re_(spec):
+        return _seal_through("real_estate", "RE_VERIFY", spec)
+
+    S = {
+        "mortgage_30": re_({"loan_principal": 300000, "annual_rate": 0.065, "loan_term_months": 360, "claimed_monthly_payment": 1896.20}),
+        "mortgage_15": re_({"loan_principal": 300000, "annual_rate": 0.065, "loan_term_months": 180, "claimed_monthly_payment": 2613.32}),
+        "cap_rate": re_({"net_operating_income": 24000, "property_value": 400000, "claimed_cap_rate": 0.06}),
+        "grm": re_({"property_price": 300000, "annual_gross_rent": 24000, "claimed_grm": 12.5}),
+        "ltv": re_({"loan_amount": 240000, "appraised_value": 300000, "claimed_ltv": 0.80}),
+        "dscr": re_({"net_operating_income": 24000, "annual_debt_service": 22755, "claimed_dscr": 1.055}),
+        "yield": re_({"annual_rent": 18000, "property_value": 400000, "claimed_rental_yield": 0.045}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "real-estate numbers")
+    sid = TS.create("Real estate - mortgage, cap rate, LTV and coverage, sealed",
+                    statement="Property finance is the annuity formula and five ratios: payment, NOI over value, "
+                              "price over rent, loan over value, NOI over debt service, rent over value.",
+                    field="real_estate",
+                    references=["The annuity (amortization) formula M = P r (1+r)^n / ((1+r)^n - 1) - a geometric "
+                                "series, public domain",
+                                "Appraisal Institute, The Appraisal of Real Estate, 15th ed. (2020) - income "
+                                "capitalization",
+                                "Fannie Mae Selling Guide B2-1.2: the 80 percent LTV line for mortgage insurance"])["id"]
+    RE = "sealed through real_estate.RE_VERIFY"
+    marks = [
+        ("instance", f"[a 30-year mortgage, SEALED] $300,000 at 6.5 percent over 360 months: M = P r (1+r)^n / "
+                     f"((1+r)^n - 1) with r = 0.065/12 gives $1,896.20 a month ({RE}). The annuity formula is the sum "
+                     "of a geometric series: the loan equals the present value of the payments.", S["mortgage_30"]),
+        ("instance", f"[the same loan over 15 years, SEALED] 180 months: $2,613.32 ({RE}) - 38 percent more a month, "
+                     "but $392,000 less interest over the life of the loan (6.5 percent: $382,633 interest at 30 "
+                     "years against $170,398 at 15). Time is the lender's price.", S["mortgage_15"]),
+        ("instance", f"[cap rate, SEALED] NOI $24,000 on a $400,000 property is 6.0 percent ({RE}): the unlevered yield "
+                     "the income capitalization approach prices on.", S["cap_rate"]),
+        ("instance", f"[gross rent multiplier, SEALED] $300,000 over $24,000 of annual rent is 12.5 ({RE}): years of "
+                     "gross rent in the price, before expenses.", S["grm"]),
+        ("instance", f"[loan-to-value, SEALED] $240,000 on $300,000 appraised is 80 percent ({RE}): the line at which "
+                     "conventional lenders stop requiring mortgage insurance.", S["ltv"]),
+        ("instance", f"[debt-service coverage, SEALED] NOI $24,000 over $22,755 of annual debt service is 1.055 ({RE}): "
+                     "the income covers the payments with 5.5 percent to spare - below the 1.25 most lenders want.",
+         S["dscr"]),
+        ("instance", f"[gross rental yield, SEALED] $18,000 of rent on a $400,000 property is 4.5 percent ({RE}).",
+         S["yield"]),
+        ("postulate", "[the conventions, CITED] 80 percent LTV (Fannie Mae), a 1.25 DSCR floor, a 'good' cap rate - "
+                      "these are lender and market conventions, chosen and changeable, cited never sealed. The annuity "
+                      "formula is a theorem; the ratios are definitions; what a property is WORTH is a forecast and is "
+                      "declined. Nothing here is investment advice.",
+         {"source": "Fannie Mae Selling Guide B2-1.2; Appraisal Institute (2020); src/concordance/verifiers/real_estate.py"}),
+        ("note", "[on the one map] Property finance is the economics floor's time value of money (card_floor_economics; "
+                 "the economics stick: present value, compound interest) with the compounding of e (the e stick: "
+                 "(1 + r/n)^n) applied to one asset class. The same annuity formula prices a bond, a pension and a car "
+                 "loan.",
+         {"source": "the one map; card_floor_economics; the economics stick"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py real_estate")
+    return 0
+
+
+def stick_sports_analytics() -> int:
+    """SPORTS ANALYTICS - the published models, sealed (issue #11, 2026-10-16: reach, down the domain list).
+    Through sports_analytics.SPORT_VERIFY: Bill James's Pythagorean expectation (750 runs for, 600 against, and the
+    even case), the Elo expected score at a 100-point gap, at equal ratings, and the 400-point gap that defines the
+    scale as ten-to-one, the Elo update for a win and for a loss at K = 32, and games behind (a five-game gap and a
+    tie). The Pythagorean exponent and Elo's logistic with its 400 are fitted conventions, CITED; the arithmetic is
+    SEALED. Idempotent."""
+    from concordance import tickstick as TS
+
+    def sp(spec):
+        return _seal_through("sports_analytics", "SPORT_VERIFY", spec)
+
+    S = {
+        "pythagorean": sp({"runs_scored": 750, "runs_allowed": 600, "pythag_exponent": 2.0, "claimed_winning_pct": 0.610}),
+        "pythagorean_even": sp({"runs_scored": 600, "runs_allowed": 600, "pythag_exponent": 2.0, "claimed_winning_pct": 0.500}),
+        "elo_100": sp({"elo_a": 1600, "elo_b": 1500, "claimed_expected_score_a": 0.640}),
+        "elo_equal": sp({"elo_a": 1500, "elo_b": 1500, "claimed_expected_score_a": 0.500}),
+        "elo_400": sp({"elo_a": 1500, "elo_b": 1900, "claimed_expected_score_a": 0.0909}),
+        "elo_win": sp({"elo_a_pre": 1600, "elo_b_pre": 1500, "actual_score_a": 1.0, "elo_K": 32, "claimed_elo_a_post": 1611.52}),
+        "elo_loss": sp({"elo_a_pre": 1600, "elo_b_pre": 1500, "actual_score_a": 0.0, "elo_K": 32, "claimed_elo_a_post": 1579.52}),
+        "games_behind": sp({"leader_wins": 50, "leader_losses": 30, "team_wins": 45, "team_losses": 35, "claimed_games_behind": 5.0}),
+        "games_behind_tie": sp({"leader_wins": 50, "leader_losses": 30, "team_wins": 50, "team_losses": 30, "claimed_games_behind": 0.0}),
+    }
+    if not all(S.values()):
+        return 1
+    print("sealed", len(S), "sports-analytics numbers")
+    sid = TS.create("Sports analytics - Pythagorean expectation, Elo, games behind",
+                    statement="A season's record is predicted from runs by a power law, a match by a logistic of "
+                              "the rating gap, and a standing by half the sum of two differences.",
+                    field="sports_analytics",
+                    references=["B. James, Baseball Abstract (1980s) - the Pythagorean expectation",
+                                "A. E. Elo, The Rating of Chessplayers, Past and Present (1978)",
+                                "FIDE Rating Regulations (2024), article 8 - the expected-score table and K factors"])["id"]
+    SP = "sealed through sports_analytics.SPORT_VERIFY"
+    marks = [
+        ("instance", f"[Pythagorean expectation, SEALED] 750 runs scored, 600 allowed: W = 750^2 / (750^2 + 600^2) = "
+                     f"0.610 ({SP}) - about 99 wins in 162. James's rule: a team's record follows from its run "
+                     "differential more faithfully than from its record so far.", S["pythagorean"]),
+        ("instance", f"[the even case, SEALED] Equal runs for and against give exactly 0.500 ({SP}), whatever the "
+                     "exponent - the formula is symmetric.", S["pythagorean_even"]),
+        ("instance", f"[a 100-point Elo gap, SEALED] 1600 against 1500: E = 1 / (1 + 10^(-100/400)) = 0.640 ({SP}). "
+                     "The stronger player is expected to score 64 percent - a win in nearly two games of three.",
+         S["elo_100"]),
+        ("instance", f"[equal ratings, SEALED] 1500 against 1500: 0.500 ({SP}).", S["elo_equal"]),
+        ("instance", f"[the 400-point gap, SEALED] 1500 against 1900: E = 1 / (1 + 10^1) = 0.0909 ({SP}). Four hundred "
+                     "points is DEFINED as ten-to-one odds - the 400 in the formula is the scale's unit, not a finding.",
+         S["elo_400"]),
+        ("instance", f"[a win, SEALED] 1600 beats 1500 at K = 32: R' = 1600 + 32 (1 - 0.640) = 1611.52 ({SP}). The "
+                     "favourite gains little for doing what was expected.", S["elo_win"]),
+        ("instance", f"[a loss, SEALED] The same player loses: R' = 1600 + 32 (0 - 0.640) = 1579.52 ({SP}) - and loses "
+                     "20.48 points, the surprise priced by the same expectation. Win and loss are not symmetric; "
+                     "expectation is the pivot.", S["elo_loss"]),
+        ("instance", f"[games behind, SEALED] A leader at 50-30 and a team at 45-35: GB = ((50 - 45) + (35 - 30)) / 2 = "
+                     f"5.0 ({SP}): half the sum of the two differences, so a half-game is possible when the teams have "
+                     "played different numbers of games.", S["games_behind"]),
+        ("instance", f"[a tie, SEALED] Identical records are 0.0 games behind ({SP}).", S["games_behind_tie"]),
+        ("postulate", "[the models, CITED] The exponent 2 is James's original; the best fit for baseball is nearer "
+                      "1.83 (and varies by sport) - a FITTED model, not a law. Elo's logistic with 400 and the K factor "
+                      "(FIDE uses 10, 20 and 40) are chosen conventions of a rating system. Cited as postulates: they "
+                      "work, so a prediction from them is inferred, never kept as fact; the standing is the fact.",
+         {"source": "James, Baseball Abstract; Elo (1978); FIDE Rating Regulations (2024) art. 8"}),
+        ("note", "[on the one map] The three models are statistics (card_floor_statistics: a power-law share, a "
+                 "logistic expectation, an update that moves by the surprise) applied to the record of games. The Elo "
+                 "scale was built for chess (the chess stick holds the board; this stick holds the rating) and the "
+                 "probability stick holds the odds the 400 encodes.",
+         {"source": "the one map; card_floor_statistics; the chess and probability sticks"}),
+    ]
+    _mint_marks(sid, marks, by="tools/tick.py sports_analytics")
+    return 0
+
+
 def game_theory() -> int:
     """GAME THEORY - equilibrium, dilemmas, and strategy (Matt, 2026-10-10, down the domain list). The mathematics of
     strategic choice: a NASH EQUILIBRIUM is a fixed point where no one gains by deviating alone; the PRISONER'S
@@ -10995,6 +12448,40 @@ def main() -> int:
         return computer_science()
     if a[0] in ("formal_logic", "formal-logic", "logic", "boolean", "boolean_algebra", "truth_table", "boole", "sheffer"):
         return stick_formal_logic()
+    if a[0] in ("archaeology", "radiocarbon", "carbon_dating", "decay_clock"):
+        return stick_archaeology()
+    if a[0] in ("chess", "checkmate", "stalemate", "perft"):
+        return stick_chess()
+    if a[0] in ("condensed_matter", "condensed-matter", "phonon", "quantum_hall", "von_klitzing"):
+        return stick_condensed_matter()
+    if a[0] in ("cybersecurity", "cyber", "tls", "cvss", "subnet"):
+        return stick_cybersecurity()
+    if a[0] in ("document_validation", "check_digit", "checksum", "isbn", "luhn"):
+        return stick_document_validation()
+    if a[0] in ("ephemeris", "julian_day", "moon_phase", "sunrise", "solstice"):
+        return stick_ephemeris()
+    if a[0] in ("exercise_science", "exercise", "met", "heart_rate", "karvonen"):
+        return stick_exercise_science()
+    if a[0] in ("history_chronology", "chronology", "no_year_zero", "era", "century"):
+        return stick_history_chronology()
+    if a[0] in ("labor", "wages", "overtime", "flsa", "payroll"):
+        return stick_labor()
+    if a[0] in ("linear_algebra", "matrices", "matrix", "determinant", "eigenvalues"):
+        return stick_linear_algebra()
+    if a[0] in ("manufacturing", "six_sigma", "spc", "process_capability", "cpk"):
+        return stick_manufacturing()
+    if a[0] in ("molecular_geometry", "vsepr", "bond_angle", "molecular_shape"):
+        return stick_molecular_geometry()
+    if a[0] in ("philosophy", "modal_logic", "leibniz", "a_priori", "ethics"):
+        return stick_philosophy()
+    if a[0] in ("photography", "exposure_value", "f_stop", "hyperfocal", "sunny_16"):
+        return stick_photography()
+    if a[0] in ("photonics", "waveguide", "fiber_optics", "laser", "v_number"):
+        return stick_photonics()
+    if a[0] in ("real_estate", "mortgage", "cap_rate", "amortization", "ltv"):
+        return stick_real_estate()
+    if a[0] in ("sports_analytics", "sports", "elo", "pythagorean_expectation", "games_behind"):
+        return stick_sports_analytics()
     if a[0] in ("tesseract", "hypercube", "four_cube", "eight_cell"):
         return tesseract()
     if a[0] in ("statistics", "stats", "inference", "the_normal_distribution"):
