@@ -1446,6 +1446,11 @@ _INVERSE_REL = {
     "culminates_in": "culmination_of",
     "feeds_back": "fed_back_by",
     "instance_of_one_floor": "has_instance_on_one_floor",
+    # issue #25 / the Floor-roots fix (2026-10-17): a floor or card RESTS_ON a more-fundamental one
+    # (the solve path rests_on the instruments — its two doors are instruments); the reverse is that the
+    # fundamental one SUPPORTS it. Same shape as builds_on/enables. Theory cards use rests_on inline, so
+    # declaring it here also gives any future rests_on BRIDGE row the correct reverse instead of a mirror.
+    "rests_on": "supports",
 }
 # the involutive lookup: forward AND inverse labels, so _reverse_rel(_reverse_rel(x)) == x for every x here.
 _REVERSE_REL: Dict[str, str] = {**_INVERSE_REL, **{v: k for k, v in _INVERSE_REL.items()}}

@@ -99,6 +99,9 @@ def test_the_original_ten_pairs_are_unchanged_and_the_audit_list_is_covered():
     # the named pairs the issue asked for
     assert corpus._reverse_rel("precedes") == "follows"
     assert corpus._reverse_rel("follows") == "precedes"
+    # the Floor-roots fix added rests_on as a directional pair (same shape as builds_on/enables)
+    assert corpus._reverse_rel("rests_on") == "supports"
+    assert corpus._reverse_rel("supports") == "rests_on"
     assert corpus._reverse_rel("demonstrated_by") == "demonstrates"
     assert corpus._reverse_rel("verified_by") == "verifies"
     assert corpus._reverse_rel("cites") == "cited_by"
