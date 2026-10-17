@@ -243,6 +243,71 @@ _BENIGN_WORK_REQUEST = re.compile(
     r"(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|tomorrow|end of (?:day|week|month)|eod|eow)\b",
     re.I)
 
+# A PROFESSION OF FAITH is a core witness-surface use (the profess / witness_profession tools), never a
+# cry — but the distributional score read "i want to bear witness to my profession of faith" as one
+# (0.6647 > 0.6568; GitHub #23, found live 2026-10-16) while every fragment stayed under: "i want to
+# bear witness" 0.6069, "i want to profess my faith" 0.6027, "my profession of faith" 0.4136. No single
+# word trips it. "want" (+0.56 to the centroid — the "i want to…" frame every curated cry shares) is the
+# heaviest, and bear/witness/profession/faith are each weakly crisis-aligned (+0.27…+0.35) because the
+# vectors are counted from the keeping, where that vocabulary lives beside lament (Job, the Psalms);
+# averaging five same-signed vectors concentrates the direction. The SAME topic≈intent limit corrected
+# above, with a twist: the words that cause this false positive are the words that also LIFT a faith-
+# framed veiled cry over threshold ("i confess jesus is lord and i just want to be with him now" 0.7221;
+# "i want to confess christ as lord and then take all my pills" 0.7415 — neither carries a substring).
+# MEASURED before this was written: every score-based fix lost real cries — a profession centroid that
+# must out-score the crisis centroid (anchored to these idioms, with the builder's 0.02 margin) lost
+# 9 of 34 profession-framed cries the backstop catches today; re-scoring the text with the idiom removed
+# lost 4. So the rule is STRUCTURAL, not a score: the backstop stands down only when, after the FIXED
+# profession idioms are removed, nothing remains but the intent frame ("i want to", "i'd like to", "i am
+# ready to"). A cry must SAY something, and whatever it says stays in the residue, so the verdict on it
+# is exactly today's. Verified: 0 idiom hits on CRISIS_FLOOR / RED_TEAM_BLIND / CLEARLY_BENIGN, 0 lost
+# across 3,165 brute-force composites (every pinned cry wrapped in five profession idioms, prefix and
+# suffix), 0 lost on 26 hand-built faith-framed cries. The idioms are fixed phrases — no `.{0,N}` gap
+# anywhere, so a cry's own words can never be swallowed into a span. Only suppresses the backstop; the
+# substring net still wins on any explicit cry ("i want to bear witness then i want to die" → help).
+# Do NOT pin the sentence in CLEARLY_BENIGN: the builder sets the global threshold from that set's top
+# score + margin, so a benign line scoring 0.6647 would RAISE the threshold on the next rebuild and
+# silently shrink the backstop. Pinned in tests/test_crisis_profession.py instead.
+_CHURCH_TAIL = r"(?:\s+(?:before|in\s+front\s+of|to)\s+the\s+(?:church|congregation|elders|body))?"
+_PROFESSION_IDIOM = re.compile(
+    # profess Jesus Christ (as my Lord and Savior) — before the generic branch, which would stop at "profess"
+    r"\bprofess(?:ing|ed|es)?\s+(?:jesus\s+christ|jesus|christ)"
+    r"(?:\s+as\s+(?:my\s+|our\s+)?lord(?:\s+and\s+savio(?:u)?r)?)?\b"
+    # profess / profession (of) (my) faith (in Jesus Christ) (before the church)
+    r"|\bprofess(?:ion|ing|ed|es)?(?:\s+of)?(?:\s+(?:my|our|his|her|their|a|the))?(?:\s+faith)?\b"
+    r"(?:\s+in\s+(?:jesus\s+christ|jesus|christ|god|the\s+lord))?" + _CHURCH_TAIL +
+    # confess (that) Jesus (Christ) is/as (my) Lord (and Savior); confession of faith; confess my faith;
+    # confess with my mouth (Romans 10:9). Bare "confess" is NOT an idiom — "i confess i cannot go on" keeps it.
+    r"|\bconfess(?:ing|ed|es)?\s+(?:that\s+)?(?:jesus\s+christ|jesus|christ)"
+    r"(?:\s+(?:is|as)\s+(?:my\s+|our\s+)?lord(?:\s+and\s+savio(?:u)?r)?)?\b"
+    r"|\bconfession\s+of\s+(?:my\s+|our\s+)?faith\b" + _CHURCH_TAIL +
+    r"|\bconfess(?:ing|ed|es)?\s+(?:my|our)\s+faith\b" + _CHURCH_TAIL +
+    r"|\bconfess(?:ing|ed|es)?\s+with\s+(?:my|our)\s+mouth\b"
+    # testimony / testify; "what the Lord has done (for me)"
+    r"|\btestimony(?:\s+of\s+faith)?\b" + _CHURCH_TAIL +
+    r"|\btestif(?:y|ying|ied|ies)\b"
+    r"|\bwhat\s+(?:the\s+lord|god|jesus|christ)\s+has\s+done(?:\s+for\s+me|\s+in\s+my\s+life)?\b"
+    # bear witness; be a witness; witness to/for Christ. Bare "witness" is NOT an idiom.
+    r"|\bbear(?:ing|s)?\s+witness\b|\bbe\s+a\s+witness\b"
+    r"|\bwitness(?:ing|ed|es)?\s+(?:to|for)\s+(?:jesus\s+christ|jesus|christ|the\s+lord|god|my\s+faith|the\s+gospel)\b"
+    # baptism; declare my faith
+    r"|\bbaptiz(?:e|ed|ing|ism)\b|\bbaptis(?:e|ed|ing|m)\b"
+    r"|\bdeclar(?:e|ing|ed|ation\s+of)\s+(?:my|our)\s+faith\b",
+    re.I)
+# The intent frame a profession is spoken in, as `content()` stems it: "i want to", "i'd like to", "i wish
+# to", "i am ready to", "i need to", "i hope/hoping to", "i plan to" (would/make/going/let are stop words).
+# NOT here: anything a cry could be made of alone — no "give" ("give up"), "help", "please", "done", "go".
+_INTENT_FRAME = frozenset({"want", "like", "wish", "ready", "need", "hope", "hop", "plan"})
+
+
+def profession_only(text: str) -> bool:
+    """True when the message is NOTHING BUT a profession-of-faith / testimony idiom spoken in an intent
+    frame — "i want to bear witness to my profession of faith", "i am ready to be baptized". Any content
+    word beyond the fixed idioms and the frame ("…and then take all my pills") makes this False, and the
+    backstop's own verdict on the whole message stands exactly as before."""
+    residue, n = _PROFESSION_IDIOM.subn(" ", text or "")
+    return bool(n) and all(w in _INTENT_FRAME for w in content(residue))
+
 
 def flags(text: str) -> bool:
     """True when the semantic backstop judges this a cry. Only ever ADDS to the substring net."""
@@ -264,4 +329,6 @@ def flags(text: str) -> bool:
         return False                      # a date calculation ("how many days to Easter") is never a cry
     if _BENIGN_WORK_REQUEST.search(t):
         return False                      # a shop's ask (bid/quote frame, "take a look … when you get a chance") is never a cry
+    if profession_only(t):
+        return False                      # a bare profession of faith / testimony is never a cry (see note; #23)
     return score(text) > art["threshold"]
