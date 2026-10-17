@@ -1877,6 +1877,583 @@ def _x_substance(text: str):
     return out
 
 
+# ── THE REACH (issue #11, 2026-10-16): verifiers no sentence could reach ─────────────────────────
+# Thirteen domain verifiers were built, registered and pinned by their own tests, and no extractor ever
+# handed one of them a plain claim — a person's sentence stopped at the door. Below, the same discipline
+# as the logic front door: a strict regex anchored to a WHOLE clause, every number parsed (never guessed),
+# units carried into the verifier's own key, and nothing extracted when any required part is missing.
+# Two domains are left unreached on purpose: pressure_fighting takes a 14-field closed-set observation
+# and retrieval takes id lists — neither is a sentence, and a miss stays a miss.
+import json as _json
+
+_RN = r"-?\d[\d,]*(?:\.\d+)?"                        # a signed plain number, commas allowed
+_IS = r"(?:is|equals|=|comes\s+to)"
+
+
+def _fl(s: str) -> float:
+    return float(str(s).replace(",", "").strip())
+
+
+def _cnt(tok: str) -> int:
+    """'four' / '4' / 'no' / 'zero' -> an int."""
+    t = tok.strip().lower()
+    if t in ("no", "zero", "none"):
+        return 0
+    return _NUMBER_WORDS.index(t) + 1 if t in _NUMBER_WORDS else int(t)
+
+
+# ── linear algebra: a bracketed literal parsed WHOLE ───────────────────────────────────────────────
+_LA_N = r"-?\d+(?:\.\d+)?"
+_LA_ROW = r"\[\s*" + _LA_N + r"(?:\s*,\s*" + _LA_N + r")*\s*\]"
+_LA_MAT = r"\[\s*" + _LA_ROW + r"(?:\s*,\s*" + _LA_ROW + r")*\s*\]"
+_LA_DEG = r"\s*(?:°|degrees?|deg)\b"
+_LA_DET = re.compile(r"(?:the\s+)?(?:determinant\s+of\s+(?:the\s+)?(?:matrix\s+)?|det\s*\(?\s*)(?P<m>" + _LA_MAT +
+                     r")\s*\)?\s*" + _IS + r"\s*" + _HEDGE + r"(?P<c>" + _RN + r")", re.I)
+_LA_TR = re.compile(r"(?:the\s+)?(?:trace\s+of\s+(?:the\s+)?(?:matrix\s+)?|tr\s*\(?\s*)(?P<m>" + _LA_MAT +
+                    r")\s*\)?\s*" + _IS + r"\s*" + _HEDGE + r"(?P<c>" + _RN + r")", re.I)
+_LA_DOT = re.compile(r"(?:(?:the\s+)?dot\s+product\s+of\s+(?P<a>" + _LA_ROW + r")\s+and\s+(?P<b>" + _LA_ROW +
+                     r")|(?P<a2>" + _LA_ROW + r")\s*[·⋅]\s*(?P<b2>" + _LA_ROW + r"))\s*" + _IS + r"\s*" + _HEDGE +
+                     r"(?P<c>" + _RN + r")", re.I)
+_LA_MAG = re.compile(r"(?:(?:the\s+)?(?:magnitude|norm|length)\s+of\s+(?:the\s+)?(?:vector\s+)?(?P<v>" + _LA_ROW +
+                     r")|\|\s*(?P<v2>" + _LA_ROW + r")\s*\|)\s*" + _IS + r"\s*" + _HEDGE + r"(?P<c>" + _RN + r")", re.I)
+_LA_ANG = re.compile(r"(?:the\s+)?angle\s+between\s+(?:the\s+)?(?:vectors?\s+)?(?P<a>" + _LA_ROW + r")\s+and\s+(?P<b>" +
+                     _LA_ROW + r")\s+" + _IS + r"\s*" + _HEDGE + r"(?P<c>" + _RN + r")" + _LA_DEG, re.I)
+_LA_ID = re.compile(r"(?:the\s+)?(?:(?P<n>\d{1,2})\s*[x×]\s*(?P<n2>\d{1,2})\s+identity\s+matrix\s+has\s+(?:a\s+)?"
+                    r"(?P<k>trace|determinant)\s+(?:of\s+)?|(?P<k2>trace|determinant)\s+of\s+(?:the\s+)?(?P<n3>\d{1,2})"
+                    r"\s*[x×]\s*(?P<n4>\d{1,2})\s+identity\s+matrix\s+" + _IS + r"\s+)" + _HEDGE + r"(?P<c>" + _RN + r")", re.I)
+
+
+def _la_load(span: str):
+    try:
+        return _json.loads(re.sub(r"\s+", "", span))
+    except ValueError:
+        return None
+
+
+def _la_square(m) -> bool:
+    return bool(isinstance(m, list) and m and all(isinstance(r, list) and len(r) == len(m) for r in m))
+
+
+def _x_linear_algebra(text: str):
+    """"the determinant of [[1,2],[3,4]] is -2" / "the trace of [[1,2],[3,4]] is 5" / "the dot product of [1,2,3]
+    and [4,5,6] is 32" / "the magnitude of [3,4] is 5" / "the angle between [1,0] and [0,1] is 90 degrees" /
+    "the 3x3 identity matrix has trace 3" -> linear_algebra (LIN_VERIFY). A matrix or vector is a bracketed
+    literal parsed whole; a ragged or non-square matrix, or two vectors of different length, is not extracted."""
+    out = []
+    for m in _LA_DET.finditer(text):
+        mat = _la_load(m.group("m"))
+        if _la_square(mat):
+            out.append((_q(text, m), "linear_algebra",
+                        {"LIN_VERIFY": {"matrix": mat, "claimed_determinant": _fl(m.group("c")), "claimed_literal": m.group("c")}}))
+    for m in _LA_TR.finditer(text):
+        mat = _la_load(m.group("m"))
+        if _la_square(mat):
+            out.append((_q(text, m), "linear_algebra",
+                        {"LIN_VERIFY": {"matrix": mat, "claimed_trace": _fl(m.group("c")), "claimed_literal": m.group("c")}}))
+    for m in _LA_DOT.finditer(text):
+        a, b = _la_load(m.group("a") or m.group("a2")), _la_load(m.group("b") or m.group("b2"))
+        if isinstance(a, list) and isinstance(b, list) and len(a) == len(b) and a:
+            out.append((_q(text, m), "linear_algebra",
+                        {"LIN_VERIFY": {"vec_a": a, "vec_b": b, "claimed_dot_product": _fl(m.group("c")), "claimed_literal": m.group("c")}}))
+    for m in _LA_MAG.finditer(text):
+        v = _la_load(m.group("v") or m.group("v2"))
+        if isinstance(v, list) and v:
+            out.append((_q(text, m), "linear_algebra",
+                        {"LIN_VERIFY": {"vec": v, "claimed_magnitude": _fl(m.group("c")), "claimed_literal": m.group("c")}}))
+    for m in _LA_ANG.finditer(text):
+        a, b = _la_load(m.group("a")), _la_load(m.group("b"))
+        if isinstance(a, list) and isinstance(b, list) and len(a) == len(b) and a:
+            out.append((_q(text, m), "linear_algebra",
+                        {"LIN_VERIFY": {"vec_a": a, "vec_b": b, "claimed_angle_deg": _fl(m.group("c")), "claimed_literal": m.group("c")}}))
+    for m in _LA_ID.finditer(text):
+        n, n2 = int(m.group("n") or m.group("n3")), int(m.group("n2") or m.group("n4"))
+        if n != n2 or not 1 <= n <= 12:
+            continue
+        ident = [[1 if i == j else 0 for j in range(n)] for i in range(n)]
+        key = "claimed_" + (m.group("k") or m.group("k2")).lower()
+        out.append((_q(text, m), "linear_algebra",
+                    {"LIN_VERIFY": {"matrix": ident, key: _fl(m.group("c")), "claimed_literal": m.group("c")}}))
+    return out
+
+
+# ── chess: a FEN is unmistakable, a move is coordinate notation ────────────────────────────────────
+_CH_FEN = r"(?P<fen>(?-i:(?:[rnbqkpRNBQKP1-8]{1,8}/){7}[rnbqkpRNBQKP1-8]{1,8}\s+[wb]\s+(?:-|K?Q?k?q?)\s+(?:-|[a-h][36])\s+\d+\s+\d+))"
+_CH_MOVE = r"(?P<move>[a-h][1-8][a-h][1-8][qrbn]?)"
+_CH_START = r"(?:the\s+)?(?:starting|initial|opening|start)\s+position"
+_CH_LEG = r"is\s+(?P<neg>not\s+)?(?:an?\s+)?(?P<leg>legal|illegal)(?:\s+move)?\b"
+_CH_LEGAL_A = re.compile(r"(?:in|from)\s+" + _CH_START + r",?\s+(?:the\s+move\s+)?" + _CH_MOVE + r"\s+" + _CH_LEG, re.I)
+_CH_LEGAL_B = re.compile(r"(?:the\s+move\s+)?" + _CH_MOVE + r"\s+" + _CH_LEG + r"\s+(?:in|from)\s+" + _CH_START + r"\b", re.I)
+_CH_LEGAL_FEN = re.compile(r"(?:in\s+)?(?:the\s+)?position\s+" + _CH_FEN + r",?\s+(?:the\s+move\s+)?" + _CH_MOVE + r"\s+" + _CH_LEG, re.I)
+_CH_STATE = re.compile(r"(?:(?:in\s+)?(?:the\s+)?position\s+)?" + _CH_FEN +
+                       r"\s+is\s+(?P<neg>not\s+)?(?:(?:a|in)\s+)?(?P<kind>checkmate|stalemate|check|mate)\b", re.I)
+
+
+def _x_chess(text: str):
+    """"in the starting position, e2e4 is a legal move" / "e2e5 is not a legal move from the starting position" /
+    "in the position <FEN>, g1f3 is legal" / "the position <FEN> is checkmate" -> chess (CHESS_VERIFY, the
+    PERFT-proven rules engine). A move is coordinate notation only; a FEN must carry all six fields."""
+    from .chess import START_FEN                     # the engine itself runs inside the verifier
+    out = []
+    for rx, fen_from in ((_CH_LEGAL_A, None), (_CH_LEGAL_B, None), (_CH_LEGAL_FEN, "fen")):
+        for m in rx.finditer(text):
+            claimed = (m.group("leg").lower() == "legal") != bool(m.group("neg"))
+            fen = m.group("fen") if fen_from else START_FEN
+            out.append((_q(text, m), "chess",
+                        {"CHESS_VERIFY": {"fen": re.sub(r"\s+", " ", fen), "claim": "legal_move",
+                                          "move": m.group("move").lower(), "claimed": claimed}}))
+    for m in _CH_STATE.finditer(text):
+        kind = m.group("kind").lower()
+        kind = "checkmate" if kind == "mate" else kind
+        out.append((_q(text, m), "chess",
+                    {"CHESS_VERIFY": {"fen": re.sub(r"\s+", " ", m.group("fen")), "claim": kind,
+                                      "claimed": not bool(m.group("neg"))}}))
+    return out
+
+
+# ── condensed matter: the named solid-state constants and the quantum Hall plateau ─────────────────
+_CM_OHM = r"\s*(?P<u>k(?:ilo-?)?ohms?|kΩ|ohms?|Ω)\b"
+_CM_VK = re.compile(r"(?:the\s+)?(?:von\s+klitzing\s+constant|resistance\s+quantum|quantum\s+of\s+resistance)"
+                    r"(?:\s*,?\s*(?:R_?K|h\s*/\s*e[²^2]*)\s*,?)?\s+" + _IS + r"\s*" + _HEDGE + r"(?P<c>" + _RN + r")" + _CM_OHM, re.I)
+_CM_KJ = re.compile(r"(?:the\s+)?josephson\s+constant(?:\s*,?\s*(?:K_?J|2\s*e\s*/\s*h)\s*,?)?\s+" + _IS + r"\s*" + _HEDGE +
+                    r"(?P<c>" + _RN + r")\s*(?P<u>(?-i:[kMGT]?Hz))\s*(?:/|per)\s*(?:V|volt)\b", re.I)
+_CM_JMOLK = r"\s*(?:J|joules?)\s*(?:/|per)?\s*\(?\s*mol(?:e)?\s*(?:[·\*\s]|/|per)?\s*K(?:elvin)?\s*\)?(?![A-Za-z])"
+_CM_DP = re.compile(r"(?:by\s+|under\s+|from\s+)?(?:the\s+)?dulong[\s\-–]petit\b[^.;\n]{0,70}?\b(?:is|equals|=|approaches|of)\s+"
+                    r"(?:3\s*R\s*[=≈]\s*)?" + _HEDGE + r"(?P<c>" + _RN + r")" + _CM_JMOLK, re.I)
+_CM_HALL_A = re.compile(r"(?:at\s+)?(?:a\s+)?filling\s+factor\s+(?:of\s+)?(?:(?:ν|nu)\s*=\s*)?(?P<nu>\d+(?:\.\d+)?),?\s+(?:the\s+)?"
+                        r"(?:quantum\s+)?hall\s+(?:resistance|plateau)(?:\s+plateau)?\s+" + _IS + r"\s*(?:at\s+)?" + _HEDGE +
+                        r"(?P<c>" + _RN + r")" + _CM_OHM, re.I)
+_CM_HALL_B = re.compile(r"(?:the\s+)?(?:ν|nu)\s*=\s*(?P<nu>\d+(?:\.\d+)?)\s+(?:quantum\s+)?hall\s+(?:resistance|plateau)(?:\s+plateau)?\s+" +
+                        _IS + r"\s*(?:at\s+)?" + _HEDGE + r"(?P<c>" + _RN + r")" + _CM_OHM, re.I)
+_HZ = {"Hz": 1e-9, "kHz": 1e-6, "MHz": 1e-3, "GHz": 1.0, "THz": 1e3}
+
+
+def _ohm(u: str) -> float:
+    return 1000.0 if u.lower().startswith("k") else 1.0
+
+
+def _x_condensed_matter(text: str):
+    """"the von Klitzing constant is 25812.807 ohms" / "the Josephson constant is 483597.8 GHz/V" / "by the
+    Dulong-Petit law the molar heat capacity of a solid is 24.94 J/(mol K)" / "at filling factor 2 the Hall
+    resistance is 12906.4 ohms" -> condensed_matter (CONDMAT_VERIFY), computed through h, e and alpha."""
+    out = []
+    for m in _CM_VK.finditer(text):
+        out.append((_q(text, m), "condensed_matter",
+                    {"CONDMAT_VERIFY": {"claimed_von_klitzing_ohm": _fl(m.group("c")) * _ohm(m.group("u")), "claimed_literal": m.group("c")}}))
+    for m in _CM_KJ.finditer(text):
+        out.append((_q(text, m), "condensed_matter",
+                    {"CONDMAT_VERIFY": {"claimed_josephson_ghz_per_v": _fl(m.group("c")) * _HZ[m.group("u")], "claimed_literal": m.group("c")}}))
+    for m in _CM_DP.finditer(text):
+        out.append((_q(text, m), "condensed_matter",
+                    {"CONDMAT_VERIFY": {"claimed_molar_heat_capacity": _fl(m.group("c")), "claimed_literal": m.group("c")}}))
+    for rx in (_CM_HALL_A, _CM_HALL_B):
+        for m in rx.finditer(text):
+            out.append((_q(text, m), "condensed_matter",
+                        {"CONDMAT_VERIFY": {"filling_factor": float(m.group("nu")),
+                                            "claimed_hall_resistance_ohm": _fl(m.group("c")) * _ohm(m.group("u")),
+                                            "claimed_literal": m.group("c")}}))
+    return out
+
+
+# ── cybersecurity: the standards' own tables (IANA, FIRST, IETF) and the entropy formula ───────────
+_CY_SUBNET = re.compile(r"(?:an?\s+)?/(?P<p>\d{1,2})\s+(?:(?:ipv4\s+)?(?:subnet|network|block|prefix|cidr\s+block)\s+)?"
+                        r"(?:has|gives|provides|allows|supports|contains|offers|yields)\s+(?P<c>\d[\d,]*)\s+"
+                        r"(?:usable\s+(?:hosts?|addresses|host\s+addresses|ips?)|hosts?|host\s+addresses)\b", re.I)
+_CY_PORT = re.compile(r"\b(?:(?:tcp|udp)\s+)?port\s+(?P<p>\d{1,5})\s+is\s+(?:an?\s+)?(?P<k>well[\s-]?known|registered|dynamic|ephemeral|private)"
+                      r"(?:\s+(?:tcp|udp))?\s+port\b", re.I)
+_CY_CVSS = re.compile(r"(?:an?\s+)?cvss\s*(?:v?3(?:\.\d)?\s*)?(?:base\s+)?(?:score\s+)?(?:of\s+)?(?P<s>\d{1,2}(?:\.\d)?)\s+"
+                      r"(?:is|rates\s+as|is\s+rated|maps\s+to|means|counts\s+as)\s+(?:an?\s+|as\s+)?(?P<k>none|low|medium|high|critical)"
+                      r"(?:\s+severity)?\b", re.I)
+_CY_TLS = re.compile(r"\b(?:(?P<tls>TLS)\s*v?(?P<v>1\.[0-3])|(?P<ssl>SSL)\s*v?(?P<sv>[23])(?:\.0)?)\s+is\s+"
+                     r"(?:(?:now|considered|officially)\s+)?(?P<k>deprecated|current|recommended|insecure)\b", re.I)
+_CY_ENTROPY = re.compile(r"(?:an?\s+)?(?P<L>\d{1,4})[-\s]character\s+(?:(?P<named>lowercase|uppercase|alphanumeric|hex(?:adecimal)?|base64|numeric|digits?)\s+)?"
+                         r"password\s+(?:(?:drawn|chosen|picked|taken)\s+)?(?:(?:from|over|using)\s+(?:an?\s+)?(?P<N>\d{1,4})[-\s](?:character|symbol)\s+"
+                         r"(?:set|alphabet|charset|pool|space)\s+)?has\s+(?:" + _HEDGE + r"(?P<c>" + _RN + r")\s+bits\s+of\s+entropy|an?\s+entropy\s+of\s+" +
+                         _HEDGE + r"(?P<c2>" + _RN + r")\s+bits)\b", re.I)
+_CY_NAMED = {"lowercase": "lowercase", "uppercase": "uppercase", "alphanumeric": "alphanumeric", "hex": "hex", "hexadecimal": "hex",
+             "base64": "base64", "numeric": "digits", "digit": "digits", "digits": "digits"}
+
+
+def _x_cybersecurity(text: str):
+    """"a /24 subnet has 254 usable hosts" / "port 443 is a well-known port" / "a CVSS score of 9.1 is critical" /
+    "TLS 1.0 is deprecated" / "a 16-character password from a 94-character set has 104.9 bits of entropy" ->
+    cybersecurity (CYBER_VERIFY). Usable hosts only: a bare "256 addresses" (the total) is not the verifier's
+    quantity and is left alone."""
+    out = []
+    for m in _CY_SUBNET.finditer(text):
+        out.append((_q(text, m), "cybersecurity",
+                    {"CYBER_VERIFY": {"cidr_prefix": int(m.group("p")), "claimed_host_count": int(m.group("c").replace(",", "")),
+                                      "claimed_literal": m.group("c")}}))
+    for m in _CY_PORT.finditer(text):
+        k = re.sub(r"[\s-]+", "_", m.group("k").lower())
+        k = "dynamic" if k in ("ephemeral", "private") else k
+        out.append((_q(text, m), "cybersecurity", {"CYBER_VERIFY": {"port_number": int(m.group("p")), "claimed_port_class": k}}))
+    for m in _CY_CVSS.finditer(text):
+        out.append((_q(text, m), "cybersecurity",
+                    {"CYBER_VERIFY": {"cvss_base_score": float(m.group("s")), "claimed_cvss_severity": m.group("k").lower()}}))
+    for m in _CY_TLS.finditer(text):
+        v = m.group("v") if m.group("tls") else "ssl" + m.group("sv")
+        out.append((_q(text, m), "cybersecurity", {"CYBER_VERIFY": {"tls_version": v, "claimed_tls_status": m.group("k").lower()}}))
+    for m in _CY_ENTROPY.finditer(text):
+        charset = m.group("N") and int(m.group("N"))
+        if charset is None and m.group("named"):
+            charset = _CY_NAMED[m.group("named").lower()]
+        if charset is None:
+            continue
+        lit = m.group("c") or m.group("c2")
+        out.append((_q(text, m), "cybersecurity",
+                    {"CYBER_VERIFY": {"password_length": int(m.group("L")), "charset_size": charset,
+                                      "claimed_entropy_bits": _fl(lit), "claimed_literal": lit}}))
+    return out
+
+
+# ── document validation: a checksum is a yes/no the digits themselves decide ───────────────────────
+_DV_VALID = r"is\s+(?:an?\s+)?(?P<neg>not\s+)?(?P<v>valid|invalid)"
+_DV_ISBN = re.compile(r"\bISBN(?:[-\s]?(?P<kind>1[03]))?\s*:?\s*(?P<n>\d[\d\-\s]{7,18}[\dXx])\s+" + _DV_VALID + r"(?:\s+ISBN)?\b", re.I)
+_DV_CARD = re.compile(r"(?:the\s+)?(?:credit[-\s]card|card|account|imei|debit[-\s]card)\s+number\s+(?P<n>\d[\d\-\s]{9,22}\d)\s+" + _DV_VALID + r"\b", re.I)
+_DV_LUHN = re.compile(r"(?:(?:the\s+)?(?:(?:credit[-\s]card|card|account|imei)\s+)?number\s+)?(?P<n>\d[\d\-\s]{9,22}\d)\s+(?P<pf>passes|fails)\s+"
+                      r"(?:the\s+)?luhn(?:\s+(?:check|test|algorithm|checksum))?\b", re.I)
+_DV_EAN = re.compile(r"\b(?:the\s+)?(?:UPC(?:-A)?|EAN(?:-13)?|barcode|bar\s+code)\s*(?:number\s+|code\s+)?:?\s*(?P<n>\d[\d\-\s]{10,15}\d)\s+" +
+                     _DV_VALID + r"\b", re.I)
+
+
+def _dv_digits(s: str) -> str:
+    return re.sub(r"[^0-9Xx]", "", s)
+
+
+def _x_document_validation(text: str):
+    """"ISBN 0-306-40615-2 is valid" / "ISBN 978-0-306-40615-7 is valid" / "79927398713 passes the Luhn check" /
+    "the card number 4532 0151 1283 0366 is valid" / "UPC 036000291452 is valid" -> document_validation
+    (DOC_VERIFY). ISBN length decides 10 vs 13; an explicit "ISBN-13" on ten digits is a contradiction and is
+    not extracted; a UPC/EAN must be 12 or 13 digits."""
+    out = []
+    for m in _DV_ISBN.finditer(text):
+        d = _dv_digits(m.group("n"))
+        claimed = (m.group("v").lower() == "valid") != bool(m.group("neg"))
+        if len(d) == 10 and m.group("kind") in (None, "10"):
+            out.append((_q(text, m), "document_validation", {"DOC_VERIFY": {"isbn10": d, "claimed_isbn10_valid": claimed}}))
+        elif len(d) == 13 and d.isdigit() and m.group("kind") in (None, "13"):
+            out.append((_q(text, m), "document_validation", {"DOC_VERIFY": {"isbn13": d, "claimed_isbn13_valid": claimed}}))
+    for m in _DV_CARD.finditer(text):
+        d = _dv_digits(m.group("n"))
+        if d.isdigit() and len(d) >= 10:
+            claimed = (m.group("v").lower() == "valid") != bool(m.group("neg"))
+            out.append((_q(text, m), "document_validation", {"DOC_VERIFY": {"luhn_number": d, "claimed_luhn_valid": claimed}}))
+    for m in _DV_LUHN.finditer(text):
+        d = _dv_digits(m.group("n"))
+        if d.isdigit() and len(d) >= 10:
+            out.append((_q(text, m), "document_validation",
+                        {"DOC_VERIFY": {"luhn_number": d, "claimed_luhn_valid": m.group("pf").lower() == "passes"}}))
+    for m in _DV_EAN.finditer(text):
+        d = _dv_digits(m.group("n"))
+        if d.isdigit() and len(d) in (12, 13):
+            claimed = (m.group("v").lower() == "valid") != bool(m.group("neg"))
+            out.append((_q(text, m), "document_validation", {"DOC_VERIFY": {"ean_or_upc": d, "claimed_ean_valid": claimed}}))
+    return out
+
+
+# ── manufacturing: Six Sigma's table, the 3-sigma chart, the RSS stack ─────────────────────────────
+_MF_SIG = r"(?P<s>\d(?:\.\d)?|one|two|three|four|five|six|seven)[\s-]*(?:sigma|σ)"
+_MF_DPMO_WORD = r"(?:DPMO|defects?\s+per\s+million(?:\s+opportunities)?)"
+_MF_DPMO_A = re.compile(r"(?:(?:a\s+)?DPMO\s+of\s+(?P<d1>" + _RN + r")|(?:a\s+)?(?:defect\s+rate\s+of\s+)?(?P<d2>" + _RN + r")\s+" + _MF_DPMO_WORD +
+                        r")\s+(?:is|corresponds\s+to|equals|means|=|maps\s+to)\s+(?:about\s+|roughly\s+|approximately\s+)?(?:a\s+)?" + _MF_SIG +
+                        r"(?:\s+(?:level|process|quality))?\b", re.I)
+_MF_DPMO_B = re.compile(r"(?:a\s+)?" + _MF_SIG + r"(?:\s+(?:level|process|quality))?\s+(?:is|means|corresponds\s+to|equals|=|allows|has)\s+"
+                        r"(?:about\s+|roughly\s+|approximately\s+|only\s+)?(?P<d>" + _RN + r")\s+" + _MF_DPMO_WORD + r"\b", re.I)
+_MF_SPC = re.compile(r"(?:(?:a|the)\s+)?(?:process\s+|chart\s+)?with\s+(?:a\s+)?(?:process\s+)?mean\s+(?:of\s+)?(?P<m>" + _RN + r")\s+and\s+(?:a\s+)?"
+                     r"(?:standard\s+deviation|sigma|σ|std\.?\s*dev\.?)\s+(?:of\s+)?(?P<s>" + _RN + r"),?\s+(?:the\s+|has\s+|gives\s+)?"
+                     r"(?:(?P<k>[1-3]|one|two|three)[\s-]*(?:sigma|σ)\s+)?(?:x-?bar\s+)?control\s+limits\s+(?:are|of|at|=|is)\s+"
+                     r"(?:UCL\s*(?:=|of)?\s*)?(?P<a>" + _RN + r")\s+and\s+(?:LCL\s*(?:=|of)?\s*)?(?P<b>" + _RN + r")\b", re.I)
+_MF_LIST = r"(?P<list>" + _RN + r"(?:\s*,\s*" + _RN + r")*(?:,?\s*(?:and|&)\s+" + _RN + r")?)"
+_MF_RSS_WORD = r"(?:RSS|root[-\s]sum[-\s](?:of[-\s])?squares?|statistical)"
+_MF_RSS_A = re.compile(r"(?:the\s+)?" + _MF_RSS_WORD + r"\s+(?:tolerance\s+)?stack(?:[-\s]?up)?\s+(?:of|for)\s+(?:(?:the\s+)?tolerances\s+(?:of\s+)?)?" +
+                       _MF_LIST + r"\s+" + _IS + r"\s*" + _HEDGE + r"(?P<c>" + _RN + r")\b", re.I)
+_MF_RSS_B = re.compile(r"tolerances\s+(?:of\s+)?" + _MF_LIST + r"\s+stack\s+(?:up\s+)?(?:statistically\s+)?to\s+(?:an?\s+)?" + _MF_RSS_WORD +
+                       r"\s+(?:total\s+|stack(?:[-\s]?up)?\s+)?(?:of\s+)?" + _HEDGE + r"(?P<c>" + _RN + r")\b", re.I)
+
+
+def _sigf(tok: str) -> float:
+    """'5' / '5.0' / 'six' -> a sigma level."""
+    return float(tok) if re.match(r"\d", tok) else float(_cnt(tok))
+
+
+def _x_manufacturing(text: str):
+    """"a DPMO of 233 is a 5 sigma level" / "six sigma is 3.4 defects per million opportunities" / "with a mean of
+    100 and a standard deviation of 2, the 3-sigma control limits are 94 and 106" / "the RSS stack-up of
+    tolerances 0.1, 0.2 and 0.2 is 0.3" -> manufacturing (MFG_VERIFY). Control limits are an unordered pair:
+    the lower one is the LCL whichever is written first."""
+    out = []
+    for m in _MF_DPMO_A.finditer(text):
+        out.append((_q(text, m), "manufacturing",
+                    {"MFG_VERIFY": {"dpmo": _fl(m.group("d1") or m.group("d2")), "claimed_sigma": _sigf(m.group("s"))}}))
+    for m in _MF_DPMO_B.finditer(text):
+        out.append((_q(text, m), "manufacturing",
+                    {"MFG_VERIFY": {"dpmo": _fl(m.group("d")), "claimed_sigma": _sigf(m.group("s"))}}))
+    for m in _MF_SPC.finditer(text):
+        a, b = _fl(m.group("a")), _fl(m.group("b"))
+        spec = {"mean": _fl(m.group("m")), "sigma": _fl(m.group("s")), "claimed_ucl": max(a, b), "claimed_lcl": min(a, b)}
+        if m.group("k"):
+            spec["k"] = _cnt(m.group("k"))
+        out.append((_q(text, m), "manufacturing", {"MFG_VERIFY": spec}))
+    for rx in (_MF_RSS_A, _MF_RSS_B):
+        for m in rx.finditer(text):
+            tols = [_fl(t) for t in re.findall(_RN, m.group("list"))]
+            if len(tols) < 2 or any(t < 0 for t in tols):
+                continue
+            out.append((_q(text, m), "manufacturing",
+                        {"MFG_VERIFY": {"tolerances": tols, "claimed_rss": _fl(m.group("c")), "claimed_literal": m.group("c")}}))
+    return out
+
+
+# ── molecular geometry: VSEPR from the domain count, in AXE notation or in words ───────────────────
+_MG_GEO = r"(?P<geo>linear|trigonal[\s_-]planar|bent|tetrahedral|trigonal[\s_-]pyramidal|trigonal[\s_-]bipyramidal|see-?saw|t[\s_-]shaped|octahedral|square[\s_-]pyramidal|square[\s_-]planar)"
+_MG_DEGU = r"\s*(?:°|degrees?|deg)\b"
+_MG_ANG_A = r"(?:ideal\s+)?(?:bond\s+)?angles?\s+(?:of\s+)?" + _HEDGE + r"(?P<angA>\d{2,3}(?:\.\d+)?)" + _MG_DEGU
+_MG_ANG_B = _HEDGE + r"(?P<angB>\d{2,3}(?:\.\d+)?)\s*(?:°|degrees?|deg)\s+(?:bond\s+)?angles?\b"
+_MG_ANG_C = r"(?:ideal\s+)?(?:bond\s+)?angles?\s+(?:of\s+)?" + _HEDGE + r"(?P<angC>\d{2,3}(?:\.\d+)?)" + _MG_DEGU
+_MG_ANG_D = _HEDGE + r"(?P<angD>\d{2,3}(?:\.\d+)?)\s*(?:°|degrees?|deg)\s+(?:bond\s+)?angles?\b"
+_MG_TAIL = (r"(?:(?:is|are|has|have|adopts?|gives?|forms?|yields?|makes?)\s+(?:an?\s+)?(?:(?:molecular\s+)?(?:geometry|shape)\s+(?:of|that\s+is)\s+(?:an?\s+)?)?" +
+            _MG_GEO + r"(?:\s+(?:geometry|shape|molecule))?(?:\s+(?:with|and)\s+(?:an?\s+)?(?:" + _MG_ANG_A + r"|" + _MG_ANG_B + r"))?" +
+            r"|(?:has|have|with)\s+(?:an?\s+)?(?:" + _MG_ANG_C + r"|" + _MG_ANG_D + r"))")
+_MG_AXE = re.compile(r"\b(?:an?\s+)?AX(?P<n>[1-6])(?P<E>E(?P<e>[1-3])?)?\b\s*(?:(?:molecule|species|system|geometry)\s+)?" + _MG_TAIL, re.I)
+_MG_CNT = r"(?:\d|one|two|three|four|five|six|no|zero)"
+_MG_DOM = re.compile(r"(?:(?:(?:a|an|the)\s+)?(?:(?:central\s+)?atom|molecule|species)\s+)?(?:(?:with|having|that\s+has)\s+)?(?P<n>" + _MG_CNT +
+                     r")\s+(?:bonding\s+(?:domains?|pairs?|groups?|regions?)|bond(?:ed)?\s+(?:pairs?|atoms?)|bonds)\s+and\s+(?P<e>" + _MG_CNT +
+                     r")\s+lone\s+pairs?\s+" + _MG_TAIL, re.I)
+
+
+def _x_molecular_geometry(text: str):
+    """"an AX4 molecule is tetrahedral with 109.5° bond angles" / "AX2E2 is bent" / "a molecule with 4 bonding
+    pairs and no lone pairs is tetrahedral" -> molecular_geometry (VSEPR_VERIFY). The domain count is read from
+    AXE notation or the words; a geometry the verifier's table gives more than one angle for is not extracted
+    with an angle (the verifier cannot decide a single value), and an untabulated count is not extracted."""
+    from .verifiers.molecular_geometry import _VSEPR
+    out = []
+    for rx in (_MG_AXE, _MG_DOM):
+        for m in rx.finditer(text):
+            n = _cnt(m.group("n"))
+            if rx is _MG_AXE:
+                e = (int(m.group("e") or 1)) if m.group("E") else 0
+            else:
+                e = _cnt(m.group("e"))
+            entry = _VSEPR.get((n + e, e))
+            if entry is None or n < 1:
+                continue
+            geo = m.group("geo")
+            ang = m.group("angA") or m.group("angB") or m.group("angC") or m.group("angD")
+            if ang is not None and entry[1] is None:
+                continue
+            spec: Dict[str, Any] = {"bonding_domains": n, "lone_pairs": e}
+            if geo:
+                g = re.sub(r"[\s_-]+", "_", geo.lower())
+                spec["claimed_geometry"] = "seesaw" if g in ("see_saw", "seesaw") else g
+            if ang is not None:
+                spec["claimed_bond_angle_deg"] = float(ang)
+                spec["claimed_literal"] = ang
+            out.append((_q(text, m), "molecular_geometry", {"VSEPR_VERIFY": spec}))
+    return out
+
+
+# ── philosophy: which named framework judges by outcomes (the verifier's own four) ─────────────────
+_PH_FW = r"(?P<fw>consequentialism|consequentialist\s+ethics|consequentialists?|deontology|deontological\s+ethics|deontologists?|virtue\s+ethics|virtue\s+ethicists?|contractarianism|contractarian\s+ethics|contractarians?)"
+_PH_OUT = r"(?:outcomes?|consequences?|results)"
+_PH_PRED = (r"(?:(?:(?P<n1>does\s+not|doesn't|do\s+not|don't)\s+)?(?:judges?|evaluates?|assesses?|measures?|grades?|determines?)\s+(?:the\s+)?(?:moral\s+)?"
+            r"(?:worth\s+of\s+|rightness\s+of\s+)?(?:an\s+)?(?:actions?|acts?|conduct|behaviou?r)\s+(?:solely\s+|primarily\s+|only\s+|entirely\s+)?by\s+(?:their\s+|its\s+)?" + _PH_OUT +
+            r"|(?:is|are)\s+(?P<n2>not\s+)?(?:(?:solely|primarily|chiefly|mainly)\s+)?(?:focused\s+on|concerned\s+with|about|based\s+on|grounded\s+in|a\s+matter\s+of)\s+" + _PH_OUT +
+            r"|(?:(?P<n3>does\s+not|doesn't|do\s+not|don't)\s+)?focus(?:es)?\s+(?:solely\s+|primarily\s+)?on\s+" + _PH_OUT + r")")
+_PH_RE = re.compile(r"\b" + _PH_FW + r"\s+" + _PH_PRED + r"\b", re.I)
+
+
+def _x_philosophy(text: str):
+    """"consequentialism judges actions by their outcomes" / "virtue ethics is not about outcomes" / "deontology
+    does not judge actions by their consequences" -> philosophy (PHIL_VERIFY, the ethical-framework catalogue).
+    Only the verifier's own four frameworks are named; no school is mapped onto another."""
+    out = []
+    for m in _PH_RE.finditer(text):
+        fw = m.group("fw").lower()
+        key = ("consequentialist" if fw.startswith("consequential") else "deontological" if fw.startswith("deontolog")
+               else "virtue_ethics" if fw.startswith("virtue") else "contractarian")
+        neg = bool(m.group("n1") or m.group("n2") or m.group("n3"))
+        out.append((_q(text, m), "philosophy", {"PHIL_VERIFY": {"framework_name": key, "claimed_focuses_on_outcomes": not neg}}))
+    return out
+
+
+# ── photonics: a photon's energy from its wavelength or frequency, through h ───────────────────────
+_PN_WL = r"(?P<wu>nm|nanomet(?:er|re)s?|µm|μm|um|microns?|micromet(?:er|re)s?|Å|angstroms?|pm|picomet(?:er|re)s?|mm|millimet(?:er|re)s?|met(?:er|re)s?|m)"
+_PN_FQ = r"(?P<fu>(?-i:[kMGTP]?Hz)|hertz|kilohertz|megahertz|gigahertz|terahertz|petahertz)"
+_PN_UNIT = r"(?:" + _PN_WL + r"|" + _PN_FQ + r")\b"
+_PN_EV = r"(?P<eu>(?-i:[mk]?eV)|electron[-\s]?volts?|electronvolts?)\b"
+_PN_A = re.compile(r"(?:a|an|the)\s+(?P<x>" + _RN + r")\s*" + _PN_UNIT + r"\s+(?:photon|light|laser)\s+(?:has|carries)\s+(?:an?\s+)?(?:photon\s+)?energy\s+(?:of\s+)?" +
+                   _HEDGE + r"(?P<c>" + _RN + r")\s*" + _PN_EV, re.I)
+_PN_B = re.compile(r"(?:the\s+)?(?:photon\s+)?energy\s+of\s+(?:a|an)\s+(?P<x>" + _RN + r")\s*" + _PN_UNIT + r"\s+(?:photon|light)\s+" + _IS + r"\s*" +
+                   _HEDGE + r"(?P<c>" + _RN + r")\s*" + _PN_EV, re.I)
+_PN_C = re.compile(r"(?:a|an)\s+photon\s+(?:of|with|at)\s+(?:a\s+)?(?:wavelength|frequency)?\s*(?:of\s+)?(?P<x>" + _RN + r")\s*" + _PN_UNIT +
+                   r"\s+(?:has|carries)\s+(?:an?\s+)?energy\s+(?:of\s+)?" + _HEDGE + r"(?P<c>" + _RN + r")\s*" + _PN_EV, re.I)
+_PN_D = re.compile(r"(?:light|photons?)\s+at\s+(?P<x>" + _RN + r")\s*" + _PN_UNIT + r"\s+(?:has|have|carries|carry)\s+(?:an?\s+)?(?:photon\s+)?energy\s+(?:of\s+)?" +
+                   _HEDGE + r"(?P<c>" + _RN + r")\s*" + _PN_EV, re.I)
+_PN_WLF = {"nm": 1e-9, "nanomet": 1e-9, "µm": 1e-6, "μm": 1e-6, "um": 1e-6, "micron": 1e-6, "micromet": 1e-6, "å": 1e-10, "angstrom": 1e-10,
+           "pm": 1e-12, "picomet": 1e-12, "mm": 1e-3, "millimet": 1e-3, "met": 1.0, "m": 1.0}
+_PN_FQF = {"hz": 1.0, "khz": 1e3, "mhz": 1e6, "ghz": 1e9, "thz": 1e12, "phz": 1e15, "hertz": 1.0, "kilohertz": 1e3, "megahertz": 1e6,
+           "gigahertz": 1e9, "terahertz": 1e12, "petahertz": 1e15}
+_PN_EVF = {"ev": 1.0, "mev": 1e-3, "kev": 1e3}
+
+
+def _pn_factor(table: Dict[str, float], unit: str) -> Optional[float]:
+    u = unit.lower()
+    for k in sorted(table, key=len, reverse=True):
+        if u == k or u.startswith(k):
+            return table[k]
+    return None
+
+
+def _x_photonics(text: str):
+    """"a 500 nm photon has energy 2.48 eV" / "the energy of a 1550 nm photon is 0.8 eV" / "a 600 THz photon has
+    energy 2.48 eV" -> photonics (PHOT_VERIFY, E = h c / lambda or E = h nu). Wavelength and frequency units
+    are converted into the verifier's metres and hertz; the energy into eV."""
+    out = []
+    for rx in (_PN_A, _PN_B, _PN_C, _PN_D):
+        for m in rx.finditer(text):
+            x = _fl(m.group("x"))
+            eu = m.group("eu").lower()
+            ef = 1.0 if eu.startswith("electron") else _PN_EVF.get(eu)
+            if x <= 0 or ef is None:
+                continue
+            spec: Dict[str, Any] = {"claimed_photon_energy_ev": _fl(m.group("c")) * ef, "claimed_literal": m.group("c")}
+            if m.group("wu"):
+                f = _pn_factor(_PN_WLF, m.group("wu"))
+                if f is None:
+                    continue
+                spec["photon_wavelength_m"] = x * f
+            else:
+                f = _pn_factor(_PN_FQF, m.group("fu"))
+                if f is None:
+                    continue
+                spec["photon_frequency_hz"] = x * f
+            out.append((_q(text, m), "photonics", {"PHOT_VERIFY": spec}))
+    return out
+
+
+# ── sports analytics: games behind, the Elo expectation, the Pythagorean record ────────────────────
+_SP_LEADER = r"(?:leader|first[-\s]place\s+team|team|club)"
+_SP_GB = re.compile(r"(?:(?:a|the)\s+)?(?:team\s+)?(?:(?:at|with\s+a\s+record\s+of|with\s+a|standing\s+at)\s+)?(?P<tw>\d{1,3})\s*[-–]\s*(?P<tl>\d{1,3})"
+                    r"(?:\s+(?:team|record|club))?\s+(?:is|are|sits|stands)\s+(?P<gb>" + _RN + r")\s+games?\s+(?:back|behind)(?:\s+of)?\s+(?:(?:a|the)\s+)?"
+                    r"(?:(?P<lw>\d{1,3})\s*[-–]\s*(?P<ll>\d{1,3})\s+" + _SP_LEADER + r"|" + _SP_LEADER + r"\s+(?:at|with\s+a\s+record\s+of|with\s+a)\s+"
+                    r"(?P<lw2>\d{1,3})\s*[-–]\s*(?P<ll2>\d{1,3}))\b", re.I)
+_SP_RATED = r"(?:[-\s](?:elo[-\s])?rated|[-\s]elo)?"
+_SP_SCORE = r"(?:(?P<s>0?\.\d+|1\.0+|0|1)|(?P<pc>\d{1,3}(?:\.\d+)?)\s*%)(?!\d)"
+_SP_EXPECT = r"(?:is\s+expected\s+to\s+score|has\s+an?\s+expected\s+score\s+of|expects\s+to\s+score|should\s+score)"
+_SP_ELO_A = re.compile(r"(?:a|an)\s+(?P<a>\d{3,4})" + _SP_RATED + r"\s+(?:player|team)\s+" + _SP_EXPECT + r"\s+" + _HEDGE + _SP_SCORE +
+                       r"\s+(?:against|versus|vs\.?)\s+(?:a|an)\s+(?P<b>\d{3,4})" + _SP_RATED + r"\s+(?:player|team|opponent)\b", re.I)
+_SP_ELO_B = re.compile(r"(?:a|an)\s+(?P<a>\d{3,4})" + _SP_RATED + r"\s+(?:player|team)\s+(?:against|versus|vs\.?|facing|playing)\s+(?:a|an)\s+(?P<b>\d{3,4})" +
+                       _SP_RATED + r"\s+(?:player|team|opponent)\s+" + _SP_EXPECT + r"\s+" + _HEDGE + _SP_SCORE, re.I)
+_SP_PCT = r"(?:(?P<p>\.\d+|0\.\d+|1\.0+)|(?P<ppc>\d{1,3}(?:\.\d+)?)\s*%)(?!\d)"
+_SP_PYWORD = r"pythagorean\s+(?:win(?:ning)?\s+(?:percentage|pct\.?|expectation|%)|expectation|record|win\s+%)"
+_SP_PY_A = re.compile(r"(?:(?:a|the)\s+)?(?:team\s+)?(?:that\s+|which\s+|who\s+)?(?:scored|scoring|with|having\s+scored)\s+(?P<rs>\d[\d,]*)\s+runs?(?:\s+scored)?\s+and\s+"
+                      r"(?:allowed|allowing|gave\s+up|giving\s+up|conceded|conceding)\s+(?P<ra>\d[\d,]*)(?:\s+runs?)?\s+(?:has|have|had|gets|earns)\s+(?:an?\s+)?(?:expected\s+)?" +
+                      _SP_PYWORD + r"\s+(?:of\s+)?" + _HEDGE + _SP_PCT, re.I)
+_SP_PY_B = re.compile(r"(?:the\s+)?" + _SP_PYWORD + r"\s+(?:for|of)\s+(?:a\s+team\s+(?:with|that\s+scored)\s+)?(?P<rs>\d[\d,]*)\s+runs?\s+(?:scored\s+)?and\s+(?P<ra>\d[\d,]*)\s+"
+                      r"(?:runs\s+)?allowed\s+" + _IS + r"\s*" + _HEDGE + _SP_PCT, re.I)
+
+
+def _x_sports_analytics(text: str):
+    """"a team at 45-35 is 5 games behind a leader at 50-30" / "a 1600-rated player is expected to score 0.64 against
+    a 1500-rated player" / "a team that scored 750 runs and allowed 600 has a Pythagorean winning percentage of
+    .610" -> sports_analytics (SPORT_VERIFY). The word "Pythagorean" is REQUIRED (it names the exponent-2 formula);
+    a bare win percentage is not this claim."""
+    out = []
+    for m in _SP_GB.finditer(text):
+        lw, ll = m.group("lw") or m.group("lw2"), m.group("ll") or m.group("ll2")
+        out.append((_q(text, m), "sports_analytics",
+                    {"SPORT_VERIFY": {"leader_wins": int(lw), "leader_losses": int(ll), "team_wins": int(m.group("tw")),
+                                      "team_losses": int(m.group("tl")), "claimed_games_behind": _fl(m.group("gb")), "claimed_literal": m.group("gb")}}))
+    for rx in (_SP_ELO_A, _SP_ELO_B):
+        for m in rx.finditer(text):
+            lit = m.group("s") or m.group("pc")
+            score = float(m.group("s")) if m.group("s") else float(m.group("pc")) / 100.0
+            out.append((_q(text, m), "sports_analytics",
+                        {"SPORT_VERIFY": {"elo_a": float(m.group("a")), "elo_b": float(m.group("b")), "claimed_expected_score_a": score,
+                                          "claimed_literal": lit}}))
+    for rx in (_SP_PY_A, _SP_PY_B):
+        for m in rx.finditer(text):
+            lit = m.group("p") or m.group("ppc")
+            pct = float(m.group("p")) if m.group("p") else float(m.group("ppc")) / 100.0
+            out.append((_q(text, m), "sports_analytics",
+                        {"SPORT_VERIFY": {"runs_scored": int(m.group("rs").replace(",", "")), "runs_allowed": int(m.group("ra").replace(",", "")),
+                                          "claimed_winning_pct": pct, "claimed_literal": lit}}))
+    return out
+
+
+# ── archaeology: the decay clock, from the surviving fraction ──────────────────────────────────────
+_AR_FRAC = (r"(?:(?P<pct>\d+(?:\.\d+)?)\s*(?:%|percent)|(?P<dec>0?\.\d+)|(?P<word>half|one[-\s]half|a\s+half|(?:a|one)[-\s]quarter|(?:a|one)[-\s]fourth|"
+            r"three[-\s]quarters|(?:an|one)[-\s]eighth|(?:a|one)[-\s]sixteenth))")
+_AR_WORDS = {"half": 0.5, "one half": 0.5, "a half": 0.5, "a quarter": 0.25, "one quarter": 0.25, "a fourth": 0.25, "one fourth": 0.25,
+             "three quarters": 0.75, "an eighth": 0.125, "one eighth": 0.125, "a sixteenth": 0.0625, "one sixteenth": 0.0625}
+_AR_C14 = r"(?:carbon[-\s]?14|carbon[-\s]?fourteen|C[-\s]?14|14[-\s]?C|¹⁴C|radiocarbon)"
+_AR_SCALE = r"(?P<ys>thousand|million|billion)?"
+_AR_YEARS = r"(?P<age>" + _RN + r")\s*" + _AR_SCALE + r"\s*years?(?:\s+old)?\b"
+_AR_HALFN = r"(?P<n>" + _RN + r"|one|two|three|four|five|six|seven|eight|nine|ten)\s+half[-\s]li(?:fe|ves)\b"
+_AR_A = re.compile(r"(?:(?:a|the)\s+)?(?:sample|bone|charcoal|wood|artifact|artefact|specimen|object|fossil|shell|seed)\s+(?:with|retaining|that\s+retains|that\s+has|having|containing)\s+"
+                   r"(?:only\s+|just\s+)?" + _AR_FRAC + r"\s+of\s+(?:its|the)\s+(?:original\s+)?" + _AR_C14 + r"(?:\s+(?:remaining|left|intact))?\s+"
+                   r"(?:is|dates\s+to|would\s+be|must\s+be|has\s+an\s+age\s+of|is\s+dated\s+(?:at|to))\s+" + _HEDGE + _AR_YEARS, re.I)
+_AR_B = re.compile(r"(?:if\s+|when\s+)?(?:only\s+)?" + _AR_FRAC + r"\s+of\s+(?:the|its|a\s+sample's)\s+(?:original\s+)?" + _AR_C14 +
+                   r"\s+(?:remains|is\s+left|survives|is\s+remaining),?\s+(?:the\s+)?(?:sample|object|bone|specimen|age)\s+(?:is|would\s+be|dates\s+to|must\s+be)\s+" +
+                   _HEDGE + _AR_YEARS, re.I)
+_AR_C = re.compile(_AR_FRAC + r"\s+(?:remaining|surviving|left|residual)\s+" + _AR_C14 +
+                   r"\s+(?:is|means|gives|corresponds\s+to|=|indicates|implies|dates\s+to)\s+(?:an\s+age\s+of\s+)?" + _HEDGE + _AR_YEARS, re.I)
+_AR_HL_A = re.compile(_AR_FRAC + r"\s+(?:remaining|left|surviving)(?:\s+of\s+(?:a|the|an)\s+(?:original\s+)?(?:sample|isotope|parent|nuclide|amount))?\s+"
+                      r"(?:is|means|represents|corresponds\s+to|=|equals|takes|after)\s+" + _AR_HALFN, re.I)
+_AR_HL_B = re.compile(r"after\s+" + _AR_HALFN + r",?\s+(?:only\s+)?" + _AR_FRAC +
+                      r"(?:\s+of\s+(?:the|a|an)\s+(?:original\s+)?(?:sample|isotope|parent|nuclide|amount))?\s+(?:remains|is\s+left|survives|will\s+remain)\b", re.I)
+_AR_ISO = re.compile(r"(?:with\s+)?(?:a\s+)?half[-\s]life\s+of\s+(?P<hl>" + _RN + r")\s*(?P<hls>thousand|million|billion)?\s*years,?\s+(?:a\s+sample\s+with\s+)?" + _AR_FRAC +
+                     r"\s+(?:remaining|left)\s+(?:is|means|gives|corresponds\s+to|dates\s+to|implies)\s+(?:an\s+age\s+of\s+)?" + _HEDGE + _AR_YEARS, re.I)
+_SCALE = {None: 1.0, "thousand": 1e3, "million": 1e6, "billion": 1e9}
+
+
+def _ar_frac(m: re.Match) -> Optional[float]:
+    if m.group("pct"):
+        f = float(m.group("pct")) / 100.0
+    elif m.group("dec"):
+        f = float(m.group("dec"))
+    else:
+        f = _AR_WORDS.get(re.sub(r"[-\s]+", " ", m.group("word").lower()))
+    return f if f is not None and 0.0 < f <= 1.0 else None
+
+
+def _x_archaeology(text: str):
+    """"a sample with 25% of its carbon-14 remaining is about 11,460 years old" / "25% remaining carbon-14 is about
+    11460 years" / "if 50% of the carbon-14 remains, the sample is 5730 years old" / "12.5% remaining is 3
+    half-lives" / "with a half-life of 1.25 billion years, 50% remaining is 1.25 billion years old" ->
+    archaeology (ARCH_VERIFY, t = -(T/ln 2) ln f). The fraction is a percent, a decimal or a plain word."""
+    out = []
+    for rx in (_AR_A, _AR_B, _AR_C):
+        for m in rx.finditer(text):
+            f = _ar_frac(m)
+            if f is None:
+                continue
+            age = _fl(m.group("age")) * _SCALE[(m.group("ys") or "").lower() or None]
+            out.append((_q(text, m), "archaeology",
+                        {"ARCH_VERIFY": {"fraction_remaining": f, "claimed_age_years": age, "claimed_literal": m.group("age")}}))
+    for rx in (_AR_HL_A, _AR_HL_B):
+        for m in rx.finditer(text):
+            f = _ar_frac(m)
+            if f is None:
+                continue
+            n = m.group("n")
+            out.append((_q(text, m), "archaeology",
+                        {"ARCH_VERIFY": {"fraction_for_halflives": f, "claimed_half_lives": float(_cnt(n)) if not re.match(r"-?\d", n) else _fl(n),
+                                         "claimed_literal": n}}))
+    for m in _AR_ISO.finditer(text):
+        f = _ar_frac(m)
+        if f is None:
+            continue
+        hl = _fl(m.group("hl")) * _SCALE[(m.group("hls") or "").lower() or None]
+        age = _fl(m.group("age")) * _SCALE[(m.group("ys") or "").lower() or None]
+        if hl <= 0:
+            continue
+        out.append((_q(text, m), "archaeology",
+                    {"ARCH_VERIFY": {"fraction_remaining_iso": f, "half_life_years": hl, "claimed_age_years_iso": age, "claimed_literal": m.group("age")}}))
+    return out
+
+
 _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("sum", _x_sum), ("product", _x_product), ("quotient", _x_quotient), ("arith_words", _x_arith_words),
     ("rational_roots", _x_rational_roots), ("substance", _x_substance),
@@ -1886,6 +2463,11 @@ _EXTRACTORS: Tuple[Tuple[str, Callable], ...] = (
     ("propositional_logic", _x_propositional_logic), ("logic_relations", _x_logic_relations), ("argument_form", _x_argument_form),
     ("syllogism", _x_syllogism), ("logic_counts", _x_logic_counts), ("named_forms", _x_named_forms),
     ("fallacy_kind", _x_fallacy_kind),
+    # THE REACH (issue #11): the eleven domains a sentence could not reach until 2026-10-16
+    ("linear_algebra", _x_linear_algebra), ("chess", _x_chess), ("condensed_matter", _x_condensed_matter),
+    ("cybersecurity", _x_cybersecurity), ("document_validation", _x_document_validation),
+    ("manufacturing", _x_manufacturing), ("molecular_geometry", _x_molecular_geometry), ("philosophy", _x_philosophy),
+    ("photonics", _x_photonics), ("sports_analytics", _x_sports_analytics), ("archaeology", _x_archaeology),
     ("word_letters", _x_word_letters), ("anagram", _x_anagram), ("palindrome", _x_palindrome),
     ("edit_distance", _x_edit_distance), ("alphabet", _x_alphabet), ("plural", _x_plural), ("letter_rank", _x_letter_rank),
     ("rhyme", _x_rhyme), ("homophone", _x_homophone), ("stress", _x_stress), ("silent_letter", _x_silent_letter),
