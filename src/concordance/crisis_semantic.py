@@ -309,26 +309,39 @@ def profession_only(text: str) -> bool:
     return bool(n) and all(w in _INTENT_FRAME for w in content(residue))
 
 
+def guarded(text: str) -> bool:
+    """True when a STRUCTURAL guard stands the backstop down: by its frame this message is never a cry.
+    The ONE list, in the order the notes above introduce them. Consulted by flags() at runtime AND by
+    tools/build_crisis_semantic.py when it derives the threshold (issue #41): a benign line a guard
+    already handles never reaches the score, so it must not set the score ceiling for every line the
+    guards do not cover — that raised a rebuild's threshold 0.6568 -> 0.7406 and would have silently
+    dropped 37 of the 62 pinned catches."""
+    t = text or ""
+    if _BENIGN_MEASUREMENT.search(t):
+        return True                       # a physical measurement/conversion is never a cry (see note)
+    if _THEODICY.search(t):
+        return True                       # a theodicy question is the seeker's, not a cry (see note)
+    if _REVERENT_FEAR.search(t):
+        return True                       # "the fear of the LORD" is reverence, not a cry (see note)
+    if _BENIGN_FINANCIAL.search(t):
+        return True                       # a money CALCULATION ("how much ... mortgage") is never a cry
+    if _BENIGN_TECHNICAL.search(t):
+        return True                       # a scientific lookup (isotope/voltage/wavelength) is never a cry
+    if _BENIGN_CALENDAR.search(t):
+        return True                       # a date calculation ("how many days to Easter") is never a cry
+    if _BENIGN_WORK_REQUEST.search(t):
+        return True                       # a shop's ask (bid/quote frame, "take a look … when you get a chance") is never a cry
+    if profession_only(t):
+        return True                       # a bare profession of faith / testimony is never a cry (see note; #23)
+    return False
+
+
 def flags(text: str) -> bool:
-    """True when the semantic backstop judges this a cry. Only ever ADDS to the substring net."""
+    """True when the semantic backstop judges this a cry. Only ever ADDS to the substring net:
+    a structural guard (guarded) stands it down; otherwise the score against the sealed threshold."""
     art = _load()
     if not art:
         return False
-    t = text or ""
-    if _BENIGN_MEASUREMENT.search(t):
-        return False                      # a physical measurement/conversion is never a cry (see note)
-    if _THEODICY.search(t):
-        return False                      # a theodicy question is the seeker's, not a cry (see note)
-    if _REVERENT_FEAR.search(t):
-        return False                      # "the fear of the LORD" is reverence, not a cry (see note)
-    if _BENIGN_FINANCIAL.search(t):
-        return False                      # a money CALCULATION ("how much ... mortgage") is never a cry
-    if _BENIGN_TECHNICAL.search(t):
-        return False                      # a scientific lookup (isotope/voltage/wavelength) is never a cry
-    if _BENIGN_CALENDAR.search(t):
-        return False                      # a date calculation ("how many days to Easter") is never a cry
-    if _BENIGN_WORK_REQUEST.search(t):
-        return False                      # a shop's ask (bid/quote frame, "take a look … when you get a chance") is never a cry
-    if profession_only(t):
-        return False                      # a bare profession of faith / testimony is never a cry (see note; #23)
+    if guarded(text):
+        return False
     return score(text) > art["threshold"]

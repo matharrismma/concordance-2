@@ -70,3 +70,18 @@ rise further with: a larger benign set (a better-estimated threshold, so a highe
 adds noise); a centroid built from the full keeping; and the tier idea both red teams flagged — the
 softest catches warranting a *gentle check-in* rather than a hard interrupt, to keep false-positive
 fatigue from eroding trust. The ratchet in `tests/test_crisis_coverage.py` records every gain.
+
+## Rebuild discipline (issue #41, 2026-10-17)
+
+The threshold is a property of the **unguarded** benign set. `tools/build_crisis_semantic.py` derives it
+as the top score among the `CLEARLY_BENIGN` lines that no structural guard handles (`crisis_semantic.guarded`:
+measurement, theodicy, reverent fear, money/technical/calendar lookups, a shop's ask, a bare profession of
+faith), plus the margin. A guard-handled line never reaches the score at runtime, so it must not set the
+ceiling for every message the guards do not cover. Measured on 2026-10-17: deriving over *all* benign lines
+would have moved a rebuild from 0.6568 to 0.7406 and silently dropped 37 of the 62 pinned catches.
+
+The build is fail-closed. Before it writes `data/crisis_semantic.json` it judges the candidate exactly as the
+runtime will (`ask.substring_net` OR (unguarded AND score > threshold)) and refuses to seal if the backstop
+fires on any benign line, any `CRISIS_FLOOR` cry is missed, the blind red-team ratchet is not held, or any
+line the *previous* artifact catches would be lost. The net may grow, never shrink.
+`tests/test_crisis_threshold.py` pins the derivation and the hazard against the sealed artifact.
