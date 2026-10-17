@@ -129,9 +129,11 @@ def test_every_page_offers_a_way_home():
               "reader.html", "concordance.html",
               # THE UNIFIED HERO (2026-10-11): console.html carries its own brand-home link (href="/"),
               # not the shared nh-home.js; it is served at / by home_for() on both faces. bridge.html is
-              # the operator console with its own home control; keep.html is the operator sign-in shell
-              # that redirects to bridge.html (a thin redirect, not a page that carries nh-home.js).
-              "console.html", "bridge.html", "keep.html"}
+              # the operator console with its own home control. (keep.html, once listed here, is gone:
+              # /keep* is answered by api._keep with the Bridge shell — issue #20, 2026-10-16.)
+              "console.html", "bridge.html"}
+    dead = sorted(n for n in hidden if not (SITE / n).exists())
+    assert not dead, f"hidden names pages that no longer ship — drop them: {dead}"
     missing = [f.name for f in SITE.glob("*.html")
                if f.name != "index.html" and f.name not in hidden
                and "nh-home.js" not in f.read_text(encoding="utf-8")]
@@ -164,7 +166,7 @@ def test_every_tool_in_the_palette_exists():
 
 
 def test_the_palette_never_offers_a_page_that_is_not_public():
-    """keep.html is the operator's own surface: noindex, and 404 to the world. Listing it would
+    """/keep.html is the operator's sign-in door (answered by api._keep; no file ships): noindex. Listing it would
     hand every visitor a door that opens onto nothing — or worse, onto something private."""
     for href, name in _palette():
         assert "keep.html" not in href, f"{name!r} exposes the operator surface"
@@ -177,7 +179,9 @@ def test_the_palette_reaches_every_public_page():
     # documented exclusions — see the comment above TOOLS in nh-tools.js. mesh.html is the HIDDEN
     # discovery surface: never in the palette (the whole point is that it is found, not advertised —
     # Matthew 13:44), served but revealing nothing until the agent opens it and confession is made.
-    excused = {"index.html", "keep.html", "ask.html", "encyclopedia.html", "live.html",
+    # (keep.html / ask.html / encyclopedia.html were excused here after they were gone — a server door
+    # with no file, and two api._RETIRED 301s. A name here must ship; the guard below holds it.)
+    excused = {"index.html", "live.html",
                # self-contained surfaces, reached by direct URL / their own nav, not the palette: the
                # efficiency front door + confession + lobby, the offline instruments, the operator pages
                "checkit.html", "about.html", "halls.html", "golf.html", "grappling.html",
@@ -213,6 +217,8 @@ def test_the_palette_reaches_every_public_page():
                # console.html — THE UNIFIED HERO, served at / by home_for() on both faces (2026-10-11);
                # bridge.html — the operator console. Reached by surface routing / redirect, not the palette.
                "console.html", "bridge.html"}
+    dead = sorted(n for n in excused if not (SITE / n).exists())
+    assert not dead, f"excused names pages that no longer ship — drop them: {dead}"
     unreachable = sorted(
         p.name for p in SITE.glob("*.html") if p.name not in listed and p.name not in excused)
     assert not unreachable, f"no way to reach: {unreachable} (list them or excuse them by name)"

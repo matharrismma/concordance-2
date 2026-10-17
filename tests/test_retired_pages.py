@@ -59,6 +59,17 @@ def _raw_get(addr, path):
         conn.close()
 
 
+def _raw_get_body(addr, path):
+    """As _raw_get, with the body — for a door whose answer IS a page, byte for byte."""
+    conn = http.client.HTTPConnection(addr[0], addr[1], timeout=30)
+    try:
+        conn.request("GET", path)
+        r = conn.getresponse()
+        return r.status, {k.lower(): v for k, v in r.getheaders()}, r.read()
+    finally:
+        conn.close()
+
+
 CARD = {"id": "card_test_daily", "title": "A card for today", "body": "worked and kept",
         "kind": "reference", "shelf": "test", "source": {"label": "test", "url": ""}}
 
@@ -152,6 +163,21 @@ def test_no_retired_page_still_404s(server):
     for path in api._RETIRED:
         status, _ = _raw_get(server, path)
         assert status in (301, 302), f"{path} answers {status} — a retired page is not a 404"
+
+
+def test_keep_html_is_the_servers_door_to_the_bridge_not_a_file(server):
+    """site/keep.html was a one-line JS redirect to bridge.html that never reached the wire: GET /keep*
+    is answered by api._keep BEFORE _RETIRED and before static serving, with the Bridge sign-in shell
+    itself (a 200, not a redirect). Deleted 2026-10-16 (issue #20); pinned so the door stays open
+    without the file — the shell byte for byte, the token still riding the URL, the DATA still gated."""
+    assert not (SITE / "keep.html").exists(), "keep.html shipped again — the server already owns /keep*"
+    bridge = (SITE / "bridge.html").read_bytes()
+    for path in ("/keep", "/keep.html", "/keep.html?token=not-the-token"):
+        status, hdrs, body = _raw_get_body(server, path)
+        assert status == 200 and body == bridge, (path, status)
+        assert hdrs.get("content-type", "").startswith("text/html"), path
+    status, _ = _raw_get(server, "/keep.json")
+    assert status == 404                                   # the data stays gated without a token
 
 
 # --- the guard that matters: a destination must honour what it was sent ------------------------

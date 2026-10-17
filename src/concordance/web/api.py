@@ -3913,7 +3913,8 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                     return self._json(404, {"error": "not found"})   # the DATA stays gated
                 return self._json(200, _keep_dash(config), {"cache-control": "no-store"})
             # the SHELL — only a sign-in prompt; reveals no operator data. THE BRIDGE is the renamed
-            # operator console (Matt, 2026-10-06); keep.html is kept as a thin redirect to it.
+            # operator console (Matt, 2026-10-06); the /keep* URLs stay as its door. (site/keep.html, a
+            # JS redirect this handler always pre-empted, was deleted 2026-10-16 — issue #20.)
             if site is not None:
                 return self._static("bridge.html")
             return self._json(404, {"error": "not found"})
